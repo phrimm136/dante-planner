@@ -12,8 +12,6 @@ import { isMDPlanner } from '../types/PlannerTypes'
 import { queryClient } from '@/lib/queryClient'
 import { AUTO_SAVE_DEBOUNCE_MS, INITIAL_SYNC_VERSION } from '@/lib/constants'
 import { generateUUID } from '@/lib/uuid'
-import { assertNever } from '@/lib/utils'
-import { withRollback } from '@/lib/withRollback'
 import {
   validatePlannerForDraftSave,
   validatePlannerForPublish,
@@ -21,10 +19,11 @@ import {
 } from '../lib/plannerValidation'
 import { toUserFriendlyError } from '../lib/plannerValidationErrors'
 import { classifyAppError, validationAppError } from '@/lib/apiErrorClassifier'
-import { planConflictResolution } from '../lib/conflictChoice'
+import { planConflictResolution, interpretConflictPlan } from '../lib/conflictChoice'
+import { acknowledgedCopy } from './usePlannerSyncAdapter'
 import { ok, err } from '@/lib/result'
 import type { Result } from '@/lib/result'
-import type { ConflictEffect, ConflictForkMetadata } from '../lib/conflictChoice'
+import type { ConflictEffect, ConflictOps } from '../lib/conflictChoice'
 import type { AcknowledgedPlanner } from './usePlannerSyncAdapter'
 import type { AppError } from '@/lib/apiErrorClassifier'
 import type { MDCategory, RRCategory, PlannerType } from '@/shared/gameData'
@@ -155,6 +154,8 @@ export interface PlannerSaveResult {
   isSaving: boolean
   /** Why the last save failed, or null when it did not */
   error: AppError | null
+  /** Why the last resolution attempt failed. The conflict itself stays in `error`. */
+  resolutionError: AppError | null
   /** Clear the current error */
   clearError: () => void
   /** Trigger manual save, returns true if succeeded. */
@@ -420,6 +421,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   const syncVersionRef = useRef<number>(initialSyncVersion ?? INITIAL_SYNC_VERSION)
 
   const [error, setError] = useState<AppError | null>(null)
+  const [resolutionError, setResolutionError] = useState<AppError | null>(null)
 
   // Split adapters
   const storage = usePlannerStorage()
@@ -456,23 +458,20 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
    * A published planner faces the strict rules (title + theme packs required,
    * full difficulty enforced); a draft faces structural checks only.
    */
-  const validateForSave = (
-    saveable: SaveablePlanner,
-    state: PlannerState,
-    publishedNow: boolean,
-  ): AppError | null => {
+  const validateForSave = (saveable: SaveablePlanner): AppError | null => {
     if (!isMDPlanner(saveable)) return null
 
     const { content } = saveable
+    const { category } = saveable.config
 
     const noteSizeError = validateNoteSizes(content.sectionNotes)
     if (noteSizeError) return plannerValidationError(noteSizeError)
 
-    if (publishedNow) {
+    if (saveable.metadata.published) {
       const { isValid, errors } = validatePlannerForPublish(
-        state.title,
+        saveable.metadata.title,
         content,
-        state.category,
+        category,
         egoGiftSpec,
         egoGiftI18n,
       )
@@ -481,7 +480,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
 
     const validationError = validatePlannerForDraftSave(
       content,
-      state.category,
+      category,
       egoGiftSpec,
       egoGiftI18n,
     )
@@ -553,7 +552,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       status,
     })
 
-    const invalid = validateForSave(saveable, currentState, isCurrentlyPublished)
+    const invalid = validateForSave(saveable)
     if (invalid) return err(invalid)
 
     // Sync first, so the local copy carries the version the server just assigned
@@ -772,76 +771,6 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     }
   }
 
-  /** Keep Both: fork local changes to a new planner, then run the rest of the plan. */
-  const forkLocalChanges = async (
-    metadata: ConflictForkMetadata,
-    rest: () => Promise<Result<void, AppError>>,
-  ): Promise<Result<void, AppError>> => {
-    const currentState = getState()
-    const newPlanner = createSaveablePlanner({
-      state: { ...currentState, title: metadata.title },
-      plannerId: metadata.id,
-      deviceId: metadata.deviceId,
-      schemaVersion,
-      contentVersion,
-      plannerType,
-      existingCreatedAt: metadata.createdAt,
-      existingSyncVersion: metadata.syncVersion,
-      published: false,
-      status: metadata.status,
-    })
-
-    // The copy carries the same content as currentState, so the draft rules apply.
-    if (isMDPlanner(newPlanner)) {
-      const { content } = newPlanner
-      const noteSizeError = validateNoteSizes(content.sectionNotes)
-      if (noteSizeError) return err(plannerValidationError(noteSizeError))
-      if (egoGiftSpec) {
-        const validationError = validatePlannerForDraftSave(
-          content,
-          currentState.category,
-          egoGiftSpec,
-          egoGiftI18n,
-        )
-        if (validationError) return err(plannerValidationError(validationError))
-      }
-    }
-
-    const outcome = await withRollback<AppError>({
-      create: () => storage.saveToLocal(newPlanner),
-      rollback: () => storage.deleteFromLocal(metadata.id),
-      rest: async () => {
-        // The user pressed save intentionally, so the copy syncs regardless of syncEnabled.
-        if (isAuthenticated) {
-          const synced = await syncToServer(newPlanner, 'forceSync')
-          if (!synced.ok) return err(synced.error)
-        }
-
-        const remaining = await rest()
-        if (!remaining.ok) return remaining
-
-        if (onKeepBothCreated) {
-          onKeepBothCreated(metadata.id)
-        }
-        return ok(undefined)
-      },
-    })
-
-    switch (outcome.kind) {
-      case 'completed':
-        return ok(undefined)
-      case 'undone':
-        return err(outcome.error)
-      case 'undoFailed':
-        // The copy survives the failure, so the editor reports the original cause
-        // while the orphan stays visible in the planner list.
-        console.error('Rollback of the forked planner failed:', outcome.rollbackError)
-        return err(outcome.error)
-      default:
-        return assertNever(outcome)
-    }
-  }
-
   /**
    * Take the server's current sync version without touching local content.
    *
@@ -857,74 +786,34 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     return ok(undefined)
   }
 
-  /** Discard local changes: adopt the server version as both the local copy and editor state. */
-  const revertToServerVersion = async (): Promise<Result<void, AppError>> => {
-    // A resolution that proceeds without the server copy either overwrites the
-    // server from a stale version or reports a discard that never happened.
-    const fetched = await syncAdapter.fetchFromServer(plannerId)
-    if (!fetched.ok) return err(fetched.error)
+  /** The title an untitled planner is copied and displayed under. */
+  const untitled = (): string => t('pages.plannerMD.untitled', 'Untitled')
 
-    const serverPlanner = fetched.value.planner
-
-    // Adopted only once the copy is durable: a failed write would otherwise leave
-    // the version at the server's while the content is still the old local one.
-    const localResult = await storage.saveToLocal(serverPlanner)
-    if (!localResult.ok) return localResult
-    adoptAck(fetched.value.ack)
-
-    // A reload that refused the copy leaves the editor holding the old local
-    // content. Reporting success there would announce a discard that never
-    // happened and navigate away from the conflict it claimed to resolve.
-    if (onServerReload) {
-      if (!onServerReload(serverPlanner)) return err({ kind: 'unknown' })
-      markSaved(stateToComparableString(getState()))
-    }
-    return ok(undefined)
-  }
-
-  /** Run a resolution plan in order; a fork rolls back when a later effect fails. */
-  const runEffects = async (
-    effects: ConflictEffect[],
-    serverVersion: number | null,
-  ): Promise<Result<void, AppError>> => {
-    const [effect, ...remaining] = effects
-    if (!effect) return ok(undefined)
-
-    switch (effect.kind) {
-      case 'keepLocal': {
-        // A conflict that reported no server version leaves the local syncVersion
-        // unanchored, so read the server's back before writing over it.
-        if (serverVersion == null) {
-          const adopted = await adoptServerSyncVersion()
-          if (!adopted.ok) return adopted
-        }
-        const saved = await performSave('saved', { mode: 'forcePush' })
-        if (!saved.ok) return saved
-        markSaved(saved.value)
-        break
-      }
-      case 'forkCopy':
-        return forkLocalChanges(effect.metadata, () => runEffects(remaining, serverVersion))
-      case 'adoptIncoming': {
-        const reverted = await revertToServerVersion()
-        if (!reverted.ok) return reverted
-        break
-      }
-      default:
-        return assertNever(effect)
-    }
-
-    return runEffects(remaining, serverVersion)
-  }
+  /** The local side of the conflict, as the editor holds it right now. */
+  const localSide = (deviceId: string): SaveablePlanner =>
+    createSaveablePlanner({
+      state: getState(),
+      plannerId,
+      deviceId,
+      schemaVersion,
+      contentVersion,
+      plannerType,
+      existingCreatedAt: createdAtRef.current,
+      existingSyncVersion: presentedVersion(),
+      published,
+      status: 'saved',
+    })
 
   /**
    * Report a failed resolution.
    *
    * The conflict is still unresolved, so the conflict error stays put and the
-   * dialog with it. Only a newer conflict displaces it.
+   * dialog with it. Only a newer conflict displaces it, which is why the reason
+   * the attempt failed needs a slot of its own.
    */
   const failResolution = (failure: AppError): boolean => {
     reactToFailure(failure)
+    setResolutionError(failure)
     if (failure.kind === 'conflict') {
       setError(failure)
     }
@@ -940,36 +829,90 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     const { serverVersion } = error
 
     beginSave()
+    setResolutionError(null)
 
     // Prevents a race where the timer fires with stale state before React re-renders
     cancelPendingAutoSave()
 
     try {
       const deviceId = await storage.getOrCreateDeviceId()
-      if (!deviceId.ok) throw new Error('Failed to get device ID', { cause: deviceId.error })
+      if (!deviceId.ok) return failResolution({ kind: 'unknown' })
+
+      const ctx = { deviceId: deviceId.value, now: new Date().toISOString(), newId: generateUUID }
       const plan = planConflictResolution(
         choice,
+        { forkSide: 'local', forkTitle: getState().title || untitled() },
         {
-          forkSide: 'local',
-          forkTitle: getState().title || t('pages.plannerMD.untitled', 'Untitled'),
-        },
-        {
-          deviceId: deviceId.value,
-          now: new Date().toISOString(),
-          newId: generateUUID,
+          ...ctx,
           copyTitle: (title) =>
             t('pages.plannerMD.conflict.copySuffix', '{{title}} (Copy)', { title }),
         },
       )
 
-      const resolved = await runEffects(plan, serverVersion)
-      if (!resolved.ok) return failResolution(resolved.error)
+      // A conflict that reported no server version leaves the local syncVersion
+      // unanchored, so read the server's back before writing over it.
+      if (serverVersion == null && plan.some((effect) => effect.kind === 'keepLocal')) {
+        const adopted = await adoptServerSyncVersion()
+        if (!adopted.ok) return failResolution(adopted.error)
+      }
+
+      // Held rather than applied on arrival: the server's version may only be
+      // adopted once its content is durable locally.
+      const fetched: { value: AcknowledgedPlanner | null } = { value: null }
+
+      const ops: ConflictOps = {
+        local: () => localSide(deviceId.value),
+        incoming: async () => {
+          const incoming = await syncAdapter.fetchFromServer(plannerId)
+          if (!incoming.ok) return err(incoming.error)
+          fetched.value = incoming.value
+          return ok(incoming.value.planner)
+        },
+        validate: validateForSave,
+        saveLocal: storage.saveToLocal,
+        deleteLocal: storage.deleteFromLocal,
+        sync: async (planner, force) => {
+          // The user chose this resolution, so it uploads whatever the sync
+          // setting says; a signed-out editor still resolves locally.
+          if (!isAuthenticated) return ok(planner)
+
+          const synced = await syncToServer(planner, force ? 'forcePush' : 'forceSync')
+          if (!synced.ok) return err(synced.error)
+
+          // Only the conflicting planner's own ack moves the version this editor presents.
+          if (planner.metadata.id === plannerId) adoptAck(synced.value.ack)
+          return ok(acknowledgedCopy(synced.value))
+        },
+        sanitizeTitle: (title) => title.trim() || untitled(),
+      }
+
+      const resolved = await interpretConflictPlan(plan, ops, ctx)
+      if (!resolved.ok) return failResolution(resolved.error.error)
+
+      if (fetched.value) {
+        adoptAck(fetched.value.ack)
+        if (onServerReload) onServerReload(fetched.value.planner)
+      }
+      if (plan.some((effect) => effect.kind === 'keepLocal')) {
+        markSaved()
+      }
+
+      // Write-through: every mounted consumer (publish header, list pages) must
+      // see the version the resolution left on the server.
+      void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.detail(plannerId) })
+      void queryClient.invalidateQueries({ queryKey: userPlannersQueryKeys.all })
+
+      const forked = plan.find(
+        (effect): effect is Extract<ConflictEffect, { kind: 'forkCopy' }> =>
+          effect.kind === 'forkCopy',
+      )
+      if (forked && onKeepBothCreated) onKeepBothCreated(forked.metadata.id)
 
       // Clear conflict state only on success
       setError(null)
       return true
-    } catch (resolutionError: unknown) {
-      return failResolution(classifyAppError(resolutionError))
+    } catch (failure: unknown) {
+      return failResolution(classifyAppError(failure))
     } finally {
       endSave()
     }
@@ -980,6 +923,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
    */
   const clearError = () => {
     setError(null)
+    setResolutionError(null)
   }
 
   // The subscription must survive re-renders, so the effect reads the auto-save
@@ -1059,6 +1003,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     isAutoSaving,
     isSaving,
     error,
+    resolutionError,
     clearError,
     save,
     resolveConflict,

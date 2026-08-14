@@ -150,7 +150,7 @@ describe('interpretConflictPlan', () => {
     // Only the build may mint; everything after this point is a replay of it.
     newId.mockClear()
 
-    const saveLocal = vi.fn(async () => ok(undefined))
+    const saveLocal = vi.fn(async (_planner: SaveablePlanner) => ok(undefined))
     const ops = operations({ saveLocal })
 
     expect(await interpretConflictPlan(plan, ops, ctx)).toEqual({ ok: true, value: undefined })
@@ -162,7 +162,7 @@ describe('interpretConflictPlan', () => {
   })
 
   it('deletes the copy it saved when the copy fails to sync', async () => {
-    const deleteLocal = vi.fn(async () => ok(undefined))
+    const deleteLocal = vi.fn(async (_id: string) => ok(undefined))
     const ctx = interpreterContext()
     const plan = planConflictResolution('both', FORK_LOCAL, { ...ctx, copyTitle: (t) => t })
 
@@ -177,7 +177,7 @@ describe('interpretConflictPlan', () => {
   })
 
   it('deletes the copy when a later effect fails, not only its own sync', async () => {
-    const deleteLocal = vi.fn(async () => ok(undefined))
+    const deleteLocal = vi.fn(async (_id: string) => ok(undefined))
     const ctx = interpreterContext()
     const plan = planConflictResolution('both', FORK_LOCAL, { ...ctx, copyTitle: (t) => t })
 
@@ -212,7 +212,7 @@ describe('interpretConflictPlan', () => {
   })
 
   it('stops before writing anything the validator rejects', async () => {
-    const saveLocal = vi.fn(async () => ok(undefined))
+    const saveLocal = vi.fn(async (_planner: SaveablePlanner) => ok(undefined))
     const sync = vi.fn(async (planner: SaveablePlanner) => ok(planner))
     const ctx = interpreterContext()
 
@@ -231,7 +231,7 @@ describe('interpretConflictPlan', () => {
   })
 
   it('marks the kept side saved under the version the server acknowledged', async () => {
-    const saveLocal = vi.fn(async () => ok(undefined))
+    const saveLocal = vi.fn(async (_planner: SaveablePlanner) => ok(undefined))
     const ctx = interpreterContext()
 
     await interpretConflictPlan(
@@ -249,7 +249,7 @@ describe('interpretConflictPlan', () => {
   })
 
   it('leaves the copy unpublished whatever the original was', async () => {
-    const saveLocal = vi.fn(async () => ok(undefined))
+    const saveLocal = vi.fn(async (_planner: SaveablePlanner) => ok(undefined))
     const ctx = interpreterContext()
     const plan = planConflictResolution('both', FORK_LOCAL, { ...ctx, copyTitle: (t) => t })
 

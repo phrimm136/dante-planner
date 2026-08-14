@@ -63,6 +63,10 @@ vi.mock('../usePlannerSyncAdapter', () => ({
     deleteFromServer: vi.fn(),
     listFromServer: vi.fn(),
   }),
+  acknowledgedCopy: ({ planner, ack }: AcknowledgedPlanner) => ({
+    ...planner,
+    metadata: { ...planner.metadata, syncVersion: ack.syncVersion },
+  }),
 }))
 
 const mockUseAuthQuery = vi.fn()
@@ -1028,5 +1032,54 @@ describe('usePlannerSave - isDirty', () => {
     })
 
     expect(result.current.isDirty()).toBe(false)
+
+describe('usePlannerSave - failed resolution surface', () => {
+  /** Reach the conflict through the one public path that sets it: a rejected save. */
+  async function driveIntoConflict(overrides: Partial<UsePlannerSaveOptions> = {}) {
+    mockSyncToServer.mockRejectedValueOnce(new ConflictError('SYNC_CONFLICT', 'conflict', 7))
+    const hook = renderHook(() => usePlannerSave(baseOptions(overrides)))
+
+    await act(async () => {
+      await hook.result.current.save({ published: false })
+    })
+
+    expect(hook.result.current.error?.kind).toBe('conflict')
+    callOrder.length = 0
+    return hook
+  }
+
+  it('reports a non-conflict resolution failure without displacing the conflict', async () => {
+    authenticated()
+    const { result } = await driveIntoConflict()
+    mockFetchFromServer.mockResolvedValue(err({ kind: 'quota' }))
+
+    await act(async () => {
+      await result.current.resolveConflict('discard')
+    })
+
+    // The conflict is still unresolved, so its dialog stays; the failure that
+    // stopped the resolution has nowhere else to be reported from.
+    expect(result.current.error?.kind).toBe('conflict')
+    expect(result.current.resolutionError).toEqual({ kind: 'quota' })
+  })
+
+  it('clears the previous resolution failure when a later attempt succeeds', async () => {
+    authenticated()
+    const onServerReload = vi.fn()
+    const { result } = await driveIntoConflict({ onServerReload })
+    mockFetchFromServer.mockResolvedValue(err({ kind: 'quota' }))
+
+    await act(async () => {
+      await result.current.resolveConflict('discard')
+    })
+    expect(result.current.resolutionError).not.toBeNull()
+
+    mockFetchFromServer.mockResolvedValue(ok(fetchedAt(9)))
+    await act(async () => {
+      await result.current.resolveConflict('discard')
+    })
+
+    expect(result.current.error).toBeNull()
+    expect(result.current.resolutionError).toBeNull()
   })
 })
