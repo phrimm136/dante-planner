@@ -8,12 +8,7 @@ import { EGOGiftFilterBar } from '@/pages/egoGift'
 import { EGOGiftSelectionList } from '@/pages/egoGift'
 import type { SortMode } from '@/shared/filter'
 import { bucketAndSortFloorGifts } from '../../lib/floorGiftBucketing'
-import {
-  encodeGiftSelection,
-  findEncodedGiftId,
-  decodeGiftSelection,
-  getCascadeIngredients,
-} from '@/pages/egoGift'
+import { encodeGiftSelection, buildSelectionLookup, getCascadeIngredients } from '@/pages/egoGift'
 import type { EGOGiftListItem } from '@/pages/egoGift'
 import type { EnhancementLevel, DungeonIdx } from '@/shared/gameData'
 import { SECTION_STYLES } from '@/lib/constants'
@@ -110,17 +105,13 @@ export function FloorGiftSelectorPane({
         } = latest.current
         const newSelection = new Set(current)
 
-        const existingEncodedId = findEncodedGiftId(giftId, current)
+        const selectionLookup = buildSelectionLookup(current)
+        const existing = selectionLookup.get(giftId)
 
-        if (existingEncodedId) {
-          const currentEnhancement = decodeGiftSelection(existingEncodedId)?.enhancement
-
-          if (currentEnhancement === enhancement) {
-            newSelection.delete(existingEncodedId)
-          } else {
-            newSelection.delete(existingEncodedId)
-            const newEncodedId = encodeGiftSelection(enhancement, giftId)
-            newSelection.add(newEncodedId)
+        if (existing) {
+          newSelection.delete(existing.encodedId)
+          if (existing.enhancement !== enhancement) {
+            newSelection.add(encodeGiftSelection(enhancement, giftId))
           }
         } else {
           const newEncodedId = encodeGiftSelection(enhancement, giftId)
@@ -143,7 +134,7 @@ export function FloorGiftSelectorPane({
                 ingredientSpec.themePack.includes(packId)
 
               // Only add to floor if obtainable in this theme pack
-              if (isObtainable && !findEncodedGiftId(ingredientIdStr, newSelection)) {
+              if (isObtainable && !selectionLookup.has(ingredientIdStr)) {
                 newSelection.add(encodeGiftSelection(0, ingredientIdStr))
               }
             }

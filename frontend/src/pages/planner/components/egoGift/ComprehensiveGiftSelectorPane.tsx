@@ -3,12 +3,7 @@ import { useTranslation } from 'react-i18next'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import {
-  encodeGiftSelection,
-  decodeGiftSelection,
-  findEncodedGiftId,
-  getCascadeIngredients,
-} from '@/pages/egoGift'
+import { encodeGiftSelection, buildSelectionLookup, getCascadeIngredients } from '@/pages/egoGift'
 import type { EGOGiftListItem } from '@/pages/egoGift'
 import type { EnhancementLevel } from '@/shared/gameData'
 import { useEGOGiftListData } from '@/pages/egoGift'
@@ -99,15 +94,12 @@ export function ComprehensiveGiftSelectorPane({
           setComprehensiveGiftIds: notify,
         } = latest.current
         const newSelection = new Set(current)
-        const existingEncodedId = findEncodedGiftId(giftId, current)
+        const selectionLookup = buildSelectionLookup(current)
+        const existing = selectionLookup.get(giftId)
 
-        if (existingEncodedId) {
-          const currentEnhancement = decodeGiftSelection(existingEncodedId)?.enhancement
-
-          if (currentEnhancement === enhancement) {
-            newSelection.delete(existingEncodedId)
-          } else {
-            newSelection.delete(existingEncodedId)
+        if (existing) {
+          newSelection.delete(existing.encodedId)
+          if (existing.enhancement !== enhancement) {
             newSelection.add(encodeGiftSelection(enhancement, giftId))
           }
         } else {
@@ -126,7 +118,7 @@ export function ComprehensiveGiftSelectorPane({
             const ingredientIdStr = String(ingredientId)
             if (visited.has(ingredientIdStr)) continue
             visited.add(ingredientIdStr)
-            if (!findEncodedGiftId(ingredientIdStr, newSelection)) {
+            if (!selectionLookup.has(ingredientIdStr)) {
               newSelection.add(encodeGiftSelection(0, ingredientIdStr))
             }
           }
