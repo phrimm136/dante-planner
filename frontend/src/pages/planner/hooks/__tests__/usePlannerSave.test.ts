@@ -692,3 +692,115 @@ describe('usePlannerSave - cross-surface version convergence', () => {
     invalidateSpy.mockRestore()
   })
 })
+
+/** A store stand-in whose change notifications the test drives by hand. */
+function manualStore() {
+  const listeners = new Set<() => void>()
+  return {
+    subscribe: (listener: () => void) => {
+      listeners.add(listener)
+      return () => {
+        listeners.delete(listener)
+      }
+    },
+    notify: () => {
+      for (const listener of listeners) listener()
+    },
+  }
+}
+
+describe('usePlannerSave - autosave flush on teardown', () => {
+  it('writes to storage exactly once when unmounted with an armed autosave timer', async () => {
+    authenticated()
+    const store = manualStore()
+    let currentState = validState({ title: 'before' })
+    const { result, unmount } = renderHook(() =>
+      usePlannerSave(baseOptions({ getState: () => currentState, subscribe: store.subscribe })),
+    )
+
+    // A manual save adopts the current state as the autosave baseline; without one
+    // the first autosave only initializes that baseline and writes nothing.
+    await act(async () => {
+      await result.current.save({ published: false })
+    })
+    mockSaveToLocal.mockClear()
+
+    currentState = validState({ title: 'after' })
+    act(() => {
+      store.notify()
+    })
+
+    await act(async () => {
+      unmount()
+    })
+
+    expect(mockSaveToLocal).toHaveBeenCalledTimes(1)
+  })
+
+  it('writes nothing when unmounted with no armed timer', async () => {
+    authenticated()
+    const store = manualStore()
+    const currentState = validState({ title: 'untouched' })
+    const { result, unmount } = renderHook(() =>
+      usePlannerSave(baseOptions({ getState: () => currentState, subscribe: store.subscribe })),
+    )
+
+    await act(async () => {
+      await result.current.save({ published: false })
+    })
+    mockSaveToLocal.mockClear()
+
+    await act(async () => {
+      unmount()
+    })
+
+    expect(mockSaveToLocal).not.toHaveBeenCalled()
+  })
+})
+
+describe('usePlannerSave - isDirty', () => {
+  it('reads dirty as soon as the store notifies, without an intervening render', async () => {
+    authenticated()
+    const store = manualStore()
+    let currentState = validState({ title: 'before' })
+    const { result } = renderHook(() =>
+      usePlannerSave(baseOptions({ getState: () => currentState, subscribe: store.subscribe })),
+    )
+
+    await act(async () => {
+      await result.current.save({ published: false })
+    })
+    expect(result.current.isDirty()).toBe(false)
+
+    const isDirty = result.current.isDirty
+    currentState = validState({ title: 'after' })
+    store.notify()
+
+    // Deliberately no act(): the reader must not depend on a re-render, and the
+    // reference taken before the write must observe the same dirtiness.
+    expect(isDirty()).toBe(true)
+  })
+
+  it('reads clean again once the pending autosave has written', async () => {
+    authenticated()
+    const store = manualStore()
+    let currentState = validState({ title: 'before' })
+    const { result, unmount } = renderHook(() =>
+      usePlannerSave(baseOptions({ getState: () => currentState, subscribe: store.subscribe })),
+    )
+
+    await act(async () => {
+      await result.current.save({ published: false })
+    })
+
+    currentState = validState({ title: 'after' })
+    act(() => {
+      store.notify()
+    })
+    await act(async () => {
+      unmount()
+    })
+
+    expect(result.current.isDirty()).toBe(false)
+  })
+})

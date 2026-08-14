@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import i18n from '@/lib/i18n'
 import { useAuthQuery, authQueryKeys } from '@/shared/auth'
@@ -167,6 +167,12 @@ export interface PlannerSaveResult {
   hasUnsyncedChanges: boolean
   /** Whether there are changes not yet auto-saved to IndexedDB (for beforeunload warning) */
   hasLocalUnsavedChanges: boolean
+  /**
+   * Whether a store change has arrived since the last local write, read at call
+   * time. Stable across renders, so a listener registered once on mount keeps
+   * seeing current dirtiness.
+   */
+  isDirty: () => boolean
   /** Last synced timestamp (ISO 8601, null if never synced) */
   lastSavedAt: string | null
   /** Whether user is restricted (banned or timed out) - disables sync button */
@@ -353,6 +359,11 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   // Previous state for dirty checking - empty string means "not yet initialized"
   const previousStateRef = useRef<string>('')
 
+  // Whether a store change has arrived since the last local write. Maintained by
+  // the subscription rather than by render, so an unload firing between a keystroke
+  // and the next render still sees the planner as dirty.
+  const dirtyRef = useRef(false)
+
   // Last synced state for beforeunload warning detection
   const lastSyncedStateRef = useRef<string>('')
 
@@ -526,10 +537,16 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     return ok(undefined)
   }
 
+  /** Adopt `comparable` as the local-write baseline; nothing is dirty against it. */
+  const markLocalBaseline = (comparable: string) => {
+    previousStateRef.current = comparable
+    dirtyRef.current = false
+  }
+
   /** Adopt the just-saved state as both dirty-check baselines. */
   const markSaved = () => {
     const comparable = stateToComparableString(getState())
-    previousStateRef.current = comparable
+    markLocalBaseline(comparable)
     lastSyncedStateRef.current = comparable
     setLastSavedAt(new Date().toISOString())
   }
@@ -548,13 +565,14 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
 
     // First run: initialize baseline and skip save (handles planner loading in edit mode)
     if (previousStateRef.current === '') {
-      previousStateRef.current = currentStateString
+      markLocalBaseline(currentStateString)
       lastSyncedStateRef.current = currentStateString
       return
     }
 
     // Skip if state hasn't changed
     if (currentStateString === previousStateRef.current) {
+      dirtyRef.current = false
       return
     }
 
@@ -592,7 +610,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
         return
       }
 
-      previousStateRef.current = currentStateString
+      markLocalBaseline(currentStateString)
       setLastSavedAt(new Date().toISOString())
     } catch (autoSaveError: unknown) {
       reportFailure(classifyAppError(autoSaveError))
@@ -860,22 +878,31 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     if (!isClient) return
 
     const unsubscribe = subscribe(() => {
+      dirtyRef.current = true
+
       if (timerRef.current) {
         clearTimeout(timerRef.current)
       }
 
       timerRef.current = setTimeout(() => {
+        timerRef.current = null
         void autoSaveRef.current()
       }, AUTO_SAVE_DEBOUNCE_MS)
     })
 
     return () => {
       unsubscribe()
+      // A cancelled timer is silent data loss on unmount and on tab close, so the
+      // teardown runs what it was holding instead of dropping it.
       if (timerRef.current) {
         clearTimeout(timerRef.current)
+        timerRef.current = null
+        void autoSaveRef.current()
       }
     }
   }, [subscribe])
+
+  const isDirty = useCallback(() => dirtyRef.current, [])
 
   // Dirty flags compare the live state against the two save baselines. An
   // uninitialized baseline ('') means there is nothing to compare against yet.
@@ -903,6 +930,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     syncVersion: presentedVersion(),
     hasUnsyncedChanges,
     hasLocalUnsavedChanges,
+    isDirty,
     lastSavedAt,
     isRestricted,
     restrictionReason,
