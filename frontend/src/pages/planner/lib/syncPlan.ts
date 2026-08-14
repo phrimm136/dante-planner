@@ -33,13 +33,27 @@ function versionOf(planner: PlannerSummary): number {
   return planner.syncVersion ?? 0
 }
 
+export type PlannerVerdict = 'pull' | 'conflict' | 'skip'
+
+/**
+ * What one server row means against its local counterpart. A row the server
+ * has not advanced is left alone; an advanced row over a local draft is a
+ * conflict, since pulling it would discard unsaved edits.
+ */
+export function categorizePlanner(
+  local: PlannerSummary | undefined,
+  server: PlannerSummary,
+): PlannerVerdict {
+  if (!local) return 'pull'
+  if (versionOf(server) <= versionOf(local)) return 'skip'
+  return local.status === 'draft' ? 'conflict' : 'pull'
+}
+
 /**
  * Partition a sync pass over the two summary lists it compares.
  *
- * A server row is pulled when it has no local counterpart, or when its
- * syncVersion is above the local one and local is not a draft; the same
- * version gap over a local draft is a conflict instead, since a pull would
- * discard unsaved edits. A row at or below the local version is left alone.
+ * `categorizePlanner` decides each server row; a local row absent from the
+ * server is purged only when `shouldPurgeLocal` agrees.
  */
 export function categorizeSync(server: PlannerSummary[], local: PlannerSummary[]): SyncPlan {
   const localById = new Map(local.map((p) => [p.id, p]))
@@ -50,18 +64,15 @@ export function categorizeSync(server: PlannerSummary[], local: PlannerSummary[]
   const purge: PlannerSummary[] = []
 
   for (const serverPlanner of server) {
-    const localPlanner = localById.get(serverPlanner.id)
-    if (!localPlanner) {
-      pull.push(serverPlanner)
-      continue
-    }
-
-    if (versionOf(serverPlanner) <= versionOf(localPlanner)) continue
-
-    if (localPlanner.status === 'draft') {
-      conflict.push(serverPlanner)
-    } else {
-      pull.push(serverPlanner)
+    switch (categorizePlanner(localById.get(serverPlanner.id), serverPlanner)) {
+      case 'pull':
+        pull.push(serverPlanner)
+        break
+      case 'conflict':
+        conflict.push(serverPlanner)
+        break
+      case 'skip':
+        break
     }
   }
 

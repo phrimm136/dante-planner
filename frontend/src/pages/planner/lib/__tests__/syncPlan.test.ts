@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
-import { categorizeSync, shouldPurgeLocal } from '../syncPlan'
+import { categorizePlanner, categorizeSync, shouldPurgeLocal } from '../syncPlan'
 
+import type { PlannerVerdict } from '../syncPlan'
 import type { PlannerSummary } from '../../types/PlannerTypes'
 
 const SAVED_AT = '2026-06-01T00:00:00.000Z'
@@ -174,5 +175,61 @@ describe('shouldPurgeLocal', () => {
     expect(
       shouldPurgeLocal(makeSummary({ status: 'saved', savedAt: SAVED_AT, syncVersion: 99 })),
     ).toBe(true)
+  })
+})
+
+describe('categorizePlanner', () => {
+  const cases: {
+    name: string
+    local: PlannerSummary | undefined
+    server: PlannerSummary
+    expected: PlannerVerdict
+  }[] = [
+    {
+      name: 'no local row is pulled',
+      local: undefined,
+      server: makeSummary({ syncVersion: 1 }),
+      expected: 'pull',
+    },
+    {
+      name: 'a higher server version over a draft conflicts',
+      local: makeSummary({ status: 'draft', syncVersion: 1 }),
+      server: makeSummary({ syncVersion: 9 }),
+      expected: 'conflict',
+    },
+    {
+      name: 'a higher server version over a saved row pulls',
+      local: makeSummary({ status: 'saved', syncVersion: 1 }),
+      server: makeSummary({ syncVersion: 9 }),
+      expected: 'pull',
+    },
+    {
+      name: 'an equal server version is skipped',
+      local: makeSummary({ syncVersion: 9 }),
+      server: makeSummary({ syncVersion: 9 }),
+      expected: 'skip',
+    },
+    {
+      name: 'a lower server version is skipped',
+      local: makeSummary({ syncVersion: 9 }),
+      server: makeSummary({ syncVersion: 4 }),
+      expected: 'skip',
+    },
+    {
+      name: 'an equal server version over a draft is skipped, not a conflict',
+      local: makeSummary({ status: 'draft', syncVersion: 3 }),
+      server: makeSummary({ syncVersion: 3 }),
+      expected: 'skip',
+    },
+    {
+      name: 'a local row never synced falls to the version path',
+      local: makeSummary({ status: 'saved', syncVersion: undefined }),
+      server: makeSummary({ syncVersion: 1 }),
+      expected: 'pull',
+    },
+  ]
+
+  it.each(cases)('$name', ({ local, server, expected }) => {
+    expect(categorizePlanner(local, server)).toBe(expected)
   })
 })
