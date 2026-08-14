@@ -397,7 +397,16 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
 
   /** The effects one conflict's resolution runs against storage and the server. */
   const conflictOps = (conflict: ConflictItem): ConflictOps => ({
-    local: () => conflict.localPlanner,
+    local: async () => {
+      // Read now, not when the sync pass raised this conflict: a write that
+      // landed since is exactly what the force push would destroy, and a parked
+      // dialog leaves that window open indefinitely.
+      const loaded = await storage.loadFromLocal(conflict.id)
+      if (!loaded.ok) return err({ kind: 'unknown' })
+      // A row that is gone resolves to nothing; pushing that would erase the
+      // server's copy on the user's behalf.
+      return loaded.value ? ok(loaded.value) : err({ kind: 'notFound' })
+    },
     incoming: async () => {
       // Read at resolution time: the copy captured during sync can be minutes
       // stale, and discarding local changes for a stale server copy loses both.

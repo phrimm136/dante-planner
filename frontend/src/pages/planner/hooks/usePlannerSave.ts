@@ -892,7 +892,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       const fetched: { value: AcknowledgedPlanner | null } = { value: null }
 
       const ops: ConflictOps = {
-        local: () => localSide(deviceId.value),
+        local: async () => ok(localSide(deviceId.value)),
         incoming: async () => {
           const incoming = await syncAdapter.fetchFromServer(plannerId)
           if (!incoming.ok) return err(incoming.error)
@@ -912,8 +912,9 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
         },
         sync: async (planner, force) => {
           // The user chose this resolution, so it uploads whatever the sync
-          // setting says; a signed-out editor still resolves locally.
-          if (!isAuthenticated) return ok(planner)
+          // setting says; a signed-out editor resolves locally and uploads
+          // nothing, which is what `null` says to the rollback.
+          if (!isAuthenticated) return ok(null)
 
           const synced = await syncToServer(planner, force ? 'forcePush' : 'forceSync')
           if (!synced.ok) return err(synced.error)

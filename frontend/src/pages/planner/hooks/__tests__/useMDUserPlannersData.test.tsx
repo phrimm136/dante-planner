@@ -549,6 +549,47 @@ describe('useMDUserPlannersData batch conflict resolution', () => {
     expect(stored.metadata.title).toBe('moved on')
   })
 
+  it('pushes the local row as it stands at resolution time, not as sync found it', async () => {
+    const result = await pendingThreeConflicts()
+    syncMocks.syncToServer.mockImplementation(async (planner: unknown) => ({
+      planner,
+      ack: { syncVersion: 6 },
+    }))
+    // The user edited the planner after the sync pass raised the conflict, and a
+    // parked dialog makes that window unbounded.
+    syncMocks.loadFromLocal.mockResolvedValue({
+      ok: true,
+      value: {
+        metadata: { id: 'planner-0', title: 'edited after the sync pass', syncVersion: 1 },
+        config: { type: 'MIRROR_DUNGEON', category: '5F' },
+        content: {},
+      },
+    })
+    syncMocks.saveToLocal.mockClear()
+
+    await act(async () => {
+      await result.current.resolveConflicts([{ id: 'planner-0', choice: 'overwrite' }])
+    })
+
+    const pushed = syncMocks.syncToServer.mock.calls[0]![0] as SaveablePlanner
+    expect(pushed.metadata.title).toBe('edited after the sync pass')
+    const stored = syncMocks.saveToLocal.mock.calls[0]![0] as SaveablePlanner
+    expect(stored.metadata.title).toBe('edited after the sync pass')
+  })
+
+  it('reports a failure rather than pushing nothing when the local row is gone', async () => {
+    const result = await pendingThreeConflicts()
+    syncMocks.loadFromLocal.mockResolvedValue({ ok: true, value: null })
+
+    let outcomes: ConflictOutcome[] = []
+    await act(async () => {
+      outcomes = await result.current.resolveConflicts([{ id: 'planner-0', choice: 'overwrite' }])
+    })
+
+    expect(outcomes[0]!.result.ok).toBe(false)
+    expect(syncMocks.syncToServer).not.toHaveBeenCalled()
+  })
+
   it('refuses to push a planner it cannot validate for want of the gift spec', async () => {
     // The spec load has not landed, so the affordability rules cannot run.
     syncMocks.egoGiftSpec = null

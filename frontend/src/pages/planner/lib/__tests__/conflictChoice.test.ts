@@ -136,7 +136,7 @@ describe('interpretConflictPlan', () => {
 
   function operations(overrides: Partial<ConflictOps> = {}): ConflictOps {
     return {
-      local: () => LOCAL,
+      local: async () => ok(LOCAL),
       incoming: async () => ok(INCOMING),
       validate: () => null,
       saveLocal: async () => ok(undefined),
@@ -218,6 +218,94 @@ describe('interpretConflictPlan', () => {
     expect(outcome).toEqual({ ok: false, error: { step: 'sync', error: { kind: 'notFound' } } })
     expect(deleteLocal).toHaveBeenCalledWith('copy-id')
     expect(deleteRemote).toHaveBeenCalledWith('copy-id')
+  })
+
+  it('leaves the server alone when the caller uploaded nothing at all', async () => {
+    // A signed-out resolution writes locally and syncs nothing, so there is no
+    // server copy to undo — and a DELETE for an id the server never had would
+    // downgrade a clean rollback to a failed one.
+    const deleteRemote = vi.fn(async (_id: string) => ok(undefined))
+    const ctx = interpreterContext()
+    const plan = planConflictResolution('both', FORK_LOCAL, { ...ctx, copyTitle: (t) => t })
+
+    const outcome = await interpretConflictPlan(
+      plan,
+      operations({
+        deleteRemote,
+        sync: async () => ok(null),
+        incoming: async () => err({ kind: 'notFound' }),
+      }),
+      ctx,
+    )
+
+    expect(outcome).toEqual({ ok: false, error: { step: 'sync', error: { kind: 'notFound' } } })
+    expect(deleteRemote).not.toHaveBeenCalled()
+  })
+
+  it('reports a rollback the server refused under its own step', async () => {
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const ctx = interpreterContext()
+    const plan = planConflictResolution('both', FORK_LOCAL, { ...ctx, copyTitle: (t) => t })
+    const rollbackSteps: string[] = []
+
+    const outcome = await interpretConflictPlan(
+      plan,
+      operations({
+        incoming: async () => err({ kind: 'notFound' }),
+        deleteRemote: async () => err({ kind: 'unavailable', scope: 'backend' }),
+        deleteLocal: async (id: string) => {
+          rollbackSteps.push(id)
+          return err({ kind: 'quota' })
+        },
+      }),
+      ctx,
+    )
+
+    // The user still sees what stopped the plan; the orphan is what the log carries.
+    expect(outcome).toEqual({ ok: false, error: { step: 'sync', error: { kind: 'notFound' } } })
+    expect(rollbackSteps).toEqual(['copy-id'])
+    expect(logged).toHaveBeenCalled()
+    logged.mockRestore()
+  })
+
+  it('stores what the sync did not upload, so a local-only resolution still lands', async () => {
+    const saveLocal = vi.fn(async (_planner: SaveablePlanner) => ok(undefined))
+    const ctx = interpreterContext()
+
+    const outcome = await interpretConflictPlan(
+      planConflictResolution('overwrite', FORK_LOCAL, { ...ctx, copyTitle: (t) => t }),
+      operations({ saveLocal, sync: async () => ok(null) }),
+      ctx,
+    )
+
+    expect(outcome).toEqual({ ok: true, value: undefined })
+    const stored = saveLocal.mock.calls[0]![0]
+    expect(stored.metadata).toMatchObject({ id: PLANNER_ID, status: 'saved', savedAt: NOW })
+  })
+
+  it('reads the local side when the resolution runs, not when the plan was built', async () => {
+    const local = vi.fn(async () => ok(LOCAL))
+    const ctx = interpreterContext()
+    const plan = planConflictResolution('overwrite', FORK_LOCAL, { ...ctx, copyTitle: (t) => t })
+
+    await interpretConflictPlan(plan, operations({ local }), ctx)
+    await interpretConflictPlan(plan, operations({ local }), ctx)
+
+    expect(local).toHaveBeenCalledTimes(2)
+  })
+
+  it('pushes nothing when the local side cannot be read', async () => {
+    const sync = vi.fn(async (planner: SaveablePlanner) => ok(planner))
+    const ctx = interpreterContext()
+
+    const outcome = await interpretConflictPlan(
+      planConflictResolution('overwrite', FORK_LOCAL, { ...ctx, copyTitle: (t) => t }),
+      operations({ sync, local: async () => err({ kind: 'notFound' }) }),
+      ctx,
+    )
+
+    expect(outcome).toEqual({ ok: false, error: { step: 'saveLocal', error: { kind: 'notFound' } } })
+    expect(sync).not.toHaveBeenCalled()
   })
 
   it('leaves the server alone when the copy never reached it', async () => {
@@ -316,7 +404,8 @@ describe('interpretConflictPlan', () => {
       plan,
       operations({
         saveLocal,
-        local: () => buildSaveablePlanner({ metadata: { id: PLANNER_ID, published: true } }),
+        local: async () =>
+          ok(buildSaveablePlanner({ metadata: { id: PLANNER_ID, published: true } })),
       }),
       ctx,
     )

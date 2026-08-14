@@ -87,7 +87,7 @@ function forkMetadata(
  * the whole submission rather than to the row it happened to stop at.
  */
 export interface ConflictFailure {
-  step: 'precondition' | 'validate' | 'saveLocal' | 'sync' | 'deleteLocal'
+  step: 'precondition' | 'validate' | 'saveLocal' | 'sync' | 'deleteLocal' | 'deleteRemote'
   error: AppError
 }
 
@@ -99,8 +99,14 @@ export interface ConflictOutcome {
 
 /** The effectful operations a resolution needs, injected so the interpreter stays testable. */
 export interface ConflictOps {
-  /** The side that ends up under the conflicting id when local wins. */
-  local: () => SaveablePlanner
+  /**
+   * The side that ends up under the conflicting id when local wins.
+   *
+   * Read when the resolution runs, never captured when the conflict was raised:
+   * a resolution force-pushes what it is handed, and a snapshot is stale by
+   * every write the user made since.
+   */
+  local: () => Promise<Result<SaveablePlanner, AppError>>
   /** The server's side, read here when the caller does not already hold it. */
   incoming: () => Promise<Result<SaveablePlanner, AppError>>
   validate: (planner: SaveablePlanner) => AppError | null
@@ -108,7 +114,15 @@ export interface ConflictOps {
   deleteLocal: (id: string) => Promise<Result<void, AppError>>
   /** Rollback for a fork the server already accepted. */
   deleteRemote: (id: string) => Promise<Result<void, AppError>>
-  sync: (planner: SaveablePlanner, force: boolean) => Promise<Result<SaveablePlanner, AppError>>
+  /**
+   * Upload the planner, answering with what the server acknowledged — or `null`
+   * when the caller uploaded nothing, which is what keeps a rollback from
+   * deleting a copy the server never held.
+   */
+  sync: (
+    planner: SaveablePlanner,
+    force: boolean,
+  ) => Promise<Result<SaveablePlanner | null, AppError>>
   sanitizeTitle: (title: string) => string
 }
 
@@ -131,20 +145,22 @@ async function keepLocal(
   ops: ConflictOps,
   ctx: ConflictInterpreterContext,
 ): Promise<Result<void, ConflictFailure>> {
-  const planner = ops.local()
+  const planner = await ops.local()
+  if (!planner.ok) return failed('saveLocal', planner.error)
 
-  const invalid = ops.validate(planner)
+  const invalid = ops.validate(planner.value)
   if (invalid) return failed('validate', invalid)
 
-  const synced = await ops.sync(planner, true)
+  const synced = await ops.sync(planner.value, true)
   if (!synced.ok) return failed('sync', synced.error)
 
   // The server echoes the status it was sent, so the resolution marks the row
   // saved itself. Left a draft it would stay badged unsaved and turn the next
   // server-version bump into another conflict prompt.
+  const stored = synced.value ?? planner.value
   const saved = await ops.saveLocal({
-    ...synced.value,
-    metadata: { ...synced.value.metadata, status: 'saved', savedAt: ctx.now },
+    ...stored,
+    metadata: { ...stored.metadata, status: 'saved', savedAt: ctx.now },
   })
   return saved.ok ? ok(undefined) : failed('saveLocal', saved.error)
 }
@@ -172,8 +188,8 @@ async function forkCopy(
   ctx: ConflictInterpreterContext,
 ): Promise<Result<void, ConflictFailure>> {
   const { metadata } = effect
-  const source = effect.side === 'incoming' ? await ops.incoming() : ok(ops.local())
-  if (!source.ok) return failed('sync', source.error)
+  const source = effect.side === 'incoming' ? await ops.incoming() : await ops.local()
+  if (!source.ok) return failed(effect.side === 'incoming' ? 'sync' : 'saveLocal', source.error)
 
   const copy: SaveablePlanner = {
     ...source.value,
@@ -201,14 +217,23 @@ async function forkCopy(
     rest: async () => {
       const synced = await ops.sync(copy, false)
       if (!synced.ok) return failed('sync', synced.error)
-      uploaded = true
+      // Only an upload the server acknowledged leaves anything there to undo.
+      uploaded = synced.value !== null
       return interpretConflictPlan(remaining, ops, ctx)
     },
     rollback: async () => {
       const remote = uploaded ? await ops.deleteRemote(copy.metadata.id) : ok(undefined)
       const local = await ops.deleteLocal(copy.metadata.id)
-      if (!local.ok) return failed('deleteLocal', local.error)
-      return remote.ok ? ok(undefined) : failed('deleteLocal', remote.error)
+
+      if (!remote.ok) {
+        // The copy the server keeps is what the next sync pulls back, so it is
+        // the failure the rollback reports even when both went wrong.
+        if (!local.ok) {
+          console.error('Rollback of the forked planner failed locally too:', local.error)
+        }
+        return failed('deleteRemote', remote.error)
+      }
+      return local.ok ? ok(undefined) : failed('deleteLocal', local.error)
     },
   })
 
