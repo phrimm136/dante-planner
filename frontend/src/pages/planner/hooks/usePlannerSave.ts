@@ -111,8 +111,8 @@ export interface UsePlannerSaveOptions {
   initialSavedAt?: string
   /** Current published state (from component) */
   published?: boolean
-  /** Callback when server version is reloaded (on discard) */
-  onServerReload?: (planner: SaveablePlanner) => void
+  /** Reload the editor from the server copy; returns whether it was adopted. */
+  onServerReload?: (planner: SaveablePlanner) => boolean
   /** Callback when "Keep Both" creates a new planner (for navigation) */
   onKeepBothCreated?: (newPlannerId: string) => void
   /** Whether sync to server is enabled (from user settings). Defaults to false if not set. */
@@ -361,11 +361,26 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   const autoSaveRef = useRef<(flushing?: boolean) => Promise<void>>(async () => {})
   const inFlightRef = useRef<Promise<void>>(Promise.resolve())
 
+  // Whether a manual save owns the write right now. The state above cannot answer
+  // that after unmount: nothing re-renders this hook again, so every closure keeps
+  // whatever it captured while the save was still running.
+  const isSavingRef = useRef(false)
+
+  // A teardown flush that arrives mid-save, waiting for that save to finish.
+  const pendingFlushRef = useRef(false)
+
+  // Set once the subscription is torn down, so no timer outlives the editor.
+  const unmountedRef = useRef(false)
+
   // Read by isDirty, which must stay stable for a listener registered once.
   const getStateRef = useRef(options.getState)
 
   /** Arm, or re-arm, the debounce that runs the autosave. */
   const armAutoSave = () => {
+    // Past teardown there is nobody left to save for, and a timer that re-arms
+    // itself would hold the store for the life of the tab.
+    if (unmountedRef.current) return
+
     if (timerRef.current) {
       clearTimeout(timerRef.current)
     }
@@ -560,10 +575,17 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     return ok(savedComparable)
   }
 
-  /** Adopt `comparable` as the local-write baseline; nothing is dirty against it. */
+  /**
+   * Adopt `comparable` as the local-write baseline.
+   *
+   * The baseline is deliberately older than the live state whenever a save
+   * overlapped an edit, so dirtiness is what the comparison says rather than a
+   * flat false — clearing it there would silence the unload warning over exactly
+   * the window where the edit is still unwritten.
+   */
   const markLocalBaseline = (comparable: string) => {
     previousStateRef.current = comparable
-    dirtyRef.current = false
+    dirtyRef.current = stateToComparableString(getStateRef.current()) !== comparable
   }
 
   /**
@@ -582,24 +604,20 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
    * syncing to the server is manual-save only.
    */
   const runAutoSave = async (flushing: boolean) => {
-    // A manual save owns the write. Re-arm rather than return: dropping the timer
-    // here loses every edit made between the save starting and it finishing.
-    if (isSaving) {
-      armAutoSave()
+    // A manual save owns the write. Never just return: that loses every edit made
+    // between the save starting and it finishing. A teardown flush cannot wait on
+    // a timer, so it hands itself to the save to run when it is done.
+    if (isSavingRef.current) {
+      if (flushing) {
+        pendingFlushRef.current = true
+      } else {
+        armAutoSave()
+      }
       return
     }
 
     const currentState = getState()
     const currentStateString = stateToComparableString(currentState)
-
-    // First run: initialize baseline and skip save (handles planner loading in edit
-    // mode, where the store already matches storage). A teardown flush has no next
-    // run to write for it, so unsaved changes are written even without a baseline.
-    if (previousStateRef.current === '' && !(flushing && dirtyRef.current)) {
-      markLocalBaseline(currentStateString)
-      lastSyncedStateRef.current = currentStateString
-      return
-    }
 
     // Skip if state hasn't changed
     if (currentStateString === previousStateRef.current) {
@@ -661,6 +679,27 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     return chained
   }
 
+  /** Take ownership of the write for a manual save. */
+  const beginSave = () => {
+    isSavingRef.current = true
+    setIsSaving(true)
+  }
+
+  /**
+   * Release it, and run a teardown flush that arrived while the save held it.
+   * Refs still work on an unmounted fiber, which is the only reason those last
+   * edits are still reachable at all.
+   */
+  const endSave = () => {
+    isSavingRef.current = false
+    setIsSaving(false)
+
+    if (pendingFlushRef.current) {
+      pendingFlushRef.current = false
+      void autoSaveRef.current(true)
+    }
+  }
+
   /** Drop a pending auto-save so it cannot land on top of a manual write. */
   const cancelPendingAutoSave = () => {
     if (timerRef.current) {
@@ -679,7 +718,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     // Prevents a race where auto-save overwrites with a stale syncVersion
     cancelPendingAutoSave()
 
-    setIsSaving(true)
+    beginSave()
 
     try {
       const saved = await performSave('saved', {
@@ -697,7 +736,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       reportFailure(classifyAppError(saveFailure))
       return false
     } finally {
-      setIsSaving(false)
+      endSave()
     }
   }
 
@@ -801,10 +840,9 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     if (!localResult.ok) return localResult
     adoptAck(fetched.value.ack)
 
-    if (onServerReload) {
-      onServerReload(serverPlanner)
-      // The reload rewrote the store with the server's copy. Without adopting it
-      // as the baseline, the next autosave writes it straight back as a draft.
+    // Only a reload that actually adopted the copy may be baselined: a consumer
+    // that rejected it still holds the old local content, which is not clean.
+    if (onServerReload?.(serverPlanner)) {
       markSaved(stateToComparableString(getState()))
     }
     return ok(undefined)
@@ -867,7 +905,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     if (error?.kind !== 'conflict') return false
     const { serverVersion } = error
 
-    setIsSaving(true)
+    beginSave()
 
     // Prevents a race where the timer fires with stale state before React re-renders
     cancelPendingAutoSave()
@@ -899,7 +937,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     } catch (resolutionError: unknown) {
       return failResolution(classifyAppError(resolutionError))
     } finally {
-      setIsSaving(false)
+      endSave()
     }
   }
 
@@ -923,12 +961,24 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   useEffect(() => {
     if (!isClient) return
 
+    unmountedRef.current = false
+
+    // Install the baseline up front. A lazily initialized one leaves a window in
+    // which a teardown flush adopts unwritten text as the baseline instead of
+    // writing it, and the store is already loaded by the time this runs.
+    if (previousStateRef.current === '') {
+      const initial = stateToComparableString(getStateRef.current())
+      previousStateRef.current = initial
+      lastSyncedStateRef.current = initial
+    }
+
     const unsubscribe = subscribe(() => {
       dirtyRef.current = true
       armAutoSave()
     })
 
     return () => {
+      unmountedRef.current = true
       unsubscribe()
       if (timerRef.current) {
         clearTimeout(timerRef.current)
@@ -949,8 +999,6 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   // the caller is an unload handler, so the comparison runs rarely.
   const isDirty = useCallback(() => {
     if (!dirtyRef.current) return false
-    // Nothing has been written yet, so there is no baseline to acquit the change.
-    if (previousStateRef.current === '') return true
     return stateToComparableString(getStateRef.current()) !== previousStateRef.current
   }, [])
 

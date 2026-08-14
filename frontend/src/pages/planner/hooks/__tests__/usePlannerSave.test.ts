@@ -819,15 +819,71 @@ describe('usePlannerSave - edits during an in-flight manual save', () => {
   })
 })
 
+describe('usePlannerSave - unmounting during a save', () => {
+  it('writes an edit made while a save was in flight, after the editor is gone', async () => {
+    authenticated()
+    const store = manualStore()
+    let currentState = validState({ title: 'before' })
+    const { result, unmount } = renderHook(() =>
+      usePlannerSave(baseOptions({ getState: () => currentState, subscribe: store.subscribe })),
+    )
+
+    await act(async () => {
+      await result.current.save({ published: false })
+    })
+    mockSaveToLocal.mockClear()
+
+    let releaseSync: (() => void) | null = null
+    mockSyncToServer.mockImplementation(
+      (planner) =>
+        new Promise((resolve) => {
+          releaseSync = () => {
+            resolve({ planner, ack: { syncVersion: 5 } })
+          }
+        }),
+    )
+
+    let savePromise: Promise<boolean> | undefined
+    await act(async () => {
+      savePromise = result.current.save({ published: false })
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    currentState = validState({ title: 'after' })
+    act(() => {
+      store.notify()
+    })
+
+    // The editor closes while the save is still running. Nothing re-renders this
+    // hook again, so anything reading save state off a render closure is frozen
+    // from here on.
+    await act(async () => {
+      unmount()
+    })
+
+    await act(async () => {
+      releaseSync?.()
+      await savePromise
+    })
+
+    await waitFor(() => {
+      const titles = mockSaveToLocal.mock.calls.map(([planner]) => planner.metadata.title)
+      expect(titles).toContain('after')
+    })
+  })
+})
+
 describe('usePlannerSave - discard adoption', () => {
   it('leaves the adopted server copy clean instead of queued for a draft rewrite', async () => {
     authenticated()
     const store = manualStore()
     let currentState = validState({ title: 'local' })
-    // The reload rewrites the store with the server's content, as the shell does.
+    // The reload rewrites the store with the server's content, as the shell does,
+    // and reports that it adopted it.
     const onServerReload = vi.fn(() => {
       currentState = validState({ title: 'from server' })
       store.notify()
+      return true
     })
 
     mockSyncToServer.mockRejectedValueOnce(new ConflictError('SYNC_CONFLICT', 'conflict', 7))
@@ -856,6 +912,38 @@ describe('usePlannerSave - discard adoption', () => {
       await new Promise((resolve) => setTimeout(resolve, AUTO_SAVE_DEBOUNCE_MS * 2))
     })
     expect(mockSaveToLocal).toHaveBeenCalledTimes(1)
+  })
+
+  it('stays dirty when the reload refused the server copy', async () => {
+    authenticated()
+    const store = manualStore()
+    let currentState = validState({ title: 'local' })
+    // A consumer that rejects the copy leaves the old local content in the store.
+    const onServerReload = vi.fn(() => false)
+
+    mockSyncToServer.mockRejectedValueOnce(new ConflictError('SYNC_CONFLICT', 'conflict', 7))
+    const { result } = renderHook(() =>
+      usePlannerSave(
+        baseOptions({ getState: () => currentState, subscribe: store.subscribe, onServerReload }),
+      ),
+    )
+
+    await act(async () => {
+      await result.current.save({ published: false })
+    })
+
+    mockFetchFromServer.mockResolvedValue(ok(fetchedAt(9)))
+    currentState = validState({ title: 'edited while conflicted' })
+    act(() => {
+      store.notify()
+    })
+
+    await act(async () => {
+      await result.current.resolveConflict('discard')
+    })
+
+    expect(onServerReload).toHaveBeenCalledTimes(1)
+    expect(result.current.isDirty()).toBe(true)
   })
 })
 
