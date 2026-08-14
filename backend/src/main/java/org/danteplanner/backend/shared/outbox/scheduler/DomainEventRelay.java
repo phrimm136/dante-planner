@@ -47,8 +47,14 @@ public class DomainEventRelay {
 
     /**
      * Dispatch one batch of events the eager hop left open.
+     *
+     * <p>The first pass waits a full interval. A fixed delay declared without one runs the instant
+     * the context is built, which aims a recovery scan at a pod that has not finished starting —
+     * and nothing is owed to the relay that early, because a row that young still belongs to the
+     * eager hop.</p>
      */
-    @Scheduled(fixedDelayString = "${outbox.relay.fixed-delay-ms:60000}")
+    @Scheduled(initialDelayString = "${outbox.relay.fixed-delay-ms:60000}",
+            fixedDelayString = "${outbox.relay.fixed-delay-ms:60000}")
     @SchedulerLock(name = "dispatchDomainEvents", lockAtMostFor = "PT30M", lockAtLeastFor = "PT30S")
     public void dispatchPendingEvents() {
         Instant cutoff = Instant.now().minus(graceDuration);
