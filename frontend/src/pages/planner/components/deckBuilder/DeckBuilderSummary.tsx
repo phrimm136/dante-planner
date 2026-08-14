@@ -9,16 +9,22 @@ import type { IdentityListItem } from '@/pages/identity'
 import { SinnerGrid, type SkillData } from './SinnerGrid'
 import { StatusViewer } from './StatusViewer'
 import { DeckBuilderActionBar } from './DeckBuilderActionBar'
+import type { DeckBuilderActions } from './DeckBuilderContent'
 import { SECTION_STYLES } from '@/lib/constants'
 
-/** Everything the summary renders that it does not fetch for itself. */
-export interface DeckBuilderSummaryProps {
+/**
+ * Everything the summary renders that it does not fetch for itself.
+ *
+ * The summary edits no identity, so it takes the deck-wide commands without
+ * `onIdentityChange`, and takes them optionally because the read-only viewer
+ * supplies none.
+ */
+export interface DeckBuilderSummaryProps extends Partial<
+  Omit<DeckBuilderActions, 'onIdentityChange'>
+> {
   equipment: Record<string, SinnerEquipment>
   deploymentOrder: number[]
   onToggleDeploy?: (sinnerIndex: number) => void
-  onImport?: () => void
-  onExport?: () => void
-  onResetOrder?: () => void
   onEditDeck?: () => void
   readOnly?: boolean
   trackerMode?: boolean
