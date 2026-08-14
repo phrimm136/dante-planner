@@ -17,7 +17,7 @@ import {
   showErrorMessage,
 } from '../errorPresentation'
 import type { ErrorPresentation } from '../errorPresentation'
-import type { AppError } from '../apiErrorClassifier'
+import type { AppError, RestrictionKind, UnavailableScope } from '../apiErrorClassifier'
 
 const CONTACT_MESSAGE = 'If this error persists, please contact contact@dante-planner.com.'
 
@@ -58,25 +58,49 @@ describe('presentError', () => {
     })
   })
 
-  it('returns null for the conflict alone', () => {
-    const silent = (
-      [
-        { kind: 'validation', key: 'k' },
-        { kind: 'restricted', reason: 'banned' },
-        { kind: 'rateLimit' },
-        { kind: 'forbidden', code: 'X' },
-        { kind: 'notFound' },
-        { kind: 'unavailable', scope: 'service' },
-        { kind: 'unavailable', scope: 'backend' },
-        { kind: 'unavailable', scope: 'auth' },
-        { kind: 'unavailable', scope: 'write' },
-        { kind: 'retryable' },
-        { kind: 'quota' },
-        { kind: 'unknown' },
-      ] satisfies AppError[]
-    ).filter((error) => presentError(error) === null)
+  // Keyed by kind and scope, so a case added to either union fails to compile
+  // here rather than slipping through as a silently unpresented failure.
+  const RESTRICTED: Record<RestrictionKind, AppError> = {
+    banned: { kind: 'restricted', reason: 'banned' },
+    timedOut: { kind: 'restricted', reason: 'timedOut' },
+  }
 
-    expect(silent).toEqual([])
+  const UNAVAILABLE: Record<UnavailableScope, AppError> = {
+    service: { kind: 'unavailable', scope: 'service' },
+    backend: { kind: 'unavailable', scope: 'backend' },
+    auth: { kind: 'unavailable', scope: 'auth' },
+    write: { kind: 'unavailable', scope: 'write' },
+  }
+
+  const EVERY_CASE: Record<AppError['kind'], AppError[]> = {
+    conflict: [{ kind: 'conflict', code: 'SYNC_CONFLICT', serverVersion: 4 }],
+    validation: [{ kind: 'validation', key: 'planner:k' }],
+    restricted: Object.values(RESTRICTED),
+    rateLimit: [{ kind: 'rateLimit' }],
+    forbidden: [{ kind: 'forbidden', code: 'PLANNER_FORBIDDEN' }],
+    notFound: [{ kind: 'notFound' }],
+    unavailable: Object.values(UNAVAILABLE),
+    retryable: [{ kind: 'retryable' }],
+    quota: [{ kind: 'quota' }],
+    unknown: [{ kind: 'unknown' }],
+  }
+
+  const everyError = Object.values(EVERY_CASE).flat()
+
+  it('delegates to a mounted owner for the conflict alone', () => {
+    const silent = everyError
+      .filter((error) => presentError(error) === null)
+      .map((error) => error.kind)
+
+    expect(silent).toEqual(['conflict'])
+  })
+
+  it('gives every other case a key to render', () => {
+    const keyless = everyError
+      .filter((error) => error.kind !== 'conflict')
+      .filter((error) => (presentError(error)?.key ?? '') === '')
+
+    expect(keyless).toEqual([])
   })
 
   const presented: { name: string; error: AppError; expected: ErrorPresentation }[] = [
