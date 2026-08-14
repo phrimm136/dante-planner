@@ -10,8 +10,6 @@ import {
   encodeGiftSelection,
   decodeGiftSelection,
   getBaseGiftId,
-  isGiftSelected,
-  getGiftEnhancement,
   findEncodedGiftId,
   buildSelectionLookup,
   getCascadeIngredients,
@@ -74,45 +72,6 @@ describe('getBaseGiftId', () => {
 
   it('returns null for a malformed encoding', () => {
     expect(getBaseGiftId('39001')).toBeNull()
-  })
-})
-
-describe('isGiftSelected', () => {
-  it('returns true when base gift is in selection', () => {
-    const selection = new Set(['9001', '9002'])
-    expect(isGiftSelected('9001', selection)).toBe(true)
-  })
-
-  it('returns true when enhanced gift is in selection', () => {
-    const selection = new Set(['19001', '9002'])
-    expect(isGiftSelected('9001', selection)).toBe(true)
-  })
-
-  it('returns false when gift is not in selection', () => {
-    const selection = new Set(['9002', '9003'])
-    expect(isGiftSelected('9001', selection)).toBe(false)
-  })
-
-  it('returns false for empty selection', () => {
-    expect(isGiftSelected('9001', new Set())).toBe(false)
-  })
-})
-
-describe('getGiftEnhancement', () => {
-  it('returns 0 when gift is not selected', () => {
-    expect(getGiftEnhancement('9001', new Set())).toBe(0)
-  })
-
-  it('returns 0 when gift is selected at base level', () => {
-    expect(getGiftEnhancement('9001', new Set(['9001']))).toBe(0)
-  })
-
-  it('returns 1 when gift is selected at enhancement 1', () => {
-    expect(getGiftEnhancement('9001', new Set(['19001']))).toBe(1)
-  })
-
-  it('returns 2 when gift is selected at enhancement 2', () => {
-    expect(getGiftEnhancement('9001', new Set(['29001']))).toBe(2)
   })
 })
 

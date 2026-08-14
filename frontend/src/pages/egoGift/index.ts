@@ -72,8 +72,6 @@ export {
   encodeGiftSelection,
   decodeGiftSelection,
   getBaseGiftId,
-  isGiftSelected,
-  getGiftEnhancement,
   findEncodedGiftId,
   buildSelectionLookup,
   getCascadeIngredients,

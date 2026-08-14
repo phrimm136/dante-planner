@@ -62,41 +62,6 @@ export function getBaseGiftId(encodedId: string): string | null {
 }
 
 /**
- * Checks if a gift ID is selected in a set of encoded selections
- * Matches regardless of enhancement level
- *
- * @param giftId - Gift ID to check
- * @param selectedIds - Set of encoded selection strings
- * @returns True if the gift is selected (at any enhancement level)
- */
-export function isGiftSelected(giftId: string, selectedIds: Set<string>): boolean {
-  for (const encodedId of selectedIds) {
-    if (getBaseGiftId(encodedId) === giftId) {
-      return true
-    }
-  }
-  return false
-}
-
-/**
- * Gets the current enhancement level for a gift from a set of selections
- * Returns 0 if not selected
- *
- * @param giftId - Gift ID to check
- * @param selectedIds - Set of encoded selection strings
- * @returns Enhancement level (0, 1, or 2)
- */
-export function getGiftEnhancement(giftId: string, selectedIds: Set<string>): EnhancementLevel {
-  for (const encodedId of selectedIds) {
-    const decoded = decodeGiftSelection(encodedId)
-    if (decoded?.giftId === giftId) {
-      return decoded.enhancement
-    }
-  }
-  return 0
-}
-
-/**
  * Finds the encoded ID for a specific gift in a set of selections
  * Returns undefined if not found
  *
