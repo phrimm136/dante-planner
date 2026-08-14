@@ -22,7 +22,8 @@ import { useEGOGiftListData } from '@/pages/egoGift'
 import { plannerQueryKeys } from '../../lib/plannerQueryKeys'
 import { deriveSaveStatus, SAVE_STATUS_BADGE_VARIANT } from '../../lib/plannerBadges'
 import { decidePublishAction } from '../../lib/plannerPublishPolicy'
-import { showAppError, showError, showErrorMessage, showSuccess } from '@/lib/errorPresentation'
+import { showAppError, showErrorMessage, showSuccess } from '@/lib/errorPresentation'
+import { showSyncFailure } from '../../lib/syncFailure'
 import { validatePlannerForPublish } from '../../lib/plannerValidation'
 import { toUserFriendlyError } from '../../lib/plannerValidationErrors'
 
@@ -160,7 +161,7 @@ export function PersonalPlannerHeader({
       callPublishMutation(false, acknowledgedCopy(synced))
     } catch (error) {
       console.error('Failed to upload plan for publishing:', error)
-      showError(error)
+      showSyncFailure(error)
       setIsUploadingForPublish(false)
     }
   }

@@ -3,7 +3,8 @@ import { useNavigate } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 
 import { NotFoundError } from '@/lib/api'
-import { showError, showSuccess } from '@/lib/errorPresentation'
+import { showSuccess } from '@/lib/errorPresentation'
+import { showSyncFailure } from '../lib/syncFailure'
 import { plannerQueryKeys } from '../lib/plannerQueryKeys'
 import { publishedPlannerQueryKeys } from './usePublishedPlannerQuery'
 import { userPlannersQueryKeys } from './useMDUserPlannersData'
@@ -118,7 +119,7 @@ export function usePlannerHeaderActions({
     await applyUpdate()
       .catch((error: unknown) => {
         console.error('Failed to apply latest mirror:', error)
-        showError(error)
+        showSyncFailure(error)
       })
       .finally(() => {
         setIsApplyingLatestMirror(false)
