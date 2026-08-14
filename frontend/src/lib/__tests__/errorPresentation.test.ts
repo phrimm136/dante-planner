@@ -9,7 +9,13 @@ import {
   WriteTemporarilyUnavailableError,
 } from '@/lib/api'
 
-import { presentError, showError, showSuccess, showUnavailable } from '../errorPresentation'
+import {
+  presentError,
+  showError,
+  showSuccess,
+  showUnavailable,
+  showValidationError,
+} from '../errorPresentation'
 import type { ErrorPresentation } from '../errorPresentation'
 import type { AppError } from '../apiErrorClassifier'
 
@@ -189,6 +195,23 @@ describe('showUnavailable', () => {
     showUnavailable(new WriteTemporarilyUnavailableError('paused'))
 
     expect(sonnerToast.warning).not.toHaveBeenCalled()
+  })
+})
+
+describe('showValidationError', () => {
+  it('reports a client-side rule under its own key, with no support hint', () => {
+    showValidationError('planner:exportImport.invalidFileFormat')
+
+    expect(sonnerToast.error).toHaveBeenCalledWith(
+      'planner:exportImport.invalidFileFormat',
+      undefined,
+    )
+  })
+
+  it('carries the rule params through to the message', () => {
+    showValidationError('planner:exportImport.fileTooLarge', { max: '10MB' })
+
+    expect(sonnerToast.error).toHaveBeenCalledOnce()
   })
 })
 

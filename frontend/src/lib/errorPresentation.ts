@@ -12,7 +12,7 @@ import i18n from '@/lib/i18n'
 import { linkifyText } from '@/components/ui/LinkifyText'
 import { assertNever } from '@/lib/utils'
 
-import { classifyAppError } from './apiErrorClassifier'
+import { classifyAppError, validationAppError } from './apiErrorClassifier'
 import type { AppError, RestrictionKind, UnavailableScope } from './apiErrorClassifier'
 
 export interface ErrorPresentation {
@@ -99,6 +99,13 @@ export function showUnavailable(error: unknown): void {
   if (classified.kind !== 'unavailable') return
 
   const presentation = presentError(classified)
+  if (presentation === null) return
+  emit(presentation)
+}
+
+/** Report a failure a client-side rule raised, which never reached the API. */
+export function showValidationError(key: string, params?: Record<string, string>): void {
+  const presentation = presentError(validationAppError({ key, params }))
   if (presentation === null) return
   emit(presentation)
 }
