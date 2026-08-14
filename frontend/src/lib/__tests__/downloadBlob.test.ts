@@ -52,4 +52,23 @@ describe('downloadBlob', () => {
 
     expect(revokeObjectURL).toHaveBeenCalledWith(OBJECT_URL)
   })
+
+  it('reports the download it handed to the browser', () => {
+    expect(downloadBlob('file.danteplanner', new Blob(['x']))).toBe(true)
+  })
+
+  it('refuses an empty blob rather than saving nothing', () => {
+    expect(downloadBlob('file.danteplanner', new Blob([]))).toBe(false)
+    expect(createObjectURL).not.toHaveBeenCalled()
+  })
+
+  it('reports a failure instead of throwing, and still revokes', () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    vi.mocked(HTMLAnchorElement.prototype.click).mockImplementation(() => {
+      throw new Error('blocked')
+    })
+
+    expect(downloadBlob('file.danteplanner', new Blob(['x']))).toBe(false)
+    expect(revokeObjectURL).toHaveBeenCalledWith(OBJECT_URL)
+  })
 })
