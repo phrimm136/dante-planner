@@ -7,11 +7,8 @@ import { parseShortcutKeys } from '@/shared/noteEditor/lib/tiptap-utils'
 import { useTiptapEditor } from '../use-tiptap-editor'
 
 // --- Tiptap UI ---
-import type { UseImageUploadConfig } from '@/components/tiptap-ui/image-upload-button'
-import {
-  IMAGE_UPLOAD_SHORTCUT_KEY,
-  useImageUpload,
-} from '@/components/tiptap-ui/image-upload-button'
+import type { UseImageUploadConfig } from './use-image-upload'
+import { IMAGE_UPLOAD_SHORTCUT_KEY, useImageUpload } from './use-image-upload'
 
 // --- UI Primitives ---
 import type { ButtonProps } from '@/components/tiptap-ui-primitive/button'
