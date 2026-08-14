@@ -1,0 +1,14 @@
+id: no-bare-toast-tsx
+valid:
+  - showError(error)
+  - showSuccess('common:settings.logoutEverywhere.success')
+  - toast.info(t('exportImport.noPlannersToExport'))
+  - toast.warning(t('pages.plannerMD.publish.requiresHardMode'))
+  - "const onClick = () => <button onClick={() => showError(error)} />"
+invalid:
+  - toast.error(t('settings.deleteAccount.error'))
+  - "toast.success(t('plannerTakedown.success', { ns: 'moderation' }))"
+  - |
+    const handler = () => {
+      mutate(vars, { onError: () => toast.error(t(failKey)) })
+    }

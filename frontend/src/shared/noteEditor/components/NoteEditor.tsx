@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useEditor, EditorContent, EditorContext } from '@tiptap/react'
 import { ErrorBoundary, type FallbackProps } from 'react-error-boundary'
 import { useTranslation } from 'react-i18next'
-import { toast } from '@/lib/toast'
+import { showErrorMessage } from '@/lib/errorPresentation'
 import StarterKit from '@tiptap/starter-kit'
 
 import { cn } from '@/lib/utils'
@@ -301,7 +301,7 @@ function NoteEditorInner({
 
     const safeUrl = sanitizeUrl(processedUrl, window.location.origin)
     if (safeUrl === '#') {
-      toast.error(t('pages.plannerMD.noteEditor.linkDialog.invalidUrl'))
+      showErrorMessage('planner:pages.plannerMD.noteEditor.linkDialog.invalidUrl')
       return
     }
 

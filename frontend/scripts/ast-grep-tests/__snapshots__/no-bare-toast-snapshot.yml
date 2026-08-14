@@ -1,0 +1,31 @@
+id: no-bare-toast
+snapshots:
+  toast.error('Something went wrong'):
+    labels:
+    - source: toast.error('Something went wrong')
+      style: primary
+      start: 0
+      end: 35
+  'toast.error(t(failKey), { duration: 5000 })':
+    labels:
+    - source: 'toast.error(t(failKey), { duration: 5000 })'
+      style: primary
+      start: 0
+      end: 43
+  toast.success(t('settings.username.saveSuccess')):
+    labels:
+    - source: toast.success(t('settings.username.saveSuccess'))
+      style: primary
+      start: 0
+      end: 49
+  ? |
+    try {
+      await save()
+    } catch (error) {
+      toast.error(t('pages.plannerMD.save.failed'))
+    }
+  : labels:
+    - source: toast.error(t('pages.plannerMD.save.failed'))
+      style: primary
+      start: 41
+      end: 86

@@ -1,11 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
-import { useTranslation } from 'react-i18next'
 
-import { toast } from '@/lib/toast'
 import { NotFoundError } from '@/lib/api'
-import { showError } from '@/lib/errorPresentation'
+import { showError, showSuccess } from '@/lib/errorPresentation'
 import { plannerQueryKeys } from '../lib/plannerQueryKeys'
 import { publishedPlannerQueryKeys } from './usePublishedPlannerQuery'
 import { userPlannersQueryKeys } from './useMDUserPlannersData'
@@ -43,7 +41,6 @@ export function usePlannerHeaderActions({
   syncEnabled,
   onDelete,
 }: UsePlannerHeaderActionsOptions) {
-  const { t } = useTranslation(['planner', 'common'])
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const config = usePlannerConfig()
@@ -115,7 +112,7 @@ export function usePlannerHeaderActions({
       void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.detail(plannerId) })
       void queryClient.invalidateQueries({ queryKey: publishedPlannerQueryKeys.detail(plannerId) })
 
-      toast.success(t('pages.plannerMD.applyLatestMirror.success'))
+      showSuccess('planner:pages.plannerMD.applyLatestMirror.success')
     }
 
     await applyUpdate()

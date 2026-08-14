@@ -31,12 +31,10 @@ vi.mock('sonner', () => ({
 }))
 
 // ── API errors ────────────────────────────────────────────────
-vi.mock('@/lib/api', () => ({
-  BannedError: class BannedError extends Error {},
-  TimedOutError: class TimedOutError extends Error {},
-  NotFoundError: class NotFoundError extends Error {},
-  ConflictError: class ConflictError extends Error {},
-  WriteTemporarilyUnavailableError: class WriteTemporarilyUnavailableError extends Error {},
+// The classifier reads every error class the API layer exports, so the real
+// ones stand in and only the client is replaced.
+vi.mock('@/lib/api', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/api')>()),
 }))
 
 // ── Child dialogs ─────────────────────────────────────────────

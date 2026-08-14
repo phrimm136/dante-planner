@@ -249,7 +249,7 @@ describe('NoteEditor - XSS Prevention', () => {
 
       // Should show error toast
       await waitFor(() => {
-        expect(mockToastError).toHaveBeenCalledWith('Invalid URL')
+        expect(mockToastError).toHaveBeenCalledWith('Invalid or unsafe URL')
       })
     })
 
@@ -286,7 +286,7 @@ describe('NoteEditor - XSS Prevention', () => {
 
       // Should show error toast
       await waitFor(() => {
-        expect(mockToastError).toHaveBeenCalledWith('Invalid URL')
+        expect(mockToastError).toHaveBeenCalledWith('Invalid or unsafe URL')
       })
     })
 
@@ -416,7 +416,7 @@ describe('NoteEditor - XSS Prevention', () => {
 
         // Should show error toast
         await waitFor(() => {
-          expect(mockToastError).toHaveBeenCalledWith('Invalid URL')
+          expect(mockToastError).toHaveBeenCalledWith('Invalid or unsafe URL')
         })
       })
     })

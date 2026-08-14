@@ -1,0 +1,21 @@
+id: no-bare-toast
+valid:
+  - showError(error)
+  - showAppError(saveResult.error)
+  - showErrorMessage('planner:deckBuilder.importError')
+  - showSuccess('common:settings.sync.enabledSuccess')
+  - toast.info(t('exportImport.noPlannersToExport'))
+  - toast.warning(t('pages.plannerMD.publish.requiresHardMode'))
+  - toast.dismiss('toast-id')
+  - "toast[descriptor.severity](t(descriptor.key))"
+  - expect(toast.error).toHaveBeenCalledOnce()
+invalid:
+  - toast.error('Something went wrong')
+  - toast.success(t('settings.username.saveSuccess'))
+  - "toast.error(t(failKey), { duration: 5000 })"
+  - |
+    try {
+      await save()
+    } catch (error) {
+      toast.error(t('pages.plannerMD.save.failed'))
+    }
