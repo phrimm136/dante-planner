@@ -24,7 +24,12 @@ import lombok.Setter;
 import org.danteplanner.backend.planner.converter.KeywordSetConverter;
 import org.danteplanner.backend.planner.converter.PlannerStatusConverter;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.util.HexFormat;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -77,6 +82,14 @@ public class PlannerContent {
     @Setter
     private String content;
 
+    /**
+     * SHA-256 over the content document as the write path received it. MySQL re-serializes a JSON
+     * column, so this is the only surviving identity of the author's bytes: recomputing it from
+     * {@link #content} after a round trip yields a different value for an unchanged document.
+     */
+    @Column(name = "content_digest", columnDefinition = "BINARY(32)", nullable = false)
+    private byte[] contentDigest;
+
     @Column(name = "content_schema_version", nullable = false)
     @Setter
     @Builder.Default
@@ -128,6 +141,19 @@ public class PlannerContent {
         if (lastModifiedAt == null) {
             lastModifiedAt = Instant.now();
         }
+        contentDigest = digestOf(content);
+    }
+
+    private static byte[] digestOf(String content) {
+        try {
+            return MessageDigest.getInstance("SHA-256").digest(content.getBytes(StandardCharsets.UTF_8));
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    public String contentDigestHex() {
+        return HexFormat.of().formatHex(contentDigest);
     }
 
     @PreUpdate
@@ -148,9 +174,13 @@ public class PlannerContent {
     }
 
     /**
-     * Record a save: bump the sync version handed back to clients.
+     * Record a save: bump the sync version handed back to clients, and re-derive the content
+     * digest when this transaction actually moved the document.
      */
     public void recordSave() {
         this.syncVersion = this.syncVersion + 1;
+        if (!Objects.equals(content, loadedContent)) {
+            this.contentDigest = digestOf(content);
+        }
     }
 }
