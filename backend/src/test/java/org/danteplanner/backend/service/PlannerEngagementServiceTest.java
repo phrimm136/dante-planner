@@ -2,13 +2,10 @@ package org.danteplanner.backend.service;
 import org.danteplanner.backend.planner.service.PlannerEngagementService;
 import org.mockito.ArgumentCaptor;
 
-import org.danteplanner.backend.planner.dto.BookmarkResponse;
 import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.entity.PlannerBookmark;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerBookmarkRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
@@ -48,7 +45,7 @@ import org.danteplanner.backend.planner.dto.VoteResponse;
 import org.danteplanner.backend.planner.entity.VoteType;
 
 /**
- * Unit tests for PlannerEngagementService (immutable voting and bookmark toggling).
+ * Unit tests for PlannerEngagementService (immutable voting and bookmark reads).
  */
 @ExtendWith(SpringExtension.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
@@ -117,138 +114,6 @@ class PlannerEngagementServiceTest {
                 .schemaVersion(1)
                 .contentVersion(6)
                 .plannerType(PlannerType.MIRROR_DUNGEON);
-    }
-
-    private Planner createTestPlanner() {
-        return testPlannerBuilder().build();
-    }
-
-    @Nested
-    @DisplayName("setBookmark Tests")
-    class SetBookmarkTests {
-
-        @Test
-        @DisplayName("bookmarking an already-bookmarked planner leaves the bookmark in place")
-        void bookmarkIdempotentStateTargeted_WhenSentTwice_StaysBookmarked() {
-            Planner planner = testPlannerBuilder().published(true).build();
-            UUID plannerId = planner.getId();
-
-            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
-            when(plannerBookmarkRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
-                    .thenReturn(Optional.of(new PlannerBookmark(testUser.getId(), plannerId)));
-
-            BookmarkResponse response = engagementService.setBookmark(testUser.getId(), plannerId, true);
-
-            assertTrue(response.bookmarked(), "a repeated bookmark must not un-bookmark");
-            verify(plannerBookmarkRepository, never()).delete(any());
-        }
-
-        @Test
-        @DisplayName("removing an absent bookmark leaves it absent")
-        void bookmarkIdempotentStateTargeted_WhenRemoveRepeated_StaysUnbookmarked() {
-            Planner planner = testPlannerBuilder().published(true).build();
-            UUID plannerId = planner.getId();
-
-            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
-            when(plannerBookmarkRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
-                    .thenReturn(Optional.empty());
-
-            BookmarkResponse response = engagementService.setBookmark(testUser.getId(), plannerId, false);
-
-            assertFalse(response.bookmarked());
-            verify(plannerBookmarkRepository, never()).insert(any(PlannerBookmark.class));
-        }
-    }
-
-    @Nested
-    @DisplayName("toggleBookmark Tests")
-    class ToggleBookmarkTests {
-
-        private Planner createPublishedPlanner() {
-            Planner planner = testPlannerBuilder().published(true).build();
-            return planner;
-        }
-
-        @Test
-        @DisplayName("Should add bookmark when not bookmarked")
-        void toggleBookmark_WhenNotBookmarked_AddsBookmark() {
-            // Arrange
-            Planner planner = createPublishedPlanner();
-            UUID plannerId = planner.getId();
-
-            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
-            when(plannerBookmarkRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
-                    .thenReturn(Optional.empty());
-            when(plannerBookmarkRepository.insert(any(PlannerBookmark.class)))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
-
-            // Act
-            BookmarkResponse response = engagementService.toggleBookmark(testUser.getId(), plannerId);
-
-            // Assert
-            assertTrue(response.bookmarked());
-            assertEquals(plannerId, response.plannerId());
-            ArgumentCaptor<PlannerBookmark> bookmarkCaptor =
-                    ArgumentCaptor.forClass(PlannerBookmark.class);
-            verify(plannerBookmarkRepository).insert(bookmarkCaptor.capture());
-            assertEquals(testUser.getId(), bookmarkCaptor.getValue().getUserId());
-            assertEquals(plannerId, bookmarkCaptor.getValue().getPlannerId());
-            verify(plannerBookmarkRepository, never()).delete(any());
-        }
-
-        @Test
-        @DisplayName("Should remove bookmark when already bookmarked")
-        void toggleBookmark_WhenAlreadyBookmarked_RemovesBookmark() {
-            // Arrange
-            Planner planner = createPublishedPlanner();
-            UUID plannerId = planner.getId();
-            PlannerBookmark existingBookmark = new PlannerBookmark(testUser.getId(), plannerId);
-
-            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
-            when(plannerBookmarkRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
-                    .thenReturn(Optional.of(existingBookmark));
-
-            // Act
-            BookmarkResponse response = engagementService.toggleBookmark(testUser.getId(), plannerId);
-
-            // Assert
-            assertFalse(response.bookmarked());
-            assertEquals(plannerId, response.plannerId());
-            verify(plannerBookmarkRepository).delete(existingBookmark);
-            verify(plannerBookmarkRepository, never()).insert(any());
-        }
-
-        @Test
-        @DisplayName("Should throw PlannerNotFoundException when planner not found")
-        void toggleBookmark_WhenPlannerNotFound_ThrowsException() {
-            // Arrange
-            UUID nonExistentId = UUID.randomUUID();
-            when(plannerRepository.existsPublishedById(nonExistentId)).thenReturn(false);
-
-            // Act & Assert
-            assertThrows(
-                    PlannerNotFoundException.class,
-                    () -> engagementService.toggleBookmark(testUser.getId(), nonExistentId)
-            );
-
-            verify(plannerBookmarkRepository, never()).findByUserIdAndPlannerId(any(), any());
-        }
-
-        @Test
-        @DisplayName("Should throw PlannerNotFoundException when planner not published")
-        void toggleBookmark_WhenPlannerNotPublished_ThrowsException() {
-            // Arrange
-            Planner planner = createTestPlanner(); // Not published
-            UUID plannerId = planner.getId();
-
-            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(false);
-
-            // Act & Assert
-            assertThrows(
-                    PlannerNotFoundException.class,
-                    () -> engagementService.toggleBookmark(testUser.getId(), plannerId)
-            );
-        }
     }
 
     @Nested

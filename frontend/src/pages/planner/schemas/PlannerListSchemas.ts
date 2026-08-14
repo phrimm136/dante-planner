@@ -67,18 +67,6 @@ export const PaginatedPlannersSchema = pagedModelSchema(PublicPlannerSchema)
 // ============================================================================
 
 /**
- * Bookmark toggle response schema
- */
-export const BookmarkResponseSchema = z
-  .object({
-    /** ID of the bookmarked planner */
-    plannerId: z.string().uuid(),
-    /** New bookmark state */
-    bookmarked: z.boolean(),
-  })
-  .strict()
-
-/**
  * Vote response schema
  */
 export const VoteResponseSchema = z

@@ -8,7 +8,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import type { BookmarkResponse, PublicPlanner, VoteResponse } from '../../../types/PlannerListTypes'
+import type { PublicPlanner, VoteResponse } from '../../../types/PlannerListTypes'
 import { ConflictError } from '@/lib/api'
 import { buildMutationResult } from '@/test-utils'
 
@@ -25,8 +25,6 @@ vi.mock('react-i18next', async (importOriginal) => {
         const translations: Record<string, string> = {
           'pages.plannerList.contextMenu.view': 'View',
           'pages.plannerList.contextMenu.fork': 'Fork',
-          'pages.plannerList.contextMenu.bookmark': 'Bookmark',
-          'pages.plannerList.contextMenu.removeBookmark': 'Remove Bookmark',
           'pages.plannerList.contextMenu.upvote': 'Upvote',
           'pages.plannerList.contextMenu.downvote': 'Downvote',
           'pages.plannerList.contextMenu.upvoted': 'Upvoted',
@@ -43,18 +41,12 @@ vi.mock('../../../hooks/usePlannerVote', () => ({
   usePlannerVote: vi.fn(),
 }))
 
-vi.mock('../../../hooks/usePlannerBookmark', () => ({
-  usePlannerBookmark: vi.fn(),
-}))
-
 vi.mock('../../../hooks/usePlannerFork', () => ({
   usePlannerFork: vi.fn(),
 }))
 
 import { usePlannerVote } from '../../../hooks/usePlannerVote'
 import type { VotePlannerInput } from '../../../hooks/usePlannerVote'
-import { usePlannerBookmark } from '../../../hooks/usePlannerBookmark'
-import type { BookmarkVariables } from '../../../hooks/usePlannerBookmark'
 import { usePlannerFork } from '../../../hooks/usePlannerFork'
 import { PlannerCardContextMenu } from '../PlannerCardContextMenu'
 
@@ -64,7 +56,6 @@ type ForkResult = NonNullable<ForkMutation['data']>
 type ForkInput = NonNullable<ForkMutation['variables']>
 
 const mockVoteMutate = vi.fn<ReturnType<typeof usePlannerVote>['mutate']>()
-const mockBookmarkMutate = vi.fn<ReturnType<typeof usePlannerBookmark>['mutate']>()
 const mockForkMutate = vi.fn<ForkMutation['mutate']>()
 
 const basePlanner: PublicPlanner = {
@@ -93,12 +84,6 @@ describe('PlannerCardContextMenu', () => {
         isPending: false,
         isError: false,
         error: null,
-      }),
-    )
-    vi.mocked(usePlannerBookmark).mockReturnValue(
-      buildMutationResult<BookmarkResponse, Error, BookmarkVariables>({
-        mutate: mockBookmarkMutate,
-        isPending: false,
       }),
     )
     vi.mocked(usePlannerFork).mockReturnValue(

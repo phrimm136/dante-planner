@@ -3,7 +3,6 @@ import type { MDCategory, RRCategory, PlannerType } from '@/shared/gameData'
 import type {
   PublicPlannerSchema,
   PaginatedPlannersSchema,
-  BookmarkResponseSchema,
   VoteResponseSchema,
   SubscriptionResponseSchema,
   PublishedPlannerDetailSchema,
@@ -52,9 +51,6 @@ export type PaginatedPlanners = z.infer<typeof PaginatedPlannersSchema>
 // ============================================================================
 // Action Response Types
 // ============================================================================
-
-/** Response from bookmark toggle endpoint */
-export type BookmarkResponse = z.infer<typeof BookmarkResponseSchema>
 
 /** Response from vote endpoint */
 export type VoteResponse = z.infer<typeof VoteResponseSchema>

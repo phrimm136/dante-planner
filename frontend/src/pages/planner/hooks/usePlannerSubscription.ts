@@ -4,8 +4,6 @@
  * Handles subscribing/unsubscribing to community planners.
  * Toggle endpoint - calling again removes the subscription.
  * Invalidates planner list cache on success.
- *
- * Pattern: usePlannerBookmark.ts (toggle mutation + cache invalidation)
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'

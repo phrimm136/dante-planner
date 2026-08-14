@@ -3,9 +3,6 @@ package org.danteplanner.backend.planner.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
-import io.micrometer.core.instrument.MeterRegistry;
-import org.danteplanner.backend.planner.dto.BookmarkRequest;
-import org.danteplanner.backend.planner.dto.BookmarkResponse;
 import org.danteplanner.backend.moderation.dto.PlannerActionResponse;
 import org.danteplanner.backend.planner.dto.SubscriptionResponse;
 import org.danteplanner.backend.planner.dto.VoteRequest;
@@ -27,7 +24,7 @@ import java.util.UUID;
 /**
  * REST controller for user engagement on published planners.
  *
- * <p>Handles voting, bookmarking, subscription toggling, and reporting.
+ * <p>Handles voting, subscription toggling, and reporting.
  * All endpoints require authentication.</p>
  */
 @RestController
@@ -35,12 +32,8 @@ import java.util.UUID;
 @RequestMapping("/api/planner/md")
 public class PlannerEngagementController {
 
-    /** Counts calls still using the pre-state-targeted toggle shape, tagged by operation. */
-    private static final String LEGACY_TOGGLE_COUNTER = "planner.legacy_toggle";
-
     private final PlannerEngagementService plannerEngagementService;
     private final PlannerSubscriptionService subscriptionService;
-    private final MeterRegistry meterRegistry;
 
     /**
      * Cast an immutable vote on a planner.
@@ -62,37 +55,6 @@ public class PlannerEngagementController {
 
         VoteResponse response = plannerEngagementService.castVote(userId, id, request.voteType());
         return ResponseEntity.ok(response);
-    }
-
-    /**
-     * Set the bookmark state of a planner.
-     *
-     * <p>Requires authentication. Returns 401 if not authenticated, 404 if planner not found or not
-     * published.</p>
-     *
-     * <p>A body naming {@code bookmarked} drives the bookmark to that state idempotently, so a
-     * retry never un-bookmarks. A body that omits it — or no body at all — takes the legacy toggle
-     * path, counted so it can be retired once tabs on previously cached bundles have gone.</p>
-     *
-     * @param userId  the authenticated user ID
-     * @param id      the planner ID
-     * @param request the desired bookmark state
-     * @return the updated bookmark state
-     */
-    @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "bookmark")
-    @PostMapping("/{id}/bookmark")
-    public ResponseEntity<BookmarkResponse> setBookmark(
-            @AuthenticationPrincipal Long userId,
-            @PathVariable UUID id,
-            @Valid @RequestBody(required = false) BookmarkRequest request) {
-
-        if (request != null && request.namesState()) {
-            return ResponseEntity.ok(
-                    plannerEngagementService.setBookmark(userId, id, request.bookmarked()));
-        }
-
-        meterRegistry.counter(LEGACY_TOGGLE_COUNTER, "operation", "bookmark").increment();
-        return ResponseEntity.ok(plannerEngagementService.toggleBookmark(userId, id));
     }
 
     /**

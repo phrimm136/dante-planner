@@ -5,11 +5,9 @@ package org.danteplanner.backend.planner.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
-import org.danteplanner.backend.planner.dto.BookmarkResponse;
 import org.danteplanner.backend.planner.dto.VoteResponse;
 import org.danteplanner.backend.planner.event.PlannerRecommendedEvent;
 import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.entity.PlannerBookmark;
 import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.entity.PlannerVoteId;
 import org.danteplanner.backend.planner.entity.VoteType;
@@ -26,7 +24,7 @@ import java.util.UUID;
 
 /**
  * Service for social engagement actions on planners.
- * Handles immutable upvotes and bookmark toggling.
+ * Handles immutable upvotes, reports, and the viewer's bookmark state.
  */
 @Service
 @Slf4j
@@ -136,82 +134,6 @@ public class PlannerEngagementService {
                 .upvoteCount(upvotesAfter)
                 .hasUpvoted(true)
                 .build();
-    }
-
-    /**
-     * Drive a planner's bookmark to an explicit state for a user.
-     *
-     * <p>Idempotent: a request naming the state the bookmark is already in leaves it untouched, so a
-     * retried or failed-over mutation never un-bookmarks.</p>
-     *
-     * @param userId     the user ID
-     * @param plannerId  the planner ID
-     * @param bookmarked the desired bookmark state
-     * @return the bookmark response in the requested state
-     * @throws PlannerNotFoundException if planner not found or not published
-     */
-    @Transactional
-    public BookmarkResponse setBookmark(Long userId, UUID plannerId, boolean bookmarked) {
-        accessGuard.checkPublished(plannerId);
-
-        var existingBookmark = plannerBookmarkRepository.findByUserIdAndPlannerId(userId, plannerId);
-        if (existingBookmark.isPresent() == bookmarked) {
-            return BookmarkResponse.builder()
-                    .plannerId(plannerId)
-                    .bookmarked(bookmarked)
-                    .build();
-        }
-
-        if (bookmarked) {
-            plannerBookmarkRepository.insert(new PlannerBookmark(userId, plannerId));
-            log.debug("User {} bookmarked planner {}", userId, plannerId);
-        } else {
-            plannerBookmarkRepository.delete(existingBookmark.get());
-            log.debug("User {} removed bookmark from planner {}", userId, plannerId);
-        }
-        return BookmarkResponse.builder()
-                .plannerId(plannerId)
-                .bookmarked(bookmarked)
-                .build();
-    }
-
-    /**
-     * Toggle bookmark state for a planner.
-     * If bookmarked, removes the bookmark. If not bookmarked, adds it.
-     *
-     * @param userId    the user ID
-     * @param plannerId the planner ID
-     * @return the bookmark response with current state
-     * @throws PlannerNotFoundException if planner not found or not published
-     * @deprecated superseded by {@link #setBookmark(Long, UUID, boolean)}; retained so tabs still
-     *             running a previously cached bundle keep working. Remove once its usage counter
-     *             reaches zero.
-     */
-    @Deprecated
-    @Transactional
-    public BookmarkResponse toggleBookmark(Long userId, UUID plannerId) {
-        accessGuard.checkPublished(plannerId);
-
-        var existingBookmark = plannerBookmarkRepository.findByUserIdAndPlannerId(userId, plannerId);
-
-        if (existingBookmark.isPresent()) {
-            // Remove bookmark
-            plannerBookmarkRepository.delete(existingBookmark.get());
-            log.debug("User {} removed bookmark from planner {}", userId, plannerId);
-            return BookmarkResponse.builder()
-                    .plannerId(plannerId)
-                    .bookmarked(false)
-                    .build();
-        } else {
-            // Add bookmark
-            PlannerBookmark bookmark = new PlannerBookmark(userId, plannerId);
-            plannerBookmarkRepository.insert(bookmark);
-            log.debug("User {} bookmarked planner {}", userId, plannerId);
-            return BookmarkResponse.builder()
-                    .plannerId(plannerId)
-                    .bookmarked(true)
-                    .build();
-        }
     }
 
     /**
