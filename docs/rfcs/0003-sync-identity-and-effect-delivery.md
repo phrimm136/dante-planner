@@ -649,16 +649,37 @@ Decision: ADR 072 (the recommended audit) and the reconciler's own fleet-safety 
 
 ### Target design
 
-`PlannerDriftReconciler.reconcile()` runs once per fleet, not once per pod. Two audits join it, both
-emitting the existing `DriftRecord(plannerId, kind, expected, actual)` shape through `emit`, and both
+`PlannerDriftReconciler.reconcile()` runs once per fleet, not once per pod. Three audits join it, all
+emitting the existing `DriftRecord(plannerId, kind, expected, actual)` shape through `emit`, and all
 repairing nothing.
 
 Catalog scalar copies (`title`, `category`) are compared in SQL with MySQL's NULL-safe equality
-negated. `selected_keywords` is never compared in SQL: the stored JSON array is order-bearing, the
-converter sorts on write and nulls an empty set, so a raw comparison reports drift that is not there.
-Both sides are read raw and normalized in Java through the same path the runtime uses —
-`PlannerKeywords.fromStorage(...)`, which is what `parseKeywords` (`PlannerDriftReconciler.java:193-204`)
-already wraps — then compared as `Set`s.
+negated, under an explicit `COLLATE utf8mb4_0900_bin`. The columns' own `utf8mb4_unicode_ci` is
+case-insensitive, accent-insensitive and PAD SPACE, which blinds the comparison to the stale copy
+most likely to exist: one left by a rename that changed only capitalization, or one carrying a
+trailing space. `utf8mb4_bin` is not sufficient — it is itself PAD SPACE; the `_0900_` form is NO
+PAD.
+
+`selected_keywords` is never compared in SQL, but not because the JPA converter's output would
+disagree with itself: `KeywordSetConverter` sorts ascending and nulls an empty set on both columns,
+so a byte comparison holds for every row it wrote. The reasons are that both columns are also
+written from outside JPA — backfill migrations and manual repair — and that `PlannerKeywords`
+remaps renamed ids on read, so an array carrying a legacy alias and one carrying its current id
+denote the same keywords and differ as strings. Both sides are read raw and normalized in Java
+through the same path the runtime uses, `PlannerKeywords.fromStorage(...)`, then compared as `Set`s.
+
+That normalization is total, matching `KeywordSetConverter.convertToEntityAttribute`: a column that
+cannot be parsed is compared as the empty set, because the empty set is what a reader of that
+planner is served. The abstaining read stays in the filter-index rebuild, where an unreadable column
+means the expected state is unknown — treating corrupt as empty is right for saying what a user sees
+and wrong for deciding which index rows to delete. Its known limitation: `fromStorage` drops unknown
+members and remaps aliases, so drift confined to invalid or legacy members is invisible to the
+audit. That is the intended reading — the question is whether the two columns serve the same
+keywords, not whether they hold the same bytes.
+
+Both catalog audits carry the class's `c.deleted_at IS NULL` predicate. A tombstoned planner whose
+catalog row outlived it is already reported as `catalog_membership`, and comparing its copies on top
+turns one bug into three records against the same planner.
 
 ### Snippets
 
@@ -679,13 +700,15 @@ public List<CatalogScalarDriftRow> driftedCatalogScalars() {
                    c.title AS expected, cat.title AS actual
             FROM planner_catalog cat
             JOIN planner_content c ON c.planner_id = cat.planner_id
-            WHERE NOT (cat.title <=> c.title)
+            WHERE c.deleted_at IS NULL
+              AND NOT (cat.title <=> c.title COLLATE utf8mb4_0900_bin)
             UNION ALL
             SELECT BIN_TO_UUID(cat.planner_id) AS planner_id, 'category' AS field,
                    c.category AS expected, cat.category AS actual
             FROM planner_catalog cat
             JOIN planner_content c ON c.planner_id = cat.planner_id
-            WHERE NOT (cat.category <=> c.category)
+            WHERE c.deleted_at IS NULL
+              AND NOT (cat.category <=> c.category COLLATE utf8mb4_0900_bin)
             """,
             (rs, rowNum) -> new CatalogScalarDriftRow(UUID.fromString(rs.getString("planner_id")),
                     rs.getString("field"), rs.getString("expected"), rs.getString("actual")));
@@ -706,18 +729,24 @@ private List<DriftRecord> auditCatalogScalars() {
 private List<DriftRecord> auditCatalogKeywords() {
     return auditRepository.catalogKeywordPairs().stream()
             .map(row -> {
-                Optional<Set<String>> want = parseKeywords(row.contentKeywords());
-                Optional<Set<String>> have = parseKeywords(row.catalogKeywords());
-                if (want.isEmpty() || have.isEmpty() || want.get().equals(have.get())) {
-                    return Optional.<DriftRecord>empty();
-                }
-                return Optional.of(new DriftRecord(row.plannerId(), "catalog_keywords",
-                        String.valueOf(want.get()), String.valueOf(have.get())));
+                Set<String> want = keywordsAsServed(row.plannerId(), "content", row.contentKeywords());
+                Set<String> have = keywordsAsServed(row.plannerId(), "catalog", row.catalogKeywords());
+                return want.equals(have)
+                        ? Optional.<DriftRecord>empty()
+                        : Optional.of(new DriftRecord(row.plannerId(), "catalog_keywords",
+                                String.valueOf(want), String.valueOf(have)));
             })
             .flatMap(Optional::stream)
             .toList();
 }
+
+private Set<String> keywordsAsServed(UUID plannerId, String side, String keywordsJson) {
+    return parseKeywords(plannerId, side, keywordsJson).orElseGet(Set::of);
+}
 ```
+
+`parseKeywords` gains the planner id and the side so its warn names both; the filter-index rebuild
+keeps calling it for its `Optional`, which is the abstaining read.
 
 ```sql
 SELECT BIN_TO_UUID(s.planner_id) AS planner_id
@@ -728,6 +757,7 @@ LEFT JOIN notifications n
        ON n.content_id = BIN_TO_UUID(s.planner_id)
       AND n.notification_type = 'PLANNER_RECOMMENDED'
 WHERE s.recommended_notified_at IS NOT NULL
+  AND s.recommended_notified_at > DATE_SUB(NOW(6), INTERVAL :windowDays DAY)
   AND e.id IS NULL
   AND n.id IS NULL
 ```
@@ -736,14 +766,26 @@ Emitted as kind `recommended_notification`, expected `event or notification row`
 Both sides must be absent before a record is emitted: an event row aged out of retention after its
 notification landed is not drift, and neither is a dispatched event whose recipient deleted the row.
 
+The age bound follows from that same rule rather than being an optimization. Once absence-by-age is
+conceded as non-drift, the audit is only sound over stamps young enough that absence still carries
+information: every latch taken before the outbox existed has no event row at all, and
+`NotificationRetentionService` hard-deletes the notification rows that carried them 465 days after
+they were written. Unbounded, the audit converts the entire back catalogue into permanent findings
+no repair can clear — arriving on its own as the oldest rows cross the line, not when anyone changes
+anything. The window is a named constant on the repository, 30 days, comfortably inside every
+retention window in play. The cutoff is computed from the database clock, matching the
+`CURRENT_TIMESTAMP(6)` the latch is written with; an `Instant` bound by the driver would be rendered
+in the JVM's zone and land hours off on a non-UTC host.
+
 ### Change list
 
 1. `planner/service/PlannerDriftReconciler.java` — add `@SchedulerLock` to `reconcile()` (line 85-87);
    add `auditCatalogScalars()`, `auditCatalogKeywords()` and `auditRecommendedNotification()` to the
    `Stream.of(...)` at line 88-93.
 2. `planner/repository/PlannerDriftAuditRepository.java` — add `CatalogScalarDriftRow`,
-   `CatalogKeywordRow`, `driftedCatalogScalars()`, `catalogKeywordPairs()`, and
-   `stampedRecommendationsWithoutEffect()`, following the class's stated naming convention.
+   `CatalogKeywordRow`, `driftedCatalogScalars()`, `catalogKeywordPairs()`,
+   `stampedRecommendationsWithoutEffect()` and the audit-window constant, following the class's
+   stated naming convention.
 3. `PlannerDriftReconcilerSchedulingTest.java` — additive third test asserting `reconcile` carries
    `@SchedulerLock` with a non-blank `name`; the two existing tests are unchanged.
 
@@ -752,9 +794,17 @@ notification landed is not drift, and neither is a dispatched event whose recipi
 - Reconciler IT: a catalog row whose title diverges from its content row yields exactly one
   `catalog_title` record; a catalog row whose `selected_keywords` differ only in element order yields
   none; one whose keyword *set* differs yields one `catalog_keywords` record.
+- Reconciler IT: a catalog title differing from its content row only by case, and one differing only
+  by a trailing space, each yield one `catalog_title` record. Both pass under the columns' own
+  collation, so this is the test that fails if the explicit `COLLATE` is ever dropped.
+- Reconciler IT: a tombstoned planner whose catalog row survives with diverged copies yields
+  `catalog_membership` and neither `catalog_title` nor `catalog_keywords`.
+- Reconciler IT: a planner whose stored content keywords cannot be parsed yields one
+  `catalog_keywords` record comparing the empty set against the catalog's copy, and still yields no
+  `entity_filter` or `keyword_filter` record — the two reads of the same corrupt column, held apart.
 - Reconciler IT: a `planner_stats` row with `recommended_notified_at` set and neither a
   `PLANNER_RECOMMENDED` event row nor a notification row yields one `recommended_notification` record;
-  adding either row clears it.
+  adding either row clears it; a stamp older than the audit window yields nothing.
 - Scheduling test as above.
 
 ---
