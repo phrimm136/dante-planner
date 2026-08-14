@@ -12,8 +12,19 @@ import { z } from 'zod'
 import { zodValidator } from '@tanstack/zod-adapter'
 import { GlobalLayout } from '@/components/layout/GlobalLayout'
 import i18n from '@/lib/i18n'
-import { queryClient } from '@/lib/queryClient'
-import { loadPlannerTitle, untitledPlannerTitle } from '@/pages/planner/lib/loadPlannerTitle'
+import { untitledPlannerTitle } from '@/pages/planner/lib/loadPlannerTitle'
+import { MD_CATEGORIES } from '@/shared/gameData'
+import {
+  loadPublishedPlanner,
+  loadPlannerTitleRoute,
+  loadIdentityName,
+  loadEgoName,
+  loadEgoGiftName,
+  loadThemePackName,
+  loadKeywordName,
+  loadAbEventTitle,
+} from '@/lib/routeLoaders'
+import { syncTitleOnLanguageChange } from '@/lib/routerTitle'
 import { RouteErrorComponent } from '@/components/feedback/RouteErrorComponent'
 import { RoutePendingFallback } from '@/components/feedback/RoutePendingFallback'
 
@@ -48,7 +59,7 @@ const mdUserDefaults = {
  * Minimal params - category filter, pagination, and search
  */
 const mdUserSearchSchema = z.object({
-  category: z.enum(['5F', '10F', '15F']).optional(),
+  category: z.enum(MD_CATEGORIES).optional(),
   page: z.coerce.number().int().min(0).default(mdUserDefaults.page),
   q: z.string().max(200).optional(),
   keyword: z.string().max(500).optional(),
@@ -68,7 +79,7 @@ const mdGesellschaftDefaults = {
  * Includes mode parameter for all published vs recommended
  */
 const mdGesellschaftSearchSchema = z.object({
-  category: z.enum(['5F', '10F', '15F']).optional(),
+  category: z.enum(MD_CATEGORIES).optional(),
   page: z.coerce.number().int().min(0).default(mdGesellschaftDefaults.page),
   mode: z.enum(['published', 'best']).default(mdGesellschaftDefaults.mode),
   q: z.string().max(200).optional(),
@@ -163,22 +174,7 @@ const plannerMDGesellschaftDetailRoute = createRoute({
   search: {
     middlewares: [stripSearchParams(mdGesellschaftDefaults)],
   },
-  loader: async ({ params }) => {
-    // Dynamic so the published-planner schemas stay out of the entry chunk.
-    const {
-      publishedPlannerQueryKeys,
-      fetchPublishedPlanner,
-      isPlannerRemoved,
-      publishedPlannerStaleTime,
-    } = await import('@/pages/planner/hooks/usePublishedPlannerQuery')
-    const result = await queryClient.fetchQuery({
-      queryKey: publishedPlannerQueryKeys.detail(params.id),
-      queryFn: ({ signal }) => fetchPublishedPlanner(params.id, signal),
-      staleTime: (query) => publishedPlannerStaleTime(query.state.data),
-    })
-    if (isPlannerRemoved(result)) return { title: untitledPlannerTitle() }
-    return { title: result.apiData.title || untitledPlannerTitle() }
-  },
+  loader: loadPublishedPlanner,
   head: ({ loaderData }) => detailHead(loaderData?.title, untitledPlannerTitle()),
 })
 
@@ -211,10 +207,7 @@ const plannerMDDetailRoute = createRoute({
   search: {
     middlewares: [stripSearchParams(mdUserDefaults)],
   },
-  loader: async ({ params }) => {
-    const title = await loadPlannerTitle(params.id)
-    return { title }
-  },
+  loader: loadPlannerTitleRoute,
   head: ({ loaderData }) => detailHead(loaderData?.title, untitledPlannerTitle()),
 })
 
@@ -223,10 +216,7 @@ const plannerMDEditRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/$id/edit',
   component: lazyRouteComponent(() => import('@/pages/planner/PlannerMDEditPage')),
-  loader: async ({ params }) => {
-    const title = await loadPlannerTitle(params.id)
-    return { title }
-  },
+  loader: loadPlannerTitleRoute,
   head: ({ loaderData }) => ({
     meta: [
       {
@@ -263,11 +253,7 @@ const identityDetailRoute = createRoute({
   path: '/identity/$id',
   component: lazyRouteComponent(() => import('@/pages/identity/IdentityDetailPage')),
 
-  loader: async ({ params }) => {
-    const module = await import(`@static/i18n/${i18n.language}/identity/${params.id}.json`)
-    const name = (module.default as { name?: string }).name?.replace(/\n/g, ' ') ?? params.id
-    return { name }
-  },
+  loader: loadIdentityName,
   head: ({ loaderData }) => detailHead(loaderData?.name, 'Identity'),
 })
 
@@ -288,11 +274,7 @@ const egoDetailRoute = createRoute({
   path: '/ego/$id',
   component: lazyRouteComponent(() => import('@/pages/ego/EGODetailPage')),
 
-  loader: async ({ params }) => {
-    const module = await import(`@static/i18n/${i18n.language}/ego/${params.id}.json`)
-    const name = (module.default as { name?: string }).name?.replace(/\n/g, ' ') ?? params.id
-    return { name }
-  },
+  loader: loadEgoName,
   head: ({ loaderData }) => detailHead(loaderData?.name, 'EGO'),
 })
 
@@ -313,11 +295,7 @@ const egoGiftDetailRoute = createRoute({
   path: '/ego-gift/$id',
   component: lazyRouteComponent(() => import('@/pages/egoGift/EGOGiftDetailPage')),
 
-  loader: async ({ params }) => {
-    const module = await import(`@static/i18n/${i18n.language}/egoGift/${params.id}.json`)
-    const name = (module.default as { name?: string }).name ?? params.id
-    return { name }
-  },
+  loader: loadEgoGiftName,
   head: ({ loaderData }) => detailHead(loaderData?.name, 'EGO Gift'),
 })
 
@@ -336,11 +314,7 @@ const themePackDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/theme-pack/$id',
   component: lazyRouteComponent(() => import('@/pages/themePack/ThemePackDetailPage')),
-  loader: async ({ params }) => {
-    const module = await import(`@static/i18n/${i18n.language}/themePack.json`)
-    const name = (module.default as Record<string, { name?: string }>)[params.id]?.name ?? params.id
-    return { name }
-  },
+  loader: loadThemePackName,
   head: ({ loaderData }) => detailHead(loaderData?.name, 'Theme Pack'),
 })
 
@@ -359,17 +333,7 @@ const abEventDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ab-event/$id',
   component: lazyRouteComponent(() => import('@/pages/abEvent/AbEventDetailPage')),
-  loader: async ({ params }) => {
-    try {
-      const module = await import(`@static/i18n/${i18n.language}/abEvent/${params.id}.json`)
-      const data = module.default as { desc?: string }
-      const raw = (data.desc ?? '').replace(/\n/g, ' ')
-      const snippet = raw.length > 20 ? `${raw.slice(0, 20)}...` : raw
-      return { title: snippet || params.id }
-    } catch {
-      return { title: params.id }
-    }
-  },
+  loader: loadAbEventTitle,
   head: ({ loaderData }) => detailHead(loaderData?.title, 'Dungeon Event'),
 })
 
@@ -388,12 +352,7 @@ const keywordDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/keyword/$id',
   component: lazyRouteComponent(() => import('@/pages/keyword/KeywordDetailPage')),
-  loader: async ({ params }) => {
-    const module = await import(`@static/i18n/${i18n.language}/battleKeywords.json`)
-    const keywords = module.default as Record<string, { name?: string }>
-    const name = keywords[params.id]?.name ?? params.id
-    return { name }
-  },
+  loader: loadKeywordName,
   head: ({ loaderData }) => detailHead(loaderData?.name, 'Keyword'),
 })
 
@@ -529,39 +488,7 @@ export const router = createRouter({
   parseSearch: parseSearchWith,
 })
 
-/**
- * The title the deepest matched route published, or null when no match carries
- * one. Matches are ordered root-first, so the search runs from the end.
- */
-export function titleFromMatches(matches: ReadonlyArray<{ meta?: unknown }>): string | null {
-  for (let i = matches.length - 1; i >= 0; i--) {
-    const meta = matches[i].meta
-    if (!Array.isArray(meta) || meta.length === 0) continue
-
-    const titleMeta = meta.find(
-      (m): m is { title: string } =>
-        typeof m === 'object' &&
-        m !== null &&
-        'title' in m &&
-        typeof (m as { title: unknown }).title === 'string',
-    )
-    return titleMeta?.title ? titleMeta.title : null
-  }
-  return null
-}
-
-// Sync document.title when language changes.
-// TanStack Router evaluates head() only during route matching, not on i18n changes.
-i18n.on('languageChanged', async () => {
-  // Invalidating re-runs the loaders so detail pages re-fetch localized data,
-  // and re-evaluates head(), which republishes each match's meta.
-  await router.invalidate()
-
-  const title = titleFromMatches(router.state.matches)
-  if (title !== null) {
-    document.title = title
-  }
-})
+syncTitleOnLanguageChange(router)
 
 // Register router for type safety
 declare module '@tanstack/react-router' {

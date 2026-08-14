@@ -14,7 +14,7 @@ import {
   createMemoryHistory,
 } from '@tanstack/react-router'
 
-import { titleFromMatches } from '../router'
+import { titleFromMatches } from '../routerTitle'
 
 function buildRouter(readLang: () => string) {
   const rootRoute = createRootRoute({
