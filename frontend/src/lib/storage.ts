@@ -14,12 +14,80 @@
  */
 
 import { ok, err } from './result'
+import { PLANNER_STORAGE_KEYS } from './constants'
 import type { Result, Tagged } from './result'
 
 const DB_NAME = 'danteplanner'
 /** Object store holding every persisted row; exported for direct cursor access. */
 export const STORAGE_STORE_NAME = 'planner'
-const DB_VERSION = 1
+const DB_VERSION = 2
+
+/**
+ * The v2 key a v1 planner key maps to, or null for a key that is not one.
+ *
+ * The one-part `deviceId` singleton falls out here under both this parser and
+ * the read-time one, so it survives the migration untouched.
+ */
+function flatKeyFor(key: string): string | null {
+  const parts = key.split(':')
+  if (parts.length !== 4) return null
+  if (parts[0] !== PLANNER_STORAGE_KEYS.PLANNER || parts[1] !== PLANNER_STORAGE_KEYS.MD) return null
+  return `${PLANNER_STORAGE_KEYS.PLANNER}:${parts[3]}`
+}
+
+/** Epoch millis of a row's `metadata.lastModifiedAt`; 0 when it carries none readable. */
+function lastModifiedAtOf(value: string): number {
+  try {
+    const millis = Date.parse(JSON.parse(value)?.metadata?.lastModifiedAt)
+    return Number.isNaN(millis) ? 0 : millis
+  } catch {
+    return 0
+  }
+}
+
+/**
+ * Rewrite `planner:md:{deviceId}:{plannerId}` rows as `planner:{plannerId}`.
+ *
+ * Two devices can hold the same planner id, so a collision keeps whichever row
+ * was modified last. Each source is deleted only after its copy reads back at
+ * the new key, so an interrupted upgrade loses nothing.
+ *
+ * Runs inside the `versionchange` transaction: every request below is queued on
+ * it, so the upgrade cannot complete until the last delete has run.
+ */
+export function migrateToFlatKeys(transaction: IDBTransaction): void {
+  const store = transaction.objectStore(STORAGE_STORE_NAME)
+  const winners = new Map<string, { value: string; modifiedAt: number }>()
+  const sources = new Map<string, string[]>()
+
+  const cursorRequest = store.openCursor()
+  cursorRequest.onsuccess = () => {
+    const cursor = cursorRequest.result
+    if (cursor) {
+      const flatKey = flatKeyFor(String(cursor.key))
+      if (flatKey) {
+        const value = String(cursor.value)
+        const modifiedAt = lastModifiedAtOf(value)
+        const held = winners.get(flatKey)
+        if (!held || modifiedAt > held.modifiedAt) winners.set(flatKey, { value, modifiedAt })
+        sources.set(flatKey, [...(sources.get(flatKey) ?? []), String(cursor.key)])
+      }
+      cursor.continue()
+      return
+    }
+
+    for (const [flatKey, winner] of winners) {
+      const put = store.put(winner.value, flatKey)
+      put.onsuccess = () => {
+        const verify = store.get(flatKey)
+        verify.onsuccess = () => {
+          if (verify.result !== winner.value) return
+          for (const sourceKey of sources.get(flatKey) ?? []) store.delete(sourceKey)
+        }
+      }
+    }
+  }
+}
 
 /** Why a read could not be performed. Absence is not a failure — it is `ok(null)`. */
 export type StorageReadError = Tagged<'notInBrowser'> | Tagged<'ioError', { cause: unknown }>
@@ -59,9 +127,13 @@ function getDB(): Promise<IDBDatabase> {
     }
 
     request.onupgradeneeded = (event) => {
-      const db = (event.target as IDBOpenDBRequest).result
-      if (!db.objectStoreNames.contains(STORAGE_STORE_NAME)) {
-        db.createObjectStore(STORAGE_STORE_NAME)
+      const { oldVersion } = event
+      const openRequest = event.target as IDBOpenDBRequest
+      const db = openRequest.result
+
+      if (oldVersion < 1) db.createObjectStore(STORAGE_STORE_NAME)
+      if (oldVersion < 2 && openRequest.transaction) {
+        migrateToFlatKeys(openRequest.transaction)
       }
     }
   })
