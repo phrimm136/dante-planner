@@ -95,7 +95,22 @@ function NoteEditorInner({
   // The debounce effect re-runs on every keystroke and clears its timer each time,
   // so unmount would otherwise drop the last edit. Flush it from an unmount-only
   // effect, which runs after that cleanup.
-  useEffect(() => () => pendingRef.current?.(), [])
+  //
+  // A tab closing inside the debounce window loses the same text, and silently:
+  // the parent was never told anything changed, so it raises no warning. Capture
+  // runs ahead of the parent's own handler, so what this delivers is what that
+  // handler sees.
+  useEffect(() => {
+    const deliverPending = () => {
+      pendingRef.current?.()
+    }
+
+    window.addEventListener('beforeunload', deliverPending, { capture: true })
+    return () => {
+      window.removeEventListener('beforeunload', deliverPending, { capture: true })
+      deliverPending()
+    }
+  }, [])
 
   // Measure the same { content } shape the cap and schema enforce, so the
   // counter never disagrees with what the editor actually rejects.
@@ -279,6 +294,9 @@ function NoteEditorInner({
       gesture.pending = null
       // `click` is dispatched after `pointerup` within the same task, so yielding a
       // task lets the press land before the row disappears.
+      if (gesture.release) {
+        clearTimeout(gesture.release)
+      }
       gesture.release = setTimeout(() => {
         gesture.release = null
         setIsFocused(false)
