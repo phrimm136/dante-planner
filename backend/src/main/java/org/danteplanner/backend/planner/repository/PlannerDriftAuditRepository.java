@@ -63,6 +63,18 @@ public class PlannerDriftAuditRepository {
     }
 
     /**
+     * One catalog scalar copy that disagrees with the content row it was copied from.
+     */
+    public record CatalogScalarDriftRow(UUID plannerId, String field, String expected, String actual) {
+    }
+
+    /**
+     * One catalog row's stored keyword array beside its content row's, both as written.
+     */
+    public record CatalogKeywordRow(UUID plannerId, String catalogKeywords, String contentKeywords) {
+    }
+
+    /**
      * One indexed entity reference.
      */
     public record EntityFilterRow(UUID plannerId, String entityType, int entityId) {
@@ -145,6 +157,52 @@ public class PlannerDriftAuditRepository {
                    OR c.deleted_at IS NOT NULL OR m.taken_down_at IS NOT NULL
                 """,
                 (rs, rowNum) -> UUID.fromString(rs.getString("planner_id")));
+    }
+
+    /**
+     * Catalog scalar copies that disagree with the content row they were copied from, one row per
+     * disagreeing column.
+     *
+     * @return one row per disagreeing catalog column
+     */
+    public List<CatalogScalarDriftRow> driftedCatalogScalars() {
+        return jdbc.query("""
+                SELECT BIN_TO_UUID(cat.planner_id) AS planner_id, 'title' AS field,
+                       c.title AS expected, cat.title AS actual
+                FROM planner_catalog cat
+                JOIN planner_content c ON c.planner_id = cat.planner_id
+                WHERE NOT (cat.title <=> c.title)
+                UNION ALL
+                SELECT BIN_TO_UUID(cat.planner_id) AS planner_id, 'category' AS field,
+                       c.category AS expected, cat.category AS actual
+                FROM planner_catalog cat
+                JOIN planner_content c ON c.planner_id = cat.planner_id
+                WHERE NOT (cat.category <=> c.category)
+                """,
+                (rs, rowNum) -> new CatalogScalarDriftRow(UUID.fromString(rs.getString("planner_id")),
+                        rs.getString("field"), rs.getString("expected"), rs.getString("actual")));
+    }
+
+    /**
+     * Both stored keyword arrays of every catalogued planner, raw.
+     *
+     * <p>Deliberately unfiltered where the scalar copies are compared in SQL: the stored array is
+     * order-bearing and the converter sorts on write, so a SQL comparison reports drift on a row
+     * whose keyword set is identical. Normalization is the caller's, through the path the runtime
+     * reads these columns with.</p>
+     *
+     * @return one row per catalogued planner
+     */
+    public List<CatalogKeywordRow> catalogKeywordPairs() {
+        return jdbc.query("""
+                SELECT BIN_TO_UUID(cat.planner_id) AS planner_id,
+                       cat.selected_keywords AS catalog_keywords,
+                       c.selected_keywords AS content_keywords
+                FROM planner_catalog cat
+                JOIN planner_content c ON c.planner_id = cat.planner_id
+                """,
+                (rs, rowNum) -> new CatalogKeywordRow(UUID.fromString(rs.getString("planner_id")),
+                        rs.getString("catalog_keywords"), rs.getString("content_keywords")));
     }
 
     /**

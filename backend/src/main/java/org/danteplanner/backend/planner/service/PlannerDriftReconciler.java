@@ -30,7 +30,8 @@ import java.util.stream.Stream;
 /**
  * Scheduled drift reconciler over the planner projections and counters: detects
  * divergence between planner_stats and the authoritative child aggregates,
- * catalog membership vs visibility, the filter indexes vs a rebuild of the
+ * catalog membership vs visibility, the catalog's scalar and keyword copies vs
+ * the content row they were taken from, the filter indexes vs a rebuild of the
  * stored content (same extraction path as runtime maintenance), and the derived
  * recommended flag. Emits one structured drift record (log event + metric) per
  * finding and repairs NOTHING — drift means a maintenance bug to fix, not a
@@ -95,6 +96,8 @@ public class PlannerDriftReconciler {
                         auditUpvotes(),
                         auditCommentCounts(),
                         auditCatalogMembership(),
+                        auditCatalogScalars(),
+                        auditCatalogKeywords(),
                         auditFilters(),
                         auditRecommended())
                 .flatMap(List::stream)
@@ -132,6 +135,37 @@ public class PlannerDriftReconciler {
                         auditRepository.catalogRowsWithoutVisiblePlanner().stream()
                                 .map(plannerId -> new DriftRecord(plannerId, "catalog_membership",
                                         "row absent", "row present")))
+                .toList();
+    }
+
+    private List<DriftRecord> auditCatalogScalars() {
+        return auditRepository.driftedCatalogScalars().stream()
+                .map(row -> new DriftRecord(row.plannerId(), "catalog_" + row.field(),
+                        String.valueOf(row.expected()), String.valueOf(row.actual())))
+                .toList();
+    }
+
+    /**
+     * Compare the catalog's keyword copy against the content row's.
+     *
+     * <p>Both sides go through the same normalization the runtime reads them with, because the
+     * stored array is order-bearing and its ordering carries no meaning; a row whose column could
+     * not be read is left out, as its expected state is unknown rather than empty.</p>
+     *
+     * @return one record per planner whose two keyword sets disagree
+     */
+    private List<DriftRecord> auditCatalogKeywords() {
+        return auditRepository.catalogKeywordPairs().stream()
+                .map(row -> {
+                    Optional<Set<String>> want = parseKeywords(row.contentKeywords());
+                    Optional<Set<String>> have = parseKeywords(row.catalogKeywords());
+                    if (want.isEmpty() || have.isEmpty() || want.get().equals(have.get())) {
+                        return Optional.<DriftRecord>empty();
+                    }
+                    return Optional.of(new DriftRecord(row.plannerId(), "catalog_keywords",
+                            String.valueOf(want.get()), String.valueOf(have.get())));
+                })
+                .flatMap(Optional::stream)
                 .toList();
     }
 

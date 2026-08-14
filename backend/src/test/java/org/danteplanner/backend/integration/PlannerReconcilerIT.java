@@ -110,9 +110,13 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
     }
 
     private Planner publishClean(String title) {
+        return publishClean(title, Set.of("Sinking"));
+    }
+
+    private Planner publishClean(String title, Set<String> keywords) {
         Planner planner = TestDataFactory.planner(owner)
                 .title(title)
-                .selectedKeywords(Set.of("Sinking"))
+                .selectedKeywords(keywords)
                 .published(true)
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
@@ -131,6 +135,12 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
                 .filter(r -> r.plannerId().equals(plannerId))
                 .map(DriftRecord::kind)
                 .collect(Collectors.toSet());
+    }
+
+    private List<DriftRecord> recordsFor(List<DriftRecord> records, UUID plannerId, String kind) {
+        return records.stream()
+                .filter(r -> r.plannerId().equals(plannerId) && r.kind().equals(kind))
+                .toList();
     }
 
     @Test
@@ -245,5 +255,49 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
                 .doesNotContain("entity_filter", "keyword_filter");
         assertThat(entityFilterRows(unreadable.getId()))
                 .as("nothing is repaired away either").isPositive();
+    }
+
+    @Test
+    @DisplayName("catalog scalar drift: a stale title copy is reported once, naming both sides")
+    void catalogTitleDrift_WhenTheCatalogCopyDivergesFromTheContentRow_ReportsOneRecord() {
+        Planner titleDrift = publishClean("Catalog Title Drift");
+        jdbc.update("UPDATE planner_catalog SET title = 'Stale Copy' WHERE planner_id = UUID_TO_BIN(?)",
+                titleDrift.getId().toString());
+
+        List<DriftRecord> records = reconciler.reconcile();
+
+        assertThat(recordsFor(records, titleDrift.getId(), "catalog_title"))
+                .singleElement()
+                .satisfies(record -> {
+                    assertThat(record.expected()).isEqualTo("Catalog Title Drift");
+                    assertThat(record.actual()).isEqualTo("Stale Copy");
+                });
+        assertThat(kindsFor(records, titleDrift.getId()))
+                .as("only the diverged column is reported")
+                .doesNotContain("catalog_category");
+        assertThat(jdbc.queryForObject("SELECT title FROM planner_catalog WHERE planner_id = UUID_TO_BIN(?)",
+                String.class, titleDrift.getId().toString()))
+                .as("the audit repairs nothing").isEqualTo("Stale Copy");
+    }
+
+    @Test
+    @DisplayName("catalog keyword drift: element order is not drift, a different set is")
+    void catalogKeywordDrift_WhenTheStoredArraysDifferInOrderAndInMembership_ReportsOnlyTheSetDifference() {
+        Planner reordered = publishClean("Reordered Keywords", Set.of("Burst", "Sinking"));
+        jdbc.update("UPDATE planner_catalog SET selected_keywords = '[\"Sinking\", \"Burst\"]' "
+                + "WHERE planner_id = UUID_TO_BIN(?)", reordered.getId().toString());
+
+        Planner different = publishClean("Different Keywords", Set.of("Burst", "Sinking"));
+        jdbc.update("UPDATE planner_catalog SET selected_keywords = '[\"Combustion\"]' "
+                + "WHERE planner_id = UUID_TO_BIN(?)", different.getId().toString());
+
+        List<DriftRecord> records = reconciler.reconcile();
+
+        assertThat(kindsFor(records, reordered.getId()))
+                .as("the stored array is order-bearing and the set it denotes is not")
+                .doesNotContain("catalog_keywords");
+        assertThat(recordsFor(records, different.getId(), "catalog_keywords"))
+                .as("a differing membership is drift")
+                .hasSize(1);
     }
 }
