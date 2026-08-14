@@ -388,9 +388,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
                             .content(requestBody))
                     .andExpect(status().isCreated());
 
-            List<Notification> notifications = notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
-                    testUser.getId(), org.springframework.data.domain.PageRequest.of(0, 10)
-            ).getContent();
+            List<Notification> notifications = awaitNotifications(testUser.getId(), 1);
             assertThat(notifications).hasSize(1);
             assertThat(notifications.get(0).getNotificationType()).isEqualTo(NotificationType.REPLY_RECEIVED);
         }
@@ -406,9 +404,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
                             .content(requestBody))
                     .andExpect(status().isCreated());
 
-            List<Notification> notifications = notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
-                    testUser.getId(), org.springframework.data.domain.PageRequest.of(0, 10)
-            ).getContent();
+            List<Notification> notifications = awaitNotifications(testUser.getId(), 1);
             assertThat(notifications).hasSize(1);
             assertThat(notifications.get(0).getNotificationType()).isEqualTo(NotificationType.COMMENT_RECEIVED);
         }
@@ -605,4 +601,41 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(status().isForbidden());
         }
     }
+
+    /** Deadline for the outbox dispatch to derive what a committed event owes. */
+    private static final long DERIVATION_DEADLINE_MS = 10_000L;
+
+    private static final long DERIVATION_POLL_INTERVAL_MS = 50L;
+
+    /**
+     * The recipient's notifications, once the outbox dispatch has derived them.
+     *
+     * <p>The request's whole obligation is the event row it commits; the notification follows in a
+     * transaction of the dispatcher's own, on another thread. The poll asserts the derivation
+     * happens, never how fast.</p>
+     *
+     * @param userId   the recipient
+     * @param expected how many notifications the derivation owes
+     * @return what the recipient carries, whether or not it reached {@code expected}
+     */
+    private List<Notification> awaitNotifications(Long userId, int expected) {
+        long deadline = System.nanoTime() + DERIVATION_DEADLINE_MS * 1_000_000L;
+        List<Notification> found = notificationsOf(userId);
+        while (found.size() < expected && System.nanoTime() < deadline) {
+            try {
+                Thread.sleep(DERIVATION_POLL_INTERVAL_MS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return found;
+            }
+            found = notificationsOf(userId);
+        }
+        return found;
+    }
+
+    private List<Notification> notificationsOf(Long userId) {
+        return notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
+                userId, org.springframework.data.domain.PageRequest.of(0, 10)).getContent();
+    }
+
 }

@@ -87,12 +87,17 @@ class CausalGateIT extends CausalHarnessSupport {
             "[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}:\\d");
 
     /**
-     * The transactions a first publish commits: the main one, the {@code AFTER_COMMIT}
-     * {@code REQUIRES_NEW} filter rebuild, and the notification fan-out. Each is pinned to a row
-     * this test owns, so the count is a property of the fixtures rather than of whatever else the
-     * shared harness database happens to hold.
+     * The transactions a first publish commits: the main one and the {@code AFTER_COMMIT}
+     * {@code REQUIRES_NEW} filter rebuild. Each is pinned to a row this test owns, so the count is
+     * a property of the fixtures rather than of whatever else the shared harness database happens
+     * to hold.
+     *
+     * <p>The notification fan-out is deliberately not among them. It is derived from the
+     * {@code domain_events} row this request commits, in a transaction of the dispatcher's own on
+     * another thread — so it is not a commit the request could gate a replica read past, and the
+     * publisher never waits for it.</p>
      */
-    private static final int PUBLISH_TRANSACTIONS = 3;
+    private static final int PUBLISH_TRANSACTIONS = 2;
 
     @Autowired
     private MockMvc mockMvc;
@@ -273,9 +278,9 @@ class CausalGateIT extends CausalHarnessSupport {
                 .as("the filter rebuild (the AFTER_COMMIT REQUIRES_NEW commit) must have "
                         + "populated the entity index")
                 .isPositive();
-        assertThat(countNotifications(subscriber.getId(), plannerId))
-                .as("the fan-out (the other AFTER_COMMIT REQUIRES_NEW commit) must have notified "
-                        + "this test's own subscriber")
+        assertThat(countDomainEvents(plannerId))
+                .as("the publish commits the row the fan-out is later derived from, in the main "
+                        + "transaction rather than in one of its own")
                 .isPositive();
         assertThat(recordingsDuringPublish)
                 .as("the transaction manager must register a commit capture for EACH of the %s "
@@ -284,8 +289,8 @@ class CausalGateIT extends CausalHarnessSupport {
                 .isGreaterThanOrEqualTo(PUBLISH_TRANSACTIONS);
         assertThat(countTransactions(cookieGtidSet))
                 .as("the ryw cookie (%s) must union all %s of the request's commits, so a replica "
-                        + "read gates past the filter rebuild and the fan-out, not only the main "
-                        + "commit", cookieGtidSet, PUBLISH_TRANSACTIONS)
+                        + "read gates past the filter rebuild, not only the main commit",
+                        cookieGtidSet, PUBLISH_TRANSACTIONS)
                 .isGreaterThanOrEqualTo(PUBLISH_TRANSACTIONS);
         assertThat(gtidSubset(cookieGtidSet, executedAfter))
                 .as("the cookie (%s) must name transactions the primary committed (%s)",
@@ -381,11 +386,10 @@ class CausalGateIT extends CausalHarnessSupport {
                 userId);
     }
 
-    private int countNotifications(Long userId, UUID plannerId) {
+    private int countDomainEvents(UUID plannerId) {
         Integer count = primaryJdbc.queryForObject(
-                "SELECT COUNT(*) FROM notifications "
-                        + "WHERE user_id = ? AND planner_id = UUID_TO_BIN(?)",
-                Integer.class, userId, plannerId.toString());
+                "SELECT COUNT(*) FROM domain_events WHERE aggregate_id = UUID_TO_BIN(?)",
+                Integer.class, plannerId.toString());
         return count == null ? 0 : count;
     }
 

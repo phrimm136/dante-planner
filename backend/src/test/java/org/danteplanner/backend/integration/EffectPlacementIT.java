@@ -34,8 +34,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -203,16 +201,21 @@ class EffectPlacementIT extends SharedMySqlContainerSupport {
      * Writes the event row the way a dead pod would have left it: committed, and never handed to an
      * eager dispatch.
      *
+     * <p>The age comes from the database clock rather than the JVM's. A {@code java.sql.Timestamp}
+     * is rendered by the driver in the JVM's default zone, while the relay's cutoff is an
+     * {@code Instant} bound as UTC — so on any non-UTC agent the row would land hours the wrong
+     * side of the cutoff and the relay would never see it.</p>
+     *
      * @param commentId the comment the effect is about
      */
     private void recordEventDirectly(Long commentId) {
         transaction().executeWithoutResult(status -> jdbcTemplate.update("""
                 INSERT INTO domain_events (event_type, aggregate_id, payload, created_at)
-                VALUES ('COMMENT_RECEIVED', UUID_TO_BIN(?), JSON_OBJECT('commentId', ?), ?)
+                VALUES ('COMMENT_RECEIVED', UUID_TO_BIN(?), JSON_OBJECT('commentId', ?),
+                        DATE_SUB(NOW(6), INTERVAL 1 MINUTE))
                 """,
                 planner.getId().toString(),
-                commentId,
-                java.sql.Timestamp.from(Instant.now().minus(1, ChronoUnit.MINUTES))));
+                commentId));
     }
 
     private int eventRowsForPlanner() {

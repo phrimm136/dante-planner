@@ -2,6 +2,7 @@ package org.danteplanner.backend.service;
 
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.sse.SseChannelSender;
+import org.danteplanner.backend.shared.sse.SseConstants;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -123,6 +124,34 @@ class SsePublisherTest {
             assertThat(meterRegistry.find("sse.publish.dropped").counter())
                     .as("the send succeeded, so nothing was dropped")
                     .isNull();
+        }
+    }
+
+    /**
+     * The drop counter is the signal that an outage outlasted the retry, so it must not move until
+     * every attempt has been spent.
+     */
+    @Test
+    void publishUserEvent_WhenEverySendFails_CountsOneDropAfterTheAttemptsAreSpent() {
+        try (AnnotationConfigApplicationContext context =
+                new AnnotationConfigApplicationContext(RetryHarness.class)) {
+            StringRedisTemplate template = context.getBean(StringRedisTemplate.class);
+            when(template.convertAndSend(anyString(), any()))
+                    .thenThrow(new RedisConnectionFailureException("primary unreachable"));
+
+            SsePublisher publisher = new SsePublisher(
+                    context.getBean(SseChannelSender.class), objectMapper, meterRegistry);
+
+            assertThatCode(() -> publisher.publishUserEvent(
+                    1L, SseEventType.NOTIFY_COMMENT, "planner-9", Map.of()))
+                    .doesNotThrowAnyException();
+
+            verify(template, times(SseConstants.PUBLISH_MAX_ATTEMPTS))
+                    .convertAndSend(eq("sse:user"), anyString());
+            assertThat(meterRegistry.get("sse.publish.dropped")
+                    .tag("channel", "USER").counter().count())
+                    .as("one publish dropped, not one per attempt")
+                    .isEqualTo(1.0);
         }
     }
 

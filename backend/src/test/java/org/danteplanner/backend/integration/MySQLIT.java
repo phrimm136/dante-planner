@@ -232,13 +232,29 @@ class MySQLIT extends SharedMySqlContainerSupport {
             assertThat(voteRows).isEqualTo(totalVoters);
             assertThat(upvotes).isEqualTo(totalVoters);
 
-            // CAS gate: the recommended-threshold notification fires exactly once
-            long recommendedNotifications = notificationRepository.findAll().stream()
-                    .filter(n -> n.getUserId().equals(testUser.getId()))
-                    .filter(n -> n.getNotificationType() == NotificationType.PLANNER_RECOMMENDED)
-                    .count();
+            // CAS gate: exactly one vote records the event, and its dispatch derives one row.
+            // The derivation runs off the voting threads, so the count is polled rather than read
+            // the instant the last vote returns.
+            long deadline = System.nanoTime() + DERIVATION_DEADLINE_MS * 1_000_000L;
+            long recommendedNotifications = countRecommended();
+            while (recommendedNotifications < 1 && System.nanoTime() < deadline) {
+                Thread.sleep(DERIVATION_POLL_INTERVAL_MS);
+                recommendedNotifications = countRecommended();
+            }
             assertThat(recommendedNotifications).isEqualTo(1);
         }
+    }
+
+    /** Deadline for the outbox dispatch to derive what a committed event owes. */
+    private static final long DERIVATION_DEADLINE_MS = 10_000L;
+
+    private static final long DERIVATION_POLL_INTERVAL_MS = 50L;
+
+    private long countRecommended() {
+        return notificationRepository.findAll().stream()
+                .filter(n -> n.getUserId().equals(testUser.getId()))
+                .filter(n -> n.getNotificationType() == NotificationType.PLANNER_RECOMMENDED)
+                .count();
     }
 
     @Nested

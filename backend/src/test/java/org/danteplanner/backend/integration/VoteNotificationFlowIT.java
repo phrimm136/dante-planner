@@ -132,6 +132,44 @@ class VoteNotificationFlowIT {
                 .build());
     }
 
+
+    /** Deadline for the outbox dispatch to derive what a committed event owes. */
+    private static final long DERIVATION_DEADLINE_MS = 10_000L;
+
+    private static final long DERIVATION_POLL_INTERVAL_MS = 50L;
+
+    /**
+     * The recipient's notifications, once the outbox dispatch has derived them.
+     *
+     * <p>The vote's whole obligation is the event row it commits. The notification follows in a
+     * transaction of the dispatcher's own, on another thread, so a read taken the instant
+     * {@code castVote} returns reads a race rather than the contract. The poll asserts the
+     * derivation happens, never how fast.</p>
+     *
+     * @param userId   the recipient
+     * @param expected how many notifications the derivation owes
+     * @return what the recipient carries, whether or not it reached {@code expected}
+     */
+    private List<Notification> awaitNotifications(Long userId, int expected) {
+        long deadline = System.nanoTime() + DERIVATION_DEADLINE_MS * 1_000_000L;
+        List<Notification> found = notificationsOf(userId);
+        while (found.size() < expected && System.nanoTime() < deadline) {
+            try {
+                Thread.sleep(DERIVATION_POLL_INTERVAL_MS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return found;
+            }
+            found = notificationsOf(userId);
+        }
+        return found;
+    }
+
+    private List<Notification> notificationsOf(Long userId) {
+        return notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
+                userId, org.springframework.data.domain.PageRequest.of(0, 10)).getContent();
+    }
+
     // ==================== IT1: Vote Crossing Threshold Creates Notification ====================
 
     @Test
@@ -152,9 +190,8 @@ class VoteNotificationFlowIT {
 
         // Commit to trigger AFTER_COMMIT listener, then start new transaction for assertions
 
-        // Assert - Notification created
-        List<Notification> notifications = notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
-                plannerOwner.getId(), org.springframework.data.domain.PageRequest.of(0, 10)).getContent();
+        // Assert - Notification derived from the committed event
+        List<Notification> notifications = awaitNotifications(plannerOwner.getId(), 1);
 
         assertEquals(1, notifications.size());
         Notification notification = notifications.get(0);
@@ -205,10 +242,8 @@ class VoteNotificationFlowIT {
 
         // Commit to trigger AFTER_COMMIT listener
 
-        // Assert - Notification created
-        long notificationsCount = notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
-                plannerOwner.getId(), org.springframework.data.domain.PageRequest.of(0, 10)).getTotalElements();
-        assertEquals(1, notificationsCount);
+        // Assert - Notification derived from the committed event
+        assertEquals(1, awaitNotifications(plannerOwner.getId(), 1).size());
 
         PlannerStats stats = plannerStatsRepository.findById(testPlanner.getId()).orElseThrow();
         assertEquals(recommendedThreshold, stats.getUpvotes());
@@ -361,10 +396,9 @@ class VoteNotificationFlowIT {
         PlannerVoteId voteId = new PlannerVoteId(voter1.getId(), testPlanner.getId());
         assertTrue(plannerVoteRepository.existsById(voteId), "Vote should be persisted");
 
-        // 2. Notification exists
-        long notificationsCount = notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
-                plannerOwner.getId(), org.springframework.data.domain.PageRequest.of(0, 10)).getTotalElements();
-        assertEquals(1, notificationsCount, "Notification should be persisted");
+        // 2. Notification derived from the event the vote committed
+        assertEquals(1, awaitNotifications(plannerOwner.getId(), 1).size(),
+                "Notification should be derived");
 
         // 3. Planner vote count updated
         PlannerStats stats = plannerStatsRepository.findById(testPlanner.getId()).orElseThrow();

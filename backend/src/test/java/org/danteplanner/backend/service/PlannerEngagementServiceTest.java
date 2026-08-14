@@ -19,17 +19,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Value;
+import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Optional;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.user.service.UserService;
@@ -182,6 +185,66 @@ class PlannerEngagementServiceTest {
             assertEquals(VoteType.UP,
                     voteCaptor.getValue().getVoteType());
             verify(plannerStatsService).incrementUpvotes(plannerId);
+        }
+
+        @Test
+        @DisplayName("crossing the threshold records one PLANNER_RECOMMENDED event")
+        void castVote_WhenCrossingTheThreshold_RecordsTheRecommendedEvent() {
+            Planner planner = createPublishedPlanner();
+            UUID plannerId = planner.getId();
+
+            when(plannerRepository.findPublishedAggregate(plannerId))
+                    .thenReturn(Optional.of(planner));
+            when(plannerVoteRepository.existsById(any(PlannerVoteId.class))).thenReturn(false);
+            when(plannerVoteRepository.insert(any(PlannerVote.class)))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
+            when(plannerStatsService.upvotesOf(plannerId)).thenReturn(recommendedThreshold);
+            when(plannerStatsService.trySetRecommendedNotified(plannerId, recommendedThreshold))
+                    .thenReturn(1);
+
+            engagementService.castVote(testUser.getId(), plannerId, VoteType.UP);
+
+            verify(domainEventRecorder).recordDomainEvent(
+                    DomainEventType.PLANNER_RECOMMENDED, plannerId,
+                    Map.of("ownerId", planner.getUser().getId()));
+        }
+
+        @Test
+        @DisplayName("a vote the latch refuses records nothing, so one crossing owes one event")
+        void castVote_WhenAnotherVoteAlreadyLatched_RecordsNothing() {
+            Planner planner = createPublishedPlanner();
+            UUID plannerId = planner.getId();
+
+            when(plannerRepository.findPublishedAggregate(plannerId))
+                    .thenReturn(Optional.of(planner));
+            when(plannerVoteRepository.existsById(any(PlannerVoteId.class))).thenReturn(false);
+            when(plannerVoteRepository.insert(any(PlannerVote.class)))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
+            when(plannerStatsService.upvotesOf(plannerId)).thenReturn(recommendedThreshold);
+            when(plannerStatsService.trySetRecommendedNotified(plannerId, recommendedThreshold))
+                    .thenReturn(0);
+
+            engagementService.castVote(testUser.getId(), plannerId, VoteType.UP);
+
+            verifyNoInteractions(domainEventRecorder);
+        }
+
+        @Test
+        @DisplayName("a vote below the threshold records nothing")
+        void castVote_WhenBelowTheThreshold_RecordsNothing() {
+            Planner planner = createPublishedPlanner();
+            UUID plannerId = planner.getId();
+
+            when(plannerRepository.findPublishedAggregate(plannerId))
+                    .thenReturn(Optional.of(planner));
+            when(plannerVoteRepository.existsById(any(PlannerVoteId.class))).thenReturn(false);
+            when(plannerVoteRepository.insert(any(PlannerVote.class)))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
+            when(plannerStatsService.upvotesOf(plannerId)).thenReturn(recommendedThreshold - 1);
+
+            engagementService.castVote(testUser.getId(), plannerId, VoteType.UP);
+
+            verifyNoInteractions(domainEventRecorder);
         }
     }
 

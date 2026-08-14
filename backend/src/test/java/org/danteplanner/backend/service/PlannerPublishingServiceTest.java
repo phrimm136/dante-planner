@@ -1,4 +1,5 @@
 package org.danteplanner.backend.service;
+import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
@@ -35,6 +36,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -43,8 +45,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import org.danteplanner.backend.user.exception.UserBannedException;
 
@@ -143,6 +148,49 @@ class PlannerPublishingServiceTest {
 
             assertFalse(result.published());
             verify(plannerCatalogService, never()).onBecameInvisible(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("publish effect recording Tests")
+    class PublishEffectRecordingTests {
+
+        @Test
+        @DisplayName("a first publish records one PLANNER_PUBLISHED event and announces nothing itself")
+        void applyPublish_WhenFirstPublish_RecordsTheEventInsteadOfAnnouncing() {
+            Planner planner = testPlannerBuilder().published(false).build();
+            when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+
+            publishingService.publish(testUser.getId(), planner.getId());
+
+            verify(domainEventRecorder).recordDomainEvent(
+                    DomainEventType.PLANNER_PUBLISHED, planner.getId(),
+                    Map.of("authorId", testUser.getId()));
+            verifyNoMoreInteractions(domainEventRecorder);
+        }
+
+        @Test
+        @DisplayName("a repeated publish records nothing, because nothing changed to announce")
+        void applyPublish_WhenAlreadyPublished_RecordsNothing() {
+            Planner planner = testPlannerBuilder().published(false).build();
+            when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            publishingService.publish(testUser.getId(), planner.getId());
+            reset(domainEventRecorder);
+
+            publishingService.publish(testUser.getId(), planner.getId());
+
+            verifyNoInteractions(domainEventRecorder);
+        }
+
+        @Test
+        @DisplayName("a withdrawal records nothing, because it has no observer effect")
+        void applyUnpublish_WhenWithdrawn_RecordsNothing() {
+            Planner planner = testPlannerBuilder().published(true).build();
+            when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+
+            publishingService.unpublish(testUser.getId(), planner.getId());
+
+            verifyNoInteractions(domainEventRecorder);
         }
     }
 
