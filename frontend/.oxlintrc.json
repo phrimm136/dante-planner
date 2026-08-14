@@ -75,7 +75,7 @@
     "typescript/require-array-sort-compare": ["error", { "ignoreStringArrays": true }],
     "oxc/no-accumulating-spread": "error",
     "typescript/no-misused-promises": "warn",
-    "import/no-cycle": "warn",
+    "import/no-cycle": "error",
     "no-restricted-imports": [
       "error",
       {
