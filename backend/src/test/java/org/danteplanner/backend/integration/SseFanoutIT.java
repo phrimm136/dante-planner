@@ -93,12 +93,12 @@ class SseFanoutIT extends CausalHarnessSupport {
         String entityId = "planner-9";
         Map<String, Object> payload = Map.of("plannerId", entityId, "title", "Refactored deck");
 
-        ssePublisher.publishUserEvent(userId, null, SseEventType.UPDATED, entityId, payload);
+        ssePublisher.publishUserEvent(userId, null, SseEventType.COMMENT_ADDED, entityId, payload);
 
         verify(sseService, timeout(5000)).sendToUser(
                 eq(userId),
                 isNull(),
-                eq(SseEventType.UPDATED.getValue()),
+                eq(SseEventType.COMMENT_ADDED.getValue()),
                 argThat(data -> data != null && data.toString().contains(entityId)));
     }
 
@@ -149,11 +149,11 @@ class SseFanoutIT extends CausalHarnessSupport {
         String commentId = "comment-123";
         Map<String, Object> payload = Map.of("commentId", commentId, "body", "nice deck");
 
-        ssePublisher.publishCommentEvent(plannerId, SseEventType.CREATED, commentId, null, payload);
+        ssePublisher.publishCommentEvent(plannerId, SseEventType.COMMENT_ADDED, commentId, null, payload);
 
         verify(plannerCommentSseService, timeout(5000)).broadcast(
                 eq(plannerId),
-                eq(SseEventType.CREATED.getValue()),
+                eq(SseEventType.COMMENT_ADDED.getValue()),
                 argThat(data -> data != null && data.toString().contains(commentId)),
                 any());
     }

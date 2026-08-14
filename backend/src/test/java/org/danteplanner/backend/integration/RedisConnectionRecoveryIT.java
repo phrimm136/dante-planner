@@ -281,9 +281,9 @@ class RedisConnectionRecoveryIT {
     void sseFanout_WhenSubscriberConnectionRestored_ResubscribesAndDelivers() throws IOException {
         Long userId = 4243L;
 
-        ssePublisher.publishUserEvent(userId, null, SseEventType.UPDATED, "recovery-warmup",
+        ssePublisher.publishUserEvent(userId, null, SseEventType.COMMENT_ADDED, "recovery-warmup",
                 Map.of("id", "recovery-warmup"));
-        verify(sseService, timeout(10_000)).sendToUser(eq(userId), isNull(), eq("updated"), any());
+        verify(sseService, timeout(10_000)).sendToUser(eq(userId), isNull(), eq("comment:added"), any());
 
         SSE_LOCAL_REDIS_PROXY.disable();
         SSE_LOCAL_REDIS_PROXY.enable();
@@ -294,11 +294,11 @@ class RedisConnectionRecoveryIT {
         // until one arrives, bounded by the attempt budget.
         boolean delivered = false;
         for (int attempt = 0; attempt < SSE_REPUBLISH_ATTEMPTS && !delivered; attempt++) {
-            ssePublisher.publishUserEvent(userId, null, SseEventType.UPDATED,
+            ssePublisher.publishUserEvent(userId, null, SseEventType.COMMENT_ADDED,
                     "recovery-attempt-" + attempt, Map.of("id", "recovery-attempt-" + attempt));
             try {
                 verify(sseService, timeout(SSE_DELIVERY_WAIT_MS).atLeastOnce())
-                        .sendToUser(eq(userId), isNull(), eq("updated"), any());
+                        .sendToUser(eq(userId), isNull(), eq("comment:added"), any());
                 delivered = true;
             } catch (AssertionError notYetResubscribed) {
                 delivered = false;

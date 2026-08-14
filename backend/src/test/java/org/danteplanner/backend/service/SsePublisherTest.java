@@ -40,7 +40,7 @@ class SsePublisherTest {
         publisher.publishUserEvent(
                 1L,
                 null,
-                SseEventType.UPDATED,
+                SseEventType.COMMENT_ADDED,
                 "planner-9",
                 Map.of("plannerId", "planner-9", "title", "Deck"));
 
@@ -49,7 +49,7 @@ class SsePublisherTest {
 
         String message = (String) messageCaptor.getValue();
         assertThat(message)
-                .contains("updated")
+                .contains("comment:added")
                 .contains("planner-9")
                 .contains("title")
                 .contains("Deck");
@@ -65,7 +65,7 @@ class SsePublisherTest {
         when(stringRedisTemplate.convertAndSend(anyString(), any()))
                 .thenThrow(new RedisConnectionFailureException("primary unreachable"));
 
-        assertThatCode(() -> publisher.publishUserEvent(1L, SseEventType.UPDATED, "planner-9", Map.of()))
+        assertThatCode(() -> publisher.publishUserEvent(1L, SseEventType.COMMENT_ADDED, "planner-9", Map.of()))
                 .doesNotThrowAnyException();
 
         assertThat(meterRegistry.get("sse.publish.dropped").tag("channel", "USER").counter().count())
