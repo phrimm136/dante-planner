@@ -14,7 +14,7 @@ import { MDPlannerToolbar } from './components/plannerList/MDPlannerToolbar'
 import { PlannerListFilterPills } from './components/plannerList/PlannerListFilterPills'
 import { PlannerGridSkeleton } from '@/components/feedback/ListPageSkeleton'
 import { CommunityPlansErrorFallback } from '@/components/feedback/CommunityPlansErrorFallback'
-import { usePublishedPlannerQuery } from './hooks/usePublishedPlannerQuery'
+import { usePublishedPlannerQuery, isPlannerRemoved } from './hooks/usePublishedPlannerQuery'
 import { isMDPlanner } from './types/PlannerTypes'
 import { useAuthQuery } from '@/shared/auth'
 import { useUserSettingsQuery } from '@/pages/settings'
@@ -60,7 +60,7 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
 
   // Load published planner from API via Suspense query
   // Returns both apiData (for header/footer) and planner (for viewer)
-  const { apiData, planner } = usePublishedPlannerQuery(plannerId)
+  const queryState = usePublishedPlannerQuery(plannerId)
 
   // Get auth state for ownership check and gating actions
   const { data: user } = useAuthQuery()
@@ -72,6 +72,19 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
 
   // URL search params for list section
   const { category, page, mode, search, setFilters } = useMDGesellschaftFilters()
+
+  if (isPlannerRemoved(queryState)) {
+    return (
+      <div className="space-y-6 text-center py-12">
+        <h1 className={SECTION_STYLES.TEXT.pageTitle}>{t('sync.removedOnAnotherDevice')}</h1>
+        <Button asChild variant="outline">
+          <Link to="/planner/md/gesellschaft">{t('pages.detail.backToList')}</Link>
+        </Button>
+      </div>
+    )
+  }
+
+  const { apiData, planner } = queryState
 
   // Determine ownership by comparing author username with current user's username
   const isOwner =

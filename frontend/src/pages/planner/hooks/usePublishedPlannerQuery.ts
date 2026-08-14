@@ -9,7 +9,7 @@
 
 import { useSuspenseQuery } from '@tanstack/react-query'
 
-import { ApiClient } from '@/lib/api'
+import { ApiClient, NotFoundError } from '@/lib/api'
 import { validateData } from '@/lib/validation'
 import { PublishedPlannerDetailSchema } from '../schemas/PlannerListSchemas'
 
@@ -26,6 +26,20 @@ export interface PublishedPlannerQueryResult {
   apiData: PublishedPlannerDetail
   /** Parsed SaveablePlanner structure - for PlannerViewer */
   planner: SaveablePlanner
+}
+
+/** The planner is no longer published — deleted or unpublished elsewhere. */
+export interface PublishedPlannerRemoved {
+  removed: true
+}
+
+export type PublishedPlannerQueryState = PublishedPlannerQueryResult | PublishedPlannerRemoved
+
+/** Narrows the query state to the removed case. */
+export function isPlannerRemoved(
+  state: PublishedPlannerQueryState,
+): state is PublishedPlannerRemoved {
+  return 'removed' in state
 }
 
 // ============================================================================
@@ -52,8 +66,16 @@ export const publishedPlannerQueryKeys = {
 export async function fetchPublishedPlanner(
   plannerId: string,
   signal?: AbortSignal,
-): Promise<PublishedPlannerQueryResult> {
-  const data = await ApiClient.get(`/api/planner/md/published/${plannerId}`, { signal })
+): Promise<PublishedPlannerQueryState> {
+  let data: unknown
+  try {
+    data = await ApiClient.get(`/api/planner/md/published/${plannerId}`, { signal })
+  } catch (error) {
+    // An entry opened from a stale list can have been deleted on another
+    // device; that is an answer to show, not an error to escalate.
+    if (error instanceof NotFoundError) return { removed: true }
+    throw error
+  }
   const apiData = validateData(
     data,
     PublishedPlannerDetailSchema,
@@ -122,7 +144,7 @@ export async function fetchPublishedPlanner(
  * }
  * ```
  */
-export function usePublishedPlannerQuery(plannerId: string): PublishedPlannerQueryResult {
+export function usePublishedPlannerQuery(plannerId: string): PublishedPlannerQueryState {
   const query = useSuspenseQuery({
     queryKey: publishedPlannerQueryKeys.detail(plannerId),
     queryFn: ({ signal }) => fetchPublishedPlanner(plannerId, signal),
