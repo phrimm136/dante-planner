@@ -2,31 +2,27 @@ package org.danteplanner.backend.comment.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.comment.dto.CommentTreeNode;
 import org.danteplanner.backend.comment.dto.CreateCommentRequest;
 import org.danteplanner.backend.comment.dto.CreateCommentResponse;
 import org.danteplanner.backend.comment.dto.UpdateCommentRequest;
 import org.danteplanner.backend.comment.dto.UpdateCommentResponse;
 import org.danteplanner.backend.comment.entity.PlannerComment;
-import org.danteplanner.backend.comment.event.CommentCreatedEvent;
 import org.danteplanner.backend.comment.exception.CommentForbiddenException;
 import org.danteplanner.backend.comment.exception.CommentNotFoundException;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.validation.CommentAccessValidator;
 import org.danteplanner.backend.comment.validation.CommentAuthorshipValidator;
 import org.danteplanner.backend.comment.validation.CommentStateValidator;
-import org.danteplanner.backend.notification.service.NotificationDispatchService;
-import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.planner.service.PlannerStatsService;
+import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
+import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.danteplanner.backend.shared.util.CommentConstants;
-import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.service.UserService;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -40,9 +36,7 @@ public class CommentCommandService {
 
     private final PlannerCommentRepository commentRepository;
     private final CommentQueryService commentQueryService;
-    private final UserService userService;
-    private final NotificationDispatchService notificationDispatchService;
-    private final ApplicationEventPublisher eventPublisher;
+    private final DomainEventRecorder domainEventRecorder;
     private final PlannerAccessGuard accessGuard;
     private final PlannerStatsService plannerStatsService;
     private final CommentAccessValidator accessValidator;
@@ -65,7 +59,7 @@ public class CommentCommandService {
     public CreateCommentResponse createComment(UUID plannerId, Long userId, UUID deviceId, CreateCommentRequest request) {
         accessGuard.checkNotRestricted(userId);
 
-        Planner planner = accessGuard.requirePublished(plannerId);
+        accessGuard.checkPublished(plannerId);
 
         int depth = 0;
         Long effectiveParentId = null;
@@ -93,43 +87,14 @@ public class CommentCommandService {
         PlannerComment saved = commentRepository.insert(comment);
         plannerStatsService.incrementCommentCount(plannerId);
 
-        // Send notifications (respecting user notification settings)
-        UUID parentPublicId = null;
         if (effectiveParentId == null) {
-            // Top-level comment - notify planner owner (if not self-comment and owner has notifications enabled)
-            Long plannerOwnerId = planner.getUser().getId();
-            if (!userId.equals(plannerOwnerId) && planner.isOwnerNotificationsEnabled()) {
-                notificationDispatchService.notifyCommentReceived(
-                        saved.getId(),
-                        saved.getPublicId(),
-                        plannerId,
-                        planner.getTitle(),
-                        request.content(),
-                        plannerOwnerId,
-                        userId
-                );
-                log.debug("Sent COMMENT_RECEIVED notification to planner owner {}", plannerOwnerId);
-            }
+            domainEventRecorder.recordDomainEvent(DomainEventType.COMMENT_RECEIVED, plannerId,
+                    Map.of("commentId", saved.getId()));
         } else {
-            // Reply - notify parent comment author (if not self-reply and author has notifications enabled)
-            PlannerComment parentComment = commentRepository.findById(effectiveParentId).orElseThrow();
-            parentPublicId = parentComment.getPublicId();
-            Long parentAuthorId = parentComment.getUserId();
-            if (!userId.equals(parentAuthorId) && parentComment.isAuthorNotificationsEnabled()) {
-                notificationDispatchService.notifyReplyReceived(
-                        saved.getId(),
-                        saved.getPublicId(),
-                        plannerId,
-                        planner.getTitle(),
-                        request.content(),
-                        parentAuthorId,
-                        userId
-                );
-                log.debug("Sent REPLY_RECEIVED notification to parent author {}", parentAuthorId);
-            }
+            domainEventRecorder.recordDomainEvent(DomainEventType.REPLY_RECEIVED, plannerId,
+                    Map.of("replyId", saved.getId()));
         }
 
-        publishCommentCreated(plannerId, saved, parentPublicId, userId);
         log.info("User {} created comment {} on planner {}", userId, saved.getId(), plannerId);
 
         return new CreateCommentResponse(saved.getPublicId(), saved.getCreatedAt());
@@ -155,7 +120,7 @@ public class CommentCommandService {
 
         UUID plannerId = parent.getPlannerId();
 
-        Planner planner = accessGuard.requirePublished(plannerId);
+        accessGuard.checkPublished(plannerId);
 
         stateValidator.requireReplyable(parent);
 
@@ -173,23 +138,9 @@ public class CommentCommandService {
         PlannerComment saved = commentRepository.insert(reply);
         plannerStatsService.incrementCommentCount(plannerId);
 
-        // Send notification to parent author (if not self-reply and author has notifications enabled)
-        PlannerComment notifyParent = commentRepository.findById(effectiveParentId).orElseThrow();
-        Long parentAuthorId = notifyParent.getUserId();
-        if (!userId.equals(parentAuthorId) && notifyParent.isAuthorNotificationsEnabled()) {
-            notificationDispatchService.notifyReplyReceived(
-                    saved.getId(),
-                    saved.getPublicId(),
-                    plannerId,
-                    planner.getTitle(),
-                    content,
-                    parentAuthorId,
-                    userId
-            );
-            log.debug("Sent REPLY_RECEIVED notification to parent author {}", parentAuthorId);
-        }
+        domainEventRecorder.recordDomainEvent(DomainEventType.REPLY_RECEIVED, plannerId,
+                Map.of("replyId", saved.getId()));
 
-        publishCommentCreated(plannerId, saved, notifyParent.getPublicId(), userId);
         log.info("User {} created reply {} to comment {} on planner {}", userId, saved.getId(), parent.getId(), plannerId);
 
         return new CreateCommentResponse(saved.getPublicId(), saved.getCreatedAt());
@@ -263,22 +214,4 @@ public class CommentCommandService {
         log.info("User {} deleted comment {}", userId, commentPublicId);
     }
 
-    /**
-     * Raise the fan-out of a newly created comment, for delivery once the comment commits.
-     *
-     * <p>The payload is rendered here rather than in the listener: the listener runs after commit
-     * with no session, and the author lookup it needs would have none to load from.</p>
-     *
-     * @param plannerId      the planner the comment belongs to
-     * @param saved          the persisted comment to broadcast
-     * @param parentPublicId the public UUID of the comment replied to, null at top level
-     * @param authorUserId   the comment author's user ID
-     */
-    private void publishCommentCreated(UUID plannerId, PlannerComment saved, UUID parentPublicId,
-            Long authorUserId) {
-        User author = userService.findOptionalById(authorUserId).orElse(null);
-        CommentTreeNode payload = CommentTreeNode.forBroadcast(saved, parentPublicId, author);
-        eventPublisher.publishEvent(
-                new CommentCreatedEvent(plannerId, saved.getPublicId(), authorUserId, payload));
-    }
 }

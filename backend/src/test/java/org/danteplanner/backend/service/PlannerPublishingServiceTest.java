@@ -1,5 +1,5 @@
 package org.danteplanner.backend.service;
-import org.danteplanner.backend.shared.sse.SsePublisher;
+import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
@@ -8,7 +8,6 @@ import org.danteplanner.backend.planner.service.PlannerPublishingService;
 import org.danteplanner.backend.planner.validation.PlannerOwnershipValidator;
 import org.danteplanner.backend.planner.validation.PlannerPublishValidator;
 
-import org.danteplanner.backend.notification.service.NotificationDispatchService;
 
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
@@ -78,13 +77,7 @@ class PlannerPublishingServiceTest {
     private PlannerSubscriptionService subscriptionService;
 
     @Mock
-    private SsePublisher ssePublisher;
-
-    @Mock
-    private NotificationDispatchService notificationDispatchService;
-
-    @Mock
-    private org.springframework.context.ApplicationEventPublisher eventPublisher;
+    private DomainEventRecorder domainEventRecorder;
 
     private PlannerPublishingService publishingService;
 
@@ -103,12 +96,10 @@ class PlannerPublishingServiceTest {
                 contentValidator,
                 plannerCatalogService,
                 subscriptionService,
-                ssePublisher,
-                notificationDispatchService,
                 accessGuard,
                 new PlannerOwnershipValidator(),
                 new PlannerPublishValidator(),
-                eventPublisher
+                domainEventRecorder
         );
 
         testUser = TestDataFactory.unsavedUser(1L);

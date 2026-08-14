@@ -1,17 +1,12 @@
 package org.danteplanner.backend.planner.service;
 
-import org.danteplanner.backend.shared.sse.SsePublisher;
-import org.danteplanner.backend.notification.service.NotificationDispatchService;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.planner.dto.PlannerPublishedPayload;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.ToggleOwnerNotificationsResponse;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PublicationChange;
-import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
@@ -21,14 +16,14 @@ import org.danteplanner.backend.planner.validation.PlannerContentValidator;
 import org.danteplanner.backend.planner.validation.PlannerOwnershipValidator;
 import org.danteplanner.backend.planner.validation.PlannerPublishValidator;
 import org.danteplanner.backend.planner.validation.ValidationPolicy;
-import org.springframework.context.ApplicationEventPublisher;
+import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
+import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -47,20 +42,10 @@ public class PlannerPublishingService {
     private final PlannerContentValidator contentValidator;
     private final PlannerCatalogService plannerCatalogService;
     private final PlannerSubscriptionService subscriptionService;
-    private final SsePublisher ssePublisher;
-    private final NotificationDispatchService notificationDispatchService;
     private final PlannerAccessGuard accessGuard;
     private final PlannerOwnershipValidator ownershipValidator;
     private final PlannerPublishValidator publishValidator;
-    private final ApplicationEventPublisher eventPublisher;
-
-    /**
-     * Carries the publish SSE broadcast so it can be emitted only after the publishing
-     * transaction commits.
-     */
-    public record PlannerPublishedEvent(
-            Long authorId, UUID plannerId, String plannerTitle, PlannerPublishedPayload data) {
-    }
+    private final DomainEventRecorder domainEventRecorder;
 
     /**
      * A moderator transition that withdraws a planner from public view.
@@ -75,13 +60,6 @@ public class PlannerPublishingService {
          * @return what the transition turned out to be
          */
         PublicationChange apply(Planner planner);
-    }
-
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void onPlannerPublished(PlannerPublishedEvent event) {
-        ssePublisher.publishBroadcast(event.authorId(), SseEventType.NOTIFY_PUBLISHED, event.data());
-        notificationDispatchService.notifyPlannerPublished(
-                event.authorId(), event.plannerId(), event.plannerTitle());
     }
 
     /**
@@ -186,13 +164,9 @@ public class PlannerPublishingService {
         plannerCatalogService.onBecameVisible(planner);
         subscriptionService.createSubscription(userId, plannerId);
 
-        // The DB fan-out and the SSE broadcast both run from the AFTER_COMMIT listener, so neither
-        // persists nor fires when the publish rolls back.
         if (change == PublicationChange.FIRST_PUBLISH) {
-            eventPublisher.publishEvent(new PlannerPublishedEvent(
-                    userId, plannerId, planner.getTitle(),
-                    PlannerPublishedPayload.fromEntity(planner)));
-            log.info("Broadcast first-publish notification for planner {} by user {}", plannerId, userId);
+            domainEventRecorder.recordDomainEvent(DomainEventType.PLANNER_PUBLISHED, plannerId,
+                    Map.of("authorId", userId));
         }
 
         log.info("Published planner {} by user {}", plannerId, userId);

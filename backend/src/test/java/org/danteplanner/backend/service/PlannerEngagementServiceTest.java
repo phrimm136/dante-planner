@@ -19,7 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationEventPublisher;
+import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -64,7 +64,7 @@ class PlannerEngagementServiceTest {
     private PlannerBookmarkRepository plannerBookmarkRepository;
 
     @Mock
-    private ApplicationEventPublisher eventPublisher;
+    private DomainEventRecorder domainEventRecorder;
 
     @Mock
     private PlannerStatsService plannerStatsService;
@@ -91,7 +91,7 @@ class PlannerEngagementServiceTest {
                 plannerBookmarkRepository,
                 plannerStatsService,
                 plannerCatalogService,
-                eventPublisher,
+                domainEventRecorder,
                 new PlannerAccessGuard(userService, plannerRepository),
                 reportService,
                 new VoteUniquenessValidator(),

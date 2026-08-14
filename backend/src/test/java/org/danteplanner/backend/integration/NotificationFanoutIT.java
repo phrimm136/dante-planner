@@ -76,40 +76,37 @@ class NotificationFanoutIT extends SharedMySqlContainerSupport {
     }
 
     /**
-     * The dispatch pre-check answers for exactly the rows {@code uk_notification_dedup} rejects.
+     * {@code uk_notification_dedup} is what makes a re-dispatch write nothing the second time, and
+     * the property the relay depends on is that no preceding read is involved.
      *
-     * <p>A pre-check narrower than the key would let a dispatch through to fire the violation it
-     * exists to avoid, which under joined propagation reaches the caller as an
-     * {@code UnexpectedRollbackException}. The soft-deleted case is the one that can drift: the key
-     * does not include {@code deleted_at}, so a soft-deleted row still occupies it.</p>
+     * <p>The soft-deleted case is the one that can drift: the key does not include
+     * {@code deleted_at}, so a soft-deleted row still occupies it and a replayed dispatch must
+     * still write nothing.</p>
      */
     @Test
     @Transactional
-    @DisplayName("the duplicate pre-check answers for the same rows the dedup key rejects")
-    void dedupPreCheck_WhenARowOccupiesTheKey_MatchesTheConstraintIncludingSoftDeleted() {
-        Long recipient = enabledUser("precheck").getId();
+    @DisplayName("the dedup key refuses the second write, soft-deleted rows included")
+    void dedupKey_WhenARowAlreadyOccupiesIt_RefusesTheSecondWriteIncludingSoftDeleted() {
+        Long recipient = enabledUser("dedup").getId();
         UUID plannerId = UUID.randomUUID();
         String contentId = plannerId.toString();
 
-        assertThat(notificationRepository.existsByUserIdAndContentIdAndNotificationType(
-                recipient, contentId, NotificationType.PLANNER_RECOMMENDED))
+        assertThat(raise(recipient, contentId, NotificationType.PLANNER_RECOMMENDED, plannerId))
                 .as("nothing occupies the key yet")
-                .isFalse();
+                .isEqualTo(1);
 
-        Notification raised = notificationRepository.save(new Notification(
-                recipient, contentId, NotificationType.PLANNER_RECOMMENDED,
-                plannerId, "Recommended Build", null, null));
+        assertThat(raise(recipient, contentId, NotificationType.PLANNER_RECOMMENDED, plannerId))
+                .as("the key is occupied, so the replayed statement writes nothing")
+                .isZero();
 
-        assertThat(notificationRepository.existsByUserIdAndContentIdAndNotificationType(
-                recipient, contentId, NotificationType.PLANNER_RECOMMENDED))
-                .as("the row now occupies the key")
-                .isTrue();
-
-        assertThat(notificationRepository.existsByUserIdAndContentIdAndNotificationType(
-                recipient, contentId, NotificationType.COMMENT_RECEIVED))
+        assertThat(raise(recipient, contentId, NotificationType.COMMENT_RECEIVED, plannerId))
                 .as("a different type is a different key")
-                .isFalse();
+                .isEqualTo(1);
 
+        Notification raised = notificationRepository
+                .findByUserIdAndContentIdAndNotificationType(
+                        recipient, contentId, NotificationType.PLANNER_RECOMMENDED)
+                .orElseThrow();
         raised.softDelete();
         notificationRepository.saveAndFlush(raised);
 
@@ -118,10 +115,14 @@ class NotificationFanoutIT extends SharedMySqlContainerSupport {
                 .as("the row reached the database soft-deleted, so the assertion below is not vacuous")
                 .isNotNull();
 
-        assertThat(notificationRepository.existsByUserIdAndContentIdAndNotificationType(
-                recipient, contentId, NotificationType.PLANNER_RECOMMENDED))
-                .as("a soft-deleted row still occupies the key, so it still counts as carried")
-                .isTrue();
+        assertThat(raise(recipient, contentId, NotificationType.PLANNER_RECOMMENDED, plannerId))
+                .as("a soft-deleted row still occupies the key, so it still refuses the write")
+                .isZero();
+    }
+
+    private int raise(Long userId, String contentId, NotificationType type, UUID plannerId) {
+        return notificationRepository.insertIgnore(userId, contentId, type.name(),
+                plannerId.toString(), "Recommended Build", null, null);
     }
 
     private long unread(Long userId) {

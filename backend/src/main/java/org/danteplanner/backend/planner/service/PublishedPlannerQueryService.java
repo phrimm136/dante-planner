@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.moderation.service.PlannerReportService;
 import org.danteplanner.backend.planner.dto.CatalogQuery;
 import org.danteplanner.backend.planner.dto.PlannerCoreInfo;
+import org.danteplanner.backend.planner.dto.PlannerNotificationTarget;
 import org.danteplanner.backend.planner.dto.PublicPlannerResponse;
 import org.danteplanner.backend.planner.dto.PublishedPlannerDetailResponse;
 import org.danteplanner.backend.shared.entity.ContentEntityType;
@@ -34,6 +35,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -92,6 +94,21 @@ public class PublishedPlannerQueryService {
         this.plannerStatsRepository = plannerStatsRepository;
         this.accessGuard = accessGuard;
         this.catalogReadValidator = catalogReadValidator;
+    }
+
+    /**
+     * Resolve what a notification about a planner needs to know about it.
+     *
+     * <p>Publication state is deliberately not part of the predicate: a comment already exists on
+     * the planner, and withdrawing it from public view does not withdraw the notification its
+     * author is owed. A soft-deleted planner has nothing left to announce and comes back empty.</p>
+     *
+     * @param plannerId the planner ID
+     * @return the notification target, empty when no live planner carries the id
+     */
+    @Transactional(readOnly = true)
+    public Optional<PlannerNotificationTarget> notificationTargetOf(UUID plannerId) {
+        return plannerRepository.findNotificationTarget(plannerId);
     }
 
     /**

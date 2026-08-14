@@ -2,6 +2,7 @@ package org.danteplanner.backend.planner.repository;
 
 
 import org.danteplanner.backend.planner.dto.PlannerCoreInfo;
+import org.danteplanner.backend.planner.dto.PlannerNotificationTarget;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -71,6 +72,20 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
      */
     @Query(AGGREGATE_LOAD + "WHERE p.id = :id AND p.publication.published = TRUE AND c.deletedAt IS NULL")
     Optional<Planner> findPublishedAggregate(@Param("id") UUID id);
+
+    /**
+     * Project the fields a notification about a planner needs, without hydrating the aggregate.
+     *
+     * <p>A projection rather than a load: the caller is outside the planner feature, and the owner
+     * id has to reach it without the {@code User} the aggregate would carry.</p>
+     */
+    @Query("""
+            SELECT new org.danteplanner.backend.planner.dto.PlannerNotificationTarget(
+                p.id, c.title, p.user.id, pub.ownerNotificationsEnabled)
+            FROM Planner p JOIN p.content c JOIN p.publication pub
+            WHERE p.id = :id AND c.deletedAt IS NULL
+            """)
+    Optional<PlannerNotificationTarget> findNotificationTarget(@Param("id") UUID id);
 
     /**
      * Count non-deleted planners for a user.

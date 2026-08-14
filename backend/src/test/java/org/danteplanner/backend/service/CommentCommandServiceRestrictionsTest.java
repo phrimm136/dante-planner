@@ -9,11 +9,10 @@ import org.danteplanner.backend.comment.validation.CommentAccessValidator;
 import org.danteplanner.backend.comment.validation.CommentAuthorshipValidator;
 import org.danteplanner.backend.comment.validation.CommentStateValidator;
 import org.danteplanner.backend.planner.service.PlannerStatsService;
-import org.danteplanner.backend.notification.service.NotificationDispatchService;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
-import org.springframework.context.ApplicationEventPublisher;
+import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserRole;
 import org.danteplanner.backend.user.exception.UserBannedException;
@@ -50,8 +49,7 @@ class CommentCommandServiceRestrictionsTest {
     @Mock PlannerRepository plannerRepository;
     @Mock PlannerStatsRepository plannerStatsRepository;
     @Mock UserService userService;
-    @Mock NotificationDispatchService notificationDispatchService;
-    @Mock ApplicationEventPublisher eventPublisher;
+    @Mock DomainEventRecorder domainEventRecorder;
 
     private CommentCommandService commentService() {
         return new CommentCommandService(
@@ -59,9 +57,7 @@ class CommentCommandServiceRestrictionsTest {
                 new CommentQueryService(commentRepository, commentVoteRepository, userService,
                         new PlannerAccessGuard(userService, plannerRepository),
                         new CommentAccessValidator()),
-                userService,
-                notificationDispatchService,
-                eventPublisher,
+                domainEventRecorder,
                 new PlannerAccessGuard(userService, plannerRepository),
                 new PlannerStatsService(plannerStatsRepository),
                 new CommentAccessValidator(), new CommentAuthorshipValidator(),

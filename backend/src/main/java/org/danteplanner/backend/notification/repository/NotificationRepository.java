@@ -26,19 +26,52 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     Optional<Notification> findByPublicId(UUID publicId);
 
     /**
-     * Whether the recipient already carries a notification for this content.
+     * The row occupying a deduplication key.
      *
      * <p>The three columns are those of {@code uk_notification_dedup} and no others: the key does
-     * not include {@code deleted_at}, so a soft-deleted row still occupies it and must still count
-     * as carried.</p>
+     * not include {@code deleted_at}, so a soft-deleted row still occupies it and is still what
+     * comes back.</p>
      *
      * @param userId           the recipient
      * @param contentId        the content the notification is about
      * @param notificationType the notification kind
-     * @return true when a row already occupies the deduplication key
+     * @return the row on that key, empty when the key is free
      */
-    boolean existsByUserIdAndContentIdAndNotificationType(
+    Optional<Notification> findByUserIdAndContentIdAndNotificationType(
             Long userId, String contentId, NotificationType notificationType);
+
+    /**
+     * Write one notification unless its deduplication key is already occupied.
+     *
+     * <p>The constraint decides, not a preceding existence check. A dispatch replayed after a
+     * crash re-runs this statement and writes nothing the second time, which is the property the
+     * relay depends on.</p>
+     *
+     * @param userId          the recipient
+     * @param contentId       the content the notification is about
+     * @param type            the notification kind, as its stored name
+     * @param plannerId       the planner to navigate to
+     * @param plannerTitle    the planner title for display
+     * @param commentSnippet  a snippet of the comment that occasioned it, null when there is none
+     * @param commentPublicId the comment's public UUID, null when there is none
+     * @return 1 when the row was written, 0 when the key was already occupied
+     */
+    @Modifying
+    @Query(value = """
+            INSERT IGNORE INTO notifications
+                (user_id, content_id, notification_type, public_id, planner_id, planner_title,
+                 comment_snippet, comment_public_id)
+            VALUES (:userId, :contentId, :type, UUID_TO_BIN(UUID()), UUID_TO_BIN(:plannerId),
+                    :plannerTitle, :commentSnippet, UUID_TO_BIN(:commentPublicId))
+            """, nativeQuery = true)
+    int insertIgnore(
+            @Param("userId") Long userId,
+            @Param("contentId") String contentId,
+            @Param("type") String type,
+            @Param("plannerId") String plannerId,
+            @Param("plannerTitle") String plannerTitle,
+            @Param("commentSnippet") String commentSnippet,
+            @Param("commentPublicId") String commentPublicId);
 
     /**
      * Find notifications for a user's inbox (non-deleted, ordered by creation time).

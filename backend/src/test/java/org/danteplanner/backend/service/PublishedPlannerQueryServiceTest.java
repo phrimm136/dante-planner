@@ -37,7 +37,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationEventPublisher;
+import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -103,7 +103,7 @@ class PublishedPlannerQueryServiceTest {
     private PlannerCatalogService plannerCatalogService;
 
     @Mock
-    private ApplicationEventPublisher eventPublisher;
+    private DomainEventRecorder domainEventRecorder;
 
     @Mock
     private PlannerStatsRepository plannerStatsRepository;
@@ -129,7 +129,7 @@ class PublishedPlannerQueryServiceTest {
                 plannerBookmarkRepository,
                 plannerStatsService,
                 plannerCatalogService,
-                eventPublisher,
+                domainEventRecorder,
                 accessGuard,
                 reportService,
                 new VoteUniquenessValidator(),

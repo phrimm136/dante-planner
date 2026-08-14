@@ -1,5 +1,6 @@
 package org.danteplanner.backend.architecture;
 
+import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.domain.JavaCodeUnit;
 import com.tngtech.archunit.core.domain.JavaMethod;
@@ -19,6 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -112,6 +114,171 @@ class EffectPlacementTest {
                 .as("these no longer reach a guard effect, so the allowlist now grants permission "
                         + "nobody uses; delete the entry")
                 .isEmpty();
+    }
+
+    private static final String TRANSACTIONAL_EVENT_LISTENER =
+            "org.springframework.transaction.event.TransactionalEventListener";
+
+    private static final String DOMAIN_EVENT_DISPATCHER =
+            "org.danteplanner.backend.shared.outbox.service.DomainEventDispatcher";
+
+    private static final String DOMAIN_EFFECT =
+            "org.danteplanner.backend.shared.outbox.service.DomainEffect";
+
+    private static final String NOTIFICATION_DISPATCH_SERVICE =
+            "org.danteplanner.backend.notification.service.NotificationDispatchService";
+
+    private static final String NOTIFICATION_REPOSITORY =
+            "org.danteplanner.backend.notification.repository.NotificationRepository";
+
+    private static final String EAGER_DISPATCH =
+            "org.danteplanner.backend.shared.outbox.service.DomainEventEagerDispatch";
+
+    private static final String NOTIFICATION_PACKAGE = "org.danteplanner.backend.notification";
+
+    /**
+     * The methods that derive a notification row, as the arms call them. Their placement is the
+     * whole claim: a notification exists because a committed event row said so, never because a
+     * request thread was passing.
+     */
+    private static final Set<String> RAISE_METHODS = Set.of(
+            "notifyPlannerPublished", "notifyPlannerRecommended",
+            "notifyCommentReceived", "notifyReplyReceived");
+
+    private static final Set<String> NOTIFICATION_WRITE_METHODS = Set.of(
+            "insert", "insertIgnore", "insertPublishedFanout", "markAsRead", "markAllAsRead",
+            "softDeleteOldReadNotifications", "hardDeleteOldNotifications", "softDeleteAllByUserId");
+
+    @Test
+    @DisplayName("no after-commit listener derives a notification")
+    void afterCommitListener_WhenItDerivesANotification_IsRejected() {
+        Set<String> offenders = afterCommitListeners().stream()
+                .filter(listener -> reaches(listener, NOTIFICATION_DISPATCH_SERVICE))
+                .map(EffectPlacementTest::qualifiedName)
+                .collect(Collectors.toCollection(TreeSet::new));
+
+        assertThat(offenders)
+                .as("a listener that writes its own notification loses the push and the row "
+                        + "together when the process dies in the commit-to-listener window; record "
+                        + "a domain event inside the causing transaction and let an arm derive it")
+                .isEmpty();
+    }
+
+    @Test
+    @DisplayName("the eager hop is the only after-commit listener that reaches the dispatcher")
+    void outboxDispatch_WhenReachedFromAfterCommit_ComesOnlyFromTheEagerHop() {
+        Set<String> reaching = afterCommitListeners().stream()
+                .filter(listener -> reaches(listener, DOMAIN_EVENT_DISPATCHER))
+                .map(EffectPlacementTest::qualifiedName)
+                .collect(Collectors.toCollection(TreeSet::new));
+
+        assertThat(reaching)
+                .as("the eager hop is the one listener the outbox has; a second entry point into "
+                        + "the dispatcher is a second place its idempotence has to be reasoned "
+                        + "about")
+                .containsExactly(EAGER_DISPATCH + ".onDomainEventRecorded");
+    }
+
+    @Test
+    @DisplayName("notification rows are written only from within the notification feature")
+    void notificationWrite_WhenIssuedOutsideTheFeature_IsRejected() {
+        Set<String> offenders = new TreeSet<>();
+
+        for (JavaClass caller : MAIN_CLASSES) {
+            if (caller.getPackageName().startsWith(NOTIFICATION_PACKAGE)) {
+                continue;
+            }
+            for (JavaMethodCall call : caller.getMethodCallsFromSelf()) {
+                if (NOTIFICATION_REPOSITORY.equals(call.getTargetOwner().getFullName())
+                        && NOTIFICATION_WRITE_METHODS.contains(call.getTarget().getName())) {
+                    offenders.add(caller.getFullName() + " -> " + call.getTarget().getName());
+                }
+            }
+        }
+
+        assertThat(offenders)
+                .as("the notification row is the notification feature's to write; an effect arm "
+                        + "goes through NotificationDispatchService, which is what keeps the "
+                        + "INSERT IGNORE derivation in one place")
+                .isEmpty();
+    }
+
+    @Test
+    @DisplayName("a notification is raised only by an effect arm")
+    void raiseMethod_WhenCalledOutsideAnEffectArm_IsRejected() {
+        Set<String> offenders = new TreeSet<>();
+
+        for (JavaClass caller : MAIN_CLASSES) {
+            if (caller.getPackageName().contains(".effect")
+                    || caller.getPackageName().startsWith(NOTIFICATION_PACKAGE)) {
+                continue;
+            }
+            for (JavaMethodCall call : caller.getMethodCallsFromSelf()) {
+                if (NOTIFICATION_DISPATCH_SERVICE.equals(call.getTargetOwner().getFullName())
+                        && RAISE_METHODS.contains(call.getTarget().getName())) {
+                    offenders.add(caller.getFullName() + " -> " + call.getTarget().getName());
+                }
+            }
+        }
+
+        assertThat(offenders)
+                .as("a notification is owed by a committed domain event, so the only caller is the "
+                        + "arm the dispatcher selected; record an event instead")
+                .isEmpty();
+    }
+
+    @Test
+    @DisplayName("every effect arm lives in its feature's effect package")
+    void effectArm_WhenDeclaredOutsideAnEffectPackage_IsRejected() {
+        Set<String> offenders = MAIN_CLASSES.stream()
+                .filter(javaClass -> javaClass.getAllRawInterfaces().stream()
+                        .anyMatch(implemented -> DOMAIN_EFFECT.equals(implemented.getFullName())))
+                .filter(javaClass -> !javaClass.getPackageName().contains(".effect"))
+                .map(JavaClass::getFullName)
+                .collect(Collectors.toCollection(TreeSet::new));
+
+        assertThat(offenders)
+                .as("an arm belongs to the feature that owns the rows it writes, in that feature's "
+                        + "effect package; shared/outbox carries the mechanism and no feature")
+                .isEmpty();
+    }
+
+    private static List<JavaMethod> afterCommitListeners() {
+        return MAIN_CLASSES.stream()
+                .flatMap(clazz -> clazz.getMethods().stream())
+                .filter(method -> method.isAnnotatedWith(TRANSACTIONAL_EVENT_LISTENER))
+                .toList();
+    }
+
+    /**
+     * Whether a method reaches a type through the helpers between them.
+     *
+     * @param root  the method to walk from
+     * @param owner the fully qualified type to look for
+     * @return true when some call chain from the method lands on that type
+     */
+    private static boolean reaches(JavaMethod root, String owner) {
+        Set<String> visited = new HashSet<>();
+        Deque<JavaCodeUnit> pending = new ArrayDeque<>();
+        pending.push(root);
+        visited.add(qualifiedName(root));
+
+        while (!pending.isEmpty()) {
+            for (JavaMethodCall call : pending.pop().getMethodCallsFromSelf()) {
+                String target = call.getTargetOwner().getFullName();
+                if (target.equals(owner)) {
+                    return true;
+                }
+                if (!target.startsWith("org.danteplanner.backend")) {
+                    continue;
+                }
+                Optional<JavaMethod> callee = call.getTarget().resolveMember();
+                if (callee.isPresent() && visited.add(qualifiedName(callee.get()))) {
+                    pending.push(callee.get());
+                }
+            }
+        }
+        return false;
     }
 
     private static List<JavaMethod> transactionalMethods() {

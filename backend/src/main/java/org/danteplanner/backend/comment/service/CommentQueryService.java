@@ -84,6 +84,19 @@ public class CommentQueryService {
     }
 
     /**
+     * Render a comment as the node its planner's readers insert into their thread.
+     *
+     * @param comment        the persisted comment to announce
+     * @param parentPublicId the public UUID of the comment replied to, null at top level
+     * @return the rendered node, carrying no replies and no viewer-specific state
+     */
+    @Transactional(readOnly = true)
+    public CommentTreeNode broadcastNode(PlannerComment comment, UUID parentPublicId) {
+        User author = userService.findOptionalById(comment.getUserId()).orElse(null);
+        return CommentTreeNode.forBroadcast(comment, parentPublicId, author);
+    }
+
+    /**
      * Require the comment carrying an internal id.
      *
      * @param commentId the comment's internal ID

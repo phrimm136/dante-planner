@@ -14,9 +14,8 @@ import org.danteplanner.backend.comment.validation.CommentStateValidator;
 import org.danteplanner.backend.planner.validation.VoteUniquenessValidator;
 import org.danteplanner.backend.moderation.service.CommentReportService;
 import org.danteplanner.backend.planner.service.PlannerStatsService;
-import org.springframework.context.ApplicationEventPublisher;
+import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 
-import org.danteplanner.backend.notification.service.NotificationDispatchService;
 
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.comment.dto.CommentTreeNode;
@@ -80,13 +79,11 @@ class CommentServiceLayerTest {
     private UserService userService;
 
     @Mock
-    private NotificationDispatchService notificationDispatchService;
+    private DomainEventRecorder domainEventRecorder;
 
 
     // Comment fan-out is raised as an event and published after commit, so no create test here
     // can assert delivery.
-    @Mock
-    private ApplicationEventPublisher eventPublisher;
 
     @Mock
     private CommentReportService commentReportService;
@@ -108,7 +105,7 @@ class CommentServiceLayerTest {
                 new PlannerAccessGuard(userService, plannerRepository),
                 new CommentAccessValidator());
         commandService = new CommentCommandService(
-                commentRepository, queryService, userService, notificationDispatchService, eventPublisher,
+                commentRepository, queryService, domainEventRecorder,
                 new PlannerAccessGuard(userService, plannerRepository),
                 new PlannerStatsService(plannerStatsRepository),
                 new CommentAccessValidator(), new CommentAuthorshipValidator(),
@@ -165,8 +162,7 @@ class CommentServiceLayerTest {
             CreateCommentRequest request = new CreateCommentRequest("Test comment", null);
             AtomicReference<PlannerComment> persisted = new AtomicReference<>();
             when(userService.findById(testUser.getId())).thenReturn(testUser);
-            when(plannerRepository.findPublishedAggregate(plannerId))
-                    .thenReturn(Optional.of(publishedPlanner));
+            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
             when(commentRepository.insert(any(PlannerComment.class)))
                     .thenAnswer(i -> {
                         PlannerComment c = i.getArgument(0);
@@ -205,11 +201,8 @@ class CommentServiceLayerTest {
             CreateCommentRequest request = new CreateCommentRequest("Reply comment", parentPublicId);
             AtomicReference<PlannerComment> persisted = new AtomicReference<>();
             when(userService.findById(testUser.getId())).thenReturn(testUser);
-            when(plannerRepository.findPublishedAggregate(plannerId))
-                    .thenReturn(Optional.of(publishedPlanner));
+            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
             when(commentRepository.findByPublicId(parentPublicId))
-                    .thenReturn(Optional.of(parentComment));
-            when(commentRepository.findById(50L))
                     .thenReturn(Optional.of(parentComment));
             when(commentRepository.insert(any(PlannerComment.class)))
                     .thenAnswer(i -> {
@@ -240,8 +233,7 @@ class CommentServiceLayerTest {
             // Arrange
             CreateCommentRequest request = new CreateCommentRequest("Test", null);
             when(userService.findById(testUser.getId())).thenReturn(testUser);
-            when(plannerRepository.findPublishedAggregate(plannerId))
-                    .thenReturn(Optional.empty());
+            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(false);
 
             // Act & Assert
             UUID deviceId = UUID.randomUUID();
@@ -256,8 +248,7 @@ class CommentServiceLayerTest {
             UUID nonExistentParentId = UUID.randomUUID();
             CreateCommentRequest request = new CreateCommentRequest("Reply", nonExistentParentId);
             when(userService.findById(testUser.getId())).thenReturn(testUser);
-            when(plannerRepository.findPublishedAggregate(plannerId))
-                    .thenReturn(Optional.of(publishedPlanner));
+            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
             when(commentRepository.findByPublicId(nonExistentParentId))
                     .thenReturn(Optional.empty());
 
@@ -282,11 +273,8 @@ class CommentServiceLayerTest {
             CreateCommentRequest request = new CreateCommentRequest("Very deep reply", parentPublicId);
             AtomicReference<PlannerComment> persisted = new AtomicReference<>();
             when(userService.findById(testUser.getId())).thenReturn(testUser);
-            when(plannerRepository.findPublishedAggregate(plannerId))
-                    .thenReturn(Optional.of(publishedPlanner));
+            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
             when(commentRepository.findByPublicId(parentPublicId))
-                    .thenReturn(Optional.of(depth5Parent));
-            when(commentRepository.findById(50L))
                     .thenReturn(Optional.of(depth5Parent));
             when(commentRepository.insert(any(PlannerComment.class)))
                     .thenAnswer(i -> {

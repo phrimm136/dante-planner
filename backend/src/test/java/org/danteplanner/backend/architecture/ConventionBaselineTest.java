@@ -46,22 +46,69 @@ class ConventionBaselineTest {
     private static final String TRANSACTIONAL = "org.springframework.transaction.annotation.Transactional";
 
     /**
+     * The one method allowed to leave the calling thread, and the one class allowed to give it
+     * somewhere to go.
+     *
+     * <p>The outbox dispatch answers every objection the rules encode rather than waiving them: it
+     * opens its own transaction, reads no security context, and its pool drains on shutdown. What
+     * it cannot do is stay on the request thread, because its fan-out has no bound on its size.</p>
+     */
+    private static final Set<String> ASYNC_METHODS_FROZEN = Set.of(
+            "org.danteplanner.backend.shared.outbox.service.DomainEventEagerDispatch"
+                    + ".onDomainEventRecorded");
+
+    private static final Set<String> ASYNC_ENABLEMENT_FROZEN = Set.of(
+            "org.danteplanner.backend.shared.outbox.config.OutboxAsyncConfig");
+
+    /**
      * The async model is {@code @Scheduled} plus {@code @TransactionalEventListener(AFTER_COMMIT)}
-     * plus Redis pub/sub. A thread pool introduced alongside it would carry no transaction and no
-     * security context, and would run work the pod's shutdown never drains.
+     * plus Redis pub/sub plus the outbox dispatch executor. A thread pool introduced anywhere else
+     * would carry no transaction and no security context, and would run work the pod's shutdown
+     * never drains.
      */
     @ArchTest
     static final ArchRule no_async_annotation =
             noMethods()
+                    .that(notFrozenAsyncMethod())
                     .should().beAnnotatedWith(ASYNC)
-                    .as("no @Async: the async model is @Scheduled + AFTER_COMMIT listeners + Redis pub/sub");
+                    .as("no @Async outside the outbox dispatch: the async model is @Scheduled + "
+                            + "AFTER_COMMIT listeners + Redis pub/sub");
 
     @ArchTest
     static final ArchRule no_async_enablement_or_thread_pools =
             noClasses()
+                    .that(notFrozenAsyncConfig())
                     .should().beAnnotatedWith(ENABLE_ASYNC)
                     .orShould().dependOnClassesThat().haveFullyQualifiedName(TASK_EXECUTOR)
-                    .as("no @EnableAsync and no ThreadPoolTaskExecutor");
+                    .as("no @EnableAsync and no ThreadPoolTaskExecutor outside the outbox dispatch");
+
+    @ArchTest
+    static void frozenAsyncMethods_WhenScanned_AreStillAnnotated(JavaClasses classes) {
+        Set<String> stale = new TreeSet<>(ASYNC_METHODS_FROZEN);
+        classes.stream()
+                .flatMap(javaClass -> javaClass.getMethods().stream())
+                .filter(method -> method.isAnnotatedWith(ASYNC))
+                .forEach(method -> stale.remove(qualifiedName(method)));
+
+        assertThat(stale)
+                .as("these no longer carry @Async, so the entry now excuses an escape hatch nobody "
+                        + "uses; delete it and let the rule cover the method again")
+                .isEmpty();
+    }
+
+    @ArchTest
+    static void frozenAsyncConfigs_WhenScanned_AreStillLive(JavaClasses classes) {
+        Set<String> stale = new TreeSet<>(ASYNC_ENABLEMENT_FROZEN);
+        classes.stream()
+                .filter(ConventionBaselineTest::enablesAsyncOrHoldsAThreadPool)
+                .forEach(javaClass -> stale.remove(topLevel(javaClass)));
+
+        assertThat(stale)
+                .as("these no longer enable async or hold a thread pool, so the entry now excuses "
+                        + "an escape hatch nobody uses; delete it and let the rule cover the class "
+                        + "again")
+                .isEmpty();
+    }
 
     /**
      * Structured logging is the only observable channel: MDC carries the request context that a
@@ -153,6 +200,29 @@ class ConventionBaselineTest {
                 .as("these no longer touch a mapped entity, so the entry now excuses a leak nobody "
                         + "has; delete it and let the rule cover the controller again")
                 .isEmpty();
+    }
+
+    private static DescribedPredicate<JavaMethod> notFrozenAsyncMethod() {
+        return DescribedPredicate.describe(
+                "are not frozen against @Async",
+                method -> !ASYNC_METHODS_FROZEN.contains(qualifiedName(method)));
+    }
+
+    private static DescribedPredicate<JavaClass> notFrozenAsyncConfig() {
+        return DescribedPredicate.describe(
+                "are not frozen against async enablement",
+                javaClass -> !ASYNC_ENABLEMENT_FROZEN.contains(topLevel(javaClass)));
+    }
+
+    private static boolean enablesAsyncOrHoldsAThreadPool(JavaClass javaClass) {
+        return javaClass.isAnnotatedWith(ENABLE_ASYNC)
+                || javaClass.getDirectDependenciesFromSelf().stream()
+                        .anyMatch(dependency ->
+                                dependency.getTargetClass().getFullName().equals(TASK_EXECUTOR));
+    }
+
+    private static String qualifiedName(JavaMethod method) {
+        return method.getOwner().getFullName() + "." + method.getName();
     }
 
     private static DescribedPredicate<JavaClass> notFrozen() {

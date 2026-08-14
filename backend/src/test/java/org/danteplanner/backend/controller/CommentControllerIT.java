@@ -24,11 +24,10 @@ import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.comment.validation.CommentAccessValidator;
 import org.danteplanner.backend.comment.validation.CommentAuthorshipValidator;
 import org.danteplanner.backend.comment.validation.CommentStateValidator;
-import org.danteplanner.backend.notification.service.NotificationDispatchService;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.planner.service.PlannerStatsService;
 import org.danteplanner.backend.planner.validation.VoteUniquenessValidator;
-import org.springframework.context.ApplicationEventPublisher;
+import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.AuthCookies;
@@ -87,11 +86,10 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
                 CommentQueryService commentQueryService,
                 PlannerRepository plannerRepository,
                 UserService userService,
-                NotificationDispatchService notificationDispatchService,
-                ApplicationEventPublisher eventPublisher,
+                DomainEventRecorder domainEventRecorder,
                 PlannerStatsRepository plannerStatsRepository) {
-            return new CommentCommandService(commentRepository, commentQueryService, userService,
-                    notificationDispatchService, eventPublisher,
+            return new CommentCommandService(commentRepository, commentQueryService,
+                    domainEventRecorder,
                     new PlannerAccessGuard(userService, plannerRepository),
                     new PlannerStatsService(plannerStatsRepository),
                     new CommentAccessValidator(), new CommentAuthorshipValidator(),

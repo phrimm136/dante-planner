@@ -2,9 +2,7 @@ package org.danteplanner.backend.notification.service;
 
 import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.entity.NotificationType;
-import org.danteplanner.backend.notification.event.NotificationRaisedEvent;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
-import org.danteplanner.backend.shared.entity.SseEventType;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,29 +10,26 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 /**
- * Pins duplicate suppression as a value rather than a caught exception.
+ * Pins duplicate suppression as a value the constraint decides, rather than a preceding check.
  *
- * <p>The reachable duplicate is a planner re-crossing the recommendation threshold, dispatched from
- * an after-commit listener in its own REQUIRES_NEW transaction. Since comment and reply dispatch
- * began joining their caller's transaction, a constraint violation fired to signal a duplicate would
- * mark that shared transaction rollback-only, and the swallow would surface as an
- * {@code UnexpectedRollbackException} at the caller instead of suppressing anything.</p>
- *
- * <p>That nothing is caught is asserted as the absence of the attempt: the duplicate case never
- * reaches {@code save}, so no violation is fired for a catch block to swallow.</p>
+ * <p>A dispatch replayed by the relay re-runs the same statement, and the row it would duplicate is
+ * refused by {@code uk_notification_dedup} rather than by an existence read that a concurrent
+ * writer could have raced. The suppressed case is asserted as the absence of the read-back: nothing
+ * was written, so there is nothing to announce.</p>
  */
 @ExtendWith(MockitoExtension.class)
 class NotificationDispatchOutcomeTest {
@@ -45,60 +40,69 @@ class NotificationDispatchOutcomeTest {
 
     private static final UUID SAVED_PUBLIC_ID = UUID.fromString("99999999-8888-7777-6666-555555555555");
 
-    @Mock
-    private NotificationRepository notificationRepository;
+    private static final String TITLE = "A planner that crossed the threshold";
 
     @Mock
-    private ApplicationEventPublisher eventPublisher;
+    private NotificationRepository notificationRepository;
 
     @InjectMocks
     private NotificationDispatchService dispatchService;
 
     @Test
-    @DisplayName("an already-notified recipient dispatches as Duplicate, writing nothing")
-    void dispatch_WhenTheRecipientAlreadyCarriesTheNotification_YieldsDuplicateAndWritesNothing() {
-        when(notificationRepository.existsByUserIdAndContentIdAndNotificationType(
-                RECIPIENT_ID, PLANNER_ID.toString(), NotificationType.PLANNER_RECOMMENDED))
-                .thenReturn(true);
+    @DisplayName("a raise the dedup key refuses yields Duplicate and reads nothing back")
+    void raise_WhenTheDedupKeyIsAlreadyOccupied_YieldsDuplicateAndReadsNothingBack() {
+        whenInsertIgnoreYields(0);
 
         NotificationOutcome outcome =
-                dispatchService.dispatch(recommendation(), SseEventType.NOTIFY_RECOMMENDED);
+                dispatchService.notifyPlannerRecommended(PLANNER_ID, TITLE, RECIPIENT_ID);
 
         assertThat(outcome).isEqualTo(new NotificationOutcome.Duplicate(
                 RECIPIENT_ID, PLANNER_ID.toString(), NotificationType.PLANNER_RECOMMENDED));
-        verify(notificationRepository, never()).insert(any());
-        verifyNoInteractions(eventPublisher);
+        verify(notificationRepository, never())
+                .findByUserIdAndContentIdAndNotificationType(any(), any(), any());
     }
 
     @Test
-    @DisplayName("a first-time notification dispatches as Delivered and queues its push")
-    void dispatch_WhenTheRecipientCarriesNoSuchNotification_YieldsDeliveredAndQueuesThePush() {
-        Notification notification = recommendation();
-        when(notificationRepository.existsByUserIdAndContentIdAndNotificationType(
+    @DisplayName("a raise the dedup key accepts yields Delivered carrying the recipient's payload")
+    void raise_WhenTheDedupKeyIsFree_YieldsDeliveredCarryingTheRecipientsPayload() {
+        whenInsertIgnoreYields(1);
+        when(notificationRepository.findByUserIdAndContentIdAndNotificationType(
                 RECIPIENT_ID, PLANNER_ID.toString(), NotificationType.PLANNER_RECOMMENDED))
-                .thenReturn(false);
-        when(notificationRepository.insert(notification)).thenReturn(persisted(notification));
+                .thenReturn(Optional.of(persisted()));
 
         NotificationOutcome outcome =
-                dispatchService.dispatch(notification, SseEventType.NOTIFY_RECOMMENDED);
+                dispatchService.notifyPlannerRecommended(PLANNER_ID, TITLE, RECIPIENT_ID);
 
-        assertThat(outcome).isEqualTo(new NotificationOutcome.Delivered(SAVED_PUBLIC_ID));
-        verify(eventPublisher).publishEvent(any(NotificationRaisedEvent.class));
+        assertThat(outcome).isInstanceOfSatisfying(NotificationOutcome.Delivered.class, delivered -> {
+            assertThat(delivered.userId()).isEqualTo(RECIPIENT_ID);
+            assertThat(delivered.payload().id()).isEqualTo(SAVED_PUBLIC_ID.toString());
+            assertThat(delivered.payload().type())
+                    .isEqualTo(NotificationType.PLANNER_RECOMMENDED.name());
+        });
     }
 
-    private static Notification recommendation() {
-        return new Notification(
+    private void whenInsertIgnoreYields(int rows) {
+        when(notificationRepository.insertIgnore(
+                eq(RECIPIENT_ID),
+                eq(PLANNER_ID.toString()),
+                eq(NotificationType.PLANNER_RECOMMENDED.name()),
+                eq(PLANNER_ID.toString()),
+                eq(TITLE),
+                isNull(),
+                isNull()))
+                .thenReturn(rows);
+    }
+
+    /** The row as the persistence callbacks would hand it back. */
+    private static Notification persisted() {
+        Notification notification = new Notification(
                 RECIPIENT_ID,
                 PLANNER_ID.toString(),
                 NotificationType.PLANNER_RECOMMENDED,
                 PLANNER_ID,
-                "A planner that crossed the threshold",
+                TITLE,
                 null,
                 null);
-    }
-
-    /** The same notification as the persistence callbacks would hand it back. */
-    private static Notification persisted(Notification notification) {
         notification.setPublicId(SAVED_PUBLIC_ID);
         notification.setCreatedAt(Instant.parse("2026-01-01T00:00:00Z"));
         return notification;

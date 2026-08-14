@@ -4,9 +4,7 @@ package org.danteplanner.backend.planner.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationEventPublisher;
 import org.danteplanner.backend.planner.dto.VoteResponse;
-import org.danteplanner.backend.planner.event.PlannerRecommendedEvent;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.entity.PlannerVoteId;
@@ -17,9 +15,12 @@ import org.danteplanner.backend.moderation.service.PlannerReportService;
 import org.danteplanner.backend.planner.repository.PlannerBookmarkRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.planner.validation.VoteUniquenessValidator;
+import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
+import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -34,7 +35,7 @@ public class PlannerEngagementService {
     private final PlannerBookmarkRepository plannerBookmarkRepository;
     private final PlannerStatsService plannerStatsService;
     private final PlannerCatalogService plannerCatalogService;
-    private final ApplicationEventPublisher eventPublisher;
+    private final DomainEventRecorder domainEventRecorder;
     private final PlannerAccessGuard accessGuard;
     private final PlannerReportService reportService;
     private final VoteUniquenessValidator voteUniquenessValidator;
@@ -46,7 +47,7 @@ public class PlannerEngagementService {
             PlannerBookmarkRepository plannerBookmarkRepository,
             PlannerStatsService plannerStatsService,
             PlannerCatalogService plannerCatalogService,
-            ApplicationEventPublisher eventPublisher,
+            DomainEventRecorder domainEventRecorder,
             PlannerAccessGuard accessGuard,
             PlannerReportService reportService,
             VoteUniquenessValidator voteUniquenessValidator,
@@ -55,7 +56,7 @@ public class PlannerEngagementService {
         this.plannerBookmarkRepository = plannerBookmarkRepository;
         this.plannerStatsService = plannerStatsService;
         this.plannerCatalogService = plannerCatalogService;
-        this.eventPublisher = eventPublisher;
+        this.domainEventRecorder = domainEventRecorder;
         this.accessGuard = accessGuard;
         this.reportService = reportService;
         this.voteUniquenessValidator = voteUniquenessValidator;
@@ -67,12 +68,10 @@ public class PlannerEngagementService {
      * Votes are permanent - users can upvote ONCE, with no changes or removal allowed.
      * Uses atomic increment operations and threshold detection for notifications.
      *
-     * NOTIFICATION PATTERN:
-     * - This method publishes a {@link PlannerRecommendedEvent} which is handled asynchronously
-     *   by {@link org.danteplanner.backend.notification.listener.NotificationEventListener}.
-     * - Event is delivered AFTER this transaction commits (AFTER_COMMIT phase).
-     * - Benefits: Shorter transaction duration, reduced lock contention, eventual consistency for notifications.
-     * - Trade-off: Notification creation is no longer atomic with vote (acceptable for this use case).
+     * <p>Crossing the threshold records a {@code PLANNER_RECOMMENDED} row in the outbox, inside
+     * this transaction. The notification and its push are derived from that row by
+     * {@link org.danteplanner.backend.planner.effect.PlannerRecommendedEffect}, so the vote pays
+     * for the record and nothing else.</p>
      *
      * @param userId    the user ID
      * @param plannerId the planner ID
@@ -108,16 +107,11 @@ public class PlannerEngagementService {
             // Try to atomically set notification flag (prevents race condition duplicates)
             int rowsUpdated = plannerStatsService.trySetRecommendedNotified(plannerId, recommendedThreshold);
             if (rowsUpdated > 0) {
-                // First thread to cross threshold wins - publish event (handled AFTER_COMMIT)
-                eventPublisher.publishEvent(new PlannerRecommendedEvent(
-                        this,
-                        plannerId,
-                        planner.getTitle(),
-                        planner.getUser().getId(),
-                        upvotesBefore,
-                        upvotesAfter
-                ));
-                log.debug("Planner {} crossed threshold ({}→{}), event published for notification",
+                // The latch and the event row commit together, so the obligation to notify cannot
+                // be lost to a latch that is never reset.
+                domainEventRecorder.recordDomainEvent(DomainEventType.PLANNER_RECOMMENDED, plannerId,
+                        Map.of("ownerId", planner.getUser().getId()));
+                log.debug("Planner {} crossed threshold ({}→{}), notification recorded",
                         plannerId, upvotesBefore, upvotesAfter);
             } else {
                 log.debug("Planner {} crossed threshold but notification already sent by another thread",

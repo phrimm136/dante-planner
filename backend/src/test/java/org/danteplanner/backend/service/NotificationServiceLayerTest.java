@@ -1,19 +1,16 @@
 package org.danteplanner.backend.service;
-import org.danteplanner.backend.notification.dto.NotificationEventPayload;
 import org.danteplanner.backend.shared.exception.EntityNotFoundException;
-import org.danteplanner.backend.notification.event.NotificationRaisedEvent;
-import org.springframework.context.ApplicationEventPublisher;
 
 import org.danteplanner.backend.notification.service.NotificationRetentionService;
 import org.danteplanner.backend.notification.service.NotificationDispatchService;
 import org.danteplanner.backend.notification.service.NotificationInboxService;
+import org.danteplanner.backend.notification.service.NotificationOutcome;
 
 import org.danteplanner.backend.notification.dto.NotificationInboxResponse;
 import org.danteplanner.backend.notification.dto.NotificationResponse;
 import org.danteplanner.backend.notification.dto.UnreadCountResponse;
 import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.entity.NotificationType;
-import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -48,9 +45,6 @@ class NotificationServiceLayerTest {
     @Mock
     private NotificationRepository notificationRepository;
 
-    @Mock
-    private ApplicationEventPublisher eventPublisher;
-
     private NotificationInboxService inboxService;
     private NotificationDispatchService dispatchService;
     private NotificationRetentionService retentionService;
@@ -61,8 +55,31 @@ class NotificationServiceLayerTest {
     @BeforeEach
     void setUp() {
         inboxService = new NotificationInboxService(notificationRepository);
-        dispatchService = new NotificationDispatchService(notificationRepository, eventPublisher);
+        dispatchService = new NotificationDispatchService(notificationRepository);
         retentionService = new NotificationRetentionService(notificationRepository);
+    }
+
+    private void whenInsertIgnoreYields(int rows) {
+        when(notificationRepository.insertIgnore(
+                any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(rows);
+    }
+
+    /**
+     * Stands the read-back row up as the persistence callbacks would hand it back.
+     *
+     * @return the public UUID the row came back carrying
+     */
+    private UUID whenReadBackYields(
+            Long userId, String contentId, NotificationType type, String plannerTitle) {
+        Notification stored = new Notification(
+                userId, contentId, type, testPlannerId, plannerTitle, null, null);
+        UUID publicId = UUID.randomUUID();
+        stored.setPublicId(publicId);
+        stored.setCreatedAt(Instant.now());
+        lenient().when(notificationRepository.findByUserIdAndContentIdAndNotificationType(
+                userId, contentId, type)).thenReturn(Optional.of(stored));
+        return publicId;
     }
 
     @Nested
@@ -88,98 +105,64 @@ class NotificationServiceLayerTest {
     class NotifyPlannerRecommendedTests {
 
         @Test
-        @DisplayName("Should create PLANNER_RECOMMENDED notification successfully")
+        @DisplayName("Should derive a PLANNER_RECOMMENDED row on the dedup key")
         void notifyPlannerRecommended_WhenValid_CreatesNotification() {
-            // Arrange - set publicId and createdAt on saved notification (simulating @PrePersist)
-            when(notificationRepository.insert(any(Notification.class)))
-                    .thenAnswer(invocation -> {
-                        Notification n = invocation.getArgument(0);
-                        n.setPublicId(UUID.randomUUID());
-                        n.setCreatedAt(Instant.now());
-                        return n;
-                    });
+            // Arrange
+            whenInsertIgnoreYields(1);
+            whenReadBackYields(testUserId, testPlannerId.toString(),
+                    NotificationType.PLANNER_RECOMMENDED, "Test Planner Title");
 
             // Act
             dispatchService.notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId);
 
             // Assert
-            // The persisted row is observable only in a containerized test; the captured entity is
-            // the nearest stand-in for what reaches the notifications table.
-            ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
-            verify(notificationRepository).insert(captor.capture());
-
-            Notification saved = captor.getValue();
-            assertEquals(testUserId, saved.getUserId());
-            assertEquals(testPlannerId.toString(), saved.getContentId());
-            assertEquals(NotificationType.PLANNER_RECOMMENDED, saved.getNotificationType());
-            assertEquals(testPlannerId, saved.getPlannerId());
-            assertEquals("Test Planner Title", saved.getPlannerTitle());
-            assertFalse(saved.isRead());
+            verify(notificationRepository).insertIgnore(
+                    testUserId,
+                    testPlannerId.toString(),
+                    NotificationType.PLANNER_RECOMMENDED.name(),
+                    testPlannerId.toString(),
+                    "Test Planner Title",
+                    null,
+                    null);
         }
 
         @Test
-        @DisplayName("Should write nothing when the owner was already notified")
+        @DisplayName("Should read nothing back when the dedup key refused the row")
         void notifyPlannerRecommended_WhenAlreadyNotified_WritesNothing() {
             // Arrange
-            when(notificationRepository.existsByUserIdAndContentIdAndNotificationType(
-                    testUserId, testPlannerId.toString(), NotificationType.PLANNER_RECOMMENDED))
-                    .thenReturn(true);
+            whenInsertIgnoreYields(0);
 
             // Act
-            dispatchService.notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId);
+            NotificationOutcome outcome = dispatchService
+                    .notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId);
 
-            // Assert - the duplicate is decided before the write, so no violation is ever fired
-            verify(notificationRepository, never()).insert(any());
+            // Assert - the constraint decides, so nothing precedes the statement and nothing follows it
+            assertInstanceOf(NotificationOutcome.Duplicate.class, outcome);
+            verify(notificationRepository, never())
+                    .findByUserIdAndContentIdAndNotificationType(any(), any(), any());
         }
 
         @Test
-        @DisplayName("Should push saved notification to recipient via SSE on success")
-        void notifyPlannerRecommended_WhenSuccess_PushesViaSse() {
+        @DisplayName("Should hand the arm the written row's payload on success")
+        void notifyPlannerRecommended_WhenSuccess_CarriesTheWrittenPayload() {
             // Arrange
-            UUID[] persistedPublicId = new UUID[1];
-            when(notificationRepository.insert(any(Notification.class)))
-                    .thenAnswer(invocation -> {
-                        Notification n = invocation.getArgument(0);
-                        n.setPublicId(UUID.randomUUID());
-                        n.setCreatedAt(Instant.now());
-                        persistedPublicId[0] = n.getPublicId();
-                        return n;
-                    });
+            whenInsertIgnoreYields(1);
+            UUID publicId = whenReadBackYields(testUserId, testPlannerId.toString(),
+                    NotificationType.PLANNER_RECOMMENDED, "Test Planner Title");
 
             // Act
-            dispatchService.notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId);
+            NotificationOutcome outcome = dispatchService
+                    .notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId);
 
             // Assert
-            ArgumentCaptor<NotificationRaisedEvent> raised =
-                    ArgumentCaptor.forClass(NotificationRaisedEvent.class);
-            verify(eventPublisher).publishEvent(raised.capture());
-
-            NotificationRaisedEvent event = raised.getValue();
-            assertEquals(testUserId, event.userId());
-            assertEquals(SseEventType.NOTIFY_RECOMMENDED, event.eventType());
-            assertEquals(persistedPublicId[0].toString(), event.entityId());
-
-            NotificationEventPayload payload = event.payload();
-            assertEquals(persistedPublicId[0].toString(), payload.id());
-            assertEquals(NotificationType.PLANNER_RECOMMENDED.name(), payload.type());
-            assertEquals(testPlannerId.toString(), payload.contentId());
-            assertEquals(testPlannerId.toString(), payload.plannerId());
-            assertEquals("Test Planner Title", payload.plannerTitle());
-        }
-
-        @Test
-        @DisplayName("Should not push via SSE when the owner was already notified")
-        void notifyPlannerRecommended_WhenAlreadyNotified_DoesNotPush() {
-            // Arrange
-            when(notificationRepository.existsByUserIdAndContentIdAndNotificationType(
-                    testUserId, testPlannerId.toString(), NotificationType.PLANNER_RECOMMENDED))
-                    .thenReturn(true);
-
-            // Act
-            dispatchService.notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId);
-
-            // Assert
-            verify(eventPublisher, never()).publishEvent(any(NotificationRaisedEvent.class));
+            NotificationOutcome.Delivered delivered =
+                    assertInstanceOf(NotificationOutcome.Delivered.class, outcome);
+            assertEquals(testUserId, delivered.userId());
+            assertEquals(publicId.toString(), delivered.payload().id());
+            assertEquals(NotificationType.PLANNER_RECOMMENDED.name(), delivered.payload().type());
+            assertEquals(testPlannerId.toString(), delivered.payload().contentId());
+            assertEquals(testPlannerId.toString(), delivered.payload().plannerId());
+            assertEquals("Test Planner Title", delivered.payload().plannerTitle());
         }
     }
 
@@ -188,80 +171,50 @@ class NotificationServiceLayerTest {
     class NotifyCommentReceivedTests {
 
         @Test
-        @DisplayName("Should create COMMENT_RECEIVED notification when commenter is not owner")
-        void notifyCommentReceived_WhenDifferentUser_CreatesNotification() {
+        @DisplayName("Should derive a COMMENT_RECEIVED row keyed on the comment")
+        void notifyCommentReceived_WhenRaised_CreatesNotification() {
             // Arrange
             Long plannerOwnerId = 100L;
-            Long commenterId = 200L;
             Long commentId = 999L;
             UUID commentPublicId = UUID.randomUUID();
-
-            // Set publicId and createdAt on saved notification (simulating @PrePersist)
-            when(notificationRepository.insert(any(Notification.class)))
-                    .thenAnswer(invocation -> {
-                        Notification n = invocation.getArgument(0);
-                        n.setPublicId(UUID.randomUUID());
-                        n.setCreatedAt(Instant.now());
-                        return n;
-                    });
+            whenInsertIgnoreYields(1);
+            whenReadBackYields(plannerOwnerId, commentId.toString(),
+                    NotificationType.COMMENT_RECEIVED, "Test Planner");
 
             // Act
             dispatchService.notifyCommentReceived(
                     commentId, commentPublicId, testPlannerId, "Test Planner",
-                    "Test content", plannerOwnerId, commenterId);
+                    "Test content", plannerOwnerId);
 
             // Assert
-            // The persisted row is observable only in a containerized test; the captured entity is
-            // the nearest stand-in for what reaches the notifications table.
-            ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
-            verify(notificationRepository).insert(captor.capture());
-
-            Notification saved = captor.getValue();
-            assertEquals(plannerOwnerId, saved.getUserId());
-            assertEquals(commentId.toString(), saved.getContentId());
-            assertEquals(NotificationType.COMMENT_RECEIVED, saved.getNotificationType());
+            verify(notificationRepository).insertIgnore(
+                    plannerOwnerId,
+                    commentId.toString(),
+                    NotificationType.COMMENT_RECEIVED.name(),
+                    testPlannerId.toString(),
+                    "Test Planner",
+                    "Test content",
+                    commentPublicId.toString());
         }
 
         @Test
-        @DisplayName("Should not notify when commenter is the planner owner")
-        void notifyCommentReceived_WhenSameUser_NoNotification() {
-            // Arrange
-            Long userId = 100L;
-            Long commentId = 999L;
-            UUID commentPublicId = UUID.randomUUID();
-
-            // Act
-            dispatchService.notifyCommentReceived(
-                    commentId, commentPublicId, testPlannerId, "Test Planner",
-                    "Test content", userId, userId);
-
-            // Assert
-            verify(notificationRepository, never()).insert(any());
-        }
-
-        @Test
-        @DisplayName("Should write nothing when the owner was already notified")
+        @DisplayName("Should read nothing back when the dedup key refused the row")
         void notifyCommentReceived_WhenAlreadyNotified_WritesNothing() {
             // Arrange
             Long plannerOwnerId = 100L;
-            Long commenterId = 200L;
             Long commentId = 999L;
             UUID commentPublicId = UUID.randomUUID();
-
-            // A comment keys on its own fresh primary key, so production never reaches this;
-            // asserted because the entry point joins its caller's transaction, where a fired
-            // constraint would poison the caller rather than suppress anything.
-            when(notificationRepository.existsByUserIdAndContentIdAndNotificationType(
-                    plannerOwnerId, commentId.toString(), NotificationType.COMMENT_RECEIVED))
-                    .thenReturn(true);
+            whenInsertIgnoreYields(0);
 
             // Act
-            dispatchService.notifyCommentReceived(
+            NotificationOutcome outcome = dispatchService.notifyCommentReceived(
                     commentId, commentPublicId, testPlannerId, "Test Planner",
-                    "Test content", plannerOwnerId, commenterId);
+                    "Test content", plannerOwnerId);
 
             // Assert
-            verify(notificationRepository, never()).insert(any());
+            assertInstanceOf(NotificationOutcome.Duplicate.class, outcome);
+            verify(notificationRepository, never())
+                    .findByUserIdAndContentIdAndNotificationType(any(), any(), any());
         }
     }
 
@@ -270,55 +223,30 @@ class NotificationServiceLayerTest {
     class NotifyReplyReceivedTests {
 
         @Test
-        @DisplayName("Should create REPLY_RECEIVED notification when replier is not parent author")
-        void notifyReplyReceived_WhenDifferentUser_CreatesNotification() {
+        @DisplayName("Should derive a REPLY_RECEIVED row keyed on the reply")
+        void notifyReplyReceived_WhenRaised_CreatesNotification() {
             // Arrange
             Long replyId = 101L;
             UUID replyPublicId = UUID.randomUUID();
             Long parentAuthorId = 100L;
-            Long replierId = 200L;
-
-            // Set publicId and createdAt on saved notification (simulating @PrePersist)
-            when(notificationRepository.insert(any(Notification.class)))
-                    .thenAnswer(invocation -> {
-                        Notification n = invocation.getArgument(0);
-                        n.setPublicId(UUID.randomUUID());
-                        n.setCreatedAt(Instant.now());
-                        return n;
-                    });
+            whenInsertIgnoreYields(1);
+            whenReadBackYields(parentAuthorId, replyId.toString(),
+                    NotificationType.REPLY_RECEIVED, "Test Planner");
 
             // Act
             dispatchService.notifyReplyReceived(
                     replyId, replyPublicId, testPlannerId, "Test Planner",
-                    "Reply content", parentAuthorId, replierId);
+                    "Reply content", parentAuthorId);
 
             // Assert
-            // The persisted row is observable only in a containerized test; the captured entity is
-            // the nearest stand-in for what reaches the notifications table.
-            ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
-            verify(notificationRepository).insert(captor.capture());
-
-            Notification saved = captor.getValue();
-            assertEquals(parentAuthorId, saved.getUserId());
-            assertEquals(replyId.toString(), saved.getContentId());
-            assertEquals(NotificationType.REPLY_RECEIVED, saved.getNotificationType());
-        }
-
-        @Test
-        @DisplayName("Should not notify when replier is the parent comment author")
-        void notifyReplyReceived_WhenSameUser_NoNotification() {
-            // Arrange
-            Long userId = 100L;
-            Long replyId = 101L;
-            UUID replyPublicId = UUID.randomUUID();
-
-            // Act
-            dispatchService.notifyReplyReceived(
-                    replyId, replyPublicId, testPlannerId, "Test Planner",
-                    "Reply content", userId, userId);
-
-            // Assert
-            verify(notificationRepository, never()).insert(any());
+            verify(notificationRepository).insertIgnore(
+                    parentAuthorId,
+                    replyId.toString(),
+                    NotificationType.REPLY_RECEIVED.name(),
+                    testPlannerId.toString(),
+                    "Test Planner",
+                    "Reply content",
+                    replyPublicId.toString());
         }
     }
 

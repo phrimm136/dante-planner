@@ -68,7 +68,6 @@ class FeatureBoundaryTest {
             MAIN + "admin.service.AdminService");
 
     private static final Set<String> PLANNER_INTERNALS_FROZEN = Set.of(
-            MAIN + "comment.service.CommentCommandService",
             MAIN + "comment.service.CommentEngagementService",
             MAIN + "comment.validation.CommentAccessValidator",
             MAIN + "moderation.controller.ModerationController",
@@ -91,7 +90,6 @@ class FeatureBoundaryTest {
             MAIN + "auth.token.TokenClaims",
             MAIN + "auth.token.TokenGenerator",
             MAIN + "comment.dto.CommentTreeNode",
-            MAIN + "comment.service.CommentCommandService",
             MAIN + "comment.service.CommentQueryService",
             MAIN + "moderation.controller.ModerationController",
             MAIN + "moderation.dto.ModeratedUserResponse",
