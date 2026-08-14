@@ -13,7 +13,7 @@ import { zodValidator } from '@tanstack/zod-adapter'
 import { GlobalLayout } from '@/components/layout/GlobalLayout'
 import i18n from '@/lib/i18n'
 import { queryClient } from '@/lib/queryClient'
-import { loadPlannerTitle, untitledPlannerTitle } from '@/pages/planner'
+import { loadPlannerTitle, untitledPlannerTitle } from '@/pages/planner/lib/loadPlannerTitle'
 import { RouteErrorComponent } from '@/components/feedback/RouteErrorComponent'
 import { RoutePendingFallback } from '@/components/feedback/RoutePendingFallback'
 
