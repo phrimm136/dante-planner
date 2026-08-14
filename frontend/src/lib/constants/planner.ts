@@ -36,10 +36,10 @@ export const PLANNER_CONFIG = {
 export const MAX_NOTE_BYTES = 2048
 
 /**
- * Auto-save debounce delay in milliseconds
- * Triggers save 1 second after user stops making changes
+ * One interval for every editor-side debounce, so a flush window is never additive.
+ * The editor to store hop and the store to IndexedDB autosave both wait this long.
  */
-export const AUTO_SAVE_DEBOUNCE_MS = 1000
+export const AUTO_SAVE_DEBOUNCE_MS = 200
 
 /**
  * Current planner schema version for migration support
