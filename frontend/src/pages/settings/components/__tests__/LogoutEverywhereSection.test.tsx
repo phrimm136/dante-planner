@@ -2,8 +2,20 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { toast } from 'sonner'
+import { QueryClient } from '@tanstack/react-query'
+import type { MutationFunctionContext, UseMutateFunction } from '@tanstack/react-query'
+import { buildMutationResult } from '@/test-utils'
 
 import { LogoutEverywhereSection } from '../LogoutEverywhereSection'
+
+/** `mutate` as the component sees it: the logout-everywhere mutation's own signature. */
+type LogoutEverywhereMutate = UseMutateFunction<void, Error, void, unknown>
+
+/** The context react-query threads into mutation callbacks. */
+const mutationContext: MutationFunctionContext = {
+  client: new QueryClient(),
+  meta: undefined,
+}
 
 vi.mock('sonner', () => ({
   toast: {
@@ -12,9 +24,9 @@ vi.mock('sonner', () => ({
   },
 }))
 
-const mockMutate = vi.fn()
-const mockSetQueryData = vi.fn()
-const mockNavigate = vi.fn()
+const mockMutate = vi.fn<LogoutEverywhereMutate>()
+const mockSetQueryData = vi.fn<(key: unknown, data: unknown) => void>()
+const mockNavigate = vi.fn<(options: { to: string }) => void>()
 
 vi.mock('@/shared/auth/hooks/useLogoutEverywhere', () => ({
   useLogoutEverywhere: vi.fn(() => ({
@@ -48,10 +60,12 @@ import { useLogoutEverywhere } from '@/shared/auth'
 describe('LogoutEverywhereSection', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(useLogoutEverywhere).mockReturnValue({
-      mutate: mockMutate,
-      isPending: false,
-    } as ReturnType<typeof useLogoutEverywhere>)
+    vi.mocked(useLogoutEverywhere).mockReturnValue(
+      buildMutationResult<void, Error, void, unknown>({
+        mutate: mockMutate,
+        isPending: false,
+      }),
+    )
   })
 
   it('renders section title and button from i18n', () => {
@@ -73,13 +87,15 @@ describe('LogoutEverywhereSection', () => {
 
   it('confirm triggers mutation, shows success toast, clears auth cache, and redirects', async () => {
     const user = userEvent.setup()
-    const mockMutateWithCallback = vi.fn((_, options) => {
-      options?.onSuccess?.()
+    const mockMutateWithCallback = vi.fn<LogoutEverywhereMutate>((_, options) => {
+      options?.onSuccess?.(undefined, undefined, undefined, mutationContext)
     })
-    vi.mocked(useLogoutEverywhere).mockReturnValue({
-      mutate: mockMutateWithCallback,
-      isPending: false,
-    } as ReturnType<typeof useLogoutEverywhere>)
+    vi.mocked(useLogoutEverywhere).mockReturnValue(
+      buildMutationResult<void, Error, void, unknown>({
+        mutate: mockMutateWithCallback,
+        isPending: false,
+      }),
+    )
 
     render(<LogoutEverywhereSection />)
 
@@ -99,10 +115,12 @@ describe('LogoutEverywhereSection', () => {
 
   it('shows loading state while mutation is pending', async () => {
     const user = userEvent.setup()
-    vi.mocked(useLogoutEverywhere).mockReturnValue({
-      mutate: mockMutate,
-      isPending: true,
-    } as ReturnType<typeof useLogoutEverywhere>)
+    vi.mocked(useLogoutEverywhere).mockReturnValue(
+      buildMutationResult<void, Error, void, unknown>({
+        mutate: mockMutate,
+        isPending: true,
+      }),
+    )
 
     render(<LogoutEverywhereSection />)
 
@@ -115,13 +133,15 @@ describe('LogoutEverywhereSection', () => {
 
   it('error path shows error toast and does not redirect', async () => {
     const user = userEvent.setup()
-    const mockMutateWithError = vi.fn((_, options) => {
-      options?.onError?.(new Error('network'))
+    const mockMutateWithError = vi.fn<LogoutEverywhereMutate>((_, options) => {
+      options?.onError?.(new Error('network'), undefined, undefined, mutationContext)
     })
-    vi.mocked(useLogoutEverywhere).mockReturnValue({
-      mutate: mockMutateWithError,
-      isPending: false,
-    } as ReturnType<typeof useLogoutEverywhere>)
+    vi.mocked(useLogoutEverywhere).mockReturnValue(
+      buildMutationResult<void, Error, void, unknown>({
+        mutate: mockMutateWithError,
+        isPending: false,
+      }),
+    )
 
     render(<LogoutEverywhereSection />)
 

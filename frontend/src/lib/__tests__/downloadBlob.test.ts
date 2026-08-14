@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import type { Mock } from 'vitest'
 import { downloadBlob } from '../downloadBlob'
 
 const OBJECT_URL = 'blob:mock-object-url'
@@ -6,7 +7,7 @@ const OBJECT_URL = 'blob:mock-object-url'
 describe('downloadBlob', () => {
   let createObjectURL: ReturnType<typeof vi.fn>
   let revokeObjectURL: ReturnType<typeof vi.fn>
-  let appendSpy: ReturnType<typeof vi.spyOn<Node, 'appendChild'>>
+  let appendSpy: Mock<typeof document.body.appendChild>
   let attachedAtClick: boolean
 
   const appendedLink = () => appendSpy.mock.calls[0]?.[0] as HTMLAnchorElement | undefined

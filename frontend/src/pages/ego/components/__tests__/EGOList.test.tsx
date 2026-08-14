@@ -76,6 +76,7 @@ const mockEGOs: EGOListItem[] = [
     atkTypes: ['SLASH', 'PENETRATE'],
     updateDate: 20240101,
     season: 1,
+    maxThreadspin: 4,
   },
   {
     id: '20201',
@@ -87,6 +88,7 @@ const mockEGOs: EGOListItem[] = [
     atkTypes: ['PENETRATE'],
     updateDate: 20240102,
     season: 2,
+    maxThreadspin: 4,
   },
   {
     id: '20301',
@@ -98,6 +100,7 @@ const mockEGOs: EGOListItem[] = [
     atkTypes: ['HIT'],
     updateDate: 20240103,
     season: 1,
+    maxThreadspin: 4,
   },
 ]
 

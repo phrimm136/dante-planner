@@ -7,7 +7,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import type { UseMutateFunction } from '@tanstack/react-query'
+import { buildMutationResult } from '@/test-utils'
 import type { User } from '@/shared/auth'
+import type { UpdateUsernameEpithetRequest } from '../../types/UserSettingsTypes'
+
+/** `mutate` as the component sees it: the epithet-update mutation's own signature. */
+type UpdateEpithetMutate = UseMutateFunction<User, Error, UpdateUsernameEpithetRequest, unknown>
 
 // Mock react-i18next
 vi.mock('react-i18next', async (importOriginal) => {
@@ -54,14 +60,13 @@ vi.mock('sonner', () => ({
 const mockEpithets = ['LCB', 'W_CORP', 'ZWEI']
 
 const mockUser: User = {
-  id: 1,
   email: 'test@example.com',
-  provider: 'google',
   usernameEpithet: 'LCB',
   usernameSuffix: '1234',
+  role: 'NORMAL',
 }
 
-const mockMutate = vi.fn()
+const mockMutate = vi.fn<UpdateEpithetMutate>()
 
 // Mock hooks
 vi.mock('@/shared/auth/hooks/useAuthQuery', () => ({
@@ -87,10 +92,12 @@ describe('UsernameSection', () => {
     vi.clearAllMocks()
     vi.mocked(useAuthQuery).mockReturnValue({ data: null } as ReturnType<typeof useAuthQuery>)
     vi.mocked(useEpithetsQuery).mockReturnValue({ epithets: mockEpithets })
-    vi.mocked(useUpdateEpithetMutation).mockReturnValue({
-      mutate: mockMutate,
-      isPending: false,
-    } as unknown as ReturnType<typeof useUpdateEpithetMutation>)
+    vi.mocked(useUpdateEpithetMutation).mockReturnValue(
+      buildMutationResult<User, Error, UpdateUsernameEpithetRequest, unknown>({
+        mutate: mockMutate,
+        isPending: false,
+      }),
+    )
   })
 
   describe('unauthenticated state', () => {
@@ -182,10 +189,12 @@ describe('UsernameSection', () => {
 
     it('save button is disabled while mutation is pending', () => {
       vi.mocked(useAuthQuery).mockReturnValue({ data: mockUser } as ReturnType<typeof useAuthQuery>)
-      vi.mocked(useUpdateEpithetMutation).mockReturnValue({
-        mutate: mockMutate,
-        isPending: true,
-      } as unknown as ReturnType<typeof useUpdateEpithetMutation>)
+      vi.mocked(useUpdateEpithetMutation).mockReturnValue(
+        buildMutationResult<User, Error, UpdateUsernameEpithetRequest, unknown>({
+          mutate: mockMutate,
+          isPending: true,
+        }),
+      )
 
       render(<UsernameSection />)
 

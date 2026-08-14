@@ -23,6 +23,7 @@ const mockAnnouncements = [
     formattedDate: 'Feb 20, 2026',
     title: 'Test Announcement',
     body: 'Test body',
+    permanent: false,
   },
 ]
 

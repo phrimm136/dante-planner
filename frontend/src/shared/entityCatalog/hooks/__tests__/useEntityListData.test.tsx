@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import type { QueryObserverOptions } from '@tanstack/react-query'
 import { z } from 'zod'
 import { Suspense, type ReactNode } from 'react'
 
@@ -110,7 +111,9 @@ describe('useEntityListData', () => {
       expect(query?.state.data).toBeDefined()
     })
     const query = queryClient.getQueryCache().find({ queryKey: ['identity', 'list', 'i18n', 'EN'] })
-    expect(query?.options.staleTime).toBe(STATIC_DATA_STALE_TIME)
+    // The cache stores the observer's defaulted options, which is where staleTime lives.
+    const options = query?.options as QueryObserverOptions | undefined
+    expect(options?.staleTime).toBe(STATIC_DATA_STALE_TIME)
   })
 
   it('returns emptyI18n from the deferred hook until the name list resolves', async () => {

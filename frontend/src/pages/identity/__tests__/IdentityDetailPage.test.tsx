@@ -5,6 +5,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { createTestQueryClient } from '@/test-utils/queryClient'
 import { MAX_LEVEL } from '@/shared/gameData'
 import IdentityDetailPage from '../IdentityDetailPage'
+import type { IdentityData, IdentityI18n } from '../types/IdentityTypes'
 
 // Mock react-i18next with proper i18n instance and initReactI18next
 vi.mock('react-i18next', async (importOriginal) => {
@@ -37,7 +38,7 @@ vi.mock('react-i18next', async (importOriginal) => {
 })
 
 // Mock static data based on identity 10101 (LCB Sinner - base identity)
-const mockIdentityData10101 = {
+const mockIdentityData10101: IdentityData = {
   updatedDate: 20230227,
   skillKeywordList: ['Sinking'],
   panicType: 9999,
@@ -55,12 +56,18 @@ const mockIdentityData10101 = {
     min: ['OnDieAllyAsLevelRatio10'],
   },
   skills: {
-    skill1: [{ id: 1010101, skillData: [{ attributeType: 'AZURE', atkType: 'SLASH' }] }],
-    skill2: [{ id: 1010102, skillData: [{ attributeType: 'VIOLET', atkType: 'PENETRATE' }] }],
+    skill1: [
+      { id: 1010101, skillData: [{ attributeType: 'AZURE', atkType: 'SLASH' }, {}, {}, {}] },
+    ],
+    skill2: [
+      { id: 1010102, skillData: [{ attributeType: 'VIOLET', atkType: 'PENETRATE' }, {}, {}, {}] },
+    ],
     skill3: [
       { id: 1010103, skillData: [{}, {}, { attributeType: 'AMBER', atkType: 'SLASH' }, {}] },
     ],
-    skillDef: [{ id: 1010104, skillData: [{ attributeType: 'NEUTRAL', atkType: 'NONE' }] }],
+    skillDef: [
+      { id: 1010104, skillData: [{ attributeType: 'NEUTRAL', atkType: 'NONE' }, {}, {}, {}] },
+    ],
   },
   passives: {
     battlePassiveList: [[1010101], [], [], []], // Only uptie 1 has battle passive
@@ -72,7 +79,7 @@ const mockIdentityData10101 = {
   },
 }
 
-const mockIdentityI18n10101 = {
+const mockIdentityI18n10101: IdentityI18n = {
   name: 'LCB\nSinner',
   skills: {
     '1010101': { name: 'Deflect', descs: [{ desc: '', coinDescs: ['Inflict 1 Sinking'] }] },
@@ -87,7 +94,7 @@ const mockIdentityI18n10101 = {
 }
 
 // Mock static data based on identity 10114 (Heishou Pack - complex identity)
-const mockIdentityData10114 = {
+const mockIdentityData10114: IdentityData = {
   updatedDate: 20250828,
   skillKeywordList: ['Burst', 'Vibration'],
   panicType: 9999,
@@ -112,12 +119,18 @@ const mockIdentityData10114 = {
     min: ['OnDieAllyAsLevelRatio10'],
   },
   skills: {
-    skill1: [{ id: 1011401, skillData: [{ attributeType: 'AMBER', atkType: 'SLASH' }] }],
-    skill2: [{ id: 1011402, skillData: [{ attributeType: 'VIOLET', atkType: 'SLASH' }] }],
+    skill1: [
+      { id: 1011401, skillData: [{ attributeType: 'AMBER', atkType: 'SLASH' }, {}, {}, {}] },
+    ],
+    skill2: [
+      { id: 1011402, skillData: [{ attributeType: 'VIOLET', atkType: 'SLASH' }, {}, {}, {}] },
+    ],
     skill3: [
       { id: 1011403, skillData: [{}, {}, { attributeType: 'SHAMROCK', atkType: 'SLASH' }, {}] },
     ],
-    skillDef: [{ id: 1011404, skillData: [{ attributeType: 'NEUTRAL', atkType: 'NONE' }] }],
+    skillDef: [
+      { id: 1011404, skillData: [{ attributeType: 'NEUTRAL', atkType: 'NONE' }, {}, {}, {}] },
+    ],
   },
   passives: {
     battlePassiveList: [
@@ -134,7 +147,7 @@ const mockIdentityData10114 = {
   },
 }
 
-const mockIdentityI18n10114 = {
+const mockIdentityI18n10114: IdentityI18n = {
   name: 'Heishou Pack -\nWu Branch Adept',
   skills: {
     '1011401': { name: 'Cut Down and Trample', descs: [{ desc: 'Test skill', coinDescs: [] }] },

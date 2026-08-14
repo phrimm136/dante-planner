@@ -10,16 +10,18 @@ import { useThemePackListData } from '../useThemePackListData'
 describe('useThemePackListData', () => {
   it('returns correct type structure (spec, i18n)', () => {
     // This is a compile-time test - if it compiles, the types are correct
-    type ReturnType = ReturnType<typeof useThemePackListData>
+    type HookResult = ReturnType<typeof useThemePackListData>
 
     // This will fail to compile if the return type doesn't have 'spec' property
-    const _testSpec: (data: ReturnType) => typeof data.spec = (data) => data.spec
+    const testSpec: (data: HookResult) => HookResult['spec'] = (data) => data.spec
 
     // This will fail to compile if the return type doesn't have 'i18n' property
-    const _testI18n: (data: ReturnType) => typeof data.i18n = (data) => data.i18n
+    const testI18n: (data: HookResult) => HookResult['i18n'] = (data) => data.i18n
 
     // Verify the hook exports the correct pattern
     expect(true).toBe(true)
+    expect(testSpec).toBeTypeOf('function')
+    expect(testI18n).toBeTypeOf('function')
   })
 
   it('documentation matches pattern (spec, i18n, not themePackList/themePackI18n)', () => {

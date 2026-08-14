@@ -1,5 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render } from '@testing-library/react'
+import { DUNGEON_IDX } from '@/shared/gameData'
+import type { ThemePackEntry } from '../../types/ThemePackTypes'
 import { ThemePackCard } from '../ThemePackCard'
 
 vi.mock('react-i18next', async (importOriginal) => {
@@ -38,16 +40,16 @@ function getSrcs(container: HTMLElement) {
 }
 
 describe('ThemePackCard', () => {
-  const normalPackEntry = {
-    floorNumber: 1,
+  const normalPackEntry: ThemePackEntry = {
     themePackConfig: { textColor: 'FFFFFF' },
-    exceptionConditions: [{ dungeonIdx: 1 }],
+    exceptionConditions: [{ dungeonIdx: DUNGEON_IDX.HARD }],
+    specificEgoGiftPool: [],
   }
 
-  const extremePackEntry = {
-    floorNumber: 1,
+  const extremePackEntry: ThemePackEntry = {
     themePackConfig: { textColor: 'FF0000' },
-    exceptionConditions: [{ dungeonIdx: 3 }],
+    exceptionConditions: [{ dungeonIdx: DUNGEON_IDX.EXTREME }],
+    specificEgoGiftPool: [],
   }
 
   const defaultProps = {

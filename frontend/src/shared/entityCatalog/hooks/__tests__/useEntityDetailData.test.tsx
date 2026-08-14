@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import type { QueryObserverOptions } from '@tanstack/react-query'
 import { z } from 'zod'
 import { Suspense, type ReactNode } from 'react'
 
@@ -105,7 +106,11 @@ describe('useEntityDetailData', () => {
     })
     const spec = queryClient.getQueryCache().find({ queryKey: ['identity', '10101'] })
     const i18n = queryClient.getQueryCache().find({ queryKey: ['identity', '10101', 'i18n', 'EN'] })
-    expect(spec?.options.staleTime).toBe(STATIC_DATA_STALE_TIME)
-    expect(i18n?.options.placeholderData).toBeUndefined()
+    // The cache stores the observer's defaulted options, which is where staleTime
+    // and placeholderData live.
+    const specOptions = spec?.options as QueryObserverOptions | undefined
+    const i18nOptions = i18n?.options as QueryObserverOptions | undefined
+    expect(specOptions?.staleTime).toBe(STATIC_DATA_STALE_TIME)
+    expect(i18nOptions?.placeholderData).toBeUndefined()
   })
 })

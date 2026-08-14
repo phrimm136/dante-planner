@@ -14,9 +14,10 @@ vi.mock('@/pages/egoGift/hooks/useEGOGiftDetailData', () => ({
 // Mock useColorCodes hook used by GiftName
 vi.mock('@/shared/gameText/hooks/useColorCodes', () => ({
   useColorCodes: () => ({
+    // colorCode.json is keyed by affinity name, not by sin name.
     data: {
-      WRATH: '#ff0000',
-      LUST: '#ff6600',
+      CRIMSON: '#ff0000',
+      SCARLET: '#ff6600',
     },
   }),
 }))
@@ -34,14 +35,14 @@ function createWrapper() {
 
 describe('GiftNameI18n', () => {
   it('should render gift name from i18n data', () => {
-    render(<GiftNameI18n id="9001" attributeType="WRATH" />, { wrapper: createWrapper() })
+    render(<GiftNameI18n id="9001" attributeType="CRIMSON" />, { wrapper: createWrapper() })
 
     // Should render the name from mocked i18n data
     expect(screen.getByText('Test Gift Name')).toBeDefined()
   })
 
   it('should not suspend parent component', () => {
-    const { container } = render(<GiftNameI18n id="9001" attributeType="WRATH" />, {
+    const { container } = render(<GiftNameI18n id="9001" attributeType="CRIMSON" />, {
       wrapper: createWrapper(),
     })
 
