@@ -24,6 +24,6 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["vite.config.ts", "vite-plugin-hash-static.ts"],
+  "include": ["vite.config.ts", "vite-plugin-hash-static.ts", "vite-plugin-hash-static.test.ts"],
   "references": [{ "path": "./tsconfig.app.json" }]
 }
