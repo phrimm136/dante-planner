@@ -14,7 +14,7 @@ import { GlobalLayout } from '@/components/layout/GlobalLayout'
 import i18n from '@/lib/i18n'
 import { queryClient } from '@/lib/queryClient'
 import { storage } from '@/lib/storage'
-import { PLANNER_STORAGE_KEYS, STALE_TIME } from '@/lib/constants'
+import { PLANNER_STORAGE_KEYS } from '@/lib/constants'
 import { RouteErrorComponent } from '@/components/feedback/RouteErrorComponent'
 import { RoutePendingFallback } from '@/components/feedback/RoutePendingFallback'
 
@@ -186,12 +186,16 @@ const plannerMDGesellschaftDetailRoute = createRoute({
   },
   loader: async ({ params }) => {
     // Dynamic so the published-planner schemas stay out of the entry chunk.
-    const { publishedPlannerQueryKeys, fetchPublishedPlanner, isPlannerRemoved } =
-      await import('@/pages/planner/hooks/usePublishedPlannerQuery')
+    const {
+      publishedPlannerQueryKeys,
+      fetchPublishedPlanner,
+      isPlannerRemoved,
+      publishedPlannerStaleTime,
+    } = await import('@/pages/planner/hooks/usePublishedPlannerQuery')
     const result = await queryClient.fetchQuery({
       queryKey: publishedPlannerQueryKeys.detail(params.id),
       queryFn: ({ signal }) => fetchPublishedPlanner(params.id, signal),
-      staleTime: STALE_TIME.MEDIUM,
+      staleTime: (query) => publishedPlannerStaleTime(query.state.data),
     })
     if (isPlannerRemoved(result)) return { title: getUntitledPlaceholder() }
     return { title: result.apiData.title || getUntitledPlaceholder() }

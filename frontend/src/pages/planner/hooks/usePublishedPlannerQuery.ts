@@ -42,6 +42,20 @@ export function isPlannerRemoved(
   return 'removed' in state
 }
 
+/**
+ * A removed verdict never keeps its freshness: unpublishing is reversible, and
+ * a cached one would otherwise outlive the republish on every other device,
+ * which has no event left to tell it otherwise.
+ *
+ * `ensureSuspenseTimers` raises any suspense query's staleTime to a 1000ms
+ * floor, so the zero only lands in full on the route loader's `fetchQuery` —
+ * which is what a navigation runs, and therefore where the re-ask is
+ * guaranteed rather than merely likely.
+ */
+export function publishedPlannerStaleTime(data: PublishedPlannerQueryState | undefined): number {
+  return data !== undefined && isPlannerRemoved(data) ? 0 : STALE_TIME.MEDIUM
+}
+
 // ============================================================================
 // Query Keys
 // ============================================================================
@@ -148,7 +162,7 @@ export function usePublishedPlannerQuery(plannerId: string): PublishedPlannerQue
   const query = useSuspenseQuery({
     queryKey: publishedPlannerQueryKeys.detail(plannerId),
     queryFn: ({ signal }) => fetchPublishedPlanner(plannerId, signal),
-    staleTime: STALE_TIME.MEDIUM,
+    staleTime: (query) => publishedPlannerStaleTime(query.state.data),
     gcTime: GC_TIME.MEDIUM,
   })
 
