@@ -56,9 +56,10 @@ public enum SseEventType {
     /**
      * Whether clients receive this event's payload directly rather than the fan-out envelope.
      *
-     * <p>Sync events carry the envelope, because the client reads its routing fields alongside the
-     * payload. Notification-style events predate the envelope on the wire and their client schemas
-     * require the payload's own fields at the top level, so the envelope stays server-side.</p>
+     * <p>Comment-stream and control events carry the envelope, because the client reads its routing
+     * fields alongside the payload. Notification-style events predate the envelope on the wire and
+     * their client schemas require the payload's own fields at the top level, so the envelope stays
+     * server-side.</p>
      */
     public boolean deliversRawPayload() {
         return rawPayloadDelivery;

@@ -18,8 +18,7 @@ import java.util.UUID;
 /**
  * REST controller for Server-Sent Events subscriptions.
  *
- * <p>Provides a unified SSE endpoint for all real-time notifications
- * including planner sync events and user notifications.</p>
+ * <p>Provides a unified SSE endpoint for all real-time user notifications.</p>
  */
 @RestController
 @RequiredArgsConstructor

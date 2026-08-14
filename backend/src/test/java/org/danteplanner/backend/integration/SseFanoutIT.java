@@ -37,10 +37,10 @@ import static org.mockito.Mockito.verify;
  * Phase-10 acceptance test: cross-node SSE fan-out over Redis pub/sub.
  *
  * <p>Models a Seoul-style pod that publishes to the Oregon Redis <b>primary</b> yet subscribes to
- * its <b>local</b> Redis: a "planner updated" event published on the primary via {@link SsePublisher}
- * must reach the subscriber listening on the local endpoint and be dispatched to this node's
- * {@link SseService} carrying the payload — true fan-out with no sticky sessions, and no
- * notify-then-refetch (the recipient patches its cache from the payload).</p>
+ * its <b>local</b> Redis: an event published on the primary via {@link SsePublisher} must reach the
+ * subscriber listening on the local endpoint and be dispatched to this node's {@link SseService}
+ * carrying the payload — true fan-out with no sticky sessions, and no notify-then-refetch (the
+ * recipient patches its cache from the payload).</p>
  *
  * <p>The harness reuses {@link CausalHarnessSupport}'s full app context (MySQL primary/replica +
  * {@code AUTH_REDIS}). The publisher targets the primary (bound to {@code redis.auth.*}); the

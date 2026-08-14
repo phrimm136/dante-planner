@@ -238,7 +238,7 @@ public class PlannerCommandService {
      * <p>Package-private to allow unit testing while hiding from external API.</p>
      *
      * @param userId   the user ID
-     * @param deviceId the device ID making the request (for SSE notification exclusion)
+     * @param deviceId the device ID making the request, stamped on the content row
      * @param request      the create planner request
      * @return the created planner response
      * @throws PlannerLimitExceededException if user has reached max planners
@@ -254,7 +254,7 @@ public class PlannerCommandService {
      * Create a planner and return the persisted aggregate with its response.
      *
      * @param userId   the user ID
-     * @param deviceId the device ID making the request (for SSE notification exclusion)
+     * @param deviceId the device ID making the request, stamped on the content row
      * @param request      the create planner request
      * @return the persisted aggregate and its response
      * @throws PlannerLimitExceededException if user has reached max planners
@@ -297,7 +297,7 @@ public class PlannerCommandService {
      * updates it with the provided data. Otherwise creates a new planner.</p>
      *
      * @param userId   the user ID
-     * @param deviceId the device ID making the request (for SSE notification exclusion)
+     * @param deviceId the device ID making the request, stamped on the content row
      * @param id       the planner ID (from URL path)
      * @param request      the planner data
      * @param force    if true, skip syncVersion conflict check
@@ -313,8 +313,8 @@ public class PlannerCommandService {
     }
 
     /**
-     * Upsert a planner on behalf of a caller that originated from no device, so every one of the
-     * owner's devices hears about the write.
+     * Upsert a planner on behalf of a caller that originated from no device, leaving the content
+     * row's device stamp untouched.
      *
      * @param userId  the user ID
      * @param id      the planner ID
@@ -333,7 +333,7 @@ public class PlannerCommandService {
      * that keeps working on the same planner reuses this load instead of reading it again.
      *
      * @param userId   the user ID
-     * @param deviceId the device ID making the request (for SSE notification exclusion)
+     * @param deviceId the device ID making the request, stamped on the content row
      * @param id       the planner ID (from URL path)
      * @param request      the planner data
      * @param force    if true, skip syncVersion conflict check
@@ -385,7 +385,7 @@ public class PlannerCommandService {
      * Update an existing planner.
      *
      * @param userId   the user ID
-     * @param deviceId the device ID making the request (for SSE notification exclusion)
+     * @param deviceId the device ID making the request, stamped on the content row
      * @param id       the planner ID
      * @param request      the update request
      * @param force    if true, skip syncVersion conflict check
