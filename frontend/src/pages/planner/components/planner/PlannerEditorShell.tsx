@@ -177,11 +177,11 @@ export function PlannerEditorShell({
   // ============================================================================
   // SSE Reload Handler - Uses store batch action
   // ============================================================================
-  const handleServerReload = (reloadedPlanner: SaveablePlanner) => {
+  const handleServerReload = (reloadedPlanner: SaveablePlanner): boolean => {
     if (!isMDPlanner(reloadedPlanner)) {
       console.error('Attempted to load non-MD planner in MD editor:', reloadedPlanner.config.type)
       showErrorMessage('planner:pages.plannerMD.errors.invalidType')
-      return
+      return false
     }
 
     initializeFromPlannerAction(reloadedPlanner.content, {
@@ -189,6 +189,7 @@ export function PlannerEditorShell({
       category: reloadedPlanner.config.category,
       isPublished: reloadedPlanner.metadata.published ?? false,
     })
+    return true
   }
 
   // ============================================================================
