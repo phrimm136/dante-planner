@@ -20,11 +20,10 @@ import type { z } from 'zod'
 /** Toast method used to surface an outcome. */
 export type ToastSeverity = 'info' | 'success' | 'warning' | 'error'
 
-/** A toast to raise: which sonner method, which i18n key, and its inline default. */
+/** A toast to raise: at which severity, under which i18n key. */
 export interface ToastDescriptor {
   severity: ToastSeverity
   key: string
-  fallback: string
 }
 
 /** A toast whose message interpolates counts. */
@@ -77,22 +76,18 @@ const IMPORT_ERROR_TOASTS = {
   invalidFileFormat: {
     severity: 'error',
     key: 'exportImport.invalidFileFormat',
-    fallback: 'Invalid file format',
   },
   decompressFailed: {
     severity: 'error',
     key: 'exportImport.decompressFailed',
-    fallback: 'Failed to decompress file',
   },
   parseFailed: {
     severity: 'error',
     key: 'exportImport.parseFailed',
-    fallback: 'Failed to parse file',
   },
   noPlannersInFile: {
     severity: 'info',
     key: 'exportImport.noPlannersInFile',
-    fallback: 'No planners in file',
   },
 } as const satisfies Record<ImportError['kind'], ToastDescriptor>
 
@@ -168,19 +163,16 @@ export const IMPORT_OUTCOME_TOASTS: Record<ImportOutcome, OutcomeToast<ImportCou
   partialImport: {
     severity: 'info',
     key: 'exportImport.partialImport',
-    fallback: 'Imported {{imported}}, {{conflicts}} conflicts',
     params: ({ imported, conflicts }) => ({ imported, conflicts }),
   },
   partialSuccess: {
     severity: 'success',
     key: 'exportImport.importPartialSuccess',
-    fallback: 'Imported {{imported}}, skipped {{skipped}}',
     params: ({ imported, skipped }) => ({ imported, skipped }),
   },
   success: {
     severity: 'success',
     key: 'exportImport.importSuccess',
-    fallback: 'Imported {{count}} planners',
     params: ({ imported }) => ({ count: imported }),
   },
 }
@@ -205,19 +197,16 @@ export const RESOLVE_OUTCOME_TOASTS: Record<ResolveOutcome, OutcomeToast<Resolve
   partial: {
     severity: 'warning',
     key: 'exportImport.resolvePartial',
-    fallback: 'Resolved {{saved}}, {{errors}} errors',
     params: ({ saved, errors }) => ({ saved, errors }),
   },
   success: {
     severity: 'success',
     key: 'exportImport.resolveSuccess',
-    fallback: 'Resolved {{count}} conflicts',
     params: ({ saved }) => ({ count: saved }),
   },
   keptLocal: {
     severity: 'success',
     key: 'exportImport.resolveKeptLocal',
-    fallback: 'Kept all local versions',
     params: () => ({}),
   },
 }

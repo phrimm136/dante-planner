@@ -97,7 +97,7 @@ function PlannerExportImportSectionContent() {
         showInfo(key, params)
         return
       case 'error':
-        showErrorMessage(key)
+        showErrorMessage(key, params)
         return
       default:
         assertNever(descriptor.severity)

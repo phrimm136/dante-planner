@@ -31,7 +31,7 @@ export type UnavailableScope = 'service' | 'backend' | 'auth' | 'write'
 /** Every failure the API layer can hand a consumer, as one closed union. */
 export type AppError =
   | Tagged<'conflict', { code: string; serverVersion: number | null }>
-  | Tagged<'validation', { key: string; params?: Record<string, string> }>
+  | Tagged<'validation', { key: string; params?: Record<string, string | number> }>
   | Tagged<'restricted', { reason: RestrictionKind }>
   | Tagged<'rateLimit'>
   | Tagged<'forbidden', { code: string }>
@@ -46,7 +46,7 @@ const API_VALIDATION_KEY = 'common:errors.validation.message'
 /** Carry a validator's i18n key and params into the app error vocabulary. */
 export function validationAppError(friendly: {
   key: string
-  params?: Record<string, string>
+  params?: Record<string, string | number>
 }): AppError {
   return { kind: 'validation', key: friendly.key, params: friendly.params }
 }

@@ -17,7 +17,7 @@ import type { AppError, RestrictionKind, UnavailableScope } from './apiErrorClas
 
 export interface ErrorPresentation {
   key: string
-  params?: Record<string, string>
+  params?: Record<string, string | number>
   severity: 'error' | 'warning'
   /** Append the contact-on-repeat description. Opt-in, per error. */
   supportHint: boolean
@@ -112,7 +112,7 @@ export function showUnavailable(error: unknown): void {
 }
 
 /** Report a failure under a message the caller chose, not one the classifier picked. */
-export function showErrorMessage(key: string, params?: Record<string, string>): void {
+export function showErrorMessage(key: string, params?: Record<string, string | number>): void {
   showAppError(validationAppError({ key, params }))
 }
 
