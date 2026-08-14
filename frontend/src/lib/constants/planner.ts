@@ -97,6 +97,12 @@ export const PLANNER_LIST = {
 } as const
 
 /**
+ * The version a planner presents before the server has assigned one.
+ * The wire type is a positive integer, so 0 is not a reachable server version.
+ */
+export const INITIAL_SYNC_VERSION = 1
+
+/**
  * Planner status badge styles for card display
  * - Draft: Never manually saved (yellowish)
  * - Unsynced: Has local changes not pushed (blue)

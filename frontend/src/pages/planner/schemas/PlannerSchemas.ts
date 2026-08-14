@@ -10,6 +10,7 @@ import {
 import type { DungeonIdx } from '@/shared/gameData'
 import { JSONContentSchema } from '@/shared/noteEditor'
 import { pagedModelSchema } from '@/lib/validation'
+import { INITIAL_SYNC_VERSION } from '@/lib/constants'
 import type {
   SerializableFloorSelection,
   SaveablePlanner,
@@ -18,6 +19,13 @@ import type {
   PlannerEditorConfig,
 } from '../types/PlannerTypes'
 import { EgoTypeSchema } from '@/shared/gameData'
+
+/**
+ * Tolerated during the coexistence window: the backend still emits a content
+ * digest, which the client never reads. The field leaves the wire with RFC
+ * 0003's cleanup, and this schema line goes with it.
+ */
+const ToleratedContentDigestSchema = z.string().optional()
 
 /**
  * Planner Schemas
@@ -240,7 +248,7 @@ export const PlannerMetadataSchema = z
     /** Type of planner (MIRROR_DUNGEON, REFRACTED_RAILWAY) */
     plannerType: PlannerTypeSchema,
     /** Server sync version for optimistic locking (starts at 1) */
-    syncVersion: z.number().int().positive().default(1),
+    syncVersion: z.number().int().positive().default(INITIAL_SYNC_VERSION),
     /** ISO 8601 timestamp when planner was first created */
     createdAt: z.string().datetime(),
     /** ISO 8601 timestamp when planner was last modified */
@@ -581,6 +589,8 @@ export const ServerPlannerResponseSchema = z
     status: PlannerStatusSchema,
     /** Planner content as JSON string */
     content: z.string(),
+    /** Emitted by the backend, never read here; see the coexistence window */
+    contentDigest: ToleratedContentDigestSchema,
     /** Schema version for data format migration support */
     schemaVersion: z.number().int().positive(),
     /** Game content version (e.g., 6 for MD6, 5 for RR5) */
@@ -622,6 +632,8 @@ export const ServerPlannerSummarySchema = z
     status: PlannerStatusSchema,
     /** Server sync version for optimistic locking */
     syncVersion: z.number().int().positive(),
+    /** Emitted by the backend, never read here; see the coexistence window */
+    contentDigest: ToleratedContentDigestSchema,
     /** ISO 8601 timestamp when planner was last modified */
     lastModifiedAt: z.string(),
   })
@@ -632,6 +644,12 @@ export const ServerPlannerSummarySchema = z
  * Used for validating list endpoint responses
  */
 export const ServerPlannerSummaryPageSchema = pagedModelSchema(ServerPlannerSummarySchema)
+
+/**
+ * Batch pull response: a bare array, not positionally aligned with the request.
+ * Ids naming nothing, a deleted planner, or another user's planner are absent.
+ */
+export const ServerPlannerBatchResponseSchema = z.array(ServerPlannerResponseSchema)
 
 /**
  * Response schema for bulk import operation

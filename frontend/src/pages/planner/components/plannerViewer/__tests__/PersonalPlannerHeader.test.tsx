@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { PersonalPlannerHeader } from '../PersonalPlannerHeader'
 import { NotFoundError } from '@/lib/api'
 import type { SaveablePlanner, MDPlannerContent } from '../../../types/PlannerTypes'
+import type { AcknowledgedPlanner } from '../../../hooks/usePlannerSyncAdapter'
 
 // ── Router ────────────────────────────────────────────────────
 const mockNavigate = vi.fn()
@@ -194,6 +195,12 @@ const syncedPlanner: SaveablePlanner = {
   content: EMPTY_CONTENT,
 }
 
+/** The write outcome the adapter returns: the server's planner plus its ack. */
+const syncedResult: AcknowledgedPlanner = {
+  planner: syncedPlanner,
+  ack: { syncVersion: 2 },
+}
+
 function makePlanner(overrides: Partial<SaveablePlanner['metadata']> = {}): SaveablePlanner {
   return {
     metadata: {
@@ -246,7 +253,7 @@ async function triggerApplyLatestMirror() {
 describe('PersonalPlannerHeader – Apply Latest Mirror', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockSyncToServer.mockResolvedValue(syncedPlanner)
+    mockSyncToServer.mockResolvedValue(syncedResult)
     mockSavePlanner.mockResolvedValue({ ok: true, value: undefined })
   })
 
@@ -495,7 +502,7 @@ describe('PersonalPlannerHeader – publish sync guard', () => {
   })
 
   it('uploads then publishes when syncEnabled is true', async () => {
-    mockSyncToServer.mockResolvedValue(syncedPlanner)
+    mockSyncToServer.mockResolvedValue(syncedResult)
     const { wrapper } = createWrapper()
     render(
       <PersonalPlannerHeader
@@ -523,7 +530,7 @@ describe('PersonalPlannerHeader – publish sync guard', () => {
   })
 
   it('threads the server-bumped syncVersion into the local save on publish', async () => {
-    mockSyncToServer.mockResolvedValue(syncedPlanner) // syncVersion: 2
+    mockSyncToServer.mockResolvedValue(syncedResult) // syncVersion: 2
     mockPublishMutate.mockImplementation(
       (
         _id: string,
@@ -605,7 +612,7 @@ describe('PersonalPlannerHeader – publish sync guard', () => {
 describe('PersonalPlannerHeader – unpublish', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockSyncToServer.mockResolvedValue(syncedPlanner)
+    mockSyncToServer.mockResolvedValue(syncedResult)
     mockPublishMutate.mockImplementation(vi.fn())
   })
 

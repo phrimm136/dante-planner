@@ -10,6 +10,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { INITIAL_SYNC_VERSION } from '@/lib/constants'
 
 import { userPlannersQueryKeys } from './useMDUserPlannersData'
 import { usePlannerStorage } from './usePlannerStorage'
@@ -120,7 +121,7 @@ export function usePlannerFork() {
           schemaVersion: plannerData.schemaVersion,
           contentVersion: plannerData.contentVersion,
           plannerType: plannerData.plannerType,
-          syncVersion: 1, // Initial version for new planner
+          syncVersion: INITIAL_SYNC_VERSION,
           createdAt: now,
           lastModifiedAt: now,
           savedAt: now,

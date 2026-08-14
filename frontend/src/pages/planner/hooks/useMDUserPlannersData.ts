@@ -245,7 +245,7 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
           try {
             const fetched = await syncAdapter.fetchFromServer(serverPlanner.id)
             if (fetched.ok) {
-              const fullPlanner = fetched.value
+              const fullPlanner = fetched.value.planner
               console.log(`Saving planner ${serverPlanner.id}:`, fullPlanner.metadata)
               const result = await storage.saveToLocal(fullPlanner)
               if (result.ok) {
@@ -284,7 +284,7 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
                 conflicts.push({
                   id: sp.id,
                   localPlanner: localPlanner.value,
-                  serverPlanner: serverPlanner.value,
+                  serverPlanner: serverPlanner.value.planner,
                 })
               }
             } catch (error) {
@@ -433,7 +433,7 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
               validateBeforeSync(conflict.localPlanner)
               // Keep local draft, force push to server
               const synced = await syncAdapter.syncToServer(conflict.localPlanner, true)
-              await storage.saveToLocal(adoptSyncedVersion(conflict.localPlanner, synced))
+              await storage.saveToLocal(adoptSyncedVersion(conflict.localPlanner, synced.planner))
               break
             }
             case 'adoptIncoming':

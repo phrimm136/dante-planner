@@ -84,6 +84,10 @@ function createMockPlanner(
   } as SaveablePlanner
 }
 
+/** Well-formed wire digests: 64 lowercase hex characters. */
+const SERVER_DIGEST = 'a1b2c3d4'.repeat(8)
+const OTHER_DIGEST = 'f0e1d2c3'.repeat(8)
+
 /**
  * Create a mock server response
  */
@@ -92,10 +96,10 @@ function createMockServerResponse(
 ): ServerPlannerResponse {
   return {
     id: '550e8400-e29b-41d4-a716-446655440000' as PlannerId,
-    userId: 456,
     title: 'Test Planner',
     category: '5F',
     status: 'saved',
+    contentDigest: SERVER_DIGEST,
     content: JSON.stringify({
       selectedKeywords: [],
       selectedBuffIds: [],
@@ -155,7 +159,8 @@ describe('usePlannerSyncAdapter', () => {
         }),
         undefined,
       )
-      expect(result.metadata.syncVersion).toBe(2)
+      expect(result.planner.metadata.syncVersion).toBe(2)
+      expect(result.ack).toEqual({ syncVersion: 2 })
     })
 
     it('uses upsert for existing planner when userId exists', async () => {
@@ -180,7 +185,7 @@ describe('usePlannerSyncAdapter', () => {
         }),
         undefined,
       )
-      expect(result.metadata.syncVersion).toBe(6)
+      expect(result.planner.metadata.syncVersion).toBe(6)
     })
 
     it('passes force=true to upsert when specified', async () => {
@@ -233,6 +238,7 @@ describe('usePlannerSyncAdapter', () => {
           category: '5F',
           status: 'saved',
           syncVersion: 3,
+          contentDigest: SERVER_DIGEST,
           lastModifiedAt: '2024-01-02T00:00:00.000Z',
         },
         {
@@ -242,6 +248,7 @@ describe('usePlannerSyncAdapter', () => {
           category: '10F',
           status: 'draft',
           syncVersion: 1,
+          contentDigest: OTHER_DIGEST,
           lastModifiedAt: '2024-01-01T00:00:00.000Z',
         },
       ]
@@ -299,8 +306,9 @@ describe('usePlannerSyncAdapter', () => {
       expect(mockGet).toHaveBeenCalledWith('550e8400-e29b-41d4-a716-446655440000')
       expect(result.ok).toBe(true)
       if (!result.ok) throw new Error('expected a successful fetch')
-      expect(result.value.metadata.id).toBe('550e8400-e29b-41d4-a716-446655440000')
-      expect(result.value.metadata.syncVersion).toBe(2)
+      expect(result.value.planner.metadata.id).toBe('550e8400-e29b-41d4-a716-446655440000')
+      expect(result.value.planner.metadata.syncVersion).toBe(2)
+      expect(result.value.ack).toEqual({ syncVersion: 2 })
     })
 
     it('reports a classified error when the fetch fails', async () => {
@@ -406,4 +414,5 @@ describe('usePlannerSyncAdapter', () => {
       )
     })
   })
+
 })

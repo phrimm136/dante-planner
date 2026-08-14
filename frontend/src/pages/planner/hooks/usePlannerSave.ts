@@ -10,7 +10,7 @@ import { useEGOGiftListData } from '@/pages/egoGift'
 import { serializeSets } from '../schemas/PlannerSchemas'
 import { isMDPlanner } from '../types/PlannerTypes'
 import { queryClient } from '@/lib/queryClient'
-import { AUTO_SAVE_DEBOUNCE_MS } from '@/lib/constants'
+import { AUTO_SAVE_DEBOUNCE_MS, INITIAL_SYNC_VERSION } from '@/lib/constants'
 import { generateUUID } from '@/lib/uuid'
 import { assertNever } from '@/lib/utils'
 import { withRollback } from '@/lib/withRollback'
@@ -25,6 +25,7 @@ import { planConflictResolution } from '../lib/conflictChoice'
 import { ok, err } from '@/lib/result'
 import type { Result } from '@/lib/result'
 import type { ConflictEffect, ConflictForkMetadata } from '../lib/conflictChoice'
+import type { AcknowledgedPlanner } from './usePlannerSyncAdapter'
 import type { SaveError } from '../lib/plannerSaveErrors'
 import type { MDCategory, RRCategory, PlannerType } from '@/shared/gameData'
 import type { SinnerEquipment, SkillEAState } from '../types/DeckTypes'
@@ -35,6 +36,7 @@ import type {
   ConflictResolutionChoice,
   PlannerStatus,
   MDPlannerContent,
+  ServerAck,
 } from '../types/PlannerTypes'
 
 export type { SaveError } from '../lib/plannerSaveErrors'
@@ -355,7 +357,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   const createdAtRef = useRef<string | null>(null)
 
   // Track sync version for optimistic locking
-  const syncVersionRef = useRef<number>(initialSyncVersion ?? 1)
+  const syncVersionRef = useRef<number>(initialSyncVersion ?? INITIAL_SYNC_VERSION)
 
   const [error, setError] = useState<SaveError | null>(null)
 
@@ -367,17 +369,24 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   const { spec: egoGiftSpec, i18n: egoGiftI18n } = useEGOGiftListData()
 
   /**
+   * The version the next write presents. Forward-only, and it writes nothing.
+   *
    * Another surface (publish header, conflict resolution) may advance the server
    * version while this instance stays mounted; its cache write-through re-renders
-   * this hook with a newer initialSyncVersion. Adoption is forward-only — a
-   * lagging prop must never roll back a version this instance already holds, or
-   * the next save would present a stale version and conflict (409).
+   * this hook with a newer initialSyncVersion. A lagging prop must never roll back
+   * a version this instance already holds, or the next save would present a stale
+   * version and conflict (409).
    */
-  const adoptSyncVersion = (): number => {
-    if (initialSyncVersion !== undefined && initialSyncVersion > syncVersionRef.current) {
-      syncVersionRef.current = initialSyncVersion
-    }
-    return syncVersionRef.current
+  const presentedVersion = (): number =>
+    Math.max(syncVersionRef.current, initialSyncVersion ?? INITIAL_SYNC_VERSION)
+
+  /**
+   * Adopt the version the awaited response assigned: awaiting it is what ties
+   * the ack to the request that produced it, and the server's own version check
+   * is what rejects a stale concurrent write.
+   */
+  const adoptAck = (incoming: ServerAck): void => {
+    syncVersionRef.current = incoming.syncVersion
   }
 
   /**
@@ -422,7 +431,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   const syncToServer = async (
     planner: SaveablePlanner,
     mode: SaveMode,
-  ): Promise<Result<SaveablePlanner, SaveError>> => {
+  ): Promise<Result<AcknowledgedPlanner, SaveError>> => {
     try {
       return ok(await syncAdapter.syncToServer(planner, mode === 'forcePush'))
     } catch (syncFailure: unknown) {
@@ -475,7 +484,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       contentVersion,
       plannerType,
       existingCreatedAt: createdAtRef.current,
-      existingSyncVersion: adoptSyncVersion(),
+      existingSyncVersion: presentedVersion(),
       published: isCurrentlyPublished,
       status,
     })
@@ -490,11 +499,8 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       if (!synced.ok) return err(synced.error)
       didSync = true
 
-      // Update sync version from server response
-      if (synced.value.metadata.syncVersion) {
-        syncVersionRef.current = synced.value.metadata.syncVersion
-        saveable.metadata.syncVersion = synced.value.metadata.syncVersion
-      }
+      adoptAck(synced.value.ack)
+      saveable.metadata.syncVersion = synced.value.ack.syncVersion
     }
 
     // Save to IndexedDB (with updated syncVersion if synced)
@@ -570,7 +576,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
         contentVersion,
         plannerType,
         existingCreatedAt: createdAtRef.current,
-        existingSyncVersion: adoptSyncVersion(),
+        existingSyncVersion: presentedVersion(),
         published,
         status: 'draft',
       })
@@ -706,7 +712,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     const fetched = await syncAdapter.fetchFromServer(plannerId)
     if (!fetched.ok) return err(fetched.error)
 
-    syncVersionRef.current = fetched.value.metadata.syncVersion
+    adoptAck(fetched.value.ack)
     return ok(undefined)
   }
 
@@ -717,8 +723,8 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     const fetched = await syncAdapter.fetchFromServer(plannerId)
     if (!fetched.ok) return err(fetched.error)
 
-    const serverPlanner = fetched.value
-    syncVersionRef.current = serverPlanner.metadata.syncVersion
+    const serverPlanner = fetched.value.planner
+    adoptAck(fetched.value.ack)
 
     const localResult = await storage.saveToLocal(serverPlanner)
     if (!localResult.ok) return localResult
@@ -881,7 +887,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     clearError,
     save,
     resolveConflict,
-    syncVersion: Math.max(syncVersionRef.current, initialSyncVersion ?? 0),
+    syncVersion: presentedVersion(),
     hasUnsyncedChanges,
     hasLocalUnsavedChanges,
     lastSavedAt,

@@ -20,15 +20,17 @@ import type { PlannerState, UsePlannerSaveOptions } from '../usePlannerSave'
 import type { SaveError } from '../../lib/plannerSaveErrors'
 import type { Result } from '@/lib/result'
 import type { SaveablePlanner } from '../../types/PlannerTypes'
+import type { AcknowledgedPlanner } from '../usePlannerSyncAdapter'
 import { BannedError, ConflictError, WriteTemporarilyUnavailableError } from '@/lib/api'
 import { ok, err } from '@/lib/result'
 
 // Shared call-order recorder: every adapter call pushes its label so order is assertable.
 const callOrder: string[] = []
 
-const mockGetOrCreateDeviceId = vi.fn<[], Promise<string>>()
-const mockSaveToLocal = vi.fn<[SaveablePlanner], Promise<Result<void, SaveError>>>()
-const mockSyncToServer = vi.fn<[SaveablePlanner, boolean?], Promise<SaveablePlanner>>()
+const mockGetOrCreateDeviceId = vi.fn<() => Promise<string>>()
+const mockSaveToLocal = vi.fn<(planner: SaveablePlanner) => Promise<Result<void, SaveError>>>()
+const mockSyncToServer =
+  vi.fn<(planner: SaveablePlanner, force?: boolean) => Promise<AcknowledgedPlanner>>()
 const mockFetchFromServer = vi.fn()
 const mockDeleteFromLocal = vi.fn()
 
@@ -105,6 +107,22 @@ function baseOptions(overrides: Partial<UsePlannerSaveOptions> = {}): UsePlanner
   }
 }
 
+/** A write outcome standing in for the adapter: the server assigned `syncVersion`. */
+function syncedFrom(planner: SaveablePlanner, syncVersion: number): Promise<AcknowledgedPlanner> {
+  return Promise.resolve({
+    planner: { ...planner, metadata: { ...planner.metadata, syncVersion } },
+    ack: { syncVersion },
+  })
+}
+
+/** A fetch outcome carrying the version the server holds. */
+function fetchedAt(syncVersion: number): AcknowledgedPlanner {
+  return {
+    planner: { metadata: { syncVersion } } as SaveablePlanner,
+    ack: { syncVersion },
+  }
+}
+
 function authenticated() {
   mockUseAuthQuery.mockReturnValue({
     data: { id: 'u1', isBanned: false, isTimedOut: false },
@@ -117,9 +135,7 @@ beforeEach(() => {
   mockGetOrCreateDeviceId.mockResolvedValue('device-123')
   mockSaveToLocal.mockResolvedValue(ok(undefined))
   mockDeleteFromLocal.mockResolvedValue(ok(undefined))
-  mockSyncToServer.mockResolvedValue({
-    metadata: { syncVersion: 5 },
-  } as SaveablePlanner)
+  mockSyncToServer.mockImplementation((planner) => syncedFrom(planner, 5))
 })
 
 describe('usePlannerSave - save() golden master', () => {
@@ -178,9 +194,7 @@ describe('usePlannerSave - save() golden master', () => {
 
   it('adopts the syncVersion returned by the server', async () => {
     authenticated()
-    mockSyncToServer.mockResolvedValue({
-      metadata: { syncVersion: 42 },
-    } as SaveablePlanner)
+    mockSyncToServer.mockImplementation((planner) => syncedFrom(planner, 42))
     const { result } = renderHook(() => usePlannerSave(baseOptions()))
 
     await act(async () => {
@@ -389,8 +403,9 @@ describe('usePlannerSave - resolveConflict adapter ordering (golden master)', ()
   beforeEach(() => {
     // Resolution branches read a server planner; default it to a truthy value with a
     // syncVersion so the if (serverPlanner) blocks execute (fetch -> local -> callbacks).
-    mockFetchFromServer.mockResolvedValue(ok({ metadata: { syncVersion: 9 } } as SaveablePlanner))
+    mockFetchFromServer.mockResolvedValue(ok(fetchedAt(9)))
   })
+
 
   it('overwrite force-saves via performSave: sync THEN local, clears conflict', async () => {
     authenticated()
@@ -407,6 +422,8 @@ describe('usePlannerSave - resolveConflict adapter ordering (golden master)', ()
     expect(onServerReload).not.toHaveBeenCalled()
     expect(result.current.error).toBeNull()
   })
+
+
 
   it('discard reloads from server: fetch THEN local, fires onServerReload, clears conflict', async () => {
     authenticated()
@@ -517,9 +534,7 @@ describe('usePlannerSave - cross-surface version convergence', () => {
     const sentVersions: number[] = []
     mockSyncToServer.mockImplementation((planner: SaveablePlanner) => {
       sentVersions.push(planner.metadata.syncVersion)
-      return Promise.resolve({
-        metadata: { syncVersion: planner.metadata.syncVersion + 1 },
-      } as SaveablePlanner)
+      return syncedFrom(planner, planner.metadata.syncVersion + 1)
     })
     return sentVersions
   }
@@ -574,6 +589,30 @@ describe('usePlannerSave - cross-surface version convergence', () => {
     })
 
     expect(sentVersions).toEqual([6, 7])
+  })
+
+  it("adopts the ack's version, so the next save presents what the server assigned", async () => {
+    authenticated()
+    const plannerId = '11111111-1111-4111-8111-111111111111'
+    const sentVersions: number[] = []
+    mockSyncToServer.mockImplementation((planner: SaveablePlanner) => {
+      sentVersions.push(planner.metadata.syncVersion)
+      // The server jumps the version rather than incrementing it.
+      return syncedFrom(planner, 30)
+    })
+    const { result } = renderHook(() =>
+      usePlannerSave(baseOptions({ initialPlannerId: plannerId, initialSyncVersion: 4 })),
+    )
+
+    await act(async () => {
+      await result.current.save()
+    })
+    await act(async () => {
+      await result.current.save()
+    })
+
+    expect(sentVersions).toEqual([4, 30])
+    expect(result.current.syncVersion).toBe(30)
   })
 
   it('refreshes the planner and userPlanners caches after a synced save', async () => {

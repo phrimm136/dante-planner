@@ -229,6 +229,11 @@ export type ServerPlannerResponse = z.infer<typeof ServerPlannerResponseSchema>
 /** Server summary for planner list display (no content) */
 export type ServerPlannerSummary = z.infer<typeof ServerPlannerSummarySchema>
 
+/** What the server confirms about a write: which version it assigned. */
+export interface ServerAck {
+  syncVersion: number
+}
+
 /**
  * Request payload for creating a new planner on the server
  */

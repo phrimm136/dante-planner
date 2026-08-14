@@ -156,7 +156,7 @@ export function PersonalPlannerHeader({
       // The synced result carries the server-bumped syncVersion — thread it into
       // the local save so the next toggle doesn't send a stale version (409).
       const synced = await syncAdapter.syncToServer(planner)
-      callPublishMutation(false, synced)
+      callPublishMutation(false, synced.planner)
     } catch (error) {
       console.error('Failed to upload plan for publishing:', error)
       toast.error(t('pages.plannerMD.publish.uploadFailed'))

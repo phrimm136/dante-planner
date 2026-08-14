@@ -103,7 +103,7 @@ export function usePlannerHeaderActions({
       if (isAuthenticated && (syncEnabled === true || !!plannerToUpdate.metadata.published)) {
         // Sync to server — response is source of truth (carries server-bumped syncVersion)
         const synced = await syncAdapter.syncToServer(updatedPlanner)
-        await saveToLocal(synced)
+        await saveToLocal(synced.planner)
       } else {
         // Local-only save (personal, sync disabled / unauthenticated)
         // syncVersion unchanged — server-assigned, must not drift without server confirmation
