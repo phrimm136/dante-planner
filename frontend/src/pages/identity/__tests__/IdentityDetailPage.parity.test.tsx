@@ -57,8 +57,8 @@ vi.mock('@/pages/identity/hooks/useSanityConditionFormatter', () => ({
 }))
 
 // Suspends on shared filter i18n; stubbed so the snapshots never race its resolution
-vi.mock('@/components/layout/EntityMetaInfo', () => ({
-  EntityMetaInfo: ({ season, updateDate }: { season: number; updateDate: number }) => (
+vi.mock('@/components/layout/EntityMetaInfoI18n', () => ({
+  EntityMetaInfoWithI18n: ({ season, updateDate }: { season: number; updateDate: number }) => (
     <div data-testid="entity-meta">
       {season}/{updateDate}
     </div>

@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 
-import { EntityMetaInfo } from '@/components/layout/EntityMetaInfo'
+import { EntityMetaInfoWithI18n } from '@/components/layout/EntityMetaInfoI18n'
 import { IdentityHeader } from './IdentityHeader'
 import { IdentityHeaderWithI18n } from './IdentityHeaderI18n'
 import { StatusPanel } from './StatusPanel'
@@ -79,7 +79,7 @@ export function IdentityInfoPane({ id, identity, uptie, level }: IdentityInfoPan
             </div>
           }
         >
-          <EntityMetaInfo season={identity.season} updateDate={identity.updatedDate} />
+          <EntityMetaInfoWithI18n season={identity.season} updateDate={identity.updatedDate} />
         </Suspense>
       </div>
     </>

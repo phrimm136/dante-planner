@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 
-import { EntityMetaInfo } from '@/components/layout/EntityMetaInfo'
+import { EntityMetaInfoWithI18n } from '@/components/layout/EntityMetaInfoI18n'
 import { EGOHeader } from './EGOHeader'
 import { EGOHeaderWithI18n } from './EGOHeaderI18n'
 import { SinCostPanel } from './SinCostPanel'
@@ -44,7 +44,7 @@ export function EGOInfoPane({ id, ego }: EGOInfoPaneProps) {
             </div>
           }
         >
-          <EntityMetaInfo season={ego.season} updateDate={ego.updatedDate} />
+          <EntityMetaInfoWithI18n season={ego.season} updateDate={ego.updatedDate} />
         </Suspense>
       </div>
     </>
