@@ -483,8 +483,14 @@ export function showUnavailable(error: unknown): void
 export function showSuccess(key: string, params?: Record<string, unknown>): void
 ```
 
-`presentError` returns `null` for `conflict` (the conflict dialog owns it) and for
-`{kind:'unavailable', scope:'write'}` (the sync-paused banner owns it). `supportHint` replaces the
+`presentError` returns `null` for `conflict` only — and a `null` is a delegation, never a
+disposal: every call site funnelling into `showError` that can carry a conflict must either sit
+under the mounted conflict dialog or present the conflict itself with a distinct stale-version
+message (the two imperative header paths — publish-with-upload and apply-latest-mirror — are the
+known such sites). `{kind:'unavailable', scope:'write'}` presents as a warning with its own copy:
+no surface owns write-pauses (the sync-paused banner this table once cited never existed), and a
+silent failed save is the worst outcome this stream exists to remove. The rule in one line: `null`
+requires a named, mounted owner; absent one, the presenter speaks. `supportHint` replaces the
 unconditional `contactOnRepeat` description that `lib/toast.ts`'s `Proxy` (`:18-23`) appends to
 every error toast; the proxy is deleted and `lib/toast.ts` re-exports sonner's `toast` unwrapped.
 
@@ -570,8 +576,12 @@ deleted; `PlannerCardContextMenu.tsx:146-150` — the empty `hasUpvoted` block a
 
 ### (e) Rule
 
-Bare `toast.error` / `toast.success` outside `lib/errorPresentation.ts` and `lib/toast.ts` fails
-the build.
+Bare `toast.error` / `toast.success` / `toast.warning` outside `lib/errorPresentation.ts` and
+`lib/toast.ts` fails the build — and so does importing `toast` from `sonner` or `@/lib/toast`
+outside those two modules, because a call-shape ban alone is evaded by aliasing, destructuring,
+computed member access (`toast[severity]`), or a fresh re-export module. The rule's own tests may
+not whitelist a live violation: a `valid:` entry must be a shape the codebase is allowed to keep,
+not a shape it happens to contain.
 
 Verify first that oxlint implements `no-restricted-syntax` — run
 `yarn --cwd frontend oxlint --print-config` and confirm the rule appears, because oxlint drops
