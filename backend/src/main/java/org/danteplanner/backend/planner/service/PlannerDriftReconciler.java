@@ -32,8 +32,9 @@ import java.util.stream.Stream;
  * divergence between planner_stats and the authoritative child aggregates,
  * catalog membership vs visibility, the catalog's scalar and keyword copies vs
  * the content row they were taken from, the filter indexes vs a rebuild of the
- * stored content (same extraction path as runtime maintenance), and the derived
- * recommended flag. Emits one structured drift record (log event + metric) per
+ * stored content (same extraction path as runtime maintenance), the derived
+ * recommended flag, and recommendation latches whose announcement nothing
+ * carries. Emits one structured drift record (log event + metric) per
  * finding and repairs NOTHING — drift means a maintenance bug to fix, not a
  * table to quietly patch.
  */
@@ -99,7 +100,8 @@ public class PlannerDriftReconciler {
                         auditCatalogScalars(),
                         auditCatalogKeywords(),
                         auditFilters(),
-                        auditRecommended())
+                        auditRecommended(),
+                        auditRecommendedNotification())
                 .flatMap(List::stream)
                 .toList();
         records.forEach(this::emit);
@@ -305,6 +307,13 @@ public class PlannerDriftReconciler {
         return auditRepository.driftedRecommendedFlags(recommendedThreshold).stream()
                 .map(row -> new DriftRecord(row.plannerId(), "recommended",
                         String.valueOf(row.derived()), String.valueOf(row.recommended())))
+                .toList();
+    }
+
+    private List<DriftRecord> auditRecommendedNotification() {
+        return auditRepository.stampedRecommendationsWithoutEffect().stream()
+                .map(plannerId -> new DriftRecord(plannerId, "recommended_notification",
+                        "event or notification row", "neither"))
                 .toList();
     }
 }

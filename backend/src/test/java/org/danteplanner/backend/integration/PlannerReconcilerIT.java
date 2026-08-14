@@ -300,4 +300,46 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
                 .as("a differing membership is drift")
                 .hasSize(1);
     }
+
+    @Test
+    @DisplayName("recommendation stamp with neither an event nor a notification row is reported; either row clears it")
+    void recommendedNotificationDrift_WhenTheStampCarriesNeitherRow_ReportsUntilEitherExists() {
+        Planner neither = publishClean("Stamped Without Effect");
+        Planner withEvent = publishClean("Stamped With Event");
+        Planner withNotification = publishClean("Stamped With Notification");
+        stampRecommended(neither);
+        stampRecommended(withEvent);
+        stampRecommended(withNotification);
+
+        jdbc.update("INSERT INTO domain_events (event_type, aggregate_id, payload) "
+                        + "VALUES ('PLANNER_RECOMMENDED', UUID_TO_BIN(?), ?)",
+                withEvent.getId().toString(), "{\"ownerId\": " + owner.getId() + "}");
+        jdbc.update("INSERT INTO notifications (user_id, content_id, notification_type, public_id) "
+                        + "VALUES (?, ?, 'PLANNER_RECOMMENDED', UUID_TO_BIN(?))",
+                owner.getId(), withNotification.getId().toString(), UUID.randomUUID().toString());
+
+        List<DriftRecord> records = reconciler.reconcile();
+
+        assertThat(recordsFor(records, neither.getId(), "recommended_notification"))
+                .as("the latch was taken, so the owner was owed a notification nothing carries")
+                .singleElement()
+                .satisfies(record -> {
+                    assertThat(record.expected()).isEqualTo("event or notification row");
+                    assertThat(record.actual()).isEqualTo("neither");
+                });
+        assertThat(kindsFor(records, withEvent.getId()))
+                .as("an event row aged out of retention after delivery is not drift, so its presence clears")
+                .doesNotContain("recommended_notification");
+        assertThat(kindsFor(records, withNotification.getId()))
+                .as("a recipient who deleted the row still received it, so its presence clears")
+                .doesNotContain("recommended_notification");
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM notifications WHERE content_id = ?",
+                Integer.class, neither.getId().toString()))
+                .as("the audit repairs nothing").isZero();
+    }
+
+    private void stampRecommended(Planner planner) {
+        jdbc.update("UPDATE planner_stats SET recommended_notified_at = NOW(6) "
+                + "WHERE planner_id = UUID_TO_BIN(?)", planner.getId().toString());
+    }
 }

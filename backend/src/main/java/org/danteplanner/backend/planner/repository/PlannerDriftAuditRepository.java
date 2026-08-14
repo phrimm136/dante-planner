@@ -250,6 +250,31 @@ public class PlannerDriftAuditRepository {
     }
 
     /**
+     * Planners whose recommendation latch was taken while neither an event row nor a notification
+     * row exists to carry the announcement it committed to.
+     *
+     * <p>Both sides must be absent: an event row aged out of retention after its notification
+     * landed is not drift, and neither is a dispatched event whose recipient deleted the row.</p>
+     *
+     * @return the planner ids
+     */
+    public List<UUID> stampedRecommendationsWithoutEffect() {
+        return jdbc.query("""
+                SELECT BIN_TO_UUID(s.planner_id) AS planner_id
+                FROM planner_stats s
+                LEFT JOIN domain_events e
+                       ON e.aggregate_id = s.planner_id AND e.event_type = 'PLANNER_RECOMMENDED'
+                LEFT JOIN notifications n
+                       ON n.content_id = BIN_TO_UUID(s.planner_id)
+                      AND n.notification_type = 'PLANNER_RECOMMENDED'
+                WHERE s.recommended_notified_at IS NOT NULL
+                  AND e.id IS NULL
+                  AND n.id IS NULL
+                """,
+                (rs, rowNum) -> UUID.fromString(rs.getString("planner_id")));
+    }
+
+    /**
      * Catalog rows whose stored recommended flag disagrees with the derived one.
      *
      * @param threshold upvotes at which a planner counts as recommended
