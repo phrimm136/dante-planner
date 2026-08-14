@@ -1,12 +1,4 @@
 /**
- * Typed errors for the API's failure responses.
- *
- * They live apart from the client so the query cache and the error
- * classifier can recognise a failure without importing the module that
- * performs requests.
- */
-
-/**
  * Custom error class for 409 Conflict responses
  * Enables typed error handling with instanceof checks
  *
