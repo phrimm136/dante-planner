@@ -6,8 +6,8 @@
  */
 
 import { useSanityConditionI18n } from '@/shared/gameText'
-import { formatSanityCondition, formatSanityConditions } from './formatSanityCondition'
-import type { SanityConditionResult } from './formatSanityCondition'
+import { formatSanityCondition, formatSanityConditions } from '../lib/formatSanityCondition'
+import type { SanityConditionResult } from '../lib/formatSanityCondition'
 import type { SanityConditionType } from '@/shared/gameData'
 
 /**

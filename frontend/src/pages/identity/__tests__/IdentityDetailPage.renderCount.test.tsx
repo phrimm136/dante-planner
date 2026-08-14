@@ -49,7 +49,7 @@ vi.mock('@/pages/identity/hooks/useTraitsI18n', async () => {
   return { useTraitsI18n: () => identityTraitLabels }
 })
 
-vi.mock('@/pages/identity/lib/sanityConditionFormatter', () => ({
+vi.mock('@/pages/identity/hooks/useSanityConditionFormatter', () => ({
   useSanityConditionFormatter: () => ({
     formatAll: (conditions: string[]) => conditions.map(() => 'Formatted condition'),
   }),

@@ -232,7 +232,7 @@ vi.mock('@/shared/assets', async (importOriginal) => {
 })
 
 // Mock sanity condition formatter
-vi.mock('@/pages/identity/lib/sanityConditionFormatter', () => ({
+vi.mock('@/pages/identity/hooks/useSanityConditionFormatter', () => ({
   useSanityConditionFormatter: () => ({
     formatAll: (conditions: string[]) => conditions.map(() => 'Formatted condition'),
   }),
