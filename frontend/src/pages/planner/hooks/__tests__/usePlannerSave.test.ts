@@ -355,13 +355,29 @@ describe('usePlannerSave - error surface', () => {
 
 describe('usePlannerSave - dirty tracking surface', () => {
   // Dirty tracking is NOT store state; it lives here as ref-baseline comparisons.
-  // Baselines start uninitialized ('') so both flags read false until a save sets them.
-  it('reports no unsynced / no local-unsaved changes against an uninitialized baseline', () => {
+  // Both baselines are installed when the subscription mounts, so an untouched
+  // planner is clean against them and an edit is what makes it dirty.
+  it('reports a freshly mounted planner clean, and an edit against it dirty', () => {
     authenticated()
-    const { result } = renderHook(() => usePlannerSave(baseOptions()))
+    const store = manualStore()
+    let currentState = validState({ title: 'as loaded' })
+    const { result, rerender } = renderHook(() =>
+      usePlannerSave(baseOptions({ getState: () => currentState, subscribe: store.subscribe })),
+    )
 
     expect(result.current.hasUnsyncedChanges).toBe(false)
     expect(result.current.hasLocalUnsavedChanges).toBe(false)
+
+    currentState = validState({ title: 'edited' })
+    act(() => {
+      store.notify()
+    })
+    // These two are computed during render, so they answer for the last one. The
+    // reader that does not wait for a render is isDirty, covered separately.
+    rerender()
+
+    expect(result.current.hasUnsyncedChanges).toBe(true)
+    expect(result.current.hasLocalUnsavedChanges).toBe(true)
   })
 
   it('clears unsynced state after a successful manual save sets the synced baseline', async () => {
@@ -486,7 +502,7 @@ describe('usePlannerSave - resolveConflict adapter ordering (golden master)', ()
 
   it('discard reloads from server: fetch THEN local, fires onServerReload, clears conflict', async () => {
     authenticated()
-    const onServerReload = vi.fn()
+    const onServerReload = vi.fn(() => true)
     const { result } = await driveIntoConflict({ onServerReload })
 
     let outcome: boolean | undefined
@@ -542,7 +558,7 @@ describe('usePlannerSave - resolveConflict adapter ordering (golden master)', ()
     // Warning: keep-both saves the copy locally, syncs the copy, fetches the original,
     // then saves the original locally — TWO saveToLocal calls in this exact order.
     authenticated()
-    const onServerReload = vi.fn()
+    const onServerReload = vi.fn(() => true)
     const onKeepBothCreated = vi.fn()
     const { result } = await driveIntoConflict({
       onServerReload,

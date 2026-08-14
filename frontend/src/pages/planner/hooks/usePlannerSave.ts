@@ -366,6 +366,9 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   // whatever it captured while the save was still running.
   const isSavingRef = useRef(false)
 
+  // How many nested owners hold that write.
+  const saveHoldsRef = useRef(0)
+
   // A teardown flush that arrives mid-save, waiting for that save to finish.
   const pendingFlushRef = useRef(false)
 
@@ -391,8 +394,14 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     }, AUTO_SAVE_DEBOUNCE_MS)
   }
 
-  // Previous state for dirty checking - empty string means "not yet initialized"
-  const previousStateRef = useRef<string>('')
+  // The planner as it stood when this editor opened. Both baselines start here
+  // rather than being filled in later: a window in which no baseline exists is a
+  // window in which a flush cannot tell unsaved work from an untouched load, and
+  // in which the dirty flags below have nothing to compare against.
+  const [mountComparable] = useState(() => stateToComparableString(options.getState()))
+
+  // Previous state for dirty checking
+  const previousStateRef = useRef<string>(mountComparable)
 
   // Whether a store change has arrived since the last local write. Maintained by
   // the subscription rather than by render, so an unload firing between a keystroke
@@ -400,7 +409,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   const dirtyRef = useRef(false)
 
   // Last synced state for beforeunload warning detection
-  const lastSyncedStateRef = useRef<string>('')
+  const lastSyncedStateRef = useRef<string>(mountComparable)
 
   // Track the original createdAt timestamp
   const createdAtRef = useRef<string | null>(null)
@@ -599,6 +608,16 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   }
 
   /**
+   * A failed teardown flush has nowhere to surface: the editor is gone, so the
+   * error state and its toast reach nobody. Leave the loss in the console with
+   * enough to identify which planner lost what.
+   */
+  const reportLostFlush = (flushing: boolean, failure: SaveError) => {
+    if (!flushing) return
+    console.error('Planner autosave flush lost after teardown', { plannerId, failure })
+  }
+
+  /**
    * Debounced auto-save.
    * Auto-saves ALWAYS go to IndexedDB only (local-first architecture);
    * syncing to the server is manual-save only.
@@ -656,13 +675,16 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       const result = await storage.saveToLocal(saveable)
       if (!result.ok) {
         reportFailure(result.error)
+        reportLostFlush(flushing, result.error)
         return
       }
 
       markLocalBaseline(currentStateString)
       setLastSavedAt(new Date().toISOString())
     } catch (autoSaveError: unknown) {
-      reportFailure(classifyAppError(autoSaveError))
+      const failure = classifyAppError(autoSaveError)
+      reportFailure(failure)
+      reportLostFlush(flushing, failure)
     } finally {
       setIsAutoSaving(false)
     }
@@ -679,18 +701,26 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     return chained
   }
 
-  /** Take ownership of the write for a manual save. */
+  /**
+   * Take ownership of the write for a manual save. Owners nest — a conflict
+   * resolution runs saves of its own — so the lock counts holds rather than
+   * flipping a flag the inner release would drop on the outer owner's behalf.
+   */
   const beginSave = () => {
+    saveHoldsRef.current += 1
     isSavingRef.current = true
     setIsSaving(true)
   }
 
   /**
-   * Release it, and run a teardown flush that arrived while the save held it.
-   * Refs still work on an unmounted fiber, which is the only reason those last
-   * edits are still reachable at all.
+   * Release one hold, and once the last is gone run a teardown flush that arrived
+   * while a save held it. Refs still work on an unmounted fiber, which is the only
+   * reason those last edits are still reachable at all.
    */
   const endSave = () => {
+    saveHoldsRef.current = Math.max(0, saveHoldsRef.current - 1)
+    if (saveHoldsRef.current > 0) return
+
     isSavingRef.current = false
     setIsSaving(false)
 
@@ -840,9 +870,11 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     if (!localResult.ok) return localResult
     adoptAck(fetched.value.ack)
 
-    // Only a reload that actually adopted the copy may be baselined: a consumer
-    // that rejected it still holds the old local content, which is not clean.
-    if (onServerReload?.(serverPlanner)) {
+    // A reload that refused the copy leaves the editor holding the old local
+    // content. Reporting success there would announce a discard that never
+    // happened and navigate away from the conflict it claimed to resolve.
+    if (onServerReload) {
+      if (!onServerReload(serverPlanner)) return err({ kind: 'unknown' })
       markSaved(stateToComparableString(getState()))
     }
     return ok(undefined)
@@ -963,15 +995,6 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
 
     unmountedRef.current = false
 
-    // Install the baseline up front. A lazily initialized one leaves a window in
-    // which a teardown flush adopts unwritten text as the baseline instead of
-    // writing it, and the store is already loaded by the time this runs.
-    if (previousStateRef.current === '') {
-      const initial = stateToComparableString(getStateRef.current())
-      previousStateRef.current = initial
-      lastSyncedStateRef.current = initial
-    }
-
     const unsubscribe = subscribe(() => {
       dirtyRef.current = true
       armAutoSave()
@@ -1002,13 +1025,11 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     return stateToComparableString(getStateRef.current()) !== previousStateRef.current
   }, [])
 
-  // Dirty flags compare the live state against the two save baselines. An
-  // uninitialized baseline ('') means there is nothing to compare against yet.
+  // Dirty flags compare the live state against the two save baselines, both of
+  // which the subscription installs at mount.
   const currentComparable = stateToComparableString(getState())
-  const hasUnsyncedChanges =
-    lastSyncedStateRef.current !== '' && currentComparable !== lastSyncedStateRef.current
-  const hasLocalUnsavedChanges =
-    previousStateRef.current !== '' && currentComparable !== previousStateRef.current
+  const hasUnsyncedChanges = currentComparable !== lastSyncedStateRef.current
+  const hasLocalUnsavedChanges = currentComparable !== previousStateRef.current
 
   const isRestricted = user?.isBanned === true || user?.isTimedOut === true
   const restrictionReason = !isRestricted
