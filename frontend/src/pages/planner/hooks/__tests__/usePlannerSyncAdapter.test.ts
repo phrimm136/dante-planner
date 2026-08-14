@@ -37,7 +37,7 @@ vi.mock('../../lib/plannerApi', () => ({
 }))
 
 // Import after mocking
-import { usePlannerSyncAdapter } from '../usePlannerSyncAdapter'
+import { usePlannerSyncAdapter, acknowledgedCopy } from '../usePlannerSyncAdapter'
 
 /**
  * Create a minimal mock SaveablePlanner for testing
@@ -415,4 +415,30 @@ describe('usePlannerSyncAdapter', () => {
     })
   })
 
+  describe('acknowledgedCopy', () => {
+    it("keeps the server's content rather than the local bytes that were sent", async () => {
+      // The sanitizer may normalize a write, so what the server echoes is what
+      // the local row must hold; keeping local bytes under the server's version
+      // would hide the divergence from a sync that compares versions alone.
+      const localPlanner = createMockPlanner({ syncVersion: 1, userId: null })
+      mockUpsert.mockResolvedValue(
+        createMockServerResponse({ title: 'Normalized by the server', syncVersion: 4 }),
+      )
+      const { result: hookResult } = renderHook(() => usePlannerSyncAdapter())
+
+      const stored = acknowledgedCopy(await hookResult.current.syncToServer(localPlanner))
+
+      expect(stored.metadata.title).toBe('Normalized by the server')
+      expect(stored.metadata.title).not.toBe(localPlanner.metadata.title)
+    })
+
+    it('stores the version the ack assigned', () => {
+      const planner = createMockPlanner({ syncVersion: 1, userId: null })
+
+      const stored = acknowledgedCopy({ planner, ack: { syncVersion: 9 } })
+
+      expect(stored.metadata.syncVersion).toBe(9)
+      expect(stored.content).toEqual(planner.content)
+    })
+  })
 })

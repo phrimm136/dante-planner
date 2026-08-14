@@ -44,6 +44,16 @@ function ackOf(response: ServerPlannerResponse): ServerAck {
   return { syncVersion: response.syncVersion }
 }
 
+/**
+ * The server's copy as it must be persisted: its content under the version the
+ * ack assigned. Content and version travel together, because a version names
+ * the server's bytes — the sanitizer can normalize a write, and keeping local
+ * bytes under the server's version would hide that divergence from a sync that
+ * compares versions alone.
+ */
+export function acknowledgedCopy({ planner, ack }: AcknowledgedPlanner): SaveablePlanner {
+  return { ...planner, metadata: { ...planner.metadata, syncVersion: ack.syncVersion } }
+}
 
 /**
  * Convert server response to SaveablePlanner format

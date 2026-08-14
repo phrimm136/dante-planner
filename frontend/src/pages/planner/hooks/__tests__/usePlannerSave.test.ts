@@ -406,6 +406,15 @@ describe('usePlannerSave - resolveConflict adapter ordering (golden master)', ()
     mockFetchFromServer.mockResolvedValue(ok(fetchedAt(9)))
   })
 
+  /** Record the version each force push presents, once the conflict is already set. */
+  function captureSentVersionsOnce(): number[] {
+    const sentVersions: number[] = []
+    mockSyncToServer.mockImplementation((planner: SaveablePlanner) => {
+      sentVersions.push(planner.metadata.syncVersion)
+      return syncedFrom(planner, planner.metadata.syncVersion)
+    })
+    return sentVersions
+  }
 
   it('overwrite force-saves via performSave: sync THEN local, clears conflict', async () => {
     authenticated()
@@ -423,7 +432,55 @@ describe('usePlannerSave - resolveConflict adapter ordering (golden master)', ()
     expect(result.current.error).toBeNull()
   })
 
+  it('never lowers the presented version on the pre-force-push read', async () => {
+    // The read adopts no content, so taking a lower server version would present a
+    // version the local copy has already passed and overwrite the server from behind.
+    // It runs only when the conflict reported no server version, and initialSyncVersion
+    // must stay undefined or presentedVersion's max would mask a lowered ref.
+    authenticated()
+    const plannerId = '11111111-1111-4111-8111-111111111111'
+    const options = baseOptions({ initialPlannerId: plannerId })
 
+    // Advance the ref to 12 through a confirmed ack, not through a prop.
+    mockSyncToServer.mockImplementation((planner) => syncedFrom(planner, 12))
+    const { result } = renderHook(() => usePlannerSave(options))
+    await act(async () => {
+      await result.current.save({ published: false })
+    })
+    expect(result.current.syncVersion).toBe(12)
+
+    // A conflict carrying no server version is what routes through the read.
+    mockSyncToServer.mockRejectedValueOnce(new ConflictError('SYNC_CONFLICT', 'conflict', null))
+    await act(async () => {
+      await result.current.save({ published: false })
+    })
+    expect(result.current.error?.kind).toBe('conflict')
+
+    mockFetchFromServer.mockResolvedValue(ok(fetchedAt(3)))
+    const sentVersions = captureSentVersionsOnce()
+
+    await act(async () => {
+      await result.current.resolveConflict('overwrite')
+    })
+
+    expect(sentVersions).toEqual([12])
+    expect(result.current.syncVersion).toBe(12)
+  })
+
+  it('leaves the version alone when the discard write fails', async () => {
+    // Adopting before the write is confirmed would leave version=server with the
+    // old local content still on disk.
+    authenticated()
+    const { result } = await driveIntoConflict({ initialSyncVersion: 2 })
+    mockFetchFromServer.mockResolvedValue(ok(fetchedAt(9)))
+    mockSaveToLocal.mockResolvedValue(err({ kind: 'quota' }))
+
+    await act(async () => {
+      await result.current.resolveConflict('discard')
+    })
+
+    expect(result.current.syncVersion).toBe(2)
+  })
 
   it('discard reloads from server: fetch THEN local, fires onServerReload, clears conflict', async () => {
     authenticated()

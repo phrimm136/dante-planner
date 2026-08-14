@@ -18,7 +18,7 @@ import { SyncOffWarningDialog } from '../SyncOffWarningDialog'
 import { usePlannerHeaderActions } from '../../hooks/usePlannerHeaderActions'
 import { usePlannerPublish } from '../../hooks/usePlannerPublish'
 import { usePlannerStorage } from '../../hooks/usePlannerStorage'
-import { usePlannerSyncAdapter } from '../../hooks/usePlannerSyncAdapter'
+import { usePlannerSyncAdapter, acknowledgedCopy } from '../../hooks/usePlannerSyncAdapter'
 import { useEGOGiftListData } from '@/pages/egoGift'
 import { plannerQueryKeys } from '../../lib/plannerQueryKeys'
 import { deriveSaveStatus, SAVE_STATUS_BADGE_VARIANT } from '../../lib/plannerBadges'
@@ -153,10 +153,10 @@ export function PersonalPlannerHeader({
 
     try {
       // Upload current content first (the publish PUT carries none), then toggle.
-      // The synced result carries the server-bumped syncVersion — thread it into
-      // the local save so the next toggle doesn't send a stale version (409).
+      // The server's copy carries the bumped syncVersion its ack assigned —
+      // thread it in so the next toggle doesn't send a stale version (409).
       const synced = await syncAdapter.syncToServer(planner)
-      callPublishMutation(false, synced.planner)
+      callPublishMutation(false, acknowledgedCopy(synced))
     } catch (error) {
       console.error('Failed to upload plan for publishing:', error)
       toast.error(t('pages.plannerMD.publish.uploadFailed'))

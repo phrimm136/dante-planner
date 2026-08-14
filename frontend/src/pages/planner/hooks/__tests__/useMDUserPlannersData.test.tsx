@@ -6,11 +6,12 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { renderHook, waitFor } from '@testing-library/react'
+import { renderHook, waitFor, act } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React from 'react'
-import type { SaveablePlanner } from '../../types/PlannerTypes'
+import type { PlannerSummary, SaveablePlanner } from '../../types/PlannerTypes'
 import { BATCH_PULL_MAX_IDS } from '@/lib/constants'
+import { categorizePlanner } from '../../lib/syncPlan'
 
 const syncMocks = vi.hoisted(() => ({
   isAuthenticated: true,
@@ -77,11 +78,7 @@ vi.mock('@/pages/egoGift', () => ({
   useEGOGiftListData: () => ({ spec: null, i18n: null }),
 }))
 
-import {
-  userPlannersQueryKeys,
-  adoptSyncedVersion,
-  useMDUserPlannersData,
-} from '../useMDUserPlannersData'
+import { userPlannersQueryKeys, useMDUserPlannersData } from '../useMDUserPlannersData'
 
 describe('useMDUserPlannersData background sync', () => {
   function createWrapper() {
@@ -248,6 +245,84 @@ describe('useMDUserPlannersData background sync', () => {
     expect(savedIds()).toEqual(['planner-0', 'planner-1'])
   })
 
+  /**
+   * Drive a draft-vs-server conflict into pendingConflicts, then resolve it by
+   * keeping the local copy (choice 'overwrite' plans a single keepLocal effect).
+   */
+  async function resolveKeepingLocal() {
+    const conflicted = {
+      id: 'planner-0',
+      title: 'Planner 0',
+      plannerType: 'MIRROR_DUNGEON',
+      category: '5F',
+      status: 'draft',
+      lastModifiedAt: '2026-01-01T00:00:00.000Z',
+      savedAt: null,
+      syncVersion: 1,
+    }
+    const localPlanner = {
+      metadata: { ...conflicted, syncVersion: 1 },
+      config: { type: 'MIRROR_DUNGEON', category: '5F' },
+      content: {},
+    }
+    syncMocks.listFromServer.mockResolvedValue([{ ...conflicted, status: 'saved', syncVersion: 5 }])
+    syncMocks.listLocal.mockResolvedValue([conflicted])
+    syncMocks.loadFromLocal.mockResolvedValue({ ok: true, value: localPlanner })
+    syncMocks.fetchFromServer.mockResolvedValue({
+      ok: true,
+      value: { planner: localPlanner, ack: { syncVersion: 5 } },
+    })
+    // The server echoes the status it was sent — still 'draft'.
+    syncMocks.syncToServer.mockResolvedValue({
+      planner: localPlanner,
+      ack: { syncVersion: 6 },
+    })
+
+    const { result } = renderHook((props: { page: number }) => useMDUserPlannersData(props), {
+      wrapper: createWrapper(),
+      initialProps: { page: 0 },
+    })
+    await waitFor(() => expect(result.current).not.toBeNull())
+    await waitFor(() => expect(result.current.pendingConflicts).toHaveLength(1))
+
+    await act(async () => {
+      await result.current.resolveConflicts([{ id: 'planner-0', choice: 'overwrite' }])
+    })
+
+    const stored = syncMocks.saveToLocal.mock.calls.at(-1)?.[0] as SaveablePlanner
+    return stored
+  }
+
+  it('marks the kept local planner saved with a savedAt timestamp', async () => {
+    const stored = await resolveKeepingLocal()
+
+    expect(stored.metadata.status).toBe('saved')
+    expect(stored.metadata.savedAt).not.toBeNull()
+    expect(stored.metadata.syncVersion).toBe(6)
+  })
+
+  function makeSummary(overrides: Partial<PlannerSummary>): PlannerSummary {
+    return {
+      id: 'planner-0',
+      title: 'Planner 0',
+      plannerType: 'MIRROR_DUNGEON',
+      category: '5F',
+      status: 'saved',
+      lastModifiedAt: '2026-01-01T00:00:00.000Z',
+      savedAt: '2026-01-01T00:00:00.000Z',
+      syncVersion: 1,
+      ...overrides,
+    }
+  }
+
+  it('leaves the resolved row pullable, not conflicting, on the next server bump', () => {
+    // Left a draft, the row would prompt the same conflict again on every bump.
+    const resolved = makeSummary({ status: 'saved', syncVersion: 6 })
+    const bumped = makeSummary({ status: 'saved', syncVersion: 7 })
+
+    expect(categorizePlanner(resolved, bumped)).toBe('pull')
+    expect(categorizePlanner({ ...resolved, status: 'draft' }, bumped)).toBe('conflict')
+  })
 })
 
 describe('userPlannersQueryKeys', () => {
@@ -271,39 +346,5 @@ describe('userPlannersQueryKeys', () => {
     expect(key[0]).toBe('userPlanners')
     expect(key[1]).toBe('list')
     expect(key[2]).toHaveProperty('isAuthenticated', true)
-  })
-})
-
-describe('adoptSyncedVersion', () => {
-  function makePlanner(syncVersion: number, title: string): SaveablePlanner {
-    return {
-      metadata: {
-        id: '11111111-2222-3333-4444-555555555555',
-        title,
-        status: 'draft',
-        syncVersion,
-        savedAt: null,
-      },
-      config: { type: 'MIRROR_DUNGEON', category: '5F' },
-      content: { title },
-    } as unknown as SaveablePlanner
-  }
-
-  it('keeps the local content but adopts the server-assigned syncVersion', () => {
-    const local = makePlanner(1, 'Local draft')
-    const synced = makePlanner(7, 'Server echo')
-
-    const saved = adoptSyncedVersion(local, synced)
-
-    expect(saved.metadata.syncVersion).toBe(7)
-    expect(saved.content).toEqual(local.content)
-    expect(saved.metadata.title).toBe('Local draft')
-  })
-
-  it('marks the planner saved with a savedAt timestamp', () => {
-    const saved = adoptSyncedVersion(makePlanner(1, 'A'), makePlanner(2, 'A'))
-
-    expect(saved.metadata.status).toBe('saved')
-    expect(saved.metadata.savedAt).not.toBeNull()
   })
 })

@@ -16,7 +16,11 @@ import { useTranslation } from 'react-i18next'
 import { useSuspenseQuery, useQuery, queryOptions, useQueryClient } from '@tanstack/react-query'
 
 import { usePlannerStorage } from './usePlannerStorage'
-import { usePlannerSyncAdapter, serverResponseToSaveable } from './usePlannerSyncAdapter'
+import {
+  usePlannerSyncAdapter,
+  serverResponseToSaveable,
+  acknowledgedCopy,
+} from './usePlannerSyncAdapter'
 import { plannerApi } from '../lib/plannerApi'
 import { useAuthQuery } from '@/shared/auth'
 import { useUserSettingsQuery } from '@/pages/settings'
@@ -59,31 +63,6 @@ export const userPlannersQueryKeys = {
   /** Key for user's full planner list with content (for content-based filtering) */
   listFull: (isAuthenticated: boolean) =>
     [...userPlannersQueryKeys.all, 'listFull', { isAuthenticated }] as const,
-}
-
-// ============================================================================
-// Local-vs-server reconciliation
-// ============================================================================
-
-/**
- * Build the local save for a planner whose content won a conflict resolution:
- * keeps the local content but adopts the server-assigned syncVersion from the
- * sync response. Persisting the pre-sync version would make every subsequent
- * non-forced upload conflict (409) until the versions realign.
- */
-export function adoptSyncedVersion(
-  local: SaveablePlanner,
-  synced: SaveablePlanner,
-): SaveablePlanner {
-  return {
-    ...local,
-    metadata: {
-      ...local.metadata,
-      status: 'saved',
-      syncVersion: synced.metadata.syncVersion,
-      savedAt: new Date().toISOString(),
-    },
-  }
 }
 
 // ============================================================================
@@ -438,9 +417,21 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
             case 'keepLocal': {
               // Validate before syncing local draft to server
               validateBeforeSync(conflict.localPlanner)
-              // Keep local draft, force push to server
+              // The local draft wins the conflict by being force-pushed; what the
+              // server then holds is what gets stored, under the version it acked.
               const synced = await syncAdapter.syncToServer(conflict.localPlanner, true)
-              await storage.saveToLocal(adoptSyncedVersion(conflict.localPlanner, synced.planner))
+              const stored = acknowledgedCopy(synced)
+              // The server echoes the status it was sent, so the resolution marks
+              // the row saved itself. Left a draft it would stay badged unsaved and
+              // turn the next server-version bump into another conflict prompt.
+              await storage.saveToLocal({
+                ...stored,
+                metadata: {
+                  ...stored.metadata,
+                  status: 'saved',
+                  savedAt: new Date().toISOString(),
+                },
+              })
               break
             }
             case 'adoptIncoming':

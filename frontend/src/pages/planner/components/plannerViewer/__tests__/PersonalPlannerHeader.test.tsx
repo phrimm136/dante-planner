@@ -87,7 +87,9 @@ vi.mock('../../../hooks/usePlannerStorage', () => ({
 
 // ── Sync adapter ──────────────────────────────────────────────
 const mockSyncToServer = vi.fn()
-vi.mock('../../../hooks/usePlannerSyncAdapter', () => ({
+// Only the hook is faked; acknowledgedCopy is a pure helper and stays real.
+vi.mock('../../../hooks/usePlannerSyncAdapter', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../../hooks/usePlannerSyncAdapter')>()),
   usePlannerSyncAdapter: () => ({ syncToServer: mockSyncToServer }),
 }))
 

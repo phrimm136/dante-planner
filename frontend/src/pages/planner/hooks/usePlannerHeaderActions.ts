@@ -11,7 +11,7 @@ import { publishedPlannerQueryKeys } from './usePublishedPlannerQuery'
 import { userPlannersQueryKeys } from './useMDUserPlannersData'
 import { usePlannerDelete } from './usePlannerDelete'
 import { usePlannerStorage } from './usePlannerStorage'
-import { usePlannerSyncAdapter } from './usePlannerSyncAdapter'
+import { usePlannerSyncAdapter, acknowledgedCopy } from './usePlannerSyncAdapter'
 import { usePlannerConfig } from './usePlannerConfig'
 
 import type { SaveablePlanner } from '../types/PlannerTypes'
@@ -101,9 +101,11 @@ export function usePlannerHeaderActions({
       }
 
       if (isAuthenticated && (syncEnabled === true || !!plannerToUpdate.metadata.published)) {
-        // Sync to server — response is source of truth (carries server-bumped syncVersion)
+        // The server's copy is persisted under the version its ack assigned;
+        // keeping the pre-sync version would make every later non-forced
+        // upload conflict (409).
         const synced = await syncAdapter.syncToServer(updatedPlanner)
-        await saveToLocal(synced.planner)
+        await saveToLocal(acknowledgedCopy(synced))
       } else {
         // Local-only save (personal, sync disabled / unauthenticated)
         // syncVersion unchanged — server-assigned, must not drift without server confirmation

@@ -381,9 +381,10 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     Math.max(syncVersionRef.current, initialSyncVersion ?? INITIAL_SYNC_VERSION)
 
   /**
-   * Adopt the version the awaited response assigned: awaiting it is what ties
-   * the ack to the request that produced it, and the server's own version check
-   * is what rejects a stale concurrent write.
+   * Adopt the version the awaited response assigned, wherever a response is in
+   * hand: awaiting it is what ties the ack to the request that produced it, and
+   * the server's own version check is what rejects a stale concurrent write.
+   * The pre-force-push read is the one other writer, and it only moves forward.
    */
   const adoptAck = (incoming: ServerAck): void => {
     syncVersionRef.current = incoming.syncVersion
@@ -707,12 +708,18 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     }
   }
 
-  /** Take the server's current sync version without touching local content. */
+  /**
+   * Take the server's current sync version without touching local content.
+   *
+   * Local content stays as it is here, so the version must only ever move
+   * forward: adopting a lower one would present a version the local copy has
+   * already passed, and the force push that follows would overwrite from behind.
+   */
   const adoptServerSyncVersion = async (): Promise<Result<void, SaveError>> => {
     const fetched = await syncAdapter.fetchFromServer(plannerId)
     if (!fetched.ok) return err(fetched.error)
 
-    adoptAck(fetched.value.ack)
+    syncVersionRef.current = Math.max(syncVersionRef.current, fetched.value.ack.syncVersion)
     return ok(undefined)
   }
 
@@ -724,10 +731,12 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     if (!fetched.ok) return err(fetched.error)
 
     const serverPlanner = fetched.value.planner
-    adoptAck(fetched.value.ack)
 
+    // Adopted only once the copy is durable: a failed write would otherwise leave
+    // the version at the server's while the content is still the old local one.
     const localResult = await storage.saveToLocal(serverPlanner)
     if (!localResult.ok) return localResult
+    adoptAck(fetched.value.ack)
 
     if (onServerReload) {
       onServerReload(serverPlanner)

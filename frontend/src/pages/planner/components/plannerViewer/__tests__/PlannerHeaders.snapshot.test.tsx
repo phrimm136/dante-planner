@@ -45,7 +45,8 @@ vi.mock('@/shared/auth/hooks/useAuthQuery', () => ({
 vi.mock('../../../hooks/usePlannerStorage', () => ({
   usePlannerStorage: () => ({ saveToLocal: vi.fn(), deleteFromLocal: vi.fn() }),
 }))
-vi.mock('../../../hooks/usePlannerSyncAdapter', () => ({
+vi.mock('../../../hooks/usePlannerSyncAdapter', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../../hooks/usePlannerSyncAdapter')>()),
   usePlannerSyncAdapter: () => ({ syncToServer: vi.fn() }),
 }))
 vi.mock('../../../hooks/usePlannerConfig', () => ({
