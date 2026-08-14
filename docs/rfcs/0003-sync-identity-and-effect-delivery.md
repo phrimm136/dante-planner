@@ -36,8 +36,18 @@ for the searchable-value comparison, and the same fact governs the digest. A con
 `contentDigest` alongside `content` treats the digest as the identity of those bytes; it must not
 hash what it received and expect a match.
 
-Digest recomputation is therefore conditional on the document having actually moved this transaction,
-which is what `loadedContent` already answers.
+The string the write path receives is the output of the request DTO's `@Sanitized(PLANNER_CONTENT)`
+bind-time normalization — Jackson re-serialization plus any Tiptap URL rewrite — not the raw request
+body, so the digest identifies that normalized string.
+
+Digest recomputation is therefore conditional on the save carrying a content document at all, not on
+the document having changed. Every save whose request carried one re-derives the digest from it; a
+save carrying none leaves the digest over the string it already identifies. The digest is never
+computed from the loaded or stored column, so `loadedContent` cannot answer this question: a client
+that pulls a document and saves it back unchanged sends the stored form, and an equality test would
+leave the row identifying a string no live copy holds. A byte-identical resave therefore yields the
+same digest value, because the derivation is a pure function of the string — not because the write
+was skipped.
 
 ### Snippets
 
@@ -46,6 +56,14 @@ which is what `loadedContent` already answers.
 ```java
 @Column(name = "content_digest", columnDefinition = "BINARY(32)", nullable = false)
 private byte[] contentDigest;
+
+@Transient
+private boolean contentAssigned;
+
+public void setContent(String content) {
+    this.content = content;
+    this.contentAssigned = true;
+}
 
 private static byte[] digestOf(String content) {
     try {
@@ -65,12 +83,14 @@ protected void onCreate() {
         lastModifiedAt = Instant.now();
     }
     contentDigest = digestOf(content);
+    contentAssigned = false;
 }
 
 public void recordSave() {
     this.syncVersion = this.syncVersion + 1;
-    if (!Objects.equals(content, loadedContent)) {
+    if (contentAssigned) {
         this.contentDigest = digestOf(content);
+        this.contentAssigned = false;
     }
 }
 ```
@@ -168,6 +188,12 @@ array rather than an error; the array is not positionally aligned with the reque
 - New IT: save a document, read it back through `GET /api/planner/md/{id}`, and assert the returned
   digest equals SHA-256 of the *request* body, not of the response's `content` field. This is the
   lineage rule as an executable claim.
+- New IT: a request body whose `content` carries whitespace Jackson normalizes away — the returned
+  digest equals SHA-256 of the sanitizer's output and not of the raw body, pinning which string the
+  digest names.
+- New IT: save, `GET`, then resave the returned `content` verbatim — the response digest equals
+  SHA-256 of that second request's post-sanitization string. A no-op resave is what an equality-based
+  recompute rule silently gets wrong, and what RFC 0004's `adoptAck` comparison depends on.
 - New IT: `POST /api/planner/md/batch` with a mix of owned, foreign, deleted and unknown ids returns
   only the owned live ones; over `BATCH_PULL_MAX_IDS` ids returns 400.
 - Migration smoke test covers the backfill via the updated seed.
