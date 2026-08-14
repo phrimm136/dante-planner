@@ -42,7 +42,9 @@ desync class from silent to loud.
 - `TokenBlacklistService` and `RefreshRotationService` are coupled bidirectionally: the logout Lua
   in the blacklist writes rotation's `REVOKED_FIELD` into `rt:fam:*` hashes, and rotation's Lua
   reads the blacklist's `uinv:` keys. Blacklist reads fail open on a replica template; rotation
-  fails closed on the primary. The coupling at proposal time, verbatim:
+  fails closed on the primary. The family hash tracks per-jti states `UNUSED_LATEST`, `PENDING`,
+  `RETIRED`, `SUPERSEDED`, plus a legacy `USED` spelling matched in the theft check. The coupling
+  at proposal time, verbatim:
 
   ```java
   // TokenBlacklistService — the logout Lua writes rotation's namespace:
@@ -122,7 +124,7 @@ ArchUnit rule banning `@Value` constructor parameters outside `@ConfigurationPro
 - legacy-lineage-removal — the non-lineage rotation branch, legacy admission, synthesized family ids and their call sites, and the rollout flag are gone
 - session-refresher — the filter delegates refresh orchestration to one collaborator; behavior unchanged (after: legacy-lineage-removal)
 - rotation-properties — jwt.rotation.* binds once, nested under the existing jwt properties class (after: legacy-lineage-removal)
-- token-lifecycle-consolidation — one TokenLifecycleService owns access hashes, user invalidation, families, and both Lua scripts; logout drops the refresh token revocation (after: legacy-lineage-removal)
+- token-lifecycle-consolidation — one TokenLifecycleService owns access hashes, user invalidation, families, and both Lua scripts; logout drops the refresh token revocation; the family state machine is renamed and pre-rename values are converted at boot (after: legacy-lineage-removal)
 - notification-factories — named per-type factories; the 3-arg constructor is gone
 - report-received-wiring — REPORT_RECEIVED flows from both report services to admin inboxes through the outbox; the NotificationType matrix test exists (after: notification-factories)
 - upsert-restriction-gate — restricted users cannot mutate published planners; the FE disable narrows to published planners
@@ -173,6 +175,11 @@ Scenario: Logout kills the family and the access token atomically (token-lifecyc
   Given a logged-in session with a lineage refresh token
   When the user logs out and the old refresh token is later replayed
   Then rotation of that family fails as revoked, the old access token is rejected with 401, and the logout call recorded exactly one access-token revocation and one family revocation
+
+Scenario: Pre-rename family state survives the rename (token-lifecycle-consolidation)
+  Given family hashes written before the release hold UNUSED_LATEST, PENDING, or USED state prefixes
+  When the release boots and the converter completes before readiness
+  Then every jti field's state prefix is one of LIVE, IN_GRACE, RETIRED, SUPERSEDED, and no family key's TTL changed
 
 Scenario: A comment notification is built by its factory (notification-factories)
   Given a comment lands on a published planner
@@ -276,6 +283,20 @@ Scenario: The dead command surface is gone (dead-surface-removal)
   family revocation covers it and is stronger under outage, because the hash check fails open
   while the family check fails closed. REJECTED: keeping both — a fail-open backup behind a
   fail-closed primary adds storage, not guarantee.
+- @auth @rotation @naming — The persisted rotation states rename to `LIVE` (was `UNUSED_LATEST`)
+  and `IN_GRACE` (was `PENDING`), and the legacy `USED` spelling is dropped after conversion to
+  `RETIRED`; the theft arm's spellings (`RETIRED`, `SUPERSEDED`) are untouched. REJECTED: keeping
+  the old spellings — the state machine is the security argument, and its names misstated it.
+- @auth @rotation @migration — Pre-rename values are batch-converted by an idempotent boot-time
+  converter running before readiness, valid only because the deployment is big-bang (no old
+  writer survives into the new keyspace); the converter is deleted in the first release after it
+  has run in production. REJECTED: a synonym window inside the script — its removal step edits
+  the security-critical Lua a third time, where the converter's removal deletes an inert class.
+- @auth @logout (taste) — The logout script keeps its array-based segmented-KEYS form although
+  the population shrinks to at most one token and one family, because revocations are built
+  conditionally and the legal shapes are {0,1} tokens x {0,1} families. REJECTED: fixed
+  positional keys — they need sentinel keys or four call variants, moving shape-handling from
+  one Lua loop into the caller.
 - @config — `jwt.rotation.*` binds once, nested under the existing `jwt` properties class,
   absorbing the standalone rotation flag bean. REJECTED: three parallel binding mechanisms for
   one prefix.
@@ -347,6 +368,9 @@ Scenario: The dead command surface is gone (dead-surface-removal)
 - Consolidation: a regression in either failure posture is caught by the existing degradation
   integration tests, which must pass unmodified.
 - Report fanout: bounded by admin count and the dedup key.
+- The converter decision is contingent on big-bang deployment: switching to rolling deploys
+  before this ships reopens it (old pods would write old spellings past conversion), detected at
+  review of any deploy-mode change, undone by adding the synonym window the decision rejected.
 
 ## Open questions
 
