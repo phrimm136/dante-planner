@@ -13,7 +13,7 @@
 import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ErrorBoundary } from 'react-error-boundary'
-import { ExtractionCalculator } from '@/pages/extraction'
+import { ExtractionCalculator } from './components/ExtractionCalculator'
 import { SECTION_STYLES } from '@/lib/constants'
 
 /**
