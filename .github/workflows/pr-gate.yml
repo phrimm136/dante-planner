@@ -216,14 +216,24 @@ jobs:
           node-version: '24'
           cache: 'yarn'
           cache-dependency-path: frontend/yarn.lock
+      - name: FE Install
+        working-directory: ./frontend
+        run: yarn install --frozen-lockfile
+      - name: FE Typecheck
+        working-directory: ./frontend
+        run: yarn typecheck
       - name: FE Test
         working-directory: ./frontend
-        run: |
-          yarn install --frozen-lockfile
-          yarn test
+        run: yarn test:coverage
       - name: FE Lint
         working-directory: ./frontend
         run: yarn lint
+      - name: FE False Positive Scan
+        working-directory: ./frontend
+        run: yarn check:fp
+      - name: FE Compiler Bailouts
+        working-directory: ./frontend
+        run: yarn check:compiler-bailouts
       - name: FE Format Check
         working-directory: ./frontend
         run: yarn fmt:check
