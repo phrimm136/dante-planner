@@ -5,6 +5,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.sentry.Sentry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.entity.SseEventType;
@@ -27,7 +28,9 @@ public class SsePublisher {
 
     private static final String DROPPED_COUNTER = "sse.publish.dropped";
 
-    private final StringRedisTemplate stringRedisTemplate;
+    private static final String UNSERIALIZABLE_COUNTER = "sse.publish.unserializable";
+
+    private final SseChannelSender channelSender;
     private final ObjectMapper objectMapper;
     private final MeterRegistry meterRegistry;
 
@@ -124,6 +127,11 @@ public class SsePublisher {
      * caller — fan-out is best-effort delivery, and the triggering write must survive a
      * Redis outage (degrade by operation).
      *
+     * <p>The two failures are counted apart because they mean opposite things. An unreachable
+     * Redis is transient and self-repairing once the retries behind {@link SseChannelSender} give
+     * up; an envelope that will not serialize is a defect that repeats on every publish of its
+     * shape and nothing in the runtime will fix it.</p>
+     *
      * @param channel  the Redis pub/sub channel
      * @param envelope the envelope to serialize and publish
      */
@@ -132,12 +140,14 @@ public class SsePublisher {
         try {
             json = objectMapper.writeValueAsString(envelope);
         } catch (JsonProcessingException e) {
+            meterRegistry.counter(UNSERIALIZABLE_COUNTER, "channel", channel.name()).increment();
             log.error("Failed to serialize SSE envelope for channel {} type {}", channel, envelope.type(), e);
+            Sentry.captureException(e);
             return;
         }
 
         try {
-            stringRedisTemplate.convertAndSend(channel.topic(), json);
+            channelSender.send(channel.topic(), json);
         } catch (DataAccessException e) {
             meterRegistry.counter(DROPPED_COUNTER, "channel", channel.name()).increment();
             log.warn("SSE publish skipped, Redis unreachable (transient): channel {} type {}: {}",

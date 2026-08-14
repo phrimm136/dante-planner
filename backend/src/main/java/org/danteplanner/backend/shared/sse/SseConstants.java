@@ -24,6 +24,17 @@ public final class SseConstants {
      */
     public static final int CAPACITY_RETRY_AFTER_SECONDS = 13;
 
+    /**
+     * Attempts one publish gets before the drop counter moves. A Redis failover reassigns the
+     * primary in well under the window these three attempts span.
+     */
+    public static final int PUBLISH_MAX_ATTEMPTS = 3;
+
+    /** Wait before the second publish attempt, doubled for the third. */
+    public static final long PUBLISH_RETRY_DELAY_MS = 50L;
+
+    public static final double PUBLISH_RETRY_MULTIPLIER = 2.0;
+
     private SseConstants() {
     }
 }
