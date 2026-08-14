@@ -223,7 +223,7 @@ export function PlannerEditorShell({
     clearError,
     save,
     resolveConflict,
-    hasLocalUnsavedChanges,
+    isDirty,
     lastSavedAt,
   } = usePlannerSave({
     getState,
@@ -263,21 +263,22 @@ export function PlannerEditorShell({
     clearError()
   }, [saveError, clearError])
 
-  // Warn before closing tab only if there are unsaved local changes (not yet auto-saved to IndexedDB)
+  // Warn before closing the tab if changes have not reached IndexedDB yet. The
+  // listener is registered for the whole mount and asks at fire time, because an
+  // edit can arrive between renders and the close would then go unwarned.
   // Skip if intentional navigation (e.g., "Keep Both" conflict resolution)
   useEffect(() => {
-    if (!hasLocalUnsavedChanges) return
-
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       // Skip warning during intentional navigation
       if (isIntentionalNavigationRef.current) return
+      if (!isDirty()) return
       e.preventDefault()
       e.returnValue = ''
     }
 
     window.addEventListener('beforeunload', handleBeforeUnload)
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
-  }, [hasLocalUnsavedChanges])
+  }, [isDirty])
 
   const {
     handleImport: handleDeckImport,
