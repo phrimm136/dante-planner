@@ -17,8 +17,8 @@ export { RecipeSection } from './components/RecipeSection'
 export { GiftNameI18n } from './components/GiftNameI18n'
 export { EnhancementsPanelI18n } from './components/EnhancementsPanelI18n'
 export { EGOGiftKeywordFilter } from './components/EGOGiftKeywordFilter'
-export { CompactDifficultyFilter } from './components/CompactDifficultyFilter'
-export { CompactTierFilter } from './components/CompactTierFilter'
+export { DifficultyFilter } from './components/DifficultyFilter'
+export { TierFilter } from './components/TierFilter'
 
 export {
   useEGOGiftListData,

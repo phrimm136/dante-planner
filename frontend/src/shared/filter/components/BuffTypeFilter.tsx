@@ -1,22 +1,22 @@
 import { useTranslation } from 'react-i18next'
-import { CompactIconFilter } from './CompactIconFilter'
+import { IconFilter } from './IconFilter'
 import { BUFF_TYPES } from '@/shared/gameData'
 
 import type { BuffType } from '@/shared/gameData'
 
-interface CompactBuffTypeFilterProps {
+interface BuffTypeFilterProps {
   selected: Set<BuffType>
   onBuffTypesChange: (types: Set<BuffType>) => void
 }
 
 /**
- * Compact buff type filter for keyword filter sidebar.
+ * Buff type filter for keyword filter sidebar.
  * Three text-label buttons: Positive, Negative, Neutral.
  *
- * Pattern: Wraps CompactIconFilter in text mode (no getIconPath)
- * like CompactAttributeTypeFilter wraps it in icon mode.
+ * Pattern: Wraps IconFilter in text mode (no getIconPath)
+ * like AttributeTypeFilter wraps it in icon mode.
  */
-export function CompactBuffTypeFilter({ selected, onBuffTypesChange }: CompactBuffTypeFilterProps) {
+export function BuffTypeFilter({ selected, onBuffTypesChange }: BuffTypeFilterProps) {
   const { t } = useTranslation('database')
 
   const getLabel = (option: string): string => {
@@ -25,7 +25,7 @@ export function CompactBuffTypeFilter({ selected, onBuffTypesChange }: CompactBu
   }
 
   return (
-    <CompactIconFilter
+    <IconFilter
       options={BUFF_TYPES}
       selectedOptions={selected as Set<string>}
       onSelectionChange={(types) => {

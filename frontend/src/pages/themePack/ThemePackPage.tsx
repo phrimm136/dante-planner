@@ -6,8 +6,8 @@ import { useSetFilters } from '@/components/hooks/useSetFilters'
 import { EntityListPage } from '@/shared/filter'
 import { FilterPageLayout } from '@/shared/filter'
 import { FilterSectionList, filterSection } from '@/shared/filter'
-import { CompactDungeonDifficultyFilter } from '@/shared/filter'
-import { CompactFloorFilter } from '@/shared/filter'
+import { DungeonDifficultyFilter } from '@/shared/filter'
+import { FloorFilter } from '@/shared/filter'
 import { SearchBar } from '@/shared/filter'
 import { EGOGiftFilterDropdown } from '@/pages/egoGift'
 import { ThemePackList } from '@/pages/themePack'
@@ -42,7 +42,7 @@ function ThemePackPageShell() {
       key: 'selectedDifficulties',
       titleKey: 'filters.difficulty',
       titleFallback: 'Difficulty',
-      Component: CompactDungeonDifficultyFilter,
+      Component: DungeonDifficultyFilter,
       selected: filters.selectedDifficulties,
       onSelectionChange: setters.selectedDifficulties,
     }),
@@ -53,7 +53,7 @@ function ThemePackPageShell() {
       key: 'selectedFloors',
       titleKey: 'filters.floor',
       titleFallback: 'Floor',
-      Component: CompactFloorFilter,
+      Component: FloorFilter,
       selected: filters.selectedFloors,
       onSelectionChange: setters.selectedFloors,
     }),

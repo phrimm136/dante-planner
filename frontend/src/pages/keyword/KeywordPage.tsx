@@ -9,7 +9,7 @@ import type { KeywordFacetState } from './lib/keywordFilter'
 import { EntityListPage } from '@/shared/filter'
 import { FilterPageLayout } from '@/shared/filter'
 import { FilterSection } from '@/shared/filter'
-import { CompactBuffTypeFilter } from '@/shared/filter'
+import { BuffTypeFilter } from '@/shared/filter'
 import { SearchBar } from '@/shared/filter'
 import { IdentityFilterDropdown } from '@/pages/identity'
 import { EGOFilterDropdown } from '@/pages/ego'
@@ -83,7 +83,7 @@ function KeywordPageShell() {
   const primaryFilters = (
     <>
       <FilterSection title={t('keyword.buffType')} activeCount={filters.selectedBuffTypes.size}>
-        <CompactBuffTypeFilter
+        <BuffTypeFilter
           selected={filters.selectedBuffTypes}
           onBuffTypesChange={setters.selectedBuffTypes}
         />

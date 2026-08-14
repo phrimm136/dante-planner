@@ -1,24 +1,24 @@
-import { CompactIconFilter } from './CompactIconFilter'
+import { IconFilter } from './IconFilter'
 import { AFFINITIES, type SkillAttributeType } from '@/shared/gameData'
 import { getAffinityIconPath } from '@/shared/assets'
 
-interface CompactSkillAttributeFilterProps {
+interface SkillAttributeFilterProps {
   selected: Set<SkillAttributeType>
   onSelectionChange: (attributes: Set<SkillAttributeType>) => void
 }
 
 /**
- * Compact skill attribute icon filter for filter sidebar
+ * Skill attribute icon filter for filter sidebar
  * 7 affinity icons displayed in a 7-column grid (1 row)
  *
- * Pattern: Wraps CompactIconFilter like SkillAttributeFilter wraps IconFilter
+ * Pattern: Wraps IconFilter like SkillAttributeFilter wraps IconFilter
  */
-export function CompactSkillAttributeFilter({
+export function SkillAttributeFilter({
   selected,
   onSelectionChange,
-}: CompactSkillAttributeFilterProps) {
+}: SkillAttributeFilterProps) {
   return (
-    <CompactIconFilter
+    <IconFilter
       options={AFFINITIES}
       selectedOptions={selected}
       onSelectionChange={onSelectionChange}

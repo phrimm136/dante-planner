@@ -3,7 +3,7 @@ import { getKeywordDisplayName } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 import type { ReactNode } from 'react'
 
-interface CompactIconFilterProps<T extends string = string> {
+interface IconFilterProps<T extends string = string> {
   options: readonly T[]
   selectedOptions: Set<T>
   onSelectionChange: (options: Set<T>) => void
@@ -23,7 +23,7 @@ interface CompactIconFilterProps<T extends string = string> {
 }
 
 /**
- * Compact filter for filter sidebar - supports both icon and text modes
+ * Filter for filter sidebar - supports both icon and text modes
  *
  * Modes:
  * - Icon mode (getIconPath provided): Renders icon buttons
@@ -35,7 +35,7 @@ interface CompactIconFilterProps<T extends string = string> {
  *
  * Reset is the parent's "Reset All" unless onClearAll is passed.
  */
-export function CompactIconFilter<T extends string>({
+export function IconFilter<T extends string>({
   options,
   selectedOptions,
   onSelectionChange,
@@ -46,7 +46,7 @@ export function CompactIconFilter<T extends string>({
   layout = 'wrap',
   onClearAll,
   children,
-}: CompactIconFilterProps<T>) {
+}: IconFilterProps<T>) {
   const { t } = useTranslation()
   const clearAllLabel = t('filters.resetAll', 'Reset All')
   // Determine mode: icon vs text

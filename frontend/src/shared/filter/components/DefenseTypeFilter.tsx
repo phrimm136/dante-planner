@@ -1,18 +1,18 @@
-import { CompactIconFilter } from './CompactIconFilter'
+import { IconFilter } from './IconFilter'
 import { DEF_TYPES, type DefType } from '@/shared/gameData'
 import { getDefenseTypeIconPath } from '@/shared/assets'
 
-interface CompactDefenseTypeFilterProps {
+interface DefenseTypeFilterProps {
   selected: Set<DefType>
   onSelectionChange: (types: Set<DefType>) => void
 }
 
-export function CompactDefenseTypeFilter({
+export function DefenseTypeFilter({
   selected,
   onSelectionChange,
-}: CompactDefenseTypeFilterProps) {
+}: DefenseTypeFilterProps) {
   return (
-    <CompactIconFilter
+    <IconFilter
       options={DEF_TYPES}
       selectedOptions={selected}
       onSelectionChange={onSelectionChange}

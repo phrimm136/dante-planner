@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 
-import { CompactIconFilter } from '@/shared/filter'
+import { IconFilter } from '@/shared/filter'
 import { getKeywordIconPath } from '@/shared/assets'
 import { KEYWORD_ORDER } from '@/shared/gameData'
 
@@ -42,7 +42,7 @@ export function EGOGiftKeywordFilter({
   const isNoneSelected = selected.has('None')
 
   return (
-    <CompactIconFilter
+    <IconFilter
       options={iconKeywords}
       selectedOptions={selected}
       onSelectionChange={onSelectionChange}
@@ -73,6 +73,6 @@ export function EGOGiftKeywordFilter({
           <rect x="30" y="30" width="40" height="40" fill="currentColor" />
         </svg>
       </button>
-    </CompactIconFilter>
+    </IconFilter>
   )
 }

@@ -9,12 +9,12 @@ import type { FilterStore } from '@/components/hooks/useSetFilters'
 import { EntityListPage } from '@/shared/filter'
 import { FilterPageLayout } from '@/shared/filter'
 import { FilterSectionList, filterSection } from '@/shared/filter'
-import { CompactSinnerFilter } from '@/shared/filter'
-import { CompactKeywordFilter } from '@/shared/filter'
-import { CompactSkillAttributeFilter } from '@/shared/filter'
-import { CompactAttackTypeFilter } from '@/shared/filter'
-import { CompactDefenseTypeFilter } from '@/shared/filter'
-import { CompactRarityFilter } from '@/shared/filter'
+import { SinnerFilter } from '@/shared/filter'
+import { KeywordFilter } from '@/shared/filter'
+import { SkillAttributeFilter } from '@/shared/filter'
+import { AttackTypeFilter } from '@/shared/filter'
+import { DefenseTypeFilter } from '@/shared/filter'
+import { RarityFilter } from '@/shared/filter'
 import { SeasonDropdown } from '@/shared/filter'
 import { UnitKeywordDropdown } from '@/shared/filter'
 import { BattleKeywordDropdown } from '@/shared/filter'
@@ -91,7 +91,7 @@ function IdentityPageShell() {
       titleKey: 'filters.sinner',
       titleFallback: 'Sinner',
       defaultExpanded: true,
-      Component: CompactSinnerFilter,
+      Component: SinnerFilter,
       selected: filters.selectedSinners,
       onSelectionChange: setters.selectedSinners,
     }),
@@ -100,7 +100,7 @@ function IdentityPageShell() {
       titleKey: 'filters.keyword',
       titleFallback: 'Keyword',
       defaultExpanded: true,
-      Component: CompactKeywordFilter,
+      Component: KeywordFilter,
       selected: filters.selectedKeywords,
       onSelectionChange: setters.selectedKeywords,
     }),
@@ -113,7 +113,7 @@ function IdentityPageShell() {
       titleKey: 'filters.skillAttribute',
       titleFallback: 'Skill Attribute',
       defaultExpanded: false,
-      Component: CompactSkillAttributeFilter,
+      Component: SkillAttributeFilter,
       selected: filters.selectedAttributes,
       onSelectionChange: setters.selectedAttributes,
     }),
@@ -122,7 +122,7 @@ function IdentityPageShell() {
       titleKey: 'filters.attackType',
       titleFallback: 'Attack Type',
       defaultExpanded: false,
-      Component: CompactAttackTypeFilter,
+      Component: AttackTypeFilter,
       selected: filters.selectedAtkTypes,
       onSelectionChange: setters.selectedAtkTypes,
     }),
@@ -131,7 +131,7 @@ function IdentityPageShell() {
       titleKey: 'filters.defenseType',
       titleFallback: 'Defense Type',
       defaultExpanded: false,
-      Component: CompactDefenseTypeFilter,
+      Component: DefenseTypeFilter,
       selected: filters.selectedDefTypes,
       onSelectionChange: setters.selectedDefTypes,
     }),
@@ -140,7 +140,7 @@ function IdentityPageShell() {
       titleKey: 'filters.rank',
       titleFallback: 'Rarity',
       defaultExpanded: false,
-      Component: CompactRarityFilter,
+      Component: RarityFilter,
       selected: filters.selectedRaritys,
       onSelectionChange: setters.selectedRaritys,
     }),

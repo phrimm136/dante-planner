@@ -60,7 +60,7 @@ function selectSearchQuery<T>(state: FilterState<T>): string {
  *   selectedSeasons: new Set<Season>(),
  * })
  *
- * <CompactSinnerFilter
+ * <SinnerFilter
  *   selected={filters.selectedSinners}
  *   onSelectionChange={setters.selectedSinners}
  * />

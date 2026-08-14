@@ -11,12 +11,12 @@ import { EntityListPage } from '@/shared/filter'
 import { FilterPageLayout } from '@/shared/filter'
 import { FilterSectionList, filterSection } from '@/shared/filter'
 import { EGOGiftKeywordFilter } from '@/pages/egoGift'
-import { CompactDifficultyFilter } from '@/pages/egoGift'
-import { CompactTierFilter } from '@/pages/egoGift'
+import { DifficultyFilter } from '@/pages/egoGift'
+import { TierFilter } from '@/pages/egoGift'
 import { ThemePackFilterDropdown } from '@/pages/themePack'
 import { BattleKeywordDropdown } from '@/shared/filter'
-import { CompactAttributeTypeFilter } from '@/shared/filter'
-import { CompactIconFilter } from '@/shared/filter'
+import { AttributeTypeFilter } from '@/shared/filter'
+import { IconFilter } from '@/shared/filter'
 import { SearchBar } from '@/shared/filter'
 import { EGOGiftList } from '@/pages/egoGift'
 import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
@@ -30,7 +30,7 @@ function BooleanFilter({
   onSelectionChange: (options: Set<string>) => void
 }) {
   return (
-    <CompactIconFilter
+    <IconFilter
       options={BOOLEAN_FILTER_OPTIONS}
       selectedOptions={selected}
       onSelectionChange={onSelectionChange}
@@ -112,7 +112,7 @@ function EGOGiftPageShell() {
       key: 'selectedDifficulties',
       titleKey: 'filters.difficulty',
       titleFallback: 'Difficulty',
-      Component: CompactDifficultyFilter,
+      Component: DifficultyFilter,
       selected: filters.selectedDifficulties,
       onSelectionChange: setters.selectedDifficulties,
     }),
@@ -124,7 +124,7 @@ function EGOGiftPageShell() {
       key: 'selectedTiers',
       titleKey: 'filters.tier',
       titleFallback: 'Tier',
-      Component: CompactTierFilter,
+      Component: TierFilter,
       selected: filters.selectedTiers,
       onSelectionChange: setters.selectedTiers,
     }),
@@ -132,7 +132,7 @@ function EGOGiftPageShell() {
       key: 'selectedAttributeTypes',
       titleKey: 'filters.attributeType',
       titleFallback: 'Attribute',
-      Component: CompactAttributeTypeFilter,
+      Component: AttributeTypeFilter,
       selected: filters.selectedAttributeTypes,
       onSelectionChange: setters.selectedAttributeTypes,
     }),

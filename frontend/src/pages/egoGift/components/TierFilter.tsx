@@ -1,24 +1,24 @@
-import { CompactIconFilter } from '@/shared/filter'
+import { IconFilter } from '@/shared/filter'
 import { EGO_GIFT_TIERS } from '@/shared/gameData'
 
 import type { EGOGiftTier } from '@/shared/gameData'
 
-interface CompactTierFilterProps {
+interface TierFilterProps {
   selected: Set<EGOGiftTier>
   onSelectionChange: (tiers: Set<EGOGiftTier>) => void
 }
 
 /**
- * Compact tier text filter for filter sidebar
+ * Tier text filter for filter sidebar
  * 6 text buttons (I, II, III, IV, V, EX) displayed in a flex row
  *
  * Reset is handled by parent "Reset All" button, not individual filters.
  *
- * Pattern: Wraps CompactIconFilter in text mode (no getIconPath)
+ * Pattern: Wraps IconFilter in text mode (no getIconPath)
  */
-export function CompactTierFilter({ selected, onSelectionChange }: CompactTierFilterProps) {
+export function TierFilter({ selected, onSelectionChange }: TierFilterProps) {
   return (
-    <CompactIconFilter
+    <IconFilter
       options={EGO_GIFT_TIERS}
       selectedOptions={selected as Set<string>}
       onSelectionChange={(options) => {

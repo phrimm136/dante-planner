@@ -1,21 +1,21 @@
 import { getSinnerIconPath } from '@/shared/assets'
-import { CompactIconFilter } from './CompactIconFilter'
+import { IconFilter } from './IconFilter'
 import { SINNERS } from '@/shared/gameData'
 
-interface CompactSinnerFilterProps {
+interface SinnerFilterProps {
   selected: Set<string>
   onSelectionChange: (sinners: Set<string>) => void
 }
 
 /**
- * Compact sinner icon filter for filter sidebar
+ * Sinner icon filter for filter sidebar
  * 12 sinners displayed in a 6-column grid (2 rows)
  *
- * Pattern: Wraps CompactIconFilter like SinnerFilter wraps IconFilter
+ * Pattern: Wraps IconFilter like SinnerFilter wraps IconFilter
  */
-export function CompactSinnerFilter({ selected, onSelectionChange }: CompactSinnerFilterProps) {
+export function SinnerFilter({ selected, onSelectionChange }: SinnerFilterProps) {
   return (
-    <CompactIconFilter
+    <IconFilter
       options={SINNERS}
       selectedOptions={selected}
       onSelectionChange={onSelectionChange}

@@ -1,23 +1,23 @@
-import { CompactIconFilter } from './CompactIconFilter'
+import { IconFilter } from './IconFilter'
 import { THEME_PACK_DIFFICULTIES, THEME_PACK_DIFFICULTY_LABELS } from '@/shared/gameData'
 
 import type { DungeonIdx } from '@/shared/gameData'
 
-interface CompactDungeonDifficultyFilterProps {
+interface DungeonDifficultyFilterProps {
   selected: Set<DungeonIdx>
   onSelectionChange: (difficulties: Set<DungeonIdx>) => void
 }
 
 /**
- * Compact dungeon difficulty filter for theme pack filtering.
+ * Dungeon difficulty filter for theme pack filtering.
  * 4 text buttons: Normal / Hard / Infinity / Extreme
  */
-export function CompactDungeonDifficultyFilter({
+export function DungeonDifficultyFilter({
   selected,
   onSelectionChange,
-}: CompactDungeonDifficultyFilterProps) {
+}: DungeonDifficultyFilterProps) {
   return (
-    <CompactIconFilter
+    <IconFilter
       options={THEME_PACK_DIFFICULTIES.map(String)}
       selectedOptions={new Set(Array.from(selected).map(String))}
       onSelectionChange={(options) => {

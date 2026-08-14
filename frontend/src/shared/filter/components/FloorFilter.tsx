@@ -1,20 +1,20 @@
-import { CompactIconFilter } from './CompactIconFilter'
+import { IconFilter } from './IconFilter'
 import { THEME_PACK_FLOORS, THEME_PACK_FLOOR_LABELS } from '@/shared/gameData'
 
 import type { ThemePackFloor } from '@/shared/gameData'
 
-interface CompactFloorFilterProps {
+interface FloorFilterProps {
   selected: Set<ThemePackFloor>
   onSelectionChange: (floors: Set<ThemePackFloor>) => void
 }
 
 /**
- * Compact floor filter for theme pack filtering.
+ * Floor filter for theme pack filtering.
  * 5 text buttons: 1F / 2F / 3F / 4F / 5F
  */
-export function CompactFloorFilter({ selected, onSelectionChange }: CompactFloorFilterProps) {
+export function FloorFilter({ selected, onSelectionChange }: FloorFilterProps) {
   return (
-    <CompactIconFilter
+    <IconFilter
       options={THEME_PACK_FLOORS.map(String)}
       selectedOptions={new Set(Array.from(selected).map(String))}
       onSelectionChange={(options) => {

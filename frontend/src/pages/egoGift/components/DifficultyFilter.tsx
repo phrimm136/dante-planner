@@ -1,4 +1,4 @@
-import { CompactIconFilter } from '@/shared/filter'
+import { IconFilter } from '@/shared/filter'
 import { EGO_GIFT_DIFFICULTIES } from '@/shared/gameData'
 
 import type { EGOGiftDifficulty } from '@/shared/gameData'
@@ -10,25 +10,25 @@ const DIFFICULTY_LABELS: Record<EGOGiftDifficulty, string> = {
   extreme: 'Extreme',
 }
 
-interface CompactDifficultyFilterProps {
+interface DifficultyFilterProps {
   selected: Set<EGOGiftDifficulty>
   onSelectionChange: (difficulties: Set<EGOGiftDifficulty>) => void
 }
 
 /**
- * Compact difficulty text filter for filter sidebar
+ * Difficulty text filter for filter sidebar
  * 3 text buttons displayed in a flex row
  *
  * Reset is handled by parent "Reset All" button, not individual filters.
  *
- * Pattern: Wraps CompactIconFilter in text mode (no getIconPath)
+ * Pattern: Wraps IconFilter in text mode (no getIconPath)
  */
-export function CompactDifficultyFilter({
+export function DifficultyFilter({
   selected,
   onSelectionChange,
-}: CompactDifficultyFilterProps) {
+}: DifficultyFilterProps) {
   return (
-    <CompactIconFilter
+    <IconFilter
       options={EGO_GIFT_DIFFICULTIES}
       selectedOptions={selected as Set<string>}
       onSelectionChange={(options) => {

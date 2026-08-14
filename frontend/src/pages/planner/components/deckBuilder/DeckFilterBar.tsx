@@ -18,13 +18,13 @@ import type { EgoType } from '@/shared/gameData'
 
 import { SearchBar } from '@/shared/filter'
 import { FilterSection } from '@/shared/filter'
-import { CompactSinnerFilter } from '@/shared/filter'
-import { CompactKeywordFilter } from '@/shared/filter'
-import { CompactSkillAttributeFilter } from '@/shared/filter'
-import { CompactAttackTypeFilter } from '@/shared/filter'
-import { CompactDefenseTypeFilter } from '@/shared/filter'
-import { CompactRarityFilter } from '@/shared/filter'
-import { CompactEGOTypeFilter } from '@/shared/filter'
+import { SinnerFilter } from '@/shared/filter'
+import { KeywordFilter } from '@/shared/filter'
+import { SkillAttributeFilter } from '@/shared/filter'
+import { AttackTypeFilter } from '@/shared/filter'
+import { DefenseTypeFilter } from '@/shared/filter'
+import { RarityFilter } from '@/shared/filter'
+import { EGOTypeFilter } from '@/shared/filter'
 import { SeasonDropdown } from '@/shared/filter'
 import { UnitKeywordDropdown } from '@/shared/filter'
 import { BattleKeywordDropdown } from '@/shared/filter'
@@ -52,7 +52,7 @@ interface FilterControlProps {
 
 function SinnerControl({ state, setField }: FilterControlProps) {
   return (
-    <CompactSinnerFilter
+    <SinnerFilter
       selected={state.selectedSinners}
       onSelectionChange={setField('selectedSinners')}
     />
@@ -61,7 +61,7 @@ function SinnerControl({ state, setField }: FilterControlProps) {
 
 function KeywordControl({ state, setField }: FilterControlProps) {
   return (
-    <CompactKeywordFilter
+    <KeywordFilter
       selected={state.selectedKeywords}
       onSelectionChange={setField('selectedKeywords')}
     />
@@ -70,7 +70,7 @@ function KeywordControl({ state, setField }: FilterControlProps) {
 
 function SkillAttributeControl({ state, setField }: FilterControlProps) {
   return (
-    <CompactSkillAttributeFilter
+    <SkillAttributeFilter
       selected={state.selectedAttributes}
       onSelectionChange={setField('selectedAttributes')}
     />
@@ -79,7 +79,7 @@ function SkillAttributeControl({ state, setField }: FilterControlProps) {
 
 function AttackTypeControl({ state, setField }: FilterControlProps) {
   return (
-    <CompactAttackTypeFilter
+    <AttackTypeFilter
       selected={state.selectedAtkTypes}
       onSelectionChange={setField('selectedAtkTypes')}
     />
@@ -88,7 +88,7 @@ function AttackTypeControl({ state, setField }: FilterControlProps) {
 
 function DefenseTypeControl({ state, setField }: FilterControlProps) {
   return (
-    <CompactDefenseTypeFilter
+    <DefenseTypeFilter
       selected={state.selectedDefTypes}
       onSelectionChange={setField('selectedDefTypes')}
     />
@@ -99,7 +99,7 @@ function EGOTypeControl({ state, setField }: FilterControlProps) {
   const setEgoTypes = setField('selectedEgoTypes')
 
   return (
-    <CompactEGOTypeFilter
+    <EGOTypeFilter
       selected={state.selectedEgoTypes as Set<string>}
       onSelectionChange={(types) => {
         setEgoTypes(types as Set<EgoType>)
@@ -110,7 +110,7 @@ function EGOTypeControl({ state, setField }: FilterControlProps) {
 
 function RarityControl({ state, setField }: FilterControlProps) {
   return (
-    <CompactRarityFilter
+    <RarityFilter
       selected={state.selectedRaritys}
       onSelectionChange={setField('selectedRaritys')}
     />

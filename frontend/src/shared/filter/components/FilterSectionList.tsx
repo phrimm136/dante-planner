@@ -46,7 +46,7 @@ interface FilterSectionSpec<TSelection extends { readonly size: number }, TProps
  *   key: 'selectedSinners',
  *   titleKey: 'filters.sinner',
  *   titleFallback: 'Sinner',
- *   Component: CompactSinnerFilter,
+ *   Component: SinnerFilter,
  *   selected: filters.selectedSinners,
  *   onSelectionChange: setters.selectedSinners,
  * })

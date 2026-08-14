@@ -9,11 +9,11 @@ import { calculateActiveFilterCount } from '@/shared/filter'
 import { useSetFilters } from '@/components/hooks/useSetFilters'
 import type { FilterStore } from '@/components/hooks/useSetFilters'
 import { FilterSectionList, filterSection } from '@/shared/filter'
-import { CompactSinnerFilter } from '@/shared/filter'
-import { CompactKeywordFilter } from '@/shared/filter'
-import { CompactAttackTypeFilter } from '@/shared/filter'
-import { CompactEGOTypeFilter } from '@/shared/filter'
-import { CompactSkillAttributeFilter } from '@/shared/filter'
+import { SinnerFilter } from '@/shared/filter'
+import { KeywordFilter } from '@/shared/filter'
+import { AttackTypeFilter } from '@/shared/filter'
+import { EGOTypeFilter } from '@/shared/filter'
+import { SkillAttributeFilter } from '@/shared/filter'
 import { SeasonDropdown } from '@/shared/filter'
 import { BattleKeywordDropdown } from '@/shared/filter'
 import { EntityListPage } from '@/shared/filter'
@@ -95,7 +95,7 @@ function EGOPageShell() {
       titleKey: 'filters.sinner',
       titleFallback: 'Sinner',
       defaultExpanded: true,
-      Component: CompactSinnerFilter,
+      Component: SinnerFilter,
       selected: filters.selectedSinners,
       onSelectionChange: setters.selectedSinners,
     }),
@@ -104,7 +104,7 @@ function EGOPageShell() {
       titleKey: 'filters.keyword',
       titleFallback: 'Keyword',
       defaultExpanded: true,
-      Component: CompactKeywordFilter,
+      Component: KeywordFilter,
       selected: filters.selectedKeywords,
       onSelectionChange: setters.selectedKeywords,
     }),
@@ -117,7 +117,7 @@ function EGOPageShell() {
       titleKey: 'filters.skillAttribute',
       titleFallback: 'Skill Attribute',
       defaultExpanded: false,
-      Component: CompactSkillAttributeFilter,
+      Component: SkillAttributeFilter,
       selected: filters.selectedAttributes,
       onSelectionChange: setters.selectedAttributes,
     }),
@@ -126,7 +126,7 @@ function EGOPageShell() {
       titleKey: 'filters.attackType',
       titleFallback: 'Attack Type',
       defaultExpanded: false,
-      Component: CompactAttackTypeFilter,
+      Component: AttackTypeFilter,
       selected: filters.selectedAtkTypes,
       onSelectionChange: setters.selectedAtkTypes,
     }),
@@ -135,7 +135,7 @@ function EGOPageShell() {
       titleKey: 'filters.egoType',
       titleFallback: 'EGO Type',
       defaultExpanded: false,
-      Component: CompactEGOTypeFilter,
+      Component: EGOTypeFilter,
       selected: filters.selectedEGOTypes as Set<string>,
       onSelectionChange: (types: Set<string>) => {
         setters.selectedEGOTypes(types as Set<EgoType>)
