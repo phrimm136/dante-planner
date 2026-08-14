@@ -230,6 +230,21 @@ describe('useSseEngine — connection lifecycle', () => {
     expect(onUpdate.mock.calls[0][0].data).toBe('one\ntwo')
   })
 
+  it('drops a frame whose type is outside the vocabulary', async () => {
+    // The gate is the engine's, so every consumer inherits it — a server that
+    // starts naming an event the client does not know reaches no handler.
+    const onUpdate = vi.fn()
+    renderHook(() =>
+      useSseEngine(makeConfig({ handlers: { [SSE_EVENTS.COMMENT_ADDED]: onUpdate } })),
+    )
+    await advance(SSE_CONNECTION.INITIAL_DELAY)
+
+    emit(lastStream(), 'renamed', { plannerId: 'p1' })
+    await settle()
+
+    expect(onUpdate).not.toHaveBeenCalled()
+  })
+
   it('marks connected on the transport-level connected event', async () => {
     renderHook(() => useSseEngine(makeConfig()))
     await advance(SSE_CONNECTION.INITIAL_DELAY)

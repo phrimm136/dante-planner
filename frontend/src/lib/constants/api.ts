@@ -112,7 +112,7 @@ export const SSE_TRANSPORT = {
   RETRY_AFTER_HEADER: 'Retry-After',
   /** Status answered with a cooldown instead of a stream */
   RATE_LIMITED_STATUS: 429,
-  /** Status for a stream whose subject no longer exists; never retried */
+  /** Status a resource-named stream reads as its subject being gone; terminal only where the consumer opts in */
   STREAM_GONE_STATUS: 404,
   /** Milliseconds per second of `Retry-After` */
   RETRY_AFTER_UNIT_MS: 1000,
