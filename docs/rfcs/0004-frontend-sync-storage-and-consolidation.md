@@ -733,6 +733,21 @@ const pendingRef = useRef<(() => void) | null>(null)
 useEffect(() => () => pendingRef.current?.(), [])
 ```
 
+**Delivery is pulled, never raced.** Editor-local text and the store are two owners of dirtiness,
+and any design that has each editor push its pending text on its own `beforeunload` listener
+depends on listener registration order — which, at the `window` target, is the only order there
+is: AT_TARGET runs capture and bubble listeners alike in registration sequence, and progressively
+revealed sections register after the shell. So editors do not listen for unload at all. A small
+registry context holds each mounted editor's `deliverPending` callback; the shell's single unload
+handler (registered for `beforeunload` and `pagehide` both) first drains the registry — every
+pending delivery lands in the store synchronously — and only then consults `isDirty()` to decide
+the warning. Ordering is irrelevant by construction, and an editor's unmount flush is unchanged.
+
+Tiptap's mount-time normalization is delivered synchronously in `onCreate`, not through the
+debounce: children's effects run before the parent's, so the store already holds the normalized
+document when the save hook's subscription installs the eager baseline — opening a planner is not
+a change, arms nothing, and never rewrites a saved row as a draft.
+
 ```ts
 // pages/planner/hooks/usePlannerSave.ts — replaces the cleanup at :853-858
 return () => {
