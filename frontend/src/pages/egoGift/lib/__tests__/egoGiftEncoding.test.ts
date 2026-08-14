@@ -257,34 +257,35 @@ describe('getCascadeIngredients', () => {
 })
 
 describe('ENCODED_SELECTION_PATTERN vs GiftIdSchema', () => {
-  // Exhaustive over the schema's domain: an optional enhancement prefix, then
-  // 9 followed by three digits. Widening GiftIdSchema without widening the
-  // decoder pattern would strand the new ids as undecodable.
-  function everyGiftIdSchemaAccepts(): string[] {
+  // A superset of the schema's current domain: every optional single-digit prefix
+  // against every four-digit body. The assertions below quantify over what the
+  // schema accepts rather than over a hardcoded list, so widening GiftIdSchema
+  // beyond what the decoder pattern matches fails here instead of stranding the
+  // new ids as undecodable.
+  function candidateIds(): string[] {
     const ids: string[] = []
-    for (const prefix of ['', '1', '2']) {
-      for (let suffix = 0; suffix < 1000; suffix++) {
-        ids.push(`${prefix}9${String(suffix).padStart(3, '0')}`)
+    for (const prefix of ['', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']) {
+      for (let body = 0; body < 10000; body++) {
+        ids.push(`${prefix}${String(body).padStart(4, '0')}`)
       }
     }
     return ids
   }
 
-  it('covers the whole GiftIdSchema domain', () => {
-    const ids = everyGiftIdSchemaAccepts()
-    expect(ids).toHaveLength(3000)
-    expect(ids.every((id) => GiftIdSchema.safeParse(id).success)).toBe(true)
+  const accepted = candidateIds().filter((id) => GiftIdSchema.safeParse(id).success)
+
+  it('spans a superset of what the schema accepts', () => {
+    expect(candidateIds()).toHaveLength(110000)
+    expect(accepted.length).toBeGreaterThan(0)
   })
 
   it('accepts every string GiftIdSchema accepts', () => {
-    const undecodable = everyGiftIdSchemaAccepts().filter(
-      (id) => !ENCODED_SELECTION_PATTERN.test(id),
-    )
+    const undecodable = accepted.filter((id) => !ENCODED_SELECTION_PATTERN.test(id))
     expect(undecodable).toEqual([])
   })
 
   it('decodes every schema-valid gift id back to its base id', () => {
-    const roundTripFailures = everyGiftIdSchemaAccepts().filter((id) => {
+    const roundTripFailures = accepted.filter((id) => {
       const decoded = decodeGiftSelection(id)
       return decoded === null || encodeGiftSelection(decoded.enhancement, decoded.giftId) !== id
     })
