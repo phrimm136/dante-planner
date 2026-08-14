@@ -27,38 +27,25 @@ vi.mock('@/pages/egoGift/components/EGOGiftCard', () => ({
   ),
 }))
 
-vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
-  useEGOGiftListData: () => ({
-    spec: {
-      9001: {
-        tag: ['TIER_3'],
-        keyword: 'Burn',
-        attributeType: 'WRATH',
-        themePack: '1001',
-        maxEnhancement: 3,
+// The spec entries pass through the boundary schema the catalog validates with, so a
+// mock that drifts from the real spec shape fails here instead of rendering nothing.
+vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', async () => {
+  const { buildEgoGiftSpecList } = await import('@/test-utils/fixtures')
+  return {
+    useEGOGiftListData: () => ({
+      spec: buildEgoGiftSpecList({
+        9001: { tag: ['TIER_3'], keyword: 'Burn', attributeType: 'WRATH', themePack: ['1001'] },
+        9002: { tag: ['TIER_2'], keyword: 'Bleed', attributeType: 'LUST', themePack: ['1002'] },
+        9003: { tag: ['TIER_1'], keyword: 'Tremor', attributeType: 'PRIDE', themePack: ['1001'] },
+      }),
+      i18n: {
+        9001: 'Gift One',
+        9002: 'Gift Two',
+        9003: 'Gift Three',
       },
-      9002: {
-        tag: ['TIER_2'],
-        keyword: 'Bleed',
-        attributeType: 'LUST',
-        themePack: '1002',
-        maxEnhancement: 3,
-      },
-      9003: {
-        tag: ['TIER_1'],
-        keyword: 'Tremor',
-        attributeType: 'PRIDE',
-        themePack: '1001',
-        maxEnhancement: 3,
-      },
-    },
-    i18n: {
-      9001: 'Gift One',
-      9002: 'Gift Two',
-      9003: 'Gift Three',
-    },
-  }),
-}))
+    }),
+  }
+})
 
 vi.mock('@/shared/filter/hooks/useSearchMappings', () => ({
   useSearchMappingsDeferred: () => ({
