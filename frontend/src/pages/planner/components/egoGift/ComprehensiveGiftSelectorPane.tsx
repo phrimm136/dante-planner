@@ -177,7 +177,6 @@ export function ComprehensiveGiftSelectorPane({
             selectedKeywords={selectedKeywords}
             searchQuery={searchQuery}
             selectedGiftIds={selectedGiftIds}
-            maxSelectable={Infinity}
             enableEnhancementSelection
             onEnhancementSelect={handleEnhancementSelect}
           />

@@ -15,7 +15,6 @@ interface EGOGiftSelectionListProps {
   selectedKeywords: Set<string>
   searchQuery: string
   selectedGiftIds: Set<string>
-  maxSelectable: number
   onGiftSelect?: (giftId: string) => void
   enableEnhancementSelection?: boolean
   onEnhancementSelect?: (giftId: string, enhancement: EnhancementLevel) => void
@@ -34,7 +33,6 @@ export function EGOGiftSelectionList({
   selectedKeywords,
   searchQuery,
   selectedGiftIds,
-  maxSelectable: _maxSelectable,
   onGiftSelect,
   enableEnhancementSelection = false,
   onEnhancementSelect,

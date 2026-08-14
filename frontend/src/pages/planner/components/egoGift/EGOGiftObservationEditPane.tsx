@@ -1,13 +1,14 @@
-import { useState, useEffect, useRef, startTransition } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { useEGOGiftObservationData } from '@/pages/egoGift'
 import { useEGOGiftListData } from '@/pages/egoGift'
+import { useCappedSelection } from '../../hooks/useCappedSelection'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import type { EGOGiftListItem } from '@/pages/egoGift'
 import type { SortMode } from '@/shared/filter'
 import { EGOGiftFilterBar } from '@/pages/egoGift'
+import { SelectorPaneShell } from '../SelectorPaneShell'
 import { StarlightCostDisplay } from '../StarlightCostDisplay'
 import { sortEGOGifts } from '@/pages/egoGift'
 import { EGOGiftSelectionList } from '@/pages/egoGift'
@@ -82,46 +83,12 @@ export function EGOGiftObservationEditPane({
     }
   }, [open])
 
-  // Read through a ref so the handler keeps one identity for the pane's lifetime.
-  // Closing over the selection would give every gift cell a new callback on each
-  // toggle, re-rendering all of them to change one card.
-  const latest = useRef({
-    selectedGiftIds,
-    comprehensiveGiftIds,
-    setObservationGiftIds,
-    setComprehensiveGiftIds,
-  })
-  useEffect(() => {
-    latest.current = {
-      selectedGiftIds,
-      comprehensiveGiftIds,
-      setObservationGiftIds,
-      setComprehensiveGiftIds,
-    }
-  })
-
-  const [handleGiftToggle] = useState(() => (giftId: string) => {
-    startTransition(() => {
-      const {
-        selectedGiftIds: current,
-        comprehensiveGiftIds: currentComprehensive,
-        setObservationGiftIds: notifyObservation,
-        setComprehensiveGiftIds: notifyComprehensive,
-      } = latest.current
-      const newSelection = new Set(current)
-      const newComprehensive = new Set(currentComprehensive)
-
-      if (newSelection.has(giftId)) {
-        newSelection.delete(giftId)
-        newComprehensive.delete(giftId)
-      } else if (newSelection.size < MAX_OBSERVABLE_GIFTS) {
-        newSelection.add(giftId)
-        newComprehensive.add(giftId)
-      }
-
-      notifyObservation(newSelection)
-      notifyComprehensive(newComprehensive)
-    })
+  const { toggle: handleGiftToggle, clear } = useCappedSelection({
+    cap: MAX_OBSERVABLE_GIFTS,
+    selected: selectedGiftIds,
+    onSelectedChange: setObservationGiftIds,
+    mirror: comprehensiveGiftIds,
+    onMirrorChange: setComprehensiveGiftIds,
   })
 
   // Calculate current cost from observation data
@@ -131,81 +98,51 @@ export function EGOGiftObservationEditPane({
     )?.starlightCost || 0
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="max-w-[calc(100%-0.5rem)] sm:max-w-[95vw] lg:max-w-[1440px] max-h-[90vh] flex flex-col"
-        showCloseButton={false}
-      >
-        <DialogHeader className="shrink-0 border-b border-border pb-4">
-          <div className="flex items-center gap-4 flex-wrap">
-            <DialogTitle>{t('pages.plannerMD.egoGiftObservation')}</DialogTitle>
-            <div className="flex items-center gap-4 ml-auto">
-              <StarlightCostDisplay cost={currentCost} size="lg" />
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    if (selectedGiftIds.size > 0) {
-                      const newComprehensive = new Set(comprehensiveGiftIds)
-                      for (const id of selectedGiftIds) {
-                        newComprehensive.delete(id)
-                      }
-                      setComprehensiveGiftIds(newComprehensive)
-                    }
-                    setObservationGiftIds(new Set())
-                  }}
-                >
-                  {t('common:reset')}
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => {
-                    onOpenChange(false)
-                  }}
-                >
-                  {t('common:done')}
-                </Button>
-              </div>
-            </div>
+    <SelectorPaneShell
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t('pages.plannerMD.egoGiftObservation')}
+      headerActions={
+        <>
+          <StarlightCostDisplay cost={currentCost} size="lg" />
+          <Button variant="outline" size="sm" onClick={clear}>
+            {t('common:reset')}
+          </Button>
+        </>
+      }
+    >
+      <div className="flex flex-col gap-4">
+        <EGOGiftFilterBar
+          selectedKeywords={selectedKeywords}
+          onKeywordsChange={setSelectedKeywords}
+          sortMode={sortMode}
+          onSortModeChange={setSortMode}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+        />
+
+        {/* Main content: Portrait phones stacked, ≥640px side-by-side */}
+        <div className="flex flex-col sm:flex-row gap-2">
+          {/* Selection List - takes remaining space */}
+          <div className="flex-1 min-w-0">
+            <EGOGiftSelectionList
+              gifts={sortedGifts}
+              selectedKeywords={selectedKeywords}
+              searchQuery={searchQuery}
+              selectedGiftIds={selectedGiftIds}
+              onGiftSelect={handleGiftToggle}
+            />
           </div>
-        </DialogHeader>
 
-        {/* Scrollable content area */}
-        <div className="flex-1 overflow-y-auto py-4 -mx-6 px-6 flex flex-col gap-4">
-          <EGOGiftFilterBar
-            selectedKeywords={selectedKeywords}
-            onKeywordsChange={setSelectedKeywords}
-            sortMode={sortMode}
-            onSortModeChange={setSortMode}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-          />
-
-          {/* Main content: Portrait phones stacked, ≥640px side-by-side */}
-          <div className="flex flex-col sm:flex-row gap-2">
-            {/* Selection List - takes remaining space */}
-            <div className="flex-1 min-w-0">
-              <EGOGiftSelectionList
-                gifts={sortedGifts}
-                selectedKeywords={selectedKeywords}
-                searchQuery={searchQuery}
-                selectedGiftIds={selectedGiftIds}
-                maxSelectable={MAX_OBSERVABLE_GIFTS}
-                onGiftSelect={handleGiftToggle}
-              />
-            </div>
-
-            {/* Selected Gifts - w-24 for tablets, w-32 for desktop */}
-            <div className="sm:w-24 lg:w-32 sm:shrink-0 lg:shrink-0">
-              <EGOGiftObservationSelection
-                selectedGiftIds={Array.from(selectedGiftIds)}
-                onGiftRemove={handleGiftToggle}
-              />
-            </div>
+          {/* Selected Gifts - w-24 for tablets, w-32 for desktop */}
+          <div className="sm:w-24 lg:w-32 sm:shrink-0 lg:shrink-0">
+            <EGOGiftObservationSelection
+              selectedGiftIds={Array.from(selectedGiftIds)}
+              onGiftRemove={handleGiftToggle}
+            />
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </SelectorPaneShell>
   )
 }

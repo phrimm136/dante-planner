@@ -196,7 +196,6 @@ export function FloorGiftSelectorPane({
             selectedKeywords={selectedKeywords}
             searchQuery={searchQuery}
             selectedGiftIds={selectedGiftIds}
-            maxSelectable={Infinity}
             enableEnhancementSelection
             onEnhancementSelect={handleEnhancementSelect}
           />
