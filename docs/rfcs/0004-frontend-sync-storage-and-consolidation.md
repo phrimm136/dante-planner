@@ -316,14 +316,15 @@ incoming destroys the very side the user chose to keep.
 /** Which step of a resolution failed, and why. `precondition` names a failure before any item
  *  was attempted (a device id that could not be read); it is batch-wide, never per-row. */
 export interface ConflictFailure {
-  step: 'precondition' | 'validate' | 'saveLocal' | 'sync' | 'deleteLocal'
+  step: 'precondition' | 'validate' | 'saveLocal' | 'sync' | 'deleteLocal' | 'deleteRemote'
   error: AppError
 }
 
 /** The effectful operations a resolution needs, injected so the interpreter stays testable. */
 export interface ConflictOps {
-  /** The two sides of the conflict, supplied by the caller that holds them. */
-  local: () => SaveablePlanner
+  /** The two sides of the conflict, read at RESOLUTION time — a mount-time snapshot on either
+   *  side replays stale bytes over whatever landed since; a missing row fails closed. */
+  local: () => Promise<Result<SaveablePlanner, AppError>>
   incoming: () => Promise<Result<SaveablePlanner, AppError>>
   validate: (planner: SaveablePlanner) => AppError | null
   saveLocal: (planner: SaveablePlanner) => Promise<Result<void, AppError>>
