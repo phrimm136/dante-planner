@@ -13,6 +13,8 @@ import {
   readImportEnvelope,
 } from '../plannerExportImport'
 
+import { ok, err } from '@/lib/result'
+
 import type { ImportError } from '../plannerExportImport'
 import type { Result } from '@/lib/result'
 
@@ -72,35 +74,57 @@ describe('getValidDeviceId', () => {
   })
 
   it('returns the first id when it is a valid UUID, without retrying', async () => {
-    const source = vi.fn(async () => VALID_UUID)
+    const source = vi.fn(async () => ok(VALID_UUID))
 
-    await expect(getValidDeviceId(source)).resolves.toBe(VALID_UUID)
+    await expect(getValidDeviceId(source)).resolves.toEqual(ok(VALID_UUID))
     expect(source).toHaveBeenCalledTimes(1)
     expect(console.warn).not.toHaveBeenCalled()
   })
 
   it('retries once when the first id is empty', async () => {
-    const source = vi.fn().mockResolvedValueOnce('').mockResolvedValueOnce(OTHER_UUID)
+    const source = vi.fn().mockResolvedValueOnce(ok('')).mockResolvedValueOnce(ok(OTHER_UUID))
 
-    await expect(getValidDeviceId(source)).resolves.toBe(OTHER_UUID)
+    await expect(getValidDeviceId(source)).resolves.toEqual(ok(OTHER_UUID))
     expect(source).toHaveBeenCalledTimes(2)
     expect(console.warn).not.toHaveBeenCalled()
   })
 
   it('retries once when the first id is not a UUID', async () => {
-    const source = vi.fn().mockResolvedValueOnce('not-a-uuid').mockResolvedValueOnce(OTHER_UUID)
+    const source = vi
+      .fn()
+      .mockResolvedValueOnce(ok('not-a-uuid'))
+      .mockResolvedValueOnce(ok(OTHER_UUID))
 
-    await expect(getValidDeviceId(source)).resolves.toBe(OTHER_UUID)
+    await expect(getValidDeviceId(source)).resolves.toEqual(ok(OTHER_UUID))
     expect(source).toHaveBeenCalledTimes(2)
   })
 
   it('falls back to a generated UUID and warns when both attempts fail', async () => {
-    const source = vi.fn(async () => 'not-a-uuid')
+    const source = vi.fn(async () => ok('not-a-uuid'))
 
-    await expect(getValidDeviceId(source)).resolves.toBe(FALLBACK_UUID)
+    await expect(getValidDeviceId(source)).resolves.toEqual(ok(FALLBACK_UUID))
     expect(source).toHaveBeenCalledTimes(2)
     expect(crypto.randomUUID).toHaveBeenCalledTimes(1)
     expect(console.warn).toHaveBeenCalledWith('Using fallback device ID:', FALLBACK_UUID)
+  })
+
+  it('reports a read that broke instead of minting over it', async () => {
+    const failure = err({ kind: 'ioError' as const, cause: new Error('disk gone') })
+    const source = vi.fn(async () => failure)
+
+    await expect(getValidDeviceId(source)).resolves.toBe(failure)
+    expect(source).toHaveBeenCalledTimes(1)
+    expect(crypto.randomUUID).not.toHaveBeenCalled()
+    expect(console.warn).not.toHaveBeenCalled()
+  })
+
+  it('reports a retry that broke after a first id that was not a UUID', async () => {
+    const failure = err({ kind: 'ioError' as const, cause: new Error('disk gone') })
+    const source = vi.fn().mockResolvedValueOnce(ok('not-a-uuid')).mockResolvedValueOnce(failure)
+
+    await expect(getValidDeviceId(source)).resolves.toBe(failure)
+    expect(source).toHaveBeenCalledTimes(2)
+    expect(crypto.randomUUID).not.toHaveBeenCalled()
   })
 })
 

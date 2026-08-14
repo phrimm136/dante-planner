@@ -19,6 +19,7 @@ import { createPlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import type { PlannerState, UsePlannerSaveOptions } from '../usePlannerSave'
 import type { SaveError } from '../../lib/plannerSaveErrors'
 import type { Result } from '@/lib/result'
+import type { StorageReadError } from '@/lib/storage'
 import type { SaveablePlanner } from '../../types/PlannerTypes'
 import type { AcknowledgedPlanner } from '../usePlannerSyncAdapter'
 import { BannedError, ConflictError, WriteTemporarilyUnavailableError } from '@/lib/api'
@@ -27,7 +28,7 @@ import { ok, err } from '@/lib/result'
 // Shared call-order recorder: every adapter call pushes its label so order is assertable.
 const callOrder: string[] = []
 
-const mockGetOrCreateDeviceId = vi.fn<() => Promise<string>>()
+const mockGetOrCreateDeviceId = vi.fn<() => Promise<Result<string, StorageReadError>>>()
 const mockSaveToLocal = vi.fn<(planner: SaveablePlanner) => Promise<Result<void, SaveError>>>()
 const mockSyncToServer =
   vi.fn<(planner: SaveablePlanner, force?: boolean) => Promise<AcknowledgedPlanner>>()
@@ -132,7 +133,7 @@ function authenticated() {
 beforeEach(() => {
   vi.clearAllMocks()
   callOrder.length = 0
-  mockGetOrCreateDeviceId.mockResolvedValue('device-123')
+  mockGetOrCreateDeviceId.mockResolvedValue(ok('device-123'))
   mockSaveToLocal.mockResolvedValue(ok(undefined))
   mockDeleteFromLocal.mockResolvedValue(ok(undefined))
   mockSyncToServer.mockImplementation((planner) => syncedFrom(planner, 5))

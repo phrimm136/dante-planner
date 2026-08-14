@@ -7,6 +7,7 @@ import { SaveablePlannerSchema, toSaveablePlanner } from '../schemas/PlannerSche
 import { classifySaveError } from '../lib/plannerSaveErrors'
 import { isMDPlanner } from '../types/PlannerTypes'
 import type { Result } from '@/lib/result'
+import type { StorageReadError } from '@/lib/storage'
 import type { SaveError } from '../lib/plannerSaveErrors'
 import type { SaveablePlanner, PlannerSummary } from '../types/PlannerTypes'
 
@@ -17,31 +18,26 @@ const isClient = typeof window !== 'undefined'
 
 /**
  * Storage key builders for planner data
- * Key format: planner:{type}:{deviceId}:{plannerId}
+ * Key format: planner:{plannerId}
  */
 export const storageKeys = {
-  /** Mirror Dungeon planner key: planner:md:{deviceId}:{plannerId} */
-  md: (deviceId: string, plannerId: string) =>
-    `${PLANNER_STORAGE_KEYS.PLANNER}:${PLANNER_STORAGE_KEYS.MD}:${deviceId}:${plannerId}`,
+  /** Planner row key: planner:{plannerId} */
+  planner: (plannerId: string) => `${PLANNER_STORAGE_KEYS.PLANNER}:${plannerId}`,
   /** Device ID key */
   deviceId: () => PLANNER_STORAGE_KEYS.DEVICE_ID,
 }
 
 /**
  * Parses a storage key to extract components
- * @param key - Storage key in format planner:{type}:{deviceId}:{plannerId}
+ * @param key - Storage key in format planner:{plannerId}
  * @returns Parsed components or null if invalid
  */
-function parseStorageKey(
-  key: string,
-): { prefix: string; type: string; deviceId: string; plannerId: string } | null {
+function parseStorageKey(key: string): { prefix: string; plannerId: string } | null {
   const parts = key.split(':')
-  if (parts.length !== 4) return null
+  if (parts.length !== 2) return null
   return {
     prefix: parts[0],
-    type: parts[1],
-    deviceId: parts[2],
-    plannerId: parts[3],
+    plannerId: parts[1],
   }
 }
 
@@ -96,8 +92,8 @@ export type LoadResult = Result<SaveablePlanner | null, StorageErrorCode>
  * Provides CRUD operations with Zod validation and guest draft limits
  */
 export interface PlannerStorageOperations {
-  /** Get device ID from storage or create new UUID */
-  getOrCreateDeviceId: () => Promise<string>
+  /** Get device ID from storage or create new UUID; a read that broke reports why */
+  getOrCreateDeviceId: () => Promise<Result<string, StorageReadError>>
   /** Save planner to IndexedDB with proper key based on status, reporting why it failed */
   saveToLocal: (
     planner: SaveablePlanner,
@@ -116,7 +112,7 @@ export interface PlannerStorageOperations {
 }
 
 // Promise cache for getOrCreateDeviceId to prevent race conditions
-let deviceIdPromise: Promise<string> | null = null
+let deviceIdPromise: Promise<Result<string, StorageReadError>> | null = null
 
 /**
  * Hook that provides planner storage operations using IndexedDB
@@ -151,8 +147,8 @@ export function usePlannerStorage(): PlannerStorageOperations {
      * Device ID is used for namespacing storage keys
      * Uses promise caching to prevent race conditions with concurrent calls
      */
-    const getOrCreateDeviceId = async (): Promise<string> => {
-      if (!isClient) return ''
+    const getOrCreateDeviceId = async (): Promise<Result<string, StorageReadError>> => {
+      if (!isClient) return err({ kind: 'notInBrowser' })
 
       // Return cached promise if already in progress (prevents race condition)
       if (deviceIdPromise) return deviceIdPromise
@@ -162,14 +158,14 @@ export function usePlannerStorage(): PlannerStorageOperations {
           const existingId = await storage.getItem(storageKeys.deviceId())
           // A read that broke says nothing about whether an id exists. Minting
           // one here would orphan every row written under the previous id.
-          if (!existingId.ok) return ''
+          if (!existingId.ok) return existingId
           if (existingId.value) {
-            return existingId.value
+            return ok(existingId.value)
           }
 
           const newId = generateUUID()
           await storage.setItem(storageKeys.deviceId(), newId)
-          return newId
+          return ok(newId)
         } finally {
           // Clear promise cache after resolution to allow re-fetch if storage is cleared externally
           deviceIdPromise = null
@@ -209,8 +205,7 @@ export function usePlannerStorage(): PlannerStorageOperations {
       }
 
       try {
-        const deviceId = await getOrCreateDeviceId()
-        const key = storageKeys.md(deviceId, planner.metadata.id)
+        const key = storageKeys.planner(planner.metadata.id)
 
         await storage.setItem(key, JSON.stringify(validation.data))
         return ok(undefined)
@@ -237,8 +232,7 @@ export function usePlannerStorage(): PlannerStorageOperations {
 
       let rawData: string | null
       try {
-        const deviceId = await getOrCreateDeviceId()
-        const read = await storage.getItem(storageKeys.md(deviceId, id))
+        const read = await storage.getItem(storageKeys.planner(id))
         if (!read.ok) {
           console.error('Failed to read planner from storage:', read.error)
           options?.onError?.('loadFailed')
@@ -286,8 +280,6 @@ export function usePlannerStorage(): PlannerStorageOperations {
     const listLocal = async (): Promise<PlannerSummary[]> => {
       if (!isClient) return []
 
-      const deviceId = await getOrCreateDeviceId()
-
       // Access IndexedDB directly to iterate keys
       // storage utility doesn't expose key iteration, so we need direct access
       const db = await openStorageDb()
@@ -306,12 +298,8 @@ export function usePlannerStorage(): PlannerStorageOperations {
             const key = cursor.key as string
             const parsed = parseStorageKey(key)
 
-            // Only include MD planners for this device
-            if (
-              parsed?.deviceId === deviceId &&
-              parsed.prefix === PLANNER_STORAGE_KEYS.PLANNER &&
-              parsed.type === PLANNER_STORAGE_KEYS.MD
-            ) {
+            // Only include planner rows; the deviceId singleton parses to null
+            if (parsed?.prefix === PLANNER_STORAGE_KEYS.PLANNER) {
               try {
                 const data = JSON.parse(cursor.value)
                 const validation = SaveablePlannerSchema.safeParse(data)
@@ -370,8 +358,6 @@ export function usePlannerStorage(): PlannerStorageOperations {
     const listLocalFull = async (): Promise<SaveablePlanner[]> => {
       if (!isClient) return []
 
-      const deviceId = await getOrCreateDeviceId()
-
       const db = await openStorageDb()
       if (!db) return []
 
@@ -388,11 +374,7 @@ export function usePlannerStorage(): PlannerStorageOperations {
             const key = cursor.key as string
             const parsed = parseStorageKey(key)
 
-            if (
-              parsed?.deviceId === deviceId &&
-              parsed.prefix === PLANNER_STORAGE_KEYS.PLANNER &&
-              parsed.type === PLANNER_STORAGE_KEYS.MD
-            ) {
+            if (parsed?.prefix === PLANNER_STORAGE_KEYS.PLANNER) {
               try {
                 const data = JSON.parse(cursor.value)
                 const validation = SaveablePlannerSchema.safeParse(data)
@@ -437,8 +419,7 @@ export function usePlannerStorage(): PlannerStorageOperations {
       if (!isClient) return err({ kind: 'unknown' })
 
       try {
-        const deviceId = await getOrCreateDeviceId()
-        await storage.removeItem(storageKeys.md(deviceId, id))
+        await storage.removeItem(storageKeys.planner(id))
         return ok(undefined)
       } catch (error) {
         console.error('Failed to delete planner:', error)

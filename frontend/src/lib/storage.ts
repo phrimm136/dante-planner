@@ -64,13 +64,18 @@ export function migrateToFlatKeys(transaction: IDBTransaction): void {
   cursorRequest.onsuccess = () => {
     const cursor = cursorRequest.result
     if (cursor) {
-      const flatKey = flatKeyFor(String(cursor.key))
-      if (flatKey) {
-        const value = String(cursor.value)
-        const modifiedAt = lastModifiedAtOf(value)
-        const held = winners.get(flatKey)
-        if (!held || modifiedAt > held.modifiedAt) winners.set(flatKey, { value, modifiedAt })
-        sources.set(flatKey, [...(sources.get(flatKey) ?? []), String(cursor.key)])
+      const key: IDBValidKey = cursor.key
+      const value: unknown = cursor.value
+      // Every row this store holds is a string under a string key; anything
+      // else is not something the old key format could have produced.
+      if (typeof key === 'string' && typeof value === 'string') {
+        const flatKey = flatKeyFor(key)
+        if (flatKey) {
+          const modifiedAt = lastModifiedAtOf(value)
+          const held = winners.get(flatKey)
+          if (!held || modifiedAt > held.modifiedAt) winners.set(flatKey, { value, modifiedAt })
+          sources.set(flatKey, [...(sources.get(flatKey) ?? []), key])
+        }
       }
       cursor.continue()
       return

@@ -472,7 +472,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
 
     // Get deviceId
     const deviceId = await storage.getOrCreateDeviceId()
-    if (!deviceId) return err({ kind: 'unknown' })
+    if (!deviceId.ok) return err({ kind: 'unknown' })
 
     const currentState = getState()
     const isCurrentlyPublished = opts.published ?? published
@@ -480,7 +480,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     const saveable = createSaveablePlanner({
       state: currentState,
       plannerId,
-      deviceId,
+      deviceId: deviceId.value,
       schemaVersion,
       contentVersion,
       plannerType,
@@ -567,12 +567,12 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
 
       // Get deviceId
       const deviceId = await storage.getOrCreateDeviceId()
-      if (!deviceId) return
+      if (!deviceId.ok) return
 
       const saveable = createSaveablePlanner({
         state: currentState,
         plannerId,
-        deviceId,
+        deviceId: deviceId.value,
         schemaVersion,
         contentVersion,
         plannerType,
@@ -808,6 +808,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
 
     try {
       const deviceId = await storage.getOrCreateDeviceId()
+      if (!deviceId.ok) throw new Error('Failed to get device ID')
       const plan = planConflictResolution(
         choice,
         {
@@ -815,7 +816,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
           forkTitle: getState().title || t('pages.plannerMD.untitled', 'Untitled'),
         },
         {
-          deviceId,
+          deviceId: deviceId.value,
           now: new Date().toISOString(),
           newId: generateUUID,
           copyTitle: (title) =>

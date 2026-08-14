@@ -36,7 +36,7 @@ vi.mock('../../lib/plannerApi', () => ({
 // dependency-array stability must not rest on their identity.
 vi.mock('../usePlannerStorage', () => ({
   usePlannerStorage: () => ({
-    getOrCreateDeviceId: vi.fn(async () => 'test-device'),
+    getOrCreateDeviceId: vi.fn(async () => ({ ok: true, value: 'test-device' })),
     saveToLocal: syncMocks.saveToLocal,
     loadFromLocal: syncMocks.loadFromLocal,
     listLocal: syncMocks.listLocal,

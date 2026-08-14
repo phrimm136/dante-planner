@@ -142,10 +142,15 @@ function PlannerExportImportSectionContent() {
 
       // Construct export envelope
       const deviceId = await getOrCreateDeviceId()
+      if (!deviceId.ok) {
+        toast.error(t('exportImport.exportFailed', 'Export failed'))
+        setState({ k: 'idle' })
+        return
+      }
       const envelope: ExportEnvelope = {
         exportVersion: EXPORT_VERSION,
         exportedAt: new Date().toISOString(),
-        sourceDeviceId: deviceId,
+        sourceDeviceId: deviceId.value,
         planners,
       }
 
@@ -245,6 +250,12 @@ function PlannerExportImportSectionContent() {
       setState({ k: 'importing', pct: 60 })
 
       const currentDeviceId = await getValidDeviceId(getOrCreateDeviceId)
+      if (!currentDeviceId.ok) {
+        toast.error(t('exportImport.importFailed', 'Import failed'))
+        clearFileInput()
+        setState({ k: 'idle' })
+        return
+      }
 
       // Check for conflicts with existing planners
       const existingPlanners = await listLocal()
@@ -263,7 +274,7 @@ function PlannerExportImportSectionContent() {
           {
             ...item.metadata,
             title: sanitizedTitle,
-            deviceId: currentDeviceId,
+            deviceId: currentDeviceId.value,
           },
           item.config,
           item.content,
@@ -334,8 +345,15 @@ function PlannerExportImportSectionContent() {
   const handleConflictResolve = async (resolutions: ConflictResolution[]) => {
     setState({ k: 'resolving', pct: progress, conflicts })
 
+    const deviceId = await getValidDeviceId(getOrCreateDeviceId)
+    if (!deviceId.ok) {
+      toast.error(t('exportImport.importFailed', 'Import failed'))
+      setState({ k: 'idle' })
+      return
+    }
+
     const resolutionContext = {
-      deviceId: await getValidDeviceId(getOrCreateDeviceId),
+      deviceId: deviceId.value,
       now: new Date().toISOString(),
       newId: generateUUID,
       copyTitle: (title: string) =>

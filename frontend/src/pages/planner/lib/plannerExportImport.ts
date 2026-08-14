@@ -14,6 +14,7 @@ import { generateUUID } from '@/lib/uuid'
 import { ExportEnvelopeSchema } from '../schemas/PlannerSchemas'
 
 import type { Result } from '@/lib/result'
+import type { StorageReadError } from '@/lib/storage'
 import type { z } from 'zod'
 
 /** Toast method used to surface an outcome. */
@@ -38,17 +39,27 @@ export interface OutcomeToast<TCounts> extends ToastDescriptor {
 /**
  * Resolve a usable device id: one retry of the supplied source, then a generated
  * UUID so imported planners always carry a well-formed owner key.
+ *
+ * A read that could not be performed is reported instead. Minting over it would
+ * orphan every row already written under the id the read failed to see.
  */
-export async function getValidDeviceId(source: () => Promise<string>): Promise<string> {
-  let deviceId = await source()
-  if (!deviceId || !isValidUUID(deviceId)) {
-    deviceId = await source()
+export async function getValidDeviceId(
+  source: () => Promise<Result<string, StorageReadError>>,
+): Promise<Result<string, StorageReadError>> {
+  let read = await source()
+  if (!read.ok) return read
+
+  if (!isValidUUID(read.value)) {
+    read = await source()
+    if (!read.ok) return read
   }
-  if (!deviceId || !isValidUUID(deviceId)) {
-    deviceId = generateUUID()
-    console.warn('Using fallback device ID:', deviceId)
+
+  if (!isValidUUID(read.value)) {
+    const fallback = generateUUID()
+    console.warn('Using fallback device ID:', fallback)
+    return ok(fallback)
   }
-  return deviceId
+  return read
 }
 
 /* -------------------------------------------------------------------------- */

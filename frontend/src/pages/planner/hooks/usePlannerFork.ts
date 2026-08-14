@@ -98,7 +98,7 @@ export function usePlannerFork() {
       const newPlannerId = generateUUID()
       const deviceId = await storage.getOrCreateDeviceId()
 
-      if (!deviceId) {
+      if (!deviceId.ok) {
         throw new Error('Failed to get device ID')
       }
 
@@ -125,7 +125,7 @@ export function usePlannerFork() {
           createdAt: now,
           lastModifiedAt: now,
           savedAt: now,
-          deviceId,
+          deviceId: deviceId.value,
           published: false, // New copy is not published
         },
         {
