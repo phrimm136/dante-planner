@@ -1,5 +1,6 @@
 import { useParams } from '@tanstack/react-router'
 import { Suspense, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { useIdentityDetailSpec } from '@/pages/identity'
 import { DetailPageLayout } from '@/components/layout/DetailPageLayout'
@@ -8,7 +9,8 @@ import { DetailRightPanel } from '@/components/layout/DetailRightPanel'
 import { MobileDetailTabs } from '@/components/layout/MobileDetailTabs'
 import { DetailPageSkeleton } from '@/components/feedback/DetailPageSkeleton'
 import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
-import { MAX_LEVEL, MAX_ENTITY_TIER } from '@/shared/gameData'
+import { getEGOTierIconPath } from '@/shared/assets'
+import { MAX_LEVEL, MAX_ENTITY_TIER, MIN_ENTITY_TIER } from '@/shared/gameData'
 import { IdentityInfoPane } from './components/IdentityInfoPane'
 import { IdentitySkillsPane } from './components/IdentitySkillsPane'
 import { IdentityPassivesPane } from './components/IdentityPassivesPane'
@@ -25,6 +27,7 @@ import type { Uptie } from '@/pages/identity'
  */
 function IdentityDetailContent() {
   const { id } = useParams({ strict: false })
+  const { t } = useTranslation('database')
 
   // Controllable uptie and level state
   const [uptie, setUptie] = useState<number>(MAX_ENTITY_TIER.identity)
@@ -49,9 +52,12 @@ function IdentityDetailContent() {
   // Selector component (shared between desktop and mobile)
   const selector = (
     <DetailEntitySelector
-      entityType="identity"
+      tierLabel={t('tierLabel.uptie')}
+      minTier={MIN_ENTITY_TIER.identity}
+      maxTier={MAX_ENTITY_TIER.identity}
       tier={uptie}
       onTierChange={setUptie}
+      tierIconPath={getEGOTierIconPath}
       level={level}
       onLevelChange={setLevel}
       sticky

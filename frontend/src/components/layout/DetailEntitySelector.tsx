@@ -1,56 +1,49 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Slider } from '@/components/ui/slider'
 import { cn, getDisplayFontForNumeric, getDisplayFontForLanguage } from '@/lib/utils'
-import { getEGOTierIconPath } from '@/shared/assets'
-import {
-  MAX_LEVEL,
-  type DetailEntityType,
-  MAX_ENTITY_TIER,
-  MIN_ENTITY_TIER,
-} from '@/shared/gameData'
+import { MAX_LEVEL } from '@/shared/gameData'
 import { SECTION_STYLES } from '@/lib/constants'
 
 interface DetailEntitySelectorProps {
-  /** Entity type determines icon style and tier range */
-  entityType: DetailEntityType
+  /** Heading for the tier row, already resolved by the caller */
+  tierLabel: ReactNode
+  /** Lowest selectable tier */
+  minTier: number
+  /** Highest selectable tier */
+  maxTier: number
   /** Current tier/uptie/threadspin/enhancement level */
   tier: number
   /** Callback when tier changes */
   onTierChange: (tier: number) => void
-  /** Current level (only used for identity) */
+  /** Icon shown on a tier button */
+  tierIconPath: (tier: number) => string
+  /** Current level; the level slider renders only when `onLevelChange` is given */
   level?: number
-  /** Callback when level changes (only used for identity) */
+  /** Callback when level changes */
   onLevelChange?: (level: number) => void
   /** Whether the selector should be sticky */
   sticky?: boolean
-  /** Tiers to disable (e.g., enhancement levels with empty descriptions) */
-  disabledTiers?: number[]
-  /** Per-entity max tier override. Defaults to MAX_ENTITY_TIER[entityType]. */
-  maxTier?: number
 }
 
 /**
- * DetailEntitySelector - Unified tier/level selector for detail pages
- *
- * Supports three entity types:
- * - Identity: Uptie 1-4 (tier icons) + Level 1-MAX_LEVEL (slider)
- * - EGO: Threadspin 1-4 (tier icons), no level
- * - EGO Gift: Enhancement 0-2 (enhancement icons), no level
+ * DetailEntitySelector - Tier selector for detail pages, with an optional level slider.
  *
  * Pattern: TierLevelSelector.tsx (tier icons), EGOGiftEnhancementSelector.tsx (enhancement icons)
  */
 export function DetailEntitySelector({
-  entityType,
+  tierLabel,
+  minTier,
+  maxTier,
   tier,
   onTierChange,
+  tierIconPath,
   level = MAX_LEVEL,
   onLevelChange,
   sticky = false,
-  maxTier: maxTierOverride,
 }: DetailEntitySelectorProps) {
-  const { t, i18n } = useTranslation('database')
+  const { i18n } = useTranslation('database')
   const [inputValue, setInputValue] = useState(String(level))
   const [appliedLevel, setAppliedLevel] = useState(level)
   const displayStyle = getDisplayFontForLanguage(i18n.language)
@@ -61,10 +54,6 @@ export function DetailEntitySelector({
     setInputValue(String(level))
   }
 
-  const minTier = MIN_ENTITY_TIER[entityType]
-  const maxTier = maxTierOverride ?? MAX_ENTITY_TIER[entityType]
-
-  // Generate tier array based on entity type
   const tiers = Array.from({ length: maxTier - minTier + 1 }, (_, i) => minTier + i)
 
   const handleSliderChange = (values: number[]) => {
@@ -72,9 +61,6 @@ export function DetailEntitySelector({
     setInputValue(String(newLevel))
     onLevelChange?.(newLevel)
   }
-
-  // Only Identity has level slider
-  const showLevelSelector = entityType === 'identity'
 
   return (
     <div
@@ -87,17 +73,12 @@ export function DetailEntitySelector({
         {/* Tier selector */}
         <div className={SECTION_STYLES.LAYOUT.row}>
           <span className="text-lg font-medium" style={displayStyle}>
-            {entityType === 'identity'
-              ? t('tierLabel.uptie')
-              : entityType === 'ego'
-                ? t('tierLabel.threadspin')
-                : t('tierLabel.enhancement')}
+            {tierLabel}
           </span>
           <div className="flex gap-1">
             {tiers.map((t) => {
               const isSelected = tier === t
 
-              // Tier icons for Identity/EGO
               return (
                 <button
                   key={t}
@@ -110,19 +91,15 @@ export function DetailEntitySelector({
                   data-selected={isSelected}
                   aria-label={`Tier ${t}`}
                 >
-                  <img
-                    src={getEGOTierIconPath(t)}
-                    alt={`Tier ${t}`}
-                    className="w-8 h-8 object-contain"
-                  />
+                  <img src={tierIconPath(t)} alt={`Tier ${t}`} className="w-8 h-8 object-contain" />
                 </button>
               )
             })}
           </div>
         </div>
 
-        {/* Level selector (only for identity) */}
-        {showLevelSelector && (
+        {/* Level selector */}
+        {onLevelChange && (
           <div
             className="flex items-center gap-3 flex-1"
             style={{ fontFamily: getDisplayFontForNumeric() }}

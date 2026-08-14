@@ -1,5 +1,6 @@
 import { useParams } from '@tanstack/react-router'
 import { Suspense, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { DetailPageLayout } from '@/components/layout/DetailPageLayout'
 import { DetailPageSkeleton } from '@/components/feedback/DetailPageSkeleton'
 import { DetailEntitySelector } from '@/components/layout/DetailEntitySelector'
@@ -7,6 +8,8 @@ import { DetailRightPanel } from '@/components/layout/DetailRightPanel'
 import { MobileDetailTabs } from '@/components/layout/MobileDetailTabs'
 import { useEGODetailSpec } from '@/pages/ego'
 import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
+import { getEGOTierIconPath } from '@/shared/assets'
+import { MIN_ENTITY_TIER } from '@/shared/gameData'
 import { EGOInfoPane } from './components/EGOInfoPane'
 import { EGOSkillsPane } from './components/EGOSkillsPane'
 import { EGOPassivesPane } from './components/EGOPassivesPane'
@@ -17,6 +20,7 @@ import type { Threadspin } from '@/pages/ego'
  */
 function EGODetailContent() {
   const { id } = useParams({ strict: false })
+  const { t } = useTranslation('database')
 
   // Progressive rendering: render sections one-by-one (start immediately)
   // Sections: 1=Skills, 2=Passives
@@ -40,10 +44,12 @@ function EGODetailContent() {
   // Selector component (shared between desktop and mobile)
   const selector = (
     <DetailEntitySelector
-      entityType="ego"
+      tierLabel={t('tierLabel.threadspin')}
+      minTier={MIN_ENTITY_TIER.ego}
+      maxTier={spec.maxThreadspin}
       tier={threadspin}
       onTierChange={setThreadspin}
-      maxTier={spec.maxThreadspin}
+      tierIconPath={getEGOTierIconPath}
       sticky
     />
   )
