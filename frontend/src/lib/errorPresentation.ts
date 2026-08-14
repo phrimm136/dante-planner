@@ -26,6 +26,10 @@ export interface ErrorPresentation {
 const CONTACT_KEY = 'common:errors.contactOnRepeat'
 const GENERIC_KEY = 'common:errors.generic.message'
 const QUOTA_KEY = 'planner:pages.plannerMD.save.quotaExceeded'
+const RATE_LIMIT_KEY = 'common:errors.rateLimit.message'
+const FORBIDDEN_KEY = 'common:errors.forbidden.message'
+const RESOURCE_NOT_FOUND_KEY = 'common:errors.resourceNotFound.message'
+const RETRYABLE_KEY = 'common:errors.retryable.message'
 
 const RESTRICTION_KEY: Record<RestrictionKind, string> = {
   banned: 'common:moderation.banned',
@@ -54,12 +58,13 @@ export function presentError(error: AppError): ErrorPresentation | null {
       return key === null ? null : { key, severity: 'warning', supportHint: false }
     }
     case 'rateLimit':
-      return { key: GENERIC_KEY, severity: 'warning', supportHint: false }
+      return { key: RATE_LIMIT_KEY, severity: 'warning', supportHint: false }
     case 'retryable':
-      return { key: GENERIC_KEY, severity: 'warning', supportHint: true }
+      return { key: RETRYABLE_KEY, severity: 'warning', supportHint: true }
     case 'forbidden':
+      return { key: FORBIDDEN_KEY, severity: 'error', supportHint: false }
     case 'notFound':
-      return { key: GENERIC_KEY, severity: 'error', supportHint: false }
+      return { key: RESOURCE_NOT_FOUND_KEY, severity: 'error', supportHint: false }
     case 'quota':
       return { key: QUOTA_KEY, severity: 'error', supportHint: false }
     case 'unknown':

@@ -35,7 +35,7 @@ describe('classifyAppError', () => {
     {
       name: 'a backend validation failure',
       thrown: new ValidationError('TITLE_TOO_LONG', 'invalid'),
-      expected: { kind: 'validation', key: 'common:errors.generic.message' },
+      expected: { kind: 'validation', key: 'common:errors.validation.message' },
     },
     {
       name: 'a missing resource',

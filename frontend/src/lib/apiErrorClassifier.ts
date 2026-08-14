@@ -41,12 +41,7 @@ export type AppError =
   | Tagged<'quota'>
   | Tagged<'unknown'>
 
-/**
- * The backend classifies a 400 under a code that has no translated copy, so the
- * API's validation failures reuse the generic message; only client-side rules,
- * which own their wording, carry a key of their own.
- */
-const API_VALIDATION_KEY = 'common:errors.generic.message'
+const API_VALIDATION_KEY = 'common:errors.validation.message'
 
 /** Carry a validator's i18n key and params into the app error vocabulary. */
 export function validationAppError(friendly: {

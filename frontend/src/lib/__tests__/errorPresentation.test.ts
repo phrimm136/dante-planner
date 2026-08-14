@@ -90,22 +90,26 @@ describe('presentError', () => {
     {
       name: 'a rate limit',
       error: { kind: 'rateLimit' },
-      expected: { key: 'common:errors.generic.message', severity: 'warning', supportHint: false },
+      expected: { key: 'common:errors.rateLimit.message', severity: 'warning', supportHint: false },
     },
     {
       name: 'a retryable failure',
       error: { kind: 'retryable' },
-      expected: { key: 'common:errors.generic.message', severity: 'warning', supportHint: true },
+      expected: { key: 'common:errors.retryable.message', severity: 'warning', supportHint: true },
     },
     {
       name: 'a forbidden action',
       error: { kind: 'forbidden', code: 'PLANNER_FORBIDDEN' },
-      expected: { key: 'common:errors.generic.message', severity: 'error', supportHint: false },
+      expected: { key: 'common:errors.forbidden.message', severity: 'error', supportHint: false },
     },
     {
       name: 'a missing resource',
       error: { kind: 'notFound' },
-      expected: { key: 'common:errors.generic.message', severity: 'error', supportHint: false },
+      expected: {
+        key: 'common:errors.resourceNotFound.message',
+        severity: 'error',
+        supportHint: false,
+      },
     },
     {
       name: 'an unrecognized failure',
