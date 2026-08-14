@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-import { SSE_CONNECTION, SSE_EVENTS } from '@/lib/constants'
+import { SSE_CONNECTION, SSE_EVENTS, SSE_TRANSPORT, type SseEventType } from '@/lib/constants'
 import { useSseStore } from '../stores/useSseStore'
 import { runSseStream, type SseFrame } from '../lib/sseStream'
 
@@ -49,6 +49,13 @@ export const DEFAULT_SSE_POLICY: SseReconnectPolicy = {
   stableAfterMs: SSE_CONNECTION.STABLE_CONNECTION_THRESHOLD,
 }
 
+const SSE_EVENT_TYPES: readonly string[] = Object.values(SSE_EVENTS)
+
+/** Frames naming a type outside the vocabulary dispatch to nothing. */
+function isKnownEventType(type: string): type is SseEventType {
+  return SSE_EVENT_TYPES.includes(type)
+}
+
 /**
  * Where one engine keeps its connection status and attempt counter.
  *
@@ -76,9 +83,14 @@ export interface SseEngineConfig {
   /** API path of the stream, resolved against the API base URL. */
   url: string
   /** Map of SSE event name → handler. Resolved per dispatched event. */
-  handlers: Record<string, (event: MessageEvent) => void>
+  handlers: Partial<Record<SseEventType, (event: MessageEvent) => void>>
   /** Runs on every open, the first one and every reconnect alike. */
   onConnected?: () => void
+  /**
+   * The server answered the open with `STREAM_GONE_STATUS`. Fires once; the
+   * engine stops retrying, so this is the caller's only notice.
+   */
+  onStreamGone?: () => void
   /** Reconnect timings; defaults to the app-wide stream's policy. */
   policy?: SseReconnectPolicy
   /** Connection state binding; defaults to the shared SSE store. */
@@ -100,15 +112,16 @@ export function useSseEngine({
   url,
   handlers,
   onConnected,
+  onStreamGone,
   policy = DEFAULT_SSE_POLICY,
   state,
 }: SseEngineConfig): void {
   // The effect owns the whole lifecycle, so only `shouldConnect` may retrigger
   // it. Everything else reaches the running connection through this ref, which
   // the callbacks read at dispatch time rather than capturing at open time.
-  const configRef = useRef({ url, handlers, onConnected, policy, state })
+  const configRef = useRef({ url, handlers, onConnected, onStreamGone, policy, state })
   useEffect(() => {
-    configRef.current = { url, handlers, onConnected, policy, state }
+    configRef.current = { url, handlers, onConnected, onStreamGone, policy, state }
   })
 
   const setConnected = useSseStore((s) => s.setConnected)
@@ -134,8 +147,9 @@ export function useSseEngine({
     // never-opened or short-lived connection (keep backing off) from a healthy
     // one (reset).
     let connectionStartTime = 0
-    let lastEventId: string | null = null
     let serverRetryMs: number | null = null
+    // A stream the server reported gone is never reopened for this lifecycle.
+    let streamGone = false
 
     function clearAllTimers() {
       if (reconnectTimeout) {
@@ -162,13 +176,13 @@ export function useSseEngine({
     }
 
     function dispatchFrame(frame: SseFrame) {
-      if (frame.id !== null) lastEventId = frame.id
       if (frame.retryMs !== null) serverRetryMs = frame.retryMs
 
       if (frame.type === SSE_EVENTS.CONNECTED) {
         connectionState.setConnected(true)
       }
       if (frame.data === null) return
+      if (!isKnownEventType(frame.type)) return
 
       configRef.current.handlers[frame.type]?.(
         new MessageEvent(frame.type, { data: frame.data, lastEventId: frame.id ?? '' }),
@@ -208,8 +222,17 @@ export function useSseEngine({
       configRef.current.onConnected?.()
     }
 
-    function handleClosed() {
+    function handleClosed(status: number | null) {
       connectionState.setConnected(false)
+
+      // A stream whose subject the server says is gone will not come back, so
+      // retrying only spends the attempt budget against a certain 404.
+      if (status === SSE_TRANSPORT.STREAM_GONE_STATUS) {
+        streamGone = true
+        clearAllTimers()
+        configRef.current.onStreamGone?.()
+        return
+      }
 
       // Credit the connection as healthy only if it stayed open past the
       // stability floor; a never-opened or short-lived drop keeps the attempt
@@ -257,12 +280,12 @@ export function useSseEngine({
 
     /** The one place a stream is opened. No-ops while one is already live. */
     function openStream() {
-      if (controller) return
+      if (controller || streamGone) return
       const active = new AbortController()
       controller = active
       connectionStartTime = 0
 
-      void runSseStream(configRef.current.url, lastEventId, active.signal, {
+      void runSseStream(configRef.current.url, active.signal, {
         onOpen: () => {
           if (controller === active) handleOpen()
         },
@@ -274,10 +297,10 @@ export function useSseEngine({
           controller = null
           handleRateLimited(retryAfterMs)
         },
-        onClosed: () => {
+        onClosed: (status) => {
           if (controller !== active) return
           controller = null
-          handleClosed()
+          handleClosed(status)
         },
       })
     }

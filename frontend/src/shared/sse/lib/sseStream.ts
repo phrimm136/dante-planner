@@ -3,8 +3,7 @@ import { env } from '@/lib/env'
 
 /**
  * SSE transport — one `fetch` per connection, decoded here rather than by the
- * browser, so the request carries `Last-Event-ID` and the response's status and
- * `Retry-After` reach the caller.
+ * browser, so the response's status and `Retry-After` reach the caller.
  */
 
 const LINE_SEPARATOR = '\n'
@@ -29,8 +28,11 @@ export interface SseStreamCallbacks {
   onFrame: (frame: SseFrame) => void
   /** The server refused with 429; the argument is its cooldown, when parseable. */
   onRateLimited: (retryAfterMs: number | null) => void
-  /** The stream ended or never started, and was not aborted by the caller. */
-  onClosed: () => void
+  /**
+   * The stream ended or never started, and was not aborted by the caller.
+   * `status` is the HTTP status when the open itself failed, null on a normal end.
+   */
+  onClosed: (status: number | null) => void
 }
 
 /** Parses one frame's field lines into the event it dispatches. */
@@ -88,14 +90,6 @@ function parseRetryAfterMs(header: string | null): number | null {
   return seconds * SSE_TRANSPORT.RETRY_AFTER_UNIT_MS
 }
 
-function buildHeaders(lastEventId: string | null): Record<string, string> {
-  const headers: Record<string, string> = { Accept: SSE_TRANSPORT.ACCEPT }
-  if (lastEventId !== null) {
-    headers[SSE_TRANSPORT.LAST_EVENT_ID_HEADER] = lastEventId
-  }
-  return headers
-}
-
 async function pumpFrames(
   body: ReadableStream<Uint8Array>,
   signal: AbortSignal,
@@ -136,7 +130,6 @@ async function pumpFrames(
  */
 export async function runSseStream(
   path: string,
-  lastEventId: string | null,
   signal: AbortSignal,
   callbacks: SseStreamCallbacks,
 ): Promise<void> {
@@ -145,10 +138,10 @@ export async function runSseStream(
     response = await fetch(`${env.VITE_API_BASE_URL}${path}`, {
       credentials: 'include',
       signal,
-      headers: buildHeaders(lastEventId),
+      headers: { Accept: SSE_TRANSPORT.ACCEPT },
     })
   } catch {
-    if (!signal.aborted) callbacks.onClosed()
+    if (!signal.aborted) callbacks.onClosed(null)
     return
   }
 
@@ -162,7 +155,7 @@ export async function runSseStream(
   }
 
   if (!response.ok || !response.body) {
-    callbacks.onClosed()
+    callbacks.onClosed(response.status)
     return
   }
 
@@ -171,9 +164,9 @@ export async function runSseStream(
   try {
     await pumpFrames(response.body, signal, callbacks.onFrame)
   } catch {
-    if (!signal.aborted) callbacks.onClosed()
+    if (!signal.aborted) callbacks.onClosed(null)
     return
   }
 
-  if (!signal.aborted) callbacks.onClosed()
+  if (!signal.aborted) callbacks.onClosed(null)
 }

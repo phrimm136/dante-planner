@@ -235,20 +235,6 @@ describe('useSseEngine — connection lifecycle', () => {
     expect(useSseStore.getState().isConnected).toBe(true)
   })
 
-  it('replays the last seen event id on the reconnect request', async () => {
-    renderHook(() => useSseEngine(makeConfig()))
-    await advance(SSE_CONNECTION.INITIAL_DELAY)
-
-    lastStream().push(`id: 42\nevent: ${SSE_EVENTS.UPDATED}\ndata: {}\n\n`)
-    await settle()
-    lastStream().end()
-    await settle()
-    await advance(SSE_CONNECTION.BASE_DELAY)
-
-    expect(globalThis.fetch).toHaveBeenCalledTimes(2)
-    expect(requests[1].headers).toMatchObject({ [SSE_TRANSPORT.LAST_EVENT_ID_HEADER]: '42' })
-  })
-
   it('aborts the request and stops reconnecting on unmount', async () => {
     const { unmount } = renderHook(() => useSseEngine(makeConfig()))
     await advance(SSE_CONNECTION.INITIAL_DELAY)
@@ -394,6 +380,47 @@ describe('useSseEngine — backoff + reconnect', () => {
     expect(first.signal?.aborted).toBe(true)
     await advance(SSE_CONNECTION.INITIAL_DELAY)
     expect(globalThis.fetch).toHaveBeenCalledTimes(2)
+  })
+})
+
+describe('useSseEngine — stream gone', () => {
+  it('reports a 404 open exactly once and never reconnects', async () => {
+    serveAlways(statusResponse(SSE_TRANSPORT.STREAM_GONE_STATUS))
+    const onStreamGone = vi.fn()
+    renderHook(() => useSseEngine(makeConfig({ onStreamGone })))
+
+    await advance(SSE_CONNECTION.INITIAL_DELAY)
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1)
+    expect(onStreamGone).toHaveBeenCalledTimes(1)
+
+    // Nothing the backoff, the idle reset, or the proactive timer could fire
+    // may reopen a stream the server said is gone.
+    await advance(SSE_CONNECTION.IDLE_RESET_TIMEOUT + SSE_CONNECTION.MAX_DELAY)
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1)
+    expect(onStreamGone).toHaveBeenCalledTimes(1)
+    expect(useSseStore.getState().isConnected).toBe(false)
+  })
+
+  it('spends no reconnect attempt on a 404', async () => {
+    serveAlways(statusResponse(SSE_TRANSPORT.STREAM_GONE_STATUS))
+    renderHook(() => useSseEngine(makeConfig()))
+
+    await advance(SSE_CONNECTION.INITIAL_DELAY)
+    await advance(SSE_CONNECTION.IDLE_RESET_TIMEOUT)
+
+    expect(useSseStore.getState().reconnectAttempts).toBe(0)
+  })
+
+  it('still reconnects when the open fails with a status that is not 404', async () => {
+    serveAlways(statusResponse(500))
+    const onStreamGone = vi.fn()
+    renderHook(() => useSseEngine(makeConfig({ onStreamGone })))
+
+    await advance(SSE_CONNECTION.INITIAL_DELAY)
+    await advance(SSE_CONNECTION.BASE_DELAY)
+
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2)
+    expect(onStreamGone).not.toHaveBeenCalled()
   })
 })
 
