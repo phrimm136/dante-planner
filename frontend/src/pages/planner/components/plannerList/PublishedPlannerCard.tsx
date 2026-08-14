@@ -7,7 +7,6 @@ import { formatUsername } from '@/lib/formatUsername'
 import { getKeywordIconPath } from '@/shared/assets'
 import {
   PLANNER_LIST,
-  PLANNER_STATUS_BADGE_STYLES,
   RECOMMENDED_THRESHOLD,
   SECTION_STYLES,
   STAR_ICON_CLASS,
@@ -16,15 +15,12 @@ import { MdCategoryLabel } from '../MdCategoryLabel'
 import { categoryBadgeStyle } from '../../lib/plannerBadges'
 
 import type { PublicPlanner } from '../../types/PlannerListTypes'
-import type { PlannerStatusBadge } from '@/lib/constants'
 
 interface PublishedPlannerCardProps {
   /** Planner data to display */
   planner: PublicPlanner
   /** Whether to show bookmark indicator (only in community view for logged-in users) */
   showBookmark?: boolean
-  /** Status indicator badge type (Draft, Unsynced, Unpublished) */
-  statusBadge?: PlannerStatusBadge | null
   /** Optional context menu handler */
   onContextMenu?: (e: React.MouseEvent) => void
   /** Additional className */
@@ -56,11 +52,10 @@ interface PublishedPlannerCardProps {
 export function PublishedPlannerCard({
   planner,
   showBookmark = false,
-  statusBadge,
   onContextMenu,
   className,
 }: PublishedPlannerCardProps) {
-  const { t, i18n } = useTranslation(['planner', 'common'])
+  const { i18n } = useTranslation(['planner', 'common'])
   const {
     title,
     category,
@@ -74,13 +69,6 @@ export function PublishedPlannerCard({
     createdAt,
     isBookmarked,
   } = planner
-
-  // Status badge labels
-  const statusBadgeLabels: Record<PlannerStatusBadge, string> = {
-    DRAFT: t('pages.plannerList.status.draft', 'Draft'),
-    UNSYNCED: t('pages.plannerList.status.unsynced', 'Unsynced'),
-    UNPUBLISHED: t('pages.plannerList.status.unpublished', 'Unpublished changes'),
-  }
 
   // Limit displayed keywords (handle nullable)
   const keywords = selectedKeywords ?? []
@@ -124,16 +112,6 @@ export function PublishedPlannerCard({
 
         {/* Right: Indicator (reserve space for layout stability) */}
         <div className="shrink-0 min-w-[1rem] flex justify-end">
-          {statusBadge && (
-            <span
-              className={cn(
-                'px-1.5 py-0.5 text-[10px] font-medium rounded whitespace-nowrap',
-                PLANNER_STATUS_BADGE_STYLES[statusBadge],
-              )}
-            >
-              {statusBadgeLabels[statusBadge]}
-            </span>
-          )}
           {upvotes >= RECOMMENDED_THRESHOLD && <Star className={cn('size-4', STAR_ICON_CLASS)} />}
           {showBookmark && isBookmarked && (
             <Bookmark className="size-4 fill-primary text-primary" />

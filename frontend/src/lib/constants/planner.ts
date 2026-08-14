@@ -110,23 +110,6 @@ export const BATCH_PULL_MAX_IDS = 50
 export const INITIAL_SYNC_VERSION = 1
 
 /**
- * Planner status badge styles for card display
- * - Draft: Never manually saved (yellowish)
- * - Unsynced: Has local changes not pushed (blue)
- * - Unpublished: Published planner with local changes (orange)
- */
-export const PLANNER_STATUS_BADGE_STYLES = {
-  DRAFT: 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400',
-  UNSYNCED: 'bg-blue-500/20 text-blue-600 dark:text-blue-400',
-  UNPUBLISHED: 'bg-orange-500/20 text-orange-600 dark:text-orange-400',
-} as const
-
-/**
- * Planner status badge type
- */
-export type PlannerStatusBadge = keyof typeof PLANNER_STATUS_BADGE_STYLES
-
-/**
  * Calculate total pages from item count
  * Uses PLANNER_LIST.PAGE_SIZE as divisor
  */
