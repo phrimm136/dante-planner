@@ -259,8 +259,7 @@ public void logoutAll(Long userId, String accessToken) {
 }
 ```
 
-Its rotate script, with renamed states and named arguments; the logout script text stays
-byte-identical to today's, only its call population shrinking:
+Its rotate script, with renamed states and named arguments:
 
 ```lua
 -- KEYS = rt:fam:{F}, uinv:{user}
@@ -315,6 +314,25 @@ redis.call('HSET', familyKey, jti, 'IN_GRACE|' .. succJti .. '|' .. succExpiryMs
 redis.call('HSET', familyKey, 'succjwt:' .. jti, nowMs .. '|' .. succJwt)
 redis.call('PEXPIRE', familyKey, familyTtlMs)
 return outcome
+```
+
+The logout script keeps its segmented-KEYS form with the same named-locals treatment; its
+semantics are unchanged and only the call population shrinks (at most one token, one family):
+
+```lua
+-- KEYS = bl:{sha256(token)} x tokenCount, then rt:fam:{familyId} for the rest
+-- ARGV = marker, tokenCount, tokenTtlMs..., revokedAtMs, familyTtlMs
+local marker, tokenCount = ARGV[1], tonumber(ARGV[2])
+local revokedAtMs, familyTtlMs = ARGV[tokenCount + 3], ARGV[tokenCount + 4]
+
+for i = 1, tokenCount do
+  redis.call('SET', KEYS[i], marker, 'PX', ARGV[2 + i])
+end
+for i = tokenCount + 1, #KEYS do
+  redis.call('HSET', KEYS[i], '__revoked__', revokedAtMs)
+  redis.call('PEXPIRE', KEYS[i], familyTtlMs)
+end
+return 'OK'
 ```
 
 The boot-time converter, deleted in the release after it runs:
