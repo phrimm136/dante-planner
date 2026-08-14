@@ -767,7 +767,9 @@ ast-grep rule closes the assertion hole that let a hollow test look green.
 
 `tsconfig.app.json` excludes tests, so a solution-style build is the only way `tsc -b` reaches them.
 Composite projects must emit, so declarations go to a temp directory that nothing ships — Vite owns
-the real build.
+the real build. The build script therefore compiles only the app project (`tsc -b
+tsconfig.app.json`); the bare `tsc -b` solution build belongs to `typecheck` alone, so a test-file
+type error can fail the PR gate but never the release artifact.
 
 ```jsonc
 // frontend/tsconfig.json
@@ -786,12 +788,25 @@ the real build.
     "composite": true,
     "emitDeclarationOnly": true,
     "outDir": "./node_modules/.tmp/types/test",
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.test.tsbuildinfo",
     "types": ["vite/client", "vitest/globals"]
   },
-  "include": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/**/__tests__/**", "src/test-utils"],
+  "include": [
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/**/__tests__/**/*",
+    "src/**/__fixtures__/**/*.json",
+    "src/test-utils",
+    "vitest.setup.ts"
+  ],
+  "exclude": [],
   "references": [{ "path": "./tsconfig.app.json" }]
 }
 ```
+
+`"exclude": []` is load-bearing: the inherited app `exclude` filters out exactly the tests this
+project includes. The JSON include is load-bearing too — TypeScript 6 defaults `resolveJsonModule`
+on, so golden-file imports are project inputs and TS6307 fires without it.
 
 ```ts
 // src/test-utils/fixtures.ts
@@ -816,9 +831,8 @@ severity: error
 message: queryBy* answers null when absent, so toBeDefined() passes on a missing element; assert toBeInTheDocument() or not.toBeNull().
 files:
   - src/**/*.test.ts
+  - src/**/*.spec.ts
   - src/**/__tests__/**
-ignores:
-  - '**/*.snap'
 rule:
   pattern: expect($RECEIVER).toBeDefined()
   has:
@@ -834,7 +848,9 @@ test. Validate both patterns with `ast-grep run --debug-query` before committing
 ### Ordered change list
 
 1. `frontend/tsconfig.app.json` — `composite: true`, `emitDeclarationOnly: true`,
-   `outDir: ./node_modules/.tmp/types/app`; keep the test exclusions.
+   `outDir: ./node_modules/.tmp/types/app`; keep the test exclusions and add `src/test-utils` to
+   them, so the app project neither compiles test helpers nor emits a second declaration set for
+   them.
 2. `frontend/tsconfig.node.json` — same composite settings so the solution can reference it.
 3. `frontend/tsconfig.test.json` — new, as above.
 4. `frontend/tsconfig.json` — becomes the solution file; the current `extends`/`incremental` block
@@ -846,10 +862,15 @@ test. Validate both patterns with `ast-grep run --debug-query` before committing
    `src/test-utils/index.ts`.
 7. `frontend/scripts/ast-grep-rules/no-tobedefined-on-queryby.yml` and its `-tsx` twin;
    `frontend/scripts/ast-grep-tests/no-tobedefined-on-queryby-test.yml` and the twin's test file.
-   Add the missing `queryfn-consumes-signal-tsx-test.yml` while in the directory, and give the twin
-   the `ignores:` list its `.ts` sibling carries.
+   Add the missing `queryfn-consumes-signal-tsx-test.yml` while in the directory. The twin carries
+   no `ignores:` — a `Tsx` rule cannot match the `.ts` paths its sibling exempts, so a copied list
+   is a no-op that reads as a live exemption.
 8. `.github/workflows/pr-gate.yml` — the `test-frontend` job (`:202-229`) gains
-   `yarn typecheck`, `yarn check:fp`, and `yarn check:compiler-bailouts` steps.
+   `yarn typecheck`, `yarn check:fp`, `yarn check:rules`, and `yarn check:compiler-bailouts`
+   steps. `check:rules` is `ast-grep test`: without it the rule tests and snapshots execute
+   nowhere, and `ast-grep scan` cannot tell a clean tree from a rule that stopped matching. The
+   frontend `build` script's tsc invocation becomes `tsc -b tsconfig.app.json` in the same change,
+   per the target design.
 9. `frontend/vite.config.ts` — coverage (`:194-204`) gains `thresholds`, an `lcov` reporter, and
    `src/test-utils/**` in `exclude`; the `plugin` project (`:238-245`) gains
    `environment: 'node'`; CI runs `yarn test:coverage`.
@@ -1072,6 +1093,15 @@ with their counterparts, in this order:
 
 Land stream 7 first if anything is landed out of order: every other stream's test plan assumes
 fixtures that type-check.
+
+**Stream 7b — pre-existing test-type repair.** The first solution build over the test surface
+exposed 169 pre-existing type errors across 41 test files that no stream's change list claims;
+roughly a dozen of those files belong to no stream at all, so per-stream fixing cannot ever turn
+the new CI typecheck step green. A dedicated node lands immediately after stream 7 and fixes all
+of them mechanically — hollow fixtures completed, unsafe mock casts typed — except
+`usePlannerSave.test.ts` and `usePlannerSyncAdapter.test.ts`, which stream 1's change list already
+rewrites under its own authorization. Behavior-preserving: no assertion may weaken, and the
+`tests/` diffstat stays non-negative.
 
 ---
 
