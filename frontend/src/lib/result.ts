@@ -7,6 +7,14 @@
 
 export type Result<T, E> = { ok: true; value: T } | { ok: false; error: E }
 
+/**
+ * The member shape every discriminated error union in the app is built from.
+ *
+ * Unions stay per-boundary so each `switch` over one remains exhaustively
+ * narrow; this only dedupes the shape of a member, it never merges the unions.
+ */
+export type Tagged<K extends string, P = object> = { kind: K } & P
+
 /** Wrap a successful value. */
 export function ok<T>(value: T): Result<T, never> {
   return { ok: true, value }

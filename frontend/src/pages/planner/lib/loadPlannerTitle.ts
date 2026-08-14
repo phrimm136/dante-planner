@@ -15,13 +15,21 @@ export const untitledPlannerTitle = (): string =>
  */
 export async function loadPlannerTitle(plannerId: string): Promise<string> {
   const deviceId = await storage.getItem(storageKeys.deviceId())
-  if (!deviceId) return untitledPlannerTitle()
+  if (!deviceId.ok) {
+    console.error('Planner title read could not reach storage:', deviceId.error)
+    return untitledPlannerTitle()
+  }
+  if (deviceId.value === null) return untitledPlannerTitle()
 
-  const rawData = await storage.getItem(storageKeys.md(deviceId, plannerId))
-  if (!rawData) return untitledPlannerTitle()
+  const rawData = await storage.getItem(storageKeys.md(deviceId.value, plannerId))
+  if (!rawData.ok) {
+    console.error('Planner title read could not reach storage:', rawData.error)
+    return untitledPlannerTitle()
+  }
+  if (rawData.value === null) return untitledPlannerTitle()
 
   try {
-    const parsed = JSON.parse(rawData)
+    const parsed = JSON.parse(rawData.value)
     return parsed?.metadata?.title || untitledPlannerTitle()
   } catch {
     return untitledPlannerTitle()

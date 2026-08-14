@@ -160,8 +160,11 @@ export function usePlannerStorage(): PlannerStorageOperations {
       deviceIdPromise = (async () => {
         try {
           const existingId = await storage.getItem(storageKeys.deviceId())
-          if (existingId) {
-            return existingId
+          // A read that broke says nothing about whether an id exists. Minting
+          // one here would orphan every row written under the previous id.
+          if (!existingId.ok) return ''
+          if (existingId.value) {
+            return existingId.value
           }
 
           const newId = generateUUID()
@@ -235,7 +238,13 @@ export function usePlannerStorage(): PlannerStorageOperations {
       let rawData: string | null
       try {
         const deviceId = await getOrCreateDeviceId()
-        rawData = await storage.getItem(storageKeys.md(deviceId, id))
+        const read = await storage.getItem(storageKeys.md(deviceId, id))
+        if (!read.ok) {
+          console.error('Failed to read planner from storage:', read.error)
+          options?.onError?.('loadFailed')
+          return err('loadFailed')
+        }
+        rawData = read.value
       } catch (error) {
         console.error('Failed to read planner from storage:', error)
         options?.onError?.('loadFailed')
