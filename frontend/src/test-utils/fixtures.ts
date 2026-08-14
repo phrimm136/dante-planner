@@ -101,18 +101,25 @@ export function buildPlannerSummary(overrides: Partial<PlannerSummary> = {}): Pl
  * the boundary schema, then merged into a list item by `toEGOGiftCardProps`.
  */
 export function buildEgoGiftListItem(overrides: Partial<EGOGiftListItem> = {}): EGOGiftListItem {
-  const { id = '9001', name, ...specOverrides } = overrides
+  const { id = '9001', name = 'Fixture Gift', ...specOverrides } = overrides
   const spec = EGOGiftSpecSchema.parse({
     tag: ['TIER_3'],
     keyword: null,
     battleKeywordList: [],
     attributeType: 'WRATH',
     themePack: ['1001'],
-    maxEnhancement: 0,
+    maxEnhancement: 2,
     ...specOverrides,
   })
-  const item = toEGOGiftCardProps(id, spec)
-  return name === undefined ? item : { ...item, name }
+  // toEGOGiftCardProps carries only the fields a card renders, so the optionals a
+  // caller overrode have to be put back or the fixture silently drops them.
+  return {
+    ...toEGOGiftCardProps(id, spec),
+    name,
+    ...(spec.hardOnly === undefined ? {} : { hardOnly: spec.hardOnly }),
+    ...(spec.extremeOnly === undefined ? {} : { extremeOnly: spec.extremeOnly }),
+    ...(spec.fusioned === undefined ? {} : { fusioned: spec.fusioned }),
+  }
 }
 
 /** A gift spec keyed by base id, parsed at the boundary schema the catalog validates with. */
@@ -128,7 +135,7 @@ export function buildEgoGiftSpecList(
         battleKeywordList: [],
         attributeType: 'WRATH',
         themePack: ['1001'],
-        maxEnhancement: 0,
+        maxEnhancement: 2,
         ...overrides,
       }),
     ]),
