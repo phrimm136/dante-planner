@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.danteplanner.backend.planner.entity.PlannerKeywords;
 import org.danteplanner.backend.planner.repository.PlannerDriftAuditRepository;
 import org.danteplanner.backend.planner.repository.PlannerDriftAuditRepository.ContentDocumentRow;
@@ -80,9 +81,14 @@ public class PlannerDriftReconciler {
      * <p>The read-only boundary spans the whole pass: every audit read routes to the replica, and
      * one transaction gives them a single snapshot to disagree against.</p>
      *
+     * <p>Multi-pod safe: {@code @SchedulerLock} over the shared auth Redis lock store ensures the
+     * pass fires once across the fleet, not once per pod. A refused pod's call returns null rather
+     * than an empty list — the scheduler discards it, and nothing else calls this method.</p>
+     *
      * @return the drift records found in this pass
      */
     @Scheduled(cron = "${planner.reconciler.cron:0 0 4 * * *}")
+    @SchedulerLock(name = "reconcilePlannerDrift", lockAtMostFor = "PT10M", lockAtLeastFor = "PT30S")
     @Transactional(readOnly = true)
     public List<DriftRecord> reconcile() {
         List<DriftRecord> records = Stream.of(

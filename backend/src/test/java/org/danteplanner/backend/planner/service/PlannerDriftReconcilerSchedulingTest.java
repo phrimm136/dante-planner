@@ -4,6 +4,8 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
+
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,5 +39,16 @@ class PlannerDriftReconcilerSchedulingTest {
         assertThat(reconcile.getAnnotation(Scheduled.class)).isNotNull();
         assertThat(reconcile.getAnnotation(Transactional.class)).isNotNull();
         assertThat(reconcile.getAnnotation(Transactional.class).readOnly()).isTrue();
+    }
+
+    @Test
+    void reconcile_WhenAnnotated_CarriesASchedulerLockNamingItsFleetLock() throws NoSuchMethodException {
+        SchedulerLock lock = PlannerDriftReconciler.class.getMethod("reconcile")
+                .getAnnotation(SchedulerLock.class);
+
+        assertThat(lock)
+                .as("without a fleet lock every pod runs the pass, so one drift is reported N times")
+                .isNotNull();
+        assertThat(lock.name()).isNotBlank();
     }
 }

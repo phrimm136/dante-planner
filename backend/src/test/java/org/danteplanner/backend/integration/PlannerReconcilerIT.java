@@ -1,6 +1,7 @@
 package org.danteplanner.backend.integration;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import net.javacrumbs.shedlock.core.LockProvider;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
@@ -22,12 +23,16 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
 import javax.sql.DataSource;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -41,10 +46,26 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @ActiveProfiles("it")
 @Tag("containerized")
-@Import(TestConfig.class)
+@Import({TestConfig.class, PlannerReconcilerIT.ReconcilerLockHarness.class})
 class PlannerReconcilerIT extends SharedMySqlContainerSupport {
 
+    /**
+     * Stands in for the fleet lock the pass takes.
+     *
+     * <p>The lock is always granted because this class drives {@code reconcile()} directly and
+     * several times over: the real provider holds the lock for {@code lockAtLeastFor} past each
+     * release, and a refused call returns null rather than a record list. Fleet arbitration is
+     * {@code ShedLockMultiPodIT}'s subject, not this one's.</p>
+     */
+    @TestConfiguration
+    static class ReconcilerLockHarness {
 
+        @Bean
+        @Primary
+        LockProvider lockProvider() {
+            return configuration -> Optional.of(() -> { });
+        }
+    }
 
     @Autowired
     private UserRepository userRepository;
