@@ -34,11 +34,33 @@ desync class from silent to loud.
   `KnownConstraint.PLANNER_BOOKMARK` maps violations nothing can produce,
   `PlannerBookmarkRepository.countByPlannerId` has no caller, and four i18n stubs plus stale docs
   still advertise the toggle. `docs/debt.md` records the table-and-mapping drop as an undecided
-  tail.
+  tail. The read side's whole visible life:
+
+  ```tsx
+  /** Whether current user has bookmarked; false when not authenticated */
+  isBookmarked: z.boolean(),          // required by the read schema; no writer has ever set it true
+
+  {showBookmark && isBookmarked && (  // render-only; no mutation path exists anywhere
+    <Bookmark className="size-4 fill-primary text-primary" />
+  )}
+  ```
 - `JwtAuthenticationFilter` holds ten collaborators. Its non-lineage rotation branch is guarded by
   `LineageRotationFlag` (`jwt.rotation.lineage-enabled`, default `false`) although the lineage
   rollout completed around 2026-05; `RefreshRotationService` still admits legacy-format tokens via
-  `legacyAdmitEnabled` and synthesized family ids.
+  `legacyAdmitEnabled` and synthesized family ids. The fork at proposal time (condensed — this
+  method is also the orchestration the refresher extraction moves):
+
+  ```java
+  if (lineageRotationFlag.isEnabled()) {
+      RotationResult.Rotated rotated = refreshRotationService.rotate(refreshToken).orThrow();
+      cookieUtils.setCookie(response, CookieConstants.REFRESH_TOKEN, rotated.newRefreshJwt(), ...);
+      return true;
+  }
+  // legacy branch: mints locally, records no lineage
+  tokenBlacklistService.blacklistTokenForRotation(refreshToken, claims.expiration());
+  cookieUtils.setCookie(response, CookieConstants.REFRESH_TOKEN,
+          tokenGenerator.generateRefreshToken(user.getId()), ...);
+  ```
 - `TokenBlacklistService` and `RefreshRotationService` are coupled bidirectionally: the logout Lua
   in the blacklist writes rotation's `REVOKED_FIELD` into `rt:fam:*` hashes, and rotation's Lua
   reads the blacklist's `uinv:` keys. Blacklist reads fail open on a replica template; rotation
@@ -71,6 +93,14 @@ desync class from silent to loud.
   public static Notification plannerScoped(Long userId, String contentId, NotificationType type,
                                            UUID plannerId, String plannerTitle)
   ```
+
+  And the unwired declaration, visible as a one-value mismatch between the two enums (condensed):
+
+  ```java
+  enum NotificationType { PLANNER_RECOMMENDED, PLANNER_PUBLISHED, COMMENT_RECEIVED, REPLY_RECEIVED, REPORT_RECEIVED }
+  enum DomainEventType  { PLANNER_PUBLISHED, PLANNER_RECOMMENDED, COMMENT_RECEIVED, REPLY_RECEIVED }
+  // REPORT_RECEIVED: declared for the inbox, absent from the outbox — no producer can exist
+  ```
 - `PlannerCommandService.upsertAggregate` propagates edits of a published planner to the public
   catalog via `PlannerCatalogService.onVisibleEditCommitted` with no restriction check, while
   every other public-contribution write calls `PlannerAccessGuard`:
@@ -85,7 +115,20 @@ desync class from silent to loud.
   callers.
 - Twenty-nine constructor parameters are `@Value`-bound in feature classes;
   `planner.recommended-threshold` binds in three classes, five other keys bind twice, and
-  `JwtProperties` owns the `jwt` prefix while two `jwt.*` keys are read beside it via `@Value`.
+  `JwtProperties` owns the `jwt` prefix while two `jwt.*` keys are read beside it via `@Value`:
+
+  ```java
+  // one key, three independent bindings
+  PlannerCatalogService:    @Value("${planner.recommended-threshold}") int recommendedThreshold
+  PlannerDriftReconciler:   @Value("${planner.recommended-threshold}") int recommendedThreshold
+  PlannerEngagementService: @Value("${planner.recommended-threshold}") int recommendedThreshold
+
+  // one prefix, three binding mechanisms
+  @Value("${jwt.rotation.legacy-admit-enabled:true}") boolean legacyAdmitEnabled      // ctor param
+  @Value("${jwt.rotation.retry-reuse-window-ms:30000}") long retryReuseWindowMs       // ctor param
+  public LineageRotationFlag(@Value("${jwt.rotation.lineage-enabled:false}") boolean enabled)  // its own bean
+  @ConfigurationProperties(prefix = "jwt")   // JwtProperties — the class that already owns the prefix
+  ```
 
 ## Prior art
 
