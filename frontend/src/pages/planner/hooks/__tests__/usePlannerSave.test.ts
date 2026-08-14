@@ -1067,6 +1067,27 @@ describe('usePlannerSave - failed resolution surface', () => {
     expect(result.current.resolutionError).toEqual({ kind: 'quota' })
   })
 
+  it('drops the previous resolution failure when a newer failure arrives', async () => {
+    authenticated()
+    const { result } = await driveIntoConflict()
+    mockFetchFromServer.mockResolvedValue(err({ kind: 'quota' }))
+
+    await act(async () => {
+      await result.current.resolveConflict('discard')
+    })
+    expect(result.current.resolutionError).toEqual({ kind: 'quota' })
+
+    // A fresh save conflicts again: the old reason describes a conflict that is
+    // no longer the one on screen.
+    mockSyncToServer.mockRejectedValueOnce(new ConflictError('SYNC_CONFLICT', 'conflict', 12))
+    await act(async () => {
+      await result.current.save({ published: false })
+    })
+
+    expect(result.current.error?.kind).toBe('conflict')
+    expect(result.current.resolutionError).toBeNull()
+  })
+
   it('clears the previous resolution failure when a later attempt succeeds', async () => {
     authenticated()
     const onServerReload = vi.fn()
