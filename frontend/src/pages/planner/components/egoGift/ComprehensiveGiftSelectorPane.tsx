@@ -4,7 +4,7 @@ import { LoadingState } from '@/components/feedback/LoadingState'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { encodeGiftSelection, buildSelectionLookup, getCascadeIngredients } from '@/pages/egoGift'
+import { applyGiftToggle } from '../../lib/giftToggle'
 import type { EGOGiftListItem } from '@/pages/egoGift'
 import type { EnhancementLevel } from '@/shared/gameData'
 import { useEGOGiftListData } from '@/pages/egoGift'
@@ -85,38 +85,8 @@ export function ComprehensiveGiftSelectorPane({
           specById: specs,
           setComprehensiveGiftIds: notify,
         } = latest.current
-        const newSelection = new Set(current)
-        const selectionLookup = buildSelectionLookup(current)
-        const existing = selectionLookup.get(giftId)
 
-        if (existing) {
-          newSelection.delete(existing.encodedId)
-          if (existing.enhancement !== enhancement) {
-            newSelection.add(encodeGiftSelection(enhancement, giftId))
-          }
-        } else {
-          newSelection.add(encodeGiftSelection(enhancement, giftId))
-
-          const giftSpec = specs.get(giftId)
-          if (!giftSpec) {
-            notify(newSelection)
-            return
-          }
-
-          const ingredientIds = getCascadeIngredients(giftSpec.recipe)
-          const visited = new Set<string>([giftId])
-
-          for (const ingredientId of ingredientIds) {
-            const ingredientIdStr = String(ingredientId)
-            if (visited.has(ingredientIdStr)) continue
-            visited.add(ingredientIdStr)
-            if (!selectionLookup.has(ingredientIdStr)) {
-              newSelection.add(encodeGiftSelection(0, ingredientIdStr))
-            }
-          }
-        }
-
-        notify(newSelection)
+        notify(applyGiftToggle(current, giftId, enhancement, { specById: specs }))
       })
     },
   )

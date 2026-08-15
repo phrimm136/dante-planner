@@ -9,7 +9,7 @@ import { EGOGiftFilterBar } from '@/pages/egoGift'
 import { EGOGiftSelectionList } from '@/pages/egoGift'
 import type { SortMode } from '@/shared/filter'
 import { bucketAndSortFloorGifts } from '../../lib/floorGiftBucketing'
-import { encodeGiftSelection, buildSelectionLookup, getCascadeIngredients } from '@/pages/egoGift'
+import { applyGiftToggle } from '../../lib/giftToggle'
 import type { EGOGiftListItem } from '@/pages/egoGift'
 import type { EnhancementLevel, DungeonIdx } from '@/shared/gameData'
 import { SECTION_STYLES } from '@/lib/constants'
@@ -93,45 +93,18 @@ export function FloorGiftSelectorPane({
           themePackId: packId,
           onGiftSelectionChange: notify,
         } = latest.current
-        const newSelection = new Set(current)
 
-        const selectionLookup = buildSelectionLookup(current)
-        const existing = selectionLookup.get(giftId)
-
-        if (existing) {
-          newSelection.delete(existing.encodedId)
-          if (existing.enhancement !== enhancement) {
-            newSelection.add(encodeGiftSelection(enhancement, giftId))
-          }
-        } else {
-          const newEncodedId = encodeGiftSelection(enhancement, giftId)
-          newSelection.add(newEncodedId)
-
-          const giftSpec = specs.get(giftId)
-          if (giftSpec) {
-            const ingredientIds = getCascadeIngredients(giftSpec.recipe)
-            const visited = new Set<string>([giftId])
-
-            for (const ingredientId of ingredientIds) {
-              const ingredientIdStr = String(ingredientId)
-              if (visited.has(ingredientIdStr)) continue
-              visited.add(ingredientIdStr)
-
-              const ingredientSpec = specs.get(ingredientIdStr)
-              const isObtainable =
-                !ingredientSpec ||
-                ingredientSpec.themePack.length === 0 ||
-                ingredientSpec.themePack.includes(packId)
-
-              // Only add to floor if obtainable in this theme pack
-              if (isObtainable && !selectionLookup.has(ingredientIdStr)) {
-                newSelection.add(encodeGiftSelection(0, ingredientIdStr))
-              }
-            }
-          }
+        // A floor only carries what this theme pack can hand out
+        const canCascade = (ingredientId: string) => {
+          const ingredientSpec = specs.get(ingredientId)
+          return (
+            !ingredientSpec ||
+            ingredientSpec.themePack.length === 0 ||
+            ingredientSpec.themePack.includes(packId)
+          )
         }
 
-        notify(newSelection)
+        notify(applyGiftToggle(current, giftId, enhancement, { specById: specs, canCascade }))
       })
     },
   )
