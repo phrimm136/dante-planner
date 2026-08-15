@@ -438,7 +438,7 @@ asset pipeline.
   against rule 3.
 - 2026-08-15 — NoteEditor.handlePaste policy is still inline; only its primitives moved to
   noteUtils. The policy extraction remains open.
-- 2026-08-15 — jsx-a11y ships eight of nine rules; prefer-tag-over-role is off per ADR 082
+- 2026-08-15 — jsx-a11y ships eight of nine rules; prefer-tag-over-role is off per ADR 083
   (four correct-ARIA reports the rule cannot express as native tags) — cross-reference, since
   the acceptance row names this ledger.
 - 2026-08-15 — epic composition audit residue (RFC 0004), accepted as debt: suppressErrorToast/
