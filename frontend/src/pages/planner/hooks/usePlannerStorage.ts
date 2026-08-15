@@ -2,6 +2,7 @@ import { storage, openStorageDb, STORAGE_STORE_NAME } from '@/lib/storage'
 import { PLANNER_STORAGE_KEYS } from '@/lib/constants'
 import { generateUUID } from '@/lib/uuid'
 import { ok, err } from '@/lib/result'
+import { validateDataOrNull } from '@/lib/validation'
 import { migrateKeywords } from '@/shared/gameData'
 import { SaveablePlannerSchema, toSaveablePlanner } from '../schemas/PlannerSchemas'
 import { classifyAppError } from '@/lib/apiErrorClassifier'
@@ -193,16 +194,12 @@ export function usePlannerStorage(): PlannerStorageOperations {
       }
 
       // Validate planner data before saving
-      const validation = SaveablePlannerSchema.safeParse(planner)
-      if (!validation.success) {
-        console.error('Planner validation failed before save:')
-        console.error('  Planner ID:', planner.metadata?.id)
-        console.error('  Validation errors:', JSON.stringify(validation.error.issues, null, 2))
-        validation.error.issues.forEach((err, idx) => {
-          console.error(
-            `  [${idx}] Path: ${err.path.join('.')}, Code: ${err.code}, Message: ${err.message}`,
-          )
-        })
+      const validated = validateDataOrNull(
+        planner,
+        SaveablePlannerSchema,
+        `planner save / ${planner.metadata?.id}`,
+      )
+      if (!validated) {
         options?.onError?.('validationFailed')
         return err({ kind: 'unknown' })
       }
@@ -210,7 +207,7 @@ export function usePlannerStorage(): PlannerStorageOperations {
       try {
         const key = storageKeys.planner(planner.metadata.id)
 
-        const written = await storage.setItem(key, JSON.stringify(validation.data))
+        const written = await storage.setItem(key, JSON.stringify(validated))
         if (!written.ok) {
           const saveError = classifyAppError(
             written.error.kind === 'ioError' ? written.error.cause : written.error,
@@ -266,18 +263,13 @@ export function usePlannerStorage(): PlannerStorageOperations {
         return err('corruptedData')
       }
 
-      const result = SaveablePlannerSchema.safeParse(parsed)
-      if (!result.success) {
-        console.error('Planner validation failed:', result.error)
+      const validated = validateDataOrNull(parsed, SaveablePlannerSchema, `planner load / ${id}`)
+      if (!validated) {
         options?.onError?.('validationFailed')
         return err('validationFailed')
       }
 
-      const planner = toSaveablePlanner(
-        result.data.metadata,
-        result.data.config,
-        result.data.content,
-      )
+      const planner = toSaveablePlanner(validated.metadata, validated.config, validated.content)
       // Migrate renamed keyword ids so the detail/view page renders current icons.
       return ok(withMigratedKeywords(planner))
     }
@@ -312,13 +304,17 @@ export function usePlannerStorage(): PlannerStorageOperations {
             if (parsed?.prefix === PLANNER_STORAGE_KEYS.PLANNER) {
               try {
                 const data = JSON.parse(cursor.value)
-                const validation = SaveablePlannerSchema.safeParse(data)
+                const validated = validateDataOrNull(
+                  data,
+                  SaveablePlannerSchema,
+                  `planner list / ${parsed.plannerId}`,
+                )
 
-                if (validation.success) {
+                if (validated) {
                   const planner = toSaveablePlanner(
-                    validation.data.metadata,
-                    validation.data.config,
-                    validation.data.content,
+                    validated.metadata,
+                    validated.config,
+                    validated.content,
                   )
 
                   // Extract keywords for MD planners only (RR has no keywords)
@@ -387,13 +383,17 @@ export function usePlannerStorage(): PlannerStorageOperations {
             if (parsed?.prefix === PLANNER_STORAGE_KEYS.PLANNER) {
               try {
                 const data = JSON.parse(cursor.value)
-                const validation = SaveablePlannerSchema.safeParse(data)
+                const validated = validateDataOrNull(
+                  data,
+                  SaveablePlannerSchema,
+                  `planner listFull / ${parsed.plannerId}`,
+                )
 
-                if (validation.success) {
+                if (validated) {
                   const planner = toSaveablePlanner(
-                    validation.data.metadata,
-                    validation.data.config,
-                    validation.data.content,
+                    validated.metadata,
+                    validated.config,
+                    validated.content,
                   )
                   // Migrate renamed keyword ids so downstream sync-validation and
                   // keyword filtering see current ids (content is unvalidated here).

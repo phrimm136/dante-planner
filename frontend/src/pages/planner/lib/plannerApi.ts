@@ -7,6 +7,7 @@
 
 import { ApiClient } from '@/lib/api'
 import { BATCH_PULL_MAX_IDS } from '@/lib/constants'
+import { validateData } from '@/lib/validation'
 import {
   ServerPlannerResponseSchema,
   ServerPlannerBatchResponseSchema,
@@ -38,7 +39,7 @@ export const plannerApi = {
    */
   async list(page = 0, size = 100): Promise<{ content: ServerPlannerSummary[]; last: boolean }> {
     const data = await ApiClient.get(`${PLANNERS_BASE}?page=${page}&size=${size}`)
-    const parsed = ServerPlannerSummaryPageSchema.parse(data)
+    const parsed = validateData(data, ServerPlannerSummaryPageSchema, 'planner list')
     return {
       content: parsed.content,
       last: parsed.page.number >= parsed.page.totalPages - 1,
@@ -74,7 +75,7 @@ export const plannerApi = {
    */
   async get(id: PlannerId | string): Promise<ServerPlannerResponse> {
     const data = await ApiClient.get(`${PLANNERS_BASE}/${id}`)
-    return ServerPlannerResponseSchema.parse(data)
+    return validateData(data, ServerPlannerResponseSchema, 'planner get')
   },
 
   /**
@@ -93,7 +94,7 @@ export const plannerApi = {
       const data = await ApiClient.post(`${PLANNERS_BASE}/batch`, {
         ids: ids.slice(i, i + BATCH_PULL_MAX_IDS),
       })
-      yield ServerPlannerBatchResponseSchema.parse(data)
+      yield validateData(data, ServerPlannerBatchResponseSchema, 'planner batch')
     }
   },
 
@@ -114,7 +115,7 @@ export const plannerApi = {
   ): Promise<ServerPlannerResponse> {
     const endpoint = force ? `${PLANNERS_BASE}/${id}?force=true` : `${PLANNERS_BASE}/${id}`
     const data = await ApiClient.put(endpoint, request)
-    return ServerPlannerResponseSchema.parse(data)
+    return validateData(data, ServerPlannerResponseSchema, 'planner upsert')
   },
 
   /**
@@ -134,7 +135,7 @@ export const plannerApi = {
    */
   async import(request: ImportPlannersRequest): Promise<ImportPlannersResponse> {
     const data = await ApiClient.post(`${PLANNERS_BASE}/import`, request)
-    return ImportPlannersResponseSchema.parse(data)
+    return validateData(data, ImportPlannersResponseSchema, 'planner import')
   },
 
   /**
@@ -146,7 +147,7 @@ export const plannerApi = {
    */
   async publish(id: PlannerId | string): Promise<ServerPlannerResponse> {
     const data = await ApiClient.post(`${PLANNERS_BASE}/${id}/publish`)
-    return ServerPlannerResponseSchema.parse(data)
+    return validateData(data, ServerPlannerResponseSchema, 'planner publish')
   },
 
   /**
@@ -158,6 +159,6 @@ export const plannerApi = {
    */
   async unpublish(id: PlannerId | string): Promise<ServerPlannerResponse> {
     const data = await ApiClient.post(`${PLANNERS_BASE}/${id}/unpublish`)
-    return ServerPlannerResponseSchema.parse(data)
+    return validateData(data, ServerPlannerResponseSchema, 'planner unpublish')
   },
 }

@@ -42,12 +42,8 @@ export function GlobalLayout({ children }: GlobalLayoutProps) {
     }
   }, [user, settings, openSyncChoiceDialog])
 
-  const handleSyncChoice = (syncEnabled: boolean) => {
+  const handleSyncChoice = () => {
     closeSyncChoiceDialog()
-    // If sync enabled, pending sync will be triggered by the component that needs it
-    if (syncEnabled) {
-      console.log('Cloud sync enabled by user')
-    }
   }
 
   return (

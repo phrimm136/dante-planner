@@ -272,10 +272,6 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
             console.error(`Failed to purge local planner ${local.id}:`, error)
           }
         }
-        if (purgedCount > 0) {
-          console.log(`Reconciled local IndexedDB: purged ${purgedCount} server-deleted planner(s)`)
-        }
-
         // Build conflict items if any conflicts detected
         if (plan.conflict.length > 0) {
           const conflicts: ConflictItem[] = []

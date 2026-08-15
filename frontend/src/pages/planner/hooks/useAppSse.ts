@@ -1,9 +1,11 @@
 import { useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import type { z } from 'zod'
 
 import i18n from '@/lib/i18n'
 import { SSE_EVENTS } from '@/lib/constants'
 import { formatUsername } from '@/lib/formatUsername'
+import { validateDataOrNull } from '@/lib/validation'
 import { useSseEngine, useSseStore, SseAccountSuspendedSchema } from '@/shared/sse'
 import {
   showBrowserNotification,
@@ -29,6 +31,22 @@ const NOTIFICATION_TITLE_KEY: Partial<Record<NotificationType, string>> = {
   COMMENT_RECEIVED: 'notifications.types.commentReceived',
   REPLY_RECEIVED: 'notifications.types.replyReceived',
   PLANNER_RECOMMENDED: 'notifications.types.plannerRecommended',
+}
+
+/**
+ * Reads an event frame's payload, degrading to `null` on a body the contract
+ * does not describe. The engine calls handlers from inside the stream's read
+ * loop, which a throw escapes.
+ */
+function readPayload<T>(event: MessageEvent, schema: z.ZodType<T>, context: string): T | null {
+  let raw: unknown
+  try {
+    raw = JSON.parse(event.data as string)
+  } catch (error) {
+    console.error(`[${context}] Malformed JSON:`, error)
+    return null
+  }
+  return validateDataOrNull(raw, schema, context)
 }
 
 /**
@@ -116,21 +134,10 @@ export function useAppSse(): void {
     void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.all })
     setLastEventTime(Date.now())
 
-    let raw: unknown
-    try {
-      raw = JSON.parse(event.data as string)
-    } catch (e) {
-      console.error('Failed to parse SSE notification event:', e)
-      return
-    }
+    const data = readPayload(event, SseNotificationEventSchema, 'sse notification')
+    if (!data) return
 
-    const parsed = SseNotificationEventSchema.safeParse(raw)
-    if (!parsed.success) {
-      console.warn('SSE notification parse failed:', parsed.error)
-      return
-    }
-
-    showNotificationForEvent(parsed.data)
+    showNotificationForEvent(data)
   }
 
   /**
@@ -143,21 +150,10 @@ export function useAppSse(): void {
     // Invalidate auth query to refresh user profile
     void queryClient.invalidateQueries({ queryKey: ['auth', 'me'] })
 
-    let raw: unknown
-    try {
-      raw = JSON.parse(event.data as string)
-    } catch (e) {
-      console.error('Failed to parse SSE account_suspended event:', e)
-      return
-    }
+    const data = readPayload(event, SseAccountSuspendedSchema, 'sse account suspended')
+    if (!data) return
 
-    const parsed = SseAccountSuspendedSchema.safeParse(raw)
-    if (!parsed.success) {
-      console.warn('SSE account_suspended parse failed:', parsed.error)
-      return
-    }
-
-    const { suspensionType, reason } = parsed.data
+    const { suspensionType, reason } = data
     console.warn(`Account suspended (${suspensionType}):`, reason || 'No reason provided')
   }
 
@@ -172,21 +168,9 @@ export function useAppSse(): void {
     // Invalidate notification queries to show new notification in inbox
     void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.all })
 
-    let raw: unknown
-    try {
-      raw = JSON.parse(event.data as string)
-    } catch (e) {
-      console.error('Failed to parse SSE published event:', e)
-      return
-    }
+    const data = readPayload(event, SsePublishedEventSchema, 'sse published')
+    if (!data) return
 
-    const parsed = SsePublishedEventSchema.safeParse(raw)
-    if (!parsed.success) {
-      console.warn('SSE published event parse failed:', parsed.error)
-      return
-    }
-
-    const data = parsed.data
     const title = i18n.t('notifications.types.plannerPublished', { ns: 'common' })
     const authorDisplay = formatUsername(data.authorEpithet, data.authorSuffix)
     const body = `${authorDisplay}: ${data.plannerTitle}`
