@@ -26,7 +26,7 @@ describe('EGOGiftObservationDataSchema', () => {
       { egogiftCount: 1, starlightCost: 70 },
       { egogiftCount: 2, starlightCost: 160 },
     ],
-    observationEgoGiftDataList: [9001, 9002, 9003],
+    observationEgoGiftDataList: ['9001', '9002', '9003'],
   }
 
   it('accepts a valid observation data sample from egoGiftObservationData.json', () => {
@@ -37,6 +37,22 @@ describe('EGOGiftObservationDataSchema', () => {
     const result = EGOGiftObservationDataSchema.strict().safeParse({
       ...validData,
       unexpected: true,
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects a numeric gift id', () => {
+    const result = EGOGiftObservationDataSchema.safeParse({
+      ...validData,
+      observationEgoGiftDataList: [9001, 9002, 9003],
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects a gift id carrying an enhancement prefix', () => {
+    const result = EGOGiftObservationDataSchema.safeParse({
+      ...validData,
+      observationEgoGiftDataList: ['19001'],
     })
     expect(result.success).toBe(false)
   })
