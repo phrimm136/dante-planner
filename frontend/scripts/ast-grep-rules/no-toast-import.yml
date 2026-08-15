@@ -5,15 +5,12 @@ message: Only lib/errorPresentation.ts may hold the toast handle. Keying on the 
 files:
   - src/**/*.ts
 ignores:
-  # The presenter owns the handle. NotificationToast renders bespoke
-  # toast.custom notifications rather than error/success semantics.
+  # The presenter owns the handle.
   - src/lib/errorPresentation.ts
-  - src/shared/notifications/components/NotificationToast.tsx
   # A test asserting on the sink needs the handle it asserts against. Scoped to
   # test files themselves: a helper module a production import could reach is
   # not exempt.
   - src/**/*.test.ts
-  - src/**/__tests__/**/*.test.ts
 rule:
   any:
     - kind: import_statement

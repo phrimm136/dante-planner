@@ -9,7 +9,6 @@ files:
   - src/shared/*/schemas/**/*.tsx
 ignores:
   - '**/__tests__/**'
-  - '**/*.test.ts'
   - '**/*.test.tsx'
 rule:
   pattern: $EXPR as unknown as $TYPE
