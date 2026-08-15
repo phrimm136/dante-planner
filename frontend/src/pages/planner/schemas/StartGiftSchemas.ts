@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { EGOGiftIdSchema } from '@/shared/gameData'
 
 /**
  * Start Gift Schemas
@@ -8,4 +9,4 @@ import { z } from 'zod'
  */
 
 // StartEgoGiftPools schema - maps keyword to array of gift IDs
-export const StartEgoGiftPoolsSchema = z.record(z.string(), z.array(z.number()))
+export const StartEgoGiftPoolsSchema = z.record(z.string(), z.array(EGOGiftIdSchema))

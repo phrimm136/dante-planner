@@ -5,10 +5,11 @@ import { EGOGiftTooltip } from '@/pages/egoGift'
 import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { CARD_GRID } from '@/lib/constants'
 import { toGiftListItem, toUnknownGiftListItem } from '@/pages/egoGift'
+import type { EGOGiftId } from '@/shared/gameData'
 
 interface StartGiftRowProps {
   keyword: string
-  giftIds: number[]
+  giftIds: EGOGiftId[]
   giftSpecMap: Record<string, EGOGiftSpec>
   giftNameMap: EGOGiftNameList
   isRowSelected: boolean
@@ -77,17 +78,18 @@ export function StartGiftRow({
       {/* Gift cards - horizontal layout */}
       <div className="relative z-10 flex items-start gap-2 lg:gap-4">
         {giftIds.map((giftId) => {
-          const idStr = String(giftId)
-          const spec = giftSpecMap[idStr]
-          const name = giftNameMap[idStr] || `Gift ${giftId}`
-          const isSelected = selectedGiftIds.has(idStr)
+          const spec = giftSpecMap[giftId]
+          const name = giftNameMap[giftId] || `Gift ${giftId}`
+          const isSelected = selectedGiftIds.has(giftId)
           const canSelect = isRowSelected && (isSelected || selectedGiftIds.size < maxSelectable)
 
           // Build gift object for EGOGiftCard
-          const gift = spec ? toGiftListItem(idStr, spec, name) : toUnknownGiftListItem(idStr, name)
+          const gift = spec
+            ? toGiftListItem(giftId, spec, name)
+            : toUnknownGiftListItem(giftId, name)
 
           return (
-            <EGOGiftTooltip key={giftId} giftId={idStr}>
+            <EGOGiftTooltip key={giftId} giftId={giftId}>
               <ScaledCardWrapper
                 mobileScale={mobileScale}
                 cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
@@ -96,7 +98,7 @@ export function StartGiftRow({
                 <button
                   type="button"
                   onClick={() => {
-                    handleGiftCardClick(idStr)
+                    handleGiftCardClick(giftId)
                   }}
                   disabled={!canSelect}
                   className={`group ${!canSelect ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}

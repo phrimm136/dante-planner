@@ -52,9 +52,9 @@ vi.mock('../../../stores/usePlannerEditorStore', () => ({
   },
 }))
 
-const mockPools: Record<string, number[]> = {
-  Burn: [9001, 9002, 9003],
-  Bleed: [9004, 9005, 9006],
+const mockPools: Record<string, string[]> = {
+  Burn: ['9001', '9002', '9003'],
+  Bleed: ['9004', '9005', '9006'],
 }
 
 const mockSpec: Record<string, EGOGiftSpec> = buildEgoGiftSpecList({
