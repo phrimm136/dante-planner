@@ -3,20 +3,28 @@ import { gzip } from 'pako'
 import {
   IMPORT_OUTCOME_TOASTS,
   RESOLVE_OUTCOME_TOASTS,
+  buildExportEnvelope,
   classifyImportOutcome,
   classifyResolveOutcome,
   decompressImport,
+  encodeExportEnvelope,
+  exportFileName,
   getValidDeviceId,
   importErrorToast,
   parseImportJson,
+  partitionImport,
   readGzipBytes,
   readImportEnvelope,
+  sanitizePlannerTitle,
+  toExportItem,
 } from '../plannerExportImport'
+import { GZIP_OS_BYTE_OFFSET, GZIP_OS_TOPS20 } from '../deckCode'
 
 import { ok, err } from '@/lib/result'
-import { INFLATE_INPUT_CHUNK_BYTES } from '@/lib/constants'
+import { EXPORT_FILE_EXTENSION, EXPORT_VERSION, INFLATE_INPUT_CHUNK_BYTES } from '@/lib/constants'
+import { buildSaveablePlanner } from '@/test-utils'
 
-import type { ImportError } from '../plannerExportImport'
+import type { ImportEnvelope, ImportError } from '../plannerExportImport'
 import type { Result } from '@/lib/result'
 
 const VALID_UUID = '3f2504e0-4f89-41d3-9a0c-0305e82c3301'
@@ -370,6 +378,119 @@ describe('classifyResolveOutcome', () => {
 
   it('reports kept-local when nothing was saved and nothing errored', () => {
     expect(classifyResolveOutcome({ saved: 0, errors: 0 })).toBe('keptLocal')
+  })
+})
+
+describe('toExportItem', () => {
+  it('lifts the id out and drops the owning device', () => {
+    const planner = buildSaveablePlanner({ metadata: { id: VALID_UUID, deviceId: OTHER_UUID } })
+
+    const item = toExportItem(planner)
+
+    expect(item.id).toBe(VALID_UUID)
+    expect(item.metadata.deviceId).toBe('')
+    expect(item.metadata.title).toBe(planner.metadata.title)
+    expect(item.config).toEqual(planner.config)
+    expect(item.content).toEqual(planner.content)
+  })
+})
+
+describe('buildExportEnvelope', () => {
+  it('stamps the export version and the device the file came from', () => {
+    const items = [toExportItem(buildSaveablePlanner())]
+
+    expect(buildExportEnvelope(items, VALID_UUID, TIMESTAMP)).toEqual({
+      exportVersion: EXPORT_VERSION,
+      exportedAt: TIMESTAMP,
+      sourceDeviceId: VALID_UUID,
+      planners: items,
+    })
+  })
+})
+
+describe('encodeExportEnvelope', () => {
+  const envelopeOf = () =>
+    buildExportEnvelope([toExportItem(buildSaveablePlanner())], VALID_UUID, TIMESTAMP)
+
+  it('stamps the OS byte the reader checks', () => {
+    expect(encodeExportEnvelope(envelopeOf())[GZIP_OS_BYTE_OFFSET]).toBe(GZIP_OS_TOPS20)
+  })
+
+  it('produces bytes the import stages read back', () => {
+    const bytes = expectOk(readGzipBytes(encodeExportEnvelope(envelopeOf())))
+    const text = expectOk(decompressImport(bytes))
+
+    expect(expectOk(parseImportJson(text))).toEqual(envelopeOf())
+  })
+})
+
+describe('exportFileName', () => {
+  it('names the file after the day the export was taken', () => {
+    expect(exportFileName(TIMESTAMP)).toBe(`plans-2026-01-01${EXPORT_FILE_EXTENSION}`)
+  })
+})
+
+describe('sanitizePlannerTitle', () => {
+  it('reduces a title to its text', () => {
+    expect(sanitizePlannerTitle('<b>Run</b>')).toBe('Run')
+  })
+
+  it('trims the surviving text', () => {
+    expect(sanitizePlannerTitle('  Run  ')).toBe('Run')
+  })
+
+  it('falls back when nothing survives', () => {
+    expect(sanitizePlannerTitle('<img src=x onerror=alert(1)>')).toBe('Untitled')
+    expect(sanitizePlannerTitle('<p></p>')).toBe('Untitled')
+    expect(sanitizePlannerTitle('   ')).toBe('Untitled')
+  })
+})
+
+describe('partitionImport', () => {
+  beforeEach(() => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  function envelopeOf(items: unknown[]): ImportEnvelope {
+    return expectOk(readImportEnvelope(envelope(items)))
+  }
+
+  it('rewrites an import with no local counterpart onto this device', () => {
+    const { conflicting, fresh } = partitionImport(envelopeOf([EXPORT_ITEM]), new Set(), OTHER_UUID)
+
+    expect(conflicting).toEqual([])
+    expect(fresh).toHaveLength(1)
+    expect(fresh[0].metadata.id).toBe(VALID_UUID)
+    expect(fresh[0].metadata.deviceId).toBe(OTHER_UUID)
+    expect(fresh[0].metadata.title).toBe('Imported plan')
+  })
+
+  it('holds back an import whose id the local store already carries', () => {
+    const { conflicting, fresh } = partitionImport(
+      envelopeOf([EXPORT_ITEM]),
+      new Set([VALID_UUID]),
+      OTHER_UUID,
+    )
+
+    expect(fresh).toEqual([])
+    expect(conflicting).toHaveLength(1)
+    expect(conflicting[0].id).toBe(VALID_UUID)
+    expect(conflicting[0].incoming.metadata.deviceId).toBe(OTHER_UUID)
+  })
+
+  it('reduces an imported title to plain text', () => {
+    const scripted = {
+      ...EXPORT_ITEM,
+      metadata: { ...EXPORT_ITEM.metadata, title: '<b>Run</b>' },
+    }
+
+    const { fresh } = partitionImport(envelopeOf([scripted]), new Set(), OTHER_UUID)
+
+    expect(fresh[0].metadata.title).toBe('Run')
   })
 })
 

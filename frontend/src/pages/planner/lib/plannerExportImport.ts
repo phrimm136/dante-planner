@@ -1,21 +1,30 @@
 /**
  * Planner Export/Import Support
  *
- * The decode stages of the import pipeline, the device-id resolution used when
- * rewriting imported planners, and the outcome tables mapping an end state to its
- * user-facing toast (severity + i18n key + interpolation params).
+ * The encode stage of the export pipeline, the decode and partition stages of the
+ * import pipeline, the device-id resolution used when rewriting imported planners,
+ * and the outcome tables mapping an end state to its user-facing toast (severity +
+ * i18n key + interpolation params). Storage IO stays with the caller.
  */
 
-import { Inflate } from 'pako'
+import { Inflate, gzip } from 'pako'
 
 import { ok, err } from '@/lib/result'
-import { EXPORT_MAX_DECOMPRESSED_SIZE, INFLATE_INPUT_CHUNK_BYTES } from '@/lib/constants'
+import {
+  EXPORT_FILE_EXTENSION,
+  EXPORT_MAX_DECOMPRESSED_SIZE,
+  EXPORT_VERSION,
+  INFLATE_INPUT_CHUNK_BYTES,
+} from '@/lib/constants'
 import { isValidUUID } from '@/lib/utils'
 import { generateUUID } from '@/lib/uuid'
-import { ExportEnvelopeSchema } from '../schemas/PlannerSchemas'
+import { sanitizeToPlainText } from '@/shared/sanitize'
+import { ExportEnvelopeSchema, toSaveablePlanner } from '../schemas/PlannerSchemas'
+import { GZIP_OS_BYTE_OFFSET, GZIP_OS_TOPS20 } from './deckCode'
 
 import type { Result } from '@/lib/result'
 import type { StorageReadError } from '@/lib/storage'
+import type { ExportEnvelope, PlannerExportItem, SaveablePlanner } from '../types/PlannerTypes'
 import type { z } from 'zod'
 
 /** Toast method used to surface an outcome. */
@@ -60,6 +69,51 @@ export async function getValidDeviceId(
     return ok(fallback)
   }
   return read
+}
+
+/* -------------------------------------------------------------------------- */
+/* Export stages                                                               */
+/* -------------------------------------------------------------------------- */
+
+/** Leading part of an export file name; the export date and extension close it. */
+const EXPORT_FILE_PREFIX = 'plans-'
+
+/** Drop the owning device so an exported planner can be read back anywhere. */
+export function toExportItem(planner: SaveablePlanner): PlannerExportItem {
+  return {
+    id: planner.metadata.id,
+    metadata: { ...planner.metadata, deviceId: '' },
+    config: planner.config,
+    content: planner.content,
+  }
+}
+
+/** Wrap the exported planners with the version and provenance a reader needs. */
+export function buildExportEnvelope(
+  planners: PlannerExportItem[],
+  sourceDeviceId: string,
+  exportedAt: string,
+): ExportEnvelope {
+  return {
+    exportVersion: EXPORT_VERSION,
+    exportedAt,
+    sourceDeviceId,
+    planners,
+  }
+}
+
+/** Compress the envelope into the bytes an export file carries. */
+export function encodeExportEnvelope(envelope: ExportEnvelope): Uint8Array<ArrayBuffer> {
+  // pako 3 ignores a `header` option on the one-shot gzip(), so the OS byte is
+  // written directly into the emitted header instead.
+  const compressed = gzip(JSON.stringify(envelope))
+  compressed[GZIP_OS_BYTE_OFFSET] = GZIP_OS_TOPS20
+  return compressed
+}
+
+/** Name an export file after the day it was taken. */
+export function exportFileName(exportedAt: string): string {
+  return `${EXPORT_FILE_PREFIX}${exportedAt.split('T')[0]}${EXPORT_FILE_EXTENSION}`
 }
 
 /* -------------------------------------------------------------------------- */
@@ -175,6 +229,72 @@ export function readImportEnvelope(parsed: unknown): Result<ImportEnvelope, Impo
     return err<ImportError>({ kind: 'noPlannersInFile' })
   }
   return ok(validation.data)
+}
+
+/* -------------------------------------------------------------------------- */
+/* Import partition                                                            */
+/* -------------------------------------------------------------------------- */
+
+/** Title an imported planner takes when its own is empty or markup-only. */
+const UNTITLED_IMPORT_TITLE = 'Untitled'
+
+/** Reduce a title to plain text, so imported markup never reaches the DOM. */
+export function sanitizePlannerTitle(title: string): string {
+  return sanitizeToPlainText(title).trim() || UNTITLED_IMPORT_TITLE
+}
+
+/** An imported planner whose id the local store already holds. */
+export interface ImportConflictCandidate {
+  id: string
+  incoming: SaveablePlanner
+}
+
+/** Imported planners split by whether their id collides with a local one. */
+export interface PartitionedImport {
+  conflicting: ImportConflictCandidate[]
+  fresh: SaveablePlanner[]
+}
+
+/** Rebuild an exported planner as one this device owns. */
+function toImportedPlanner(
+  item: ImportEnvelope['planners'][number],
+  deviceId: string,
+): SaveablePlanner {
+  return toSaveablePlanner(
+    {
+      ...item.metadata,
+      title: sanitizePlannerTitle(item.metadata.title),
+      deviceId,
+    },
+    item.config,
+    item.content,
+  )
+}
+
+/**
+ * Rewrite every imported planner onto this device and split them by id collision.
+ *
+ * A collision is only a candidate: whether the local side can be read is what
+ * decides between raising a conflict and importing over an id nothing answers to.
+ */
+export function partitionImport(
+  envelope: ImportEnvelope,
+  existingIds: ReadonlySet<string>,
+  deviceId: string,
+): PartitionedImport {
+  const conflicting: ImportConflictCandidate[] = []
+  const fresh: SaveablePlanner[] = []
+
+  for (const item of envelope.planners) {
+    const incoming = toImportedPlanner(item, deviceId)
+    if (existingIds.has(item.id)) {
+      conflicting.push({ id: item.id, incoming })
+    } else {
+      fresh.push(incoming)
+    }
+  }
+
+  return { conflicting, fresh }
 }
 
 /* -------------------------------------------------------------------------- */
