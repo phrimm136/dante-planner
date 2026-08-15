@@ -120,7 +120,7 @@
       }
     },
     {
-      "files": ["src/components/layout/GlobalLayout.tsx", "src/components/feedback/RouteErrorComponent.tsx"],
+      "files": ["src/components/layout/GlobalLayout.tsx"],
       "rules": {
         "no-restricted-imports": [
           "error",
