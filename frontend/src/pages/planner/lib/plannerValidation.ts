@@ -651,7 +651,7 @@ function validateFloorGiftExistence(
     const floorNumber = i + 1
     return [
       {
-        code: 'GIFT_UNKNOWN_ID' as const,
+        code: 'FLOOR_UNKNOWN_GIFT_ID' as const,
         message: `Floor ${floorNumber}: unknown gift ID(s): ${unknownIds.join(', ')}`,
         field: `floorSelections[${i}].giftIds`,
         floorIndex: i,

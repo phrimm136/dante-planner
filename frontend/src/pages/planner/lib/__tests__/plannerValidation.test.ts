@@ -627,7 +627,7 @@ describe('validatePlannerForPublish – gift affordability', () => {
 })
 
 // ============================================================================
-// validatePlannerForPublish – gift existence (GIFT_UNKNOWN_ID)
+// validatePlannerForPublish – gift existence (FLOOR_UNKNOWN_GIFT_ID)
 // ============================================================================
 
 describe('validatePlannerForPublish – gift existence', () => {
@@ -636,46 +636,46 @@ describe('validatePlannerForPublish – gift existence', () => {
     '9220': makeGiftSpec(['1024']),
   }
 
-  it('unknown floor gift ID returns GIFT_UNKNOWN_ID', () => {
+  it('unknown floor gift ID returns FLOOR_UNKNOWN_GIFT_ID', () => {
     const content = makeValidContent('5F')
     content.floorSelections[0].giftIds = ['2029']
 
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '5F', spec)
     expect(isValid).toBe(false)
-    const err = errors.find((e) => e.code === 'GIFT_UNKNOWN_ID') as FloorValidationError
+    const err = errors.find((e) => e.code === 'FLOOR_UNKNOWN_GIFT_ID') as FloorValidationError
     expect(err).toBeDefined()
     expect(err.floorNumber).toBe(1)
     expect(err.context?.giftIds as string[]).toContain('2029')
   })
 
-  it('multiple unknown IDs on one floor produce a single GIFT_UNKNOWN_ID error listing all', () => {
+  it('multiple unknown IDs on one floor produce a single FLOOR_UNKNOWN_GIFT_ID error listing all', () => {
     const content = makeValidContent('5F')
     content.floorSelections[0].giftIds = ['2029', '2030']
 
     const { errors } = validatePlannerForPublish('My Plan', content, '5F', spec)
-    const unknownErrors = errors.filter((e) => e.code === 'GIFT_UNKNOWN_ID')
+    const unknownErrors = errors.filter((e) => e.code === 'FLOOR_UNKNOWN_GIFT_ID')
     expect(unknownErrors).toHaveLength(1)
     expect((unknownErrors[0] as FloorValidationError).context?.giftIds as string[]).toHaveLength(2)
   })
 
-  it('unknown IDs on two separate floors produce one GIFT_UNKNOWN_ID error per floor', () => {
+  it('unknown IDs on two separate floors produce one FLOOR_UNKNOWN_GIFT_ID error per floor', () => {
     const content = makeValidContent('5F')
     content.floorSelections[0].giftIds = ['2029']
     content.floorSelections[1].giftIds = ['2030']
 
     const { errors } = validatePlannerForPublish('My Plan', content, '5F', spec)
-    const unknownErrors = errors.filter((e) => e.code === 'GIFT_UNKNOWN_ID')
+    const unknownErrors = errors.filter((e) => e.code === 'FLOOR_UNKNOWN_GIFT_ID')
     expect(unknownErrors).toHaveLength(2)
     expect((unknownErrors[0] as FloorValidationError).floorNumber).toBe(1)
     expect((unknownErrors[1] as FloorValidationError).floorNumber).toBe(2)
   })
 
-  it('valid floor gift IDs return no GIFT_UNKNOWN_ID errors', () => {
+  it('valid floor gift IDs return no FLOOR_UNKNOWN_GIFT_ID errors', () => {
     const content = makeValidContent('5F')
     content.floorSelections[0].giftIds = ['9001', '9220']
 
     const { errors } = validatePlannerForPublish('My Plan', content, '5F', spec)
-    expect(errors.filter((e) => e.code === 'GIFT_UNKNOWN_ID')).toHaveLength(0)
+    expect(errors.filter((e) => e.code === 'FLOOR_UNKNOWN_GIFT_ID')).toHaveLength(0)
   })
 
   it('existence check is skipped when egoGiftSpec is not provided', () => {

@@ -34,9 +34,9 @@ describe('toUserFriendlyError', () => {
     expect(result.params?.gifts).toBe('Gift A, Gift B')
   })
 
-  it('GIFT_UNKNOWN_ID → unknownGiftId key with floor and gifts params', () => {
+  it('FLOOR_UNKNOWN_GIFT_ID → unknownGiftId key with floor and gifts params', () => {
     const result = toUserFriendlyError({
-      code: 'GIFT_UNKNOWN_ID',
+      code: 'FLOOR_UNKNOWN_GIFT_ID',
       message: '',
       floorNumber: 2,
       context: { giftIds: ['2029', '2030'] },

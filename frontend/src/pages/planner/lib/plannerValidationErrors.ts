@@ -80,7 +80,7 @@ export interface FloorValidationError extends ValidationError {
     | 'FLOOR_DUPLICATE_GIFT_ID'
     | 'FLOOR_DUPLICATE_THEME_PACK'
     | 'FLOOR_UNAFFORDABLE_GIFT'
-    | 'GIFT_UNKNOWN_ID'
+    | 'FLOOR_UNKNOWN_GIFT_ID'
   /** 0-indexed floor that failed validation */
   floorIndex?: number
   /** 1-indexed floor number for display */
@@ -156,13 +156,12 @@ export function toUserFriendlyError(error: PlannerValidationError): {
         },
       }
     }
-    case 'GIFT_UNKNOWN_ID': {
-      const floorError = error as FloorValidationError
-      const ctx = floorError.context as { giftIds?: string[] } | undefined
+    case 'FLOOR_UNKNOWN_GIFT_ID': {
+      const ctx = error.context as { giftIds?: string[] } | undefined
       return {
         key: 'pages.plannerMD.validation.unknownGiftId',
         params: {
-          floor: String(floorError.floorNumber ?? ''),
+          floor: String(error.floorNumber ?? ''),
           gifts: ctx?.giftIds?.join(', ') ?? '',
         },
       }
