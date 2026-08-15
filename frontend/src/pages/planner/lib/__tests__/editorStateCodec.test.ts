@@ -246,3 +246,39 @@ describe('hydrateEditorState / projectEditorState round trip', () => {
     expect(projected.sectionNotes).toBe(state.sectionNotes)
   })
 })
+
+describe('skill EA reconciliation at ingest', () => {
+  it('coerces a stored string value to a number', () => {
+    const state = hydrateEditorState(
+      makeContent({
+        skillEAState: {
+          '1': { 0: '3', 1: 2, 2: 1 },
+        } as unknown as MDPlannerContent['skillEAState'],
+      }),
+      METADATA,
+    )
+    expect(state.skillEAState['1']).toEqual({ 0: 3, 1: 2, 2: 1 })
+  })
+
+  it('drops a value that is neither a number nor a numeric string', () => {
+    const state = hydrateEditorState(
+      makeContent({
+        skillEAState: {
+          '1': { 0: 'nope', 1: 2, 2: 1 },
+        } as unknown as MDPlannerContent['skillEAState'],
+      }),
+      METADATA,
+    )
+    expect(state.skillEAState['1']).toEqual({ 1: 2, 2: 1 })
+  })
+
+  it('falls back to the default when the field is not an object', () => {
+    const state = hydrateEditorState(
+      makeContent({
+        skillEAState: 'nope' as unknown as MDPlannerContent['skillEAState'],
+      }),
+      METADATA,
+    )
+    expect(state.skillEAState).toEqual(createDefaultSkillEAState())
+  })
+})

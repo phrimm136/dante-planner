@@ -59,6 +59,35 @@ export function createDefaultEquipment(): Record<string, SinnerEquipment> {
  * Creates default skill EA state for all 12 sinners
  * Each sinner gets default EA values: S1=3, S2=2, S3=1
  */
+/**
+ * Rebuild the skill-EA record from whatever survived storage.
+ *
+ * No production path enforced the value type — the enforcing schema is
+ * test-only — so a slot could hold the string "3", and `total += "3"` turns a
+ * running total into "0321" rather than a number.
+ */
+function reconcileSkillEAState(value: unknown): Record<string, SkillEAState> {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return createDefaultSkillEAState()
+  }
+
+  const reconciled: Record<string, SkillEAState> = {}
+  for (const [sinnerKey, slots] of Object.entries(value)) {
+    if (typeof slots !== 'object' || slots === null || Array.isArray(slots)) continue
+
+    const numericSlots: Record<string, number> = {}
+    for (const [slotKey, ea] of Object.entries(slots as Record<string, unknown>)) {
+      const numeric = typeof ea === 'string' ? Number(ea) : ea
+      if (typeof numeric === 'number' && Number.isFinite(numeric)) {
+        numericSlots[slotKey] = numeric
+      }
+    }
+    reconciled[sinnerKey] = numericSlots as SkillEAState
+  }
+
+  return Object.keys(reconciled).length === 0 ? createDefaultSkillEAState() : reconciled
+}
+
 export function createDefaultSkillEAState(): Record<string, SkillEAState> {
   const state: Record<string, SkillEAState> = {}
   SINNERS.forEach((_, index) => {
@@ -205,7 +234,7 @@ export function hydrateEditorState(
       Array.isArray(content.observationGiftIds) ? content.observationGiftIds : [],
     ),
     selectedGiftKeyword: content.selectedGiftKeyword ?? null,
-    skillEAState: content.skillEAState ?? createDefaultSkillEAState(),
+    skillEAState: reconcileSkillEAState(content.skillEAState),
     deckFilterState: createDefaultDeckFilterState(),
 
     sectionNotes: {

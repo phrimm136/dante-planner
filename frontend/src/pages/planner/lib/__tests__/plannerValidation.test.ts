@@ -397,6 +397,17 @@ describe('validateSkillEAState', () => {
     expect(errors.some((e) => e.code === 'SKILL_EA_INVALID_SLOT')).toBe(true)
   })
 
+  it('a stored string value is reported as a bad total, not concatenated into one', () => {
+    const state = makeValidSkillEAState()
+    // Warning: deliberately invalid input — a value that survived storage as text.
+    state['01'] = { 0: '3', 1: 2, 2: 1 } as unknown as SkillEAState
+    const errors = validateSkillEAState(state)
+    const err = errors.find((e) => e.code === 'SKILL_EA_INVALID_TOTAL')
+    expect(err).toBeDefined()
+    // The string slot is skipped, so the total is the two numeric slots.
+    expect(err!.context!.total).toBe(3)
+  })
+
   it('skill EA totalling 7 instead of 6 returns SKILL_EA_INVALID_TOTAL', () => {
     const state = makeValidSkillEAState()
     state['01'] = { 0: 4, 1: 2, 2: 1 } // 4+2+1=7

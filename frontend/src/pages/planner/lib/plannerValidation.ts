@@ -288,7 +288,11 @@ export function validateSkillEAState(
       }
       seenSlots.add(slotKey)
 
-      total += sinnerSkills[slotKey as unknown as (typeof OFFENSIVE_SKILL_SLOTS)[number]]
+      // A stored non-number would turn the running total into a string, so the
+      // mismatch is reported by the total check below rather than concatenated.
+      const ea = sinnerSkills[slotKey as unknown as (typeof OFFENSIVE_SKILL_SLOTS)[number]]
+      if (typeof ea !== 'number' || !Number.isFinite(ea)) continue
+      total += ea
     }
 
     // Check total equals SKILL_EA_TOTAL
