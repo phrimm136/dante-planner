@@ -26,6 +26,7 @@ import type {
 import { isMixedRecipe } from '../lib/egoGiftUtils'
 import { SECTION_STYLES } from '@/lib/constants'
 import type { EGOGiftId } from '@/shared/gameData'
+import { toGiftListItem } from '../lib/giftListItem'
 
 interface RecipeSectionProps {
   recipe: EGOGiftRecipe
@@ -76,17 +77,7 @@ function StandardRecipeRow({
         const spec = specMap[String(id)]
         if (!spec) return null
 
-        const gift: EGOGiftListItem = {
-          id: String(id),
-          tag: spec.tag,
-          keyword: spec.keyword,
-          battleKeywordList: spec.battleKeywordList ?? [],
-          attributeType: spec.attributeType,
-          themePack: spec.themePack,
-          maxEnhancement: spec.maxEnhancement,
-          hardOnly: spec.hardOnly,
-          extremeOnly: spec.extremeOnly,
-        }
+        const gift: EGOGiftListItem = toGiftListItem(String(id), spec)
 
         return (
           <div key={id} className="flex items-start">
@@ -130,15 +121,7 @@ function MixedRecipeDisplay({
             const spec = specMap[String(id)]
             if (!spec) return null
 
-            const gift: EGOGiftListItem = {
-              id: String(id),
-              tag: spec.tag,
-              keyword: spec.keyword,
-              battleKeywordList: spec.battleKeywordList ?? [],
-              attributeType: spec.attributeType,
-              themePack: spec.themePack,
-              maxEnhancement: spec.maxEnhancement,
-            }
+            const gift: EGOGiftListItem = toGiftListItem(String(id), spec)
 
             return <IngredientCard key={id} gift={gift} />
           })}
@@ -162,15 +145,7 @@ function MixedRecipeDisplay({
             const spec = specMap[String(id)]
             if (!spec) return null
 
-            const gift: EGOGiftListItem = {
-              id: String(id),
-              tag: spec.tag,
-              keyword: spec.keyword,
-              battleKeywordList: spec.battleKeywordList ?? [],
-              attributeType: spec.attributeType,
-              themePack: spec.themePack,
-              maxEnhancement: spec.maxEnhancement,
-            }
+            const gift: EGOGiftListItem = toGiftListItem(String(id), spec)
 
             return <IngredientCard key={id} gift={gift} />
           })}

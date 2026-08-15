@@ -21,6 +21,7 @@ import { sortEGOGifts } from '../egoGiftSort'
 
 import type { EGOGiftListItem, EGOGiftSpec } from '../../index'
 import type { EnhancementLevel } from '@/shared/gameData'
+import { toGiftListItem } from '../giftListItem'
 
 const SPEC: Record<string, EGOGiftSpec> = {
   '9001': {
@@ -84,16 +85,7 @@ function legacyDecodeAndSort(
     const giftSpec = spec[giftId]
     if (giftSpec) {
       gifts.push({
-        item: {
-          id: giftId,
-          name: i18n[giftId] || giftId,
-          tag: giftSpec.tag as EGOGiftListItem['tag'],
-          keyword: giftSpec.keyword,
-          battleKeywordList: giftSpec.battleKeywordList ?? [],
-          attributeType: giftSpec.attributeType,
-          themePack: giftSpec.themePack,
-          maxEnhancement: giftSpec.maxEnhancement,
-        },
+        item: toGiftListItem(giftId, giftSpec, i18n[giftId] || giftId),
         enhancement,
       })
     }

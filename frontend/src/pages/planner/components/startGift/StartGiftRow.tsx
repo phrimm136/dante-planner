@@ -4,6 +4,7 @@ import { EGOGiftCard } from '@/pages/egoGift'
 import { EGOGiftTooltip } from '@/pages/egoGift'
 import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { CARD_GRID } from '@/lib/constants'
+import { toGiftListItem, toUnknownGiftListItem } from '@/pages/egoGift'
 
 interface StartGiftRowProps {
   keyword: string
@@ -77,16 +78,7 @@ export function StartGiftRow({
           const canSelect = isRowSelected && (isSelected || selectedGiftIds.size < maxSelectable)
 
           // Build gift object for EGOGiftCard
-          const gift = {
-            id: idStr,
-            name,
-            tag: spec?.tag || ['TIER_1'],
-            keyword: spec?.keyword || null,
-            battleKeywordList: spec?.battleKeywordList ?? [],
-            attributeType: spec?.attributeType || 'CRIMSON',
-            themePack: spec?.themePack || [],
-            maxEnhancement: spec?.maxEnhancement ?? 0,
-          }
+          const gift = spec ? toGiftListItem(idStr, spec, name) : toUnknownGiftListItem(idStr, name)
 
           return (
             <EGOGiftTooltip key={giftId} giftId={idStr}>

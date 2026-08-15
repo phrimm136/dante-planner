@@ -5,6 +5,7 @@ import type { EGOGiftRecipe, EGOGiftListItem, EGOGiftSpec } from '@/pages/egoGif
 import type { SortMode } from '@/shared/filter'
 import { sortEGOGifts } from './egoGiftSort'
 import { isMixedRecipe } from './egoGiftUtils'
+import { toGiftListItem } from './giftListItem'
 
 /**
  * Encodes a gift selection into a numeric string format
@@ -149,16 +150,7 @@ export function decodeGiftSelections(
     decoded.push({
       encodedId,
       enhancement,
-      item: {
-        id: giftId,
-        name: i18n[giftId] || giftId,
-        tag: giftSpec.tag as EGOGiftListItem['tag'],
-        keyword: giftSpec.keyword,
-        battleKeywordList: giftSpec.battleKeywordList ?? [],
-        attributeType: giftSpec.attributeType,
-        themePack: giftSpec.themePack,
-        maxEnhancement: giftSpec.maxEnhancement,
-      },
+      item: toGiftListItem(giftId, giftSpec, i18n[giftId] || giftId),
     })
   }
 

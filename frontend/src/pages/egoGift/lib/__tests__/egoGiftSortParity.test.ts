@@ -12,6 +12,7 @@ import { KEYWORD_ORDER } from '@/shared/gameData'
 
 import type { EGOGiftListItem } from '../../types/EGOGiftTypes'
 import type { SortMode } from '@/shared/filter'
+import { EGOGiftIdSchema } from '@/shared/gameData'
 
 function getCategoryIndex(keyword: string | null): number {
   if (!keyword) return KEYWORD_ORDER.indexOf('None')
@@ -76,7 +77,7 @@ const TAGS: string[][] = [
 const GIFTS: EGOGiftListItem[] = KEYWORDS.flatMap((keyword, k) =>
   TAGS.flatMap((tag, t) =>
     [0, 1].map((n) => ({
-      id: String(9000 + k * 20 + t * 2 + n),
+      id: EGOGiftIdSchema.parse(String(9000 + k * 20 + t * 2 + n)),
       name: `Gift ${k}-${t}-${n}`,
       tag: tag as EGOGiftListItem['tag'],
       keyword,

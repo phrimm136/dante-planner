@@ -12,6 +12,7 @@ import { enumerateSelectionStates, findParityMismatches } from '@/test-utils/fac
 import { EGO_GIFT_FACETS, deriveDifficulty, type EGOGiftFacetState } from '../egoGiftFilter'
 import { parseTier, toRomanTier } from '../egoGiftTier'
 import type { EGOGiftListItem } from '../../types/EGOGiftTypes'
+import { EGOGiftIdSchema } from '@/shared/gameData'
 
 function legacyKeyword(giftKeyword: string | null, selectedKeywords: ReadonlySet<string>): boolean {
   if (selectedKeywords.size === 0) return true
@@ -107,7 +108,7 @@ function makeGift(overrides: Partial<EGOGiftListItem> & { id: string }): EGOGift
 
 const ITEMS: EGOGiftListItem[] = [
   makeGift({
-    id: '9001',
+    id: EGOGiftIdSchema.parse('9001'),
     tag: ['TIER_1', 'GIFT'],
     keyword: 'Burn',
     battleKeywordList: ['Poise'],
@@ -116,7 +117,7 @@ const ITEMS: EGOGiftListItem[] = [
     fusioned: true,
   }),
   makeGift({
-    id: '9002',
+    id: EGOGiftIdSchema.parse('9002'),
     tag: ['TIER_3'],
     keyword: 'Bleed',
     battleKeywordList: ['Poise', 'Sinking'],
@@ -125,7 +126,7 @@ const ITEMS: EGOGiftListItem[] = [
     hardOnly: true,
   }),
   makeGift({
-    id: '9003',
+    id: EGOGiftIdSchema.parse('9003'),
     tag: ['GIFT'],
     keyword: null,
     battleKeywordList: [],
@@ -134,7 +135,7 @@ const ITEMS: EGOGiftListItem[] = [
     extremeOnly: true,
   }),
   makeGift({
-    id: '9004',
+    id: EGOGiftIdSchema.parse('9004'),
     tag: ['TIER_1', 'TIER_3'],
     keyword: 'Burn',
     battleKeywordList: undefined as unknown as string[],
@@ -143,7 +144,7 @@ const ITEMS: EGOGiftListItem[] = [
     fusioned: false,
   }),
   makeGift({
-    id: '9005',
+    id: EGOGiftIdSchema.parse('9005'),
     tag: ['TIER_3'],
     keyword: 'None',
     battleKeywordList: ['Sinking'],
@@ -153,7 +154,7 @@ const ITEMS: EGOGiftListItem[] = [
     extremeOnly: true,
   }),
   makeGift({
-    id: '9006',
+    id: EGOGiftIdSchema.parse('9006'),
     tag: [],
     keyword: 'Bleed',
     battleKeywordList: ['Poise'],

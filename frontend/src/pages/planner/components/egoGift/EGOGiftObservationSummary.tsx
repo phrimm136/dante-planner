@@ -9,6 +9,7 @@ import { PlannerSection } from '@/components/layout/PlannerSection'
 import { StarlightCostDisplay } from '../StarlightCostDisplay'
 import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { EGOGiftCard } from '@/pages/egoGift'
+import { toGiftListItem } from '@/pages/egoGift'
 
 export interface EGOGiftObservationSummaryProps {
   mdVersion: number
@@ -50,18 +51,7 @@ export function EGOGiftObservationSummary({
     const gifts: EGOGiftListItem[] = []
     for (const id of selectedGiftIds) {
       const specData = spec[id]
-      if (specData) {
-        gifts.push({
-          id,
-          name: i18n[id] || id,
-          tag: specData.tag as EGOGiftListItem['tag'],
-          keyword: specData.keyword,
-          battleKeywordList: specData.battleKeywordList ?? [],
-          attributeType: specData.attributeType,
-          themePack: specData.themePack,
-          maxEnhancement: specData.maxEnhancement,
-        })
-      }
+      if (specData) gifts.push(toGiftListItem(id, specData, i18n[id] || id))
     }
     return gifts
   })()

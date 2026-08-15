@@ -83,3 +83,4 @@ export {
   giftDisplayName,
 } from './lib/egoGiftEncoding'
 export type { GiftSelectionEntry, DecodedGiftSelection } from './lib/egoGiftEncoding'
+export { toGiftListItem, toGiftListItems, toUnknownGiftListItem } from './lib/giftListItem'

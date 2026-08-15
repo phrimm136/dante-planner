@@ -1,5 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { useEGOGiftListSpec } from '@/pages/egoGift'
+import { toGiftListItems } from './lib/giftListItem'
+
 import type { EGOGiftListItem, EGOGiftSpecListSchema, EGOGiftFacetState } from '@/pages/egoGift'
 import type { z } from 'zod'
 import type { EGOGiftDifficulty, EGOGiftTier, EGOGiftAttributeType } from '@/shared/gameData'
@@ -50,18 +52,7 @@ function EGOGiftCardGrid({
   store: FilterStore<EGOGiftFacetState>
 }) {
   // Build EGOGiftListItem array from spec directly
-  const gifts: EGOGiftListItem[] = Object.entries(spec).map(([id, specData]) => ({
-    id,
-    tag: specData.tag as EGOGiftListItem['tag'],
-    keyword: specData.keyword,
-    battleKeywordList: specData.battleKeywordList,
-    attributeType: specData.attributeType,
-    themePack: specData.themePack,
-    maxEnhancement: specData.maxEnhancement,
-    hardOnly: specData.hardOnly,
-    extremeOnly: specData.extremeOnly,
-    fusioned: specData.fusioned,
-  }))
+  const gifts: EGOGiftListItem[] = toGiftListItems(spec)
 
   return <EGOGiftList gifts={gifts} store={store} />
 }

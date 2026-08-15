@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { PlannerSection } from '@/components/layout/PlannerSection'
-import { EGOGiftCard, toEGOGiftCardProps } from '@/pages/egoGift'
-import type { EGOGiftListItem } from '@/pages/egoGift'
+import { EGOGiftCard, toEGOGiftCardProps, toUnknownGiftListItem } from '@/pages/egoGift'
 import { getKeywordIconPath } from '@/shared/assets'
 import { useEGOGiftListData } from '@/pages/egoGift'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
@@ -46,18 +45,7 @@ export function StartGiftSummary({
       const giftSpec = spec[giftId]
       const name = i18n[giftId] || `Gift ${giftId}`
 
-      if (!giftSpec) {
-        return {
-          id: giftId,
-          name,
-          tag: ['TIER_1'],
-          keyword: null,
-          battleKeywordList: [],
-          attributeType: 'CRIMSON',
-          themePack: [],
-          maxEnhancement: 0,
-        } satisfies EGOGiftListItem
-      }
+      if (!giftSpec) return toUnknownGiftListItem(giftId, name)
 
       return { ...toEGOGiftCardProps(giftId, giftSpec), name }
     })

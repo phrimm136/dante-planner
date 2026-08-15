@@ -1,4 +1,5 @@
 import type { z } from 'zod'
+import type { EGOGiftId } from '@/shared/gameData'
 import type {
   StandardRecipeSchema,
   MixedRecipeSchema,
@@ -25,7 +26,7 @@ export type EGOGiftI18n = z.infer<typeof EGOGiftI18nSchema>
  * EGOGiftName for granular Suspense boundaries.
  */
 export interface EGOGiftListItem {
-  id: string
+  id: EGOGiftId
   /** Optional - populated when i18n is loaded */
   name?: string
   tag: string[]
@@ -34,6 +35,7 @@ export interface EGOGiftListItem {
   attributeType: string
   themePack: string[]
   maxEnhancement: 0 | 1 | 2
+  recipe?: EGOGiftRecipe
   hardOnly?: boolean
   extremeOnly?: boolean
   fusioned?: boolean

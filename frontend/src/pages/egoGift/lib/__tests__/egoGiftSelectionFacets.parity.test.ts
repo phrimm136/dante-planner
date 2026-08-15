@@ -10,6 +10,7 @@ import { applyFacets } from '@/shared/filter'
 import { enumerateSelectionStates, findParityMismatches } from '@/test-utils/facetParity'
 import { EGO_GIFT_SELECTION_FACETS, type EGOGiftSelectionFacetState } from '../egoGiftFilter'
 import type { EGOGiftListItem } from '../../types/EGOGiftTypes'
+import { EGOGiftIdSchema } from '@/shared/gameData'
 
 function legacyMatches(gift: EGOGiftListItem, state: EGOGiftSelectionFacetState): boolean {
   if (state.selectedKeywords.size > 0) {
@@ -33,11 +34,11 @@ function makeGift(overrides: Partial<EGOGiftListItem> & { id: string }): EGOGift
 }
 
 const ITEMS: EGOGiftListItem[] = [
-  makeGift({ id: '9001', keyword: 'Burn' }),
-  makeGift({ id: '9002', keyword: 'Bleed' }),
-  makeGift({ id: '9003', keyword: null }),
-  makeGift({ id: '9004', keyword: 'None' }),
-  makeGift({ id: '9005', keyword: undefined as unknown as string }),
+  makeGift({ id: EGOGiftIdSchema.parse('9001'), keyword: 'Burn' }),
+  makeGift({ id: EGOGiftIdSchema.parse('9002'), keyword: 'Bleed' }),
+  makeGift({ id: EGOGiftIdSchema.parse('9003'), keyword: null }),
+  makeGift({ id: EGOGiftIdSchema.parse('9004'), keyword: 'None' }),
+  makeGift({ id: EGOGiftIdSchema.parse('9005'), keyword: undefined as unknown as string }),
 ]
 
 const BASE_STATE: EGOGiftSelectionFacetState = { selectedKeywords: new Set() }

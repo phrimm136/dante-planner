@@ -13,6 +13,7 @@ import { encodeGiftSelection, buildSelectionLookup, getCascadeIngredients } from
 import type { EGOGiftListItem } from '@/pages/egoGift'
 import type { EnhancementLevel, DungeonIdx } from '@/shared/gameData'
 import { SECTION_STYLES } from '@/lib/constants'
+import { toGiftListItems } from '@/pages/egoGift'
 
 interface FloorGiftSelectorPaneProps {
   open: boolean
@@ -62,19 +63,7 @@ export function FloorGiftSelectorPane({
 
   // Convert to EGOGiftListItem array
   const gifts: EGOGiftListItem[] = (() => {
-    return Object.entries(spec).map(([id, specData]) => ({
-      id,
-      name: i18n[id] || id,
-      tag: specData.tag as EGOGiftListItem['tag'],
-      keyword: specData.keyword,
-      battleKeywordList: specData.battleKeywordList ?? [],
-      attributeType: specData.attributeType,
-      themePack: specData.themePack,
-      maxEnhancement: specData.maxEnhancement,
-      recipe: specData.recipe,
-      hardOnly: specData.hardOnly,
-      extremeOnly: specData.extremeOnly,
-    }))
+    return toGiftListItems(spec, i18n)
   })()
 
   // Build O(1) lookup map for recipe cascade selection

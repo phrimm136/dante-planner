@@ -4,6 +4,7 @@ import { CARD_GRID } from '@/lib/constants'
 import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { EGOGiftCard } from './EGOGiftCard'
 import { EGOGiftTooltip } from './EGOGiftTooltip'
+import { toGiftListItems } from '../lib/giftListItem'
 
 interface EGOGiftObservationSelectionProps {
   selectedGiftIds: string[]
@@ -24,16 +25,7 @@ export function EGOGiftObservationSelection({
   const { spec, i18n } = useEGOGiftListData()
 
   // Merge spec and i18n into EGOGiftListItem array
-  const gifts: EGOGiftListItem[] = Object.entries(spec).map(([id, specData]) => ({
-    id,
-    name: i18n[id] || id,
-    tag: specData.tag as EGOGiftListItem['tag'],
-    keyword: specData.keyword,
-    battleKeywordList: specData.battleKeywordList ?? [],
-    attributeType: specData.attributeType,
-    themePack: specData.themePack,
-    maxEnhancement: specData.maxEnhancement,
-  }))
+  const gifts: EGOGiftListItem[] = toGiftListItems(spec, i18n)
 
   const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
 
