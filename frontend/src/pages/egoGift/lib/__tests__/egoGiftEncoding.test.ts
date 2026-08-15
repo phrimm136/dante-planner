@@ -17,7 +17,7 @@ import {
 } from '../egoGiftEncoding'
 import type { EGOGiftRecipe } from '@/pages/egoGift'
 import { EGOGiftRecipeSchema } from '@/pages/egoGift'
-import { GiftIdSchema } from '@/pages/planner'
+import { GiftIdStringSchema } from '@/shared/gameData'
 
 describe('encodeGiftSelection', () => {
   it('returns just giftId when enhancement is 0', () => {
@@ -216,10 +216,10 @@ describe('getCascadeIngredients', () => {
   })
 })
 
-describe('ENCODED_SELECTION_PATTERN vs GiftIdSchema', () => {
+describe('ENCODED_SELECTION_PATTERN vs GiftIdStringSchema', () => {
   // A superset of the schema's current domain: every optional single-digit prefix
   // against every four-digit body. The assertions below quantify over what the
-  // schema accepts rather than over a hardcoded list, so widening GiftIdSchema
+  // schema accepts rather than over a hardcoded list, so widening GiftIdStringSchema
   // beyond what the decoder pattern matches fails here instead of stranding the
   // new ids as undecodable.
   function candidateIds(): string[] {
@@ -233,7 +233,7 @@ describe('ENCODED_SELECTION_PATTERN vs GiftIdSchema', () => {
   }
 
   const candidates = candidateIds()
-  const accepted = candidates.filter((id) => GiftIdSchema.safeParse(id).success)
+  const accepted = candidates.filter((id) => GiftIdStringSchema.safeParse(id).success)
 
   it('spans a superset of what the schema accepts', () => {
     expect(candidates).toHaveLength(110000)
@@ -241,7 +241,7 @@ describe('ENCODED_SELECTION_PATTERN vs GiftIdSchema', () => {
     expect(accepted).toHaveLength(3000)
   })
 
-  it('accepts every string GiftIdSchema accepts', () => {
+  it('accepts every string GiftIdStringSchema accepts', () => {
     const undecodable = accepted.filter((id) => !ENCODED_SELECTION_PATTERN.test(id))
     expect(undecodable).toEqual([])
   })

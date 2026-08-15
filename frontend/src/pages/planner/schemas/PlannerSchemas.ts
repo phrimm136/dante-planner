@@ -6,11 +6,10 @@ import {
   RR_CATEGORIES,
   PLANNER_TYPES,
   migrateKeywords,
-  IDENTITY_ID_PATTERN,
-  EGO_ID_PATTERN,
-  GIFT_ID_PATTERN,
-  GIFT_ENHANCEMENT_PREFIX_PATTERN,
-  THEME_PACK_ID_PATTERN,
+  IdentityIdStringSchema,
+  EGOIdStringSchema,
+  GiftIdStringSchema,
+  ThemePackIdStringSchema,
 } from '@/shared/gameData'
 import type { DungeonIdx } from '@/shared/gameData'
 import { JSONContentSchema } from '@/shared/noteEditor'
@@ -42,51 +41,6 @@ const ToleratedContentDigestSchema = z.string().optional()
  * Also includes serialization helpers for converting between
  * page state (with Sets) and storage format (with arrays).
  */
-
-// ============================================================================
-// ID Pattern Schemas
-// ============================================================================
-
-/**
- * Identity ID pattern: 1{01-12}{:2}
- * Examples: 10101, 10102, 11212
- * Format: 1 + sinner index (01-12, 2 digits) + identity index (2+ digits)
- */
-export const IdentityIdSchema = z
-  .string()
-  .regex(
-    new RegExp(`^${IDENTITY_ID_PATTERN}$`),
-    'Identity ID must match pattern 1{01-12}{2+ digits}',
-  )
-
-/**
- * EGO ID pattern: 2{01-12}{:2}
- * Examples: 20101, 20102, 21212
- * Format: 2 + sinner index (01-12, 2 digits) + EGO index (2+ digits)
- */
-export const EGOIdSchema = z
-  .string()
-  .regex(new RegExp(`^${EGO_ID_PATTERN}$`), 'EGO ID must match pattern 2{01-12}{2+ digits}')
-
-/**
- * Gift ID pattern: {1, 2, or empty}{4-digit starting with 9}
- * Examples: 9001, 9999, 19001, 29001
- * Format: optional prefix (1 or 2) + 9 + 3 digits
- */
-export const GiftIdSchema = z
-  .string()
-  .regex(
-    new RegExp(`^${GIFT_ENHANCEMENT_PREFIX_PATTERN}${GIFT_ID_PATTERN}$`),
-    'Gift ID must match pattern {1|2|empty}9{3 digits}',
-  )
-
-/**
- * Theme pack ID pattern: {4-digit}
- * Examples: 1001, 1122, 1508
- */
-export const ThemePackSchema = z
-  .string()
-  .regex(new RegExp(`^${THEME_PACK_ID_PATTERN}$`), 'Theme Pack Id must match pattern {4 digits}')
 
 // ============================================================================
 // Enum Schemas
@@ -152,7 +106,7 @@ const ThreadspinTierSchema = z.union([
  */
 const EquippedIdentitySchema = z
   .object({
-    id: IdentityIdSchema,
+    id: IdentityIdStringSchema,
     uptie: UptieTierSchema,
     level: z.number().int().min(1).max(MAX_LEVEL),
   })
@@ -163,7 +117,7 @@ const EquippedIdentitySchema = z
  */
 const EquippedEGOSchema = z
   .object({
-    id: EGOIdSchema,
+    id: EGOIdStringSchema,
     threadspin: ThreadspinTierSchema,
   })
   .strict()
@@ -199,11 +153,11 @@ const SinnerEquipmentSchema = z
 export const FloorSelectionDraftSchema = z
   .object({
     /** Selected theme pack ID, null if none selected */
-    themePackId: ThemePackSchema.nullable(),
+    themePackId: ThemePackIdStringSchema.nullable(),
     /** Selected difficulty for this floor */
     difficulty: DungeonIdxSchema,
     /** Selected gift IDs as array (serialized from Set) - validated as gift IDs */
-    giftIds: z.array(GiftIdSchema),
+    giftIds: z.array(GiftIdStringSchema),
   })
   .strict()
 
@@ -213,7 +167,7 @@ export const FloorSelectionDraftSchema = z
  */
 export const FloorSelectionSaveSchema = FloorSelectionDraftSchema.extend({
   /** Selected theme pack ID - REQUIRED for save */
-  themePackId: ThemePackSchema,
+  themePackId: ThemePackIdStringSchema,
 })
 
 // ============================================================================
@@ -326,11 +280,11 @@ const MDPlannerContentBaseFields = {
   /** Currently selected gift keyword filter */
   selectedGiftKeyword: z.string().nullable(),
   /** Selected start gift IDs (serialized from Set) - validated as gift IDs */
-  selectedGiftIds: z.array(GiftIdSchema),
+  selectedGiftIds: z.array(GiftIdStringSchema),
   /** Observation gift IDs (serialized from Set) - validated as gift IDs */
-  observationGiftIds: z.array(GiftIdSchema),
+  observationGiftIds: z.array(GiftIdStringSchema),
   /** Comprehensive gift IDs with enhancement encoding (serialized from Set) - validated as gift IDs */
-  comprehensiveGiftIds: z.array(GiftIdSchema),
+  comprehensiveGiftIds: z.array(GiftIdStringSchema),
   /** Equipment configuration per sinner */
   equipment: z.record(z.string(), SinnerEquipmentSchema),
   /** Deployment order as array of sinner indices */
