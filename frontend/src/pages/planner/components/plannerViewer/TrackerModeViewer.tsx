@@ -3,12 +3,11 @@ import { useTranslation } from 'react-i18next'
 import { PlannerSection } from '@/components/layout/PlannerSection'
 import { RevealSection } from '../RevealSection'
 import type { RevealSectionSpec } from '../RevealSection'
-import { GiftGridSkeleton, SectionBlockSkeleton } from '../plannerSkeletons'
+import { GiftGridSkeleton, SectionBlockSkeleton, SkillGridSkeleton } from '../plannerSkeletons'
 import { SectionNoteDialog } from '../SectionNoteDialog'
 import { StartBuffSection } from '../startBuff/StartBuffSection'
 import { StartGiftSummary } from '../startGift/StartGiftSummary'
 import { EGOGiftObservationSummary } from '../egoGift/EGOGiftObservationSummary'
-import { Skeleton } from '@/components/ui/skeleton'
 import { DeckTrackerPanel } from './DeckTrackerPanel'
 import { DeckBuilderPane } from '../deckBuilder/DeckBuilderPane'
 import { TrackerDeckBuilderContent } from '../deckBuilder/DeckBuilderContent'
@@ -26,8 +25,6 @@ import { NOTE_SECTIONS } from './viewerSections'
 import type { NoteSectionId } from './viewerSections'
 import { deserializeSets } from '../../schemas/PlannerSchemas'
 import type { MDSaveablePlanner } from '../../types/PlannerTypes'
-import { staggerDelay } from '@/lib/stagger'
-import { STAGGER_STEP_MS } from '@/lib/constants'
 
 const SECTION_COUNT = NOTE_SECTIONS.length
 
@@ -190,19 +187,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
       id: 'skillReplacement',
       node: (
         <Suspense
-          fallback={
-            <PlannerSection title={t('pages.plannerMD.skillReplacement.title')}>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                {Array.from({ length: 12 }).map((_, i) => (
-                  <Skeleton
-                    key={i}
-                    className="h-32 rounded-lg"
-                    style={staggerDelay(i, STAGGER_STEP_MS.NORMAL)}
-                  />
-                ))}
-              </div>
-            </PlannerSection>
-          }
+          fallback={<SkillGridSkeleton title={t('pages.plannerMD.skillReplacement.title')} />}
         >
           <SkillReplacementSection
             equipment={trackerState.equipment}
