@@ -165,14 +165,14 @@ export function decodeGiftSelections(
 }
 
 /**
- * Sort decoded selections by the shared gift ordering, keeping each item paired
+ * Order decoded selections by the shared gift ordering, keeping each item paired
  * with the enhancement it was selected at.
  *
  * @param selections - Decoded selections
  * @param sortMode - Ordering to apply
- * @returns A new sorted array
+ * @returns A new ordered array
  */
-export function sortGiftSelections(
+export function orderSelectionsByGiftOrder(
   selections: DecodedGiftSelection[],
   sortMode: SortMode,
 ): DecodedGiftSelection[] {
@@ -181,6 +181,25 @@ export function sortGiftSelections(
     selections.map((selection) => selection.item),
     sortMode,
   ).map((item) => byGiftId.get(item.id)!)
+}
+
+/**
+ * Resolve encoded selections and order them in one step — the shape every
+ * viewer needs, so neither half is called alone at a call site.
+ *
+ * @param encodedIds - Encoded gift selection strings
+ * @param spec - Gift specs keyed by base gift ID
+ * @param i18n - Gift names keyed by base gift ID
+ * @param sortMode - Ordering to apply
+ * @returns Resolved selections in the shared gift order
+ */
+export function decodeAndOrderGiftSelections(
+  encodedIds: Iterable<string>,
+  spec: Record<string, EGOGiftSpec>,
+  i18n: Record<string, string>,
+  sortMode: SortMode,
+): DecodedGiftSelection[] {
+  return orderSelectionsByGiftOrder(decodeGiftSelections(encodedIds, spec, i18n), sortMode)
 }
 
 /**

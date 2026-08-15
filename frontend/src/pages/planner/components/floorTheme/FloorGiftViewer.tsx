@@ -3,7 +3,7 @@ import { useEGOGiftListData } from '@/pages/egoGift'
 import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { EGOGiftCard } from '@/pages/egoGift'
 import { EGOGiftTooltip } from '@/pages/egoGift'
-import { decodeGiftSelections, sortGiftSelections } from '@/pages/egoGift'
+import { decodeAndOrderGiftSelections } from '@/pages/egoGift'
 import { CARD_GRID } from '@/lib/constants'
 import type { EGOGiftListItem } from '@/pages/egoGift'
 import type { EnhancementLevel } from '@/shared/gameData'
@@ -51,10 +51,7 @@ export function FloorGiftViewer({
 
   const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
 
-  const selectedGifts = sortGiftSelections(
-    decodeGiftSelections(selectedGiftIds, spec, i18n),
-    'tier-first',
-  )
+  const selectedGifts = decodeAndOrderGiftSelections(selectedGiftIds, spec, i18n, 'tier-first')
 
   // Empty state
   if (selectedGifts.length === 0) {

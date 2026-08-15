@@ -10,7 +10,7 @@ import { describe, it, expect } from 'vitest'
 
 import {
   decodeGiftSelections,
-  sortGiftSelections,
+  orderSelectionsByGiftOrder,
   lookupByGiftId,
   hasGiftId,
   giftDisplayName,
@@ -105,10 +105,10 @@ function legacyDecodeAndSort(
   ).map((item) => ({ item, enhancement: enhancementMap.get(item.id)! }))
 }
 
-describe('decodeGiftSelections + sortGiftSelections', () => {
+describe('decodeGiftSelections + orderSelectionsByGiftOrder', () => {
   it('matches the legacy component block over every id shape', () => {
     const legacy = legacyDecodeAndSort(IDS, SPEC, I18N)
-    const next = sortGiftSelections(decodeGiftSelections(IDS, SPEC, I18N), 'tier-first')
+    const next = orderSelectionsByGiftOrder(decodeGiftSelections(IDS, SPEC, I18N), 'tier-first')
 
     expect(next.map(({ item, enhancement }) => ({ item, enhancement }))).toEqual(legacy)
   })
@@ -131,7 +131,7 @@ describe('decodeGiftSelections + sortGiftSelections', () => {
   })
 
   it('keeps each item paired with the enhancement it was selected at', () => {
-    const sorted = sortGiftSelections(decodeGiftSelections(IDS, SPEC, I18N), 'tier-first')
+    const sorted = orderSelectionsByGiftOrder(decodeGiftSelections(IDS, SPEC, I18N), 'tier-first')
     for (const { encodedId, item, enhancement } of sorted) {
       expect(getBaseGiftId(encodedId)).toBe(item.id)
       expect(enhancement).toBe(decodeGiftSelection(encodedId)?.enhancement)
@@ -139,7 +139,9 @@ describe('decodeGiftSelections + sortGiftSelections', () => {
   })
 
   it('returns an empty list for an empty selection', () => {
-    expect(sortGiftSelections(decodeGiftSelections([], SPEC, I18N), 'tier-first')).toEqual([])
+    expect(orderSelectionsByGiftOrder(decodeGiftSelections([], SPEC, I18N), 'tier-first')).toEqual(
+      [],
+    )
   })
 })
 

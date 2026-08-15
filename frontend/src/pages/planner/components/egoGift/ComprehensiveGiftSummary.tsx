@@ -1,7 +1,7 @@
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { decodeGiftSelections, sortGiftSelections } from '@/pages/egoGift'
+import { decodeAndOrderGiftSelections } from '@/pages/egoGift'
 import { EMPTY_STATE, CARD_GRID } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import type { EGOGiftListItem } from '@/pages/egoGift'
@@ -75,10 +75,7 @@ export function ComprehensiveGiftSummary({
 
   const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
 
-  const selectedGifts = sortGiftSelections(
-    decodeGiftSelections(selectedGiftIds, spec, i18n),
-    'tier-first',
-  )
+  const selectedGifts = decodeAndOrderGiftSelections(selectedGiftIds, spec, i18n, 'tier-first')
 
   const hasSelectedGifts = selectedGifts.length > 0
 
