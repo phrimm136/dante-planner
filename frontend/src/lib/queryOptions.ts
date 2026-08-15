@@ -1,16 +1,7 @@
-import { queryOptions, keepPreviousData } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import type { z } from 'zod'
 import { validateData } from './validation'
 import { STATIC_DATA_STALE_TIME } from './constants'
-
-export interface StaticDataQueryOptionsOpts {
-  /**
-   * Keep the previous language's data visible while the next loads
-   * (`placeholderData: keepPreviousData`) — prevents the i18n
-   * language-switch flash.
-   */
-  keepPrevious?: boolean
-}
 
 /**
  * Builds TanStack `queryOptions` for a statically imported JSON module
@@ -38,7 +29,6 @@ export function createStaticDataQueryOptions<T, TKey extends readonly unknown[]>
   importer: () => Promise<{ default: unknown }>,
   schema: z.ZodType<T>,
   context: string,
-  opts?: StaticDataQueryOptionsOpts,
 ) {
   return queryOptions({
     queryKey,
@@ -47,6 +37,5 @@ export function createStaticDataQueryOptions<T, TKey extends readonly unknown[]>
       return validateData(module.default, schema, context)
     },
     staleTime: STATIC_DATA_STALE_TIME,
-    ...(opts?.keepPrevious ? { placeholderData: keepPreviousData } : {}),
   })
 }

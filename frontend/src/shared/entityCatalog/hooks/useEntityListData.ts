@@ -37,7 +37,6 @@ function i18nOptions<TSpec, TI18n>(cfg: EntityListDataConfig<TSpec, TI18n>, lang
     () => cfg.i18nImport(language),
     cfg.i18nSchema,
     `${cfg.kind} nameList / ${language}`,
-    { keepPrevious: true },
   )
 }
 

@@ -12,7 +12,7 @@ export const unitKeywordsQueryKeys = {
   i18n: (language: string) => ['unitKeywords', 'i18n', language] as const,
 }
 
-function createUnitKeywordsQueryOptions(language: string, keepPrevious = false) {
+function createUnitKeywordsQueryOptions(language: string) {
   return createStaticDataQueryOptions(
     unitKeywordsQueryKeys.i18n(language),
     async () => {
@@ -25,7 +25,6 @@ function createUnitKeywordsQueryOptions(language: string, keepPrevious = false) 
     },
     UnitKeywordsSchema,
     `unitKeywords / ${language}`,
-    { keepPrevious },
   )
 }
 
@@ -50,6 +49,6 @@ export function useUnitKeywords(): UnitKeywords {
  */
 export function useUnitKeywordsDeferred(): UnitKeywords {
   const { i18n } = useTranslation()
-  const { data } = useQuery(createUnitKeywordsQueryOptions(i18n.language, true))
+  const { data } = useQuery(createUnitKeywordsQueryOptions(i18n.language))
   return data ?? EMPTY_UNIT_KEYWORDS
 }

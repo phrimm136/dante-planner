@@ -7,7 +7,8 @@ One vertical folder per route slice: route components at the slice root plus `co
 - Paired singular `useSuspenseQuery` hooks per entity: `use<Entity>ListData` / `use<Entity>DetailData` in the slice's `hooks/`.
 - Build query options with `createStaticDataQueryOptions` (`src/lib/queryOptions.ts`) wrapping a literal dynamic `import('@static/data/...')` — never `fetch('/data/...')`.
 - Query keys come from the factories in `src/lib/queryKeys.ts`; tuple shapes like `['identity', id]` and `['identity', id, 'i18n', language]` are load-bearing cache identities.
-- Spec and i18n staleTime is `STATIC_DATA_STALE_TIME` (7 days, `src/lib/constants/api.ts`); server-backed queries pick a named window from `STALE_TIME`/`GC_TIME` in the same module. i18n queries set `keepPrevious` to avoid the language-switch flash.
+- Spec and i18n staleTime is `STATIC_DATA_STALE_TIME` (7 days, `src/lib/constants/api.ts`); server-backed queries pick a named window from `STALE_TIME`/`GC_TIME` in the same module.
+- A load shows a skeleton, never a placeholder: suspending hooks render their boundary's skeleton, and the `*Deferred` hooks return their empty value until the data resolves.
 
 ## Route components
 

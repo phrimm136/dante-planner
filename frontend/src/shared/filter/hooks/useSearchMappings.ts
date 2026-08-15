@@ -25,7 +25,6 @@ function createKeywordMatchQueryOptions(language: string) {
     },
     KeywordMatchSchema,
     `keywordMatch / ${language}`,
-    { keepPrevious: true },
   )
 }
 

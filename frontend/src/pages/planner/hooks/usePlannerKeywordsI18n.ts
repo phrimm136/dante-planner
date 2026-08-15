@@ -37,7 +37,6 @@ function createPlannerKeywordsI18nQueryOptions(language: string) {
     () => import(`@static/i18n/${language}/plannerKeywords.json`),
     PlannerKeywordsI18nSchema,
     `plannerKeywords i18n / ${language}`,
-    { keepPrevious: true },
   )
 }
 

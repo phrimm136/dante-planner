@@ -128,7 +128,7 @@ describe('useEntityListData', () => {
     })
   })
 
-  it('keeps the previous language visible while the next name list loads', async () => {
+  it('falls back to emptyI18n while the next language name list loads', async () => {
     const { wrapper } = createWrapper()
 
     language.current = 'EN'
@@ -143,8 +143,8 @@ describe('useEntityListData', () => {
     language.current = 'KR'
     rerender()
 
-    // keepPreviousData: no flash back to emptyI18n on the language switch
-    expect(result.current).toEqual({ '10101': 'Yi Sang EN' })
+    // The switch shows the empty fallback rather than the previous language.
+    expect(result.current).toEqual({})
 
     await waitFor(() => {
       expect(result.current).toEqual({ '10101': 'Yi Sang KR' })
