@@ -14,12 +14,12 @@ import { Suspense } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { TraitsI18n } from '../TraitsI18n'
 
-// Mock the useTraitsI18n hook
-vi.mock('../../hooks/useTraitsI18n', () => ({
-  useTraitsI18n: vi.fn(),
+// Mock the useUnitKeywords hook
+vi.mock('@/shared/filter/hooks/useUnitKeywords', () => ({
+  useUnitKeywords: vi.fn(),
 }))
 
-import { useTraitsI18n } from '../../hooks/useTraitsI18n'
+import { useUnitKeywords } from '@/shared/filter'
 
 function createWrapper() {
   const queryClient = new QueryClient({
@@ -45,7 +45,7 @@ describe('TraitsI18n', () => {
   })
 
   it('renders traits with translated names - UT4', async () => {
-    vi.mocked(useTraitsI18n).mockReturnValue({
+    vi.mocked(useUnitKeywords).mockReturnValue({
       LIMBUS_COMPANY: 'Limbus Company',
       LIMBUS_COMPANY_LCB: 'LCB',
       BLACK_BEAST: 'Black Beast',
@@ -62,7 +62,7 @@ describe('TraitsI18n', () => {
   })
 
   it('filters out hidden traits (BASE_APPEARANCE, SMALL)', async () => {
-    vi.mocked(useTraitsI18n).mockReturnValue({
+    vi.mocked(useUnitKeywords).mockReturnValue({
       BASE_APPEARANCE: 'Base Appearance',
       SMALL: 'Small',
       LIMBUS_COMPANY: 'Limbus Company',
@@ -82,7 +82,7 @@ describe('TraitsI18n', () => {
   })
 
   it('filters out traits without translations', async () => {
-    vi.mocked(useTraitsI18n).mockReturnValue({})
+    vi.mocked(useUnitKeywords).mockReturnValue({})
 
     const { container } = render(<TraitsI18n traits={['UNKNOWN_TRAIT']} />, {
       wrapper: createWrapper(),
@@ -96,7 +96,7 @@ describe('TraitsI18n', () => {
   })
 
   it('filters out untranslated traits while keeping translated ones', async () => {
-    vi.mocked(useTraitsI18n).mockReturnValue({
+    vi.mocked(useUnitKeywords).mockReturnValue({
       LIMBUS_COMPANY: 'Limbus Company',
       BLACK_BEAST: 'Black Beast',
     })
@@ -113,7 +113,7 @@ describe('TraitsI18n', () => {
   })
 
   it('renders nothing when all traits are hidden', async () => {
-    vi.mocked(useTraitsI18n).mockReturnValue({
+    vi.mocked(useUnitKeywords).mockReturnValue({
       BASE_APPEARANCE: 'Base Appearance',
       SMALL: 'Small',
     })
@@ -133,7 +133,7 @@ describe('TraitsI18n', () => {
   })
 
   it('renders nothing when traits array is empty', async () => {
-    vi.mocked(useTraitsI18n).mockReturnValue({})
+    vi.mocked(useUnitKeywords).mockReturnValue({})
 
     const { container } = render(<TraitsI18n traits={[]} />, { wrapper: createWrapper() })
 
@@ -144,7 +144,7 @@ describe('TraitsI18n', () => {
   })
 
   it('renders multiple traits in flex container', async () => {
-    vi.mocked(useTraitsI18n).mockReturnValue({
+    vi.mocked(useUnitKeywords).mockReturnValue({
       TRAIT_A: 'Trait A',
       TRAIT_B: 'Trait B',
       TRAIT_C: 'Trait C',
@@ -160,7 +160,7 @@ describe('TraitsI18n', () => {
   })
 
   it('handles Unity rich text with color formatting', async () => {
-    vi.mocked(useTraitsI18n).mockReturnValue({
+    vi.mocked(useUnitKeywords).mockReturnValue({
       JIA_FAMILY: '<color=#d40000>Jia Family</color>',
     })
 
@@ -177,7 +177,7 @@ describe('TraitsI18n', () => {
   })
 
   it('handles Unity rich text with strikethrough', async () => {
-    vi.mocked(useTraitsI18n).mockReturnValue({
+    vi.mocked(useUnitKeywords).mockReturnValue({
       DEPRECATED_TRAIT: '<s>Deprecated</s>',
     })
 
@@ -193,7 +193,7 @@ describe('TraitsI18n', () => {
   })
 
   it('handles combined color and strikethrough', async () => {
-    vi.mocked(useTraitsI18n).mockReturnValue({
+    vi.mocked(useUnitKeywords).mockReturnValue({
       COMBINED_TRAIT: '<color=#d40000><s>Combined</s></color>',
     })
 
@@ -211,9 +211,9 @@ describe('TraitsI18n Suspense boundary - UT4', () => {
   })
 
   it('component is designed for Suspense boundary usage', async () => {
-    // TraitsI18n uses useTraitsI18n which is a suspending hook
+    // TraitsI18n uses useUnitKeywords which is a suspending hook
     // When wrapped in Suspense, it should work correctly
-    vi.mocked(useTraitsI18n).mockReturnValue({
+    vi.mocked(useUnitKeywords).mockReturnValue({
       LIMBUS_COMPANY: 'Limbus Company',
     })
 
@@ -225,7 +225,7 @@ describe('TraitsI18n Suspense boundary - UT4', () => {
   })
 
   it('uses key prop from trait ID for stable rendering', async () => {
-    vi.mocked(useTraitsI18n).mockReturnValue({
+    vi.mocked(useUnitKeywords).mockReturnValue({
       TRAIT_A: 'Trait A',
       TRAIT_B: 'Trait B',
     })

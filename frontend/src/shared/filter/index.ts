@@ -34,6 +34,11 @@ export type { SearchDropdownOption } from './components/searchDropdownOptions'
 
 export { useFilterI18nData, filterI18nQueryKeys } from './hooks/useFilterI18nData'
 export {
+  useUnitKeywords,
+  useUnitKeywordsDeferred,
+  unitKeywordsQueryKeys,
+} from './hooks/useUnitKeywords'
+export {
   useSearchMappings,
   useSearchMappingsDeferred,
   searchMappingsQueryKeys,
@@ -48,6 +53,6 @@ export { calculateActiveFilterCount } from './lib/filterUtils'
 export { collectKeywordTerms, matchesSearch } from './lib/searchTerms'
 export { entriesSortedById, sortByReleaseDate, sortEGOByDate } from './lib/entitySort'
 
-export { SeasonsI18nSchema, UnitKeywordsI18nSchema } from './schemas/FilterSchemas'
+export { SeasonsI18nSchema } from './schemas/FilterSchemas'
 export { KeywordMatchSchema, UnitKeywordsSchema } from './schemas/SearchMappingSchemas'
 export type { UnitKeywords } from './schemas/SearchMappingSchemas'

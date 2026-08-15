@@ -10,11 +10,11 @@ import { Fragment, type ReactNode } from 'react'
 
 import { TraitsI18n } from '../TraitsI18n'
 
-vi.mock('../../hooks/useTraitsI18n', () => ({
-  useTraitsI18n: vi.fn(),
+vi.mock('@/shared/filter/hooks/useUnitKeywords', () => ({
+  useUnitKeywords: vi.fn(),
 }))
 
-import { useTraitsI18n } from '../../hooks/useTraitsI18n'
+import { useUnitKeywords } from '@/shared/filter'
 
 /** Shipped unitKeywords.json values plus the tag shapes that separate parsers */
 const LABEL_CORPUS = [
@@ -63,7 +63,7 @@ function htmlOf(node: ReactNode): string {
 
 describe('TraitsI18n rich text parity', () => {
   it.each(LABEL_CORPUS)('renders %j like the reference parser', (label) => {
-    vi.mocked(useTraitsI18n).mockReturnValue({ TRAIT: label })
+    vi.mocked(useUnitKeywords).mockReturnValue({ TRAIT: label })
 
     const { container } = render(<TraitsI18n traits={['TRAIT']} />)
     const badge = container.querySelector('span.px-2') as HTMLElement

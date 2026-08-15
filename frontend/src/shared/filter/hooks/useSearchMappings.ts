@@ -1,7 +1,8 @@
 import { useSuspenseQuery, useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { createStaticDataQueryOptions } from '@/lib/queryOptions'
-import { KeywordMatchSchema, UnitKeywordsSchema } from '../schemas/SearchMappingSchemas'
+import { KeywordMatchSchema } from '../schemas/SearchMappingSchemas'
+import { useUnitKeywords, useUnitKeywordsDeferred } from './useUnitKeywords'
 
 // Query key factory for search mappings
 // Hand-rolled: tuples lack the 'list'/'i18n' segments the shared factory produces
@@ -9,7 +10,6 @@ export const searchMappingsQueryKeys = {
   all: ['searchMappings'] as const,
   keywordMatch: (language: string) =>
     [...searchMappingsQueryKeys.all, 'keyword', language] as const,
-  unitKeywords: (language: string) => [...searchMappingsQueryKeys.all, 'unit', language] as const,
 }
 
 function createKeywordMatchQueryOptions(language: string) {
@@ -25,23 +25,6 @@ function createKeywordMatchQueryOptions(language: string) {
     },
     KeywordMatchSchema,
     `keywordMatch / ${language}`,
-    { keepPrevious: true },
-  )
-}
-
-function createUnitKeywordsQueryOptions(language: string) {
-  return createStaticDataQueryOptions(
-    searchMappingsQueryKeys.unitKeywords(language),
-    async () => {
-      try {
-        return await import(`@static/i18n/${language}/unitKeywords.json`)
-      } catch {
-        // Missing language file falls back to empty mappings, not an error
-        return { default: {} }
-      }
-    },
-    UnitKeywordsSchema,
-    `unitKeywords / ${language}`,
     { keepPrevious: true },
   )
 }
@@ -92,7 +75,7 @@ export function useSearchMappings(): SearchMappings {
   const { i18n } = useTranslation()
 
   const { data: keywordMatch } = useSuspenseQuery(createKeywordMatchQueryOptions(i18n.language))
-  const { data: unitKeywords } = useSuspenseQuery(createUnitKeywordsQueryOptions(i18n.language))
+  const unitKeywords = useUnitKeywords()
 
   return {
     keywordToValue: buildReverseMap(keywordMatch),
@@ -117,10 +100,10 @@ export function useSearchMappingsDeferred(): SearchMappings {
   const { i18n } = useTranslation()
 
   const { data: keywordMatch } = useQuery(createKeywordMatchQueryOptions(i18n.language))
-  const { data: unitKeywords } = useQuery(createUnitKeywordsQueryOptions(i18n.language))
+  const unitKeywords = useUnitKeywordsDeferred()
 
   // Empty mappings while loading: cards stay visible, search matches nothing.
-  if (!keywordMatch || !unitKeywords) {
+  if (!keywordMatch) {
     return EMPTY_MAPPINGS
   }
 

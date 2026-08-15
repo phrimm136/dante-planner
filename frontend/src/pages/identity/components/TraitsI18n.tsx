@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-import { useTraitsI18n } from '../hooks/useTraitsI18n'
+import { useUnitKeywords } from '@/shared/filter'
 import { applyStrikethrough, extractLeadingColor } from '@/shared/gameText'
 
 /** Keywords to skip in trait display (internal/visual only) */
@@ -48,7 +48,7 @@ interface TraitsI18nProps {
  * </Suspense>
  */
 export function TraitsI18n({ traits }: TraitsI18nProps) {
-  const traitsI18n = useTraitsI18n()
+  const traitsI18n = useUnitKeywords()
 
   // Filter out hidden traits
   const visibleTraits = traits.filter((trait) => !HIDDEN_TRAITS.has(trait))
