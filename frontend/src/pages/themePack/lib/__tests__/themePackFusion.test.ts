@@ -45,14 +45,28 @@ const SPEC: Record<string, EGOGiftSpec> = {
   '13': makeSpec({ recipe: EGOGiftRecipeSchema.parse({ materials: [[]] }) }),
   // Both mixed pools are covered
   '14': makeSpec({
-    recipe: EGOGiftRecipeSchema.parse({ type: 'mixed', a: { ids: [1, 2], count: 1 }, b: { ids: [3], count: 1 } }),
+    recipe: EGOGiftRecipeSchema.parse({
+      type: 'mixed',
+      a: { ids: [1, 2], count: 1 },
+      b: { ids: [3], count: 1 },
+    }),
   }),
   // One id of the mixed recipe sits outside the pool
   '15': makeSpec({
-    recipe: EGOGiftRecipeSchema.parse({ type: 'mixed', a: { ids: [1, 2], count: 1 }, b: { ids: [9], count: 1 } }),
+    recipe: EGOGiftRecipeSchema.parse({
+      type: 'mixed',
+      a: { ids: [1, 2], count: 1 },
+      b: { ids: [9], count: 1 },
+    }),
   }),
   // Empty mixed pools never count as covered
-  '16': makeSpec({ recipe: EGOGiftRecipeSchema.parse({ type: 'mixed', a: { ids: [], count: 0 }, b: { ids: [], count: 0 } }) }),
+  '16': makeSpec({
+    recipe: EGOGiftRecipeSchema.parse({
+      type: 'mixed',
+      a: { ids: [], count: 0 },
+      b: { ids: [], count: 0 },
+    }),
+  }),
   // Recipeless gifts are never fusion results
   '17': makeSpec(),
 }
