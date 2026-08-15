@@ -482,5 +482,3 @@ function NoteEditorInner({
 
 // Wrap with memo using custom prop comparison to prevent unnecessary re-renders
 export const NoteEditor = NoteEditorInner
-
-export default NoteEditor

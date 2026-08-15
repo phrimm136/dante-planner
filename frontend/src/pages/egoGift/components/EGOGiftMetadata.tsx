@@ -151,5 +151,3 @@ export function EGOGiftMetadata({
     </div>
   )
 }
-
-export default EGOGiftMetadata

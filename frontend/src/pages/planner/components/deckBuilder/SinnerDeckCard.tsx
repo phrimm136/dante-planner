@@ -154,5 +154,3 @@ export const SinnerDeckCard = function SinnerDeckCard({
     </div>
   )
 }
-
-export default SinnerDeckCard

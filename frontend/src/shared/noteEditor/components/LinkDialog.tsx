@@ -99,5 +99,3 @@ export function LinkDialog({ open, onClose, onConfirm, initialText = '' }: LinkD
     </Dialog>
   )
 }
-
-export default LinkDialog

@@ -56,5 +56,3 @@ export function CompactEgoGrid({ equipment, egoAffinityMap }: CompactEgoGridProp
     </div>
   )
 }
-
-export default CompactEgoGrid

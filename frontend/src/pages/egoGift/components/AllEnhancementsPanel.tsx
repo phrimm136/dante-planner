@@ -99,5 +99,3 @@ export function AllEnhancementsPanel({
     </div>
   )
 }
-
-export default AllEnhancementsPanel

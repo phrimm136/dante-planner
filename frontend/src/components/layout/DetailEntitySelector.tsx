@@ -121,5 +121,3 @@ export function DetailEntitySelector({
     </div>
   )
 }
-
-export default DetailEntitySelector

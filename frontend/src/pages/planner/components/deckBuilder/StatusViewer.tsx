@@ -70,5 +70,3 @@ export const StatusViewer: React.FC<StatusViewerProps> = ({ deckState }) => {
     </div>
   )
 }
-
-export default StatusViewer

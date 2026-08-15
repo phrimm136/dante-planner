@@ -109,5 +109,3 @@ export const SinnerGrid = function SinnerGrid({
     </div>
   )
 }
-
-export default SinnerGrid

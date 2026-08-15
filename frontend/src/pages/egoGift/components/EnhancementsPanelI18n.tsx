@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import { useEGOGiftDetailI18n } from '../hooks/useEGOGiftDetailData'
-import AllEnhancementsPanel from './AllEnhancementsPanel'
+import { AllEnhancementsPanel } from './AllEnhancementsPanel'
 import type { EnhancementLevel } from '@/shared/gameData'
 
 interface EnhancementsPanelI18nProps {

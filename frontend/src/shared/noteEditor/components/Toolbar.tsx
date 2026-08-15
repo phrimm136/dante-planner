@@ -175,5 +175,3 @@ export function Toolbar({ editor, visible, onLinkClick }: ToolbarProps) {
     </div>
   )
 }
-
-export default Toolbar

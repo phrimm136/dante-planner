@@ -107,5 +107,3 @@ export function SyncChoiceDialog({ open, onChoice }: SyncChoiceDialogProps) {
     </Dialog>
   )
 }
-
-export default SyncChoiceDialog

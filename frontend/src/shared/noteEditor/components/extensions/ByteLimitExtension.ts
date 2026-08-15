@@ -63,5 +63,3 @@ export const ByteLimitExtension = Extension.create<ByteLimitOptions>({
     ]
   },
 })
-
-export default ByteLimitExtension

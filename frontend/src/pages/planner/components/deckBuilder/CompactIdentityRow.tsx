@@ -163,5 +163,3 @@ export const CompactIdentityRow = function CompactIdentityRow({
     </div>
   )
 }
-
-export default CompactIdentityRow

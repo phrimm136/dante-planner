@@ -154,5 +154,3 @@ export function ConflictResolutionDialog({
     </Dialog>
   )
 }
-
-export default ConflictResolutionDialog

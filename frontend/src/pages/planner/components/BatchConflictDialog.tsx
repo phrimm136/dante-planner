@@ -339,5 +339,3 @@ export function BatchConflictDialog({
 function formatDate(isoString: string): string {
   return formatPlannerDate(isoString, undefined, DATE_FORMATS.SHORT_DATE_TIME) ?? MISSING_DATE_LABEL
 }
-
-export default BatchConflictDialog
