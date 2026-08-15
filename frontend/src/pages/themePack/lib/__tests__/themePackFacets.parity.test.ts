@@ -11,6 +11,10 @@ import { DUNGEON_IDX, type DungeonIdx, type ThemePackFloor } from '@/shared/game
 import { enumerateSelectionStates, findParityMismatches } from '@/test-utils/facetParity'
 import { THEME_PACK_FACETS, type ThemePackFacetState } from '../themePackFilter'
 import type { ThemePackEntry } from '../../types/ThemePackTypes'
+import { EGOGiftIdSchema } from '@/shared/gameData'
+import type { EGOGiftId } from '@/shared/gameData'
+
+const gid = (id: string): EGOGiftId => EGOGiftIdSchema.parse(id)
 
 function legacyDungeonDifficulty(
   entry: ThemePackEntry,
@@ -69,20 +73,20 @@ const ITEMS: PackFixture[] = [
       { dungeonIdx: DUNGEON_IDX.NORMAL, selectableFloors: [0, 1] },
       { dungeonIdx: DUNGEON_IDX.HARD, selectableFloors: [0] },
     ],
-    specificEgoGiftPool: [9403, 9404],
+    specificEgoGiftPool: [gid('9403'), gid('9404')],
   }),
   makePack('1002', {
     exceptionConditions: [{ dungeonIdx: DUNGEON_IDX.NORMAL, selectableFloors: [1] }],
-    specificEgoGiftPool: [9403],
+    specificEgoGiftPool: [gid('9403')],
   }),
   makePack('1003', {
     exceptionConditions: [{ dungeonIdx: DUNGEON_IDX.PARALLEL }],
     specificEgoGiftPool: [],
-    fixedRewardEgoGifts: [9242, 9083],
+    fixedRewardEgoGifts: [gid('9242'), gid('9083')],
   }),
   makePack('1004', {
     exceptionConditions: [{ dungeonIdx: DUNGEON_IDX.EXTREME }],
-    specificEgoGiftPool: [9404],
+    specificEgoGiftPool: [gid('9404')],
     fixedRewardEgoGifts: [],
   }),
   makePack('1005', {
@@ -91,8 +95,8 @@ const ITEMS: PackFixture[] = [
       { dungeonIdx: DUNGEON_IDX.HARD, selectableFloors: [1, 2] },
       { dungeonIdx: DUNGEON_IDX.EXTREME },
     ],
-    specificEgoGiftPool: [9403],
-    fixedRewardEgoGifts: [9242],
+    specificEgoGiftPool: [gid('9403')],
+    fixedRewardEgoGifts: [gid('9242')],
   }),
   makePack('1006'),
 ]

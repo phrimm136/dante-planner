@@ -71,7 +71,7 @@ export function resolveCondition(condition: string, shared: AbEventShared): stri
 export function createEffectTextResolver(shared: AbEventShared, giftNames: Record<string, string>) {
   return function resolveEffectText(
     effectType: string,
-    giftId?: number,
+    giftId?: string,
     amount?: number,
     target?: string,
     condition?: string,
@@ -97,7 +97,7 @@ export function createEffectTextResolver(shared: AbEventShared, giftNames: Recor
     const extractedAmount = amount
 
     if (giftId && template.includes('{reward}')) {
-      const giftName = giftNames[String(giftId)] ?? String(giftId)
+      const giftName = giftNames[giftId] ?? giftId
       template = template.replace('{reward}', `"${giftName}"`)
     }
 

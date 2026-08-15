@@ -86,7 +86,7 @@ describe('EGODataSchema', () => {
     skills: {
       awaken: [
         {
-          id: 2070811,
+          id: '2070811',
           skillData: [
             {
               attributeType: 'AMBER',
@@ -106,7 +106,7 @@ describe('EGODataSchema', () => {
       ],
       erosion: [
         {
-          id: 2070821,
+          id: '2070821',
           skillData: [{ attributeType: 'AMBER', atkType: 'HIT', defaultValue: 28 }, {}, {}, {}],
         },
       ],

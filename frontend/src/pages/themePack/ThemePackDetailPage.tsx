@@ -30,6 +30,7 @@ import type { DungeonIdx, ThemePackFloor, DifficultyLabel } from '@/shared/gameD
 import type { ThemePackDetail } from '@/pages/themePack'
 import { Link } from '@tanstack/react-router'
 import { DIFFICULTY_COLORS, SECTION_STYLES } from '@/lib/constants'
+import type { EGOGiftId } from '@/shared/gameData'
 
 const GIFT_ROW = 'flex flex-wrap gap-3'
 
@@ -179,7 +180,7 @@ export function FeaturedBoss({
 /**
  * Specific EGO gifts grid (from specificEgoGiftPool + fusioned gifts)
  */
-function SpecificEgoGifts({ giftIds }: { giftIds: number[] }) {
+function SpecificEgoGifts({ giftIds }: { giftIds: EGOGiftId[] }) {
   const { spec } = useEGOGiftListData()
 
   if (giftIds.length === 0) return null
@@ -199,7 +200,7 @@ function SpecificEgoGifts({ giftIds }: { giftIds: number[] }) {
 /**
  * Fixed reward EGO gifts for hidden theme packs
  */
-function FixedRewardEgoGifts({ giftIds }: { giftIds: number[] }) {
+function FixedRewardEgoGifts({ giftIds }: { giftIds: EGOGiftId[] }) {
   const { spec } = useEGOGiftListData()
 
   return <EGOGiftGrid ids={giftIds.map(String)} spec={spec} showName className={GIFT_ROW} />
@@ -209,7 +210,7 @@ function FixedRewardEgoGifts({ giftIds }: { giftIds: number[] }) {
  * Exclusive abnormality events section — events only in this pack.
  * Self-contained: renders nothing if no exclusive events found.
  */
-function ExclusiveEventsSection({ eventPool, packId }: { eventPool: number[]; packId: string }) {
+function ExclusiveEventsSection({ eventPool, packId }: { eventPool: string[]; packId: string }) {
   const { t } = useTranslation('database')
   const { spec: abEventSpec } = useAbEventListData()
 
@@ -250,7 +251,7 @@ function ExclusiveEventsSection({ eventPool, packId }: { eventPool: number[]; pa
 /**
  * All acquirable EGO gifts grid (from egoGiftPool)
  */
-function AllEgoGifts({ giftIds }: { giftIds: number[] }) {
+function AllEgoGifts({ giftIds }: { giftIds: EGOGiftId[] }) {
   const { spec } = useEGOGiftListData()
 
   return <EGOGiftGrid ids={giftIds.map(String)} spec={spec} />
@@ -259,7 +260,7 @@ function AllEgoGifts({ giftIds }: { giftIds: number[] }) {
 /**
  * All encounterable events grid — title below image
  */
-function AllEvents({ eventPool }: { eventPool: number[] }) {
+function AllEvents({ eventPool }: { eventPool: string[] }) {
   const { spec: abEventSpec } = useAbEventListData()
 
   return (

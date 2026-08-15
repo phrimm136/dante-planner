@@ -151,12 +151,12 @@ describe('createEffectTextResolver', () => {
 
   describe('reward substitution', () => {
     it('substitutes gift name in {reward} placeholder', () => {
-      const result = resolve('GetConfirmedEgogift', 9001)
+      const result = resolve('GetConfirmedEgogift', '9001')
       expect(result).toContain('Bleeding Blade')
     })
 
     it('falls back to gift ID when name not found', () => {
-      const result = resolve('GetConfirmedEgogift', 99999)
+      const result = resolve('GetConfirmedEgogift', '99999')
       expect(result).toContain('99999')
     })
   })

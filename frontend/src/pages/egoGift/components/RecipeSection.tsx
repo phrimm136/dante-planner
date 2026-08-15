@@ -25,6 +25,7 @@ import type {
 } from '../types/EGOGiftTypes'
 import { isMixedRecipe } from '../lib/egoGiftUtils'
 import { SECTION_STYLES } from '@/lib/constants'
+import type { EGOGiftId } from '@/shared/gameData'
 
 interface RecipeSectionProps {
   recipe: EGOGiftRecipe
@@ -66,7 +67,7 @@ function StandardRecipeRow({
   ingredients,
   specMap,
 }: {
-  ingredients: number[]
+  ingredients: EGOGiftId[]
   specMap: Record<string, import('../types/EGOGiftTypes').EGOGiftSpec>
 }) {
   return (

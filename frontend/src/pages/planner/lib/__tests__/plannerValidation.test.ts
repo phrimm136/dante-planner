@@ -28,6 +28,7 @@ import type { FloorThemeSelection } from '@/pages/themePack'
 import type { DungeonIdx } from '@/shared/gameData'
 import type { MDPlannerContent, SerializableFloorSelection } from '../../types/PlannerTypes'
 import type { SinnerEquipment, SkillEAState } from '../../types/DeckTypes'
+import { ThemePackIdSchema } from '@/shared/gameData'
 
 // ============================================================================
 // Fixtures
@@ -78,7 +79,7 @@ function makeValidFloorSelections(
 ): SerializableFloorSelection[] {
   const { difficulty = 1, startPackId = 1001 } = opts
   return Array.from({ length: count }, (_, i) => ({
-    themePackId: String(startPackId + i),
+    themePackId: ThemePackIdSchema.parse(String(startPackId + i)),
     difficulty,
     giftIds: [] as string[],
   }))
@@ -162,7 +163,7 @@ describe('validateEquipment', () => {
 describe('validateFloorThemePacksForSave', () => {
   function makeFloors(packs: (string | null)[]): FloorThemeSelection[] {
     return packs.map((themePackId) => ({
-      themePackId,
+      themePackId: themePackId === null ? null : ThemePackIdSchema.parse(themePackId),
       difficulty: 1,
       giftIds: new Set<string>(),
     }))
@@ -202,7 +203,7 @@ describe('validateFloorThemePacksForSave', () => {
     // This test calls validateFloorThemePacksForSave directly with corrupted data.
     const floors: FloorThemeSelection[] = [
       {
-        themePackId: '1001',
+        themePackId: ThemePackIdSchema.parse('1001'),
         difficulty: 1,
         // Warning: deliberately invalid input — an array masquerading as a Set
         // exercises the duplicate-gift guard that Set deserialization would otherwise hide.
@@ -536,7 +537,7 @@ describe('validatePlannerForPublish – gift affordability', () => {
 
   it("gift '9220' is not affordable for theme pack '1110' → FLOOR_UNAFFORDABLE_GIFT", () => {
     const content = makeValidContent('5F')
-    content.floorSelections[0].themePackId = '1110'
+    content.floorSelections[0].themePackId = ThemePackIdSchema.parse('1110')
     content.floorSelections[0].giftIds = ['9220']
 
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '5F', spec)
@@ -550,7 +551,7 @@ describe('validatePlannerForPublish – gift affordability', () => {
 
   it("enhanced gift '19220' (level 1) not affordable for theme pack '1110' → FLOOR_UNAFFORDABLE_GIFT", () => {
     const content = makeValidContent('5F')
-    content.floorSelections[0].themePackId = '1110'
+    content.floorSelections[0].themePackId = ThemePackIdSchema.parse('1110')
     content.floorSelections[0].giftIds = ['19220'] // encoded: enhancement=1, base=9220
 
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '5F', spec)
@@ -560,7 +561,7 @@ describe('validatePlannerForPublish – gift affordability', () => {
 
   it("gift '9220' on its correct pack '1024' passes affordability", () => {
     const content = makeValidContent('5F')
-    content.floorSelections[0].themePackId = '1024'
+    content.floorSelections[0].themePackId = ThemePackIdSchema.parse('1024')
     content.floorSelections[0].giftIds = ['9220']
 
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '5F', spec)
@@ -583,7 +584,7 @@ describe('validatePlannerForPublish – gift affordability', () => {
       '9221': makeGiftSpec(['1024']),
     }
     const content = makeValidContent('5F')
-    content.floorSelections[0].themePackId = '1110'
+    content.floorSelections[0].themePackId = ThemePackIdSchema.parse('1110')
     content.floorSelections[0].giftIds = ['9220', '9221']
 
     const { errors } = validatePlannerForPublish('My Plan', content, '5F', twoGiftSpec)
@@ -594,9 +595,9 @@ describe('validatePlannerForPublish – gift affordability', () => {
 
   it('unaffordable gifts on two separate floors produce one error per floor', () => {
     const content = makeValidContent('5F')
-    content.floorSelections[0].themePackId = '1110' // floor 1
+    content.floorSelections[0].themePackId = ThemePackIdSchema.parse('1110') // floor 1
     content.floorSelections[0].giftIds = ['9220']
-    content.floorSelections[1].themePackId = '2000' // floor 2 (unique, not '1110')
+    content.floorSelections[1].themePackId = ThemePackIdSchema.parse('2000') // floor 2 (unique, not '1110')
     content.floorSelections[1].giftIds = ['9220']
 
     const { errors } = validatePlannerForPublish('My Plan', content, '5F', spec)
@@ -608,7 +609,7 @@ describe('validatePlannerForPublish – gift affordability', () => {
 
   it('egoGiftI18n resolves gift ID to display name in error context', () => {
     const content = makeValidContent('5F')
-    content.floorSelections[0].themePackId = '1110'
+    content.floorSelections[0].themePackId = ThemePackIdSchema.parse('1110')
     content.floorSelections[0].giftIds = ['9220']
 
     const { errors } = validatePlannerForPublish('My Plan', content, '5F', spec, i18n)
@@ -796,7 +797,7 @@ describe('validatePlannerForDraftSave – additional cases', () => {
 
   it('egoGiftI18n name appears in params.gifts for unaffordable gift', () => {
     const content = makeValidContent('5F')
-    content.floorSelections[0].themePackId = '1110'
+    content.floorSelections[0].themePackId = ThemePackIdSchema.parse('1110')
     content.floorSelections[0].giftIds = ['9220']
 
     const result = validatePlannerForDraftSave(content, '5F', spec, i18n)
@@ -829,7 +830,7 @@ describe('validatePlannerForDraftSave – additional cases', () => {
 
   it('existence error is reported before affordability error', () => {
     const content = makeValidContent('5F')
-    content.floorSelections[0].themePackId = '1110'
+    content.floorSelections[0].themePackId = ThemePackIdSchema.parse('1110')
     content.floorSelections[0].giftIds = ['2029', '9220']
 
     const result = validatePlannerForDraftSave(content, '5F', spec)
@@ -851,7 +852,7 @@ describe('validatePlannerForDraftSave – gift affordability', () => {
 
   it('unaffordable gift returns themePackEgoGiftInconsistency with pack and gift name', () => {
     const content = makeValidContent('5F')
-    content.floorSelections[0].themePackId = '1110'
+    content.floorSelections[0].themePackId = ThemePackIdSchema.parse('1110')
     content.floorSelections[0].giftIds = ['9220']
 
     const result = validatePlannerForDraftSave(content, '5F', spec, i18n)
@@ -862,7 +863,7 @@ describe('validatePlannerForDraftSave – gift affordability', () => {
 
   it('gift on correct pack returns null', () => {
     const content = makeValidContent('5F')
-    content.floorSelections[0].themePackId = '1024'
+    content.floorSelections[0].themePackId = ThemePackIdSchema.parse('1024')
     content.floorSelections[0].giftIds = ['9220']
 
     expect(validatePlannerForDraftSave(content, '5F', spec)).toBeNull()
@@ -877,7 +878,7 @@ describe('validatePlannerForDraftSave – gift affordability', () => {
 
   it('multiple unaffordable gifts on one floor lists all names', () => {
     const content = makeValidContent('5F')
-    content.floorSelections[0].themePackId = '1110'
+    content.floorSelections[0].themePackId = ThemePackIdSchema.parse('1110')
     content.floorSelections[0].giftIds = ['9220', '9221']
 
     const result = validatePlannerForDraftSave(content, '5F', spec, i18n)

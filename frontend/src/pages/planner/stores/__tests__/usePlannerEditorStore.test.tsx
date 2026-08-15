@@ -19,6 +19,7 @@ import { createEmptyNoteContent } from '@/shared/noteEditor'
 import { DUNGEON_IDX } from '@/shared/gameData'
 import type { MDPlannerContent } from '../../types/PlannerTypes'
 import type { SinnerEquipment, SkillEAState } from '../../types/DeckTypes'
+import { ThemePackIdSchema } from '@/shared/gameData'
 
 describe('usePlannerEditorStore', () => {
   describe('initial state', () => {
@@ -105,7 +106,7 @@ describe('usePlannerEditorStore', () => {
     it('updateFloorSelection replaces a single floor by index', () => {
       const store = createPlannerEditorStore()
       const updated = {
-        themePackId: 'pack-1',
+        themePackId: ThemePackIdSchema.parse('1001'),
         difficulty: DUNGEON_IDX.HARD,
         giftIds: new Set(['g1']),
       }
@@ -207,7 +208,11 @@ describe('usePlannerEditorStore', () => {
         deploymentOrder: [0, 1, 2],
         skillEAState: createDefaultSkillEAState(),
         floorSelections: [
-          { themePackId: 'pack-1', difficulty: DUNGEON_IDX.NORMAL, giftIds: ['fg1', 'fg2'] },
+          {
+            themePackId: ThemePackIdSchema.parse('1001'),
+            difficulty: DUNGEON_IDX.NORMAL,
+            giftIds: ['fg1', 'fg2'],
+          },
         ],
         sectionNotes: { intro: { content: 'note' } },
         ...overrides,
@@ -312,7 +317,7 @@ describe('usePlannerEditorStore', () => {
     it('preserves floorSelections[i].giftIds as a Set with the original ids', () => {
       const store = createPlannerEditorStore()
       store.getState().updateFloorSelection(2, {
-        themePackId: 'pack-2',
+        themePackId: ThemePackIdSchema.parse('1002'),
         difficulty: DUNGEON_IDX.HARD,
         giftIds: new Set(['fg1', 'fg2']),
       })

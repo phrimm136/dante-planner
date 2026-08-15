@@ -11,6 +11,7 @@
  */
 
 import { selectEffectivePassives, selectLockedPassives } from '@/shared/passiveSelection'
+import type { PassiveId } from '@/shared/gameData'
 import type { IdentityData } from '../types/IdentityTypes'
 
 type PassiveConditions = IdentityData['passives']['conditions']
@@ -21,18 +22,19 @@ type PassiveCondition = PassiveConditions[string]
  * ID format: {identity_id:5}{type:1}{variant:1}1
  * Type: 0=battle, 1=enhanced battle, 2=support
  */
-export function getPassiveInfo(passiveId: number): { type: number; variant: number } {
-  const suffix = passiveId % 100
-  const type = Math.floor(suffix / 10)
-  const variant = suffix % 10
-  return { type, variant }
+export function getPassiveInfo(passiveId: PassiveId): { type: number; variant: number } {
+  const suffix = passiveId.slice(-2)
+  return { type: Number(suffix[0]), variant: Number(suffix[1]) }
 }
 
 /**
  * Get effective passives at the current uptie level.
  * Empty arrays mean "inherit from previous tier".
  */
-export function getEffectivePassives(passiveList: number[][], currentUptieIndex: number): number[] {
+export function getEffectivePassives(
+  passiveList: PassiveId[][],
+  currentUptieIndex: number,
+): PassiveId[] {
   return selectEffectivePassives(passiveList, currentUptieIndex)
 }
 
@@ -41,7 +43,10 @@ export function getEffectivePassives(passiveList: number[][], currentUptieIndex:
  * tier. A higher-tier passive sharing a variant with an already-shown one is
  * hidden, not previewed.
  */
-export function getLockedPassives(passiveList: number[][], currentUptieIndex: number): number[] {
+export function getLockedPassives(
+  passiveList: PassiveId[][],
+  currentUptieIndex: number,
+): PassiveId[] {
   return selectLockedPassives(passiveList, currentUptieIndex, (passiveId) => {
     return getPassiveInfo(passiveId).variant
   })
@@ -54,15 +59,16 @@ export function getLockedPassives(passiveList: number[][], currentUptieIndex: nu
  */
 export function getPassiveCondition(
   conditions: PassiveConditions,
-  passiveId: number,
+  passiveId: PassiveId,
 ): PassiveCondition | undefined {
-  const directCondition = conditions[String(passiveId)]
+  const directCondition = conditions[passiveId]
   if (directCondition) return directCondition
 
-  const { type } = getPassiveInfo(passiveId)
+  const { type, variant } = getPassiveInfo(passiveId)
   if (type === 1) {
-    const basePassiveId = passiveId - 10
-    return conditions[String(basePassiveId)]
+    // Same variant one type down: the enhanced passive's base counterpart.
+    const basePassiveId = `${passiveId.slice(0, -2)}0${variant}`
+    return conditions[basePassiveId]
   }
 
   return undefined

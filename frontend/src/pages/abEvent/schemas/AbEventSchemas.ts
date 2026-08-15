@@ -26,7 +26,7 @@ export const AbEventSpecListSchema = z.record(z.string(), AbEventSpecListEntrySc
 
 export const AbEventRewardSchema = z.object({
   type: z.string(),
-  id: z.number().nullable(),
+  id: z.string().nullable(),
   num: z.number(),
   prob: z.number(),
 })
@@ -37,26 +37,26 @@ export const AbEventEffectSchema = z.object({
   condition: z.string().optional(),
   descId: z.string().optional(),
   reward: AbEventRewardSchema.optional(),
-  nextBattleId: z.number().optional(),
+  nextBattleId: z.string().optional(),
 })
 
 const AbEventProbabilityResultSchema = z.object({
   probability: z.number(),
   effects: z.array(AbEventEffectSchema),
-  nextEventId: z.number().optional(),
+  nextEventId: z.string().optional(),
 })
 
 const AbEventConditionalResultSchema = z.object({
   condition: z.string().optional(),
   probability: z.number().optional(),
   effects: z.array(AbEventEffectSchema),
-  nextEventId: z.number().optional(),
+  nextEventId: z.string().optional(),
 })
 
 export const AbEventChoiceSchema = z.object({
   index: z.number(),
   cantSelectInThisCase: z.string().optional(),
-  nextEventId: z.number().optional(),
+  nextEventId: z.string().optional(),
   directEffects: z.array(AbEventEffectSchema).optional(),
   probabilityResults: z.array(AbEventProbabilityResultSchema).optional(),
   conditionalResults: z.array(AbEventConditionalResultSchema).optional(),
@@ -71,7 +71,7 @@ export const AbEventJudgementSchema = z.object({
 export const AbEventResultSchema = z.object({
   outcome: z.string(),
   effects: z.array(AbEventEffectSchema),
-  nextEventId: z.number().optional(),
+  nextEventId: z.string().optional(),
   subResults: z.array(AbEventConditionalResultSchema).optional(),
 })
 

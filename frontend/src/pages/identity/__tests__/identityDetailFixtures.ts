@@ -19,16 +19,16 @@ export const identitySpec10101 = {
     min: ['OnDieAllyAsLevelRatio10'],
   },
   skills: {
-    skill1: [{ id: 1010101, skillData: [{ attributeType: 'AZURE', atkType: 'SLASH' }] }],
-    skill2: [{ id: 1010102, skillData: [{ attributeType: 'VIOLET', atkType: 'PENETRATE' }] }],
+    skill1: [{ id: '1010101', skillData: [{ attributeType: 'AZURE', atkType: 'SLASH' }] }],
+    skill2: [{ id: '1010102', skillData: [{ attributeType: 'VIOLET', atkType: 'PENETRATE' }] }],
     skill3: [
-      { id: 1010103, skillData: [{}, {}, { attributeType: 'AMBER', atkType: 'SLASH' }, {}] },
+      { id: '1010103', skillData: [{}, {}, { attributeType: 'AMBER', atkType: 'SLASH' }, {}] },
     ],
-    skillDef: [{ id: 1010104, skillData: [{ attributeType: 'NEUTRAL', atkType: 'NONE' }] }],
+    skillDef: [{ id: '1010104', skillData: [{ attributeType: 'NEUTRAL', atkType: 'NONE' }] }],
   },
   passives: {
-    battlePassiveList: [[1010101], [], [], []],
-    supportPassiveList: [[], [], [1010121], []],
+    battlePassiveList: [['1010101'], [], [], []],
+    supportPassiveList: [[], [], ['1010121'], []],
     conditions: {
       '1010101': { type: 'RESONANCE', values: { AZURE: 4 } },
       '1010121': { type: 'STOCK', values: { AZURE: 4 } },
@@ -76,21 +76,21 @@ export const identitySpec10114 = {
     min: ['OnDieAllyAsLevelRatio10'],
   },
   skills: {
-    skill1: [{ id: 1011401, skillData: [{ attributeType: 'AMBER', atkType: 'SLASH' }] }],
-    skill2: [{ id: 1011402, skillData: [{ attributeType: 'VIOLET', atkType: 'SLASH' }] }],
+    skill1: [{ id: '1011401', skillData: [{ attributeType: 'AMBER', atkType: 'SLASH' }] }],
+    skill2: [{ id: '1011402', skillData: [{ attributeType: 'VIOLET', atkType: 'SLASH' }] }],
     skill3: [
-      { id: 1011403, skillData: [{}, {}, { attributeType: 'SHAMROCK', atkType: 'SLASH' }, {}] },
+      { id: '1011403', skillData: [{}, {}, { attributeType: 'SHAMROCK', atkType: 'SLASH' }, {}] },
     ],
-    skillDef: [{ id: 1011404, skillData: [{ attributeType: 'NEUTRAL', atkType: 'NONE' }] }],
+    skillDef: [{ id: '1011404', skillData: [{ attributeType: 'NEUTRAL', atkType: 'NONE' }] }],
   },
   passives: {
     battlePassiveList: [
-      [1011402, 1011403],
-      [1011402, 1011403, 1011401],
+      ['1011402', '1011403'],
+      ['1011402', '1011403', '1011401'],
       [],
-      [1011402, 1011403, 1011411],
+      ['1011402', '1011403', '1011411'],
     ],
-    supportPassiveList: [[], [], [1011421], []],
+    supportPassiveList: [[], [], ['1011421'], []],
     conditions: {
       '1011401': { type: 'STOCK', values: { SHAMROCK: 5 } },
       '1011421': { type: 'STOCK', values: { SHAMROCK: 4 } },

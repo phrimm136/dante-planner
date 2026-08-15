@@ -52,7 +52,7 @@ export const IdentitySkillDataTupleSchema = z.tuple([
 // Skill entry schema
 export const IdentitySkillEntrySchema = z.object({
   id: SkillIdSchema,
-  textID: z.number().optional(),
+  textID: SkillIdSchema.optional(),
   skillTier: z.number().optional(),
   skillData: IdentitySkillDataTupleSchema,
 })
@@ -90,7 +90,7 @@ export const IdentityPassivesDataSchema = z.object({
 export const IdentityDataSchema = z.object({
   updatedDate: z.number(),
   skillKeywordList: z.array(z.string()),
-  panicType: z.number(),
+  panicType: z.string(),
   season: z.number(),
   rank: z.number(),
   hp: IdentityHpDataSchema,

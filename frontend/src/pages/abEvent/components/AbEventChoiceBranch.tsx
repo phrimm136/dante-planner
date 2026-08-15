@@ -12,7 +12,7 @@ type OptionI18n = NonNullable<AbEventI18n['options']>[number]
 type SelectionTextI18n = NonNullable<AbEventI18n['selectionTexts']>[string]
 type ResolveEffectText = (
   effect: string,
-  giftId?: number,
+  giftId?: string,
   amount?: number,
   target?: string,
   condition?: string,
@@ -81,7 +81,7 @@ export function formatConditionLabel(condition: string, t: TFunc): string {
 
 interface EffectEntry {
   effect: string
-  reward?: { id: number | null; num: number; prob: number; type: string }
+  reward?: { id: string | null; num: number; prob: number; type: string }
   target?: string
   condition?: string
   descId?: string
@@ -130,11 +130,11 @@ function BranchCard({
   label?: string
   narrativeText?: string
   effects: EffectEntry[]
-  nextEventId?: number
+  nextEventId?: string
   selfEventId?: string
   ctx: RenderContext
 }) {
-  const isSelfRef = Boolean(nextEventId && selfEventId && String(nextEventId) === selfEventId)
+  const isSelfRef = Boolean(nextEventId && selfEventId && nextEventId === selfEventId)
   return (
     <div className="border border-border rounded-sm overflow-hidden">
       {label && (
@@ -153,8 +153,8 @@ function BranchCard({
         ) : isSelfRef ? null : (
           <NothingHappened ctx={ctx} />
         )}
-        {nextEventId && !isSelfRef && ctx.subEvents?.[String(nextEventId)] && (
-          <SubEventBlock subEventId={String(nextEventId)} ctx={ctx} />
+        {nextEventId && !isSelfRef && ctx.subEvents?.[nextEventId] && (
+          <SubEventBlock subEventId={nextEventId} ctx={ctx} />
         )}
       </div>
     </div>
@@ -488,12 +488,8 @@ function SubEventChoice({
         {outcomes.length === 0 && <NothingHappened ctx={ctx} />}
 
         {/* Coin toss or nested sub-event via nextEventId */}
-        {choice.nextEventId && String(choice.nextEventId) !== subEventId && (
-          <NextEventBlock
-            nextId={String(choice.nextEventId)}
-            ctx={ctx}
-            selectionCtx={selectionCtx}
-          />
+        {choice.nextEventId && choice.nextEventId !== subEventId && (
+          <NextEventBlock nextId={choice.nextEventId} ctx={ctx} selectionCtx={selectionCtx} />
         )}
       </div>
     </div>
@@ -585,12 +581,12 @@ function CoinTossOutcome({
   result: {
     outcome: string
     effects: EffectEntry[]
-    nextEventId?: number
+    nextEventId?: string
     subResults?: Array<{
       condition?: string
       probability?: number
       effects: EffectEntry[]
-      nextEventId?: number
+      nextEventId?: string
     }>
   }
   selectionText?: SelectionTextI18n

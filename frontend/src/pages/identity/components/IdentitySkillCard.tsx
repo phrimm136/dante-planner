@@ -8,6 +8,7 @@ import {
 import { StyledSkillName } from '@/shared/gameText'
 import { getSkillImagePath, getSkillImagePathFromIconID } from '@/shared/assets'
 import type { IdentitySkillEntry, Uptie } from '../types/IdentityTypes'
+import type { SkillId } from '@/shared/gameData'
 
 interface IdentitySkillCardWithGranularI18nProps {
   identityId: string
@@ -83,16 +84,11 @@ function IdentitySkillName({
   attributeType,
 }: {
   identityId: string
-  skillId: number
+  skillId: SkillId
   attributeType?: string
 }) {
   const i18n = useIdentityDetailI18n(identityId)
-  return (
-    <StyledSkillName
-      name={i18n.skills[String(skillId)]?.name ?? ''}
-      attributeType={attributeType}
-    />
-  )
+  return <StyledSkillName name={i18n.skills[skillId]?.name ?? ''} attributeType={attributeType} />
 }
 
 /**
@@ -104,11 +100,11 @@ function IdentitySkillDescription({
   level,
 }: {
   identityId: string
-  skillId: number
+  skillId: SkillId
   level: Uptie
 }) {
   const i18n = useIdentityDetailI18n(identityId)
-  const skillI18n = i18n.skills[String(skillId)]
+  const skillI18n = i18n.skills[skillId]
   return (
     <SkillDescription
       descData={getMergedSkillDesc(skillI18n?.descs ?? [], level)}

@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { TrackerModeViewer } from '../TrackerModeViewer'
 import { DUNGEON_IDX, MAX_LEVEL } from '@/shared/gameData'
 import type { MDSaveablePlanner, MDPlannerContent } from '../../../types/PlannerTypes'
+import { ThemePackIdSchema } from '@/shared/gameData'
 
 // Create wrapper with QueryClient
 function createWrapper() {
@@ -182,7 +183,7 @@ vi.mock('../../SectionNoteDialog', () => ({
 describe('TrackerModeViewer', () => {
   const createMockPlanner = (floorCount: number): MDSaveablePlanner => {
     const floorSelections = Array.from({ length: floorCount }, (_, i) => ({
-      themePackId: `themePack${i + 1}`,
+      themePackId: ThemePackIdSchema.parse(String(1001 + i)),
       difficulty: DUNGEON_IDX.NORMAL,
       giftIds: [`gift${i + 1}A`, `gift${i + 1}B`],
     }))

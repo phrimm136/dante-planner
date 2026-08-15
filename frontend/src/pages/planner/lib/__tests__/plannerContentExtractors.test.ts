@@ -9,6 +9,7 @@ import { describe, it, expect } from 'vitest'
 import type { MDPlannerContent, SaveablePlanner } from '../../types/PlannerTypes'
 import type { PlannerSearchFilters } from '../../types/PlannerSearchTypes'
 import { EMPTY_PLANNER_SEARCH_FILTERS } from '../../types/PlannerSearchTypes'
+import { ThemePackIdSchema } from '@/shared/gameData'
 import {
   extractIdentityIds,
   extractEgoIds,
@@ -268,8 +269,8 @@ describe('extractThemePackIds', () => {
   it('extracts non-null themePackId from floorSelections', () => {
     const content = createMockMDContent({
       floorSelections: [
-        { themePackId: '1001', difficulty: 0, giftIds: [] },
-        { themePackId: '1002', difficulty: 1, giftIds: [] },
+        { themePackId: ThemePackIdSchema.parse('1001'), difficulty: 0, giftIds: [] },
+        { themePackId: ThemePackIdSchema.parse('1002'), difficulty: 1, giftIds: [] },
       ],
     })
 
@@ -281,9 +282,9 @@ describe('extractThemePackIds', () => {
   it('skips null themePackId entries', () => {
     const content = createMockMDContent({
       floorSelections: [
-        { themePackId: '1001', difficulty: 0, giftIds: [] },
+        { themePackId: ThemePackIdSchema.parse('1001'), difficulty: 0, giftIds: [] },
         { themePackId: null, difficulty: 0, giftIds: [] },
-        { themePackId: '1003', difficulty: 1, giftIds: [] },
+        { themePackId: ThemePackIdSchema.parse('1003'), difficulty: 1, giftIds: [] },
       ],
     })
 

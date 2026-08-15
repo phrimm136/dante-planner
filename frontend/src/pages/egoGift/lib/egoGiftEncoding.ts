@@ -1,4 +1,5 @@
 import { GIFT_ID_PATTERN } from '@/shared/gameData'
+import type { EGOGiftId } from '@/shared/gameData'
 import type { EnhancementLevel } from '@/shared/gameData'
 import type { EGOGiftRecipe, EGOGiftListItem, EGOGiftSpec } from '@/pages/egoGift'
 import type { SortMode } from '@/shared/filter'
@@ -246,7 +247,7 @@ export function giftDisplayName(encodedId: string, i18n: Record<string, string>)
  * @param recipe - Recipe object or undefined
  * @returns Array of ingredient gift IDs to cascade-select
  */
-export function getCascadeIngredients(recipe: EGOGiftRecipe | undefined): number[] {
+export function getCascadeIngredients(recipe: EGOGiftRecipe | undefined): EGOGiftId[] {
   if (!recipe) return []
 
   // Mixed recipe (Lunar Memory): skip cascade, user must manually select
@@ -254,10 +255,8 @@ export function getCascadeIngredients(recipe: EGOGiftRecipe | undefined): number
 
   // Standard recipe: union all materials across all recipe options
   if ('materials' in recipe) {
-    const uniqueIds = new Set<number>()
-    recipe.materials.forEach((option: number[]) =>
-      option.forEach((id: number) => uniqueIds.add(id)),
-    )
+    const uniqueIds = new Set<EGOGiftId>()
+    recipe.materials.forEach((option) => option.forEach((id) => uniqueIds.add(id)))
     return Array.from(uniqueIds)
   }
 

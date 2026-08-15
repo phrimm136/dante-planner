@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ComprehensiveGiftGridTracker } from '../ComprehensiveGiftGridTracker'
 import { encodeGiftSelection } from '@/pages/egoGift'
 import { buildEgoGiftSpecList, buildFloorSelection } from '@/test-utils'
+import { ThemePackIdSchema } from '@/shared/gameData'
 
 // The card is the seam the grid renders through, so the mock surfaces the three
 // values the grid computes: which gift, at which enhancement, and highlighted or not.
@@ -182,7 +183,10 @@ describe('ComprehensiveGiftGridTracker', () => {
 
   describe('Highlighting logic', () => {
     it('marks the hovered theme pack floor gifts as selected', () => {
-      const floor = buildFloorSelection({ themePackId: '1001', giftIds: ['9001'] })
+      const floor = buildFloorSelection({
+        themePackId: ThemePackIdSchema.parse('1001'),
+        giftIds: ['9001'],
+      })
 
       const { getByTestId } = render(
         <ComprehensiveGiftGridTracker
@@ -198,7 +202,10 @@ describe('ComprehensiveGiftGridTracker', () => {
     })
 
     it('leaves every gift unselected when no theme pack is hovered', () => {
-      const floor = buildFloorSelection({ themePackId: '1001', giftIds: ['9001'] })
+      const floor = buildFloorSelection({
+        themePackId: ThemePackIdSchema.parse('1001'),
+        giftIds: ['9001'],
+      })
 
       const { getByTestId } = render(
         <ComprehensiveGiftGridTracker

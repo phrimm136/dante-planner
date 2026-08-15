@@ -13,6 +13,7 @@ import type { JSONContent } from '@tiptap/core'
 import type { EditorMetadata } from '../editorStateCodec'
 import type { MDPlannerContent } from '../../types/PlannerTypes'
 import type { PlannerState } from '../../hooks/usePlannerSave'
+import { ThemePackIdSchema } from '@/shared/gameData'
 
 // hydrateEditorState substitutes '' for a note body it cannot read, so both the
 // fixtures and the round-tripped map carry a string where the type says JSONContent.
@@ -36,7 +37,11 @@ function makeContent(
     deploymentOrder: [0, 1, 2],
     skillEAState: createDefaultSkillEAState(),
     floorSelections: [
-      { themePackId: 'pack-1', difficulty: DUNGEON_IDX.NORMAL, giftIds: ['fg1', 'fg2'] },
+      {
+        themePackId: ThemePackIdSchema.parse('1001'),
+        difficulty: DUNGEON_IDX.NORMAL,
+        giftIds: ['fg1', 'fg2'],
+      },
     ],
     sectionNotes: { intro: { content: 'note' } },
     ...overrides,
@@ -99,7 +104,11 @@ describe('hydrateEditorState / projectEditorState round trip', () => {
         comprehensiveGiftIds: ['c1'],
         deploymentOrder: [0, 1, 2],
         floorSelections: [
-          { themePackId: 'pack-1', difficulty: DUNGEON_IDX.NORMAL, giftIds: ['fg1', 'fg2'] },
+          {
+            themePackId: ThemePackIdSchema.parse('1001'),
+            difficulty: DUNGEON_IDX.NORMAL,
+            giftIds: ['fg1', 'fg2'],
+          },
         ],
         sectionNotes: { ...defaultNotes, intro: { content: 'note' } },
       },

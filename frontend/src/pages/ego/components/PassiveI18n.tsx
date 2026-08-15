@@ -48,7 +48,7 @@ export function PassiveCardWithSuspense({ id, passiveId, isLocked }: PassiveCard
 function PassiveNameContent({ id, passiveId }: { id: string; passiveId: PassiveId }) {
   const i18n = useEGODetailI18n(id)
   const passive = i18n.passives[passiveId]
-  return <StyledSkillName name={passive?.name || String(passiveId)} attributeType="NEUTRAL" />
+  return <StyledSkillName name={passive?.name || passiveId} attributeType="NEUTRAL" />
 }
 
 /**

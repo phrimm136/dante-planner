@@ -160,7 +160,7 @@ function AbEventDetailContent() {
 
   const getSelectionKey = (choice: AbEventChoice): string | undefined => {
     if (!choice.nextEventId) return undefined
-    const lastTwo = String(choice.nextEventId).slice(-2)
+    const lastTwo = choice.nextEventId.slice(-2)
     return String(parseInt(lastTwo, 10))
   }
 

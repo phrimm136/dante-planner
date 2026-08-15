@@ -86,18 +86,16 @@ export {
   IdentityIdSchema,
   EGOIdSchema,
   EGOGiftIdSchema,
+  EncodedGiftIdSchema,
   PassiveIdSchema,
   SkillIdSchema,
   ThemePackIdSchema,
-  IdentityIdStringSchema,
-  EGOIdStringSchema,
-  GiftIdStringSchema,
-  ThemePackIdStringSchema,
   IDENTITY_ID_PATTERN,
   EGO_ID_PATTERN,
   GIFT_ID_PATTERN,
   GIFT_ENHANCEMENT_PREFIX_PATTERN,
   THEME_PACK_ID_PATTERN,
+  ENTITY_MEMBER_ID_PATTERN,
 } from './ids'
 export type { IdentityId, EGOId, EGOGiftId, PassiveId, SkillId, ThemePackId } from './ids'
 

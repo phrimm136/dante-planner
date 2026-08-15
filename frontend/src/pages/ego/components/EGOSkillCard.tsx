@@ -8,6 +8,7 @@ import {
 import { StyledSkillName } from '@/shared/gameText'
 import { getEGOSkillImagePath } from '@/shared/assets'
 import type { EGOSkillEntry, Threadspin } from '../types/EGOTypes'
+import type { SkillId } from '@/shared/gameData'
 
 interface EGOSkillCardWithGranularI18nProps {
   egoId: string
@@ -60,16 +61,11 @@ function EGOSkillName({
   attributeType,
 }: {
   egoId: string
-  skillId: number
+  skillId: SkillId
   attributeType?: string
 }) {
   const i18n = useEGODetailI18n(egoId)
-  return (
-    <StyledSkillName
-      name={i18n.skills[String(skillId)]?.name ?? ''}
-      attributeType={attributeType}
-    />
-  )
+  return <StyledSkillName name={i18n.skills[skillId]?.name ?? ''} attributeType={attributeType} />
 }
 
 /**
@@ -81,11 +77,11 @@ function EGOSkillDescription({
   level,
 }: {
   egoId: string
-  skillId: number
+  skillId: SkillId
   level: Threadspin
 }) {
   const i18n = useEGODetailI18n(egoId)
-  const skillI18n = i18n.skills[String(skillId)]
+  const skillI18n = i18n.skills[skillId]
   return (
     <SkillDescription
       descData={getMergedSkillDesc(skillI18n?.descs ?? [], level)}

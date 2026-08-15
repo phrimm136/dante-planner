@@ -16,6 +16,7 @@ import { canSelectFloorThemePack, getUnaffordableGiftNames } from '../../lib/pla
 import { PlannerSection } from '@/components/layout/PlannerSection'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import type { FloorThemeSelection } from '@/pages/themePack'
+import { ThemePackIdSchema } from '@/shared/gameData'
 
 /** Shared empty result so a closed picker's selector keeps one identity. */
 const EMPTY_PACK_IDS: string[] = []
@@ -135,7 +136,7 @@ export function FloorThemeGiftSection({
       }
 
       updateFloorSelection(floorIndex, {
-        themePackId: packId,
+        themePackId: ThemePackIdSchema.parse(packId),
         difficulty,
         giftIds: newGiftIds,
       })

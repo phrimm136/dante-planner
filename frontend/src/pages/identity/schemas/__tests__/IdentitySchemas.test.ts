@@ -146,7 +146,7 @@ describe('IdentityDataSchema', () => {
   const validIdentityData = {
     updatedDate: 20230227,
     skillKeywordList: ['Sinking'],
-    panicType: 9999,
+    panicType: '9999',
     season: 0,
     rank: 1,
     hp: { defaultStat: 72, incrementByLevel: 2.48 },
@@ -161,10 +161,10 @@ describe('IdentityDataSchema', () => {
       min: ['OnDieAllyAsLevelRatio10'],
     },
     skills: {
-      skill1: [{ id: 1010101, skillData: [{}, {}, {}, {}] }],
-      skill2: [{ id: 1010102, skillData: [{}, {}, {}, {}] }],
-      skill3: [{ id: 1010103, skillData: [{}, {}, {}, {}] }],
-      skillDef: [{ id: 1010104, skillData: [{}, {}, {}, {}] }],
+      skill1: [{ id: '1010101', skillData: [{}, {}, {}, {}] }],
+      skill2: [{ id: '1010102', skillData: [{}, {}, {}, {}] }],
+      skill3: [{ id: '1010103', skillData: [{}, {}, {}, {}] }],
+      skillDef: [{ id: '1010104', skillData: [{}, {}, {}, {}] }],
     },
     passives: {
       battlePassiveList: [[], [], [], []],

@@ -51,7 +51,7 @@ function judgement(threshold: number) {
 // Spec fixtures
 // =============================================================================
 
-const GIFT_EFFECT = { effect: 'GainGift', reward: { type: 'gift', id: 9001, num: 2, prob: 1 } }
+const GIFT_EFFECT = { effect: 'GainGift', reward: { type: 'gift', id: '9001', num: 2, prob: 1 } }
 
 /** Keyed by the last two digits of a nextEventId, parsed as an int */
 export const SELECTION_EVENTS: Record<string, AbEventSelectionEvent> = {
@@ -79,7 +79,7 @@ export const SELECTION_EVENTS: Record<string, AbEventSelectionEvent> = {
         subResults: [
           { probability: 0.5, effects: [{ effect: 'SubA' }] },
           { condition: 'Prob_0.25', effects: [] },
-          { effects: [{ effect: 'SubC' }], nextEventId: 901401 },
+          { effects: [{ effect: 'SubC' }], nextEventId: '901401' },
         ],
       },
       { outcome: 'FAILURE', effects: [{ effect: 'Flop' }] },
@@ -89,8 +89,8 @@ export const SELECTION_EVENTS: Record<string, AbEventSelectionEvent> = {
     canSkip: false,
     judgement: judgement(11),
     results: [
-      { outcome: 'SUCCESS', effects: [{ effect: 'Win' }], nextEventId: 901205 },
-      { outcome: 'FAILURE', effects: [{ effect: 'Lose' }], nextEventId: 901301 },
+      { outcome: 'SUCCESS', effects: [{ effect: 'Win' }], nextEventId: '901205' },
+      { outcome: 'FAILURE', effects: [{ effect: 'Lose' }], nextEventId: '901301' },
     ],
   },
   '5': {
@@ -102,12 +102,12 @@ export const SELECTION_EVENTS: Record<string, AbEventSelectionEvent> = {
     canSkip: false,
     judgement: judgement(13),
     results: [
-      { outcome: 'SUCCESS', effects: [], nextEventId: 901299 },
+      { outcome: 'SUCCESS', effects: [], nextEventId: '901299' },
       {
         outcome: 'FAILURE',
         effects: [],
-        nextEventId: 901301,
-        subResults: [{ effects: [{ effect: 'Sup' }], nextEventId: 901401 }],
+        nextEventId: '901301',
+        subResults: [{ effects: [{ effect: 'Sup' }], nextEventId: '901401' }],
       },
     ],
   },
@@ -126,16 +126,16 @@ const SUB_EVENTS: NonNullable<ChoiceBranchProps['subEvents']> = {
     choices: [
       { index: 0, directEffects: [{ effect: 'Heal' }] },
       { index: 1 },
-      { index: 2, nextEventId: 901301 },
-      { index: 3, nextEventId: 901303 },
-      { index: 4, nextEventId: 901307 },
-      { index: 5, nextEventId: 901401 },
-      { index: 6, nextEventId: 901399 },
-      { index: 7, nextEventId: 901302 },
+      { index: 2, nextEventId: '901301' },
+      { index: 3, nextEventId: '901303' },
+      { index: 4, nextEventId: '901307' },
+      { index: 5, nextEventId: '901401' },
+      { index: 6, nextEventId: '901399' },
+      { index: 7, nextEventId: '901302' },
       {
         index: 8,
         probabilityResults: [
-          { probability: 0.5, effects: [{ effect: 'P1' }], nextEventId: 901401 },
+          { probability: 0.5, effects: [{ effect: 'P1' }], nextEventId: '901401' },
           { probability: 0.5, effects: [] },
         ],
       },
@@ -210,7 +210,7 @@ const PROBABILITY_RESULTS = [
 ]
 const CONDITIONAL_RESULTS = [
   { condition: 'Prob_0.5', effects: [{ effect: 'CR' }] },
-  { effects: [{ effect: 'CR2' }], nextEventId: 901401 },
+  { effects: [{ effect: 'CR2' }], nextEventId: '901401' },
 ]
 /** Empty-effect branches make BranchCard fall back to its own "nothing happened" line */
 const EMPTY_BRANCH_RESULTS = [

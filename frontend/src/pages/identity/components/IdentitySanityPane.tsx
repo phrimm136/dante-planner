@@ -4,7 +4,7 @@ import type { IdentityData } from '../types/IdentityTypes'
 
 interface IdentitySanityPaneProps {
   /** Panic type ID */
-  panicType: number
+  panicType: string
   /** Sanity increase and decrease conditions */
   mentalConditionInfo: IdentityData['mentalConditionInfo']
 }

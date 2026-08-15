@@ -5,8 +5,8 @@
  * normally) vs "locked" (dimmed preview of future tiers) at a given threadspin.
  *
  * EGO dedupes by a `slot key` derived from the ID (everything except the last
- * digit). Two passives that differ only in the last digit (e.g. 2040211
- * "active at threadspin 2-4" and 2040212 "active at threadspin 5") share a
+ * digit). Two passives that differ only in the last digit (e.g. `2040211`
+ * "active at threadspin 2-4" and `2040212` "active at threadspin 5") share a
  * slot and are mutually exclusive — the higher-tier one *replaces* the
  * lower-tier one rather than appearing alongside it.
  */
@@ -18,11 +18,11 @@ import type { PassiveId } from '@/shared/gameData'
  * Slot key for an EGO passive — drops the trailing variant digit.
  *
  * @example
- * getEgoPassiveSlotKey(2040211) // => 204021
- * getEgoPassiveSlotKey(2040212) // => 204021   (same slot, different variant)
+ * getEgoPassiveSlotKey('2040211') // => '204021'
+ * getEgoPassiveSlotKey('2040212') // => '204021'   (same slot, different variant)
  */
-export function getEgoPassiveSlotKey(passiveId: PassiveId): number {
-  return Math.floor(passiveId / 10)
+export function getEgoPassiveSlotKey(passiveId: PassiveId): string {
+  return passiveId.slice(0, -1)
 }
 
 /**

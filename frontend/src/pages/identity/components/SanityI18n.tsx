@@ -14,7 +14,7 @@ import { getDisplayFontForLanguage } from '@/lib/utils'
 
 interface PanicTypeSectionI18nProps {
   /** Panic type ID */
-  panicType: number
+  panicType: string
 }
 
 /**
@@ -75,7 +75,7 @@ export function PanicTypeSectionI18n({ panicType }: PanicTypeSectionI18nProps) {
  * Internal component that fetches and renders panic description.
  * Returns empty FormattedDescription if panic entry not found.
  */
-function SanityDescContent({ panicType }: { panicType: number }) {
+function SanityDescContent({ panicType }: { panicType: string }) {
   const { data: panicInfo } = usePanicInfo()
   const panicEntry = getPanicEntry(panicInfo, panicType)
   const desc = panicEntry?.panicDesc ?? ''
@@ -88,7 +88,7 @@ function SanityDescContent({ panicType }: { panicType: number }) {
 
 interface SanityNameI18nProps {
   /** Panic type ID */
-  panicType: number
+  panicType: string
 }
 
 /**

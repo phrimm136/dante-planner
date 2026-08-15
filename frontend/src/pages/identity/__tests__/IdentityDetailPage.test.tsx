@@ -41,7 +41,7 @@ vi.mock('react-i18next', async (importOriginal) => {
 const mockIdentityData10101: IdentityData = {
   updatedDate: 20230227,
   skillKeywordList: ['Sinking'],
-  panicType: 9999,
+  panicType: '9999',
   season: 0,
   rank: 1,
   hp: { defaultStat: 72, incrementByLevel: 2.48 },
@@ -58,32 +58,32 @@ const mockIdentityData10101: IdentityData = {
   skills: {
     skill1: [
       {
-        id: SkillIdSchema.parse(1010101),
+        id: SkillIdSchema.parse('1010101'),
         skillData: [{ attributeType: 'AZURE', atkType: 'SLASH' }, {}, {}, {}],
       },
     ],
     skill2: [
       {
-        id: SkillIdSchema.parse(1010102),
+        id: SkillIdSchema.parse('1010102'),
         skillData: [{ attributeType: 'VIOLET', atkType: 'PENETRATE' }, {}, {}, {}],
       },
     ],
     skill3: [
       {
-        id: SkillIdSchema.parse(1010103),
+        id: SkillIdSchema.parse('1010103'),
         skillData: [{}, {}, { attributeType: 'AMBER', atkType: 'SLASH' }, {}],
       },
     ],
     skillDef: [
       {
-        id: SkillIdSchema.parse(1010104),
+        id: SkillIdSchema.parse('1010104'),
         skillData: [{ attributeType: 'NEUTRAL', atkType: 'NONE' }, {}, {}, {}],
       },
     ],
   },
   passives: {
-    battlePassiveList: [[PassiveIdSchema.parse(1010101)], [], [], []], // Only uptie 1 has battle passive
-    supportPassiveList: [[], [], [PassiveIdSchema.parse(1010121)], []], // Only uptie 3 has support passive
+    battlePassiveList: [[PassiveIdSchema.parse('1010101')], [], [], []], // Only uptie 1 has battle passive
+    supportPassiveList: [[], [], [PassiveIdSchema.parse('1010121')], []], // Only uptie 3 has support passive
     conditions: {
       '1010101': { type: 'RESONANCE', values: { AZURE: 4 } },
       '1010121': { type: 'STOCK', values: { AZURE: 4 } },
@@ -109,7 +109,7 @@ const mockIdentityI18n10101: IdentityI18n = {
 const mockIdentityData10114: IdentityData = {
   updatedDate: 20250828,
   skillKeywordList: ['Burst', 'Vibration'],
-  panicType: 9999,
+  panicType: '9999',
   season: 6,
   rank: 3,
   hp: { defaultStat: 66, incrementByLevel: 3.41 },
@@ -133,45 +133,45 @@ const mockIdentityData10114: IdentityData = {
   skills: {
     skill1: [
       {
-        id: SkillIdSchema.parse(1011401),
+        id: SkillIdSchema.parse('1011401'),
         skillData: [{ attributeType: 'AMBER', atkType: 'SLASH' }, {}, {}, {}],
       },
     ],
     skill2: [
       {
-        id: SkillIdSchema.parse(1011402),
+        id: SkillIdSchema.parse('1011402'),
         skillData: [{ attributeType: 'VIOLET', atkType: 'SLASH' }, {}, {}, {}],
       },
     ],
     skill3: [
       {
-        id: SkillIdSchema.parse(1011403),
+        id: SkillIdSchema.parse('1011403'),
         skillData: [{}, {}, { attributeType: 'SHAMROCK', atkType: 'SLASH' }, {}],
       },
     ],
     skillDef: [
       {
-        id: SkillIdSchema.parse(1011404),
+        id: SkillIdSchema.parse('1011404'),
         skillData: [{ attributeType: 'NEUTRAL', atkType: 'NONE' }, {}, {}, {}],
       },
     ],
   },
   passives: {
     battlePassiveList: [
-      [PassiveIdSchema.parse(1011402), PassiveIdSchema.parse(1011403)],
+      [PassiveIdSchema.parse('1011402'), PassiveIdSchema.parse('1011403')],
       [
-        PassiveIdSchema.parse(1011402),
-        PassiveIdSchema.parse(1011403),
-        PassiveIdSchema.parse(1011401),
+        PassiveIdSchema.parse('1011402'),
+        PassiveIdSchema.parse('1011403'),
+        PassiveIdSchema.parse('1011401'),
       ],
       [],
       [
-        PassiveIdSchema.parse(1011402),
-        PassiveIdSchema.parse(1011403),
-        PassiveIdSchema.parse(1011411),
+        PassiveIdSchema.parse('1011402'),
+        PassiveIdSchema.parse('1011403'),
+        PassiveIdSchema.parse('1011411'),
       ],
     ],
-    supportPassiveList: [[], [], [PassiveIdSchema.parse(1011421)], []],
+    supportPassiveList: [[], [], [PassiveIdSchema.parse('1011421')], []],
     conditions: {
       '1011401': { type: 'STOCK', values: { SHAMROCK: 5 } },
       '1011421': { type: 'STOCK', values: { SHAMROCK: 4 } },

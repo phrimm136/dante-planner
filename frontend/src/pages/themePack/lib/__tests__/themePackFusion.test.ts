@@ -22,45 +22,45 @@ function makeSpec(overrides: Partial<EGOGiftSpec> = {}): EGOGiftSpec {
   }
 }
 
-const POOL = ['1', '2', '3']
+const POOL = ['9001', '9002', '9003']
 
 const SPEC: Record<string, EGOGiftSpec> = {
-  '1': makeSpec(),
-  '2': makeSpec(),
-  '3': makeSpec(),
+  '9001': makeSpec(),
+  '9002': makeSpec(),
+  '9003': makeSpec(),
   // Every material of one set is in the pool
-  '10': makeSpec({ recipe: EGOGiftRecipeSchema.parse({ materials: [[1, 2]] }) }),
+  '9010': makeSpec({ recipe: EGOGiftRecipeSchema.parse({ materials: [['9001', '9002']] }) }),
   // Only the second set is covered
-  '11': makeSpec({
+  '9011': makeSpec({
     recipe: EGOGiftRecipeSchema.parse({
       materials: [
-        [1, 9],
-        [2, 3],
+        ['9001', '9009'],
+        ['9002', '9003'],
       ],
     }),
   }),
   // No set is covered
-  '12': makeSpec({ recipe: EGOGiftRecipeSchema.parse({ materials: [[1, 9]] }) }),
+  '9012': makeSpec({ recipe: EGOGiftRecipeSchema.parse({ materials: [['9001', '9009']] }) }),
   // An empty material set never counts as covered
-  '13': makeSpec({ recipe: EGOGiftRecipeSchema.parse({ materials: [[]] }) }),
+  '9013': makeSpec({ recipe: EGOGiftRecipeSchema.parse({ materials: [[]] }) }),
   // Both mixed pools are covered
-  '14': makeSpec({
+  '9014': makeSpec({
     recipe: EGOGiftRecipeSchema.parse({
       type: 'mixed',
-      a: { ids: [1, 2], count: 1 },
-      b: { ids: [3], count: 1 },
+      a: { ids: ['9001', '9002'], count: 1 },
+      b: { ids: ['9003'], count: 1 },
     }),
   }),
   // One id of the mixed recipe sits outside the pool
-  '15': makeSpec({
+  '9015': makeSpec({
     recipe: EGOGiftRecipeSchema.parse({
       type: 'mixed',
-      a: { ids: [1, 2], count: 1 },
-      b: { ids: [9], count: 1 },
+      a: { ids: ['9001', '9002'], count: 1 },
+      b: { ids: ['9009'], count: 1 },
     }),
   }),
   // Empty mixed pools never count as covered
-  '16': makeSpec({
+  '9016': makeSpec({
     recipe: EGOGiftRecipeSchema.parse({
       type: 'mixed',
       a: { ids: [], count: 0 },
@@ -68,7 +68,7 @@ const SPEC: Record<string, EGOGiftSpec> = {
     }),
   }),
   // Recipeless gifts are never fusion results
-  '17': makeSpec(),
+  '9017': makeSpec(),
 }
 
 describe('findFusionGifts', () => {
@@ -76,18 +76,18 @@ describe('findFusionGifts', () => {
     {
       name: 'returns every gift whose recipe the pool covers',
       giftIds: POOL,
-      expected: ['10', '11', '14'],
+      expected: ['9010', '9011', '9014'],
     },
     { name: 'finds nothing for an empty pool', giftIds: [], expected: [] },
     {
       name: 'needs the whole material set, not part of it',
-      giftIds: ['1'],
+      giftIds: ['9001'],
       expected: [],
     },
     {
       name: 'covers a standard recipe from a partial pool that still holds one full set',
-      giftIds: ['1', '2'],
-      expected: ['10'],
+      giftIds: ['9001', '9002'],
+      expected: ['9010'],
     },
   ]
 
@@ -96,14 +96,14 @@ describe('findFusionGifts', () => {
   })
 
   it('skips gifts already in the pool', () => {
-    expect(findFusionGifts(SPEC, [...POOL, '10'])).toEqual(['11', '14'])
+    expect(findFusionGifts(SPEC, [...POOL, '9010'])).toEqual(['9011', '9014'])
   })
 
   it('reports a gift once even when several material sets are covered', () => {
     const spec: Record<string, EGOGiftSpec> = {
-      '20': makeSpec({ recipe: EGOGiftRecipeSchema.parse({ materials: [[1], [2]] }) }),
+      '9020': makeSpec({ recipe: EGOGiftRecipeSchema.parse({ materials: [['9001'], ['9002']] }) }),
     }
 
-    expect(findFusionGifts(spec, POOL)).toEqual(['20'])
+    expect(findFusionGifts(spec, POOL)).toEqual(['9020'])
   })
 })

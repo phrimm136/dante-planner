@@ -17,7 +17,7 @@ import {
 } from '../egoGiftEncoding'
 import type { EGOGiftRecipe } from '@/pages/egoGift'
 import { EGOGiftRecipeSchema } from '@/pages/egoGift'
-import { GiftIdStringSchema } from '@/shared/gameData'
+import { EncodedGiftIdSchema } from '@/shared/gameData'
 
 describe('encodeGiftSelection', () => {
   it('returns just giftId when enhancement is 0', () => {
@@ -112,10 +112,10 @@ describe('getCascadeIngredients', () => {
 
     it('returns ingredients from single recipe option', () => {
       const recipe: EGOGiftRecipe = EGOGiftRecipeSchema.parse({
-        materials: [[9069, 9099, 9182]],
+        materials: [['9069', '9099', '9182']],
       })
       const result = getCascadeIngredients(recipe)
-      expect(result).toEqual(expect.arrayContaining([9069, 9099, 9182]))
+      expect(result).toEqual(expect.arrayContaining(['9069', '9099', '9182']))
       expect(result).toHaveLength(3)
     })
 
@@ -123,27 +123,27 @@ describe('getCascadeIngredients', () => {
       // Gift 9088 has two recipe options with overlapping ingredients
       const recipe: EGOGiftRecipe = EGOGiftRecipeSchema.parse({
         materials: [
-          [9003, 9053, 9157],
-          [9003, 9053, 9101, 9155],
+          ['9003', '9053', '9157'],
+          ['9003', '9053', '9101', '9155'],
         ],
       })
       const result = getCascadeIngredients(recipe)
-      // Union: 9003, 9053, 9157, 9101, 9155 (5 unique)
-      expect(result).toEqual(expect.arrayContaining([9003, 9053, 9157, 9101, 9155]))
+      // Union: '9003', '9053', '9157', '9101', '9155' (5 unique)
+      expect(result).toEqual(expect.arrayContaining(['9003', '9053', '9157', '9101', '9155']))
       expect(result).toHaveLength(5)
     })
 
     it('deduplicates shared ingredients across recipe options', () => {
       const recipe: EGOGiftRecipe = EGOGiftRecipeSchema.parse({
         materials: [
-          [9003, 9053],
-          [9003, 9053, 9101],
+          ['9003', '9053'],
+          ['9003', '9053', '9101'],
         ],
       })
       const result = getCascadeIngredients(recipe)
-      // 9003 and 9053 appear in both options but should only be returned once
-      expect(result.filter((id) => id === 9003)).toHaveLength(1)
-      expect(result.filter((id) => id === 9053)).toHaveLength(1)
+      // '9003' and '9053' appear in both options but should only be returned once
+      expect(result.filter((id) => id === '9003')).toHaveLength(1)
+      expect(result.filter((id) => id === '9053')).toHaveLength(1)
     })
 
     it('handles empty materials array', () => {
@@ -155,10 +155,10 @@ describe('getCascadeIngredients', () => {
 
     it('handles recipe option with empty ingredient array', () => {
       const recipe: EGOGiftRecipe = EGOGiftRecipeSchema.parse({
-        materials: [[], [9001, 9002]],
+        materials: [[], ['9001', '9002']],
       })
       const result = getCascadeIngredients(recipe)
-      expect(result).toEqual(expect.arrayContaining([9001, 9002]))
+      expect(result).toEqual(expect.arrayContaining(['9001', '9002']))
       expect(result).toHaveLength(2)
     })
   })
@@ -168,8 +168,8 @@ describe('getCascadeIngredients', () => {
       // Lunar Memory (9083) - requires manual selection
       const recipe: EGOGiftRecipe = EGOGiftRecipeSchema.parse({
         type: 'mixed',
-        a: { ids: [9105, 9110, 9116, 9121, 9126, 9131, 9136], count: 2 },
-        b: { ids: [9142, 9147, 9152], count: 3 },
+        a: { ids: ['9105', '9110', '9116', '9121', '9126', '9131', '9136'], count: 2 },
+        b: { ids: ['9142', '9147', '9152'], count: 3 },
       })
       expect(getCascadeIngredients(recipe)).toEqual([])
     })
@@ -177,49 +177,49 @@ describe('getCascadeIngredients', () => {
     it('does not auto-select any ingredients from mixed pools', () => {
       const recipe: EGOGiftRecipe = EGOGiftRecipeSchema.parse({
         type: 'mixed',
-        a: { ids: [9105], count: 1 },
-        b: { ids: [9142], count: 1 },
+        a: { ids: ['9105'], count: 1 },
+        b: { ids: ['9142'], count: 1 },
       })
       const result = getCascadeIngredients(recipe)
-      expect(result).not.toContain(9105)
-      expect(result).not.toContain(9142)
+      expect(result).not.toContain('9105')
+      expect(result).not.toContain('9142')
     })
   })
 
   describe('real game data examples', () => {
     it('handles gift 9100 (single recipe, 3 ingredients)', () => {
       const recipe: EGOGiftRecipe = EGOGiftRecipeSchema.parse({
-        materials: [[9069, 9099, 9182]],
+        materials: [['9069', '9099', '9182']],
       })
       const result = getCascadeIngredients(recipe)
-      expect(result.sort((a, b) => a - b)).toEqual([9069, 9099, 9182])
+      expect(result.sort()).toEqual(['9069', '9099', '9182'])
     })
 
     it('handles gift 9088 (two recipe options)', () => {
       const recipe: EGOGiftRecipe = EGOGiftRecipeSchema.parse({
         materials: [
-          [9003, 9053, 9157],
-          [9003, 9053, 9101, 9155],
+          ['9003', '9053', '9157'],
+          ['9003', '9053', '9101', '9155'],
         ],
       })
       const result = getCascadeIngredients(recipe)
-      expect(result.sort((a, b) => a - b)).toEqual([9003, 9053, 9101, 9155, 9157])
+      expect(result.sort()).toEqual(['9003', '9053', '9101', '9155', '9157'])
     })
 
     it('handles gift 9761 (hardOnly, single recipe)', () => {
       const recipe: EGOGiftRecipe = EGOGiftRecipeSchema.parse({
-        materials: [[9759, 9760]],
+        materials: [['9759', '9760']],
       })
       const result = getCascadeIngredients(recipe)
-      expect(result.sort((a, b) => a - b)).toEqual([9759, 9760])
+      expect(result.sort()).toEqual(['9759', '9760'])
     })
   })
 })
 
-describe('ENCODED_SELECTION_PATTERN vs GiftIdStringSchema', () => {
+describe('ENCODED_SELECTION_PATTERN vs EncodedGiftIdSchema', () => {
   // A superset of the schema's current domain: every optional single-digit prefix
   // against every four-digit body. The assertions below quantify over what the
-  // schema accepts rather than over a hardcoded list, so widening GiftIdStringSchema
+  // schema accepts rather than over a hardcoded list, so widening EncodedGiftIdSchema
   // beyond what the decoder pattern matches fails here instead of stranding the
   // new ids as undecodable.
   function candidateIds(): string[] {
@@ -233,15 +233,15 @@ describe('ENCODED_SELECTION_PATTERN vs GiftIdStringSchema', () => {
   }
 
   const candidates = candidateIds()
-  const accepted = candidates.filter((id) => GiftIdStringSchema.safeParse(id).success)
+  const accepted = candidates.filter((id) => EncodedGiftIdSchema.safeParse(id).success)
 
   it('spans a superset of what the schema accepts', () => {
     expect(candidates).toHaveLength(110000)
-    // 9000-9999, plus the same bodies behind each of the two permitted prefixes.
+    // '9000'-'9999', plus the same bodies behind each of the two permitted prefixes.
     expect(accepted).toHaveLength(3000)
   })
 
-  it('accepts every string GiftIdStringSchema accepts', () => {
+  it('accepts every string EncodedGiftIdSchema accepts', () => {
     const undecodable = accepted.filter((id) => !ENCODED_SELECTION_PATTERN.test(id))
     expect(undecodable).toEqual([])
   })

@@ -8,6 +8,7 @@ import type {
   ImportPlannersResponseSchema,
 } from '../schemas/PlannerSchemas'
 import type { SinnerEquipment, SkillEAState } from './DeckTypes'
+import type { ThemePackId } from '@/shared/gameData'
 
 /**
  * Planner status for tracking save state
@@ -22,7 +23,7 @@ export type PlannerStatus = 'draft' | 'saved'
  */
 export interface SerializableFloorSelection {
   /** Selected theme pack ID, null if none selected */
-  themePackId: string | null
+  themePackId: ThemePackId | null
   /** Selected difficulty for this floor */
   difficulty: DungeonIdx
   /** Selected gift IDs as array (serialized from Set) */

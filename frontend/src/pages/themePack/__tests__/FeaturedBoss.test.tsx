@@ -26,9 +26,9 @@ vi.mock('react-i18next', async (importOriginal) => {
 
 describe('FeaturedBoss', () => {
   const roster: ThemePackDetail['featuredBosses'] = [
-    { unitId: 71001, portraitId: 71001 },
-    { unitId: 1058, portraitId: '8605' },
-    { unitId: 8002, portraitId: 8002 },
+    { unitId: '71001', portraitId: '71001' },
+    { unitId: '1058', portraitId: '8605' },
+    { unitId: '8002', portraitId: '8002' },
   ]
 
   it('renders one img per manifest entry with the expected src (numeric and string portraitId)', () => {

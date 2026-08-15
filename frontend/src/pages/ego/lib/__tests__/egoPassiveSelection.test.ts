@@ -24,55 +24,55 @@ import {
 import { PassiveIdSchema } from '@/shared/gameData'
 import type { PassiveId } from '@/shared/gameData'
 
-const pid = (id: number): PassiveId => PassiveIdSchema.parse(id)
+const pid = (id: string): PassiveId => PassiveIdSchema.parse(id)
 
 describe('getEgoPassiveSlotKey', () => {
   it('drops the trailing variant digit', () => {
-    expect(getEgoPassiveSlotKey(pid(2040211))).toBe(204021)
-    expect(getEgoPassiveSlotKey(pid(2040212))).toBe(204021)
+    expect(getEgoPassiveSlotKey(pid('2040211'))).toBe('204021')
+    expect(getEgoPassiveSlotKey(pid('2040212'))).toBe('204021')
   })
 
   it('produces matching keys for tier-replacement siblings', () => {
-    expect(getEgoPassiveSlotKey(pid(2040211))).toBe(getEgoPassiveSlotKey(pid(2040212)))
+    expect(getEgoPassiveSlotKey(pid('2040211'))).toBe(getEgoPassiveSlotKey(pid('2040212')))
   })
 
   it('distinguishes unrelated passive IDs', () => {
-    expect(getEgoPassiveSlotKey(pid(2010111))).not.toBe(getEgoPassiveSlotKey(pid(2010211)))
+    expect(getEgoPassiveSlotKey(pid('2010111'))).not.toBe(getEgoPassiveSlotKey(pid('2010211')))
   })
 })
 
 describe('getEffectiveEgoPassives', () => {
   describe('single-passive EGO', () => {
-    const single = [[], [pid(2010111)], [], []]
+    const single = [[], [pid('2010111')], [], []]
 
     it('returns empty at threadspin 1 (slot[0] is empty, no earlier slot)', () => {
       expect(getEffectiveEgoPassives(single, 0)).toEqual([])
     })
 
     it('returns the lone passive at threadspin 2', () => {
-      expect(getEffectiveEgoPassives(single, 1)).toEqual([pid(2010111)])
+      expect(getEffectiveEgoPassives(single, 1)).toEqual([pid('2010111')])
     })
 
     it('inherits the lone passive at threadspin 3 (empty slot walks back)', () => {
-      expect(getEffectiveEgoPassives(single, 2)).toEqual([pid(2010111)])
+      expect(getEffectiveEgoPassives(single, 2)).toEqual([pid('2010111')])
     })
 
     it('inherits the lone passive at threadspin 4', () => {
-      expect(getEffectiveEgoPassives(single, 3)).toEqual([pid(2010111)])
+      expect(getEffectiveEgoPassives(single, 3)).toEqual([pid('2010111')])
     })
   })
 
   describe('tier-replacement EGO (20402)', () => {
-    const replacement = [[], [pid(2040211)], [], [], [pid(2040212)]]
+    const replacement = [[], [pid('2040211')], [], [], [pid('2040212')]]
 
     it('returns the t2-4 variant at threadspin 2-4', () => {
-      expect(getEffectiveEgoPassives(replacement, 1)).toEqual([pid(2040211)])
-      expect(getEffectiveEgoPassives(replacement, 2)).toEqual([pid(2040211)])
-      expect(getEffectiveEgoPassives(replacement, 3)).toEqual([pid(2040211)])
+      expect(getEffectiveEgoPassives(replacement, 1)).toEqual([pid('2040211')])
+      expect(getEffectiveEgoPassives(replacement, 2)).toEqual([pid('2040211')])
+      expect(getEffectiveEgoPassives(replacement, 3)).toEqual([pid('2040211')])
     })
 
     it('swaps to the t5 variant at threadspin 5', () => {
-      expect(getEffectiveEgoPassives(replacement, 4)).toEqual([pid(2040212)])
+      expect(getEffectiveEgoPassives(replacement, 4)).toEqual([pid('2040212')])
     })
   })
 
@@ -82,17 +82,17 @@ describe('getEffectiveEgoPassives', () => {
 
   it('handles a missing slot gracefully', () => {
     // Sparse arrays should not throw — the loop just skips undefined slots.
-    const sparse = [undefined as unknown as PassiveId[], [pid(2010111)]]
-    expect(getEffectiveEgoPassives(sparse, 1)).toEqual([pid(2010111)])
+    const sparse = [undefined as unknown as PassiveId[], [pid('2010111')]]
+    expect(getEffectiveEgoPassives(sparse, 1)).toEqual([pid('2010111')])
   })
 })
 
 describe('getLockedEgoPassives', () => {
   describe('single-passive EGO', () => {
-    const single = [[], [pid(2010111)], [], []]
+    const single = [[], [pid('2010111')], [], []]
 
     it('surfaces the future passive as locked at threadspin 1', () => {
-      expect(getLockedEgoPassives(single, 0)).toEqual([pid(2010111)])
+      expect(getLockedEgoPassives(single, 0)).toEqual([pid('2010111')])
     })
 
     it('is empty once the passive is effective', () => {
@@ -102,12 +102,12 @@ describe('getLockedEgoPassives', () => {
   })
 
   describe('tier-replacement EGO (20402)', () => {
-    const replacement = [[], [pid(2040211)], [], [], [pid(2040212)]]
+    const replacement = [[], [pid('2040211')], [], [], [pid('2040212')]]
 
     it('at threadspin 1: previews the first variant (slot not yet covered)', () => {
       // Only one slot key is uncovered (204021), so only ONE locked passive shows.
       // The t5 replacement variant collides on the same slot — should NOT also show.
-      expect(getLockedEgoPassives(replacement, 0)).toEqual([pid(2040211)])
+      expect(getLockedEgoPassives(replacement, 0)).toEqual([pid('2040211')])
     })
 
     it('at threadspin 2-4: the t5 replacement is HIDDEN, not dimmed', () => {
@@ -125,11 +125,11 @@ describe('getLockedEgoPassives', () => {
     // Forward-compat: if PM ever ships an EGO with a genuinely NEW passive
     // slot at a higher tier (not a replacement of an existing one), it must
     // still surface as locked. Two different slot keys → no dedupe.
-    const multiSlot = [[], [pid(2049911)], [], [], [pid(2049921)]]
+    const multiSlot = [[], [pid('2049911')], [], [], [pid('2049921')]]
 
     it('shows the genuinely-new higher-tier passive as locked', () => {
-      // pid(2049911) is effective; pid(2049921) has slot 204992 which is new → locked.
-      expect(getLockedEgoPassives(multiSlot, 1)).toEqual([pid(2049921)])
+      // pid('2049911') is effective; pid('2049921') has slot 204992 which is new → locked.
+      expect(getLockedEgoPassives(multiSlot, 1)).toEqual([pid('2049921')])
     })
   })
 

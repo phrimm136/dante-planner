@@ -110,7 +110,7 @@ export const PATHS = {
   egoGiftIcon: (giftId: string) => resolveAsset(`/images/icon/egoGift/${giftId}.webp`),
   battleKeywordIcon: (iconIdOrKey: string) =>
     resolveAsset(`/images/icon/battleKeywords/${iconIdOrKey}.webp`),
-  panicIcon: (panicType: number) => resolveAsset(`/images/icon/sanity/${String(panicType)}.webp`),
+  panicIcon: (panicType: string) => resolveAsset(`/images/icon/sanity/${panicType}.webp`),
 
   egoCg: (egoId: string) => resolveAsset(`/images/ego/${egoId}/${egoId}_cg.webp`),
   egoProfileImage: (egoId: string) =>
@@ -242,7 +242,7 @@ export const getEGOTypeIconPath = (egoType: string): string => path('egoTypeIcon
 export const getEGOGiftIconPath = (giftId: string): string => path('egoGiftIcon', giftId)
 export const getBattleKeywordIconPath = (iconIdOrKey: string): string =>
   path('battleKeywordIcon', iconIdOrKey)
-export const getPanicIconPath = (panicType: number): string => path('panicIcon', panicType)
+export const getPanicIconPath = (panicType: string): string => path('panicIcon', panicType)
 
 export const getEGOImagePath = (egoId: string): string => path('egoCg', egoId)
 export const getEGODetailImagePath = (egoId: string): string => path('egoCg', egoId)

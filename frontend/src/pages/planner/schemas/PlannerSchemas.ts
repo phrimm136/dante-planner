@@ -6,12 +6,12 @@ import {
   RR_CATEGORIES,
   PLANNER_TYPES,
   migrateKeywords,
-  IdentityIdStringSchema,
-  EGOIdStringSchema,
-  GiftIdStringSchema,
-  ThemePackIdStringSchema,
+  IdentityIdSchema,
+  EGOIdSchema,
+  EncodedGiftIdSchema,
+  ThemePackIdSchema,
 } from '@/shared/gameData'
-import type { DungeonIdx } from '@/shared/gameData'
+import type { DungeonIdx, ThemePackId } from '@/shared/gameData'
 import { JSONContentSchema } from '@/shared/noteEditor'
 import { pagedModelSchema } from '@/lib/validation'
 import { INITIAL_SYNC_VERSION } from '@/lib/constants'
@@ -106,7 +106,7 @@ const ThreadspinTierSchema = z.union([
  */
 const EquippedIdentitySchema = z
   .object({
-    id: IdentityIdStringSchema,
+    id: IdentityIdSchema,
     uptie: UptieTierSchema,
     level: z.number().int().min(1).max(MAX_LEVEL),
   })
@@ -117,7 +117,7 @@ const EquippedIdentitySchema = z
  */
 const EquippedEGOSchema = z
   .object({
-    id: EGOIdStringSchema,
+    id: EGOIdSchema,
     threadspin: ThreadspinTierSchema,
   })
   .strict()
@@ -153,11 +153,11 @@ const SinnerEquipmentSchema = z
 export const FloorSelectionDraftSchema = z
   .object({
     /** Selected theme pack ID, null if none selected */
-    themePackId: ThemePackIdStringSchema.nullable(),
+    themePackId: ThemePackIdSchema.nullable(),
     /** Selected difficulty for this floor */
     difficulty: DungeonIdxSchema,
     /** Selected gift IDs as array (serialized from Set) - validated as gift IDs */
-    giftIds: z.array(GiftIdStringSchema),
+    giftIds: z.array(EncodedGiftIdSchema),
   })
   .strict()
 
@@ -167,7 +167,7 @@ export const FloorSelectionDraftSchema = z
  */
 export const FloorSelectionSaveSchema = FloorSelectionDraftSchema.extend({
   /** Selected theme pack ID - REQUIRED for save */
-  themePackId: ThemePackIdStringSchema,
+  themePackId: ThemePackIdSchema,
 })
 
 // ============================================================================
@@ -280,11 +280,11 @@ const MDPlannerContentBaseFields = {
   /** Currently selected gift keyword filter */
   selectedGiftKeyword: z.string().nullable(),
   /** Selected start gift IDs (serialized from Set) - validated as gift IDs */
-  selectedGiftIds: z.array(GiftIdStringSchema),
+  selectedGiftIds: z.array(EncodedGiftIdSchema),
   /** Observation gift IDs (serialized from Set) - validated as gift IDs */
-  observationGiftIds: z.array(GiftIdStringSchema),
+  observationGiftIds: z.array(EncodedGiftIdSchema),
   /** Comprehensive gift IDs with enhancement encoding (serialized from Set) - validated as gift IDs */
-  comprehensiveGiftIds: z.array(GiftIdStringSchema),
+  comprehensiveGiftIds: z.array(EncodedGiftIdSchema),
   /** Equipment configuration per sinner */
   equipment: z.record(z.string(), SinnerEquipmentSchema),
   /** Deployment order as array of sinner indices */
@@ -423,13 +423,16 @@ export function validateSaveablePlanner(
   // Step 2: Validate content based on config.type
   if (base.config.type === 'MIRROR_DUNGEON') {
     const contentSchema = mode === 'save' ? MDPlannerContentSaveSchema : MDPlannerContentDraftSchema
-    return {
-      metadata: base.metadata,
-      config: base.config,
-      // JSONContentSchema validates note bodies structurally as `unknown`, so the
-      // parse output is wider than MDPlannerContent on `sectionNotes`.
-      content: contentSchema.parse(base.content) as MDPlannerContent,
+    const parsed = contentSchema.parse(base.content)
+    const content: MDPlannerContent = {
+      ...parsed,
+      // JSONContentSchema validates note bodies structurally as `unknown`, and
+      // the skill-EA record is gated per key rather than per slot, so the parse
+      // output is wider than MDPlannerContent on exactly these two fields.
+      sectionNotes: parsed.sectionNotes as MDPlannerContent['sectionNotes'],
+      skillEAState: parsed.skillEAState as MDPlannerContent['skillEAState'],
     }
+    return { metadata: base.metadata, config: base.config, content }
   }
 
   const contentSchema = mode === 'save' ? RRPlannerContentSaveSchema : RRPlannerContentDraftSchema
@@ -454,7 +457,7 @@ interface PageStateWithSets {
   observationGiftIds: Set<string>
   comprehensiveGiftIds: Set<string>
   floorSelections: {
-    themePackId: string | null
+    themePackId: ThemePackId | null
     difficulty: DungeonIdx
     giftIds: Set<string>
   }[]
