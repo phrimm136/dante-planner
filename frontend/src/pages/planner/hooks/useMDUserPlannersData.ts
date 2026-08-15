@@ -26,10 +26,19 @@ import { useAuthQuery } from '@/shared/auth'
 import { useUserSettingsQuery } from '@/shared/userSettings'
 import { useEGOGiftListData } from '@/pages/egoGift'
 import { validatePlannerForDraftSave, validatePlannerForPublish } from '../lib/plannerValidation'
-import { toUserFriendlyError } from '../lib/plannerValidationErrors'
-import { planConflictResolution, interpretConflictPlan } from '../lib/conflictChoice'
-import { categorizeSync } from '../lib/syncPlan'
-import { classifyAppError, validationAppError } from '@/lib/apiErrorClassifier'
+import { plannerValidationError, toUserFriendlyError } from '../lib/plannerValidationErrors'
+import {
+  planConflictResolution,
+  interpretConflictPlan,
+  reportedDelete,
+} from '../lib/conflictChoice'
+import {
+  categorizeSync,
+  collectSyncConflicts,
+  pullServerPlanners,
+  purgeLocalPlanners,
+} from '../lib/syncPlan'
+import { classifyAppError } from '@/lib/apiErrorClassifier'
 import { ok, err } from '@/lib/result'
 import { generateUUID } from '@/lib/uuid'
 import { PLANNER_LIST, STALE_TIME } from '@/lib/constants'
@@ -39,6 +48,7 @@ import { matchesPlannerFilters } from '../lib/plannerContentExtractors'
 import { isMDPlanner } from '../types/PlannerTypes'
 import type { AppError } from '@/lib/apiErrorClassifier'
 import type { ConflictEffect, ConflictOps, ConflictOutcome } from '../lib/conflictChoice'
+import type { SyncOps } from '../lib/syncPlan'
 import type { PlannerSummary, SaveablePlanner } from '../types/PlannerTypes'
 import type { PlannerSearchFilters } from '../types/PlannerSearchTypes'
 import type { ConflictItem, ConflictResolution } from '../components/BatchConflictDialog'
@@ -72,11 +82,6 @@ export const userPlannersQueryKeys = {
 // ============================================================================
 // Hook Options Interface
 // ============================================================================
-
-/** Planner validators name their keys inside the planner namespace. */
-function plannerValidationError(friendly: { key: string; params?: Record<string, string> }) {
-  return validationAppError({ key: `planner:${friendly.key}`, params: friendly.params })
-}
 
 export interface UseMDUserPlannersDataOptions {
   /** MD category filter (optional) */
@@ -225,6 +230,15 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
       syncInProgressRef.current = true
       setIsSyncing(true)
 
+      const ops: SyncOps = {
+        fetchChunks: (ids) => plannerApi.batchChunks(ids),
+        toSaveable: serverResponseToSaveable,
+        saveLocal: storage.saveToLocal,
+        deleteLocal: storage.deleteFromLocal,
+        loadLocal: storage.loadFromLocal,
+        fetchServer: syncAdapter.fetchFromServer,
+      }
+
       try {
         // Fetch ALL server planner metadata
         const serverPlanners = await syncAdapter.listFromServer()
@@ -236,60 +250,14 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
         hasSyncedRef.current = true
         lastSyncKeyRef.current = syncKey
 
-        // Pull non-conflicting planners in chunked round trips. Each chunk is
-        // written as it arrives, so a later chunk failing keeps what came before;
-        // the response is not positionally aligned, so omitted rows stay local-untouched.
-        let syncedCount = 0
-        const pullIds = plan.pull.map((p) => p.id)
-        if (pullIds.length > 0) {
-          try {
-            for await (const chunk of plannerApi.batchChunks(pullIds)) {
-              for (const response of chunk) {
-                try {
-                  const result = await storage.saveToLocal(serverResponseToSaveable(response))
-                  if (result.ok) {
-                    syncedCount++
-                  } else {
-                    console.error(`Failed to save planner ${response.id}:`, result.error)
-                  }
-                } catch (error) {
-                  console.error(`Failed to save planner ${response.id}:`, error)
-                }
-              }
-            }
-          } catch (error) {
-            console.error('Stopped fetching planners for sync:', error)
-          }
-        }
+        const syncedCount = await pullServerPlanners(
+          plan.pull.map((p) => p.id),
+          ops,
+        )
+        const purgedCount = await purgeLocalPlanners(plan.purge, ops)
 
-        // Purge local rows the server no longer has. Idempotent IndexedDB delete.
-        let purgedCount = 0
-        for (const local of plan.purge) {
-          try {
-            await storage.deleteFromLocal(local.id)
-            purgedCount++
-          } catch (error) {
-            console.error(`Failed to purge local planner ${local.id}:`, error)
-          }
-        }
-        // Build conflict items if any conflicts detected
         if (plan.conflict.length > 0) {
-          const conflicts: ConflictItem[] = []
-          for (const sp of plan.conflict) {
-            try {
-              const localPlanner = await storage.loadFromLocal(sp.id)
-              const serverPlanner = await syncAdapter.fetchFromServer(sp.id)
-              if (localPlanner.ok && localPlanner.value && serverPlanner.ok) {
-                conflicts.push({
-                  id: sp.id,
-                  localPlanner: localPlanner.value,
-                  serverPlanner: serverPlanner.value.planner,
-                })
-              }
-            } catch (error) {
-              console.error(`Failed to load conflict planners for ${sp.id}:`, error)
-            }
-          }
+          const conflicts = await collectSyncConflicts(plan.conflict, ops)
           if (conflicts.length > 0) {
             heldPlans.current.clear()
             setPendingConflicts(conflicts)
@@ -412,14 +380,7 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
     validate: validateBeforeSync,
     saveLocal: storage.saveToLocal,
     deleteLocal: storage.deleteFromLocal,
-    deleteRemote: async (id) => {
-      try {
-        await syncAdapter.deleteFromServer(id)
-        return ok(undefined)
-      } catch (removal: unknown) {
-        return err(classifyAppError(removal))
-      }
-    },
+    deleteRemote: reportedDelete((id) => syncAdapter.deleteFromServer(id)),
     sync: async (planner, force) => {
       try {
         return ok(acknowledgedCopy(await syncAdapter.syncToServer(planner, force)))

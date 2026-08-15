@@ -1,6 +1,7 @@
 import { assertNever } from '@/lib/utils'
 import { ok, err } from '@/lib/result'
 import { withRollback } from '@/lib/withRollback'
+import { classifyAppError } from '@/lib/apiErrorClassifier'
 
 import type { Result } from '@/lib/result'
 import type { AppError } from '@/lib/apiErrorClassifier'
@@ -124,6 +125,18 @@ export interface ConflictOps {
     force: boolean,
   ) => Promise<Result<SaveablePlanner | null, AppError>>
   sanitizeTitle: (title: string) => string
+}
+
+/** Lift a throwing server delete into the reported one the rollback needs. */
+export function reportedDelete(remove: (id: string) => Promise<void>): ConflictOps['deleteRemote'] {
+  return async (id: string) => {
+    try {
+      await remove(id)
+      return ok(undefined)
+    } catch (removal: unknown) {
+      return err(classifyAppError(removal))
+    }
+  }
 }
 
 /**

@@ -5,6 +5,8 @@
  * plus the mapping from a structured error to a user-facing i18n key + params.
  */
 
+import { validationAppError } from '@/lib/apiErrorClassifier'
+
 /**
  * Base validation error with context
  */
@@ -127,6 +129,11 @@ export type PlannerValidationError =
   | DifficultyValidationError
   | TitleValidationError
   | KeywordValidationError
+
+/** Planner validators name their keys inside the planner namespace. */
+export function plannerValidationError(friendly: { key: string; params?: Record<string, string> }) {
+  return validationAppError({ key: `planner:${friendly.key}`, params: friendly.params })
+}
 
 /**
  * Maps a structured validation error to an i18n key + params for toast display

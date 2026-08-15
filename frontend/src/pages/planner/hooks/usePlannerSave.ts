@@ -8,7 +8,6 @@ import { usePlannerSyncAdapter } from './usePlannerSyncAdapter'
 import { userPlannersQueryKeys } from './useMDUserPlannersData'
 import { plannerQueryKeys } from '../lib/plannerQueryKeys'
 import { useEGOGiftListData } from '@/pages/egoGift'
-import { serializeSets } from '../schemas/PlannerSchemas'
 import { isMDPlanner } from '../types/PlannerTypes'
 import { queryClient } from '@/lib/queryClient'
 import { AUTO_SAVE_DEBOUNCE_MS, INITIAL_SYNC_VERSION } from '@/lib/constants'
@@ -18,69 +17,42 @@ import {
   validatePlannerForPublish,
   validateNoteSizes,
 } from '../lib/plannerValidation'
-import { toUserFriendlyError } from '../lib/plannerValidationErrors'
-import { classifyAppError, validationAppError } from '@/lib/apiErrorClassifier'
-import { planConflictResolution, interpretConflictPlan } from '../lib/conflictChoice'
+import { plannerValidationError, toUserFriendlyError } from '../lib/plannerValidationErrors'
+import { classifyAppError } from '@/lib/apiErrorClassifier'
+import {
+  planConflictResolution,
+  interpretConflictPlan,
+  reportedDelete,
+} from '../lib/conflictChoice'
+import {
+  forkedPlannerId,
+  keepsLocal,
+  needsServerAnchor,
+  resolutionPlan,
+} from '../lib/editorConflictPlan'
+import { createSaveablePlanner, stateToComparableString } from '../lib/saveablePlanner'
 import { acknowledgedCopy } from './usePlannerSyncAdapter'
 import { ok, err } from '@/lib/result'
 import type { Result } from '@/lib/result'
-import type { ConflictEffect, ConflictOps } from '../lib/conflictChoice'
+import type { ConflictOps } from '../lib/conflictChoice'
+import type { HeldResolution } from '../lib/editorConflictPlan'
+import type { PlannerState } from '../lib/saveablePlanner'
 import type { AcknowledgedPlanner } from './usePlannerSyncAdapter'
 import type { AppError } from '@/lib/apiErrorClassifier'
-import type { MDCategory, PlannerType } from '@/shared/gameData'
-import type { SinnerEquipment, SkillEAState } from '../types/DeckTypes'
-import type { FloorThemeSelection } from '@/pages/themePack'
-import type { NoteContent } from '@/shared/noteEditor'
 import type {
   SaveablePlanner,
   ConflictResolutionChoice,
+  MDConfig,
   PlannerStatus,
-  MDPlannerContent,
   ServerAck,
 } from '../types/PlannerTypes'
 
-/** Planner validators name their keys inside the planner namespace. */
-function plannerValidationError(friendly: { key: string; params?: Record<string, string> }) {
-  return validationAppError({ key: `planner:${friendly.key}`, params: friendly.params })
-}
+export type { PlannerState } from '../lib/saveablePlanner'
 
 /**
  * SSR safety check
  */
 const isClient = typeof window !== 'undefined'
-
-/**
- * Planner state interface matching PlannerMDNewPage state structure
- * Uses Set types for in-memory representation
- */
-export interface PlannerState {
-  /** Planner title */
-  title: string
-  /** MD category (5F, 10F, 15F) */
-  category: MDCategory
-  /** Selected planner keywords */
-  selectedKeywords: Set<string>
-  /** Selected start buff IDs */
-  selectedBuffIds: Set<number>
-  /** Currently selected gift keyword filter */
-  selectedGiftKeyword: string | null
-  /** Selected start gift IDs */
-  selectedGiftIds: Set<string>
-  /** Observation gift IDs */
-  observationGiftIds: Set<string>
-  /** Comprehensive gift IDs with enhancement encoding */
-  comprehensiveGiftIds: Set<string>
-  /** Equipment configuration per sinner */
-  equipment: Record<string, SinnerEquipment>
-  /** Deployment order as array of sinner indices */
-  deploymentOrder: number[]
-  /** Skill EA state per sinner */
-  skillEAState: Record<string, SkillEAState>
-  /** Floor theme selections (has Set inside) */
-  floorSelections: FloorThemeSelection[]
-  /** Section notes keyed by section identifier */
-  sectionNotes: Record<string, NoteContent>
-}
 
 /**
  * Options for usePlannerSave hook
@@ -101,8 +73,8 @@ export interface UsePlannerSaveOptions {
   schemaVersion: number
   /** Game content version */
   contentVersion: number
-  /** Type of planner */
-  plannerType: PlannerType
+  /** Type of planner. This editor holds Mirror Dungeon state, and saves it as that. */
+  plannerType: MDConfig['type']
   /** Optional existing planner ID (for editing) */
   initialPlannerId?: string
   /** Optional initial sync version (for editing) */
@@ -181,111 +153,6 @@ export interface PlannerSaveResult {
   isRestricted: boolean
   /** Reason for restriction (ban or timeout reason) */
   restrictionReason: string | undefined
-}
-
-/** Everything a `SaveablePlanner` needs that is not derived from the editor state. */
-interface SaveablePlannerInput {
-  state: PlannerState
-  plannerId: string
-  deviceId: string
-  schemaVersion: number
-  contentVersion: number
-  plannerType: PlannerType
-  /** Original creation timestamp, or null for a planner being created now. */
-  existingCreatedAt: string | null
-  existingSyncVersion: number
-  published: boolean
-  status: PlannerStatus
-}
-
-/**
- * Serialize PlannerState to SaveablePlanner format
- */
-function createSaveablePlanner(input: SaveablePlannerInput): SaveablePlanner {
-  const { state } = input
-  const now = new Date().toISOString()
-
-  // Convert Sets to arrays using serializeSets
-  const serialized = serializeSets({
-    selectedKeywords: state.selectedKeywords,
-    selectedBuffIds: state.selectedBuffIds,
-    selectedGiftIds: state.selectedGiftIds,
-    observationGiftIds: state.observationGiftIds,
-    comprehensiveGiftIds: state.comprehensiveGiftIds,
-    floorSelections: state.floorSelections,
-  })
-
-  // Convert NoteContent to SerializableNoteContent
-  const serializableNotes: Record<
-    string,
-    { content: (typeof state.sectionNotes)[string]['content'] }
-  > = {}
-  for (const [key, note] of Object.entries(state.sectionNotes)) {
-    serializableNotes[key] = { content: note.content }
-  }
-
-  const metadata = {
-    id: input.plannerId,
-    title: state.title,
-    status: input.status,
-    schemaVersion: input.schemaVersion,
-    contentVersion: input.contentVersion,
-    plannerType: input.plannerType,
-    syncVersion: input.existingSyncVersion,
-    createdAt: input.existingCreatedAt ?? now,
-    lastModifiedAt: now,
-    savedAt: input.status === 'saved' ? now : null,
-    published: input.published,
-    deviceId: input.deviceId,
-  }
-
-  const content: MDPlannerContent = {
-    selectedKeywords: serialized.selectedKeywords,
-    selectedBuffIds: serialized.selectedBuffIds,
-    selectedGiftKeyword: state.selectedGiftKeyword,
-    selectedGiftIds: serialized.selectedGiftIds,
-    observationGiftIds: serialized.observationGiftIds,
-    comprehensiveGiftIds: serialized.comprehensiveGiftIds,
-    equipment: state.equipment,
-    deploymentOrder: state.deploymentOrder,
-    skillEAState: state.skillEAState,
-    floorSelections: serialized.floorSelections,
-    sectionNotes: serializableNotes,
-  }
-
-  if (input.plannerType === 'MIRROR_DUNGEON') {
-    return { metadata, config: { type: input.plannerType, category: state.category }, content }
-  }
-
-  // The editor state carries an MD category whatever the planner type is, so a
-  // Refracted Railway save has no category to give. Saving one under a laundered
-  // MD category would write a planner the discriminated union says cannot exist.
-  throw new Error(`Cannot build a ${input.plannerType} planner from Mirror Dungeon editor state`)
-}
-
-/**
- * Deep comparison for dirty state detection
- */
-function stateToComparableString(state: PlannerState): string {
-  const serialized = serializeSets({
-    selectedKeywords: state.selectedKeywords,
-    selectedBuffIds: state.selectedBuffIds,
-    selectedGiftIds: state.selectedGiftIds,
-    observationGiftIds: state.observationGiftIds,
-    comprehensiveGiftIds: state.comprehensiveGiftIds,
-    floorSelections: state.floorSelections,
-  })
-
-  return JSON.stringify({
-    title: state.title,
-    category: state.category,
-    selectedGiftKeyword: state.selectedGiftKeyword,
-    equipment: state.equipment,
-    deploymentOrder: state.deploymentOrder,
-    skillEAState: state.skillEAState,
-    sectionNotes: state.sectionNotes,
-    ...serialized,
-  })
 }
 
 /**
@@ -414,6 +281,37 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   // Last synced state for beforeunload warning detection
   const lastSyncedStateRef = useRef<string>(mountComparable)
 
+  // The live planner's comparable, and whether the store has moved since it was
+  // computed. Serializing the whole planner is what the dirty flags cost, and
+  // they are read on every render while the store changes far less often.
+  const comparableRef = useRef<string>(mountComparable)
+  const comparableStaleRef = useRef(false)
+
+  /**
+   * The comparable of the planner as it stands now.
+   *
+   * Passing `state` recomputes unconditionally. The cache tracks staleness from
+   * the store subscription, and the subscription is gone by the time a teardown
+   * flush runs: React destroys this effect before the descendant editors that
+   * hand over their last note, so the final write of a planner's life arrives
+   * unobserved. Deciding from the cache there drops it as a no-op.
+   *
+   * The cached path serves the two dirty flags, which are read every render and
+   * hold the same assumption the `isDirty` fast path already makes.
+   */
+  const readComparable = (state?: PlannerState): string => {
+    if (state !== undefined) {
+      comparableRef.current = stateToComparableString(state)
+      comparableStaleRef.current = false
+      return comparableRef.current
+    }
+    if (comparableStaleRef.current) {
+      comparableRef.current = stateToComparableString(getStateRef.current())
+      comparableStaleRef.current = false
+    }
+    return comparableRef.current
+  }
+
   // Track the original createdAt timestamp
   const createdAtRef = useRef<string | null>(null)
 
@@ -423,19 +321,8 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   const [error, setError] = useState<AppError | null>(null)
   const [resolutionError, setResolutionError] = useState<AppError | null>(null)
 
-  /**
-   * The plan built for the conflict now on screen, held across retries.
-   *
-   * Planning again would mint a second identity, so a retried "keep both" would
-   * write a second copy while the first attempt's copy is already rolled back or
-   * still on disk. The conflict object is its own identity: a newer conflict is
-   * a new object and earns a new plan.
-   */
-  const heldPlan = useRef<{
-    conflict: AppError
-    choice: ConflictResolutionChoice
-    plan: ConflictEffect[]
-  } | null>(null)
+  // The plan built for the conflict now on screen, held across retries.
+  const heldPlan = useRef<HeldResolution | null>(null)
 
   // Split adapters
   const storage = usePlannerStorage()
@@ -464,6 +351,36 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
    */
   const adoptAck = (incoming: ServerAck): void => {
     syncVersionRef.current = incoming.syncVersion
+  }
+
+  /**
+   * The planner a write is about to persist.
+   *
+   * Every writer differs on three things only: the state it writes, whose
+   * publication it carries, and the status it lands under. A null `createdAt`
+   * would stamp a fresh creation time onto a planner that already exists, so the
+   * first write to reach here is the one that fixes it.
+   */
+  const buildSaveable = (
+    state: PlannerState,
+    status: PlannerStatus,
+    isPublished: boolean,
+    deviceId: string,
+  ): SaveablePlanner => {
+    createdAtRef.current ??= new Date().toISOString()
+
+    return createSaveablePlanner({
+      state,
+      plannerId,
+      deviceId,
+      schemaVersion,
+      contentVersion,
+      plannerType,
+      existingCreatedAt: createdAtRef.current,
+      existingSyncVersion: presentedVersion(),
+      published: isPublished,
+      status,
+    })
   }
 
   /**
@@ -536,11 +453,6 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   ): Promise<Result<string, AppError>> => {
     if (!isClient) return err({ kind: 'unknown' })
 
-    // Set createdAt on first save
-    if (createdAtRef.current === null) {
-      createdAtRef.current = new Date().toISOString()
-    }
-
     // Get deviceId
     const deviceId = await storage.getOrCreateDeviceId()
     if (!deviceId.ok) return err({ kind: 'unknown' })
@@ -548,21 +460,14 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     const currentState = getState()
     // The snapshot this save is about to write. Everything after here may await,
     // so the live state can move on; the baseline must describe what was written.
-    const savedComparable = stateToComparableString(currentState)
-    const isCurrentlyPublished = opts.published ?? published
+    const savedComparable = readComparable(currentState)
 
-    const saveable = createSaveablePlanner({
-      state: currentState,
-      plannerId,
-      deviceId: deviceId.value,
-      schemaVersion,
-      contentVersion,
-      plannerType,
-      existingCreatedAt: createdAtRef.current,
-      existingSyncVersion: presentedVersion(),
-      published: isCurrentlyPublished,
+    const saveable = buildSaveable(
+      currentState,
       status,
-    })
+      opts.published ?? published,
+      deviceId.value,
+    )
 
     const invalid = validateForSave(saveable)
     if (invalid) return err(invalid)
@@ -607,7 +512,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
    */
   const markLocalBaseline = (comparable: string) => {
     previousStateRef.current = comparable
-    dirtyRef.current = stateToComparableString(getStateRef.current()) !== comparable
+    dirtyRef.current = readComparable(getStateRef.current()) !== comparable
   }
 
   /**
@@ -649,7 +554,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     }
 
     const currentState = getState()
-    const currentStateString = stateToComparableString(currentState)
+    const currentStateString = readComparable(currentState)
 
     // Skip if state hasn't changed
     if (currentStateString === previousStateRef.current) {
@@ -662,27 +567,11 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     try {
       if (!isClient) return
 
-      // Set createdAt on first save
-      if (createdAtRef.current === null) {
-        createdAtRef.current = new Date().toISOString()
-      }
-
       // Get deviceId
       const deviceId = await storage.getOrCreateDeviceId()
       if (!deviceId.ok) return
 
-      const saveable = createSaveablePlanner({
-        state: currentState,
-        plannerId,
-        deviceId: deviceId.value,
-        schemaVersion,
-        contentVersion,
-        plannerType,
-        existingCreatedAt: createdAtRef.current,
-        existingSyncVersion: presentedVersion(),
-        published,
-        status: 'draft',
-      })
+      const saveable = buildSaveable(currentState, 'draft', published, deviceId.value)
 
       // Save to IndexedDB only via SaveAdapter (never server for auto-save)
       const result = await storage.saveToLocal(saveable)
@@ -802,25 +691,8 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   const untitled = (): string => t('pages.plannerMD.untitled', 'Untitled')
 
   /** The local side of the conflict, as the editor holds it right now. */
-  const localSide = (deviceId: string): SaveablePlanner => {
-    // A null here would stamp a fresh createdAt onto a planner that already exists.
-    if (createdAtRef.current === null) {
-      createdAtRef.current = new Date().toISOString()
-    }
-
-    return createSaveablePlanner({
-      state: getState(),
-      plannerId,
-      deviceId,
-      schemaVersion,
-      contentVersion,
-      plannerType,
-      existingCreatedAt: createdAtRef.current,
-      existingSyncVersion: presentedVersion(),
-      published,
-      status: 'saved',
-    })
-  }
+  const localSide = (deviceId: string): SaveablePlanner =>
+    buildSaveable(getState(), 'saved', published, deviceId)
 
   /**
    * Report a failed resolution.
@@ -856,14 +728,8 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       const deviceId = await storage.getOrCreateDeviceId()
       if (!deviceId.ok) return failResolution({ kind: 'unknown' })
 
-      const held =
-        heldPlan.current?.conflict === error && heldPlan.current.choice === choice
-          ? heldPlan.current
-          : null
-
       const ctx = { deviceId: deviceId.value, now: new Date().toISOString(), newId: generateUUID }
-      const plan =
-        held?.plan ??
+      const plan = resolutionPlan(heldPlan.current, error, choice, () =>
         planConflictResolution(
           choice,
           { forkSide: 'local', forkTitle: getState().title || untitled() },
@@ -872,12 +738,11 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
             copyTitle: (title) =>
               t('pages.plannerMD.conflict.copySuffix', '{{title}} (Copy)', { title }),
           },
-        )
+        ),
+      )
       heldPlan.current = { conflict: error, choice, plan }
 
-      // A conflict that reported no server version leaves the local syncVersion
-      // unanchored, so read the server's back before writing over it.
-      if (serverVersion == null && plan.some((effect) => effect.kind === 'keepLocal')) {
+      if (needsServerAnchor(serverVersion, plan)) {
         const adopted = await adoptServerSyncVersion()
         if (!adopted.ok) return failResolution(adopted.error)
       }
@@ -892,7 +757,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       const handed: { comparable: string | null } = { comparable: null }
       const ops: ConflictOps = {
         local: async () => {
-          handed.comparable = stateToComparableString(getState())
+          handed.comparable = readComparable(getState())
           return ok(localSide(deviceId.value))
         },
         incoming: async () => {
@@ -904,14 +769,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
         validate: validateForSave,
         saveLocal: storage.saveToLocal,
         deleteLocal: storage.deleteFromLocal,
-        deleteRemote: async (id) => {
-          try {
-            await syncAdapter.deleteFromServer(id)
-            return ok(undefined)
-          } catch (removal: unknown) {
-            return err(classifyAppError(removal))
-          }
-        },
+        deleteRemote: reportedDelete((id) => syncAdapter.deleteFromServer(id)),
         sync: async (planner, force) => {
           // The user chose this resolution, so it uploads whatever the sync
           // setting says; a signed-out editor resolves locally and uploads
@@ -939,10 +797,10 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
           if (!onServerReload(fetched.value.planner)) {
             return failResolution({ kind: 'unknown' })
           }
-          markSaved(stateToComparableString(getState()))
+          markSaved(readComparable(getState()))
         }
       }
-      if (plan.some((effect) => effect.kind === 'keepLocal') && handed.comparable !== null) {
+      if (keepsLocal(plan) && handed.comparable !== null) {
         markSaved(handed.comparable)
       }
 
@@ -951,11 +809,8 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.detail(plannerId) })
       void queryClient.invalidateQueries({ queryKey: userPlannersQueryKeys.all })
 
-      const forked = plan.find(
-        (effect): effect is Extract<ConflictEffect, { kind: 'forkCopy' }> =>
-          effect.kind === 'forkCopy',
-      )
-      if (forked && onKeepBothCreated) onKeepBothCreated(forked.metadata.id)
+      const forkedId = forkedPlannerId(plan)
+      if (forkedId !== null && onKeepBothCreated) onKeepBothCreated(forkedId)
 
       // Clear conflict state only on success
       heldPlan.current = null
@@ -1000,7 +855,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     // written back as a draft.
     if (!baselineSettledRef.current) {
       baselineSettledRef.current = true
-      const settled = stateToComparableString(getStateRef.current())
+      const settled = readComparable(getStateRef.current())
       previousStateRef.current = settled
       lastSyncedStateRef.current = settled
       dirtyRef.current = false
@@ -1008,6 +863,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
 
     const unsubscribe = subscribe(() => {
       dirtyRef.current = true
+      comparableStaleRef.current = true
       armAutoSave()
     })
 
@@ -1033,12 +889,14 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   // the caller is an unload handler, so the comparison runs rarely.
   const isDirty = useCallback(() => {
     if (!dirtyRef.current) return false
-    return stateToComparableString(getStateRef.current()) !== previousStateRef.current
+    return readComparable() !== previousStateRef.current
   }, [])
 
   // Dirty flags compare the live state against the two save baselines, both of
-  // which the subscription installs at mount.
-  const currentComparable = stateToComparableString(getState())
+  // which the subscription installs at mount. The baselines advance separately —
+  // an autosave moves the local one only — so each flag holds its own comparison
+  // over the one shared reading of the planner.
+  const currentComparable = readComparable()
   const hasUnsyncedChanges = currentComparable !== lastSyncedStateRef.current
   const hasLocalUnsavedChanges = currentComparable !== previousStateRef.current
 

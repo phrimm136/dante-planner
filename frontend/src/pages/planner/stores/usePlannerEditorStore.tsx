@@ -19,7 +19,7 @@ import type { SinnerEquipment, SkillEAState, DeckFilterState } from '../types/De
 import type { FloorThemeSelection } from '@/pages/themePack'
 import type { NoteContent } from '@/shared/noteEditor'
 import type { MDPlannerContent } from '../types/PlannerTypes'
-import type { PlannerState } from '../hooks/usePlannerSave'
+import type { PlannerState } from '../lib/saveablePlanner'
 
 export {
   createDefaultDeckFilterState,

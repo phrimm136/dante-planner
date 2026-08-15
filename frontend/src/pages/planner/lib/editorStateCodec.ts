@@ -20,7 +20,7 @@ import type {
   ThreadspinTier,
 } from '../types/DeckTypes'
 import type { MDPlannerContent } from '../types/PlannerTypes'
-import type { PlannerState } from '../hooks/usePlannerSave'
+import type { PlannerState } from './saveablePlanner'
 
 const DEFAULT_ZAYIN_MAX_THREADSPIN: Record<string, ThreadspinTier> = (() => {
   const lookup = egoSpecList as Record<string, { maxThreadspin: 4 | 5 }>
