@@ -25,9 +25,8 @@ import type {
 import { EgoTypeSchema } from '@/shared/gameData'
 
 /**
- * Tolerated during the coexistence window: the backend still emits a content
- * digest, which the client never reads. The field leaves the wire with RFC
- * 0003's cleanup, and this schema line goes with it.
+ * Declared only because the response schemas are `.strict()`: the server sends
+ * this key and nothing here reads it. It goes when the server stops sending it.
  */
 const ToleratedContentDigestSchema = z.string().optional()
 
@@ -557,7 +556,7 @@ export const ServerPlannerResponseSchema = z
     status: PlannerStatusSchema,
     /** Planner content as JSON string */
     content: z.string(),
-    /** Emitted by the backend, never read here; see the coexistence window */
+    /** Unread here; declared so `.strict()` accepts what the server sends */
     contentDigest: ToleratedContentDigestSchema,
     /** Schema version for data format migration support */
     schemaVersion: z.number().int().positive(),
@@ -600,7 +599,7 @@ export const ServerPlannerSummarySchema = z
     status: PlannerStatusSchema,
     /** Server sync version for optimistic locking */
     syncVersion: z.number().int().positive(),
-    /** Emitted by the backend, never read here; see the coexistence window */
+    /** Unread here; declared so `.strict()` accepts what the server sends */
     contentDigest: ToleratedContentDigestSchema,
     /** ISO 8601 timestamp when planner was last modified */
     lastModifiedAt: z.string(),
