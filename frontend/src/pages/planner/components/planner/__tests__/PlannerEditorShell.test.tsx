@@ -77,10 +77,6 @@ vi.mock('react-i18next', async (importOriginal) => {
   }
 })
 
-vi.mock('@/lib/toast', () => ({
-  toast: { error: vi.fn(), success: vi.fn(), warning: vi.fn(), info: vi.fn() },
-}))
-
 // The editing surface itself is irrelevant here, and mounting it would pull in
 // every game-data query plus a Tiptap editor per section.
 vi.mock('../../deckBuilder/DeckBuilderSummary', () => ({

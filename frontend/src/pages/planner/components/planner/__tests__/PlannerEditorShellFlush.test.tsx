@@ -77,10 +77,6 @@ vi.mock('react-i18next', async (importOriginal) => {
   }
 })
 
-vi.mock('@/lib/toast', () => ({
-  toast: { error: vi.fn(), success: vi.fn(), warning: vi.fn(), info: vi.fn() },
-}))
-
 // Everything except the section notes: those are the point of this file.
 vi.mock('../../deckBuilder/DeckBuilderSummary', () => ({
   StoreBoundDeckBuilderSummary: () => null,

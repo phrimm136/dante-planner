@@ -241,19 +241,6 @@ vi.mock('@/pages/identity/hooks/usePanicInfo', () => ({
   },
 }))
 
-// Mock useTraitsI18n hook (used in TraitsDisplay)
-vi.mock('@/pages/identity/hooks/useTraitsI18n', () => ({
-  useTraitsI18n: () => ({
-    LIMBUS_COMPANY: 'Limbus Company',
-    LIMBUS_COMPANY_LCB: 'LCB',
-    BLACK_BEAST: 'Black Beast',
-    BLACK_BEAST_CHIEF: 'Black Beast Chief',
-    FAMILY_GA: 'Family Ga',
-    BLACK_BEAST_HORSE: 'Black Beast Horse',
-    H_CORP: 'H Corp',
-  }),
-}))
-
 // Mock asset paths - use importOriginal for complete mock
 vi.mock('@/shared/assets', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/shared/assets')>()

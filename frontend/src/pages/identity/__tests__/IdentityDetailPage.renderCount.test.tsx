@@ -44,11 +44,6 @@ vi.mock('@/pages/identity/hooks/usePanicInfo', () => ({
     panicType === 9999 ? { name: 'Standard Panic', panicDesc: 'Standard panic effect' } : null,
 }))
 
-vi.mock('@/pages/identity/hooks/useTraitsI18n', async () => {
-  const { identityTraitLabels } = await import('./identityDetailFixtures')
-  return { useTraitsI18n: () => identityTraitLabels }
-})
-
 vi.mock('@/pages/identity/hooks/useSanityConditionFormatter', () => ({
   useSanityConditionFormatter: () => ({
     formatAll: (conditions: string[]) => conditions.map(() => 'Formatted condition'),
