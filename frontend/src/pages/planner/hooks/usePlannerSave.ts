@@ -27,7 +27,7 @@ import type { Result } from '@/lib/result'
 import type { ConflictEffect, ConflictOps } from '../lib/conflictChoice'
 import type { AcknowledgedPlanner } from './usePlannerSyncAdapter'
 import type { AppError } from '@/lib/apiErrorClassifier'
-import type { MDCategory, RRCategory, PlannerType } from '@/shared/gameData'
+import type { MDCategory, PlannerType } from '@/shared/gameData'
 import type { SinnerEquipment, SkillEAState } from '../types/DeckTypes'
 import type { FloorThemeSelection } from '@/pages/themePack'
 import type { NoteContent } from '@/shared/noteEditor'
@@ -257,12 +257,10 @@ function createSaveablePlanner(input: SaveablePlannerInput): SaveablePlanner {
     return { metadata, config: { type: input.plannerType, category: state.category }, content }
   }
 
-  // The editor state carries an MD category whatever the planner type is.
-  return {
-    metadata,
-    config: { type: input.plannerType, category: state.category as unknown as RRCategory },
-    content,
-  }
+  // The editor state carries an MD category whatever the planner type is, so a
+  // Refracted Railway save has no category to give. Saving one under a laundered
+  // MD category would write a planner the discriminated union says cannot exist.
+  throw new Error(`Cannot build a ${input.plannerType} planner from Mirror Dungeon editor state`)
 }
 
 /**

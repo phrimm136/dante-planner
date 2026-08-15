@@ -79,18 +79,18 @@ async function readErrorBody(response: Response): Promise<ErrorBody | null> {
 export class ApiClient {
   static async fetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const method = (options.method ?? 'GET').toUpperCase()
-    const callerHeaders = (options.headers as Record<string, string> | undefined) ?? {}
-    const headers: Record<string, string> = { ...callerHeaders }
+    // HeadersInit is a Headers instance, a tuple array, or a record; asserting the
+    // record shape made the Content-Type check below miss a caller-set header on
+    // the other two, and the spread produce garbage.
+    const headers = new Headers(options.headers)
 
     // Bodyless GET/HEAD must stay CORS "simple" — a request Content-Type would force a
     // preflight OPTIONS that blocks the cold-load request burst.
     const isBodylessMethod = method === 'GET' || method === 'HEAD'
     const isFormDataBody = typeof FormData !== 'undefined' && options.body instanceof FormData
-    const callerSetContentType = Object.keys(callerHeaders).some(
-      (key) => key.toLowerCase() === 'content-type',
-    )
+    const callerSetContentType = headers.has('Content-Type')
     if (!isBodylessMethod && !isFormDataBody && !callerSetContentType) {
-      headers['Content-Type'] = 'application/json'
+      headers.set('Content-Type', 'application/json')
     }
 
     // Double-submit CSRF: echo the readable `csrf` cookie on state-changing
@@ -98,7 +98,7 @@ export class ApiClient {
     if (!isBodylessMethod) {
       const csrfToken = readCsrfToken()
       if (csrfToken) {
-        headers[CSRF_HEADER_NAME] = csrfToken
+        headers.set(CSRF_HEADER_NAME, csrfToken)
       }
     }
 

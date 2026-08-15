@@ -786,6 +786,14 @@ function computeTargetProbability(
 
   const isEgo = target.type === 'ego'
   const featuredCount = ctx.featuredCounts[target.type]
+
+  // No featured item of this type means no pull can produce one. Dividing by the
+  // count instead yields an item rate of Infinity and, from it, zero expected
+  // pulls — a certainty reported for something that cannot happen.
+  if (!isEgo && featuredCount <= 0) {
+    return { target, probability: 0, expectedPulls: Infinity, pityApplies: false }
+  }
+
   const totalRate = RATE_UP_FOR[target.type](ctx.allEgoCollected)
   const itemRate = isEgo ? totalRate : totalRate / featuredCount
 

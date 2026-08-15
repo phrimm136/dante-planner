@@ -339,14 +339,8 @@ describe('ApiClient', () => {
 
       await ApiClient.post('/api/planner', { name: 'Test' })
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          headers: expect.objectContaining({
-            'Content-Type': 'application/json',
-          }),
-        }),
-      )
+      const headers = new Headers((mockFetch.mock.calls[0][1] as RequestInit).headers)
+      expect(headers.get('Content-Type')).toBe('application/json')
     })
 
     it('stringifies request body for POST', async () => {
@@ -372,15 +366,14 @@ describe('ApiClient', () => {
     // Bodyless GET/HEAD must stay CORS "simple" requests: a request Content-Type would
     // force a preflight OPTIONS that blocks the cold-load request burst.
     const okJson = () => ({ ok: true, status: 200, json: vi.fn().mockResolvedValue({}) })
-    const sentHeaders = () =>
-      ((mockFetch.mock.calls[0][1] as RequestInit).headers ?? {}) as Record<string, string>
+    const sentHeaders = () => new Headers((mockFetch.mock.calls[0][1] as RequestInit).headers)
 
     it('GET requests send no Content-Type header', async () => {
       mockFetch.mockResolvedValue(okJson())
 
       await ApiClient.get('/api/planner/md/published?page=0&size=20')
 
-      expect(sentHeaders()).not.toHaveProperty('Content-Type')
+      expect(sentHeaders().has('Content-Type')).toBe(false)
     })
 
     it('GET requests carry only CORS-safelisted headers', async () => {
@@ -389,7 +382,7 @@ describe('ApiClient', () => {
       await ApiClient.get('/api/auth/me')
 
       const safelisted = ['accept', 'accept-language', 'content-language']
-      const nonSimple = Object.keys(sentHeaders()).filter(
+      const nonSimple = [...sentHeaders().keys()].filter(
         (key) => !safelisted.includes(key.toLowerCase()),
       )
       expect(nonSimple).toEqual([])
@@ -400,7 +393,7 @@ describe('ApiClient', () => {
 
       await ApiClient.post('/api/planner/md/123/publish', { published: true })
 
-      expect(sentHeaders()).toMatchObject({ 'Content-Type': 'application/json' })
+      expect(sentHeaders().get('Content-Type')).toBe('application/json')
     })
 
     it('does not force application/json on a FormData body', async () => {
@@ -410,7 +403,7 @@ describe('ApiClient', () => {
       form.append('file', new Blob(['x']), 'x.png')
       await ApiClient.fetch('/api/upload', { method: 'POST', body: form })
 
-      expect(sentHeaders()).not.toHaveProperty('Content-Type')
+      expect(sentHeaders().has('Content-Type')).toBe(false)
     })
 
     it('preserves a caller-supplied Content-Type', async () => {
@@ -422,14 +415,13 @@ describe('ApiClient', () => {
         headers: { 'Content-Type': 'text/plain' },
       })
 
-      expect(sentHeaders()['Content-Type']).toBe('text/plain')
+      expect(sentHeaders().get('Content-Type')).toBe('text/plain')
     })
   })
 
   describe('CSRF double-submit header', () => {
     const okJson = () => ({ ok: true, status: 200, json: vi.fn().mockResolvedValue({}) })
-    const sentHeaders = () =>
-      ((mockFetch.mock.calls[0][1] as RequestInit).headers ?? {}) as Record<string, string>
+    const sentHeaders = () => new Headers((mockFetch.mock.calls[0][1] as RequestInit).headers)
 
     let cookieValue = ''
     beforeEach(() => {
@@ -446,7 +438,7 @@ describe('ApiClient', () => {
 
       await ApiClient.post('/api/planner', { name: 'Test' })
 
-      expect(sentHeaders()['X-CSRF-Token']).toBe('token-abc123')
+      expect(sentHeaders().get('X-CSRF-Token')).toBe('token-abc123')
     })
 
     it('does not attach X-CSRF-Token on a GET request', async () => {
@@ -473,7 +465,7 @@ describe('ApiClient', () => {
 
       await ApiClient.post('/api/planner', { name: 'Test' })
 
-      expect(sentHeaders()['X-CSRF-Token']).toBe('real-token')
+      expect(sentHeaders().get('X-CSRF-Token')).toBe('real-token')
     })
 
     it('preserves "=" characters in the cookie value', async () => {
@@ -482,7 +474,7 @@ describe('ApiClient', () => {
 
       await ApiClient.post('/api/planner', { name: 'Test' })
 
-      expect(sentHeaders()['X-CSRF-Token']).toBe('abc=def==')
+      expect(sentHeaders().get('X-CSRF-Token')).toBe('abc=def==')
     })
   })
 })

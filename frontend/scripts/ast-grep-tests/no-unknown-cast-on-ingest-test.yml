@@ -1,0 +1,14 @@
+id: no-unknown-cast-on-ingest
+valid:
+  - const planner = SaveablePlannerSchema.parse(payload)
+  - 'const config = PlannerConfigDiscriminatedSchema.parse({ type, category })'
+  # A single narrowing assertion still reads as a claim the compiler can check.
+  - const category = raw as MDCategory
+  - const value = input as unknown
+  - const value = JSON.parse(text) as unknown
+invalid:
+  - const content = parsed as unknown as MDPlannerContent
+  - 'const config = { type, category } as unknown as PlannerEditorConfig'
+  - 'return { metadata, config, content: content as unknown as MDPlannerContent }'
+  - const category = state.category as unknown as RRCategory
+  - foo(response as unknown as ServerPlannerResponse)

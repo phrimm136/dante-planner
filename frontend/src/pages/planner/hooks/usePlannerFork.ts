@@ -21,10 +21,9 @@ import { ApiClient } from '@/lib/api'
 import { generateUUID } from '@/lib/uuid'
 import { validateData } from '@/lib/validation'
 import { PublishedPlannerDetailSchema } from '../schemas/PlannerListSchemas'
-import { toSaveablePlanner } from '../schemas/PlannerSchemas'
+import { toSaveablePlanner, PlannerConfigDiscriminatedSchema } from '../schemas/PlannerSchemas'
 
 import type { PublishedPlannerDetail } from '../types/PlannerListTypes'
-import type { PlannerEditorConfig } from '../types/PlannerTypes'
 
 // ============================================================================
 // Types
@@ -128,10 +127,10 @@ export function usePlannerFork() {
           deviceId: deviceId.value,
           published: false, // New copy is not published
         },
-        {
+        PlannerConfigDiscriminatedSchema.parse({
           type: plannerData.plannerType,
           category: plannerData.category,
-        } as PlannerEditorConfig,
+        }),
         contentData, // Parsed content object
       )
 

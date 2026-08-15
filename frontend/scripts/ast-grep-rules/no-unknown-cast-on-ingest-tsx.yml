@@ -1,0 +1,15 @@
+id: no-unknown-cast-on-ingest-tsx
+language: Tsx
+severity: error
+message: Ingest must parse, not assert. `as unknown as` erases the mismatch a schema would have caught; validate the payload and let the parse produce the type.
+files:
+  - src/pages/*/hooks/**/*.tsx
+  - src/pages/*/schemas/**/*.tsx
+  - src/shared/*/hooks/**/*.tsx
+  - src/shared/*/schemas/**/*.tsx
+ignores:
+  - '**/__tests__/**'
+  - '**/*.test.ts'
+  - '**/*.test.tsx'
+rule:
+  pattern: $EXPR as unknown as $TYPE

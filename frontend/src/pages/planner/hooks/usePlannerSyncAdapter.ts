@@ -2,12 +2,11 @@ import { plannerApi } from '../lib/plannerApi'
 import { PLANNER_SCHEMA_VERSION } from '@/lib/constants'
 import { ok, err } from '@/lib/result'
 import { classifyAppError } from '@/lib/apiErrorClassifier'
-import { toSaveablePlanner } from '../schemas/PlannerSchemas'
+import { toSaveablePlanner, PlannerConfigDiscriminatedSchema } from '../schemas/PlannerSchemas'
 import type { Result } from '@/lib/result'
 import type { AppError } from '@/lib/apiErrorClassifier'
 import type {
   SaveablePlanner,
-  PlannerEditorConfig,
   PlannerSummary,
   ServerAck,
   ServerPlannerResponse,
@@ -81,10 +80,10 @@ export function serverResponseToSaveable(response: ServerPlannerResponse): Savea
       deviceId: response.deviceId ?? '',
       published: response.published,
     },
-    {
+    PlannerConfigDiscriminatedSchema.parse({
       type: response.plannerType,
       category: response.category,
-    } as PlannerEditorConfig,
+    }),
     content,
   )
 }
