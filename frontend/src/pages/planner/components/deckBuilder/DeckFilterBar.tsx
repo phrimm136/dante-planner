@@ -11,9 +11,10 @@ import { DETAIL_PAGE } from '@/lib/constants'
 import { useIsBreakpoint } from '@/components/hooks/use-is-breakpoint'
 
 import { useDeckFilterState, useSetDeckFilterState } from '../../stores/usePlannerEditorStore'
+import { FILTER_SET_KEYS, createEmptyFilterSets } from '../../types/DeckTypes'
 
 import type { ComponentType } from 'react'
-import type { DeckFilterState, EntityMode } from '../../types/DeckTypes'
+import type { DeckFilterState, EntityMode, FilterSetKey } from '../../types/DeckTypes'
 import type { EgoType } from '@/shared/gameData'
 
 import { SearchBar } from '@/shared/filter'
@@ -37,11 +38,6 @@ const FILTER_BOX = 'rounded-md border border-border/60 p-1'
 type SetFilterField = <K extends keyof DeckFilterState>(
   key: K,
 ) => (value: DeckFilterState[K]) => void
-
-/** The filter-state fields a filter chip owns: all of them hold a selection set. */
-type FilterSetKey = {
-  [K in keyof DeckFilterState]: DeckFilterState[K] extends Set<unknown> ? K : never
-}[keyof DeckFilterState]
 
 interface FilterControlProps {
   state: DeckFilterState
@@ -148,9 +144,7 @@ function BattleKeywordControl({ state, setField, className }: FilterControlProps
   )
 }
 
-interface DeckFilter {
-  /** Selection set this filter reads its active count from. */
-  key: FilterSetKey
+interface DeckFilterChip {
   labelKey: string
   label: string
   Control: ComponentType<FilterControlProps>
@@ -162,78 +156,70 @@ interface DeckFilter {
   dropdown?: boolean
 }
 
-/** Render order, shared by both layouts. */
-const FILTERS: readonly DeckFilter[] = [
-  {
-    key: 'selectedSinners',
+const CHIPS: Record<FilterSetKey, DeckFilterChip> = {
+  selectedSinners: {
     labelKey: 'filters.sinner',
     label: 'Sinner',
     Control: SinnerControl,
     primary: true,
   },
-  {
-    key: 'selectedKeywords',
+  selectedKeywords: {
     labelKey: 'filters.keyword',
     label: 'Keyword',
     Control: KeywordControl,
     primary: true,
   },
-  {
-    key: 'selectedAttributes',
+  selectedAttributes: {
     labelKey: 'filters.skillAttribute',
     label: 'Skill Attribute',
     Control: SkillAttributeControl,
   },
-  {
-    key: 'selectedAtkTypes',
+  selectedAtkTypes: {
     labelKey: 'filters.attackType',
     label: 'Attack Type',
     Control: AttackTypeControl,
   },
-  {
-    key: 'selectedDefTypes',
+  selectedDefTypes: {
     labelKey: 'filters.defenseType',
     label: 'Defense Type',
     Control: DefenseTypeControl,
     mode: 'identity',
   },
-  {
-    key: 'selectedEgoTypes',
+  selectedEgoTypes: {
     labelKey: 'filters.egoType',
     label: 'EGO Type',
     Control: EGOTypeControl,
     mode: 'ego',
   },
-  {
-    key: 'selectedRaritys',
+  selectedRaritys: {
     labelKey: 'filters.rank',
     label: 'Rarity',
     Control: RarityControl,
     mode: 'identity',
   },
-  {
-    key: 'selectedSeasons',
+  selectedSeasons: {
     labelKey: 'filters.season',
     label: 'Season',
     Control: SeasonControl,
     dropdown: true,
   },
-  {
-    key: 'selectedUnitKeywords',
+  selectedUnitKeywords: {
     labelKey: 'filters.unitKeywords',
     label: 'Unit Keywords',
     Control: UnitKeywordControl,
     mode: 'identity',
     dropdown: true,
   },
-  {
-    key: 'selectedBattleKeywords',
+  selectedBattleKeywords: {
     labelKey: 'filters.additionalKeyword',
     label: 'Additional Keywords',
     Control: BattleKeywordControl,
     dropdown: true,
   },
-]
+}
+
+/** Render order, shared by both layouts. */
+const FILTERS = FILTER_SET_KEYS.map((key) => ({ key, ...CHIPS[key] }))
 
 /**
  * Single-row filter bar for the deck builder.
@@ -259,16 +245,7 @@ export function DeckFilterBar() {
   const isDesktop = useIsBreakpoint('min', DETAIL_PAGE.BREAKPOINT_LG)
 
   const activeFilterCount = calculateActiveFilterCount(
-    filterState.selectedSinners,
-    filterState.selectedKeywords,
-    filterState.selectedAttributes,
-    filterState.selectedAtkTypes,
-    filterState.selectedDefTypes,
-    filterState.selectedRaritys,
-    filterState.selectedEgoTypes,
-    filterState.selectedSeasons,
-    filterState.selectedUnitKeywords,
-    filterState.selectedBattleKeywords,
+    ...FILTER_SET_KEYS.map((key) => filterState[key]),
   )
   const hasSearch = filterState.searchQuery.length > 0
   const hasActiveFilters = activeFilterCount > 0
@@ -287,16 +264,7 @@ export function DeckFilterBar() {
   const handleResetAll = () => {
     setFilterState((prev) => ({
       ...prev,
-      selectedSinners: new Set(),
-      selectedKeywords: new Set(),
-      selectedAttributes: new Set(),
-      selectedAtkTypes: new Set(),
-      selectedDefTypes: new Set(),
-      selectedRaritys: new Set(),
-      selectedEgoTypes: new Set(),
-      selectedSeasons: new Set(),
-      selectedUnitKeywords: new Set(),
-      selectedBattleKeywords: new Set(),
+      ...createEmptyFilterSets(),
       searchQuery: '',
     }))
   }

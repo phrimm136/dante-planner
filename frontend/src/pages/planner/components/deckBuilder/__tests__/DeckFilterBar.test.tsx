@@ -8,7 +8,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
@@ -195,6 +195,25 @@ describe('DeckFilterBar', () => {
     // EgoType should still be in the store
     expect(storeApi.getState().deckFilterState.selectedEgoTypes.has('ALEPH')).toBe(true)
     expect(storeApi.getState().deckFilterState.selectedDefTypes.has('GUARD')).toBe(true)
+  })
+
+  it('counts selections from both entity modes in the Reset All badge', async () => {
+    const { storeApi } = renderWithStore(<DeckFilterBar />)
+
+    // Identity mode is active, so the EGO-type chip is not rendered
+    storeApi.setState((s) => ({
+      deckFilterState: {
+        ...s.deckFilterState,
+        entityMode: 'identity',
+        selectedSinners: new Set(['YiSang']),
+        selectedDefTypes: new Set(['GUARD']),
+        selectedEgoTypes: new Set(['ALEPH', 'WAW']),
+      },
+    }))
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /Reset All/i })).toHaveTextContent('(4)')
+    })
   })
 
   it('mobile chevron toggles secondary filter visibility via aria-expanded', async () => {

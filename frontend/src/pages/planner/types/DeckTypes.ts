@@ -131,3 +131,44 @@ export interface DeckFilterState {
   /** Free-text search query */
   searchQuery: string
 }
+
+/**
+ * The DeckFilterState fields a filter chip owns: all of them hold a selection set.
+ */
+export type FilterSetKey = {
+  [K in keyof DeckFilterState]: DeckFilterState[K] extends Set<unknown> ? K : never
+}[keyof DeckFilterState]
+
+/**
+ * Every selection set of DeckFilterState, in filter-bar render order.
+ */
+export const FILTER_SET_KEYS = [
+  'selectedSinners',
+  'selectedKeywords',
+  'selectedAttributes',
+  'selectedAtkTypes',
+  'selectedDefTypes',
+  'selectedEgoTypes',
+  'selectedRaritys',
+  'selectedSeasons',
+  'selectedUnitKeywords',
+  'selectedBattleKeywords',
+] as const satisfies readonly FilterSetKey[]
+
+type Expect<T extends true> = T
+
+/**
+ * Resolves to `false` — failing the build — when DeckFilterState gains a
+ * selection set that FILTER_SET_KEYS does not name.
+ */
+export type FilterSetKeyCoverage = Expect<
+  Exclude<FilterSetKey, (typeof FILTER_SET_KEYS)[number]> extends never ? true : false
+>
+
+/** Every selection set of DeckFilterState, emptied. */
+export function createEmptyFilterSets(): Pick<DeckFilterState, FilterSetKey> {
+  return Object.fromEntries(FILTER_SET_KEYS.map((key) => [key, new Set()])) as Pick<
+    DeckFilterState,
+    FilterSetKey
+  >
+}

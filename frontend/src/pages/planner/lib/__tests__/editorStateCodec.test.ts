@@ -1,11 +1,13 @@
 import { describe, it, expect } from 'vitest'
 import {
+  createDefaultDeckFilterState,
   createDefaultEquipment,
   createDefaultSectionNotes,
   createDefaultSkillEAState,
   hydrateEditorState,
   projectEditorState,
 } from '../editorStateCodec'
+import { FILTER_SET_KEYS } from '../../types/DeckTypes'
 import { DUNGEON_IDX } from '@/shared/gameData'
 import { createEmptyNoteContent } from '@/shared/noteEditor'
 
@@ -280,5 +282,25 @@ describe('skill EA reconciliation at ingest', () => {
       METADATA,
     )
     expect(state.skillEAState).toEqual(createDefaultSkillEAState())
+  })
+})
+
+describe('createDefaultDeckFilterState', () => {
+  it('defaults exactly the selection sets FILTER_SET_KEYS names, all empty', () => {
+    const state = createDefaultDeckFilterState()
+
+    const setFields = Object.entries(state)
+      .filter(([, value]) => value instanceof Set)
+      .map(([key]) => key)
+
+    expect(setFields).toEqual([...FILTER_SET_KEYS])
+    expect(FILTER_SET_KEYS.map((key) => state[key].size)).toEqual(FILTER_SET_KEYS.map(() => 0))
+  })
+
+  it('starts in identity mode with an empty search query', () => {
+    const state = createDefaultDeckFilterState()
+
+    expect(state.entityMode).toBe('identity')
+    expect(state.searchQuery).toBe('')
   })
 })

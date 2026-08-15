@@ -8,6 +8,8 @@ import {
 import { createEmptyNoteContent } from '@/shared/noteEditor'
 import egoSpecList from '@static/data/egoSpecList.json'
 
+import { createEmptyFilterSets } from '../types/DeckTypes'
+
 import type { MDCategory, DungeonIdx } from '@/shared/gameData'
 import type { NoteContent } from '@/shared/noteEditor'
 import type { FloorThemeSelection } from '@/pages/themePack'
@@ -135,16 +137,7 @@ export function createDefaultSectionNotes(): Record<string, NoteContent> {
 export function createDefaultDeckFilterState(): DeckFilterState {
   return {
     entityMode: 'identity',
-    selectedSinners: new Set(),
-    selectedKeywords: new Set(),
-    selectedAttributes: new Set(),
-    selectedAtkTypes: new Set(),
-    selectedDefTypes: new Set(),
-    selectedRaritys: new Set(),
-    selectedEgoTypes: new Set(),
-    selectedSeasons: new Set(),
-    selectedUnitKeywords: new Set(),
-    selectedBattleKeywords: new Set(),
+    ...createEmptyFilterSets(),
     searchQuery: '',
   }
 }
