@@ -1,4 +1,5 @@
 import { assertNever } from '@/lib/utils'
+import { INITIAL_SYNC_VERSION } from '@/lib/constants'
 import { ok, err } from '@/lib/result'
 import { withRollback } from '@/lib/withRollback'
 import { classifyAppError } from '@/lib/apiErrorClassifier'
@@ -20,9 +21,6 @@ export const CONFLICT_TOAST_KEY: Record<ConflictResolutionChoice, string> = {
   discard: 'planner:pages.plannerMD.conflict.discardSuccess',
   both: 'planner:pages.plannerMD.conflict.keepBothSuccess',
 }
-
-/** Sync version a freshly forked copy starts from. */
-const FORK_SYNC_VERSION = 1
 
 /** The conflicting planner, as far as the resolution decision needs it. */
 export type PlannerConflict = {
@@ -73,7 +71,7 @@ function forkMetadata(
     id: ctx.newId(),
     title: ctx.copyTitle(conflict.forkTitle),
     status: 'saved',
-    syncVersion: FORK_SYNC_VERSION,
+    syncVersion: INITIAL_SYNC_VERSION,
     deviceId: ctx.deviceId,
     createdAt: ctx.now,
     lastModifiedAt: ctx.now,
