@@ -491,6 +491,7 @@ function HeavySections({
               }}
               className="selectable size-10 rounded overflow-hidden p-0"
               data-selected={isSelected('gift', item.id)}
+              aria-label={item.label}
               title={item.label}
             >
               <img
@@ -521,6 +522,7 @@ function HeavySections({
               }}
               className="selectable size-14 rounded overflow-hidden p-0"
               data-selected={isSelected('themePack', item.id)}
+              aria-label={item.label}
               title={item.label}
             >
               <img

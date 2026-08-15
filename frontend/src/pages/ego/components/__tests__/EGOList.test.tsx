@@ -24,11 +24,7 @@ vi.mock('@tanstack/react-router', () => ({
     children: React.ReactNode
     to: string
     params?: Record<string, string>
-  }) => (
-    <a href={params?.id ? `${to.replace('$id', params.id)}` : to} role="link">
-      {children}
-    </a>
-  ),
+  }) => <a href={params?.id ? `${to.replace('$id', params.id)}` : to}>{children}</a>,
 }))
 
 // Mock asset paths
@@ -180,8 +176,8 @@ describe('EGOList', () => {
 
       // Only ZAYIN EGOs should be visible (hidden class is on parent div)
       // Count wrapper divs with hidden class
-      const hiddenWrappers = container.querySelectorAll('div.hidden > a[role="link"]')
-      const allCards = container.querySelectorAll('a[role="link"]')
+      const hiddenWrappers = container.querySelectorAll('div.hidden > a')
+      const allCards = container.querySelectorAll('a')
 
       expect(allCards.length).toBe(3) // Single unified grid
       expect(hiddenWrappers.length).toBe(2) // 2 hidden in single grid
@@ -194,8 +190,8 @@ describe('EGOList', () => {
       )
 
       // EGOs with AZURE: 20101 (CRIMSON+AZURE) and 20201 (AZURE)
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3)
       expect(hiddenCards.length).toBe(1) // VIOLET (20301) hidden
     })
@@ -210,8 +206,8 @@ describe('EGOList', () => {
       )
 
       // Only 20101 has BOTH CRIMSON and AZURE
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3)
       expect(hiddenCards.length).toBe(2) // 20201 and 20301 hidden
     })
@@ -223,8 +219,8 @@ describe('EGOList', () => {
       )
 
       // EGOs with PENETRATE: 20101 (SLASH+PENETRATE) and 20201 (PENETRATE)
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3)
       expect(hiddenCards.length).toBe(1) // HIT (20301) hidden
     })
@@ -239,8 +235,8 @@ describe('EGOList', () => {
       )
 
       // Only 20101 has BOTH SLASH and PENETRATE
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3)
       expect(hiddenCards.length).toBe(2) // 20201 and 20301 hidden
     })
@@ -252,8 +248,8 @@ describe('EGOList', () => {
       )
 
       // Season 1 EGOs only (hidden class is on parent div)
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3) // Single unified grid
       expect(hiddenCards.length).toBe(1) // Season 2 (20201) should be hidden
     })
@@ -272,8 +268,8 @@ describe('EGOList', () => {
 
       // Must have CRIMSON attribute AND SLASH attack type
       // Only 20101 has both (CRIMSON+AZURE attributes, SLASH+PENETRATE attacks)
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3)
       expect(hiddenCards.length).toBe(2) // 20201 and 20301 hidden
     })
@@ -317,8 +313,8 @@ describe('EGOList', () => {
       })
 
       // EGOs with Burst keyword should be visible (hidden class is on parent div)
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3) // Single unified grid
       expect(hiddenCards.length).toBe(1) // 20101 and 20301 have 'Burst', so only 20201 hidden × 2 grids
     })
@@ -336,8 +332,8 @@ describe('EGOList', () => {
         wrapper: createWrapper(),
       })
 
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3) // Single unified grid
       expect(hiddenCards.length).toBe(2) // Only 'CHARGE' (20201) matches, 20101 and 20301 hidden
     })
@@ -362,8 +358,8 @@ describe('EGOList', () => {
       )
 
       // Must match ZAYIN type AND have Burst keyword (hidden class is on parent div)
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3) // Single unified grid
       expect(hiddenCards.length).toBe(2) // Only 20101 matches both filters, 20201 and 20301 hidden
     })

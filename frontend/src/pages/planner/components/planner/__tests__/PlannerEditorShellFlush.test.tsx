@@ -168,9 +168,8 @@ beforeEach(() => {
 
 /** Put text into the first mounted note editor, as a paste jsdom can carry. */
 function typeIntoNote(container: Element, text: string) {
-  // The editor is only editable while focused, so a paste into an untouched one
-  // is discarded before it ever reaches the document.
-  fireEvent.click(container)
+  // Enter the note first, as typing into one always follows.
+  fireEvent.focusIn(container)
 
   const contentEl = container.querySelector('.note-editor-content')
   expect(contentEl).toBeTruthy()

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, memo } from 'react'
+import { useState, useEffect, useId, useRef, memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, ChevronDown } from 'lucide-react'
 
@@ -55,6 +55,7 @@ export function SearchableMultiSelect({
   sortByLabel = true,
 }: SearchableMultiSelectProps) {
   const [open, setOpen] = useState(false)
+  const listboxId = useId()
 
   // Read through a ref so the handler keeps one identity for the dropdown's lifetime.
   // Closing over `selectedValues` would give every option row a new callback on each
@@ -84,6 +85,7 @@ export function SearchableMultiSelect({
           variant="outline"
           role="combobox"
           aria-expanded={open}
+          aria-controls={listboxId}
           data-selected={selectedCount > 0}
           className={cn('selectable w-full justify-between', className)}
         >
@@ -96,7 +98,11 @@ export function SearchableMultiSelect({
           <ChevronDown className="size-4 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+      <PopoverContent
+        id={listboxId}
+        className="w-[var(--radix-popover-trigger-width)] p-0"
+        align="start"
+      >
         <Command>
           <CommandInput placeholder={searchPlaceholder} />
           <CommandList>

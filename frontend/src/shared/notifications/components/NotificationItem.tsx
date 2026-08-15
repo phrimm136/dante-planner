@@ -65,40 +65,46 @@ export function NotificationItem({ notification, onNavigate, onDelete }: Notific
     onNavigate(plannerId, notification.commentPublicId ?? null)
   }
 
-  const handleDelete = (e: React.MouseEvent) => {
-    e.stopPropagation()
+  const handleDelete = () => {
     onDelete(notification.id)
   }
 
   return (
     <div
       className={cn(
-        'flex items-start gap-3 p-3 rounded-lg cursor-pointer transition-colors',
+        'flex items-start gap-3 p-3 rounded-lg transition-colors',
         'hover:bg-accent',
         !notification.read && 'bg-accent/50',
       )}
-      onClick={handleClick}
     >
-      {/* Icon */}
-      <div className={cn('shrink-0 mt-0.5', config.color)}>
-        <Icon className="size-5" />
-      </div>
+      <button
+        type="button"
+        className="flex flex-1 items-start gap-3 min-w-0 text-left cursor-pointer"
+        onClick={handleClick}
+      >
+        {/* Icon */}
+        <div className={cn('shrink-0 mt-0.5', config.color)}>
+          <Icon className="size-5" />
+        </div>
 
-      {/* Content */}
-      <div className="flex-1 min-w-0">
-        <p className={cn('text-sm', !notification.read && 'font-medium')}>{t(config.labelKey)}</p>
-        {/* Plan title */}
-        {notification.plannerTitle && (
-          <p className="text-sm text-foreground/80 truncate mt-0.5">{notification.plannerTitle}</p>
-        )}
-        {/* Comment snippet */}
-        {notification.commentSnippet && (
-          <p className="text-xs text-muted-foreground truncate mt-0.5">
-            {notification.commentSnippet}
-          </p>
-        )}
-        <p className="text-xs text-muted-foreground mt-1">{formattedTime}</p>
-      </div>
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <p className={cn('text-sm', !notification.read && 'font-medium')}>{t(config.labelKey)}</p>
+          {/* Plan title */}
+          {notification.plannerTitle && (
+            <p className="text-sm text-foreground/80 truncate mt-0.5">
+              {notification.plannerTitle}
+            </p>
+          )}
+          {/* Comment snippet */}
+          {notification.commentSnippet && (
+            <p className="text-xs text-muted-foreground truncate mt-0.5">
+              {notification.commentSnippet}
+            </p>
+          )}
+          <p className="text-xs text-muted-foreground mt-1">{formattedTime}</p>
+        </div>
+      </button>
 
       {/* Delete button */}
       <Button

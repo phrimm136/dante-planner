@@ -140,9 +140,7 @@ describe('ThemePackTrackerCard', () => {
 
       render(<ThemePackTrackerCard {...defaultProps} onFocusToggle={onFocusToggle} />)
 
-      const viewer = screen.getByTestId('theme-pack-viewer')
-      const clickTarget = viewer.parentElement!
-      fireEvent.click(clickTarget)
+      fireEvent.click(screen.getByRole('button', { name: 'Test Pack' }))
       expect(onFocusToggle).toHaveBeenCalledOnce()
     })
 
@@ -162,9 +160,8 @@ describe('ThemePackTrackerCard', () => {
       const hoverTarget = viewer.parentElement!
       fireEvent.mouseEnter(hoverTarget)
 
-      const buttons = screen.getAllByRole('button')
-      fireEvent.click(buttons[0])
-      // stopPropagation prevents the focus toggle from firing
+      fireEvent.click(screen.getByRole('button', { name: 'Mark as Done' }))
+      // the done button sits outside the card's click target, so it cannot toggle focus
       expect(onFocusToggle).not.toHaveBeenCalled()
     })
   })
@@ -180,9 +177,8 @@ describe('ThemePackTrackerCard', () => {
       const hoverTarget = viewer.parentElement!
       fireEvent.mouseEnter(hoverTarget)
 
-      // Click the done button (first button in overlay)
-      const buttons = screen.getAllByRole('button')
-      fireEvent.click(buttons[0])
+      // Click the done button in the hover overlay
+      fireEvent.click(screen.getByRole('button', { name: 'Mark as Done' }))
       expect(onToggleDone).toHaveBeenCalledOnce()
     })
   })

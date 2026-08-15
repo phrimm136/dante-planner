@@ -24,11 +24,7 @@ vi.mock('@tanstack/react-router', () => ({
     children: React.ReactNode
     to: string
     params?: Record<string, string>
-  }) => (
-    <a href={params?.id ? `${to.replace('$id', params.id)}` : to} role="link">
-      {children}
-    </a>
-  ),
+  }) => <a href={params?.id ? `${to.replace('$id', params.id)}` : to}>{children}</a>,
 }))
 
 // Mock asset paths
@@ -186,8 +182,8 @@ describe('IdentityList', () => {
       )
 
       // Identities with AZURE: 10101 (CRIMSON+AZURE) and 10201 (AZURE)
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3)
       expect(hiddenCards.length).toBe(1) // VIOLET (10301) hidden
     })
@@ -202,8 +198,8 @@ describe('IdentityList', () => {
       )
 
       // Only 10101 has BOTH CRIMSON and AZURE
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3)
       expect(hiddenCards.length).toBe(2) // 10201 and 10301 hidden
     })
@@ -218,8 +214,8 @@ describe('IdentityList', () => {
       )
 
       // Identities with PENETRATE: 10101 (SLASH+PENETRATE) and 10201 (PENETRATE)
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3)
       expect(hiddenCards.length).toBe(1) // HIT (10301) hidden
     })
@@ -234,8 +230,8 @@ describe('IdentityList', () => {
       )
 
       // Only 10101 has BOTH SLASH and PENETRATE
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3)
       expect(hiddenCards.length).toBe(2) // 10201 and 10301 hidden
     })
@@ -250,8 +246,8 @@ describe('IdentityList', () => {
       )
 
       // Rank 3: 10101 and 10301
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3)
       expect(hiddenCards.length).toBe(1) // 10201 (rank 2) hidden
     })
@@ -266,8 +262,8 @@ describe('IdentityList', () => {
       )
 
       // Season 1: 10101 and 10301
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3)
       expect(hiddenCards.length).toBe(1) // Season 2 (10201) hidden
     })
@@ -282,8 +278,8 @@ describe('IdentityList', () => {
       )
 
       // Only 10201 has SevenAssociation
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3)
       expect(hiddenCards.length).toBe(2) // 10101 and 10301 hidden
     })
@@ -298,8 +294,8 @@ describe('IdentityList', () => {
       )
 
       // Only 10101 has BOTH Burst and Combustion
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3)
       expect(hiddenCards.length).toBe(2) // 10201 and 10301 hidden
     })
@@ -318,8 +314,8 @@ describe('IdentityList', () => {
 
       // Must have CRIMSON attribute AND SLASH attack type
       // Only 10101 has both
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3)
       expect(hiddenCards.length).toBe(2) // 10201 and 10301 hidden
     })
@@ -361,8 +357,8 @@ describe('IdentityList', () => {
       )
 
       // Identities with Burst keyword: 10101 and 10301
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3)
       expect(hiddenCards.length).toBe(1) // 10201 hidden
     })
@@ -381,8 +377,8 @@ describe('IdentityList', () => {
         { wrapper: createWrapper() },
       )
 
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3)
       expect(hiddenCards.length).toBe(2) // Only 10201 matches
     })
@@ -408,8 +404,8 @@ describe('IdentityList', () => {
 
       // Must have CRIMSON attribute AND match "rupture" search (Burst keyword)
       // Only 10101 has both
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3)
       expect(hiddenCards.length).toBe(2) // 10201 and 10301 hidden
     })

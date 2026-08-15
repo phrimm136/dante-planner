@@ -199,7 +199,8 @@ export function PlannerCardContextMenu({
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
       <DropdownMenuTrigger asChild>
-        <div
+        <button
+          type="button"
           onClick={handleLeftClick}
           onPointerDown={(e) => {
             // Prevent DropdownMenuTrigger from opening on left click
@@ -212,10 +213,10 @@ export function PlannerCardContextMenu({
             e.preventDefault()
             setOpen(true)
           }}
-          className="cursor-pointer"
+          className="cursor-pointer text-left"
         >
           {children}
-        </div>
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" onCloseAutoFocus={(e) => e.preventDefault()}>
         <DropdownMenuItem onClick={handleView}>

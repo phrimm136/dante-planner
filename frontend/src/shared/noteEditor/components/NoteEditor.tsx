@@ -38,7 +38,7 @@ function EditorErrorFallback({ resetErrorBoundary }: FallbackProps) {
  * NoteEditor - WYSIWYG rich text editor using Tiptap
  *
  * Features:
- * - Focus-based preview mode (unfocused = read-only preview)
+ * - Focus-revealed toolbar (unfocused shows a bare preview)
  * - Controlled component pattern (value + onChange)
  * - Text formatting: bold, italic, strikethrough, headings, lists, quotes, code
  * - Custom spoiler mark extension
@@ -156,7 +156,7 @@ function NoteEditorInner({
   const editor = useEditor({
     extensions,
     content: value.content,
-    editable: !readOnly && isFocused,
+    editable: !readOnly,
     onUpdate: ({ editor }) => {
       // Update local state only - parent sync happens on blur
       const newContent = editor.getJSON()
@@ -276,12 +276,12 @@ function NoteEditorInner({
     }
   }, [])
 
-  // Update editable state when focus or readOnly changes
+  // Update editable state when readOnly changes
   useEffect(() => {
     if (editor) {
-      editor.setEditable(!readOnly && isFocused)
+      editor.setEditable(!readOnly)
     }
-  }, [editor, isFocused, readOnly])
+  }, [editor, readOnly])
 
   // Sync from parent when value prop changes externally (load/import)
   // Skip if we have local changes to avoid overwriting user's typing
@@ -300,14 +300,10 @@ function NoteEditorInner({
     }
   }, [editor, value.content])
 
-  // Handle click to activate editor - synchronous focus for React Compiler compatibility
-  const handleClick = () => {
+  // Reveal the editing chrome once focus reaches anything inside the editor.
+  const handleFocus = () => {
     if (!readOnly && !isFocused) {
       setIsFocused(true)
-      // Direct synchronous focus - no RAF to avoid race conditions
-      if (editor && !editor.isDestroyed) {
-        editor.commands.focus()
-      }
     }
   }
 
@@ -429,7 +425,7 @@ function NoteEditorInner({
           isFocused && 'ring-2 ring-ring ring-offset-2',
           className,
         )}
-        onClick={handleClick}
+        onFocus={handleFocus}
         onBlur={handleBlur}
       >
         {/* Toolbar - only visible when focused */}

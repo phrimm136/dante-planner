@@ -140,7 +140,7 @@ describe('tracker deck pane', () => {
     // Identity mode shows Unit Keywords; EGO mode does not.
     expect(screen.getByText('Unit Keywords')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: /ego/i }))
+    await user.click(screen.getByRole('button', { name: 'deckBuilder.entityToggle.ego' }))
 
     expect(screen.queryByText('Unit Keywords')).toBeNull()
     expect(screen.getByText('Additional Keywords')).toBeInTheDocument()
@@ -160,7 +160,7 @@ describe('tracker deck pane', () => {
     )
 
     const paneA = within(screen.getByTestId('pane-a'))
-    await user.click(paneA.getByRole('button', { name: /ego/i }))
+    await user.click(paneA.getByRole('button', { name: 'deckBuilder.entityToggle.ego' }))
 
     expect(paneA.queryByText('Unit Keywords')).toBeNull()
     expect(within(screen.getByTestId('pane-b')).getByText('Unit Keywords')).toBeInTheDocument()

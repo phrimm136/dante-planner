@@ -2,8 +2,9 @@ import { useState } from 'react'
 
 import type { ComponentProps } from 'react'
 
-interface FallbackImageProps extends Omit<ComponentProps<'img'>, 'src' | 'onError'> {
+interface FallbackImageProps extends Omit<ComponentProps<'img'>, 'src' | 'onError' | 'alt'> {
   src: string
+  alt: string
   /** Rendered once `src` fails to load. */
   fallbackSrc: string
   /** Fired on the swap, for callers that mirror the resolved source in their own state. */
@@ -15,12 +16,13 @@ interface FallbackImageProps extends Omit<ComponentProps<'img'>, 'src' | 'onErro
  * at most once per `src`, so a failing fallback cannot loop, and a new `src`
  * gets its own attempt.
  */
-export function FallbackImage({ src, fallbackSrc, onFallback, ...props }: FallbackImageProps) {
+export function FallbackImage({ src, alt, fallbackSrc, onFallback, ...props }: FallbackImageProps) {
   const [failedSrc, setFailedSrc] = useState<string | null>(null)
   const hasFailed = failedSrc === src
 
   return (
     <img
+      alt={alt}
       {...props}
       src={hasFailed ? fallbackSrc : src}
       onError={() => {

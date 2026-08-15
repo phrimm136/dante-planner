@@ -47,6 +47,7 @@ function EnhancementButton({
   version: number
   onEnhancementClick: (level: 1 | 2) => void
 }) {
+  const { t } = useTranslation('database')
   const isButtonSelected = enhancement === lvl
   const iconPath = isButtonSelected
     ? getStartBuffEnhancementIconPath(lvl)
@@ -62,6 +63,8 @@ function EnhancementButton({
           e.stopPropagation()
           onEnhancementClick(lvl)
         }}
+        aria-label={`${t('tierLabel.enhancement')} ${lvl}`}
+        aria-pressed={isButtonSelected}
         className="absolute inset-0 overflow-visible"
         style={{
           borderStyle: 'solid',
@@ -191,7 +194,6 @@ export function StartBuffCard({
       onMouseLeave={() => {
         setIsHovered(false)
       }}
-      onClick={handleCardClick}
     >
       {/* Pane background */}
       <img src={getStartBuffPanePath(version)} alt="" className={variant.pane} />
@@ -249,7 +251,7 @@ export function StartBuffCard({
         </div>
 
         {/* Enhancement buttons - bottom */}
-        <div className={variant.enhancementRow}>
+        <div className={`relative z-20 ${variant.enhancementRow}`}>
           <EnhancementButton
             lvl={1}
             enhancement={enhancement}
@@ -266,11 +268,21 @@ export function StartBuffCard({
           />
         </div>
       </div>
+
+      {/* Card click target */}
+      <button
+        type="button"
+        className="absolute inset-0 z-10"
+        aria-label={displayBuff.name}
+        aria-pressed={isSelected}
+        onClick={handleCardClick}
+      />
+
       {/* Highlight overlay */}
       <img
         src={getStartBuffHighlightPath(version)}
         alt=""
-        className={`${variant.highlight} ${showHighlight ? 'opacity-100' : 'opacity-0'}`}
+        className={`${variant.highlight} z-30 ${showHighlight ? 'opacity-100' : 'opacity-0'}`}
       />
     </div>
   )

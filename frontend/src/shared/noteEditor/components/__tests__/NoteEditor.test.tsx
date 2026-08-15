@@ -137,12 +137,46 @@ describe('NoteEditor', () => {
       })
 
       const container = document.querySelector('.note-editor')!
-      fireEvent.click(container)
+      fireEvent.focusIn(container)
 
       await waitFor(() => {
         // Toolbar should be visible when focused
         expect(container.classList.contains('ring-2')).toBe(true)
       })
+    })
+
+    it('is reachable and activatable without a pointer', async () => {
+      render(<NoteEditor value={defaultValue} onChange={mockOnChange} />)
+
+      await waitFor(() => {
+        expect(document.querySelector('.ProseMirror')).toBeTruthy()
+      })
+
+      // Tab reaches the writing surface only while it is a focusable area, and a
+      // contenteditable host is one only when the attribute reads "true".
+      const surface = document.querySelector('.ProseMirror') as HTMLElement
+      expect(surface.getAttribute('contenteditable')).toBe('true')
+
+      // What Tab does, with no click anywhere in this test.
+      surface.focus()
+
+      expect(document.activeElement).toBe(surface)
+      await waitFor(() => {
+        expect(document.querySelector('.note-editor')!.classList.contains('ring-2')).toBe(true)
+        expect(screen.getByLabelText('Bold')).toBeTruthy()
+      })
+    })
+
+    it('leaves a readOnly editor out of the tab order', async () => {
+      render(<NoteEditor value={defaultValue} readOnly />)
+
+      await waitFor(() => {
+        expect(document.querySelector('.ProseMirror')).toBeTruthy()
+      })
+
+      const surface = document.querySelector('.ProseMirror') as HTMLElement
+      expect(surface.getAttribute('contenteditable')).toBe('false')
+      expect(surface.hasAttribute('tabindex')).toBe(false)
     })
   })
 
@@ -206,7 +240,7 @@ describe('NoteEditor - XSS Prevention', () => {
 
       // Focus the editor first
       const container = document.querySelector('.note-editor')!
-      await user.click(container)
+      fireEvent.focusIn(container)
 
       await waitFor(() => {
         expect(container.classList.contains('ring-2')).toBe(true)
@@ -232,7 +266,7 @@ describe('NoteEditor - XSS Prevention', () => {
 
       // Focus and open link dialog
       const container = document.querySelector('.note-editor')!
-      await user.click(container)
+      fireEvent.focusIn(container)
 
       await waitFor(() => {
         expect(container.classList.contains('ring-2')).toBe(true)
@@ -269,7 +303,7 @@ describe('NoteEditor - XSS Prevention', () => {
 
       // Focus and open link dialog
       const container = document.querySelector('.note-editor')!
-      await user.click(container)
+      fireEvent.focusIn(container)
 
       await waitFor(() => {
         expect(container.classList.contains('ring-2')).toBe(true)
@@ -306,7 +340,7 @@ describe('NoteEditor - XSS Prevention', () => {
 
       // Focus and open link dialog
       const container = document.querySelector('.note-editor')!
-      await user.click(container)
+      fireEvent.focusIn(container)
 
       await waitFor(() => {
         expect(container.classList.contains('ring-2')).toBe(true)
@@ -346,7 +380,7 @@ describe('NoteEditor - XSS Prevention', () => {
 
       // Focus and open link dialog
       const container = document.querySelector('.note-editor')!
-      await user.click(container)
+      fireEvent.focusIn(container)
 
       await waitFor(() => {
         expect(container.classList.contains('ring-2')).toBe(true)
@@ -399,7 +433,7 @@ describe('NoteEditor - XSS Prevention', () => {
 
         // Focus and open link dialog
         const container = document.querySelector('.note-editor')!
-        await user.click(container)
+        fireEvent.focusIn(container)
 
         await waitFor(() => {
           expect(container.classList.contains('ring-2')).toBe(true)
@@ -448,7 +482,7 @@ describe('NoteEditor - XSS Prevention', () => {
 
         // Focus and open link dialog
         const container = document.querySelector('.note-editor')!
-        await user.click(container)
+        fireEvent.focusIn(container)
 
         await waitFor(() => {
           expect(container.classList.contains('ring-2')).toBe(true)
@@ -536,7 +570,7 @@ describe('NoteEditor - paste byte limit', () => {
 
     const container = document.querySelector('.note-editor') as Element
     await waitFor(() => expect(container).toBeTruthy())
-    fireEvent.click(container)
+    fireEvent.focusIn(container)
 
     pasteText('x'.repeat(8000))
 
@@ -557,7 +591,7 @@ describe('NoteEditor - paste byte limit', () => {
 
     const container = document.querySelector('.note-editor') as Element
     await waitFor(() => expect(container).toBeTruthy())
-    fireEvent.click(container)
+    fireEvent.focusIn(container)
 
     pasteText('hello world')
 
@@ -580,7 +614,7 @@ describe('NoteEditor - paste byte limit', () => {
 
     const container = document.querySelector('.note-editor') as Element
     await waitFor(() => expect(container).toBeTruthy())
-    fireEvent.click(container)
+    fireEvent.focusIn(container)
 
     // All-ASCII payload: 1 byte/char near the cut, so the largest fitting
     // prefix lands within a couple bytes of the cap, and NEVER over it.
@@ -665,7 +699,7 @@ describe('NoteEditor - debounce flush on unmount', () => {
 
     const container = document.querySelector('.note-editor') as Element
     await waitFor(() => expect(container).toBeTruthy())
-    fireEvent.click(container)
+    fireEvent.focusIn(container)
 
     typeText('unflushed keystrokes')
 
@@ -686,7 +720,7 @@ describe('NoteEditor - debounce flush on unmount', () => {
 
     const container = document.querySelector('.note-editor') as Element
     await waitFor(() => expect(container).toBeTruthy())
-    fireEvent.click(container)
+    fireEvent.focusIn(container)
 
     typeText('settled content')
 
@@ -720,7 +754,7 @@ describe('NoteEditor - debounce flush on unmount', () => {
 
     const container = document.querySelector('.note-editor') as Element
     await waitFor(() => expect(container).toBeTruthy())
-    fireEvent.click(container)
+    fireEvent.focusIn(container)
 
     onChange.mockClear()
     typeText('held by the debounce')

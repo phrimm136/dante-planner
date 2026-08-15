@@ -40,17 +40,23 @@ export function StartGiftRow({
     onRowSelect(keyword)
   }
 
-  const handleGiftCardClick = (e: React.MouseEvent, giftId: string) => {
-    e.stopPropagation()
+  const handleGiftCardClick = (giftId: string) => {
     onGiftClick(keyword, giftId)
   }
 
   return (
     <div
-      className="selectable inline-flex items-center gap-4 p-3 rounded-lg cursor-pointer"
+      className="selectable relative inline-flex items-center gap-4 p-3 rounded-lg cursor-pointer"
       data-selected={isRowSelected}
-      onClick={handleRowClick}
     >
+      <button
+        type="button"
+        className="absolute inset-0 rounded-lg"
+        aria-label={keyword}
+        aria-pressed={isRowSelected}
+        onClick={handleRowClick}
+      />
+
       {/* Keyword icon */}
       <ScaledCardWrapper
         mobileScale={mobileScale}
@@ -69,7 +75,7 @@ export function StartGiftRow({
       </ScaledCardWrapper>
 
       {/* Gift cards - horizontal layout */}
-      <div className="flex items-start gap-2 lg:gap-4">
+      <div className="relative z-10 flex items-start gap-2 lg:gap-4">
         {giftIds.map((giftId) => {
           const idStr = String(giftId)
           const spec = giftSpecMap[idStr]
@@ -89,8 +95,8 @@ export function StartGiftRow({
               >
                 <button
                   type="button"
-                  onClick={(e) => {
-                    handleGiftCardClick(e, idStr)
+                  onClick={() => {
+                    handleGiftCardClick(idStr)
                   }}
                   disabled={!canSelect}
                   className={`group ${!canSelect ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}

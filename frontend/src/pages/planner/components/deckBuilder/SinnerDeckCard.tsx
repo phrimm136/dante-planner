@@ -82,9 +82,12 @@ export const SinnerDeckCard = function SinnerDeckCard({
   return (
     <div className="relative flex flex-col items-center gap-1 p-2 transition-colors">
       {/* Identity Card with deployment overlay - click here to toggle deploy */}
-      <div
+      <button
+        type="button"
         className="group"
-        onClick={readOnly || !onToggleDeploy ? undefined : () => onToggleDeploy(sinnerIndex)}
+        disabled={readOnly || !onToggleDeploy}
+        aria-pressed={deploymentOrder !== null}
+        onClick={() => onToggleDeploy?.(sinnerIndex)}
         style={{ cursor: readOnly ? 'default' : 'pointer' }}
       >
         <IdentityCard
@@ -94,7 +97,7 @@ export const SinnerDeckCard = function SinnerDeckCard({
           isSelected={deploymentOrder !== null}
           overlay={deploymentOverlay}
         />
-      </div>
+      </button>
 
       {/* Skill Info Row - atkType icon on affinity-colored background */}
       <div className="flex gap-1">

@@ -103,7 +103,7 @@ vi.mock('../../StarlightCostDisplay', () => ({
 
 // Mock Sorter
 vi.mock('@/shared/filter/components/Sorter', () => ({
-  Sorter: () => <select data-testid="sorter" />,
+  Sorter: () => <select data-testid="sorter" aria-label="Sorter" />,
 }))
 
 // Mock EGOGiftKeywordFilter

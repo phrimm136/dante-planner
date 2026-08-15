@@ -66,15 +66,18 @@ export const CompactIdentityRow = function CompactIdentityRow({
         const isDeployed = order !== null && order <= 7
 
         return (
-          <div
+          <button
             key={sinnerName}
+            type="button"
             className="relative flex flex-col items-center gap-1"
             style={{
               width: `${String(CARD_GRID.WIDTH.COMPACT_IDENTITY)}px`,
               height: `${String(CARD_GRID.HEIGHT.COMPACT_IDENTITY)}px`,
               cursor: readOnly ? 'default' : 'pointer',
             }}
-            onClick={readOnly || !onToggleDeploy ? undefined : () => onToggleDeploy(index)}
+            disabled={readOnly || !onToggleDeploy}
+            aria-pressed={order !== null}
+            onClick={() => onToggleDeploy?.(index)}
           >
             {/* Portrait container */}
             <div
@@ -157,7 +160,7 @@ export const CompactIdentityRow = function CompactIdentityRow({
                 )
               })}
             </div>
-          </div>
+          </button>
         )
       })}
     </div>

@@ -5,7 +5,7 @@ import type { StartBuff, StartBuffI18n, EnhancementLevel } from '@/shared/gameTe
 
 // Mock react-i18next
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ i18n: { language: 'EN' } }),
+  useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'EN' } }),
   initReactI18next: { type: '3rdParty', init: () => {} },
 }))
 
@@ -58,20 +58,18 @@ function renderCard(overrides: Partial<Parameters<typeof StartBuffCard>[0]> = {}
 }
 
 describe('StartBuffCard', () => {
-  it('renders enhancement buttons', () => {
+  it('renders the card button alongside its two enhancement buttons', () => {
     renderCard()
 
-    expect(screen.getAllByRole('button')).toHaveLength(2)
+    expect(screen.getByRole('button', { name: 'Test Buff' })).toBeInTheDocument()
+    expect(screen.getAllByRole('button')).toHaveLength(3)
   })
 
   it('calls onSelect when card is clicked', () => {
     const onSelect = vi.fn()
     renderCard({ onSelect })
 
-    const card = screen.getByText('Test Buff').closest('.cursor-pointer')
-    if (card) {
-      fireEvent.click(card)
-    }
+    fireEvent.click(screen.getByRole('button', { name: 'Test Buff' }))
 
     expect(onSelect).toHaveBeenCalledWith(100, true)
   })
@@ -80,10 +78,7 @@ describe('StartBuffCard', () => {
     const onSelect = vi.fn()
     renderCard({ onSelect, isSelected: true })
 
-    const card = screen.getByText('Test Buff').closest('.cursor-pointer')
-    if (card) {
-      fireEvent.click(card)
-    }
+    fireEvent.click(screen.getByRole('button', { name: 'Test Buff' }))
 
     expect(onSelect).toHaveBeenCalledWith(100, false)
   })
@@ -115,10 +110,7 @@ describe('StartBuffCard', () => {
     const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout')
     const { unmount } = renderCard()
 
-    const card = screen.getByText('Test Buff').closest('.cursor-pointer')
-    if (card) {
-      fireEvent.click(card)
-    }
+    fireEvent.click(screen.getByRole('button', { name: 'Test Buff' }))
     unmount()
 
     expect(clearTimeoutSpy).toHaveBeenCalled()

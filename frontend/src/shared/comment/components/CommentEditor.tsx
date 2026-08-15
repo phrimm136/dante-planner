@@ -140,7 +140,7 @@ export function CommentEditor({
         isFocused && 'ring-2 ring-ring ring-offset-2',
         disabled && 'opacity-50 cursor-not-allowed',
       )}
-      onClick={handleFocus}
+      onFocus={handleFocus}
       onBlur={handleBlur}
     >
       <ReactErrorBoundary FallbackComponent={CommentEditorErrorFallback}>

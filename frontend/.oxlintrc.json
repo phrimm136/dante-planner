@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["eslint", "typescript", "react", "import", "unicorn", "oxc", "vitest"],
+  "plugins": ["eslint", "typescript", "react", "import", "unicorn", "oxc", "vitest", "jsx-a11y"],
   "jsPlugins": [
     "eslint-plugin-react-refresh",
     "eslint-plugin-react-you-might-not-need-an-effect",
@@ -10,6 +10,7 @@
     "correctness": "error"
   },
   "rules": {
+    "jsx-a11y/prefer-tag-over-role": "off",
     "react-hooks/rules-of-hooks": "error",
     "reacthooks/capitalized-calls": "error",
     "reacthooks/component-hook-factories": "error",

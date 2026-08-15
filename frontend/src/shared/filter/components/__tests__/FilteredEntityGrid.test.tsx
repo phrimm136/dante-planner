@@ -55,7 +55,7 @@ function renderGrid(
       getKey={(item) => item.id}
       store={store}
       matches={matches}
-      renderCard={(item) => <a data-testid={item.id}>{item.id}</a>}
+      renderCard={(item) => <span data-testid={item.id}>{item.id}</span>}
       emptyStateKey="test.emptyState"
       emptyStateFallback="Nothing matches."
       geometry={GEOMETRY}
