@@ -441,3 +441,19 @@ asset pipeline.
 - 2026-08-15 — jsx-a11y ships eight of nine rules; prefer-tag-over-role is off per ADR 082
   (four correct-ARIA reports the rule cannot express as native tags) — cross-reference, since
   the acceptance row names this ledger.
+- 2026-08-15 — epic composition audit residue (RFC 0004), accepted as debt: suppressErrorToast/
+  successParams are declared-but-unconsumed sink surface; NotificationToast's sonner import and
+  toast.info sit outside the written toast law (exemption is real, law text lags); coverage
+  thresholds are zero-margin measured values and CI runs the suite without the worker cap or
+  NODE_OPTIONS the sibling jobs set; six text placeholders and LoadingState's hardcoded English
+  sit beside content-shaped skeletons; String()/Number() id coercions survive in seven component
+  sites plus StartGiftRow's number[] prop; EGOGiftSpec.themePack and FeaturedBoss.unitId lack
+  brands (the latter needs a seventh primitive the RFC never defined); the gift enhancement
+  prefix is restated inline in egoGiftEncoding; StartBuffSchemas patched the flip with
+  z.coerce.number(); shared/noteEditor is a blanket deep-import exemption with nine deep
+  importers and a barrel that exports neither components nor the registry; the pagehide drain
+  lands text in the store a discarded tab never persists (probably irreducible); ADR
+  stale-write-noop's REJECTED clause and the shipped ToleratedContentDigestSchema disagree on
+  who owns the field's removal; reportFailure can displace a live conflict where resolutionError
+  was built for exactly that; the two held-plan callers key by different identities; the comment
+  SSE hook mixes throwing and safeParse idioms in one file.
