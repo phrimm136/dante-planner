@@ -1012,7 +1012,7 @@ No design content. One row per item: the change, the files it touches, and what 
 | `Partial<DeckBuilderActions>` on `DeckBuilderSummary` | `deckBuilder/DeckBuilderSummary.tsx:14-27`; `deckBuilder/DeckBuilderContent.tsx:35-41` | Three optionals stop duplicating the action type |
 | 9-prop filter bundle from `useMDGesellschaftFilters` | `plannerList/PublishedPlannerList.tsx:15-38,65-75`; `hooks/useMDGesellschaftFilters.ts:31-60` | The 8 filter props are already re-spread verbatim into the data hook |
 | `CardGeometry` on `FilteredEntityGrid` | `shared/filter/components/FilteredEntityGrid.tsx:13-35,84-88,97-99,127-136` | `cardWidth`/`cardHeight`/`mobileScale`/`fixedRowHeight` are threaded twice today |
-| `ExtractionScenario` replaces the 5-param bundles | `pages/extraction/lib/extractionCalculator.ts:247-253,342-348,376-382` | Three orderings of the same five values, side by side at `lib/__tests__/extractionMatrix.ts:186-202` |
+| `ExtractionScenario` replaces the 5-param bundles | — | SUPERSEDED: the three sites are not orderings of one bundle — only `{pulls, featuredCount, wantedCount}` is common, one takes a loop variable and one derives its rate — so a shared five-field scenario forces optionals at every site. A narrower `{pulls, rate, featuredCount, wantedCount}` cut over two of the three remains available if ever wanted |
 
 ### Generalizations
 
@@ -1047,18 +1047,17 @@ export const EGOGiftIdSchema = z.string().regex(GIFT_ID_PATTERN).brand<'EGOGiftI
 export const PassiveIdSchema = z.string().regex(PASSIVE_ID_PATTERN).brand<'PassiveId'>()
 export const SkillIdSchema = z.string().regex(SKILL_ID_PATTERN).brand<'SkillId'>()
 export const ThemePackIdSchema = z.string().regex(THEME_PACK_ID_PATTERN).brand<'ThemePackId'>()
-export const SeasonSchema = z.number().int().brand<'Season'>() // seasons are ordinals, not ids
 
 export type IdentityId = z.infer<typeof IdentityIdSchema>
-// ... one type per schema
+// ... one type per schema. No SeasonSchema: seasons are ordinals with no consumer for a brand.
 ```
 
 Composition rules, in dependency order:
 
 1. Entity slices' Zod schemas reference these primitives for every value-role field (recipe
-   materials, passive lists, theme-pack pools, `FeaturedBoss.unitId`), replacing bare `z.number()`.
-   The two realignments from the sweep (ego passive ids, `EGOGiftSpec.themePack` — string→number,
-   data included) land first so every value-role field has a numeric source.
+   materials, passive lists, theme-pack pools, `FeaturedBoss.unitId`), replacing bare unbranded
+   forms. No realignment precedes them: the pipeline serializes every generated id as a string,
+   and the brands are string-shaped to match.
 2. String wire forms compose from the primitives, not from local regexes: `shared/gameData/ids.ts`
    also exports the base string patterns (`GIFT_ID_PATTERN` = the `9\d{3}` base), and
    `schemas/PlannerSchemas.ts:42-70` re-derives its `IdentityIdSchema`/`EGOIdSchema`/`GiftIdSchema`/
@@ -1079,7 +1078,7 @@ Composition rules, in dependency order:
 | `GIFT_UNKNOWN_ID` splits into a floor-scoped code with emitter context | `lib/plannerValidationErrors.ts:56,83,159`; `lib/plannerValidation.ts:334,654` | Removes the `as FloorValidationError` cast; the non-floor emitter stops producing empty `floor`/`gifts` params |
 | Difficulty switch → per-category table keyed by `FLOOR_COUNTS` | `lib/plannerValidation.ts:575-623`; `shared/gameData/constants.ts:365-369` | Four branches push one identical error; only the allowed set differs |
 | Gate the per-render stringify behind the store subscription | `hooks/usePlannerSave.ts:258,863-867` | Full planner JSON on every render today; stream 6's `dirtyRef` supplies the answer |
-| `setComprehensiveGift(base, enhancement)` shared by the three panes | `stores/usePlannerEditorStore.tsx:97,217-218`; `StartGiftEditPane.tsx:49-77,80-97,100-128,150-160`; `EGOGiftObservationEditPane.tsx:103-125,148-157`; `ComprehensiveGiftSelectorPane.tsx:93-138,153-155` | Whole-Set replace forces four hand-written mirrorings per pane |
+| `setComprehensiveGift(base, enhancement)` shared by the three panes | — | SUPERSEDED in the main: `useCappedSelection.onMirrorChange` owns the mirroring in both selector panes; the one surviving hand-written branch (`StartGiftEditPane.handleGiftClick`) belongs to the `applyGiftToggle` residue row and lands there |
 | Rename `sortGiftSelections` to name what it does; add the merged variant | `pages/egoGift/lib/egoGiftEncoding.ts:209-217`; `pages/egoGift/index.ts:82`; `ComprehensiveGiftSummary.tsx:78`; `FloorGiftViewer.tsx:54` | It re-pairs enhancement levels onto `sortEGOGifts` output; it does not sort selections |
 | Branded entity-ID schemas adopted at list-item construction | new `shared/gameData/ids.ts`; `ComprehensiveGiftSelectorPane.tsx:58-70`, `EGOGiftObservationEditPane.tsx:52-63`, `FloorGiftSelectorPane.tsx:71`, `EGOGiftObservationSummary.tsx:56`, `EGOGiftObservationSelection.tsx:29` | Five hand-rolled constructors; one omits `recipe` |
 | Ego passive ids and `EGOGiftSpec.themePack` become numbers | `pages/ego/schemas/EGOSchemas.ts:57-66,70,81,111`; `pages/egoGift/schemas/EGOGiftSchemas.ts:48,65`; `pages/egoGift/types/EGOGiftTypes.ts:36`; `static/data/ego/*.json` (111 files, 116 entries); `static/data/egoGiftSpecList.json` (230 records) | Skill ids are already numbers in the same files; i18n keys stay strings |
@@ -1087,7 +1086,7 @@ Composition rules, in dependency order:
 | Rename the `t` shadow | `components/layout/DetailEntitySelector.tsx:97,111,115` | Unblocks the i18n `t` for the two hardcoded `Tier ${t}` strings |
 | Restore the `.env` ignores | `frontend/.gitignore:27` | The line reads `.env.env.production` — a bad append onto an unterminated final line that also destroyed the original `.env` entry; the pattern matches no file, so both `.env` and `.env.production` are committable today |
 | Drop the `association` namespace | `components/layout/Header.tsx:183`; `lib/i18n.ts:14` | `useTranslation(['common', 'association'])` requests a namespace that exists in no locale directory and is absent from `NAMESPACES` |
-| Enable `jsx-a11y`; label 5 icon-only buttons | `.oxlintrc.json:3`; `Header.tsx:164`; `CommentActionButtons.tsx:167-169`; `PlannerDetailFooter.tsx:88-113`; `PersonalPlannerHeader.tsx:247-253`; `PublishedPlannerHeader.tsx:198-201,279-286` | `hidden lg:inline` labels are `display:none` below `lg`, so those buttons have no accessible name on mobile |
+| Enable `jsx-a11y`; label 5 icon-only buttons | `.oxlintrc.json:3` + the icon-button files (labels landed) | The label half shipped; enabling the plugin surfaces 32 findings across 20 files (18 of them clickable divs needing roles and keyboard handlers) — the enable lands with that remediation as one unit in the final residue pass, since a rule that ships red is a rule that gets disabled |
 
 ### Security and ingest hardening
 
