@@ -1,3 +1,4 @@
+import { GIFT_ID_PATTERN } from '@/shared/gameData'
 import type { EnhancementLevel } from '@/shared/gameData'
 import type { EGOGiftRecipe, EGOGiftListItem, EGOGiftSpec } from '@/pages/egoGift'
 import type { SortMode } from '@/shared/filter'
@@ -21,9 +22,9 @@ export function encodeGiftSelection(enhancement: EnhancementLevel, giftId: strin
 }
 
 /**
- * Encoded selection: an optional enhancement digit followed by the 4-digit gift ID.
+ * Encoded selection: an optional enhancement digit followed by the gift base id.
  */
-export const ENCODED_SELECTION_PATTERN = /^([12])?(\d{4})$/
+export const ENCODED_SELECTION_PATTERN = new RegExp(`^([12])?(${GIFT_ID_PATTERN})$`)
 
 /**
  * A decoded gift selection

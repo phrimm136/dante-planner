@@ -82,5 +82,20 @@ export { migrateKeywords } from './keywordNormalize'
 export { getResistanceInfo } from './resistance'
 export type { ResistanceCategoryKey, ResistanceInfo } from './resistance'
 
+export {
+  IdentityIdSchema,
+  EGOIdSchema,
+  EGOGiftIdSchema,
+  PassiveIdSchema,
+  SkillIdSchema,
+  ThemePackIdSchema,
+  IDENTITY_ID_PATTERN,
+  EGO_ID_PATTERN,
+  GIFT_ID_PATTERN,
+  GIFT_ENHANCEMENT_PREFIX_PATTERN,
+  THEME_PACK_ID_PATTERN,
+} from './ids'
+export type { IdentityId, EGOId, EGOGiftId, PassiveId, SkillId, ThemePackId } from './ids'
+
 export { SkillDescEntrySchema } from './schemas/SkillSchemas'
 export type { SkillDescEntry, Uptie, Threadspin } from './schemas/SkillSchemas'

@@ -6,6 +6,11 @@ import {
   RR_CATEGORIES,
   PLANNER_TYPES,
   migrateKeywords,
+  IDENTITY_ID_PATTERN,
+  EGO_ID_PATTERN,
+  GIFT_ID_PATTERN,
+  GIFT_ENHANCEMENT_PREFIX_PATTERN,
+  THEME_PACK_ID_PATTERN,
 } from '@/shared/gameData'
 import type { DungeonIdx } from '@/shared/gameData'
 import { JSONContentSchema } from '@/shared/noteEditor'
@@ -49,7 +54,10 @@ const ToleratedContentDigestSchema = z.string().optional()
  */
 export const IdentityIdSchema = z
   .string()
-  .regex(/^1(0[1-9]|1[0-2])\d{2,}$/, 'Identity ID must match pattern 1{01-12}{2+ digits}')
+  .regex(
+    new RegExp(`^${IDENTITY_ID_PATTERN}$`),
+    'Identity ID must match pattern 1{01-12}{2+ digits}',
+  )
 
 /**
  * EGO ID pattern: 2{01-12}{:2}
@@ -58,7 +66,7 @@ export const IdentityIdSchema = z
  */
 export const EGOIdSchema = z
   .string()
-  .regex(/^2(0[1-9]|1[0-2])\d{2,}$/, 'EGO ID must match pattern 2{01-12}{2+ digits}')
+  .regex(new RegExp(`^${EGO_ID_PATTERN}$`), 'EGO ID must match pattern 2{01-12}{2+ digits}')
 
 /**
  * Gift ID pattern: {1, 2, or empty}{4-digit starting with 9}
@@ -67,7 +75,10 @@ export const EGOIdSchema = z
  */
 export const GiftIdSchema = z
   .string()
-  .regex(/^[12]?9\d{3}$/, 'Gift ID must match pattern {1|2|empty}9{3 digits}')
+  .regex(
+    new RegExp(`^${GIFT_ENHANCEMENT_PREFIX_PATTERN}${GIFT_ID_PATTERN}$`),
+    'Gift ID must match pattern {1|2|empty}9{3 digits}',
+  )
 
 /**
  * Theme pack ID pattern: {4-digit}
@@ -75,7 +86,7 @@ export const GiftIdSchema = z
  */
 export const ThemePackSchema = z
   .string()
-  .regex(/^\d{4}$/, 'Theme Pack Id must match pattern {4 digits}')
+  .regex(new RegExp(`^${THEME_PACK_ID_PATTERN}$`), 'Theme Pack Id must match pattern {4 digits}')
 
 // ============================================================================
 // Enum Schemas
