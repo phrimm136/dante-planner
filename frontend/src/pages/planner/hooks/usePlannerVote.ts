@@ -16,7 +16,8 @@ import { showErrorMessage } from '@/lib/errorPresentation'
 import { validateData } from '@/lib/validation'
 import { VoteResponseSchema } from '../schemas/PlannerListSchemas'
 import { useInvalidatePlannerLists } from './useInvalidatePlannerLists'
-import { publishedPlannerQueryKeys } from './usePublishedPlannerQuery'
+import { publishedPlannerQueryKeys, isPlannerRemoved } from './usePublishedPlannerQuery'
+import type { PublishedPlannerQueryState } from './usePublishedPlannerQuery'
 
 import type { VoteResponse } from '../types/PlannerListTypes'
 
@@ -81,17 +82,20 @@ export function usePlannerVote() {
     },
     onSuccess: (response, { plannerId }) => {
       // Optimistically update cache with response data
-      queryClient.setQueryData(publishedPlannerQueryKeys.detail(plannerId), (old: any) => {
-        if (!old?.apiData) return old
-        return {
-          ...old,
-          apiData: {
-            ...old.apiData,
-            upvotes: response.upvoteCount,
-            hasUpvoted: response.hasUpvoted,
-          },
-        }
-      })
+      queryClient.setQueryData(
+        publishedPlannerQueryKeys.detail(plannerId),
+        (old: PublishedPlannerQueryState | undefined) => {
+          if (!old || isPlannerRemoved(old)) return old
+          return {
+            ...old,
+            apiData: {
+              ...old.apiData,
+              upvotes: response.upvoteCount,
+              hasUpvoted: response.hasUpvoted,
+            },
+          }
+        },
+      )
 
       // Also invalidate list queries to refresh cards
       invalidatePlannerLists()
