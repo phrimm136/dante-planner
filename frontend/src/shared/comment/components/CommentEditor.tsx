@@ -11,7 +11,7 @@
 
 import { useState, useRef } from 'react'
 import { useEditor, EditorContent, EditorContext, type Editor } from '@tiptap/react'
-import { ErrorBoundary } from 'react-error-boundary'
+import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
 import { useTranslation } from 'react-i18next'
 import StarterKit from '@tiptap/starter-kit'
 
@@ -143,7 +143,7 @@ export function CommentEditor({
       onClick={handleFocus}
       onBlur={handleBlur}
     >
-      <ErrorBoundary FallbackComponent={CommentEditorErrorFallback}>
+      <ReactErrorBoundary FallbackComponent={CommentEditorErrorFallback}>
         <EditorContext.Provider value={{ editor }}>
           <div className="relative">
             <EditorContent editor={editor} />
@@ -156,7 +156,7 @@ export function CommentEditor({
             )}
           </div>
         </EditorContext.Provider>
-      </ErrorBoundary>
+      </ReactErrorBoundary>
 
       {/* Footer: character count + buttons */}
       <div className="flex items-center justify-end gap-3 px-3 py-2 border-t border-input">

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useEditor, EditorContent, EditorContext } from '@tiptap/react'
-import { ErrorBoundary, type FallbackProps } from 'react-error-boundary'
+import { ErrorBoundary as ReactErrorBoundary, type FallbackProps } from 'react-error-boundary'
 import { useTranslation } from 'react-i18next'
 import { showErrorMessage } from '@/lib/errorPresentation'
 import StarterKit from '@tiptap/starter-kit'
@@ -436,7 +436,7 @@ function NoteEditorInner({
         <Toolbar editor={editor} visible={isFocused && !readOnly} onLinkClick={handleLinkClick} />
 
         {/* Editor content with error boundary */}
-        <ErrorBoundary
+        <ReactErrorBoundary
           FallbackComponent={EditorErrorFallback}
           onError={(error) => {
             console.error('NoteEditor error:', error)
@@ -452,7 +452,7 @@ function NoteEditorInner({
                 : placeholder || t('pages.plannerMD.noteEditor.placeholder')}
             </div>
           )}
-        </ErrorBoundary>
+        </ReactErrorBoundary>
 
         {/* Link dialog */}
         <LinkDialog

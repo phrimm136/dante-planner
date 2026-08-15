@@ -12,7 +12,7 @@
 
 import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ErrorBoundary } from 'react-error-boundary'
+import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
 import { ExtractionCalculator } from './components/ExtractionCalculator'
 import { SECTION_STYLES } from '@/lib/constants'
 
@@ -61,11 +61,11 @@ export default function ExtractionPlannerPage() {
     <div className={SECTION_STYLES.LAYOUT.page}>
       {/* Calculator Section */}
       <div className="bg-background rounded-lg">
-        <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <ReactErrorBoundary FallbackComponent={ErrorFallback}>
           <Suspense fallback={<LoadingFallback />}>
             <ExtractionCalculator />
           </Suspense>
-        </ErrorBoundary>
+        </ReactErrorBoundary>
       </div>
     </div>
   )
