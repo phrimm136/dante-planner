@@ -43,8 +43,8 @@ vi.mock('@/shared/assets', () => ({
 }))
 
 // Mock search mappings - non-suspending version
-vi.mock('@/shared/filter/hooks/useSearchMappings', () => ({
-  useSearchMappingsDeferred: vi.fn(),
+vi.mock('@/shared/filter/hooks/useSearchTermSources', () => ({
+  useSearchTermSources: vi.fn(),
 }))
 
 // Mock IdentityListI18n for IdentityName component
@@ -54,14 +54,16 @@ vi.mock('../../hooks/useIdentityListData', () => ({
     '10201': 'Test Identity 2',
     '10301': 'Test Identity 3',
   }),
-  useIdentityListI18nDeferred: () => ({
-    '10101': 'Test Identity 1',
-    '10201': 'Test Identity 2',
-    '10301': 'Test Identity 3',
-  }),
+  IDENTITY_LIST: { kind: 'identity' },
 }))
 
-import { useSearchMappingsDeferred } from '@/shared/filter'
+import { useSearchTermSources } from '@/shared/filter'
+
+const IDENTITY_NAMES = {
+  '10101': 'Test Identity 1',
+  '10201': 'Test Identity 2',
+  '10301': 'Test Identity 3',
+}
 
 const mockIdentities: IdentityListItem[] = [
   {
@@ -141,9 +143,12 @@ describe('IdentityList', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     // Default: return empty mappings (loading state)
-    vi.mocked(useSearchMappingsDeferred).mockReturnValue({
-      keywordToValue: new Map(),
-      unitKeywordToValue: new Map(),
+    vi.mocked(useSearchTermSources).mockReturnValue({
+      names: IDENTITY_NAMES,
+      mappings: {
+        keywordToValue: new Map(),
+        unitKeywordToValue: new Map(),
+      },
     })
   })
 
@@ -322,9 +327,12 @@ describe('IdentityList', () => {
 
   describe('search with deferred mappings', () => {
     it('returns no results when mappings are loading (empty)', () => {
-      vi.mocked(useSearchMappingsDeferred).mockReturnValue({
-        keywordToValue: new Map(),
-        unitKeywordToValue: new Map(),
+      vi.mocked(useSearchTermSources).mockReturnValue({
+        names: IDENTITY_NAMES,
+        mappings: {
+          keywordToValue: new Map(),
+          unitKeywordToValue: new Map(),
+        },
       })
 
       render(<IdentityList identities={mockIdentities} store={makeStore({}, 'rupture')} />, {
@@ -335,13 +343,16 @@ describe('IdentityList', () => {
     })
 
     it('filters by keyword search when mappings are loaded', () => {
-      vi.mocked(useSearchMappingsDeferred).mockReturnValue({
-        keywordToValue: new Map([
-          ['rupture', ['Burst']],
-          ['burn', ['Combustion']],
-          ['charge', ['Charge']],
-        ]),
-        unitKeywordToValue: new Map(),
+      vi.mocked(useSearchTermSources).mockReturnValue({
+        names: IDENTITY_NAMES,
+        mappings: {
+          keywordToValue: new Map([
+            ['rupture', ['Burst']],
+            ['burn', ['Combustion']],
+            ['charge', ['Charge']],
+          ]),
+          unitKeywordToValue: new Map(),
+        },
       })
 
       const { container } = render(
@@ -357,9 +368,12 @@ describe('IdentityList', () => {
     })
 
     it('search is case-insensitive', () => {
-      vi.mocked(useSearchMappingsDeferred).mockReturnValue({
-        keywordToValue: new Map([['charge', ['Charge']]]),
-        unitKeywordToValue: new Map(),
+      vi.mocked(useSearchTermSources).mockReturnValue({
+        names: IDENTITY_NAMES,
+        mappings: {
+          keywordToValue: new Map([['charge', ['Charge']]]),
+          unitKeywordToValue: new Map(),
+        },
       })
 
       const { container } = render(
@@ -376,9 +390,12 @@ describe('IdentityList', () => {
 
   describe('combined filters and search', () => {
     it('applies both filters and search together', () => {
-      vi.mocked(useSearchMappingsDeferred).mockReturnValue({
-        keywordToValue: new Map([['rupture', ['Burst']]]),
-        unitKeywordToValue: new Map(),
+      vi.mocked(useSearchTermSources).mockReturnValue({
+        names: IDENTITY_NAMES,
+        mappings: {
+          keywordToValue: new Map([['rupture', ['Burst']]]),
+          unitKeywordToValue: new Map(),
+        },
       })
 
       const { container } = render(

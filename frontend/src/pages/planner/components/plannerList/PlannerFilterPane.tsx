@@ -31,7 +31,7 @@ import { useIdentityListSpec, useIdentityListI18n } from '@/pages/identity'
 import { useEGOListSpec, useEGOListI18n } from '@/pages/ego'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
 import { useThemePackListData } from '@/pages/themePack'
-import { usePlannerKeywordsI18nDeferred } from '../../hooks/usePlannerKeywordsI18n'
+import { usePlannerKeywordsI18n } from '../../hooks/usePlannerKeywordsI18n'
 
 import { PLANNER_KEYWORDS, SINNERS } from '@/shared/gameData'
 import { getSinnerFromId } from '@/shared/gameData'
@@ -104,8 +104,7 @@ export function PlannerFilterPane({ filters, onFiltersChange }: PlannerFilterPan
     themePack: null,
   })
 
-  // Keywords load eagerly via non-suspending hook (tiny data, always visible)
-  const keywordsI18n = usePlannerKeywordsI18nDeferred()
+  const keywordsI18n = usePlannerKeywordsI18n()
 
   // Keyword items (always available)
   const keywordItems: FilterItem[] = PLANNER_KEYWORDS.map((kw) => ({

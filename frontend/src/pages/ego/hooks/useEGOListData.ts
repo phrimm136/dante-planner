@@ -3,7 +3,6 @@ import {
   useEntityListData,
   useEntityListSpec,
   useEntityListI18n,
-  useEntityListI18nDeferred,
   type EntityListDataConfig,
 } from '@/shared/entityCatalog'
 import type { z } from 'zod'
@@ -11,7 +10,7 @@ import { EGOSpecListSchema, EGONameListSchema } from '../schemas/EGOSchemas'
 
 export const egoListQueryKeys = createEntityListQueryKeys('ego')
 
-const EGO_LIST: EntityListDataConfig<
+export const EGO_LIST: EntityListDataConfig<
   z.infer<typeof EGOSpecListSchema>,
   z.infer<typeof EGONameListSchema>
 > = {
@@ -20,7 +19,6 @@ const EGO_LIST: EntityListDataConfig<
   specSchema: EGOSpecListSchema,
   i18nImport: (language) => import(`@static/i18n/${language}/egoNameList.json`),
   i18nSchema: EGONameListSchema,
-  emptyI18n: {},
 }
 
 /** EGO spec map; suspends on initial load, not on language change */
@@ -31,11 +29,6 @@ export function useEGOListSpec() {
 /** EGO name map; suspends while loading */
 export function useEGOListI18n() {
   return useEntityListI18n(EGO_LIST)
-}
-
-/** EGO name map for list filtering; empty while loading, never suspends */
-export function useEGOListI18nDeferred(): Record<string, string> {
-  return useEntityListI18nDeferred(EGO_LIST)
 }
 
 /** EGO spec map and name map; suspends while loading */

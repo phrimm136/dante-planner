@@ -8,7 +8,7 @@ One vertical folder per route slice: route components at the slice root plus `co
 - Build query options with `createStaticDataQueryOptions` (`src/lib/queryOptions.ts`) wrapping a literal dynamic `import('@static/data/...')` — never `fetch('/data/...')`.
 - Query keys come from the factories in `src/lib/queryKeys.ts`; tuple shapes like `['identity', id]` and `['identity', id, 'i18n', language]` are load-bearing cache identities.
 - Spec and i18n staleTime is `STATIC_DATA_STALE_TIME` (7 days, `src/lib/constants/api.ts`); server-backed queries pick a named window from `STALE_TIME`/`GC_TIME` in the same module.
-- A load shows a skeleton, never a placeholder: suspending hooks render their boundary's skeleton, and the `*Deferred` hooks return their empty value until the data resolves.
+- A load shows a skeleton, never a placeholder: read static data through the suspending hook and let the nearest boundary render the skeleton. A non-suspending `*Deferred` variant is justified only where the nearest boundary has no skeleton to show — `usePlannerKeywordsI18nDeferred` is the one such case, because the planner filter pane sits behind a `fallback={null}` boundary and would vanish rather than degrade.
 
 ## Route components
 

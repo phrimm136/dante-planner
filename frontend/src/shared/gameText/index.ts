@@ -10,8 +10,8 @@ export {
   keywordListQueryKeys,
   useKeywordListSpec,
   useKeywordListI18n,
-  useKeywordListI18nDeferred,
   useKeywordListData,
+  KEYWORD_LIST,
 } from './hooks/useKeywordListData'
 
 export { applyStrikethrough } from './lib/unityRichText'

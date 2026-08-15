@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef, startTransition } from 'react'
+import { useState, useEffect, useRef, startTransition, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
+import { LoadingState } from '@/components/feedback/LoadingState'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -191,14 +192,16 @@ export function FloorGiftSelectorPane({
 
         {/* Gift selection list */}
         <div className="flex-1 overflow-y-auto">
-          <EGOGiftSelectionList
-            gifts={sortedGifts}
-            selectedKeywords={selectedKeywords}
-            searchQuery={searchQuery}
-            selectedGiftIds={selectedGiftIds}
-            enableEnhancementSelection
-            onEnhancementSelect={handleEnhancementSelect}
-          />
+          <Suspense fallback={<LoadingState />}>
+            <EGOGiftSelectionList
+              gifts={sortedGifts}
+              selectedKeywords={selectedKeywords}
+              searchQuery={searchQuery}
+              selectedGiftIds={selectedGiftIds}
+              enableEnhancementSelection
+              onEnhancementSelect={handleEnhancementSelect}
+            />
+          </Suspense>
         </div>
       </DialogContent>
     </Dialog>

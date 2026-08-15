@@ -1,7 +1,7 @@
 import type { EGOGiftListItem } from '../types/EGOGiftTypes'
 import { CARD_GRID } from '@/lib/constants'
-import { FilteredEntityGrid, useSearchMappingsDeferred, type CardGeometry } from '@/shared/filter'
-import { useEGOGiftListI18nDeferred } from '../hooks/useEGOGiftListData'
+import { FilteredEntityGrid, useSearchTermSources, type CardGeometry } from '@/shared/filter'
+import { EGO_GIFT_LIST } from '../hooks/useEGOGiftListData'
 import type { FilterStore } from '@/components/hooks/useSetFilters'
 import { sortEGOGifts } from '../lib/egoGiftSort'
 import {
@@ -10,6 +10,8 @@ import {
   type EGOGiftFacetState,
 } from '../lib/egoGiftFilter'
 import { EGOGiftCardLink } from './EGOGiftCardLink'
+
+const EMPTY_NAMES: Record<string, string> = {}
 
 const EGO_GIFT_GEOMETRY: CardGeometry = {
   cardWidth: CARD_GRID.WIDTH.EGO_GIFT,
@@ -35,10 +37,7 @@ interface EGOGiftListProps {
  * - Search: OR logic (name OR keyword)
  */
 export function EGOGiftList({ gifts, store }: EGOGiftListProps) {
-  // Non-suspending: returns empty mappings while loading, search won't match until loaded
-  const mappings = useSearchMappingsDeferred()
-  // Non-suspending: returns empty object while loading, name search won't match until loaded
-  const giftNames = useEGOGiftListI18nDeferred()
+  const { names: giftNames, mappings } = useSearchTermSources(EGO_GIFT_LIST, EMPTY_NAMES)
 
   // Sort all gifts once (stable order for CSS-based filtering)
   // Default sort: tier-first (higher tier first, then by keyword)

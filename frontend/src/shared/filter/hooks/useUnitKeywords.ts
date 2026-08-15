@@ -1,4 +1,4 @@
-import { useSuspenseQuery, useQuery } from '@tanstack/react-query'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { createStaticDataQueryOptions } from '@/lib/queryOptions'
 import { UnitKeywordsSchema } from '../schemas/SearchMappingSchemas'
@@ -12,7 +12,7 @@ export const unitKeywordsQueryKeys = {
   i18n: (language: string) => ['unitKeywords', 'i18n', language] as const,
 }
 
-function createUnitKeywordsQueryOptions(language: string) {
+export function createUnitKeywordsQueryOptions(language: string) {
   return createStaticDataQueryOptions(
     unitKeywordsQueryKeys.i18n(language),
     async () => {
@@ -28,8 +28,6 @@ function createUnitKeywordsQueryOptions(language: string) {
   )
 }
 
-const EMPTY_UNIT_KEYWORDS: UnitKeywords = {}
-
 /**
  * Unit keyword code → localized name, for the active language.
  *
@@ -41,14 +39,4 @@ export function useUnitKeywords(): UnitKeywords {
   const { i18n } = useTranslation()
   const { data } = useSuspenseQuery(createUnitKeywordsQueryOptions(i18n.language))
   return data
-}
-
-/**
- * Non-suspending variant for list filtering: returns an empty map while
- * loading, so a language switch never suspends a list.
- */
-export function useUnitKeywordsDeferred(): UnitKeywords {
-  const { i18n } = useTranslation()
-  const { data } = useQuery(createUnitKeywordsQueryOptions(i18n.language))
-  return data ?? EMPTY_UNIT_KEYWORDS
 }

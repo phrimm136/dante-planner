@@ -1,4 +1,6 @@
+import { Suspense } from 'react'
 import { Link } from '@tanstack/react-router'
+import { Skeleton } from '@/components/ui/skeleton'
 import type { EGOGiftListItem } from '../types/EGOGiftTypes'
 import { EGOGiftCard } from './EGOGiftCard'
 import { EGOGiftName } from './EGOGiftName'
@@ -34,7 +36,9 @@ export const EGOGiftCardLink = function EGOGiftCardLink({
       <div className="flex flex-col items-center gap-1.5">
         <EGOGiftCard gift={gift} enhancement={enhancement} enableHoverHighlight />
         <span className="text-xs text-center text-foreground line-clamp-2 w-24 leading-tight font-medium">
-          <EGOGiftName id={gift.id} />
+          <Suspense fallback={<Skeleton className="h-5 w-24 bg-foreground" />}>
+            <EGOGiftName id={gift.id} />
+          </Suspense>
         </span>
       </div>
     </Link>

@@ -10,7 +10,6 @@ import {
   useEntityListData,
   useEntityListSpec,
   useEntityListI18n,
-  useEntityListI18nDeferred,
   type EntityListDataConfig,
 } from '../useEntityListData'
 
@@ -32,7 +31,6 @@ function createConfig(
     specSchema: SpecSchema,
     i18nImport: (lang) => Promise.resolve({ default: { '10101': `Yi Sang ${lang}` } }),
     i18nSchema: NameSchema,
-    emptyI18n: {},
     ...overrides,
   }
 }
@@ -114,41 +112,5 @@ describe('useEntityListData', () => {
     // The cache stores the observer's defaulted options, which is where staleTime lives.
     const options = query?.options as QueryObserverOptions | undefined
     expect(options?.staleTime).toBe(STATIC_DATA_STALE_TIME)
-  })
-
-  it('returns emptyI18n from the deferred hook until the name list resolves', async () => {
-    const { wrapper } = createWrapper()
-
-    const { result } = renderHook(() => useEntityListI18nDeferred(createConfig()), { wrapper })
-
-    expect(result.current).toEqual({})
-
-    await waitFor(() => {
-      expect(result.current).toEqual({ '10101': 'Yi Sang EN' })
-    })
-  })
-
-  it('falls back to emptyI18n while the next language name list loads', async () => {
-    const { wrapper } = createWrapper()
-
-    language.current = 'EN'
-    const { result, rerender } = renderHook(() => useEntityListI18nDeferred(createConfig()), {
-      wrapper,
-    })
-
-    await waitFor(() => {
-      expect(result.current).toEqual({ '10101': 'Yi Sang EN' })
-    })
-
-    language.current = 'KR'
-    rerender()
-
-    // The switch shows the empty fallback rather than the previous language.
-    expect(result.current).toEqual({})
-
-    await waitFor(() => {
-      expect(result.current).toEqual({ '10101': 'Yi Sang KR' })
-    })
-    language.current = 'EN'
   })
 })

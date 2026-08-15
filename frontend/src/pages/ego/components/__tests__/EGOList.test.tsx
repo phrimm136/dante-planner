@@ -45,8 +45,8 @@ vi.mock('@/shared/assets', () => ({
 }))
 
 // Mock search mappings - non-suspending version
-vi.mock('@/shared/filter/hooks/useSearchMappings', () => ({
-  useSearchMappingsDeferred: vi.fn(),
+vi.mock('@/shared/filter/hooks/useSearchTermSources', () => ({
+  useSearchTermSources: vi.fn(),
 }))
 
 // Mock EGOListI18n for EGOName component
@@ -56,14 +56,16 @@ vi.mock('../../hooks/useEGOListData', () => ({
     '20201': 'Test EGO 2',
     '20301': 'Test EGO 3',
   }),
-  useEGOListI18nDeferred: () => ({
-    '20101': 'Test EGO 1',
-    '20201': 'Test EGO 2',
-    '20301': 'Test EGO 3',
-  }),
+  EGO_LIST: { kind: 'ego' },
 }))
 
-import { useSearchMappingsDeferred } from '@/shared/filter'
+import { useSearchTermSources } from '@/shared/filter'
+
+const EGO_NAMES = {
+  '20101': 'Test EGO 1',
+  '20201': 'Test EGO 2',
+  '20301': 'Test EGO 3',
+}
 
 const mockEGOs: EGOListItem[] = [
   {
@@ -138,9 +140,12 @@ describe('EGOList', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     // Default: return empty mappings (loading state)
-    vi.mocked(useSearchMappingsDeferred).mockReturnValue({
-      keywordToValue: new Map(),
-      unitKeywordToValue: new Map(),
+    vi.mocked(useSearchTermSources).mockReturnValue({
+      names: EGO_NAMES,
+      mappings: {
+        keywordToValue: new Map(),
+        unitKeywordToValue: new Map(),
+      },
     })
   })
 
@@ -277,9 +282,12 @@ describe('EGOList', () => {
   describe('search with deferred mappings', () => {
     it('returns no results when mappings are loading (empty)', () => {
       // Mappings are empty (loading state)
-      vi.mocked(useSearchMappingsDeferred).mockReturnValue({
-        keywordToValue: new Map(),
-        unitKeywordToValue: new Map(),
+      vi.mocked(useSearchTermSources).mockReturnValue({
+        names: EGO_NAMES,
+        mappings: {
+          keywordToValue: new Map(),
+          unitKeywordToValue: new Map(),
+        },
       })
 
       render(<EGOList egos={mockEGOs} store={makeStore({}, 'rupture')} />, {
@@ -292,13 +300,16 @@ describe('EGOList', () => {
 
     it('filters by keyword search when mappings are loaded', () => {
       // Mappings are loaded
-      vi.mocked(useSearchMappingsDeferred).mockReturnValue({
-        keywordToValue: new Map([
-          ['rupture', ['Burst']],
-          ['burn', ['Combustion']],
-          ['charge', ['Charge']],
-        ]),
-        unitKeywordToValue: new Map(),
+      vi.mocked(useSearchTermSources).mockReturnValue({
+        names: EGO_NAMES,
+        mappings: {
+          keywordToValue: new Map([
+            ['rupture', ['Burst']],
+            ['burn', ['Combustion']],
+            ['charge', ['Charge']],
+          ]),
+          unitKeywordToValue: new Map(),
+        },
       })
 
       const { container } = render(<EGOList egos={mockEGOs} store={makeStore({}, 'rupture')} />, {
@@ -313,9 +324,12 @@ describe('EGOList', () => {
     })
 
     it('search is case-insensitive', () => {
-      vi.mocked(useSearchMappingsDeferred).mockReturnValue({
-        keywordToValue: new Map([['charge', ['Charge']]]),
-        unitKeywordToValue: new Map(),
+      vi.mocked(useSearchTermSources).mockReturnValue({
+        names: EGO_NAMES,
+        mappings: {
+          keywordToValue: new Map([['charge', ['Charge']]]),
+          unitKeywordToValue: new Map(),
+        },
       })
 
       const { container } = render(<EGOList egos={mockEGOs} store={makeStore({}, 'CHARGE')} />, {
@@ -331,9 +345,12 @@ describe('EGOList', () => {
 
   describe('combined filters and search', () => {
     it('applies both filters and search together', () => {
-      vi.mocked(useSearchMappingsDeferred).mockReturnValue({
-        keywordToValue: new Map([['rupture', ['Burst']]]),
-        unitKeywordToValue: new Map(),
+      vi.mocked(useSearchTermSources).mockReturnValue({
+        names: EGO_NAMES,
+        mappings: {
+          keywordToValue: new Map([['rupture', ['Burst']]]),
+          unitKeywordToValue: new Map(),
+        },
       })
 
       const { container } = render(

@@ -1,5 +1,7 @@
+import { Suspense } from 'react'
 import { Link } from '@tanstack/react-router'
 
+import { Skeleton } from '@/components/ui/skeleton'
 import { SECTION_STYLES } from '@/lib/constants'
 
 import { toEGOGiftCardProps } from '../lib/egoGiftCardProps'
@@ -40,7 +42,9 @@ export function EGOGiftGrid({
               <div className="flex flex-col items-center gap-1">
                 {card}
                 <span className={NAME_CLASS}>
-                  <EGOGiftName id={id} />
+                  <Suspense fallback={<Skeleton className="h-5 w-24 bg-foreground" />}>
+                    <EGOGiftName id={id} />
+                  </Suspense>
                 </span>
               </div>
             ) : (

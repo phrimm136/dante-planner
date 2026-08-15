@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils'
 import type { EGOGiftListItem } from '@/pages/egoGift'
 import type { EnhancementLevel } from '@/shared/gameData'
 import { useEGOGiftListData } from '@/pages/egoGift'
-import { useSearchMappingsDeferred } from '@/shared/filter'
+import { useSearchMappings } from '@/shared/filter'
 import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { EGOGiftCard } from '@/pages/egoGift'
 import { EGOGiftTooltip } from '@/pages/egoGift'
@@ -49,7 +49,7 @@ export function ComprehensiveGiftGridTracker({
 }: ComprehensiveGiftGridTrackerProps) {
   const { t } = useTranslation(['planner', 'common'])
   const { spec, i18n } = useEGOGiftListData()
-  const { keywordToValue } = useSearchMappingsDeferred()
+  const { keywordToValue } = useSearchMappings()
 
   // Filter and sort states
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())

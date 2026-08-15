@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import type { EGOGiftListItem } from '../types/EGOGiftTypes'
 import type { EnhancementLevel } from '@/shared/gameData'
 import { CARD_GRID, PROGRESSIVE_REVEAL, SECTION_STYLES } from '@/lib/constants'
-import { applyFacets, useSearchMappingsDeferred } from '@/shared/filter'
+import { applyFacets, useSearchMappings } from '@/shared/filter'
 import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
 import { buildSelectionLookup } from '../lib/egoGiftEncoding'
 import { EGO_GIFT_SELECTION_FACETS } from '../lib/egoGiftFilter'
@@ -38,7 +38,7 @@ export function EGOGiftSelectionList({
   onEnhancementSelect,
 }: EGOGiftSelectionListProps) {
   const { t } = useTranslation('database')
-  const { keywordToValue } = useSearchMappingsDeferred()
+  const { keywordToValue } = useSearchMappings()
 
   // Progressive rendering: start with one batch, add a batch per frame
   const displayCount = useProgressiveCount({

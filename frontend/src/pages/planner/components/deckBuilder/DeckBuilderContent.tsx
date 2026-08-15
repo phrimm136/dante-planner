@@ -6,7 +6,7 @@ import {
 } from '../../stores/usePlannerEditorStore'
 import { useIdentityListData } from '@/pages/identity'
 import { useEGOListData } from '@/pages/ego'
-import { useSearchMappingsDeferred } from '@/shared/filter'
+import { useSearchMappings } from '@/shared/filter'
 import { matchesDeckFilter } from '../../lib/deckFilter'
 import type {
   UptieTier,
@@ -212,7 +212,7 @@ export function DeckBuilderContent({
 
   // Sort identities ONCE (stable order - sorting doesn't change on filter)
   // Uses snapshot of equipped IDs to keep equipped items at top
-  const searchMappings = useSearchMappingsDeferred()
+  const searchMappings = useSearchMappings()
 
   const sortedIdentities = (() => {
     return [...identities].sort((a, b) => {

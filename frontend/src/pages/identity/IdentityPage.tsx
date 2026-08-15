@@ -23,8 +23,7 @@ import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
 import { buildFacetCounts } from './lib/identityFacetCounts'
 
 /**
- * Card grid section - no longer suspends at grid level.
- * Name search uses deferred hook in IdentityList (no suspension).
+ * Card grid section.
  */
 function IdentityCardGrid({
   spec,
@@ -34,7 +33,6 @@ function IdentityCardGrid({
   store: FilterStore<IdentityFacetState>
 }) {
   // Build IdentityListItem array from spec directly (no transformation needed)
-  // Name lookup handled by IdentityList's deferred hook
   const identities: IdentityListItem[] = Object.entries(spec).map(([id, specData]) => ({
     id,
     rank: specData.rank,
@@ -184,9 +182,6 @@ function IdentityPageShell() {
         />
       }
     >
-      {/* No Suspense needed - IdentityCardGrid doesn't suspend */}
-      {/* Spec loading is caught by outer ListPageSkeleton */}
-      {/* Name search uses deferred hook in IdentityList */}
       <IdentityCardGrid spec={spec} store={store} />
     </FilterPageLayout>
   )
@@ -198,7 +193,7 @@ function IdentityPageShell() {
  * Granular loading architecture:
  * - Outer Suspense: ListPageSkeleton for spec loading (initial)
  * - Season/UnitKeyword dropdowns: Own Suspense for dropdown i18n
- * - IdentityList: Uses deferred hook for name search (no suspension on language change)
+ * - IdentityList: name lookups suspend at the card name, not the grid
  */
 export default function IdentityPage() {
   return (

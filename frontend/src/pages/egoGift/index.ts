@@ -24,7 +24,6 @@ export {
   useEGOGiftListData,
   useEGOGiftListSpec,
   useEGOGiftListI18n,
-  useEGOGiftListI18nDeferred,
   egoGiftListQueryKeys,
 } from './hooks/useEGOGiftListData'
 export {

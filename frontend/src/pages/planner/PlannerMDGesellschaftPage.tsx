@@ -19,6 +19,7 @@
  * Pattern: PlannerMDPage.tsx (Suspense wrapping, filter layout)
  */
 
+import { Skeleton } from '@/components/ui/skeleton'
 import { Suspense } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
@@ -96,7 +97,7 @@ function GesellschaftPageContent() {
 
       {/* Content Search Filter Pane */}
       <div className="mb-4">
-        <Suspense fallback={null}>
+        <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
           <PlannerFilterPane filters={searchFilters} onFiltersChange={setSearchFilters} />
         </Suspense>
       </div>

@@ -20,7 +20,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 /**
  * Card grid section - builds keyword items from spec and passes to KeywordList.
- * No suspension at grid level (name search uses deferred hook in KeywordList).
+ * The name list suspends into this section's own boundary, so the sidebar and
+ * search bar stay on screen through a language change.
  *
  * Pattern Source: EGOGiftCardGrid in EGOGiftPage.tsx
  */

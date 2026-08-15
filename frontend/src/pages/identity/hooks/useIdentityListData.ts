@@ -3,7 +3,6 @@ import {
   useEntityListData,
   useEntityListSpec,
   useEntityListI18n,
-  useEntityListI18nDeferred,
   type EntityListDataConfig,
 } from '@/shared/entityCatalog'
 import type { z } from 'zod'
@@ -11,7 +10,7 @@ import { IdentitySpecListSchema, IdentityNameListSchema } from '../schemas/Ident
 
 export const identityListQueryKeys = createEntityListQueryKeys('identity')
 
-const IDENTITY_LIST: EntityListDataConfig<
+export const IDENTITY_LIST: EntityListDataConfig<
   z.infer<typeof IdentitySpecListSchema>,
   z.infer<typeof IdentityNameListSchema>
 > = {
@@ -20,7 +19,6 @@ const IDENTITY_LIST: EntityListDataConfig<
   specSchema: IdentitySpecListSchema,
   i18nImport: (language) => import(`@static/i18n/${language}/identityNameList.json`),
   i18nSchema: IdentityNameListSchema,
-  emptyI18n: {},
 }
 
 /** Identity spec map; suspends on initial load, not on language change */
@@ -31,11 +29,6 @@ export function useIdentityListSpec() {
 /** Identity name map; suspends while loading */
 export function useIdentityListI18n() {
   return useEntityListI18n(IDENTITY_LIST)
-}
-
-/** Identity name map for list filtering; empty while loading, never suspends */
-export function useIdentityListI18nDeferred(): Record<string, string> {
-  return useEntityListI18nDeferred(IDENTITY_LIST)
 }
 
 /** Identity spec map and name map; suspends while loading */

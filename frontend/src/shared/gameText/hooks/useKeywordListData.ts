@@ -3,7 +3,6 @@ import { createEntityListQueryKeys } from '@/lib/queryKeys'
 import {
   useEntityListData,
   useEntityListI18n,
-  useEntityListI18nDeferred,
   useEntityListSpec,
   type EntityListDataConfig,
 } from '@/shared/entityCatalog'
@@ -23,7 +22,6 @@ export const KEYWORD_LIST: EntityListDataConfig<
   specSchema: BattleKeywordSpecListSchema,
   i18nImport: (language) => import(`@static/i18n/${language}/battleKeywords.json`),
   i18nSchema: BattleKeywordsSchema,
-  emptyI18n: {},
 }
 
 /**
@@ -49,17 +47,6 @@ export function useKeywordListSpec(): Record<string, BattleKeywordSpecEntry> {
  */
 export function useKeywordListI18n(): Record<string, BattleKeywordI18nEntry> {
   return useEntityListI18n(KEYWORD_LIST)
-}
-
-/**
- * Non-suspending version of useKeywordListI18n for list filtering.
- * Returns empty object while loading - name search won't match anything.
- * Use this in list components to prevent suspension during language change.
- *
- * @returns Keyword i18n map (id -> { name, desc }), empty object while loading
- */
-export function useKeywordListI18nDeferred(): Record<string, BattleKeywordI18nEntry> {
-  return useEntityListI18nDeferred(KEYWORD_LIST)
 }
 
 /**

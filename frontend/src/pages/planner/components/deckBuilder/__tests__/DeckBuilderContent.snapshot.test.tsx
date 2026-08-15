@@ -114,7 +114,7 @@ vi.mock('@/pages/ego/hooks/useEGOListData', () => ({
   }),
 }))
 vi.mock('@/shared/filter/hooks/useSearchMappings', () => ({
-  useSearchMappingsDeferred: () => ({
+  useSearchMappings: () => ({
     keywordToValue: new Map<string, string[]>(),
     unitKeywordToValue: new Map<string, string[]>(),
   }),

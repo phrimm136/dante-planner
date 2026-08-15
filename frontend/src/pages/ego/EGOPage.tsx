@@ -23,8 +23,7 @@ import type { z } from 'zod'
 import type { EGOSpecListSchema } from '@/pages/ego'
 
 /**
- * Card grid section - no longer suspends at grid level.
- * Name search uses deferred hook in EGOList (no suspension).
+ * Card grid section.
  */
 function EGOCardGrid({
   spec,
@@ -34,7 +33,6 @@ function EGOCardGrid({
   store: FilterStore<EGOFacetState>
 }) {
   // Build EGOListItem array from spec directly (no transformation needed)
-  // Name lookup handled by EGOList's deferred hook
   const egos: EGOListItem[] = Object.entries(spec).map(([id, specData]) => ({
     id,
     egoType: specData.egoType,
@@ -172,7 +170,6 @@ function EGOPageShell() {
         />
       }
     >
-      {/* No Suspense needed - EGOCardGrid doesn't suspend */}
       <EGOCardGrid spec={spec} store={store} />
     </FilterPageLayout>
   )
@@ -187,7 +184,7 @@ function EGOPageShell() {
  * Suspense Strategy:
  * - Outer Suspense: ListPageSkeleton for spec loading (initial)
  * - Season dropdown: Own Suspense for dropdown i18n
- * - EGOList: Uses deferred hook for name search (no suspension on language change)
+ * - EGOList: name lookups suspend at the card name, not the grid
  */
 export default function EGOPage() {
   return (

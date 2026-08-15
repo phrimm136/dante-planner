@@ -1,6 +1,6 @@
 import type { IdentityListItem } from '../types/IdentityTypes'
-import { useSearchMappingsDeferred } from '@/shared/filter'
-import { useIdentityListI18nDeferred } from '../hooks/useIdentityListData'
+import { useSearchTermSources } from '@/shared/filter'
+import { IDENTITY_LIST } from '../hooks/useIdentityListData'
 import type { FilterStore } from '@/components/hooks/useSetFilters'
 import { CARD_GRID } from '@/lib/constants'
 import { FilteredEntityGrid, sortByReleaseDate, type CardGeometry } from '@/shared/filter'
@@ -10,6 +10,8 @@ import {
   type IdentityFacetState,
 } from '../lib/identityFilter'
 import { IdentityCardLink } from './IdentityCardLink'
+
+const EMPTY_NAMES: Record<string, string> = {}
 
 const IDENTITY_GEOMETRY: CardGeometry = {
   cardWidth: CARD_GRID.WIDTH.IDENTITY,
@@ -38,10 +40,7 @@ interface IdentityListProps {
  * - Search: OR logic (name OR keyword OR trait)
  */
 export function IdentityList({ identities, store }: IdentityListProps) {
-  // Non-suspending: returns empty mappings while loading, search won't match until loaded
-  const mappings = useSearchMappingsDeferred()
-  // Non-suspending: returns empty object while loading, name search won't match until loaded
-  const identityNames = useIdentityListI18nDeferred()
+  const { names: identityNames, mappings } = useSearchTermSources(IDENTITY_LIST, EMPTY_NAMES)
 
   // Sort all identities once (stable order for CSS-based filtering)
   const sortedIdentities = sortByReleaseDate(identities)

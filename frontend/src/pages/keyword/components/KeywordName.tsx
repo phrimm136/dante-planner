@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useKeywordListI18nDeferred } from '@/shared/gameText'
+import { useKeywordListI18n } from '@/shared/gameText'
 import { KoreanText } from '@/components/ui/KoreanText'
 
 interface KeywordNameProps {
@@ -9,17 +9,17 @@ interface KeywordNameProps {
 
 /**
  * Component that fetches and displays keyword name.
- * Uses non-suspending hook - does NOT require Suspense boundary.
+ * Suspends while the name list loads - requires a Suspense boundary above.
  * Memoized by id to prevent re-renders during list filtering.
  *
- * Returns empty string while loading (caller can show fallback if needed).
+ * Renders an empty string for an id the active language has no name for.
  *
  * For Korean text, uses KoreanText component to handle S-Core Dream's
  * incomplete glyph coverage with Pretendard fallback.
  */
 export const KeywordName = function KeywordName({ id }: KeywordNameProps) {
   const { i18n } = useTranslation()
-  const names = useKeywordListI18nDeferred()
+  const names = useKeywordListI18n()
   const name = names[id]?.name ?? ''
 
   if (i18n.language === 'KR') {

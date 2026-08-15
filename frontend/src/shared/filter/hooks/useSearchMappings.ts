@@ -1,8 +1,8 @@
-import { useSuspenseQuery, useQuery } from '@tanstack/react-query'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { createStaticDataQueryOptions } from '@/lib/queryOptions'
 import { KeywordMatchSchema } from '../schemas/SearchMappingSchemas'
-import { useUnitKeywords, useUnitKeywordsDeferred } from './useUnitKeywords'
+import { useUnitKeywords } from './useUnitKeywords'
 
 // Query key factory for search mappings
 // Hand-rolled: tuples lack the 'list'/'i18n' segments the shared factory produces
@@ -12,7 +12,7 @@ export const searchMappingsQueryKeys = {
     [...searchMappingsQueryKeys.all, 'keyword', language] as const,
 }
 
-function createKeywordMatchQueryOptions(language: string) {
+export function createKeywordMatchQueryOptions(language: string) {
   return createStaticDataQueryOptions(
     searchMappingsQueryKeys.keywordMatch(language),
     async () => {
@@ -44,7 +44,7 @@ function appendToBucket<K, V>(map: Map<K, V[]>, key: K, value: V): void {
  * `{ "Burst": "Rupture" }` becomes `{ "rupture": ["Burst"] }`. Distinct codes
  * can share a display name, so the value is a bucket rather than a scalar.
  */
-function buildReverseMap(byInternalCode: Record<string, string>): Map<string, string[]> {
+export function buildReverseMap(byInternalCode: Record<string, string>): Map<string, string[]> {
   const reverse = new Map<string, string[]>()
   for (const [internalCode, displayName] of Object.entries(byInternalCode)) {
     appendToBucket(reverse, displayName.toLowerCase(), internalCode)
@@ -75,36 +75,6 @@ export function useSearchMappings(): SearchMappings {
 
   const { data: keywordMatch } = useSuspenseQuery(createKeywordMatchQueryOptions(i18n.language))
   const unitKeywords = useUnitKeywords()
-
-  return {
-    keywordToValue: buildReverseMap(keywordMatch),
-    unitKeywordToValue: buildReverseMap(unitKeywords),
-  }
-}
-
-// Empty mappings constant for loading state
-const EMPTY_MAPPINGS: SearchMappings = {
-  keywordToValue: new Map(),
-  unitKeywordToValue: new Map(),
-}
-
-/**
- * Non-suspending version of useSearchMappings for list filtering.
- * Returns empty mappings while loading - search won't match anything.
- * Use this in list components to prevent suspension during language change.
- *
- * Cards stay visible, search just returns no matches until data loads.
- */
-export function useSearchMappingsDeferred(): SearchMappings {
-  const { i18n } = useTranslation()
-
-  const { data: keywordMatch } = useQuery(createKeywordMatchQueryOptions(i18n.language))
-  const unitKeywords = useUnitKeywordsDeferred()
-
-  // Empty mappings while loading: cards stay visible, search matches nothing.
-  if (!keywordMatch) {
-    return EMPTY_MAPPINGS
-  }
 
   return {
     keywordToValue: buildReverseMap(keywordMatch),

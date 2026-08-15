@@ -33,16 +33,9 @@ export { buildNameOptions, buildSinnerSuffixedOptions } from './components/searc
 export type { SearchDropdownOption } from './components/searchDropdownOptions'
 
 export { useFilterI18nData, filterI18nQueryKeys } from './hooks/useFilterI18nData'
-export {
-  useUnitKeywords,
-  useUnitKeywordsDeferred,
-  unitKeywordsQueryKeys,
-} from './hooks/useUnitKeywords'
-export {
-  useSearchMappings,
-  useSearchMappingsDeferred,
-  searchMappingsQueryKeys,
-} from './hooks/useSearchMappings'
+export { useUnitKeywords, unitKeywordsQueryKeys } from './hooks/useUnitKeywords'
+export { useSearchMappings, searchMappingsQueryKeys } from './hooks/useSearchMappings'
+export { useSearchTermSources } from './hooks/useSearchTermSources'
 export type { SearchMappings } from './hooks/useSearchMappings'
 
 export { applyFacets } from './lib/applyFacets'

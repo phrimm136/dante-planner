@@ -2,12 +2,13 @@ import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { CARD_GRID, PROGRESSIVE_REVEAL, SECTION_STYLES } from '@/lib/constants'
-import { useKeywordListI18nDeferred } from '@/shared/gameText'
+import { KEYWORD_LIST, type BattleKeywordI18nEntry } from '@/shared/gameText'
 import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
 import type { FilterStore } from '@/components/hooks/useSetFilters'
 import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
 import { FilteredCardSlot } from '@/shared/filter'
 import { FilterEmptyState } from '@/shared/filter'
+import { useSearchTermSources } from '@/shared/filter'
 import {
   buildKeywordSearchTerms,
   matchesKeyword,
@@ -15,6 +16,8 @@ import {
   type KeywordFacetState,
 } from '../lib/keywordFilter'
 import { KeywordCardLink } from './KeywordCardLink'
+
+const EMPTY_NAMES: Record<string, BattleKeywordI18nEntry> = {}
 
 interface KeywordListItem extends KeywordFacetItem {
   id: string
@@ -38,7 +41,7 @@ interface KeywordListProps {
  */
 export function KeywordList({ keywords, store }: KeywordListProps) {
   const { t } = useTranslation('database')
-  const keywordNames = useKeywordListI18nDeferred()
+  const { names: keywordNames } = useSearchTermSources(KEYWORD_LIST, EMPTY_NAMES, false)
 
   // Progressive rendering: start with one batch, add a batch per frame
   const displayCount = useProgressiveCount({
@@ -80,7 +83,7 @@ export function KeywordList({ keywords, store }: KeywordListProps) {
 
 interface KeywordCardCellProps {
   keyword: KeywordListItem
-  keywordNames: ReturnType<typeof useKeywordListI18nDeferred>
+  keywordNames: Record<string, BattleKeywordI18nEntry>
   store: FilterStore<KeywordFacetState>
 }
 

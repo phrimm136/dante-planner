@@ -1,4 +1,6 @@
+import { Suspense } from 'react'
 import { Link } from '@tanstack/react-router'
+import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import colorCode from '@static/data/colorCode.json'
 import { KeywordCard } from './KeywordCard'
@@ -36,7 +38,9 @@ export const KeywordCardLink = function KeywordCardLink({
           className="text-xs text-center line-clamp-2 w-24 leading-tight font-medium"
           style={{ color: nameColor }}
         >
-          <KeywordName id={id} />
+          <Suspense fallback={<Skeleton className="h-5 w-24" />}>
+            <KeywordName id={id} />
+          </Suspense>
         </span>
       </div>
     </Link>

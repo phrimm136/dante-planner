@@ -40,8 +40,7 @@ function BooleanFilter({
 }
 
 /**
- * Card grid section - no longer suspends at grid level.
- * Name search uses deferred hook in EGOGiftList (no suspension).
+ * Card grid section.
  */
 function EGOGiftCardGrid({
   spec,
@@ -51,7 +50,6 @@ function EGOGiftCardGrid({
   store: FilterStore<EGOGiftFacetState>
 }) {
   // Build EGOGiftListItem array from spec directly
-  // Name lookup handled by EGOGiftList's deferred hook
   const gifts: EGOGiftListItem[] = Object.entries(spec).map(([id, specData]) => ({
     id,
     tag: specData.tag as EGOGiftListItem['tag'],
@@ -187,9 +185,6 @@ function EGOGiftPageShell() {
         />
       }
     >
-      {/* No Suspense needed - EGOGiftCardGrid doesn't suspend */}
-      {/* Spec loading is caught by outer ListPageSkeleton */}
-      {/* Name search uses deferred hook in EGOGiftList */}
       <EGOGiftCardGrid spec={spec} store={store} />
     </FilterPageLayout>
   )
@@ -201,7 +196,7 @@ function EGOGiftPageShell() {
  * Granular loading architecture:
  * - Outer Suspense: ListPageSkeleton for spec loading (initial)
  * - Theme pack dropdown: Own Suspense for dropdown i18n
- * - EGOGiftList: Uses deferred hook for name search (no suspension on language change)
+ * - EGOGiftList: name lookups suspend at the card name, not the grid
  */
 export default function EGOGiftPage() {
   return (

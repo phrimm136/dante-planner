@@ -1,11 +1,13 @@
 import type { EGOListItem } from '../types/EGOTypes'
-import { useSearchMappingsDeferred } from '@/shared/filter'
-import { useEGOListI18nDeferred } from '../hooks/useEGOListData'
+import { useSearchTermSources } from '@/shared/filter'
+import { EGO_LIST } from '../hooks/useEGOListData'
 import type { FilterStore } from '@/components/hooks/useSetFilters'
 import { CARD_GRID } from '@/lib/constants'
 import { FilteredEntityGrid, sortEGOByDate, type CardGeometry } from '@/shared/filter'
 import { buildEGOSearchTerms, matchesEGO, type EGOFacetState } from '../lib/egoFilter'
 import { EGOCardLink } from './EGOCardLink'
+
+const EMPTY_NAMES: Record<string, string> = {}
 
 const EGO_GEOMETRY: CardGeometry = {
   cardWidth: CARD_GRID.WIDTH.EGO,
@@ -21,10 +23,7 @@ interface EGOListProps {
 
 /** The EGO browser's card grid. */
 export function EGOList({ egos, store }: EGOListProps) {
-  // Non-suspending: returns empty mappings while loading, search won't match until loaded
-  const mappings = useSearchMappingsDeferred()
-  // Non-suspending: returns empty object while loading, name search won't match until loaded
-  const egoNames = useEGOListI18nDeferred()
+  const { names: egoNames, mappings } = useSearchTermSources(EGO_LIST, EMPTY_NAMES)
 
   // Sort all EGOs once (stable order for CSS-based filtering)
   const sortedEGOs = sortEGOByDate(egos)

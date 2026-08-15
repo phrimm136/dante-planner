@@ -83,17 +83,15 @@ const EGO_I18N = Object.fromEntries(Object.keys(EGO_SPEC).map((id) => [id, `Ego 
 vi.mock('@/pages/identity/hooks/useIdentityListData', () => ({
   useIdentityListSpec: () => IDENTITY_SPEC,
   useIdentityListI18n: () => IDENTITY_I18N,
-  useIdentityListI18nDeferred: () => IDENTITY_I18N,
   useIdentityListData: () => ({ spec: IDENTITY_SPEC, i18n: IDENTITY_I18N }),
 }))
 vi.mock('@/pages/ego/hooks/useEGOListData', () => ({
   useEGOListSpec: () => EGO_SPEC,
   useEGOListI18n: () => EGO_I18N,
-  useEGOListI18nDeferred: () => EGO_I18N,
   useEGOListData: () => ({ spec: EGO_SPEC, i18n: EGO_I18N }),
 }))
 vi.mock('@/shared/filter/hooks/useSearchMappings', () => ({
-  useSearchMappingsDeferred: () => ({
+  useSearchMappings: () => ({
     keywordToValue: new Map<string, string[]>(),
     unitKeywordToValue: new Map<string, string[]>(),
   }),

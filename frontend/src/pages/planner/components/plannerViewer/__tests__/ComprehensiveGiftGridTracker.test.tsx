@@ -49,7 +49,7 @@ const GIFT_CATALOG = {
 }
 
 vi.mock('@/shared/filter/hooks/useSearchMappings', () => ({
-  useSearchMappingsDeferred: () => ({
+  useSearchMappings: () => ({
     keywordToValue: new Map(),
   }),
 }))
