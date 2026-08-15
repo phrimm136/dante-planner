@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { AffinitySchema, ATK_TYPES, DEF_TYPES } from '@/shared/gameData'
-import { SkillDescEntrySchema, SkillIdSchema } from '@/shared/gameData'
+import { SkillDescEntrySchema, SkillIdSchema, PassiveIdSchema } from '@/shared/gameData'
 
 /**
  * Identity Schemas
@@ -73,10 +73,10 @@ export const IdentityPassiveConditionSchema = z.object({
 
 // Passive list tuple - 4 entries for uptie levels 0-3
 export const IdentityPassiveListTupleSchema = z.tuple([
-  z.array(z.number()),
-  z.array(z.number()),
-  z.array(z.number()),
-  z.array(z.number()),
+  z.array(PassiveIdSchema),
+  z.array(PassiveIdSchema),
+  z.array(PassiveIdSchema),
+  z.array(PassiveIdSchema),
 ])
 
 // Passives data schema

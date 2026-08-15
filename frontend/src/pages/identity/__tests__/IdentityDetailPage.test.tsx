@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { Suspense } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { createTestQueryClient } from '@/test-utils/queryClient'
-import { MAX_LEVEL, SkillIdSchema } from '@/shared/gameData'
+import { MAX_LEVEL, SkillIdSchema, PassiveIdSchema } from '@/shared/gameData'
 import IdentityDetailPage from '../IdentityDetailPage'
 import type { IdentityData, IdentityI18n } from '../types/IdentityTypes'
 
@@ -70,8 +70,8 @@ const mockIdentityData10101: IdentityData = {
     ],
   },
   passives: {
-    battlePassiveList: [[1010101], [], [], []], // Only uptie 1 has battle passive
-    supportPassiveList: [[], [], [1010121], []], // Only uptie 3 has support passive
+    battlePassiveList: [[PassiveIdSchema.parse(1010101)], [], [], []], // Only uptie 1 has battle passive
+    supportPassiveList: [[], [], [PassiveIdSchema.parse(1010121)], []], // Only uptie 3 has support passive
     conditions: {
       '1010101': { type: 'RESONANCE', values: { AZURE: 4 } },
       '1010121': { type: 'STOCK', values: { AZURE: 4 } },
@@ -134,12 +134,12 @@ const mockIdentityData10114: IdentityData = {
   },
   passives: {
     battlePassiveList: [
-      [1011402, 1011403],
-      [1011402, 1011403, 1011401],
+      [PassiveIdSchema.parse(1011402), PassiveIdSchema.parse(1011403)],
+      [PassiveIdSchema.parse(1011402), PassiveIdSchema.parse(1011403), PassiveIdSchema.parse(1011401)],
       [],
-      [1011402, 1011403, 1011411],
+      [PassiveIdSchema.parse(1011402), PassiveIdSchema.parse(1011403), PassiveIdSchema.parse(1011411)],
     ],
-    supportPassiveList: [[], [], [1011421], []],
+    supportPassiveList: [[], [], [PassiveIdSchema.parse(1011421)], []],
     conditions: {
       '1011401': { type: 'STOCK', values: { SHAMROCK: 5 } },
       '1011421': { type: 'STOCK', values: { SHAMROCK: 4 } },

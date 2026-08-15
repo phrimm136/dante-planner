@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { AffinitySchema, EgoTypeSchema } from '@/shared/gameData'
-import { SkillDescEntrySchema, SkillIdSchema } from '@/shared/gameData'
+import { SkillDescEntrySchema, SkillIdSchema, PassiveIdSchema } from '@/shared/gameData'
 
 export { EgoTypeSchema }
 
@@ -53,15 +53,20 @@ export const EGOSkillsDataSchema = z.object({
 })
 
 // Passive list tuple - 4 or 5 entries (per-EGO threadspin levels)
-// Each element is an array of passive ID strings active at that level
+// Each element is an array of passive IDs active at that level
 export const EGOPassiveListTupleSchema = z.union([
-  z.tuple([z.array(z.string()), z.array(z.string()), z.array(z.string()), z.array(z.string())]),
   z.tuple([
-    z.array(z.string()),
-    z.array(z.string()),
-    z.array(z.string()),
-    z.array(z.string()),
-    z.array(z.string()),
+    z.array(PassiveIdSchema),
+    z.array(PassiveIdSchema),
+    z.array(PassiveIdSchema),
+    z.array(PassiveIdSchema),
+  ]),
+  z.tuple([
+    z.array(PassiveIdSchema),
+    z.array(PassiveIdSchema),
+    z.array(PassiveIdSchema),
+    z.array(PassiveIdSchema),
+    z.array(PassiveIdSchema),
   ]),
 ])
 
