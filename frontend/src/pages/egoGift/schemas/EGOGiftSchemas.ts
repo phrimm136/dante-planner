@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { EGOGiftIdSchema } from '@/shared/gameData'
 
 /**
  * EGO Gift Schemas
@@ -22,7 +23,7 @@ const tagArraySchema = z
 // Standard recipe: multiple recipe options, each with fixed ingredient IDs
 export const StandardRecipeSchema = z
   .object({
-    materials: z.array(z.array(z.number())),
+    materials: z.array(z.array(EGOGiftIdSchema)),
   })
   .strict()
 
@@ -30,8 +31,8 @@ export const StandardRecipeSchema = z
 export const MixedRecipeSchema = z
   .object({
     type: z.literal('mixed'),
-    a: z.object({ ids: z.array(z.number()), count: z.number() }).strict(),
-    b: z.object({ ids: z.array(z.number()), count: z.number() }).strict(),
+    a: z.object({ ids: z.array(EGOGiftIdSchema), count: z.number() }).strict(),
+    b: z.object({ ids: z.array(EGOGiftIdSchema), count: z.number() }).strict(),
   })
   .strict()
 

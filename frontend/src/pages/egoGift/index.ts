@@ -56,6 +56,7 @@ export type {
   EGOGiftNameList,
 } from './types/EGOGiftTypes'
 export {
+  EGOGiftRecipeSchema,
   EGOGiftSpecSchema,
   EGOGiftDataSchema,
   EGOGiftI18nSchema,
