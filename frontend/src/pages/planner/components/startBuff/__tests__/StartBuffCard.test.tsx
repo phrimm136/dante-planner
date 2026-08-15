@@ -73,10 +73,10 @@ describe('StartBuffCard', () => {
       fireEvent.click(card)
     }
 
-    expect(onSelect).toHaveBeenCalledWith(100)
+    expect(onSelect).toHaveBeenCalledWith(100, true)
   })
 
-  it('calls onSelect with negative ID when deselecting', () => {
+  it('calls onSelect with selected=false when deselecting', () => {
     const onSelect = vi.fn()
     renderCard({ onSelect, isSelected: true })
 
@@ -85,7 +85,7 @@ describe('StartBuffCard', () => {
       fireEvent.click(card)
     }
 
-    expect(onSelect).toHaveBeenCalledWith(-100)
+    expect(onSelect).toHaveBeenCalledWith(100, false)
   })
 
   it('shows selection highlight when selected', () => {
