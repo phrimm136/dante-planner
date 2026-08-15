@@ -43,7 +43,7 @@ export function DetailEntitySelector({
   onLevelChange,
   sticky = false,
 }: DetailEntitySelectorProps) {
-  const { i18n } = useTranslation('database')
+  const { t, i18n } = useTranslation('database')
   const [inputValue, setInputValue] = useState(String(level))
   const [appliedLevel, setAppliedLevel] = useState(level)
   const displayStyle = getDisplayFontForLanguage(i18n.language)
@@ -76,22 +76,23 @@ export function DetailEntitySelector({
             {tierLabel}
           </span>
           <div className="flex gap-1">
-            {tiers.map((t) => {
-              const isSelected = tier === t
+            {tiers.map((tierOption) => {
+              const isSelected = tier === tierOption
+              const tierName = `${t('filters.tier')} ${tierOption}`
 
               return (
                 <button
-                  key={t}
+                  key={tierOption}
                   type="button"
-                  onClick={() => onTierChange(t)}
+                  onClick={() => onTierChange(tierOption)}
                   className={cn(
                     'selectable w-10 h-10 rounded flex items-center justify-center translation-250ms',
                     !isSelected && 'opacity-60 hover:opacity-100',
                   )}
                   data-selected={isSelected}
-                  aria-label={`Tier ${t}`}
+                  aria-label={tierName}
                 >
-                  <img src={tierIconPath(t)} alt={`Tier ${t}`} className="w-8 h-8 object-contain" />
+                  <img src={tierIconPath(tierOption)} alt="" className="w-8 h-8 object-contain" />
                 </button>
               )
             })}
