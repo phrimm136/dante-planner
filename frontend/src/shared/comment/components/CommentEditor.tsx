@@ -40,11 +40,7 @@ interface CommentEditorProps {
 
 function CommentEditorErrorFallback() {
   const { t } = useTranslation(['planner', 'common'])
-  return (
-    <div className="p-3 text-sm text-muted-foreground">
-      {t('common:error.editorFailed', 'Editor failed to load')}
-    </div>
-  )
+  return <div className="p-3 text-sm text-muted-foreground">{t('common:loadError')}</div>
 }
 
 export function CommentEditor({
