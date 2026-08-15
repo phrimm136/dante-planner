@@ -1029,11 +1029,14 @@ No design content. One row per item: the change, the files it touches, and what 
 
 ### Branded entity-id primitives and schema composition
 
-`shared/gameData/ids.ts` declares one branded primitive per value-role entity id. Value-role ids are
-numbers in the source data; key-role record keys and route params stay plain `string`, converted once
-where list items are constructed (per the sweep: entity ids as referenced values are `z.number()`
-throughout the data — the brands make transposition a compile error, per the `PlannerIdSchema`
-precedent at `schemas/PlannerSchemas.ts:566`).
+`shared/gameData/ids.ts` declares one branded primitive per value-role entity id; key-role record
+keys and route params stay plain `string`, converted once where list items are constructed (the
+brands make transposition a compile error, per the `PlannerIdSchema` precedent at
+`schemas/PlannerSchemas.ts:566`). The sweep's premise did not survive contact with the shipped
+data: EVERY value-role id in the current static output is a string — skill ids and passive ids
+included, not only the two fields named below — so the numeric brands ship defined and exported
+but wired nowhere until the static pipeline realigns all id emitters and the pointer bumps
+(user's lane). The string-pattern derivations (composition rule 2) are live regardless.
 
 ```ts
 // shared/gameData/ids.ts
