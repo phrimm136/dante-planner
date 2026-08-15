@@ -13,10 +13,10 @@ import { useTranslation } from 'react-i18next'
 
 import { FormattedDescription } from '@/shared/gameText'
 import { DetailPageLayout } from '@/components/layout/DetailPageLayout'
-import { DetailPageSkeleton } from '@/components/feedback/DetailPageSkeleton'
 import { Skeleton } from '@/components/ui/skeleton'
 import { KeywordBacklinkList } from './components/KeywordBacklinkList'
 import { KeywordCard } from './components/KeywordCard'
+import { KeywordDetailSkeleton } from './components/KeywordDetailSkeleton'
 import { useKeywordDetailSpec, useKeywordDetailI18n } from './hooks/useKeywordDetailData'
 import { useIdentityListI18n } from '@/pages/identity'
 import { useEGOListI18n } from '@/pages/ego'
@@ -222,7 +222,7 @@ function KeywordDetailContent() {
  */
 export default function KeywordDetailPage() {
   return (
-    <Suspense fallback={<DetailPageSkeleton preset="keyword" />}>
+    <Suspense fallback={<KeywordDetailSkeleton />}>
       <KeywordDetailContent />
     </Suspense>
   )

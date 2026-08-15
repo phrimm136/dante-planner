@@ -2,7 +2,6 @@ import { useParams } from '@tanstack/react-router'
 import { Suspense, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DetailPageLayout } from '@/components/layout/DetailPageLayout'
-import { DetailPageSkeleton } from '@/components/feedback/DetailPageSkeleton'
 import { DetailEntitySelector } from '@/components/layout/DetailEntitySelector'
 import { DetailRightPanel } from '@/components/layout/DetailRightPanel'
 import { MobileDetailTabs } from '@/components/layout/MobileDetailTabs'
@@ -10,6 +9,7 @@ import { useEGODetailSpec } from '@/pages/ego'
 import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
 import { getEGOTierIconPath } from '@/shared/assets'
 import { MIN_ENTITY_TIER } from '@/shared/gameData'
+import { EGODetailSkeleton } from './components/EGODetailSkeleton'
 import { EGOInfoPane } from './components/EGOInfoPane'
 import { EGOSkillsPane } from './components/EGOSkillsPane'
 import { EGOPassivesPane } from './components/EGOPassivesPane'
@@ -110,7 +110,7 @@ function EGODetailContent() {
  */
 export default function EGODetailPage() {
   return (
-    <Suspense fallback={<DetailPageSkeleton preset="ego" />}>
+    <Suspense fallback={<EGODetailSkeleton />}>
       <EGODetailContent />
     </Suspense>
   )

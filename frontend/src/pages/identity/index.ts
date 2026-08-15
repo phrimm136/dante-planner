@@ -1,6 +1,7 @@
 // Public API of the identity entity. Import from '@/pages/identity', not internal paths.
 
 export { IdentityCard } from './components/IdentityCard'
+export { IdentityDetailSkeleton } from './components/IdentityDetailSkeleton'
 export { IdentityFilterDropdown } from './components/IdentityFilterDropdown'
 export { IdentityList } from './components/IdentityList'
 export { IdentityHeader } from './components/IdentityHeader'

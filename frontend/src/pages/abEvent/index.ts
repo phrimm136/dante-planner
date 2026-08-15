@@ -2,6 +2,7 @@
 
 export { AbEventList } from './components/AbEventList'
 export { AbEventCard } from './components/AbEventCard'
+export { AbEventDetailSkeleton } from './components/AbEventDetailSkeleton'
 export { ChoiceBranch } from './components/AbEventChoiceBranch'
 
 export { useAbEventListData, useAbEventListSpec } from './hooks/useAbEventListData'

@@ -10,7 +10,6 @@ import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { DetailPageLayout } from '@/components/layout/DetailPageLayout'
-import { DetailPageSkeleton } from '@/components/feedback/DetailPageSkeleton'
 import { ColoredText } from '@/shared/gameText'
 import { EGOGiftGrid } from '@/pages/egoGift'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -18,6 +17,7 @@ import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
 import { useThemePackI18n } from '@/pages/themePack'
 import { getAbEventImagePath } from '@/shared/assets'
 import {
+  AbEventDetailSkeleton,
   ChoiceBranch,
   useAbEventDetailData,
   useAbEventShared,
@@ -210,7 +210,7 @@ function AbEventDetailContent() {
 
 export default function AbEventDetailPage() {
   return (
-    <Suspense fallback={<DetailPageSkeleton preset="abEvent" />}>
+    <Suspense fallback={<AbEventDetailSkeleton />}>
       <AbEventDetailContent />
     </Suspense>
   )

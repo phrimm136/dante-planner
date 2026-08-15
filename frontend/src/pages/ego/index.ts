@@ -2,6 +2,7 @@
 
 export { EGOList } from './components/EGOList'
 export { EGOCard } from './components/EGOCard'
+export { EGODetailSkeleton } from './components/EGODetailSkeleton'
 export { EGOFilterDropdown } from './components/EGOFilterDropdown'
 export { EGOHeader } from './components/EGOHeader'
 export { EGOHeaderWithI18n } from './components/EGOHeaderI18n'

@@ -7,10 +7,10 @@ import { DetailPageLayout } from '@/components/layout/DetailPageLayout'
 import { DetailEntitySelector } from '@/components/layout/DetailEntitySelector'
 import { DetailRightPanel } from '@/components/layout/DetailRightPanel'
 import { MobileDetailTabs } from '@/components/layout/MobileDetailTabs'
-import { DetailPageSkeleton } from '@/components/feedback/DetailPageSkeleton'
 import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
 import { getEGOTierIconPath } from '@/shared/assets'
 import { MAX_LEVEL, MAX_ENTITY_TIER, MIN_ENTITY_TIER } from '@/shared/gameData'
+import { IdentityDetailSkeleton } from './components/IdentityDetailSkeleton'
 import { IdentityInfoPane } from './components/IdentityInfoPane'
 import { IdentitySkillsPane } from './components/IdentitySkillsPane'
 import { IdentityPassivesPane } from './components/IdentityPassivesPane'
@@ -144,7 +144,7 @@ function IdentityDetailContent() {
  */
 export default function IdentityDetailPage() {
   return (
-    <Suspense fallback={<DetailPageSkeleton preset="identity" />}>
+    <Suspense fallback={<IdentityDetailSkeleton />}>
       <IdentityDetailContent />
     </Suspense>
   )

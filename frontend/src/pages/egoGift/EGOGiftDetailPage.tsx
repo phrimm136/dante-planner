@@ -15,8 +15,8 @@ import { GiftNameI18n } from '@/pages/egoGift'
 import { EGOGiftMetadata } from '@/pages/egoGift'
 import { EnhancementsPanelI18n } from '@/pages/egoGift'
 import { RecipeSection } from '@/pages/egoGift'
+import { EGOGiftDetailSkeleton } from '@/pages/egoGift'
 import { DetailPageLayout } from '@/components/layout/DetailPageLayout'
-import { DetailPageSkeleton } from '@/components/feedback/DetailPageSkeleton'
 import { useEGOGiftDetailSpec } from '@/pages/egoGift'
 import { ENHANCEMENT_LEVELS } from '@/shared/gameData'
 import { calculateEnhancementCost, parseTier } from '@/pages/egoGift'
@@ -108,7 +108,7 @@ function EGOGiftDetailContent() {
  */
 export default function EGOGiftDetailPage() {
   return (
-    <Suspense fallback={<DetailPageSkeleton preset="egoGift" />}>
+    <Suspense fallback={<EGOGiftDetailSkeleton />}>
       <EGOGiftDetailContent />
     </Suspense>
   )

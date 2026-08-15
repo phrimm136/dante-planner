@@ -2,6 +2,7 @@
 
 export { EGOGiftCard } from './components/EGOGiftCard'
 export { EGOGiftCardLink } from './components/EGOGiftCardLink'
+export { EGOGiftDetailSkeleton } from './components/EGOGiftDetailSkeleton'
 export { EGOGiftGrid } from './components/EGOGiftGrid'
 export { EGOGiftList } from './components/EGOGiftList'
 export { EGOGiftName } from './components/EGOGiftName'

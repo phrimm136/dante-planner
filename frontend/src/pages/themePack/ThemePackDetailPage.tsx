@@ -10,8 +10,8 @@ import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { DetailPageLayout } from '@/components/layout/DetailPageLayout'
-import { DetailPageSkeleton } from '@/components/feedback/DetailPageSkeleton'
 import { ThemePackCard } from '@/pages/themePack'
+import { ThemePackDetailSkeleton } from '@/pages/themePack'
 import { EGOGiftGrid } from '@/pages/egoGift'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useThemePackDetailData } from '@/pages/themePack'
@@ -408,7 +408,7 @@ function ThemePackDetailContent() {
 
 export default function ThemePackDetailPage() {
   return (
-    <Suspense fallback={<DetailPageSkeleton preset="themePack" />}>
+    <Suspense fallback={<ThemePackDetailSkeleton />}>
       <ThemePackDetailContent />
     </Suspense>
   )

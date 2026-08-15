@@ -2,6 +2,7 @@
 
 // Components
 export { ThemePackCard } from './components/ThemePackCard'
+export { ThemePackDetailSkeleton } from './components/ThemePackDetailSkeleton'
 export { ThemePackList } from './components/ThemePackList'
 export { ThemePackCardLink } from './components/ThemePackCardLink'
 export { ThemePackFilterDropdown } from './components/ThemePackFilterDropdown'
