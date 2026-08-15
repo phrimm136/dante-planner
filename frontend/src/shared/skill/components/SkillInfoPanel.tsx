@@ -92,7 +92,7 @@ export function SkillInfoPanelWithSuspense({
           <span>{t('identity.atkWeight')}</span>
           <div className="flex gap-1 h-3.5">
             {Array.from({ length: atkWeight }).map((_, index) => (
-              <img key={index} src={getAttackWeightIconPath()} alt="■" className="w-3 h-3" />
+              <img key={index} src={getAttackWeightIconPath()} alt="" className="w-3 h-3" />
             ))}
           </div>
         </div>

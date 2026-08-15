@@ -60,7 +60,7 @@ export function EGOCard({
   overlay,
   className,
 }: EGOCardProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['common', 'database'])
   const { id, egoType: rank, attributeTypes } = ego
   const sinner = getSinnerFromId(id)
 
@@ -70,7 +70,7 @@ export function EGOCard({
       <div className="absolute inset-0 flex items-center justify-center">
         <img
           src={getEGOImagePath(id)}
-          alt="EGO"
+          alt=""
           loading="lazy"
           className="w-36 h-36 object-cover rounded-full"
         />
@@ -160,7 +160,7 @@ export function EGOCard({
           <div className="items-center h-8 pl-1" style={{ width: EGO_CARD_INFO_ROW.ICON_SLOT }}>
             <img
               src={getEGOTierIconPath(ego.maxThreadspin)}
-              alt={`Tier ${ego.maxThreadspin}`}
+              alt={`${t('database:filters.tier')} ${ego.maxThreadspin}`}
               loading="lazy"
               className="w-5 h-5 translate-x-2.5 translate-y-1 object-contain"
               style={{ transform: 'skewY(-20deg)' }}
@@ -173,7 +173,7 @@ export function EGOCard({
       <div className="absolute bottom-5.75 left-1/2 -translate-x-1/2 w-12 h-12 pointer-events-none">
         <img
           src={getEGORankIconPath(rank)}
-          alt={`Rank ${rank}`}
+          alt=""
           loading="lazy"
           className="w-12 h-12 object-contain"
         />

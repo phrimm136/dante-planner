@@ -8,6 +8,8 @@
  */
 
 import { Suspense } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import { getEGOGiftEnhancementIconPath, getEGOGiftCostIconPath } from '@/shared/assets'
 import { FormattedDescription } from '@/shared/gameText'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -37,6 +39,8 @@ function EnhancementRow({
   cost: number | null
   isLast: boolean
 }) {
+  const { t } = useTranslation('database')
+
   return (
     <div className={!isLast ? 'pb-4 border-b' : ''}>
       {/* Structure - always visible (icon + cost) */}
@@ -57,7 +61,7 @@ function EnhancementRow({
         {/* Enhancement Cost */}
         {cost !== null && (
           <div className={SECTION_STYLES.LAYOUT.row}>
-            <img src={getEGOGiftCostIconPath()} alt="Cost" className="w-6 h-6" />
+            <img src={getEGOGiftCostIconPath()} alt={t('egoGift.price')} className="w-6 h-6" />
             <span className="text-sm font-semibold">{cost}</span>
           </div>
         )}

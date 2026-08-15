@@ -54,7 +54,7 @@ export function SkillImageSimple({
           {!showMissingPlaceholder ? (
             <img
               src={skillImagePath}
-              alt="Skill"
+              alt=""
               className="w-full h-full object-cover"
               style={{
                 clipPath:
