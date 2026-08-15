@@ -42,7 +42,7 @@ export interface ConflictResolutionDialogProps {
  * @example
  * ```tsx
  * <ConflictResolutionDialog
- *   open={errorCode === 'conflict'}
+ *   open={isSyncConflict(saveError)}
  *   conflictState={conflictState}
  *   onChoice={resolveConflict}
  *   isResolving={isSaving}

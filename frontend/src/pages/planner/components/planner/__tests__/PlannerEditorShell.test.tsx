@@ -17,6 +17,12 @@ import type { StorageReadError } from '@/lib/storage'
 
 const mockSaveToLocal = vi.fn<(planner: SaveablePlanner) => Promise<Result<void, AppError>>>()
 const mockGetOrCreateDeviceId = vi.fn<() => Promise<Result<string, StorageReadError>>>()
+const mockSyncToServer = vi.fn<(planner: SaveablePlanner, force?: boolean) => Promise<unknown>>()
+
+// Read at render time, so a test can put the shell on the far side of the two
+// conditions a server round-trip needs.
+let mockAuthUser: { id: string } | null = null
+let mockSyncEnabled = false
 
 vi.mock('@/pages/planner/hooks/usePlannerStorage', () => ({
   usePlannerStorage: () => ({
@@ -31,7 +37,7 @@ vi.mock('@/pages/planner/hooks/usePlannerStorage', () => ({
 
 vi.mock('@/pages/planner/hooks/usePlannerSyncAdapter', () => ({
   usePlannerSyncAdapter: () => ({
-    syncToServer: vi.fn(),
+    syncToServer: mockSyncToServer,
     fetchFromServer: vi.fn(),
     deleteFromServer: vi.fn(),
     listFromServer: vi.fn(),
@@ -39,7 +45,7 @@ vi.mock('@/pages/planner/hooks/usePlannerSyncAdapter', () => ({
 }))
 
 vi.mock('@/shared/auth', () => ({
-  useAuthQuery: () => ({ data: null }),
+  useAuthQuery: () => ({ data: mockAuthUser }),
   authQueryKeys: { me: ['auth', 'me'] as const },
 }))
 
@@ -48,8 +54,23 @@ vi.mock('@/pages/egoGift', () => ({
 }))
 
 vi.mock('@/shared/userSettings', () => ({
-  useUserSettingsQuery: () => ({ data: { syncEnabled: false } }),
+  useUserSettingsQuery: () => ({ data: { syncEnabled: mockSyncEnabled } }),
 }))
+
+// The presenter's sink, and translation as the identity so the key it picks is
+// what the assertion reads.
+vi.mock('sonner', () => {
+  const toastFn = Object.assign(vi.fn(), {
+    error: vi.fn(),
+    success: vi.fn(),
+    warning: vi.fn(),
+    info: vi.fn(),
+    dismiss: vi.fn(),
+  })
+  return { toast: toastFn }
+})
+
+vi.mock('@/lib/i18n', () => ({ default: { t: (key: string) => key } }))
 
 vi.mock('@tanstack/react-router', () => ({
   useNavigate: () => vi.fn(),
@@ -110,11 +131,18 @@ vi.mock('../../skillReplacement/SkillReplacementSection', () => ({
 }))
 vi.mock('../../floorTheme/FloorThemeGiftSection', () => ({ FloorThemeGiftSection: () => null }))
 vi.mock('../StoreBoundSectionNote', () => ({ StoreBoundSectionNote: () => null }))
-vi.mock('../ConflictResolutionDialog', () => ({ ConflictResolutionDialog: () => null }))
+// Rendered as a marker rather than nothing: whether it is open is the subject
+// of the conflict tests below.
+vi.mock('../ConflictResolutionDialog', () => ({
+  ConflictResolutionDialog: ({ open }: { open: boolean }) =>
+    open ? <div data-testid="conflict-dialog" /> : null,
+}))
 vi.mock('../../SyncOffWarningDialog', () => ({ SyncOffWarningDialog: () => null }))
 vi.mock('../KeywordSelector', () => ({ KeywordSelector: () => null }))
 
 import { PlannerEditorShell } from '../PlannerEditorShell'
+import { toast as sonnerToast } from 'sonner'
+import { ConflictError } from '@/lib/apiErrors'
 import {
   PlannerEditorStoreProvider,
   usePlannerEditorStoreApi,
@@ -153,7 +181,18 @@ beforeEach(() => {
   vi.clearAllMocks()
   mockGetOrCreateDeviceId.mockResolvedValue(ok('device-123'))
   mockSaveToLocal.mockResolvedValue(ok(undefined))
+  mockAuthUser = null
+  mockSyncEnabled = false
 })
+
+/** Press the header's save button and let the save settle. */
+async function clickSave() {
+  const saveButton = screen.getAllByRole('button', { name: 'pages.plannerMD.save.button' })[0]
+  assert(saveButton, 'the shell renders no save button')
+  await act(async () => {
+    fireEvent.click(saveButton)
+  })
+}
 
 describe('PlannerEditorShell - unload warning', () => {
   it('does not warn on a freshly mounted, untouched planner', () => {
@@ -178,13 +217,7 @@ describe('PlannerEditorShell - unload warning', () => {
     storeApi.getState().setDeploymentOrder([3, 1, 2])
     expect(fireBeforeUnload()).toBe(true)
 
-    const saveButton = screen.getAllByRole('button', {
-      name: 'pages.plannerMD.save.button',
-    })[0]
-    assert(saveButton, 'the shell renders no save button')
-    await act(async () => {
-      fireEvent.click(saveButton)
-    })
+    await clickSave()
 
     await waitFor(() => {
       expect(mockSaveToLocal).toHaveBeenCalled()
@@ -215,5 +248,47 @@ describe('PlannerEditorShell - unload warning', () => {
     await waitFor(() => {
       expect(fireBeforeUnload()).toBe(false)
     })
+  })
+})
+
+/**
+ * A rejected server write, over a signed-in account with sync on — the only
+ * route by which the shell holds a conflict at all.
+ */
+describe('PlannerEditorShell - a rejected server write', () => {
+  beforeEach(() => {
+    mockAuthUser = { id: 'user-1' }
+    mockSyncEnabled = true
+  })
+
+  it('reports a conflict the dialog cannot resolve instead of opening it', async () => {
+    mockSyncToServer.mockRejectedValue(
+      new ConflictError('PLANNER_LIMIT_EXCEEDED', 'too many planners', null),
+    )
+    const { storeApi } = renderShell()
+    storeApi.getState().setDeploymentOrder([3, 1, 2])
+
+    await clickSave()
+
+    await waitFor(() => {
+      expect(sonnerToast.error).toHaveBeenCalledWith('common:errors.generic.message', {
+        description: expect.anything(),
+      })
+    })
+    expect(screen.queryByTestId('conflict-dialog')).toBeNull()
+  })
+
+  it('opens the dialog for the conflict that carries a server version, and says nothing', async () => {
+    mockSyncToServer.mockRejectedValue(new ConflictError('SYNC_CONFLICT', 'conflict', 9))
+    const { storeApi } = renderShell()
+    storeApi.getState().setDeploymentOrder([3, 1, 2])
+
+    await clickSave()
+
+    await waitFor(() => {
+      expect(screen.getByTestId('conflict-dialog')).toBeInTheDocument()
+    })
+    expect(sonnerToast.error).not.toHaveBeenCalled()
+    expect(sonnerToast.warning).not.toHaveBeenCalled()
   })
 })

@@ -46,7 +46,7 @@ beforeEach(() => {
 })
 
 describe('presentError', () => {
-  it('stays silent for a conflict, which the resolution dialog owns', () => {
+  it('stays silent for a sync conflict, which the resolution dialog owns', () => {
     expect(presentError({ kind: 'conflict', code: 'SYNC_CONFLICT', serverVersion: 4 })).toBeNull()
   })
 
@@ -73,7 +73,10 @@ describe('presentError', () => {
   }
 
   const EVERY_CASE: Record<AppError['kind'], AppError[]> = {
-    conflict: [{ kind: 'conflict', code: 'SYNC_CONFLICT', serverVersion: 4 }],
+    conflict: [
+      { kind: 'conflict', code: 'SYNC_CONFLICT', serverVersion: 4 },
+      { kind: 'conflict', code: 'PLANNER_LIMIT_EXCEEDED', serverVersion: null },
+    ],
     validation: [{ kind: 'validation', key: 'planner:k' }],
     restricted: Object.values(RESTRICTED),
     rateLimit: [{ kind: 'rateLimit' }],
@@ -87,18 +90,17 @@ describe('presentError', () => {
 
   const everyError = Object.values(EVERY_CASE).flat()
 
-  it('delegates to a mounted owner for the conflict alone', () => {
-    const silent = everyError
-      .filter((error) => presentError(error) === null)
-      .map((error) => error.kind)
+  it('delegates to a mounted owner for the sync conflict alone', () => {
+    const silent = everyError.filter((error) => presentError(error) === null)
 
-    expect(silent).toEqual(['conflict'])
+    expect(silent).toEqual([{ kind: 'conflict', code: 'SYNC_CONFLICT', serverVersion: 4 }])
   })
 
-  it('gives every other case a key to render', () => {
+  it('gives every case it speaks for a key to render', () => {
     const keyless = everyError
-      .filter((error) => error.kind !== 'conflict')
-      .filter((error) => (presentError(error)?.key ?? '') === '')
+      .map((error) => presentError(error))
+      .filter((presentation) => presentation !== null)
+      .filter((presentation) => presentation.key === '')
 
     expect(keyless).toEqual([])
   })
@@ -171,6 +173,31 @@ describe('presentError', () => {
       error: { kind: 'unknown' },
       expected: { key: 'common:errors.generic.message', severity: 'error', supportHint: true },
     },
+    {
+      name: 'a write the server refused because a concurrent one landed first',
+      error: { kind: 'conflict', code: 'CONCURRENT_WRITE', serverVersion: null },
+      expected: { key: 'planner:sync.changedElsewhere', severity: 'warning', supportHint: false },
+    },
+    {
+      name: 'an exhausted server-side planner allowance',
+      error: { kind: 'conflict', code: 'PLANNER_LIMIT_EXCEEDED', serverVersion: null },
+      expected: { key: 'common:errors.generic.message', severity: 'error', supportHint: true },
+    },
+    {
+      name: 'a duplicate vote',
+      error: { kind: 'conflict', code: 'VOTE_ALREADY_EXISTS', serverVersion: null },
+      expected: { key: 'common:errors.generic.message', severity: 'error', supportHint: true },
+    },
+    {
+      name: 'a 409 whose body could not be read, which carries the bare code',
+      error: { kind: 'conflict', code: 'CONFLICT', serverVersion: null },
+      expected: { key: 'common:errors.generic.message', severity: 'error', supportHint: true },
+    },
+    {
+      name: 'a conflict code this client has never heard of',
+      error: { kind: 'conflict', code: 'A_CODE_ADDED_LATER', serverVersion: null },
+      expected: { key: 'common:errors.generic.message', severity: 'error', supportHint: true },
+    },
   ]
 
   it.each(presented)('presents $name', ({ error, expected }) => {
@@ -220,6 +247,14 @@ describe('showError', () => {
 
     expect(sonnerToast.error).not.toHaveBeenCalled()
     expect(sonnerToast.warning).not.toHaveBeenCalled()
+  })
+
+  it('reports a conflict no dialog owns rather than leaving the user with silence', () => {
+    showError(new ConflictError('PLANNER_LIMIT_EXCEEDED', 'too many planners', null))
+
+    expect(sonnerToast.error).toHaveBeenCalledWith('common:errors.generic.message', {
+      description: CONTACT_MESSAGE,
+    })
   })
 
   it('reports a paused write rather than swallowing the failed save', () => {

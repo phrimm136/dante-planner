@@ -12,7 +12,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { ApiClient } from '@/lib/api'
 import { ConflictError } from '@/lib/apiErrors'
-import { showErrorMessage } from '@/lib/errorPresentation'
+import { showError, showErrorMessage } from '@/lib/errorPresentation'
 import { validateData } from '@/lib/validation'
 import { VoteResponseSchema } from '../schemas/PlannerListSchemas'
 import { useInvalidatePlannerLists } from './useInvalidatePlannerLists'
@@ -100,10 +100,15 @@ export function usePlannerVote() {
       // Also invalidate list queries to refresh cards
       invalidatePlannerLists()
     },
+    // The server answers a duplicate vote with a code it also uses for comment
+    // upvotes, so the copy naming the plan can only come from here.
+    meta: { suppressErrorToast: true },
     onError: (error) => {
       if (error instanceof ConflictError) {
         showErrorMessage('planner:toast.alreadyVoted')
+        return
       }
+      showError(error)
     },
   })
 }

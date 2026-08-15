@@ -26,6 +26,11 @@ export interface UseApiMutationOptions<TData, TVariables> {
   onSuccess?: (data: TData, variables: TVariables, queryClient: QueryClient) => void
   /** Extension for branch-specific failure handling; the cache still reports the error */
   onError?: (error: Error) => void
+  /**
+   * Hand reporting to `onError` entirely, for a mutation whose copy depends on
+   * which resource it acted on — something the failure alone cannot say.
+   */
+  suppressErrorToast?: boolean
 }
 
 export function useApiMutation<TData, TVariables = void>(
@@ -37,6 +42,7 @@ export function useApiMutation<TData, TVariables = void>(
     mutationFn: options.mutationFn,
     meta: {
       ...(options.successToastKey !== undefined && { successMessage: options.successToastKey }),
+      ...(options.suppressErrorToast === true && { suppressErrorToast: true }),
     },
     onSuccess: (data, variables) => {
       for (const queryKey of options.invalidateKeys?.(variables) ?? []) {

@@ -33,13 +33,8 @@ import { getKeywordIconPath } from '@/shared/assets'
 import { assertNever, calculateByteLength } from '@/lib/utils'
 import { CONFLICT_TOAST_KEY } from '../../lib/conflictChoice'
 import { MdCategoryLabel } from '../MdCategoryLabel'
-import {
-  presentError,
-  showAppError,
-  showErrorMessage,
-  showSuccess,
-  showWarning,
-} from '@/lib/errorPresentation'
+import { showAppError, showErrorMessage, showSuccess, showWarning } from '@/lib/errorPresentation'
+import { isSyncConflict } from '@/lib/apiErrorClassifier'
 
 // Project types & schemas
 import type { MDCategory } from '@/shared/gameData'
@@ -253,20 +248,20 @@ export function PlannerEditorShell({
   // is minted once per conflict rather than on every render.
   const conflictState = useMemo(
     () =>
-      saveError?.kind === 'conflict'
+      isSyncConflict(saveError)
         ? { serverVersion: saveError.serverVersion, detectedAt: new Date().toISOString() }
         : null,
     [saveError],
   )
 
-  // Show error toasts. Only the conflict has its own surface, so only it yields
-  // no message and stays set to keep the dialog open.
+  // Show error toasts. The sync conflict is the one failure with a surface of
+  // its own, so it is also the one that stays set instead of being reported.
   useEffect(() => {
     if (!saveError) return
 
-    // The conflict stays set so the dialog keeps rendering it; anything the
-    // presenter speaks for is reported and cleared.
-    if (presentError(saveError) === null) return
+    // Kept set so the dialog keeps rendering it; every other failure, including
+    // the rest of the 409 codes, is reported and cleared.
+    if (isSyncConflict(saveError)) return
 
     showAppError(saveError)
     clearError()
@@ -642,7 +637,7 @@ export function PlannerEditorShell({
     <NoteDeliveryProvider registry={noteDelivery}>
       <div className={SECTION_STYLES.LAYOUT.page}>
         <ConflictResolutionDialog
-          open={saveError?.kind === 'conflict'}
+          open={isSyncConflict(saveError)}
           conflictState={conflictState}
           resolutionError={resolutionError}
           onChoice={handleConflictResolution}

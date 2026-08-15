@@ -11,6 +11,7 @@ import { toast } from 'sonner'
 import i18n from '@/lib/i18n'
 import { linkifyText } from '@/components/ui/LinkifyText'
 import { assertNever } from '@/lib/utils'
+import { CONFLICT_CODE } from '@/lib/constants'
 
 import { classifyAppError, validationAppError } from './apiErrorClassifier'
 import type { AppError, RestrictionKind, UnavailableScope } from './apiErrorClassifier'
@@ -30,6 +31,7 @@ const RATE_LIMIT_KEY = 'common:errors.rateLimit.message'
 const FORBIDDEN_KEY = 'common:errors.forbidden.message'
 const RESOURCE_NOT_FOUND_KEY = 'common:errors.resourceNotFound.message'
 const RETRYABLE_KEY = 'common:errors.retryable.message'
+const CHANGED_ELSEWHERE_KEY = 'planner:sync.changedElsewhere'
 
 const RESTRICTION_KEY: Record<RestrictionKind, string> = {
   banned: 'common:moderation.banned',
@@ -44,16 +46,30 @@ const UNAVAILABLE_KEY: Record<UnavailableScope, string> = {
 }
 
 /**
+ * How a rejected write is shown, given the code the server rejected it with.
+ *
+ * The code is a bare string: an unlisted one is a code this client predates,
+ * and it is reported like any other failure rather than swallowed.
+ */
+function presentConflict(code: string): ErrorPresentation | null {
+  if (code === CONFLICT_CODE.SYNC_CONFLICT) return null
+  if (code === CONFLICT_CODE.CONCURRENT_WRITE) {
+    return { key: CHANGED_ELSEWHERE_KEY, severity: 'warning', supportHint: false }
+  }
+  return { key: GENERIC_KEY, severity: 'error', supportHint: true }
+}
+
+/**
  * How an error is shown, or null when a mounted surface owns it.
  *
- * A null is a delegation, never a disposal: only `conflict` returns one, and
- * only because the resolution dialog renders it. A caller that can carry a
- * conflict without that dialog mounted has to present it itself.
+ * A null is a delegation, never a disposal: only the sync conflict returns one,
+ * and only because the resolution dialog renders it. A caller that can carry
+ * that conflict without the dialog mounted has to present it itself.
  */
 export function presentError(error: AppError): ErrorPresentation | null {
   switch (error.kind) {
     case 'conflict':
-      return null
+      return presentConflict(error.code)
     case 'validation':
       return {
         key: error.key,

@@ -5,6 +5,8 @@
  * belongs to the caller that knows which surface is failing.
  */
 
+import { CONFLICT_CODE } from '@/lib/constants'
+
 import {
   AuthTemporarilyUnavailableError,
   BackendUnavailableError,
@@ -40,6 +42,19 @@ export type AppError =
   | Tagged<'retryable'>
   | Tagged<'quota'>
   | Tagged<'unknown'>
+
+/** The failure a write is answered with when the server's copy has moved on. */
+export type ConflictAppError = Extract<AppError, { kind: 'conflict' }>
+
+/**
+ * Whether a failure is the conflict a resolution flow can act on.
+ *
+ * Every other 409 shares the kind but carries no version to resolve against,
+ * so a caller that opens a resolution surface has to ask for this one by name.
+ */
+export function isSyncConflict(error: AppError | null): error is ConflictAppError {
+  return error !== null && error.kind === 'conflict' && error.code === CONFLICT_CODE.SYNC_CONFLICT
+}
 
 const API_VALIDATION_KEY = 'common:errors.validation.message'
 

@@ -3,6 +3,19 @@
  */
 
 /**
+ * The 409 codes a caller reacts to by more than reporting the failure.
+ *
+ * A body that cannot be read is answered with the bare `CONFLICT` code, so
+ * every consumer has to treat an unlisted code as an ordinary failure.
+ */
+export const CONFLICT_CODE = {
+  /** An optimistic-lock miss; the only 409 that carries the server's version */
+  SYNC_CONFLICT: 'SYNC_CONFLICT',
+  /** A write that lost a race, reported without a version to resolve against */
+  CONCURRENT_WRITE: 'CONCURRENT_WRITE',
+} as const
+
+/**
  * Stale time for static JSON data queries in milliseconds (7 days).
  * Static data only changes on deploy, so it is effectively immutable at runtime.
  */

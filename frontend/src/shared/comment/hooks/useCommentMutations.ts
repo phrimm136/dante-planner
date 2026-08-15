@@ -7,7 +7,7 @@
 
 import { ApiClient } from '@/lib/api'
 import { ConflictError } from '@/lib/apiErrors'
-import { showErrorMessage } from '@/lib/errorPresentation'
+import { showError, showErrorMessage } from '@/lib/errorPresentation'
 import { requestNotificationPermission } from '@/shared/notifications'
 import { useApiMutation } from '@/components/hooks/useApiMutation'
 import { updateCommentInTree } from '../lib/commentTree'
@@ -118,10 +118,16 @@ export function useUpvoteComment() {
         }))
       })
     },
+    // The 409 code the server sends for a duplicate upvote is the same one it
+    // sends for a duplicate planner vote, so only this call site knows which
+    // resource the user is being told about.
+    suppressErrorToast: true,
     onError: (error) => {
       if (error instanceof ConflictError) {
         showErrorMessage('common:comments.toast.alreadyUpvoted')
+        return
       }
+      showError(error)
     },
   })
 }
@@ -143,10 +149,13 @@ export function useReportComment() {
     },
     invalidateKeys: ({ plannerId }) => [commentsQueryKeys.list(plannerId)],
     successToastKey: 'common:comments.toast.reportedSuccess',
+    suppressErrorToast: true,
     onError: (error) => {
       if (error instanceof ConflictError) {
         showErrorMessage('common:comments.toast.alreadyReported')
+        return
       }
+      showError(error)
     },
   })
 }

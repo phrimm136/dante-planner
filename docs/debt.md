@@ -457,3 +457,15 @@ asset pipeline.
   who owns the field's removal; reportFailure can displace a live conflict where resolutionError
   was built for exactly that; the two held-plan callers key by different identities; the comment
   SSE hook mixes throwing and safeParse idioms in one file.
+- 2026-08-15 — `PLANNER_LIMIT_EXCEEDED` has no copy of its own in the i18n bundle and presents
+  the generic error message, so a user who hits the server-side planner cap is not told what
+  the cap is or that they hit one. The server carries the current count and the maximum only
+  inside an English prose message, with no structured field a translation could interpolate.
+- 2026-08-15 — `PlannerCardContextMenu.test.tsx` builds its duplicate-vote 409 with
+  `CONCURRENT_WRITE`, a code that endpoint cannot emit: `CONCURRENT_WRITE` is written only from
+  the optimistic-locking handler, and `PlannerContent` is the sole `@Version` entity. The codes
+  a duplicate vote actually produces are `VOTE_ALREADY_EXISTS` and `DUPLICATE_ACTION`.
+- 2026-08-15 — `KnownConstraint` omits `planner_comment_votes`, so a raced duplicate comment
+  upvote falls to `UNEXPECTED_CONFLICT`: it answers the generic `CONFLICT` code and raises a
+  Sentry alert, while the equivalent planner-vote and comment-report races are listed and
+  resolve silently to `DUPLICATE_ACTION`.

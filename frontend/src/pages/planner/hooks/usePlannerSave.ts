@@ -18,7 +18,7 @@ import {
   validateNoteSizes,
 } from '../lib/plannerValidation'
 import { plannerValidationError, toUserFriendlyError } from '../lib/plannerValidationErrors'
-import { classifyAppError } from '@/lib/apiErrorClassifier'
+import { classifyAppError, isSyncConflict } from '@/lib/apiErrorClassifier'
 import {
   planConflictResolution,
   interpretConflictPlan,
@@ -180,7 +180,7 @@ export interface PlannerSaveResult {
  *     <div>
  *       {isAutoSaving && <span>Saving...</span>}
  *       <button onClick={() => save()} disabled={isSaving}>Save</button>
- *       {error?.kind === 'conflict' && (
+ *       {isSyncConflict(error) && (
  *         <ConflictDialog
  *           onOverwrite={() => resolveConflict('overwrite')}
  *           onDiscard={() => resolveConflict('discard')}
@@ -705,7 +705,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   const failResolution = (failure: AppError): boolean => {
     reactToFailure(failure)
     setResolutionError(failure)
-    if (failure.kind === 'conflict') {
+    if (isSyncConflict(failure)) {
       setError(failure)
     }
     return false
@@ -716,7 +716,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
    * @returns true if resolution succeeded, false if it failed
    */
   const resolveConflict = async (choice: ConflictResolutionChoice): Promise<boolean> => {
-    if (error?.kind !== 'conflict') return false
+    if (!isSyncConflict(error)) return false
     const { serverVersion } = error
 
     beginSave()
