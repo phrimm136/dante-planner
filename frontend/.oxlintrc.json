@@ -81,7 +81,8 @@
       {
         "patterns": [
           { "group": ["@/pages/*/**"], "message": "Import a page slice via its public API (@/pages/<name>), not a deep internal path." },
-          { "group": ["@/shared/*/**", "!@/shared/noteEditor/**"], "message": "Import a shared concept via its public API (@/shared/<name>), not a deep internal path." }
+          { "group": ["@/shared/*/**", "!@/shared/noteEditor/**"], "message": "Import a shared concept via its public API (@/shared/<name>), not a deep internal path." },
+          { "group": ["dompurify"], "message": "Sanitizer configuration lives in @/shared/sanitize; import sanitizeUserHtml or sanitizeToPlainText from there." }
         ]
       }
     ]
@@ -96,7 +97,8 @@
             "patterns": [
               { "group": ["@/pages/*/**"], "message": "Import a page slice via its public API (@/pages/<name>), not a deep internal path." },
               { "group": ["@/shared/*/**", "!@/shared/noteEditor/**"], "message": "Import a shared concept via its public API (@/shared/<name>), not a deep internal path." },
-              { "group": ["@/pages/*", "@/pages/*/**"], "message": "This layer is a dependency sink: it must not import page slices." }
+              { "group": ["@/pages/*", "@/pages/*/**"], "message": "This layer is a dependency sink: it must not import page slices." },
+              { "group": ["dompurify"], "message": "Sanitizer configuration lives in @/shared/sanitize; import sanitizeUserHtml or sanitizeToPlainText from there." }
             ]
           }
         ]
@@ -110,7 +112,8 @@
           {
             "patterns": [
               { "group": ["@/pages/*", "@/pages/*/**"], "message": "This layer is a dependency sink: it must not import page slices." },
-              { "group": ["@/shared/*", "@/shared/*/**"], "message": "lib is the domain-free sink: it must not import shared concepts." }
+              { "group": ["@/shared/*", "@/shared/*/**"], "message": "lib is the domain-free sink: it must not import shared concepts." },
+              { "group": ["dompurify"], "message": "Sanitizer configuration lives in @/shared/sanitize; import sanitizeUserHtml or sanitizeToPlainText from there." }
             ]
           }
         ]
@@ -177,6 +180,12 @@
         "vitest/valid-describe-callback": "off",
         "vitest/no-conditional-tests": "off",
         "vitest/expect-expect": "off"
+      }
+    }
+    ,{
+      "files": ["src/shared/sanitize/lib/*.ts"],
+      "rules": {
+        "no-restricted-imports": "off"
       }
     }
   ]

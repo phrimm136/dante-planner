@@ -12,7 +12,7 @@
 
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import DOMPurify from 'dompurify'
+import { sanitizeUserHtml } from '@/shared/sanitize'
 
 import { COMMENT_INDENT_PER_LEVEL } from '@/lib/constants'
 import { formatShortRelativeTime } from '@/lib/utils'
@@ -53,8 +53,7 @@ export const CommentCard = function CommentCard({
   // Format relative dates (short format with i18n)
   const formattedCreatedAt = formatShortRelativeTime(comment.createdAt, i18n.language)
 
-  // Sanitize HTML content for XSS protection using DOMPurify
-  const sanitizedContent = comment.content ? DOMPurify.sanitize(comment.content) : ''
+  const sanitizedContent = comment.content ? sanitizeUserHtml(comment.content) : ''
 
   const handleReplyClick = () => setShowReplyEditor(true)
   const handleEditClick = () => setShowEditEditor(true)

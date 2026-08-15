@@ -8,7 +8,7 @@ import {
   showWarning,
 } from '@/lib/errorPresentation'
 import { gzip } from 'pako'
-import DOMPurify from 'dompurify'
+import { sanitizeToPlainText } from '@/shared/sanitize'
 
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -63,7 +63,7 @@ type SectionState =
  * Sanitize planner title to prevent XSS
  */
 function sanitizeTitle(title: string): string {
-  return DOMPurify.sanitize(title, { ALLOWED_TAGS: [] }).trim() || 'Untitled'
+  return sanitizeToPlainText(title).trim() || 'Untitled'
 }
 
 /**

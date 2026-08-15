@@ -34,6 +34,9 @@ const I18N_NAMESPACE_CHUNK = Object.fromEntries(
 // contenteditable support — run in the src-editor project, not under happy-dom
 const EDITOR_TESTS = [
   'src/shared/noteEditor/**/__tests__/**',
+  // DOMPurify reports itself unsupported under happy-dom and returns its input
+  // unchanged, so a sanitizer assertion there proves nothing.
+  'src/shared/sanitize/**/__tests__/**',
   'src/pages/planner/__tests__/PlannerMDEditPage.test.tsx',
   'src/pages/planner/components/planner/__tests__/PlannerMDEditorContent.test.tsx',
   'src/pages/planner/components/planner/__tests__/PlannerEditorShellFlush.test.tsx',
