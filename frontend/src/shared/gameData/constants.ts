@@ -290,6 +290,26 @@ export const FLOOR_COUNTS: Record<MDCategory, number> = {
 } as const
 
 /**
+ * Difficulties a floor may carry, indexed by 0-based floor within the category.
+ * A 15F run repeats the 10F requirement over its first `FLOOR_COUNTS['10F']`
+ * floors and demands Extreme above them.
+ */
+export const ALLOWED_FLOOR_DIFFICULTIES: Record<MDCategory, readonly (readonly DungeonIdx[])[]> = {
+  '5F': Array.from({ length: FLOOR_COUNTS['5F'] }, () => [DUNGEON_IDX.NORMAL, DUNGEON_IDX.HARD]),
+  '10F': Array.from({ length: FLOOR_COUNTS['10F'] }, () => [DUNGEON_IDX.HARD]),
+  '15F': Array.from({ length: FLOOR_COUNTS['15F'] }, (_, floorIndex) =>
+    floorIndex < FLOOR_COUNTS['10F'] ? [DUNGEON_IDX.HARD] : [DUNGEON_IDX.EXTREME],
+  ),
+}
+
+/**
+ * Dungeon index to its constant name, for developer-facing validation messages.
+ */
+export const DUNGEON_NAME_BY_IDX = new Map<DungeonIdx, string>(
+  Object.entries(DUNGEON_IDX).map(([name, idx]) => [idx, name]),
+)
+
+/**
  * Planner types for different game content
  * - MIRROR_DUNGEON: Mirror Dungeon mode (single current version)
  * - REFRACTED_RAILWAY: Refracted Railway mode (multiple parallel versions)

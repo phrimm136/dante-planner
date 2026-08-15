@@ -10,7 +10,8 @@ import {
   EGO_TYPES,
   OFFENSIVE_SKILL_SLOTS,
   FLOOR_COUNTS,
-  DUNGEON_IDX,
+  ALLOWED_FLOOR_DIFFICULTIES,
+  DUNGEON_NAME_BY_IDX,
   PLANNER_KEYWORDS,
   migrateKeywords,
 } from '@/shared/gameData'
@@ -552,11 +553,6 @@ export function validateFloorThemePacksForSave(
 
 /**
  * Validates floor difficulty requirements based on category
- *
- * Rules:
- * - 5F: All floors must be Normal(0) or Hard(1)
- * - 10F: All floors must be Hard(1)
- * - 15F: Floors 1-10 must be Hard(1), Floors 11-15 must be Extreme(3)
  */
 function validateFloorDifficulties(
   floorSelections: FloorThemeSelection[],
@@ -564,61 +560,24 @@ function validateFloorDifficulties(
   floorCount: number,
 ): DifficultyValidationError[] {
   const errors: DifficultyValidationError[] = []
+  const allowedByFloor = ALLOWED_FLOOR_DIFFICULTIES[category]
 
   for (let i = 0; i < floorCount; i++) {
     const floor = floorSelections[i]
     if (!floor) continue
 
-    const difficulty = floor.difficulty
-    const floorNumber = i + 1
+    const allowed = allowedByFloor[i]
+    if (!allowed || allowed.includes(floor.difficulty)) continue
 
-    switch (category) {
-      case '5F':
-        // 5F: All floors must be Normal(0) or Hard(1)
-        if (difficulty !== DUNGEON_IDX.NORMAL && difficulty !== DUNGEON_IDX.HARD) {
-          errors.push({
-            code: 'DIFFICULTY_INVALID_FOR_CATEGORY',
-            message: `Floor ${floorNumber} must be Normal or Hard for 5F category`,
-            field: `floorSelections[${i}].difficulty`,
-            floorIndex: i,
-            floorNumber,
-          })
-        }
-        break
-      case '10F':
-        // 10F: All floors must be Hard(1)
-        if (difficulty !== DUNGEON_IDX.HARD) {
-          errors.push({
-            code: 'DIFFICULTY_INVALID_FOR_CATEGORY',
-            message: `Floor ${floorNumber} must be Hard for 10F category`,
-            field: `floorSelections[${i}].difficulty`,
-            floorIndex: i,
-            floorNumber,
-          })
-        }
-        break
-      case '15F':
-        // 15F: Floors 1-10 must be Hard(1), Floors 11-15 must be Extreme(3)
-        if (i < 10 && difficulty !== DUNGEON_IDX.HARD) {
-          errors.push({
-            code: 'DIFFICULTY_INVALID_FOR_CATEGORY',
-            message: `Floor ${floorNumber} must be Hard for 15F category`,
-            field: `floorSelections[${i}].difficulty`,
-            floorIndex: i,
-            floorNumber,
-          })
-        }
-        if (i >= 10 && difficulty !== DUNGEON_IDX.EXTREME) {
-          errors.push({
-            code: 'DIFFICULTY_INVALID_FOR_CATEGORY',
-            message: `Floor ${floorNumber} must be Extreme for 15F category`,
-            field: `floorSelections[${i}].difficulty`,
-            floorIndex: i,
-            floorNumber,
-          })
-        }
-        break
-    }
+    const floorNumber = i + 1
+    const expected = allowed.map((idx) => DUNGEON_NAME_BY_IDX.get(idx)).join(' or ')
+    errors.push({
+      code: 'DIFFICULTY_INVALID_FOR_CATEGORY',
+      message: `Floor ${floorNumber} must be ${expected} for ${category} category`,
+      field: `floorSelections[${i}].difficulty`,
+      floorIndex: i,
+      floorNumber,
+    })
   }
 
   return errors
