@@ -13,6 +13,12 @@ row, content compared as parsed JSON trees — and if so acknowledges it with th
 writing nothing. Clients identify saves by `syncVersion` alone; the content digest never crosses
 the wire and its column is retired for want of a reader.
 
+## The rule
+
+> A stale write that would change no persisted field — every carried scalar equal, the
+> content tree-equal — is acknowledged with the stored `syncVersion`, writing nothing;
+> every other path of the version check is unchanged.
+
 ## Motivation
 
 The `(syncVersion, contentDigest)` client identity (ADR 071, RFC 0003/0004 stream 1) cannot work as
@@ -34,7 +40,7 @@ actually diverged.
   `PlannerResponse.contentDigest`, `PlannerSummaryResponse.contentDigest`, and the
   `findOwnerSummaries` projection. Nothing else reads it.
 - RFC 0004 stream 1 (in flight) holds frontend commits that consume the exposed digest; they are
-  being stripped to version-only as node `frontend-versiononly` of this proposal.
+  being stripped to version-only as job `frontend-versiononly` of this proposal.
 
 ## Prior art
 
@@ -71,15 +77,21 @@ comparands are already in hand on this branch, so no digest, hash, or token part
 wire exposure withdrawn (RFC 0003's amended stream 1), the digest column has zero readers and is
 dropped.
 
-## Decomposition
+## Plan
 
-```
-- backend-noop        — stale writes arbitrated by effective no-op equality; contentDigest leaves
-                        the response DTOs; content_digest column and its entity code retired
-- frontend-versiononly — RFC 0004 stream 1 lands version-only: client digest code stripped, batch
-                        pull and version discipline kept; RFC 0004's stream 1 text corrected
-                        (after: backend-noop)
-```
+Two phases, one job each.
+
+- **Phase 1**
+  - `backend-noop` — stale writes arbitrated by effective no-op equality; contentDigest
+    leaves the response DTOs; content_digest column and its entity code retired.
+    Files: the two upsert paths in `PlannerCommandService`, `SyncVersionValidator`,
+    the response DTOs and `findOwnerSummaries` projection, the drop migration.
+    Verification: the eight `backend-noop` scenarios and the four invariant gates.
+- **Phase 2**
+  - `frontend-versiononly` — RFC 0004 stream 1 lands version-only: client digest code
+    stripped, batch pull and version discipline kept; RFC 0004's stream 1 text
+    corrected. Verification: `frontend-schemas-parse-digestless-responses`; the digest
+    modules are deleted, so any surviving importer fails `tsc -b`.
 
 ## Scenarios
 
@@ -142,30 +154,17 @@ Scenario: frontend-schemas-parse-digestless-responses       # frontend-versionon
 - No frontend code references a content digest. Gate: the digest modules are deleted, so any
   surviving importer fails `tsc -b`.
 
-## Decisions
+## Verified facts
 
-- @sync @conflict @noop — stale writes are arbitrated by direct equality (scalars directly, content
-  as parsed trees), because both operands are local to the check and equality is the question being
-  asked. REJECTED: digest-equality comparison — spiked dead: MySQL re-sorts keys and re-spaces,
-  Jackson and JavaScript each renormalize numeric literals, so a recomputed digest diverges from
-  the stored one for semantically identical content. REJECTED: a concatenated multi-field digest —
-  equality via hashing, plus a field-recipe that must track every future mutable column.
-  REJECTED: client-visible digest tokens (the ADR 071 / RFC 0003–0004 stream 1 design) —
-  normalization makes an ack unmatchable by its author; supersedes the `@sync @digest` decisions
-  (identity, causality, recompute, backfill) on Implemented.
-- @sync @digest @retirement — the `content_digest` column is dropped, because after wire withdrawal
-  and direct comparison it has zero readers, and an unread column is speculative retention.
-  REJECTED: keeping it for observability — nothing observes it.
-- @sync @rollout @ordering — backend-noop merges before frontend-versiononly, because the
-  frontend's `.strict()` schemas reject unknown response fields, so the backend must stop emitting
-  `contentDigest` before the frontend stops declaring it. REJECTED: a tolerated optional schema
-  field — a compatibility shim that merge ordering makes unnecessary.
+1. JSON byte stability — dead. Input `{"zebra":1,…,"big":1e21,…}` returned from a
+   MySQL 8 JSON column key-resorted and re-spaced; Jackson renders `1e21` as `1.0E21`;
+   `JSON.stringify(JSON.parse(x))` renders it `1e+21`.
+2. Comparison cost — double parse plus tree-compare of a 170 KB document measured at
+   1.4 ms, paid only on the stale branch.
 
-Spike evidence: JSON byte stability — verdict dead (input
-`{"zebra":1,…,"big":1e21,…}` returned from a MySQL 8 JSON column key-resorted and re-spaced;
-Jackson renders `1e21` as `1.0E21`; `JSON.stringify(JSON.parse(x))` renders it `1e+21`).
-Comparison cost — double parse plus tree-compare of a 170 KB document measured at 1.4 ms,
-paid only on the stale branch.
+Fact 1 licenses tree-equality over byte- or digest-equality (082 @sync @conflict);
+fact 2 prices the arbitration branch. Decisions live in `docs/adr/` (082); this
+document keeps no second copy.
 
 ## Drawbacks
 

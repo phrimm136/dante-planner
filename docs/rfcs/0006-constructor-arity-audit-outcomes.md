@@ -14,6 +14,12 @@ and the unwired `REPORT_RECEIVED` type), a server-side restriction gate on edits
 published content, and an ArchUnit form ratchet on configuration scalars in constructors. The
 audit's remaining findings closed as recorded accept or reject rulings rather than work.
 
+## The rule
+
+> Every seam the audit exposed either loses its dead half, gains its missing
+> server-side gate, or gets a ratchet that makes the next silent desync loud; a
+> finding meriting none of those closed as a recorded ruling, not code.
+
 ## Motivation
 
 Twenty-three classes carry five or more constructor arguments. The count itself turned out to be a
@@ -423,21 +429,41 @@ static final ArchRule noValueConstructorParams = constructors()
 
 Dead-surface removal is pure deletion and carries no constructive code.
 
-## Decomposition
+## Plan
 
-```
-- bookmark-removal — the bookmark feature, its table (forward-only drop), wire field, icon rendering, unreachable constraint mapping, i18n stubs (separate static-submodule commit), and doc references are gone, and the open debt entries recording them are closed
-- legacy-lineage-removal — the non-lineage rotation branch, legacy admission, synthesized family ids and their call sites, and the rollout flag are gone
-- session-refresher — the filter delegates refresh orchestration to one collaborator; behavior unchanged (after: legacy-lineage-removal)
-- rotation-properties — jwt.rotation.* binds once, nested under the existing jwt properties class (after: legacy-lineage-removal)
-- token-lifecycle-consolidation — one TokenLifecycleService owns access hashes, user invalidation, families, and both Lua scripts; logout drops the refresh token revocation; the family state machine is renamed and pre-rename values are converted at boot (after: legacy-lineage-removal)
-- notification-factories — named per-type factories; the 3-arg constructor is gone
-- report-received-wiring — REPORT_RECEIVED flows from both report services to admin inboxes through the outbox; the NotificationType matrix test exists (after: notification-factories)
-- upsert-restriction-gate — restricted users cannot mutate published planners; the FE disable narrows to published planners
-- config-consolidation — every duplicated property key binds in exactly one place; feature config moves to @ConfigurationProperties
-- dead-surface-removal — the dead command methods and duplicate constructor, the unused controller token validator, the dead view-count increment, and the stale RFC index status row are gone
-- value-param-ratchet — the ArchUnit ban on @Value constructor params is blocking at a zero baseline (after: rotation-properties, config-consolidation)
-```
+Three phases. Jobs within a phase run in parallel and are file-disjoint; each job's
+verification is its scenario group below, and its files are stated in the Proposal's
+per-topic sections — the Plan keeps no second copy of them.
+
+- **Phase 1**
+  - `bookmark-removal` — the bookmark feature, its table (forward-only drop), wire
+    field, icon rendering, unreachable constraint mapping, i18n stubs (separate
+    static-submodule commit), and doc references are gone, and the open debt entries
+    recording them are closed.
+  - `legacy-lineage-removal` — the non-lineage rotation branch, legacy admission,
+    synthesized family ids and their call sites, and the rollout flag are gone.
+  - `notification-factories` — named per-type factories; the 3-arg constructor is gone.
+  - `upsert-restriction-gate` — restricted users cannot mutate published planners; the
+    FE disable narrows to published planners.
+  - `config-consolidation` — every duplicated property key binds in exactly one place;
+    feature config moves to @ConfigurationProperties.
+  - `dead-surface-removal` — the dead command methods and duplicate constructor, the
+    unused controller token validator, the dead view-count increment, and the stale
+    RFC index status row are gone.
+- **Phase 2**
+  - `session-refresher` — the filter delegates refresh orchestration to one
+    collaborator; behavior unchanged.
+  - `rotation-properties` — jwt.rotation.* binds once, nested under the existing jwt
+    properties class.
+  - `token-lifecycle-consolidation` — one TokenLifecycleService owns access hashes,
+    user invalidation, families, and both Lua scripts; logout drops the refresh token
+    revocation; the family state machine is renamed and pre-rename values are
+    converted at boot.
+  - `report-received-wiring` — REPORT_RECEIVED flows from both report services to
+    admin inboxes through the outbox; the NotificationType matrix test exists.
+- **Phase 3**
+  - `value-param-ratchet` — the ArchUnit ban on @Value constructor params is blocking
+    at a zero baseline.
 
 ## Scenarios
 
@@ -557,14 +583,14 @@ Scenario: The dead command surface is gone (dead-surface-removal)
 - The refresh flow's observable behavior is unchanged by the refresher extraction — gate: existing
   filter and rotation integration tests pass unmodified.
 
-## Decisions
+## Verified facts
 
-Recorded in `docs/adr/` at decision time (076-081, plus an addition to 058) rather than held
-here for wrap-up harvest; this section keeps no second copy.
+1. Production `planner_bookmarks` row count — spike inconclusive (no live AWS
+   session); superseded by the user's ruling that the feature was never active and
+   the table holds zero rows.
 
-- Spike: production `planner_bookmarks` row count — inconclusive (no live AWS session);
-  superseded by the user's ruling that the feature was never active and the table holds zero
-  rows.
+Decisions live in `docs/adr/` (076–081, plus an addition to 058); this document keeps
+no second copy.
 
 ## Drawbacks
 
