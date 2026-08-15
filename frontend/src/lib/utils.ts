@@ -1,17 +1,7 @@
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
-import { formatDistanceToNowStrict, type Locale } from 'date-fns'
-import { enUS, ja, ko, zhCN } from 'date-fns/locale'
 import keywordMatch from '@static/i18n/EN/keywordMatch.json'
 import i18n from './i18n'
-
-/** Map app language codes to date-fns locales */
-const dateFnsLocales: Record<string, Locale> = {
-  EN: enUS,
-  JP: ja,
-  KR: ko,
-  CN: zhCN,
-}
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -160,65 +150,6 @@ export function getLineHeightForLanguage(language?: string): number {
 export function isValidUUID(value: string): boolean {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
   return uuidRegex.test(value)
-}
-
-/**
- * Per-locale abbreviation rules applied to date-fns' full relative phrase.
- *
- * `Intl.RelativeTimeFormat` reproduces the English and Korean output exactly but
- * not the Japanese or Chinese: this UI writes 「ヶ月」 where CLDR writes 「か月」,
- * and clips 分钟/小时/个月 to 分/时/月. Locales absent from this map keep the
- * unabbreviated phrase.
- */
-const RELATIVE_TIME_ABBREVIATIONS = new Map<Locale, Array<[RegExp, string]>>([
-  [
-    enUS,
-    [
-      [/(\d+)\s*seconds?\s*ago/, '$1s ago'],
-      [/(\d+)\s*minutes?\s*ago/, '$1m ago'],
-      [/(\d+)\s*hours?\s*ago/, '$1h ago'],
-      [/(\d+)\s*days?\s*ago/, '$1d ago'],
-      [/(\d+)\s*months?\s*ago/, '$1mo ago'],
-      [/(\d+)\s*years?\s*ago/, '$1y ago'],
-    ],
-  ],
-  [ja, [[/(\d+)か月前/, '$1ヶ月前']]],
-  [
-    zhCN,
-    [
-      [/(\d+)\s*秒钟?前/, '$1秒前'],
-      [/(\d+)\s*分钟前/, '$1分前'],
-      [/(\d+)\s*小时前/, '$1时前'],
-      [/(\d+)\s*天前/, '$1天前'],
-      [/(\d+)\s*个月前/, '$1月前'],
-      [/(\d+)\s*年前/, '$1年前'],
-    ],
-  ],
-])
-
-/**
- * Formats a date to short relative time with i18n support.
- * Output format: "23m ago", "2h ago", "3d ago"
- *
- * @param date - Date to format (Date object or ISO string)
- * @param language - Optional language code. If not provided, uses current i18n language
- * @returns Short formatted relative time string
- * @example
- * formatShortRelativeTime(new Date()) // "0s ago"
- * formatShortRelativeTime("2024-01-01T00:00:00Z") // "3d ago"
- */
-export function formatShortRelativeTime(date: Date | string, language?: string): string {
-  const dateObj = typeof date === 'string' ? new Date(date) : date
-  const lang = language ?? i18n.language
-  const locale = dateFnsLocales[lang] ?? enUS
-
-  const distance = formatDistanceToNowStrict(dateObj, { locale, addSuffix: true })
-
-  const rules = RELATIVE_TIME_ABBREVIATIONS.get(locale) ?? []
-  return rules.reduce(
-    (text, [pattern, replacement]) => text.replace(pattern, replacement),
-    distance,
-  )
 }
 
 /**

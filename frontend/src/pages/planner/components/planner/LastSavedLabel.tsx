@@ -1,14 +1,6 @@
 import { useTranslation } from 'react-i18next'
-import { formatDistanceToNow } from 'date-fns'
-import { enUS, ja, ko, zhCN } from 'date-fns/locale'
 import { SECTION_STYLES } from '@/lib/constants'
-
-const DATE_FNS_LOCALES = {
-  EN: enUS,
-  JP: ja,
-  KR: ko,
-  CN: zhCN,
-}
+import { formatRelativeTime } from '@/lib/formatDate'
 
 interface LastSavedLabelProps {
   /** ISO 8601 timestamp of the last successful save, or null when there is none. */
@@ -29,10 +21,7 @@ export function LastSavedLabel({ lastSavedAt, inline = false }: LastSavedLabelPr
   if (isNaN(parsedDate.getTime())) return null
 
   const text = t('sync.lastSaved', {
-    time: formatDistanceToNow(parsedDate, {
-      addSuffix: true,
-      locale: DATE_FNS_LOCALES[i18n.language as keyof typeof DATE_FNS_LOCALES] ?? enUS,
-    }),
+    time: formatRelativeTime(lastSavedAt, i18n.language),
   })
 
   if (inline) return <>{` - ${text}`}</>

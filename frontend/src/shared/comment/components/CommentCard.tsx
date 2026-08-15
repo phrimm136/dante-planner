@@ -15,7 +15,7 @@ import { useTranslation } from 'react-i18next'
 import { sanitizeUserHtml } from '@/shared/sanitize'
 
 import { COMMENT_INDENT_PER_LEVEL } from '@/lib/constants'
-import { formatShortRelativeTime } from '@/lib/utils'
+import { formatCompactRelativeTime } from '@/lib/formatDate'
 import { formatUsername } from '@/lib/formatUsername'
 import { DeletedCommentPlaceholder } from './DeletedCommentPlaceholder'
 import { CommentActionButtons } from './CommentActionButtons'
@@ -51,7 +51,7 @@ export const CommentCard = function CommentCard({
       : t('pages.plannerMD.comments.deletedUser')
 
   // Format relative dates (short format with i18n)
-  const formattedCreatedAt = formatShortRelativeTime(comment.createdAt, i18n.language)
+  const formattedCreatedAt = formatCompactRelativeTime(comment.createdAt, i18n.language)
 
   const sanitizedContent = comment.content ? sanitizeUserHtml(comment.content) : ''
 

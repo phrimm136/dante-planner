@@ -148,10 +148,53 @@ export function formatEntityReleaseDate(dateInt: number, locale: string = 'en-US
   })
 }
 
+const MS_PER_SECOND = 1000
+const MS_PER_MINUTE = 60 * MS_PER_SECOND
+const MS_PER_HOUR = 60 * MS_PER_MINUTE
+const MS_PER_DAY = 24 * MS_PER_HOUR
+const MS_PER_MONTH = 30.436875 * MS_PER_DAY
+const MS_PER_YEAR = 365.2425 * MS_PER_DAY
+
+/** Largest first: the first unit the elapsed span fills whole is the one rendered. */
+const RELATIVE_UNITS: ReadonlyArray<readonly [Intl.RelativeTimeFormatUnit, number]> = [
+  ['year', MS_PER_YEAR],
+  ['month', MS_PER_MONTH],
+  ['day', MS_PER_DAY],
+  ['hour', MS_PER_HOUR],
+  ['minute', MS_PER_MINUTE],
+  ['second', MS_PER_SECOND],
+]
+
 /**
- * Format a relative time string (e.g., "2 hours ago", "3 days ago").
- *
- * Useful for displaying how long ago something happened.
+ * App language code (EN/JP/KR/CN) to BCP 47, passing through anything already
+ * a locale string. Undefined leaves the runtime default in charge.
+ */
+function toRelativeTimeLocale(locale?: string): string | undefined {
+  return locale ? (I18N_LOCALE_MAP[locale] ?? locale) : undefined
+}
+
+/**
+ * Signed unit count between now and `dateString`, negative for the past.
+ */
+function relativeTimeParts(dateString: string): {
+  value: number
+  unit: Intl.RelativeTimeFormatUnit
+} {
+  const elapsedMs = Date.now() - new Date(dateString).getTime()
+  const magnitudeMs = Math.abs(elapsedMs)
+  // A zero span keeps the -1: Intl reads -0 as past ("0s ago") and 0 as future ("in 0s").
+  const direction = elapsedMs < 0 ? 1 : -1
+
+  for (const [unit, unitMs] of RELATIVE_UNITS) {
+    const value = Math.floor(magnitudeMs / unitMs)
+    if (value > 0) return { value: direction * value, unit }
+  }
+
+  return { value: direction * Math.floor(magnitudeMs / MS_PER_SECOND), unit: 'second' }
+}
+
+/**
+ * Format a relative time string (e.g., "2 hours ago", "yesterday").
  *
  * @param dateString - ISO 8601 date string from API
  * @param locale - Optional app language code (EN/JP/KR/CN) or BCP 47 locale string
@@ -162,27 +205,32 @@ export function formatEntityReleaseDate(dateInt: number, locale: string = 'en-US
  * formatRelativeTime("2024-12-31T10:00:00Z", "KR") // => "5시간 전"
  */
 export function formatRelativeTime(dateString: string, locale?: string): string {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffSeconds = Math.floor(diffMs / 1000)
-  const diffMinutes = Math.floor(diffSeconds / 60)
-  const diffHours = Math.floor(diffMinutes / 60)
-  const diffDays = Math.floor(diffHours / 24)
+  const { value, unit } = relativeTimeParts(dateString)
 
-  const bcp47Locale = locale ? (I18N_LOCALE_MAP[locale] ?? locale) : undefined
-  const rtf = new Intl.RelativeTimeFormat(bcp47Locale, { numeric: 'auto' })
+  return new Intl.RelativeTimeFormat(toRelativeTimeLocale(locale), { numeric: 'auto' }).format(
+    value,
+    unit,
+  )
+}
 
-  if (diffDays > 0) {
-    return rtf.format(-diffDays, 'day')
-  }
-  if (diffHours > 0) {
-    return rtf.format(-diffHours, 'hour')
-  }
-  if (diffMinutes > 0) {
-    return rtf.format(-diffMinutes, 'minute')
-  }
-  return rtf.format(-diffSeconds, 'second')
+/**
+ * Format a relative time string in its shortest localized form ("23m ago", "3d ago").
+ *
+ * @param dateString - ISO 8601 date string from API
+ * @param locale - Optional app language code (EN/JP/KR/CN) or BCP 47 locale string
+ * @returns Abbreviated relative time string
+ *
+ * @example
+ * formatCompactRelativeTime("2024-12-31T10:00:00Z") // => "5h ago"
+ * formatCompactRelativeTime("2024-12-31T10:00:00Z", "KR") // => "5시간 전"
+ */
+export function formatCompactRelativeTime(dateString: string, locale?: string): string {
+  const { value, unit } = relativeTimeParts(dateString)
+
+  return new Intl.RelativeTimeFormat(toRelativeTimeLocale(locale), {
+    numeric: 'always',
+    style: 'narrow',
+  }).format(value, unit)
 }
 
 /**

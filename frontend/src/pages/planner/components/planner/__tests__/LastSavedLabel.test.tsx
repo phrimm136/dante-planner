@@ -1,15 +1,10 @@
 /**
- * Parity tests for the extracted last-saved label.
- *
- * `LegacyLastSaved` is the pre-split inline IIFE, transcribed verbatim from the
- * editor. Every row renders both and compares innerHTML, so the extraction
- * cannot have changed a byte of the emitted DOM.
+ * Rendering rules for the last-saved label: the standalone span, the inline
+ * suffix, and the timestamps that must render nothing at all.
  */
 
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { render } from '@testing-library/react'
-import { formatDistanceToNow } from 'date-fns'
-import { enUS, ja, ko, zhCN } from 'date-fns/locale'
 import { LastSavedLabel } from '../LastSavedLabel'
 
 vi.mock('react-i18next', () => ({
@@ -20,89 +15,78 @@ vi.mock('react-i18next', () => ({
   }),
 }))
 
-const dateFnsLocale = { EN: enUS, JP: ja, KR: ko, CN: zhCN }['EN'] ?? enUS
+const NOW = new Date('2026-08-15T00:00:00.000Z')
 
-const t = (key: string, params?: Record<string, unknown>) =>
-  params && 'time' in params ? `${key}:${String(params.time)}` : key
+const AUTO_SAVING = 'pages.plannerMD.save.autoSaving'
 
-/** The pre-split inline suffix, rendered inside the auto-saving span. */
-function LegacyInline({ lastSavedAt }: { lastSavedAt: string | null }) {
-  return (
-    <span className="text-sm text-muted-foreground">
-      {t('pages.plannerMD.save.autoSaving')}
-      {lastSavedAt &&
-        (() => {
-          try {
-            const parsedDate = new Date(lastSavedAt)
-            if (isNaN(parsedDate.getTime())) return null
-            return ` - ${t('sync.lastSaved', { time: formatDistanceToNow(parsedDate, { addSuffix: true, locale: dateFnsLocale }) })}`
-          } catch {
-            return null
-          }
-        })()}
-    </span>
-  )
-}
+/** Timestamp, and the relative phrase the label must render for it. */
+const RENDERED_CASES: Array<[string, string, string]> = [
+  ['a recent timestamp', new Date(NOW.getTime() - 120_000).toISOString(), '2 minutes ago'],
+  ['an old timestamp', '2020-01-01T00:00:00.000Z', '6 years ago'],
+  ['a future timestamp', new Date(NOW.getTime() + 600_000).toISOString(), 'in 10 minutes'],
+]
 
-/** The pre-split standalone span. */
-function LegacyStandalone({ lastSavedAt }: { lastSavedAt: string | null }) {
-  return (
-    <>
-      {lastSavedAt &&
-        (() => {
-          try {
-            const parsedDate = new Date(lastSavedAt)
-            if (isNaN(parsedDate.getTime())) return null
-            return (
-              <span className="text-sm text-muted-foreground">
-                {t('sync.lastSaved', {
-                  time: formatDistanceToNow(parsedDate, {
-                    addSuffix: true,
-                    locale: dateFnsLocale,
-                  }),
-                })}
-              </span>
-            )
-          } catch {
-            return null
-          }
-        })()}
-    </>
-  )
-}
-
-const CASES: Array<[string, string | null]> = [
-  ['a recent timestamp', new Date(Date.now() - 120_000).toISOString()],
-  ['an old timestamp', '2020-01-01T00:00:00.000Z'],
-  ['a future timestamp', new Date(Date.now() + 600_000).toISOString()],
+const EMPTY_CASES: Array<[string, string | null]> = [
   ['an unparseable string', 'not-a-date'],
   ['an empty string', ''],
   ['null', null],
 ]
 
-describe('LastSavedLabel DOM parity', () => {
-  it.each(CASES)('matches the legacy standalone span for %s', (_label, lastSavedAt) => {
-    const legacy = render(<LegacyStandalone lastSavedAt={lastSavedAt} />)
-    const legacyHtml = legacy.container.innerHTML
-    legacy.unmount()
-
-    const next = render(<LastSavedLabel lastSavedAt={lastSavedAt} />)
-
-    expect(next.container.innerHTML).toBe(legacyHtml)
+describe('LastSavedLabel', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.setSystemTime(NOW)
   })
 
-  it.each(CASES)('matches the legacy inline suffix for %s', (_label, lastSavedAt) => {
-    const legacy = render(<LegacyInline lastSavedAt={lastSavedAt} />)
-    const legacyHtml = legacy.container.innerHTML
-    legacy.unmount()
+  afterEach(() => {
+    vi.useRealTimers()
+  })
 
-    const next = render(
+  it.each(RENDERED_CASES)(
+    'renders the standalone span for %s',
+    (_label, lastSavedAt, relativeTime) => {
+      const { container } = render(<LastSavedLabel lastSavedAt={lastSavedAt} />)
+
+      expect(container.innerHTML).toBe(
+        `<span class="text-sm text-muted-foreground">sync.lastSaved:${relativeTime}</span>`,
+      )
+    },
+  )
+
+  it.each(RENDERED_CASES)(
+    'renders the inline suffix for %s',
+    (_label, lastSavedAt, relativeTime) => {
+      const { container } = render(
+        <span className="text-sm text-muted-foreground">
+          {AUTO_SAVING}
+          <LastSavedLabel lastSavedAt={lastSavedAt} inline />
+        </span>,
+      )
+
+      const line = container.firstElementChild
+
+      expect(line?.childElementCount).toBe(0)
+      expect(line?.textContent).toBe(`${AUTO_SAVING} - sync.lastSaved:${relativeTime}`)
+    },
+  )
+
+  it.each(EMPTY_CASES)('renders nothing standalone for %s', (_label, lastSavedAt) => {
+    const { container } = render(<LastSavedLabel lastSavedAt={lastSavedAt} />)
+
+    expect(container.innerHTML).toBe('')
+  })
+
+  it.each(EMPTY_CASES)('renders no inline suffix for %s', (_label, lastSavedAt) => {
+    const { container } = render(
       <span className="text-sm text-muted-foreground">
-        {t('pages.plannerMD.save.autoSaving')}
+        {AUTO_SAVING}
         <LastSavedLabel lastSavedAt={lastSavedAt} inline />
       </span>,
     )
 
-    expect(next.container.innerHTML).toBe(legacyHtml)
+    const line = container.firstElementChild
+
+    expect(line?.childElementCount).toBe(0)
+    expect(line?.textContent).toBe(AUTO_SAVING)
   })
 })
