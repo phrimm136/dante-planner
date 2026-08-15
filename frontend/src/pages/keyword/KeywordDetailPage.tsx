@@ -7,7 +7,7 @@
  * Pattern Source: EGOGiftDetailPage.tsx
  */
 
-import { Link, useParams } from '@tanstack/react-router'
+import { useParams } from '@tanstack/react-router'
 import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -15,6 +15,7 @@ import { FormattedDescription } from '@/shared/gameText'
 import { DetailPageLayout } from '@/components/layout/DetailPageLayout'
 import { DetailPageSkeleton } from '@/components/feedback/DetailPageSkeleton'
 import { Skeleton } from '@/components/ui/skeleton'
+import { KeywordBacklinkList } from './components/KeywordBacklinkList'
 import { KeywordCard } from './components/KeywordCard'
 import { useKeywordDetailSpec, useKeywordDetailI18n } from './hooks/useKeywordDetailData'
 import { useIdentityListI18n } from '@/pages/identity'
@@ -52,42 +53,37 @@ function KeywordNameContent({ id, nameColor }: { id: string; nameColor: string }
 }
 
 /**
+ * Entry label for backlinks to sinner-owned entities: name, then the sinner.
+ */
+function useSinnerScopedLabel() {
+  const { t } = useTranslation('sinnerNames')
+
+  return (id: string, name: string) => {
+    const sinnerKey = getSinnerFromId(id)
+    return (
+      <>
+        {name.replace(/\n/g, ' ')} - {t(sinnerKey, { defaultValue: sinnerKey })}
+      </>
+    )
+  }
+}
+
+/**
  * Backlink section for Related Identities.
  * Internal Suspense for independent language switching.
  */
 function KeywordRelatedIdentities({ ids }: { ids: string[] }) {
-  const { t } = useTranslation(['database', 'sinnerNames'])
-  const nameList = useIdentityListI18n()
+  const names = useIdentityListI18n()
+  const formatLabel = useSinnerScopedLabel()
 
   return (
-    <div className="space-y-1.5">
-      <div className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
-        {t('keyword.relatedIdentities', { ns: 'database' })}
-      </div>
-      {ids.length === 0 ? (
-        <div className="text-sm text-muted-foreground/60">-</div>
-      ) : (
-        <div className="text-sm">
-          {ids.map((entityId, idx) => {
-            const sinnerKey = getSinnerFromId(entityId)
-            const sinnerName = t(`${sinnerKey}`, { ns: 'sinnerNames', defaultValue: sinnerKey })
-            const identityName = (nameList[entityId] ?? entityId).replace(/\n/g, ' ')
-            return (
-              <span key={entityId}>
-                {idx > 0 && ', '}
-                <Link
-                  to="/identity/$id"
-                  params={{ id: entityId }}
-                  className="hover:underline text-foreground"
-                >
-                  {identityName} - {sinnerName}
-                </Link>
-              </span>
-            )
-          })}
-        </div>
-      )}
-    </div>
+    <KeywordBacklinkList
+      labelKey="keyword.relatedIdentities"
+      ids={ids}
+      names={names}
+      to="/identity/$id"
+      formatLabel={formatLabel}
+    />
   )
 }
 
@@ -96,38 +92,17 @@ function KeywordRelatedIdentities({ ids }: { ids: string[] }) {
  * Internal Suspense for independent language switching.
  */
 function KeywordRelatedEgos({ ids }: { ids: string[] }) {
-  const { t } = useTranslation(['database', 'sinnerNames'])
-  const nameList = useEGOListI18n()
+  const names = useEGOListI18n()
+  const formatLabel = useSinnerScopedLabel()
 
   return (
-    <div className="space-y-1.5">
-      <div className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
-        {t('keyword.relatedEgos', { ns: 'database' })}
-      </div>
-      {ids.length === 0 ? (
-        <div className="text-sm text-muted-foreground/60">-</div>
-      ) : (
-        <div className="text-sm">
-          {ids.map((entityId, idx) => {
-            const sinnerKey = getSinnerFromId(entityId)
-            const sinnerName = t(`${sinnerKey}`, { ns: 'sinnerNames', defaultValue: sinnerKey })
-            const egoName = (nameList[entityId] ?? entityId).replace(/\n/g, ' ')
-            return (
-              <span key={entityId}>
-                {idx > 0 && ', '}
-                <Link
-                  to="/ego/$id"
-                  params={{ id: entityId }}
-                  className="hover:underline text-foreground"
-                >
-                  {egoName} - {sinnerName}
-                </Link>
-              </span>
-            )
-          })}
-        </div>
-      )}
-    </div>
+    <KeywordBacklinkList
+      labelKey="keyword.relatedEgos"
+      ids={ids}
+      names={names}
+      to="/ego/$id"
+      formatLabel={formatLabel}
+    />
   )
 }
 
@@ -136,33 +111,15 @@ function KeywordRelatedEgos({ ids }: { ids: string[] }) {
  * Internal Suspense for independent language switching.
  */
 function KeywordRelatedEgoGifts({ ids }: { ids: string[] }) {
-  const { t } = useTranslation('database')
-  const nameList = useEGOGiftListI18n()
+  const names = useEGOGiftListI18n()
 
   return (
-    <div className="space-y-1.5">
-      <div className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
-        {t('keyword.relatedEgoGifts')}
-      </div>
-      {ids.length === 0 ? (
-        <div className="text-sm text-muted-foreground/60">-</div>
-      ) : (
-        <div className="text-sm">
-          {ids.map((entityId, idx) => (
-            <span key={entityId}>
-              {idx > 0 && ', '}
-              <Link
-                to="/ego-gift/$id"
-                params={{ id: entityId }}
-                className="hover:underline text-foreground"
-              >
-                {nameList[entityId] ?? entityId}
-              </Link>
-            </span>
-          ))}
-        </div>
-      )}
-    </div>
+    <KeywordBacklinkList
+      labelKey="keyword.relatedEgoGifts"
+      ids={ids}
+      names={names}
+      to="/ego-gift/$id"
+    />
   )
 }
 
