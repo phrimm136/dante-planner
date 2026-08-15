@@ -17,10 +17,6 @@ const MAC_SYMBOLS: Record<string, string> = {
   capslock: '⇪',
 } as const
 
-export function cn(...classes: (string | boolean | undefined | null)[]): string {
-  return classes.filter(Boolean).join(' ')
-}
-
 /**
  * Determines if the current platform is macOS
  * @returns boolean indicating if the current platform is Mac
