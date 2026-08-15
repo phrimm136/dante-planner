@@ -118,3 +118,59 @@ asset pipeline.
   too short under load (transient "did not start" failures on a busy box) — replace with
   a bounded poll of `Replica_SQL_Running`. Step 2's flyway grep was fixed 2026-08-13 to
   match "is up to date" on re-runs; the sleep remains.
+- Two alt-text sites still carry hardcoded English because no registered namespace names
+  them and `static/` was out of scope for the pass: `shared/skill/components/SkillInfoPanel.tsx`
+  (`alt={isDefenseSkill ? 'Defense' : 'Attack'}` — `database:skill.defense` covers one arm,
+  nothing covers "Attack") and `pages/identity/components/ResistancePanel.tsx`
+  (`Slash`/`Pierce`/`Blunt` — labels exist in `plannerKeywords.json`, which is not in
+  `NAMESPACES` and is lazy-loaded by a planner hook, so an identity component cannot reach
+  them). Adding the three damage types plus an "Attack" sibling to `database` closes both.
+  `SkillInfoPanel`'s attack-weight squares also lost their count to the accessibility tree
+  when they took `alt=""`; conveying it needs an interpolated `aria-label` on the container.
+- `ApiClient.post/put/patch` drop falsy bodies: the body is spread under a truthiness test,
+  so `post('/x', false)`, `post('/x', 0)` and `post('/x', '')` send no body while still
+  setting `Content-Type: application/json`. Widening the guard to `!== undefined` is a
+  behavior change no current caller needs, which is why it was left as found.
+- `shared/comment/lib/commentTree.ts` is inconsistent about a node with no `replies` array:
+  `containsComment` and `insertComment` tolerate it (and a test pins that), while
+  `updateCommentInTree` and `countComments` dereference it unguarded and would throw on the
+  same input. `replies` is a declared non-optional property, so no compiler flag surfaces it.
+- `components/hooks/useUrlFilters.ts` documents that "an undefined value drops its key", but
+  its `setParams(updates: Partial<TParams>)` signature cannot express that under
+  `exactOptionalPropertyTypes`. `usePlannerSearchFilters` works around it with a locally
+  widened mapped type; the root fix is widening the shared signature to
+  `{[K in keyof TParams]?: TParams[K] | undefined}`, which also serves `useMDUserFilters`
+  and `useMDGesellschaftFilters`.
+- `lib/constants/theme.ts` declares `DIFFICULTY_COLORS: Record<string, string>` and
+  `MD_ACCENT_COLORS: Record<number, string>` — index signatures over finite domains
+  (`DifficultyLabel`, the MD versions). Keying them by those literal unions would make every
+  lookup non-optional at the root and let two consumer widenings be reverted
+  (`ThemePackSelectorPane.getDifficultyColor`, `StartBuffCardVariant.descriptionColor`).
+- DOMPurify reports itself unsupported under happy-dom and hands back its input, so any test
+  outside `src/shared/sanitize/**` that asserts on sanitized output is asserting on garbage.
+  `vite.config.ts` routes the sanitizer's own tests to jsdom for exactly this reason; the
+  same hazard applies to every other suite that happens to sanitize.
+- `StartGiftEditPane.handleGiftClick` did not fold into the shared `applyGiftToggle`: it
+  works on unencoded ids, writes three store slices in one update (dropping the old row's
+  gifts, setting the keyword, setting the selection), and its same-row arm is already
+  `useCappedSelection.toggle` with a cap and a mirror. The recipe cascade would be wrong for
+  start gifts. Folding it needs cap, mirror and keyword injection — a different function.
+- `HorizontalThemePackGallery.getFloorIndexForPack` returns `-1` for a pack absent from
+  `floorSelections`, which yields the note key `floor--1` and renders "Floor 0".
+- Two deliberate UX regressions taken to make elements keyboard-reachable: `StartBuffCard`'s
+  description sits under a full-card overlay button and can no longer be wheel-scrolled (its
+  scrollbar was already hidden), and `NoteEditor` now activates on focus rather than click,
+  so clicking the byte-counter strip or the border padding no longer reveals the toolbar.
+  Both are reversible if the affordance turns out to matter more than the reach.
+- The full-suite worker OOM is survivable with `vitest run --maxWorkers=1` (green at 216
+  files / 7814 tests where `--maxWorkers=2` intermittently loses a worker on a loaded box).
+  That is a workaround, not the pool-tuning pass the earlier entry asks for.
+- `DeckFilterBar` renders the Reset All control twice with identical props and children (a
+  desktop `resetAllButton` and an inline mobile copy); `deckFilterFacets.parity.test.ts`
+  keeps a fifth hand-written enumeration of the ten filter sets in its `BASE_STATE` fixture,
+  which `createDefaultDeckFilterState()` now supersedes.
+- `pages/identity/lib/formatSanityCondition.ts` still exports `formatSanityConditions` with
+  its own unit tests, but production no longer calls it — `useSanityConditionFormatter`
+  maps the singular form over the names instead of zipping two parallel arrays.
+- `vite.config.ts`'s `EDITOR_TESTS` list names `PlannerMDEditorContent.test.tsx`, which no
+  longer exists.
