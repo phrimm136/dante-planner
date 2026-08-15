@@ -178,7 +178,7 @@ function AuthSectionFallback() {
  * Auth-dependent UI is isolated in AuthSection with Suspense boundary.
  */
 export function Header() {
-  const { t, i18n } = useTranslation(['common', 'association'])
+  const { t, i18n } = useTranslation('common')
   const displayFont = getDisplayFontForLabel()
 
   const changeLanguage = (lng: string) => {
