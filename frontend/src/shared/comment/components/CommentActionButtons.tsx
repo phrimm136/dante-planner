@@ -164,7 +164,12 @@ export function CommentActionButtons({
       {hasMenuItems && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-7 px-2 sm:hidden">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 sm:hidden"
+              aria-label={t('common:a11y.moreActions', 'More actions')}
+            >
               <MoreHorizontal className="size-3.5" />
             </Button>
           </DropdownMenuTrigger>

@@ -158,8 +158,9 @@ function AuthSection() {
  * AuthSectionFallback - Loading state for auth section
  */
 function AuthSectionFallback() {
+  const { t } = useTranslation('common')
   return (
-    <Button variant="ghost" size="icon" disabled>
+    <Button variant="ghost" size="icon" disabled aria-label={t('loading')}>
       <User className="animate-pulse" />
     </Button>
   )

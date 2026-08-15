@@ -199,6 +199,7 @@ export function PublishedPlannerHeader({
               size="sm"
               onClick={() => setShowDeleteDialog(true)}
               className="text-destructive hover:text-destructive"
+              aria-label={t('pages.plannerList.contextMenu.delete')}
             >
               <Trash2 className="size-4" />
               <span className="hidden lg:inline">{t('pages.plannerList.contextMenu.delete')}</span>

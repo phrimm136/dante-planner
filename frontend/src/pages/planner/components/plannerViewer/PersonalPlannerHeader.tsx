@@ -257,6 +257,11 @@ export function PersonalPlannerHeader({
               size="sm"
               onClick={handlePublishToggle}
               disabled={publishMutation.isPending || isUploadingForPublish}
+              aria-label={t(
+                PUBLISH_LABEL_KEYS[publishMutation.isPending ? 'pending' : 'idle'][
+                  planner.metadata.published ? 'unpublish' : 'publish'
+                ],
+              )}
             >
               <Upload className="size-4" />
               <span className="hidden lg:inline">
