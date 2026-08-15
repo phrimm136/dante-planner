@@ -1,29 +1,6 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { useTranslation } from 'react-i18next'
-import { createStaticDataQueryOptions } from '@/lib/queryOptions'
+import { useEntityListData } from '@/shared/entityCatalog'
 import type { BattleKeywords } from '../types/StartBuffTypes'
-import { BattleKeywordsSchema } from '../schemas/BattleKeywordsSchemas'
-import { BattleKeywordSpecListSchema } from '../schemas/KeywordSchemas'
-import { keywordListQueryKeys } from './useKeywordListData'
-
-function createBattleKeywordsI18nQueryOptions(language: string) {
-  return createStaticDataQueryOptions(
-    keywordListQueryKeys.i18n(language),
-    () => import(`@static/i18n/${language}/battleKeywords.json`),
-    BattleKeywordsSchema,
-    `battleKeywords / ${language}`,
-    { keepPrevious: true },
-  )
-}
-
-function createBattleKeywordsSpecQueryOptions() {
-  return createStaticDataQueryOptions(
-    keywordListQueryKeys.spec(),
-    () => import('@static/data/battleKeywordSpecList.json'),
-    BattleKeywordSpecListSchema,
-    'battleKeywords spec',
-  )
-}
+import { KEYWORD_LIST } from './useKeywordListData'
 
 /**
  * Hook that loads battle keywords with i18n translations merged with spec data.
@@ -34,10 +11,7 @@ function createBattleKeywordsSpecQueryOptions() {
  * Used for translating buff keywords like ParryingResultUp, AttackDmgUp, Protection.
  */
 export function useBattleKeywords(): { data: BattleKeywords } {
-  const { i18n } = useTranslation()
-
-  const { data: i18nData } = useSuspenseQuery(createBattleKeywordsI18nQueryOptions(i18n.language))
-  const { data: specData } = useSuspenseQuery(createBattleKeywordsSpecQueryOptions())
+  const { spec: specData, i18n: i18nData } = useEntityListData(KEYWORD_LIST)
 
   // Merge i18n (name, desc) with spec (iconId, buffType) for each keyword
   const merged: BattleKeywords = {}

@@ -1,7 +1,12 @@
-import { useSuspenseQuery, useQuery } from '@tanstack/react-query'
-import { useTranslation } from 'react-i18next'
+import type { z } from 'zod'
 import { createEntityListQueryKeys } from '@/lib/queryKeys'
-import { createStaticDataQueryOptions } from '@/lib/queryOptions'
+import {
+  useEntityListData,
+  useEntityListI18n,
+  useEntityListI18nDeferred,
+  useEntityListSpec,
+  type EntityListDataConfig,
+} from '@/shared/entityCatalog'
 import { BattleKeywordSpecListSchema } from '../schemas/KeywordSchemas'
 import { BattleKeywordsSchema } from '../schemas/BattleKeywordsSchemas'
 import type { BattleKeywordSpecEntry } from '../types/KeywordTypes'
@@ -9,23 +14,16 @@ import type { BattleKeywordI18nEntry } from '../types/StartBuffTypes'
 
 export const keywordListQueryKeys = createEntityListQueryKeys('keyword')
 
-function createKeywordSpecListQueryOptions() {
-  return createStaticDataQueryOptions(
-    keywordListQueryKeys.spec(),
-    () => import('@static/data/battleKeywordSpecList.json'),
-    BattleKeywordSpecListSchema,
-    'keyword specList',
-  )
-}
-
-function createKeywordI18nQueryOptions(language: string) {
-  return createStaticDataQueryOptions(
-    keywordListQueryKeys.i18n(language),
-    () => import(`@static/i18n/${language}/battleKeywords.json`),
-    BattleKeywordsSchema,
-    `keyword i18n / ${language}`,
-    { keepPrevious: true },
-  )
+export const KEYWORD_LIST: EntityListDataConfig<
+  z.infer<typeof BattleKeywordSpecListSchema>,
+  z.infer<typeof BattleKeywordsSchema>
+> = {
+  kind: 'keyword',
+  specImport: () => import('@static/data/battleKeywordSpecList.json'),
+  specSchema: BattleKeywordSpecListSchema,
+  i18nImport: (language) => import(`@static/i18n/${language}/battleKeywords.json`),
+  i18nSchema: BattleKeywordsSchema,
+  emptyI18n: {},
 }
 
 /**
@@ -37,8 +35,7 @@ function createKeywordI18nQueryOptions(language: string) {
  * @returns Validated keyword spec map (id -> BattleKeywordSpecEntry)
  */
 export function useKeywordListSpec(): Record<string, BattleKeywordSpecEntry> {
-  const { data: spec } = useSuspenseQuery(createKeywordSpecListQueryOptions())
-  return spec
+  return useEntityListSpec(KEYWORD_LIST)
 }
 
 /**
@@ -51,13 +48,8 @@ export function useKeywordListSpec(): Record<string, BattleKeywordSpecEntry> {
  * @returns Validated keyword i18n map (id -> { name, desc })
  */
 export function useKeywordListI18n(): Record<string, BattleKeywordI18nEntry> {
-  const { i18n } = useTranslation()
-  const { data: i18nData } = useSuspenseQuery(createKeywordI18nQueryOptions(i18n.language))
-  return i18nData
+  return useEntityListI18n(KEYWORD_LIST)
 }
-
-// Empty i18n list constant for loading state
-const EMPTY_I18N_LIST: Record<string, BattleKeywordI18nEntry> = {}
 
 /**
  * Non-suspending version of useKeywordListI18n for list filtering.
@@ -67,9 +59,7 @@ const EMPTY_I18N_LIST: Record<string, BattleKeywordI18nEntry> = {}
  * @returns Keyword i18n map (id -> { name, desc }), empty object while loading
  */
 export function useKeywordListI18nDeferred(): Record<string, BattleKeywordI18nEntry> {
-  const { i18n } = useTranslation()
-  const { data: i18nData } = useQuery(createKeywordI18nQueryOptions(i18n.language))
-  return i18nData ?? EMPTY_I18N_LIST
+  return useEntityListI18nDeferred(KEYWORD_LIST)
 }
 
 /**
@@ -84,13 +74,5 @@ export function useKeywordListData(): {
   spec: Record<string, BattleKeywordSpecEntry>
   i18n: Record<string, BattleKeywordI18nEntry>
 } {
-  const { i18n } = useTranslation()
-
-  const { data: spec } = useSuspenseQuery(createKeywordSpecListQueryOptions())
-  const { data: i18nData } = useSuspenseQuery(createKeywordI18nQueryOptions(i18n.language))
-
-  return {
-    spec,
-    i18n: i18nData,
-  }
+  return useEntityListData(KEYWORD_LIST)
 }
