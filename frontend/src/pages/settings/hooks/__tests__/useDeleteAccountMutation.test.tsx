@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { useDeleteAccountMutation } from '../useUserSettingsQuery'
+import { useDeleteAccountMutation } from '../useAccountData'
 import { ApiClient } from '@/lib/api'
 
 // Mock ApiClient

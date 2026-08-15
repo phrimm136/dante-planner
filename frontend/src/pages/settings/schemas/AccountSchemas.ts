@@ -1,9 +1,9 @@
 import { z } from 'zod'
 
 /**
- * User Settings Schemas
+ * Account Schemas
  *
- * Zod schemas for runtime validation of user settings data structures.
+ * Zod schemas for runtime validation of account data structures.
  * Used for username customization and account deletion.
  * Types are derived via z.infer — schemas are the single source of truth.
  */

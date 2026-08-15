@@ -1,10 +1,7 @@
 import { useSuspenseQuery, useMutation, useQueryClient, queryOptions } from '@tanstack/react-query'
 import { ApiClient } from '@/lib/api'
 import { validateData } from '@/lib/validation'
-import {
-  EpithetListResponseSchema,
-  UserDeletionResponseSchema,
-} from '../schemas/UserSettingsSchemas'
+import { EpithetListResponseSchema, UserDeletionResponseSchema } from '../schemas/AccountSchemas'
 import { UserSchema } from '@/shared/auth'
 import { authQueryKeys } from '@/shared/auth'
 import type {
@@ -16,9 +13,9 @@ import type { User } from '@/shared/auth'
 import { STALE_TIME } from '@/lib/constants'
 
 /**
- * Query keys for user settings queries
+ * Query keys for account queries
  */
-export const userSettingsQueryKeys = {
+export const accountQueryKeys = {
   epithets: () => ['user', 'epithets'] as const,
 }
 
@@ -28,7 +25,7 @@ export const userSettingsQueryKeys = {
  */
 function createEpithetsQueryOptions() {
   return queryOptions({
-    queryKey: userSettingsQueryKeys.epithets(),
+    queryKey: accountQueryKeys.epithets(),
     queryFn: async ({ signal }): Promise<EpithetListResponse> => {
       const data = await ApiClient.get<EpithetListResponse>('/api/user/epithets', { signal })
       return validateData(data, EpithetListResponseSchema, 'user epithets')

@@ -9,4 +9,4 @@ export type {
   EpithetListResponse,
   UpdateUsernameEpithetRequest,
   UserDeletionResponse,
-} from '../schemas/UserSettingsSchemas'
+} from '../schemas/AccountSchemas'

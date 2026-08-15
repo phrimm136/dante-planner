@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { showSuccess } from '@/lib/errorPresentation'
 
 import { useAuthQuery } from '@/shared/auth'
-import { useEpithetsQuery, useUpdateEpithetMutation } from '../hooks/useUserSettingsQuery'
+import { useEpithetsQuery, useUpdateEpithetMutation } from '../hooks/useAccountData'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,

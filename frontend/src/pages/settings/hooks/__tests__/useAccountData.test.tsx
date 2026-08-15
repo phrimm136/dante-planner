@@ -1,18 +1,14 @@
 /**
- * useUserSettingsQuery.test.tsx
+ * useAccountData.test.tsx
  *
- * Tests for user settings query and mutation hooks.
+ * Tests for account query and mutation hooks.
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, waitFor, act } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React, { Suspense } from 'react'
-import {
-  userSettingsQueryKeys,
-  useUpdateEpithetMutation,
-  useEpithetsQuery,
-} from '../useUserSettingsQuery'
+import { accountQueryKeys, useUpdateEpithetMutation, useEpithetsQuery } from '../useAccountData'
 import { authQueryKeys } from '@/shared/auth'
 import { STALE_TIME } from '@/lib/constants'
 
@@ -55,9 +51,9 @@ function createWrapper() {
   }
 }
 
-describe('userSettingsQueryKeys', () => {
+describe('accountQueryKeys', () => {
   it('creates consistent key for epithets', () => {
-    const key = userSettingsQueryKeys.epithets()
+    const key = accountQueryKeys.epithets()
     expect(key).toEqual(['user', 'epithets'])
   })
 })
@@ -108,7 +104,7 @@ describe('useEpithetsQuery — staleness window', () => {
 
     // Backdate the cached entry past the window rather than moving the clock,
     // which react-query reads through Date.now on both sides of the comparison.
-    const cached = queryClient.getQueryCache().find({ queryKey: userSettingsQueryKeys.epithets() })
+    const cached = queryClient.getQueryCache().find({ queryKey: accountQueryKeys.epithets() })
     cached?.setState({ dataUpdatedAt: Date.now() - STALE_TIME.LONG - 1 })
 
     const second = renderHook(() => useEpithetsQuery(), { wrapper })

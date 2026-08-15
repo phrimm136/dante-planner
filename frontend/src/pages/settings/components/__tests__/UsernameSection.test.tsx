@@ -73,7 +73,7 @@ vi.mock('@/shared/auth/hooks/useAuthQuery', () => ({
   useAuthQuery: vi.fn(() => ({ data: null })),
 }))
 
-vi.mock('../../hooks/useUserSettingsQuery', () => ({
+vi.mock('../../hooks/useAccountData', () => ({
   useEpithetsQuery: vi.fn(() => ({
     epithets: mockEpithets,
   })),
@@ -84,7 +84,7 @@ vi.mock('../../hooks/useUserSettingsQuery', () => ({
 }))
 
 import { useAuthQuery } from '@/shared/auth'
-import { useEpithetsQuery, useUpdateEpithetMutation } from '../../hooks/useUserSettingsQuery'
+import { useEpithetsQuery, useUpdateEpithetMutation } from '../../hooks/useAccountData'
 import { UsernameSection } from '../UsernameSection'
 
 describe('UsernameSection', () => {

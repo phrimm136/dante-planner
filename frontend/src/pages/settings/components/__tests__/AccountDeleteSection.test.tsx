@@ -38,7 +38,7 @@ vi.mock('@/shared/auth/hooks/useAuthQuery', () => ({
   },
 }))
 
-vi.mock('../../hooks/useUserSettingsQuery', () => ({
+vi.mock('../../hooks/useAccountData', () => ({
   useDeleteAccountMutation: vi.fn(() => ({
     mutate: mockMutate,
     isPending: false,
@@ -58,7 +58,7 @@ vi.mock('@tanstack/react-query', async () => {
 })
 
 import { useAuthQuery } from '@/shared/auth'
-import { useDeleteAccountMutation } from '../../hooks/useUserSettingsQuery'
+import { useDeleteAccountMutation } from '../../hooks/useAccountData'
 
 describe('AccountDeleteSection', () => {
   const mockUser: User = {
