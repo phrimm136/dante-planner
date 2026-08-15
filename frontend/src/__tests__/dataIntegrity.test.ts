@@ -26,7 +26,9 @@ import {
   EGOGiftI18nSchema,
   EGOGiftSpecListSchema,
   EGOGiftNameListSchema,
+  EGOGiftObservationDataSchema,
 } from '@/pages/egoGift'
+import { StartEgoGiftPoolsSchema } from '@/pages/planner'
 import { ThemePackDetailSchema, ThemePackListSchema, ThemePackI18nSchema } from '@/pages/themePack'
 import {
   BattleKeywordsSchema,
@@ -114,9 +116,16 @@ describe('spec list files', () => {
 
 const MD_DIRS = fs.readdirSync(DATA_DIR).filter((d: string) => /^MD\d+$/.test(d))
 
-describe.each(MD_DIRS)('start buff data [%s]', (mdDir) => {
+describe.each(MD_DIRS)('mirror dungeon data [%s]', (mdDir) => {
   it('startBuffs.json', () =>
     validateFile(path.join(DATA_DIR, mdDir, 'startBuffs.json'), StartBuffDataListSchema))
+  it('startEgoGiftPools.json', () =>
+    validateFile(path.join(DATA_DIR, mdDir, 'startEgoGiftPools.json'), StartEgoGiftPoolsSchema))
+  it('egoGiftObservationData.json', () =>
+    validateFile(
+      path.join(DATA_DIR, mdDir, 'egoGiftObservationData.json'),
+      EGOGiftObservationDataSchema,
+    ))
 })
 
 // --- Individual data files ---

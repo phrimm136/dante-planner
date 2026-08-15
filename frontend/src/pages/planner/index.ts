@@ -18,6 +18,7 @@ export { plannerQueryKeys } from './lib/plannerQueryKeys'
 // Schemas & Types
 export type { MDGesellschaftMode } from './types/MDPlannerListTypes'
 export { FloorSelectionDraftSchema, validateSaveablePlanner } from './schemas/PlannerSchemas'
+export { StartEgoGiftPoolsSchema } from './schemas/StartGiftSchemas'
 export type {
   PlannerSummary,
   SaveablePlanner,
