@@ -89,6 +89,49 @@ beforeEach(() => {
   })
 })
 
+/**
+ * A complete comment node. The SSE handler parses the payload through
+ * CommentNodeSchema, so a partial object is no longer a usable fixture.
+ */
+const UUID_BY_KEY: Record<string, string> = {
+  c1: '00000000-0000-4000-8000-000000000001',
+  c2: '00000000-0000-4000-8000-000000000002',
+  c3: '00000000-0000-4000-8000-000000000003',
+  c9: '00000000-0000-4000-8000-000000000009',
+  r1: '00000000-0000-4000-8000-0000000000a1',
+  r2: '00000000-0000-4000-8000-0000000000a2',
+  r3: '00000000-0000-4000-8000-0000000000a3',
+  r9: '00000000-0000-4000-8000-0000000000a9',
+  unloaded: '00000000-0000-4000-8000-00000000ff01',
+}
+
+function uid(key: string): string {
+  const value = UUID_BY_KEY[key]
+  if (!value) throw new Error(`no uuid registered for ${key}`)
+  return value
+}
+
+function node(
+  key: string,
+  overrides: { content?: string; parentKey?: string; replies?: unknown[] } = {},
+) {
+  return {
+    id: uid(key),
+    parentCommentId: overrides.parentKey ? uid(overrides.parentKey) : null,
+    content: overrides.content ?? key,
+    authorEpithet: 'Epithet',
+    authorSuffix: '0001',
+    isAuthor: false,
+    createdAt: '2026-01-01T00:00:00Z',
+    updatedAt: null,
+    isDeleted: false,
+    upvoteCount: 0,
+    hasUpvoted: false,
+    authorNotificationsEnabled: false,
+    replies: overrides.replies ?? [],
+  }
+}
+
 describe('usePlannerCommentsSse — comment tree cache patch', () => {
   it('subscribes to the planner comment stream', async () => {
     const { wrapper } = createWrapper()
@@ -99,24 +142,21 @@ describe('usePlannerCommentsSse — comment tree cache patch', () => {
 
   it('comment:added event with a comment payload appends the comment to the tree cache', async () => {
     const { queryClient, wrapper } = createWrapper()
-    queryClient.setQueryData(
-      ['comments', 'planner-1'],
-      [{ id: 'c1', content: 'first', replies: [] }],
-    )
+    queryClient.setQueryData(['comments', 'planner-1'], [node('c1', { content: 'first' })])
 
     const { stream } = await mountStream('planner-1', wrapper)
     await emit(stream, 'comment:added', {
       type: 'created',
       plannerId: 'planner-1',
-      payload: { id: 'c2', content: 'second', replies: [] },
+      payload: node('c2', { content: 'second' }),
     })
 
     const tree = queryClient.getQueryData(['comments', 'planner-1']) as Array<{
       id: string
       content: string
     }>
-    expect(tree).toContainEqual(expect.objectContaining({ id: 'c1' }))
-    expect(tree).toContainEqual(expect.objectContaining({ id: 'c2', content: 'second' }))
+    expect(tree).toContainEqual(expect.objectContaining({ id: uid('c1') }))
+    expect(tree).toContainEqual(expect.objectContaining({ id: uid('c2'), content: 'second' }))
   })
 
   it('a redelivered comment:added counts once and appends once', async () => {
@@ -127,29 +167,26 @@ describe('usePlannerCommentsSse — comment tree cache patch', () => {
     const event = {
       type: 'created',
       plannerId: 'planner-1',
-      payload: { id: 'c9', content: 'only once', replies: [] },
+      payload: node('c9', { content: 'only once' }),
     }
 
     await emit(stream, 'comment:added', event)
     await emit(stream, 'comment:added', event)
 
     const tree = queryClient.getQueryData(['comments', 'planner-1']) as Array<{ id: string }>
-    expect(tree.filter((c) => c.id === 'c9')).toHaveLength(1)
+    expect(tree.filter((c) => c.id === uid('c9'))).toHaveLength(1)
     expect(result.current.newCommentsCount).toBe(1)
   })
 
   it('a reply lands under its parent, not at the top level', async () => {
     const { queryClient, wrapper } = createWrapper()
-    queryClient.setQueryData(
-      ['comments', 'planner-1'],
-      [{ id: 'c1', content: 'root', replies: [] }],
-    )
+    queryClient.setQueryData(['comments', 'planner-1'], [node('c1', { content: 'root' })])
 
     const { stream } = await mountStream('planner-1', wrapper)
     await emit(stream, 'comment:added', {
       type: 'comment:added',
       plannerId: 'planner-1',
-      payload: { id: 'r1', parentCommentId: 'c1', content: 'reply', replies: [] },
+      payload: node('r1', { content: 'reply', parentKey: 'c1' }),
     })
 
     const tree = queryClient.getQueryData(['comments', 'planner-1']) as Array<{
@@ -157,45 +194,47 @@ describe('usePlannerCommentsSse — comment tree cache patch', () => {
       replies: Array<{ id: string }>
     }>
     expect(tree).toHaveLength(1)
-    expect(tree[0].replies).toContainEqual(expect.objectContaining({ id: 'r1' }))
+    expect(tree[0].replies).toContainEqual(expect.objectContaining({ id: uid('r1') }))
   })
 
   it('a nested reply lands under a parent that is itself a reply', async () => {
     const { queryClient, wrapper } = createWrapper()
     queryClient.setQueryData(
       ['comments', 'planner-1'],
-      [{ id: 'c1', content: 'root', replies: [{ id: 'r1', content: 'reply', replies: [] }] }],
+      [
+        node('c1', {
+          content: 'root',
+          replies: [node('r1', { content: 'reply', parentKey: 'c1' })],
+        }),
+      ],
     )
 
     const { stream } = await mountStream('planner-1', wrapper)
     await emit(stream, 'comment:added', {
       type: 'comment:added',
       plannerId: 'planner-1',
-      payload: { id: 'r2', parentCommentId: 'r1', content: 'nested', replies: [] },
+      payload: node('r2', { content: 'nested', parentKey: 'r1' }),
     })
 
     const tree = queryClient.getQueryData(['comments', 'planner-1']) as Array<{
       replies: Array<{ id: string; replies: Array<{ id: string }> }>
     }>
-    expect(tree[0].replies[0].replies).toContainEqual(expect.objectContaining({ id: 'r2' }))
+    expect(tree[0].replies[0].replies).toContainEqual(expect.objectContaining({ id: uid('r2') }))
   })
 
   it('a reply to a parent outside the loaded tree only moves the counter', async () => {
     const { queryClient, wrapper } = createWrapper()
-    queryClient.setQueryData(
-      ['comments', 'planner-1'],
-      [{ id: 'c1', content: 'root', replies: [] }],
-    )
+    queryClient.setQueryData(['comments', 'planner-1'], [node('c1', { content: 'root' })])
 
     const { result, stream } = await mountStream('planner-1', wrapper)
     await emit(stream, 'comment:added', {
       type: 'comment:added',
       plannerId: 'planner-1',
-      payload: { id: 'r9', parentCommentId: 'unloaded', content: 'orphan', replies: [] },
+      payload: node('r9', { content: 'orphan', parentKey: 'unloaded' }),
     })
 
     expect(queryClient.getQueryData(['comments', 'planner-1'])).toEqual([
-      { id: 'c1', content: 'root', replies: [] },
+      node('c1', { content: 'root' }),
     ])
     expect(result.current.newCommentsCount).toBe(1)
   })

@@ -11,6 +11,7 @@ import {
 } from '@/shared/sse'
 
 import { containsComment, insertComment } from '../lib/commentTree'
+import { CommentNodeSchema } from '../schemas/CommentSchemas'
 import { commentsQueryKeys } from './useCommentsQuery'
 
 import type { CommentNode } from '../types/CommentTypes'
@@ -98,9 +99,12 @@ export function usePlannerCommentsSse(plannerId: string) {
       return
     }
 
-    if (!payload || typeof payload !== 'object') return
-    const added = payload as CommentNode
-    if (typeof added.id !== 'string') return
+    const parsed = CommentNodeSchema.safeParse(payload)
+    if (!parsed.success) {
+      console.warn('Planner comment SSE: comment:added parse failed', parsed.error)
+      return
+    }
+    const added = parsed.data
 
     const listKey = commentsQueryKeys.list(plannerId)
     const cached = queryClient.getQueryData<CommentNode[]>(listKey)
