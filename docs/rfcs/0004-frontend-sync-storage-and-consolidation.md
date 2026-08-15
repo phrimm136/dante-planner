@@ -1030,23 +1030,24 @@ No design content. One row per item: the change, the files it touches, and what 
 ### Branded entity-id primitives and schema composition
 
 `shared/gameData/ids.ts` declares one branded primitive per value-role entity id; key-role record
-keys and route params stay plain `string`, converted once where list items are constructed (the
-brands make transposition a compile error, per the `PlannerIdSchema` precedent at
-`schemas/PlannerSchemas.ts:566`). The sweep's premise did not survive contact with the shipped
-data: EVERY value-role id in the current static output is a string — skill ids and passive ids
-included, not only the two fields named below — so the numeric brands ship defined and exported
-but wired nowhere until the static pipeline realigns all id emitters and the pointer bumps
-(user's lane). The string-pattern derivations (composition rule 2) are live regardless.
+keys and route params stay plain, converted once where list items are constructed (the brands make
+transposition a compile error, per the `PlannerIdSchema` precedent at
+`schemas/PlannerSchemas.ts:566`). The primitives are **branded strings**: the static pipeline
+settled on serializing every generated id as a string (static `b290bb8b`), which kills the numeric
+design this section originally carried — a numeric brand over string data would demand a
+conversion layer at every boundary for no compile-time gain the string brand does not already
+provide. Each brand composes its slice's existing pattern (`z.string().regex(...).brand<'…'>()`),
+so the wire-form derivations of composition rule 2 and the brands are now the same declaration.
 
 ```ts
 // shared/gameData/ids.ts
-export const IdentityIdSchema = z.number().int().brand<'IdentityId'>()
-export const EGOIdSchema = z.number().int().brand<'EGOId'>()
-export const EGOGiftIdSchema = z.number().int().brand<'EGOGiftId'>() // base id, no enhancement prefix
-export const PassiveIdSchema = z.number().int().brand<'PassiveId'>()
-export const SkillIdSchema = z.number().int().brand<'SkillId'>()
-export const ThemePackIdSchema = z.number().int().brand<'ThemePackId'>()
-export const SeasonSchema = z.number().int().brand<'Season'>()
+export const IdentityIdSchema = z.string().regex(IDENTITY_ID_PATTERN).brand<'IdentityId'>()
+export const EGOIdSchema = z.string().regex(EGO_ID_PATTERN).brand<'EGOId'>()
+export const EGOGiftIdSchema = z.string().regex(GIFT_ID_PATTERN).brand<'EGOGiftId'>() // base id
+export const PassiveIdSchema = z.string().regex(PASSIVE_ID_PATTERN).brand<'PassiveId'>()
+export const SkillIdSchema = z.string().regex(SKILL_ID_PATTERN).brand<'SkillId'>()
+export const ThemePackIdSchema = z.string().regex(THEME_PACK_ID_PATTERN).brand<'ThemePackId'>()
+export const SeasonSchema = z.number().int().brand<'Season'>() // seasons are ordinals, not ids
 
 export type IdentityId = z.infer<typeof IdentityIdSchema>
 // ... one type per schema
