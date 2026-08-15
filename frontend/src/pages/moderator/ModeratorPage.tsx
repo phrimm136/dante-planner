@@ -72,7 +72,7 @@ function TableHeaderRow({ labelKeys }: { labelKeys: readonly string[] }) {
   )
 }
 
-/** What one user-row dialog renders and which toast its mutation resolves to. */
+/** What one moderation dialog renders and which toast its mutation resolves to. */
 interface ModerationDialogSpec {
   Dialog: (props: ModerationDialogProps) => React.ReactNode
   successKey: string
@@ -106,44 +106,39 @@ interface ModerationVariables {
   durationMinutes: number
 }
 
-/** The slice of a mutation result the dialog table needs. */
+/** The slice of a mutation result the row buttons and dialogs need. */
 interface ModerationMutation {
   mutate: (variables: ModerationVariables, options: { onSuccess: () => void }) => void
   isPending: boolean
+  variables?: { usernameSuffix: string }
+}
+
+type ModerationMutations = Record<ModerationDialogKind, ModerationMutation>
+
+/** One mutation serves every row, so pending belongs to the user it was fired for. */
+function isPendingFor(mutation: ModerationMutation, usernameSuffix: string) {
+  return mutation.isPending && mutation.variables?.usernameSuffix === usernameSuffix
 }
 
 /**
  * User table row with action buttons
  */
-function UserRow({ user, currentUserSuffix }: { user: UserForMod; currentUserSuffix: string }) {
+function UserRow({
+  user,
+  currentUserSuffix,
+  mutations,
+  onOpenDialog,
+}: {
+  user: UserForMod
+  currentUserSuffix: string
+  mutations: ModerationMutations
+  onOpenDialog: (kind: ModerationDialogKind, user: UserForMod) => void
+}) {
   const { t, i18n } = useTranslation(['moderation', 'common'])
-  const [openDialog, setOpenDialog] = useState<ModerationDialogKind | null>(null)
-
-  const mutations: Record<ModerationDialogKind, ModerationMutation> = {
-    ban: useBanUser(),
-    unban: useUnbanUser(),
-    timeout: useTimeoutUser(),
-    clearTimeout: useUntimeoutUser(),
-  }
 
   const isSelf = user.usernameSuffix === currentUserSuffix
   const canBan = user.role !== 'ADMIN' && !isSelf
   const canTimeout = (user.role === 'NORMAL' || user.role === 'MODERATOR') && !isSelf
-  const username = formatUsername(user.usernameEpithet, user.usernameSuffix, i18n.language)
-
-  const confirmModeration =
-    (kind: ModerationDialogKind) => (reason: string, durationMinutes?: number) => {
-      const { successKey } = MODERATION_DIALOGS[kind]
-      mutations[kind].mutate(
-        { usernameSuffix: user.usernameSuffix, reason, durationMinutes: durationMinutes ?? 0 },
-        {
-          onSuccess: () => {
-            showSuccess(successKey)
-            setOpenDialog(null)
-          },
-        },
-      )
-    }
 
   return (
     <tr className="border-b">
@@ -164,8 +159,8 @@ function UserRow({ user, currentUserSuffix }: { user: UserForMod; currentUserSuf
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setOpenDialog('unban')}
-              disabled={mutations.unban.isPending || isSelf}
+              onClick={() => onOpenDialog('unban', user)}
+              disabled={isPendingFor(mutations.unban, user.usernameSuffix) || isSelf}
             >
               <UserCheck className="size-4 mr-1" />
               {t('dashboard.unban')}
@@ -174,8 +169,8 @@ function UserRow({ user, currentUserSuffix }: { user: UserForMod; currentUserSuf
             <Button
               variant="destructive"
               size="sm"
-              onClick={() => setOpenDialog('ban')}
-              disabled={!canBan || mutations.ban.isPending}
+              onClick={() => onOpenDialog('ban', user)}
+              disabled={!canBan || isPendingFor(mutations.ban, user.usernameSuffix)}
             >
               <Ban className="size-4 mr-1" />
               {t('dashboard.ban')}
@@ -186,8 +181,8 @@ function UserRow({ user, currentUserSuffix }: { user: UserForMod; currentUserSuf
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setOpenDialog('clearTimeout')}
-              disabled={mutations.clearTimeout.isPending || isSelf}
+              onClick={() => onOpenDialog('clearTimeout', user)}
+              disabled={isPendingFor(mutations.clearTimeout, user.usernameSuffix) || isSelf}
             >
               <UserCheck className="size-4 mr-1" />
               {t('dashboard.untimeout')}
@@ -196,8 +191,8 @@ function UserRow({ user, currentUserSuffix }: { user: UserForMod; currentUserSuf
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setOpenDialog('timeout')}
-              disabled={!canTimeout || mutations.timeout.isPending}
+              onClick={() => onOpenDialog('timeout', user)}
+              disabled={!canTimeout || isPendingFor(mutations.timeout, user.usernameSuffix)}
             >
               <Clock className="size-4 mr-1" />
               {t('dashboard.timeout')}
@@ -205,22 +200,99 @@ function UserRow({ user, currentUserSuffix }: { user: UserForMod; currentUserSuf
           )}
         </div>
       </td>
+    </tr>
+  )
+}
+
+/**
+ * User management table.
+ *
+ * Holds the one mutation set and the one dialog set the whole table shares; the
+ * dialogs are keyed by target so a reason typed for one user never carries to another.
+ */
+function UserTable({
+  users,
+  currentUserSuffix,
+}: {
+  users: UserForMod[]
+  currentUserSuffix: string
+}) {
+  const { i18n } = useTranslation()
+  const [openKind, setOpenKind] = useState<ModerationDialogKind | null>(null)
+  const [target, setTarget] = useState<UserForMod | null>(null)
+
+  const mutations: ModerationMutations = {
+    ban: useBanUser(),
+    unban: useUnbanUser(),
+    timeout: useTimeoutUser(),
+    clearTimeout: useUntimeoutUser(),
+  }
+
+  const openDialog = (kind: ModerationDialogKind, user: UserForMod) => {
+    setTarget(user)
+    setOpenKind(kind)
+  }
+
+  const confirmModeration =
+    (kind: ModerationDialogKind, user: UserForMod) =>
+    (reason: string, durationMinutes?: number) => {
+      const { successKey } = MODERATION_DIALOGS[kind]
+      mutations[kind].mutate(
+        {
+          usernameSuffix: user.usernameSuffix,
+          reason,
+          durationMinutes: durationMinutes ?? 0,
+        },
+        {
+          onSuccess: () => {
+            showSuccess(successKey)
+            setOpenKind(null)
+          },
+        },
+      )
+    }
+
+  return (
+    <>
+      <div className="border rounded-lg overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-muted">
+            <TableHeaderRow labelKeys={USER_TABLE_HEADER_KEYS} />
+          </thead>
+          <tbody>
+            {users.map((user) => (
+              <UserRow
+                key={user.usernameSuffix}
+                user={user}
+                currentUserSuffix={currentUserSuffix}
+                mutations={mutations}
+                onOpenDialog={openDialog}
+              />
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {/* Dialogs */}
-      {MODERATION_DIALOG_KINDS.map((kind) => {
-        const { Dialog } = MODERATION_DIALOGS[kind]
-        return (
-          <Dialog
-            key={kind}
-            open={openDialog === kind}
-            onOpenChange={(next) => setOpenDialog(next ? kind : null)}
-            username={username}
-            onConfirm={confirmModeration(kind)}
-            isPending={mutations[kind].isPending}
-          />
-        )
-      })}
-    </tr>
+      {target !== null &&
+        MODERATION_DIALOG_KINDS.map((kind) => {
+          const { Dialog } = MODERATION_DIALOGS[kind]
+          return (
+            <Dialog
+              key={`${kind}:${target.usernameSuffix}`}
+              open={openKind === kind}
+              onOpenChange={(next) => setOpenKind(next ? kind : null)}
+              username={formatUsername(
+                target.usernameEpithet,
+                target.usernameSuffix,
+                i18n.language,
+              )}
+              onConfirm={confirmModeration(kind, target)}
+              isPending={isPendingFor(mutations[kind], target.usernameSuffix)}
+            />
+          )
+        })}
+    </>
   )
 }
 
@@ -254,52 +326,21 @@ function HistoryRow({ action }: { action: ModerationAction }) {
 }
 
 /**
- * Moderator Dashboard Page
+ * Moderator dashboard tables
  *
- * Displays user list with ban/timeout controls and moderation action history.
- * Only accessible to MODERATOR and ADMIN roles.
+ * Suspends on the moderation queries, so it stays behind the staff gate.
  */
-export default function ModeratorPage() {
+function ModeratorDashboard({ currentUserSuffix }: { currentUserSuffix: string }) {
   const { t } = useTranslation(['moderation'])
-  const { data: currentUser } = useAuthQuery()
   const users = useModeratorUsers()
   const history = useModerationHistory()
-
-  // Verify user has moderator role
-  const isModerator = isStaff(currentUser?.role)
-  if (!isModerator) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
-          <Shield className="size-16 mx-auto text-muted-foreground mb-4" />
-          <h1 className="text-2xl font-bold mb-2">{t('dashboard.accessDenied')}</h1>
-          <p className={SECTION_STYLES.TEXT.muted}>{t('dashboard.moderatorOnly')}</p>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
       {/* User List */}
       <section className="space-y-4">
         <h2 className={SECTION_STYLES.TEXT.pageTitle}>{t('dashboard.userManagement')}</h2>
-        <div className="border rounded-lg overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-muted">
-              <TableHeaderRow labelKeys={USER_TABLE_HEADER_KEYS} />
-            </thead>
-            <tbody>
-              {users.map((user) => (
-                <UserRow
-                  key={user.usernameSuffix}
-                  user={user}
-                  currentUserSuffix={currentUser?.usernameSuffix || ''}
-                />
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <UserTable users={users} currentUserSuffix={currentUserSuffix} />
       </section>
 
       {/* Moderation History */}
@@ -320,4 +361,29 @@ export default function ModeratorPage() {
       </section>
     </div>
   )
+}
+
+/**
+ * Moderator Dashboard Page
+ *
+ * Displays user list with ban/timeout controls and moderation action history.
+ * Only accessible to MODERATOR and ADMIN roles.
+ */
+export default function ModeratorPage() {
+  const { t } = useTranslation(['moderation'])
+  const { data: currentUser } = useAuthQuery()
+
+  if (!isStaff(currentUser?.role)) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">
+          <Shield className="size-16 mx-auto text-muted-foreground mb-4" />
+          <h1 className="text-2xl font-bold mb-2">{t('dashboard.accessDenied')}</h1>
+          <p className={SECTION_STYLES.TEXT.muted}>{t('dashboard.moderatorOnly')}</p>
+        </div>
+      </div>
+    )
+  }
+
+  return <ModeratorDashboard currentUserSuffix={currentUser?.usernameSuffix || ''} />
 }
