@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { Suspense } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { createTestQueryClient } from '@/test-utils/queryClient'
-import { MAX_LEVEL } from '@/shared/gameData'
+import { MAX_LEVEL, SkillIdSchema } from '@/shared/gameData'
 import IdentityDetailPage from '../IdentityDetailPage'
 import type { IdentityData, IdentityI18n } from '../types/IdentityTypes'
 
@@ -57,16 +57,16 @@ const mockIdentityData10101: IdentityData = {
   },
   skills: {
     skill1: [
-      { id: 1010101, skillData: [{ attributeType: 'AZURE', atkType: 'SLASH' }, {}, {}, {}] },
+      { id: SkillIdSchema.parse(1010101), skillData: [{ attributeType: 'AZURE', atkType: 'SLASH' }, {}, {}, {}] },
     ],
     skill2: [
-      { id: 1010102, skillData: [{ attributeType: 'VIOLET', atkType: 'PENETRATE' }, {}, {}, {}] },
+      { id: SkillIdSchema.parse(1010102), skillData: [{ attributeType: 'VIOLET', atkType: 'PENETRATE' }, {}, {}, {}] },
     ],
     skill3: [
-      { id: 1010103, skillData: [{}, {}, { attributeType: 'AMBER', atkType: 'SLASH' }, {}] },
+      { id: SkillIdSchema.parse(1010103), skillData: [{}, {}, { attributeType: 'AMBER', atkType: 'SLASH' }, {}] },
     ],
     skillDef: [
-      { id: 1010104, skillData: [{ attributeType: 'NEUTRAL', atkType: 'NONE' }, {}, {}, {}] },
+      { id: SkillIdSchema.parse(1010104), skillData: [{ attributeType: 'NEUTRAL', atkType: 'NONE' }, {}, {}, {}] },
     ],
   },
   passives: {
@@ -120,16 +120,16 @@ const mockIdentityData10114: IdentityData = {
   },
   skills: {
     skill1: [
-      { id: 1011401, skillData: [{ attributeType: 'AMBER', atkType: 'SLASH' }, {}, {}, {}] },
+      { id: SkillIdSchema.parse(1011401), skillData: [{ attributeType: 'AMBER', atkType: 'SLASH' }, {}, {}, {}] },
     ],
     skill2: [
-      { id: 1011402, skillData: [{ attributeType: 'VIOLET', atkType: 'SLASH' }, {}, {}, {}] },
+      { id: SkillIdSchema.parse(1011402), skillData: [{ attributeType: 'VIOLET', atkType: 'SLASH' }, {}, {}, {}] },
     ],
     skill3: [
-      { id: 1011403, skillData: [{}, {}, { attributeType: 'SHAMROCK', atkType: 'SLASH' }, {}] },
+      { id: SkillIdSchema.parse(1011403), skillData: [{}, {}, { attributeType: 'SHAMROCK', atkType: 'SLASH' }, {}] },
     ],
     skillDef: [
-      { id: 1011404, skillData: [{ attributeType: 'NEUTRAL', atkType: 'NONE' }, {}, {}, {}] },
+      { id: SkillIdSchema.parse(1011404), skillData: [{ attributeType: 'NEUTRAL', atkType: 'NONE' }, {}, {}, {}] },
     ],
   },
   passives: {

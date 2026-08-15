@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { AffinitySchema, EgoTypeSchema } from '@/shared/gameData'
-import { SkillDescEntrySchema } from '@/shared/gameData'
+import { SkillDescEntrySchema, SkillIdSchema } from '@/shared/gameData'
 
 export { EgoTypeSchema }
 
@@ -42,7 +42,7 @@ export const EGOSkillDataTupleSchema = z.union([
 
 // Skill entry schema
 export const EGOSkillEntrySchema = z.object({
-  id: z.number(),
+  id: SkillIdSchema,
   skillData: EGOSkillDataTupleSchema,
 })
 

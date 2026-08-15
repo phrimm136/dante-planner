@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { AffinitySchema, ATK_TYPES, DEF_TYPES } from '@/shared/gameData'
-import { SkillDescEntrySchema } from '@/shared/gameData'
+import { SkillDescEntrySchema, SkillIdSchema } from '@/shared/gameData'
 
 /**
  * Identity Schemas
@@ -51,7 +51,7 @@ export const IdentitySkillDataTupleSchema = z.tuple([
 
 // Skill entry schema
 export const IdentitySkillEntrySchema = z.object({
-  id: z.number(),
+  id: SkillIdSchema,
   textID: z.number().optional(),
   skillTier: z.number().optional(),
   skillData: IdentitySkillDataTupleSchema,
