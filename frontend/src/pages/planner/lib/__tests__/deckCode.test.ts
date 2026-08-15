@@ -6,7 +6,14 @@
  */
 
 import { describe, it, expect } from 'vitest'
-import { encodeDeckCode, decodeDeckCode, GZIP_OS_BYTE_OFFSET, GZIP_OS_TOPS20 } from '../deckCode'
+import {
+  encodeDeckCode,
+  decodeDeckCode,
+  validateDeckCode,
+  GZIP_OS_BYTE_OFFSET,
+  GZIP_OS_TOPS20,
+} from '../deckCode'
+import { DECK_CODE_MAX_LENGTH } from '@/lib/constants'
 
 /** A code emitted by this encoder, kept verbatim to detect format drift. */
 const KNOWN_CODE =
@@ -55,5 +62,27 @@ describe('decodeDeckCode', () => {
 
     expect(Object.keys(equipment)).toHaveLength(12)
     expect(warnings.length).toBeGreaterThan(0)
+  })
+})
+
+describe('deck code length bound', () => {
+  const overLong = 'A'.repeat(DECK_CODE_MAX_LENGTH + 1)
+
+  it('rejects an over-long code before it reaches atob', () => {
+    const result = validateDeckCode(overLong)
+    expect(result.isValid).toBe(false)
+  })
+
+  it('decodes an over-long code to nothing rather than inflating it', () => {
+    const decoded = decodeDeckCode(overLong, {}, {})
+    expect(decoded.equipment).toEqual({})
+    expect(decoded.deploymentOrder).toEqual([])
+    expect(decoded.warnings.length).toBeGreaterThan(0)
+  })
+
+  it('still accepts a code at the cap', () => {
+    // Not a real code, so it fails on content rather than on length.
+    const atCap = 'A'.repeat(DECK_CODE_MAX_LENGTH)
+    expect(() => validateDeckCode(atCap)).not.toThrow()
   })
 })

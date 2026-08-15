@@ -65,6 +65,26 @@ export const EXPORT_FILE_EXTENSION = '.danteplanner'
 export const EXPORT_MAX_FILE_SIZE = 10 * 1024 * 1024
 
 /**
+ * Maximum characters an import may inflate to.
+ *
+ * pako has no output cap of its own, and the file-size gate bounds only the
+ * compressed bytes — gzip reaches ratios past 1000:1, so a file inside the
+ * 10MB gate can still exhaust memory on inflate.
+ */
+export const EXPORT_MAX_DECOMPRESSED_SIZE = EXPORT_MAX_FILE_SIZE * 20
+
+/** Compressed bytes fed to the inflater per step, so the cap is checked as it grows. */
+export const INFLATE_INPUT_CHUNK_BYTES = 64 * 1024
+
+/**
+ * Maximum characters a pasted deck code may carry.
+ *
+ * A real deck code is around 150 characters; the clipboard path bounded nothing
+ * before handing the string to atob and then to the inflater.
+ */
+export const DECK_CODE_MAX_LENGTH = 512
+
+/**
  * IndexedDB storage key prefixes for planner data
  * All planner-related keys use these prefixes for namespacing
  */

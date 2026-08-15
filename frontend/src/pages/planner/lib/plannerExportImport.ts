@@ -6,9 +6,10 @@
  * user-facing toast (severity + i18n key + interpolation params).
  */
 
-import { ungzip } from 'pako'
+import { Inflate } from 'pako'
 
 import { ok, err } from '@/lib/result'
+import { EXPORT_MAX_DECOMPRESSED_SIZE, INFLATE_INPUT_CHUNK_BYTES } from '@/lib/constants'
 import { isValidUUID } from '@/lib/utils'
 import { generateUUID } from '@/lib/uuid'
 import { ExportEnvelopeSchema } from '../schemas/PlannerSchemas'
@@ -69,6 +70,7 @@ export async function getValidDeviceId(
 export type ImportError =
   | { kind: 'invalidFileFormat' }
   | { kind: 'decompressFailed' }
+  | { kind: 'decompressedTooLarge' }
   | { kind: 'parseFailed' }
   | { kind: 'noPlannersInFile' }
 
@@ -80,6 +82,10 @@ const IMPORT_ERROR_TOASTS = {
   decompressFailed: {
     severity: 'error',
     key: 'exportImport.decompressFailed',
+  },
+  decompressedTooLarge: {
+    severity: 'error',
+    key: 'exportImport.fileTooLarge',
   },
   parseFailed: {
     severity: 'error',
@@ -108,13 +114,45 @@ export function readGzipBytes(data: Uint8Array): Result<Uint8Array, ImportError>
   return isGzip ? ok(data) : err<ImportError>({ kind: 'invalidFileFormat' })
 }
 
-/** Inflate the export file into its JSON text. */
+/**
+ * Inflate the export file into its JSON text, abandoning it once the output
+ * passes {@link EXPORT_MAX_DECOMPRESSED_SIZE}. The input is fed in chunks so the
+ * cap is reached before the whole bomb is materialised.
+ */
 export function decompressImport(data: Uint8Array): Result<string, ImportError> {
+  const inflater = new Inflate()
+  const parts: Uint8Array[] = []
+  let produced = 0
+  let exceeded = false
+
+  inflater.onData = (chunk) => {
+    produced += chunk.length
+    if (produced > EXPORT_MAX_DECOMPRESSED_SIZE) {
+      exceeded = true
+      return
+    }
+    parts.push(chunk)
+  }
+
   try {
-    return ok(ungzip(data, { toText: true }))
+    for (let offset = 0; offset < data.length; offset += INFLATE_INPUT_CHUNK_BYTES) {
+      const end = Math.min(offset + INFLATE_INPUT_CHUNK_BYTES, data.length)
+      inflater.push(data.subarray(offset, end), end === data.length)
+      if (exceeded) return err<ImportError>({ kind: 'decompressedTooLarge' })
+    }
   } catch {
     return err<ImportError>({ kind: 'decompressFailed' })
   }
+
+  if (inflater.err) return err<ImportError>({ kind: 'decompressFailed' })
+
+  const inflated = new Uint8Array(produced)
+  let at = 0
+  for (const part of parts) {
+    inflated.set(part, at)
+    at += part.length
+  }
+  return ok(new TextDecoder().decode(inflated))
 }
 
 /** Parse the inflated text; the shape is checked by {@link readImportEnvelope}. */

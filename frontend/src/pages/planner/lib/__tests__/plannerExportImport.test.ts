@@ -14,6 +14,7 @@ import {
 } from '../plannerExportImport'
 
 import { ok, err } from '@/lib/result'
+import { INFLATE_INPUT_CHUNK_BYTES } from '@/lib/constants'
 
 import type { ImportError } from '../plannerExportImport'
 import type { Result } from '@/lib/result'
@@ -54,6 +55,12 @@ function envelope(planners: unknown[]) {
 
 function gzipped(payload: unknown): Uint8Array {
   return gzip(JSON.stringify(payload))
+}
+
+function expectOk<T>(result: Result<T, ImportError>): T {
+  expect(result.ok).toBe(true)
+  if (!result.ok) throw new Error('expected a successful stage')
+  return result.value
 }
 
 function expectErr<T>(result: Result<T, ImportError>): ImportError {
@@ -147,6 +154,32 @@ describe('readGzipBytes', () => {
 })
 
 describe('decompressImport', () => {
+  it('inflates an input spanning several compressed chunks', () => {
+    // Larger than INFLATE_INPUT_CHUNK_BYTES once compressed, so the loop pushes
+    // more than one slice and the reassembled output must still be exact.
+    // Deterministic pseudo-random text: repeated filler compresses away to a few
+    // KB, which would never span more than one input chunk.
+    const chars: string[] = []
+    let seed = 0x2545f491
+    for (let i = 0; i < 400_000; i++) {
+      // xorshift32 via Math.imul: a plain multiply overflows float precision and
+      // degenerates into a short, highly compressible cycle.
+      seed ^= seed << 13
+      seed = Math.imul(seed, 1) | 0
+      seed ^= seed >>> 17
+      seed ^= seed << 5
+      seed = seed | 0
+      chars.push(String.fromCharCode(33 + (Math.abs(seed) % 90)))
+    }
+    const filler = chars.join('')
+    const bulky = envelope([])
+    ;(bulky as { filler?: string }).filler = filler
+    const compressed = gzipped(bulky)
+    expect(compressed.length).toBeGreaterThan(INFLATE_INPUT_CHUNK_BYTES)
+
+    expect(JSON.parse(expectOk(decompressImport(compressed)))).toEqual(bulky)
+  })
+
   it('inflates gzipped bytes back to their text', () => {
     const result = decompressImport(gzipped(envelope([])))
 

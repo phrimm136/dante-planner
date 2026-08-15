@@ -18,6 +18,7 @@
 
 import { gzip, ungzip } from 'pako'
 import { SINNERS, MAX_LEVEL } from '@/shared/gameData'
+import { DECK_CODE_MAX_LENGTH } from '@/lib/constants'
 import type { SinnerEquipment } from '../types/DeckTypes'
 import type { EgoType } from '@/shared/gameData'
 
@@ -169,6 +170,16 @@ export function decodeDeckCode(
 ): DecodedDeck {
   const warnings: string[] = []
 
+  // A pasted code reaches atob and then the inflater unbounded; a real code is
+  // around 150 characters, so anything past the cap decodes to nothing.
+  if (code.length > DECK_CODE_MAX_LENGTH) {
+    return {
+      equipment: {},
+      deploymentOrder: [],
+      warnings: ['Deck code exceeds the maximum length'],
+    }
+  }
+
   // Second base64 decode
   const compressedStr = atob(code)
   const compressed = new Uint8Array(compressedStr.length)
@@ -296,6 +307,10 @@ export function decodeDeckCode(
  * Validate a deck code string
  */
 export function validateDeckCode(code: string): ValidationResult {
+  if (code.length > DECK_CODE_MAX_LENGTH) {
+    return { isValid: false, warnings: ['Invalid deck code format'] }
+  }
+
   try {
     // Second base64 decode
     const compressedStr = atob(code)
