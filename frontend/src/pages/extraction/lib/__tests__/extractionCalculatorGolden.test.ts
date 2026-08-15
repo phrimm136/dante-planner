@@ -3,7 +3,7 @@ import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import * as calculator from '../extractionCalculator'
 import golden from './__fixtures__/extractionCalculatorGolden.json'
-import { encodeScalar, runMatrix, type MatrixScalar } from './extractionMatrix'
+import { encodeScalar, MATRIX_GROUP_NAMES, runMatrix, type MatrixScalar } from './extractionMatrix'
 
 /**
  * Characterization test: every calculator entry point driven over the `core`
@@ -40,15 +40,18 @@ describe('extractionCalculator golden matrix', () => {
     expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort())
   })
 
-  describe.each(Object.keys(actual))('%s', (group) => {
+  describe.each(MATRIX_GROUP_NAMES)('%s', (group) => {
     it('matches the pinned values case for case', () => {
       const cases = actual[group]
       const pinned = expected[group]
+      if (pinned === undefined) {
+        throw new Error(`golden fixture has no group ${group}`)
+      }
 
       expect(cases.length, `${group} case count`).toBe(pinned.length)
 
-      for (let i = 0; i < cases.length; i++) {
-        expect(cases[i].values.map(encodeScalar), `${group}[${i}] ${cases[i].label}`).toEqual(
+      for (const [i, matrixCase] of cases.entries()) {
+        expect(matrixCase.values.map(encodeScalar), `${group}[${i}] ${matrixCase.label}`).toEqual(
           pinned[i],
         )
       }

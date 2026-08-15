@@ -16,7 +16,7 @@ interface SkillExchangeModalProps {
   identityId: string
   skillInfos: [SkillInfo, SkillInfo, SkillInfo] // S1, S2, S3
   skillEA: SkillEAState
-  currentEA?: SkillEAState
+  currentEA?: SkillEAState | undefined
   onExchange: (sourceSlot: OffensiveSkillSlot, targetSlot: OffensiveSkillSlot) => void
   onReset: () => void
 }

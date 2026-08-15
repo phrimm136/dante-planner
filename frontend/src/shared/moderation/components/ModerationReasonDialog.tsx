@@ -84,7 +84,7 @@ export function ModerationReasonDialog({
       destructive={destructive}
       onConfirm={handleConfirm}
       onCancel={handleCancel}
-      isPending={isPending}
+      {...(isPending !== undefined && { isPending })}
       confirmDisabled={!reason.trim()}
     >
       {children ? (

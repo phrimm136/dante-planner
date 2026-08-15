@@ -3,17 +3,17 @@ import { Upload, Download, Edit } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 interface DeckBuilderActionBarProps {
-  onImport?: () => void
-  onExport?: () => void
-  onResetOrder?: () => void
+  onImport?: (() => void) | undefined
+  onExport?: (() => void) | undefined
+  onResetOrder?: (() => void) | undefined
   /** Show "Edit Deck" button (Summary view only) */
   showEditDeck?: boolean
   /** Callback when "Edit Deck" is clicked */
-  onEditDeck?: () => void
+  onEditDeck?: (() => void) | undefined
   /** Tracker mode flag - shows "Reset to Initial" instead of "Reset Order" */
   trackerMode?: boolean
   /** Reset to planner's original deployment (tracker mode only) */
-  onResetToInitial?: () => void
+  onResetToInitial?: (() => void) | undefined
 }
 
 /**

@@ -85,8 +85,11 @@ export function createEffectTextResolver(shared: AbEventShared, giftNames: Recor
     const numericSuffixes: number[] = []
     if (!template) {
       const parts = effectType.split('_')
-      while (parts.length > 1 && /^\d+$/.test(parts[parts.length - 1])) {
-        numericSuffixes.unshift(parseInt(parts.pop()!, 10))
+      while (parts.length > 1) {
+        const last = parts[parts.length - 1]
+        if (last === undefined || !/^\d+$/.test(last)) break
+        parts.pop()
+        numericSuffixes.unshift(parseInt(last, 10))
       }
       if (numericSuffixes.length > 0) {
         template = shared.effects[parts.join('_')]
@@ -173,7 +176,11 @@ export function formatAdderInfo(
   sinnerNames: Record<string, string>,
   identityNames?: Record<string, string>,
 ): string[] {
-  const ctx: AdderNameContext = { unitKeywords, sinnerNames, identityNames }
+  const ctx: AdderNameContext = {
+    unitKeywords,
+    sinnerNames,
+    ...(identityNames !== undefined && { identityNames }),
+  }
   return adderInfo.map((ai) => {
     const raw = ai.correctionCase
     const match = ADDER_RESOLVERS.find(([prefix]) => raw.startsWith(prefix))

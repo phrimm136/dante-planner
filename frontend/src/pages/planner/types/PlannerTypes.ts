@@ -66,7 +66,7 @@ export interface PlannerMetadata {
   /** Device identifier for local storage namespacing */
   deviceId: string
   /** Whether planner is published (visible in community list) */
-  published?: boolean
+  published?: boolean | undefined
 }
 
 // ============================================================================

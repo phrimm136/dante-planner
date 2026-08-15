@@ -14,7 +14,8 @@ const AFFINITY_TO_SIN_NAME: Record<string, string> = {
 
 const frameLevel = (skillTier: number): number => Math.max(1, Math.min(3, skillTier))
 
-const pascalWord = (word: string): string => word[0].toUpperCase() + word.slice(1).toLowerCase()
+const pascalWord = (word: string): string =>
+  word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
 
 /**
  * The `hashStaticPlugin` build transform rewrites this file only, by regex: every `resolveAsset`

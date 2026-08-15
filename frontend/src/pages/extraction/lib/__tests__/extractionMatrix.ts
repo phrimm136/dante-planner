@@ -22,7 +22,27 @@ export interface MatrixCase {
   values: MatrixScalar[]
 }
 
-export type MatrixGroups = Record<string, MatrixCase[]>
+export const MATRIX_GROUP_NAMES = [
+  'rateTable',
+  'rateForTarget',
+  'singleTarget',
+  'atLeastKHits',
+  'couponCollector',
+  'naturalProbability',
+  'categoryDistribution',
+  'convolve',
+  'expectedPulls',
+  'lunacyCost',
+  'effectiveRates',
+  'multiTarget',
+  'pityAdjusted',
+  'successive',
+  'extraction',
+] as const
+
+export type MatrixGroupName = (typeof MATRIX_GROUP_NAMES)[number]
+
+export type MatrixGroups = Record<MatrixGroupName, MatrixCase[]>
 
 export type MatrixScale = 'core' | 'full'
 

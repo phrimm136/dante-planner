@@ -218,8 +218,8 @@ interface EgoGiftCardWithOverlayProps {
   isHighlighted: boolean
   isDone: boolean
   mobileScale: number
-  readOnly?: boolean
-  onToggleDone?: (encodedId: string) => void
+  readOnly?: boolean | undefined
+  onToggleDone?: ((encodedId: string) => void) | undefined
 }
 
 /**

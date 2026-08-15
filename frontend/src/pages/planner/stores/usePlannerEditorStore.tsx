@@ -313,7 +313,7 @@ const PlannerEditorStoreContext = createContext<StoreApi<PlannerEditorStore> | n
  */
 interface PlannerEditorStoreProviderProps {
   children: ReactNode
-  initialState?: Partial<PlannerEditorState>
+  initialState?: Partial<PlannerEditorState> | undefined
 }
 
 /**

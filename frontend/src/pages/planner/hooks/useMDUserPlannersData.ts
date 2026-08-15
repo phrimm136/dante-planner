@@ -345,14 +345,15 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
     const { title, published } = planner.metadata
 
     if (published) {
-      const { isValid, errors } = validatePlannerForPublish(
+      const { errors } = validatePlannerForPublish(
         title,
         content,
         category,
         egoGiftSpec,
         egoGiftI18n,
       )
-      return isValid ? null : plannerValidationError(toUserFriendlyError(errors[0]))
+      const [firstError] = errors
+      return firstError ? plannerValidationError(toUserFriendlyError(firstError)) : null
     }
 
     const friendlyError = validatePlannerForDraftSave(content, category, egoGiftSpec, egoGiftI18n)

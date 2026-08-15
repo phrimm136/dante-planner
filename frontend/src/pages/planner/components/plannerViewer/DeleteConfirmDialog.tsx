@@ -48,7 +48,7 @@ export function DeleteConfirmDialog({
       pendingLabel={t('pages.detail.deleteConfirm.deleting')}
       destructive
       onConfirm={onConfirm}
-      isPending={isPending}
+      {...(isPending !== undefined && { isPending })}
     >
       <p className="text-sm text-destructive">{t('pages.detail.deleteConfirm.warning')}</p>
     </ConfirmActionDialog>

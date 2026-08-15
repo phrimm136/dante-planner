@@ -25,8 +25,13 @@ import type { EgoType } from '@/shared/gameData'
 const BITS_PER_SINNER = 46
 const TOTAL_BITS = 560
 
-const EGO_RANK_ORDER: EgoType[] = ['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH']
-const EGO_BIT_LENGTHS = [7, 7, 7, 7, 6] // ZAYIN, TETH, HE, WAW, ALEPH
+const EGO_SLOTS: { rank: EgoType; bits: number }[] = [
+  { rank: 'ZAYIN', bits: 7 },
+  { rank: 'TETH', bits: 7 },
+  { rank: 'HE', bits: 7 },
+  { rank: 'WAW', bits: 7 },
+  { rank: 'ALEPH', bits: 6 },
+]
 
 /** Offset of the OS field in a gzip member header (RFC 1952 section 2.3) */
 export const GZIP_OS_BYTE_OFFSET = 9
@@ -103,8 +108,8 @@ function binaryToBytes(binary: string): Uint8Array {
  */
 function bytesToBinary(bytes: Uint8Array): string {
   let binary = ''
-  for (let i = 0; i < bytes.length; i++) {
-    binary += bytes[i].toString(2).padStart(8, '0')
+  for (const byte of bytes) {
+    binary += byte.toString(2).padStart(8, '0')
   }
   return binary
 }
@@ -131,9 +136,7 @@ export function encodeDeckCode(
     binary += toBinary(deploymentPosition, 4)
 
     // EGO slots (ZAYIN, TETH, HE, WAW, ALEPH)
-    for (let i = 0; i < EGO_RANK_ORDER.length; i++) {
-      const rank = EGO_RANK_ORDER[i]
-      const bits = EGO_BIT_LENGTHS[i]
+    for (const { rank, bits } of EGO_SLOTS) {
       const ego = sinnerEquipment?.egos[rank]
       const egoIndex = ego ? getEntityIndex(ego.id) : 0
       binary += toBinary(egoIndex, bits)
@@ -230,9 +233,7 @@ export function decodeDeckCode(
     const egos: SinnerEquipment['egos'] = {}
     let egoOffset = offset + 12
 
-    for (let i = 0; i < EGO_RANK_ORDER.length; i++) {
-      const rank = EGO_RANK_ORDER[i]
-      const bits = EGO_BIT_LENGTHS[i]
+    for (const { rank, bits } of EGO_SLOTS) {
       const egoIndex = fromBinary(binary.slice(egoOffset, egoOffset + bits))
       egoOffset += bits
 

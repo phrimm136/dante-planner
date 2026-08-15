@@ -38,6 +38,7 @@ export function FloorGalleryTracker({
         {floorIndices.map((floorIndex) => {
           const floorNumber = floorIndex + 1
           const floorNoteKey = `floor-${floorIndex}`
+          const floorNote = sectionNotes[floorNoteKey]
           return (
             <div key={floorIndex} className="space-y-2">
               <FloorThemeGiftSection
@@ -46,9 +47,9 @@ export function FloorGalleryTracker({
                 floorSelectionsOverride={deserializedFloorSelections}
                 readOnly={true}
               />
-              {!isNoteEmpty(sectionNotes[floorNoteKey]) && (
+              {floorNote && !isNoteEmpty(floorNote) && (
                 <NoteEditor
-                  value={sectionNotes[floorNoteKey]}
+                  value={floorNote}
                   placeholder={t('pages.plannerMD.noteEditor.placeholder')}
                   readOnly={true}
                 />

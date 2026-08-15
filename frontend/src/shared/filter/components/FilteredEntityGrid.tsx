@@ -87,7 +87,7 @@ export function FilteredEntityGrid<TItem, TState>({
   const grid = (
     <ResponsiveCardGrid
       cardWidth={geometry.cardWidth}
-      cardHeight={geometry.fixedRowHeight === true ? geometry.cardHeight : undefined}
+      {...(geometry.fixedRowHeight === true && { cardHeight: geometry.cardHeight })}
       mobileScale={geometry.mobileScale}
     >
       {items.slice(0, displayCount).map((item) => (
@@ -130,7 +130,7 @@ interface FilteredEntityCellProps<TItem, TState> {
   item: TItem
   store: FilterStore<TState>
   matches: (item: TItem, state: FilterState<TState>, terms: readonly string[]) => boolean
-  buildTerms?: (item: TItem) => string[]
+  buildTerms?: ((item: TItem) => string[]) | undefined
   renderCard: (item: TItem) => ReactNode
   geometry: CardGeometry
 }

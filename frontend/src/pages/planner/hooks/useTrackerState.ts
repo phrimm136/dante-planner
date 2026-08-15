@@ -68,21 +68,24 @@ function createInitialDoneMarks(): DoneMarkState {
   return { packs: {}, gifts: new Set() }
 }
 
+/** One sinner's untouched skill counts: 3/2/1 for slots 0/1/2 */
+function defaultSkillCounts(): Record<OffensiveSkillSlot, number> {
+  return {
+    0: DEFAULT_SKILL_EA[0],
+    1: DEFAULT_SKILL_EA[1],
+    2: DEFAULT_SKILL_EA[2],
+  }
+}
+
 /**
  * Create initial skill counts
- * Default EA values: 3/2/1 for skill slots 0/1/2
  * Keys are numeric strings ("1", "2", ...) matching equipment/plannedEAState format
  */
 function createInitialSkillCounts(): Record<string, Record<OffensiveSkillSlot, number>> {
   const currentSkillCounts: Record<string, Record<OffensiveSkillSlot, number>> = {}
 
   for (let i = 0; i < SINNERS.length; i++) {
-    const sinnerCode = String(i + 1)
-    currentSkillCounts[sinnerCode] = {
-      0: DEFAULT_SKILL_EA[0],
-      1: DEFAULT_SKILL_EA[1],
-      2: DEFAULT_SKILL_EA[2],
-    }
+    currentSkillCounts[String(i + 1)] = defaultSkillCounts()
   }
 
   return currentSkillCounts
@@ -144,13 +147,15 @@ export function useTrackerState(
     skillSlot: OffensiveSkillSlot,
     count: number,
   ) => {
-    setCurrentSkillCounts((prev) => ({
-      ...prev,
-      [sinnerId]: {
-        ...prev[sinnerId],
-        [skillSlot]: count,
-      },
-    }))
+    setCurrentSkillCounts((prev) => {
+      // A sinner absent from the map has never been tracked, so its other slots
+      // are still at the defaults rather than blank.
+      const sinnerCounts = prev[sinnerId] ?? defaultSkillCounts()
+      return {
+        ...prev,
+        [sinnerId]: { ...sinnerCounts, [skillSlot]: count },
+      }
+    })
   }
 
   const toggleEgoGiftDoneMark = (encodedId: string) => {

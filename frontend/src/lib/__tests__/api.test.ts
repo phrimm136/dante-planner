@@ -36,6 +36,12 @@ vi.mock('../queryClient', () => ({
 const mockFetch = vi.fn()
 global.fetch = mockFetch
 
+function firstRequestInit(): RequestInit {
+  const [firstCall] = mockFetch.mock.calls
+  if (!firstCall) throw new Error('fetch was never called')
+  return firstCall[1] as RequestInit
+}
+
 // Mock window.location for redirect tests
 const mockLocation = { href: '' }
 Object.defineProperty(window, 'location', {
@@ -339,7 +345,7 @@ describe('ApiClient', () => {
 
       await ApiClient.post('/api/planner', { name: 'Test' })
 
-      const headers = new Headers((mockFetch.mock.calls[0][1] as RequestInit).headers)
+      const headers = new Headers(firstRequestInit().headers)
       expect(headers.get('Content-Type')).toBe('application/json')
     })
 
@@ -366,7 +372,7 @@ describe('ApiClient', () => {
     // Bodyless GET/HEAD must stay CORS "simple" requests: a request Content-Type would
     // force a preflight OPTIONS that blocks the cold-load request burst.
     const okJson = () => ({ ok: true, status: 200, json: vi.fn().mockResolvedValue({}) })
-    const sentHeaders = () => new Headers((mockFetch.mock.calls[0][1] as RequestInit).headers)
+    const sentHeaders = () => new Headers(firstRequestInit().headers)
 
     it('GET requests send no Content-Type header', async () => {
       mockFetch.mockResolvedValue(okJson())
@@ -421,7 +427,7 @@ describe('ApiClient', () => {
 
   describe('CSRF double-submit header', () => {
     const okJson = () => ({ ok: true, status: 200, json: vi.fn().mockResolvedValue({}) })
-    const sentHeaders = () => new Headers((mockFetch.mock.calls[0][1] as RequestInit).headers)
+    const sentHeaders = () => new Headers(firstRequestInit().headers)
 
     let cookieValue = ''
     beforeEach(() => {

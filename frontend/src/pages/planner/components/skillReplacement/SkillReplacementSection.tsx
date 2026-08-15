@@ -108,9 +108,13 @@ export function SkillReplacementSection({
   // Get current modal data (selectedSinner is now a sinner code)
   const selectedSinnerEquipment = selectedSinner ? equipment[selectedSinner] : null
   const selectedIdentityId = selectedSinnerEquipment?.identity.id
+  const selectedSinnerName = selectedSinner ? SINNERS[parseInt(selectedSinner, 10) - 1] : undefined
 
   return (
-    <PlannerSection title={t('pages.plannerMD.skillReplacement.title')} onViewNotes={onViewNotes}>
+    <PlannerSection
+      title={t('pages.plannerMD.skillReplacement.title')}
+      {...(onViewNotes !== undefined && { onViewNotes })}
+    >
       {/* Sinner Grid - Responsive: 6->4->3->2 columns */}
       <div
         className="grid mx-auto gap-0.5"
@@ -156,11 +160,11 @@ export function SkillReplacementSection({
       </div>
 
       {/* Exchange Modal - Don't render when readOnly */}
-      {!readOnly && selectedSinner && selectedIdentityId && (
+      {!readOnly && selectedSinner && selectedIdentityId && selectedSinnerName && (
         <SkillExchangeModal
           open={!!selectedSinner}
           onOpenChange={(open) => !open && setSelectedSinner(null)}
-          sinnerName={SINNERS[parseInt(selectedSinner, 10) - 1]}
+          sinnerName={selectedSinnerName}
           identityId={selectedIdentityId}
           skillInfos={getSkillInfos(selectedIdentityId)}
           skillEA={plannedEAState[selectedSinner] || { ...DEFAULT_SKILL_EA }}

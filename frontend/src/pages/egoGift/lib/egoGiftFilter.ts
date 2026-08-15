@@ -21,8 +21,8 @@ import { parseTier, toRomanTier } from './egoGiftTier'
  * deriveDifficulty({}) // Returns 'normal'
  */
 export function deriveDifficulty(gift: {
-  hardOnly?: boolean
-  extremeOnly?: boolean
+  hardOnly?: boolean | undefined
+  extremeOnly?: boolean | undefined
 }): EGOGiftDifficulty {
   if (gift.extremeOnly) return 'extreme'
   if (gift.hardOnly) return 'hard'

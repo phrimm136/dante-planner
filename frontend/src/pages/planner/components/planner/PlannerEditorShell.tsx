@@ -100,11 +100,11 @@ export interface PlannerEditorSession {
   /** Game content version the planner is authored against. */
   contentVersion: number
   /** Existing planner id; absent means the shell mints one. */
-  initialPlannerId?: string
+  initialPlannerId?: string | undefined
   /** Server version to present on the next sync. */
-  initialSyncVersion?: number
+  initialSyncVersion?: number | undefined
   /** Timestamp to seed the "last saved" label with. */
-  initialSavedAt?: string
+  initialSavedAt?: string | undefined
 }
 
 /**
@@ -240,9 +240,9 @@ export function PlannerEditorShell({
     schemaVersion: config.schemaVersion,
     contentVersion: mdVersion,
     plannerType: 'MIRROR_DUNGEON',
-    initialPlannerId,
-    initialSyncVersion,
-    initialSavedAt,
+    ...(initialPlannerId !== undefined && { initialPlannerId }),
+    ...(initialSyncVersion !== undefined && { initialSyncVersion }),
+    ...(initialSavedAt !== undefined && { initialSavedAt }),
     published: isPublished,
     onServerReload: handleServerReload,
     onKeepBothCreated: handleKeepBothCreated,

@@ -85,7 +85,9 @@ export async function fetchPublishedPlanner(
 ): Promise<PublishedPlannerQueryState> {
   let data: unknown
   try {
-    data = await ApiClient.get(`/api/planner/md/published/${plannerId}`, { signal })
+    data = await ApiClient.get(`/api/planner/md/published/${plannerId}`, {
+      ...(signal !== undefined && { signal }),
+    })
   } catch (error) {
     // An entry opened from a stale list can have been deleted on another
     // device; that is an answer to show, not an error to escalate.

@@ -59,7 +59,10 @@ export function EGOGiftObservationSummary({
   const hasSelectedGifts = selectedGifts.length > 0
 
   return (
-    <PlannerSection title={t('pages.plannerMD.egoGiftObservation')} onViewNotes={onViewNotes}>
+    <PlannerSection
+      title={t('pages.plannerMD.egoGiftObservation')}
+      {...(onViewNotes !== undefined && { onViewNotes })}
+    >
       {/* Cost display - right aligned */}
       <div className="flex justify-end mb-4">
         <StarlightCostDisplay cost={currentCost} size="lg" />

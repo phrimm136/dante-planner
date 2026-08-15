@@ -156,7 +156,7 @@ function LazySelector({ children, selector }: LazySelectorProps) {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        if (entry?.isIntersecting) {
           setIsVisible(true)
           observer.disconnect() // Once visible, stop observing
         }
@@ -322,7 +322,7 @@ function EgoThreadspinSelectorInner({
   maxThreadspin: ThreadspinTier
   isSelected: boolean
   onConfirm: (entityId: string, data: TierSelection) => void
-  onUnequip?: (entityId: string) => void
+  onUnequip?: ((entityId: string) => void) | undefined
 }) {
   const { t } = useTranslation(['common'])
   const [threadspin, setThreadspin] = useState<ThreadspinTier>(currentThreadspin)

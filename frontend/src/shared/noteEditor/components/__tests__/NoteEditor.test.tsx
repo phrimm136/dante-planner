@@ -8,7 +8,7 @@
  */
 
 import { useEffect } from 'react'
-import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest'
+import { describe, it, expect, vi, beforeEach, beforeAll, afterAll, type Mock } from 'vitest'
 import {
   NoteDeliveryProvider,
   useNoteDeliveryRegistry,
@@ -19,6 +19,13 @@ import userEvent from '@testing-library/user-event'
 import { NoteEditor } from '../NoteEditor'
 import { calculateNoteByteLength } from '../../lib/noteUtils'
 import type { NoteContent } from '../../types/NoteEditorTypes'
+
+/** The content a change handler was last called with. */
+function lastChange(onChange: Mock<(value: NoteContent) => void>): NoteContent {
+  const call = onChange.mock.calls.at(-1)
+  if (call === undefined) throw new Error('onChange was never called')
+  return call[0]
+}
 
 // Mock i18next with initReactI18next for proper module loading
 vi.mock('react-i18next', async (importOriginal) => {
@@ -565,7 +572,7 @@ describe('NoteEditor - paste byte limit', () => {
   }
 
   it('truncates an over-limit paste so the note stays within the cap', async () => {
-    const onChange = vi.fn()
+    const onChange = vi.fn<(value: NoteContent) => void>()
     render(<NoteEditor value={emptyValue} onChange={onChange} maxBytes={400} />)
 
     const container = document.querySelector('.note-editor') as Element
@@ -577,8 +584,7 @@ describe('NoteEditor - paste byte limit', () => {
     await waitFor(
       () => {
         expect(onChange).toHaveBeenCalled()
-        const calls = onChange.mock.calls
-        const last = calls[calls.length - 1][0] as NoteContent
+        const last = lastChange(onChange)
         expect(calculateNoteByteLength({ content: last.content })).toBeLessThanOrEqual(400)
       },
       { timeout: 2000 },
@@ -586,7 +592,7 @@ describe('NoteEditor - paste byte limit', () => {
   })
 
   it('keeps an in-limit paste intact', async () => {
-    const onChange = vi.fn()
+    const onChange = vi.fn<(value: NoteContent) => void>()
     render(<NoteEditor value={emptyValue} onChange={onChange} maxBytes={4096} />)
 
     const container = document.querySelector('.note-editor') as Element
@@ -598,8 +604,7 @@ describe('NoteEditor - paste byte limit', () => {
     await waitFor(
       () => {
         expect(onChange).toHaveBeenCalled()
-        const calls = onChange.mock.calls
-        const last = calls[calls.length - 1][0] as NoteContent
+        const last = lastChange(onChange)
         expect(JSON.stringify(last.content)).toContain('hello world')
         expect(calculateNoteByteLength({ content: last.content })).toBeLessThanOrEqual(4096)
       },
@@ -608,7 +613,7 @@ describe('NoteEditor - paste byte limit', () => {
   })
 
   it('truncates right up to the cap — never over, fills the budget', async () => {
-    const onChange = vi.fn()
+    const onChange = vi.fn<(value: NoteContent) => void>()
     const cap = 300
     render(<NoteEditor value={emptyValue} onChange={onChange} maxBytes={cap} />)
 
@@ -623,8 +628,7 @@ describe('NoteEditor - paste byte limit', () => {
     await waitFor(
       () => {
         expect(onChange).toHaveBeenCalled()
-        const calls = onChange.mock.calls
-        const last = calls[calls.length - 1][0] as NoteContent
+        const last = lastChange(onChange)
         const size = calculateNoteByteLength({ content: last.content })
         expect(size).toBeLessThanOrEqual(cap) // inclusive boundary: never exceeds
         expect(size).toBeGreaterThan(cap - 5) // truncated to fit, not under-cut
@@ -694,7 +698,7 @@ describe('NoteEditor - debounce flush on unmount', () => {
   }
 
   it('calls onChange exactly once with the typed content when unmounted before the interval elapses', async () => {
-    const onChange = vi.fn()
+    const onChange = vi.fn<(value: NoteContent) => void>()
     const { unmount } = render(<NoteEditor value={emptyValue} onChange={onChange} />)
 
     const container = document.querySelector('.note-editor') as Element
@@ -710,12 +714,12 @@ describe('NoteEditor - debounce flush on unmount', () => {
     unmount()
 
     expect(onChange).toHaveBeenCalledTimes(1)
-    const flushed = onChange.mock.calls[0][0] as NoteContent
+    const flushed = lastChange(onChange)
     expect(JSON.stringify(flushed.content)).toContain('unflushed keystrokes')
   })
 
   it('calls onChange once in total when the debounce already fired before unmount', async () => {
-    const onChange = vi.fn()
+    const onChange = vi.fn<(value: NoteContent) => void>()
     const { unmount } = render(<NoteEditor value={emptyValue} onChange={onChange} />)
 
     const container = document.querySelector('.note-editor') as Element
@@ -732,7 +736,7 @@ describe('NoteEditor - debounce flush on unmount', () => {
   })
 
   it('hands pending text to its owner when the registry is drained', async () => {
-    const onChange = vi.fn()
+    const onChange = vi.fn<(value: NoteContent) => void>()
     const captured: { registry: NoteDeliveryRegistry | null } = { registry: null }
     const captureRegistry = (owned: NoteDeliveryRegistry) => {
       captured.registry = owned
@@ -763,7 +767,7 @@ describe('NoteEditor - debounce flush on unmount', () => {
     captured.registry?.drain()
 
     expect(onChange).toHaveBeenCalledTimes(1)
-    const delivered = onChange.mock.calls[0][0] as NoteContent
+    const delivered = lastChange(onChange)
     expect(JSON.stringify(delivered.content)).toContain('held by the debounce')
   })
 

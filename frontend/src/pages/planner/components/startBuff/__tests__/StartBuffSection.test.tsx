@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, assert } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { StartBuffSection } from '../StartBuffSection'
 import { PLANNER_CONFIG } from '@/lib/constants'
@@ -93,7 +93,9 @@ describe('StartBuffSection', () => {
 
       const miniCards = screen.getAllByTestId('start-buff-mini-card')
       expect(miniCards.length).toBe(1)
-      expect(miniCards[0].getAttribute('data-buff-id')).toBe('1001')
+      const [firstCard] = miniCards
+      assert(firstCard, 'the section renders no mini card')
+      expect(firstCard.getAttribute('data-buff-id')).toBe('1001')
     })
 
     it('renders multiple mini cards for multiple selections', () => {

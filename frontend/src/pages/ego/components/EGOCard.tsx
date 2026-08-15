@@ -62,6 +62,7 @@ export function EGOCard({
 }: EGOCardProps) {
   const { t } = useTranslation(['common', 'database'])
   const { id, egoType: rank, attributeTypes } = ego
+  const [primaryAttributeType] = attributeTypes
   const sinner = getSinnerFromId(id)
 
   return (
@@ -123,12 +124,14 @@ export function EGOCard({
       {/* Layer 5: Info Panel (bottom) with sin-colored background */}
       <div className="absolute bottom-3 left-0 right-0 h-12 w-36 translate-x-2 pointer-events-none">
         {/* Sin-colored panel background */}
-        <img
-          src={getEGOInfoPanelPath(attributeTypes[0])}
-          alt={t('a11y.infoPanel')}
-          loading="lazy"
-          className="absolute inset-0 items-center object-cover"
-        />
+        {primaryAttributeType !== undefined && (
+          <img
+            src={getEGOInfoPanelPath(primaryAttributeType)}
+            alt={t('a11y.infoPanel')}
+            loading="lazy"
+            className="absolute inset-0 items-center object-cover"
+          />
+        )}
 
         {/* Panel content - three sections */}
         <div

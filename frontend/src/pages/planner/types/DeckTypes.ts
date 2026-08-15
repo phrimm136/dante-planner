@@ -51,7 +51,7 @@ export type SkillEAState = Record<OffensiveSkillSlot, number>
  */
 export interface SkillInfo {
   attributeType: SkillAttributeType
-  atkType?: string
+  atkType?: string | undefined
 }
 
 /**

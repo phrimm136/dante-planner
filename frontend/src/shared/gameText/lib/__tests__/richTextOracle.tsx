@@ -17,6 +17,13 @@ const STRIKETHROUGH_RE = /<s>([\s\S]*?)<\/s>/g
 const STYLE_RE = /<style="upgradeHighlight">([\s\S]*?)<\/style>/g
 const UPGRADE_HIGHLIGHT_COLOR = '#f8c200'
 
+/** The capture group the pattern guarantees; a miss is a broken oracle, not empty input. */
+function captured(match: RegExpMatchArray, group: number): string {
+  const value = match[group]
+  if (value === undefined) throw new Error(`no capture ${String(group)} in ${match[0]}`)
+  return value
+}
+
 function sanitize(text: string): string {
   return text
     .replace(/<size=[^>]*>/g, '<small>')
@@ -91,7 +98,7 @@ export function OracleColoredText({ text }: { text: string }) {
     }
     topParts.push(
       <span key={`small-${start}`} className="text-[75%]">
-        {parseRecursive(smallMatch[1], start)}
+        {parseRecursive(captured(smallMatch, 1), start)}
       </span>,
     )
     topLastIndex = start + smallMatch[0].length
@@ -123,7 +130,7 @@ function parseSegments(text: string): TextSegment[] {
 
     const sizeMatch = remaining.match(/^<size=[^>]*>([\s\S]*?)<\/size>/)
     if (sizeMatch) {
-      const innerSegments = parseSegments(sizeMatch[1])
+      const innerSegments = parseSegments(captured(sizeMatch, 1))
       innerSegments.forEach((seg) => {
         segments.push({ ...seg, type: seg.type === 'text' ? 'size' : seg.type })
       })
@@ -133,7 +140,11 @@ function parseSegments(text: string): TextSegment[] {
 
     const colorMatch = remaining.match(/^<color=([^>]*)>([\s\S]*?)<\/color>/)
     if (colorMatch) {
-      segments.push({ type: 'color', content: colorMatch[2], color: colorMatch[1] })
+      segments.push({
+        type: 'color',
+        content: captured(colorMatch, 2),
+        color: captured(colorMatch, 1),
+      })
       remaining = remaining.slice(colorMatch[0].length)
       continue
     }
@@ -147,7 +158,7 @@ function parseSegments(text: string): TextSegment[] {
       if (closeMatch) {
         remaining = remaining.slice(closeMatch[0].length)
       } else {
-        segments.push({ type: 'text', content: remaining[0] })
+        segments.push({ type: 'text', content: remaining.charAt(0) })
         remaining = remaining.slice(1)
       }
     } else {
@@ -209,7 +220,7 @@ export function oracleParseStyleSegments(text: string): StyleSegment[] {
     if (match.index > lastIndex) {
       segments.push({ content: text.slice(lastIndex, match.index), isHighlighted: false })
     }
-    segments.push({ content: match[1], isHighlighted: true })
+    segments.push({ content: captured(match, 1), isHighlighted: true })
     lastIndex = match.index + match[0].length
   }
 
@@ -295,10 +306,9 @@ export interface OracleLeadingColor {
 }
 
 export function oracleExtractLeadingColor(input: string): OracleLeadingColor {
-  const colorMatch = input.match(/<color=([^>]+)>/)
-  if (!colorMatch) return { text: input }
+  const color = input.match(/<color=([^>]+)>/)?.[1]
+  if (color === undefined) return { text: input }
 
-  const color = colorMatch[1]
   const text = input.replace(/<color=[^>]+>/g, '').replace(/<\/color>/g, '')
   return { color, text }
 }

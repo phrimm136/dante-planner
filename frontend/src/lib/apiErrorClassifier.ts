@@ -48,7 +48,11 @@ export function validationAppError(friendly: {
   key: string
   params?: Record<string, string | number>
 }): AppError {
-  return { kind: 'validation', key: friendly.key, params: friendly.params }
+  return {
+    kind: 'validation',
+    key: friendly.key,
+    ...(friendly.params !== undefined && { params: friendly.params }),
+  }
 }
 
 /** Map a thrown value onto the app error vocabulary. */

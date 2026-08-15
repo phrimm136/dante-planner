@@ -320,8 +320,7 @@ export function validateGiftIdArray(
   const errors: GiftValidationError[] = []
   const seen = new Set<string>()
 
-  for (let i = 0; i < giftIds.length; i++) {
-    const giftId = giftIds[i]
+  for (const [i, giftId] of giftIds.entries()) {
     if (seen.has(giftId)) {
       errors.push({
         code: 'GIFT_DUPLICATE_ID',
@@ -371,9 +370,7 @@ export function validateStartBuffIds(buffIds: number[]): BuffValidationError[] {
   // Track base IDs to detect duplicates
   const seenBaseIds = new Set<number>()
 
-  for (let i = 0; i < buffIds.length; i++) {
-    const buffId = buffIds[i]
-
+  for (const [i, buffId] of buffIds.entries()) {
     // Extract base ID (00-09 part)
     const baseId = buffId % 100
 
@@ -427,8 +424,7 @@ export function validateStartGiftSelection(
 
   // Check for duplicates
   const seen = new Set<string>()
-  for (let i = 0; i < selectedGiftIds.length; i++) {
-    const giftId = selectedGiftIds[i]
+  for (const [i, giftId] of selectedGiftIds.entries()) {
     if (seen.has(giftId)) {
       errors.push({
         code: 'START_GIFT_DUPLICATE_ID',
@@ -487,8 +483,9 @@ export function validateFloorThemePacksForSave(
     const floor = floorSelections[i]
     const floorNumber = i + 1
 
-    // Rule 1: Each floor must have a theme pack
-    if (!floor.themePackId) {
+    // Rule 1: Each floor must have a theme pack. A floor absent from the array
+    // has none either, so it reports the same way.
+    if (!floor?.themePackId) {
       errors.push({
         code: 'FLOOR_MISSING_THEME_PACK',
         message: `Floor ${floorNumber} must have a theme pack selected`,
@@ -502,7 +499,7 @@ export function validateFloorThemePacksForSave(
     // Rule 2: Progressive prerequisite (skip for floor 1)
     if (i > 0) {
       const previousFloor = floorSelections[i - 1]
-      if (!previousFloor.themePackId) {
+      if (!previousFloor?.themePackId) {
         errors.push({
           code: 'FLOOR_PREREQUISITE_VIOLATION',
           message: `Floor ${floorNumber} cannot have a theme pack because Floor ${i} is missing one`,
@@ -536,8 +533,7 @@ export function validateFloorThemePacksForSave(
     // Rule 4: No duplicate gift IDs within this floor's gifts
     const giftIds = Array.from(floor.giftIds)
     const seenGiftIds = new Set<string>()
-    for (let j = 0; j < giftIds.length; j++) {
-      const giftId = giftIds[j]
+    for (const [j, giftId] of giftIds.entries()) {
       if (seenGiftIds.has(giftId)) {
         errors.push({
           code: 'FLOOR_DUPLICATE_GIFT_ID',
@@ -859,8 +855,9 @@ export function validatePlannerForDraftSave(
     )
   }
 
-  if (errors.length === 0) return null
-  return toUserFriendlyError(errors[0])
+  const [firstError] = errors
+  if (firstError === undefined) return null
+  return toUserFriendlyError(firstError)
 }
 
 /**

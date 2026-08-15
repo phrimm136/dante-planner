@@ -48,13 +48,11 @@ export function EGOGiftKeywordFilter({
       onSelectionChange={onSelectionChange}
       getIconPath={getKeywordIconPath}
       layout={layout}
-      onClearAll={
-        layout === 'bar'
-          ? () => {
-              onSelectionChange(new Set())
-            }
-          : undefined
-      }
+      {...(layout === 'bar' && {
+        onClearAll: () => {
+          onSelectionChange(new Set())
+        },
+      })}
     >
       <button
         onClick={handleNoneClick}

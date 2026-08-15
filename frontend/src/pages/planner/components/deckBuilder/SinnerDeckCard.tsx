@@ -21,7 +21,7 @@ interface SinnerDeckCardProps {
   skillData: SkillData
   egoAffinityMap: Record<string, string>
   deploymentOrder: number | null
-  onToggleDeploy?: (sinnerIndex: number) => void
+  onToggleDeploy?: ((sinnerIndex: number) => void) | undefined
   readOnly?: boolean
 }
 
@@ -131,8 +131,9 @@ export const SinnerDeckCard = function SinnerDeckCard({
       <div className="flex gap-0.5">
         {EGO_RANKS.map((rank) => {
           const equippedEgo = equipment.egos[rank]
-          const egoBgColor = equippedEgo
-            ? (colorCode as Record<string, string>)[egoAffinityMap[equippedEgo.id]]
+          const egoAffinity = equippedEgo ? egoAffinityMap[equippedEgo.id] : undefined
+          const egoBgColor = egoAffinity
+            ? (colorCode as Record<string, string>)[egoAffinity]
             : undefined
           return (
             <div

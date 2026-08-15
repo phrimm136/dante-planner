@@ -110,7 +110,7 @@ interface ModerationVariables {
 interface ModerationMutation {
   mutate: (variables: ModerationVariables, options: { onSuccess: () => void }) => void
   isPending: boolean
-  variables?: { usernameSuffix: string }
+  variables?: { usernameSuffix: string } | undefined
 }
 
 type ModerationMutations = Record<ModerationDialogKind, ModerationMutation>

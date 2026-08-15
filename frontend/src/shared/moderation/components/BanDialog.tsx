@@ -33,7 +33,7 @@ export function BanDialog({
       confirmLabel={t('dialogs.ban.confirm')}
       destructive
       onConfirm={onConfirm}
-      isPending={isPending}
+      {...(isPending !== undefined && { isPending })}
     />
   )
 }
@@ -73,7 +73,7 @@ export function TimeoutDialog({
       confirmLabel={t('dialogs.timeout.confirm')}
       destructive
       onConfirm={(reason) => onConfirm(reason, duration)}
-      isPending={isPending}
+      {...(isPending !== undefined && { isPending })}
     >
       <div className="space-y-2">
         <label className="text-sm font-medium">{t('dialogs.timeout.duration')}</label>
@@ -119,7 +119,7 @@ export function UnbanDialog({
       cancelLabel={t('common:cancel')}
       confirmLabel={t('dialogs.unban.confirm')}
       onConfirm={onConfirm}
-      isPending={isPending}
+      {...(isPending !== undefined && { isPending })}
     />
   )
 }
@@ -145,7 +145,7 @@ export function ClearTimeoutDialog({
       cancelLabel={t('common:cancel')}
       confirmLabel={t('dialogs.clearTimeout.confirm')}
       onConfirm={onConfirm}
-      isPending={isPending}
+      {...(isPending !== undefined && { isPending })}
     />
   )
 }
@@ -175,7 +175,7 @@ export function CommentDeleteDialog({
       confirmLabel={t('common:delete')}
       destructive
       onConfirm={onConfirm}
-      isPending={isPending}
+      {...(isPending !== undefined && { isPending })}
     />
   )
 }

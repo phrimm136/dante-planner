@@ -47,9 +47,12 @@ export function decodeGiftSelection(encodedId: string): GiftSelection | null {
   const match = encodedId.match(ENCODED_SELECTION_PATTERN)
   if (!match) return null
 
+  const [, enhancementDigit, giftId] = match
+  if (giftId === undefined) return null
+
   return {
-    enhancement: match[1] ? (Number(match[1]) as EnhancementLevel) : 0,
-    giftId: match[2],
+    enhancement: enhancementDigit ? (Number(enhancementDigit) as EnhancementLevel) : 0,
+    giftId,
   }
 }
 

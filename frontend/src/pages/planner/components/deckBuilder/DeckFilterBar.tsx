@@ -118,7 +118,7 @@ function SeasonControl({ state, setField, className }: FilterControlProps) {
     <SeasonDropdown
       selected={state.selectedSeasons}
       onSelectionChange={setField('selectedSeasons')}
-      className={className}
+      {...(className !== undefined && { className })}
     />
   )
 }
@@ -128,7 +128,7 @@ function UnitKeywordControl({ state, setField, className }: FilterControlProps) 
     <UnitKeywordDropdown
       selected={state.selectedUnitKeywords}
       onSelectionChange={setField('selectedUnitKeywords')}
-      className={className}
+      {...(className !== undefined && { className })}
     />
   )
 }
@@ -139,7 +139,7 @@ function BattleKeywordControl({ state, setField, className }: FilterControlProps
       entityType={state.entityMode === 'identity' ? 'identity' : 'ego'}
       selected={state.selectedBattleKeywords}
       onSelectionChange={setField('selectedBattleKeywords')}
-      className={className}
+      {...(className !== undefined && { className })}
     />
   )
 }

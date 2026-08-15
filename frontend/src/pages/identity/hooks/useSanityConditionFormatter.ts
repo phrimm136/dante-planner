@@ -6,7 +6,7 @@
  */
 
 import { useSanityConditionI18n } from '@/shared/gameText'
-import { formatSanityCondition, formatSanityConditions } from '../lib/formatSanityCondition'
+import { formatSanityCondition } from '../lib/formatSanityCondition'
 import type { SanityConditionResult } from '../lib/formatSanityCondition'
 import type { SanityConditionType } from '@/shared/gameData'
 
@@ -65,8 +65,8 @@ export function useSanityConditionFormatter() {
      * @returns Array of formatted descriptions
      */
     formatAll: (encodedNames: string[], type: SanityConditionType): string[] => {
-      return formatSanityConditions(encodedNames, i18n, type).map((result, index) =>
-        resolve(result, encodedNames[index]),
+      return encodedNames.map((encodedName) =>
+        resolve(formatSanityCondition(encodedName, i18n, type), encodedName),
       )
     },
 

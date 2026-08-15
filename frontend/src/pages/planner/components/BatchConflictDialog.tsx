@@ -178,7 +178,7 @@ export function BatchConflictDialog({
       // A conflict has no message of its own; this dialog is what reports it.
       return t('pages.plannerMD.batchConflict.itemFailed', 'This planner could not be resolved.')
     }
-    return t(presentation.key, presentation.params)
+    return presentation.params ? t(presentation.key, presentation.params) : t(presentation.key)
   }
 
   // Track resolution choice for each conflict

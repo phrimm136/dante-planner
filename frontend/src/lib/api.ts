@@ -31,8 +31,9 @@ function readCsrfToken(): string | null {
   if (typeof document === 'undefined') {
     return null
   }
-  const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${CSRF_COOKIE_NAME}=([^;]*)`))
-  return match ? decodeURIComponent(match[1]) : null
+  const [, encoded] =
+    document.cookie.match(new RegExp(`(?:^|;\\s*)${CSRF_COOKIE_NAME}=([^;]*)`)) ?? []
+  return encoded === undefined ? null : decodeURIComponent(encoded)
 }
 
 /** Shape every backend error body is read through; every field is best-effort. */
@@ -187,14 +188,14 @@ export class ApiClient {
   static async post<T>(endpoint: string, data?: unknown): Promise<T> {
     return this.fetch<T>(endpoint, {
       method: 'POST',
-      body: data ? JSON.stringify(data) : undefined,
+      ...(data ? { body: JSON.stringify(data) } : {}),
     })
   }
 
   static async put<T>(endpoint: string, data?: unknown): Promise<T> {
     return this.fetch<T>(endpoint, {
       method: 'PUT',
-      body: data ? JSON.stringify(data) : undefined,
+      ...(data ? { body: JSON.stringify(data) } : {}),
     })
   }
 
@@ -205,7 +206,7 @@ export class ApiClient {
   static async patch<T>(endpoint: string, data?: unknown): Promise<T> {
     return this.fetch<T>(endpoint, {
       method: 'PATCH',
-      body: data ? JSON.stringify(data) : undefined,
+      ...(data ? { body: JSON.stringify(data) } : {}),
     })
   }
 }

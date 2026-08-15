@@ -138,6 +138,7 @@ describe('ChoiceBranch nothing-happened fallback', () => {
     )
 
     const [emptyCard, filledCard] = divsWithClass(container, BRANCH_CARD)
+    if (!emptyCard || !filledCard) throw new Error('expected an empty and a filled branch card')
     expect(hasOwnFallback(emptyCard.children[1])).toBe(true)
     expect(hasOwnFallback(filledCard.children[1])).toBe(false)
   })
@@ -198,11 +199,14 @@ describe('ChoiceBranch next-target resolution', () => {
       />,
     )
     const [success, failure] = coinTossOutcomes(container)
+    if (!success || !failure) throw new Error('expected a success and a failure outcome')
 
     const [successNext] = childrenWithClass(success, NEXT_EVENT_WRAPPER)
+    if (!successNext) throw new Error('expected a next-event block under the success outcome')
     expect(coinTossThresholds(successNext)).toEqual(['15+'])
 
     const [failureNext] = childrenWithClass(failure, NEXT_EVENT_WRAPPER)
+    if (!failureNext) throw new Error('expected a next-event block under the failure outcome')
     expect(failureNext.textContent).toContain('Sub event desc')
   })
 
@@ -215,6 +219,7 @@ describe('ChoiceBranch next-target resolution', () => {
       />,
     )
     const [success, failure] = coinTossOutcomes(container)
+    if (!success || !failure) throw new Error('expected a success and a failure outcome')
 
     expect(childrenWithClass(success, NEXT_EVENT_WRAPPER)).toHaveLength(0)
     expect(childrenWithClass(failure, NEXT_EVENT_WRAPPER)).toHaveLength(0)

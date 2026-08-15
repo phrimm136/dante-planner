@@ -65,8 +65,9 @@ describe('plannerApi.batchChunks', () => {
     const result = await collect(idsOf(BATCH_PULL_MAX_IDS + 1))
 
     expect(mockPost).toHaveBeenCalledTimes(2)
-    expect((mockPost.mock.calls[0][1] as { ids: string[] }).ids).toHaveLength(BATCH_PULL_MAX_IDS)
-    expect((mockPost.mock.calls[1][1] as { ids: string[] }).ids).toHaveLength(1)
+    const [firstBody, secondBody] = mockPost.mock.calls.map((call) => call[1] as { ids: string[] })
+    expect(firstBody?.ids).toHaveLength(BATCH_PULL_MAX_IDS)
+    expect(secondBody?.ids).toHaveLength(1)
     expect(result).toHaveLength(BATCH_PULL_MAX_IDS + 1)
   })
 
@@ -108,10 +109,12 @@ describe('plannerApi.batchChunks', () => {
   })
 
   it('fails a whole chunk when one of its rows is malformed', async () => {
-    mockPost.mockImplementation(async (_url: string, body: { ids: string[] }) => [
-      responseFor(body.ids[0]),
-      { ...responseFor(body.ids[1]), syncVersion: -3 },
-    ])
+    mockPost.mockImplementation(async (_url: string, body: { ids: string[] }) =>
+      // The second row of the chunk carries an out-of-range syncVersion.
+      body.ids.map((id, index) =>
+        index === 1 ? { ...responseFor(id), syncVersion: -3 } : responseFor(id),
+      ),
+    )
 
     await expect(collect([uuidAt(0), uuidAt(1)])).rejects.toThrow(
       'Too small: expected number to be >0',

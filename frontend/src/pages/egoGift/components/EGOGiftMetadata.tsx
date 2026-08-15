@@ -28,9 +28,9 @@ interface EGOGiftMetadataProps {
   /** Theme pack IDs */
   themePack: string[]
   /** Whether gift is hard mode only */
-  hardOnly?: boolean
+  hardOnly?: boolean | undefined
   /** Whether gift is extreme mode only */
-  extremeOnly?: boolean
+  extremeOnly?: boolean | undefined
   /** Maximum enhancement level (0 = base, 1 = +, 2 = ++) */
   maxEnhancement: EnhancementLevel
 }

@@ -35,7 +35,9 @@ export function useApiMutation<TData, TVariables = void>(
 
   return useMutation({
     mutationFn: options.mutationFn,
-    meta: { successMessage: options.successToastKey },
+    meta: {
+      ...(options.successToastKey !== undefined && { successMessage: options.successToastKey }),
+    },
     onSuccess: (data, variables) => {
       for (const queryKey of options.invalidateKeys?.(variables) ?? []) {
         void queryClient.invalidateQueries({ queryKey })

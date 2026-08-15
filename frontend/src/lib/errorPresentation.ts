@@ -55,7 +55,12 @@ export function presentError(error: AppError): ErrorPresentation | null {
     case 'conflict':
       return null
     case 'validation':
-      return { key: error.key, params: error.params, severity: 'error', supportHint: false }
+      return {
+        key: error.key,
+        ...(error.params !== undefined && { params: error.params }),
+        severity: 'error',
+        supportHint: false,
+      }
     case 'restricted':
       return { key: RESTRICTION_KEY[error.reason], severity: 'error', supportHint: false }
     case 'unavailable':
@@ -77,8 +82,12 @@ export function presentError(error: AppError): ErrorPresentation | null {
   }
 }
 
+function translate(key: string, params?: Record<string, unknown>): string {
+  return params === undefined ? i18n.t(key) : i18n.t(key, params)
+}
+
 function emit(presentation: ErrorPresentation): void {
-  const message = i18n.t(presentation.key, presentation.params)
+  const message = translate(presentation.key, presentation.params)
   const options = presentation.supportHint
     ? { description: linkifyText(i18n.t(CONTACT_KEY)) }
     : undefined
@@ -113,19 +122,19 @@ export function showUnavailable(error: unknown): void {
 
 /** Report a failure under a message the caller chose, not one the classifier picked. */
 export function showErrorMessage(key: string, params?: Record<string, string | number>): void {
-  showAppError(validationAppError({ key, params }))
+  showAppError(validationAppError({ key, ...(params !== undefined && { params }) }))
 }
 
 export function showSuccess(key: string, params?: Record<string, unknown>): void {
-  toast.success(i18n.t(key, params))
+  toast.success(translate(key, params))
 }
 
 /** An outcome that is neither a failure nor a clean success. */
 export function showWarning(key: string, params?: Record<string, unknown>): void {
-  toast.warning(i18n.t(key, params))
+  toast.warning(translate(key, params))
 }
 
 /** A neutral notice. Carried here so no other module needs the toast import. */
 export function showInfo(key: string, params?: Record<string, unknown>): void {
-  toast.info(i18n.t(key, params))
+  toast.info(translate(key, params))
 }

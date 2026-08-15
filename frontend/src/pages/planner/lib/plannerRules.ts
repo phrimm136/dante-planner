@@ -96,6 +96,8 @@ export function canSelectFloorThemePack(
   // First floor always enabled
   if (floorIndex === 0) return true
 
-  // Other floors require previous floor to have a theme pack
-  return floorSelections[floorIndex - 1].themePackId !== null
+  // Other floors require previous floor to have a theme pack. A floor absent
+  // from the array has none, so the next one stays locked.
+  const previousFloor = floorSelections[floorIndex - 1]
+  return previousFloor !== undefined && previousFloor.themePackId !== null
 }

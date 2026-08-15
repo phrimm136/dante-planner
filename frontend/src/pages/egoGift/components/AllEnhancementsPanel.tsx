@@ -92,7 +92,7 @@ export function AllEnhancementsPanel({
           key={level}
           level={level}
           description={descriptions[level] ?? ''}
-          cost={costs[level]}
+          cost={costs[level] ?? null}
           isLast={index === levelsToRender.length - 1}
         />
       ))}

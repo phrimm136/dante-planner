@@ -6,7 +6,7 @@
  * adapters faked, as in usePlannerSave.test.ts).
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, assert } from 'vitest'
 import { render, act, waitFor, screen, fireEvent } from '@testing-library/react'
 import type { StoreApi } from 'zustand'
 import { ok } from '@/lib/result'
@@ -185,6 +185,7 @@ describe('PlannerEditorShell - unload warning', () => {
     const saveButton = screen.getAllByRole('button', {
       name: 'pages.plannerMD.save.button',
     })[0]
+    assert(saveButton, 'the shell renders no save button')
     await act(async () => {
       fireEvent.click(saveButton)
     })

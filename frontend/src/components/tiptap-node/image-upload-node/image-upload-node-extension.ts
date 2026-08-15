@@ -80,9 +80,6 @@ export const ImageUploadNode = Node.create<ImageUploadNodeOptions>({
       accept: 'image/*',
       limit: 1,
       maxSize: 0,
-      upload: undefined,
-      onError: undefined,
-      onSuccess: undefined,
       HTMLAttributes: {},
     }
   },

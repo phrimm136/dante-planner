@@ -132,7 +132,10 @@ export type PlannerValidationError =
 
 /** Planner validators name their keys inside the planner namespace. */
 export function plannerValidationError(friendly: { key: string; params?: Record<string, string> }) {
-  return validationAppError({ key: `planner:${friendly.key}`, params: friendly.params })
+  return validationAppError({
+    key: `planner:${friendly.key}`,
+    ...(friendly.params !== undefined && { params: friendly.params }),
+  })
 }
 
 /**

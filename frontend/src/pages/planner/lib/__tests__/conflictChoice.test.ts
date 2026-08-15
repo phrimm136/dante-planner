@@ -378,8 +378,9 @@ describe('interpretConflictPlan', () => {
       ctx,
     )
 
-    const stored = saveLocal.mock.calls[0][0] as SaveablePlanner
-    expect(stored.metadata).toMatchObject({ status: 'saved', savedAt: NOW, syncVersion: 12 })
+    const [storeCall] = saveLocal.mock.calls
+    if (!storeCall) throw new Error('expected saveLocal to have been called')
+    expect(storeCall[0].metadata).toMatchObject({ status: 'saved', savedAt: NOW, syncVersion: 12 })
   })
 
   it('copies the side the plan names, not whichever side is cheapest to reach', async () => {
@@ -413,7 +414,8 @@ describe('interpretConflictPlan', () => {
       ctx,
     )
 
-    const copy = saveLocal.mock.calls[0][0] as SaveablePlanner
-    expect(copy.metadata.published).toBe(false)
+    const [copyCall] = saveLocal.mock.calls
+    if (!copyCall) throw new Error('expected saveLocal to have been called')
+    expect(copyCall[0].metadata.published).toBe(false)
   })
 })

@@ -10,7 +10,7 @@ interface DeckTrackerPanelProps {
   onImport: () => void
   onExport: () => void
   onResetToPreset: () => void
-  onViewNotes?: () => void
+  onViewNotes?: (() => void) | undefined
 }
 
 /**

@@ -17,7 +17,7 @@ interface SinnerGridProps {
   identities: Identity[]
   skillDataMap: Record<string, SkillData>
   egoAffinityMap: Record<string, string>
-  onToggleDeploy?: (sinnerIndex: number) => void
+  onToggleDeploy?: ((sinnerIndex: number) => void) | undefined
   readOnly?: boolean
 }
 

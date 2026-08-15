@@ -77,9 +77,9 @@ function showNotificationForEvent(data: SseNotificationEvent): void {
 
   // Show browser notification if tab hidden, in-app toast if visible
   if (isTabHidden()) {
-    showBrowserNotification({ title, body, url })
+    showBrowserNotification({ title, body, ...(url !== undefined && { url }) })
   } else {
-    showNotificationToast({ type: data.type, title, body, url })
+    showNotificationToast({ type: data.type, title, body, ...(url !== undefined && { url }) })
   }
 }
 

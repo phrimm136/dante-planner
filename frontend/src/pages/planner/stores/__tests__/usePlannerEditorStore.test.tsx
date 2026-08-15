@@ -7,7 +7,7 @@
  * the store is vanilla Zustand, so it is driven directly via createPlannerEditorStore().
  */
 
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, assert } from 'vitest'
 import {
   createPlannerEditorStore,
   createDefaultEquipment,
@@ -115,7 +115,9 @@ describe('usePlannerEditorStore', () => {
 
       const floors = store.getState().floorSelections
       expect(floors[3]).toEqual(updated)
-      expect(floors[0].themePackId).toBeNull()
+      const firstFloor = floors[0]
+      assert(firstFloor, 'the store holds no first floor')
+      expect(firstFloor.themePackId).toBeNull()
     })
   })
 
@@ -233,8 +235,10 @@ describe('usePlannerEditorStore', () => {
       expect(Array.from(s.selectedGiftIds)).toEqual(['g1', 'g2'])
       expect(Array.from(s.observationGiftIds)).toEqual(['o1'])
       expect(Array.from(s.comprehensiveGiftIds)).toEqual(['c1'])
-      expect(s.floorSelections[0].giftIds).toBeInstanceOf(Set)
-      expect(Array.from(s.floorSelections[0].giftIds)).toEqual(['fg1', 'fg2'])
+      const firstFloor = s.floorSelections[0]
+      assert(firstFloor, 'the store holds no first floor')
+      expect(firstFloor.giftIds).toBeInstanceOf(Set)
+      expect(Array.from(firstFloor.giftIds)).toEqual(['fg1', 'fg2'])
       expect(s.title).toBe('T')
       expect(s.isPublished).toBe(true)
     })
@@ -324,8 +328,10 @@ describe('usePlannerEditorStore', () => {
 
       const planner = store.getState().getPlannerState()
 
-      expect(planner.floorSelections[2].giftIds).toBeInstanceOf(Set)
-      expect(Array.from(planner.floorSelections[2].giftIds)).toEqual(['fg1', 'fg2'])
+      const thirdFloor = planner.floorSelections[2]
+      assert(thirdFloor, 'the planner state holds no third floor')
+      expect(thirdFloor.giftIds).toBeInstanceOf(Set)
+      expect(Array.from(thirdFloor.giftIds)).toEqual(['fg1', 'fg2'])
     })
   })
 

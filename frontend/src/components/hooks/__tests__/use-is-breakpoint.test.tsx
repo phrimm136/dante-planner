@@ -13,6 +13,12 @@ interface FakeMediaQueryList {
 
 const originalMatchMedia = window.matchMedia
 
+function latestList(lists: FakeMediaQueryList[]): FakeMediaQueryList {
+  const list = lists.at(-1)
+  if (!list) throw new Error('window.matchMedia was never called')
+  return list
+}
+
 function stubMatchMedia(initialWidth: number) {
   const lists: FakeMediaQueryList[] = []
 
@@ -69,7 +75,7 @@ describe('useIsBreakpoint', () => {
     expect(result.current).toBe(false)
 
     act(() => {
-      lists[lists.length - 1].emit(true)
+      latestList(lists).emit(true)
     })
     expect(result.current).toBe(true)
   })
@@ -78,7 +84,7 @@ describe('useIsBreakpoint', () => {
     const lists = stubMatchMedia(800)
 
     const { unmount } = renderHook(() => useIsBreakpoint('min', 1024))
-    const list = lists[lists.length - 1]
+    const list = latestList(lists)
     const removeSpy = vi.spyOn(list, 'removeEventListener')
 
     unmount()

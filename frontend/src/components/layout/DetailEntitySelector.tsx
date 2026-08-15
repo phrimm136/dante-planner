@@ -56,8 +56,8 @@ export function DetailEntitySelector({
 
   const tiers = Array.from({ length: maxTier - minTier + 1 }, (_, i) => minTier + i)
 
-  const handleSliderChange = (values: number[]) => {
-    const newLevel = values[0]
+  const handleSliderChange = ([newLevel]: number[]) => {
+    if (newLevel === undefined) return
     setInputValue(String(newLevel))
     onLevelChange?.(newLevel)
   }

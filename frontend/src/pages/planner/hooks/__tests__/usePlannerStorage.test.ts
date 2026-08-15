@@ -47,8 +47,9 @@ function stubDbOver(rows: Map<string, string>) {
           } = { onsuccess: null, onerror: null, result: null }
           const step = () => {
             queueMicrotask(() => {
-              if (index < entries.length) {
-                const [key, value] = entries[index++]
+              const entry = entries[index++]
+              if (entry) {
+                const [key, value] = entry
                 req.result = { key, value, continue: step }
               } else {
                 req.result = null
@@ -136,7 +137,7 @@ describe('listLocal', () => {
     const summaries = await storageHook().listLocal()
 
     expect(summaries).toHaveLength(1)
-    expect(summaries[0].id).toBe(planner.metadata.id)
+    expect(summaries[0]?.id).toBe(planner.metadata.id)
   })
 
   it('ignores a row still held under an old four-part key', async () => {

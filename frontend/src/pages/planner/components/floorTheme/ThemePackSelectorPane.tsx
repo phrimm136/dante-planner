@@ -15,7 +15,7 @@ interface ThemePackSelectorPaneProps {
   floorNumber: number // 1-indexed floor (1-15)
   previousFloorDifficulty: DungeonIdx | null // null for floor 1
   themePackList: ThemePackListType
-  themePackI18n: Record<string, { name: string; specialName?: string }>
+  themePackI18n: Record<string, { name: string; specialName?: string | undefined }>
   onSelect: (packId: string, difficulty: DungeonIdx) => void
   /** Set of theme pack IDs already used on other floors (to prevent duplicates) */
   usedThemePackIds: Set<string>
@@ -35,26 +35,22 @@ function getAvailableDifficulties(
   floorNumber: number,
   previousFloorDifficulty: DungeonIdx | null,
   category: MDCategory,
-): DungeonIdx[] {
+): [DungeonIdx, ...DungeonIdx[]] {
   // Floor 11-15: Extreme only
   if (floorNumber >= 11) {
     return [DUNGEON_IDX.EXTREME]
   }
-
-  const available: DungeonIdx[] = []
 
   // Normal available for:
   // - 1F with 5F category (N/H mode allows Normal start)
   // - Any floor if previous floor was Normal
   const isFirstFloorWithNormalAllowed = floorNumber === 1 && category === '5F'
   if (isFirstFloorWithNormalAllowed || previousFloorDifficulty === DUNGEON_IDX.NORMAL) {
-    available.push(DUNGEON_IDX.NORMAL)
+    return [DUNGEON_IDX.NORMAL, DUNGEON_IDX.HARD]
   }
 
   // Hard always available for floors 1-10
-  available.push(DUNGEON_IDX.HARD)
-
-  return available
+  return [DUNGEON_IDX.HARD]
 }
 
 /**
@@ -145,7 +141,7 @@ export function ThemePackSelectorPane({
     }
   }
 
-  const getDifficultyColor = (idx: DungeonIdx): string => {
+  const getDifficultyColor = (idx: DungeonIdx): string | undefined => {
     switch (idx) {
       case DUNGEON_IDX.NORMAL:
         return DIFFICULTY_COLORS[DIFFICULTY_LABELS.NORMAL]

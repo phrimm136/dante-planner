@@ -33,9 +33,9 @@ export function toGiftListItem(id: string, spec: EGOGiftSpec, name?: string): EG
     attributeType: spec.attributeType,
     themePack: spec.themePack,
     maxEnhancement: spec.maxEnhancement,
-    recipe: spec.recipe,
-    hardOnly: spec.hardOnly,
-    extremeOnly: spec.extremeOnly,
+    ...(spec.recipe === undefined ? {} : { recipe: spec.recipe }),
+    ...(spec.hardOnly === undefined ? {} : { hardOnly: spec.hardOnly }),
+    ...(spec.extremeOnly === undefined ? {} : { extremeOnly: spec.extremeOnly }),
   }
 }
 

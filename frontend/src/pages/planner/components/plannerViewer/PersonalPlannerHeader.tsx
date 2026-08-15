@@ -48,11 +48,11 @@ interface PersonalPlannerHeaderProps {
   /** Whether user is authenticated */
   isAuthenticated: boolean
   /** Whether sync is enabled (null = not chosen, true = enabled, false = disabled) */
-  syncEnabled?: boolean | null
+  syncEnabled?: boolean | null | undefined
   /** Callback when edit is clicked */
-  onEdit?: () => void
+  onEdit?: (() => void) | undefined
   /** Callback when delete is confirmed (optional, uses internal mutation if not provided) */
-  onDelete?: () => void
+  onDelete?: (() => void) | undefined
 }
 
 /**
@@ -95,8 +95,8 @@ export function PersonalPlannerHeader({
     listRoute: '/planner/md',
     plannerToUpdate: planner,
     isAuthenticated,
-    syncEnabled,
-    onDelete,
+    ...(syncEnabled !== undefined && { syncEnabled }),
+    ...(onDelete !== undefined && { onDelete }),
   })
 
   // `base` is the planner the local save is derived from: for publish it's the

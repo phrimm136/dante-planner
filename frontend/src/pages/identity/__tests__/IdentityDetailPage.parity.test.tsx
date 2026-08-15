@@ -142,9 +142,10 @@ describe('IdentityDetailPage DOM parity', () => {
     })
 
     for (const uptie of [1, 4]) {
-      for (const index of [0, 2]) {
+      for (const [index, tab] of SKILL_TABS.entries()) {
+        if (index !== 0 && index !== 2) continue
         it(`renders uptie ${uptie} with ${SKILL_TAB_NAMES[index]} selected`, async () => {
-          expect(await renderCell(uptie, SKILL_TABS[index], true)).toMatchSnapshot()
+          expect(await renderCell(uptie, tab, true)).toMatchSnapshot()
         })
       }
     }

@@ -17,7 +17,7 @@ interface ThemePackCardProps {
   packEntry: ThemePackEntry
   packName: string
   /** Special name with embedded color codes (e.g., "<color=#XXXXXX>text</color>") */
-  specialName?: string
+  specialName?: string | undefined
   /** Enable hover highlight overlay (for selection contexts) */
   enableHoverHighlight?: boolean
   /** Show persistent select highlight (for click-to-pin focus) */

@@ -31,17 +31,17 @@ export function enumerateSelectionStates<TState extends object>(
   cap = 20000,
 ): TState[] {
   const keys = Object.keys(domains) as (keyof TState)[]
-  const optionLists = keys.map((key) => domains[key] ?? [])
-  const total = optionLists.reduce((product, options) => product * options.length, 1)
+  const facets = keys.map((key) => ({ key, options: domains[key] ?? [] }))
+  const total = facets.reduce((product, facet) => product * facet.options.length, 1)
 
   const stateAt = (index: number): TState => {
     const state = { ...base }
     let rest = index
-    keys.forEach((key, position) => {
-      const options = optionLists[position]
-      state[key] = new Set(options[rest % options.length]) as unknown as TState[typeof key]
+    for (const { key, options } of facets) {
+      const selected = options[rest % options.length] ?? []
+      state[key] = new Set(selected) as unknown as TState[typeof key]
       rest = Math.floor(rest / options.length)
-    })
+    }
     return state
   }
 
@@ -55,11 +55,11 @@ export function enumerateSelectionStates<TState extends object>(
   }
 
   if (stride > 1) {
-    keys.forEach((key, position) => {
-      for (const options of optionLists[position]) {
-        states.push({ ...base, [key]: new Set(options) })
+    for (const { key, options } of facets) {
+      for (const selection of options) {
+        states.push({ ...base, [key]: new Set(selection) })
       }
-    })
+    }
   }
 
   return states

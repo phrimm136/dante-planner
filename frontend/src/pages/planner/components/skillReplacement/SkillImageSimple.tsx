@@ -12,7 +12,7 @@ interface SkillImageSimpleProps {
   attributeType: SkillAttributeType
   /** Skill tier (1-3) determines frame appearance */
   skillTier: number
-  atkType?: string
+  atkType?: string | undefined
   onImageError?: () => void
   showMissingPlaceholder?: boolean
 }

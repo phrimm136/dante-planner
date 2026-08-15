@@ -93,7 +93,7 @@ export function StyledSkillName({ name, attributeType }: StyledSkillNameProps) {
  * Skeleton matching StyledSkillName's gradient background.
  * Used as Suspense fallback for skill/passive name loading.
  */
-export function StyledNameSkeleton({ attributeType }: { attributeType?: string }) {
+export function StyledNameSkeleton({ attributeType }: { attributeType?: string | undefined }) {
   const { primary, dark } = getAttributeColors(attributeType)
 
   return (

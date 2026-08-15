@@ -399,14 +399,15 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     if (noteSizeError) return plannerValidationError(noteSizeError)
 
     if (saveable.metadata.published) {
-      const { isValid, errors } = validatePlannerForPublish(
+      const { errors } = validatePlannerForPublish(
         saveable.metadata.title,
         content,
         category,
         egoGiftSpec,
         egoGiftI18n,
       )
-      return isValid ? null : plannerValidationError(toUserFriendlyError(errors[0]))
+      const [firstError] = errors
+      return firstError ? plannerValidationError(toUserFriendlyError(firstError)) : null
     }
 
     const validationError = validatePlannerForDraftSave(content, category, egoGiftSpec, egoGiftI18n)
@@ -654,7 +655,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
 
     try {
       const saved = await performSave('saved', {
-        published: saveOptions?.published,
+        ...(saveOptions?.published !== undefined && { published: saveOptions.published }),
         mode: saveOptions?.forceSync ? 'forceSync' : 'syncIfEnabled',
       })
       if (!saved.ok) {

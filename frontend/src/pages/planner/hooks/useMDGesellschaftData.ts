@@ -31,30 +31,12 @@ export const gesellschaftQueryKeys = {
   all: ['gesellschaft'] as const,
 
   /** Key for published planners */
-  published: (params: {
-    page: number
-    size: number
-    category?: MDCategory
-    search?: string
-    keyword?: string
-    identity?: string
-    ego?: string
-    gift?: string
-    themePack?: string
-  }) => [...gesellschaftQueryKeys.all, 'published', params] as const,
+  published: (params: GesellschaftQueryParams) =>
+    [...gesellschaftQueryKeys.all, 'published', params] as const,
 
   /** Key for recommended planners (best) */
-  recommended: (params: {
-    page: number
-    size: number
-    category?: MDCategory
-    search?: string
-    keyword?: string
-    identity?: string
-    ego?: string
-    gift?: string
-    themePack?: string
-  }) => [...gesellschaftQueryKeys.all, 'recommended', params] as const,
+  recommended: (params: GesellschaftQueryParams) =>
+    [...gesellschaftQueryKeys.all, 'recommended', params] as const,
 }
 
 // ============================================================================
@@ -64,13 +46,13 @@ export const gesellschaftQueryKeys = {
 interface GesellschaftQueryParams {
   page: number
   size: number
-  category?: MDCategory
-  search?: string
-  keyword?: string
-  identity?: string
-  ego?: string
-  gift?: string
-  themePack?: string
+  category?: MDCategory | undefined
+  search?: string | undefined
+  keyword?: string | undefined
+  identity?: string | undefined
+  ego?: string | undefined
+  gift?: string | undefined
+  themePack?: string | undefined
 }
 
 /**

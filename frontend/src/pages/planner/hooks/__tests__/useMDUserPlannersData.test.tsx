@@ -223,7 +223,8 @@ describe('useMDUserPlannersData background sync', () => {
     await runSyncWith(serverRows(BATCH_PULL_MAX_IDS + 1))
 
     expect(syncMocks.batchChunks).toHaveBeenCalledTimes(1)
-    expect(syncMocks.batchChunks.mock.calls[0][0]).toHaveLength(BATCH_PULL_MAX_IDS + 1)
+    const [firstCall] = syncMocks.batchChunks.mock.calls
+    expect(firstCall?.[0]).toHaveLength(BATCH_PULL_MAX_IDS + 1)
   })
 
   it('issues no request for an empty residue, which the server would reject', async () => {

@@ -12,7 +12,7 @@ interface ThemePackTrackerCardProps {
   packId: string
   packEntry: ThemePackEntry
   packName: string
-  specialName?: string
+  specialName?: string | undefined
   floorNumber: number
   noteContent: NoteContent
   isDone: boolean

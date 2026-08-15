@@ -34,6 +34,13 @@ vi.mock('@/components/ui/dropdown-menu', async () => {
   return createDropdownMenuStub()
 })
 
+/** The nth element of a surface, named in the failure when the surface is shorter. */
+function nth<T>(elements: readonly T[], index: number): T {
+  const element = elements[index]
+  if (element === undefined) throw new Error(`the surface holds no element ${String(index)}`)
+  return element
+}
+
 describe('CommentActionButtons DOM', () => {
   for (const testCase of ACTION_CASES) {
     it(`renders ${testCase.label}`, () => {
@@ -90,8 +97,8 @@ describe('CommentActionButtons wiring', () => {
     expect(menu).toHaveLength(AUTHOR_ACTIONS.length)
 
     for (const [index, name] of AUTHOR_ACTIONS.entries()) {
-      await user.click(inline[index])
-      await user.click(menu[index])
+      await user.click(nth(inline, index))
+      await user.click(nth(menu, index))
       expect(spies[name]).toHaveBeenCalledTimes(2)
     }
   })
@@ -101,10 +108,10 @@ describe('CommentActionButtons wiring', () => {
     const comment = makeComment({ isAuthor: true, authorNotificationsEnabled: true })
     const { spies, inline } = renderWithSpies({ viewer: { kind: 'user' }, comment })
 
-    await user.click(inline[2])
+    await user.click(nth(inline, 2))
     expect(spies.onDelete).toHaveBeenCalledWith(comment.id)
 
-    await user.click(inline[3])
+    await user.click(nth(inline, 3))
     expect(spies.onToggleNotifications).toHaveBeenCalledWith(comment.id, false)
   })
 
@@ -116,8 +123,8 @@ describe('CommentActionButtons wiring', () => {
     expect(inline).toHaveLength(2)
     expect(menu).toHaveLength(2)
 
-    await user.click(inline[1])
-    await user.click(menu[1])
+    await user.click(nth(inline, 1))
+    await user.click(nth(menu, 1))
     expect(spies.onModeratorDelete).toHaveBeenCalledTimes(2)
     expect(spies.onDelete).not.toHaveBeenCalled()
   })
@@ -125,7 +132,7 @@ describe('CommentActionButtons wiring', () => {
   it('upvotes from the always-visible button and disables it once upvoted', async () => {
     const user = userEvent.setup()
     const live = renderWithSpies({})
-    await user.click(screen.getAllByRole('button')[0])
+    await user.click(nth(screen.getAllByRole('button'), 0))
     expect(live.spies.onUpvote).toHaveBeenCalledTimes(1)
 
     render(

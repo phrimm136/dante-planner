@@ -37,7 +37,9 @@ const resources = {
  * Every importer is a literal `import('@static/…')` so the build can split each
  * namespace into its own chunk; a variable path would defeat that.
  */
-const translationChunks: Record<string, Record<string, () => Promise<{ default: unknown }>>> = {
+type Namespace = (typeof NAMESPACES)[number]
+
+const translationChunks: Record<string, Record<Namespace, () => Promise<{ default: unknown }>>> = {
   JP: {
     common: () => import('@static/i18n/JP/common.json'),
     database: () => import('@static/i18n/JP/database.json'),
@@ -76,10 +78,12 @@ async function loadLanguage(language: string | undefined): Promise<void> {
   if (!chunks) return
   loaded.add(language)
   try {
-    const modules = await Promise.all(NAMESPACES.map((ns) => chunks[ns]()))
-    NAMESPACES.forEach((ns, index) => {
-      i18n.addResourceBundle(language, ns, modules[index].default, true, true)
-    })
+    const bundles = await Promise.all(
+      NAMESPACES.map(async (ns) => ({ ns, resource: (await chunks[ns]()).default })),
+    )
+    for (const { ns, resource } of bundles) {
+      i18n.addResourceBundle(language, ns, resource, true, true)
+    }
   } catch (error) {
     // A failed fetch must not keep the app from rendering: EN is already in the
     // store, so the UI degrades to the fallback language instead of to nothing.

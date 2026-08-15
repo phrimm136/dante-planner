@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 interface AbEventCardProps {
   eventId: string
   hasImage: boolean
-  illustId?: string
+  illustId?: string | undefined
   enableHoverHighlight?: boolean
   className?: string
 }

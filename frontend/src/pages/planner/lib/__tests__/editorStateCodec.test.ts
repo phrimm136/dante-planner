@@ -221,7 +221,7 @@ describe('hydrateEditorState / projectEditorState round trip', () => {
     expect(state.selectedGiftIds).toBeInstanceOf(Set)
     expect(state.observationGiftIds).toBeInstanceOf(Set)
     expect(state.comprehensiveGiftIds).toBeInstanceOf(Set)
-    expect(state.floorSelections[0].giftIds).toBeInstanceOf(Set)
+    expect(state.floorSelections[0]?.giftIds).toBeInstanceOf(Set)
     expect(state.deckFilterState.searchQuery).toBe('')
     expect(state.deckFilterState.entityMode).toBe('identity')
   })

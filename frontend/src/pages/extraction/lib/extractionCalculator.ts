@@ -424,15 +424,16 @@ export function calculateCategoryDistribution(
  * @returns Convolved distribution [P(X+Y=0), P(X+Y=1), ...]
  */
 export function convolveDistributions(dist1: number[], dist2: number[]): number[] {
-  const result: number[] = Array.from({ length: dist1.length + dist2.length - 1 }, () => 0)
-
-  for (let i = 0; i < dist1.length; i++) {
-    for (let j = 0; j < dist2.length; j++) {
-      result[i + j] += dist1[i] * dist2[j]
+  return Array.from({ length: dist1.length + dist2.length - 1 }, (_, n) => {
+    let sum = 0
+    for (const [i, p1] of dist1.entries()) {
+      const p2 = dist2[n - i]
+      if (p2 !== undefined) {
+        sum += p1 * p2
+      }
     }
-  }
-
-  return result
+    return sum
+  })
 }
 
 /**
@@ -481,14 +482,15 @@ export function calculateSuccessiveTargetProbabilities(
     distributions.push(dist)
   }
 
-  if (distributions.length === 0) {
+  const [firstDistribution, ...remainingDistributions] = distributions
+  if (firstDistribution === undefined) {
     return []
   }
 
   // Convolve all distributions to get total acquisition distribution
-  let totalDistribution = distributions[0]
-  for (let i = 1; i < distributions.length; i++) {
-    totalDistribution = convolveDistributions(totalDistribution, distributions[i])
+  let totalDistribution = firstDistribution
+  for (const distribution of remainingDistributions) {
+    totalDistribution = convolveDistributions(totalDistribution, distribution)
   }
 
   // Apply pity: P(Y >= k) = P(X >= max(0, k - pityCount))
@@ -500,10 +502,9 @@ export function calculateSuccessiveTargetProbabilities(
     const naturalRequirement = Math.max(0, k - pityCount)
 
     // P(X >= naturalRequirement)
-    let probability = 0
-    for (let j = naturalRequirement; j < totalDistribution.length; j++) {
-      probability += totalDistribution[j]
-    }
+    const probability = totalDistribution
+      .slice(naturalRequirement)
+      .reduce((sum, bucketProbability) => sum + bucketProbability, 0)
 
     results.push({
       count: k,

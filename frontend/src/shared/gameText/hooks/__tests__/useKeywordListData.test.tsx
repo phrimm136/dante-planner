@@ -44,16 +44,15 @@ describe('useKeywordListSpec', () => {
     })
 
     await waitFor(() => {
-      const keys = Object.keys(result.current)
-      expect(keys.length).toBeGreaterThan(0)
+      const entries = Object.entries(result.current)
+      expect(entries.length).toBeGreaterThan(0)
 
-      const firstKey = keys[0]
-      const entry = result.current[firstKey]
+      const entry = entries[0]?.[1]
       expect(entry).toHaveProperty('iconId')
       expect(entry).toHaveProperty('buffType')
-      expect(Array.isArray(entry.identities)).toBe(true)
-      expect(Array.isArray(entry.egos)).toBe(true)
-      expect(Array.isArray(entry.egoGifts)).toBe(true)
+      expect(Array.isArray(entry?.identities)).toBe(true)
+      expect(Array.isArray(entry?.egos)).toBe(true)
+      expect(Array.isArray(entry?.egoGifts)).toBe(true)
     })
   })
 })
@@ -76,13 +75,12 @@ describe('useKeywordListI18n', () => {
     })
 
     await waitFor(() => {
-      const keys = Object.keys(result.current)
-      expect(keys.length).toBeGreaterThan(0)
+      const entries = Object.entries(result.current)
+      expect(entries.length).toBeGreaterThan(0)
 
-      const firstKey = keys[0]
-      const entry = result.current[firstKey]
-      expect(typeof entry.name).toBe('string')
-      expect(typeof entry.desc).toBe('string')
+      const entry = entries[0]?.[1]
+      expect(typeof entry?.name).toBe('string')
+      expect(typeof entry?.desc).toBe('string')
     })
   })
 })

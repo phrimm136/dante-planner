@@ -157,8 +157,10 @@ describe('useAnnouncementData business logic', () => {
     setupQueryMocks(baseSpec, baseI18n)
     const { result } = renderHook(() => useAnnouncementData())
 
-    expect(result.current[0].id).toBe('newest')
-    expect(result.current[1].id).toBe('older')
+    const [newest, older] = result.current
+    if (!newest || !older) throw new Error('expected two announcements')
+    expect(newest.id).toBe('newest')
+    expect(older.id).toBe('older')
   })
 
   it('UT3: returns empty array when spec list is empty', () => {
@@ -181,7 +183,9 @@ describe('useAnnouncementData business logic', () => {
     const { result } = renderHook(() => useAnnouncementData())
 
     expect(result.current).toHaveLength(1)
-    expect(result.current[0].id).toBe('has-i18n')
+    const [only] = result.current
+    if (!only) throw new Error('expected one announcement')
+    expect(only.id).toBe('has-i18n')
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('no-i18n'))
 
     consoleSpy.mockRestore()

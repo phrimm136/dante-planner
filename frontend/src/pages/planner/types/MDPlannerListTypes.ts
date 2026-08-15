@@ -35,7 +35,7 @@ export type MDGesellschaftMode = 'published' | 'best'
  */
 export interface MDUserSearchParams {
   /** MD category filter (5F, 10F, 15F) */
-  category?: MDCategory
+  category?: MDCategory | undefined
   /** Current page number (0-indexed) */
   page?: number
   /** Search query for title filtering */
@@ -50,7 +50,7 @@ export interface MDUserSearchParams {
  */
 export interface MDGesellschaftSearchParams {
   /** MD category filter (5F, 10F, 15F) */
-  category?: MDCategory
+  category?: MDCategory | undefined
   /** Current page number (0-indexed) */
   page?: number
   /** Display mode: 'published' (all) or 'best' (recommended only) */

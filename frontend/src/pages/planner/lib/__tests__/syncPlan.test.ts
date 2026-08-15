@@ -20,6 +20,12 @@ function makeSummary(overrides: Partial<PlannerSummary> = {}): PlannerSummary {
   }
 }
 
+/** A row that never synced, so it carries no syncVersion at all. */
+function makeUnsyncedSummary(overrides: Partial<PlannerSummary> = {}): PlannerSummary {
+  const { syncVersion: _syncVersion, ...rest } = makeSummary(overrides)
+  return rest
+}
+
 describe('categorizeSync', () => {
   const cases: {
     name: string
@@ -66,7 +72,7 @@ describe('categorizeSync', () => {
     {
       name: 'a missing syncVersion counts as never synced on either side',
       server: [makeSummary({ id: 'a', syncVersion: 1 })],
-      local: [makeSummary({ id: 'a', syncVersion: undefined })],
+      local: [makeUnsyncedSummary({ id: 'a' })],
       expected: { pull: ['a'], conflict: [], purge: [] },
     },
     {
@@ -223,7 +229,7 @@ describe('categorizePlanner', () => {
     },
     {
       name: 'a local row never synced falls to the version path',
-      local: makeSummary({ status: 'saved', syncVersion: undefined }),
+      local: makeUnsyncedSummary({ status: 'saved' }),
       server: makeSummary({ syncVersion: 1 }),
       expected: 'pull',
     },

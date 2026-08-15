@@ -7,7 +7,7 @@
  * neither of them can show on its own.
  */
 
-import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest'
+import { describe, it, expect, vi, beforeEach, beforeAll, afterAll, assert } from 'vitest'
 import { render, fireEvent, waitFor } from '@testing-library/react'
 import { ok } from '@/lib/result'
 import type { Result } from '@/lib/result'
@@ -242,7 +242,9 @@ describe('PlannerEditorShell - teardown with real note editors', () => {
     await waitFor(() => {
       expect(mockSaveToLocal).toHaveBeenCalledTimes(1)
     })
-    const written = mockSaveToLocal.mock.calls[0][0]
+    const [firstCall] = mockSaveToLocal.mock.calls
+    assert(firstCall, 'saveToLocal recorded no call')
+    const written = firstCall[0]
     expect(JSON.stringify(written)).toContain('typed just before leaving')
   })
 
@@ -260,7 +262,9 @@ describe('PlannerEditorShell - teardown with real note editors', () => {
     await waitFor(() => {
       expect(mockSaveToLocal).toHaveBeenCalledTimes(1)
     })
-    expect(JSON.stringify(mockSaveToLocal.mock.calls[0][0])).toContain('typed before any baseline')
+    const [firstCall] = mockSaveToLocal.mock.calls
+    assert(firstCall, 'saveToLocal recorded no call')
+    expect(JSON.stringify(firstCall[0])).toContain('typed before any baseline')
   })
 
   it('warns for a note in a progressively revealed section, and keeps its text', async () => {
@@ -276,6 +280,7 @@ describe('PlannerEditorShell - teardown with real note editors', () => {
     expect(fireBeforeUnload()).toBe(false)
 
     const revealedNote = document.querySelectorAll('.note-editor')[2]
+    assert(revealedNote, 'the shell revealed fewer than three notes')
     typeIntoNote(revealedNote, 'typed in a revealed section')
 
     expect(fireBeforeUnload()).toBe(true)

@@ -133,7 +133,7 @@ describe('gesellschaftQueryKeys', () => {
       search: 'test',
     })
 
-    const params = key[2] as Record<string, unknown>
+    const params = key[2]
     expect(params).not.toHaveProperty('sort')
     expect(params).toHaveProperty('category', '5F')
     expect(params).toHaveProperty('search', 'test')

@@ -81,7 +81,9 @@ describe('useApiMutation', () => {
     result.current.mutate()
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(queryClient.getMutationCache().getAll()[0].meta).toEqual({
+    const [mutation] = queryClient.getMutationCache().getAll()
+    expect(mutation).toBeDefined()
+    expect(mutation?.meta).toEqual({
       successMessage: 'common:comments.toast.deletedSuccess',
     })
   })
@@ -96,7 +98,9 @@ describe('useApiMutation', () => {
     result.current.mutate()
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(queryClient.getMutationCache().getAll()[0].meta).toEqual({
+    const [mutation] = queryClient.getMutationCache().getAll()
+    expect(mutation).toBeDefined()
+    expect(mutation?.meta).toEqual({
       successMessage: undefined,
     })
   })

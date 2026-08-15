@@ -48,7 +48,10 @@ export function StartBuffSection({
   const hasSelectedBuffs = selectedBuffs.length > 0
 
   return (
-    <PlannerSection title={t('pages.plannerMD.startBuffs')} onViewNotes={onViewNotes}>
+    <PlannerSection
+      title={t('pages.plannerMD.startBuffs')}
+      {...(onViewNotes !== undefined && { onViewNotes })}
+    >
       {/* Star cost display */}
       <div className="flex justify-end mb-4">
         <StarlightCostDisplay cost={totalCost} size="lg" />

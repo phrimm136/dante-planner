@@ -60,7 +60,9 @@ async function mountStream(
 ) {
   const rendered = renderHook(() => usePlannerCommentsSse(plannerId), { wrapper })
   await settle()
-  return { ...rendered, stream: streams[streams.length - 1] }
+  const stream = streams.at(-1)
+  if (stream === undefined) throw new Error('the hook opened no stream')
+  return { ...rendered, stream }
 }
 
 async function emit(stream: StreamHandle, type: string, data: unknown) {
@@ -194,7 +196,7 @@ describe('usePlannerCommentsSse — comment tree cache patch', () => {
       replies: Array<{ id: string }>
     }>
     expect(tree).toHaveLength(1)
-    expect(tree[0].replies).toContainEqual(expect.objectContaining({ id: uid('r1') }))
+    expect(tree[0]?.replies).toContainEqual(expect.objectContaining({ id: uid('r1') }))
   })
 
   it('a nested reply lands under a parent that is itself a reply', async () => {
@@ -219,7 +221,7 @@ describe('usePlannerCommentsSse — comment tree cache patch', () => {
     const tree = queryClient.getQueryData(['comments', 'planner-1']) as Array<{
       replies: Array<{ id: string; replies: Array<{ id: string }> }>
     }>
-    expect(tree[0].replies[0].replies).toContainEqual(expect.objectContaining({ id: uid('r2') }))
+    expect(tree[0]?.replies[0]?.replies).toContainEqual(expect.objectContaining({ id: uid('r2') }))
   })
 
   it('a reply to a parent outside the loaded tree only moves the counter', async () => {

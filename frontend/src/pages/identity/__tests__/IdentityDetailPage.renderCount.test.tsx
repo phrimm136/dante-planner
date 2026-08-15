@@ -138,7 +138,15 @@ const UNRELATED_RIGHT_PANE_LABELS = [
 ]
 
 function pick(delta: Record<string, number>, labels: string[]): Record<string, number> {
-  return Object.fromEntries(labels.map((label) => [label, delta[label]]))
+  return Object.fromEntries(
+    labels.map((label) => {
+      const count = delta[label]
+      if (count === undefined) {
+        throw new Error(`no render count recorded for ${label}`)
+      }
+      return [label, count]
+    }),
+  )
 }
 
 function renderDetailPage() {

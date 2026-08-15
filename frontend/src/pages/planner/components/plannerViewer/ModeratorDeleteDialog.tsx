@@ -34,7 +34,7 @@ export function ModeratorDeleteDialog({
       confirmLabel={t('plannerTakedown.takedown')}
       destructive
       onConfirm={onConfirm}
-      isPending={isPending}
+      {...(isPending !== undefined && { isPending })}
     />
   )
 }

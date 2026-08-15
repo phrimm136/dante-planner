@@ -68,7 +68,9 @@ export function ConflictResolutionDialog({
   const failureMessage = !resolutionError
     ? null
     : failure
-      ? t(failure.key, failure.params)
+      ? failure.params
+        ? t(failure.key, failure.params)
+        : t(failure.key)
       : // The presenter yields nothing for a conflict, and this dialog is what owns it.
         t(
           'pages.plannerMD.conflict.conflictAgain',

@@ -39,6 +39,14 @@ function toCsvParam(values: string[]): string | undefined {
   return values.length > 0 ? values.join(',') : undefined
 }
 
+/**
+ * Search params as an update payload, where an explicit `undefined` drops the
+ * key from the URL rather than leaving the previous value in place.
+ */
+type PlannerSearchParamsUpdate = {
+  [K in keyof PlannerSearchParams]: PlannerSearchParams[K] | undefined
+}
+
 // ============================================================================
 // Return Type
 // ============================================================================
@@ -86,7 +94,7 @@ export interface UsePlannerSearchFiltersResult {
  * ```
  */
 export function usePlannerSearchFilters(): UsePlannerSearchFiltersResult {
-  const { params: search, setParams } = useUrlFilters<PlannerSearchParams>()
+  const { params: search, setParams } = useUrlFilters<PlannerSearchParamsUpdate>()
 
   // Parse URL params to filter state
   const filters: PlannerSearchFilters = {

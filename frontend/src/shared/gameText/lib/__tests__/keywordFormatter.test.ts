@@ -16,7 +16,7 @@ import {
 import type { KeywordResolutionContext } from '../../types/KeywordTypes'
 
 // Test fixtures
-const mockBattleKeywords: KeywordResolutionContext['battleKeywords'] = {
+const mockBattleKeywords = {
   Sinking: {
     name: 'Sinking',
     desc: 'Each turn, lose HP equal to Sinking count.',
@@ -35,7 +35,7 @@ const mockBattleKeywords: KeywordResolutionContext['battleKeywords'] = {
     iconId: 'Protection',
     buffType: 'Positive',
   },
-}
+} satisfies KeywordResolutionContext['battleKeywords']
 
 const mockSkillTags: KeywordResolutionContext['skillTags'] = {
   WhenUse: '[On Use]',
@@ -416,49 +416,51 @@ describe('formatDescription', () => {
 
   it('attaches resolved keyword to keyword segments', () => {
     const result = formatDescription('Apply [Sinking]', mockContext)
+    const [lead, sinking] = result
 
     expect(result).toHaveLength(2)
-    expect(result[0]).toEqual({ type: 'text', content: 'Apply ' })
-    expect(result[1].type).toBe('keyword')
-    expect(result[1].content).toBe('Sinking')
-    expect(result[1].keyword).toBeDefined()
-    expect(result[1].keyword?.type).toBe('battleKeyword')
-    expect(result[1].keyword?.displayText).toBe('Sinking')
+    expect(lead).toEqual({ type: 'text', content: 'Apply ' })
+    expect(sinking?.type).toBe('keyword')
+    expect(sinking?.content).toBe('Sinking')
+    expect(sinking?.keyword).toBeDefined()
+    expect(sinking?.keyword?.type).toBe('battleKeyword')
+    expect(sinking?.keyword?.displayText).toBe('Sinking')
   })
 
   it('handles mixed battle keywords and skill tags', () => {
     const result = formatDescription('[WhenUse] Apply [Sinking]', mockContext)
+    const [whenUse, between, sinking] = result
 
     expect(result).toHaveLength(3)
 
     // First segment: skill tag
-    expect(result[0].type).toBe('keyword')
-    expect(result[0].keyword?.type).toBe('skillTag')
-    expect(result[0].keyword?.displayText).toBe('[On Use]')
+    expect(whenUse?.type).toBe('keyword')
+    expect(whenUse?.keyword?.type).toBe('skillTag')
+    expect(whenUse?.keyword?.displayText).toBe('[On Use]')
 
     // Second segment: text
-    expect(result[1].type).toBe('text')
-    expect(result[1].content).toBe(' Apply ')
+    expect(between?.type).toBe('text')
+    expect(between?.content).toBe(' Apply ')
 
     // Third segment: battle keyword
-    expect(result[2].type).toBe('keyword')
-    expect(result[2].keyword?.type).toBe('battleKeyword')
-    expect(result[2].keyword?.displayText).toBe('Sinking')
+    expect(sinking?.type).toBe('keyword')
+    expect(sinking?.keyword?.type).toBe('battleKeyword')
+    expect(sinking?.keyword?.displayText).toBe('Sinking')
   })
 
   it('handles unknown keywords in description', () => {
     const result = formatDescription('Text [Unknown] more', mockContext)
 
     expect(result).toHaveLength(3)
-    expect(result[1].keyword?.type).toBe('unknown')
-    expect(result[1].keyword?.displayText).toBe('[Unknown]')
+    expect(result[1]?.keyword?.type).toBe('unknown')
+    expect(result[1]?.keyword?.displayText).toBe('[Unknown]')
   })
 
   it('handles consecutive keywords', () => {
     const result = formatDescription('[WhenUse][Sinking]', mockContext)
 
     expect(result).toHaveLength(2)
-    expect(result[0].keyword?.type).toBe('skillTag')
-    expect(result[1].keyword?.type).toBe('battleKeyword')
+    expect(result[0]?.keyword?.type).toBe('skillTag')
+    expect(result[1]?.keyword?.type).toBe('battleKeyword')
   })
 })

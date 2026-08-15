@@ -58,13 +58,19 @@ describe('insertComment', () => {
   })
 
   it.each([
-    ['a root', 'c1', (tree: CommentNode[]) => tree[0].replies],
-    ['a reply', 'r1', (tree: CommentNode[]) => tree[0].replies[0].replies],
-    ['a reply of a reply', 'r1a', (tree: CommentNode[]) => tree[0].replies[0].replies[0].replies],
+    ['a root', 'c1', (tree: CommentNode[]) => tree[0]?.replies],
+    ['a reply', 'r1', (tree: CommentNode[]) => tree[0]?.replies[0]?.replies],
+    [
+      'a reply of a reply',
+      'r1a',
+      (tree: CommentNode[]) => tree[0]?.replies[0]?.replies[0]?.replies,
+    ],
   ] as const)('grafts a reply under %s', (_label, parentCommentId, select) => {
     const next = insertComment(NESTED, node('new', [], { parentCommentId }))
     expect(next).not.toBeNull()
-    expect(select(next as CommentNode[]).map((n) => n.id)).toContain('new')
+    const grafted = select(next as CommentNode[])
+    expect(grafted).toBeDefined()
+    expect(grafted?.map((n) => n.id)).toContain('new')
   })
 
   it('returns null when the named parent is outside the loaded tree', () => {
@@ -73,7 +79,7 @@ describe('insertComment', () => {
 
   it('grafts a reply with an empty replies array of its own', () => {
     const next = insertComment(NESTED, node('new', [node('ignored')], { parentCommentId: 'c1' }))
-    expect(next?.[0].replies.at(-1)).toEqual(expect.objectContaining({ id: 'new', replies: [] }))
+    expect(next?.[0]?.replies.at(-1)).toEqual(expect.objectContaining({ id: 'new', replies: [] }))
   })
 
   it('leaves the input tree untouched', () => {
@@ -89,8 +95,8 @@ describe('updateCommentInTree', () => {
 
   it.each([
     ['a root', 'c1', (tree: CommentNode[]) => tree[0]],
-    ['a reply', 'r1', (tree: CommentNode[]) => tree[0].replies[0]],
-    ['a reply of a reply', 'r1a', (tree: CommentNode[]) => tree[0].replies[0].replies[0]],
+    ['a reply', 'r1', (tree: CommentNode[]) => tree[0]?.replies[0]],
+    ['a reply of a reply', 'r1a', (tree: CommentNode[]) => tree[0]?.replies[0]?.replies[0]],
   ] as const)('updates %s in place', (_label, targetId, select) => {
     const next = updateCommentInTree(NESTED, targetId, upvote)
     expect(select(next)).toEqual(expect.objectContaining({ upvoteCount: 1, hasUpvoted: true }))
@@ -99,8 +105,8 @@ describe('updateCommentInTree', () => {
   it('preserves the shape of the tree around the updated node', () => {
     const next = updateCommentInTree(NESTED, 'r1', upvote)
     expect(next.map((n) => n.id)).toEqual(['c1', 'c2'])
-    expect(next[0].replies.map((n) => n.id)).toEqual(['r1'])
-    expect(next[0].replies[0].replies.map((n) => n.id)).toEqual(['r1a'])
+    expect(next[0]?.replies.map((n) => n.id)).toEqual(['r1'])
+    expect(next[0]?.replies[0]?.replies.map((n) => n.id)).toEqual(['r1a'])
     expect(countComments(next)).toBe(countComments(NESTED))
   })
 

@@ -25,16 +25,23 @@ vi.mock('react-i18next', async (importOriginal) => {
   }
 })
 
-vi.mock('@/shared/filter/hooks/useFilterI18nData', () => ({
-  useFilterI18nData: () => ({
-    seasonsI18n: {},
-    unitKeywordsI18n: {
-      ...Object.fromEntries(ASSOCIATIONS.map((a) => [a, `Label_${a}`])),
-      [ASSOCIATIONS[0]]: '<color=#d40000><s>Jia Family</s></color>',
-      [ASSOCIATIONS[1]]: 'サ<size=50%>ル</size>党派',
-    },
-  }),
-}))
+vi.mock('@/shared/filter/hooks/useFilterI18nData', () => {
+  const [colored, sized] = ASSOCIATIONS
+  if (colored === undefined || sized === undefined) {
+    throw new Error('ASSOCIATIONS carries fewer than the two keywords these labels need')
+  }
+
+  return {
+    useFilterI18nData: () => ({
+      seasonsI18n: {},
+      unitKeywordsI18n: {
+        ...Object.fromEntries(ASSOCIATIONS.map((a) => [a, `Label_${a}`])),
+        [colored]: '<color=#d40000><s>Jia Family</s></color>',
+        [sized]: 'サ<size=50%>ル</size>党派',
+      },
+    }),
+  }
+})
 
 function referenceStrikethrough(text: string): ReactNode {
   if (!text.includes('<s>')) return text

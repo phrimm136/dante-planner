@@ -37,7 +37,7 @@ function EventImage({
 }: {
   eventId: string
   hasImage: boolean
-  illustId?: string
+  illustId?: string | undefined
 }) {
   if (!hasImage && !illustId) {
     return (

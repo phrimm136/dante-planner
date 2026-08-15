@@ -52,7 +52,10 @@ export function StartGiftSummary({
   })()
 
   return (
-    <PlannerSection title={t('pages.plannerMD.startEgoGift')} onViewNotes={onViewNotes}>
+    <PlannerSection
+      title={t('pages.plannerMD.startEgoGift')}
+      {...(onViewNotes !== undefined && { onViewNotes })}
+    >
       <button
         type="button"
         onClick={onClick}

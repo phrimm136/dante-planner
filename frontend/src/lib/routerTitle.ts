@@ -10,8 +10,8 @@ interface TitleSyncRouter {
  * one. Matches are ordered root-first, so the search runs from the end.
  */
 export function titleFromMatches(matches: ReadonlyArray<{ meta?: unknown }>): string | null {
-  for (let i = matches.length - 1; i >= 0; i--) {
-    const meta = matches[i].meta
+  for (const match of [...matches].reverse()) {
+    const meta = match.meta
     if (!Array.isArray(meta) || meta.length === 0) continue
 
     const titleMeta = meta.find(

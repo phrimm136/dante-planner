@@ -23,7 +23,7 @@ interface SearchableMultiSelectOption {
   /** Custom render content - falls back to label when omitted */
   renderLabel?: ReactNode
   /** Count displayed on the right side of the option */
-  count?: number
+  count?: number | undefined
 }
 
 interface SearchableMultiSelectProps {
@@ -33,7 +33,7 @@ interface SearchableMultiSelectProps {
   placeholder: string
   searchPlaceholder: string
   emptyMessage?: string
-  className?: string
+  className?: string | undefined
   /** Sort options alphabetically by label using locale collation (default: true) */
   sortByLabel?: boolean
 }

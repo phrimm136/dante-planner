@@ -22,13 +22,11 @@ function DialogClose({ ...props }: React.ComponentProps<typeof DialogPrimitive.C
 
 function DialogOverlay({
   className,
-  forceMount,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
   return (
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
-      forceMount={forceMount}
       className={cn(
         'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:pointer-events-none data-[state=closed]:opacity-0 fixed inset-0 z-50 bg-black/50 transition-opacity',
         className,
@@ -49,11 +47,11 @@ function DialogContent({
   forceMount?: boolean
 }) {
   return (
-    <DialogPortal data-slot="dialog-portal" forceMount={forceMount}>
-      <DialogOverlay forceMount={forceMount} />
+    <DialogPortal data-slot="dialog-portal" {...(forceMount !== undefined && { forceMount })}>
+      <DialogOverlay {...(forceMount !== undefined && { forceMount })} />
       <DialogPrimitive.Content
         data-slot="dialog-content"
-        forceMount={forceMount}
+        {...(forceMount !== undefined && { forceMount })}
         className={cn(
           'bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:pointer-events-none data-[state=closed]:opacity-0 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 outline-none sm:max-w-lg',
           className,

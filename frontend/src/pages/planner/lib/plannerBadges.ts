@@ -18,9 +18,9 @@ export type SaveStatus =
 
 /** The persisted fields a save status is derived from. */
 export interface SaveStatusSource {
-  published?: boolean | null
+  published?: boolean | null | undefined
   status: PlannerStatus
-  savedAt?: string | null
+  savedAt?: string | null | undefined
 }
 
 /** Badge variant per save status, so a new status cannot ship unstyled. */

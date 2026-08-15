@@ -54,7 +54,7 @@ function judgement(threshold: number) {
 const GIFT_EFFECT = { effect: 'GainGift', reward: { type: 'gift', id: '9001', num: 2, prob: 1 } }
 
 /** Keyed by the last two digits of a nextEventId, parsed as an int */
-export const SELECTION_EVENTS: Record<string, AbEventSelectionEvent> = {
+export const SELECTION_EVENTS = {
   '1': {
     canSkip: false,
     judgement: judgement(12),
@@ -111,15 +111,15 @@ export const SELECTION_EVENTS: Record<string, AbEventSelectionEvent> = {
       },
     ],
   },
-}
+} satisfies Record<string, AbEventSelectionEvent>
 
-export const SELECTION_TEXTS: NonNullable<ChoiceBranchProps['allSelectionTexts']> = {
+export const SELECTION_TEXTS = {
   '1': { behaveDesc: 'Parent toss 1', successDesc: 'you win', failureDesc: ['you lose'] },
   '3': { behaveDesc: 'PARENT-3', successDesc: ['p1', 'p2', 'p3'] },
   '4': { behaveDesc: 'Parent toss 4' },
   '5': { behaveDesc: 'Parent toss 5' },
   '6': { behaveDesc: 'Parent toss 6', failureDesc: ['f1'] },
-}
+} satisfies NonNullable<ChoiceBranchProps['allSelectionTexts']>
 
 const SUB_EVENTS: NonNullable<ChoiceBranchProps['subEvents']> = {
   '901301': {

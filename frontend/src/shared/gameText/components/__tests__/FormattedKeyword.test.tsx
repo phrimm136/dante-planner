@@ -194,10 +194,8 @@ describe('FormattedKeyword', () => {
 
     it('handles missing description gracefully', async () => {
       const user = userEvent.setup()
-      const keywordNoDesc: ResolvedKeyword = {
-        ...battleKeyword,
-        description: undefined,
-      }
+      const keywordNoDesc: ResolvedKeyword = { ...battleKeyword }
+      delete keywordNoDesc.description
 
       render(<FormattedKeyword keyword={keywordNoDesc} />)
 

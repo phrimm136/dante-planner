@@ -25,8 +25,8 @@ interface IdentitySkillCardWithGranularI18nProps {
  * Falls back to 1 when no slot has data — keeps the card visible rather than blank.
  */
 export function getFirstDefinedUptie(skillData: IdentitySkillEntry['skillData']): Uptie {
-  for (let i = 0; i < skillData.length; i++) {
-    if (Object.keys(skillData[i]).length > 0) {
+  for (const [i, levelData] of skillData.entries()) {
+    if (Object.keys(levelData).length > 0) {
       return (i + 1) as Uptie
     }
   }
@@ -85,10 +85,15 @@ function IdentitySkillName({
 }: {
   identityId: string
   skillId: SkillId
-  attributeType?: string
+  attributeType?: string | undefined
 }) {
   const i18n = useIdentityDetailI18n(identityId)
-  return <StyledSkillName name={i18n.skills[skillId]?.name ?? ''} attributeType={attributeType} />
+  return (
+    <StyledSkillName
+      name={i18n.skills[skillId]?.name ?? ''}
+      {...(attributeType !== undefined && { attributeType })}
+    />
+  )
 }
 
 /**
@@ -108,7 +113,7 @@ function IdentitySkillDescription({
   return (
     <SkillDescription
       descData={getMergedSkillDesc(skillI18n?.descs ?? [], level)}
-      flavor={skillI18n?.flavor}
+      {...(skillI18n?.flavor !== undefined && { flavor: skillI18n.flavor })}
     />
   )
 }

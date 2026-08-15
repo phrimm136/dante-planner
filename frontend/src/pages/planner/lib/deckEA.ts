@@ -61,10 +61,12 @@ export function computeAffinityEA(
   identitySpec: Record<string, IdentityEASpec>,
   egoSpec: Record<string, EGOEASpec>,
 ): AffinityCount[] {
-  const counts: Record<string, { generated: number; consumed: number }> = {}
-  AFFINITIES.forEach((affinity) => {
-    counts[affinity] = { generated: 0, consumed: 0 }
-  })
+  const counts: AffinityCount[] = AFFINITIES.map((affinity) => ({
+    affinity,
+    generated: 0,
+    consumed: 0,
+  }))
+  const byAffinity = new Map<string, AffinityCount>(counts.map((entry) => [entry.affinity, entry]))
 
   sinnerCodesOf(deckState.deploymentOrder).forEach((sinnerCode) => {
     const equipment = deckState.equipment[sinnerCode]
@@ -75,7 +77,7 @@ export function computeAffinityEA(
       const affinity = attributeType?.[slot]
       if (affinity === undefined) return
 
-      const entry = counts[affinity]
+      const entry = byAffinity.get(affinity)
       if (entry) entry.generated += DEFAULT_SKILL_EA[slot]
     })
 
@@ -86,17 +88,13 @@ export function computeAffinityEA(
       if (!requirements) return
 
       Object.entries(requirements).forEach(([affinity, cost]) => {
-        const entry = counts[affinity]
+        const entry = byAffinity.get(affinity)
         if (entry && cost > 0) entry.consumed += cost
       })
     })
   })
 
-  return AFFINITIES.map((affinity) => ({
-    affinity,
-    generated: counts[affinity].generated,
-    consumed: counts[affinity].consumed,
-  }))
+  return counts
 }
 
 /**
@@ -111,32 +109,29 @@ export function computeKeywordEA(
   deckState: DeckState,
   identitySpec: Record<string, IdentityEASpec>,
 ): KeywordEACount[] {
-  const deployedCounts: Record<string, number> = {}
-  const allCounts: Record<string, number> = {}
-  STATUS_EFFECTS.forEach((effect) => {
-    deployedCounts[effect] = 0
-    allCounts[effect] = 0
-  })
+  const tallies: KeywordEACount[] = STATUS_EFFECTS.map((keyword) => ({
+    keyword,
+    count: 0,
+    deployedCount: 0,
+    allCount: 0,
+  }))
+  const byKeyword = new Map<string, KeywordEACount>(tallies.map((entry) => [entry.keyword, entry]))
 
-  const tally = (sinnerCodes: string[], into: Record<string, number>) => {
+  const tally = (sinnerCodes: string[], scope: 'deployedCount' | 'allCount') => {
     sinnerCodes.forEach((sinnerCode) => {
       const equipment = deckState.equipment[sinnerCode]
       if (!equipment) return
 
       identitySpec[equipment.identity.id]?.skillKeywordList?.forEach((keyword) => {
-        if (into[keyword] !== undefined) into[keyword] += 1
+        const entry = byKeyword.get(keyword)
+        if (entry) entry[scope] += 1
       })
     })
   }
 
   const allSinnerCodes = sinnerCodesOf(deckState.deploymentOrder)
-  tally(allSinnerCodes.slice(0, deckState.deploymentConfig.maxDeployed), deployedCounts)
-  tally(allSinnerCodes, allCounts)
+  tally(allSinnerCodes.slice(0, deckState.deploymentConfig.maxDeployed), 'deployedCount')
+  tally(allSinnerCodes, 'allCount')
 
-  return STATUS_EFFECTS.map((keyword) => ({
-    keyword,
-    count: allCounts[keyword],
-    deployedCount: deployedCounts[keyword],
-    allCount: allCounts[keyword],
-  }))
+  return tallies.map((entry) => ({ ...entry, count: entry.allCount }))
 }

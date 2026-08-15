@@ -45,15 +45,14 @@ describe('useBattleKeywords', () => {
     })
 
     await waitFor(() => {
-      const keys = Object.keys(result.current.data)
-      expect(keys.length).toBeGreaterThan(0)
+      const entries = Object.entries(result.current.data)
+      expect(entries.length).toBeGreaterThan(0)
 
-      const firstKey = keys[0]
-      const entry = result.current.data[firstKey]
-      expect(typeof entry.name).toBe('string')
-      expect(typeof entry.desc).toBe('string')
+      const entry = entries[0]?.[1]
+      expect(typeof entry?.name).toBe('string')
+      expect(typeof entry?.desc).toBe('string')
       expect(entry).toHaveProperty('iconId')
-      expect(typeof entry.buffType).toBe('string')
+      expect(typeof entry?.buffType).toBe('string')
     })
   })
 

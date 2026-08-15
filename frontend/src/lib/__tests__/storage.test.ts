@@ -106,7 +106,8 @@ function installIndexedDB(outcomes: OpenOutcome[]) {
 
   const indexedDB = {
     open: () => {
-      const outcome = outcomes[opens.length] ?? outcomes[outcomes.length - 1]
+      const outcome = outcomes[opens.length] ?? outcomes.at(-1)
+      if (!outcome) throw new Error('installIndexedDB needs at least one outcome')
       const request = makeRequest<ReturnType<typeof stubDb>>()
       opens.push(request)
 
@@ -132,6 +133,12 @@ function installIndexedDB(outcomes: OpenOutcome[]) {
 
   vi.stubGlobal('indexedDB', indexedDB)
   return { opens, dbs }
+}
+
+function firstDb(dbs: ReturnType<typeof stubDb>[]): ReturnType<typeof stubDb> {
+  const [db] = dbs
+  if (!db) throw new Error('no connection was handed out')
+  return db
 }
 
 async function importStorage() {
@@ -247,7 +254,7 @@ describe('storage connection lifecycle', () => {
     const db = await openStorageDb()
     ;(db as unknown as { onversionchange: () => void }).onversionchange()
 
-    expect(dbs[0].close).toHaveBeenCalledTimes(1)
+    expect(firstDb(dbs).close).toHaveBeenCalledTimes(1)
   })
 
   it('closes a superseded connection instead of leaking it', async () => {
@@ -260,7 +267,7 @@ describe('storage connection lifecycle', () => {
     const { storage } = await importStorage()
 
     await storage.getItem('k')
-    const first = dbs[0]
+    const first = firstDb(dbs)
     ;(first as unknown as { onversionchange: () => void }).onversionchange()
     await storage.getItem('k')
 

@@ -21,7 +21,7 @@ export interface StartBuffCardVariant {
   nameMaxFontSize: number
   nameTextShadow?: string
   description: string
-  descriptionColor?: string
+  descriptionColor?: string | undefined
   enhancementRow: string
   enhancementSlot: string
   enhancementStates: {

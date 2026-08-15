@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react'
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest'
 
 import { SSE_CONNECTION, SSE_EVENTS, SSE_TRANSPORT } from '@/lib/constants'
 import { useSseStore } from '../../stores/useSseStore'
@@ -72,7 +72,19 @@ function serveAlways(responder: (init: RequestInit) => Response) {
   defaultResponder = responder
 }
 
-const lastStream = () => streams[streams.length - 1]
+/** The stream opened most recently; every caller requires the engine to have opened one. */
+function lastStream(): StreamHandle {
+  const stream = streams.at(-1)
+  if (stream === undefined) throw new Error('the engine opened no stream')
+  return stream
+}
+
+/** The event a handler received on its first call. */
+function firstEvent(handler: Mock<(event: MessageEvent) => void>): MessageEvent {
+  const [call] = handler.mock.calls
+  if (call === undefined) throw new Error('the handler received no event')
+  return call[0]
+}
 
 /** Flush the promise chain the fetch transport runs on. */
 async function settle() {
@@ -140,9 +152,11 @@ describe('useSseEngine — gating', () => {
     renderHook(() => useSseEngine(makeConfig()))
     await advance(SSE_CONNECTION.INITIAL_DELAY)
 
+    const [firstRequest] = requests
     expect(requestUrls[0]).toBe(`${BASE_URL}${STREAM_PATH}`)
-    expect(requests[0].credentials).toBe('include')
-    expect(requests[0].headers).toMatchObject({ Accept: SSE_TRANSPORT.ACCEPT })
+    expect(firstRequest).toBeDefined()
+    expect(firstRequest?.credentials).toBe('include')
+    expect(firstRequest?.headers).toMatchObject({ Accept: SSE_TRANSPORT.ACCEPT })
   })
 
   it('does not connect when shouldConnect is false', async () => {
@@ -181,7 +195,7 @@ describe('useSseEngine — connection lifecycle', () => {
   })
 
   it('dispatches injected handlers for their event type', async () => {
-    const onUpdate = vi.fn()
+    const onUpdate = vi.fn<(event: MessageEvent) => void>()
     renderHook(() =>
       useSseEngine(makeConfig({ handlers: { [SSE_EVENTS.COMMENT_ADDED]: onUpdate } })),
     )
@@ -191,11 +205,11 @@ describe('useSseEngine — connection lifecycle', () => {
     await settle()
 
     expect(onUpdate).toHaveBeenCalledTimes(1)
-    expect(JSON.parse(onUpdate.mock.calls[0][0].data)).toEqual({ plannerId: 'p1' })
+    expect(JSON.parse(firstEvent(onUpdate).data)).toEqual({ plannerId: 'p1' })
   })
 
   it('assembles a frame split across chunk boundaries', async () => {
-    const onUpdate = vi.fn()
+    const onUpdate = vi.fn<(event: MessageEvent) => void>()
     renderHook(() =>
       useSseEngine(makeConfig({ handlers: { [SSE_EVENTS.COMMENT_ADDED]: onUpdate } })),
     )
@@ -213,11 +227,11 @@ describe('useSseEngine — connection lifecycle', () => {
     stream.push('\n')
     await settle()
     expect(onUpdate).toHaveBeenCalledTimes(1)
-    expect(JSON.parse(onUpdate.mock.calls[0][0].data)).toEqual({ plannerId: 'p1' })
+    expect(JSON.parse(firstEvent(onUpdate).data)).toEqual({ plannerId: 'p1' })
   })
 
   it('joins multiple data lines with a newline and ignores comment lines', async () => {
-    const onUpdate = vi.fn()
+    const onUpdate = vi.fn<(event: MessageEvent) => void>()
     renderHook(() =>
       useSseEngine(makeConfig({ handlers: { [SSE_EVENTS.COMMENT_ADDED]: onUpdate } })),
     )
@@ -227,13 +241,13 @@ describe('useSseEngine — connection lifecycle', () => {
     await settle()
 
     expect(onUpdate).toHaveBeenCalledTimes(1)
-    expect(onUpdate.mock.calls[0][0].data).toBe('one\ntwo')
+    expect(firstEvent(onUpdate).data).toBe('one\ntwo')
   })
 
   it('drops a frame whose type is outside the vocabulary', async () => {
     // The gate is the engine's, so every consumer inherits it — a server that
     // starts naming an event the client does not know reaches no handler.
-    const onUpdate = vi.fn()
+    const onUpdate = vi.fn<(event: MessageEvent) => void>()
     renderHook(() =>
       useSseEngine(makeConfig({ handlers: { [SSE_EVENTS.COMMENT_ADDED]: onUpdate } })),
     )

@@ -190,11 +190,11 @@ export interface LeadingColor {
  *       -> { color: "#d40000", text: "<s>Jia Family</s>" }
  */
 export function extractLeadingColor(input: string): LeadingColor {
-  const colorMatch = input.match(FIRST_COLOR_VALUE_RE)
-  if (!colorMatch) return { text: input }
+  const color = input.match(FIRST_COLOR_VALUE_RE)?.[1]
+  if (color === undefined) return { text: input }
 
   return {
-    color: colorMatch[1],
+    color,
     text: input.replace(COLOR_OPEN_RE, '').replace(COLOR_CLOSE_RE, ''),
   }
 }

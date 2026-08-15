@@ -40,7 +40,7 @@ export function ApplyLatestMirrorDialog({
       confirmLabel={t('pages.plannerMD.applyLatestMirror.confirm')}
       pendingLabel={t('pages.plannerMD.applyLatestMirror.applying')}
       onConfirm={onConfirm}
-      isPending={isPending}
+      {...(isPending !== undefined && { isPending })}
     />
   )
 }

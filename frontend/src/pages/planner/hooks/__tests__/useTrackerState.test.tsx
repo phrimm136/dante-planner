@@ -92,7 +92,7 @@ describe('useTrackerState', () => {
         result.current.updateCurrentSkillCount('1', 0, 5)
       })
 
-      expect(result.current.state.currentSkillCounts['1'][0]).toBe(5)
+      expect(result.current.state.currentSkillCounts['1']?.[0]).toBe(5)
     })
 
     it('preserves other skill counts when updating one', () => {
@@ -104,8 +104,8 @@ describe('useTrackerState', () => {
         result.current.updateCurrentSkillCount('1', 0, 5)
       })
 
-      expect(result.current.state.currentSkillCounts['1'][1]).toBe(DEFAULT_SKILL_EA[1])
-      expect(result.current.state.currentSkillCounts['1'][2]).toBe(DEFAULT_SKILL_EA[2])
+      expect(result.current.state.currentSkillCounts['1']?.[1]).toBe(DEFAULT_SKILL_EA[1])
+      expect(result.current.state.currentSkillCounts['1']?.[2]).toBe(DEFAULT_SKILL_EA[2])
     })
 
     it('updates skill counts for different sinners independently', () => {
@@ -118,8 +118,8 @@ describe('useTrackerState', () => {
         result.current.updateCurrentSkillCount('2', 1, 4)
       })
 
-      expect(result.current.state.currentSkillCounts['1'][0]).toBe(5)
-      expect(result.current.state.currentSkillCounts['2'][1]).toBe(4)
+      expect(result.current.state.currentSkillCounts['1']?.[0]).toBe(5)
+      expect(result.current.state.currentSkillCounts['2']?.[1]).toBe(4)
     })
 
     it('allows skill count to be set to 0', () => {
@@ -131,7 +131,7 @@ describe('useTrackerState', () => {
         result.current.updateCurrentSkillCount('1', 0, 0)
       })
 
-      expect(result.current.state.currentSkillCounts['1'][0]).toBe(0)
+      expect(result.current.state.currentSkillCounts['1']?.[0]).toBe(0)
     })
   })
 
@@ -242,7 +242,7 @@ describe('useTrackerState', () => {
 
       // Verify reset
       expect(result.current.state.deploymentOrder).toEqual([0, 1, 2])
-      expect(result.current.state.currentSkillCounts['1'][0]).toBe(DEFAULT_SKILL_EA[0])
+      expect(result.current.state.currentSkillCounts['1']?.[0]).toBe(DEFAULT_SKILL_EA[0])
       expect(result.current.state.doneMarks).toEqual({})
     })
   })
@@ -274,7 +274,7 @@ describe('useTrackerState', () => {
       })
 
       expect(result.current.state.deploymentOrder).toEqual([0])
-      expect(result.current.state.currentSkillCounts['2'][1]).toBe(4)
+      expect(result.current.state.currentSkillCounts['2']?.[1]).toBe(4)
       expect(result.current.state.doneMarks[2]?.has('themePack3')).toBe(true)
     })
   })

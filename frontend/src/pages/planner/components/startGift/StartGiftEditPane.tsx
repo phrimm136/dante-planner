@@ -79,7 +79,7 @@ export function StartGiftEditPane({ open, onOpenChange, mdVersion }: StartGiftEd
     toggle(giftId)
   }
 
-  const keywords = Object.keys(pools)
+  const keywordPools = Object.entries(pools)
 
   return (
     <SelectorPaneShell
@@ -107,11 +107,11 @@ export function StartGiftEditPane({ open, onOpenChange, mdVersion }: StartGiftEd
     >
       {/* 10 Keyword Rows */}
       <div className="space-y-2">
-        {keywords.map((keyword) => (
+        {keywordPools.map(([keyword, giftIds]) => (
           <StartGiftRow
             key={keyword}
             keyword={keyword}
-            giftIds={pools[keyword]}
+            giftIds={giftIds}
             giftSpecMap={spec as Record<string, EGOGiftSpec>}
             giftNameMap={i18n as EGOGiftNameList}
             isRowSelected={selectedKeyword === keyword}

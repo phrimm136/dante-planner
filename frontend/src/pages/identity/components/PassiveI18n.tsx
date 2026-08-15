@@ -38,7 +38,7 @@ interface PassiveCardWithSuspenseProps {
   /** Passive ID */
   passiveId: PassiveId
   /** Passive activation condition (affinity requirements) */
-  condition?: PassiveCondition
+  condition?: PassiveCondition | undefined
   /** Whether this passive is locked (from higher tier) */
   isLocked: boolean
 }

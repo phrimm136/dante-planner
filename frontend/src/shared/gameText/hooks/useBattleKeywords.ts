@@ -15,13 +15,12 @@ export function useBattleKeywords(): { data: BattleKeywords } {
 
   // Merge i18n (name, desc) with spec (iconId, buffType) for each keyword
   const merged: BattleKeywords = {}
-  for (const key of Object.keys(i18nData)) {
-    const i18nEntry = i18nData[key]
+  for (const [key, i18nEntry] of Object.entries(i18nData)) {
     const specEntry = specData[key]
     merged[key] = {
       name: i18nEntry.name,
       desc: i18nEntry.desc,
-      flavor: i18nEntry.flavor,
+      ...(i18nEntry.flavor !== undefined && { flavor: i18nEntry.flavor }),
       iconId: specEntry?.iconId ?? null,
       buffType: specEntry?.buffType ?? 'Neutral',
     }

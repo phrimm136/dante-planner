@@ -117,6 +117,7 @@ describe('ThemePackCard', () => {
 
       const images = getImages(container)
       const hoverLayer = images[1]
+      if (!hoverLayer) throw new Error('expected a hover highlight layer')
       expect(hoverLayer.className).toContain('opacity-0')
       expect(hoverLayer.className).toContain('group-hover:opacity-100')
     })
@@ -126,6 +127,7 @@ describe('ThemePackCard', () => {
 
       const images = getImages(container)
       const selectLayer = images[1]
+      if (!selectLayer) throw new Error('expected a select highlight layer')
       expect(selectLayer).toHaveAttribute('src', '/images/UI/themePack/onSelect.webp')
       expect(selectLayer.className).not.toContain('opacity-0')
     })

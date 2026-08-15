@@ -34,12 +34,9 @@ export const storageKeys = {
  * @returns Parsed components or null if invalid
  */
 function parseStorageKey(key: string): { prefix: string; plannerId: string } | null {
-  const parts = key.split(':')
-  if (parts.length !== 2) return null
-  return {
-    prefix: parts[0],
-    plannerId: parts[1],
-  }
+  const [prefix, plannerId, ...rest] = key.split(':')
+  if (prefix === undefined || plannerId === undefined || rest.length > 0) return null
+  return { prefix, plannerId }
 }
 
 /**
@@ -317,10 +314,7 @@ export function usePlannerStorage(): PlannerStorageOperations {
                     validated.content,
                   )
 
-                  // Extract keywords for MD planners only (RR has no keywords)
-                  const selectedKeywords = isMDPlanner(planner)
-                    ? migrateKeywords(planner.content.selectedKeywords)
-                    : undefined
+                  const { published } = planner.metadata
 
                   results.push({
                     id: planner.metadata.id,
@@ -331,8 +325,11 @@ export function usePlannerStorage(): PlannerStorageOperations {
                     lastModifiedAt: planner.metadata.lastModifiedAt,
                     savedAt: planner.metadata.savedAt,
                     syncVersion: planner.metadata.syncVersion,
-                    published: planner.metadata.published,
-                    selectedKeywords,
+                    ...(published !== undefined && { published }),
+                    // Keywords are MD-only; RR summaries omit the field entirely.
+                    ...(isMDPlanner(planner) && {
+                      selectedKeywords: migrateKeywords(planner.content.selectedKeywords),
+                    }),
                   })
                 }
               } catch {

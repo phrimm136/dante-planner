@@ -28,8 +28,9 @@ export function CompactEgoGrid({ equipment, egoAffinityMap }: CompactEgoGridProp
           <div key={sinnerCode} className="flex gap-0.5 justify-center">
             {EGO_RANKS.map((rank) => {
               const equippedEgo = sinnerEquipment.egos[rank]
-              const egoBgColor = equippedEgo
-                ? (colorCode as Record<string, string>)[egoAffinityMap[equippedEgo.id]]
+              const egoAffinity = equippedEgo ? egoAffinityMap[equippedEgo.id] : undefined
+              const egoBgColor = egoAffinity
+                ? (colorCode as Record<string, string>)[egoAffinity]
                 : undefined
               return (
                 <div

@@ -37,9 +37,17 @@ export function PublishedPlannerList({
   isAuthenticated,
   onPageChange,
 }: PublishedPlannerListProps) {
+  const { category, keyword, identity, ego, gift, themePack, search } = filters
   const { data } = useMDGesellschaftData({
-    ...filters,
-    search: filters.search || undefined,
+    page: filters.page,
+    mode: filters.mode,
+    ...(category !== undefined && { category }),
+    ...(search ? { search } : {}),
+    ...(keyword !== undefined && { keyword }),
+    ...(identity !== undefined && { identity }),
+    ...(ego !== undefined && { ego }),
+    ...(gift !== undefined && { gift }),
+    ...(themePack !== undefined && { themePack }),
   })
 
   const currentSearch = useSearch({ strict: false })

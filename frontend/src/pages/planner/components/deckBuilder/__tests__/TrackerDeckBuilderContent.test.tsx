@@ -5,7 +5,7 @@
  * the viewer does and drives a filter through it.
  */
 
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, assert } from 'vitest'
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -176,6 +176,7 @@ describe('tracker deck pane', () => {
     expect(shownIdentityNames(container).length).toBeGreaterThan(1)
 
     const search = screen.getAllByRole('textbox')[0]
+    assert(search, 'the pane renders no search textbox')
     await user.type(search, 'no such identity')
 
     // SearchBar debounces before it writes the query back.

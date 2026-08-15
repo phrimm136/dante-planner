@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 interface AbEventCardLinkProps {
   eventId: string
   hasImage: boolean
-  illustId?: string
+  illustId?: string | undefined
   className?: string
 }
 

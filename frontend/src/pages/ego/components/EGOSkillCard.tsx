@@ -62,10 +62,15 @@ function EGOSkillName({
 }: {
   egoId: string
   skillId: SkillId
-  attributeType?: string
+  attributeType?: string | undefined
 }) {
   const i18n = useEGODetailI18n(egoId)
-  return <StyledSkillName name={i18n.skills[skillId]?.name ?? ''} attributeType={attributeType} />
+  return (
+    <StyledSkillName
+      name={i18n.skills[skillId]?.name ?? ''}
+      {...(attributeType !== undefined && { attributeType })}
+    />
+  )
 }
 
 /**
@@ -85,7 +90,7 @@ function EGOSkillDescription({
   return (
     <SkillDescription
       descData={getMergedSkillDesc(skillI18n?.descs ?? [], level)}
-      flavor={skillI18n?.flavor}
+      {...(skillI18n?.flavor !== undefined && { flavor: skillI18n.flavor })}
     />
   )
 }

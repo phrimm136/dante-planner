@@ -9,12 +9,12 @@ import { SkillDescriptionSkeleton } from './SkillDescription'
 
 /** Minimal structural shape of the per-level skill stats a card reads. */
 interface SkillCardData {
-  attributeType?: string
-  atkType?: string
-  defaultValue?: number
-  scale?: number
-  skillLevelCorrection?: number
-  targetNum?: number
+  attributeType?: string | undefined
+  atkType?: string | undefined
+  defaultValue?: number | undefined
+  scale?: number | undefined
+  skillLevelCorrection?: number | undefined
+  targetNum?: number | undefined
 }
 
 interface SkillCardProps {

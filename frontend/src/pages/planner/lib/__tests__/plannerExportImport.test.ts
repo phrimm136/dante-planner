@@ -232,7 +232,7 @@ describe('readImportEnvelope', () => {
     expect(result.ok).toBe(true)
     if (!result.ok) return
     expect(result.value.planners).toHaveLength(1)
-    expect(result.value.planners[0].metadata.title).toBe('Imported plan')
+    expect(result.value.planners[0]?.metadata.title).toBe('Imported plan')
   })
 
   it('rejects a payload that does not match the envelope shape', () => {
@@ -464,9 +464,9 @@ describe('partitionImport', () => {
 
     expect(conflicting).toEqual([])
     expect(fresh).toHaveLength(1)
-    expect(fresh[0].metadata.id).toBe(VALID_UUID)
-    expect(fresh[0].metadata.deviceId).toBe(OTHER_UUID)
-    expect(fresh[0].metadata.title).toBe('Imported plan')
+    expect(fresh[0]?.metadata.id).toBe(VALID_UUID)
+    expect(fresh[0]?.metadata.deviceId).toBe(OTHER_UUID)
+    expect(fresh[0]?.metadata.title).toBe('Imported plan')
   })
 
   it('holds back an import whose id the local store already carries', () => {
@@ -478,8 +478,8 @@ describe('partitionImport', () => {
 
     expect(fresh).toEqual([])
     expect(conflicting).toHaveLength(1)
-    expect(conflicting[0].id).toBe(VALID_UUID)
-    expect(conflicting[0].incoming.metadata.deviceId).toBe(OTHER_UUID)
+    expect(conflicting[0]?.id).toBe(VALID_UUID)
+    expect(conflicting[0]?.incoming.metadata.deviceId).toBe(OTHER_UUID)
   })
 
   it('reduces an imported title to plain text', () => {
@@ -490,7 +490,7 @@ describe('partitionImport', () => {
 
     const { fresh } = partitionImport(envelopeOf([scripted]), new Set(), OTHER_UUID)
 
-    expect(fresh[0].metadata.title).toBe('Run')
+    expect(fresh[0]?.metadata.title).toBe('Run')
   })
 })
 

@@ -196,7 +196,7 @@ export function FloorThemeGiftSection({
   return (
     <PlannerSection
       title={t('pages.plannerMD.floor', { number: floorNumber })}
-      onViewNotes={onViewNotes}
+      {...(onViewNotes !== undefined && { onViewNotes })}
     >
       <div
         className={cn(

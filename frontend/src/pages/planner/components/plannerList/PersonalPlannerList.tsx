@@ -21,13 +21,13 @@ import type { PlannerSearchFilters } from '../../types/PlannerSearchTypes'
 
 export interface PersonalPlannerListProps {
   /** MD category filter (optional) */
-  category?: MDCategory
+  category?: MDCategory | undefined
   /** Current page number (0-indexed) */
   page: number
   /** Search query for title filtering (optional) */
-  search?: string
+  search?: string | undefined
   /** Content search filters for local filtering (optional) */
-  contentFilters?: PlannerSearchFilters
+  contentFilters?: PlannerSearchFilters | undefined
   /** Callback when page changes */
   onPageChange: (page: number) => void
 }
@@ -60,10 +60,10 @@ export function PersonalPlannerList({
     resolveConflicts,
     isResolvingConflicts,
   } = useMDUserPlannersData({
-    category,
+    ...(category !== undefined && { category }),
     page,
-    search: search || undefined,
-    contentFilters,
+    ...(search ? { search } : {}),
+    ...(contentFilters !== undefined && { contentFilters }),
   })
 
   const { t } = useTranslation('planner')

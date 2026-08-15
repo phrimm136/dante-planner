@@ -44,8 +44,9 @@ function stubStore(initial: Iterable<readonly [string, string]>) {
       const req: StubRequest<unknown> = { onsuccess: null, onerror: null, result: null }
       const step = () => {
         queueMicrotask(() => {
-          if (index < entries.length) {
-            const [key, value] = entries[index++]
+          const entry = entries[index++]
+          if (entry) {
+            const [key, value] = entry
             req.result = { key, value, continue: step }
           } else {
             req.result = null

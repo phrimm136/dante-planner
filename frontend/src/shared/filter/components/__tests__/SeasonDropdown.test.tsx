@@ -91,7 +91,8 @@ describe('SeasonDropdown', () => {
   it('calls onSelectionChange with removed season when toggling off', async () => {
     const onSelectionChange = vi.fn()
     const user = userEvent.setup()
-    const firstSeason = SEASONS[0]
+    const [firstSeason] = SEASONS
+    if (firstSeason === undefined) throw new Error('SEASONS carries no season to toggle off')
 
     render(
       <SeasonDropdown

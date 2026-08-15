@@ -24,12 +24,12 @@ export interface DeckBuilderSummaryProps extends Partial<
 > {
   equipment: Record<string, SinnerEquipment>
   deploymentOrder: number[]
-  onToggleDeploy?: (sinnerIndex: number) => void
-  onEditDeck?: () => void
+  onToggleDeploy?: ((sinnerIndex: number) => void) | undefined
+  onEditDeck?: (() => void) | undefined
   readOnly?: boolean
   trackerMode?: boolean
-  onResetToInitial?: () => void
-  onViewNotes?: () => void
+  onResetToInitial?: (() => void) | undefined
+  onViewNotes?: (() => void) | undefined
 }
 
 /**
@@ -107,7 +107,10 @@ export function DeckBuilderSummary({
   }
 
   return (
-    <PlannerSection title={t('pages.plannerMD.deckBuilder')} onViewNotes={onViewNotes}>
+    <PlannerSection
+      title={t('pages.plannerMD.deckBuilder')}
+      {...(onViewNotes !== undefined && { onViewNotes })}
+    >
       {/* Sinner Grid */}
       <SinnerGrid
         equipment={equipment}

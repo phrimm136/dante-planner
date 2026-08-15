@@ -34,6 +34,9 @@ export function IdentityInfoPane({ id, identity, uptie, level }: IdentityInfoPan
   const uptieIndex = uptie - 1
   const minSpeed = identity.minSpeedList[uptieIndex] ?? identity.minSpeedList[0]
   const maxSpeed = identity.maxSpeedList[uptieIndex] ?? identity.maxSpeedList[0]
+  if (minSpeed === undefined || maxSpeed === undefined) {
+    throw new Error(`Identity ${id} has no speed range`)
+  }
 
   return (
     <>

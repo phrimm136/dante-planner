@@ -14,9 +14,9 @@ import { CoinDisplay } from './CoinDisplay'
 
 /** Minimal structural shape of the per-level skill stats this panel reads. */
 interface SkillInfoPanelData {
-  attributeType?: string
-  skillLevelCorrection?: number
-  targetNum?: number
+  attributeType?: string | undefined
+  skillLevelCorrection?: number | undefined
+  targetNum?: number | undefined
 }
 
 interface SkillInfoPanelWithSuspenseProps {
@@ -31,7 +31,7 @@ interface SkillInfoPanelWithSuspenseProps {
   /** Identity-only: renders the defense level icon instead of attack. EGO skills are always attack. */
   isDefenseSkill?: boolean
   /** EGO-only: sanity (MP) cost. When provided, renders the sanity-cost stat. */
-  sanityCost?: number
+  sanityCost?: number | undefined
 }
 
 /**

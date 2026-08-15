@@ -6,8 +6,11 @@ import { ThemePackTrackerCard } from './ThemePackTrackerCard'
 import { useThemePackListData } from '@/pages/themePack'
 import { CARD_GRID, EMPTY_STATE } from '@/lib/constants'
 import { cn, getDisplayFontForLanguage } from '@/lib/utils'
+import { createEmptyNoteContent } from '@/shared/noteEditor'
 import type { SerializableFloorSelection } from '../../types/PlannerTypes'
 import type { NoteContent } from '@/shared/noteEditor'
+
+const EMPTY_NOTE = createEmptyNoteContent()
 
 interface HorizontalThemePackGalleryProps {
   floorSelections: SerializableFloorSelection[]
@@ -66,7 +69,7 @@ export function HorizontalThemePackGallery({
   const getNoteContentForPack = (themePackId: string): NoteContent => {
     const floorIndex = getFloorIndexForPack(themePackId)
     const floorNoteKey = `floor-${floorIndex}`
-    return sectionNotes[floorNoteKey] || { type: 'doc', content: [] }
+    return sectionNotes[floorNoteKey] ?? EMPTY_NOTE
   }
 
   // No theme packs selected at all

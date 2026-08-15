@@ -6,7 +6,7 @@ import { cn, getDisplayFontForLanguage } from '@/lib/utils'
 
 interface SkillTabButtonProps {
   /** Skill attribute type for color theming */
-  attributeType?: string
+  attributeType?: string | undefined
   /** Button label text */
   label: string
   /** Click handler */

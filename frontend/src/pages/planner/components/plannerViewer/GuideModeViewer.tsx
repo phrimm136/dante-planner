@@ -207,7 +207,7 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
       )}
 
       {sections.map((section, index) => (
-        <RevealSection key={section.id} visible={visibleSections[index]}>
+        <RevealSection key={section.id} visible={visibleSections[index] ?? false}>
           {section.node}
         </RevealSection>
       ))}

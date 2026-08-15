@@ -47,6 +47,8 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
   const activeThemePackId = hoveredThemePackId ?? focusedThemePackId
 
   const { content } = planner
+  const introNote = content.sectionNotes?.intro
+  const outroNote = content.sectionNotes?.outro
 
   // At most one section note dialog is open at a time
   const [openNote, setOpenNote] = useState<NoteSectionId | null>(null)
@@ -257,10 +259,10 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
   return (
     <div className="bg-background rounded-lg space-y-2">
       {/* Intro */}
-      {!isNoteEmpty(content.sectionNotes?.intro) && (
+      {introNote && !isNoteEmpty(introNote) && (
         <PlannerSection title={t('pages.plannerMD.introduction')}>
           <NoteEditor
-            value={content.sectionNotes.intro}
+            value={introNote}
             placeholder={t('pages.plannerMD.noteEditor.placeholder')}
             readOnly={true}
           />
@@ -269,7 +271,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
 
       {sections.map((section, index) => (
         <Fragment key={section.id}>
-          <RevealSection mode="fade" visible={visibleSections[index]}>
+          <RevealSection mode="fade" visible={visibleSections[index] ?? false}>
             {section.node}
           </RevealSection>
           {section.aside}
@@ -277,10 +279,10 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
       ))}
 
       {/* Outro */}
-      {!isNoteEmpty(content.sectionNotes?.outro) && (
+      {outroNote && !isNoteEmpty(outroNote) && (
         <PlannerSection title={t('pages.plannerMD.closingNotes')}>
           <NoteEditor
-            value={content.sectionNotes.outro}
+            value={outroNote}
             placeholder={t('pages.plannerMD.noteEditor.placeholder')}
             readOnly={true}
           />

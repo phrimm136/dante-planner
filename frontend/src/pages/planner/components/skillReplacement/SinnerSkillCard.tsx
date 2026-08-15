@@ -14,7 +14,7 @@ interface SinnerSkillCardProps {
   rank: number
   skillInfos: [SkillInfo, SkillInfo, SkillInfo]
   skillEA: SkillEAState
-  currentEA?: SkillEAState
+  currentEA?: SkillEAState | undefined
   onClick: () => void
   readOnly?: boolean
 }

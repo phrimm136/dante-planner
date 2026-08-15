@@ -139,7 +139,7 @@ export function Tooltip({ children, ...props }: TooltipProviderProps) {
   return (
     <FloatingDelayGroup
       delay={{ open: props.delay ?? 0, close: props.closeDelay ?? 0 }}
-      timeoutMs={props.timeout}
+      {...(props.timeout !== undefined && { timeoutMs: props.timeout })}
     >
       <TooltipContext.Provider value={tooltip}>{children}</TooltipContext.Provider>
     </FloatingDelayGroup>

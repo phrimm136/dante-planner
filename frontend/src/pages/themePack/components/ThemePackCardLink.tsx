@@ -7,7 +7,7 @@ interface ThemePackCardLinkProps {
   packId: string
   packEntry: ThemePackEntry
   packName: string
-  specialName?: string
+  specialName?: string | undefined
   className?: string
 }
 

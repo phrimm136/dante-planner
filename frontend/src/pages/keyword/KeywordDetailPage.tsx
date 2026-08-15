@@ -26,6 +26,7 @@ import colorCode from '@static/data/colorCode.json'
 import { SECTION_STYLES } from '@/lib/constants'
 
 const colorMap = colorCode as Record<string, string>
+const NEUTRAL_NAME_COLOR = colorCode.Neutral
 
 /**
  * Keyword name display with buffType color.
@@ -34,7 +35,7 @@ const colorMap = colorCode as Record<string, string>
  * Pattern Source: GiftNameI18n.tsx
  */
 function KeywordNameI18n({ id, buffType }: { id: string; buffType: string }) {
-  const nameColor = colorMap[buffType] ?? colorMap['Neutral']
+  const nameColor = colorMap[buffType] ?? NEUTRAL_NAME_COLOR
 
   return (
     <Suspense fallback={<Skeleton className="h-8 w-32" />}>

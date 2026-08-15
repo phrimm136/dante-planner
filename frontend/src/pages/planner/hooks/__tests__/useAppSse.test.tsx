@@ -115,8 +115,11 @@ async function flushConnectDelay() {
   await advance(SSE_CONNECTION.INITIAL_DELAY)
 }
 
-function lastStream() {
-  return streams[streams.length - 1]
+/** The most recently opened stream, failing loudly when the hook opened none. */
+function lastStream(): StreamHandle {
+  const stream = streams[streams.length - 1]
+  if (!stream) throw new Error('expected the hook to have opened a stream')
+  return stream
 }
 
 async function emit(stream: StreamHandle, type: string, data: unknown) {

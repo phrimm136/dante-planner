@@ -1,7 +1,10 @@
 import { NoteEditor } from '@/shared/noteEditor/components/NoteEditor'
 import { MAX_NOTE_BYTES } from '@/lib/constants'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
+import { createEmptyNoteContent } from '@/shared/noteEditor'
 import type { NoteContent } from '@/shared/noteEditor'
+
+const EMPTY_NOTE = createEmptyNoteContent()
 
 interface StoreBoundSectionNoteProps {
   /** Key into the store's sectionNotes record. */
@@ -21,7 +24,7 @@ export function StoreBoundSectionNote({ sectionKey, placeholder }: StoreBoundSec
 
   return (
     <NoteEditor
-      value={value}
+      value={value ?? EMPTY_NOTE}
       onChange={(content: NoteContent) => {
         updateSectionNote(sectionKey, content)
       }}

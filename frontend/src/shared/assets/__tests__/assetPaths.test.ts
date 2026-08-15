@@ -139,7 +139,9 @@ const CASES: Case[] = [
 
 describe('asset path getters', () => {
   it.each(CASES)('%s(%j) → %s', (name, args, expected) => {
-    expect(getters[name](...args)).toBe(resolveAsset(expected))
+    const getter = getters[name]
+    expect(getter).toBeDefined()
+    expect(getter?.(...args)).toBe(resolveAsset(expected))
   })
 
   it('pins every exported getter', () => {

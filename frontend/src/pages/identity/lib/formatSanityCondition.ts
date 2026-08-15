@@ -111,12 +111,13 @@ export function formatSanityCondition(
   const { baseName, args } = parseSanityCondition(encodedName)
 
   // Object.hasOwn for runtime safety against prototype keys
-  if (!Object.hasOwn(i18n, baseName)) {
+  const entry = Object.hasOwn(i18n, baseName) ? i18n[baseName] : undefined
+  if (entry === undefined) {
     return err({ baseName })
   }
 
   // Substitute arguments - keep tags for FormattedSanityText to parse
-  return ok(substituteArgs(i18n[baseName][type], args))
+  return ok(substituteArgs(entry[type], args))
 }
 
 /**

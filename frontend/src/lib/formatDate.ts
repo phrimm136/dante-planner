@@ -247,7 +247,7 @@ export function formatCompactRelativeTime(dateString: string, locale?: string): 
  * formatAnnouncementDate("2026-02-19", "KR") // => "2026. 2. 19."
  */
 export function formatAnnouncementDate(dateStr: string, language: string): string {
-  const [year, month, day] = dateStr.split('-').map(Number)
+  const [year = NaN, month = NaN, day = NaN] = dateStr.split('-').map(Number)
   const date = new Date(year, month - 1, day)
   return date.toLocaleDateString(I18N_LOCALE_MAP[language] ?? 'en-US', {
     year: 'numeric',

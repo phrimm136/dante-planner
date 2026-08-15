@@ -71,9 +71,9 @@ export function filterSection<
   return {
     key,
     titleKey,
-    titleFallback,
+    ...(titleFallback !== undefined && { titleFallback }),
     activeCount: selected.size,
-    suspense,
+    ...(suspense !== undefined && { suspense }),
     control: <Component {...controlProps} />,
   }
 }

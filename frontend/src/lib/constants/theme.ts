@@ -142,21 +142,23 @@ export const AFFINITY_COLORS: Record<string, string> = {
  * Difficulty colors for indicator display, keyed by difficulty label.
  * NORMAL: yellow, HARD: orange, INFINITY: red, EXTREME: white
  */
-export const DIFFICULTY_COLORS: Record<string, string> = {
+const DIFFICULTY_COLOR_BY_LABEL = {
   NORMAL: '#ffd700',
   HARD: '#ff8c00',
   'INFINITY MIRROR': '#dc070c',
   'EXTREME MIRROR': '#ffffff',
 } as const
 
+export const DIFFICULTY_COLORS: Record<string, string> = DIFFICULTY_COLOR_BY_LABEL
+
 /**
  * MD category background colors aligned with difficulty colors
  * 5F uses HARD orange, 10F uses INFINITY red, 15F uses EXTREME white
  */
 export const MD_CATEGORY_COLORS: Record<string, string> = {
-  '5F': DIFFICULTY_COLORS.HARD,
-  '10F': DIFFICULTY_COLORS['INFINITY MIRROR'],
-  '15F': DIFFICULTY_COLORS['EXTREME MIRROR'],
+  '5F': DIFFICULTY_COLOR_BY_LABEL.HARD,
+  '10F': DIFFICULTY_COLOR_BY_LABEL['INFINITY MIRROR'],
+  '15F': DIFFICULTY_COLOR_BY_LABEL['EXTREME MIRROR'],
 } as const
 
 /**

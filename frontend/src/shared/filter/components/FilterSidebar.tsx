@@ -15,7 +15,7 @@ interface FilterSidebarProps {
   /** Search bar - visible in mobile collapsed state next to Reset All */
   searchBar?: React.ReactNode
   activeFilterCount?: number
-  onResetAll?: () => void
+  onResetAll?: (() => void) | undefined
 }
 
 /**
