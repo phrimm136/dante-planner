@@ -477,3 +477,24 @@ asset pipeline.
   every one of its stale resends moves the column and can never be acknowledged. Whether the
   device stamp deserves to defeat an otherwise-identical write is a product question the
   arbitration design did not reach.
+- 2026-08-16 — `PlannerContentDigestTest` was the only HTTP-level test asserting that
+  `PlannerContentSanitizer` normalization survives the upsert endpoint. It went with the digest
+  it was named for, and nothing replaced that assertion: sanitizer behavior is now covered only
+  below the endpoint, so a regression in how the upsert path applies normalization reaches the
+  wire untested.
+- 2026-08-16 — The stale-write arbitration integration test pins one device cookie for the whole
+  class, so two behaviors of the no-op predicate are code-verified but unexercised: the
+  cross-device 409, where a second cookie resends identical content and is refused, and the
+  cookieless case, where `DeviceIdResolver` mints a fresh UUID per request so no stale resend can
+  ever be acknowledged. Both follow from `device_id` counting as a persisted field; neither has a
+  test that would catch the day it changes.
+- 2026-08-16 — No frontend test drives the stale-ack shape specifically: the client presents
+  version N and the acknowledgement returns N+k with content unchanged. Ack adoption is covered
+  only by the generic version-jump tests in `usePlannerSave.test.ts`, which do not distinguish an
+  ack won by no-op arbitration from an ordinary forward version bump.
+- 2026-08-16 — Six e2e app-suite specs (`mutation-gestures`, `note-save-gesture`) fail on the
+  local rig: the planner page's IndexedDB open in `frontend/src/lib/storage.ts` dies with
+  "upgrade blocked by another tab", so owner controls never render and every assertion that
+  depends on them fails. The cause is upstream of the arbitration work — the failing page makes
+  no planner network call before it dies, and the storage path is untouched by it — and traces
+  to the device-free-key migration.

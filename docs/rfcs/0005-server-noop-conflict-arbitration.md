@@ -1,6 +1,6 @@
 ---
 status: Accepted
-tracking: none
+tracking: rfc-0005/integration — phase 1 (backend-noop) and phase 2 (frontend-versiononly) landed
 ---
 
 # 0005 Server-side no-op conflict arbitration and digest retirement
