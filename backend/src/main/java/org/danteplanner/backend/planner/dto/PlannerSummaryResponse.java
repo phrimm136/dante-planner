@@ -1,5 +1,6 @@
 package org.danteplanner.backend.planner.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 
 import org.danteplanner.backend.planner.entity.Planner;
@@ -12,6 +13,10 @@ import java.util.UUID;
 
 /**
  * Summary response DTO for planner list views.
+ *
+ * <p>{@code deletedAt} is omitted when null so the live-row wire shape is byte-identical to what
+ * strict clients already parse; it appears only on the tombstoned rows an includeDeleted listing
+ * adds.</p>
  */
 @Builder
 public record PlannerSummaryResponse(
@@ -21,7 +26,8 @@ public record PlannerSummaryResponse(
     PlannerType plannerType,
     PlannerStatus status,
     long syncVersion,
-    Instant lastModifiedAt
+    Instant lastModifiedAt,
+    @JsonInclude(JsonInclude.Include.NON_NULL) Instant deletedAt
 ) {
 
     /**
@@ -57,6 +63,7 @@ public record PlannerSummaryResponse(
                 .status(row.getStatus())
                 .syncVersion(row.getSyncVersion())
                 .lastModifiedAt(row.getLastModifiedAt())
+                .deletedAt(row.getDeletedAt())
                 .build();
     }
 }

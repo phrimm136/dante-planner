@@ -25,4 +25,6 @@ public interface PlannerSummaryRow {
     long getSyncVersion();
 
     Instant getLastModifiedAt();
+
+    Instant getDeletedAt();
 }

@@ -37,8 +37,13 @@ export const plannerApi = {
    * @param size - Number of items per page
    * @returns Paginated response with content and whether this is the final page
    */
-  async list(page = 0, size = 100): Promise<{ content: ServerPlannerSummary[]; last: boolean }> {
-    const data = await ApiClient.get(`${PLANNERS_BASE}?page=${page}&size=${size}`)
+  async list(
+    page = 0,
+    size = 100,
+    includeDeleted = false,
+  ): Promise<{ content: ServerPlannerSummary[]; last: boolean }> {
+    const deletedParam = includeDeleted ? '&includeDeleted=true' : ''
+    const data = await ApiClient.get(`${PLANNERS_BASE}?page=${page}&size=${size}${deletedParam}`)
     const parsed = validateData(data, ServerPlannerSummaryPageSchema, 'planner list')
     return {
       content: parsed.content,
@@ -47,8 +52,9 @@ export const plannerApi = {
   },
 
   /**
-   * List ALL planners for the current user (loops through all pages)
-   * Use for sync operations that need complete planner list
+   * List ALL planners for the current user (loops through all pages), tombstones included:
+   * sync is the one consumer that must learn of deletions, and the deletedAt each tombstone
+   * carries is what routes it to a purge instead of a pull.
    *
    * @returns Array of all planner summaries
    */
@@ -58,7 +64,7 @@ export const plannerApi = {
     let hasMore = true
 
     while (hasMore) {
-      const result = await this.list(page, 100)
+      const result = await this.list(page, 100, true)
       allPlanners.push(...result.content)
       hasMore = !result.last
       page++

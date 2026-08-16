@@ -215,6 +215,8 @@ export interface PlannerSummary {
   syncVersion?: number
   /** Selected keywords for display (MD planners only) */
   selectedKeywords?: string[]
+  /** Server tombstone; present only on rows a sync listing carries as deleted */
+  deletedAt?: string
 }
 
 // ============================================================================

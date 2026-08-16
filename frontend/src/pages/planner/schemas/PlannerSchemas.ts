@@ -610,6 +610,8 @@ export const ServerPlannerSummarySchema = z
     syncVersion: z.number().int().positive(),
     /** ISO 8601 timestamp when planner was last modified */
     lastModifiedAt: z.string(),
+    /** Tombstone: present only on rows an includeDeleted listing adds */
+    deletedAt: z.string().optional(),
   })
   .strict()
 

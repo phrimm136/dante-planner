@@ -36,13 +36,28 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
      */
     @Query(value = "SELECT p.id AS id, c.title AS title, c.category AS category, "
             + "p.plannerType AS plannerType, c.status AS status, c.syncVersion AS syncVersion, "
-            + "c.lastModifiedAt AS lastModifiedAt "
+            + "c.lastModifiedAt AS lastModifiedAt, c.deletedAt AS deletedAt "
             + "FROM Planner p JOIN PlannerContent c ON c.plannerId = p.id "
             + "WHERE p.user.id = :userId AND c.deletedAt IS NULL "
             + "ORDER BY c.lastModifiedAt DESC",
             countQuery = "SELECT COUNT(p) FROM Planner p JOIN PlannerContent c ON c.plannerId = p.id "
             + "WHERE p.user.id = :userId AND c.deletedAt IS NULL")
     Page<PlannerSummaryRow> findOwnerSummaries(@Param("userId") Long userId, Pageable pageable);
+
+    /**
+     * Owner list for sync pulls: tombstoned rows ride along carrying their {@code deletedAt}, so
+     * a device that still holds a copy learns of the deletion from the same listing it pulls from.
+     */
+    @Query(value = "SELECT p.id AS id, c.title AS title, c.category AS category, "
+            + "p.plannerType AS plannerType, c.status AS status, c.syncVersion AS syncVersion, "
+            + "c.lastModifiedAt AS lastModifiedAt, c.deletedAt AS deletedAt "
+            + "FROM Planner p JOIN PlannerContent c ON c.plannerId = p.id "
+            + "WHERE p.user.id = :userId "
+            + "ORDER BY c.lastModifiedAt DESC",
+            countQuery = "SELECT COUNT(p) FROM Planner p JOIN PlannerContent c ON c.plannerId = p.id "
+            + "WHERE p.user.id = :userId")
+    Page<PlannerSummaryRow> findOwnerSummariesIncludingDeleted(
+            @Param("userId") Long userId, Pageable pageable);
 
     /**
      * Load the full aggregate for an owner-scoped, non-deleted planner.

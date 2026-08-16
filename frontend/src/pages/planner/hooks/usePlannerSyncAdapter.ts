@@ -101,6 +101,7 @@ function serverSummaryToLocal(summary: ServerPlannerSummary): PlannerSummary {
     lastModifiedAt: summary.lastModifiedAt,
     savedAt: null,
     syncVersion: summary.syncVersion,
+    ...(summary.deletedAt !== undefined && { deletedAt: summary.deletedAt }),
   }
 }
 

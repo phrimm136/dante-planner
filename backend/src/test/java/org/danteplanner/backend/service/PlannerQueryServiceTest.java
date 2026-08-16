@@ -82,6 +82,10 @@ class PlannerQueryServiceTest {
     }
 
     private static PlannerSummaryRow summaryRow(Planner planner) {
+        return summaryRow(planner, null);
+    }
+
+    private static PlannerSummaryRow summaryRow(Planner planner, Instant deletedAt) {
         return new PlannerSummaryRow() {
 
             @Override
@@ -118,6 +122,11 @@ class PlannerQueryServiceTest {
             public Instant getLastModifiedAt() {
                 return planner.getLastModifiedAt();
             }
+
+            @Override
+            public Instant getDeletedAt() {
+                return deletedAt;
+            }
         };
     }
 
@@ -138,13 +147,33 @@ class PlannerQueryServiceTest {
                     .thenReturn(rowPage);
 
             // Act
-            Page<PlannerSummaryResponse> result = queryService.getPlanners(testUser.getId(), pageable);
+            Page<PlannerSummaryResponse> result = queryService.getPlanners(testUser.getId(), pageable, false);
 
             // Assert
             assertEquals(2, result.getTotalElements());
             assertEquals(2, result.getContent().size());
             assertEquals(planner.getTitle(), result.getContent().get(0).title());
             assertEquals(planner.getSyncVersion(), result.getContent().get(0).syncVersion());
+        }
+
+        @Test
+        @DisplayName("Should carry tombstones only through the includeDeleted listing")
+        void getPlanners_WhenIncludeDeleted_CarriesTombstones() {
+            // Arrange
+            Pageable pageable = PageRequest.of(0, 10);
+            Instant deletedAt = Instant.parse("2026-08-16T00:00:00Z");
+            Page<PlannerSummaryRow> rowPage = new PageImpl<>(
+                    List.of(summaryRow(createTestPlanner(), deletedAt)), pageable, 1);
+
+            when(plannerRepository.findOwnerSummariesIncludingDeleted(testUser.getId(), pageable))
+                    .thenReturn(rowPage);
+
+            // Act
+            Page<PlannerSummaryResponse> result =
+                    queryService.getPlanners(testUser.getId(), pageable, true);
+
+            // Assert
+            assertEquals(deletedAt, result.getContent().get(0).deletedAt());
         }
 
         @Test
@@ -158,7 +187,7 @@ class PlannerQueryServiceTest {
                     .thenReturn(emptyPage);
 
             // Act
-            Page<PlannerSummaryResponse> result = queryService.getPlanners(testUser.getId(), pageable);
+            Page<PlannerSummaryResponse> result = queryService.getPlanners(testUser.getId(), pageable, false);
 
             // Assert
             assertEquals(0, result.getTotalElements());

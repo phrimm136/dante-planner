@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest'
-import { categorizePlanner, categorizeSync, shouldPurgeLocal } from '../syncPlan'
+import { INITIAL_SYNC_VERSION } from '@/lib/constants'
+import { categorizePlanner, categorizeSync } from '../syncPlan'
+import { createSaveablePlanner } from '../saveablePlanner'
 
 import type { PlannerVerdict } from '../syncPlan'
 import type { PlannerSummary } from '../../types/PlannerTypes'
@@ -76,15 +78,27 @@ describe('categorizeSync', () => {
       expected: { pull: ['a'], conflict: [], purge: [] },
     },
     {
-      name: 'a previously-synced local row missing on the server is purged',
+      name: 'a local row missing on the server is kept, whatever its witnesses say',
       server: [],
+      local: [makeSummary({ id: 'a', status: 'saved', savedAt: SAVED_AT })],
+      expected: { pull: [], conflict: [], purge: [] },
+    },
+    {
+      name: 'a server tombstone purges its saved local counterpart',
+      server: [makeSummary({ id: 'a', deletedAt: SAVED_AT })],
       local: [makeSummary({ id: 'a', status: 'saved', savedAt: SAVED_AT })],
       expected: { pull: [], conflict: [], purge: ['a'] },
     },
     {
-      name: 'a local draft missing on the server is kept',
-      server: [],
+      name: 'a server tombstone keeps a local draft',
+      server: [makeSummary({ id: 'a', deletedAt: SAVED_AT, syncVersion: 9 })],
       local: [makeSummary({ id: 'a', status: 'draft', savedAt: SAVED_AT })],
+      expected: { pull: [], conflict: [], purge: [] },
+    },
+    {
+      name: 'a tombstone with no local counterpart contributes nothing',
+      server: [makeSummary({ id: 'a', deletedAt: SAVED_AT })],
+      local: [],
       expected: { pull: [], conflict: [], purge: [] },
     },
     {
@@ -94,12 +108,14 @@ describe('categorizeSync', () => {
         makeSummary({ id: 'pull-newer', syncVersion: 4 }),
         makeSummary({ id: 'conflicting', syncVersion: 4 }),
         makeSummary({ id: 'untouched', syncVersion: 2 }),
+        makeSummary({ id: 'deleted-elsewhere', deletedAt: SAVED_AT }),
       ],
       local: [
         makeSummary({ id: 'pull-newer', syncVersion: 3, status: 'saved' }),
         makeSummary({ id: 'conflicting', syncVersion: 3, status: 'draft' }),
         makeSummary({ id: 'untouched', syncVersion: 2 }),
         makeSummary({ id: 'deleted-elsewhere', status: 'saved', savedAt: SAVED_AT }),
+        makeSummary({ id: 'local-only', status: 'saved', savedAt: SAVED_AT }),
         makeSummary({ id: 'local-draft', status: 'draft', savedAt: null }),
       ],
       expected: {
@@ -123,10 +139,10 @@ describe('categorizeSync', () => {
   it('returns the server row for a pull and a conflict, and the local row for a purge', () => {
     const serverRow = makeSummary({ id: 'a', syncVersion: 4, title: 'Server' })
     const draftRow = makeSummary({ id: 'b', syncVersion: 4, title: 'Server draft side' })
-    const localRow = makeSummary({ id: 'c', title: 'Local only', status: 'saved' })
+    const localRow = makeSummary({ id: 'c', title: 'Deleted elsewhere', status: 'saved' })
 
     const plan = categorizeSync(
-      [serverRow, draftRow],
+      [serverRow, draftRow, makeSummary({ id: 'c', deletedAt: SAVED_AT })],
       [
         makeSummary({ id: 'a', syncVersion: 1, status: 'saved', title: 'Local' }),
         makeSummary({ id: 'b', syncVersion: 1, status: 'draft', title: 'Local draft' }),
@@ -147,40 +163,6 @@ describe('categorizeSync', () => {
 
     expect(server).toEqual([makeSummary({ id: 'a', syncVersion: 4 })])
     expect(local).toEqual([makeSummary({ id: 'a', syncVersion: 1, status: 'draft' })])
-  })
-})
-
-describe('shouldPurgeLocal', () => {
-  it('purges when saved and savedAt is set (two witnesses of prior sync)', () => {
-    expect(shouldPurgeLocal(makeSummary({ status: 'saved', savedAt: SAVED_AT }))).toBe(true)
-  })
-
-  it('keeps drafts even when they have prior saves', () => {
-    // User started editing a previously-synced planner; their edits must not be wiped
-    // just because the server lost the row.
-    expect(shouldPurgeLocal(makeSummary({ status: 'draft', savedAt: SAVED_AT }))).toBe(false)
-  })
-
-  it('keeps never-synced drafts', () => {
-    expect(shouldPurgeLocal(makeSummary({ status: 'draft', savedAt: null }))).toBe(false)
-  })
-
-  it('keeps inconsistent local state (saved but no savedAt)', () => {
-    // Defensive: corrupt or pre-migration row that says saved but has no timestamp.
-    // Erring toward preservation costs at most one repeated WARN; erring toward
-    // purge could destroy user work.
-    expect(shouldPurgeLocal(makeSummary({ status: 'saved', savedAt: null }))).toBe(false)
-  })
-
-  it('ignores syncVersion (relies on status + savedAt only)', () => {
-    // syncVersion alone can't distinguish "first server save" from "never synced",
-    // so it is deliberately not part of the predicate.
-    expect(
-      shouldPurgeLocal(makeSummary({ status: 'saved', savedAt: SAVED_AT, syncVersion: 1 })),
-    ).toBe(true)
-    expect(
-      shouldPurgeLocal(makeSummary({ status: 'saved', savedAt: SAVED_AT, syncVersion: 99 })),
-    ).toBe(true)
   })
 })
 
@@ -237,5 +219,56 @@ describe('categorizePlanner', () => {
 
   it.each(cases)('$name', ({ local, server, expected }) => {
     expect(categorizePlanner(local, server)).toBe(expected)
+  })
+})
+
+describe('purge against rows the server never acknowledged', () => {
+  // The row exactly as a manual save produces it when no push happened: performSave builds with
+  // status 'saved' before the sync gate, and createSaveablePlanner stamps savedAt from status
+  // alone — a signed-out or sync-off save, and a fork whose upload failed, all share this shape.
+  function localOnlySavedSummary(): PlannerSummary {
+    const planner = createSaveablePlanner({
+      state: {
+        title: 'local only',
+        category: '5F',
+        selectedKeywords: new Set(),
+        selectedBuffIds: new Set(),
+        selectedGiftKeyword: null,
+        selectedGiftIds: new Set(),
+        observationGiftIds: new Set(),
+        comprehensiveGiftIds: new Set(),
+        equipment: {},
+        deploymentOrder: [],
+        skillEAState: {},
+        floorSelections: [],
+        sectionNotes: {},
+      },
+      plannerId: '99999999-8888-7777-6666-555555555555',
+      deviceId: 'test-device',
+      schemaVersion: 1,
+      contentVersion: 1,
+      plannerType: 'MIRROR_DUNGEON',
+      existingCreatedAt: null,
+      existingSyncVersion: INITIAL_SYNC_VERSION,
+      published: false,
+      status: 'saved',
+    })
+
+    // The same field pick listLocal performs on a stored row.
+    return {
+      id: planner.metadata.id,
+      title: planner.metadata.title,
+      plannerType: planner.config.type,
+      category: planner.config.category,
+      status: planner.metadata.status,
+      lastModifiedAt: planner.metadata.lastModifiedAt,
+      savedAt: planner.metadata.savedAt,
+      syncVersion: planner.metadata.syncVersion,
+    }
+  }
+
+  it('a saved row the server never acknowledged survives a pull pass that does not list it', () => {
+    const plan = categorizeSync([], [localOnlySavedSummary()])
+    expect(plan.purge).toEqual([])
   })
 })

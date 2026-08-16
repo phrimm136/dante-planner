@@ -8,6 +8,7 @@ import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
+import org.danteplanner.backend.planner.repository.PlannerSummaryRow;
 import org.danteplanner.backend.planner.repository.PlannerUpvoteRow;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,13 +35,18 @@ public class PlannerQueryService {
     /**
      * Get all planners for a user with pagination.
      *
-     * @param userId   the user ID
-     * @param pageable pagination information
+     * @param userId         the user ID
+     * @param pageable       pagination information
+     * @param includeDeleted whether tombstoned rows ride along carrying their deletedAt
      * @return page of planner summaries
      */
     @Transactional(readOnly = true)
-    public Page<PlannerSummaryResponse> getPlanners(Long userId, Pageable pageable) {
-        return plannerRepository.findOwnerSummaries(userId, pageable).map(PlannerSummaryResponse::from);
+    public Page<PlannerSummaryResponse> getPlanners(
+            Long userId, Pageable pageable, boolean includeDeleted) {
+        Page<PlannerSummaryRow> rows = includeDeleted
+                ? plannerRepository.findOwnerSummariesIncludingDeleted(userId, pageable)
+                : plannerRepository.findOwnerSummaries(userId, pageable);
+        return rows.map(PlannerSummaryResponse::from);
     }
 
     /**

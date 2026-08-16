@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -40,17 +41,20 @@ public class PlannerQueryController {
     /**
      * Get all planners for the authenticated user with pagination.
      *
-     * @param userId   the authenticated user ID
-     * @param pageable pagination parameters (page, size, sort)
+     * @param userId         the authenticated user ID
+     * @param pageable       pagination parameters (page, size, sort)
+     * @param includeDeleted whether tombstoned rows ride along for a sync pull
      * @return page of planner summaries
      */
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "list")
     @GetMapping
     public ResponseEntity<Page<PlannerSummaryResponse>> getPlanners(
             @AuthenticationPrincipal Long userId,
-            Pageable pageable) {
+            Pageable pageable,
+            @RequestParam(defaultValue = "false") boolean includeDeleted) {
 
-        Page<PlannerSummaryResponse> planners = plannerQueryService.getPlanners(userId, pageable);
+        Page<PlannerSummaryResponse> planners =
+                plannerQueryService.getPlanners(userId, pageable, includeDeleted);
         return ResponseEntity.ok(planners);
     }
 

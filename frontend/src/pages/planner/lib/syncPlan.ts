@@ -3,21 +3,6 @@ import type { AppError } from '@/lib/apiErrorClassifier'
 import type { PlannerSummary, SaveablePlanner, ServerPlannerResponse } from '../types/PlannerTypes'
 
 /**
- * Decide whether a local planner that the server no longer has should be
- * purged from IndexedDB. Defaults to the safe choice (keep) whenever local
- * state is ambiguous or inconsistent.
- *
- * Purge only when two independent fields agree the row was previously saved
- * to the server (status='saved' AND savedAt is set). All other shapes are
- * preserved — drafts, never-synced rows, and inconsistent local state.
- */
-export function shouldPurgeLocal(local: PlannerSummary): boolean {
-  if (local.savedAt === null) return false
-  if (local.status === 'draft') return false
-  return true
-}
-
-/**
  * Three-way partition of a sync pass, in the order the caller executes it.
  * `pull` and `conflict` carry server summaries, `purge` carries local ones.
  */
@@ -26,7 +11,7 @@ export interface SyncPlan {
   pull: PlannerSummary[]
   /** Server rows that are newer than a local draft, so the user has to choose. */
   conflict: PlannerSummary[]
-  /** Local rows absent from the server that carry two witnesses of a prior sync. */
+  /** Local rows whose server copy carries a tombstone. */
   purge: PlannerSummary[]
 }
 
@@ -54,19 +39,27 @@ export function categorizePlanner(
 /**
  * Partition a sync pass over the two summary lists it compares.
  *
- * `categorizePlanner` decides each server row; a local row absent from the
- * server is purged only when `shouldPurgeLocal` agrees.
+ * A purge takes positive evidence: only a server tombstone (`deletedAt`) removes a local row,
+ * and a local draft survives even that, since pulling the deletion would discard unsaved edits.
+ * A local row the server never listed is kept — absence also describes a row that was never
+ * uploaded, and deleting on that reading destroys the only copy.
  */
 export function categorizeSync(server: PlannerSummary[], local: PlannerSummary[]): SyncPlan {
   const localById = new Map(local.map((p) => [p.id, p]))
-  const serverIds = new Set(server.map((p) => p.id))
 
   const pull: PlannerSummary[] = []
   const conflict: PlannerSummary[] = []
   const purge: PlannerSummary[] = []
 
   for (const serverPlanner of server) {
-    switch (categorizePlanner(localById.get(serverPlanner.id), serverPlanner)) {
+    const localPlanner = localById.get(serverPlanner.id)
+
+    if (serverPlanner.deletedAt !== undefined) {
+      if (localPlanner && localPlanner.status !== 'draft') purge.push(localPlanner)
+      continue
+    }
+
+    switch (categorizePlanner(localPlanner, serverPlanner)) {
       case 'pull':
         pull.push(serverPlanner)
         break
@@ -76,11 +69,6 @@ export function categorizeSync(server: PlannerSummary[], local: PlannerSummary[]
       case 'skip':
         break
     }
-  }
-
-  for (const localPlanner of local) {
-    if (serverIds.has(localPlanner.id)) continue
-    if (shouldPurgeLocal(localPlanner)) purge.push(localPlanner)
   }
 
   return { pull, conflict, purge }
