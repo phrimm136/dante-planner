@@ -469,3 +469,11 @@ asset pipeline.
   upvote falls to `UNEXPECTED_CONFLICT`: it answers the generic `CONFLICT` code and raises a
   Sentry alert, while the equivalent planner-vote and comment-report races are listed and
   resolve silently to `DUPLICATE_ACTION`.
+- 2026-08-16 — The no-op arbitration predicate counts `planner_content.device_id` as a persisted
+  field, because the upsert path stamps it and the biconditional invariant admits no field the
+  write touches. The consequence is cross-device: device B resending content identical to what
+  device A saved still gets a 409, since applying it would restamp the device. A caller sending
+  no device cookie is worse off still — `DeviceIdResolver` mints a fresh UUID per request, so
+  every one of its stale resends moves the column and can never be acknowledged. Whether the
+  device stamp deserves to defeat an otherwise-identical write is a product question the
+  arbitration design did not reach.
