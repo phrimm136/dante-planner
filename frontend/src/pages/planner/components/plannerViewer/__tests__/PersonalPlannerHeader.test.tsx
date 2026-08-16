@@ -79,8 +79,13 @@ vi.mock('@/shared/auth/hooks/useAuthQuery', () => ({
 // ── Storage ───────────────────────────────────────────────────
 const mockSavePlanner = vi.fn().mockResolvedValue({ ok: true, value: undefined })
 const mockDeletePlanner = vi.fn().mockResolvedValue({ ok: true, value: undefined })
+const mockLoadPlanner = vi.fn().mockResolvedValue({ ok: true, value: null })
 vi.mock('../../../hooks/usePlannerStorage', () => ({
-  usePlannerStorage: () => ({ saveToLocal: mockSavePlanner, deleteFromLocal: mockDeletePlanner }),
+  usePlannerStorage: () => ({
+    saveToLocal: mockSavePlanner,
+    deleteFromLocal: mockDeletePlanner,
+    loadFromLocal: mockLoadPlanner,
+  }),
 }))
 
 // ── Sync adapter ──────────────────────────────────────────────
@@ -331,6 +336,30 @@ describe('PersonalPlannerHeader – Apply Latest Mirror', () => {
         )
         // Server response (with bumped syncVersion) is persisted — not the local draft
         expect(mockSavePlanner).toHaveBeenCalledWith(syncedPlanner)
+      })
+    })
+
+    it('keeps a local draft through the synced upgrade: only the stamps move', async () => {
+      const localDraft = makePlanner({ status: 'draft', title: 'Draft edits' })
+      mockLoadPlanner.mockResolvedValueOnce({ ok: true, value: localDraft })
+
+      const { wrapper } = createWrapper()
+      render(
+        <PersonalPlannerHeader planner={makePlanner()} isAuthenticated={true} syncEnabled={true} />,
+        { wrapper },
+      )
+
+      await triggerApplyLatestMirror()
+
+      await waitFor(() => {
+        expect(mockSavePlanner).toHaveBeenCalledWith({
+          ...localDraft,
+          metadata: {
+            ...localDraft.metadata,
+            contentVersion: CURRENT_VERSION,
+            syncVersion: syncedPlanner.metadata.syncVersion,
+          },
+        })
       })
     })
 

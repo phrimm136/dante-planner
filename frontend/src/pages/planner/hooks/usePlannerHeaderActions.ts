@@ -52,7 +52,7 @@ export function usePlannerHeaderActions({
   const [isApplyingLatestMirror, setIsApplyingLatestMirror] = useState(false)
 
   const deleteMutation = usePlannerDelete()
-  const { saveToLocal, deleteFromLocal } = usePlannerStorage()
+  const { saveToLocal, deleteFromLocal, loadFromLocal } = usePlannerStorage()
   const syncAdapter = usePlannerSyncAdapter()
 
   const handleBack = () => {
@@ -104,7 +104,24 @@ export function usePlannerHeaderActions({
         // keeping the pre-sync version would make every later non-forced
         // upload conflict (409).
         const synced = await syncAdapter.syncToServer(updatedPlanner)
-        await saveToLocal(acknowledgedCopy(synced))
+
+        // A local draft keeps its own bytes: only the stamps move — the mirror version, and
+        // the acked syncVersion so this upgrade's own bump cannot 409 the next manual save.
+        const localRead = await loadFromLocal(plannerId)
+        const localDraft =
+          localRead.ok && localRead.value?.metadata.status === 'draft' ? localRead.value : null
+        if (localDraft) {
+          await saveToLocal({
+            ...localDraft,
+            metadata: {
+              ...localDraft.metadata,
+              contentVersion: config.mdCurrentVersion,
+              syncVersion: Math.max(localDraft.metadata.syncVersion ?? 0, synced.ack.syncVersion),
+            },
+          })
+        } else {
+          await saveToLocal(acknowledgedCopy(synced))
+        }
       } else {
         // Local-only save (personal, sync disabled / unauthenticated)
         // syncVersion unchanged — server-assigned, must not drift without server confirmation
