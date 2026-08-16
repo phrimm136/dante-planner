@@ -5,8 +5,8 @@ package org.danteplanner.backend.planner.entity;
  * persistence provider.
  *
  * <p>Lives in the entity package because the callbacks are protected, and exists at all because a
- * content row that skipped {@code @PrePersist} carries no digest, which every mapper reading one
- * treats as a fault.</p>
+ * content row that skipped {@code @PrePersist} carries no {@code lastModifiedAt}, which its column
+ * forbids and readers of a stored row take for granted.</p>
  */
 public final class PlannerContentLifecycle {
 
@@ -14,7 +14,8 @@ public final class PlannerContentLifecycle {
     }
 
     /**
-     * Applies the persist callback, giving the row the digest a stored row always carries.
+     * Applies the persist callback, giving the row the modification stamp a stored row always
+     * carries.
      *
      * @param content the content row to stamp
      * @return the same row
