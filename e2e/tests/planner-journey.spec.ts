@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test'
 import { randomUUID } from 'node:crypto'
 import { authenticateContext, createAuthenticatedApi } from '../src/auth'
+import { becomesTrue } from '../src/consistency'
 import { closeSeedPool, createUser, deleteUser } from '../src/seed'
 import { plannerPayload } from '../src/plannerContent'
 import { edgeContext } from '../src/edge'
@@ -28,15 +29,21 @@ test('an owner publishes a planner and it reaches the community list', async ({ 
     })
     expect(published.status(), await published.text()).toBe(200)
 
-    // Anonymous, because the community list is what a visitor sees.
+    // Anonymous, because the community list is what a visitor sees. A visitor carries no
+    // ryw_gtid, so the replica region serves this listing at whatever replication lag holds:
+    // containment is a liveness property, not an instant one.
     const anonymous = await edgeContext({
       baseURL: process.env.E2E_API_URL ?? baseURL!,
     })
-    const list = await anonymous.get('/api/planner/md/published?page=0&size=50')
-    expect(list.status()).toBe(200)
-
-    const titles = ((await list.json()).content as Array<{ title: string }>).map((p) => p.title)
-    expect(titles).toContain(title)
+    await becomesTrue(
+      async () => {
+        const list = await anonymous.get('/api/planner/md/published?page=0&size=50')
+        expect(list.status()).toBe(200)
+        const titles = ((await list.json()).content as Array<{ title: string }>).map((p) => p.title)
+        return titles.includes(title)
+      },
+      { what: `${title} on the anonymous published listing` },
+    )
     await anonymous.dispose()
   } finally {
     // Delete through the API, not the database. Deleting the user row alone leaves the FK-less

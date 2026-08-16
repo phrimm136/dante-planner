@@ -120,6 +120,7 @@ export async function createAuthenticatedApi(
   baseURL: string,
   userId: number | bigint,
   role: Role = 'NORMAL',
+  extraCookies = '',
 ): Promise<APIRequestContext> {
   // Callers pass the page's base, but /api lives on its own hostname wherever the SPA and
   // API are split (staging, prod); the SPA host would answer the CSRF bootstrap with HTML.
@@ -139,12 +140,16 @@ export async function createAuthenticatedApi(
 
   if (!csrf) throw new Error(`no ${CSRF_COOKIE} cookie was issued by ${apiBase}/api/auth/me`)
 
+  // An explicit Cookie header replaces the context's jar on every request, so cookies the
+  // server sets in responses (deviceId among them) are never sent back; a caller that needs a
+  // stable one passes it here.
+  const cookieSuffix = extraCookies ? `; ${extraCookies}` : ''
   return playwrightRequest.newContext({
     baseURL: apiBase,
     extraHTTPHeaders: {
       ...ACCESS_HEADERS,
       ...authHeaders(userId, role),
-      Cookie: `${ACCESS_TOKEN_COOKIE}=${mintAccessToken(userId, role)}; ${CSRF_COOKIE}=${csrf}`,
+      Cookie: `${ACCESS_TOKEN_COOKIE}=${mintAccessToken(userId, role)}; ${CSRF_COOKIE}=${csrf}${cookieSuffix}`,
       'X-CSRF-Token': csrf,
     },
   })

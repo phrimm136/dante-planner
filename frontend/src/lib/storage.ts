@@ -17,10 +17,10 @@ import { ok, err } from './result'
 import { PLANNER_STORAGE_KEYS } from './constants'
 import type { Result, Tagged } from './result'
 
-const DB_NAME = 'danteplanner'
+export const DB_NAME = 'danteplanner'
 /** Object store holding every persisted row; exported for direct cursor access. */
 export const STORAGE_STORE_NAME = 'planner'
-const DB_VERSION = 2
+export const DB_VERSION = 2
 
 /**
  * The v2 key a v1 planner key maps to, or null for a key that is not one.
