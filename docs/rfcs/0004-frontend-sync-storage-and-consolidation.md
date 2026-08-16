@@ -27,10 +27,11 @@ Refs: 071 @sync @identity, 071 @sync @digest, 071 @sync @adoption.
 
 ### Target design
 
-The client identifies a save by `syncVersion` alone. Content digests exist only server-side: the
-write path computes them and compares them at the conflict check (RFC 0003), so a stale-version
-write over byte-identical content is not a conflict — and no digest field crosses the wire in
-either direction. The client neither computes, stores, nor compares digests.
+The client identifies a save by `syncVersion` alone. No digest exists on either side: the server
+arbitrates a stale-version write by comparing the request against the stored row field by field,
+content as parsed JSON trees (RFC 0005), so a stale write that would change nothing is
+acknowledged rather than refused. No digest field crosses the wire in either direction, and the
+client neither computes, stores, nor compares digests.
 
 Version state inside `usePlannerSave` splits into a pure reader and a single writer replacing
 `adoptSyncVersion` (`hooks/usePlannerSave.ts:376-381`): the writer takes its version from the
@@ -79,13 +80,9 @@ export function categorizePlanner(
 }
 ```
 
-**Coexistence window.** The backend currently emits `contentDigest` on planner responses and
-summaries; the digest is being withdrawn from the wire entirely (server-side comparison only, RFC
-0003). Until the backend removes the field, the two `.strict()` schemas
-(`ServerPlannerSummarySchema` `schemas/PlannerSchemas.ts:611-628`, `ServerPlannerResponseSchema`
-`:572-605`) carry `contentDigest: z.string().optional()` as a tolerated, never-read field. Removing
-that line when the backend stops emitting the key is part of RFC 0003's wire cleanup, not a
-follow-up.
+The backend emits no `contentDigest`, and `ServerPlannerSummarySchema` and
+`ServerPlannerResponseSchema` declare no such key. Both are `.strict()`, so a response that still
+carried one would fail to parse rather than be tolerated.
 
 `runSync` fetches its pull residue in one call instead of a per-id loop:
 
@@ -115,9 +112,8 @@ must not issue a request at all.
 ### Ordered change list
 
 1. `types/PlannerTypes.ts` — add `ServerAck` (version only).
-2. `schemas/PlannerSchemas.ts` — the tolerated optional `contentDigest` on
-   `ServerPlannerResponseSchema` (`:572`) and `ServerPlannerSummarySchema` (`:611`) per the
-   coexistence window; new
+2. `schemas/PlannerSchemas.ts` — no `contentDigest` key on `ServerPlannerResponseSchema` or
+   `ServerPlannerSummarySchema`; new
    `ServerPlannerBatchResponseSchema = z.array(ServerPlannerResponseSchema)` — the endpoint answers
    a bare array, so an object wrapper would fail every parse.
 3. `hooks/usePlannerSyncAdapter.ts` — return the `ServerAck` alongside the `SaveablePlanner` from
@@ -1134,10 +1130,9 @@ Composition rules, in dependency order:
 **Inside the big-bang window** — these change a wire contract or an on-disk format and must land
 with their counterparts, in this order:
 
-1. Stream 1 with RFC 0003 stream 1. The `.strict()` schemas tolerate the transitional
-   `contentDigest` key as optional while the backend still emits it; the backend's wire cleanup
-   (withdrawing the field) and the batch endpoint are the coupled halves. The frontend must not
-   land its optional-field removal before the backend stops emitting the key.
+1. Stream 1 with RFC 0003 stream 1. The backend's wire cleanup (withdrawing `contentDigest`) and
+   the batch endpoint are the coupled halves; the `.strict()` schemas drop the key only after the
+   backend stops emitting it, which RFC 0005 sequenced as its two phases.
 2. Stream 2's `DB_VERSION` 2 migration. It is not reversible: a client that has upgraded and then
    loads an older bundle finds two-part keys under a v1 reader. A rollback of the frontend after
    this ships strands local planners.
@@ -1171,8 +1166,8 @@ rewrites under its own authorization. Behavior-preserving: no assertion may weak
 
 ## Acceptance checklist
 
-- [ ] The client presents and adopts `syncVersion` only; no digest is computed, stored, or
-      compared client-side, and the tolerated wire field is never read.
+- [x] The client presents and adopts `syncVersion` only; no digest is computed, stored, or
+      compared client-side, and no digest field is declared or received.
 - [ ] `presentedVersion` never decreases; `adoptAck` decreases it only at the two sites that adopt
       server content in the same step, and only after the local write is confirmed; the
       pre-force-push read is forward-only.
