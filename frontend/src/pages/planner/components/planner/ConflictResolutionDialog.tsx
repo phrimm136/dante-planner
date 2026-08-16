@@ -108,15 +108,6 @@ export function ConflictResolutionDialog({
           </div>
         )}
 
-        {conflictState?.serverVersion != null && (
-          <div className="flex justify-between py-2 text-sm">
-            <span className={SECTION_STYLES.TEXT.muted}>
-              {t('pages.plannerMD.conflict.serverVersion', 'Server version')}:
-            </span>
-            <span className="font-medium">{conflictState.serverVersion}</span>
-          </div>
-        )}
-
         <p className={SECTION_STYLES.TEXT.captionSmall}>
           {t('pages.plannerMD.conflict.keepBothUnpublished', 'The copy will not be published')}
         </p>
