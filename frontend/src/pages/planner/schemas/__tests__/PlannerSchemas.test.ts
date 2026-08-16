@@ -20,6 +20,7 @@ import {
   validateSaveablePlanner,
 } from '../PlannerSchemas'
 import { validateNoteSizes } from '../../lib/plannerValidation'
+import { isMDPlanner } from '../../types/PlannerTypes'
 import { MAX_NOTE_BYTES } from '@/lib/constants'
 
 // ============================================================================
@@ -246,6 +247,25 @@ describe('validateSaveablePlanner', () => {
       // Add required themePackId for save mode (all floor selections need it)
       const result = validateSaveablePlanner(planner, 'save')
       expect(result.config.type).toBe('MIRROR_DUNGEON')
+    })
+
+    it('accepts equipment whose ego slots cover only some tiers', () => {
+      const planner = createValidSaveablePlanner('MIRROR_DUNGEON')
+      planner.content = {
+        ...planner.content,
+        equipment: {
+          '1': {
+            identity: { id: '10101', uptie: 4, level: 45 },
+            egos: { ZAYIN: { id: '20101', threadspin: 2 } },
+          },
+        },
+      }
+
+      const result = validateSaveablePlanner(planner, 'draft')
+      assert(isMDPlanner(result))
+      expect(result.content.equipment['1']?.egos).toEqual({
+        ZAYIN: { id: '20101', threadspin: 2 },
+      })
     })
   })
 

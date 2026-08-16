@@ -118,7 +118,7 @@ const EquippedEGOSchema = z
 /**
  * EGO slots schema - Record keyed by EGO type (ZAYIN, TETH, etc.)
  */
-const EGOSlotsSchema = z.record(EgoTypeSchema, EquippedEGOSchema)
+const EGOSlotsSchema = z.partialRecord(EgoTypeSchema, EquippedEGOSchema)
 
 /**
  * Skill EA state schema - Record keyed by skill slot (0, 1, 2)
