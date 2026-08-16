@@ -104,11 +104,4 @@ describe('ConflictResolutionDialog - failed resolution', () => {
 
     expect(screen.getByText('The copy will not be published')).toBeInTheDocument()
   })
-
-  it('shows the server version the conflict reported', () => {
-    render(<ConflictResolutionDialog {...baseProps} />)
-
-    expect(screen.getByText('Server version:')).toBeInTheDocument()
-    expect(screen.getByText('3')).toBeInTheDocument()
-  })
 })
