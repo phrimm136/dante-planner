@@ -88,6 +88,12 @@ export function SyncChoiceDialog({ open, onChoice }: SyncChoiceDialogProps) {
                 'You can also export your planners from the Settings page to backup or transfer them.',
               )}
             </span>
+            <span className="block text-xs font-medium">
+              {t(
+                'settings.sync.choiceDialog.sharedDeviceWarning',
+                'Locally stored plans remain on this device and are visible to anyone who uses this browser, even after you sign out.',
+              )}
+            </span>
           </DialogDescription>
         </DialogHeader>
 
