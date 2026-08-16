@@ -351,6 +351,12 @@ public class PlannerCommandService {
             log.info("Planner {} exists for user {}, updating (force={})", id, userId, force);
             Planner planner = existingPlanner.get();
 
+            // Editing a published planner is public contribution, so the restriction gate sits
+            // before every other check: a restricted caller's stale write answers 403, never 409.
+            if (planner.isPublished()) {
+                accessGuard.checkNotRestricted(userId);
+            }
+
             CarriedWrite carried = CarriedWrite.builder()
                     .title(request.title())
                     .status(request.status())
