@@ -1,0 +1,9 @@
+# 085 device-stamp-in-noop-predicate
+epic: none · pr: none
+
+## Decisions
+- @sync @conflict @device — `EffectiveNoOpPredicate` compares `device_id` like every other field the write path stamps, so a stale resend of tree-identical content from a different device, or from a cookieless client, is a real conflict answered 409 rather than an ackable no-op. The biconditional invariant admits no exception: the predicate answers true exactly when applying the write would change no persisted field, and the upsert path stamps `device_id`, so excluding it would acknowledge a write whose application moves a column. REJECTED: an authored-vs-provenance carve-out, excluding server-resolved context fields such as the device cookie from the comparison alongside the always-mutating version, timestamp, and lock columns, so that cross-device identical resends ack — the state that would qualify needs content identical to a newer stored row while the presented version is stale, which the clean pull path never produces because a pull adopts version and content together; it buys a rare path at the price of the mechanical apply-and-diff form of the invariant and the gate that checks it.
+- @sync @conflict @device @retry — Same-device retries acknowledge, because the device cookie is stable across them at a 365-day max-age, while cross-device stale identical resends are refused and a cookieless caller is never acknowledged at all: `DeviceIdResolver` mints a fresh UUID per request, so every stale resend of such a caller moves the column. Corollary of comparing the device stamp; the arbitration integration test models same-device retries only.
+
+## Takeaway
+- takeaway: when an invariant reads "changes no persisted field", every field the write path touches is inside it — carving out the ones that feel incidental trades a mechanically checkable predicate for a standing judgment call about which columns count.
