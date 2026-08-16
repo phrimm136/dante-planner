@@ -115,11 +115,6 @@ class PlannerQueryServiceTest {
             }
 
             @Override
-            public byte[] getContentDigest() {
-                return new byte[32];
-            }
-
-            @Override
             public Instant getLastModifiedAt() {
                 return planner.getLastModifiedAt();
             }

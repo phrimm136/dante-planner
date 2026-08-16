@@ -123,14 +123,4 @@ class PlannerBatchPullIT extends SharedMySqlContainerSupport {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
     }
-
-    @Test
-    void batchPull_WhenPlannerIsOwned_CarriesTheContentDigest() throws Exception {
-        String json = pull(List.of(owned.getId()))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-
-        assertThat(objectMapper.readTree(json).get(0).get("contentDigest").asText())
-                .matches("[0-9a-f]{64}");
-    }
 }

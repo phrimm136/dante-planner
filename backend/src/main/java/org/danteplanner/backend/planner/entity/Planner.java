@@ -134,10 +134,6 @@ public class Planner implements Persistable<UUID> {
         return content.getContent();
     }
 
-    public String getContentDigestHex() {
-        return content.contentDigestHex();
-    }
-
     /**
      * The content document as it was read from storage, before any field this
      * transaction applied.

@@ -137,20 +137,10 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
                 .andReturn().getResponse().getContentAsString();
 
         assertThat(fieldNames(objectMapper.readTree(json))).containsExactlyInAnyOrder(
-                "id", "title", "category", "status", "content", "contentDigest",
+                "id", "title", "category", "status", "content",
                 "schemaVersion", "contentVersion", "plannerType", "syncVersion",
                 "deviceId", "createdAt", "lastModifiedAt", "savedAt",
                 "published", "upvotes");
-    }
-
-    @Test
-    void contentDigest_WhenOwnerDetail_IsSixtyFourLowercaseHexChars() throws Exception {
-        String json = performAuthed(mockMvc, get("/api/planner/md/{id}", published.getId()), token)
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-
-        assertThat(objectMapper.readTree(json).get("contentDigest").asText())
-                .matches("[0-9a-f]{64}");
     }
 
     @Test
@@ -171,8 +161,7 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
         JsonNode first = objectMapper.readTree(json).get("content").get(0);
         assertThat(fieldNames(first)).containsExactlyInAnyOrder(
                 "id", "title", "category", "plannerType", "status",
-                "syncVersion", "contentDigest", "lastModifiedAt");
-        assertThat(first.get("contentDigest").asText()).matches("[0-9a-f]{64}");
+                "syncVersion", "lastModifiedAt");
     }
 
     @Test

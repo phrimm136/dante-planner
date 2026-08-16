@@ -36,7 +36,7 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
      */
     @Query(value = "SELECT p.id AS id, c.title AS title, c.category AS category, "
             + "p.plannerType AS plannerType, c.status AS status, c.syncVersion AS syncVersion, "
-            + "c.contentDigest AS contentDigest, c.lastModifiedAt AS lastModifiedAt "
+            + "c.lastModifiedAt AS lastModifiedAt "
             + "FROM Planner p JOIN PlannerContent c ON c.plannerId = p.id "
             + "WHERE p.user.id = :userId AND c.deletedAt IS NULL "
             + "ORDER BY c.lastModifiedAt DESC",

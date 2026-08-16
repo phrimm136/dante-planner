@@ -22,7 +22,6 @@ public record PlannerResponse(
     String category,
     PlannerStatus status,
     String content,
-    String contentDigest,
     int schemaVersion,
     int contentVersion,
     PlannerType plannerType,
@@ -49,7 +48,6 @@ public record PlannerResponse(
                 .category(planner.getCategory())
                 .status(planner.getStatus())
                 .content(planner.getContentJson())
-                .contentDigest(planner.getContentDigestHex())
                 .schemaVersion(planner.getSchemaVersion())
                 .contentVersion(planner.getContentVersion())
                 .plannerType(planner.getPlannerType())

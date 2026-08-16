@@ -15,10 +15,10 @@
 --   - ENUM/JSON values must match the schema after all MERGED migrations
 --   - Every keyword and ENUM value should appear in at least one row
 --
--- Schema version: V059 (planner aggregate + projections; planners table gone;
+-- Schema version: V060 (planner aggregate + projections; planners table gone;
 --                       user_settings sync choice split into two non-null flags;
 --                       planner_views no longer foreign-keys the planner core;
---                       planner_content carries a NOT NULL content_digest;
+--                       planner_content no longer carries content_digest;
 --                       domain_events outbox)
 --
 -- Coverage:
@@ -30,9 +30,6 @@
 --   - EGO_GIFT ids: base (9xxx) and both enhanced encodings (19xxx, 29xxx),
 --     including a base/enhanced pair of one gift on the same planner
 --   - content: JSON with equipment, gifts, floorSelections structure
---   - content_digest: 32 bytes on every planner_content row; the values are
---     arbitrary, since the column holds the identity of the author's bytes and
---     the seed's stored JSON is not the form any author wrote
 --   - planner_catalog: visible rows only; one recommended (upvotes >= 10)
 --   - planner_views: several view_date values, and a row whose planner_id
 --     matches no planner row — legal since V057 dropped fk_view_planner
@@ -74,7 +71,7 @@ VALUES
 -- ============================================================================
 
 -- Planner 1: MD planner with status effects + attack types keywords
-INSERT IGNORE INTO planner_content (planner_id, title, status, category, selected_keywords, content, content_digest, content_schema_version, game_content_version, sync_version, row_lock_version, last_modified_at)
+INSERT IGNORE INTO planner_content (planner_id, title, status, category, selected_keywords, content, content_schema_version, game_content_version, sync_version, row_lock_version, last_modified_at)
 VALUES (
     UNHEX('AAAA0001000000000000000000000001'),
     'Seed MD Planner - Status Effects', 'saved', '5F',
@@ -98,12 +95,11 @@ VALUES (
             JSON_OBJECT('giftIds', JSON_ARRAY('29007'), 'themePackId', NULL)
         )
     ),
-    UNHEX(SHA2('seed-planner-1', 256)),
     1, 6, 1, 0, NOW(6)
 );
 
 -- Planner 2: RR planner with affinity keywords
-INSERT IGNORE INTO planner_content (planner_id, title, status, category, selected_keywords, content, content_digest, content_schema_version, game_content_version, sync_version, row_lock_version, last_modified_at)
+INSERT IGNORE INTO planner_content (planner_id, title, status, category, selected_keywords, content, content_schema_version, game_content_version, sync_version, row_lock_version, last_modified_at)
 VALUES (
     UNHEX('AAAA0002000000000000000000000002'),
     'Seed RR Planner - Affinities', 'saved', '10F',
@@ -120,12 +116,11 @@ VALUES (
         'comprehensiveGiftIds', JSON_ARRAY(),
         'floorSelections', JSON_ARRAY()
     ),
-    UNHEX(SHA2('seed-planner-2', 256)),
     1, 5, 1, 0, NOW(6)
 );
 
 -- Planner 3: MD planner with synergy keywords (includes EmergencyChargeForceField)
-INSERT IGNORE INTO planner_content (planner_id, title, status, category, selected_keywords, content, content_digest, content_schema_version, game_content_version, sync_version, row_lock_version, last_modified_at)
+INSERT IGNORE INTO planner_content (planner_id, title, status, category, selected_keywords, content, content_schema_version, game_content_version, sync_version, row_lock_version, last_modified_at)
 VALUES (
     UNHEX('AAAA0003000000000000000000000003'),
     'Seed MD Planner - Synergy Keywords', 'saved', '15F',
@@ -142,18 +137,16 @@ VALUES (
         'comprehensiveGiftIds', JSON_ARRAY(),
         'floorSelections', JSON_ARRAY()
     ),
-    UNHEX(SHA2('seed-planner-3', 256)),
     1, 6, 1, 0, NOW(6)
 );
 
 -- Planner 4: draft planner with remaining keywords (9154)
-INSERT IGNORE INTO planner_content (planner_id, title, status, category, selected_keywords, content, content_digest, content_schema_version, game_content_version, sync_version, row_lock_version, last_modified_at)
+INSERT IGNORE INTO planner_content (planner_id, title, status, category, selected_keywords, content, content_schema_version, game_content_version, sync_version, row_lock_version, last_modified_at)
 VALUES (
     UNHEX('AAAA0004000000000000000000000004'),
     'Seed Draft Planner', 'draft', '5F',
     '["9154"]',
     JSON_OBJECT('equipment', JSON_OBJECT(), 'selectedGiftIds', JSON_ARRAY(), 'observationGiftIds', JSON_ARRAY(), 'comprehensiveGiftIds', JSON_ARRAY(), 'floorSelections', JSON_ARRAY()),
-    UNHEX(SHA2('seed-planner-4', 256)),
     1, 6, 1, 0, NOW(6)
 );
 
