@@ -15,9 +15,9 @@
     "fmt": "oxfmt src",
     "fmt:check": "oxfmt --check src",
     "preview": "vite preview",
-    "test": "vitest",
+    "test": "NODE_OPTIONS=--max-old-space-size=4096 vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage",
+    "test:coverage": "NODE_OPTIONS=--max-old-space-size=4096 vitest run --coverage",
     "test:watch": "vitest watch"
   },
   "resolutions": {
