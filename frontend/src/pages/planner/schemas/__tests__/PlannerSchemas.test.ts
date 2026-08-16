@@ -13,6 +13,10 @@ import {
   RRConfigSchema,
   PlannerConfigDiscriminatedSchema,
   SaveablePlannerSchema,
+  ServerPlannerBatchResponseSchema,
+  ServerPlannerResponseSchema,
+  ServerPlannerSummaryPageSchema,
+  ServerPlannerSummarySchema,
   validateSaveablePlanner,
 } from '../PlannerSchemas'
 import { validateNoteSizes } from '../../lib/plannerValidation'
@@ -383,5 +387,94 @@ describe('import path: oversized note tolerated by storage, gated at save', () =
       key: 'pages.plannerMD.validation.noteTooLarge',
       params: { section: 'intro', limit: String(MAX_NOTE_BYTES) },
     })
+  })
+})
+
+// ============================================================================
+// frontend-schemas-parse-digestless-responses
+// ============================================================================
+//
+// The server sends no contentDigest and the client declares none. Because the
+// response schemas are `.strict()`, the absence is enforced in both directions:
+// a digestless payload parses, and a payload still carrying the key is
+// rejected rather than tolerated.
+
+describe('frontend-schemas-parse-digestless-responses', () => {
+  const PLANNER_ID = '550e8400-e29b-41d4-a716-446655440000'
+
+  /** A planner read/write response exactly as the digestless backend sends it. */
+  function digestlessResponse() {
+    return {
+      id: PLANNER_ID,
+      title: 'Test Planner',
+      category: '5F',
+      status: 'saved',
+      content: '{}',
+      schemaVersion: 2,
+      contentVersion: 6,
+      plannerType: 'MIRROR_DUNGEON',
+      syncVersion: 1,
+      published: false,
+      createdAt: '2026-01-01T00:00:00.000Z',
+      lastModifiedAt: '2026-01-01T00:00:00.000Z',
+    }
+  }
+
+  /** A planner summary row as the digestless backend sends it. */
+  function digestlessSummary() {
+    return {
+      id: PLANNER_ID,
+      title: 'Test Planner',
+      category: '5F',
+      plannerType: 'MIRROR_DUNGEON',
+      status: 'saved',
+      syncVersion: 1,
+      lastModifiedAt: '2026-01-01T00:00:00.000Z',
+    }
+  }
+
+  function summaryPage() {
+    return {
+      content: [digestlessSummary()],
+      page: { size: 100, number: 0, totalElements: 1, totalPages: 1 },
+    }
+  }
+
+  it('parses a digestless read response', () => {
+    expect(ServerPlannerResponseSchema.safeParse(digestlessResponse()).success).toBe(true)
+  })
+
+  it('parses a digestless write response', () => {
+    // The upsert (write) path validates against the same response schema, so a
+    // write acknowledgement carries a syncVersion and nothing identifying beyond it.
+    const acknowledgement = { ...digestlessResponse(), syncVersion: 7 }
+
+    const parsed = ServerPlannerResponseSchema.parse(acknowledgement)
+
+    expect(parsed.syncVersion).toBe(7)
+    expect(parsed).not.toHaveProperty('contentDigest')
+  })
+
+  it('parses a digestless summary response', () => {
+    expect(ServerPlannerSummarySchema.safeParse(digestlessSummary()).success).toBe(true)
+    expect(ServerPlannerSummaryPageSchema.safeParse(summaryPage()).success).toBe(true)
+  })
+
+  it('parses a digestless batch response', () => {
+    const batch = [digestlessResponse(), { ...digestlessResponse(), syncVersion: 3 }]
+
+    expect(ServerPlannerBatchResponseSchema.safeParse(batch).success).toBe(true)
+  })
+
+  it('rejects a response that still carries contentDigest', () => {
+    const withDigest = { ...digestlessResponse(), contentDigest: 'ab'.repeat(32) }
+
+    expect(ServerPlannerResponseSchema.safeParse(withDigest).success).toBe(false)
+  })
+
+  it('rejects a summary that still carries contentDigest', () => {
+    const withDigest = { ...digestlessSummary(), contentDigest: 'ab'.repeat(32) }
+
+    expect(ServerPlannerSummarySchema.safeParse(withDigest).success).toBe(false)
   })
 })

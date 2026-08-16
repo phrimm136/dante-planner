@@ -11,8 +11,7 @@ import { plannerApi } from '../plannerApi'
 import type { ServerPlannerResponse } from '../../types/PlannerTypes'
 
 /**
- * A response row that satisfies ServerPlannerResponseSchema. It carries the
- * backend's contentDigest, which the client tolerates and never reads.
+ * A response row that satisfies ServerPlannerResponseSchema.
  */
 function responseFor(id: string) {
   return {
@@ -21,7 +20,6 @@ function responseFor(id: string) {
     category: '5F',
     status: 'saved',
     content: '{}',
-    contentDigest: 'ab'.repeat(32),
     schemaVersion: 2,
     contentVersion: 6,
     plannerType: 'MIRROR_DUNGEON',

@@ -25,12 +25,6 @@ import type {
 import { EgoTypeSchema } from '@/shared/gameData'
 
 /**
- * Declared only because the response schemas are `.strict()`: the server sends
- * this key and nothing here reads it. It goes when the server stops sending it.
- */
-const ToleratedContentDigestSchema = z.string().optional()
-
-/**
  * Planner Schemas
  *
  * Zod schemas for runtime validation of planner data structures.
@@ -556,8 +550,6 @@ export const ServerPlannerResponseSchema = z
     status: PlannerStatusSchema,
     /** Planner content as JSON string */
     content: z.string(),
-    /** Unread here; declared so `.strict()` accepts what the server sends */
-    contentDigest: ToleratedContentDigestSchema,
     /** Schema version for data format migration support */
     schemaVersion: z.number().int().positive(),
     /** Game content version (e.g., 6 for MD6, 5 for RR5) */
@@ -599,8 +591,6 @@ export const ServerPlannerSummarySchema = z
     status: PlannerStatusSchema,
     /** Server sync version for optimistic locking */
     syncVersion: z.number().int().positive(),
-    /** Unread here; declared so `.strict()` accepts what the server sends */
-    contentDigest: ToleratedContentDigestSchema,
     /** ISO 8601 timestamp when planner was last modified */
     lastModifiedAt: z.string(),
   })
