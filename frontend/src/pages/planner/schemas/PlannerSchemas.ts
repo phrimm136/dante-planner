@@ -188,37 +188,54 @@ export const SerializableNoteContentSchema = z
 export const PlannerTypeSchema = z.enum(PLANNER_TYPES)
 
 /**
+ * Metadata keys written by earlier app versions that still sit in persisted
+ * planners and old export files. Dropped before the strict gate so legacy rows
+ * load while unknown keys keep failing.
+ */
+const LEGACY_METADATA_KEYS = ['userId'] as const
+
+function dropLegacyMetadataKeys(value: unknown): unknown {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return value
+  const cleaned = { ...(value as Record<string, unknown>) }
+  for (const key of LEGACY_METADATA_KEYS) delete cleaned[key]
+  return cleaned
+}
+
+/**
  * Planner metadata schema
  * Contains tracking and identification data
  */
-export const PlannerMetadataSchema = z
-  .object({
-    /** Unique identifier (UUID v4) */
-    id: z.string().uuid(),
-    /** Planner title (identification, not game state) */
-    title: z.string(),
-    /** Current save status */
-    status: PlannerStatusSchema,
-    /** Schema version for data format migration support (1, 2, ...) */
-    schemaVersion: z.number().int().positive(),
-    /** Game content version (e.g., 6 for MD6, 5 for RR5) */
-    contentVersion: z.number().int().positive(),
-    /** Type of planner (MIRROR_DUNGEON, REFRACTED_RAILWAY) */
-    plannerType: PlannerTypeSchema,
-    /** Server sync version for optimistic locking (starts at 1) */
-    syncVersion: z.number().int().positive().default(INITIAL_SYNC_VERSION),
-    /** ISO 8601 timestamp when planner was first created */
-    createdAt: z.string().datetime(),
-    /** ISO 8601 timestamp when planner was last modified */
-    lastModifiedAt: z.string().datetime(),
-    /** ISO 8601 timestamp when planner was explicitly saved */
-    savedAt: z.string().datetime().nullable(),
-    /** Device identifier for local storage namespacing */
-    deviceId: z.string(),
-    /** Whether planner is published to Gesellschaft */
-    published: z.boolean().optional(),
-  })
-  .strict()
+export const PlannerMetadataSchema = z.preprocess(
+  dropLegacyMetadataKeys,
+  z
+    .object({
+      /** Unique identifier (UUID v4) */
+      id: z.string().uuid(),
+      /** Planner title (identification, not game state) */
+      title: z.string(),
+      /** Current save status */
+      status: PlannerStatusSchema,
+      /** Schema version for data format migration support (1, 2, ...) */
+      schemaVersion: z.number().int().positive(),
+      /** Game content version (e.g., 6 for MD6, 5 for RR5) */
+      contentVersion: z.number().int().positive(),
+      /** Type of planner (MIRROR_DUNGEON, REFRACTED_RAILWAY) */
+      plannerType: PlannerTypeSchema,
+      /** Server sync version for optimistic locking (starts at 1) */
+      syncVersion: z.number().int().positive().default(INITIAL_SYNC_VERSION),
+      /** ISO 8601 timestamp when planner was first created */
+      createdAt: z.string().datetime(),
+      /** ISO 8601 timestamp when planner was last modified */
+      lastModifiedAt: z.string().datetime(),
+      /** ISO 8601 timestamp when planner was explicitly saved */
+      savedAt: z.string().datetime().nullable(),
+      /** Device identifier for local storage namespacing */
+      deviceId: z.string(),
+      /** Whether planner is published to Gesellschaft */
+      published: z.boolean().optional(),
+    })
+    .strict(),
+)
 
 // ============================================================================
 // Config Schemas (Discriminated Union)

@@ -235,6 +235,20 @@ describe('readImportEnvelope', () => {
     expect(result.value.planners[0]?.metadata.title).toBe('Imported plan')
   })
 
+  it('accepts a pre-userId-removal export and strips the legacy key', () => {
+    const legacyItem = {
+      ...EXPORT_ITEM,
+      metadata: { ...EXPORT_ITEM.metadata, userId: 42 },
+    }
+
+    const result = readImportEnvelope(envelope([legacyItem]))
+
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.value.planners[0]?.metadata).not.toHaveProperty('userId')
+    expect(result.value.planners[0]?.metadata.id).toBe(VALID_UUID)
+  })
+
   it('rejects a payload that does not match the envelope shape', () => {
     expect(expectErr(readImportEnvelope({ planners: 'nope' }))).toEqual({
       kind: 'invalidFileFormat',

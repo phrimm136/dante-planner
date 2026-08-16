@@ -294,6 +294,22 @@ describe('validateSaveablePlanner', () => {
   })
 
   describe('metadata validation', () => {
+    it('strips the legacy userId key persisted by pre-removal app versions', () => {
+      const planner = createValidSaveablePlanner('MIRROR_DUNGEON')
+      const stored = { ...planner, metadata: { ...planner.metadata, userId: 42 } }
+
+      const result = validateSaveablePlanner(stored, 'draft')
+      expect(result.metadata).not.toHaveProperty('userId')
+      expect(result.metadata.id).toBe(planner.metadata.id)
+    })
+
+    it('still rejects an unknown non-legacy metadata key', () => {
+      const planner = createValidSaveablePlanner('MIRROR_DUNGEON')
+      const stored = { ...planner, metadata: { ...planner.metadata, driftKey: true } }
+
+      expect(() => validateSaveablePlanner(stored, 'draft')).toThrow(ZodError)
+    })
+
     it('rejects invalid UUID in metadata.id', () => {
       const planner = createValidSaveablePlanner('MIRROR_DUNGEON')
       planner.metadata.id = 'not-a-uuid'
