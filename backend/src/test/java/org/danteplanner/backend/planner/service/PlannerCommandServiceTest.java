@@ -7,11 +7,13 @@ import org.danteplanner.backend.planner.dto.ImportPlannersResponse;
 import org.danteplanner.backend.planner.dto.ImportPlannersRequest;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.planner.dto.PlannerSummaryResponse;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.validation.PlannerCategoryValidator;
 import org.danteplanner.backend.planner.validation.PlannerLimitValidator;
 import org.danteplanner.backend.planner.validation.PlannerOwnershipValidator;
+import org.danteplanner.backend.planner.validation.EffectiveNoOpPredicate;
 import org.danteplanner.backend.planner.validation.SyncVersionValidator;
 import org.danteplanner.backend.planner.entity.PlannerContent;
 import org.danteplanner.backend.planner.entity.PlannerContentLifecycle;
@@ -111,7 +113,7 @@ class PlannerCommandServiceTest {
                 new PlannerCategoryValidator(),
                 new PlannerLimitValidator(),
                 new PlannerOwnershipValidator(),
-                new SyncVersionValidator(),
+                new SyncVersionValidator(new EffectiveNoOpPredicate(new ObjectMapper())),
                 maxPlannersPerUser,
                 currentSchemaVersion
         );

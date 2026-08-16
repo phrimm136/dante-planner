@@ -24,6 +24,7 @@ import org.danteplanner.backend.planner.exception.PlannerLimitExceededException;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
+import org.danteplanner.backend.planner.validation.CarriedWrite;
 import org.danteplanner.backend.planner.validation.ContentVersionValidator;
 import org.danteplanner.backend.planner.validation.PlannerCategoryValidator;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
@@ -31,6 +32,7 @@ import org.danteplanner.backend.planner.validation.PlannerLimitValidator;
 import org.danteplanner.backend.planner.validation.PlannerOwnershipValidator;
 import org.danteplanner.backend.planner.validation.SyncVersionValidator;
 import org.danteplanner.backend.planner.validation.ValidationPolicy;
+import org.danteplanner.backend.planner.validation.WriteArbitration;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
 import org.springframework.stereotype.Service;
@@ -349,7 +351,26 @@ public class PlannerCommandService {
             log.info("Planner {} exists for user {}, updating (force={})", id, userId, force);
             Planner planner = existingPlanner.get();
 
-            syncVersionValidator.requireSyncVersionMatch(force, request.syncVersion(), planner.getSyncVersion());
+            CarriedWrite carried = CarriedWrite.builder()
+                    .title(request.title())
+                    .status(request.status())
+                    .category(request.category())
+                    .content(request.content())
+                    .gameContentVersion(request.contentVersion())
+                    .contentSchemaVersion(currentSchemaVersion)
+                    .selectedKeywords(request.selectedKeywords())
+                    .deviceId(deviceId)
+                    .build();
+
+            WriteArbitration arbitration = syncVersionValidator.arbitrate(
+                    force, request.syncVersion(), planner.getSyncVersion(), planner.getContent(), carried);
+            if (arbitration == WriteArbitration.ACK_NO_OP) {
+                log.info("Upsert of planner {} would move no field, acknowledging syncVersion {} without a write",
+                        id, planner.getSyncVersion());
+                PlannerResponse acknowledged =
+                        PlannerResponse.fromEntity(planner, statsRepository.upvotesOf(id));
+                return new UpsertedPlanner(planner, acknowledged, false);
+            }
 
             applyUpsertFields(planner, request, deviceId);
 
@@ -399,7 +420,22 @@ public class PlannerCommandService {
         // Check if user has any restrictions
         Planner planner = accessGuard.findPlannerOrThrow(userId, id);
 
-        syncVersionValidator.requireSyncVersionMatch(force, request.syncVersion(), planner.getSyncVersion());
+        CarriedWrite carried = CarriedWrite.builder()
+                .title(request.title())
+                .status(request.status())
+                .category(request.category())
+                .content(request.content())
+                .selectedKeywords(request.selectedKeywords())
+                .deviceId(deviceId)
+                .build();
+
+        WriteArbitration arbitration = syncVersionValidator.arbitrate(
+                force, request.syncVersion(), planner.getSyncVersion(), planner.getContent(), carried);
+        if (arbitration == WriteArbitration.ACK_NO_OP) {
+            log.info("Update of planner {} would move no field, acknowledging syncVersion {} without a write",
+                    id, planner.getSyncVersion());
+            return PlannerResponse.fromEntity(planner, statsRepository.upvotesOf(id));
+        }
 
         applyUpdateFields(planner, request, deviceId);
 
