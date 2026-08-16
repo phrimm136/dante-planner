@@ -68,12 +68,6 @@ asset pipeline.
   the FE extension set) → smoke-check converted-comment render and new-comment
   round-trip → reopen. Rehearse the entire window first on a prod dump restored
   locally: Flyway train plus converter against real data.
-- RESOLVED 2026-08-12 — `DegradationIT` F2 (rate-limit Redis cut → 503) order-dependence
-  was not leaked sibling state: bucket4j's `withRequestTimeout` and Lettuce's command
-  timeout shared the same 3s constant, so every rate-limit stall raced two equal timers
-  and the exception type depended on the winner (`RedisException` → typed 503,
-  `io.github.bucket4j.TimeoutException` → catch-all 500); sibling tests merely biased
-  the race. Fixed by mapping bucket4j's `TimeoutException` in the same handler.
 - `DegradationIT.evictPooledPrimaryConnections` still cannot evict the primary pool: the
   routing target for PRIMARY is the `GtidCapturingDataSource` wrapper, not a
   `HikariDataSource`, so the helper's instanceof walk skips it. Replica and bulkhead are
@@ -97,23 +91,6 @@ asset pipeline.
 - No CI lane asserts query shape: statement-count and EXPLAIN access-path checks against
   seeded, ANALYZE'd data exist only as measurement-form prose in the portfolio catalog. A
   regression in pagination depth cost or FULLTEXT access path ships silently today.
-- The full vitest suite (~7600 tests) now trips the per-worker heap cap on most runs
-  (`ERR_WORKER_OUT_OF_MEMORY`, one worker, cumulative heap — no single hot file; the run
-  is green under `--logHeapUsage`, whose forced per-file GC masks it). Needs a worker
-  memory/pool tuning pass in `vitest.config`, not a test fix.
-- RESOLVED 2026-08-13 — e2e oauth-journey vs the id_token verifier: the stub minted an
-  `alg:none` id_token the post-853e1211 `GoogleIdTokenVerifier` rejects at decode, and
-  nothing pointed `GOOGLE_OAUTH_JWKS_URI` at the stub. Fixed by signing the stub's
-  id_token RS256 with the e2e test RSA key, serving a `/jwks` route, and wiring
-  `GOOGLE_OAUTH_JWKS_URI`/`GOOGLE_OAUTH_ISSUER` in both stub-facing compose files.
-- RESOLVED 2026-08-13 — the publish/unpublish gesture specs failed on two stacked
-  defects. Real bug: `useAppSse.applyPlannerUpsert` wrote the server's flat SSE planner
-  payload into `plannerQueryKeys.detail(id)`, whose consumers expect a nested
-  SaveablePlanner — any save's SSE echo shape-corrupted the open detail page and the
-  next render crashed into the error boundary (`isMDPlanner` reading `.config` of a flat
-  row). Fixed by invalidate-never-patch, per the ruled sync-stream direction. Masked
-  underneath: the specs expected the pre-intent-endpoint contract (`PUT /{id}/publish`
-  with a body) while the API is body-less `POST /{id}/publish|unpublish`; specs updated.
 - `local-multiregion-up.sh` step 5 verifies replication with a fixed `sleep 4`, which is
   too short under load (transient "did not start" failures on a busy box) — replace with
   a bounded poll of `Replica_SQL_Running`. Step 2's flyway grep was fixed 2026-08-13 to
@@ -478,9 +455,74 @@ asset pipeline.
   version N and the acknowledgement returns N+k with content unchanged. Ack adoption is covered
   only by the generic version-jump tests in `usePlannerSave.test.ts`, which do not distinguish an
   ack won by no-op arbitration from an ordinary forward version bump.
-- 2026-08-16 — Six e2e app-suite specs (`mutation-gestures`, `note-save-gesture`) fail on the
-  local rig: the planner page's IndexedDB open in `frontend/src/lib/storage.ts` dies with
-  "upgrade blocked by another tab", so owner controls never render and every assertion that
-  depends on them fails. The cause is upstream of the arbitration work — the failing page makes
-  no planner network call before it dies, and the storage path is untouched by it — and traces
-  to the device-free-key migration.
+- 2026-08-16 — Comment content is HTML at rest by frontend convention alone: `CommentEditor`
+  submits `editor.getHTML()` into `planner_comments.content` (`TEXT`, V015), and the backend
+  acknowledges the format at exactly one site — `Notification`'s
+  `truncate(stripHtml(...), 100)` snippet. Notes carry the opposite guarantee
+  (`planner_content.content` is a MySQL `JSON` column, format DB-enforced since the first
+  save), so the asymmetry is comment-only. Moving comments to tiptap-JSON-at-rest is
+  therefore a real migration, not a flag flip: a `TEXT` column with no DB-side validation,
+  no server-side HTML parser to convert with (an offline pass would need one; the
+  alternative is lazy migrate-on-write through tiptap's polymorphic `setContent`), and
+  coordinated changes to `CommentCard`'s sanitize-and-inject render, the `sanitizeUserHtml`
+  allowlist, and `stripHtml`. No current requirement forces the move; this entry prices the
+  coupling so a future format change is proposed as the project it is.
+- 2026-08-16 — Every compose flavor (default+override, oauth-gtid, multiregion, e2e, loadtest)
+  runs under the same default project name, so they all mount the one
+  `limbusplanner_mysql-data` volume. MySQL applies env credentials only on first init of an
+  empty datadir, so switching flavors leaves the datadir on the previous stack's passwords
+  and the backend fails at Flyway with error 1045. Found work: isolate the flavors — a
+  distinct volume name or an explicit `name:`/`COMPOSE_PROJECT_NAME` per flavor — so a stack
+  switch cannot poison dev credentials.
+- 2026-08-16 — Dead client surface found by coverage audit: `plannerApi.import` (no call
+  site), the `settings:invalidated` SSE event constant (declared in `lib/constants/api.ts`,
+  no registered handler), `usePlannerStorage.clearCorruptedLocal` (no consumer), and the
+  `my-plans` branch of `PlannerCardContextMenu` (never mounted).
+- 2026-08-16 — The pull pass counts purges it did not verify (`purgeLocalPlanners` discards
+  `deleteLocal`'s Result) and a failed background sync marks the session synced with no
+  retry and no indicator (`hasSyncedRef` set on error; the `isSyncing` consumer is a TODO in
+  `PersonalPlannerList.tsx`).
+- 2026-08-16 — Trailing keystrokes typed just before a client-side navigation out of the
+  editor are lost nondeterministically (reproduced ~25% on the rig): the note editor's
+  commit to the store and the unmount flush race, the internal-nav path has no guard (only
+  `beforeunload` drains editors, and it covers hard navigation alone), and `reportLostFlush`
+  surfaces the loss to the console only. A deterministic e2e spec for the unmount flush is
+  not writable until the editor commit is synchronous on unmount or a router blocker drains
+  it; a flaky attempt was written and deliberately removed.
+- 2026-08-16 — IndexedDB planner rows carry no account identity, and the tombstone-only purge
+  (ADR 088) removed the accidental cleanup the old absence heuristic performed: on a shared
+  device, account B's list renders account A's rows indefinitely, and B's pull pass will
+  never remove them (their ids are absent from B's listing, which now means keep). Scoping
+  local rows by account — or clearing on identity change — is a design decision the sync
+  model has never made; until it is, "My Plans" on a shared device is a union of every
+  account's local saves. Argued 2026-08-16 and deferred by ruling: the sync-choice dialog
+  now carries a shared-device warning as the standing mitigation. The argued-to shape when
+  this resumes: stamp rows with the syncing account at pull/ack time (field name must avoid
+  `userId`, which the legacy-key tolerance drops on read), filter "My Plans" to
+  current-account plus unstamped rows, keep-and-hide on identity change, adoption only
+  through the account's own saves; namespaces (blocks cross-account sharing and the guest
+  upgrade) and a per-plan adoption dialog (adoption-by-copy duplicates plans in the
+  logged-out view) were both killed in the debate, and unstamped-row visibility is the one
+  open sub-question.
+- 2026-08-16 — `stack:down` composes only the base file set, so after `stack:up:rig` it
+  orphans four running services (`backend-oregon`, `mysql-replica`, `oauth-stub`,
+  `toxiproxy`) — verified live by diffing `config --services` against running containers.
+  Add a `stack:down:rig` mirroring the rig's file set, or `--remove-orphans` to
+  `stack:down`.
+- 2026-08-16 — Every planner update response serializes `lastModifiedAt` before `@PreUpdate`
+  stamps it at flush, so the wire value undersells the stored one by the flush skew (~50ms
+  observed) and the client adopts the stale value into IndexedDB. Harmless today (nothing
+  compares the two), but any future logic trusting response `lastModifiedAt` against a read
+  inherits a guaranteed mismatch; `noop-arbitration.contract.spec.ts` documents the shape by
+  asserting on reads instead.
+- 2026-08-16 — The unread badge can stay wrong for five minutes after a real-time push,
+  reproduced on the rig: `notify:comment` invalidates and the refetch races replication (the
+  notification row committed on the primary ~40ms earlier, the Seoul replica answered
+  `{"unreadCount":0}`), the answer marks the query fresh, and `useUnreadCountQuery`'s
+  `staleTime: STALE_TIME.MEDIUM` (5 min — the constant's own comment files notification
+  inbox under SHORT) blocks every focus heal for the window. No ryw_gtid protects the read:
+  the write was server-side, so the client never held a cookie for it. Candidate fixes are a
+  design choice (carry state in the push against the SSE-invalidates-only convention, pin
+  notification reads to the primary, or shorten the staleTime and accept the focus heal);
+  `notification-push.spec.ts` asserts the push-driven refetch and the fresh-mount render, and
+  should grow the push-then-badge assertion once this is decided.
