@@ -4,14 +4,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
 import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
-import {
-  DUNGEON_IDX,
-  DIFFICULTY_COLORS,
-  DIFFICULTY_LABELS,
-  type DungeonIdx,
-  type MDCategory,
-} from '@/shared/gameData'
-import { CARD_GRID } from '@/lib/constants'
+import { DUNGEON_IDX, DIFFICULTY_LABELS, type DungeonIdx, type MDCategory } from '@/shared/gameData'
+import { CARD_GRID, DIFFICULTY_COLORS } from '@/lib/constants'
 import { ThemePackViewer } from './ThemePackViewer'
 import type { ThemePackListType, ThemePackEntry } from '@/pages/themePack'
 
@@ -21,7 +15,7 @@ interface ThemePackSelectorPaneProps {
   floorNumber: number // 1-indexed floor (1-15)
   previousFloorDifficulty: DungeonIdx | null // null for floor 1
   themePackList: ThemePackListType
-  themePackI18n: Record<string, { name: string; specialName?: string }>
+  themePackI18n: Record<string, { name: string; specialName?: string | undefined }>
   onSelect: (packId: string, difficulty: DungeonIdx) => void
   /** Set of theme pack IDs already used on other floors (to prevent duplicates) */
   usedThemePackIds: Set<string>
@@ -41,26 +35,22 @@ function getAvailableDifficulties(
   floorNumber: number,
   previousFloorDifficulty: DungeonIdx | null,
   category: MDCategory,
-): DungeonIdx[] {
+): [DungeonIdx, ...DungeonIdx[]] {
   // Floor 11-15: Extreme only
   if (floorNumber >= 11) {
     return [DUNGEON_IDX.EXTREME]
   }
-
-  const available: DungeonIdx[] = []
 
   // Normal available for:
   // - 1F with 5F category (N/H mode allows Normal start)
   // - Any floor if previous floor was Normal
   const isFirstFloorWithNormalAllowed = floorNumber === 1 && category === '5F'
   if (isFirstFloorWithNormalAllowed || previousFloorDifficulty === DUNGEON_IDX.NORMAL) {
-    available.push(DUNGEON_IDX.NORMAL)
+    return [DUNGEON_IDX.NORMAL, DUNGEON_IDX.HARD]
   }
 
   // Hard always available for floors 1-10
-  available.push(DUNGEON_IDX.HARD)
-
-  return available
+  return [DUNGEON_IDX.HARD]
 }
 
 /**
@@ -131,13 +121,6 @@ export function ThemePackSelectorPane({
 
   const [selectedDifficulty, setSelectedDifficulty] = useState<DungeonIdx>(availableDifficulties[0])
 
-  const filteredPacks = filterThemePacks(
-    themePackList,
-    floorNumber,
-    selectedDifficulty,
-    usedThemePackIds,
-  )
-
   const handlePackSelect = (packId: string) => {
     startTransition(() => {
       onSelect(packId, selectedDifficulty)
@@ -158,7 +141,7 @@ export function ThemePackSelectorPane({
     }
   }
 
-  const getDifficultyColor = (idx: DungeonIdx): string => {
+  const getDifficultyColor = (idx: DungeonIdx): string | undefined => {
     switch (idx) {
       case DUNGEON_IDX.NORMAL:
         return DIFFICULTY_COLORS[DIFFICULTY_LABELS.NORMAL]
@@ -205,50 +188,54 @@ export function ThemePackSelectorPane({
             ))}
           </TabsList>
 
-          {availableDifficulties.map((diff) => (
-            <TabsContent
-              key={diff}
-              value={String(diff)}
-              className="mt-4 flex-1 overflow-x-hidden overflow-y-auto"
-            >
-              {filteredPacks.length === 0 ? (
-                <div className="flex items-center justify-center h-32 text-muted-foreground">
-                  {t('pages.plannerMD.noThemePacksAvailable')}
-                </div>
-              ) : (
-                <ResponsiveCardGrid
-                  cardWidth={CARD_GRID.WIDTH.THEME_PACK}
-                  cardHeight={CARD_GRID.HEIGHT.THEME_PACK}
-                  mobileScale={0.6}
-                >
-                  {filteredPacks.map(({ id, entry }) => {
-                    const i18nData = themePackI18n[id]
-                    const name = i18nData?.name || `Pack ${id}`
+          {availableDifficulties.map((diff) => {
+            const packs = filterThemePacks(themePackList, floorNumber, diff, usedThemePackIds)
 
-                    return (
-                      <ScaledCardWrapper
-                        key={id}
-                        cardWidth={CARD_GRID.WIDTH.THEME_PACK}
-                        cardHeight={CARD_GRID.HEIGHT.THEME_PACK}
-                        mobileScale={0.6}
-                      >
-                        <ThemePackViewer
-                          packId={id}
-                          packEntry={entry}
-                          packName={name}
-                          specialName={i18nData?.specialName}
-                          onClick={() => {
-                            handlePackSelect(id)
-                          }}
-                          enableHoverHighlight
-                        />
-                      </ScaledCardWrapper>
-                    )
-                  })}
-                </ResponsiveCardGrid>
-              )}
-            </TabsContent>
-          ))}
+            return (
+              <TabsContent
+                key={diff}
+                value={String(diff)}
+                className="mt-4 flex-1 overflow-x-hidden overflow-y-auto"
+              >
+                {packs.length === 0 ? (
+                  <div className="flex items-center justify-center h-32 text-muted-foreground">
+                    {t('pages.plannerMD.noThemePacksAvailable')}
+                  </div>
+                ) : (
+                  <ResponsiveCardGrid
+                    cardWidth={CARD_GRID.WIDTH.THEME_PACK}
+                    cardHeight={CARD_GRID.HEIGHT.THEME_PACK}
+                    mobileScale={0.6}
+                  >
+                    {packs.map(({ id, entry }) => {
+                      const i18nData = themePackI18n[id]
+                      const name = i18nData?.name || `Pack ${id}`
+
+                      return (
+                        <ScaledCardWrapper
+                          key={id}
+                          cardWidth={CARD_GRID.WIDTH.THEME_PACK}
+                          cardHeight={CARD_GRID.HEIGHT.THEME_PACK}
+                          mobileScale={0.6}
+                        >
+                          <ThemePackViewer
+                            packId={id}
+                            packEntry={entry}
+                            packName={name}
+                            specialName={i18nData?.specialName}
+                            onClick={() => {
+                              handlePackSelect(id)
+                            }}
+                            enableHoverHighlight
+                          />
+                        </ScaledCardWrapper>
+                      )
+                    })}
+                  </ResponsiveCardGrid>
+                )}
+              </TabsContent>
+            )
+          })}
         </Tabs>
       </DialogContent>
     </Dialog>

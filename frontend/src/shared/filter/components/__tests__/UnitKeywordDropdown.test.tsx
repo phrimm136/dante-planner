@@ -26,10 +26,14 @@ vi.mock('@/shared/filter/hooks/useFilterI18nData', () => ({
 
 // Sorted by label to match SearchableMultiSelect's localeCompare sort
 const sorted = [...ASSOCIATIONS].sort((a, b) => `Label_${a}`.localeCompare(`Label_${b}`))
+const [firstAssoc, secondAssoc] = sorted
+if (firstAssoc === undefined || secondAssoc === undefined) {
+  throw new Error('ASSOCIATIONS carries fewer than the two keywords these tests select')
+}
 
 describe('UnitKeywordDropdown', () => {
   const defaultProps = {
-    selectedUnitKeywords: new Set<string>(),
+    selected: new Set<string>(),
     onSelectionChange: vi.fn(),
   }
 
@@ -41,9 +45,9 @@ describe('UnitKeywordDropdown', () => {
   })
 
   it('shows selected count when unit keywords are active', () => {
-    const selected = new Set([sorted[0], sorted[1]])
+    const selected = new Set([firstAssoc, secondAssoc])
 
-    render(<UnitKeywordDropdown {...defaultProps} selectedUnitKeywords={selected} />)
+    render(<UnitKeywordDropdown {...defaultProps} selected={selected} />)
 
     expect(screen.getByText('(2)')).toBeInTheDocument()
   })
@@ -61,10 +65,10 @@ describe('UnitKeywordDropdown', () => {
     await user.click(screen.getByRole('combobox'))
 
     expect(
-      screen.getByRole('option', { name: new RegExp(`Label_${sorted[0]}`) }),
+      screen.getByRole('option', { name: new RegExp(`Label_${firstAssoc}`) }),
     ).toBeInTheDocument()
     expect(
-      screen.getByRole('option', { name: new RegExp(`Label_${sorted[1]}`) }),
+      screen.getByRole('option', { name: new RegExp(`Label_${secondAssoc}`) }),
     ).toBeInTheDocument()
   })
 
@@ -73,26 +77,22 @@ describe('UnitKeywordDropdown', () => {
     const user = userEvent.setup()
 
     render(
-      <UnitKeywordDropdown
-        selectedUnitKeywords={new Set<string>()}
-        onSelectionChange={onSelectionChange}
-      />,
+      <UnitKeywordDropdown selected={new Set<string>()} onSelectionChange={onSelectionChange} />,
     )
 
     await user.click(screen.getByRole('combobox'))
-    await user.click(screen.getByRole('option', { name: new RegExp(`Label_${sorted[0]}`) }))
+    await user.click(screen.getByRole('option', { name: new RegExp(`Label_${firstAssoc}`) }))
 
-    expect(onSelectionChange).toHaveBeenCalledWith(new Set([sorted[0]]))
+    expect(onSelectionChange).toHaveBeenCalledWith(new Set([firstAssoc]))
   })
 
   it('calls onSelectionChange with removed keyword when toggling off', async () => {
     const onSelectionChange = vi.fn()
     const user = userEvent.setup()
-    const firstAssoc = sorted[0]
 
     render(
       <UnitKeywordDropdown
-        selectedUnitKeywords={new Set([firstAssoc])}
+        selected={new Set([firstAssoc])}
         onSelectionChange={onSelectionChange}
       />,
     )
@@ -108,16 +108,16 @@ describe('UnitKeywordDropdown', () => {
     render(<UnitKeywordDropdown {...defaultProps} />)
 
     await user.click(screen.getByRole('combobox'))
-    await user.click(screen.getByRole('option', { name: new RegExp(`Label_${sorted[0]}`) }))
+    await user.click(screen.getByRole('option', { name: new RegExp(`Label_${firstAssoc}`) }))
 
     expect(
-      screen.getByRole('option', { name: new RegExp(`Label_${sorted[1]}`) }),
+      screen.getByRole('option', { name: new RegExp(`Label_${secondAssoc}`) }),
     ).toBeInTheDocument()
   })
 
   it('displays element counts when provided', async () => {
     const user = userEvent.setup()
-    const counts = { [sorted[0]]: 15 }
+    const counts = { [firstAssoc]: 15 }
 
     render(<UnitKeywordDropdown {...defaultProps} counts={counts} />)
 

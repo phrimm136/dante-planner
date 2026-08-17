@@ -1,0 +1,11 @@
+# 002 flyway-cli-for-migration-ci
+
+epic: none · pr: none
+
+## Decisions
+- @migrations @ci @test-migration @parser — the `test-migration` job applies migrations with the Flyway CLI, pinned to the `flyway-core` version in `backend/build.gradle.kts`, rather than redirecting each file into the `mysql` client. The client splits its input on every semicolon, so a migration whose body carries them — `V052`'s `CREATE PROCEDURE`, written without `DELIMITER` because Flyway does not need one — is cut mid-statement and fails with a syntax error the application never encounters. A harness that parses migrations differently from the runtime reports failures the runtime would not have, and the cost lands on whoever debugs a red build against SQL that is fine. REJECTED: adding `DELIMITER` around the procedure bodies to satisfy the client — Flyway's parser does not accept it, so the file would then run in CI and fail at boot. REJECTED: keeping the client and excluding procedure-bearing migrations from the job — the exclusion list is invisible from the migration itself, so a later author learns of it when their migration is silently untested.
+- @migrations @ci @flyway-target — the job migrates to the base branch's highest version (`-target`), loads the seed, then migrates the remainder, preserving the property the job exists for: a new migration meets populated tables. REJECTED: seeding first and migrating once — the seed is written against the base-branch schema, so it cannot be loaded before the migrations that create the tables it fills.
+- @migrations @ci @checksums — `validateOnMigrate=false`, matching `spring.flyway.validate-on-migrate` in `application.properties`. The CLI and the application compute checksums independently, and CI asserting a stricter contract than production would fail on migrations production accepts.
+
+## Takeaway
+- takeaway: the job passed for ten days while testing nothing. It only ever saw `V046`-`V048`, because `V049`-`V053` landed after the last pull request and the workflow triggers on `pull_request` alone — so direct commits to the integration branch left a green check that had not run. A gate whose absence and whose success look identical is worth what the last run proved, not what its name claims.

@@ -1,14 +1,16 @@
 import { Suspense } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { PlannerEditorStoreProvider } from './stores/usePlannerEditorStore'
-import { PlannerMDEditorContent } from './components/planner/PlannerMDEditorContent'
+import { PlannerCreateEditor } from './components/planner/PlannerCreateEditor'
+import { staggerDelay } from '@/lib/stagger'
+import { SECTION_STYLES } from '@/lib/constants'
 
 /**
  * Page-level skeleton for initial data load
  */
 function PlannerMDNewPageSkeleton() {
   return (
-    <div className="container mx-auto p-8">
+    <div className={SECTION_STYLES.LAYOUT.page}>
       <div className="flex items-center justify-between mb-4">
         <div className="space-y-2">
           <Skeleton className="h-9 w-64" />
@@ -28,13 +30,9 @@ function PlannerMDNewPageSkeleton() {
         <div className="space-y-2">
           <Skeleton className="h-6 w-32" />
           <div className="border-2 border-border rounded-lg p-4">
-            <div className="flex flex-wrap gap-2">
+            <div className={SECTION_STYLES.LAYOUT.wrap}>
               {Array.from({ length: 12 }).map((_, i) => (
-                <Skeleton
-                  key={i}
-                  className="w-16 h-20 rounded-md"
-                  style={{ animationDelay: `${i * 40}ms` }}
-                />
+                <Skeleton key={i} className="w-16 h-20 rounded-md" style={staggerDelay(i)} />
               ))}
             </div>
           </div>
@@ -53,13 +51,13 @@ function PlannerMDNewPageSkeleton() {
 
 /**
  * Main export with Suspense boundary
- * Delegates all editor logic to PlannerMDEditorContent with mode="new"
+ * Delegates all editor logic to PlannerCreateEditor
  */
 export default function PlannerMDNewPage() {
   return (
     <PlannerEditorStoreProvider>
       <Suspense fallback={<PlannerMDNewPageSkeleton />}>
-        <PlannerMDEditorContent mode="new" />
+        <PlannerCreateEditor />
       </Suspense>
     </PlannerEditorStoreProvider>
   )

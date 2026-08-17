@@ -1,17 +1,16 @@
 package org.danteplanner.backend.service;
 import org.danteplanner.backend.planner.service.PlannerEngagementService;
+import org.mockito.ArgumentCaptor;
 
-import org.danteplanner.backend.auth.entity.AuthProviderType;
-import org.danteplanner.backend.planner.dto.BookmarkResponse;
 import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.entity.PlannerBookmark;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerBookmarkRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
+import org.danteplanner.backend.moderation.service.PlannerReportService;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -20,26 +19,43 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationEventPublisher;
+import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
+import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.time.Instant;
 import java.util.Optional;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import org.danteplanner.backend.planner.service.PlannerAccessGuard;
+import org.danteplanner.backend.user.service.UserService;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.ArgumentMatchers.anyLong;
+import org.danteplanner.backend.planner.service.PlannerCatalogService;
+import org.danteplanner.backend.planner.service.PlannerStatsService;
+import org.danteplanner.backend.planner.validation.VoteUniquenessValidator;
+import org.danteplanner.backend.planner.entity.PlannerVote;
+import org.danteplanner.backend.planner.entity.PlannerVoteId;
+import org.danteplanner.backend.planner.exception.VoteAlreadyExistsException;
+import org.danteplanner.backend.planner.dto.VoteResponse;
+import org.danteplanner.backend.planner.entity.VoteType;
 
 /**
- * Unit tests for PlannerEngagementService (immutable voting and bookmark toggling).
+ * Unit tests for PlannerEngagementService (immutable voting and bookmark reads).
  */
 @ExtendWith(SpringExtension.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
 class PlannerEngagementServiceTest {
+
+    @Mock
+    private UserService userService;
 
     @Mock
     private PlannerRepository plannerRepository;
@@ -51,7 +67,16 @@ class PlannerEngagementServiceTest {
     private PlannerBookmarkRepository plannerBookmarkRepository;
 
     @Mock
-    private ApplicationEventPublisher eventPublisher;
+    private DomainEventRecorder domainEventRecorder;
+
+    @Mock
+    private PlannerStatsService plannerStatsService;
+
+    @Mock
+    private PlannerCatalogService plannerCatalogService;
+
+    @Mock
+    private PlannerReportService reportService;
 
     private PlannerEngagementService engagementService;
 
@@ -65,133 +90,33 @@ class PlannerEngagementServiceTest {
         MockitoAnnotations.openMocks(this);
 
         engagementService = new PlannerEngagementService(
-                plannerRepository,
                 plannerVoteRepository,
                 plannerBookmarkRepository,
-                eventPublisher,
+                plannerStatsService,
+                plannerCatalogService,
+                domainEventRecorder,
+                new PlannerAccessGuard(userService, plannerRepository),
+                reportService,
+                new VoteUniquenessValidator(),
                 recommendedThreshold
         );
 
-        testUser = User.builder()
-                .id(1L)
-                .email("test@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-123")
-                .usernameEpithet("W_CORP")
-                .usernameSuffix("test1")
-                .build();
+        testUser = TestDataFactory.unsavedUser(1L);
+        // The access guard resolves the principal on every guarded path; an unstubbed
+        // repository would surface as UserNotFoundException instead of the behavior under test.
+        lenient().when(userService.findById(anyLong())).thenReturn(testUser);
+
     }
 
-    private Planner.PlannerBuilder testPlannerBuilder() {
-        return Planner.builder()
-                .id(UUID.randomUUID())
-                .user(testUser)
+    private TestDataFactory.PlannerBuilder testPlannerBuilder() {
+        return TestDataFactory.planner(testUser)
                 .title("Test Planner")
                 .category("5F")
                 .status(PlannerStatus.DRAFT)
                 .content("{\"data\": \"test\"}")
-                .syncVersion(1L)
                 .schemaVersion(1)
                 .contentVersion(6)
-                .plannerType(PlannerType.MIRROR_DUNGEON)
-                .createdAt(Instant.now())
-                .lastModifiedAt(Instant.now())
-                .savedAt(Instant.now());
-    }
-
-    private Planner createTestPlanner() {
-        return testPlannerBuilder().build();
-    }
-
-    @Nested
-    @DisplayName("toggleBookmark Tests")
-    class ToggleBookmarkTests {
-
-        private Planner createPublishedPlanner() {
-            Planner planner = testPlannerBuilder().published(true).build();
-            return planner;
-        }
-
-        @Test
-        @DisplayName("Should add bookmark when not bookmarked")
-        void toggleBookmark_NotBookmarked_AddsBookmark() {
-            // Arrange
-            Planner planner = createPublishedPlanner();
-            UUID plannerId = planner.getId();
-
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
-                    .thenReturn(Optional.of(planner));
-            when(plannerBookmarkRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
-                    .thenReturn(Optional.empty());
-            when(plannerBookmarkRepository.save(any(PlannerBookmark.class)))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
-
-            // Act
-            BookmarkResponse response = engagementService.toggleBookmark(testUser.getId(), plannerId);
-
-            // Assert
-            assertTrue(response.bookmarked());
-            assertEquals(plannerId, response.plannerId());
-            verify(plannerBookmarkRepository).save(any(PlannerBookmark.class));
-            verify(plannerBookmarkRepository, never()).delete(any());
-        }
-
-        @Test
-        @DisplayName("Should remove bookmark when already bookmarked")
-        void toggleBookmark_AlreadyBookmarked_RemovesBookmark() {
-            // Arrange
-            Planner planner = createPublishedPlanner();
-            UUID plannerId = planner.getId();
-            PlannerBookmark existingBookmark = new PlannerBookmark(testUser.getId(), plannerId);
-
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
-                    .thenReturn(Optional.of(planner));
-            when(plannerBookmarkRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
-                    .thenReturn(Optional.of(existingBookmark));
-
-            // Act
-            BookmarkResponse response = engagementService.toggleBookmark(testUser.getId(), plannerId);
-
-            // Assert
-            assertFalse(response.bookmarked());
-            assertEquals(plannerId, response.plannerId());
-            verify(plannerBookmarkRepository).delete(existingBookmark);
-            verify(plannerBookmarkRepository, never()).save(any());
-        }
-
-        @Test
-        @DisplayName("Should throw PlannerNotFoundException when planner not found")
-        void toggleBookmark_PlannerNotFound_ThrowsException() {
-            // Arrange
-            UUID nonExistentId = UUID.randomUUID();
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(nonExistentId))
-                    .thenReturn(Optional.empty());
-
-            // Act & Assert
-            assertThrows(
-                    PlannerNotFoundException.class,
-                    () -> engagementService.toggleBookmark(testUser.getId(), nonExistentId)
-            );
-
-            verify(plannerBookmarkRepository, never()).findByUserIdAndPlannerId(any(), any());
-        }
-
-        @Test
-        @DisplayName("Should throw PlannerNotFoundException when planner not published")
-        void toggleBookmark_PlannerNotPublished_ThrowsException() {
-            // Arrange
-            Planner planner = createTestPlanner(); // Not published
-            UUID plannerId = planner.getId();
-
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
-                    .thenReturn(Optional.empty());
-
-            // Act & Assert
-            assertThrows(
-                    PlannerNotFoundException.class,
-                    () -> engagementService.toggleBookmark(testUser.getId(), plannerId)
-            );
-        }
+                .plannerType(PlannerType.MIRROR_DUNGEON);
     }
 
     @Nested
@@ -199,87 +124,127 @@ class PlannerEngagementServiceTest {
     class CastVoteImmutabilityTests {
 
         private Planner createPublishedPlanner() {
-            Planner planner = testPlannerBuilder().published(true).build();
-            planner.setUpvotes(5);
-            return planner;
+            return testPlannerBuilder().published(true).build();
         }
 
         @Test
         @DisplayName("Should throw VoteAlreadyExistsException when user attempts duplicate vote")
-        void castVote_DuplicateVote_ThrowsException() {
+        void castVote_WhenDuplicateVote_ThrowsException() {
             // Arrange
             Planner planner = createPublishedPlanner();
             UUID plannerId = planner.getId();
-            org.danteplanner.backend.planner.entity.PlannerVoteId voteId =
-                new org.danteplanner.backend.planner.entity.PlannerVoteId(testUser.getId(), plannerId);
+            PlannerVoteId voteId =
+                new PlannerVoteId(testUser.getId(), plannerId);
 
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
+            when(plannerRepository.findPublishedAggregate(plannerId))
                     .thenReturn(Optional.of(planner));
             when(plannerVoteRepository.existsById(voteId))
                     .thenReturn(true);
 
             // Act & Assert
-            org.danteplanner.backend.planner.exception.VoteAlreadyExistsException exception = assertThrows(
-                    org.danteplanner.backend.planner.exception.VoteAlreadyExistsException.class,
-                    () -> engagementService.castVote(testUser.getId(), plannerId, org.danteplanner.backend.planner.entity.VoteType.UP)
+            VoteAlreadyExistsException exception = assertThrows(
+                    VoteAlreadyExistsException.class,
+                    () -> engagementService.castVote(testUser.getId(), plannerId, VoteType.UP)
             );
 
             assertEquals(plannerId, exception.getPlannerId());
             assertEquals(testUser.getId(), exception.getUserId());
-            verify(plannerVoteRepository, never()).save(any());
-            verify(plannerRepository, never()).incrementUpvotes(any());
-        }
-
-        @Test
-        @DisplayName("Should throw IllegalArgumentException when voteType is null")
-        void castVote_NullVoteType_ThrowsException() {
-            // Arrange
-            Planner planner = createPublishedPlanner();
-            UUID plannerId = planner.getId();
-
-            when(plannerRepository.findByIdForUpdate(plannerId))
-                    .thenReturn(Optional.of(planner));
-
-            // Act & Assert
-            IllegalArgumentException exception = assertThrows(
-                    IllegalArgumentException.class,
-                    () -> engagementService.castVote(testUser.getId(), plannerId, null)
-            );
-
-            assertTrue(exception.getMessage().contains("Vote type cannot be null"));
-            verify(plannerVoteRepository, never()).existsById(any());
-            verify(plannerVoteRepository, never()).save(any());
+            verify(plannerVoteRepository, never()).insert(any());
+            verify(plannerStatsService, never()).incrementUpvotes(any());
         }
 
         @Test
         @DisplayName("Should allow first vote and create new vote record")
-        void castVote_FirstVote_CreatesVote() {
+        void castVote_WhenFirstVote_CreatesVote() {
             // Arrange
             Planner planner = createPublishedPlanner();
             UUID plannerId = planner.getId();
-            Planner updatedPlanner = createPublishedPlanner();
-            updatedPlanner.setId(plannerId);
-            updatedPlanner.setUpvotes(6);
-            org.danteplanner.backend.planner.entity.PlannerVoteId voteId =
-                new org.danteplanner.backend.planner.entity.PlannerVoteId(testUser.getId(), plannerId);
+            PlannerVoteId voteId =
+                new PlannerVoteId(testUser.getId(), plannerId);
 
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
+            when(plannerRepository.findPublishedAggregate(plannerId))
                     .thenReturn(Optional.of(planner));
             when(plannerVoteRepository.existsById(voteId))
                     .thenReturn(false);
-            when(plannerVoteRepository.save(any(org.danteplanner.backend.planner.entity.PlannerVote.class)))
+            when(plannerVoteRepository.insert(any(PlannerVote.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
-            when(plannerRepository.findById(plannerId)).thenReturn(Optional.of(updatedPlanner));
+            when(plannerStatsService.upvotesOf(plannerId)).thenReturn(6);
 
             // Act
-            org.danteplanner.backend.planner.dto.VoteResponse response =
-                    engagementService.castVote(testUser.getId(), plannerId, org.danteplanner.backend.planner.entity.VoteType.UP);
+            VoteResponse response =
+                    engagementService.castVote(testUser.getId(), plannerId, VoteType.UP);
 
             // Assert
             assertEquals(6, response.upvoteCount());
             assertTrue(response.hasUpvoted());
-            verify(plannerVoteRepository).save(any(org.danteplanner.backend.planner.entity.PlannerVote.class));
-            verify(plannerRepository).incrementUpvotes(plannerId);
+            ArgumentCaptor<PlannerVote> voteCaptor =
+                    ArgumentCaptor.forClass(PlannerVote.class);
+            verify(plannerVoteRepository).insert(voteCaptor.capture());
+            assertEquals(testUser.getId(), voteCaptor.getValue().getUserId());
+            assertEquals(plannerId, voteCaptor.getValue().getPlannerId());
+            assertEquals(VoteType.UP,
+                    voteCaptor.getValue().getVoteType());
+            verify(plannerStatsService).incrementUpvotes(plannerId);
+        }
+
+        @Test
+        @DisplayName("crossing the threshold records one PLANNER_RECOMMENDED event")
+        void castVote_WhenCrossingTheThreshold_RecordsTheRecommendedEvent() {
+            Planner planner = createPublishedPlanner();
+            UUID plannerId = planner.getId();
+
+            when(plannerRepository.findPublishedAggregate(plannerId))
+                    .thenReturn(Optional.of(planner));
+            when(plannerVoteRepository.existsById(any(PlannerVoteId.class))).thenReturn(false);
+            when(plannerVoteRepository.insert(any(PlannerVote.class)))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
+            when(plannerStatsService.upvotesOf(plannerId)).thenReturn(recommendedThreshold);
+            when(plannerStatsService.trySetRecommendedNotified(plannerId, recommendedThreshold))
+                    .thenReturn(1);
+
+            engagementService.castVote(testUser.getId(), plannerId, VoteType.UP);
+
+            verify(domainEventRecorder).recordDomainEvent(
+                    DomainEventType.PLANNER_RECOMMENDED, plannerId,
+                    Map.of("ownerId", planner.getUser().getId()));
+        }
+
+        @Test
+        @DisplayName("a vote the latch refuses records nothing, so one crossing owes one event")
+        void castVote_WhenAnotherVoteAlreadyLatched_RecordsNothing() {
+            Planner planner = createPublishedPlanner();
+            UUID plannerId = planner.getId();
+
+            when(plannerRepository.findPublishedAggregate(plannerId))
+                    .thenReturn(Optional.of(planner));
+            when(plannerVoteRepository.existsById(any(PlannerVoteId.class))).thenReturn(false);
+            when(plannerVoteRepository.insert(any(PlannerVote.class)))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
+            when(plannerStatsService.upvotesOf(plannerId)).thenReturn(recommendedThreshold);
+            when(plannerStatsService.trySetRecommendedNotified(plannerId, recommendedThreshold))
+                    .thenReturn(0);
+
+            engagementService.castVote(testUser.getId(), plannerId, VoteType.UP);
+
+            verifyNoInteractions(domainEventRecorder);
+        }
+
+        @Test
+        @DisplayName("a vote below the threshold records nothing")
+        void castVote_WhenBelowTheThreshold_RecordsNothing() {
+            Planner planner = createPublishedPlanner();
+            UUID plannerId = planner.getId();
+
+            when(plannerRepository.findPublishedAggregate(plannerId))
+                    .thenReturn(Optional.of(planner));
+            when(plannerVoteRepository.existsById(any(PlannerVoteId.class))).thenReturn(false);
+            when(plannerVoteRepository.insert(any(PlannerVote.class)))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
+            when(plannerStatsService.upvotesOf(plannerId)).thenReturn(recommendedThreshold - 1);
+
+            engagementService.castVote(testUser.getId(), plannerId, VoteType.UP);
+
+            verifyNoInteractions(domainEventRecorder);
         }
     }
 
@@ -289,7 +254,7 @@ class PlannerEngagementServiceTest {
 
         @Test
         @DisplayName("Should return true when bookmark exists")
-        void isBookmarked_Exists_ReturnsTrue() {
+        void isBookmarked_WhenExists_ReturnsTrue() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
             when(plannerBookmarkRepository.existsByUserIdAndPlannerId(testUser.getId(), plannerId))
@@ -301,7 +266,7 @@ class PlannerEngagementServiceTest {
 
         @Test
         @DisplayName("Should return false when bookmark does not exist")
-        void isBookmarked_NotExists_ReturnsFalse() {
+        void isBookmarked_WhenNotExists_ReturnsFalse() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
             when(plannerBookmarkRepository.existsByUserIdAndPlannerId(testUser.getId(), plannerId))

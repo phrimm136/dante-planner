@@ -12,9 +12,9 @@ vi.mock('@/shared/auth/hooks/useAuthQuery', () => ({
   useAuthQuery: () => mockUseAuthQuery(),
 }))
 
-// Mock linkifyText to pass through (test focuses on banner behavior, not link rendering)
+// Mock LinkifyText to pass through (test focuses on banner behavior, not link rendering)
 vi.mock('@/components/ui/LinkifyText', () => ({
-  linkifyText: (text: string) => text,
+  LinkifyText: ({ text }: { text: string }) => text,
 }))
 
 // Mock react-i18next
@@ -48,6 +48,7 @@ describe('BanStatusBanner', () => {
       email: 'test@example.com',
       usernameEpithet: 'TEST',
       usernameSuffix: 'test1',
+      role: 'NORMAL',
       isBanned: true,
       bannedAt: new Date().toISOString(),
       banReason: 'Violated terms of service',
@@ -72,6 +73,7 @@ describe('BanStatusBanner', () => {
       email: 'test@example.com',
       usernameEpithet: 'TEST',
       usernameSuffix: 'test1',
+      role: 'NORMAL',
       isBanned: true,
       bannedAt: new Date().toISOString(),
     }
@@ -92,6 +94,7 @@ describe('BanStatusBanner', () => {
       email: 'test@example.com',
       usernameEpithet: 'TEST',
       usernameSuffix: 'test1',
+      role: 'NORMAL',
       isTimedOut: true,
       timeoutUntil: new Date(Date.now() + 3600000).toISOString(),
       timeoutReason: 'Spam detected',
@@ -113,6 +116,7 @@ describe('BanStatusBanner', () => {
       email: 'test@example.com',
       usernameEpithet: 'TEST',
       usernameSuffix: 'test1',
+      role: 'NORMAL',
     }
 
     mockUseAuthQuery.mockReturnValue({ data: normalUser })
@@ -134,6 +138,7 @@ describe('BanStatusBanner', () => {
       email: 'test@example.com',
       usernameEpithet: 'TEST',
       usernameSuffix: 'test1',
+      role: 'NORMAL',
       isBanned: true,
       bannedAt: new Date().toISOString(),
       banReason: 'Test',

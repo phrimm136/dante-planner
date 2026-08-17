@@ -1,6 +1,7 @@
 package org.danteplanner.backend.integration;
 
 import com.redis.testcontainers.RedisContainer;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import eu.rekawek.toxiproxy.Proxy;
 import eu.rekawek.toxiproxy.ToxiproxyClient;
 import java.io.IOException;
@@ -36,7 +37,15 @@ import org.testcontainers.toxiproxy.ToxiproxyContainer;
  * {@link ReplicationControl#awaitCaughtUp()} on the caller's side, never a sleep.</p>
  */
 @Import(CausalHarnessSupport.HarnessDataSourceConfig.class)
+@ResourceLock(CausalHarnessSupport.SHARED_HARNESS)
 abstract class CausalHarnessSupport {
+
+    /**
+     * The thirteen subclasses drive replication state and toxics through one primary/replica pair,
+     * one Redis, and one Toxiproxy held as per-fork statics. Unlike the single-database tests they
+     * cannot isolate by owning a database, so they serialize against each other instead.
+     */
+    static final String SHARED_HARNESS = "causal-harness";
 
     private static final Logger log = LoggerFactory.getLogger(CausalHarnessSupport.class);
 
@@ -55,7 +64,11 @@ abstract class CausalHarnessSupport {
 
     private static final Network NETWORK = Network.newNetwork();
 
+    // Relaxed durability and no performance_schema: throwaway test databases need no
+    // crash-safety, and GTID replication depends on neither fsync timing nor
+    // performance_schema — the flags cut boot time and per-instance memory.
     static final MySQLContainer PRIMARY = new MySQLContainer(MYSQL_IMAGE)
+            .withTmpFs(java.util.Map.of("/var/lib/mysql", "rw,size=512m"))
             .withNetwork(NETWORK)
             .withNetworkAliases(PRIMARY_ALIAS)
             .withDatabaseName("testdb")
@@ -66,9 +79,19 @@ abstract class CausalHarnessSupport {
                     "--log-bin=mysql-bin",
                     "--binlog-format=ROW",
                     "--gtid-mode=ON",
-                    "--enforce-gtid-consistency=ON");
+                    "--enforce-gtid-consistency=ON",
+                    "--session-track-gtids=OWN_GTID",
+                    // The data directory is a tmpfs, so a large buffer pool caches RAM in
+                    // RAM; a test database is a schema and a few hundred rows.
+                    "--innodb-buffer-pool-size=64M",
+                    "--innodb-flush-log-at-trx-commit=0",
+                    "--innodb-doublewrite=0",
+                    "--sync-binlog=0",
+                    "--performance-schema=OFF",
+                    "--skip-name-resolve");
 
     static final MySQLContainer REPLICA = new MySQLContainer(MYSQL_IMAGE)
+            .withTmpFs(java.util.Map.of("/var/lib/mysql", "rw,size=512m"))
             .withNetwork(NETWORK)
             .withDatabaseName("testdb")
             .withUsername("test")
@@ -78,7 +101,15 @@ abstract class CausalHarnessSupport {
                     "--log-bin=mysql-bin",
                     "--binlog-format=ROW",
                     "--gtid-mode=ON",
-                    "--enforce-gtid-consistency=ON");
+                    "--enforce-gtid-consistency=ON",
+                    // The data directory is a tmpfs, so a large buffer pool caches RAM in
+                    // RAM; a test database is a schema and a few hundred rows.
+                    "--innodb-buffer-pool-size=64M",
+                    "--innodb-flush-log-at-trx-commit=0",
+                    "--innodb-doublewrite=0",
+                    "--sync-binlog=0",
+                    "--performance-schema=OFF",
+                    "--skip-name-resolve");
 
     static final RedisContainer AUTH_REDIS = new RedisContainer(REDIS_IMAGE);
 
@@ -113,7 +144,9 @@ abstract class CausalHarnessSupport {
 
     @DynamicPropertySource
     static void primaryDatasourceProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", PRIMARY::getJdbcUrl);
+        // The driver surfaces OWN_GTID session-state changes only when asked to track them,
+        // so the app url mirrors production and the capture path is exercised for real.
+        registry.add("spring.datasource.url", () -> withSessionStateTracking(PRIMARY.getJdbcUrl()));
         registry.add("spring.datasource.username", PRIMARY::getUsername);
         registry.add("spring.datasource.password", PRIMARY::getPassword);
         registry.add("spring.flyway.url", PRIMARY::getJdbcUrl);
@@ -133,6 +166,11 @@ abstract class CausalHarnessSupport {
         replicaJdbcTemplate.execute("START REPLICA");
         toxiproxyControl = new ToxiproxyControl(APP_TO_PRIMARY_PROXY);
         toxiproxyControl.removeWan();
+    }
+
+    /** Appends the driver flag, respecting any query string the container url already carries. */
+    static String withSessionStateTracking(String jdbcUrl) {
+        return jdbcUrl + (jdbcUrl.contains("?") ? "&" : "?") + "trackSessionState=true";
     }
 
     /**

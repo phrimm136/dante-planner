@@ -1,6 +1,5 @@
-import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { PlannerSection } from '../PlannerSection'
+import { PlannerSection } from '@/components/layout/PlannerSection'
 import { FloorThemeGiftSection } from '../floorTheme/FloorThemeGiftSection'
 import { NoteEditor } from '@/shared/noteEditor/components/NoteEditor'
 import type { SerializableFloorSelection } from '../../types/PlannerTypes'
@@ -25,17 +24,13 @@ export function FloorGalleryTracker({
 }: FloorGalleryTrackerProps) {
   const { t } = useTranslation(['planner', 'common'])
 
-  const floorIndices = useMemo(() => Array.from({ length: floorCount }, (_, i) => i), [floorCount])
+  const floorIndices = Array.from({ length: floorCount }, (_, i) => i)
 
   // Deserialize floor selections (convert giftIds from string[] to Set<string>)
-  const deserializedFloorSelections = useMemo<FloorThemeSelection[]>(
-    () =>
-      floorSelections.map((floor) => ({
-        ...floor,
-        giftIds: new Set(floor.giftIds),
-      })),
-    [floorSelections],
-  )
+  const deserializedFloorSelections: FloorThemeSelection[] = floorSelections.map((floor) => ({
+    ...floor,
+    giftIds: new Set(floor.giftIds),
+  }))
 
   return (
     <PlannerSection title={t('pages.plannerMD.floorThemes')}>
@@ -43,6 +38,7 @@ export function FloorGalleryTracker({
         {floorIndices.map((floorIndex) => {
           const floorNumber = floorIndex + 1
           const floorNoteKey = `floor-${floorIndex}`
+          const floorNote = sectionNotes[floorNoteKey]
           return (
             <div key={floorIndex} className="space-y-2">
               <FloorThemeGiftSection
@@ -51,10 +47,9 @@ export function FloorGalleryTracker({
                 floorSelectionsOverride={deserializedFloorSelections}
                 readOnly={true}
               />
-              {!isNoteEmpty(sectionNotes[floorNoteKey]) && (
+              {floorNote && !isNoteEmpty(floorNote) && (
                 <NoteEditor
-                  value={sectionNotes[floorNoteKey]}
-                  onChange={() => {}}
+                  value={floorNote}
                   placeholder={t('pages.plannerMD.noteEditor.placeholder')}
                   readOnly={true}
                 />

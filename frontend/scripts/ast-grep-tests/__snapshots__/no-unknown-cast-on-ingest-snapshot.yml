@@ -1,0 +1,32 @@
+id: no-unknown-cast-on-ingest
+snapshots:
+  const category = state.category as unknown as RRCategory:
+    labels:
+    - source: state.category as unknown as RRCategory
+      style: primary
+      start: 17
+      end: 56
+  const config = { type, category } as unknown as PlannerEditorConfig:
+    labels:
+    - source: '{ type, category } as unknown as PlannerEditorConfig'
+      style: primary
+      start: 15
+      end: 67
+  const content = parsed as unknown as MDPlannerContent:
+    labels:
+    - source: parsed as unknown as MDPlannerContent
+      style: primary
+      start: 16
+      end: 53
+  foo(response as unknown as ServerPlannerResponse):
+    labels:
+    - source: response as unknown as ServerPlannerResponse
+      style: primary
+      start: 4
+      end: 48
+  'return { metadata, config, content: content as unknown as MDPlannerContent }':
+    labels:
+    - source: content as unknown as MDPlannerContent
+      style: primary
+      start: 36
+      end: 74

@@ -27,12 +27,25 @@ locals {
 
   account_id = data.aws_caller_identity.current.account_id
 
+  # Deterministic, so the grants below hold whether this stack owns the bucket or
+  # terraform/state-backend does.
+  tf_state_bucket     = "${var.name_prefix}-tfstate-${data.aws_caller_identity.current.account_id}"
+  tf_state_bucket_arn = "arn:aws:s3:::${var.name_prefix}-tfstate-${data.aws_caller_identity.current.account_id}"
+
   # The exact node roles/instance-profiles terraform/oregon creates
   # (oregon/iam.tf: ${name_prefix}-oregon-{cp,ingress,data,app}). The provisioning
   # policy's iam:* and iam:PassRole are scoped to these ARN patterns so a
   # compromised provisioner cannot touch unrelated roles in the account.
-  oregon_role_arn_pattern             = "arn:aws:iam::${local.account_id}:role/${var.name_prefix}-oregon-*"
-  oregon_instance_profile_arn_pattern = "arn:aws:iam::${local.account_id}:instance-profile/${var.name_prefix}-oregon-*"
+  # modules/fleet names every node role ${name_prefix}-${region_name_suffix}-{cp,ingress,data,app},
+  # so a region absent here cannot be applied by this identity.
+  fleet_role_arn_patterns = [
+    for suffix in var.fleet_region_suffixes :
+    "arn:aws:iam::${local.account_id}:role/${var.name_prefix}-${suffix}-*"
+  ]
+  fleet_instance_profile_arn_patterns = [
+    for suffix in var.fleet_region_suffixes :
+    "arn:aws:iam::${local.account_id}:instance-profile/${var.name_prefix}-${suffix}-*"
+  ]
 }
 
 # --- Trust policy: two assumption paths -------------------------------------
@@ -44,7 +57,7 @@ data "aws_iam_policy_document" "assume" {
     actions = ["sts:AssumeRole"]
     principals {
       type        = "AWS"
-      identifiers = [var.trusted_admin_principal_arn]
+      identifiers = var.trusted_admin_principal_arns
     }
   }
 
@@ -74,7 +87,7 @@ data "aws_iam_policy_document" "assume" {
 
 resource "aws_iam_role" "provisioner" {
   name                 = var.role_name
-  description          = "Least-privilege identity that provisions the Oregon fleet (terraform/oregon). Assumable by an admin laptop (STS) and GitHub Actions CI (OIDC). No instance profile - neither runner is an EC2 instance."
+  description          = "Least-privilege identity that provisions every terraform stack in this account. Assumable by an admin laptop (STS) and GitHub Actions CI (OIDC). No instance profile - neither runner is an EC2 instance."
   assume_role_policy   = data.aws_iam_policy_document.assume.json
   max_session_duration = 3600
   tags                 = var.tags
@@ -170,10 +183,124 @@ data "aws_iam_policy_document" "provisioning" {
     sid     = "S3SnapshotBucket"
     effect  = "Allow"
     actions = ["s3:*"]
-    resources = [
-      "arn:aws:s3:::${var.name_prefix}-oregon-*",
-      "arn:aws:s3:::${var.name_prefix}-oregon-*/*",
+    # Every fleet region, not just the first one built: the second region's snapshot bucket is
+    # named for its own suffix, so an oregon-only pattern leaves it unreadable and a refresh
+    # reports the live bucket as absent.
+    resources = flatten([
+      for suffix in var.fleet_region_suffixes : [
+        "arn:aws:s3:::${var.name_prefix}-${suffix}-*",
+        "arn:aws:s3:::${var.name_prefix}-${suffix}-*/*",
+      ]
+    ])
+  }
+
+  # Terraform's own state. PutObject/DeleteObject also back `use_lockfile`.
+  statement {
+    sid    = "TerraformStateBucket"
+    effect = "Allow"
+    actions = [
+      "s3:ListBucket",
+      "s3:GetBucketVersioning",
+      "s3:GetObject",
+      "s3:GetObjectVersion",
+      "s3:PutObject",
+      "s3:DeleteObject",
     ]
+    resources = [
+      local.tf_state_bucket_arn,
+      "${local.tf_state_bucket_arn}/*",
+    ]
+  }
+
+  statement {
+    sid       = "Rds"
+    effect    = "Allow"
+    actions   = ["rds:*"]
+    resources = ["*"]
+  }
+
+  # The database stack resolves this at PLAN time, so without it that stack cannot be inspected,
+  # let alone applied. Not an escalation beyond the statement above: rds:* already permits
+  # resetting the same password, which is the louder way to obtain it.
+  statement {
+    sid       = "RdsMasterPassword"
+    effect    = "Allow"
+    actions   = ["secretsmanager:GetSecretValue"]
+    resources = ["arn:aws:secretsmanager:${var.region}:${local.account_id}:secret:${var.rds_master_password_secret_name}-*"]
+  }
+
+  # RDS calls KMS as the caller, so encrypted storage needs grant creation here.
+  statement {
+    sid    = "RdsStorageEncryption"
+    effect = "Allow"
+    actions = [
+      "kms:CreateGrant",
+      "kms:DescribeKey",
+      "kms:ListAliases",
+    ]
+    resources = ["*"] # the aws/rds alias resolves to a key id that differs per region.
+  }
+
+  # The fleet's internal private zone and its records. Route53 is global, so no region scoping.
+  statement {
+    sid    = "Route53InternalZone"
+    effect = "Allow"
+    actions = [
+      "route53:CreateHostedZone",
+      "route53:DeleteHostedZone",
+      "route53:GetHostedZone",
+      "route53:ListHostedZones",
+      "route53:ListHostedZonesByName",
+      "route53:ListHostedZonesByVPC",
+      "route53:AssociateVPCWithHostedZone",
+      "route53:DisassociateVPCFromHostedZone",
+      "route53:ChangeResourceRecordSets",
+      "route53:ListResourceRecordSets",
+      "route53:GetChange",
+      "route53:ChangeTagsForResource",
+      "route53:ListTagsForResource",
+    ]
+    resources = ["*"] # route53 Get/List actions do not accept a hosted-zone ARN.
+  }
+
+  # SSM documents the fleet installs on its nodes.
+  statement {
+    sid    = "SsmDocuments"
+    effect = "Allow"
+    actions = [
+      "ssm:CreateDocument",
+      "ssm:DeleteDocument",
+      "ssm:DescribeDocument",
+      "ssm:DescribeDocumentPermission",
+      "ssm:ModifyDocumentPermission",
+      "ssm:GetDocument",
+      "ssm:ListDocuments",
+      "ssm:UpdateDocument",
+      "ssm:UpdateDocumentDefaultVersion",
+      "ssm:ListTagsForResource",
+      "ssm:AddTagsToResource",
+      "ssm:RemoveTagsFromResource",
+      "ssm:CreateAssociation",
+      "ssm:DeleteAssociation",
+      "ssm:DescribeAssociation",
+      "ssm:DescribeAssociationExecutions",
+      "ssm:ListAssociations",
+      "ssm:UpdateAssociation",
+    ]
+    resources = ["*"] # ssm:ListDocuments is account-level; document ARNs are name-scoped only.
+  }
+
+  # A fresh account has no rds.amazonaws.com service-linked role until the first instance.
+  statement {
+    sid       = "RdsServiceLinkedRole"
+    effect    = "Allow"
+    actions   = ["iam:CreateServiceLinkedRole"]
+    resources = ["arn:aws:iam::${local.account_id}:role/aws-service-role/rds.amazonaws.com/*"]
+    condition {
+      test     = "StringEquals"
+      variable = "iam:AWSServiceName"
+      values   = ["rds.amazonaws.com"]
+    }
   }
 
   # Billing + instance auto-recovery metric alarms.
@@ -196,7 +323,7 @@ data "aws_iam_policy_document" "provisioning" {
   # them to EC2. Resource-scoped to the exact name patterns terraform/oregon
   # creates so this identity cannot mint or alter privileged roles elsewhere.
   statement {
-    sid    = "OregonNodeRolesAndProfiles"
+    sid    = "FleetNodeRolesAndProfiles"
     effect = "Allow"
     actions = [
       "iam:CreateRole",
@@ -222,16 +349,13 @@ data "aws_iam_policy_document" "provisioning" {
       "iam:UntagInstanceProfile",
       "iam:PassRole",
     ]
-    resources = [
-      local.oregon_role_arn_pattern,
-      local.oregon_instance_profile_arn_pattern,
-    ]
+    resources = concat(local.fleet_role_arn_patterns, local.fleet_instance_profile_arn_patterns)
   }
 }
 
 resource "aws_iam_policy" "provisioning" {
   name        = "${var.role_name}-policy"
-  description = "Service-scoped provisioning permissions for terraform/oregon (EC2/ASG/ECR/SSM/S3/CloudWatch/Logs + oregon-* IAM)."
+  description = "Service-scoped provisioning permissions (EC2/ASG/ECR/SSM/S3/RDS/KMS/CloudWatch/Logs + fleet-region IAM)."
   policy      = data.aws_iam_policy_document.provisioning.json
   tags        = var.tags
 }
@@ -239,27 +363,6 @@ resource "aws_iam_policy" "provisioning" {
 resource "aws_iam_role_policy_attachment" "provisioning" {
   role       = aws_iam_role.provisioner.name
   policy_arn = aws_iam_policy.provisioning.arn
-}
-
-# --- Reproducible grant to the external terraform/rds role ------------------
-# It needs ec2 route actions to add the fleet <-> RDS peering return route.
-# Managed as code (vs a one-off put-role-policy); gated on the role name, which
-# comes from a variable so it never lands in a committed file.
-data "aws_iam_policy_document" "rds_fleet_peering" {
-  count = var.rds_provisioner_role_name != "" ? 1 : 0
-  statement {
-    sid       = "FleetPeeringRoutes"
-    effect    = "Allow"
-    actions   = ["ec2:CreateRoute", "ec2:DeleteRoute", "ec2:ReplaceRoute", "ec2:DescribeRouteTables", "ec2:ModifySecurityGroupRules", "ec2:AuthorizeSecurityGroupIngress", "ec2:RevokeSecurityGroupIngress", "ec2:DescribeSecurityGroupRules", "ec2:UpdateSecurityGroupRuleDescriptionsIngress"]
-    resources = ["*"]
-  }
-}
-
-resource "aws_iam_role_policy" "rds_fleet_peering" {
-  count  = var.rds_provisioner_role_name != "" ? 1 : 0
-  name   = "fleet-peering"
-  role   = var.rds_provisioner_role_name
-  policy = data.aws_iam_policy_document.rds_fleet_peering[0].json
 }
 
 # --- CI deploy-surge grant (github-actions-deploy user) ----------------------
@@ -291,6 +394,15 @@ data "aws_iam_policy_document" "deploy_surge" {
     resources = ["arn:aws:ssm:*::document/AWS-RunShellScript"]
   }
 
+  # SendCommand returns a command id; the outcome is a separate GetCommandInvocation call,
+  # whose invocation does not exist when the policy is evaluated.
+  statement {
+    sid       = "SsmCommandResults"
+    effect    = "Allow"
+    actions   = ["ssm:GetCommandInvocation", "ssm:ListCommandInvocations"]
+    resources = ["*"]
+  }
+
   statement {
     sid       = "SurgeSsmTargets"
     actions   = ["ssm:SendCommand"]
@@ -309,7 +421,33 @@ resource "aws_iam_policy" "deploy_surge" {
   tags   = var.tags
 }
 
-resource "aws_iam_user_policy_attachment" "deploy_surge" {
-  user       = "github-actions-deploy"
+resource "aws_iam_role_policy_attachment" "deploy_surge" {
+  role       = aws_iam_role.provisioner.name
   policy_arn = aws_iam_policy.deploy_surge.arn
+}
+
+# The user is created by hand; no resource here owns it, so an account without one must set
+# legacy_deploy_user = "" or the apply fails on a missing principal.
+resource "aws_iam_user_policy_attachment" "deploy_surge" {
+  count      = var.legacy_deploy_user == "" ? 0 : 1
+  user       = var.legacy_deploy_user
+  policy_arn = aws_iam_policy.deploy_surge.arn
+}
+
+variable "fleet_region_suffixes" {
+  description = "region_name_suffix of every fleet this identity may provision. Each expands to the IAM role and instance-profile name patterns modules/fleet creates."
+  type        = list(string)
+  default     = ["oregon", "seoul"]
+}
+
+variable "legacy_deploy_user" {
+  description = "IAM user the deploy workflow authenticates as, for the surge-scaling policy. Empty = no user attachment (the role attachment above is the only grant), which is what a fresh account wants."
+  type        = string
+  default     = "github-actions-deploy"
+}
+
+# count moved the address to [0]; without this it plans as destroy-then-create.
+moved {
+  from = aws_iam_user_policy_attachment.deploy_surge
+  to   = aws_iam_user_policy_attachment.deploy_surge[0]
 }

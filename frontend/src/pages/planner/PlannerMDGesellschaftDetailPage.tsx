@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorBoundary } from '@/components/feedback/ErrorBoundary'
 import { PlannerViewer } from './components/plannerViewer/PlannerViewer'
-import { PlannerDetailHeader } from './components/plannerViewer/PlannerDetailHeader'
+import { PublishedPlannerHeader } from './components/plannerViewer/PublishedPlannerHeader'
 import { PlannerDetailFooter } from './components/plannerViewer/PlannerDetailFooter'
 import { CommentSection } from '@/shared/comment'
 import { PublishedPlannerList } from './components/plannerList/PublishedPlannerList'
@@ -14,9 +14,10 @@ import { MDPlannerToolbar } from './components/plannerList/MDPlannerToolbar'
 import { PlannerListFilterPills } from './components/plannerList/PlannerListFilterPills'
 import { PlannerGridSkeleton } from '@/components/feedback/ListPageSkeleton'
 import { CommunityPlansErrorFallback } from '@/components/feedback/CommunityPlansErrorFallback'
-import { usePublishedPlannerQuery } from './hooks/usePublishedPlannerQuery'
+import { usePublishedPlannerQuery, isPlannerRemoved } from './hooks/usePublishedPlannerQuery'
+import { isMDPlanner } from './types/PlannerTypes'
 import { useAuthQuery } from '@/shared/auth'
-import { useUserSettingsQuery } from '@/pages/settings'
+import { useUserSettingsQuery } from '@/shared/userSettings'
 import { useMDGesellschaftFilters } from './hooks/useMDGesellschaftFilters'
 import { SECTION_STYLES } from '@/lib/constants'
 
@@ -29,11 +30,11 @@ export default function PlannerMDGesellschaftDetailPage() {
 
   return (
     <ErrorBoundary>
-      <div className="container mx-auto p-8">
+      <div className={SECTION_STYLES.LAYOUT.page}>
         <Suspense
           fallback={
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
+              <div className={SECTION_STYLES.LAYOUT.rowBetween}>
                 <Skeleton className="h-10 w-64" />
                 <Skeleton className="h-10 w-32" />
               </div>
@@ -59,7 +60,7 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
 
   // Load published planner from API via Suspense query
   // Returns both apiData (for header/footer) and planner (for viewer)
-  const { apiData, planner } = usePublishedPlannerQuery(plannerId)
+  const queryState = usePublishedPlannerQuery(plannerId)
 
   // Get auth state for ownership check and gating actions
   const { data: user } = useAuthQuery()
@@ -70,7 +71,20 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
   const syncEnabled = userSettings?.syncEnabled
 
   // URL search params for list section
-  const { category, page, mode, search, setFilters } = useMDGesellschaftFilters()
+  const { filters, setFilters } = useMDGesellschaftFilters()
+
+  if (isPlannerRemoved(queryState)) {
+    return (
+      <div className="space-y-6 text-center py-12">
+        <h1 className={SECTION_STYLES.TEXT.pageTitle}>{t('sync.removedOnAnotherDevice')}</h1>
+        <Button asChild variant="outline">
+          <Link to="/planner/md/gesellschaft">{t('pages.detail.backToList')}</Link>
+        </Button>
+      </div>
+    )
+  }
+
+  const { apiData, planner } = queryState
 
   // Determine ownership by comparing author username with current user's username
   const isOwner =
@@ -80,12 +94,12 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
     user.usernameSuffix === apiData.authorUsernameSuffix
 
   // Validate planner type - viewer only supports Mirror Dungeon planners
-  if (planner.config.type !== 'MIRROR_DUNGEON') {
+  if (!isMDPlanner(planner)) {
     return (
       <div className="space-y-6 text-center py-12">
-        <h1 className="text-2xl font-bold">{t('pages.detail.invalidType')}</h1>
-        <p className="text-muted-foreground">{t('pages.detail.invalidTypeMessage')}</p>
-        <p className="text-sm text-muted-foreground">
+        <h1 className={SECTION_STYLES.TEXT.pageTitle}>{t('pages.detail.invalidType')}</h1>
+        <p className={SECTION_STYLES.TEXT.muted}>{t('pages.detail.invalidTypeMessage')}</p>
+        <p className={SECTION_STYLES.TEXT.caption}>
           {t('pages.detail.currentType')}: {planner.config.type}
         </p>
         <Button asChild variant="outline">
@@ -109,8 +123,7 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
   return (
     <div className="space-y-4">
       {/* Header with author info, stats, and actions */}
-      <PlannerDetailHeader
-        variant="published"
+      <PublishedPlannerHeader
         planner={apiData}
         isOwner={isOwner}
         isAuthenticated={isAuthenticated}
@@ -143,10 +156,10 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
         {/* Toolbar: Search + Mode Toggle */}
         <div className="mb-4">
           <MDPlannerToolbar
-            search={search}
+            search={filters.search}
             onSearchChange={(q) => setFilters({ q, page: 0 })}
             showModeToggle
-            mode={mode}
+            mode={filters.mode}
             onModeChange={(m) => setFilters({ mode: m, page: 0 })}
           />
         </div>
@@ -154,7 +167,7 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
         {/* Category Filter Pills */}
         <div className="mb-6">
           <PlannerListFilterPills
-            selectedCategory={category}
+            selectedCategory={filters.category}
             onCategoryChange={(c) => setFilters({ category: c, page: 0 })}
           />
         </div>
@@ -163,10 +176,16 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
         <ReactErrorBoundary FallbackComponent={CommunityPlansErrorFallback}>
           <Suspense fallback={<PlannerGridSkeleton />}>
             <PublishedPlannerList
-              mode={mode}
-              category={category}
-              page={page}
-              search={search}
+              filters={{
+                ...filters,
+                // The list under a plan is not narrowed by the entity filters the
+                // gesellschaft page applies; only category, mode, search and page carry over.
+                keyword: undefined,
+                identity: undefined,
+                ego: undefined,
+                gift: undefined,
+                themePack: undefined,
+              }}
               isAuthenticated={isAuthenticated}
               onPageChange={(p) => setFilters({ page: p })}
             />

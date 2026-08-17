@@ -2,11 +2,14 @@
 
 export { EGOGiftCard } from './components/EGOGiftCard'
 export { EGOGiftCardLink } from './components/EGOGiftCardLink'
+export { EGOGiftDetailSkeleton } from './components/EGOGiftDetailSkeleton'
+export { EGOGiftGrid } from './components/EGOGiftGrid'
 export { EGOGiftList } from './components/EGOGiftList'
 export { EGOGiftName } from './components/EGOGiftName'
 export { EGOGiftMetadata } from './components/EGOGiftMetadata'
 export { EGOGiftTooltip } from './components/EGOGiftTooltip'
 export { EGOGiftFilterBar } from './components/EGOGiftFilterBar'
+export { EGOGiftFilterDropdown } from './components/EGOGiftFilterDropdown'
 export { EGOGiftSelectionList } from './components/EGOGiftSelectionList'
 export { EGOGiftSelectableCard } from './components/EGOGiftSelectableCard'
 export { EGOGiftObservationSelection } from './components/EGOGiftObservationSelection'
@@ -14,15 +17,14 @@ export { EGOGiftEnhancementIndicator } from './components/EGOGiftEnhancementIndi
 export { RecipeSection } from './components/RecipeSection'
 export { GiftNameI18n } from './components/GiftNameI18n'
 export { EnhancementsPanelI18n } from './components/EnhancementsPanelI18n'
-export { CompactEGOGiftKeywordFilter } from './components/CompactEGOGiftKeywordFilter'
-export { CompactDifficultyFilter } from './components/CompactDifficultyFilter'
-export { CompactTierFilter } from './components/CompactTierFilter'
+export { EGOGiftKeywordFilter } from './components/EGOGiftKeywordFilter'
+export { DifficultyFilter } from './components/DifficultyFilter'
+export { TierFilter } from './components/TierFilter'
 
 export {
   useEGOGiftListData,
   useEGOGiftListSpec,
   useEGOGiftListI18n,
-  useEGOGiftListI18nDeferred,
   egoGiftListQueryKeys,
 } from './hooks/useEGOGiftListData'
 export {
@@ -37,22 +39,12 @@ export {
 } from './hooks/useEGOGiftObservationData'
 
 export { sortEGOGifts } from './lib/egoGiftSort'
-export {
-  calculateEnhancementCost,
-  extractEGOGiftTier,
-  getDisabledEnhancementLevels,
-  getMaxEnhancementLevel,
-} from './lib/egoGiftUtils'
-export {
-  deriveDifficulty,
-  matchesKeywordFilter,
-  matchesDifficultyFilter,
-  matchesTierFilter,
-  matchesThemePackFilter,
-  matchesAttributeTypeFilter,
-  matchesFusionedFilter,
-  matchesExclusiveFilter,
-} from './lib/egoGiftFilter'
+export { calculateEnhancementCost, isMixedRecipe } from './lib/egoGiftUtils'
+export { parseTier, toRomanTier } from './lib/egoGiftTier'
+export type { EGOGiftTierValue } from './lib/egoGiftTier'
+export { toEGOGiftCardProps } from './lib/egoGiftCardProps'
+export { deriveDifficulty } from './lib/egoGiftFilter'
+export type { EGOGiftFacetState } from './lib/egoGiftFilter'
 
 export type {
   StandardRecipe,
@@ -62,20 +54,13 @@ export type {
   EGOGiftData,
   EGOGiftI18n,
   EGOGiftListItem,
-  EGOGiftListItemWithName,
-  EGOGiftSpecList,
   EGOGiftNameList,
 } from './types/EGOGiftTypes'
-export type {
-  EGOGiftObservationCost,
-  EGOGiftObservationData,
-} from './types/EGOGiftObservationTypes'
-
 export {
+  EGOGiftRecipeSchema,
   EGOGiftSpecSchema,
   EGOGiftDataSchema,
   EGOGiftI18nSchema,
-  EGOGiftListItemSchema,
   EGOGiftSpecListSchema,
   EGOGiftNameListSchema,
 } from './schemas/EGOGiftSchemas'
@@ -88,10 +73,15 @@ export {
   encodeGiftSelection,
   decodeGiftSelection,
   getBaseGiftId,
-  isGiftSelected,
-  getGiftEnhancement,
   findEncodedGiftId,
   buildSelectionLookup,
   getCascadeIngredients,
+  decodeGiftSelections,
+  orderSelectionsByGiftOrder,
+  decodeAndOrderGiftSelections,
+  lookupByGiftId,
+  hasGiftId,
+  giftDisplayName,
 } from './lib/egoGiftEncoding'
-export type { GiftSelectionEntry } from './lib/egoGiftEncoding'
+export type { GiftSelectionEntry, DecodedGiftSelection } from './lib/egoGiftEncoding'
+export { toGiftListItem, toGiftListItems, toUnknownGiftListItem } from './lib/giftListItem'

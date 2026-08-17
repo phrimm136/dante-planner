@@ -1,7 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, assert } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { StartBuffSection } from '../StartBuffSection'
-import { CURRENT_MD_VERSION } from '@/lib/constants'
+import { PLANNER_CONFIG } from '@/lib/constants'
+
+const CURRENT_MD_VERSION = PLANNER_CONFIG.mdCurrentVersion
 
 // Mock react-i18next
 vi.mock('react-i18next', async (importOriginal) => {
@@ -17,17 +19,6 @@ vi.mock('react-i18next', async (importOriginal) => {
     }),
   }
 })
-
-// Mock planner editor store (safe version - can return undefined)
-vi.mock('../../../stores/usePlannerEditorStore', () => ({
-  usePlannerEditorStoreSafe: (selector: (state: Record<string, unknown>) => unknown) => {
-    const mockState = {
-      selectedBuffIds: new Set<number>(),
-      setSelectedBuffIds: vi.fn(),
-    }
-    return selector(mockState)
-  },
-}))
 
 // Mock useStartBuffSelection hook
 vi.mock('../../../hooks/useStartBuffSelection', () => ({
@@ -56,7 +47,7 @@ vi.mock('../StartBuffMiniCard', () => ({
 }))
 
 // Mock PlannerSection
-vi.mock('../../PlannerSection', () => ({
+vi.mock('@/components/layout/PlannerSection', () => ({
   PlannerSection: ({ title, children }: { title: string; children: React.ReactNode }) => (
     <section>
       <h2>{title}</h2>
@@ -72,9 +63,7 @@ describe('StartBuffSection', () => {
 
   describe('empty state', () => {
     it('shows placeholder when no buffs selected', () => {
-      render(
-        <StartBuffSection mdVersion={CURRENT_MD_VERSION} selectedBuffIdsOverride={new Set()} />,
-      )
+      render(<StartBuffSection mdVersion={CURRENT_MD_VERSION} selectedBuffIds={new Set()} />)
 
       expect(screen.getByText('Click to select start buffs')).toBeDefined()
       expect(screen.queryByTestId('start-buff-mini-card')).toBeNull()
@@ -86,7 +75,7 @@ describe('StartBuffSection', () => {
       render(
         <StartBuffSection
           mdVersion={CURRENT_MD_VERSION}
-          selectedBuffIdsOverride={new Set()}
+          selectedBuffIds={new Set()}
           onClick={onClick}
         />,
       )
@@ -100,24 +89,18 @@ describe('StartBuffSection', () => {
 
   describe('with selected buffs', () => {
     it('renders mini cards for selected buffs', () => {
-      render(
-        <StartBuffSection
-          mdVersion={CURRENT_MD_VERSION}
-          selectedBuffIdsOverride={new Set([1001])}
-        />,
-      )
+      render(<StartBuffSection mdVersion={CURRENT_MD_VERSION} selectedBuffIds={new Set([1001])} />)
 
       const miniCards = screen.getAllByTestId('start-buff-mini-card')
       expect(miniCards.length).toBe(1)
-      expect(miniCards[0].getAttribute('data-buff-id')).toBe('1001')
+      const [firstCard] = miniCards
+      assert(firstCard, 'the section renders no mini card')
+      expect(firstCard.getAttribute('data-buff-id')).toBe('1001')
     })
 
     it('renders multiple mini cards for multiple selections', () => {
       render(
-        <StartBuffSection
-          mdVersion={CURRENT_MD_VERSION}
-          selectedBuffIdsOverride={new Set([1001, 1002])}
-        />,
+        <StartBuffSection mdVersion={CURRENT_MD_VERSION} selectedBuffIds={new Set([1001, 1002])} />,
       )
 
       const miniCards = screen.getAllByTestId('start-buff-mini-card')
@@ -125,12 +108,7 @@ describe('StartBuffSection', () => {
     })
 
     it('does not show placeholder when buffs are selected', () => {
-      render(
-        <StartBuffSection
-          mdVersion={CURRENT_MD_VERSION}
-          selectedBuffIdsOverride={new Set([1001])}
-        />,
-      )
+      render(<StartBuffSection mdVersion={CURRENT_MD_VERSION} selectedBuffIds={new Set([1001])} />)
 
       expect(screen.queryByText('Click to select start buffs')).toBeNull()
     })
@@ -143,7 +121,7 @@ describe('StartBuffSection', () => {
       render(
         <StartBuffSection
           mdVersion={CURRENT_MD_VERSION}
-          selectedBuffIdsOverride={new Set([1001])}
+          selectedBuffIds={new Set([1001])}
           onClick={onClick}
         />,
       )
@@ -158,7 +136,7 @@ describe('StartBuffSection', () => {
       render(
         <StartBuffSection
           mdVersion={CURRENT_MD_VERSION}
-          selectedBuffIdsOverride={new Set()}
+          selectedBuffIds={new Set()}
           onClick={() => {}}
         />,
       )

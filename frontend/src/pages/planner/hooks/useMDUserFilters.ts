@@ -11,7 +11,7 @@
  * Pattern: useSearch + useNavigate
  */
 
-import { useSearch, useNavigate } from '@tanstack/react-router'
+import { useUrlFilters } from '@/components/hooks/useUrlFilters'
 
 import type { MDCategory } from '@/shared/gameData'
 import type { MDUserSearchParams } from '../types/MDPlannerListTypes'
@@ -66,43 +66,16 @@ export interface UseMDUserFiltersResult {
  * ```
  */
 export function useMDUserFilters(): UseMDUserFiltersResult {
-  // Get current search params from URL
-  // Route must define validateSearch for type safety
-  const search = useSearch({ strict: false }) as MDUserSearchParams | undefined
-
-  const navigate = useNavigate()
+  const {
+    params: search,
+    setParams: setFilters,
+    clearParams: clearFilters,
+  } = useUrlFilters<MDUserSearchParams>()
 
   // Extract values with defaults (handle undefined from optional schema)
   const category = search?.category
   const page = search?.page ?? DEFAULT_PAGE
   const searchQuery = search?.q ?? ''
-
-  /**
-   * Update filter values in URL
-   * Merges with existing params, undefined values are omitted (hidden from URL)
-   */
-  const setFilters = (updates: Partial<MDUserSearchParams>) => {
-    void navigate({
-      to: '.',
-      search: (prev) => {
-        const next = { ...prev, ...updates }
-        return next
-      },
-      replace: false,
-    })
-  }
-
-  /**
-   * Clear all filters
-   * Resets to default state (empty URL params)
-   */
-  const clearFilters = () => {
-    void navigate({
-      to: '.',
-      search: {},
-      replace: false,
-    })
-  }
 
   /**
    * Reset page to 0

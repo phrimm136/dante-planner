@@ -19,11 +19,10 @@ LIB_DIR="$SCRIPT_DIR/lib"
 # shellcheck source=lib/common.sh
 source "$LIB_DIR/common.sh"
 
-AWS_REGION="${AWS_REGION:-us-west-2}"
 TF_DIR="${TF_DIR:-$SCRIPT_DIR/../../terraform/oregon}"
 
 resolve_cp_id() {
-    if [ -n "${CP_INSTANCE_ID:-}" ]; then
+    if [[ -n "${CP_INSTANCE_ID:-}" ]]; then
         echo "$CP_INSTANCE_ID"
         return
     fi
@@ -81,55 +80,67 @@ REMOTE
 # `exit 1` on any fatal failure so the exit code gates a cutover. (Suggested fatal
 # set: any node not Ready; any pod not Running; any app not Synced+Healthy; RDS
 # unreachable.)
+NODES_NOT_READY='$2!="Ready"{print $1}'
+PODS_NOT_READY='{split($2,r,"/"); if($3!="Running"||r[1]!=r[2]) print $1"("$3","$2")"}'
+ARGOCD_NOT_HEALTHY='$2!="Synced"||$3!="Healthy"{print $1"("$2"/"$3")"}'
+
+# Lines under the "=== NAME ===" header of $2, up to the next header.
+section_of() {
+    awk -v want="=== $1 ===" 'index($0, want){f=1;next} /^=== /{f=0} f' <<<"$2"
+}
+
 verdict() {
-    local output="$1" fatal=0 section
+    local output="$1" fatal=0 section offenders
 
     # NODES — every node must be Ready.
-    section=$(awk '/=== NODES ===/{f=1;next} /^=== /{f=0} f' <<<"$output")
-    if [ -z "$section" ]; then
+    section=$(section_of NODES "$output")
+    offenders=$(awk "$NODES_NOT_READY" <<<"$section")
+    if [[ -z "$section" ]]; then
         log_error "NODES: none reported"
         fatal=1
-    elif [ -n "$(awk '$2!="Ready"{print $1}' <<<"$section")" ]; then
-        log_error "NODES not Ready: $(awk '$2!="Ready"{print $1}' <<<"$section" | paste -sd' ')"
+    elif [[ -n "$offenders" ]]; then
+        log_error "NODES not Ready: $(paste -sd' ' <<<"$offenders")"
         fatal=1
     else
         log_info "NODES Ready: $(grep -c . <<<"$section")"
     fi
 
     # PODS — every danteplanner pod Running AND all containers ready (READY N/N).
-    section=$(awk '/=== PODS ===/{f=1;next} /^=== /{f=0} f' <<<"$output")
-    if [ -z "$section" ]; then
+    section=$(section_of PODS "$output")
+    offenders=$(awk "$PODS_NOT_READY" <<<"$section")
+    if [[ -z "$section" ]]; then
         log_error "PODS: none reported"
         fatal=1
-    elif [ -n "$(awk '{split($2,r,"/"); if($3!="Running"||r[1]!=r[2]) print $1"("$3","$2")"}' <<<"$section")" ]; then
-        log_error "PODS not ready: $(awk '{split($2,r,"/"); if($3!="Running"||r[1]!=r[2]) print $1"("$3","$2")"}' <<<"$section" | paste -sd' ')"
+    elif [[ -n "$offenders" ]]; then
+        log_error "PODS not ready: $(paste -sd' ' <<<"$offenders")"
         fatal=1
     else
         log_info "PODS Running+Ready: $(grep -c . <<<"$section")"
     fi
 
     # ARGOCD — every app Synced AND Healthy (Progressing/OutOfSync fails the gate).
-    section=$(awk '/=== ARGOCD ===/{f=1;next} /^=== /{f=0} f' <<<"$output")
-    if [ -z "$section" ]; then
+    section=$(section_of ARGOCD "$output")
+    offenders=$(awk "$ARGOCD_NOT_HEALTHY" <<<"$section")
+    if [[ -z "$section" ]]; then
         log_error "ARGOCD: no applications reported"
         fatal=1
-    elif [ -n "$(awk '$2!="Synced"||$3!="Healthy"{print $1"("$2"/"$3")"}' <<<"$section")" ]; then
-        log_error "ARGOCD not Synced+Healthy: $(awk '$2!="Synced"||$3!="Healthy"{print $1"("$2"/"$3")"}' <<<"$section" | paste -sd' ')"
+    elif [[ -n "$offenders" ]]; then
+        log_error "ARGOCD not Synced+Healthy: $(paste -sd' ' <<<"$offenders")"
         fatal=1
     else
         log_info "ARGOCD Synced+Healthy: $(grep -c . <<<"$section")"
     fi
 
     # RDS — reachable from a backend pod (RDS_UNREACHABLE marker = nc failed).
-    section=$(awk '/=== RDS ===/{f=1;next} /^=== /{f=0} f' <<<"$output")
-    if [ -z "$section" ] || grep -q "RDS_UNREACHABLE" <<<"$section"; then
+    section=$(section_of RDS "$output")
+    if [[ -z "$section" ]] || grep -q "RDS_UNREACHABLE" <<<"$section"; then
         log_error "RDS unreachable from backend pod"
         fatal=1
     else
         log_info "RDS reachable"
     fi
 
-    if [ "$fatal" -ne 0 ]; then
+    if [[ "$fatal" -ne 0 ]]; then
         log_error "fleet is NOT cutover-ready"
         exit 1
     fi
@@ -138,7 +149,7 @@ verdict() {
 
 main() {
     local cp_id output
-    if [ "${1:-}" = "--kubeconfig" ]; then
+    if [[ "${1:-}" = "--kubeconfig" ]]; then
         fetch_kubeconfig
         shift || true
     fi

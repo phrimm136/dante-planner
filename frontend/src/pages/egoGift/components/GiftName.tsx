@@ -1,6 +1,7 @@
 import type { EGOGiftAttributeType } from '@/shared/gameData'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useColorCodes } from '@/shared/gameText'
+import { SECTION_STYLES } from '@/lib/constants'
 
 interface GiftNameProps {
   attributeType: EGOGiftAttributeType
@@ -16,7 +17,7 @@ export default function GiftName({ attributeType, name }: GiftNameProps) {
   }
 
   return (
-    <h1 className="text-2xl font-bold" style={{ color }}>
+    <h1 className={SECTION_STYLES.TEXT.pageTitle} style={{ color }}>
       {name}
     </h1>
   )

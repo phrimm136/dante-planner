@@ -1,5 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render } from '@testing-library/react'
+import { DUNGEON_IDX } from '@/shared/gameData'
+import type { ThemePackEntry } from '../../types/ThemePackTypes'
 import { ThemePackCard } from '../ThemePackCard'
 
 vi.mock('react-i18next', async (importOriginal) => {
@@ -38,16 +40,16 @@ function getSrcs(container: HTMLElement) {
 }
 
 describe('ThemePackCard', () => {
-  const normalPackEntry = {
-    floorNumber: 1,
+  const normalPackEntry: ThemePackEntry = {
     themePackConfig: { textColor: 'FFFFFF' },
-    exceptionConditions: [{ dungeonIdx: 1 }],
+    exceptionConditions: [{ dungeonIdx: DUNGEON_IDX.HARD }],
+    specificEgoGiftPool: [],
   }
 
-  const extremePackEntry = {
-    floorNumber: 1,
+  const extremePackEntry: ThemePackEntry = {
     themePackConfig: { textColor: 'FF0000' },
-    exceptionConditions: [{ dungeonIdx: 3 }],
+    exceptionConditions: [{ dungeonIdx: DUNGEON_IDX.EXTREME }],
+    specificEgoGiftPool: [],
   }
 
   const defaultProps = {
@@ -115,6 +117,7 @@ describe('ThemePackCard', () => {
 
       const images = getImages(container)
       const hoverLayer = images[1]
+      if (!hoverLayer) throw new Error('expected a hover highlight layer')
       expect(hoverLayer.className).toContain('opacity-0')
       expect(hoverLayer.className).toContain('group-hover:opacity-100')
     })
@@ -124,8 +127,19 @@ describe('ThemePackCard', () => {
 
       const images = getImages(container)
       const selectLayer = images[1]
+      if (!selectLayer) throw new Error('expected a select highlight layer')
       expect(selectLayer).toHaveAttribute('src', '/images/UI/themePack/onSelect.webp')
       expect(selectLayer.className).not.toContain('opacity-0')
+    })
+  })
+
+  describe('Lazy loading', () => {
+    it('lazy-loads the theme pack art so off-screen grid cards defer their fetch', () => {
+      const { container } = render(<ThemePackCard {...defaultProps} />)
+
+      const art = getImages(container)[0]
+      expect(art).toHaveAttribute('src', '/images/themePack/pack1.webp')
+      expect(art).toHaveAttribute('loading', 'lazy')
     })
   })
 })

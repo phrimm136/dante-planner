@@ -29,6 +29,12 @@ public final class CookieConstants {
      */
     public static final String OAUTH_TX = "oauth_tx";
 
+    /**
+     * Cookie name for the long-lived device identifier that distinguishes a caller's browsers,
+     * used for SSE echo suppression and for rate limiting behind NAT.
+     */
+    public static final String DEVICE_ID = "deviceId";
+
     private CookieConstants() {
         // Utility class - prevent instantiation
     }

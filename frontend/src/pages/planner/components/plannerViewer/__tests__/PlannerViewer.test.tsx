@@ -1,7 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { PlannerViewer } from '../PlannerViewer'
-import type { SaveablePlanner, MDPlannerContent } from '../../../types/PlannerTypes'
+import type {
+  MDSaveablePlanner,
+  SaveablePlanner,
+  MDPlannerContent,
+} from '../../../types/PlannerTypes'
 
 // Mock react-i18next with initReactI18next for proper module loading
 vi.mock('react-i18next', async (importOriginal) => {
@@ -56,7 +60,7 @@ describe('PlannerViewer', () => {
     },
   }
 
-  const mockPlanner: SaveablePlanner = {
+  const mockPlanner: MDSaveablePlanner = {
     metadata: {
       id: '550e8400-e29b-41d4-a716-446655440000',
       title: 'Test Planner',
@@ -68,7 +72,6 @@ describe('PlannerViewer', () => {
       createdAt: '2026-01-10T00:00:00Z',
       lastModifiedAt: '2026-01-10T00:00:00Z',
       savedAt: null,
-      userId: null,
       deviceId: 'device-123',
     },
     config: {

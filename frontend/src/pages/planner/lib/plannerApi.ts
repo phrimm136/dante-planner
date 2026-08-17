@@ -6,9 +6,12 @@
  */
 
 import { ApiClient } from '@/lib/api'
+import { BATCH_PULL_MAX_IDS } from '@/lib/constants'
+import { validateData } from '@/lib/validation'
 import {
   ServerPlannerResponseSchema,
-  ServerPlannerSummaryArraySchema,
+  ServerPlannerBatchResponseSchema,
+  ServerPlannerSummaryPageSchema,
   ImportPlannersResponseSchema,
 } from '../schemas/PlannerSchemas'
 import type {
@@ -32,21 +35,26 @@ export const plannerApi = {
    *
    * @param page - Page number (0-indexed)
    * @param size - Number of items per page
-   * @returns Paginated response with content and metadata
+   * @returns Paginated response with content and whether this is the final page
    */
-  async list(page = 0, size = 100): Promise<{ content: ServerPlannerSummary[]; last: boolean }> {
-    const data = await ApiClient.get<{ content: unknown[]; last: boolean }>(
-      `${PLANNERS_BASE}?page=${page}&size=${size}`,
-    )
+  async list(
+    page = 0,
+    size = 100,
+    includeDeleted = false,
+  ): Promise<{ content: ServerPlannerSummary[]; last: boolean }> {
+    const deletedParam = includeDeleted ? '&includeDeleted=true' : ''
+    const data = await ApiClient.get(`${PLANNERS_BASE}?page=${page}&size=${size}${deletedParam}`)
+    const parsed = validateData(data, ServerPlannerSummaryPageSchema, 'planner list')
     return {
-      content: ServerPlannerSummaryArraySchema.parse(data.content),
-      last: data.last,
+      content: parsed.content,
+      last: parsed.page.number >= parsed.page.totalPages - 1,
     }
   },
 
   /**
-   * List ALL planners for the current user (loops through all pages)
-   * Use for sync operations that need complete planner list
+   * List ALL planners for the current user (loops through all pages), tombstones included:
+   * sync is the one consumer that must learn of deletions, and the deletedAt each tombstone
+   * carries is what routes it to a purge instead of a pull.
    *
    * @returns Array of all planner summaries
    */
@@ -56,7 +64,7 @@ export const plannerApi = {
     let hasMore = true
 
     while (hasMore) {
-      const result = await this.list(page, 100)
+      const result = await this.list(page, 100, true)
       allPlanners.push(...result.content)
       hasMore = !result.last
       page++
@@ -73,7 +81,27 @@ export const plannerApi = {
    */
   async get(id: PlannerId | string): Promise<ServerPlannerResponse> {
     const data = await ApiClient.get(`${PLANNERS_BASE}/${id}`)
-    return ServerPlannerResponseSchema.parse(data)
+    return validateData(data, ServerPlannerResponseSchema, 'planner get')
+  },
+
+  /**
+   * Fetch several planners, chunked to the server's id cap, one chunk per yield.
+   * A chunk is parsed whole, so a malformed row fails its chunk loudly; yielding
+   * per chunk lets the caller keep rows it already received when a later chunk
+   * fails. The response is a bare array, not positionally aligned with the
+   * request: ids naming nothing, a deleted planner, or another user's planner
+   * are simply absent.
+   *
+   * @param ids - Planner UUIDs to fetch
+   * @yields The planners the caller may see, one chunk at a time
+   */
+  async *batchChunks(ids: string[]): AsyncGenerator<ServerPlannerResponse[]> {
+    for (let i = 0; i < ids.length; i += BATCH_PULL_MAX_IDS) {
+      const data = await ApiClient.post(`${PLANNERS_BASE}/batch`, {
+        ids: ids.slice(i, i + BATCH_PULL_MAX_IDS),
+      })
+      yield validateData(data, ServerPlannerBatchResponseSchema, 'planner batch')
+    }
   },
 
   /**
@@ -84,7 +112,7 @@ export const plannerApi = {
    * @param request - Full planner data including syncVersion
    * @param force - If true, bypasses syncVersion check (for conflict override)
    * @returns Created or updated planner with new syncVersion
-   * @throws ApiConflictError if syncVersion doesn't match (HTTP 409)
+   * @throws ConflictError if syncVersion does not match (HTTP 409)
    */
   async upsert(
     id: PlannerId | string,
@@ -93,7 +121,7 @@ export const plannerApi = {
   ): Promise<ServerPlannerResponse> {
     const endpoint = force ? `${PLANNERS_BASE}/${id}?force=true` : `${PLANNERS_BASE}/${id}`
     const data = await ApiClient.put(endpoint, request)
-    return ServerPlannerResponseSchema.parse(data)
+    return validateData(data, ServerPlannerResponseSchema, 'planner upsert')
   },
 
   /**
@@ -113,37 +141,30 @@ export const plannerApi = {
    */
   async import(request: ImportPlannersRequest): Promise<ImportPlannersResponse> {
     const data = await ApiClient.post(`${PLANNERS_BASE}/import`, request)
-    return ImportPlannersResponseSchema.parse(data)
+    return validateData(data, ImportPlannersResponseSchema, 'planner import')
   },
 
   /**
-   * Toggle publish state of a planner
-   * Idempotent operation: publishes if unpublished, unpublishes if published
+   * Publish a planner.
+   * Idempotent: a repeated request leaves the planner where it already is.
    *
    * @param id - Planner UUID
-   * @returns Updated planner with toggled published state
+   * @returns The published planner
    */
-  async togglePublish(id: PlannerId | string): Promise<ServerPlannerResponse> {
-    const data = await ApiClient.put(`${PLANNERS_BASE}/${id}/publish`)
-    return ServerPlannerResponseSchema.parse(data)
+  async publish(id: PlannerId | string): Promise<ServerPlannerResponse> {
+    const data = await ApiClient.post(`${PLANNERS_BASE}/${id}/publish`)
+    return validateData(data, ServerPlannerResponseSchema, 'planner publish')
   },
 
   /**
-   * Create an EventSource for real-time planner updates
-   * Used for multi-device sync notifications
+   * Withdraw a planner from public view.
+   * Idempotent: a repeated request leaves the planner where it already is.
    *
-   * @returns EventSource connected to unified SSE endpoint
-   *
-   * @example
-   * const eventSource = plannerApi.createEventsConnection()
-   * eventSource.onmessage = (event) => {
-   *   const data = PlannerSseEventSchema.parse(JSON.parse(event.data))
-   *   // Handle update...
-   * }
-   * eventSource.onerror = () => eventSource.close()
+   * @param id - Planner UUID
+   * @returns The withdrawn planner
    */
-  createEventsConnection(): EventSource {
-    // Using unified SSE endpoint for all event types
-    return ApiClient.createEventSource('/api/sse/subscribe')
+  async unpublish(id: PlannerId | string): Promise<ServerPlannerResponse> {
+    const data = await ApiClient.post(`${PLANNERS_BASE}/${id}/unpublish`)
+    return validateData(data, ServerPlannerResponseSchema, 'planner unpublish')
   },
 }

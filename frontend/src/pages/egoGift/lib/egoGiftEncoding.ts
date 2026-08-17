@@ -1,5 +1,11 @@
+import { GIFT_ID_PATTERN } from '@/shared/gameData'
+import type { EGOGiftId } from '@/shared/gameData'
 import type { EnhancementLevel } from '@/shared/gameData'
-import type { EGOGiftRecipe } from '@/pages/egoGift'
+import type { EGOGiftRecipe, EGOGiftListItem, EGOGiftSpec } from '@/pages/egoGift'
+import type { SortMode } from '@/shared/filter'
+import { sortEGOGifts } from './egoGiftSort'
+import { isMixedRecipe } from './egoGiftUtils'
+import { toGiftListItem } from './giftListItem'
 
 /**
  * Encodes a gift selection into a numeric string format
@@ -18,33 +24,36 @@ export function encodeGiftSelection(enhancement: EnhancementLevel, giftId: strin
 }
 
 /**
+ * Encoded selection: an optional enhancement digit followed by the gift base id.
+ */
+export const ENCODED_SELECTION_PATTERN = new RegExp(`^([12])?(${GIFT_ID_PATTERN})$`)
+
+/**
+ * A decoded gift selection
+ */
+export interface GiftSelection {
+  enhancement: EnhancementLevel
+  giftId: string
+}
+
+/**
  * Decodes an encoded gift selection string into enhancement level and gift ID
  * Handles both enhanced (19001) and base (9001) formats
  *
  * @param encodedId - Encoded gift selection string
- * @returns Object with enhancement level and gift ID
+ * @returns Decoded selection, or null when the string is not a valid encoding
  */
-export function decodeGiftSelection(encodedId: string): {
-  enhancement: EnhancementLevel
-  giftId: string
-} {
-  // Gift IDs are 4 digits (9xxx format), so:
-  // - 4 digits = base gift (enhancement 0)
-  // - 5 digits = enhanced gift (first digit is enhancement level)
-  if (encodedId.length === 4) {
-    return { enhancement: 0, giftId: encodedId }
+export function decodeGiftSelection(encodedId: string): GiftSelection | null {
+  const match = encodedId.match(ENCODED_SELECTION_PATTERN)
+  if (!match) return null
+
+  const [, enhancementDigit, giftId] = match
+  if (giftId === undefined) return null
+
+  return {
+    enhancement: enhancementDigit ? (Number(enhancementDigit) as EnhancementLevel) : 0,
+    giftId,
   }
-
-  const enhancementDigit = parseInt(encodedId[0], 10)
-  const giftId = encodedId.slice(1)
-
-  // Validate enhancement level
-  if (enhancementDigit === 1 || enhancementDigit === 2) {
-    return { enhancement: enhancementDigit, giftId }
-  }
-
-  // Fallback: treat as base gift if parsing fails
-  return { enhancement: 0, giftId: encodedId }
 }
 
 /**
@@ -52,45 +61,10 @@ export function decodeGiftSelection(encodedId: string): {
  * Useful for checking if a gift is selected regardless of enhancement
  *
  * @param encodedId - Encoded gift selection string
- * @returns Base gift ID
+ * @returns Base gift ID, or null when the string is not a valid encoding
  */
-export function getBaseGiftId(encodedId: string): string {
-  return decodeGiftSelection(encodedId).giftId
-}
-
-/**
- * Checks if a gift ID is selected in a set of encoded selections
- * Matches regardless of enhancement level
- *
- * @param giftId - Gift ID to check
- * @param selectedIds - Set of encoded selection strings
- * @returns True if the gift is selected (at any enhancement level)
- */
-export function isGiftSelected(giftId: string, selectedIds: Set<string>): boolean {
-  for (const encodedId of selectedIds) {
-    if (getBaseGiftId(encodedId) === giftId) {
-      return true
-    }
-  }
-  return false
-}
-
-/**
- * Gets the current enhancement level for a gift from a set of selections
- * Returns 0 if not selected
- *
- * @param giftId - Gift ID to check
- * @param selectedIds - Set of encoded selection strings
- * @returns Enhancement level (0, 1, or 2)
- */
-export function getGiftEnhancement(giftId: string, selectedIds: Set<string>): EnhancementLevel {
-  for (const encodedId of selectedIds) {
-    const decoded = decodeGiftSelection(encodedId)
-    if (decoded.giftId === giftId) {
-      return decoded.enhancement
-    }
-  }
-  return 0
+export function getBaseGiftId(encodedId: string): string | null {
+  return decodeGiftSelection(encodedId)?.giftId ?? null
 }
 
 /**
@@ -120,10 +94,9 @@ export interface GiftSelectionEntry {
 
 /**
  * Builds a Map from giftId to selection data for O(1) lookups
- * Use with useMemo to cache the result and avoid O(n) iteration per gift card
  *
  * @example
- * const selectionMap = useMemo(() => buildSelectionLookup(selectedGiftIds), [selectedGiftIds])
+ * const selectionMap = buildSelectionLookup(selectedGiftIds)
  * const entry = selectionMap.get(giftId)
  * const isSelected = entry !== undefined
  * const enhancement = entry?.enhancement ?? 0
@@ -134,10 +107,131 @@ export interface GiftSelectionEntry {
 export function buildSelectionLookup(selectedIds: Set<string>): Map<string, GiftSelectionEntry> {
   const map = new Map<string, GiftSelectionEntry>()
   for (const encodedId of selectedIds) {
-    const { giftId, enhancement } = decodeGiftSelection(encodedId)
-    map.set(giftId, { encodedId, enhancement })
+    const decoded = decodeGiftSelection(encodedId)
+    if (!decoded) continue
+    map.set(decoded.giftId, { encodedId, enhancement: decoded.enhancement })
   }
   return map
+}
+
+/**
+ * A selected gift resolved against the spec, with the enhancement it was
+ * selected at. The name is always resolved — untranslated gifts carry their id.
+ */
+export interface DecodedGiftSelection {
+  encodedId: string
+  item: EGOGiftListItem & { name: string }
+  enhancement: EnhancementLevel
+}
+
+/**
+ * Resolve encoded gift selections against the spec and i18n catalogues.
+ *
+ * Selections that do not decode, or whose gift the spec does not carry, are
+ * dropped — a planner may hold ids from a content version this build predates.
+ *
+ * @param encodedIds - Encoded gift selection strings
+ * @param spec - Gift specs keyed by base gift ID
+ * @param i18n - Gift names keyed by base gift ID
+ * @returns One entry per resolvable selection, in iteration order
+ */
+export function decodeGiftSelections(
+  encodedIds: Iterable<string>,
+  spec: Record<string, EGOGiftSpec>,
+  i18n: Record<string, string>,
+): DecodedGiftSelection[] {
+  const decoded: DecodedGiftSelection[] = []
+
+  for (const encodedId of encodedIds) {
+    const selection = decodeGiftSelection(encodedId)
+    if (!selection) continue
+
+    const { giftId, enhancement } = selection
+    const giftSpec = spec[giftId]
+    if (!giftSpec) continue
+
+    decoded.push({
+      encodedId,
+      enhancement,
+      item: toGiftListItem(giftId, giftSpec, i18n[giftId] || giftId),
+    })
+  }
+
+  return decoded
+}
+
+/**
+ * Order decoded selections by the shared gift ordering, keeping each item paired
+ * with the enhancement it was selected at.
+ *
+ * @param selections - Decoded selections
+ * @param sortMode - Ordering to apply
+ * @returns A new ordered array
+ */
+export function orderSelectionsByGiftOrder(
+  selections: DecodedGiftSelection[],
+  sortMode: SortMode,
+): DecodedGiftSelection[] {
+  const byGiftId = new Map(selections.map((selection) => [selection.item.id, selection]))
+  return sortEGOGifts(
+    selections.map((selection) => selection.item),
+    sortMode,
+  ).map((item) => byGiftId.get(item.id)!)
+}
+
+/**
+ * Resolve encoded selections and order them in one step — the shape every
+ * viewer needs, so neither half is called alone at a call site.
+ *
+ * @param encodedIds - Encoded gift selection strings
+ * @param spec - Gift specs keyed by base gift ID
+ * @param i18n - Gift names keyed by base gift ID
+ * @param sortMode - Ordering to apply
+ * @returns Resolved selections in the shared gift order
+ */
+export function decodeAndOrderGiftSelections(
+  encodedIds: Iterable<string>,
+  spec: Record<string, EGOGiftSpec>,
+  i18n: Record<string, string>,
+  sortMode: SortMode,
+): DecodedGiftSelection[] {
+  return orderSelectionsByGiftOrder(decodeGiftSelections(encodedIds, spec, i18n), sortMode)
+}
+
+/**
+ * Look an encoded selection up in a map keyed by base gift ID.
+ *
+ * @param encodedId - Encoded gift selection string
+ * @param byGiftId - Map keyed by base gift ID
+ * @returns The entry, or undefined when the encoding is invalid or absent
+ */
+export function lookupByGiftId<T>(encodedId: string, byGiftId: Record<string, T>): T | undefined {
+  const giftId = getBaseGiftId(encodedId)
+  return giftId === null ? undefined : byGiftId[giftId]
+}
+
+/**
+ * Whether a map keyed by base gift ID carries an entry for this encoded selection.
+ *
+ * @param encodedId - Encoded gift selection string
+ * @param byGiftId - Map keyed by base gift ID
+ * @returns False when the encoding is invalid or the key is absent
+ */
+export function hasGiftId(encodedId: string, byGiftId: Record<string, unknown>): boolean {
+  const giftId = getBaseGiftId(encodedId)
+  return giftId !== null && giftId in byGiftId
+}
+
+/**
+ * Localized name for an encoded selection, falling back to the id itself when
+ * the encoding is invalid or untranslated.
+ *
+ * @param encodedId - Encoded gift selection string
+ * @param i18n - Gift names keyed by base gift ID
+ * @returns Display name
+ */
+export function giftDisplayName(encodedId: string, i18n: Record<string, string>): string {
+  return lookupByGiftId(encodedId, i18n) ?? encodedId
 }
 
 /**
@@ -148,18 +242,16 @@ export function buildSelectionLookup(selectedIds: Set<string>): Map<string, Gift
  * @param recipe - Recipe object or undefined
  * @returns Array of ingredient gift IDs to cascade-select
  */
-export function getCascadeIngredients(recipe: EGOGiftRecipe | undefined): number[] {
+export function getCascadeIngredients(recipe: EGOGiftRecipe | undefined): EGOGiftId[] {
   if (!recipe) return []
 
   // Mixed recipe (Lunar Memory): skip cascade, user must manually select
-  if ('type' in recipe && recipe.type === 'mixed') return []
+  if (isMixedRecipe(recipe)) return []
 
   // Standard recipe: union all materials across all recipe options
   if ('materials' in recipe) {
-    const uniqueIds = new Set<number>()
-    recipe.materials.forEach((option: number[]) =>
-      option.forEach((id: number) => uniqueIds.add(id)),
-    )
+    const uniqueIds = new Set<EGOGiftId>()
+    recipe.materials.forEach((option) => option.forEach((id) => uniqueIds.add(id)))
     return Array.from(uniqueIds)
   }
 

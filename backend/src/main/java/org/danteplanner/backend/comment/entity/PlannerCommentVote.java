@@ -1,7 +1,19 @@
 package org.danteplanner.backend.comment.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
+import jakarta.persistence.Index;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.PostPersist;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import org.springframework.data.domain.Persistable;
+import org.springframework.util.Assert;
 
 import java.time.Instant;
 
@@ -84,10 +96,8 @@ public class PlannerCommentVote implements Persistable<PlannerCommentVoteId> {
     protected void markNotNew() {
         this.isNew = false;
         // Validate entity integrity after loading from database
-        if (this.voteType == null) {
-            throw new IllegalStateException(
-                "Comment vote loaded with null voteType - data corruption detected for vote: " + getId());
-        }
+        Assert.notNull(this.voteType,
+                () -> "Comment vote loaded with null voteType - data corruption detected for vote: " + getId());
     }
 
     // Getters only - votes are immutable

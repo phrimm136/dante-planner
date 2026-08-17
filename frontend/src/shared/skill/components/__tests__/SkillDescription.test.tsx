@@ -9,7 +9,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { SkillDescription } from '../SkillDescription'
-import { FLAVOR_TEXT_COLOR } from '@/shared/gameData'
+import { FLAVOR_TEXT_COLOR } from '@/lib/constants'
 import type { SkillDescEntry } from '@/shared/gameData'
 
 // Asset path helper is used by the coin row renderer.

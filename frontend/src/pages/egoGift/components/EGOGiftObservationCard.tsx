@@ -1,4 +1,3 @@
-import { memo } from 'react'
 import { EGOGiftTooltip } from './EGOGiftTooltip'
 
 interface EGOGiftObservationCardProps {
@@ -8,21 +7,11 @@ interface EGOGiftObservationCardProps {
   children: React.ReactNode
 }
 
-// Custom comparison - exclude children and callback, include isSelected
-function areObservationCardPropsEqual(
-  prev: EGOGiftObservationCardProps,
-  next: EGOGiftObservationCardProps,
-): boolean {
-  return prev.giftId === next.giftId && prev.isSelected === next.isSelected
-  // children excluded - inner card handles its own memoization
-  // onSelect excluded - callback identity may change but behavior is same
-}
-
 /**
  * Gift card wrapper with tooltip (for observation/start gift selection)
  * Uses children pattern for consistent DevTools display with SelectableCard
  */
-export const EGOGiftObservationCard = memo(function EGOGiftObservationCard({
+export const EGOGiftObservationCard = function EGOGiftObservationCard({
   giftId,
   isSelected: _isSelected,
   onSelect,
@@ -41,4 +30,4 @@ export const EGOGiftObservationCard = memo(function EGOGiftObservationCard({
       </button>
     </EGOGiftTooltip>
   )
-}, areObservationCardPropsEqual)
+}

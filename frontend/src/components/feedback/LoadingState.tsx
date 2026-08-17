@@ -1,3 +1,4 @@
+import { SECTION_STYLES } from '@/lib/constants'
 interface LoadingStateProps {
   message?: string
 }
@@ -9,9 +10,9 @@ interface LoadingStateProps {
  */
 export function LoadingState({ message = 'Loading...' }: LoadingStateProps) {
   return (
-    <div className="container mx-auto p-8">
+    <div className={SECTION_STYLES.LAYOUT.page}>
       <div className="flex items-center justify-center h-64">
-        <div className="text-muted-foreground">{message}</div>
+        <div className={SECTION_STYLES.TEXT.muted}>{message}</div>
       </div>
     </div>
   )

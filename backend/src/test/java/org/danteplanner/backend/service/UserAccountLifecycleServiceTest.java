@@ -1,10 +1,13 @@
 package org.danteplanner.backend.service;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 
-import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.exception.UserNotFoundException;
-import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
+import org.danteplanner.backend.comment.service.CommentAccountPurgeService;
+import org.danteplanner.backend.moderation.service.ModerationAccountPurgeService;
+import org.danteplanner.backend.planner.service.PlannerAccountPurgeService;
+import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,13 +15,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -37,13 +41,16 @@ class UserAccountLifecycleServiceTest {
     private UserRepository userRepository;
 
     @Mock
-    private PlannerVoteRepository plannerVoteRepository;
+    private PlannerAccountPurgeService plannerAccountPurgeService;
 
     @Mock
-    private org.danteplanner.backend.comment.repository.PlannerCommentRepository plannerCommentRepository;
+    private PlannerCatalogService plannerCatalogService;
 
     @Mock
-    private org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository plannerCommentVoteRepository;
+    private CommentAccountPurgeService commentAccountPurgeService;
+
+    @Mock
+    private ModerationAccountPurgeService moderationAccountPurgeService;
 
     @Mock
     private TokenBlacklistService tokenBlacklistService;
@@ -58,21 +65,15 @@ class UserAccountLifecycleServiceTest {
     void setUp() {
         lifecycleService = new UserAccountLifecycleService(
                 userRepository,
-                plannerVoteRepository,
-                plannerCommentRepository,
-                plannerCommentVoteRepository,
+                plannerAccountPurgeService,
+                plannerCatalogService,
+                commentAccountPurgeService,
+                moderationAccountPurgeService,
                 tokenBlacklistService,
                 GRACE_PERIOD_DAYS
         );
 
-        testUser = User.builder()
-                .id(123L)
-                .email("test@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-123")
-                .usernameEpithet("W_CORP")
-                .usernameSuffix("test1")
-                .build();
+        testUser = TestDataFactory.unsavedUser(123L);
     }
 
     @Nested
@@ -84,7 +85,6 @@ class UserAccountLifecycleServiceTest {
         void deleteAccount_WhenFirstDeletion_SetsDeletedAtAndScheduledDate() {
             // Arrange
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-            when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
             Instant scheduledDate = lifecycleService.deleteAccount(testUser.getId());
@@ -101,14 +101,15 @@ class UserAccountLifecycleServiceTest {
             assertTrue(scheduledDate.isAfter(expectedScheduleMin));
             assertTrue(scheduledDate.isBefore(expectedScheduleMax));
 
-            verify(userRepository).save(testUser);
-            // Fix 3: deletion must push token invalidation (filter no longer does a DB lookup)
+            // Auth is token-only, so deletion must push token invalidation itself.
+            // The outcome form — a request carrying the old token is rejected — is only
+            // reachable through the filter chain, so it needs a MockMvc-tier test.
             verify(tokenBlacklistService).invalidateUserTokens(testUser.getId());
         }
 
         @Test
         @DisplayName("Should be idempotent and return existing scheduled date")
-        void deleteAccount_idempotent_returnsExistingScheduledDate() {
+        void deleteAccount_WhenIdempotent_ReturnsExistingScheduledDate() {
             // Arrange - user already deleted
             Instant existingScheduledAt = Instant.now().plus(Duration.ofDays(25));
             testUser.softDelete(existingScheduledAt);
@@ -120,13 +121,12 @@ class UserAccountLifecycleServiceTest {
 
             // Assert
             assertEquals(existingScheduledAt, scheduledDate);
-            verify(userRepository, never()).save(any()); // No save on idempotent call
             verify(tokenBlacklistService, never()).invalidateUserTokens(any()); // No re-invalidation
         }
 
         @Test
         @DisplayName("Should throw UserNotFoundException when user not found")
-        void deleteAccount_userNotFound_throwsException() {
+        void deleteAccount_WhenUserNotFound_ThrowsException() {
             // Arrange
             Long nonExistentId = 999L;
             when(userRepository.findById(nonExistentId)).thenReturn(Optional.empty());
@@ -138,7 +138,6 @@ class UserAccountLifecycleServiceTest {
             );
 
             assertEquals(nonExistentId, exception.getUserId());
-            verify(userRepository, never()).save(any());
         }
     }
 
@@ -154,7 +153,6 @@ class UserAccountLifecycleServiceTest {
             assertTrue(testUser.isDeleted());
 
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-            when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
             lifecycleService.reactivateAccount(testUser.getId());
@@ -163,13 +161,11 @@ class UserAccountLifecycleServiceTest {
             assertFalse(testUser.isDeleted());
             assertNull(testUser.getDeletedAt());
             assertNull(testUser.getPermanentDeleteScheduledAt());
-
-            verify(userRepository).save(testUser);
         }
 
         @Test
         @DisplayName("Should throw UserNotFoundException when user not found")
-        void reactivateAccount_userNotFound_throwsException() {
+        void reactivateAccount_WhenUserNotFound_ThrowsException() {
             // Arrange
             Long nonExistentId = 999L;
             when(userRepository.findById(nonExistentId)).thenReturn(Optional.empty());
@@ -181,12 +177,11 @@ class UserAccountLifecycleServiceTest {
             );
 
             assertEquals(nonExistentId, exception.getUserId());
-            verify(userRepository, never()).save(any());
         }
 
         @Test
         @DisplayName("Should be idempotent for non-deleted user")
-        void reactivateAccount_nonDeletedUser_noOp() {
+        void reactivateAccount_WhenNonDeletedUser_NoOp() {
             // Arrange - user is not deleted
             assertFalse(testUser.isDeleted());
 
@@ -197,7 +192,6 @@ class UserAccountLifecycleServiceTest {
 
             // Assert
             assertFalse(testUser.isDeleted());
-            verify(userRepository, never()).save(any()); // Idempotent: no save for already-active user
         }
     }
 
@@ -206,133 +200,66 @@ class UserAccountLifecycleServiceTest {
     class PerformHardDeleteTests {
 
         @Test
-        @DisplayName("Should reassign votes to sentinel and delete user")
-        void performHardDelete_WhenCalled_ReassignsVotesAndDeletesUser() {
-            // Arrange
-            when(plannerVoteRepository.reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
-                    .thenReturn(5);
-            when(plannerCommentVoteRepository.reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
-                    .thenReturn(3);
-            when(plannerCommentRepository.reassignCommentsToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
-                    .thenReturn(2);
-            doNothing().when(userRepository).delete(testUser);
+        @DisplayName("Should anonymize authorship, sweep planner rows, then delete the user")
+        void performHardDelete_WhenUserOwnsPlanners_AnonymizesThenSweepsThenDeletes() {
+            List<UUID> plannerIds = List.of(UUID.randomUUID());
+            when(userRepository.findWithLockPurgeable(eq(testUser.getId()), any(Instant.class)))
+                    .thenReturn(Optional.of(testUser));
+            when(plannerAccountPurgeService.plannerIdsOwnedBy(testUser.getId())).thenReturn(plannerIds);
 
-            // Act
-            lifecycleService.performHardDelete(testUser);
+            lifecycleService.performHardDelete(testUser.getId(), Instant.now());
 
-            // Assert - verify order of operations
-            var inOrder = inOrder(plannerVoteRepository, plannerCommentVoteRepository, plannerCommentRepository, userRepository);
-            inOrder.verify(plannerVoteRepository).reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
-            inOrder.verify(plannerCommentVoteRepository).reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
-            inOrder.verify(plannerCommentRepository).reassignCommentsToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
+            var inOrder = inOrder(plannerAccountPurgeService, commentAccountPurgeService,
+                    moderationAccountPurgeService, userRepository);
+            inOrder.verify(plannerAccountPurgeService)
+                    .reassignVotesToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
+            inOrder.verify(commentAccountPurgeService)
+                    .reassignAuthorshipToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
+            // The actor FK is RESTRICT, so the audit rows must change hands before the delete.
+            inOrder.verify(moderationAccountPurgeService)
+                    .reassignActionsToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
+            // Reports hold no-action FKs to the rows the sweep and the cascade remove, so they go first.
+            inOrder.verify(moderationAccountPurgeService).deleteReportsFor(plannerIds);
+            inOrder.verify(plannerAccountPurgeService).deleteProjectionsFor(plannerIds);
+            // Last: the cascade off this row removes the planner cores the sweep left behind.
             inOrder.verify(userRepository).delete(testUser);
+            // A purged account's cookie would otherwise keep authenticating until natural expiry.
+            verify(tokenBlacklistService).invalidateUserTokens(testUser.getId());
         }
 
         @Test
-        @DisplayName("Should use correct sentinel user ID")
-        void performHardDelete_WhenCalled_UsesCorrectSentinelId() {
-            // Arrange
-            ArgumentCaptor<Long> userIdCaptor = ArgumentCaptor.forClass(Long.class);
-            ArgumentCaptor<Long> sentinelIdCaptor = ArgumentCaptor.forClass(Long.class);
-            when(plannerVoteRepository.reassignUserVotes(userIdCaptor.capture(), sentinelIdCaptor.capture()))
-                    .thenReturn(3);
-            when(plannerCommentVoteRepository.reassignUserVotes(any(), any()))
-                    .thenReturn(2);
-            when(plannerCommentRepository.reassignCommentsToSentinel(any(), any()))
-                    .thenReturn(1);
-            doNothing().when(userRepository).delete(testUser);
+        @DisplayName("Should still anonymize authorship when the account owns no planners")
+        void performHardDelete_WhenUserOwnsNoPlanners_SkipsSweepButStillAnonymizes() {
+            when(userRepository.findWithLockPurgeable(eq(testUser.getId()), any(Instant.class)))
+                    .thenReturn(Optional.of(testUser));
+            when(plannerAccountPurgeService.plannerIdsOwnedBy(testUser.getId())).thenReturn(List.of());
 
-            // Act
-            lifecycleService.performHardDelete(testUser);
+            lifecycleService.performHardDelete(testUser.getId(), Instant.now());
 
-            // Assert
-            assertEquals(testUser.getId(), userIdCaptor.getValue());
-            assertEquals(0L, sentinelIdCaptor.getValue()); // SENTINEL_USER_ID = 0
-        }
-
-        @Test
-        @DisplayName("Should reassign both planner votes and comment votes")
-        void performHardDelete_WhenCalled_ReassignsBothVoteTypes() {
-            // Arrange
-            when(plannerVoteRepository.reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
-                    .thenReturn(5);
-            when(plannerCommentVoteRepository.reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
-                    .thenReturn(3);
-            when(plannerCommentRepository.reassignCommentsToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
-                    .thenReturn(2);
-            doNothing().when(userRepository).delete(testUser);
-
-            // Act
-            lifecycleService.performHardDelete(testUser);
-
-            // Assert
-            verify(plannerVoteRepository).reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
-            verify(plannerCommentVoteRepository).reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
-        }
-
-        @Test
-        @DisplayName("Should handle zero votes reassignment gracefully")
-        void performHardDelete_zeroVotes_stillDeletesUser() {
-            // Arrange
-            when(plannerVoteRepository.reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
-                    .thenReturn(0);
-            when(plannerCommentVoteRepository.reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
-                    .thenReturn(0);
-            when(plannerCommentRepository.reassignCommentsToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
-                    .thenReturn(0);
-            doNothing().when(userRepository).delete(testUser);
-
-            // Act
-            lifecycleService.performHardDelete(testUser);
-
-            // Assert
+            verify(plannerAccountPurgeService)
+                    .reassignVotesToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
+            verify(commentAccountPurgeService)
+                    .reassignAuthorshipToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
+            verify(moderationAccountPurgeService)
+                    .reassignActionsToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
+            verify(moderationAccountPurgeService, never()).deleteReportsFor(any());
+            verify(plannerAccountPurgeService, never()).deleteProjectionsFor(any());
             verify(userRepository).delete(testUser);
         }
 
         @Test
-        @DisplayName("Should reassign comments before deleting user")
-        void performHardDelete_WhenCalled_ReassignsCommentsBeforeDelete() {
-            // Arrange
-            when(plannerVoteRepository.reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
-                    .thenReturn(2);
-            when(plannerCommentVoteRepository.reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
-                    .thenReturn(1);
-            when(plannerCommentRepository.reassignCommentsToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
-                    .thenReturn(4);
-            doNothing().when(userRepository).delete(testUser);
+        @DisplayName("Should skip and touch nothing when the account was reactivated after listing")
+        void performHardDelete_WhenNoLongerPurgeable_SkipsWithoutDeleting() {
+            when(userRepository.findWithLockPurgeable(eq(testUser.getId()), any(Instant.class)))
+                    .thenReturn(Optional.empty());
 
-            // Act
-            lifecycleService.performHardDelete(testUser);
+            boolean deleted = lifecycleService.performHardDelete(testUser.getId(), Instant.now());
 
-            // Assert - verify order includes comment reassignment
-            var inOrder = inOrder(plannerVoteRepository, plannerCommentVoteRepository, plannerCommentRepository, userRepository);
-            inOrder.verify(plannerVoteRepository).reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
-            inOrder.verify(plannerCommentVoteRepository).reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
-            inOrder.verify(plannerCommentRepository).reassignCommentsToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
-            inOrder.verify(userRepository).delete(testUser);
-        }
-
-        @Test
-        @DisplayName("Should delete colliding votes before reassigning to sentinel")
-        void performHardDelete_WhenCalled_DeletesCollidingVotesBeforeReassign() {
-            // Arrange
-            when(plannerVoteRepository.reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
-                    .thenReturn(2);
-            when(plannerCommentVoteRepository.reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
-                    .thenReturn(1);
-            when(plannerCommentRepository.reassignCommentsToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
-                    .thenReturn(0);
-            doNothing().when(userRepository).delete(testUser);
-
-            // Act
-            lifecycleService.performHardDelete(testUser);
-
-            // Assert - collision deletion must precede reassignment to avoid duplicate PK
-            var inOrder = inOrder(plannerVoteRepository, plannerCommentVoteRepository);
-            inOrder.verify(plannerVoteRepository).deleteVotesCollidingWithSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
-            inOrder.verify(plannerVoteRepository).reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
-            inOrder.verify(plannerCommentVoteRepository).deleteVotesCollidingWithSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
-            inOrder.verify(plannerCommentVoteRepository).reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
+            assertFalse(deleted);
+            verify(userRepository, never()).delete(any(User.class));
+            verify(tokenBlacklistService, never()).invalidateUserTokens(any());
+            verify(plannerAccountPurgeService, never()).reassignVotesToSentinel(any(), any());
+            verify(moderationAccountPurgeService, never()).reassignActionsToSentinel(any(), any());
         }
     }
 }

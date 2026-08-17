@@ -39,6 +39,7 @@ vi.mock('@/pages/home/components/BannerSection', () => ({
 // Mock RecentlyReleasedSection
 vi.mock('@/pages/home/components/RecentlyReleasedSection', () => ({
   RecentlyReleasedSection: () => <div data-testid="recently-released">Recently Released</div>,
+  RecentlyReleasedSkeleton: () => <div data-testid="recently-released-skeleton" />,
 }))
 
 // Mock CommunityPlansSection

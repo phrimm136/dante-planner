@@ -10,12 +10,13 @@ import {
   EGO_TYPES,
   OFFENSIVE_SKILL_SLOTS,
   FLOOR_COUNTS,
-  DUNGEON_IDX,
+  ALLOWED_FLOOR_DIFFICULTIES,
+  DUNGEON_NAME_BY_IDX,
   PLANNER_KEYWORDS,
   migrateKeywords,
 } from '@/shared/gameData'
 import { MAX_NOTE_BYTES } from '@/lib/constants'
-import { getBaseGiftId } from '@/pages/egoGift'
+import { hasGiftId, giftDisplayName } from '@/pages/egoGift'
 import { measureDocBytes } from '@/shared/noteEditor'
 import { getUnaffordableGiftIds } from './plannerRules'
 import { toUserFriendlyError } from './plannerValidationErrors'
@@ -88,6 +89,23 @@ const MAX_BUFF_BASE_ID = 9
 // ============================================================================
 
 /**
+ * Collect the sinner keys present in a per-sinner record, normalized to the
+ * 2-digit format. Keys that are not integers in the sinner range are ignored.
+ */
+function collectPresentSinnerKeys(source: Record<string, unknown>): Set<string> {
+  const presentKeys = new Set<string>()
+
+  for (const key of Object.keys(source)) {
+    const index = Number(key)
+    if (!Number.isInteger(index)) continue
+    if (index < MIN_EQUIPMENT_SINNER || index > MAX_EQUIPMENT_SINNER) continue
+    presentKeys.add(String(index).padStart(2, '0'))
+  }
+
+  return presentKeys
+}
+
+/**
  * Validate equipment configuration
  * Rules:
  * - All 12 sinners must be present (keys 1-12 or 01-12)
@@ -100,19 +118,7 @@ export function validateEquipment(
 ): EquipmentValidationError[] {
   const errors: EquipmentValidationError[] = []
 
-  // Collect present sinner keys and normalize to 2-digit format
-  const presentKeys = new Set<string>()
-  for (const key of Object.keys(equipment)) {
-    try {
-      const index = parseInt(key, 10)
-      if (index < MIN_EQUIPMENT_SINNER || index > MAX_EQUIPMENT_SINNER) {
-        continue
-      }
-      presentKeys.add(String(index).padStart(2, '0'))
-    } catch {
-      continue
-    }
-  }
+  const presentKeys = collectPresentSinnerKeys(equipment)
 
   // Check all 12 sinners are present
   const missingSinners = ALL_SINNER_KEYS.filter((key) => !presentKeys.has(key))
@@ -238,19 +244,7 @@ export function validateSkillEAState(
 ): SkillEAValidationError[] {
   const errors: SkillEAValidationError[] = []
 
-  // Collect present sinner keys
-  const presentKeys = new Set<string>()
-  for (const key of Object.keys(skillEAState)) {
-    try {
-      const index = parseInt(key, 10)
-      if (index < MIN_EQUIPMENT_SINNER || index > MAX_EQUIPMENT_SINNER) {
-        continue
-      }
-      presentKeys.add(String(index).padStart(2, '0'))
-    } catch {
-      continue
-    }
-  }
+  const presentKeys = collectPresentSinnerKeys(skillEAState)
 
   // Check all 12 sinners are present
   const missingSinners = ALL_SINNER_KEYS.filter((key) => !presentKeys.has(key))
@@ -294,7 +288,11 @@ export function validateSkillEAState(
       }
       seenSlots.add(slotKey)
 
-      total += sinnerSkills[slotKey as unknown as (typeof OFFENSIVE_SKILL_SLOTS)[number]]
+      // A stored non-number would turn the running total into a string, so the
+      // mismatch is reported by the total check below rather than concatenated.
+      const ea = sinnerSkills[slotKey as unknown as (typeof OFFENSIVE_SKILL_SLOTS)[number]]
+      if (typeof ea !== 'number' || !Number.isFinite(ea)) continue
+      total += ea
     }
 
     // Check total equals SKILL_EA_TOTAL
@@ -322,8 +320,7 @@ export function validateGiftIdArray(
   const errors: GiftValidationError[] = []
   const seen = new Set<string>()
 
-  for (let i = 0; i < giftIds.length; i++) {
-    const giftId = giftIds[i]
+  for (const [i, giftId] of giftIds.entries()) {
     if (seen.has(giftId)) {
       errors.push({
         code: 'GIFT_DUPLICATE_ID',
@@ -336,8 +333,7 @@ export function validateGiftIdArray(
     seen.add(giftId)
 
     if (egoGiftSpec) {
-      const baseId = getBaseGiftId(giftId)
-      if (!(baseId in egoGiftSpec)) {
+      if (!hasGiftId(giftId, egoGiftSpec)) {
         errors.push({
           code: 'GIFT_UNKNOWN_ID',
           message: `Gift ID '${giftId}' not found in ${fieldName}`,
@@ -374,9 +370,7 @@ export function validateStartBuffIds(buffIds: number[]): BuffValidationError[] {
   // Track base IDs to detect duplicates
   const seenBaseIds = new Set<number>()
 
-  for (let i = 0; i < buffIds.length; i++) {
-    const buffId = buffIds[i]
-
+  for (const [i, buffId] of buffIds.entries()) {
     // Extract base ID (00-09 part)
     const baseId = buffId % 100
 
@@ -430,8 +424,7 @@ export function validateStartGiftSelection(
 
   // Check for duplicates
   const seen = new Set<string>()
-  for (let i = 0; i < selectedGiftIds.length; i++) {
-    const giftId = selectedGiftIds[i]
+  for (const [i, giftId] of selectedGiftIds.entries()) {
     if (seen.has(giftId)) {
       errors.push({
         code: 'START_GIFT_DUPLICATE_ID',
@@ -490,8 +483,9 @@ export function validateFloorThemePacksForSave(
     const floor = floorSelections[i]
     const floorNumber = i + 1
 
-    // Rule 1: Each floor must have a theme pack
-    if (!floor.themePackId) {
+    // Rule 1: Each floor must have a theme pack. A floor absent from the array
+    // has none either, so it reports the same way.
+    if (!floor?.themePackId) {
       errors.push({
         code: 'FLOOR_MISSING_THEME_PACK',
         message: `Floor ${floorNumber} must have a theme pack selected`,
@@ -505,7 +499,7 @@ export function validateFloorThemePacksForSave(
     // Rule 2: Progressive prerequisite (skip for floor 1)
     if (i > 0) {
       const previousFloor = floorSelections[i - 1]
-      if (!previousFloor.themePackId) {
+      if (!previousFloor?.themePackId) {
         errors.push({
           code: 'FLOOR_PREREQUISITE_VIOLATION',
           message: `Floor ${floorNumber} cannot have a theme pack because Floor ${i} is missing one`,
@@ -539,8 +533,7 @@ export function validateFloorThemePacksForSave(
     // Rule 4: No duplicate gift IDs within this floor's gifts
     const giftIds = Array.from(floor.giftIds)
     const seenGiftIds = new Set<string>()
-    for (let j = 0; j < giftIds.length; j++) {
-      const giftId = giftIds[j]
+    for (const [j, giftId] of giftIds.entries()) {
       if (seenGiftIds.has(giftId)) {
         errors.push({
           code: 'FLOOR_DUPLICATE_GIFT_ID',
@@ -560,11 +553,6 @@ export function validateFloorThemePacksForSave(
 
 /**
  * Validates floor difficulty requirements based on category
- *
- * Rules:
- * - 5F: All floors must be Normal(0) or Hard(1)
- * - 10F: All floors must be Hard(1)
- * - 15F: Floors 1-10 must be Hard(1), Floors 11-15 must be Extreme(3)
  */
 function validateFloorDifficulties(
   floorSelections: FloorThemeSelection[],
@@ -572,61 +560,24 @@ function validateFloorDifficulties(
   floorCount: number,
 ): DifficultyValidationError[] {
   const errors: DifficultyValidationError[] = []
+  const allowedByFloor = ALLOWED_FLOOR_DIFFICULTIES[category]
 
   for (let i = 0; i < floorCount; i++) {
     const floor = floorSelections[i]
     if (!floor) continue
 
-    const difficulty = floor.difficulty
-    const floorNumber = i + 1
+    const allowed = allowedByFloor[i]
+    if (!allowed || allowed.includes(floor.difficulty)) continue
 
-    switch (category) {
-      case '5F':
-        // 5F: All floors must be Normal(0) or Hard(1)
-        if (difficulty !== DUNGEON_IDX.NORMAL && difficulty !== DUNGEON_IDX.HARD) {
-          errors.push({
-            code: 'DIFFICULTY_INVALID_FOR_CATEGORY',
-            message: `Floor ${floorNumber} must be Normal or Hard for 5F category`,
-            field: `floorSelections[${i}].difficulty`,
-            floorIndex: i,
-            floorNumber,
-          })
-        }
-        break
-      case '10F':
-        // 10F: All floors must be Hard(1)
-        if (difficulty !== DUNGEON_IDX.HARD) {
-          errors.push({
-            code: 'DIFFICULTY_INVALID_FOR_CATEGORY',
-            message: `Floor ${floorNumber} must be Hard for 10F category`,
-            field: `floorSelections[${i}].difficulty`,
-            floorIndex: i,
-            floorNumber,
-          })
-        }
-        break
-      case '15F':
-        // 15F: Floors 1-10 must be Hard(1), Floors 11-15 must be Extreme(3)
-        if (i < 10 && difficulty !== DUNGEON_IDX.HARD) {
-          errors.push({
-            code: 'DIFFICULTY_INVALID_FOR_CATEGORY',
-            message: `Floor ${floorNumber} must be Hard for 15F category`,
-            field: `floorSelections[${i}].difficulty`,
-            floorIndex: i,
-            floorNumber,
-          })
-        }
-        if (i >= 10 && difficulty !== DUNGEON_IDX.EXTREME) {
-          errors.push({
-            code: 'DIFFICULTY_INVALID_FOR_CATEGORY',
-            message: `Floor ${floorNumber} must be Extreme for 15F category`,
-            field: `floorSelections[${i}].difficulty`,
-            floorIndex: i,
-            floorNumber,
-          })
-        }
-        break
-    }
+    const floorNumber = i + 1
+    const expected = allowed.map((idx) => DUNGEON_NAME_BY_IDX.get(idx)).join(' or ')
+    errors.push({
+      code: 'DIFFICULTY_INVALID_FOR_CATEGORY',
+      message: `Floor ${floorNumber} must be ${expected} for ${category} category`,
+      field: `floorSelections[${i}].difficulty`,
+      floorIndex: i,
+      floorNumber,
+    })
   }
 
   return errors
@@ -649,8 +600,7 @@ function validateFloorGiftExistence(
     const unknownIds: string[] = []
 
     for (const giftId of floor.giftIds) {
-      const baseId = getBaseGiftId(giftId)
-      if (!(baseId in egoGiftSpec)) {
+      if (!hasGiftId(giftId, egoGiftSpec)) {
         unknownIds.push(giftId)
       }
     }
@@ -660,7 +610,7 @@ function validateFloorGiftExistence(
     const floorNumber = i + 1
     return [
       {
-        code: 'GIFT_UNKNOWN_ID' as const,
+        code: 'FLOOR_UNKNOWN_GIFT_ID' as const,
         message: `Floor ${floorNumber}: unknown gift ID(s): ${unknownIds.join(', ')}`,
         field: `floorSelections[${i}].giftIds`,
         floorIndex: i,
@@ -689,7 +639,7 @@ function validateFloorGiftAffordability(
     if (unaffordableIds.length === 0) return []
 
     const floorNumber = i + 1
-    const giftNames = unaffordableIds.map((id) => egoGiftI18n?.[getBaseGiftId(id)] ?? id).join(', ')
+    const giftNames = unaffordableIds.map((id) => giftDisplayName(id, egoGiftI18n ?? {})).join(', ')
 
     return [
       {
@@ -747,7 +697,7 @@ export function validateSelectedKeywords(keywords: string[]): KeywordValidationE
  * if (!result.isValid) {
  *   console.error('Validation failed:', result.errors)
  *   // Show first error to user
- *   toast.error(result.errors[0].message)
+ *   showErrorMessage(`planner:${toUserFriendlyError(result.errors[0]).key}`)
  * }
  */
 export function validatePlannerForPublish(
@@ -853,29 +803,27 @@ export function validatePlannerForDraftSave(
   egoGiftSpec?: Record<string, EGOGiftSpec>,
   egoGiftI18n?: Record<string, string>,
 ): { key: string; params?: Record<string, string> } | null {
-  const errors: PlannerValidationError[] = []
+  const errors: PlannerValidationError[] = [
+    // 1. Equipment validation
+    ...validateEquipment(content.equipment),
 
-  // 1. Equipment validation
-  errors.push(...validateEquipment(content.equipment))
+    // 2. Deployment order validation
+    ...validateDeploymentOrder(content.deploymentOrder),
 
-  // 2. Deployment order validation
-  errors.push(...validateDeploymentOrder(content.deploymentOrder))
+    // 3. Skill EA state validation
+    ...validateSkillEAState(content.skillEAState),
 
-  // 3. Skill EA state validation
-  errors.push(...validateSkillEAState(content.skillEAState))
-
-  // 4. Gift IDs validation (all three arrays)
-  errors.push(...validateGiftIdArray(content.selectedGiftIds, 'selectedGiftIds', egoGiftSpec))
-  errors.push(...validateGiftIdArray(content.observationGiftIds, 'observationGiftIds', egoGiftSpec))
-  errors.push(
+    // 4. Gift IDs validation (all three arrays)
+    ...validateGiftIdArray(content.selectedGiftIds, 'selectedGiftIds', egoGiftSpec),
+    ...validateGiftIdArray(content.observationGiftIds, 'observationGiftIds', egoGiftSpec),
     ...validateGiftIdArray(content.comprehensiveGiftIds, 'comprehensiveGiftIds', egoGiftSpec),
-  )
 
-  // 5. Start buffs validation
-  errors.push(...validateStartBuffIds(content.selectedBuffIds))
+    // 5. Start buffs validation
+    ...validateStartBuffIds(content.selectedBuffIds),
 
-  // 6. Start gifts validation
-  errors.push(...validateStartGiftSelection(content.selectedGiftKeyword, content.selectedGiftIds))
+    // 6. Start gifts validation
+    ...validateStartGiftSelection(content.selectedGiftKeyword, content.selectedGiftIds),
+  ]
 
   // 7. Floor selections validation (non-strict: theme packs optional)
   const floorCount = FLOOR_COUNTS[category]
@@ -907,8 +855,9 @@ export function validatePlannerForDraftSave(
     )
   }
 
-  if (errors.length === 0) return null
-  return toUserFriendlyError(errors[0])
+  const [firstError] = errors
+  if (firstError === undefined) return null
+  return toUserFriendlyError(firstError)
 }
 
 /**

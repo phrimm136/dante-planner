@@ -1,10 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import {
-  resolveCondition,
-  createEffectTextResolver,
-  formatAdderInfo,
-  AFFINITY_COLORS,
-} from '../abEventTextResolver'
+import { resolveCondition, createEffectTextResolver, formatAdderInfo } from '../abEventTextResolver'
+import { AFFINITY_COLORS } from '@/lib/constants'
 import type { AbEventShared } from '../../schemas/AbEventSchemas'
 
 // =============================================================================
@@ -155,12 +151,12 @@ describe('createEffectTextResolver', () => {
 
   describe('reward substitution', () => {
     it('substitutes gift name in {reward} placeholder', () => {
-      const result = resolve('GetConfirmedEgogift', 9001)
+      const result = resolve('GetConfirmedEgogift', '9001')
       expect(result).toContain('Bleeding Blade')
     })
 
     it('falls back to gift ID when name not found', () => {
-      const result = resolve('GetConfirmedEgogift', 99999)
+      const result = resolve('GetConfirmedEgogift', '99999')
       expect(result).toContain('99999')
     })
   })
@@ -211,6 +207,58 @@ describe('createEffectTextResolver', () => {
     it('uses explicit amount over suffix-extracted amount', () => {
       const result = resolve('RecoverHpMpSameAmount_15', undefined, 25)
       expect(result).toContain('25')
+    })
+  })
+
+  describe('condition and target placeholder shapes', () => {
+    const CREAM = '#ebcaa2'
+    const shapedShared: AbEventShared = {
+      ...shared,
+      effects: {
+        ...shared.effects,
+        SplitShape: '{conditions}hits {targets} hard',
+        ConditionOnly: '{conditions}nothing else',
+      },
+    }
+    const resolveShaped = createEffectTextResolver(shapedShared, GIFT_NAMES)
+
+    it('fills the shared cream span of a {conditions}{targets} pair in one substitution', () => {
+      expect(resolveShaped('LoseHpOnly_10', undefined, undefined, 'EveryAlly', 'SomeKeyword')).toBe(
+        `<color=${CREAM}>A keyword condition</color><color=${CREAM}>All Allies</color>` +
+          ' <color=#e30000>10 HP</color> damage!',
+      )
+    })
+
+    it('keeps an empty cream span when the paired template has no target', () => {
+      expect(resolveShaped('LoseHpOnly_10', undefined, undefined, undefined, 'SomeKeyword')).toBe(
+        `<color=${CREAM}>A keyword condition</color><color=${CREAM}></color>` +
+          ' <color=#e30000>10 HP</color> damage!',
+      )
+    })
+
+    it('drops the placeholder pair to a bare target when there is no condition', () => {
+      expect(resolveShaped('LoseHpOnly_10', undefined, undefined, 'EveryAlly')).toBe(
+        `<color=${CREAM}>All Allies</color> <color=#e30000>10 HP</color> damage!`,
+      )
+    })
+
+    it('colors condition and target separately when the placeholders are apart', () => {
+      expect(resolveShaped('SplitShape', undefined, undefined, 'EveryAlly', 'SomeKeyword')).toBe(
+        `<color=${CREAM}>A keyword condition</color>hits <color=${CREAM}>All Allies</color> hard`,
+      )
+    })
+
+    it('leaves a separated target uncolored when there is no condition', () => {
+      expect(resolveShaped('SplitShape', undefined, undefined, 'EveryAlly')).toBe(
+        'hits All Allies hard',
+      )
+    })
+
+    it('substitutes a lone {conditions} placeholder', () => {
+      expect(resolveShaped('ConditionOnly', undefined, undefined, undefined, 'SomeKeyword')).toBe(
+        `<color=${CREAM}>A keyword condition</color>nothing else`,
+      )
+      expect(resolveShaped('ConditionOnly')).toBe('nothing else')
     })
   })
 })
@@ -353,5 +401,39 @@ describe('formatAdderInfo', () => {
       sinnerNames,
     )
     expect(result[0]).toContain('Some Unknown Key')
+  })
+
+  it('falls back to underscore-to-space for unknown SpecificAssociation keys', () => {
+    const result = formatAdderInfo(
+      [{ correctionCase: 'SpecificAssociation_LCB,Some_Unknown', adder: 2 }],
+      unitKeywords,
+      sinnerNames,
+    )
+    expect(result).toEqual(['LCB Sinner / Some Unknown +2'])
+  })
+
+  it('returns the raw correction case for an unrecognised prefix', () => {
+    const result = formatAdderInfo(
+      [
+        { correctionCase: 'SomethingElse_Foo', adder: 2 },
+        { correctionCase: 'Specific', adder: -2 },
+      ],
+      unitKeywords,
+      sinnerNames,
+    )
+    expect(result).toEqual(['SomethingElse_Foo +2', 'Specific -2'])
+  })
+
+  it('formats a zero adder without a sign', () => {
+    const result = formatAdderInfo(
+      [{ correctionCase: 'SpecificUnit_DonQuixote', adder: 0 }],
+      unitKeywords,
+      sinnerNames,
+    )
+    expect(result).toEqual(['Don Quixote 0'])
+  })
+
+  it('returns nothing for an empty adder list', () => {
+    expect(formatAdderInfo([], unitKeywords, sinnerNames)).toEqual([])
   })
 })

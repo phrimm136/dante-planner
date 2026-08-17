@@ -2,7 +2,7 @@
  * MD User Planners Data Hook
  *
  * Fetches personal planners for the /planner/md route.
- * - Guests: IndexedDB only via usePlannerSaveAdapter
+ * - Guests: IndexedDB only via usePlannerStorage
  * - Authenticated + sync ON: Auto-pull from server when:
  *   - Planner doesn't exist locally (server-only)
  *   - Local is not a draft AND local syncVersion < server syncVersion
@@ -11,22 +11,48 @@
  * Pattern: Split adapters + TanStack Query
  */
 
-import { useMemo, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useSuspenseQuery, useQuery, queryOptions, useQueryClient } from '@tanstack/react-query'
 
-import { usePlannerSaveAdapter } from './usePlannerSaveAdapter'
-import { usePlannerSyncAdapter } from './usePlannerSyncAdapter'
+import { usePlannerStorage } from './usePlannerStorage'
+import {
+  usePlannerSyncAdapter,
+  serverResponseToSaveable,
+  acknowledgedCopy,
+} from './usePlannerSyncAdapter'
+import { plannerApi } from '../lib/plannerApi'
 import { useAuthQuery } from '@/shared/auth'
-import { useUserSettingsQuery } from '@/pages/settings'
+import { useUserSettingsQuery } from '@/shared/userSettings'
 import { useEGOGiftListData } from '@/pages/egoGift'
 import { validatePlannerForDraftSave, validatePlannerForPublish } from '../lib/plannerValidation'
-import { toUserFriendlyError } from '../lib/plannerValidationErrors'
+import { plannerValidationError, toUserFriendlyError } from '../lib/plannerValidationErrors'
+import {
+  planConflictResolution,
+  interpretConflictPlan,
+  reportedDelete,
+} from '../lib/conflictChoice'
+import {
+  categorizeSync,
+  collectSyncConflicts,
+  pullServerPlanners,
+  purgeLocalPlanners,
+} from '../lib/syncPlan'
+import { classifyAppError } from '@/lib/apiErrorClassifier'
+import { ok, err } from '@/lib/result'
+import { generateUUID } from '@/lib/uuid'
+import { PLANNER_LIST, STALE_TIME } from '@/lib/constants'
 
 import { matchesPlannerFilters } from '../lib/plannerContentExtractors'
 
-import type { PlannerSummary, SaveablePlanner, MDPlannerContent } from '../types/PlannerTypes'
+import { isMDPlanner } from '../types/PlannerTypes'
+import type { AppError } from '@/lib/apiErrorClassifier'
+import type { ConflictEffect, ConflictOps, ConflictOutcome } from '../lib/conflictChoice'
+import type { SyncOps } from '../lib/syncPlan'
+import type { PlannerSummary, SaveablePlanner } from '../types/PlannerTypes'
 import type { PlannerSearchFilters } from '../types/PlannerSearchTypes'
 import type { ConflictItem, ConflictResolution } from '../components/BatchConflictDialog'
+import type { ConflictResolutionChoice } from '../types/PlannerTypes'
 import type { MDCategory } from '@/shared/gameData'
 
 // ============================================================================
@@ -51,46 +77,6 @@ export const userPlannersQueryKeys = {
   /** Key for user's full planner list with content (for content-based filtering) */
   listFull: (isAuthenticated: boolean) =>
     [...userPlannersQueryKeys.all, 'listFull', { isAuthenticated }] as const,
-}
-
-// ============================================================================
-// Local-vs-server reconciliation
-// ============================================================================
-
-/**
- * Decide whether a local planner that the server no longer has should be
- * purged from IndexedDB. Defaults to the safe choice (keep) whenever local
- * state is ambiguous or inconsistent.
- *
- * Purge only when two independent fields agree the row was previously saved
- * to the server (status='saved' AND savedAt is set). All other shapes are
- * preserved — drafts, never-synced rows, and inconsistent local state.
- */
-export function shouldPurgeLocal(local: PlannerSummary): boolean {
-  if (local.savedAt === null) return false
-  if (local.status === 'draft') return false
-  return true
-}
-
-/**
- * Build the local save for a planner whose content won a conflict resolution:
- * keeps the local content but adopts the server-assigned syncVersion from the
- * sync response. Persisting the pre-sync version would make every subsequent
- * non-forced upload conflict (409) until the versions realign.
- */
-export function adoptSyncedVersion(
-  local: SaveablePlanner,
-  synced: SaveablePlanner,
-): SaveablePlanner {
-  return {
-    ...local,
-    metadata: {
-      ...local.metadata,
-      status: 'saved',
-      syncVersion: synced.metadata.syncVersion,
-      savedAt: new Date().toISOString(),
-    },
-  }
 }
 
 // ============================================================================
@@ -123,19 +109,11 @@ export interface MDUserPlannersResult {
   isSyncing: boolean
   /** Pending conflicts that need user resolution (local draft vs server newer) */
   pendingConflicts: ConflictItem[]
-  /** Resolve batch conflicts - call after user chooses resolutions */
-  resolveConflicts: (resolutions: ConflictResolution[]) => Promise<void>
+  /** Resolve batch conflicts - call after user chooses resolutions, one outcome per attempt */
+  resolveConflicts: (resolutions: ConflictResolution[]) => Promise<ConflictOutcome[]>
   /** Whether conflict resolution is in progress */
   isResolvingConflicts: boolean
-  /** Validation or sync error from last conflict resolution attempt */
-  conflictResolutionError: { key: string; params?: Record<string, string> } | null
 }
-
-// ============================================================================
-// Constants
-// ============================================================================
-
-const PAGE_SIZE = 20
 
 // ============================================================================
 // Main Hook
@@ -183,7 +161,8 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
       contentFilters.giftIds.length > 0 ||
       contentFilters.themePackIds.length > 0)
   )
-  const saveAdapter = usePlannerSaveAdapter()
+  const { t } = useTranslation('planner')
+  const storage = usePlannerStorage()
   const syncAdapter = usePlannerSyncAdapter()
   const queryClient = useQueryClient()
   const { data: user } = useAuthQuery()
@@ -200,10 +179,16 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
   // Conflict resolution state
   const [pendingConflicts, setPendingConflicts] = useState<ConflictItem[]>([])
   const [isResolvingConflicts, setIsResolvingConflicts] = useState(false)
-  const [conflictResolutionError, setConflictResolutionError] = useState<{
-    key: string
-    params?: Record<string, string>
-  } | null>(null)
+
+  /**
+   * The plan built for each pending conflict, held across resubmissions.
+   *
+   * Re-planning after a partial failure would mint a second copy for every item
+   * the user resubmits, so a retry re-interprets what its item already built.
+   */
+  const heldPlans = useRef(
+    new Map<string, { choice: ConflictResolutionChoice; plan: ConflictEffect[] }>(),
+  )
 
   // EGO Gift spec for affordability validation in conflict resolution
   const { spec: egoGiftSpec, i18n: egoGiftI18n } = useEGOGiftListData()
@@ -212,8 +197,10 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
   const { data: allPlanners } = useSuspenseQuery(
     queryOptions({
       queryKey: userPlannersQueryKeys.list(isAuthenticated),
-      queryFn: () => saveAdapter.listLocal(),
-      staleTime: 30 * 1000,
+      queryFn: () => storage.listLocal(),
+      staleTime: STALE_TIME.FREQUENT,
+      // The source is local storage, so regaining focus says nothing about it.
+      refetchOnWindowFocus: false,
     }),
   )
 
@@ -221,9 +208,11 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
   // Only fetched when content filters are active. For 1-5 plans, IndexedDB read is near-instant.
   const { data: allFullPlanners } = useQuery({
     queryKey: userPlannersQueryKeys.listFull(isAuthenticated),
-    queryFn: () => saveAdapter.listLocalFull(),
-    staleTime: 30 * 1000,
+    queryFn: () => storage.listLocalFull(),
+    staleTime: STALE_TIME.FREQUENT,
     enabled: hasContentFilters,
+    // The source is local storage, so regaining focus says nothing about it.
+    refetchOnWindowFocus: false,
   })
 
   // Background sync: Pull missing planners from server
@@ -241,121 +230,43 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
       syncInProgressRef.current = true
       setIsSyncing(true)
 
+      const ops: SyncOps = {
+        fetchChunks: (ids) => plannerApi.batchChunks(ids),
+        toSaveable: serverResponseToSaveable,
+        saveLocal: storage.saveToLocal,
+        deleteLocal: storage.deleteFromLocal,
+        loadLocal: storage.loadFromLocal,
+        fetchServer: syncAdapter.fetchFromServer,
+      }
+
       try {
         // Fetch ALL server planner metadata
         const serverPlanners = await syncAdapter.listFromServer()
-        const localPlanners = await saveAdapter.listLocal()
-        const localMap = new Map(localPlanners.map((p) => [p.id, p]))
-        const serverIds = new Set(serverPlanners.map((p) => p.id))
+        const localPlanners = await storage.listLocal()
 
-        // Categorize planners:
-        // 1. Auto-pull: Server-only OR (local saved + server newer)
-        // 2. Conflict: Local DRAFT + server newer → needs user decision
-        // 3. Purge: Local-only AND already-server-saved → deleted on another device
-        const plannersToPull: PlannerSummary[] = []
-        const conflictServerPlanners: PlannerSummary[] = []
-        const plannersToPurge: PlannerSummary[] = []
-
-        for (const sp of serverPlanners) {
-          const local = localMap.get(sp.id)
-          if (!local) {
-            // Server-only, always pull
-            plannersToPull.push(sp)
-            continue
-          }
-
-          const localVersion = local.syncVersion ?? 0
-          const serverVersion = sp.syncVersion ?? 0
-
-          if (serverVersion <= localVersion) {
-            // Local is up-to-date or newer, skip
-            continue
-          }
-
-          // Server is newer
-          if (local.status === 'draft') {
-            // CONFLICT: local draft vs server newer
-            conflictServerPlanners.push(sp)
-          } else {
-            // Local is saved, safe to overwrite
-            plannersToPull.push(sp)
-          }
-        }
-
-        // Reconcile local-only rows: a planner present locally but absent on the
-        // server was deleted on another device. Only purge when local state has
-        // two independent witnesses that it was previously synced — status='saved'
-        // AND savedAt is set. Drafts and never-synced rows are preserved.
-        for (const local of localPlanners) {
-          if (serverIds.has(local.id)) continue
-          if (shouldPurgeLocal(local)) {
-            plannersToPurge.push(local)
-          }
-        }
+        const plan = categorizeSync(serverPlanners, localPlanners)
 
         // Mark as synced even if nothing to pull
         hasSyncedRef.current = true
         lastSyncKeyRef.current = syncKey
 
-        // Pull non-conflicting planners automatically
-        let syncedCount = 0
-        for (const serverPlanner of plannersToPull) {
-          try {
-            const fullPlanner = await syncAdapter.fetchFromServer(serverPlanner.id)
-            if (fullPlanner) {
-              console.log(`Saving planner ${serverPlanner.id}:`, fullPlanner.metadata)
-              const result = await saveAdapter.saveToLocal(fullPlanner)
-              if (result.success) {
-                syncedCount++
-              } else {
-                console.error(`Failed to save planner ${serverPlanner.id}:`, result.errorCode)
-              }
-            }
-          } catch (error) {
-            console.error(`Failed to fetch planner ${serverPlanner.id}:`, error)
-          }
-        }
+        const syncedCount = await pullServerPlanners(
+          plan.pull.map((p) => p.id),
+          ops,
+        )
+        const purgedCount = await purgeLocalPlanners(plan.purge, ops)
 
-        // Purge local rows the server no longer has. Idempotent IndexedDB delete.
-        let purgedCount = 0
-        for (const local of plannersToPurge) {
-          try {
-            await saveAdapter.deleteFromLocal(local.id)
-            purgedCount++
-          } catch (error) {
-            console.error(`Failed to purge local planner ${local.id}:`, error)
-          }
-        }
-        if (purgedCount > 0) {
-          console.log(`Reconciled local IndexedDB: purged ${purgedCount} server-deleted planner(s)`)
-        }
-
-        // Build conflict items if any conflicts detected
-        if (conflictServerPlanners.length > 0) {
-          const conflicts: ConflictItem[] = []
-          for (const sp of conflictServerPlanners) {
-            try {
-              const localPlanner = await saveAdapter.loadFromLocal(sp.id)
-              const serverPlanner = await syncAdapter.fetchFromServer(sp.id)
-              if (localPlanner && serverPlanner) {
-                conflicts.push({
-                  id: sp.id,
-                  localPlanner,
-                  serverPlanner,
-                })
-              }
-            } catch (error) {
-              console.error(`Failed to load conflict planners for ${sp.id}:`, error)
-            }
-          }
+        if (plan.conflict.length > 0) {
+          const conflicts = await collectSyncConflicts(plan.conflict, ops)
           if (conflicts.length > 0) {
+            heldPlans.current.clear()
             setPendingConflicts(conflicts)
           }
         }
 
         // Directly update cache with synced planners (avoids re-suspension)
         if (syncedCount > 0 || purgedCount > 0) {
-          const updatedLocal = await saveAdapter.listLocal()
+          const updatedLocal = await storage.listLocal()
           queryClient.setQueryData(userPlannersQueryKeys.list(isAuthenticated), updatedLocal)
           // Invalidate full planners cache so content filters pick up synced data
           void queryClient.invalidateQueries({
@@ -367,18 +278,16 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
         // Mark as synced even on error - no retry
         hasSyncedRef.current = true
         lastSyncKeyRef.current = syncKey
-      } finally {
-        setIsSyncing(false)
-        syncInProgressRef.current = false
       }
+
+      setIsSyncing(false)
+      syncInProgressRef.current = false
     }
 
     void runSync()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [syncKey])
+  }, [syncKey, syncAdapter, storage, queryClient, syncEnabled, isAuthenticated])
 
-  // Memoize filtering to prevent recalculation on unrelated re-renders
-  const { paginatedPlanners, totalCount } = useMemo(() => {
+  const { paginatedPlanners, totalCount } = (() => {
     const normalizedSearch = search?.toLowerCase().trim()
 
     // When content filters are active, filter against full planners using matchesPlannerFilters
@@ -399,9 +308,9 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
       )
 
       const filtered = allPlanners.filter((p) => matchedIds.has(p.id))
-      const startIndex = page * PAGE_SIZE
+      const startIndex = page * PLANNER_LIST.PAGE_SIZE
       return {
-        paginatedPlanners: filtered.slice(startIndex, startIndex + PAGE_SIZE),
+        paginatedPlanners: filtered.slice(startIndex, startIndex + PLANNER_LIST.PAGE_SIZE),
         totalCount: filtered.length,
       }
     }
@@ -414,116 +323,142 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
     })
 
     // Client-side pagination
-    const startIndex = page * PAGE_SIZE
+    const startIndex = page * PLANNER_LIST.PAGE_SIZE
     return {
-      paginatedPlanners: filtered.slice(startIndex, startIndex + PAGE_SIZE),
+      paginatedPlanners: filtered.slice(startIndex, startIndex + PLANNER_LIST.PAGE_SIZE),
       totalCount: filtered.length,
     }
-  }, [allPlanners, allFullPlanners, category, search, page, hasContentFilters, contentFilters])
+  })()
 
   /**
-   * Validate a local planner's content before syncing to server.
-   * Mirrors performSave: strict when published, non-strict otherwise.
-   * Throws a typed error if invalid, to be caught by resolveConflicts outer catch.
+   * Why a local planner may not be synced, or null when it may be.
+   * Mirrors performSave: strict when published, structural checks otherwise.
    */
-  const validateBeforeSync = (planner: SaveablePlanner) => {
-    if (planner.config.type !== 'MIRROR_DUNGEON' || !egoGiftSpec) return
-    const content = planner.content as MDPlannerContent
+  const validateBeforeSync = (planner: SaveablePlanner): AppError | null => {
+    if (!isMDPlanner(planner)) return null
+    // Without the gift spec the affordability rules cannot run at all, and a
+    // resolution that skips them pushes content no validator ever checked.
+    if (!egoGiftSpec) return { kind: 'retryable' }
+
+    const { content } = planner
     const { category } = planner.config
     const { title, published } = planner.metadata
 
-    let friendlyError: { key: string; params?: Record<string, string> } | null = null
-
     if (published) {
-      const { isValid, errors } = validatePlannerForPublish(
+      const { errors } = validatePlannerForPublish(
         title,
         content,
         category,
         egoGiftSpec,
         egoGiftI18n,
       )
-      if (!isValid) friendlyError = toUserFriendlyError(errors[0])
-    } else {
-      friendlyError = validatePlannerForDraftSave(content, category, egoGiftSpec, egoGiftI18n)
+      const [firstError] = errors
+      return firstError ? plannerValidationError(toUserFriendlyError(firstError)) : null
     }
 
-    if (friendlyError) {
-      throw Object.assign(new Error('validationFailed'), {
-        code: 'validationFailed',
-        friendlyError,
-      })
-    }
+    const friendlyError = validatePlannerForDraftSave(content, category, egoGiftSpec, egoGiftI18n)
+    return friendlyError ? plannerValidationError(friendlyError) : null
   }
 
+  /** The effects one conflict's resolution runs against storage and the server. */
+  const conflictOps = (conflict: ConflictItem): ConflictOps => ({
+    local: async () => {
+      // Read now, not when the sync pass raised this conflict: a write that
+      // landed since is exactly what the force push would destroy, and a parked
+      // dialog leaves that window open indefinitely.
+      const loaded = await storage.loadFromLocal(conflict.id)
+      if (!loaded.ok) return err({ kind: 'unknown' })
+      // A row that is gone resolves to nothing; pushing that would erase the
+      // server's copy on the user's behalf.
+      return loaded.value ? ok(loaded.value) : err({ kind: 'notFound' })
+    },
+    incoming: async () => {
+      // Read at resolution time: the copy captured during sync can be minutes
+      // stale, and discarding local changes for a stale server copy loses both.
+      const fetched = await syncAdapter.fetchFromServer(conflict.id)
+      return fetched.ok ? ok(fetched.value.planner) : err(fetched.error)
+    },
+    validate: validateBeforeSync,
+    saveLocal: storage.saveToLocal,
+    deleteLocal: storage.deleteFromLocal,
+    deleteRemote: reportedDelete((id) => syncAdapter.deleteFromServer(id)),
+    sync: async (planner, force) => {
+      try {
+        return ok(acknowledgedCopy(await syncAdapter.syncToServer(planner, force)))
+      } catch (failure: unknown) {
+        return err(classifyAppError(failure))
+      }
+    },
+    sanitizeTitle: (title) => title.trim() || t('pages.plannerMD.untitled', 'Untitled'),
+  })
+
   /**
-   * Resolve batch conflicts based on user choices
-   * Pattern: mirrors usePlannerSave.resolveConflict() but for multiple items
+   * Resolve batch conflicts based on user choices.
+   *
+   * Stops at the first failure: the resolutions after it are the user's to
+   * re-submit once they know what went wrong, and only what resolved leaves the
+   * pending list.
    */
-  const resolveConflicts = async (resolutions: ConflictResolution[]) => {
-    if (resolutions.length === 0) return
+  const resolveConflicts = async (
+    resolutions: ConflictResolution[],
+  ): Promise<ConflictOutcome[]> => {
+    const [first] = resolutions
+    if (!first) return []
 
     setIsResolvingConflicts(true)
-    setConflictResolutionError(null)
 
     try {
+      // The copy is stamped with this device, and the id lives in the same store
+      // the copy would be written to.
+      const deviceId = await storage.getOrCreateDeviceId()
+      if (!deviceId.ok) {
+        // Nothing was attempted, so this failed the submission, not its first row.
+        return [{ id: first.id, result: err({ step: 'precondition', error: { kind: 'unknown' } }) }]
+      }
+
+      const outcomes: ConflictOutcome[] = []
+      const resolved = new Set<string>()
+
       for (const resolution of resolutions) {
         const conflict = pendingConflicts.find((c) => c.id === resolution.id)
         if (!conflict) continue
 
-        if (resolution.choice === 'overwrite') {
-          // Validate before syncing local draft to server
-          validateBeforeSync(conflict.localPlanner)
-          // Keep local draft, force push to server
-          const synced = await syncAdapter.syncToServer(conflict.localPlanner, true)
-          await saveAdapter.saveToLocal(adoptSyncedVersion(conflict.localPlanner, synced))
-        } else if (resolution.choice === 'discard') {
-          // Use server version, discard local draft
-          await saveAdapter.saveToLocal(conflict.serverPlanner)
-        } else if (resolution.choice === 'both') {
-          // Keep both: create copy of local, then use server for original
-          const copyId = crypto.randomUUID()
-          const deviceId = await saveAdapter.getOrCreateDeviceId()
-          const copy: SaveablePlanner = {
-            ...conflict.localPlanner,
-            metadata: {
-              ...conflict.localPlanner.metadata,
-              id: copyId,
-              title: `${conflict.localPlanner.metadata.title} (Copy)`,
-              status: 'saved',
-              syncVersion: 1,
-              deviceId,
-              createdAt: new Date().toISOString(),
-              lastModifiedAt: new Date().toISOString(),
-              savedAt: new Date().toISOString(),
-            },
-          }
-          // Validate copy before syncing (same content as localPlanner)
-          validateBeforeSync(copy)
-          await saveAdapter.saveToLocal(copy)
-          await syncAdapter.syncToServer(copy)
-          // Use server version for original
-          await saveAdapter.saveToLocal(conflict.serverPlanner)
-        }
+        const ctx = { deviceId: deviceId.value, now: new Date().toISOString(), newId: generateUUID }
+        const held = heldPlans.current.get(conflict.id)
+        const plan =
+          held?.choice === resolution.choice
+            ? held.plan
+            : planConflictResolution(
+                resolution.choice,
+                { forkSide: 'local', forkTitle: conflict.localPlanner.metadata.title },
+                {
+                  ...ctx,
+                  copyTitle: (title: string) =>
+                    t('pages.plannerMD.conflict.copySuffix', '{{title}} (Copy)', { title }),
+                },
+              )
+        heldPlans.current.set(conflict.id, { choice: resolution.choice, plan })
+
+        const result = await interpretConflictPlan(plan, conflictOps(conflict), ctx)
+        outcomes.push({ id: conflict.id, result })
+        if (!result.ok) break
+
+        resolved.add(conflict.id)
       }
 
-      // Only clear conflicts after ALL resolutions succeed
-      setPendingConflicts([])
-      const updatedLocal = await saveAdapter.listLocal()
+      setPendingConflicts((pending) => pending.filter((conflict) => !resolved.has(conflict.id)))
+      // A plan outlives only the conflict it belongs to.
+      for (const id of resolved) heldPlans.current.delete(id)
+
+      const updatedLocal = await storage.listLocal()
       queryClient.setQueryData(userPlannersQueryKeys.list(isAuthenticated), updatedLocal)
       void queryClient.invalidateQueries({
         queryKey: userPlannersQueryKeys.listFull(isAuthenticated),
       })
-    } catch (error) {
-      const e = error as {
-        code?: string
-        friendlyError?: { key: string; params?: Record<string, string> }
-      }
-      if (e.code === 'validationFailed' && e.friendlyError) {
-        setConflictResolutionError(e.friendlyError)
-      } else {
-        console.error('Conflict resolution failed:', error)
-      }
+
+      return outcomes
     } finally {
+      // Left set by a throw, the dialog's buttons stay disabled for good.
       setIsResolvingConflicts(false)
     }
   }
@@ -536,31 +471,5 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
     pendingConflicts,
     resolveConflicts,
     isResolvingConflicts,
-    conflictResolutionError,
-  }
-}
-
-// ============================================================================
-// Cache Invalidation Helper
-// ============================================================================
-
-/**
- * Hook to get invalidation function for user planners cache
- * Use after planner create/update/delete operations
- *
- * @example
- * ```tsx
- * const invalidate = useInvalidateUserPlanners();
- * await adapter.deletePlanner(id);
- * invalidate();
- * ```
- */
-export function useInvalidateUserPlanners() {
-  const queryClient = useQueryClient()
-
-  return () => {
-    void queryClient.invalidateQueries({
-      queryKey: userPlannersQueryKeys.all,
-    })
   }
 }

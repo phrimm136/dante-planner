@@ -50,7 +50,7 @@ export const BuffUIConfigSchema = z
 export const StartBuffDataSchema = z
   .object({
     level: z.number(),
-    baseId: z.number(),
+    baseId: z.coerce.number(),
     cost: z.number(),
     localizeId: z.string(),
     effects: z.array(BuffEffectSchema),

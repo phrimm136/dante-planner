@@ -18,5 +18,50 @@ variable "secret_names" {
     "danteplanner/jwt/rs256-private-key",
     "danteplanner/jwt/rs256-public-key",
     "danteplanner/jwt/encryption-key",
+    # Telemetry credentials — containers enrolled here; values are injected by
+    # scripts/ops/provision/*.sh into the PRIMARY region only (replication
+    # carries the versions to Seoul). Both endpoint entries hold region-invariant
+    # RDS hostnames, so replication cannot clobber a region-specific value.
+    "danteplanner/grafana/loki-username",
+    "danteplanner/grafana/loki-password",
+    "danteplanner/grafana/remote-write-username",
+    "danteplanner/grafana/remote-write-password",
+    "danteplanner/mysqld-exporter/username",
+    "danteplanner/mysqld-exporter/password",
+    "danteplanner/mysqld-exporter/primary-endpoint",
+    "danteplanner/mysqld-exporter/replica-endpoint",
+    # Human/agent access credentials — containers created by
+    # scripts/ops/provision/rds-readonly-secrets.sh before enrollment here.
+    "danteplanner/rds/readonly-username",
+    "danteplanner/rds/readonly-password",
+    # Read by terraform/rds at plan time. Container created by
+    # scripts/ops/provision/rds-master-password-secret.sh before enrollment here.
+    "danteplanner/rds/master-password",
+    "danteplanner/grafana/observability-read-token",
+    # Both regions' tunnel tokens in one entry, keyed by region. Container created by
+    # scripts/ops/provision/cloudflare-tunnel-secrets.sh before enrollment here.
+    "danteplanner/cloudflare/tunnel-tokens",
   ]
+}
+
+variable "aws_account_id" {
+  description = "The 12-digit AWS account this stack may apply into."
+  type        = string
+
+  validation {
+    condition     = can(regex("^[0-9]{12}$", var.aws_account_id))
+    error_message = "aws_account_id must be the 12-digit AWS account number."
+  }
+}
+
+variable "manage_grafana_datasource_user" {
+  description = "Adopt the Grafana CloudWatch datasource user here. False for an environment with no Grafana datasource, where the import has nothing to adopt and fails the plan."
+  type        = bool
+  default     = true
+}
+
+variable "manage_origin_tls" {
+  description = "Adopt the edge origin-certificate container here. False for an environment that has no edge certificate, where the import has nothing to adopt."
+  type        = bool
+  default     = true
 }

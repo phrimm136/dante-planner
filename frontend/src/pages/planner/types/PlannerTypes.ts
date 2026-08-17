@@ -1,7 +1,14 @@
 import type { JSONContent } from '@tiptap/core'
 import type { z } from 'zod'
 import type { MDCategory, RRCategory, DungeonIdx, PlannerType } from '@/shared/gameData'
+import type {
+  PlannerIdSchema,
+  ServerPlannerResponseSchema,
+  ServerPlannerSummarySchema,
+  ImportPlannersResponseSchema,
+} from '../schemas/PlannerSchemas'
 import type { SinnerEquipment, SkillEAState } from './DeckTypes'
+import type { ThemePackId } from '@/shared/gameData'
 
 /**
  * Planner status for tracking save state
@@ -16,7 +23,7 @@ export type PlannerStatus = 'draft' | 'saved'
  */
 export interface SerializableFloorSelection {
   /** Selected theme pack ID, null if none selected */
-  themePackId: string | null
+  themePackId: ThemePackId | null
   /** Selected difficulty for this floor */
   difficulty: DungeonIdx
   /** Selected gift IDs as array (serialized from Set) */
@@ -59,7 +66,7 @@ export interface PlannerMetadata {
   /** Device identifier for local storage namespacing */
   deviceId: string
   /** Whether planner is published (visible in community list) */
-  published?: boolean
+  published?: boolean | undefined
 }
 
 // ============================================================================
@@ -90,7 +97,7 @@ export interface RRConfig {
  * Planner config union type
  * Use type narrowing: if (config.type === 'MIRROR_DUNGEON') { ... }
  */
-export type PlannerConfig = MDConfig | RRConfig
+export type PlannerEditorConfig = MDConfig | RRConfig
 
 // ============================================================================
 // Content Types
@@ -98,7 +105,7 @@ export type PlannerConfig = MDConfig | RRConfig
 
 /**
  * Mirror Dungeon planner content - all state from PlannerMDNewPage
- * Note: title is in PlannerMetadata, category is in PlannerConfig
+ * Note: title is in PlannerMetadata, category is in PlannerEditorConfig
  * All Set types are converted to arrays for JSON serialization
  */
 export interface MDPlannerContent {
@@ -141,16 +148,46 @@ export interface RRPlannerContent {
 export type PlannerContent = MDPlannerContent | RRPlannerContent
 
 /**
- * Complete saveable planner structure
- * Combines metadata, config (with category), and content for IndexedDB storage
+ * Mirror Dungeon planner: config and content are pinned to the MD half
  */
-export interface SaveablePlanner {
+export interface MDSaveablePlanner {
   /** Planner metadata (id, status, timestamps, etc.) */
   metadata: PlannerMetadata
-  /** Planner config (type discriminator and category) */
-  config: PlannerConfig
-  /** Planner content (all user-editable state) */
-  content: PlannerContent
+  /** MD config (type discriminator and MD category) */
+  config: MDConfig
+  /** MD content (all user-editable state) */
+  content: MDPlannerContent
+}
+
+/**
+ * Refracted Railway planner: config and content are pinned to the RR half
+ */
+export interface RRSaveablePlanner {
+  /** Planner metadata (id, status, timestamps, etc.) */
+  metadata: PlannerMetadata
+  /** RR config (type discriminator and RR category) */
+  config: RRConfig
+  /** RR content (all user-editable state) */
+  content: RRPlannerContent
+}
+
+/**
+ * Complete saveable planner structure
+ *
+ * Discriminated at the root, so `content` follows `config`. Select a branch
+ * with `isMDPlanner` rather than testing `config.type` inline.
+ */
+export type SaveablePlanner = MDSaveablePlanner | RRSaveablePlanner
+
+/**
+ * Narrow a planner to its Mirror Dungeon branch.
+ *
+ * A bare `planner.config.type === 'MIRROR_DUNGEON'` narrows `planner.config`
+ * and stops there — the discriminant sits one level below the union root, so
+ * the sibling `content` stays widened. This predicate carries it across.
+ */
+export function isMDPlanner(planner: SaveablePlanner): planner is MDSaveablePlanner {
+  return planner.config.type === 'MIRROR_DUNGEON'
 }
 
 /**
@@ -178,76 +215,26 @@ export interface PlannerSummary {
   syncVersion?: number
   /** Selected keywords for display (MD planners only) */
   selectedKeywords?: string[]
+  /** Server tombstone; present only on rows a sync listing carries as deleted */
+  deletedAt?: string
 }
 
 // ============================================================================
 // Server API Types
 // ============================================================================
 
-/**
- * Branded type for planner UUID identifiers
- * Uses Zod's brand type for consistency with schema validation
- */
-export type PlannerId = string & z.BRAND<'PlannerId'>
+/** Branded type for planner UUID identifiers */
+export type PlannerId = z.infer<typeof PlannerIdSchema>
 
-/**
- * Server response for a single planner
- * Contains full planner data from the backend
- */
-export interface ServerPlannerResponse {
-  /** Unique identifier (UUID) */
-  id: PlannerId
-  /** Planner title */
-  title: string
-  /** Category (MD: 5F/10F/15F, RR: placeholder) - reuses existing constant types */
-  category: MDCategory | RRCategory
-  /** Current save status - reuses existing type */
-  status: PlannerStatus
-  /** Planner content as JSON string */
-  content: string
-  /** Schema version for data format migration support */
-  schemaVersion: number
-  /** Game content version (e.g., 6 for MD6, 5 for RR5) */
-  contentVersion: number
-  /** Type of planner (MIRROR_DUNGEON, REFRACTED_RAILWAY) */
-  plannerType: PlannerType
-  /** Server sync version for optimistic locking */
-  syncVersion: number
-  /** Device identifier (optional, server may return null) */
-  deviceId?: string | null
-  /** ISO 8601 timestamp when planner was created */
-  createdAt: string
-  /** ISO 8601 timestamp when planner was last modified */
-  lastModifiedAt: string
-  /** ISO 8601 timestamp when planner was explicitly saved (optional, may be null) */
-  savedAt?: string | null
-  /** Whether planner is published (visible in community list) */
-  published: boolean
-  /** Number of upvotes */
-  upvotes?: number
-}
+/** Server response for a single planner (full data from the backend) */
+export type ServerPlannerResponse = z.infer<typeof ServerPlannerResponseSchema>
 
-/**
- * Server summary for planner list display
- * Lightweight version without full content
- */
-export interface ServerPlannerSummary {
-  /** Unique identifier (UUID) */
-  id: PlannerId
-  /** Planner title */
-  title: string
-  /** Category (MD: 5F/10F/15F, RR: placeholder) - reuses existing constant types */
-  category: MDCategory | RRCategory
-  /** Type of planner */
-  plannerType: PlannerType
-  /** Current save status - reuses existing type */
-  status: PlannerStatus
-  /** Server sync version for optimistic locking */
+/** Server summary for planner list display (no content) */
+export type ServerPlannerSummary = z.infer<typeof ServerPlannerSummarySchema>
+
+/** What the server confirms about a write: which version it assigned. */
+export interface ServerAck {
   syncVersion: number
-  /** ISO 8601 timestamp when planner was last modified */
-  lastModifiedAt: string
-  /** Whether planner is published (visible in community list) */
-  published?: boolean
 }
 
 /**
@@ -277,22 +264,6 @@ export interface UpsertPlannerRequest {
 }
 
 /**
- * Request payload for updating an existing planner
- */
-export interface UpdatePlannerRequest {
-  /** Updated title (optional) */
-  title?: string
-  /** Updated status (optional) */
-  status?: PlannerStatus
-  /** Updated content as JSON string (optional) */
-  content?: string
-  /** Current sync version for optimistic locking (required) */
-  syncVersion: number
-  /** Device identifier for tracking (optional) */
-  deviceId?: string
-}
-
-/**
  * Request payload for bulk importing planners
  */
 export interface ImportPlannersRequest {
@@ -300,28 +271,8 @@ export interface ImportPlannersRequest {
   planners: UpsertPlannerRequest[]
 }
 
-/**
- * Response from bulk import operation
- */
-export interface ImportPlannersResponse {
-  /** Number of planners successfully imported */
-  imported: number
-  /** Total number of planners in request */
-  total: number
-  /** Summary of imported planners */
-  planners: ServerPlannerSummary[]
-}
-
-/**
- * Server-Sent Event for planner updates
- * Used for real-time sync notifications
- */
-export interface PlannerSseEvent {
-  /** ID of the affected planner (UUID) */
-  plannerId: PlannerId
-  /** Type of change that occurred */
-  type: 'created' | 'updated' | 'deleted'
-}
+/** Response from bulk import operation */
+export type ImportPlannersResponse = z.infer<typeof ImportPlannersResponseSchema>
 
 // ============================================================================
 // Conflict Resolution Types
@@ -332,8 +283,8 @@ export interface PlannerSseEvent {
  * Used when server returns 409 conflict
  */
 export interface ConflictState {
-  /** Server's current version */
-  serverVersion: number
+  /** Server's current version, null when the conflict did not report one */
+  serverVersion: number | null
   /** ISO 8601 timestamp when conflict was detected */
   detectedAt: string
 }
@@ -361,7 +312,7 @@ export interface PlannerExportItem {
   /** Planner metadata (timestamps, status, etc.) */
   metadata: PlannerMetadata
   /** Planner config (type discriminator and category) */
-  config: PlannerConfig
+  config: PlannerEditorConfig
   /** Planner content (all user-editable state) */
   content: PlannerContent
 }

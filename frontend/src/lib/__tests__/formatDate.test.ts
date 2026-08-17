@@ -6,9 +6,76 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { formatPlannerDate, formatFullDate, formatRelativeTime } from '../formatDate'
+import {
+  DATE_FORMATS,
+  formatCompactDate,
+  formatFullDate,
+  formatPlannerDate,
+  formatRelativeTime,
+} from '../formatDate'
 
 describe('formatPlannerDate', () => {
+  it('returns null for absent input', () => {
+    expect(formatPlannerDate(null)).toBeNull()
+    expect(formatPlannerDate(undefined)).toBeNull()
+    expect(formatPlannerDate('')).toBeNull()
+  })
+
+  it('returns null for an unparseable date instead of throwing', () => {
+    expect(formatPlannerDate('invalid-date')).toBeNull()
+    expect(formatPlannerDate('2024-13-45T99:99:99Z')).toBeNull()
+  })
+
+  it('formats with the requested locale and options', () => {
+    const result = formatPlannerDate('2024-12-31T14:32:00Z', 'en-US', {
+      ...DATE_FORMATS.LONG_DATE,
+      timeZone: 'UTC',
+    })
+
+    expect(result).toBe('December 31, 2024')
+  })
+
+  it('honours a non-English locale', () => {
+    const result = formatPlannerDate('2024-12-31T14:32:00Z', 'ko-KR', {
+      ...DATE_FORMATS.LONG_DATE,
+      timeZone: 'UTC',
+    })
+
+    expect(result).toContain('2024')
+    expect(result).not.toContain('December')
+  })
+
+  it('renders the 12-hour full format with a meridiem marker', () => {
+    const result = formatPlannerDate('2024-12-31T14:32:00Z', 'en-US', {
+      ...DATE_FORMATS.FULL_DATE_TIME_12H,
+      timeZone: 'UTC',
+    })
+
+    expect(result).toMatch(/Dec 31, 2024/)
+    expect(result).toMatch(/PM/i)
+  })
+
+  it('renders the time-only format as hour, minute and second', () => {
+    const result = formatPlannerDate('2024-12-31T14:32:07Z', 'en-US', {
+      ...DATE_FORMATS.TIME_ONLY,
+      timeZone: 'UTC',
+    })
+
+    expect(result).toMatch(/2:32:07/)
+  })
+
+  it('renders the short date-time format without a year', () => {
+    const result = formatPlannerDate('2024-12-31T14:32:00Z', 'en-US', {
+      ...DATE_FORMATS.SHORT_DATE_TIME,
+      timeZone: 'UTC',
+    })
+
+    expect(result).toMatch(/Dec 31/)
+    expect(result).not.toMatch(/2024/)
+  })
+})
+
+describe('formatCompactDate', () => {
   beforeEach(() => {
     // Mock current time to a fixed date: 2024-12-31 15:00:00 UTC
     vi.useFakeTimers()
@@ -22,7 +89,7 @@ describe('formatPlannerDate', () => {
   describe('recent dates (< 24 hours)', () => {
     it('returns HH:mm format for dates within 24 hours', () => {
       // 5 hours ago
-      const result = formatPlannerDate('2024-12-31T10:30:00Z')
+      const result = formatCompactDate('2024-12-31T10:30:00Z')
 
       // Should contain hour:minute format (exact format depends on locale)
       // At minimum, should NOT contain a slash (date format)
@@ -33,7 +100,7 @@ describe('formatPlannerDate', () => {
 
     it('returns HH:mm format for dates 1 hour ago', () => {
       // 1 hour ago
-      const result = formatPlannerDate('2024-12-31T14:00:00Z')
+      const result = formatCompactDate('2024-12-31T14:00:00Z')
 
       expect(result).not.toContain('/')
       expect(result).toContain(':')
@@ -41,7 +108,7 @@ describe('formatPlannerDate', () => {
 
     it('returns HH:mm format for dates just under 24 hours', () => {
       // 23 hours ago
-      const result = formatPlannerDate('2024-12-30T16:00:00Z')
+      const result = formatCompactDate('2024-12-30T16:00:00Z')
 
       expect(result).not.toContain('/')
       expect(result).toContain(':')
@@ -49,7 +116,7 @@ describe('formatPlannerDate', () => {
 
     it('returns time in 24-hour format', () => {
       // 2 hours ago (13:00:00)
-      const result = formatPlannerDate('2024-12-31T13:00:00Z')
+      const result = formatCompactDate('2024-12-31T13:00:00Z')
 
       // Result should be in 24-hour format (no AM/PM)
       expect(result).not.toMatch(/[AP]M/i)
@@ -59,7 +126,7 @@ describe('formatPlannerDate', () => {
   describe('older dates (>= 24 hours)', () => {
     it('returns MM/DD format for dates 24+ hours old', () => {
       // Exactly 24 hours ago
-      const result = formatPlannerDate('2024-12-30T15:00:00Z')
+      const result = formatCompactDate('2024-12-30T15:00:00Z')
 
       // Should contain a slash (date format)
       expect(result).toContain('/')
@@ -69,7 +136,7 @@ describe('formatPlannerDate', () => {
 
     it('returns MM/DD format for dates several days old', () => {
       // 6 days ago
-      const result = formatPlannerDate('2024-12-25T10:30:00Z')
+      const result = formatCompactDate('2024-12-25T10:30:00Z')
 
       // Should be date format (contains slash)
       expect(result).toContain('/')
@@ -77,14 +144,14 @@ describe('formatPlannerDate', () => {
 
     it('returns MM/DD format for dates a month ago', () => {
       // 30 days ago
-      const result = formatPlannerDate('2024-12-01T10:30:00Z')
+      const result = formatCompactDate('2024-12-01T10:30:00Z')
 
       expect(result).toContain('/')
     })
 
     it('handles dates from previous year', () => {
       // 1 year ago
-      const result = formatPlannerDate('2023-12-31T10:30:00Z')
+      const result = formatCompactDate('2023-12-31T10:30:00Z')
 
       // Should still return date format
       expect(result).toContain('/')
@@ -94,17 +161,17 @@ describe('formatPlannerDate', () => {
   describe('edge cases', () => {
     it('handles exactly 24 hour boundary', () => {
       // Exactly 24 hours minus 1 second should be recent
-      const justUnder = formatPlannerDate('2024-12-30T15:00:01Z')
+      const justUnder = formatCompactDate('2024-12-30T15:00:01Z')
       expect(justUnder).not.toContain('/')
 
       // Exactly 24 hours should be old
-      const exactlyAt = formatPlannerDate('2024-12-30T15:00:00Z')
+      const exactlyAt = formatCompactDate('2024-12-30T15:00:00Z')
       expect(exactlyAt).toContain('/')
     })
 
     it('handles future dates gracefully', () => {
       // 1 hour in the future
-      const result = formatPlannerDate('2024-12-31T16:00:00Z')
+      const result = formatCompactDate('2024-12-31T16:00:00Z')
 
       // Should still produce a valid format (time, since diff is < 24h)
       expect(result).toBeDefined()
@@ -115,7 +182,7 @@ describe('formatPlannerDate', () => {
     it('handles invalid date string by throwing', () => {
       // Invalid dates will cause Intl.DateTimeFormat to throw RangeError
       // This is expected behavior - callers should validate input
-      expect(() => formatPlannerDate('invalid-date')).toThrow()
+      expect(() => formatCompactDate('invalid-date')).toThrow(RangeError)
     })
   })
 })

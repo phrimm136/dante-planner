@@ -8,14 +8,20 @@
 
 import { Fragment, type ReactNode } from 'react'
 
-const STRIKETHROUGH_RE = /<s>([\s\S]*?)<\/s>/g
+import { STRIKETHROUGH_GRAMMAR, tokenizeRichText, type RichTextToken } from './richText'
+
+function renderToken(token: RichTextToken): ReactNode {
+  if (token.kind === 'element') return <s key={`strike-${token.index}`}>{token.content}</s>
+  if (token.kind === 'text') return token.value
+  return null
+}
 
 /**
  * Render Unity <s>...</s> strikethrough, preserving tag position.
  *
  * Splits the input on each balanced <s>...</s> pair: wrapped substrings
  * render inside a real <s> element, surrounding substrings render as
- * plain text in place.
+ * plain text in place. Text without a pair is returned unchanged.
  *
  * Flat parser, balanced pairs only. Nested <s> is not supported.
  * Orphan <s> or </s> with no partner render as literal text.
@@ -27,18 +33,8 @@ const STRIKETHROUGH_RE = /<s>([\s\S]*?)<\/s>/g
 export function applyStrikethrough(text: string): ReactNode {
   if (!text.includes('<s>')) return text
 
-  const nodes: ReactNode[] = []
-  let lastIndex = 0
-  let key = 0
+  const tokens = tokenizeRichText(text, STRIKETHROUGH_GRAMMAR)
+  if (!tokens.some((token) => token.kind === 'element')) return text
 
-  for (const match of text.matchAll(STRIKETHROUGH_RE)) {
-    const start = match.index
-    if (start > lastIndex) nodes.push(text.slice(lastIndex, start))
-    nodes.push(<s key={key++}>{match[1]}</s>)
-    lastIndex = start + match[0].length
-  }
-
-  if (nodes.length === 0) return text
-  if (lastIndex < text.length) nodes.push(text.slice(lastIndex))
-  return <Fragment>{nodes}</Fragment>
+  return <Fragment>{tokens.map(renderToken)}</Fragment>
 }

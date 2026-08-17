@@ -1,4 +1,4 @@
-import { useState, memo, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { EnhancementLevel } from '@/shared/gameData'
 import { EGOGiftEnhancementSelector } from './EGOGiftEnhancementSelector'
 
@@ -20,25 +20,11 @@ interface EGOGiftSelectableCardInnerProps {
   onEnhancementSelect: (giftId: string, enhancement: EnhancementLevel) => void
 }
 
-// Custom comparison for inner - exclude callback
-function areInnerPropsEqual(
-  prev: EGOGiftSelectableCardInnerProps,
-  next: EGOGiftSelectableCardInnerProps,
-): boolean {
-  return (
-    prev.giftId === next.giftId &&
-    prev.enhancement === next.enhancement &&
-    prev.maxEnhancement === next.maxEnhancement &&
-    prev.isSelected === next.isSelected
-    // onEnhancementSelect excluded - stable behavior via functional update
-  )
-}
-
 /**
  * Inner component that handles hover state and enhancement selector overlay
  * Separated from outer wrapper to prevent card re-renders on hover
  */
-const EGOGiftSelectableCardInner = memo(function EGOGiftSelectableCardInner({
+const EGOGiftSelectableCardInner = function EGOGiftSelectableCardInner({
   giftId,
   enhancement,
   maxEnhancement,
@@ -106,34 +92,15 @@ const EGOGiftSelectableCardInner = memo(function EGOGiftSelectableCardInner({
       )}
     </div>
   )
-}, areInnerPropsEqual)
-
-// Custom comparison for outer wrapper - ignore children and callback
-function arePropsEqual(
-  prev: EGOGiftSelectableCardProps,
-  next: EGOGiftSelectableCardProps,
-): boolean {
-  return (
-    prev.giftId === next.giftId &&
-    prev.enhancement === next.enhancement &&
-    prev.maxEnhancement === next.maxEnhancement &&
-    prev.isSelected === next.isSelected
-    // children intentionally excluded
-    // onEnhancementSelect excluded - callback identity may change but behavior is same
-  )
 }
 
 /**
  * Gift card with enhancement selector overlay (for comprehensive list)
- * Shows enhancement selector on hover without re-rendering the card itself
  *
- * Pattern: Like TierLevelSelector
- * - Outer wrapper: memo with custom comparison excluding children
- * - Children rendered outside hover component with pointer-events-none
- * - Inner component: handles hover state + overlay separately
- * - Result: Hover only re-renders overlay, not the card
+ * The card sits in `children` under `pointer-events-none`, and the hover state lives
+ * in the sibling inner component, so opening the overlay re-renders only the overlay.
  */
-export const EGOGiftSelectableCard = memo(function EGOGiftSelectableCard({
+export const EGOGiftSelectableCard = function EGOGiftSelectableCard({
   giftId,
   enhancement,
   maxEnhancement,
@@ -153,4 +120,4 @@ export const EGOGiftSelectableCard = memo(function EGOGiftSelectableCard({
       />
     </div>
   )
-}, arePropsEqual)
+}

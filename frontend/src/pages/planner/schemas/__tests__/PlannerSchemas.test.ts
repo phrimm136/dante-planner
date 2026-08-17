@@ -6,17 +6,21 @@
  * and the two-step validateSaveablePlanner function.
  */
 
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, assert } from 'vitest'
 import { ZodError } from 'zod'
 import {
   MDConfigSchema,
   RRConfigSchema,
   PlannerConfigDiscriminatedSchema,
   SaveablePlannerSchema,
-  SsePlannerPayloadSchema,
+  ServerPlannerBatchResponseSchema,
+  ServerPlannerResponseSchema,
+  ServerPlannerSummaryPageSchema,
+  ServerPlannerSummarySchema,
   validateSaveablePlanner,
 } from '../PlannerSchemas'
 import { validateNoteSizes } from '../../lib/plannerValidation'
+import { isMDPlanner } from '../../types/PlannerTypes'
 import { MAX_NOTE_BYTES } from '@/lib/constants'
 
 // ============================================================================
@@ -91,12 +95,9 @@ function createValidSaveablePlanner(configType: 'MIRROR_DUNGEON' | 'REFRACTED_RA
 
 describe('MDConfigSchema', () => {
   it('validates valid MD config', () => {
-    const result = MDConfigSchema.safeParse(validMDConfig)
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.type).toBe('MIRROR_DUNGEON')
-      expect(result.data.category).toBe('5F')
-    }
+    const result = MDConfigSchema.parse(validMDConfig)
+    expect(result.type).toBe('MIRROR_DUNGEON')
+    expect(result.category).toBe('5F')
   })
 
   it('validates all MD categories', () => {
@@ -145,12 +146,9 @@ describe('MDConfigSchema', () => {
 
 describe('RRConfigSchema', () => {
   it('validates valid RR config', () => {
-    const result = RRConfigSchema.safeParse(validRRConfig)
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.type).toBe('REFRACTED_RAILWAY')
-      expect(result.data.category).toBe('RR_PLACEHOLDER')
-    }
+    const result = RRConfigSchema.parse(validRRConfig)
+    expect(result.type).toBe('REFRACTED_RAILWAY')
+    expect(result.category).toBe('RR_PLACEHOLDER')
   })
 
   it('rejects invalid type', () => {
@@ -178,19 +176,13 @@ describe('RRConfigSchema', () => {
 
 describe('PlannerConfigDiscriminatedSchema', () => {
   it('validates MD config via discriminated union', () => {
-    const result = PlannerConfigDiscriminatedSchema.safeParse(validMDConfig)
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.type).toBe('MIRROR_DUNGEON')
-    }
+    const result = PlannerConfigDiscriminatedSchema.parse(validMDConfig)
+    expect(result.type).toBe('MIRROR_DUNGEON')
   })
 
   it('validates RR config via discriminated union', () => {
-    const result = PlannerConfigDiscriminatedSchema.safeParse(validRRConfig)
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.type).toBe('REFRACTED_RAILWAY')
-    }
+    const result = PlannerConfigDiscriminatedSchema.parse(validRRConfig)
+    expect(result.type).toBe('REFRACTED_RAILWAY')
   })
 
   it('rejects unknown type', () => {
@@ -239,10 +231,8 @@ describe('validateSaveablePlanner', () => {
       const planner = createValidSaveablePlanner('MIRROR_DUNGEON')
       const result = validateSaveablePlanner(planner, 'draft')
       expect(result.metadata.id).toBe(planner.metadata.id)
-      expect(result.config.type).toBe('MIRROR_DUNGEON')
-      if (result.config.type === 'MIRROR_DUNGEON') {
-        expect(result.config.category).toBe('5F')
-      }
+      assert(result.config.type === 'MIRROR_DUNGEON')
+      expect(result.config.category).toBe('5F')
     })
 
     it('validates valid RR planner in draft mode', () => {
@@ -257,6 +247,25 @@ describe('validateSaveablePlanner', () => {
       // Add required themePackId for save mode (all floor selections need it)
       const result = validateSaveablePlanner(planner, 'save')
       expect(result.config.type).toBe('MIRROR_DUNGEON')
+    })
+
+    it('accepts equipment whose ego slots cover only some tiers', () => {
+      const planner = createValidSaveablePlanner('MIRROR_DUNGEON')
+      planner.content = {
+        ...planner.content,
+        equipment: {
+          '1': {
+            identity: { id: '10101', uptie: 4, level: 45 },
+            egos: { ZAYIN: { id: '20101', threadspin: 2 } },
+          },
+        },
+      }
+
+      const result = validateSaveablePlanner(planner, 'draft')
+      assert(isMDPlanner(result))
+      expect(result.content.equipment['1']?.egos).toEqual({
+        ZAYIN: { id: '20101', threadspin: 2 },
+      })
     })
   })
 
@@ -285,6 +294,22 @@ describe('validateSaveablePlanner', () => {
   })
 
   describe('metadata validation', () => {
+    it('strips the legacy userId key persisted by pre-removal app versions', () => {
+      const planner = createValidSaveablePlanner('MIRROR_DUNGEON')
+      const stored = { ...planner, metadata: { ...planner.metadata, userId: 42 } }
+
+      const result = validateSaveablePlanner(stored, 'draft')
+      expect(result.metadata).not.toHaveProperty('userId')
+      expect(result.metadata.id).toBe(planner.metadata.id)
+    })
+
+    it('still rejects an unknown non-legacy metadata key', () => {
+      const planner = createValidSaveablePlanner('MIRROR_DUNGEON')
+      const stored = { ...planner, metadata: { ...planner.metadata, driftKey: true } }
+
+      expect(() => validateSaveablePlanner(stored, 'draft')).toThrow(ZodError)
+    })
+
     it('rejects invalid UUID in metadata.id', () => {
       const planner = createValidSaveablePlanner('MIRROR_DUNGEON')
       planner.metadata.id = 'not-a-uuid'
@@ -339,18 +364,14 @@ describe('PlannerSchemas integration', () => {
   it('discriminated union enables type narrowing', () => {
     const mdConfig = PlannerConfigDiscriminatedSchema.parse(validMDConfig)
 
-    // TypeScript should narrow the type based on discriminator
-    if (mdConfig.type === 'MIRROR_DUNGEON') {
-      // Should have access to MD-specific category values
-      expect(['5F', '10F', '15F']).toContain(mdConfig.category)
-    }
+    // Asserting the discriminator both narrows the type and proves the parse chose that arm.
+    assert(mdConfig.type === 'MIRROR_DUNGEON')
+    expect(['5F', '10F', '15F']).toContain(mdConfig.category)
 
     const rrConfig = PlannerConfigDiscriminatedSchema.parse(validRRConfig)
 
-    if (rrConfig.type === 'REFRACTED_RAILWAY') {
-      // Should have access to RR-specific category values
-      expect(rrConfig.category).toBe('RR_PLACEHOLDER')
-    }
+    assert(rrConfig.type === 'REFRACTED_RAILWAY')
+    expect(rrConfig.category).toBe('RR_PLACEHOLDER')
   })
 
   it('full planner roundtrip validation', () => {
@@ -405,28 +426,91 @@ describe('import path: oversized note tolerated by storage, gated at save', () =
   })
 })
 
-describe('SsePlannerPayloadSchema', () => {
-  const P1 = '11111111-1111-4111-8111-111111111111'
+// ============================================================================
+// frontend-schemas-parse-digestless-responses
+// ============================================================================
+//
+// The server sends no contentDigest and the client declares none. Because the
+// response schemas are `.strict()`, the absence is enforced in both directions:
+// a digestless payload parses, and a payload still carrying the key is
+// rejected rather than tolerated.
 
-  it('accepts a partial planner row carrying id and syncVersion', () => {
-    const result = SsePlannerPayloadSchema.safeParse({
-      id: P1,
-      title: 'Deck',
-      syncVersion: 7,
-    })
+describe('frontend-schemas-parse-digestless-responses', () => {
+  const PLANNER_ID = '550e8400-e29b-41d4-a716-446655440000'
 
-    expect(result.success).toBe(true)
+  /** A planner read/write response exactly as the digestless backend sends it. */
+  function digestlessResponse() {
+    return {
+      id: PLANNER_ID,
+      title: 'Test Planner',
+      category: '5F',
+      status: 'saved',
+      content: '{}',
+      schemaVersion: 2,
+      contentVersion: 6,
+      plannerType: 'MIRROR_DUNGEON',
+      syncVersion: 1,
+      published: false,
+      createdAt: '2026-01-01T00:00:00.000Z',
+      lastModifiedAt: '2026-01-01T00:00:00.000Z',
+    }
+  }
+
+  /** A planner summary row as the digestless backend sends it. */
+  function digestlessSummary() {
+    return {
+      id: PLANNER_ID,
+      title: 'Test Planner',
+      category: '5F',
+      plannerType: 'MIRROR_DUNGEON',
+      status: 'saved',
+      syncVersion: 1,
+      lastModifiedAt: '2026-01-01T00:00:00.000Z',
+    }
+  }
+
+  function summaryPage() {
+    return {
+      content: [digestlessSummary()],
+      page: { size: 100, number: 0, totalElements: 1, totalPages: 1 },
+    }
+  }
+
+  it('parses a digestless read response', () => {
+    expect(ServerPlannerResponseSchema.safeParse(digestlessResponse()).success).toBe(true)
   })
 
-  it('rejects an envelope-routing payload that is not a planner row', () => {
-    const result = SsePlannerPayloadSchema.safeParse({ plannerId: P1, type: 'updated' })
+  it('parses a digestless write response', () => {
+    // The upsert (write) path validates against the same response schema, so a
+    // write acknowledgement carries a syncVersion and nothing identifying beyond it.
+    const acknowledgement = { ...digestlessResponse(), syncVersion: 7 }
 
-    expect(result.success).toBe(false)
+    const parsed = ServerPlannerResponseSchema.parse(acknowledgement)
+
+    expect(parsed.syncVersion).toBe(7)
+    expect(parsed).not.toHaveProperty('contentDigest')
   })
 
-  it('rejects a payload without an id', () => {
-    const result = SsePlannerPayloadSchema.safeParse({ title: 'Deck', syncVersion: 7 })
+  it('parses a digestless summary response', () => {
+    expect(ServerPlannerSummarySchema.safeParse(digestlessSummary()).success).toBe(true)
+    expect(ServerPlannerSummaryPageSchema.safeParse(summaryPage()).success).toBe(true)
+  })
 
-    expect(result.success).toBe(false)
+  it('parses a digestless batch response', () => {
+    const batch = [digestlessResponse(), { ...digestlessResponse(), syncVersion: 3 }]
+
+    expect(ServerPlannerBatchResponseSchema.safeParse(batch).success).toBe(true)
+  })
+
+  it('rejects a response that still carries contentDigest', () => {
+    const withDigest = { ...digestlessResponse(), contentDigest: 'ab'.repeat(32) }
+
+    expect(ServerPlannerResponseSchema.safeParse(withDigest).success).toBe(false)
+  })
+
+  it('rejects a summary that still carries contentDigest', () => {
+    const withDigest = { ...digestlessSummary(), contentDigest: 'ab'.repeat(32) }
+
+    expect(ServerPlannerSummarySchema.safeParse(withDigest).success).toBe(false)
   })
 })

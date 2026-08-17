@@ -1,0 +1,14 @@
+# 012 observability-outside-the-region
+epic: none · pr: none
+
+## Decisions
+- @alerting @locality — Alert rules are evaluated in Grafana Cloud, never in-cluster; Prometheus stays in-region for scraping and remote-writes out. REJECTED: an in-cluster Alertmanager — it dies with the region it monitors, so the outage that most needs a page is the one that cannot send it. The 2GiB data node also has no room for it.
+- @alerting @silence — An external synthetic probe plus a dead-man's-switch on metric absence back the rule set, with a per-cluster staleness meta-alert so a broken `remote_write` cannot blind alerting quietly. REJECTED: relying on firing rules alone — a collapsed pipeline produces no alerts, and silence is indistinguishable from health unless something asserts on the absence itself.
+- @alerting @channels (taste) — The primary notification contact point is backed by an independent second channel on the same notification policy. REJECTED: a single webhook — a revoked webhook or a provider outage drops firing alerts with no symptom, making the notification path an unmonitored single point of failure.
+- @metrics @coverage — Metric selection is incident-driven and deliberately covers the planes that fail quietly: ArgoCD sync/health and External Secrets sync failures, control-plane and etcd health with a dead-man on the S3 etcd snapshots, and Prometheus self-scrape. Control planes fail silent, data planes fail loud, so only the first class needs instrumenting on purpose.
+- @metrics @kube-state — Pod and Node conditions come from kube-state-metrics under a metric allowlist, one per cluster. REJECTED: deriving them from node_exporter and kubelet metrics — object state exists only in the apiserver, and without a cloud-controller-manager an orphaned NotReady node is never garbage-collected, so nothing else would surface it.
+- @metrics @read-path — Query telemetry runs on every database instance that serves reads, not only the primary, memory-gated per instance. REJECTED: primary-only telemetry — in a read-local topology it structurally cannot observe replica-only pathologies, which are precisely the ones the second region introduces. A failed gate on the replica falls back to primary-only as a recorded blind spot.
+- @metrics @mechanism — Database telemetry comes from `mysqld_exporter` per region against its region-local endpoint. REJECTED: polling `performance_schema` from the backend — it couples the application to monitoring and loses its history on every surge redeploy. REJECTED: `EXPLAIN ANALYZE` as a recorded metric — it is an on-demand drill, while statement digests are the census that tells you which query to drill into.
+
+## Takeaway
+- takeaway: monitoring inherits the failure domain of wherever it runs, so each stage has to be placed against the failures it is meant to report. The corollary is that the pipeline must monitor itself, because a broken observer reports the same thing as a healthy system.

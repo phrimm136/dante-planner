@@ -1,85 +1,50 @@
 /**
- * ColoredText — Unified Unity rich text tag processing
+ * ColoredText — Unity rich text with six-digit hex colors.
  *
- * Single source of truth for parsing Unity color/size tags into React nodes.
- * Handles: nested tags, malformed close tags, size tags.
+ * Nested colors, malformed close tags and size blocks all resolve here.
  *
  * Used by: AbEventDetailPage, ThemePackCard, formatBuffDescription, etc.
  */
 
-/**
- * Sanitize Unity rich text before parsing:
- * - <size=N%>content</size> -> <small>content</small>
- * - </color=#hex> -> </color> (malformed close tags)
- */
-function sanitize(text: string): string {
-  return text
-    .replace(/<size=[^>]*>/g, '<small>')
-    .replace(/<\/size>/g, '</small>')
-    .replace(/<\/color=[^>]*>/g, '</color>')
+import {
+  HEX_COLOR_SOURCE,
+  NESTED_HEX_COLOR_GRAMMAR,
+  RICH_TEXT_TAG,
+  tokenizeRichText,
+  type RichTextToken,
+} from '../lib/richText'
+
+const COLOR_PAIR_RE = new RegExp(`<color=${HEX_COLOR_SOURCE}>([^<]*)</color>`, 'g')
+
+function renderTokens(tokens: RichTextToken[]): React.ReactNode[] {
+  return tokens.map((token) => {
+    switch (token.kind) {
+      case 'text':
+        return token.value
+      case 'break':
+        return <br key={`break-${token.index}`} />
+      case 'element':
+        return token.name === RICH_TEXT_TAG.size ? (
+          <span key={`size-${token.index}`} className="text-[75%]">
+            {renderTokens(token.children)}
+          </span>
+        ) : (
+          <span key={`color-${token.index}`} style={{ color: token.value }}>
+            {renderTokens(token.children)}
+          </span>
+        )
+    }
+  })
 }
 
 /**
- * Parse Unity color tags into React nodes. Handles nested tags recursively.
+ * Parse Unity color and size tags into React nodes, nesting included.
  *
  * This is the single consolidated tag processing function.
  * All color tag parsing in the codebase should use this.
  */
 export function parseColorTags(text: string): React.ReactNode[] {
-  const sanitized = sanitize(text)
-  return parseRecursive(sanitized, 0)
-}
-
-function parseRecursive(text: string, keyBase: number): React.ReactNode[] {
-  const parts: React.ReactNode[] = []
-  const openTagRegex = /<color=(#[0-9a-fA-F]{6})>/
-  let lastIndex = 0
-
-  while (lastIndex < text.length) {
-    const slice = text.slice(lastIndex)
-    const match = openTagRegex.exec(slice)
-    if (!match) {
-      parts.push(slice)
-      break
-    }
-
-    const tagStart = lastIndex + match.index
-    const color = match[1]
-    const contentStart = tagStart + match[0].length
-
-    if (tagStart > lastIndex) {
-      parts.push(text.slice(lastIndex, tagStart))
-    }
-
-    // Find matching </color> using depth counter for nesting
-    let depth = 1
-    let pos = contentStart
-    while (pos < text.length && depth > 0) {
-      if (text.startsWith('<color=', pos)) {
-        depth++
-        const gtIndex = text.indexOf('>', pos)
-        pos = gtIndex === -1 ? text.length : gtIndex + 1
-      } else if (text.startsWith('</color>', pos)) {
-        depth--
-        if (depth > 0) pos += '</color>'.length
-      } else {
-        pos++
-      }
-    }
-
-    const innerContent = text.slice(contentStart, pos)
-    if (innerContent) {
-      parts.push(
-        <span key={keyBase + tagStart} style={{ color }}>
-          {parseRecursive(innerContent, keyBase + contentStart)}
-        </span>,
-      )
-    }
-
-    lastIndex = pos + '</color>'.length
-  }
-
-  return parts
+  return renderTokens(tokenizeRichText(text, NESTED_HEX_COLOR_GRAMMAR))
 }
 
 /** Strip all color tags, keeping inner text */
@@ -89,7 +54,7 @@ export function stripColorTags(text: string): string {
   let prev = ''
   while (result !== prev) {
     prev = result
-    result = result.replace(/<color=#[0-9a-fA-F]{6}>([^<]*)<\/color>/g, '$1')
+    result = result.replace(COLOR_PAIR_RE, '$1')
   }
   return result
 }
@@ -99,31 +64,5 @@ export function stripColorTags(text: string): string {
  * Handles <color>, <size>, nested tags, and malformed close tags.
  */
 export function ColoredText({ text }: { text: string }) {
-  const sanitized = sanitize(text)
-
-  // Handle <small> tags (from <size> conversion) by splitting first
-  const smallRegex = /<small>([\s\S]*?)<\/small>/g
-  const topParts: React.ReactNode[] = []
-  let topLastIndex = 0
-  let smallMatch
-
-  while ((smallMatch = smallRegex.exec(sanitized)) !== null) {
-    if (smallMatch.index > topLastIndex) {
-      topParts.push(
-        ...parseRecursive(sanitized.slice(topLastIndex, smallMatch.index), topLastIndex),
-      )
-    }
-    topParts.push(
-      <span key={`small-${smallMatch.index}`} className="text-[75%]">
-        {parseRecursive(smallMatch[1], smallMatch.index)}
-      </span>,
-    )
-    topLastIndex = smallRegex.lastIndex
-  }
-
-  if (topLastIndex < sanitized.length) {
-    topParts.push(...parseRecursive(sanitized.slice(topLastIndex), topLastIndex))
-  }
-
-  return <>{topParts}</>
+  return <>{parseColorTags(text)}</>
 }

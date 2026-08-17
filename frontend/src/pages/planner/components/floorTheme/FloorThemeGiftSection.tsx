@@ -1,9 +1,9 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useShallow } from 'zustand/shallow'
 import { useThemePackListData } from '@/pages/themePack'
 import { useEGOGiftListData } from '@/pages/egoGift'
-import { toast } from 'sonner'
+import { showWarning } from '@/lib/errorPresentation'
 import { usePlannerEditorStoreSafe } from '../../stores/usePlannerEditorStore'
 import { DifficultyIndicator, getFloorDifficultyLabel } from './DifficultyIndicator'
 import { ThemePackViewer, ThemePackPlaceholder } from './ThemePackViewer'
@@ -13,9 +13,13 @@ import { FloorGiftSelectorPane } from './FloorGiftSelectorPane'
 import { DUNGEON_IDX, type DungeonIdx, type MDCategory } from '@/shared/gameData'
 import { cn } from '@/lib/utils'
 import { canSelectFloorThemePack, getUnaffordableGiftNames } from '../../lib/plannerRules'
-import { PlannerSection } from '../PlannerSection'
+import { PlannerSection } from '@/components/layout/PlannerSection'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import type { FloorThemeSelection } from '@/pages/themePack'
+import { ThemePackIdSchema } from '@/shared/gameData'
+
+/** Shared empty result so a closed picker's selector keeps one identity. */
+const EMPTY_PACK_IDS: string[] = []
 
 interface FloorThemeGiftSectionProps {
   floorNumber: number // 1-indexed (1-15)
@@ -52,24 +56,58 @@ export function FloorThemeGiftSection({
   const { spec: themePackList, i18n: themePackI18n } = useThemePackListData()
   const { spec: egoGiftSpec, i18n: egoGiftI18n } = useEGOGiftListData()
 
-  // Store state (safe - returns undefined if outside context)
-  // Extract only the data needed for this floor to minimize re-renders
-  const { allFloors, updateFloorSelection, storeCategory } = usePlannerEditorStoreSafe(
+  const [isThemePackPaneOpen, setIsThemePackPaneOpen] = useState(false)
+  const [isGiftPaneOpen, setIsGiftPaneOpen] = useState(false)
+
+  // Only this floor's own selection plus the two cross-floor facts it reads: the
+  // previous floor's difficulty and whether that floor has a pack at all. Every
+  // member is a primitive or an entry whose identity survives a sibling's edit.
+  const storeSlice = usePlannerEditorStoreSafe(
     useShallow((s) => ({
-      currentFloor: s?.floorSelections?.[floorIndex],
-      allFloors: s?.floorSelections ?? [],
+      selection: s?.floorSelections?.[floorIndex],
+      previousDifficulty:
+        floorIndex > 0 ? (s?.floorSelections?.[floorIndex - 1]?.difficulty ?? null) : null,
+      previousHasThemePack:
+        floorIndex === 0 || (s?.floorSelections?.[floorIndex - 1]?.themePackId ?? null) !== null,
       updateFloorSelection: s?.updateFloorSelection,
       storeCategory: s?.category,
     })),
-  ) ?? {
-    currentFloor: undefined,
-    allFloors: [],
-    updateFloorSelection: undefined,
-    storeCategory: undefined,
-  }
+  )
 
-  const floorSelections = floorSelectionsOverride ?? allFloors
-  const category = categoryProp ?? storeCategory ?? '5F'
+  // Which packs the other floors occupy is read only while the picker is open,
+  // so a closed picker never subscribes to a sibling floor.
+  const usedThemePackIdsFromStore = usePlannerEditorStoreSafe(
+    useShallow((s) =>
+      isThemePackPaneOpen && !floorSelectionsOverride
+        ? s.floorSelections.flatMap((floor, i) =>
+            i !== floorIndex && floor.themePackId ? [floor.themePackId] : [],
+          )
+        : EMPTY_PACK_IDS,
+    ),
+  )
+
+  const updateFloorSelection = storeSlice?.updateFloorSelection
+  const category = categoryProp ?? storeSlice?.storeCategory ?? '5F'
+
+  // Tracker mode drives the whole floor list in as a prop; the editor reads the store.
+  const selection = floorSelectionsOverride
+    ? floorSelectionsOverride[floorIndex]
+    : storeSlice?.selection
+  const previousFloorDifficulty = floorSelectionsOverride
+    ? floorIndex > 0
+      ? (floorSelectionsOverride[floorIndex - 1]?.difficulty ?? null)
+      : null
+    : (storeSlice?.previousDifficulty ?? null)
+  const canSelectThemePack = floorSelectionsOverride
+    ? canSelectFloorThemePack(floorIndex, floorSelectionsOverride)
+    : (storeSlice?.previousHasThemePack ?? true)
+  const usedThemePackIds = new Set(
+    floorSelectionsOverride
+      ? floorSelectionsOverride.flatMap((floor, i) =>
+          i !== floorIndex && floor.themePackId ? [floor.themePackId] : [],
+        )
+      : (usedThemePackIdsFromStore ?? EMPTY_PACK_IDS),
+  )
 
   // Handlers - use override if provided (tracker mode), otherwise use store action
   const handleThemePackSelect = (packId: string, difficulty: DungeonIdx) => {
@@ -77,7 +115,7 @@ export function FloorThemeGiftSection({
       onThemePackSelectOverride(packId, difficulty)
     } else if (updateFloorSelection) {
       // Preserve existing gifts
-      const existingGifts = floorSelections[floorIndex]?.giftIds ?? new Set<string>()
+      const existingGifts = selection?.giftIds ?? new Set<string>()
 
       // Remove gifts that are unaffordable for the new theme pack
       let newGiftIds = existingGifts
@@ -90,17 +128,15 @@ export function FloorThemeGiftSection({
         )
         if (names.length > 0) {
           newGiftIds = new Set([...existingGifts].filter((id) => !ids.includes(id)))
-          toast.warning(
-            t('pages.plannerMD.gifts.unaffordableWarning', {
-              floor: floorNumber,
-              gifts: names.join(', '),
-            }),
-          )
+          showWarning('planner:pages.plannerMD.gifts.unaffordableWarning', {
+            floor: floorNumber,
+            gifts: names.join(', '),
+          })
         }
       }
 
       updateFloorSelection(floorIndex, {
-        themePackId: packId,
+        themePackId: ThemePackIdSchema.parse(packId),
         difficulty,
         giftIds: newGiftIds,
       })
@@ -110,30 +146,25 @@ export function FloorThemeGiftSection({
   const handleGiftSelectionChange = (giftIds: Set<string>) => {
     if (setSelectedGiftIdsOverride) {
       setSelectedGiftIdsOverride(giftIds)
-    } else if (updateFloorSelection && floorSelections[floorIndex]) {
+    } else if (updateFloorSelection && selection) {
       updateFloorSelection(floorIndex, {
-        ...floorSelections[floorIndex],
+        ...selection,
         giftIds,
       })
     }
   }
 
-  // Derived state from floor selections
-  const selection = floorSelections[floorIndex]
   const selectedThemePackId = selection?.themePackId ?? null
   const selectedDifficulty = selection?.difficulty ?? null
   const selectedGiftIds = selection?.giftIds ?? new Set<string>()
-  const previousFloorDifficulty =
-    floorIndex > 0 ? (floorSelections[floorIndex - 1]?.difficulty ?? null) : null
 
-  const [isThemePackPaneOpen, setIsThemePackPaneOpen] = useState(false)
-  const [isGiftPaneOpen, setIsGiftPaneOpen] = useState(false)
+  // Hints explain why an editable surface is locked, so they only apply when the
+  // section itself is editable.
+  const showThemePackLockHint = !readOnly && !canSelectThemePack
+  const showGiftLockHint = !readOnly && !selectedThemePackId
 
-  // Check if theme pack selector should be readOnly
-  const isThemePackReadOnly = readOnly || !canSelectFloorThemePack(floorIndex, floorSelections)
-
-  // Check if gift selector should be readOnly (no theme pack selected)
-  const isGiftReadOnly = readOnly || !selectedThemePackId
+  const isThemePackReadOnly = readOnly || showThemePackLockHint
+  const isGiftReadOnly = readOnly || showGiftLockHint
 
   // Get the selected theme pack entry and name
   const selectedPackEntry = selectedThemePackId ? themePackList[selectedThemePackId] : null
@@ -162,23 +193,10 @@ export function FloorThemeGiftSection({
     }
   }
 
-  // Memoize used theme pack IDs to prevent unnecessary child re-renders
-  const usedThemePackIds = useMemo(() => {
-    const ids = new Set<string>()
-    for (let i = 0; i < floorSelections.length; i++) {
-      if (i === floorIndex) continue
-      const floorThemePackId = floorSelections[i].themePackId
-      if (floorThemePackId) {
-        ids.add(floorThemePackId)
-      }
-    }
-    return ids
-  }, [floorSelections, floorIndex])
-
   return (
     <PlannerSection
       title={t('pages.plannerMD.floor', { number: floorNumber })}
-      onViewNotes={onViewNotes}
+      {...(onViewNotes !== undefined && { onViewNotes })}
     >
       <div
         className={cn(
@@ -212,7 +230,7 @@ export function FloorThemeGiftSection({
                     />
                   )}
                 </TooltipTrigger>
-                {isThemePackReadOnly && !readOnly && (
+                {showThemePackLockHint && (
                   <TooltipContent>
                     <p>{t('pages.plannerMD.previousFloorNoThemePack')}</p>
                   </TooltipContent>
@@ -233,7 +251,7 @@ export function FloorThemeGiftSection({
                   readOnly={isGiftReadOnly}
                 />
               </TooltipTrigger>
-              {isGiftReadOnly && !readOnly && (
+              {showGiftLockHint && (
                 <TooltipContent>
                   <p>{t('pages.plannerMD.selectThemePackFirst')}</p>
                 </TooltipContent>

@@ -25,11 +25,7 @@ export function useTiptapEditor(providedEditor?: Editor | null): {
     editor: mainEditor,
     selector(context) {
       if (!context.editor) {
-        return {
-          editor: null,
-          editorState: undefined,
-          canCommand: undefined,
-        }
+        return { editor: null }
       }
 
       return {

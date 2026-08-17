@@ -1,0 +1,25 @@
+id: no-throw-in-lib-tsx
+snapshots:
+  ? |
+    function render(raw: string) {
+      const parsed = schema.safeParse(raw)
+      if (!parsed.success) throw new Error('invalid payload')
+      return <em>{parsed.data}</em>
+    }
+  : labels:
+    - source: throw new Error('invalid payload')
+      style: primary
+      start: 93
+      end: 127
+  throw err:
+    labels:
+    - source: throw err
+      style: primary
+      start: 0
+      end: 9
+  throw new Error('boom'):
+    labels:
+    - source: throw new Error('boom')
+      style: primary
+      start: 0
+      end: 23

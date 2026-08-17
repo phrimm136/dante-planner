@@ -97,5 +97,3 @@ export const SpoilerExtension = Mark.create({
     }
   },
 })
-
-export default SpoilerExtension

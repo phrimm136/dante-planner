@@ -14,7 +14,11 @@
       },
       {
         "regex": "#[0-9a-fA-F]{3,8}",
-        "exclude": ["constants.ts", ".test.", ".spec."],
+        "exclude": [
+          "constants.ts",
+          ".test.",
+          ".spec."
+        ],
         "message": "Use constants.ts colors or Tailwind classes instead of hardcoded hex",
         "severity": "warning"
       },
@@ -36,12 +40,20 @@
       },
       {
         "regex": "useTranslation\\(\\)(?!\\s*//\\s*i18n-ok)",
-        "exclude": ["i18n.ts", "LanguageSync.tsx"],
+        "exclude": [
+          "i18n.ts",
+          "LanguageSync.tsx"
+        ],
         "message": "Specify namespace explicitly: useTranslation(['namespace', 'common']) or useTranslation('common'). Add // i18n-ok comment if only using i18n object for language detection.",
         "severity": "warning"
       }
     ],
-    "extensions": [".ts", ".tsx", ".js", ".jsx"]
+    "extensions": [
+      ".ts",
+      ".tsx",
+      ".js",
+      ".jsx"
+    ]
   },
   "backend": {
     "patterns": [
@@ -80,9 +92,26 @@
         "regex": "@RequestBody(?!.*@Valid)",
         "message": "Add @Valid before @RequestBody for validation",
         "severity": "warning"
+      },
+      {
+        "regex": "(identical to the (previous|old|former)|\\bwas missing\\b|\\brenamed from\\b|\\bmoved from\\b|\\bused to be\\b|no longer (does|exists|has|supports|uses|contains))",
+        "message": "Durable records carry no change history - state what the code does now; git owns the diff",
+        "severity": "error"
+      },
+      {
+        "regex": "Boolean\\.TRUE\\.equals\\(",
+        "exclude": [
+          "ContentTombstoneStore.java",
+          "RefreshRotationService.java"
+        ],
+        "message": "Boolean.TRUE.equals() re-checks a value a primitive boolean already proves - make the getter primitive (excluded: the two Redis hasKey call sites, whose Boolean is genuinely nullable)",
+        "severity": "warning"
       }
     ],
-    "extensions": [".java", ".kt"],
+    "extensions": [
+      ".java",
+      ".kt"
+    ],
     "fileSpecificPatterns": {
       "Controller": [
         {

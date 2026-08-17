@@ -1,6 +1,5 @@
-import { memo } from 'react'
 import type { SinnerEquipment } from '../../types/DeckTypes'
-import type { EGOType } from '@/pages/ego'
+import type { EgoType } from '@/shared/gameData'
 import type { IdentityListItem } from '@/pages/identity'
 import type { SkillData } from './SinnerGrid'
 import {
@@ -22,18 +21,18 @@ interface SinnerDeckCardProps {
   skillData: SkillData
   egoAffinityMap: Record<string, string>
   deploymentOrder: number | null
-  onToggleDeploy: (sinnerIndex: number) => void
+  onToggleDeploy?: ((sinnerIndex: number) => void) | undefined
   readOnly?: boolean
 }
 
-const EGO_RANKS: EGOType[] = ['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH']
+const EGO_RANKS: EgoType[] = ['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH']
 
 /**
  * Deck card showing equipped identity with deployment status, skills, and EGOs.
  * Uses IdentityCard for identity display with deployment order overlay.
  * Memoized to prevent re-renders when sibling sinners' data changes.
  */
-export const SinnerDeckCard = memo(function SinnerDeckCard({
+export const SinnerDeckCard = function SinnerDeckCard({
   sinnerIndex,
   equipment,
   identityData,
@@ -83,9 +82,12 @@ export const SinnerDeckCard = memo(function SinnerDeckCard({
   return (
     <div className="relative flex flex-col items-center gap-1 p-2 transition-colors">
       {/* Identity Card with deployment overlay - click here to toggle deploy */}
-      <div
+      <button
+        type="button"
         className="group"
-        onClick={readOnly ? undefined : () => onToggleDeploy(sinnerIndex)}
+        disabled={readOnly || !onToggleDeploy}
+        aria-pressed={deploymentOrder !== null}
+        onClick={() => onToggleDeploy?.(sinnerIndex)}
         style={{ cursor: readOnly ? 'default' : 'pointer' }}
       >
         <IdentityCard
@@ -95,7 +97,7 @@ export const SinnerDeckCard = memo(function SinnerDeckCard({
           isSelected={deploymentOrder !== null}
           overlay={deploymentOverlay}
         />
-      </div>
+      </button>
 
       {/* Skill Info Row - atkType icon on affinity-colored background */}
       <div className="flex gap-1">
@@ -129,8 +131,9 @@ export const SinnerDeckCard = memo(function SinnerDeckCard({
       <div className="flex gap-0.5">
         {EGO_RANKS.map((rank) => {
           const equippedEgo = equipment.egos[rank]
-          const egoBgColor = equippedEgo
-            ? (colorCode as Record<string, string>)[egoAffinityMap[equippedEgo.id]]
+          const egoAffinity = equippedEgo ? egoAffinityMap[equippedEgo.id] : undefined
+          const egoBgColor = egoAffinity
+            ? (colorCode as Record<string, string>)[egoAffinity]
             : undefined
           return (
             <div
@@ -154,6 +157,4 @@ export const SinnerDeckCard = memo(function SinnerDeckCard({
       </div>
     </div>
   )
-})
-
-export default SinnerDeckCard
+}

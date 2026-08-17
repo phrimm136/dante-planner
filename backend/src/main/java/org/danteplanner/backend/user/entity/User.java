@@ -1,6 +1,20 @@
 package org.danteplanner.backend.user.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,6 +24,7 @@ import lombok.Setter;
 import org.danteplanner.backend.auth.converter.AuthProviderTypeConverter;
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -120,12 +135,28 @@ public class User {
     }
 
     /**
+     * The restriction in force on this account at {@code clock}'s instant.
+     *
+     * <p>A live timeout is reported ahead of a ban, so {@link RestrictionState#BANNED} comes back
+     * only for an account that is not also serving one.</p>
+     *
+     * @param clock the clock a timeout's expiry is measured against
+     * @return the restriction in force
+     */
+    public RestrictionState restrictionState(Clock clock) {
+        if (timeoutUntil != null && clock.instant().isBefore(timeoutUntil)) {
+            return RestrictionState.TIMED_OUT;
+        }
+        return bannedAt != null ? RestrictionState.BANNED : RestrictionState.ACTIVE;
+    }
+
+    /**
      * Check if this user is currently timed out.
      *
      * @return true if user has an active timeout, false otherwise
      */
     public boolean isTimedOut() {
-        return timeoutUntil != null && Instant.now().isBefore(timeoutUntil);
+        return restrictionState(Clock.systemUTC()) == RestrictionState.TIMED_OUT;
     }
 
     /**

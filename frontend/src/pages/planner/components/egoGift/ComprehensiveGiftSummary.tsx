@@ -1,23 +1,22 @@
-import { useMemo, memo } from 'react'
+import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { decodeGiftSelection } from '@/pages/egoGift'
-import { sortEGOGifts } from '@/pages/egoGift'
+import { decodeAndOrderGiftSelections } from '@/pages/egoGift'
 import { EMPTY_STATE, CARD_GRID } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import type { EGOGiftListItem } from '@/pages/egoGift'
 import type { EnhancementLevel } from '@/shared/gameData'
 import { useEGOGiftListData } from '@/pages/egoGift'
-import { usePlannerEditorStoreSafe } from '../../stores/usePlannerEditorStore'
-import { PlannerSection } from '../PlannerSection'
+import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
+import { PlannerSection } from '@/components/layout/PlannerSection'
 import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { EGOGiftCard } from '@/pages/egoGift'
 import { EGOGiftTooltip } from '@/pages/egoGift'
 
-interface ComprehensiveGiftSummaryProps {
+export interface ComprehensiveGiftSummaryProps {
   onClick: () => void
-  /** Override selectedGiftIds from store (for tracker mode) */
-  selectedGiftIdsOverride?: Set<string> // Encoded IDs (enhancement + giftId)
+  /** Encoded IDs (enhancement + giftId) */
+  selectedGiftIds: Set<string>
 }
 
 interface DecodedGift {
@@ -27,34 +26,39 @@ interface DecodedGift {
 
 /**
  * Individual gift item for summary display.
- * Memoized with custom comparison on item.id and enhancement to prevent
- * re-renders when other gifts are added/removed from selection.
+ *
+ * `decodeGiftSelections` mints a fresh `item` per render, so the default
+ * comparison never bails out. `id` and `name` are the only fields the card
+ * renders that vary — `name` carries the active language.
  */
 const SummaryGiftItem = memo(
-  function SummaryGiftItem({
-    item,
-    enhancement,
-    mobileScale,
-  }: DecodedGift & { mobileScale: number }) {
-    return (
-      <ScaledCardWrapper
-        cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
-        cardHeight={CARD_GRID.HEIGHT.EGO_GIFT}
-        mobileScale={mobileScale}
-      >
-        <EGOGiftTooltip giftId={item.id} enhancement={enhancement}>
-          <div>
-            <EGOGiftCard gift={item} enhancement={enhancement} />
-          </div>
-        </EGOGiftTooltip>
-      </ScaledCardWrapper>
-    )
-  },
-  (prev, next) => {
-    // Only re-render if the gift ID or enhancement changed
-    return prev.item.id === next.item.id && prev.enhancement === next.enhancement
-  },
+  SummaryGiftItemImpl,
+  (prev, next) =>
+    prev.item.id === next.item.id &&
+    prev.item.name === next.item.name &&
+    prev.enhancement === next.enhancement &&
+    prev.mobileScale === next.mobileScale,
 )
+
+function SummaryGiftItemImpl({
+  item,
+  enhancement,
+  mobileScale,
+}: DecodedGift & { mobileScale: number }) {
+  return (
+    <ScaledCardWrapper
+      cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
+      cardHeight={CARD_GRID.HEIGHT.EGO_GIFT}
+      mobileScale={mobileScale}
+    >
+      <EGOGiftTooltip giftId={item.id} enhancement={enhancement}>
+        <div>
+          <EGOGiftCard gift={item} enhancement={enhancement} />
+        </div>
+      </EGOGiftTooltip>
+    </ScaledCardWrapper>
+  )
+}
 
 /**
  * Displays selected EGO gifts for the comprehensive gift section.
@@ -64,50 +68,14 @@ const SummaryGiftItem = memo(
  */
 export function ComprehensiveGiftSummary({
   onClick,
-  selectedGiftIdsOverride,
+  selectedGiftIds,
 }: ComprehensiveGiftSummaryProps) {
-  // Store state (safe - returns undefined if outside context)
-  const storeSelectedGiftIds = usePlannerEditorStoreSafe((s) => s.comprehensiveGiftIds)
-  const selectedGiftIds = selectedGiftIdsOverride ?? storeSelectedGiftIds!
   const { t } = useTranslation(['planner', 'common'])
   const { spec, i18n } = useEGOGiftListData()
 
-  // Breakpoint detection for scaling
-
   const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
 
-  // Decode selected IDs and convert to gift items with enhancement
-  // Memoized to prevent re-computation on every render
-  const selectedGifts = useMemo(() => {
-    const gifts: DecodedGift[] = []
-    for (const encodedId of selectedGiftIds) {
-      const { giftId, enhancement } = decodeGiftSelection(encodedId)
-      const giftSpec = spec[giftId]
-      if (giftSpec) {
-        gifts.push({
-          item: {
-            id: giftId,
-            name: i18n[giftId] || giftId,
-            tag: giftSpec.tag as EGOGiftListItem['tag'],
-            keyword: giftSpec.keyword,
-            battleKeywordList: giftSpec.battleKeywordList ?? [],
-            attributeType: giftSpec.attributeType,
-            themePack: giftSpec.themePack,
-            maxEnhancement: giftSpec.maxEnhancement,
-          },
-          enhancement,
-        })
-      }
-    }
-    const enhancementMap = new Map(gifts.map((g) => [g.item.id, g.enhancement]))
-    return sortEGOGifts(
-      gifts.map((g) => g.item),
-      'tier-first',
-    ).map((item) => ({
-      item,
-      enhancement: enhancementMap.get(item.id)!,
-    }))
-  }, [selectedGiftIds, spec, i18n])
+  const selectedGifts = decodeAndOrderGiftSelections(selectedGiftIds, spec, i18n, 'tier-first')
 
   const hasSelectedGifts = selectedGifts.length > 0
 
@@ -150,4 +118,17 @@ export function ComprehensiveGiftSummary({
       </button>
     </PlannerSection>
   )
+}
+
+/** Props a store-bound caller supplies; the selection comes from the store. */
+export type StoreBoundComprehensiveGiftSummaryProps = Omit<
+  ComprehensiveGiftSummaryProps,
+  'selectedGiftIds'
+>
+
+/** Renders the summary against the comprehensive gifts held by the planner editor store. */
+export function StoreBoundComprehensiveGiftSummary(props: StoreBoundComprehensiveGiftSummaryProps) {
+  const selectedGiftIds = usePlannerEditorStore((s) => s.comprehensiveGiftIds)
+
+  return <ComprehensiveGiftSummary {...props} selectedGiftIds={selectedGiftIds} />
 }

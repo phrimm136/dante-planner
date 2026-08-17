@@ -1,0 +1,54 @@
+name: Bug
+description: Something is broken
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What
+      description: What happens, and what you expected instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: where
+    attributes:
+      label: Where
+      description: Route, component, or `file:line` if you know it. "Unknown" is an honest answer.
+      placeholder: unknown
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      description: The shortest path to seeing it. If it is intermittent, say how often.
+    validations:
+      required: false
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Why it matters
+      description: The user-visible or operational consequence.
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: >
+        The boundary — what this issue does NOT cover. Anything found outside it
+        becomes its own issue rather than riding along in the fix.
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser, OS, region, or build, where relevant.
+    validations:
+      required: false

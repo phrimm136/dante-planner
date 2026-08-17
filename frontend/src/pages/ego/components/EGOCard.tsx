@@ -15,6 +15,7 @@ import {
 } from '@/shared/assets'
 import { getSinnerFromId } from '@/shared/gameData'
 import { cn } from '@/lib/utils'
+import { EGO_CARD_INFO_ROW } from '@/lib/constants'
 import { EGOName } from './EGOName'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -59,8 +60,9 @@ export function EGOCard({
   overlay,
   className,
 }: EGOCardProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['common', 'database'])
   const { id, egoType: rank, attributeTypes } = ego
+  const [primaryAttributeType] = attributeTypes
   const sinner = getSinnerFromId(id)
 
   return (
@@ -69,7 +71,7 @@ export function EGOCard({
       <div className="absolute inset-0 flex items-center justify-center">
         <img
           src={getEGOImagePath(id)}
-          alt="EGO"
+          alt=""
           loading="lazy"
           className="w-36 h-36 object-cover rounded-full"
         />
@@ -122,17 +124,22 @@ export function EGOCard({
       {/* Layer 5: Info Panel (bottom) with sin-colored background */}
       <div className="absolute bottom-3 left-0 right-0 h-12 w-36 translate-x-2 pointer-events-none">
         {/* Sin-colored panel background */}
-        <img
-          src={getEGOInfoPanelPath(attributeTypes[0])}
-          alt={t('a11y.infoPanel')}
-          loading="lazy"
-          className="absolute inset-0 items-center object-cover"
-        />
+        {primaryAttributeType !== undefined && (
+          <img
+            src={getEGOInfoPanelPath(primaryAttributeType)}
+            alt={t('a11y.infoPanel')}
+            loading="lazy"
+            className="absolute inset-0 items-center object-cover"
+          />
+        )}
 
         {/* Panel content - three sections */}
-        <div className="absolute left-0 translate-y-4.5 inset-0 flex items-center w-32 h-8">
+        <div
+          className="absolute left-0 translate-y-4.5 inset-0 flex items-center h-8"
+          style={{ width: EGO_CARD_INFO_ROW.WIDTH }}
+        >
           {/* Left: Small Rank Icon */}
-          <div className="items-center w-8 h-8 pl-1">
+          <div className="items-center h-8 pl-1" style={{ width: EGO_CARD_INFO_ROW.ICON_SLOT }}>
             <img
               src={getEGOSmallRankIconPath(rank)}
               alt={rank}
@@ -143,17 +150,20 @@ export function EGOCard({
           </div>
 
           {/* Center: EGO Name */}
-          <div className="flex text-center justify-center items-center w-[76px] h-8 text-shadow-black text-shadow-xs translate-x-[8px] translate-y-1">
+          <div
+            className="flex text-center justify-center items-center h-8 text-shadow-black text-shadow-xs translate-x-[8px] translate-y-1"
+            style={{ width: EGO_CARD_INFO_ROW.NAME_SLOT }}
+          >
             <Suspense fallback={<Skeleton className="w-12 h-3 inline-block bg-foreground" />}>
               <EGOName id={id} />
             </Suspense>
           </div>
 
           {/* Right: Tier Icon (stretched/tilted) */}
-          <div className="items-center w-8 h-8 pl-1">
+          <div className="items-center h-8 pl-1" style={{ width: EGO_CARD_INFO_ROW.ICON_SLOT }}>
             <img
               src={getEGOTierIconPath(ego.maxThreadspin)}
-              alt={`Tier ${ego.maxThreadspin}`}
+              alt={`${t('database:filters.tier')} ${ego.maxThreadspin}`}
               loading="lazy"
               className="w-5 h-5 translate-x-2.5 translate-y-1 object-contain"
               style={{ transform: 'skewY(-20deg)' }}
@@ -166,7 +176,7 @@ export function EGOCard({
       <div className="absolute bottom-5.75 left-1/2 -translate-x-1/2 w-12 h-12 pointer-events-none">
         <img
           src={getEGORankIconPath(rank)}
-          alt={`Rank ${rank}`}
+          alt=""
           loading="lazy"
           className="w-12 h-12 object-contain"
         />

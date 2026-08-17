@@ -1,4 +1,13 @@
 terraform {
+  # terraform init -backend-config=../backend.hcl
+  backend "s3" {
+    key                  = "rds/terraform.tfstate"
+    region               = "us-west-2"
+    workspace_key_prefix = "env"
+    encrypt              = true
+    use_lockfile         = true
+  }
+
   required_version = ">= 1.6"
   required_providers {
     aws = {
@@ -10,60 +19,46 @@ terraform {
 
 # Credentials come from the operator's AWS profile (a dedicated least-privilege
 # provisioning identity assumed via STS). No role ARN is hardcoded here so this
-# file is safe to publish in a public repo. See docs/tasks/030-rds-migration/runbook.md.
+# file is safe to publish in a public repo. See docs/runbooks/rds-migration.md.
 provider "aws" {
-  region = var.region
+  allowed_account_ids = [var.aws_account_id]
+  region              = var.region
 }
 
 # --- Networking (referenced, not owned) -------------------------------------
 
 resource "aws_db_subnet_group" "this" {
   name       = "${var.name_prefix}-rds"
-  subnet_ids = var.db_subnet_ids # >= 2 subnets across >= 2 AZs (RDS requirement, even for single-AZ)
+  subnet_ids = local.db_subnet_ids # >= 2 subnets across >= 2 AZs (RDS requirement, even for single-AZ)
   tags       = var.tags
 }
 
 # The RDS VPC, for its CIDR (exported so a cross-region fleet can route to it).
 data "aws_vpc" "this" {
-  id = var.vpc_id
+  id = local.vpc_id
 }
 
-# RDS-side security group: the backend on EC2 reaches RDS on 3306.
+# Container created by scripts/ops/provision/rds-master-password-secret.sh and enrolled in
+# terraform/secrets secret_names; apply that stack before this one or the read fails.
+#
+# Ephemeral, so the value is held only for the duration of a run and never reaches state or a
+# plan file. It can therefore be consumed only by a write-only argument.
+ephemeral "aws_secretsmanager_secret_version" "master_password" {
+  secret_id = var.master_password_secret_name
+}
+
 resource "aws_security_group" "rds" {
   name        = "${var.name_prefix}-rds"
   description = "RDS MySQL access"
-  vpc_id      = var.vpc_id
+  vpc_id      = local.vpc_id
   tags        = var.tags
-}
-
-resource "aws_vpc_security_group_ingress_rule" "app_to_rds" {
-  security_group_id            = aws_security_group.rds.id
-  description                  = "Backend (EC2) to RDS MySQL"
-  referenced_security_group_id = var.ec2_security_group_id
-  from_port                    = 3306
-  to_port                      = 3306
-  ip_protocol                  = "tcp"
 }
 
 resource "aws_vpc_security_group_egress_rule" "rds_all" {
   security_group_id = aws_security_group.rds.id
-  description       = "RDS egress (replication pull to source + AWS APIs)"
+  description       = "RDS egress (AWS APIs)"
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1"
-}
-
-# TEMPORARY: lets RDS (replica) pull the binlog FROM the on-box source MySQL.
-# Toggled on only during the migration (Zone 0) and removed at decommission
-# (Zone 4) by setting enable_replication_ingress=false and re-applying.
-# Added to the EXISTING EC2 security group so we don't own/replace it.
-resource "aws_vpc_security_group_ingress_rule" "rds_to_source" {
-  count                        = var.enable_replication_ingress ? 1 : 0
-  security_group_id            = var.ec2_security_group_id
-  description                  = "TEMP: RDS replica pulls binlog from source MySQL (remove after cutover)"
-  referenced_security_group_id = aws_security_group.rds.id
-  from_port                    = 3306
-  to_port                      = 3306
-  ip_protocol                  = "tcp"
 }
 
 # --- Parameter group --------------------------------------------------------
@@ -84,6 +79,14 @@ resource "aws_db_parameter_group" "this" {
     name         = "enforce_gtid_consistency"
     value        = "ON"
     apply_method = "pending-reboot"
+  }
+  # Required by docs/multi-region-request-paths.md §4a, with trackSessionState=true on the app url.
+  # RDS types this boolean and rejects the MySQL enum names, so it takes the ordinal: 1 = OWN_GTID.
+  # Dynamic, but it seeds a SESSION variable at connect time, so pooled connections keep the old
+  # value until they rotate.
+  parameter {
+    name  = "session_track_gtids"
+    value = "1"
   }
 
   parameter {
@@ -136,7 +139,7 @@ resource "aws_db_parameter_group" "this" {
   # log entry — per-execution diagnosis without in-memory instrumentation.
   parameter {
     name  = "log_slow_extra"
-    value = "1"
+    value = "ON"
   }
   parameter {
     name  = "log_output"
@@ -152,9 +155,8 @@ resource "aws_db_instance" "this" {
   engine_version = var.engine_version
   instance_class = var.instance_class
 
-  # Single-AZ, pinned to the EC2 instance's AZ (avoids cross-AZ latency + transfer).
-  availability_zone   = var.availability_zone
-  multi_az            = false
+  # availability_zone is rejected alongside multi_az; AWS owns both placements.
+  multi_az            = var.multi_az
   publicly_accessible = false
 
   allocated_storage     = var.allocated_storage
@@ -169,13 +171,15 @@ resource "aws_db_instance" "this" {
 
   db_name  = var.db_name # empty schema for the dump to load into
   username = var.master_username
-  # AWS-managed master password (manage_master_user_password) is unsupported as a
-  # read-replica SOURCE for MySQL, so it is disabled to allow the Seoul cross-region
-  # replica. Password is now supplied via var.master_password (set to the CURRENT
-  # value pulled from the old managed secret, so nothing rotates). The app connects
-  # as the danteplanner user, not master, so this is admin-only. Trade-off vs the
-  # 030 managed-password decision: the master password now lives in state/tfvars.
-  password = var.master_password
+  # manage_master_user_password is deliberately absent, not false: the provider declares it
+  # ConflictsWith password, so naming it at all is an error. An instance whose credentials are
+  # Secrets-Manager-managed also cannot have a read replica CREATED from it, which would leave
+  # the Seoul replica unrebuildable.
+  # Raising master_password_version re-sends whatever the secret currently holds. Rotating the
+  # secret alone changes nothing here: Terraform stores no copy to compare against, so it cannot
+  # see that the value moved.
+  password_wo         = ephemeral.aws_secretsmanager_secret_version.master_password.secret_string
+  password_wo_version = var.master_password_version
 
   db_subnet_group_name   = aws_db_subnet_group.this.name
   vpc_security_group_ids = [aws_security_group.rds.id]
@@ -214,7 +218,7 @@ resource "aws_db_instance" "this" {
 # guarded so a plain RDS apply (no fleet) is unaffected until fleet_* are set.
 data "aws_route_tables" "rds_vpc" {
   count  = var.fleet_peering_connection_id != "" ? 1 : 0
-  vpc_id = var.vpc_id
+  vpc_id = local.vpc_id
 }
 
 resource "aws_route" "rds_to_fleet" {
@@ -243,7 +247,7 @@ resource "aws_vpc_security_group_ingress_rule" "fleet_to_rds" {
 # until seoul_peering_connection_id is set.
 data "aws_route_tables" "rds_vpc_seoul" {
   count  = var.seoul_peering_connection_id != "" ? 1 : 0
-  vpc_id = var.vpc_id
+  vpc_id = local.vpc_id
 }
 
 resource "aws_route" "rds_to_seoul_fleet" {

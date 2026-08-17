@@ -1,20 +1,32 @@
-import { useEffect } from 'react'
+import { Suspense, lazy, useEffect } from 'react'
 import { Header } from './Header'
 import { Footer } from '../Footer'
 import { LanguageSync } from '../LanguageSync'
-import { SyncChoiceDialog, useFirstLoginStore } from '@/pages/settings'
-import { useAppSse } from '@/pages/planner'
+import { SyncChoiceDialog } from '@/pages/settings'
 import { useDragToScroll } from '@/components/hooks/useDragToScroll'
 import { useAuthQueryNonBlocking } from '@/shared/auth'
-import { useUserSettingsQuery } from '@/pages/settings'
+import { useUserSettingsQuery, useFirstLoginStore } from '@/shared/userSettings'
+
+/**
+ * `useAppSse` reaches the planner storage, validation and EGO Gift graphs.
+ * Behind `lazy` those land in a chunk fetched after the first paint instead of
+ * in the entry chunk of every route.
+ */
+const AppSse = lazy(async () => {
+  const { useAppSse } = await import('@/pages/planner')
+  return {
+    default: function AppSse() {
+      useAppSse()
+      return null
+    },
+  }
+})
 
 interface GlobalLayoutProps {
   children: React.ReactNode
 }
 
 export function GlobalLayout({ children }: GlobalLayoutProps) {
-  // Manage SSE connection based on auth + sync settings
-  useAppSse()
   useDragToScroll()
 
   const { data: user } = useAuthQueryNonBlocking()
@@ -25,21 +37,20 @@ export function GlobalLayout({ children }: GlobalLayoutProps) {
 
   // Check on mount if user needs to configure sync preference
   useEffect(() => {
-    if (user && settings?.syncEnabled === null) {
+    if (user && settings && !settings.syncChoiceMade) {
       openSyncChoiceDialog()
     }
   }, [user, settings, openSyncChoiceDialog])
 
-  const handleSyncChoice = (syncEnabled: boolean) => {
+  const handleSyncChoice = () => {
     closeSyncChoiceDialog()
-    // If sync enabled, pending sync will be triggered by the component that needs it
-    if (syncEnabled) {
-      console.log('Cloud sync enabled by user')
-    }
   }
 
   return (
     <div className="min-h-screen flex flex-col">
+      <Suspense fallback={null}>
+        <AppSse />
+      </Suspense>
       <LanguageSync />
       <div className="bg-card border-b border-border">
         <Header />

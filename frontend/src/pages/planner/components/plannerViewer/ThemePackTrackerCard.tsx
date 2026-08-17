@@ -12,7 +12,7 @@ interface ThemePackTrackerCardProps {
   packId: string
   packEntry: ThemePackEntry
   packName: string
-  specialName?: string
+  specialName?: string | undefined
   floorNumber: number
   noteContent: NoteContent
   isDone: boolean
@@ -55,7 +55,11 @@ export function ThemePackTrackerCard({
 
   return (
     <>
-      <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onClick={onFocusToggle}>
+      <div
+        className="group relative w-fit"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
         <ThemePackViewer
           packId={packId}
           packEntry={packEntry}
@@ -65,39 +69,40 @@ export function ThemePackTrackerCard({
           isSelected={isFocused}
           readOnly
           className={cn(isDone && 'brightness-50')}
-          overlay={
-            isHovered && (
-              <div className="absolute inset-0 flex items-center justify-center gap-4">
-                <Button
-                  size="icon"
-                  variant={isDone ? 'default' : 'secondary'}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onToggleDone()
-                  }}
-                  aria-label={
-                    isDone
-                      ? t('common.markAsNotDone', 'Mark as Not Done')
-                      : t('common.markAsDone', 'Mark as Done')
-                  }
-                >
-                  <CheckCircle2 className="h-5 w-5" />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="secondary"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setShowNotesDialog(true)
-                  }}
-                  aria-label={t('common.viewNotes', 'View Notes')}
-                >
-                  <FileText className="h-5 w-5" />
-                </Button>
-              </div>
-            )
-          }
         />
+        <button
+          type="button"
+          className="absolute inset-0 cursor-pointer"
+          aria-label={packName}
+          aria-pressed={isFocused}
+          onClick={onFocusToggle}
+        />
+        {isHovered && (
+          <div className="absolute inset-0 flex items-center justify-center gap-4">
+            <Button
+              size="icon"
+              variant={isDone ? 'default' : 'secondary'}
+              onClick={onToggleDone}
+              aria-label={
+                isDone
+                  ? t('common:markAsNotDone', 'Mark as Not Done')
+                  : t('common:markAsDone', 'Mark as Done')
+              }
+            >
+              <CheckCircle2 className="h-5 w-5" />
+            </Button>
+            <Button
+              size="icon"
+              variant="secondary"
+              onClick={() => {
+                setShowNotesDialog(true)
+              }}
+              aria-label={t('common:viewNotes', 'View Notes')}
+            >
+              <FileText className="h-5 w-5" />
+            </Button>
+          </div>
+        )}
       </div>
       <FloorNoteDialog
         open={showNotesDialog}

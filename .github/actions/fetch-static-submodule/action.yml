@@ -1,0 +1,25 @@
+name: Fetch static submodule
+description: >-
+  Initialize the private data submodule with a read-only deploy key. Run after actions/checkout.
+
+inputs:
+  static-deploy-key:
+    description: Read-only deploy key for the private data submodule.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    # Never hand the initialized tree to another job as an artifact: artifact visibility
+    # follows the repository, so on a public repo that publishes the private submodule.
+    - name: Fetch data submodule
+      shell: bash
+      env:
+        STATIC_DEPLOY_KEY: ${{ inputs.static-deploy-key }}
+      run: |
+        mkdir -p ~/.ssh && chmod 700 ~/.ssh
+        printf '%s\n' "$STATIC_DEPLOY_KEY" > ~/.ssh/static_key
+        chmod 600 ~/.ssh/static_key
+        ssh-keyscan -t ed25519,rsa github.com >> ~/.ssh/known_hosts 2>/dev/null
+        GIT_SSH_COMMAND="ssh -i ~/.ssh/static_key -o IdentitiesOnly=yes" \
+          git submodule update --init --depth 1 static

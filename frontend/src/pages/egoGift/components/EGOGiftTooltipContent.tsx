@@ -1,6 +1,6 @@
 import { Suspense, useRef, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ErrorBoundary } from 'react-error-boundary'
+import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { useEGOGiftDetailData } from '../hooks/useEGOGiftDetailData'
 import { getColorForAttributeType, useColorCodes } from '@/shared/gameText'
@@ -115,10 +115,10 @@ interface EGOGiftTooltipContentProps {
  */
 export function EGOGiftTooltipContent({ giftId, enhancement }: EGOGiftTooltipContentProps) {
   return (
-    <ErrorBoundary fallback={<TooltipError />}>
+    <ReactErrorBoundary fallback={<TooltipError />}>
       <Suspense fallback={<TooltipLoading />}>
         <EGOGiftTooltipInner giftId={giftId} enhancement={enhancement} />
       </Suspense>
-    </ErrorBoundary>
+    </ReactErrorBoundary>
   )
 }

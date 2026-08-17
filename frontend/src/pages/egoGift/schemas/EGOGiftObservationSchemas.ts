@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { EGOGiftIdSchema } from '@/shared/gameData'
 
 /**
  * EGO Gift Observation Schemas
@@ -19,6 +20,6 @@ export const EGOGiftObservationCostSchema = z
 export const EGOGiftObservationDataSchema = z
   .object({
     observationEgoGiftCostDataList: z.array(EGOGiftObservationCostSchema),
-    observationEgoGiftDataList: z.array(z.number()),
+    observationEgoGiftDataList: z.array(EGOGiftIdSchema),
   })
   .strict()

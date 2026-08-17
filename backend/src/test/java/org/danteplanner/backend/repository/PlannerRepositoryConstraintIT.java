@@ -1,0 +1,510 @@
+package org.danteplanner.backend.repository;
+import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
+import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
+import org.junit.jupiter.api.Tag;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
+import org.danteplanner.backend.planner.entity.VoteType;
+import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.planner.entity.PlannerVote;
+import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.entity.PlannerContent;
+import org.danteplanner.backend.planner.entity.PlannerModeration;
+import org.danteplanner.backend.planner.entity.PlannerPublication;
+import org.danteplanner.backend.planner.entity.PlannerStats;
+import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.comment.entity.PlannerComment;
+import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
+
+import org.danteplanner.backend.auth.entity.AuthProviderType;
+import jakarta.persistence.EntityManager;
+import org.danteplanner.backend.config.TestConfig;
+import org.danteplanner.backend.support.TestDataFactory;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.*;
+
+/**
+ * Constraint validation tests for Planner-related entities.
+ *
+ * <p>Tests database constraint enforcement (FK, UNIQUE, NOT NULL) at the persistence layer.
+ * Uses entityManager.flush() to trigger constraint checks immediately.
+ * Separate from business logic tests - focuses on database integrity.</p>
+ */
+@SpringBootTest
+@ActiveProfiles("it")
+@Tag("containerized")
+@Import(TestConfig.class)
+@Transactional
+class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PlannerRepository plannerRepository;
+
+    @Autowired
+    private PlannerVoteRepository voteRepository;
+
+    @Autowired
+    private PlannerStatsRepository statsRepository;
+
+    @Autowired
+    private PlannerCommentRepository commentRepository;
+
+    @Autowired
+    private EntityManager entityManager;
+
+    private User testUser;
+
+    @BeforeEach
+    void setUp() {
+        entityManager.flush();
+        entityManager.clear();
+
+        testUser = TestDataFactory.createTestUser(userRepository, "test@example.com");
+    }
+
+    private Planner buildPlanner(User owner, String title) {
+        Planner planner = Planner.builder()
+                .id(UUID.randomUUID())
+                .user(owner)
+                .plannerType(PlannerType.MIRROR_DUNGEON)
+                .build();
+        planner.attach(
+                PlannerContent.builder()
+                        .title(title)
+                        .category("5F")
+                        .content("{}")
+                        .gameContentVersion(1)
+                        .build(),
+                PlannerPublication.builder().build(),
+                PlannerModeration.builder().build());
+        return planner;
+    }
+
+    @Nested
+    @DisplayName("Foreign Key Constraint Tests")
+    class ForeignKeyTests {
+        @Test
+        @DisplayName("Invalid planner ID in vote throws FK constraint exception")
+        void foreignKey_WhenInvalidPlannerId_ThrowsException() {
+            assertThatThrownBy(() -> {
+                PlannerVote vote = new PlannerVote(testUser.getId(), UUID.randomUUID(), VoteType.UP);
+                voteRepository.saveAndFlush(vote);
+            }).isInstanceOf(DataIntegrityViolationException.class);
+        }
+        @Test
+        @DisplayName("Invalid user ID in vote throws FK constraint exception")
+        void foreignKey_WhenInvalidUserId_ThrowsException() {
+            Planner planner = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
+
+            assertThatThrownBy(() -> {
+                PlannerVote vote = new PlannerVote(99999L, planner.getId(), VoteType.UP);
+                voteRepository.saveAndFlush(vote);
+            }).isInstanceOf(DataIntegrityViolationException.class);
+        }
+        @Test
+        @DisplayName("Invalid planner ID in comment throws FK constraint exception")
+        void foreignKey_WhenInvalidPlannerIdInComment_ThrowsException() {
+            assertThatThrownBy(() -> {
+                PlannerComment comment = new PlannerComment(
+                        UUID.randomUUID(),
+                        testUser.getId(),
+                        "Test comment",
+                        null,
+                        0
+                );
+                commentRepository.save(comment);
+                entityManager.flush();
+            }).isInstanceOf(DataIntegrityViolationException.class);
+        }
+        @Test
+        @DisplayName("Invalid user ID in comment throws FK constraint exception")
+        void foreignKey_WhenInvalidUserIdInComment_ThrowsException() {
+            Planner planner = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
+
+            assertThatThrownBy(() -> {
+                PlannerComment comment = new PlannerComment(
+                        planner.getId(),
+                        99999L,
+                        "Test comment",
+                        null,
+                        0
+                );
+                commentRepository.save(comment);
+                entityManager.flush();
+            }).isInstanceOf(DataIntegrityViolationException.class);
+        }
+        @Test
+        @DisplayName("Cascade delete on planner removes associated votes")
+        void foreignKey_WhenCascadeDelete_DeletesChildVotes() {
+            Planner planner = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
+
+            PlannerVote vote = new PlannerVote(testUser.getId(), planner.getId(), VoteType.UP);
+            voteRepository.save(vote);
+            entityManager.flush();
+
+            long votesBeforeDelete = countVotesFor(planner.getId());
+            assertThat(votesBeforeDelete).isEqualTo(1);
+
+            plannerRepository.delete(planner);
+            entityManager.flush();
+
+            long votesAfterDelete = countVotesFor(planner.getId());
+            assertThat(votesAfterDelete).isZero();
+        }
+        @Test
+        @DisplayName("Cascade delete on planner removes associated comments")
+        void foreignKey_WhenCascadeDelete_DeletesChildComments() {
+            Planner planner = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
+
+            PlannerComment comment = new PlannerComment(
+                    planner.getId(),
+                    testUser.getId(),
+                    "Test comment",
+                    null,
+                    0
+            );
+            commentRepository.save(comment);
+            entityManager.flush();
+
+            long commentsBeforeDelete = countCommentsFor(planner.getId());
+            assertThat(commentsBeforeDelete).isEqualTo(1);
+
+            plannerRepository.delete(planner);
+            entityManager.flush();
+
+            long commentsAfterDelete = countCommentsFor(planner.getId());
+            assertThat(commentsAfterDelete).isZero();
+        }
+
+        private long countVotesFor(UUID plannerId) {
+            return voteRepository.findAll().stream()
+                    .filter(vote -> plannerId.equals(vote.getPlannerId()))
+                    .count();
+        }
+
+        private long countCommentsFor(UUID plannerId) {
+            return commentRepository.findAll().stream()
+                    .filter(comment -> plannerId.equals(comment.getPlannerId()))
+                    .count();
+        }
+    }
+
+    @Nested
+    @DisplayName("UNIQUE Constraint Tests")
+    class UniqueConstraintTests {
+
+        @Test
+        @DisplayName("Duplicate vote (same user + planner) throws UNIQUE constraint exception")
+        void uniqueConstraint_WhenDuplicateVote_ThrowsException() {
+            Planner planner = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
+
+            PlannerVote vote1 = new PlannerVote(testUser.getId(), planner.getId(), VoteType.UP);
+            voteRepository.save(vote1);
+            entityManager.flush();
+            entityManager.clear();
+
+            assertThatThrownBy(() -> {
+                PlannerVote vote2 = new PlannerVote(testUser.getId(), planner.getId(), VoteType.UP);
+                voteRepository.save(vote2);
+                entityManager.flush();
+            }).satisfiesAnyOf(
+                    e -> assertThat(e).isInstanceOf(DataIntegrityViolationException.class),
+                    e -> assertThat(e).isInstanceOf(ConstraintViolationException.class)
+            );
+        }
+
+        @Test
+        @DisplayName("Different user same planner allows separate votes")
+        void uniqueConstraint_WhenDifferentUserSamePlanner_Allowed() {
+            Planner planner = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
+            User otherUser = TestDataFactory.createTestUser(userRepository, "other@example.com");
+
+            PlannerVote vote1 = new PlannerVote(testUser.getId(), planner.getId(), VoteType.UP);
+            voteRepository.save(vote1);
+
+            PlannerVote vote2 = new PlannerVote(otherUser.getId(), planner.getId(), VoteType.UP);
+            voteRepository.save(vote2);
+
+            assertThatNoException().isThrownBy(() -> entityManager.flush());
+        }
+
+        @Test
+        @DisplayName("Same user different planner allows separate votes")
+        void uniqueConstraint_WhenSameUserDifferentPlanner_Allowed() {
+            Planner planner1 = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
+            Planner planner2 = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
+
+            PlannerVote vote1 = new PlannerVote(testUser.getId(), planner1.getId(), VoteType.UP);
+            voteRepository.save(vote1);
+
+            PlannerVote vote2 = new PlannerVote(testUser.getId(), planner2.getId(), VoteType.UP);
+            voteRepository.save(vote2);
+
+            assertThatNoException().isThrownBy(() -> entityManager.flush());
+        }
+
+        @Test
+        @DisplayName("Duplicate username_suffix throws UNIQUE constraint exception")
+        void uniqueConstraint_WhenDuplicateUsernameSuffix_ThrowsException() {
+            String suffix = "test1";
+
+            User user1 = User.builder()
+                    .email("user1@example.com")
+                    .provider(AuthProviderType.GOOGLE)
+                    .providerId("google-1")
+                    .usernameEpithet("TEST")
+                    .usernameSuffix(suffix)
+                    .role(UserRole.NORMAL)
+                    .build();
+            userRepository.save(user1);
+            entityManager.flush();
+
+            assertThatThrownBy(() -> {
+                User user2 = User.builder()
+                        .email("user2@example.com")
+                        .provider(AuthProviderType.GOOGLE)
+                        .providerId("google-2")
+                        .usernameEpithet("TEST")
+                        .usernameSuffix(suffix)
+                        .role(UserRole.NORMAL)
+                        .build();
+                userRepository.save(user2);
+                entityManager.flush();
+            }).isInstanceOf(DataIntegrityViolationException.class);
+        }
+
+        @Test
+        @DisplayName("Duplicate provider + providerId throws UNIQUE constraint exception")
+        void uniqueConstraint_WhenDuplicateProviderAndProviderId_ThrowsException() {
+            User user1 = User.builder()
+                    .email("user1@example.com")
+                    .provider(AuthProviderType.GOOGLE)
+                    .providerId("google-123")
+                    .usernameEpithet("TEST")
+                    .usernameSuffix(TestDataFactory.uniqueSuffix(""))
+                    .role(UserRole.NORMAL)
+                    .build();
+            userRepository.save(user1);
+            entityManager.flush();
+
+            assertThatThrownBy(() -> {
+                User user2 = User.builder()
+                        .email("user2@example.com")
+                        .provider(AuthProviderType.GOOGLE)
+                        .providerId("google-123")
+                        .usernameEpithet("TEST")
+                        .usernameSuffix(TestDataFactory.uniqueSuffix(""))
+                        .role(UserRole.NORMAL)
+                        .build();
+                userRepository.save(user2);
+                entityManager.flush();
+            }).isInstanceOf(DataIntegrityViolationException.class);
+        }
+
+        @Test
+        @DisplayName("Different provider same providerId allows separate users")
+        void uniqueConstraint_WhenDifferentProviderSameProviderId_Allowed() {
+            User user1 = User.builder()
+                    .email("user1@example.com")
+                    .provider(AuthProviderType.GOOGLE)
+                    .providerId("123")
+                    .usernameEpithet("TEST")
+                    .usernameSuffix(TestDataFactory.uniqueSuffix(""))
+                    .role(UserRole.NORMAL)
+                    .build();
+            userRepository.save(user1);
+
+            User user2 = User.builder()
+                    .email("user2@example.com")
+                    .provider(AuthProviderType.APPLE)
+                    .providerId("123")
+                    .usernameEpithet("TEST")
+                    .usernameSuffix(TestDataFactory.uniqueSuffix(""))
+                    .role(UserRole.NORMAL)
+                    .build();
+            userRepository.save(user2);
+
+            assertThatNoException().isThrownBy(() -> entityManager.flush());
+        }
+    }
+
+    @Nested
+    @DisplayName("NOT NULL Constraint Tests")
+    class NotNullTests {
+
+        @Test
+        @DisplayName("Missing planner title throws NOT NULL constraint exception")
+        void notNullConstraint_WhenMissingTitle_ThrowsException() {
+            assertThatThrownBy(() -> {
+                Planner planner = buildPlanner(testUser, null);
+                plannerRepository.save(planner);
+                entityManager.flush();
+            }).satisfiesAnyOf(
+                    e -> assertThat(e).isInstanceOf(DataIntegrityViolationException.class),
+                    e -> assertThat(e).isInstanceOf(ConstraintViolationException.class)
+            );
+        }
+
+        @Test
+        @DisplayName("Missing planner owner throws NOT NULL constraint exception")
+        void notNullConstraint_WhenMissingOwner_ThrowsException() {
+            assertThatThrownBy(() -> {
+                Planner planner = buildPlanner(null, "Test Title");
+                plannerRepository.save(planner);
+                entityManager.flush();
+            }).satisfiesAnyOf(
+                    e -> assertThat(e).isInstanceOf(DataIntegrityViolationException.class),
+                    e -> assertThat(e).isInstanceOf(ConstraintViolationException.class)
+            );
+        }
+
+        @Test
+        @DisplayName("Missing comment content throws NOT NULL constraint exception")
+        void notNullConstraint_WhenMissingCommentContent_ThrowsException() {
+            Planner planner = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
+
+            assertThatThrownBy(() -> {
+                PlannerComment comment = new PlannerComment(
+                        planner.getId(),
+                        testUser.getId(),
+                        null,
+                        null,
+                        0
+                );
+                commentRepository.save(comment);
+                entityManager.flush();
+            }).isInstanceOf(DataIntegrityViolationException.class);
+        }
+
+        @Test
+        @DisplayName("Missing user email throws NOT NULL constraint exception")
+        void notNullConstraint_WhenMissingEmail_ThrowsException() {
+            assertThatThrownBy(() -> {
+                User user = User.builder()
+                        .email(null)
+                        .provider(AuthProviderType.GOOGLE)
+                        .providerId("google-123")
+                        .usernameEpithet("TEST")
+                        .usernameSuffix(TestDataFactory.uniqueSuffix(""))
+                        .role(UserRole.NORMAL)
+                        .build();
+                userRepository.save(user);
+                entityManager.flush();
+            }).isInstanceOf(DataIntegrityViolationException.class);
+        }
+
+        @Test
+        @DisplayName("Missing user provider throws NOT NULL constraint exception")
+        void notNullConstraint_WhenMissingProvider_ThrowsException() {
+            assertThatThrownBy(() -> {
+                User user = User.builder()
+                        .email("test@example.com")
+                        .provider(null)
+                        .providerId("google-123")
+                        .usernameEpithet("TEST")
+                        .usernameSuffix(TestDataFactory.uniqueSuffix(""))
+                        .role(UserRole.NORMAL)
+                        .build();
+                userRepository.save(user);
+                entityManager.flush();
+            }).isInstanceOf(DataIntegrityViolationException.class);
+        }
+
+        @Test
+        @DisplayName("Missing user providerId throws NOT NULL constraint exception")
+        void notNullConstraint_WhenMissingProviderId_ThrowsException() {
+            assertThatThrownBy(() -> {
+                User user = User.builder()
+                        .email("test@example.com")
+                        .provider(AuthProviderType.GOOGLE)
+                        .providerId(null)
+                        .usernameEpithet("TEST")
+                        .usernameSuffix(TestDataFactory.uniqueSuffix(""))
+                        .role(UserRole.NORMAL)
+                        .build();
+                userRepository.save(user);
+                entityManager.flush();
+            }).isInstanceOf(DataIntegrityViolationException.class);
+        }
+
+        @Test
+        @DisplayName("Empty string title allowed, null forbidden")
+        void notNullConstraint_WhenEmptyStringAllowed_NullForbidden() {
+            Planner planner1 = buildPlanner(testUser, "");
+            plannerRepository.save(planner1);
+            assertThatNoException().isThrownBy(() -> entityManager.flush());
+
+            entityManager.clear();
+
+            assertThatThrownBy(() -> {
+                Planner planner2 = buildPlanner(testUser, null);
+                plannerRepository.save(planner2);
+                entityManager.flush();
+            }).satisfiesAnyOf(
+                    e -> assertThat(e).isInstanceOf(DataIntegrityViolationException.class),
+                    e -> assertThat(e).isInstanceOf(ConstraintViolationException.class)
+            );
+        }
+
+        @Test
+        @DisplayName("Default value applied for published field (false)")
+        void notNullConstraint_WhenDefaultValueApplied_PublishedFalse() {
+            Planner planner = buildPlanner(testUser, "Test");
+            plannerRepository.save(planner);
+            entityManager.flush();
+
+            Planner saved = plannerRepository.findById(planner.getId()).orElseThrow();
+            assertThat(saved.isPublished()).isFalse();
+        }
+
+        @Test
+        @DisplayName("Default value applied for upvotes field (0)")
+        void notNullConstraint_WhenDefaultValueApplied_UpvotesZero() {
+            Planner planner = buildPlanner(testUser, "Test");
+            plannerRepository.save(planner);
+            statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
+            entityManager.flush();
+            entityManager.clear();
+
+            PlannerStats saved = statsRepository.findById(planner.getId()).orElseThrow();
+            assertThat(saved.getUpvotes()).isZero();
+        }
+
+        @Test
+        @DisplayName("Default value applied for comment upvoteCount (0)")
+        void notNullConstraint_WhenDefaultValueApplied_CommentUpvoteCountZero() {
+            Planner planner = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
+
+            PlannerComment comment = new PlannerComment(
+                    planner.getId(),
+                    testUser.getId(),
+                    "Test content",
+                    null,
+                    0
+            );
+            commentRepository.save(comment);
+            entityManager.flush();
+
+            PlannerComment saved = commentRepository.findById(comment.getId()).orElseThrow();
+            assertThat(saved.getUpvoteCount()).isZero();
+        }
+    }
+}

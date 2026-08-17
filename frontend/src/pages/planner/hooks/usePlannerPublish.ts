@@ -2,29 +2,22 @@
  * Planner Publish Mutation Hook
  *
  * Handles publishing/unpublishing a planner.
- * Toggle endpoint - calling again unpublishes.
+ * The requested state selects the intent endpoint; neither one flips the planner.
  * Only the planner owner can publish/unpublish.
  * Invalidates planner list cache on success.
  *
  * Pattern: usePlannerFork.ts (mutation + cache invalidation)
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 
 import { ApiClient } from '@/lib/api'
+import { validateData } from '@/lib/validation'
 import { requestNotificationPermission } from '@/shared/notifications'
-import { gesellschaftQueryKeys } from './useMDGesellschaftData'
+import { ServerPlannerResponseSchema } from '../schemas/PlannerSchemas'
+import { useInvalidatePlannerLists } from './useInvalidatePlannerLists'
 
-// ============================================================================
-// Response Type (simple toggle response)
-// ============================================================================
-
-interface PublishResponse {
-  /** ID of the planner */
-  plannerId: string
-  /** New publish state */
-  published: boolean
-}
+import type { ServerPlannerResponse } from '../types/PlannerTypes'
 
 // ============================================================================
 // Main Hook
@@ -53,18 +46,26 @@ interface PublishResponse {
  * }
  * ```
  */
+/** The state the caller wants the planner to end in, not a flip of whatever it is now. */
+interface PublishVariables {
+  plannerId: string
+  published: boolean
+}
+
 export function usePlannerPublish() {
-  const queryClient = useQueryClient()
+  const invalidatePlannerLists = useInvalidatePlannerLists()
 
   return useMutation({
-    mutationFn: async (plannerId: string): Promise<PublishResponse> => {
-      // PUT toggles publish state
-      const data = await ApiClient.put<PublishResponse>(`/api/planner/md/${plannerId}/publish`)
-      return data
+    mutationFn: async ({
+      plannerId,
+      published,
+    }: PublishVariables): Promise<ServerPlannerResponse> => {
+      const intent = published ? 'publish' : 'unpublish'
+      const data = await ApiClient.post(`/api/planner/md/${plannerId}/${intent}`)
+      return validateData(data, ServerPlannerResponseSchema, 'planner publish')
     },
     onSuccess: (response) => {
-      // Invalidate all planner list queries to refresh publish state
-      void queryClient.invalidateQueries({ queryKey: gesellschaftQueryKeys.all })
+      invalidatePlannerLists()
 
       // Request browser notification permission when publishing (not unpublishing)
       if (response.published) {

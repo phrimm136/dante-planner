@@ -2,13 +2,13 @@ import { Link, useSearch } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Clock } from 'lucide-react'
 
-import { formatPlannerDate } from '@/lib/formatDate'
+import { formatCompactDate } from '@/lib/formatDate'
 import { getKeywordIconPath } from '@/shared/assets'
-import { MD_CATEGORY_COLORS, MD_CATEGORY_TEXT_COLORS } from '@/shared/gameData'
-import { PLANNER_LIST } from '@/lib/constants'
+import { PLANNER_LIST, SECTION_STYLES } from '@/lib/constants'
+import { MdCategoryLabel } from '../MdCategoryLabel'
 import { PlannerStatusIcon } from './PlannerStatusIcon'
+import { categoryBadgeStyle, deriveSaveStatus } from '../../lib/plannerBadges'
 
-import type { MDCategory } from '@/shared/gameData'
 import type { PlannerSummary } from '../../types/PlannerTypes'
 
 interface PersonalPlannerCardProps {
@@ -44,55 +44,12 @@ export function PersonalPlannerCard({
   const { t } = useTranslation(['planner', 'common'])
   const search = useSearch({ strict: false })
 
-  const categoryBgColor =
-    planner.category in MD_CATEGORY_COLORS
-      ? MD_CATEGORY_COLORS[planner.category as MDCategory]
-      : undefined
-  const categoryTextColor =
-    planner.category in MD_CATEGORY_TEXT_COLORS
-      ? MD_CATEGORY_TEXT_COLORS[planner.category as MDCategory]
-      : undefined
-
   // Keywords display (max 3 icons + overflow indicator)
   const keywords = planner.selectedKeywords ?? []
   const displayedKeywords = keywords.slice(0, PLANNER_LIST.MAX_KEYWORDS_DISPLAY)
   const hasMoreKeywords = keywords.length > PLANNER_LIST.MAX_KEYWORDS_DISPLAY
 
-  // Determine status (priority-based cascade)
-  let status:
-    | 'draft'
-    | 'saved'
-    | 'unsynced'
-    | 'synced'
-    | 'published'
-    | 'unpublishedChanges'
-    | null = null
-
-  if (planner.published === true) {
-    if (planner.status === 'draft') {
-      // Published but has unsaved local changes
-      status = 'unpublishedChanges'
-    } else {
-      // Published and saved
-      status = 'published'
-    }
-  } else if (isAuthenticated && syncEnabled === true) {
-    if (planner.status === 'draft' || planner.savedAt === null) {
-      // Authenticated with sync enabled but has unsaved changes
-      status = 'unsynced'
-    } else {
-      // Authenticated with sync enabled and saved
-      status = 'synced'
-    }
-  } else {
-    // Guest or sync disabled
-    if (planner.status === 'draft' || planner.savedAt === null) {
-      status = 'draft'
-    } else {
-      // Saved locally with sync off
-      status = 'saved'
-    }
-  }
+  const status = deriveSaveStatus(planner, isAuthenticated, syncEnabled)
 
   return (
     <Link to="/planner/md/$id" params={{ id: planner.id }} search={search} className="block">
@@ -103,12 +60,9 @@ export function PersonalPlannerCard({
           <div className="flex items-center gap-1 flex-wrap min-w-0">
             <span
               className="px-2 py-0.5 text-xs font-medium rounded shrink-0 whitespace-nowrap"
-              style={{
-                backgroundColor: categoryBgColor,
-                color: categoryTextColor,
-              }}
+              style={categoryBadgeStyle(planner.category)}
             >
-              {t(`pages.plannerList.mdCategory.${planner.category}`)}
+              <MdCategoryLabel category={planner.category} />
             </span>
 
             {/* Keywords (icons inline with floor badge) */}
@@ -121,7 +75,7 @@ export function PersonalPlannerCard({
               />
             ))}
             {hasMoreKeywords && (
-              <span className="text-xs text-muted-foreground">
+              <span className={SECTION_STYLES.TEXT.captionSmall}>
                 +{keywords.length - PLANNER_LIST.MAX_KEYWORDS_DISPLAY}
               </span>
             )}
@@ -129,7 +83,7 @@ export function PersonalPlannerCard({
 
           {/* Right: Status indicator icon */}
           <div className="shrink-0 flex justify-end">
-            {status && <PlannerStatusIcon status={status} />}
+            <PlannerStatusIcon status={status} />
           </div>
         </div>
 
@@ -141,7 +95,7 @@ export function PersonalPlannerCard({
         {/* Last modified */}
         <p className="flex items-center gap-1 text-xs text-muted-foreground">
           <Clock className="size-3" />
-          {formatPlannerDate(planner.lastModifiedAt)}
+          {formatCompactDate(planner.lastModifiedAt)}
         </p>
       </div>
     </Link>

@@ -10,10 +10,10 @@
 import { useState } from 'react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { getBattleKeywordIconPath } from '@/shared/assets'
-import { FLAVOR_TEXT_COLOR } from '@/shared/gameData'
 import { applyStrikethrough } from '../lib/unityRichText'
 import { cn } from '@/lib/utils'
 import type { ResolvedKeyword } from '../types/KeywordTypes'
+import { FLAVOR_TEXT_COLOR, SECTION_STYLES } from '@/lib/constants'
 
 interface FormattedKeywordProps {
   /** Resolved keyword data from useKeywordFormatter */
@@ -87,7 +87,7 @@ export function FormattedKeyword({ keyword, className }: FormattedKeywordProps) 
         )}
       >
         <div className="space-y-1 max-w-[280px]">
-          <div className="flex items-center gap-1">
+          <div className={SECTION_STYLES.LAYOUT.rowTight}>
             <img
               src={getBattleKeywordIconPath(path)}
               alt=""

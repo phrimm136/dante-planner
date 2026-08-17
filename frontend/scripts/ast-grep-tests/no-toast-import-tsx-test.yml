@@ -1,0 +1,16 @@
+id: no-toast-import-tsx
+valid:
+  - import { showError, showSuccess } from '@/lib/errorPresentation'
+  - import { Toaster } from 'sonner'
+  # NotificationToast renders bespoke toast.custom notifications and is exempt by
+  # path; the exemption is the rule's, not this shape's.
+  - import { NotificationToast } from '@/shared/notifications'
+invalid:
+  - import { toast } from 'sonner'
+  - import { toast } from '@/lib/toast'
+  - import { toast as notify } from '@/lib/toast'
+  - export { toast } from 'sonner'
+  # Evasion shapes the earlier identifier-keyed rule walked past.
+  - import * as ns from 'sonner'
+  - const { toast } = await import('sonner')
+  - export * from 'sonner'

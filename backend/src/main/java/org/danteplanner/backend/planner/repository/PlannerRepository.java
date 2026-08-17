@@ -1,319 +1,170 @@
 package org.danteplanner.backend.planner.repository;
 
 
+import org.danteplanner.backend.planner.dto.PlannerCoreInfo;
+import org.danteplanner.backend.planner.dto.PlannerNotificationTarget;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Lock;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import jakarta.persistence.LockModeType;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Repository for the planner write aggregate. Single-row paths load the full
+ * aggregate (core + satellites + user) with fetch joins; the owner list is a row
+ * projection over {@code planner ⨝ planner_content} and deliberately filesorts on
+ * {@code last_modified_at} (INV6 forbids an index on the content row, and per-user
+ * cardinality is small). Public browse/search reads live on the catalog projection.
+ */
 @Repository
-public interface PlannerRepository extends JpaRepository<Planner, UUID>, JpaSpecificationExecutor<Planner> {
+public interface PlannerRepository extends JpaRepository<Planner, UUID> {
+
+    String AGGREGATE_LOAD = "SELECT p FROM Planner p "
+            + "JOIN FETCH p.content c JOIN FETCH p.publication JOIN FETCH p.moderation "
+            + "JOIN FETCH p.user ";
 
     /**
-     * Find all non-deleted planners for a user with pagination, ordered by last modified date descending.
-     * Uses EntityGraph to prevent N+1 queries when accessing user data.
+     * Owner list: summary cards for all non-deleted planners of a user, most
+     * recently modified first.
+     */
+    @Query(value = "SELECT p.id AS id, c.title AS title, c.category AS category, "
+            + "p.plannerType AS plannerType, c.status AS status, c.syncVersion AS syncVersion, "
+            + "c.lastModifiedAt AS lastModifiedAt, c.deletedAt AS deletedAt "
+            + "FROM Planner p JOIN PlannerContent c ON c.plannerId = p.id "
+            + "WHERE p.user.id = :userId AND c.deletedAt IS NULL "
+            + "ORDER BY c.lastModifiedAt DESC",
+            countQuery = "SELECT COUNT(p) FROM Planner p JOIN PlannerContent c ON c.plannerId = p.id "
+            + "WHERE p.user.id = :userId AND c.deletedAt IS NULL")
+    Page<PlannerSummaryRow> findOwnerSummaries(@Param("userId") Long userId, Pageable pageable);
+
+    /**
+     * Owner list for sync pulls: tombstoned rows ride along carrying their {@code deletedAt}, so
+     * a device that still holds a copy learns of the deletion from the same listing it pulls from.
+     */
+    @Query(value = "SELECT p.id AS id, c.title AS title, c.category AS category, "
+            + "p.plannerType AS plannerType, c.status AS status, c.syncVersion AS syncVersion, "
+            + "c.lastModifiedAt AS lastModifiedAt, c.deletedAt AS deletedAt "
+            + "FROM Planner p JOIN PlannerContent c ON c.plannerId = p.id "
+            + "WHERE p.user.id = :userId "
+            + "ORDER BY c.lastModifiedAt DESC",
+            countQuery = "SELECT COUNT(p) FROM Planner p JOIN PlannerContent c ON c.plannerId = p.id "
+            + "WHERE p.user.id = :userId")
+    Page<PlannerSummaryRow> findOwnerSummariesIncludingDeleted(
+            @Param("userId") Long userId, Pageable pageable);
+
+    /**
+     * Load the full aggregate for an owner-scoped, non-deleted planner.
+     */
+    @Query(AGGREGATE_LOAD + "WHERE p.id = :id AND p.user.id = :userId AND c.deletedAt IS NULL")
+    Optional<Planner> findAggregateForOwner(@Param("id") UUID id, @Param("userId") Long userId);
+
+    /**
+     * Load the full aggregates for the owner-scoped, non-deleted planners among the named ids.
      *
-     * @param userId   the user ID
-     * @param pageable pagination information
-     * @return page of planners
+     * <p>An id naming no planner, a soft-deleted one, or another user's is absent from the result
+     * rather than an error, so the result is not positionally aligned with the argument.</p>
      */
-    @EntityGraph(attributePaths = {"user"})
-    Page<Planner> findByUserIdAndDeletedAtIsNullOrderByLastModifiedAtDesc(Long userId, Pageable pageable);
+    @Query(AGGREGATE_LOAD + "WHERE p.id IN :ids AND p.user.id = :userId AND c.deletedAt IS NULL")
+    List<Planner> findAggregatesForOwner(@Param("ids") Collection<UUID> ids,
+            @Param("userId") Long userId);
 
     /**
-     * Find a specific non-deleted planner by ID and user ID.
-     * Uses EntityGraph to prevent N+1 queries when accessing user data.
+     * Load the full aggregate for a planner regardless of owner or publication,
+     * excluding soft-deleted rows (moderation paths).
      */
-    @EntityGraph(attributePaths = {"user"})
-    Optional<Planner> findByIdAndUserIdAndDeletedAtIsNull(UUID id, Long userId);
+    @Query(AGGREGATE_LOAD + "WHERE p.id = :id AND c.deletedAt IS NULL")
+    Optional<Planner> findAggregate(@Param("id") UUID id);
+
+    /**
+     * Load the full aggregate for a published, non-deleted planner (public detail).
+     */
+    @Query(AGGREGATE_LOAD + "WHERE p.id = :id AND p.publication.published = TRUE AND c.deletedAt IS NULL")
+    Optional<Planner> findPublishedAggregate(@Param("id") UUID id);
+
+    /**
+     * Project the fields a notification about a planner needs, without hydrating the aggregate.
+     *
+     * <p>A projection rather than a load: the caller is outside the planner feature, and the owner
+     * id has to reach it without the {@code User} the aggregate would carry.</p>
+     */
+    @Query("""
+            SELECT new org.danteplanner.backend.planner.dto.PlannerNotificationTarget(
+                p.id, c.title, p.user.id, pub.ownerNotificationsEnabled)
+            FROM Planner p JOIN p.content c JOIN p.publication pub
+            WHERE p.id = :id AND c.deletedAt IS NULL
+            """)
+    Optional<PlannerNotificationTarget> findNotificationTarget(@Param("id") UUID id);
 
     /**
      * Count non-deleted planners for a user.
      */
-    long countByUserIdAndDeletedAtIsNull(Long userId);
+    @Query("SELECT COUNT(p) FROM Planner p JOIN p.content c WHERE p.user.id = :userId AND c.deletedAt IS NULL")
+    long countActiveByUserId(@Param("userId") Long userId);
 
     /**
      * Check if a non-deleted planner exists by ID (any user).
      * Used for ID collision detection in upsert.
      */
-    boolean existsByIdAndDeletedAtIsNull(UUID id);
+    @Query("SELECT COUNT(p) > 0 FROM Planner p JOIN p.content c WHERE p.id = :id AND c.deletedAt IS NULL")
+    boolean existsActiveById(@Param("id") UUID id);
 
     /**
-     * Check if a planner exists by ID and user ID, regardless of soft-delete state.
-     * Used to detect soft-deleted planners before attempting recreation in upsert.
+     * Check if a published, non-deleted planner exists by ID. Mirrors the visibility
+     * predicate of {@link #findPublishedAggregate(UUID)} without loading the aggregate,
+     * for callers that only need the authorization outcome.
      */
-    boolean existsByIdAndUserId(UUID id, Long userId);
-
-    // ==================== Published Planner Queries ====================
+    @Query("SELECT COUNT(p) > 0 FROM Planner p JOIN p.content c JOIN p.publication pub "
+            + "WHERE p.id = :id AND pub.published = TRUE AND c.deletedAt IS NULL")
+    boolean existsPublishedById(@Param("id") UUID id);
 
     /**
-     * Find all published non-deleted planners with pagination.
-     * Uses EntityGraph to eagerly load user data for author information.
-     *
-     * @param pageable pagination information
-     * @return page of published planners
+     * Read a planner id's owner and soft-delete state in one SELECT. Distinguishes an owner's
+     * soft-deleted planner from another user's row without a second existence probe.
      */
-    @EntityGraph(attributePaths = {"user"})
-    Page<Planner> findByPublishedTrueAndDeletedAtIsNull(Pageable pageable);
+    @Query("SELECT p.user.id AS userId, c.deletedAt AS deletedAt "
+            + "FROM Planner p JOIN p.content c WHERE p.id = :id")
+    Optional<PlannerOwnershipRow> findOwnershipById(@Param("id") UUID id);
 
     /**
-     * Find published non-deleted planners filtered by category.
-     * Uses EntityGraph to eagerly load user data for author information.
-     *
-     * @param category the category to filter by (e.g., "5F", "10F", "15F" for MD)
-     * @param pageable pagination information
-     * @return page of published planners in the specified category
+     * Core + author fields for a batch of planners (public list card assembly).
      */
-    @EntityGraph(attributePaths = {"user"})
-    Page<Planner> findByPublishedTrueAndCategoryAndDeletedAtIsNull(String category, Pageable pageable);
+    @Query("SELECT new org.danteplanner.backend.planner.dto.PlannerCoreInfo("
+            + "p.id, p.createdAt, u.usernameEpithet, u.usernameSuffix) "
+            + "FROM Planner p JOIN p.user u WHERE p.id IN :ids")
+    List<PlannerCoreInfo> findCoreInfoByIds(@Param("ids") Collection<UUID> ids);
 
     /**
-     * Find recommended planners (net votes >= threshold), all categories.
-     * Excludes planners hidden by moderators.
-     *
-     * @param threshold minimum net votes required (e.g., 10)
-     * @param pageable  pagination information
-     * @return page of recommended planners
+     * All planner ids belonging to a user, regardless of state (hard-delete sweep).
      */
-    @Query(value = "SELECT p FROM Planner p JOIN FETCH p.user " +
-           "WHERE p.published = true AND p.deletedAt IS NULL AND p.takenDownAt IS NULL " +
-           "AND p.hiddenFromRecommended = false " +
-           "AND p.upvotes >= :threshold",
-           countQuery = "SELECT COUNT(p) FROM Planner p " +
-           "WHERE p.published = true AND p.deletedAt IS NULL AND p.takenDownAt IS NULL " +
-           "AND p.hiddenFromRecommended = false " +
-           "AND p.upvotes >= :threshold")
-    Page<Planner> findRecommendedPlanners(@Param("threshold") int threshold, Pageable pageable);
+    @Query("SELECT p.id FROM Planner p WHERE p.user.id = :userId")
+    List<UUID> findIdsByUserId(@Param("userId") Long userId);
 
     /**
-     * Find recommended planners (net votes >= threshold) filtered by category.
-     * Excludes planners hidden by moderators.
-     *
-     * @param threshold minimum net votes required (e.g., 10)
-     * @param category  the category to filter by
-     * @param pageable  pagination information
-     * @return page of recommended planners in the specified category
+     * Find all planners hidden by moderators from the recommended list.
      */
-    @Query(value = "SELECT p FROM Planner p JOIN FETCH p.user " +
-           "WHERE p.published = true AND p.deletedAt IS NULL AND p.takenDownAt IS NULL " +
-           "AND p.hiddenFromRecommended = false " +
-           "AND p.category = :category " +
-           "AND p.upvotes >= :threshold",
-           countQuery = "SELECT COUNT(p) FROM Planner p " +
-           "WHERE p.published = true AND p.deletedAt IS NULL AND p.takenDownAt IS NULL " +
-           "AND p.hiddenFromRecommended = false " +
-           "AND p.category = :category " +
-           "AND p.upvotes >= :threshold")
-    Page<Planner> findRecommendedPlannersByCategory(
-            @Param("threshold") int threshold,
-            @Param("category") String category,
-            Pageable pageable);
+    @Query(value = AGGREGATE_LOAD
+            + "WHERE p.moderation.hiddenFromRecommended = TRUE AND c.deletedAt IS NULL",
+            countQuery = "SELECT COUNT(p) FROM Planner p JOIN p.content c "
+            + "WHERE p.moderation.hiddenFromRecommended = TRUE AND c.deletedAt IS NULL")
+    Page<Planner> findHiddenFromRecommended(Pageable pageable);
 
     /**
-     * Find a published non-deleted planner by ID.
-     * Used for public viewing of published planners.
+     * Persists an aggregate that does not exist yet, satellites included.
      *
-     * @param id the planner ID
-     * @return the planner if found and published
+     * <p>The id is the client's, so no id-null guard can tell a new aggregate from an existing
+     * one: passing one that already exists overwrites it.</p>
+     *
+     * @param planner the aggregate to insert
+     * @return the persisted aggregate
      */
-    @EntityGraph(attributePaths = {"user"})
-    Optional<Planner> findByIdAndPublishedTrueAndDeletedAtIsNull(UUID id);
-
-    // ==================== Atomic Vote Operations ====================
-
-    /**
-     * Atomically increment the upvote count for a planner.
-     * Uses UPDATE query to prevent race conditions from concurrent votes.
-     *
-     * @param plannerId the planner ID
-     * @return number of rows updated (1 if successful, 0 if planner not found)
-     */
-    @Modifying(flushAutomatically = true, clearAutomatically = true)
-    @Query("UPDATE Planner p SET p.upvotes = p.upvotes + 1 WHERE p.id = :plannerId")
-    int incrementUpvotes(@Param("plannerId") UUID plannerId);
-
-    /**
-     * Atomically decrement the upvote count for a planner.
-     * Uses WHERE clause to prevent negative values.
-     *
-     * @param plannerId the planner ID
-     * @return number of rows updated (1 if successful, 0 if planner not found or upvotes already 0)
-     */
-    @Modifying
-    @Query("UPDATE Planner p SET p.upvotes = p.upvotes - 1 WHERE p.id = :plannerId AND p.upvotes > 0")
-    int decrementUpvotes(@Param("plannerId") UUID plannerId);
-
-    // ==================== View Count Operations ====================
-
-    /**
-     * Atomically increment the view count for a planner.
-     * Uses UPDATE query to prevent race conditions from concurrent views.
-     *
-     * @param plannerId the planner ID
-     * @return number of rows updated (1 if successful, 0 if planner not found)
-     */
-    @Modifying(flushAutomatically = true, clearAutomatically = true)
-    @Query("UPDATE Planner p SET p.viewCount = p.viewCount + 1 WHERE p.id = :plannerId")
-    int incrementViewCount(@Param("plannerId") UUID plannerId);
-
-    /**
-     * Find planner by ID with pessimistic write lock (SELECT FOR UPDATE).
-     * Acquires exclusive lock on the planner row to prevent deadlocks during concurrent view recording.
-     *
-     * <p>Lock Ordering Strategy: By acquiring the exclusive lock on the planners table FIRST
-     * (before any operations on planner_views), we ensure consistent lock ordering across
-     * all concurrent transactions. This prevents circular lock dependencies that cause deadlocks.</p>
-     *
-     * <p>Deadlock Scenario (without this method):
-     * Thread A: SELECT planners (shared) → INSERT planner_views → UPDATE planners (needs exclusive, waits)
-     * Thread B: SELECT planners (shared) → INSERT planner_views → UPDATE planners (needs exclusive, waits)
-     * Result: Circular wait → Deadlock</p>
-     *
-     * <p>Solution (with this method):
-     * Thread A: SELECT FOR UPDATE planners (exclusive) → INSERT planner_views → UPDATE planners (no wait)
-     * Thread B: SELECT FOR UPDATE planners (waits for A) → INSERT planner_views → UPDATE planners (no wait)
-     * Result: Sequential execution → No deadlock</p>
-     *
-     * @param plannerId the planner ID
-     * @return Optional of locked planner (empty if not found or deleted)
-     */
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT p FROM Planner p JOIN FETCH p.user WHERE p.id = :plannerId AND p.deletedAt IS NULL")
-    Optional<Planner> findByIdForUpdate(@Param("plannerId") UUID plannerId);
-
-    // ==================== Search Operations ====================
-
-    /**
-     * Find published planners with search term matching title OR keywords.
-     * Keywords are stored as comma-separated values, so we use LIKE for matching.
-     *
-     * @param search   the search term (case-insensitive)
-     * @param pageable pagination information
-     * @return page of published planners matching the search
-     */
-    @Query(value = "SELECT p FROM Planner p JOIN FETCH p.user " +
-           "WHERE p.published = true AND p.deletedAt IS NULL AND p.takenDownAt IS NULL " +
-           "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
-           "OR LOWER(p.selectedKeywords) LIKE LOWER(CONCAT('%', :search, '%')))",
-           countQuery = "SELECT COUNT(p) FROM Planner p " +
-           "WHERE p.published = true AND p.deletedAt IS NULL AND p.takenDownAt IS NULL " +
-           "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
-           "OR LOWER(p.selectedKeywords) LIKE LOWER(CONCAT('%', :search, '%')))")
-    Page<Planner> findPublishedWithSearch(@Param("search") String search, Pageable pageable);
-
-    /**
-     * Find published planners with search term and category filter.
-     *
-     * @param category the category to filter by
-     * @param search   the search term (case-insensitive)
-     * @param pageable pagination information
-     * @return page of published planners matching category and search
-     */
-    @Query(value = "SELECT p FROM Planner p JOIN FETCH p.user " +
-           "WHERE p.published = true AND p.deletedAt IS NULL AND p.takenDownAt IS NULL " +
-           "AND p.category = :category " +
-           "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
-           "OR LOWER(p.selectedKeywords) LIKE LOWER(CONCAT('%', :search, '%')))",
-           countQuery = "SELECT COUNT(p) FROM Planner p " +
-           "WHERE p.published = true AND p.deletedAt IS NULL AND p.takenDownAt IS NULL " +
-           "AND p.category = :category " +
-           "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
-           "OR LOWER(p.selectedKeywords) LIKE LOWER(CONCAT('%', :search, '%')))")
-    Page<Planner> findPublishedByCategoryWithSearch(
-            @Param("category") String category,
-            @Param("search") String search,
-            Pageable pageable);
-
-    /**
-     * Find recommended planners with search term matching title OR keywords.
-     * Excludes planners hidden by moderators.
-     *
-     * @param threshold minimum net votes required
-     * @param search    the search term (case-insensitive)
-     * @param pageable  pagination information
-     * @return page of recommended planners matching the search
-     */
-    @Query(value = "SELECT p FROM Planner p JOIN FETCH p.user " +
-           "WHERE p.published = true AND p.deletedAt IS NULL AND p.takenDownAt IS NULL " +
-           "AND p.hiddenFromRecommended = false " +
-           "AND p.upvotes >= :threshold " +
-           "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
-           "OR LOWER(p.selectedKeywords) LIKE LOWER(CONCAT('%', :search, '%')))",
-           countQuery = "SELECT COUNT(p) FROM Planner p " +
-           "WHERE p.published = true AND p.deletedAt IS NULL AND p.takenDownAt IS NULL " +
-           "AND p.hiddenFromRecommended = false " +
-           "AND p.upvotes >= :threshold " +
-           "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
-           "OR LOWER(p.selectedKeywords) LIKE LOWER(CONCAT('%', :search, '%')))")
-    Page<Planner> findRecommendedPlannersWithSearch(
-            @Param("threshold") int threshold,
-            @Param("search") String search,
-            Pageable pageable);
-
-    /**
-     * Find recommended planners with search term and category filter.
-     * Excludes planners hidden by moderators.
-     *
-     * @param threshold minimum net votes required
-     * @param category  the category to filter by
-     * @param search    the search term (case-insensitive)
-     * @param pageable  pagination information
-     * @return page of recommended planners matching category and search
-     */
-    @Query(value = "SELECT p FROM Planner p JOIN FETCH p.user " +
-           "WHERE p.published = true AND p.deletedAt IS NULL AND p.takenDownAt IS NULL " +
-           "AND p.hiddenFromRecommended = false " +
-           "AND p.category = :category " +
-           "AND p.upvotes >= :threshold " +
-           "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
-           "OR LOWER(p.selectedKeywords) LIKE LOWER(CONCAT('%', :search, '%')))",
-           countQuery = "SELECT COUNT(p) FROM Planner p " +
-           "WHERE p.published = true AND p.deletedAt IS NULL AND p.takenDownAt IS NULL " +
-           "AND p.hiddenFromRecommended = false " +
-           "AND p.category = :category " +
-           "AND p.upvotes >= :threshold " +
-           "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
-           "OR LOWER(p.selectedKeywords) LIKE LOWER(CONCAT('%', :search, '%')))")
-    Page<Planner> findRecommendedPlannersByCategoryWithSearch(
-            @Param("threshold") int threshold,
-            @Param("category") String category,
-            @Param("search") String search,
-            Pageable pageable);
-
-    // ==================== Notification & Moderation Operations ====================
-
-    /**
-     * Atomically set the recommended notification flag if it hasn't been set yet.
-     * This prevents duplicate notifications when multiple votes cross the threshold simultaneously.
-     *
-     * @param plannerId the planner ID
-     * @param threshold the threshold value to verify net votes
-     * @return 1 if flag was set (first thread wins), 0 if already set or threshold not met
-     */
-    @Modifying
-    @Query(value = "UPDATE planners SET recommended_notified_at = CURRENT_TIMESTAMP " +
-           "WHERE id = :plannerId " +
-           "AND upvotes >= :threshold " +
-           "AND recommended_notified_at IS NULL", nativeQuery = true)
-    int trySetRecommendedNotified(@Param("plannerId") UUID plannerId, @Param("threshold") int threshold);
-
-    /**
-     * Find all hidden planners (hidden by moderators from recommended list).
-     *
-     * @param pageable pagination information
-     * @return page of hidden planners
-     */
-    @EntityGraph(attributePaths = {"user"})
-    Page<Planner> findByHiddenFromRecommendedTrueAndDeletedAtIsNull(Pageable pageable);
+    default Planner insert(Planner planner) {
+        return save(planner);
+    }
 }

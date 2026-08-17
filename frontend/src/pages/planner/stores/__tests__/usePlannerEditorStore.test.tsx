@@ -7,7 +7,7 @@
  * the store is vanilla Zustand, so it is driven directly via createPlannerEditorStore().
  */
 
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, assert } from 'vitest'
 import {
   createPlannerEditorStore,
   createDefaultEquipment,
@@ -19,6 +19,7 @@ import { createEmptyNoteContent } from '@/shared/noteEditor'
 import { DUNGEON_IDX } from '@/shared/gameData'
 import type { MDPlannerContent } from '../../types/PlannerTypes'
 import type { SinnerEquipment, SkillEAState } from '../../types/DeckTypes'
+import { ThemePackIdSchema } from '@/shared/gameData'
 
 describe('usePlannerEditorStore', () => {
   describe('initial state', () => {
@@ -105,7 +106,7 @@ describe('usePlannerEditorStore', () => {
     it('updateFloorSelection replaces a single floor by index', () => {
       const store = createPlannerEditorStore()
       const updated = {
-        themePackId: 'pack-1',
+        themePackId: ThemePackIdSchema.parse('1001'),
         difficulty: DUNGEON_IDX.HARD,
         giftIds: new Set(['g1']),
       }
@@ -114,7 +115,9 @@ describe('usePlannerEditorStore', () => {
 
       const floors = store.getState().floorSelections
       expect(floors[3]).toEqual(updated)
-      expect(floors[0].themePackId).toBeNull()
+      const firstFloor = floors[0]
+      assert(firstFloor, 'the store holds no first floor')
+      expect(firstFloor.themePackId).toBeNull()
     })
   })
 
@@ -207,7 +210,11 @@ describe('usePlannerEditorStore', () => {
         deploymentOrder: [0, 1, 2],
         skillEAState: createDefaultSkillEAState(),
         floorSelections: [
-          { themePackId: 'pack-1', difficulty: DUNGEON_IDX.NORMAL, giftIds: ['fg1', 'fg2'] },
+          {
+            themePackId: ThemePackIdSchema.parse('1001'),
+            difficulty: DUNGEON_IDX.NORMAL,
+            giftIds: ['fg1', 'fg2'],
+          },
         ],
         sectionNotes: { intro: { content: 'note' } },
         ...overrides,
@@ -228,8 +235,10 @@ describe('usePlannerEditorStore', () => {
       expect(Array.from(s.selectedGiftIds)).toEqual(['g1', 'g2'])
       expect(Array.from(s.observationGiftIds)).toEqual(['o1'])
       expect(Array.from(s.comprehensiveGiftIds)).toEqual(['c1'])
-      expect(s.floorSelections[0].giftIds).toBeInstanceOf(Set)
-      expect(Array.from(s.floorSelections[0].giftIds)).toEqual(['fg1', 'fg2'])
+      const firstFloor = s.floorSelections[0]
+      assert(firstFloor, 'the store holds no first floor')
+      expect(firstFloor.giftIds).toBeInstanceOf(Set)
+      expect(Array.from(firstFloor.giftIds)).toEqual(['fg1', 'fg2'])
       expect(s.title).toBe('T')
       expect(s.isPublished).toBe(true)
     })
@@ -312,15 +321,17 @@ describe('usePlannerEditorStore', () => {
     it('preserves floorSelections[i].giftIds as a Set with the original ids', () => {
       const store = createPlannerEditorStore()
       store.getState().updateFloorSelection(2, {
-        themePackId: 'pack-2',
+        themePackId: ThemePackIdSchema.parse('1002'),
         difficulty: DUNGEON_IDX.HARD,
         giftIds: new Set(['fg1', 'fg2']),
       })
 
       const planner = store.getState().getPlannerState()
 
-      expect(planner.floorSelections[2].giftIds).toBeInstanceOf(Set)
-      expect(Array.from(planner.floorSelections[2].giftIds)).toEqual(['fg1', 'fg2'])
+      const thirdFloor = planner.floorSelections[2]
+      assert(thirdFloor, 'the planner state holds no third floor')
+      expect(thirdFloor.giftIds).toBeInstanceOf(Set)
+      expect(Array.from(thirdFloor.giftIds)).toEqual(['fg1', 'fg2'])
     })
   })
 

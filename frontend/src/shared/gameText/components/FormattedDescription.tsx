@@ -11,9 +11,11 @@
 import { Fragment } from 'react'
 import { useKeywordFormatter } from '../hooks/useKeywordFormatter'
 import { cn } from '@/lib/utils'
+import { UPGRADE_HIGHLIGHT_GRAMMAR, tokenizeRichText } from '../lib/richText'
 import { FormattedKeyword } from './FormattedKeyword'
+import { ACCENT_COLORS } from '@/lib/constants'
 
-const UPGRADE_HIGHLIGHT_COLOR = '#f8c200'
+const UPGRADE_HIGHLIGHT_COLOR = ACCENT_COLORS.ENHANCED
 
 /** Represents a segment after style tag parsing */
 interface StyleSegment {
@@ -26,27 +28,11 @@ interface StyleSegment {
  * This preserves style boundaries even when keywords are inside styled regions.
  */
 function parseStyleSegments(text: string): StyleSegment[] {
-  const segments: StyleSegment[] = []
-  const styleRegex = /<style="upgradeHighlight">([\s\S]*?)<\/style>/g
-  let lastIndex = 0
-  let match
-
-  while ((match = styleRegex.exec(text)) !== null) {
-    // Add unstyled text before the match
-    if (match.index > lastIndex) {
-      segments.push({ content: text.slice(lastIndex, match.index), isHighlighted: false })
-    }
-    // Add the styled content (without tags)
-    segments.push({ content: match[1], isHighlighted: true })
-    lastIndex = match.index + match[0].length
-  }
-
-  // Add remaining unstyled text
-  if (lastIndex < text.length) {
-    segments.push({ content: text.slice(lastIndex), isHighlighted: false })
-  }
-
-  return segments
+  return tokenizeRichText(text, UPGRADE_HIGHLIGHT_GRAMMAR).flatMap<StyleSegment>((token) => {
+    if (token.kind === 'element') return [{ content: token.content, isHighlighted: true }]
+    if (token.kind === 'text') return [{ content: token.value, isHighlighted: false }]
+    return []
+  })
 }
 
 interface FormattedDescriptionProps {

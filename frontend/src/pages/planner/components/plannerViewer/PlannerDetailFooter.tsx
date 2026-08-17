@@ -90,6 +90,11 @@ export function PlannerDetailFooter({ planner, isAuthenticated }: PlannerDetailF
           onClick={handleUpvote}
           disabled={voteMutation.isPending || hasVoted}
           aria-pressed={hasVoted}
+          aria-label={
+            hasVoted
+              ? t('pages.plannerList.contextMenu.upvoted')
+              : t('pages.plannerList.contextMenu.upvote')
+          }
         >
           <ThumbsUp className={hasVoted ? 'size-4 fill-current text-primary' : 'size-4'} />
           <span className="hidden lg:inline">
@@ -101,13 +106,18 @@ export function PlannerDetailFooter({ planner, isAuthenticated }: PlannerDetailF
       )}
 
       {/* Copy (Fork) - Available for all users */}
-      <Button variant="outline" onClick={handleDuplicate} disabled={forkMutation.isPending}>
+      <Button
+        variant="outline"
+        onClick={handleDuplicate}
+        disabled={forkMutation.isPending}
+        aria-label={t('pages.plannerList.contextMenu.copy')}
+      >
         <GitFork className="size-4" />
         <span className="hidden lg:inline">{t('pages.plannerList.contextMenu.copy')}</span>
       </Button>
 
       {/* Back to Top - Always visible */}
-      <Button variant="outline" onClick={handleBackToTop}>
+      <Button variant="outline" onClick={handleBackToTop} aria-label={t('pages.detail.backToTop')}>
         <ArrowUp className="size-4" />
         <span className="hidden lg:inline">{t('pages.detail.backToTop')}</span>
       </Button>

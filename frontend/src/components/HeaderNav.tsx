@@ -3,10 +3,11 @@ import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Menu, ChevronDown } from 'lucide-react'
 
-import { useAuthQueryNonBlocking } from '@/shared/auth'
+import { useAuthQueryNonBlocking, isStaff } from '@/shared/auth'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { cn } from '@/lib/utils'
+import { SECTION_STYLES } from '@/lib/constants'
 
 /**
  * Navigation structure with categories and items
@@ -34,7 +35,7 @@ const NAV_STRUCTURE = {
   moderator: {
     labelKey: 'header.nav.categories.moderator',
     items: [{ key: 'moderation', path: '/moderation', labelKey: 'header.nav.moderator' }],
-    requiresRole: ['MODERATOR', 'ADMIN'] as const,
+    staffOnly: true,
   },
 } as const
 
@@ -53,10 +54,7 @@ function DesktopNav() {
       {(Object.entries(NAV_STRUCTURE) as [CategoryKey, (typeof NAV_STRUCTURE)[CategoryKey]][]).map(
         ([categoryKey, category]) => {
           // Filter moderator section based on role
-          if (
-            'requiresRole' in category &&
-            (!user || !category.requiresRole.includes(user.role as 'MODERATOR' | 'ADMIN'))
-          ) {
+          if ('staffOnly' in category && !isStaff(user?.role)) {
             return null
           }
 
@@ -73,7 +71,7 @@ function DesktopNav() {
               {/* Category trigger */}
               <Button
                 variant="ghost"
-                className="flex items-center gap-1"
+                className={SECTION_STYLES.LAYOUT.rowTight}
                 onClick={() => {
                   setOpenCategory(isOpen ? null : categoryKey)
                 }}
@@ -142,10 +140,7 @@ function MobileNav() {
             Object.entries(NAV_STRUCTURE) as [CategoryKey, (typeof NAV_STRUCTURE)[CategoryKey]][]
           ).map(([categoryKey, category]) => {
             // Filter moderator section based on role
-            if (
-              'requiresRole' in category &&
-              (!user || !category.requiresRole.includes(user.role as 'MODERATOR' | 'ADMIN'))
-            ) {
+            if ('staffOnly' in category && !isStaff(user?.role)) {
               return null
             }
 

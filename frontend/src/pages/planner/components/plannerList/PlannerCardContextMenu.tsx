@@ -143,12 +143,6 @@ export function PlannerCardContextMenu({
       return // Ignore rapid clicks
     }
 
-    // IMMUTABLE VOTING: No toggle, vote once only
-    if (planner.hasUpvoted) {
-      // User already voted - mutation will return 409 Conflict
-      // Error handled by hook (shows toast)
-    }
-
     voteInProgressRef.current = true
     voteMutation.mutate(
       { plannerId: planner.id, voteType: 'UP' },
@@ -205,7 +199,8 @@ export function PlannerCardContextMenu({
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
       <DropdownMenuTrigger asChild>
-        <div
+        <button
+          type="button"
           onClick={handleLeftClick}
           onPointerDown={(e) => {
             // Prevent DropdownMenuTrigger from opening on left click
@@ -218,10 +213,10 @@ export function PlannerCardContextMenu({
             e.preventDefault()
             setOpen(true)
           }}
-          className="cursor-pointer"
+          className="cursor-pointer text-left"
         >
           {children}
-        </div>
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" onCloseAutoFocus={(e) => e.preventDefault()}>
         <DropdownMenuItem onClick={handleView}>

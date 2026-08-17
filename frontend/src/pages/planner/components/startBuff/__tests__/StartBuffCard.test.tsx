@@ -1,22 +1,23 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { StartBuffCardMD6 as StartBuffCard } from '../StartBuffCardMD6'
-import type { StartBuff, StartBuffI18n } from '@/shared/gameText'
+import { StartBuffCard } from '../StartBuffCard'
+import type { StartBuff, StartBuffI18n, EnhancementLevel } from '@/shared/gameText'
 
 // Mock react-i18next
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ i18n: { language: 'EN' } }),
+  useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'EN' } }),
   initReactI18next: { type: '3rdParty', init: () => {} },
 }))
 
-// Mock asset path functions
+// Mock asset path functions — arguments are reflected so version/level routing is visible
 vi.mock('@/shared/assets', () => ({
-  getStartBuffIconPath: () => '/mock/icon.png',
-  getStartBuffPanePath: () => '/mock/pane.png',
-  getStartBuffHighlightPath: () => '/mock/highlight.png',
-  getStartBuffStarLightPath: () => '/mock/star.png',
-  getStartBuffEnhancementBgPath: () => '/mock/enhance-bg.png',
-  getStartBuffEnhancementIconPath: () => '/mock/enhance-icon.png',
+  getStartBuffIconPath: (baseId: number, version: number) => `/icon/${baseId}/${version}.png`,
+  getStartBuffPanePath: (version: number) => `/pane/${version}.png`,
+  getStartBuffHighlightPath: (version: number) => `/highlight/${version}.png`,
+  getStartBuffStarLightPath: () => '/star.png',
+  getStartBuffEnhancementBgPath: (lvl: number, version: number) => `/bg/${lvl}/${version}.png`,
+  getStartBuffEnhancementOverlayPath: (version: number) => `/overlay/${version}.png`,
+  getStartBuffEnhancementIconPath: (lvl: number) => `/enhance/${lvl}.png`,
 }))
 
 // Mock formatBuffEffects to return simple text
@@ -41,92 +42,93 @@ const mockBuff: StartBuff = {
 
 const mockI18n: StartBuffI18n = {}
 
+function renderCard(overrides: Partial<Parameters<typeof StartBuffCard>[0]> = {}) {
+  const props = {
+    mdVersion: 6,
+    buff: mockBuff,
+    allBuffs: [mockBuff],
+    i18n: mockI18n,
+    isSelected: false,
+    onSelect: vi.fn(),
+    enhancement: 0 as EnhancementLevel,
+    onEnhancementChange: vi.fn(),
+    ...overrides,
+  }
+  return { props, ...render(<StartBuffCard {...props} />) }
+}
+
 describe('StartBuffCard', () => {
-  it('renders enhancement buttons', () => {
-    const onSelect = vi.fn()
+  it('renders the card button alongside its two enhancement buttons', () => {
+    renderCard()
 
-    render(
-      <StartBuffCard
-        buff={mockBuff}
-        allBuffs={[mockBuff]}
-        i18n={mockI18n}
-        isSelected={false}
-        onSelect={onSelect}
-        enhancement={0}
-        onEnhancementChange={vi.fn()}
-      />,
-    )
-
-    expect(screen.getAllByRole('button')).toHaveLength(2)
+    expect(screen.getByRole('button', { name: 'Test Buff' })).toBeInTheDocument()
+    expect(screen.getAllByRole('button')).toHaveLength(3)
   })
 
   it('calls onSelect when card is clicked', () => {
     const onSelect = vi.fn()
+    renderCard({ onSelect })
 
-    render(
-      <StartBuffCard
-        buff={mockBuff}
-        allBuffs={[mockBuff]}
-        i18n={mockI18n}
-        isSelected={false}
-        onSelect={onSelect}
-        enhancement={0}
-        onEnhancementChange={vi.fn()}
-      />,
-    )
+    fireEvent.click(screen.getByRole('button', { name: 'Test Buff' }))
 
-    // Click the card (the outer div with cursor-pointer)
-    const card = screen.getByText('Test Buff').closest('.cursor-pointer')
-    if (card) {
-      fireEvent.click(card)
-    }
-
-    // onSelect should be called with the buff ID (baseId + enhancement creates 100)
-    expect(onSelect).toHaveBeenCalledWith(100)
+    expect(onSelect).toHaveBeenCalledWith(100, true)
   })
 
-  it('calls onSelect with negative ID when deselecting', () => {
+  it('calls onSelect with selected=false when deselecting', () => {
     const onSelect = vi.fn()
+    renderCard({ onSelect, isSelected: true })
 
-    render(
-      <StartBuffCard
-        buff={mockBuff}
-        allBuffs={[mockBuff]}
-        i18n={mockI18n}
-        isSelected={true}
-        onSelect={onSelect}
-        enhancement={0}
-        onEnhancementChange={vi.fn()}
-      />,
-    )
+    fireEvent.click(screen.getByRole('button', { name: 'Test Buff' }))
 
-    // Click the card to deselect
-    const card = screen.getByText('Test Buff').closest('.cursor-pointer')
-    if (card) {
-      fireEvent.click(card)
-    }
-
-    // onSelect should be called with negative ID to signal deselection
-    expect(onSelect).toHaveBeenCalledWith(-100)
+    expect(onSelect).toHaveBeenCalledWith(100, false)
   })
 
   it('shows selection highlight when selected', () => {
-    const onSelect = vi.fn()
+    const { container } = renderCard({ isSelected: true })
 
-    const { container } = render(
-      <StartBuffCard
-        buff={mockBuff}
-        allBuffs={[mockBuff]}
-        i18n={mockI18n}
-        isSelected={true}
-        onSelect={onSelect}
-        enhancement={0}
-        onEnhancementChange={vi.fn()}
-      />,
-    )
+    expect(container.querySelector('img[src="/highlight/6.png"]')).not.toBeNull()
+  })
 
-    // Highlight image should be rendered - check for the specific mock path
-    const highlightImg = container.querySelector('img[src="/mock/highlight.png"]')
-    expect(highlightImg).not.toBeNull()
+  it('resolves every asset through the requested MD version', () => {
+    const { container } = renderCard({ mdVersion: 7 })
+
+    expect(container.querySelector('img[src="/pane/7.png"]')).not.toBeNull()
+    expect(container.querySelector('img[src="/icon/100/7.png"]')).not.toBeNull()
+    expect(container.querySelector('img[src="/highlight/7.png"]')).not.toBeNull()
+  })
+
+  it('draws the selected-state overlay frame only for MD7', () => {
+    const { container: md7 } = renderCard({ mdVersion: 7, enhancement: 1 })
+    expect(md7.innerHTML).toContain('/overlay/7.png')
+
+    const { container: md6 } = renderCard({ mdVersion: 6, enhancement: 1 })
+    expect(md6.innerHTML).not.toContain('/overlay/')
+  })
+
+  it('clears the press timer on unmount', () => {
+    vi.useFakeTimers()
+    const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout')
+    const { unmount } = renderCard()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Test Buff' }))
+    unmount()
+
+    expect(clearTimeoutSpy).toHaveBeenCalled()
+    clearTimeoutSpy.mockRestore()
+    vi.useRealTimers()
+  })
+
+  // Locks the per-variant layout: any class, offset or border-image change shows up here
+  it.each([6, 7])('matches the MD%i layout snapshot', (mdVersion) => {
+    const { container } = renderCard({ mdVersion, enhancement: 1, isSelected: true })
+
+    expect(container.innerHTML).toMatchSnapshot()
+  })
+
+  it('falls back to the MD6 layout for an unknown version', () => {
+    const { container: unknown } = renderCard({ mdVersion: 99 })
+    const { container: md6 } = renderCard({ mdVersion: 6 })
+
+    expect(unknown.innerHTML).toBe(md6.innerHTML)
   })
 })

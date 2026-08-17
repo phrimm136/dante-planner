@@ -1,23 +1,33 @@
 package org.danteplanner.backend.service;
+import org.danteplanner.backend.planner.service.PlannerCatalogService;
+import org.danteplanner.backend.planner.service.PlannerStatsService;
 import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
 import org.danteplanner.backend.planner.service.PlannerEngagementService;
 import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
+import org.danteplanner.backend.planner.validation.CatalogReadValidator;
+import org.danteplanner.backend.planner.validation.VoteUniquenessValidator;
 
 import org.danteplanner.backend.moderation.service.PlannerReportService;
-import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.planner.dto.CatalogQuery;
+import org.danteplanner.backend.planner.dto.PlannerCoreInfo;
 import org.danteplanner.backend.planner.dto.PublicPlannerResponse;
 import org.danteplanner.backend.planner.dto.PublishedPlannerDetailResponse;
 import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.entity.PlannerStatus;
+import org.danteplanner.backend.planner.entity.PlannerCatalog;
+import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerType;
-import org.danteplanner.backend.planner.entity.PlannerView;
+import org.danteplanner.backend.planner.entity.PlannerVote;
+import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
+import org.danteplanner.backend.planner.exception.PlannerValidationException;
+import org.danteplanner.backend.shared.entity.ContentEntityType;
 import org.danteplanner.backend.planner.repository.PlannerBookmarkRepository;
-import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
+import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
-import org.danteplanner.backend.planner.repository.PlannerViewRepository;
+import org.danteplanner.backend.planner.service.PlannerViewRecorder;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -27,7 +37,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationEventPublisher;
+import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -38,17 +48,21 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.danteplanner.backend.planner.service.PlannerAccessGuard;
+import org.danteplanner.backend.user.service.UserService;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 
 /**
  * Unit tests for PublishedPlannerQueryService (public catalog read model:
@@ -59,7 +73,13 @@ import static org.mockito.Mockito.when;
 class PublishedPlannerQueryServiceTest {
 
     @Mock
+    private UserService userService;
+
+    @Mock
     private PlannerRepository plannerRepository;
+
+    @Mock
+    private PlannerCatalogRepository catalogRepository;
 
     @Mock
     private PlannerVoteRepository plannerVoteRepository;
@@ -68,10 +88,7 @@ class PublishedPlannerQueryServiceTest {
     private PlannerBookmarkRepository plannerBookmarkRepository;
 
     @Mock
-    private PlannerViewRepository plannerViewRepository;
-
-    @Mock
-    private PlannerCommentRepository commentRepository;
+    private PlannerViewRecorder plannerViewRecorder;
 
     @Mock
     private PlannerSubscriptionService subscriptionService;
@@ -80,7 +97,16 @@ class PublishedPlannerQueryServiceTest {
     private PlannerReportService reportService;
 
     @Mock
-    private ApplicationEventPublisher eventPublisher;
+    private PlannerStatsService plannerStatsService;
+
+    @Mock
+    private PlannerCatalogService plannerCatalogService;
+
+    @Mock
+    private DomainEventRecorder domainEventRecorder;
+
+    @Mock
+    private PlannerStatsRepository plannerStatsRepository;
 
     private PlannerEngagementService engagementService;
     private PublishedPlannerQueryService publishedQueryService;
@@ -94,192 +120,167 @@ class PublishedPlannerQueryServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
+        PlannerAccessGuard accessGuard = new PlannerAccessGuard(userService, plannerRepository);
+
         // engagementService is a real collaborator wired to the mocked repositories,
         // matching how PublishedPlannerQueryService delegates isBookmarked() to it.
         engagementService = new PlannerEngagementService(
-                plannerRepository,
                 plannerVoteRepository,
                 plannerBookmarkRepository,
-                eventPublisher,
+                plannerStatsService,
+                plannerCatalogService,
+                domainEventRecorder,
+                accessGuard,
+                reportService,
+                new VoteUniquenessValidator(),
                 recommendedThreshold
         );
 
         publishedQueryService = new PublishedPlannerQueryService(
                 plannerRepository,
+                catalogRepository,
                 plannerVoteRepository,
                 plannerBookmarkRepository,
-                plannerViewRepository,
-                commentRepository,
                 subscriptionService,
                 reportService,
                 engagementService,
-                recommendedThreshold
+                plannerViewRecorder,
+                plannerStatsRepository,
+                accessGuard,
+                new CatalogReadValidator()
         );
 
-        testUser = User.builder()
-                .id(1L)
-                .email("test@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-123")
-                .usernameEpithet("W_CORP")
-                .usernameSuffix("test1")
+        testUser = TestDataFactory.unsavedUser(1L);
+    }
+
+    private PlannerCatalog catalogRow(String title, boolean recommended) {
+        return PlannerCatalog.builder()
+                .plannerId(UUID.randomUUID())
+                .plannerType(PlannerType.MIRROR_DUNGEON)
+                .category("5F")
+                .title(title)
+                .firstPublishedAt(Instant.now())
+                .recommended(recommended)
                 .build();
     }
 
-    private Planner.PlannerBuilder testPlannerBuilder() {
-        return Planner.builder()
-                .id(UUID.randomUUID())
-                .user(testUser)
-                .title("Test Planner")
-                .category("5F")
-                .status(PlannerStatus.DRAFT)
-                .content("{\"data\": \"test\"}")
-                .syncVersion(1L)
-                .schemaVersion(1)
-                .contentVersion(6)
-                .plannerType(PlannerType.MIRROR_DUNGEON)
-                .createdAt(Instant.now())
-                .lastModifiedAt(Instant.now())
-                .savedAt(Instant.now());
+    /**
+     * Every listing composes one Specification over the catalog projection; the mocked executor
+     * answers whatever page the case seeds, so these assert the composition and the mapping, not
+     * the predicate\u2019s SQL (which belongs to the containerized tier).
+     */
+    private void stubCatalogPage(Page<PlannerCatalog> page) {
+        when(catalogRepository.findAll(any(Specification.class), any(Pageable.class)))
+                .thenReturn(page);
     }
 
-    private Planner createTestPlanner() {
-        return testPlannerBuilder().build();
+    private Page<PlannerCatalog> pageOf(Pageable pageable, PlannerCatalog... rows) {
+        return new PageImpl<>(List.of(rows), pageable, rows.length);
     }
 
     @Nested
-    @DisplayName("getPublishedPlanners Tests")
-    class GetPublishedPlannersTests {
-
-        private Planner createPublishedPlanner(String title) {
-            return testPlannerBuilder().title(title).published(true).build();
-        }
+    @DisplayName("published listing")
+    class PublishedListingTests {
 
         @Test
-        @DisplayName("Should return paginated published planners")
-        void getPublishedPlanners_WhenCalled_ReturnsPage() {
-            // Arrange
+        void publishedListing_WhenRowsExist_ReturnsPage() {
             Pageable pageable = PageRequest.of(0, 10);
-            List<Planner> planners = List.of(
-                    createPublishedPlanner("Planner 1"),
-                    createPublishedPlanner("Planner 2")
-            );
-            Page<Planner> plannerPage = new PageImpl<>(planners, pageable, 2);
+            stubCatalogPage(pageOf(pageable, catalogRow("Planner 1", false), catalogRow("Planner 2", false)));
 
-            when(plannerRepository.findByPublishedTrueAndDeletedAtIsNull(pageable))
-                    .thenReturn(plannerPage);
+            Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
+                    new CatalogQuery(false, null, null, null, null), pageable, null);
 
-            // Act
-            Page<PublicPlannerResponse> result = publishedQueryService.getPublishedPlanners(pageable, null);
-
-            // Assert
             assertEquals(2, result.getTotalElements());
             assertEquals(2, result.getContent().size());
         }
 
         @Test
-        @DisplayName("Should filter by category when provided")
-        void getPublishedPlanners_WithCategory_FiltersResults() {
-            // Arrange
+        void publishedListing_WhenCategory_ComposesCategoryPredicate() {
             Pageable pageable = PageRequest.of(0, 10);
-            String category = "5F";
-            List<Planner> planners = List.of(createPublishedPlanner("F5 Planner"));
-            Page<Planner> plannerPage = new PageImpl<>(planners, pageable, 1);
+            PlannerCatalog inCategory = catalogRow("F5 Planner", false);
+            stubCatalogPage(pageOf(pageable, inCategory));
 
-            when(plannerRepository.findByPublishedTrueAndCategoryAndDeletedAtIsNull(category, pageable))
-                    .thenReturn(plannerPage);
+            Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
+                    new CatalogQuery(false, "5F", null, null, null), pageable, null);
 
-            // Act
-            Page<PublicPlannerResponse> result = publishedQueryService.getPublishedPlanners(pageable, category);
-
-            // Assert
             assertEquals(1, result.getTotalElements());
-            verify(plannerRepository).findByPublishedTrueAndCategoryAndDeletedAtIsNull(category, pageable);
+            PublicPlannerResponse card = result.getContent().get(0);
+            assertEquals(inCategory.getPlannerId(), card.id());
+            assertEquals("F5 Planner", card.title());
+            assertEquals("5F", card.category());
         }
 
         @Test
-        @DisplayName("Should return empty page when no published planners")
-        void getPublishedPlanners_NoPlanners_ReturnsEmpty() {
-            // Arrange
+        void publishedListing_WhenNoRows_ReturnsEmpty() {
             Pageable pageable = PageRequest.of(0, 10);
-            Page<Planner> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+            stubCatalogPage(new PageImpl<>(List.of(), pageable, 0));
 
-            when(plannerRepository.findByPublishedTrueAndDeletedAtIsNull(pageable))
-                    .thenReturn(emptyPage);
+            Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
+                    new CatalogQuery(false, null, null, null, null), pageable, null);
 
-            // Act
-            Page<PublicPlannerResponse> result = publishedQueryService.getPublishedPlanners(pageable, null);
-
-            // Assert
             assertEquals(0, result.getTotalElements());
             assertTrue(result.getContent().isEmpty());
+        }
+
+        @Test
+        void publishedListing_WhenRowLacksStatsAndCore_DefaultsCountersToZero() {
+            Pageable pageable = PageRequest.of(0, 10);
+            PlannerCatalog row = catalogRow("Counterless", false);
+            stubCatalogPage(pageOf(pageable, row));
+            when(plannerRepository.findCoreInfoByIds(List.of(row.getPlannerId()))).thenReturn(List.of());
+            when(plannerStatsRepository.findAllById(List.of(row.getPlannerId()))).thenReturn(List.of());
+
+            PublicPlannerResponse card = publishedQueryService.searchPlanners(
+                    new CatalogQuery(false, null, null, null, null), pageable, null)
+                    .getContent().get(0);
+
+            assertEquals(0, card.upvotes());
+            assertEquals(0, card.viewCount());
+            assertEquals(0L, card.commentCount());
+            assertNull(card.authorUsernameEpithet());
+            assertNull(card.authorUsernameSuffix());
+            assertNull(card.createdAt());
         }
     }
 
     @Nested
-    @DisplayName("getRecommendedPlanners Tests")
-    class GetRecommendedPlannersTests {
-
-        private Planner createRecommendedPlanner(String title, int upvotes) {
-            return testPlannerBuilder().title(title).published(true).upvotes(upvotes).build();
-        }
+    @DisplayName("recommended listing")
+    class RecommendedListingTests {
 
         @Test
-        @DisplayName("Should return planners meeting threshold")
-        void getRecommendedPlanners_WhenCalled_ReturnsQualifyingPlanners() {
-            // Arrange
+        void recommendedListing_WhenRowsExist_ReturnsPage() {
             Pageable pageable = PageRequest.of(0, 10);
-            List<Planner> planners = List.of(
-                    createRecommendedPlanner("High Votes", 15),
-                    createRecommendedPlanner("Medium Votes", 12)
-            );
-            Page<Planner> plannerPage = new PageImpl<>(planners, pageable, 2);
+            stubCatalogPage(pageOf(pageable, catalogRow("High Votes", true), catalogRow("Medium Votes", true)));
 
-            when(plannerRepository.findRecommendedPlanners(recommendedThreshold, pageable))
-                    .thenReturn(plannerPage);
+            Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
+                    new CatalogQuery(true, null, null, null, null), pageable, null);
 
-            // Act
-            Page<PublicPlannerResponse> result = publishedQueryService.getRecommendedPlanners(pageable, null);
-
-            // Assert
             assertEquals(2, result.getTotalElements());
         }
 
         @Test
-        @DisplayName("Should filter by category when provided")
-        void getRecommendedPlanners_WithCategory_FiltersResults() {
-            // Arrange
+        void recommendedListing_WhenCategory_ComposesCategoryPredicate() {
             Pageable pageable = PageRequest.of(0, 10);
-            String category = "10F";
-            List<Planner> planners = List.of(createRecommendedPlanner("F10 Planner", 20));
-            Page<Planner> plannerPage = new PageImpl<>(planners, pageable, 1);
+            PlannerCatalog inCategory = catalogRow("F10 Planner", true);
+            stubCatalogPage(pageOf(pageable, inCategory));
 
-            when(plannerRepository.findRecommendedPlannersByCategory(recommendedThreshold, category, pageable))
-                    .thenReturn(plannerPage);
+            Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
+                    new CatalogQuery(true, "10F", null, null, null), pageable, null);
 
-            // Act
-            Page<PublicPlannerResponse> result = publishedQueryService.getRecommendedPlanners(pageable, category);
-
-            // Assert
             assertEquals(1, result.getTotalElements());
-            verify(plannerRepository).findRecommendedPlannersByCategory(
-                    recommendedThreshold, category, pageable);
+            PublicPlannerResponse card = result.getContent().get(0);
+            assertEquals(inCategory.getPlannerId(), card.id());
+            assertEquals("F10 Planner", card.title());
         }
 
         @Test
-        @DisplayName("Should return empty when no planners meet threshold")
-        void getRecommendedPlanners_NoneQualify_ReturnsEmpty() {
-            // Arrange
+        void recommendedListing_WhenNoRows_ReturnsEmpty() {
             Pageable pageable = PageRequest.of(0, 10);
-            Page<Planner> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+            stubCatalogPage(new PageImpl<>(List.of(), pageable, 0));
 
-            when(plannerRepository.findRecommendedPlanners(recommendedThreshold, pageable))
-                    .thenReturn(emptyPage);
+            Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
+                    new CatalogQuery(true, null, null, null, null), pageable, null);
 
-            // Act
-            Page<PublicPlannerResponse> result = publishedQueryService.getRecommendedPlanners(pageable, null);
-
-            // Assert
             assertTrue(result.getContent().isEmpty());
         }
     }
@@ -290,44 +291,48 @@ class PublishedPlannerQueryServiceTest {
 
         @Test
         @DisplayName("Should increment view count atomically")
-        void incrementViewCount_Success_IncrementsCount() {
+        void incrementViewCount_WhenSuccess_IncrementsCount() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
-            when(plannerRepository.incrementViewCount(plannerId)).thenReturn(1);
+            when(plannerRepository.existsActiveById(plannerId)).thenReturn(true);
 
             // Act
             publishedQueryService.incrementViewCount(plannerId);
 
             // Assert
-            verify(plannerRepository).incrementViewCount(plannerId);
+            // The increment returns nothing and the counter lives in planner_stats; reading back
+            // view_count instead of the call needs a committing (containerized) test.
+            verify(plannerStatsRepository).incrementViewCountBy(plannerId, 1);
         }
 
         @Test
         @DisplayName("Should throw PlannerNotFoundException when planner not found")
-        void incrementViewCount_NotFound_ThrowsException() {
+        void incrementViewCount_WhenNotFound_ThrowsException() {
             // Arrange
             UUID nonExistentId = UUID.randomUUID();
-            when(plannerRepository.incrementViewCount(nonExistentId)).thenReturn(0);
+            when(plannerRepository.existsActiveById(nonExistentId)).thenReturn(false);
 
             // Act & Assert
             assertThrows(
                     PlannerNotFoundException.class,
                     () -> publishedQueryService.incrementViewCount(nonExistentId)
             );
+            verify(plannerStatsRepository, never()).incrementViewCountBy(any(), anyInt());
         }
 
         @Test
-        @DisplayName("Should handle deleted planner (returns 0 rows updated)")
-        void incrementViewCount_DeletedPlanner_ThrowsException() {
-            // Arrange
-            UUID deletedPlannerId = UUID.randomUUID();
-            when(plannerRepository.incrementViewCount(deletedPlannerId)).thenReturn(0);
+        @DisplayName("Should throw PlannerNotFoundException when planner is soft-deleted")
+        void incrementViewCount_WhenDeletedPlanner_ThrowsException() {
+            // Arrange: a soft-deleted planner still has a core row but is not active
+            UUID deletedId = UUID.randomUUID();
+            when(plannerRepository.existsActiveById(deletedId)).thenReturn(false);
 
             // Act & Assert
             assertThrows(
                     PlannerNotFoundException.class,
-                    () -> publishedQueryService.incrementViewCount(deletedPlannerId)
+                    () -> publishedQueryService.incrementViewCount(deletedId)
             );
+            verify(plannerStatsRepository, never()).incrementViewCountBy(any(), anyInt());
         }
     }
 
@@ -338,40 +343,36 @@ class PublishedPlannerQueryServiceTest {
         private static final String IP_ADDRESS = "192.168.1.100";
         private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)";
 
-        private Planner createPublishedPlanner() {
-            Planner planner = testPlannerBuilder().published(true).build();
-            planner.setViewCount(10);
-            return planner;
+        private Planner createPublishedPlannerWithId(UUID id) {
+            return TestDataFactory.planner(testUser).id(id).published(true).build();
         }
 
         private void mockNewView(UUID plannerId) {
-            when(plannerRepository.findByIdForUpdate(plannerId))
+            when(plannerRepository.findPublishedAggregate(plannerId))
                     .thenReturn(Optional.of(createPublishedPlannerWithId(plannerId)));
-            when(plannerViewRepository.existsByPlannerIdAndViewerHashAndViewDate(eq(plannerId), any(), any()))
-                    .thenReturn(false);
-            when(plannerViewRepository.save(any(PlannerView.class)))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
-            when(commentRepository.countByPlannerIdAndDeletedAtIsNull(plannerId)).thenReturn(0L);
+            when(plannerStatsRepository.findById(plannerId))
+                    .thenReturn(Optional.of(PlannerStats.builder()
+                            .plannerId(plannerId)
+                            .viewCount(10)
+                            .build()));
         }
 
-        private Planner createPublishedPlannerWithId(UUID id) {
-            Planner planner = createPublishedPlanner();
-            planner.setId(id);
-            return planner;
-        }
-
+        /**
+         * Each of the four context flags carries a distinct value, so a response that crosses
+         * two of them fails rather than matching by coincidence.
+         */
         private void mockUserContext(UUID plannerId) {
             when(plannerVoteRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
-                    .thenReturn(Optional.empty());
+                    .thenReturn(Optional.of(new PlannerVote(testUser.getId(), plannerId, VoteType.UP)));
             when(plannerBookmarkRepository.existsByUserIdAndPlannerId(testUser.getId(), plannerId))
                     .thenReturn(false);
-            when(subscriptionService.isSubscribed(testUser.getId(), plannerId)).thenReturn(false);
+            when(subscriptionService.isSubscribed(testUser.getId(), plannerId)).thenReturn(true);
             when(reportService.hasReported(testUser.getId(), plannerId)).thenReturn(false);
         }
 
         @Test
-        @DisplayName("Should record view and increment count for anonymous visitor")
-        void getPublishedPlanner_NewAnonymousView_IncrementsCount() {
+        @DisplayName("Should buffer view and return pre-request count for anonymous visitor")
+        void getPublishedPlanner_WhenNewAnonymousView_BuffersView() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
             mockNewView(plannerId);
@@ -381,14 +382,16 @@ class PublishedPlannerQueryServiceTest {
                     publishedQueryService.getPublishedPlanner(plannerId, null, IP_ADDRESS, USER_AGENT);
 
             // Assert
-            verify(plannerViewRepository).save(any(PlannerView.class));
-            verify(plannerRepository).incrementViewCount(plannerId);
-            assertEquals(11, result.viewCount());
+            // A buffered view has no state form at this tier: it reaches planner_view only when
+            // PlannerViewRecorder.flush() commits, which needs a containerized test.
+            verify(plannerViewRecorder).record(eq(plannerId), any(), any());
+            verify(plannerStatsRepository, never()).incrementViewCountBy(any(), anyInt());
+            assertEquals(10, result.viewCount());
         }
 
         @Test
-        @DisplayName("Should record view and increment count for authenticated visitor")
-        void getPublishedPlanner_NewAuthenticatedView_IncrementsCount() {
+        @DisplayName("Should buffer view and return pre-request count for authenticated visitor")
+        void getPublishedPlanner_WhenNewAuthenticatedView_BuffersView() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
             mockNewView(plannerId);
@@ -399,56 +402,39 @@ class PublishedPlannerQueryServiceTest {
                     publishedQueryService.getPublishedPlanner(plannerId, testUser.getId(), IP_ADDRESS, USER_AGENT);
 
             // Assert
-            verify(plannerViewRepository).save(any(PlannerView.class));
-            verify(plannerRepository).incrementViewCount(plannerId);
-            assertEquals(11, result.viewCount());
-        }
-
-        @Test
-        @DisplayName("Should not increment count for duplicate view same day")
-        void getPublishedPlanner_DuplicateView_NoIncrement() {
-            // Arrange
-            UUID plannerId = UUID.randomUUID();
-            when(plannerRepository.findByIdForUpdate(plannerId))
-                    .thenReturn(Optional.of(createPublishedPlannerWithId(plannerId)));
-            when(plannerViewRepository.existsByPlannerIdAndViewerHashAndViewDate(eq(plannerId), any(), any()))
-                    .thenReturn(true);
-            when(commentRepository.countByPlannerIdAndDeletedAtIsNull(plannerId)).thenReturn(0L);
-
-            // Act
-            PublishedPlannerDetailResponse result =
-                    publishedQueryService.getPublishedPlanner(plannerId, null, IP_ADDRESS, USER_AGENT);
-
-            // Assert
-            verify(plannerViewRepository, never()).save(any());
-            verify(plannerRepository, never()).incrementViewCount(any());
+            // A buffered view has no state form at this tier: it reaches planner_view only when
+            // PlannerViewRecorder.flush() commits, which needs a containerized test.
+            verify(plannerViewRecorder).record(eq(plannerId), any(), any());
+            verify(plannerStatsRepository, never()).incrementViewCountBy(any(), anyInt());
             assertEquals(10, result.viewCount());
+            assertTrue(result.hasUpvoted());
+            assertFalse(result.isBookmarked());
+            assertTrue(result.isSubscribed());
+            assertFalse(result.hasReported());
         }
 
         @Test
         @DisplayName("Should throw PlannerNotFoundException for unpublished planner")
-        void getPublishedPlanner_UnpublishedPlanner_ThrowsException() {
+        void getPublishedPlanner_WhenUnpublishedPlanner_ThrowsException() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
-            Planner unpublished = createTestPlanner();
-            unpublished.setId(plannerId);
-            when(plannerRepository.findByIdForUpdate(plannerId)).thenReturn(Optional.of(unpublished));
+            // findPublishedAggregate filters unpublished rows at the query level
+            when(plannerRepository.findPublishedAggregate(plannerId)).thenReturn(Optional.empty());
 
             // Act & Assert
             assertThrows(PlannerNotFoundException.class,
                     () -> publishedQueryService.getPublishedPlanner(plannerId, null, IP_ADDRESS, USER_AGENT));
 
-            verify(plannerViewRepository, never()).existsByPlannerIdAndViewerHashAndViewDate(any(), any(), any());
-            verify(plannerViewRepository, never()).save(any());
-            verify(plannerRepository, never()).incrementViewCount(any());
+            verify(plannerViewRecorder, never()).record(any(), any(), any());
+            verify(plannerStatsRepository, never()).incrementViewCountBy(any(), anyInt());
         }
 
         @Test
         @DisplayName("Should throw PlannerNotFoundException for non-existent planner")
-        void getPublishedPlanner_PlannerNotFound_ThrowsException() {
+        void getPublishedPlanner_WhenPlannerNotFound_ThrowsException() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
-            when(plannerRepository.findByIdForUpdate(plannerId)).thenReturn(Optional.empty());
+            when(plannerRepository.findPublishedAggregate(plannerId)).thenReturn(Optional.empty());
 
             // Act & Assert
             assertThrows(PlannerNotFoundException.class,
@@ -457,97 +443,92 @@ class PublishedPlannerQueryServiceTest {
 
         @Test
         @DisplayName("Should handle null User-Agent gracefully")
-        void getPublishedPlanner_NullUserAgent_Success() {
+        void getPublishedPlanner_WhenNullUserAgent_Success() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
             mockNewView(plannerId);
 
-            // Act & Assert - should not throw
-            assertDoesNotThrow(() ->
+            // Act
+            PublishedPlannerDetailResponse result = assertDoesNotThrow(() ->
                     publishedQueryService.getPublishedPlanner(plannerId, null, IP_ADDRESS, null));
 
-            verify(plannerViewRepository).save(any(PlannerView.class));
+            // Assert
+            assertEquals(plannerId, result.id());
+            assertEquals(10, result.viewCount());
+            assertNotNull(result.content());
+            assertFalse(result.hasUpvoted());
+            assertFalse(result.isBookmarked());
         }
 
         @Test
         @DisplayName("Should use different viewer hashes for authenticated vs anonymous")
-        void getPublishedPlanner_AuthVsAnon_DifferentHashes() {
+        void getPublishedPlanner_WhenAuthVsAnon_DifferentHashes() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
             mockNewView(plannerId);
             mockUserContext(plannerId);
 
-            ArgumentCaptor<PlannerView> anonCaptor = ArgumentCaptor.forClass(PlannerView.class);
+            // The viewer hash never reaches the response; comparing the two forms through state
+            // would mean reading the recorded planner_view rows in a containerized test.
+            ArgumentCaptor<String> anonHash = ArgumentCaptor.forClass(String.class);
 
             // Act - anonymous first
             publishedQueryService.getPublishedPlanner(plannerId, null, IP_ADDRESS, USER_AGENT);
-            verify(plannerViewRepository).save(anonCaptor.capture());
+            verify(plannerViewRecorder).record(eq(plannerId), anonHash.capture(), any());
 
-            // Reset mock for authenticated call
-            reset(plannerViewRepository);
-            when(plannerViewRepository.existsByPlannerIdAndViewerHashAndViewDate(eq(plannerId), any(), any()))
-                    .thenReturn(false);
-            when(plannerViewRepository.save(any(PlannerView.class)))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
-
-            ArgumentCaptor<PlannerView> authCaptor = ArgumentCaptor.forClass(PlannerView.class);
+            // Reset the recorder for the authenticated call
+            reset(plannerViewRecorder);
+            ArgumentCaptor<String> authHash = ArgumentCaptor.forClass(String.class);
 
             // Act - authenticated
             publishedQueryService.getPublishedPlanner(plannerId, testUser.getId(), IP_ADDRESS, USER_AGENT);
-            verify(plannerViewRepository).save(authCaptor.capture());
+            verify(plannerViewRecorder).record(eq(plannerId), authHash.capture(), any());
 
             // Assert - hashes must differ
-            assertNotEquals(anonCaptor.getValue().getViewerHash(), authCaptor.getValue().getViewerHash());
+            assertNotEquals(anonHash.getValue(), authHash.getValue());
         }
     }
 
     @Nested
-    @DisplayName("getPublishedPlanners with user context Tests")
-    class GetPublishedPlannersWithContextTests {
+    @DisplayName("summary projection")
+    class SummaryProjectionTests {
 
         @Test
-        @DisplayName("Should list published planners without search for anonymous user")
-        void getPublishedPlanners_NoSearchAnonymous_ReturnsPage() {
-            // Arrange
+        void publishedListing_WhenAnonymous_ProjectsEveryCardField() {
             Pageable pageable = PageRequest.of(0, 10);
-            Planner planner = testPlannerBuilder().published(true).build();
-            Page<Planner> plannerPage = new PageImpl<>(List.of(planner), pageable, 1);
+            PlannerCatalog row = catalogRow("Test Planner", false);
+            UUID plannerId = row.getPlannerId();
+            Instant createdAt = Instant.parse("2024-01-02T03:04:05Z");
 
-            when(plannerRepository.findByPublishedTrueAndDeletedAtIsNull(pageable)).thenReturn(plannerPage);
-            when(commentRepository.countByPlannerIdsGrouped(anyList())).thenReturn(List.of());
+            stubCatalogPage(pageOf(pageable, row));
+            when(plannerRepository.findCoreInfoByIds(List.of(plannerId)))
+                    .thenReturn(List.of(new PlannerCoreInfo(plannerId, createdAt, "W_CORP", "test1")));
+            when(plannerStatsRepository.findAllById(List.of(plannerId)))
+                    .thenReturn(List.of(PlannerStats.builder()
+                            .plannerId(plannerId)
+                            .viewCount(42)
+                            .upvotes(7)
+                            .commentCount(3)
+                            .build()));
 
-            // Act
-            Page<PublicPlannerResponse> result =
-                    publishedQueryService.getPublishedPlanners(pageable, null, null, null);
+            Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
+                    new CatalogQuery(false, null, null, null, null), pageable, null);
 
-            // Assert
             assertEquals(1, result.getTotalElements());
-            verify(plannerRepository).findByPublishedTrueAndDeletedAtIsNull(pageable);
-        }
-    }
-
-    @Nested
-    @DisplayName("getRecommendedPlanners with user context Tests")
-    class GetRecommendedPlannersWithContextTests {
-
-        @Test
-        @DisplayName("Should list recommended planners without search for anonymous user")
-        void getRecommendedPlanners_NoSearchAnonymous_ReturnsPage() {
-            // Arrange
-            Pageable pageable = PageRequest.of(0, 10);
-            Planner planner = testPlannerBuilder().published(true).upvotes(20).build();
-            Page<Planner> plannerPage = new PageImpl<>(List.of(planner), pageable, 1);
-
-            when(plannerRepository.findRecommendedPlanners(recommendedThreshold, pageable)).thenReturn(plannerPage);
-            when(commentRepository.countByPlannerIdsGrouped(anyList())).thenReturn(List.of());
-
-            // Act
-            Page<PublicPlannerResponse> result =
-                    publishedQueryService.getRecommendedPlanners(pageable, null, null, null);
-
-            // Assert
-            assertEquals(1, result.getTotalElements());
-            verify(plannerRepository).findRecommendedPlanners(recommendedThreshold, pageable);
+            PublicPlannerResponse card = result.getContent().get(0);
+            assertEquals(plannerId, card.id());
+            assertEquals("Test Planner", card.title());
+            assertEquals("5F", card.category());
+            assertEquals(PlannerType.MIRROR_DUNGEON, card.plannerType());
+            assertEquals(row.getFirstPublishedAt(), card.firstPublishedAt());
+            assertEquals("W_CORP", card.authorUsernameEpithet());
+            assertEquals("test1", card.authorUsernameSuffix());
+            assertEquals(createdAt, card.createdAt());
+            assertEquals(42, card.viewCount());
+            assertEquals(7, card.upvotes());
+            assertEquals(3L, card.commentCount());
+            assertFalse(card.hasUpvoted());
+            assertFalse(card.isBookmarked());
         }
     }
 
@@ -557,23 +538,40 @@ class PublishedPlannerQueryServiceTest {
 
         @Test
         @DisplayName("Should search planners via specification and map for anonymous user")
-        void searchPlanners_AnonymousNoFilters_ReturnsPage() {
+        void searchPlanners_WhenAnonymousNoFilters_ReturnsPage() {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
-            Planner planner = testPlannerBuilder().published(true).build();
-            Page<Planner> plannerPage = new PageImpl<>(List.of(planner), pageable, 1);
-            Specification<Planner> baseSpec = (root, query, cb) -> null;
+            PlannerCatalog row = catalogRow("Test Planner", false);
+            Page<PlannerCatalog> rowPage = new PageImpl<>(List.of(row), pageable, 1);
 
-            when(plannerRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(plannerPage);
-            when(commentRepository.countByPlannerIdsGrouped(anyList())).thenReturn(List.of());
+            stubCatalogPage(rowPage);
 
             // Act
             Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
-                    baseSpec, pageable, null, null, null, null, null, null, null, null);
+                    new CatalogQuery(false, null, null, null, null), pageable, null);
 
             // Assert
             assertEquals(1, result.getTotalElements());
-            verify(plannerRepository).findAll(any(Specification.class), eq(pageable));
+            PublicPlannerResponse card = result.getContent().get(0);
+            assertEquals(row.getPlannerId(), card.id());
+            assertEquals("Test Planner", card.title());
+            assertFalse(card.hasUpvoted());
+            assertFalse(card.isBookmarked());
+        }
+
+        @Test
+        @DisplayName("Should reject a non-numeric entity filter id rather than empty the page")
+        void malformedEntityFilterId_WhenParsed_IsRejectedNotSilentlyDropped() {
+            // Arrange
+            CatalogQuery query = new CatalogQuery(false, null, null, null,
+                    Map.of(ContentEntityType.THEME_PACK, List.of("not-a-number")));
+
+            // Act
+            PlannerValidationException thrown = assertThrows(PlannerValidationException.class,
+                    () -> publishedQueryService.searchPlanners(query, PageRequest.of(0, 10), null));
+
+            // Assert
+            assertEquals("INVALID_FILTER_ID", thrown.getErrorCode());
         }
     }
 }

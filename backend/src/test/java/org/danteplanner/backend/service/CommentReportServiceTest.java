@@ -1,6 +1,9 @@
 package org.danteplanner.backend.service;
 
 import org.danteplanner.backend.moderation.service.CommentReportService;
+import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator;
+import org.danteplanner.backend.comment.validation.CommentStateValidator;
+import org.mockito.ArgumentCaptor;
 import org.danteplanner.backend.moderation.dto.CommentReportRequest;
 import org.danteplanner.backend.moderation.dto.CommentReportResponse;
 import org.danteplanner.backend.comment.entity.PlannerComment;
@@ -9,7 +12,9 @@ import org.danteplanner.backend.comment.exception.CommentForbiddenException;
 import org.danteplanner.backend.comment.exception.CommentNotFoundException;
 import org.danteplanner.backend.moderation.exception.CommentReportAlreadyExistsException;
 import org.danteplanner.backend.moderation.repository.PlannerCommentReportRepository;
-import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
+import org.danteplanner.backend.comment.service.CommentQueryService;
+import org.danteplanner.backend.planner.service.PlannerAccessGuard;
+import org.danteplanner.backend.user.exception.UserBannedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -18,7 +23,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,7 +40,10 @@ class CommentReportServiceTest {
     private PlannerCommentReportRepository reportRepository;
 
     @Mock
-    private PlannerCommentRepository commentRepository;
+    private CommentQueryService commentQueryService;
+
+    @Mock
+    private PlannerAccessGuard accessGuard;
 
     private CommentReportService service;
 
@@ -48,7 +55,8 @@ class CommentReportServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new CommentReportService(reportRepository, commentRepository);
+        service = new CommentReportService(reportRepository, commentQueryService, accessGuard,
+                new CommentStateValidator(), new ReportUniquenessValidator());
     }
 
     @Nested
@@ -68,10 +76,10 @@ class CommentReportServiceTest {
         @DisplayName("Should create report when comment exists and not already reported")
         void createReport_WhenNotReported_CreatesReport() {
             // Arrange
-            when(commentRepository.findByPublicId(COMMENT_PUBLIC_ID)).thenReturn(Optional.of(comment));
+            when(commentQueryService.requireByPublicId(COMMENT_PUBLIC_ID)).thenReturn(comment);
             when(reportRepository.existsByReporterIdAndCommentId(REPORTER_ID, COMMENT_INTERNAL_ID))
                     .thenReturn(false);
-            when(reportRepository.save(any(PlannerCommentReport.class)))
+            when(reportRepository.insert(any(PlannerCommentReport.class)))
                     .thenAnswer(inv -> {
                         PlannerCommentReport r = inv.getArgument(0);
                         r.setCreatedAt(java.time.Instant.now());
@@ -85,14 +93,33 @@ class CommentReportServiceTest {
 
             // Assert
             assertNotNull(response.createdAt());
-            verify(reportRepository).save(any(PlannerCommentReport.class));
+
+            ArgumentCaptor<PlannerCommentReport> captor =
+                    ArgumentCaptor.forClass(PlannerCommentReport.class);
+            verify(reportRepository).insert(captor.capture());
+            assertEquals(REPORTER_ID, captor.getValue().getReporterId());
+            assertEquals(REASON, captor.getValue().getReason());
+        }
+
+        @Test
+        void createReport_WhenReporterIsBanned_ThrowsAndWritesNothing() {
+            doThrow(new UserBannedException(REPORTER_ID, java.time.Instant.now()))
+                    .when(accessGuard).checkNotBanned(REPORTER_ID);
+            CommentReportRequest request = new CommentReportRequest(REASON);
+
+            assertThrows(UserBannedException.class,
+                    () -> service.createReport(COMMENT_PUBLIC_ID, REPORTER_ID, request));
+
+            verify(reportRepository, never()).insert(any(PlannerCommentReport.class));
+            verifyNoInteractions(commentQueryService);
         }
 
         @Test
         @DisplayName("Should throw CommentNotFoundException when comment not found")
         void createReport_WhenCommentNotFound_ThrowsException() {
             // Arrange
-            when(commentRepository.findByPublicId(COMMENT_PUBLIC_ID)).thenReturn(Optional.empty());
+            when(commentQueryService.requireByPublicId(COMMENT_PUBLIC_ID))
+                    .thenThrow(new CommentNotFoundException(COMMENT_PUBLIC_ID));
             CommentReportRequest request = new CommentReportRequest(REASON);
 
             // Act & Assert
@@ -100,14 +127,14 @@ class CommentReportServiceTest {
                     () -> service.createReport(COMMENT_PUBLIC_ID, REPORTER_ID, request));
 
             verify(reportRepository, never()).existsByReporterIdAndCommentId(any(), any());
-            verify(reportRepository, never()).save(any());
+            verify(reportRepository, never()).insert(any());
         }
 
         @Test
         @DisplayName("Should throw CommentReportAlreadyExistsException when already reported")
         void createReport_WhenAlreadyReported_ThrowsException() {
             // Arrange
-            when(commentRepository.findByPublicId(COMMENT_PUBLIC_ID)).thenReturn(Optional.of(comment));
+            when(commentQueryService.requireByPublicId(COMMENT_PUBLIC_ID)).thenReturn(comment);
             when(reportRepository.existsByReporterIdAndCommentId(REPORTER_ID, COMMENT_INTERNAL_ID))
                     .thenReturn(true);
             CommentReportRequest request = new CommentReportRequest(REASON);
@@ -120,7 +147,7 @@ class CommentReportServiceTest {
 
             assertEquals(COMMENT_INTERNAL_ID, exception.getCommentId());
             assertEquals(REPORTER_ID, exception.getUserId());
-            verify(reportRepository, never()).save(any());
+            verify(reportRepository, never()).insert(any());
         }
 
         @Test
@@ -128,7 +155,7 @@ class CommentReportServiceTest {
         void createReport_WhenCommentDeleted_ThrowsException() {
             // Arrange
             comment.softDelete();
-            when(commentRepository.findByPublicId(COMMENT_PUBLIC_ID)).thenReturn(Optional.of(comment));
+            when(commentQueryService.requireByPublicId(COMMENT_PUBLIC_ID)).thenReturn(comment);
             CommentReportRequest request = new CommentReportRequest(REASON);
 
             // Act & Assert
@@ -136,14 +163,15 @@ class CommentReportServiceTest {
                     () -> service.createReport(COMMENT_PUBLIC_ID, REPORTER_ID, request));
 
             verify(reportRepository, never()).existsByReporterIdAndCommentId(any(), any());
-            verify(reportRepository, never()).save(any());
+            verify(reportRepository, never()).insert(any());
         }
 
         @Test
         @DisplayName("Should validate comment before checking existing report")
         void createReport_WhenCommentMissing_ValidatesCommentFirst() {
             // Arrange
-            when(commentRepository.findByPublicId(COMMENT_PUBLIC_ID)).thenReturn(Optional.empty());
+            when(commentQueryService.requireByPublicId(COMMENT_PUBLIC_ID))
+                    .thenThrow(new CommentNotFoundException(COMMENT_PUBLIC_ID));
             CommentReportRequest request = new CommentReportRequest(REASON);
 
             // Act & Assert
@@ -151,7 +179,7 @@ class CommentReportServiceTest {
                     () -> service.createReport(COMMENT_PUBLIC_ID, REPORTER_ID, request));
 
             // Verify order: comment lookup first, then never reaches report check
-            verify(commentRepository).findByPublicId(COMMENT_PUBLIC_ID);
+            verify(commentQueryService).requireByPublicId(COMMENT_PUBLIC_ID);
             verify(reportRepository, never()).existsByReporterIdAndCommentId(any(), any());
         }
     }

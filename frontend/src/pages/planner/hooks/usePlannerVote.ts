@@ -10,10 +10,14 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { ApiClient, ConflictError } from '@/lib/api'
+import { ApiClient } from '@/lib/api'
+import { ConflictError } from '@/lib/apiErrors'
+import { showError, showErrorMessage } from '@/lib/errorPresentation'
+import { validateData } from '@/lib/validation'
 import { VoteResponseSchema } from '../schemas/PlannerListSchemas'
-import { gesellschaftQueryKeys } from './useMDGesellschaftData'
-import { publishedPlannerQueryKeys } from './usePublishedPlannerQuery'
+import { useInvalidatePlannerLists } from './useInvalidatePlannerLists'
+import { publishedPlannerQueryKeys, isPlannerRemoved } from './usePublishedPlannerQuery'
+import type { PublishedPlannerQueryState } from './usePublishedPlannerQuery'
 
 import type { VoteResponse } from '../types/PlannerListTypes'
 
@@ -69,45 +73,42 @@ export interface VotePlannerInput {
  */
 export function usePlannerVote() {
   const queryClient = useQueryClient()
+  const invalidatePlannerLists = useInvalidatePlannerLists()
 
   return useMutation({
     mutationFn: async ({ plannerId, voteType }: VotePlannerInput): Promise<VoteResponse> => {
       const data = await ApiClient.post(`/api/planner/md/${plannerId}/upvote`, { voteType })
-      const result = VoteResponseSchema.safeParse(data)
-
-      if (!result.success) {
-        console.error('Vote response validation failed:', result.error)
-        throw new Error('Invalid vote response from server')
-      }
-
-      return result.data
+      return validateData(data, VoteResponseSchema, 'planner vote')
     },
     onSuccess: (response, { plannerId }) => {
       // Optimistically update cache with response data
-      queryClient.setQueryData(publishedPlannerQueryKeys.detail(plannerId), (old: any) => {
-        if (!old?.apiData) return old
-        return {
-          ...old,
-          apiData: {
-            ...old.apiData,
-            upvotes: response.upvoteCount,
-            hasUpvoted: response.hasUpvoted,
-          },
-        }
-      })
+      queryClient.setQueryData(
+        publishedPlannerQueryKeys.detail(plannerId),
+        (old: PublishedPlannerQueryState | undefined) => {
+          if (!old || isPlannerRemoved(old)) return old
+          return {
+            ...old,
+            apiData: {
+              ...old.apiData,
+              upvotes: response.upvoteCount,
+              hasUpvoted: response.hasUpvoted,
+            },
+          }
+        },
+      )
 
       // Also invalidate list queries to refresh cards
-      void queryClient.invalidateQueries({ queryKey: gesellschaftQueryKeys.all })
+      invalidatePlannerLists()
     },
+    // The server answers a duplicate vote with a code it also uses for comment
+    // upvotes, so the copy naming the plan can only come from here.
+    meta: { suppressErrorToast: true },
     onError: (error) => {
       if (error instanceof ConflictError) {
-        // 409 Conflict: User already voted (votes are immutable)
-        console.error('Vote already exists - votes are permanent and cannot be changed')
-        // TODO: Show toast notification when toast utility is implemented
-        // toast.error('You have already voted. Votes are permanent and cannot be changed.')
-      } else {
-        console.error('Vote failed:', error)
+        showErrorMessage('planner:toast.alreadyVoted')
+        return
       }
+      showError(error)
     },
   })
 }

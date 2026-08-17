@@ -1,44 +1,54 @@
 package org.danteplanner.backend.shared.exception;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.lettuce.core.RedisException;
 import io.sentry.Sentry;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.connector.ClientAbortException;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.danteplanner.backend.planner.exception.PlannerConflictException;
-import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
-import org.danteplanner.backend.planner.exception.PlannerLimitExceededException;
-import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
-import org.danteplanner.backend.planner.exception.VoteAlreadyExistsException;
-import org.danteplanner.backend.comment.exception.CommentForbiddenException;
+import org.danteplanner.backend.planner.validation.ErrorCode;
 import org.danteplanner.backend.user.exception.AccountDeletedException;
 import org.danteplanner.backend.user.exception.UserBannedException;
-import org.danteplanner.backend.user.exception.UserNotFoundException;
 import org.danteplanner.backend.user.exception.UserTimedOutException;
 import org.danteplanner.backend.user.exception.UsernameGenerationException;
-import org.danteplanner.backend.comment.exception.CommentNotFoundException;
 import org.danteplanner.backend.auth.exception.OAuthException;
 import org.danteplanner.backend.auth.exception.SessionRevokedException;
 import org.danteplanner.backend.auth.exception.TokenRevokedException;
-import org.danteplanner.backend.moderation.exception.CommentReportAlreadyExistsException;
-import org.danteplanner.backend.moderation.exception.ReportAlreadyExistsException;
-import org.danteplanner.backend.shared.util.CookieConstants;
+import org.danteplanner.backend.shared.ratelimit.RateLimitExceededException;
+import org.danteplanner.backend.shared.sse.SseCapacityExceededException;
+import org.danteplanner.backend.shared.sse.SseConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
+import org.springframework.core.NestedRuntimeException;
+import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RestControllerAdvice
 @Slf4j
@@ -46,55 +56,36 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     private final CookieUtils cookieUtils;
+    private final ObjectMapper objectMapper;
 
     public record ErrorResponse(String code, String message) {}
 
     public record ConflictErrorResponse(String code, String message, Long serverVersion) {}
 
+    private static HttpStatus statusOf(ErrorKind kind) {
+        return switch (kind) {
+            case NOT_FOUND -> HttpStatus.NOT_FOUND;
+            case FORBIDDEN -> HttpStatus.FORBIDDEN;
+            case CONFLICT -> HttpStatus.CONFLICT;
+            case INVALID_REQUEST -> HttpStatus.BAD_REQUEST;
+        };
+    }
+
     /**
-     * Log a warning and build an error response for the simple warn -> status -> body handler families.
+     * Answers every business error whose response is fully described by its kind, code, and
+     * message. A subclass needing more of the response than that keeps its own handler below,
+     * which Spring prefers over this one by exception-type specificity.
      *
-     * @param status    the HTTP status to return
-     * @param logFormat the SLF4J warn format (single {} placeholder for the message)
-     * @param code      the client-facing error code
-     * @param message   the error message, used for both the log and the response body
-     * @return the error response entity
+     * @param ex the business error
+     * @return the client-facing error response
      */
-    private ResponseEntity<ErrorResponse> warnAndRespond(HttpStatus status, String logFormat, String code, String message) {
-        log.warn(logFormat, message);
-        return ResponseEntity.status(status)
-            .body(new ErrorResponse(code, message));
+    @ExceptionHandler(DomainException.class)
+    public ResponseEntity<ErrorResponse> handleDomain(DomainException ex) {
+        log.warn("{}: {}", ex.getErrorCode(), ex.getMessage());
+        return ResponseEntity.status(statusOf(ex.getKind()))
+            .body(new ErrorResponse(ex.getErrorCode(), ex.getMessage()));
     }
 
-    @ExceptionHandler(PlannerNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handlePlannerNotFound(PlannerNotFoundException ex) {
-        return warnAndRespond(HttpStatus.NOT_FOUND, "Planner not found: {}", "PLANNER_NOT_FOUND", ex.getMessage());
-    }
-
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleEntityNotFound(EntityNotFoundException ex) {
-        return warnAndRespond(HttpStatus.NOT_FOUND, "Entity not found: {}", "NOT_FOUND", ex.getMessage());
-    }
-
-    @ExceptionHandler(PlannerForbiddenException.class)
-    public ResponseEntity<ErrorResponse> handlePlannerForbidden(PlannerForbiddenException ex) {
-        return warnAndRespond(HttpStatus.FORBIDDEN, "Planner access forbidden: {}", "PLANNER_FORBIDDEN", ex.getMessage());
-    }
-
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException ex) {
-        return warnAndRespond(HttpStatus.NOT_FOUND, "User not found: {}", "USER_NOT_FOUND", ex.getMessage());
-    }
-
-    @ExceptionHandler(CommentNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleCommentNotFound(CommentNotFoundException ex) {
-        return warnAndRespond(HttpStatus.NOT_FOUND, "Comment not found: {}", "COMMENT_NOT_FOUND", ex.getMessage());
-    }
-
-    @ExceptionHandler(CommentForbiddenException.class)
-    public ResponseEntity<ErrorResponse> handleCommentForbidden(CommentForbiddenException ex) {
-        return warnAndRespond(HttpStatus.FORBIDDEN, "Comment access forbidden: {}", "COMMENT_FORBIDDEN", ex.getMessage());
-    }
 
     @ExceptionHandler(TokenRevokedException.class)
     public ResponseEntity<ErrorResponse> handleTokenRevoked(TokenRevokedException ex) {
@@ -108,8 +99,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleSessionRevoked(SessionRevokedException ex, HttpServletResponse response) {
         Sentry.captureException(ex);
         log.warn("Session revoked: {}", ex.getMessage());
-        cookieUtils.clearCookie(response, CookieConstants.ACCESS_TOKEN);
-        cookieUtils.clearCookie(response, CookieConstants.REFRESH_TOKEN);
+        cookieUtils.clearAuthCookies(response);
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
             .body(new ErrorResponse("UNAUTHORIZED", "Authentication required"));
     }
@@ -136,11 +126,17 @@ public class GlobalExceptionHandler {
             .body(new ErrorResponse("USER_BANNED", "Your account has been suspended"));
     }
 
+    /**
+     * A bare {@link IllegalArgumentException} states an invariant the caller cannot influence, so
+     * reaching here is a bug. Its message may name internals and never reaches the client; a
+     * rejection the caller can act on throws {@link InvalidRequestException} instead.
+     */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
-        log.warn("Illegal argument: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-            .body(new ErrorResponse("FORBIDDEN", ex.getMessage()));
+        log.error("Illegal argument reached the handler", ex);
+        Sentry.captureException(ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(new ErrorResponse("INTERNAL_ERROR", "An unexpected error occurred"));
     }
 
     @ExceptionHandler(InvalidTokenException.class)
@@ -169,12 +165,33 @@ public class GlobalExceptionHandler {
             .body(new ErrorResponse("USERNAME_GENERATION_FAILED", "Unable to create account. Please try again."));
     }
 
+    /**
+     * Rate limiting is an expected user error (no Sentry). The response is written directly to
+     * bypass content negotiation: SSE endpoints declare {@code produces=text/event-stream}, for
+     * which no converter can serialize the JSON body — returning a {@code ResponseEntity} there
+     * throws {@code HttpMediaTypeNotAcceptableException} and the 429 escapes to Tomcat as a 500.
+     */
     @ExceptionHandler(RateLimitExceededException.class)
-    public ResponseEntity<ErrorResponse> handleRateLimitExceeded(RateLimitExceededException ex) {
-        Sentry.captureException(ex);
+    public void handleRateLimitExceeded(RateLimitExceededException ex, HttpServletResponse response) throws IOException {
         log.warn("Rate limit exceeded: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
-            .body(new ErrorResponse("RATE_LIMIT_EXCEEDED", ex.getMessage()));
+        response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.getWriter().write(objectMapper.writeValueAsString(new ErrorResponse("RATE_LIMIT_EXCEEDED", ex.getMessage())));
+    }
+
+    /**
+     * A full planner SSE registry is an expected user error (no Sentry). The response is written
+     * directly because the subscription endpoint declares {@code produces=text/event-stream}, for
+     * which no converter can serialize the JSON body.
+     */
+    @ExceptionHandler(SseCapacityExceededException.class)
+    public void handleSseCapacityExceeded(SseCapacityExceededException ex, HttpServletResponse response) throws IOException {
+        log.warn("SSE capacity exceeded: {}", ex.getMessage());
+        response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setHeader(HttpHeaders.RETRY_AFTER, String.valueOf(SseConstants.CAPACITY_RETRY_AFTER_SECONDS));
+        response.getWriter().write(objectMapper.writeValueAsString(
+            new ErrorResponse("SSE_CAPACITY_EXCEEDED", "Too many active connections for this planner")));
     }
 
     @ExceptionHandler(PlannerConflictException.class)
@@ -184,26 +201,11 @@ public class GlobalExceptionHandler {
             .body(new ConflictErrorResponse("SYNC_CONFLICT", ex.getMessage(), ex.getActualVersion()));
     }
 
-    @ExceptionHandler(PlannerLimitExceededException.class)
-    public ResponseEntity<ErrorResponse> handlePlannerLimitExceeded(PlannerLimitExceededException ex) {
-        log.warn("Planner limit exceeded: {}", ex.getMessage());
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<ConflictErrorResponse> handleOptimisticLocking(ObjectOptimisticLockingFailureException ex) {
+        log.warn("Concurrent write conflict: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT)
-            .body(new ErrorResponse("PLANNER_LIMIT_EXCEEDED", ex.getMessage()));
-    }
-
-    @ExceptionHandler(VoteAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponse> handleVoteAlreadyExists(VoteAlreadyExistsException ex) {
-        return warnAndRespond(HttpStatus.CONFLICT, "Duplicate vote attempt: {}", "VOTE_ALREADY_EXISTS", ex.getMessage());
-    }
-
-    @ExceptionHandler(ReportAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponse> handleReportAlreadyExists(ReportAlreadyExistsException ex) {
-        return warnAndRespond(HttpStatus.CONFLICT, "Duplicate report attempt: {}", "REPORT_ALREADY_EXISTS", ex.getMessage());
-    }
-
-    @ExceptionHandler(CommentReportAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponse> handleCommentReportAlreadyExists(CommentReportAlreadyExistsException ex) {
-        return warnAndRespond(HttpStatus.CONFLICT, "Duplicate comment report attempt: {}", "COMMENT_REPORT_ALREADY_EXISTS", ex.getMessage());
+            .body(new ConflictErrorResponse("CONCURRENT_WRITE", "The resource was modified concurrently", null));
     }
 
     /**
@@ -216,31 +218,35 @@ public class GlobalExceptionHandler {
      * are structural validation errors that reveal API schema details and are mapped to generic
      * VALIDATION_ERROR to prevent information disclosure and schema probing attacks.</p>
      */
-    private static final java.util.Set<String> USER_FACING_ERROR_CODES = java.util.Set.of(
-            "EMPTY_CONTENT",      // User can provide content
-            "SIZE_EXCEEDED",      // User can reduce content size
-            "MALFORMED_JSON"      // User can fix JSON syntax
-    );
+    private static final Set<String> USER_FACING_ERROR_CODES = Stream.of(
+            ErrorCode.EMPTY_CONTENT,
+            ErrorCode.SIZE_EXCEEDED,
+            ErrorCode.MALFORMED_JSON)
+            .map(ErrorCode::getCode)
+            .collect(Collectors.toUnmodifiableSet());
 
     @ExceptionHandler(PlannerValidationException.class)
     public ResponseEntity<ErrorResponse> handlePlannerValidation(PlannerValidationException ex) {
         if (USER_FACING_ERROR_CODES.contains(ex.getErrorCode())) {
-            log.warn("Planner validation error [{}]: {}", ex.getErrorCode(), ex.getMessage());
+            logValidationError(ex.getErrorCode(), ex.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse(ex.getErrorCode(), ex.getMessage()));
         }
 
-        // Multi-error: log each sub-error individually for CloudWatch searchability
-        if (!ex.getSubErrors().isEmpty()) {
-            ex.getSubErrors().forEach(e ->
-                log.warn("Planner validation error [{}]: {}", e.code(), e.message()));
+        // Each sub-error is logged on its own line so CloudWatch can search for one code.
+        if (ex.getSubErrors().isEmpty()) {
+            logValidationError(ex.getErrorCode(), ex.getMessage());
         } else {
-            log.warn("Planner validation error [{}]: {}", ex.getErrorCode(), ex.getMessage());
+            ex.getSubErrors().forEach(e -> logValidationError(e.code(), e.message()));
         }
 
         Sentry.captureException(ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .body(new ErrorResponse("VALIDATION_ERROR", "Invalid planner content structure"));
+    }
+
+    private static void logValidationError(String code, String message) {
+        log.warn("Planner validation error [{}]: {}", code, message);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
@@ -277,56 +283,34 @@ public class GlobalExceptionHandler {
     /**
      * Handle database constraint violations (PRIMARY KEY, UNIQUE, FOREIGN KEY, NOT NULL).
      *
-     * <p>UUID collisions from race conditions are expected and return 409 Conflict.
-     * Other constraint violations indicate bugs and are sent to Sentry.</p>
+     * <p>{@link ConstraintViolationClassifier} decides the outcome from typed driver signals and the
+     * {@link KnownConstraint} table; this method only renders it. Expected races (a UUID collision, a
+     * repeated user action) return 409 without an alert; anything else is a defect and reaches
+     * Sentry.</p>
      */
-    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(
-            org.springframework.dao.DataIntegrityViolationException ex) {
+            DataIntegrityViolationException ex) {
 
-        String message = ex.getMessage() != null ? ex.getMessage().toLowerCase() : "";
+        ConstraintViolationOutcome outcome = ConstraintViolationClassifier.classify(ex);
 
-        // Detect PRIMARY KEY or UNIQUE constraint violations
-        if (message.contains("duplicate") ||
-            message.contains("unique") ||
-            message.contains("primary key")) {
-
-            // UUID collision on planners table (expected race condition)
-            if (message.contains("planners") && (message.contains("primary") || message.contains("id"))) {
-                log.warn("UUID collision detected (race condition): {}", ex.getMessage());
-                return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ErrorResponse(
-                        "UUID_COLLISION",
-                        "Plan ID already exists. Please retry with a new ID."
-                    ));
-            }
-
-            // Duplicate vote/bookmark/report (expected user behavior, but should be caught earlier)
-            if (message.contains("planner_votes") ||
-                message.contains("planner_bookmarks") ||
-                message.contains("planner_reports") ||
-                message.contains("comment_reports")) {
-                log.warn("Duplicate action bypassed application check: {}", ex.getMessage());
-                return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ErrorResponse("DUPLICATE_ACTION", "Action already performed"));
-            }
-
-            // Other unique constraint violations (unexpected)
-            log.warn("Unexpected unique constraint violation: {}", ex.getMessage());
-            Sentry.captureException(ex);
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(new ErrorResponse("CONFLICT", "Resource conflict"));
+        switch (outcome) {
+            case UUID_COLLISION -> log.warn("UUID collision detected (race condition): {}", ex.getMessage());
+            case DUPLICATE_ACTION -> log.warn("Duplicate action bypassed application check: {}", ex.getMessage());
+            case UNEXPECTED_CONFLICT -> log.warn("Unexpected unique constraint violation: {}", ex.getMessage());
+            case INVALID_DATA -> log.error("Database constraint violation", ex);
         }
 
-        // Foreign key or NOT NULL violations (indicate bugs)
-        Sentry.captureException(ex);
-        log.error("Database constraint violation", ex);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-            .body(new ErrorResponse("INVALID_REQUEST", "Invalid data"));
+        if (outcome.reportToSentry()) {
+            Sentry.captureException(ex);
+        }
+
+        return ResponseEntity.status(outcome.status())
+            .body(new ErrorResponse(outcome.code(), outcome.clientMessage()));
     }
 
-    @ExceptionHandler(org.springframework.dao.CannotAcquireLockException.class)
-    public ResponseEntity<ErrorResponse> handleCannotAcquireLock(org.springframework.dao.CannotAcquireLockException ex) {
+    @ExceptionHandler(CannotAcquireLockException.class)
+    public ResponseEntity<ErrorResponse> handleCannotAcquireLock(CannotAcquireLockException ex) {
         log.warn("Database deadlock detected: {}", ex.getMessage());
         // Return 503 Service Unavailable with retry-after hint
         // Client should retry the request (view recording is idempotent)
@@ -357,11 +341,11 @@ public class GlobalExceptionHandler {
      * direct backend access); external clients always see BACKEND_UNAVAILABLE.</p>
      */
     @ExceptionHandler({
-            org.springframework.dao.DataAccessResourceFailureException.class,
-            org.springframework.transaction.CannotCreateTransactionException.class
+            DataAccessResourceFailureException.class,
+            CannotCreateTransactionException.class
     })
     public ResponseEntity<ErrorResponse> handleDatabaseUnavailable(
-            org.springframework.core.NestedRuntimeException ex) {
+            NestedRuntimeException ex) {
         log.warn("Database unavailable (transient): {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
             .header("Retry-After", "10")
@@ -379,9 +363,9 @@ public class GlobalExceptionHandler {
      * self-healing — deliberately NOT sent to Sentry for the same reason as the DB handler: it is
      * expected during a Redis outage and would otherwise alert-storm.</p>
      */
-    @ExceptionHandler(org.springframework.data.redis.RedisConnectionFailureException.class)
+    @ExceptionHandler(RedisConnectionFailureException.class)
     public ResponseEntity<ErrorResponse> handleRedisUnavailable(
-            org.springframework.data.redis.RedisConnectionFailureException ex) {
+            RedisConnectionFailureException ex) {
         log.warn("Redis unavailable during authentication (transient): {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
             .header("Retry-After", "10")
@@ -395,9 +379,10 @@ public class GlobalExceptionHandler {
      * <p>The rate limiter uses a RAW Lettuce client (only {@code RedisConnectionConfig} does — bucket4j's
      * {@code LettuceBasedProxyManager} is handed a raw {@code RedisClient.connect(...)}), so a rate-limit
      * Redis outage does NOT surface as Spring Data's {@code RedisConnectionFailureException}. It rethrows
-     * the raw {@code io.lettuce.core.RedisException} (RedisConnectionException / RedisCommandTimeoutException /
-     * RedisSystemException) unwrapped. Mapping the common supertype covers every cut variant. Transient and
-     * self-healing — the client reconnects when Redis returns.</p>
+     * the raw {@code RedisException} (RedisConnectionException / RedisCommandTimeoutException /
+     * RedisSystemException) unwrapped — or bucket4j's own {@code TimeoutException} when its request
+     * timeout fires before Lettuce's equal command timeout. Mapping both covers every cut variant.
+     * Transient and self-healing — the client reconnects when Redis returns.</p>
      *
      * <p>Returning 503 (not letting it fall to the catch-all 500) honours the edge contract: nginx has
      * {@code proxy_intercept_errors on}, so it rewrites any backend 5xx to {@code BACKEND_UNAVAILABLE}.
@@ -406,8 +391,8 @@ public class GlobalExceptionHandler {
      * The {@code RATE_LIMIT_TEMPORARILY_UNAVAILABLE} code is internal-only; external clients see
      * BACKEND_UNAVAILABLE.</p>
      */
-    @ExceptionHandler(io.lettuce.core.RedisException.class)
-    public ResponseEntity<ErrorResponse> handleRateLimitRedisUnavailable(io.lettuce.core.RedisException ex) {
+    @ExceptionHandler({RedisException.class, io.github.bucket4j.TimeoutException.class})
+    public ResponseEntity<ErrorResponse> handleRateLimitRedisUnavailable(RuntimeException ex) {
         log.warn("Rate-limit Redis unavailable (transient): {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
             .header("Retry-After", "10")
@@ -430,26 +415,44 @@ public class GlobalExceptionHandler {
      *   <li>Explicit connection close from client</li>
      * </ul>
      * </p>
+     *
+     * <p>Any other IOException is a server failure and answers 500 — unless the response is
+     * already committed, where a null return marks the request handled because no status or body
+     * can still be written.</p>
      */
     @ExceptionHandler(IOException.class)
-    public void handleIOException(IOException ex) {
-        String message = ex.getMessage() != null ? ex.getMessage().toLowerCase() : "";
-        String className = ex.getClass().getName();
-
-        // SSE client disconnection (broken pipe, connection reset)
-        // Also catches Tomcat's ClientAbortException which extends IOException
-        if (message.contains("broken pipe") ||
-            message.contains("connection reset") ||
-            message.contains("connection abort") ||
-            message.contains("stream closed") ||
-            className.contains("ClientAbortException")) {
-            log.debug("SSE client disconnected ({}): {}", className, ex.getMessage());
-            return;
+    public ResponseEntity<ErrorResponse> handleIOException(IOException ex, HttpServletResponse response) {
+        if (ex instanceof ClientAbortException || carriesDisconnectStrerror(ex)) {
+            log.debug("SSE client disconnected ({}): {}", ex.getClass().getName(), ex.getMessage());
+            return null;
         }
 
         // Other IOExceptions are unexpected and should be sent to Sentry
         Sentry.captureException(ex);
         log.error("Unexpected IOException", ex);
+
+        if (response.isCommitted()) {
+            return null;
+        }
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(new ErrorResponse("INTERNAL_ERROR", "An unexpected error occurred"));
+    }
+
+    /**
+     * Socket teardown reaches the JVM as a plain {@link IOException} carrying the OS strerror text
+     * and nothing else — no subclass, no code — so these phrases are the only available signal.
+     * {@code Locale.ROOT} keeps the default locale out of the decision.
+     */
+    private static final List<String> CLIENT_DISCONNECT_STRERRORS = List.of(
+            "broken pipe",
+            "connection reset",
+            "connection abort",
+            "stream closed");
+
+    private static boolean carriesDisconnectStrerror(IOException ex) {
+        String message = ex.getMessage() != null ? ex.getMessage().toLowerCase(Locale.ROOT) : "";
+        return CLIENT_DISCONNECT_STRERRORS.stream().anyMatch(message::contains);
     }
 
     /**
@@ -498,17 +501,5 @@ public class GlobalExceptionHandler {
         log.error("Unexpected error", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(new ErrorResponse("INTERNAL_ERROR", "An unexpected error occurred"));
-    }
-
-    private static final int MAX_LOG_CONTENT_LENGTH = 1000;
-
-    private static String truncate(String content) {
-        if (content == null) {
-            return "<null>";
-        }
-        if (content.length() <= MAX_LOG_CONTENT_LENGTH) {
-            return content;
-        }
-        return content.substring(0, MAX_LOG_CONTENT_LENGTH) + "...(truncated)";
     }
 }

@@ -1,7 +1,7 @@
 import { renderHook, act } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 import { useTrackerState } from '../useTrackerState'
-import { DEFAULT_SKILL_EA, SINNERS } from '@/shared/gameData'
+import { DEFAULT_SKILL_EA, MAX_LEVEL, SINNERS } from '@/shared/gameData'
 
 // Default test props - hook requires initialEquipment and initialDeployment
 const defaultInitialEquipment = {}
@@ -92,7 +92,7 @@ describe('useTrackerState', () => {
         result.current.updateCurrentSkillCount('1', 0, 5)
       })
 
-      expect(result.current.state.currentSkillCounts['1'][0]).toBe(5)
+      expect(result.current.state.currentSkillCounts['1']?.[0]).toBe(5)
     })
 
     it('preserves other skill counts when updating one', () => {
@@ -104,8 +104,8 @@ describe('useTrackerState', () => {
         result.current.updateCurrentSkillCount('1', 0, 5)
       })
 
-      expect(result.current.state.currentSkillCounts['1'][1]).toBe(DEFAULT_SKILL_EA[1])
-      expect(result.current.state.currentSkillCounts['1'][2]).toBe(DEFAULT_SKILL_EA[2])
+      expect(result.current.state.currentSkillCounts['1']?.[1]).toBe(DEFAULT_SKILL_EA[1])
+      expect(result.current.state.currentSkillCounts['1']?.[2]).toBe(DEFAULT_SKILL_EA[2])
     })
 
     it('updates skill counts for different sinners independently', () => {
@@ -118,8 +118,8 @@ describe('useTrackerState', () => {
         result.current.updateCurrentSkillCount('2', 1, 4)
       })
 
-      expect(result.current.state.currentSkillCounts['1'][0]).toBe(5)
-      expect(result.current.state.currentSkillCounts['2'][1]).toBe(4)
+      expect(result.current.state.currentSkillCounts['1']?.[0]).toBe(5)
+      expect(result.current.state.currentSkillCounts['2']?.[1]).toBe(4)
     })
 
     it('allows skill count to be set to 0', () => {
@@ -131,7 +131,7 @@ describe('useTrackerState', () => {
         result.current.updateCurrentSkillCount('1', 0, 0)
       })
 
-      expect(result.current.state.currentSkillCounts['1'][0]).toBe(0)
+      expect(result.current.state.currentSkillCounts['1']?.[0]).toBe(0)
     })
   })
 
@@ -222,7 +222,9 @@ describe('useTrackerState', () => {
 
   describe('Reset State', () => {
     it('resets all state to defaults', () => {
-      const initialEquipment = { '1': { identityId: 'test', ego: {} } }
+      const initialEquipment = {
+        '1': { identity: { id: 'test', uptie: 4 as const, level: MAX_LEVEL }, egos: {} },
+      }
       const initialDeployment = [0, 1, 2]
       const { result } = renderHook(() => useTrackerState(initialEquipment, initialDeployment))
 
@@ -240,7 +242,7 @@ describe('useTrackerState', () => {
 
       // Verify reset
       expect(result.current.state.deploymentOrder).toEqual([0, 1, 2])
-      expect(result.current.state.currentSkillCounts['1'][0]).toBe(DEFAULT_SKILL_EA[0])
+      expect(result.current.state.currentSkillCounts['1']?.[0]).toBe(DEFAULT_SKILL_EA[0])
       expect(result.current.state.doneMarks).toEqual({})
     })
   })
@@ -272,7 +274,7 @@ describe('useTrackerState', () => {
       })
 
       expect(result.current.state.deploymentOrder).toEqual([0])
-      expect(result.current.state.currentSkillCounts['2'][1]).toBe(4)
+      expect(result.current.state.currentSkillCounts['2']?.[1]).toBe(4)
       expect(result.current.state.doneMarks[2]?.has('themePack3')).toBe(true)
     })
   })

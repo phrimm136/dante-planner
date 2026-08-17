@@ -7,6 +7,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook } from '@testing-library/react'
+import { ConflictError } from '@/lib/apiErrors'
 import type {
   SaveablePlanner,
   ServerPlannerResponse,
@@ -36,7 +37,7 @@ vi.mock('../../lib/plannerApi', () => ({
 }))
 
 // Import after mocking
-import { usePlannerSyncAdapter } from '../usePlannerSyncAdapter'
+import { usePlannerSyncAdapter, acknowledgedCopy } from '../usePlannerSyncAdapter'
 
 /**
  * Create a minimal mock SaveablePlanner for testing
@@ -91,7 +92,6 @@ function createMockServerResponse(
 ): ServerPlannerResponse {
   return {
     id: '550e8400-e29b-41d4-a716-446655440000' as PlannerId,
-    userId: 456,
     title: 'Test Planner',
     category: '5F',
     status: 'saved',
@@ -154,7 +154,8 @@ describe('usePlannerSyncAdapter', () => {
         }),
         undefined,
       )
-      expect(result.metadata.syncVersion).toBe(2)
+      expect(result.planner.metadata.syncVersion).toBe(2)
+      expect(result.ack).toEqual({ syncVersion: 2 })
     })
 
     it('uses upsert for existing planner when userId exists', async () => {
@@ -179,7 +180,7 @@ describe('usePlannerSyncAdapter', () => {
         }),
         undefined,
       )
-      expect(result.metadata.syncVersion).toBe(6)
+      expect(result.planner.metadata.syncVersion).toBe(6)
     })
 
     it('passes force=true to upsert when specified', async () => {
@@ -296,12 +297,14 @@ describe('usePlannerSyncAdapter', () => {
 
       // Assert
       expect(mockGet).toHaveBeenCalledWith('550e8400-e29b-41d4-a716-446655440000')
-      expect(result).not.toBeNull()
-      expect(result?.metadata.id).toBe('550e8400-e29b-41d4-a716-446655440000')
-      expect(result?.metadata.syncVersion).toBe(2)
+      expect(result.ok).toBe(true)
+      if (!result.ok) throw new Error('expected a successful fetch')
+      expect(result.value.planner.metadata.id).toBe('550e8400-e29b-41d4-a716-446655440000')
+      expect(result.value.planner.metadata.syncVersion).toBe(2)
+      expect(result.value.ack).toEqual({ syncVersion: 2 })
     })
 
-    it('returns null when planner not found', async () => {
+    it('reports a classified error when the fetch fails', async () => {
       // Arrange
       mockGet.mockRejectedValue(new Error('Not found'))
 
@@ -312,7 +315,25 @@ describe('usePlannerSyncAdapter', () => {
       const result = await adapter.fetchFromServer('non-existent')
 
       // Assert
-      expect(result).toBeNull()
+      expect(result.ok).toBe(false)
+      if (result.ok) throw new Error('expected a failed fetch')
+      expect(result.error).toEqual({ kind: 'unknown' })
+    })
+
+    it('reports the conflict kind when the server rejects with one', async () => {
+      // Arrange
+      mockGet.mockRejectedValue(new ConflictError('SYNC_CONFLICT', 'conflict', 11))
+
+      const { result: hookResult } = renderHook(() => usePlannerSyncAdapter())
+      const adapter = hookResult.current
+
+      // Act
+      const result = await adapter.fetchFromServer('550e8400-e29b-41d4-a716-446655440000')
+
+      // Assert
+      expect(result.ok).toBe(false)
+      if (result.ok) throw new Error('expected a failed fetch')
+      expect(result.error.kind).toBe('conflict')
     })
   })
 
@@ -384,6 +405,33 @@ describe('usePlannerSyncAdapter', () => {
         }),
         undefined,
       )
+    })
+  })
+
+  describe('acknowledgedCopy', () => {
+    it("keeps the server's content rather than the local bytes that were sent", async () => {
+      // The sanitizer may normalize a write, so what the server echoes is what
+      // the local row must hold; keeping local bytes under the server's version
+      // would hide the divergence from a sync that compares versions alone.
+      const localPlanner = createMockPlanner({ syncVersion: 1, userId: null })
+      mockUpsert.mockResolvedValue(
+        createMockServerResponse({ title: 'Normalized by the server', syncVersion: 4 }),
+      )
+      const { result: hookResult } = renderHook(() => usePlannerSyncAdapter())
+
+      const stored = acknowledgedCopy(await hookResult.current.syncToServer(localPlanner))
+
+      expect(stored.metadata.title).toBe('Normalized by the server')
+      expect(stored.metadata.title).not.toBe(localPlanner.metadata.title)
+    })
+
+    it('stores the version the ack assigned', () => {
+      const planner = createMockPlanner({ syncVersion: 1, userId: null })
+
+      const stored = acknowledgedCopy({ planner, ack: { syncVersion: 9 } })
+
+      expect(stored.metadata.syncVersion).toBe(9)
+      expect(stored.content).toEqual(planner.content)
     })
   })
 })

@@ -28,11 +28,11 @@ public class PrimaryReCheck {
 
     static final String PROMOTED_COUNTER = "replica_miss_promoted_total";
 
-    private final MeterRegistry meterRegistry;
+    private final Counter promotedCounter;
     private final ContentTombstoneStore tombstoneStore;
 
     public PrimaryReCheck(MeterRegistry meterRegistry, ContentTombstoneStore tombstoneStore) {
-        this.meterRegistry = meterRegistry;
+        this.promotedCounter = Counter.builder(PROMOTED_COUNTER).register(meterRegistry);
         this.tombstoneStore = tombstoneStore;
     }
 
@@ -56,7 +56,7 @@ public class PrimaryReCheck {
             ReadOnlyRoutingDataSource.pinTo(RoutingKey.BULKHEAD);
             try {
                 T promoted = dereference.get();
-                Counter.builder(PROMOTED_COUNTER).register(meterRegistry).increment();
+                promotedCounter.increment();
                 return promoted;
             } finally {
                 ReadOnlyRoutingDataSource.clear();

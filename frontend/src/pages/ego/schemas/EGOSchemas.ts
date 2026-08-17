@@ -1,6 +1,8 @@
 import { z } from 'zod'
-import { AffinitySchema } from '@/shared/gameData'
-import { SkillDescEntrySchema } from '@/shared/gameData'
+import { AffinitySchema, EgoTypeSchema } from '@/shared/gameData'
+import { SkillDescEntrySchema, SkillIdSchema, PassiveIdSchema } from '@/shared/gameData'
+
+export { EgoTypeSchema }
 
 /**
  * EGO Schemas
@@ -8,9 +10,6 @@ import { SkillDescEntrySchema } from '@/shared/gameData'
  * Zod schemas for runtime validation of EGO data structures.
  * These schemas mirror the TypeScript interfaces in types/EGOTypes.ts.
  */
-
-// EGO type enum (ZAYIN, TETH, HE, WAW, ALEPH)
-export const EgoTypeSchema = z.enum(['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH'])
 
 // Skill data entry schema - all fields optional for flexibility
 export const EGOSkillDataEntrySchema = z.object({
@@ -43,7 +42,7 @@ export const EGOSkillDataTupleSchema = z.union([
 
 // Skill entry schema
 export const EGOSkillEntrySchema = z.object({
-  id: z.number(),
+  id: SkillIdSchema,
   skillData: EGOSkillDataTupleSchema,
 })
 
@@ -54,15 +53,20 @@ export const EGOSkillsDataSchema = z.object({
 })
 
 // Passive list tuple - 4 or 5 entries (per-EGO threadspin levels)
-// Each element is an array of passive ID strings active at that level
+// Each element is an array of passive IDs active at that level
 export const EGOPassiveListTupleSchema = z.union([
-  z.tuple([z.array(z.string()), z.array(z.string()), z.array(z.string()), z.array(z.string())]),
   z.tuple([
-    z.array(z.string()),
-    z.array(z.string()),
-    z.array(z.string()),
-    z.array(z.string()),
-    z.array(z.string()),
+    z.array(PassiveIdSchema),
+    z.array(PassiveIdSchema),
+    z.array(PassiveIdSchema),
+    z.array(PassiveIdSchema),
+  ]),
+  z.tuple([
+    z.array(PassiveIdSchema),
+    z.array(PassiveIdSchema),
+    z.array(PassiveIdSchema),
+    z.array(PassiveIdSchema),
+    z.array(PassiveIdSchema),
   ]),
 ])
 
@@ -115,15 +119,6 @@ export const EGOI18nSchema = z.object({
 /**
  * EGO list schemas (for list views)
  */
-
-// EGO list item schema
-export const EGOSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  rank: EgoTypeSchema,
-  attributeType: z.array(z.string()),
-  skillKeywordList: z.array(z.string()),
-})
 
 // Attack type enum for spec list
 export const EGOAtkTypeSchema = z.enum(['SLASH', 'PENETRATE', 'HIT'])

@@ -16,7 +16,7 @@ import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.PublishedPlannerDetailResponse;
 import org.danteplanner.backend.planner.service.PlannerQueryService;
 import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
-import org.danteplanner.backend.shared.config.RateLimitConfig;
+import org.danteplanner.backend.shared.ratelimit.RateLimitService;
 import org.danteplanner.backend.shared.config.SecurityProperties;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.junit.jupiter.api.Test;
@@ -44,7 +44,7 @@ class ByIdReadSeamTest {
     PlannerQueryService plannerQueryService;
 
     @Mock
-    RateLimitConfig rateLimitConfig;
+    RateLimitService rateLimitService;
 
     @Mock
     PublishedPlannerQueryService publishedPlannerQueryService;
@@ -82,11 +82,13 @@ class ByIdReadSeamTest {
         when(request.getRemoteAddr()).thenReturn("1.2.3.4");
         when(securityProperties.isTrustedProxy("1.2.3.4")).thenReturn(false);
         when(request.getHeader("User-Agent")).thenReturn("agent");
+        // No edge in front of this seam, so the viewer identity falls through to the peer address.
+        when(request.getHeader("CF-Connecting-IP")).thenReturn(null);
         when(publishedPlannerQueryService.getPublishedPlanner(eq(id), eq(userId), anyString(), any()))
                 .thenReturn(expected);
 
         ResponseEntity<PublishedPlannerDetailResponse> result =
-                publishedPlannerController.getPublishedPlanner(request, id, userId);
+                publishedPlannerController.getPublishedPlanner(request, id, userId, UUID.randomUUID());
 
         assertThat(result.getBody()).isSameAs(expected);
         verify(byIdReadGuard).read(eq("planner"), eq(id), any());

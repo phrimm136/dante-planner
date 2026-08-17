@@ -1,9 +1,19 @@
 import i18next from 'i18next'
 
 /**
+ * Join the resolved parts of a display username.
+ *
+ * @example
+ * composeUsername('Naive', 'Faust', 'AB123') // => "NaiveFaust#AB123"
+ */
+export function composeUsername(epithet: string, sinner: string, suffix: string): string {
+  return `${epithet}${sinner}#${suffix}`
+}
+
+/**
  * Format a username for display.
  *
- * Composes: {translatedEpithet}{sinner}#{suffix}
+ * Resolves the epithet and sinner name against i18next, then composes them.
  *
  * **i18n Dependency**: Requires `epithet` namespace (static/i18n/{lang}/epithet.json)
  * - `sinner`: Base sinner name (e.g., "Faust")
@@ -25,13 +35,12 @@ import i18next from 'i18next'
  * formatUsername("", "", "EN") // => "Unknown"
  */
 export function formatUsername(
-  usernameEpithet: string,
-  usernameSuffix: string,
+  usernameEpithet: string | null | undefined,
+  usernameSuffix: string | null | undefined,
   language?: string,
 ): string {
   const lng = language || i18next.language
 
-  // Validate inputs - return fallback for missing data
   if (!usernameEpithet || !usernameSuffix) {
     if (import.meta.env.DEV) {
       console.warn('[formatUsername] Missing username fields:', { usernameEpithet, usernameSuffix })
@@ -39,17 +48,19 @@ export function formatUsername(
     return i18next.t('unknown', { ns: 'common', lng, defaultValue: 'Unknown' })
   }
 
-  const sinner = i18next.t('sinner', { ns: 'epithet', lng })
   const translatedEpithet = i18next.t(usernameEpithet, {
     ns: 'epithet',
     lng,
     defaultValue: usernameEpithet,
   })
 
-  // Warn in dev mode if translation key is missing
   if (import.meta.env.DEV && translatedEpithet === usernameEpithet) {
     console.warn(`[formatUsername] Missing i18n key: epithet.${usernameEpithet}`)
   }
 
-  return `${translatedEpithet}${sinner}#${usernameSuffix}`
+  return composeUsername(
+    translatedEpithet,
+    i18next.t('sinner', { ns: 'epithet', lng }),
+    usernameSuffix,
+  )
 }

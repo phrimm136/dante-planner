@@ -117,7 +117,7 @@ class AuthLocalReadSplitIT {
 
     @Test
     @DisplayName("Blacklist bl: and uinv: writes land on auth but are invisible via the read path until auth-local catches up")
-    void blacklistReadWriteSplit_bl_and_uinv() {
+    void blacklistReadWriteSplit_WhenBl_And_Uinv() {
         // bl: half
         String token = "phase14a-access-token";
         Date futureExpiry = new Date(System.currentTimeMillis() + Duration.ofHours(1).toMillis());
@@ -162,7 +162,7 @@ class AuthLocalReadSplitIT {
 
     @Test
     @DisplayName("Tombstone del: write lands on auth but is invisible via the read path until auth-local catches up")
-    void tombstoneRead_whenAuthLocalStale_returnsFalseUntilCaughtUp() {
+    void tombstoneRead_WhenAuthLocalStale_ReturnsFalseUntilCaughtUp() {
         UUID id = UUID.randomUUID();
 
         contentTombstoneStore.writeTombstone("planner", id);
@@ -185,7 +185,7 @@ class AuthLocalReadSplitIT {
 
     @Test
     @DisplayName("Both read paths fail open (no exception) when auth-local is unreachable")
-    void reads_whenAuthLocalUnreachable_failOpen() {
+    void reads_WhenAuthLocalUnreachable_FailOpen() {
         LettuceConnectionFactory deadFactory = new LettuceConnectionFactory(
                 new RedisStandaloneConfiguration(deadHost, deadPort));
         deadFactory.afterPropertiesSet();
@@ -194,9 +194,11 @@ class AuthLocalReadSplitIT {
 
         SimpleMeterRegistry registry = new SimpleMeterRegistry();
         TokenBlacklistService blSvc =
-                new TokenBlacklistService(stringRedisTemplate, deadTemplate, registry);
+                new TokenBlacklistService(stringRedisTemplate, deadTemplate, registry,
+                        TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
         ContentTombstoneStore tsSvc =
-                new ContentTombstoneStore(stringRedisTemplate, deadTemplate);
+                new ContentTombstoneStore(stringRedisTemplate, deadTemplate,
+                        new io.micrometer.core.instrument.simple.SimpleMeterRegistry());
 
         String token = "phase14a-failopen-token";
         Date futureExpiry = new Date(System.currentTimeMillis() + Duration.ofHours(1).toMillis());

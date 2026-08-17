@@ -27,27 +27,13 @@ export function isNotificationSupported(): boolean {
 }
 
 /**
- * Check if notification permission is granted
- */
-export function isNotificationPermissionGranted(): boolean {
-  return isNotificationSupported() && Notification.permission === 'granted'
-}
-
-/**
- * Check if notification permission is denied (user explicitly blocked)
- */
-export function isNotificationPermissionDenied(): boolean {
-  return isNotificationSupported() && Notification.permission === 'denied'
-}
-
-/**
  * Permission state type for UI display
  */
 export type NotificationPermissionState = 'granted' | 'denied' | 'default' | 'unsupported'
 
 /**
- * Get current notification permission state for UI display.
- * Useful for showing permission status in settings.
+ * Current notification permission, with unsupported browsers folded in as a
+ * fourth state. Every permission decision in this module reads it.
  *
  * @returns Permission state: 'granted' | 'denied' | 'default' | 'unsupported'
  */
@@ -56,6 +42,13 @@ export function getNotificationPermissionState(): NotificationPermissionState {
     return 'unsupported'
   }
   return Notification.permission as NotificationPermissionState
+}
+
+/**
+ * Check if notification permission is granted
+ */
+export function isNotificationPermissionGranted(): boolean {
+  return getNotificationPermissionState() === 'granted'
 }
 
 /**
@@ -73,27 +66,21 @@ export function isTabHidden(): boolean {
  * @returns Promise<boolean> true if permission granted
  */
 export async function requestNotificationPermission(): Promise<boolean> {
-  if (!isNotificationSupported()) {
-    return false
-  }
-
-  // Already granted
-  if (Notification.permission === 'granted') {
-    return true
-  }
-
-  // Already denied - can't request again
-  if (Notification.permission === 'denied') {
-    return false
-  }
-
-  // Request permission (requires user gesture)
-  try {
-    const result = await Notification.requestPermission()
-    return result === 'granted'
-  } catch {
-    // Safari older versions use callback instead of promise
-    return false
+  switch (getNotificationPermissionState()) {
+    case 'unsupported':
+      return false
+    case 'granted':
+      return true
+    // Denied is terminal: the browser refuses a second prompt.
+    case 'denied':
+      return false
+    case 'default':
+      try {
+        return (await Notification.requestPermission()) === 'granted'
+      } catch {
+        // Older Safari resolves permission through a callback, not a promise.
+        return false
+      }
   }
 }
 

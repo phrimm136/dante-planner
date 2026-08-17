@@ -1,5 +1,5 @@
 import { Skeleton } from '@/components/ui/skeleton'
-import { CARD_GRID } from '@/lib/constants'
+import { CARD_GRID, SECTION_STYLES } from '@/lib/constants'
 import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
 
 /**
@@ -128,7 +128,7 @@ export function ListPageSkeleton({
       {/* Main content area */}
       <div className="flex-1 min-w-0">
         {/* Card grid skeleton */}
-        <div className="bg-muted border border-border rounded-md p-6">
+        <div className={SECTION_STYLES.panel}>
           <div className="pt-4">
             <ResponsiveCardGrid
               cardWidth={cardWidth}

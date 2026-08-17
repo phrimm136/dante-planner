@@ -36,6 +36,7 @@ vi.mock('@/shared/auth/hooks/useAuthQuery')
 const mockPlanner: SaveablePlanner = {
   metadata: {
     id: 'test-planner-123',
+    title: 'Test Planner',
     status: 'draft',
     schemaVersion: 2,
     contentVersion: 6,
@@ -44,7 +45,6 @@ const mockPlanner: SaveablePlanner = {
     createdAt: '2026-01-10T00:00:00Z',
     lastModifiedAt: '2026-01-10T00:00:00Z',
     savedAt: null,
-    userId: null,
     deviceId: 'device-123',
   },
   config: {
@@ -80,9 +80,9 @@ vi.mock('../components/plannerViewer/PlannerViewer', () => ({
   ),
 }))
 
-// Mock PlannerDetailHeader
-vi.mock('../components/plannerViewer/PlannerDetailHeader', () => ({
-  PlannerDetailHeader: () => <div data-testid="planner-detail-header">Header</div>,
+// Mock PersonalPlannerHeader
+vi.mock('../components/plannerViewer/PersonalPlannerHeader', () => ({
+  PersonalPlannerHeader: () => <div data-testid="planner-detail-header">Header</div>,
 }))
 
 // Mock ErrorBoundary

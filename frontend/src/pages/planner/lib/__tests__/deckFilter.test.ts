@@ -66,6 +66,7 @@ function makeEgo(overrides: Partial<EGOListItem> = {}): EGOListItem {
     atkTypes: ['SLASH'],
     updateDate: 20240101,
     season: 1,
+    maxThreadspin: 4,
     ...overrides,
   }
 }

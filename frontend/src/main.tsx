@@ -7,10 +7,10 @@ import { Toaster } from 'sonner'
 import { ErrorBoundary } from '@/components/feedback/ErrorBoundary'
 import { queryClient } from '@/lib/queryClient'
 import { router } from '@/lib/router'
-import './lib/i18n'
+import { i18nReady } from './lib/i18n'
 import './styles/globals.css'
 
-createRoot(document.getElementById('root')!).render(
+const app = (
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <ErrorBoundary>
@@ -39,5 +39,10 @@ createRoot(document.getElementById('root')!).render(
       {/* Dev tools - only in development */}
       {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>
-  </StrictMode>,
+  </StrictMode>
 )
+
+// Rendering waits on the active language so a non-EN visitor never sees English.
+void i18nReady.then(() => {
+  createRoot(document.getElementById('root')!).render(app)
+})

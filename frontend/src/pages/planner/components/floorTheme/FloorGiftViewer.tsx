@@ -1,11 +1,9 @@
-import { useMemo, memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEGOGiftListData } from '@/pages/egoGift'
 import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { EGOGiftCard } from '@/pages/egoGift'
 import { EGOGiftTooltip } from '@/pages/egoGift'
-import { decodeGiftSelection } from '@/pages/egoGift'
-import { sortEGOGifts } from '@/pages/egoGift'
+import { decodeAndOrderGiftSelections } from '@/pages/egoGift'
 import { CARD_GRID } from '@/lib/constants'
 import type { EGOGiftListItem } from '@/pages/egoGift'
 import type { EnhancementLevel } from '@/shared/gameData'
@@ -27,20 +25,15 @@ interface DecodedGift {
  * Individual gift item in floor viewer.
  * Memoized to prevent re-renders when other gifts are added/removed.
  */
-const FloorGiftItem = memo(
-  function FloorGiftItem({ item, enhancement }: DecodedGift) {
-    return (
-      <EGOGiftTooltip giftId={item.id} enhancement={enhancement}>
-        <div>
-          <EGOGiftCard gift={item} enhancement={enhancement} />
-        </div>
-      </EGOGiftTooltip>
-    )
-  },
-  (prev, next) => {
-    return prev.item.id === next.item.id && prev.enhancement === next.enhancement
-  },
-)
+const FloorGiftItem = function FloorGiftItem({ item, enhancement }: DecodedGift) {
+  return (
+    <EGOGiftTooltip giftId={item.id} enhancement={enhancement}>
+      <div>
+        <EGOGiftCard gift={item} enhancement={enhancement} />
+      </div>
+    </EGOGiftTooltip>
+  )
+}
 
 /**
  * Displays only the selected EGO gifts for a floor with their enhancement levels
@@ -56,55 +49,16 @@ export function FloorGiftViewer({
   const { t } = useTranslation(['planner', 'common'])
   const { spec, i18n } = useEGOGiftListData()
 
-  // Breakpoint detection for scaling
-
   const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
 
-  // Memoize decoded gifts to prevent unnecessary re-renders
-  const selectedGifts = useMemo(() => {
-    const gifts: DecodedGift[] = []
-    for (const encodedId of selectedGiftIds) {
-      const { giftId, enhancement } = decodeGiftSelection(encodedId)
-      const giftSpec = spec[giftId]
-      if (giftSpec) {
-        gifts.push({
-          item: {
-            id: giftId,
-            name: i18n[giftId] || giftId,
-            tag: giftSpec.tag as EGOGiftListItem['tag'],
-            keyword: giftSpec.keyword,
-            battleKeywordList: giftSpec.battleKeywordList ?? [],
-            attributeType: giftSpec.attributeType,
-            themePack: giftSpec.themePack,
-            maxEnhancement: giftSpec.maxEnhancement,
-          },
-          enhancement,
-        })
-      }
-    }
-    const enhancementMap = new Map(gifts.map((g) => [g.item.id, g.enhancement]))
-    return sortEGOGifts(
-      gifts.map((g) => g.item),
-      'tier-first',
-    ).map((item) => ({
-      item,
-      enhancement: enhancementMap.get(item.id)!,
-    }))
-  }, [selectedGiftIds, spec, i18n])
-
-  // Handle click - prevent when readOnly
-  const handleClick = () => {
-    if (!readOnly) {
-      onClick()
-    }
-  }
+  const selectedGifts = decodeAndOrderGiftSelections(selectedGiftIds, spec, i18n, 'tier-first')
 
   // Empty state
   if (selectedGifts.length === 0) {
     return (
       <button
         type="button"
-        onClick={handleClick}
+        onClick={readOnly ? undefined : onClick}
         disabled={readOnly}
         aria-label={t('pages.plannerMD.selectFloorEgoGifts')}
         className={cn(
@@ -126,7 +80,7 @@ export function FloorGiftViewer({
   return (
     <button
       type="button"
-      onClick={handleClick}
+      onClick={readOnly ? undefined : onClick}
       disabled={readOnly}
       aria-label={t('pages.plannerMD.selectedEgoGifts')}
       className={cn(

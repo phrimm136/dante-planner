@@ -6,6 +6,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import org.danteplanner.backend.moderation.util.ModerationConstants;
+import org.danteplanner.backend.shared.sanitize.Sanitized;
+import org.danteplanner.backend.shared.sanitize.SanitizerKind;
+
 /**
  * Request DTO for timing out a user.
  *
@@ -18,10 +22,13 @@ import jakarta.validation.constraints.Size;
 public record TimeoutRequest(
     @NotNull(message = "Duration is required")
     @Min(value = 1, message = "Duration must be at least 1 minute")
-    @Max(value = 43200, message = "Duration cannot exceed 30 days (43200 minutes)")
+    @Max(value = ModerationConstants.TIMEOUT_MAX_MINUTES,
+         message = "Duration cannot exceed 30 days (43200 minutes)")
     Integer durationMinutes,
 
     @NotBlank(message = "Reason is required for audit trail")
-    @Size(max = 500, message = "Reason cannot exceed 500 characters")
+    @Size(max = ModerationConstants.ACTION_REASON_MAX_LENGTH,
+          message = "Reason cannot exceed 500 characters")
+    @Sanitized(SanitizerKind.PLAIN)
     String reason
 ) {}

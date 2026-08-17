@@ -1,7 +1,14 @@
 import { useIdentityDetailI18n } from '../hooks/useIdentityDetailData'
-import { SkillCard, mergeSkillDataUpToLevel } from '@/shared/skill'
+import {
+  SkillCard,
+  SkillDescription,
+  getMergedSkillDesc,
+  mergeSkillDataUpToLevel,
+} from '@/shared/skill'
+import { StyledSkillName } from '@/shared/gameText'
 import { getSkillImagePath, getSkillImagePathFromIconID } from '@/shared/assets'
 import type { IdentitySkillEntry, Uptie } from '../types/IdentityTypes'
+import type { SkillId } from '@/shared/gameData'
 
 interface IdentitySkillCardWithGranularI18nProps {
   identityId: string
@@ -18,8 +25,8 @@ interface IdentitySkillCardWithGranularI18nProps {
  * Falls back to 1 when no slot has data — keeps the card visible rather than blank.
  */
 export function getFirstDefinedUptie(skillData: IdentitySkillEntry['skillData']): Uptie {
-  for (let i = 0; i < skillData.length; i++) {
-    if (Object.keys(skillData[i]).length > 0) {
+  for (const [i, levelData] of skillData.entries()) {
+    if (Object.keys(levelData).length > 0) {
       return (i + 1) as Uptie
     }
   }
@@ -48,16 +55,65 @@ export function IdentitySkillCardWithGranularI18n({
 
   return (
     <SkillCard
-      entityId={identityId}
-      skillId={textId}
-      level={uptie}
       skillData={mergedData}
       coinString={coinString}
       skillImagePath={skillImagePath}
       skillTier={skillEntry.skillTier ?? skillSlot}
-      useDetailI18n={useIdentityDetailI18n}
+      nameSlot={
+        <IdentitySkillName
+          identityId={identityId}
+          skillId={textId}
+          attributeType={mergedData.attributeType}
+        />
+      }
+      descriptionSlot={
+        <IdentitySkillDescription identityId={identityId} skillId={textId} level={uptie} />
+      }
       isDefenseSkill={isDefenseSkill}
       isLocked={isLocked}
+    />
+  )
+}
+
+/**
+ * Suspending name slot — resolves the skill name from identity detail i18n.
+ */
+function IdentitySkillName({
+  identityId,
+  skillId,
+  attributeType,
+}: {
+  identityId: string
+  skillId: SkillId
+  attributeType?: string | undefined
+}) {
+  const i18n = useIdentityDetailI18n(identityId)
+  return (
+    <StyledSkillName
+      name={i18n.skills[skillId]?.name ?? ''}
+      {...(attributeType !== undefined && { attributeType })}
+    />
+  )
+}
+
+/**
+ * Suspending description slot — merges identity skill descriptions up to the uptie.
+ */
+function IdentitySkillDescription({
+  identityId,
+  skillId,
+  level,
+}: {
+  identityId: string
+  skillId: SkillId
+  level: Uptie
+}) {
+  const i18n = useIdentityDetailI18n(identityId)
+  const skillI18n = i18n.skills[skillId]
+  return (
+    <SkillDescription
+      descData={getMergedSkillDesc(skillI18n?.descs ?? [], level)}
+      {...(skillI18n?.flavor !== undefined && { flavor: skillI18n.flavor })}
     />
   )
 }

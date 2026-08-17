@@ -8,6 +8,7 @@
  */
 
 import { ApiClient } from '@/lib/api'
+import { validateData } from '@/lib/validation'
 import { NotificationResponseSchema } from '../schemas/NotificationSchemas'
 import { useApiMutation } from '@/components/hooks/useApiMutation'
 import { notificationQueryKeys } from './useNotificationsQuery'
@@ -49,17 +50,9 @@ export function useMarkReadMutation() {
   return useApiMutation<NotificationResponse, MarkReadInput>({
     mutationFn: async ({ notificationId }: MarkReadInput): Promise<NotificationResponse> => {
       const data = await ApiClient.post(`/api/notifications/${notificationId}/mark-read`, {})
-      const result = NotificationResponseSchema.safeParse(data)
-
-      if (!result.success) {
-        console.error('Mark read response validation failed:', result.error)
-        throw new Error('Invalid mark read response from server')
-      }
-
-      return result.data
+      return validateData(data, NotificationResponseSchema, 'notifications markRead')
     },
     // Invalidate notifications list and unread count
     invalidateKeys: () => [notificationQueryKeys.all],
-    errorLogPrefix: 'Mark read failed',
   })
 }

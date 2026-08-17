@@ -22,11 +22,14 @@ import { describe, it, expect } from 'vitest'
 import { bucketAndSortFloorGifts } from '../floorGiftBucketing'
 import { DUNGEON_IDX } from '@/shared/gameData'
 import type { EGOGiftListItem } from '@/pages/egoGift'
+import { EGOGiftIdSchema } from '@/shared/gameData'
 
 // EGOGiftListItem resolves to an error/any type under oxlint's type-aware pass because test
 // files are excluded from tsconfig; the intersection is well-typed under tsc. False positive.
 // oxlint-disable-next-line typescript/no-redundant-type-constituents
-function makeGift(overrides: Partial<EGOGiftListItem> & { id: string }): EGOGiftListItem {
+function makeGift(
+  overrides: Omit<Partial<EGOGiftListItem>, 'id'> & { id: string },
+): EGOGiftListItem {
   return {
     tag: ['TIER_2'],
     keyword: null,
@@ -35,6 +38,7 @@ function makeGift(overrides: Partial<EGOGiftListItem> & { id: string }): EGOGift
     themePack: [],
     maxEnhancement: 0,
     ...overrides,
+    id: EGOGiftIdSchema.parse(overrides.id),
   }
 }
 
@@ -129,7 +133,7 @@ describe('bucketAndSortFloorGifts', () => {
     it('places themed gifts before general gifts regardless of input order', () => {
       const input = [G_9092, G_9408] // general first, themed second
       const out = bucketAndSortFloorGifts(input, '1004', DUNGEON_IDX.NORMAL, 'tier-first')
-      const ids = out.map((g) => g.id)
+      const ids: string[] = out.map((g) => g.id)
       expect(ids.indexOf('9408')).toBeLessThan(ids.indexOf('9092'))
     })
 
@@ -137,8 +141,8 @@ describe('bucketAndSortFloorGifts', () => {
       // Two themed (different tiers) + two general (different tiers)
       const themedHigh = makeGift({ id: '9999', themePack: ['1004'], tag: ['TIER_4'] })
       const themedLow = makeGift({ id: '9998', themePack: ['1004'], tag: ['TIER_1'] })
-      const generalHigh = makeGift({ id: '8999', themePack: [], tag: ['TIER_4'] })
-      const generalLow = makeGift({ id: '8998', themePack: [], tag: ['TIER_1'] })
+      const generalHigh = makeGift({ id: '9997', themePack: [], tag: ['TIER_4'] })
+      const generalLow = makeGift({ id: '9996', themePack: [], tag: ['TIER_1'] })
 
       const out = bucketAndSortFloorGifts(
         [generalLow, themedLow, generalHigh, themedHigh],
@@ -146,10 +150,10 @@ describe('bucketAndSortFloorGifts', () => {
         DUNGEON_IDX.NORMAL,
         'tier-first',
       )
-      const ids = out.map((g) => g.id)
+      const ids: string[] = out.map((g) => g.id)
       // Both themed before any general
       expect(Math.max(ids.indexOf('9998'), ids.indexOf('9999'))).toBeLessThan(
-        Math.min(ids.indexOf('8998'), ids.indexOf('8999')),
+        Math.min(ids.indexOf('9996'), ids.indexOf('9997')),
       )
     })
   })
@@ -246,7 +250,7 @@ describe('bucketAndSortFloorGifts', () => {
         DUNGEON_IDX.NORMAL,
         'tier-first',
       )
-      const ids = new Set(out.map((g) => g.id))
+      const ids = new Set<string>(out.map((g) => g.id))
       expect(ids.has('9410')).toBe(true) // co-themed includes 1004
       expect(ids.has('9408')).toBe(true) // 1004-exclusive
       expect(ids.has('9092')).toBe(true) // general

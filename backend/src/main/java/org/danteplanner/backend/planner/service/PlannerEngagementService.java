@@ -4,50 +4,62 @@ package org.danteplanner.backend.planner.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationEventPublisher;
-import org.danteplanner.backend.planner.dto.BookmarkResponse;
 import org.danteplanner.backend.planner.dto.VoteResponse;
-import org.danteplanner.backend.planner.event.PlannerRecommendedEvent;
 import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.entity.PlannerBookmark;
 import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.entity.PlannerVoteId;
 import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.exception.VoteAlreadyExistsException;
+import org.danteplanner.backend.moderation.service.PlannerReportService;
 import org.danteplanner.backend.planner.repository.PlannerBookmarkRepository;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
+import org.danteplanner.backend.planner.validation.VoteUniquenessValidator;
+import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
+import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
 import java.util.UUID;
 
 /**
  * Service for social engagement actions on planners.
- * Handles immutable upvotes and bookmark toggling.
+ * Handles immutable upvotes, reports, and the viewer's bookmark state.
  */
 @Service
 @Slf4j
 public class PlannerEngagementService {
 
-    private final PlannerRepository plannerRepository;
     private final PlannerVoteRepository plannerVoteRepository;
     private final PlannerBookmarkRepository plannerBookmarkRepository;
-    private final ApplicationEventPublisher eventPublisher;
+    private final PlannerStatsService plannerStatsService;
+    private final PlannerCatalogService plannerCatalogService;
+    private final DomainEventRecorder domainEventRecorder;
+    private final PlannerAccessGuard accessGuard;
+    private final PlannerReportService reportService;
+    private final VoteUniquenessValidator voteUniquenessValidator;
 
     private final int recommendedThreshold;
 
     public PlannerEngagementService(
-            PlannerRepository plannerRepository,
             PlannerVoteRepository plannerVoteRepository,
             PlannerBookmarkRepository plannerBookmarkRepository,
-            ApplicationEventPublisher eventPublisher,
+            PlannerStatsService plannerStatsService,
+            PlannerCatalogService plannerCatalogService,
+            DomainEventRecorder domainEventRecorder,
+            PlannerAccessGuard accessGuard,
+            PlannerReportService reportService,
+            VoteUniquenessValidator voteUniquenessValidator,
             @Value("${planner.recommended-threshold}") int recommendedThreshold) {
-        this.plannerRepository = plannerRepository;
         this.plannerVoteRepository = plannerVoteRepository;
         this.plannerBookmarkRepository = plannerBookmarkRepository;
-        this.eventPublisher = eventPublisher;
+        this.plannerStatsService = plannerStatsService;
+        this.plannerCatalogService = plannerCatalogService;
+        this.domainEventRecorder = domainEventRecorder;
+        this.accessGuard = accessGuard;
+        this.reportService = reportService;
+        this.voteUniquenessValidator = voteUniquenessValidator;
         this.recommendedThreshold = recommendedThreshold;
     }
 
@@ -56,12 +68,10 @@ public class PlannerEngagementService {
      * Votes are permanent - users can upvote ONCE, with no changes or removal allowed.
      * Uses atomic increment operations and threshold detection for notifications.
      *
-     * NOTIFICATION PATTERN:
-     * - This method publishes a {@link PlannerRecommendedEvent} which is handled asynchronously
-     *   by {@link org.danteplanner.backend.notification.listener.NotificationEventListener}.
-     * - Event is delivered AFTER this transaction commits (AFTER_COMMIT phase).
-     * - Benefits: Shorter transaction duration, reduced lock contention, eventual consistency for notifications.
-     * - Trade-off: Notification creation is no longer atomic with vote (acceptable for this use case).
+     * <p>Crossing the threshold records a {@code PLANNER_RECOMMENDED} row in the outbox, inside
+     * this transaction. The notification and its push are derived from that row by
+     * {@link org.danteplanner.backend.planner.effect.PlannerRecommendedEffect}, so the vote pays
+     * for the record and nothing else.</p>
      *
      * @param userId    the user ID
      * @param plannerId the planner ID
@@ -69,56 +79,39 @@ public class PlannerEngagementService {
      * @return the updated vote response with counts
      * @throws PlannerNotFoundException if planner not found or not published
      * @throws VoteAlreadyExistsException if user has already voted (409 Conflict)
-     * @throws IllegalArgumentException if voteType is null
      */
     @Transactional
     public VoteResponse castVote(Long userId, UUID plannerId, VoteType voteType) {
-        // Validate input (fail-fast)
-        if (voteType == null) {
-            throw new IllegalArgumentException("Vote type cannot be null - votes are immutable and cannot be removed");
-        }
+        accessGuard.checkNotBanned(userId);
 
-        // Verify planner exists and is published (fail-fast)
-        Planner planner = plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId)
-                .orElseThrow(() -> new PlannerNotFoundException(plannerId));
+        Planner planner = accessGuard.requirePublished(plannerId);
 
-        // Check if vote already exists (immutability enforcement)
         PlannerVoteId voteId = new PlannerVoteId(userId, plannerId);
-        if (plannerVoteRepository.existsById(voteId)) {
-            throw new VoteAlreadyExistsException(plannerId, userId);
-        }
-
-        // Get current upvote count BEFORE voting (for threshold detection)
-        int upvotesBefore = planner.getUpvotes();
+        voteUniquenessValidator.requireFirstVote(
+                plannerVoteRepository.existsById(voteId), plannerId, userId);
 
         // Create new immutable vote
         PlannerVote newVote = new PlannerVote(userId, plannerId, voteType);
-        plannerVoteRepository.save(newVote);
+        plannerVoteRepository.insert(newVote);
 
         // Atomic increment for upvote
-        plannerRepository.incrementUpvotes(plannerId);
+        plannerStatsService.incrementUpvotes(plannerId);
 
-        // Re-fetch planner to get updated counts after atomic increment
-        Planner updatedPlanner = plannerRepository.findById(plannerId)
-                .orElseThrow(() -> new PlannerNotFoundException(plannerId));
-
-        int upvotesAfter = updatedPlanner.getUpvotes();
+        int upvotesAfter = plannerStatsService.upvotesOf(plannerId);
+        int upvotesBefore = upvotesAfter - 1;
 
         // Check threshold crossing for notification (9→10 net votes)
         if (upvotesBefore < recommendedThreshold && upvotesAfter >= recommendedThreshold) {
+            // Keep the catalog's derived flag in step with the crossing
+            plannerCatalogService.refreshRecommended(plannerId);
             // Try to atomically set notification flag (prevents race condition duplicates)
-            int rowsUpdated = plannerRepository.trySetRecommendedNotified(plannerId, recommendedThreshold);
+            int rowsUpdated = plannerStatsService.trySetRecommendedNotified(plannerId, recommendedThreshold);
             if (rowsUpdated > 0) {
-                // First thread to cross threshold wins - publish event (handled AFTER_COMMIT)
-                eventPublisher.publishEvent(new PlannerRecommendedEvent(
-                        this,
-                        plannerId,
-                        planner.getTitle(),
-                        planner.getUser().getId(),
-                        upvotesBefore,
-                        upvotesAfter
-                ));
-                log.debug("Planner {} crossed threshold ({}→{}), event published for notification",
+                // The latch and the event row commit together, so the obligation to notify cannot
+                // be lost to a latch that is never reset.
+                domainEventRecorder.recordDomainEvent(DomainEventType.PLANNER_RECOMMENDED, plannerId,
+                        Map.of("ownerId", planner.getUser().getId()));
+                log.debug("Planner {} crossed threshold ({}→{}), notification recorded",
                         plannerId, upvotesBefore, upvotesAfter);
             } else {
                 log.debug("Planner {} crossed threshold but notification already sent by another thread",
@@ -138,41 +131,16 @@ public class PlannerEngagementService {
     }
 
     /**
-     * Toggle bookmark state for a planner.
-     * If bookmarked, removes the bookmark. If not bookmarked, adds it.
+     * Report a published planner on a user's behalf.
      *
-     * @param userId    the user ID
-     * @param plannerId the planner ID
-     * @return the bookmark response with current state
+     * @param userId    the reporting user ID
+     * @param plannerId the planner ID being reported
      * @throws PlannerNotFoundException if planner not found or not published
+     * @throws org.danteplanner.backend.moderation.exception.ReportAlreadyExistsException
+     *         if the user has already reported this planner
      */
-    @Transactional
-    public BookmarkResponse toggleBookmark(Long userId, UUID plannerId) {
-        // Verify planner exists and is published (fail-fast)
-        if (plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId).isEmpty()) {
-            throw new PlannerNotFoundException(plannerId);
-        }
-
-        var existingBookmark = plannerBookmarkRepository.findByUserIdAndPlannerId(userId, plannerId);
-
-        if (existingBookmark.isPresent()) {
-            // Remove bookmark
-            plannerBookmarkRepository.delete(existingBookmark.get());
-            log.debug("User {} removed bookmark from planner {}", userId, plannerId);
-            return BookmarkResponse.builder()
-                    .plannerId(plannerId)
-                    .bookmarked(false)
-                    .build();
-        } else {
-            // Add bookmark
-            PlannerBookmark bookmark = new PlannerBookmark(userId, plannerId);
-            plannerBookmarkRepository.save(bookmark);
-            log.debug("User {} bookmarked planner {}", userId, plannerId);
-            return BookmarkResponse.builder()
-                    .plannerId(plannerId)
-                    .bookmarked(true)
-                    .build();
-        }
+    public void reportPlanner(Long userId, UUID plannerId) {
+        reportService.createReport(userId, plannerId);
     }
 
     /**

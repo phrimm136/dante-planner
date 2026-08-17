@@ -34,6 +34,14 @@
 
 import http from 'k6/http';
 import { check } from 'k6';
+import { Rate } from 'k6/metrics';
+
+// A held stream runs to the 120s request timeout; anything returning this fast
+// was refused or reset by nginx/backend.
+const CONNECT_FAIL_MS = 1000;
+const HELD_OPEN_MS = 100000;
+
+const connectionFailures = new Rate('sse_connection_failures');
 
 export const options = {
   stages: [
@@ -46,9 +54,11 @@ export const options = {
 
   thresholds: {
     // http_req_failed intentionally omitted — SSE timeouts are expected and healthy.
-    // Real failures (connection refused/reset) show up as connecting/waiting spikes.
-    'http_req_connecting': ['p(95)<2000'], // nginx accepting connections
-    'http_req_waiting':    ['p(95)<2000'], // backend setting up SSE emitter
+    // Refused/reset connections are counted by sse_connection_failures instead.
+    'http_req_connecting':      ['p(95)<2000'], // nginx accepting connections
+    'http_req_waiting':         ['p(95)<2000'], // backend setting up SSE emitter
+    'sse_connection_failures':  ['rate<0.01'],
+    'checks':                   ['rate>0.99'],
   },
 };
 
@@ -97,8 +107,8 @@ export default function (data) {
   });
 
   // SSE never completes — k6 hits the 120s timeout, which IS the success condition.
-  // A connection that was refused or reset would return immediately (duration < 1s).
+  connectionFailures.add(res.timings.duration < CONNECT_FAIL_MS);
   check(res, {
-    'SSE held open': (r) => r.timings.duration > 100000,
+    'SSE held open': (r) => r.timings.duration > HELD_OPEN_MS,
   });
 }

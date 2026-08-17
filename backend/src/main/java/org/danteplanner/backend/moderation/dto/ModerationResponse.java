@@ -1,5 +1,7 @@
 package org.danteplanner.backend.moderation.dto;
 
+import org.danteplanner.backend.planner.entity.Planner;
+
 import java.time.Instant;
 import java.util.UUID;
 
@@ -15,4 +17,23 @@ public record ModerationResponse(
     Instant hiddenAt,
     int upvotes
 ) {
+
+    /**
+     * Create a ModerationResponse from a planner aggregate.
+     *
+     * @param planner the planner aggregate root
+     * @param upvotes the planner's upvote count (from planner_stats)
+     * @return the response DTO
+     */
+    public static ModerationResponse fromEntity(Planner planner, int upvotes) {
+        return new ModerationResponse(
+                planner.getId(),
+                planner.getTitle(),
+                planner.isHiddenFromRecommended(),
+                planner.getModeration().getHiddenByModeratorId(),
+                planner.getModeration().getHiddenReason(),
+                planner.getModeration().getHiddenAt(),
+                upvotes
+        );
+    }
 }

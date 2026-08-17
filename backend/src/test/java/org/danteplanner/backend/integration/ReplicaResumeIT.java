@@ -44,7 +44,7 @@ class ReplicaResumeIT extends CausalHarnessSupport {
 
     @Test
     @DisplayName("After startReplica + awaitCaughtUp, a row written while stopped becomes visible on the replica")
-    void startReplica_writeWithheldWhileStopped_visibleAfterResumeAndCaughtUp() {
+    void startReplica_WhenWriteWithheldWhileStopped_VisibleAfterResumeAndCaughtUp() {
         primaryJdbcTemplate.execute("CREATE TABLE IF NOT EXISTS replica_resume_probe (id INT PRIMARY KEY)");
         primaryJdbcTemplate.update("INSERT INTO replica_resume_probe (id) VALUES (201)");
         replicationControl.awaitCaughtUp();

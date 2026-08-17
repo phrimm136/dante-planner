@@ -1,16 +1,14 @@
 package org.danteplanner.backend.planner.validation;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import static org.danteplanner.backend.planner.validation.SinnerKeys.ALL_SINNER_KEYS;
-import static org.danteplanner.backend.planner.validation.SinnerKeys.MAX_EQUIPMENT_SINNER;
-import static org.danteplanner.backend.planner.validation.SinnerKeys.MIN_EQUIPMENT_SINNER;
+import static org.danteplanner.backend.planner.validation.JsonTraversal.arrayField;
+import static org.danteplanner.backend.planner.validation.JsonTraversal.eachNumber;
+import static org.danteplanner.backend.planner.validation.SinnerKeys.forEachSinnerEntry;
 
 /**
  * Validates equipment structure: sinner-index keys, presence of all 12
@@ -18,7 +16,6 @@ import static org.danteplanner.backend.planner.validation.SinnerKeys.MIN_EQUIPME
  * the deployment order array.
  */
 @Component
-@Slf4j
 class EquipmentValidator {
 
     private static final int MIN_DEPLOYMENT_SINNER = 0;
@@ -31,140 +28,73 @@ class EquipmentValidator {
     );
 
     void validateEquipmentSinnerIndices(JsonNode root, ValidationContext context) {
-        JsonNode equipment = root.get("equipment");
-        if (equipment == null || !equipment.isObject()) {
-            return;
-        }
-
-        Set<String> presentKeys = new HashSet<>();
-        Iterator<String> keys = equipment.fieldNames();
-        while (keys.hasNext()) {
-            String key = keys.next();
-            try {
-                int index = Integer.parseInt(key);
-                if (index < MIN_EQUIPMENT_SINNER || index > MAX_EQUIPMENT_SINNER) {
-                    log.warn("Validation failed: equipment index '{}' out of range", index);
-                    context.addError(ValidationErrors.valueOutOfRange("equipment key", index, MIN_EQUIPMENT_SINNER, MAX_EQUIPMENT_SINNER));
-                    continue;
-                }
-                presentKeys.add(String.format("%02d", index));
-            } catch (NumberFormatException e) {
-                log.warn("Validation failed: equipment key '{}' not an integer", key);
-                context.addError(ValidationErrors.invalidFieldType("equipment key '" + key + "'", "integer"));
-                continue;
-            }
-        }
-
-        Set<String> missingSinners = new HashSet<>(ALL_SINNER_KEYS);
-        missingSinners.removeAll(presentKeys);
-        if (!missingSinners.isEmpty()) {
-            log.warn("Validation failed: missing sinners in equipment - {}", missingSinners);
-            context.addError(ValidationErrors.missingRequiredField(missingSinners));
-            return;
-        }
-
-        for (String sinnerKey : presentKeys) {
-            JsonNode sinnerEquipment = equipment.get(sinnerKey);
-            if (sinnerEquipment == null) {
-                sinnerEquipment = equipment.get(String.valueOf(Integer.parseInt(sinnerKey)));
-            }
-            if (sinnerEquipment == null || !sinnerEquipment.isObject()) {
-                log.warn("Validation failed: equipment[{}] is not an object", sinnerKey);
-                context.addError(ValidationErrors.invalidFieldType("equipment[" + sinnerKey + "]", "object"));
-                continue;
-            }
-
+        forEachSinnerEntry(root.path("equipment"), "equipment", context, (sinnerKey, sinnerEquipment) -> {
             validateSinnerHasIdentity(sinnerKey, sinnerEquipment, context);
             validateSinnerHasZayinEgo(sinnerKey, sinnerEquipment, context);
-        }
+        });
     }
 
     private void validateSinnerHasIdentity(String sinnerKey, JsonNode sinnerEquipment, ValidationContext context) {
-        JsonNode identity = sinnerEquipment.get("identity");
-        if (identity == null || !identity.isObject()) {
-            log.warn("Validation failed: equipment[{}] missing identity", sinnerKey);
-            context.addError(ValidationErrors.invalidFieldType("equipment[" + sinnerKey + "].identity", "object"));
+        JsonNode identity = sinnerEquipment.path("identity");
+        if (!identity.isObject()) {
+            context.reject("equipment[" + sinnerKey + "].identity",
+                    p -> ValidationErrors.invalidFieldType(p, "object"));
             return;
         }
 
-        JsonNode idNode = identity.get("id");
-        if (idNode == null || !idNode.isTextual() || idNode.asText().isBlank()) {
-            log.warn("Validation failed: equipment[{}].identity missing id", sinnerKey);
-            context.addError(ValidationErrors.invalidFieldType("equipment[" + sinnerKey + "].identity.id", "non-empty string"));
+        JsonNode idNode = identity.path("id");
+        if (!idNode.isTextual() || idNode.asText().isBlank()) {
+            context.reject("equipment[" + sinnerKey + "].identity.id",
+                    p -> ValidationErrors.invalidFieldType(p, "non-empty string"));
         }
     }
 
     private void validateSinnerHasZayinEgo(String sinnerKey, JsonNode sinnerEquipment, ValidationContext context) {
-        JsonNode egos = sinnerEquipment.get("egos");
-        if (egos == null || !egos.isObject()) {
-            log.warn("Validation failed: equipment[{}] missing egos", sinnerKey);
-            context.addError(ValidationErrors.invalidFieldType("equipment[" + sinnerKey + "].egos", "object"));
+        JsonNode egos = sinnerEquipment.path("egos");
+        if (!egos.isObject()) {
+            context.reject("equipment[" + sinnerKey + "].egos",
+                    p -> ValidationErrors.invalidFieldType(p, "object"));
             return;
         }
 
         validateEgoTypes(sinnerKey, egos, context);
+        validateRequiredEgo(sinnerKey, egos, context);
+    }
 
-        JsonNode zayinEgo = egos.get(REQUIRED_EGO_TYPE);
-        if (zayinEgo == null || !zayinEgo.isObject()) {
-            log.warn("Validation failed: equipment[{}] missing {} EGO", sinnerKey, REQUIRED_EGO_TYPE);
-            context.addError(ValidationErrors.missingRequiredField(Set.of("equipment[" + sinnerKey + "].egos.ZAYIN")));
+    private void validateRequiredEgo(String sinnerKey, JsonNode egos, ValidationContext context) {
+        JsonNode zayinEgo = egos.path(REQUIRED_EGO_TYPE);
+        if (!zayinEgo.isObject()) {
+            context.reject("equipment[" + sinnerKey + "].egos." + REQUIRED_EGO_TYPE,
+                    p -> ValidationErrors.missingRequiredField(Set.of(p)));
             return;
         }
 
-        JsonNode idNode = zayinEgo.get("id");
-        if (idNode == null || !idNode.isTextual() || idNode.asText().isBlank()) {
-            log.warn("Validation failed: equipment[{}].egos.{} missing id", sinnerKey, REQUIRED_EGO_TYPE);
-            context.addError(ValidationErrors.invalidFieldType("equipment[" + sinnerKey + "].egos.ZAYIN.id", "non-empty string"));
+        JsonNode idNode = zayinEgo.path("id");
+        if (!idNode.isTextual() || idNode.asText().isBlank()) {
+            context.reject("equipment[" + sinnerKey + "].egos." + REQUIRED_EGO_TYPE + ".id",
+                    p -> ValidationErrors.invalidFieldType(p, "non-empty string"));
         }
     }
 
     private void validateEgoTypes(String sinnerKey, JsonNode egos, ValidationContext context) {
-        Set<String> seenTypes = new HashSet<>();
         Iterator<String> egoKeys = egos.fieldNames();
 
         while (egoKeys.hasNext()) {
             String egoType = egoKeys.next();
 
             if (!VALID_EGO_TYPES.contains(egoType)) {
-                log.warn("Validation failed: equipment[{}].egos has invalid type '{}'", sinnerKey, egoType);
-                context.addError(ValidationErrors.invalidFieldType("equipment[" + sinnerKey + "].egos." + egoType,
-                        "valid EGO type (ZAYIN/TETH/HE/WAW/ALEPH)"));
-                continue;
+                context.reject("equipment[" + sinnerKey + "].egos." + egoType,
+                        p -> ValidationErrors.invalidFieldType(p, "valid EGO type (ZAYIN/TETH/HE/WAW/ALEPH)"));
             }
-
-            if (!seenTypes.add(egoType)) {
-                log.warn("Validation failed: equipment[{}].egos has duplicate type '{}'", sinnerKey, egoType);
-                context.addError(ValidationErrors.duplicateValue("equipment[" + sinnerKey + "].egos", egoType));
-            }
-        }
-
-        if (seenTypes.size() > VALID_EGO_TYPES.size()) {
-            log.warn("Validation failed: equipment[{}].egos has more than {} EGO types", sinnerKey, VALID_EGO_TYPES.size());
-            context.addError(ValidationErrors.valueOutOfRange("equipment[" + sinnerKey + "].egos count",
-                    seenTypes.size(), 1, VALID_EGO_TYPES.size()));
         }
     }
 
     void validateDeploymentOrder(JsonNode root, ValidationContext context) {
-        JsonNode order = root.get("deploymentOrder");
-        if (order == null || !order.isArray()) {
-            return;
-        }
-
-        for (int i = 0; i < order.size(); i++) {
-            JsonNode node = order.get(i);
-            if (!node.isNumber()) {
-                log.warn("Validation failed: deploymentOrder[{}] not a number", i);
-                context.addError(ValidationErrors.invalidFieldType("deploymentOrder[" + i + "]", "number", node));
-                continue;
+        eachNumber(arrayField(root, "deploymentOrder"), "deploymentOrder", context, (sinnerIndex, position) -> {
+            if (sinnerIndex < MIN_DEPLOYMENT_SINNER || sinnerIndex > MAX_DEPLOYMENT_SINNER) {
+                context.reject("deploymentOrder[" + position + "]", p -> ValidationErrors.valueOutOfRange(
+                        p, sinnerIndex, MIN_DEPLOYMENT_SINNER, MAX_DEPLOYMENT_SINNER));
             }
-
-            int index = node.asInt();
-            if (index < MIN_DEPLOYMENT_SINNER || index > MAX_DEPLOYMENT_SINNER) {
-                log.warn("Validation failed: deploymentOrder[{}]={} out of range", i, index);
-                context.addError(ValidationErrors.valueOutOfRange("deploymentOrder[" + i + "]", index,
-                        MIN_DEPLOYMENT_SINNER, MAX_DEPLOYMENT_SINNER));
-            }
-        }
+        });
     }
 }

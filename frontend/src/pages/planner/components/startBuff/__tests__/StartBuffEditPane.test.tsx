@@ -53,11 +53,8 @@ vi.mock('@/shared/gameText/hooks/useBattleKeywords', () => ({
   useBattleKeywords: () => ({ data: {} }),
 }))
 
-vi.mock('../StartBuffCardMD6', () => ({
-  StartBuffCardMD6: () => <div data-testid="start-buff-card">Start Buff Card</div>,
-}))
-vi.mock('../StartBuffCardMD7', () => ({
-  StartBuffCardMD7: () => <div data-testid="start-buff-card">Start Buff Card</div>,
+vi.mock('../StartBuffCard', () => ({
+  StartBuffCard: () => <div data-testid="start-buff-card">Start Buff Card</div>,
 }))
 
 describe('StartBuffEditPane', () => {

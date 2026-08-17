@@ -1,0 +1,10 @@
+# 084 conflict-code-presentation
+epic: none · pr: none
+
+## Decisions
+- @errors @conflict @presentation — A rejected write is presented on the code the server rejected it with, and a null presentation means one thing only: the sync conflict is delegated to the resolution dialog that renders it. The server answers writes with nine distinct conflict codes, and exactly one of them carries the version a resolution flow needs, so the status alone cannot say who owns the failure. REJECTED: deciding at the kind level — one silent branch covers all nine, so a user who exhausts the server-side planner allowance is handed a version-resolution dialog for a conflict that has no version, or nothing at all. REJECTED: a per-call-site catch that presents the failure itself — the same mapping copied into every consumer, each free to drift and each having to rediscover which code the dialog can act on.
+- @errors @conflict @ownership — A mutation whose copy names the resource the user acted on owns its whole failure channel through the mutation cache's suppression flag. The server answers a duplicate planner vote and a duplicate comment upvote with the same code, so the failure cannot say which resource it is about and only the call site can. REJECTED: mapping that code centrally in the presenter — one code, two resources, so the message is wrong for whichever one loses. REJECTED: leaving the cache's report standing beside the bespoke one — every such rejection then reports twice, once named and once generic.
+- @errors @i18n — A code with no copy of its own presents the generic failure message. REJECTED: writing new English at the presentation site — a string outside the translation bundle reaches one locale and is invisible to the process that owns every other message.
+
+## Takeaway
+- takeaway: a discriminated union is only as sharp as the discriminant the code branches on; when the payload carries a second one the sender already distinguishes, branching on the tag alone silently merges cases the wire kept apart.

@@ -2,7 +2,8 @@ package org.danteplanner.backend.planner.dto;
 
 import lombok.Builder;
 
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.entity.PlannerCatalog;
+import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerType;
 
 import java.time.Instant;
@@ -10,13 +11,15 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Response DTO for public planner listings.
- * Contains only the information needed for public browsing.
+ * Response DTO for public planner listings, sourced from the catalog projection.
+ * The card carries the release date ({@code firstPublishedAt}); content metadata
+ * lives on the detail response only.
  *
- * @param hasUpvoted   whether the current user has upvoted; null for unauthenticated users
- * @param isBookmarked whether the current user has bookmarked; null for unauthenticated users
+ * @param authorUsernameEpithet the author's epithet; null once the account is gone
+ * @param authorUsernameSuffix  the author's suffix; null once the account is gone
+ * @param hasUpvoted   whether the current user has upvoted
+ * @param isBookmarked whether the current user has bookmarked
  * @param viewCount    total view count for this planner
- * @param lastModifiedAt last modification timestamp
  * @param commentCount total non-deleted comment count for this planner
  */
 @Builder(toBuilder = true)
@@ -24,67 +27,69 @@ public record PublicPlannerResponse(
     UUID id,
     String title,
     String category,
-    Integer contentVersion,
     PlannerType plannerType,
     Set<String> selectedKeywords,
     String authorUsernameEpithet,
     String authorUsernameSuffix,
-    Integer upvotes,
+    int upvotes,
     Instant createdAt,
-    Integer viewCount,
-    Instant lastModifiedAt,
-    Boolean hasUpvoted,
-    Boolean isBookmarked,
-    Long commentCount
+    int viewCount,
+    Instant firstPublishedAt,
+    boolean hasUpvoted,
+    boolean isBookmarked,
+    long commentCount
 ) {
     public PublicPlannerResponse {
-        selectedKeywords = selectedKeywords == null ? null : Set.copyOf(selectedKeywords);
+        selectedKeywords = selectedKeywords == null ? Set.of() : Set.copyOf(selectedKeywords);
     }
 
     /**
-     * Create a PublicPlannerResponse from a Planner entity.
+     * Create a list card for a viewer with no account.
      *
-     * <p>Author username is extracted from the planner's user entity.
-     * Frontend will format as "Faust-{translatedKeyword}-{suffix}".
+     * <p>An anonymous viewer has no account to have upvoted or bookmarked with, so both
+     * are false.</p>
      *
-     * <p>Note: userVote and isBookmarked are not set by this method.
-     * They must be populated by the service layer based on the authenticated user.
-     *
-     * @param planner the planner entity
+     * @param row   the catalog projection row
+     * @param core  the planner's core and author fields
+     * @param stats the planner's counter row
      * @return the public planner response DTO
      */
-    public static PublicPlannerResponse fromEntity(Planner planner) {
-        return commonBuilder(planner).build();
+    public static PublicPlannerResponse forAnonymous(
+            PlannerCatalog row, PlannerCoreInfo core, PlannerStats stats) {
+        return fromCatalog(row, core, stats, false, false);
     }
 
     /**
-     * Create a PublicPlannerResponse from a Planner entity with user context.
+     * Create a list card from the catalog projection, its core fields, and its counters.
      *
-     * @param planner the planner entity
-     * @param hasUpvoted whether the current user has upvoted (null if not authenticated)
-     * @param isBookmarked whether the current user has bookmarked this planner (null if not authenticated)
-     * @return the public planner response DTO with user context
+     * @param row          the catalog projection row
+     * @param core         the planner's core and author fields
+     * @param stats        the planner's counter row
+     * @param hasUpvoted   whether the current user has upvoted
+     * @param isBookmarked whether the current user has bookmarked
+     * @return the public planner response DTO
      */
-    public static PublicPlannerResponse fromEntity(Planner planner, Boolean hasUpvoted, Boolean isBookmarked) {
-        return commonBuilder(planner)
+    public static PublicPlannerResponse fromCatalog(
+            PlannerCatalog row,
+            PlannerCoreInfo core,
+            PlannerStats stats,
+            boolean hasUpvoted,
+            boolean isBookmarked) {
+        return PublicPlannerResponse.builder()
+                .id(row.getPlannerId())
+                .title(row.getTitle())
+                .category(row.getCategory())
+                .plannerType(row.getPlannerType())
+                .selectedKeywords(row.getSelectedKeywords())
+                .authorUsernameEpithet(core.authorUsernameEpithet())
+                .authorUsernameSuffix(core.authorUsernameSuffix())
+                .upvotes(stats.getUpvotes())
+                .createdAt(core.createdAt())
+                .viewCount(stats.getViewCount())
+                .firstPublishedAt(row.getFirstPublishedAt())
                 .hasUpvoted(hasUpvoted)
                 .isBookmarked(isBookmarked)
+                .commentCount(stats.getCommentCount())
                 .build();
-    }
-
-    private static PublicPlannerResponseBuilder commonBuilder(Planner planner) {
-        return PublicPlannerResponse.builder()
-                .id(planner.getId())
-                .title(planner.getTitle())
-                .category(planner.getCategory())
-                .contentVersion(planner.getContentVersion())
-                .plannerType(planner.getPlannerType())
-                .selectedKeywords(planner.getSelectedKeywords())
-                .authorUsernameEpithet(planner.getUser().getUsernameEpithet())
-                .authorUsernameSuffix(planner.getUser().getUsernameSuffix())
-                .upvotes(planner.getUpvotes())
-                .createdAt(planner.getCreatedAt())
-                .viewCount(planner.getViewCount())
-                .lastModifiedAt(planner.getLastModifiedAt());
     }
 }

@@ -1,4 +1,4 @@
-import type { EGOType } from '@/pages/ego'
+import type { EgoType } from '@/shared/gameData'
 import type {
   Affinity,
   AtkType,
@@ -38,7 +38,7 @@ export interface EquippedEGO {
 /**
  * EGO slots by rank for a sinner
  */
-export type EGOSlots = Partial<Record<EGOType, EquippedEGO>>
+export type EGOSlots = Partial<Record<EgoType, EquippedEGO>>
 
 /**
  * Skill EA (Exchange Allowance) state per offensive skill slot
@@ -51,7 +51,7 @@ export type SkillEAState = Record<OffensiveSkillSlot, number>
  */
 export interface SkillInfo {
   attributeType: SkillAttributeType
-  atkType?: string
+  atkType?: string | undefined
 }
 
 /**
@@ -121,7 +121,7 @@ export interface DeckFilterState {
   /** Selected identity ranks — applied in identity mode only */
   selectedRaritys: Set<number>
   /** Selected EGO types — applied in EGO mode only */
-  selectedEgoTypes: Set<EGOType>
+  selectedEgoTypes: Set<EgoType>
   /** Selected seasons */
   selectedSeasons: Set<Season>
   /** Selected unit keywords — applied in identity mode only */
@@ -130,4 +130,45 @@ export interface DeckFilterState {
   selectedBattleKeywords: Set<string>
   /** Free-text search query */
   searchQuery: string
+}
+
+/**
+ * The DeckFilterState fields a filter chip owns: all of them hold a selection set.
+ */
+export type FilterSetKey = {
+  [K in keyof DeckFilterState]: DeckFilterState[K] extends Set<unknown> ? K : never
+}[keyof DeckFilterState]
+
+/**
+ * Every selection set of DeckFilterState, in filter-bar render order.
+ */
+export const FILTER_SET_KEYS = [
+  'selectedSinners',
+  'selectedKeywords',
+  'selectedAttributes',
+  'selectedAtkTypes',
+  'selectedDefTypes',
+  'selectedEgoTypes',
+  'selectedRaritys',
+  'selectedSeasons',
+  'selectedUnitKeywords',
+  'selectedBattleKeywords',
+] as const satisfies readonly FilterSetKey[]
+
+type Expect<T extends true> = T
+
+/**
+ * Resolves to `false` — failing the build — when DeckFilterState gains a
+ * selection set that FILTER_SET_KEYS does not name.
+ */
+export type FilterSetKeyCoverage = Expect<
+  Exclude<FilterSetKey, (typeof FILTER_SET_KEYS)[number]> extends never ? true : false
+>
+
+/** Every selection set of DeckFilterState, emptied. */
+export function createEmptyFilterSets(): Pick<DeckFilterState, FilterSetKey> {
+  return Object.fromEntries(FILTER_SET_KEYS.map((key) => [key, new Set()])) as Pick<
+    DeckFilterState,
+    FilterSetKey
+  >
 }

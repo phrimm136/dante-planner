@@ -1,0 +1,17 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`CommentComposer DOM > renders published+auth+idle 1`] = `"<button type="button" data-testid="comment-editor" data-placeholder="pages.plannerMD.comments.placeholder" data-submitting="false">editor</button>"`;
+
+exports[`CommentComposer DOM > renders published+auth+submitting 1`] = `"<button type="button" data-testid="comment-editor" data-placeholder="pages.plannerMD.comments.placeholder" data-submitting="true">editor</button>"`;
+
+exports[`CommentComposer DOM > renders published+guest+idle 1`] = `"<p class="text-muted-foreground text-sm">pages.plannerMD.comments.loginRequired</p>"`;
+
+exports[`CommentComposer DOM > renders published+guest+submitting 1`] = `"<p class="text-muted-foreground text-sm">pages.plannerMD.comments.loginRequired</p>"`;
+
+exports[`CommentComposer DOM > renders unpublished+auth+idle 1`] = `"<p class="text-muted-foreground text-sm">pages.plannerMD.comments.unpublished</p>"`;
+
+exports[`CommentComposer DOM > renders unpublished+auth+submitting 1`] = `"<p class="text-muted-foreground text-sm">pages.plannerMD.comments.unpublished</p>"`;
+
+exports[`CommentComposer DOM > renders unpublished+guest+idle 1`] = `"<p class="text-muted-foreground text-sm">pages.plannerMD.comments.unpublished</p>"`;
+
+exports[`CommentComposer DOM > renders unpublished+guest+submitting 1`] = `"<p class="text-muted-foreground text-sm">pages.plannerMD.comments.unpublished</p>"`;

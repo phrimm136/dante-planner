@@ -5,21 +5,15 @@
  * Resolves effect templates, conditions, and targets from _shared.json data.
  */
 
-import type { AbEventShared } from '../schemas/AbEventSchemas'
+import { AFFINITY_COLORS } from '@/lib/constants'
 
-/** Sin affinity colors from game ChoiceEventEffect color tags */
-export const AFFINITY_COLORS: Record<string, string> = {
-  CRIMSON: '#a0392b',
-  SCARLET: '#bb521f',
-  AMBER: '#e48801',
-  SHAMROCK: '#61822b',
-  AZURE: '#306471',
-  INDIGO: '#185188',
-  VIOLET: '#7d4e94',
-}
+import type { AbEventShared } from '../schemas/AbEventSchemas'
 
 /** Default cream text color used in game effect templates */
 const CREAM = '#ebcaa2'
+
+/** Template shape where condition and target share one cream-colored span */
+const CREAM_WRAPPED_PAIR = `<color=${CREAM}>{conditions}{targets}</color>`
 
 export interface CoinTossI18nContext {
   affinityNames: Record<string, string>
@@ -77,7 +71,7 @@ export function resolveCondition(condition: string, shared: AbEventShared): stri
 export function createEffectTextResolver(shared: AbEventShared, giftNames: Record<string, string>) {
   return function resolveEffectText(
     effectType: string,
-    giftId?: number,
+    giftId?: string,
     amount?: number,
     target?: string,
     condition?: string,
@@ -91,8 +85,11 @@ export function createEffectTextResolver(shared: AbEventShared, giftNames: Recor
     const numericSuffixes: number[] = []
     if (!template) {
       const parts = effectType.split('_')
-      while (parts.length > 1 && /^\d+$/.test(parts[parts.length - 1])) {
-        numericSuffixes.unshift(parseInt(parts.pop()!, 10))
+      while (parts.length > 1) {
+        const last = parts[parts.length - 1]
+        if (last === undefined || !/^\d+$/.test(last)) break
+        parts.pop()
+        numericSuffixes.unshift(parseInt(last, 10))
       }
       if (numericSuffixes.length > 0) {
         template = shared.effects[parts.join('_')]
@@ -103,7 +100,7 @@ export function createEffectTextResolver(shared: AbEventShared, giftNames: Recor
     const extractedAmount = amount
 
     if (giftId && template.includes('{reward}')) {
-      const giftName = giftNames[String(giftId)] ?? String(giftId)
+      const giftName = giftNames[giftId] ?? giftId
       template = template.replace('{reward}', `"${giftName}"`)
     }
 
@@ -126,12 +123,13 @@ export function createEffectTextResolver(shared: AbEventShared, giftNames: Recor
 
       if (condition) {
         const resolvedCond = resolveCondition(condition, shared)
-        template = template.replace(
-          new RegExp(`<color=${CREAM}>\\{conditions\\}\\{targets\\}</color>`),
-          `${resolvedCond}<color=${CREAM}>${resolvedTarget}</color>`,
-        )
-        template = template.replace('{conditions}', resolvedCond)
-        template = template.replace('{targets}', `<color=${CREAM}>${resolvedTarget}</color>`)
+        const creamTarget = `<color=${CREAM}>${resolvedTarget}</color>`
+        if (template.includes(CREAM_WRAPPED_PAIR)) {
+          template = template.replace(CREAM_WRAPPED_PAIR, `${resolvedCond}${creamTarget}`)
+        } else {
+          template = template.replace('{conditions}', resolvedCond)
+          template = template.replace('{targets}', creamTarget)
+        }
       } else {
         template = template.replace('{conditions}', '')
         template = template.replace('{targets}', resolvedTarget)
@@ -142,6 +140,33 @@ export function createEffectTextResolver(shared: AbEventShared, giftNames: Recor
   }
 }
 
+interface AdderNameContext {
+  unitKeywords: Record<string, string>
+  sinnerNames: Record<string, string>
+  identityNames?: Record<string, string>
+}
+
+const ADDER_RESOLVERS: Array<[string, (rest: string, ctx: AdderNameContext) => string]> = [
+  [
+    'SpecificAssociation_',
+    (rest, ctx) =>
+      rest
+        .split(',')
+        .map((key) => ctx.unitKeywords[key] ?? key.replace(/_/g, ' '))
+        .join(' / '),
+  ],
+  ['SpecificKeyword_', (rest, ctx) => ctx.unitKeywords[rest] ?? rest.replace(/_/g, ' ')],
+  ['SpecificUnit_', (rest, ctx) => ctx.sinnerNames[rest] ?? rest],
+  [
+    'SpecificPersonality_',
+    (rest, ctx) =>
+      rest
+        .split(',')
+        .map((id) => ctx.identityNames?.[id] ?? id)
+        .join(', '),
+  ],
+]
+
 /**
  * Format adder info with i18n lookups.
  */
@@ -151,22 +176,15 @@ export function formatAdderInfo(
   sinnerNames: Record<string, string>,
   identityNames?: Record<string, string>,
 ): string[] {
+  const ctx: AdderNameContext = {
+    unitKeywords,
+    sinnerNames,
+    ...(identityNames !== undefined && { identityNames }),
+  }
   return adderInfo.map((ai) => {
     const raw = ai.correctionCase
-    let label = raw
-    if (raw.startsWith('SpecificAssociation_')) {
-      const keys = raw.replace('SpecificAssociation_', '').split(',')
-      label = keys.map((k) => unitKeywords[k] ?? k.replace(/_/g, ' ')).join(' / ')
-    } else if (raw.startsWith('SpecificKeyword_')) {
-      const key = raw.replace('SpecificKeyword_', '')
-      label = unitKeywords[key] ?? key.replace(/_/g, ' ')
-    } else if (raw.startsWith('SpecificUnit_')) {
-      const key = raw.replace('SpecificUnit_', '')
-      label = sinnerNames[key] ?? key
-    } else if (raw.startsWith('SpecificPersonality_')) {
-      const ids = raw.replace('SpecificPersonality_', '').split(',')
-      label = ids.map((id) => identityNames?.[id] ?? id).join(', ')
-    }
+    const match = ADDER_RESOLVERS.find(([prefix]) => raw.startsWith(prefix))
+    const label = match ? match[1](raw.slice(match[0].length), ctx) : raw
     const sign = ai.adder > 0 ? '+' : ''
     return `${label} ${sign}${ai.adder}`
   })

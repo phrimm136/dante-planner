@@ -1,0 +1,9 @@
+# 064 sse-capacity-rejection
+epic: none · pr: none
+
+## Decisions
+- @sse @capacity — A planner's comment SSE registry answers a subscription that would exceed its connection cap by rejecting the arriving subscriber with 429, leaving every connected stream untouched. The registry admits guests and orders its entries by arrival, so the only identity available to choose a victim by is a client-writable device cookie; a rejection needs no victim and no choice. REJECTED: FIFO eviction of the oldest connection — closing a stream is what the browser's EventSource treats as a signal to reconnect, so each eviction produces the arrival that evicts the next-oldest, and a client rotating its device cookie converts a bounded registry into a self-sustaining eviction cascade over real subscribers. REJECTED: eviction keyed by identity, dropping the arriving client's own oldest connection first — it holds only for authenticated subscribers, and binding capacity to identity is the pending SSE identity design's subject, not this one.
+- @sse @capacity — The refusal is an expected user error: logged at warn, no stack, never sent to the alerting sink, and written straight to the response rather than returned as a negotiated body. The subscription endpoint produces text/event-stream, for which no converter can serialize a JSON error, so a returned entity would surface as an unhandled 500 instead of the status the client is meant to read. REJECTED: reporting it as a server error — a full registry is a capacity condition the caller can retry, not a defect.
+
+## Takeaway
+- takeaway: under a quota, admitting a newcomer by removing an incumbent hands the newcomer a lever over the incumbent; when the quota's subjects are anonymous, refusing entry is the only bound that cannot be turned into a weapon.

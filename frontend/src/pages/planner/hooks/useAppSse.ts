@@ -1,10 +1,12 @@
-import { useCallback, useMemo } from 'react'
+import { useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import type { z } from 'zod'
 
 import i18n from '@/lib/i18n'
 import { SSE_EVENTS } from '@/lib/constants'
 import { formatUsername } from '@/lib/formatUsername'
-import { useSseEngine, useSseStore, SseEnvelopeSchema } from '@/shared/sse'
+import { validateDataOrNull } from '@/lib/validation'
+import { useSseEngine, useSseStore, SseAccountSuspendedSchema } from '@/shared/sse'
 import {
   showBrowserNotification,
   isTabHidden,
@@ -14,14 +16,38 @@ import {
   notificationQueryKeys,
 } from '@/shared/notifications'
 import { useAuthQueryNonBlocking } from '@/shared/auth'
-import { useUserSettingsQuery } from '@/pages/settings'
-import { plannerApi } from '../lib/plannerApi'
-import { SsePlannerPayloadSchema } from '../schemas/PlannerSchemas'
-import { usePlannerSaveAdapter } from './usePlannerSaveAdapter'
-import { plannerQueryKeys } from './usePlannerSync'
-import { userPlannersQueryKeys } from './useMDUserPlannersData'
+import { useUserSettingsQuery, userSettingsKeys } from '@/shared/userSettings'
 
-import type { SseNotificationEvent } from '@/shared/notifications'
+import type { SseNotificationEvent, NotificationType } from '@/shared/notifications'
+
+/** The single stream carrying every app-level event type. */
+const APP_SSE_PATH = '/api/sse/subscribe'
+
+/**
+ * Title i18n key per notification type. A type absent from the table raises no
+ * notification at all.
+ */
+const NOTIFICATION_TITLE_KEY: Partial<Record<NotificationType, string>> = {
+  COMMENT_RECEIVED: 'notifications.types.commentReceived',
+  REPLY_RECEIVED: 'notifications.types.replyReceived',
+  PLANNER_RECOMMENDED: 'notifications.types.plannerRecommended',
+}
+
+/**
+ * Reads an event frame's payload, degrading to `null` on a body the contract
+ * does not describe. The engine calls handlers from inside the stream's read
+ * loop, which a throw escapes.
+ */
+function readPayload<T>(event: MessageEvent, schema: z.ZodType<T>, context: string): T | null {
+  let raw: unknown
+  try {
+    raw = JSON.parse(event.data as string)
+  } catch (error) {
+    console.error(`[${context}] Malformed JSON:`, error)
+    return null
+  }
+  return validateDataOrNull(raw, schema, context)
+}
 
 /**
  * Show notification for SSE event.
@@ -29,26 +55,9 @@ import type { SseNotificationEvent } from '@/shared/notifications'
  * - Tab visible: in-app toast popup (bottom-right)
  */
 function showNotificationForEvent(data: SseNotificationEvent): void {
-  // Build notification title based on type
-  let title: string
-  let type: 'COMMENT_RECEIVED' | 'REPLY_RECEIVED' | 'PLANNER_RECOMMENDED'
-  switch (data.type) {
-    case 'COMMENT_RECEIVED':
-      title = i18n.t('notifications.types.commentReceived', { ns: 'common' })
-      type = 'COMMENT_RECEIVED'
-      break
-    case 'REPLY_RECEIVED':
-      title = i18n.t('notifications.types.replyReceived', { ns: 'common' })
-      type = 'REPLY_RECEIVED'
-      break
-    case 'PLANNER_RECOMMENDED':
-      title = i18n.t('notifications.types.plannerRecommended', { ns: 'common' })
-      type = 'PLANNER_RECOMMENDED'
-      break
-    default:
-      // REPORT_RECEIVED or unknown - don't show notification
-      return
-  }
+  const titleKey = NOTIFICATION_TITLE_KEY[data.type]
+  if (!titleKey) return
+  const title = i18n.t(titleKey, { ns: 'common' })
 
   // Build notification body
   const body = data.plannerTitle
@@ -68,20 +77,10 @@ function showNotificationForEvent(data: SseNotificationEvent): void {
 
   // Show browser notification if tab hidden, in-app toast if visible
   if (isTabHidden()) {
-    showBrowserNotification({ title, body, url })
+    showBrowserNotification({ title, body, ...(url !== undefined && { url }) })
   } else {
-    showNotificationToast({ type, title, body, url })
+    showNotificationToast({ type: data.type, title, body, ...(url !== undefined && { url }) })
   }
-}
-
-/**
- * Replace the entry matching `item.id` in a planner list cache, or append it
- * when absent. Non-mutating; tolerates a non-array/undefined `list`.
- */
-function upsertById(list: unknown, item: { id?: string } | undefined) {
-  const arr = Array.isArray(list) ? list : []
-  const i = arr.findIndex((p) => p?.id === item?.id)
-  return i >= 0 ? arr.map((p, idx) => (idx === i ? item : p)) : [...arr, item]
 }
 
 /**
@@ -90,11 +89,12 @@ function upsertById(list: unknown, item: { id?: string } | undefined) {
  *
  * Owns the domain wiring the generic `useSseEngine` deliberately does not:
  * gating the connection on auth + user settings (sync OR any notification pref),
- * opening the planner event stream, and the per-event side-effects (planner
- * cache invalidation + local purge, notification cache invalidation + toast,
- * auth refresh on suspension). Lives in `pages/planner` because it composes the
- * planner and settings slices — a legal page→page dependency — which keeps the
- * SSE primitive itself free of any page import.
+ * opening the app event stream, and the per-event side-effects (notification
+ * cache invalidation + toast, auth refresh on suspension). Planner freshness is
+ * not among them — server-backed planner queries refetch on window focus
+ * instead. Lives in `pages/planner` because it composes the planner and
+ * settings slices — a legal page→page dependency — which keeps the SSE
+ * primitive itself free of any page import.
  *
  * @example
  * ```tsx
@@ -106,7 +106,6 @@ function upsertById(list: unknown, item: { id?: string } | undefined) {
  */
 export function useAppSse(): void {
   const queryClient = useQueryClient()
-  const saveAdapter = usePlannerSaveAdapter()
   const setLastEventTime = useSseStore((s) => s.setLastEventTime)
 
   // Auth and settings state (non-blocking to avoid suspending page load)
@@ -126,174 +125,87 @@ export function useAppSse(): void {
   const shouldConnect = isAuthenticated && (syncEnabled || notificationsEnabled)
 
   /**
-   * Handle SSE planner update event.
-   *
-   * On 'deleted', purge the row from IndexedDB so a stale local copy can't
-   * trigger an upsert against the soft-deleted server row on next edit.
-   * The underlying IndexedDB delete is idempotent — safe if the row is
-   * already absent (e.g. self-originated event echoed back).
-   */
-  const handlePlannerUpdate = useCallback(
-    (event: MessageEvent) => {
-      try {
-        const data = SseEnvelopeSchema.parse(JSON.parse(event.data as string))
-        const plannerId = data.entityId ?? data.plannerId
-
-        if (data.type === 'deleted') {
-          const deletedId = data.deletedId ?? plannerId
-          if (deletedId) {
-            void saveAdapter.deleteFromLocal(deletedId).catch((e) => {
-              console.error('Failed to purge local planner after SSE delete:', e)
-            })
-            queryClient.setQueryData(plannerQueryKeys.list(), (prev) =>
-              Array.isArray(prev) ? prev.filter((p) => p?.id !== deletedId) : prev,
-            )
-          }
-        } else if ((data.type === 'created' || data.type === 'updated') && plannerId) {
-          const parsed = SsePlannerPayloadSchema.safeParse(data.payload)
-          if (parsed.success) {
-            queryClient.setQueryData(plannerQueryKeys.detail(plannerId), parsed.data)
-            queryClient.setQueryData(plannerQueryKeys.list(), (prev) =>
-              upsertById(prev, parsed.data),
-            )
-          } else {
-            // Contract violation: the payload must be a planner row. Never write
-            // an unparsed payload into a cache — mark the row-level caches stale
-            // and let consumers refetch.
-            console.error('SSE planner payload failed schema parse; falling back to invalidation')
-            void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.detail(plannerId) })
-            void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.list() })
-          }
-          // userPlanners reads IndexedDB, so this refetch cannot race replica
-          // replication; without it, mounted pages keep a pre-save syncVersion
-          // and later present it to the server (409).
-          void queryClient.invalidateQueries({ queryKey: userPlannersQueryKeys.all })
-        }
-
-        setLastEventTime(Date.now())
-      } catch (e) {
-        console.error('Failed to parse SSE planner-update event:', e)
-      }
-    },
-    [queryClient, setLastEventTime, saveAdapter],
-  )
-
-  /**
    * Handle SSE notification event (comment, recommended, published)
    * Invalidates notification queries to trigger immediate UI update.
    * Shows browser notification if tab is hidden and permission granted.
    */
-  const handleNotification = useCallback(
-    (event: MessageEvent) => {
-      // Invalidate all notification queries (inbox + unread count)
-      void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.all })
-      setLastEventTime(Date.now())
+  const handleNotification = (event: MessageEvent) => {
+    // Invalidate all notification queries (inbox + unread count)
+    void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.all })
+    setLastEventTime(Date.now())
 
-      // Parse and show browser notification
-      try {
-        const parsed = SseNotificationEventSchema.safeParse(JSON.parse(event.data as string))
-        if (!parsed.success) {
-          console.warn('SSE notification parse failed:', parsed.error)
-          return
-        }
+    const data = readPayload(event, SseNotificationEventSchema, 'sse notification')
+    if (!data) return
 
-        showNotificationForEvent(parsed.data)
-      } catch (e) {
-        console.error('Failed to parse SSE notification event:', e)
-      }
-    },
-    [queryClient, setLastEventTime],
-  )
+    showNotificationForEvent(data)
+  }
 
   /**
    * Handle account suspension event (ban or timeout)
    * Invalidates auth query to refresh user profile with restriction status.
    */
-  const handleAccountSuspended = useCallback(
-    (event: MessageEvent) => {
-      setLastEventTime(Date.now())
+  const handleAccountSuspended = (event: MessageEvent) => {
+    setLastEventTime(Date.now())
 
-      // Invalidate auth query to refresh user profile
-      void queryClient.invalidateQueries({ queryKey: ['auth', 'me'] })
+    // Invalidate auth query to refresh user profile
+    void queryClient.invalidateQueries({ queryKey: ['auth', 'me'] })
 
-      // Parse event for logging
-      try {
-        const data = JSON.parse(event.data as string)
-        const suspensionType = data.suspensionType as string
-        const reason = data.reason as string
+    const data = readPayload(event, SseAccountSuspendedSchema, 'sse account suspended')
+    if (!data) return
 
-        console.warn(`Account suspended (${suspensionType}):`, reason || 'No reason provided')
-      } catch (e) {
-        console.error('Failed to parse SSE account_suspended event:', e)
-      }
-    },
-    [queryClient, setLastEventTime],
-  )
+    const { suspensionType, reason } = data
+    console.warn(`Account suspended (${suspensionType}):`, reason || 'No reason provided')
+  }
 
   /**
    * Handle SSE published event (new planner published broadcast).
-   * Shows notification (browser or in-app) and invalidates planner list cache.
+   *
+   * This type is delivered as its bare payload, not as an envelope.
    */
-  const handlePublished = useCallback(
-    (event: MessageEvent) => {
-      setLastEventTime(Date.now())
+  const handlePublished = (event: MessageEvent) => {
+    setLastEventTime(Date.now())
 
-      let raw: unknown
+    // Invalidate notification queries to show new notification in inbox
+    void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.all })
 
-      // Insert the published planner into the list cache from the payload
-      try {
-        raw = JSON.parse(event.data as string)
-        const envelope = SseEnvelopeSchema.parse(raw)
-        const published = envelope.payload as { id?: string } | undefined
-        if (published?.id) {
-          queryClient.setQueryData(plannerQueryKeys.list(), (prev) => upsertById(prev, published))
-        }
-      } catch (e) {
-        console.error('Failed to parse SSE published envelope:', e)
-      }
-      // Invalidate notification queries to show new notification in inbox
-      void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.all })
+    const data = readPayload(event, SsePublishedEventSchema, 'sse published')
+    if (!data) return
 
-      // Parse and show notification
-      try {
-        const parsed = SsePublishedEventSchema.safeParse(raw)
-        if (!parsed.success) {
-          console.warn('SSE published event parse failed:', parsed.error)
-          return
-        }
+    const title = i18n.t('notifications.types.plannerPublished', { ns: 'common' })
+    const authorDisplay = formatUsername(data.authorEpithet, data.authorSuffix)
+    const body = `${authorDisplay}: ${data.plannerTitle}`
+    const url = `/planner/md/gesellschaft/${data.plannerId}`
 
-        const data = parsed.data
-        const title = i18n.t('notifications.types.plannerPublished', { ns: 'common' })
-        const authorDisplay = formatUsername(data.authorKeyword, data.authorSuffix)
-        const body = `${authorDisplay}: ${data.plannerTitle}`
-        const url = `/planner/md/gesellschaft/${data.plannerId}`
+    // Show browser notification if tab hidden, in-app toast if visible
+    if (isTabHidden()) {
+      showBrowserNotification({ title, body, url })
+    } else {
+      showNotificationToast({ type: 'PLANNER_PUBLISHED', title, body, url })
+    }
+  }
 
-        // Show browser notification if tab hidden, in-app toast if visible
-        if (isTabHidden()) {
-          showBrowserNotification({ title, body, url })
-        } else {
-          showNotificationToast({ type: 'PLANNER_PUBLISHED', title, body, url })
-        }
-      } catch (e) {
-        console.error('Failed to parse SSE published event:', e)
-      }
-    },
-    [queryClient, setLastEventTime],
-  )
+  /** Settings are re-read after a gap in the stream, not on the first open. */
+  const hasConnectedRef = useRef(false)
+  const handleConnected = () => {
+    if (hasConnectedRef.current) {
+      void queryClient.invalidateQueries({ queryKey: userSettingsKeys.settings() })
+    }
+    hasConnectedRef.current = true
+  }
 
-  const createConnection = useCallback(() => plannerApi.createEventsConnection(), [])
+  const handlers = {
+    [SSE_EVENTS.NOTIFY_COMMENT]: handleNotification,
+    [SSE_EVENTS.NOTIFY_RECOMMENDED]: handleNotification,
+    [SSE_EVENTS.NOTIFY_PUBLISHED]: handlePublished,
+    [SSE_EVENTS.ACCOUNT_SUSPENDED]: handleAccountSuspended,
+  }
 
-  const handlers = useMemo(
-    () => ({
-      [SSE_EVENTS.PLANNER_UPDATE]: handlePlannerUpdate,
-      [SSE_EVENTS.SYNC_PLANNER]: handlePlannerUpdate,
-      [SSE_EVENTS.NOTIFY_COMMENT]: handleNotification,
-      [SSE_EVENTS.NOTIFY_RECOMMENDED]: handleNotification,
-      [SSE_EVENTS.NOTIFY_PUBLISHED]: handlePublished,
-      account_suspended: handleAccountSuspended,
-    }),
-    [handlePlannerUpdate, handleNotification, handlePublished, handleAccountSuspended],
-  )
-
-  useSseEngine({ shouldConnect, createConnection, handlers })
+  // This path names no resource, so its 404s are infrastructure rather than a
+  // missing subject: it keeps the ordinary backoff instead of stopping.
+  useSseEngine({
+    shouldConnect,
+    url: APP_SSE_PATH,
+    handlers,
+    onConnected: handleConnected,
+  })
 }

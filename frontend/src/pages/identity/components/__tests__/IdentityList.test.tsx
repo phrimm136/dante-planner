@@ -10,6 +10,8 @@ import { render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Suspense } from 'react'
 import { IdentityList } from '../IdentityList'
+import { createTestFilterStore } from '@/test-utils/filterStore'
+import type { IdentityFacetState } from '../../lib/identityFilter'
 import type { IdentityListItem } from '../../types/IdentityTypes'
 
 // Mock TanStack Router Link component
@@ -22,11 +24,7 @@ vi.mock('@tanstack/react-router', () => ({
     children: React.ReactNode
     to: string
     params?: Record<string, string>
-  }) => (
-    <a href={params?.id ? `${to.replace('$id', params.id)}` : to} role="link">
-      {children}
-    </a>
-  ),
+  }) => <a href={params?.id ? `${to.replace('$id', params.id)}` : to}>{children}</a>,
 }))
 
 // Mock asset paths
@@ -41,8 +39,8 @@ vi.mock('@/shared/assets', () => ({
 }))
 
 // Mock search mappings - non-suspending version
-vi.mock('@/shared/filter/hooks/useSearchMappings', () => ({
-  useSearchMappingsDeferred: vi.fn(),
+vi.mock('@/shared/filter/hooks/useSearchTermSources', () => ({
+  useSearchTermSources: vi.fn(),
 }))
 
 // Mock IdentityListI18n for IdentityName component
@@ -52,14 +50,16 @@ vi.mock('../../hooks/useIdentityListData', () => ({
     '10201': 'Test Identity 2',
     '10301': 'Test Identity 3',
   }),
-  useIdentityListI18nDeferred: () => ({
-    '10101': 'Test Identity 1',
-    '10201': 'Test Identity 2',
-    '10301': 'Test Identity 3',
-  }),
+  IDENTITY_LIST: { kind: 'identity' },
 }))
 
-import { useSearchMappingsDeferred } from '@/shared/filter'
+import { useSearchTermSources } from '@/shared/filter'
+
+const IDENTITY_NAMES = {
+  '10101': 'Test Identity 1',
+  '10201': 'Test Identity 2',
+  '10301': 'Test Identity 3',
+}
 
 const mockIdentities: IdentityListItem[] = [
   {
@@ -103,6 +103,22 @@ const mockIdentities: IdentityListItem[] = [
   },
 ]
 
+const EMPTY_FACETS: IdentityFacetState = {
+  selectedSinners: new Set(),
+  selectedKeywords: new Set(),
+  selectedBattleKeywords: new Set(),
+  selectedAttributes: new Set(),
+  selectedAtkTypes: new Set(),
+  selectedDefTypes: new Set(),
+  selectedRaritys: new Set(),
+  selectedSeasons: new Set(),
+  selectedUnitKeywords: new Set(),
+}
+
+function makeStore(values: Partial<IdentityFacetState> = {}, searchQuery = '') {
+  return createTestFilterStore<IdentityFacetState>({ ...EMPTY_FACETS, ...values }, searchQuery)
+}
+
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -123,30 +139,20 @@ describe('IdentityList', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     // Default: return empty mappings (loading state)
-    vi.mocked(useSearchMappingsDeferred).mockReturnValue({
-      keywordToValue: new Map(),
-      unitKeywordToValue: new Map(),
+    vi.mocked(useSearchTermSources).mockReturnValue({
+      names: IDENTITY_NAMES,
+      mappings: {
+        keywordToValue: new Map(),
+        unitKeywordToValue: new Map(),
+      },
     })
   })
 
   describe('rendering', () => {
     it('renders all identities when no filters applied', () => {
-      render(
-        <IdentityList
-          identities={mockIdentities}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set()}
-          selectedDefTypes={new Set()}
-          selectedRaritys={new Set()}
-          selectedSeasons={new Set()}
-          selectedUnitKeywords={new Set()}
-          searchQuery=""
-        />,
-        { wrapper: createWrapper() },
-      )
+      render(<IdentityList identities={mockIdentities} store={makeStore()} />, {
+        wrapper: createWrapper(),
+      })
 
       const cards = screen.getAllByRole('link')
       expect(cards).toHaveLength(3)
@@ -156,16 +162,7 @@ describe('IdentityList', () => {
       render(
         <IdentityList
           identities={mockIdentities}
-          selectedSinners={new Set(['NonExistentSinner'])}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set()}
-          selectedDefTypes={new Set()}
-          selectedRaritys={new Set()}
-          selectedSeasons={new Set()}
-          selectedUnitKeywords={new Set()}
-          searchQuery=""
+          store={makeStore({ selectedSinners: new Set(['NonExistentSinner']) })}
         />,
         { wrapper: createWrapper() },
       )
@@ -179,23 +176,14 @@ describe('IdentityList', () => {
       const { container } = render(
         <IdentityList
           identities={mockIdentities}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set(['AZURE'])}
-          selectedAtkTypes={new Set()}
-          selectedDefTypes={new Set()}
-          selectedRaritys={new Set()}
-          selectedSeasons={new Set()}
-          selectedUnitKeywords={new Set()}
-          searchQuery=""
+          store={makeStore({ selectedAttributes: new Set(['AZURE']) })}
         />,
         { wrapper: createWrapper() },
       )
 
       // Identities with AZURE: 10101 (CRIMSON+AZURE) and 10201 (AZURE)
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3)
       expect(hiddenCards.length).toBe(1) // VIOLET (10301) hidden
     })
@@ -204,23 +192,14 @@ describe('IdentityList', () => {
       const { container } = render(
         <IdentityList
           identities={mockIdentities}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set(['CRIMSON', 'AZURE'])}
-          selectedAtkTypes={new Set()}
-          selectedDefTypes={new Set()}
-          selectedRaritys={new Set()}
-          selectedSeasons={new Set()}
-          selectedUnitKeywords={new Set()}
-          searchQuery=""
+          store={makeStore({ selectedAttributes: new Set(['CRIMSON', 'AZURE']) })}
         />,
         { wrapper: createWrapper() },
       )
 
       // Only 10101 has BOTH CRIMSON and AZURE
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3)
       expect(hiddenCards.length).toBe(2) // 10201 and 10301 hidden
     })
@@ -229,23 +208,14 @@ describe('IdentityList', () => {
       const { container } = render(
         <IdentityList
           identities={mockIdentities}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set(['PENETRATE'])}
-          selectedDefTypes={new Set()}
-          selectedRaritys={new Set()}
-          selectedSeasons={new Set()}
-          selectedUnitKeywords={new Set()}
-          searchQuery=""
+          store={makeStore({ selectedAtkTypes: new Set(['PENETRATE']) })}
         />,
         { wrapper: createWrapper() },
       )
 
       // Identities with PENETRATE: 10101 (SLASH+PENETRATE) and 10201 (PENETRATE)
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3)
       expect(hiddenCards.length).toBe(1) // HIT (10301) hidden
     })
@@ -254,23 +224,14 @@ describe('IdentityList', () => {
       const { container } = render(
         <IdentityList
           identities={mockIdentities}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set(['SLASH', 'PENETRATE'])}
-          selectedDefTypes={new Set()}
-          selectedRaritys={new Set()}
-          selectedSeasons={new Set()}
-          selectedUnitKeywords={new Set()}
-          searchQuery=""
+          store={makeStore({ selectedAtkTypes: new Set(['SLASH', 'PENETRATE']) })}
         />,
         { wrapper: createWrapper() },
       )
 
       // Only 10101 has BOTH SLASH and PENETRATE
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3)
       expect(hiddenCards.length).toBe(2) // 10201 and 10301 hidden
     })
@@ -279,23 +240,14 @@ describe('IdentityList', () => {
       const { container } = render(
         <IdentityList
           identities={mockIdentities}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set()}
-          selectedDefTypes={new Set()}
-          selectedRaritys={new Set([3])}
-          selectedSeasons={new Set()}
-          selectedUnitKeywords={new Set()}
-          searchQuery=""
+          store={makeStore({ selectedRaritys: new Set([3]) })}
         />,
         { wrapper: createWrapper() },
       )
 
       // Rank 3: 10101 and 10301
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3)
       expect(hiddenCards.length).toBe(1) // 10201 (rank 2) hidden
     })
@@ -304,23 +256,14 @@ describe('IdentityList', () => {
       const { container } = render(
         <IdentityList
           identities={mockIdentities}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set()}
-          selectedDefTypes={new Set()}
-          selectedRaritys={new Set()}
-          selectedSeasons={new Set([1])}
-          selectedUnitKeywords={new Set()}
-          searchQuery=""
+          store={makeStore({ selectedSeasons: new Set([1]) })}
         />,
         { wrapper: createWrapper() },
       )
 
       // Season 1: 10101 and 10301
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3)
       expect(hiddenCards.length).toBe(1) // Season 2 (10201) hidden
     })
@@ -329,23 +272,14 @@ describe('IdentityList', () => {
       const { container } = render(
         <IdentityList
           identities={mockIdentities}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set()}
-          selectedDefTypes={new Set()}
-          selectedRaritys={new Set()}
-          selectedSeasons={new Set()}
-          selectedUnitKeywords={new Set(['SevenAssociation'])}
-          searchQuery=""
+          store={makeStore({ selectedUnitKeywords: new Set(['SevenAssociation']) })}
         />,
         { wrapper: createWrapper() },
       )
 
       // Only 10201 has SevenAssociation
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3)
       expect(hiddenCards.length).toBe(2) // 10101 and 10301 hidden
     })
@@ -354,23 +288,14 @@ describe('IdentityList', () => {
       const { container } = render(
         <IdentityList
           identities={mockIdentities}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set(['Burst', 'Combustion'])}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set()}
-          selectedDefTypes={new Set()}
-          selectedRaritys={new Set()}
-          selectedSeasons={new Set()}
-          selectedUnitKeywords={new Set()}
-          searchQuery=""
+          store={makeStore({ selectedKeywords: new Set(['Burst', 'Combustion']) })}
         />,
         { wrapper: createWrapper() },
       )
 
       // Only 10101 has BOTH Burst and Combustion
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3)
       expect(hiddenCards.length).toBe(2) // 10201 and 10301 hidden
     })
@@ -379,24 +304,18 @@ describe('IdentityList', () => {
       const { container } = render(
         <IdentityList
           identities={mockIdentities}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set(['CRIMSON'])}
-          selectedAtkTypes={new Set(['SLASH'])}
-          selectedDefTypes={new Set()}
-          selectedRaritys={new Set()}
-          selectedSeasons={new Set()}
-          selectedUnitKeywords={new Set()}
-          searchQuery=""
+          store={makeStore({
+            selectedAttributes: new Set(['CRIMSON']),
+            selectedAtkTypes: new Set(['SLASH']),
+          })}
         />,
         { wrapper: createWrapper() },
       )
 
       // Must have CRIMSON attribute AND SLASH attack type
       // Only 10101 has both
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3)
       expect(hiddenCards.length).toBe(2) // 10201 and 10301 hidden
     })
@@ -404,90 +323,62 @@ describe('IdentityList', () => {
 
   describe('search with deferred mappings', () => {
     it('returns no results when mappings are loading (empty)', () => {
-      vi.mocked(useSearchMappingsDeferred).mockReturnValue({
-        keywordToValue: new Map(),
-        unitKeywordToValue: new Map(),
+      vi.mocked(useSearchTermSources).mockReturnValue({
+        names: IDENTITY_NAMES,
+        mappings: {
+          keywordToValue: new Map(),
+          unitKeywordToValue: new Map(),
+        },
       })
 
-      render(
-        <IdentityList
-          identities={mockIdentities}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set()}
-          selectedDefTypes={new Set()}
-          selectedRaritys={new Set()}
-          selectedSeasons={new Set()}
-          selectedUnitKeywords={new Set()}
-          searchQuery="rupture"
-        />,
-        { wrapper: createWrapper() },
-      )
+      render(<IdentityList identities={mockIdentities} store={makeStore({}, 'rupture')} />, {
+        wrapper: createWrapper(),
+      })
 
       expect(screen.getByText(/No Identities match/)).toBeInTheDocument()
     })
 
     it('filters by keyword search when mappings are loaded', () => {
-      vi.mocked(useSearchMappingsDeferred).mockReturnValue({
-        keywordToValue: new Map([
-          ['rupture', ['Burst']],
-          ['burn', ['Combustion']],
-          ['charge', ['Charge']],
-        ]),
-        unitKeywordToValue: new Map(),
+      vi.mocked(useSearchTermSources).mockReturnValue({
+        names: IDENTITY_NAMES,
+        mappings: {
+          keywordToValue: new Map([
+            ['rupture', ['Burst']],
+            ['burn', ['Combustion']],
+            ['charge', ['Charge']],
+          ]),
+          unitKeywordToValue: new Map(),
+        },
       })
 
       const { container } = render(
-        <IdentityList
-          identities={mockIdentities}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set()}
-          selectedDefTypes={new Set()}
-          selectedRaritys={new Set()}
-          selectedSeasons={new Set()}
-          selectedUnitKeywords={new Set()}
-          searchQuery="rupture"
-        />,
+        <IdentityList identities={mockIdentities} store={makeStore({}, 'rupture')} />,
         { wrapper: createWrapper() },
       )
 
       // Identities with Burst keyword: 10101 and 10301
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3)
       expect(hiddenCards.length).toBe(1) // 10201 hidden
     })
 
     it('search is case-insensitive', () => {
-      vi.mocked(useSearchMappingsDeferred).mockReturnValue({
-        keywordToValue: new Map([['charge', ['Charge']]]),
-        unitKeywordToValue: new Map(),
+      vi.mocked(useSearchTermSources).mockReturnValue({
+        names: IDENTITY_NAMES,
+        mappings: {
+          keywordToValue: new Map([['charge', ['Charge']]]),
+          unitKeywordToValue: new Map(),
+        },
       })
 
       const { container } = render(
-        <IdentityList
-          identities={mockIdentities}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set()}
-          selectedDefTypes={new Set()}
-          selectedRaritys={new Set()}
-          selectedSeasons={new Set()}
-          selectedUnitKeywords={new Set()}
-          searchQuery="CHARGE"
-        />,
+        <IdentityList identities={mockIdentities} store={makeStore({}, 'CHARGE')} />,
         { wrapper: createWrapper() },
       )
 
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3)
       expect(hiddenCards.length).toBe(2) // Only 10201 matches
     })
@@ -495,32 +386,26 @@ describe('IdentityList', () => {
 
   describe('combined filters and search', () => {
     it('applies both filters and search together', () => {
-      vi.mocked(useSearchMappingsDeferred).mockReturnValue({
-        keywordToValue: new Map([['rupture', ['Burst']]]),
-        unitKeywordToValue: new Map(),
+      vi.mocked(useSearchTermSources).mockReturnValue({
+        names: IDENTITY_NAMES,
+        mappings: {
+          keywordToValue: new Map([['rupture', ['Burst']]]),
+          unitKeywordToValue: new Map(),
+        },
       })
 
       const { container } = render(
         <IdentityList
           identities={mockIdentities}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set(['CRIMSON'])}
-          selectedAtkTypes={new Set()}
-          selectedDefTypes={new Set()}
-          selectedRaritys={new Set()}
-          selectedSeasons={new Set()}
-          selectedUnitKeywords={new Set()}
-          searchQuery="rupture"
+          store={makeStore({ selectedAttributes: new Set(['CRIMSON']) }, 'rupture')}
         />,
         { wrapper: createWrapper() },
       )
 
       // Must have CRIMSON attribute AND match "rupture" search (Burst keyword)
       // Only 10101 has both
-      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
-      const totalCards = container.querySelectorAll('a[role="link"]')
+      const hiddenCards = container.querySelectorAll('div.hidden > a')
+      const totalCards = container.querySelectorAll('a')
       expect(totalCards.length).toBe(3)
       expect(hiddenCards.length).toBe(2) // 10201 and 10301 hidden
     })

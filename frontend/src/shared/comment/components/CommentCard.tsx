@@ -10,77 +10,39 @@
  * Content is sanitized with DOMPurify before rendering.
  */
 
-import { useState, useCallback, memo } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import DOMPurify from 'dompurify'
+import { sanitizeUserHtml } from '@/shared/sanitize'
 
 import { COMMENT_INDENT_PER_LEVEL } from '@/lib/constants'
-import { formatShortRelativeTime } from '@/lib/utils'
+import { formatCompactRelativeTime } from '@/lib/formatDate'
 import { formatUsername } from '@/lib/formatUsername'
 import { DeletedCommentPlaceholder } from './DeletedCommentPlaceholder'
 import { CommentActionButtons } from './CommentActionButtons'
 import { CommentEditor } from './CommentEditor'
 
 import type { CommentNode } from '../types/CommentTypes'
+import type { CommentActions, CommentViewer } from '../lib/commentViewer'
 
 interface CommentCardProps {
   comment: CommentNode
+  /** Whether the planner carrying the comment is published. */
   isPublished: boolean
-  isAuthenticated: boolean
-  isModerator: boolean
-  onReply: (commentId: string, content: string) => void
-  onEdit: (commentId: string, content: string) => void
-  onDelete: (commentId: string) => void
-  onModeratorDelete: (commentId: string) => void
-  onUpvote: (commentId: string) => void
-  onToggleNotifications: (commentId: string) => void
-  onReport: (commentId: string) => void
+  viewer: CommentViewer
+  actions: CommentActions
   isUpvoting?: boolean
 }
 
-// Custom comparison - only re-render when comment data actually changes
-function commentCardPropsAreEqual(prev: CommentCardProps, next: CommentCardProps): boolean {
-  // Compare comment data fields that affect rendering
-  const prevComment = prev.comment
-  const nextComment = next.comment
-
-  return (
-    prevComment.id === nextComment.id &&
-    prevComment.content === nextComment.content &&
-    prevComment.upvoteCount === nextComment.upvoteCount &&
-    prevComment.hasUpvoted === nextComment.hasUpvoted &&
-    prevComment.isDeleted === nextComment.isDeleted &&
-    prevComment.isUpdated === nextComment.isUpdated &&
-    prevComment.authorNotificationsEnabled === nextComment.authorNotificationsEnabled &&
-    prev.isPublished === next.isPublished &&
-    prev.isAuthenticated === next.isAuthenticated &&
-    prev.isModerator === next.isModerator &&
-    prev.isUpvoting === next.isUpvoting
-  )
-}
-
-export const CommentCard = memo(function CommentCard({
+export const CommentCard = function CommentCard({
   comment,
   isPublished,
-  isAuthenticated,
-  isModerator,
-  onReply,
-  onEdit,
-  onDelete,
-  onModeratorDelete,
-  onUpvote,
-  onToggleNotifications,
-  onReport,
+  viewer,
+  actions,
   isUpvoting = false,
 }: CommentCardProps) {
   const { t, i18n } = useTranslation(['planner', 'common'])
   const [showReplyEditor, setShowReplyEditor] = useState(false)
   const [showEditEditor, setShowEditEditor] = useState(false)
-
-  // Show deleted placeholder for deleted comments
-  if (comment.isDeleted) {
-    return <DeletedCommentPlaceholder />
-  }
 
   // Format author name with i18n translation for epithet
   const authorName =
@@ -89,51 +51,27 @@ export const CommentCard = memo(function CommentCard({
       : t('pages.plannerMD.comments.deletedUser')
 
   // Format relative dates (short format with i18n)
-  const formattedCreatedAt = formatShortRelativeTime(comment.createdAt, i18n.language)
+  const formattedCreatedAt = formatCompactRelativeTime(comment.createdAt, i18n.language)
 
-  // Sanitize HTML content for XSS protection using DOMPurify
-  const sanitizedContent = comment.content ? DOMPurify.sanitize(comment.content) : ''
+  const sanitizedContent = comment.content ? sanitizeUserHtml(comment.content) : ''
 
-  const handleReplyClick = useCallback(() => setShowReplyEditor(true), [])
-  const handleEditClick = useCallback(() => setShowEditEditor(true), [])
+  const handleReplyClick = () => setShowReplyEditor(true)
+  const handleEditClick = () => setShowEditEditor(true)
 
-  // Delete triggers parent's confirmation dialog
-  const handleDeleteClick = useCallback(() => {
-    onDelete(comment.id)
-  }, [comment.id, onDelete])
+  const handleReplySubmit = (content: string) => {
+    actions.onReply(comment.id, content)
+    setShowReplyEditor(false)
+  }
 
-  // Moderator delete triggers parent's confirmation dialog
-  const handleModeratorDeleteClick = useCallback(() => {
-    onModeratorDelete(comment.id)
-  }, [comment.id, onModeratorDelete])
+  const handleEditSubmit = (content: string) => {
+    actions.onEdit(comment.id, content)
+    setShowEditEditor(false)
+  }
 
-  const handleReplySubmit = useCallback(
-    (content: string) => {
-      onReply(comment.id, content)
-      setShowReplyEditor(false)
-    },
-    [comment.id, onReply],
-  )
-
-  const handleEditSubmit = useCallback(
-    (content: string) => {
-      onEdit(comment.id, content)
-      setShowEditEditor(false)
-    },
-    [comment.id, onEdit],
-  )
-
-  const handleUpvote = useCallback(() => {
-    onUpvote(comment.id)
-  }, [comment.id, onUpvote])
-
-  const handleToggleNotifications = useCallback(() => {
-    onToggleNotifications(comment.id)
-  }, [comment.id, onToggleNotifications])
-
-  const handleReport = useCallback(() => {
-    onReport(comment.id)
-  }, [comment.id, onReport])
+  // Show deleted placeholder for deleted comments
+  if (comment.isDeleted) {
+    return <DeletedCommentPlaceholder />
+  }
 
   return (
     <div id={`comment-${comment.id}`} className="py-3 scroll-mt-20">
@@ -148,15 +86,10 @@ export const CommentCard = memo(function CommentCard({
         <CommentActionButtons
           comment={comment}
           isPublished={isPublished}
-          isAuthenticated={isAuthenticated}
-          isModerator={isModerator}
-          onReply={handleReplyClick}
-          onEdit={handleEditClick}
-          onDelete={handleDeleteClick}
-          onModeratorDelete={handleModeratorDeleteClick}
-          onUpvote={handleUpvote}
-          onToggleNotifications={handleToggleNotifications}
-          onReport={handleReport}
+          viewer={viewer}
+          actions={actions}
+          onStartReply={handleReplyClick}
+          onStartEdit={handleEditClick}
           isUpvoting={isUpvoting}
         />
       </div>
@@ -171,7 +104,7 @@ export const CommentCard = memo(function CommentCard({
         />
       ) : (
         <>
-          {comment.isUpdated && (
+          {comment.updatedAt != null && (
             <span className="text-muted-foreground text-xs">
               ({t('pages.plannerMD.comments.modified', 'edited')})
             </span>
@@ -199,4 +132,4 @@ export const CommentCard = memo(function CommentCard({
       )}
     </div>
   )
-}, commentCardPropsAreEqual)
+}

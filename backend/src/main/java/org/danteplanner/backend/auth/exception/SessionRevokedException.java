@@ -23,6 +23,15 @@ public class SessionRevokedException extends RuntimeException {
     }
 
     /**
+     * Creates a new SessionRevokedException for a revocation whose family the rejection
+     * did not name.
+     */
+    public SessionRevokedException() {
+        super("Refresh token family has been revoked");
+        this.familyId = null;
+    }
+
+    /**
      * Returns the revoked token family identifier.
      */
     public String getFamilyId() {

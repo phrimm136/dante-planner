@@ -1,44 +1,31 @@
-import { useMemo } from 'react'
-import { useTranslation } from 'react-i18next'
-
 import type { EGOGiftListItem } from '../types/EGOGiftTypes'
-import type { EGOGiftAttributeType, EGOGiftDifficulty, EGOGiftTier } from '@/shared/gameData'
-import { CARD_GRID, PROGRESSIVE_REVEAL } from '@/lib/constants'
-import { useSearchMappingsDeferred } from '@/shared/filter'
-import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
-import { useEGOGiftListI18nDeferred } from '../hooks/useEGOGiftListData'
+import { CARD_GRID } from '@/lib/constants'
+import { FilteredEntityGrid, useSearchTermSources, type CardGeometry } from '@/shared/filter'
+import { EGO_GIFT_LIST } from '../hooks/useEGOGiftListData'
+import type { FilterStore } from '@/components/hooks/useSetFilters'
 import { sortEGOGifts } from '../lib/egoGiftSort'
 import {
-  matchesKeywordFilter,
-  matchesDifficultyFilter,
-  matchesTierFilter,
-  matchesThemePackFilter,
-  matchesAttributeTypeFilter,
-  matchesFusionedFilter,
-  matchesExclusiveFilter,
+  buildEGOGiftSearchTerms,
+  matchesEGOGift,
+  type EGOGiftFacetState,
 } from '../lib/egoGiftFilter'
-import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
-import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { EGOGiftCardLink } from './EGOGiftCardLink'
+
+const EMPTY_NAMES: Record<string, string> = {}
+
+const EGO_GIFT_GEOMETRY: CardGeometry = {
+  cardWidth: CARD_GRID.WIDTH.EGO_GIFT,
+  cardHeight: CARD_GRID.HEIGHT.EGO_GIFT,
+  mobileScale: 0.8,
+}
 
 interface EGOGiftListProps {
   gifts: EGOGiftListItem[]
-  selectedKeywords: Set<string>
-  selectedBattleKeywords: Set<string>
-  selectedDifficulties: Set<EGOGiftDifficulty>
-  selectedTiers: Set<EGOGiftTier>
-  selectedThemePacks: Set<string>
-  selectedAttributeTypes: Set<EGOGiftAttributeType>
-  selectedFusioned: Set<string>
-  selectedExclusive: Set<string>
-  searchQuery: string
+  store: FilterStore<EGOGiftFacetState>
 }
 
 /**
- * EGOGiftList - Renders list of EGO Gift cards with CSS-based filtering
- *
- * All cards are rendered once, visibility is toggled via CSS class.
- * This eliminates React reconciliation on filter changes.
+ * The EGO Gift browser's card grid.
  *
  * Filter Logic:
  * - All filter types use AND between each other
@@ -49,126 +36,23 @@ interface EGOGiftListProps {
  * - Attribute Type: OR logic (any selected attribute type)
  * - Search: OR logic (name OR keyword)
  */
-export function EGOGiftList({
-  gifts,
-  selectedKeywords,
-  selectedBattleKeywords,
-  selectedDifficulties,
-  selectedTiers,
-  selectedThemePacks,
-  selectedAttributeTypes,
-  selectedFusioned,
-  selectedExclusive,
-  searchQuery,
-}: EGOGiftListProps) {
-  const { t } = useTranslation('database')
-  // Non-suspending: returns empty mappings while loading, search won't match until loaded
-  const { keywordToValue } = useSearchMappingsDeferred()
-  // Non-suspending: returns empty object while loading, name search won't match until loaded
-  const giftNames = useEGOGiftListI18nDeferred()
+export function EGOGiftList({ gifts, store }: EGOGiftListProps) {
+  const { names: giftNames, mappings } = useSearchTermSources(EGO_GIFT_LIST, EMPTY_NAMES)
 
   // Sort all gifts once (stable order for CSS-based filtering)
   // Default sort: tier-first (higher tier first, then by keyword)
-  const sortedGifts = useMemo(() => sortEGOGifts(gifts, 'tier-first'), [gifts])
-
-  // Progressive rendering: start with one batch, add a batch per frame
-  const displayCount = useProgressiveCount({
-    total: sortedGifts.length,
-    step: PROGRESSIVE_REVEAL.CARD_BATCH,
-    initial: PROGRESSIVE_REVEAL.CARD_BATCH,
-    resetKey: sortedGifts,
-  })
-
-  // Create Set of visible gift IDs based on filters
-  // This is fast O(n) computation, much cheaper than React reconciliation
-  const visibleIds = useMemo(() => {
-    const ids = new Set<string>()
-
-    // Cache array conversion before loop to avoid O(N×M) allocations
-    const keywordEntries = Array.from(keywordToValue.entries())
-
-    for (const gift of sortedGifts) {
-      // Apply all filters using extracted utility functions
-      // Each filter: OR logic within, AND logic across filter types
-      if (!matchesKeywordFilter(gift.keyword, selectedKeywords)) continue
-
-      // Battle keyword filter - OR logic (gift must have ANY selected battle keyword)
-      if (selectedBattleKeywords.size > 0) {
-        const hasAnyBattleKeyword = (gift.battleKeywordList ?? []).some((keyword) =>
-          selectedBattleKeywords.has(keyword),
-        )
-        if (!hasAnyBattleKeyword) continue
-      }
-
-      if (!matchesDifficultyFilter(gift, selectedDifficulties)) continue
-      if (!matchesTierFilter(gift.tag, selectedTiers)) continue
-      if (!matchesThemePackFilter(gift.themePack, selectedThemePacks)) continue
-      if (!matchesAttributeTypeFilter(gift.attributeType, selectedAttributeTypes)) continue
-      if (!matchesFusionedFilter(gift.fusioned, selectedFusioned)) continue
-      if (!matchesExclusiveFilter(gift.themePack, selectedExclusive)) continue
-
-      // Search filter - match name OR keyword (both deferred, no suspension)
-      if (searchQuery) {
-        const lowerQuery = searchQuery.toLowerCase()
-
-        // Check name match (partial, case-insensitive)
-        const giftName = giftNames[gift.id] ?? ''
-        const nameMatch = giftName.toLowerCase().includes(lowerQuery)
-
-        // Check keyword match (partial match on natural language, then lookup PascalCase values)
-        const keywordMatch = keywordEntries.some(([naturalLang, pascalValues]) => {
-          if (naturalLang.includes(lowerQuery)) {
-            return gift.keyword && pascalValues.includes(gift.keyword)
-          }
-          return false
-        })
-
-        // Must match at least one
-        if (!nameMatch && !keywordMatch) continue
-      }
-
-      ids.add(gift.id)
-    }
-
-    return ids
-  }, [
-    sortedGifts,
-    selectedKeywords,
-    selectedBattleKeywords,
-    selectedDifficulties,
-    selectedTiers,
-    selectedThemePacks,
-    selectedAttributeTypes,
-    selectedFusioned,
-    selectedExclusive,
-    searchQuery,
-    keywordToValue,
-    giftNames,
-  ])
-
-  if (visibleIds.size === 0) {
-    return (
-      <div className="bg-muted border border-border rounded-md p-6">
-        <div className="text-center text-muted-foreground py-8">{t('egoGift.emptyState')}</div>
-      </div>
-    )
-  }
+  const sortedGifts = sortEGOGifts(gifts, 'tier-first')
 
   return (
-    <div className="bg-muted border border-border rounded-md p-6">
-      <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.EGO_GIFT} mobileScale={0.8}>
-        {sortedGifts.slice(0, displayCount).map((gift) => (
-          <ScaledCardWrapper
-            key={gift.id}
-            mobileScale={0.8}
-            cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
-            cardHeight={CARD_GRID.HEIGHT.EGO_GIFT}
-            className={visibleIds.has(gift.id) ? '' : 'hidden'}
-          >
-            <EGOGiftCardLink gift={gift} />
-          </ScaledCardWrapper>
-        ))}
-      </ResponsiveCardGrid>
-    </div>
+    <FilteredEntityGrid
+      items={sortedGifts}
+      getKey={(gift) => gift.id}
+      store={store}
+      matches={matchesEGOGift}
+      buildTerms={(gift) => buildEGOGiftSearchTerms(gift, giftNames, mappings)}
+      renderCard={(gift) => <EGOGiftCardLink gift={gift} />}
+      emptyStateKey="egoGift.emptyState"
+      geometry={EGO_GIFT_GEOMETRY}
+    />
   )
 }

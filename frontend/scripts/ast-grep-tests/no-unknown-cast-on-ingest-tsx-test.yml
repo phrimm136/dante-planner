@@ -1,0 +1,9 @@
+id: no-unknown-cast-on-ingest-tsx
+valid:
+  - const planner = SaveablePlannerSchema.parse(payload)
+  - const category = raw as MDCategory
+  - const value = input as unknown
+invalid:
+  - const content = parsed as unknown as MDPlannerContent
+  - 'const config = { type, category } as unknown as PlannerEditorConfig'
+  - const category = state.category as unknown as RRCategory

@@ -10,9 +10,11 @@
 import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
 
 import { ApiClient } from '@/lib/api'
+import { validateData } from '@/lib/validation'
 import { UserForModSchema, ModerationActionSchema } from '../schemas/ModeratorSchemas'
 
 import type { UserForMod, ModerationAction } from '../types/ModeratorTypes'
+import { STALE_TIME } from '@/lib/constants'
 
 // ============================================================================
 // Query Key Factory
@@ -31,36 +33,22 @@ export const moderatorQueryKeys = {
 function createModeratorUsersQueryOptions() {
   return queryOptions({
     queryKey: moderatorQueryKeys.users(),
-    queryFn: async (): Promise<UserForMod[]> => {
-      const data = await ApiClient.get('/api/moderation/users')
-      const result = UserForModSchema.array().safeParse(data)
-
-      if (!result.success) {
-        console.error('Moderator users validation failed:', result.error)
-        throw new Error('Invalid users response from server')
-      }
-
-      return result.data
+    queryFn: async ({ signal }): Promise<UserForMod[]> => {
+      const data = await ApiClient.get('/api/moderation/users', { signal })
+      return validateData(data, UserForModSchema.array(), 'moderation users')
     },
-    staleTime: 30 * 1000, // 30 seconds
+    staleTime: STALE_TIME.FREQUENT,
   })
 }
 
 function createModerationHistoryQueryOptions() {
   return queryOptions({
     queryKey: moderatorQueryKeys.actions(),
-    queryFn: async (): Promise<ModerationAction[]> => {
-      const data = await ApiClient.get('/api/moderation/actions')
-      const result = ModerationActionSchema.array().safeParse(data)
-
-      if (!result.success) {
-        console.error('Moderation actions validation failed:', result.error)
-        throw new Error('Invalid moderation actions response from server')
-      }
-
-      return result.data
+    queryFn: async ({ signal }): Promise<ModerationAction[]> => {
+      const data = await ApiClient.get('/api/moderation/actions', { signal })
+      return validateData(data, ModerationActionSchema.array(), 'moderation actions')
     },
-    staleTime: 10 * 1000, // 10 seconds
+    staleTime: STALE_TIME.LIVE,
   })
 }
 

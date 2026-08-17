@@ -16,16 +16,32 @@
  * Encoding chain: Binary → Base64 → Gzip → Base64
  */
 
-import pako from 'pako'
+import { gzip, ungzip } from 'pako'
 import { SINNERS, MAX_LEVEL } from '@/shared/gameData'
+import { DECK_CODE_MAX_LENGTH } from '@/lib/constants'
 import type { SinnerEquipment } from '../types/DeckTypes'
-import type { EGOType } from '@/pages/ego'
+import type { EgoType } from '@/shared/gameData'
 
 const BITS_PER_SINNER = 46
 const TOTAL_BITS = 560
 
-const EGO_RANK_ORDER: EGOType[] = ['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH']
-const EGO_BIT_LENGTHS = [7, 7, 7, 7, 6] // ZAYIN, TETH, HE, WAW, ALEPH
+const EGO_SLOTS: { rank: EgoType; bits: number }[] = [
+  { rank: 'ZAYIN', bits: 7 },
+  { rank: 'TETH', bits: 7 },
+  { rank: 'HE', bits: 7 },
+  { rank: 'WAW', bits: 7 },
+  { rank: 'ALEPH', bits: 6 },
+]
+
+/** Offset of the OS field in a gzip member header (RFC 1952 section 2.3) */
+export const GZIP_OS_BYTE_OFFSET = 9
+
+/**
+ * OS field value 10, TOPS-20 (RFC 1952 section 2.3.1). Load-bearing: it fixes
+ * the leading base64 character of every emitted code, so any other value
+ * changes the shape of what this app writes.
+ */
+export const GZIP_OS_TOPS20 = 10
 
 export interface DecodedDeck {
   equipment: Record<string, SinnerEquipment>
@@ -92,8 +108,8 @@ function binaryToBytes(binary: string): Uint8Array {
  */
 function bytesToBinary(bytes: Uint8Array): string {
   let binary = ''
-  for (let i = 0; i < bytes.length; i++) {
-    binary += bytes[i].toString(2).padStart(8, '0')
+  for (const byte of bytes) {
+    binary += byte.toString(2).padStart(8, '0')
   }
   return binary
 }
@@ -120,9 +136,7 @@ export function encodeDeckCode(
     binary += toBinary(deploymentPosition, 4)
 
     // EGO slots (ZAYIN, TETH, HE, WAW, ALEPH)
-    for (let i = 0; i < EGO_RANK_ORDER.length; i++) {
-      const rank = EGO_RANK_ORDER[i]
-      const bits = EGO_BIT_LENGTHS[i]
+    for (const { rank, bits } of EGO_SLOTS) {
       const ego = sinnerEquipment?.egos[rank]
       const egoIndex = ego ? getEntityIndex(ego.id) : 0
       binary += toBinary(egoIndex, bits)
@@ -138,8 +152,10 @@ export function encodeDeckCode(
   // First base64 encode
   const firstBase64 = btoa(String.fromCharCode(...bytes))
 
-  // Gzip compress with Windows OS header for compatibility
-  const compressed = pako.gzip(firstBase64, { header: { os: 10 } } as pako.DeflateFunctionOptions)
+  // pako 3 ignores a `header` option on the one-shot gzip(), so the OS byte is
+  // written directly into the emitted header instead.
+  const compressed = gzip(firstBase64)
+  compressed[GZIP_OS_BYTE_OFFSET] = GZIP_OS_TOPS20
 
   // Second base64 encode
   const secondBase64 = btoa(String.fromCharCode(...compressed))
@@ -157,6 +173,16 @@ export function decodeDeckCode(
 ): DecodedDeck {
   const warnings: string[] = []
 
+  // A pasted code reaches atob and then the inflater unbounded; a real code is
+  // around 150 characters, so anything past the cap decodes to nothing.
+  if (code.length > DECK_CODE_MAX_LENGTH) {
+    return {
+      equipment: {},
+      deploymentOrder: [],
+      warnings: ['Deck code exceeds the maximum length'],
+    }
+  }
+
   // Second base64 decode
   const compressedStr = atob(code)
   const compressed = new Uint8Array(compressedStr.length)
@@ -165,7 +191,7 @@ export function decodeDeckCode(
   }
 
   // Gzip decompress
-  const firstBase64 = pako.ungzip(compressed, { to: 'string' })
+  const firstBase64 = ungzip(compressed, { toText: true })
 
   // First base64 decode
   const bytesStr = atob(firstBase64)
@@ -207,9 +233,7 @@ export function decodeDeckCode(
     const egos: SinnerEquipment['egos'] = {}
     let egoOffset = offset + 12
 
-    for (let i = 0; i < EGO_RANK_ORDER.length; i++) {
-      const rank = EGO_RANK_ORDER[i]
-      const bits = EGO_BIT_LENGTHS[i]
+    for (const { rank, bits } of EGO_SLOTS) {
       const egoIndex = fromBinary(binary.slice(egoOffset, egoOffset + bits))
       egoOffset += bits
 
@@ -284,6 +308,10 @@ export function decodeDeckCode(
  * Validate a deck code string
  */
 export function validateDeckCode(code: string): ValidationResult {
+  if (code.length > DECK_CODE_MAX_LENGTH) {
+    return { isValid: false, warnings: ['Invalid deck code format'] }
+  }
+
   try {
     // Second base64 decode
     const compressedStr = atob(code)
@@ -293,7 +321,7 @@ export function validateDeckCode(code: string): ValidationResult {
     }
 
     // Gzip decompress
-    const firstBase64 = pako.ungzip(compressed, { to: 'string' })
+    const firstBase64 = ungzip(compressed, { toText: true })
 
     // First base64 decode
     atob(firstBase64)

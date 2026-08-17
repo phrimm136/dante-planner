@@ -10,17 +10,47 @@
 import type { DeckFilterState, EntityMode } from '../types/DeckTypes'
 import type { IdentityListItem } from '@/pages/identity'
 import type { EGOListItem } from '@/pages/ego'
-import type { SearchMappings } from '@/shared/filter'
+import type { Facet, SearchMappings } from '@/shared/filter'
+import { applyFacets } from '@/shared/filter'
 import type { Keyword } from '@/shared/gameData'
 import { getSinnerFromId } from '@/shared/gameData'
 
 type DeckFilterItem = IdentityListItem | EGOListItem
 
+const DECK_FACETS: readonly Facet<DeckFilterItem, DeckFilterState>[] = [
+  { sel: (s) => s.selectedSinners, get: (i) => getSinnerFromId(i.id), mode: 'any' },
+  { sel: (s) => s.selectedKeywords, get: (i) => i.skillKeywordList, mode: 'all' },
+  { sel: (s) => s.selectedAttributes, get: (i) => i.attributeTypes, mode: 'any' },
+  { sel: (s) => s.selectedAtkTypes, get: (i) => i.atkTypes, mode: 'any' },
+  { sel: (s) => s.selectedSeasons, get: (i) => i.season, mode: 'any' },
+  { sel: (s) => s.selectedBattleKeywords, get: (i) => i.battleKeywordList ?? [], mode: 'any' },
+  {
+    sel: (s) => (s.entityMode === 'identity' ? s.selectedDefTypes : undefined),
+    get: (i) => (i as IdentityListItem).defenseTypes,
+    mode: 'any',
+  },
+  {
+    sel: (s) => (s.entityMode === 'identity' ? s.selectedRaritys : undefined),
+    get: (i) => (i as IdentityListItem).rank,
+    mode: 'any',
+  },
+  {
+    sel: (s) => (s.entityMode === 'identity' ? s.selectedUnitKeywords : undefined),
+    get: (i) => (i as IdentityListItem).unitKeywordList,
+    mode: 'any',
+  },
+  {
+    sel: (s) => (s.entityMode === 'ego' ? s.selectedEgoTypes : undefined),
+    get: (i) => (i as EGOListItem).egoType,
+    mode: 'any',
+  },
+]
+
 /**
  * Evaluates whether an item passes all active deck filters for the given mode.
  *
  * Semantics:
- * - Empty filter sets match everything (short-circuit when size === 0).
+ * - Empty filter sets match everything.
  * - Sinner: derived from entity ID; item's sinner must be in the selected set.
  * - Skill keywords: item must have ALL selected keywords (AND).
  * - Attribute / Atk / Def / Rank / Season / Unit / Battle keywords: ANY match (OR).
@@ -41,58 +71,7 @@ export function matchesDeckFilter(
   mode: EntityMode,
   searchMappings: SearchMappings,
 ): boolean {
-  if (state.selectedSinners.size > 0) {
-    if (!state.selectedSinners.has(getSinnerFromId(item.id))) return false
-  }
-
-  if (state.selectedKeywords.size > 0) {
-    const keywords = Array.from(state.selectedKeywords)
-    const hasAllKeywords = keywords.every((kw) => item.skillKeywordList.includes(kw as Keyword))
-    if (!hasAllKeywords) return false
-  }
-
-  if (state.selectedAttributes.size > 0) {
-    const hasAny = item.attributeTypes.some((attr) => state.selectedAttributes.has(attr))
-    if (!hasAny) return false
-  }
-
-  if (state.selectedAtkTypes.size > 0) {
-    const hasAny = item.atkTypes.some((atk) => state.selectedAtkTypes.has(atk))
-    if (!hasAny) return false
-  }
-
-  if (state.selectedSeasons.size > 0) {
-    if (!state.selectedSeasons.has(item.season)) return false
-  }
-
-  if (state.selectedBattleKeywords.size > 0) {
-    const hasAny = (item.battleKeywordList ?? []).some((kw) => state.selectedBattleKeywords.has(kw))
-    if (!hasAny) return false
-  }
-
-  if (mode === 'identity') {
-    const identity = item as IdentityListItem
-
-    if (state.selectedDefTypes.size > 0) {
-      const hasAny = identity.defenseTypes.some((def) => state.selectedDefTypes.has(def))
-      if (!hasAny) return false
-    }
-
-    if (state.selectedRaritys.size > 0) {
-      if (!state.selectedRaritys.has(identity.rank)) return false
-    }
-
-    if (state.selectedUnitKeywords.size > 0) {
-      const hasAny = identity.unitKeywordList.some((kw) => state.selectedUnitKeywords.has(kw))
-      if (!hasAny) return false
-    }
-  } else {
-    const ego = item as EGOListItem
-
-    if (state.selectedEgoTypes.size > 0) {
-      if (!state.selectedEgoTypes.has(ego.egoType)) return false
-    }
-  }
+  if (!applyFacets(item, { ...state, entityMode: mode }, DECK_FACETS)) return false
 
   if (state.searchQuery) {
     const lowerQuery = state.searchQuery.toLowerCase()

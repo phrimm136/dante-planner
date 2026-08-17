@@ -2,19 +2,17 @@ package org.danteplanner.backend.auth.token;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.JwtProperties;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.danteplanner.backend.shared.redis.RedisKeyScanner;
-import org.danteplanner.backend.shared.util.CookieConstants;
-import org.danteplanner.backend.shared.util.CookieUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -47,15 +45,13 @@ public class RefreshRotationService {
     private static final String LEGACY_FAMILY_SYNTHESIS_FORMAT = "legacy-family:%d:%d";
     private static final String LEGACY_JTI_SYNTHESIS_FORMAT = "legacy-jti:%d:%d";
 
-    private static final String FAMILY_KEY_PREFIX = "rt:fam:";
+    static final String FAMILY_KEY_PREFIX = "rt:fam:";
     private static final String FAMILY_KEY_PATTERN = FAMILY_KEY_PREFIX + "*";
-    private static final String REVOKED_FIELD = "__revoked__";
+    static final String REVOKED_FIELD = "__revoked__";
     private static final String SUCCESSOR_JWT_FIELD_PREFIX = "succjwt:";
     private static final String FIELD_SEPARATOR = "|";
-    private static final String ROTATED_RESULT = "ROTATED";
-    private static final String THEFT_RESULT = "THEFT";
-    private static final String REVOKED_RESULT = "REVOKED";
-    private static final String REUSED_RESULT_PREFIX = "REUSED" + FIELD_SEPARATOR;
+    private static final String REUSED_RESULT_PREFIX = Outcome.REUSED.name() + FIELD_SEPARATOR;
+    private static final String UNEXPECTED_RESULT_MESSAGE = "Unexpected rotation transition result: ";
 
     static final String METRIC_OUTCOME = "jwt_rotation_outcome_total";
     static final String TAG_OUTCOME = "outcome";
@@ -66,13 +62,18 @@ public class RefreshRotationService {
     static final String OUTCOME_THEFT_REVOKED = "theft_revoked";
     static final String OUTCOME_LEGACY_ADMITTED = "legacy_admitted";
     static final String OUTCOME_REJECTED_REVOKED_FAMILY = "rejected_revoked_family";
+    static final String OUTCOME_REJECTED_USER_INVALIDATED = "rejected_user_invalidated";
     static final String OUTCOME_REJECTED_INVALID = "rejected_invalid";
 
     /**
      * Atomic single-family rotation transition (mechanics §2.2).
      *
-     * <p>KEYS[1] = family key; ARGV = jti, parentJti (or ""), successorJti,
-     * succExpiryMs, nowMs, ttlMs, successorJwt, reuseWindowMs. Returns {@code "REVOKED"}
+     * <p>KEYS[1] = family key, KEYS[2] = user-invalidation key; ARGV = jti, parentJti (or ""),
+     * successorJti, succExpiryMs, nowMs, ttlMs, successorJwt, reuseWindowMs, presentedIssuedAtMs.
+     * Both keys are read in one script so "logged out everywhere" is an invariant rotation
+     * enforces rather than a check each caller must remember; they carry no common hash tag,
+     * so this requires a non-clustered Redis. Returns {@code "INVALIDATED"} if the presented
+     * token predates the user's invalidation stamp; {@code "REVOKED"}
      * if the family already carries the revocation marker; {@code "THEFT"} (and revokes
      * the whole family) if the presented token is a replay of a spent
      * ({@code RETIRED}/{@code SUPERSEDED}) token; {@code "REUSED|<jwt>"} if the presented
@@ -81,7 +82,7 @@ public class RefreshRotationService {
      * otherwise marks the parent {@code RETIRED}, supersedes a stale successor on a retry
      * outside the window, registers the new successor {@code UNUSED_LATEST}, moves the
      * presented token to {@code PENDING}, refreshes the family TTL, and returns
-     * {@code "ROTATED"}.</p>
+     * {@code "SUPERSEDED"} when the presented token was a retry, {@code "ROTATED"} otherwise.</p>
      *
      * <p>Entries written as {@code USED} before the rename to {@code RETIRED} may survive
      * in Redis for up to one family TTL; the theft check matches both spellings.</p>
@@ -92,10 +93,14 @@ public class RefreshRotationService {
      * in Redis.</p>
      */
     private static final String ROTATE_SCRIPT = """
-            -- KEYS[1] = rt:fam:{F}
-            -- ARGV   = jti, parentJti, successorJti, succExpiryMs, nowMs, ttlMs, succJwt, reuseWindowMs
-            local fkey = KEYS[1]
+            -- KEYS = rt:fam:{F}, uinv:{user}
+            -- ARGV = jti, parentJti, successorJti, succExpiryMs, nowMs, ttlMs, succJwt,
+            --        reuseWindowMs, presentedIssuedAtMs
+            local fkey, ikey = KEYS[1], KEYS[2]
             local jti, parent, succ = ARGV[1], ARGV[2], ARGV[3]
+
+            local inv = redis.call('GET', ikey)
+            if inv and tonumber(ARGV[9]) < tonumber(inv) then return 'INVALIDATED' end
 
             if redis.call('HGET', fkey, '__revoked__') then return 'REVOKED' end
 
@@ -115,6 +120,7 @@ public class RefreshRotationService {
               end
             end
 
+            local outcome = 'ROTATED'
             if state == 'PENDING' then                           -- retry: reuse the stored successor or supersede it
               local oldSucc = string.match(cur, '|([^|]*)|')
               local stored = redis.call('HGET', fkey, 'succjwt:'..jti)  -- "mintedAtMs|jwt" or false
@@ -129,19 +135,19 @@ public class RefreshRotationService {
               if oldSucc and oldSucc ~= '' then
                 redis.call('HSET', fkey, oldSucc, 'SUPERSEDED||'..ARGV[4])
               end
+              outcome = 'SUPERSEDED'
             end
 
             redis.call('HSET', fkey, succ, 'UNUSED_LATEST||'..ARGV[4])
             redis.call('HSET', fkey, jti,  'PENDING|'..succ..'|'..ARGV[4])
             redis.call('HSET', fkey, 'succjwt:'..jti, ARGV[5]..'|'..ARGV[7])
             redis.call('PEXPIRE', fkey, ARGV[6])                 -- sliding TTL = the cleanup job
-            return 'ROTATED'
+            return outcome
             """;
 
     private final StringRedisTemplate authRedisTemplate;
     private final TokenValidator tokenValidator;
     private final TokenGenerator tokenGenerator;
-    private final CookieUtils cookieUtils;
     private final JwtProperties jwtProperties;
     private final MeterRegistry meterRegistry;
     private final boolean legacyAdmitEnabled;
@@ -153,7 +159,6 @@ public class RefreshRotationService {
             StringRedisTemplate authRedisTemplate,
             TokenValidator tokenValidator,
             TokenGenerator tokenGenerator,
-            CookieUtils cookieUtils,
             JwtProperties jwtProperties,
             MeterRegistry meterRegistry,
             @Value("${jwt.rotation.legacy-admit-enabled:true}") boolean legacyAdmitEnabled,
@@ -161,7 +166,6 @@ public class RefreshRotationService {
         this.authRedisTemplate = authRedisTemplate;
         this.tokenValidator = tokenValidator;
         this.tokenGenerator = tokenGenerator;
-        this.cookieUtils = cookieUtils;
         this.jwtProperties = jwtProperties;
         this.meterRegistry = meterRegistry;
         this.legacyAdmitEnabled = legacyAdmitEnabled;
@@ -175,27 +179,24 @@ public class RefreshRotationService {
     /**
      * Rotates a refresh token through the lineage state machine.
      *
-     * <p>On a successful rotation a fresh successor is minted and written as a
-     * {@code Set-Cookie} on {@code response}.</p>
+     * <p>On a successful rotation a fresh successor is minted and carried back on the
+     * {@link RotationResult.Rotated} outcome; no cookie is written here.</p>
      *
      * @param refreshToken the presented refresh JWT
-     * @param response     the response to attach cookies to
      * @return the rotation outcome
      */
-    public RotationResult rotate(String refreshToken, HttpServletResponse response) {
+    public RotationResult rotate(String refreshToken) {
         TokenClaims claims;
         try {
-            claims = tokenValidator.validateToken(refreshToken);
+            claims = tokenValidator.validateRefreshToken(refreshToken);
         } catch (InvalidTokenException e) {
-            incrementOutcome(OUTCOME_REJECTED_INVALID);
-            return new RotationResult.Rejected(RotationResult.Rejected.Reason.INVALID);
+            return rejectInvalid();
         }
 
-        // An access token has null jti+familyId and would otherwise hit the legacy-admit
-        // branch and be upgraded to a refresh token; reject it regardless of the flag.
+        // Defense in depth: reject non-refresh tokens with a type check independent of the
+        // upstream refresh-typed parser, so admission never relies on its configuration alone.
         if (!claims.isRefreshToken()) {
-            incrementOutcome(OUTCOME_REJECTED_INVALID);
-            return new RotationResult.Rejected(RotationResult.Rejected.Reason.INVALID);
+            return rejectInvalid();
         }
 
         boolean legacy = claims.jti() == null || claims.familyId() == null;
@@ -205,8 +206,7 @@ public class RefreshRotationService {
             // token always maps to the same lineage across retries, then proceed
             // through normal rotation; the successor carries proper UUID claims.
             if (!legacyAdmitEnabled) {
-                incrementOutcome(OUTCOME_REJECTED_INVALID);
-                return new RotationResult.Rejected(RotationResult.Rejected.Reason.INVALID);
+                return rejectInvalid();
             }
             claims = admitLegacy(claims);
         }
@@ -216,101 +216,105 @@ public class RefreshRotationService {
         String parentJti = claims.parentJti() != null ? claims.parentJti() : "";
 
         String successorJwt = tokenGenerator.generateRefreshToken(claims.userId(), familyId, jti);
-        TokenClaims successorClaims = tokenValidator.validateToken(successorJwt);
+        TokenClaims successorClaims = tokenValidator.validateRefreshToken(successorJwt);
         String successorJti = successorClaims.jti();
         long succExpiryMs = successorClaims.expiration().getTime();
         long nowMs = System.currentTimeMillis();
         long ttlMs = jwtProperties.getRefreshTokenExpiry();
 
-        // Metric labelling only: the Lua returns ROTATED for both a fresh rotation and a
-        // legit retry, so classify a retry by the presented jti's pre-call state. The
-        // mutation itself stays atomic inside the script.
-        boolean retry = !legacy && presentedState(familyId, jti) == RotationState.PENDING;
-
         String result = authRedisTemplate.execute(
                 rotateScript,
-                List.of(familyKey(familyId)),
+                List.of(familyKey(familyId), userInvalidationKey(claims.userId())),
                 jti, parentJti, successorJti,
                 String.valueOf(succExpiryMs), String.valueOf(nowMs), String.valueOf(ttlMs),
-                successorJwt, String.valueOf(retryReuseWindowMs));
+                successorJwt, String.valueOf(retryReuseWindowMs),
+                String.valueOf(claims.issuedAt().getTime()));
 
-        if (result != null && result.startsWith(REUSED_RESULT_PREFIX)) {
-            // Concurrent retry: replay the memoized successor so every racer converges
-            // on one cookie; the JWT this call optimistically signed is discarded.
-            String storedJwt = result.substring(REUSED_RESULT_PREFIX.length());
-            TokenClaims storedClaims = tokenValidator.validateToken(storedJwt);
-            cookieUtils.setCookie(response, CookieConstants.REFRESH_TOKEN, storedJwt,
-                    jwtProperties.getRefreshTokenExpirySeconds());
-            incrementOutcome(OUTCOME_RETRY_REUSED);
-            return new RotationResult.Rotated(storedJwt, storedClaims);
-        }
-
-        return switch (result) {
-            case THEFT_RESULT -> {
-                clearAuthCookies(response);
+        Outcome outcome = Outcome.of(result);
+        return switch (outcome) {
+            case REUSED -> {
+                // Concurrent retry: replay the memoized successor so every racer converges
+                // on one cookie; the JWT this call optimistically signed is discarded.
+                String storedJwt = result.substring(REUSED_RESULT_PREFIX.length());
+                TokenClaims storedClaims = tokenValidator.validateRefreshToken(storedJwt);
+                incrementOutcome(OUTCOME_RETRY_REUSED);
+                yield new RotationResult.Rotated(storedJwt, storedClaims);
+            }
+            case THEFT -> {
                 incrementOutcome(OUTCOME_THEFT_REVOKED);
                 yield new RotationResult.Revoked(familyId);
             }
-            case REVOKED_RESULT -> {
-                clearAuthCookies(response);
+            case REVOKED -> {
                 incrementOutcome(OUTCOME_REJECTED_REVOKED_FAMILY);
                 yield new RotationResult.Rejected(RotationResult.Rejected.Reason.REVOKED_FAMILY);
             }
-            case ROTATED_RESULT -> {
-                cookieUtils.setCookie(response, CookieConstants.REFRESH_TOKEN, successorJwt,
-                        jwtProperties.getRefreshTokenExpirySeconds());
+            case INVALIDATED -> {
+                incrementOutcome(OUTCOME_REJECTED_USER_INVALIDATED);
+                yield new RotationResult.Rejected(RotationResult.Rejected.Reason.REVOKED_FAMILY);
+            }
+            case ROTATED, SUPERSEDED -> {
                 incrementOutcome(legacy ? OUTCOME_LEGACY_ADMITTED
-                        : retry ? OUTCOME_RETRY_SUPERSEDED : OUTCOME_ROTATED);
+                        : outcome == Outcome.SUPERSEDED ? OUTCOME_RETRY_SUPERSEDED : OUTCOME_ROTATED);
                 yield new RotationResult.Rotated(successorJwt, successorClaims);
             }
-            default -> throw new IllegalStateException(
-                    "Unexpected rotation transition result: " + result);
         };
     }
 
     /**
-     * Reads the presented token's rotation state within its own family hash, or null if
-     * absent. Used to distinguish a retry of an already-rotated parent from a fresh
-     * rotation for metric labelling.
+     * Rejects a token that never reached the rotation script, counting the outcome as it goes.
      *
-     * @param familyId the token's family
-     * @param jti      the presented token's jti
-     * @return the presented token's state, or null if unknown
+     * @return the rejection to hand back to the caller
      */
-    private RotationState presentedState(String familyId, String jti) {
-        Object value = authRedisTemplate.opsForHash().get(familyKey(familyId), jti);
-        return parseLeadingState(value == null ? null : value.toString());
+    private RotationResult rejectInvalid() {
+        incrementOutcome(OUTCOME_REJECTED_INVALID);
+        return new RotationResult.Rejected(RotationResult.Rejected.Reason.INVALID);
     }
 
     /**
      * Recovers the leading {@link RotationState} from a family-hash field value of shape
      * {@code "<STATE>|<succ>|<exp>"}, taking the segment before the first separator.
      *
-     * @param fieldValue the raw hash field value, or null
-     * @return the leading state, or null if {@code fieldValue} is null
+     * @param fieldValue the raw hash field value
+     * @return the leading state
      */
-    private RotationState parseLeadingState(String fieldValue) {
-        if (fieldValue == null) {
-            return null;
-        }
+    private static RotationState parseLeadingState(String fieldValue) {
         int sep = fieldValue.indexOf(FIELD_SEPARATOR);
-        String leading = sep >= 0 ? fieldValue.substring(0, sep) : fieldValue;
-        // Entries persisted before the USED -> RETIRED rename survive one family TTL.
-        if ("USED".equals(leading)) {
-            return RotationState.RETIRED;
-        }
-        return RotationState.valueOf(leading);
+        return RotationState.of(sep >= 0 ? fieldValue.substring(0, sep) : fieldValue);
     }
 
     /**
-     * Clears both auth cookies (access and refresh) by setting their max age to 0, used
-     * when a rotation attempt is rejected or triggers a theft-driven family revocation.
-     *
-     * @param response the response to attach the cleared cookies to
+     * What the atomic rotation script did with the presented token. Each constant is spelled
+     * exactly as the script returns it; {@link #REUSED} carries the memoized successor JWT
+     * behind a separator.
      */
-    private void clearAuthCookies(HttpServletResponse response) {
-        cookieUtils.clearCookie(response, CookieConstants.REFRESH_TOKEN);
-        cookieUtils.clearCookie(response, CookieConstants.ACCESS_TOKEN);
+    private enum Outcome {
+        ROTATED,
+        SUPERSEDED,
+        REUSED,
+        THEFT,
+        REVOKED,
+        INVALIDATED;
+
+        /**
+         * The outcome a raw script result names.
+         *
+         * @param result the script's return value
+         * @return the matching outcome
+         * @throws IllegalStateException if the script returned something no outcome names
+         */
+        static Outcome of(String result) {
+            if (result != null) {
+                if (result.startsWith(REUSED_RESULT_PREFIX)) {
+                    return REUSED;
+                }
+                for (Outcome candidate : values()) {
+                    if (candidate.name().equals(result)) {
+                        return candidate;
+                    }
+                }
+            }
+            throw new IllegalStateException(UNEXPECTED_RESULT_MESSAGE + result);
+        }
     }
 
     /**
@@ -323,16 +327,28 @@ public class RefreshRotationService {
      */
     private TokenClaims admitLegacy(TokenClaims legacy) {
         long issuedAtMs = legacy.issuedAt().getTime();
-        String synthesizedFamilyId = UUID.nameUUIDFromBytes(
-                String.format(LEGACY_FAMILY_SYNTHESIS_FORMAT, legacy.userId(), issuedAtMs)
-                        .getBytes(StandardCharsets.UTF_8)).toString();
+        String synthesizedFamilyId = legacyFamilyId(legacy.userId(), issuedAtMs);
         String synthesizedJti = UUID.nameUUIDFromBytes(
                 String.format(LEGACY_JTI_SYNTHESIS_FORMAT, legacy.userId(), issuedAtMs)
                         .getBytes(StandardCharsets.UTF_8)).toString();
         return new TokenClaims(
-                legacy.userId(), legacy.email(), legacy.type(), legacy.role(),
+                legacy.userId(), legacy.type(), legacy.role(),
                 legacy.issuedAt(), legacy.expiration(),
                 synthesizedJti, synthesizedFamilyId, legacy.parentJti());
+    }
+
+    /**
+     * The family a legacy (pre-deploy) refresh token resolves to on admission. Exposed so
+     * logout can revoke that family without the token carrying one.
+     *
+     * @param userId     the token's subject
+     * @param issuedAtMs the token's issue time in milliseconds
+     * @return the synthesized family identifier
+     */
+    public static String legacyFamilyId(Long userId, long issuedAtMs) {
+        return UUID.nameUUIDFromBytes(
+                String.format(LEGACY_FAMILY_SYNTHESIS_FORMAT, userId, issuedAtMs)
+                        .getBytes(StandardCharsets.UTF_8)).toString();
     }
 
     /**
@@ -345,8 +361,12 @@ public class RefreshRotationService {
         if (familyId == null) {
             return;
         }
+        String key = familyKey(familyId);
         authRedisTemplate.opsForHash().put(
-                familyKey(familyId), REVOKED_FIELD, String.valueOf(System.currentTimeMillis()));
+                key, REVOKED_FIELD, String.valueOf(System.currentTimeMillis()));
+        // Revoking a family that never rotated creates the hash here, where the rotation
+        // script's sliding PEXPIRE has not run and would not run again.
+        authRedisTemplate.expire(key, Duration.ofMillis(jwtProperties.getRefreshTokenExpiry()));
         log.info("Revoked refresh token family {}", familyId);
     }
 
@@ -357,8 +377,18 @@ public class RefreshRotationService {
                 .increment();
     }
 
-    private String familyKey(String familyId) {
+    /**
+     * The Redis key holding one family's rotation state.
+     *
+     * @param familyId the family identifier
+     * @return the family hash key
+     */
+    static String familyKey(String familyId) {
         return FAMILY_KEY_PREFIX + "{" + familyId + "}";
+    }
+
+    private String userInvalidationKey(Long userId) {
+        return TokenBlacklistService.USER_INVALIDATION_KEY_PREFIX + userId;
     }
 
     /**

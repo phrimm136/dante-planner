@@ -2,13 +2,22 @@ package org.danteplanner.backend.notification.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.notification.dto.NotificationBulkResultResponse;
 import org.danteplanner.backend.notification.dto.NotificationInboxResponse;
 import org.danteplanner.backend.notification.dto.NotificationResponse;
 import org.danteplanner.backend.notification.dto.UnreadCountResponse;
-import org.danteplanner.backend.notification.service.NotificationService;
+import org.danteplanner.backend.notification.service.NotificationInboxService;
+import org.danteplanner.backend.shared.ratelimit.RateLimited;
+import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
@@ -24,7 +33,7 @@ import java.util.UUID;
 @Slf4j
 public class NotificationController {
 
-    private final NotificationService notificationService;
+    private final NotificationInboxService notificationInboxService;
 
     /**
      * Get user's notification inbox with pagination.
@@ -37,6 +46,7 @@ public class NotificationController {
      * @param size   the page size (default 20, max 100)
      * @return notification inbox with pagination metadata
      */
+    @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "notifications-inbox")
     @GetMapping("/inbox")
     public ResponseEntity<NotificationInboxResponse> getInbox(
             @AuthenticationPrincipal Long userId,
@@ -47,7 +57,7 @@ public class NotificationController {
         int pageSize = Math.min(size, 100);
 
         log.debug("User {} fetching notification inbox (page {}, size {})", userId, page, pageSize);
-        NotificationInboxResponse response = notificationService.getInbox(userId, page, pageSize);
+        NotificationInboxResponse response = notificationInboxService.getInbox(userId, page, pageSize);
         return ResponseEntity.ok(response);
     }
 
@@ -57,12 +67,13 @@ public class NotificationController {
      * @param userId the authenticated user ID
      * @return unread notification count
      */
+    @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "notifications-unread-count")
     @GetMapping("/unread-count")
     public ResponseEntity<UnreadCountResponse> getUnreadCount(
             @AuthenticationPrincipal Long userId) {
 
         log.debug("User {} fetching unread notification count", userId);
-        UnreadCountResponse response = notificationService.getUnreadCount(userId);
+        UnreadCountResponse response = notificationInboxService.getUnreadCount(userId);
         return ResponseEntity.ok(response);
     }
 
@@ -73,13 +84,14 @@ public class NotificationController {
      * @param publicId the notification public ID
      * @return the updated notification
      */
+    @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "notifications-mark-read")
     @PostMapping("/{id}/mark-read")
     public ResponseEntity<NotificationResponse> markAsRead(
             @AuthenticationPrincipal Long userId,
             @PathVariable("id") UUID publicId) {
 
         log.info("User {} marking notification {} as read", userId, publicId);
-        NotificationResponse response = notificationService.markAsRead(publicId, userId);
+        NotificationResponse response = notificationInboxService.markAsRead(publicId, userId);
         return ResponseEntity.ok(response);
     }
 
@@ -89,13 +101,14 @@ public class NotificationController {
      * @param userId the authenticated user ID
      * @return count of notifications marked as read
      */
+    @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "notifications-mark-all-read")
     @PostMapping("/mark-all-read")
-    public ResponseEntity<Integer> markAllAsRead(
+    public ResponseEntity<NotificationBulkResultResponse> markAllAsRead(
             @AuthenticationPrincipal Long userId) {
 
         log.info("User {} marking all notifications as read", userId);
-        int count = notificationService.markAllAsRead(userId);
-        return ResponseEntity.ok(count);
+        int count = notificationInboxService.markAllAsRead(userId);
+        return ResponseEntity.ok(new NotificationBulkResultResponse(count));
     }
 
     /**
@@ -108,13 +121,14 @@ public class NotificationController {
      * @param publicId the notification public ID
      * @return 204 No Content on success
      */
+    @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "notifications-delete")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteNotification(
             @AuthenticationPrincipal Long userId,
             @PathVariable("id") UUID publicId) {
 
         log.info("User {} deleting notification {}", userId, publicId);
-        notificationService.deleteNotification(publicId, userId);
+        notificationInboxService.deleteNotification(publicId, userId);
         return ResponseEntity.noContent().build();
     }
 
@@ -124,12 +138,13 @@ public class NotificationController {
      * @param userId the authenticated user ID
      * @return count of notifications deleted
      */
+    @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "notifications-delete-all")
     @DeleteMapping("/all")
-    public ResponseEntity<Integer> deleteAllNotifications(
+    public ResponseEntity<NotificationBulkResultResponse> deleteAllNotifications(
             @AuthenticationPrincipal Long userId) {
 
         log.info("User {} deleting all notifications", userId);
-        int count = notificationService.deleteAllNotifications(userId);
-        return ResponseEntity.ok(count);
+        int count = notificationInboxService.deleteAllNotifications(userId);
+        return ResponseEntity.ok(new NotificationBulkResultResponse(count));
     }
 }

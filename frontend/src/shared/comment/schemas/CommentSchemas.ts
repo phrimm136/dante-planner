@@ -15,6 +15,8 @@ import { z } from 'zod'
 const CommentNodeBaseSchema = z.object({
   /** Public UUID (not internal DB id) */
   id: z.string().uuid(),
+  /** Public UUID of the comment this one replies to; absent at top level */
+  parentCommentId: z.string().uuid().nullish(),
   /** Comment content (empty string if deleted) */
   content: z.string(),
   /** Author association keyword (e.g., 'W_CORP') - translatable via i18n */
@@ -25,17 +27,15 @@ const CommentNodeBaseSchema = z.object({
   isAuthor: z.boolean(),
   /** Creation timestamp */
   createdAt: z.string(),
-  /** Edit timestamp (null if never edited) */
-  updatedAt: z.string().nullable(),
-  /** Whether this comment was edited (shows edit indicator) */
-  isUpdated: z.boolean(),
+  /** Edit timestamp (absent if never edited) */
+  updatedAt: z.string().nullish(),
   /** Whether this comment has been deleted */
   isDeleted: z.boolean(),
   /** Number of upvotes */
   upvoteCount: z.number().int().min(0),
   /** Whether current user has upvoted */
   hasUpvoted: z.boolean(),
-  /** Whether author has notifications enabled for replies */
+  /** Whether author has notifications enabled for replies; false for every other viewer */
   authorNotificationsEnabled: z.boolean(),
 })
 

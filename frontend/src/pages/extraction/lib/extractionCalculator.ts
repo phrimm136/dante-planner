@@ -18,6 +18,7 @@
  * @see constants.ts for EXTRACTION_RATES
  */
 
+import { clamp01 } from '@/lib/utils'
 import { EXTRACTION_RATES, type ExtractionRateTable } from './extractionRates'
 import type {
   BannerModifiers,
@@ -28,6 +29,43 @@ import type {
   ExtractionTargetType,
   TargetProbability,
 } from '../types/ExtractionTypes'
+
+type ActiveRateTable = ExtractionResult['activeRateTable']
+
+/** Rate table per banner configuration, keyed by the name the result reports */
+const RATE_TABLES = {
+  standard: EXTRACTION_RATES.STANDARD,
+  withAnnouncer: EXTRACTION_RATES.WITH_ANNOUNCER,
+  allEgoCollected: EXTRACTION_RATES.ALL_EGO_COLLECTED,
+  allEgoWithAnnouncer: EXTRACTION_RATES.ALL_EGO_WITH_ANNOUNCER,
+} as const satisfies Record<ActiveRateTable, ExtractionRateTable>
+
+/**
+ * Rate-up total per target type, before splitting among featured items
+ *
+ * EGO is the only type whose rate-up total moves with a modifier: with every
+ * non-rate-up EGO already owned, the pik-tteul half of the pool folds into it.
+ */
+const RATE_UP_FOR: Record<ExtractionTargetType, (allEgoCollected: boolean) => number> = {
+  threeStarId: () => EXTRACTION_RATES.RATE_UP.THREE_STAR_ID,
+  ego: (allEgoCollected) =>
+    allEgoCollected ? EXTRACTION_RATES.RATE_UP.EGO_ALL_COLLECTED : EXTRACTION_RATES.RATE_UP.EGO,
+  announcer: () => EXTRACTION_RATES.RATE_UP.ANNOUNCER,
+}
+
+/**
+ * Get the rate table name for display purposes
+ *
+ * @param allEgoCollected - User has collected all EGO from banner
+ * @param hasAnnouncer - Banner features an Announcer
+ * @returns The rate table name
+ */
+export function getRateTableName(allEgoCollected: boolean, hasAnnouncer: boolean): ActiveRateTable {
+  if (allEgoCollected) {
+    return hasAnnouncer ? 'allEgoWithAnnouncer' : 'allEgoCollected'
+  }
+  return hasAnnouncer ? 'withAnnouncer' : 'standard'
+}
 
 /**
  * Get the appropriate rate table based on banner modifiers
@@ -40,39 +78,7 @@ export function getEffectiveRates(
   allEgoCollected: boolean,
   hasAnnouncer: boolean,
 ): ExtractionRateTable {
-  if (allEgoCollected && hasAnnouncer) {
-    return EXTRACTION_RATES.ALL_EGO_WITH_ANNOUNCER
-  }
-  if (allEgoCollected) {
-    return EXTRACTION_RATES.ALL_EGO_COLLECTED
-  }
-  if (hasAnnouncer) {
-    return EXTRACTION_RATES.WITH_ANNOUNCER
-  }
-  return EXTRACTION_RATES.STANDARD
-}
-
-/**
- * Get the rate table name for display purposes
- *
- * @param allEgoCollected - User has collected all EGO from banner
- * @param hasAnnouncer - Banner features an Announcer
- * @returns The rate table name
- */
-export function getRateTableName(
-  allEgoCollected: boolean,
-  hasAnnouncer: boolean,
-): ExtractionResult['activeRateTable'] {
-  if (allEgoCollected && hasAnnouncer) {
-    return 'allEgoWithAnnouncer'
-  }
-  if (allEgoCollected) {
-    return 'allEgoCollected'
-  }
-  if (hasAnnouncer) {
-    return 'withAnnouncer'
-  }
-  return 'standard'
+  return RATE_TABLES[getRateTableName(allEgoCollected, hasAnnouncer)]
 }
 
 /**
@@ -94,20 +100,7 @@ export function calculateRateForTarget(
     return 0
   }
 
-  switch (type) {
-    case 'threeStarId':
-      return EXTRACTION_RATES.RATE_UP.THREE_STAR_ID / featuredCount
-    case 'ego':
-      // When all EGO collected: rate-up gets full 1.3% instead of 0.65%
-      const egoRate = allEgoCollected
-        ? EXTRACTION_RATES.RATE_UP.EGO_ALL_COLLECTED
-        : EXTRACTION_RATES.RATE_UP.EGO
-      return egoRate / featuredCount
-    case 'announcer':
-      return EXTRACTION_RATES.RATE_UP.ANNOUNCER / featuredCount
-    default:
-      return 0
-  }
+  return RATE_UP_FOR[type](allEgoCollected) / featuredCount
 }
 
 /**
@@ -130,8 +123,7 @@ export function calculateSingleTargetProbability(pulls: number, rate: number): n
   // P(at least 1) = 1 - P(none) = 1 - (1-rate)^pulls
   const probability = 1 - Math.pow(1 - rate, pulls)
 
-  // Clamp to [0, 1] to handle floating point edge cases
-  return Math.min(1, Math.max(0, probability))
+  return clamp01(probability)
 }
 
 /**
@@ -170,7 +162,7 @@ export function calculateAtLeastKHits(pulls: number, rate: number, hitsNeeded: n
   // P(X >= hitsNeeded) = 1 - P(X < hitsNeeded)
   const probability = 1 - cumulativeLessThan
 
-  return Math.min(1, Math.max(0, probability))
+  return clamp01(probability)
 }
 
 /**
@@ -221,6 +213,7 @@ export function calculateCouponCollectorProbability(
 
   if (wantedCount === featuredCount) {
     // Want all featured items: P = P(hit each) = probHitOne^M
+    // Math.pow and the log-space PMF below disagree by ~1 ulp on this term
     return Math.pow(probHitOne, featuredCount)
   }
 
@@ -233,11 +226,8 @@ export function calculateCouponCollectorProbability(
     probAtLeastN += binomialPmf(featuredCount, k, probHitOne)
   }
 
-  return Math.min(1, Math.max(0, probAtLeastN))
+  return clamp01(probAtLeastN)
 }
-
-// Keep old function name for backwards compatibility
-export const calculateMultiCopyProbability = calculateAtLeastKHits
 
 /**
  * Calculate natural probability for a target (without pity)
@@ -392,31 +382,23 @@ export function calculateCategoryDistribution(
   }
 
   const distribution: number[] = []
+  const totalRate = RATE_UP_FOR[targetType](allEgoCollected)
 
   if (targetType === 'ego') {
     // EGO: Binomial distribution (비복원추출 - each hit is unique)
-    const egoRate = allEgoCollected
-      ? EXTRACTION_RATES.RATE_UP.EGO_ALL_COLLECTED
-      : EXTRACTION_RATES.RATE_UP.EGO
-
     for (let k = 0; k <= wantedCount; k++) {
       if (k === wantedCount) {
         // P(at least wantedCount) for the last bucket
-        distribution.push(calculateAtLeastKHits(pulls, egoRate, k))
+        distribution.push(calculateAtLeastKHits(pulls, totalRate, k))
       } else {
         // P(exactly k) = P(at least k) - P(at least k+1)
-        const atLeastK = k === 0 ? 1 : calculateAtLeastKHits(pulls, egoRate, k)
-        const atLeastKPlus1 = calculateAtLeastKHits(pulls, egoRate, k + 1)
+        const atLeastK = k === 0 ? 1 : calculateAtLeastKHits(pulls, totalRate, k)
+        const atLeastKPlus1 = calculateAtLeastKHits(pulls, totalRate, k + 1)
         distribution.push(Math.max(0, atLeastK - atLeastKPlus1))
       }
     }
   } else {
     // Identity/Announcer: Coupon Collector (복원추출 - can get duplicates)
-    const totalRate =
-      targetType === 'threeStarId'
-        ? EXTRACTION_RATES.RATE_UP.THREE_STAR_ID
-        : EXTRACTION_RATES.RATE_UP.ANNOUNCER
-
     for (let k = 0; k <= wantedCount; k++) {
       if (k === wantedCount) {
         // P(at least wantedCount) for the last bucket
@@ -442,15 +424,16 @@ export function calculateCategoryDistribution(
  * @returns Convolved distribution [P(X+Y=0), P(X+Y=1), ...]
  */
 export function convolveDistributions(dist1: number[], dist2: number[]): number[] {
-  const result: number[] = Array.from({ length: dist1.length + dist2.length - 1 }, () => 0)
-
-  for (let i = 0; i < dist1.length; i++) {
-    for (let j = 0; j < dist2.length; j++) {
-      result[i + j] += dist1[i] * dist2[j]
+  return Array.from({ length: dist1.length + dist2.length - 1 }, (_, n) => {
+    let sum = 0
+    for (const [i, p1] of dist1.entries()) {
+      const p2 = dist2[n - i]
+      if (p2 !== undefined) {
+        sum += p1 * p2
+      }
     }
-  }
-
-  return result
+    return sum
+  })
 }
 
 /**
@@ -499,14 +482,15 @@ export function calculateSuccessiveTargetProbabilities(
     distributions.push(dist)
   }
 
-  if (distributions.length === 0) {
+  const [firstDistribution, ...remainingDistributions] = distributions
+  if (firstDistribution === undefined) {
     return []
   }
 
   // Convolve all distributions to get total acquisition distribution
-  let totalDistribution = distributions[0]
-  for (let i = 1; i < distributions.length; i++) {
-    totalDistribution = convolveDistributions(totalDistribution, distributions[i])
+  let totalDistribution = firstDistribution
+  for (const distribution of remainingDistributions) {
+    totalDistribution = convolveDistributions(totalDistribution, distribution)
   }
 
   // Apply pity: P(Y >= k) = P(X >= max(0, k - pityCount))
@@ -518,14 +502,13 @@ export function calculateSuccessiveTargetProbabilities(
     const naturalRequirement = Math.max(0, k - pityCount)
 
     // P(X >= naturalRequirement)
-    let probability = 0
-    for (let j = naturalRequirement; j < totalDistribution.length; j++) {
-      probability += totalDistribution[j]
-    }
+    const probability = totalDistribution
+      .slice(naturalRequirement)
+      .reduce((sum, bucketProbability) => sum + bucketProbability, 0)
 
     results.push({
       count: k,
-      probability: Math.min(1, Math.max(0, probability)),
+      probability: clamp01(probability),
     })
   }
 
@@ -565,11 +548,11 @@ export function calculateMultiTargetProbability(
     }
 
     const rate = calculateRateForTarget(target.type, featuredCounts[target.type], allEgoCollected)
-    const targetProb = calculateMultiCopyProbability(pulls, rate, copiesNeeded)
+    const targetProb = calculateAtLeastKHits(pulls, rate, copiesNeeded)
     probability *= targetProb
   }
 
-  return Math.min(1, Math.max(0, probability))
+  return clamp01(probability)
 }
 
 /**
@@ -601,37 +584,26 @@ export function calculatePityAdjustedProbability(
     0,
   )
 
-  // Check if pity can apply: reaches 200 pulls and only needs 1 more copy total
   const pityReached = totalPulls >= EXTRACTION_RATES.PITY_PULLS
-  const singleCopyNeeded = totalCopiesNeeded === 1
 
-  if (pityReached && singleCopyNeeded) {
-    return { probability: 1, pityApplies: true }
+  if (pityReached && totalCopiesNeeded > 0) {
+    // Pity guarantees one copy; the rest has to come naturally
+    const probability =
+      totalCopiesNeeded === 1
+        ? 1
+        : calculateMultiTargetProbability(
+            reduceOneFromTargets(targets),
+            pulls,
+            featuredCounts,
+            allEgoCollected,
+          )
+    return { probability, pityApplies: true }
   }
 
-  // For multiple copies or not reaching pity, calculate normally
-  const baseProbability = calculateMultiTargetProbability(
-    targets,
-    pulls,
-    featuredCounts,
-    allEgoCollected,
-  )
-
-  // If pity is reached but need multiple copies, pity guarantees at least 1
-  // P(all with pity) = P(get remaining M-1 naturally | have 1 from pity)
-  if (pityReached && totalCopiesNeeded > 1) {
-    // Reduce copies needed by 1 (pity guarantees one)
-    const adjustedTargets = reduceOneFromTargets(targets)
-    const pityAdjustedProb = calculateMultiTargetProbability(
-      adjustedTargets,
-      pulls,
-      featuredCounts,
-      allEgoCollected,
-    )
-    return { probability: pityAdjustedProb, pityApplies: true }
+  return {
+    probability: calculateMultiTargetProbability(targets, pulls, featuredCounts, allEgoCollected),
+    pityApplies: false,
   }
-
-  return { probability: baseProbability, pityApplies: false }
 }
 
 /**
@@ -727,11 +699,9 @@ export function calculateEffectiveRates(
 /**
  * Calculate optimal pity allocation across targets
  *
- * Distributes pity to targets with LOWEST NATURAL PROBABILITY first (hardest to obtain).
- * Fixes bug where pity was allocated by raw rate, not accounting for:
- * - Rate modifiers (allEgoCollected doubles EGO rate)
- * - Coupon Collector scenarios (wanting N from M featured items)
- * - Different probability models (binomial vs. Coupon Collector)
+ * Distributes pity to targets with LOWEST NATURAL PROBABILITY first (hardest to obtain),
+ * which accounts for rate modifiers, Coupon Collector scenarios, and the different
+ * probability models rather than ranking by raw rate.
  *
  * @param targets - Array of extraction targets
  * @param pityCount - Total pity available
@@ -756,17 +726,7 @@ function calculatePityAllocation(
   // Build target info with index, rate, and natural probability
   const targetInfos = targets.map((target, index) => {
     const wantedCount = Math.max(0, target.wantedCopies - target.currentCopies)
-    let rate: number
-
-    if (target.type === 'ego') {
-      rate = allEgoCollected
-        ? EXTRACTION_RATES.RATE_UP.EGO_ALL_COLLECTED
-        : EXTRACTION_RATES.RATE_UP.EGO
-    } else if (target.type === 'threeStarId') {
-      rate = EXTRACTION_RATES.RATE_UP.THREE_STAR_ID
-    } else {
-      rate = EXTRACTION_RATES.RATE_UP.ANNOUNCER
-    }
+    const rate = RATE_UP_FOR[target.type](allEgoCollected)
 
     // Calculate natural probability (without pity)
     const naturalProb = calculateNaturalProbability(
@@ -794,6 +754,65 @@ function calculatePityAllocation(
   }
 
   return allocation
+}
+
+/** Inputs shared by every target in one calculation run */
+interface TargetProbabilityContext {
+  pulls: number
+  featuredCounts: Record<ExtractionTargetType, number>
+  allEgoCollected: boolean
+  /** Pity copies this target was allocated */
+  pityAllocated: number
+}
+
+/**
+ * Calculate the probability result for a single target
+ *
+ * - EGO: 비복원추출 (without replacement) - every hit is unique, so N hits suffice
+ * - Identity/Announcer: 복원추출 (with replacement) - each wanted item must be hit
+ *
+ * @param target - The target to evaluate
+ * @param ctx - Shared calculation inputs plus this target's pity allocation
+ * @returns Probability result for the target
+ */
+function computeTargetProbability(
+  target: ExtractionTarget,
+  ctx: TargetProbabilityContext,
+): TargetProbability {
+  const wantedCount = Math.max(0, target.wantedCopies - target.currentCopies)
+
+  if (wantedCount <= 0) {
+    return { target, probability: 1, expectedPulls: 0, pityApplies: false }
+  }
+
+  const isEgo = target.type === 'ego'
+  const featuredCount = ctx.featuredCounts[target.type]
+
+  // No featured item of this type means no pull can produce one. Dividing by the
+  // count instead yields an item rate of Infinity and, from it, zero expected
+  // pulls — a certainty reported for something that cannot happen.
+  if (!isEgo && featuredCount <= 0) {
+    return { target, probability: 0, expectedPulls: Infinity, pityApplies: false }
+  }
+
+  const totalRate = RATE_UP_FOR[target.type](ctx.allEgoCollected)
+  const itemRate = isEgo ? totalRate : totalRate / featuredCount
+
+  const naturalWanted = Math.max(0, wantedCount - ctx.pityAllocated)
+
+  let probability = 1
+  if (naturalWanted > 0) {
+    probability = isEgo
+      ? calculateAtLeastKHits(ctx.pulls, totalRate, naturalWanted)
+      : calculateCouponCollectorProbability(ctx.pulls, totalRate, featuredCount, naturalWanted)
+  }
+
+  return {
+    target,
+    probability,
+    expectedPulls: (1 / itemRate) * wantedCount,
+    pityApplies: ctx.pityAllocated > 0,
+  }
 }
 
 /**
@@ -846,75 +865,14 @@ export function calculateExtraction(input: ExtractionInput): ExtractionResult {
     plannedPulls,
   )
 
-  // Calculate per-target probabilities
-  // Different calculation based on extraction type:
-  // - EGO: 비복원추출 (without replacement) - every hit is unique
-  // - Identity/Announcer: 복원추출 (with replacement) - can get duplicates
-  const targetResults: TargetProbability[] = targets.map((target, index) => {
-    const wantedCount = Math.max(0, target.wantedCopies - target.currentCopies)
-    const featuredCount = featuredCounts[target.type]
-    const pityForThis = pityAllocation.get(index) ?? 0
-
-    let probability: number
-    let pityApplies = false
-    let expectedPulls = 0
-
-    if (wantedCount <= 0) {
-      probability = 1
-    } else if (target.type === 'ego') {
-      // EGO: 비복원추출 - "want N EGOs" = "need at least N EGO hits"
-      // Every hit is guaranteed unique, so just need enough hits total
-      const egoRate = modifiers.allEgoCollected
-        ? EXTRACTION_RATES.RATE_UP.EGO_ALL_COLLECTED
-        : EXTRACTION_RATES.RATE_UP.EGO
-
-      // Use pre-calculated pity allocation
-      const naturalHitsNeeded = Math.max(0, wantedCount - pityForThis)
-
-      if (naturalHitsNeeded <= 0) {
-        probability = 1
-        pityApplies = true
-      } else {
-        probability = calculateAtLeastKHits(plannedPulls, egoRate, naturalHitsNeeded)
-        pityApplies = pityForThis > 0
-      }
-
-      expectedPulls = wantedCount > 0 ? (1 / egoRate) * wantedCount : 0
-    } else {
-      // Identity/Announcer: 복원추출 - "want N different" = Coupon Collector
-      // Need to hit each specific item at least once
-      const totalRate =
-        target.type === 'threeStarId'
-          ? EXTRACTION_RATES.RATE_UP.THREE_STAR_ID
-          : EXTRACTION_RATES.RATE_UP.ANNOUNCER
-
-      // Use pre-calculated pity allocation
-      const naturalWanted = Math.max(0, wantedCount - pityForThis)
-
-      if (naturalWanted <= 0) {
-        probability = 1
-        pityApplies = true
-      } else {
-        probability = calculateCouponCollectorProbability(
-          plannedPulls,
-          totalRate,
-          featuredCount,
-          naturalWanted,
-        )
-        pityApplies = pityForThis > 0
-      }
-
-      const itemRate = totalRate / featuredCount
-      expectedPulls = wantedCount > 0 ? (1 / itemRate) * wantedCount : 0
-    }
-
-    return {
-      target,
-      probability,
-      expectedPulls,
-      pityApplies,
-    }
-  })
+  const targetResults: TargetProbability[] = targets.map((target, index) =>
+    computeTargetProbability(target, {
+      pulls: plannedPulls,
+      featuredCounts,
+      allEgoCollected: modifiers.allEgoCollected,
+      pityAllocated: pityAllocation.get(index) ?? 0,
+    }),
+  )
 
   // Calculate P(any) = probability of getting at least ONE target
   // P(any) = 1 - P(none) = 1 - product of (1 - P(target))
@@ -990,17 +948,7 @@ function calculateCombinedPityProbability(
   // Build target info with appropriate rates and natural probabilities
   const targetInfos = targets.map((target) => {
     const wantedCount = Math.max(0, target.wantedCopies - target.currentCopies)
-    let rate: number
-
-    if (target.type === 'ego') {
-      rate = allEgoCollected
-        ? EXTRACTION_RATES.RATE_UP.EGO_ALL_COLLECTED
-        : EXTRACTION_RATES.RATE_UP.EGO
-    } else if (target.type === 'threeStarId') {
-      rate = EXTRACTION_RATES.RATE_UP.THREE_STAR_ID
-    } else {
-      rate = EXTRACTION_RATES.RATE_UP.ANNOUNCER
-    }
+    const rate = RATE_UP_FOR[target.type](allEgoCollected)
 
     // Calculate natural probability (without pity)
     const naturalProb = calculateNaturalProbability(
@@ -1027,8 +975,7 @@ function calculateCombinedPityProbability(
     return 1 // Pity covers everything
   }
 
-  // Distribute pity optimally (to lowest NATURAL PROBABILITY targets first)
-  // Fixes bug where sort by rate didn't account for Coupon Collector probabilities
+  // Distribute pity to the lowest NATURAL PROBABILITY targets first
   const sorted = [...targetInfos].sort((a, b) => a.naturalProb - b.naturalProb)
 
   let pityRemaining = pityGuarantees
@@ -1062,5 +1009,5 @@ function calculateCombinedPityProbability(
     probability *= targetProb
   }
 
-  return Math.min(1, Math.max(0, probability))
+  return clamp01(probability)
 }

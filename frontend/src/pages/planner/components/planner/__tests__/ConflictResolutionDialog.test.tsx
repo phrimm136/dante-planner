@@ -67,3 +67,41 @@ describe('ConflictResolutionDialog', () => {
     expect(screen.getByText('Use Server')).toBeDisabled()
   })
 })
+
+describe('ConflictResolutionDialog - failed resolution', () => {
+  const baseProps = {
+    open: true,
+    conflictState: { serverVersion: 3, detectedAt: '2026-01-04T12:00:00Z' },
+    onChoice: vi.fn(),
+  }
+
+  it('reports a failure the presenter has a message for', () => {
+    render(<ConflictResolutionDialog {...baseProps} resolutionError={{ kind: 'quota' }} />)
+
+    expect(screen.getByText('planner:pages.plannerMD.save.quotaExceeded')).toBeInTheDocument()
+  })
+
+  it('speaks for a failure that is itself a conflict, which the presenter will not', () => {
+    // presentError yields null for a conflict precisely because this dialog owns it.
+    render(
+      <ConflictResolutionDialog
+        {...baseProps}
+        resolutionError={{ kind: 'conflict', code: 'SYNC_CONFLICT', serverVersion: 9 }}
+      />,
+    )
+
+    expect(screen.getByText(/changed again/)).toBeInTheDocument()
+  })
+
+  it('says nothing about a failure when none has happened', () => {
+    render(<ConflictResolutionDialog {...baseProps} />)
+
+    expect(screen.queryByText(/changed again/)).toBeNull()
+  })
+
+  it('warns that the copy stays unpublished, since keep-both is always on offer', () => {
+    render(<ConflictResolutionDialog {...baseProps} />)
+
+    expect(screen.getByText('The copy will not be published')).toBeInTheDocument()
+  })
+})

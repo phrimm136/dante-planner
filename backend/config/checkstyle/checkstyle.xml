@@ -5,15 +5,23 @@
 
 <!--
   Idiom ratchet (docs/32 phase 13). Tool-per-axis: Checkstyle polices import
-  hygiene and the entity/dto lombok.Data ban only. Bug patterns live in Error
-  Prone, duplication in CPD, test-method naming in ArchUnit (annotation-aware),
-  service Javadoc in the scoped checkstyleServiceJavadoc task. Zero suppressions.
+  hygiene, the entity/dto lombok.Data ban and the raw-Redis-construction ban.
+  Bug patterns live in Error Prone, duplication in CPD, test-method naming in
+  ArchUnit (annotation-aware), service Javadoc in the scoped
+  checkstyleServiceJavadoc task.
 -->
 <module name="Checker">
     <property name="severity" value="error"/>
     <property name="fileExtensions" value="java"/>
 
+    <module name="SuppressionFilter">
+        <property name="file" value="${config_loc}/suppressions.xml"/>
+    </module>
+
     <module name="TreeWalker">
+        <module name="AvoidStarImport">
+            <property name="allowStaticMemberImports" value="true"/>
+        </module>
         <module name="UnusedImports">
             <property name="processJavadoc" value="true"/>
         </module>
@@ -21,6 +29,12 @@
         <!-- Locks in phases 7/9: dto/ and entity/ are records/@Getter, never @Data. -->
         <module name="IllegalImport">
             <property name="illegalClasses" value="lombok.Data"/>
+        </module>
+        <module name="RegexpSinglelineJava">
+            <property name="id" value="rawRedisConstruction"/>
+            <property name="format" value="RedisClient\.create\(|new LettuceConnectionFactory\("/>
+            <property name="message"
+                      value="Build Redis connections through BoundedRedisConnections (shared/config) - a raw client or factory inherits the 60s Lettuce command-timeout default"/>
         </module>
     </module>
 </module>

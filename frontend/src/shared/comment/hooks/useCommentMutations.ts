@@ -5,12 +5,12 @@
  * Most mutations use cache invalidation. Notification toggle uses direct cache update (no refetch).
  */
 
-import { useTranslation } from 'react-i18next'
-import { toast } from '@/lib/toast'
-
-import { ApiClient, ConflictError } from '@/lib/api'
+import { ApiClient } from '@/lib/api'
+import { ConflictError } from '@/lib/apiErrors'
+import { showError, showErrorMessage } from '@/lib/errorPresentation'
 import { requestNotificationPermission } from '@/shared/notifications'
 import { useApiMutation } from '@/components/hooks/useApiMutation'
+import { updateCommentInTree } from '../lib/commentTree'
 import { commentsQueryKeys } from './useCommentsQuery'
 
 import type { CommentNode, CommentReportReason } from '../types/CommentTypes'
@@ -41,8 +41,6 @@ export function useCreateComment() {
     onSuccess: () => {
       void requestNotificationPermission()
     },
-    errorLogPrefix: 'Create comment failed',
-    errorToastKey: 'comments.toast.postFailed',
   })
 }
 
@@ -68,13 +66,10 @@ export function useEditComment() {
         return updateCommentInTree(oldTree, commentId, (node) => ({
           ...node,
           content,
-          isUpdated: true,
           updatedAt: new Date().toISOString(),
         }))
       })
     },
-    errorLogPrefix: 'Edit comment failed',
-    errorToastKey: 'comments.toast.editFailed',
   })
 }
 
@@ -94,9 +89,7 @@ export function useDeleteComment() {
     },
     // Invalidate to refetch from server - backend prunes deleted leaf comments
     invalidateKeys: ({ plannerId }) => [commentsQueryKeys.list(plannerId)],
-    successToastKey: 'comments.toast.deletedSuccess',
-    errorLogPrefix: 'Delete comment failed',
-    errorToastKey: 'comments.toast.deleteFailed',
+    successToastKey: 'common:comments.toast.deletedSuccess',
   })
 }
 
@@ -110,8 +103,6 @@ interface UpvoteCommentInput {
 }
 
 export function useUpvoteComment() {
-  const { t } = useTranslation()
-
   return useApiMutation<void, UpvoteCommentInput>({
     mutationFn: async ({ commentId }) => {
       await ApiClient.post(`/api/comments/${commentId}/upvote`, {})
@@ -127,13 +118,16 @@ export function useUpvoteComment() {
         }))
       })
     },
+    // The 409 code the server sends for a duplicate upvote is the same one it
+    // sends for a duplicate planner vote, so only this call site knows which
+    // resource the user is being told about.
+    suppressErrorToast: true,
     onError: (error) => {
       if (error instanceof ConflictError) {
-        toast.error(t('comments.toast.alreadyUpvoted'))
-      } else {
-        console.error('Upvote failed:', error)
-        toast.error(t('comments.toast.upvoteFailed'))
+        showErrorMessage('common:comments.toast.alreadyUpvoted')
+        return
       }
+      showError(error)
     },
   })
 }
@@ -149,21 +143,19 @@ interface ReportCommentInput {
 }
 
 export function useReportComment() {
-  const { t } = useTranslation()
-
   return useApiMutation<void, ReportCommentInput>({
     mutationFn: async ({ commentId, reason }) => {
       await ApiClient.post(`/api/comments/${commentId}/report`, { reason })
     },
     invalidateKeys: ({ plannerId }) => [commentsQueryKeys.list(plannerId)],
-    successToastKey: 'comments.toast.reportedSuccess',
+    successToastKey: 'common:comments.toast.reportedSuccess',
+    suppressErrorToast: true,
     onError: (error) => {
       if (error instanceof ConflictError) {
-        toast.error(t('comments.toast.alreadyReported'))
-      } else {
-        console.error('Report failed:', error)
-        toast.error(t('comments.toast.reportFailed'))
+        showErrorMessage('common:comments.toast.alreadyReported')
+        return
       }
+      showError(error)
     },
   })
 }
@@ -176,30 +168,6 @@ interface ToggleNotificationsInput {
   commentId: string // UUID
   enabled: boolean
   plannerId: string
-}
-
-// ============================================================================
-// Cache Update Helpers
-// ============================================================================
-
-/**
- * Recursively updates a single comment in the tree.
- * Returns a new tree with the updated node (immutable update).
- */
-function updateCommentInTree(
-  nodes: CommentNode[],
-  targetId: string,
-  updater: (node: CommentNode) => CommentNode,
-): CommentNode[] {
-  return nodes.map((node) => {
-    if (node.id === targetId) {
-      return updater(node)
-    }
-    if (node.replies.length > 0) {
-      return { ...node, replies: updateCommentInTree(node.replies, targetId, updater) }
-    }
-    return node
-  })
 }
 
 export function useToggleCommentNotifications() {
@@ -217,7 +185,5 @@ export function useToggleCommentNotifications() {
         }))
       })
     },
-    errorLogPrefix: 'Toggle notifications failed',
-    errorToastKey: 'comments.toast.notificationUpdateFailed',
   })
 }

@@ -1,14 +1,16 @@
-import { useState, useEffect, useRef, useMemo, memo } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useEditor, EditorContent, EditorContext } from '@tiptap/react'
-import { ErrorBoundary } from 'react-error-boundary'
+import { ErrorBoundary as ReactErrorBoundary, type FallbackProps } from 'react-error-boundary'
 import { useTranslation } from 'react-i18next'
-import { toast } from '@/lib/toast'
+import { showErrorMessage } from '@/lib/errorPresentation'
 import StarterKit from '@tiptap/starter-kit'
 
 import { cn } from '@/lib/utils'
-import { measureDocBytes, largestPrefixWithinLimit } from '../lib/noteUtils'
+import { measureDocBytes, largestPrefixWithinLimit, isNoteEmpty } from '../lib/noteUtils'
 import { sanitizeUrl } from '../lib/tiptap-utils'
-import { MAX_NOTE_BYTES } from '@/lib/constants'
+import { AUTO_SAVE_DEBOUNCE_MS, MAX_NOTE_BYTES } from '@/lib/constants'
+import { env } from '@/lib/env'
+import { useNoteDelivery } from '../context/NoteDeliveryRegistry'
 import type { NoteEditorProps } from '../types/NoteEditorTypes'
 import { SpoilerExtension } from './extensions/SpoilerExtension'
 import { ByteLimitExtension, BYTE_LIMIT_BYPASS } from './extensions/ByteLimitExtension'
@@ -20,13 +22,8 @@ import './NoteEditor.css'
 /**
  * EditorErrorFallback - Simple inline fallback when editor crashes
  */
-function EditorErrorFallback({
-  resetErrorBoundary,
-  t,
-}: {
-  resetErrorBoundary: () => void
-  t: (key: string) => string
-}) {
+function EditorErrorFallback({ resetErrorBoundary }: FallbackProps) {
+  const { t } = useTranslation(['planner', 'common'])
   return (
     <div className="p-3 text-center text-sm text-muted-foreground bg-muted/50 rounded min-h-[100px] flex flex-col items-center justify-center gap-2">
       <span>{t('pages.plannerMD.noteEditor.errorFallback.loadFailed')}</span>
@@ -41,26 +38,13 @@ function EditorErrorFallback({
  * NoteEditor - WYSIWYG rich text editor using Tiptap
  *
  * Features:
- * - Focus-based preview mode (unfocused = read-only preview)
+ * - Focus-revealed toolbar (unfocused shows a bare preview)
  * - Controlled component pattern (value + onChange)
  * - Text formatting: bold, italic, strikethrough, headings, lists, quotes, code
  * - Custom spoiler mark extension
  * - Image upload using Tiptap's ImageUploadNode
  * - Link insertion dialog
  */
-// Custom comparison for memo - compares value.content by reference equality
-// since parent should provide stable NoteContent objects
-function areNoteEditorPropsEqual(prev: NoteEditorProps, next: NoteEditorProps): boolean {
-  return (
-    prev.value === next.value &&
-    prev.placeholder === next.placeholder &&
-    prev.readOnly === next.readOnly &&
-    prev.className === next.className &&
-    prev.maxBytes === next.maxBytes
-    // onChange intentionally excluded - should be stable from parent
-  )
-}
-
 function NoteEditorInner({
   value,
   onChange,
@@ -86,58 +70,105 @@ function NoteEditorInner({
   const [localContent, setLocalContent] = useState(value.content)
   const hasLocalChangesRef = useRef(false)
 
-  // Debounced sync to parent - fires 500ms after typing stops
+  // What the armed debounce would have delivered, callable outside its timer.
+  const pendingRef = useRef<(() => void) | null>(null)
+
+  // Whether the note arrived empty, and whether anything has been handed to the
+  // owner since. Together they bound the window in which Tiptap's own reparse of
+  // the loaded note can be told apart from the user typing.
+  const [loadedEmpty] = useState(() => isNoteEmpty(value))
+  const hasDeliveredRef = useRef(false)
+
+  // Debounced sync to parent - fires AUTO_SAVE_DEBOUNCE_MS after typing stops
   useEffect(() => {
+    pendingRef.current = null
     if (!hasLocalChangesRef.current || !localContent) return
 
-    const timer = setTimeout(() => {
+    const flush = () => {
       if (hasLocalChangesRef.current) {
-        onChange({ content: localContent })
+        hasDeliveredRef.current = true
+        onChange?.({ content: localContent })
         hasLocalChangesRef.current = false
       }
-    }, 500)
+    }
+    pendingRef.current = flush
+
+    const timer = setTimeout(() => {
+      pendingRef.current = null
+      flush()
+    }, AUTO_SAVE_DEBOUNCE_MS)
 
     return () => clearTimeout(timer)
   }, [localContent, onChange])
 
+  // The debounce effect re-runs on every keystroke and clears its timer each time,
+  // so unmount would otherwise drop the last edit. Flush it from an unmount-only
+  // effect, which runs after that cleanup.
+  useEffect(() => () => pendingRef.current?.(), [])
+
+  // An owner collecting pending text before the page goes away pulls it from
+  // here. Listening for the unload directly would put this editor's delivery at
+  // the mercy of listener registration order against the owner's own handler.
+  const delivery = useNoteDelivery()
+  useEffect(() => {
+    if (!delivery) return
+    return delivery.register(() => {
+      pendingRef.current?.()
+    })
+  }, [delivery])
+
+  // An editable editor with no owner to pull from it loses whatever the debounce
+  // is holding when the page closes, and nothing at runtime would say so.
+  useEffect(() => {
+    if (!env.DEV || delivery || readOnly || !onChange) return
+    console.warn(
+      'NoteEditor is editable but has no NoteDeliveryProvider above it: text still inside its debounce will be lost when the page closes.',
+    )
+  }, [delivery, readOnly, onChange])
+
   // Measure the same { content } shape the cap and schema enforce, so the
   // counter never disagrees with what the editor actually rejects.
-  const currentBytes = useMemo(() => {
+  const currentBytes = (() => {
     if (!localContent) return 0
     return measureDocBytes(localContent)
-  }, [localContent])
+  })()
 
   // Memoize extensions to prevent recreation on every render
-  const extensions = useMemo(
-    () => [
-      // StarterKit includes Link by default in Tiptap v3
-      // Configure Link through StarterKit to avoid duplicate extension warning
-      StarterKit.configure({
-        heading: {
-          levels: [1, 2, 3],
+  const extensions = [
+    // StarterKit includes Link by default in Tiptap v3
+    // Configure Link through StarterKit to avoid duplicate extension warning
+    StarterKit.configure({
+      heading: {
+        levels: [1, 2, 3],
+      },
+      link: {
+        openOnClick: false,
+        HTMLAttributes: {
+          class: 'note-link',
         },
-        link: {
-          openOnClick: false,
-          HTMLAttributes: {
-            class: 'note-link',
-          },
-        },
-      }),
-      SpoilerExtension,
-      ByteLimitExtension.configure({ limit: byteLimit }),
-    ],
-    [byteLimit],
-  )
+      },
+    }),
+    SpoilerExtension,
+    ByteLimitExtension.configure({ limit: byteLimit }),
+  ]
 
   // Initialize Tiptap editor
   const editor = useEditor({
     extensions,
     content: value.content,
-    editable: !readOnly && isFocused,
+    editable: !readOnly,
     onUpdate: ({ editor }) => {
       // Update local state only - parent sync happens on blur
       const newContent = editor.getJSON()
       setLocalContent(newContent)
+
+      // Tiptap reparses the loaded note as it starts up and reports that as an
+      // update. A note stored without content arrives as `''` and parses into a
+      // document holding a single empty paragraph, so that first update looks
+      // like a change while nothing about the note has changed. Until this editor
+      // has handed something over, an empty note that is still empty is no edit.
+      if (!hasDeliveredRef.current && loadedEmpty && isNoteEmpty({ content: newContent })) return
+
       hasLocalChangesRef.current = true
     },
     editorProps: {
@@ -188,12 +219,69 @@ function NoteEditorInner({
     },
   })
 
-  // Update editable state when focus or readOnly changes
+  // Hand Tiptap's parsed document over at mount instead of letting it travel as a
+  // debounced edit: the stored form and the parsed form differ for anything that
+  // does not round-trip, and an owner that saw only the difference would read a
+  // plain load as an edit. This effect runs before the owner's own, which is when
+  // the owner takes the loaded planner as its baseline.
+  useEffect(() => {
+    if (!editor || hasDeliveredRef.current) return
+
+    // An empty note that parses into an empty document has not changed, however
+    // little the two shapes resemble each other — the stored form is `''` and the
+    // parsed one a document holding one empty paragraph. Sections reveal one frame
+    // at a time, long after the owner took its baseline, so reporting this would
+    // make merely opening a planner an edit for every note that was blank.
+    const loaded = editor.getJSON()
+    if (loadedEmpty && isNoteEmpty({ content: loaded })) return
+
+    hasDeliveredRef.current = true
+    onChange?.({ content: loaded })
+  }, [editor, onChange, loadedEmpty])
+
+  // Whether a pointer is currently pressed, and the wait for its release if one is
+  // already scheduled. Read by collapseToolbar, which must not reflow mid-gesture.
+  const gestureRef = useRef<{
+    down: boolean
+    pending: AbortController | null
+    release: ReturnType<typeof setTimeout> | null
+  }>({
+    down: false,
+    pending: null,
+    release: null,
+  })
+
+  useEffect(() => {
+    const gesture = gestureRef.current
+    const markDown = () => {
+      gesture.down = true
+    }
+    const markUp = () => {
+      gesture.down = false
+    }
+
+    document.addEventListener('pointerdown', markDown, true)
+    document.addEventListener('pointerup', markUp, true)
+    document.addEventListener('pointercancel', markUp, true)
+
+    return () => {
+      document.removeEventListener('pointerdown', markDown, true)
+      document.removeEventListener('pointerup', markUp, true)
+      document.removeEventListener('pointercancel', markUp, true)
+      gesture.pending?.abort()
+      if (gesture.release) {
+        clearTimeout(gesture.release)
+        gesture.release = null
+      }
+    }
+  }, [])
+
+  // Update editable state when readOnly changes
   useEffect(() => {
     if (editor) {
-      editor.setEditable(!readOnly && isFocused)
+      editor.setEditable(!readOnly)
     }
-  }, [editor, isFocused, readOnly])
+  }, [editor, readOnly])
 
   // Sync from parent when value prop changes externally (load/import)
   // Skip if we have local changes to avoid overwriting user's typing
@@ -212,15 +300,49 @@ function NoteEditorInner({
     }
   }, [editor, value.content])
 
-  // Handle click to activate editor - synchronous focus for React Compiler compatibility
-  const handleClick = () => {
+  // Reveal the editing chrome once focus reaches anything inside the editor.
+  const handleFocus = () => {
     if (!readOnly && !isFocused) {
       setIsFocused(true)
-      // Direct synchronous focus - no RAF to avoid race conditions
-      if (editor && !editor.isDestroyed) {
-        editor.commands.focus()
-      }
     }
+  }
+
+  /**
+   * Drop the toolbar, but never between a press and its release.
+   *
+   * The toolbar is a row in the flow, so removing it lifts everything below by its
+   * height. A press outside the editor blurs it, and the blur is delivered before
+   * the release — collapse on arrival and the control under the pointer travels
+   * out from under it, so no `click` is ever composed and nothing downstream runs.
+   */
+  const collapseToolbar = () => {
+    const gesture = gestureRef.current
+
+    if (!gesture.down) {
+      setIsFocused(false)
+      return
+    }
+
+    gesture.pending?.abort()
+    const controller = new AbortController()
+    gesture.pending = controller
+
+    const finish = () => {
+      controller.abort()
+      gesture.pending = null
+      // `click` is dispatched after `pointerup` within the same task, so yielding a
+      // task lets the press land before the row disappears.
+      if (gesture.release) {
+        clearTimeout(gesture.release)
+      }
+      gesture.release = setTimeout(() => {
+        gesture.release = null
+        setIsFocused(false)
+      }, 0)
+    }
+
+    document.addEventListener('pointerup', finish, { signal: controller.signal })
+    document.addEventListener('pointercancel', finish, { signal: controller.signal })
   }
 
   // Handle blur with relatedTarget for reliable focus tracking
@@ -230,11 +352,11 @@ function NoteEditorInner({
 
     if (containerRef.current && !containerRef.current.contains(relatedTarget)) {
       if (!linkDialogOpen) {
-        setIsFocused(false)
+        collapseToolbar()
 
         // Sync local changes to parent on blur
         if (hasLocalChangesRef.current && localContent) {
-          onChange({ content: localContent })
+          onChange?.({ content: localContent })
           hasLocalChangesRef.current = false
         }
       }
@@ -262,7 +384,7 @@ function NoteEditorInner({
 
     const safeUrl = sanitizeUrl(processedUrl, window.location.origin)
     if (safeUrl === '#') {
-      toast.error(t('pages.plannerMD.noteEditor.linkDialog.invalidUrl'))
+      showErrorMessage('planner:pages.plannerMD.noteEditor.linkDialog.invalidUrl')
       return
     }
 
@@ -303,17 +425,15 @@ function NoteEditorInner({
           isFocused && 'ring-2 ring-ring ring-offset-2',
           className,
         )}
-        onClick={handleClick}
+        onFocus={handleFocus}
         onBlur={handleBlur}
       >
         {/* Toolbar - only visible when focused */}
         <Toolbar editor={editor} visible={isFocused && !readOnly} onLinkClick={handleLinkClick} />
 
         {/* Editor content with error boundary */}
-        <ErrorBoundary
-          fallbackRender={({ resetErrorBoundary }) => (
-            <EditorErrorFallback resetErrorBoundary={resetErrorBoundary} t={t} />
-          )}
+        <ReactErrorBoundary
+          FallbackComponent={EditorErrorFallback}
           onError={(error) => {
             console.error('NoteEditor error:', error)
           }}
@@ -328,7 +448,7 @@ function NoteEditorInner({
                 : placeholder || t('pages.plannerMD.noteEditor.placeholder')}
             </div>
           )}
-        </ErrorBoundary>
+        </ReactErrorBoundary>
 
         {/* Link dialog */}
         <LinkDialog
@@ -357,6 +477,4 @@ function NoteEditorInner({
 }
 
 // Wrap with memo using custom prop comparison to prevent unnecessary re-renders
-export const NoteEditor = memo(NoteEditorInner, areNoteEditorPropsEqual)
-
-export default NoteEditor
+export const NoteEditor = NoteEditorInner

@@ -33,6 +33,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import org.danteplanner.backend.shared.exception.EntityNotFoundException;
+import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 
 /**
  * Phase-3 acceptance test (INV1): a replica {@code byId} miss re-checks the primary before
@@ -101,7 +103,7 @@ class ReplicaLagIT extends CausalHarnessSupport {
 
     @Test
     @DisplayName("INV1: a replica byId miss re-checks the primary, serves the entity, and increments the promotion counter")
-    void byIdMissOnPausedReplica_reChecksPrimary_servesEntityAndIncrementsCounter() {
+    void byIdMissOnPausedReplica_WhenReChecksPrimary_ServesEntityAndIncrementsCounter() {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-it@example.com");
         Long userId = owner.getId();
         replicationControl.awaitCaughtUp();
@@ -139,7 +141,7 @@ class ReplicaLagIT extends CausalHarnessSupport {
 
     @Test
     @DisplayName("INV1 negative: a byId absent on both replica and primary propagates PlannerNotFoundException, does not promote, and clears the BULKHEAD pin so a follow-on read-only read still routes to the replica")
-    void byIdMissOnBothReplicaAndPrimary_propagatesNotFound_doesNotPromote_andClearsPin() {
+    void byIdMissOnBothReplicaAndPrimary_WhenPropagatesNotFound_DoesNotPromote_AndClearsPin() {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-doublemiss@example.com");
         Long userId = owner.getId();
         replicationControl.awaitCaughtUp();
@@ -165,7 +167,7 @@ class ReplicaLagIT extends CausalHarnessSupport {
 
             assertThat(thrown)
                     .as("a byId absent on both replica and primary must propagate the miss as a 404")
-                    .isInstanceOf(org.danteplanner.backend.planner.exception.PlannerNotFoundException.class);
+                    .isInstanceOf(PlannerNotFoundException.class);
             assertThat(promotedCount() - before)
                     .as("a double-miss must NOT increment " + PROMOTED_COUNTER)
                     .isEqualTo(0.0);
@@ -180,7 +182,7 @@ class ReplicaLagIT extends CausalHarnessSupport {
 
     @Test
     @DisplayName("INV1 replica hit: a byId present on the replica is served without a re-check and leaves the promotion counter unchanged")
-    void byIdHitOnReplica_servesWithoutReCheck_andDoesNotPromote() {
+    void byIdHitOnReplica_WhenServesWithoutReCheck_AndDoesNotPromote() {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-hit@example.com");
         Long userId = owner.getId();
         replicationControl.awaitCaughtUp();
@@ -212,7 +214,7 @@ class ReplicaLagIT extends CausalHarnessSupport {
 
     @Test
     @DisplayName("INV2: a delete on the primary while replication is paused makes a byId via the stale replica return 404, even though the replica still holds the non-soft-deleted row")
-    void deleteTombstonesGhost_ReplicaPositive_Returns404() {
+    void deleteTombstonesGhost_WhenReplicaPositive_Returns404() {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-tombstone@example.com");
         Long userId = owner.getId();
 
@@ -223,10 +225,10 @@ class ReplicaLagIT extends CausalHarnessSupport {
         try {
             replicationControl.stopReplica();
 
-            plannerCommandService.deletePlanner(userId, UUID.randomUUID(), plannerId);
+            plannerCommandService.deletePlanner(userId, plannerId);
 
             Timestamp replicaDeletedAt = replicaJdbcTemplate.queryForObject(
-                    "SELECT deleted_at FROM planners WHERE id = UUID_TO_BIN(?)",
+                    "SELECT deleted_at FROM planner_content WHERE planner_id = UUID_TO_BIN(?)",
                     Timestamp.class,
                     plannerId.toString());
             assertThat(replicaDeletedAt)
@@ -240,7 +242,7 @@ class ReplicaLagIT extends CausalHarnessSupport {
 
             assertThat(thrown)
                     .as("a delete issues a tombstone synchronously before the response, so a replica-served positive whose del:planner:<id> is present must return 404")
-                    .isInstanceOf(org.danteplanner.backend.shared.exception.EntityNotFoundException.class);
+                    .isInstanceOf(EntityNotFoundException.class);
         } finally {
             replicationControl.startReplica();
             replicationControl.awaitCaughtUp();
@@ -249,13 +251,13 @@ class ReplicaLagIT extends CausalHarnessSupport {
 
     @Test
     @DisplayName("INV2 write half: a delete issues a del:planner:<id> tombstone synchronously with a bounded ~1h TTL")
-    void deleteOnPrimary_WritesTombstoneKey_WithBoundedTtl() {
+    void deleteOnPrimary_WhenWritesTombstoneKey_WithBoundedTtl() {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-tombstone-write@example.com");
 
         Planner p = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
         UUID plannerId = p.getId();
 
-        plannerCommandService.deletePlanner(owner.getId(), UUID.randomUUID(), plannerId);
+        plannerCommandService.deletePlanner(owner.getId(), plannerId);
 
         String key = "del:planner:" + plannerId;
 

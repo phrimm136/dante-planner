@@ -19,6 +19,7 @@ const mockAnnouncements: Announcement[] = [
     formattedDate: 'Feb 20, 2026',
     title: 'First Announcement',
     body: 'First body text\nWith newlines',
+    permanent: false,
   },
   {
     id: 'id-2',
@@ -26,6 +27,7 @@ const mockAnnouncements: Announcement[] = [
     formattedDate: 'Feb 19, 2026',
     title: 'Second Announcement',
     body: 'Second body text',
+    permanent: false,
   },
 ]
 

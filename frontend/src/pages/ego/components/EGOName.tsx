@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { useEGOListI18n } from '../hooks/useEGOListData'
 import { getDisplayFontForLanguage, getLineHeightForLanguage } from '@/lib/utils'
 import { AutoSizeWrappedText } from '@/components/ui/AutoSizeWrappedText'
+import { EGO_CARD_INFO_ROW } from '@/lib/constants'
 
 interface EGONameProps {
   /** EGO ID to look up name */
@@ -43,7 +44,7 @@ export function EGOName({ id }: EGONameProps) {
   return (
     <AutoSizeWrappedText
       text={name}
-      width={78}
+      width={EGO_CARD_INFO_ROW.NAME_SLOT}
       maxLines={3}
       className="text-center"
       style={{ ...displayStyle }}

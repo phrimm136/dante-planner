@@ -58,5 +58,3 @@ export function MobileDetailTabs({
     </Tabs>
   )
 }
-
-export default MobileDetailTabs

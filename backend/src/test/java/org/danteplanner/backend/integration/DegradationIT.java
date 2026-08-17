@@ -1,6 +1,7 @@
 package org.danteplanner.backend.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zaxxer.hikari.HikariDataSource;
 import eu.rekawek.toxiproxy.Proxy;
 import eu.rekawek.toxiproxy.ToxiproxyClient;
 import eu.rekawek.toxiproxy.model.Toxic;
@@ -11,7 +12,10 @@ import jakarta.servlet.http.Cookie;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.BooleanSupplier;
 import javax.sql.DataSource;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
@@ -19,6 +23,9 @@ import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
+import org.danteplanner.backend.shared.ratelimit.RateLimitService;
+import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -34,9 +41,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
+import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -82,7 +93,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * control API, never a wall-clock timeout — the primary write path fails within Hikari's
  * production connection-timeout (a production constant, not a test timing window), and replication
  * readiness is gated by {@link ReplicationControl#awaitCaughtUp()}; {@code appendfsync always}
- * makes the AOF replay deterministic. No sleeps.</p>
+ * makes the AOF replay deterministic. No assertion waits on a sleep; teardown polls for the
+ * Lettuce clients to reconnect, which they do on their own backoff rather than on next call.</p>
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
@@ -103,6 +115,13 @@ class DegradationIT {
     private static final int PRIMARY_DB_PROXY_LISTEN_PORT = 8667;
     private static final String RATE_LIMIT_REDIS_PROXY_NAME = "degradation-app-to-rate-limit-redis";
     private static final int RATE_LIMIT_PROXY_LISTEN_PORT = 8668;
+
+    /** A killed socket fails on the first packet, so the retries cost milliseconds, not waiting. */
+    private static final int CONNECTION_PROBE_ATTEMPTS = 20;
+
+    /** Matches RedisConnectionRecoveryIT: a client reconnect is not instant, so poll to a deadline. */
+    private static final long REDIS_RECOVERY_DEADLINE_MS = 30_000L;
+    private static final long REDIS_POLL_INTERVAL_MS = 250L;
     private static final String ROOT_USER = "root";
     private static final String REPL_USER = "repl";
     private static final String REPL_PASSWORD = "repl-pass";
@@ -112,36 +131,23 @@ class DegradationIT {
     private static final String COUNTER_NAME = "blacklist_check_skipped_total";
     private static final long ONE_HOUR_MS = 3_600_000L;
 
+    /**
+     * Wall-clock bounds for the blackholed write: the floor separates a genuine hang from an
+     * instant refusal; the ceiling allows the JDBC socketTimeout plus generous pool/validation
+     * headroom without letting the request hang unbounded.
+     */
+    private static final long BLACKHOLE_WRITE_FAILURE_FLOOR_MS = 1_000;
+    private static final long BLACKHOLE_WRITE_FAILURE_CEILING_MS = 25_000;
+
     /** Minimal planner content that passes {@code PlannerContentValidator} (from CausalGateIT). */
-    private static final String VALID_CONTENT = """
-        {
-            "selectedKeywords":[],
-            "selectedBuffIds":[100,201],
-            "selectedGiftKeyword":"Combustion",
-            "selectedGiftIds":["9001"],
-            "equipment":{
-                "01":{"identity":{"id":"10101","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20101","threadspin":4}}},
-                "02":{"identity":{"id":"10201","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20201","threadspin":4}}},
-                "03":{"identity":{"id":"10301","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20301","threadspin":4}}},
-                "04":{"identity":{"id":"10401","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20401","threadspin":4}}},
-                "05":{"identity":{"id":"10501","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20501","threadspin":4}}},
-                "06":{"identity":{"id":"10601","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20601","threadspin":4}}},
-                "07":{"identity":{"id":"10701","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20701","threadspin":4}}},
-                "08":{"identity":{"id":"10801","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20801","threadspin":4}}},
-                "09":{"identity":{"id":"10901","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20901","threadspin":4}}},
-                "10":{"identity":{"id":"11001","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"21001","threadspin":4}}},
-                "11":{"identity":{"id":"11101","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"21101","threadspin":4}}},
-                "12":{"identity":{"id":"11201","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"21201","threadspin":4}}}
-            },
-            "deploymentOrder":[0,1,2,3,4,5],
-            "floorSelections":[{"themePackId":"1001","difficulty":0,"giftIds":["9002"]}],
-            "sectionNotes":{}
-        }
-        """.trim().replace("\n", "").replace(" ", "");
 
     private static final Network DEGRADATION_NETWORK = Network.newNetwork();
 
+    // Relaxed durability and no performance_schema: throwaway test databases need no
+    // crash-safety, and GTID replication depends on neither fsync timing nor
+    // performance_schema — the flags cut boot time and per-instance memory.
     static final MySQLContainer PRIMARY = new MySQLContainer(MYSQL_IMAGE)
+            .withTmpFs(java.util.Map.of("/var/lib/mysql", "rw,size=512m"))
             .withNetwork(DEGRADATION_NETWORK)
             .withNetworkAliases(PRIMARY_ALIAS)
             .withDatabaseName("testdb")
@@ -152,9 +158,18 @@ class DegradationIT {
                     "--log-bin=mysql-bin",
                     "--binlog-format=ROW",
                     "--gtid-mode=ON",
-                    "--enforce-gtid-consistency=ON");
+                    "--enforce-gtid-consistency=ON",
+                    // The data directory is a tmpfs, so a large buffer pool caches RAM in
+                    // RAM; a test database is a schema and a few hundred rows.
+                    "--innodb-buffer-pool-size=64M",
+                    "--innodb-flush-log-at-trx-commit=0",
+                    "--innodb-doublewrite=0",
+                    "--sync-binlog=0",
+                    "--performance-schema=OFF",
+                    "--skip-name-resolve");
 
     static final MySQLContainer REPLICA = new MySQLContainer(MYSQL_IMAGE)
+            .withTmpFs(java.util.Map.of("/var/lib/mysql", "rw,size=512m"))
             .withNetwork(DEGRADATION_NETWORK)
             .withDatabaseName("testdb")
             .withUsername("test")
@@ -164,7 +179,15 @@ class DegradationIT {
                     "--log-bin=mysql-bin",
                     "--binlog-format=ROW",
                     "--gtid-mode=ON",
-                    "--enforce-gtid-consistency=ON");
+                    "--enforce-gtid-consistency=ON",
+                    // The data directory is a tmpfs, so a large buffer pool caches RAM in
+                    // RAM; a test database is a schema and a few hundred rows.
+                    "--innodb-buffer-pool-size=64M",
+                    "--innodb-flush-log-at-trx-commit=0",
+                    "--innodb-doublewrite=0",
+                    "--sync-binlog=0",
+                    "--performance-schema=OFF",
+                    "--skip-name-resolve");
 
     static final GenericContainer<?> DEDICATED_AUTH_REDIS = new GenericContainer<>(
             DockerImageName.parse(REDIS_IMAGE))
@@ -208,6 +231,9 @@ class DegradationIT {
     private LettuceConnectionFactory authRedisConnectionFactory;
 
     @Autowired
+    private RateLimitService rateLimitService;
+
+    @Autowired
     private MockMvc mockMvc;
 
     @Autowired
@@ -218,6 +244,9 @@ class DegradationIT {
 
     @Autowired
     private JwtTokenService jwtTokenService;
+
+    @Autowired
+    private DataSource appDataSource;
 
     @Autowired
     @Qualifier("degradationPrimaryJdbcTemplate")
@@ -252,9 +281,18 @@ class DegradationIT {
         registry.add("redis.rate-limit.port", () -> DEGRADATION_TOXIPROXY.getMappedPort(RATE_LIMIT_PROXY_LISTEN_PORT));
     }
 
+    // Production's JDBC URL carries these (application-prod.properties, DB_CONNECT_TIMEOUT_MS /
+    // DB_SOCKET_TIMEOUT_MS defaults). The driver's own defaults are infinite, so without them a
+    // blackholed primary would hang a request forever instead of failing within the bound the
+    // blackhole test asserts.
+    private static final long JDBC_CONNECT_TIMEOUT_MS = 10_000;
+    private static final long JDBC_SOCKET_TIMEOUT_MS = 10_000;
+
     private static String primaryUrlThroughProxy() {
         return "jdbc:mysql://" + DEGRADATION_TOXIPROXY.getHost() + ":"
-                + DEGRADATION_TOXIPROXY.getMappedPort(PRIMARY_DB_PROXY_LISTEN_PORT) + "/testdb";
+                + DEGRADATION_TOXIPROXY.getMappedPort(PRIMARY_DB_PROXY_LISTEN_PORT) + "/testdb"
+                + "?connectTimeout=" + JDBC_CONNECT_TIMEOUT_MS
+                + "&socketTimeout=" + JDBC_SOCKET_TIMEOUT_MS;
     }
 
     @BeforeEach
@@ -274,10 +312,137 @@ class DegradationIT {
             toxic.remove();
         }
         PRIMARY_DB_PROXY.enable();
+        evictPooledPrimaryConnections();
+        awaitLivePooledConnections();
         for (Toxic toxic : RATE_LIMIT_REDIS_PROXY.toxics().getAll()) {
             toxic.remove();
         }
         RATE_LIMIT_REDIS_PROXY.enable();
+        awaitLiveAuthRedis();
+        awaitLiveRateLimitRedis();
+    }
+
+    /**
+     * Pings the auth Redis until it answers.
+     *
+     * <p>The blacklist read fails open, so a connection the cut killed does not raise here — it
+     * quietly reports every token as clean, and the next test asserting that a blacklisted token
+     * stays rejected fails on an outage it never asked for.</p>
+     */
+    private void awaitLiveAuthRedis() {
+        authRedisConnectionFactory.resetConnection();
+        if (!awaitTrue(this::authRedisAnswers)) {
+            throw new IllegalStateException("the auth Redis never came back after the cut");
+        }
+    }
+
+    private boolean authRedisAnswers() {
+        try (RedisConnection connection = authRedisConnectionFactory.getConnection()) {
+            connection.ping();
+            return true;
+        } catch (RuntimeException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Charges a throwaway bucket until the limiter answers.
+     *
+     * <p>Re-enabling the proxy restores the route, but bucket4j's proxy manager holds a Lettuce
+     * connection the cut killed and reconnects on its own schedule. Until it does, the next test's
+     * first rate-limited write degrades to 503 — the code F2 asserts — and reads as a broken write
+     * path. The subject comes from a sequence, so no probe ever drains a bucket a test uses.</p>
+     */
+    private void awaitLiveRateLimitRedis() {
+        if (!awaitTrue(this::rateLimiterAnswers)) {
+            throw new IllegalStateException("the rate limiter never came back after the cut");
+        }
+    }
+
+    private boolean rateLimiterAnswers() {
+        try {
+            rateLimitService.check(RateLimitPolicy.CRUD, TestDataFactory.nextUserId(), "degradation-probe");
+            return true;
+        } catch (RuntimeException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Polls to a deadline rather than spinning: a Lettuce client reconnects on its own backoff
+     * schedule, not on the next call, so immediate retries all fail while the client is still
+     * waiting out its delay.
+     */
+    private static boolean awaitTrue(BooleanSupplier condition) {
+        long deadline = System.nanoTime() + REDIS_RECOVERY_DEADLINE_MS * 1_000_000L;
+        while (System.nanoTime() < deadline) {
+            if (condition.getAsBoolean()) {
+                return true;
+            }
+            try {
+                Thread.sleep(REDIS_POLL_INTERVAL_MS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return false;
+            }
+        }
+        return condition.getAsBoolean();
+    }
+
+    /**
+     * Probes every pooled target until it answers, evicting again between attempts.
+     *
+     * <p>Re-enabling the proxy restores the route but not instantly, so a connection the pool
+     * refills inside that window is half-open while eviction has already run. The next test then
+     * draws it and its first statement dies on a socket the cut killed.</p>
+     */
+    private void awaitLivePooledConnections() {
+        for (DataSource target : resolvedTargets(appDataSource)) {
+            DataAccessException unreachable = null;
+            for (int attempt = 0; attempt < CONNECTION_PROBE_ATTEMPTS; attempt++) {
+                try {
+                    new JdbcTemplate(target).queryForObject("SELECT 1", Integer.class);
+                    unreachable = null;
+                    break;
+                } catch (DataAccessException e) {
+                    unreachable = e;
+                    evictPooledPrimaryConnections();
+                }
+            }
+            if (unreachable != null) {
+                throw new IllegalStateException(
+                        "a pooled connection never recovered from the cut", unreachable);
+            }
+        }
+    }
+
+    /**
+     * Disabling the proxy closes every established connection, and re-enabling it only restores the
+     * route for new ones. Hikari skips {@code isValid()} inside its 500 ms alive-bypass window, so
+     * without this the next test can be handed a dead socket and fail with {@code EOFException} on
+     * its first statement.
+     */
+    private void evictPooledPrimaryConnections() {
+        for (DataSource target : resolvedTargets(appDataSource)) {
+            if (target instanceof HikariDataSource hikari && hikari.isRunning()) {
+                hikari.getHikariPoolMXBean().softEvictConnections();
+            }
+        }
+    }
+
+    /**
+     * Descends to the pools themselves. Probing the injected datasource instead would route rather
+     * than reach a pool: the routing key is resolved from the transaction, and there is none here.
+     */
+    private static List<DataSource> resolvedTargets(DataSource dataSource) {
+        if (dataSource instanceof LazyConnectionDataSourceProxy lazy) {
+            return resolvedTargets(lazy.getTargetDataSource());
+        }
+        if (dataSource instanceof AbstractRoutingDataSource routing) {
+            Map<Object, DataSource> resolved = routing.getResolvedDataSources();
+            return List.copyOf(resolved.values());
+        }
+        return List.of(dataSource);
     }
 
     @Test
@@ -330,9 +495,9 @@ class DegradationIT {
     void primaryDbCut_WhenWriteAttempted_ReturnsWriteTemporarilyUnavailableWhileReadsServe() throws Exception {
         User author = TestDataFactory.createTestUser(
                 userRepository, "degradation-inv5-" + UUID.randomUUID() + "@example.com");
-        Cookie auth = new Cookie("accessToken",
+        Cookie auth = AuthCookies.accessToken(
                 TestDataFactory.generateAccessToken(jwtTokenService, author));
-        Cookie device = new Cookie("deviceId", UUID.randomUUID().toString());
+        Cookie device = AuthCookies.freshDeviceId();
         UUID seedPlannerId = UUID.randomUUID();
 
         mockMvc.perform(put("/api/planner/md/" + seedPlannerId).with(withCsrf())
@@ -370,6 +535,66 @@ class DegradationIT {
     }
 
     /**
+     * With the primary blackholed — {@code timeout} toxics hold every connection open and forward
+     * nothing, so a connect hangs rather than refuses — a write must fail typed within the JDBC
+     * timeout budget while reads keep serving 200 from the healthy replica. Severing the route
+     * instead, so connections are refused, fails in milliseconds and exercises no timeout at all,
+     * which is why this case is driven separately. The wall-clock floor proves the cut really hung;
+     * the ceiling proves no request outlives the connectTimeout/socketTimeout the production url
+     * carries.
+     */
+    @Test
+    @DisplayName("primary blackholed (hangs, not refuses) → write 503 WRITE_TEMPORARILY_UNAVAILABLE within the timeout budget, read still 200 from the replica")
+    void writeHangReadsSurvive_WhenPrimaryBlackholed_WriteFails503WithinTimeoutWhileReadStillServes()
+            throws Exception {
+        User author = TestDataFactory.createTestUser(
+                userRepository, "degradation-blackhole-" + UUID.randomUUID() + "@example.com");
+        Cookie auth = AuthCookies.accessToken(
+                TestDataFactory.generateAccessToken(jwtTokenService, author));
+        Cookie device = AuthCookies.freshDeviceId();
+        UUID seedPlannerId = UUID.randomUUID();
+
+        mockMvc.perform(put("/api/planner/md/" + seedPlannerId).with(withCsrf())
+                        .cookie(auth, device)
+                        .contentType(APPLICATION_JSON)
+                        .content(upsertBody(seedPlannerId, "degradation-blackhole-seed")))
+                .andExpect(status().is2xxSuccessful());
+
+        new ReplicationControl(degradationPrimaryJdbcTemplate, degradationReplicaJdbcTemplate)
+                .awaitCaughtUp();
+
+        blackholePrimaryDb();
+        try {
+            long startNanos = System.nanoTime();
+            UUID writePlannerId = UUID.randomUUID();
+            mockMvc.perform(put("/api/planner/md/" + writePlannerId).with(withCsrf())
+                            .cookie(auth, device)
+                            .contentType(APPLICATION_JSON)
+                            .content(upsertBody(writePlannerId, "degradation-blackhole-write")))
+                    .andExpect(status().isServiceUnavailable())
+                    .andExpect(jsonPath("$.code").value("WRITE_TEMPORARILY_UNAVAILABLE"));
+            long elapsedMillis = (System.nanoTime() - startNanos) / 1_000_000;
+
+            assertThat(elapsedMillis)
+                    .as("a blackholed primary must hold the write until a timeout fires — "
+                            + "sub-second failure means the connection was refused, not hung")
+                    .isGreaterThan(BLACKHOLE_WRITE_FAILURE_FLOOR_MS);
+            assertThat(elapsedMillis)
+                    .as("the write must fail within the JDBC timeout budget (socketTimeout %sms "
+                            + "plus pool headroom), not hang open", JDBC_SOCKET_TIMEOUT_MS)
+                    .isLessThan(BLACKHOLE_WRITE_FAILURE_CEILING_MS);
+
+            mockMvc.perform(get("/api/planner/md").cookie(auth))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.content").isNotEmpty());
+        } finally {
+            for (Toxic toxic : PRIMARY_DB_PROXY.toxics().getAll()) {
+                toxic.remove();
+            }
+        }
+    }
+
+    /**
      * F2: with the rate-limit Redis route severed (Toxiproxy proxy disabled) and every other path
      * healthy, a rate-limited write endpoint must degrade by operation — the raw-Lettuce failure the
      * bucket4j {@code tryConsume} raises at controller entry must be mapped to a typed
@@ -384,9 +609,9 @@ class DegradationIT {
     void rateLimitRedisCut_WhenRateLimitedEndpointCalled_ReturnsRateLimitTemporarilyUnavailable() throws Exception {
         User author = TestDataFactory.createTestUser(
                 userRepository, "degradation-f2-" + UUID.randomUUID() + "@example.com");
-        Cookie auth = new Cookie("accessToken",
+        Cookie auth = AuthCookies.accessToken(
                 TestDataFactory.generateAccessToken(jwtTokenService, author));
-        Cookie device = new Cookie("deviceId", UUID.randomUUID().toString());
+        Cookie device = AuthCookies.freshDeviceId();
         UUID plannerId = UUID.randomUUID();
 
         cutRateLimitRedis();
@@ -412,13 +637,23 @@ class DegradationIT {
         PRIMARY_DB_PROXY.disable();
     }
 
+    /**
+     * Blackholes the app→primary path: the proxy keeps ACCEPTING connections but {@code timeout}
+     * toxics (0 = never close) swallow all data in both directions, so the MySQL handshake and
+     * every in-flight command hang instead of being refused — a peering loss, not a downed host.
+     */
+    private void blackholePrimaryDb() throws IOException {
+        PRIMARY_DB_PROXY.toxics().timeout("primary-blackhole-upstream", ToxicDirection.UPSTREAM, 0);
+        PRIMARY_DB_PROXY.toxics().timeout("primary-blackhole-downstream", ToxicDirection.DOWNSTREAM, 0);
+    }
+
     private void cutRateLimitRedis() throws IOException {
         RATE_LIMIT_REDIS_PROXY.disable();
     }
 
     private String upsertBody(UUID id, String title) throws IOException {
         UpsertPlannerRequest request = new UpsertPlannerRequest(
-                id.toString(), "5F", title, PlannerStatus.DRAFT, VALID_CONTENT, 7,
+                id.toString(), "5F", title, PlannerStatus.DRAFT, TestDataFactory.VALID_CONTENT, 7,
                 PlannerType.MIRROR_DUNGEON, null, null);
         return objectMapper.writeValueAsString(request);
     }

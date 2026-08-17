@@ -24,7 +24,8 @@ vi.mock('@/lib/api', async (importActual) => {
   }
 })
 
-import { ApiClient, BackendUnavailableError, ServiceUpdatingError } from '@/lib/api'
+import { ApiClient } from '@/lib/api'
+import { BackendUnavailableError, ServiceUpdatingError } from '@/lib/apiErrors'
 
 /**
  * Mock user response matching UserSchema
@@ -77,7 +78,11 @@ describe('useAuthQuery error handling', () => {
 
   describe('queryFn behavior', () => {
     const callQueryFn = () =>
-      (createAuthMeQueryOptions().queryFn as unknown as () => Promise<unknown>)()
+      (
+        createAuthMeQueryOptions().queryFn as unknown as (ctx: {
+          signal: AbortSignal
+        }) => Promise<unknown>
+      )({ signal: new AbortController().signal })
 
     it('returns null for unauthenticated user (null response)', async () => {
       vi.mocked(ApiClient.get).mockResolvedValue(null)
@@ -109,7 +114,11 @@ describe('useAuthQuery transient-failure session preservation (Fix 2b)', () => {
   })
 
   const callQueryFn = () =>
-    (createAuthMeQueryOptions().queryFn as unknown as () => Promise<unknown>)()
+    (
+      createAuthMeQueryOptions().queryFn as unknown as (ctx: {
+        signal: AbortSignal
+      }) => Promise<unknown>
+    )({ signal: new AbortController().signal })
 
   it('preserves the cached user when /auth/me hits a transient BackendUnavailableError', async () => {
     queryClient.setQueryData(authQueryKeys.me, mockUserResponse)
@@ -128,6 +137,17 @@ describe('useAuthQuery transient-failure session preservation (Fix 2b)', () => {
     const result = await callQueryFn()
 
     // A rolling deploy (SERVICE_UPDATING) is availability, not identity — stay logged in
+    expect(result).toEqual(mockUserResponse)
+  })
+
+  it('preserves the cached user when the fetch itself rejects (offline blip)', async () => {
+    queryClient.setQueryData(authQueryKeys.me, mockUserResponse)
+    vi.mocked(ApiClient.get).mockRejectedValue(new TypeError('Failed to fetch'))
+
+    const result = await callQueryFn()
+
+    // A request that never reached the server says nothing about the session,
+    // and focus refetching makes a wifi blip a routine way to hit this path.
     expect(result).toEqual(mockUserResponse)
   })
 

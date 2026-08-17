@@ -1,57 +1,53 @@
 /**
  * themePackFilter.ts
  *
- * Utility functions for theme pack filtering logic.
+ * Facet descriptors for the theme pack browser, plus the per-item predicate the grid's
+ * card slots subscribe through.
  */
 
+import type { z } from 'zod'
+import type { EntityMatcher, Facet } from '@/shared/filter'
+import { createEntityMatcher } from '@/shared/filter'
 import type { DungeonIdx, ThemePackFloor } from '@/shared/gameData'
+import type { ThemePackI18nSchema } from '../schemas/ThemePackSchemas'
 import type { ThemePackEntry } from '../types/ThemePackTypes'
 
-/**
- * Check if a theme pack matches the selected dungeon difficulties filter.
- * A pack matches if ALL selected difficulties appear in its exceptionConditions.
- * Empty selection = no filter (returns true).
- */
-export function matchesDungeonDifficultyFilter(
-  entry: ThemePackEntry,
-  selectedDifficulties: Set<DungeonIdx>,
-): boolean {
-  if (selectedDifficulties.size === 0) return true
-  const packDifficulties = new Set(entry.exceptionConditions.map((c) => c.dungeonIdx))
-  return Array.from(selectedDifficulties).every((d) => packDifficulties.has(d))
+export interface ThemePackFacetState {
+  selectedDifficulties: ReadonlySet<DungeonIdx>
+  selectedFloors: ReadonlySet<ThemePackFloor>
+  selectedEgoGifts: ReadonlySet<string>
 }
 
-/**
- * Check if a theme pack matches the selected floors filter.
- * A pack matches if ALL selected floors appear in its exceptionConditions.
- * Packs with undefined selectableFloors (infinity/extreme) never match floor filters.
- * Empty selection = no filter (returns true).
- */
-export function matchesFloorFilter(
-  entry: ThemePackEntry,
-  selectedFloors: Set<ThemePackFloor>,
-): boolean {
-  if (selectedFloors.size === 0) return true
-  const packFloors = new Set<number>()
-  for (const cond of entry.exceptionConditions) {
-    for (const f of cond.selectableFloors ?? []) {
-      packFloors.add(f)
-    }
-  }
-  return Array.from(selectedFloors).every((f) => packFloors.has(f))
-}
+export const THEME_PACK_FACETS: readonly Facet<ThemePackEntry, ThemePackFacetState>[] = [
+  {
+    sel: (s) => s.selectedDifficulties,
+    get: (e) => e.exceptionConditions.map((c) => c.dungeonIdx),
+    mode: 'all',
+  },
+  {
+    sel: (s) => s.selectedFloors,
+    get: (e) => e.exceptionConditions.flatMap((c) => c.selectableFloors ?? []),
+    mode: 'all',
+  },
+  {
+    sel: (s) => s.selectedEgoGifts,
+    get: (e) => [...e.specificEgoGiftPool, ...(e.fixedRewardEgoGifts ?? [])].map(String),
+    mode: 'any',
+  },
+]
 
 /**
- * Check if a theme pack matches the selected ego gifts filter.
- * A pack matches if ANY of its specificEgoGiftPool IDs is in the selected set.
- * Empty selection = no filter (returns true).
+ * Every lowercased string the search box matches a theme pack on: its localized name.
+ *
+ * Depends only on the i18n payload, so a filter toggle never invalidates it.
  */
-export function matchesEgoGiftFilter(
-  entry: ThemePackEntry,
-  selectedEgoGifts: Set<string>,
-): boolean {
-  if (selectedEgoGifts.size === 0) return true
-  if (entry.specificEgoGiftPool.some((giftId) => selectedEgoGifts.has(String(giftId)))) return true
-  if (entry.fixedRewardEgoGifts?.some((giftId) => selectedEgoGifts.has(String(giftId)))) return true
-  return false
+export function buildThemePackSearchTerms(
+  packId: string,
+  themePackI18n: z.infer<typeof ThemePackI18nSchema>,
+): string[] {
+  return [(themePackI18n[packId]?.name ?? '').toLowerCase()]
 }
+
+/** Whether one theme pack survives the current facets and search query. */
+export const matchesThemePack: EntityMatcher<ThemePackEntry, ThemePackFacetState> =
+  createEntityMatcher(THEME_PACK_FACETS)

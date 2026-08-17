@@ -1,9 +1,8 @@
-import { Suspense } from 'react'
-
 import { getCoinDescIconPath } from '@/shared/assets'
-import { FLAVOR_TEXT_COLOR, type SkillDescEntry } from '@/shared/gameData'
+import { type SkillDescEntry } from '@/shared/gameData'
 import { FormattedDescription } from '@/shared/gameText'
 import { Skeleton } from '@/components/ui/skeleton'
+import { FLAVOR_TEXT_COLOR } from '@/lib/constants'
 
 interface SkillDescriptionProps {
   descData: SkillDescEntry
@@ -67,44 +66,10 @@ export function SkillDescription({ descData, flavor }: SkillDescriptionProps) {
   )
 }
 
-// =============================================================================
-// Granular I18n Version
-// =============================================================================
-
-/** Minimal shape of the per-entity detail-i18n a skill card needs. */
-interface SkillDetailI18n {
-  skills: Record<string, { descs?: SkillDescEntry[]; flavor?: string } | undefined>
-}
-
-interface SkillDescriptionWithSuspenseProps {
-  entityId: string
-  skillId: number
-  /** Enhancement level (identity uptie 1–4, ego threadspin 1–5). */
-  level: number
-  /**
-   * The owning slice's detail-i18n hook, injected so this shared component
-   * stays free of any `@/pages/*` import (sink rule). Identity passes
-   * `useIdentityDetailI18n`; ego passes `useEGODetailI18n`.
-   */
-  useDetailI18n: (id: string) => SkillDetailI18n
-}
-
 /**
- * SkillDescription with granular i18n Suspense.
- * Shows skeleton, then fetches and renders description.
+ * Skeleton stand-in while a slice's description slot suspends for i18n.
  */
-export function SkillDescriptionWithSuspense(props: SkillDescriptionWithSuspenseProps) {
-  return (
-    <Suspense fallback={<SkillDescriptionSkeleton />}>
-      <SkillDescriptionContent {...props} />
-    </Suspense>
-  )
-}
-
-/**
- * Skeleton for skill description.
- */
-function SkillDescriptionSkeleton() {
+export function SkillDescriptionSkeleton() {
   return (
     <div className="text-sm space-y-2">
       <Skeleton className="h-4 w-full" />
@@ -130,20 +95,4 @@ export function getMergedSkillDesc(descs: SkillDescEntry[], level: number): Skil
     }
   }
   return merged
-}
-
-/**
- * Internal: fetches i18n via the injected hook and renders the description.
- */
-function SkillDescriptionContent({
-  entityId,
-  skillId,
-  level,
-  useDetailI18n,
-}: SkillDescriptionWithSuspenseProps) {
-  const i18n = useDetailI18n(entityId)
-  const skillI18n = i18n.skills[String(skillId)]
-  const descData = getMergedSkillDesc(skillI18n?.descs ?? [], level)
-
-  return <SkillDescription descData={descData} flavor={skillI18n?.flavor} />
 }

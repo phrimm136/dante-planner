@@ -8,19 +8,22 @@
  * Pattern: Conflict resolution "Save as Copy" (usePlannerSave.ts)
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { INITIAL_SYNC_VERSION } from '@/lib/constants'
 
-import { gesellschaftQueryKeys } from './useMDGesellschaftData'
-import { usePlannerSaveAdapter } from './usePlannerSaveAdapter'
+import { useInvalidatePlannerLists } from './useInvalidatePlannerLists'
+import { usePlannerStorage } from './usePlannerStorage'
 import { usePlannerSyncAdapter } from './usePlannerSyncAdapter'
-import { useUserSettingsQuery } from '@/pages/settings'
+import { useUserSettingsQuery } from '@/shared/userSettings'
 import { useAuthQuery } from '@/shared/auth'
 import { ApiClient } from '@/lib/api'
+import { generateUUID } from '@/lib/uuid'
+import { validateData } from '@/lib/validation'
 import { PublishedPlannerDetailSchema } from '../schemas/PlannerListSchemas'
+import { toSaveablePlanner, PlannerConfigDiscriminatedSchema } from '../schemas/PlannerSchemas'
 
 import type { PublishedPlannerDetail } from '../types/PlannerListTypes'
-import type { SaveablePlanner, PlannerConfig } from '../types/PlannerTypes'
 
 // ============================================================================
 // Types
@@ -36,17 +39,6 @@ interface ForkInput {
 interface ForkResult {
   /** ID of the newly created planner copy */
   newPlannerId: string
-}
-
-// ============================================================================
-// Helper
-// ============================================================================
-
-/**
- * Generate UUID v4
- */
-function generateUUID(): string {
-  return crypto.randomUUID()
 }
 
 // ============================================================================
@@ -79,8 +71,8 @@ function generateUUID(): string {
  * ```
  */
 export function usePlannerFork() {
-  const queryClient = useQueryClient()
-  const saveAdapter = usePlannerSaveAdapter()
+  const invalidatePlannerLists = useInvalidatePlannerLists()
+  const storage = usePlannerStorage()
   const syncAdapter = usePlannerSyncAdapter()
   const { t } = useTranslation('planner')
   const { data: user } = useAuthQuery()
@@ -94,22 +86,19 @@ export function usePlannerFork() {
       let plannerData = planner
       if (!plannerData) {
         const data = await ApiClient.get(`/api/planner/md/published/${plannerId}`)
-        const result = PublishedPlannerDetailSchema.safeParse(data)
-
-        if (!result.success) {
-          console.error('Failed to fetch planner for fork:', result.error)
-          throw new Error('Invalid planner data from server')
-        }
-
-        plannerData = result.data
+        plannerData = validateData(
+          data,
+          PublishedPlannerDetailSchema,
+          `planner fork source / ${plannerId}`,
+        )
       }
 
       // 1. Generate new planner ID and get device ID
       const newPlannerId = generateUUID()
-      const deviceId = await saveAdapter.getOrCreateDeviceId()
+      const deviceId = await storage.getOrCreateDeviceId()
 
-      if (!deviceId) {
-        throw new Error('Failed to get device ID')
+      if (!deviceId.ok) {
+        throw new Error('Failed to get device ID', { cause: deviceId.error })
       }
 
       // 2. Apply i18n copySuffix to title
@@ -123,30 +112,30 @@ export function usePlannerFork() {
 
       // 4. Create new SaveablePlanner with correct metadata structure
       const now = new Date().toISOString()
-      const newPlanner: SaveablePlanner = {
-        metadata: {
+      const newPlanner = toSaveablePlanner(
+        {
           id: newPlannerId,
           title: copyTitle,
           status: 'saved', // Mark as saved (immediately persisted to local)
           schemaVersion: plannerData.schemaVersion,
           contentVersion: plannerData.contentVersion,
           plannerType: plannerData.plannerType,
-          syncVersion: 1, // Initial version for new planner
+          syncVersion: INITIAL_SYNC_VERSION,
           createdAt: now,
           lastModifiedAt: now,
           savedAt: now,
-          deviceId,
+          deviceId: deviceId.value,
           published: false, // New copy is not published
         },
-        config: {
+        PlannerConfigDiscriminatedSchema.parse({
           type: plannerData.plannerType,
           category: plannerData.category,
-        } as PlannerConfig,
-        content: contentData, // Parsed content object
-      }
+        }),
+        contentData, // Parsed content object
+      )
 
       // 5. Save to local storage
-      await saveAdapter.saveToLocal(newPlanner)
+      await storage.saveToLocal(newPlanner)
 
       // 6. Optionally sync to server if authenticated AND sync enabled
       // This follows the same pattern as conflict resolution's keepBoth
@@ -162,8 +151,7 @@ export function usePlannerFork() {
       return { newPlannerId }
     },
     onSuccess: () => {
-      // Invalidate planner list queries (my plans will have new entry)
-      void queryClient.invalidateQueries({ queryKey: gesellschaftQueryKeys.all })
+      invalidatePlannerLists()
     },
     onError: (error) => {
       console.error('Fork failed:', error)

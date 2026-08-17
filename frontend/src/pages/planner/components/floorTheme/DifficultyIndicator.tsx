@@ -1,5 +1,6 @@
-import { DIFFICULTY_LABELS, DIFFICULTY_COLORS, type DifficultyLabel } from '@/shared/gameData'
+import { DIFFICULTY_LABELS, type DifficultyLabel } from '@/shared/gameData'
 import { cn } from '@/lib/utils'
+import { DIFFICULTY_COLORS, SECTION_STYLES } from '@/lib/constants'
 
 interface DifficultyIndicatorProps {
   difficulty: DifficultyLabel | null
@@ -14,7 +15,7 @@ export function DifficultyIndicator({ difficulty, className }: DifficultyIndicat
   if (!difficulty) {
     return (
       <div className={cn('h-6 flex items-center', className)}>
-        <span className="text-sm text-muted-foreground">-</span>
+        <span className={SECTION_STYLES.TEXT.caption}>-</span>
       </div>
     )
   }

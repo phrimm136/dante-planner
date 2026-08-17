@@ -66,10 +66,12 @@ describe('CommunityPlansSection', () => {
     mockUseMDGesellschaftData.mockReturnValue({
       data: {
         content: [],
-        totalPages: 1,
-        totalElements: 0,
-        number: 0,
-        size: 20,
+        page: {
+          size: 20,
+          number: 0,
+          totalElements: 0,
+          totalPages: 1,
+        },
       },
     })
 
@@ -91,10 +93,12 @@ describe('CommunityPlansSection', () => {
     mockUseMDGesellschaftData.mockReturnValue({
       data: {
         content: [],
-        totalPages: 1,
-        totalElements: 0,
-        number: 0,
-        size: 20,
+        page: {
+          size: 20,
+          number: 0,
+          totalElements: 0,
+          totalPages: 1,
+        },
       },
     })
 
@@ -177,10 +181,12 @@ describe('CommunityPlansSection', () => {
             isBookmarked: false,
           },
         ],
-        totalPages: 1,
-        totalElements: 1,
-        number: 0,
-        size: 20,
+        page: {
+          size: 20,
+          number: 0,
+          totalElements: 1,
+          totalPages: 1,
+        },
       },
     })
 
@@ -228,10 +234,12 @@ describe('CommunityPlansSection', () => {
             isBookmarked: false,
           },
         ],
-        totalPages: 1,
-        totalElements: 2,
-        number: 0,
-        size: 20,
+        page: {
+          size: 20,
+          number: 0,
+          totalElements: 2,
+          totalPages: 1,
+        },
       },
     })
 
@@ -255,10 +263,12 @@ describe('CommunityPlansSection', () => {
     mockUseMDGesellschaftData.mockReturnValue({
       data: {
         content: [],
-        totalPages: 0,
-        totalElements: 0,
-        number: 0,
-        size: 20,
+        page: {
+          size: 20,
+          number: 0,
+          totalElements: 0,
+          totalPages: 0,
+        },
       },
     })
 

@@ -1,0 +1,17 @@
+# Copy to terraform/backend.hcl (gitignored) and fill in the bucket.
+#
+# One file per ACCOUNT, serving every stack in it: state lives in the account whose resources it
+# describes, so each account has its own bucket. Each stack's key, region, workspace prefix and
+# locking are literals in its own `backend "s3"` block; only what varies by account lives here.
+#
+# The name is `<name_prefix>-tfstate-<account_id>`; read it from the stack that creates it:
+#   terraform -chdir=terraform/state-backend output -raw tf_state_bucket
+#
+# A backend resolves credentials independently of the provider, so reaching another account needs
+# assume_role HERE too — the provider's is not consulted, and init fails as whoever is ambient:
+#   assume_role = { role_arn = "arn:aws:iam::<account>:role/<role>" }
+#
+# Then, from any stack directory:
+#   terraform init -backend-config=../backend.hcl
+
+bucket = "danteplanner-tfstate-111122223333"

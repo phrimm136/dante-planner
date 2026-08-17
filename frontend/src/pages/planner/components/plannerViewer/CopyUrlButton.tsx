@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Link } from 'lucide-react'
-import { toast } from '@/lib/toast'
+import { showError, showSuccess } from '@/lib/errorPresentation'
 
 import { Button } from '@/components/ui/button'
 
@@ -35,10 +35,10 @@ export function CopyUrlButton({ url }: CopyUrlButtonProps) {
 
     try {
       await navigator.clipboard.writeText(urlToCopy)
-      toast.success(t('pages.detail.urlCopied'))
+      showSuccess('planner:pages.detail.urlCopied')
     } catch (error) {
       console.error('Failed to copy URL:', error)
-      toast.error(t('common:error'))
+      showError(error)
     }
   }
 

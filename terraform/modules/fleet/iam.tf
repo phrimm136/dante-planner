@@ -125,9 +125,11 @@ data "aws_iam_policy_document" "app_secrets" {
   statement {
     sid     = "ReadBackendSecrets"
     actions = ["secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"]
+    # Enumerated rather than globbed over the whole namespace, which would also admit
+    # danteplanner/rds/* — the database master password, which no pod reads.
     resources = [
-      # The app's own secret namespace: jwt/* keys + the backend/* runtime-config bundle.
-      "arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:${dirname(dirname(var.rs256_private_key_secret_name))}/*"
+      for pattern in var.app_secret_name_patterns :
+      "arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:${pattern}"
     ]
   }
 }

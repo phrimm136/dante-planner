@@ -1,0 +1,54 @@
+# Copy to terraform.tfvars (gitignored) and fill in. Never commit the real file — it carries
+# account-specific identifiers.
+
+# --- Required ---------------------------------------------------------------
+
+# The account this stack may apply into; a plan resolving to any other account fails. This is
+# the organization's management account, and no other account can apply this stack.
+aws_account_id = "REPLACE_WITH_ACCOUNT_ID"
+
+# The existing organization this stack adopts, rather than creates:
+#   aws organizations describe-organization --query Organization.Id --output text
+organization_id = "o-REPLACE_WITH_ORG_ID"
+
+# The human to create in the Identity Center directory. Terraform creates the user without a
+# password; AWS emails a verification link only when you send one from the console, so a user
+# created here cannot sign in until that invitation is sent.
+operator = {
+  user_name    = "REPLACE_WITH_USERNAME"
+  display_name = "REPLACE_WITH_DISPLAY_NAME"
+  given_name   = "REPLACE_WITH_GIVEN_NAME"
+  family_name  = "REPLACE_WITH_FAMILY_NAME"
+  email        = "REPLACE_WITH_EMAIL"
+}
+
+# Member accounts in the Security unit. Each address is that account's ROOT login and its only
+# recovery path, so it must be reachable and globally unique across AWS. Plus-addressing on one
+# inbox satisfies both. Removing an entry does not close the account.
+security_accounts = {
+  "log-archive" = "REPLACE_WITH_EMAIL+aws-logarchive"
+  "audit"       = "REPLACE_WITH_EMAIL+aws-audit"
+}
+
+# Environment accounts, under the workloads hierarchy, so they inherit its guardrails. The
+# security accounts do not sit here and are governed separately.
+nonprod_accounts = {
+  "danteplanner-staging" = "REPLACE_WITH_EMAIL+aws-staging"
+}
+
+# --- Optional overrides (defaults in variables.tf are sensible) --------------
+
+# region              = "us-west-2"
+# operator_group_name = "Operators"
+
+# Account NAME to permission set. Names, not ids, so nothing here identifies an account.
+# Read-only is the default and the wider sets are the exception: Terraform reaches an account
+# through an assumed role, so a console session is for looking rather than changing. The
+# management account is where this stack is applied from, so it takes the administrator set.
+# assignments = {
+#   "REPLACE_WITH_MANAGEMENT_ACCOUNT_NAME" = "AdministratorAccess"
+#   "log-archive"                          = "ReadOnlyAccess"
+#   "audit"                                = "ReadOnlyAccess"
+#   "danteplanner-staging"                 = "AdministratorAccess"
+#   "danteplanner-prod"                    = "ReadOnlyAccess"
+# }

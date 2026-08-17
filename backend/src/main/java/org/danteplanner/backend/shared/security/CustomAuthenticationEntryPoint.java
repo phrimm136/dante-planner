@@ -27,7 +27,15 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
-    private static final String AUTH_ERROR_ATTRIBUTE = "auth.error";
+    /** Request attribute {@link JwtAuthenticationFilter} names the failure in. */
+    public static final String AUTH_ERROR_ATTRIBUTE = "auth.error";
+
+    /** The presented token was structurally unusable. */
+    public static final String INVALID_TOKEN = "INVALID_TOKEN";
+
+    /** The session behind the token was withdrawn: revoked family, logout, or a dead account. */
+    public static final String SESSION_REVOKED = "SESSION_REVOKED";
+
     private static final String DEFAULT_ERROR_CODE = "UNAUTHORIZED";
     private static final String DEFAULT_ERROR_MESSAGE = "Authentication required";
 
@@ -39,10 +47,12 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
             HttpServletResponse response,
             AuthenticationException authException
     ) throws IOException {
+        Object attribute = request.getAttribute(AUTH_ERROR_ATTRIBUTE);
+        String code = attribute instanceof String named ? named : DEFAULT_ERROR_CODE;
+
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
-        response.getWriter().write(
-                objectMapper.writeValueAsString(Map.of("message", DEFAULT_ERROR_MESSAGE))
-        );
+        response.getWriter().write(objectMapper.writeValueAsString(
+                Map.of("code", code, "message", DEFAULT_ERROR_MESSAGE)));
     }
 }

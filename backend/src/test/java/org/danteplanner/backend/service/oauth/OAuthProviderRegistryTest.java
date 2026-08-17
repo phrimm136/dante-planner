@@ -1,4 +1,5 @@
 package org.danteplanner.backend.service.oauth;
+import org.danteplanner.backend.shared.exception.InvalidRequestException;
 import org.danteplanner.backend.auth.oauth.OAuthTokens;
 import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
 import org.danteplanner.backend.auth.oauth.OAuthUserInfo;
@@ -14,6 +15,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import java.util.Locale;
 
 /**
  * Unit tests for OAuthProviderRegistry.
@@ -66,17 +68,17 @@ class OAuthProviderRegistryTest {
         }
 
         @Test
-        @DisplayName("Should throw IllegalArgumentException for unknown provider")
+        @DisplayName("Should throw InvalidRequestException for unknown provider")
         void getProvider_WhenUnknownProvider_Throws() {
             // Act & Assert
-            IllegalArgumentException exception = assertThrows(
-                    IllegalArgumentException.class,
+            InvalidRequestException exception = assertThrows(
+                    InvalidRequestException.class,
                     () -> registry.getProvider("unknown")
             );
 
             assertTrue(exception.getMessage().contains("unknown"),
                     "Exception message should contain the unknown provider name");
-            assertTrue(exception.getMessage().toLowerCase().contains("unknown oauth provider"),
+            assertTrue(exception.getMessage().toLowerCase(Locale.ROOT).contains("unknown oauth provider"),
                     "Exception message should indicate it's an unknown provider");
         }
 
@@ -99,7 +101,7 @@ class OAuthProviderRegistryTest {
         void getProvider_WhenEmptyName_Throws() {
             // Act & Assert
             assertThrows(
-                    IllegalArgumentException.class,
+                    InvalidRequestException.class,
                     () -> registry.getProvider("")
             );
         }
@@ -154,7 +156,7 @@ class OAuthProviderRegistryTest {
 
             // Assert
             assertThrows(
-                    IllegalArgumentException.class,
+                    InvalidRequestException.class,
                     () -> emptyRegistry.getProvider("any")
             );
             assertFalse(emptyRegistry.hasProvider("google"));
@@ -210,7 +212,7 @@ class OAuthProviderRegistryTest {
         @DisplayName("Returned provider should be usable for OAuth operations")
         void getProvider_WhenCalled_ReturnedProviderIsUsable() {
             // Arrange
-            OAuthTokens expectedTokens = new OAuthTokens("access", "refresh", null, 3600L);
+            OAuthTokens expectedTokens = new OAuthTokens("access", "refresh", null);
             OAuthUserInfo expectedUserInfo = new OAuthUserInfo("123", "test@example.com");
 
             when(googleProvider.exchangeCodeForTokens("code", "redirect", "verifier"))

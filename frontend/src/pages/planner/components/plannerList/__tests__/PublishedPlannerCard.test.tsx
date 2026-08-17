@@ -22,7 +22,7 @@ vi.mock('@/shared/assets', () => ({
 }))
 
 vi.mock('@/lib/formatDate', () => ({
-  formatPlannerDate: (date: string) => date,
+  formatCompactDate: (date: string) => date,
 }))
 
 vi.mock('@/lib/formatUsername', () => ({
@@ -49,9 +49,9 @@ function createMockPlanner(overrides: Partial<PublicPlanner> = {}): PublicPlanne
     authorUsernameEpithet: 'W_CORP',
     authorUsernameSuffix: 'test1',
     createdAt: '2024-01-01T00:00:00.000Z',
-    lastModifiedAt: null,
-    hasUpvoted: null,
-    isBookmarked: null,
+    firstPublishedAt: '2024-01-01T00:00:00.000Z',
+    hasUpvoted: false,
+    isBookmarked: false,
     ...overrides,
   }
 }

@@ -1,5 +1,4 @@
 import { describe, it, expect, vi } from 'vitest'
-import { keepPreviousData } from '@tanstack/react-query'
 import { z } from 'zod'
 
 import { createStaticDataQueryOptions } from '../queryOptions'
@@ -72,19 +71,7 @@ describe('createStaticDataQueryOptions', () => {
     expect(STATIC_DATA_STALE_TIME).toBe(7 * 24 * 60 * 60 * 1000)
   })
 
-  it('maps keepPrevious: true to placeholderData: keepPreviousData', () => {
-    const options = createStaticDataQueryOptions(
-      QUERY_KEY,
-      createImporter({ name: 'Dante' }),
-      TestSchema,
-      'test data',
-      { keepPrevious: true },
-    )
-
-    expect(options.placeholderData).toBe(keepPreviousData)
-  })
-
-  it('leaves placeholderData unset when keepPrevious is omitted', () => {
+  it('leaves placeholderData unset', () => {
     const options = createStaticDataQueryOptions(
       QUERY_KEY,
       createImporter({ name: 'Dante' }),

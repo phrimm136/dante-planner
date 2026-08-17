@@ -1,0 +1,24 @@
+id: no-toast-import
+language: TypeScript
+severity: error
+message: Only lib/errorPresentation.ts may hold the toast handle. Keying on the module source catches aliasing, namespace imports, dynamic import() and re-export modules alike. Call showError, showAppError, showErrorMessage, showSuccess, showWarning or showInfo instead.
+files:
+  - src/**/*.ts
+ignores:
+  # The presenter owns the handle.
+  - src/lib/errorPresentation.ts
+  # A test asserting on the sink needs the handle it asserts against. Scoped to
+  # test files themselves: a helper module a production import could reach is
+  # not exempt.
+  - src/**/*.test.ts
+rule:
+  any:
+    - kind: import_statement
+    - kind: export_statement
+    - pattern: import($$$SOURCE)
+  has:
+    kind: string
+    regex: ^['"](sonner|@/lib/toast)['"]$
+    stopBy: end
+  not:
+    pattern: import { Toaster } from 'sonner'

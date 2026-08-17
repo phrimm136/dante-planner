@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { DUNGEON_IDX } from '@/shared/gameData'
+import { EGOGiftIdSchema } from '@/shared/gameData'
 
 /**
  * Theme Pack Schemas
@@ -48,9 +49,9 @@ export const ThemePackI18nSchema = z.record(z.string(), ThemePackI18nEntrySchema
 export const ThemePackEntrySchema = z
   .object({
     exceptionConditions: z.array(ExceptionConditionSchema),
-    specificEgoGiftPool: z.array(z.number()),
+    specificEgoGiftPool: z.array(EGOGiftIdSchema),
     themePackConfig: ThemePackConfigSchema,
-    fixedRewardEgoGifts: z.array(z.number()).optional(),
+    fixedRewardEgoGifts: z.array(EGOGiftIdSchema).optional(),
   })
   .strict()
 
@@ -58,11 +59,10 @@ export const ThemePackEntrySchema = z
 export const ThemePackListSchema = z.record(z.string(), ThemePackEntrySchema)
 
 // Featured boss schema (unitId + portrait reference for a theme pack's boss roster)
-// portraitId is a string when the source field is a string sdPortrait, number otherwise
 export const FeaturedBossSchema = z
   .object({
-    unitId: z.number(),
-    portraitId: z.union([z.number(), z.string()]),
+    unitId: z.string(),
+    portraitId: z.string(),
   })
   .strict()
 
@@ -70,25 +70,25 @@ export type FeaturedBoss = z.infer<typeof FeaturedBossSchema>
 
 // Node option schema (battle/event pools in individual theme pack files)
 const NodeOptionSchema = z.object({
-  bossPool: z.array(z.number()),
-  battlePool: z.array(z.number()),
-  abBattlePool: z.array(z.number()),
-  hardBattlePool: z.array(z.number()),
-  hardAbBattlePool: z.array(z.number()),
-  eventPool: z.array(z.number()),
-  specialEventPool: z.array(z.number()).optional(),
+  bossPool: z.array(z.string()),
+  battlePool: z.array(z.string()),
+  abBattlePool: z.array(z.string()),
+  hardBattlePool: z.array(z.string()),
+  hardAbBattlePool: z.array(z.string()),
+  eventPool: z.array(z.string()),
+  specialEventPool: z.array(z.string()).optional(),
 })
 
 // Individual theme pack detail schema (full data from themePack/{id}.json)
 export const ThemePackDetailSchema = z.object({
   exceptionConditions: z.array(ExceptionConditionSchema),
   nodeOption: NodeOptionSchema,
-  egoGiftPool: z.array(z.number()),
-  specificEgoGiftPool: z.array(z.number()),
+  egoGiftPool: z.array(EGOGiftIdSchema),
+  specificEgoGiftPool: z.array(EGOGiftIdSchema),
   themePackConfig: ThemePackConfigSchema,
   featuredBosses: z.array(FeaturedBossSchema),
   hiddenThemeRate: z.number().optional(),
-  fixedRewardEgoGifts: z.array(z.number()).optional(),
+  fixedRewardEgoGifts: z.array(EGOGiftIdSchema).optional(),
 })
 
 export type ThemePackDetail = z.infer<typeof ThemePackDetailSchema>

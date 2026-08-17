@@ -11,8 +11,8 @@ vi.mock('@/shared/assets', () => ({
 }))
 
 // Mock constants
-vi.mock('@/shared/gameData', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/shared/gameData')>()),
+vi.mock('@/lib/constants', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/constants')>()),
   MD_ACCENT_COLORS: { 6: '#00ffcc', 7: '#b00000' },
 }))
 
@@ -158,7 +158,9 @@ describe('StartBuffMiniCard', () => {
       const nameElements = screen.getAllByText('Test Buff')
       // The visible element should have the color
       const visibleElement = nameElements.find((el) => !el.getAttribute('aria-hidden'))
-      expect(visibleElement?.style.color).toBe('rgb(0, 255, 204)') // #00ffcc
+      // toHaveStyle normalizes both sides, so the assertion is independent of how the
+      // DOM implementation serializes color values (hex vs rgb())
+      expect(visibleElement).toHaveStyle({ color: '#00ffcc' })
     })
 
     it('has correct dimensions (w-24 h-24)', () => {

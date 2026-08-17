@@ -1,6 +1,7 @@
 /// <reference types="vitest/config" />
 import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import react, { reactCompilerPreset } from '@vitejs/plugin-react'
+import babel from '@rolldown/plugin-babel'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 import fs from 'fs'
@@ -9,6 +10,37 @@ import { hashStaticPlugin } from './vite-plugin-hash-static'
 
 const STATIC_ROOT = path.resolve(__dirname, '../static')
 const STATIC_WHITELIST = ['images', 'data', 'i18n']
+// Well-known files that must be served at stable root paths, outside the hashed pipeline
+const STATIC_ROOT_FILES = ['sitemap.xml', 'robots.txt', 'favicon.ico', '_headers']
+
+const I18N_NAMESPACES = [
+  'common',
+  'database',
+  'planner',
+  'extraction',
+  'epithet',
+  'sinnerNames',
+  'moderation',
+]
+const I18N_LANGUAGES = ['EN', 'JP', 'KR', 'CN'] as const
+const I18N_NAMESPACE_CHUNK = Object.fromEntries(
+  I18N_LANGUAGES.map((lng) => [
+    lng,
+    new RegExp(`static/i18n/${lng}/(${I18N_NAMESPACES.join('|')})\\.json$`),
+  ]),
+) as Record<(typeof I18N_LANGUAGES)[number], RegExp>
+
+// Mount real Tiptap/ProseMirror editors, which need jsdom's fuller Range/Selection/
+// contenteditable support — run in the src-editor project, not under happy-dom
+const EDITOR_TESTS = [
+  'src/shared/noteEditor/**/__tests__/**',
+  // DOMPurify reports itself unsupported under happy-dom and returns its input
+  // unchanged, so a sanitizer assertion there proves nothing.
+  'src/shared/sanitize/**/__tests__/**',
+  'src/pages/planner/__tests__/PlannerMDEditPage.test.tsx',
+  'src/pages/planner/components/planner/__tests__/PlannerMDEditorContent.test.tsx',
+  'src/pages/planner/components/planner/__tests__/PlannerEditorShellFlush.test.tsx',
+]
 
 function serveWhitelistedStatic(): Plugin {
   return {
@@ -41,6 +73,12 @@ function serveWhitelistedStatic(): Plugin {
           })
         }
       }
+      for (const file of STATIC_ROOT_FILES) {
+        const src = path.join(STATIC_ROOT, file)
+        if (fs.existsSync(src)) {
+          await fs.promises.copyFile(src, path.join(distRoot, file))
+        }
+      }
     },
   }
 }
@@ -54,7 +92,7 @@ function staticFile404Plugin(): Plugin {
         const url = req.url ?? ''
         // Check if request is for a static file (images, data, i18n)
         const staticPrefixes = ['/images/', '/data/', '/i18n/']
-        const isStaticRequest = staticPrefixes.some(prefix => url.startsWith(prefix))
+        const isStaticRequest = staticPrefixes.some((prefix) => url.startsWith(prefix))
         if (isStaticRequest && !url.includes('?')) {
           const filePath = path.resolve(__dirname, '../static', url.slice(1))
           if (!fs.existsSync(filePath)) {
@@ -75,11 +113,8 @@ export default defineConfig({
     serveWhitelistedStatic(),
     staticFile404Plugin(),
     hashStaticPlugin({ staticDir: path.resolve(__dirname, '../static') }),
-    react({
-      babel: {
-        plugins: ['babel-plugin-react-compiler']
-      }
-    }),
+    react(),
+    babel({ presets: [reactCompilerPreset()] }),
     tailwindcss(),
   ],
   resolve: {
@@ -120,11 +155,21 @@ export default defineConfig({
             { name: 'react-vendor', test: /node_modules\/(react-dom|react)\// },
             { name: 'tanstack', test: /node_modules\/@tanstack\/(react-query|react-router)/ },
             { name: 'radix', test: /node_modules\/@radix-ui\// },
-            { name: 'i18n', test: /node_modules\/(i18next|react-i18next|i18next-browser-languagedetector)/ },
+            {
+              name: 'i18n',
+              test: /node_modules\/(i18next|react-i18next|i18next-browser-languagedetector)/,
+            },
             { name: 'icons', test: /node_modules\/lucide-react/ },
             { name: 'zod', test: /node_modules\/zod/ },
             { name: 'sonner', test: /node_modules\/sonner/ },
             { name: 'tiptap', test: /node_modules\/@tiptap\// },
+            // One chunk per language for the app's own namespaces, so a visitor
+            // fetches their language in a single request and never the others.
+            // Per-entity files under the same directories stay unmatched.
+            { name: 'i18n-en', test: I18N_NAMESPACE_CHUNK.EN },
+            { name: 'i18n-jp', test: I18N_NAMESPACE_CHUNK.JP },
+            { name: 'i18n-kr', test: I18N_NAMESPACE_CHUNK.KR },
+            { name: 'i18n-cn', test: I18N_NAMESPACE_CHUNK.CN },
           ],
         },
       },
@@ -152,21 +197,65 @@ export default defineConfig({
     // Coverage configuration
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html'],
+      reporter: ['text', 'json', 'html', 'lcov'],
       include: ['src/**/*.{ts,tsx}'],
       exclude: [
         'src/**/*.test.{ts,tsx}',
         'src/**/*.spec.{ts,tsx}',
         'src/main.tsx',
         'src/**/*.d.ts',
+        'src/test-utils/**',
+        'src/**/__tests__/**',
       ],
+      thresholds: {
+        lines: 54.7,
+        functions: 53.2,
+        branches: 36.8,
+        statements: 47.1,
+      },
     },
-
-    // Process pool for stability
-    pool: 'forks',
 
     // Better mock management
     clearMocks: true,
     restoreMocks: true,
+
+    // Three projects, split by environment need. Per-file isolation stays ON everywhere:
+    // 75 test files rely on top-level vi.mock with partial factories, which bleed across
+    // files if the module registry is shared (verified: isolate:false breaks 20 files).
+    // - src: happy-dom on worker threads — environment setup is several times cheaper
+    //   than jsdom, and these tests only query/interact via testing-library
+    // - src-editor: real Tiptap/ProseMirror mounts need jsdom's fuller Range/Selection/
+    //   contenteditable support
+    // - plugin: process.chdir() is unavailable in worker threads, so forks
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: 'src',
+          include: ['src/**/*.{test,spec}.{ts,tsx}'],
+          exclude: EDITOR_TESTS,
+          pool: 'threads',
+          environment: 'happy-dom',
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: 'src-editor',
+          include: EDITOR_TESTS,
+          pool: 'threads',
+          environment: 'jsdom',
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: 'plugin',
+          include: ['vite-plugin-hash-static.test.ts'],
+          pool: 'forks',
+          environment: 'node',
+        },
+      },
+    ],
   },
 })

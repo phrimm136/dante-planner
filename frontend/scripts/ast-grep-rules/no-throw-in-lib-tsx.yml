@@ -1,0 +1,11 @@
+id: no-throw-in-lib-tsx
+language: Tsx
+severity: error
+message: lib is the functional core; return a Result, throw only in boundary adapters.
+files:
+  - src/pages/*/lib/**/*.tsx
+  - src/shared/*/lib/**/*.tsx
+ignores:
+  - '**/__tests__/**'
+rule:
+  pattern: throw $ERR

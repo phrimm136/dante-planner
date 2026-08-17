@@ -15,11 +15,6 @@ import { notificationQueryKeys } from './useNotificationsQuery'
 // Mutation Input
 // ============================================================================
 
-export interface DeleteNotificationInput {
-  /** Public UUID of the notification to delete */
-  notificationId: string
-}
-
 // ============================================================================
 // Main Hook
 // ============================================================================
@@ -47,6 +42,5 @@ export function useDeleteNotificationMutation() {
     },
     // Invalidate notifications list and unread count
     invalidateKeys: () => [notificationQueryKeys.all],
-    errorLogPrefix: 'Delete notification failed',
   })
 }

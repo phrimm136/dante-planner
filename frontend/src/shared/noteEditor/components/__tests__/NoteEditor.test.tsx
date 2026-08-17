@@ -7,12 +7,25 @@
  * 3. Content rendering and controlled component pattern
  */
 
-import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest'
+import { useEffect } from 'react'
+import { describe, it, expect, vi, beforeEach, beforeAll, afterAll, type Mock } from 'vitest'
+import {
+  NoteDeliveryProvider,
+  useNoteDeliveryRegistry,
+  type NoteDeliveryRegistry,
+} from '../../context/NoteDeliveryRegistry'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { NoteEditor } from '../NoteEditor'
 import { calculateNoteByteLength } from '../../lib/noteUtils'
 import type { NoteContent } from '../../types/NoteEditorTypes'
+
+/** The content a change handler was last called with. */
+function lastChange(onChange: Mock<(value: NoteContent) => void>): NoteContent {
+  const call = onChange.mock.calls.at(-1)
+  if (call === undefined) throw new Error('onChange was never called')
+  return call[0]
+}
 
 // Mock i18next with initReactI18next for proper module loading
 vi.mock('react-i18next', async (importOriginal) => {
@@ -131,12 +144,46 @@ describe('NoteEditor', () => {
       })
 
       const container = document.querySelector('.note-editor')!
-      fireEvent.click(container)
+      fireEvent.focusIn(container)
 
       await waitFor(() => {
         // Toolbar should be visible when focused
         expect(container.classList.contains('ring-2')).toBe(true)
       })
+    })
+
+    it('is reachable and activatable without a pointer', async () => {
+      render(<NoteEditor value={defaultValue} onChange={mockOnChange} />)
+
+      await waitFor(() => {
+        expect(document.querySelector('.ProseMirror')).toBeTruthy()
+      })
+
+      // Tab reaches the writing surface only while it is a focusable area, and a
+      // contenteditable host is one only when the attribute reads "true".
+      const surface = document.querySelector('.ProseMirror') as HTMLElement
+      expect(surface.getAttribute('contenteditable')).toBe('true')
+
+      // What Tab does, with no click anywhere in this test.
+      surface.focus()
+
+      expect(document.activeElement).toBe(surface)
+      await waitFor(() => {
+        expect(document.querySelector('.note-editor')!.classList.contains('ring-2')).toBe(true)
+        expect(screen.getByLabelText('Bold')).toBeTruthy()
+      })
+    })
+
+    it('leaves a readOnly editor out of the tab order', async () => {
+      render(<NoteEditor value={defaultValue} readOnly />)
+
+      await waitFor(() => {
+        expect(document.querySelector('.ProseMirror')).toBeTruthy()
+      })
+
+      const surface = document.querySelector('.ProseMirror') as HTMLElement
+      expect(surface.getAttribute('contenteditable')).toBe('false')
+      expect(surface.hasAttribute('tabindex')).toBe(false)
     })
   })
 
@@ -200,7 +247,7 @@ describe('NoteEditor - XSS Prevention', () => {
 
       // Focus the editor first
       const container = document.querySelector('.note-editor')!
-      await user.click(container)
+      fireEvent.focusIn(container)
 
       await waitFor(() => {
         expect(container.classList.contains('ring-2')).toBe(true)
@@ -226,7 +273,7 @@ describe('NoteEditor - XSS Prevention', () => {
 
       // Focus and open link dialog
       const container = document.querySelector('.note-editor')!
-      await user.click(container)
+      fireEvent.focusIn(container)
 
       await waitFor(() => {
         expect(container.classList.contains('ring-2')).toBe(true)
@@ -249,7 +296,7 @@ describe('NoteEditor - XSS Prevention', () => {
 
       // Should show error toast
       await waitFor(() => {
-        expect(mockToastError).toHaveBeenCalledWith('Invalid URL')
+        expect(mockToastError).toHaveBeenCalledWith('Invalid or unsafe URL')
       })
     })
 
@@ -263,7 +310,7 @@ describe('NoteEditor - XSS Prevention', () => {
 
       // Focus and open link dialog
       const container = document.querySelector('.note-editor')!
-      await user.click(container)
+      fireEvent.focusIn(container)
 
       await waitFor(() => {
         expect(container.classList.contains('ring-2')).toBe(true)
@@ -286,7 +333,7 @@ describe('NoteEditor - XSS Prevention', () => {
 
       // Should show error toast
       await waitFor(() => {
-        expect(mockToastError).toHaveBeenCalledWith('Invalid URL')
+        expect(mockToastError).toHaveBeenCalledWith('Invalid or unsafe URL')
       })
     })
 
@@ -300,7 +347,7 @@ describe('NoteEditor - XSS Prevention', () => {
 
       // Focus and open link dialog
       const container = document.querySelector('.note-editor')!
-      await user.click(container)
+      fireEvent.focusIn(container)
 
       await waitFor(() => {
         expect(container.classList.contains('ring-2')).toBe(true)
@@ -340,7 +387,7 @@ describe('NoteEditor - XSS Prevention', () => {
 
       // Focus and open link dialog
       const container = document.querySelector('.note-editor')!
-      await user.click(container)
+      fireEvent.focusIn(container)
 
       await waitFor(() => {
         expect(container.classList.contains('ring-2')).toBe(true)
@@ -393,7 +440,7 @@ describe('NoteEditor - XSS Prevention', () => {
 
         // Focus and open link dialog
         const container = document.querySelector('.note-editor')!
-        await user.click(container)
+        fireEvent.focusIn(container)
 
         await waitFor(() => {
           expect(container.classList.contains('ring-2')).toBe(true)
@@ -416,7 +463,7 @@ describe('NoteEditor - XSS Prevention', () => {
 
         // Should show error toast
         await waitFor(() => {
-          expect(mockToastError).toHaveBeenCalledWith('Invalid URL')
+          expect(mockToastError).toHaveBeenCalledWith('Invalid or unsafe URL')
         })
       })
     })
@@ -442,7 +489,7 @@ describe('NoteEditor - XSS Prevention', () => {
 
         // Focus and open link dialog
         const container = document.querySelector('.note-editor')!
-        await user.click(container)
+        fireEvent.focusIn(container)
 
         await waitFor(() => {
           expect(container.classList.contains('ring-2')).toBe(true)
@@ -525,20 +572,19 @@ describe('NoteEditor - paste byte limit', () => {
   }
 
   it('truncates an over-limit paste so the note stays within the cap', async () => {
-    const onChange = vi.fn()
+    const onChange = vi.fn<(value: NoteContent) => void>()
     render(<NoteEditor value={emptyValue} onChange={onChange} maxBytes={400} />)
 
     const container = document.querySelector('.note-editor') as Element
     await waitFor(() => expect(container).toBeTruthy())
-    fireEvent.click(container)
+    fireEvent.focusIn(container)
 
     pasteText('x'.repeat(8000))
 
     await waitFor(
       () => {
         expect(onChange).toHaveBeenCalled()
-        const calls = onChange.mock.calls
-        const last = calls[calls.length - 1][0] as NoteContent
+        const last = lastChange(onChange)
         expect(calculateNoteByteLength({ content: last.content })).toBeLessThanOrEqual(400)
       },
       { timeout: 2000 },
@@ -546,20 +592,19 @@ describe('NoteEditor - paste byte limit', () => {
   })
 
   it('keeps an in-limit paste intact', async () => {
-    const onChange = vi.fn()
+    const onChange = vi.fn<(value: NoteContent) => void>()
     render(<NoteEditor value={emptyValue} onChange={onChange} maxBytes={4096} />)
 
     const container = document.querySelector('.note-editor') as Element
     await waitFor(() => expect(container).toBeTruthy())
-    fireEvent.click(container)
+    fireEvent.focusIn(container)
 
     pasteText('hello world')
 
     await waitFor(
       () => {
         expect(onChange).toHaveBeenCalled()
-        const calls = onChange.mock.calls
-        const last = calls[calls.length - 1][0] as NoteContent
+        const last = lastChange(onChange)
         expect(JSON.stringify(last.content)).toContain('hello world')
         expect(calculateNoteByteLength({ content: last.content })).toBeLessThanOrEqual(4096)
       },
@@ -568,13 +613,13 @@ describe('NoteEditor - paste byte limit', () => {
   })
 
   it('truncates right up to the cap — never over, fills the budget', async () => {
-    const onChange = vi.fn()
+    const onChange = vi.fn<(value: NoteContent) => void>()
     const cap = 300
     render(<NoteEditor value={emptyValue} onChange={onChange} maxBytes={cap} />)
 
     const container = document.querySelector('.note-editor') as Element
     await waitFor(() => expect(container).toBeTruthy())
-    fireEvent.click(container)
+    fireEvent.focusIn(container)
 
     // All-ASCII payload: 1 byte/char near the cut, so the largest fitting
     // prefix lands within a couple bytes of the cap, and NEVER over it.
@@ -583,8 +628,7 @@ describe('NoteEditor - paste byte limit', () => {
     await waitFor(
       () => {
         expect(onChange).toHaveBeenCalled()
-        const calls = onChange.mock.calls
-        const last = calls[calls.length - 1][0] as NoteContent
+        const last = lastChange(onChange)
         const size = calculateNoteByteLength({ content: last.content })
         expect(size).toBeLessThanOrEqual(cap) // inclusive boundary: never exceeds
         expect(size).toBeGreaterThan(cap - 5) // truncated to fit, not under-cut
@@ -597,4 +641,149 @@ describe('NoteEditor - paste byte limit', () => {
   // editor.chain().setMeta(BYTE_LIMIT_BYPASS,true).setContent(...)) is covered
   // deterministically at the Editor level in ByteLimitExtension.test.ts —
   // exercising the exact call shape without jsdom/React/debounce flakiness.
+})
+
+describe('NoteEditor - debounce flush on unmount', () => {
+  const emptyValue: NoteContent = {
+    content: { type: 'doc', content: [{ type: 'paragraph' }] },
+  }
+
+  // jsdom has no layout: ProseMirror's post-dispatch scrollToSelection calls
+  // Range.getClientRects(), which returns empty and throws. Shim a zero rect.
+  const zeroRect = {
+    top: 0,
+    left: 0,
+    bottom: 0,
+    right: 0,
+    width: 0,
+    height: 0,
+    x: 0,
+    y: 0,
+    toJSON: () => ({}),
+  } as DOMRect
+  let origBounding: typeof Range.prototype.getBoundingClientRect
+  let origClientRects: typeof Range.prototype.getClientRects
+
+  beforeAll(() => {
+    origBounding = Range.prototype.getBoundingClientRect
+    origClientRects = Range.prototype.getClientRects
+    Range.prototype.getBoundingClientRect = () => zeroRect
+    Range.prototype.getClientRects = () =>
+      ({
+        length: 1,
+        item: () => zeroRect,
+        0: zeroRect,
+        [Symbol.iterator]: () => [zeroRect][Symbol.iterator](),
+      }) as unknown as DOMRectList
+  })
+
+  afterAll(() => {
+    Range.prototype.getBoundingClientRect = origBounding
+    Range.prototype.getClientRects = origClientRects
+  })
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  function typeText(text: string) {
+    const contentEl = document.querySelector('.note-editor-content')
+    expect(contentEl).toBeTruthy()
+    const clipboardData = {
+      getData: (type: string) => (type === 'text/plain' ? text : ''),
+      types: ['text/plain'],
+      files: [],
+    }
+    fireEvent.paste(contentEl as Element, { clipboardData })
+  }
+
+  it('calls onChange exactly once with the typed content when unmounted before the interval elapses', async () => {
+    const onChange = vi.fn<(value: NoteContent) => void>()
+    const { unmount } = render(<NoteEditor value={emptyValue} onChange={onChange} />)
+
+    const container = document.querySelector('.note-editor') as Element
+    await waitFor(() => expect(container).toBeTruthy())
+    fireEvent.focusIn(container)
+
+    typeText('unflushed keystrokes')
+
+    // No await between the edit and the unmount, so the debounce cannot have
+    // elapsed: whatever onChange sees came from the teardown flush.
+    expect(onChange).not.toHaveBeenCalled()
+
+    unmount()
+
+    expect(onChange).toHaveBeenCalledTimes(1)
+    const flushed = lastChange(onChange)
+    expect(JSON.stringify(flushed.content)).toContain('unflushed keystrokes')
+  })
+
+  it('calls onChange once in total when the debounce already fired before unmount', async () => {
+    const onChange = vi.fn<(value: NoteContent) => void>()
+    const { unmount } = render(<NoteEditor value={emptyValue} onChange={onChange} />)
+
+    const container = document.querySelector('.note-editor') as Element
+    await waitFor(() => expect(container).toBeTruthy())
+    fireEvent.focusIn(container)
+
+    typeText('settled content')
+
+    await waitFor(() => expect(onChange).toHaveBeenCalledTimes(1), { timeout: 2000 })
+
+    unmount()
+
+    expect(onChange).toHaveBeenCalledTimes(1)
+  })
+
+  it('hands pending text to its owner when the registry is drained', async () => {
+    const onChange = vi.fn<(value: NoteContent) => void>()
+    const captured: { registry: NoteDeliveryRegistry | null } = { registry: null }
+    const captureRegistry = (owned: NoteDeliveryRegistry) => {
+      captured.registry = owned
+    }
+
+    function Harness({ onReady }: { onReady: (owned: NoteDeliveryRegistry) => void }) {
+      const owned = useNoteDeliveryRegistry()
+      useEffect(() => {
+        onReady(owned)
+      }, [owned, onReady])
+      return (
+        <NoteDeliveryProvider registry={owned}>
+          <NoteEditor value={emptyValue} onChange={onChange} />
+        </NoteDeliveryProvider>
+      )
+    }
+
+    render(<Harness onReady={captureRegistry} />)
+
+    const container = document.querySelector('.note-editor') as Element
+    await waitFor(() => expect(container).toBeTruthy())
+    fireEvent.focusIn(container)
+
+    onChange.mockClear()
+    typeText('held by the debounce')
+    expect(onChange).not.toHaveBeenCalled()
+
+    captured.registry?.drain()
+
+    expect(onChange).toHaveBeenCalledTimes(1)
+    const delivered = lastChange(onChange)
+    expect(JSON.stringify(delivered.content)).toContain('held by the debounce')
+  })
+
+  it('registers no unload listener of its own', async () => {
+    // Pushing from here would race the owner's own handler: at the window target
+    // listeners run in registration order, and an editor revealed later registers
+    // after it. The owner pulls instead, so there is nothing to order.
+    const addSpy = vi.spyOn(window, 'addEventListener')
+    render(<NoteEditor value={emptyValue} onChange={vi.fn()} />)
+    await waitFor(() => expect(document.querySelector('.note-editor')).toBeTruthy())
+
+    const unloadListeners = addSpy.mock.calls
+      .map(([type]) => type)
+      .filter((type) => type === 'beforeunload' || type === 'pagehide')
+
+    expect(unloadListeners).toEqual([])
+    addSpy.mockRestore()
+  })
 })

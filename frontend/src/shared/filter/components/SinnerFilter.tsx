@@ -1,29 +1,25 @@
-import { memo } from 'react'
 import { getSinnerIconPath } from '@/shared/assets'
-import { areSetsEqual } from '@/lib/setUtils'
 import { IconFilter } from './IconFilter'
 import { SINNERS } from '@/shared/gameData'
 
 interface SinnerFilterProps {
-  selectedSinners: Set<string>
+  selected: Set<string>
   onSelectionChange: (sinners: Set<string>) => void
 }
 
-export const SinnerFilter = memo(
-  function SinnerFilter({ selectedSinners, onSelectionChange }: SinnerFilterProps) {
-    const getIconPath = (sinner: string) => getSinnerIconPath(sinner)
-
-    return (
-      <IconFilter
-        options={SINNERS}
-        selectedOptions={selectedSinners}
-        onSelectionChange={onSelectionChange}
-        getIconPath={getIconPath}
-      />
-    )
-  },
-  (prev, next) => {
-    return areSetsEqual(prev.selectedSinners, next.selectedSinners)
-    // onSelectionChange excluded - callback identity changes but behavior is same
-  },
-)
+/**
+ * Sinner icon filter for filter sidebar
+ * 12 sinners displayed in a 6-column grid (2 rows)
+ *
+ * Pattern: Wraps IconFilter like SinnerFilter wraps IconFilter
+ */
+export function SinnerFilter({ selected, onSelectionChange }: SinnerFilterProps) {
+  return (
+    <IconFilter
+      options={SINNERS}
+      selectedOptions={selected}
+      onSelectionChange={onSelectionChange}
+      getIconPath={getSinnerIconPath}
+    />
+  )
+}

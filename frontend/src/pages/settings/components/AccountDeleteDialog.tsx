@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { SECTION_STYLES } from '@/lib/constants'
 
 /**
  * Props for AccountDeleteDialog
@@ -88,7 +89,9 @@ export function AccountDeleteDialog({
               autoComplete="off"
             />
           </div>
-          <p className="text-xs text-muted-foreground">{t('settings.deleteAccount.cannotUndo')}</p>
+          <p className={SECTION_STYLES.TEXT.captionSmall}>
+            {t('settings.deleteAccount.cannotUndo')}
+          </p>
         </div>
 
         <DialogFooter className="flex-col gap-2 sm:flex-row">

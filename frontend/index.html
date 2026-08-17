@@ -23,7 +23,7 @@
     <meta name="naver-site-verification" content="08b0e1141af020077adee31f06493c15ec9d7162" />
     <style>
       /* Hide SEO skeleton visually (bots still read it) */
-      body { background: #0e0804; }
+      body { background: #0e0804; margin: 0; }
       #seo-skeleton {
         position: absolute;
         width: 1px;
@@ -34,6 +34,31 @@
         clip: rect(0, 0, 0, 0);
         white-space: nowrap;
         border: 0;
+      }
+      /* App shell: painted by the HTML alone, replaced when React mounts into #root */
+      #app-shell {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #app-shell .shell-dot {
+        width: 0.5rem;
+        height: 0.5rem;
+        margin: 0 0.25rem;
+        border-radius: 9999px;
+        background: #6a5a4a;
+        display: inline-block;
+        animation: shell-pulse 1.2s ease-in-out infinite;
+      }
+      #app-shell .shell-dot:nth-child(2) { animation-delay: 0.15s; }
+      #app-shell .shell-dot:nth-child(3) { animation-delay: 0.3s; }
+      @keyframes shell-pulse {
+        0%, 100% { opacity: 0.25; }
+        50% { opacity: 1; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #app-shell .shell-dot { animation: none; opacity: 0.6; }
       }
     </style>
   </head>
@@ -60,6 +85,11 @@
           <a href="/privacy">Privacy Policy</a>
           <a href="/terms">Terms of Service</a>
         </footer>
+      </div>
+      <div id="app-shell" aria-hidden="true">
+        <div>
+          <span class="shell-dot"></span><span class="shell-dot"></span><span class="shell-dot"></span>
+        </div>
       </div>
     </div>
     <script type="module" src="/src/main.tsx"></script>

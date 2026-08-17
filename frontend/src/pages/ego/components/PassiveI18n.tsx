@@ -3,14 +3,15 @@ import { useEGODetailI18n } from '../hooks/useEGODetailData'
 import { FormattedDescription } from '@/shared/gameText'
 import { StyledSkillName, StyledNameSkeleton } from '@/shared/gameText'
 import { Skeleton } from '@/components/ui/skeleton'
-import { FLAVOR_TEXT_COLOR } from '@/shared/gameData'
 import { cn } from '@/lib/utils'
+import { FLAVOR_TEXT_COLOR, SECTION_STYLES } from '@/lib/constants'
+import type { PassiveId } from '@/shared/gameData'
 
 interface PassiveCardWithSuspenseProps {
   /** EGO ID for i18n lookup */
   id: string
-  /** Passive ID (string type for EGO) */
-  passiveId: string
+  /** Passive ID */
+  passiveId: PassiveId
   /** Whether this passive is locked (from higher threadspin) */
   isLocked: boolean
 }
@@ -23,7 +24,7 @@ interface PassiveCardWithSuspenseProps {
 export function PassiveCardWithSuspense({ id, passiveId, isLocked }: PassiveCardWithSuspenseProps) {
   return (
     <div className={cn('space-y-1', isLocked && 'opacity-50')}>
-      <div className="flex items-center gap-2">
+      <div className={SECTION_STYLES.LAYOUT.row}>
         <Suspense fallback={<StyledNameSkeleton attributeType="NEUTRAL" />}>
           <PassiveNameContent id={id} passiveId={passiveId} />
         </Suspense>
@@ -44,7 +45,7 @@ export function PassiveCardWithSuspense({ id, passiveId, isLocked }: PassiveCard
 /**
  * Internal: Fetches and renders passive name with styled formatting.
  */
-function PassiveNameContent({ id, passiveId }: { id: string; passiveId: string }) {
+function PassiveNameContent({ id, passiveId }: { id: string; passiveId: PassiveId }) {
   const i18n = useEGODetailI18n(id)
   const passive = i18n.passives[passiveId]
   return <StyledSkillName name={passive?.name || passiveId} attributeType="NEUTRAL" />
@@ -53,7 +54,7 @@ function PassiveNameContent({ id, passiveId }: { id: string; passiveId: string }
 /**
  * Internal: Fetches and renders passive description with keyword formatting.
  */
-function PassiveDescContent({ id, passiveId }: { id: string; passiveId: string }) {
+function PassiveDescContent({ id, passiveId }: { id: string; passiveId: PassiveId }) {
   const i18n = useEGODetailI18n(id)
   const passive = i18n.passives[passiveId]
   return <FormattedDescription text={passive?.desc ?? ''} />
@@ -63,7 +64,7 @@ function PassiveDescContent({ id, passiveId }: { id: string; passiveId: string }
  * Internal: Fetches and renders passive flavor lore.
  * Returns null when the passive has no flavor (most do not).
  */
-function PassiveFlavorContent({ id, passiveId }: { id: string; passiveId: string }) {
+function PassiveFlavorContent({ id, passiveId }: { id: string; passiveId: PassiveId }) {
   const i18n = useEGODetailI18n(id)
   const passive = i18n.passives[passiveId]
   const flavor = passive?.flavor

@@ -1,11 +1,9 @@
 package org.danteplanner.backend.planner.validation;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -15,11 +13,11 @@ import java.util.List;
  * focused sub-validator and threading a single {@link ValidationContext}
  * through the call chain.
  *
- * <p>Behavior is identical to the previous monolith: same error codes, same
- * messages, same call order, same strict-mode semantics, and the same
- * fail-fast vs. accumulate-and-combine behavior.
+ * <p>Structural failures throw and abort; reference failures accumulate into the
+ * context and are combined once at the end.
  */
 @Component
+@RequiredArgsConstructor
 @Slf4j
 public class PlannerContentValidator {
 
@@ -30,62 +28,32 @@ public class PlannerContentValidator {
     private final IdReferenceValidator idReferenceValidator;
     private final StartBuffValidator startBuffValidator;
 
-    @Autowired
-    public PlannerContentValidator(
-            StructuralValidator structuralValidator,
-            CategoryValidator categoryValidator,
-            EquipmentValidator equipmentValidator,
-            SkillStateValidator skillStateValidator,
-            IdReferenceValidator idReferenceValidator,
-            StartBuffValidator startBuffValidator) {
-        this.structuralValidator = structuralValidator;
-        this.categoryValidator = categoryValidator;
-        this.equipmentValidator = equipmentValidator;
-        this.skillStateValidator = skillStateValidator;
-        this.idReferenceValidator = idReferenceValidator;
-        this.startBuffValidator = startBuffValidator;
-    }
-
-    public PlannerContentValidator(
-            ObjectMapper objectMapper,
-            GameDataRegistry gameDataRegistry,
-            SinnerIdValidator sinnerIdValidator,
-            @Value("${planner.validation.max-content-size}") int maxContentSizeBytes,
-            @Value("${planner.validation.max-note-size}") int maxNoteSizeBytes) {
-        this(
-                new StructuralValidator(objectMapper, maxContentSizeBytes, maxNoteSizeBytes),
-                new CategoryValidator(),
-                new EquipmentValidator(),
-                new SkillStateValidator(),
-                new IdReferenceValidator(gameDataRegistry, sinnerIdValidator),
-                new StartBuffValidator(gameDataRegistry));
-    }
-
     /**
      * Validate planner content with relaxed rules (for save/draft).
      * Allows empty title and themepack.
      */
     public JsonNode validate(String content, String category) {
-        return validate(content, category, false);
+        return validate(content, category, ValidationPolicy.DRAFT);
     }
 
     /**
      * Validate planner content.
      *
-     * @param content    the content JSON
-     * @param category   the planner category
-     * @param strictMode if true, requires title and themePackId (for publish)
+     * @param content  the content JSON
+     * @param category the planner category
+     * @param policy   how completely the document must be filled in; {@link ValidationPolicy#PUBLISH}
+     *                 additionally requires every floor to name a resolvable theme pack
      */
-    public JsonNode validate(String content, String category, boolean strictMode) {
+    public JsonNode validate(String content, String category, ValidationPolicy policy) {
         try {
-            return doValidate(content, category, strictMode);
+            return doValidate(content, category, policy);
         } catch (PlannerValidationException ex) {
             ex.setFailedContent(content);
             throw ex;
         }
     }
 
-    private JsonNode doValidate(String content, String category, boolean strictMode) {
+    private JsonNode doValidate(String content, String category, ValidationPolicy policy) {
         if (content == null || content.isBlank()) {
             log.warn("Validation failed: content is null or empty");
             throw ValidationErrors.emptyContent();
@@ -94,7 +62,7 @@ public class PlannerContentValidator {
         structuralValidator.validateContentSize(content);
         categoryValidator.validateCategory(category);
 
-        ValidationContext context = new ValidationContext(strictMode);
+        ValidationContext context = new ValidationContext(policy);
 
         JsonNode root = structuralValidator.parseJson(content);
 

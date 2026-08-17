@@ -1,0 +1,22 @@
+# Copy to <account>.tfvars (gitignored) and fill in — one file per account, applied in a workspace
+# of the same name. Never commit the real file; it carries account-specific identifiers.
+#
+#   terraform -chdir=terraform/state-backend workspace new <account>
+#   terraform -chdir=terraform/state-backend apply -var-file=<account>.tfvars
+#
+# The default terraform.tfvars is auto-loaded alongside -var-file, so an account file must override
+# every value that differs rather than relying on absence.
+
+# --- Required ---------------------------------------------------------------
+
+# The account this stack may apply into; a plan resolving to any other account fails.
+aws_account_id = "REPLACE_WITH_ACCOUNT_ID"
+
+# --- Optional overrides (defaults in variables.tf are sensible) --------------
+
+# Role to assume in the target account. Leave unset when the credentials already belong there.
+# Reaching a member account from the management account uses the role each account is created with.
+# assume_role_arn = "arn:aws:iam::REPLACE_WITH_ACCOUNT_ID:role/OrganizationAccountAccessRole"
+
+# region      = "us-west-2"
+# name_prefix = "danteplanner"      # changing this orphans an existing bucket, it does not rename one

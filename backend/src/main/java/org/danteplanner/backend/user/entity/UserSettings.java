@@ -1,6 +1,13 @@
 package org.danteplanner.backend.user.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.MapsId;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,9 +33,13 @@ public class UserSettings {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User user;
 
-    @Column(name = "sync_enabled")
-    @Setter
-    private Boolean syncEnabled;
+    @Builder.Default
+    @Column(name = "sync_enabled", nullable = false)
+    private boolean syncEnabled = false;
+
+    @Builder.Default
+    @Column(name = "sync_choice_made", nullable = false)
+    private boolean syncChoiceMade = false;
 
     @Builder.Default
     @Column(name = "notify_comments", nullable = false)
@@ -44,4 +55,17 @@ public class UserSettings {
     @Column(name = "notify_new_publications", nullable = false)
     @Setter
     private boolean notifyNewPublications = false;
+
+    /**
+     * Records the user's answer to the sync prompt.
+     *
+     * <p>Sync can only be on once it has been chosen, an invariant the
+     * {@code ck_user_settings_sync_choice} check constraint also enforces.</p>
+     *
+     * @param enabled whether cloud sync is enabled
+     */
+    public void chooseSync(boolean enabled) {
+        this.syncEnabled = enabled;
+        this.syncChoiceMade = true;
+    }
 }

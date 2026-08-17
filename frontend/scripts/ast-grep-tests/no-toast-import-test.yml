@@ -1,0 +1,19 @@
+id: no-toast-import
+valid:
+  - import { showError, showSuccess } from '@/lib/errorPresentation'
+  - import { Toaster } from 'sonner'
+  - import { showWarning } from '@/lib/errorPresentation'
+  - import { formatDate } from '@/lib/formatDate'
+  - export { showError } from '@/lib/errorPresentation'
+  - const mod = await import('@/lib/errorPresentation')
+invalid:
+  - import { toast } from 'sonner'
+  - import { toast } from '@/lib/toast'
+  - import { toast as notify } from 'sonner'
+  - import { toast, Toaster } from 'sonner'
+  - export { toast } from '@/lib/toast'
+  - import { type ExternalToast, toast } from 'sonner'
+  # Evasion shapes the earlier identifier-keyed rule walked past.
+  - import * as ns from 'sonner'
+  - const { toast } = await import('sonner')
+  - export * from 'sonner'

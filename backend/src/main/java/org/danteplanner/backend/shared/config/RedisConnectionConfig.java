@@ -23,6 +23,7 @@ import jakarta.validation.constraints.NotBlank;
 import io.github.bucket4j.BucketConfiguration;
 import io.github.bucket4j.distributed.ExpirationAfterWriteStrategy;
 import io.github.bucket4j.distributed.proxy.AsyncProxyManager;
+import io.github.bucket4j.distributed.proxy.ClientSideConfig;
 import io.github.bucket4j.distributed.proxy.ProxyManager;
 import io.github.bucket4j.distributed.proxy.RemoteBucketBuilder;
 import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager;
@@ -84,22 +85,22 @@ public class RedisConnectionConfig {
     @Bean
     @Primary
     public LettuceConnectionFactory authRedisConnectionFactory() {
-        return new LettuceConnectionFactory(standaloneConfiguration(auth));
+        return BoundedRedisConnections.connectionFactory(standaloneConfiguration(auth));
     }
 
     @Bean
     public LettuceConnectionFactory rateLimitRedisConnectionFactory() {
-        return new LettuceConnectionFactory(standaloneConfiguration(rateLimit));
+        return BoundedRedisConnections.connectionFactory(standaloneConfiguration(rateLimit));
     }
 
     @Bean
     public LettuceConnectionFactory sseLocalRedisConnectionFactory() {
-        return new LettuceConnectionFactory(standaloneConfiguration(sseLocal));
+        return BoundedRedisConnections.connectionFactory(standaloneConfiguration(sseLocal));
     }
 
     @Bean
     public LettuceConnectionFactory authLocalRedisConnectionFactory() {
-        return new LettuceConnectionFactory(standaloneConfiguration(authLocal));
+        return BoundedRedisConnections.connectionFactory(standaloneConfiguration(authLocal));
     }
 
     /**
@@ -149,7 +150,7 @@ public class RedisConnectionConfig {
      * @return a byte[]-keyed proxy manager backed by the given Redis endpoint
      */
     public static ProxyManager<byte[]> buildRateLimitProxyManager(String host, int port, Duration bucketTtl) {
-        RedisClient client = RedisClient.create("redis://" + host + ":" + port);
+        RedisClient client = BoundedRedisConnections.redisClient(host, port);
         StatefulRedisConnection<byte[], byte[]> connection;
         try {
             connection = client.connect(ByteArrayCodec.INSTANCE);
@@ -158,6 +159,8 @@ public class RedisConnectionConfig {
             throw e;
         }
         return LettuceBasedProxyManager.builderFor(connection)
+                .withClientSideConfig(ClientSideConfig.getDefault()
+                        .withRequestTimeout(Duration.ofMillis(TimeoutHierarchy.RATE_LIMIT_FUTURE_TIMEOUT_MS)))
                 .withExpirationStrategy(ExpirationAfterWriteStrategy.fixedTimeToLive(bucketTtl))
                 .build();
     }

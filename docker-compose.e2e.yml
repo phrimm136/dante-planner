@@ -1,0 +1,10 @@
+# Overlay for the end-to-end suite, on top of docker-compose.yml + docker-compose.override.yml.
+#
+#   yarn --cwd e2e stack:up
+#
+# nginx/Dockerfile copies no frontend build, so /usr/share/nginx/html is empty in the image.
+# Populate it first with: yarn --cwd frontend build
+services:
+  nginx:
+    volumes:
+      - ./frontend/dist:/usr/share/nginx/html:ro

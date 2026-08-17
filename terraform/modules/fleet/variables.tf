@@ -129,6 +129,12 @@ variable "app_asg_max_size" {
 
 # --- Container registry -----------------------------------------------------
 
+variable "backend_ecr_account_id" {
+  description = "Account owning the backend ECR registry. Empty = the account this fleet is applied into. Set it when the fleet lives elsewhere (a staging account pulling production images), and grant that account pull access on the repository policy."
+  type        = string
+  default     = ""
+}
+
 variable "backend_image_repo" {
   description = "ECR repository name for the backend image. Matches the existing single-region deploy (.github/workflows/deploy.yml pushes danteplanner-backend)."
   type        = string
@@ -219,5 +225,31 @@ variable "tags" {
 variable "rds_vpc_id" {
   description = "RDS (prod) VPC id to peer with for private RDS access. Set in terraform.tfvars (gitignored) — do not commit."
   type        = string
+}
+
+variable "k3s_token_version" {
+  description = "Raise to rotate the cluster join token. The token is regenerated every run and written only when this changes; nodes joined under the previous token must rejoin."
+  type        = number
+  default     = 1
+}
+
+variable "app_secret_name_patterns" {
+  description = "Secrets Manager name patterns an app node may read, matching the ExternalSecret keys under deploy/. Adding a secret to the cluster without adding it here fails the pull at runtime, not at apply."
+  type        = list(string)
+  default = [
+    "danteplanner/backend/*",
+    "danteplanner/cloudflare/*",
+    "danteplanner/grafana/*",
+    "danteplanner/jwt/*",
+    "danteplanner/mysqld-exporter/*",
+    "danteplanner/origin-client-ca*",
+    "danteplanner/origin-tls*",
+  ]
+}
+
+variable "kubeconfig_seed_version" {
+  description = "Raise to overwrite the admin kubeconfig with the bootstrap placeholder, discarding what the CP wrote. Only useful when re-seeding a rebuilt control plane."
+  type        = number
+  default     = 1
 }
 

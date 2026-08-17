@@ -20,15 +20,4 @@ class LineageRotationFlagTest {
 
         assertThat(flag.isEnabled()).isFalse();
     }
-
-    @Test
-    void setEnabled_WhenToggled_FlipsValue() {
-        LineageRotationFlag flag = new LineageRotationFlag(false);
-
-        flag.setEnabled(true);
-        assertThat(flag.isEnabled()).isTrue();
-
-        flag.setEnabled(false);
-        assertThat(flag.isEnabled()).isFalse();
-    }
 }

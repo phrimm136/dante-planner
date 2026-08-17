@@ -1,0 +1,32 @@
+# Phase 02: Filter access + flag-off refresh routing, audit-log reason pin
+
+- Kind: local-tdd — filter unit tests (`@ExtendWith(MockitoExtension.class)`), no containers. Run:
+  `./gradlew -p backend test -PexcludeTags=containerized --tests "org.danteplanner.backend.shared.security.*"`
+- Files:
+  - `backend/src/main/java/org/danteplanner/backend/shared/security/JwtAuthenticationFilter.java` — route `:126` (primary auth) to `tokenValidator.validateAccessToken`, and the flag-off auto-refresh `:237` to `tokenValidator.validateRefreshToken`. The audit-log reason enrichment at `:189` is ALREADY delivered in the working tree — do not re-implement it.
+- Tests (both files `@Mock` `TokenValidator`; re-routing the production calls makes the old `validateToken(...)` stubs stale — updating them to the typed methods is in-scope implementation, not optional):
+  - `backend/src/test/java/org/danteplanner/backend/shared/security/JwtAuthenticationFilterTest.java`
+  - `backend/src/test/java/org/danteplanner/backend/shared/security/JwtAuthenticationFilterLineageTest.java`
+- External contract: a `type=refresh` JWT placed in the `accessToken` cookie → no `SecurityContext` authentication set, request proceeds as guest, and the security event is logged as `TOKEN_INVALID (INVALID_TYPE)`. An access JWT presented on the auto-refresh path → no refresh performed, request proceeds as guest.
+- Behavior inventory (Seam 1 — filter access-token path):
+  - B1 `:126-161` — valid access token → authenticate `ROLE_<claim role>`, default `NORMAL`: preserved. Characterization: `JwtAuthenticationFilterTest`.
+  - B2 `:167-185` — expired access token → silent auto-refresh, no WARN: preserved. Characterization: `JwtAuthenticationFilterTest` (the `EXPIRED` branch is untouched — routing changes the parser, not the expiry handling).
+  - B3 `:186-191` — malformed / bad-signature access token → WARN + clear context + guest: preserved, NOW logs the reason (INV6). The `:189` enrichment already renders `TOKEN_INVALID (MALFORMED)` / `(INVALID_SIGNATURE)` — pin as GREEN-NOW characterization, not red-green.
+  - B4 `:126-161` — refresh JWT in access cookie → authenticates as `NORMAL`: DROPPED per Decision 1 — now rejected as `INVALID_TYPE`. This is the primary new behavior (TW1).
+  - B5 `:106-122` — null access cookie → auto-refresh if refresh cookie present, else guest: preserved. Characterization: `JwtAuthenticationFilterTest`.
+  - B6 `:163-166` — revoked/blacklisted token → `TOKEN_REVOKED`, clear context, guest: preserved. Characterization: `JwtAuthenticationFilterTest`.
+  - B7 `:142-146` — sentinel user (id=0) → blocked, guest: preserved. Characterization: `JwtAuthenticationFilterTest`.
+- Test allocation notes:
+  - TW2 flag-off: filter `:237` now calls `validateRefreshToken`; an access JWT → `INVALID_TYPE` → `attemptAutoRefresh` returns false → guest. Real production behavior, `JwtAuthenticationFilterTest`.
+  - TW2 flag-on: the lineage path delegates to a MOCKED `RefreshRotationService.rotate` (`@Mock` at `JwtAuthenticationFilterLineageTest:68`); stub `rotate → Rejected` and assert guest. This is green-now filter-delegation characterization — the real access-token rotation rejection lives in phase 03's `RefreshRotationServiceTest`, NOT here. Do not treat this mocked case as INV2 rotation-half coverage.
+- Mechanics sections:
+  - `mechanics.md §2` (call-site routing, binding) — rows `JwtAuthenticationFilter.java:126` → `accessParser` and `:237` → `refreshParser`. Exactly these two filter rows; no other filter call site exists.
+  - `mechanics.md §3` — the rendered label: `mapReasonToErrorCode` (`:201-210`) already maps `INVALID_TYPE → TOKEN_INVALID`; the `:189` enrichment appends the reason, giving `TOKEN_INVALID (INVALID_TYPE)`.
+- Considerations:
+  - requirements INV1 — refresh JWT in access cookie MUST NOT authenticate; served as guest (TW1, the phase's headline assertion).
+  - requirements INV5 — the wrong-type token surfaces as `TOKEN_INVALID (INVALID_TYPE)`; the reason is not masked. This is the FIRST time `INVALID_TYPE` is reachable — new red-green, distinct from B3/INV6.
+  - requirements INV6 (delivered) — `TOKEN_INVALID` WARN carries `MALFORMED`/`INVALID_SIGNATURE`/`INVALID_TYPE`; assert against `:189` output. Green-now pin.
+  - requirements Deferred — the filter clears `SecurityContext` but does NOT delete the broken/wrong-type cookie; a wrong-type cookie keeps emitting one WARN per request until expiry. Do not add self-healing cookie clear here (out of scope).
+  - `backend/src/test/CLAUDE.md` — unit tier only (`MockitoExtension`), fixed `Clock` for any JWT construction, no `@WebMvcTest`/`@MockBean`.
+- Depends on: 01 (needs `validateAccessToken` / `validateRefreshToken` on the interface).
+- Verify: `./gradlew -p backend test -PexcludeTags=containerized --tests "org.danteplanner.backend.shared.security.*"` green, with all pre-existing filter cases (B1/B2/B5/B6/B7) still passing.

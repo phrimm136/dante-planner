@@ -8,7 +8,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { useUpdateUserSettingsMutation } from '../hooks/useUserSettings'
+import { useUpdateUserSettingsMutation } from '@/shared/userSettings'
 
 /**
  * Props for SyncChoiceDialog
@@ -24,7 +24,7 @@ export interface SyncChoiceDialogProps {
  * First-login sync choice dialog (GDPR compliant)
  *
  * Non-dismissible dialog that forces users to explicitly choose their sync preference.
- * Shown when syncEnabled === null (first login).
+ * Shown when the sync prompt has not been answered (first login).
  *
  * Features:
  * - No X button, no click-outside close, no Escape key dismissal
@@ -34,7 +34,7 @@ export interface SyncChoiceDialogProps {
  * @example
  * ```tsx
  * <SyncChoiceDialog
- *   open={settings?.syncEnabled === null}
+ *   open={settings ? !settings.syncChoiceMade : false}
  *   onChoice={(enabled) => {
  *     if (enabled) triggerPendingSync()
  *   }}
@@ -88,6 +88,12 @@ export function SyncChoiceDialog({ open, onChoice }: SyncChoiceDialogProps) {
                 'You can also export your planners from the Settings page to backup or transfer them.',
               )}
             </span>
+            <span className="block text-xs font-medium">
+              {t(
+                'settings.sync.choiceDialog.sharedDeviceWarning',
+                'Locally stored plans remain on this device and are visible to anyone who uses this browser, even after you sign out.',
+              )}
+            </span>
           </DialogDescription>
         </DialogHeader>
 
@@ -107,5 +113,3 @@ export function SyncChoiceDialog({ open, onChoice }: SyncChoiceDialogProps) {
     </Dialog>
   )
 }
-
-export default SyncChoiceDialog

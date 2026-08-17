@@ -109,7 +109,7 @@ class GtidCookieFilterTest {
     void write_WhenCaptureHasGtid_SetsGtidCookieAndSkipsReadGate() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/planners");
         MockHttpServletResponse response = new MockHttpServletResponse();
-        when(writeCapture.pollCapturedGtid()).thenReturn(Optional.of(GTID));
+        when(writeCapture.takeCapturedGtid()).thenReturn(Optional.of(GTID));
 
         try (MockedStatic<ReadOnlyRoutingDataSource> ds = mockStatic(ReadOnlyRoutingDataSource.class)) {
             filter.doFilter(request, response, new MockFilterChain());
@@ -132,13 +132,28 @@ class GtidCookieFilterTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
         String gtidSet = "3e11fa47-71ca-11e1-9e33-c80aa9429562:1-100,"
                 + "8f9e0d1c-2b3a-4c5d-6e7f-8a9b0c1d2e3f:1-50";
-        when(writeCapture.pollCapturedGtid()).thenReturn(Optional.of(gtidSet));
+        when(writeCapture.takeCapturedGtid()).thenReturn(Optional.of(gtidSet));
 
         filter.doFilter(request, response, new MockFilterChain());
 
         assertThat(response.getHeaders(HttpHeaders.SET_COOKIE))
                 .anySatisfy(header -> assertThat(header)
                         .contains(GtidCookie.NAME + "=" + GtidCookie.of(gtidSet).getValue()));
+    }
+
+    @Test
+    void oauthGoogleCallbackMintsCookie_WhenGetCommitsTx_SetsCookie() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/auth/google/callback");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        when(writeCapture.takeCapturedGtid()).thenReturn(Optional.of(GTID));
+
+        try (MockedStatic<ReadOnlyRoutingDataSource> ds = mockStatic(ReadOnlyRoutingDataSource.class)) {
+            filter.doFilter(request, response, new MockFilterChain());
+        }
+
+        assertThat(response.getHeaders(HttpHeaders.SET_COOKIE))
+                .anySatisfy(header -> assertThat(header)
+                        .contains(GtidCookie.NAME + "=" + GtidCookie.of(GTID).getValue()));
     }
 
     @Test

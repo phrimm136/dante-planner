@@ -18,8 +18,8 @@ There is **no instance profile** — neither runner is an EC2 instance.
 
 | Resource | Purpose |
 |----------|---------|
-| `aws_iam_role.provisioner` | The provisioning role (`var.role_name`, default `dante-oregon-provisioner`). |
-| `aws_iam_policy.provisioning` | Service-scoped permissions (EC2 / ASG / ECR / SSM / S3 / CloudWatch / Logs + `oregon-*` IAM). |
+| `aws_iam_role.provisioner` | The provisioning role (`var.role_name`, default `danteplanner-provisioner`). |
+| `aws_iam_policy.provisioning` | Service-scoped permissions (EC2 / ASG / ECR / SSM / S3 / RDS / KMS / CloudWatch / Logs + per-region fleet IAM). |
 | `aws_iam_openid_connect_provider.github` | GitHub Actions OIDC provider (guarded by `create_github_oidc_provider`; only one per account). |
 
 ## Scoping
@@ -62,14 +62,14 @@ Then wire the two consumers to that role ARN:
 [profile dante-admin]
 # your admin credentials (IAM user keys or SSO)
 
-[profile dante-oregon-provisioner]
+[profile danteplanner-provisioner]
 role_arn    = <provisioner_role_arn output>
 source_profile = dante-admin
 region      = us-west-2
 ```
 
 ```bash
-AWS_PROFILE=dante-oregon-provisioner terraform -chdir=terraform/oregon apply
+AWS_PROFILE=danteplanner-provisioner terraform -chdir=terraform/oregon apply
 ```
 
 **(b) Oregon CI workflow** — replace static access keys with OIDC. The job needs

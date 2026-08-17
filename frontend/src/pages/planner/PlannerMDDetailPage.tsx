@@ -4,16 +4,17 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorBoundary } from '@/components/feedback/ErrorBoundary'
-import { PlannerNotFound } from './components/PlannerNotFound'
+import { PlannerNotFound } from '@/components/feedback/PlannerNotFound'
 import { PlannerViewer } from './components/plannerViewer/PlannerViewer'
-import { PlannerDetailHeader } from './components/plannerViewer/PlannerDetailHeader'
+import { PersonalPlannerHeader } from './components/plannerViewer/PersonalPlannerHeader'
 import { PersonalPlannerList } from './components/plannerList/PersonalPlannerList'
 import { MDPlannerToolbar } from './components/plannerList/MDPlannerToolbar'
 import { PlannerListFilterPills } from './components/plannerList/PlannerListFilterPills'
 import { PlannerGridSkeleton } from '@/components/feedback/ListPageSkeleton'
 import { useSavedPlannerQuery } from './hooks/useSavedPlannerQuery'
+import { isMDPlanner } from './types/PlannerTypes'
 import { useAuthQuery } from '@/shared/auth'
-import { useUserSettingsQuery } from '@/pages/settings'
+import { useUserSettingsQuery } from '@/shared/userSettings'
 import { useMDUserFilters } from './hooks/useMDUserFilters'
 import { SECTION_STYLES } from '@/lib/constants'
 
@@ -25,11 +26,11 @@ export default function PlannerMDDetailPage() {
 
   return (
     <ErrorBoundary>
-      <div className="container mx-auto p-8">
+      <div className={SECTION_STYLES.LAYOUT.page}>
         <Suspense
           fallback={
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
+              <div className={SECTION_STYLES.LAYOUT.rowBetween}>
                 <Skeleton className="h-10 w-64" />
                 <Skeleton className="h-10 w-32" />
               </div>
@@ -72,19 +73,19 @@ function PlannerDetailContent({ plannerId }: { plannerId: string }) {
   }
 
   // Validate planner type - viewer only supports Mirror Dungeon planners
-  if (planner.config.type !== 'MIRROR_DUNGEON') {
+  if (!isMDPlanner(planner)) {
     return (
       <div className="space-y-6 text-center py-12">
-        <h1 className="text-2xl font-bold">
+        <h1 className={SECTION_STYLES.TEXT.pageTitle}>
           {t('pages.detail.invalidType', 'Invalid Planner Type')}
         </h1>
-        <p className="text-muted-foreground">
+        <p className={SECTION_STYLES.TEXT.muted}>
           {t(
             'pages.detail.invalidTypeMessage',
             'This viewer only supports Mirror Dungeon planners.',
           )}
         </p>
-        <p className="text-sm text-muted-foreground">
+        <p className={SECTION_STYLES.TEXT.caption}>
           {t('pages.detail.currentType', 'Current type')}: {planner.config.type}
         </p>
         <Button asChild variant="outline">
@@ -104,10 +105,8 @@ function PlannerDetailContent({ plannerId }: { plannerId: string }) {
   return (
     <div className="space-y-4">
       {/* Header with status badge and edit action */}
-      <PlannerDetailHeader
-        variant="personal"
+      <PersonalPlannerHeader
         planner={planner}
-        isOwner={true}
         isAuthenticated={isAuthenticated}
         syncEnabled={syncEnabled}
         onEdit={handleEdit}

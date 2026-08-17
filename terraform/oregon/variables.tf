@@ -185,3 +185,25 @@ variable "seoul_region" {
   type        = string
   default     = "ap-northeast-2"
 }
+
+variable "aws_account_id" {
+  description = "The 12-digit AWS account this stack may apply into."
+  type        = string
+
+  validation {
+    condition     = can(regex("^[0-9]{12}$", var.aws_account_id))
+    error_message = "aws_account_id must be the 12-digit AWS account number."
+  }
+}
+
+variable "backend_ecr_account_id" {
+  description = "Account owning the backend ECR registry. Empty = the account this stack is applied into."
+  type        = string
+  default     = ""
+}
+
+variable "replicate_registry" {
+  description = "Replicate this account's registry to the second region. False where the fleet pulls from another account's registry, so there is nothing local to mirror."
+  type        = bool
+  default     = true
+}

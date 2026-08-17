@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { ThemePackTrackerCard } from '../ThemePackTrackerCard'
+import type { ThemePackEntry } from '@/pages/themePack'
+import type { NoteContent } from '@/shared/noteEditor'
 
 // Mock react-i18next with initReactI18next for proper module loading
 vi.mock('react-i18next', async (importOriginal) => {
@@ -55,17 +57,17 @@ vi.mock('../FloorNoteDialog', () => ({
 }))
 
 describe('ThemePackTrackerCard', () => {
-  const mockPackEntry = {
-    floorNumber: 1,
+  const mockPackEntry: ThemePackEntry = {
     themePackConfig: {
       textColor: 'FFFFFF',
     },
     exceptionConditions: [],
+    specificEgoGiftPool: [],
   }
 
-  const mockNoteContent = {
+  const mockNoteContent: NoteContent = {
     content: {
-      type: 'doc' as const,
+      type: 'doc',
       content: [],
     },
   }
@@ -138,9 +140,7 @@ describe('ThemePackTrackerCard', () => {
 
       render(<ThemePackTrackerCard {...defaultProps} onFocusToggle={onFocusToggle} />)
 
-      const viewer = screen.getByTestId('theme-pack-viewer')
-      const clickTarget = viewer.parentElement!
-      fireEvent.click(clickTarget)
+      fireEvent.click(screen.getByRole('button', { name: 'Test Pack' }))
       expect(onFocusToggle).toHaveBeenCalledOnce()
     })
 
@@ -160,9 +160,8 @@ describe('ThemePackTrackerCard', () => {
       const hoverTarget = viewer.parentElement!
       fireEvent.mouseEnter(hoverTarget)
 
-      const buttons = screen.getAllByRole('button')
-      fireEvent.click(buttons[0])
-      // stopPropagation prevents the focus toggle from firing
+      fireEvent.click(screen.getByRole('button', { name: 'Mark as Done' }))
+      // the done button sits outside the card's click target, so it cannot toggle focus
       expect(onFocusToggle).not.toHaveBeenCalled()
     })
   })
@@ -178,9 +177,8 @@ describe('ThemePackTrackerCard', () => {
       const hoverTarget = viewer.parentElement!
       fireEvent.mouseEnter(hoverTarget)
 
-      // Click the done button (first button in overlay)
-      const buttons = screen.getAllByRole('button')
-      fireEvent.click(buttons[0])
+      // Click the done button in the hover overlay
+      fireEvent.click(screen.getByRole('button', { name: 'Mark as Done' }))
       expect(onToggleDone).toHaveBeenCalledOnce()
     })
   })

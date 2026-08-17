@@ -55,7 +55,7 @@ class GlobalExceptionHandlerDbUnavailableTest {
     @BeforeEach
     void setUp() {
         mockMvc = standaloneSetup(new ThrowingController())
-                .setControllerAdvice(new GlobalExceptionHandler(mock(CookieUtils.class)))
+                .setControllerAdvice(new GlobalExceptionHandler(mock(CookieUtils.class), new com.fasterxml.jackson.databind.ObjectMapper()))
                 .build();
     }
 

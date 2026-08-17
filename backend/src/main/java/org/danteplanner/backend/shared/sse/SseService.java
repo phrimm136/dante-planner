@@ -2,18 +2,22 @@ package org.danteplanner.backend.shared.sse;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.user.entity.UserSettings;
 import org.danteplanner.backend.user.service.UserSettingsService;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
+import java.time.Duration;
+
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import org.danteplanner.backend.shared.entity.SseEventType;
 
 /**
  * Central SSE service managing connections and settings-aware event dispatch.
@@ -23,7 +27,6 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * <p>Event types and their setting checks:
  * <ul>
- *   <li>{@code sync:planner} - requires syncEnabled == true</li>
  *   <li>{@code notify:comment} - requires notifyComments == true</li>
  *   <li>{@code notify:recommended} - requires notifyRecommendations == true</li>
  *   <li>{@code notify:published} - requires notifyNewPublications == true</li>
@@ -31,27 +34,43 @@ import java.util.concurrent.ConcurrentHashMap;
  * </p>
  */
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class SseService extends AbstractSseService<Long> {
 
-    private static final long HEARTBEAT_INTERVAL_MS = 10_000L;
-    private static final long CLEANUP_INTERVAL_MS = 60_000L;
+    private static final long HEARTBEAT_INTERVAL_MS = SseConstants.USER_STREAM_HEARTBEAT_INTERVAL_MS;
+
+    private static final Duration SETTINGS_CACHE_TTL = Duration.ofMinutes(5);
+    private static final long SETTINGS_CACHE_MAX_ENTRIES = 10_000;
 
     private final ObjectMapper objectMapper;
     private final UserSettingsService userSettingsService;
 
-    private final ConcurrentHashMap<Long, CachedSettings> settingsCache = new ConcurrentHashMap<>();
+    public SseService(
+            ObjectMapper objectMapper,
+            UserSettingsService userSettingsService,
+            @Qualifier(SseHeartbeatWorkerConfig.SSE_HEARTBEAT_WORKER) TaskExecutor heartbeatWorker) {
+        super(heartbeatWorker);
+        this.objectMapper = objectMapper;
+        this.userSettingsService = userSettingsService;
+    }
+
+    /**
+     * Per-node cache of the settings that gate event delivery. Entries expire on their own so a node
+     * that misses an invalidation — its Redis hop dropped, or it joined after the change — serves
+     * stale settings for a bounded time instead of until restart.
+     */
+    private final Cache<Long, CachedSettings> settingsCache = Caffeine.newBuilder()
+            .expireAfterWrite(SETTINGS_CACHE_TTL)
+            .maximumSize(SETTINGS_CACHE_MAX_ENTRIES)
+            .build();
 
     private record CachedSettings(
-            Boolean syncEnabled,
             boolean notifyComments,
             boolean notifyRecommendations,
             boolean notifyNewPublications
     ) {
         static CachedSettings from(UserSettings settings) {
             return new CachedSettings(
-                    settings.getSyncEnabled(),
                     settings.isNotifyComments(),
                     settings.isNotifyRecommendations(),
                     settings.isNotifyNewPublications()
@@ -66,8 +85,9 @@ public class SseService extends AbstractSseService<Long> {
      * @param userId   the user ID
      * @param deviceId the device identifier (UUID)
      * @return the SSE emitter for the connection
+     * @throws IOException if the initial connected event cannot be written
      */
-    public SseEmitter subscribe(Long userId, UUID deviceId) {
+    public SseEmitter subscribe(Long userId, UUID deviceId) throws IOException {
         SseEmitter emitter = register(userId, deviceId);
         log.info("SSE subscribed: user={}, device={}", userId, deviceId);
         return emitter;
@@ -77,7 +97,7 @@ public class SseService extends AbstractSseService<Long> {
      * Send an event to a user if their settings allow it.
      *
      * @param userId    the user ID
-     * @param eventType the event type (e.g., "sync:planner", "notify:comment")
+     * @param eventType the event type (e.g., "comment:added", "notify:comment")
      * @param data      the event data object
      */
     public void sendToUser(Long userId, String eventType, Object data) {
@@ -178,19 +198,12 @@ public class SseService extends AbstractSseService<Long> {
      * Notify a user that their account has been suspended (banned or timed out).
      * This sends an SSE event to all of the user's connected devices.
      *
-     * @param userId          the user ID
-     * @param reason          the reason for suspension (optional)
-     * @param suspensionType  the type of suspension ("BAN" or "TIMEOUT")
-     * @param durationMinutes the duration for timeouts (null for bans)
+     * @param userId  the user ID
+     * @param payload the suspension detail prepared by the publisher
      */
-    public void notifyAccountSuspended(Long userId, String reason, String suspensionType, Integer durationMinutes) {
-        Map<String, Object> data = Map.of(
-                "suspensionType", suspensionType,
-                "reason", reason != null ? reason : "",
-                "durationMinutes", durationMinutes != null ? durationMinutes : 0
-        );
-        sendToUser(userId, "account_suspended", data);
-        log.info("Sent account_suspended notification to user {} (type: {})", userId, suspensionType);
+    public void notifyAccountSuspended(Long userId, Object payload) {
+        sendToUser(userId, SseEventType.ACCOUNT_SUSPENDED.getValue(), payload);
+        log.info("Sent account_suspended notification to user {}", userId);
     }
 
     /**
@@ -200,7 +213,7 @@ public class SseService extends AbstractSseService<Long> {
      * @param userId the user ID
      */
     public void invalidateSettingsCache(Long userId) {
-        settingsCache.remove(userId);
+        settingsCache.invalidate(userId);
         log.debug("Invalidated settings cache for user {}", userId);
     }
 
@@ -215,11 +228,11 @@ public class SseService extends AbstractSseService<Long> {
     }
 
     /**
-     * Send heartbeat to all connected emitters.
+     * Submit a heartbeat for every connected emitter to the heartbeat worker pool.
      */
     @Scheduled(fixedRate = HEARTBEAT_INTERVAL_MS)
-    public void sendHeartbeats() {
-        heartbeatConnections();
+    public void sweepSseHeartbeats() {
+        sweepHeartbeatConnections();
     }
 
     /**
@@ -240,12 +253,7 @@ public class SseService extends AbstractSseService<Long> {
 
     @Override
     protected void afterKeyRemoved(Long userId) {
-        settingsCache.remove(userId);
-    }
-
-    @Override
-    protected void onConnectedSendFailure(Long userId, UUID deviceId) {
-        log.warn("Failed to send connected event to user {} device {}", userId, deviceId);
+        settingsCache.invalidate(userId);
     }
 
     @Override
@@ -258,23 +266,32 @@ public class SseService extends AbstractSseService<Long> {
         log.debug("Heartbeat failed for user {} device {}, removing emitter", userId, deviceId);
     }
 
+    /**
+     * Whether the user's settings admit an event of this type.
+     *
+     * <p>The switch carries no default arm, so a type added to {@link SseEventType} fails to compile
+     * here rather than inheriting delivery it was never granted. A value naming no type at all is
+     * not delivered: it can only be a client this node does not understand.</p>
+     */
     private boolean isEventAllowed(Long userId, String eventType) {
-        CachedSettings settings = settingsCache.get(userId);
-        if (settings == null) {
-            settings = cacheSettingsIfAbsent(userId);
+        SseEventType type = SseEventType.fromValue(eventType);
+        if (type == null) {
+            log.warn("Unrecognized SSE event type {}, not delivered to user {}", eventType, userId);
+            return false;
         }
 
-        return switch (eventType) {
-            case "sync:planner" -> Boolean.TRUE.equals(settings.syncEnabled());
-            case "notify:comment" -> settings.notifyComments();
-            case "notify:recommended" -> settings.notifyRecommendations();
-            case "notify:published" -> settings.notifyNewPublications();
-            default -> true;
+        CachedSettings settings = cacheSettingsIfAbsent(userId);
+
+        return switch (type) {
+            case NOTIFY_COMMENT -> settings.notifyComments();
+            case NOTIFY_RECOMMENDED -> settings.notifyRecommendations();
+            case NOTIFY_PUBLISHED -> settings.notifyNewPublications();
+            case COMMENT_ADDED, SETTINGS_INVALIDATED, ACCOUNT_SUSPENDED -> true;
         };
     }
 
     private CachedSettings cacheSettingsIfAbsent(Long userId) {
-        return settingsCache.computeIfAbsent(userId, id -> {
+        return settingsCache.get(userId, id -> {
             UserSettings settings = userSettingsService.getOrCreateEntity(id);
             return CachedSettings.from(settings);
         });

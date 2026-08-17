@@ -9,92 +9,45 @@ import { useSseStore } from '@/shared/sse'
  * Characterization tests for useAppSse — the SSE orchestration hook, exercising
  * the REAL generic engine (@/shared/sse) end-to-end.
  *
- * Scope (deliberately narrow): the three seams the shared→pages split endangers —
+ * Scope (deliberately narrow): the four seams the shared→pages split endangers —
  * (a) the connection gating truth-table (auth × settings), (b) the event→effect
- * map (which SSE event drives which cache invalidation / side-effect), and
- * (c) unmount cleanup. Reconnect/backoff timing lives in the engine's own DI
- * tests, not here.
+ * map (which SSE event drives which notification side-effect, and that planner
+ * events drive none), (c) the reconnect catch-up, and (d) unmount cleanup.
+ * Reconnect/backoff timing lives in the engine's own DI tests, not here.
  *
- * Only leaf deps are mocked. Planner leaf modules are mocked by their relative
- * paths (the hook imports them intra-slice); auth/settings/notifications by
- * their public specifiers. The engine + store are real.
+ * Only leaf deps are mocked: auth, settings and notifications by their public
+ * specifiers. The transport double is `fetch` itself: it answers the stream
+ * request with a body the test feeds frames into.
  */
 
-// ── Controllable EventSource double + mutable auth/settings refs ──
-const h = vi.hoisted(() => {
-  class MockEventSource {
-    static instances: MockEventSource[] = []
-    url: string
-    onopen: (() => void) | null = null
-    onerror: (() => void) | null = null
-    listeners: Record<string, ((e: { data: string }) => void)[]> = {}
-    closed = false
-    constructor(url: string) {
-      this.url = url
-      MockEventSource.instances.push(this)
-    }
-    addEventListener(type: string, cb: (e: { data: string }) => void) {
-      ;(this.listeners[type] ??= []).push(cb)
-    }
-    close() {
-      this.closed = true
-    }
-    // test drivers
-    fireOpen() {
-      this.onopen?.()
-    }
-    fireError() {
-      this.onerror?.()
-    }
-    emit(type: string, data: unknown) {
-      ;(this.listeners[type] ?? []).forEach((cb) => cb({ data: JSON.stringify(data) }))
-    }
-  }
-  return {
-    MockEventSource,
-    userRef: { current: null as unknown },
-    settingsRef: { current: null as unknown },
-    createEventsConnection: vi.fn(() => new MockEventSource('/api/planner/events')),
-    deleteFromLocal: vi.fn(() => Promise.resolve()),
-    showBrowserNotification: vi.fn(),
-    showNotificationToast: vi.fn(),
-    isTabHidden: vi.fn(() => false),
-    PLANNER_KEYS: {
-      all: ['planners'] as const,
-      list: () => ['planners', 'list'] as const,
-      detail: (id: string) => ['planners', 'detail', id] as const,
-    },
-    USER_PLANNER_KEYS: { all: ['userPlanners'] as const },
-    NOTIFICATION_KEYS: { all: ['notifications'] as const },
-  }
-})
+const encoder = new TextEncoder()
 
-// Planner leaf modules — mocked by the same relative specifiers the hook imports.
-vi.mock('../../lib/plannerApi', () => ({
-  plannerApi: { createEventsConnection: h.createEventsConnection },
-}))
-vi.mock('../usePlannerSaveAdapter', () => ({
-  usePlannerSaveAdapter: () => ({ deleteFromLocal: h.deleteFromLocal }),
-}))
-vi.mock('../usePlannerSync', () => ({ plannerQueryKeys: h.PLANNER_KEYS }))
-vi.mock('../useMDUserPlannersData', () => ({ userPlannersQueryKeys: h.USER_PLANNER_KEYS }))
+interface StreamHandle {
+  push: (chunk: string) => void
+  end: () => void
+  signal: AbortSignal | null
+}
 
-vi.mock('@/pages/settings', () => ({
+const streams: StreamHandle[] = []
+
+// ── Mutable auth/settings refs shared with the module mocks ──
+const h = vi.hoisted(() => ({
+  userRef: { current: null as unknown },
+  settingsRef: { current: null as unknown },
+  showBrowserNotification: vi.fn(),
+  showNotificationToast: vi.fn(),
+  isTabHidden: vi.fn(() => false),
+  NOTIFICATION_KEYS: { all: ['notifications'] as const },
+  SETTINGS_KEYS: { settings: () => ['user', 'settings'] as const },
+}))
+
+vi.mock('@/shared/userSettings', () => ({
   useUserSettingsQuery: () => ({ data: h.settingsRef.current, isLoading: false }),
+  userSettingsKeys: h.SETTINGS_KEYS,
 }))
 
 vi.mock('@/shared/auth', () => ({
   useAuthQueryNonBlocking: () => ({ data: h.userRef.current }),
-}))
-
-// Real engine + store (the 10 engine-driven tests rely on them); only the
-// envelope schema is a pass-through so handlers see the raw payload verbatim.
-vi.mock('@/shared/sse', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/shared/sse')>()),
-  SseEnvelopeSchema: {
-    parse: (x: unknown) => x,
-    safeParse: (x: unknown) => ({ success: true, data: x }),
-  },
 }))
 
 vi.mock('@/shared/notifications', () => ({
@@ -141,27 +94,67 @@ function createWrapper() {
   return { queryClient, wrapper }
 }
 
-/** Advance past the INITIAL_DELAY gate that fronts connect(). */
-async function flushConnectDelay() {
+/** Flush the promise chain the fetch transport runs on. */
+async function settle() {
   await act(async () => {
-    await vi.advanceTimersByTimeAsync(SSE_CONNECTION.INITIAL_DELAY)
+    for (let i = 0; i < 20; i++) {
+      await Promise.resolve()
+    }
   })
 }
 
-function lastEventSource() {
-  const list = h.MockEventSource.instances
-  return list[list.length - 1]
+async function advance(ms: number) {
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(ms)
+  })
+  await settle()
+}
+
+/** Advance past the INITIAL_DELAY gate that fronts connect(). */
+async function flushConnectDelay() {
+  await advance(SSE_CONNECTION.INITIAL_DELAY)
+}
+
+/** The most recently opened stream, failing loudly when the hook opened none. */
+function lastStream(): StreamHandle {
+  const stream = streams[streams.length - 1]
+  if (!stream) throw new Error('expected the hook to have opened a stream')
+  return stream
+}
+
+async function emit(stream: StreamHandle, type: string, data: unknown) {
+  stream.push(`event: ${type}\ndata: ${JSON.stringify(data)}\n\n`)
+  await settle()
 }
 
 beforeEach(() => {
   vi.useFakeTimers()
   vi.clearAllMocks()
-  h.MockEventSource.instances = []
+  streams.length = 0
   h.userRef.current = null
   h.settingsRef.current = null
   useSseStore.setState({ isConnected: false, lastEventTime: null, reconnectAttempts: 0 })
   vi.spyOn(console, 'error').mockImplementation(() => {})
   vi.spyOn(console, 'warn').mockImplementation(() => {})
+  vi.mocked(globalThis.fetch).mockImplementation((_input: unknown, init: RequestInit = {}) => {
+    let controller: ReadableStreamDefaultController<Uint8Array> | null = null
+    const body = new ReadableStream<Uint8Array>({
+      start(c) {
+        controller = c
+      },
+    })
+    streams.push({
+      push: (chunk) => controller?.enqueue(encoder.encode(chunk)),
+      end: () => controller?.close(),
+      signal: init.signal ?? null,
+    })
+    return Promise.resolve({
+      ok: true,
+      status: 200,
+      headers: new Headers(),
+      body,
+    } as unknown as Response)
+  })
 })
 
 afterEach(() => {
@@ -178,7 +171,7 @@ describe('useAppSse — gating truth-table', () => {
     renderHook(() => useAppSse(), { wrapper })
 
     await flushConnectDelay()
-    expect(h.createEventsConnection).toHaveBeenCalledTimes(1)
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1)
   })
 
   it('connects when authenticated AND a notification pref is enabled', async () => {
@@ -188,7 +181,7 @@ describe('useAppSse — gating truth-table', () => {
     renderHook(() => useAppSse(), { wrapper })
 
     await flushConnectDelay()
-    expect(h.createEventsConnection).toHaveBeenCalledTimes(1)
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1)
   })
 
   it('does NOT connect when authenticated but sync + all notifications are off', async () => {
@@ -198,7 +191,7 @@ describe('useAppSse — gating truth-table', () => {
     renderHook(() => useAppSse(), { wrapper })
 
     await flushConnectDelay()
-    expect(h.createEventsConnection).not.toHaveBeenCalled()
+    expect(globalThis.fetch).not.toHaveBeenCalled()
   })
 
   it('does NOT connect when unauthenticated even if sync is enabled', async () => {
@@ -208,33 +201,28 @@ describe('useAppSse — gating truth-table', () => {
     renderHook(() => useAppSse(), { wrapper })
 
     await flushConnectDelay()
-    expect(h.createEventsConnection).not.toHaveBeenCalled()
+    expect(globalThis.fetch).not.toHaveBeenCalled()
   })
 
-  it('disconnects (closes the stream) when the gate flips to false', async () => {
+  it('disconnects (aborts the stream) when the gate flips to false', async () => {
     h.userRef.current = USER
     h.settingsRef.current = SYNC_ON
     const { wrapper } = createWrapper()
     const { rerender } = renderHook(() => useAppSse(), { wrapper })
     await flushConnectDelay()
-    const es = lastEventSource()
-    act(() => es.fireOpen())
+    const stream = lastStream()
 
     // Gate flips off → effect cleanup disconnects
     h.userRef.current = null
     act(() => rerender())
+    await settle()
 
-    expect(es.closed).toBe(true)
+    expect(stream.signal?.aborted).toBe(true)
     expect(useSseStore.getState().isConnected).toBe(false)
   })
 })
 
 describe('useAppSse — event → effect map', () => {
-  // Real UUIDs: payloads flow through the real SsePlannerPayloadSchema, whose
-  // id field enforces uuid format.
-  const P1 = '11111111-1111-4111-8111-111111111111'
-  const P9 = '99999999-9999-4999-8999-999999999999'
-
   async function connectAndOpen() {
     h.userRef.current = USER
     h.settingsRef.current = SYNC_ON
@@ -243,252 +231,108 @@ describe('useAppSse — event → effect map', () => {
     const setDataSpy = vi.spyOn(queryClient, 'setQueryData')
     renderHook(() => useAppSse(), { wrapper })
     await flushConnectDelay()
-    const es = lastEventSource()
-    act(() => es.fireOpen())
+    const stream = lastStream()
     invalidateSpy.mockClear()
     setDataSpy.mockClear()
-    return { es, invalidateSpy, setDataSpy, queryClient }
+    return { stream, invalidateSpy, setDataSpy, queryClient }
   }
-
-  it('planner-update patches list + detail caches and does not invalidate', async () => {
-    const { es, invalidateSpy, queryClient } = await connectAndOpen()
-    queryClient.setQueryData(
-      ['planners', 'list'],
-      [
-        { id: P1, title: 'Old' },
-        { id: 'p2', title: 'Keep' },
-      ],
-    )
-    queryClient.setQueryData(['planners', 'detail', P1], { id: P1, title: 'Old' })
-    act(() =>
-      es.emit(SSE_EVENTS.PLANNER_UPDATE, {
-        type: 'updated',
-        entityId: P1,
-        payload: { id: P1, title: 'Changed' },
-      }),
-    )
-
-    const list = queryClient.getQueryData(['planners', 'list']) as Array<{
-      id: string
-      title: string
-    }>
-    expect(list).toEqual(
-      expect.arrayContaining([
-        { id: P1, title: 'Changed' },
-        { id: 'p2', title: 'Keep' },
-      ]),
-    )
-    expect(queryClient.getQueryData(['planners', 'detail', P1])).toMatchObject({
-      title: 'Changed',
-    })
-    expect(invalidateSpy).not.toHaveBeenCalledWith({ queryKey: ['planners', 'list'] })
-    expect(invalidateSpy).not.toHaveBeenCalledWith({ queryKey: ['planners', 'detail', P1] })
-  })
-
-  it("'updated' planner envelope replaces the matching entry in the planner LIST cache from payload", async () => {
-    const { es, queryClient } = await connectAndOpen()
-    queryClient.setQueryData(
-      ['planners', 'list'],
-      [
-        { id: P1, title: 'Old' },
-        { id: 'p2', title: 'Keep' },
-      ],
-    )
-    act(() =>
-      es.emit(SSE_EVENTS.PLANNER_UPDATE, {
-        type: 'updated',
-        entityId: P1,
-        payload: { id: P1, title: 'Changed' },
-      }),
-    )
-
-    const list = queryClient.getQueryData(['planners', 'list']) as Array<{
-      id: string
-      title: string
-    }>
-    expect(list).toEqual(
-      expect.arrayContaining([
-        { id: P1, title: 'Changed' },
-        { id: 'p2', title: 'Keep' },
-      ]),
-    )
-    expect(list).not.toContainEqual({ id: P1, title: 'Old' })
-  })
-
-  it("'created' planner envelope inserts a new entry into the planner LIST cache from payload", async () => {
-    const { es, queryClient } = await connectAndOpen()
-    queryClient.setQueryData(['planners', 'list'], [{ id: 'p2', title: 'Keep' }])
-    act(() =>
-      es.emit(SSE_EVENTS.PLANNER_UPDATE, {
-        type: 'created',
-        entityId: P9,
-        payload: { id: P9, title: 'New' },
-      }),
-    )
-
-    const list = queryClient.getQueryData(['planners', 'list']) as Array<{
-      id: string
-      title: string
-    }>
-    expect(list).toEqual(
-      expect.arrayContaining([
-        { id: P9, title: 'New' },
-        { id: 'p2', title: 'Keep' },
-      ]),
-    )
-  })
-
-  it('planner update does NOT invalidate the patched list and detail caches', async () => {
-    const { es, invalidateSpy } = await connectAndOpen()
-    act(() =>
-      es.emit(SSE_EVENTS.PLANNER_UPDATE, {
-        type: 'updated',
-        entityId: P1,
-        payload: { id: P1, title: 'Changed' },
-      }),
-    )
-
-    expect(invalidateSpy).not.toHaveBeenCalledWith({ queryKey: ['planners', 'list'] })
-    expect(invalidateSpy).not.toHaveBeenCalledWith({ queryKey: ['planners', 'detail', P1] })
-  })
-
-  it("'updated' planner envelope patches the detail cache from payload and does not invalidate", async () => {
-    const { es, invalidateSpy, queryClient } = await connectAndOpen()
-    queryClient.setQueryData(['planners', 'detail', P1], { id: P1, title: 'Old Title' })
-    const envelope = {
-      type: 'updated',
-      entityId: P1,
-      payload: { id: P1, title: 'Changed Title' },
-    }
-
-    act(() => es.emit(SSE_EVENTS.PLANNER_UPDATE, envelope))
-
-    expect(queryClient.getQueryData(['planners', 'detail', P1])).toMatchObject({
-      title: 'Changed Title',
-    })
-    expect(invalidateSpy).not.toHaveBeenCalledWith({ queryKey: ['planners', 'detail', P1] })
-  })
-
-  it('planner-update of type "deleted" purges the local planner copy', async () => {
-    const { es } = await connectAndOpen()
-    act(() => es.emit(SSE_EVENTS.PLANNER_UPDATE, { type: 'deleted', deletedId: 'p1' }))
-
-    expect(h.deleteFromLocal).toHaveBeenCalledWith('p1')
-  })
-
-  it("'deleted' planner envelope removes the entry from the LIST cache and does not invalidate", async () => {
-    const { es, invalidateSpy, queryClient } = await connectAndOpen()
-    queryClient.setQueryData(
-      ['planners', 'list'],
-      [
-        { id: 'p1', title: 'A' },
-        { id: 'p2', title: 'B' },
-      ],
-    )
-    act(() => es.emit(SSE_EVENTS.PLANNER_UPDATE, { type: 'deleted', deletedId: 'p1' }))
-
-    const list = queryClient.getQueryData(['planners', 'list']) as Array<{
-      id: string
-      title: string
-    }>
-    expect(list).not.toContainEqual(expect.objectContaining({ id: 'p1' }))
-    expect(list).toContainEqual({ id: 'p2', title: 'B' })
-    expect(invalidateSpy).not.toHaveBeenCalledWith({ queryKey: ['planners', 'list'] })
-  })
-
-  it('planner-update whose payload is not a planner row must not clobber the caches', async () => {
-    const { es, queryClient } = await connectAndOpen()
-    queryClient.setQueryData(['planners', 'list'], [{ id: 'p1', title: 'Old' }])
-    queryClient.setQueryData(['planners', 'detail', 'p1'], { id: 'p1', title: 'Old' })
-
-    act(() =>
-      es.emit(SSE_EVENTS.PLANNER_UPDATE, {
-        type: 'updated',
-        entityId: 'p1',
-        payload: { plannerId: 'p1', type: 'updated' },
-      }),
-    )
-
-    expect(queryClient.getQueryData(['planners', 'detail', 'p1'])).toEqual({
-      id: 'p1',
-      title: 'Old',
-    })
-    expect(queryClient.getQueryData(['planners', 'list'])).toEqual([{ id: 'p1', title: 'Old' }])
-  })
-
-  it("'updated' planner envelope refreshes the userPlanners tree so mounted pages re-read local state", async () => {
-    const { es, invalidateSpy } = await connectAndOpen()
-
-    act(() =>
-      es.emit(SSE_EVENTS.PLANNER_UPDATE, {
-        type: 'updated',
-        entityId: P1,
-        payload: { id: P1, title: 'Changed' },
-      }),
-    )
-
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['userPlanners'] })
-  })
 
   it('notification event invalidates notification caches and shows a toast when tab visible', async () => {
     h.isTabHidden.mockReturnValue(false)
-    const { es, invalidateSpy } = await connectAndOpen()
-    act(() =>
-      es.emit(SSE_EVENTS.NOTIFY_COMMENT, {
-        type: 'COMMENT_RECEIVED',
-        plannerId: 'p1',
-        plannerTitle: 'My Plan',
-      }),
-    )
+    const { stream, invalidateSpy } = await connectAndOpen()
+    await emit(stream, SSE_EVENTS.NOTIFY_COMMENT, {
+      type: 'COMMENT_RECEIVED',
+      plannerId: 'p1',
+      plannerTitle: 'My Plan',
+    })
 
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['notifications'] })
     expect(h.showNotificationToast).toHaveBeenCalledTimes(1)
     expect(h.showBrowserNotification).not.toHaveBeenCalled()
   })
 
-  it("'notify:published' envelope inserts the published planner into the LIST cache from payload and does not invalidate the list, still toasts", async () => {
+  it("'notify:published' arrives as a bare payload: it toasts and leaves the personal list alone", async () => {
     h.isTabHidden.mockReturnValue(false)
-    const { es, invalidateSpy, queryClient } = await connectAndOpen()
+    const { stream, invalidateSpy, queryClient } = await connectAndOpen()
     queryClient.setQueryData(['planners', 'list'], [{ id: 'p2', title: 'B' }])
-    act(() =>
-      es.emit(SSE_EVENTS.NOTIFY_PUBLISHED, {
-        type: 'notify:published',
-        entityId: 'p9',
-        payload: { id: 'p9', title: 'Published' },
-        plannerId: 'p9',
-        plannerTitle: 'Published',
-        authorKeyword: 'auth',
-        authorSuffix: '0001',
-      }),
-    )
+    await emit(stream, SSE_EVENTS.NOTIFY_PUBLISHED, {
+      plannerId: 'p9',
+      plannerTitle: 'Published',
+      authorEpithet: 'NAIVE',
+      authorSuffix: '0001',
+    })
 
-    const list = queryClient.getQueryData(['planners', 'list']) as Array<{
-      id: string
-      title: string
-    }>
-    expect(list).toEqual(
-      expect.arrayContaining([
-        { id: 'p9', title: 'Published' },
-        { id: 'p2', title: 'B' },
-      ]),
-    )
-    expect(invalidateSpy).not.toHaveBeenCalledWith({ queryKey: ['planners', 'list'] })
+    expect(queryClient.getQueryData(['planners', 'list'])).toEqual([{ id: 'p2', title: 'B' }])
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['notifications'] })
     expect(h.showNotificationToast).toHaveBeenCalled()
+  })
+
+  it('an unparseable payload on a handled type raises no notification and does not throw', async () => {
+    const { stream, invalidateSpy } = await connectAndOpen()
+
+    stream.push(`event: ${SSE_EVENTS.NOTIFY_COMMENT}\ndata: not json at all\n\n`)
+    await settle()
+
+    // The handler invalidates before it parses, so the cache refresh still runs;
+    // what the unparseable body must not do is surface a notification.
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['notifications'] })
+    expect(h.showNotificationToast).not.toHaveBeenCalled()
+    expect(h.showBrowserNotification).not.toHaveBeenCalled()
+  })
+
+  it('a frame whose type is outside the vocabulary reaches no handler', async () => {
+    const { stream, invalidateSpy, setDataSpy } = await connectAndOpen()
+
+    await emit(stream, 'renamed', { entityId: 'p1' })
+
+    expect(setDataSpy).not.toHaveBeenCalled()
+    expect(invalidateSpy).not.toHaveBeenCalled()
+    expect(h.showNotificationToast).not.toHaveBeenCalled()
+  })
+})
+
+describe('useAppSse — reconnect catch-up', () => {
+  it('does not invalidate settings on the first connection of a session', async () => {
+    h.userRef.current = USER
+    h.settingsRef.current = SYNC_ON
+    const { queryClient, wrapper } = createWrapper()
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
+    renderHook(() => useAppSse(), { wrapper })
+
+    await flushConnectDelay()
+
+    expect(invalidateSpy).not.toHaveBeenCalledWith({ queryKey: ['user', 'settings'] })
+  })
+
+  it('invalidates settings once the stream comes back after a drop', async () => {
+    h.userRef.current = USER
+    h.settingsRef.current = SYNC_ON
+    const { queryClient, wrapper } = createWrapper()
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
+    renderHook(() => useAppSse(), { wrapper })
+    await flushConnectDelay()
+
+    lastStream().end()
+    await settle()
+    await advance(SSE_CONNECTION.BASE_DELAY + SSE_CONNECTION.MAX_JITTER)
+
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2)
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['user', 'settings'] })
   })
 })
 
 describe('useAppSse — unmount cleanup', () => {
-  it('closes the stream on unmount', async () => {
+  it('aborts the stream on unmount', async () => {
     h.userRef.current = USER
     h.settingsRef.current = SYNC_ON
     const { wrapper } = createWrapper()
     const { unmount } = renderHook(() => useAppSse(), { wrapper })
     await flushConnectDelay()
-    const es = lastEventSource()
-    act(() => es.fireOpen())
+    const stream = lastStream()
 
     act(() => unmount())
-    expect(es.closed).toBe(true)
+    await settle()
+    expect(stream.signal?.aborted).toBe(true)
   })
 
   it('does not open a new stream after unmount', async () => {
@@ -498,12 +342,10 @@ describe('useAppSse — unmount cleanup', () => {
     const { unmount } = renderHook(() => useAppSse(), { wrapper })
     await flushConnectDelay()
     act(() => unmount())
-    h.createEventsConnection.mockClear()
+    vi.mocked(globalThis.fetch).mockClear()
 
     // Drain any scheduled timers; none should reconnect a torn-down hook.
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(SSE_CONNECTION.MAX_DELAY)
-    })
-    expect(h.createEventsConnection).not.toHaveBeenCalled()
+    await advance(SSE_CONNECTION.MAX_DELAY)
+    expect(globalThis.fetch).not.toHaveBeenCalled()
   })
 })

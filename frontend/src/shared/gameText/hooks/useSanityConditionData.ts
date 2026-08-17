@@ -26,7 +26,7 @@ function createSanityConditionI18nQueryOptions(language: string) {
  * Suspends while loading - wrap in Suspense boundary.
  *
  * Returns the raw i18n data for manual formatting.
- * For formatting, use useSanityConditionFormatter from lib/sanityConditionFormatter.ts
+ * For formatting, use useSanityConditionFormatter from hooks/useSanityConditionFormatter.ts
  *
  * @returns Validated sanity condition i18n data
  */

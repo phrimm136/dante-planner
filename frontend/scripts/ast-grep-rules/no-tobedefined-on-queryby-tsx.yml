@@ -1,0 +1,14 @@
+id: no-tobedefined-on-queryby-tsx
+language: Tsx
+severity: error
+message: queryBy* answers null when absent, so toBeDefined() passes on a missing element; assert toBeInTheDocument() or not.toBeNull().
+files:
+  - src/**/*.test.tsx
+  - src/**/*.spec.tsx
+  - src/**/__tests__/**
+rule:
+  pattern: expect($RECEIVER).toBeDefined()
+  has:
+    kind: call_expression
+    regex: 'queryBy|queryAllBy'
+    stopBy: end

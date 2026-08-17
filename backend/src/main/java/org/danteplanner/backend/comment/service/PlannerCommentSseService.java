@@ -1,10 +1,15 @@
 package org.danteplanner.backend.comment.service;
 
 import org.danteplanner.backend.shared.sse.AbstractSseService;
+import org.danteplanner.backend.shared.sse.SseCapacityExceededException;
+import org.danteplanner.backend.shared.sse.SseConstants;
+import org.danteplanner.backend.shared.sse.SseHeartbeatWorkerConfig;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.planner.service.PlannerAccessGuard;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -16,7 +21,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * SSE service for planner comment notifications.
  *
- * <p>Unlike {@link SseService} which is user-centric, this service is planner-centric.
+ * <p>Unlike {@link org.danteplanner.backend.shared.sse.SseService} which is user-centric, this service is planner-centric.
  * Any device (authenticated or guest) can subscribe to a planner's comment feed
  * and receive notifications when new comments are posted.</p>
  *
@@ -30,45 +35,61 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * </p>
  */
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class PlannerCommentSseService extends AbstractSseService<UUID> {
 
-    private static final long HEARTBEAT_INTERVAL_MS = 15_000L; // 15 seconds
-    private static final long CLEANUP_INTERVAL_MS = 60_000L; // 1 minute
+    private static final long HEARTBEAT_INTERVAL_MS = SseConstants.COMMENT_STREAM_HEARTBEAT_INTERVAL_MS;
+    private static final long HEARTBEAT_INITIAL_DELAY_MS = 5_000L;
+    private static final long CLEANUP_INITIAL_DELAY_MS = 30_000L;
     private static final int MAX_CONNECTIONS_PER_PLANNER = 500; // Prevent DoS
 
     private final ObjectMapper objectMapper;
+    private final PlannerAccessGuard plannerAccessGuard;
+
+    public PlannerCommentSseService(
+            ObjectMapper objectMapper,
+            PlannerAccessGuard plannerAccessGuard,
+            @Qualifier(SseHeartbeatWorkerConfig.SSE_HEARTBEAT_WORKER) TaskExecutor heartbeatWorker) {
+        super(heartbeatWorker);
+        this.objectMapper = objectMapper;
+        this.plannerAccessGuard = plannerAccessGuard;
+    }
 
     /**
      * Subscribe a device to receive comment notifications for a planner.
      *
      * @param plannerId the planner ID to subscribe to
      * @param deviceId  the device identifier (from cookie)
+     * @param userId    the authenticated account, or null for a guest
      * @return the SSE emitter for the connection
+     * @throws org.danteplanner.backend.planner.exception.PlannerNotFoundException
+     *         if no published planner carries the id
+     * @throws SseCapacityExceededException if the planner already holds its maximum connections
+     * @throws IOException if the initial connected event cannot be written
      */
-    public SseEmitter subscribe(UUID plannerId, UUID deviceId) {
-        SseEmitter emitter = register(plannerId, deviceId);
+    public SseEmitter subscribe(UUID plannerId, UUID deviceId, Long userId) throws IOException {
+        plannerAccessGuard.checkPublished(plannerId);
+        SseEmitter emitter = register(plannerId, deviceId, userId);
         log.debug("Comment SSE subscribed: planner={}, device={}", plannerId, deviceId);
         return emitter;
     }
 
     /**
-     * Send a serialized event to the given subscribers of a planner, skipping an optional device
+     * Send a serialized event to the given subscribers of a planner, skipping every connection of an optional account
      * and removing emitters that fail on send.
      *
      * @param plannerId       the planner ID whose subscribers receive the event
      * @param subscribers     the subscriber list to send to
      * @param eventName       the SSE event name
      * @param jsonData        the serialized event payload
-     * @param excludeDeviceId the device ID to skip, or {@code null} to send to all
+     * @param excludeUserId the account to skip, or {@code null} to send to all
      * @return the number of subscribers the event was sent to
      */
     private int sendToSubscribers(UUID plannerId, CopyOnWriteArrayList<EmitterEntry> subscribers,
-                                  String eventName, String jsonData, UUID excludeDeviceId) {
+                                  String eventName, String jsonData, Long excludeUserId) {
         int sent = 0;
         for (EmitterEntry entry : subscribers) {
-            if (excludeDeviceId != null && entry.deviceId().equals(excludeDeviceId)) {
+            if (excludeUserId != null && excludeUserId.equals(entry.userId())) {
                 continue;
             }
 
@@ -93,8 +114,9 @@ public class PlannerCommentSseService extends AbstractSseService<UUID> {
      * @param plannerId the planner ID whose subscribers receive the event
      * @param eventType the SSE event name
      * @param payload   the event payload
+     * @param excludeUserId the account whose action raised the event, or null
      */
-    public void broadcast(UUID plannerId, String eventType, Object payload) {
+    public void broadcast(UUID plannerId, String eventType, Object payload, Long excludeUserId) {
         var subscribers = emitters.get(plannerId);
         if (subscribers == null || subscribers.isEmpty()) {
             log.debug("No subscribers for planner {} comment event {}", plannerId, eventType);
@@ -109,7 +131,7 @@ public class PlannerCommentSseService extends AbstractSseService<UUID> {
             return;
         }
 
-        sendToSubscribers(plannerId, subscribers, eventType, jsonData, null);
+        sendToSubscribers(plannerId, subscribers, eventType, jsonData, excludeUserId);
     }
 
     /**
@@ -134,18 +156,18 @@ public class PlannerCommentSseService extends AbstractSseService<UUID> {
     }
 
     /**
-     * Send heartbeat to all connected emitters.
+     * Submit a heartbeat for every connected emitter to the heartbeat worker pool.
      * Uses different fixedRate to avoid collision with SseService heartbeats.
      */
-    @Scheduled(fixedRate = HEARTBEAT_INTERVAL_MS, initialDelay = 5000)
-    public void sendHeartbeats() {
-        heartbeatConnections();
+    @Scheduled(fixedRate = HEARTBEAT_INTERVAL_MS, initialDelay = HEARTBEAT_INITIAL_DELAY_MS)
+    public void sweepSseHeartbeats() {
+        sweepHeartbeatConnections();
     }
 
     /**
      * Cleanup zombie connections by probing all emitters.
      */
-    @Scheduled(fixedRate = CLEANUP_INTERVAL_MS, initialDelay = 30000)
+    @Scheduled(fixedRate = CLEANUP_INTERVAL_MS, initialDelay = CLEANUP_INITIAL_DELAY_MS)
     public void cleanupZombieConnections() {
         int removed = cleanupConnections();
         if (removed > 0) {
@@ -155,22 +177,11 @@ public class PlannerCommentSseService extends AbstractSseService<UUID> {
 
     @Override
     protected void beforeRegister(UUID plannerId, CopyOnWriteArrayList<EmitterEntry> connections) {
-        // FIFO eviction if at max capacity (DoS prevention)
-        while (connections.size() >= MAX_CONNECTIONS_PER_PLANNER && !connections.isEmpty()) {
-            EmitterEntry oldest = connections.remove(0);
-            try {
-                oldest.emitter().complete();
-            } catch (Exception e) {
-                // Ignore completion errors
-            }
-            log.warn("Comment SSE: Evicted oldest connection for planner {} (max {} reached)",
+        if (connections.size() >= MAX_CONNECTIONS_PER_PLANNER) {
+            log.warn("Comment SSE: rejected a subscriber for planner {} (max {} reached)",
                     plannerId, MAX_CONNECTIONS_PER_PLANNER);
+            throw new SseCapacityExceededException(plannerId, MAX_CONNECTIONS_PER_PLANNER);
         }
-    }
-
-    @Override
-    protected void onConnectedSendFailure(UUID plannerId, UUID deviceId) {
-        log.warn("Failed to send connected event for planner {} device {}", plannerId, deviceId);
     }
 
     @Override

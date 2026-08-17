@@ -1,0 +1,97 @@
+# The tunnel connector: dials out to Cloudflare's edge and forwards to the local Traefik.
+#
+# Traefik is a hostNetwork DaemonSet with no Service in front of it, so no cluster DNS name resolves
+# to it; sharing the host network makes the origin localhost:443.
+#
+# tunnels.tf sets config_src = "cloudflare", so the pod carries a token and no config file.
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: cloudflare-tunnel-token
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: aws-secrets-manager
+    kind: SecretStore
+  target:
+    name: cloudflare-tunnel-token
+    creationPolicy: Owner
+  # One entry with a field per region: Secrets Manager replication would clobber a region-specific
+  # value.
+  data:
+    - secretKey: oregon
+      remoteRef:
+        key: danteplanner/cloudflare/tunnel-tokens
+        property: oregon
+    - secretKey: seoul
+      remoteRef:
+        key: danteplanner/cloudflare/tunnel-tokens
+        property: seoul
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: cloudflared
+spec:
+  selector:
+    matchLabels:
+      app: cloudflared
+  template:
+    metadata:
+      labels:
+        app: cloudflared
+    spec:
+      nodeSelector:
+        role: ingress
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+        - name: cloudflared
+          image: cloudflare/cloudflared:2026.7.3
+          args:
+            - tunnel
+            - --no-autoupdate
+            - --metrics
+            - 127.0.0.1:2000
+            - run
+          env:
+            - name: TUNNEL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: cloudflare-tunnel-token
+                  key: oregon
+          volumeMounts:
+            # origin_ca_pool_path in terraform/cloudflare: the CA cloudflared verifies Traefik
+            # against. NOT the Authenticated Origin Pull CA, which Traefik trusts in the opposite
+            # direction. origin-tls is self-signed, so the certificate serves as its own CA.
+            - name: origin-ca
+              mountPath: /etc/cloudflared
+              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 2000
+              host: 127.0.0.1
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /ready
+              port: 2000
+              host: 127.0.0.1
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 128Mi
+      volumes:
+        - name: origin-ca
+          secret:
+            secretName: origin-tls
+            items:
+              - key: tls.crt
+                path: origin-ca.pem

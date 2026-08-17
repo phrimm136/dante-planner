@@ -1,0 +1,17 @@
+# Copy to terraform.tfvars (gitignored) and fill in. Never commit the real file — it carries
+# account-specific identifiers.
+
+# --- Required ---------------------------------------------------------------
+
+# The account owning the registry; a plan resolving to any other account fails.
+aws_account_id = "REPLACE_WITH_REGISTRY_ACCOUNT_ID"
+
+# Accounts in this organization may pull. Membership is the entire grant.
+organization_id = "o-REPLACE_WITH_ORG_ID"
+
+# --- Optional overrides (defaults in variables.tf are sensible) --------------
+
+# Only images a fleet actually runs. A repository left out stays reachable from its own account.
+# pullable_repositories = ["danteplanner-backend"]
+
+# region = "us-west-2"

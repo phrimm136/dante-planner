@@ -8,7 +8,11 @@
 # author a mirror rule back.
 data "aws_caller_identity" "current" {}
 
+# Gated: only an account that OWNS the registry replicates outward. An environment that pulls
+# from another account's registry has an empty one of its own, so a rule here mirrors nothing.
 resource "aws_ecr_replication_configuration" "backend" {
+  count = var.replicate_registry ? 1 : 0
+
   replication_configuration {
     rule {
       destination {

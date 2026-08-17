@@ -3,14 +3,15 @@
  *
  * Unit tests for EGOGiftObservationSummary component.
  * Tests empty state, selected state, cost display, and accessibility.
- * Note: Component can use store or selectedGiftIdsOverride prop.
+ * The selection arrives as a required prop.
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { EGOGiftObservationSummary } from '../EGOGiftObservationSummary'
-import type { EGOGiftSpec, EGOGiftNameList } from '@/pages/egoGift'
+import { buildEgoGiftSpecList } from '@/test-utils'
+import type { EGOGiftNameList } from '@/pages/egoGift'
 
 // Mock react-i18next with initReactI18next for proper module loading
 vi.mock('react-i18next', async (importOriginal) => {
@@ -30,11 +31,6 @@ vi.mock('react-i18next', async (importOriginal) => {
   }
 })
 
-// Mock planner editor store safe (returns empty Set for testing)
-vi.mock('../../../stores/usePlannerEditorStore', () => ({
-  usePlannerEditorStoreSafe: () => new Set<string>(),
-}))
-
 // Mock observation data (cost lookup)
 const mockObservationData = {
   observationEgoGiftCostDataList: [
@@ -47,26 +43,26 @@ const mockObservationData = {
 }
 
 // Mock gift spec data
-const mockSpec: Record<string, EGOGiftSpec> = {
+const mockSpec = buildEgoGiftSpecList({
   '9001': {
-    tag: ['TIER_1'] as EGOGiftSpec['tag'],
+    tag: ['TIER_1'],
     keyword: 'Burn',
     attributeType: 'Red',
     themePack: [],
   },
   '9002': {
-    tag: ['TIER_2'] as EGOGiftSpec['tag'],
+    tag: ['TIER_2'],
     keyword: 'Bleed',
     attributeType: 'Red',
     themePack: [],
   },
   '9003': {
-    tag: ['TIER_3'] as EGOGiftSpec['tag'],
+    tag: ['TIER_3'],
     keyword: 'Tremor',
     attributeType: 'Yellow',
     themePack: [],
   },
-}
+})
 
 const mockI18n: EGOGiftNameList = {
   '9001': 'Blazing Gift',
@@ -88,7 +84,7 @@ vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
 }))
 
 // Mock PlannerSection to simplify testing
-vi.mock('../../PlannerSection', () => ({
+vi.mock('@/components/layout/PlannerSection', () => ({
   PlannerSection: ({ title, children }: { title: string; children: React.ReactNode }) => (
     <section data-testid="planner-section">
       <h2>{title}</h2>
@@ -122,7 +118,7 @@ vi.mock('@/pages/egoGift/components/EGOGiftCard', () => ({
 }))
 
 describe('EGOGiftObservationSummary', () => {
-  const defaultProps = { mdVersion: 6 }
+  const defaultProps = { mdVersion: 6, selectedGiftIds: new Set<string>() }
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -146,21 +142,16 @@ describe('EGOGiftObservationSummary', () => {
     })
   })
 
-  describe('cost display with override', () => {
+  describe('cost display', () => {
     it('shows cost 70 for 1 gift', () => {
-      render(
-        <EGOGiftObservationSummary {...defaultProps} selectedGiftIdsOverride={new Set(['9001'])} />,
-      )
+      render(<EGOGiftObservationSummary {...defaultProps} selectedGiftIds={new Set(['9001'])} />)
       const costDisplay = screen.getByTestId('starlight-cost')
       expect(costDisplay).toHaveAttribute('data-cost', '70')
     })
 
     it('shows cost 160 for 2 gifts', () => {
       render(
-        <EGOGiftObservationSummary
-          {...defaultProps}
-          selectedGiftIdsOverride={new Set(['9001', '9002'])}
-        />,
+        <EGOGiftObservationSummary {...defaultProps} selectedGiftIds={new Set(['9001', '9002'])} />,
       )
       const costDisplay = screen.getByTestId('starlight-cost')
       expect(costDisplay).toHaveAttribute('data-cost', '160')
@@ -170,7 +161,7 @@ describe('EGOGiftObservationSummary', () => {
       render(
         <EGOGiftObservationSummary
           {...defaultProps}
-          selectedGiftIdsOverride={new Set(['9001', '9002', '9003'])}
+          selectedGiftIds={new Set(['9001', '9002', '9003'])}
         />,
       )
       const costDisplay = screen.getByTestId('starlight-cost')
@@ -180,9 +171,7 @@ describe('EGOGiftObservationSummary', () => {
 
   describe('selected state with override', () => {
     it('renders gift cards when gifts are selected', () => {
-      render(
-        <EGOGiftObservationSummary {...defaultProps} selectedGiftIdsOverride={new Set(['9001'])} />,
-      )
+      render(<EGOGiftObservationSummary {...defaultProps} selectedGiftIds={new Set(['9001'])} />)
       expect(screen.getByTestId('gift-card-9001')).toBeInTheDocument()
       expect(screen.getByText('Blazing Gift')).toBeInTheDocument()
     })
@@ -191,7 +180,7 @@ describe('EGOGiftObservationSummary', () => {
       render(
         <EGOGiftObservationSummary
           {...defaultProps}
-          selectedGiftIdsOverride={new Set(['9001', '9002', '9003'])}
+          selectedGiftIds={new Set(['9001', '9002', '9003'])}
         />,
       )
       expect(screen.getByTestId('gift-card-9001')).toBeInTheDocument()
@@ -200,9 +189,7 @@ describe('EGOGiftObservationSummary', () => {
     })
 
     it('does not render placeholder when gifts selected', () => {
-      render(
-        <EGOGiftObservationSummary {...defaultProps} selectedGiftIdsOverride={new Set(['9001'])} />,
-      )
+      render(<EGOGiftObservationSummary {...defaultProps} selectedGiftIds={new Set(['9001'])} />)
       expect(screen.queryByText('Select EGO Gifts')).not.toBeInTheDocument()
     })
   })
@@ -220,12 +207,14 @@ describe('EGOGiftObservationSummary', () => {
       expect(onClick).toHaveBeenCalledTimes(1)
     })
 
-    it('does not throw when onClick is undefined', async () => {
+    it('survives a click when onClick is undefined', async () => {
       const user = userEvent.setup()
       render(<EGOGiftObservationSummary {...defaultProps} />)
       const clickableArea = screen.getByRole('button')
-      // Should not throw
+
       await user.click(clickableArea)
+
+      expect(clickableArea).toBeInTheDocument()
     })
   })
 
@@ -234,7 +223,7 @@ describe('EGOGiftObservationSummary', () => {
       render(
         <EGOGiftObservationSummary
           {...defaultProps}
-          selectedGiftIdsOverride={new Set(['9001', 'unknown-id'])}
+          selectedGiftIds={new Set(['9001', 'unknown-id'])}
         />,
       )
       // Known gift should render
@@ -248,7 +237,7 @@ describe('EGOGiftObservationSummary', () => {
       render(
         <EGOGiftObservationSummary
           {...defaultProps}
-          selectedGiftIdsOverride={new Set(['9001', '9002', '9003', 'extra'])}
+          selectedGiftIds={new Set(['9001', '9002', '9003', 'extra'])}
         />,
       )
       const costDisplay = screen.getByTestId('starlight-cost')

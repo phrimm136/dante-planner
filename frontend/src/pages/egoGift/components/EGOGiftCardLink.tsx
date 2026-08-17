@@ -1,5 +1,6 @@
-import { memo } from 'react'
+import { Suspense } from 'react'
 import { Link } from '@tanstack/react-router'
+import { Skeleton } from '@/components/ui/skeleton'
 import type { EGOGiftListItem } from '../types/EGOGiftTypes'
 import { EGOGiftCard } from './EGOGiftCard'
 import { EGOGiftName } from './EGOGiftName'
@@ -18,8 +19,6 @@ interface EGOGiftCardLinkProps {
  * Navigation wrapper for EGOGiftCard that links to the EGO gift detail page.
  * Use this when clicking the card should navigate to `/ego-gift/$id`.
  *
- * Memoized by gift.id to prevent re-renders during list filtering.
- *
  * @example
  * // In a list view with navigation
  * <EGOGiftCardLink gift={gift} />
@@ -27,18 +26,21 @@ interface EGOGiftCardLinkProps {
  * // With enhancement level
  * <EGOGiftCardLink gift={gift} enhancement={1} />
  */
-export const EGOGiftCardLink = memo(
-  function EGOGiftCardLink({ gift, enhancement = 0, className }: EGOGiftCardLinkProps) {
-    return (
-      <Link to="/ego-gift/$id" params={{ id: gift.id }} className={cn(className)}>
-        <div className="flex flex-col items-center gap-1.5">
-          <EGOGiftCard gift={gift} enhancement={enhancement} enableHoverHighlight />
-          <span className="text-xs text-center text-foreground line-clamp-2 w-24 leading-tight font-medium">
+export const EGOGiftCardLink = function EGOGiftCardLink({
+  gift,
+  enhancement = 0,
+  className,
+}: EGOGiftCardLinkProps) {
+  return (
+    <Link to="/ego-gift/$id" params={{ id: gift.id }} className={cn(className)}>
+      <div className="flex flex-col items-center gap-1.5">
+        <EGOGiftCard gift={gift} enhancement={enhancement} enableHoverHighlight />
+        <span className="text-xs text-center text-foreground line-clamp-2 w-24 leading-tight font-medium">
+          <Suspense fallback={<Skeleton className="h-5 w-24 bg-foreground" />}>
             <EGOGiftName id={gift.id} />
-          </span>
-        </div>
-      </Link>
-    )
-  },
-  (prev, next) => prev.gift.id === next.gift.id && prev.enhancement === next.enhancement,
-)
+          </Suspense>
+        </span>
+      </div>
+    </Link>
+  )
+}

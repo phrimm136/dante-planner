@@ -24,6 +24,14 @@ import type {
 const KEYWORD_PATTERN = /\[([^\]]+)\]/g
 
 /**
+ * Reads a record entry only when the key is an own property, so keys taken from
+ * description text cannot reach `Object.prototype` members.
+ */
+function ownEntry<T>(record: Record<string, T>, key: string): T | undefined {
+  return Object.hasOwn(record, key) ? record[key] : undefined
+}
+
+/**
  * Parses description text into segments of plain text and keyword references.
  *
  * Uses String.matchAll() to avoid global regex state issues.
@@ -45,6 +53,8 @@ export function parseKeywords(text: string): ParsedSegment[] {
 
   // Use matchAll to avoid global regex state issues
   for (const match of text.matchAll(KEYWORD_PATTERN)) {
+    const bracketed = match[0]
+
     // Add text before this keyword
     if (match.index > lastIndex) {
       segments.push({
@@ -56,10 +66,10 @@ export function parseKeywords(text: string): ParsedSegment[] {
     // Add keyword segment (content is the captured group, not the brackets)
     segments.push({
       type: 'keyword',
-      content: match[1],
+      content: bracketed.slice(1, -1),
     })
 
-    lastIndex = match.index + match[0].length
+    lastIndex = match.index + bracketed.length
   }
 
   // Add remaining text after last keyword
@@ -120,20 +130,15 @@ export function getKeywordColor(
   battleKeywords: KeywordResolutionContext['battleKeywords'],
 ): string {
   if (type === 'battleKeyword') {
-    const buffType = battleKeywords[key]?.buffType
-    if (buffType && Object.hasOwn(colorCodes, buffType)) {
-      return colorCodes[buffType]
-    }
+    const buffType = ownEntry(battleKeywords, key)?.buffType
+    const buffColor = buffType ? ownEntry(colorCodes, buffType) : undefined
     // Fallback for battle keywords without buffType
-    return colorCodes['Critical'] ?? ''
+    return buffColor ?? colorCodes['Critical'] ?? ''
   }
 
   if (type === 'skillTag') {
     // Try key-specific color, fallback to Critical (green)
-    if (Object.hasOwn(colorCodes, key)) {
-      return colorCodes[key]
-    }
-    return colorCodes['Critical'] ?? ''
+    return ownEntry(colorCodes, key) ?? colorCodes['Critical'] ?? ''
   }
 
   // Unknown keywords inherit parent color
@@ -169,14 +174,14 @@ export function resolveKeyword(key: string, context: KeywordResolutionContext): 
   const color = getKeywordColor(key, type, colorCodes, battleKeywords)
 
   // Battle keyword: full data with icon and description
-  if (type === 'battleKeyword') {
-    const keywordData = battleKeywords[key]
+  const keywordData = ownEntry(battleKeywords, key)
+  if (type === 'battleKeyword' && keywordData) {
     return {
       type,
       key,
       displayText: keywordData.name,
       description: keywordData.desc,
-      flavor: keywordData.flavor,
+      ...(keywordData.flavor !== undefined && { flavor: keywordData.flavor }),
       iconId: keywordData.iconId,
       buffType: keywordData.buffType,
       color,
@@ -184,11 +189,12 @@ export function resolveKeyword(key: string, context: KeywordResolutionContext): 
   }
 
   // Skill tag: display text only
-  if (type === 'skillTag') {
+  const tagText = ownEntry(skillTags, key)
+  if (type === 'skillTag' && tagText !== undefined) {
     return {
       type,
       key,
-      displayText: skillTags[key],
+      displayText: tagText,
       color,
     }
   }

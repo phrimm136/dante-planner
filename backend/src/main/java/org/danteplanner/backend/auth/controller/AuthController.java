@@ -4,24 +4,23 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.shared.config.DeviceId;
 import org.danteplanner.backend.shared.config.FrontendProperties;
+import org.danteplanner.backend.shared.config.LoginRedirect;
 import org.danteplanner.backend.shared.config.JwtProperties;
 import org.danteplanner.backend.shared.config.OAuthProperties;
-import org.danteplanner.backend.shared.config.RateLimitConfig;
-import org.danteplanner.backend.shared.config.SecurityProperties;
-import org.danteplanner.backend.user.dto.UserDto;
-import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.auth.facade.AuthenticationFacade;
-import org.danteplanner.backend.auth.facade.AuthenticationFacade.AuthResult;
-import org.danteplanner.backend.user.service.UserService;
+import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
+import org.danteplanner.backend.user.dto.UserResponse;
+import org.danteplanner.backend.auth.service.AuthenticationService;
+import org.danteplanner.backend.auth.service.AuthenticationService.AuthResult;
 import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
 import org.danteplanner.backend.auth.oauth.OAuthStateService;
 import org.danteplanner.backend.auth.oauth.OAuthStateService.OAuthTransaction;
 import org.danteplanner.backend.auth.token.TokenValidator;
-import org.danteplanner.backend.shared.util.ClientIpResolver;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
+import org.danteplanner.backend.shared.ratelimit.RateLimitDenial;
+import org.danteplanner.backend.shared.ratelimit.RateLimitExempt;
+import org.danteplanner.backend.shared.ratelimit.RateLimited;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -37,11 +36,10 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * REST controller for authentication endpoints.
- * Delegates business logic to AuthenticationFacade.
+ * Delegates business logic to AuthenticationService.
  */
 @RestController
 @RequestMapping("/api/auth")
@@ -49,16 +47,11 @@ import java.util.UUID;
 @Slf4j
 public class AuthController {
 
-    private static final String LOGIN_ERROR_PATH = "/?login=error";
-
-    private final AuthenticationFacade authFacade;
+    private final AuthenticationService authService;
     private final TokenValidator tokenValidator;
-    private final UserService userService;
-    private final RateLimitConfig rateLimitConfig;
     private final OAuthProperties oAuthProperties;
     private final CookieUtils cookieUtils;
     private final JwtProperties jwtProperties;
-    private final SecurityProperties securityProperties;
     private final OAuthStateService oAuthStateService;
     private final OAuthProviderRegistry providerRegistry;
     private final FrontendProperties frontendProperties;
@@ -73,6 +66,7 @@ public class AuthController {
      * @param response HTTP response the {@code oauth_tx} cookie is set on
      * @return 302 redirect to Google's authorization endpoint
      */
+    @RateLimitExempt
     @GetMapping("/google/start")
     public ResponseEntity<Void> googleStart(
             @RequestParam(required = false) String returnTo,
@@ -104,50 +98,41 @@ public class AuthController {
      * {@code csrf} cookie is ensured by {@link org.danteplanner.backend.shared.security.CsrfDoubleSubmitFilter}
      * on this GET response.
      *
-     * @param code        authorization code from Google (absent on user denial)
-     * @param state       state echoed back by Google
-     * @param error       error code if the user denied consent or Google failed
-     * @param httpRequest HTTP request for rate-limit identity and reading {@code oauth_tx}
-     * @param response    HTTP response for setting/clearing cookies
-     * @param deviceId    device identifier for rate limiting
+     * @param code     authorization code from Google (absent on user denial)
+     * @param state    state echoed back by Google
+     * @param error    error code if the user denied consent or Google failed
+     * @param request  HTTP request for reading {@code oauth_tx}
+     * @param response HTTP response for setting/clearing cookies
      * @return 302 redirect to the SPA root on success, or to the SPA error route on rejection
      */
+    @RateLimited(value = RateLimitPolicy.AUTH, denial = RateLimitDenial.REDIRECT_LOGIN)
     @GetMapping("/google/callback")
     public ResponseEntity<Void> googleCallback(
             @RequestParam(required = false) String code,
             @RequestParam(required = false) String state,
             @RequestParam(required = false) String error,
-            HttpServletRequest httpRequest,
-            HttpServletResponse response,
-            @DeviceId UUID deviceId) {
+            HttpServletRequest request,
+            HttpServletResponse response) {
 
         // Read and clear the transient oauth_tx up front so it is cleared on EVERY exit path
-        // (success, rejection, rate-limit, or exchange failure).
-        String oauthTx = cookieUtils.getCookieValue(httpRequest, CookieConstants.OAUTH_TX);
+        // (success, rejection, or exchange failure).
+        Optional<String> oauthTx = cookieUtils.getCookieValue(request, CookieConstants.OAUTH_TX);
         cookieUtils.clearCookie(response, CookieConstants.OAUTH_TX);
 
         // This is a top-level browser-redirect endpoint: any failure must land the user back on the
-        // SPA error route, never a JSON error body from GlobalExceptionHandler. The rate-limit check
-        // and the token exchange both run inside the guard.
+        // SPA error route, never a JSON error body from GlobalExceptionHandler.
         try {
-            String identifier = ClientIpResolver.resolveClientIdentifier(
-                    httpRequest,
-                    securityProperties,
-                    deviceId
-            );
-            rateLimitConfig.checkAuthLimit(identifier);
-
             if (error != null || code == null || code.isBlank() || state == null) {
-                return redirect(frontendProperties.getUrl() + LOGIN_ERROR_PATH);
+                return redirect(frontendProperties.getUrl() + LoginRedirect.ERROR);
             }
 
-            Optional<OAuthTransaction> transaction = oAuthStateService.open(oauthTx);
+            Optional<OAuthTransaction> transaction = oauthTx.flatMap(oAuthStateService::open);
             if (transaction.isEmpty() || !statesMatch(transaction.get().state(), state)) {
                 log.warn("OAuth callback rejected: oauth_tx absent/expired/tampered or state mismatch");
-                return redirect(frontendProperties.getUrl() + LOGIN_ERROR_PATH);
+                return redirect(frontendProperties.getUrl() + LoginRedirect.ERROR);
             }
 
-            AuthResult result = authFacade.authenticateWithOAuth(
+            AuthResult result = authService.authenticateWithOAuth(
                     "google",
                     code,
                     oAuthProperties.getGoogle().getRedirectUri(),
@@ -159,78 +144,70 @@ public class AuthController {
             // Return the user to where they started auth (validated + sealed at /start).
             return redirect(transaction.get().returnTo());
         } catch (Exception e) {
+            // The redirect is deliberate for a browser endpoint, but it makes a total login outage
+            // indistinguishable from a user declining consent, so the cause is reported here.
+            io.sentry.Sentry.captureException(e);
             log.warn("OAuth callback failed: {}", e.getMessage());
-            return redirect(frontendProperties.getUrl() + LOGIN_ERROR_PATH);
+            return redirect(frontendProperties.getUrl() + LoginRedirect.ERROR);
         }
     }
 
+    @RateLimited(RateLimitPolicy.AUTH)
     @PostMapping("/apple/callback")
-    public ResponseEntity<UserDto> appleCallback(
-            HttpServletRequest httpRequest,
-            @DeviceId UUID deviceId) {
-
-        // Apply rate limiting by client identifier (IP or device ID)
-        String identifier = ClientIpResolver.resolveClientIdentifier(
-                httpRequest,
-                securityProperties,
-                deviceId
-        );
-        rateLimitConfig.checkAuthLimit(identifier);
-
+    public ResponseEntity<UserResponse> appleCallback() {
         // Apple OAuth not yet implemented
         return ResponseEntity.badRequest().build();
     }
 
+    @RateLimitExempt
     @GetMapping("/me")
-    public ResponseEntity<UserDto> getCurrentUser() {
+    public ResponseEntity<UserResponse> getCurrentUser() {
         // Trust SecurityContext set by JwtAuthenticationFilter
         // Filter handles token validation, expiry, and auto-refresh
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         // No authentication or anonymous user = guest (valid state)
         if (auth == null || auth instanceof AnonymousAuthenticationToken) {
-            return ResponseEntity.ok(null);
+            return ResponseEntity.noContent().build();
         }
 
         // Get user ID from SecurityContext (set by filter as Long)
         Object principal = auth.getPrincipal();
         if (!(principal instanceof Long)) {
             log.warn("Unexpected principal type: {}", principal.getClass().getName());
-            return ResponseEntity.ok(null);
+            return ResponseEntity.noContent().build();
         }
 
         Long userId = (Long) principal;
-        User user = userService.findById(userId);
-        UserDto userDto = userService.toDto(user);
-
-        return ResponseEntity.ok(userDto);
+        return ResponseEntity.ok(authService.currentUser(userId));
     }
 
+    @RateLimitExempt
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
-        String accessToken = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN);
-        String refreshToken = cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN);
+        String accessToken = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)
+                .orElse(null);
+        String refreshToken = cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)
+                .orElse(null);
 
-        // Blacklist tokens
-        authFacade.logout(accessToken, refreshToken);
+        authService.logout(accessToken, refreshToken);
 
-        // Clear cookies
-        cookieUtils.clearCookie(response, CookieConstants.ACCESS_TOKEN);
-        cookieUtils.clearCookie(response, CookieConstants.REFRESH_TOKEN);
+        cookieUtils.clearAuthCookies(response);
 
         return ResponseEntity.noContent().build();
     }
 
+    @RateLimitExempt
     @PostMapping("/logout-all")
     public ResponseEntity<Void> logoutAll(HttpServletRequest request, HttpServletResponse response) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Long userId = (Long) auth.getPrincipal();
 
-        String accessToken = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN);
-        authFacade.logoutAll(userId, accessToken);
+        String accessToken = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)
+                .orElse(null);
+        authService.logoutAll(userId, accessToken);
 
-        cookieUtils.clearCookie(response, CookieConstants.ACCESS_TOKEN);
-        cookieUtils.clearCookie(response, CookieConstants.REFRESH_TOKEN);
+        cookieUtils.clearAuthCookies(response);
 
         return ResponseEntity.noContent().build();
     }

@@ -23,6 +23,16 @@ public record TimeoutResponse(
 ) {
 
     /**
+     * Creates a TimeoutResponse from a User entity, carrying no operation-result message.
+     *
+     * @param user the user entity
+     * @return the response DTO
+     */
+    public static TimeoutResponse fromUser(User user) {
+        return fromUser(user, null);
+    }
+
+    /**
      * Creates a TimeoutResponse from a User entity and message.
      *
      * @param user    the user entity

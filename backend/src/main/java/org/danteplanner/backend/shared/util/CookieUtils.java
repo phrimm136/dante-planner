@@ -1,5 +1,7 @@
 package org.danteplanner.backend.shared.util;
 
+import java.util.Optional;
+
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -83,7 +85,7 @@ public class CookieUtils {
         cookie.setPath("/");
         cookie.setMaxAge(maxAgeSeconds);
         cookie.setAttribute("SameSite", sameSite);
-        if (cookieDomain != null && !cookieDomain.isEmpty()) {
+        if (!cookieDomain.isEmpty()) {
             cookie.setDomain(cookieDomain);
         }
         return cookie;
@@ -96,16 +98,19 @@ public class CookieUtils {
      * @param name cookie name to clear
      */
     public void clearCookie(HttpServletResponse response, String name) {
-        Cookie cookie = new Cookie(name, null);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(secureCookies);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        cookie.setAttribute("SameSite", sameSite);
-        if (cookieDomain != null && !cookieDomain.isEmpty()) {
-            cookie.setDomain(cookieDomain);
-        }
-        response.addCookie(cookie);
+        // A browser drops the stored cookie only when the expiring one matches it on
+        // domain/path/secure, so the attributes must come from the same builder that set it.
+        response.addCookie(buildCookie(name, "", 0, true));
+    }
+
+    /**
+     * Clears both authentication cookies (access and refresh).
+     *
+     * @param response HTTP response to add the expiring cookies to
+     */
+    public void clearAuthCookies(HttpServletResponse response) {
+        clearCookie(response, CookieConstants.ACCESS_TOKEN);
+        clearCookie(response, CookieConstants.REFRESH_TOKEN);
     }
 
     /**
@@ -113,17 +118,17 @@ public class CookieUtils {
      *
      * @param request HTTP request containing cookies
      * @param name cookie name to find
-     * @return cookie value, or null if not found
+     * @return the cookie value, empty if the request carries no cookie of that name
      */
-    public String getCookieValue(HttpServletRequest request, String name) {
+    public Optional<String> getCookieValue(HttpServletRequest request, String name) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if (name.equals(cookie.getName())) {
-                    return cookie.getValue();
+                    return Optional.ofNullable(cookie.getValue());
                 }
             }
         }
-        return null;
+        return Optional.empty();
     }
 }

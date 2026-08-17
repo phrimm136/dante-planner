@@ -1,0 +1,44 @@
+name: Enhancement
+description: Something is missing
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        For a change that introduces observable behavior across two or more seams,
+        this form is the wrong shape — it needs a design proposal under `docs/rfcs/`
+        first. File it here anyway if you are unsure; it will be routed.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What
+      description: What is missing, stated as the behavior you want rather than the implementation.
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it matters
+      description: What you cannot do today, and what changes for you if this lands.
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: >
+        The boundary — what this does NOT cover. An unbounded request expands into
+        whatever the implementer notices nearby.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other ways to get the same outcome, and why they are worse.
+    validations:
+      required: false

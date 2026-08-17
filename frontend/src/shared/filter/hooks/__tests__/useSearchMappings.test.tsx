@@ -2,7 +2,7 @@
  * useSearchMappings.test.tsx
  *
  * Tests for search mapping hooks:
- * - useSearchMappingsDeferred: non-suspending version for list filtering
+ * - useSearchMappings: reverse-map construction from the keyword and unit-keyword sources
  *
  * The hook uses dynamic import() for JSON files. We mock the module
  * itself rather than the JSON files, since constants.ts also statically
@@ -30,7 +30,7 @@ let unitKeywordsData = mockUnitKeywords
 // Mock the hook module to avoid dynamic import issues in tests.
 // constants.ts statically imports unitKeywords.json, so we can't mock that globally.
 vi.mock('../useSearchMappings', () => ({
-  useSearchMappingsDeferred: (): SearchMappings => {
+  useSearchMappings: (): SearchMappings => {
     const keywordToValue = new Map<string, string[]>()
     const unitKeywordToValue = new Map<string, string[]>()
 
@@ -51,16 +51,16 @@ vi.mock('../useSearchMappings', () => ({
 }))
 
 // Import after mock
-import { useSearchMappingsDeferred } from '../useSearchMappings'
+import { useSearchMappings } from '../useSearchMappings'
 
-describe('useSearchMappingsDeferred', () => {
+describe('useSearchMappings', () => {
   beforeEach(() => {
     keywordMatchData = mockKeywordMatch
     unitKeywordsData = mockUnitKeywords
   })
 
   it('populates mappings with keyword data', () => {
-    const result = useSearchMappingsDeferred()
+    const result = useSearchMappings()
 
     // Verify keyword mappings (display name -> internal codes)
     expect(result.keywordToValue.get('rupture')).toContain('Burst')
@@ -79,7 +79,7 @@ describe('useSearchMappingsDeferred', () => {
     }
     unitKeywordsData = {}
 
-    const result = useSearchMappingsDeferred()
+    const result = useSearchMappings()
 
     // Keys should be lowercase
     expect(result.keywordToValue.get('display name with spaces')).toContain('SomePascalCase')
@@ -97,7 +97,7 @@ describe('useSearchMappingsDeferred', () => {
     }
     unitKeywordsData = {}
 
-    const result = useSearchMappingsDeferred()
+    const result = useSearchMappings()
 
     // Both codes should be in the array for the same display name
     const sameDisplayCodes = result.keywordToValue.get('same display')

@@ -1,0 +1,29 @@
+# Copy to terraform.tfvars (gitignored) and fill in. Never commit the real file — it carries
+# account-specific identifiers.
+#
+# Apply order: terraform/state-backend for this account creates the bucket this stack stores state
+# in, and terraform/organization creates the account itself.
+
+# --- Required ---------------------------------------------------------------
+
+# The log-archive account. A plan resolving to any other account fails.
+aws_account_id = "REPLACE_WITH_LOG_ARCHIVE_ACCOUNT_ID"
+
+# The account the organization trail is created in. Its id appears in the trail ARN the bucket
+# policy admits, and its own records land under a prefix keyed by it.
+management_account_id = "REPLACE_WITH_MANAGEMENT_ACCOUNT_ID"
+
+# Member records land under AWSLogs/<organization_id>/, so this scopes the write grant.
+organization_id = "o-REPLACE_WITH_ORG_ID"
+
+# --- Optional overrides (defaults in variables.tf are sensible) --------------
+
+# Role to assume here. Leave unset when the credentials already belong to this account.
+# assume_role_arn = "arn:aws:iam::REPLACE_WITH_LOG_ARCHIVE_ACCOUNT_ID:role/OrganizationAccountAccessRole"
+
+# Must match the trail resource in the management account: the bucket policy admits exactly the
+# ARN built from this name, the region and the management account.
+# trail_name  = "danteplanner-organization"
+
+# region      = "us-west-2"
+# name_prefix = "danteplanner"

@@ -1,6 +1,16 @@
 package org.danteplanner.backend.notification.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -44,7 +54,7 @@ public class Notification {
     private NotificationType notificationType;
 
     @Column(name = "`read`", nullable = false)
-    private Boolean read = false;
+    private boolean read = false;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -106,6 +116,27 @@ public class Notification {
         this.commentSnippet = truncate(stripHtml(commentSnippet), 100);
         this.commentPublicId = commentPublicId;
         this.read = false;
+    }
+
+    /**
+     * Builds a notification about a planner rather than a comment on one, so it carries no comment
+     * snippet or comment link.
+     *
+     * @param userId           the user to notify
+     * @param contentId        unique ID for deduplication
+     * @param notificationType the planner-scoped notification type
+     * @param plannerId        the planner UUID for navigation
+     * @param plannerTitle     the planner title (truncated to 100 chars)
+     * @return the notification
+     */
+    public static Notification plannerScoped(
+            Long userId,
+            String contentId,
+            NotificationType notificationType,
+            UUID plannerId,
+            String plannerTitle
+    ) {
+        return new Notification(userId, contentId, notificationType, plannerId, plannerTitle, null, null);
     }
 
     private static String truncate(String s, int maxLen) {

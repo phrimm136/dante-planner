@@ -1,0 +1,210 @@
+name: "One-time: schema decomposition window"
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type WINDOW to proceed'
+        required: true
+        type: string
+
+concurrency:
+  group: k3s-gitops-deploy
+  cancel-in-progress: false
+
+env:
+  OREGON_REGION: us-west-2
+  SEOUL_REGION: ap-northeast-2
+  IMAGE_REPO: danteplanner-backend
+  RDS_ID: danteplanner-mysql
+  PARAM_GROUP: danteplanner-mysql80
+  GIT_SHA: ${{ github.sha }}
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Refuse an accidental dispatch
+        env:
+          CONFIRM: ${{ inputs.confirm }}
+        run: '[ "$CONFIRM" = "WINDOW" ] || { echo "::error::confirm was not WINDOW"; exit 1; }'
+
+  build:
+    needs: guard
+    runs-on: ubuntu-latest
+    permissions: { contents: read, id-token: write }
+    env:
+      ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6
+      - name: Fetch data submodule
+        env:
+          STATIC_DEPLOY_KEY: ${{ secrets.STATIC_DEPLOY_KEY }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$STATIC_DEPLOY_KEY" > ~/.ssh/static_key && chmod 600 ~/.ssh/static_key
+          ssh-keyscan -t ed25519,rsa github.com >> ~/.ssh/known_hosts 2>/dev/null
+          GIT_SSH_COMMAND="ssh -i ~/.ssh/static_key -o IdentitiesOnly=yes" \
+            git submodule update --init --depth 1 static
+      - uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c  # v6
+        with:
+          role-to-assume: ${{ secrets.AWS_PROVISIONER_ROLE_ARN }}
+          aws-region: us-west-2
+      - uses: aws-actions/amazon-ecr-login@d539f0932e70871a027e9d5a9d8fc38589180a64  # v2
+      - uses: aws-actions/amazon-ecr-login@d539f0932e70871a027e9d5a9d8fc38589180a64  # v2
+        env: { AWS_REGION: ap-northeast-2, AWS_DEFAULT_REGION: ap-northeast-2 }
+      - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130  # v3
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f  # v3
+      - uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8  # v6
+        with:
+          context: .
+          file: ./backend/Dockerfile
+          platforms: linux/arm64
+          push: true
+          tags: |
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-west-2.amazonaws.com/danteplanner-backend:${{ github.sha }}
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-northeast-2.amazonaws.com/danteplanner-backend:${{ github.sha }}
+          build-args: |
+            GIT_SHA=${{ github.sha }}
+          cache-from: type=gha,scope=backend-arm64
+          cache-to: type=gha,mode=max,scope=backend-arm64
+
+  gate-fleet-verified:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - run: echo "Runbook A4 satisfied; proceeding to freeze."
+
+  freeze:
+    needs: gate-fleet-verified
+    runs-on: ubuntu-latest
+    permissions: { contents: read, id-token: write }
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6
+      - uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c  # v6
+        with:
+          role-to-assume: ${{ secrets.AWS_PROVISIONER_ROLE_ARN }}
+          aws-region: us-west-2
+      - name: Pause GitOps and drain both regions
+        run: |
+          . .github/scripts/window-lib.sh
+          for pair in "$OREGON_REGION:oregon" "$SEOUL_REGION:seoul"; do
+            region=${pair%%:*}; site=${pair##*:}
+            iid=$(cp_id "$region" "danteplanner-${site}-cp")
+            argocd_pause "$region" "$iid" "$site"
+            ssm "$region" "$iid" "sudo k3s kubectl -n danteplanner patch ds/backend --type merge -p '{\"spec\":{\"template\":{\"spec\":{\"nodeSelector\":{\"role\":\"__migrating__\"}}}}}'"
+            ssm "$region" "$iid" "sudo k3s kubectl -n danteplanner rollout status ds/backend --timeout=120s"
+          done
+      - name: Prove the pause held
+        run: |
+          . .github/scripts/window-lib.sh
+          sleep 45
+          for pair in "$OREGON_REGION:oregon" "$SEOUL_REGION:seoul"; do
+            region=${pair%%:*}; site=${pair##*:}
+            iid=$(cp_id "$region" "danteplanner-${site}-cp")
+            sel=$(ssm "$region" "$iid" "sudo k3s kubectl -n danteplanner get ds/backend -o jsonpath={.spec.template.spec.nodeSelector.role}")
+            case "$sel" in
+              *__migrating__*) echo "$site drained" ;;
+              *) echo "::error::$site nodeSelector is '$sel' — ArgoCD is still reconciling"; exit 1 ;;
+            esac
+          done
+
+  snapshot:
+    needs: freeze
+    runs-on: ubuntu-latest
+    permissions: { contents: read, id-token: write }
+    steps:
+      - uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c  # v6
+        with:
+          role-to-assume: ${{ secrets.AWS_PROVISIONER_ROLE_ARN }}
+          aws-region: us-west-2
+      - name: Snapshot the primary
+        run: |
+          SNAP="danteplanner-pre-v052-${GIT_SHA:0:8}"
+          aws rds create-db-snapshot --region "$OREGON_REGION" \
+            --db-instance-identifier "$RDS_ID" --db-snapshot-identifier "$SNAP" \
+            --query 'DBSnapshot.Status' --output text
+          aws rds wait db-snapshot-available --region "$OREGON_REGION" --db-snapshot-identifier "$SNAP"
+          echo "::notice::Rollback point $SNAP. A restore MUST pass --db-parameter-group-name $PARAM_GROUP; the default group turns gtid_mode off."
+
+  migrate-oregon:
+    needs: snapshot
+    runs-on: ubuntu-latest
+    permissions: { contents: read, id-token: write }
+    env:
+      ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6
+      - uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c  # v6
+        with:
+          role-to-assume: ${{ secrets.AWS_PROVISIONER_ROLE_ARN }}
+          aws-region: us-west-2
+      - name: Release Oregon; the first pod up runs Flyway
+        run: |
+          . .github/scripts/window-lib.sh
+          iid=$(cp_id "$OREGON_REGION" "danteplanner-oregon-cp")
+          img="${ACCOUNT}.dkr.ecr.${OREGON_REGION}.amazonaws.com/${IMAGE_REPO}:${GIT_SHA}"
+          ssm "$OREGON_REGION" "$iid" "sudo k3s kubectl -n danteplanner set image ds/backend backend=${img}"
+          ssm "$OREGON_REGION" "$iid" "sudo k3s kubectl -n danteplanner patch ds/backend --type merge -p '{\"spec\":{\"template\":{\"spec\":{\"nodeSelector\":{\"role\":\"app\"}}}}}'"
+          ssm "$OREGON_REGION" "$iid" "sudo k3s kubectl -n danteplanner rollout status ds/backend --timeout=900s"
+      - name: Confirm the running build reports this commit
+        run: |
+          . .github/scripts/window-lib.sh
+          iid=$(cp_id "$OREGON_REGION" "danteplanner-oregon-cp")
+          for _ in $(seq 1 30); do
+            out=$(ssm "$OREGON_REGION" "$iid" "sudo k3s kubectl -n danteplanner exec ds/backend -- curl -sf localhost:8080/actuator/info") || true
+            case "$out" in *"$GIT_SHA"*) echo "oregon serving $GIT_SHA"; exit 0;; esac
+            sleep 10
+          done
+          echo "::error::Oregon never reported $GIT_SHA"; exit 1
+
+  gate-oregon-verified:
+    needs: migrate-oregon
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - run: echo "Runbook C2 satisfied; releasing Seoul."
+
+  migrate-seoul:
+    needs: gate-oregon-verified
+    runs-on: ubuntu-latest
+    permissions: { contents: read, id-token: write }
+    env:
+      ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6
+      - uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c  # v6
+        with:
+          role-to-assume: ${{ secrets.AWS_PROVISIONER_ROLE_ARN }}
+          aws-region: us-west-2
+      - name: Release Seoul
+        run: |
+          . .github/scripts/window-lib.sh
+          iid=$(cp_id "$SEOUL_REGION" "danteplanner-seoul-cp")
+          img="${ACCOUNT}.dkr.ecr.${SEOUL_REGION}.amazonaws.com/${IMAGE_REPO}:${GIT_SHA}"
+          ssm "$SEOUL_REGION" "$iid" "sudo k3s kubectl -n danteplanner set image ds/backend backend=${img}"
+          ssm "$SEOUL_REGION" "$iid" "sudo k3s kubectl -n danteplanner patch ds/backend --type merge -p '{\"spec\":{\"template\":{\"spec\":{\"nodeSelector\":{\"role\":\"app\"}}}}}'"
+          ssm "$SEOUL_REGION" "$iid" "sudo k3s kubectl -n danteplanner rollout status ds/backend --timeout=900s"
+
+  restore-gitops:
+    needs: [freeze, migrate-oregon, migrate-seoul]
+    if: always() && needs.freeze.result == 'success'
+    runs-on: ubuntu-latest
+    permissions: { contents: read, id-token: write }
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6
+      - uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c  # v6
+        with:
+          role-to-assume: ${{ secrets.AWS_PROVISIONER_ROLE_ARN }}
+          aws-region: us-west-2
+      - name: Re-enable sync on both roots
+        run: |
+          . .github/scripts/window-lib.sh
+          for pair in "$OREGON_REGION:oregon" "$SEOUL_REGION:seoul"; do
+            region=${pair%%:*}; site=${pair##*:}
+            argocd_resume "$region" "$(cp_id "$region" "danteplanner-${site}-cp")" "$site"
+          done
+      - name: Warn loudly if it did not take
+        if: failure()
+        run: echo "::error::GitOps sync was NOT restored — re-enable it by hand or the next deploy silently does nothing."

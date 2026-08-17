@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { AFFINITIES, EGO_TYPES } from '../constants'
 
 /**
  * Shared Schemas
@@ -11,32 +12,13 @@ import { z } from 'zod'
  */
 
 /**
- * Sin type enum validation (display names)
- * Seven sin types matching game mechanics
- */
-export const SinSchema = z.enum(['Wrath', 'Lust', 'Sloth', 'Gluttony', 'Gloom', 'Pride', 'Envy'])
-
-/**
  * Affinity type enum validation (data format names)
  * Used in spec list data files for internal computation
  */
-export const AffinitySchema = z.enum([
-  'CRIMSON',
-  'SCARLET',
-  'AMBER',
-  'SHAMROCK',
-  'AZURE',
-  'INDIGO',
-  'VIOLET',
-])
+export const AffinitySchema = z.enum(AFFINITIES)
 
 /**
- * PassiveI18n schema - shared between Identity and EGO
- * Used for passive skill internationalization data
+ * EGO type enum validation (ZAYIN, TETH, HE, WAW, ALEPH)
+ * Ordered by ascending rank
  */
-export const PassiveI18nSchema = z
-  .object({
-    name: z.string(),
-    desc: z.string(),
-  })
-  .strict()
+export const EgoTypeSchema = z.enum(EGO_TYPES)

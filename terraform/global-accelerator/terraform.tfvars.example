@@ -1,0 +1,17 @@
+# Copy to terraform.tfvars (gitignored) and fill in. Never commit the real file — it carries
+# account-specific identifiers.
+
+# --- Required ---------------------------------------------------------------
+
+# The account this stack may apply into; a plan resolving to any other account fails.
+aws_account_id = "REPLACE_WITH_ACCOUNT_ID"
+
+# --- Optional overrides (defaults in variables.tf are sensible) --------------
+
+# region      = "us-west-2"
+# name_prefix = "danteplanner"
+
+# Seoul's ingress node, registered as a second accelerator endpoint. Empty (the default) runs the
+# accelerator single-region. Clearing it once set plans a DESTROY of the Seoul endpoint group,
+# because the resource is count-gated on this value being non-empty.
+# seoul_ingress_instance_id = "i-REPLACE_WITH_INSTANCE_ID"

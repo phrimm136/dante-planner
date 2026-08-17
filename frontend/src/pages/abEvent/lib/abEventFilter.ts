@@ -1,33 +1,29 @@
 /**
  * abEventFilter.ts
  *
- * Utility functions for abnormality event filtering logic.
+ * Facet descriptors for the abnormality event browser, plus the per-item predicate the
+ * grid's card slots subscribe through.
  */
 
+import type { Facet } from '@/shared/filter'
+import { applyFacets } from '@/shared/filter'
+import type { FilterState } from '@/components/hooks/useSetFilters'
 import type { AbEventSpecListEntry } from '../schemas/AbEventSchemas'
 
-/**
- * Check if an event matches the selected ego gifts filter.
- * An event matches if ANY of its relatedEgoGifts is in the selected set.
- * Empty selection = no filter (returns true).
- */
-export function matchesRelatedEgoGiftFilter(
-  entry: AbEventSpecListEntry,
-  selectedEgoGifts: Set<string>,
-): boolean {
-  if (selectedEgoGifts.size === 0) return true
-  return entry.relatedEgoGifts.some((giftId) => selectedEgoGifts.has(giftId))
+export interface AbEventFacetState {
+  selectedEgoGifts: ReadonlySet<string>
+  selectedThemePacks: ReadonlySet<string>
 }
 
-/**
- * Check if an event matches the selected theme packs filter.
- * An event matches if ANY of its relatedThemePacks is in the selected set.
- * Empty selection = no filter (returns true).
- */
-export function matchesRelatedThemePackFilter(
+export const AB_EVENT_FACETS: readonly Facet<AbEventSpecListEntry, AbEventFacetState>[] = [
+  { sel: (s) => s.selectedEgoGifts, get: (e) => e.relatedEgoGifts, mode: 'any' },
+  { sel: (s) => s.selectedThemePacks, get: (e) => e.relatedThemePacks, mode: 'any' },
+]
+
+/** Whether one event survives the current facets. */
+export function matchesAbEvent(
   entry: AbEventSpecListEntry,
-  selectedThemePacks: Set<string>,
+  state: FilterState<AbEventFacetState>,
 ): boolean {
-  if (selectedThemePacks.size === 0) return true
-  return entry.relatedThemePacks.some((packId) => selectedThemePacks.has(packId))
+  return applyFacets(entry, state.values, AB_EVENT_FACETS)
 }

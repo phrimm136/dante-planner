@@ -4,7 +4,8 @@ import { forwardRef, Fragment, useMemo } from 'react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/tiptap-ui-primitive/tooltip'
 
 // --- Lib ---
-import { cn, parseShortcutKeys } from '@/shared/noteEditor/lib/tiptap-utils'
+import { cn } from '@/lib/utils'
+import { parseShortcutKeys } from '@/shared/noteEditor/lib/tiptap-utils'
 
 import '@/components/tiptap-ui-primitive/button/button-colors.scss'
 import '@/components/tiptap-ui-primitive/button/button-group.scss'
@@ -100,5 +101,3 @@ export const ButtonGroup = forwardRef<
   )
 })
 ButtonGroup.displayName = 'ButtonGroup'
-
-export default Button

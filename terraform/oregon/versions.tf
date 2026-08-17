@@ -1,4 +1,13 @@
 terraform {
+  # terraform init -backend-config=../backend.hcl
+  backend "s3" {
+    key                  = "oregon/terraform.tfstate"
+    region               = "us-west-2"
+    workspace_key_prefix = "env"
+    encrypt              = true
+    use_lockfile         = true
+  }
+
   required_version = ">= 1.6"
   required_providers {
     aws = {
@@ -16,12 +25,14 @@ terraform {
 # provisioning identity assumed via STS). No role ARN is hardcoded here so this
 # file is safe to publish in a public repo. Matches terraform/rds.
 provider "aws" {
-  region = var.region
+  allowed_account_ids = [var.aws_account_id]
+  region              = var.region
 }
 
 # AWS/Billing EstimatedCharges is published only in us-east-1; the billing alarm
 # must watch the metric there regardless of the fleet's region.
 provider "aws" {
-  alias  = "us_east_1"
-  region = "us-east-1"
+  allowed_account_ids = [var.aws_account_id]
+  alias               = "us_east_1"
+  region              = "us-east-1"
 }

@@ -1,7 +1,7 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { z } from 'zod'
 
-import { validateData } from '../validation'
+import { validateData, validateDataOrNull } from '../validation'
 
 const TestSchema = z.object({
   id: z.string(),
@@ -40,5 +40,26 @@ describe('validateData', () => {
 
     expect(result).toEqual({ id: 'yisang-01', level: 45 })
     expect('extra' in result).toBe(false)
+  })
+})
+
+describe('validateDataOrNull', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('returns the parsed data on success', () => {
+    const result = validateDataOrNull({ id: 'yisang-01', level: 45 }, TestSchema, 'auth me')
+
+    expect(result).toEqual({ id: 'yisang-01', level: 45 })
+  })
+
+  it('returns null and logs the context instead of throwing on failure', () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const result = validateDataOrNull({ id: 42 }, TestSchema, 'auth me')
+
+    expect(result).toBeNull()
+    expect(errorSpy).toHaveBeenCalledWith('[auth me] Validation failed:', expect.anything())
   })
 })

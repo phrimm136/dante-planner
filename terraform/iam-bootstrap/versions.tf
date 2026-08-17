@@ -15,5 +15,6 @@ terraform {
 # stacks assume. No role ARN is hardcoded here, so this file is safe to publish
 # in a public repo. Matches terraform/rds and terraform/oregon.
 provider "aws" {
-  region = var.region
+  allowed_account_ids = [var.aws_account_id]
+  region              = var.region
 }

@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 
 import { Skeleton } from '@/components/ui/skeleton'
-import { ANNOUNCEMENT_PREVIEW_COUNT } from '@/lib/constants'
+import { ANNOUNCEMENT_PREVIEW_COUNT, SECTION_STYLES } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import type { Announcement } from '../types/AnnouncementTypes'
 
@@ -11,8 +11,8 @@ import type { Announcement } from '../types/AnnouncementTypes'
 
 export function AnnouncementSkeleton() {
   return (
-    <section className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
+    <section className={SECTION_STYLES.LAYOUT.column}>
+      <div className={SECTION_STYLES.LAYOUT.rowBetween}>
         <Skeleton className="h-7 w-24" />
         <Skeleton className="h-9 w-24" />
       </div>
@@ -52,8 +52,8 @@ export function AnnouncementSection({
   const preview = [...regular.slice(0, ANNOUNCEMENT_PREVIEW_COUNT), ...permanent]
 
   return (
-    <section className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
+    <section className={SECTION_STYLES.LAYOUT.column}>
+      <div className={SECTION_STYLES.LAYOUT.rowBetween}>
         <h2 className="text-xl font-semibold">{t('announcements.title')}</h2>
         <button
           onClick={onViewAll}

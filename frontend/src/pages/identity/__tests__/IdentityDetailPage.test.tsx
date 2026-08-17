@@ -3,8 +3,9 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { Suspense } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { createTestQueryClient } from '@/test-utils/queryClient'
-import { MAX_LEVEL } from '@/shared/gameData'
+import { MAX_LEVEL, SkillIdSchema, PassiveIdSchema } from '@/shared/gameData'
 import IdentityDetailPage from '../IdentityDetailPage'
+import type { IdentityData, IdentityI18n } from '../types/IdentityTypes'
 
 // Mock react-i18next with proper i18n instance and initReactI18next
 vi.mock('react-i18next', async (importOriginal) => {
@@ -37,10 +38,10 @@ vi.mock('react-i18next', async (importOriginal) => {
 })
 
 // Mock static data based on identity 10101 (LCB Sinner - base identity)
-const mockIdentityData10101 = {
+const mockIdentityData10101: IdentityData = {
   updatedDate: 20230227,
   skillKeywordList: ['Sinking'],
-  panicType: 9999,
+  panicType: '9999',
   season: 0,
   rank: 1,
   hp: { defaultStat: 72, incrementByLevel: 2.48 },
@@ -55,16 +56,34 @@ const mockIdentityData10101 = {
     min: ['OnDieAllyAsLevelRatio10'],
   },
   skills: {
-    skill1: [{ id: 1010101, skillData: [{ attributeType: 'AZURE', atkType: 'SLASH' }] }],
-    skill2: [{ id: 1010102, skillData: [{ attributeType: 'VIOLET', atkType: 'PENETRATE' }] }],
-    skill3: [
-      { id: 1010103, skillData: [{}, {}, { attributeType: 'AMBER', atkType: 'SLASH' }, {}] },
+    skill1: [
+      {
+        id: SkillIdSchema.parse('1010101'),
+        skillData: [{ attributeType: 'AZURE', atkType: 'SLASH' }, {}, {}, {}],
+      },
     ],
-    skillDef: [{ id: 1010104, skillData: [{ attributeType: 'NEUTRAL', atkType: 'NONE' }] }],
+    skill2: [
+      {
+        id: SkillIdSchema.parse('1010102'),
+        skillData: [{ attributeType: 'VIOLET', atkType: 'PENETRATE' }, {}, {}, {}],
+      },
+    ],
+    skill3: [
+      {
+        id: SkillIdSchema.parse('1010103'),
+        skillData: [{}, {}, { attributeType: 'AMBER', atkType: 'SLASH' }, {}],
+      },
+    ],
+    skillDef: [
+      {
+        id: SkillIdSchema.parse('1010104'),
+        skillData: [{ attributeType: 'NEUTRAL', atkType: 'NONE' }, {}, {}, {}],
+      },
+    ],
   },
   passives: {
-    battlePassiveList: [[1010101], [], [], []], // Only uptie 1 has battle passive
-    supportPassiveList: [[], [], [1010121], []], // Only uptie 3 has support passive
+    battlePassiveList: [[PassiveIdSchema.parse('1010101')], [], [], []], // Only uptie 1 has battle passive
+    supportPassiveList: [[], [], [PassiveIdSchema.parse('1010121')], []], // Only uptie 3 has support passive
     conditions: {
       '1010101': { type: 'RESONANCE', values: { AZURE: 4 } },
       '1010121': { type: 'STOCK', values: { AZURE: 4 } },
@@ -72,7 +91,7 @@ const mockIdentityData10101 = {
   },
 }
 
-const mockIdentityI18n10101 = {
+const mockIdentityI18n10101: IdentityI18n = {
   name: 'LCB\nSinner',
   skills: {
     '1010101': { name: 'Deflect', descs: [{ desc: '', coinDescs: ['Inflict 1 Sinking'] }] },
@@ -87,10 +106,10 @@ const mockIdentityI18n10101 = {
 }
 
 // Mock static data based on identity 10114 (Heishou Pack - complex identity)
-const mockIdentityData10114 = {
+const mockIdentityData10114: IdentityData = {
   updatedDate: 20250828,
   skillKeywordList: ['Burst', 'Vibration'],
-  panicType: 9999,
+  panicType: '9999',
   season: 6,
   rank: 3,
   hp: { defaultStat: 66, incrementByLevel: 3.41 },
@@ -112,21 +131,47 @@ const mockIdentityData10114 = {
     min: ['OnDieAllyAsLevelRatio10'],
   },
   skills: {
-    skill1: [{ id: 1011401, skillData: [{ attributeType: 'AMBER', atkType: 'SLASH' }] }],
-    skill2: [{ id: 1011402, skillData: [{ attributeType: 'VIOLET', atkType: 'SLASH' }] }],
-    skill3: [
-      { id: 1011403, skillData: [{}, {}, { attributeType: 'SHAMROCK', atkType: 'SLASH' }, {}] },
+    skill1: [
+      {
+        id: SkillIdSchema.parse('1011401'),
+        skillData: [{ attributeType: 'AMBER', atkType: 'SLASH' }, {}, {}, {}],
+      },
     ],
-    skillDef: [{ id: 1011404, skillData: [{ attributeType: 'NEUTRAL', atkType: 'NONE' }] }],
+    skill2: [
+      {
+        id: SkillIdSchema.parse('1011402'),
+        skillData: [{ attributeType: 'VIOLET', atkType: 'SLASH' }, {}, {}, {}],
+      },
+    ],
+    skill3: [
+      {
+        id: SkillIdSchema.parse('1011403'),
+        skillData: [{}, {}, { attributeType: 'SHAMROCK', atkType: 'SLASH' }, {}],
+      },
+    ],
+    skillDef: [
+      {
+        id: SkillIdSchema.parse('1011404'),
+        skillData: [{ attributeType: 'NEUTRAL', atkType: 'NONE' }, {}, {}, {}],
+      },
+    ],
   },
   passives: {
     battlePassiveList: [
-      [1011402, 1011403],
-      [1011402, 1011403, 1011401],
+      [PassiveIdSchema.parse('1011402'), PassiveIdSchema.parse('1011403')],
+      [
+        PassiveIdSchema.parse('1011402'),
+        PassiveIdSchema.parse('1011403'),
+        PassiveIdSchema.parse('1011401'),
+      ],
       [],
-      [1011402, 1011403, 1011411],
+      [
+        PassiveIdSchema.parse('1011402'),
+        PassiveIdSchema.parse('1011403'),
+        PassiveIdSchema.parse('1011411'),
+      ],
     ],
-    supportPassiveList: [[], [], [1011421], []],
+    supportPassiveList: [[], [], [PassiveIdSchema.parse('1011421')], []],
     conditions: {
       '1011401': { type: 'STOCK', values: { SHAMROCK: 5 } },
       '1011421': { type: 'STOCK', values: { SHAMROCK: 4 } },
@@ -134,7 +179,7 @@ const mockIdentityData10114 = {
   },
 }
 
-const mockIdentityI18n10114 = {
+const mockIdentityI18n10114: IdentityI18n = {
   name: 'Heishou Pack -\nWu Branch Adept',
   skills: {
     '1011401': { name: 'Cut Down and Trample', descs: [{ desc: 'Test skill', coinDescs: [] }] },
@@ -196,19 +241,6 @@ vi.mock('@/pages/identity/hooks/usePanicInfo', () => ({
   },
 }))
 
-// Mock useTraitsI18n hook (used in TraitsDisplay)
-vi.mock('@/pages/identity/hooks/useTraitsI18n', () => ({
-  useTraitsI18n: () => ({
-    LIMBUS_COMPANY: 'Limbus Company',
-    LIMBUS_COMPANY_LCB: 'LCB',
-    BLACK_BEAST: 'Black Beast',
-    BLACK_BEAST_CHIEF: 'Black Beast Chief',
-    FAMILY_GA: 'Family Ga',
-    BLACK_BEAST_HORSE: 'Black Beast Horse',
-    H_CORP: 'H Corp',
-  }),
-}))
-
 // Mock asset paths - use importOriginal for complete mock
 vi.mock('@/shared/assets', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/shared/assets')>()
@@ -219,7 +251,7 @@ vi.mock('@/shared/assets', async (importOriginal) => {
 })
 
 // Mock sanity condition formatter
-vi.mock('@/pages/identity/lib/sanityConditionFormatter', () => ({
+vi.mock('@/pages/identity/hooks/useSanityConditionFormatter', () => ({
   useSanityConditionFormatter: () => ({
     formatAll: (conditions: string[]) => conditions.map(() => 'Formatted condition'),
   }),

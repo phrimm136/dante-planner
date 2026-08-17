@@ -1,89 +1,52 @@
-import { useState, Suspense, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useIdentityListSpec, IdentityList } from '@/pages/identity'
-import type { IdentityListItem, IdentitySpecListSchema } from '@/pages/identity'
+import type { IdentityListItem, IdentitySpecListSchema, IdentityFacetState } from '@/pages/identity'
 import type { z } from 'zod'
 import type { Season, SkillAttributeType, AtkType, DefType } from '@/shared/gameData'
 import { calculateActiveFilterCount } from '@/shared/filter'
 import { useSetFilters } from '@/components/hooks/useSetFilters'
+import type { FilterStore } from '@/components/hooks/useSetFilters'
+import { EntityListPage } from '@/shared/filter'
 import { FilterPageLayout } from '@/shared/filter'
-import { FilterSection } from '@/shared/filter'
-import { CompactSinnerFilter } from '@/shared/filter'
-import { CompactKeywordFilter } from '@/shared/filter'
-import { CompactSkillAttributeFilter } from '@/shared/filter'
-import { CompactAttackTypeFilter } from '@/shared/filter'
-import { CompactDefenseTypeFilter } from '@/shared/filter'
-import { CompactRarityFilter } from '@/shared/filter'
+import { FilterSectionList, filterSection } from '@/shared/filter'
+import { SinnerFilter } from '@/shared/filter'
+import { KeywordFilter } from '@/shared/filter'
+import { SkillAttributeFilter } from '@/shared/filter'
+import { AttackTypeFilter } from '@/shared/filter'
+import { DefenseTypeFilter } from '@/shared/filter'
+import { RarityFilter } from '@/shared/filter'
 import { SeasonDropdown } from '@/shared/filter'
 import { UnitKeywordDropdown } from '@/shared/filter'
 import { BattleKeywordDropdown } from '@/shared/filter'
 import { SearchBar } from '@/shared/filter'
 import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
-import { Skeleton } from '@/components/ui/skeleton'
+import { buildFacetCounts } from './lib/identityFacetCounts'
 
 /**
- * Card grid section - no longer suspends at grid level.
- * Name search uses deferred hook in IdentityList (no suspension).
+ * Card grid section.
  */
 function IdentityCardGrid({
   spec,
-  selectedSinners,
-  selectedKeywords,
-  selectedBattleKeywords,
-  selectedAttributes,
-  selectedAtkTypes,
-  selectedDefTypes,
-  selectedRaritys,
-  selectedSeasons,
-  selectedUnitKeywords,
-  searchQuery,
+  store,
 }: {
   spec: z.infer<typeof IdentitySpecListSchema>
-  selectedSinners: Set<string>
-  selectedKeywords: Set<string>
-  selectedBattleKeywords: Set<string>
-  selectedAttributes: Set<SkillAttributeType>
-  selectedAtkTypes: Set<AtkType>
-  selectedDefTypes: Set<DefType>
-  selectedRaritys: Set<number>
-  selectedSeasons: Set<Season>
-  selectedUnitKeywords: Set<string>
-  searchQuery: string
+  store: FilterStore<IdentityFacetState>
 }) {
   // Build IdentityListItem array from spec directly (no transformation needed)
-  // Name lookup handled by IdentityList's deferred hook
-  const identities = useMemo<IdentityListItem[]>(
-    () =>
-      Object.entries(spec).map(([id, specData]) => ({
-        id,
-        rank: specData.rank,
-        unitKeywordList: specData.unitKeywordList,
-        skillKeywordList: specData.skillKeywordList,
-        battleKeywordList: specData.battleKeywordList,
-        attributeTypes: specData.attributeType,
-        atkTypes: specData.atkType,
-        defenseTypes: specData.defenseType,
-        updateDate: specData.updateDate,
-        season: specData.season,
-      })),
-    [spec],
-  )
+  const identities: IdentityListItem[] = Object.entries(spec).map(([id, specData]) => ({
+    id,
+    rank: specData.rank,
+    unitKeywordList: specData.unitKeywordList,
+    skillKeywordList: specData.skillKeywordList,
+    battleKeywordList: specData.battleKeywordList,
+    attributeTypes: specData.attributeType,
+    atkTypes: specData.atkType,
+    defenseTypes: specData.defenseType,
+    updateDate: specData.updateDate,
+    season: specData.season,
+  }))
 
-  return (
-    <IdentityList
-      identities={identities}
-      selectedSinners={selectedSinners}
-      selectedKeywords={selectedKeywords}
-      selectedBattleKeywords={selectedBattleKeywords}
-      selectedAttributes={selectedAttributes}
-      selectedAtkTypes={selectedAtkTypes}
-      selectedDefTypes={selectedDefTypes}
-      selectedRaritys={selectedRaritys}
-      selectedSeasons={selectedSeasons}
-      selectedUnitKeywords={selectedUnitKeywords}
-      searchQuery={searchQuery}
-    />
-  )
+  return <IdentityList identities={identities} store={store} />
 }
 
 /**
@@ -94,25 +57,16 @@ function IdentityPageShell() {
   const { t } = useTranslation(['database', 'common'])
   const spec = useIdentityListSpec()
 
-  // Compute counts for dropdown display
-  const { seasonCounts, unitKeywordCounts } = useMemo(() => {
-    const sc: Record<string, number> = {}
-    const ukc: Record<string, number> = {}
-    for (const entry of Object.values(spec)) {
-      const key = String(entry.season)
-      sc[key] = (sc[key] ?? 0) + 1
-      for (const kw of entry.unitKeywordList) {
-        ukc[kw] = (ukc[kw] ?? 0) + 1
-      }
-    }
-    return { seasonCounts: sc, unitKeywordCounts: ukc }
-  }, [spec])
+  const { seasonCounts, unitKeywordCounts } = buildFacetCounts(spec)
 
   // Filter states
   const {
     values: filters,
     setters,
+    searchQuery,
+    setSearchQuery,
     resetAll,
+    store,
   } = useSetFilters({
     selectedSinners: new Set<string>(),
     selectedKeywords: new Set<string>(),
@@ -124,150 +78,102 @@ function IdentityPageShell() {
     selectedSeasons: new Set<Season>(),
     selectedUnitKeywords: new Set<string>(),
   })
-  const [searchQuery, setSearchQuery] = useState<string>('')
 
   // Calculate active filter count for mobile badge
   const activeFilterCount = calculateActiveFilterCount(...Object.values(filters))
 
-  // Reset all filters
-  const handleResetAll = () => {
-    resetAll()
-    setSearchQuery('')
-  }
-
   // Primary filters (always visible on mobile): Sinner and Keyword
-  const primaryFilters = (
-    <>
-      <FilterSection
-        title={t('filters.sinner', 'Sinner')}
-        defaultExpanded={true}
-        activeCount={filters.selectedSinners.size}
-      >
-        <CompactSinnerFilter
-          selectedSinners={filters.selectedSinners}
-          onSelectionChange={setters.selectedSinners}
-        />
-      </FilterSection>
-
-      <FilterSection
-        title={t('filters.keyword', 'Keyword')}
-        defaultExpanded={true}
-        activeCount={filters.selectedKeywords.size}
-      >
-        <CompactKeywordFilter
-          selectedKeywords={filters.selectedKeywords}
-          onSelectionChange={setters.selectedKeywords}
-        />
-      </FilterSection>
-    </>
-  )
+  const PRIMARY_FILTERS = [
+    filterSection({
+      key: 'selectedSinners',
+      titleKey: 'filters.sinner',
+      titleFallback: 'Sinner',
+      Component: SinnerFilter,
+      selected: filters.selectedSinners,
+      onSelectionChange: setters.selectedSinners,
+    }),
+    filterSection({
+      key: 'selectedKeywords',
+      titleKey: 'filters.keyword',
+      titleFallback: 'Keyword',
+      Component: KeywordFilter,
+      selected: filters.selectedKeywords,
+      onSelectionChange: setters.selectedKeywords,
+    }),
+  ]
 
   // Secondary filters (shown when mobile expanded): Skill Attribute, Attack Type, Rarity, Season, Unit Keywords
-  const secondaryFilters = (
-    <>
-      <FilterSection
-        title={t('filters.skillAttribute', 'Skill Attribute')}
-        defaultExpanded={false}
-        activeCount={filters.selectedAttributes.size}
-      >
-        <CompactSkillAttributeFilter
-          selectedAttributes={filters.selectedAttributes}
-          onSelectionChange={setters.selectedAttributes}
-        />
-      </FilterSection>
-
-      <FilterSection
-        title={t('filters.attackType', 'Attack Type')}
-        defaultExpanded={false}
-        activeCount={filters.selectedAtkTypes.size}
-      >
-        <CompactAttackTypeFilter
-          selectedTypes={filters.selectedAtkTypes}
-          onSelectionChange={setters.selectedAtkTypes}
-        />
-      </FilterSection>
-
-      <FilterSection
-        title={t('filters.defenseType', 'Defense Type')}
-        defaultExpanded={false}
-        activeCount={filters.selectedDefTypes.size}
-      >
-        <CompactDefenseTypeFilter
-          selectedTypes={filters.selectedDefTypes}
-          onSelectionChange={setters.selectedDefTypes}
-        />
-      </FilterSection>
-
-      <FilterSection
-        title={t('filters.rank', 'Rarity')}
-        defaultExpanded={false}
-        activeCount={filters.selectedRaritys.size}
-      >
-        <CompactRarityFilter
-          selectedRaritys={filters.selectedRaritys}
-          onSelectionChange={setters.selectedRaritys}
-        />
-      </FilterSection>
-
-      <FilterSection
-        title={t('filters.season', 'Season')}
-        defaultExpanded={false}
-        activeCount={filters.selectedSeasons.size}
-      >
-        <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
-          <SeasonDropdown
-            selectedSeasons={filters.selectedSeasons}
-            onSelectionChange={setters.selectedSeasons}
-            counts={seasonCounts}
-          />
-        </Suspense>
-      </FilterSection>
-
-      <FilterSection
-        title={t('filters.unitKeywords', 'Unit Keywords')}
-        defaultExpanded={false}
-        activeCount={filters.selectedUnitKeywords.size}
-      >
-        <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
-          <UnitKeywordDropdown
-            selectedUnitKeywords={filters.selectedUnitKeywords}
-            onSelectionChange={setters.selectedUnitKeywords}
-            counts={unitKeywordCounts}
-          />
-        </Suspense>
-      </FilterSection>
-
-      <FilterSection
-        title={t('filters.additionalKeyword', 'Additional Keywords')}
-        defaultExpanded={false}
-        activeCount={filters.selectedBattleKeywords.size}
-      >
-        <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
-          <BattleKeywordDropdown
-            entityType="identity"
-            selectedBattleKeywords={filters.selectedBattleKeywords}
-            onSelectionChange={setters.selectedBattleKeywords}
-          />
-        </Suspense>
-      </FilterSection>
-    </>
-  )
-
-  // Combined filter content for desktop sidebar (all filters together)
-  const filterContent = (
-    <>
-      {primaryFilters}
-      {secondaryFilters}
-    </>
-  )
+  const SECONDARY_FILTERS = [
+    filterSection({
+      key: 'selectedAttributes',
+      titleKey: 'filters.skillAttribute',
+      titleFallback: 'Skill Attribute',
+      Component: SkillAttributeFilter,
+      selected: filters.selectedAttributes,
+      onSelectionChange: setters.selectedAttributes,
+    }),
+    filterSection({
+      key: 'selectedAtkTypes',
+      titleKey: 'filters.attackType',
+      titleFallback: 'Attack Type',
+      Component: AttackTypeFilter,
+      selected: filters.selectedAtkTypes,
+      onSelectionChange: setters.selectedAtkTypes,
+    }),
+    filterSection({
+      key: 'selectedDefTypes',
+      titleKey: 'filters.defenseType',
+      titleFallback: 'Defense Type',
+      Component: DefenseTypeFilter,
+      selected: filters.selectedDefTypes,
+      onSelectionChange: setters.selectedDefTypes,
+    }),
+    filterSection({
+      key: 'selectedRaritys',
+      titleKey: 'filters.rank',
+      titleFallback: 'Rarity',
+      Component: RarityFilter,
+      selected: filters.selectedRaritys,
+      onSelectionChange: setters.selectedRaritys,
+    }),
+    filterSection({
+      key: 'selectedSeasons',
+      titleKey: 'filters.season',
+      titleFallback: 'Season',
+      suspense: true,
+      Component: SeasonDropdown,
+      selected: filters.selectedSeasons,
+      onSelectionChange: setters.selectedSeasons,
+      props: { counts: seasonCounts },
+    }),
+    filterSection({
+      key: 'selectedUnitKeywords',
+      titleKey: 'filters.unitKeywords',
+      titleFallback: 'Unit Keywords',
+      suspense: true,
+      Component: UnitKeywordDropdown,
+      selected: filters.selectedUnitKeywords,
+      onSelectionChange: setters.selectedUnitKeywords,
+      props: { counts: unitKeywordCounts },
+    }),
+    filterSection({
+      key: 'selectedBattleKeywords',
+      titleKey: 'filters.additionalKeyword',
+      titleFallback: 'Additional Keywords',
+      suspense: true,
+      Component: BattleKeywordDropdown,
+      selected: filters.selectedBattleKeywords,
+      onSelectionChange: setters.selectedBattleKeywords,
+      props: { entityType: 'identity' as const },
+    }),
+  ]
 
   return (
     <FilterPageLayout
-      filterContent={filterContent}
-      primaryFilters={primaryFilters}
-      secondaryFilters={secondaryFilters}
+      primaryFilters={<FilterSectionList sections={PRIMARY_FILTERS} />}
+      secondaryFilters={<FilterSectionList sections={SECONDARY_FILTERS} />}
       activeFilterCount={activeFilterCount}
-      onResetAll={handleResetAll}
+      onResetAll={resetAll}
       searchBar={
         <SearchBar
           searchQuery={searchQuery}
@@ -276,22 +182,7 @@ function IdentityPageShell() {
         />
       }
     >
-      {/* No Suspense needed - IdentityCardGrid doesn't suspend */}
-      {/* Spec loading is caught by outer ListPageSkeleton */}
-      {/* Name search uses deferred hook in IdentityList */}
-      <IdentityCardGrid
-        spec={spec}
-        selectedSinners={filters.selectedSinners}
-        selectedKeywords={filters.selectedKeywords}
-        selectedBattleKeywords={filters.selectedBattleKeywords}
-        selectedAttributes={filters.selectedAttributes}
-        selectedAtkTypes={filters.selectedAtkTypes}
-        selectedDefTypes={filters.selectedDefTypes}
-        selectedRaritys={filters.selectedRaritys}
-        selectedSeasons={filters.selectedSeasons}
-        selectedUnitKeywords={filters.selectedUnitKeywords}
-        searchQuery={searchQuery}
-      />
+      <IdentityCardGrid spec={spec} store={store} />
     </FilterPageLayout>
   )
 }
@@ -302,14 +193,12 @@ function IdentityPageShell() {
  * Granular loading architecture:
  * - Outer Suspense: ListPageSkeleton for spec loading (initial)
  * - Season/UnitKeyword dropdowns: Own Suspense for dropdown i18n
- * - IdentityList: Uses deferred hook for name search (no suspension on language change)
+ * - IdentityList: name lookups suspend at the card name, not the grid
  */
 export default function IdentityPage() {
   return (
-    <div className="container mx-auto p-8">
-      <Suspense fallback={<ListPageSkeleton preset="identity" />}>
-        <IdentityPageShell />
-      </Suspense>
-    </div>
+    <EntityListPage skeleton={<ListPageSkeleton preset="identity" />}>
+      <IdentityPageShell />
+    </EntityListPage>
   )
 }

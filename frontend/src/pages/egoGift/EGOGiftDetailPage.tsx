@@ -15,11 +15,11 @@ import { GiftNameI18n } from '@/pages/egoGift'
 import { EGOGiftMetadata } from '@/pages/egoGift'
 import { EnhancementsPanelI18n } from '@/pages/egoGift'
 import { RecipeSection } from '@/pages/egoGift'
+import { EGOGiftDetailSkeleton } from '@/pages/egoGift'
 import { DetailPageLayout } from '@/components/layout/DetailPageLayout'
-import { DetailPageSkeleton } from '@/components/feedback/DetailPageSkeleton'
 import { useEGOGiftDetailSpec } from '@/pages/egoGift'
 import { ENHANCEMENT_LEVELS } from '@/shared/gameData'
-import { calculateEnhancementCost, extractEGOGiftTier } from '@/pages/egoGift'
+import { calculateEnhancementCost, parseTier } from '@/pages/egoGift'
 import type { EGOGiftListItem } from '@/pages/egoGift'
 
 /**
@@ -36,14 +36,15 @@ function EGOGiftDetailContent() {
   // Fetch spec data only (stable - no language dependency)
   const giftData = useEGOGiftDetailSpec(id)
 
-  // Extract tier from tag array using utility
-  const tier = extractEGOGiftTier(giftData.tag)
+  const tier = parseTier(giftData.tag)
 
   // Max enhancement from spec data (language-independent)
   const maxEnhancement = giftData.maxEnhancement
 
-  // Calculate costs for all enhancement levels
-  const enhancementCosts = ENHANCEMENT_LEVELS.map((level) => calculateEnhancementCost(tier, level))
+  // An unreadable tier prices no enhancement level
+  const enhancementCosts = ENHANCEMENT_LEVELS.map((level) =>
+    tier === null ? null : calculateEnhancementCost(tier, level),
+  )
 
   // Construct gift object for EGOGiftCard (spec data only for stable card display)
   // Type assertion needed: Zod validates tag has TIER_* at runtime,
@@ -107,7 +108,7 @@ function EGOGiftDetailContent() {
  */
 export default function EGOGiftDetailPage() {
   return (
-    <Suspense fallback={<DetailPageSkeleton preset="egoGift" />}>
+    <Suspense fallback={<EGOGiftDetailSkeleton />}>
       <EGOGiftDetailContent />
     </Suspense>
   )

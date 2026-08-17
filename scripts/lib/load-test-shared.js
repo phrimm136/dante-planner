@@ -7,13 +7,31 @@ import http from 'k6/http';
 import { check, group } from 'k6';
 
 /**
+ * Pass/fail budget shared by the HTTP load profiles. The SSE profile keeps its
+ * own: it measures connection-phase timings, not request durations.
+ */
+export const HTTP_THRESHOLDS = {
+  'http_req_duration':                              ['p(95)<2000', 'p(99)<5000'],
+  'http_req_duration{group:::public reads}':        ['p(95)<1500'],
+  'http_req_duration{group:::authenticated reads}': ['p(95)<2000'],
+  'http_req_failed':                                ['rate<0.05'],
+  'checks':                                         ['rate>0.95'],
+};
+
+/**
  * Runs once before test starts. Fetches a published planner ID
  * so per-planner endpoints have a valid target.
  * Also reads __ENV here — k6 globals are not available at module top-level.
+ * Aborts without AUTH_TOKEN: the authenticated-reads threshold has no data
+ * to judge, and an empty submetric passes silently.
  */
 export function setup() {
   const base  = __ENV.BASE_URL   || 'http://localhost:8080';
   const token = __ENV.AUTH_TOKEN || '';
+
+  if (!token) {
+    throw new Error('setup: AUTH_TOKEN is required — pass -e AUTH_TOKEN=<accessToken cookie value>');
+  }
 
   const res = http.get(`${base}/api/planner/md/published?size=1`);
   if (res.status !== 200) {
@@ -34,7 +52,8 @@ export function setup() {
  */
 export function runEndpoints(data) {
   const { base, token, publishedId } = data;
-  const params = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  // The backend authenticates from the accessToken cookie only.
+  const params = { cookies: { accessToken: token } };
 
   group('public reads', () => {
     // Config — lightweight, likely no heavy query. Baseline reference point.
@@ -71,28 +90,25 @@ export function runEndpoints(data) {
     }
   });
 
-  // Authenticated reads — only runs if AUTH_TOKEN is set.
-  if (token) {
-    group('authenticated reads', () => {
-      // Epithets — small lookup table, requires auth.
-      check(http.get(`${base}/api/user/epithets`, params), {
-        'epithets 200': (r) => r.status === 200,
-      });
-
-      // Own planners list — DB read scoped to user ID.
-      check(http.get(`${base}/api/planner/md`, params), {
-        'own planners 200': (r) => r.status === 200,
-      });
-
-      // Notification inbox — likely indexed by (user_id, is_read).
-      check(http.get(`${base}/api/notifications/inbox?size=20`, params), {
-        'inbox 200': (r) => r.status === 200,
-      });
-
-      // Unread count — COUNT query, should be fast if indexed.
-      check(http.get(`${base}/api/notifications/unread-count`, params), {
-        'unread count 200': (r) => r.status === 200,
-      });
+  group('authenticated reads', () => {
+    // Epithets — small lookup table, requires auth.
+    check(http.get(`${base}/api/user/epithets`, params), {
+      'epithets 200': (r) => r.status === 200,
     });
-  }
+
+    // Own planners list — DB read scoped to user ID.
+    check(http.get(`${base}/api/planner/md`, params), {
+      'own planners 200': (r) => r.status === 200,
+    });
+
+    // Notification inbox — likely indexed by (user_id, is_read).
+    check(http.get(`${base}/api/notifications/inbox?size=20`, params), {
+      'inbox 200': (r) => r.status === 200,
+    });
+
+    // Unread count — COUNT query, should be fast if indexed.
+    check(http.get(`${base}/api/notifications/unread-count`, params), {
+      'unread count 200': (r) => r.status === 200,
+    });
+  });
 }

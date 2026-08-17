@@ -10,15 +10,16 @@ import {
   getButtonExpandImagePath,
 } from '@/shared/assets'
 import { Skeleton } from '@/components/ui/skeleton'
-import { SINNER_COLORS, type Sinner } from '@/shared/gameData'
+import { type Sinner } from '@/shared/gameData'
 import { getSinnerFromId } from '@/shared/gameData'
 import { getDisplayFontForLanguage } from '@/lib/utils'
-import type { EGOType } from '../types/EGOTypes'
+import type { EgoType } from '@/shared/gameData'
+import { SECTION_STYLES, SINNER_COLORS } from '@/lib/constants'
 
 interface EGOHeaderProps {
   egoId: string
   name: string
-  rank: EGOType
+  rank: EgoType
 }
 
 /**
@@ -69,7 +70,10 @@ export function EGOHeader({ egoId, name, rank }: EGOHeaderProps) {
           </div>
           {/* EGO name with sinner color */}
           {name ? (
-            <h1 className="text-2xl font-bold" style={{ color: sinnerColor, ...displayStyle }}>
+            <h1
+              className={SECTION_STYLES.TEXT.pageTitle}
+              style={{ color: sinnerColor, ...displayStyle }}
+            >
               {name}
             </h1>
           ) : (

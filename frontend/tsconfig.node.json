@@ -1,6 +1,9 @@
 {
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
+    "composite": true,
+    "emitDeclarationOnly": true,
+    "outDir": "./node_modules/.tmp/types/node",
     "target": "ES2023",
     "lib": ["ES2023"],
     "module": "ESNext",
@@ -12,7 +15,6 @@
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
-    "noEmit": true,
 
     /* Linting */
     "strict": true,
@@ -22,5 +24,6 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["vite.config.ts"]
+  "include": ["vite.config.ts", "vite-plugin-hash-static.ts", "vite-plugin-hash-static.test.ts"],
+  "references": [{ "path": "./tsconfig.app.json" }]
 }

@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import { AffinitySchema } from '@/shared/gameData'
-import { SkillDescEntrySchema } from '@/shared/gameData'
+import { AffinitySchema, ATK_TYPES, DEF_TYPES } from '@/shared/gameData'
+import { SkillDescEntrySchema, SkillIdSchema, PassiveIdSchema } from '@/shared/gameData'
 
 /**
  * Identity Schemas
@@ -51,8 +51,8 @@ export const IdentitySkillDataTupleSchema = z.tuple([
 
 // Skill entry schema
 export const IdentitySkillEntrySchema = z.object({
-  id: z.number(),
-  textID: z.number().optional(),
+  id: SkillIdSchema,
+  textID: SkillIdSchema.optional(),
   skillTier: z.number().optional(),
   skillData: IdentitySkillDataTupleSchema,
 })
@@ -73,10 +73,10 @@ export const IdentityPassiveConditionSchema = z.object({
 
 // Passive list tuple - 4 entries for uptie levels 0-3
 export const IdentityPassiveListTupleSchema = z.tuple([
-  z.array(z.number()),
-  z.array(z.number()),
-  z.array(z.number()),
-  z.array(z.number()),
+  z.array(PassiveIdSchema),
+  z.array(PassiveIdSchema),
+  z.array(PassiveIdSchema),
+  z.array(PassiveIdSchema),
 ])
 
 // Passives data schema
@@ -90,7 +90,7 @@ export const IdentityPassivesDataSchema = z.object({
 export const IdentityDataSchema = z.object({
   updatedDate: z.number(),
   skillKeywordList: z.array(z.string()),
-  panicType: z.number(),
+  panicType: z.string(),
   season: z.number(),
   rank: z.number(),
   hp: IdentityHpDataSchema,
@@ -140,16 +140,10 @@ export const IdentityI18nSchema = z.object({
  */
 
 // Attack type enum for spec list
-export const AtkTypeSchema = z.enum(['SLASH', 'PENETRATE', 'HIT'])
+export const AtkTypeSchema = z.enum(ATK_TYPES)
 
 // Defense type enum for spec list
-export const DefenseTypeSchema = z.enum([
-  'GUARD',
-  'EVADE',
-  'COUNTER',
-  'CLASHABLE_GUARD',
-  'CLASHABLE_COUNTER',
-])
+export const DefenseTypeSchema = z.enum(DEF_TYPES)
 
 // Spec list item schema
 export const IdentitySpecListItemSchema = z.object({

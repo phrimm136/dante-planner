@@ -14,19 +14,33 @@
 # Certificate (dashboard → SSL/TLS → Origin Server), put-secret-value the new
 # cert+key into danteplanner/origin-tls, revoke the old cert. Terraform (no version)
 # does not fight that update. JSON fields tls_crt/tls_key match the ExternalSecret.
+# Gated for the same reason as the datasource user: an environment with no edge certificate
+# has nothing to adopt, and an unconditional import fails the plan on a missing object.
+locals {
+  origin_tls_secret = toset(var.manage_origin_tls ? ["danteplanner/origin-tls"] : [])
+}
+
 import {
-  to = aws_secretsmanager_secret.origin_tls
-  id = "danteplanner/origin-tls"
+  for_each = local.origin_tls_secret
+  to       = aws_secretsmanager_secret.origin_tls[each.key]
+  id       = each.key
 }
 
 resource "aws_secretsmanager_secret" "origin_tls" {
-  name = "danteplanner/origin-tls"
+  for_each = local.origin_tls_secret
+
+  name = each.key
   replica {
     region = var.replica_region
   }
   lifecycle {
     prevent_destroy = true
   }
+}
+
+moved {
+  from = aws_secretsmanager_secret.origin_tls
+  to   = aws_secretsmanager_secret.origin_tls["danteplanner/origin-tls"]
 }
 
 # origin-client-ca is the Cloudflare Authenticated Origin Pull CA — PUBLIC (same

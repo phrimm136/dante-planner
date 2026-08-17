@@ -2,19 +2,20 @@ package org.danteplanner.backend.planner.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.SecurityProperties;
+import org.danteplanner.backend.planner.dto.CatalogQuery;
 import org.danteplanner.backend.planner.dto.PublicPlannerResponse;
 import org.danteplanner.backend.planner.dto.PublishedPlannerDetailResponse;
 import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
-import org.danteplanner.backend.planner.specification.PlannerSpecifications;
+import org.danteplanner.backend.shared.entity.ContentEntityType;
+import org.danteplanner.backend.shared.config.DeviceId;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.shared.util.ClientIpResolver;
-import org.springframework.beans.factory.annotation.Value;
+import org.danteplanner.backend.shared.ratelimit.RateLimited;
+import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,7 +25,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -37,18 +40,15 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/planner/md")
-@Slf4j
 public class PublishedPlannerController {
 
     private final PublishedPlannerQueryService publishedPlannerQueryService;
     private final SecurityProperties securityProperties;
     private final ByIdReadGuard byIdReadGuard;
 
-    @Value("${planner.recommended-threshold}")
-    private int recommendedThreshold;
-
     /**
-     * Get all published planners with pagination.
+     * Get all published planners with pagination, ordered by release date
+     * (first published, newest first).
      *
      * <p>This endpoint is public and does not require authentication.
      * Returns planners that have been published by their owners.
@@ -56,17 +56,16 @@ public class PublishedPlannerController {
      *
      * @param page     page number (0-indexed)
      * @param size     page size
-     * @param sort     sort option: "recent" (createdAt), "popular" (viewCount), "votes" (upvotes)
      * @param category optional category filter (e.g., "5F", "10F", "15F" for MD)
      * @param q        optional search term for title/keywords
      * @param userId   optional authenticated user ID (null for anonymous)
      * @return page of public planner summaries with optional user context
      */
+    @RateLimited(RateLimitPolicy.PUBLIC_READ)
     @GetMapping("/published")
     public ResponseEntity<Page<PublicPlannerResponse>> getPublishedPlanners(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "recent") String sort,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String q,
             @RequestParam(required = false) String keyword,
@@ -76,20 +75,8 @@ public class PublishedPlannerController {
             @RequestParam(required = false) String themePack,
             @AuthenticationPrincipal Long userId) {
 
-        Pageable pageable = createPageable(page, size, sort);
-        log.debug("Fetching published planners, category: {}, search: {}, userId: {}, pagination: {}",
-                category, q, userId, pageable);
-
-        if (hasStructuredFilters(keyword, identity, ego, gift, themePack)) {
-            Page<PublicPlannerResponse> planners = publishedPlannerQueryService.searchPlanners(
-                    PlannerSpecifications.isPublished(), pageable, category, userId, q,
-                    parseCsv(keyword), parseCsv(identity), parseCsv(ego),
-                    parseCsv(gift), parseCsv(themePack));
-            return ResponseEntity.ok(planners);
-        }
-
-        Page<PublicPlannerResponse> planners = publishedPlannerQueryService.getPublishedPlanners(pageable, category, userId, q);
-        return ResponseEntity.ok(planners);
+        return listPlanners(false, page, size, category, q, keyword,
+                entityFilters(identity, ego, gift, themePack), userId);
     }
 
     /**
@@ -101,17 +88,16 @@ public class PublishedPlannerController {
      *
      * @param page     page number (0-indexed)
      * @param size     page size
-     * @param sort     sort option: "recent" (createdAt), "popular" (viewCount), "votes" (upvotes)
      * @param category optional category filter (e.g., "5F", "10F", "15F" for MD)
      * @param q        optional search term for title/keywords
      * @param userId   optional authenticated user ID (null for anonymous)
      * @return page of recommended public planner summaries with optional user context
      */
+    @RateLimited(RateLimitPolicy.PUBLIC_READ)
     @GetMapping("/recommended")
     public ResponseEntity<Page<PublicPlannerResponse>> getRecommendedPlanners(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "votes") String sort,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String q,
             @RequestParam(required = false) String keyword,
@@ -121,20 +107,8 @@ public class PublishedPlannerController {
             @RequestParam(required = false) String themePack,
             @AuthenticationPrincipal Long userId) {
 
-        Pageable pageable = createPageable(page, size, sort);
-        log.debug("Fetching recommended planners, category: {}, search: {}, userId: {}, pagination: {}",
-                category, q, userId, pageable);
-
-        if (hasStructuredFilters(keyword, identity, ego, gift, themePack)) {
-            Page<PublicPlannerResponse> planners = publishedPlannerQueryService.searchPlanners(
-                    PlannerSpecifications.isRecommended(recommendedThreshold), pageable, category, userId, q,
-                    parseCsv(keyword), parseCsv(identity), parseCsv(ego),
-                    parseCsv(gift), parseCsv(themePack));
-            return ResponseEntity.ok(planners);
-        }
-
-        Page<PublicPlannerResponse> planners = publishedPlannerQueryService.getRecommendedPlanners(pageable, category, userId, q);
-        return ResponseEntity.ok(planners);
+        return listPlanners(true, page, size, category, q, keyword,
+                entityFilters(identity, ego, gift, themePack), userId);
     }
 
     /**
@@ -150,45 +124,90 @@ public class PublishedPlannerController {
      * @param userId  optional authenticated user ID (null for anonymous)
      * @return the public planner response with user context and updated view count
      */
+    @RateLimited(RateLimitPolicy.PUBLIC_READ)
     @GetMapping("/published/{id}")
     public ResponseEntity<PublishedPlannerDetailResponse> getPublishedPlanner(
             HttpServletRequest request,
             @PathVariable UUID id,
-            @AuthenticationPrincipal Long userId) {
+            @AuthenticationPrincipal Long userId,
+            @DeviceId UUID deviceId) {
 
-        String clientIp = ClientIpResolver.resolve(request, securityProperties);
+        // Cloudflare appends to X-Forwarded-For rather than replacing it, so its leftmost entry is
+        // caller-controlled.
+        String viewerIdentity = ClientIpResolver.resolveClientIdentifier(request, securityProperties, deviceId);
         String userAgent = request.getHeader("User-Agent");
-        log.debug("Fetching published planner {} for userId {}", id, userId);
         PublishedPlannerDetailResponse response = byIdReadGuard.read(ByIdReadGuard.PLANNER_ENTITY_TYPE, id,
-                () -> publishedPlannerQueryService.getPublishedPlanner(id, userId, clientIp, userAgent));
+                () -> publishedPlannerQueryService.getPublishedPlanner(id, userId, viewerIdentity, userAgent));
         return ResponseEntity.ok(response);
     }
 
     /**
-     * Create a Pageable with mapped sort property.
+     * Shared body of the two catalog listings: every request composes one filter set, an empty one
+     * being the plain recency listing.
+     *
+     * @param recommendedOnly       restrict the result to the recommended subset
+     * @param page                  page number (0-indexed)
+     * @param size                  page size
+     * @param category              optional category filter
+     * @param q                     optional search term for title/keywords
+     * @param keyword               optional comma-separated keyword facet values
+     * @param entityFilters         entity filter ids, keyed by the type each filters on
+     * @param userId                optional authenticated user ID (null for anonymous)
+     * @return page of public planner summaries with optional user context
+     */
+    private ResponseEntity<Page<PublicPlannerResponse>> listPlanners(
+            boolean recommendedOnly,
+            int page,
+            int size,
+            String category,
+            String q,
+            String keyword,
+            Map<ContentEntityType, List<String>> entityFilters,
+            Long userId) {
+
+        Pageable pageable = createPageable(page, size);
+
+        CatalogQuery catalogQuery = new CatalogQuery(recommendedOnly, category, q,
+                parseCsv(keyword), entityFilters);
+        return ResponseEntity.ok(
+                publishedPlannerQueryService.searchPlanners(catalogQuery, pageable, userId));
+    }
+
+    /**
+     * Create a capped, unsorted Pageable; the read side pins the recency order.
      *
      * @param page page number (0-indexed)
      * @param size page size
-     * @param sort sort option: "recent", "popular", "votes"
-     * @return Pageable with correct sort property
+     * @return Pageable for the catalog queries
      */
-    private Pageable createPageable(int page, int size, String sort) {
-        Sort.Direction direction = Sort.Direction.DESC;
-        String property = switch (sort) {
-            case "popular" -> "viewCount";
-            case "votes" -> "upvotes";
-            default -> "createdAt"; // "recent" or any other value
-        };
-        return PageRequest.of(page, Math.min(size, 100), Sort.by(direction, property));
+    private Pageable createPageable(int page, int size) {
+        return PageRequest.of(page, Math.min(size, 100));
     }
 
-    private boolean hasStructuredFilters(String keyword, String identity, String ego, String gift, String themePack) {
-        return keyword != null || identity != null || ego != null || gift != null || themePack != null;
+    /**
+     * Key each entity filter parameter by the content type it filters on.
+     */
+    private Map<ContentEntityType, List<String>> entityFilters(
+            String identity, String ego, String gift, String themePack) {
+        Map<ContentEntityType, List<String>> filters = new EnumMap<>(ContentEntityType.class);
+        putIfSupplied(filters, ContentEntityType.IDENTITY, identity);
+        putIfSupplied(filters, ContentEntityType.EGO, ego);
+        putIfSupplied(filters, ContentEntityType.EGO_GIFT, gift);
+        putIfSupplied(filters, ContentEntityType.THEME_PACK, themePack);
+        return filters;
+    }
+
+    private void putIfSupplied(
+            Map<ContentEntityType, List<String>> filters, ContentEntityType type, String value) {
+        List<String> ids = parseCsv(value);
+        if (!ids.isEmpty()) {
+            filters.put(type, ids);
+        }
     }
 
     private List<String> parseCsv(String value) {
         if (value == null || value.isBlank()) {
-            return null;
+            return List.of();
         }
         return Arrays.stream(value.split(","))
                 .map(String::trim)

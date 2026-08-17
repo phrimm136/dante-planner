@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Design proposal
+    url: https://github.com/phrimm136/dante-planner/tree/main/docs/rfcs
+    about: >
+      Changes that introduce observable behavior across two or more seams, or that
+      move a module seam, start as an RFC rather than an issue. Read the existing
+      proposals and the convention there first.

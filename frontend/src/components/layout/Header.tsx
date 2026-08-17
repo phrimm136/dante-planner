@@ -21,8 +21,8 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
 import { HeaderNav } from '@/components/HeaderNav'
-import { toast } from '@/lib/toast'
 import { startGoogleLogin } from '@/shared/auth'
+import { SECTION_STYLES } from '@/lib/constants'
 
 /**
  * UnreadBadge - Renders unread notification count badge on User icon.
@@ -104,7 +104,7 @@ function AuthSection() {
                 <p className="text-sm font-medium">
                   {formatUsername(user.usernameEpithet, user.usernameSuffix, i18n.language)}
                 </p>
-                <p className="text-xs text-muted-foreground">{user.email}</p>
+                <p className={SECTION_STYLES.TEXT.captionSmall}>{user.email}</p>
               </div>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
@@ -129,7 +129,6 @@ function AuthSection() {
                   onClick={() => {
                     logout.mutate(undefined, {
                       onSuccess: () => {
-                        toast.success(t('header.auth.successLogout'))
                         window.location.reload()
                       },
                     })
@@ -159,8 +158,9 @@ function AuthSection() {
  * AuthSectionFallback - Loading state for auth section
  */
 function AuthSectionFallback() {
+  const { t } = useTranslation('common')
   return (
-    <Button variant="ghost" size="icon" disabled>
+    <Button variant="ghost" size="icon" disabled aria-label={t('loading')}>
       <User className="animate-pulse" />
     </Button>
   )
@@ -179,7 +179,7 @@ function AuthSectionFallback() {
  * Auth-dependent UI is isolated in AuthSection with Suspense boundary.
  */
 export function Header() {
-  const { t, i18n } = useTranslation(['common', 'association'])
+  const { t, i18n } = useTranslation('common')
   const displayFont = getDisplayFontForLabel()
 
   const changeLanguage = (lng: string) => {

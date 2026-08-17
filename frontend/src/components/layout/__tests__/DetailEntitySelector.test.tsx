@@ -1,7 +1,28 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { DetailEntitySelector } from '../DetailEntitySelector'
-import { MAX_LEVEL } from '@/shared/gameData'
+import { getEGOTierIconPath } from '@/shared/assets'
+import { MAX_LEVEL, MAX_ENTITY_TIER, MIN_ENTITY_TIER } from '@/shared/gameData'
+
+const IDENTITY_BOUNDS = {
+  tierLabel: 'Uptie',
+  minTier: MIN_ENTITY_TIER.identity,
+  maxTier: MAX_ENTITY_TIER.identity,
+  tierIconPath: getEGOTierIconPath,
+}
+
+const EGO_BOUNDS = {
+  tierLabel: 'Threadspin',
+  minTier: MIN_ENTITY_TIER.ego,
+  tierIconPath: getEGOTierIconPath,
+}
+
+const GIFT_BOUNDS = {
+  tierLabel: 'Enhancement',
+  minTier: MIN_ENTITY_TIER.egoGift,
+  maxTier: MAX_ENTITY_TIER.egoGift,
+  tierIconPath: getEGOTierIconPath,
+}
 
 describe('DetailEntitySelector', () => {
   describe('Identity mode', () => {
@@ -11,7 +32,7 @@ describe('DetailEntitySelector', () => {
 
       render(
         <DetailEntitySelector
-          entityType="identity"
+          {...IDENTITY_BOUNDS}
           tier={4}
           onTierChange={onTierChange}
           level={MAX_LEVEL}
@@ -32,7 +53,7 @@ describe('DetailEntitySelector', () => {
 
       render(
         <DetailEntitySelector
-          entityType="identity"
+          {...IDENTITY_BOUNDS}
           tier={4}
           onTierChange={onTierChange}
           level={MAX_LEVEL}
@@ -51,7 +72,7 @@ describe('DetailEntitySelector', () => {
 
       render(
         <DetailEntitySelector
-          entityType="identity"
+          {...IDENTITY_BOUNDS}
           tier={4}
           onTierChange={onTierChange}
           level={MAX_LEVEL}
@@ -69,7 +90,7 @@ describe('DetailEntitySelector', () => {
 
       render(
         <DetailEntitySelector
-          entityType="identity"
+          {...IDENTITY_BOUNDS}
           tier={4}
           onTierChange={onTierChange}
           level={30}
@@ -90,7 +111,7 @@ describe('DetailEntitySelector', () => {
 
       render(
         <DetailEntitySelector
-          entityType="identity"
+          {...IDENTITY_BOUNDS}
           tier={4}
           onTierChange={onTierChange}
           level={MAX_LEVEL}
@@ -105,6 +126,20 @@ describe('DetailEntitySelector', () => {
       expect(slider).toHaveAttribute('aria-valuemin', '1')
       expect(slider).toHaveAttribute('aria-valuenow', String(MAX_LEVEL))
     })
+
+    it('renders the caller-supplied tier label', () => {
+      render(
+        <DetailEntitySelector
+          {...IDENTITY_BOUNDS}
+          tier={4}
+          onTierChange={vi.fn()}
+          level={MAX_LEVEL}
+          onLevelChange={vi.fn()}
+        />,
+      )
+
+      expect(screen.getByText('Uptie')).toBeDefined()
+    })
   })
 
   describe('EGO mode', () => {
@@ -112,7 +147,7 @@ describe('DetailEntitySelector', () => {
       const onTierChange = vi.fn()
 
       render(
-        <DetailEntitySelector entityType="ego" tier={4} onTierChange={onTierChange} maxTier={4} />,
+        <DetailEntitySelector {...EGO_BOUNDS} maxTier={4} tier={4} onTierChange={onTierChange} />,
       )
 
       expect(screen.getByRole('button', { name: /tier 1/i })).toBeDefined()
@@ -125,7 +160,7 @@ describe('DetailEntitySelector', () => {
       const onTierChange = vi.fn()
 
       render(
-        <DetailEntitySelector entityType="ego" tier={5} onTierChange={onTierChange} maxTier={5} />,
+        <DetailEntitySelector {...EGO_BOUNDS} maxTier={5} tier={5} onTierChange={onTierChange} />,
       )
 
       expect(screen.getByRole('button', { name: /tier 1/i })).toBeDefined()
@@ -133,12 +168,25 @@ describe('DetailEntitySelector', () => {
       expect(screen.getByRole('button', { name: /tier 5/i })).toBeDefined()
     })
 
-    it('falls back to the global MAX_ENTITY_TIER.ego (5) when no maxTier is passed', () => {
+    it('renders up to the global MAX_ENTITY_TIER.ego (5) when given that cap', () => {
       const onTierChange = vi.fn()
 
-      render(<DetailEntitySelector entityType="ego" tier={4} onTierChange={onTierChange} />)
+      render(
+        <DetailEntitySelector
+          {...EGO_BOUNDS}
+          maxTier={MAX_ENTITY_TIER.ego}
+          tier={4}
+          onTierChange={onTierChange}
+        />,
+      )
 
       expect(screen.getByRole('button', { name: /tier 5/i })).toBeDefined()
+    })
+
+    it('omits the level slider when no onLevelChange is given', () => {
+      render(<DetailEntitySelector {...EGO_BOUNDS} maxTier={5} tier={5} onTierChange={vi.fn()} />)
+
+      expect(screen.queryByRole('slider')).toBeNull()
     })
   })
 
@@ -146,7 +194,7 @@ describe('DetailEntitySelector', () => {
     it('renders 3 enhancement buttons (0, 1, 2)', () => {
       const onTierChange = vi.fn()
 
-      render(<DetailEntitySelector entityType="egoGift" tier={0} onTierChange={onTierChange} />)
+      render(<DetailEntitySelector {...GIFT_BOUNDS} tier={0} onTierChange={onTierChange} />)
 
       // Should have 3 enhancement buttons (tier 0, 1, 2)
       const buttons = screen.getAllByRole('button')
@@ -161,7 +209,7 @@ describe('DetailEntitySelector', () => {
     it('does not render level slider', () => {
       const onTierChange = vi.fn()
 
-      render(<DetailEntitySelector entityType="egoGift" tier={0} onTierChange={onTierChange} />)
+      render(<DetailEntitySelector {...GIFT_BOUNDS} tier={0} onTierChange={onTierChange} />)
 
       // Should NOT have level input
       expect(screen.queryByRole('spinbutton')).toBeNull()

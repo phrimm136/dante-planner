@@ -1,0 +1,25 @@
+id: queryfn-consumes-signal
+valid:
+  - "const o = { queryFn: ({ signal }) => fetchThing(id, signal) }"
+  - "const o = { queryFn: async ({ signal }) => await fetchThing(id, signal) }"
+  - |
+    const o = {
+      queryFn: async ({ signal }): Promise<User | null> => {
+        return await ApiClient.get('/api/auth/me', { signal })
+      },
+    }
+  - "const o = { queryFn: async (context: QueryFunctionContext) => fetchThing(context.signal) }"
+  - "const o = { queryFn: function ({ signal }) { return fetchThing(signal) } }"
+  - "const o = { queryKey: ['a'], staleTime: 0 }"
+invalid:
+  - "const o = { queryFn: () => fetchThing(id) }"
+  - "const o = { queryFn: async () => await fetchThing(id) }"
+  - |
+    const o = {
+      queryFn: async (): Promise<User | null> => {
+        return await ApiClient.get('/api/auth/me')
+      },
+    }
+  - "const o = { queryFn: (): number => 1 }"
+  - "const o = { queryFn: function () { return fetchThing(id) } }"
+  - "const o = { queryFn: async function () { return fetchThing(id) } }"

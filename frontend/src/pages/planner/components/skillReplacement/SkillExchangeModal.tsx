@@ -5,7 +5,7 @@ import { SkillEADisplay } from './SkillEADisplay'
 import { SkillExchangePane } from './SkillExchangePane'
 import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { OFFENSIVE_SKILL_SLOTS } from '@/shared/gameData'
-import { CARD_GRID } from '@/lib/constants'
+import { CARD_GRID, SECTION_STYLES } from '@/lib/constants'
 import type { OffensiveSkillSlot } from '@/shared/gameData'
 import type { SkillEAState, SkillInfo } from '../../types/DeckTypes'
 
@@ -16,7 +16,7 @@ interface SkillExchangeModalProps {
   identityId: string
   skillInfos: [SkillInfo, SkillInfo, SkillInfo] // S1, S2, S3
   skillEA: SkillEAState
-  currentEA?: SkillEAState
+  currentEA?: SkillEAState | undefined
   onExchange: (sourceSlot: OffensiveSkillSlot, targetSlot: OffensiveSkillSlot) => void
   onReset: () => void
 }
@@ -49,8 +49,6 @@ export function SkillExchangeModal({
   onReset,
 }: SkillExchangeModalProps) {
   const { t } = useTranslation(['planner', 'common', 'sinnerNames'])
-
-  // Breakpoint detection for scaling
 
   const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
 
@@ -93,7 +91,7 @@ export function SkillExchangeModal({
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto py-4">
-          <div className="flex flex-col gap-4">
+          <div className={SECTION_STYLES.LAYOUT.column}>
             {/* Top: Current EA display */}
             <div className="flex flex-col gap-2">
               <h3 className="text-sm font-medium text-muted-foreground">
@@ -121,7 +119,7 @@ export function SkillExchangeModal({
             </div>
 
             {/* Bottom: Exchange options */}
-            <div className="flex flex-col gap-4">
+            <div className={SECTION_STYLES.LAYOUT.column}>
               <h3 className="text-sm font-medium text-muted-foreground">
                 {t('pages.plannerMD.skillReplacement.exchangeOptions')}
               </h3>

@@ -1,0 +1,19 @@
+id: no-throw-in-lib-tsx
+valid:
+  - const parsed = schema.safeParse(raw)
+  - "const Fallback = () => <span className=\"text-muted-foreground\">{label}</span>"
+  - |
+    function render(raw: string) {
+      const parsed = schema.safeParse(raw)
+      if (!parsed.success) return <span>{raw}</span>
+      return <em>{parsed.data}</em>
+    }
+invalid:
+  - throw new Error('boom')
+  - |
+    function render(raw: string) {
+      const parsed = schema.safeParse(raw)
+      if (!parsed.success) throw new Error('invalid payload')
+      return <em>{parsed.data}</em>
+    }
+  - throw err

@@ -6,25 +6,23 @@ package org.danteplanner.backend.auth.oauth;
  * @param accessToken  Access token for API calls (required)
  * @param refreshToken Refresh token for renewing access (nullable, not all providers return this)
  * @param idToken      ID token containing user claims (nullable, OIDC providers only)
- * @param expiresIn    Token lifetime in seconds (nullable if not provided by provider)
  */
 public record OAuthTokens(
         String accessToken,
         String refreshToken,
-        String idToken,
-        Long expiresIn
+        String idToken
 ) {
     /**
      * Factory method for tokens without refresh/id token.
      */
-    public static OAuthTokens accessOnly(String accessToken, Long expiresIn) {
-        return new OAuthTokens(accessToken, null, null, expiresIn);
+    public static OAuthTokens accessOnly(String accessToken) {
+        return new OAuthTokens(accessToken, null, null);
     }
 
     /**
      * Factory method for tokens with refresh token.
      */
-    public static OAuthTokens withRefresh(String accessToken, String refreshToken, Long expiresIn) {
-        return new OAuthTokens(accessToken, refreshToken, null, expiresIn);
+    public static OAuthTokens withRefresh(String accessToken, String refreshToken) {
+        return new OAuthTokens(accessToken, refreshToken, null);
     }
 }

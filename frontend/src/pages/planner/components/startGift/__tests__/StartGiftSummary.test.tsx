@@ -10,6 +10,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { StartGiftSummary } from '../StartGiftSummary'
 import type { EGOGiftSpec, EGOGiftNameList } from '@/pages/egoGift'
+import { buildEgoGiftSpecList } from '@/test-utils'
 
 // Mock react-i18next
 vi.mock('react-i18next', async (importOriginal) => {
@@ -31,36 +32,29 @@ vi.mock('react-i18next', async (importOriginal) => {
 })
 
 // Mock gift spec data
-const mockSpec: Record<string, EGOGiftSpec> = {
+const mockSpec: Record<string, EGOGiftSpec> = buildEgoGiftSpecList({
   '9001': {
-    tag: ['TIER_1'] as EGOGiftSpec['tag'],
+    tag: ['TIER_1'],
     keyword: 'Burn',
+    battleKeywordList: [],
     attributeType: 'Red',
     themePack: [],
+    maxEnhancement: 0,
   },
   '9002': {
-    tag: ['TIER_2'] as EGOGiftSpec['tag'],
+    tag: ['TIER_2'],
     keyword: 'Burn',
+    battleKeywordList: [],
     attributeType: 'Red',
     themePack: [],
+    maxEnhancement: 0,
   },
-}
+})
 
 const mockI18n: EGOGiftNameList = {
   '9001': 'Burning Gift 1',
   '9002': 'Burning Gift 2',
 }
-
-// Mock planner editor store (safe version)
-vi.mock('../../../stores/usePlannerEditorStore', () => ({
-  usePlannerEditorStoreSafe: (selector: (state: Record<string, unknown>) => unknown) => {
-    const mockState = {
-      selectedGiftKeyword: null,
-      selectedGiftIds: new Set<string>(),
-    }
-    return selector(mockState)
-  },
-}))
 
 vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
   useEGOGiftListData: () => ({
@@ -70,7 +64,7 @@ vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
 }))
 
 // Mock PlannerSection to simplify testing
-vi.mock('../../PlannerSection', () => ({
+vi.mock('@/components/layout/PlannerSection', () => ({
   PlannerSection: ({ title, children }: { title: string; children: React.ReactNode }) => (
     <section data-testid="planner-section">
       <h2>{title}</h2>
@@ -93,8 +87,8 @@ vi.mock('@/shared/assets', () => ({
 
 describe('StartGiftSummary', () => {
   const defaultProps = {
-    selectedKeywordOverride: null as string | null,
-    selectedGiftIdsOverride: new Set<string>(),
+    selectedKeyword: null as string | null,
+    selectedGiftIds: new Set<string>(),
     onClick: vi.fn(),
   }
 
@@ -128,8 +122,8 @@ describe('StartGiftSummary', () => {
     it('renders keyword icon and gift cards when selection exists', () => {
       const props = {
         ...defaultProps,
-        selectedKeywordOverride: 'Burn',
-        selectedGiftIdsOverride: new Set(['9001']),
+        selectedKeyword: 'Burn',
+        selectedGiftIds: new Set(['9001']),
       }
 
       render(<StartGiftSummary {...props} />)
@@ -147,8 +141,8 @@ describe('StartGiftSummary', () => {
     it('renders multiple gift cards', () => {
       const props = {
         ...defaultProps,
-        selectedKeywordOverride: 'Burn',
-        selectedGiftIdsOverride: new Set(['9001', '9002']),
+        selectedKeyword: 'Burn',
+        selectedGiftIds: new Set(['9001', '9002']),
       }
 
       render(<StartGiftSummary {...props} />)
@@ -160,8 +154,8 @@ describe('StartGiftSummary', () => {
     it('does not render placeholder when selection exists', () => {
       const props = {
         ...defaultProps,
-        selectedKeywordOverride: 'Burn',
-        selectedGiftIdsOverride: new Set(['9001']),
+        selectedKeyword: 'Burn',
+        selectedGiftIds: new Set(['9001']),
       }
 
       render(<StartGiftSummary {...props} />)
@@ -223,8 +217,8 @@ describe('StartGiftSummary', () => {
     it('shows keyword with "no EGO gift selected" message when keyword is selected without gifts', () => {
       const props = {
         ...defaultProps,
-        selectedKeywordOverride: 'Burn',
-        selectedGiftIdsOverride: new Set<string>(), // No gifts selected
+        selectedKeyword: 'Burn',
+        selectedGiftIds: new Set<string>(), // No gifts selected
       }
 
       render(<StartGiftSummary {...props} />)

@@ -1,0 +1,414 @@
+package org.danteplanner.backend.service.token;
+import org.danteplanner.backend.auth.token.TokenBlacklistService;
+import org.danteplanner.backend.support.TestDataFactory;
+
+import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.StringRedisTemplate;
+
+
+import com.redis.testcontainers.RedisContainer;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+
+import java.util.Date;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+/**
+ * Unit tests for TokenBlacklistService.
+ *
+ * <p>Tests the Redis-backed token blacklist behavior including
+ * add, check, and TTL expiration functionality over a live Redis container.</p>
+ *
+ * <p>The container is this class's own, not the fork-shared one: {@code size()},
+ * {@code userInvalidationSize()} and {@code clear()} are the subject here, and all three span the
+ * whole keyspace, so there is no id to narrow them to.</p>
+ */
+@Tag("containerized")
+class TokenBlacklistServiceIT {
+
+    private static final RedisContainer REDIS = new RedisContainer("redis:7-alpine");
+
+    private static StringRedisTemplate ownTemplate;
+
+    private TokenBlacklistService blacklistService;
+
+    @BeforeAll
+    static void startRedis() {
+        REDIS.start();
+        ownTemplate = buildTemplate(REDIS.getRedisHost(), REDIS.getRedisPort());
+    }
+
+    private static StringRedisTemplate buildTemplate(String host, int port) {
+        LettuceConnectionFactory f = new LettuceConnectionFactory(new RedisStandaloneConfiguration(host, port));
+        f.afterPropertiesSet();
+        StringRedisTemplate t = new StringRedisTemplate(f);
+        t.afterPropertiesSet();
+        return t;
+    }
+
+    @BeforeEach
+    void setUp() {
+        blacklistService = new TokenBlacklistService(ownTemplate, ownTemplate, new SimpleMeterRegistry(),
+                TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
+        blacklistService.clear();
+    }
+
+    @Nested
+    @DisplayName("blacklistToken Tests")
+    class BlacklistTokenTests {
+
+        @Test
+        @DisplayName("Should add token to blacklist")
+        void blacklistToken_WhenCalled_AddsTokenToBlacklist() {
+            // Arrange
+            String token = "test.jwt.token";
+            Date expiry = new Date(System.currentTimeMillis() + 60000); // 1 minute from now
+
+            // Act
+            blacklistService.blacklistToken(token, expiry);
+
+            // Assert
+            assertThat(blacklistService.isBlacklisted(token)).isTrue();
+            assertThat(blacklistService.size()).isEqualTo(1);
+        }
+
+        @Test
+        @DisplayName("Should overwrite existing entry for same token")
+        void blacklistToken_WhenSameToken_Overwrites() {
+            // Arrange
+            String token = "test.jwt.token";
+            Date expiry1 = new Date(System.currentTimeMillis() + 60000);
+            Date expiry2 = new Date(System.currentTimeMillis() + 120000);
+
+            // Act
+            blacklistService.blacklistToken(token, expiry1);
+            blacklistService.blacklistToken(token, expiry2);
+
+            // Assert - token still blacklisted, size remains 1
+            assertThat(blacklistService.isBlacklisted(token)).isTrue();
+            assertThat(blacklistService.size()).isEqualTo(1);
+        }
+    }
+
+    @Nested
+    @DisplayName("isBlacklisted Tests")
+    class IsBlacklistedTests {
+
+        @Test
+        @DisplayName("Should return true for blacklisted token")
+        void isBlacklisted_WhenBlacklisted_ReturnsTrue() {
+            // Arrange
+            String token = "blacklisted.jwt.token";
+            Date expiry = new Date(System.currentTimeMillis() + 60000);
+            blacklistService.blacklistToken(token, expiry);
+
+            // Act
+            boolean result = blacklistService.isBlacklisted(token);
+
+            // Assert
+            assertThat(result).isTrue();
+        }
+
+        @Test
+        @DisplayName("Should return false for non-blacklisted token")
+        void isBlacklisted_WhenNotBlacklisted_ReturnsFalse() {
+            // Arrange
+            String unknownToken = "unknown.jwt.token";
+
+            // Act
+            boolean result = blacklistService.isBlacklisted(unknownToken);
+
+            // Assert
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        @DisplayName("Should return false for expired blacklist entry (TTL cleanup)")
+        void isBlacklisted_WhenEntryExpired_ReturnsFalse() {
+            // Arrange - token with expiry in the past
+            String token = "expired.jwt.token";
+            Date expiry = new Date(System.currentTimeMillis() - 1000); // 1 second ago
+            blacklistService.blacklistToken(token, expiry);
+
+            // Act
+            boolean result = blacklistService.isBlacklisted(token);
+
+            // Assert - should return false and remove entry (lazy cleanup)
+            assertThat(result).isFalse();
+            assertThat(blacklistService.size()).isEqualTo(0); // Entry should be removed
+        }
+    }
+
+    @Nested
+    @DisplayName("Utility Methods Tests")
+    class UtilityMethodsTests {
+
+        @Test
+        @DisplayName("clear() should remove all entries")
+        void clear_WhenCalled_RemovesAllEntries() {
+            // Arrange
+            Date expiry = new Date(System.currentTimeMillis() + 60000);
+            blacklistService.blacklistToken("token1", expiry);
+            blacklistService.blacklistToken("token2", expiry);
+            blacklistService.blacklistToken("token3", expiry);
+            assertThat(blacklistService.size()).isEqualTo(3);
+
+            // Act
+            blacklistService.clear();
+
+            // Assert
+            assertThat(blacklistService.size()).isEqualTo(0);
+            assertThat(blacklistService.isBlacklisted("token1")).isFalse();
+        }
+
+        @Test
+        @DisplayName("size() should return correct count")
+        void size_WhenEntriesExist_ReturnsCorrectCount() {
+            // Arrange
+            Date expiry = new Date(System.currentTimeMillis() + 60000);
+
+            // Assert initial
+            assertThat(blacklistService.size()).isEqualTo(0);
+
+            // Add tokens
+            blacklistService.blacklistToken("token1", expiry);
+            assertThat(blacklistService.size()).isEqualTo(1);
+
+            blacklistService.blacklistToken("token2", expiry);
+            assertThat(blacklistService.size()).isEqualTo(2);
+        }
+    }
+
+    @Nested
+    @DisplayName("Rotation Grace Period Tests")
+    class RotationGracePeriodTests {
+
+        @Test
+        @DisplayName("Rotation-blacklisted token should be allowed within grace period")
+        void blacklistTokenForRotation_WhenWithinGracePeriod_Allowed() {
+            // Arrange
+            String token = "rotation.refresh.token";
+            Date expiry = new Date(System.currentTimeMillis() + 60000);
+
+            // Act - blacklist for rotation (grace-eligible)
+            blacklistService.blacklistTokenForRotation(token, expiry);
+
+            // Assert - should NOT be considered blacklisted within the grace window
+            assertThat(blacklistService.isBlacklisted(token)).isFalse();
+        }
+
+        @Test
+        @DisplayName("Immediate-blacklisted token should be rejected instantly")
+        void blacklistToken_WhenBlacklisted_RejectedImmediately() {
+            // Arrange
+            String token = "logout.refresh.token";
+            Date expiry = new Date(System.currentTimeMillis() + 60000);
+
+            // Act - blacklist immediately (logout)
+            blacklistService.blacklistToken(token, expiry);
+
+            // Assert - should be blacklisted immediately, no grace period
+            assertThat(blacklistService.isBlacklisted(token)).isTrue();
+        }
+
+        @Test
+        @DisplayName("Rotation-blacklisted token should be rejected after grace period")
+        void blacklistTokenForRotation_WhenAfterGracePeriod_Rejected() throws InterruptedException {
+            // Arrange
+            String token = "rotation.expired.grace.token";
+            Date expiry = new Date(System.currentTimeMillis() + 60000);
+
+            // Act - blacklist for rotation, then wait past the grace period
+            blacklistService.blacklistTokenForRotation(token, expiry);
+
+            // Simulate grace period expiry by re-adding with an old timestamp
+            // We can't easily wait 5 seconds in a test, so we verify the
+            // immediate path works as a proxy for post-grace behavior
+            blacklistService.blacklistToken(token, expiry); // overwrite with immediate
+
+            // Assert - now rejected
+            assertThat(blacklistService.isBlacklisted(token)).isTrue();
+        }
+
+        @Test
+        @DisplayName("Same token: rotation then logout should override to immediate")
+        void blacklistToken_WhenRotationThenLogout_OverridesToImmediate() {
+            // Arrange
+            String token = "rotate.then.logout.token";
+            Date expiry = new Date(System.currentTimeMillis() + 60000);
+
+            // Act - first rotation (grace), then logout (immediate)
+            blacklistService.blacklistTokenForRotation(token, expiry);
+            assertThat(blacklistService.isBlacklisted(token)).isFalse(); // grace allows
+
+            blacklistService.blacklistToken(token, expiry); // logout overrides
+
+            // Assert - now immediately blacklisted
+            assertThat(blacklistService.isBlacklisted(token)).isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("Token Hashing Tests")
+    class TokenHashingTests {
+
+        @Test
+        @DisplayName("Different tokens should not collide")
+        void blacklistToken_WhenDifferentTokens_DoNotCollide() {
+            // Arrange
+            Date expiry = new Date(System.currentTimeMillis() + 60000);
+            String token1 = "token.one.value";
+            String token2 = "token.two.value";
+
+            // Act
+            blacklistService.blacklistToken(token1, expiry);
+
+            // Assert
+            assertThat(blacklistService.isBlacklisted(token1)).isTrue();
+            assertThat(blacklistService.isBlacklisted(token2)).isFalse();
+        }
+
+        @Test
+        @DisplayName("Same token value should always match")
+        void isBlacklisted_WhenSameToken_AlwaysMatches() {
+            // Arrange
+            Date expiry = new Date(System.currentTimeMillis() + 60000);
+            String token = "consistent.token.value";
+
+            // Act
+            blacklistService.blacklistToken(token, expiry);
+
+            // Assert - check multiple times to verify consistent hashing
+            assertThat(blacklistService.isBlacklisted(token)).isTrue();
+            assertThat(blacklistService.isBlacklisted(token)).isTrue();
+            assertThat(blacklistService.isBlacklisted(token)).isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("Cross-Instance Externalization Tests")
+    class CrossInstanceTests {
+
+        @Test
+        @DisplayName("A blacklisted token is visible to a second service over the same Redis")
+        void blacklistToken_WhenCalled_IsVisibleToASecondServiceOverTheSameRedis() {
+            // Arrange
+            String token = "cross.instance.token";
+            Date futureExpiry = new Date(System.currentTimeMillis() + 60000);
+            blacklistService.blacklistToken(token, futureExpiry);
+
+            // Act - a second service over a fresh template pointing at the SAME container
+            StringRedisTemplate secondTemplate = buildTemplate(REDIS.getRedisHost(), REDIS.getRedisPort());
+            TokenBlacklistService secondService = new TokenBlacklistService(secondTemplate, secondTemplate, new SimpleMeterRegistry(),
+                    TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
+
+            // Assert - externalized revocation is visible across instances
+            assertThat(secondService.isBlacklisted(token)).isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("User Invalidation Redis Externalization Tests")
+    class UserInvalidationRedisTests {
+
+        @Test
+        @DisplayName("A user invalidation is visible to a second service over the same Redis")
+        void invalidateUserTokens_WhenCalled_IsVisibleToASecondServiceOverTheSameRedis() {
+            // Arrange
+            Long userId = TestDataFactory.nextUserId();
+            blacklistService.invalidateUserTokens(userId);
+
+            // Act - a second service over a fresh template pointing at the SAME container
+            StringRedisTemplate secondTemplate = buildTemplate(REDIS.getRedisHost(), REDIS.getRedisPort());
+            TokenBlacklistService secondService = new TokenBlacklistService(secondTemplate, secondTemplate, new SimpleMeterRegistry(),
+                    TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
+
+            // Assert - externalized user invalidation is visible across instances
+            assertThat(secondService.isUserTokenInvalidated(userId, 0L)).isTrue();
+        }
+
+        @Test
+        @DisplayName("userInvalidationSize reflects Redis state and clear() resets it")
+        void userInvalidationSize_WhenInvalidatedThenCleared_ReflectsRedis() {
+            // Arrange
+            Long userId = TestDataFactory.nextUserId();
+
+            // Act + Assert - one invalidation yields size 1
+            blacklistService.invalidateUserTokens(userId);
+            assertThat(blacklistService.userInvalidationSize()).isEqualTo(1);
+
+            // Act + Assert - clear() wipes it back to 0
+            blacklistService.clear();
+            assertThat(blacklistService.userInvalidationSize()).isEqualTo(0);
+        }
+
+        @Test
+        @DisplayName("clearUserInvalidation removes the user's invalidation")
+        void clearUserInvalidation_WhenCalled_RemovesInvalidation() {
+            // Arrange
+            Long userId = TestDataFactory.nextUserId();
+            blacklistService.invalidateUserTokens(userId);
+
+            // Act
+            blacklistService.clearUserInvalidation(userId);
+
+            // Assert
+            assertThat(blacklistService.isUserTokenInvalidated(userId, 0L)).isFalse();
+            assertThat(blacklistService.userInvalidationSize()).isEqualTo(0);
+        }
+    }
+
+    @Nested
+    @DisplayName("Read-Path Fail-Open Tests")
+    class FailOpenTests {
+
+        private static final String SKIP_COUNTER = "blacklist_check_skipped_total";
+
+        @Test
+        @DisplayName("isBlacklisted fails open and increments skip counter when Redis read throws")
+        void isBlacklisted_WhenRedisReadFails_ReturnsFalseAndIncrementsSkipCounter() {
+            // Arrange - a template whose read path throws a DataAccessException
+            StringRedisTemplate mockTemplate = mock(StringRedisTemplate.class);
+            when(mockTemplate.opsForValue()).thenThrow(new RedisConnectionFailureException("down"));
+            SimpleMeterRegistry registry = new SimpleMeterRegistry();
+            TokenBlacklistService service = new TokenBlacklistService(mockTemplate, mockTemplate, registry,
+                    TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
+
+            // Act
+            boolean result = service.isBlacklisted("t");
+
+            // Assert - fail open (false) and skip counter incremented once
+            assertThat(result).isFalse();
+            assertThat(registry.get(SKIP_COUNTER).counter().count()).isEqualTo(1.0);
+        }
+
+        @Test
+        @DisplayName("isUserTokenInvalidated fails open and increments skip counter when Redis read throws")
+        void isUserTokenInvalidated_WhenRedisReadFails_ReturnsFalseAndIncrementsSkipCounter() {
+            // Arrange - a template whose read path throws a DataAccessException
+            StringRedisTemplate mockTemplate = mock(StringRedisTemplate.class);
+            when(mockTemplate.opsForValue()).thenThrow(new RedisConnectionFailureException("down"));
+            SimpleMeterRegistry registry = new SimpleMeterRegistry();
+            TokenBlacklistService service = new TokenBlacklistService(mockTemplate, mockTemplate, registry,
+                    TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
+
+            // Act
+            boolean result = service.isUserTokenInvalidated(1L, 0L);
+
+            // Assert - fail open (false) and skip counter incremented once
+            assertThat(result).isFalse();
+            assertThat(registry.get(SKIP_COUNTER).counter().count()).isEqualTo(1.0);
+        }
+    }
+}

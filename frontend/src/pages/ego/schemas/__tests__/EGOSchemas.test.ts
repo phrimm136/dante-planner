@@ -21,14 +21,11 @@ describe('EGOSkillI18nSchema flavor field', () => {
   })
 
   it('accepts a skill with a flavor lore line', () => {
-    const result = EGOSkillI18nSchema.safeParse({
+    const result = EGOSkillI18nSchema.parse({
       ...baseSkill,
       flavor: 'A blade that cuts through space itself.',
     })
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.flavor).toBe('A blade that cuts through space itself.')
-    }
+    expect(result.flavor).toBe('A blade that cuts through space itself.')
   })
 
   it('rejects non-string flavor', () => {
@@ -52,14 +49,11 @@ describe('EGOPassiveI18nSchema flavor field', () => {
   })
 
   it('accepts a passive with a flavor lore line', () => {
-    const result = EGOPassiveI18nSchema.safeParse({
+    const result = EGOPassiveI18nSchema.parse({
       ...basePassive,
       flavor: 'A whispered prescript.',
     })
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.flavor).toBe('A whispered prescript.')
-    }
+    expect(result.flavor).toBe('A whispered prescript.')
   })
 
   it('rejects non-string flavor', () => {
@@ -92,7 +86,7 @@ describe('EGODataSchema', () => {
     skills: {
       awaken: [
         {
-          id: 2070811,
+          id: '2070811',
           skillData: [
             {
               attributeType: 'AMBER',
@@ -112,7 +106,7 @@ describe('EGODataSchema', () => {
       ],
       erosion: [
         {
-          id: 2070821,
+          id: '2070821',
           skillData: [{ attributeType: 'AMBER', atkType: 'HIT', defaultValue: 28 }, {}, {}, {}],
         },
       ],

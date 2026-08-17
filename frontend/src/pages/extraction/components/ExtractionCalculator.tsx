@@ -16,7 +16,7 @@
 
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { PlannerSection } from '@/pages/planner'
+import { PlannerSection } from '@/components/layout/PlannerSection'
 import { ExtractionInputs } from './ExtractionInputs'
 import { ExtractionResults } from './ExtractionResults'
 import { calculateExtraction } from '../lib/extractionCalculator'

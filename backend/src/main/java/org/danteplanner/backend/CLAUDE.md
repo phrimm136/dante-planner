@@ -10,8 +10,9 @@ Package-by-feature: feature roots (`admin`, `auth`, `comment`, `moderation`, `no
 
 ## Async
 
-- Deliberately NO `@Async`/`@EnableAsync`/`ThreadPoolTaskExecutor` anywhere. The async model is `@Scheduled` + `@TransactionalEventListener(AFTER_COMMIT)` + Redis pub/sub — do not introduce thread pools.
-- AFTER_COMMIT listeners run with no live transaction: any write they perform needs `@Transactional(propagation = REQUIRES_NEW)` or it silently never commits.
+- The async model is `@Scheduled` + `@TransactionalEventListener(AFTER_COMMIT)` + Redis pub/sub + the outbox dispatch executor. `@Async`/`@EnableAsync`/`ThreadPoolTaskExecutor` are banned everywhere else; the single exception is `DomainEventEagerDispatch.onDomainEventRecorded` on `OutboxAsyncConfig`'s pool, frozen by name in `ConventionBaselineTest` with a staleness check. Do not introduce another thread pool.
+- AFTER_COMMIT listeners run with no live transaction: any write they perform directly needs `@Transactional(propagation = REQUIRES_NEW)` or it silently never commits. The eager hop deliberately carries no such annotation — it writes nothing itself, and the `DomainEventDispatcher` it calls opens a transaction of its own.
+- An observer effect is not written by a listener at all. The causing transaction commits a `domain_events` row; the dispatcher derives the effect, and its arms enqueue SSE pushes that are released only after that dispatch commits.
 
 ## Controllers & DTOs
 
@@ -29,6 +30,9 @@ Package-by-feature: feature roots (`admin`, `auth`, `comment`, `moderation`, `no
 - Collections `FetchType.LAZY`; prevent N+1 with `@EntityGraph` or `JOIN FETCH`; explicit `countQuery` on paginated `@Query`.
 - List endpoints take `Pageable` (default size 20, max 100) — never an unbounded `List<Entity>`.
 - Check-then-act races: `@Lock(LockModeType.PESSIMISTIC_WRITE)` repository method. Counters: atomic `@Modifying @Query("... SET x = x + 1")`, not read-modify-write.
+- Method names carry the cardinality: a plural noun returns a collection, `…ById`/`…Of` returns at most one row, a verb prefix (`try…`, `insert…`, `refresh…`, `increment…`) mutates and returns the affected count.
+- Projection interfaces live in the repository package with a `*Row` suffix; repositories never return `*Response` types — a `*Row` is mapped by a static `from(row)` on the DTO.
+- A method returning `boolean`/`Boolean` is named `is…`, never `get…`
 
 ## Security
 

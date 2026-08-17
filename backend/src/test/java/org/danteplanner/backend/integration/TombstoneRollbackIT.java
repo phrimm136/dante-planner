@@ -63,15 +63,14 @@ class TombstoneRollbackIT extends CausalHarnessSupport {
         Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
         Long userId = owner.getId();
         UUID plannerId = planner.getId();
-        UUID deviceId = UUID.randomUUID();
 
         TransactionTemplate txTemplate = new TransactionTemplate(transactionManager);
         txTemplate.executeWithoutResult(status -> {
-            plannerCommandService.deletePlanner(userId, deviceId, plannerId);
+            plannerCommandService.deletePlanner(userId, plannerId);
             status.setRollbackOnly();
         });
 
-        assertThat(plannerRepository.findByIdAndUserIdAndDeletedAtIsNull(plannerId, userId))
+        assertThat(plannerRepository.findAggregateForOwner(plannerId, userId))
                 .as("the rollback must revert the soft-delete: the planner is still live")
                 .isPresent();
 

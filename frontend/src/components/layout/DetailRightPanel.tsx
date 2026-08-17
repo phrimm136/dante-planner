@@ -23,5 +23,3 @@ export function DetailRightPanel({ selector, children }: DetailRightPanelProps) 
     </div>
   )
 }
-
-export default DetailRightPanel

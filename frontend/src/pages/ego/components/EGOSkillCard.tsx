@@ -1,7 +1,14 @@
 import { useEGODetailI18n } from '../hooks/useEGODetailData'
-import { SkillCard, mergeSkillDataUpToLevel } from '@/shared/skill'
+import {
+  SkillCard,
+  SkillDescription,
+  getMergedSkillDesc,
+  mergeSkillDataUpToLevel,
+} from '@/shared/skill'
+import { StyledSkillName } from '@/shared/gameText'
 import { getEGOSkillImagePath } from '@/shared/assets'
 import type { EGOSkillEntry, Threadspin } from '../types/EGOTypes'
+import type { SkillId } from '@/shared/gameData'
 
 interface EGOSkillCardWithGranularI18nProps {
   egoId: string
@@ -26,15 +33,64 @@ export function EGOSkillCardWithGranularI18n({
 
   return (
     <SkillCard
-      entityId={egoId}
-      skillId={skillEntry.id}
-      level={threadspin}
       skillData={mergedData}
       coinString={coinString}
       skillImagePath={getEGOSkillImagePath(egoId, skillType)}
       skillTier={3}
-      useDetailI18n={useEGODetailI18n}
+      nameSlot={
+        <EGOSkillName
+          egoId={egoId}
+          skillId={skillEntry.id}
+          attributeType={mergedData.attributeType}
+        />
+      }
+      descriptionSlot={
+        <EGOSkillDescription egoId={egoId} skillId={skillEntry.id} level={threadspin} />
+      }
       sanityCost={mergedData.mpUsage ?? 0}
+    />
+  )
+}
+
+/**
+ * Suspending name slot — resolves the skill name from EGO detail i18n.
+ */
+function EGOSkillName({
+  egoId,
+  skillId,
+  attributeType,
+}: {
+  egoId: string
+  skillId: SkillId
+  attributeType?: string | undefined
+}) {
+  const i18n = useEGODetailI18n(egoId)
+  return (
+    <StyledSkillName
+      name={i18n.skills[skillId]?.name ?? ''}
+      {...(attributeType !== undefined && { attributeType })}
+    />
+  )
+}
+
+/**
+ * Suspending description slot — merges EGO skill descriptions up to the threadspin.
+ */
+function EGOSkillDescription({
+  egoId,
+  skillId,
+  level,
+}: {
+  egoId: string
+  skillId: SkillId
+  level: Threadspin
+}) {
+  const i18n = useEGODetailI18n(egoId)
+  const skillI18n = i18n.skills[skillId]
+  return (
+    <SkillDescription
+      descData={getMergedSkillDesc(skillI18n?.descs ?? [], level)}
+      {...(skillI18n?.flavor !== undefined && { flavor: skillI18n.flavor })}
     />
   )
 }

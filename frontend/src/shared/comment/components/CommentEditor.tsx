@@ -9,9 +9,9 @@
  * - Cancel/Submit buttons when focused
  */
 
-import { useState, useRef, useMemo } from 'react'
-import { useEditor, EditorContent, EditorContext } from '@tiptap/react'
-import { ErrorBoundary } from 'react-error-boundary'
+import { useState, useRef } from 'react'
+import { useEditor, EditorContent, EditorContext, type Editor } from '@tiptap/react'
+import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
 import { useTranslation } from 'react-i18next'
 import StarterKit from '@tiptap/starter-kit'
 
@@ -38,6 +38,11 @@ interface CommentEditorProps {
   isSubmitting?: boolean
 }
 
+function CommentEditorErrorFallback() {
+  const { t } = useTranslation(['planner', 'common'])
+  return <div className="p-3 text-sm text-muted-foreground">{t('common:loadError')}</div>
+}
+
 export function CommentEditor({
   placeholder,
   disabled = false,
@@ -50,17 +55,21 @@ export function CommentEditor({
   const { t } = useTranslation(['planner', 'common'])
   const containerRef = useRef<HTMLDivElement>(null)
   const [isFocused, setIsFocused] = useState(false)
+  // The server's limit applies to the HTML that gets submitted, not to its plain text.
   const [charCount, setCharCount] = useState(0)
+  const [isEmpty, setIsEmpty] = useState(true)
+
+  const syncCounters = (editor: Editor) => {
+    setCharCount(editor.getHTML().length)
+    setIsEmpty(editor.getText().trim().length === 0)
+  }
 
   // Extensions - StarterKit only (no images, no spoilers)
-  const extensions = useMemo(
-    () => [
-      StarterKit.configure({
-        heading: { levels: [1, 2, 3] },
-      }),
-    ],
-    [],
-  )
+  const extensions = [
+    StarterKit.configure({
+      heading: { levels: [1, 2, 3] },
+    }),
+  ]
 
   const editor = useEditor({
     extensions,
@@ -73,15 +82,15 @@ export function CommentEditor({
       },
     },
     onUpdate: ({ editor }) => {
-      setCharCount(editor.getText().length)
+      syncCounters(editor)
     },
     onCreate: ({ editor }) => {
-      setCharCount(editor.getText().length)
+      syncCounters(editor)
     },
   })
 
   const isOverLimit = charCount > COMMENT_MAX_CHARS
-  const canSubmit = charCount > 0 && !isOverLimit && !isSubmitting
+  const canSubmit = !isEmpty && !isOverLimit && !isSubmitting
 
   const handleFocus = () => {
     if (!disabled) {
@@ -95,7 +104,7 @@ export function CommentEditor({
     // Keep focused if clicking within container (e.g., buttons)
     if (containerRef.current && !containerRef.current.contains(relatedTarget)) {
       // Empty content: collapse buttons (both main and reply editors)
-      if (charCount === 0) {
+      if (isEmpty) {
         setIsFocused(false)
       }
     }
@@ -131,16 +140,10 @@ export function CommentEditor({
         isFocused && 'ring-2 ring-ring ring-offset-2',
         disabled && 'opacity-50 cursor-not-allowed',
       )}
-      onClick={handleFocus}
+      onFocus={handleFocus}
       onBlur={handleBlur}
     >
-      <ErrorBoundary
-        fallbackRender={() => (
-          <div className="p-3 text-sm text-muted-foreground">
-            {t('common:error.editorFailed', 'Editor failed to load')}
-          </div>
-        )}
-      >
+      <ReactErrorBoundary FallbackComponent={CommentEditorErrorFallback}>
         <EditorContext.Provider value={{ editor }}>
           <div className="relative">
             <EditorContent editor={editor} />
@@ -153,7 +156,7 @@ export function CommentEditor({
             )}
           </div>
         </EditorContext.Provider>
-      </ErrorBoundary>
+      </ReactErrorBoundary>
 
       {/* Footer: character count + buttons */}
       <div className="flex items-center justify-end gap-3 px-3 py-2 border-t border-input">
@@ -163,7 +166,7 @@ export function CommentEditor({
 
         {isFocused && (
           <div className="flex gap-2">
-            {(isReply || charCount > 0) && (
+            {(isReply || !isEmpty) && (
               <Button
                 type="button"
                 variant="outline"

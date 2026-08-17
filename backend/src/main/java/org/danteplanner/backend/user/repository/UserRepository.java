@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.Assert;
 
 import java.time.Instant;
 import java.util.List;
@@ -68,6 +69,32 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findWithLockByIdAndDeletedAtIsNull(Long id);
 
     /**
+     * Read a purge-eligible account under a row-level lock.
+     *
+     * <p>Empty means the account stopped being eligible after the scheduler listed it —
+     * reactivation nulls both timestamps — so the caller must treat absence as "skip",
+     * not as "missing".</p>
+     *
+     * @param id     the candidate account
+     * @param cutoff the instant the grace period must have expired before
+     * @return the account if it is still purgeable, with a row-level lock
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT u FROM User u WHERE u.id = :id AND u.deletedAt IS NOT NULL "
+            + "AND u.permanentDeleteScheduledAt IS NOT NULL "
+            + "AND u.permanentDeleteScheduledAt < :cutoff")
+    Optional<User> findWithLockPurgeable(@Param("id") Long id, @Param("cutoff") Instant cutoff);
+
+    /**
+     * Find every active (non-deleted) user except the one holding the given id.
+     * Used by the moderation dashboard to list accounts while excluding the sentinel user.
+     *
+     * @param id the user ID to exclude
+     * @return list of active users other than the excluded one
+     */
+    List<User> findByDeletedAtIsNullAndIdNot(Long id);
+
+    /**
      * Find all active users with timeouts that haven't expired yet.
      * Uses the V014 partial index on timeout_until for efficient lookup.
      * Useful for moderation dashboards to see currently timed-out users.
@@ -78,16 +105,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findByTimeoutUntilAfterAndDeletedAtIsNull(Instant now);
 
     /**
-     * Get all active user IDs except the specified one.
-     * Used for broadcast notifications (e.g., new planner published).
-     *
-     * @param excludeUserId the user ID to exclude (typically the author)
-     * @return list of user IDs
-     */
-    @Query("SELECT u.id FROM User u WHERE u.deletedAt IS NULL AND u.id <> :excludeUserId")
-    List<Long> findAllActiveUserIdsExcept(@Param("excludeUserId") Long excludeUserId);
-
-    /**
      * Find an active (non-deleted) user by username suffix.
      * Username suffixes are unique identifiers safe for moderation operations.
      * Used by moderation endpoints to identify users without exposing internal IDs.
@@ -96,4 +113,16 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @return the active user if found
      */
     Optional<User> findByUsernameSuffixAndDeletedAtIsNull(String usernameSuffix);
+
+    /**
+     * Persists an account that does not exist yet.
+     *
+     * @param user the account to insert, carrying no id
+     * @return the persisted account, carrying its generated id
+     * @throws IllegalArgumentException if the account already carries an id
+     */
+    default User insert(User user) {
+        Assert.isNull(user.getId(), "insert() takes new rows only");
+        return save(user);
+    }
 }

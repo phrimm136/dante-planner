@@ -27,7 +27,6 @@ const validCommentNode = {
   isAuthor: false,
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: null,
-  isUpdated: false,
   isDeleted: false,
   upvoteCount: 5,
   hasUpvoted: true,
@@ -59,10 +58,15 @@ describe('CommentNodeSchema', () => {
     const updatedComment = {
       ...validCommentNode,
       updatedAt: '2024-01-02T00:00:00Z',
-      isUpdated: true,
     }
     const result = CommentNodeSchema.safeParse(updatedComment)
     expect(result.success).toBe(true)
+  })
+
+  it('should reject comment without authorNotificationsEnabled', () => {
+    const { authorNotificationsEnabled: _omitted, ...missingField } = validCommentNode
+    const result = CommentNodeSchema.safeParse(missingField)
+    expect(result.success).toBe(false)
   })
 
   it('should validate comment with nested replies', () => {

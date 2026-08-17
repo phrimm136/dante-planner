@@ -25,12 +25,28 @@ import { calculateNoteByteLength } from '@/shared/noteEditor'
 import type { FloorValidationError, DifficultyValidationError } from '../plannerValidationErrors'
 import type { EGOGiftSpec } from '@/pages/egoGift'
 import type { FloorThemeSelection } from '@/pages/themePack'
-import type { MDPlannerContent } from '../../types/PlannerTypes'
+import type { DungeonIdx } from '@/shared/gameData'
+import type { MDPlannerContent, SerializableFloorSelection } from '../../types/PlannerTypes'
 import type { SinnerEquipment, SkillEAState } from '../../types/DeckTypes'
+import { ThemePackIdSchema } from '@/shared/gameData'
 
 // ============================================================================
 // Fixtures
 // ============================================================================
+
+/** The element at `index`, failing with the actual length instead of yielding undefined. */
+function at<T>(items: readonly T[], index: number): T {
+  const item = items[index]
+  if (item === undefined) {
+    throw new Error(`expected an element at index ${index}, got ${items.length}`)
+  }
+  return item
+}
+
+/** The floor at `index`, failing loudly if the fixture is shorter than the test assumes. */
+function floorAt(content: MDPlannerContent, index: number): SerializableFloorSelection {
+  return at(content.floorSelections, index)
+}
 
 /** Builds a genuinely valid EGOGiftSpec restricted to the given theme packs. */
 function makeGiftSpec(themePack: string[]): EGOGiftSpec {
@@ -73,11 +89,11 @@ function makeValidSkillEAState(): Record<string, SkillEAState> {
  */
 function makeValidFloorSelections(
   count: number,
-  opts: { difficulty?: number; startPackId?: number } = {},
-) {
+  opts: { difficulty?: DungeonIdx; startPackId?: number } = {},
+): SerializableFloorSelection[] {
   const { difficulty = 1, startPackId = 1001 } = opts
   return Array.from({ length: count }, (_, i) => ({
-    themePackId: String(startPackId + i),
+    themePackId: ThemePackIdSchema.parse(String(startPackId + i)),
     difficulty,
     giftIds: [] as string[],
   }))
@@ -95,8 +111,8 @@ function makeValidContent(category: '5F' | '10F' | '15F' = '5F'): MDPlannerConte
   const floorSelections = makeValidFloorSelections(count)
 
   if (category === '15F') {
-    for (let i = 10; i < 15; i++) {
-      floorSelections[i].difficulty = 3 // EXTREME
+    for (const floor of floorSelections.slice(10, 15)) {
+      floor.difficulty = 3 // EXTREME
     }
   }
 
@@ -146,6 +162,12 @@ describe('validateEquipment', () => {
     const errors = validateEquipment(equipment)
     expect(errors.some((e) => e.code === 'EQUIPMENT_MISSING_ZAYIN')).toBe(true)
   })
+
+  it.each(['abc', '', '1.5', ' 2'])('ignores the non-integer sinner key %j', (key) => {
+    const equipment = makeValidEquipment()
+    equipment[key] = { identity: { id: 'i' }, egos: { ZAYIN: { id: 'z' } } } as SinnerEquipment
+    expect(validateEquipment(equipment)).toHaveLength(0)
+  })
 })
 
 // ============================================================================
@@ -155,7 +177,7 @@ describe('validateEquipment', () => {
 describe('validateFloorThemePacksForSave', () => {
   function makeFloors(packs: (string | null)[]): FloorThemeSelection[] {
     return packs.map((themePackId) => ({
-      themePackId,
+      themePackId: themePackId === null ? null : ThemePackIdSchema.parse(themePackId),
       difficulty: 1,
       giftIds: new Set<string>(),
     }))
@@ -195,7 +217,7 @@ describe('validateFloorThemePacksForSave', () => {
     // This test calls validateFloorThemePacksForSave directly with corrupted data.
     const floors: FloorThemeSelection[] = [
       {
-        themePackId: '1001',
+        themePackId: ThemePackIdSchema.parse('1001'),
         difficulty: 1,
         // Warning: deliberately invalid input — an array masquerading as a Set
         // exercises the duplicate-gift guard that Set deserialization would otherwise hide.
@@ -232,7 +254,7 @@ describe('validatePlannerForPublish (strict)', () => {
 
   it('missing theme pack on active floor returns FLOOR_MISSING_THEME_PACK', () => {
     const content = makeValidContent('5F')
-    content.floorSelections[2].themePackId = null
+    floorAt(content, 2).themePackId = null
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '5F')
     expect(isValid).toBe(false)
     expect(errors.some((e) => e.code === 'FLOOR_MISSING_THEME_PACK')).toBe(true)
@@ -240,7 +262,7 @@ describe('validatePlannerForPublish (strict)', () => {
 
   it('Normal difficulty on 10F floor returns DIFFICULTY_INVALID_FOR_CATEGORY', () => {
     const content = makeValidContent('10F')
-    content.floorSelections[0].difficulty = 0 // NORMAL — invalid for 10F
+    floorAt(content, 0).difficulty = 0 // NORMAL — invalid for 10F
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '10F')
     expect(isValid).toBe(false)
     expect(errors.some((e) => e.code === 'DIFFICULTY_INVALID_FOR_CATEGORY')).toBe(true)
@@ -276,13 +298,13 @@ describe('validateSelectedKeywords', () => {
   it('rejects a legacy (renamed) keyword id — the read tier should have remapped it', () => {
     const errors = validateSelectedKeywords(['AccelBullet'])
     expect(errors).toHaveLength(1)
-    expect(errors[0].code).toBe('KEYWORD_INVALID')
+    expect(at(errors, 0).code).toBe('KEYWORD_INVALID')
   })
 
   it('rejects an unknown keyword id', () => {
     const errors = validateSelectedKeywords(['GhostKeyword'])
     expect(errors).toHaveLength(1)
-    expect(errors[0].code).toBe('KEYWORD_INVALID')
+    expect(at(errors, 0).code).toBe('KEYWORD_INVALID')
   })
 })
 
@@ -301,14 +323,14 @@ describe('validatePlannerForDraftSave (non-strict)', () => {
   it('missing theme pack on last floor is allowed (returns null)', () => {
     const content = makeValidContent('5F')
     // Null the last floor only — no subsequent floor can trigger a prerequisite violation
-    content.floorSelections[4].themePackId = null
+    floorAt(content, 4).themePackId = null
     expect(validatePlannerForDraftSave(content, '5F')).toBeNull()
   })
 
   it('floor 3 has pack but floor 2 missing still returns prerequisite error', () => {
     const content = makeValidContent('5F')
     // Floor 2 has no pack, Floor 3 has one → FLOOR_PREREQUISITE_VIOLATION
-    content.floorSelections[1].themePackId = null
+    floorAt(content, 1).themePackId = null
     // floor 2 (index 1) missing, floor 3 (index 2) has pack
     const result = validatePlannerForDraftSave(content, '5F')
     expect(result?.key).toBe('pages.plannerMD.validation.corruptedState')
@@ -324,7 +346,7 @@ describe('validatePlannerForDraftSave (non-strict)', () => {
   it('unaffordable gift on floor with theme pack returns themePackEgoGiftInconsistency i18n key', () => {
     const content = makeValidContent('5F')
     // Floor 1 has themePackId '1001', add gift that's only for '1024'
-    content.floorSelections[0].giftIds = ['9220']
+    floorAt(content, 0).giftIds = ['9220']
     const spec: Record<string, EGOGiftSpec> = {
       '9220': makeGiftSpec(['1024']),
     }
@@ -389,11 +411,28 @@ describe('validateSkillEAState', () => {
     expect(errors.some((e) => e.code === 'SKILL_EA_INVALID_SLOT')).toBe(true)
   })
 
+  it('a stored string value is reported as a bad total, not concatenated into one', () => {
+    const state = makeValidSkillEAState()
+    // Warning: deliberately invalid input — a value that survived storage as text.
+    state['01'] = { 0: '3', 1: 2, 2: 1 } as unknown as SkillEAState
+    const errors = validateSkillEAState(state)
+    const err = errors.find((e) => e.code === 'SKILL_EA_INVALID_TOTAL')
+    expect(err).toBeDefined()
+    // The string slot is skipped, so the total is the two numeric slots.
+    expect(err!.context!.total).toBe(3)
+  })
+
   it('skill EA totalling 7 instead of 6 returns SKILL_EA_INVALID_TOTAL', () => {
     const state = makeValidSkillEAState()
     state['01'] = { 0: 4, 1: 2, 2: 1 } // 4+2+1=7
     const errors = validateSkillEAState(state)
     expect(errors.some((e) => e.code === 'SKILL_EA_INVALID_TOTAL')).toBe(true)
+  })
+
+  it.each(['abc', '', '1.5', ' 2'])('ignores the non-integer sinner key %j', (key) => {
+    const state = makeValidSkillEAState()
+    state[key] = { 0: 3, 1: 2, 2: 1 }
+    expect(validateSkillEAState(state)).toHaveLength(0)
   })
 })
 
@@ -413,7 +452,7 @@ describe('validateGiftIdArray', () => {
   it('duplicate gift ID returns GIFT_DUPLICATE_ID with fieldName in field', () => {
     const errors = validateGiftIdArray(['9001', '9002', '9001'], 'comprehensiveGiftIds')
     expect(errors.some((e) => e.code === 'GIFT_DUPLICATE_ID')).toBe(true)
-    expect(errors[0].field).toContain('comprehensiveGiftIds')
+    expect(at(errors, 0).field).toContain('comprehensiveGiftIds')
   })
 
   it('unknown gift ID returns GIFT_UNKNOWN_ID when egoGiftSpec is provided', () => {
@@ -422,8 +461,8 @@ describe('validateGiftIdArray', () => {
     }
     const errors = validateGiftIdArray(['9001', '9999'], 'selectedGiftIds', spec)
     expect(errors).toHaveLength(1)
-    expect(errors[0].code).toBe('GIFT_UNKNOWN_ID')
-    expect(errors[0].context?.giftId).toBe('9999')
+    expect(at(errors, 0).code).toBe('GIFT_UNKNOWN_ID')
+    expect(at(errors, 0).context?.giftId).toBe('9999')
   })
 
   it('all valid gift IDs return no errors when egoGiftSpec is provided', () => {
@@ -445,8 +484,8 @@ describe('validateGiftIdArray', () => {
     const spec: Record<string, EGOGiftSpec> = {}
     const errors = validateGiftIdArray(['9999', '9999'], 'selectedGiftIds', spec)
     expect(errors).toHaveLength(2)
-    expect(errors[0].code).toBe('GIFT_UNKNOWN_ID')
-    expect(errors[1].code).toBe('GIFT_DUPLICATE_ID')
+    expect(at(errors, 0).code).toBe('GIFT_UNKNOWN_ID')
+    expect(at(errors, 1).code).toBe('GIFT_DUPLICATE_ID')
   })
 
   it('skips existence check when egoGiftSpec is not provided', () => {
@@ -523,8 +562,8 @@ describe('validatePlannerForPublish – gift affordability', () => {
 
   it("gift '9220' is not affordable for theme pack '1110' → FLOOR_UNAFFORDABLE_GIFT", () => {
     const content = makeValidContent('5F')
-    content.floorSelections[0].themePackId = '1110'
-    content.floorSelections[0].giftIds = ['9220']
+    floorAt(content, 0).themePackId = ThemePackIdSchema.parse('1110')
+    floorAt(content, 0).giftIds = ['9220']
 
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '5F', spec)
     expect(isValid).toBe(false)
@@ -537,8 +576,8 @@ describe('validatePlannerForPublish – gift affordability', () => {
 
   it("enhanced gift '19220' (level 1) not affordable for theme pack '1110' → FLOOR_UNAFFORDABLE_GIFT", () => {
     const content = makeValidContent('5F')
-    content.floorSelections[0].themePackId = '1110'
-    content.floorSelections[0].giftIds = ['19220'] // encoded: enhancement=1, base=9220
+    floorAt(content, 0).themePackId = ThemePackIdSchema.parse('1110')
+    floorAt(content, 0).giftIds = ['19220'] // encoded: enhancement=1, base=9220
 
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '5F', spec)
     expect(isValid).toBe(false)
@@ -547,8 +586,8 @@ describe('validatePlannerForPublish – gift affordability', () => {
 
   it("gift '9220' on its correct pack '1024' passes affordability", () => {
     const content = makeValidContent('5F')
-    content.floorSelections[0].themePackId = '1024'
-    content.floorSelections[0].giftIds = ['9220']
+    floorAt(content, 0).themePackId = ThemePackIdSchema.parse('1024')
+    floorAt(content, 0).giftIds = ['9220']
 
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '5F', spec)
     expect(isValid).toBe(true)
@@ -557,7 +596,7 @@ describe('validatePlannerForPublish – gift affordability', () => {
 
   it('universal gift (empty themePack) passes affordability on any pack', () => {
     const content = makeValidContent('5F')
-    content.floorSelections[2].giftIds = ['9001'] // pack '1003', universal gift
+    floorAt(content, 2).giftIds = ['9001'] // pack '1003', universal gift
 
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '5F', spec)
     expect(isValid).toBe(true)
@@ -570,8 +609,8 @@ describe('validatePlannerForPublish – gift affordability', () => {
       '9221': makeGiftSpec(['1024']),
     }
     const content = makeValidContent('5F')
-    content.floorSelections[0].themePackId = '1110'
-    content.floorSelections[0].giftIds = ['9220', '9221']
+    floorAt(content, 0).themePackId = ThemePackIdSchema.parse('1110')
+    floorAt(content, 0).giftIds = ['9220', '9221']
 
     const { errors } = validatePlannerForPublish('My Plan', content, '5F', twoGiftSpec)
     const affordErrors = errors.filter((e) => e.code === 'FLOOR_UNAFFORDABLE_GIFT')
@@ -581,10 +620,10 @@ describe('validatePlannerForPublish – gift affordability', () => {
 
   it('unaffordable gifts on two separate floors produce one error per floor', () => {
     const content = makeValidContent('5F')
-    content.floorSelections[0].themePackId = '1110' // floor 1
-    content.floorSelections[0].giftIds = ['9220']
-    content.floorSelections[1].themePackId = '2000' // floor 2 (unique, not '1110')
-    content.floorSelections[1].giftIds = ['9220']
+    floorAt(content, 0).themePackId = ThemePackIdSchema.parse('1110') // floor 1
+    floorAt(content, 0).giftIds = ['9220']
+    floorAt(content, 1).themePackId = ThemePackIdSchema.parse('2000') // floor 2 (unique, not '1110')
+    floorAt(content, 1).giftIds = ['9220']
 
     const { errors } = validatePlannerForPublish('My Plan', content, '5F', spec)
     const affordErrors = errors.filter((e) => e.code === 'FLOOR_UNAFFORDABLE_GIFT')
@@ -595,8 +634,8 @@ describe('validatePlannerForPublish – gift affordability', () => {
 
   it('egoGiftI18n resolves gift ID to display name in error context', () => {
     const content = makeValidContent('5F')
-    content.floorSelections[0].themePackId = '1110'
-    content.floorSelections[0].giftIds = ['9220']
+    floorAt(content, 0).themePackId = ThemePackIdSchema.parse('1110')
+    floorAt(content, 0).giftIds = ['9220']
 
     const { errors } = validatePlannerForPublish('My Plan', content, '5F', spec, i18n)
     const err = errors.find((e) => e.code === 'FLOOR_UNAFFORDABLE_GIFT') as FloorValidationError
@@ -605,7 +644,7 @@ describe('validatePlannerForPublish – gift affordability', () => {
 
   it('affordability check is skipped when egoGiftSpec is not provided', () => {
     const content = makeValidContent('5F')
-    content.floorSelections[0].giftIds = ['9220'] // would fail if spec were provided
+    floorAt(content, 0).giftIds = ['9220'] // would fail if spec were provided
 
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '5F') // no spec
     expect(isValid).toBe(true)
@@ -614,7 +653,7 @@ describe('validatePlannerForPublish – gift affordability', () => {
 })
 
 // ============================================================================
-// validatePlannerForPublish – gift existence (GIFT_UNKNOWN_ID)
+// validatePlannerForPublish – gift existence (FLOOR_UNKNOWN_GIFT_ID)
 // ============================================================================
 
 describe('validatePlannerForPublish – gift existence', () => {
@@ -623,51 +662,51 @@ describe('validatePlannerForPublish – gift existence', () => {
     '9220': makeGiftSpec(['1024']),
   }
 
-  it('unknown floor gift ID returns GIFT_UNKNOWN_ID', () => {
+  it('unknown floor gift ID returns FLOOR_UNKNOWN_GIFT_ID', () => {
     const content = makeValidContent('5F')
-    content.floorSelections[0].giftIds = ['2029']
+    floorAt(content, 0).giftIds = ['2029']
 
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '5F', spec)
     expect(isValid).toBe(false)
-    const err = errors.find((e) => e.code === 'GIFT_UNKNOWN_ID') as FloorValidationError
+    const err = errors.find((e) => e.code === 'FLOOR_UNKNOWN_GIFT_ID') as FloorValidationError
     expect(err).toBeDefined()
     expect(err.floorNumber).toBe(1)
     expect(err.context?.giftIds as string[]).toContain('2029')
   })
 
-  it('multiple unknown IDs on one floor produce a single GIFT_UNKNOWN_ID error listing all', () => {
+  it('multiple unknown IDs on one floor produce a single FLOOR_UNKNOWN_GIFT_ID error listing all', () => {
     const content = makeValidContent('5F')
-    content.floorSelections[0].giftIds = ['2029', '2030']
+    floorAt(content, 0).giftIds = ['2029', '2030']
 
     const { errors } = validatePlannerForPublish('My Plan', content, '5F', spec)
-    const unknownErrors = errors.filter((e) => e.code === 'GIFT_UNKNOWN_ID')
+    const unknownErrors = errors.filter((e) => e.code === 'FLOOR_UNKNOWN_GIFT_ID')
     expect(unknownErrors).toHaveLength(1)
     expect((unknownErrors[0] as FloorValidationError).context?.giftIds as string[]).toHaveLength(2)
   })
 
-  it('unknown IDs on two separate floors produce one GIFT_UNKNOWN_ID error per floor', () => {
+  it('unknown IDs on two separate floors produce one FLOOR_UNKNOWN_GIFT_ID error per floor', () => {
     const content = makeValidContent('5F')
-    content.floorSelections[0].giftIds = ['2029']
-    content.floorSelections[1].giftIds = ['2030']
+    floorAt(content, 0).giftIds = ['2029']
+    floorAt(content, 1).giftIds = ['2030']
 
     const { errors } = validatePlannerForPublish('My Plan', content, '5F', spec)
-    const unknownErrors = errors.filter((e) => e.code === 'GIFT_UNKNOWN_ID')
+    const unknownErrors = errors.filter((e) => e.code === 'FLOOR_UNKNOWN_GIFT_ID')
     expect(unknownErrors).toHaveLength(2)
     expect((unknownErrors[0] as FloorValidationError).floorNumber).toBe(1)
     expect((unknownErrors[1] as FloorValidationError).floorNumber).toBe(2)
   })
 
-  it('valid floor gift IDs return no GIFT_UNKNOWN_ID errors', () => {
+  it('valid floor gift IDs return no FLOOR_UNKNOWN_GIFT_ID errors', () => {
     const content = makeValidContent('5F')
-    content.floorSelections[0].giftIds = ['9001', '9220']
+    floorAt(content, 0).giftIds = ['9001', '9220']
 
     const { errors } = validatePlannerForPublish('My Plan', content, '5F', spec)
-    expect(errors.filter((e) => e.code === 'GIFT_UNKNOWN_ID')).toHaveLength(0)
+    expect(errors.filter((e) => e.code === 'FLOOR_UNKNOWN_GIFT_ID')).toHaveLength(0)
   })
 
   it('existence check is skipped when egoGiftSpec is not provided', () => {
     const content = makeValidContent('5F')
-    content.floorSelections[0].giftIds = ['2029']
+    floorAt(content, 0).giftIds = ['2029']
 
     const { isValid } = validatePlannerForPublish('My Plan', content, '5F')
     expect(isValid).toBe(true)
@@ -752,7 +791,7 @@ describe('validatePlannerForPublish – 15F difficulty', () => {
 
   it('floor 11 Hard (not Extreme) in 15F returns DIFFICULTY_INVALID_FOR_CATEGORY for floor 11', () => {
     const content = makeValidContent('15F')
-    content.floorSelections[10].difficulty = 1 // index 10 = floor 11, must be Extreme (3)
+    floorAt(content, 10).difficulty = 1 // index 10 = floor 11, must be Extreme (3)
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '15F')
     expect(isValid).toBe(false)
     const err = errors.find(
@@ -764,7 +803,7 @@ describe('validatePlannerForPublish – 15F difficulty', () => {
 
   it('floor 1 Normal (not Hard) in 15F returns DIFFICULTY_INVALID_FOR_CATEGORY', () => {
     const content = makeValidContent('15F')
-    content.floorSelections[0].difficulty = 0 // Normal — floors 1-10 must be Hard
+    floorAt(content, 0).difficulty = 0 // Normal — floors 1-10 must be Hard
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '15F')
     expect(isValid).toBe(false)
     expect(errors.some((e) => e.code === 'DIFFICULTY_INVALID_FOR_CATEGORY')).toBe(true)
@@ -783,8 +822,8 @@ describe('validatePlannerForDraftSave – additional cases', () => {
 
   it('egoGiftI18n name appears in params.gifts for unaffordable gift', () => {
     const content = makeValidContent('5F')
-    content.floorSelections[0].themePackId = '1110'
-    content.floorSelections[0].giftIds = ['9220']
+    floorAt(content, 0).themePackId = ThemePackIdSchema.parse('1110')
+    floorAt(content, 0).giftIds = ['9220']
 
     const result = validatePlannerForDraftSave(content, '5F', spec, i18n)
     expect(result?.key).toBe('pages.plannerMD.publish.themePackEgoGiftInconsistency')
@@ -793,20 +832,20 @@ describe('validatePlannerForDraftSave – additional cases', () => {
 
   it('affordability check skipped without egoGiftSpec returns null', () => {
     const content = makeValidContent('5F')
-    content.floorSelections[0].giftIds = ['9220'] // would fail with spec
+    floorAt(content, 0).giftIds = ['9220'] // would fail with spec
     expect(validatePlannerForDraftSave(content, '5F')).toBeNull()
   })
 
   it('duplicate pack in non-strict mode returns corruptedState key', () => {
     const content = makeValidContent('5F')
-    content.floorSelections[1].themePackId = content.floorSelections[0].themePackId // duplicate
+    floorAt(content, 1).themePackId = floorAt(content, 0).themePackId // duplicate
     const result = validatePlannerForDraftSave(content, '5F')
     expect(result?.key).toBe('pages.plannerMD.validation.corruptedState')
   })
 
   it('unknown floor gift ID returns unknownGiftId i18n key', () => {
     const content = makeValidContent('5F')
-    content.floorSelections[0].giftIds = ['2029']
+    floorAt(content, 0).giftIds = ['2029']
 
     const result = validatePlannerForDraftSave(content, '5F', spec)
     expect(result?.key).toBe('pages.plannerMD.validation.unknownGiftId')
@@ -816,8 +855,8 @@ describe('validatePlannerForDraftSave – additional cases', () => {
 
   it('existence error is reported before affordability error', () => {
     const content = makeValidContent('5F')
-    content.floorSelections[0].themePackId = '1110'
-    content.floorSelections[0].giftIds = ['2029', '9220']
+    floorAt(content, 0).themePackId = ThemePackIdSchema.parse('1110')
+    floorAt(content, 0).giftIds = ['2029', '9220']
 
     const result = validatePlannerForDraftSave(content, '5F', spec)
     expect(result?.key).toBe('pages.plannerMD.validation.unknownGiftId')
@@ -838,8 +877,8 @@ describe('validatePlannerForDraftSave – gift affordability', () => {
 
   it('unaffordable gift returns themePackEgoGiftInconsistency with pack and gift name', () => {
     const content = makeValidContent('5F')
-    content.floorSelections[0].themePackId = '1110'
-    content.floorSelections[0].giftIds = ['9220']
+    floorAt(content, 0).themePackId = ThemePackIdSchema.parse('1110')
+    floorAt(content, 0).giftIds = ['9220']
 
     const result = validatePlannerForDraftSave(content, '5F', spec, i18n)
     expect(result?.key).toBe('pages.plannerMD.publish.themePackEgoGiftInconsistency')
@@ -849,23 +888,23 @@ describe('validatePlannerForDraftSave – gift affordability', () => {
 
   it('gift on correct pack returns null', () => {
     const content = makeValidContent('5F')
-    content.floorSelections[0].themePackId = '1024'
-    content.floorSelections[0].giftIds = ['9220']
+    floorAt(content, 0).themePackId = ThemePackIdSchema.parse('1024')
+    floorAt(content, 0).giftIds = ['9220']
 
     expect(validatePlannerForDraftSave(content, '5F', spec)).toBeNull()
   })
 
   it('universal gift on any pack returns null', () => {
     const content = makeValidContent('5F')
-    content.floorSelections[0].giftIds = ['9001']
+    floorAt(content, 0).giftIds = ['9001']
 
     expect(validatePlannerForDraftSave(content, '5F', spec)).toBeNull()
   })
 
   it('multiple unaffordable gifts on one floor lists all names', () => {
     const content = makeValidContent('5F')
-    content.floorSelections[0].themePackId = '1110'
-    content.floorSelections[0].giftIds = ['9220', '9221']
+    floorAt(content, 0).themePackId = ThemePackIdSchema.parse('1110')
+    floorAt(content, 0).giftIds = ['9220', '9221']
 
     const result = validatePlannerForDraftSave(content, '5F', spec, i18n)
     expect(result?.key).toBe('pages.plannerMD.publish.themePackEgoGiftInconsistency')
@@ -876,14 +915,14 @@ describe('validatePlannerForDraftSave – gift affordability', () => {
   it('floor without theme pack skips affordability check', () => {
     const content = makeValidContent('5F')
     for (const floor of content.floorSelections) floor.themePackId = null
-    content.floorSelections[0].giftIds = ['9220']
+    floorAt(content, 0).giftIds = ['9220']
 
     expect(validatePlannerForDraftSave(content, '5F', spec)).toBeNull()
   })
 
   it('affordability check skipped without egoGiftSpec', () => {
     const content = makeValidContent('5F')
-    content.floorSelections[0].giftIds = ['9220']
+    floorAt(content, 0).giftIds = ['9220']
 
     expect(validatePlannerForDraftSave(content, '5F')).toBeNull()
   })

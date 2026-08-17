@@ -59,7 +59,7 @@ class RoutingSeoulIT extends CausalHarnessSupport {
 
     @Test
     @DisplayName("readOnly tx routes to the stale replica; read-write tx routes to the fresh primary")
-    void routing_readOnlyTxSeesStaleReplica_readWriteTxSeesFreshPrimary() {
+    void routing_WhenReadOnlyTxSeesStaleReplica_ReadWriteTxSeesFreshPrimary() {
         try {
             primaryJdbcTemplate.execute(
                     "CREATE TABLE IF NOT EXISTS routing_probe (id INT PRIMARY KEY, val VARCHAR(64))");

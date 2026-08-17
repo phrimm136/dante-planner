@@ -1,27 +1,26 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { PlannerSection } from '../PlannerSection'
+import { useIsBreakpoint } from '@/components/hooks/use-is-breakpoint'
+import { PlannerSection } from '@/components/layout/PlannerSection'
 import { SinnerSkillCard } from './SinnerSkillCard'
 import { SkillExchangeModal } from './SkillExchangeModal'
 import { useIdentityListData } from '@/pages/identity'
-import { usePlannerEditorStoreSafe } from '../../stores/usePlannerEditorStore'
+import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { SINNERS, DEFAULT_SKILL_EA } from '@/shared/gameData'
 import { CARD_GRID } from '@/lib/constants'
 import type { OffensiveSkillSlot } from '@/shared/gameData'
 import type { SinnerEquipment, SkillEAState, SkillInfo } from '../../types/DeckTypes'
 
-interface SkillReplacementSectionProps {
+export interface SkillReplacementSectionProps {
+  equipment: Record<string, SinnerEquipment>
+  plannedEAState: Record<string, SkillEAState>
   /** Current EA state for tracker mode (shows difference from planned) */
   currentEAState?: Record<string, SkillEAState>
+  /** Absent in read-only surfaces, which never open the exchange modal. */
+  setSkillEAState?: (state: Record<string, SkillEAState>) => void
   readOnly?: boolean
   onViewNotes?: () => void
-  /** Override equipment from store (for viewer/tracker mode) */
-  equipmentOverride?: Record<string, SinnerEquipment>
-  /** Override plannedEAState from store (for viewer/tracker mode) */
-  plannedEAStateOverride?: Record<string, SkillEAState>
-  /** Override setSkillEAState from store (for tracker mode - sets currentEAState) */
-  setSkillEAStateOverride?: (state: Record<string, SkillEAState>) => void
 }
 
 /**
@@ -31,21 +30,13 @@ interface SkillReplacementSectionProps {
  * Fetches identity data internally for skill attribute/attack type display.
  */
 export function SkillReplacementSection({
+  equipment,
+  plannedEAState,
   currentEAState,
+  setSkillEAState,
   readOnly = false,
   onViewNotes,
-  equipmentOverride,
-  plannedEAStateOverride,
-  setSkillEAStateOverride,
 }: SkillReplacementSectionProps) {
-  // Store state (safe - returns undefined if outside context)
-  const storeEquipment = usePlannerEditorStoreSafe((s) => s.equipment)
-  const storeSkillEAState = usePlannerEditorStoreSafe((s) => s.skillEAState)
-  const storeSetSkillEAState = usePlannerEditorStoreSafe((s) => s.setSkillEAState)
-  const equipment = equipmentOverride ?? storeEquipment!
-  const plannedEAState = plannedEAStateOverride ?? storeSkillEAState!
-  // No-op setter for viewer mode
-  const setSkillEAState = setSkillEAStateOverride ?? storeSetSkillEAState ?? (() => {})
   const { t } = useTranslation(['planner', 'common'])
 
   // Fetch identity data internally
@@ -54,32 +45,16 @@ export function SkillReplacementSection({
   // Modal state
   const [selectedSinner, setSelectedSinner] = useState<string | null>(null)
 
-  // Breakpoint detection for scaling and column count
-  const [windowWidth, setWindowWidth] = useState(
-    typeof window !== 'undefined' ? window.innerWidth : 1024,
-  )
-
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowWidth(window.innerWidth)
-    }
-
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
+  const isDesktop = useIsBreakpoint('min', CARD_GRID.LG_BREAKPOINT)
+  const isSm = useIsBreakpoint('min', CARD_GRID.SM_BREAKPOINT)
 
   // Calculate scale and dimensions
-  const isDesktop = windowWidth >= CARD_GRID.LG_BREAKPOINT
   const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
   const scale = isDesktop ? 1 : mobileScale
   const scaledWidth = CARD_GRID.WIDTH.SINNER_SKILL * scale
   const scaledHeight = CARD_GRID.HEIGHT.SINNER_SKILL * scale
 
-  // Calculate column count based on breakpoint
-  const getColumnCount = () => {
-    if (windowWidth >= 640) return 6 // sm
-    return 3 // default
-  }
+  const getColumnCount = () => (isSm ? 6 : 3)
 
   const columnCount = getColumnCount()
 
@@ -112,7 +87,7 @@ export function SkillReplacementSection({
     const activeEA = ea || { ...DEFAULT_SKILL_EA }
     if (activeEA[sourceSlot] <= 0) return
 
-    setSkillEAState({
+    setSkillEAState?.({
       ...plannedEAState,
       [sinnerCode]: {
         ...activeEA,
@@ -124,7 +99,7 @@ export function SkillReplacementSection({
 
   // Handle reset: restore EA to defaults (3/2/1)
   const handleReset = (sinnerCode: string) => {
-    setSkillEAState({
+    setSkillEAState?.({
       ...plannedEAState,
       [sinnerCode]: { ...DEFAULT_SKILL_EA },
     })
@@ -133,9 +108,13 @@ export function SkillReplacementSection({
   // Get current modal data (selectedSinner is now a sinner code)
   const selectedSinnerEquipment = selectedSinner ? equipment[selectedSinner] : null
   const selectedIdentityId = selectedSinnerEquipment?.identity.id
+  const selectedSinnerName = selectedSinner ? SINNERS[parseInt(selectedSinner, 10) - 1] : undefined
 
   return (
-    <PlannerSection title={t('pages.plannerMD.skillReplacement.title')} onViewNotes={onViewNotes}>
+    <PlannerSection
+      title={t('pages.plannerMD.skillReplacement.title')}
+      {...(onViewNotes !== undefined && { onViewNotes })}
+    >
       {/* Sinner Grid - Responsive: 6->4->3->2 columns */}
       <div
         className="grid mx-auto gap-0.5"
@@ -181,11 +160,11 @@ export function SkillReplacementSection({
       </div>
 
       {/* Exchange Modal - Don't render when readOnly */}
-      {!readOnly && selectedSinner && selectedIdentityId && (
+      {!readOnly && selectedSinner && selectedIdentityId && selectedSinnerName && (
         <SkillExchangeModal
           open={!!selectedSinner}
           onOpenChange={(open) => !open && setSelectedSinner(null)}
-          sinnerName={SINNERS[parseInt(selectedSinner, 10) - 1]}
+          sinnerName={selectedSinnerName}
           identityId={selectedIdentityId}
           skillInfos={getSkillInfos(selectedIdentityId)}
           skillEA={plannedEAState[selectedSinner] || { ...DEFAULT_SKILL_EA }}
@@ -199,5 +178,27 @@ export function SkillReplacementSection({
         />
       )}
     </PlannerSection>
+  )
+}
+
+/** Props a store-bound caller supplies; deck and planned EA come from the store. */
+export type StoreBoundSkillReplacementSectionProps = Omit<
+  SkillReplacementSectionProps,
+  'equipment' | 'plannedEAState' | 'setSkillEAState'
+>
+
+/** Renders the section against the deck and skill EA held by the planner editor store. */
+export function StoreBoundSkillReplacementSection(props: StoreBoundSkillReplacementSectionProps) {
+  const equipment = usePlannerEditorStore((s) => s.equipment)
+  const plannedEAState = usePlannerEditorStore((s) => s.skillEAState)
+  const setSkillEAState = usePlannerEditorStore((s) => s.setSkillEAState)
+
+  return (
+    <SkillReplacementSection
+      {...props}
+      equipment={equipment}
+      plannedEAState={plannedEAState}
+      setSkillEAState={setSkillEAState}
+    />
   )
 }

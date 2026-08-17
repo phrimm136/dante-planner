@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.Assert;
 
 import java.util.List;
 import java.util.Optional;
@@ -56,16 +57,19 @@ public interface PlannerCommentRepository extends JpaRepository<PlannerComment, 
     int decrementUpvoteCount(@Param("commentId") Long commentId);
 
     /**
-     * Reassign all comments from a user to the sentinel user.
-     * Used during hard-delete to preserve comment content while anonymizing the author.
+     * Reassign a user's comments to the sentinel user and clear their text.
      *
-     * @param userId     the user ID whose comments should be reassigned
+     * <p>The row survives so replies keep their parent; the content does not. {@code content} is
+     * NOT NULL, so it is emptied rather than nulled, matching {@link
+     * org.danteplanner.backend.comment.entity.PlannerComment#softDelete()}.</p>
+     *
+     * @param userId     the user ID whose comments should be anonymized
      * @param sentinelId the sentinel user ID to reassign comments to
-     * @return the number of comments reassigned
+     * @return the number of comments anonymized
      */
     @Modifying
-    @Query("UPDATE PlannerComment c SET c.userId = :sentinelId WHERE c.userId = :userId")
-    int reassignCommentsToSentinel(@Param("userId") Long userId, @Param("sentinelId") Long sentinelId);
+    @Query("UPDATE PlannerComment c SET c.userId = :sentinelId, c.content = '' WHERE c.userId = :userId")
+    int anonymizeCommentsToSentinel(@Param("userId") Long userId, @Param("sentinelId") Long sentinelId);
 
     /**
      * Count non-deleted comments for a planner.
@@ -77,21 +81,6 @@ public interface PlannerCommentRepository extends JpaRepository<PlannerComment, 
     long countByPlannerIdAndDeletedAtIsNull(UUID plannerId);
 
     /**
-     * Batch count non-deleted comments grouped by planner ID.
-     * Used for list views to avoid N+1 queries when displaying comment counts.
-     *
-     * @param plannerIds list of planner IDs to count comments for
-     * @return list of [plannerId, count] pairs
-     */
-    @Query("""
-        SELECT c.plannerId, COUNT(c)
-        FROM PlannerComment c
-        WHERE c.plannerId IN :plannerIds AND c.deletedAt IS NULL
-        GROUP BY c.plannerId
-        """)
-    List<Object[]> countByPlannerIdsGrouped(@Param("plannerIds") List<UUID> plannerIds);
-
-    /**
      * Find a comment by its public UUID.
      * Used for resolving frontend UUIDs to internal entities.
      *
@@ -99,4 +88,16 @@ public interface PlannerCommentRepository extends JpaRepository<PlannerComment, 
      * @return the comment if found
      */
     Optional<PlannerComment> findByPublicId(UUID publicId);
+
+    /**
+     * Persists a comment that does not exist yet.
+     *
+     * @param comment the comment to insert, carrying no id
+     * @return the persisted comment, carrying its generated id
+     * @throws IllegalArgumentException if the comment already carries an id
+     */
+    default PlannerComment insert(PlannerComment comment) {
+        Assert.isNull(comment.getId(), "insert() takes new rows only");
+        return save(comment);
+    }
 }

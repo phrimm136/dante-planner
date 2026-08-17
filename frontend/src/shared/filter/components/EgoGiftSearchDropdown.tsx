@@ -1,32 +1,34 @@
-import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { SearchableMultiSelect } from './SearchableMultiSelect'
-import { buildNameOptions, type SearchListDataHook } from './searchDropdownOptions'
+import { buildNameOptions } from './searchDropdownOptions'
 
 /**
  * EGO Gift searchable dropdown with i18n names.
- * Shared by AbEventPage and ThemePackPage filter panes.
  * Gifts are not sinner-owned: no sinner suffix on labels (unlike the
  * identity/EGO search dropdowns).
+ *
+ * The egoGift slice fetches ids/names and renders this inside its own Suspense
+ * boundary, keeping `shared/filter` free of any `@/pages/*` import (sink rule).
  */
 export function EgoGiftSearchDropdown({
-  selectedEgoGifts,
+  selected,
   onSelectionChange,
-  useListData,
+  ids,
+  names,
 }: {
-  selectedEgoGifts: Set<string>
+  selected: Set<string>
   onSelectionChange: (gifts: Set<string>) => void
-  useListData: SearchListDataHook
+  ids: string[]
+  names: Record<string, string>
 }) {
   const { t } = useTranslation('database')
-  const { spec, i18n: giftNames } = useListData()
 
-  const options = useMemo(() => buildNameOptions(Object.keys(spec), giftNames), [spec, giftNames])
+  const options = buildNameOptions(ids, names)
 
   return (
     <SearchableMultiSelect
       options={options}
-      selectedValues={selectedEgoGifts}
+      selectedValues={selected}
       onSelectionChange={onSelectionChange}
       placeholder={t('filters.egoGift', 'EGO Gift')}
       searchPlaceholder={t('filters.searchEgoGift', 'Search EGO Gifts...')}

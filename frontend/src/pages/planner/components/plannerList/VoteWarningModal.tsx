@@ -1,17 +1,11 @@
 import { useTranslation } from 'react-i18next'
-import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogDescription,
-} from '@/components/ui/dialog'
 
-interface VoteWarningModalProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+import {
+  ConfirmActionDialog,
+  type ActionDialogControl,
+} from '@/components/feedback/ConfirmActionDialog'
+
+interface VoteWarningModalProps extends ActionDialogControl {
   onConfirm: () => void
   voteDirection: 'UP' | 'DOWN'
   plannerId: string
@@ -39,44 +33,30 @@ export function VoteWarningModal({
   const { t } = useTranslation('planner')
 
   const handleConfirm = () => {
-    // Mark warning as shown for this planner
-    // Fallback: If localStorage fails (disabled/full/unavailable), still proceed with vote
+    // Warning is a courtesy: an unavailable localStorage must not block the vote
     try {
       localStorage.setItem(`vote-warning-shown-${plannerId}`, 'true')
     } catch (error) {
-      // localStorage unavailable (private browsing, quota exceeded, disabled)
-      // Log error but don't block vote - warning is courtesy, not requirement
       console.warn('Failed to save vote warning state to localStorage:', error)
     }
     onConfirm()
     onOpenChange(false)
   }
 
-  const handleCancel = () => {
-    onOpenChange(false)
-  }
-
   const messageKey = voteDirection === 'UP' ? 'voteWarning.messageUp' : 'voteWarning.messageDown'
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full max-w-[400px] sm:max-w-[90vw]">
-        <DialogHeader>
-          <DialogTitle>{t('voteWarning.title')}</DialogTitle>
-          <DialogDescription className="text-base font-medium pt-2">
-            {t(messageKey)}
-          </DialogDescription>
-        </DialogHeader>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={handleCancel}>
-            {t('voteWarning.cancel')}
-          </Button>
-          <Button variant="destructive" onClick={handleConfirm}>
-            {t('voteWarning.understand')}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <ConfirmActionDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      className="w-full max-w-[400px] sm:max-w-[90vw]"
+      title={t('voteWarning.title')}
+      description={t(messageKey)}
+      descriptionClassName="text-base font-medium pt-2"
+      cancelLabel={t('voteWarning.cancel')}
+      confirmLabel={t('voteWarning.understand')}
+      destructive
+      onConfirm={handleConfirm}
+    />
   )
 }

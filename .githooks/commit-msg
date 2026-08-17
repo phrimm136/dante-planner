@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Check if commit message contains Claude signature
+if grep -q "Co-Authored-By: Claude" "$1"; then
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "❌ COMMIT REJECTED"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "Claude signature detected in commit message."
+    echo ""
+    echo "Per CLAUDE.md Git Workflow rules:"
+    echo "  ❌ Do NOT add 'Co-Authored-By: Claude' to commits"
+    echo ""
+    echo "Please remove the Co-Authored-By line and try again."
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    exit 1
+fi
+
+exit 0

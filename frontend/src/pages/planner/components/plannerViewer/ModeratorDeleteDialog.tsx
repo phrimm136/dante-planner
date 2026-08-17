@@ -1,22 +1,11 @@
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
+import { ModerationReasonDialog } from '@/shared/moderation'
+import type { ActionDialogControl } from '@/components/feedback/ConfirmActionDialog'
 
-interface ModeratorDeleteDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+interface ModeratorDeleteDialogProps extends ActionDialogControl {
   plannerTitle: string
   onConfirm: (reason: string) => void
-  isPending: boolean
 }
 
 /**
@@ -31,57 +20,21 @@ export function ModeratorDeleteDialog({
   isPending,
 }: ModeratorDeleteDialogProps) {
   const { t } = useTranslation(['moderation'])
-  const [reason, setReason] = useState('')
-
-  const handleConfirm = () => {
-    onConfirm(reason)
-    setReason('') // Reset for next time
-  }
-
-  const handleCancel = () => {
-    onOpenChange(false)
-    setReason('') // Reset on cancel
-  }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t('plannerTakedown.title')}</DialogTitle>
-          <DialogDescription>
-            {t('plannerTakedown.description', { title: plannerTitle })}
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-2">
-          <label htmlFor="takedown-reason" className="text-sm font-medium">
-            {t('plannerTakedown.reason')}
-          </label>
-          <textarea
-            id="takedown-reason"
-            value={reason}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setReason(e.target.value)}
-            placeholder={t('plannerTakedown.reasonPlaceholder')}
-            maxLength={500}
-            rows={4}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none overflow-y-auto"
-          />
-          <p className="text-xs text-muted-foreground text-right">{reason.length}/500</p>
-        </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={handleCancel} disabled={isPending}>
-            {t('plannerTakedown.cancel')}
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={handleConfirm}
-            disabled={isPending || !reason.trim()}
-          >
-            {t('plannerTakedown.takedown')}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <ModerationReasonDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t('plannerTakedown.title')}
+      description={t('plannerTakedown.description', { title: plannerTitle })}
+      reasonLabel={t('plannerTakedown.reason')}
+      reasonPlaceholder={t('plannerTakedown.reasonPlaceholder')}
+      reasonInputId="takedown-reason"
+      cancelLabel={t('plannerTakedown.cancel')}
+      confirmLabel={t('plannerTakedown.takedown')}
+      destructive
+      onConfirm={onConfirm}
+      {...(isPending !== undefined && { isPending })}
+    />
   )
 }

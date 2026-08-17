@@ -1,9 +1,8 @@
 package org.danteplanner.backend.shared.gtid;
 
+import lombok.extern.slf4j.Slf4j;
 import javax.sql.DataSource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -18,9 +17,9 @@ import org.springframework.transaction.support.TransactionTemplate;
  * routing datasource, so the probe resolves to the replica pool. Called before the request pins to
  * the primary, so a not-caught-up result lets the filter route this one request to the primary.</p>
  */
+@Slf4j
 public class GtidReadGate {
 
-    private static final Logger log = LoggerFactory.getLogger(GtidReadGate.class);
 
     private static final String WAIT_GTID_SQL = "SELECT WAIT_FOR_EXECUTED_GTID_SET(?, ?)";
 

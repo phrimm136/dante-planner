@@ -5,6 +5,8 @@
  * plus the mapping from a structured error to a user-facing i18n key + params.
  */
 
+import { validationAppError } from '@/lib/apiErrorClassifier'
+
 /**
  * Base validation error with context
  */
@@ -80,7 +82,7 @@ export interface FloorValidationError extends ValidationError {
     | 'FLOOR_DUPLICATE_GIFT_ID'
     | 'FLOOR_DUPLICATE_THEME_PACK'
     | 'FLOOR_UNAFFORDABLE_GIFT'
-    | 'GIFT_UNKNOWN_ID'
+    | 'FLOOR_UNKNOWN_GIFT_ID'
   /** 0-indexed floor that failed validation */
   floorIndex?: number
   /** 1-indexed floor number for display */
@@ -128,6 +130,14 @@ export type PlannerValidationError =
   | TitleValidationError
   | KeywordValidationError
 
+/** Planner validators name their keys inside the planner namespace. */
+export function plannerValidationError(friendly: { key: string; params?: Record<string, string> }) {
+  return validationAppError({
+    key: `planner:${friendly.key}`,
+    ...(friendly.params !== undefined && { params: friendly.params }),
+  })
+}
+
 /**
  * Maps a structured validation error to an i18n key + params for toast display
  *
@@ -156,13 +166,12 @@ export function toUserFriendlyError(error: PlannerValidationError): {
         },
       }
     }
-    case 'GIFT_UNKNOWN_ID': {
-      const floorError = error as FloorValidationError
-      const ctx = floorError.context as { giftIds?: string[] } | undefined
+    case 'FLOOR_UNKNOWN_GIFT_ID': {
+      const ctx = error.context as { giftIds?: string[] } | undefined
       return {
         key: 'pages.plannerMD.validation.unknownGiftId',
         params: {
-          floor: String(floorError.floorNumber ?? ''),
+          floor: String(error.floorNumber ?? ''),
           gifts: ctx?.giftIds?.join(', ') ?? '',
         },
       }

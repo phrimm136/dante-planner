@@ -61,7 +61,7 @@ class OAuthStateServiceTest {
 
     @Test
     @DisplayName("seal then open returns the same state and code verifier")
-    void open_whenSealedByService_returnsSameTransaction() {
+    void open_WhenSealedByService_ReturnsSameTransaction() {
         String state = "state-abc";
         String verifier = "verifier-xyz";
         String returnTo = "http://localhost:5173/planner/1";
@@ -76,19 +76,19 @@ class OAuthStateServiceTest {
 
     @Test
     @DisplayName("open returns empty when the token is null")
-    void open_whenNull_returnsEmpty() {
+    void open_WhenNull_ReturnsEmpty() {
         assertThat(stateService.open(null)).isEmpty();
     }
 
     @Test
     @DisplayName("open returns empty when the token is blank")
-    void open_whenBlank_returnsEmpty() {
+    void open_WhenBlank_ReturnsEmpty() {
         assertThat(stateService.open("   ")).isEmpty();
     }
 
     @Test
     @DisplayName("open returns empty when the signature is tampered")
-    void open_whenTampered_returnsEmpty() {
+    void open_WhenTampered_ReturnsEmpty() {
         String sealed = stateService.seal("state", "verifier", "http://localhost");
         // Corrupt a character mid-payload so the signed content changes (flipping the final
         // signature char only touches unused base64 bits and can still verify).
@@ -102,7 +102,7 @@ class OAuthStateServiceTest {
 
     @Test
     @DisplayName("open returns empty when the token is signed by a different key")
-    void open_whenSignedByForeignKey_returnsEmpty() throws Exception {
+    void open_WhenSignedByForeignKey_ReturnsEmpty() throws Exception {
         KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
         generator.initialize(2048);
         PrivateKey foreignKey = generator.generateKeyPair().getPrivate();
@@ -119,7 +119,7 @@ class OAuthStateServiceTest {
 
     @Test
     @DisplayName("open returns empty when the token is expired")
-    void open_whenExpired_returnsEmpty() throws Exception {
+    void open_WhenExpired_ReturnsEmpty() throws Exception {
         Date past = new Date(System.currentTimeMillis() - 1_000L);
         String expiredToken = Jwts.builder()
                 .claim(TX_CLAIM, encryptTx("state", "verifier"))

@@ -4,18 +4,18 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorBoundary } from '@/components/feedback/ErrorBoundary'
-import { PlannerNotFound } from './components/PlannerNotFound'
+import { PlannerNotFound } from '@/components/feedback/PlannerNotFound'
 import {
   PlannerEditorStoreProvider,
   createDefaultSectionNotes,
 } from './stores/usePlannerEditorStore'
 import { deserializeSets } from './schemas/PlannerSchemas'
-import { PlannerMDEditorContent } from './components/planner/PlannerMDEditorContent'
+import { PlannerEditEditor } from './components/planner/PlannerEditEditor'
 import { useSavedPlannerQuery } from './hooks/useSavedPlannerQuery'
-import type { MDCategory } from '@/shared/gameData'
-import type { MDPlannerContent } from './types/PlannerTypes'
+import { isMDPlanner } from './types/PlannerTypes'
 import type { FloorThemeSelection } from '@/pages/themePack'
 import type { PlannerEditorState } from './stores/usePlannerEditorStore'
+import { SECTION_STYLES } from '@/lib/constants'
 
 /**
  * Planner MD Edit Page - Edit an existing planner
@@ -29,7 +29,7 @@ export default function PlannerMDEditPage() {
         fallback={
           <div className="container mx-auto py-6">
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
+              <div className={SECTION_STYLES.LAYOUT.rowBetween}>
                 <Skeleton className="h-10 w-64" />
                 <Skeleton className="h-10 w-32" />
               </div>
@@ -56,7 +56,7 @@ function PlannerEditContent({ id }: { id: string }) {
     return <PlannerNotFound listPath="/planner/md" />
   }
 
-  if (planner.config.type !== 'MIRROR_DUNGEON') {
+  if (!isMDPlanner(planner)) {
     return (
       <div className="container mx-auto py-16 text-center">
         <h1 className="text-2xl font-bold mb-4">
@@ -68,7 +68,7 @@ function PlannerEditContent({ id }: { id: string }) {
             'This editor only supports Mirror Dungeon planners.',
           )}
         </p>
-        <p className="text-sm text-muted-foreground">
+        <p className={SECTION_STYLES.TEXT.caption}>
           {t('pages.detail.currentType', 'Current type')}: {planner.config.type}
         </p>
         <Button asChild variant="outline">
@@ -79,12 +79,12 @@ function PlannerEditContent({ id }: { id: string }) {
   }
 
   // Build initial state from planner data for the store
-  const content = planner.content as MDPlannerContent
+  const { content } = planner
   const deserialized = deserializeSets(content)
 
   const initialState: Partial<PlannerEditorState> = {
     title: planner.metadata.title,
-    category: planner.config.category as MDCategory,
+    category: planner.config.category,
     isPublished: planner.metadata.published ?? false,
     equipment: content.equipment,
     floorSelections: deserialized.floorSelections as FloorThemeSelection[],
@@ -113,7 +113,7 @@ function PlannerEditContent({ id }: { id: string }) {
   // This ensures plannerId state resets and auto-save writes to the correct planner
   return (
     <PlannerEditorStoreProvider key={planner.metadata.id} initialState={initialState}>
-      <PlannerMDEditorContent mode="edit" planner={planner} />
+      <PlannerEditEditor planner={planner} />
     </PlannerEditorStoreProvider>
   )
 }

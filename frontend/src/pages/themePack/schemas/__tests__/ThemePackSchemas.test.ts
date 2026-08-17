@@ -9,17 +9,17 @@ describe('ThemePackDetailSchema', () => {
         { dungeonIdx: 1, selectableFloors: [0] },
       ],
       nodeOption: {
-        bossPool: [2060222],
-        battlePool: [2060201],
-        abBattlePool: [2060216],
-        hardBattlePool: [2060219],
+        bossPool: ['2060222'],
+        battlePool: ['2060201'],
+        abBattlePool: ['2060216'],
+        hardBattlePool: ['2060219'],
         hardAbBattlePool: [],
-        eventPool: [901001, 901002],
+        eventPool: ['901001', '901002'],
       },
-      egoGiftPool: [9001, 9002],
-      specificEgoGiftPool: [9403, 9404],
+      egoGiftPool: ['9001', '9002'],
+      specificEgoGiftPool: ['9403', '9404'],
       themePackConfig: { textColor: 'af241c' },
-      featuredBosses: [{ unitId: 71001, portraitId: 91001 }],
+      featuredBosses: [{ unitId: '71001', portraitId: '91001' }],
     })
     expect(result.success).toBe(true)
   })
@@ -44,7 +44,7 @@ describe('ThemePackDetailSchema', () => {
   })
 
   it('does not include difficulty in parsed output', () => {
-    const result = ThemePackDetailSchema.safeParse({
+    const result = ThemePackDetailSchema.parse({
       exceptionConditions: [],
       nodeOption: {
         bossPool: [],
@@ -59,14 +59,11 @@ describe('ThemePackDetailSchema', () => {
       themePackConfig: { textColor: 'af241c' },
       featuredBosses: [],
     })
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect('difficulty' in result.data).toBe(false)
-    }
+    expect('difficulty' in result).toBe(false)
   })
 
   it('accepts nodeOption with specialEventPool', () => {
-    const result = ThemePackDetailSchema.safeParse({
+    const result = ThemePackDetailSchema.parse({
       exceptionConditions: [{ dungeonIdx: 0, selectableFloors: [0] }],
       nodeOption: {
         bossPool: [],
@@ -74,48 +71,42 @@ describe('ThemePackDetailSchema', () => {
         abBattlePool: [],
         hardBattlePool: [],
         hardAbBattlePool: [],
-        eventPool: [901001],
-        specialEventPool: [971001, 971002],
+        eventPool: ['901001'],
+        specialEventPool: ['971001', '971002'],
       },
       egoGiftPool: [],
       specificEgoGiftPool: [],
       themePackConfig: { textColor: 'af241c' },
       featuredBosses: [],
     })
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.nodeOption.specialEventPool).toEqual([971001, 971002])
-    }
+    expect(result.nodeOption.specialEventPool).toEqual(['971001', '971002'])
   })
 
   it('accepts hidden theme fields', () => {
-    const result = ThemePackDetailSchema.safeParse({
+    const result = ThemePackDetailSchema.parse({
       exceptionConditions: [{ dungeonIdx: 1, selectableFloors: [2, 3, 4] }, { dungeonIdx: 2 }],
       nodeOption: {
-        bossPool: [2070401],
+        bossPool: ['2070401'],
         battlePool: [],
         abBattlePool: [],
         hardBattlePool: [],
         hardAbBattlePool: [],
-        eventPool: [971055],
-        specialEventPool: [971089],
+        eventPool: ['971055'],
+        specialEventPool: ['971089'],
       },
-      egoGiftPool: [9003],
+      egoGiftPool: ['9003'],
       specificEgoGiftPool: [],
       themePackConfig: { textColor: 'e5c6a0' },
-      featuredBosses: [{ unitId: 70401, portraitId: 90401 }],
+      featuredBosses: [{ unitId: '70401', portraitId: '90401' }],
       hiddenThemeRate: 0.0002,
-      fixedRewardEgoGifts: [9242, 9083, 9082, 9081],
+      fixedRewardEgoGifts: ['9242', '9083', '9082', '9081'],
     })
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.hiddenThemeRate).toBe(0.0002)
-      expect(result.data.fixedRewardEgoGifts).toEqual([9242, 9083, 9082, 9081])
-    }
+    expect(result.hiddenThemeRate).toBe(0.0002)
+    expect(result.fixedRewardEgoGifts).toEqual(['9242', '9083', '9082', '9081'])
   })
 
   it('accepts detail without hidden theme fields', () => {
-    const result = ThemePackDetailSchema.safeParse({
+    const result = ThemePackDetailSchema.parse({
       exceptionConditions: [{ dungeonIdx: 0, selectableFloors: [0] }],
       nodeOption: {
         bossPool: [],
@@ -130,11 +121,8 @@ describe('ThemePackDetailSchema', () => {
       themePackConfig: { textColor: 'af241c' },
       featuredBosses: [],
     })
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.hiddenThemeRate).toBeUndefined()
-      expect(result.data.fixedRewardEgoGifts).toBeUndefined()
-    }
+    expect(result.hiddenThemeRate).toBeUndefined()
+    expect(result.fixedRewardEgoGifts).toBeUndefined()
   })
 
   it('rejects invalid dungeonIdx', () => {
@@ -157,7 +145,7 @@ describe('ThemePackDetailSchema', () => {
   })
 
   it('accepts populated featuredBosses with numeric and string portraitId', () => {
-    const result = ThemePackDetailSchema.safeParse({
+    const result = ThemePackDetailSchema.parse({
       exceptionConditions: [{ dungeonIdx: 0, selectableFloors: [0] }],
       nodeOption: {
         bossPool: [],
@@ -171,17 +159,14 @@ describe('ThemePackDetailSchema', () => {
       specificEgoGiftPool: [],
       themePackConfig: { textColor: 'af241c' },
       featuredBosses: [
-        { unitId: 71001, portraitId: 91001 },
-        { unitId: 1355, portraitId: '1355' },
+        { unitId: '71001', portraitId: '91001' },
+        { unitId: '1355', portraitId: '1355' },
       ],
     })
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.featuredBosses).toEqual([
-        { unitId: 71001, portraitId: 91001 },
-        { unitId: 1355, portraitId: '1355' },
-      ])
-    }
+    expect(result.featuredBosses).toEqual([
+      { unitId: '71001', portraitId: '91001' },
+      { unitId: '1355', portraitId: '1355' },
+    ])
   })
 
   it('accepts empty featuredBosses', () => {
@@ -238,9 +223,9 @@ describe('ThemePackListSchema', () => {
     const result = ThemePackListSchema.safeParse({
       '3001': {
         exceptionConditions: [{ dungeonIdx: 1, selectableFloors: [2, 3, 4] }],
-        specificEgoGiftPool: [9242],
+        specificEgoGiftPool: ['9242'],
         themePackConfig: { textColor: 'e5c6a0' },
-        fixedRewardEgoGifts: [9242, 9083],
+        fixedRewardEgoGifts: ['9242', '9083'],
       },
     })
     expect(result.success).toBe(true)

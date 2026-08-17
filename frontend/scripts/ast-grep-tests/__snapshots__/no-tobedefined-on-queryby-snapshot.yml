@@ -1,0 +1,44 @@
+id: no-tobedefined-on-queryby
+snapshots:
+  ? |
+    const found = renderHeadless()
+    expect(found.queryByLabelText('Mark as Done')).toBeDefined()
+  : labels:
+    - source: expect(found.queryByLabelText('Mark as Done')).toBeDefined()
+      style: primary
+      start: 31
+      end: 91
+    - source: expect(found.queryByLabelText('Mark as Done'))
+      style: secondary
+      start: 31
+      end: 77
+  expect(queryAllByRole('row')).toBeDefined():
+    labels:
+    - source: expect(queryAllByRole('row')).toBeDefined()
+      style: primary
+      start: 0
+      end: 43
+    - source: expect(queryAllByRole('row'))
+      style: secondary
+      start: 0
+      end: 29
+  expect(queryByTestId('gift-card-9001')).toBeDefined():
+    labels:
+    - source: expect(queryByTestId('gift-card-9001')).toBeDefined()
+      style: primary
+      start: 0
+      end: 53
+    - source: expect(queryByTestId('gift-card-9001'))
+      style: secondary
+      start: 0
+      end: 39
+  expect(screen.queryByText('Gift One')).toBeDefined():
+    labels:
+    - source: expect(screen.queryByText('Gift One')).toBeDefined()
+      style: primary
+      start: 0
+      end: 52
+    - source: expect(screen.queryByText('Gift One'))
+      style: secondary
+      start: 0
+      end: 38

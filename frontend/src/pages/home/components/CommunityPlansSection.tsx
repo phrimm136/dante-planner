@@ -20,7 +20,7 @@ import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
 import { CommunityPlansErrorFallback } from '@/components/feedback/CommunityPlansErrorFallback'
 
 import { useMDGesellschaftData } from '@/pages/planner'
-import { CARD_GRID } from '@/lib/constants'
+import { CARD_GRID, SECTION_STYLES } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 
 import type { MDGesellschaftMode } from '@/pages/planner'
@@ -75,7 +75,7 @@ function CommunityPlansContent({ mode }: CommunityPlansContentProps) {
 
 function CommunityPlansSkeleton() {
   return (
-    <div className="flex flex-col gap-4">
+    <div className={SECTION_STYLES.LAYOUT.column}>
       {Array.from({ length: 3 }).map((_, i) => (
         <Skeleton key={i} className="h-24 w-full" />
       ))}
@@ -96,9 +96,9 @@ export function CommunityPlansSection() {
   const [mode, setMode] = useState<MDGesellschaftMode>('published')
 
   return (
-    <section className="flex flex-col gap-4">
+    <section className={SECTION_STYLES.LAYOUT.column}>
       {/* Header with browse link */}
-      <div className="flex items-center justify-between">
+      <div className={SECTION_STYLES.LAYOUT.rowBetween}>
         <h2 className="text-xl font-semibold">{t('pages.home.communityPlans.title')}</h2>
         <Link
           to="/planner/md/gesellschaft"
@@ -112,7 +112,7 @@ export function CommunityPlansSection() {
       </div>
 
       {/* Content container */}
-      <div className="bg-muted border border-border rounded-md p-6">
+      <div className={SECTION_STYLES.panel}>
         {/* Tab switcher */}
         <Tabs value={mode} onValueChange={(v) => setMode(v as MDGesellschaftMode)} className="mb-4">
           <TabsList>

@@ -11,8 +11,7 @@
  * Pattern: useSearch + useNavigate (same as useMDGesellschaftFilters)
  */
 
-import { useCallback, useMemo } from 'react'
-import { useSearch, useNavigate } from '@tanstack/react-router'
+import { useUrlFilters } from '@/components/hooks/useUrlFilters'
 
 import type { PlannerSearchFilters, PlannerSearchParams } from '../types/PlannerSearchTypes'
 
@@ -38,6 +37,14 @@ function parseCsvParam(value: string | undefined): string[] {
  */
 function toCsvParam(values: string[]): string | undefined {
   return values.length > 0 ? values.join(',') : undefined
+}
+
+/**
+ * Search params as an update payload, where an explicit `undefined` drops the
+ * key from the URL rather than leaving the previous value in place.
+ */
+type PlannerSearchParamsUpdate = {
+  [K in keyof PlannerSearchParams]: PlannerSearchParams[K] | undefined
 }
 
 // ============================================================================
@@ -87,78 +94,58 @@ export interface UsePlannerSearchFiltersResult {
  * ```
  */
 export function usePlannerSearchFilters(): UsePlannerSearchFiltersResult {
-  const search = useSearch({ strict: false }) as PlannerSearchParams | undefined
-  const navigate = useNavigate()
+  const { params: search, setParams } = useUrlFilters<PlannerSearchParamsUpdate>()
 
   // Parse URL params to filter state
-  const filters: PlannerSearchFilters = useMemo(
-    () => ({
-      title: search?.q || null,
-      keywords: parseCsvParam(search?.keyword),
-      identityIds: parseCsvParam(search?.identity),
-      egoIds: parseCsvParam(search?.ego),
-      giftIds: parseCsvParam(search?.gift),
-      themePackIds: parseCsvParam(search?.themePack),
-    }),
-    [search?.q, search?.keyword, search?.identity, search?.ego, search?.gift, search?.themePack],
-  )
+  const filters: PlannerSearchFilters = {
+    title: search?.q || null,
+    keywords: parseCsvParam(search?.keyword),
+    identityIds: parseCsvParam(search?.identity),
+    egoIds: parseCsvParam(search?.ego),
+    giftIds: parseCsvParam(search?.gift),
+    themePackIds: parseCsvParam(search?.themePack),
+  }
 
-  const hasActiveFilters = useMemo(
-    () =>
-      filters.title !== null ||
-      filters.keywords.length > 0 ||
-      filters.identityIds.length > 0 ||
-      filters.egoIds.length > 0 ||
-      filters.giftIds.length > 0 ||
-      filters.themePackIds.length > 0,
-    [filters],
-  )
+  const hasActiveFilters =
+    filters.title !== null ||
+    filters.keywords.length > 0 ||
+    filters.identityIds.length > 0 ||
+    filters.egoIds.length > 0 ||
+    filters.giftIds.length > 0 ||
+    filters.themePackIds.length > 0
 
   /**
    * Update filter values in URL
    * Merges with current filters, converts to URL param format.
    * Preserves existing non-search params (category, page, mode).
    */
-  const setFilters = useCallback(
-    (updates: Partial<PlannerSearchFilters>) => {
-      const merged = { ...filters, ...updates }
+  const setFilters = (updates: Partial<PlannerSearchFilters>) => {
+    const merged = { ...filters, ...updates }
 
-      void navigate({
-        to: '.',
-        search: (prev) => ({
-          ...prev,
-          q: merged.title || undefined,
-          keyword: toCsvParam(merged.keywords),
-          identity: toCsvParam(merged.identityIds),
-          ego: toCsvParam(merged.egoIds),
-          gift: toCsvParam(merged.giftIds),
-          themePack: toCsvParam(merged.themePackIds),
-        }),
-        replace: false,
-      })
-    },
-    [filters, navigate],
-  )
+    setParams({
+      q: merged.title || undefined,
+      keyword: toCsvParam(merged.keywords),
+      identity: toCsvParam(merged.identityIds),
+      ego: toCsvParam(merged.egoIds),
+      gift: toCsvParam(merged.giftIds),
+      themePack: toCsvParam(merged.themePackIds),
+    })
+  }
 
   /**
    * Clear all search filters
    * Preserves existing non-search params (category, page, mode)
    */
-  const clearFilters = useCallback(() => {
-    void navigate({
-      to: '.',
-      search: (prev) => ({
-        ...prev,
-        q: undefined,
-        keyword: undefined,
-        identity: undefined,
-        ego: undefined,
-        gift: undefined,
-        themePack: undefined,
-      }),
-      replace: false,
+  const clearFilters = () => {
+    setParams({
+      q: undefined,
+      keyword: undefined,
+      identity: undefined,
+      ego: undefined,
+      gift: undefined,
+      themePack: undefined,
     })
-  }, [navigate])
+  }
 
   return {
     filters,

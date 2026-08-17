@@ -10,7 +10,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { EGOGiftObservationEditPane } from '../EGOGiftObservationEditPane'
-import type { EGOGiftSpec, EGOGiftNameList } from '@/pages/egoGift'
+import { buildEgoGiftSpecList } from '@/test-utils'
+import type { EGOGiftNameList } from '@/pages/egoGift'
 
 // Mock react-i18next with initReactI18next for proper module loading
 vi.mock('react-i18next', async (importOriginal) => {
@@ -58,20 +59,20 @@ const mockObservationData = {
 }
 
 // Mock gift spec data
-const mockSpec: Record<string, EGOGiftSpec> = {
+const mockSpec = buildEgoGiftSpecList({
   '9001': {
-    tag: ['TIER_1'] as EGOGiftSpec['tag'],
+    tag: ['TIER_1'],
     keyword: 'Burn',
     attributeType: 'Red',
     themePack: [],
   },
   '9002': {
-    tag: ['TIER_2'] as EGOGiftSpec['tag'],
+    tag: ['TIER_2'],
     keyword: 'Bleed',
     attributeType: 'Red',
     themePack: [],
   },
-}
+})
 
 const mockI18n: EGOGiftNameList = {
   '9001': 'Blazing Gift',
@@ -102,7 +103,7 @@ vi.mock('../../StarlightCostDisplay', () => ({
 
 // Mock Sorter
 vi.mock('@/shared/filter/components/Sorter', () => ({
-  Sorter: () => <select data-testid="sorter" />,
+  Sorter: () => <select data-testid="sorter" aria-label="Sorter" />,
 }))
 
 // Mock EGOGiftKeywordFilter
@@ -200,7 +201,7 @@ describe('EGOGiftObservationEditPane', () => {
       const onOpenChange = vi.fn()
       const user = userEvent.setup()
 
-      render(<EGOGiftObservationEditPane open onOpenChange={onOpenChange} />)
+      render(<EGOGiftObservationEditPane open onOpenChange={onOpenChange} mdVersion={6} />)
       await user.click(screen.getByRole('button', { name: 'Done' }))
 
       expect(onOpenChange).toHaveBeenCalledWith(false)

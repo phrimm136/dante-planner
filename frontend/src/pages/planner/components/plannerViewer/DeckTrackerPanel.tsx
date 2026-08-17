@@ -10,7 +10,7 @@ interface DeckTrackerPanelProps {
   onImport: () => void
   onExport: () => void
   onResetToPreset: () => void
-  onViewNotes?: () => void
+  onViewNotes?: (() => void) | undefined
 }
 
 /**
@@ -49,8 +49,8 @@ export function DeckTrackerPanel({
     <div className="space-y-4">
       {/* Equipment Display */}
       <DeckBuilderSummary
-        equipmentOverride={equipment}
-        deploymentOrderOverride={deploymentOrder}
+        equipment={equipment}
+        deploymentOrder={deploymentOrder}
         onToggleDeploy={handleToggleDeploy}
         onImport={onImport}
         onExport={onExport}

@@ -31,17 +31,6 @@ function createThemePackI18nQueryOptions(language: string) {
 }
 
 /**
- * Hook that loads theme pack detail spec data (individual file with egoGiftPool, eventPool, etc.)
- *
- * @param id - Theme pack ID
- * @returns Validated theme pack detail data
- */
-export function useThemePackDetailSpec(id: string) {
-  const { data: spec } = useSuspenseQuery(createThemePackDetailQueryOptions(id))
-  return spec
-}
-
-/**
  * Hook that loads theme pack detail data (spec + i18n)
  * Suspends while loading - wrap in Suspense boundary
  *

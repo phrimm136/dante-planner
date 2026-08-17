@@ -1,5 +1,6 @@
-import { memo } from 'react'
+import { Suspense } from 'react'
 import { Link } from '@tanstack/react-router'
+import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import colorCode from '@static/data/colorCode.json'
 import { KeywordCard } from './KeywordCard'
@@ -21,24 +22,27 @@ interface KeywordCardLinkProps {
  * Pattern Source: EGOGiftCardLink.tsx
  * Memoized by id to prevent re-renders during list filtering.
  */
-export const KeywordCardLink = memo(
-  function KeywordCardLink({ id, iconId, buffType, className }: KeywordCardLinkProps) {
-    const nameColor = colorMap[buffType] ?? colorMap['Neutral']
+export const KeywordCardLink = function KeywordCardLink({
+  id,
+  iconId,
+  buffType,
+  className,
+}: KeywordCardLinkProps) {
+  const nameColor = colorMap[buffType] ?? colorMap['Neutral']
 
-    return (
-      <Link to="/keyword/$id" params={{ id }} className={cn(className)}>
-        <div className="flex flex-col items-center gap-1.5">
-          <KeywordCard id={id} iconId={iconId} enableHoverHighlight />
-          <span
-            className="text-xs text-center line-clamp-2 w-24 leading-tight font-medium"
-            style={{ color: nameColor }}
-          >
+  return (
+    <Link to="/keyword/$id" params={{ id }} className={cn(className)}>
+      <div className="flex flex-col items-center gap-1.5">
+        <KeywordCard id={id} iconId={iconId} enableHoverHighlight />
+        <span
+          className="text-xs text-center line-clamp-2 w-24 leading-tight font-medium"
+          style={{ color: nameColor }}
+        >
+          <Suspense fallback={<Skeleton className="h-5 w-24" />}>
             <KeywordName id={id} />
-          </span>
-        </div>
-      </Link>
-    )
-  },
-  (prev, next) =>
-    prev.id === next.id && prev.buffType === next.buffType && prev.iconId === next.iconId,
-)
+          </Suspense>
+        </span>
+      </div>
+    </Link>
+  )
+}

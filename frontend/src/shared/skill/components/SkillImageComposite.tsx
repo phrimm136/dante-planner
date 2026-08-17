@@ -5,15 +5,16 @@ import {
   getAttackTypeFramePath,
   getAttackTypeFrameBGPath,
 } from '@/shared/assets'
-import { SKILL_FRAME_GLOW_COLORS, type SkillAttributeType } from '@/shared/gameData'
+import { type SkillAttributeType } from '@/shared/gameData'
 import { getDisplayFontForNumeric } from '@/lib/utils'
+import { SKILL_FRAME_GLOW_COLORS } from '@/lib/constants'
 
 interface SkillImageCompositeProps {
   skillImagePath: string
   attributeType: SkillAttributeType
   /** Skill tier (1-3) determines frame appearance */
   skillTier: number
-  atkType?: string
+  atkType?: string | undefined
   basePower: number
   coinPower: number
   onImageError?: () => void
@@ -73,7 +74,7 @@ export function SkillImageComposite({
           {!showMissingPlaceholder ? (
             <img
               src={skillImagePath}
-              alt="Skill"
+              alt=""
               className="w-full h-full object-cover"
               style={{
                 clipPath:

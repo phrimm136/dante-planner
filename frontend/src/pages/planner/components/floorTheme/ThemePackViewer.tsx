@@ -9,7 +9,7 @@ interface ThemePackViewerProps {
   packEntry: ThemePackEntry
   packName: string
   /** Special name with embedded color codes */
-  specialName?: string
+  specialName?: string | undefined
   onClick?: () => void
   readOnly?: boolean
   enableHoverHighlight?: boolean
@@ -41,7 +41,7 @@ export function ThemePackViewer({
           packId={packId}
           packEntry={packEntry}
           packName={packName}
-          specialName={specialName}
+          {...(specialName !== undefined && { specialName })}
           enableHoverHighlight={enableHoverHighlight}
           isSelected={isSelected}
           overlay={overlay}
@@ -56,7 +56,7 @@ export function ThemePackViewer({
         packId={packId}
         packEntry={packEntry}
         packName={packName}
-        specialName={specialName}
+        {...(specialName !== undefined && { specialName })}
         enableHoverHighlight={enableHoverHighlight}
         overlay={overlay}
       />

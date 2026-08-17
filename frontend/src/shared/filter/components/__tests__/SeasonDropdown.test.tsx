@@ -26,7 +26,7 @@ vi.mock('@/shared/filter/hooks/useFilterI18nData', () => ({
 
 describe('SeasonDropdown', () => {
   const defaultProps = {
-    selectedSeasons: new Set<Season>(),
+    selected: new Set<Season>(),
     onSelectionChange: vi.fn(),
   }
 
@@ -38,7 +38,7 @@ describe('SeasonDropdown', () => {
   })
 
   it('shows selected count when seasons are active', () => {
-    render(<SeasonDropdown {...defaultProps} selectedSeasons={new Set<Season>([1, 3])} />)
+    render(<SeasonDropdown {...defaultProps} selected={new Set<Season>([1, 3])} />)
 
     expect(screen.getByText('(2)')).toBeInTheDocument()
   })
@@ -80,9 +80,7 @@ describe('SeasonDropdown', () => {
     const onSelectionChange = vi.fn()
     const user = userEvent.setup()
 
-    render(
-      <SeasonDropdown selectedSeasons={new Set<Season>()} onSelectionChange={onSelectionChange} />,
-    )
+    render(<SeasonDropdown selected={new Set<Season>()} onSelectionChange={onSelectionChange} />)
 
     await user.click(screen.getByRole('combobox'))
     await user.click(screen.getByRole('option', { name: new RegExp(`Season ${SEASONS[0]}`) }))
@@ -93,11 +91,12 @@ describe('SeasonDropdown', () => {
   it('calls onSelectionChange with removed season when toggling off', async () => {
     const onSelectionChange = vi.fn()
     const user = userEvent.setup()
-    const firstSeason = SEASONS[0]
+    const [firstSeason] = SEASONS
+    if (firstSeason === undefined) throw new Error('SEASONS carries no season to toggle off')
 
     render(
       <SeasonDropdown
-        selectedSeasons={new Set<Season>([firstSeason])}
+        selected={new Set<Season>([firstSeason])}
         onSelectionChange={onSelectionChange}
       />,
     )

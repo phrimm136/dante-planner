@@ -1,11 +1,16 @@
 package org.danteplanner.backend.service;
 import org.danteplanner.backend.user.service.RandomUsernameGenerator;
 import org.danteplanner.backend.user.service.UserService;
+import org.danteplanner.backend.user.service.UserSettingsService;
 
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.shared.config.EpithetConfig;
+import org.danteplanner.backend.user.validation.EpithetValidator;
+import org.danteplanner.backend.support.IntegrityViolations;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.exception.UserNotFoundException;
+import org.danteplanner.backend.user.exception.UsernameGenerationException;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,10 +20,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.springframework.transaction.support.TransactionCallback;
+
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import org.danteplanner.backend.moderation.service.ModerationAuditService;
 
 /**
  * Unit tests for UserService.
@@ -39,7 +49,13 @@ class UserServiceTest {
     private EpithetConfig epithetConfig;
 
     @Mock
-    private org.danteplanner.backend.moderation.repository.ModerationActionRepository moderationActionRepository;
+    private ModerationAuditService moderationAuditService;
+
+    @Mock
+    private UserSettingsService userSettingsService;
+
+    @Mock
+    private org.springframework.transaction.support.TransactionTemplate transactionTemplate;
 
     private UserService userService;
 
@@ -47,16 +63,62 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        userService = new UserService(userRepository, usernameGenerator, epithetConfig, moderationActionRepository);
+        userService = new UserService(userRepository, usernameGenerator, new EpithetValidator(epithetConfig),
+                moderationAuditService, userSettingsService, transactionTemplate);
 
-        testUser = User.builder()
-                .id(123L)
-                .email("test@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-123")
-                .usernameEpithet("W_CORP")
-                .usernameSuffix("test1")
-                .build();
+        testUser = TestDataFactory.unsavedUser(123L);
+    }
+
+    @Nested
+    @DisplayName("findOrCreateUser Tests")
+    class FindOrCreateUserTests {
+
+        private static final String PROVIDER_ID = "google-123";
+        private static final Map<String, String> IDENTITY =
+                Map.of("id", PROVIDER_ID, "email", "test@example.com");
+
+        private void runTransactionsInline() {
+            when(transactionTemplate.execute(any())).thenAnswer(invocation ->
+                    invocation.<TransactionCallback<User>>getArgument(0).doInTransaction(null));
+        }
+
+        @Test
+        @DisplayName("A lost provider-id race recovers on the first collision, not after exhausting suffixes")
+        void findOrCreateUser_WhenProviderIdRaceLost_RecoversWithoutRetrying() {
+            runTransactionsInline();
+            when(userRepository.findByProviderAndProviderId(AuthProviderType.GOOGLE, PROVIDER_ID))
+                    .thenReturn(Optional.empty())
+                    .thenReturn(Optional.of(testUser));
+            when(usernameGenerator.generate())
+                    .thenReturn(new RandomUsernameGenerator.UsernameComponents("W_CORP", "test1"));
+            when(userRepository.insert(any(User.class))).thenThrow(
+                    IntegrityViolations.duplicateEntry("users.uk_provider_provider_id"));
+
+            User resolved = userService.findOrCreateUser("google", IDENTITY);
+
+            assertEquals(testUser.getId(), resolved.getId());
+            // A constraint no new suffix can satisfy must not be retried against new suffixes.
+            verify(userRepository, times(1)).insert(any(User.class));
+        }
+
+        @Test
+        @DisplayName("Suffix exhaustion surfaces as its own error rather than a lost race")
+        void findOrCreateUser_WhenSuffixesExhausted_ThrowsUsernameGenerationException() {
+            runTransactionsInline();
+            when(userRepository.findByProviderAndProviderId(AuthProviderType.GOOGLE, PROVIDER_ID))
+                    .thenReturn(Optional.empty());
+            when(usernameGenerator.generate())
+                    .thenReturn(new RandomUsernameGenerator.UsernameComponents("W_CORP", "test1"));
+            when(userRepository.insert(any(User.class))).thenThrow(
+                    IntegrityViolations.duplicateEntry("users.uk_users_username_suffix"));
+
+            assertThrows(UsernameGenerationException.class,
+                    () -> userService.findOrCreateUser("google", IDENTITY));
+
+            // No recovery lookup: exhaustion is not a race, so there is no winner to find.
+            verify(userRepository, times(1))
+                    .findByProviderAndProviderId(AuthProviderType.GOOGLE, PROVIDER_ID);
+        }
     }
 
     @Nested
@@ -80,7 +142,7 @@ class UserServiceTest {
 
         @Test
         @DisplayName("Should return empty for deleted user")
-        void findActiveById_deletedUser_returnsEmpty() {
+        void findActiveById_WhenDeletedUser_ReturnsEmpty() {
             // Arrange - user is deleted, repository returns empty
             when(userRepository.findByIdAndDeletedAtIsNull(testUser.getId()))
                     .thenReturn(Optional.empty());
@@ -94,7 +156,7 @@ class UserServiceTest {
 
         @Test
         @DisplayName("Should return empty for non-existent user")
-        void findActiveById_nonExistentUser_returnsEmpty() {
+        void findActiveById_WhenNonExistentUser_ReturnsEmpty() {
             // Arrange
             Long nonExistentId = 999L;
             when(userRepository.findByIdAndDeletedAtIsNull(nonExistentId))
@@ -114,7 +176,7 @@ class UserServiceTest {
 
         @Test
         @DisplayName("Should return user when found")
-        void findById_found_returnsUser() {
+        void findById_WhenFound_ReturnsUser() {
             // Arrange
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
 
@@ -127,7 +189,7 @@ class UserServiceTest {
 
         @Test
         @DisplayName("Should throw UserNotFoundException when not found")
-        void findById_notFound_throwsException() {
+        void findById_WhenNotFound_ThrowsException() {
             // Arrange
             Long nonExistentId = 999L;
             when(userRepository.findById(nonExistentId)).thenReturn(Optional.empty());

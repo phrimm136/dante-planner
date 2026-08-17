@@ -1,0 +1,19 @@
+id: no-unknown-cast-on-ingest
+language: TypeScript
+severity: error
+message: Ingest must parse, not assert. `as unknown as` erases the mismatch a schema would have caught; validate the payload and let the parse produce the type.
+files:
+  - src/pages/*/hooks/**
+  - src/pages/*/schemas/**
+  - src/shared/*/hooks/**
+  - src/shared/*/schemas/**
+ignores:
+  - '**/__tests__/**'
+  - '**/*.test.ts'
+  - '**/*.test.tsx'
+  # toSaveablePlanner is the sanctioned seam: it is the single place an
+  # already-narrowed config is paired with a content record the reader schemas
+  # deliberately keep loose, and it documents that in its own docstring.
+  - src/pages/planner/schemas/PlannerSchemas.ts
+rule:
+  pattern: $EXPR as unknown as $TYPE

@@ -16,6 +16,7 @@
  * Pattern: IdentityPage.tsx (Suspense wrapping, filter layout)
  */
 
+import { Skeleton } from '@/components/ui/skeleton'
 import { Suspense } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
@@ -33,6 +34,7 @@ import { PlannerListFilterPills } from './components/plannerList/PlannerListFilt
 import { PlannerFilterPane } from './components/plannerList/PlannerFilterPane'
 import { LoadingState } from '@/components/feedback/LoadingState'
 import { PlannerGridSkeleton } from '@/components/feedback/ListPageSkeleton'
+import { SECTION_STYLES } from '@/lib/constants'
 
 // ============================================================================
 // Page Content Component
@@ -50,7 +52,7 @@ function PlannerMDPageContent() {
   const { filters: searchFilters, setFilters: setSearchFilters } = usePlannerSearchFilters()
 
   return (
-    <div className="container mx-auto p-8">
+    <div className={SECTION_STYLES.LAYOUT.page}>
       {/* Create New Button */}
       <div className="flex justify-end mb-6">
         <Button asChild>
@@ -81,7 +83,7 @@ function PlannerMDPageContent() {
 
       {/* Content Search Filter Pane */}
       <div className="mb-4">
-        <Suspense fallback={null}>
+        <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
           <PlannerFilterPane filters={searchFilters} onFiltersChange={setSearchFilters} />
         </Suspense>
       </div>

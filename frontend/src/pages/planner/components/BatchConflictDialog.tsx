@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { cva } from 'class-variance-authority'
 import {
   Dialog,
   DialogContent,
@@ -10,7 +11,13 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { DATE_FORMATS, formatPlannerDate } from '@/lib/formatDate'
+import { presentError } from '@/lib/errorPresentation'
+import type { ConflictFailure, ConflictOutcome } from '../lib/conflictChoice'
 import type { ConflictResolutionChoice, SaveablePlanner } from '../types/PlannerTypes'
+import { SECTION_STYLES } from '@/lib/constants'
+
+const MISSING_DATE_LABEL = '-'
 
 /**
  * A single conflict item with local and server planner data
@@ -46,9 +53,17 @@ export interface BatchConflictDialogProps {
   onResolve: (resolutions: ConflictResolution[]) => void
   /** Whether resolution is in progress */
   isResolving?: boolean
-  /** Validation error from last resolution attempt (i18n key + optional params) */
-  error?: { key: string; params?: Record<string, string> } | null
+  /** One entry per attempted item, in submission order. */
+  outcomes?: ConflictOutcome[]
+  /**
+   * The user closed the dialog. Its consumer decides what that means — parking
+   * the batch behind a reopen, or cancelling the run that raised it.
+   */
+  onDismiss?: () => void
 }
+
+/** The choices in the order both the per-item row and the apply-to-all row show them. */
+const CHOICE_ORDER: ConflictResolutionChoice[] = ['overwrite', 'discard', 'both']
 
 /**
  * Resolution choice button styling
@@ -56,16 +71,63 @@ export interface BatchConflictDialogProps {
  * - discard (Use Server): muted/neutral
  * - both (Save as Copy): same as discard for visual consistency
  */
-const CHOICE_STYLES: Record<ConflictResolutionChoice, string> = {
-  overwrite: 'bg-destructive/10 text-destructive border-destructive/30',
-  discard: 'bg-muted text-muted-foreground border-border',
-  both: 'bg-muted text-muted-foreground border-border',
-}
+const choiceButtonVariants = cva(
+  'rounded border transition-colors disabled:opacity-50 disabled:cursor-not-allowed',
+  {
+    variants: {
+      choice: { overwrite: '', discard: '', both: '' },
+      selected: { true: '', false: '' },
+      size: { sm: 'px-2 py-1 text-xs', md: 'px-3 py-1.5 text-sm' },
+    },
+    compoundVariants: [
+      {
+        choice: 'overwrite',
+        selected: false,
+        class: 'bg-destructive/10 text-destructive border-destructive/30',
+      },
+      {
+        choice: 'overwrite',
+        selected: true,
+        class: 'bg-destructive text-destructive-foreground border-destructive',
+      },
+      { choice: 'discard', selected: false, class: 'bg-muted text-muted-foreground border-border' },
+      {
+        choice: 'discard',
+        selected: true,
+        class: 'bg-primary text-primary-foreground border-primary',
+      },
+      { choice: 'both', selected: false, class: 'bg-muted text-muted-foreground border-border' },
+      { choice: 'both', selected: true, class: 'bg-primary text-primary-foreground border-primary' },
+    ],
+    defaultVariants: { selected: false, size: 'sm' },
+  }
+)
 
-const CHOICE_SELECTED_STYLES: Record<ConflictResolutionChoice, string> = {
-  overwrite: 'bg-destructive text-destructive-foreground border-destructive',
-  discard: 'bg-primary text-primary-foreground border-primary',
-  both: 'bg-primary text-primary-foreground border-primary',
+function ChoiceButton({
+  choice,
+  label,
+  selected = false,
+  size,
+  disabled,
+  onClick,
+}: {
+  choice: ConflictResolutionChoice
+  label: string
+  selected?: boolean
+  size?: 'sm' | 'md'
+  disabled: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={cn(choiceButtonVariants({ choice, selected, size }))}
+    >
+      {label}
+    </button>
+  )
 }
 
 /**
@@ -92,9 +154,32 @@ export function BatchConflictDialog({
   conflicts,
   onResolve,
   isResolving = false,
-  error = null,
+  outcomes = [],
+  onDismiss,
 }: BatchConflictDialogProps) {
   const { t } = useTranslation(['planner', 'common'])
+
+  /** Failures of the whole submission, which belong to no single row. */
+  const batchFailures = outcomes
+    .map((outcome) => (outcome.result.ok ? null : outcome.result.error))
+    .filter((failure): failure is ConflictFailure => failure?.step === 'precondition')
+
+  /** Why the attempt on this row failed, or null when it did not fail. */
+  const failureOf = (id: string): ConflictFailure | null => {
+    const outcome = outcomes.find((entry) => entry.id === id)
+    if (!outcome || outcome.result.ok) return null
+    // A precondition failure stopped the submission before this row was reached.
+    return outcome.result.error.step === 'precondition' ? null : outcome.result.error
+  }
+
+  const failureMessage = (failure: ConflictFailure): string => {
+    const presentation = presentError(failure.error)
+    if (!presentation) {
+      // A conflict has no message of its own; this dialog is what reports it.
+      return t('pages.plannerMD.batchConflict.itemFailed', 'This planner could not be resolved.')
+    }
+    return presentation.params ? t(presentation.key, presentation.params) : t(presentation.key)
+  }
 
   // Track resolution choice for each conflict
   const [resolutions, setResolutions] = useState<Record<string, ConflictResolutionChoice>>(() => {
@@ -128,11 +213,6 @@ export function BatchConflictDialog({
     onResolve(result)
   }
 
-  // Prevent dismissal via ESC key or clicking outside
-  const preventDismissal = (e: Event) => {
-    e.preventDefault()
-  }
-
   // Resolution choice labels
   const choiceLabels: Record<ConflictResolutionChoice, string> = {
     overwrite: t('pages.plannerMD.conflict.overwrite', 'Keep Local'),
@@ -140,38 +220,14 @@ export function BatchConflictDialog({
     both: t('pages.plannerMD.conflict.keepBoth', 'Keep Both'),
   }
 
-  // Choice button component
-  const ChoiceButton = ({
-    choice,
-    selected,
-    onClick,
-  }: {
-    choice: ConflictResolutionChoice
-    selected: boolean
-    onClick: () => void
-  }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={isResolving}
-      className={cn(
-        'px-2 py-1 text-xs rounded border transition-colors',
-        selected ? CHOICE_SELECTED_STYLES[choice] : CHOICE_STYLES[choice],
-        isResolving && 'opacity-50 cursor-not-allowed'
-      )}
-    >
-      {choiceLabels[choice]}
-    </button>
-  )
-
   return (
-    <Dialog open={open}>
-      <DialogContent
-        showCloseButton={false}
-        onEscapeKeyDown={preventDismissal}
-        onInteractOutside={preventDismissal}
-        className="max-w-2xl"
-      >
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        if (!next) onDismiss?.()
+      }}
+    >
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>
             {t('pages.plannerMD.batchConflict.title', 'Conflicts Detected')}
@@ -185,48 +241,28 @@ export function BatchConflictDialog({
           </DialogDescription>
         </DialogHeader>
 
+        {batchFailures.map((failure, index) => (
+          <p key={index} className="text-sm text-destructive" data-testid="batch-failure">
+            {failureMessage(failure)}
+          </p>
+        ))}
+
         {/* Apply to All section - vertical layout */}
         <div className="flex flex-col gap-2 py-3 border-b border-border">
-          <span className="text-sm text-muted-foreground">
+          <span className={SECTION_STYLES.TEXT.caption}>
             {t('pages.plannerMD.batchConflict.applyToAll', 'Apply to all')}
           </span>
           <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => applyToAll('overwrite')}
-              disabled={isResolving}
-              className={cn(
-                'px-3 py-1.5 text-sm rounded border transition-colors',
-                CHOICE_STYLES.overwrite,
-                isResolving && 'opacity-50 cursor-not-allowed'
-              )}
-            >
-              {choiceLabels.overwrite}
-            </button>
-            <button
-              type="button"
-              onClick={() => applyToAll('discard')}
-              disabled={isResolving}
-              className={cn(
-                'px-3 py-1.5 text-sm rounded border transition-colors',
-                CHOICE_STYLES.discard,
-                isResolving && 'opacity-50 cursor-not-allowed'
-              )}
-            >
-              {choiceLabels.discard}
-            </button>
-            <button
-              type="button"
-              onClick={() => applyToAll('both')}
-              disabled={isResolving}
-              className={cn(
-                'px-3 py-1.5 text-sm rounded border transition-colors',
-                CHOICE_STYLES.both,
-                isResolving && 'opacity-50 cursor-not-allowed'
-              )}
-            >
-              {choiceLabels.both}
-            </button>
+            {CHOICE_ORDER.map((choice) => (
+              <ChoiceButton
+                key={choice}
+                choice={choice}
+                label={choiceLabels[choice]}
+                size="md"
+                disabled={isResolving}
+                onClick={() => applyToAll(choice)}
+              />
+            ))}
           </div>
         </div>
 
@@ -234,6 +270,7 @@ export function BatchConflictDialog({
         <div className="max-h-64 overflow-y-auto space-y-3 py-2">
           {conflicts.map((conflict) => {
             const currentChoice = resolutions[conflict.id] ?? 'overwrite'
+            const failure = failureOf(conflict.id)
             return (
               <div
                 key={conflict.id}
@@ -251,34 +288,35 @@ export function BatchConflictDialog({
                   )}
                 </div>
                 {/* Save dates */}
-                <p className="text-xs text-muted-foreground">
+                <p className={SECTION_STYLES.TEXT.captionSmall}>
                   {t('pages.plannerMD.batchConflict.localModified', 'Local')}: {formatDate(conflict.localPlanner.metadata.lastModifiedAt)}
                   {' | '}
                   {t('pages.plannerMD.batchConflict.serverModified', 'Server')}: {formatDate(conflict.serverPlanner.metadata.lastModifiedAt)}
                 </p>
                 {/* Notification that copy won't be published */}
                 {conflict.localPlanner.metadata.published && (
-                  <p className="text-xs text-muted-foreground">
+                  <p className={SECTION_STYLES.TEXT.captionSmall}>
                     {t('pages.plannerMD.conflict.keepBothUnpublished', 'The copy will not be published')}
+                  </p>
+                )}
+                {/* Why the attempt on this row failed */}
+                {failure && (
+                  <p className="text-sm text-destructive" data-testid={`outcome-${conflict.id}`}>
+                    {failureMessage(failure)}
                   </p>
                 )}
                 {/* Buttons */}
                 <div className="flex gap-1">
-                  <ChoiceButton
-                    choice="overwrite"
-                    selected={currentChoice === 'overwrite'}
-                    onClick={() => setResolution(conflict.id, 'overwrite')}
-                  />
-                  <ChoiceButton
-                    choice="discard"
-                    selected={currentChoice === 'discard'}
-                    onClick={() => setResolution(conflict.id, 'discard')}
-                  />
-                  <ChoiceButton
-                    choice="both"
-                    selected={currentChoice === 'both'}
-                    onClick={() => setResolution(conflict.id, 'both')}
-                  />
+                  {CHOICE_ORDER.map((choice) => (
+                    <ChoiceButton
+                      key={choice}
+                      choice={choice}
+                      label={choiceLabels[choice]}
+                      selected={currentChoice === choice}
+                      disabled={isResolving}
+                      onClick={() => setResolution(conflict.id, choice)}
+                    />
+                  ))}
                 </div>
               </div>
             )
@@ -286,11 +324,6 @@ export function BatchConflictDialog({
         </div>
 
         <DialogFooter className="flex-col items-stretch gap-2 sm:flex-col">
-          {error && (
-            <p className="text-sm text-destructive">
-              {t(error.key, { ns: 'planner', ...error.params })}
-            </p>
-          )}
           <Button onClick={handleResolveAll} disabled={isResolving}>
             {t('pages.plannerMD.batchConflict.resolveAll', 'Resolve All')}
           </Button>
@@ -304,17 +337,5 @@ export function BatchConflictDialog({
  * Format ISO date string for display
  */
 function formatDate(isoString: string): string {
-  try {
-    const date = new Date(isoString)
-    return date.toLocaleDateString(undefined, {
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-    })
-  } catch {
-    return '-'
-  }
+  return formatPlannerDate(isoString, undefined, DATE_FORMATS.SHORT_DATE_TIME) ?? MISSING_DATE_LABEL
 }
-
-export default BatchConflictDialog

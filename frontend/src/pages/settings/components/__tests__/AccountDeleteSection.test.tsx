@@ -4,8 +4,20 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { AccountDeleteSection } from '../AccountDeleteSection'
 import { AccountDeleteDialog } from '../AccountDeleteDialog'
 import { toast } from 'sonner'
+import { QueryClient } from '@tanstack/react-query'
+import type { MutationFunctionContext, UseMutateFunction } from '@tanstack/react-query'
+import { buildMutationResult } from '@/test-utils'
 import type { User } from '@/shared/auth'
 import type { UserDeletionResponse } from '../../types/UserSettingsTypes'
+
+/** `mutate` as the component sees it: the delete-account mutation's own signature. */
+type DeleteAccountMutate = UseMutateFunction<UserDeletionResponse, Error, void, unknown>
+
+/** The context react-query threads into mutation callbacks. */
+const mutationContext: MutationFunctionContext = {
+  client: new QueryClient(),
+  meta: undefined,
+}
 
 // Mock dependencies
 vi.mock('sonner', () => ({
@@ -15,8 +27,8 @@ vi.mock('sonner', () => ({
   },
 }))
 
-const mockMutate = vi.fn()
-const mockSetQueryData = vi.fn()
+const mockMutate = vi.fn<DeleteAccountMutate>()
+const mockSetQueryData = vi.fn<(key: unknown, data: unknown) => void>()
 
 // Mock hooks
 vi.mock('@/shared/auth/hooks/useAuthQuery', () => ({
@@ -26,7 +38,7 @@ vi.mock('@/shared/auth/hooks/useAuthQuery', () => ({
   },
 }))
 
-vi.mock('../../hooks/useUserSettingsQuery', () => ({
+vi.mock('../../hooks/useAccountData', () => ({
   useDeleteAccountMutation: vi.fn(() => ({
     mutate: mockMutate,
     isPending: false,
@@ -46,15 +58,14 @@ vi.mock('@tanstack/react-query', async () => {
 })
 
 import { useAuthQuery } from '@/shared/auth'
-import { useDeleteAccountMutation } from '../../hooks/useUserSettingsQuery'
+import { useDeleteAccountMutation } from '../../hooks/useAccountData'
 
 describe('AccountDeleteSection', () => {
   const mockUser: User = {
-    id: '550e8400-e29b-41d4-a716-446655440000',
     email: 'test@example.com',
-    provider: 'google',
-    usernameKeyword: 'don',
+    usernameEpithet: 'don',
     usernameSuffix: '1234',
+    role: 'NORMAL',
   }
 
   const mockDeleteResponse: UserDeletionResponse = {
@@ -71,12 +82,14 @@ describe('AccountDeleteSection', () => {
       value: { href: 'http://localhost:5173/settings', origin: 'http://localhost:5173' },
     })
     vi.mocked(useAuthQuery).mockReturnValue({ data: null } as ReturnType<typeof useAuthQuery>)
-    vi.mocked(useDeleteAccountMutation).mockReturnValue({
-      mutate: mockMutate,
-      isPending: false,
-      isSuccess: false,
-      isError: false,
-    } as ReturnType<typeof useDeleteAccountMutation>)
+    vi.mocked(useDeleteAccountMutation).mockReturnValue(
+      buildMutationResult<UserDeletionResponse, Error, void, unknown>({
+        mutate: mockMutate,
+        isPending: false,
+        isSuccess: false,
+        isError: false,
+      }),
+    )
   })
 
   it('shows sign-in prompt when user is unauthenticated', () => {
@@ -116,17 +129,19 @@ describe('AccountDeleteSection', () => {
     vi.mocked(useAuthQuery).mockReturnValue({ data: mockUser } as ReturnType<typeof useAuthQuery>)
 
     // Mock mutate to call onSuccess callback
-    const mockMutateWithCallback = vi.fn((_, options) => {
+    const mockMutateWithCallback = vi.fn<DeleteAccountMutate>((_, options) => {
       if (options?.onSuccess) {
-        options.onSuccess(mockDeleteResponse)
+        options.onSuccess(mockDeleteResponse, undefined, undefined, mutationContext)
       }
     })
-    vi.mocked(useDeleteAccountMutation).mockReturnValue({
-      mutate: mockMutateWithCallback,
-      isPending: false,
-      isSuccess: false,
-      isError: false,
-    } as ReturnType<typeof useDeleteAccountMutation>)
+    vi.mocked(useDeleteAccountMutation).mockReturnValue(
+      buildMutationResult<UserDeletionResponse, Error, void, unknown>({
+        mutate: mockMutateWithCallback,
+        isPending: false,
+        isSuccess: false,
+        isError: false,
+      }),
+    )
 
     render(<AccountDeleteSection />)
 
@@ -152,13 +167,15 @@ describe('AccountDeleteSection', () => {
   it('calls mutation with success and error callbacks', () => {
     vi.mocked(useAuthQuery).mockReturnValue({ data: mockUser } as ReturnType<typeof useAuthQuery>)
 
-    const mockMutateImpl = vi.fn()
-    vi.mocked(useDeleteAccountMutation).mockReturnValue({
-      mutate: mockMutateImpl,
-      isPending: false,
-      isSuccess: false,
-      isError: false,
-    } as ReturnType<typeof useDeleteAccountMutation>)
+    const mockMutateImpl = vi.fn<DeleteAccountMutate>()
+    vi.mocked(useDeleteAccountMutation).mockReturnValue(
+      buildMutationResult<UserDeletionResponse, Error, void, unknown>({
+        mutate: mockMutateImpl,
+        isPending: false,
+        isSuccess: false,
+        isError: false,
+      }),
+    )
 
     render(<AccountDeleteSection />)
 
@@ -170,12 +187,14 @@ describe('AccountDeleteSection', () => {
 
   it('disables buttons during deletion (isPending state)', () => {
     vi.mocked(useAuthQuery).mockReturnValue({ data: mockUser } as ReturnType<typeof useAuthQuery>)
-    vi.mocked(useDeleteAccountMutation).mockReturnValue({
-      mutate: mockMutate,
-      isPending: true,
-      isSuccess: false,
-      isError: false,
-    } as ReturnType<typeof useDeleteAccountMutation>)
+    vi.mocked(useDeleteAccountMutation).mockReturnValue(
+      buildMutationResult<UserDeletionResponse, Error, void, unknown>({
+        mutate: mockMutate,
+        isPending: true,
+        isSuccess: false,
+        isError: false,
+      }),
+    )
 
     render(<AccountDeleteSection />)
 

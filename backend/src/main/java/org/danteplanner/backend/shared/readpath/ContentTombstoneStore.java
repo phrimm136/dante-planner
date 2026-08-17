@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import lombok.extern.slf4j.Slf4j;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 
 /**
  * Writes short-lived tombstone markers so a just-deleted entity served from a stale replica can be
@@ -28,11 +30,14 @@ public class ContentTombstoneStore {
 
     private final StringRedisTemplate stringRedisTemplate;
     private final StringRedisTemplate authLocalStringRedisTemplate;
+    private final Counter skipped;
 
     public ContentTombstoneStore(StringRedisTemplate stringRedisTemplate,
-            @Qualifier("authLocalStringRedisTemplate") StringRedisTemplate authLocalStringRedisTemplate) {
+            @Qualifier("authLocalStringRedisTemplate") StringRedisTemplate authLocalStringRedisTemplate,
+            MeterRegistry meterRegistry) {
         this.stringRedisTemplate = stringRedisTemplate;
         this.authLocalStringRedisTemplate = authLocalStringRedisTemplate;
+        this.skipped = meterRegistry.counter("tombstone.check_skipped");
     }
 
     /**
@@ -52,9 +57,12 @@ public class ContentTombstoneStore {
     }
 
     /**
-     * Reports whether a tombstone marker is present for the entity. Fail-open: a Redis failure is
-     * logged and treated as absent so the check can never wrongly mask a valid read; correctness
-     * still rests on the primary re-check gate.
+     * Reports whether a tombstone marker is present for the entity.
+     *
+     * <p>Fail-open, and on a replica <em>hit</em> this is the only gate: {@code PrimaryReCheck}
+     * promotes to the primary on a miss, so it does not re-examine a positive. A Redis failure can
+     * therefore serve a row that was already deleted, until replication catches up. The
+     * {@code tombstone.check_skipped} counter makes that window visible instead of silent.</p>
      *
      * @param entityType the entity type prefix (e.g. "planner")
      * @param id         the entity id
@@ -65,7 +73,8 @@ public class ContentTombstoneStore {
         try {
             return Boolean.TRUE.equals(authLocalStringRedisTemplate.hasKey(key));
         } catch (DataAccessException e) {
-            log.warn("tombstone check failed for {}:{} — serving the positive (primary re-check remains the gate)", entityType, id, e);
+            skipped.increment();
+            log.warn("tombstone check failed for {}:{} — serving the row unmasked", entityType, id, e);
             return false;
         }
     }

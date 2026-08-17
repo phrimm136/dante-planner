@@ -1,8 +1,8 @@
-import { useMemo } from 'react'
-import { useSuspenseQuery, useQuery } from '@tanstack/react-query'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { createStaticDataQueryOptions } from '@/lib/queryOptions'
-import { KeywordMatchSchema, UnitKeywordsSchema } from '../schemas/SearchMappingSchemas'
+import { KeywordMatchSchema } from '../schemas/SearchMappingSchemas'
+import { useUnitKeywords } from './useUnitKeywords'
 
 // Query key factory for search mappings
 // Hand-rolled: tuples lack the 'list'/'i18n' segments the shared factory produces
@@ -10,10 +10,9 @@ export const searchMappingsQueryKeys = {
   all: ['searchMappings'] as const,
   keywordMatch: (language: string) =>
     [...searchMappingsQueryKeys.all, 'keyword', language] as const,
-  unitKeywords: (language: string) => [...searchMappingsQueryKeys.all, 'unit', language] as const,
 }
 
-function createKeywordMatchQueryOptions(language: string) {
+export function createKeywordMatchQueryOptions(language: string) {
   return createStaticDataQueryOptions(
     searchMappingsQueryKeys.keywordMatch(language),
     async () => {
@@ -26,25 +25,31 @@ function createKeywordMatchQueryOptions(language: string) {
     },
     KeywordMatchSchema,
     `keywordMatch / ${language}`,
-    { keepPrevious: true },
   )
 }
 
-function createUnitKeywordsQueryOptions(language: string) {
-  return createStaticDataQueryOptions(
-    searchMappingsQueryKeys.unitKeywords(language),
-    async () => {
-      try {
-        return await import(`@static/i18n/${language}/unitKeywords.json`)
-      } catch {
-        // Missing language file falls back to empty mappings, not an error
-        return { default: {} }
-      }
-    },
-    UnitKeywordsSchema,
-    `unitKeywords / ${language}`,
-    { keepPrevious: true },
-  )
+function appendToBucket<K, V>(map: Map<K, V[]>, key: K, value: V): void {
+  const bucket = map.get(key)
+  if (bucket) {
+    bucket.push(value)
+  } else {
+    map.set(key, [value])
+  }
+}
+
+/**
+ * Invert an internal-code → display-name record into lowercased display name →
+ * every internal code that renders as it.
+ *
+ * `{ "Burst": "Rupture" }` becomes `{ "rupture": ["Burst"] }`. Distinct codes
+ * can share a display name, so the value is a bucket rather than a scalar.
+ */
+export function buildReverseMap(byInternalCode: Record<string, string>): Map<string, string[]> {
+  const reverse = new Map<string, string[]>()
+  for (const [internalCode, displayName] of Object.entries(byInternalCode)) {
+    appendToBucket(reverse, displayName.toLowerCase(), internalCode)
+  }
+  return reverse
 }
 
 export interface SearchMappings {
@@ -69,81 +74,10 @@ export function useSearchMappings(): SearchMappings {
   const { i18n } = useTranslation()
 
   const { data: keywordMatch } = useSuspenseQuery(createKeywordMatchQueryOptions(i18n.language))
-  const { data: unitKeywords } = useSuspenseQuery(createUnitKeywordsQueryOptions(i18n.language))
+  const unitKeywords = useUnitKeywords()
 
-  // Build reverse mappings: display name (lowercase) -> internal code(s)
-  return useMemo(() => {
-    const keywordToValue = new Map<string, string[]>()
-    const unitKeywordToValue = new Map<string, string[]>()
-
-    // Build reverse map for skill keywords
-    // keywordMatch: { "Burst": "Rupture" } -> keywordToValue: { "rupture": ["Burst"] }
-    Object.entries(keywordMatch).forEach(([internalCode, displayName]) => {
-      const lowerDisplay = displayName.toLowerCase()
-      if (!keywordToValue.has(lowerDisplay)) {
-        keywordToValue.set(lowerDisplay, [])
-      }
-      keywordToValue.get(lowerDisplay)!.push(internalCode)
-    })
-
-    // Build reverse map for unit keywords (traits, associations)
-    // unitKeywords: { "BLADE_LINEAGE": "Blade Lineage" } -> unitKeywordToValue: { "blade lineage": ["BLADE_LINEAGE"] }
-    Object.entries(unitKeywords).forEach(([internalCode, displayName]) => {
-      const lowerDisplay = displayName.toLowerCase()
-      if (!unitKeywordToValue.has(lowerDisplay)) {
-        unitKeywordToValue.set(lowerDisplay, [])
-      }
-      unitKeywordToValue.get(lowerDisplay)!.push(internalCode)
-    })
-
-    return { keywordToValue, unitKeywordToValue }
-  }, [keywordMatch, unitKeywords])
-}
-
-// Empty mappings constant for loading state
-const EMPTY_MAPPINGS: SearchMappings = {
-  keywordToValue: new Map(),
-  unitKeywordToValue: new Map(),
-}
-
-/**
- * Non-suspending version of useSearchMappings for list filtering.
- * Returns empty mappings while loading - search won't match anything.
- * Use this in list components to prevent suspension during language change.
- *
- * Cards stay visible, search just returns no matches until data loads.
- */
-export function useSearchMappingsDeferred(): SearchMappings {
-  const { i18n } = useTranslation()
-
-  const { data: keywordMatch } = useQuery(createKeywordMatchQueryOptions(i18n.language))
-  const { data: unitKeywords } = useQuery(createUnitKeywordsQueryOptions(i18n.language))
-
-  return useMemo(() => {
-    // Return empty mappings while loading
-    if (!keywordMatch || !unitKeywords) {
-      return EMPTY_MAPPINGS
-    }
-
-    const keywordToValue = new Map<string, string[]>()
-    const unitKeywordToValue = new Map<string, string[]>()
-
-    Object.entries(keywordMatch).forEach(([internalCode, displayName]) => {
-      const lowerDisplay = displayName.toLowerCase()
-      if (!keywordToValue.has(lowerDisplay)) {
-        keywordToValue.set(lowerDisplay, [])
-      }
-      keywordToValue.get(lowerDisplay)!.push(internalCode)
-    })
-
-    Object.entries(unitKeywords).forEach(([internalCode, displayName]) => {
-      const lowerDisplay = displayName.toLowerCase()
-      if (!unitKeywordToValue.has(lowerDisplay)) {
-        unitKeywordToValue.set(lowerDisplay, [])
-      }
-      unitKeywordToValue.get(lowerDisplay)!.push(internalCode)
-    })
-
-    return { keywordToValue, unitKeywordToValue }
-  }, [keywordMatch, unitKeywords])
+  return {
+    keywordToValue: buildReverseMap(keywordMatch),
+    unitKeywordToValue: buildReverseMap(unitKeywords),
+  }
 }

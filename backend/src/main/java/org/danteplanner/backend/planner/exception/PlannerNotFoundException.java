@@ -12,7 +12,7 @@ public class PlannerNotFoundException extends EntityNotFoundException {
     private final UUID plannerId;
 
     public PlannerNotFoundException(UUID plannerId) {
-        super("Planner not found with id: " + plannerId);
+        super("PLANNER_NOT_FOUND", "Planner not found with id: " + plannerId);
         this.plannerId = plannerId;
     }
 }

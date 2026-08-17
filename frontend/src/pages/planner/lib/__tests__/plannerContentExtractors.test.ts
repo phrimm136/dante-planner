@@ -9,6 +9,7 @@ import { describe, it, expect } from 'vitest'
 import type { MDPlannerContent, SaveablePlanner } from '../../types/PlannerTypes'
 import type { PlannerSearchFilters } from '../../types/PlannerSearchTypes'
 import { EMPTY_PLANNER_SEARCH_FILTERS } from '../../types/PlannerSearchTypes'
+import { ThemePackIdSchema } from '@/shared/gameData'
 import {
   extractIdentityIds,
   extractEgoIds,
@@ -101,7 +102,7 @@ describe('extractIdentityIds', () => {
   it('returns empty set when equipment is undefined', () => {
     const content = createMockMDContent()
     // Force undefined to test the guard
-    ;(content as Record<string, unknown>).equipment = undefined
+    Object.assign(content, { equipment: undefined })
     expect(extractIdentityIds(content)).toEqual(new Set())
   })
 
@@ -187,28 +188,52 @@ describe('extractEgoIds', () => {
 describe('extractGiftIds', () => {
   it('extracts from all 4 sources', () => {
     const content = createMockMDContent({
-      selectedGiftIds: ['g1', 'g2'],
-      observationGiftIds: ['g3'],
-      comprehensiveGiftIds: ['g4'],
-      floorSelections: [{ themePackId: null, difficulty: 0, giftIds: ['g5', 'g6'] }],
+      selectedGiftIds: ['9001', '9002'],
+      observationGiftIds: ['9003'],
+      comprehensiveGiftIds: ['9004'],
+      floorSelections: [{ themePackId: null, difficulty: 0, giftIds: ['9005', '9006'] }],
     })
 
     const result = extractGiftIds(content)
 
-    expect(result).toEqual(new Set(['g1', 'g2', 'g3', 'g4', 'g5', 'g6']))
+    expect(result).toEqual(new Set(['9001', '9002', '9003', '9004', '9005', '9006']))
+  })
+
+  it('indexes an enhanced gift under its base id', () => {
+    const content = createMockMDContent({
+      selectedGiftIds: ['9154'],
+      observationGiftIds: [],
+      comprehensiveGiftIds: ['19154'],
+      floorSelections: [{ themePackId: null, difficulty: 0, giftIds: ['29154'] }],
+    })
+
+    const result = extractGiftIds(content)
+
+    expect(result).toEqual(new Set(['9154']))
+  })
+
+  it('drops ids that are not a valid gift encoding', () => {
+    const content = createMockMDContent({
+      selectedGiftIds: ['9001', 'not-a-gift', '', '999'],
+      observationGiftIds: [],
+      comprehensiveGiftIds: [],
+      floorSelections: [],
+    })
+
+    expect(extractGiftIds(content)).toEqual(new Set(['9001']))
   })
 
   it('deduplicates across sources', () => {
     const content = createMockMDContent({
-      selectedGiftIds: ['g1', 'g2'],
-      observationGiftIds: ['g2', 'g3'],
+      selectedGiftIds: ['9001', '9002'],
+      observationGiftIds: ['9002', '9003'],
       comprehensiveGiftIds: [],
-      floorSelections: [{ themePackId: null, difficulty: 0, giftIds: ['g1'] }],
+      floorSelections: [{ themePackId: null, difficulty: 0, giftIds: ['9001'] }],
     })
 
     const result = extractGiftIds(content)
 
-    expect(result).toEqual(new Set(['g1', 'g2', 'g3']))
+    expect(result).toEqual(new Set(['9001', '9002', '9003']))
     expect(result.size).toBe(3)
   })
 
@@ -225,10 +250,12 @@ describe('extractGiftIds', () => {
 
   it('handles undefined sources gracefully', () => {
     const content = createMockMDContent()
-    ;(content as Record<string, unknown>).selectedGiftIds = undefined
-    ;(content as Record<string, unknown>).observationGiftIds = undefined
-    ;(content as Record<string, unknown>).comprehensiveGiftIds = undefined
-    ;(content as Record<string, unknown>).floorSelections = undefined
+    Object.assign(content, {
+      selectedGiftIds: undefined,
+      observationGiftIds: undefined,
+      comprehensiveGiftIds: undefined,
+      floorSelections: undefined,
+    })
 
     expect(extractGiftIds(content)).toEqual(new Set())
   })
@@ -242,8 +269,8 @@ describe('extractThemePackIds', () => {
   it('extracts non-null themePackId from floorSelections', () => {
     const content = createMockMDContent({
       floorSelections: [
-        { themePackId: '1001', difficulty: 0, giftIds: [] },
-        { themePackId: '1002', difficulty: 1, giftIds: [] },
+        { themePackId: ThemePackIdSchema.parse('1001'), difficulty: 0, giftIds: [] },
+        { themePackId: ThemePackIdSchema.parse('1002'), difficulty: 1, giftIds: [] },
       ],
     })
 
@@ -255,9 +282,9 @@ describe('extractThemePackIds', () => {
   it('skips null themePackId entries', () => {
     const content = createMockMDContent({
       floorSelections: [
-        { themePackId: '1001', difficulty: 0, giftIds: [] },
+        { themePackId: ThemePackIdSchema.parse('1001'), difficulty: 0, giftIds: [] },
         { themePackId: null, difficulty: 0, giftIds: [] },
-        { themePackId: '1003', difficulty: 1, giftIds: [] },
+        { themePackId: ThemePackIdSchema.parse('1003'), difficulty: 1, giftIds: [] },
       ],
     })
 
@@ -274,7 +301,7 @@ describe('extractThemePackIds', () => {
 
   it('returns empty set when floorSelections is undefined', () => {
     const content = createMockMDContent()
-    ;(content as Record<string, unknown>).floorSelections = undefined
+    Object.assign(content, { floorSelections: undefined })
     expect(extractThemePackIds(content)).toEqual(new Set())
   })
 })
@@ -449,7 +476,7 @@ describe('matchesPlannerFilters', () => {
           savedAt: null,
           deviceId: 'test-device',
         },
-        config: { type: 'REFRACTED_RAILWAY', category: 'RR5' },
+        config: { type: 'REFRACTED_RAILWAY', category: 'RR_PLACEHOLDER' },
         content: {},
       }
       const filters = createFilters({ keywords: ['Burn'] })
@@ -472,7 +499,7 @@ describe('matchesPlannerFilters', () => {
           savedAt: null,
           deviceId: 'test-device',
         },
-        config: { type: 'REFRACTED_RAILWAY', category: 'RR5' },
+        config: { type: 'REFRACTED_RAILWAY', category: 'RR_PLACEHOLDER' },
         content: {},
       }
       const filters = createFilters({ title: 'railway' })
@@ -484,9 +511,9 @@ describe('matchesPlannerFilters', () => {
   describe('missing content edge cases', () => {
     it('returns false when plan has no keywords but keyword filter is active', () => {
       const content = createMockMDContent()
-      ;(content as Record<string, unknown>).selectedKeywords = undefined
+      Object.assign(content, { selectedKeywords: undefined })
       const plan = createMockPlanner()
-      ;(plan.content as Record<string, unknown>).selectedKeywords = undefined
+      Object.assign(plan.content, { selectedKeywords: undefined })
       const filters = createFilters({ keywords: ['Burn'] })
 
       expect(matchesPlannerFilters(plan, filters)).toBe(false)

@@ -1,0 +1,193 @@
+{
+  "schema": 1,
+  "task": "042-cross-region-latency-remediation",
+  "base": "4ce6fceba79e7506925731318696163213d57095",
+  "deepSet": "backend/gradlew -p backend checkstyleMain checkstyleTest checkstyleServiceJavadoc cpdCheck test",
+  "phases": [
+    {
+      "id": "01",
+      "kind": "local-tdd",
+      "deps": [],
+      "status": "closed",
+      "rows": [
+        "sort-popular-collapses-to-recent",
+        "sort-unknown-falls-back-recent",
+        "list-excludes-nonpublic",
+        "list-field-parity",
+        "takedown-unpublishes-entity",
+        "republish-blocked-while-taken-down",
+        "logout-revocations-atomic",
+        "logout-invalid-token-fast-path",
+        "resttemplate-timeouts-bounded",
+        "oolfe-maps-to-409-concurrent",
+        "counters-immune-to-entity-save",
+        "promotion-counter-registered-at-boot"
+      ],
+      "touches": [
+        "backend/src/main/java/org/danteplanner/backend/planner/repository/PlannerRepository.java",
+        "backend/src/main/java/org/danteplanner/backend/planner/controller/PublishedPlannerController.java",
+        "backend/src/main/java/org/danteplanner/backend/planner/dto/PublicPlannerResponse.java",
+        "backend/src/main/java/org/danteplanner/backend/planner/entity/Planner.java",
+        "backend/src/main/java/org/danteplanner/backend/auth/facade/AuthenticationFacade.java",
+        "backend/src/main/java/org/danteplanner/backend/auth/token/TokenBlacklistService.java",
+        "backend/src/main/java/org/danteplanner/backend/auth/token/RefreshRotationService.java",
+        "backend/src/main/java/org/danteplanner/backend/shared/config/HttpClientConfig.java",
+        "backend/src/main/java/org/danteplanner/backend/shared/exception/GlobalExceptionHandler.java",
+        "backend/src/main/java/org/danteplanner/backend/shared/readpath/PrimaryReCheck.java"
+      ],
+      "stubAllow": [
+        "**/PlannerSummaryRow.java"
+      ],
+      "testExceptions": [
+        "**/db/migration/*.sql",
+        "**/support/TestDataFactory.java",
+        "**/facade/AuthenticationFacade*Test.java"
+      ],
+      "validation": "/home/user/github/LimbusPlanner/backend/gradlew -p /home/user/github/LimbusPlanner/backend test --tests 'org.danteplanner.backend.integration.PublishedPlanner*' --tests 'org.danteplanner.backend.integration.Logout*' --tests 'org.danteplanner.backend.integration.PlannerUpsertConflictIT' --tests 'org.danteplanner.backend.integration.PlannerCounterGuardIT' --tests 'org.danteplanner.backend.integration.MetricsRegistrationIT' --tests 'org.danteplanner.backend.planner.entity.PlannerEntityTest' --tests 'org.danteplanner.backend.shared.config.HttpClientConfigTest'",
+      "checks": [
+        "/home/user/github/LimbusPlanner/backend/gradlew -p /home/user/github/LimbusPlanner/backend test"
+      ],
+      "timeboxMin": 45,
+      "pct": 100,
+      "startedAt": "2026-07-18T15:14:17.878470+00:00",
+      "receipts": {
+        "red": "2026-07-19T00:49:11+00:00",
+        "green": "2026-07-19T00:53:56+00:00"
+      },
+      "runs": {},
+      "findings": []
+    },
+    {
+      "id": "02",
+      "kind": "local-tdd",
+      "deps": [
+        "01"
+      ],
+      "status": "closed",
+      "rows": [
+        "view-dedup-composite-pk",
+        "view-flush-replay-idempotent",
+        "detail-read-holds-no-lock",
+        "detail-response-precedes-view-write",
+        "publish-sse-after-commit-only",
+        "settings-get-absent-row-defaults",
+        "settings-null-sync-semantics",
+        "settings-created-with-user",
+        "settings-backfill-covers-legacy",
+        "oauth-race-loser-converges",
+        "returning-login-no-insert"
+      ],
+      "touches": [
+        "backend/src/main/java/org/danteplanner/backend/planner/service/PublishedPlannerQueryService.java",
+        "backend/src/main/java/org/danteplanner/backend/planner/service/PlannerPublishingService.java",
+        "backend/src/main/java/org/danteplanner/backend/planner/service/PlannerCommandService.java",
+        "backend/src/main/java/org/danteplanner/backend/comment/service/CommentService.java",
+        "backend/src/main/java/org/danteplanner/backend/user/service/UserSettingsService.java",
+        "backend/src/main/java/org/danteplanner/backend/auth/**",
+        "backend/src/test/resources/db/seed/migration-test-seed.sql",
+        "backend/src/main/java/org/danteplanner/backend/CLAUDE.md",
+        "backend/src/main/java/org/danteplanner/backend/user/service/UserService.java"
+      ],
+      "stubAllow": [
+        "**/PlannerViewRecorder.java"
+      ],
+      "testExceptions": [
+        "**/db/migration/*.sql",
+        "**/seed/*.sql",
+        "**/CLAUDE.md",
+        "**/service/PublishedPlannerQueryServiceTest.java",
+        "**/service/PlannerPublishingServiceTest.java",
+        "**/service/UserServiceTest.java",
+        "**/service/UserSettingsServiceTest.java",
+        "**/controller/PlannerControllerTest.java"
+      ],
+      "validation": "/home/user/github/LimbusPlanner/backend/gradlew -p /home/user/github/LimbusPlanner/backend test --tests 'org.danteplanner.backend.integration.PlannerViewPipelineIT' --tests 'org.danteplanner.backend.integration.PublishedPlannerDetailIT' --tests 'org.danteplanner.backend.integration.User*' --tests 'org.danteplanner.backend.integration.SettingsBackfillMigrationIT' --tests 'org.danteplanner.backend.integration.PlannerPublishEventIT'",
+      "checks": [
+        "/home/user/github/LimbusPlanner/backend/gradlew -p /home/user/github/LimbusPlanner/backend test"
+      ],
+      "timeboxMin": 60,
+      "pct": 100,
+      "startedAt": null,
+      "receipts": {
+        "red": "2026-07-19T02:49:05+00:00",
+        "green": "2026-07-19T03:13:13+00:00"
+      },
+      "runs": {},
+      "findings": []
+    },
+    {
+      "id": "03",
+      "kind": "local-tdd",
+      "deps": [
+        "02"
+      ],
+      "status": "closed",
+      "rows": [
+        "stats-dual-write-consistent",
+        "stats-flag-on-reads-stats",
+        "stats-flag-off-reads-legacy"
+      ],
+      "touches": [
+        "backend/src/main/java/org/danteplanner/backend/planner/service/**",
+        "backend/src/test/resources/db/seed/migration-test-seed.sql",
+        "deploy/overlays/oregon/configmap-patch.yaml",
+        "deploy/overlays/seoul/configmap-patch.yaml",
+        "backend/src/main/resources/db/migration/**",
+        "backend/src/main/java/org/danteplanner/backend/planner/entity/PlannerStats.java",
+        "backend/src/main/java/org/danteplanner/backend/planner/repository/PlannerStatsRepository.java"
+      ],
+      "stubAllow": [
+        "**/PlannerStats.java",
+        "**/PlannerStatsRepository.java",
+        "**/StatsReadsFlag.java"
+      ],
+      "testExceptions": [
+        "**/db/migration/*.sql",
+        "**/seed/*.sql",
+        "deploy/overlays/**",
+        "**/service/PublishedPlannerQueryServiceTest.java",
+        "**/service/PlannerEngagementServiceTest.java"
+      ],
+      "validation": "/home/user/github/LimbusPlanner/backend/gradlew -p /home/user/github/LimbusPlanner/backend test --tests 'org.danteplanner.backend.integration.PlannerStats*'",
+      "checks": [
+        "/home/user/github/LimbusPlanner/backend/gradlew -p /home/user/github/LimbusPlanner/backend test"
+      ],
+      "timeboxMin": 45,
+      "pct": 100,
+      "startedAt": "2026-07-19T03:32:01.724534+00:00",
+      "receipts": {
+        "red": "2026-07-19T03:58:09+00:00",
+        "green": "2026-07-19T03:59:42+00:00"
+      },
+      "runs": {},
+      "findings": []
+    }
+  ],
+  "runs": {
+    "deepSet": {
+      "head": "7f2d674588c8adccd807bf862108f87c0cb3acac",
+      "verdict": "fail",
+      "failed": [
+        "org.danteplanner.backend.controller.PlannerControllerTest$CreatePlannerTests#Should return 201 when creating planner with valid data",
+        "org.danteplanner.backend.controller.PlannerControllerTest$EdgeCaseTests#Content well under 50KB should succeed",
+        "org.danteplanner.backend.controller.PlannerControllerTest$EdgeCaseTests#Creating 100th planner should succeed",
+        "org.danteplanner.backend.controller.PlannerControllerTest$EdgeCaseTests#Deleted planners should not count toward limit",
+        "org.danteplanner.backend.controller.PlannerControllerTest$ImportPlannersTests#Should return 201 when importing planners within limit",
+        "org.danteplanner.backend.controller.PlannerControllerTest$TogglePublishTests#Should return 200 when owner toggles publish status",
+        "org.danteplanner.backend.controller.PlannerControllerTest$UpdatePlannerTests#Should increment syncVersion on successful update",
+        "org.danteplanner.backend.controller.PlannerControllerTest$UpdatePlannerTests#Should persist updated contentVersion on upsert update",
+        "org.danteplanner.backend.converter.KeywordParityTest#VALID_KEYWORDS equals the FE plannerKeywords.json id set",
+        "org.danteplanner.backend.integration.CausalGateIT#Author write sets a GTID cookie; the cookie-bearing read routes to the fresh primary while the replica lags, then serves the replica and clears the cookie once caught up",
+        "org.danteplanner.backend.integration.DegradationIT#INV5: primary DB cut \u2192 readiness stays UP, write returns WRITE_TEMPORARILY_UNAVAILABLE, list read still serves the replica",
+        "org.danteplanner.backend.integration.HibernateInsertBatchingIT#importPlanners: prepared-statement count is bounded, not one INSERT per row",
+        "org.danteplanner.backend.integration.PlannerPublishEventIT#publish_WhenRolledBack_EmitsNoSseEvent",
+        "org.danteplanner.backend.integration.PlannerUpsertConflictIT#upsert_WhenConcurrent_Yields409ConcurrentWrite",
+        "org.danteplanner.backend.integration.RedisConnectionRecoveryIT#Rate-limit Redis restored: the typed 503 gives way to normal request handling"
+      ],
+      "analyzer": [],
+      "coverage": null,
+      "at": "2026-07-19T04:53:48+00:00"
+    }
+  },
+  "taskFindings": []
+}

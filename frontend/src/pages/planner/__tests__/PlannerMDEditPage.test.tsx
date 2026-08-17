@@ -24,10 +24,10 @@ vi.mock('react-i18next', () => ({
 
 vi.mock('../hooks/useSavedPlannerQuery')
 
-vi.mock('../components/planner/PlannerMDEditorContent', () => ({
-  PlannerMDEditorContent: ({ mode, planner }: { mode: string; planner?: SaveablePlanner }) => (
+vi.mock('../components/planner/PlannerEditEditor', () => ({
+  PlannerEditEditor: ({ planner }: { planner?: SaveablePlanner }) => (
     <div data-testid="editor-content">
-      EditorContent - Mode: {mode}, Planner ID: {planner?.metadata.id || 'none'}
+      EditEditor - Planner ID: {planner?.metadata.id || 'none'}
     </div>
   ),
 }))
@@ -39,6 +39,7 @@ vi.mock('@/components/feedback/ErrorBoundary', () => ({
 const mockPlanner: SaveablePlanner = {
   metadata: {
     id: 'test-planner-123',
+    title: 'Test Planner',
     status: 'draft',
     schemaVersion: 2,
     contentVersion: 6,
@@ -47,7 +48,6 @@ const mockPlanner: SaveablePlanner = {
     createdAt: '2026-01-10T00:00:00Z',
     lastModifiedAt: '2026-01-10T00:00:00Z',
     savedAt: null,
-    userId: 1,
     deviceId: 'device-123',
   },
   config: {
@@ -102,7 +102,7 @@ describe('PlannerMDEditPage', () => {
       expect(useSavedPlannerQuery).toHaveBeenCalledWith('test-planner-123')
     })
 
-    it('renders EditorContent with mode="edit" and loaded planner', () => {
+    it('renders the edit editor with the loaded planner', () => {
       render(
         <QueryClientProvider client={queryClient}>
           <PlannerMDEditPage />
@@ -111,7 +111,7 @@ describe('PlannerMDEditPage', () => {
 
       const editor = screen.getByTestId('editor-content')
       expect(editor).toBeDefined()
-      expect(editor.textContent).toContain('Mode: edit')
+      expect(editor.textContent).toContain('EditEditor')
       expect(editor.textContent).toContain('Planner ID: test-planner-123')
     })
   })
@@ -131,10 +131,11 @@ describe('PlannerMDEditPage', () => {
     })
 
     it('shows invalid type error when planner type is not MIRROR_DUNGEON', () => {
-      const nonMDPlanner = {
+      const nonMDPlanner: SaveablePlanner = {
         ...mockPlanner,
         config: {
-          type: 'ABNORMALITY_ENCOUNTER' as const,
+          type: 'REFRACTED_RAILWAY',
+          category: 'RR_PLACEHOLDER',
         },
       }
       vi.mocked(useSavedPlannerQuery).mockReturnValue(nonMDPlanner)
@@ -151,7 +152,7 @@ describe('PlannerMDEditPage', () => {
   })
 
   describe('state initialization', () => {
-    it('passes loaded planner to EditorContent', () => {
+    it('passes loaded planner to the edit editor', () => {
       render(
         <QueryClientProvider client={queryClient}>
           <PlannerMDEditPage />
@@ -162,7 +163,7 @@ describe('PlannerMDEditPage', () => {
       expect(editor.textContent).toContain('test-planner-123')
     })
 
-    it('uses correct mode prop', () => {
+    it('routes to the edit editor rather than the create editor', () => {
       render(
         <QueryClientProvider client={queryClient}>
           <PlannerMDEditPage />
@@ -170,7 +171,7 @@ describe('PlannerMDEditPage', () => {
       )
 
       const editor = screen.getByTestId('editor-content')
-      expect(editor.textContent).toContain('Mode: edit')
+      expect(editor.textContent).toContain('EditEditor')
     })
   })
 

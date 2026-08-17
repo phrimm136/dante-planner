@@ -4,10 +4,12 @@ import { EGOGiftCard } from '@/pages/egoGift'
 import { EGOGiftTooltip } from '@/pages/egoGift'
 import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { CARD_GRID } from '@/lib/constants'
+import { toGiftListItem, toUnknownGiftListItem } from '@/pages/egoGift'
+import type { EGOGiftId } from '@/shared/gameData'
 
 interface StartGiftRowProps {
   keyword: string
-  giftIds: number[]
+  giftIds: EGOGiftId[]
   giftSpecMap: Record<string, EGOGiftSpec>
   giftNameMap: EGOGiftNameList
   isRowSelected: boolean
@@ -32,8 +34,6 @@ export function StartGiftRow({
   onRowSelect,
   onGiftClick,
 }: StartGiftRowProps) {
-  // Breakpoint detection for scaling
-
   // Calculate scaled dimensions
   const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
 
@@ -41,17 +41,23 @@ export function StartGiftRow({
     onRowSelect(keyword)
   }
 
-  const handleGiftCardClick = (e: React.MouseEvent, giftId: string) => {
-    e.stopPropagation()
+  const handleGiftCardClick = (giftId: string) => {
     onGiftClick(keyword, giftId)
   }
 
   return (
     <div
-      className="selectable inline-flex items-center gap-4 p-3 rounded-lg cursor-pointer"
+      className="selectable relative inline-flex items-center gap-4 p-3 rounded-lg cursor-pointer"
       data-selected={isRowSelected}
-      onClick={handleRowClick}
     >
+      <button
+        type="button"
+        className="absolute inset-0 rounded-lg"
+        aria-label={keyword}
+        aria-pressed={isRowSelected}
+        onClick={handleRowClick}
+      />
+
       {/* Keyword icon */}
       <ScaledCardWrapper
         mobileScale={mobileScale}
@@ -70,28 +76,20 @@ export function StartGiftRow({
       </ScaledCardWrapper>
 
       {/* Gift cards - horizontal layout */}
-      <div className="flex items-start gap-2 lg:gap-4">
+      <div className="relative z-10 flex items-start gap-2 lg:gap-4">
         {giftIds.map((giftId) => {
-          const idStr = String(giftId)
-          const spec = giftSpecMap[idStr]
-          const name = giftNameMap[idStr] || `Gift ${giftId}`
-          const isSelected = selectedGiftIds.has(idStr)
+          const spec = giftSpecMap[giftId]
+          const name = giftNameMap[giftId] || `Gift ${giftId}`
+          const isSelected = selectedGiftIds.has(giftId)
           const canSelect = isRowSelected && (isSelected || selectedGiftIds.size < maxSelectable)
 
           // Build gift object for EGOGiftCard
-          const gift = {
-            id: idStr,
-            name,
-            tag: spec?.tag || ['TIER_1'],
-            keyword: spec?.keyword || null,
-            battleKeywordList: spec?.battleKeywordList ?? [],
-            attributeType: spec?.attributeType || 'CRIMSON',
-            themePack: spec?.themePack || [],
-            maxEnhancement: spec?.maxEnhancement ?? 0,
-          }
+          const gift = spec
+            ? toGiftListItem(giftId, spec, name)
+            : toUnknownGiftListItem(giftId, name)
 
           return (
-            <EGOGiftTooltip key={giftId} giftId={idStr}>
+            <EGOGiftTooltip key={giftId} giftId={giftId}>
               <ScaledCardWrapper
                 mobileScale={mobileScale}
                 cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
@@ -99,8 +97,8 @@ export function StartGiftRow({
               >
                 <button
                   type="button"
-                  onClick={(e) => {
-                    handleGiftCardClick(e, idStr)
+                  onClick={() => {
+                    handleGiftCardClick(giftId)
                   }}
                   disabled={!canSelect}
                   className={`group ${!canSelect ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}

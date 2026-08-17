@@ -78,4 +78,17 @@ public interface PlannerVoteRepository extends JpaRepository<PlannerVote, Planne
     @Modifying
     @Query("UPDATE PlannerVote v SET v.userId = :sentinelId WHERE v.userId = :userId")
     int reassignUserVotes(@Param("userId") Long userId, @Param("sentinelId") Long sentinelId);
+
+    /**
+     * Persists a vote that does not exist yet.
+     *
+     * <p>The key is the (user, planner) pair the caller supplies, so no id-null guard can tell a
+     * new row from an existing one: passing a row that already exists overwrites it.</p>
+     *
+     * @param vote the vote to insert
+     * @return the persisted vote
+     */
+    default PlannerVote insert(PlannerVote vote) {
+        return save(vote);
+    }
 }

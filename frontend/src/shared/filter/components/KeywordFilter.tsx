@@ -1,29 +1,25 @@
-import { memo } from 'react'
-import { getKeywordIconPath } from '@/shared/assets'
-import { areSetsEqual } from '@/lib/setUtils'
+import { getBattleKeywordIconPath } from '@/shared/assets'
 import { IconFilter } from './IconFilter'
 import { STATUS_EFFECTS } from '@/shared/gameData'
 
 interface KeywordFilterProps {
-  selectedKeywords: Set<string>
+  selected: Set<string>
   onSelectionChange: (keywords: Set<string>) => void
 }
 
-export const KeywordFilter = memo(
-  function KeywordFilter({ selectedKeywords, onSelectionChange }: KeywordFilterProps) {
-    const getIconPath = (keyword: string) => getKeywordIconPath(keyword)
-
-    return (
-      <IconFilter
-        options={STATUS_EFFECTS}
-        selectedOptions={selectedKeywords}
-        onSelectionChange={onSelectionChange}
-        getIconPath={getIconPath}
-      />
-    )
-  },
-  (prev, next) => {
-    return areSetsEqual(prev.selectedKeywords, next.selectedKeywords)
-    // onSelectionChange excluded - callback identity changes but behavior is same
-  },
-)
+/**
+ * Keyword icon filter for filter sidebar
+ * 7 status effects displayed in a 7-column grid (1 row)
+ *
+ * Pattern: Wraps IconFilter like KeywordFilter wraps IconFilter
+ */
+export function KeywordFilter({ selected, onSelectionChange }: KeywordFilterProps) {
+  return (
+    <IconFilter
+      options={STATUS_EFFECTS}
+      selectedOptions={selected}
+      onSelectionChange={onSelectionChange}
+      getIconPath={getBattleKeywordIconPath}
+    />
+  )
+}

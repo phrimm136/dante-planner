@@ -3,48 +3,73 @@ import { QueryClient, QueryCache, MutationCache } from '@tanstack/react-query'
 import {
   ServiceUpdatingError,
   BackendUnavailableError,
-  AuthTemporarilyUnavailableError,
-} from './api'
-import { toast } from './toast'
-import i18n from './i18n'
+  RetryableUnavailableError,
+} from './apiErrors'
+import { showError, showSuccess, showUnavailable } from './errorPresentation'
+import {
+  STALE_TIME,
+  GC_TIME,
+  MAX_RETRYABLE_ATTEMPTS,
+  RETRY_BASE_MS,
+  RETRY_MAX_MS,
+} from '@/lib/constants'
 
-export function handleBackendDownError(error: Error): void {
-  if (error instanceof ServiceUpdatingError) {
-    toast.error(i18n.t('errors.serviceUpdating'))
-  } else if (error instanceof BackendUnavailableError) {
-    toast.error(i18n.t('errors.backendUnavailable'))
-  } else if (error instanceof AuthTemporarilyUnavailableError) {
-    toast.error(i18n.t('errors.authUnavailable'))
+declare module '@tanstack/react-query' {
+  interface Register {
+    mutationMeta: {
+      successMessage?: string
+      successParams?: Record<string, unknown>
+      /** Opt out where the mutation renders its own failure surface. */
+      suppressErrorToast?: boolean
+    }
   }
 }
 
-export const queryClient = new QueryClient({
-  queryCache: new QueryCache({
+export function createQueryCache(): QueryCache {
+  return new QueryCache({
     onError: (error) => {
-      // Log errors for debugging
       console.error('Query failed:', error)
-      handleBackendDownError(error)
-      // Note: Other toast notifications are disabled for queries
-      // useSuspenseQuery throws errors that are caught by RouteErrorComponent
-      // This prevents duplicate error displays (toast + error page)
+      // Queries stay narrow: a thrown query error already reaches the route
+      // error component, so toasting anything else would double-report it.
+      showUnavailable(error)
     },
-  }),
-  mutationCache: new MutationCache({
-    onError: (error) => {
-      handleBackendDownError(error)
+  })
+}
+
+export function createMutationCache(): MutationCache {
+  return new MutationCache({
+    onError: (error, _variables, _onMutateResult, mutation) => {
+      // Logging precedes the opt-out: a mutation that renders its own failure
+      // surface still belongs in the console.
+      console.error('Mutation failed:', error)
+      if (mutation.meta?.suppressErrorToast === true) return
+      showError(error)
     },
-  }),
+    onSuccess: (_data, _variables, _onMutateResult, mutation) => {
+      const message = mutation.meta?.successMessage
+      if (message !== undefined) showSuccess(message, mutation.meta?.successParams)
+    },
+  })
+}
+
+export const queryClient = new QueryClient({
+  queryCache: createQueryCache(),
+  mutationCache: createMutationCache(),
   defaultOptions: {
     queries: {
-      staleTime: 60 * 1000, // 1 minute - data is fresh for 1 min
-      gcTime: 5 * 60 * 1000, // 5 minutes - cache for 5 min (formerly cacheTime)
+      staleTime: STALE_TIME.SHORT,
+      gcTime: GC_TIME.SHORT,
       retry: (failureCount, error) => {
+        if (error instanceof RetryableUnavailableError) {
+          return failureCount < MAX_RETRYABLE_ATTEMPTS
+        }
         if (error instanceof ServiceUpdatingError || error instanceof BackendUnavailableError) {
           return false
         }
         return failureCount < 1
       },
-      refetchOnWindowFocus: false, // Don't refetch when window regains focus
+      retryDelay: (attempt) => Math.min(RETRY_BASE_MS * 2 ** attempt, RETRY_MAX_MS),
+      refetchOnWindowFocus: true,
     },
   },
 })

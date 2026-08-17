@@ -29,17 +29,6 @@ export type BuffType = 'Positive' | 'Negative' | 'Neutral' | (string & {})
 export type { BattleKeywordSpecEntry } from '../schemas/KeywordSchemas'
 
 /**
- * Merged list item for keyword browser display
- * Combines spec data with optional i18n name
- */
-export interface BattleKeywordListItem {
-  id: string
-  iconId: string | null
-  buffType: string
-  name?: string
-}
-
-/**
  * Resolved keyword with all data needed for rendering
  */
 export interface ResolvedKeyword {

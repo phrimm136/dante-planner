@@ -1,0 +1,25 @@
+id: no-throw-in-lib
+snapshots:
+  ? |
+    function load(raw: string) {
+      const parsed = schema.safeParse(raw)
+      if (!parsed.success) throw new Error('invalid payload')
+      return parsed.data
+    }
+  : labels:
+    - source: throw new Error('invalid payload')
+      style: primary
+      start: 91
+      end: 125
+  throw err:
+    labels:
+    - source: throw err
+      style: primary
+      start: 0
+      end: 9
+  throw new Error('boom'):
+    labels:
+    - source: throw new Error('boom')
+      style: primary
+      start: 0
+      end: 23

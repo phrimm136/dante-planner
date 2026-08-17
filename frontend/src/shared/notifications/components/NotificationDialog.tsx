@@ -16,6 +16,7 @@ import { useNotificationPermission } from '../hooks/useNotificationPermission'
 import { useNotificationsQuery } from '../hooks/useNotificationsQuery'
 import { useDeleteNotificationMutation } from '../hooks/useDeleteNotificationMutation'
 import { useClearAllNotificationsMutation } from '../hooks/useClearAllNotificationsMutation'
+import { SECTION_STYLES } from '@/lib/constants'
 
 interface NotificationDialogProps {
   open: boolean
@@ -114,7 +115,7 @@ function DesktopNotificationCta() {
 
   return (
     <div className="flex items-center justify-between gap-3 rounded-md border border-border bg-muted/50 px-3 py-2">
-      <p className="text-sm text-muted-foreground">{t('notifications.desktopCta.message')}</p>
+      <p className={SECTION_STYLES.TEXT.caption}>{t('notifications.desktopCta.message')}</p>
       <Button size="sm" variant="outline" className="shrink-0" onClick={request}>
         {t('notifications.desktopCta.enable')}
       </Button>

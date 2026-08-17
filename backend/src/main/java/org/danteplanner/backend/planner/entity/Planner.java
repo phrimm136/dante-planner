@@ -1,6 +1,21 @@
 package org.danteplanner.backend.planner.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.PostPersist;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,28 +24,34 @@ import lombok.Setter;
 
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.springframework.data.domain.Persistable;
 
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.planner.converter.KeywordSetConverter;
-import org.danteplanner.backend.planner.converter.PlannerStatusConverter;
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
 
 import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Write-once planner core: identity, owner, type, creation time. Everything mutable
+ * lives on the satellite rows ({@link PlannerContent}, {@link PlannerPublication},
+ * {@link PlannerModeration}) sharing this row's PK, so FKs pointing here never
+ * contend with owner writes.
+ *
+ * <p>As the aggregate root it coordinates cross-entity invariants (a taken-down
+ * planner cannot be republished) and fronts the satellites with delegating readers.</p>
+ *
+ * <p>Implements Persistable so client-assigned ids take the persist path
+ * (batchable INSERTs) instead of merge's SELECT-then-INSERT.</p>
+ */
 @Entity
-@Table(name = "planners",
-       indexes = {
-           @Index(name = "idx_user_modified", columnList = "user_id, last_modified_at DESC"),
-           @Index(name = "idx_user_status", columnList = "user_id, status"),
-           @Index(name = "idx_user_deleted", columnList = "user_id, deleted_at")
-       })
+@Table(name = "planner")
 @Getter
 @Builder
 @NoArgsConstructor
-@AllArgsConstructor
-public class Planner {
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public class Planner implements Persistable<UUID> {
 
     @Id
     @Setter
@@ -42,152 +63,143 @@ public class Planner {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false)
-    @Setter
-    @Builder.Default
-    private String title = "Untitled";
-
-    @Column(nullable = false, length = 50)
-    @Setter
-    private String category;
-
-    @Column(nullable = false)
-    @Setter
-    @Convert(converter = PlannerStatusConverter.class)
-    @JdbcTypeCode(SqlTypes.CHAR)
-    @Builder.Default
-    private PlannerStatus status = PlannerStatus.DRAFT;
-
-    @Column(columnDefinition = "JSON", nullable = false)
-    @Setter
-    private String content;
-
-    @Column(name = "schema_version", nullable = false)
-    @Setter
-    @Builder.Default
-    private Integer schemaVersion = 2;
-
-    @Column(name = "content_version", nullable = false)
-    @Setter
-    private Integer contentVersion;
-
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.CHAR)
-    @Column(name = "planner_type", nullable = false)
+    @Column(name = "planner_type", nullable = false, updatable = false)
     private PlannerType plannerType;
-
-    @Column(name = "sync_version", nullable = false)
-    @Builder.Default
-    private Long syncVersion = 1L;
-
-    @Column(name = "device_id")
-    @Setter
-    private String deviceId;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     @Setter
     private Instant createdAt;
 
-    @Column(name = "last_modified_at", nullable = false)
-    @Setter
-    private Instant lastModifiedAt;
+    @OneToOne(mappedBy = "planner", cascade = CascadeType.ALL, orphanRemoval = true, optional = false)
+    private PlannerContent content;
 
-    @Column(name = "saved_at")
-    private Instant savedAt;
+    @OneToOne(mappedBy = "planner", cascade = CascadeType.ALL, orphanRemoval = true, optional = false)
+    private PlannerPublication publication;
 
-    @Column(name = "deleted_at")
-    private Instant deletedAt;
+    @OneToOne(mappedBy = "planner", cascade = CascadeType.ALL, orphanRemoval = true, optional = false)
+    private PlannerModeration moderation;
 
-    // Publishing fields
-    @Column(nullable = false)
+    @Transient
     @Builder.Default
-    private Boolean published = false;
+    private boolean isNew = true;
 
-    @Column(nullable = false)
-    @Setter
-    @Builder.Default
-    private Integer upvotes = 0;
+    @Override
+    public boolean isNew() {
+        return isNew;
+    }
 
-    @Column(name = "selected_keywords")
-    @Setter
-    @Convert(converter = KeywordSetConverter.class)
-    @JdbcTypeCode(SqlTypes.CHAR)
-    private Set<String> selectedKeywords;
-
-    @Column(name = "view_count", nullable = false)
-    @Setter
-    @Builder.Default
-    private Integer viewCount = 0;
-
-    // Moderation fields
-    @Column(name = "hidden_from_recommended", nullable = false)
-    @Builder.Default
-    private Boolean hiddenFromRecommended = false;
-
-    @Column(name = "hidden_by_moderator_id")
-    private Long hiddenByModeratorId;
-
-    @Column(name = "hidden_reason", columnDefinition = "TEXT")
-    private String hiddenReason;
-
-    @Column(name = "hidden_at")
-    private Instant hiddenAt;
-
-    // Written by takeDown(); the preservation guard in PlannerCommandService.upsertPlanner
-    // restores a captured value, so this field alone retains a setter (INV7 exception).
-    @Column(name = "taken_down_at")
-    @Setter
-    private Instant takenDownAt;
-
-    @Column(name = "owner_notifications_enabled", nullable = false)
-    @Setter
-    @Builder.Default
-    private Boolean ownerNotificationsEnabled = true;
-
-    @Version
-    @Column(name = "version")
-    private Long version;
-
-    @Column(name = "recommended_notified_at")
-    @Setter
-    private Instant recommendedNotifiedAt;
-
-    @Column(name = "first_published_at")
-    private Instant firstPublishedAt;
+    @PostPersist
+    @PostLoad
+    protected void markNotNew() {
+        this.isNew = false;
+    }
 
     @PrePersist
     protected void onCreate() {
-        Instant now = Instant.now();
-        createdAt = now;
-        lastModifiedAt = now;
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        lastModifiedAt = Instant.now();
+        if (createdAt == null) {
+            createdAt = Instant.now();
+        }
     }
 
     /**
-     * Check if this planner has been soft deleted.
+     * Attach the three satellite rows on aggregate creation. Each satellite derives
+     * its PK from this root via {@code @MapsId}.
      */
+    public void attach(PlannerContent content, PlannerPublication publication, PlannerModeration moderation) {
+        content.setPlanner(this);
+        publication.setPlanner(this);
+        moderation.setPlanner(this);
+        this.content = content;
+        this.publication = publication;
+        this.moderation = moderation;
+    }
+
+    // --- delegating readers (aggregate facade) ---
+
+    public String getTitle() {
+        return content.getTitle();
+    }
+
+    public String getCategory() {
+        return content.getCategory();
+    }
+
+    public PlannerStatus getStatus() {
+        return content.getStatus();
+    }
+
+    public String getContentJson() {
+        return content.getContent();
+    }
+
+    /**
+     * The content document as it was read from storage, before any field this
+     * transaction applied.
+     */
+    public String getLoadedContentJson() {
+        return content.getLoadedContent();
+    }
+
+    public int getSchemaVersion() {
+        return content.getContentSchemaVersion();
+    }
+
+    public int getContentVersion() {
+        return content.getGameContentVersion();
+    }
+
+    public long getSyncVersion() {
+        return content.getSyncVersion();
+    }
+
+    public UUID getDeviceId() {
+        return content.getDeviceId();
+    }
+
+    public Instant getLastModifiedAt() {
+        return content.getLastModifiedAt();
+    }
+
+    public Set<String> getSelectedKeywords() {
+        return content.getSelectedKeywords();
+    }
+
+    /**
+     * The keyword set as it was read from storage, before any field this
+     * transaction applied.
+     */
+    public Set<String> getLoadedKeywords() {
+        return content.getLoadedSelectedKeywords();
+    }
+
+    public boolean isPublished() {
+        return publication.isPublished();
+    }
+
+    public Instant getFirstPublishedAt() {
+        return publication.getFirstPublishedAt();
+    }
+
+    public boolean isOwnerNotificationsEnabled() {
+        return publication.isOwnerNotificationsEnabled();
+    }
+
+    public Instant getTakenDownAt() {
+        return moderation.getTakenDownAt();
+    }
+
+    public boolean isHiddenFromRecommended() {
+        return moderation.isHiddenFromRecommended();
+    }
+
     public boolean isDeleted() {
-        return deletedAt != null;
+        return content.isDeleted();
     }
 
-    /**
-     * Check if this planner has been taken down by a moderator.
-     *
-     * @return true if planner is taken down, false otherwise
-     */
     public boolean isTakenDown() {
-        return takenDownAt != null;
-    }
-
-    /**
-     * Soft delete this planner.
-     */
-    public void softDelete() {
-        this.deletedAt = Instant.now();
+        return moderation.isTakenDown();
     }
 
     /**
@@ -201,11 +213,25 @@ public class Planner {
     }
 
     /**
-     * Take this planner down as a moderator. Unpublishing is part of the takedown.
+     * Soft delete this planner.
      */
-    public void takeDown() {
-        this.takenDownAt = Instant.now();
-        this.published = false;
+    public void softDelete() {
+        content.markDeleted();
+    }
+
+    /**
+     * Take this planner down as a moderator. Unpublishing is part of the takedown.
+     *
+     * <p>A takedown that newly stamps the planner reports {@link PublicationChange#WITHDRAWN} even
+     * when the planner was already unpublished: the stamp pins it unpublishable, which is a
+     * departure from public view the caller still has to persist and project.</p>
+     *
+     * @return what the takedown turned out to be
+     */
+    public PublicationChange takeDown() {
+        boolean moderated = moderation.takeDown();
+        PublicationChange withdrawal = publication.unpublish();
+        return moderated ? PublicationChange.WITHDRAWN : withdrawal;
     }
 
     /**
@@ -215,53 +241,55 @@ public class Planner {
      * @param reason      the reason for hiding
      */
     public void hideFromRecommended(Long moderatorId, String reason) {
-        this.hiddenFromRecommended = true;
-        this.hiddenByModeratorId = moderatorId;
-        this.hiddenReason = reason;
-        this.hiddenAt = Instant.now();
+        moderation.hide(moderatorId, reason);
     }
 
     /**
      * Restore this planner to the recommended list.
      */
     public void unhideFromRecommended() {
-        this.hiddenFromRecommended = false;
-        this.hiddenByModeratorId = null;
-        this.hiddenReason = null;
-        this.hiddenAt = null;
+        moderation.unhide();
     }
 
     /**
-     * Toggle the published state. On the first transition to published, stamps
-     * firstPublishedAt once.
-     *
-     * @return the new published state
-     * @throws PlannerForbiddenException if publishing a planner taken down by a moderator
+     * Update the owner's comment-notification preference.
      */
-    public boolean togglePublished() {
-        if (isTakenDown() && !published) {
+    public void setOwnerNotificationsEnabled(boolean enabled) {
+        publication.setOwnerNotificationsEnabled(enabled);
+    }
+
+    /**
+     * Publish this planner, stamping firstPublishedAt on the first transition into published.
+     *
+     * <p>Idempotent: publishing a planner already published changes nothing, so a retry or a
+     * failover cannot flip it back.</p>
+     *
+     * @return what the transition turned out to be
+     * @throws PlannerForbiddenException if the planner was taken down by a moderator
+     */
+    public PublicationChange publish() {
+        if (moderation.isTakenDown()) {
             throw new PlannerForbiddenException(id);
         }
-        boolean nowPublished = !published;
-        this.published = nowPublished;
-        if (nowPublished && firstPublishedAt == null) {
-            this.firstPublishedAt = Instant.now();
-        }
-        return nowPublished;
+        return publication.publish();
     }
 
     /**
-     * Record a save: bump the sync version and stamp the save time.
+     * Record a save: bump the sync version on the content row.
      */
     public void recordSave() {
-        this.syncVersion = this.syncVersion + 1;
-        this.savedAt = Instant.now();
+        content.recordSave();
     }
 
     /**
-     * Unpublish this planner. No moderation side effects.
+     * Withdraw this planner from public view. No moderation side effects, and a takedown does not
+     * block it.
+     *
+     * <p>Idempotent: withdrawing a planner already withdrawn changes nothing.</p>
+     *
+     * @return what the transition turned out to be
      */
-    public void unpublish() {
-        this.published = false;
+    public PublicationChange unpublish() {
+        return publication.unpublish();
     }
 }

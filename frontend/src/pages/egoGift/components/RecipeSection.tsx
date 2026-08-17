@@ -23,16 +23,13 @@ import type {
   StandardRecipe,
   MixedRecipe,
 } from '../types/EGOGiftTypes'
+import { isMixedRecipe } from '../lib/egoGiftUtils'
+import { SECTION_STYLES } from '@/lib/constants'
+import type { EGOGiftId } from '@/shared/gameData'
+import { toGiftListItem } from '../lib/giftListItem'
 
 interface RecipeSectionProps {
   recipe: EGOGiftRecipe
-}
-
-/**
- * Type guard to check if recipe is mixed type (Lunar Memory)
- */
-function isMixedRecipe(recipe: EGOGiftRecipe): recipe is MixedRecipe {
-  return 'type' in recipe && recipe.type === 'mixed'
 }
 
 /**
@@ -71,7 +68,7 @@ function StandardRecipeRow({
   ingredients,
   specMap,
 }: {
-  ingredients: number[]
+  ingredients: EGOGiftId[]
   specMap: Record<string, import('../types/EGOGiftTypes').EGOGiftSpec>
 }) {
   return (
@@ -80,17 +77,7 @@ function StandardRecipeRow({
         const spec = specMap[String(id)]
         if (!spec) return null
 
-        const gift: EGOGiftListItem = {
-          id: String(id),
-          tag: spec.tag,
-          keyword: spec.keyword,
-          battleKeywordList: spec.battleKeywordList ?? [],
-          attributeType: spec.attributeType,
-          themePack: spec.themePack,
-          maxEnhancement: spec.maxEnhancement,
-          hardOnly: spec.hardOnly,
-          extremeOnly: spec.extremeOnly,
-        }
+        const gift: EGOGiftListItem = toGiftListItem(String(id), spec)
 
         return (
           <div key={id} className="flex items-start">
@@ -125,7 +112,7 @@ function MixedRecipeDisplay({
       {/* Pool A */}
       <div className="space-y-2">
         {showPoolALabel && (
-          <p className="text-sm text-muted-foreground">
+          <p className={SECTION_STYLES.TEXT.caption}>
             {t('recipe.selectNofM', { count: recipe.a.count, total: recipe.a.ids.length })}
           </p>
         )}
@@ -134,15 +121,7 @@ function MixedRecipeDisplay({
             const spec = specMap[String(id)]
             if (!spec) return null
 
-            const gift: EGOGiftListItem = {
-              id: String(id),
-              tag: spec.tag,
-              keyword: spec.keyword,
-              battleKeywordList: spec.battleKeywordList ?? [],
-              attributeType: spec.attributeType,
-              themePack: spec.themePack,
-              maxEnhancement: spec.maxEnhancement,
-            }
+            const gift: EGOGiftListItem = toGiftListItem(String(id), spec)
 
             return <IngredientCard key={id} gift={gift} />
           })}
@@ -157,7 +136,7 @@ function MixedRecipeDisplay({
       {/* Pool B */}
       <div className="space-y-2">
         {showPoolBLabel && (
-          <p className="text-sm text-muted-foreground">
+          <p className={SECTION_STYLES.TEXT.caption}>
             {t('recipe.selectNofM', { count: recipe.b.count, total: recipe.b.ids.length })}
           </p>
         )}
@@ -166,15 +145,7 @@ function MixedRecipeDisplay({
             const spec = specMap[String(id)]
             if (!spec) return null
 
-            const gift: EGOGiftListItem = {
-              id: String(id),
-              tag: spec.tag,
-              keyword: spec.keyword,
-              battleKeywordList: spec.battleKeywordList ?? [],
-              attributeType: spec.attributeType,
-              themePack: spec.themePack,
-              maxEnhancement: spec.maxEnhancement,
-            }
+            const gift: EGOGiftListItem = toGiftListItem(String(id), spec)
 
             return <IngredientCard key={id} gift={gift} />
           })}

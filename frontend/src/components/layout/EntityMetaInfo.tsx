@@ -1,5 +1,4 @@
 import { useTranslation } from 'react-i18next'
-import { useFilterI18nData } from '@/shared/filter'
 import { getSeasonColor } from '@/shared/gameData'
 import { formatEntityReleaseDate } from '@/lib/formatDate'
 import { I18N_LOCALE_MAP } from '@/lib/constants'
@@ -7,6 +6,8 @@ import { I18N_LOCALE_MAP } from '@/lib/constants'
 interface EntityMetaInfoProps {
   /** Season number (0=Standard, 1-7=Seasons, 8000=Collab, 9101+=Walpurgis) */
   season: number
+  /** Localized season name */
+  seasonName: string
   /** Release date as YYYYMMDD integer (e.g., 20230227) */
   updateDate: number
 }
@@ -15,18 +16,14 @@ interface EntityMetaInfoProps {
  * EntityMetaInfo - Displays season and release date metadata
  *
  * Two-column layout showing:
- * - Season name (from seasons.json i18n)
+ * - Season name
  * - Release date (formatted based on locale)
- *
- * Uses Suspense internally via useFilterI18nData - wrap in Suspense boundary.
  *
  * Pattern: Follows StatusPanel.tsx grid layout
  */
-export function EntityMetaInfo({ season, updateDate }: EntityMetaInfoProps) {
+export function EntityMetaInfo({ season, seasonName, updateDate }: EntityMetaInfoProps) {
   const { t, i18n } = useTranslation(['database', 'common'])
-  const { seasonsI18n } = useFilterI18nData()
 
-  const seasonName = seasonsI18n[String(season) as `${number}`] || `Season ${season}`
   const seasonColor = getSeasonColor(season)
   const locale = I18N_LOCALE_MAP[i18n.language] ?? 'en-US'
   const formattedDate = formatEntityReleaseDate(updateDate, locale)

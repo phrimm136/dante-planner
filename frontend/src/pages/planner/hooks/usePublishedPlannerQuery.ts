@@ -10,10 +10,14 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 
 import { ApiClient } from '@/lib/api'
+import { NotFoundError } from '@/lib/apiErrors'
+import { validateData } from '@/lib/validation'
 import { PublishedPlannerDetailSchema } from '../schemas/PlannerListSchemas'
+import { validateSaveablePlanner } from '../schemas/PlannerSchemas'
 
-import type { PublishedPlannerDetail, RRCategory } from '../types/PlannerListTypes'
-import type { SaveablePlanner, MDPlannerContent, RRPlannerContent } from '../types/PlannerTypes'
+import type { PublishedPlannerDetail } from '../types/PlannerListTypes'
+import type { SaveablePlanner } from '../types/PlannerTypes'
+import { STALE_TIME, GC_TIME } from '@/lib/constants'
 
 /**
  * Return type for usePublishedPlannerQuery
@@ -24,6 +28,34 @@ export interface PublishedPlannerQueryResult {
   apiData: PublishedPlannerDetail
   /** Parsed SaveablePlanner structure - for PlannerViewer */
   planner: SaveablePlanner
+}
+
+/** The planner is no longer published — deleted or unpublished elsewhere. */
+export interface PublishedPlannerRemoved {
+  removed: true
+}
+
+export type PublishedPlannerQueryState = PublishedPlannerQueryResult | PublishedPlannerRemoved
+
+/** Narrows the query state to the removed case. */
+export function isPlannerRemoved(
+  state: PublishedPlannerQueryState,
+): state is PublishedPlannerRemoved {
+  return 'removed' in state
+}
+
+/**
+ * A removed verdict never keeps its freshness: unpublishing is reversible, and
+ * a cached one would otherwise outlive the republish on every other device,
+ * which has no event left to tell it otherwise.
+ *
+ * `ensureSuspenseTimers` raises any suspense query's staleTime to a 1000ms
+ * floor, so the zero only lands in full on the route loader's `fetchQuery` —
+ * which is what a navigation runs, and therefore where the re-ask is
+ * guaranteed rather than merely likely.
+ */
+export function publishedPlannerStaleTime(data: PublishedPlannerQueryState | undefined): number {
+  return data !== undefined && isPlannerRemoved(data) ? 0 : STALE_TIME.MEDIUM
 }
 
 // ============================================================================
@@ -49,49 +81,56 @@ export const publishedPlannerQueryKeys = {
  */
 export async function fetchPublishedPlanner(
   plannerId: string,
-): Promise<PublishedPlannerQueryResult> {
-  const data = await ApiClient.get(`/api/planner/md/published/${plannerId}`)
-  const result = PublishedPlannerDetailSchema.safeParse(data)
+  signal?: AbortSignal,
+): Promise<PublishedPlannerQueryState> {
+  let data: unknown
+  try {
+    data = await ApiClient.get(`/api/planner/md/published/${plannerId}`, {
+      ...(signal !== undefined && { signal }),
+    })
+  } catch (error) {
+    // An entry opened from a stale list can have been deleted on another
+    // device; that is an answer to show, not an error to escalate.
+    if (error instanceof NotFoundError) return { removed: true }
+    throw error
+  }
+  const apiData = validateData(
+    data,
+    PublishedPlannerDetailSchema,
+    `planner published / ${plannerId}`,
+  )
 
-  if (!result.success) {
-    console.error('Published planner response validation failed:', result.error)
-    throw new Error('Invalid published planner response from server')
+  // The content arrives as a JSON string a publisher wrote, so it is ingest like
+  // any other: parsed, then gated in draft mode, which tolerates the partial
+  // shapes a published draft can legitimately carry.
+  let contentData: unknown
+  try {
+    contentData = JSON.parse(apiData.content)
+  } catch {
+    throw new Error(`planner published / ${plannerId}: content is not JSON`)
   }
 
-  const apiData = result.data
-
-  // Parse content JSON and construct SaveablePlanner
-  // Server is trusted source - no frontend validation needed
-  const contentData = JSON.parse(apiData.content)
-  const metadata = {
-    id: apiData.id,
-    title: apiData.title,
-    status: apiData.status,
-    schemaVersion: apiData.schemaVersion,
-    contentVersion: apiData.contentVersion,
-    plannerType: apiData.plannerType,
-    syncVersion: apiData.syncVersion,
-    createdAt: apiData.createdAt,
-    lastModifiedAt: apiData.lastModifiedAt ?? apiData.createdAt,
-    savedAt: apiData.createdAt,
-    userId: null,
-    deviceId: 'published',
-    published: true,
-  }
-
-  // Type narrowing based on plannerType
-  const planner: SaveablePlanner =
-    apiData.plannerType === 'MIRROR_DUNGEON'
-      ? {
-          metadata,
-          config: { type: 'MIRROR_DUNGEON', category: apiData.category },
-          content: contentData as MDPlannerContent,
-        }
-      : {
-          metadata,
-          config: { type: 'REFRACTED_RAILWAY', category: apiData.category as RRCategory },
-          content: contentData as RRPlannerContent,
-        }
+  const planner = validateSaveablePlanner(
+    {
+      metadata: {
+        id: apiData.id,
+        title: apiData.title,
+        status: apiData.status,
+        schemaVersion: apiData.schemaVersion,
+        contentVersion: apiData.contentVersion,
+        plannerType: apiData.plannerType,
+        syncVersion: apiData.syncVersion,
+        createdAt: apiData.createdAt,
+        lastModifiedAt: apiData.lastModifiedAt,
+        savedAt: apiData.createdAt,
+        deviceId: 'published',
+        published: true,
+      },
+      config: { type: apiData.plannerType, category: apiData.category },
+      content: contentData,
+    },
+    'draft',
+  )
 
   return { apiData, planner }
 }
@@ -114,7 +153,7 @@ export async function fetchPublishedPlanner(
  *
  *   return (
  *     <>
- *       <PlannerDetailHeader planner={apiData} />
+ *       <PublishedPlannerHeader planner={apiData} />
  *       <PlannerViewer planner={planner} />
  *       <PlannerDetailFooter planner={apiData} />
  *     </>
@@ -122,12 +161,12 @@ export async function fetchPublishedPlanner(
  * }
  * ```
  */
-export function usePublishedPlannerQuery(plannerId: string): PublishedPlannerQueryResult {
+export function usePublishedPlannerQuery(plannerId: string): PublishedPlannerQueryState {
   const query = useSuspenseQuery({
     queryKey: publishedPlannerQueryKeys.detail(plannerId),
-    queryFn: () => fetchPublishedPlanner(plannerId),
-    staleTime: 5 * 60 * 1000, // 5 minutes - planner content changes infrequently
-    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    queryFn: ({ signal }) => fetchPublishedPlanner(plannerId, signal),
+    staleTime: (query) => publishedPlannerStaleTime(query.state.data),
+    gcTime: GC_TIME.MEDIUM,
   })
 
   return query.data

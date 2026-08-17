@@ -1,130 +1,32 @@
-import { createContext, useContext, useRef } from 'react'
+import { createContext, useContext, useState } from 'react'
 import { createStore, useStore } from 'zustand'
 import { devtools } from 'zustand/middleware'
-import { useShallow } from 'zustand/shallow'
 
 import {
-  SINNERS,
-  MAX_LEVEL,
-  DEFAULT_SKILL_EA,
-  DUNGEON_IDX,
-  migrateKeywords,
-} from '@/shared/gameData'
-import { createEmptyNoteContent } from '@/shared/noteEditor'
-import egoSpecList from '@static/data/egoSpecList.json'
+  createDefaultDeckFilterState,
+  createDefaultEquipment,
+  createDefaultFloorSelections,
+  createDefaultSectionNotes,
+  createDefaultSkillEAState,
+  hydrateEditorState,
+  projectEditorState,
+} from '../lib/editorStateCodec'
 
 import type { ReactNode } from 'react'
 import type { StoreApi } from 'zustand'
-import type { MDCategory, DungeonIdx } from '@/shared/gameData'
-import type {
-  SinnerEquipment,
-  SkillEAState,
-  DeckFilterState,
-  ThreadspinTier,
-} from '../types/DeckTypes'
+import type { MDCategory } from '@/shared/gameData'
+import type { SinnerEquipment, SkillEAState, DeckFilterState } from '../types/DeckTypes'
 import type { FloorThemeSelection } from '@/pages/themePack'
 import type { NoteContent } from '@/shared/noteEditor'
 import type { MDPlannerContent } from '../types/PlannerTypes'
-import type { PlannerState } from '../hooks/usePlannerSave'
+import type { PlannerState } from '../lib/saveablePlanner'
 
-const DEFAULT_ZAYIN_MAX_THREADSPIN: Record<string, ThreadspinTier> = (() => {
-  const lookup = egoSpecList as Record<string, { maxThreadspin: 4 | 5 }>
-  const out: Record<string, ThreadspinTier> = {}
-  SINNERS.forEach((_, index) => {
-    const id = `2${String(index + 1).padStart(2, '0')}01`
-    out[id] = lookup[id]?.maxThreadspin ?? 4
-  })
-  return out
-})()
-
-// ============================================================================
-// Default State Factories
-// ============================================================================
-
-/**
- * Creates default equipment for all 12 sinners
- * Each sinner gets their base identity (uptie 4, max level) and ZAYIN EGO
- */
-export function createDefaultEquipment(): Record<string, SinnerEquipment> {
-  const equipment: Record<string, SinnerEquipment> = {}
-  SINNERS.forEach((_, index) => {
-    const sinnerCode = String(index + 1)
-    const sinnerIdPart = sinnerCode.padStart(2, '0')
-    const defaultIdentityId = `1${sinnerIdPart}01`
-    const defaultEgoId = `2${sinnerIdPart}01`
-    equipment[sinnerCode] = {
-      identity: { id: defaultIdentityId, uptie: 4, level: MAX_LEVEL },
-      egos: {
-        ZAYIN: { id: defaultEgoId, threadspin: DEFAULT_ZAYIN_MAX_THREADSPIN[defaultEgoId] ?? 4 },
-      },
-    }
-  })
-  return equipment
-}
-
-/**
- * Creates default skill EA state for all 12 sinners
- * Each sinner gets default EA values: S1=3, S2=2, S3=1
- */
-export function createDefaultSkillEAState(): Record<string, SkillEAState> {
-  const state: Record<string, SkillEAState> = {}
-  SINNERS.forEach((_, index) => {
-    state[String(index + 1)] = { ...DEFAULT_SKILL_EA }
-  })
-  return state
-}
-
-/**
- * Creates default floor selections for 15 floors
- * All floors start with no theme pack selected and normal difficulty
- */
-export function createDefaultFloorSelections(): FloorThemeSelection[] {
-  return Array.from({ length: 15 }, () => ({
-    themePackId: null,
-    difficulty: DUNGEON_IDX.NORMAL as DungeonIdx,
-    giftIds: new Set<string>(),
-  }))
-}
-
-/**
- * Creates default section notes for all planner sections
- * Includes 6 fixed sections + 15 floor sections
- */
-export function createDefaultSectionNotes(): Record<string, NoteContent> {
-  const notes: Record<string, NoteContent> = {
-    intro: createEmptyNoteContent(),
-    deckBuilder: createEmptyNoteContent(),
-    startBuffs: createEmptyNoteContent(),
-    startGifts: createEmptyNoteContent(),
-    observation: createEmptyNoteContent(),
-    skillReplacement: createEmptyNoteContent(),
-    comprehensiveGifts: createEmptyNoteContent(),
-    outro: createEmptyNoteContent(),
-  }
-  for (let i = 0; i < 15; i++) {
-    notes[`floor-${i}`] = createEmptyNoteContent()
-  }
-  return notes
-}
-
-/**
- * Creates default deck filter state
- */
-export function createDefaultDeckFilterState(): DeckFilterState {
-  return {
-    entityMode: 'identity',
-    selectedSinners: new Set(),
-    selectedKeywords: new Set(),
-    selectedAttributes: new Set(),
-    selectedAtkTypes: new Set(),
-    selectedDefTypes: new Set(),
-    selectedRaritys: new Set(),
-    selectedEgoTypes: new Set(),
-    selectedSeasons: new Set(),
-    selectedUnitKeywords: new Set(),
-    selectedBattleKeywords: new Set(),
-    searchQuery: '',
-  }
+export {
+  createDefaultDeckFilterState,
+  createDefaultEquipment,
+  createDefaultFloorSelections,
+  createDefaultSectionNotes,
+  createDefaultSkillEAState,
 }
 
 // ============================================================================
@@ -384,83 +286,12 @@ export const createPlannerEditorStore = (initialState?: Partial<PlannerEditorSta
 
         // Batch operations
         initializeFromPlanner: (content, metadata) =>
-          set(
-            {
-              // Metadata
-              title: metadata.title,
-              category: metadata.category,
-              isPublished: metadata.isPublished,
-
-              // Hot state - with defensive array validation
-              equipment: content.equipment ?? createDefaultEquipment(),
-              floorSelections: Array.isArray(content.floorSelections)
-                ? content.floorSelections.map((floor) => ({
-                    themePackId: floor?.themePackId ?? null,
-                    difficulty: floor?.difficulty ?? (DUNGEON_IDX.NORMAL as DungeonIdx),
-                    giftIds: new Set(Array.isArray(floor?.giftIds) ? floor.giftIds : []),
-                  }))
-                : createDefaultFloorSelections(),
-              comprehensiveGiftIds: new Set(
-                Array.isArray(content.comprehensiveGiftIds) ? content.comprehensiveGiftIds : [],
-              ),
-              deploymentOrder: Array.isArray(content.deploymentOrder)
-                ? content.deploymentOrder
-                : [],
-
-              // Warm state - migrate renamed keyword ids (handles non-array input)
-              selectedKeywords: new Set(migrateKeywords(content.selectedKeywords)),
-              selectedBuffIds: new Set(
-                Array.isArray(content.selectedBuffIds) ? content.selectedBuffIds : [],
-              ),
-              selectedGiftIds: new Set(
-                Array.isArray(content.selectedGiftIds) ? content.selectedGiftIds : [],
-              ),
-              observationGiftIds: new Set(
-                Array.isArray(content.observationGiftIds) ? content.observationGiftIds : [],
-              ),
-              selectedGiftKeyword: content.selectedGiftKeyword ?? null,
-              skillEAState: content.skillEAState ?? createDefaultSkillEAState(),
-              deckFilterState: createDefaultDeckFilterState(),
-
-              // Cold state - section notes need conversion
-              // Merge with defaults to backfill missing keys (e.g., intro/outro for v1 plans)
-              sectionNotes: {
-                ...createDefaultSectionNotes(),
-                ...(content.sectionNotes
-                  ? Object.fromEntries(
-                      Object.entries(content.sectionNotes).map(([key, note]) => [
-                        key,
-                        { content: note?.content ?? '' },
-                      ]),
-                    )
-                  : {}),
-              },
-            },
-            false,
-            'initializeFromPlanner',
-          ),
+          set(hydrateEditorState(content, metadata), false, 'initializeFromPlanner'),
 
         reset: () => set(createInitialState(), false, 'reset'),
 
         // Derived state - compose PlannerState without subscription
-        getPlannerState: () => {
-          const s = get()
-          return {
-            title: s.title,
-            category: s.category,
-            selectedKeywords: s.selectedKeywords,
-            selectedBuffIds: s.selectedBuffIds,
-            selectedGiftKeyword: s.selectedGiftKeyword,
-            selectedGiftIds: s.selectedGiftIds,
-            observationGiftIds: s.observationGiftIds,
-            comprehensiveGiftIds: s.comprehensiveGiftIds,
-            equipment: s.equipment,
-            deploymentOrder: s.deploymentOrder,
-            skillEAState: s.skillEAState,
-            floorSelections: s.floorSelections,
-            sectionNotes: s.sectionNotes,
-          }
-        },
+        getPlannerState: () => projectEditorState(get()),
       }),
       { name: 'PlannerEditorStore', enabled: import.meta.env.DEV },
     ),
@@ -482,7 +313,7 @@ const PlannerEditorStoreContext = createContext<StoreApi<PlannerEditorStore> | n
  */
 interface PlannerEditorStoreProviderProps {
   children: ReactNode
-  initialState?: Partial<PlannerEditorState>
+  initialState?: Partial<PlannerEditorState> | undefined
 }
 
 /**
@@ -492,7 +323,7 @@ interface PlannerEditorStoreProviderProps {
  * @example
  * ```tsx
  * <PlannerEditorStoreProvider initialState={{ category: '15F' }}>
- *   <PlannerMDEditorContent mode="new" />
+ *   <PlannerCreateEditor />
  * </PlannerEditorStoreProvider>
  * ```
  */
@@ -500,14 +331,10 @@ export function PlannerEditorStoreProvider({
   children,
   initialState,
 }: PlannerEditorStoreProviderProps) {
-  const storeRef = useRef<StoreApi<PlannerEditorStore> | null>(null)
-
-  if (!storeRef.current) {
-    storeRef.current = createPlannerEditorStore(initialState)
-  }
+  const [store] = useState(() => createPlannerEditorStore(initialState))
 
   return (
-    <PlannerEditorStoreContext.Provider value={storeRef.current}>
+    <PlannerEditorStoreContext.Provider value={store}>
       {children}
     </PlannerEditorStoreContext.Provider>
   )
@@ -542,14 +369,15 @@ export function usePlannerEditorStore<T>(selector: (state: PlannerEditorStore) =
 }
 
 /**
- * Hook to check if inside PlannerEditorStoreProvider context
- * Use this to conditionally render store-dependent components
- *
- * @returns true if inside provider, false otherwise
+ * Stand-in store for components rendered outside a provider. One instance for
+ * the whole app: it exists only so `useStore` is always called, its value is
+ * never returned, and nothing ever writes to it.
  */
-export function useIsInPlannerEditorContext(): boolean {
-  const store = useContext(PlannerEditorStoreContext)
-  return store !== null
+let placeholderStore: StoreApi<PlannerEditorStore> | null = null
+
+function getPlaceholderStore(): StoreApi<PlannerEditorStore> {
+  placeholderStore ??= createPlannerEditorStore()
+  return placeholderStore
 }
 
 /**
@@ -564,24 +392,9 @@ export function usePlannerEditorStoreSafe<T>(
   selector: (state: PlannerEditorStore) => T,
 ): T | undefined {
   const store = useContext(PlannerEditorStoreContext)
+  const value = useStore(store ?? getPlaceholderStore(), selector)
 
-  // Create a stable dummy store for when we're outside context
-  // This satisfies the Rules of Hooks (always call useStore)
-  const dummyStore = useRef<StoreApi<PlannerEditorStore> | null>(null)
-  if (!dummyStore.current && !store) {
-    // Create a minimal store just to satisfy useStore
-    dummyStore.current = createPlannerEditorStore()
-  }
-
-  const effectiveStore = store ?? dummyStore.current!
-  const value = useStore(effectiveStore, selector)
-
-  // Return undefined if we're not in a real context
-  if (!store) {
-    return undefined
-  }
-
-  return value
+  return store ? value : undefined
 }
 
 /**
@@ -604,115 +417,10 @@ export function usePlannerEditorStoreApi(): StoreApi<PlannerEditorStore> {
   return store
 }
 
-/**
- * Hook for save logic - single subscription with shallow equality
- * Returns composed PlannerState for usePlannerSave
- *
- * Uses Zustand's shallow equality to prevent re-renders when values
- * haven't actually changed. This replaces 15+ individual subscriptions
- * with ONE subscription that only triggers re-render on actual changes.
- *
- * @returns PlannerState composed from current store state
- */
-export function usePlannerStateForSave(): PlannerState {
-  const store = useContext(PlannerEditorStoreContext)
-
-  if (!store) {
-    throw new Error('usePlannerStateForSave must be used within PlannerEditorStoreProvider')
-  }
-
-  // Single subscription with shallow equality comparison
-  // Re-renders only when actual values change (not object reference)
-  return useStore(
-    store,
-    useShallow((s) => ({
-      title: s.title,
-      category: s.category,
-      selectedKeywords: s.selectedKeywords,
-      selectedBuffIds: s.selectedBuffIds,
-      selectedGiftKeyword: s.selectedGiftKeyword,
-      selectedGiftIds: s.selectedGiftIds,
-      observationGiftIds: s.observationGiftIds,
-      comprehensiveGiftIds: s.comprehensiveGiftIds,
-      equipment: s.equipment,
-      deploymentOrder: s.deploymentOrder,
-      skillEAState: s.skillEAState,
-      floorSelections: s.floorSelections,
-      sectionNotes: s.sectionNotes,
-    })),
-  )
-}
-
 // ============================================================================
 // Selector Hooks (Granular Subscriptions)
 // ============================================================================
 
-/**
- * Pre-built selector hooks for common state slices.
- *
- * These are OPTIONAL convenience exports - components can also use
- * `usePlannerEditorStore((s) => s.fieldName)` directly for custom selectors.
- *
- * Benefits of pre-built selectors:
- * - Consistent subscription granularity across components
- * - Discoverable API for store consumers
- * - TypeScript autocomplete support
- *
- * Usage pattern:
- * ```tsx
- * // Option 1: Pre-built selector (recommended for common fields)
- * const equipment = useEquipment()
- *
- * // Option 2: Inline selector (for custom/combined selections)
- * const sinnerEquipment = usePlannerEditorStore((s) => s.equipment[sinnerId])
- * ```
- */
-
-// Hot state selectors
-export const useEquipment = () => usePlannerEditorStore((s) => s.equipment)
-export const useFloorSelections = () => usePlannerEditorStore((s) => s.floorSelections)
-export const useComprehensiveGiftIds = () => usePlannerEditorStore((s) => s.comprehensiveGiftIds)
-export const useDeploymentOrder = () => usePlannerEditorStore((s) => s.deploymentOrder)
-
-// Warm state selectors
-export const useSelectedKeywords = () => usePlannerEditorStore((s) => s.selectedKeywords)
-export const useSelectedBuffIds = () => usePlannerEditorStore((s) => s.selectedBuffIds)
-export const useSelectedGiftIds = () => usePlannerEditorStore((s) => s.selectedGiftIds)
-export const useObservationGiftIds = () => usePlannerEditorStore((s) => s.observationGiftIds)
-export const useSelectedGiftKeyword = () => usePlannerEditorStore((s) => s.selectedGiftKeyword)
-export const useSkillEAState = () => usePlannerEditorStore((s) => s.skillEAState)
 export const useDeckFilterState = () => usePlannerEditorStore((s) => s.deckFilterState)
 export const useDeckVisibleCount = () => usePlannerEditorStore((s) => s.deckVisibleCount)
-
-// Cold state selectors
-export const usePlannerTitle = () => usePlannerEditorStore((s) => s.title)
-export const usePlannerCategory = () => usePlannerEditorStore((s) => s.category)
-export const useIsPublished = () => usePlannerEditorStore((s) => s.isPublished)
-export const useVisibleSections = () => usePlannerEditorStore((s) => s.visibleSections)
-export const useSectionNotes = () => usePlannerEditorStore((s) => s.sectionNotes)
-
-// Action selectors
-export const useSetEquipment = () => usePlannerEditorStore((s) => s.setEquipment)
-export const useUpdateSinnerEquipment = () => usePlannerEditorStore((s) => s.updateSinnerEquipment)
-export const useSetFloorSelections = () => usePlannerEditorStore((s) => s.setFloorSelections)
-export const useUpdateFloorSelection = () => usePlannerEditorStore((s) => s.updateFloorSelection)
-export const useSetComprehensiveGiftIds = () =>
-  usePlannerEditorStore((s) => s.setComprehensiveGiftIds)
-export const useSetDeploymentOrder = () => usePlannerEditorStore((s) => s.setDeploymentOrder)
-export const useSetSelectedKeywords = () => usePlannerEditorStore((s) => s.setSelectedKeywords)
-export const useSetSelectedBuffIds = () => usePlannerEditorStore((s) => s.setSelectedBuffIds)
-export const useSetSelectedGiftIds = () => usePlannerEditorStore((s) => s.setSelectedGiftIds)
-export const useSetObservationGiftIds = () => usePlannerEditorStore((s) => s.setObservationGiftIds)
-export const useSetSelectedGiftKeyword = () =>
-  usePlannerEditorStore((s) => s.setSelectedGiftKeyword)
-export const useSetSkillEAState = () => usePlannerEditorStore((s) => s.setSkillEAState)
-export const useUpdateSinnerSkillEA = () => usePlannerEditorStore((s) => s.updateSinnerSkillEA)
 export const useSetDeckFilterState = () => usePlannerEditorStore((s) => s.setDeckFilterState)
-export const useSetTitle = () => usePlannerEditorStore((s) => s.setTitle)
-export const useSetCategory = () => usePlannerEditorStore((s) => s.setCategory)
-export const useSetIsPublished = () => usePlannerEditorStore((s) => s.setIsPublished)
-export const useSetVisibleSections = () => usePlannerEditorStore((s) => s.setVisibleSections)
-export const useSetSectionNotes = () => usePlannerEditorStore((s) => s.setSectionNotes)
-export const useUpdateSectionNote = () => usePlannerEditorStore((s) => s.updateSectionNote)
-export const useInitializeFromPlanner = () => usePlannerEditorStore((s) => s.initializeFromPlanner)
-export const useResetStore = () => usePlannerEditorStore((s) => s.reset)

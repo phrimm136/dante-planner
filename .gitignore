@@ -21,6 +21,10 @@ logs/
 .claude/projects/
 .claude/worktrees/
 .playwright-mcp/
+**/settings.local.json
+
+# Miniflare's local R2/KV emulation state
+frontend/.wrangler/
 
 # Backup files
 *.backup
@@ -35,3 +39,15 @@ node_modules/
 
 # Local dev JWT keys (docker-compose.local.yml)
 backend/jwt-keys-local/
+
+# State holds the RDS master password and the tunnel secrets in plaintext. Duplicated from
+# terraform/.gitignore, which only covers its own directory.
+*.tfstate
+*.tfstate.*
+
+# Temporary files
+tmp/
+
+# Playwright run artifacts
+test-results/
+playwright-report/

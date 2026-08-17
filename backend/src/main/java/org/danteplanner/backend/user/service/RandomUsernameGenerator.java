@@ -1,8 +1,7 @@
 package org.danteplanner.backend.user.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.EpithetProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
@@ -23,9 +22,9 @@ import java.util.List;
  * providing ~28.6 million unique combinations (31^5).
  */
 @Service
+@Slf4j
 public class RandomUsernameGenerator {
 
-    private static final Logger log = LoggerFactory.getLogger(RandomUsernameGenerator.class);
 
     /**
      * Safe alphanumeric characters for suffix generation.
@@ -44,35 +43,35 @@ public class RandomUsernameGenerator {
     }
 
     /**
-     * Result of username generation containing keyword and suffix.
+     * Result of username generation containing epithet and suffix.
      */
-    public record UsernameComponents(String keyword, String suffix) {}
+    public record UsernameComponents(String epithet, String suffix) {}
 
     /**
      * Generate a new username with weighted random epithet and unique suffix.
      *
-     * @return username components (epithet keyword and suffix)
+     * @return username components (epithet and suffix)
      */
     public UsernameComponents generate() {
-        String keyword = selectWeightedEpithet();
+        String epithet = selectWeightedEpithet();
         String suffix = generateSuffix();
-        return new UsernameComponents(keyword, suffix);
+        return new UsernameComponents(epithet, suffix);
     }
 
     /**
-     * Select an epithet keyword using time-decay weighted random selection.
+     * Select an epithet using time-decay weighted random selection.
      * Epithets with higher weights appear more frequently in the selection pool.
      *
-     * @return selected epithet keyword
+     * @return selected epithet
      */
     String selectWeightedEpithet() {
         List<String> epithets = epithetProvider.getEpithets();
         List<String> weightedPool = new ArrayList<>();
 
-        for (String keyword : epithets) {
-            int weight = epithetProvider.getWeight(keyword);
+        for (String epithet : epithets) {
+            int weight = epithetProvider.getWeight(epithet);
             for (int i = 0; i < weight; i++) {
-                weightedPool.add(keyword);
+                weightedPool.add(epithet);
             }
         }
 

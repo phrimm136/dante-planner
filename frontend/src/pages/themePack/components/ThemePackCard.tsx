@@ -17,7 +17,7 @@ interface ThemePackCardProps {
   packEntry: ThemePackEntry
   packName: string
   /** Special name with embedded color codes (e.g., "<color=#XXXXXX>text</color>") */
-  specialName?: string
+  specialName?: string | undefined
   /** Enable hover highlight overlay (for selection contexts) */
   enableHoverHighlight?: boolean
   /** Show persistent select highlight (for click-to-pin focus) */
@@ -53,7 +53,12 @@ export function ThemePackCard({
   return (
     <div className={cn('group relative w-60 aspect-[416/684]', className)}>
       {/* Layer 1: Theme pack image - static to define container size */}
-      <img src={getThemePackImagePath(packId)} alt={packName} className="w-full h-auto" />
+      <img
+        src={getThemePackImagePath(packId)}
+        alt={packName}
+        loading="lazy"
+        className="w-full h-auto"
+      />
 
       {/* Layer 2: Select highlight overlay */}
       {isSelected && (

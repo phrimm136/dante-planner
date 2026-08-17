@@ -4,17 +4,16 @@ Spring Boot + Java + JPA/Hibernate + Bean Validation (Jakarta) + MySQL + Redis +
 
 ## Build & Tooling
 
-- Gradle: always `./gradlew -p backend` from the repo root — bare `./gradlew` without a project dir is hook-blocked.
+- Gradle: always `/home/user/github/LimbusPlanner/backend/gradlew -p /home/user/github/LimbusPlanner/backend` — bare `gradlew` without a project dir is hook-blocked, and a relative `-p` resolves against the shell's current directory.
 - Forbidden patterns are hook-enforced (`.claude/hooks/forbidden-patterns.json`): field injection, empty catch blocks, string concatenation in `@Query`, `@Transactional` on private methods, and more — the hook blocks the write, so fix before saving.
-- Integration tests (MySQL/Redis Testcontainers, tagged `containerized`) run in the default test task and require Docker; exclude them with `-PexcludeTags=containerized`.
+- Unit tier only (no Docker): `/home/user/github/LimbusPlanner/backend/gradlew -p /home/user/github/LimbusPlanner/backend test -PexcludeTags=containerized`. Add `--tests "<pattern>"` to scope further.
+- Full suite (default `test` task) also runs the integration tests (MySQL/Redis Testcontainers, tagged `containerized`), which require Docker.
 - Import order (enforced): java → spring framework → spring boot → spring data jpa → jakarta.validation → jakarta.persistence → third-party → project packages.
 
-## Comments & Javadoc (main and test)
+## Async model
 
-- A comment is justified only as: why/constraint, warning, workaround, cross-ref (spec/OWASP), tracked TODO (`#issue`), or non-obvious invariant (nullability, threading).
-- Never: restating code, change history ("was missing", "moved from"), tombstones for deleted code, commented-out code — git owns all of that.
-- No parenthetical micro-explanations (`doX(); // (does X)`) — delete, or promote to a standalone why-comment.
-- Javadoc required on public/protected classes and business-logic methods; document all business `@throws`; third-person voice; no `@author`/`@version`/`@since`; skip trivial getters and self-explanatory DTOs.
+- The async model is `@Scheduled` + `@TransactionalEventListener(AFTER_COMMIT)` + Redis pub/sub + the outbox dispatch executor. `@Async`, `@EnableAsync` and `ThreadPoolTaskExecutor` are banned everywhere else; the single exception is frozen by name in `ConventionBaselineTest` and paired with a staleness check.
+- Observer effects are not written by listeners. A write records a `domain_events` row inside its own transaction, `DomainEventDispatcher` derives the effect in a transaction of its own, and `DomainEventRelay` re-dispatches whatever the eager hop missed. Notification rows are derived by `INSERT IGNORE` on `uk_notification_dedup`, never after an existence check.
 
 ## Migrations touch tests
 

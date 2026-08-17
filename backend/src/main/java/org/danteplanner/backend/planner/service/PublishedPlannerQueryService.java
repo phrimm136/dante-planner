@@ -1,23 +1,29 @@
 package org.danteplanner.backend.planner.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.danteplanner.backend.moderation.service.PlannerReportService;
+import org.danteplanner.backend.planner.dto.CatalogQuery;
+import org.danteplanner.backend.planner.dto.PlannerCoreInfo;
+import org.danteplanner.backend.planner.dto.PlannerNotificationTarget;
 import org.danteplanner.backend.planner.dto.PublicPlannerResponse;
 import org.danteplanner.backend.planner.dto.PublishedPlannerDetailResponse;
 import org.danteplanner.backend.shared.entity.ContentEntityType;
-import org.danteplanner.backend.planner.specification.PlannerSpecifications;
+import org.danteplanner.backend.planner.specification.CatalogSpecifications;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerBookmark;
+import org.danteplanner.backend.planner.entity.PlannerCatalog;
 import org.danteplanner.backend.planner.entity.PlannerVote;
-import org.danteplanner.backend.planner.entity.PlannerView;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
+import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.repository.PlannerBookmarkRepository;
-import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
+import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
-import org.danteplanner.backend.planner.repository.PlannerViewRepository;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
+import org.danteplanner.backend.planner.validation.CatalogReadValidator;
 import org.danteplanner.backend.shared.util.ViewerHashUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,86 +35,80 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.danteplanner.backend.planner.exception.PlannerValidationException;
 
 /**
  * Service for the public planner catalog read model (CQRS read side).
- * Handles published/recommended listings, search, single-planner detail with
- * view recording, and atomic view-count increments.
+ * Listings, search, and facets read only the catalog projection and its filter
+ * tables; counters come from planner_stats; the single-planner detail reads the
+ * write aggregate. Ordering is recency-only (first published, newest first).
  */
 @Service
 @Slf4j
 public class PublishedPlannerQueryService {
 
+    /**
+     * Stand-ins for a planner whose counter row or core projection is missing, so the response
+     * assembly reads one shape. Neither instance is ever persisted.
+     */
+    private static final PlannerStats NO_STATS = PlannerStats.builder().build();
+    private static final PlannerCoreInfo NO_CORE = PlannerCoreInfo.absent();
+
     private final PlannerRepository plannerRepository;
+    private final PlannerCatalogRepository catalogRepository;
     private final PlannerVoteRepository plannerVoteRepository;
     private final PlannerBookmarkRepository plannerBookmarkRepository;
-    private final PlannerViewRepository plannerViewRepository;
-    private final PlannerCommentRepository commentRepository;
     private final PlannerSubscriptionService subscriptionService;
     private final PlannerReportService reportService;
     private final PlannerEngagementService engagementService;
-
-    private final int recommendedThreshold;
+    private final PlannerViewRecorder plannerViewRecorder;
+    private final PlannerStatsRepository plannerStatsRepository;
+    private final PlannerAccessGuard accessGuard;
+    private final CatalogReadValidator catalogReadValidator;
 
     public PublishedPlannerQueryService(
             PlannerRepository plannerRepository,
+            PlannerCatalogRepository catalogRepository,
             PlannerVoteRepository plannerVoteRepository,
             PlannerBookmarkRepository plannerBookmarkRepository,
-            PlannerViewRepository plannerViewRepository,
-            PlannerCommentRepository commentRepository,
             PlannerSubscriptionService subscriptionService,
             PlannerReportService reportService,
             PlannerEngagementService engagementService,
-            @Value("${planner.recommended-threshold}") int recommendedThreshold) {
+            PlannerViewRecorder plannerViewRecorder,
+            PlannerStatsRepository plannerStatsRepository,
+            PlannerAccessGuard accessGuard,
+            CatalogReadValidator catalogReadValidator) {
         this.plannerRepository = plannerRepository;
+        this.catalogRepository = catalogRepository;
         this.plannerVoteRepository = plannerVoteRepository;
         this.plannerBookmarkRepository = plannerBookmarkRepository;
-        this.plannerViewRepository = plannerViewRepository;
-        this.commentRepository = commentRepository;
         this.subscriptionService = subscriptionService;
         this.reportService = reportService;
         this.engagementService = engagementService;
-        this.recommendedThreshold = recommendedThreshold;
+        this.plannerViewRecorder = plannerViewRecorder;
+        this.plannerStatsRepository = plannerStatsRepository;
+        this.accessGuard = accessGuard;
+        this.catalogReadValidator = catalogReadValidator;
     }
 
     /**
-     * Get all published planners with optional category filter.
+     * Resolve what a notification about a planner needs to know about it.
      *
-     * @param pageable pagination information
-     * @param category optional category filter (null for all categories)
-     * @return page of public planner responses
+     * <p>Publication state is deliberately not part of the predicate: a comment already exists on
+     * the planner, and withdrawing it from public view does not withdraw the notification its
+     * author is owed. A soft-deleted planner has nothing left to announce and comes back empty.</p>
+     *
+     * @param plannerId the planner ID
+     * @return the notification target, empty when no live planner carries the id
      */
     @Transactional(readOnly = true)
-    public Page<PublicPlannerResponse> getPublishedPlanners(Pageable pageable, String category) {
-        Page<Planner> planners;
-        if (category == null) {
-            planners = plannerRepository.findByPublishedTrueAndDeletedAtIsNull(pageable);
-        } else {
-            planners = plannerRepository.findByPublishedTrueAndCategoryAndDeletedAtIsNull(category, pageable);
-        }
-        return planners.map(PublicPlannerResponse::fromEntity);
-    }
-
-    /**
-     * Get recommended planners (net votes >= threshold) with optional category filter.
-     *
-     * @param pageable pagination information
-     * @param category optional category filter (null for all categories)
-     * @return page of recommended public planner responses
-     */
-    @Transactional(readOnly = true)
-    public Page<PublicPlannerResponse> getRecommendedPlanners(Pageable pageable, String category) {
-        Page<Planner> planners;
-        if (category == null) {
-            planners = plannerRepository.findRecommendedPlanners(recommendedThreshold, pageable);
-        } else {
-            planners = plannerRepository.findRecommendedPlannersByCategory(
-                    recommendedThreshold, category, pageable);
-        }
-        return planners.map(PublicPlannerResponse::fromEntity);
+    public Optional<PlannerNotificationTarget> notificationTargetOf(UUID plannerId) {
+        return plannerRepository.findNotificationTarget(plannerId);
     }
 
     /**
@@ -119,210 +119,110 @@ public class PublishedPlannerQueryService {
      */
     @Transactional
     public void incrementViewCount(UUID plannerId) {
-        int updated = plannerRepository.incrementViewCount(plannerId);
-        if (updated == 0) {
-            throw new PlannerNotFoundException(plannerId);
-        }
+        catalogReadValidator.requireActivePlanner(plannerRepository.existsActiveById(plannerId), plannerId);
+        plannerStatsRepository.incrementViewCountBy(plannerId, 1);
         log.debug("Incremented view count for planner {}", plannerId);
     }
 
     /**
-     * Get all published planners with optional category filter, search, and user context.
-     * When userId is provided, includes user's vote and bookmark state for each planner.
+     * List published or recommended planners using composable Specifications over the catalog
+     * projection, ordered by recency. Applies AND semantics across all provided filters; a query
+     * carrying no filter at all is the plain browse listing.
      *
-     * @param pageable pagination information
-     * @param category optional category filter (null for all categories)
-     * @param userId   optional user ID for vote/bookmark context (null for anonymous)
-     * @param search   optional search term for title/keywords (null or blank to skip)
+     * @param catalogQuery the filter set to compose
+     * @param pageable     pagination information
+     * @param userId       optional user ID for vote/bookmark context
      * @return page of public planner responses with user context
-     */
-    @Transactional(readOnly = true)
-    public Page<PublicPlannerResponse> getPublishedPlanners(Pageable pageable, String category, Long userId, String search) {
-        Page<Planner> planners;
-        boolean hasSearch = search != null && !search.isBlank();
-
-        if (hasSearch) {
-            if (category == null) {
-                planners = plannerRepository.findPublishedWithSearch(search.trim(), pageable);
-            } else {
-                planners = plannerRepository.findPublishedByCategoryWithSearch(category, search.trim(), pageable);
-            }
-        } else {
-            if (category == null) {
-                planners = plannerRepository.findByPublishedTrueAndDeletedAtIsNull(pageable);
-            } else {
-                planners = plannerRepository.findByPublishedTrueAndCategoryAndDeletedAtIsNull(category, pageable);
-            }
-        }
-
-        return mapPlannersWithUserContext(planners, userId);
-    }
-
-    /**
-     * Get recommended planners with optional category filter, search, and user context.
-     *
-     * @param pageable pagination information
-     * @param category optional category filter (null for all categories)
-     * @param userId   optional user ID for vote/bookmark context (null for anonymous)
-     * @param search   optional search term for title/keywords (null or blank to skip)
-     * @return page of recommended public planner responses with user context
-     */
-    @Transactional(readOnly = true)
-    public Page<PublicPlannerResponse> getRecommendedPlanners(Pageable pageable, String category, Long userId, String search) {
-        Page<Planner> planners;
-        boolean hasSearch = search != null && !search.isBlank();
-
-        if (hasSearch) {
-            if (category == null) {
-                planners = plannerRepository.findRecommendedPlannersWithSearch(
-                        recommendedThreshold, search.trim(), pageable);
-            } else {
-                planners = plannerRepository.findRecommendedPlannersByCategoryWithSearch(
-                        recommendedThreshold, category, search.trim(), pageable);
-            }
-        } else {
-            if (category == null) {
-                planners = plannerRepository.findRecommendedPlanners(recommendedThreshold, pageable);
-            } else {
-                planners = plannerRepository.findRecommendedPlannersByCategory(
-                        recommendedThreshold, category, pageable);
-            }
-        }
-
-        return mapPlannersWithUserContext(planners, userId);
-    }
-
-    /**
-     * Search published or recommended planners using composable Specifications.
-     * Applies AND semantics across all provided filters.
-     *
-     * @param baseSpec    base visibility spec (isPublished or isRecommended)
-     * @param pageable    pagination information
-     * @param category    optional category filter
-     * @param userId      optional user ID for vote/bookmark context
-     * @param q           optional title search term
-     * @param keywords    optional keyword names (AND-composed)
-     * @param identityIds optional identity IDs (AND-composed via EXISTS)
-     * @param egoIds      optional EGO IDs (AND-composed via EXISTS)
-     * @param giftIds     optional EGO gift IDs (AND-composed via EXISTS)
-     * @param themePackIds optional theme pack IDs (AND-composed via EXISTS)
-     * @return page of public planner responses with user context
+     * @throws PlannerValidationException if a content-entity id is not numeric
      */
     @Transactional(readOnly = true)
     public Page<PublicPlannerResponse> searchPlanners(
-            Specification<Planner> baseSpec,
-            Pageable pageable,
-            String category,
-            Long userId,
-            String q,
-            List<String> keywords,
-            List<String> identityIds,
-            List<String> egoIds,
-            List<String> giftIds,
-            List<String> themePackIds) {
+            CatalogQuery catalogQuery, Pageable pageable, Long userId) {
 
-        Specification<Planner> spec = Specification.where(baseSpec)
-                .and(PlannerSpecifications.fetchUser());
+        Specification<PlannerCatalog> spec = (root, query, cb) -> cb.conjunction();
 
-        if (category != null) {
-            spec = spec.and(PlannerSpecifications.hasCategory(category));
+        if (catalogQuery.recommendedOnly()) {
+            spec = spec.and(CatalogSpecifications.isRecommended());
         }
-        if (q != null && !q.isBlank()) {
-            spec = spec.and(PlannerSpecifications.titleContains(q.trim()));
+        if (catalogQuery.category() != null) {
+            spec = spec.and(CatalogSpecifications.hasCategory(catalogQuery.category()));
         }
-        if (keywords != null) {
-            for (String keyword : keywords) {
-                spec = spec.and(PlannerSpecifications.hasKeyword(keyword));
-            }
+        String searchTerm = catalogQuery.searchTerm();
+        if (searchTerm != null && !searchTerm.isBlank()) {
+            spec = spec.and(CatalogSpecifications.matchesQuery(searchTerm.trim()));
         }
-        if (identityIds != null) {
-            for (String id : identityIds) {
-                spec = spec.and(PlannerSpecifications.hasContentEntity(ContentEntityType.IDENTITY, id));
-            }
+        for (String keyword : catalogQuery.keywords()) {
+            spec = spec.and(CatalogSpecifications.hasKeyword(keyword));
         }
-        if (egoIds != null) {
-            for (String id : egoIds) {
-                spec = spec.and(PlannerSpecifications.hasContentEntity(ContentEntityType.EGO, id));
-            }
-        }
-        if (giftIds != null) {
-            for (String id : giftIds) {
-                spec = spec.and(PlannerSpecifications.hasContentEntity(ContentEntityType.EGO_GIFT, id));
-            }
-        }
-        if (themePackIds != null) {
-            for (String id : themePackIds) {
-                spec = spec.and(PlannerSpecifications.hasContentEntity(ContentEntityType.THEME_PACK, id));
+        for (Map.Entry<ContentEntityType, List<String>> filter : catalogQuery.entityFilters().entrySet()) {
+            for (String id : filter.getValue()) {
+                spec = spec.and(CatalogSpecifications.containsEntity(
+                        filter.getKey(), catalogReadValidator.requireNumericEntityId(id)));
             }
         }
 
-        Page<Planner> planners = plannerRepository.findAll(spec, pageable);
-        return mapPlannersWithUserContext(planners, userId);
+        Page<PlannerCatalog> rows = catalogRepository.findAll(spec, recencySorted(pageable));
+        return mapCatalogWithUserContext(rows, userId);
     }
 
     /**
-     * Map planners to responses with user context (votes, bookmarks, and comment counts).
-     * Uses batch queries to prevent N+1 query issues.
+     * Specification queries order via the Pageable; pin it to recency.
+     */
+    private static Pageable recencySorted(Pageable pageable) {
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "firstPublishedAt"));
+    }
+
+    /**
+     * Map catalog rows to responses with author info, counters, and user context
+     * (votes, bookmarks, comment counts). Uses batch queries to prevent N+1 issues.
      *
-     * @param planners the page of planners
-     * @param userId   the user ID (null for anonymous users)
+     * @param rows   the page of catalog rows
+     * @param userId the user ID (null for anonymous users)
      * @return page of public planner responses with user context
      */
-    private Page<PublicPlannerResponse> mapPlannersWithUserContext(Page<Planner> planners, Long userId) {
-        // Batch fetch comment counts for all planners on this page (guest and authenticated)
-        List<UUID> plannerIds = planners.getContent().stream()
-                .map(Planner::getId)
-                .collect(Collectors.toList());
-        Map<UUID, Long> commentCountMap = batchFetchCommentCounts(plannerIds);
+    private Page<PublicPlannerResponse> mapCatalogWithUserContext(Page<PlannerCatalog> rows, Long userId) {
+        List<UUID> plannerIds = rows.getContent().stream()
+                .map(PlannerCatalog::getPlannerId)
+                .toList();
+        Map<UUID, PlannerCoreInfo> coreInfoMap = plannerIds.isEmpty() ? Map.of()
+                : plannerRepository.findCoreInfoByIds(plannerIds).stream()
+                        .collect(Collectors.toMap(PlannerCoreInfo::plannerId, Function.identity()));
+        Map<UUID, PlannerStats> statsMap = plannerIds.isEmpty() ? Map.of()
+                : plannerStatsRepository.findAllById(plannerIds).stream()
+                        .collect(Collectors.toMap(PlannerStats::getPlannerId, Function.identity()));
 
+        Set<UUID> upvotedIds;
+        Set<UUID> bookmarkedIds;
         if (userId == null) {
-            // Anonymous user - no vote/bookmark context needed
-            return planners.map(planner -> PublicPlannerResponse.fromEntity(planner)
-                    .toBuilder()
-                    .commentCount(commentCountMap.getOrDefault(planner.getId(), 0L))
-                    .build());
+            upvotedIds = Set.of();
+            bookmarkedIds = Set.of();
+        } else {
+            // Batch query: 1 query for all votes (immutable - no deleted_at check needed)
+            upvotedIds = plannerVoteRepository
+                    .findByUserIdAndPlannerIdIn(userId, plannerIds)
+                    .stream()
+                    .map(PlannerVote::getPlannerId)
+                    .collect(Collectors.toSet());
+
+            // Batch query: 1 query for all bookmarks
+            bookmarkedIds = plannerBookmarkRepository
+                    .findByUserIdAndPlannerIdIn(userId, plannerIds)
+                    .stream()
+                    .map(PlannerBookmark::getPlannerId)
+                    .collect(Collectors.toSet());
         }
 
-        // Batch query: 1 query for all votes (immutable - no deleted_at check needed)
-        Set<UUID> upvotedIds = plannerVoteRepository
-                .findByUserIdAndPlannerIdIn(userId, plannerIds)
-                .stream()
-                .map(PlannerVote::getPlannerId)
-                .collect(Collectors.toSet());
-
-        // Batch query: 1 query for all bookmarks
-        Set<UUID> bookmarkedIds = plannerBookmarkRepository
-                .findByUserIdAndPlannerIdIn(userId, plannerIds)
-                .stream()
-                .map(PlannerBookmark::getPlannerId)
-                .collect(Collectors.toSet());
-
-        // Map planners to responses using pre-fetched data (no additional queries)
-        return planners.map(planner -> {
-            Boolean hasUpvoted = upvotedIds.contains(planner.getId());
-            Boolean isBookmarked = bookmarkedIds.contains(planner.getId());
-            return PublicPlannerResponse.fromEntity(planner, hasUpvoted, isBookmarked)
-                    .toBuilder()
-                    .commentCount(commentCountMap.getOrDefault(planner.getId(), 0L))
-                    .build();
+        boolean anonymous = userId == null;
+        return rows.map(row -> {
+            UUID id = row.getPlannerId();
+            PlannerCoreInfo core = coreInfoMap.getOrDefault(id, NO_CORE);
+            PlannerStats stats = statsMap.getOrDefault(id, NO_STATS);
+            return anonymous
+                    ? PublicPlannerResponse.forAnonymous(row, core, stats)
+                    : PublicPlannerResponse.fromCatalog(row, core, stats,
+                            upvotedIds.contains(id), bookmarkedIds.contains(id));
         });
-    }
-
-    /**
-     * Batch fetch comment counts for a list of planner IDs.
-     *
-     * @param plannerIds list of planner IDs
-     * @return map of planner ID to non-deleted comment count
-     */
-    private Map<UUID, Long> batchFetchCommentCounts(List<UUID> plannerIds) {
-        if (plannerIds.isEmpty()) {
-            return Map.of();
-        }
-        return commentRepository.countByPlannerIdsGrouped(plannerIds).stream()
-                .collect(Collectors.toMap(
-                        row -> (UUID) row[0],
-                        row -> (Long) row[1]
-                ));
     }
 
     /**
@@ -340,75 +240,54 @@ public class PublishedPlannerQueryService {
     /**
      * Get a single published planner with full content, user context, and view recording.
      *
-     * <p>Records a view in the same transaction using daily deduplication:
-     * same viewer (by userId or IP+UA hash) counts at most once per UTC day.
-     * The response reflects the already-updated view count so no follow-up
-     * refetch is needed by the caller.</p>
+     * <p>Buffers a view for asynchronous recording with daily deduplication:
+     * same viewer (by userId or IP+UA hash) counts at most once per UTC day,
+     * applied when the buffer flushes. The response carries the view count as of
+     * this request (from {@code planner_stats}), so the just-buffered view is not
+     * yet reflected.</p>
      *
      * @param plannerId the planner ID
      * @param userId    optional user ID for vote/bookmark/subscription context (null for anonymous)
-     * @param clientIp  viewer's IP address (used for anonymous deduplication)
+     * @param viewerIdentity opaque per-viewer identity for anonymous deduplication, as produced by
+     *                  {@code ClientIpResolver.resolveClientIdentifier} ({@code ip:<addr>} or
+     *                  {@code device:<uuid>}) — never parsed, only hashed
      * @param userAgent viewer's User-Agent header (used for anonymous deduplication)
-     * @return the published planner detail response with content, user context, and updated view count
+     * @return the published planner detail response with content, user context, and current view count
      * @throws PlannerNotFoundException if planner not found or not published
      */
-    @Transactional
+    @Transactional(readOnly = true)
     public PublishedPlannerDetailResponse getPublishedPlanner(
-            UUID plannerId, Long userId, String clientIp, String userAgent) {
-        // Acquire write lock upfront — consistent lock ordering prevents deadlock
-        // with concurrent view increments (planners → planner_views)
-        Planner planner = plannerRepository.findByIdForUpdate(plannerId)
-                .orElseThrow(() -> new PlannerNotFoundException(plannerId));
+            UUID plannerId, Long userId, String viewerIdentity, String userAgent) {
+        Planner planner = accessGuard.requirePublished(plannerId);
 
-        if (!Boolean.TRUE.equals(planner.getPublished())) {
-            throw new PlannerNotFoundException(plannerId);
-        }
-
-        // Record view with daily deduplication
         String viewerHash = userId != null
                 ? ViewerHashUtil.hashForAuthenticatedUser(userId, plannerId)
-                : ViewerHashUtil.hashForAnonymousUser(clientIp, userAgent, plannerId);
+                : ViewerHashUtil.hashForAnonymousUser(viewerIdentity, userAgent, plannerId);
 
-        LocalDate today = LocalDate.now(ZoneOffset.UTC);
-        int viewCount = planner.getViewCount();
-
-        if (!plannerViewRepository.existsByPlannerIdAndViewerHashAndViewDate(plannerId, viewerHash, today)) {
-            try {
-                plannerViewRepository.save(new PlannerView(plannerId, viewerHash, today));
-                plannerRepository.incrementViewCount(plannerId);
-                viewCount = planner.getViewCount() + 1;
-                log.debug("Recorded new view for planner {} by viewer hash {}", plannerId, viewerHash.substring(0, 8));
-            } catch (org.springframework.dao.DataIntegrityViolationException e) {
-                // Race condition: another concurrent request already inserted this view
-                log.debug("Race condition: duplicate view for planner {} - ignoring", plannerId);
-            }
-        } else {
-            log.debug("Duplicate view for planner {} by viewer hash {} on {}", plannerId, viewerHash.substring(0, 8), today);
-        }
-
-        // Get comment count (excluding soft-deleted comments)
-        long commentCount = commentRepository.countByPlannerIdAndDeletedAtIsNull(plannerId);
+        plannerViewRecorder.record(plannerId, viewerHash, LocalDate.now(ZoneOffset.UTC));
+        PlannerStats stats = plannerStatsRepository.findById(plannerId).orElse(NO_STATS);
+        int viewCount = stats.getViewCount();
+        int upvotes = stats.getUpvotes();
+        long commentCount = stats.getCommentCount();
 
         // Determine owner notification setting:
         // - For owner: actual setting (defaults to true)
         // - For non-owner/anonymous: false (they can't toggle it anyway)
         boolean isOwner = userId != null && planner.isOwnedBy(userId);
-        Boolean ownerNotificationsEnabled = isOwner
-                ? Boolean.TRUE.equals(planner.getOwnerNotificationsEnabled())
-                : false;
+        boolean ownerNotificationsEnabled = isOwner && planner.isOwnerNotificationsEnabled();
 
         if (userId == null) {
-            return PublishedPlannerDetailResponse.fromEntity(
-                    planner, null, null, null, null, commentCount, ownerNotificationsEnabled, viewCount);
+            return PublishedPlannerDetailResponse.forAnonymous(
+                    planner, commentCount, ownerNotificationsEnabled, viewCount, upvotes);
         }
 
-        Boolean hasUpvoted = hasUpvoted(plannerId, userId);
-        Boolean isBookmarked = engagementService.isBookmarked(userId, plannerId);
-        Boolean isSubscribed = subscriptionService.isSubscribed(userId, plannerId);
-        Boolean hasReported = reportService.hasReported(userId, plannerId);
+        final boolean hasUpvoted = hasUpvoted(plannerId, userId);
+        final boolean isBookmarked = engagementService.isBookmarked(userId, plannerId);
+        final boolean isSubscribed = subscriptionService.isSubscribed(userId, plannerId);
+        final boolean hasReported = reportService.hasReported(userId, plannerId);
 
         return PublishedPlannerDetailResponse.fromEntity(
                 planner, hasUpvoted, isBookmarked, isSubscribed, hasReported,
-                commentCount, ownerNotificationsEnabled, viewCount);
+                commentCount, ownerNotificationsEnabled, viewCount, upvotes);
     }
 }

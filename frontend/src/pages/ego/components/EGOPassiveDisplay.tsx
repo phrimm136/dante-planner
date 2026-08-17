@@ -1,5 +1,5 @@
-import { FLAVOR_TEXT_COLOR } from '@/shared/gameData'
 import type { EGOPassiveI18n } from '../types/EGOTypes'
+import { FLAVOR_TEXT_COLOR, SECTION_STYLES } from '@/lib/constants'
 
 interface EGOPassiveDisplayProps {
   passives: EGOPassiveI18n[]
@@ -20,7 +20,7 @@ export function EGOPassiveDisplay({ passives }: EGOPassiveDisplayProps) {
       {passives.map((passive, index) => (
         <div key={index} className="space-y-1">
           <div className="font-semibold text-sm">{passive.name}</div>
-          <div className="text-sm text-muted-foreground">{passive.desc}</div>
+          <div className={SECTION_STYLES.TEXT.caption}>{passive.desc}</div>
           {passive.flavor && (
             <p
               data-testid="passive-flavor"

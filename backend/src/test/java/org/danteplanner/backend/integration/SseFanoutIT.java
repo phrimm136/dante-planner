@@ -3,16 +3,15 @@ package org.danteplanner.backend.integration;
 import java.util.Map;
 import java.util.UUID;
 import org.danteplanner.backend.comment.dto.CreateCommentRequest;
-import org.danteplanner.backend.comment.service.CommentService;
+import org.danteplanner.backend.comment.service.CommentCommandService;
 import org.danteplanner.backend.comment.service.PlannerCommentSseService;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.planner.dto.UpdatePlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
-import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.sse.SseService;
 import org.danteplanner.backend.shared.sse.SsePublisher;
+import org.danteplanner.backend.shared.sse.SuspensionType;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -27,6 +26,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -37,10 +37,10 @@ import static org.mockito.Mockito.verify;
  * Phase-10 acceptance test: cross-node SSE fan-out over Redis pub/sub.
  *
  * <p>Models a Seoul-style pod that publishes to the Oregon Redis <b>primary</b> yet subscribes to
- * its <b>local</b> Redis: a "planner updated" event published on the primary via {@link SsePublisher}
- * must reach the subscriber listening on the local endpoint and be dispatched to this node's
- * {@link SseService} carrying the payload — true fan-out with no sticky sessions, and no
- * notify-then-refetch (the recipient patches its cache from the payload).</p>
+ * its <b>local</b> Redis: an event published on the primary via {@link SsePublisher} must reach the
+ * subscriber listening on the local endpoint and be dispatched to this node's {@link SseService}
+ * carrying the payload — true fan-out with no sticky sessions, and no notify-then-refetch (the
+ * recipient patches its cache from the payload).</p>
  *
  * <p>The harness reuses {@link CausalHarnessSupport}'s full app context (MySQL primary/replica +
  * {@code AUTH_REDIS}). The publisher targets the primary (bound to {@code redis.auth.*}); the
@@ -67,10 +67,7 @@ class SseFanoutIT extends CausalHarnessSupport {
     private SsePublisher ssePublisher;
 
     @Autowired
-    private PlannerCommandService plannerCommandService;
-
-    @Autowired
-    private CommentService commentService;
+    private CommentCommandService commentCommandService;
 
     @Autowired
     private PlannerRepository plannerRepository;
@@ -91,13 +88,43 @@ class SseFanoutIT extends CausalHarnessSupport {
         String entityId = "planner-9";
         Map<String, Object> payload = Map.of("plannerId", entityId, "title", "Refactored deck");
 
-        ssePublisher.publishUserEvent(userId, null, SseEventType.UPDATED, entityId, payload);
+        ssePublisher.publishUserEvent(userId, null, SseEventType.COMMENT_ADDED, entityId, payload);
 
         verify(sseService, timeout(5000)).sendToUser(
                 eq(userId),
                 isNull(),
-                eq(SseEventType.UPDATED.getValue()),
+                eq(SseEventType.COMMENT_ADDED.getValue()),
                 argThat(data -> data != null && data.toString().contains(entityId)));
+    }
+
+    @Test
+    @DisplayName("Broadcast published on the primary Redis reaches a subscriber on another node, carrying the payload and not the envelope")
+    void sseBroadcastCrossPod_WhenPublishedOnPrimary_DeliveredWithRawPayload() {
+        Long authorId = 5150L;
+        String plannerId = "planner-broadcast-1";
+        Map<String, Object> payload = Map.of("plannerId", plannerId, "plannerTitle", "Cross-pod build");
+
+        ssePublisher.publishBroadcast(authorId, SseEventType.NOTIFY_PUBLISHED, payload);
+
+        verify(sseService, timeout(5000)).broadcastToAll(
+                eq(authorId),
+                eq(SseEventType.NOTIFY_PUBLISHED.getValue()),
+                argThat(data -> data instanceof Map<?, ?> map
+                        && plannerId.equals(map.get("plannerId"))
+                        && !map.containsKey("excludeUserId")));
+    }
+
+    @Test
+    @DisplayName("Suspension published on the primary Redis reaches the suspended user's stream on another node")
+    void sseSuspensionCrossPod_WhenPublishedOnPrimary_DeliveredToSuspendedUser() {
+        Long suspendedUserId = 6161L;
+
+        ssePublisher.publishAccountSuspended(suspendedUserId, "spam", SuspensionType.BAN, null);
+
+        verify(sseService, timeout(5000)).notifyAccountSuspended(
+                eq(suspendedUserId),
+                argThat(data -> data instanceof Map<?, ?> map
+                        && "BAN".equals(map.get("suspensionType"))));
     }
 
     @Test
@@ -117,36 +144,13 @@ class SseFanoutIT extends CausalHarnessSupport {
         String commentId = "comment-123";
         Map<String, Object> payload = Map.of("commentId", commentId, "body", "nice deck");
 
-        ssePublisher.publishCommentEvent(plannerId, SseEventType.CREATED, commentId, payload);
+        ssePublisher.publishCommentEvent(plannerId, SseEventType.COMMENT_ADDED, commentId, null, payload);
 
         verify(plannerCommentSseService, timeout(5000)).broadcast(
                 eq(plannerId),
-                eq(SseEventType.CREATED.getValue()),
-                argThat(data -> data != null && data.toString().contains(commentId)));
-    }
-
-    @Test
-    @DisplayName("A real planner update runs through the write path and fans out cross-node carrying its payload")
-    void updatePlanner_WhenWritePathRuns_FansOutCrossNodeWithPayload() {
-        User owner = TestDataFactory.createTestUser(
-                userRepository, "sse-fanout-planner-" + UUID.randomUUID() + "@example.com");
-        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
-        Long userId = owner.getId();
-        UUID plannerId = planner.getId();
-        UUID deviceId = UUID.randomUUID();
-
-        plannerCommandService.updatePlanner(
-                userId,
-                deviceId,
-                plannerId,
-                new UpdatePlannerRequest("Refactored deck", null, null, null, planner.getSyncVersion(), null),
-                true);
-
-        verify(sseService, timeout(5000)).sendToUser(
-                eq(userId),
-                eq(deviceId),
-                eq(SseEventType.UPDATED.getValue()),
-                argThat(env -> env != null && env.toString().contains(plannerId.toString())));
+                eq(SseEventType.COMMENT_ADDED.getValue()),
+                argThat(data -> data != null && data.toString().contains(commentId)),
+                any());
     }
 
     @Test
@@ -161,7 +165,7 @@ class SseFanoutIT extends CausalHarnessSupport {
         UUID plannerId = planner.getId();
         UUID deviceId = UUID.randomUUID();
 
-        commentService.createComment(
+        commentCommandService.createComment(
                 plannerId,
                 commenterId,
                 deviceId,
@@ -170,6 +174,7 @@ class SseFanoutIT extends CausalHarnessSupport {
         verify(plannerCommentSseService, timeout(5000)).broadcast(
                 eq(plannerId),
                 eq("comment:added"),
-                argThat(data -> data != null && data.toString().contains(plannerId.toString())));
+                argThat(data -> data != null && data.toString().contains(plannerId.toString())),
+                eq(commenterId));
     }
 }

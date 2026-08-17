@@ -1,7 +1,4 @@
-import type { MDCategory, PlannerType } from '@/shared/gameData'
-
-// Re-export category type for consumer convenience
-export type { MDCategory, PlannerType }
+import type { MDCategory } from '@/shared/gameData'
 
 /**
  * MD Planner List Types
@@ -10,11 +7,8 @@ export type { MDCategory, PlannerType }
  * - /planner/md: Personal planners (IndexedDB + Server)
  * - /planner/md/gesellschaft: Community planners (Published API)
  *
- * Key changes from PlannerListTypes.ts:
- * - REMOVED: PlannerListView (routes determine view, not tabs)
- * - REMOVED: PlannerSortOption (no sorting support)
- * - RENAMED: CommunityFilter -> MDGesellschaftMode
- * - ADDED: Route-specific search param interfaces
+ * Route-specific search param shapes; the routes themselves determine which
+ * view renders, so there is no view or sort vocabulary here.
  */
 
 // ============================================================================
@@ -27,11 +21,6 @@ export type { MDCategory, PlannerType }
  * - 'best': Show only recommended/featured planners
  */
 export type MDGesellschaftMode = 'published' | 'best'
-
-/**
- * Vote direction for planner voting
- */
-export type VoteDirection = 'UP' | 'DOWN'
 
 // ============================================================================
 // URL Search Params
@@ -46,7 +35,7 @@ export type VoteDirection = 'UP' | 'DOWN'
  */
 export interface MDUserSearchParams {
   /** MD category filter (5F, 10F, 15F) */
-  category?: MDCategory
+  category?: MDCategory | undefined
   /** Current page number (0-indexed) */
   page?: number
   /** Search query for title filtering */
@@ -61,7 +50,7 @@ export interface MDUserSearchParams {
  */
 export interface MDGesellschaftSearchParams {
   /** MD category filter (5F, 10F, 15F) */
-  category?: MDCategory
+  category?: MDCategory | undefined
   /** Current page number (0-indexed) */
   page?: number
   /** Display mode: 'published' (all) or 'best' (recommended only) */
@@ -80,82 +69,24 @@ export interface MDGesellschaftSearchParams {
   themePack?: string
 }
 
-// ============================================================================
-// API Response Types
-// ============================================================================
-
-/**
- * Public planner from API (matches backend PublicPlannerResponse)
- * Contains summary data for display in list view
- */
-export interface PublicPlanner {
-  /** Unique identifier (UUID) */
-  id: string
-  /** Planner title */
-  title: string
-  /** Type of planner (MIRROR_DUNGEON, REFRACTED_RAILWAY) */
-  plannerType: PlannerType
-  /** Category (MD: 5F/10F/15F) */
-  category: MDCategory
-  /** Selected planner keywords */
-  selectedKeywords: string[] | null
-  /** Number of upvotes */
-  upvotes: number
-  /** Number of downvotes */
-  downvotes: number
-  /** Number of views */
-  viewCount: number
-  /** Display name of the author */
-  authorName: string
-  /** ISO 8601 timestamp when planner was created */
-  createdAt: string
-  /** ISO 8601 timestamp when planner was last modified */
-  lastModifiedAt: string | null
-  /** Whether current user has upvoted this planner (null if not authenticated) */
-  hasUpvoted: boolean | null
-  /** Whether current user has bookmarked this planner (null if not authenticated) */
-  isBookmarked: boolean | null
-}
-
-/**
- * Paginated response for planner list
- * Follows Spring Data Page structure
- */
-export interface PaginatedPlanners {
-  /** Array of planners for current page */
-  content: PublicPlanner[]
-  /** Total number of planners matching the query */
-  totalElements: number
-  /** Total number of pages */
-  totalPages: number
-  /** Current page number (0-indexed) */
-  number: number
-  /** Page size */
-  size: number
-}
-
-// ============================================================================
-// Action Response Types
-// ============================================================================
-
-/**
- * Response from bookmark toggle endpoint
- */
-export interface BookmarkResponse {
-  /** ID of the bookmarked planner */
-  plannerId: string
-  /** New bookmark state (true = bookmarked, false = removed) */
-  bookmarked: boolean
-}
-
-/**
- * Response from vote endpoint
- */
-export interface VoteResponse {
-  /** ID of the voted planner */
-  plannerId: string
-  /** Whether the user has upvoted */
-  hasUpvoted: boolean
-  /** Updated upvote count */
-  upvoteCount: number
+/** The filter values a gesellschaft list reads from the URL, as one object. */
+export interface MDGesellschaftFilters {
+  /** MD category filter (undefined = all categories) */
+  category: MDCategory | undefined
+  /** Current page (0-indexed) */
+  page: number
+  /** Display mode: 'published' (all) or 'best' (recommended only) */
+  mode: MDGesellschaftMode
+  /** Search query for title filtering */
+  search: string
+  /** Raw comma-separated keyword filter from URL */
+  keyword: string | undefined
+  /** Raw comma-separated identity ID filter from URL */
+  identity: string | undefined
+  /** Raw comma-separated EGO ID filter from URL */
+  ego: string | undefined
+  /** Raw comma-separated gift ID filter from URL */
+  gift: string | undefined
+  /** Raw comma-separated theme pack ID filter from URL */
+  themePack: string | undefined
 }

@@ -13,29 +13,40 @@ variable "name_prefix" {
 # --- Networking (operator-supplied via gitignored terraform.tfvars) ---------
 
 variable "vpc_id" {
-  description = "VPC ID the EC2 instance and RDS live in."
+  description = "Existing VPC the database lives in. Ignored when create_vpc is true. An account with no database network sets create_vpc instead of supplying this."
   type        = string
+  default     = ""
 }
 
 variable "db_subnet_ids" {
-  description = "Subnet IDs for the DB subnet group (>= 2 across >= 2 AZs, even for single-AZ)."
+  description = "Subnets for the DB subnet group (>= 2 across >= 2 AZs, even for single-AZ). Ignored when create_vpc is true."
   type        = list(string)
+  default     = []
 
   validation {
-    condition     = length(var.db_subnet_ids) >= 2
+    condition     = length(var.db_subnet_ids) == 0 || length(var.db_subnet_ids) >= 2
     error_message = "RDS requires >= 2 subnets across >= 2 AZs, even for a single-AZ instance."
   }
 }
 
-variable "availability_zone" {
-  description = "AZ to pin the single-AZ RDS instance to — MUST match the EC2 instance's AZ."
-  type        = string
+variable "multi_az" {
+  description = "Run a standby in a second zone. False for an environment that is rebuilt rather than recovered, where a standby doubles the bill to protect something disposable."
+  type        = bool
+  default     = true
 }
 
-variable "ec2_security_group_id" {
-  description = "The backend EC2 instance's security group (source of app→RDS ingress; target of the temp replication rule)."
-  type        = string
+variable "create_vpc" {
+  description = "Build the database network here rather than taking one as input. False where a VPC predates this stack."
+  type        = bool
+  default     = false
 }
+
+variable "vpc_cidr" {
+  description = "CIDR for the created network. Must not overlap any fleet that will peer with it."
+  type        = string
+  default     = "10.40.0.0/16"
+}
+
 
 # --- Instance shape ---------------------------------------------------------
 
@@ -113,12 +124,6 @@ variable "maintenance_window" {
   default     = "Mon:18:00-Mon:19:00"
 }
 
-variable "enable_replication_ingress" {
-  description = "TEMP toggle: open the EC2 SG to RDS on 3306 so the replica can pull the binlog. true during migration (Zone 0), false at decommission (Zone 4)."
-  type        = bool
-  default     = false
-}
-
 variable "tags" {
   description = "Resource tags."
   type        = map(string)
@@ -146,10 +151,16 @@ variable "fleet_vpc_cidr" {
   default     = ""
 }
 
-variable "master_password" {
-  description = "Master password for the primary. Managed master password (AWS/Secrets Manager) is disabled because a read-replica source cannot have it enabled. Set to the CURRENT value pulled from the old managed secret so nothing rotates: `aws secretsmanager get-secret-value --secret-id <master_user_secret_arn> --query SecretString --output text` → the `password` field. Set in terraform.tfvars (gitignored) — never commit."
+variable "master_password_version" {
+  description = "Raise after rotating the Secrets Manager entry to push the new password to the instance. Terraform keeps no copy of the value, so nothing else makes it notice a rotation."
+  type        = number
+  default     = 1
+}
+
+variable "master_password_secret_name" {
+  description = "Secrets Manager entry holding the master password as a plain string. Read at plan time, so it must exist before this stack is applied."
   type        = string
-  sensitive   = true
+  default     = "danteplanner/rds/master-password"
 }
 
 variable "seoul_peering_connection_id" {
@@ -162,4 +173,14 @@ variable "seoul_fleet_cidr" {
   description = "Seoul fleet VPC CIDR, for the RDS-side return route and the CIDR-based 3306 ingress (cross-region SG references are not allowed)."
   type        = string
   default     = "10.30.0.0/16"
+}
+
+variable "aws_account_id" {
+  description = "The 12-digit AWS account this stack may apply into."
+  type        = string
+
+  validation {
+    condition     = can(regex("^[0-9]{12}$", var.aws_account_id))
+    error_message = "aws_account_id must be the 12-digit AWS account number."
+  }
 }

@@ -5,19 +5,23 @@ import java.util.UUID;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.DeviceId;
-import org.danteplanner.backend.shared.config.RateLimitConfig;
+import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.comment.dto.CommentTreeNode;
 import org.danteplanner.backend.comment.dto.CommentVoteResponse;
 import org.danteplanner.backend.comment.dto.CreateCommentRequest;
 import org.danteplanner.backend.comment.dto.CreateCommentResponse;
-import org.danteplanner.backend.comment.dto.ToggleNotificationRequest;
+import org.danteplanner.backend.shared.dto.ToggleNotificationRequest;
 import org.danteplanner.backend.comment.dto.ToggleNotificationResponse;
 import org.danteplanner.backend.comment.dto.UpdateCommentRequest;
 import org.danteplanner.backend.comment.dto.UpdateCommentResponse;
-import org.danteplanner.backend.moderation.service.CommentReportService;
-import org.danteplanner.backend.comment.service.CommentService;
+import org.danteplanner.backend.comment.service.CommentCommandService;
+import org.danteplanner.backend.comment.service.CommentEngagementService;
+import org.danteplanner.backend.comment.service.CommentQueryService;
+import org.danteplanner.backend.moderation.dto.CommentReportRequest;
+import org.danteplanner.backend.moderation.dto.CommentReportResponse;
+import org.danteplanner.backend.shared.ratelimit.RateLimitExempt;
+import org.danteplanner.backend.shared.ratelimit.RateLimited;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -40,12 +44,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
-@Slf4j
+@RateLimited(RateLimitPolicy.COMMENT)
 public class CommentController {
 
-    private final CommentService commentService;
-    private final CommentReportService commentReportService;
-    private final RateLimitConfig rateLimitConfig;
+    private final CommentQueryService commentQueryService;
+    private final CommentCommandService commentCommandService;
+    private final CommentEngagementService commentEngagementService;
 
     /**
      * Get all comments for a planner.
@@ -58,20 +62,22 @@ public class CommentController {
      * @param plannerId the planner ID
      * @return list of comments with vote status
      */
+    @RateLimitExempt
     @GetMapping("/planner/{plannerId}/comments")
     public ResponseEntity<List<CommentTreeNode>> getComments(
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID plannerId) {
 
-        List<CommentTreeNode> comments = commentService.getCommentTree(plannerId, userId);
+        List<CommentTreeNode> comments = commentQueryService.getCommentTree(plannerId, userId);
         return ResponseEntity.ok(comments);
     }
 
     /**
      * Create a new comment on a planner.
      *
-     * <p>Supports both top-level comments and threaded replies.
-     * Max depth is 5; replies at max depth become siblings.
+     * <p>Supports both top-level comments and threaded replies. Nesting stops at
+     * {@link org.danteplanner.backend.shared.util.CommentConstants#MAX_DEPTH}, where a reply
+     * becomes a sibling instead of a child.
      * Rate limited to prevent spam.</p>
      *
      * @param userId    the authenticated user ID
@@ -87,18 +93,16 @@ public class CommentController {
             @PathVariable UUID plannerId,
             @Valid @RequestBody CreateCommentRequest request) {
 
-        rateLimitConfig.checkCommentLimit(userId);
-
-        log.info("User {} creating comment on planner {}", userId, plannerId);
-        CreateCommentResponse response = commentService.createComment(plannerId, userId, deviceId, request);
+        CreateCommentResponse response = commentCommandService.createComment(plannerId, userId, deviceId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     /**
      * Create a reply to an existing comment.
      *
-     * <p>Creates a threaded reply under the specified parent comment.
-     * Max depth is 5; replies at max depth become siblings.
+     * <p>Creates a threaded reply under the specified parent comment. Nesting stops at
+     * {@link org.danteplanner.backend.shared.util.CommentConstants#MAX_DEPTH}, where a reply
+     * becomes a sibling instead of a child.
      * Rate limited to prevent spam.</p>
      *
      * @param userId          the authenticated user ID
@@ -114,10 +118,7 @@ public class CommentController {
             @PathVariable UUID parentCommentId,
             @Valid @RequestBody CreateCommentRequest request) {
 
-        rateLimitConfig.checkCommentLimit(userId);
-
-        log.info("User {} creating reply to comment {}", userId, parentCommentId);
-        CreateCommentResponse response = commentService.createReply(parentCommentId, userId, deviceId, request.content());
+        CreateCommentResponse response = commentCommandService.createReply(parentCommentId, userId, deviceId, request.content());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -138,10 +139,7 @@ public class CommentController {
             @PathVariable UUID commentId,
             @Valid @RequestBody UpdateCommentRequest request) {
 
-        rateLimitConfig.checkCommentLimit(userId);
-
-        log.info("User {} editing comment {}", userId, commentId);
-        UpdateCommentResponse response = commentService.updateComment(commentId, userId, request);
+        UpdateCommentResponse response = commentCommandService.updateComment(commentId, userId, request);
         return ResponseEntity.ok(response);
     }
 
@@ -160,8 +158,7 @@ public class CommentController {
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID commentId) {
 
-        log.info("User {} deleting comment {}", userId, commentId);
-        commentService.deleteComment(commentId, userId);
+        commentCommandService.deleteComment(commentId, userId);
         return ResponseEntity.noContent().build();
     }
 
@@ -181,10 +178,30 @@ public class CommentController {
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID commentId) {
 
-        rateLimitConfig.checkCommentLimit(userId);
-
-        CommentVoteResponse response = commentService.toggleUpvote(commentId, userId);
+        CommentVoteResponse response = commentEngagementService.toggleUpvote(commentId, userId);
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Submit a report for a comment.
+     *
+     * <p>Requires authentication. One report per user per comment: a repeat report is
+     * 409 Conflict. Reporting a deleted comment is 403 Forbidden.</p>
+     *
+     * @param userId    the authenticated user ID
+     * @param commentId the comment public UUID
+     * @param request   the report request with reason
+     * @return the report timestamp
+     */
+    @RateLimited(RateLimitPolicy.REPORT)
+    @PostMapping("/comments/{commentId}/report")
+    public ResponseEntity<CommentReportResponse> reportComment(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable UUID commentId,
+            @Valid @RequestBody CommentReportRequest request) {
+
+        CommentReportResponse response = commentEngagementService.reportComment(commentId, userId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     /**
@@ -204,33 +221,7 @@ public class CommentController {
             @PathVariable UUID commentId,
             @Valid @RequestBody ToggleNotificationRequest request) {
 
-        log.info("User {} toggling notifications for comment {}", userId, commentId);
-        ToggleNotificationResponse response = commentService.toggleNotification(commentId, userId, request.enabled());
+        ToggleNotificationResponse response = commentEngagementService.toggleNotification(commentId, userId, request.enabled());
         return ResponseEntity.ok(response);
     }
-
-    // Report endpoint - temporarily disabled
-    // /**
-    //  * Report a comment.
-    //  *
-    //  * <p>Creates a report for the specified comment. Users can only report each comment once.
-    //  * Cannot report deleted comments. Rate limited to prevent spam.</p>
-    //  *
-    //  * @param userId    the authenticated user ID
-    //  * @param commentId the comment public UUID
-    //  * @param request   the report request with reason
-    //  * @return the report timestamp
-    //  */
-    // @PostMapping("/comments/{commentId}/report")
-    // public ResponseEntity<CommentReportResponse> reportComment(
-    //         @AuthenticationPrincipal Long userId,
-    //         @PathVariable UUID commentId,
-    //         @Valid @RequestBody CommentReportRequest request) {
-    //
-    //     rateLimitConfig.checkCommentLimit(userId);
-    //
-    //     log.info("User {} reporting comment {}", userId, commentId);
-    //     CommentReportResponse response = commentReportService.createReport(commentId, userId, request);
-    //     return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    // }
 }

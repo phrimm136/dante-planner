@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 interface AbEventCardProps {
   eventId: string
   hasImage: boolean
-  illustId?: string
+  illustId?: string | undefined
   enableHoverHighlight?: boolean
   className?: string
 }
@@ -27,6 +27,7 @@ export function AbEventCard({
           <img
             src={getAbEventImagePath(illustId ?? eventId)}
             alt=""
+            loading="lazy"
             className="w-full h-full object-cover"
           />
         ) : (

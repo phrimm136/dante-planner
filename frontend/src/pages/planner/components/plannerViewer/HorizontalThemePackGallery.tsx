@@ -1,14 +1,16 @@
-import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
-import { PlannerSection } from '../PlannerSection'
+import { PlannerSection } from '@/components/layout/PlannerSection'
 import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { ThemePackTrackerCard } from './ThemePackTrackerCard'
 import { useThemePackListData } from '@/pages/themePack'
 import { CARD_GRID, EMPTY_STATE } from '@/lib/constants'
 import { cn, getDisplayFontForLanguage } from '@/lib/utils'
+import { createEmptyNoteContent } from '@/shared/noteEditor'
 import type { SerializableFloorSelection } from '../../types/PlannerTypes'
 import type { NoteContent } from '@/shared/noteEditor'
+
+const EMPTY_NOTE = createEmptyNoteContent()
 
 interface HorizontalThemePackGalleryProps {
   floorSelections: SerializableFloorSelection[]
@@ -39,7 +41,7 @@ export function HorizontalThemePackGallery({
   const mobileScale = CARD_GRID.MOBILE_SCALE.DENSE
 
   // Collect selected theme pack IDs from all floors
-  const allThemePackIds = useMemo(() => {
+  const allThemePackIds = (() => {
     const packIds: string[] = []
     floorSelections.forEach((selection) => {
       if (selection.themePackId) {
@@ -47,16 +49,16 @@ export function HorizontalThemePackGallery({
       }
     })
     return packIds
-  }, [floorSelections])
+  })()
 
   // Get all done marks across all floors
-  const allDoneMarks = useMemo(() => {
+  const allDoneMarks = (() => {
     const marks = new Set<string>()
     Object.values(doneMarks).forEach((floorMarks) => {
       floorMarks.forEach((packId) => marks.add(packId))
     })
     return marks
-  }, [doneMarks])
+  })()
 
   // Find floor index for a given theme pack from floorSelections
   const getFloorIndexForPack = (themePackId: string): number => {
@@ -67,7 +69,7 @@ export function HorizontalThemePackGallery({
   const getNoteContentForPack = (themePackId: string): NoteContent => {
     const floorIndex = getFloorIndexForPack(themePackId)
     const floorNoteKey = `floor-${floorIndex}`
-    return sectionNotes[floorNoteKey] || { type: 'doc', content: [] }
+    return sectionNotes[floorNoteKey] ?? EMPTY_NOTE
   }
 
   // No theme packs selected at all

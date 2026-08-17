@@ -42,7 +42,7 @@ class PlannerValidationExceptionTest {
 
     @Test
     @DisplayName("combined() with one error should produce exactly one sub-error")
-    void combined_SingleError_HasExactlyOneSubError() {
+    void combined_WhenSingleError_HasExactlyOneSubError() {
         PlannerValidationException combined = PlannerValidationException.combined(
                 List.of(new PlannerValidationException("ONLY_CODE", "Only message"))
         );

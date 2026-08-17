@@ -42,4 +42,17 @@ public interface PlannerSubscriptionRepository extends JpaRepository<PlannerSubs
      * @return true if subscription exists
      */
     boolean existsByUserIdAndPlannerId(Long userId, UUID plannerId);
+
+    /**
+     * Persists a subscription that does not exist yet.
+     *
+     * <p>The key is the (user, planner) pair the caller supplies, so no id-null guard can tell a
+     * new row from an existing one: passing a row that already exists overwrites it.</p>
+     *
+     * @param subscription the subscription to insert
+     * @return the persisted subscription
+     */
+    default PlannerSubscription insert(PlannerSubscription subscription) {
+        return save(subscription);
+    }
 }

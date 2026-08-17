@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { formatUsername } from '../formatUsername'
+import { composeUsername, formatUsername } from '../formatUsername'
 
 // Mock i18next
 vi.mock('i18next', () => ({
@@ -33,6 +33,17 @@ vi.mock('i18next', () => ({
     }),
   },
 }))
+
+describe('composeUsername', () => {
+  it.each([
+    ['WCorp', 'Faust', 'AB123', 'WCorpFaust#AB123'],
+    ['Naive', 'Faust', '12345', 'NaiveFaust#12345'],
+    ['각성', '파우스트', 'ZZ000', '각성파우스트#ZZ000'],
+    ['W_CORP', '', 'A1B2C', 'W_CORP#A1B2C'],
+  ])('joins %s + %s + %s', (epithet, sinner, suffix, expected) => {
+    expect(composeUsername(epithet, sinner, suffix)).toBe(expected)
+  })
+})
 
 describe('formatUsername', () => {
   beforeEach(() => {

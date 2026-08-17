@@ -1,0 +1,152 @@
+# The 1:1 rehearsal: stands up the full staging environment (five terraform stacks, both
+# fleets, candidate images), drives the e2e suites against it through the Cloudflare
+# hostnames, and tears it down. Human-invoked before changes only a full copy covers —
+# stop-the-world migrations, cluster or secrets-machinery upgrades, trust-topology changes —
+# and occasionally as a drill so the stand-up itself stays exercised.
+name: Staging rehearsal (full 1:1 e2e)
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: staging-e2e-gate
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: us-west-2
+  SEOUL_REGION: ap-northeast-2
+  TF_IN_AUTOMATION: "1"
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    environment: staging
+    permissions: { contents: read, id-token: write }
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6
+
+      - name: Assume the staging provisioner role
+        uses: aws-actions/configure-aws-credentials@25c81205f2d4b9d5cbdbd746d1c72e05494a8f52  # v5
+        with:
+          role-to-assume: ${{ secrets.STAGING_PROVISIONER_ROLE_ARN }}
+          aws-region: us-west-2
+
+      - name: Fetch tfvars from SSM Parameter Store
+        run: |
+          for stack in secrets rds oregon seoul cloudflare; do
+            aws ssm get-parameter --name "/danteplanner/staging/tfvars/$stack" \
+              --with-decryption --query 'Parameter.Value' --output text \
+              > "terraform/$stack/staging.tfvars"
+          done
+
+      - name: Init stacks against the staging backend
+        env:
+          TF_CLI_ARGS_init: -backend-config=../backend.staging.hcl
+        run: |
+          for stack in secrets rds oregon seoul cloudflare; do
+            terraform -chdir="terraform/$stack" init -input=false -no-color
+          done
+
+      - name: Apply secrets, RDS, and the Oregon fleet
+        run: |
+          terraform -chdir=terraform/secrets apply -var-file=staging.tfvars -auto-approve -input=false -no-color
+          terraform -chdir=terraform/rds     apply -var-file=staging.tfvars -auto-approve -input=false -no-color
+          terraform -chdir=terraform/oregon  apply -var-file=staging.tfvars -auto-approve -input=false -no-color
+
+      # Two-pass wiring: the RDS-side return route and 3306 ingress need the fleet's
+      # peering id, which exists only after the fleet apply.
+      - name: Wire Oregon fleet into RDS
+        run: |
+          PCX=$(terraform -chdir=terraform/oregon output -raw rds_peering_connection_id)
+          SG=$(terraform -chdir=terraform/oregon output -raw cluster_security_group_id)
+          terraform -chdir=terraform/rds apply -var-file=staging.tfvars -auto-approve -input=false -no-color \
+            -var "fleet_peering_connection_id=$PCX" \
+            -var "fleet_cluster_security_group_id=$SG" \
+            -var "fleet_vpc_cidr=10.20.0.0/16"
+
+      - name: Apply Seoul fleet and wire its return path
+        run: |
+          terraform -chdir=terraform/seoul apply -var-file=staging.tfvars -auto-approve -input=false -no-color
+          PCX_OR=$(terraform -chdir=terraform/oregon output -raw rds_peering_connection_id)
+          SG_OR=$(terraform -chdir=terraform/oregon output -raw cluster_security_group_id)
+          PCX_SE=$(terraform -chdir=terraform/seoul output -raw rds_peering_connection_id)
+          terraform -chdir=terraform/rds apply -var-file=staging.tfvars -auto-approve -input=false -no-color \
+            -var "fleet_peering_connection_id=$PCX_OR" \
+            -var "fleet_cluster_security_group_id=$SG_OR" \
+            -var "fleet_vpc_cidr=10.20.0.0/16" \
+            -var "seoul_peering_connection_id=$PCX_SE"
+
+      - name: Apply Cloudflare tunnels and store their tokens
+        run: |
+          terraform -chdir=terraform/cloudflare apply -var-file=staging.tfvars -auto-approve -input=false -no-color
+          bash scripts/ops/provision/cloudflare-tunnel-secrets.sh
+          # Store the endpoint bundle so every later step reads hostnames from Secrets
+          # Manager instead of naming them here — this file is public.
+          bash scripts/ops/provision/staging-urls-secret.sh
+
+# The gate tests the code being promoted, so the image is BUILT from this checkout — a
+      # mirror of main's tag would validate the wrong build. The tag is pinned through the
+      # ArgoCD Application's kustomize image override (staging-e2e-workloads.sh): a bare
+      # `kubectl set image` is reverted by self-heal within one sync loop.
+      - name: Build and push the candidate backend image
+        run: |
+          ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
+          docker run --privileged --rm tonistiigi/binfmt --install arm64
+          # Each fleet pulls from its own region's registry, so the candidate goes to both.
+          for region in us-west-2 ap-northeast-2; do
+            aws ecr describe-repositories --region "$region" --repository-names danteplanner-backend >/dev/null 2>&1 \
+              || aws ecr create-repository --region "$region" --repository-name danteplanner-backend >/dev/null
+            aws ecr get-login-password --region "$region" | docker login --username AWS --password-stdin \
+              "$ACCOUNT.dkr.ecr.$region.amazonaws.com"
+          done
+          docker buildx build --platform linux/arm64 -f backend/Dockerfile \
+            -t "$ACCOUNT.dkr.ecr.us-west-2.amazonaws.com/danteplanner-backend:gate-${{ github.sha }}" \
+            --build-arg "GIT_SHA=${{ github.sha }}" --push .
+          docker buildx build --platform linux/arm64 -f backend/Dockerfile \
+            -t "$ACCOUNT.dkr.ecr.ap-northeast-2.amazonaws.com/danteplanner-backend:gate-${{ github.sha }}" \
+            --build-arg "GIT_SHA=${{ github.sha }}" --push .
+
+      - name: Provision runtime secrets
+        run: bash scripts/ops/provision/staging-e2e-secrets.sh
+
+      - name: Bootstrap database users
+        run: bash scripts/ops/provision/staging-e2e-db-users.sh
+
+      - name: Build and publish the staging SPA, deploy in-cluster workloads
+        run: |
+          eval "$(scripts/ops/access/staging-env.sh)"
+          VITE_API_BASE_URL="$E2E_API_URL" yarn --cwd frontend install --frozen-lockfile
+          VITE_API_BASE_URL="$E2E_API_URL" yarn --cwd frontend build
+          BACKEND_IMAGE_TAG="gate-${{ github.sha }}" bash scripts/ops/provision/staging-e2e-workloads.sh
+
+      - name: Wait for the environment to serve
+        run: |
+          eval "$(scripts/ops/access/staging-env.sh)"
+          for url in "$E2E_API_URL/healthz-local" \
+                     "$E2E_API_SEOUL_URL/healthz-local" \
+                     "$E2E_APP_URL/" \
+                     "$E2E_IDP_URL/healthz"; do
+            timeout 600 bash -c "until curl -fsS -o /dev/null --max-time 8 '$url'; do sleep 10; done"
+          done
+
+      - name: Run the e2e suites
+        run: |
+          # The bundle's keys are the exact env names staging.ts reads, so the eval wires
+          # the suites without a rename layer in between.
+          eval "$(scripts/ops/access/staging-env.sh)"
+          export E2E_BASE_URL="$E2E_APP_URL"
+          scripts/ops/access/rds-tunnel.sh start oregon
+          yarn --cwd e2e install --frozen-lockfile
+          yarn --cwd e2e playwright install chromium
+          yarn --cwd e2e playwright test
+
+      - name: Destroy the environment
+        if: always()
+        run: |
+          terraform -chdir=terraform/cloudflare destroy -var-file=staging.tfvars -auto-approve -input=false -no-color
+          terraform -chdir=terraform/seoul      destroy -var-file=staging.tfvars -auto-approve -input=false -no-color
+          terraform -chdir=terraform/oregon     destroy -var-file=staging.tfvars -auto-approve -input=false -no-color
+          terraform -chdir=terraform/rds        destroy -var-file=staging.tfvars -auto-approve -input=false -no-color
+          # The secrets stack stays standing: deleted Secrets Manager names enter a recovery
+          # window that blocks same-name re-creation, which would break the next run.

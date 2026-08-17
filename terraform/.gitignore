@@ -3,9 +3,12 @@
 # (rds, oregon, iam-bootstrap, ...) recursively.
 *.tfstate
 *.tfstate.*
-.terraform/
+.terraform*/
 # .terraform.lock.hcl IS committed (pins provider versions + hashes).
-terraform.tfvars
-*.auto.tfvars
-!terraform.tfvars.example
+# Any tfvars carries account-specific values, whatever its environment prefix.
+*.tfvars
+!*.tfvars.example
+# No leading slash, so a per-stack backend config is ignored too.
+backend*.hcl
+!backend.hcl.example
 crash.log

@@ -20,10 +20,14 @@ import { BannerSection } from './components/BannerSection'
 import { AnnouncementContent } from './components/AnnouncementContent'
 import { AnnouncementSkeleton } from './components/AnnouncementSection'
 import { SideLinkSection } from './components/SideLinkSection'
-import { RecentlyReleasedSection } from './components/RecentlyReleasedSection'
+import {
+  RecentlyReleasedSection,
+  RecentlyReleasedSkeleton,
+} from './components/RecentlyReleasedSection'
 import { CommunityPlansSection } from './components/CommunityPlansSection'
 
 import { useRecentlyReleasedData } from './hooks/useHomePageData'
+import { SECTION_STYLES } from '@/lib/constants'
 
 // ============================================================================
 // Inner Content Component
@@ -46,7 +50,7 @@ function RecentlyReleasedContent() {
 
 function HomePageContent() {
   return (
-    <div className="container mx-auto p-8">
+    <div className={SECTION_STYLES.LAYOUT.page}>
       {/* Banner carousel */}
       <div className="mb-8">
         <BannerSection />
@@ -63,7 +67,7 @@ function HomePageContent() {
       {/* Two-column layout: Recently Released + Community Plans */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left column: Recently Released */}
-        <Suspense fallback={<LoadingState />}>
+        <Suspense fallback={<RecentlyReleasedSkeleton />}>
           <RecentlyReleasedContent />
         </Suspense>
 

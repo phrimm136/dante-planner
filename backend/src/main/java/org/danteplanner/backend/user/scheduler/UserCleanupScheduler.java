@@ -38,29 +38,40 @@ public class UserCleanupScheduler {
     public void cleanupExpiredUsers() {
         log.info("Starting scheduled user cleanup job");
 
-        List<User> expiredUsers = userRepository.findByPermanentDeleteScheduledAtBefore(Instant.now());
+        Instant cutoff = Instant.now();
+        List<Long> candidateIds = userRepository.findByPermanentDeleteScheduledAtBefore(cutoff)
+                .stream()
+                .map(User::getId)
+                .toList();
 
-        if (expiredUsers.isEmpty()) {
+        if (candidateIds.isEmpty()) {
             log.info("No expired users to clean up");
             return;
         }
 
-        log.info("Found {} expired users to hard-delete", expiredUsers.size());
+        log.info("Found {} expired users to hard-delete", candidateIds.size());
 
         int successCount = 0;
+        int skippedCount = 0;
         int failureCount = 0;
 
-        for (User user : expiredUsers) {
+        for (Long userId : candidateIds) {
             try {
-                lifecycleService.performHardDelete(user);
-                successCount++;
-                log.info("Hard-deleted user {}", user.getId());
-            } catch (Exception e) {
+                if (lifecycleService.performHardDelete(userId, cutoff)) {
+                    successCount++;
+                    log.info("Hard-deleted user {}", userId);
+                } else {
+                    skippedCount++;
+                    log.info("Skipped user {}: no longer eligible for deletion", userId);
+                }
+            } catch (RuntimeException e) {
+                // One unusable row must not strand the rest of the batch until the next run.
                 failureCount++;
-                log.error("Failed to hard-delete user {}: {}", user.getId(), e.getMessage(), e);
+                log.error("Failed to hard-delete user {}: {}", userId, e.getMessage(), e);
             }
         }
 
-        log.info("Completed user cleanup job: {} deleted, {} failed", successCount, failureCount);
+        log.info("Completed user cleanup job: {} deleted, {} skipped, {} failed",
+                successCount, skippedCount, failureCount);
     }
 }

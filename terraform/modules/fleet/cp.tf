@@ -1,37 +1,42 @@
 # --- Cluster join token -----------------------------------------------------
-# Generated once by Terraform, stored as a SecureString. The CP reads it to
-# init the server; every agent reads it to join. Fully unattended — no operator
-# secret handoff. The token lives in Terraform state (sensitive) and SSM only.
-resource "random_password" "k3s_token" {
+# The CP reads it to init the server; every agent reads it to join. Fully
+# unattended — no operator secret handoff. SSM holds the only copy.
+#
+# A fresh token is generated on EVERY run, so the write is gated on
+# k3s_token_version rather than on the value: Terraform cannot see that the
+# generated string differs and re-sends only when the number changes. Raising it
+# rotates the token, and every node joined under the old one must rejoin.
+ephemeral "random_password" "k3s_token" {
   length  = 48
   special = false
 }
 
 resource "aws_ssm_parameter" "k3s_token" {
-  name        = "/${var.name_prefix}/${var.region_name_suffix}/k3s-join-token"
-  description = "k3s cluster join token (CP writes, agents read)"
-  type        = "SecureString"
-  value       = random_password.k3s_token.result
-  tags        = var.tags
+  name             = "/${var.name_prefix}/${var.region_name_suffix}/k3s-join-token"
+  description      = "k3s cluster join token (CP writes, agents read)"
+  type             = "SecureString"
+  value_wo         = ephemeral.random_password.k3s_token.result
+  value_wo_version = var.k3s_token_version
+  tags             = var.tags
 }
 
 # --- Admin kubeconfig -------------------------------------------------------
 # The CP writes its admin kubeconfig here at bootstrap (loopback server rewritten
 # to the CP private IP, a cert SAN via --tls-san), so operators fetch cluster
 # access from SSM instead of SSHing the CP. Terraform owns existence/KMS/tags but
-# NOT the value (the CP overwrites it at runtime — ignore_changes keeps plan
-# clean). Intelligent-Tiering absorbs a >4KB kubeconfig without a standing cost.
+# NOT the value. Intelligent-Tiering absorbs a >4KB kubeconfig without a standing cost.
+#
+# Write-only, so refresh never reads the CP's kubeconfig back. Raising
+# kubeconfig_seed_version overwrites whatever the CP wrote with the seed below,
+# leaving no admin access until the CP bootstraps again.
 resource "aws_ssm_parameter" "kubeconfig" {
-  name        = "/${var.name_prefix}/${var.region_name_suffix}/kubeconfig"
-  description = "Admin kubeconfig (CP writes at bootstrap, operators read)"
-  type        = "SecureString"
-  tier        = "Intelligent-Tiering"
-  value       = "pending-cp-bootstrap"
-  tags        = var.tags
-
-  lifecycle {
-    ignore_changes = [value]
-  }
+  name             = "/${var.name_prefix}/${var.region_name_suffix}/kubeconfig"
+  description      = "Admin kubeconfig (CP writes at bootstrap, operators read)"
+  type             = "SecureString"
+  tier             = "Intelligent-Tiering"
+  value_wo         = "pending-cp-bootstrap"
+  value_wo_version = var.kubeconfig_seed_version
+  tags             = var.tags
 }
 
 # --- CP node (pet): k3s server + embedded etcd + ArgoCD core ----------------
@@ -56,7 +61,7 @@ resource "aws_instance" "cp" {
     gateway_api_version = var.gateway_api_version
     traefik_version     = var.traefik_version
     eso_chart_version   = var.external_secrets_chart_version
-    ecr_image           = "${var.backend_image_repo}=${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.region}.amazonaws.com/${var.backend_image_repo}:*"
+    ecr_image           = "${var.backend_image_repo}=${local.backend_ecr_repository_url}:*"
 
     install_scrape_annotate = file("${path.module}/user-data/scrape-annotate-install.sh")
   })

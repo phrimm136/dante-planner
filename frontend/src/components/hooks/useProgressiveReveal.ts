@@ -54,8 +54,6 @@ export interface ProgressiveCountOptions {
   step: number
   /** Starting count on mount and after a reset */
   initial: number
-  /** When this reference changes, the count resets to `initial` (e.g. the sorted items array) */
-  resetKey?: unknown
 }
 
 /**
@@ -72,24 +70,18 @@ export interface ProgressiveCountOptions {
  *   total: sortedItems.length,
  *   step: PROGRESSIVE_REVEAL.CARD_BATCH,
  *   initial: PROGRESSIVE_REVEAL.CARD_BATCH,
- *   resetKey: sortedItems,
  * })
  * return sortedItems.slice(0, displayCount).map(...)
  * ```
  */
-export function useProgressiveCount({
-  total,
-  step,
-  initial,
-  resetKey,
-}: ProgressiveCountOptions): number {
+export function useProgressiveCount({ total, step, initial }: ProgressiveCountOptions): number {
   const [count, setCount] = useState(initial)
 
-  // Reset when the underlying data changes (new data loaded)
+  // Keyed on the size, never on the items' identity: callers derive their array during render,
+  // so an identity-keyed reset re-fires every render and pins the count at `initial`.
   useEffect(() => {
     setCount(initial)
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset is keyed on data identity only
-  }, [resetKey])
+  }, [total, initial])
 
   useEffect(() => {
     if (count < total) {

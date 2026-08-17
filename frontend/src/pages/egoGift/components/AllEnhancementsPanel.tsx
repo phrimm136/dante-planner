@@ -8,10 +8,13 @@
  */
 
 import { Suspense } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import { getEGOGiftEnhancementIconPath, getEGOGiftCostIconPath } from '@/shared/assets'
 import { FormattedDescription } from '@/shared/gameText'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ENHANCEMENT_LABELS, ENHANCEMENT_LEVELS, type EnhancementLevel } from '@/shared/gameData'
+import { SECTION_STYLES } from '@/lib/constants'
 
 interface AllEnhancementsPanelProps {
   /** Maximum enhancement level to display (0, 1, or 2) */
@@ -36,6 +39,8 @@ function EnhancementRow({
   cost: number | null
   isLast: boolean
 }) {
+  const { t } = useTranslation('database')
+
   return (
     <div className={!isLast ? 'pb-4 border-b' : ''}>
       {/* Structure - always visible (icon + cost) */}
@@ -55,8 +60,8 @@ function EnhancementRow({
 
         {/* Enhancement Cost */}
         {cost !== null && (
-          <div className="flex items-center gap-2">
-            <img src={getEGOGiftCostIconPath()} alt="Cost" className="w-6 h-6" />
+          <div className={SECTION_STYLES.LAYOUT.row}>
+            <img src={getEGOGiftCostIconPath()} alt={t('egoGift.price')} className="w-6 h-6" />
             <span className="text-sm font-semibold">{cost}</span>
           </div>
         )}
@@ -87,12 +92,10 @@ export function AllEnhancementsPanel({
           key={level}
           level={level}
           description={descriptions[level] ?? ''}
-          cost={costs[level]}
+          cost={costs[level] ?? null}
           isLast={index === levelsToRender.length - 1}
         />
       ))}
     </div>
   )
 }
-
-export default AllEnhancementsPanel

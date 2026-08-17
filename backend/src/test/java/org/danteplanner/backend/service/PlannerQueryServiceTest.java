@@ -2,7 +2,6 @@ package org.danteplanner.backend.service;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.planner.service.PlannerQueryService;
 
-import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.PlannerSummaryResponse;
 import org.danteplanner.backend.planner.entity.Planner;
@@ -11,7 +10,10 @@ import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
-import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
+import org.danteplanner.backend.planner.repository.PlannerSummaryRow;
+import org.danteplanner.backend.support.TestDataFactory;
+import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -45,7 +47,10 @@ class PlannerQueryServiceTest {
     private PlannerRepository plannerRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private PlannerStatsRepository plannerStatsRepository;
+
+    @Mock
+    private UserService userService;
 
     private PlannerQueryService queryService;
 
@@ -55,38 +60,74 @@ class PlannerQueryServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        PlannerAccessGuard accessGuard = new PlannerAccessGuard(userRepository, plannerRepository);
-        queryService = new PlannerQueryService(plannerRepository, accessGuard);
+        PlannerAccessGuard accessGuard = new PlannerAccessGuard(userService, plannerRepository);
+        queryService = new PlannerQueryService(plannerRepository, plannerStatsRepository, accessGuard);
 
-        testUser = User.builder()
-                .id(1L)
-                .email("test@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-123")
-                .usernameEpithet("W_CORP")
-                .usernameSuffix("test1")
-                .build();
+        testUser = TestDataFactory.unsavedUser(1L);
     }
 
-    private Planner.PlannerBuilder testPlannerBuilder() {
-        return Planner.builder()
-                .id(UUID.randomUUID())
-                .user(testUser)
+    private TestDataFactory.PlannerBuilder testPlannerBuilder() {
+        return TestDataFactory.planner(testUser)
                 .title("Test Planner")
                 .category("5F")
                 .status(PlannerStatus.DRAFT)
                 .content("{\"data\": \"test\"}")
-                .syncVersion(1L)
                 .schemaVersion(1)
                 .contentVersion(6)
-                .plannerType(PlannerType.MIRROR_DUNGEON)
-                .createdAt(Instant.now())
-                .lastModifiedAt(Instant.now())
-                .savedAt(Instant.now());
+                .plannerType(PlannerType.MIRROR_DUNGEON);
     }
 
     private Planner createTestPlanner() {
         return testPlannerBuilder().build();
+    }
+
+    private static PlannerSummaryRow summaryRow(Planner planner) {
+        return summaryRow(planner, null);
+    }
+
+    private static PlannerSummaryRow summaryRow(Planner planner, Instant deletedAt) {
+        return new PlannerSummaryRow() {
+
+            @Override
+            public UUID getId() {
+                return planner.getId();
+            }
+
+            @Override
+            public String getTitle() {
+                return planner.getTitle();
+            }
+
+            @Override
+            public String getCategory() {
+                return planner.getCategory();
+            }
+
+            @Override
+            public PlannerType getPlannerType() {
+                return planner.getPlannerType();
+            }
+
+            @Override
+            public PlannerStatus getStatus() {
+                return planner.getStatus();
+            }
+
+            @Override
+            public long getSyncVersion() {
+                return planner.getSyncVersion();
+            }
+
+            @Override
+            public Instant getLastModifiedAt() {
+                return planner.getLastModifiedAt();
+            }
+
+            @Override
+            public Instant getDeletedAt() {
+                return deletedAt;
+            }
+        };
     }
 
     @Nested
@@ -98,32 +139,55 @@ class PlannerQueryServiceTest {
         void getPlanners_WhenCalled_ReturnsPaginatedResults() {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
-            List<Planner> planners = List.of(createTestPlanner(), createTestPlanner());
-            Page<Planner> plannerPage = new PageImpl<>(planners, pageable, 2);
+            Planner planner = createTestPlanner();
+            List<PlannerSummaryRow> rows = List.of(summaryRow(planner), summaryRow(createTestPlanner()));
+            Page<PlannerSummaryRow> rowPage = new PageImpl<>(rows, pageable, 2);
 
-            when(plannerRepository.findByUserIdAndDeletedAtIsNullOrderByLastModifiedAtDesc(testUser.getId(), pageable))
-                    .thenReturn(plannerPage);
+            when(plannerRepository.findOwnerSummaries(testUser.getId(), pageable))
+                    .thenReturn(rowPage);
 
             // Act
-            Page<PlannerSummaryResponse> result = queryService.getPlanners(testUser.getId(), pageable);
+            Page<PlannerSummaryResponse> result = queryService.getPlanners(testUser.getId(), pageable, false);
 
             // Assert
             assertEquals(2, result.getTotalElements());
             assertEquals(2, result.getContent().size());
+            assertEquals(planner.getTitle(), result.getContent().get(0).title());
+            assertEquals(planner.getSyncVersion(), result.getContent().get(0).syncVersion());
+        }
+
+        @Test
+        @DisplayName("Should carry tombstones only through the includeDeleted listing")
+        void getPlanners_WhenIncludeDeleted_CarriesTombstones() {
+            // Arrange
+            Pageable pageable = PageRequest.of(0, 10);
+            Instant deletedAt = Instant.parse("2026-08-16T00:00:00Z");
+            Page<PlannerSummaryRow> rowPage = new PageImpl<>(
+                    List.of(summaryRow(createTestPlanner(), deletedAt)), pageable, 1);
+
+            when(plannerRepository.findOwnerSummariesIncludingDeleted(testUser.getId(), pageable))
+                    .thenReturn(rowPage);
+
+            // Act
+            Page<PlannerSummaryResponse> result =
+                    queryService.getPlanners(testUser.getId(), pageable, true);
+
+            // Assert
+            assertEquals(deletedAt, result.getContent().get(0).deletedAt());
         }
 
         @Test
         @DisplayName("Should return empty page when no planners exist")
-        void getPlanners_NoPlanners_ReturnsEmptyPage() {
+        void getPlanners_WhenNoPlanners_ReturnsEmptyPage() {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
-            Page<Planner> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+            Page<PlannerSummaryRow> emptyPage = new PageImpl<>(List.of(), pageable, 0);
 
-            when(plannerRepository.findByUserIdAndDeletedAtIsNullOrderByLastModifiedAtDesc(testUser.getId(), pageable))
+            when(plannerRepository.findOwnerSummaries(testUser.getId(), pageable))
                     .thenReturn(emptyPage);
 
             // Act
-            Page<PlannerSummaryResponse> result = queryService.getPlanners(testUser.getId(), pageable);
+            Page<PlannerSummaryResponse> result = queryService.getPlanners(testUser.getId(), pageable, false);
 
             // Assert
             assertEquals(0, result.getTotalElements());
@@ -137,11 +201,13 @@ class PlannerQueryServiceTest {
 
         @Test
         @DisplayName("Should return planner when found")
-        void getPlanner_Found_ReturnsPlanner() {
+        void getPlanner_WhenFound_ReturnsPlanner() {
             // Arrange
             Planner planner = createTestPlanner();
-            when(plannerRepository.findByIdAndUserIdAndDeletedAtIsNull(planner.getId(), testUser.getId()))
+            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
+            when(plannerStatsRepository.findById(planner.getId()))
+                    .thenReturn(Optional.empty());
 
             // Act
             PlannerResponse response = queryService.getPlanner(testUser.getId(), planner.getId());
@@ -154,10 +220,10 @@ class PlannerQueryServiceTest {
 
         @Test
         @DisplayName("Should throw PlannerNotFoundException when not found")
-        void getPlanner_NotFound_ThrowsException() {
+        void getPlanner_WhenNotFound_ThrowsException() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
-            when(plannerRepository.findByIdAndUserIdAndDeletedAtIsNull(plannerId, testUser.getId()))
+            when(plannerRepository.findAggregateForOwner(plannerId, testUser.getId()))
                     .thenReturn(Optional.empty());
 
             // Act & Assert

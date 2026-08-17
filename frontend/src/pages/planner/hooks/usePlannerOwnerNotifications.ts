@@ -8,10 +8,11 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useTranslation } from 'react-i18next'
-import { toast } from '@/lib/toast'
+
+import { z } from 'zod'
 
 import { ApiClient } from '@/lib/api'
+import { validateData } from '@/lib/validation'
 import { publishedPlannerQueryKeys } from './usePublishedPlannerQuery'
 
 interface ToggleOwnerNotificationsInput {
@@ -19,10 +20,13 @@ interface ToggleOwnerNotificationsInput {
   enabled: boolean
 }
 
-interface ToggleOwnerNotificationsResponse {
-  plannerId: string
-  ownerNotificationsEnabled: boolean
-}
+const ToggleOwnerNotificationsResponseSchema = z
+  .object({
+    ownerNotificationsEnabled: z.boolean(),
+  })
+  .strict()
+
+type ToggleOwnerNotificationsResponse = z.infer<typeof ToggleOwnerNotificationsResponseSchema>
 
 /**
  * Hook for toggling owner notification settings on a planner
@@ -49,7 +53,6 @@ interface ToggleOwnerNotificationsResponse {
  */
 export function useToggleOwnerNotifications() {
   const queryClient = useQueryClient()
-  const { t } = useTranslation()
 
   return useMutation({
     mutationFn: async ({
@@ -59,7 +62,11 @@ export function useToggleOwnerNotifications() {
       const data = await ApiClient.patch(`/api/planner/md/${plannerId}/notifications`, {
         enabled,
       })
-      return data as ToggleOwnerNotificationsResponse
+      return validateData(
+        data,
+        ToggleOwnerNotificationsResponseSchema,
+        'planner owner notifications',
+      )
     },
     onSuccess: (_, { plannerId }) => {
       void queryClient.invalidateQueries({
@@ -68,7 +75,6 @@ export function useToggleOwnerNotifications() {
     },
     onError: (error) => {
       console.error('Toggle owner notifications failed:', error)
-      toast.error(t('comments.toast.notificationUpdateFailed'))
     },
   })
 }

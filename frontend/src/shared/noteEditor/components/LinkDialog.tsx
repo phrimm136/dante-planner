@@ -66,7 +66,6 @@ export function LinkDialog({ open, onClose, onConfirm, initialText = '' }: LinkD
               }}
               onKeyDown={handleKeyDown}
               placeholder="https://example.com"
-              autoFocus
             />
           </div>
 
@@ -99,5 +98,3 @@ export function LinkDialog({ open, onClose, onConfirm, initialText = '' }: LinkD
     </Dialog>
   )
 }
-
-export default LinkDialog

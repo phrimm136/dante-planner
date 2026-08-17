@@ -5,10 +5,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserRole;
 import org.danteplanner.backend.user.exception.UserNotFoundException;
-import org.danteplanner.backend.user.repository.UserRepository;
-import org.danteplanner.backend.auth.token.TokenBlacklistService;
+import org.danteplanner.backend.user.event.UserDemotedEvent;
+import org.danteplanner.backend.user.service.UserService;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import org.danteplanner.backend.moderation.entity.ModerationAction;
+import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
+import org.danteplanner.backend.moderation.service.ModerationAuditService;
+import org.danteplanner.backend.moderation.service.ModerationPolicy;
 
 /**
  * Service for administrative operations.
@@ -19,8 +25,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class AdminService {
 
-    private final UserRepository userRepository;
-    private final TokenBlacklistService tokenBlacklistService;
+    private final UserService userService;
+    private final ApplicationEventPublisher eventPublisher;
+    private final ModerationAuditService auditService;
+    private final ModerationPolicy moderationPolicy;
 
     /**
      * Change a user's role with safeguards.
@@ -29,54 +37,42 @@ public class AdminService {
      * @param targetId  the user whose role is being changed
      * @param newRole   the new role to assign
      * @return the updated user
-     * @throws UserNotFoundException if target user not found
-     * @throws IllegalArgumentException if safeguard violated
+     * @throws UserNotFoundException        if target user not found
+     * @throws ModerationForbiddenException if a rank safeguard rejects the change
      */
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public User changeRole(Long actorId, Long targetId, UserRole newRole) {
         // Use pessimistic locking to prevent TOCTOU race conditions
-        User actor = userRepository.findWithLockByIdAndDeletedAtIsNull(actorId)
-                .orElseThrow(() -> new UserNotFoundException(actorId));
-        User target = userRepository.findWithLockByIdAndDeletedAtIsNull(targetId)
-                .orElseThrow(() -> new UserNotFoundException(targetId));
+        User actor = userService.lockActiveById(actorId);
+        User target = userService.lockActiveById(targetId);
 
-        UserRole actorRole = actor.getRole();
         UserRole targetCurrentRole = target.getRole();
 
-        // Safeguard 1: Cannot grant role higher than own
-        if (newRole.outranks(actorRole)) {
-            throw new IllegalArgumentException("Cannot grant role higher than your own");
-        }
+        moderationPolicy.requireCanChangeRole(actor, target, newRole);
 
-        // Safeguard 2: Cannot modify user of equal or higher rank (unless self-demotion)
-        if (!actorId.equals(targetId) && targetCurrentRole.hasRankAtLeast(actorRole)) {
-            throw new IllegalArgumentException("Cannot modify user of equal or higher rank");
-        }
-
-        // Safeguard 3: Cannot demote last admin
-        if (targetCurrentRole == UserRole.ADMIN && newRole != UserRole.ADMIN) {
-            long adminCount = userRepository.countByRole(UserRole.ADMIN);
-            if (adminCount <= 1) {
-                throw new IllegalArgumentException("Cannot demote the last administrator");
-            }
+        if (moderationPolicy.demotesAnAdministrator(targetCurrentRole, newRole)) {
+            moderationPolicy.requireAnotherAdministratorRemains(userService.countByRole(UserRole.ADMIN));
         }
 
         // Apply role change
         UserRole oldRole = target.getRole();
         target.setRole(newRole);
-        User saved = userRepository.save(target);
 
-        // If demoted, invalidate all their tokens immediately
-        if (oldRole.outranks(newRole)) {
-            tokenBlacklistService.invalidateUserTokens(targetId);
-            log.info("User {} demoted from {} to {} by admin {}. Tokens invalidated.",
-                    targetId, oldRole, newRole, actorId);
+        boolean demotion = oldRole.outranks(newRole);
+        auditService.record(actorId, target.getPublicId().toString(),
+                demotion ? ModerationAction.ActionType.DEMOTE : ModerationAction.ActionType.PROMOTE,
+                ModerationAction.TargetType.USER, oldRole + " -> " + newRole);
+
+        // Credentials issued under the old role are withdrawn after this commits
+        if (demotion) {
+            eventPublisher.publishEvent(new UserDemotedEvent(this, targetId, oldRole, newRole));
+            log.info("User {} demoted from {} to {} by admin {}", targetId, oldRole, newRole, actorId);
         } else {
             log.info("User {} role changed from {} to {} by admin {}",
                     targetId, oldRole, newRole, actorId);
         }
 
-        return saved;
+        return target;
     }
 
     /**
@@ -88,7 +84,7 @@ public class AdminService {
      */
     @Transactional(readOnly = true)
     public UserRole getUserRole(Long userId) {
-        User user = userRepository.findByIdAndDeletedAtIsNull(userId)
+        User user = userService.findActiveById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
         return user.getRole();
     }

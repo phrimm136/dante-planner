@@ -1,6 +1,9 @@
 import { describe, it, expect } from 'vitest'
 import { parseColorTags, stripColorTags } from '../ColoredText'
 
+/** The shape parseColorTags gives a color span: an inline style carrying the hex. */
+type ColorSpan = React.ReactElement<{ style: React.CSSProperties }>
+
 describe('parseColorTags', () => {
   it('returns plain text as-is', () => {
     const result = parseColorTags('Hello world')
@@ -12,7 +15,7 @@ describe('parseColorTags', () => {
     const result = parseColorTags('<color=#ff0000>red text</color>')
     expect(result).toHaveLength(1)
     // The result is a React element with color style
-    const el = result[0] as React.ReactElement
+    const el = result[0] as ColorSpan
     expect(el.props.style.color).toBe('#ff0000')
   })
 
@@ -28,7 +31,7 @@ describe('parseColorTags', () => {
       '<color=#ff0000>outer <color=#00ff00>inner</color> still outer</color>',
     )
     expect(result).toHaveLength(1)
-    const outer = result[0] as React.ReactElement
+    const outer = result[0] as ColorSpan
     expect(outer.props.style.color).toBe('#ff0000')
   })
 

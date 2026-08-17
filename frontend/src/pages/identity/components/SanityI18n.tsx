@@ -6,15 +6,15 @@ import { FormattedDescription } from '@/shared/gameText'
 import { FormattedSanityText } from '@/shared/gameText'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getPanicIconPath, getSanityIncIconPath, getSanityDecIconPath } from '@/shared/assets'
-import { useSanityConditionFormatter } from '../lib/sanityConditionFormatter'
+import { useSanityConditionFormatter } from '../hooks/useSanityConditionFormatter'
 import { SANITY_CONDITION_TYPE } from '@/shared/gameData'
-import { SANITY_INDICATOR_COLORS } from '@/lib/constants'
+import { SANITY_INDICATOR_COLORS, SECTION_STYLES } from '@/lib/constants'
 import type { SanityConditionType } from '@/shared/gameData'
 import { getDisplayFontForLanguage } from '@/lib/utils'
 
 interface PanicTypeSectionI18nProps {
   /** Panic type ID */
-  panicType: number
+  panicType: string
 }
 
 /**
@@ -46,7 +46,7 @@ export function PanicTypeSectionI18n({ panicType }: PanicTypeSectionI18nProps) {
         </div>
         <img
           src={getPanicIconPath(panicType)}
-          alt={t('a11y.panicType')}
+          alt={t('common:a11y.panicType')}
           className="w-20 h-20 object-contain"
         />
         <div className="text-xl mt-1">
@@ -75,57 +75,11 @@ export function PanicTypeSectionI18n({ panicType }: PanicTypeSectionI18nProps) {
  * Internal component that fetches and renders panic description.
  * Returns empty FormattedDescription if panic entry not found.
  */
-function SanityDescContent({ panicType }: { panicType: number }) {
+function SanityDescContent({ panicType }: { panicType: string }) {
   const { data: panicInfo } = usePanicInfo()
   const panicEntry = getPanicEntry(panicInfo, panicType)
   const desc = panicEntry?.panicDesc ?? ''
   return <FormattedDescription text={desc} />
-}
-
-interface PanicTypeSkeletonProps {
-  /** Panic type ID for icon display */
-  panicType: number
-}
-
-/**
- * Skeleton for panic type section - keeps structure visible during loading.
- * Shows the panic icon immediately while text loads.
- */
-export function PanicTypeSkeleton({ panicType }: PanicTypeSkeletonProps) {
-  const { t } = useTranslation(['database', 'common'])
-
-  return (
-    <div className="flex gap-3">
-      {/* Left column: centered header + image + name */}
-      <div className="flex flex-col items-center">
-        <div className="mb-2">
-          <span
-            className="font-bold px-3 py-1 text-sm"
-            style={{
-              color: SANITY_INDICATOR_COLORS.INCREMENT,
-              border: `2px solid ${SANITY_INDICATOR_COLORS.INCREMENT_BORDER}`,
-            }}
-          >
-            {t('sanity.panicType', 'Panic Type')}
-          </span>
-        </div>
-        <img
-          src={getPanicIconPath(panicType)}
-          alt={t('a11y.panicType')}
-          className="w-20 h-20 object-contain"
-        />
-        <Skeleton className="h-4 w-16 mt-1" />
-      </div>
-
-      {/* Right column: description */}
-      <div className="flex-1 text-sm">
-        <div className="mt-8">
-          <span>·{t('sanity.panicEffect')}</span>
-        </div>
-        <Skeleton className="h-8 w-full" />
-      </div>
-    </div>
-  )
 }
 
 // =============================================================================
@@ -134,7 +88,7 @@ export function PanicTypeSkeleton({ panicType }: PanicTypeSkeletonProps) {
 
 interface SanityNameI18nProps {
   /** Panic type ID */
-  panicType: number
+  panicType: string
 }
 
 /**
@@ -151,7 +105,7 @@ interface SanityNameI18nProps {
  *   <SanityNameI18n panicType={identity.panicType} />
  * </Suspense>
  */
-export function SanityNameI18n({ panicType }: SanityNameI18nProps) {
+function SanityNameI18n({ panicType }: SanityNameI18nProps) {
   const { i18n } = useTranslation()
   const { data: panicInfo } = usePanicInfo()
   const panicEntry = getPanicEntry(panicInfo, panicType)
@@ -159,36 +113,6 @@ export function SanityNameI18n({ panicType }: SanityNameI18nProps) {
   const displayStyle = getDisplayFontForLanguage(i18n.language)
 
   return <span style={{ ...displayStyle, color: SANITY_INDICATOR_COLORS.INCREMENT }}>{name}</span>
-}
-
-interface SanityDescI18nProps {
-  /** Panic type ID */
-  panicType: number
-  /** Description type: 'panic' for panic description, 'lowMorale' for low morale description */
-  descType: 'panic' | 'lowMorale'
-}
-
-/**
- * Suspending component that fetches and returns panic description.
- * Uses useSuspenseQuery internally - MUST be wrapped in Suspense boundary.
- *
- * Returns the description string - caller handles rendering.
- * Returns empty string if panic entry not found (defensive fallback).
- * This allows granular loading: sanity structure stays visible while only
- * the description shows skeleton during language change.
- *
- * @example
- * <Suspense fallback={<Skeleton className="h-8 w-full" />}>
- *   <SanityDescI18n panicType={identity.panicType} descType="panic" />
- * </Suspense>
- */
-export function SanityDescI18n({ panicType, descType }: SanityDescI18nProps) {
-  const { data: panicInfo } = usePanicInfo()
-  const panicEntry = getPanicEntry(panicInfo, panicType)
-  const desc =
-    descType === 'panic' ? (panicEntry?.panicDesc ?? '') : (panicEntry?.lowMoraleDesc ?? '')
-
-  return <>{desc}</>
 }
 
 // =============================================================================
@@ -244,7 +168,7 @@ export function SanityConditionsSectionI18n({
               />
             </Suspense>
           ) : (
-            <div className="text-muted-foreground">
+            <div className={SECTION_STYLES.TEXT.muted}>
               {t('sanity.noIncrease', 'No sanity increase conditions')}
             </div>
           )}
@@ -279,7 +203,7 @@ export function SanityConditionsSectionI18n({
               />
             </Suspense>
           ) : (
-            <div className="text-muted-foreground">
+            <div className={SECTION_STYLES.TEXT.muted}>
               {t('sanity.noDecrease', 'No sanity decrease conditions')}
             </div>
           )}
@@ -326,52 +250,6 @@ function ConditionListSkeleton({ count }: { count: number }) {
       {Array.from({ length: count }).map((_, idx) => (
         <Skeleton key={idx} className="h-4 w-3/4" />
       ))}
-    </>
-  )
-}
-
-/**
- * Skeleton for sanity conditions section during i18n loading.
- */
-export function SanityConditionsSkeleton() {
-  const { t } = useTranslation(['database', 'common'])
-
-  return (
-    <>
-      <div>
-        <div className="mb-2">
-          <span
-            className="font-bold px-3 py-1 text-sm"
-            style={{
-              color: SANITY_INDICATOR_COLORS.INCREMENT,
-              border: `2px solid ${SANITY_INDICATOR_COLORS.INCREMENT_BORDER}`,
-            }}
-          >
-            {t('sanity.increaseHeader', 'Factors increasing Sanity')}
-          </span>
-        </div>
-        <div className="text-sm space-y-2 ml-1">
-          <Skeleton className="h-4 w-3/4" />
-          <Skeleton className="h-4 w-2/3" />
-        </div>
-      </div>
-      <div>
-        <div className="mb-2">
-          <span
-            className="font-bold px-3 py-1 text-sm"
-            style={{
-              color: SANITY_INDICATOR_COLORS.DECREMENT,
-              border: `2px solid ${SANITY_INDICATOR_COLORS.DECREMENT_BORDER}`,
-            }}
-          >
-            {t('sanity.decreaseHeader', 'Factors decreasing Sanity')}
-          </span>
-        </div>
-        <div className="text-sm space-y-2 ml-1">
-          <Skeleton className="h-4 w-3/4" />
-          <Skeleton className="h-4 w-2/3" />
-        </div>
-      </div>
     </>
   )
 }

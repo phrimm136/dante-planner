@@ -1,5 +1,6 @@
 package org.danteplanner.backend.converter;
 import org.danteplanner.backend.planner.converter.KeywordSetConverter;
+import org.danteplanner.backend.planner.entity.PlannerKeywords;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * filter or be rejected by the SET column. These tests fail the build instead.</p>
  *
  * <p>The expensive empirical round-trip of the full set through the real SET column lives in
- * {@code MySQLIntegrationTest} (Docker-gated); H2 cannot store all members because the
+ * {@code MySQLIT} (Docker-gated); H2 cannot store all members because the
  * converter column has no explicit length and defaults to VARCHAR(255) under JPA auto-DDL.</p>
  *
  * <p><b>Proxy note:</b> the FE source of truth is read from
@@ -55,7 +56,7 @@ class KeywordParityTest {
     @DisplayName("VALID_KEYWORDS equals the FE plannerKeywords.json id set")
     void validKeywords_WhenComparedToFrontendList_AreEqual() throws IOException {
         Set<String> feKeywords = readFrontendKeywordIds();
-        assertThat(KeywordSetConverter.VALID_KEYWORDS)
+        assertThat(PlannerKeywords.VALID_KEYWORDS)
                 .as("BE VALID_KEYWORDS must equal FE plannerKeywords.json keys")
                 .isEqualTo(feKeywords);
     }
@@ -64,7 +65,7 @@ class KeywordParityTest {
     @DisplayName("VALID_KEYWORDS equals the selected_keywords SET column members")
     void validKeywords_WhenComparedToMigrationSet_AreEqual() throws IOException {
         Set<String> setMembers = readMigrationSetMembers();
-        assertThat(KeywordSetConverter.VALID_KEYWORDS)
+        assertThat(PlannerKeywords.VALID_KEYWORDS)
                 .as("BE VALID_KEYWORDS must equal the latest migration's selected_keywords SET members")
                 .isEqualTo(setMembers);
     }

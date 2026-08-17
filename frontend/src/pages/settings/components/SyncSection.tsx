@@ -1,12 +1,13 @@
 import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
-import { toast } from '@/lib/toast'
+import { showSuccess } from '@/lib/errorPresentation'
 
 import { useAuthQuery } from '@/shared/auth'
-import { useUserSettingsQuery, useUpdateUserSettingsMutation } from '../hooks/useUserSettings'
+import { useUserSettingsQuery, useUpdateUserSettingsMutation } from '@/shared/userSettings'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
+import { SECTION_STYLES } from '@/lib/constants'
 
 /**
  * Inner component that uses Suspense hooks.
@@ -28,38 +29,33 @@ function SyncSectionContent() {
     return <SyncSectionSkeleton />
   }
 
-  // Handle toggle - null means first-login (will redirect to dialog in Phase 6)
   const handleSyncToggle = (checked: boolean) => {
     updateSettings.mutate(
       { syncEnabled: checked },
       {
-        onSuccess: () => {
-          const message = checked
-            ? t('settings.sync.enabledSuccess', 'Sync enabled')
-            : t('settings.sync.disabledSuccess', 'Sync disabled')
-          toast.success(message)
-        },
-        onError: () => {
-          toast.error(t('settings.sync.updateError', 'Failed to update sync setting'))
+        onSuccess: (settings) => {
+          showSuccess(
+            settings.syncEnabled
+              ? 'common:settings.sync.enabledSuccess'
+              : 'common:settings.sync.disabledSuccess',
+          )
         },
       },
     )
   }
 
-  // syncEnabled = null means not chosen yet (first-login case)
-  // For now, treat as OFF until Phase 6 implements the dialog
-  const syncEnabled = settings.syncEnabled ?? false
+  const syncEnabled = settings.syncEnabled
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold">{t('settings.sync.title', 'Sync')}</h2>
+      <h2 className={SECTION_STYLES.TEXT.sectionTitle}>{t('settings.sync.title', 'Sync')}</h2>
 
-      <div className="flex items-center justify-between">
+      <div className={SECTION_STYLES.LAYOUT.rowBetween}>
         <div className="space-y-1">
           <Label htmlFor="sync-toggle" className="text-base">
             {t('settings.sync.label', 'Enable Sync')}
           </Label>
-          <p className="text-sm text-muted-foreground">
+          <p className={SECTION_STYLES.TEXT.caption}>
             {syncEnabled
               ? t('settings.sync.descriptionOn', 'Your planners sync across devices')
               : t('settings.sync.descriptionOff', 'Your planners are stored locally only')}
@@ -95,7 +91,7 @@ function SyncSectionSkeleton() {
   return (
     <div className="space-y-4">
       <Skeleton className="h-6 w-16" />
-      <div className="flex items-center justify-between">
+      <div className={SECTION_STYLES.LAYOUT.rowBetween}>
         <div className="space-y-1">
           <Skeleton className="h-5 w-24" />
           <Skeleton className="h-4 w-48" />

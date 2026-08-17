@@ -30,7 +30,7 @@ function createPanicInfoQueryOptions(language: string) {
  *
  * @example
  * ```tsx
- * function PanicDisplay({ panicType }: { panicType: number }) {
+ * function PanicDisplay({ panicType }: { panicType: string }) {
  *   const { data: panicInfo } = usePanicInfo();
  *   const entry = getPanicEntry(panicInfo, panicType);
  *
@@ -47,9 +47,9 @@ export function usePanicInfo() {
 /**
  * Gets panic entry by panic type ID
  * @param panicInfo - Panic info dictionary (validated)
- * @param panicType - Panic type ID (number)
+ * @param panicType - Panic type ID
  * @returns Panic info entry or undefined if not found
  */
-export function getPanicEntry(panicInfo: PanicInfo, panicType: number): PanicInfoEntry | undefined {
-  return panicInfo[String(panicType)]
+export function getPanicEntry(panicInfo: PanicInfo, panicType: string): PanicInfoEntry | undefined {
+  return panicInfo[panicType]
 }

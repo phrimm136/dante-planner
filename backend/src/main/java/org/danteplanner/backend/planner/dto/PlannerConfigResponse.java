@@ -18,8 +18,8 @@ import java.util.List;
  */
 @Builder
 public record PlannerConfigResponse(
-    Integer schemaVersion,
-    Integer mdCurrentVersion,
+    int schemaVersion,
+    int mdCurrentVersion,
     List<Integer> mdAvailableVersions,
     List<Integer> rrAvailableVersions
 ) {}

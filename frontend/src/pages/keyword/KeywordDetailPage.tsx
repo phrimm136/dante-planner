@@ -7,23 +7,26 @@
  * Pattern Source: EGOGiftDetailPage.tsx
  */
 
-import { Link, useParams } from '@tanstack/react-router'
+import { useParams } from '@tanstack/react-router'
 import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { FormattedDescription } from '@/shared/gameText'
 import { DetailPageLayout } from '@/components/layout/DetailPageLayout'
-import { DetailPageSkeleton } from '@/components/feedback/DetailPageSkeleton'
 import { Skeleton } from '@/components/ui/skeleton'
+import { KeywordBacklinkList } from './components/KeywordBacklinkList'
 import { KeywordCard } from './components/KeywordCard'
+import { KeywordDetailSkeleton } from './components/KeywordDetailSkeleton'
 import { useKeywordDetailSpec, useKeywordDetailI18n } from './hooks/useKeywordDetailData'
 import { useIdentityListI18n } from '@/pages/identity'
 import { useEGOListI18n } from '@/pages/ego'
 import { useEGOGiftListI18n } from '@/pages/egoGift'
 import { getSinnerFromId } from '@/shared/gameData'
 import colorCode from '@static/data/colorCode.json'
+import { SECTION_STYLES } from '@/lib/constants'
 
 const colorMap = colorCode as Record<string, string>
+const NEUTRAL_NAME_COLOR = colorCode.Neutral
 
 /**
  * Keyword name display with buffType color.
@@ -32,7 +35,7 @@ const colorMap = colorCode as Record<string, string>
  * Pattern Source: GiftNameI18n.tsx
  */
 function KeywordNameI18n({ id, buffType }: { id: string; buffType: string }) {
-  const nameColor = colorMap[buffType] ?? colorMap['Neutral']
+  const nameColor = colorMap[buffType] ?? NEUTRAL_NAME_COLOR
 
   return (
     <Suspense fallback={<Skeleton className="h-8 w-32" />}>
@@ -44,10 +47,26 @@ function KeywordNameI18n({ id, buffType }: { id: string; buffType: string }) {
 function KeywordNameContent({ id, nameColor }: { id: string; nameColor: string }) {
   const i18nData = useKeywordDetailI18n(id)
   return (
-    <h1 className="text-2xl font-bold" style={{ color: nameColor }}>
+    <h1 className={SECTION_STYLES.TEXT.pageTitle} style={{ color: nameColor }}>
       {i18nData?.name ?? id}
     </h1>
   )
+}
+
+/**
+ * Entry label for backlinks to sinner-owned entities: name, then the sinner.
+ */
+function useSinnerScopedLabel() {
+  const { t } = useTranslation('sinnerNames')
+
+  return (id: string, name: string) => {
+    const sinnerKey = getSinnerFromId(id)
+    return (
+      <>
+        {name.replace(/\n/g, ' ')} - {t(sinnerKey, { defaultValue: sinnerKey })}
+      </>
+    )
+  }
 }
 
 /**
@@ -55,38 +74,17 @@ function KeywordNameContent({ id, nameColor }: { id: string; nameColor: string }
  * Internal Suspense for independent language switching.
  */
 function KeywordRelatedIdentities({ ids }: { ids: string[] }) {
-  const { t } = useTranslation(['database', 'sinnerNames'])
-  const nameList = useIdentityListI18n()
+  const names = useIdentityListI18n()
+  const formatLabel = useSinnerScopedLabel()
 
   return (
-    <div className="space-y-1.5">
-      <div className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
-        {t('keyword.relatedIdentities', { ns: 'database' })}
-      </div>
-      {ids.length === 0 ? (
-        <div className="text-sm text-muted-foreground/60">-</div>
-      ) : (
-        <div className="text-sm">
-          {ids.map((entityId, idx) => {
-            const sinnerKey = getSinnerFromId(entityId)
-            const sinnerName = t(`${sinnerKey}`, { ns: 'sinnerNames', defaultValue: sinnerKey })
-            const identityName = (nameList[entityId] ?? entityId).replace(/\n/g, ' ')
-            return (
-              <span key={entityId}>
-                {idx > 0 && ', '}
-                <Link
-                  to="/identity/$id"
-                  params={{ id: entityId }}
-                  className="hover:underline text-foreground"
-                >
-                  {identityName} - {sinnerName}
-                </Link>
-              </span>
-            )
-          })}
-        </div>
-      )}
-    </div>
+    <KeywordBacklinkList
+      labelKey="keyword.relatedIdentities"
+      ids={ids}
+      names={names}
+      to="/identity/$id"
+      formatLabel={formatLabel}
+    />
   )
 }
 
@@ -95,38 +93,17 @@ function KeywordRelatedIdentities({ ids }: { ids: string[] }) {
  * Internal Suspense for independent language switching.
  */
 function KeywordRelatedEgos({ ids }: { ids: string[] }) {
-  const { t } = useTranslation(['database', 'sinnerNames'])
-  const nameList = useEGOListI18n()
+  const names = useEGOListI18n()
+  const formatLabel = useSinnerScopedLabel()
 
   return (
-    <div className="space-y-1.5">
-      <div className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
-        {t('keyword.relatedEgos', { ns: 'database' })}
-      </div>
-      {ids.length === 0 ? (
-        <div className="text-sm text-muted-foreground/60">-</div>
-      ) : (
-        <div className="text-sm">
-          {ids.map((entityId, idx) => {
-            const sinnerKey = getSinnerFromId(entityId)
-            const sinnerName = t(`${sinnerKey}`, { ns: 'sinnerNames', defaultValue: sinnerKey })
-            const egoName = (nameList[entityId] ?? entityId).replace(/\n/g, ' ')
-            return (
-              <span key={entityId}>
-                {idx > 0 && ', '}
-                <Link
-                  to="/ego/$id"
-                  params={{ id: entityId }}
-                  className="hover:underline text-foreground"
-                >
-                  {egoName} - {sinnerName}
-                </Link>
-              </span>
-            )
-          })}
-        </div>
-      )}
-    </div>
+    <KeywordBacklinkList
+      labelKey="keyword.relatedEgos"
+      ids={ids}
+      names={names}
+      to="/ego/$id"
+      formatLabel={formatLabel}
+    />
   )
 }
 
@@ -135,33 +112,15 @@ function KeywordRelatedEgos({ ids }: { ids: string[] }) {
  * Internal Suspense for independent language switching.
  */
 function KeywordRelatedEgoGifts({ ids }: { ids: string[] }) {
-  const { t } = useTranslation('database')
-  const nameList = useEGOGiftListI18n()
+  const names = useEGOGiftListI18n()
 
   return (
-    <div className="space-y-1.5">
-      <div className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
-        {t('keyword.relatedEgoGifts')}
-      </div>
-      {ids.length === 0 ? (
-        <div className="text-sm text-muted-foreground/60">-</div>
-      ) : (
-        <div className="text-sm">
-          {ids.map((entityId, idx) => (
-            <span key={entityId}>
-              {idx > 0 && ', '}
-              <Link
-                to="/ego-gift/$id"
-                params={{ id: entityId }}
-                className="hover:underline text-foreground"
-              >
-                {nameList[entityId] ?? entityId}
-              </Link>
-            </span>
-          ))}
-        </div>
-      )}
-    </div>
+    <KeywordBacklinkList
+      labelKey="keyword.relatedEgoGifts"
+      ids={ids}
+      names={names}
+      to="/ego-gift/$id"
+    />
   )
 }
 
@@ -175,13 +134,13 @@ function KeywordDescriptionContent({ id }: { id: string }) {
 
   return (
     <div className="border rounded p-4 space-y-3">
-      <h2 className="text-lg font-semibold">{t('keyword.description')}</h2>
+      <h2 className={SECTION_STYLES.TEXT.sectionTitle}>{t('keyword.description')}</h2>
       {i18nData?.desc ? (
         <div className="text-sm leading-relaxed">
           <FormattedDescription text={i18nData.desc} />
         </div>
       ) : (
-        <div className="text-sm text-muted-foreground">-</div>
+        <div className={SECTION_STYLES.TEXT.caption}>-</div>
       )}
     </div>
   )
@@ -264,7 +223,7 @@ function KeywordDetailContent() {
  */
 export default function KeywordDetailPage() {
   return (
-    <Suspense fallback={<DetailPageSkeleton preset="keyword" />}>
+    <Suspense fallback={<KeywordDetailSkeleton />}>
       <KeywordDetailContent />
     </Suspense>
   )

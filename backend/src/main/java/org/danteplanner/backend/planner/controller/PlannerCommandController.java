@@ -2,15 +2,15 @@ package org.danteplanner.backend.planner.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.DeviceId;
-import org.danteplanner.backend.shared.config.RateLimitConfig;
+import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.planner.dto.ImportPlannersRequest;
 import org.danteplanner.backend.planner.dto.ImportPlannersResponse;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.dto.UpsertResult;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
+import org.danteplanner.backend.shared.ratelimit.RateLimited;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -34,11 +34,9 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/planner/md")
-@Slf4j
 public class PlannerCommandController {
 
     private final PlannerCommandService plannerCommandService;
-    private final RateLimitConfig rateLimitConfig;
 
     /**
      * Upsert a planner (create if not exists, update if exists).
@@ -52,6 +50,7 @@ public class PlannerCommandController {
      * @param request  the planner data (full data for create, partial updates supported)
      * @return the created (201) or updated (200) planner
      */
+    @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "upsert")
     @PutMapping("/{id}")
     public ResponseEntity<PlannerResponse> upsertPlanner(
             @AuthenticationPrincipal Long userId,
@@ -60,8 +59,6 @@ public class PlannerCommandController {
             @Valid @RequestBody UpsertPlannerRequest request,
             @RequestParam(required = false, defaultValue = "false") boolean force) {
 
-        rateLimitConfig.checkCrudLimit(userId, "upsert");
-        log.info("Upserting planner {} for user {}, force={}", id, userId, force);
         UpsertResult result = plannerCommandService.upsertPlanner(userId, deviceId, id, request, force);
 
         HttpStatus status = result.isCreated() ? HttpStatus.CREATED : HttpStatus.OK;
@@ -72,19 +69,16 @@ public class PlannerCommandController {
      * Delete a planner (soft delete).
      *
      * @param userId   the authenticated user ID
-     * @param deviceId the device identifier (from HTTP-only cookie)
      * @param id       the planner ID
      * @return no content
      */
+    @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "delete")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePlanner(
             @AuthenticationPrincipal Long userId,
-            @DeviceId UUID deviceId,
             @PathVariable UUID id) {
 
-        rateLimitConfig.checkCrudLimit(userId, "delete");
-        log.info("Deleting planner {} for user {}", id, userId);
-        plannerCommandService.deletePlanner(userId, deviceId, id);
+        plannerCommandService.deletePlanner(userId, id);
         return ResponseEntity.noContent().build();
     }
 
@@ -97,13 +91,12 @@ public class PlannerCommandController {
      * @param request the import request containing planners
      * @return the import result
      */
+    @RateLimited(RateLimitPolicy.IMPORT)
     @PostMapping("/import")
     public ResponseEntity<ImportPlannersResponse> importPlanners(
             @AuthenticationPrincipal Long userId,
             @Valid @RequestBody ImportPlannersRequest request) {
 
-        rateLimitConfig.checkImportLimit(userId);
-        log.info("Importing {} planners for user {}", request.planners().size(), userId);
         ImportPlannersResponse response = plannerCommandService.importPlanners(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

@@ -45,7 +45,7 @@ Monorepo: `frontend/` (React 19 + TypeScript, Vite), `backend/` (Spring Boot 3.5
 
 All traffic enters through the Cloudflare edge and AWS Global Accelerator, which routes each user to the nearest of two k3s clusters (Oregon primary, Seoul) running Spring behind Traefik. Data follows a read-local / write-global topology: MySQL on RDS (Multi-AZ primary in Oregon, Seoul read replica) with a causal-consistency read path — GTID read-your-own-write gate, primary re-check on replica miss over a bulkhead pool, and Redis content tombstones for deletes. Deploys are GitOps: CI builds the arm64 image once, pushes to both regional ECRs, and commits the image-tag bump that each region's ArgoCD syncs. Monitored with CloudWatch, Sentry, and per-region Prometheus.
 
-Design decisions and mechanics live in [`docs/tasks/034-multi-region-k8s-architecture/`](docs/tasks/034-multi-region-k8s-architecture/).
+Planned: multi-region k3s with a causal-consistency read path — lives in [`docs/adr/`](docs/adr/).
 
 ## Testing
 

@@ -1,0 +1,11 @@
+id: no-bare-toast-tsx
+language: Tsx
+severity: error
+message: A bare toast.error/toast.success/toast.warning bypasses error classification and the opt-in support hint; call showError, showAppError, showErrorMessage, showSuccess or showWarning from lib/errorPresentation.
+files:
+  - src/**/*.tsx
+rule:
+  any:
+    - pattern: toast.error($$$ARGS)
+    - pattern: toast.success($$$ARGS)
+    - pattern: toast.warning($$$ARGS)

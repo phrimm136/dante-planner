@@ -6,6 +6,7 @@ import org.danteplanner.backend.shared.security.CustomAuthenticationEntryPoint;
 import org.danteplanner.backend.shared.security.JwtAuthenticationFilter;
 import org.danteplanner.backend.shared.security.MdcLoggingFilter;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
@@ -16,6 +17,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 
 import jakarta.servlet.DispatcherType;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -28,6 +30,32 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final MdcLoggingFilter mdcLoggingFilter;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+
+    /**
+     * Prevents Spring Boot from auto-registering CsrfDoubleSubmitFilter in the servlet container.
+     * Without this, the filter runs twice: once at the servlet level, ahead of the Spring Security
+     * chain and outside its ordering, and once inside it.
+     */
+    @Bean
+    public FilterRegistrationBean<CsrfDoubleSubmitFilter> csrfFilterRegistration(
+            CsrfDoubleSubmitFilter filter) {
+        FilterRegistrationBean<CsrfDoubleSubmitFilter> bean = new FilterRegistrationBean<>(filter);
+        bean.setEnabled(false);
+        return bean;
+    }
+
+    /**
+     * Prevents Spring Boot from auto-registering JwtAuthenticationFilter in the servlet container.
+     * Without this, the filter runs twice: once at the servlet level, where it authenticates ahead
+     * of the CSRF check that is meant to precede it, and once inside the Spring Security chain.
+     */
+    @Bean
+    public FilterRegistrationBean<JwtAuthenticationFilter> jwtFilterRegistration(
+            JwtAuthenticationFilter filter) {
+        FilterRegistrationBean<JwtAuthenticationFilter> bean = new FilterRegistrationBean<>(filter);
+        bean.setEnabled(false);
+        return bean;
+    }
 
     /**
      * Prevents Spring Boot from auto-registering MdcLoggingFilter in the servlet container.
@@ -71,22 +99,20 @@ public class SecurityConfig {
             // Authorization rules
             .authorizeHttpRequests(auth -> auth
                 // CORS preflight requests - must be allowed before other rules
-                .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                 // ASYNC dispatch (SSE continuations) - already authenticated on initial request
                 .dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll()
 
                 // Log out everywhere requires an authenticated session (must precede /api/auth/** permitAll)
-                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/auth/logout-all").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/auth/logout-all").authenticated()
 
                 // Public endpoints: OAuth callbacks, health checks
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers("/actuator/health/readiness").permitAll()
                 .requestMatchers("/actuator/health/liveness").permitAll()
                 .requestMatchers("/actuator/prometheus").permitAll()
-                .requestMatchers("/api/internal/**").permitAll()
 
                 // Public planner endpoints (no auth required for config and browsing)
                 .requestMatchers("/api/planner/md/config").permitAll()
@@ -95,13 +121,13 @@ public class SecurityConfig {
                 .requestMatchers("/api/planner/md/recommended").permitAll()
 
                 // Public user endpoints (association list for settings page)
-                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/user/associations").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/user/associations").permitAll()
 
                 // Public comment endpoints (reading comments on published planners)
-                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/planner/{plannerId}/comments").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/planner/{plannerId}/comments").permitAll()
 
                 // Public SSE for comment notifications (guests can subscribe)
-                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/planner/{plannerId}/comments/events").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/planner/{plannerId}/comments/events").permitAll()
 
                 // Role-protected endpoints (ADMIN > MODERATOR > NORMAL hierarchy)
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
@@ -122,7 +148,7 @@ public class SecurityConfig {
             // Security headers
             .headers(headers -> headers
                 .xssProtection(xss -> xss.headerValue(
-                    org.springframework.security.web.header.writers.XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK
+                    XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK
                 ))
                 .frameOptions(frame -> frame.deny())
                 // HSTS: Force HTTPS for 1 year, include subdomains

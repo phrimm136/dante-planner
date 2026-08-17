@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { AlertTriangle, X } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import { useAuthQuery } from '@/shared/auth'
-import { linkifyText } from '@/components/ui/LinkifyText'
+import { LinkifyText } from '@/components/ui/LinkifyText'
+import { useRestrictionStatus } from '../hooks/useRestrictionStatus'
 
 /**
  * Global banner displaying account suspension status (ban or timeout).
@@ -12,17 +12,14 @@ import { linkifyText } from '@/components/ui/LinkifyText'
  */
 export function BanStatusBanner() {
   const { t } = useTranslation(['common'])
-  const { data: user } = useAuthQuery()
+  const { isRestricted, reason } = useRestrictionStatus()
   const [isDismissed, setIsDismissed] = useState(false)
 
   // Only show if user is restricted and not dismissed
-  const isRestricted = user?.isBanned === true || user?.isTimedOut === true
   if (!isRestricted || isDismissed) {
     return null
   }
 
-  const isBanned = user.isBanned === true
-  const reason = isBanned ? user.banReason : user.timeoutReason
   const message = reason
     ? t('moderation.accountSuspended', { reason })
     : t('moderation.accountSuspendedNoReason')
@@ -33,7 +30,9 @@ export function BanStatusBanner() {
         <AlertTriangle className="h-5 w-5 flex-shrink-0" />
         <div className="text-sm">
           <p className="font-medium">{message}</p>
-          <p className="text-red-100 mt-1">{linkifyText(t('moderation.contactSupport'))}</p>
+          <p className="text-red-100 mt-1">
+            <LinkifyText text={t('moderation.contactSupport')} />
+          </p>
         </div>
       </div>
       <Button

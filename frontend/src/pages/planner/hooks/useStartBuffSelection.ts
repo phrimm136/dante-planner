@@ -19,7 +19,7 @@ export interface UseStartBuffSelectionResult {
   /** Buffs to display (base buffs with current enhancement level applied) */
   displayBuffs: StartBuff[]
   /** Handler for buff selection/deselection */
-  handleSelect: (buffId: number) => void
+  handleSelect: (buffId: number, selected: boolean) => void
 }
 
 /**
@@ -68,11 +68,9 @@ export function useStartBuffSelection(
     return displayBuff ?? baseBuff
   })
 
-  const handleSelect = (buffId: number) => {
+  const handleSelect = (buffId: number, selected: boolean) => {
     startTransition(() => {
-      const isDeselect = buffId < 0
-      const actualBuffId = Math.abs(buffId)
-      const baseId = getBaseIdFromBuffId(actualBuffId)
+      const baseId = getBaseIdFromBuffId(buffId)
 
       const newSelection = new Set(selectedBuffIds)
 
@@ -81,8 +79,8 @@ export function useStartBuffSelection(
         newSelection.delete(createBuffId(baseId, level as EnhancementLevel))
       }
 
-      if (!isDeselect) {
-        newSelection.add(actualBuffId)
+      if (selected) {
+        newSelection.add(buffId)
       }
 
       onSelectionChange(newSelection)

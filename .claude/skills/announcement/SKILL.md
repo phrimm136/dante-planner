@@ -69,6 +69,38 @@ In the input, `[[{category}:{name}]]` marks an in-game term. Find its id or inte
 
 **Trait example:** `[[trait:엄지]]` → search `plannerKeywords.json` for entry whose `"label"` is `엄지` → find key `AccelBullet` → look up `AccelBullet` in EN/JP/CN `plannerKeywords.json` → `엄지/The Thumb/親指/拇指`. (`거미집` → `SojiRyoshuEntangle` → `The House of Spiders/蜘蛛の巣/蜘蛛巢`.)
 
+### Identity / E.G.O name rendering
+
+Identity and E.G.O names in the i18n files store a faction line and a name line separated by `\n` (e.g., `The Middle\nBig Brother`). When rendering them in announcement text:
+
+1. **Replace the `\n` with a single space** — e.g., `중지 작은 형님`, `The Middle Big Brother`.
+2. **Append the corresponding Sinner's name** at the end, separated by a single space — multiple identities/E.G.Os share names across Sinners, and the trailing Sinner name tells readers immediately whose identity is being discussed.
+
+The Sinner is determined from the **2nd and 3rd digits** of the numeric id (applies to both identity ids like `10715` and E.G.O ids like `20909`):
+
+| Digits | Sinner (terms.csv `term_id`) |
+|---|---|
+| `01` | `YiSang` |
+| `02` | `Faust` |
+| `03` | `DonQuixote` |
+| `04` | `Ryoshu` |
+| `05` | `Meursault` |
+| `06` | `HongLu` |
+| `07` | `Heathcliff` |
+| `08` | `Ishmael` |
+| `09` | `Rodion` |
+| `10` | `Sinclair` |
+| `11` | `Outis` |
+| `12` | `Gregor` |
+
+Use the language-appropriate Sinner name from terms.csv.
+
+**Example:** `[[id:10715]]` → digits `07` → Heathcliff → i18n id name → render as `중지 작은 형님 히스클리프` (KR), `The Middle Big Brother Heathcliff` (EN), `中指 末兄 ヒースクリフ` (JP).
+
+### Missing CN translation fallback
+
+When the CN i18n file does not contain an entry for a referenced identity, E.G.O, or skill, fall back to the EN rendering verbatim in the CN announcement body. Do not invent a Chinese transliteration.
+
 ## Step 5 — Write All 5 Files
 
 Read each file before editing. JSON must remain valid (no trailing commas).

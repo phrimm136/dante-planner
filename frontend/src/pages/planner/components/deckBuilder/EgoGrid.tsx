@@ -1,4 +1,4 @@
-import { useMemo, type Ref } from 'react'
+import { memo, type Ref } from 'react'
 
 import { CARD_GRID } from '@/lib/constants'
 import { getSelectedIndicatorPath } from '@/shared/assets'
@@ -6,7 +6,7 @@ import { useDeckVisibleCount } from '../../stores/usePlannerEditorStore'
 import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
 import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { EGOCard } from '@/pages/ego'
-import { TierLevelSelector } from './TierLevelSelector'
+import { EgoThreadspinSelector } from './EntityTierSelectors'
 import type { EGOListItem } from '@/pages/ego'
 import type { ThreadspinTier } from '../../types/DeckTypes'
 
@@ -27,6 +27,10 @@ interface EgoGridProps {
  * Subscribes atomically to deckVisibleCount so rAF-driven progressive
  * ticks re-render only this component and its sibling IdentityGrid,
  * not the rest of the deck builder.
+ *
+ * The rows take the filter and equip sets whole and read their own entry, so a
+ * progressive tick — which changes neither — leaves every already-revealed card
+ * at zero.
  */
 export function EgoGrid({
   sortedEgos,
@@ -40,7 +44,7 @@ export function EgoGrid({
 }: EgoGridProps) {
   const visibleCount = useDeckVisibleCount()
 
-  const displayEgos = useMemo(() => sortedEgos.slice(0, visibleCount), [sortedEgos, visibleCount])
+  const displayEgos = sortedEgos.slice(0, visibleCount)
 
   return (
     <div className={isActive ? '' : 'hidden'}>
@@ -55,47 +59,78 @@ export function EgoGrid({
             mobileScale={0.8}
             gap={8}
           >
-            {displayEgos.map((ego) => {
-              const isSelected = equippedIds.has(ego.id)
-              const isVisible = visibleIds.has(ego.id)
-              return (
-                <div key={ego.id} className={isVisible ? '' : 'hidden'}>
-                  <TierLevelSelector
-                    mode="ego"
-                    entityId={ego.id}
-                    currentThreadspin={equippedThreadspinMap[ego.id] ?? ego.maxThreadspin}
-                    maxThreadspin={ego.maxThreadspin}
-                    isSelected={isSelected}
-                    egoType={ego.egoType}
-                    onConfirm={onEquip}
-                    onUnequip={onUnequip}
-                  >
-                    <ScaledCardWrapper
-                      mobileScale={0.8}
-                      cardWidth={CARD_GRID.WIDTH.EGO}
-                      cardHeight={CARD_GRID.HEIGHT.EGO}
-                    >
-                      <EGOCard
-                        ego={ego}
-                        isSelected={isSelected}
-                        overlay={
-                          isSelected ? (
-                            <img
-                              src={getSelectedIndicatorPath()}
-                              alt="Selected"
-                              className="absolute inset-0 m-auto w-28 object-contain pointer-events-none"
-                            />
-                          ) : undefined
-                        }
-                      />
-                    </ScaledCardWrapper>
-                  </TierLevelSelector>
-                </div>
-              )
-            })}
+            {displayEgos.map((ego) => (
+              <EgoGridCard
+                key={ego.id}
+                ego={ego}
+                visibleIds={visibleIds}
+                equippedIds={equippedIds}
+                equippedThreadspinMap={equippedThreadspinMap}
+                onEquip={onEquip}
+                onUnequip={onUnequip}
+              />
+            ))}
           </ResponsiveCardGrid>
         </div>
       </div>
     </div>
   )
 }
+
+interface EgoGridCardProps {
+  ego: EGOListItem
+  visibleIds: Set<string>
+  equippedIds: Set<string>
+  equippedThreadspinMap: Record<string, ThreadspinTier>
+  onEquip: (egoId: string, data: { threadspin?: ThreadspinTier }) => void
+  onUnequip: (egoId: string) => void
+}
+
+/**
+ * The compiler cannot cache an element built inside a `map`, so without `memo`
+ * every revealed card re-renders on every progressive tick.
+ */
+const EgoGridCard = memo(function EgoGridCard({
+  ego,
+  visibleIds,
+  equippedIds,
+  equippedThreadspinMap,
+  onEquip,
+  onUnequip,
+}: EgoGridCardProps) {
+  const isSelected = equippedIds.has(ego.id)
+  const isVisible = visibleIds.has(ego.id)
+
+  return (
+    <div className={isVisible ? '' : 'hidden'}>
+      <EgoThreadspinSelector
+        entityId={ego.id}
+        currentThreadspin={equippedThreadspinMap[ego.id] ?? ego.maxThreadspin}
+        maxThreadspin={ego.maxThreadspin}
+        isSelected={isSelected}
+        onConfirm={onEquip}
+        onUnequip={onUnequip}
+      >
+        <ScaledCardWrapper
+          mobileScale={0.8}
+          cardWidth={CARD_GRID.WIDTH.EGO}
+          cardHeight={CARD_GRID.HEIGHT.EGO}
+        >
+          <EGOCard
+            ego={ego}
+            isSelected={isSelected}
+            overlay={
+              isSelected ? (
+                <img
+                  src={getSelectedIndicatorPath()}
+                  alt="Selected"
+                  className="absolute inset-0 m-auto w-28 object-contain pointer-events-none"
+                />
+              ) : undefined
+            }
+          />
+        </ScaledCardWrapper>
+      </EgoThreadspinSelector>
+    </div>
+  )
+})

@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { EGOGiftIdSchema } from '@/shared/gameData'
 
 /**
  * EGO Gift Schemas
@@ -22,7 +23,7 @@ const tagArraySchema = z
 // Standard recipe: multiple recipe options, each with fixed ingredient IDs
 export const StandardRecipeSchema = z
   .object({
-    materials: z.array(z.array(z.number())),
+    materials: z.array(z.array(EGOGiftIdSchema)),
   })
   .strict()
 
@@ -30,8 +31,8 @@ export const StandardRecipeSchema = z
 export const MixedRecipeSchema = z
   .object({
     type: z.literal('mixed'),
-    a: z.object({ ids: z.array(z.number()), count: z.number() }).strict(),
-    b: z.object({ ids: z.array(z.number()), count: z.number() }).strict(),
+    a: z.object({ ids: z.array(EGOGiftIdSchema), count: z.number() }).strict(),
+    b: z.object({ ids: z.array(EGOGiftIdSchema), count: z.number() }).strict(),
   })
   .strict()
 
@@ -76,22 +77,6 @@ export const EGOGiftI18nSchema = z
     name: z.string(),
     descs: z.array(z.string()),
     obtain: z.string(),
-  })
-  .strict()
-
-// EGOGiftListItem schema - merged data for list view
-export const EGOGiftListItemSchema = z
-  .object({
-    id: z.string(),
-    name: z.string(),
-    tag: tagArraySchema,
-    keyword: z.string().nullable(),
-    attributeType: z.string(),
-    themePack: z.array(z.string()),
-    maxEnhancement: z.union([z.literal(0), z.literal(1), z.literal(2)]),
-    hardOnly: z.boolean().optional(),
-    extremeOnly: z.boolean().optional(),
-    fusioned: z.boolean().optional(),
   })
   .strict()
 

@@ -74,11 +74,11 @@ describe('AbEventDataSchema', () => {
           directEffects: [
             {
               effect: 'GetConfirmedEgogift',
-              reward: { type: 'EGO_GIFT', id: 9001, num: 1, prob: 1 },
+              reward: { type: 'EGO_GIFT', id: '9001', num: 1, prob: 1 },
             },
           ],
         },
-        { index: 1, nextEventId: 90100201 },
+        { index: 1, nextEventId: '90100201' },
       ],
     })
     expect(result.success).toBe(true)
@@ -88,7 +88,7 @@ describe('AbEventDataSchema', () => {
     const result = AbEventDataSchema.safeParse({
       canSkip: false,
       eventType: 'EVENT',
-      choices: [{ index: 0, nextEventId: 90100201 }],
+      choices: [{ index: 0, nextEventId: '90100201' }],
       selectionEvents: {
         '1': {
           canSkip: false,
@@ -105,7 +105,7 @@ describe('AbEventDataSchema', () => {
               effects: [
                 {
                   effect: 'GetConfirmedEgogift',
-                  reward: { type: 'EGO_GIFT', id: 9002, num: 1, prob: 1.0 },
+                  reward: { type: 'EGO_GIFT', id: '9002', num: 1, prob: 1.0 },
                 },
               ],
             },
@@ -213,7 +213,7 @@ describe('AbEventDataSchema', () => {
                 {
                   condition: 'Failed_Under3',
                   effects: [{ effect: 'LoseHpOnly_5' }],
-                  nextEventId: 901020,
+                  nextEventId: '901020',
                 },
                 { condition: 'Failed_NotLessThan3', effects: [{ effect: 'LoseHpOnly_10' }] },
               ],

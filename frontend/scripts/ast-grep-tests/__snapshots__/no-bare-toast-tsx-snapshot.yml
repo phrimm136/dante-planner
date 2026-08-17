@@ -1,0 +1,29 @@
+id: no-bare-toast-tsx
+snapshots:
+  ? |
+    const handler = () => {
+      mutate(vars, { onError: () => toast.error(t(failKey)) })
+    }
+  : labels:
+    - source: toast.error(t(failKey))
+      style: primary
+      start: 56
+      end: 79
+  toast.error(t('settings.deleteAccount.error')):
+    labels:
+    - source: toast.error(t('settings.deleteAccount.error'))
+      style: primary
+      start: 0
+      end: 46
+  'toast.success(t(''plannerTakedown.success'', { ns: ''moderation'' }))':
+    labels:
+    - source: 'toast.success(t(''plannerTakedown.success'', { ns: ''moderation'' }))'
+      style: primary
+      start: 0
+      end: 65
+  toast.warning(t('pages.plannerMD.publish.requiresHardMode')):
+    labels:
+    - source: toast.warning(t('pages.plannerMD.publish.requiresHardMode'))
+      style: primary
+      start: 0
+      end: 60

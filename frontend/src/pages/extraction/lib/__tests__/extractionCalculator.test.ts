@@ -11,7 +11,7 @@ import {
   getRateTableName,
   calculateRateForTarget,
   calculateSingleTargetProbability,
-  calculateMultiCopyProbability,
+  calculateAtLeastKHits,
   calculateMultiTargetProbability,
   calculatePityAdjustedProbability,
   calculateExpectedPulls,
@@ -24,6 +24,14 @@ import {
 } from '../extractionCalculator'
 import { EXTRACTION_RATES } from '../extractionRates'
 import type { ExtractionInput, ExtractionTarget } from '../../types/ExtractionTypes'
+
+function at<T>(items: readonly T[], index: number): T {
+  const item = items[index]
+  if (item === undefined) {
+    throw new Error(`expected an element at index ${index}, got ${items.length} element(s)`)
+  }
+  return item
+}
 
 describe('getEffectiveRates', () => {
   it('returns standard rates when no modifiers', () => {
@@ -177,23 +185,23 @@ describe('calculateSingleTargetProbability', () => {
   })
 })
 
-describe('calculateMultiCopyProbability', () => {
+describe('calculateAtLeastKHits', () => {
   describe('standard calculations', () => {
     it('returns same as single target for 1 copy', () => {
       const single = calculateSingleTargetProbability(100, 0.0145)
-      const multi = calculateMultiCopyProbability(100, 0.0145, 1)
+      const multi = calculateAtLeastKHits(100, 0.0145, 1)
       expect(multi).toBeCloseTo(single, 5)
     })
 
     it('returns lower probability for multiple copies', () => {
-      const oneCopy = calculateMultiCopyProbability(100, 0.0145, 1)
-      const twoCopies = calculateMultiCopyProbability(100, 0.0145, 2)
+      const oneCopy = calculateAtLeastKHits(100, 0.0145, 1)
+      const twoCopies = calculateAtLeastKHits(100, 0.0145, 2)
       expect(twoCopies).toBeLessThan(oneCopy)
     })
 
     it('calculates correctly for 2 copies at 100 pulls', () => {
       // This is more complex binomial calculation
-      const probability = calculateMultiCopyProbability(100, 0.0145, 2)
+      const probability = calculateAtLeastKHits(100, 0.0145, 2)
       expect(probability).toBeGreaterThan(0.3)
       expect(probability).toBeLessThan(0.5)
     })
@@ -201,27 +209,27 @@ describe('calculateMultiCopyProbability', () => {
 
   describe('edge cases', () => {
     it('returns 1 for 0 copies wanted (trivially satisfied)', () => {
-      expect(calculateMultiCopyProbability(100, 0.0145, 0)).toBe(1)
+      expect(calculateAtLeastKHits(100, 0.0145, 0)).toBe(1)
     })
 
     it('returns 0 for zero pulls when copies wanted', () => {
-      expect(calculateMultiCopyProbability(0, 0.0145, 1)).toBe(0)
+      expect(calculateAtLeastKHits(0, 0.0145, 1)).toBe(0)
     })
 
     it('returns 0 when pulls less than copies wanted', () => {
-      expect(calculateMultiCopyProbability(2, 0.0145, 3)).toBe(0)
+      expect(calculateAtLeastKHits(2, 0.0145, 3)).toBe(0)
     })
 
     it('returns 0 for zero rate when copies wanted', () => {
-      expect(calculateMultiCopyProbability(100, 0, 1)).toBe(0)
+      expect(calculateAtLeastKHits(100, 0, 1)).toBe(0)
     })
 
     it('returns 1 for 100% rate with enough pulls', () => {
-      expect(calculateMultiCopyProbability(10, 1, 5)).toBe(1)
+      expect(calculateAtLeastKHits(10, 1, 5)).toBe(1)
     })
 
     it('returns 0 for 100% rate with not enough pulls', () => {
-      expect(calculateMultiCopyProbability(3, 1, 5)).toBe(0)
+      expect(calculateAtLeastKHits(3, 1, 5)).toBe(0)
     })
   })
 })
@@ -498,7 +506,7 @@ describe('calculateExtraction', () => {
 
       const result = calculateExtraction(input)
       expect(result.targetResults).toHaveLength(1)
-      expect(result.targetResults[0].probability).toBeCloseTo(0.765, 2)
+      expect(at(result.targetResults, 0).probability).toBeCloseTo(0.765, 2)
     })
 
     it('returns 100% with pity for single target', () => {
@@ -513,8 +521,8 @@ describe('calculateExtraction', () => {
       }
 
       const result = calculateExtraction(input)
-      expect(result.targetResults[0].probability).toBe(1)
-      expect(result.targetResults[0].pityApplies).toBe(true)
+      expect(at(result.targetResults, 0).probability).toBe(1)
+      expect(at(result.targetResults, 0).pityApplies).toBe(true)
     })
   })
 
@@ -550,8 +558,8 @@ describe('calculateExtraction', () => {
 
       const result = calculateExtraction(input)
       // P(any) should be higher than each individual
-      expect(result.anyTargetProbability).toBeGreaterThan(result.targetResults[0].probability)
-      expect(result.anyTargetProbability).toBeGreaterThan(result.targetResults[1].probability)
+      expect(result.anyTargetProbability).toBeGreaterThan(at(result.targetResults, 0).probability)
+      expect(result.anyTargetProbability).toBeGreaterThan(at(result.targetResults, 1).probability)
     })
   })
 
@@ -573,7 +581,7 @@ describe('calculateExtraction', () => {
       // itemRate = 0.0145 / 3 ≈ 0.00483
       // P(collect specific item) = 1 - (1 - 0.00483)^100 ≈ 0.385
       // P(collect at least 1 of 3) = 1 - P(miss all 3) = 1 - (1-0.385)^3 ≈ 0.767
-      expect(result.targetResults[0].probability).toBeCloseTo(0.767, 2)
+      expect(at(result.targetResults, 0).probability).toBeCloseTo(0.767, 2)
     })
 
     it('calculates P(all 3 featured IDs) correctly', () => {
@@ -591,7 +599,7 @@ describe('calculateExtraction', () => {
       // "want all 3" = want each specific item at least once
       // P(collect specific item) ≈ 0.385
       // P(collect all 3) = 0.385^3 ≈ 0.057
-      expect(result.targetResults[0].probability).toBeCloseTo(0.057, 2)
+      expect(at(result.targetResults, 0).probability).toBeCloseTo(0.057, 2)
     })
   })
 
@@ -608,7 +616,7 @@ describe('calculateExtraction', () => {
       }
 
       const result = calculateExtraction(input)
-      expect(result.targetResults[0].probability).toBe(0)
+      expect(at(result.targetResults, 0).probability).toBe(0)
       expect(result.lunacyCost).toBe(0)
     })
 
@@ -624,7 +632,7 @@ describe('calculateExtraction', () => {
       }
 
       const result = calculateExtraction(input)
-      expect(result.targetResults[0].probability).toBe(1) // Already have it
+      expect(at(result.targetResults, 0).probability).toBe(1) // Already have it
     })
 
     it('handles very large pull counts (1000+) without overflow', () => {
@@ -639,8 +647,8 @@ describe('calculateExtraction', () => {
       }
 
       const result = calculateExtraction(input)
-      expect(result.targetResults[0].probability).toBeGreaterThan(0.999)
-      expect(result.targetResults[0].probability).toBeLessThanOrEqual(1)
+      expect(at(result.targetResults, 0).probability).toBeGreaterThan(0.999)
+      expect(at(result.targetResults, 0).probability).toBeLessThanOrEqual(1)
       expect(result.lunacyCost).toBe(130000)
     })
 
@@ -686,9 +694,9 @@ describe('calculateExtraction', () => {
       // - P(X ≥ 2) where X ~ Binomial(400, 0.013)
       // - Expected = 5.2 hits
       // - P(X ≥ 2) ≈ 96.7%
-      expect(result.targetResults[0].probability).toBeGreaterThan(0.95)
-      expect(result.targetResults[0].probability).toBeLessThanOrEqual(1)
-      expect(result.targetResults[0].pityApplies).toBe(true)
+      expect(at(result.targetResults, 0).probability).toBeGreaterThan(0.95)
+      expect(at(result.targetResults, 0).probability).toBeLessThanOrEqual(1)
+      expect(at(result.targetResults, 0).pityApplies).toBe(true)
     })
 
     it('calculates EGO without pity (비복원추출)', () => {
@@ -710,8 +718,8 @@ describe('calculateExtraction', () => {
       // P(X ≥ 4) where X ~ Binomial(100, 0.013)
       // Expected = 1.3 hits
       // This is quite low - around 2-5%
-      expect(result.targetResults[0].probability).toBeLessThan(0.1)
-      expect(result.targetResults[0].pityApplies).toBe(false)
+      expect(at(result.targetResults, 0).probability).toBeLessThan(0.1)
+      expect(at(result.targetResults, 0).pityApplies).toBe(false)
     })
 
     it('calculates correctly with 3+ pity triggers (600 pulls)', () => {
@@ -732,8 +740,8 @@ describe('calculateExtraction', () => {
 
       // With 3 pity covering 3 EGOs, need only 1 natural EGO hit
       // P(X ≥ 1) at 1.3% over 600 pulls is very high (~99.96%)
-      expect(result.targetResults[0].probability).toBeGreaterThan(0.99)
-      expect(result.targetResults[0].pityApplies).toBe(true)
+      expect(at(result.targetResults, 0).probability).toBeGreaterThan(0.99)
+      expect(at(result.targetResults, 0).pityApplies).toBe(true)
     })
 
     it('calculates correctly with 5 pity triggers (1000 pulls)', () => {
@@ -754,8 +762,8 @@ describe('calculateExtraction', () => {
 
       // With 5 pity but only 4 EGOs wanted, pity covers all 4
       // Should be 100% probability
-      expect(result.targetResults[0].probability).toBe(1)
-      expect(result.targetResults[0].pityApplies).toBe(true)
+      expect(at(result.targetResults, 0).probability).toBe(1)
+      expect(at(result.targetResults, 0).pityApplies).toBe(true)
     })
 
     it('calculates multiple announcers correctly (bug fix verification)', () => {
@@ -775,8 +783,8 @@ describe('calculateExtraction', () => {
       // itemRate = 0.013 / 2 = 0.0065
       // P(collect specific item) = 1 - (1 - 0.0065)^199 ≈ 0.727
       // P(collect both) = 0.727^2 ≈ 0.528
-      expect(result.targetResults[0].probability).toBeGreaterThan(0.5)
-      expect(result.targetResults[0].probability).toBeLessThan(0.6)
+      expect(at(result.targetResults, 0).probability).toBeGreaterThan(0.5)
+      expect(at(result.targetResults, 0).probability).toBeLessThan(0.6)
     })
 
     it('distributes pity correctly across multiple targets (bug fix verification)', () => {
@@ -846,7 +854,7 @@ describe('calculateCategoryDistribution', () => {
       const dist = calculateCategoryDistribution(100, 'ego', 1, 1, false)
       // dist = [P(0), P(1+)]
       expect(dist).toHaveLength(2)
-      expect(dist[0] + dist[1]).toBeCloseTo(1, 5) // Sum to 1
+      expect(at(dist, 0) + at(dist, 1)).toBeCloseTo(1, 5) // Sum to 1
       expect(dist[0]).toBeGreaterThan(0) // P(0) > 0
       expect(dist[1]).toBeGreaterThan(0) // P(1+) > 0
     })
@@ -855,7 +863,7 @@ describe('calculateCategoryDistribution', () => {
       const distStandard = calculateCategoryDistribution(100, 'ego', 1, 1, false)
       const distAllEgo = calculateCategoryDistribution(100, 'ego', 1, 1, true)
       // allEgoCollected doubles rate: 0.65% → 1.3%
-      expect(distAllEgo[1]).toBeGreaterThan(distStandard[1])
+      expect(at(distAllEgo, 1)).toBeGreaterThan(at(distStandard, 1))
     })
 
     it('returns distribution for multiple EGOs wanted', () => {
@@ -877,7 +885,7 @@ describe('calculateCategoryDistribution', () => {
       const dist = calculateCategoryDistribution(100, 'threeStarId', 1, 2, false)
       // dist = [P(0), P(1+)]
       expect(dist).toHaveLength(2)
-      expect(dist[0] + dist[1]).toBeCloseTo(1, 5)
+      expect(at(dist, 0) + at(dist, 1)).toBeCloseTo(1, 5)
     })
 
     it('returns distribution for all 2 IDs from 2 featured', () => {
@@ -887,7 +895,7 @@ describe('calculateCategoryDistribution', () => {
       const sum = dist.reduce((a, b) => a + b, 0)
       expect(sum).toBeCloseTo(1, 5)
       // P(2) should be less than P(1) for reasonable pulls
-      expect(dist[2]).toBeLessThan(dist[1])
+      expect(at(dist, 2)).toBeLessThan(at(dist, 1))
     })
 
     it('handles 3 IDs from 3 featured correctly', () => {
@@ -902,7 +910,7 @@ describe('calculateCategoryDistribution', () => {
     it('returns valid distribution for single announcer', () => {
       const dist = calculateCategoryDistribution(100, 'announcer', 1, 1, false)
       expect(dist).toHaveLength(2)
-      expect(dist[0] + dist[1]).toBeCloseTo(1, 5)
+      expect(at(dist, 0) + at(dist, 1)).toBeCloseTo(1, 5)
     })
 
     it('returns distribution for 2 announcers from 2 featured', () => {
@@ -1025,9 +1033,9 @@ describe('calculateSuccessiveTargetProbabilities', () => {
       )
 
       expect(result).toHaveLength(1)
-      expect(result[0].count).toBe(1)
-      expect(result[0].probability).toBeGreaterThan(0)
-      expect(result[0].probability).toBeLessThanOrEqual(1)
+      expect(at(result, 0).count).toBe(1)
+      expect(at(result, 0).probability).toBeGreaterThan(0)
+      expect(at(result, 0).probability).toBeLessThanOrEqual(1)
     })
 
     it('returns entries from n down to 1', () => {
@@ -1043,12 +1051,12 @@ describe('calculateSuccessiveTargetProbabilities', () => {
       )
 
       expect(result).toHaveLength(3)
-      expect(result[0].count).toBe(3) // P(3+)
-      expect(result[1].count).toBe(2) // P(2+)
-      expect(result[2].count).toBe(1) // P(1+)
+      expect(at(result, 0).count).toBe(3) // P(3+)
+      expect(at(result, 1).count).toBe(2) // P(2+)
+      expect(at(result, 2).count).toBe(1) // P(1+)
       // P(k+) should increase as k decreases
-      expect(result[0].probability).toBeLessThanOrEqual(result[1].probability)
-      expect(result[1].probability).toBeLessThanOrEqual(result[2].probability)
+      expect(at(result, 0).probability).toBeLessThanOrEqual(at(result, 1).probability)
+      expect(at(result, 1).probability).toBeLessThanOrEqual(at(result, 2).probability)
     })
   })
 
@@ -1068,13 +1076,13 @@ describe('calculateSuccessiveTargetProbabilities', () => {
 
       // Total items = 2 + 1 = 3
       expect(result).toHaveLength(3)
-      expect(result[0].count).toBe(3) // P(3+)
-      expect(result[1].count).toBe(2) // P(2+)
-      expect(result[2].count).toBe(1) // P(1+)
+      expect(at(result, 0).count).toBe(3) // P(3+)
+      expect(at(result, 1).count).toBe(2) // P(2+)
+      expect(at(result, 2).count).toBe(1) // P(1+)
 
       // Probabilities should be monotonically increasing as count decreases
       for (let i = 0; i < result.length - 1; i++) {
-        expect(result[i].probability).toBeLessThanOrEqual(result[i + 1].probability)
+        expect(at(result, i).probability).toBeLessThanOrEqual(at(result, i + 1).probability)
       }
     })
 
@@ -1094,8 +1102,8 @@ describe('calculateSuccessiveTargetProbabilities', () => {
 
       // Total items = 2 + 1 + 2 = 5
       expect(result).toHaveLength(5)
-      expect(result[0].count).toBe(5) // P(5+)
-      expect(result[4].count).toBe(1) // P(1+)
+      expect(at(result, 0).count).toBe(5) // P(5+)
+      expect(at(result, 4).count).toBe(1) // P(1+)
     })
   })
 
@@ -1124,9 +1132,9 @@ describe('calculateSuccessiveTargetProbabilities', () => {
       )
 
       // P(2+) with pity should be >= P(2+) without pity
-      expect(withPity[0].probability).toBeGreaterThanOrEqual(noPity[0].probability)
+      expect(at(withPity, 0).probability).toBeGreaterThanOrEqual(at(noPity, 0).probability)
       // P(1+) with pity should be >= P(1+) without pity
-      expect(withPity[1].probability).toBeGreaterThanOrEqual(noPity[1].probability)
+      expect(at(withPity, 1).probability).toBeGreaterThanOrEqual(at(noPity, 1).probability)
     })
 
     it('returns 100% when pity covers all items', () => {
@@ -1140,8 +1148,8 @@ describe('calculateSuccessiveTargetProbabilities', () => {
       )
 
       expect(result).toHaveLength(2)
-      expect(result[0].probability).toBe(1) // P(2+) = 100%
-      expect(result[1].probability).toBe(1) // P(1+) = 100%
+      expect(at(result, 0).probability).toBe(1) // P(2+) = 100%
+      expect(at(result, 1).probability).toBe(1) // P(1+) = 100%
     })
 
     it('handles partial pity coverage', () => {
@@ -1161,7 +1169,7 @@ describe('calculateSuccessiveTargetProbabilities', () => {
       // P(3+) with 1 pity = P(need 2+ naturally)
       // P(2+) with 1 pity = P(need 1+ naturally)
       // P(1+) with 1 pity = P(need 0+ naturally) = 100%
-      expect(result[2].probability).toBe(1)
+      expect(at(result, 2).probability).toBe(1)
     })
   })
 
@@ -1178,7 +1186,7 @@ describe('calculateSuccessiveTargetProbabilities', () => {
       )
 
       expect(result).toHaveLength(1)
-      expect(result[0].probability).toBe(1) // Pity covers it
+      expect(at(result, 0).probability).toBe(1) // Pity covers it
     })
 
     it('handles target with currentCopies partially fulfilled', () => {
@@ -1195,7 +1203,7 @@ describe('calculateSuccessiveTargetProbabilities', () => {
       )
 
       expect(result).toHaveLength(1) // Only 1 item needed
-      expect(result[0].count).toBe(1)
+      expect(at(result, 0).count).toBe(1)
     })
   })
 })
@@ -1319,9 +1327,9 @@ describe('calculateExtraction - successiveProbabilities and totalItemsWanted', (
 
       const result = calculateExtraction(input)
       expect(result.successiveProbabilities).toHaveLength(3)
-      expect(result.successiveProbabilities[0].count).toBe(3) // P(all 3)
-      expect(result.successiveProbabilities[1].count).toBe(2) // P(2+)
-      expect(result.successiveProbabilities[2].count).toBe(1) // P(1+)
+      expect(at(result.successiveProbabilities, 0).count).toBe(3) // P(all 3)
+      expect(at(result.successiveProbabilities, 1).count).toBe(2) // P(2+)
+      expect(at(result.successiveProbabilities, 2).count).toBe(1) // P(1+)
     })
 
     it('probabilities are monotonically increasing as count decreases', () => {
@@ -1343,8 +1351,8 @@ describe('calculateExtraction - successiveProbabilities and totalItemsWanted', (
       expect(result.successiveProbabilities).toHaveLength(5)
 
       for (let i = 0; i < result.successiveProbabilities.length - 1; i++) {
-        expect(result.successiveProbabilities[i].probability).toBeLessThanOrEqual(
-          result.successiveProbabilities[i + 1].probability,
+        expect(at(result.successiveProbabilities, i).probability).toBeLessThanOrEqual(
+          at(result.successiveProbabilities, i + 1).probability,
         )
       }
     })
@@ -1372,8 +1380,8 @@ describe('calculateExtraction - successiveProbabilities and totalItemsWanted', (
 
       // With pity, probabilities should be higher
       expect(withPityResult.pityCount).toBe(1)
-      expect(withPityResult.successiveProbabilities[0].probability).toBeGreaterThanOrEqual(
-        noPityResult.successiveProbabilities[0].probability,
+      expect(at(withPityResult.successiveProbabilities, 0).probability).toBeGreaterThanOrEqual(
+        at(noPityResult.successiveProbabilities, 0).probability,
       )
     })
 
@@ -1397,7 +1405,7 @@ describe('calculateExtraction - successiveProbabilities and totalItemsWanted', (
       }
 
       const result = calculateExtraction(input)
-      const pAllFromSuccessive = result.successiveProbabilities[0].probability
+      const pAllFromSuccessive = at(result.successiveProbabilities, 0).probability
 
       // Both should be valid probabilities in [0, 1]
       expect(pAllFromSuccessive).toBeGreaterThanOrEqual(0)

@@ -17,6 +17,7 @@ import java.time.ZoneOffset;
 import java.util.Base64;
 
 import static org.junit.jupiter.api.Assertions.*;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Unit tests for JwtTokenService.
@@ -62,7 +63,7 @@ class JwtTokenServiceTest {
     private static String decodePayload(String token) {
         String[] parts = token.split("\\.");
         assertEquals(3, parts.length, "JWT should have 3 parts");
-        return new String(Base64.getUrlDecoder().decode(parts[1]));
+        return new String(Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8);
     }
 
     @Nested
@@ -71,7 +72,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should contain correct claims")
-        void givenValidInput_whenGenerateAccessToken_thenContainsCorrectClaims() {
+        void givenValidInput_WhenGenerateAccessToken_ThenContainsCorrectClaims() {
             // Arrange
             Long userId = 123L;
 
@@ -82,7 +83,6 @@ class JwtTokenServiceTest {
             assertNotNull(token);
             TokenClaims claims = tokenService.validateToken(token);
             assertEquals(userId, claims.userId());
-            assertNull(claims.email());
             assertEquals(TokenClaims.TYPE_ACCESS, claims.type());
             assertEquals(UserRole.NORMAL, claims.role());
             assertTrue(claims.isAccessToken());
@@ -91,7 +91,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should have correct expiration time")
-        void givenValidInput_whenGenerateAccessToken_thenHasCorrectExpiration() {
+        void givenValidInput_WhenGenerateAccessToken_ThenHasCorrectExpiration() {
             // Arrange
             Long userId = 123L;
 
@@ -117,7 +117,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should set issuedAt timestamp")
-        void givenValidInput_whenGenerateAccessToken_thenSetsIssuedAt() {
+        void givenValidInput_WhenGenerateAccessToken_ThenSetsIssuedAt() {
             // Arrange
             Long userId = 123L;
             long beforeGeneration = System.currentTimeMillis();
@@ -142,7 +142,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should contain correct claims")
-        void givenValidInput_whenGenerateRefreshToken_thenContainsCorrectClaims() {
+        void givenValidInput_WhenGenerateRefreshToken_ThenContainsCorrectClaims() {
             // Arrange
             Long userId = 456L;
 
@@ -153,7 +153,6 @@ class JwtTokenServiceTest {
             assertNotNull(token);
             TokenClaims claims = tokenService.validateToken(token);
             assertEquals(userId, claims.userId());
-            assertNull(claims.email());
             assertEquals(TokenClaims.TYPE_REFRESH, claims.type());
             assertTrue(claims.isRefreshToken());
             assertFalse(claims.isAccessToken());
@@ -161,7 +160,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should have longer expiration than access token")
-        void givenAccessAndRefreshTokens_whenCompareExpiration_thenRefreshLonger() {
+        void givenAccessAndRefreshTokens_WhenCompareExpiration_ThenRefreshLonger() {
             // Arrange
             Long userId = 123L;
 
@@ -184,7 +183,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Refresh token via overload carries jti, family_id, parent_jti")
-        void givenFamilyAndParent_whenGenerateRefreshToken_thenCarriesAllLineageClaims() {
+        void givenFamilyAndParent_WhenGenerateRefreshToken_ThenCarriesAllLineageClaims() {
             Long userId = 111L;
             String familyId = "fam-123";
             String parentJti = "parent-jti-456";
@@ -199,7 +198,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Refresh token via login signature carries jti and family_id, parent_jti null")
-        void givenLoginSignature_whenGenerateRefreshToken_thenCarriesJtiAndFamilyButNoParent() {
+        void givenLoginSignature_WhenGenerateRefreshToken_ThenCarriesJtiAndFamilyButNoParent() {
             String token = tokenService.generateRefreshToken(222L);
 
             TokenClaims claims = tokenService.validateToken(token);
@@ -210,7 +209,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Access token carries no lineage claims")
-        void givenAccessToken_whenValidate_thenLineageClaimsNull() {
+        void givenAccessToken_WhenValidate_ThenLineageClaimsNull() {
             String token = tokenService.generateAccessToken(333L, UserRole.NORMAL);
 
             TokenClaims claims = tokenService.validateToken(token);
@@ -226,7 +225,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should return claims for valid token")
-        void givenValidToken_whenValidate_thenReturnsClaims() {
+        void givenValidToken_WhenValidate_ThenReturnsClaims() {
             // Arrange
             Long userId = 789L;
             String token = tokenService.generateAccessToken(userId, UserRole.MODERATOR);
@@ -237,14 +236,13 @@ class JwtTokenServiceTest {
             // Assert
             assertNotNull(claims);
             assertEquals(userId, claims.userId());
-            assertNull(claims.email());
             assertNotNull(claims.issuedAt());
             assertNotNull(claims.expiration());
         }
 
         @Test
         @DisplayName("Should throw for expired token")
-        void givenExpiredToken_whenValidate_thenThrowsInvalidTokenException() {
+        void givenExpiredToken_WhenValidate_ThenThrowsInvalidTokenException() {
             // Arrange - sign at t0, validate at a fixed clock past the access-token expiry
             Instant t0 = Instant.parse("2025-01-01T00:00:00Z");
             JwtTokenService signer = new JwtTokenService(jwtProperties, Clock.fixed(t0, ZoneOffset.UTC));
@@ -263,7 +261,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should throw for invalid signature")
-        void givenInvalidSignature_whenValidate_thenThrowsInvalidTokenException() throws Exception {
+        void givenInvalidSignature_WhenValidate_ThenThrowsInvalidTokenException() throws Exception {
             // Arrange - create token with different RSA keypair
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
             keyPairGenerator.initialize(2048);
@@ -289,7 +287,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should throw for malformed token")
-        void givenMalformedToken_whenValidate_thenThrowsInvalidTokenException() {
+        void givenMalformedToken_WhenValidate_ThenThrowsInvalidTokenException() {
             // Arrange
             String malformedToken = "not.a.valid.jwt.token";
 
@@ -303,7 +301,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should throw for completely invalid token")
-        void givenGarbageData_whenValidate_thenThrowsInvalidTokenException() {
+        void givenGarbageData_WhenValidate_ThenThrowsInvalidTokenException() {
             // Arrange
             String invalidToken = "garbage-data";
 
@@ -317,7 +315,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should throw MALFORMED for non-numeric subject")
-        void givenNonNumericSubject_whenValidate_thenThrowsMalformed() {
+        void givenNonNumericSubject_WhenValidate_ThenThrowsMalformed() {
             // Arrange - sign a token whose subject is not a numeric userId
             String token = io.jsonwebtoken.Jwts.builder()
                     .subject("not-a-number")
@@ -337,7 +335,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should throw MISSING_CLAIMS for absent subject")
-        void givenAbsentSubject_whenValidate_thenThrowsMissingClaims() {
+        void givenAbsentSubject_WhenValidate_ThenThrowsMissingClaims() {
             // Arrange - sign a token with no subject
             String token = io.jsonwebtoken.Jwts.builder()
                     .claim("type", TokenClaims.TYPE_ACCESS)
@@ -356,12 +354,147 @@ class JwtTokenServiceTest {
     }
 
     @Nested
+    @DisplayName("Neutral validateToken Type-Agnostic Characterization (B8)")
+    class NeutralValidateTokenTypeAgnosticTests {
+
+        @Test
+        @DisplayName("Neutral validateToken returns claims for an access token")
+        void validateToken_WhenAccessToken_ReturnsClaimsWithAccessType() {
+            // B8 preserved: neutral parser accepts any validly-signed unexpired JWT regardless of type
+            String token = tokenService.generateAccessToken(555L, UserRole.NORMAL);
+
+            TokenClaims claims = tokenService.validateToken(token);
+
+            assertNotNull(claims);
+            assertEquals(555L, claims.userId());
+            assertEquals(TokenClaims.TYPE_ACCESS, claims.type());
+        }
+
+        @Test
+        @DisplayName("Neutral validateToken returns claims for a refresh token")
+        void validateToken_WhenRefreshToken_ReturnsClaimsWithRefreshType() {
+            // B8 preserved: neutral parser (backs getTokenType) still accepts refresh tokens
+            String token = tokenService.generateRefreshToken(555L);
+
+            TokenClaims claims = tokenService.validateToken(token);
+
+            assertNotNull(claims);
+            assertEquals(555L, claims.userId());
+            assertEquals(TokenClaims.TYPE_REFRESH, claims.type());
+        }
+    }
+
+    @Nested
+    @DisplayName("Typed Validator Type Enforcement (S1-S5 + Acceptance)")
+    class TypedValidatorTypeEnforcementTests {
+
+        @Test
+        @DisplayName("S1: validateAccessToken accepts an access token and returns its claims")
+        void validateAccessToken_WhenAccessToken_ReturnsClaims() {
+            String token = tokenService.generateAccessToken(1001L, UserRole.NORMAL);
+
+            TokenClaims claims = tokenService.validateAccessToken(token);
+
+            assertNotNull(claims);
+            assertEquals(1001L, claims.userId());
+            assertEquals(TokenClaims.TYPE_ACCESS, claims.type());
+        }
+
+        @Test
+        @DisplayName("S2: validateAccessToken rejects a refresh token with INVALID_TYPE")
+        void validateAccessToken_WhenRefreshToken_ThrowsInvalidType() {
+            String token = tokenService.generateRefreshToken(1002L);
+
+            InvalidTokenException exception = assertThrows(
+                    InvalidTokenException.class,
+                    () -> tokenService.validateAccessToken(token)
+            );
+            assertEquals(InvalidTokenException.Reason.INVALID_TYPE, exception.getReason());
+        }
+
+        @Test
+        @DisplayName("S3: validateRefreshToken accepts a refresh token and returns its claims")
+        void validateRefreshToken_WhenRefreshToken_ReturnsClaims() {
+            String token = tokenService.generateRefreshToken(1003L);
+
+            TokenClaims claims = tokenService.validateRefreshToken(token);
+
+            assertNotNull(claims);
+            assertEquals(1003L, claims.userId());
+            assertEquals(TokenClaims.TYPE_REFRESH, claims.type());
+        }
+
+        @Test
+        @DisplayName("S4: validateRefreshToken rejects an access token with INVALID_TYPE")
+        void validateRefreshToken_WhenAccessToken_ThrowsInvalidType() {
+            String token = tokenService.generateAccessToken(1004L, UserRole.NORMAL);
+
+            InvalidTokenException exception = assertThrows(
+                    InvalidTokenException.class,
+                    () -> tokenService.validateRefreshToken(token)
+            );
+            assertEquals(InvalidTokenException.Reason.INVALID_TYPE, exception.getReason());
+        }
+
+        @Test
+        @DisplayName("S5 (INV4): generated tokens round-trip through their matching typed validator")
+        void typedValidators_WhenGeneratedTokens_RoundTripWithCorrectClaims() {
+            String accessToken = tokenService.generateAccessToken(1005L, UserRole.NORMAL);
+            String refreshToken = tokenService.generateRefreshToken(1005L);
+
+            TokenClaims accessClaims = tokenService.validateAccessToken(accessToken);
+            TokenClaims refreshClaims = tokenService.validateRefreshToken(refreshToken);
+
+            assertEquals(1005L, accessClaims.userId());
+            assertEquals(TokenClaims.TYPE_ACCESS, accessClaims.type());
+            assertEquals(1005L, refreshClaims.userId());
+            assertEquals(TokenClaims.TYPE_REFRESH, refreshClaims.type());
+        }
+
+        @Test
+        @DisplayName("ACCEPTANCE: wrong-type token maps to INVALID_TYPE, not MALFORMED")
+        void acceptance_WhenWrongTypeToken_MapsToInvalidTypeNotMalformed() {
+            String refreshToken = tokenService.generateRefreshToken(2001L);
+
+            InvalidTokenException exception = assertThrows(
+                    InvalidTokenException.class,
+                    () -> tokenService.validateAccessToken(refreshToken)
+            );
+            assertEquals(InvalidTokenException.Reason.INVALID_TYPE, exception.getReason());
+            assertNotEquals(InvalidTokenException.Reason.MALFORMED, exception.getReason());
+        }
+
+        @Test
+        @DisplayName("Typed validators reject a token with no type claim as INVALID_TYPE, not MALFORMED")
+        void typedValidators_WhenTypeClaimAbsent_ThrowInvalidType() {
+            String token = io.jsonwebtoken.Jwts.builder()
+                    .subject("3001")
+                    .issuedAt(new java.util.Date())
+                    .expiration(new java.util.Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRY))
+                    .signWith(testKeyPair.getPrivate(), io.jsonwebtoken.SignatureAlgorithm.RS256)
+                    .compact();
+
+            InvalidTokenException accessException = assertThrows(
+                    InvalidTokenException.class,
+                    () -> tokenService.validateAccessToken(token)
+            );
+            assertEquals(InvalidTokenException.Reason.INVALID_TYPE, accessException.getReason());
+
+            InvalidTokenException refreshException = assertThrows(
+                    InvalidTokenException.class,
+                    () -> tokenService.validateRefreshToken(token)
+            );
+            assertEquals(InvalidTokenException.Reason.INVALID_TYPE, refreshException.getReason());
+        }
+    }
+
+    @Nested
     @DisplayName("getUserIdFromToken Tests")
     class GetUserIdFromTokenTests {
 
         @Test
         @DisplayName("Should return userId from valid token")
-        void givenValidToken_whenGetUserId_thenReturnsUserId() {
+        void givenValidToken_WhenGetUserId_ThenReturnsUserId() {
             // Arrange
             Long expectedUserId = 42L;
             String token = tokenService.generateAccessToken(expectedUserId, UserRole.NORMAL);
@@ -375,7 +508,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should throw for invalid token")
-        void givenInvalidToken_whenGetUserId_thenThrowsInvalidTokenException() {
+        void givenInvalidToken_WhenGetUserId_ThenThrowsInvalidTokenException() {
             // Arrange
             String invalidToken = "invalid.token";
 
@@ -393,7 +526,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should return false for valid non-expired token")
-        void givenValidToken_whenCheckExpired_thenReturnsFalse() {
+        void givenValidToken_WhenCheckExpired_ThenReturnsFalse() {
             // Arrange
             String token = tokenService.generateAccessToken(123L, UserRole.NORMAL);
 
@@ -406,7 +539,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should return true for expired token")
-        void givenExpiredToken_whenCheckExpired_thenReturnsTrue() {
+        void givenExpiredToken_WhenCheckExpired_ThenReturnsTrue() {
             // Arrange - sign at t0, check with a fixed clock past the access-token expiry
             Instant t0 = Instant.parse("2025-01-01T00:00:00Z");
             JwtTokenService signer = new JwtTokenService(jwtProperties, Clock.fixed(t0, ZoneOffset.UTC));
@@ -424,7 +557,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should return true for invalid token")
-        void givenInvalidToken_whenCheckExpired_thenReturnsTrue() {
+        void givenInvalidToken_WhenCheckExpired_ThenReturnsTrue() {
             // Arrange
             String invalidToken = "invalid.jwt.token";
 
@@ -442,7 +575,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should return 'access' for access token")
-        void givenAccessToken_whenGetType_thenReturnsAccess() {
+        void givenAccessToken_WhenGetType_ThenReturnsAccess() {
             // Arrange
             String token = tokenService.generateAccessToken(123L, UserRole.ADMIN);
 
@@ -455,7 +588,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should return 'refresh' for refresh token")
-        void givenRefreshToken_whenGetType_thenReturnsRefresh() {
+        void givenRefreshToken_WhenGetType_ThenReturnsRefresh() {
             // Arrange
             String token = tokenService.generateRefreshToken(123L);
 
@@ -473,7 +606,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Access token sub is the numeric userId in plaintext, no email, no enc")
-        void givenAccessToken_whenInspectPayload_thenSubIsUserIdAndNoEmailOrEnc() {
+        void givenAccessToken_WhenInspectPayload_ThenSubIsUserIdAndNoEmailOrEnc() {
             // Arrange
             String token = tokenService.generateAccessToken(12345L, UserRole.ADMIN);
 
@@ -490,7 +623,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Refresh token sub is userId, carries lineage claims, no email, no enc")
-        void givenRefreshToken_whenInspectPayload_thenSubIsUserIdAndNoEmailOrEnc() {
+        void givenRefreshToken_WhenInspectPayload_ThenSubIsUserIdAndNoEmailOrEnc() {
             // Arrange
             String token = tokenService.generateRefreshToken(67890L, "fam-1", "parent-jti");
 

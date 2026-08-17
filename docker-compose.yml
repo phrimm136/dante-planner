@@ -30,7 +30,6 @@ services:
       GOOGLE_OAUTH_CLIENT_ID: ${GOOGLE_OAUTH_CLIENT_ID}
       GOOGLE_OAUTH_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET}
       TRUSTED_PROXY_IPS: ${TRUSTED_PROXY_IPS}
-      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-}
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
       SENTRY_DSN: ${SENTRY_DSN:-}
       AUTH_REDIS_HOST: ${AUTH_REDIS_HOST:-redis-auth}
@@ -179,7 +178,7 @@ services:
 
 # Not mounted by any service — retained as the only copy of the pre-RDS prod
 # data (the rollback source). Do NOT `docker compose down -v` or prune it; see
-# docs/tasks/030-rds-migration/runbook.md (Zone 4) for the decommission gate.
+# docs/runbooks/rds-migration.md (Zone 4) for the decommission gate.
 volumes:
   mysql-data:
     driver: local

@@ -26,5 +26,4 @@ export const KeywordMatchSchema = z.record(z.string(), z.string())
 export const UnitKeywordsSchema = z.record(z.string(), z.string())
 
 // Type exports
-export type KeywordMatch = z.infer<typeof KeywordMatchSchema>
 export type UnitKeywords = z.infer<typeof UnitKeywordsSchema>

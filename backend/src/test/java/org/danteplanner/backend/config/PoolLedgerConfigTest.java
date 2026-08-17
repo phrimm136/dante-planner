@@ -18,7 +18,7 @@ class PoolLedgerConfigTest {
 
     @Test
     @DisplayName("INV9: Σ(primary-hitting pools) × max pods ≤ max_connections − reserve")
-    void poolLedger_whenSummedAcrossMaxPods_staysWithinConnectionBudget() {
+    void poolLedger_WhenSummedAcrossMaxPods_StaysWithinConnectionBudget() {
         int primaryHittingLoad =
                 (PoolLedger.OREGON_PRIMARY_POOL + PoolLedger.SEOUL_PRIMARY_POOL)
                         * PoolLedger.MAX_PODS_PER_ASG;
@@ -30,7 +30,7 @@ class PoolLedgerConfigTest {
 
     @Test
     @DisplayName("ledger values match mechanics §6 BINDING pool sizes")
-    void poolLedger_whenRead_matchesBindingPoolSizes() {
+    void poolLedger_WhenRead_MatchesBindingPoolSizes() {
         assertThat(PoolLedger.OREGON_PRIMARY_POOL).isEqualTo(15);
         assertThat(PoolLedger.SEOUL_PRIMARY_POOL).isEqualTo(10);
         assertThat(PoolLedger.SEOUL_REPLICA_POOL).isEqualTo(15);
@@ -38,7 +38,7 @@ class PoolLedgerConfigTest {
 
     @Test
     @DisplayName("INV9: Σ(primary-hitting pools including Seoul bulkhead) × max pods ≤ budget")
-    void poolLedger_whenBulkheadIncluded_staysWithinConnectionBudget() {
+    void poolLedger_WhenBulkheadIncluded_StaysWithinConnectionBudget() {
         int primaryHittingLoad =
                 (PoolLedger.OREGON_PRIMARY_POOL
                                 + PoolLedger.SEOUL_PRIMARY_POOL
@@ -52,7 +52,7 @@ class PoolLedgerConfigTest {
 
     @Test
     @DisplayName("bulkhead pool size matches mechanics §6 (isolation, not throughput)")
-    void poolLedger_whenReadBulkhead_matchesBindingPoolSize() {
+    void poolLedger_WhenReadBulkhead_MatchesBindingPoolSize() {
         assertThat(PoolLedger.BULKHEAD_POOL).isEqualTo(3);
     }
 }

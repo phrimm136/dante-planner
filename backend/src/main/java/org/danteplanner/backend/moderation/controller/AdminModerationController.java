@@ -5,27 +5,31 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.moderation.dto.HidePlannerRequest;
 import org.danteplanner.backend.moderation.dto.ModerationResponse;
-import org.danteplanner.backend.moderation.service.ModerationService;
+import org.danteplanner.backend.moderation.service.PlannerModerationService;
+import org.danteplanner.backend.shared.ratelimit.RateLimitExempt;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
 /**
  * REST controller for moderation operations.
  *
- * <p>Provides endpoints for moderators and admins to manage planner visibility
- * in the recommended list. All endpoints require ROLE_MODERATOR or ROLE_ADMIN.</p>
+ * <p>Manages planner visibility in the recommended list. The {@code /api/moderation/**} matcher in
+ * {@code SecurityConfig} requires MODERATOR, and the role hierarchy admits ADMIN through it.</p>
  */
 @RestController
-@RequestMapping("/api/admin/planner")
+@RequestMapping("/api/moderation/planner")
 @RequiredArgsConstructor
 @Slf4j
 public class AdminModerationController {
 
-    private final ModerationService moderationService;
+    private final PlannerModerationService plannerModerationService;
 
     /**
      * Hide a planner from the recommended list.
@@ -38,8 +42,8 @@ public class AdminModerationController {
      * @param request     the hide request containing reason
      * @return moderation response with updated status
      */
+    @RateLimitExempt
     @PostMapping("/{id}/hide-from-recommended")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     public ResponseEntity<ModerationResponse> hideFromRecommended(
             @AuthenticationPrincipal Long moderatorId,
             @PathVariable("id") UUID plannerId,
@@ -47,7 +51,7 @@ public class AdminModerationController {
 
         log.info("Moderator {} hiding planner {} from recommended (reason: {})",
                 moderatorId, plannerId, request.reason());
-        ModerationResponse response = moderationService.hideFromRecommended(plannerId, moderatorId, request);
+        ModerationResponse response = plannerModerationService.hideFromRecommended(plannerId, moderatorId, request);
         return ResponseEntity.ok(response);
     }
 
@@ -61,14 +65,14 @@ public class AdminModerationController {
      * @param plannerId   the planner ID to unhide
      * @return moderation response with updated status
      */
+    @RateLimitExempt
     @PostMapping("/{id}/unhide-from-recommended")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     public ResponseEntity<ModerationResponse> unhideFromRecommended(
             @AuthenticationPrincipal Long moderatorId,
             @PathVariable("id") UUID plannerId) {
 
         log.info("Moderator {} unhiding planner {} from recommended", moderatorId, plannerId);
-        ModerationResponse response = moderationService.unhideFromRecommended(plannerId, moderatorId);
+        ModerationResponse response = plannerModerationService.unhideFromRecommended(plannerId, moderatorId);
         return ResponseEntity.ok(response);
     }
 }

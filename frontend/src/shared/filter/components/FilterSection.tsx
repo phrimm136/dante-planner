@@ -1,7 +1,6 @@
 interface FilterSectionProps {
   title: string
   children: React.ReactNode
-  defaultExpanded?: boolean
   activeCount?: number
 }
 

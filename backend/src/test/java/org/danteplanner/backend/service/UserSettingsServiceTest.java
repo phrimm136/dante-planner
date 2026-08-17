@@ -1,12 +1,11 @@
 package org.danteplanner.backend.service;
 import org.danteplanner.backend.user.service.UserSettingsService;
 
-import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.user.dto.UpdateUserSettingsRequest;
 import org.danteplanner.backend.user.dto.UserSettingsResponse;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserSettings;
-import org.danteplanner.backend.user.exception.UserNotFoundException;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.repository.UserSettingsRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,7 +13,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -47,18 +45,12 @@ class UserSettingsServiceTest {
     void setUp() {
         userSettingsService = new UserSettingsService(userSettingsRepository, userRepository);
 
-        testUser = User.builder()
-                .id(123L)
-                .email("test@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-123")
-                .usernameEpithet("W_CORP")
-                .usernameSuffix("test1")
-                .build();
+        testUser = TestDataFactory.unsavedUser(123L);
 
         existingSettings = UserSettings.builder()
                 .user(testUser)
                 .syncEnabled(true)
+                .syncChoiceMade(true)
                 .notifyComments(true)
                 .notifyRecommendations(false)
                 .notifyNewPublications(false)
@@ -71,7 +63,7 @@ class UserSettingsServiceTest {
 
         @Test
         @DisplayName("Should return existing settings when found")
-        void getSettings_existingSettings_returnsSettings() {
+        void getSettings_WhenExistingSettings_ReturnsSettings() {
             // Arrange
             when(userSettingsRepository.findByUserId(testUser.getId()))
                     .thenReturn(Optional.of(existingSettings));
@@ -81,66 +73,48 @@ class UserSettingsServiceTest {
 
             // Assert
             assertTrue(result.syncEnabled());
+            assertTrue(result.syncChoiceMade());
             assertTrue(result.notifyComments());
             assertFalse(result.notifyRecommendations());
             verify(userRepository, never()).findById(any());
         }
 
         @Test
-        @DisplayName("Should create default settings for new user (lazy creation)")
-        void getSettings_newUser_createsDefaultSettings() {
+        @DisplayName("Should return default settings without persisting for a missing row")
+        void getSettings_WhenNewUser_ReturnsDefaultsWithoutPersisting() {
             // Arrange
             when(userSettingsRepository.findByUserId(testUser.getId()))
                     .thenReturn(Optional.empty());
-            when(userRepository.findById(testUser.getId()))
-                    .thenReturn(Optional.of(testUser));
-
-            UserSettings savedSettings = UserSettings.builder()
-                    .user(testUser)
-                    .syncEnabled(null)
-                    .notifyComments(true)
-                    .notifyRecommendations(true)
-                    .notifyNewPublications(false)
-                    .build();
-            when(userSettingsRepository.save(any(UserSettings.class)))
-                    .thenReturn(savedSettings);
 
             // Act
             UserSettingsResponse result = userSettingsService.getSettings(testUser.getId());
 
             // Assert
-            assertNull(result.syncEnabled());
+            assertFalse(result.syncEnabled());
+            assertFalse(result.syncChoiceMade());
             assertTrue(result.notifyComments());
             assertTrue(result.notifyRecommendations());
             assertFalse(result.notifyNewPublications());
-
-            // Verify save was called with default values
-            ArgumentCaptor<UserSettings> captor = ArgumentCaptor.forClass(UserSettings.class);
-            verify(userSettingsRepository).save(captor.capture());
-            UserSettings captured = captor.getValue();
-            assertNull(captured.getSyncEnabled());
-            assertTrue(captured.isNotifyComments());
-            assertTrue(captured.isNotifyRecommendations());
-            assertFalse(captured.isNotifyNewPublications());
+            verify(userSettingsRepository, never()).insert(any());
         }
 
         @Test
-        @DisplayName("Should throw UserNotFoundException for non-existent user")
-        void getSettings_nonExistentUser_throwsException() {
+        @DisplayName("Should return default settings for a user with no settings row")
+        void getSettings_WhenNonExistentUser_ReturnsDefaults() {
             // Arrange
             Long nonExistentId = 999L;
             when(userSettingsRepository.findByUserId(nonExistentId))
                     .thenReturn(Optional.empty());
-            when(userRepository.findById(nonExistentId))
-                    .thenReturn(Optional.empty());
 
-            // Act & Assert
-            UserNotFoundException exception = assertThrows(
-                    UserNotFoundException.class,
-                    () -> userSettingsService.getSettings(nonExistentId)
-            );
+            // Act
+            UserSettingsResponse result = userSettingsService.getSettings(nonExistentId);
 
-            assertEquals(nonExistentId, exception.getUserId());
+            // Assert
+            assertFalse(result.syncEnabled());
+            assertFalse(result.syncChoiceMade());
+            assertTrue(result.notifyComments());
+            assertTrue(result.notifyRecommendations());
+            assertFalse(result.notifyNewPublications());
         }
     }
 
@@ -150,12 +124,10 @@ class UserSettingsServiceTest {
 
         @Test
         @DisplayName("Should update only syncEnabled when only syncEnabled provided")
-        void updateSettings_onlySyncEnabled_updatesOnlySyncEnabled() {
+        void updateSettings_WhenOnlySyncEnabled_UpdatesOnlySyncEnabled() {
             // Arrange
             when(userSettingsRepository.findByUserId(testUser.getId()))
                     .thenReturn(Optional.of(existingSettings));
-            when(userSettingsRepository.save(any(UserSettings.class)))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
 
             UpdateUserSettingsRequest request = new UpdateUserSettingsRequest(
                     false,  // syncEnabled
@@ -169,18 +141,56 @@ class UserSettingsServiceTest {
 
             // Assert
             assertFalse(result.syncEnabled());
+            assertTrue(result.syncChoiceMade());
             assertTrue(result.notifyComments());      // unchanged from existing
             assertFalse(result.notifyRecommendations()); // unchanged from existing
         }
 
         @Test
+        @DisplayName("Should mark the sync choice made when an unchosen user answers the prompt")
+        void updateSettings_WhenChoiceNotYetMade_MarksChoiceMade() {
+            UserSettings unchosen = UserSettings.builder()
+                    .user(testUser)
+                    .build();
+            when(userSettingsRepository.findByUserId(testUser.getId()))
+                    .thenReturn(Optional.of(unchosen));
+
+            UpdateUserSettingsRequest request = new UpdateUserSettingsRequest(
+                    true, null, null, null
+            );
+
+            UserSettingsResponse result = userSettingsService.updateSettings(testUser.getId(), request);
+
+            assertTrue(result.syncEnabled());
+            assertTrue(result.syncChoiceMade());
+        }
+
+        @Test
+        @DisplayName("Should leave the sync choice untouched when sync is not provided")
+        void updateSettings_WhenSyncAbsent_LeavesChoiceUnmade() {
+            UserSettings unchosen = UserSettings.builder()
+                    .user(testUser)
+                    .build();
+            when(userSettingsRepository.findByUserId(testUser.getId()))
+                    .thenReturn(Optional.of(unchosen));
+
+            UpdateUserSettingsRequest request = new UpdateUserSettingsRequest(
+                    null, false, null, null
+            );
+
+            UserSettingsResponse result = userSettingsService.updateSettings(testUser.getId(), request);
+
+            assertFalse(result.syncEnabled());
+            assertFalse(result.syncChoiceMade());
+            assertFalse(result.notifyComments());
+        }
+
+        @Test
         @DisplayName("Should update only notification settings when sync not provided")
-        void updateSettings_onlyNotifications_updatesOnlyNotifications() {
+        void updateSettings_WhenOnlyNotifications_UpdatesOnlyNotifications() {
             // Arrange
             when(userSettingsRepository.findByUserId(testUser.getId()))
                     .thenReturn(Optional.of(existingSettings));
-            when(userSettingsRepository.save(any(UserSettings.class)))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
 
             UpdateUserSettingsRequest request = new UpdateUserSettingsRequest(
                     null,   // syncEnabled - should not change
@@ -194,6 +204,7 @@ class UserSettingsServiceTest {
 
             // Assert
             assertTrue(result.syncEnabled());         // unchanged from existing
+            assertTrue(result.syncChoiceMade());      // unchanged from existing
             assertFalse(result.notifyComments());
             assertTrue(result.notifyRecommendations());
             assertTrue(result.notifyNewPublications());
@@ -201,12 +212,10 @@ class UserSettingsServiceTest {
 
         @Test
         @DisplayName("Should not modify any field when all nulls provided")
-        void updateSettings_allNulls_noChanges() {
+        void updateSettings_WhenAllNulls_NoChanges() {
             // Arrange
             when(userSettingsRepository.findByUserId(testUser.getId()))
                     .thenReturn(Optional.of(existingSettings));
-            when(userSettingsRepository.save(any(UserSettings.class)))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
 
             UpdateUserSettingsRequest request = new UpdateUserSettingsRequest(
                     null, null, null, null
@@ -229,7 +238,7 @@ class UserSettingsServiceTest {
 
         @Test
         @DisplayName("Should reuse existing entity")
-        void getOrCreateEntity_existing_reusesEntity() {
+        void getOrCreateEntity_WhenExisting_ReusesEntity() {
             // Arrange
             when(userSettingsRepository.findByUserId(testUser.getId()))
                     .thenReturn(Optional.of(existingSettings));
@@ -240,18 +249,18 @@ class UserSettingsServiceTest {
             // Assert
             assertSame(existingSettings, result);
             verify(userRepository, never()).findById(any());
-            verify(userSettingsRepository, never()).save(any());
+            verify(userSettingsRepository, never()).insert(any());
         }
 
         @Test
         @DisplayName("Should create new entity when not found")
-        void getOrCreateEntity_notFound_createsNew() {
+        void getOrCreateEntity_WhenNotFound_CreatesNew() {
             // Arrange
             when(userSettingsRepository.findByUserId(testUser.getId()))
                     .thenReturn(Optional.empty());
             when(userRepository.findById(testUser.getId()))
                     .thenReturn(Optional.of(testUser));
-            when(userSettingsRepository.save(any(UserSettings.class)))
+            when(userSettingsRepository.insert(any(UserSettings.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
@@ -260,7 +269,7 @@ class UserSettingsServiceTest {
             // Assert
             assertNotNull(result);
             assertEquals(testUser, result.getUser());
-            verify(userSettingsRepository).save(any(UserSettings.class));
+            verify(userSettingsRepository).insert(any(UserSettings.class));
         }
     }
 }

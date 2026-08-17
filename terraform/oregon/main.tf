@@ -8,6 +8,7 @@ module "fleet" {
 
   region                          = var.region
   name_prefix                     = var.name_prefix
+  backend_ecr_account_id          = var.backend_ecr_account_id
   vpc_cidr                        = var.vpc_cidr
   availability_zones              = var.availability_zones
   public_subnet_cidrs             = var.public_subnet_cidrs

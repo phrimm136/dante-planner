@@ -1,11 +1,14 @@
+import net.ltgt.gradle.errorprone.errorprone
+
 plugins {
     java
-    id("org.springframework.boot") version "3.5.10"
+    id("org.springframework.boot") version "3.5.16"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.sonarqube") version "7.2.3.7755"
     id("org.owasp.dependencycheck") version "12.2.0"
     id("de.aaschmid.cpd") version "3.5"
     id("net.ltgt.errorprone") version "4.3.0"
+    id("info.solidsoft.pitest") version "1.19.0-rc.1"
     checkstyle
     jacoco
 }
@@ -19,19 +22,25 @@ java {
     }
 }
 
+// -PgitSha is supplied by backend/Dockerfile's GIT_SHA build arg.
+springBoot {
+    buildInfo {
+        properties {
+            additional.put("commit", providers.gradleProperty("gitSha").orElse("unknown"))
+        }
+    }
+}
+
 repositories {
     mavenCentral()
 }
-
-// Override tomcat to fix CLIENT_CERT auth bypass CVE
-extra["tomcat.version"] = "10.1.53"
 
 dependencyManagement {
     imports {
         // Override log4j to fix CVE-2025-68161
         mavenBom("org.apache.logging.log4j:log4j-bom:2.25.4")
-        // Override Spring Security to fix CVE-2026-22732
-        mavenBom("org.springframework.security:spring-security-bom:6.5.9")
+        // Override Jackson to fix CVE-2026-54515
+        mavenBom("com.fasterxml.jackson:jackson-bom:2.21.5")
     }
 }
 
@@ -45,6 +54,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
+    implementation("org.springframework.boot:spring-boot-starter-aop")
+    implementation("org.springframework.retry:spring-retry")
 
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-mysql")
@@ -53,7 +64,8 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.13.0")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.13.0")
 
-    runtimeOnly("com.mysql:mysql-connector-j")
+    implementation("com.mysql:mysql-connector-j")
+    implementation("com.github.ben-manes.caffeine:caffeine")
 
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
@@ -97,7 +109,33 @@ tasks.withType<Test> {
             excludeTags(*excludeTags.toTypedArray())
         }
     }
-    maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
+    // Fork count sets when the longest class starts, not how fast it runs: the heavy replication
+    // and recovery harnesses sit behind ~40 classes in their fork's queue, and a wider pool drains
+    // that queue sooner. The ceiling is memory, not cores — each fork holds its own heap and its
+    // own Testcontainers set, whose data directories are tmpfs.
+    // Sized so the cache never evicts. Eviction closes a context while other classes are still
+    // running against it, and the default bound of 32 sits below what this suite creates, so the
+    // failure lands in an unrelated class at full suite size only. Must stay above the
+    // containerized class count; TestIsolationConventionTest budgets the classes that key their own.
+    systemProperty("spring.test.context.cache.maxSize", "512")
+    maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(2)
+    // Measured: a worker sits near 1 GB resident, and the containers it drives total well under
+    // that, so the JVMs are what the box has to fit. maxParallelForks × maxHeapSize must leave
+    // room for Docker, the Testcontainers set, and their tmpfs data directories.
+    maxHeapSize = "1g"
+    // Test JVMs are short-lived and dominated by Spring context startup, so C1-only JIT favors
+    // fast warmup over peak speed the fork never reaches.
+    //
+    // G1 rather than the throughput collector because it uncommits: a fork that peaks during one
+    // heavy context would otherwise hold that heap for the whole run, six forks ratcheting upward
+    // independently and never coming back down. The free-ratio bounds are what make it give the
+    // memory back between contexts.
+    //
+    // The code cache is sized up because a fork hosting the whole suite loads enough classes to
+    // exhaust the adapter space ("Out of space in CodeCache for adapters").
+    jvmArgs("-XX:TieredStopAtLevel=1", "-XX:+UseG1GC", "-XX:+HeapDumpOnOutOfMemoryError",
+            "-XX:MinHeapFreeRatio=10", "-XX:MaxHeapFreeRatio=30",
+            "-XX:ReservedCodeCacheSize=256m")
     filter {
         includeTestsMatching("*Test")
         includeTestsMatching("*Tests")
@@ -110,7 +148,42 @@ tasks.withType<Test> {
 // Lombok-generated code carries @lombok.Generated (lombok.config) which Error Prone
 // skips, so the generator and the analyzer do not fight. JDK 16+ requires the javac
 // internals to be exported to the Error Prone plugin, via a forked compiler.
+// Mutation coverage, not line coverage: a surviving mutant is a line no test protects.
+// Scoped to the packages carrying the most behavior per line; the threshold is a ratchet, raise only.
+pitest {
+    targetClasses.set(listOf(
+        "org.danteplanner.backend.planner.service.*",
+        "org.danteplanner.backend.auth.token.*",
+        "org.danteplanner.backend.shared.readpath.*"))
+    // Without this, PIT derives targetTests from targetClasses and misses any test whose package
+    // differs from the class under test.
+    targetTests.set(listOf("org.danteplanner.backend.*"))
+    excludedTestClasses.set(listOf("*IT", "*IntegrationTest", "*ControllerTest"))
+    junit5PluginVersion.set("1.2.1")
+    threads.set(4)
+    timestampedReports.set(false)
+    // Measured baseline: 485 mutations, 277 killed (57%). Raise as coverage lands; never lower.
+    // Pinned to 1.19.0-rc.1: the 1.19.0 release crashes the coverage minion on this project
+    // (UNKNOWN_ERROR) across every pitest core from 1.19.6 to 1.22.1.
+    mutationThreshold.set(50)
+}
+
+// Javadoc references are compiler-checked so a comment can cite an invariant test by name and
+// the citation cannot outlive its target. The `missing` group stays off: DTO components and
+// trivial getters are deliberately undocumented.
+tasks.withType<Javadoc>().configureEach {
+    (options as StandardJavadocDocletOptions).apply {
+        addStringOption("Xdoclint:reference", "-quiet")
+        addBooleanOption("Werror", true)
+    }
+}
+
 tasks.withType<JavaCompile>().configureEach {
+    // Environment-dependent behavior is a build failure, not a warning: each of these compiles
+    // clean, passes CI, and then misbehaves under one locale, one charset, or one region's clock.
+    options.errorprone {
+        error("StringCaseLocaleUsage", "DefaultCharset", "JavaTimeDefaultTimeZone")
+    }
     options.forkOptions.jvmArgs!!.addAll(
         listOf(
             "--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",

@@ -6,9 +6,9 @@ interface SkillEADisplayProps {
   identityId: string
   skillSlot: OffensiveSkillSlot
   attributeType: SkillAttributeType
-  atkType?: string
+  atkType?: string | undefined
   ea: number
-  currentEA?: number
+  currentEA?: number | undefined
 }
 
 /**

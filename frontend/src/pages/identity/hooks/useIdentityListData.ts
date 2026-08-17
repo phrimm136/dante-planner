@@ -1,90 +1,37 @@
-import { useSuspenseQuery, useQuery } from '@tanstack/react-query'
-import { useTranslation } from 'react-i18next'
 import { createEntityListQueryKeys } from '@/lib/queryKeys'
-import { createStaticDataQueryOptions } from '@/lib/queryOptions'
+import {
+  useEntityListData,
+  useEntityListSpec,
+  useEntityListI18n,
+  type EntityListDataConfig,
+} from '@/shared/entityCatalog'
+import type { z } from 'zod'
 import { IdentitySpecListSchema, IdentityNameListSchema } from '../schemas/IdentitySchemas'
 
 export const identityListQueryKeys = createEntityListQueryKeys('identity')
 
-function createIdentitySpecListQueryOptions() {
-  return createStaticDataQueryOptions(
-    identityListQueryKeys.spec(),
-    () => import('@static/data/identitySpecList.json'),
-    IdentitySpecListSchema,
-    'identity specList',
-  )
+export const IDENTITY_LIST: EntityListDataConfig<
+  z.infer<typeof IdentitySpecListSchema>,
+  z.infer<typeof IdentityNameListSchema>
+> = {
+  kind: 'identity',
+  specImport: () => import('@static/data/identitySpecList.json'),
+  specSchema: IdentitySpecListSchema,
+  i18nImport: (language) => import(`@static/i18n/${language}/identityNameList.json`),
+  i18nSchema: IdentityNameListSchema,
 }
 
-function createIdentityNameListQueryOptions(language: string) {
-  return createStaticDataQueryOptions(
-    identityListQueryKeys.i18n(language),
-    () => import(`@static/i18n/${language}/identityNameList.json`),
-    IdentityNameListSchema,
-    `identity nameList / ${language}`,
-    { keepPrevious: true },
-  )
-}
-
-/**
- * Hook that loads Identity spec list only (no language dependency)
- * Suspends on initial load, but NOT on language change (key has no language)
- *
- * Use this in shell components that should stay stable during language change.
- *
- * @returns Validated Identity spec map
- */
+/** Identity spec map; suspends on initial load, not on language change */
 export function useIdentityListSpec() {
-  const { data: spec } = useSuspenseQuery(createIdentitySpecListQueryOptions())
-  return spec
+  return useEntityListSpec(IDENTITY_LIST)
 }
 
-/**
- * Hook that loads and validates Identity name list only
- * Suspends while loading - wrap in Suspense boundary
- *
- * Use this in components wrapped in their own Suspense boundary
- * for granular loading states on language change.
- *
- * @returns Validated Identity name map
- */
+/** Identity name map; suspends while loading */
 export function useIdentityListI18n() {
-  const { i18n } = useTranslation()
-  const { data: i18nData } = useSuspenseQuery(createIdentityNameListQueryOptions(i18n.language))
-  return i18nData
+  return useEntityListI18n(IDENTITY_LIST)
 }
 
-// Empty name list constant for loading state
-const EMPTY_NAME_LIST: Record<string, string> = {}
-
-/**
- * Non-suspending version of useIdentityListI18n for list filtering.
- * Returns empty object while loading - name search won't match anything.
- * Use this in list components to prevent suspension during language change.
- *
- * @returns Identity name map (id -> name), empty object while loading
- */
-export function useIdentityListI18nDeferred(): Record<string, string> {
-  const { i18n } = useTranslation()
-  const { data: i18nData } = useQuery(createIdentityNameListQueryOptions(i18n.language))
-  return i18nData ?? EMPTY_NAME_LIST
-}
-
-/**
- * Hook that loads and validates identity list data (spec list + name list)
- * Suspends while loading - wrap in Suspense boundary
- *
- * Returns spec map and name map separately for flexible consumption.
- *
- * @returns Validated identity spec map and name map
- */
+/** Identity spec map and name map; suspends while loading */
 export function useIdentityListData() {
-  const { i18n } = useTranslation()
-
-  const { data: spec } = useSuspenseQuery(createIdentitySpecListQueryOptions())
-  const { data: i18nData } = useSuspenseQuery(createIdentityNameListQueryOptions(i18n.language))
-
-  return {
-    spec,
-    i18n: i18nData,
-  }
+  return useEntityListData(IDENTITY_LIST)
 }

@@ -6,13 +6,16 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { ApiClient } from '../api'
 import {
-  ApiClient,
   ConflictError,
+  RateLimitError,
+  RetryableUnavailableError,
+  ValidationError,
   WriteTemporarilyUnavailableError,
   AuthTemporarilyUnavailableError,
   BackendUnavailableError,
-} from '../api'
+} from '../apiErrors'
 
 // Mock the env module
 vi.mock('../env', () => ({
@@ -32,6 +35,12 @@ vi.mock('../queryClient', () => ({
 // Mock global fetch
 const mockFetch = vi.fn()
 global.fetch = mockFetch
+
+function firstRequestInit(): RequestInit {
+  const [firstCall] = mockFetch.mock.calls
+  if (!firstCall) throw new Error('fetch was never called')
+  return firstCall[1] as RequestInit
+}
 
 // Mock window.location for redirect tests
 const mockLocation = { href: '' }
@@ -156,28 +165,92 @@ describe('ApiClient', () => {
 
       await expect(ApiClient.put('/api/planner/123', { version: 3 })).rejects.toThrow(ConflictError)
 
-      try {
-        await ApiClient.put('/api/planner/123', { version: 3 })
-      } catch (error) {
-        expect(error).toBeInstanceOf(ConflictError)
-        expect((error as ConflictError).serverVersion).toBe(5)
-      }
+      const error = await ApiClient.put('/api/planner/123', { version: 3 }).catch((e: unknown) => e)
+
+      expect(error).toBeInstanceOf(ConflictError)
+      expect((error as ConflictError).serverVersion).toBe(5)
     })
 
-    it('defaults serverVersion to 1 when response body parsing fails', async () => {
+    it('reports no server version when the response body cannot be parsed', async () => {
       mockFetch.mockResolvedValue({
         ok: false,
         status: 409,
         json: vi.fn().mockRejectedValue(new Error('Parse error')),
       })
 
-      try {
-        await ApiClient.put('/api/planner/123', { version: 3 })
-      } catch (error) {
-        expect(error).toBeInstanceOf(ConflictError)
-        expect((error as ConflictError).serverVersion).toBe(1)
-      }
+      const error = await ApiClient.put('/api/planner/123', { version: 3 }).catch((e: unknown) => e)
+
+      expect(error).toBeInstanceOf(ConflictError)
+      expect((error as ConflictError).serverVersion).toBeNull()
     })
+
+    it('reports no server version for a concurrent write, and carries its code', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 409,
+        json: vi.fn().mockResolvedValue({
+          code: 'CONCURRENT_WRITE',
+          message: 'The resource was modified concurrently',
+          serverVersion: null,
+        }),
+      })
+
+      const error = await ApiClient.put('/api/planner/123', {}).catch((e: unknown) => e)
+
+      expect(error).toBeInstanceOf(ConflictError)
+      expect((error as ConflictError).serverVersion).toBeNull()
+      expect((error as ConflictError).code).toBe('CONCURRENT_WRITE')
+    })
+  })
+
+  describe('400 / 429 typed errors', () => {
+    it('400 throws ValidationError carrying the backend code', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 400,
+        json: vi.fn().mockResolvedValue({
+          code: 'VALIDATION_ERROR',
+          message: 'Invalid planner content structure',
+        }),
+      })
+
+      const error = await ApiClient.post('/api/planner/md', {}).catch((e: unknown) => e)
+
+      expect(error).toBeInstanceOf(ValidationError)
+      expect((error as ValidationError).code).toBe('VALIDATION_ERROR')
+      expect((error as ValidationError).message).toBe('Invalid planner content structure')
+    })
+
+    it('429 throws RateLimitError', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 429,
+        json: vi.fn().mockResolvedValue({
+          code: 'RATE_LIMIT_EXCEEDED',
+          message: 'Too many requests',
+        }),
+      })
+
+      const error = await ApiClient.post('/api/planner/md', {}).catch((e: unknown) => e)
+
+      expect(error).toBeInstanceOf(RateLimitError)
+      expect((error as RateLimitError).code).toBe('RATE_LIMIT_EXCEEDED')
+    })
+
+    it.each(['RATE_LIMIT_TEMPORARILY_UNAVAILABLE', 'DEADLOCK'])(
+      '503 with code %s throws RetryableUnavailableError',
+      async (code) => {
+        mockFetch.mockResolvedValue({
+          ok: false,
+          status: 503,
+          json: vi.fn().mockResolvedValue({ code, message: 'please retry' }),
+        })
+
+        await expect(ApiClient.post('/api/planner/md', {})).rejects.toBeInstanceOf(
+          RetryableUnavailableError,
+        )
+      },
+    )
   })
 
   describe('503 regional failover typed errors', () => {
@@ -272,14 +345,8 @@ describe('ApiClient', () => {
 
       await ApiClient.post('/api/planner', { name: 'Test' })
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          headers: expect.objectContaining({
-            'Content-Type': 'application/json',
-          }),
-        }),
-      )
+      const headers = new Headers(firstRequestInit().headers)
+      expect(headers.get('Content-Type')).toBe('application/json')
     })
 
     it('stringifies request body for POST', async () => {
@@ -304,17 +371,15 @@ describe('ApiClient', () => {
   describe('CORS preflight avoidance (regression guard)', () => {
     // Bodyless GET/HEAD must stay CORS "simple" requests: a request Content-Type would
     // force a preflight OPTIONS that blocks the cold-load request burst.
-    // See docs/tasks/035-performance/01-request-latency.
     const okJson = () => ({ ok: true, status: 200, json: vi.fn().mockResolvedValue({}) })
-    const sentHeaders = () =>
-      ((mockFetch.mock.calls[0][1] as RequestInit).headers ?? {}) as Record<string, string>
+    const sentHeaders = () => new Headers(firstRequestInit().headers)
 
     it('GET requests send no Content-Type header', async () => {
       mockFetch.mockResolvedValue(okJson())
 
       await ApiClient.get('/api/planner/md/published?page=0&size=20')
 
-      expect(sentHeaders()).not.toHaveProperty('Content-Type')
+      expect(sentHeaders().has('Content-Type')).toBe(false)
     })
 
     it('GET requests carry only CORS-safelisted headers', async () => {
@@ -323,7 +388,7 @@ describe('ApiClient', () => {
       await ApiClient.get('/api/auth/me')
 
       const safelisted = ['accept', 'accept-language', 'content-language']
-      const nonSimple = Object.keys(sentHeaders()).filter(
+      const nonSimple = [...sentHeaders().keys()].filter(
         (key) => !safelisted.includes(key.toLowerCase()),
       )
       expect(nonSimple).toEqual([])
@@ -334,7 +399,7 @@ describe('ApiClient', () => {
 
       await ApiClient.post('/api/planner/md/123/publish', { published: true })
 
-      expect(sentHeaders()).toMatchObject({ 'Content-Type': 'application/json' })
+      expect(sentHeaders().get('Content-Type')).toBe('application/json')
     })
 
     it('does not force application/json on a FormData body', async () => {
@@ -344,7 +409,7 @@ describe('ApiClient', () => {
       form.append('file', new Blob(['x']), 'x.png')
       await ApiClient.fetch('/api/upload', { method: 'POST', body: form })
 
-      expect(sentHeaders()).not.toHaveProperty('Content-Type')
+      expect(sentHeaders().has('Content-Type')).toBe(false)
     })
 
     it('preserves a caller-supplied Content-Type', async () => {
@@ -356,14 +421,13 @@ describe('ApiClient', () => {
         headers: { 'Content-Type': 'text/plain' },
       })
 
-      expect(sentHeaders()['Content-Type']).toBe('text/plain')
+      expect(sentHeaders().get('Content-Type')).toBe('text/plain')
     })
   })
 
   describe('CSRF double-submit header', () => {
     const okJson = () => ({ ok: true, status: 200, json: vi.fn().mockResolvedValue({}) })
-    const sentHeaders = () =>
-      ((mockFetch.mock.calls[0][1] as RequestInit).headers ?? {}) as Record<string, string>
+    const sentHeaders = () => new Headers(firstRequestInit().headers)
 
     let cookieValue = ''
     beforeEach(() => {
@@ -380,7 +444,7 @@ describe('ApiClient', () => {
 
       await ApiClient.post('/api/planner', { name: 'Test' })
 
-      expect(sentHeaders()['X-CSRF-Token']).toBe('token-abc123')
+      expect(sentHeaders().get('X-CSRF-Token')).toBe('token-abc123')
     })
 
     it('does not attach X-CSRF-Token on a GET request', async () => {
@@ -407,7 +471,7 @@ describe('ApiClient', () => {
 
       await ApiClient.post('/api/planner', { name: 'Test' })
 
-      expect(sentHeaders()['X-CSRF-Token']).toBe('real-token')
+      expect(sentHeaders().get('X-CSRF-Token')).toBe('real-token')
     })
 
     it('preserves "=" characters in the cookie value', async () => {
@@ -416,7 +480,7 @@ describe('ApiClient', () => {
 
       await ApiClient.post('/api/planner', { name: 'Test' })
 
-      expect(sentHeaders()['X-CSRF-Token']).toBe('abc=def==')
+      expect(sentHeaders().get('X-CSRF-Token')).toBe('abc=def==')
     })
   })
 })

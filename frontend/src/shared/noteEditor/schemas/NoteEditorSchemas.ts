@@ -38,31 +38,6 @@ export const JSONContentSchema: z.ZodType<unknown> = z.lazy(() =>
 )
 
 /**
- * Schema for NoteContent - wrapper around JSONContent
- */
-export const NoteContentSchema = z
-  .object({
-    content: JSONContentSchema,
-  })
-  .strict()
-
-/**
- * Schema for an array of note sections
- */
-export const NoteSectionsSchema = z.array(NoteContentSchema)
-
-/**
- * Schema for NoteImage metadata
- */
-export const NoteImageSchema = z
-  .object({
-    src: z.string(),
-    alt: z.string().optional(),
-    title: z.string().optional(),
-  })
-  .strict()
-
-/**
  * Empty note content factory - creates valid empty JSONContent
  */
 export function createEmptyNoteContent(): NoteContent {

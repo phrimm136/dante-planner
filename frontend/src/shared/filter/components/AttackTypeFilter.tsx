@@ -1,23 +1,23 @@
 import { IconFilter } from './IconFilter'
-import { ATK_TYPES } from '@/shared/gameData'
+import { ATK_TYPES, type AtkType } from '@/shared/gameData'
 import { getAttackTypeIconPath } from '@/shared/assets'
 
 interface AttackTypeFilterProps {
-  selectedTypes: Set<string>
-  onSelectionChange: (types: Set<string>) => void
+  selected: Set<AtkType>
+  onSelectionChange: (types: Set<AtkType>) => void
 }
 
 /**
- * Attack type icon filter for filtering by attack types
- * 3 icons: SLASH, PENETRATE, HIT
+ * Attack type icon filter for filter sidebar
+ * 3 attack type icons displayed in a 7-column grid (matches keyword/skill attribute filters)
+ * Icons stay small and left-aligned, not stretching to fill container width
  *
- * Pattern: Wraps IconFilter like SinnerFilter.tsx
  */
-export function AttackTypeFilter({ selectedTypes, onSelectionChange }: AttackTypeFilterProps) {
+export function AttackTypeFilter({ selected, onSelectionChange }: AttackTypeFilterProps) {
   return (
     <IconFilter
       options={ATK_TYPES}
-      selectedOptions={selectedTypes}
+      selectedOptions={selected}
       onSelectionChange={onSelectionChange}
       getIconPath={getAttackTypeIconPath}
     />

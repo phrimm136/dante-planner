@@ -11,8 +11,8 @@ interface SkillExchangePaneProps {
   targetSlot: OffensiveSkillSlot
   sourceAttributeType: SkillAttributeType
   targetAttributeType: SkillAttributeType
-  sourceAtkType?: string
-  targetAtkType?: string
+  sourceAtkType?: string | undefined
+  targetAtkType?: string | undefined
   sourceEA: number
   onClick: () => void
   disabled?: boolean

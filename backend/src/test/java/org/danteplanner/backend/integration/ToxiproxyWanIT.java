@@ -27,7 +27,7 @@ class ToxiproxyWanIT extends CausalHarnessSupport {
 
     @Test
     @DisplayName("The wan profile can be applied and removed: latency toxic present after apply, absent after remove")
-    void wanProfile_applyThenRemove_toxicPresentThenAbsent() throws Exception {
+    void wanProfile_WhenApplyThenRemove_ToxicPresentThenAbsent() throws Exception {
         toxiproxyControl.applyWan();
         assertThat(toxiproxyControl.appToPrimaryProxy().toxics().getAll()).isNotEmpty();
 

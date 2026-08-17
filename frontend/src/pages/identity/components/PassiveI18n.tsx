@@ -10,8 +10,9 @@ import {
   getIdentityPassiveCountIconPath,
   getLockIconPath,
 } from '@/shared/assets'
-import { FLAVOR_TEXT_COLOR } from '@/shared/gameData'
 import { cn, getDisplayFontForNumeric, getDisplayFontForLanguage } from '@/lib/utils'
+import { FLAVOR_TEXT_COLOR, SECTION_STYLES } from '@/lib/constants'
+import type { PassiveId } from '@/shared/gameData'
 
 interface PassiveCondition {
   type: string
@@ -35,9 +36,9 @@ interface PassiveCardWithSuspenseProps {
   /** Identity ID for i18n lookup */
   id: string
   /** Passive ID */
-  passiveId: number
+  passiveId: PassiveId
   /** Passive activation condition (affinity requirements) */
-  condition?: PassiveCondition
+  condition?: PassiveCondition | undefined
   /** Whether this passive is locked (from higher tier) */
   isLocked: boolean
 }
@@ -51,7 +52,7 @@ export function PassiveCard({ name, desc, flavor, condition, isLocked }: Passive
 
   return (
     <div className={cn('relative space-y-1', isLocked && 'opacity-50')}>
-      <div className="flex items-center gap-2">
+      <div className={SECTION_STYLES.LAYOUT.row}>
         <StyledSkillName name={name} attributeType="NEUTRAL" />
       </div>
       {isLocked && (
@@ -64,7 +65,7 @@ export function PassiveCard({ name, desc, flavor, condition, isLocked }: Passive
       {condition && (
         <div className="flex items-center gap-3 text-md ml-1">
           {Object.entries(condition.values).map(([affinity, count]) => (
-            <span key={affinity} className="flex items-center gap-1">
+            <span key={affinity} className={SECTION_STYLES.LAYOUT.rowTight}>
               <img src={getAffinityIconPath(affinity)} alt={affinity} className="w-8 h-8" />
               <img src={getIdentityPassiveCountIconPath()} alt="x" className="w-4 h-4" />
               <span>{count}</span>
@@ -108,7 +109,7 @@ export function PassiveCardWithSuspense({
 
   return (
     <div className={cn('relative space-y-1', isLocked && 'opacity-50')}>
-      <div className="flex items-center gap-2">
+      <div className={SECTION_STYLES.LAYOUT.row}>
         <Suspense fallback={<StyledNameSkeleton attributeType="NEUTRAL" />}>
           <PassiveNameContent id={id} passiveId={passiveId} />
         </Suspense>
@@ -123,7 +124,7 @@ export function PassiveCardWithSuspense({
       {condition && (
         <div className="flex items-center gap-3 text-md ml-1">
           {Object.entries(condition.values).map(([affinity, count]) => (
-            <span key={affinity} className="flex items-center gap-1">
+            <span key={affinity} className={SECTION_STYLES.LAYOUT.rowTight}>
               <img src={getAffinityIconPath(affinity)} alt={affinity} className="h-8" />
               <img src={getIdentityPassiveCountIconPath()} alt="x" className="w-4 h-4" />
               <span
@@ -154,18 +155,18 @@ export function PassiveCardWithSuspense({
 /**
  * Internal: Fetches and renders passive name with styled formatting.
  */
-function PassiveNameContent({ id, passiveId }: { id: string; passiveId: number }) {
+function PassiveNameContent({ id, passiveId }: { id: string; passiveId: PassiveId }) {
   const i18n = useIdentityDetailI18n(id)
-  const passiveI18n = i18n.passives[String(passiveId)]
+  const passiveI18n = i18n.passives[passiveId]
   return <StyledSkillName name={passiveI18n?.name ?? ''} attributeType="NEUTRAL" />
 }
 
 /**
  * Internal: Fetches and renders passive description.
  */
-function PassiveDescContent({ id, passiveId }: { id: string; passiveId: number }) {
+function PassiveDescContent({ id, passiveId }: { id: string; passiveId: PassiveId }) {
   const i18n = useIdentityDetailI18n(id)
-  const passiveI18n = i18n.passives[String(passiveId)]
+  const passiveI18n = i18n.passives[passiveId]
   return <FormattedDescription text={passiveI18n?.desc ?? ''} />
 }
 
@@ -173,9 +174,9 @@ function PassiveDescContent({ id, passiveId }: { id: string; passiveId: number }
  * Internal: Fetches and renders passive flavor lore.
  * Returns null when the passive has no flavor (most do not).
  */
-function PassiveFlavorContent({ id, passiveId }: { id: string; passiveId: number }) {
+function PassiveFlavorContent({ id, passiveId }: { id: string; passiveId: PassiveId }) {
   const i18n = useIdentityDetailI18n(id)
-  const passiveI18n = i18n.passives[String(passiveId)]
+  const passiveI18n = i18n.passives[passiveId]
   const flavor = passiveI18n?.flavor
   if (!flavor) return null
   return (

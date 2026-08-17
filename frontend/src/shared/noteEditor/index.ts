@@ -8,16 +8,7 @@ export {
 export {
   TiptapMarkSchema,
   JSONContentSchema,
-  NoteContentSchema,
-  NoteSectionsSchema,
-  NoteImageSchema,
   createEmptyNoteContent,
 } from './schemas/NoteEditorSchemas'
 
-export type {
-  NoteContent,
-  NoteImage,
-  NoteEditorProps,
-  LinkDialogProps,
-  IImageUploadAdapter,
-} from './types/NoteEditorTypes'
+export type { NoteContent, NoteEditorProps, LinkDialogProps } from './types/NoteEditorTypes'

@@ -18,7 +18,7 @@ vi.mock('@tanstack/react-router', () => ({
   }: {
     children: React.ReactNode
     to: string
-    params: Record<string, string>
+    params: { id: string }
   }) => <a href={`${to.replace('$id', params.id)}`}>{children}</a>,
   useSearch: () => ({}),
 }))
@@ -43,7 +43,7 @@ vi.mock('@/shared/assets', () => ({
 }))
 
 vi.mock('@/lib/formatDate', () => ({
-  formatPlannerDate: (date: string) => date,
+  formatCompactDate: (date: string) => date,
 }))
 
 vi.mock('@/lib/utils', () => ({

@@ -1,0 +1,105 @@
+# Staging-only SPA server, applied with kubectl over SSM alongside oauth-stub.yaml.
+# The dist tarball is fetched at pod start from a presigned S3 URL (DIST_URL_PLACEHOLDER is
+# substituted at apply time; the URL is short-lived by design, so a pod restarted after expiry
+# re-fetches only after a fresh apply — acceptable for a disposable environment).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: staging-frontend-nginx
+  namespace: danteplanner
+data:
+  default.conf: |
+    server {
+      listen 80;
+      root /usr/share/nginx/html;
+      index index.html;
+      location / {
+        try_files $uri $uri/ /index.html;
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: staging-frontend
+  namespace: danteplanner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: staging-frontend
+  template:
+    metadata:
+      labels:
+        app: staging-frontend
+    spec:
+      nodeSelector:
+        role: data
+      initContainers:
+        - name: fetch-dist
+          image: curlimages/curl:8.11.1
+          command: ["sh", "-c", "curl -fsSL \"$DIST_URL\" -o /tmp/dist.tar.gz && tar -xzf /tmp/dist.tar.gz -C /usr/share/nginx/html"]
+          env:
+            - name: DIST_URL
+              value: "DIST_URL_PLACEHOLDER"
+          volumeMounts:
+            - name: html
+              mountPath: /usr/share/nginx/html
+      containers:
+        - name: nginx
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: html
+              mountPath: /usr/share/nginx/html
+              readOnly: true
+            - name: conf
+              mountPath: /etc/nginx/conf.d
+              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /index.html
+              port: 80
+          resources:
+            requests:
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+      volumes:
+        - name: html
+          emptyDir: {}
+        - name: conf
+          configMap:
+            name: staging-frontend-nginx
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: staging-frontend
+  namespace: danteplanner
+spec:
+  selector:
+    app: staging-frontend
+  ports:
+    - port: 80
+      targetPort: 80
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: staging-frontend
+  namespace: danteplanner
+spec:
+  parentRefs:
+    - name: web
+  hostnames:
+    - staging.dante-planner.com
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: staging-frontend
+          port: 80

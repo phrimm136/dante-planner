@@ -35,39 +35,6 @@ export const SINNERS = [
 export type Sinner = (typeof SINNERS)[number]
 
 /**
- * Sinner signature colors (extracted from sinner icons, adjusted for text readability)
- * Used for sinner name display in identity/EGO detail headers
- *
- * Color derivation:
- * - YiSang: Light blue-gray (icon is white/ethereal)
- * - Faust: Soft pink (rose icon)
- * - DonQuixote: Golden yellow (carousel horse icon)
- * - Ryoshu: Deep red (sakura/blood icon)
- * - Meursault: Navy blue (refined, stoic)
- * - HongLu: Cyan/turquoise (bright, playful)
- * - Heathcliff: Purple (broken moon icon)
- * - Ishmael: Orange (warm, fiery)
- * - Rodion: Dark crimson (bleeding heart icon)
- * - Sinclair: Olive/lime green (plant motif)
- * - Outis: Forest green (web/net icon)
- * - Gregor: Brown (insect/earth tones)
- */
-export const SINNER_COLORS: Record<Sinner, string> = {
-  YiSang: '#a8c4d8',
-  Faust: '#f0a8ac',
-  DonQuixote: '#e8d840',
-  Ryoshu: '#c82020',
-  Meursault: '#4858a8',
-  HongLu: '#48d0b8',
-  Heathcliff: '#6850a0',
-  Ishmael: '#e89020',
-  Rodion: '#982828',
-  Sinclair: '#98a830',
-  Outis: '#487858',
-  Gregor: '#886030',
-} as const
-
-/**
  * Status effects (keywords)
  */
 export const STATUS_EFFECTS = [
@@ -107,22 +74,6 @@ export const SKILL_ATTRIBUTE_TYPES = ['NEUTRAL', ...AFFINITIES] as const
  * Skill attribute type derived from SKILL_ATTRIBUTE_TYPES array
  */
 export type SkillAttributeType = (typeof SKILL_ATTRIBUTE_TYPES)[number]
-
-/**
- * Skill frame glow colors for coin power backgrounds
- * Extracted from skill frame BG images - these are bright neon colors
- * Used for visual prominence in coin power display
- */
-export const SKILL_FRAME_GLOW_COLORS: Record<SkillAttributeType, string> = {
-  CRIMSON: '#fe1a1a',
-  SCARLET: '#fb4201',
-  AMBER: '#fbfa03',
-  SHAMROCK: '#44ff03',
-  AZURE: '#01fdfb',
-  INDIGO: '#0243fc',
-  VIOLET: '#fe02fd',
-  NEUTRAL: '#e8c89f',
-} as const
 
 /**
  * Attack types
@@ -197,18 +148,6 @@ export const RR_CATEGORIES = ['RR_PLACEHOLDER'] as const
 export type RRCategory = (typeof RR_CATEGORIES)[number]
 
 /**
- * MD category badge styles for planner list display
- * Maps category to Tailwind classes for consistent badge styling
- * Colors: 5F=orange (entry), 10F=red (mid), 15F=white (endgame)
- * @deprecated Use MD_CATEGORY_COLORS with inline styles instead for exact color matching
- */
-export const MD_CATEGORY_STYLES: Record<MDCategory, string> = {
-  '5F': 'bg-orange-500 text-white',
-  '10F': 'bg-red-500 text-white',
-  '15F': 'bg-white text-black',
-} as const
-
-/**
  * Synergy keywords for planner
  */
 export const SYNERGY_KEYWORDS = [
@@ -240,11 +179,6 @@ export const PLANNER_KEYWORDS = [
   '9154',
   ...SYNERGY_KEYWORDS,
 ] as const
-
-/**
- * Planner keyword type
- */
-export type PlannerKeyword = (typeof PLANNER_KEYWORDS)[number]
 
 /**
  * Legacy keyword aliases → current ids. Mirrors the backend `RENAME_MAP`
@@ -311,6 +245,11 @@ export const DEFAULT_SKILL_EA: Record<OffensiveSkillSlot, number> = {
 } as const
 
 /**
+ * EA count from which a deck's affinity or keyword tally reads as a surplus
+ */
+export const EA_SURPLUS_THRESHOLD = 5
+
+/**
  * Dungeon difficulty indices from themePackList.json
  * Maps to internal game data (0=normal, 1=hard, 2=parallel, 3=extreme)
  */
@@ -342,36 +281,6 @@ export const DIFFICULTY_LABELS = {
 export type DifficultyLabel = (typeof DIFFICULTY_LABELS)[keyof typeof DIFFICULTY_LABELS]
 
 /**
- * Difficulty colors for indicator display
- * NORMAL: yellow, HARD: orange, INFINITY: red, EXTREME: white
- */
-export const DIFFICULTY_COLORS: Record<DifficultyLabel, string> = {
-  [DIFFICULTY_LABELS.NORMAL]: '#ffd700',
-  [DIFFICULTY_LABELS.HARD]: '#ff8c00',
-  [DIFFICULTY_LABELS.INFINITY_MIRROR]: '#dc070c',
-  [DIFFICULTY_LABELS.EXTREME_MIRROR]: '#ffffff',
-} as const
-
-/**
- * MD category background colors aligned with difficulty colors
- * 5F uses HARD orange, 10F uses INFINITY red, 15F uses EXTREME white
- */
-export const MD_CATEGORY_COLORS: Record<MDCategory, string> = {
-  '5F': DIFFICULTY_COLORS[DIFFICULTY_LABELS.HARD],
-  '10F': DIFFICULTY_COLORS[DIFFICULTY_LABELS.INFINITY_MIRROR],
-  '15F': DIFFICULTY_COLORS[DIFFICULTY_LABELS.EXTREME_MIRROR],
-} as const
-
-/**
- * Text colors for category badges (white for 5F/10F, black for 15F)
- */
-export const MD_CATEGORY_TEXT_COLORS: Record<MDCategory, string> = {
-  '5F': '#ffffff',
-  '10F': '#ffffff',
-  '15F': '#000000',
-} as const
-
-/**
  * Floor counts per MD category
  */
 export const FLOOR_COUNTS: Record<MDCategory, number> = {
@@ -381,17 +290,24 @@ export const FLOOR_COUNTS: Record<MDCategory, number> = {
 } as const
 
 /**
- * Selectable floors mapping from themePackList.json
- * 0 → 1F, 1 → 2F, 2 → 3F, 3 → 4F, 4 → 5-10F (represented as 5F for filtering)
+ * Difficulties a floor may carry, indexed by 0-based floor within the category.
+ * A 15F run repeats the 10F requirement over its first `FLOOR_COUNTS['10F']`
+ * floors and demands Extreme above them.
  */
-export const SELECTABLE_FLOOR_MAP = [1, 2, 3, 4, 5] as const
+export const ALLOWED_FLOOR_DIFFICULTIES: Record<MDCategory, readonly (readonly DungeonIdx[])[]> = {
+  '5F': Array.from({ length: FLOOR_COUNTS['5F'] }, () => [DUNGEON_IDX.NORMAL, DUNGEON_IDX.HARD]),
+  '10F': Array.from({ length: FLOOR_COUNTS['10F'] }, () => [DUNGEON_IDX.HARD]),
+  '15F': Array.from({ length: FLOOR_COUNTS['15F'] }, (_, floorIndex) =>
+    floorIndex < FLOOR_COUNTS['10F'] ? [DUNGEON_IDX.HARD] : [DUNGEON_IDX.EXTREME],
+  ),
+}
 
 /**
- * Flavor text color for skill / status-effect lore lines.
- * Mirrors in-game `*FlavorGlow` TMP material face color used by
- * `[Text]SkillInfoFlavor` and `[Text]BuffFlavor` GameObjects.
+ * Dungeon index to its constant name, for developer-facing validation messages.
  */
-export const FLAVOR_TEXT_COLOR = '#a16a3b'
+export const DUNGEON_NAME_BY_IDX = new Map<DungeonIdx, string>(
+  Object.entries(DUNGEON_IDX).map(([name, idx]) => [idx, name]),
+)
 
 /**
  * Planner types for different game content
@@ -404,21 +320,6 @@ export const PLANNER_TYPES = ['MIRROR_DUNGEON', 'REFRACTED_RAILWAY'] as const
  * Planner type derived from PLANNER_TYPES array
  */
 export type PlannerType = (typeof PLANNER_TYPES)[number]
-
-/**
- * Default planner type for new planners
- */
-export const DEFAULT_PLANNER_TYPE: PlannerType = 'MIRROR_DUNGEON'
-
-/**
- * Mirror Dungeon accent colors by content version
- * Used for version-specific UI elements like StartBuffMiniCard text
- */
-export const MD_ACCENT_COLORS: Record<number, string> = {
-  5: '#ff9933',
-  6: '#00ffcc',
-  7: '#e5d7d7',
-} as const
 
 /**
  * Mirror Dungeon version type
@@ -478,15 +379,6 @@ export const MIN_ENTITY_TIER: Record<DetailEntityType, number> = {
 }
 
 /**
- * Selector labels by entity type (for i18n keys)
- */
-export const ENTITY_TIER_LABELS: Record<DetailEntityType, string> = {
-  identity: 'uptie',
-  ego: 'threadspin',
-  egoGift: 'enhancement',
-}
-
-/**
  * Buff type categories for battle keywords
  */
 export const BUFF_TYPES = ['Positive', 'Negative', 'Neutral'] as const
@@ -535,11 +427,6 @@ export const EGO_GIFT_TIER_TAGS = [
   'TIER_5',
   'TIER_EX',
 ] as const
-
-/**
- * EGO Gift tier tag type (data format)
- */
-export type EGOGiftTierTag = (typeof EGO_GIFT_TIER_TAGS)[number]
 
 /**
  * EGO Gift difficulties for filtering

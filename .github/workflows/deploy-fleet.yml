@@ -7,16 +7,17 @@ name: "Deploy (multi-region k3s)"
 # pulls the image from its LOCAL registry — pushing to both here removes the
 # cross-region ECR-replication race (a bump could otherwise reference a tag not
 # yet replicated to Seoul).
+# Continuous deployment: the push-run of PR Gate on main triggers this on success, and the
+# deploy checks out the exact SHA that run verified — never main's current head, which may
+# already carry a merge the gate has not blessed. workflow_dispatch stays as the manual
+# escape hatch. The concurrency group holds one running plus one pending run, so rapid
+# merges coalesce and only the newest pending SHA deploys.
 on:
-  push:
-    # Images are built and pushed to ECR only when a PR merges to main; both
-    # regions' ArgoCD root apps track main. workflow_dispatch remains as the
-    # manual escape hatch.
-    branches: [main]
-    paths:
-      - 'backend/**'
-      - '.github/workflows/deploy-fleet.yml'
   workflow_dispatch:
+  workflow_run:
+    workflows: ["PR Gate"]
+    types: [completed]
+    branches: [main]
 
 concurrency:
   group: k3s-gitops-deploy
@@ -33,12 +34,19 @@ env:
 
 jobs:
   build-push:
+    # On workflow_run the trigger fires for red gates too; only a green verdict deploys.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      id-token: write
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       # The private data submodule is baked into the backend image; fetch it
       # with a read-only deploy key.
@@ -54,45 +62,106 @@ jobs:
             git submodule update --init --depth 1 static
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c  # v6
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.AWS_PROVISIONER_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
 
       # Log in to BOTH regional ECR registries. The action has no region input;
       # it targets the region resolved from AWS_REGION (us-west-2 by default),
       # so the Seoul step shadows AWS_REGION for that step only.
       - name: Login to Amazon ECR (Oregon)
-        uses: aws-actions/amazon-ecr-login@v2
+        uses: aws-actions/amazon-ecr-login@d539f0932e70871a027e9d5a9d8fc38589180a64  # v2
 
       - name: Login to Amazon ECR (Seoul)
-        uses: aws-actions/amazon-ecr-login@v2
+        uses: aws-actions/amazon-ecr-login@d539f0932e70871a027e9d5a9d8fc38589180a64  # v2
         env:
           AWS_REGION: ${{ env.SEOUL_REGION }}
           AWS_DEFAULT_REGION: ${{ env.SEOUL_REGION }}
 
       # arm64 (Graviton t4g fleet) built on the amd64 runner via QEMU emulation.
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130  # v3
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f  # v3
 
       # One build, pushed to both regional registries under the same tag, so each
       # region pulls locally and the tags in both overlays resolve.
       - name: Build and Push Backend (arm64) to both regions
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a  # v7
         with:
           context: .
           file: ./backend/Dockerfile
           platforms: linux/arm64
           push: true
           tags: |
-            ${{ env.ECR_REGISTRY }}/${{ env.IMAGE_REPO }}:${{ github.sha }}
-            ${{ env.ECR_REGISTRY_SEOUL }}/${{ env.IMAGE_REPO }}:${{ github.sha }}
+            ${{ env.ECR_REGISTRY }}/${{ env.IMAGE_REPO }}:${{ github.event.workflow_run.head_sha || github.sha }}
+            ${{ env.ECR_REGISTRY_SEOUL }}/${{ env.IMAGE_REPO }}:${{ github.event.workflow_run.head_sha || github.sha }}
+          build-args: |
+            GIT_SHA=${{ github.event.workflow_run.head_sha || github.sha }}
           cache-from: type=gha,scope=backend-arm64
           cache-to: type=gha,mode=max,scope=backend-arm64
+
+  # The edge tier: the verified tree serves as the local origin behind the STANDING staging
+  # edge, and the suites traverse the real path (Access, WAF, tunnel). Runs before the surge
+  # so a red verdict costs nothing in production capacity.
+  edge-gate:
+    needs: build-push
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: staging
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - uses: ./.github/actions/fetch-static-submodule
+        with:
+          static-deploy-key: ${{ secrets.STATIC_DEPLOY_KEY }}
+      - name: Setup Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38  # v6
+        with:
+          node-version: '24'
+          cache: 'yarn'
+          cache-dependency-path: e2e/yarn.lock
+      - name: Assume the staging role
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c  # v6
+        with:
+          role-to-assume: ${{ secrets.STAGING_PROVISIONER_ROLE_ARN }}
+          aws-region: us-west-2
+      - name: Write compose environment
+        run: |
+          cat > .env <<'EOF'
+          MYSQL_ROOT_PASSWORD=testpass
+          MYSQL_DATABASE=danteplanner
+          MYSQL_USER=danteplanner
+          MYSQL_PASSWORD=danteplanner
+          STUB_CLIENT_SECRET=stub-secret
+          EOF
+      - name: Bring up the origin behind the standing edge and run the suites
+        env:
+          # The local origin trusts the repo test keypair (override mount); suites sign with it.
+          E2E_STAGING_KEY_FILE: ${{ github.workspace }}/backend/src/test/resources/test-keys/private_key.pem
+        run: |
+          eval "$(scripts/ops/access/staging-env.sh)"
+          tokens=$(aws secretsmanager get-secret-value --region us-west-2 \
+            --secret-id danteplanner/cloudflare/tunnel-tokens \
+            --query SecretString --output text)
+          export CF_TUNNEL_TOKEN_OREGON=$(printf %s "$tokens" | jq -r .oregon)
+          export CF_TUNNEL_TOKEN_SEOUL=$(printf %s "$tokens" | jq -r .seoul)
+          yarn --cwd e2e stack:up:edge
+          yarn --cwd e2e install --frozen-lockfile
+          yarn --cwd e2e playwright install chromium
+          timeout 300 bash -c "until curl -fsS -o /dev/null --max-time 8 \"$E2E_API_URL/healthz-local\"; do sleep 10; done"
+          yarn --cwd e2e test:contract
+          yarn --cwd e2e test:app
+          yarn --cwd e2e test:infra
+      - name: Dump backend logs
+        if: failure()
+        run: yarn --cwd e2e stack:logs
 
   # Deploy surge: the app tier is a DaemonSet on ASG nodes (node count = pod
   # count) and two Spring heaps do not fit one 2GiB t4g.small, so zero-downtime
@@ -101,16 +170,16 @@ jobs:
   # the region's only pod before the surge node exists. settle-down returns the
   # ASGs to 1 after the rollout completes.
   surge-up:
-    needs: build-push
+    needs: [build-push, edge-gate]
     runs-on: ubuntu-latest
-    permissions: {}
+    permissions:
+      id-token: write
     timeout-minutes: 20
     steps:
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c  # v6
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.AWS_PROVISIONER_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Scale app ASGs to 2
@@ -137,6 +206,26 @@ jobs:
           }
           wait_asg "${{ secrets.AWS_REGION }}" danteplanner-oregon-app
           wait_asg "$SEOUL_REGION" danteplanner-seoul-app
+
+      # ASG tag propagation gives both app instances the same Name, so the
+      # surge node is indistinguishable in the console during an incident.
+      # The newest InService instance is the surge node (same LaunchTime
+      # ordering settle-down relies on to pick its termination target).
+      - name: Tag surge instances
+        run: |
+          tag_surge() {
+            local region="$1" asg="$2" ids surge_iid
+            ids=$(aws autoscaling describe-auto-scaling-groups --region "$region" \
+              --auto-scaling-group-names "$asg" \
+              --query 'AutoScalingGroups[0].Instances[?LifecycleState==`InService`].InstanceId' \
+              --output text)
+            surge_iid=$(aws ec2 describe-instances --region "$region" --instance-ids $ids \
+              --query 'sort_by(Reservations[].Instances[], &LaunchTime)[-1].InstanceId' --output text)
+            aws ec2 create-tags --region "$region" --resources "$surge_iid" \
+              --tags "Key=Name,Value=${asg}-surge" "Key=Surge,Value=true"
+          }
+          tag_surge "${{ secrets.AWS_REGION }}" danteplanner-oregon-app
+          tag_surge "$SEOUL_REGION" danteplanner-seoul-app
 
       # ASG InService is EC2-level only; the DaemonSet can start rolling as soon
       # as the bump syncs, so the surge node must be a READY k3s node first or
@@ -186,7 +275,7 @@ jobs:
       contents: write
     timeout-minutes: 10
     env:
-      GIT_SHA: ${{ github.sha }}
+      GIT_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
     steps:
       # Owner-scoped fine-grained PAT (contents:write). The bump push must carry
       # the repository-admin identity: dev/main sit behind a code-scanning
@@ -194,7 +283,7 @@ jobs:
       # role — the github-actions app cannot be a bypass actor outside an org.
       # [skip ci] + the backend-only path filter keep the PAT push from
       # retriggering this workflow.
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6
         with:
           ref: ${{ github.ref_name }}
           token: ${{ secrets.GH_DEPLOY_PAT }}
@@ -238,16 +327,16 @@ jobs:
   settle-down:
     needs: [bump-tag, surge-up]
     runs-on: ubuntu-latest
-    permissions: {}
+    permissions:
+      id-token: write
     timeout-minutes: 25
     env:
-      GIT_SHA: ${{ github.sha }}
+      GIT_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
     steps:
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c  # v6
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.AWS_PROVISIONER_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Wait for rollout on both clusters

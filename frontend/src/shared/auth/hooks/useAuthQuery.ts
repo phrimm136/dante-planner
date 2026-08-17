@@ -5,9 +5,12 @@ import {
   useQueryClient,
   queryOptions,
 } from '@tanstack/react-query'
-import { ApiClient, BackendUnavailableError, ServiceUpdatingError } from '@/lib/api'
+import { ApiClient } from '@/lib/api'
+import { BackendUnavailableError, ServiceUpdatingError } from '@/lib/apiErrors'
 import { queryClient } from '@/lib/queryClient'
+import { validateDataOrNull } from '@/lib/validation'
 import { UserSchema, type User } from '../schemas/AuthSchemas'
+import { STALE_TIME } from '@/lib/constants'
 
 /**
  * Query keys for auth-related queries
@@ -23,28 +26,29 @@ export const authQueryKeys = {
 export function createAuthMeQueryOptions() {
   return queryOptions({
     queryKey: authQueryKeys.me,
-    queryFn: async (): Promise<User | null> => {
+    queryFn: async ({ signal }): Promise<User | null> => {
       try {
-        const data = await ApiClient.get<User | null>('/api/auth/me')
-        if (data === null) return null
-        const result = UserSchema.safeParse(data)
-        if (!result.success) {
-          console.error('User validation failed:', result.error)
-          return null
-        }
-        return result.data
+        const data = await ApiClient.get<User | null>('/api/auth/me', { signal })
+        if (data == null) return null
+        return validateDataOrNull(data, UserSchema, 'auth me')
       } catch (error) {
         // Transient backend/DB unavailability must NOT log the user out: preserve the
         // last-known identity so a maintenance blip doesn't flip an authed user to guest.
         // Only a genuine auth failure (401 / invalid token / null body) degrades to guest.
-        if (error instanceof BackendUnavailableError || error instanceof ServiceUpdatingError) {
+        // A bare fetch rejection (TypeError) never reached the server at all, so it says
+        // nothing about the session — and window-focus refetching makes it routine.
+        if (
+          error instanceof BackendUnavailableError ||
+          error instanceof ServiceUpdatingError ||
+          error instanceof TypeError
+        ) {
           const cached = queryClient.getQueryData<User | null>(authQueryKeys.me)
           if (cached) return cached
         }
         return null
       }
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes - auth state is relatively stable
+    staleTime: STALE_TIME.MEDIUM,
     retry: false, // Don't retry auth failures
   })
 }
@@ -116,6 +120,7 @@ export function useLogout() {
     mutationFn: async () => {
       await ApiClient.post('/api/auth/logout')
     },
+    meta: { successMessage: 'common:header.auth.successLogout' },
     onSuccess: () => {
       // Clear auth cache
       queryClient.setQueryData(authQueryKeys.me, null)

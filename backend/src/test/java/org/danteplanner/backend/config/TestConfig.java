@@ -46,7 +46,7 @@ public class TestConfig {
      * <p>Guarded to the {@code test} profile because {@code it}-profile tests
      * (e.g. {@code DegradationIT}) assert the behavior of the real Redis-backed manager.
      * Rate-limit semantics themselves are covered by the containerized
-     * {@code RateLimitConfigTest}.</p>
+     * {@code RateLimitServiceIT}.</p>
      *
      * <p>Deliberately NOT named {@code rateLimitProxyManager}: with
      * {@code allow-bean-definition-overriding=true}, the component-scanned definition of the

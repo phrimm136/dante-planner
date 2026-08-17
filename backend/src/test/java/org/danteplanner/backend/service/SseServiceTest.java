@@ -12,8 +12,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 
@@ -23,6 +25,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -40,6 +44,9 @@ class SseServiceTest {
 
     private static final Long USER_ID = 1L;
 
+    /** Runs each submitted heartbeat on the calling thread, so a sweep's effects hold on return. */
+    private static final TaskExecutor SAME_THREAD = Runnable::run;
+
     @Mock
     private UserSettingsService userSettingsService;
 
@@ -49,7 +56,7 @@ class SseServiceTest {
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        sseService = new SseService(objectMapper, userSettingsService);
+        sseService = new SseService(objectMapper, userSettingsService, SAME_THREAD);
         lenient().when(userSettingsService.getOrCreateEntity(anyLong())).thenReturn(allEnabledSettings());
     }
 
@@ -69,7 +76,7 @@ class SseServiceTest {
 
         @Test
         @DisplayName("registers a connection for the user")
-        void subscribe_WhenNewDevice_RegistersConnection() {
+        void subscribe_WhenNewDevice_RegistersConnection() throws IOException {
             sseService.subscribe(USER_ID, UUID.randomUUID());
 
             assertThat(sseService.getActiveConnectionCount(USER_ID)).isEqualTo(1);
@@ -77,7 +84,7 @@ class SseServiceTest {
 
         @Test
         @DisplayName("replaces the prior emitter when the same device reconnects")
-        void subscribe_WhenSameDeviceReconnects_DoesNotDuplicate() {
+        void subscribe_WhenSameDeviceReconnects_DoesNotDuplicate() throws IOException {
             UUID deviceId = UUID.randomUUID();
 
             sseService.subscribe(USER_ID, deviceId);
@@ -88,7 +95,7 @@ class SseServiceTest {
 
         @Test
         @DisplayName("tracks each distinct device separately")
-        void subscribe_WhenMultipleDevices_CountsAll() {
+        void subscribe_WhenMultipleDevices_CountsAll() throws IOException {
             sseService.subscribe(USER_ID, UUID.randomUUID());
             sseService.subscribe(USER_ID, UUID.randomUUID());
 
@@ -102,7 +109,7 @@ class SseServiceTest {
 
         @Test
         @DisplayName("removes the connection when the emitter is dead")
-        void sendToUser_WhenEmitterDead_RemovesConnection() {
+        void sendToUser_WhenEmitterDead_RemovesConnection() throws IOException {
             UUID deviceId = UUID.randomUUID();
             SseEmitter emitter = sseService.subscribe(USER_ID, deviceId);
             emitter.complete();
@@ -118,11 +125,26 @@ class SseServiceTest {
         void sendToUser_WhenSerializationFails_DoesNotThrowNorRemove() throws Exception {
             ObjectMapper failingMapper = mock(ObjectMapper.class);
             when(failingMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("boom") {});
-            SseService service = new SseService(failingMapper, userSettingsService);
+            SseService service = new SseService(failingMapper, userSettingsService, SAME_THREAD);
             service.subscribe(USER_ID, UUID.randomUUID());
 
             assertThatCode(() -> service.sendToUser(USER_ID, "notify:comment", Map.of("k", "v")))
                     .doesNotThrowAnyException();
+            assertThat(service.getActiveConnectionCount(USER_ID)).isEqualTo(1);
+        }
+
+        @Test
+        @DisplayName("does not deliver an event type this node does not recognize")
+        void sendToUser_WhenEventTypeUnrecognized_DoesNotDeliver() throws Exception {
+            ObjectMapper watchedMapper = mock(ObjectMapper.class);
+            SseService service = new SseService(watchedMapper, userSettingsService, SAME_THREAD);
+            service.subscribe(USER_ID, UUID.randomUUID());
+
+            service.sendToUser(USER_ID, "notify:something-this-node-cannot-name", Map.of("k", "v"));
+
+            // Serialization is the first step of delivery, so never reaching it is what proves the
+            // event was dropped rather than sent.
+            verify(watchedMapper, never()).writeValueAsString(any());
             assertThat(service.getActiveConnectionCount(USER_ID)).isEqualTo(1);
         }
     }
@@ -133,7 +155,7 @@ class SseServiceTest {
 
         @Test
         @DisplayName("removes the connection when the emitter is dead")
-        void broadcastToAll_WhenEmitterDead_RemovesConnection() {
+        void broadcastToAll_WhenEmitterDead_RemovesConnection() throws IOException {
             UUID deviceId = UUID.randomUUID();
             SseEmitter emitter = sseService.subscribe(USER_ID, deviceId);
             emitter.complete();
@@ -149,7 +171,7 @@ class SseServiceTest {
         void broadcastToAll_WhenSerializationFails_DoesNotThrow() throws Exception {
             ObjectMapper failingMapper = mock(ObjectMapper.class);
             when(failingMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("boom") {});
-            SseService service = new SseService(failingMapper, userSettingsService);
+            SseService service = new SseService(failingMapper, userSettingsService, SAME_THREAD);
             service.subscribe(USER_ID, UUID.randomUUID());
 
             assertThatCode(() -> service.broadcastToAll(null, "notify:published", Map.of("k", "v")))
@@ -159,27 +181,27 @@ class SseServiceTest {
     }
 
     @Nested
-    @DisplayName("sendHeartbeats")
+    @DisplayName("sweepSseHeartbeats")
     class SendHeartbeats {
 
         @Test
         @DisplayName("removes the connection when the emitter is dead")
-        void sendHeartbeats_WhenEmitterDead_RemovesConnection() {
+        void sweepSseHeartbeats_WhenEmitterDead_RemovesConnection() throws IOException {
             SseEmitter emitter = sseService.subscribe(USER_ID, UUID.randomUUID());
             emitter.complete();
             assertThat(sseService.getActiveConnectionCount(USER_ID)).isEqualTo(1);
 
-            sseService.sendHeartbeats();
+            sseService.sweepSseHeartbeats();
 
             assertThat(sseService.getActiveConnectionCount(USER_ID)).isZero();
         }
 
         @Test
         @DisplayName("keeps a live connection")
-        void sendHeartbeats_WhenEmitterLive_KeepsConnection() {
+        void sweepSseHeartbeats_WhenEmitterLive_KeepsConnection() throws IOException {
             sseService.subscribe(USER_ID, UUID.randomUUID());
 
-            sseService.sendHeartbeats();
+            sseService.sweepSseHeartbeats();
 
             assertThat(sseService.getActiveConnectionCount(USER_ID)).isEqualTo(1);
         }
@@ -191,7 +213,7 @@ class SseServiceTest {
 
         @Test
         @DisplayName("removes the connection when the probe fails")
-        void cleanupZombieConnections_WhenEmitterDead_RemovesConnection() {
+        void cleanupZombieConnections_WhenEmitterDead_RemovesConnection() throws IOException {
             SseEmitter emitter = sseService.subscribe(USER_ID, UUID.randomUUID());
             emitter.complete();
             assertThat(sseService.getActiveConnectionCount(USER_ID)).isEqualTo(1);
@@ -203,7 +225,7 @@ class SseServiceTest {
 
         @Test
         @DisplayName("keeps a live connection")
-        void cleanupZombieConnections_WhenEmitterLive_KeepsConnection() {
+        void cleanupZombieConnections_WhenEmitterLive_KeepsConnection() throws IOException {
             sseService.subscribe(USER_ID, UUID.randomUUID());
 
             sseService.cleanupZombieConnections();
@@ -218,7 +240,7 @@ class SseServiceTest {
 
         @Test
         @DisplayName("is idempotent when called twice for the same device")
-        void removeConnection_WhenCalledTwice_DoesNotThrow() {
+        void removeConnection_WhenCalledTwice_DoesNotThrow() throws IOException {
             UUID deviceId = UUID.randomUUID();
             sseService.subscribe(USER_ID, deviceId);
 

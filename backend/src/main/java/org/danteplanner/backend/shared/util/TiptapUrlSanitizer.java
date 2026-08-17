@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Set;
+import java.util.Locale;
 
 /**
  * Utility class for sanitizing URLs in Tiptap JSON content.
@@ -160,7 +161,7 @@ public final class TiptapUrlSanitizer {
             return url;
         }
 
-        String trimmed = url.trim().toLowerCase();
+        String trimmed = url.trim().toLowerCase(Locale.ROOT);
 
         // Block dangerous protocols (OWASP recommendation)
         for (String blocked : BLOCKED_PROTOCOLS) {

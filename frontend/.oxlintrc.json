@@ -1,16 +1,89 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["eslint", "typescript", "react", "import", "unicorn", "oxc"],
+  "plugins": ["eslint", "typescript", "react", "import", "unicorn", "oxc", "vitest", "jsx-a11y"],
+  "jsPlugins": [
+    "eslint-plugin-react-refresh",
+    "eslint-plugin-react-you-might-not-need-an-effect",
+    { "name": "reacthooks", "specifier": "eslint-plugin-react-hooks" }
+  ],
   "categories": {
     "correctness": "error"
   },
   "rules": {
+    "jsx-a11y/prefer-tag-over-role": "off",
+    "react-hooks/rules-of-hooks": "error",
+    "reacthooks/capitalized-calls": "error",
+    "reacthooks/component-hook-factories": "error",
+    "reacthooks/error-boundaries": "error",
+    "reacthooks/globals": "error",
+    "reacthooks/immutability": "error",
+    "reacthooks/incompatible-library": "error",
+    "reacthooks/preserve-manual-memoization": "error",
+    "reacthooks/purity": "error",
+    "reacthooks/set-state-in-render": "error",
+    "reacthooks/use-memo": "error",
+    "reacthooks/rule-suppression": "error",
+    "reacthooks/set-state-in-effect": "warn",
+    "reacthooks/static-components": "error",
+    "reacthooks/refs": "warn",
+    "react-refresh/only-export-components": ["warn", { "allowConstantExport": true }],
+    "react-you-might-not-need-an-effect/no-derived-state": "warn",
+    "react-you-might-not-need-an-effect/no-chain-state-updates": "warn",
+    "react-you-might-not-need-an-effect/no-event-handler": "warn",
+    "react-you-might-not-need-an-effect/no-adjust-state-on-prop-change": "warn",
+    "react-you-might-not-need-an-effect/no-reset-all-state-on-prop-change": "warn",
+    "react-you-might-not-need-an-effect/no-pass-live-state-to-parent": "warn",
+    "react-you-might-not-need-an-effect/no-pass-data-to-parent": "warn",
+    "react-you-might-not-need-an-effect/no-external-store-subscription": "warn",
+    "react-you-might-not-need-an-effect/no-initialize-state": "warn",
+    "react/jsx-key": "error",
+    "react/jsx-no-duplicate-props": "error",
+    "react/jsx-no-undef": "error",
+    "react/jsx-no-target-blank": "error",
+    "react/no-children-prop": "error",
+    "react/no-danger-with-children": "error",
+    "react/no-direct-mutation-state": "error",
+    "react/no-find-dom-node": "error",
+    "react/no-is-mounted": "error",
+    "react/no-render-return-value": "error",
+    "react/no-string-refs": "error",
+    "react/no-unescaped-entities": "error",
+    "react/no-unknown-property": "error",
+    "react/require-render-return": "error",
+    "react/void-dom-elements-no-children": "error",
+    "react/checked-requires-onchange-or-readonly": "error",
+    "react/forward-ref-uses-ref": "error",
+    "react/style-prop-object": "error",
+    "react/jsx-no-comment-textnodes": "error",
+    "react/no-unsafe": "error",
+    "react/iframe-missing-sandbox": "error",
+    "react/jsx-no-script-url": "error",
+    "react/display-name": "error",
+    "react/jsx-props-no-spread-multi": "error",
+    "react/self-closing-comp": "error",
+    "react/no-unstable-nested-components": ["error", { "allowAsProps": false }],
+    "typescript/only-throw-error": ["error", { "allowRethrowing": true }],
+    "typescript/no-floating-promises": "error",
+    "typescript/use-unknown-in-catch-callback-variable": "error",
+    "preserve-caught-error": "error",
+    "typescript/switch-exhaustiveness-check": [
+      "error",
+      { "allowDefaultCaseForExhaustiveSwitch": true, "considerDefaultExhaustiveForUnions": true }
+    ],
+    "typescript/no-unsafe-enum-comparison": "error",
+    "no-param-reassign": ["error", { "props": false }],
+    "prefer-const": "error",
+    "typescript/require-array-sort-compare": ["error", { "ignoreStringArrays": true }],
+    "oxc/no-accumulating-spread": "error",
+    "typescript/no-misused-promises": "warn",
+    "import/no-cycle": "error",
     "no-restricted-imports": [
       "error",
       {
         "patterns": [
           { "group": ["@/pages/*/**"], "message": "Import a page slice via its public API (@/pages/<name>), not a deep internal path." },
-          { "group": ["@/shared/*/**", "!@/shared/noteEditor/**"], "message": "Import a shared concept via its public API (@/shared/<name>), not a deep internal path." }
+          { "group": ["@/shared/*/**", "!@/shared/noteEditor/**"], "message": "Import a shared concept via its public API (@/shared/<name>), not a deep internal path." },
+          { "group": ["dompurify"], "message": "Sanitizer configuration lives in @/shared/sanitize; import sanitizeUserHtml or sanitizeToPlainText from there." }
         ]
       }
     ]
@@ -25,7 +98,8 @@
             "patterns": [
               { "group": ["@/pages/*/**"], "message": "Import a page slice via its public API (@/pages/<name>), not a deep internal path." },
               { "group": ["@/shared/*/**", "!@/shared/noteEditor/**"], "message": "Import a shared concept via its public API (@/shared/<name>), not a deep internal path." },
-              { "group": ["@/pages/*", "@/pages/*/**"], "message": "This layer is a dependency sink: it must not import page slices." }
+              { "group": ["@/pages/*", "@/pages/*/**"], "message": "This layer is a dependency sink: it must not import page slices." },
+              { "group": ["dompurify"], "message": "Sanitizer configuration lives in @/shared/sanitize; import sanitizeUserHtml or sanitizeToPlainText from there." }
             ]
           }
         ]
@@ -39,14 +113,15 @@
           {
             "patterns": [
               { "group": ["@/pages/*", "@/pages/*/**"], "message": "This layer is a dependency sink: it must not import page slices." },
-              { "group": ["@/shared/*", "@/shared/*/**"], "message": "lib is the domain-free sink: it must not import shared concepts." }
+              { "group": ["@/shared/*", "@/shared/*/**"], "message": "lib is the domain-free sink: it must not import shared concepts." },
+              { "group": ["dompurify"], "message": "Sanitizer configuration lives in @/shared/sanitize; import sanitizeUserHtml or sanitizeToPlainText from there." }
             ]
           }
         ]
       }
     },
     {
-      "files": ["src/components/layout/GlobalLayout.tsx", "src/components/feedback/RouteErrorComponent.tsx"],
+      "files": ["src/components/layout/GlobalLayout.tsx"],
       "rules": {
         "no-restricted-imports": [
           "error",
@@ -60,15 +135,58 @@
       }
     },
     {
-      "files": ["src/lib/router.tsx"],
+      "files": ["src/lib/router.tsx", "src/lib/routeLoaders.ts"],
       "rules": {
         "no-restricted-imports": "off"
       }
     },
     {
+      "files": ["src/pages/*/lib/**/*.ts", "src/shared/*/lib/**/*.ts", "src/lib/**/*.ts"],
+      "rules": {
+        "no-console": ["warn", { "allow": [] }],
+        "unicorn/no-immediate-mutation": "error",
+        "oxc/no-map-spread": "warn",
+        "no-restricted-properties": [
+          "warn",
+          {
+            "object": "queryClient",
+            "message": "lib is the functional core: cache IO belongs in the shell"
+          },
+          {
+            "object": "message",
+            "property": "includes",
+            "message": "model the failure as a discriminated union instead of sniffing strings"
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/lib/routeLoaders.ts"],
+      "rules": {
+        "no-restricted-properties": "off"
+      }
+    },
+    {
       "files": ["**/*.test.{ts,tsx}", "**/__tests__/**"],
       "rules": {
-        "typescript/unbound-method": "off"
+        "typescript/unbound-method": "off",
+        "vitest/expect-expect": ["error", { "assertFunctionNames": ["expect", "validateFile"] }],
+        "vitest/require-mock-type-parameters": "off"
+      }
+    },
+    {
+      "files": ["src/__tests__/dataIntegrity.test.ts"],
+      "rules": {
+        "vitest/valid-title": "off",
+        "vitest/valid-describe-callback": "off",
+        "vitest/no-conditional-tests": "off",
+        "vitest/expect-expect": "off"
+      }
+    }
+    ,{
+      "files": ["src/shared/sanitize/lib/*.ts"],
+      "rules": {
+        "no-restricted-imports": "off"
       }
     }
   ]

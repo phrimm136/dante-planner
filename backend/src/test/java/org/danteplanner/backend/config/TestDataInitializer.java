@@ -58,26 +58,4 @@ public class TestDataInitializer {
         log.info("Created sentinel user (id=0) for test environment");
     }
 
-    /**
-     * Recreates the sentinel user after deleteAll() in tests.
-     * Call this in @BeforeEach after userRepository.deleteAll().
-     *
-     * @param entityManager EntityManager for native query execution
-     */
-    public static void createSentinelUser(EntityManager entityManager) {
-        entityManager.createNativeQuery(
-                "INSERT INTO users (id, email, provider, provider_id, username_keyword, username_suffix, role, created_at, updated_at) " +
-                "VALUES (0, '[deleted]', 'system', 'DELETED_USER_SENTINEL', 'DELETED', '00000', 'NORMAL', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)")
-                .executeUpdate();
-    }
-
-    /**
-     * @deprecated Use {@link #createSentinelUser(EntityManager)} instead.
-     * JPA repository cannot insert with explicit ID when using IDENTITY generation.
-     */
-    @Deprecated
-    public static org.danteplanner.backend.user.entity.User createSentinelUser(UserRepository userRepository) {
-        throw new UnsupportedOperationException(
-                "Cannot create sentinel user via JPA - use createSentinelUser(EntityManager) instead");
-    }
 }

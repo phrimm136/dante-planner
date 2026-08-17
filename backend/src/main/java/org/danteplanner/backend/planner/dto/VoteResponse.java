@@ -14,6 +14,6 @@ import java.util.UUID;
 @Builder
 public record VoteResponse(
     UUID plannerId,
-    Integer upvoteCount,
-    Boolean hasUpvoted
+    int upvoteCount,
+    boolean hasUpvoted
 ) {}

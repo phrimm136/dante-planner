@@ -1,7 +1,11 @@
 package org.danteplanner.backend.shared.sse;
 
+import java.util.UUID;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.sentry.Sentry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.entity.SseEventType;
@@ -22,8 +26,25 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class SsePublisher {
 
-    private final StringRedisTemplate stringRedisTemplate;
+    private static final String DROPPED_COUNTER = "sse.publish.dropped";
+
+    private static final String UNSERIALIZABLE_COUNTER = "sse.publish.unserializable";
+
+    private final SseChannelSender channelSender;
     private final ObjectMapper objectMapper;
+    private final MeterRegistry meterRegistry;
+
+    /**
+     * Publish a user-targeted event to every one of the user's devices.
+     *
+     * @param userId   the target user ID
+     * @param type     the event type
+     * @param entityId the affected entity id
+     * @param payload  the event payload (patched into the recipient's cache)
+     */
+    public void publishUserEvent(Long userId, SseEventType type, String entityId, Object payload) {
+        publishUserEvent(userId, null, type, entityId, payload);
+    }
 
     /**
      * Publish a user-targeted event carrying its full payload to the primary Redis.
@@ -34,9 +55,9 @@ public class SsePublisher {
      * @param entityId        the affected entity id
      * @param payload         the event payload (patched into the recipient's cache)
      */
-    public void publishUserEvent(Long userId, java.util.UUID excludeDeviceId, SseEventType type,
+    public void publishUserEvent(Long userId, UUID excludeDeviceId, SseEventType type,
             String entityId, Object payload) {
-        publish(SseChannels.USER, SseEnvelope.userEvent(userId, type, entityId,
+        publish(SseChannel.USER, SseEnvelope.userEvent(userId, type, entityId,
                 excludeDeviceId != null ? excludeDeviceId.toString() : null, payload));
     }
 
@@ -50,22 +71,54 @@ public class SsePublisher {
      * @param userId the user whose settings cache must be invalidated on every node
      */
     public void publishSettingsInvalidation(Long userId) {
-        publish(SseChannels.USER, SseEnvelope.settingsInvalidation(userId));
+        publish(SseChannel.USER, SseEnvelope.settingsInvalidation(userId));
     }
 
     /**
      * Publish a planner-comment event carrying its full payload to the primary Redis.
      *
-     * <p>Rides the {@link SseChannels#COMMENT} channel; the envelope carries the target
+     * <p>Rides the {@link SseChannel#COMMENT} channel; the envelope carries the target
      * {@code plannerId} (routing key) separately from the comment {@code entityId}.</p>
      *
      * @param plannerId the planner whose comment subscribers receive the event
      * @param type      the event type
      * @param entityId  the affected comment id
+     * @param authorUserId the account whose action raised the event, skipped on delivery
      * @param payload   the event payload (patched into the recipient's cache)
      */
-    public void publishCommentEvent(java.util.UUID plannerId, SseEventType type, String entityId, Object payload) {
-        publish(SseChannels.COMMENT, SseEnvelope.commentEvent(plannerId, type, entityId, payload));
+    public void publishCommentEvent(UUID plannerId, SseEventType type, String entityId,
+            Long authorUserId, Object payload) {
+        publish(SseChannel.COMMENT,
+                SseEnvelope.commentEvent(plannerId, type, entityId, authorUserId, payload));
+    }
+
+    /**
+     * Publish an event for every connected client except the one whose action raised it.
+     *
+     * <p>Rides the {@link SseChannel#BROADCAST} channel; the excluded user travels in the envelope
+     * because the pod that dispatches is not the pod that published.</p>
+     *
+     * @param excludeUserId the user whose action raised the event, and who is not notified
+     * @param type          the event type
+     * @param payload       the event payload
+     */
+    public void publishBroadcast(Long excludeUserId, SseEventType type, Object payload) {
+        publish(SseChannel.BROADCAST, SseEnvelope.broadcast(excludeUserId, type, payload));
+    }
+
+    /**
+     * Publish a suspension notice so it reaches the suspended user's stream on whichever node holds
+     * it, letting that node close the stream.
+     *
+     * @param userId          the suspended user
+     * @param reason          the reason for suspension (optional)
+     * @param suspensionType  the type of suspension
+     * @param durationMinutes the duration for timeouts (null for bans)
+     */
+    public void publishAccountSuspended(
+            Long userId, String reason, SuspensionType suspensionType, Integer durationMinutes) {
+        publish(SseChannel.USER, SseEnvelope.accountSuspended(userId,
+                AccountSuspendedPayload.of(suspensionType, reason, durationMinutes)));
     }
 
     /**
@@ -74,21 +127,29 @@ public class SsePublisher {
      * caller — fan-out is best-effort delivery, and the triggering write must survive a
      * Redis outage (degrade by operation).
      *
+     * <p>The two failures are counted apart because they mean opposite things. An unreachable
+     * Redis is transient and self-repairing once the retries behind {@link SseChannelSender} give
+     * up; an envelope that will not serialize is a defect that repeats on every publish of its
+     * shape and nothing in the runtime will fix it.</p>
+     *
      * @param channel  the Redis pub/sub channel
      * @param envelope the envelope to serialize and publish
      */
-    private void publish(String channel, SseEnvelope envelope) {
+    private void publish(SseChannel channel, SseEnvelope envelope) {
         String json;
         try {
             json = objectMapper.writeValueAsString(envelope);
         } catch (JsonProcessingException e) {
+            meterRegistry.counter(UNSERIALIZABLE_COUNTER, "channel", channel.name()).increment();
             log.error("Failed to serialize SSE envelope for channel {} type {}", channel, envelope.type(), e);
+            Sentry.captureException(e);
             return;
         }
 
         try {
-            stringRedisTemplate.convertAndSend(channel, json);
+            channelSender.send(channel.topic(), json);
         } catch (DataAccessException e) {
+            meterRegistry.counter(DROPPED_COUNTER, "channel", channel.name()).increment();
             log.warn("SSE publish skipped, Redis unreachable (transient): channel {} type {}: {}",
                     channel, envelope.type(), e.getMessage());
         }

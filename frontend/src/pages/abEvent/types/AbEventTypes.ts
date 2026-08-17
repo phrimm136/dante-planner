@@ -17,13 +17,3 @@ export type {
   AbEventI18n,
   AbEventShared,
 } from '../schemas/AbEventSchemas'
-
-/** List item combining spec data with optional i18n name for rendering */
-export interface AbEventListItem {
-  id: string
-  name?: string
-  relatedEgoGifts: string[]
-  relatedThemePacks: string[]
-  hasImage: boolean
-  illustId?: string
-}

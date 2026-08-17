@@ -8,11 +8,11 @@
  * - Shows empty state, loading skeleton, and new comments banner
  */
 
-import { Suspense, useEffect, useRef, useCallback, useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 
-import { useAuthQuery } from '@/shared/auth'
+import { useAuthQuery, isStaff } from '@/shared/auth'
 import { useCommentsQuery, commentsQueryKeys } from '../hooks/useCommentsQuery'
 import { usePlannerCommentsSse } from '../hooks/usePlannerCommentsSse'
 import {
@@ -24,7 +24,9 @@ import {
   useToggleCommentNotifications,
 } from '../hooks/useCommentMutations'
 import { useModeratorCommentDelete } from '../hooks/useModeratorCommentDelete'
-import { CommentEditor } from './CommentEditor'
+import { countComments } from '../lib/commentTree'
+import { toCommentViewer } from '../lib/commentViewer'
+import { CommentComposer } from './CommentComposer'
 import { CommentThread } from './CommentThread'
 import { NewCommentsBar } from './NewCommentsBar'
 import { CommentDeleteDialog } from '@/shared/moderation'
@@ -39,7 +41,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 
-import type { CommentNode, CommentReportReason } from '../types/CommentTypes'
+import type { CommentReportReason } from '../types/CommentTypes'
+import type { CommentActions } from '../lib/commentViewer'
+import { SECTION_STYLES } from '@/lib/constants'
 
 interface CommentSectionProps {
   plannerId: string
@@ -47,17 +51,12 @@ interface CommentSectionProps {
   isAuthenticated: boolean
 }
 
-/** Count all comments in tree recursively */
-function countComments(nodes: CommentNode[]): number {
-  return nodes.reduce((acc, node) => acc + 1 + countComments(node.replies), 0)
-}
-
 function CommentSectionSkeleton() {
   return (
     <div className="space-y-4">
       {[1, 2, 3].map((i) => (
         <div key={i} className="space-y-2">
-          <div className="flex items-center gap-2">
+          <div className={SECTION_STYLES.LAYOUT.row}>
             <Skeleton className="h-4 w-24" />
             <Skeleton className="h-3 w-16" />
           </div>
@@ -72,9 +71,9 @@ function CommentSectionContent({ plannerId, isPublished, isAuthenticated }: Comm
   const { t } = useTranslation(['planner', 'common'])
   const queryClient = useQueryClient()
 
-  // Check if current user is moderator
+  // Who is reading the thread: a guest, a signed-in user, or a moderator
   const { data: currentUser } = useAuthQuery()
-  const isModerator = currentUser?.role === 'MODERATOR' || currentUser?.role === 'ADMIN'
+  const viewer = toCommentViewer(isAuthenticated, isStaff(currentUser?.role))
 
   // Real-time new comment notifications via SSE
   const { newCommentsCount, resetCount } = usePlannerCommentsSse(plannerId)
@@ -119,108 +118,74 @@ function CommentSectionContent({ plannerId, isPublished, isAuthenticated }: Comm
   const toggleNotifications = useToggleCommentNotifications()
   const moderatorDeleteComment = useModeratorCommentDelete()
 
-  // Handlers - use refs to avoid recreating callbacks when mutation state changes
-  // TanStack Query's mutate function is stable, but the mutation object reference changes
-  const createCommentRef = useRef(createComment)
-  const editCommentRef = useRef(editComment)
-  const deleteCommentRef = useRef(deleteComment)
-  const upvoteCommentRef = useRef(upvoteComment)
-  const reportCommentRef = useRef(reportComment)
-  const toggleNotificationsRef = useRef(toggleNotifications)
-  const moderatorDeleteCommentRef = useRef(moderatorDeleteComment)
+  const handleCreateComment = (content: string) => {
+    createComment.mutate({ plannerId, content })
+  }
 
-  // Keep refs updated
-  createCommentRef.current = createComment
-  editCommentRef.current = editComment
-  deleteCommentRef.current = deleteComment
-  upvoteCommentRef.current = upvoteComment
-  reportCommentRef.current = reportComment
-  toggleNotificationsRef.current = toggleNotifications
-  moderatorDeleteCommentRef.current = moderatorDeleteComment
+  const handleReply = (parentCommentId: string, content: string) => {
+    createComment.mutate({ plannerId, content, parentCommentId })
+  }
 
-  // Stable handlers using refs
-  const handleCreateComment = useCallback(
-    (content: string) => {
-      createCommentRef.current.mutate({ plannerId, content })
-    },
-    [plannerId],
-  )
-
-  const handleReply = useCallback(
-    (parentCommentId: string, content: string) => {
-      createCommentRef.current.mutate({ plannerId, content, parentCommentId })
-    },
-    [plannerId],
-  )
-
-  const handleEdit = useCallback(
-    (commentId: string, content: string) => {
-      editCommentRef.current.mutate({ commentId, content, plannerId })
-    },
-    [plannerId],
-  )
+  const handleEdit = (commentId: string, content: string) => {
+    editComment.mutate({ commentId, content, plannerId })
+  }
 
   // Opens delete confirmation dialog
-  const handleDelete = useCallback(
-    (commentId: string) => {
-      setDeleteTarget({ id: commentId, title: t('pages.plannerMD.comments.deleteConfirm.title') })
-    },
-    [t],
-  )
+  const handleDelete = (commentId: string) => {
+    setDeleteTarget({ id: commentId, title: t('pages.plannerMD.comments.deleteConfirm.title') })
+  }
 
   // Actually performs the delete after confirmation
-  const handleDeleteConfirm = useCallback(() => {
+  const handleDeleteConfirm = () => {
     if (deleteTarget) {
-      deleteCommentRef.current.mutate({ commentId: deleteTarget.id, plannerId })
+      deleteComment.mutate({ commentId: deleteTarget.id, plannerId })
       setDeleteTarget(null)
     }
-  }, [deleteTarget, plannerId])
+  }
 
-  const handleUpvote = useCallback(
-    (commentId: string) => {
-      upvoteCommentRef.current.mutate({ commentId, plannerId })
-    },
-    [plannerId],
-  )
+  const handleUpvote = (commentId: string) => {
+    upvoteComment.mutate({ commentId, plannerId })
+  }
 
-  const handleToggleNotifications = useCallback(
-    (commentId: string, enabled: boolean) => {
-      toggleNotificationsRef.current.mutate({ commentId, enabled, plannerId })
-    },
-    [plannerId],
-  )
+  const handleToggleNotifications = (commentId: string, enabled: boolean) => {
+    toggleNotifications.mutate({ commentId, enabled, plannerId })
+  }
 
-  const handleReport = useCallback(
-    (commentId: string, reason: CommentReportReason) => {
-      reportCommentRef.current.mutate({ commentId, reason, plannerId })
-    },
-    [plannerId],
-  )
+  const handleReport = (commentId: string, reason: CommentReportReason) => {
+    reportComment.mutate({ commentId, reason, plannerId })
+  }
 
   // Moderator delete - opens confirmation dialog
-  const handleModeratorDelete = useCallback((commentId: string) => {
+  const handleModeratorDelete = (commentId: string) => {
     setModeratorDeleteTarget({ id: commentId, title: '' })
-  }, [])
+  }
 
   // Actually performs moderator delete after confirmation (with reason)
-  const handleModeratorDeleteConfirm = useCallback(
-    (reason: string) => {
-      if (moderatorDeleteTarget) {
-        moderatorDeleteCommentRef.current.mutate({
-          commentId: moderatorDeleteTarget.id,
-          plannerId,
-          reason,
-        })
-        setModeratorDeleteTarget(null)
-      }
-    },
-    [moderatorDeleteTarget, plannerId],
-  )
+  const handleModeratorDeleteConfirm = (reason: string) => {
+    if (moderatorDeleteTarget) {
+      moderatorDeleteComment.mutate({
+        commentId: moderatorDeleteTarget.id,
+        plannerId,
+        reason,
+      })
+      setModeratorDeleteTarget(null)
+    }
+  }
 
-  const handleRefresh = useCallback(() => {
+  const actions: CommentActions = {
+    onReply: handleReply,
+    onEdit: handleEdit,
+    onDelete: handleDelete,
+    onModeratorDelete: handleModeratorDelete,
+    onUpvote: handleUpvote,
+    onToggleNotifications: handleToggleNotifications,
+    onReport: handleReport,
+  }
+
+  const handleRefresh = () => {
     resetCount()
     void queryClient.invalidateQueries({ queryKey: commentsQueryKeys.list(plannerId) })
-  }, [resetCount, queryClient, plannerId])
+  }
 
   // Unpublished with no comments - hide section entirely
   if (!isPublished && tree.length === 0) {
@@ -229,7 +194,7 @@ function CommentSectionContent({ plannerId, isPublished, isAuthenticated }: Comm
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold">
+      <h2 className={SECTION_STYLES.TEXT.sectionTitle}>
         {t('pages.plannerMD.comments.title', 'Comments')} ({totalCount})
       </h2>
 
@@ -245,15 +210,8 @@ function CommentSectionContent({ plannerId, isPublished, isAuthenticated }: Comm
               key={node.id}
               node={node}
               isPublished={isPublished}
-              isAuthenticated={isAuthenticated}
-              isModerator={isModerator}
-              onReply={handleReply}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              onModeratorDelete={handleModeratorDelete}
-              onUpvote={handleUpvote}
-              onToggleNotifications={handleToggleNotifications}
-              onReport={handleReport}
+              viewer={viewer}
+              actions={actions}
             />
           ))}
         </div>
@@ -263,26 +221,12 @@ function CommentSectionContent({ plannerId, isPublished, isAuthenticated }: Comm
       <NewCommentsBar count={newCommentsCount} onRefresh={handleRefresh} />
 
       {/* Comment writer */}
-      {isPublished ? (
-        isAuthenticated ? (
-          <CommentEditor
-            placeholder={t('pages.plannerMD.comments.placeholder', 'Write a comment...')}
-            onSubmit={handleCreateComment}
-            isSubmitting={createComment.isPending}
-          />
-        ) : (
-          <p className="text-muted-foreground text-sm">
-            {t('pages.plannerMD.comments.loginRequired', 'Sign in to leave a comment.')}
-          </p>
-        )
-      ) : (
-        <p className="text-muted-foreground text-sm">
-          {t(
-            'pages.plannerMD.comments.unpublished',
-            'Comments are disabled while this planner is unpublished.',
-          )}
-        </p>
-      )}
+      <CommentComposer
+        isPublished={isPublished}
+        isAuthenticated={isAuthenticated}
+        onSubmit={handleCreateComment}
+        isSubmitting={createComment.isPending}
+      />
 
       {/* Shared delete confirmation dialog */}
       <Dialog open={deleteTarget !== null} onOpenChange={(open) => !open && setDeleteTarget(null)}>

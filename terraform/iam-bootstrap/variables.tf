@@ -11,14 +11,19 @@ variable "name_prefix" {
 }
 
 variable "role_name" {
-  description = "Name of the provisioning role this stack creates. The Oregon CI workflow and the operator's laptop AWS profile assume this role."
+  description = "Name of the provisioning role this stack creates. The CI workflow and the operator's laptop AWS profile assume this role."
   type        = string
-  default     = "dante-oregon-provisioner"
+  default     = "danteplanner-provisioner"
 }
 
-variable "trusted_admin_principal_arn" {
-  description = "IAM/SSO principal ARN allowed to sts:AssumeRole the provisioning role from a laptop (the human admin who runs the initial `terraform apply` of terraform/oregon). Real value lives in gitignored terraform.tfvars — never commit it. No default (public-repo invariant)."
-  type        = string
+variable "trusted_admin_principal_arns" {
+  description = "Principal ARNs allowed to sts:AssumeRole the provisioning roles from a laptop. A list so an identity-center permission-set role can be admitted alongside the principal it replaces, verified, and the old one then dropped without a window where neither works. Real values live in gitignored terraform.tfvars — never commit them. No default (public-repo invariant)."
+  type        = list(string)
+
+  validation {
+    condition     = length(var.trusted_admin_principal_arns) > 0
+    error_message = "at least one trusted admin principal is required, or the roles become assumable only by CI."
+  }
 }
 
 variable "github_oidc_subject" {
@@ -42,8 +47,24 @@ variable "tags" {
   }
 }
 
-variable "rds_provisioner_role_name" {
-  description = "Name of the existing role that applies terraform/rds. Empty = skip the peering grant. Set in terraform.tfvars (gitignored)."
+variable "rds_master_password_secret_name" {
+  description = "Secrets Manager entry the database stack reads at plan time. Must match that stack's master_password_secret_name; a mismatch is a plan that cannot resolve the password."
   type        = string
-  default     = ""
+  default     = "danteplanner/rds/master-password"
+}
+
+variable "aws_account_id" {
+  description = "The 12-digit AWS account this stack may apply into."
+  type        = string
+
+  validation {
+    condition     = can(regex("^[0-9]{12}$", var.aws_account_id))
+    error_message = "aws_account_id must be the 12-digit AWS account number."
+  }
+}
+
+variable "create_state_bucket" {
+  description = "Create this account's Terraform state bucket here. False for any account added after terraform/state-backend existed, which owns the same resources and nothing else; the provisioning grants address the bucket by name either way."
+  type        = bool
+  default     = true
 }

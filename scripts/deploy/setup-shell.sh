@@ -1,7 +1,11 @@
 #!/bin/bash
 set -euo pipefail
-SCRIPT_NAME="$(basename "$0")"
-trap 'echo "[ERROR] $SCRIPT_NAME failed at line $LINENO (exit code: $?)" >&2; exit 50' ERR
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../ops/lib/traps.sh
+source "$SCRIPT_DIR/../ops/lib/traps.sh"
+# shellcheck source=../ops/lib/constants.sh
+source "$SCRIPT_DIR/../ops/lib/constants.sh"
+install_err_trap "$EXIT_SHELL_SETUP"
 
 BASHRC_FILE="/home/ec2-user/.bashrc"
 

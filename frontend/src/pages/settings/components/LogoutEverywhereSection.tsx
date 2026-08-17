@@ -3,11 +3,12 @@ import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 
-import { toast } from '@/lib/toast'
+import { showSuccess } from '@/lib/errorPresentation'
 import { authQueryKeys } from '@/shared/auth'
 import { useLogoutEverywhere } from '@/shared/auth'
 import { Button } from '@/components/ui/button'
 import { LogoutEverywhereDialog } from './LogoutEverywhereDialog'
+import { SECTION_STYLES } from '@/lib/constants'
 
 /**
  * Settings section for logging out of every device.
@@ -30,21 +31,18 @@ export function LogoutEverywhereSection() {
   const handleLogoutEverywhere = () => {
     logoutEverywhere.mutate(undefined, {
       onSuccess: () => {
-        toast.success(t('settings.logoutEverywhere.success'))
+        showSuccess('common:settings.logoutEverywhere.success')
         setDialogOpen(false)
         queryClient.setQueryData(authQueryKeys.me, null)
         void navigate({ to: '/' })
-      },
-      onError: () => {
-        toast.error(t('settings.logoutEverywhere.error'))
       },
     })
   }
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold">{t('settings.logoutEverywhere.title')}</h2>
-      <p className="text-sm text-muted-foreground">{t('settings.logoutEverywhere.description')}</p>
+      <h2 className={SECTION_STYLES.TEXT.sectionTitle}>{t('settings.logoutEverywhere.title')}</h2>
+      <p className={SECTION_STYLES.TEXT.caption}>{t('settings.logoutEverywhere.description')}</p>
       <Button variant="destructive" onClick={() => setDialogOpen(true)}>
         {t('settings.logoutEverywhere.button')}
       </Button>
