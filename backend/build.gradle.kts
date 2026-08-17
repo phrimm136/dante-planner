@@ -2,13 +2,13 @@ import net.ltgt.gradle.errorprone.errorprone
 
 plugins {
     java
-    id("org.springframework.boot") version "3.5.16"
+    id("org.springframework.boot") version "4.1.0"
     id("io.spring.dependency-management") version "1.1.7"
-    id("org.sonarqube") version "7.2.3.7755"
-    id("org.owasp.dependencycheck") version "12.2.0"
+    id("org.sonarqube") version "7.4.0.8496"
+    id("org.owasp.dependencycheck") version "13.0.0"
     id("de.aaschmid.cpd") version "3.5"
-    id("net.ltgt.errorprone") version "4.3.0"
-    id("info.solidsoft.pitest") version "1.19.0-rc.1"
+    id("net.ltgt.errorprone") version "5.1.0"
+    id("info.solidsoft.pitest") version "1.19.0"
     checkstyle
     jacoco
 }
@@ -38,9 +38,9 @@ repositories {
 dependencyManagement {
     imports {
         // Override log4j to fix CVE-2025-68161
-        mavenBom("org.apache.logging.log4j:log4j-bom:2.25.4")
+        mavenBom("org.apache.logging.log4j:log4j-bom:2.26.1")
         // Override Jackson to fix CVE-2026-54515
-        mavenBom("com.fasterxml.jackson:jackson-bom:2.21.5")
+        mavenBom("com.fasterxml.jackson:jackson-bom:2.22.1")
     }
 }
 
@@ -75,26 +75,26 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
-    implementation("net.javacrumbs.shedlock:shedlock-spring:5.16.0")
-    implementation("net.javacrumbs.shedlock:shedlock-provider-redis-spring:5.16.0")
+    implementation("net.javacrumbs.shedlock:shedlock-spring:7.8.0")
+    implementation("net.javacrumbs.shedlock:shedlock-provider-redis-spring:7.8.0")
 
     implementation("com.bucket4j:bucket4j-core:8.10.1")
     implementation("com.bucket4j:bucket4j-redis:8.10.1")
-    implementation("org.jsoup:jsoup:1.22.1")
-    implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.37.1")
+    implementation("org.jsoup:jsoup:1.23.1")
+    implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.53.0")
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
     testRuntimeOnly("com.h2database:h2")
-    testImplementation("org.testcontainers:testcontainers:2.0.4")
-    testImplementation("org.testcontainers:testcontainers-mysql:2.0.4")
-    testImplementation("org.testcontainers:testcontainers-junit-jupiter:2.0.4")
-    testImplementation("org.testcontainers:testcontainers-toxiproxy:2.0.4")
-    testImplementation("com.redis:testcontainers-redis:2.2.2")
-    testImplementation("com.tngtech.archunit:archunit-junit5:1.3.0")
+    testImplementation("org.testcontainers:testcontainers:2.0.5")
+    testImplementation("org.testcontainers:testcontainers-mysql:2.0.5")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter:2.0.5")
+    testImplementation("org.testcontainers:testcontainers-toxiproxy:2.0.5")
+    testImplementation("com.redis:testcontainers-redis:2.2.4")
+    testImplementation("com.tngtech.archunit:archunit-junit5:1.5.0")
 
-    errorprone("com.google.errorprone:error_prone_core:2.36.0")
+    errorprone("com.google.errorprone:error_prone_core:2.50.0")
 }
 
 tasks.withType<Test> {
