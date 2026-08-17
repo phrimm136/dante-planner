@@ -1,9 +1,9 @@
-import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { createStaticDataQueryOptions } from '@/lib/queryOptions'
 import type { MDVersion } from '@/shared/gameData'
-import type { StartBuffDataList, StartBuffI18n, StartBuff } from '@/shared/gameText'
-import { BASE_BUFF_IDS } from '@/shared/gameText'
-import { STALE_TIME } from '@/lib/constants'
+import type { StartBuff } from '@/shared/gameText'
+import { BASE_BUFF_IDS, StartBuffDataListSchema, StartBuffI18nSchema } from '@/shared/gameText'
 
 // Query key factory for start buff data
 export const startBuffQueryKeys = {
@@ -15,26 +15,22 @@ export const startBuffQueryKeys = {
 
 // Data query options
 function createDataQueryOptions(version: MDVersion) {
-  return queryOptions({
-    queryKey: startBuffQueryKeys.data(version),
-    queryFn: async () => {
-      const module = await import(`@static/data/MD${version}/startBuffs.json`)
-      return module.default as StartBuffDataList
-    },
-    staleTime: STALE_TIME.STATIC,
-  })
+  return createStaticDataQueryOptions(
+    startBuffQueryKeys.data(version),
+    () => import(`@static/data/MD${version}/startBuffs.json`),
+    StartBuffDataListSchema,
+    `startBuffs/md${version}`,
+  )
 }
 
 // I18n query options
 function createI18nQueryOptions(version: MDVersion, language: string) {
-  return queryOptions({
-    queryKey: startBuffQueryKeys.i18n(version, language),
-    queryFn: async () => {
-      const module = await import(`@static/i18n/${language}/MD${version}/startBuffs.json`)
-      return module.default as StartBuffI18n
-    },
-    staleTime: STALE_TIME.STATIC,
-  })
+  return createStaticDataQueryOptions(
+    startBuffQueryKeys.i18n(version, language),
+    () => import(`@static/i18n/${language}/MD${version}/startBuffs.json`),
+    StartBuffI18nSchema,
+    `startBuffs i18n/${language}/md${version}`,
+  )
 }
 
 /**
