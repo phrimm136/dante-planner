@@ -1,11 +1,12 @@
 name: Terraform drift
 
-# Triggers carry no attacker-controlled payload: schedule and manual dispatch only, so no
+# Triggers carry no attacker-controlled payload: manual dispatch only, so no
 # github.event field reaches a run block. Secrets arrive through env and are dereferenced as
 # shell variables, never interpolated into the script text.
 on:
-  schedule:
-    - cron: "30 19 * * *"
+  # The nightly schedule is off until the TFVARS_* inputs exist: without them every stack plans
+  # with empty variables and reports its own resources as destroyed, which files a drift issue
+  # each night for a check that cannot pass. workflow_dispatch stays for running it by hand.
   workflow_dispatch:
 
 concurrency:
