@@ -17,6 +17,16 @@ services:
   # The primary. gtid flags come from docker-compose.oauth-gtid.yml; these add the binlog
   # identity a replication source needs.
   mysql:
+    # docker-compose.override.yml is gitignored, so on a CI runner nothing else
+    # supplies this service's image, environment or network.
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    networks:
+      - danteplanner-network
     # Same socket-versus-TCP correction as the replica: the base healthcheck probes over the
     # unix socket, so dependents start while the port still refuses connections. Invisible
     # while a data volume persists (startup is quick) and reliable after `down -v`.

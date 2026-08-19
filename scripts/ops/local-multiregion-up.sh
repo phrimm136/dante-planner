@@ -21,13 +21,16 @@ REPL_USER=repl
 REPL_PW=repl
 
 compose() {
-  docker compose --project-directory "$REPO" \
-    -f "$REPO/docker-compose.yml" \
-    -f "$REPO/docker-compose.override.yml" \
-    -f "$REPO/docker-compose.e2e.yml" \
-    -f "$REPO/docker-compose.oauth-gtid.yml" \
-    -f "$REPO/docker-compose.multiregion.yml" \
-    -p "$PROJECT" "$@"
+  local files=(-f "$REPO/docker-compose.yml")
+  # docker-compose.override.yml is gitignored, so it exists on developer machines
+  # and never on a CI runner.
+  if [ -f "$REPO/docker-compose.override.yml" ]; then
+    files+=(-f "$REPO/docker-compose.override.yml")
+  fi
+  files+=(-f "$REPO/docker-compose.e2e.yml"
+          -f "$REPO/docker-compose.oauth-gtid.yml"
+          -f "$REPO/docker-compose.multiregion.yml")
+  docker compose --project-directory "$REPO" "${files[@]}" -p "$PROJECT" "$@"
 }
 
 say() { printf '\n=== %s\n' "$*"; }

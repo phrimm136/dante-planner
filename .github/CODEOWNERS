@@ -10,4 +10,3 @@ backend/build.gradle    @phrimm136
 # Dockerfiles
 backend/Dockerfile      @phrimm136
 nginx/Dockerfile        @phrimm136
-mysql/Dockerfile        @phrimm136
