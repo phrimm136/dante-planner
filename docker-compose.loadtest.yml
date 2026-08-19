@@ -2,7 +2,7 @@
 # Activates the loadtest profile and exposes backend port for actuator monitoring.
 #
 # Usage:
-#   docker compose -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.loadtest.yml up -d --build
+#   docker compose -f docker-compose.yml -f docker-compose.local.yml -f docker-compose.loadtest.yml up -d --build
 #   k6 run -e BASE_URL=http://localhost scripts/load-test.js
 #
 # Monitor pool saturation (separate terminal):
