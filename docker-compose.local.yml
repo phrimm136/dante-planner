@@ -1,0 +1,88 @@
+# Makes docker-compose.yml runnable anywhere that is not a deploy.
+#
+# The base file describes the services in their deployed shape: images named from
+# ${AWS_ACCOUNT_ID}/${AWS_REGION}/${IMAGE_TAG}, logs shipped to CloudWatch, MYSQL_HOST
+# sourced from SSM. None of that resolves on a laptop or a CI runner, so this overlay
+# replaces exactly those parts and adds the database the base file has no reason to
+# define (production runs on RDS).
+#
+# Host port bindings deliberately live in docker-compose.override.yml, which is
+# gitignored: they are the one part that varies per machine.
+
+services:
+  # Production runs on RDS, so nothing else in the tree defines a database. Must join
+  # danteplanner-network — without it Compose creates a `default` network that grabs
+  # 172.18.0.0/16 and collides with the pinned danteplanner-network subnet.
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - danteplanner-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  backend:
+    image: danteplanner-backend:local
+    # backend/Dockerfile copies static/data, so the context is the repo root rather
+    # than base's ./backend.
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    volumes:
+      - ./backend/src/test/resources/test-keys:/app/keys:ro
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      # Base sources MYSQL_HOST from SSM, which is empty outside a deploy.
+      MYSQL_HOST: mysql
+      JWT_PRIVATE_KEY_PATH: /app/keys/private_key.pem
+      JWT_PUBLIC_KEY_PATH: /app/keys/public_key.pem
+      JWT_ENCRYPTION_KEY: E9dzesGJ+MrmIaVssATsvvP9EOc1M/Cj/u+9Bh1WTBg=
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  nginx:
+    image: danteplanner-nginx:local
+    volumes:
+      - ./nginx/nginx.dev.conf:/etc/nginx/nginx.conf:ro
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  redis-auth:
+    image: danteplanner-redis:local
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  redis-ratelimit:
+    image: danteplanner-redis:local
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

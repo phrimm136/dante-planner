@@ -48,7 +48,7 @@ Three of those are not guessable, and each fails in a way that names something o
 - **`E2E_DB_USER` / `E2E_DB_PASSWORD` are the compose application credentials**, the
   `MYSQL_USER` / `MYSQL_PASSWORD` pair in the repo-root `.env`. `seed.ts` throws by hand when
   either is missing, with a message about `rds-tunnel.sh` that a local run has nothing to do with.
-- **`E2E_STAGING_KEY_FILE` must point at the test keypair.** `docker-compose.override.yml` mounts
+- **`E2E_STAGING_KEY_FILE` must point at the test keypair.** `docker-compose.local.yml` mounts
   `backend/src/test/resources/test-keys` into the backend, so that private key is what the local
   stack verifies against. Unset, `auth.ts` shells out to AWS Secrets Manager under a profile a
   local checkout has no reason to hold, and the suite fails at `aws` rather than at the token.

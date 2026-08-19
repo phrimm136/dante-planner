@@ -15,7 +15,7 @@
 #   terraform -chdir=terraform/cloudflare apply -var-file=staging.tfvars
 #   export CF_TUNNEL_TOKEN_OREGON=$(terraform -chdir=terraform/cloudflare output -json tunnel_tokens | jq -r .oregon)
 #   export CF_TUNNEL_TOKEN_SEOUL=$(...  .seoul)
-#   docker compose -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.e2e.yml \
+#   docker compose -f docker-compose.yml -f docker-compose.local.yml -f docker-compose.e2e.yml \
 #                  -f docker-compose.oauth-gtid.yml -f docker-compose.edge.yml -p limbusplanner up -d
 services:
   # One connector per named tunnel. They dial out to Cloudflare, so the host needs no inbound

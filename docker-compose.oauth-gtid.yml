@@ -1,7 +1,7 @@
 # Stub-OAuth + GTID overlay: what the compose stack needs before the e2e suites can drive
 # it. Runs the OAuth stub IdP beside the app, enables GTID session tracking so the
 # read-your-writes gate can capture and mint, and wires the single-region gate flags. The
-# backend trusts the repo test keypair through the override's /app/keys mount, and the
+# backend trusts the repo test keypair through docker-compose.local.yml's /app/keys mount, and the
 # suites sign with the same pair (E2E_STAGING_KEY_FILE). The authorize URL is
 # browser-facing (host port), while the token/userinfo URLs are container-facing (service
 # DNS) — the same split staging uses.
