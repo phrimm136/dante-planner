@@ -56,6 +56,8 @@ services:
       MYSQL_HOST: mysql
       JWT_PRIVATE_KEY_PATH: /app/keys/private_key.pem
       JWT_PUBLIC_KEY_PATH: /app/keys/public_key.pem
+      # The same fixture the backend test profile pins in
+      # backend/src/test/resources/application-test.properties.
       JWT_ENCRYPTION_KEY: E9dzesGJ+MrmIaVssATsvvP9EOc1M/Cj/u+9Bh1WTBg=
     depends_on:
       mysql:
