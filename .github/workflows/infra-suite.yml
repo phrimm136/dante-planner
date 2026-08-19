@@ -59,7 +59,12 @@ jobs:
 
   edge-suites:
     needs: changes
-    if: needs.changes.outputs.infra == 'true'
+    # Disabled: the job cannot reach the staging origin. Cloudflare Access answers 403 to the
+    # runner while admitting the same service token from a workstation, and the staging edge is
+    # not represented in any terraform workspace, so there is nothing to reconcile it against.
+    # docs/debt.md carries the detail. Restore by putting the condition below back.
+    # if: needs.changes.outputs.infra == 'true'
+    if: false
     runs-on: ubuntu-latest
     timeout-minutes: 45
     environment: staging
