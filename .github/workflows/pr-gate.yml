@@ -174,7 +174,8 @@ jobs:
             -validateOnMigrate=false -baselineOnMigrate=false migrate
 
   build-backend:
-    needs: [changes, test-backend]
+    # e2e is a superset of both build conditions, so it never skips out from under a build.
+    needs: [changes, test-backend, e2e]
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     permissions:
@@ -242,7 +243,7 @@ jobs:
         run: yarn fmt:check
 
   build-frontend:
-    needs: [changes, test-frontend]
+    needs: [changes, test-frontend, e2e]
     if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
     permissions:
