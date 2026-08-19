@@ -120,7 +120,7 @@ jobs:
           # Access gates this hostname, so the poll needs the same service token the suites
           # send (e2e/src/staging.ts). Single-quoted so the token is read from the inherited
           # environment rather than interpolated into the inner shell's argv.
-          timeout 300 bash -c 'until curl -fsS -o /dev/null --max-time 8 -H "CF-Access-Client-Id: $CF_ACCESS_CLIENT_ID" -H "CF-Access-Client-Secret: $CF_ACCESS_CLIENT_SECRET" "$E2E_API_URL/healthz-local"; do sleep 10; done'
+          timeout 300 bash -c 'until curl -fsS -o /dev/null --max-time 8 -H "CF-Access-Client-Id: $CF_ACCESS_CLIENT_ID" -H "CF-Access-Client-Secret: $CF_ACCESS_CLIENT_SECRET" -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36" "$E2E_API_URL/healthz-local"; do sleep 10; done'
           yarn --cwd e2e test:contract
           yarn --cwd e2e test:app
           yarn --cwd e2e test:infra

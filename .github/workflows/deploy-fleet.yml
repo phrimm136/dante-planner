@@ -156,7 +156,11 @@ jobs:
           yarn --cwd e2e stack:up:edge
           yarn --cwd e2e install --frozen-lockfile
           yarn --cwd e2e playwright install chromium
-          timeout 300 bash -c "until curl -fsS -o /dev/null --max-time 8 \"$E2E_API_URL/healthz-local\"; do sleep 10; done"
+          # Access gates this hostname, so the poll sends the same service token the suites
+          # use (e2e/src/staging.ts). The User-Agent is not cosmetic: Bot Fight Mode issues a
+          # managed challenge to curl's default agent from a datacenter ASN, which curl cannot
+          # solve and reports as 403. Single-quoted so the token stays out of the inner argv.
+          timeout 300 bash -c 'until curl -fsS -o /dev/null --max-time 8 -H "CF-Access-Client-Id: $CF_ACCESS_CLIENT_ID" -H "CF-Access-Client-Secret: $CF_ACCESS_CLIENT_SECRET" -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36" "$E2E_API_URL/healthz-local"; do sleep 10; done'
           yarn --cwd e2e test:contract
           yarn --cwd e2e test:app
           yarn --cwd e2e test:infra
