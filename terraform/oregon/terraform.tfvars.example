@@ -45,7 +45,7 @@ rds_vpc_id = "vpc-REPLACE_WITH_RDS_VPC_ID"
 # backend_ecr_account_id        = ""            # empty = this account's registry
 # rs256_private_key_secret_name = "danteplanner/jwt/rs256-private-key"
 # gitops_repo_url               = "https://github.com/phrimm136/dante-planner.git"
-# gitops_target_revision        = "main"        # the git ref ArgoCD syncs
+# gitops_target_revision        = "main"        # git ref ArgoCD syncs; must match Seoul
 # argocd_version                = "v2.13.2"
 # billing_alarm_threshold       = 200
 # alarm_sns_topic_arn           = ""            # SNS topic for notifications; empty = none
