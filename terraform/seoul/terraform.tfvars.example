@@ -26,3 +26,9 @@ ingress_allowed_cidrs = ["REPLACE_WITH_CLOUDFLARE_CIDRS"]
 # Empty (the default) means this fleet pulls images from its own account's registry. Set it to the
 # account that owns the ECR repositories when they live elsewhere.
 # backend_ecr_account_id = "REPLACE_WITH_ACCOUNT_ID"
+
+# The git ref this region's ArgoCD syncs, and the value that decides which code the fleet runs.
+# MUST match Oregon's gitops_target_revision: a mismatch deploys a different revision per region
+# and nothing reports it. A branch tip is resolved but not immutable; pin a SHA or tag for a
+# boot-time-reproducible control plane.
+# gitops_target_revision = "main"
