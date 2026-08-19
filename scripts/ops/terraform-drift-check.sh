@@ -14,11 +14,17 @@ set -uo pipefail
 REPO_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 GH_REPO="phrimm136/dante-planner"
 ISSUE_LABEL="terraform-drift"
-STACKS=(oregon seoul rds secrets global-accelerator)
+# global-accelerator is deliberately absent: it lives in the management account, so planning it
+# with these credentials and state bucket reports its resources as destroyable.
+STACKS=(oregon seoul rds secrets cloudflare)
 
 # Stacks whose inputs are not in an auto-loaded terraform.tfvars. Anything absent here relies on
 # the auto-load, which composes with -var-file rather than being replaced by it.
-declare -A VAR_FILE=( [rds]=prod.tfvars )
+declare -A VAR_FILE=( [rds]=prod.tfvars [cloudflare]=prod.tfvars )
+
+# Stacks that keep more than one workspace. The default workspace holds different resources, so
+# planning without selecting reports the whole stack as absent.
+declare -A WORKSPACE=( [cloudflare]=prod-fleet )
 
 BACKEND_CONFIG="${BACKEND_CONFIG:-$REPO_DIR/terraform/backend.hcl}"
 
@@ -41,6 +47,14 @@ for stack in "${STACKS[@]}"; do
       summary+="- \`$stack\`: init FAILED (log: $log)"$'\n'
       continue
     }
+  fi
+
+  if [ -n "${WORKSPACE[$stack]:-}" ]; then
+    if ! terraform -chdir="$dir" workspace select "${WORKSPACE[$stack]}" >>"$log" 2>&1; then
+      failed+=("$stack")
+      summary+="- \`$stack\`: workspace ${WORKSPACE[$stack]} select FAILED (log: $log)"$'\n'
+      continue
+    fi
   fi
 
   terraform -chdir="$dir" plan "${args[@]}" >"$log" 2>&1
