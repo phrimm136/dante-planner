@@ -15,10 +15,10 @@
     "fmt": "oxfmt src",
     "fmt:check": "oxfmt --check src",
     "preview": "vite preview",
-    "test": "NODE_OPTIONS=--max-old-space-size=4096 vitest",
-    "test:ui": "vitest --ui",
-    "test:coverage": "NODE_OPTIONS=--max-old-space-size=4096 vitest run --coverage",
-    "test:watch": "vitest watch"
+    "test": "TZ=UTC NODE_OPTIONS=--max-old-space-size=4096 vitest",
+    "test:ui": "TZ=UTC vitest --ui",
+    "test:coverage": "TZ=UTC NODE_OPTIONS=--max-old-space-size=4096 vitest run --coverage",
+    "test:watch": "TZ=UTC vitest watch"
   },
   "resolutions": {
     "@babel/core": "^7.29.6",
