@@ -39,6 +39,7 @@ jobs:
       github.event_name == 'workflow_dispatch' ||
       github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
+    environment: production
     permissions:
       contents: read
       id-token: write
@@ -172,6 +173,7 @@ jobs:
   surge-up:
     needs: [build-push, edge-gate]
     runs-on: ubuntu-latest
+    environment: production
     permissions:
       id-token: write
     timeout-minutes: 20
@@ -327,6 +329,7 @@ jobs:
   settle-down:
     needs: [bump-tag, surge-up]
     runs-on: ubuntu-latest
+    environment: production
     permissions:
       id-token: write
     timeout-minutes: 25
