@@ -169,7 +169,10 @@ class PlannerCatalogLifecycleIT extends SharedMySqlContainerSupport {
             catalogService.add(planner);
         }
 
-        mockMvc.perform(get("/api/planner/md/published"))
+        // These rows are stamped hours in the past, so anything published during the run sorts
+        // above them. The default page of 20 is smaller than the catalog this suite accumulates,
+        // which drops the older two off the first page; 100 is the controller's cap.
+        mockMvc.perform(get("/api/planner/md/published").param("size", "100"))
                 .andExpect(status().isOk())
                 // Relative order among this test's rows: the catalog also holds its neighbours',
                 // so absolute positions belong to whoever published most recently.
