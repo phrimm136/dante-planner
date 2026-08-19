@@ -47,6 +47,12 @@ variable "tags" {
   }
 }
 
+variable "edge_gate_secret_names" {
+  description = "Secrets Manager entries the edge gate reads at run time: the Cloudflare tunnel tokens it starts cloudflared with, and the endpoint bundle staging-env.sh exports. The gate runs under the staging role in both deploy-fleet and infra-suite, so the grant only resolves there; in accounts without these entries it matches nothing."
+  type        = list(string)
+  default     = ["danteplanner/cloudflare/tunnel-tokens", "danteplanner/staging/e2e-endpoints"]
+}
+
 variable "rds_master_password_secret_name" {
   description = "Secrets Manager entry the database stack reads at plan time. Must match that stack's master_password_secret_name; a mismatch is a plan that cannot resolve the password."
   type        = string

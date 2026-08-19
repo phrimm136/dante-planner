@@ -229,6 +229,18 @@ data "aws_iam_policy_document" "provisioning" {
     resources = ["arn:aws:secretsmanager:${var.region}:${local.account_id}:secret:${var.rds_master_password_secret_name}-*"]
   }
 
+  # The edge gate drives the suites through the STANDING staging edge, so it reads the tunnel
+  # tokens and the endpoint bundle at run time rather than receiving them as workflow inputs.
+  statement {
+    sid     = "EdgeGateSecrets"
+    effect  = "Allow"
+    actions = ["secretsmanager:GetSecretValue"]
+    resources = [
+      for name in var.edge_gate_secret_names :
+      "arn:aws:secretsmanager:${var.region}:${local.account_id}:secret:${name}-*"
+    ]
+  }
+
   # RDS calls KMS as the caller, so encrypted storage needs grant creation here.
   statement {
     sid    = "RdsStorageEncryption"
