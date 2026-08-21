@@ -17,6 +17,7 @@ import { EnhancementsPanelI18n } from '@/pages/egoGift'
 import { RecipeSection } from '@/pages/egoGift'
 import { EGOGiftDetailSkeleton } from '@/pages/egoGift'
 import { DetailPageLayout } from '@/components/layout/DetailPageLayout'
+import { KeywordsDisplay } from '@/shared/gameText'
 import { useEGOGiftDetailSpec } from '@/pages/egoGift'
 import { ENHANCEMENT_LEVELS } from '@/shared/gameData'
 import { calculateEnhancementCost, parseTier } from '@/pages/egoGift'
@@ -80,6 +81,9 @@ function EGOGiftDetailContent() {
         extremeOnly={giftData.extremeOnly}
         maxEnhancement={maxEnhancement}
       />
+
+      {/* Battle Keywords Panel - each chip suspends internally */}
+      <KeywordsDisplay keywords={giftData.battleKeywordList} />
     </div>
   )
 

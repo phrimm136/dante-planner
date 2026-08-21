@@ -84,6 +84,7 @@ export const EGOPassivesDataSchema = z.object({
 export const EGODataSchema = z.object({
   updatedDate: z.number(),
   egoType: EgoTypeSchema,
+  battleKeywordList: z.array(z.string()),
   season: z.number(),
   attributeResist: z.record(z.string(), z.number()),
   requirements: z.record(z.string(), z.number()),

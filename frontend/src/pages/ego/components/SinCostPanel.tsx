@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { LabeledPanel } from '@/components/layout/LabeledPanel'
 import { getAffinityIconPath } from '@/shared/assets'
 import { AFFINITIES, type Affinity } from '@/shared/gameData'
 
@@ -10,8 +11,7 @@ export function SinCostPanel({ costs }: SinCostPanelProps) {
   const { t } = useTranslation('database')
 
   return (
-    <div className="border rounded p-3 space-y-2 h-full">
-      <div className="font-semibold text-sm text-center">{t('ego.sinCost')}</div>
+    <LabeledPanel title={t('ego.sinCost')}>
       <div className="grid grid-cols-7 gap-1">
         {AFFINITIES.map((affinity: Affinity) => {
           const cost = costs[affinity] || 0
@@ -27,6 +27,6 @@ export function SinCostPanel({ costs }: SinCostPanelProps) {
           )
         })}
       </div>
-    </div>
+    </LabeledPanel>
   )
 }

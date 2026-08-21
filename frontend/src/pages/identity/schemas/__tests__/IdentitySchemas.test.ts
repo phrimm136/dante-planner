@@ -146,6 +146,7 @@ describe('IdentityDataSchema', () => {
   const validIdentityData = {
     updatedDate: 20230227,
     skillKeywordList: ['Sinking'],
+    battleKeywordList: ['AttackDmgUp', 'Sinking', 'Vulnerable'],
     panicType: '9999',
     season: 0,
     rank: 1,

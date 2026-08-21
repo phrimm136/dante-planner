@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { LabeledPanel } from '@/components/layout/LabeledPanel'
 import { Skeleton } from '@/components/ui/skeleton'
 
 import { TraitsI18n } from './TraitsI18n'
@@ -21,11 +22,10 @@ export function TraitsDisplay({ traits }: TraitsDisplayProps) {
   }
 
   return (
-    <div className="border rounded p-3">
-      <div className="font-semibold text-sm mb-2 text-center">{t('identity.unitKeyword')}</div>
+    <LabeledPanel title={t('identity.unitKeyword')}>
       <Suspense fallback={<Skeleton className="h-6 w-full" />}>
         <TraitsI18n traits={traits} />
       </Suspense>
-    </div>
+    </LabeledPanel>
   )
 }

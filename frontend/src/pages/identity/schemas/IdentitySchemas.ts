@@ -95,6 +95,7 @@ export const IdentityPassivesDataSchema = z.object({
 export const IdentityDataSchema = z.object({
   updatedDate: z.number(),
   skillKeywordList: z.array(z.string()),
+  battleKeywordList: z.array(z.string()),
   panicType: z.string(),
   season: z.number(),
   rank: z.number(),

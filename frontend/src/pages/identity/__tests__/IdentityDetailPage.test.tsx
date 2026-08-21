@@ -41,6 +41,7 @@ vi.mock('react-i18next', async (importOriginal) => {
 const mockIdentityData10101: IdentityData = {
   updatedDate: 20230227,
   skillKeywordList: ['Sinking'],
+  battleKeywordList: ['AttackDmgUp', 'Sinking', 'Vulnerable'],
   panicType: '9999',
   season: 0,
   rank: 1,
@@ -109,6 +110,7 @@ const mockIdentityI18n10101: IdentityI18n = {
 const mockIdentityData10114: IdentityData = {
   updatedDate: 20250828,
   skillKeywordList: ['Burst', 'Vibration'],
+  battleKeywordList: ['Burst', 'Vibration'],
   panicType: '9999',
   season: 6,
   rank: 3,

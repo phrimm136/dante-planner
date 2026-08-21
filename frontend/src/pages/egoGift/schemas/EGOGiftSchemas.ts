@@ -60,7 +60,7 @@ export const EGOGiftDataSchema = z
   .object({
     tag: tagArraySchema,
     keyword: z.string().nullable(),
-    battleKeywordList: z.array(z.string()).optional(),
+    battleKeywordList: z.array(z.string()),
     attributeType: z.string(),
     price: z.number(),
     themePack: z.array(z.string()),

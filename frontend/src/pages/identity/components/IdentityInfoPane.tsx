@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 
 import { EntityMetaInfoWithI18n } from '@/components/layout/EntityMetaInfoI18n'
+import { KeywordsDisplay } from '@/shared/gameText'
 import { IdentityHeader } from './IdentityHeader'
 import { IdentityHeaderWithI18n } from './IdentityHeaderI18n'
 import { StatusPanel } from './StatusPanel'
@@ -73,6 +74,9 @@ export function IdentityInfoPane({ id, identity, uptie, level }: IdentityInfoPan
 
         {/* Traits Panel - Already has granular Suspense internally */}
         <TraitsDisplay traits={identity.unitKeywordList} />
+
+        {/* Battle Keywords Panel - each chip suspends internally */}
+        <KeywordsDisplay keywords={identity.battleKeywordList} />
 
         {/* Season and Release Date - Suspense for i18n data */}
         <Suspense

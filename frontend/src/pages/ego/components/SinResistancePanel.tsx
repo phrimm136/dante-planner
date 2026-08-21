@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 
+import { LabeledPanel } from '@/components/layout/LabeledPanel'
 import { getAffinityIconPath } from '@/shared/assets'
 import { AFFINITIES, getResistanceInfo, type Affinity } from '@/shared/gameData'
 
@@ -11,8 +12,7 @@ export function SinResistancePanel({ resistances }: SinResistancePanelProps) {
   const { t } = useTranslation('database')
 
   return (
-    <div className="border rounded p-3 space-y-2 h-full">
-      <div className="font-semibold text-sm text-center">{t('identity.resist.sinResistance')}</div>
+    <LabeledPanel title={t('identity.resist.sinResistance')}>
       <div className="grid grid-cols-7 gap-1">
         {AFFINITIES.map((affinity: Affinity) => {
           const resistValue = resistances[affinity] ?? 1.0
@@ -34,6 +34,6 @@ export function SinResistancePanel({ resistances }: SinResistancePanelProps) {
           )
         })}
       </div>
-    </div>
+    </LabeledPanel>
   )
 }

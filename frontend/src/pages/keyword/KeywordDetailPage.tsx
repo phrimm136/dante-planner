@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next'
 
 import { FormattedDescription } from '@/shared/gameText'
 import { DetailPageLayout } from '@/components/layout/DetailPageLayout'
+import { LabeledPanel } from '@/components/layout/LabeledPanel'
 import { Skeleton } from '@/components/ui/skeleton'
 import { KeywordBacklinkList } from './components/KeywordBacklinkList'
 import { KeywordCard } from './components/KeywordCard'
@@ -134,7 +135,7 @@ function KeywordDescriptionContent({ id }: { id: string }) {
   const i18nData = useKeywordDetailI18n(id)
 
   return (
-    <div className="border rounded p-4 space-y-3">
+    <LabeledPanel>
       <h2 className={SECTION_STYLES.TEXT.sectionTitle}>{t('keyword.description')}</h2>
       {i18nData?.desc ? (
         <div className="text-sm leading-relaxed">
@@ -143,7 +144,7 @@ function KeywordDescriptionContent({ id }: { id: string }) {
       ) : (
         <div className={SECTION_STYLES.TEXT.caption}>-</div>
       )}
-    </div>
+    </LabeledPanel>
   )
 }
 
@@ -183,7 +184,7 @@ function KeywordDetailContent() {
       </div>
 
       {/* Backlinks panel */}
-      <div className="border rounded p-4 space-y-4">
+      <LabeledPanel>
         <Suspense fallback={<BacklinkSkeleton />}>
           <KeywordRelatedIdentities ids={spec.identities} />
         </Suspense>
@@ -193,7 +194,7 @@ function KeywordDetailContent() {
         <Suspense fallback={<BacklinkSkeleton />}>
           <KeywordRelatedEgoGifts ids={spec.egoGifts} />
         </Suspense>
-      </div>
+      </LabeledPanel>
     </div>
   )
 

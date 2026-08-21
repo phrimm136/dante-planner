@@ -10,6 +10,7 @@ import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { DetailPageLayout } from '@/components/layout/DetailPageLayout'
+import { LabeledPanel } from '@/components/layout/LabeledPanel'
 import { ThemePackCard } from '@/pages/themePack'
 import { ThemePackDetailSkeleton } from '@/pages/themePack'
 import { EGOGiftGrid } from '@/pages/egoGift'
@@ -318,7 +319,7 @@ function ThemePackDetailContent() {
       )}
 
       {/* Difficulty + Floors + Hidden Theme Rate */}
-      <div className="flex-1 border rounded p-4 space-y-4">
+      <LabeledPanel className="flex-1">
         <div className="space-y-1">
           <div className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
             {t('themePack.difficulty', 'Difficulty')}
@@ -339,7 +340,7 @@ function ThemePackDetailContent() {
             <span className="px-2 py-0.5 text-sm">{(spec.hiddenThemeRate * 100).toFixed(2)}%</span>
           </div>
         )}
-      </div>
+      </LabeledPanel>
     </div>
   )
 

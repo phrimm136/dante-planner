@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { LabeledPanel } from '@/components/layout/LabeledPanel'
 import { getSeasonColor } from '@/shared/gameData'
 import { formatEntityReleaseDate } from '@/lib/formatDate'
 import { I18N_LOCALE_MAP } from '@/lib/constants'
@@ -31,21 +32,19 @@ export function EntityMetaInfo({ season, seasonName, updateDate }: EntityMetaInf
   return (
     <div className="grid grid-cols-2 gap-2">
       {/* Season Panel */}
-      <div className="border rounded p-3 space-y-2">
-        <div className="font-semibold text-sm text-center">{t('meta.season')}</div>
+      <LabeledPanel title={t('meta.season')}>
         <div
           className="text-xs text-center"
           style={seasonColor ? { color: seasonColor } : undefined}
         >
           {seasonName}
         </div>
-      </div>
+      </LabeledPanel>
 
       {/* Release Date Panel */}
-      <div className="border rounded p-3 space-y-2">
-        <div className="font-semibold text-sm text-center">{t('meta.releaseDate')}</div>
+      <LabeledPanel title={t('meta.releaseDate')}>
         <div className="text-xs text-center tabular-nums">{formattedDate}</div>
-      </div>
+      </LabeledPanel>
     </div>
   )
 }

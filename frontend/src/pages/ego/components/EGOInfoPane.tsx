@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 
 import { EntityMetaInfoWithI18n } from '@/components/layout/EntityMetaInfoI18n'
+import { KeywordsDisplay } from '@/shared/gameText'
 import { EGOHeader } from './EGOHeader'
 import { EGOHeaderWithI18n } from './EGOHeaderI18n'
 import { SinCostPanel } from './SinCostPanel'
@@ -37,6 +38,9 @@ export function EGOInfoPane({ id, ego, skillType }: EGOInfoPaneProps) {
           <SinCostPanel costs={ego.requirements} />
           <SinResistancePanel resistances={ego.attributeResist} />
         </div>
+
+        {/* Battle Keywords Panel - each chip suspends internally */}
+        <KeywordsDisplay keywords={ego.battleKeywordList} />
 
         {/* Season and Release Date - Suspense for i18n data */}
         <Suspense

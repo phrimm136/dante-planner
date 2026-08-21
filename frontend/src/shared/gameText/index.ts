@@ -1,5 +1,7 @@
 export { ColoredText, parseColorTags, stripColorTags } from './components/ColoredText'
 export { FormattedDescription } from './components/FormattedDescription'
+export { KeywordString } from './components/KeywordString'
+export { KeywordsDisplay } from './components/KeywordsDisplay'
 export { FormattedSanityText } from './components/FormattedSanityText'
 export { StyledSkillName, StyledNameSkeleton } from './components/StyledName'
 

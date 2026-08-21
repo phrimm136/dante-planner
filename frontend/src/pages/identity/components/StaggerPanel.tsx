@@ -1,5 +1,7 @@
 import { useTranslation } from 'react-i18next'
 
+import { LabeledPanel } from '@/components/layout/LabeledPanel'
+
 interface StaggerPanelProps {
   maxHP: number
   staggerThresholds: number[]
@@ -16,8 +18,7 @@ export function StaggerPanel({ maxHP, staggerThresholds }: StaggerPanelProps) {
   const { t } = useTranslation(['database', 'common'])
 
   return (
-    <div className="border rounded p-3 space-y-2 h-full">
-      <div className="font-semibold text-sm text-center">{t('identity.stagger')}</div>
+    <LabeledPanel title={t('identity.stagger')} className="h-full">
       <div className="flex justify-evenly">
         {staggerThresholds.map((threshold, index) => {
           const percentage = threshold.toFixed(0)
@@ -33,6 +34,6 @@ export function StaggerPanel({ maxHP, staggerThresholds }: StaggerPanelProps) {
           )
         })}
       </div>
-    </div>
+    </LabeledPanel>
   )
 }

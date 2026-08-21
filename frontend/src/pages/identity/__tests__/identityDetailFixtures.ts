@@ -4,6 +4,7 @@
 export const identitySpec10101 = {
   updatedDate: 20230227,
   skillKeywordList: ['Sinking'],
+  battleKeywordList: ['AttackDmgUp', 'Sinking', 'Vulnerable'],
   panicType: 9999,
   season: 0,
   rank: 1,
@@ -54,6 +55,7 @@ export const identityI18n10101 = {
 export const identitySpec10114 = {
   updatedDate: 20250828,
   skillKeywordList: ['Burst', 'Vibration'],
+  battleKeywordList: ['Burst', 'Vibration'],
   panicType: 9999,
   season: 6,
   rank: 3,

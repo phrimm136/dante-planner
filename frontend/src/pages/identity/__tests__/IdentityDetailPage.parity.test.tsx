@@ -91,9 +91,15 @@ async function waitForI18nSettled(container: HTMLElement) {
   })
 }
 
-/** Radix stamps a transient presence-animation style that has no bearing on structure. */
+/**
+ * Radix stamps a transient presence-animation style and useId-derived trigger
+ * ids; neither has any bearing on structure, and the id counter shifts with
+ * suspense resolution order across runs.
+ */
 function normalize(html: string): string {
-  return html.replaceAll(' style="animation-duration: 0s;"', '')
+  return html
+    .replaceAll(' style="animation-duration: 0s;"', '')
+    .replace(/radix-_r_[0-9a-z]+_/g, 'radix-_r_')
 }
 
 /** One matrix cell: mount, settle the reveal, drive uptie + skill slot, return the DOM. */

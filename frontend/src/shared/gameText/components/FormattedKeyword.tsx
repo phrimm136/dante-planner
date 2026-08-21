@@ -19,7 +19,7 @@ interface FormattedKeywordProps {
   /** Resolved keyword data from useKeywordFormatter */
   keyword: ResolvedKeyword
   /** Additional CSS classes */
-  className?: string
+  className?: string | undefined
 }
 
 /**

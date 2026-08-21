@@ -15,6 +15,7 @@ import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 
 import CostDisplay from './CostDisplay'
+import { LabeledPanel } from '@/components/layout/LabeledPanel'
 import { getEGOGiftEnhancementIconPath } from '@/shared/assets'
 import { useThemePackI18n } from '@/pages/themePack'
 import { ENHANCEMENT_LABELS, type EnhancementLevel } from '@/shared/gameData'
@@ -93,7 +94,7 @@ export function EGOGiftMetadata({
   const { t } = useTranslation(['database', 'common'])
 
   return (
-    <div className="border rounded p-4 space-y-4">
+    <LabeledPanel>
       {/* Price row - always visible */}
       <MetadataRow label={t('egoGift.price', 'Price')}>
         <CostDisplay cost={price} />
@@ -148,6 +149,6 @@ export function EGOGiftMetadata({
           </div>
         </MetadataRow>
       )}
-    </div>
+    </LabeledPanel>
   )
 }

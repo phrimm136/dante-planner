@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 
+import { LabeledPanel } from '@/components/layout/LabeledPanel'
 import { getHPIconPath, getSpeedIconPath, getDefenseLevelIconPath } from '@/shared/assets'
 
 interface StatusPanelProps {
@@ -16,8 +17,7 @@ export function StatusPanel({ hp, minSpeed, maxSpeed, defLevel, defCorrection }:
     defCorrection <= 0 ? String(defCorrection) : '+' + String(defCorrection)
 
   return (
-    <div className="border rounded p-3 space-y-2 h-full">
-      <div className="font-semibold text-sm text-center">{t('identity.status')}</div>
+    <LabeledPanel title={t('identity.status')}>
       <div className="grid grid-cols-3">
         {/* HP */}
         <div className="flex flex-col items-center gap-1">
@@ -41,6 +41,6 @@ export function StatusPanel({ hp, minSpeed, maxSpeed, defLevel, defCorrection }:
           </span>
         </div>
       </div>
-    </div>
+    </LabeledPanel>
   )
 }

@@ -73,6 +73,7 @@ describe('EGODataSchema', () => {
   const validEGOData = {
     updatedDate: 20241128,
     egoType: 'HE',
+    battleKeywordList: ['Agility', 'Binding', 'Reduction'],
     season: 0,
     attributeResist: {
       AMBER: 0.5,

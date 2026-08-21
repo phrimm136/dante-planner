@@ -50,7 +50,9 @@ const SKILL_TAB_NAMES = ['awaken', 'erosion'] as const
 
 /** Radix stamps a transient presence-animation style that has no bearing on structure. */
 function normalize(html: string): string {
-  return html.replaceAll(' style="animation-duration: 0s;"', '')
+  return html
+    .replaceAll(' style="animation-duration: 0s;"', '')
+    .replace(/radix-_r_[0-9a-z]+_/g, 'radix-_r_')
 }
 
 /** Every granular i18n boundary has resolved, so no skeleton is captured mid-flight. */

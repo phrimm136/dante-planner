@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 
+import { LabeledPanel } from '@/components/layout/LabeledPanel'
 import {
   getSlashResistIconPath,
   getPierceResistIconPath,
@@ -20,8 +21,7 @@ export function ResistancePanel({ slash, pierce, blunt }: ResistancePanelProps) 
   const bluntInfo = getResistanceInfo(blunt)
 
   return (
-    <div className="border rounded p-3 space-y-2 h-full">
-      <div className="font-semibold text-sm text-center">{t('identity.resistances')}</div>
+    <LabeledPanel title={t('identity.resistances')}>
       <div className="flex justify-around items-center">
         {/* Slash */}
         <div className="flex flex-col items-center gap-2">
@@ -56,6 +56,6 @@ export function ResistancePanel({ slash, pierce, blunt }: ResistancePanelProps) 
           </div>
         </div>
       </div>
-    </div>
+    </LabeledPanel>
   )
 }
