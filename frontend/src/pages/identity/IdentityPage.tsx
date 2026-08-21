@@ -3,6 +3,7 @@ import { useIdentityListSpec, IdentityList } from '@/pages/identity'
 import type { IdentityListItem, IdentitySpecListSchema, IdentityFacetState } from '@/pages/identity'
 import type { z } from 'zod'
 import type { Season, SkillAttributeType, AtkType, DefType } from '@/shared/gameData'
+import { typedEntries } from '@/lib/utils'
 import { calculateActiveFilterCount } from '@/shared/filter'
 import { useSetFilters } from '@/components/hooks/useSetFilters'
 import type { FilterStore } from '@/components/hooks/useSetFilters'
@@ -33,7 +34,7 @@ function IdentityCardGrid({
   store: FilterStore<IdentityFacetState>
 }) {
   // Build IdentityListItem array from spec directly (no transformation needed)
-  const identities: IdentityListItem[] = Object.entries(spec).map(([id, specData]) => ({
+  const identities: IdentityListItem[] = typedEntries(spec).map(([id, specData]) => ({
     id,
     rank: specData.rank,
     unitKeywordList: specData.unitKeywordList,

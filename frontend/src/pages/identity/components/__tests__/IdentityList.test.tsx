@@ -11,6 +11,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Suspense } from 'react'
 import { IdentityList } from '../IdentityList'
 import { createTestFilterStore } from '@/test-utils/filterStore'
+import { asIdentityId } from '@/test-utils/fixtures'
 import type { IdentityFacetState } from '../../lib/identityFilter'
 import type { IdentityListItem } from '../../types/IdentityTypes'
 
@@ -55,6 +56,10 @@ vi.mock('../../hooks/useIdentityListData', () => ({
 
 import { useSearchTermSources } from '@/shared/filter'
 
+const IDENTITY_10101 = asIdentityId('10101')
+const IDENTITY_10201 = asIdentityId('10201')
+const IDENTITY_10301 = asIdentityId('10301')
+
 const IDENTITY_NAMES = {
   '10101': 'Test Identity 1',
   '10201': 'Test Identity 2',
@@ -63,7 +68,7 @@ const IDENTITY_NAMES = {
 
 const mockIdentities: IdentityListItem[] = [
   {
-    id: '10101',
+    id: IDENTITY_10101,
     name: 'Test Identity 1',
     rank: 3,
     skillKeywordList: ['Burst', 'Combustion'],
@@ -76,7 +81,7 @@ const mockIdentities: IdentityListItem[] = [
     season: 1,
   },
   {
-    id: '10201',
+    id: IDENTITY_10201,
     name: 'Test Identity 2',
     rank: 2,
     skillKeywordList: ['Charge'],
@@ -89,7 +94,7 @@ const mockIdentities: IdentityListItem[] = [
     season: 2,
   },
   {
-    id: '10301',
+    id: IDENTITY_10301,
     name: 'Test Identity 3',
     rank: 3,
     skillKeywordList: ['Burst'],

@@ -6,6 +6,10 @@ import { TrackerModeViewer } from '../TrackerModeViewer'
 import { DUNGEON_IDX, MAX_LEVEL } from '@/shared/gameData'
 import type { MDSaveablePlanner, MDPlannerContent } from '../../../types/PlannerTypes'
 import { ThemePackIdSchema } from '@/shared/gameData'
+import { asIdentityId } from '@/test-utils/fixtures'
+
+const IDENTITY_IDENT1 = asIdentityId('10101')
+const IDENTITY_IDENT2 = asIdentityId('10201')
 
 // Create wrapper with QueryClient
 function createWrapper() {
@@ -63,7 +67,8 @@ vi.mock('../../../hooks/useTrackerState', () => ({
 }))
 
 // Mock deserializeSets
-vi.mock('../../../schemas/PlannerSchemas', () => ({
+vi.mock('../../../schemas/PlannerSchemas', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../../schemas/PlannerSchemas')>()),
   deserializeSets: vi.fn((data) => ({
     selectedKeywords: new Set(data.selectedKeywords || []),
     selectedBuffIds: new Set(data.selectedBuffIds || []),
@@ -205,8 +210,8 @@ describe('TrackerModeViewer', () => {
 
     const content: MDPlannerContent = {
       equipment: {
-        YiSang: { identity: { id: 'ident1', uptie: 3, level: MAX_LEVEL }, egos: {} },
-        Faust: { identity: { id: 'ident2', uptie: 4, level: MAX_LEVEL }, egos: {} },
+        YiSang: { identity: { id: IDENTITY_IDENT1, uptie: 3, level: MAX_LEVEL }, egos: {} },
+        Faust: { identity: { id: IDENTITY_IDENT2, uptie: 4, level: MAX_LEVEL }, egos: {} },
       },
       deploymentOrder: [0, 1],
       selectedKeywords: [],

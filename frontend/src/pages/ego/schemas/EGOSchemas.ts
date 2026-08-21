@@ -1,6 +1,11 @@
 import { z } from 'zod'
 import { AffinitySchema, EgoTypeSchema } from '@/shared/gameData'
-import { SkillDescEntrySchema, SkillIdSchema, PassiveIdSchema } from '@/shared/gameData'
+import {
+  SkillDescEntrySchema,
+  SkillIdSchema,
+  PassiveIdSchema,
+  EGOIdSchema,
+} from '@/shared/gameData'
 
 export { EgoTypeSchema }
 
@@ -137,5 +142,6 @@ export const EGOSpecListItemSchema = z.object({
 })
 
 // Record types for spec and name lists
-export const EGOSpecListSchema = z.record(z.string(), EGOSpecListItemSchema)
+export const EGOSpecListSchema = z.record(EGOIdSchema, EGOSpecListItemSchema)
+/** Keys stay unbranded: the game ships i18n-only ids with no spec entry. */
 export const EGONameListSchema = z.record(z.string(), z.string())

@@ -11,6 +11,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Suspense } from 'react'
 import { EGOList } from '../EGOList'
 import { createTestFilterStore } from '@/test-utils/filterStore'
+import { asEGOId } from '@/test-utils/fixtures'
 import type { EGOFacetState } from '../../lib/egoFilter'
 import type { EGOListItem } from '../../types/EGOTypes'
 
@@ -57,6 +58,10 @@ vi.mock('../../hooks/useEGOListData', () => ({
 
 import { useSearchTermSources } from '@/shared/filter'
 
+const EGO_20101 = asEGOId('20101')
+const EGO_20201 = asEGOId('20201')
+const EGO_20301 = asEGOId('20301')
+
 const EGO_NAMES = {
   '20101': 'Test EGO 1',
   '20201': 'Test EGO 2',
@@ -65,7 +70,7 @@ const EGO_NAMES = {
 
 const mockEGOs: EGOListItem[] = [
   {
-    id: '20101',
+    id: EGO_20101,
     name: 'Test EGO 1',
     egoType: 'ZAYIN',
     skillKeywordList: ['Burst', 'Combustion'],
@@ -77,7 +82,7 @@ const mockEGOs: EGOListItem[] = [
     maxThreadspin: 4,
   },
   {
-    id: '20201',
+    id: EGO_20201,
     name: 'Test EGO 2',
     egoType: 'TETH',
     skillKeywordList: ['Charge'],
@@ -89,7 +94,7 @@ const mockEGOs: EGOListItem[] = [
     maxThreadspin: 4,
   },
   {
-    id: '20301',
+    id: EGO_20301,
     name: 'Test EGO 3',
     egoType: 'HE',
     skillKeywordList: ['Burst'],

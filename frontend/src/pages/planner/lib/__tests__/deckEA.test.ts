@@ -7,11 +7,20 @@
 
 import { describe, it, expect } from 'vitest'
 import { AFFINITIES, STATUS_EFFECTS } from '@/shared/gameData'
+import type { EGOId, IdentityId } from '@/shared/gameData'
+import { asEGOId, asIdentityId } from '@/test-utils/fixtures'
 import { computeAffinityEA, computeKeywordEA } from '../deckEA'
 import type { EGOEASpec, IdentityEASpec } from '../deckEA'
 import type { AffinityCount, DeckState, SinnerEquipment } from '../../types/DeckTypes'
 
-const sinner = (identityId: string, egoIds: string[] = []): SinnerEquipment => ({
+const IDENTITY_A = asIdentityId('10101')
+const IDENTITY_B = asIdentityId('10201')
+const IDENTITY_UNKNOWN = asIdentityId('11299')
+const EGO_A = asEGOId('20101')
+const EGO_B = asEGOId('20102')
+const EGO_MISSING = asEGOId('20199')
+
+const sinner = (identityId: IdentityId, egoIds: EGOId[] = []): SinnerEquipment => ({
   identity: { id: identityId, uptie: 4, level: 45 },
   egos: Object.fromEntries(
     egoIds.map((id, index) => [
@@ -69,8 +78,8 @@ describe('computeAffinityEA', () => {
       },
     ])('$case', ({ attributeType, expected }) => {
       const result = computeAffinityEA(
-        deck({ '1': sinner('id-a') }, [0]),
-        { 'id-a': { attributeType } },
+        deck({ '1': sinner(IDENTITY_A) }, [0]),
+        { [IDENTITY_A]: { attributeType } },
         emptyEgoSpec,
       )
 
@@ -79,10 +88,10 @@ describe('computeAffinityEA', () => {
 
     it('sums generation across every sinner in the deployment order', () => {
       const result = computeAffinityEA(
-        deck({ '1': sinner('id-a'), '2': sinner('id-b') }, [0, 1]),
+        deck({ '1': sinner(IDENTITY_A), '2': sinner(IDENTITY_B) }, [0, 1]),
         {
-          'id-a': { attributeType: ['CRIMSON', 'CRIMSON', 'CRIMSON'] },
-          'id-b': { attributeType: ['CRIMSON'] },
+          [IDENTITY_A]: { attributeType: ['CRIMSON', 'CRIMSON', 'CRIMSON'] },
+          [IDENTITY_B]: { attributeType: ['CRIMSON'] },
         },
         emptyEgoSpec,
       )
@@ -92,8 +101,8 @@ describe('computeAffinityEA', () => {
 
     it('counts backup sinners beyond maxDeployed', () => {
       const result = computeAffinityEA(
-        deck({ '1': sinner('id-a'), '2': sinner('id-a') }, [0, 1], 1),
-        { 'id-a': { attributeType: ['CRIMSON'] } },
+        deck({ '1': sinner(IDENTITY_A), '2': sinner(IDENTITY_A) }, [0, 1], 1),
+        { [IDENTITY_A]: { attributeType: ['CRIMSON'] } },
         emptyEgoSpec,
       )
 
@@ -102,8 +111,8 @@ describe('computeAffinityEA', () => {
 
     it('ignores sinner codes with no equipment and identities with no spec', () => {
       const result = computeAffinityEA(
-        deck({ '2': sinner('unknown-id') }, [0, 1]),
-        { 'id-a': { attributeType: ['CRIMSON'] } },
+        deck({ '2': sinner(IDENTITY_UNKNOWN) }, [0, 1]),
+        { [IDENTITY_A]: { attributeType: ['CRIMSON'] } },
         emptyEgoSpec,
       )
 
@@ -122,8 +131,8 @@ describe('computeAffinityEA', () => {
         expected: 2,
       },
     ])('$case', ({ requirements, expected }) => {
-      const result = computeAffinityEA(deck({ '1': sinner('id-a', ['ego-a']) }, [0]), emptySpec, {
-        'ego-a': { requirements },
+      const result = computeAffinityEA(deck({ '1': sinner(IDENTITY_A, [EGO_A]) }, [0]), emptySpec, {
+        [EGO_A]: { requirements },
       })
 
       expect(consumedOf(result).CRIMSON).toBe(expected)
@@ -131,11 +140,11 @@ describe('computeAffinityEA', () => {
 
     it('sums requirements across every equipped EGO', () => {
       const result = computeAffinityEA(
-        deck({ '1': sinner('id-a', ['ego-a', 'ego-b']) }, [0]),
+        deck({ '1': sinner(IDENTITY_A, [EGO_A, EGO_B]) }, [0]),
         emptySpec,
         {
-          'ego-a': { requirements: { CRIMSON: 3, AZURE: 2 } },
-          'ego-b': { requirements: { CRIMSON: 1 } },
+          [EGO_A]: { requirements: { CRIMSON: 3, AZURE: 2 } },
+          [EGO_B]: { requirements: { CRIMSON: 1 } },
         },
       )
 
@@ -144,10 +153,10 @@ describe('computeAffinityEA', () => {
 
     it('ignores EGOs with no spec entry', () => {
       const result = computeAffinityEA(
-        deck({ '1': sinner('id-a', ['ego-missing']) }, [0]),
+        deck({ '1': sinner(IDENTITY_A, [EGO_MISSING]) }, [0]),
         emptySpec,
         {
-          'ego-a': { requirements: { CRIMSON: 3 } },
+          [EGO_A]: { requirements: { CRIMSON: 3 } },
         },
       )
 
@@ -156,9 +165,9 @@ describe('computeAffinityEA', () => {
 
     it('reports consumption exceeding generation without clamping', () => {
       const result = computeAffinityEA(
-        deck({ '1': sinner('id-a', ['ego-a']) }, [0]),
-        { 'id-a': { attributeType: ['CRIMSON'] } },
-        { 'ego-a': { requirements: { CRIMSON: 9 } } },
+        deck({ '1': sinner(IDENTITY_A, [EGO_A]) }, [0]),
+        { [IDENTITY_A]: { attributeType: ['CRIMSON'] } },
+        { [EGO_A]: { requirements: { CRIMSON: 9 } } },
       )
 
       expect(result.find((entry) => entry.affinity === 'CRIMSON')).toEqual({
@@ -193,8 +202,8 @@ describe('computeKeywordEA', () => {
     },
   ])('$case', ({ maxDeployed, expected }) => {
     const result = computeKeywordEA(
-      deck({ '1': sinner('id-a'), '2': sinner('id-b') }, [0, 1], maxDeployed),
-      { 'id-a': { skillKeywordList: [] }, 'id-b': { skillKeywordList: ['Sinking'] } },
+      deck({ '1': sinner(IDENTITY_A), '2': sinner(IDENTITY_B) }, [0, 1], maxDeployed),
+      { [IDENTITY_A]: { skillKeywordList: [] }, [IDENTITY_B]: { skillKeywordList: ['Sinking'] } },
     )
     const sinking = result.find((entry) => entry.keyword === 'Sinking')
 
@@ -202,10 +211,13 @@ describe('computeKeywordEA', () => {
   })
 
   it('mirrors the full roster tally into count', () => {
-    const result = computeKeywordEA(deck({ '1': sinner('id-a'), '2': sinner('id-b') }, [0, 1], 1), {
-      'id-a': { skillKeywordList: ['Burst'] },
-      'id-b': { skillKeywordList: ['Burst'] },
-    })
+    const result = computeKeywordEA(
+      deck({ '1': sinner(IDENTITY_A), '2': sinner(IDENTITY_B) }, [0, 1], 1),
+      {
+        [IDENTITY_A]: { skillKeywordList: ['Burst'] },
+        [IDENTITY_B]: { skillKeywordList: ['Burst'] },
+      },
+    )
 
     expect(result.find((entry) => entry.keyword === 'Burst')).toEqual({
       keyword: 'Burst',
@@ -216,8 +228,8 @@ describe('computeKeywordEA', () => {
   })
 
   it('tallies a keyword once per entry in the identity skill keyword list', () => {
-    const result = computeKeywordEA(deck({ '1': sinner('id-a') }, [0]), {
-      'id-a': { skillKeywordList: ['Charge', 'Charge', 'Charge'] },
+    const result = computeKeywordEA(deck({ '1': sinner(IDENTITY_A) }, [0]), {
+      [IDENTITY_A]: { skillKeywordList: ['Charge', 'Charge', 'Charge'] },
     })
 
     expect(result.find((entry) => entry.keyword === 'Charge')).toMatchObject({
@@ -227,8 +239,8 @@ describe('computeKeywordEA', () => {
   })
 
   it('ignores keywords outside the status effect list', () => {
-    const result = computeKeywordEA(deck({ '1': sinner('id-a') }, [0]), {
-      'id-a': { skillKeywordList: ['Rupture', 'Tremor', 'Breath'] },
+    const result = computeKeywordEA(deck({ '1': sinner(IDENTITY_A) }, [0]), {
+      [IDENTITY_A]: { skillKeywordList: ['Rupture', 'Tremor', 'Breath'] },
     })
 
     expect(result.map((entry) => entry.keyword)).toEqual([...STATUS_EFFECTS])
@@ -236,8 +248,8 @@ describe('computeKeywordEA', () => {
   })
 
   it('ignores sinner codes with no equipment and identities with no spec', () => {
-    const result = computeKeywordEA(deck({ '2': sinner('unknown-id') }, [0, 1]), {
-      'id-a': { skillKeywordList: ['Burst'] },
+    const result = computeKeywordEA(deck({ '2': sinner(IDENTITY_UNKNOWN) }, [0, 1]), {
+      [IDENTITY_A]: { skillKeywordList: ['Burst'] },
     })
 
     expect(result.every(({ allCount }) => allCount === 0)).toBe(true)

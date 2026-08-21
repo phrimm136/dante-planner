@@ -29,6 +29,7 @@ import type { DungeonIdx } from '@/shared/gameData'
 import type { MDPlannerContent, SerializableFloorSelection } from '../../types/PlannerTypes'
 import type { SinnerEquipment, SkillEAState } from '../../types/DeckTypes'
 import { ThemePackIdSchema } from '@/shared/gameData'
+import { asEGOId, asIdentityId } from '@/test-utils/fixtures'
 
 // ============================================================================
 // Fixtures
@@ -65,8 +66,8 @@ function makeValidEquipment(): Record<string, SinnerEquipment> {
   for (let i = 1; i <= 12; i++) {
     const key = String(i).padStart(2, '0')
     equipment[key] = {
-      identity: { id: `identity_${i}`, uptie: 1, level: 1 },
-      egos: { ZAYIN: { id: `ego_zayin_${i}`, threadspin: 1 } },
+      identity: { id: asIdentityId(`1${key}01`), uptie: 1, level: 1 },
+      egos: { ZAYIN: { id: asEGOId(`2${key}01`), threadspin: 1 } },
     }
   }
   return equipment

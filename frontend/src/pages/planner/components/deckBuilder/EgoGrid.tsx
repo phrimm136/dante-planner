@@ -1,4 +1,5 @@
 import { memo, type Ref } from 'react'
+import type { EGOId } from '@/shared/gameData'
 
 import { CARD_GRID } from '@/lib/constants'
 import { getSelectedIndicatorPath } from '@/shared/assets'
@@ -15,8 +16,8 @@ interface EgoGridProps {
   visibleIds: Set<string>
   equippedIds: Set<string>
   equippedThreadspinMap: Record<string, ThreadspinTier>
-  onEquip: (egoId: string, data: { threadspin?: ThreadspinTier }) => void
-  onUnequip: (egoId: string) => void
+  onEquip: (egoId: EGOId, data: { threadspin?: ThreadspinTier }) => void
+  onUnequip: (egoId: EGOId) => void
   scrollRef: Ref<HTMLDivElement>
   isActive: boolean
 }
@@ -82,8 +83,8 @@ interface EgoGridCardProps {
   visibleIds: Set<string>
   equippedIds: Set<string>
   equippedThreadspinMap: Record<string, ThreadspinTier>
-  onEquip: (egoId: string, data: { threadspin?: ThreadspinTier }) => void
-  onUnequip: (egoId: string) => void
+  onEquip: (egoId: EGOId, data: { threadspin?: ThreadspinTier }) => void
+  onUnequip: (egoId: EGOId) => void
 }
 
 /**

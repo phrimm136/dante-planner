@@ -17,10 +17,10 @@
  */
 
 import { gzip, ungzip } from 'pako'
-import { SINNERS, MAX_LEVEL } from '@/shared/gameData'
+import { SINNERS, MAX_LEVEL, IdentityIdSchema, EGOIdSchema } from '@/shared/gameData'
 import { DECK_CODE_MAX_LENGTH } from '@/lib/constants'
 import type { SinnerEquipment } from '../types/DeckTypes'
-import type { EgoType } from '@/shared/gameData'
+import type { EgoType, IdentityId, EGOId } from '@/shared/gameData'
 
 const BITS_PER_SINNER = 46
 const TOTAL_BITS = 560
@@ -64,16 +64,16 @@ function getEntityIndex(fullId: string): number {
 /**
  * Reconstruct full ID from sinner index (0-11) and entity index
  */
-function reconstructIdentityId(sinnerIndex: number, entityIndex: number): string {
+function reconstructIdentityId(sinnerIndex: number, entityIndex: number): IdentityId {
   const sinnerPart = (sinnerIndex + 1).toString().padStart(2, '0')
   const entityPart = entityIndex.toString().padStart(2, '0')
-  return `1${sinnerPart}${entityPart}`
+  return IdentityIdSchema.parse(`1${sinnerPart}${entityPart}`)
 }
 
-function reconstructEgoId(sinnerIndex: number, entityIndex: number): string {
+function reconstructEgoId(sinnerIndex: number, entityIndex: number): EGOId {
   const sinnerPart = (sinnerIndex + 1).toString().padStart(2, '0')
   const entityPart = entityIndex.toString().padStart(2, '0')
-  return `2${sinnerPart}${entityPart}`
+  return EGOIdSchema.parse(`2${sinnerPart}${entityPart}`)
 }
 
 /**

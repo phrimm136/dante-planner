@@ -18,6 +18,15 @@ export function assertNever(value: never): never {
 }
 
 /**
+ * Object.entries that keeps a branded/literal key type. Sound only for records
+ * whose keys were validated to K at the boundary (e.g. zod record schemas) —
+ * Object.entries itself always widens keys to string.
+ */
+export function typedEntries<K extends string, V>(record: Partial<Record<K, V>>): [K, V][] {
+  return Object.entries(record) as [K, V][]
+}
+
+/**
  * Extract sinner code (1-12) from entity ID
  * @param id - Entity ID (identity or EGO)
  * @returns Sinner code as string (e.g., "1", "2", ... "12")

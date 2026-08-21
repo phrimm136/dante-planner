@@ -9,6 +9,7 @@ import { describe, it, expect } from 'vitest'
 import { applyFacets } from '@/shared/filter'
 import { getSinnerFromId } from '@/shared/gameData'
 import { enumerateSelectionStates, findParityMismatches } from '@/test-utils/facetParity'
+import { asIdentityId } from '@/test-utils/fixtures'
 import { IDENTITY_FACETS, type IdentityFacetState } from '../identityFilter'
 import type { IdentityListItem } from '../../types/IdentityTypes'
 
@@ -98,9 +99,18 @@ function makeIdentity(overrides: Partial<IdentityListItem> & { id: string }): Id
   }
 }
 
+const IDENTITY_10101 = asIdentityId('10101')
+const IDENTITY_10201 = asIdentityId('10201')
+const IDENTITY_10301 = asIdentityId('10301')
+const IDENTITY_10401 = asIdentityId('10401')
+const IDENTITY_10501 = asIdentityId('10501')
+const IDENTITY_10601 = asIdentityId('10601')
+const IDENTITY_10901 = asIdentityId('10901')
+const IDENTITY_11201 = asIdentityId('11201')
+
 const ITEMS: IdentityListItem[] = [
   makeIdentity({
-    id: '10101',
+    id: IDENTITY_10101,
     skillKeywordList: ['Combustion', 'Laceration'],
     battleKeywordList: ['Poise'],
     attributeTypes: ['AZURE', 'VIOLET'],
@@ -111,7 +121,7 @@ const ITEMS: IdentityListItem[] = [
     unitKeywordList: ['BLADE_LINEAGE'],
   }),
   makeIdentity({
-    id: '10201',
+    id: IDENTITY_10201,
     skillKeywordList: ['Combustion'],
     battleKeywordList: ['Poise', 'Sinking'],
     attributeTypes: ['AZURE'],
@@ -121,9 +131,9 @@ const ITEMS: IdentityListItem[] = [
     season: 5,
     unitKeywordList: ['BLADE_LINEAGE', 'KURO_NAMI'],
   }),
-  makeIdentity({ id: '10301', rank: 3, season: 0 }),
+  makeIdentity({ id: IDENTITY_10301, rank: 3, season: 0 }),
   makeIdentity({
-    id: '10401',
+    id: IDENTITY_10401,
     battleKeywordList: undefined as unknown as string[],
     skillKeywordList: ['Laceration'],
     attributeTypes: ['VIOLET'],
@@ -134,7 +144,7 @@ const ITEMS: IdentityListItem[] = [
     unitKeywordList: ['KURO_NAMI'],
   }),
   makeIdentity({
-    id: '10501',
+    id: IDENTITY_10501,
     skillKeywordList: ['Combustion', 'Laceration', 'Tremor'],
     battleKeywordList: ['Sinking'],
     attributeTypes: ['AZURE', 'VIOLET', 'AMBER'],
@@ -145,7 +155,7 @@ const ITEMS: IdentityListItem[] = [
     unitKeywordList: ['BLADE_LINEAGE', 'KURO_NAMI'],
   }),
   makeIdentity({
-    id: '10601',
+    id: IDENTITY_10601,
     skillKeywordList: ['Tremor'],
     battleKeywordList: ['Poise'],
     attributeTypes: ['AMBER'],
@@ -156,7 +166,7 @@ const ITEMS: IdentityListItem[] = [
     unitKeywordList: ['KURO_NAMI'],
   }),
   makeIdentity({
-    id: '11201',
+    id: IDENTITY_11201,
     skillKeywordList: ['Laceration', 'Combustion'],
     battleKeywordList: ['Sinking', 'Poise'],
     attributeTypes: ['VIOLET', 'AZURE'],
@@ -166,7 +176,7 @@ const ITEMS: IdentityListItem[] = [
     season: 5,
     unitKeywordList: ['BLADE_LINEAGE'],
   }),
-  makeIdentity({ id: '10901', rank: 2, season: 1, unitKeywordList: ['BLADE_LINEAGE'] }),
+  makeIdentity({ id: IDENTITY_10901, rank: 2, season: 1, unitKeywordList: ['BLADE_LINEAGE'] }),
 ]
 
 const BASE_STATE: IdentityFacetState = {

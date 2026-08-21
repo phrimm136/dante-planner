@@ -5,6 +5,7 @@ import { scheduleIdle } from '@/lib/scheduleIdle'
 
 import { usePlannerEditorStoreApiSafe } from '../../stores/usePlannerEditorStore'
 import type { EntityMode, ThreadspinTier, UptieTier } from '../../types/DeckTypes'
+import type { EGOId, IdentityId } from '@/shared/gameData'
 import type { IdentityListItem } from '@/pages/identity'
 import type { EGOListItem } from '@/pages/ego'
 import { DeckFilterBar } from './DeckFilterBar'
@@ -21,14 +22,14 @@ interface DeckCatalogSectionProps {
   visibleIdentityIds: Set<string>
   equippedIdentityIds: Set<string>
   identityScrollRef: Ref<HTMLDivElement>
-  onEquipIdentity: (identityId: string, data: { uptie?: UptieTier; level?: number }) => void
+  onEquipIdentity: (identityId: IdentityId, data: { uptie?: UptieTier; level?: number }) => void
   sortedEgos: EGOListItem[]
   visibleEgoIds: Set<string>
   equippedEgoIds: Set<string>
   equippedThreadspinMap: Record<string, ThreadspinTier>
   egoScrollRef: Ref<HTMLDivElement>
-  onEquipEgo: (egoId: string, data: { threadspin?: ThreadspinTier }) => void
-  onUnequipEgo: (egoId: string) => void
+  onEquipEgo: (egoId: EGOId, data: { threadspin?: ThreadspinTier }) => void
+  onUnequipEgo: (egoId: EGOId) => void
 }
 
 /**

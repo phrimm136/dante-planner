@@ -1,5 +1,5 @@
 import type { z } from 'zod'
-import type { AtkType, DefType, Season, SkillAttributeType } from '@/shared/gameData'
+import type { AtkType, DefType, IdentityId, Season, SkillAttributeType } from '@/shared/gameData'
 import type {
   IdentitySkillEntrySchema,
   IdentityDataSchema,
@@ -16,7 +16,7 @@ import type {
  * IdentityName component for granular Suspense boundaries.
  */
 export interface IdentityListItem {
-  id: string
+  id: IdentityId
   /** Optional - populated when i18n is loaded */
   name?: string
   rank: number
@@ -38,7 +38,7 @@ export interface IdentityListItem {
  * @deprecated Use IdentityListItem instead. Kept for backwards compatibility.
  */
 export interface Identity {
-  id: string
+  id: IdentityId
   /** Optional - only populated when i18n is loaded. Display uses IdentityName component. */
   name?: string
   rank: number

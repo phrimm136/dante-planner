@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { useEGOListSpec, EGOList } from '@/pages/ego'
 import type { EGOListItem, EGOFacetState } from '@/pages/ego'
 import type { EgoType } from '@/shared/gameData'
+import { typedEntries } from '@/lib/utils'
 import { SearchBar } from '@/shared/filter'
 import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
 import type { Season, SkillAttributeType, AtkType } from '@/shared/gameData'
@@ -33,7 +34,7 @@ function EGOCardGrid({
   store: FilterStore<EGOFacetState>
 }) {
   // Build EGOListItem array from spec directly (no transformation needed)
-  const egos: EGOListItem[] = Object.entries(spec).map(([id, specData]) => ({
+  const egos: EGOListItem[] = typedEntries(spec).map(([id, specData]) => ({
     id,
     egoType: specData.egoType,
     skillKeywordList: specData.skillKeywordList,

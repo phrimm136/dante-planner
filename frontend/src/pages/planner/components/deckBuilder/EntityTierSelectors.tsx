@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MAX_LEVEL } from '@/shared/gameData'
 import type { UptieTier, ThreadspinTier } from '../../types/DeckTypes'
+import type { EGOId, IdentityId } from '@/shared/gameData'
 import { getEGOTierIconPath } from '@/shared/assets'
 
 const UPTIE_TIERS: UptieTier[] = [1, 2, 3, 4]
@@ -180,10 +181,10 @@ function LazySelector({ children, selector }: LazySelectorProps) {
 }
 
 interface IdentityTierSelectorProps {
-  entityId: string
+  entityId: IdentityId
   currentUptie?: UptieTier
   currentLevel?: number
-  onConfirm: (entityId: string, data: TierSelection) => void
+  onConfirm: (entityId: IdentityId, data: TierSelection) => void
   children: React.ReactNode
 }
 
@@ -219,10 +220,10 @@ function IdentityTierSelectorInner({
   currentLevel,
   onConfirm,
 }: {
-  entityId: string
+  entityId: IdentityId
   currentUptie: UptieTier
   currentLevel: number
-  onConfirm: (entityId: string, data: TierSelection) => void
+  onConfirm: (entityId: IdentityId, data: TierSelection) => void
 }) {
   const { t } = useTranslation(['common'])
   const [uptie, setUptie] = useState<UptieTier>(currentUptie)
@@ -268,13 +269,13 @@ function IdentityTierSelectorInner({
 }
 
 interface EgoThreadspinSelectorProps {
-  entityId: string
+  entityId: EGOId
   currentThreadspin?: ThreadspinTier
   /** Per-EGO threadspin ceiling (4 or 5). */
   maxThreadspin?: ThreadspinTier
   isSelected?: boolean
-  onConfirm: (entityId: string, data: TierSelection) => void
-  onUnequip?: (entityId: string) => void
+  onConfirm: (entityId: EGOId, data: TierSelection) => void
+  onUnequip?: (entityId: EGOId) => void
   children: React.ReactNode
 }
 
@@ -317,12 +318,12 @@ function EgoThreadspinSelectorInner({
   onConfirm,
   onUnequip,
 }: {
-  entityId: string
+  entityId: EGOId
   currentThreadspin: ThreadspinTier
   maxThreadspin: ThreadspinTier
   isSelected: boolean
-  onConfirm: (entityId: string, data: TierSelection) => void
-  onUnequip?: ((entityId: string) => void) | undefined
+  onConfirm: (entityId: EGOId, data: TierSelection) => void
+  onUnequip?: ((entityId: EGOId) => void) | undefined
 }) {
   const { t } = useTranslation(['common'])
   const [threadspin, setThreadspin] = useState<ThreadspinTier>(currentThreadspin)

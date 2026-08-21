@@ -35,6 +35,7 @@ import { usePlannerKeywordsI18n } from '../../hooks/usePlannerKeywordsI18n'
 
 import { PLANNER_KEYWORDS, SINNERS } from '@/shared/gameData'
 import { getSinnerFromId } from '@/shared/gameData'
+import { typedEntries } from '@/lib/utils'
 import {
   getKeywordIconPath,
   getIdentityInfoImagePath,
@@ -374,7 +375,7 @@ function HeavySections({
   const heavyItems: FilterItem[] = (() => {
     const items: FilterItem[] = []
 
-    for (const id of Object.keys(identitySpec)) {
+    for (const [id] of typedEntries(identitySpec)) {
       const sinner = getSinnerFromId(id)
       const sinnerName = t(`sinnerNames:${sinner}`)
       const name = identityI18n[id] ?? id
@@ -386,7 +387,7 @@ function HeavySections({
       })
     }
 
-    for (const id of Object.keys(egoSpec)) {
+    for (const [id] of typedEntries(egoSpec)) {
       const sinner = getSinnerFromId(id)
       const sinnerName = t(`sinnerNames:${sinner}`)
       const name = egoI18n[id] ?? id

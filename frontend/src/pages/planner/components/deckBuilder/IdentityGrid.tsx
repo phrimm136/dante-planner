@@ -10,12 +10,13 @@ import { IdentityCard } from '@/pages/identity'
 import { IdentityTierSelector } from './EntityTierSelectors'
 import type { IdentityListItem } from '@/pages/identity'
 import type { UptieTier } from '../../types/DeckTypes'
+import type { IdentityId } from '@/shared/gameData'
 
 interface IdentityGridProps {
   sortedIdentities: IdentityListItem[]
   visibleIds: Set<string>
   equippedIds: Set<string>
-  onEquip: (identityId: string, data: { uptie?: UptieTier; level?: number }) => void
+  onEquip: (identityId: IdentityId, data: { uptie?: UptieTier; level?: number }) => void
   scrollRef: Ref<HTMLDivElement>
   isActive: boolean
 }
@@ -76,7 +77,7 @@ interface IdentityGridCardProps {
   identity: IdentityListItem
   visibleIds: Set<string>
   equippedIds: Set<string>
-  onEquip: (identityId: string, data: { uptie?: UptieTier; level?: number }) => void
+  onEquip: (identityId: IdentityId, data: { uptie?: UptieTier; level?: number }) => void
 }
 
 /**

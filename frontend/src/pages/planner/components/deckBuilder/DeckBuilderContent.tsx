@@ -1,5 +1,6 @@
 import { startTransition, useState, useEffect, useRef } from 'react'
-import { MAX_LEVEL, EGO_TYPES } from '@/shared/gameData'
+import { MAX_LEVEL, EGO_TYPES, EGOIdSchema } from '@/shared/gameData'
+import type { EGOId, IdentityId } from '@/shared/gameData'
 import {
   PlannerEditorStoreProvider,
   usePlannerEditorStore,
@@ -16,7 +17,7 @@ import type {
 } from '../../types/DeckTypes'
 import type { IdentityListItem } from '@/pages/identity'
 import type { EGOListItem } from '@/pages/ego'
-import { getSinnerCodeFromId } from '@/lib/utils'
+import { getSinnerCodeFromId, typedEntries } from '@/lib/utils'
 import { type SkillData } from './SinnerGrid'
 import { DeckLoadoutSection } from './DeckLoadoutSection'
 import { DeckCatalogSection } from './DeckCatalogSection'
@@ -154,7 +155,7 @@ export function DeckBuilderContent({
 
   // Merge spec and i18n into identity/EGO arrays
   const identities: IdentityListItem[] = (() => {
-    return Object.entries(identitySpec).map(([id, specData]) => ({
+    return typedEntries(identitySpec).map(([id, specData]) => ({
       id,
       name: identityI18n[id] || id,
       rank: specData.rank,
@@ -170,7 +171,7 @@ export function DeckBuilderContent({
   })()
 
   const egos: EGOListItem[] = (() => {
-    return Object.entries(egoSpec).map(([id, specData]) => ({
+    return typedEntries(egoSpec).map(([id, specData]) => ({
       id,
       name: egoI18n[id] || id,
       egoType: specData.egoType,
@@ -292,7 +293,10 @@ export function DeckBuilderContent({
     })
   }
 
-  const handleEquipIdentity = (identityId: string, data: { uptie?: UptieTier; level?: number }) => {
+  const handleEquipIdentity = (
+    identityId: IdentityId,
+    data: { uptie?: UptieTier; level?: number },
+  ) => {
     // Save scroll position before state update
     if (identityScrollRef.current) {
       savedScrollPositionRef.current = identityScrollRef.current.scrollTop
@@ -324,7 +328,7 @@ export function DeckBuilderContent({
     })
   }
 
-  const handleEquipEgo = (egoId: string, data: { threadspin?: ThreadspinTier }) => {
+  const handleEquipEgo = (egoId: EGOId, data: { threadspin?: ThreadspinTier }) => {
     // Save scroll position before state update
     if (egoScrollRef.current) {
       savedScrollPositionRef.current = egoScrollRef.current.scrollTop
@@ -369,7 +373,7 @@ export function DeckBuilderContent({
       // When unequipping ZAYIN, revert to default ZAYIN ego
       if (rank === 'ZAYIN') {
         const sinnerIdPart = sinnerCode.padStart(2, '0')
-        const defaultEgoId = `2${sinnerIdPart}01`
+        const defaultEgoId = EGOIdSchema.parse(`2${sinnerIdPart}01`)
         const defaultMaxThreadspin = egoMap[defaultEgoId]?.maxThreadspin ?? 4
         setEquipment((prevEquipment: Record<string, SinnerEquipment>) => {
           const sinnerEquipment = prevEquipment[sinnerCode]

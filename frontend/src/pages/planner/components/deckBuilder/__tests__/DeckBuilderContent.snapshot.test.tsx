@@ -25,6 +25,7 @@ import {
 } from '../DeckBuilderContent'
 
 import type { SinnerEquipment } from '../../../types/DeckTypes'
+import { asEGOId, asIdentityId } from '@/test-utils/fixtures'
 
 // ---------------------------------------------------------------------------
 // Child stubs: this file pins the builder's own composition, not its children.
@@ -124,12 +125,15 @@ vi.mock('@/shared/filter/hooks/useSearchMappings', () => ({
 // Fixtures
 // ---------------------------------------------------------------------------
 
+const IDENTITY_10201 = asIdentityId('10201')
+const EGO_20201 = asEGOId('20201')
+
 /** A deck that differs from the default, so equipped-id sets are non-trivial. */
 const SWAPPED_EQUIPMENT: Record<string, SinnerEquipment> = {
   ...DEFAULT_EQUIPMENT,
   '1': {
-    identity: { id: '10201', uptie: 3, level: 40 },
-    egos: { ZAYIN: { id: '20201', threadspin: 3 } },
+    identity: { id: IDENTITY_10201, uptie: 3, level: 40 },
+    egos: { ZAYIN: { id: EGO_20201, threadspin: 3 } },
   },
 }
 

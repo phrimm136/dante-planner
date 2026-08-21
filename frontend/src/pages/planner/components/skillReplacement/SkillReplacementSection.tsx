@@ -9,7 +9,7 @@ import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { SINNERS, DEFAULT_SKILL_EA } from '@/shared/gameData'
 import { CARD_GRID } from '@/lib/constants'
-import type { OffensiveSkillSlot } from '@/shared/gameData'
+import type { IdentityId, OffensiveSkillSlot } from '@/shared/gameData'
 import type { SinnerEquipment, SkillEAState, SkillInfo } from '../../types/DeckTypes'
 
 export interface SkillReplacementSectionProps {
@@ -59,7 +59,7 @@ export function SkillReplacementSection({
   const columnCount = getColumnCount()
 
   // Get skill infos for a sinner's equipped identity from spec data
-  const getSkillInfos = (identityId: string): [SkillInfo, SkillInfo, SkillInfo] => {
+  const getSkillInfos = (identityId: IdentityId): [SkillInfo, SkillInfo, SkillInfo] => {
     const spec = identitySpec[identityId]
     if (!spec) {
       // Default fallback for missing identity

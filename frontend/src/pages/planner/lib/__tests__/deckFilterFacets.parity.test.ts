@@ -11,13 +11,24 @@ import type { DeckFilterState, EntityMode } from '../../types/DeckTypes'
 import type { IdentityListItem } from '@/pages/identity'
 import type { EGOListItem } from '@/pages/ego'
 import type { SearchMappings } from '@/shared/filter'
-import type { Keyword } from '@/shared/gameData'
+import type { EGOId, IdentityId, Keyword } from '@/shared/gameData'
 import { getSinnerFromId } from '@/shared/gameData'
 import { enumerateSelectionStates, findParityMismatches } from '@/test-utils/facetParity'
+import { asEGOId, asIdentityId } from '@/test-utils/fixtures'
 
 type DeckFilterItem = IdentityListItem | EGOListItem
-type IdentityOverrides = Omit<Partial<IdentityListItem>, 'id'> & { id: string }
-type EgoOverrides = Omit<Partial<EGOListItem>, 'id'> & { id: string }
+type IdentityOverrides = Omit<Partial<IdentityListItem>, 'id'> & { id: IdentityId }
+type EgoOverrides = Omit<Partial<EGOListItem>, 'id'> & { id: EGOId }
+
+const IDENTITY_10101 = asIdentityId('10101')
+const IDENTITY_10201 = asIdentityId('10201')
+const IDENTITY_10301 = asIdentityId('10301')
+const IDENTITY_10401 = asIdentityId('10401')
+const IDENTITY_11201 = asIdentityId('11201')
+const EGO_20101 = asEGOId('20101')
+const EGO_20201 = asEGOId('20201')
+const EGO_20301 = asEGOId('20301')
+const EGO_21201 = asEGOId('21201')
 
 const EMPTY_MAPPINGS: SearchMappings = {
   keywordToValue: new Map(),
@@ -144,7 +155,7 @@ function makeEgo(overrides: EgoOverrides): EGOListItem {
 
 const IDENTITIES: IdentityListItem[] = [
   makeIdentity({
-    id: '10101',
+    id: IDENTITY_10101,
     skillKeywordList: ['Combustion', 'Laceration'],
     battleKeywordList: ['Poise'],
     attributeTypes: ['AZURE', 'VIOLET'],
@@ -155,7 +166,7 @@ const IDENTITIES: IdentityListItem[] = [
     unitKeywordList: ['BLADE_LINEAGE'],
   }),
   makeIdentity({
-    id: '10201',
+    id: IDENTITY_10201,
     skillKeywordList: ['Combustion'],
     battleKeywordList: ['Poise', 'Sinking'],
     attributeTypes: ['AZURE'],
@@ -165,9 +176,9 @@ const IDENTITIES: IdentityListItem[] = [
     season: 5,
     unitKeywordList: ['BLADE_LINEAGE', 'KURO_NAMI'],
   }),
-  makeIdentity({ id: '10301', rank: 3, season: 0 }),
+  makeIdentity({ id: IDENTITY_10301, rank: 3, season: 0 }),
   makeIdentity({
-    id: '10401',
+    id: IDENTITY_10401,
     battleKeywordList: undefined as unknown as string[],
     skillKeywordList: ['Laceration'],
     attributeTypes: ['VIOLET'],
@@ -178,7 +189,7 @@ const IDENTITIES: IdentityListItem[] = [
     unitKeywordList: ['KURO_NAMI'],
   }),
   makeIdentity({
-    id: '11201',
+    id: IDENTITY_11201,
     skillKeywordList: ['Combustion', 'Laceration', 'Tremor'],
     battleKeywordList: ['Sinking'],
     attributeTypes: ['AMBER'],
@@ -192,7 +203,7 @@ const IDENTITIES: IdentityListItem[] = [
 
 const EGOS: EGOListItem[] = [
   makeEgo({
-    id: '20101',
+    id: EGO_20101,
     egoType: 'ZAYIN',
     skillKeywordList: ['Combustion', 'Laceration'],
     battleKeywordList: ['Poise'],
@@ -201,7 +212,7 @@ const EGOS: EGOListItem[] = [
     season: 1,
   }),
   makeEgo({
-    id: '20201',
+    id: EGO_20201,
     egoType: 'ALEPH',
     skillKeywordList: ['Combustion'],
     battleKeywordList: undefined as unknown as string[],
@@ -209,9 +220,9 @@ const EGOS: EGOListItem[] = [
     atkTypes: ['SLASH'],
     season: 5,
   }),
-  makeEgo({ id: '20301', egoType: 'TETH' }),
+  makeEgo({ id: EGO_20301, egoType: 'TETH' }),
   makeEgo({
-    id: '21201',
+    id: EGO_21201,
     egoType: 'ALEPH',
     skillKeywordList: ['Tremor'],
     battleKeywordList: ['Sinking'],

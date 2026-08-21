@@ -3,6 +3,8 @@ import type {
   Affinity,
   AtkType,
   DefType,
+  EGOId,
+  IdentityId,
   OffensiveSkillSlot,
   Season,
   SkillAttributeType,
@@ -22,7 +24,7 @@ export type ThreadspinTier = 1 | 2 | 3 | 4 | 5
  * Equipped identity configuration for a sinner
  */
 export interface EquippedIdentity {
-  id: string
+  id: IdentityId
   uptie: UptieTier
   level: number
 }
@@ -31,7 +33,7 @@ export interface EquippedIdentity {
  * Equipped EGO configuration
  */
 export interface EquippedEGO {
-  id: string
+  id: EGOId
   threadspin: ThreadspinTier
 }
 

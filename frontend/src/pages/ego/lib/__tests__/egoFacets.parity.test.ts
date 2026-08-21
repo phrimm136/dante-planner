@@ -9,6 +9,7 @@ import { describe, it, expect } from 'vitest'
 import { applyFacets } from '@/shared/filter'
 import { getSinnerFromId } from '@/shared/gameData'
 import { enumerateSelectionStates, findParityMismatches } from '@/test-utils/facetParity'
+import { asEGOId } from '@/test-utils/fixtures'
 import { EGO_FACETS, type EGOFacetState } from '../egoFilter'
 import type { EGOListItem } from '../../types/EGOTypes'
 
@@ -81,9 +82,16 @@ function makeEgo(overrides: Partial<EGOListItem> & { id: string }): EGOListItem 
   }
 }
 
+const EGO_20101 = asEGOId('20101')
+const EGO_20201 = asEGOId('20201')
+const EGO_20301 = asEGOId('20301')
+const EGO_20401 = asEGOId('20401')
+const EGO_20501 = asEGOId('20501')
+const EGO_21201 = asEGOId('21201')
+
 const ITEMS: EGOListItem[] = [
   makeEgo({
-    id: '20101',
+    id: EGO_20101,
     egoType: 'ZAYIN',
     skillKeywordList: ['Combustion', 'Laceration'],
     battleKeywordList: ['Poise'],
@@ -92,7 +100,7 @@ const ITEMS: EGOListItem[] = [
     season: 1,
   }),
   makeEgo({
-    id: '20201',
+    id: EGO_20201,
     egoType: 'ALEPH',
     skillKeywordList: ['Combustion'],
     battleKeywordList: ['Poise', 'Sinking'],
@@ -100,9 +108,9 @@ const ITEMS: EGOListItem[] = [
     atkTypes: ['SLASH'],
     season: 5,
   }),
-  makeEgo({ id: '20301', egoType: 'TETH' }),
+  makeEgo({ id: EGO_20301, egoType: 'TETH' }),
   makeEgo({
-    id: '20401',
+    id: EGO_20401,
     egoType: 'ALEPH',
     battleKeywordList: undefined as unknown as string[],
     skillKeywordList: ['Laceration'],
@@ -111,7 +119,7 @@ const ITEMS: EGOListItem[] = [
     season: 1,
   }),
   makeEgo({
-    id: '20501',
+    id: EGO_20501,
     egoType: 'ZAYIN',
     skillKeywordList: ['Combustion', 'Laceration', 'Tremor'],
     battleKeywordList: ['Sinking'],
@@ -120,7 +128,7 @@ const ITEMS: EGOListItem[] = [
     season: 5,
   }),
   makeEgo({
-    id: '21201',
+    id: EGO_21201,
     egoType: 'WAW',
     skillKeywordList: ['Tremor'],
     battleKeywordList: ['Poise'],

@@ -3,10 +3,11 @@ import { useEGOListI18n } from '../hooks/useEGOListData'
 import { getDisplayFontForLanguage, getLineHeightForLanguage } from '@/lib/utils'
 import { AutoSizeWrappedText } from '@/components/ui/AutoSizeWrappedText'
 import { EGO_CARD_INFO_ROW } from '@/lib/constants'
+import type { EGOId } from '@/shared/gameData'
 
 interface EGONameProps {
   /** EGO ID to look up name */
-  id: string
+  id: EGOId
 }
 
 /**

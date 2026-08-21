@@ -12,6 +12,10 @@ import type { DeckFilterState, EntityMode } from '../../types/DeckTypes'
 import type { IdentityListItem } from '@/pages/identity'
 import type { EGOListItem } from '@/pages/ego'
 import type { SearchMappings } from '@/shared/filter'
+import { asEGOId, asIdentityId } from '@/test-utils/fixtures'
+
+const IDENTITY_10101 = asIdentityId('10101')
+const EGO_20301 = asEGOId('20301')
 
 const EMPTY_MAPPINGS: SearchMappings = {
   keywordToValue: new Map(),
@@ -39,7 +43,7 @@ function makeState(overrides: Partial<DeckFilterState> = {}): DeckFilterState {
 // id 10101 -> sinner index 0 -> YiSang
 function makeIdentity(overrides: Partial<IdentityListItem> = {}): IdentityListItem {
   return {
-    id: '10101',
+    id: IDENTITY_10101,
     name: 'LCB Sinner Yi Sang',
     rank: 0,
     updateDate: 20240101,
@@ -57,7 +61,7 @@ function makeIdentity(overrides: Partial<IdentityListItem> = {}): IdentityListIt
 // id 20301 -> sinner index 2 -> DonQuixote
 function makeEgo(overrides: Partial<EGOListItem> = {}): EGOListItem {
   return {
-    id: '20301',
+    id: EGO_20301,
     name: 'Dimension Shredder',
     egoType: 'ZAYIN',
     skillKeywordList: ['Combustion'],

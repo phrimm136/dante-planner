@@ -4,6 +4,8 @@ import {
   DEFAULT_SKILL_EA,
   DUNGEON_IDX,
   migrateKeywords,
+  IdentityIdSchema,
+  EGOIdSchema,
 } from '@/shared/gameData'
 import { createEmptyNoteContent } from '@/shared/noteEditor'
 import egoSpecList from '@static/data/egoSpecList.json'
@@ -45,8 +47,8 @@ export function createDefaultEquipment(): Record<string, SinnerEquipment> {
   SINNERS.forEach((_, index) => {
     const sinnerCode = String(index + 1)
     const sinnerIdPart = sinnerCode.padStart(2, '0')
-    const defaultIdentityId = `1${sinnerIdPart}01`
-    const defaultEgoId = `2${sinnerIdPart}01`
+    const defaultIdentityId = IdentityIdSchema.parse(`1${sinnerIdPart}01`)
+    const defaultEgoId = EGOIdSchema.parse(`2${sinnerIdPart}01`)
     equipment[sinnerCode] = {
       identity: { id: defaultIdentityId, uptie: 4, level: MAX_LEVEL },
       egos: {

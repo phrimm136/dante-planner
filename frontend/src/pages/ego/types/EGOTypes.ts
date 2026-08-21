@@ -1,5 +1,5 @@
 import type { z } from 'zod'
-import type { AtkType, EgoType, Season, SkillAttributeType } from '@/shared/gameData'
+import type { AtkType, EGOId, EgoType, Season, SkillAttributeType } from '@/shared/gameData'
 import type {
   EGOSkillEntrySchema,
   EGODataSchema,
@@ -22,7 +22,7 @@ export type EgoSkillType = 'awaken' | 'erosion'
  * EGOName component for granular Suspense boundaries.
  */
 export interface EGOListItem {
-  id: string
+  id: EGOId
   /** Optional - populated when i18n is loaded */
   name?: string
   egoType: EgoType

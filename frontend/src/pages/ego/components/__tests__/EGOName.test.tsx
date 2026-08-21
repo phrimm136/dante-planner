@@ -17,6 +17,11 @@ vi.mock('../../hooks/useEGOListData', () => ({
 }))
 
 import { useEGOListI18n } from '../../hooks/useEGOListData'
+import { asEGOId } from '@/test-utils/fixtures'
+
+const EGO_20101 = asEGOId('20101')
+const EGO_20102 = asEGOId('20102')
+const EGO_UNNAMED = asEGOId('21299')
 
 function createWrapper() {
   const queryClient = new QueryClient({
@@ -41,11 +46,11 @@ describe('EGOName', () => {
 
   it('renders the name from i18n data', async () => {
     vi.mocked(useEGOListI18n).mockReturnValue({
-      '20101': 'Fluid Sac',
-      '20102': 'Dimension Shredder',
+      [EGO_20101]: 'Fluid Sac',
+      [EGO_20102]: 'Dimension Shredder',
     })
 
-    render(<EGOName id="20101" />, { wrapper: createWrapper() })
+    render(<EGOName id={EGO_20101} />, { wrapper: createWrapper() })
 
     // AutoSizeWrappedText renders text twice (hidden measurement + visible display)
     await waitFor(() => {
@@ -56,21 +61,21 @@ describe('EGOName', () => {
   it('falls back to ID when name not found', async () => {
     vi.mocked(useEGOListI18n).mockReturnValue({})
 
-    render(<EGOName id="99999" />, { wrapper: createWrapper() })
+    render(<EGOName id={EGO_UNNAMED} />, { wrapper: createWrapper() })
 
     // AutoSizeWrappedText renders text twice (hidden measurement + visible display)
     await waitFor(() => {
-      expect(screen.getAllByText('99999').length).toBeGreaterThanOrEqual(1)
+      expect(screen.getAllByText('21299').length).toBeGreaterThanOrEqual(1)
     })
   })
 
   it('renders different names for different IDs', async () => {
     vi.mocked(useEGOListI18n).mockReturnValue({
-      '20101': 'Fluid Sac',
-      '20102': 'Dimension Shredder',
+      [EGO_20101]: 'Fluid Sac',
+      [EGO_20102]: 'Dimension Shredder',
     })
 
-    const { rerender } = render(<EGOName id="20101" />, { wrapper: createWrapper() })
+    const { rerender } = render(<EGOName id={EGO_20101} />, { wrapper: createWrapper() })
 
     // AutoSizeWrappedText renders text twice (hidden measurement + visible display)
     await waitFor(() => {
@@ -80,15 +85,15 @@ describe('EGOName', () => {
     rerender(
       <QueryClientProvider client={new QueryClient()}>
         <Suspense fallback={<span>Loading...</span>}>
-          <EGOName id="20102" />
+          <EGOName id={EGO_20102} />
         </Suspense>
       </QueryClientProvider>,
     )
 
     // Mock needs to be called again for new ID lookup
     vi.mocked(useEGOListI18n).mockReturnValue({
-      '20101': 'Fluid Sac',
-      '20102': 'Dimension Shredder',
+      [EGO_20101]: 'Fluid Sac',
+      [EGO_20102]: 'Dimension Shredder',
     })
 
     await waitFor(() => {

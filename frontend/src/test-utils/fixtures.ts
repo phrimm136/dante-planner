@@ -11,7 +11,18 @@ import {
   type EGOGiftListItem,
   type EGOGiftSpec,
 } from '@/pages/egoGift'
-import { DUNGEON_IDX } from '@/shared/gameData'
+import { DUNGEON_IDX, IdentityIdSchema, EGOIdSchema } from '@/shared/gameData'
+import type { IdentityId, EGOId } from '@/shared/gameData'
+
+/** Branded identity id for fixtures; rejects malformed literals at test time. */
+export function asIdentityId(id: string): IdentityId {
+  return IdentityIdSchema.parse(id)
+}
+
+/** Branded EGO id for fixtures; rejects malformed literals at test time. */
+export function asEGOId(id: string): EGOId {
+  return EGOIdSchema.parse(id)
+}
 
 /** The Mirror Dungeon branch of the planner union, which these factories build. */
 type MDPlanner = Extract<SaveablePlanner, { config: { type: 'MIRROR_DUNGEON' } }>

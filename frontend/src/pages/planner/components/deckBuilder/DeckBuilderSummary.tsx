@@ -11,6 +11,7 @@ import { StatusViewer } from './StatusViewer'
 import { DeckBuilderActionBar } from './DeckBuilderActionBar'
 import type { DeckBuilderActions } from './DeckBuilderContent'
 import { SECTION_STYLES } from '@/lib/constants'
+import { typedEntries } from '@/lib/utils'
 
 /**
  * Everything the summary renders that it does not fetch for itself.
@@ -57,7 +58,7 @@ export function DeckBuilderSummary({
   const { spec: egoSpec } = useEGOListData()
 
   // Merge spec and i18n into IdentityListItem array for display
-  const identities: IdentityListItem[] = Object.entries(identitySpec).map(([id, specData]) => ({
+  const identities: IdentityListItem[] = typedEntries(identitySpec).map(([id, specData]) => ({
     id,
     name: identityI18n[id] || id,
     rank: specData.rank,

@@ -2,6 +2,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { MAX_LEVEL } from '@/shared/gameData'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { EgoThreadspinSelector, IdentityTierSelector } from '../EntityTierSelectors'
+import { asEGOId, asIdentityId } from '@/test-utils/fixtures'
+
+const EGO_20101 = asEGOId('20101')
+const EGO_20102 = asEGOId('20102')
+const EGO_20999 = asEGOId('20999')
+const IDENTITY_10101 = asIdentityId('10101')
+const IDENTITY_10102 = asIdentityId('10102')
 
 // The global setup mocks IntersectionObserver as a no-op, which keeps the lazy
 // inner component from ever mounting. Override per-suite so observe() fires
@@ -39,7 +46,7 @@ describe('EgoThreadspinSelector — threadspin buttons', () => {
     const onConfirm = vi.fn()
     const { container } = render(
       <EgoThreadspinSelector
-        entityId="20101"
+        entityId={EGO_20101}
         currentThreadspin={4}
         maxThreadspin={4}
         onConfirm={onConfirm}
@@ -59,7 +66,7 @@ describe('EgoThreadspinSelector — threadspin buttons', () => {
     const onConfirm = vi.fn()
     const { container } = render(
       <EgoThreadspinSelector
-        entityId="20999"
+        entityId={EGO_20999}
         currentThreadspin={5}
         maxThreadspin={5}
         onConfirm={onConfirm}
@@ -79,7 +86,7 @@ describe('EgoThreadspinSelector — threadspin buttons', () => {
     const onConfirm = vi.fn()
     const { container } = render(
       <EgoThreadspinSelector
-        entityId="20999"
+        entityId={EGO_20999}
         currentThreadspin={5}
         maxThreadspin={5}
         onConfirm={onConfirm}
@@ -100,7 +107,7 @@ describe('EgoThreadspinSelector — threadspin buttons', () => {
     const onConfirm = vi.fn()
     const { container } = render(
       <EgoThreadspinSelector
-        entityId="20101"
+        entityId={EGO_20101}
         currentThreadspin={3}
         maxThreadspin={4}
         onConfirm={onConfirm}
@@ -122,7 +129,12 @@ describe('EgoThreadspinSelector — threadspin buttons', () => {
 describe('IdentityTierSelector — uptie and level', () => {
   it('renders the four uptie tiers and no fifth', () => {
     const { container } = render(
-      <IdentityTierSelector entityId="10101" currentUptie={4} currentLevel={45} onConfirm={vi.fn()}>
+      <IdentityTierSelector
+        entityId={IDENTITY_10101}
+        currentUptie={4}
+        currentLevel={45}
+        onConfirm={vi.fn()}
+      >
         <div data-testid="identity-card">card</div>
       </IdentityTierSelector>,
     )
@@ -138,7 +150,7 @@ describe('IdentityTierSelector — uptie and level', () => {
     const onConfirm = vi.fn()
     const { container } = render(
       <IdentityTierSelector
-        entityId="10101"
+        entityId={IDENTITY_10101}
         currentUptie={4}
         currentLevel={45}
         onConfirm={onConfirm}
@@ -160,7 +172,7 @@ describe('IdentityTierSelector — uptie and level', () => {
     const onConfirm = vi.fn()
     const { container } = render(
       <IdentityTierSelector
-        entityId="10101"
+        entityId={IDENTITY_10101}
         currentUptie={4}
         currentLevel={45}
         onConfirm={onConfirm}
@@ -179,7 +191,12 @@ describe('IdentityTierSelector — uptie and level', () => {
 
   it('offers no unequip button', () => {
     const { container } = render(
-      <IdentityTierSelector entityId="10102" currentUptie={4} currentLevel={45} onConfirm={vi.fn()}>
+      <IdentityTierSelector
+        entityId={IDENTITY_10102}
+        currentUptie={4}
+        currentLevel={45}
+        onConfirm={vi.fn()}
+      >
         <div data-testid="identity-card">card</div>
       </IdentityTierSelector>,
     )
@@ -195,7 +212,7 @@ describe('EgoThreadspinSelector — unequip', () => {
     const onUnequip = vi.fn()
     const { container } = render(
       <EgoThreadspinSelector
-        entityId="20102"
+        entityId={EGO_20102}
         currentThreadspin={4}
         maxThreadspin={4}
         isSelected
@@ -216,7 +233,7 @@ describe('EgoThreadspinSelector — unequip', () => {
   it('never offers unequip for a base EGO', () => {
     const { container } = render(
       <EgoThreadspinSelector
-        entityId="20101"
+        entityId={EGO_20101}
         currentThreadspin={4}
         maxThreadspin={4}
         isSelected
@@ -236,7 +253,7 @@ describe('EgoThreadspinSelector — unequip', () => {
   it('switches back to equip once a different threadspin is picked', () => {
     const { container } = render(
       <EgoThreadspinSelector
-        entityId="20102"
+        entityId={EGO_20102}
         currentThreadspin={4}
         maxThreadspin={4}
         isSelected

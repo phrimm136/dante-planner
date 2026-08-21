@@ -17,6 +17,15 @@ import {
   extractThemePackIds,
   matchesPlannerFilters,
 } from '../plannerContentExtractors'
+import { asEGOId, asIdentityId } from '@/test-utils/fixtures'
+
+const IDENTITY_10101 = asIdentityId('10101')
+const IDENTITY_10201 = asIdentityId('10201')
+const IDENTITY_10301 = asIdentityId('10301')
+const EGO_20101 = asEGOId('20101')
+const EGO_20102 = asEGOId('20102')
+const EGO_20301 = asEGOId('20301')
+const EGO_20501 = asEGOId('20501')
 
 // ============================================================================
 // Helpers
@@ -84,8 +93,8 @@ describe('extractIdentityIds', () => {
   it('extracts identity IDs from equipment map with multiple sinners', () => {
     const content = createMockMDContent({
       equipment: {
-        '1': { identity: { id: '10101', uptie: 4, level: 40 }, egos: {} },
-        '2': { identity: { id: '10201', uptie: 3, level: 35 }, egos: {} },
+        '1': { identity: { id: IDENTITY_10101, uptie: 4, level: 40 }, egos: {} },
+        '2': { identity: { id: IDENTITY_10201, uptie: 3, level: 35 }, egos: {} },
       },
     })
 
@@ -109,7 +118,7 @@ describe('extractIdentityIds', () => {
   it('handles equipment entries with missing identity field', () => {
     const content = createMockMDContent({
       equipment: {
-        '1': { identity: { id: '10101', uptie: 4, level: 40 }, egos: {} },
+        '1': { identity: { id: IDENTITY_10101, uptie: 4, level: 40 }, egos: {} },
         '2': {} as never, // missing identity
       },
     })
@@ -129,16 +138,16 @@ describe('extractEgoIds', () => {
     const content = createMockMDContent({
       equipment: {
         '1': {
-          identity: { id: '10101', uptie: 4, level: 40 },
+          identity: { id: IDENTITY_10101, uptie: 4, level: 40 },
           egos: {
-            ZAYIN: { id: '20101', threadspin: 1 },
-            HE: { id: '20102', threadspin: 2 },
+            ZAYIN: { id: EGO_20101, threadspin: 1 },
+            HE: { id: EGO_20102, threadspin: 2 },
           },
         },
         '3': {
-          identity: { id: '10301', uptie: 3, level: 30 },
+          identity: { id: IDENTITY_10301, uptie: 3, level: 30 },
           egos: {
-            TETH: { id: '20301', threadspin: 1 },
+            TETH: { id: EGO_20301, threadspin: 1 },
           },
         },
       },
@@ -152,7 +161,7 @@ describe('extractEgoIds', () => {
   it('returns empty set when no egos equipped', () => {
     const content = createMockMDContent({
       equipment: {
-        '1': { identity: { id: '10101', uptie: 4, level: 40 }, egos: {} },
+        '1': { identity: { id: IDENTITY_10101, uptie: 4, level: 40 }, egos: {} },
       },
     })
 
@@ -163,13 +172,13 @@ describe('extractEgoIds', () => {
     const content = createMockMDContent({
       equipment: {
         '1': {
-          identity: { id: '10101', uptie: 4, level: 40 },
+          identity: { id: IDENTITY_10101, uptie: 4, level: 40 },
           egos: {
-            ALEPH: { id: '20501', threadspin: 4 },
+            ALEPH: { id: EGO_20501, threadspin: 4 },
           },
         },
         '2': {
-          identity: { id: '10201', uptie: 3, level: 35 },
+          identity: { id: IDENTITY_10201, uptie: 3, level: 35 },
           egos: {},
         },
       },
@@ -365,8 +374,8 @@ describe('matchesPlannerFilters', () => {
     it('matches when plan has all required identity IDs (AND semantics)', () => {
       const plan = createMockPlanner({
         equipment: {
-          '1': { identity: { id: '10101', uptie: 4, level: 40 }, egos: {} },
-          '2': { identity: { id: '10201', uptie: 3, level: 35 }, egos: {} },
+          '1': { identity: { id: IDENTITY_10101, uptie: 4, level: 40 }, egos: {} },
+          '2': { identity: { id: IDENTITY_10201, uptie: 3, level: 35 }, egos: {} },
         },
       })
       const filters = createFilters({ identityIds: ['10101', '10201'] })
@@ -377,7 +386,7 @@ describe('matchesPlannerFilters', () => {
     it('rejects when plan is missing a required identity', () => {
       const plan = createMockPlanner({
         equipment: {
-          '1': { identity: { id: '10101', uptie: 4, level: 40 }, egos: {} },
+          '1': { identity: { id: IDENTITY_10101, uptie: 4, level: 40 }, egos: {} },
         },
       })
       const filters = createFilters({ identityIds: ['10101', '10201'] })
@@ -391,10 +400,10 @@ describe('matchesPlannerFilters', () => {
       const plan = createMockPlanner({
         equipment: {
           '1': {
-            identity: { id: '10101', uptie: 4, level: 40 },
+            identity: { id: IDENTITY_10101, uptie: 4, level: 40 },
             egos: {
-              ZAYIN: { id: '20101', threadspin: 1 },
-              HE: { id: '20102', threadspin: 2 },
+              ZAYIN: { id: EGO_20101, threadspin: 1 },
+              HE: { id: EGO_20102, threadspin: 2 },
             },
           },
         },
@@ -408,8 +417,8 @@ describe('matchesPlannerFilters', () => {
       const plan = createMockPlanner({
         equipment: {
           '1': {
-            identity: { id: '10101', uptie: 4, level: 40 },
-            egos: { ZAYIN: { id: '20101', threadspin: 1 } },
+            identity: { id: IDENTITY_10101, uptie: 4, level: 40 },
+            egos: { ZAYIN: { id: EGO_20101, threadspin: 1 } },
           },
         },
       })
@@ -425,7 +434,7 @@ describe('matchesPlannerFilters', () => {
         {
           selectedKeywords: ['Burn'],
           equipment: {
-            '1': { identity: { id: '10101', uptie: 4, level: 40 }, egos: {} },
+            '1': { identity: { id: IDENTITY_10101, uptie: 4, level: 40 }, egos: {} },
           },
         },
         { title: 'My Burn Build' },
@@ -444,7 +453,7 @@ describe('matchesPlannerFilters', () => {
         {
           selectedKeywords: ['Burn'],
           equipment: {
-            '1': { identity: { id: '10101', uptie: 4, level: 40 }, egos: {} },
+            '1': { identity: { id: IDENTITY_10101, uptie: 4, level: 40 }, egos: {} },
           },
         },
         { title: 'My Burn Build' },

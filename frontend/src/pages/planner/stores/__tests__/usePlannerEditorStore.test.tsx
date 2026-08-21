@@ -20,6 +20,11 @@ import { DUNGEON_IDX } from '@/shared/gameData'
 import type { MDPlannerContent } from '../../types/PlannerTypes'
 import type { SinnerEquipment, SkillEAState } from '../../types/DeckTypes'
 import { ThemePackIdSchema } from '@/shared/gameData'
+import { asIdentityId } from '@/test-utils/fixtures'
+
+const IDENTITY_10101 = asIdentityId('10101')
+const IDENTITY_10199 = asIdentityId('10199')
+const IDENTITY_X = asIdentityId('11298')
 
 describe('usePlannerEditorStore', () => {
   describe('initial state', () => {
@@ -58,7 +63,7 @@ describe('usePlannerEditorStore', () => {
     it('setEquipment replaces the whole equipment map', () => {
       const store = createPlannerEditorStore()
       const replacement: Record<string, SinnerEquipment> = {
-        '1': { identity: { id: '10101', uptie: 4, level: 50 }, egos: {} },
+        '1': { identity: { id: IDENTITY_10101, uptie: 4, level: 50 }, egos: {} },
       }
 
       store.getState().setEquipment(replacement)
@@ -71,11 +76,11 @@ describe('usePlannerEditorStore', () => {
 
       store.getState().setEquipment((prev) => ({
         ...prev,
-        '99': { identity: { id: 'X', uptie: 4, level: 1 }, egos: {} },
+        '99': { identity: { id: IDENTITY_X, uptie: 4, level: 1 }, egos: {} },
       }))
 
       expect(store.getState().equipment['99']).toEqual({
-        identity: { id: 'X', uptie: 4, level: 1 },
+        identity: { id: IDENTITY_X, uptie: 4, level: 1 },
         egos: {},
       })
     })
@@ -83,7 +88,10 @@ describe('usePlannerEditorStore', () => {
     it('updateSinnerEquipment replaces a single sinner entry without dropping others', () => {
       const store = createPlannerEditorStore()
       const before = store.getState().equipment
-      const next: SinnerEquipment = { identity: { id: '10199', uptie: 4, level: 1 }, egos: {} }
+      const next: SinnerEquipment = {
+        identity: { id: IDENTITY_10199, uptie: 4, level: 1 },
+        egos: {},
+      }
 
       store.getState().updateSinnerEquipment('1', next)
 

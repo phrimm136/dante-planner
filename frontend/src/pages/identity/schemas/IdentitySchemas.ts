@@ -1,6 +1,11 @@
 import { z } from 'zod'
 import { AffinitySchema, ATK_TYPES, DEF_TYPES } from '@/shared/gameData'
-import { SkillDescEntrySchema, SkillIdSchema, PassiveIdSchema } from '@/shared/gameData'
+import {
+  SkillDescEntrySchema,
+  SkillIdSchema,
+  PassiveIdSchema,
+  IdentityIdSchema,
+} from '@/shared/gameData'
 
 /**
  * Identity Schemas
@@ -159,5 +164,6 @@ export const IdentitySpecListItemSchema = z.object({
 })
 
 // Record types for spec and name lists
-export const IdentitySpecListSchema = z.record(z.string(), IdentitySpecListItemSchema)
+export const IdentitySpecListSchema = z.record(IdentityIdSchema, IdentitySpecListItemSchema)
+/** Keys stay unbranded: the game ships i18n-only ids (e.g. 40501) with no spec entry. */
 export const IdentityNameListSchema = z.record(z.string(), z.string())
