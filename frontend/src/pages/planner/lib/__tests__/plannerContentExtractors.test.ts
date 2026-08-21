@@ -37,7 +37,11 @@ const ENCODED_19154 = asEncodedGiftId('19154')
 const ENCODED_29154 = asEncodedGiftId('29154')
 
 /** Stored ids no encoding accepts; the branded content type cannot express them. */
-const MALFORMED_GIFT_IDS = ['not-a-gift', '', '999'] as unknown as MDPlannerContent['selectedGiftIds']
+const MALFORMED_GIFT_IDS = [
+  'not-a-gift',
+  '',
+  '999',
+] as unknown as MDPlannerContent['selectedGiftIds']
 
 // ============================================================================
 // Helpers
@@ -212,7 +216,9 @@ describe('extractGiftIds', () => {
       selectedGiftIds: [ENCODED_9001, ENCODED_9002],
       observationGiftIds: [ENCODED_9003],
       comprehensiveGiftIds: [ENCODED_9004],
-      floorSelections: [{ themePackId: null, difficulty: 0, giftIds: [ENCODED_9005, ENCODED_9006] }],
+      floorSelections: [
+        { themePackId: null, difficulty: 0, giftIds: [ENCODED_9005, ENCODED_9006] },
+      ],
     })
 
     const result = extractGiftIds(content)

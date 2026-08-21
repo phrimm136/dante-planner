@@ -121,11 +121,11 @@ vi.mock('@/pages/egoGift/components/EGOGiftCard', () => ({
 
 describe('EGOGiftObservationSummary', () => {
   const ENCODED_9001 = asEncodedGiftId('9001')
-const ENCODED_9002 = asEncodedGiftId('9002')
-const ENCODED_9003 = asEncodedGiftId('9003')
-/** Decodes, but the fixture spec does not carry it: the unknown-gift id. */
-const ENCODED_9999 = asEncodedGiftId('9999')
-const ENCODED_9998 = asEncodedGiftId('9998')
+  const ENCODED_9002 = asEncodedGiftId('9002')
+  const ENCODED_9003 = asEncodedGiftId('9003')
+  /** Decodes, but the fixture spec does not carry it: the unknown-gift id. */
+  const ENCODED_9999 = asEncodedGiftId('9999')
+  const ENCODED_9998 = asEncodedGiftId('9998')
 
   const defaultProps = { mdVersion: 6, selectedGiftIds: new Set<EncodedGiftId>() }
 
@@ -153,14 +153,19 @@ const ENCODED_9998 = asEncodedGiftId('9998')
 
   describe('cost display', () => {
     it('shows cost 70 for 1 gift', () => {
-      render(<EGOGiftObservationSummary {...defaultProps} selectedGiftIds={new Set([ENCODED_9001])} />)
+      render(
+        <EGOGiftObservationSummary {...defaultProps} selectedGiftIds={new Set([ENCODED_9001])} />,
+      )
       const costDisplay = screen.getByTestId('starlight-cost')
       expect(costDisplay).toHaveAttribute('data-cost', '70')
     })
 
     it('shows cost 160 for 2 gifts', () => {
       render(
-        <EGOGiftObservationSummary {...defaultProps} selectedGiftIds={new Set([ENCODED_9001, ENCODED_9002])} />,
+        <EGOGiftObservationSummary
+          {...defaultProps}
+          selectedGiftIds={new Set([ENCODED_9001, ENCODED_9002])}
+        />,
       )
       const costDisplay = screen.getByTestId('starlight-cost')
       expect(costDisplay).toHaveAttribute('data-cost', '160')
@@ -180,7 +185,9 @@ const ENCODED_9998 = asEncodedGiftId('9998')
 
   describe('selected state with override', () => {
     it('renders gift cards when gifts are selected', () => {
-      render(<EGOGiftObservationSummary {...defaultProps} selectedGiftIds={new Set([ENCODED_9001])} />)
+      render(
+        <EGOGiftObservationSummary {...defaultProps} selectedGiftIds={new Set([ENCODED_9001])} />,
+      )
       expect(screen.getByTestId('gift-card-9001')).toBeInTheDocument()
       expect(screen.getByText('Blazing Gift')).toBeInTheDocument()
     })
@@ -198,7 +205,9 @@ const ENCODED_9998 = asEncodedGiftId('9998')
     })
 
     it('does not render placeholder when gifts selected', () => {
-      render(<EGOGiftObservationSummary {...defaultProps} selectedGiftIds={new Set([ENCODED_9001])} />)
+      render(
+        <EGOGiftObservationSummary {...defaultProps} selectedGiftIds={new Set([ENCODED_9001])} />,
+      )
       expect(screen.queryByText('Select EGO Gifts')).not.toBeInTheDocument()
     })
   })

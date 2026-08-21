@@ -173,7 +173,10 @@ describe('ComprehensiveGiftGridTracker', () => {
       const { getAllByTestId } = render(
         <ComprehensiveGiftGridTracker
           floorSelections={[buildFloorSelection({ giftIds: [] })]}
-          comprehensiveGiftIds={[encodeGiftSelection(0, GIFT_9001), encodeGiftSelection(1, GIFT_9001)]}
+          comprehensiveGiftIds={[
+            encodeGiftSelection(0, GIFT_9001),
+            encodeGiftSelection(1, GIFT_9001),
+          ]}
           hoveredThemePackId={null}
         />,
         { wrapper: createWrapper() },
