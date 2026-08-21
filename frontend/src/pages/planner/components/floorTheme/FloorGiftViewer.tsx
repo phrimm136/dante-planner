@@ -6,11 +6,11 @@ import { EGOGiftTooltip } from '@/pages/egoGift'
 import { decodeAndOrderGiftSelections } from '@/pages/egoGift'
 import { CARD_GRID } from '@/lib/constants'
 import type { EGOGiftListItem } from '@/pages/egoGift'
-import type { EnhancementLevel } from '@/shared/gameData'
+import type { EncodedGiftId, EnhancementLevel } from '@/shared/gameData'
 import { cn } from '@/lib/utils'
 
 interface FloorGiftViewerProps {
-  selectedGiftIds: Set<string> // Encoded IDs (enhancement + giftId)
+  selectedGiftIds: Set<EncodedGiftId>
   onClick: () => void
   readOnly?: boolean
   className?: string

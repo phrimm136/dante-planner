@@ -10,7 +10,12 @@ import { ThemePackViewer, ThemePackPlaceholder } from './ThemePackViewer'
 import { ThemePackSelectorPane } from './ThemePackSelectorPane'
 import { FloorGiftViewer } from './FloorGiftViewer'
 import { FloorGiftSelectorPane } from './FloorGiftSelectorPane'
-import { DUNGEON_IDX, type DungeonIdx, type MDCategory } from '@/shared/gameData'
+import {
+  DUNGEON_IDX,
+  type DungeonIdx,
+  type EncodedGiftId,
+  type MDCategory,
+} from '@/shared/gameData'
 import { cn } from '@/lib/utils'
 import { canSelectFloorThemePack, getUnaffordableGiftNames } from '../../lib/plannerRules'
 import { PlannerSection } from '@/components/layout/PlannerSection'
@@ -34,7 +39,7 @@ interface FloorThemeGiftSectionProps {
   /** Override handler for theme pack selection (for tracker mode) */
   onThemePackSelectOverride?: (packId: string, difficulty: DungeonIdx) => void
   /** Override handler for gift selection (for tracker mode) */
-  setSelectedGiftIdsOverride?: (giftIds: Set<string>) => void
+  setSelectedGiftIdsOverride?: (giftIds: Set<EncodedGiftId>) => void
 }
 
 /**
@@ -115,7 +120,7 @@ export function FloorThemeGiftSection({
       onThemePackSelectOverride(packId, difficulty)
     } else if (updateFloorSelection) {
       // Preserve existing gifts
-      const existingGifts = selection?.giftIds ?? new Set<string>()
+      const existingGifts = selection?.giftIds ?? new Set<EncodedGiftId>()
 
       // Remove gifts that are unaffordable for the new theme pack
       let newGiftIds = existingGifts
@@ -143,7 +148,7 @@ export function FloorThemeGiftSection({
     }
   }
 
-  const handleGiftSelectionChange = (giftIds: Set<string>) => {
+  const handleGiftSelectionChange = (giftIds: Set<EncodedGiftId>) => {
     if (setSelectedGiftIdsOverride) {
       setSelectedGiftIdsOverride(giftIds)
     } else if (updateFloorSelection && selection) {
@@ -156,7 +161,7 @@ export function FloorThemeGiftSection({
 
   const selectedThemePackId = selection?.themePackId ?? null
   const selectedDifficulty = selection?.difficulty ?? null
-  const selectedGiftIds = selection?.giftIds ?? new Set<string>()
+  const selectedGiftIds = selection?.giftIds ?? new Set<EncodedGiftId>()
 
   // Hints explain why an editable surface is locked, so they only apply when the
   // section itself is editable.

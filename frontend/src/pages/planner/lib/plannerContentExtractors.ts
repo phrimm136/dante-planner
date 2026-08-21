@@ -12,7 +12,7 @@
  * - THEME_PACK: floorSelections[*].themePackId (non-null only)
  */
 
-import { getBaseGiftId } from '@/pages/egoGift'
+import { decodeGiftSelection } from '@/pages/egoGift'
 import { isMDPlanner } from '../types/PlannerTypes'
 import type { MDPlannerContent, SaveablePlanner } from '../types/PlannerTypes'
 import type { PlannerSearchFilters } from '../types/PlannerSearchTypes'
@@ -78,7 +78,7 @@ export function extractGiftIds(content: MDPlannerContent): Set<string> {
   const addIds = (source: Iterable<string> | undefined | null) => {
     if (!source) return
     for (const id of source) {
-      const base = getBaseGiftId(String(id))
+      const base = decodeGiftSelection(String(id))?.giftId
       if (base) ids.add(base)
     }
   }

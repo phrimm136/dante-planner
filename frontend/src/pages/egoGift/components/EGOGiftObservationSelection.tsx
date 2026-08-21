@@ -1,5 +1,7 @@
 import { useEGOGiftListData } from '../hooks/useEGOGiftListData'
 import type { EGOGiftListItem } from '../types/EGOGiftTypes'
+import type { EncodedGiftId } from '@/shared/gameData'
+import { getBaseGiftId } from '../lib/egoGiftEncoding'
 import { CARD_GRID } from '@/lib/constants'
 import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { EGOGiftCard } from './EGOGiftCard'
@@ -7,8 +9,8 @@ import { EGOGiftTooltip } from './EGOGiftTooltip'
 import { toGiftListItems } from '../lib/giftListItem'
 
 interface EGOGiftObservationSelectionProps {
-  selectedGiftIds: string[]
-  onGiftRemove: (giftId: string) => void
+  selectedGiftIds: EncodedGiftId[]
+  onGiftRemove: (giftId: EncodedGiftId) => void
 }
 
 /**
@@ -32,7 +34,7 @@ export function EGOGiftObservationSelection({
   return (
     <div className="bg-muted border border-border rounded-md p-4 overflow-x-auto sm:overflow-x-visible sm:h-[350px] flex flex-row sm:flex-col gap-2 items-center justify-center">
       {selectedGiftIds.map((giftId) => {
-        const gift = gifts.find((g) => g.id === giftId)
+        const gift = gifts.find((g) => g.id === getBaseGiftId(giftId))
         if (!gift) return null
 
         return (

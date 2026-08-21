@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { useEGOGiftObservationData } from '@/pages/egoGift'
-import { useEGOGiftListData } from '@/pages/egoGift'
+import { useEGOGiftListData, getBaseGiftId } from '@/pages/egoGift'
+import type { EncodedGiftId } from '@/shared/gameData'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import { EMPTY_STATE, CARD_GRID } from '@/lib/constants'
 import { cn } from '@/lib/utils'
@@ -13,7 +14,7 @@ import { toGiftListItem } from '@/pages/egoGift'
 
 export interface EGOGiftObservationSummaryProps {
   mdVersion: number
-  selectedGiftIds: Set<string>
+  selectedGiftIds: ReadonlySet<EncodedGiftId>
   onClick?: () => void
   readOnly?: boolean
   onViewNotes?: () => void
@@ -50,8 +51,9 @@ export function EGOGiftObservationSummary({
   const selectedGifts: EGOGiftListItem[] = (() => {
     const gifts: EGOGiftListItem[] = []
     for (const id of selectedGiftIds) {
-      const specData = spec[id]
-      if (specData) gifts.push(toGiftListItem(id, specData, i18n[id] || id))
+      const baseId = getBaseGiftId(id)
+      const specData = spec[baseId]
+      if (specData) gifts.push(toGiftListItem(baseId, specData, i18n[baseId] || baseId))
     }
     return gifts
   })()

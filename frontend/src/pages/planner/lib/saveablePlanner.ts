@@ -1,6 +1,6 @@
 import { serializeSets } from '../schemas/PlannerSchemas'
 
-import type { MDCategory } from '@/shared/gameData'
+import type { EncodedGiftId, MDCategory } from '@/shared/gameData'
 import type { NoteContent } from '@/shared/noteEditor'
 import type { FloorThemeSelection } from '@/pages/themePack'
 import type { SinnerEquipment, SkillEAState } from '../types/DeckTypes'
@@ -27,11 +27,11 @@ export interface PlannerState {
   /** Currently selected gift keyword filter */
   selectedGiftKeyword: string | null
   /** Selected start gift IDs */
-  selectedGiftIds: Set<string>
+  selectedGiftIds: Set<EncodedGiftId>
   /** Observation gift IDs */
-  observationGiftIds: Set<string>
+  observationGiftIds: Set<EncodedGiftId>
   /** Comprehensive gift IDs with enhancement encoding */
-  comprehensiveGiftIds: Set<string>
+  comprehensiveGiftIds: Set<EncodedGiftId>
   /** Equipment configuration per sinner */
   equipment: Record<string, SinnerEquipment>
   /** Deployment order as array of sinner indices */

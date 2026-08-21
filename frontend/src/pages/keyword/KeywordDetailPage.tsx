@@ -24,6 +24,7 @@ import { useEGOGiftListI18n } from '@/pages/egoGift'
 import { getSinnerFromId } from '@/shared/gameData'
 import colorCode from '@static/data/colorCode.json'
 import { SECTION_STYLES } from '@/lib/constants'
+import type { EGOId, IdentityId, SinnerScopedId } from '@/shared/gameData'
 
 const colorMap = colorCode as Record<string, string>
 const NEUTRAL_NAME_COLOR = colorCode.Neutral
@@ -59,7 +60,7 @@ function KeywordNameContent({ id, nameColor }: { id: string; nameColor: string }
 function useSinnerScopedLabel() {
   const { t } = useTranslation('sinnerNames')
 
-  return (id: string, name: string) => {
+  return (id: SinnerScopedId, name: string) => {
     const sinnerKey = getSinnerFromId(id)
     return (
       <>
@@ -73,7 +74,7 @@ function useSinnerScopedLabel() {
  * Backlink section for Related Identities.
  * Internal Suspense for independent language switching.
  */
-function KeywordRelatedIdentities({ ids }: { ids: string[] }) {
+function KeywordRelatedIdentities({ ids }: { ids: IdentityId[] }) {
   const names = useIdentityListI18n()
   const formatLabel = useSinnerScopedLabel()
 
@@ -92,7 +93,7 @@ function KeywordRelatedIdentities({ ids }: { ids: string[] }) {
  * Backlink section for Related E.G.O.
  * Internal Suspense for independent language switching.
  */
-function KeywordRelatedEgos({ ids }: { ids: string[] }) {
+function KeywordRelatedEgos({ ids }: { ids: EGOId[] }) {
   const names = useEGOListI18n()
   const formatLabel = useSinnerScopedLabel()
 

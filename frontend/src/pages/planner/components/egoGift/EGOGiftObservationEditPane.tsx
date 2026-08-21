@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { useEGOGiftObservationData } from '@/pages/egoGift'
-import { useEGOGiftListData } from '@/pages/egoGift'
+import { useEGOGiftListData, encodeGiftSelection } from '@/pages/egoGift'
+import type { EGOGiftId } from '@/shared/gameData'
 import { useCappedSelection } from '../../hooks/useCappedSelection'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import type { EGOGiftListItem } from '@/pages/egoGift'
@@ -75,13 +76,17 @@ export function EGOGiftObservationEditPane({
     }
   }, [open])
 
-  const { toggle: handleGiftToggle, clear } = useCappedSelection({
+  const { toggle, clear } = useCappedSelection({
     cap: MAX_OBSERVABLE_GIFTS,
     selected: selectedGiftIds,
     onSelectedChange: setObservationGiftIds,
     mirror: comprehensiveGiftIds,
     onMirrorChange: setComprehensiveGiftIds,
   })
+
+  const handleGiftToggle = (giftId: EGOGiftId) => {
+    toggle(encodeGiftSelection(0, giftId))
+  }
 
   // Calculate current cost from observation data
   const currentCost =
@@ -130,7 +135,7 @@ export function EGOGiftObservationEditPane({
           <div className="sm:w-24 lg:w-32 sm:shrink-0 lg:shrink-0">
             <EGOGiftObservationSelection
               selectedGiftIds={Array.from(selectedGiftIds)}
-              onGiftRemove={handleGiftToggle}
+              onGiftRemove={toggle}
             />
           </div>
         </div>

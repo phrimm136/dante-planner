@@ -13,6 +13,8 @@ import { EGOGiftObservationSummary } from '../EGOGiftObservationSummary'
 import { buildEgoGiftSpecList } from '@/test-utils'
 import type { EGOGiftNameList } from '@/pages/egoGift'
 
+import { asEncodedGiftId } from '@/test-utils/fixtures'
+import type { EncodedGiftId } from '@/shared/gameData'
 // Mock react-i18next with initReactI18next for proper module loading
 vi.mock('react-i18next', async (importOriginal) => {
   const actual = await importOriginal<typeof import('react-i18next')>()
@@ -118,7 +120,14 @@ vi.mock('@/pages/egoGift/components/EGOGiftCard', () => ({
 }))
 
 describe('EGOGiftObservationSummary', () => {
-  const defaultProps = { mdVersion: 6, selectedGiftIds: new Set<string>() }
+  const ENCODED_9001 = asEncodedGiftId('9001')
+const ENCODED_9002 = asEncodedGiftId('9002')
+const ENCODED_9003 = asEncodedGiftId('9003')
+/** Decodes, but the fixture spec does not carry it: the unknown-gift id. */
+const ENCODED_9999 = asEncodedGiftId('9999')
+const ENCODED_9998 = asEncodedGiftId('9998')
+
+  const defaultProps = { mdVersion: 6, selectedGiftIds: new Set<EncodedGiftId>() }
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -144,14 +153,14 @@ describe('EGOGiftObservationSummary', () => {
 
   describe('cost display', () => {
     it('shows cost 70 for 1 gift', () => {
-      render(<EGOGiftObservationSummary {...defaultProps} selectedGiftIds={new Set(['9001'])} />)
+      render(<EGOGiftObservationSummary {...defaultProps} selectedGiftIds={new Set([ENCODED_9001])} />)
       const costDisplay = screen.getByTestId('starlight-cost')
       expect(costDisplay).toHaveAttribute('data-cost', '70')
     })
 
     it('shows cost 160 for 2 gifts', () => {
       render(
-        <EGOGiftObservationSummary {...defaultProps} selectedGiftIds={new Set(['9001', '9002'])} />,
+        <EGOGiftObservationSummary {...defaultProps} selectedGiftIds={new Set([ENCODED_9001, ENCODED_9002])} />,
       )
       const costDisplay = screen.getByTestId('starlight-cost')
       expect(costDisplay).toHaveAttribute('data-cost', '160')
@@ -161,7 +170,7 @@ describe('EGOGiftObservationSummary', () => {
       render(
         <EGOGiftObservationSummary
           {...defaultProps}
-          selectedGiftIds={new Set(['9001', '9002', '9003'])}
+          selectedGiftIds={new Set([ENCODED_9001, ENCODED_9002, ENCODED_9003])}
         />,
       )
       const costDisplay = screen.getByTestId('starlight-cost')
@@ -171,7 +180,7 @@ describe('EGOGiftObservationSummary', () => {
 
   describe('selected state with override', () => {
     it('renders gift cards when gifts are selected', () => {
-      render(<EGOGiftObservationSummary {...defaultProps} selectedGiftIds={new Set(['9001'])} />)
+      render(<EGOGiftObservationSummary {...defaultProps} selectedGiftIds={new Set([ENCODED_9001])} />)
       expect(screen.getByTestId('gift-card-9001')).toBeInTheDocument()
       expect(screen.getByText('Blazing Gift')).toBeInTheDocument()
     })
@@ -180,7 +189,7 @@ describe('EGOGiftObservationSummary', () => {
       render(
         <EGOGiftObservationSummary
           {...defaultProps}
-          selectedGiftIds={new Set(['9001', '9002', '9003'])}
+          selectedGiftIds={new Set([ENCODED_9001, ENCODED_9002, ENCODED_9003])}
         />,
       )
       expect(screen.getByTestId('gift-card-9001')).toBeInTheDocument()
@@ -189,7 +198,7 @@ describe('EGOGiftObservationSummary', () => {
     })
 
     it('does not render placeholder when gifts selected', () => {
-      render(<EGOGiftObservationSummary {...defaultProps} selectedGiftIds={new Set(['9001'])} />)
+      render(<EGOGiftObservationSummary {...defaultProps} selectedGiftIds={new Set([ENCODED_9001])} />)
       expect(screen.queryByText('Select EGO Gifts')).not.toBeInTheDocument()
     })
   })
@@ -223,13 +232,13 @@ describe('EGOGiftObservationSummary', () => {
       render(
         <EGOGiftObservationSummary
           {...defaultProps}
-          selectedGiftIds={new Set(['9001', 'unknown-id'])}
+          selectedGiftIds={new Set([ENCODED_9001, ENCODED_9999])}
         />,
       )
       // Known gift should render
       expect(screen.getByTestId('gift-card-9001')).toBeInTheDocument()
       // Unknown gift should be skipped (not crash)
-      expect(screen.queryByTestId('gift-card-unknown-id')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('gift-card-9999')).not.toBeInTheDocument()
     })
 
     it('defaults to 0 cost for unknown gift count', () => {
@@ -237,7 +246,7 @@ describe('EGOGiftObservationSummary', () => {
       render(
         <EGOGiftObservationSummary
           {...defaultProps}
-          selectedGiftIds={new Set(['9001', '9002', '9003', 'extra'])}
+          selectedGiftIds={new Set([ENCODED_9001, ENCODED_9002, ENCODED_9003, ENCODED_9998])}
         />,
       )
       const costDisplay = screen.getByTestId('starlight-cost')

@@ -6,7 +6,13 @@ import { TrackerModeViewer } from '../TrackerModeViewer'
 import { DUNGEON_IDX, MAX_LEVEL } from '@/shared/gameData'
 import type { MDSaveablePlanner, MDPlannerContent } from '../../../types/PlannerTypes'
 import { ThemePackIdSchema } from '@/shared/gameData'
-import { asIdentityId } from '@/test-utils/fixtures'
+import { asEncodedGiftId, asIdentityId } from '@/test-utils/fixtures'
+
+const ENCODED_9001 = asEncodedGiftId('9001')
+const ENCODED_9002 = asEncodedGiftId('9002')
+const ENCODED_9003 = asEncodedGiftId('9003')
+const ENCODED_9004 = asEncodedGiftId('9004')
+const ENCODED_9005 = asEncodedGiftId('9005')
 
 const IDENTITY_IDENT1 = asIdentityId('10101')
 const IDENTITY_IDENT2 = asIdentityId('10201')
@@ -190,7 +196,7 @@ describe('TrackerModeViewer', () => {
     const floorSelections = Array.from({ length: floorCount }, (_, i) => ({
       themePackId: ThemePackIdSchema.parse(String(1001 + i)),
       difficulty: DUNGEON_IDX.NORMAL,
-      giftIds: [`gift${i + 1}A`, `gift${i + 1}B`],
+      giftIds: [asEncodedGiftId(String(9100 + i * 2)), asEncodedGiftId(String(9101 + i * 2))],
     }))
 
     const sectionNotes = {
@@ -217,9 +223,9 @@ describe('TrackerModeViewer', () => {
       selectedKeywords: [],
       selectedBuffIds: [1, 2],
       selectedGiftKeyword: null,
-      selectedGiftIds: ['gift1', 'gift2'],
-      observationGiftIds: ['obsGift1'],
-      comprehensiveGiftIds: ['compGift1', 'compGift2'],
+      selectedGiftIds: [ENCODED_9001, ENCODED_9002],
+      observationGiftIds: [ENCODED_9003],
+      comprehensiveGiftIds: [ENCODED_9004, ENCODED_9005],
       skillEAState: {
         YiSang: { 0: 3, 1: 2, 2: 1 },
         Faust: { 0: 3, 1: 2, 2: 1 },

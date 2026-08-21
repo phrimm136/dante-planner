@@ -14,9 +14,10 @@ import { getDisplayFontForLanguage } from '@/lib/utils'
 import type { EgoType } from '@/shared/gameData'
 import type { EgoSkillType } from '../types/EGOTypes'
 import { DETAIL_IMAGE_ASPECT_RATIO, SECTION_STYLES, SINNER_COLORS } from '@/lib/constants'
+import type { EGOId } from '@/shared/gameData'
 
 interface EGOHeaderProps {
-  egoId: string
+  egoId: EGOId
   name: string
   rank: EgoType
   /** Selected skill type; erosion shows the corrosion CG */

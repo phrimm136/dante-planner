@@ -32,10 +32,10 @@ export function buildNameOptions(
  *
  * @param getSinnerName - Resolves an entity id to its localized sinner name
  */
-export function buildSinnerSuffixedOptions(
-  ids: string[],
+export function buildSinnerSuffixedOptions<Id extends string>(
+  ids: Id[],
   names: Record<string, string>,
-  getSinnerName: (id: string) => string,
+  getSinnerName: (id: Id) => string,
 ): SearchDropdownOption[] {
   return ids.map((id) => ({
     value: id,

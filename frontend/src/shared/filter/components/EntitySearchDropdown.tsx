@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { getSinnerFromId } from '@/shared/gameData'
+import type { SinnerScopedId } from '@/shared/gameData'
 import { SearchableMultiSelect } from './SearchableMultiSelect'
 import { buildSinnerSuffixedOptions } from './searchDropdownOptions'
 
@@ -21,7 +22,7 @@ export function EntitySearchDropdown({
 }: {
   selected: Set<string>
   onSelectionChange: (ids: Set<string>) => void
-  ids: string[]
+  ids: SinnerScopedId[]
   names: Record<string, string>
   /** `database` namespace key for the collapsed-state placeholder */
   placeholderKey: string

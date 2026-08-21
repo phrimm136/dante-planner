@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { EGOIdSchema, IdentityIdSchema } from '@/shared/gameData'
 
 /**
  * Keyword Schemas
@@ -16,8 +17,8 @@ export const BattleKeywordSpecEntrySchema = z
   .object({
     iconId: z.string().nullable(),
     buffType: z.string(),
-    identities: z.array(z.string()),
-    egos: z.array(z.string()),
+    identities: z.array(IdentityIdSchema),
+    egos: z.array(EGOIdSchema),
     egoGifts: z.array(z.string()),
   })
   .strict()

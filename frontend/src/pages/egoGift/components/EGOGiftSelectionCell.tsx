@@ -1,6 +1,6 @@
 import { memo } from 'react'
 
-import type { EnhancementLevel } from '@/shared/gameData'
+import type { EGOGiftId, EnhancementLevel } from '@/shared/gameData'
 import { CARD_GRID } from '@/lib/constants'
 import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import type { EGOGiftListItem } from '../types/EGOGiftTypes'
@@ -17,11 +17,11 @@ interface GiftCellProps {
 
 interface EnhancementCellProps extends GiftCellProps {
   enhancement: EnhancementLevel
-  onEnhancementSelect: (giftId: string, enhancement: EnhancementLevel) => void
+  onEnhancementSelect: (giftId: EGOGiftId, enhancement: EnhancementLevel) => void
 }
 
 interface ObservationCellProps extends GiftCellProps {
-  onSelect: (giftId: string) => void
+  onSelect: (giftId: EGOGiftId) => void
 }
 
 /**

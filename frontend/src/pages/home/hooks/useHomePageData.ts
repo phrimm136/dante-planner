@@ -18,10 +18,12 @@ const MAX_RECENT_ITEMS = 16
 const MAX_DATE_GROUPS = 4
 
 import type { EgoType } from '@/shared/gameData'
+import { typedEntries } from '@/lib/utils'
+import type { EGOId, IdentityId } from '@/shared/gameData'
 
 /** Identity data needed for card display */
 export interface RecentIdentityData {
-  id: string
+  id: IdentityId
   updateDate: number
   rank: number
   season: number
@@ -29,7 +31,7 @@ export interface RecentIdentityData {
 
 /** EGO data needed for card display */
 export interface RecentEGOData {
-  id: string
+  id: EGOId
   updateDate: number
   egoType: EgoType
   season: number
@@ -91,11 +93,11 @@ export function useRecentlyReleasedData(language: string) {
 
   const dateGroups = (() => {
     // Convert to RecentEntity array with id from record key
-    const identities: RecentEntity[] = Object.entries(identitySpecs).map(([id, spec]) => ({
+    const identities: RecentEntity[] = typedEntries(identitySpecs).map(([id, spec]) => ({
       type: 'identity' as const,
       data: { id, updateDate: spec.updateDate, rank: spec.rank, season: spec.season },
     }))
-    const egos: RecentEntity[] = Object.entries(egoSpecs).map(([id, spec]) => ({
+    const egos: RecentEntity[] = typedEntries(egoSpecs).map(([id, spec]) => ({
       type: 'ego' as const,
       data: { id, updateDate: spec.updateDate, egoType: spec.egoType, season: spec.season },
     }))

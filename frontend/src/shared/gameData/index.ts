@@ -87,6 +87,7 @@ export {
   EGOIdSchema,
   EGOGiftIdSchema,
   EncodedGiftIdSchema,
+  SinnerScopedIdSchema,
   PassiveIdSchema,
   SkillIdSchema,
   ThemePackIdSchema,
@@ -97,7 +98,17 @@ export {
   THEME_PACK_ID_PATTERN,
   ENTITY_MEMBER_ID_PATTERN,
 } from './ids'
-export type { IdentityId, EGOId, EGOGiftId, PassiveId, SkillId, ThemePackId } from './ids'
+export type {
+  EntityId,
+  SinnerScopedId,
+  IdentityId,
+  EGOId,
+  EGOGiftId,
+  EncodedGiftId,
+  PassiveId,
+  SkillId,
+  ThemePackId,
+} from './ids'
 
 export { SkillDescEntrySchema } from './schemas/SkillSchemas'
 export type { SkillDescEntry, Uptie, Threadspin } from './schemas/SkillSchemas'

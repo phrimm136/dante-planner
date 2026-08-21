@@ -1,5 +1,6 @@
 import { EntitySearchDropdown } from '@/shared/filter'
 import { useEGOListData } from '../hooks/useEGOListData'
+import { typedEntries } from '@/lib/utils'
 
 interface EGOFilterDropdownProps {
   selected: Set<string>
@@ -23,7 +24,7 @@ export function EGOFilterDropdown({
     <EntitySearchDropdown
       selected={selected}
       onSelectionChange={onSelectionChange}
-      ids={Object.keys(spec)}
+      ids={typedEntries(spec).map(([id]) => id)}
       names={i18n}
       placeholderKey={placeholderKey}
     />

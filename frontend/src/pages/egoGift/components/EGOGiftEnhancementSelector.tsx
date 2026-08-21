@@ -1,12 +1,17 @@
-import { ENHANCEMENT_LEVELS, ENHANCEMENT_LABELS, type EnhancementLevel } from '@/shared/gameData'
+import {
+  ENHANCEMENT_LEVELS,
+  ENHANCEMENT_LABELS,
+  type EGOGiftId,
+  type EnhancementLevel,
+} from '@/shared/gameData'
 import { EGOGiftTooltip } from './EGOGiftTooltip'
 
 interface EGOGiftEnhancementSelectorProps {
-  giftId: string
+  giftId: EGOGiftId
   currentEnhancement: EnhancementLevel
   maxEnhancement: EnhancementLevel
   isSelected: boolean
-  onSelect: (giftId: string, enhancement: EnhancementLevel) => void
+  onSelect: (giftId: EGOGiftId, enhancement: EnhancementLevel) => void
 }
 
 /**

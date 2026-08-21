@@ -12,7 +12,7 @@ import egoSpecList from '@static/data/egoSpecList.json'
 
 import { createEmptyFilterSets } from '../types/DeckTypes'
 
-import type { MDCategory, DungeonIdx } from '@/shared/gameData'
+import type { MDCategory, DungeonIdx, EncodedGiftId } from '@/shared/gameData'
 import type { NoteContent } from '@/shared/noteEditor'
 import type { FloorThemeSelection } from '@/pages/themePack'
 import type {
@@ -108,7 +108,7 @@ export function createDefaultFloorSelections(): FloorThemeSelection[] {
   return Array.from({ length: 15 }, () => ({
     themePackId: null,
     difficulty: DUNGEON_IDX.NORMAL as DungeonIdx,
-    giftIds: new Set<string>(),
+    giftIds: new Set<EncodedGiftId>(),
   }))
 }
 
@@ -159,12 +159,12 @@ export interface EditorMetadata {
 export interface HydratedEditorState extends EditorMetadata {
   equipment: Record<string, SinnerEquipment>
   floorSelections: FloorThemeSelection[]
-  comprehensiveGiftIds: Set<string>
+  comprehensiveGiftIds: Set<EncodedGiftId>
   deploymentOrder: number[]
   selectedKeywords: Set<string>
   selectedBuffIds: Set<number>
-  selectedGiftIds: Set<string>
-  observationGiftIds: Set<string>
+  selectedGiftIds: Set<EncodedGiftId>
+  observationGiftIds: Set<EncodedGiftId>
   selectedGiftKeyword: string | null
   skillEAState: Record<string, SkillEAState>
   deckFilterState: DeckFilterState

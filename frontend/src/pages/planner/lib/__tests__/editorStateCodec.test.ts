@@ -16,6 +16,14 @@ import type { EditorMetadata } from '../editorStateCodec'
 import type { MDPlannerContent } from '../../types/PlannerTypes'
 import type { PlannerState } from '../../hooks/usePlannerSave'
 import { ThemePackIdSchema } from '@/shared/gameData'
+import { asEncodedGiftId } from '@/test-utils/fixtures'
+
+const ENCODED_9001 = asEncodedGiftId('9001')
+const ENCODED_9002 = asEncodedGiftId('9002')
+const ENCODED_9003 = asEncodedGiftId('9003')
+const ENCODED_9004 = asEncodedGiftId('9004')
+const ENCODED_9005 = asEncodedGiftId('9005')
+const ENCODED_9006 = asEncodedGiftId('9006')
 
 // hydrateEditorState substitutes '' for a note body it cannot read, so both the
 // fixtures and the round-tripped map carry a string where the type says JSONContent.
@@ -32,9 +40,9 @@ function makeContent(
     selectedKeywords: ['Combustion'],
     selectedBuffIds: [3],
     selectedGiftKeyword: 'fire',
-    selectedGiftIds: ['g1', 'g2'],
-    observationGiftIds: ['o1'],
-    comprehensiveGiftIds: ['c1'],
+    selectedGiftIds: [ENCODED_9001, ENCODED_9002],
+    observationGiftIds: [ENCODED_9003],
+    comprehensiveGiftIds: [ENCODED_9004],
     equipment: createDefaultEquipment(),
     deploymentOrder: [0, 1, 2],
     skillEAState: createDefaultSkillEAState(),
@@ -42,7 +50,7 @@ function makeContent(
       {
         themePackId: ThemePackIdSchema.parse('1001'),
         difficulty: DUNGEON_IDX.NORMAL,
-        giftIds: ['fg1', 'fg2'],
+        giftIds: [ENCODED_9005, ENCODED_9006],
       },
     ],
     sectionNotes: { intro: { content: 'note' } },
@@ -81,10 +89,10 @@ function roundTrip(content: MDPlannerContent, metadata: EditorMetadata = METADAT
 describe('hydrateEditorState / projectEditorState round trip', () => {
   const emptyNote = createEmptyNoteContent()
   const defaultNotes = createDefaultSectionNotes()
-  const defaultFloors = Array.from({ length: 15 }, () => ({
+  const defaultFloors: MDPlannerContent['floorSelections'] = Array.from({ length: 15 }, () => ({
     themePackId: null,
     difficulty: DUNGEON_IDX.NORMAL,
-    giftIds: [] as string[],
+    giftIds: [],
   }))
 
   const cases: {
@@ -101,15 +109,15 @@ describe('hydrateEditorState / projectEditorState round trip', () => {
         selectedKeywords: ['Combustion'],
         selectedBuffIds: [3],
         selectedGiftKeyword: 'fire',
-        selectedGiftIds: ['g1', 'g2'],
-        observationGiftIds: ['o1'],
-        comprehensiveGiftIds: ['c1'],
+        selectedGiftIds: [ENCODED_9001, ENCODED_9002],
+        observationGiftIds: [ENCODED_9003],
+        comprehensiveGiftIds: [ENCODED_9004],
         deploymentOrder: [0, 1, 2],
         floorSelections: [
           {
             themePackId: ThemePackIdSchema.parse('1001'),
             difficulty: DUNGEON_IDX.NORMAL,
-            giftIds: ['fg1', 'fg2'],
+            giftIds: [ENCODED_9005, ENCODED_9006],
           },
         ],
         sectionNotes: { ...defaultNotes, intro: { content: 'note' } },
@@ -120,9 +128,9 @@ describe('hydrateEditorState / projectEditorState round trip', () => {
       content: makeContent({
         selectedKeywords: undefined as unknown as string[],
         selectedBuffIds: undefined as unknown as number[],
-        selectedGiftIds: undefined as unknown as string[],
-        observationGiftIds: undefined as unknown as string[],
-        comprehensiveGiftIds: undefined as unknown as string[],
+        selectedGiftIds: undefined as unknown as MDPlannerContent['selectedGiftIds'],
+        observationGiftIds: undefined as unknown as MDPlannerContent['observationGiftIds'],
+        comprehensiveGiftIds: undefined as unknown as MDPlannerContent['comprehensiveGiftIds'],
         deploymentOrder: undefined as unknown as number[],
         floorSelections: undefined as unknown as MDPlannerContent['floorSelections'],
       }),
@@ -140,7 +148,7 @@ describe('hydrateEditorState / projectEditorState round trip', () => {
       name: 'non-array values normalize to their defaults',
       content: makeContent({
         selectedBuffIds: 'nope' as unknown as number[],
-        comprehensiveGiftIds: {} as unknown as string[],
+        comprehensiveGiftIds: {} as unknown as MDPlannerContent['comprehensiveGiftIds'],
         deploymentOrder: 7 as unknown as number[],
       }),
       expected: {

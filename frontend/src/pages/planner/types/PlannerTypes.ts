@@ -1,6 +1,12 @@
 import type { JSONContent } from '@tiptap/core'
 import type { z } from 'zod'
-import type { MDCategory, RRCategory, DungeonIdx, PlannerType } from '@/shared/gameData'
+import type {
+  MDCategory,
+  RRCategory,
+  DungeonIdx,
+  EncodedGiftId,
+  PlannerType,
+} from '@/shared/gameData'
 import type {
   PlannerIdSchema,
   ServerPlannerResponseSchema,
@@ -27,7 +33,7 @@ export interface SerializableFloorSelection {
   /** Selected difficulty for this floor */
   difficulty: DungeonIdx
   /** Selected gift IDs as array (serialized from Set) */
-  giftIds: string[]
+  giftIds: EncodedGiftId[]
 }
 
 /**
@@ -116,11 +122,11 @@ export interface MDPlannerContent {
   /** Currently selected gift keyword filter (null if none) */
   selectedGiftKeyword: string | null
   /** Selected start gift IDs (serialized from Set) */
-  selectedGiftIds: string[]
+  selectedGiftIds: EncodedGiftId[]
   /** Observation gift IDs (serialized from Set) */
-  observationGiftIds: string[]
+  observationGiftIds: EncodedGiftId[]
   /** Comprehensive gift IDs with enhancement encoding (serialized from Set) */
-  comprehensiveGiftIds: string[]
+  comprehensiveGiftIds: EncodedGiftId[]
   /** Equipment configuration per sinner */
   equipment: Record<string, SinnerEquipment>
   /** Deployment order as array of sinner indices */

@@ -1,4 +1,5 @@
 import { useParams } from '@tanstack/react-router'
+import { IdentityIdSchema } from '@/shared/gameData'
 import { Suspense, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -38,13 +39,14 @@ function IdentityDetailContent() {
   const totalSections = 3
   const visibleSections = useProgressiveCount({ total: totalSections, step: 1, initial: 0 })
 
-  // Route validation - id must be defined
+  // Route validation - id must be defined and well-formed
   if (!id) {
     throw new Error('Identity ID is required')
   }
+  const identityId = IdentityIdSchema.parse(id)
 
   // Spec data only - no language key, won't re-suspend on language change
-  const identityData = useIdentityDetailSpec(id)
+  const identityData = useIdentityDetailSpec(identityId)
 
   // Cast to Uptie type for component props
   const uptieLevel = uptie as Uptie
@@ -66,7 +68,7 @@ function IdentityDetailContent() {
 
   // Left column: Header, Status, Resistance, Stagger, Traits (NO Sanity)
   const leftColumn = (
-    <IdentityInfoPane id={id} identity={identityData} uptie={uptieLevel} level={level} />
+    <IdentityInfoPane id={identityId} identity={identityData} uptie={uptieLevel} level={level} />
   )
 
   // Skills content (shared between desktop and mobile)

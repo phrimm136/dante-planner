@@ -14,7 +14,7 @@ import {
 
 import type { ReactNode } from 'react'
 import type { StoreApi } from 'zustand'
-import type { MDCategory } from '@/shared/gameData'
+import type { EncodedGiftId, MDCategory } from '@/shared/gameData'
 import type { SinnerEquipment, SkillEAState, DeckFilterState } from '../types/DeckTypes'
 import type { FloorThemeSelection } from '@/pages/themePack'
 import type { NoteContent } from '@/shared/noteEditor'
@@ -40,7 +40,7 @@ export {
 interface HotState {
   equipment: Record<string, SinnerEquipment>
   floorSelections: FloorThemeSelection[]
-  comprehensiveGiftIds: Set<string>
+  comprehensiveGiftIds: Set<EncodedGiftId>
   deploymentOrder: number[]
 }
 
@@ -51,8 +51,8 @@ interface HotState {
 interface WarmState {
   selectedKeywords: Set<string>
   selectedBuffIds: Set<number>
-  selectedGiftIds: Set<string>
-  observationGiftIds: Set<string>
+  selectedGiftIds: Set<EncodedGiftId>
+  observationGiftIds: Set<EncodedGiftId>
   selectedGiftKeyword: string | null
   skillEAState: Record<string, SkillEAState>
   deckFilterState: DeckFilterState
@@ -94,14 +94,14 @@ export interface PlannerEditorActions {
   updateSinnerEquipment: (sinnerId: string, equipment: SinnerEquipment) => void
   setFloorSelections: (selections: FloorThemeSelection[]) => void
   updateFloorSelection: (floorIndex: number, selection: FloorThemeSelection) => void
-  setComprehensiveGiftIds: (ids: Set<string>) => void
+  setComprehensiveGiftIds: (ids: Set<EncodedGiftId>) => void
   setDeploymentOrder: (order: number[]) => void
 
   // Warm state setters
   setSelectedKeywords: (keywords: Set<string>) => void
   setSelectedBuffIds: (ids: Set<number>) => void
-  setSelectedGiftIds: (ids: Set<string>) => void
-  setObservationGiftIds: (ids: Set<string>) => void
+  setSelectedGiftIds: (ids: Set<EncodedGiftId>) => void
+  setObservationGiftIds: (ids: Set<EncodedGiftId>) => void
   setSelectedGiftKeyword: (keyword: string | null) => void
   setSkillEAState: (state: Record<string, SkillEAState>) => void
   updateSinnerSkillEA: (sinnerId: string, state: SkillEAState) => void

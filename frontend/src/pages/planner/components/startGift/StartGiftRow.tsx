@@ -16,7 +16,7 @@ interface StartGiftRowProps {
   selectedGiftIds: Set<string>
   maxSelectable: number
   onRowSelect: (keyword: string) => void
-  onGiftClick: (keyword: string, giftId: string) => void
+  onGiftClick: (keyword: string, giftId: EGOGiftId) => void
 }
 
 /**
@@ -41,7 +41,7 @@ export function StartGiftRow({
     onRowSelect(keyword)
   }
 
-  const handleGiftCardClick = (giftId: string) => {
+  const handleGiftCardClick = (giftId: EGOGiftId) => {
     onGiftClick(keyword, giftId)
   }
 

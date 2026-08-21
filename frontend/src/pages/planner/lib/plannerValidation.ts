@@ -16,7 +16,7 @@ import {
   migrateKeywords,
 } from '@/shared/gameData'
 import { MAX_NOTE_BYTES } from '@/lib/constants'
-import { hasGiftId, giftDisplayName } from '@/pages/egoGift'
+import { decodeGiftSelection, giftDisplayName, hasGiftId } from '@/pages/egoGift'
 import { measureDocBytes } from '@/shared/noteEditor'
 import { getUnaffordableGiftIds } from './plannerRules'
 import { toUserFriendlyError } from './plannerValidationErrors'
@@ -333,7 +333,8 @@ export function validateGiftIdArray(
     seen.add(giftId)
 
     if (egoGiftSpec) {
-      if (!hasGiftId(giftId, egoGiftSpec)) {
+      const decoded = decodeGiftSelection(giftId)
+      if (!decoded || !(decoded.giftId in egoGiftSpec)) {
         errors.push({
           code: 'GIFT_UNKNOWN_ID',
           message: `Gift ID '${giftId}' not found in ${fieldName}`,

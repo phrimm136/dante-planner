@@ -11,7 +11,7 @@ import type { SortMode } from '@/shared/filter'
 import { bucketAndSortFloorGifts } from '../../lib/floorGiftBucketing'
 import { applyGiftToggle } from '../../lib/giftToggle'
 import type { EGOGiftListItem } from '@/pages/egoGift'
-import type { EnhancementLevel, DungeonIdx } from '@/shared/gameData'
+import type { EGOGiftId, EncodedGiftId, EnhancementLevel, DungeonIdx } from '@/shared/gameData'
 import { SECTION_STYLES } from '@/lib/constants'
 import { toGiftListItems } from '@/pages/egoGift'
 
@@ -21,8 +21,8 @@ interface FloorGiftSelectorPaneProps {
   floorNumber: number
   themePackId: string
   difficulty: DungeonIdx
-  selectedGiftIds: Set<string>
-  onGiftSelectionChange: (giftIds: Set<string>) => void
+  selectedGiftIds: Set<EncodedGiftId>
+  onGiftSelectionChange: (giftIds: Set<EncodedGiftId>) => void
 }
 
 /**
@@ -85,7 +85,7 @@ export function FloorGiftSelectorPane({
    * Handle enhancement selection with toggle logic and cascade
    */
   const [handleEnhancementSelect] = useState(
-    () => (giftId: string, enhancement: EnhancementLevel) => {
+    () => (giftId: EGOGiftId, enhancement: EnhancementLevel) => {
       startTransition(() => {
         const {
           selectedGiftIds: current,

@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 
 import { EntitySearchDropdown } from '../EntitySearchDropdown'
+import { SinnerScopedIdSchema } from '@/shared/gameData'
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -10,7 +11,8 @@ vi.mock('react-i18next', () => ({
   }),
 }))
 
-vi.mock('@/shared/gameData', () => ({
+vi.mock('@/shared/gameData', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/shared/gameData')>()),
   getSinnerFromId: (id: string) => `sinner-${id.slice(0, 3)}`,
 }))
 
@@ -39,8 +41,10 @@ vi.mock('../SearchableMultiSelect', () => ({
   ),
 }))
 
-const ids = ['10101', '10102']
-const names = { '10101': 'LCB Sinner\nYi Sang' }
+const ID_10101 = SinnerScopedIdSchema.parse('10101')
+const ID_10102 = SinnerScopedIdSchema.parse('10102')
+const ids = [ID_10101, ID_10102]
+const names = { [ID_10101]: 'LCB Sinner\nYi Sang' }
 
 describe('EntitySearchDropdown', () => {
   it('labels options "<name> - <sinner>" with newlines flattened, falling back to the id', () => {

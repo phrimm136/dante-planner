@@ -8,7 +8,7 @@ import { sortEGOGifts } from '@/pages/egoGift'
 import { EMPTY_STATE, CARD_GRID } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import type { EGOGiftListItem } from '@/pages/egoGift'
-import type { EnhancementLevel } from '@/shared/gameData'
+import type { EncodedGiftId, EnhancementLevel } from '@/shared/gameData'
 import { useEGOGiftListData } from '@/pages/egoGift'
 import { useSearchMappings } from '@/shared/filter'
 import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
@@ -25,7 +25,7 @@ interface ComprehensiveGiftGridTrackerProps {
   onToggleEgoGiftDone?: (encodedId: string) => void
   readOnly?: boolean
   /** Authoritative gift list from saved plan content. When provided, used as-is instead of aggregating from floorSelections. */
-  comprehensiveGiftIds: string[]
+  comprehensiveGiftIds: EncodedGiftId[]
 }
 
 interface DecodedGift {
@@ -60,7 +60,7 @@ export function ComprehensiveGiftGridTracker({
 
   // Use authoritative comprehensiveGiftIds when provided; fall back to aggregating from floors
   const allComprehensiveGiftIds = (() => {
-    const allGifts = new Set<string>(comprehensiveGiftIds)
+    const allGifts = new Set(comprehensiveGiftIds)
     floorSelections.forEach((selection) => {
       selection.giftIds.forEach((giftId) => allGifts.add(giftId))
     })

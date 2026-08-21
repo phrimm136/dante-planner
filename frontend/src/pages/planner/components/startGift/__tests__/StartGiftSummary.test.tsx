@@ -11,6 +11,11 @@ import userEvent from '@testing-library/user-event'
 import { StartGiftSummary } from '../StartGiftSummary'
 import type { EGOGiftSpec, EGOGiftNameList } from '@/pages/egoGift'
 import { buildEgoGiftSpecList } from '@/test-utils'
+import { asEncodedGiftId } from '@/test-utils/fixtures'
+import type { EncodedGiftId } from '@/shared/gameData'
+
+const ENCODED_9001 = asEncodedGiftId('9001')
+const ENCODED_9002 = asEncodedGiftId('9002')
 
 // Mock react-i18next
 vi.mock('react-i18next', async (importOriginal) => {
@@ -88,7 +93,7 @@ vi.mock('@/shared/assets', () => ({
 describe('StartGiftSummary', () => {
   const defaultProps = {
     selectedKeyword: null as string | null,
-    selectedGiftIds: new Set<string>(),
+    selectedGiftIds: new Set<EncodedGiftId>(),
     onClick: vi.fn(),
   }
 
@@ -123,7 +128,7 @@ describe('StartGiftSummary', () => {
       const props = {
         ...defaultProps,
         selectedKeyword: 'Burn',
-        selectedGiftIds: new Set(['9001']),
+        selectedGiftIds: new Set([ENCODED_9001]),
       }
 
       render(<StartGiftSummary {...props} />)
@@ -142,7 +147,7 @@ describe('StartGiftSummary', () => {
       const props = {
         ...defaultProps,
         selectedKeyword: 'Burn',
-        selectedGiftIds: new Set(['9001', '9002']),
+        selectedGiftIds: new Set([ENCODED_9001, ENCODED_9002]),
       }
 
       render(<StartGiftSummary {...props} />)
@@ -155,7 +160,7 @@ describe('StartGiftSummary', () => {
       const props = {
         ...defaultProps,
         selectedKeyword: 'Burn',
-        selectedGiftIds: new Set(['9001']),
+        selectedGiftIds: new Set([ENCODED_9001]),
       }
 
       render(<StartGiftSummary {...props} />)
@@ -218,7 +223,7 @@ describe('StartGiftSummary', () => {
       const props = {
         ...defaultProps,
         selectedKeyword: 'Burn',
-        selectedGiftIds: new Set<string>(), // No gifts selected
+        selectedGiftIds: new Set<EncodedGiftId>(), // No gifts selected
       }
 
       render(<StartGiftSummary {...props} />)

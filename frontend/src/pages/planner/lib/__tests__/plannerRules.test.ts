@@ -7,6 +7,11 @@
 import { describe, it, expect } from 'vitest'
 import { isGiftAffordableForThemePack, getUnaffordableGiftIds } from '../plannerRules'
 import type { EGOGiftSpec } from '@/pages/egoGift'
+import { asEncodedGiftId } from '@/test-utils/fixtures'
+
+const ENCODED_9220 = asEncodedGiftId('9220')
+const ENCODED_19220 = asEncodedGiftId('19220')
+const ENCODED_9999 = asEncodedGiftId('9999')
 
 // ============================================================================
 // Fixtures
@@ -52,23 +57,23 @@ describe('getUnaffordableGiftIds', () => {
   }
 
   it('base gift ID on wrong pack returns that ID', () => {
-    const result = getUnaffordableGiftIds(new Set(['9220']), '1110', spec)
+    const result = getUnaffordableGiftIds(new Set([ENCODED_9220]), '1110', spec)
     expect(result).toEqual(['9220'])
   })
 
   it('enhanced gift ID (19220) strips prefix to look up base ID 9220', () => {
     // '19220' → getBaseGiftId → '9220' → not in '1110' → unaffordable
-    const result = getUnaffordableGiftIds(new Set(['19220']), '1110', spec)
+    const result = getUnaffordableGiftIds(new Set([ENCODED_19220]), '1110', spec)
     expect(result).toEqual(['19220'])
   })
 
   it('gift on correct pack returns empty array', () => {
-    const result = getUnaffordableGiftIds(new Set(['9220']), '1024', spec)
+    const result = getUnaffordableGiftIds(new Set([ENCODED_9220]), '1024', spec)
     expect(result).toEqual([])
   })
 
   it('gift not in spec is silently skipped', () => {
-    const result = getUnaffordableGiftIds(new Set(['9999']), '1110', spec)
+    const result = getUnaffordableGiftIds(new Set([ENCODED_9999]), '1110', spec)
     expect(result).toEqual([])
   })
 })

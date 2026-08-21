@@ -1,23 +1,23 @@
 import { useState, useEffect, useRef } from 'react'
-import type { EnhancementLevel } from '@/shared/gameData'
+import type { EGOGiftId, EnhancementLevel } from '@/shared/gameData'
 import { EGOGiftEnhancementSelector } from './EGOGiftEnhancementSelector'
 
 interface EGOGiftSelectableCardProps {
-  giftId: string
+  giftId: EGOGiftId
   enhancement: EnhancementLevel
   maxEnhancement: EnhancementLevel
   isSelected: boolean
-  onEnhancementSelect: (giftId: string, enhancement: EnhancementLevel) => void
+  onEnhancementSelect: (giftId: EGOGiftId, enhancement: EnhancementLevel) => void
   children: React.ReactNode
 }
 
 // Inner component props (without children)
 interface EGOGiftSelectableCardInnerProps {
-  giftId: string
+  giftId: EGOGiftId
   enhancement: EnhancementLevel
   maxEnhancement: EnhancementLevel
   isSelected: boolean
-  onEnhancementSelect: (giftId: string, enhancement: EnhancementLevel) => void
+  onEnhancementSelect: (giftId: EGOGiftId, enhancement: EnhancementLevel) => void
 }
 
 /**

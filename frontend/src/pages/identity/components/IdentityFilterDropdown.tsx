@@ -1,5 +1,6 @@
 import { EntitySearchDropdown } from '@/shared/filter'
 import { useIdentityListData } from '../hooks/useIdentityListData'
+import { typedEntries } from '@/lib/utils'
 
 interface IdentityFilterDropdownProps {
   selected: Set<string>
@@ -23,7 +24,7 @@ export function IdentityFilterDropdown({
     <EntitySearchDropdown
       selected={selected}
       onSelectionChange={onSelectionChange}
-      ids={Object.keys(spec)}
+      ids={typedEntries(spec).map(([id]) => id)}
       names={i18n}
       placeholderKey={placeholderKey}
     />

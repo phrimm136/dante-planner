@@ -17,7 +17,7 @@ import {
   extractThemePackIds,
   matchesPlannerFilters,
 } from '../plannerContentExtractors'
-import { asEGOId, asIdentityId } from '@/test-utils/fixtures'
+import { asEGOId, asEncodedGiftId, asIdentityId } from '@/test-utils/fixtures'
 
 const IDENTITY_10101 = asIdentityId('10101')
 const IDENTITY_10201 = asIdentityId('10201')
@@ -26,6 +26,18 @@ const EGO_20101 = asEGOId('20101')
 const EGO_20102 = asEGOId('20102')
 const EGO_20301 = asEGOId('20301')
 const EGO_20501 = asEGOId('20501')
+const ENCODED_9001 = asEncodedGiftId('9001')
+const ENCODED_9002 = asEncodedGiftId('9002')
+const ENCODED_9003 = asEncodedGiftId('9003')
+const ENCODED_9004 = asEncodedGiftId('9004')
+const ENCODED_9005 = asEncodedGiftId('9005')
+const ENCODED_9006 = asEncodedGiftId('9006')
+const ENCODED_9154 = asEncodedGiftId('9154')
+const ENCODED_19154 = asEncodedGiftId('19154')
+const ENCODED_29154 = asEncodedGiftId('29154')
+
+/** Stored ids no encoding accepts; the branded content type cannot express them. */
+const MALFORMED_GIFT_IDS = ['not-a-gift', '', '999'] as unknown as MDPlannerContent['selectedGiftIds']
 
 // ============================================================================
 // Helpers
@@ -197,10 +209,10 @@ describe('extractEgoIds', () => {
 describe('extractGiftIds', () => {
   it('extracts from all 4 sources', () => {
     const content = createMockMDContent({
-      selectedGiftIds: ['9001', '9002'],
-      observationGiftIds: ['9003'],
-      comprehensiveGiftIds: ['9004'],
-      floorSelections: [{ themePackId: null, difficulty: 0, giftIds: ['9005', '9006'] }],
+      selectedGiftIds: [ENCODED_9001, ENCODED_9002],
+      observationGiftIds: [ENCODED_9003],
+      comprehensiveGiftIds: [ENCODED_9004],
+      floorSelections: [{ themePackId: null, difficulty: 0, giftIds: [ENCODED_9005, ENCODED_9006] }],
     })
 
     const result = extractGiftIds(content)
@@ -210,10 +222,10 @@ describe('extractGiftIds', () => {
 
   it('indexes an enhanced gift under its base id', () => {
     const content = createMockMDContent({
-      selectedGiftIds: ['9154'],
+      selectedGiftIds: [ENCODED_9154],
       observationGiftIds: [],
-      comprehensiveGiftIds: ['19154'],
-      floorSelections: [{ themePackId: null, difficulty: 0, giftIds: ['29154'] }],
+      comprehensiveGiftIds: [ENCODED_19154],
+      floorSelections: [{ themePackId: null, difficulty: 0, giftIds: [ENCODED_29154] }],
     })
 
     const result = extractGiftIds(content)
@@ -223,7 +235,7 @@ describe('extractGiftIds', () => {
 
   it('drops ids that are not a valid gift encoding', () => {
     const content = createMockMDContent({
-      selectedGiftIds: ['9001', 'not-a-gift', '', '999'],
+      selectedGiftIds: [ENCODED_9001, ...MALFORMED_GIFT_IDS],
       observationGiftIds: [],
       comprehensiveGiftIds: [],
       floorSelections: [],
@@ -234,10 +246,10 @@ describe('extractGiftIds', () => {
 
   it('deduplicates across sources', () => {
     const content = createMockMDContent({
-      selectedGiftIds: ['9001', '9002'],
-      observationGiftIds: ['9002', '9003'],
+      selectedGiftIds: [ENCODED_9001, ENCODED_9002],
+      observationGiftIds: [ENCODED_9002, ENCODED_9003],
       comprehensiveGiftIds: [],
-      floorSelections: [{ themePackId: null, difficulty: 0, giftIds: ['9001'] }],
+      floorSelections: [{ themePackId: null, difficulty: 0, giftIds: [ENCODED_9001] }],
     })
 
     const result = extractGiftIds(content)

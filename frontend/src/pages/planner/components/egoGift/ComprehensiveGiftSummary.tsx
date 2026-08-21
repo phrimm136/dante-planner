@@ -5,7 +5,7 @@ import { decodeAndOrderGiftSelections } from '@/pages/egoGift'
 import { EMPTY_STATE, CARD_GRID } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import type { EGOGiftListItem } from '@/pages/egoGift'
-import type { EnhancementLevel } from '@/shared/gameData'
+import type { EncodedGiftId, EnhancementLevel } from '@/shared/gameData'
 import { useEGOGiftListData } from '@/pages/egoGift'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import { PlannerSection } from '@/components/layout/PlannerSection'
@@ -15,8 +15,7 @@ import { EGOGiftTooltip } from '@/pages/egoGift'
 
 export interface ComprehensiveGiftSummaryProps {
   onClick: () => void
-  /** Encoded IDs (enhancement + giftId) */
-  selectedGiftIds: Set<string>
+  selectedGiftIds: Set<EncodedGiftId>
 }
 
 interface DecodedGift {

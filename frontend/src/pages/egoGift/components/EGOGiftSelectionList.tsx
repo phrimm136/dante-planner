@@ -1,11 +1,11 @@
 import { useTranslation } from 'react-i18next'
 
 import type { EGOGiftListItem } from '../types/EGOGiftTypes'
-import type { EnhancementLevel } from '@/shared/gameData'
+import type { EGOGiftId, EncodedGiftId, EnhancementLevel } from '@/shared/gameData'
 import { CARD_GRID, PROGRESSIVE_REVEAL, SECTION_STYLES } from '@/lib/constants'
 import { applyFacets, useSearchMappings } from '@/shared/filter'
 import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
-import { buildSelectionLookup } from '../lib/egoGiftEncoding'
+import { buildSelectionLookup, encodeGiftSelection } from '../lib/egoGiftEncoding'
 import { EGO_GIFT_SELECTION_FACETS } from '../lib/egoGiftFilter'
 import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
 import { EGOGiftEnhancementCell, EGOGiftObservationCell } from './EGOGiftSelectionCell'
@@ -14,10 +14,10 @@ interface EGOGiftSelectionListProps {
   gifts: EGOGiftListItem[]
   selectedKeywords: Set<string>
   searchQuery: string
-  selectedGiftIds: Set<string>
-  onGiftSelect?: (giftId: string) => void
+  selectedGiftIds: ReadonlySet<EncodedGiftId>
+  onGiftSelect?: (giftId: EGOGiftId) => void
   enableEnhancementSelection?: boolean
-  onEnhancementSelect?: (giftId: string, enhancement: EnhancementLevel) => void
+  onEnhancementSelect?: (giftId: EGOGiftId, enhancement: EnhancementLevel) => void
 }
 
 /**
@@ -112,7 +112,7 @@ export function EGOGiftSelectionList({
             <EGOGiftObservationCell
               key={gift.id}
               gift={gift}
-              isSelected={selectedGiftIds.has(gift.id)}
+              isSelected={selectedGiftIds.has(encodeGiftSelection(0, gift.id))}
               isVisible={visibleIds.has(gift.id)}
               onSelect={onGiftSelect}
             />

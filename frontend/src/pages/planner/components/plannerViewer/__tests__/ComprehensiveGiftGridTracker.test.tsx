@@ -5,6 +5,11 @@ import { ComprehensiveGiftGridTracker } from '../ComprehensiveGiftGridTracker'
 import { encodeGiftSelection } from '@/pages/egoGift'
 import { buildEgoGiftSpecList, buildFloorSelection } from '@/test-utils'
 import { ThemePackIdSchema } from '@/shared/gameData'
+import { asEGOGiftId, asEncodedGiftId } from '@/test-utils/fixtures'
+
+const GIFT_9001 = asEGOGiftId('9001')
+const ENCODED_9001 = asEncodedGiftId('9001')
+const ENCODED_9002 = asEncodedGiftId('9002')
 
 // The card is the seam the grid renders through, so the mock surfaces the three
 // values the grid computes: which gift, at which enhancement, and highlighted or not.
@@ -104,8 +109,8 @@ describe('ComprehensiveGiftGridTracker', () => {
     it('reserves the fixed scroll height that the Suspense skeleton mirrors', () => {
       const { container } = render(
         <ComprehensiveGiftGridTracker
-          floorSelections={[buildFloorSelection({ giftIds: ['9001'] })]}
-          comprehensiveGiftIds={['9001']}
+          floorSelections={[buildFloorSelection({ giftIds: [ENCODED_9001] })]}
+          comprehensiveGiftIds={[ENCODED_9001]}
           hoveredThemePackId={null}
         />,
         { wrapper: createWrapper() },
@@ -121,7 +126,7 @@ describe('ComprehensiveGiftGridTracker', () => {
       const { getByTestId } = render(
         <ComprehensiveGiftGridTracker
           floorSelections={[buildFloorSelection({ giftIds: [] })]}
-          comprehensiveGiftIds={['9001']}
+          comprehensiveGiftIds={[ENCODED_9001]}
           hoveredThemePackId={null}
         />,
         { wrapper: createWrapper() },
@@ -134,8 +139,8 @@ describe('ComprehensiveGiftGridTracker', () => {
     it('displays gifts present in a floor giftIds and in comprehensiveGiftIds', () => {
       const { getByTestId } = render(
         <ComprehensiveGiftGridTracker
-          floorSelections={[buildFloorSelection({ giftIds: ['9002'] })]}
-          comprehensiveGiftIds={['9001']}
+          floorSelections={[buildFloorSelection({ giftIds: [ENCODED_9002] })]}
+          comprehensiveGiftIds={[ENCODED_9001]}
           hoveredThemePackId={null}
         />,
         { wrapper: createWrapper() },
@@ -148,7 +153,7 @@ describe('ComprehensiveGiftGridTracker', () => {
 
   describe('decode survival', () => {
     it('renders the base gift and its enhancement for an encoded selection', () => {
-      const encoded = encodeGiftSelection(2, '9001')
+      const encoded = encodeGiftSelection(2, GIFT_9001)
 
       const { getByTestId } = render(
         <ComprehensiveGiftGridTracker
@@ -168,7 +173,7 @@ describe('ComprehensiveGiftGridTracker', () => {
       const { getAllByTestId } = render(
         <ComprehensiveGiftGridTracker
           floorSelections={[buildFloorSelection({ giftIds: [] })]}
-          comprehensiveGiftIds={[encodeGiftSelection(0, '9001'), encodeGiftSelection(1, '9001')]}
+          comprehensiveGiftIds={[encodeGiftSelection(0, GIFT_9001), encodeGiftSelection(1, GIFT_9001)]}
           hoveredThemePackId={null}
         />,
         { wrapper: createWrapper() },
@@ -185,13 +190,13 @@ describe('ComprehensiveGiftGridTracker', () => {
     it('marks the hovered theme pack floor gifts as selected', () => {
       const floor = buildFloorSelection({
         themePackId: ThemePackIdSchema.parse('1001'),
-        giftIds: ['9001'],
+        giftIds: [ENCODED_9001],
       })
 
       const { getByTestId } = render(
         <ComprehensiveGiftGridTracker
           floorSelections={[floor]}
-          comprehensiveGiftIds={['9001', '9002']}
+          comprehensiveGiftIds={[ENCODED_9001, ENCODED_9002]}
           hoveredThemePackId="1001"
         />,
         { wrapper: createWrapper() },
@@ -204,13 +209,13 @@ describe('ComprehensiveGiftGridTracker', () => {
     it('leaves every gift unselected when no theme pack is hovered', () => {
       const floor = buildFloorSelection({
         themePackId: ThemePackIdSchema.parse('1001'),
-        giftIds: ['9001'],
+        giftIds: [ENCODED_9001],
       })
 
       const { getByTestId } = render(
         <ComprehensiveGiftGridTracker
           floorSelections={[floor]}
-          comprehensiveGiftIds={['9001']}
+          comprehensiveGiftIds={[ENCODED_9001]}
           hoveredThemePackId={null}
         />,
         { wrapper: createWrapper() },
@@ -225,7 +230,7 @@ describe('ComprehensiveGiftGridTracker', () => {
       const { getByTestId } = render(
         <ComprehensiveGiftGridTracker
           floorSelections={[buildFloorSelection({ giftIds: [] })]}
-          comprehensiveGiftIds={['9001', '9002']}
+          comprehensiveGiftIds={[ENCODED_9001, ENCODED_9002]}
           hoveredThemePackId={null}
           egoGiftDoneMarks={new Set(['9001'])}
         />,

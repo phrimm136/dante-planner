@@ -1,4 +1,5 @@
 import { useParams } from '@tanstack/react-router'
+import { EGOIdSchema } from '@/shared/gameData'
 import { Suspense, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DetailPageLayout } from '@/components/layout/DetailPageLayout'
@@ -27,13 +28,14 @@ function EGODetailContent() {
   const totalSections = 2
   const visibleSections = useProgressiveCount({ total: totalSections, step: 1, initial: 0 })
 
-  // Route validation - id must be defined
+  // Route validation - id must be defined and well-formed
   if (!id) {
     throw new Error('EGO ID is required')
   }
+  const egoId = EGOIdSchema.parse(id)
 
   // Spec data only - no language key, won't re-suspend on language change
-  const spec = useEGODetailSpec(id)
+  const spec = useEGODetailSpec(egoId)
 
   // Controllable threadspin state — defaults to this EGO's max.
   const [threadspin, setThreadspin] = useState<number>(spec.maxThreadspin)
@@ -58,7 +60,7 @@ function EGODetailContent() {
   )
 
   // Left column: Header (with i18n), Sin Cost, Sin Resistance
-  const leftColumn = <EGOInfoPane id={id} ego={spec} skillType={skillType} />
+  const leftColumn = <EGOInfoPane id={egoId} ego={spec} skillType={skillType} />
 
   // Skills content (shared between desktop and mobile)
   const skillsContent = (

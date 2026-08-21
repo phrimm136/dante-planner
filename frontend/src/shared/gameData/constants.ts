@@ -4,6 +4,7 @@
 
 import seasonsJson from '@static/i18n/EN/seasons.json'
 import unitKeywordsJson from '@static/i18n/EN/unitKeywords.json'
+import type { SinnerScopedId } from './ids'
 
 /**
  * Max level - used to calculate actual defense values and cap level inputs
@@ -523,7 +524,7 @@ export const EGO_GIFT_ENHANCEMENT_BASE_COSTS: Record<string, number> = {
  * @param id - Entity ID (identity or EGO)
  * @returns Sinner name (e.g., "YiSang", "Faust")
  */
-export function getSinnerFromId(id: string): string {
+export function getSinnerFromId(id: SinnerScopedId): string {
   const sinnerIndex = parseInt(id.substring(1, 3), 10) - 1
   return SINNERS[sinnerIndex] || 'Unknown'
 }

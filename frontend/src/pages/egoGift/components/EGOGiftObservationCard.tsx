@@ -1,9 +1,10 @@
 import { EGOGiftTooltip } from './EGOGiftTooltip'
+import type { EGOGiftId } from '@/shared/gameData'
 
 interface EGOGiftObservationCardProps {
-  giftId: string
+  giftId: EGOGiftId
   isSelected: boolean
-  onSelect: (giftId: string) => void
+  onSelect: (giftId: EGOGiftId) => void
   children: React.ReactNode
 }
 

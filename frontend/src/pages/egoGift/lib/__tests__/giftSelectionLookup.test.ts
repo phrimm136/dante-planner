@@ -22,6 +22,16 @@ import { sortEGOGifts } from '../egoGiftSort'
 import type { EGOGiftListItem, EGOGiftSpec } from '../../index'
 import type { EnhancementLevel } from '@/shared/gameData'
 import { toGiftListItem } from '../giftListItem'
+import { asEncodedGiftId } from '@/test-utils/fixtures'
+
+const ENCODED_9001 = asEncodedGiftId('9001')
+const ENCODED_19001 = asEncodedGiftId('19001')
+const ENCODED_29001 = asEncodedGiftId('29001')
+const ENCODED_9002 = asEncodedGiftId('9002')
+const ENCODED_19002 = asEncodedGiftId('19002')
+const ENCODED_9003 = asEncodedGiftId('9003')
+const ENCODED_9999 = asEncodedGiftId('9999')
+const ENCODED_19999 = asEncodedGiftId('19999')
 
 const SPEC: Record<string, EGOGiftSpec> = {
   '9001': {
@@ -52,19 +62,18 @@ const I18N: Record<string, string> = { '9001': 'First Gift', '9003': 'Third Gift
 
 /** Every id shape the callers can hold, including ones that must be dropped. */
 const IDS = [
-  '9001', // base, in spec, translated
-  '19001', // enhancement 1, in spec
-  '29001', // enhancement 2, in spec
-  '9002', // in spec, untranslated
-  '19002', // enhanced, in spec, untranslated
-  '9003', // in spec, translated
-  '9999', // decodes, absent from spec
-  '19999', // decodes enhanced, absent from spec
-  'abcd', // does not decode
-  '', // does not decode
-  '900', // too short
-  '390001', // enhancement digit out of range
+  ENCODED_9001, // base, in spec, translated
+  ENCODED_19001, // enhancement 1, in spec
+  ENCODED_29001, // enhancement 2, in spec
+  ENCODED_9002, // in spec, untranslated
+  ENCODED_19002, // enhanced, in spec, untranslated
+  ENCODED_9003, // in spec, translated
+  ENCODED_9999, // decodes, absent from spec
+  ENCODED_19999, // decodes enhanced, absent from spec
 ]
+
+/** Ids the callers can still be handed from storage, which no encoding accepts. */
+const UNDECODABLE_IDS = ['abcd', '', '900', '390001']
 
 interface LegacyDecoded {
   item: EGOGiftListItem
@@ -114,12 +123,15 @@ describe('decodeGiftSelections + orderSelectionsByGiftOrder', () => {
       '19002',
       '9003',
     ])
+    for (const id of UNDECODABLE_IDS) {
+      expect(decodeGiftSelection(id)).toBeNull()
+    }
   })
 
   it('falls back to the gift id when untranslated', () => {
     const byId = new Map(decodeGiftSelections(IDS, SPEC, I18N).map((s) => [s.encodedId, s.item]))
-    expect(byId.get('9001')?.name).toBe('First Gift')
-    expect(byId.get('9002')?.name).toBe('9002')
+    expect(byId.get(ENCODED_9001)?.name).toBe('First Gift')
+    expect(byId.get(ENCODED_9002)?.name).toBe('9002')
   })
 
   it('keeps each item paired with the enhancement it was selected at', () => {
@@ -140,22 +152,22 @@ describe('decodeGiftSelections + orderSelectionsByGiftOrder', () => {
 describe('lookupByGiftId / hasGiftId / giftDisplayName', () => {
   it.each(IDS)('lookupByGiftId matches the legacy decode-then-index for %s', (id) => {
     const baseId = getBaseGiftId(id)
-    const legacy = baseId === null ? undefined : SPEC[baseId]
+    const legacy = SPEC[baseId]
     expect(lookupByGiftId(id, SPEC)).toBe(legacy)
   })
 
   it.each(IDS)('hasGiftId matches the legacy `in` guard for %s', (id) => {
     const baseId = getBaseGiftId(id)
-    expect(hasGiftId(id, SPEC)).toBe(!(baseId === null || !(baseId in SPEC)))
+    expect(hasGiftId(id, SPEC)).toBe(baseId in SPEC)
   })
 
   it.each(IDS)('giftDisplayName matches the legacy i18n fallback for %s', (id) => {
     const baseId = getBaseGiftId(id)
-    const legacy = (baseId === null ? undefined : I18N[baseId]) ?? id
+    const legacy = I18N[baseId] ?? id
     expect(giftDisplayName(id, I18N)).toBe(legacy)
   })
 
   it('treats an absent i18n catalogue as untranslated', () => {
-    expect(giftDisplayName('9001', {})).toBe('9001')
+    expect(giftDisplayName(ENCODED_9001, {})).toBe('9001')
   })
 })

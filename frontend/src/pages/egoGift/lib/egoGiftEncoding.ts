@@ -1,5 +1,5 @@
-import { GIFT_ID_PATTERN } from '@/shared/gameData'
-import type { EGOGiftId } from '@/shared/gameData'
+import { GIFT_ID_PATTERN, EGOGiftIdSchema, EncodedGiftIdSchema } from '@/shared/gameData'
+import type { EGOGiftId, EncodedGiftId } from '@/shared/gameData'
 import type { EnhancementLevel } from '@/shared/gameData'
 import type { EGOGiftRecipe, EGOGiftListItem, EGOGiftSpec } from '@/pages/egoGift'
 import type { SortMode } from '@/shared/filter'
@@ -16,11 +16,14 @@ import { toGiftListItem } from './giftListItem'
  * @param giftId - Gift ID string
  * @returns Encoded numeric string
  */
-export function encodeGiftSelection(enhancement: EnhancementLevel, giftId: string): string {
+export function encodeGiftSelection(
+  enhancement: EnhancementLevel,
+  giftId: EGOGiftId,
+): EncodedGiftId {
   if (enhancement === 0) {
-    return giftId
+    return EncodedGiftIdSchema.parse(giftId)
   }
-  return `${enhancement}${giftId}`
+  return EncodedGiftIdSchema.parse(`${enhancement}${giftId}`)
 }
 
 /**
@@ -33,7 +36,7 @@ export const ENCODED_SELECTION_PATTERN = new RegExp(`^([12])?(${GIFT_ID_PATTERN}
  */
 export interface GiftSelection {
   enhancement: EnhancementLevel
-  giftId: string
+  giftId: EGOGiftId
 }
 
 /**
@@ -52,7 +55,7 @@ export function decodeGiftSelection(encodedId: string): GiftSelection | null {
 
   return {
     enhancement: enhancementDigit ? (Number(enhancementDigit) as EnhancementLevel) : 0,
-    giftId,
+    giftId: EGOGiftIdSchema.parse(giftId),
   }
 }
 
@@ -60,11 +63,13 @@ export function decodeGiftSelection(encodedId: string): GiftSelection | null {
  * Extracts the base gift ID from an encoded selection
  * Useful for checking if a gift is selected regardless of enhancement
  *
- * @param encodedId - Encoded gift selection string
- * @returns Base gift ID, or null when the string is not a valid encoding
+ * @param encodedId - Encoded gift selection
+ * @returns Base gift ID
  */
-export function getBaseGiftId(encodedId: string): string | null {
-  return decodeGiftSelection(encodedId)?.giftId ?? null
+export function getBaseGiftId(encodedId: EncodedGiftId): EGOGiftId {
+  const decoded = decodeGiftSelection(encodedId)
+  if (!decoded) throw new Error(`Encoded gift id failed to decode: ${encodedId}`)
+  return decoded.giftId
 }
 
 /**
@@ -75,7 +80,10 @@ export function getBaseGiftId(encodedId: string): string | null {
  * @param selectedIds - Set of encoded selection strings
  * @returns Encoded selection string or undefined
  */
-export function findEncodedGiftId(giftId: string, selectedIds: Set<string>): string | undefined {
+export function findEncodedGiftId(
+  giftId: EGOGiftId,
+  selectedIds: ReadonlySet<EncodedGiftId>,
+): EncodedGiftId | undefined {
   for (const encodedId of selectedIds) {
     if (getBaseGiftId(encodedId) === giftId) {
       return encodedId
@@ -88,7 +96,7 @@ export function findEncodedGiftId(giftId: string, selectedIds: Set<string>): str
  * Selection lookup entry for O(1) gift status checks
  */
 export interface GiftSelectionEntry {
-  encodedId: string
+  encodedId: EncodedGiftId
   enhancement: EnhancementLevel
 }
 
@@ -104,8 +112,10 @@ export interface GiftSelectionEntry {
  * @param selectedIds - Set of encoded selection strings
  * @returns Map from giftId to selection entry
  */
-export function buildSelectionLookup(selectedIds: Set<string>): Map<string, GiftSelectionEntry> {
-  const map = new Map<string, GiftSelectionEntry>()
+export function buildSelectionLookup(
+  selectedIds: ReadonlySet<EncodedGiftId>,
+): Map<EGOGiftId, GiftSelectionEntry> {
+  const map = new Map<EGOGiftId, GiftSelectionEntry>()
   for (const encodedId of selectedIds) {
     const decoded = decodeGiftSelection(encodedId)
     if (!decoded) continue
@@ -119,7 +129,7 @@ export function buildSelectionLookup(selectedIds: Set<string>): Map<string, Gift
  * selected at. The name is always resolved — untranslated gifts carry their id.
  */
 export interface DecodedGiftSelection {
-  encodedId: string
+  encodedId: EncodedGiftId
   item: EGOGiftListItem & { name: string }
   enhancement: EnhancementLevel
 }
@@ -136,9 +146,9 @@ export interface DecodedGiftSelection {
  * @returns One entry per resolvable selection, in iteration order
  */
 export function decodeGiftSelections(
-  encodedIds: Iterable<string>,
-  spec: Record<string, EGOGiftSpec>,
-  i18n: Record<string, string>,
+  encodedIds: Iterable<EncodedGiftId>,
+  spec: Record<EGOGiftId, EGOGiftSpec>,
+  i18n: Record<EGOGiftId, string>,
 ): DecodedGiftSelection[] {
   const decoded: DecodedGiftSelection[] = []
 
@@ -190,9 +200,9 @@ export function orderSelectionsByGiftOrder(
  * @returns Resolved selections in the shared gift order
  */
 export function decodeAndOrderGiftSelections(
-  encodedIds: Iterable<string>,
-  spec: Record<string, EGOGiftSpec>,
-  i18n: Record<string, string>,
+  encodedIds: Iterable<EncodedGiftId>,
+  spec: Record<EGOGiftId, EGOGiftSpec>,
+  i18n: Record<EGOGiftId, string>,
   sortMode: SortMode,
 ): DecodedGiftSelection[] {
   return orderSelectionsByGiftOrder(decodeGiftSelections(encodedIds, spec, i18n), sortMode)
@@ -205,9 +215,11 @@ export function decodeAndOrderGiftSelections(
  * @param byGiftId - Map keyed by base gift ID
  * @returns The entry, or undefined when the encoding is invalid or absent
  */
-export function lookupByGiftId<T>(encodedId: string, byGiftId: Record<string, T>): T | undefined {
-  const giftId = getBaseGiftId(encodedId)
-  return giftId === null ? undefined : byGiftId[giftId]
+export function lookupByGiftId<T>(
+  encodedId: EncodedGiftId,
+  byGiftId: Record<EGOGiftId, T>,
+): T | undefined {
+  return byGiftId[getBaseGiftId(encodedId)]
 }
 
 /**
@@ -217,9 +229,8 @@ export function lookupByGiftId<T>(encodedId: string, byGiftId: Record<string, T>
  * @param byGiftId - Map keyed by base gift ID
  * @returns False when the encoding is invalid or the key is absent
  */
-export function hasGiftId(encodedId: string, byGiftId: Record<string, unknown>): boolean {
-  const giftId = getBaseGiftId(encodedId)
-  return giftId !== null && giftId in byGiftId
+export function hasGiftId(encodedId: EncodedGiftId, byGiftId: Record<EGOGiftId, unknown>): boolean {
+  return getBaseGiftId(encodedId) in byGiftId
 }
 
 /**
@@ -230,7 +241,7 @@ export function hasGiftId(encodedId: string, byGiftId: Record<string, unknown>):
  * @param i18n - Gift names keyed by base gift ID
  * @returns Display name
  */
-export function giftDisplayName(encodedId: string, i18n: Record<string, string>): string {
+export function giftDisplayName(encodedId: EncodedGiftId, i18n: Record<EGOGiftId, string>): string {
   return lookupByGiftId(encodedId, i18n) ?? encodedId
 }
 

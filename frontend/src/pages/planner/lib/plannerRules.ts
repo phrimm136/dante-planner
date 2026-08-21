@@ -8,6 +8,7 @@
 import { lookupByGiftId, giftDisplayName } from '@/pages/egoGift'
 import type { FloorThemeSelection } from '@/pages/themePack'
 import type { EGOGiftSpec } from '@/pages/egoGift'
+import type { EncodedGiftId } from '@/shared/gameData'
 
 /**
  * Check if an EGO Gift is affordable for a specific theme pack
@@ -33,10 +34,10 @@ export function isGiftAffordableForThemePack(gift: EGOGiftSpec, themePackId: str
  * @returns Array of gift IDs that are not affordable for this theme pack
  */
 export function getUnaffordableGiftIds(
-  giftIds: Set<string>,
+  giftIds: ReadonlySet<EncodedGiftId>,
   themePackId: string,
   egoGiftSpec: Record<string, EGOGiftSpec>,
-): string[] {
+): EncodedGiftId[] {
   return Array.from(giftIds).filter((giftId) => {
     const gift = lookupByGiftId(giftId, egoGiftSpec)
     if (!gift) return false
@@ -54,11 +55,11 @@ export function getUnaffordableGiftIds(
  * @returns Object with arrays of unaffordable gift IDs and their names
  */
 export function getUnaffordableGiftNames(
-  giftIds: Set<string>,
+  giftIds: ReadonlySet<EncodedGiftId>,
   themePackId: string,
   egoGiftSpec: Record<string, EGOGiftSpec>,
   egoGiftI18n: Record<string, string>,
-): { ids: string[]; names: string[] } {
+): { ids: EncodedGiftId[]; names: string[] } {
   const ids = getUnaffordableGiftIds(giftIds, themePackId, egoGiftSpec)
   const names = ids.map((id) => giftDisplayName(id, egoGiftI18n))
   return { ids, names }

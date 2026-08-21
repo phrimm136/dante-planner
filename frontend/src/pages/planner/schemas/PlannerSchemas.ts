@@ -11,7 +11,7 @@ import {
   EncodedGiftIdSchema,
   ThemePackIdSchema,
 } from '@/shared/gameData'
-import type { DungeonIdx, ThemePackId } from '@/shared/gameData'
+import type { DungeonIdx, EncodedGiftId, ThemePackId } from '@/shared/gameData'
 import { JSONContentSchema } from '@/shared/noteEditor'
 import { pagedModelSchema } from '@/lib/validation'
 import { INITIAL_SYNC_VERSION } from '@/lib/constants'
@@ -463,13 +463,13 @@ export function validateSaveablePlanner(
 interface PageStateWithSets {
   selectedKeywords: Set<string>
   selectedBuffIds: Set<number>
-  selectedGiftIds: Set<string>
-  observationGiftIds: Set<string>
-  comprehensiveGiftIds: Set<string>
+  selectedGiftIds: Set<EncodedGiftId>
+  observationGiftIds: Set<EncodedGiftId>
+  comprehensiveGiftIds: Set<EncodedGiftId>
   floorSelections: {
     themePackId: ThemePackId | null
     difficulty: DungeonIdx
-    giftIds: Set<string>
+    giftIds: Set<EncodedGiftId>
   }[]
 }
 
@@ -479,9 +479,9 @@ interface PageStateWithSets {
 interface SerializablePageState {
   selectedKeywords: string[]
   selectedBuffIds: number[]
-  selectedGiftIds: string[]
-  observationGiftIds: string[]
-  comprehensiveGiftIds: string[]
+  selectedGiftIds: EncodedGiftId[]
+  observationGiftIds: EncodedGiftId[]
+  comprehensiveGiftIds: EncodedGiftId[]
   floorSelections: SerializableFloorSelection[]
 }
 

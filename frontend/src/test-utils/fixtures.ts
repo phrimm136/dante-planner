@@ -11,8 +11,15 @@ import {
   type EGOGiftListItem,
   type EGOGiftSpec,
 } from '@/pages/egoGift'
-import { DUNGEON_IDX, IdentityIdSchema, EGOIdSchema } from '@/shared/gameData'
-import type { IdentityId, EGOId } from '@/shared/gameData'
+import {
+  DUNGEON_IDX,
+  IdentityIdSchema,
+  EGOIdSchema,
+  EGOGiftIdSchema,
+  EncodedGiftIdSchema,
+  SinnerScopedIdSchema,
+} from '@/shared/gameData'
+import type { IdentityId, EGOId, EGOGiftId, EncodedGiftId, SinnerScopedId } from '@/shared/gameData'
 
 /** Branded identity id for fixtures; rejects malformed literals at test time. */
 export function asIdentityId(id: string): IdentityId {
@@ -22,6 +29,21 @@ export function asIdentityId(id: string): IdentityId {
 /** Branded EGO id for fixtures; rejects malformed literals at test time. */
 export function asEGOId(id: string): EGOId {
   return EGOIdSchema.parse(id)
+}
+
+/** Branded sinner-scoped id for fixtures; rejects malformed literals at test time. */
+export function asSinnerScopedId(id: string): SinnerScopedId {
+  return SinnerScopedIdSchema.parse(id)
+}
+
+/** Branded base gift id for fixtures; rejects malformed literals at test time. */
+export function asEGOGiftId(id: string): EGOGiftId {
+  return EGOGiftIdSchema.parse(id)
+}
+
+/** Branded encoded gift selection for fixtures; rejects malformed literals at test time. */
+export function asEncodedGiftId(id: string): EncodedGiftId {
+  return EncodedGiftIdSchema.parse(id)
 }
 
 /** The Mirror Dungeon branch of the planner union, which these factories build. */

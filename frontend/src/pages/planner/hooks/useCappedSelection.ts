@@ -1,18 +1,18 @@
 import { useEffect, useRef, useState, startTransition } from 'react'
 
-interface CappedSelectionOptions {
+interface CappedSelectionOptions<Id extends string> {
   /** Upper bound on the selection size. */
   cap: number
-  selected: Set<string>
-  onSelectedChange: (next: Set<string>) => void
+  selected: Set<Id>
+  onSelectedChange: (next: Set<Id>) => void
   /** Superset the selection mirrors into: entries enter and leave alongside. */
-  mirror: Set<string>
-  onMirrorChange: (next: Set<string>) => void
+  mirror: Set<Id>
+  onMirrorChange: (next: Set<Id>) => void
 }
 
-interface CappedSelection {
+interface CappedSelection<Id extends string> {
   /** Adds the id while the cap allows it, or removes it if already selected. */
-  toggle: (id: string) => void
+  toggle: (id: Id) => void
   /** Empties the selection and withdraws its ids from the mirror. */
   clear: () => void
 }
@@ -27,13 +27,13 @@ interface CappedSelection {
  * through a ref rather than closing over it, so a toggle does not hand every
  * card a new callback and re-render the whole grid to change one of them.
  */
-export function useCappedSelection({
+export function useCappedSelection<Id extends string>({
   cap,
   selected,
   onSelectedChange,
   mirror,
   onMirrorChange,
-}: CappedSelectionOptions): CappedSelection {
+}: CappedSelectionOptions<Id>): CappedSelection<Id> {
   const latest = useRef({ cap, selected, onSelectedChange, mirror, onMirrorChange })
   useEffect(() => {
     latest.current = { cap, selected, onSelectedChange, mirror, onMirrorChange }
@@ -42,8 +42,8 @@ export function useCappedSelection({
   useEffect(() => {
     if (selected.size <= cap) return
 
-    const kept = new Set<string>()
-    const trimmed: string[] = []
+    const kept = new Set<Id>()
+    const trimmed: Id[] = []
     for (const id of selected) {
       if (kept.size < cap) {
         kept.add(id)
@@ -62,7 +62,7 @@ export function useCappedSelection({
     onSelectedChange(kept)
   }, [cap, selected, onSelectedChange, mirror, onMirrorChange])
 
-  const [toggle] = useState(() => (id: string) => {
+  const [toggle] = useState(() => (id: Id) => {
     startTransition(() => {
       const current = latest.current
       const nextSelected = new Set(current.selected)

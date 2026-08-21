@@ -9,10 +9,11 @@ import { StaggerPanel } from './StaggerPanel'
 import { TraitsDisplay } from './TraitsDisplay'
 
 import type { IdentityData, Uptie } from '../types/IdentityTypes'
+import type { IdentityId } from '@/shared/gameData'
 
 interface IdentityInfoPaneProps {
   /** Identity ID for i18n lookup */
-  id: string
+  id: IdentityId
   /** Identity spec data */
   identity: IdentityData
   /** Current uptie level (1-4) */

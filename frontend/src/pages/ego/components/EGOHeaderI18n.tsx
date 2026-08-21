@@ -2,15 +2,16 @@ import { useEGODetailI18n } from '../hooks/useEGODetailData'
 import { EGOHeader } from './EGOHeader'
 import type { EgoType } from '@/shared/gameData'
 import type { EgoSkillType } from '../types/EGOTypes'
+import type { EGOId } from '@/shared/gameData'
 
 interface EGOHeaderI18nProps {
   /** EGO ID to look up name */
-  id: string
+  id: EGOId
 }
 
 interface EGOHeaderWithI18nProps {
   /** EGO ID for i18n lookup */
-  id: string
+  id: EGOId
   /** EGO rank (ZAYIN, TETH, HE, WAW, ALEPH) */
   rank: EgoType
   /** Selected skill type, driving the CG variant */

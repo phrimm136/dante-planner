@@ -18,18 +18,30 @@ import {
 import type { EGOGiftRecipe } from '@/pages/egoGift'
 import { EGOGiftRecipeSchema } from '@/pages/egoGift'
 import { EncodedGiftIdSchema } from '@/shared/gameData'
+import { asEGOGiftId, asEncodedGiftId } from '@/test-utils/fixtures'
+
+const GIFT_9001 = asEGOGiftId('9001')
+const GIFT_9002 = asEGOGiftId('9002')
+const GIFT_9003 = asEGOGiftId('9003')
+const ENCODED_9001 = asEncodedGiftId('9001')
+const ENCODED_9002 = asEncodedGiftId('9002')
+const ENCODED_9003 = asEncodedGiftId('9003')
+const ENCODED_19001 = asEncodedGiftId('19001')
+const ENCODED_19002 = asEncodedGiftId('19002')
+const ENCODED_29001 = asEncodedGiftId('29001')
+const ENCODED_29003 = asEncodedGiftId('29003')
 
 describe('encodeGiftSelection', () => {
   it('returns just giftId when enhancement is 0', () => {
-    expect(encodeGiftSelection(0, '9001')).toBe('9001')
+    expect(encodeGiftSelection(0, GIFT_9001)).toBe('9001')
   })
 
   it('prefixes with 1 when enhancement is 1', () => {
-    expect(encodeGiftSelection(1, '9001')).toBe('19001')
+    expect(encodeGiftSelection(1, GIFT_9001)).toBe('19001')
   })
 
   it('prefixes with 2 when enhancement is 2', () => {
-    expect(encodeGiftSelection(2, '9001')).toBe('29001')
+    expect(encodeGiftSelection(2, GIFT_9001)).toBe('29001')
   })
 })
 
@@ -63,39 +75,39 @@ describe('decodeGiftSelection', () => {
 
 describe('getBaseGiftId', () => {
   it('extracts giftId from base selection', () => {
-    expect(getBaseGiftId('9001')).toBe('9001')
+    expect(getBaseGiftId(ENCODED_9001)).toBe('9001')
   })
 
   it('extracts giftId from enhanced selection', () => {
-    expect(getBaseGiftId('19001')).toBe('9001')
-    expect(getBaseGiftId('29001')).toBe('9001')
+    expect(getBaseGiftId(ENCODED_19001)).toBe('9001')
+    expect(getBaseGiftId(ENCODED_29001)).toBe('9001')
   })
 
-  it('returns null for a malformed encoding', () => {
-    expect(getBaseGiftId('39001')).toBeNull()
+  it('has no base id for a malformed encoding', () => {
+    expect(decodeGiftSelection('39001')).toBeNull()
   })
 })
 
 describe('findEncodedGiftId', () => {
   it('returns encoded ID when gift is found', () => {
-    const selection = new Set(['19001', '9002'])
-    expect(findEncodedGiftId('9001', selection)).toBe('19001')
+    const selection = new Set([ENCODED_19001, ENCODED_9002])
+    expect(findEncodedGiftId(GIFT_9001, selection)).toBe('19001')
   })
 
   it('returns undefined when gift is not found', () => {
-    const selection = new Set(['9002', '9003'])
-    expect(findEncodedGiftId('9001', selection)).toBeUndefined()
+    const selection = new Set([ENCODED_9002, ENCODED_9003])
+    expect(findEncodedGiftId(GIFT_9001, selection)).toBeUndefined()
   })
 })
 
 describe('buildSelectionLookup', () => {
   it('builds map from encoded selections', () => {
-    const selection = new Set(['9001', '19002', '29003'])
+    const selection = new Set([ENCODED_9001, ENCODED_19002, ENCODED_29003])
     const lookup = buildSelectionLookup(selection)
 
-    expect(lookup.get('9001')).toEqual({ encodedId: '9001', enhancement: 0 })
-    expect(lookup.get('9002')).toEqual({ encodedId: '19002', enhancement: 1 })
-    expect(lookup.get('9003')).toEqual({ encodedId: '29003', enhancement: 2 })
+    expect(lookup.get(GIFT_9001)).toEqual({ encodedId: '9001', enhancement: 0 })
+    expect(lookup.get(GIFT_9002)).toEqual({ encodedId: '19002', enhancement: 1 })
+    expect(lookup.get(GIFT_9003)).toEqual({ encodedId: '29003', enhancement: 2 })
   })
 
   it('returns empty map for empty selection', () => {

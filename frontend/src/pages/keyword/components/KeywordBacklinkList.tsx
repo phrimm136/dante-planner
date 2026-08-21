@@ -5,17 +5,17 @@ import { useTranslation } from 'react-i18next'
 /** Detail routes a keyword backlink can point at. */
 type KeywordBacklinkRoute = '/identity/$id' | '/ego/$id' | '/ego-gift/$id'
 
-interface KeywordBacklinkListProps {
+interface KeywordBacklinkListProps<Id extends string> {
   /** Section label key in the `database` namespace */
   labelKey: string
   /** Entity ids to link, in display order */
-  ids: string[]
+  ids: Id[]
   /** Localized names keyed by entity id */
   names: Record<string, string>
   /** Detail route the entries link to */
   to: KeywordBacklinkRoute
   /** Entry text; the localized name alone when omitted */
-  formatLabel?: (id: string, name: string) => ReactNode
+  formatLabel?: (id: Id, name: string) => ReactNode
 }
 
 /**
@@ -23,13 +23,13 @@ interface KeywordBacklinkListProps {
  * Renders `-` when the keyword has no entities of that kind, and falls back to
  * the raw id for an entity the active language has no name for.
  */
-export function KeywordBacklinkList({
+export function KeywordBacklinkList<Id extends string>({
   labelKey,
   ids,
   names,
   to,
   formatLabel,
-}: KeywordBacklinkListProps) {
+}: KeywordBacklinkListProps<Id>) {
   const { t } = useTranslation('database')
 
   return (

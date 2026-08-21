@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button'
 import { applyGiftToggle } from '../../lib/giftToggle'
 import type { EGOGiftListItem } from '@/pages/egoGift'
-import type { EnhancementLevel } from '@/shared/gameData'
+import type { EGOGiftId, EnhancementLevel } from '@/shared/gameData'
 import { useEGOGiftListData } from '@/pages/egoGift'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import { sortEGOGifts } from '@/pages/egoGift'
@@ -78,7 +78,7 @@ export function ComprehensiveGiftSelectorPane({
    * Handle enhancement selection with toggle logic and cascade
    */
   const [handleEnhancementSelect] = useState(
-    () => (giftId: string, enhancement: EnhancementLevel) => {
+    () => (giftId: EGOGiftId, enhancement: EnhancementLevel) => {
       startTransition(() => {
         const {
           selectedGiftIds: current,

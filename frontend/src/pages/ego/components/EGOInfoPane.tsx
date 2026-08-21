@@ -7,10 +7,11 @@ import { SinCostPanel } from './SinCostPanel'
 import { SinResistancePanel } from './SinResistancePanel'
 
 import type { EGOData, EgoSkillType } from '../types/EGOTypes'
+import type { EGOId } from '@/shared/gameData'
 
 interface EGOInfoPaneProps {
   /** EGO ID for i18n lookup */
-  id: string
+  id: EGOId
   /** EGO spec data */
   ego: EGOData
   /** Selected skill type, driving the header's CG variant */

@@ -1,5 +1,5 @@
 import type { z } from 'zod'
-import type { DungeonIdx } from '@/shared/gameData'
+import type { DungeonIdx, EncodedGiftId } from '@/shared/gameData'
 import type { ThemePackEntrySchema, ThemePackListSchema } from '../schemas/ThemePackSchemas'
 import type { ThemePackId } from '@/shared/gameData'
 
@@ -13,7 +13,7 @@ export type ThemePackList = z.infer<typeof ThemePackListSchema>
 export interface FloorThemeSelection {
   themePackId: ThemePackId | null
   difficulty: DungeonIdx
-  giftIds: Set<string>
+  giftIds: Set<EncodedGiftId>
 }
 
 /**

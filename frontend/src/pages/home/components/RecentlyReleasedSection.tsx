@@ -25,6 +25,7 @@ import {
   getEGORankIconPath,
 } from '@/shared/assets'
 import { getSinnerFromId } from '@/shared/gameData'
+import type { SinnerScopedId } from '@/shared/gameData'
 import { cn } from '@/lib/utils'
 import { getSeasonColor } from '@/shared/gameData'
 
@@ -58,7 +59,7 @@ function formatSeason(season: number): string {
 
 /** Plain text entity name with suspense, bound to one entity kind's i18n hook. */
 function createEntityNameText(useNames: () => Record<string, string>) {
-  return function EntityNameText({ id }: { id: string }) {
+  return function EntityNameText({ id }: { id: SinnerScopedId }) {
     const names = useNames()
     return <>{names[id] ?? id}</>
   }
@@ -68,7 +69,7 @@ const IdentityNameText = createEntityNameText(useIdentityListI18n)
 const EGONameText = createEntityNameText(useEGOListI18n)
 
 interface HomeEntityCardProps {
-  id: string
+  id: SinnerScopedId
   season: number
   imageSrc: string
   /** Used when `imageSrc` fails; equal to `imageSrc` for kinds with no alternative. */

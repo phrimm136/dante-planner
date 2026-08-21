@@ -1,14 +1,15 @@
 import { useIdentityDetailI18n } from '../hooks/useIdentityDetailData'
 import { IdentityHeader } from './IdentityHeader'
+import type { IdentityId } from '@/shared/gameData'
 
 interface IdentityHeaderI18nProps {
   /** Identity ID to look up name */
-  id: string
+  id: IdentityId
 }
 
 interface IdentityHeaderWithI18nProps {
   /** Identity ID for i18n lookup */
-  id: string
+  id: IdentityId
   /** Identity rank (1-3) */
   rank: number
   /** Current uptie level (1-4) */

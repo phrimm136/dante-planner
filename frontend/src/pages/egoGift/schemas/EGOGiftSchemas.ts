@@ -81,5 +81,6 @@ export const EGOGiftI18nSchema = z
   .strict()
 
 // Record types for spec and name lists
-export const EGOGiftSpecListSchema = z.record(z.string(), EGOGiftSpecSchema)
+export const EGOGiftSpecListSchema = z.record(EGOGiftIdSchema, EGOGiftSpecSchema)
+/** Keys stay unbranded: the game may ship i18n-only ids with no spec entry. */
 export const EGOGiftNameListSchema = z.record(z.string(), z.string())

@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { useStartGiftPools } from '../../hooks/useStartGiftPools'
-import { useEGOGiftListData } from '@/pages/egoGift'
+import { useEGOGiftListData, encodeGiftSelection } from '@/pages/egoGift'
+import type { EGOGiftId } from '@/shared/gameData'
 import { useStartBuffData } from '../../hooks/useStartBuffData'
 import { useCappedSelection } from '../../hooks/useCappedSelection'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
@@ -60,7 +61,8 @@ export function StartGiftEditPane({ open, onOpenChange, mdVersion }: StartGiftEd
   }
 
   // Gift click - combined row + gift selection in ONE update
-  const handleGiftClick = (rowKeyword: string, giftId: string) => {
+  const handleGiftClick = (rowKeyword: string, giftId: EGOGiftId) => {
+    const encodedId = encodeGiftSelection(0, giftId)
     // Different row - select row AND gift together
     if (selectedKeyword !== rowKeyword) {
       const newComprehensive = new Set(comprehensiveGiftIds)
@@ -69,14 +71,14 @@ export function StartGiftEditPane({ open, onOpenChange, mdVersion }: StartGiftEd
         newComprehensive.delete(id)
       }
       // Add new gift to comprehensive
-      newComprehensive.add(giftId)
+      newComprehensive.add(encodedId)
       setComprehensiveGiftIds(newComprehensive)
       setSelectedKeyword(rowKeyword)
-      setSelectedGiftIds(new Set([giftId]))
+      setSelectedGiftIds(new Set([encodedId]))
       return
     }
 
-    toggle(giftId)
+    toggle(encodedId)
   }
 
   const keywordPools = Object.entries(pools)

@@ -35,6 +35,13 @@ import {
 } from '../skillReplacement/SkillReplacementSection'
 
 import type { SinnerEquipment, SkillEAState } from '../../types/DeckTypes'
+import { asEncodedGiftId } from '@/test-utils/fixtures'
+
+const ENCODED_9001 = asEncodedGiftId('9001')
+const ENCODED_9002 = asEncodedGiftId('9002')
+const ENCODED_19002 = asEncodedGiftId('19002')
+/** Decodes, but the fixture spec does not carry it, so nothing renders for it. */
+const ENCODED_9999 = asEncodedGiftId('9999')
 
 vi.mock('react-i18next', async (importOriginal) => {
   const actual = await importOriginal<typeof import('react-i18next')>()
@@ -216,9 +223,9 @@ const POPULATED_STORE: Partial<PlannerEditorState> = {
   deploymentOrder: DEPLOYMENT_ORDER,
   selectedBuffIds: new Set([1001]),
   selectedGiftKeyword: 'Burn',
-  selectedGiftIds: new Set(['9001', '9002']),
-  observationGiftIds: new Set(['9001']),
-  comprehensiveGiftIds: new Set(['09001', '19002']),
+  selectedGiftIds: new Set([ENCODED_9001, ENCODED_9002]),
+  observationGiftIds: new Set([ENCODED_9001]),
+  comprehensiveGiftIds: new Set([ENCODED_9999, ENCODED_19002]),
   skillEAState: SKILL_EA,
 }
 
@@ -318,7 +325,7 @@ describe('StartGiftSummary DOM', () => {
       () => (
         <StartGiftSummary
           selectedKeyword="Burn"
-          selectedGiftIds={new Set(['9001', '9002'])}
+          selectedGiftIds={new Set([ENCODED_9001, ENCODED_9002])}
           readOnly
           onViewNotes={() => {}}
         />
@@ -362,7 +369,7 @@ describe('EGOGiftObservationSummary DOM', () => {
       () => (
         <EGOGiftObservationSummary
           mdVersion={MD_VERSION}
-          selectedGiftIds={new Set(['9001', '9002'])}
+          selectedGiftIds={new Set([ENCODED_9001, ENCODED_9002])}
           readOnly
           onViewNotes={() => {}}
         />
@@ -394,7 +401,7 @@ describe('ComprehensiveGiftSummary DOM', () => {
       () => (
         <ComprehensiveGiftSummary
           onClick={() => {}}
-          selectedGiftIds={new Set(['09001', '19002'])}
+          selectedGiftIds={new Set([ENCODED_9999, ENCODED_19002])}
         />
       ),
     ],

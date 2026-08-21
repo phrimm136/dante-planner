@@ -20,8 +20,11 @@ import { DUNGEON_IDX } from '@/shared/gameData'
 import type { MDPlannerContent } from '../../types/PlannerTypes'
 import type { SinnerEquipment, SkillEAState } from '../../types/DeckTypes'
 import { ThemePackIdSchema } from '@/shared/gameData'
-import { asIdentityId } from '@/test-utils/fixtures'
+import { asEncodedGiftId, asIdentityId } from '@/test-utils/fixtures'
 
+const ENCODED_9001 = asEncodedGiftId('9001')
+const ENCODED_9005 = asEncodedGiftId('9005')
+const ENCODED_9006 = asEncodedGiftId('9006')
 const IDENTITY_10101 = asIdentityId('10101')
 const IDENTITY_10199 = asIdentityId('10199')
 const IDENTITY_X = asIdentityId('11298')
@@ -116,7 +119,7 @@ describe('usePlannerEditorStore', () => {
       const updated = {
         themePackId: ThemePackIdSchema.parse('1001'),
         difficulty: DUNGEON_IDX.HARD,
-        giftIds: new Set(['g1']),
+        giftIds: new Set([ENCODED_9001]),
       }
 
       store.getState().updateFloorSelection(3, updated)
@@ -143,7 +146,7 @@ describe('usePlannerEditorStore', () => {
     it('setSelectedKeywords / setComprehensiveGiftIds store Set instances as-is', () => {
       const store = createPlannerEditorStore()
       const keywords = new Set(['k1', 'k2'])
-      const gifts = new Set(['g1'])
+      const gifts = new Set([ENCODED_9001])
 
       store.getState().setSelectedKeywords(keywords)
       store.getState().setComprehensiveGiftIds(gifts)
@@ -331,7 +334,7 @@ describe('usePlannerEditorStore', () => {
       store.getState().updateFloorSelection(2, {
         themePackId: ThemePackIdSchema.parse('1002'),
         difficulty: DUNGEON_IDX.HARD,
-        giftIds: new Set(['fg1', 'fg2']),
+        giftIds: new Set([ENCODED_9005, ENCODED_9006]),
       })
 
       const planner = store.getState().getPlannerState()
@@ -339,7 +342,7 @@ describe('usePlannerEditorStore', () => {
       const thirdFloor = planner.floorSelections[2]
       assert(thirdFloor, 'the planner state holds no third floor')
       expect(thirdFloor.giftIds).toBeInstanceOf(Set)
-      expect(Array.from(thirdFloor.giftIds)).toEqual(['fg1', 'fg2'])
+      expect(Array.from(thirdFloor.giftIds)).toEqual(['9005', '9006'])
     })
   })
 
@@ -348,7 +351,7 @@ describe('usePlannerEditorStore', () => {
       const store = createPlannerEditorStore()
       store.getState().setTitle('Dirty')
       store.getState().setDeploymentOrder([5, 4, 3])
-      store.getState().setComprehensiveGiftIds(new Set(['g1']))
+      store.getState().setComprehensiveGiftIds(new Set([ENCODED_9001]))
 
       store.getState().reset()
 

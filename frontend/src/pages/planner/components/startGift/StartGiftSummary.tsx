@@ -1,6 +1,12 @@
 import { useTranslation } from 'react-i18next'
 import { PlannerSection } from '@/components/layout/PlannerSection'
-import { EGOGiftCard, toEGOGiftCardProps, toUnknownGiftListItem } from '@/pages/egoGift'
+import {
+  EGOGiftCard,
+  getBaseGiftId,
+  toEGOGiftCardProps,
+  toUnknownGiftListItem,
+} from '@/pages/egoGift'
+import type { EncodedGiftId } from '@/shared/gameData'
 import { getKeywordIconPath } from '@/shared/assets'
 import { useEGOGiftListData } from '@/pages/egoGift'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
@@ -10,7 +16,7 @@ import { cn } from '@/lib/utils'
 
 export interface StartGiftSummaryProps {
   selectedKeyword: string | null
-  selectedGiftIds: Set<string>
+  selectedGiftIds: ReadonlySet<EncodedGiftId>
   onClick?: () => void
   readOnly?: boolean
   onViewNotes?: () => void
@@ -41,7 +47,8 @@ export function StartGiftSummary({
   const selectedGifts = (() => {
     if (!hasKeywordSelected || !spec || !i18n || selectedGiftIds.size === 0) return []
 
-    return Array.from(selectedGiftIds).map((giftId) => {
+    return Array.from(selectedGiftIds).map((encodedId) => {
+      const giftId = getBaseGiftId(encodedId)
       const giftSpec = spec[giftId]
       const name = i18n[giftId] || `Gift ${giftId}`
 

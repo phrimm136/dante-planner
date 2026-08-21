@@ -13,11 +13,12 @@ import { type Sinner } from '@/shared/gameData'
 import { getSinnerFromId } from '@/shared/gameData'
 import { getDisplayFontForLanguage } from '@/lib/utils'
 import { DETAIL_IMAGE_ASPECT_RATIO, SECTION_STYLES, SINNER_COLORS } from '@/lib/constants'
+import type { IdentityId } from '@/shared/gameData'
 
 type ImageVariant = 'normal' | 'gacksung'
 
 interface IdentityHeaderProps {
-  identityId: string
+  identityId: IdentityId
   name: string
   rank: number
   uptie: number
