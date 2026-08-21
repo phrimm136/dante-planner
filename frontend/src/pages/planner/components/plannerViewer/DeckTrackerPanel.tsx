@@ -1,9 +1,11 @@
 import { DeckBuilderSummary } from '../deckBuilder/DeckBuilderSummary'
+import type { EGOGiftId } from '@/shared/gameData'
 import type { SinnerEquipment } from '../../types/DeckTypes'
 
 interface DeckTrackerPanelProps {
   equipment: Record<string, SinnerEquipment>
   deploymentOrder: number[]
+  ownedGiftIds: ReadonlySet<EGOGiftId>
   setEquipment: React.Dispatch<React.SetStateAction<Record<string, SinnerEquipment>>>
   setDeploymentOrder: React.Dispatch<React.SetStateAction<number[]>>
   onEditDeck: () => void
@@ -23,6 +25,7 @@ interface DeckTrackerPanelProps {
 export function DeckTrackerPanel({
   equipment,
   deploymentOrder,
+  ownedGiftIds,
   setDeploymentOrder,
   onEditDeck,
   onImport,
@@ -51,6 +54,7 @@ export function DeckTrackerPanel({
       <DeckBuilderSummary
         equipment={equipment}
         deploymentOrder={deploymentOrder}
+        ownedGiftIds={ownedGiftIds}
         onToggleDeploy={handleToggleDeploy}
         onImport={onImport}
         onExport={onExport}

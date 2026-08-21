@@ -3,21 +3,23 @@ import { EA_SURPLUS_THRESHOLD } from '@/shared/gameData'
 import { getAffinityIconPath, getBattleKeywordIconPath } from '@/shared/assets'
 import { useIdentityListData } from '@/pages/identity'
 import { useEGOListData } from '@/pages/ego'
+import type { EGOGiftId } from '@/shared/gameData'
 import type { DeckState } from '../../types/DeckTypes'
 import { computeAffinityEA, computeKeywordEA } from '../../lib/deckEA'
 import { SECTION_STYLES } from '@/lib/constants'
 
 interface StatusViewerProps {
   deckState: DeckState
+  ownedGiftIds: ReadonlySet<EGOGiftId>
 }
 
-export const StatusViewer: React.FC<StatusViewerProps> = ({ deckState }) => {
+export const StatusViewer: React.FC<StatusViewerProps> = ({ deckState, ownedGiftIds }) => {
   // Load spec data using hooks (React Query caches shared across components)
   const { spec: identitySpec } = useIdentityListData()
   const { spec: egoSpec } = useEGOListData()
 
   const affinityCounts = computeAffinityEA(deckState, identitySpec, egoSpec)
-  const keywordCounts = computeKeywordEA(deckState, identitySpec)
+  const keywordCounts = computeKeywordEA(deckState, identitySpec, ownedGiftIds)
 
   return (
     <div className="border rounded-lg p-3 space-y-2">

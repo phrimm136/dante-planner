@@ -36,7 +36,9 @@ import {
 
 import type { SinnerEquipment, SkillEAState } from '../../types/DeckTypes'
 import { asEncodedGiftId } from '@/test-utils/fixtures'
+import type { EGOGiftId } from '@/shared/gameData'
 
+const NO_OWNED_GIFTS = new Set<EGOGiftId>()
 const ENCODED_9001 = asEncodedGiftId('9001')
 const ENCODED_9002 = asEncodedGiftId('9002')
 const ENCODED_19002 = asEncodedGiftId('19002')
@@ -241,7 +243,14 @@ describe('DeckBuilderSummary DOM', () => {
     ],
     [
       'explicit empty deck, read-only',
-      () => <DeckBuilderSummary equipment={EMPTY_EQUIPMENT} deploymentOrder={[]} readOnly />,
+      () => (
+        <DeckBuilderSummary
+          equipment={EMPTY_EQUIPMENT}
+          deploymentOrder={[]}
+          ownedGiftIds={NO_OWNED_GIFTS}
+          readOnly
+        />
+      ),
     ],
     [
       'explicit populated deck, tracker mode',
@@ -249,6 +258,7 @@ describe('DeckBuilderSummary DOM', () => {
         <DeckBuilderSummary
           equipment={DEFAULT_EQUIPMENT}
           deploymentOrder={DEPLOYMENT_ORDER}
+          ownedGiftIds={NO_OWNED_GIFTS}
           onToggleDeploy={() => {}}
           onImport={() => {}}
           onExport={() => {}}

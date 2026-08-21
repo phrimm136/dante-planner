@@ -10,10 +10,16 @@
 import {
   AFFINITIES,
   DEFAULT_SKILL_EA,
+  EGO_KEYWORD_GRANTS,
+  GIFT_KEYWORD_GRANTS,
+  KEYWORD_GRANT_MIN_THREADSPIN,
   OFFENSIVE_SKILL_SLOTS,
   STATUS_EFFECTS,
 } from '@/shared/gameData'
-import type { AffinityCount, DeckState, KeywordCount } from '../types/DeckTypes'
+import { getBaseGiftId } from '@/pages/egoGift'
+import type { EGOGiftId, EncodedGiftId } from '@/shared/gameData'
+import type { FloorThemeSelection } from '@/pages/themePack'
+import type { AffinityCount, DeckState, KeywordCount, SinnerEquipment } from '../types/DeckTypes'
 
 /**
  * Identity spec fields the EA tallies read
@@ -41,6 +47,48 @@ export type KeywordEACount = KeywordCount & {
 /** Deployment order holds 0-based sinner indices; equipment is keyed 1-based */
 function sinnerCodesOf(deploymentOrder: readonly number[]): string[] {
   return deploymentOrder.map((index) => String(index + 1))
+}
+
+/**
+ * Gifts the plan owns, as base ids: start picks, observation rewards, the
+ * comprehensive loadout, and every floor's planned acquisitions
+ *
+ * @param source - The planner's four gift collections, in stored (encoded) form
+ * @returns Base gift ids, deduplicated across collections
+ */
+export function collectOwnedGiftIds(source: {
+  selectedGiftIds: ReadonlySet<EncodedGiftId>
+  observationGiftIds: ReadonlySet<EncodedGiftId>
+  comprehensiveGiftIds: ReadonlySet<EncodedGiftId>
+  floorSelections: readonly FloorThemeSelection[]
+}): ReadonlySet<EGOGiftId> {
+  return new Set(
+    [
+      ...source.selectedGiftIds,
+      ...source.observationGiftIds,
+      ...source.comprehensiveGiftIds,
+      ...source.floorSelections.flatMap((floor) => [...floor.giftIds]),
+    ].map(getBaseGiftId),
+  )
+}
+
+/**
+ * Keywords granted to this sinner's identity by its equipped EGOs (at
+ * KEYWORD_GRANT_MIN_THREADSPIN or above) and by owned gifts
+ */
+function grantedKeywords(
+  equipment: SinnerEquipment,
+  ownedGiftIds: ReadonlySet<EGOGiftId>,
+): string[] {
+  const grants = [
+    ...Object.values(equipment.egos).flatMap((ego) =>
+      ego && ego.threadspin >= KEYWORD_GRANT_MIN_THREADSPIN ? [EGO_KEYWORD_GRANTS.get(ego.id)] : [],
+    ),
+    ...[...ownedGiftIds].map((giftId) => GIFT_KEYWORD_GRANTS.get(giftId)),
+  ]
+  return grants.flatMap((entry) =>
+    entry && entry.identityId === equipment.identity.id ? [entry.keyword] : [],
+  )
 }
 
 /**
@@ -103,11 +151,13 @@ export function computeAffinityEA(
  *
  * @param deckState - Deck equipment, deployment order and deployment config
  * @param identitySpec - Identity spec map keyed by identity ID
+ * @param ownedGiftIds - Base ids of gifts the plan owns, for keyword grants
  * @returns One entry per status effect, in STATUS_EFFECTS order
  */
 export function computeKeywordEA(
   deckState: DeckState,
   identitySpec: Record<string, IdentityEASpec>,
+  ownedGiftIds: ReadonlySet<EGOGiftId>,
 ): KeywordEACount[] {
   const tallies: KeywordEACount[] = STATUS_EFFECTS.map((keyword) => ({
     keyword,
@@ -122,10 +172,14 @@ export function computeKeywordEA(
       const equipment = deckState.equipment[sinnerCode]
       if (!equipment) return
 
-      identitySpec[equipment.identity.id]?.skillKeywordList?.forEach((keyword) => {
+      const base = identitySpec[equipment.identity.id]?.skillKeywordList ?? []
+      const granted = grantedKeywords(equipment, ownedGiftIds).filter(
+        (keyword) => !base.includes(keyword),
+      )
+      for (const keyword of [...base, ...granted]) {
         const entry = byKeyword.get(keyword)
         if (entry) entry[scope] += 1
-      })
+      }
     })
   }
 

@@ -4,9 +4,11 @@ import { PlannerSection } from '@/components/layout/PlannerSection'
 import { useIdentityListData } from '@/pages/identity'
 import { useEGOListData } from '@/pages/ego'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
+import type { EGOGiftId } from '@/shared/gameData'
 import type { SinnerEquipment, DeckState } from '../../types/DeckTypes'
 import type { IdentityListItem } from '@/pages/identity'
 import { SinnerGrid, type SkillData } from './SinnerGrid'
+import { collectOwnedGiftIds } from '../../lib/deckEA'
 import { StatusViewer } from './StatusViewer'
 import { DeckBuilderActionBar } from './DeckBuilderActionBar'
 import type { DeckBuilderActions } from './DeckBuilderContent'
@@ -25,6 +27,8 @@ export interface DeckBuilderSummaryProps extends Partial<
 > {
   equipment: Record<string, SinnerEquipment>
   deploymentOrder: number[]
+  /** Base ids of gifts the plan owns, for keyword grants in the status readout. */
+  ownedGiftIds: ReadonlySet<EGOGiftId>
   onToggleDeploy?: ((sinnerIndex: number) => void) | undefined
   onEditDeck?: (() => void) | undefined
   readOnly?: boolean
@@ -41,6 +45,7 @@ export interface DeckBuilderSummaryProps extends Partial<
 export function DeckBuilderSummary({
   equipment,
   deploymentOrder,
+  ownedGiftIds,
   onToggleDeploy,
   onImport,
   onExport,
@@ -124,7 +129,7 @@ export function DeckBuilderSummary({
       />
       {/* Status + Action Bar row */}
       <div className="mt-3 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
-        <StatusViewer deckState={deckState} />
+        <StatusViewer deckState={deckState} ownedGiftIds={ownedGiftIds} />
         {!readOnly && (
           <div className="flex flex-col items-end gap-2">
             <DeckBuilderActionBar
@@ -151,13 +156,30 @@ export function DeckBuilderSummary({
 /** Props a store-bound caller supplies; the deck itself comes from the store. */
 export type StoreBoundDeckBuilderSummaryProps = Omit<
   DeckBuilderSummaryProps,
-  'equipment' | 'deploymentOrder'
+  'equipment' | 'deploymentOrder' | 'ownedGiftIds'
 >
 
 /** Renders the summary against the deck held by the planner editor store. */
 export function StoreBoundDeckBuilderSummary(props: StoreBoundDeckBuilderSummaryProps) {
   const equipment = usePlannerEditorStore((s) => s.equipment)
   const deploymentOrder = usePlannerEditorStore((s) => s.deploymentOrder)
+  const selectedGiftIds = usePlannerEditorStore((s) => s.selectedGiftIds)
+  const observationGiftIds = usePlannerEditorStore((s) => s.observationGiftIds)
+  const comprehensiveGiftIds = usePlannerEditorStore((s) => s.comprehensiveGiftIds)
+  const floorSelections = usePlannerEditorStore((s) => s.floorSelections)
+  const ownedGiftIds = collectOwnedGiftIds({
+    selectedGiftIds,
+    observationGiftIds,
+    comprehensiveGiftIds,
+    floorSelections,
+  })
 
-  return <DeckBuilderSummary {...props} equipment={equipment} deploymentOrder={deploymentOrder} />
+  return (
+    <DeckBuilderSummary
+      {...props}
+      equipment={equipment}
+      deploymentOrder={deploymentOrder}
+      ownedGiftIds={ownedGiftIds}
+    />
+  )
 }

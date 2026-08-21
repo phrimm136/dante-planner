@@ -4,7 +4,8 @@
 
 import seasonsJson from '@static/i18n/EN/seasons.json'
 import unitKeywordsJson from '@static/i18n/EN/unitKeywords.json'
-import type { SinnerScopedId } from './ids'
+import { EGOGiftIdSchema, EGOIdSchema, IdentityIdSchema } from './ids'
+import type { EGOGiftId, EGOId, IdentityId, SinnerScopedId } from './ids'
 
 /**
  * Max level - used to calculate actual defense values and cap level inputs
@@ -192,6 +193,41 @@ export const KEYWORD_RENAME_MAP: Readonly<Record<string, string>> = {
   AccelBullet: '9828',
   ChargeLoad: 'EmergencyChargeForceField',
 } as const
+
+/**
+ * A skill keyword granted to one identity while a source (EGO or gift) is
+ * present in the deck.
+ */
+export interface KeywordGrant {
+  identityId: IdentityId
+  keyword: (typeof STATUS_EFFECTS)[number]
+}
+
+function grant(identityId: string, keyword: KeywordGrant['keyword']): KeywordGrant {
+  return { identityId: IdentityIdSchema.parse(identityId), keyword }
+}
+
+/**
+ * Skill keywords granted to an identity while the source EGO is equipped at
+ * KEYWORD_GRANT_MIN_THREADSPIN or above.
+ */
+export const EGO_KEYWORD_GRANTS: ReadonlyMap<EGOId, KeywordGrant> = new Map([
+  [EGOIdSchema.parse('20109'), grant('10110', 'Vibration')],
+  [EGOIdSchema.parse('20509'), grant('10508', 'Laceration')],
+])
+
+/**
+ * Skill keywords granted to an identity while the source gift is owned by the
+ * plan.
+ */
+export const GIFT_KEYWORD_GRANTS: ReadonlyMap<EGOGiftId, KeywordGrant> = new Map([
+  [EGOGiftIdSchema.parse('9282'), grant('11009', 'Vibration')],
+])
+
+/**
+ * Minimum threadspin at which an EGO's keyword grant takes effect
+ */
+export const KEYWORD_GRANT_MIN_THREADSPIN = 2
 
 /**
  * Max number of deployment

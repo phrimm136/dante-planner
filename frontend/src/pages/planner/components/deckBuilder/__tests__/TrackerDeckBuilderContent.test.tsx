@@ -14,6 +14,7 @@ import type { ReactElement } from 'react'
 import { createDefaultEquipment } from '../../../stores/usePlannerEditorStore'
 import { TrackerDeckBuilderContent } from '../DeckBuilderContent'
 import { SEASONS } from '@/shared/gameData'
+import type { EGOGiftId } from '@/shared/gameData'
 
 vi.mock('react-i18next', async (importOriginal) => {
   const actual = await importOriginal<typeof import('react-i18next')>()
@@ -102,6 +103,7 @@ const TRACKER_DECK = {
   setEquipment: () => {},
   deploymentOrder: [0, 3],
   setDeploymentOrder: () => {},
+  ownedGiftIds: new Set<EGOGiftId>(),
 }
 
 const ACTIONS = {

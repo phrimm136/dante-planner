@@ -1,6 +1,7 @@
 import { DEFAULT_DEPLOYMENT_MAX } from '@/shared/gameData'
 import { SECTION_STYLES } from '@/lib/constants'
 
+import type { EGOGiftId } from '@/shared/gameData'
 import type { DeckState, EntityMode, SinnerEquipment } from '../../types/DeckTypes'
 import { type SkillData } from './SinnerGrid'
 import { CompactIdentityRow } from './CompactIdentityRow'
@@ -14,6 +15,7 @@ interface DeckLoadoutSectionProps {
   deploymentOrder: number[]
   skillDataMap: Record<string, SkillData>
   egoAffinityMap: Record<string, string>
+  ownedGiftIds: ReadonlySet<EGOGiftId>
   onToggleDeploy: (sinnerIndex: number) => void
   onImport: () => void
   onExport: () => void
@@ -30,6 +32,7 @@ export function DeckLoadoutSection({
   deploymentOrder,
   skillDataMap,
   egoAffinityMap,
+  ownedGiftIds,
   onToggleDeploy,
   onImport,
   onExport,
@@ -57,7 +60,7 @@ export function DeckLoadoutSection({
       )}
       {/* Status + Action Bar row */}
       <div className="mt-3 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
-        <StatusViewer deckState={deckState} />
+        <StatusViewer deckState={deckState} ownedGiftIds={ownedGiftIds} />
         <DeckBuilderActionBar onImport={onImport} onExport={onExport} onResetOrder={onResetOrder} />
       </div>
     </div>

@@ -7,11 +7,16 @@
 
 import { describe, it, expect } from 'vitest'
 import { AFFINITIES, STATUS_EFFECTS } from '@/shared/gameData'
-import type { EGOId, IdentityId } from '@/shared/gameData'
-import { asEGOId, asIdentityId } from '@/test-utils/fixtures'
+import type { EGOGiftId, EGOId, IdentityId } from '@/shared/gameData'
+import { asEGOGiftId, asEGOId, asIdentityId } from '@/test-utils/fixtures'
 import { computeAffinityEA, computeKeywordEA } from '../deckEA'
 import type { EGOEASpec, IdentityEASpec } from '../deckEA'
-import type { AffinityCount, DeckState, SinnerEquipment } from '../../types/DeckTypes'
+import type {
+  AffinityCount,
+  DeckState,
+  SinnerEquipment,
+  ThreadspinTier,
+} from '../../types/DeckTypes'
 
 const IDENTITY_A = asIdentityId('10101')
 const IDENTITY_B = asIdentityId('10201')
@@ -19,6 +24,11 @@ const IDENTITY_UNKNOWN = asIdentityId('11299')
 const EGO_A = asEGOId('20101')
 const EGO_B = asEGOId('20102')
 const EGO_MISSING = asEGOId('20199')
+const IDENTITY_10508 = asIdentityId('10508')
+const IDENTITY_11009 = asIdentityId('11009')
+const EGO_20509 = asEGOId('20509')
+const GIFT_9282 = asEGOGiftId('9282')
+const NO_GIFTS: ReadonlySet<EGOGiftId> = new Set()
 
 const sinner = (identityId: IdentityId, egoIds: EGOId[] = []): SinnerEquipment => ({
   identity: { id: identityId, uptie: 4, level: 45 },
@@ -181,7 +191,7 @@ describe('computeAffinityEA', () => {
 
 describe('computeKeywordEA', () => {
   it('returns every status effect at zero for an empty deck', () => {
-    const result = computeKeywordEA(deck({}, []), emptySpec)
+    const result = computeKeywordEA(deck({}, []), emptySpec, NO_GIFTS)
 
     expect(result.map((entry) => entry.keyword)).toEqual([...STATUS_EFFECTS])
     expect(
@@ -204,6 +214,7 @@ describe('computeKeywordEA', () => {
     const result = computeKeywordEA(
       deck({ '1': sinner(IDENTITY_A), '2': sinner(IDENTITY_B) }, [0, 1], maxDeployed),
       { [IDENTITY_A]: { skillKeywordList: [] }, [IDENTITY_B]: { skillKeywordList: ['Sinking'] } },
+      NO_GIFTS,
     )
     const sinking = result.find((entry) => entry.keyword === 'Sinking')
 
@@ -217,6 +228,7 @@ describe('computeKeywordEA', () => {
         [IDENTITY_A]: { skillKeywordList: ['Burst'] },
         [IDENTITY_B]: { skillKeywordList: ['Burst'] },
       },
+      NO_GIFTS,
     )
 
     expect(result.find((entry) => entry.keyword === 'Burst')).toEqual({
@@ -228,9 +240,11 @@ describe('computeKeywordEA', () => {
   })
 
   it('tallies a keyword once per entry in the identity skill keyword list', () => {
-    const result = computeKeywordEA(deck({ '1': sinner(IDENTITY_A) }, [0]), {
-      [IDENTITY_A]: { skillKeywordList: ['Charge', 'Charge', 'Charge'] },
-    })
+    const result = computeKeywordEA(
+      deck({ '1': sinner(IDENTITY_A) }, [0]),
+      { [IDENTITY_A]: { skillKeywordList: ['Charge', 'Charge', 'Charge'] } },
+      NO_GIFTS,
+    )
 
     expect(result.find((entry) => entry.keyword === 'Charge')).toMatchObject({
       deployedCount: 3,
@@ -239,19 +253,92 @@ describe('computeKeywordEA', () => {
   })
 
   it('ignores keywords outside the status effect list', () => {
-    const result = computeKeywordEA(deck({ '1': sinner(IDENTITY_A) }, [0]), {
-      [IDENTITY_A]: { skillKeywordList: ['Rupture', 'Tremor', 'Breath'] },
-    })
+    const result = computeKeywordEA(
+      deck({ '1': sinner(IDENTITY_A) }, [0]),
+      { [IDENTITY_A]: { skillKeywordList: ['Rupture', 'Tremor', 'Breath'] } },
+      NO_GIFTS,
+    )
 
     expect(result.map((entry) => entry.keyword)).toEqual([...STATUS_EFFECTS])
     expect(result.find((entry) => entry.keyword === 'Breath')?.allCount).toBe(1)
   })
 
   it('ignores sinner codes with no equipment and identities with no spec', () => {
-    const result = computeKeywordEA(deck({ '2': sinner(IDENTITY_UNKNOWN) }, [0, 1]), {
-      [IDENTITY_A]: { skillKeywordList: ['Burst'] },
-    })
+    const result = computeKeywordEA(
+      deck({ '2': sinner(IDENTITY_UNKNOWN) }, [0, 1]),
+      { [IDENTITY_A]: { skillKeywordList: ['Burst'] } },
+      NO_GIFTS,
+    )
 
     expect(result.every(({ allCount }) => allCount === 0)).toBe(true)
+  })
+
+  describe('keyword grants', () => {
+    const countOf = (result: ReturnType<typeof computeKeywordEA>, keyword: string) =>
+      result.find((entry) => entry.keyword === keyword)?.allCount
+
+    const sinner05 = (threadspin: ThreadspinTier): Record<string, SinnerEquipment> => ({
+      '5': {
+        identity: { id: IDENTITY_10508, uptie: 4, level: 45 },
+        egos: { ZAYIN: { id: EGO_20509, threadspin } },
+      },
+    })
+
+    it('grants the EGO keyword at threadspin 2 and appends it to the base list', () => {
+      const result = computeKeywordEA(
+        deck(sinner05(2), [4]),
+        { [IDENTITY_10508]: { skillKeywordList: ['Breath'] } },
+        NO_GIFTS,
+      )
+
+      expect(countOf(result, 'Laceration')).toBe(1)
+      expect(countOf(result, 'Breath')).toBe(1)
+    })
+
+    it('withholds the EGO grant below threadspin 2', () => {
+      const result = computeKeywordEA(
+        deck(sinner05(1), [4]),
+        { [IDENTITY_10508]: { skillKeywordList: ['Breath'] } },
+        NO_GIFTS,
+      )
+
+      expect(countOf(result, 'Laceration')).toBe(0)
+    })
+
+    it('does not grant to a different identity of the same sinner', () => {
+      const equipment: Record<string, SinnerEquipment> = {
+        '5': {
+          identity: { id: asIdentityId('10501'), uptie: 4, level: 45 },
+          egos: { ZAYIN: { id: EGO_20509, threadspin: 4 } },
+        },
+      }
+      const result = computeKeywordEA(deck(equipment, [4]), emptySpec, NO_GIFTS)
+
+      expect(countOf(result, 'Laceration')).toBe(0)
+    })
+
+    it('grants the gift keyword to its identity while the gift is owned', () => {
+      const equipment: Record<string, SinnerEquipment> = {
+        '10': { identity: { id: IDENTITY_11009, uptie: 4, level: 45 }, egos: {} },
+      }
+      const result = computeKeywordEA(
+        deck(equipment, [9]),
+        { [IDENTITY_11009]: { skillKeywordList: ['Combustion'] } },
+        new Set([GIFT_9282]),
+      )
+
+      expect(countOf(result, 'Vibration')).toBe(1)
+      expect(countOf(result, 'Combustion')).toBe(1)
+    })
+
+    it('deduplicates a granted keyword the identity already applies', () => {
+      const result = computeKeywordEA(
+        deck(sinner05(4), [4]),
+        { [IDENTITY_10508]: { skillKeywordList: ['Laceration'] } },
+        NO_GIFTS,
+      )
+
+      expect(countOf(result, 'Laceration')).toBe(1)
+    })
   })
 })

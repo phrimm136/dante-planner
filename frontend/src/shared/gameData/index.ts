@@ -15,6 +15,9 @@ export {
   SYNERGY_KEYWORDS,
   PLANNER_KEYWORDS,
   KEYWORD_RENAME_MAP,
+  EGO_KEYWORD_GRANTS,
+  GIFT_KEYWORD_GRANTS,
+  KEYWORD_GRANT_MIN_THREADSPIN,
   DEFAULT_DEPLOYMENT_MAX,
   MAX_OBSERVABLE_GIFTS,
   ENHANCEMENT_LEVELS,
@@ -48,6 +51,7 @@ export {
 } from './constants'
 
 export type {
+  KeywordGrant,
   Sinner,
   Affinity,
   SkillAttributeType,

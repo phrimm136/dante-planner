@@ -1,6 +1,6 @@
 import { startTransition, useState, useEffect, useRef } from 'react'
 import { MAX_LEVEL, EGO_TYPES, EGOIdSchema } from '@/shared/gameData'
-import type { EGOId, IdentityId } from '@/shared/gameData'
+import type { EGOGiftId, EGOId, IdentityId } from '@/shared/gameData'
 import {
   PlannerEditorStoreProvider,
   usePlannerEditorStore,
@@ -9,6 +9,7 @@ import { useIdentityListData } from '@/pages/identity'
 import { useEGOListData } from '@/pages/ego'
 import { useSearchMappings } from '@/shared/filter'
 import { matchesDeckFilter } from '../../lib/deckFilter'
+import { collectOwnedGiftIds } from '../../lib/deckEA'
 import type {
   UptieTier,
   ThreadspinTier,
@@ -45,6 +46,8 @@ export interface DeckBuilderContentProps extends DeckBuilderDeck, DeckBuilderAct
   filterState: DeckFilterState
   /** False while a closing dialog is still painting its exit animation. */
   isActive: boolean
+  /** Base ids of gifts the plan owns, for keyword grants in the status readout. */
+  ownedGiftIds: ReadonlySet<EGOGiftId>
 }
 
 /**
@@ -58,6 +61,7 @@ export function DeckBuilderContent({
   setDeploymentOrder,
   filterState,
   isActive,
+  ownedGiftIds,
   onImport,
   onExport,
   onResetOrder,
@@ -415,6 +419,7 @@ export function DeckBuilderContent({
         deploymentOrder={deploymentOrder}
         skillDataMap={skillDataMap}
         egoAffinityMap={egoAffinityMap}
+        ownedGiftIds={ownedGiftIds}
         onToggleDeploy={handleToggleDeploy}
         onImport={onImport}
         onExport={onExport}
@@ -451,6 +456,16 @@ export function StoreBoundDeckBuilderContent(props: StoreBoundDeckBuilderContent
   const deploymentOrder = usePlannerEditorStore((s) => s.deploymentOrder)
   const setDeploymentOrder = usePlannerEditorStore((s) => s.setDeploymentOrder)
   const filterState = usePlannerEditorStore((s) => s.deckFilterState)
+  const selectedGiftIds = usePlannerEditorStore((s) => s.selectedGiftIds)
+  const observationGiftIds = usePlannerEditorStore((s) => s.observationGiftIds)
+  const comprehensiveGiftIds = usePlannerEditorStore((s) => s.comprehensiveGiftIds)
+  const floorSelections = usePlannerEditorStore((s) => s.floorSelections)
+  const ownedGiftIds = collectOwnedGiftIds({
+    selectedGiftIds,
+    observationGiftIds,
+    comprehensiveGiftIds,
+    floorSelections,
+  })
 
   return (
     <DeckBuilderContent
@@ -460,6 +475,7 @@ export function StoreBoundDeckBuilderContent(props: StoreBoundDeckBuilderContent
       deploymentOrder={deploymentOrder}
       setDeploymentOrder={setDeploymentOrder}
       filterState={filterState}
+      ownedGiftIds={ownedGiftIds}
     />
   )
 }

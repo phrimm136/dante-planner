@@ -11,6 +11,7 @@ import { EGOGiftObservationSummary } from '../egoGift/EGOGiftObservationSummary'
 import { DeckTrackerPanel } from './DeckTrackerPanel'
 import { DeckBuilderPane } from '../deckBuilder/DeckBuilderPane'
 import { TrackerDeckBuilderContent } from '../deckBuilder/DeckBuilderContent'
+import { collectOwnedGiftIds } from '../../lib/deckEA'
 import { DeckImportConfirmDialog } from '../deckBuilder/DeckImportConfirmDialog'
 import { SkillReplacementSection } from '../skillReplacement/SkillReplacementSection'
 import { ComprehensiveGiftGridTracker } from './ComprehensiveGiftGridTracker'
@@ -109,6 +110,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
           <DeckTrackerPanel
             equipment={trackerState.equipment}
             deploymentOrder={trackerState.deploymentOrder}
+            ownedGiftIds={collectOwnedGiftIds(deserialized)}
             setEquipment={setEquipment}
             setDeploymentOrder={setDeploymentOrder}
             onEditDeck={() => setDeckEditPaneOpen(true)}
@@ -124,6 +126,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
         <DeckBuilderPane open={deckEditPaneOpen} onOpenChange={setDeckEditPaneOpen}>
           <TrackerDeckBuilderContent
             isActive={deckEditPaneOpen}
+            ownedGiftIds={collectOwnedGiftIds(deserialized)}
             equipment={trackerState.equipment}
             setEquipment={setEquipment}
             deploymentOrder={trackerState.deploymentOrder}

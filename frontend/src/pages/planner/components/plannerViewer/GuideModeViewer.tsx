@@ -2,6 +2,7 @@ import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { DeckBuilderSummary } from '../deckBuilder/DeckBuilderSummary'
+import { collectOwnedGiftIds } from '../../lib/deckEA'
 import { StartBuffSection } from '../startBuff/StartBuffSection'
 import { StartGiftSummary } from '../startGift/StartGiftSummary'
 import { EGOGiftObservationSummary } from '../egoGift/EGOGiftObservationSummary'
@@ -76,6 +77,7 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
             <DeckBuilderSummary
               equipment={content.equipment}
               deploymentOrder={content.deploymentOrder}
+              ownedGiftIds={collectOwnedGiftIds(deserialized)}
               readOnly={true}
             />
           </Suspense>

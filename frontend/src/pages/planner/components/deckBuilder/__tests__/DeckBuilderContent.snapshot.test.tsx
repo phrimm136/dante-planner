@@ -25,6 +25,7 @@ import {
 } from '../DeckBuilderContent'
 
 import type { SinnerEquipment } from '../../../types/DeckTypes'
+import type { EGOGiftId } from '@/shared/gameData'
 import { asEGOId, asIdentityId } from '@/test-utils/fixtures'
 
 // ---------------------------------------------------------------------------
@@ -152,6 +153,7 @@ const TRACKER_DECK = {
   setEquipment: () => {},
   deploymentOrder: [0, 3],
   setDeploymentOrder: () => {},
+  ownedGiftIds: new Set<EGOGiftId>(),
 }
 
 function withStore(state: Partial<PlannerEditorState>, ui: ReactElement) {
@@ -214,6 +216,7 @@ const MATRIX: Array<[string, () => ReactElement]> = [
         deploymentOrder={[]}
         setDeploymentOrder={() => {}}
         filterState={EGO_FILTER}
+        ownedGiftIds={new Set<EGOGiftId>()}
         {...ACTIONS}
       />
     ),
