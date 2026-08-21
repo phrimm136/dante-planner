@@ -1,6 +1,7 @@
 import { useEGODetailI18n } from '../hooks/useEGODetailData'
 import { EGOHeader } from './EGOHeader'
 import type { EgoType } from '@/shared/gameData'
+import type { EgoSkillType } from '../types/EGOTypes'
 
 interface EGOHeaderI18nProps {
   /** EGO ID to look up name */
@@ -12,6 +13,8 @@ interface EGOHeaderWithI18nProps {
   id: string
   /** EGO rank (ZAYIN, TETH, HE, WAW, ALEPH) */
   rank: EgoType
+  /** Selected skill type, driving the CG variant */
+  skillType: EgoSkillType
 }
 
 /**
@@ -20,13 +23,13 @@ interface EGOHeaderWithI18nProps {
  * MUST be wrapped in Suspense boundary.
  *
  * @example
- * <Suspense fallback={<EGOHeader egoId={id} name="" rank={rank} />}>
- *   <EGOHeaderWithI18n id={id} rank={rank} />
+ * <Suspense fallback={<EGOHeader egoId={id} name="" rank={rank} skillType={skillType} />}>
+ *   <EGOHeaderWithI18n id={id} rank={rank} skillType={skillType} />
  * </Suspense>
  */
-export function EGOHeaderWithI18n({ id, rank }: EGOHeaderWithI18nProps) {
+export function EGOHeaderWithI18n({ id, rank, skillType }: EGOHeaderWithI18nProps) {
   const i18n = useEGODetailI18n(id)
-  return <EGOHeader egoId={id} name={i18n.name} rank={rank} />
+  return <EGOHeader egoId={id} name={i18n.name} rank={rank} skillType={skillType} />
 }
 
 /**

@@ -158,3 +158,25 @@ export const STAGGER_STEP_MS = {
   NORMAL: 60,
   LOOSE: 80,
 } as const
+
+/**
+ * CSS aspect-ratio reserving the detail-page character image box before the
+ * image loads. Values follow the shipped assets: identity CGs are 16:9, EGO
+ * CGs 1:1 (a few deviate by one pixel; object-contain absorbs it).
+ */
+export const DETAIL_IMAGE_ASPECT_RATIO = {
+  IDENTITY: '16 / 9',
+  EGO: '1 / 1',
+} as const
+
+/**
+ * Expanded-image lightbox (ExpandImageButton)
+ */
+export const LIGHTBOX = {
+  /** Fit-mode cap on the image width, as a fraction of the viewport width */
+  MAX_WIDTH_VW: 95,
+  /** Fit-mode cap on the image height, as a fraction of the dynamic viewport height */
+  MAX_HEIGHT_DVH: 95,
+  /** Upper bound for pinch/wheel zoom, relative to the fit size */
+  MAX_ZOOM_SCALE: 4,
+} as const

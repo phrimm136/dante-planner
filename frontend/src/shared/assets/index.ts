@@ -67,6 +67,7 @@ export {
   getButtonOnHoverPath,
   getButtonExpandImagePath,
   getButtonSwapImagePath,
+  getButtonClosePath,
   getAttackLevelIconPath,
   getDefenseLevelIconPath,
   getHPIconPath,

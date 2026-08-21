@@ -13,7 +13,7 @@ import { EGODetailSkeleton } from './components/EGODetailSkeleton'
 import { EGOInfoPane } from './components/EGOInfoPane'
 import { EGOSkillsPane } from './components/EGOSkillsPane'
 import { EGOPassivesPane } from './components/EGOPassivesPane'
-import type { Threadspin } from '@/pages/ego'
+import type { EgoSkillType, Threadspin } from '@/pages/ego'
 
 /**
  * Inner content component that uses Suspense-aware hooks
@@ -38,6 +38,9 @@ function EGODetailContent() {
   // Controllable threadspin state — defaults to this EGO's max.
   const [threadspin, setThreadspin] = useState<number>(spec.maxThreadspin)
 
+  // Selected skill type — read by the skills pane and the header image.
+  const [skillType, setSkillType] = useState<EgoSkillType>('awaken')
+
   // Cast to Threadspin type for component props
   const threadspinLevel = threadspin as Threadspin
 
@@ -55,11 +58,17 @@ function EGODetailContent() {
   )
 
   // Left column: Header (with i18n), Sin Cost, Sin Resistance
-  const leftColumn = <EGOInfoPane id={id} ego={spec} />
+  const leftColumn = <EGOInfoPane id={id} ego={spec} skillType={skillType} />
 
   // Skills content (shared between desktop and mobile)
   const skillsContent = (
-    <EGOSkillsPane id={id} skills={spec.skills} threadspinLevel={threadspinLevel} />
+    <EGOSkillsPane
+      id={id}
+      skills={spec.skills}
+      threadspinLevel={threadspinLevel}
+      skillType={skillType}
+      onSkillTypeChange={setSkillType}
+    />
   )
 
   // Passives content - PassiveCardWithSuspense uses internal granular Suspense

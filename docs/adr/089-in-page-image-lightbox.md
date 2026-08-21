@@ -1,0 +1,10 @@
+# 089 in-page-image-lightbox
+epic: none · pr: none
+
+## Decisions
+- @lightbox @assets — The detail-page expand button opens an in-page lightbox (Radix Dialog + zoom/pan) instead of the image URL in a new tab. The R2 asset host is referer-gated after the SSR cutover, so direct navigation to an asset URL is blocked; everything the native image tab provided — fit-to-window, zoom to natural size, panning, pinch — must live in the page, while context-menu save survives because the in-page `<img>` loads with a valid referer. REJECTED: `window.open` on the asset URL — dies with the gate.
+- @lightbox @dependency — Gestures come from `react-zoom-pan-pinch`; the page owns only policy (95vw × 95dvh contain fit, zoom cap, black ground, close button). REJECTED: hand-rolled PointerEvents pinch — two-pointer midpoint and transform-origin tracking is a known source of drift and stuck-pointer bugs, for zero dependency savings elsewhere. REJECTED: relying on native page pinch inside the dialog — it zooms the whole page, overlay included, and leaves the page zoomed after closing.
+- @layout @detail-image — Detail-page character image boxes are reserved with a per-entity CSS `aspect-ratio` (identity 16:9, EGO 1:1, `DETAIL_IMAGE_ASPECT_RATIO`). An uncached image has no intrinsic size, so an `h-auto` box collapses to zero for the duration of the fetch and reflows on load; the shipped assets are ratio-uniform per entity type, so a constant reserves the box exactly. REJECTED: fixed pixel dimensions — breaks responsive layout. REJECTED: holding the previous image until the next one loads — fixes only the swap, not the initial page load, and costs state.
+
+## Takeaway
+- takeaway: when an asset host stops serving direct navigation, every affordance the browser used to provide for free becomes product surface — enumerate the native viewer's capabilities first and let a library own the gesture math; and reserve the box of any async-loaded replaced element from a known invariant, because layout defects of this class are invisible to jsdom and only an engine with real layout can hold the regression test.

@@ -1,12 +1,9 @@
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { SkillTabButton } from '@/pages/identity'
 import { SkillsSectionI18n } from './EGOSkillI18n'
 
-import type { EGOData, Threadspin } from '../types/EGOTypes'
-
-type SkillType = 'awaken' | 'erosion'
+import type { EGOData, EgoSkillType, Threadspin } from '../types/EGOTypes'
 
 interface EGOSkillsPaneProps {
   /** EGO ID for skill image paths */
@@ -15,12 +12,15 @@ interface EGOSkillsPaneProps {
   skills: EGOData['skills']
   /** Current threadspin level */
   threadspinLevel: Threadspin
+  /** Selected skill type (controlled) */
+  skillType: EgoSkillType
+  onSkillTypeChange: (skillType: EgoSkillType) => void
 }
 
 /** First skill data entry that declares an attribute type, for tab colouring. */
 function getSkillAttributeType(
   skills: EGOData['skills'],
-  skillTypeKey: SkillType,
+  skillTypeKey: EgoSkillType,
 ): string | undefined {
   const skillsForType = skills[skillTypeKey]
   if (!skillsForType || skillsForType.length === 0) return undefined
@@ -37,12 +37,15 @@ function getSkillAttributeType(
 
 /**
  * Skill type selector and skill panel.
- *
- * Owns the selected skill type, so switching it re-renders nothing outside it.
  */
-export function EGOSkillsPane({ id, skills, threadspinLevel }: EGOSkillsPaneProps) {
+export function EGOSkillsPane({
+  id,
+  skills,
+  threadspinLevel,
+  skillType,
+  onSkillTypeChange,
+}: EGOSkillsPaneProps) {
   const { t } = useTranslation(['database', 'common'])
-  const [skillType, setSkillType] = useState<SkillType>('awaken')
 
   const hasErosion = skills.erosion && skills.erosion.length > 0
 
@@ -54,7 +57,7 @@ export function EGOSkillsPane({ id, skills, threadspinLevel }: EGOSkillsPaneProp
           attributeType={getSkillAttributeType(skills, 'awaken')}
           label={t('skill.awakening')}
           onClick={() => {
-            setSkillType('awaken')
+            onSkillTypeChange('awaken')
           }}
           isActive={skillType === 'awaken'}
         />
@@ -63,7 +66,7 @@ export function EGOSkillsPane({ id, skills, threadspinLevel }: EGOSkillsPaneProp
             attributeType={getSkillAttributeType(skills, 'erosion')}
             label={t('skill.corrosion')}
             onClick={() => {
-              setSkillType('erosion')
+              onSkillTypeChange('erosion')
             }}
             isActive={skillType === 'erosion'}
           />

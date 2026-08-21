@@ -97,6 +97,7 @@ export const PATHS = {
   buttonOnHover: () => resolveAsset('/images/UI/common/buttonOnHover.webp'),
   buttonExpandImage: () => resolveAsset('/images/UI/common/buttonExpandImage.webp'),
   buttonSwapImage: () => resolveAsset('/images/UI/common/buttonSwapImage.webp'),
+  buttonClose: () => resolveAsset('/images/UI/common/buttonClose.webp'),
 
   sinnerIcon: (sinner: string) => resolveAsset(`/images/icon/sinners/${sinner}.webp`),
   affinityIcon: (affinity: string) => {
@@ -113,7 +114,10 @@ export const PATHS = {
     resolveAsset(`/images/icon/battleKeywords/${iconIdOrKey}.webp`),
   panicIcon: (panicType: string) => resolveAsset(`/images/icon/sanity/${panicType}.webp`),
 
-  egoCg: (egoId: string) => resolveAsset(`/images/ego/${egoId}/${egoId}_cg.webp`),
+  egoCg: (egoId: string, variant: 'awaken' | 'erosion') =>
+    variant === 'erosion'
+      ? resolveAsset(`/images/ego/${egoId}/${egoId}_e_cg.webp`)
+      : resolveAsset(`/images/ego/${egoId}/${egoId}_cg.webp`),
   egoProfileImage: (egoId: string) =>
     resolveAsset(`/images/ego/${egoId}/${egoId}_awaken_profile.webp`),
   egoSkillImage: (egoId: string, skillType: 'awaken' | 'erosion') =>
@@ -234,6 +238,7 @@ export const getButtonBasePath = (): string => path('buttonBase')
 export const getButtonOnHoverPath = (): string => path('buttonOnHover')
 export const getButtonExpandImagePath = (): string => path('buttonExpandImage')
 export const getButtonSwapImagePath = (): string => path('buttonSwapImage')
+export const getButtonClosePath = (): string => path('buttonClose')
 
 export const getSinnerIconPath = (sinner: string): string => path('sinnerIcon', sinner)
 export const getAffinityIconPath = (affinity: string): string => path('affinityIcon', affinity)
@@ -245,8 +250,11 @@ export const getBattleKeywordIconPath = (iconIdOrKey: string): string =>
   path('battleKeywordIcon', iconIdOrKey)
 export const getPanicIconPath = (panicType: string): string => path('panicIcon', panicType)
 
-export const getEGOImagePath = (egoId: string): string => path('egoCg', egoId)
-export const getEGODetailImagePath = (egoId: string): string => path('egoCg', egoId)
+export const getEGOImagePath = (egoId: string): string => path('egoCg', egoId, 'awaken')
+export const getEGODetailImagePath = (
+  egoId: string,
+  variant: 'awaken' | 'erosion' = 'awaken'
+): string => path('egoCg', egoId, variant)
 export const getEGOProfileImagePath = (egoId: string): string => path('egoProfileImage', egoId)
 export const getEGOSkillImagePath = (egoId: string, skillType: 'awaken' | 'erosion'): string =>
   path('egoSkillImage', egoId, skillType)

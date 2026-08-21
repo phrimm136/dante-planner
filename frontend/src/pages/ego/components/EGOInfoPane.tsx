@@ -6,27 +6,29 @@ import { EGOHeaderWithI18n } from './EGOHeaderI18n'
 import { SinCostPanel } from './SinCostPanel'
 import { SinResistancePanel } from './SinResistancePanel'
 
-import type { EGOData } from '../types/EGOTypes'
+import type { EGOData, EgoSkillType } from '../types/EGOTypes'
 
 interface EGOInfoPaneProps {
   /** EGO ID for i18n lookup */
   id: string
   /** EGO spec data */
   ego: EGOData
+  /** Selected skill type, driving the header's CG variant */
+  skillType: EgoSkillType
 }
 
 /**
  * Left pane of the EGO detail page: header, sin cost, sin resistance and metadata.
- *
- * Reads nothing the right pane owns, so a skill-type switch leaves it untouched.
  */
-export function EGOInfoPane({ id, ego }: EGOInfoPaneProps) {
+export function EGOInfoPane({ id, ego, skillType }: EGOInfoPaneProps) {
   return (
     <>
       <div className="space-y-4">
         {/* Header with rank, name, and image - Suspends for i18n name */}
-        <Suspense fallback={<EGOHeader egoId={id} name="" rank={ego.egoType} />}>
-          <EGOHeaderWithI18n id={id} rank={ego.egoType} />
+        <Suspense
+          fallback={<EGOHeader egoId={id} name="" rank={ego.egoType} skillType={skillType} />}
+        >
+          <EGOHeaderWithI18n id={id} rank={ego.egoType} skillType={skillType} />
         </Suspense>
 
         {/* Sin Cost and Sin Resistance Panels */}

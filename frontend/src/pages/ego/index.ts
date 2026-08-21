@@ -14,7 +14,13 @@ export { PassiveCardWithSuspense } from './components/PassiveI18n'
 export { useEGOListData, useEGOListSpec, useEGOListI18n } from './hooks/useEGOListData'
 export { useEGODetailData, useEGODetailSpec, useEGODetailI18n } from './hooks/useEGODetailData'
 
-export type { EGOListItem, Threadspin, EGOSkillEntry, EGOPassiveI18n } from './types/EGOTypes'
+export type {
+  EGOListItem,
+  EgoSkillType,
+  Threadspin,
+  EGOSkillEntry,
+  EGOPassiveI18n,
+} from './types/EGOTypes'
 
 export type { EGOFacetState } from './lib/egoFilter'
 

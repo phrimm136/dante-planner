@@ -5,21 +5,22 @@ import {
   getEGODetailImagePath,
   getSinnerIconPath,
   getSinnerBGPath,
-  getButtonOnHoverPath,
-  getButtonBasePath,
-  getButtonExpandImagePath,
 } from '@/shared/assets'
+import { CharacterImageSection } from '@/components/layout/CharacterImageSection'
 import { Skeleton } from '@/components/ui/skeleton'
 import { type Sinner } from '@/shared/gameData'
 import { getSinnerFromId } from '@/shared/gameData'
 import { getDisplayFontForLanguage } from '@/lib/utils'
 import type { EgoType } from '@/shared/gameData'
-import { SECTION_STYLES, SINNER_COLORS } from '@/lib/constants'
+import type { EgoSkillType } from '../types/EGOTypes'
+import { DETAIL_IMAGE_ASPECT_RATIO, SECTION_STYLES, SINNER_COLORS } from '@/lib/constants'
 
 interface EGOHeaderProps {
   egoId: string
   name: string
   rank: EgoType
+  /** Selected skill type; erosion shows the corrosion CG */
+  skillType: EgoSkillType
 }
 
 /**
@@ -28,8 +29,8 @@ interface EGOHeaderProps {
  * Row 1: Rank icon (right-aligned)
  * Row 2: Sinner icon with rank-aware frame (left) + EGO name (right)
  */
-export function EGOHeader({ egoId, name, rank }: EGOHeaderProps) {
-  const { t, i18n } = useTranslation()
+export function EGOHeader({ egoId, name, rank, skillType }: EGOHeaderProps) {
+  const { i18n } = useTranslation()
   // Derive sinner from EGO ID and get color
   const sinner = getSinnerFromId(egoId) as Sinner
   const sinnerColor = SINNER_COLORS[sinner] || '#333333'
@@ -38,10 +39,9 @@ export function EGOHeader({ egoId, name, rank }: EGOHeaderProps) {
   // All EGOs use rank 3 frame (highest tier)
   const frameRank = 3
 
-  const handleExpandImage = () => {
-    const imagePath = getEGODetailImagePath(egoId)
-    window.open(imagePath, '_blank')
-  }
+  // Not every EGO with erosion skills has a corrosion CG.
+  const src = getEGODetailImagePath(egoId, skillType)
+  const fallbackSrc = skillType === 'erosion' ? getEGODetailImagePath(egoId, 'awaken') : undefined
 
   return (
     <div className="space-y-4">
@@ -83,37 +83,12 @@ export function EGOHeader({ egoId, name, rank }: EGOHeaderProps) {
       </div>
 
       {/* Character Image with expand button */}
-      <div className="relative bg-muted rounded-lg overflow-hidden">
-        <img
-          src={getEGODetailImagePath(egoId)}
-          alt={name}
-          className="w-full h-auto object-contain"
-        />
-
-        {/* Expand button */}
-        <div className="absolute top-4 left-4">
-          <button
-            onClick={handleExpandImage}
-            className="group relative w-12 h-12"
-            style={{
-              backgroundImage: `url(${getButtonBasePath()})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }}
-          >
-            <img
-              src={getButtonOnHoverPath()}
-              alt=""
-              className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity pointer-events-none scale-115"
-            />
-            <img
-              src={getButtonExpandImagePath()}
-              alt={t('a11y.expandImage')}
-              className="relative w-full h-full object-contain p-2"
-            />
-          </button>
-        </div>
-      </div>
+      <CharacterImageSection
+        src={src}
+        fallbackSrc={fallbackSrc}
+        alt={name}
+        aspectRatio={DETAIL_IMAGE_ASPECT_RATIO.EGO}
+      />
     </div>
   )
 }

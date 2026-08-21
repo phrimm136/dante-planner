@@ -135,7 +135,7 @@ beforeEach(() => {
 })
 
 describe('EGODetailPage render isolation', () => {
-  it('does not re-render the left pane or passives when the skill type is switched', async () => {
+  it('re-renders only the header and skills when the skill type is switched', async () => {
     await renderSettledDetailPage()
 
     const baseline = snapshotRenderCounts()
@@ -147,7 +147,7 @@ describe('EGODetailPage render isolation', () => {
     const delta = rendersSince(baseline)
     expect(delta.SkillsSectionI18n).toBe(1)
     expect(pick(delta, LEFT_PANE_LABELS)).toEqual({
-      EGOHeaderWithI18n: 0,
+      EGOHeaderWithI18n: 1,
       SinCostPanel: 0,
       SinResistancePanel: 0,
     })

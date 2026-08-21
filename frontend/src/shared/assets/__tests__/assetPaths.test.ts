@@ -66,6 +66,7 @@ const CASES: Case[] = [
   ['getButtonOnHoverPath', [], '/images/UI/common/buttonOnHover.webp'],
   ['getButtonExpandImagePath', [], '/images/UI/common/buttonExpandImage.webp'],
   ['getButtonSwapImagePath', [], '/images/UI/common/buttonSwapImage.webp'],
+  ['getButtonClosePath', [], '/images/UI/common/buttonClose.webp'],
 
   ['getSinnerIconPath', ['DonQuixote'], '/images/icon/sinners/DonQuixote.webp'],
   ['getAffinityIconPath', ['CRIMSON'], '/images/icon/sin/Wrath.webp'],
@@ -90,6 +91,7 @@ const CASES: Case[] = [
 
   ['getEGOImagePath', ['20101'], '/images/ego/20101/20101_cg.webp'],
   ['getEGODetailImagePath', ['20101'], '/images/ego/20101/20101_cg.webp'],
+  ['getEGODetailImagePath', ['20103', 'erosion'], '/images/ego/20103/20103_e_cg.webp'],
   ['getEGOProfileImagePath', ['20101'], '/images/ego/20101/20101_awaken_profile.webp'],
   ['getEGOSkillImagePath', ['20101', 'awaken'], '/images/ego/20101/20101_awaken_profile.webp'],
   ['getEGOSkillImagePath', ['20102', 'erosion'], '/images/ego/20102/20102_erosion_profile.webp'],

@@ -6,17 +6,13 @@ import {
   getIdentityDetailImagePath,
   getSinnerIconPath,
   getSinnerBGPath,
-  getButtonOnHoverPath,
-  getButtonBasePath,
-  getButtonSwapImagePath,
-  getButtonExpandImagePath,
 } from '@/shared/assets'
-import { FallbackImage } from '@/components/ui/FallbackImage'
+import { CharacterImageSection } from '@/components/layout/CharacterImageSection'
 import { Skeleton } from '@/components/ui/skeleton'
 import { type Sinner } from '@/shared/gameData'
 import { getSinnerFromId } from '@/shared/gameData'
 import { getDisplayFontForLanguage } from '@/lib/utils'
-import { SECTION_STYLES, SINNER_COLORS } from '@/lib/constants'
+import { DETAIL_IMAGE_ASPECT_RATIO, SECTION_STYLES, SINNER_COLORS } from '@/lib/constants'
 
 type ImageVariant = 'normal' | 'gacksung'
 
@@ -34,7 +30,7 @@ interface IdentityHeaderProps {
  * Row 2: Sinner icon with rank+uptie frame (left) + Identity name (right)
  */
 export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeaderProps) {
-  const { t, i18n } = useTranslation()
+  const { i18n } = useTranslation()
   // Gacksung image only available for rank > 1 AND uptie >= 3
   const canShowGacksung = rank > 1 && uptie >= 3
   const [imageVariant, setImageVariant] = useState<ImageVariant>(
@@ -55,11 +51,6 @@ export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeader
 
   const handleSwapImage = () => {
     setImageVariant((prev: ImageVariant) => (prev === 'gacksung' ? 'normal' : 'gacksung'))
-  }
-
-  const handleExpandImage = () => {
-    const imagePath = getIdentityDetailImagePath(identityId, imageVariant)
-    window.open(imagePath, '_blank')
   }
 
   const currentImagePath = getIdentityDetailImagePath(identityId, imageVariant)
@@ -104,65 +95,16 @@ export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeader
       </div>
 
       {/* Character Image with overlay buttons */}
-      <div className="relative bg-muted rounded-lg overflow-hidden">
-        <FallbackImage
-          src={currentImagePath}
-          fallbackSrc={getIdentityDetailImagePath(identityId, 'normal')}
-          onFallback={() => {
-            setImageVariant('normal')
-          }}
-          alt={name}
-          className="w-full h-auto object-contain"
-        />
-
-        {/* Stacked buttons */}
-        <div className="absolute top-4 left-4 flex flex-col gap-2">
-          {/* Swap button - disabled when gacksung image not available */}
-          <button
-            onClick={handleSwapImage}
-            disabled={!canShowGacksung}
-            className="group relative w-12 h-12 disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{
-              backgroundImage: `url(${getButtonBasePath()})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }}
-          >
-            <img
-              src={getButtonOnHoverPath()}
-              alt=""
-              className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 group-active:opacity-100 group-disabled:group-hover:opacity-0 group-disabled:group-active:opacity-0 transition-opacity pointer-events-none scale-115"
-            />
-            <img
-              src={getButtonSwapImagePath()}
-              alt={t('a11y.swapImage')}
-              className="relative w-full h-full object-contain p-2"
-            />
-          </button>
-
-          {/* Expand button */}
-          <button
-            onClick={handleExpandImage}
-            className="group relative w-12 h-12"
-            style={{
-              backgroundImage: `url(${getButtonBasePath()})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }}
-          >
-            <img
-              src={getButtonOnHoverPath()}
-              alt=""
-              className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity pointer-events-none scale-115"
-            />
-            <img
-              src={getButtonExpandImagePath()}
-              alt={t('a11y.expandImage')}
-              className="relative w-full h-full object-contain p-2"
-            />
-          </button>
-        </div>
-      </div>
+      <CharacterImageSection
+        src={currentImagePath}
+        fallbackSrc={getIdentityDetailImagePath(identityId, 'normal')}
+        onFallback={() => {
+          setImageVariant('normal')
+        }}
+        alt={name}
+        aspectRatio={DETAIL_IMAGE_ASPECT_RATIO.IDENTITY}
+        swap={{ onSwap: handleSwapImage, disabled: !canShowGacksung }}
+      />
     </div>
   )
 }

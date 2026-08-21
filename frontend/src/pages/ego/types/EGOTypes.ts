@@ -9,6 +9,9 @@ import type {
 
 export type { Threadspin } from '@/shared/gameData'
 
+/** Skill families an EGO can have; erosion also selects the corrosion CG. */
+export type EgoSkillType = 'awaken' | 'erosion'
+
 /**
  * EGO list item for list/grid views.
  *
