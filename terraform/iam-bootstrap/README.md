@@ -45,7 +45,7 @@ account), and KMS `Encrypt/Decrypt/GenerateDataKey` conditioned to `kms:ViaServi
 Run once, with **admin** credentials (not the RDS role):
 
 ```bash
-cp terraform.tfvars.example terraform.tfvars     # set trusted_admin_principal_arn (gitignored)
+cp account.tfvars.example <account>.tfvars       # set trusted_admin_principal_arn (gitignored)
 terraform -chdir=terraform/iam-bootstrap init
 terraform -chdir=terraform/iam-bootstrap validate
 terraform -chdir=terraform/iam-bootstrap plan     # READ IT
@@ -95,8 +95,8 @@ protected GitHub `oregon` environment for a stricter boundary.
 
 This repo is public. No account ID, ARN, or principal appears as a literal in any committed file —
 the account ID is derived from `data.aws_caller_identity`, and `trusted_admin_principal_arn` is a
-required variable with no default (supply it via gitignored `terraform.tfvars`; never commit it).
-`terraform.tfvars.example` holds placeholders only. The `github_oidc_subject` default is
+required variable with no default (supply it via a gitignored `<account>.tfvars` passed with -var-file; never commit it).
+`account.tfvars.example` holds placeholders only. The `github_oidc_subject` default is
 the public git remote slug and is safe to commit.
 
 ## OIDC provider already exists?
@@ -109,4 +109,4 @@ policy then looks the existing provider up as a data source instead of creating 
 
 - **The Oregon fleet** (`terraform/oregon`) — this stack only grants the identity that applies it.
 - **State backend:** configure encrypted remote state in your private setup; local state and
-  `terraform.tfvars` are gitignored. Never commit `*.tfstate`.
+  `*.tfvars` are gitignored. Never commit `*.tfstate`.

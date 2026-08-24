@@ -17,7 +17,7 @@ variable "role_name" {
 }
 
 variable "trusted_admin_principal_arns" {
-  description = "Principal ARNs allowed to sts:AssumeRole the provisioning roles from a laptop. A list so an identity-center permission-set role can be admitted alongside the principal it replaces, verified, and the old one then dropped without a window where neither works. Real values live in gitignored terraform.tfvars — never commit them. No default (public-repo invariant)."
+  description = "Principal ARNs allowed to sts:AssumeRole the provisioning roles from a laptop. A list so an identity-center permission-set role can be admitted alongside the principal it replaces, verified, and the old one then dropped without a window where neither works. Real values live in a gitignored var-file — never commit them. No default (public-repo invariant)."
   type        = list(string)
 
   validation {

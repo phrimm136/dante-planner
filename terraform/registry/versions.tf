@@ -1,5 +1,5 @@
 terraform {
-  # terraform init -backend-config=../backend.hcl
+  # terraform init -backend-config=../backend.management.hcl
   backend "s3" {
     key                  = "registry/terraform.tfstate"
     region               = "us-west-2"

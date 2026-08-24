@@ -1,5 +1,5 @@
 terraform {
-  # terraform init -backend-config=../backend.hcl
+  # terraform init -backend-config=../backend.<account>.hcl
   backend "s3" {
     key                  = "oregon/terraform.tfstate"
     region               = "us-west-2"

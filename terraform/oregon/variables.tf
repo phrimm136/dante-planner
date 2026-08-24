@@ -41,7 +41,7 @@ variable "ingress_allowed_cidrs" {
 }
 
 variable "redis_cross_region_cidr" {
-  description = "Peer-region fleet CIDR admitted to the auth Redis NodePort (Seoul's fleet CIDR, 10.30.0.0/16, so its replica can REPLICAOF and its pods can write auth state to the Oregon primary). Empty (default) = no rule; the auth Redis stays region-private. Set in terraform.tfvars when Seoul goes live. Never 0.0.0.0/0."
+  description = "Peer-region fleet CIDR admitted to the auth Redis NodePort (Seoul's fleet CIDR, 10.30.0.0/16, so its replica can REPLICAOF and its pods can write auth state to the Oregon primary). Empty (default) = no rule; the auth Redis stays region-private. Set in the stack's var-file when Seoul goes live. Never 0.0.0.0/0."
   type        = string
   default     = ""
 }
@@ -170,7 +170,7 @@ variable "tags" {
 }
 
 variable "rds_vpc_id" {
-  description = "RDS (prod) VPC id to peer with for private RDS access. Set in terraform.tfvars (gitignored) — do not commit."
+  description = "RDS (prod) VPC id to peer with for private RDS access. Set in the stack's gitignored var-file — do not commit."
   type        = string
 }
 

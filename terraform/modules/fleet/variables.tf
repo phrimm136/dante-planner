@@ -223,7 +223,7 @@ variable "tags" {
 }
 
 variable "rds_vpc_id" {
-  description = "RDS (prod) VPC id to peer with for private RDS access. Set in terraform.tfvars (gitignored) — do not commit."
+  description = "RDS (prod) VPC id to peer with for private RDS access. Set in the stack's gitignored var-file — do not commit."
   type        = string
 }
 

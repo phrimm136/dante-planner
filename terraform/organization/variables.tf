@@ -9,7 +9,7 @@ variable "aws_account_id" {
 }
 
 variable "organization_id" {
-  description = "Id of the existing organization to adopt (aws organizations describe-organization --query Organization.Id). Real value lives in gitignored terraform.tfvars — never commit it."
+  description = "Id of the existing organization to adopt (aws organizations describe-organization --query Organization.Id). Real value lives in a gitignored var-file — never commit it."
   type        = string
 
   validation {
@@ -25,7 +25,7 @@ variable "region" {
 }
 
 variable "security_accounts" {
-  description = "Account name to root email for the Security unit. Each address must be globally unique across AWS and reachable, because it is the account's root login and the only recovery path. Real values live in gitignored terraform.tfvars — they are personal data and the repo is public."
+  description = "Account name to root email for the Security unit. Each address must be globally unique across AWS and reachable, because it is the account's root login and the only recovery path. Real values live in a gitignored var-file — they are personal data and the repo is public."
   type        = map(string)
   default     = {}
 
@@ -64,7 +64,7 @@ variable "operator_group_name" {
 }
 
 variable "operator" {
-  description = "The human operator to create in the Identity Center directory. Real values live in gitignored terraform.tfvars — the email is personal data and the repo is public."
+  description = "The human operator to create in the Identity Center directory. Real values live in a gitignored var-file — the email is personal data and the repo is public."
   type = object({
     user_name    = string
     display_name = string

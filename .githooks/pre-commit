@@ -92,4 +92,16 @@ BANNED
   done <<< "$records"
 fi
 
+# Terraform auto-loads terraform.tfvars on every invocation of a stack, so a file with
+# that name supplies variables no command names and no reviewer sees. The names below are
+# environment-scoped and every var-file is passed explicitly. Checked against the working
+# tree rather than the index, because *.tfvars is gitignored and never reaches a commit.
+autoloaded=$(find terraform -mindepth 2 -maxdepth 2 -name 'terraform.tfvars' 2>/dev/null || true)
+if [[ -n "$autoloaded" ]]; then
+  echo "pre-commit: terraform.tfvars is auto-loaded and must not exist." >&2
+  echo "Rename to <environment>.tfvars and pass it with -var-file:" >&2
+  echo "$autoloaded" | sed 's/^/  /' >&2
+  fail=1
+fi
+
 exit $fail

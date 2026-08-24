@@ -1,5 +1,5 @@
 terraform {
-  # terraform init -backend-config=../backend.hcl
+  # terraform init -backend-config=../backend.management.hcl
   #
   # This stack applies in the management account, which is the account that already owns
   # the state bucket, so it has none of iam-bootstrap's circularity and stores state

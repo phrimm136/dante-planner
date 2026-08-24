@@ -1,11 +1,13 @@
 # Copy to <account>.tfvars (gitignored) and fill in — one file per account, applied in a workspace
-# of the same name. Never commit the real file; it carries account-specific identifiers.
+# of the same name, and passed explicitly:
 #
 #   terraform -chdir=terraform/state-backend workspace new <account>
 #   terraform -chdir=terraform/state-backend apply -var-file=<account>.tfvars
 #
-# The default terraform.tfvars is auto-loaded alongside -var-file, so an account file must override
-# every value that differs rather than relying on absence.
+# NOT terraform.tfvars: that name auto-loads on every invocation, including ones passing a
+# different -var-file, so one account silently inherits another's values.
+#
+# Never commit the real file; it carries account-specific identifiers.
 
 # --- Required ---------------------------------------------------------------
 

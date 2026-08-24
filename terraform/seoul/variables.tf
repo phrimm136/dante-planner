@@ -45,7 +45,7 @@ variable "rds_region" {
 }
 
 variable "rds_vpc_id" {
-  description = "Primary RDS VPC id to peer with (cross-region). Set in terraform.tfvars — do not commit."
+  description = "Primary RDS VPC id to peer with (cross-region). Set in the stack's var-file — do not commit."
   type        = string
 }
 
@@ -84,7 +84,7 @@ variable "backend_ecr_account_id" {
 # where the topology is deliberately asymmetric; the point is that a divergence must now be
 # written down rather than arising from one caller being unable to say it.
 variable "redis_cross_region_cidr" {
-  description = "Peer-region fleet CIDR admitted to the auth Redis NodePort (Seoul's fleet CIDR, 10.30.0.0/16, so its replica can REPLICAOF and its pods can write auth state to the Oregon primary). Empty (default) = no rule; the auth Redis stays region-private. Set in terraform.tfvars when Seoul goes live. Never 0.0.0.0/0."
+  description = "Peer-region fleet CIDR admitted to the auth Redis NodePort (Seoul's fleet CIDR, 10.30.0.0/16, so its replica can REPLICAOF and its pods can write auth state to the Oregon primary). Empty (default) = no rule; the auth Redis stays region-private. Set in the stack's var-file when Seoul goes live. Never 0.0.0.0/0."
   type        = string
   default     = ""
 }

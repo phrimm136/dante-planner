@@ -7,8 +7,8 @@ It does **not** load data and does **not** run the cutover — those are operato
 ## Prereqs
 - A dedicated least-privilege **provisioning identity** assumed via STS (kept in private ops notes,
   not this repo). Confirm with `aws sts get-caller-identity` before applying.
-- `cp terraform.tfvars.example terraform.tfvars` and fill your real `vpc_id` and `db_subnet_ids`.
-  `terraform.tfvars` is gitignored.
+- `cp environment.tfvars.example prod.tfvars` and fill your real `vpc_id` and `db_subnet_ids`.
+  `*.tfvars` is gitignored.
 - Seed the master password once with `scripts/ops/provision/rds-master-password-secret.sh`. It is
   read from Secrets Manager at plan time, so the entry must exist before the first apply.
 

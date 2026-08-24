@@ -9,7 +9,7 @@ variable "aws_account_id" {
 }
 
 variable "assume_role_arn" {
-  description = "Role to assume in the target account. Empty means the ambient credentials already belong there. Real value lives in gitignored terraform.tfvars — it names an account."
+  description = "Role to assume in the target account. Empty means the ambient credentials already belong there. Real value lives in a gitignored var-file — it names an account."
   type        = string
   default     = ""
 }

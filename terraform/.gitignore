@@ -10,5 +10,5 @@
 !*.tfvars.example
 # No leading slash, so a per-stack backend config is ignored too.
 backend*.hcl
-!backend.hcl.example
+!backend.account.hcl.example
 crash.log

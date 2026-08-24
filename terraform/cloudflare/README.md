@@ -22,7 +22,7 @@ assumed floor, not a measured one.
 ## Applying
 
 ```bash
-cp terraform.tfvars.example terraform.tfvars   # fill in token, account, zone
+cp environment.tfvars.example prod.tfvars   # fill in token, account, zone
 terraform init
 terraform plan                                  # expect creates only
 terraform apply

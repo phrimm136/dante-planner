@@ -31,8 +31,8 @@ account reproduces the region (Done-When: rebuild proves the bootstrap).
 ## Prereqs
 
 - A dedicated least-privilege **provisioning identity** assumed via STS (as in `terraform/rds`).
-- `cp terraform.tfvars.example terraform.tfvars` and set `ingress_allowed_cidrs`
-  (Cloudflare + GA-health ranges). `terraform.tfvars` is gitignored.
+- `cp environment.tfvars.example prod.tfvars` and set `ingress_allowed_cidrs`
+  (Cloudflare + GA-health ranges). `*.tfvars` is gitignored.
 - The JWT material must already exist in **AWS Secrets Manager** (all three required; the
   backend fails fast at boot without them): the private key at `rs256_private_key_secret_name`
   (default `danteplanner/jwt/rs256-private-key`), the X.509 public key at
@@ -79,4 +79,4 @@ terraform output backend_ecr_repository_url
 - **The RS256 private key** (Secrets Manager, operator-populated) — referenced by name only.
 - **The RDS instance and its SG** (`terraform/rds`) — referenced via the documented output wiring.
 - **State backend:** configure encrypted remote state in your private setup; local state and
-  `terraform.tfvars` are gitignored. Never commit `*.tfstate`.
+  `*.tfvars` are gitignored. Never commit `*.tfstate`.

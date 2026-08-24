@@ -10,7 +10,7 @@ variable "name_prefix" {
   default     = "danteplanner"
 }
 
-# --- Networking (operator-supplied via gitignored terraform.tfvars) ---------
+# --- Networking (operator-supplied via a gitignored var-file) ---------
 
 variable "vpc_id" {
   description = "Existing VPC the database lives in. Ignored when create_vpc is true. An account with no database network sets create_vpc instead of supplying this."

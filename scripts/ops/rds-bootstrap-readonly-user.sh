@@ -3,7 +3,7 @@
 # rds-readonly-user.sql with the Secrets Manager password substituted for
 # REPLACE_ME (env-only transit, the file on disk is untouched). Admin (master)
 # credentials are fetched, not prompted: username from the RDS API, password
-# from the gitignored terraform/rds/terraform.tfvars (its declared home — the
+# from the gitignored terraform/rds var-file (its declared home — the
 # AWS-managed master secret is disabled for cross-region replica support).
 # Run provision/rds-readonly-secrets.sh first.
 # Usage: rds-bootstrap-readonly-user.sh
