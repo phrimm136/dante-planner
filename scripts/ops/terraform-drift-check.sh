@@ -18,15 +18,22 @@ ISSUE_LABEL="terraform-drift"
 # with these credentials and state bucket reports its resources as destroyable.
 STACKS=(oregon seoul rds secrets cloudflare)
 
-# Stacks whose inputs are not in an auto-loaded terraform.tfvars. Anything absent here relies on
-# the auto-load, which composes with -var-file rather than being replaced by it.
-declare -A VAR_FILE=( [rds]=prod.tfvars [cloudflare]=prod.tfvars )
+# Every stack names its var-file. A stack with no entry is a configuration error rather than a
+# stack that needs no inputs, so the loop below refuses to plan it: a plan missing an input that
+# gates a resource reports that resource's destruction as drift.
+declare -A VAR_FILE=(
+  [oregon]=prod.tfvars
+  [seoul]=prod.tfvars
+  [rds]=prod.tfvars
+  [secrets]=prod.tfvars
+  [cloudflare]=prod.tfvars
+)
 
 # Stacks that keep more than one workspace. The default workspace holds different resources, so
 # planning without selecting reports the whole stack as absent.
 declare -A WORKSPACE=( [cloudflare]=prod-fleet )
 
-BACKEND_CONFIG="${BACKEND_CONFIG:-$REPO_DIR/terraform/backend.hcl}"
+BACKEND_CONFIG="${BACKEND_CONFIG:-$REPO_DIR/terraform/backend.prod.hcl}"
 
 drifted=()
 failed=()
@@ -37,11 +44,15 @@ for stack in "${STACKS[@]}"; do
   [ -d "$dir" ] || continue
   log="/tmp/tf-drift-$stack-$(date +%Y%m%d).log"
 
-  args=(-detailed-exitcode -input=false -lock=false -no-color)
-  [ -n "${VAR_FILE[$stack]:-}" ] && args+=(-var-file="${VAR_FILE[$stack]}")
+  if [ -z "${VAR_FILE[$stack]:-}" ]; then
+    failed+=("$stack")
+    summary+="- \`$stack\`: no VAR_FILE entry — refusing to plan without an explicit var-file"$'\n'
+    continue
+  fi
+  args=(-detailed-exitcode -input=false -lock=false -no-color -var-file="${VAR_FILE[$stack]}")
 
   if [ ! -d "$dir/.terraform" ]; then
-    terraform -chdir="$dir" init -input=false -no-color \
+    "$REPO_DIR/scripts/ops/terraform-run.sh" -chdir="$dir" init -input=false -no-color \
       -backend-config="$BACKEND_CONFIG" >"$log" 2>&1 || {
       failed+=("$stack")
       summary+="- \`$stack\`: init FAILED (log: $log)"$'\n'
@@ -50,14 +61,14 @@ for stack in "${STACKS[@]}"; do
   fi
 
   if [ -n "${WORKSPACE[$stack]:-}" ]; then
-    if ! terraform -chdir="$dir" workspace select "${WORKSPACE[$stack]}" >>"$log" 2>&1; then
+    if ! "$REPO_DIR/scripts/ops/terraform-run.sh" -chdir="$dir" workspace select "${WORKSPACE[$stack]}" >>"$log" 2>&1; then
       failed+=("$stack")
       summary+="- \`$stack\`: workspace ${WORKSPACE[$stack]} select FAILED (log: $log)"$'\n'
       continue
     fi
   fi
 
-  terraform -chdir="$dir" plan "${args[@]}" >"$log" 2>&1
+  "$REPO_DIR/scripts/ops/terraform-run.sh" -chdir="$dir" plan "${args[@]}" >"$log" 2>&1
   rc=$?
   case "$rc" in
     0) ;;
@@ -89,7 +100,7 @@ body="Drift check from $origin at $(date -Iseconds).
 
 $summary
 Counts only — plan output is never uploaded. Reproduce locally for the reason:
-\`terraform -chdir=terraform/<stack> plan\`"
+\`scripts/ops/terraform-run.sh -chdir=terraform/<stack> plan\`"
 
 existing=$(gh issue list --repo "$GH_REPO" --label "$ISSUE_LABEL" --state open \
   --json number --jq '.[0].number' 2>/dev/null)

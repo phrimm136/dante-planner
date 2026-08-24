@@ -7,7 +7,7 @@
 # them before Access can even be attacked. The service token IS a credential, and the apply that
 # creates it is the only chance to read it.
 #
-# Run after `terraform -chdir=terraform/cloudflare apply -var-file=staging.tfvars`.
+# Run after `scripts/ops/terraform-run.sh -chdir=terraform/cloudflare apply -var-file=staging.tfvars`.
 set -euo pipefail
 
 repo_root=$(git -C "$(dirname "$0")" rev-parse --show-toplevel)

@@ -4,7 +4,7 @@ Operational guide for the maintenance window that lands the **planner god-table 
 (`V049`→`V052`) on the multi-region k3s fleet. Three operations share the window and must run **in
 order**, with a hard verification gate between them:
 
-1. **Pod reposition** — a `terraform apply` per region that **replaces** the CP, data, and ingress
+1. **Pod reposition** — a `scripts/ops/terraform-run.sh apply` per region that **replaces** the CP, data, and ingress
    instances (a new AMI forces replacement) and rebuilds them from the updated `user-data`, baking
    in swap, `GOMEMLIMIT`, and the ArgoCD-on-data placement as first-boot behavior instead of
    hand-applied live patches.
@@ -78,10 +78,10 @@ DNS-level action, so it is the cheapest thing to be holding when something else 
    b. **Apply against a throwaway hostname.**
 
       ```bash
-      cd terraform/cloudflare && cp terraform.tfvars.example terraform.tfvars   # token, account, zone
+      cd terraform/cloudflare && cp environment.tfvars.example prod.tfvars   # token, account, zone
       # set api_hostname = "edge-test.dante-planner.com"
-      terraform init && terraform plan          # creates only
-      terraform apply
+      terraform init && scripts/ops/terraform-run.sh plan          # creates only
+      scripts/ops/terraform-run.sh apply
       ```
 
    c. **Verify the path end to end on that hostname** while production still runs on the
@@ -103,7 +103,7 @@ DNS-level action, so it is the cheapest thing to be holding when something else 
 5. **Apply the RDS parameter that makes read-your-writes precise.** `session_track_gtids = OWN_GTID`
    is declared in `terraform/rds/main.tf`'s `aws_db_parameter_group`; apply that stack. Do **not**
    set it by hand in the console — `aws_db_parameter_group` reconciles the whole group, so the next
-   `terraform apply` would revert an out-of-band value. It is a dynamic parameter, so no reboot is
+   `scripts/ops/terraform-run.sh apply` would revert an out-of-band value. It is a dynamic parameter, so no reboot is
    needed, but confirm it actually took:
 
    ```bash
@@ -140,10 +140,10 @@ dir (`terraform/oregon`, `terraform/seoul`) and AWS region (`us-west-2`, `ap-nor
 ### A1. Apply — replace the three stateful instances
 
 ```bash
-terraform -chdir=terraform/oregon plan     # READ IT: expect 3 replacements (cp, data, ingress)
+scripts/ops/terraform-run.sh -chdir=terraform/oregon plan     # READ IT: expect 3 replacements (cp, data, ingress)
                                            # + launch-template re-render + SSM-document updates.
                                            # Confirm nothing outside that set is touched.
-terraform -chdir=terraform/oregon apply
+scripts/ops/terraform-run.sh -chdir=terraform/oregon apply
 ```
 
 All three instances go down together — **the region goes dark**, which is fine; the window exists
@@ -186,7 +186,7 @@ kubectl -n danteplanner rollout status ds/backend
 - **Backend still serving on the old image** (pre-migration) from an in-VPC host:
   `curl -sk https://<ingress-private-ip>/healthz-local -o /dev/null -w '%{http_code}\n'` → 200.
 - **Edge reachability.** The ingress instance's public IP changed, so the *old* front door needs
-  re-pointing before Part B: `terraform -chdir=terraform/global-accelerator apply` so the endpoint
+  re-pointing before Part B: `scripts/ops/terraform-run.sh -chdir=terraform/global-accelerator apply` so the endpoint
   group tracks the new instance. The tunnel does not care — it dials out from inside the cluster and
   has no origin IP to update, which is one of the reasons it replaces this step permanently. Confirm
   public reachability before Part B.
@@ -336,8 +336,8 @@ to re-attach, and the new one has already been proven on the test hostname durin
 ```bash
 cd terraform/cloudflare
 # api_hostname: edge-test.dante-planner.com -> api.dante-planner.com
-terraform plan     # read it: the load balancer is renamed, nothing is destroyed
-terraform apply
+scripts/ops/terraform-run.sh plan     # read it: the load balancer is renamed, nothing is destroyed
+scripts/ops/terraform-run.sh apply
 ```
 
 Confirm before declaring the window closed:
@@ -410,7 +410,7 @@ Only once the new front door has carried real traffic for a bake period. Removin
 throws away the Part C rollback.
 
 ```bash
-terraform -chdir=terraform/global-accelerator destroy     # the accelerator itself
+scripts/ops/terraform-run.sh -chdir=terraform/global-accelerator destroy     # the accelerator itself
 ```
 
 Then, in the region roots, remove what only existed to serve it:
@@ -429,7 +429,7 @@ answers, and confirm in the plan that the only inbound rules left are the cluste
 cross-region Redis rule the auth replica needs:
 
 ```bash
-terraform -chdir=terraform/oregon plan | grep -A3 'ingress'    # same for seoul
+scripts/ops/terraform-run.sh -chdir=terraform/oregon plan | grep -A3 'ingress'    # same for seoul
 # then an external port scan of the former ingress IPs — expect nothing open
 ```
 
@@ -460,7 +460,7 @@ bootstrap fix ships to an instance that never executes it.
 
 | Need | Command |
 |---|---|
-| Rebuild a region | `terraform -chdir=terraform/oregon apply` (expect 3 replacements) |
+| Rebuild a region | `scripts/ops/terraform-run.sh -chdir=terraform/oregon apply` (expect 3 replacements) |
 | Refresh app nodes | `aws autoscaling start-instance-refresh --region us-west-2 --auto-scaling-group-name danteplanner-oregon-app` |
 | Fleet gate | nodes Ready · ArgoCD Synced/Healthy · argocd+metrics-server on `*-data` · swap+GOMEMLIMIT first-boot |
 | Freeze writes | scale `ds/backend` to 0 (nodeSelector) + `argocd app set … --sync-policy none` |

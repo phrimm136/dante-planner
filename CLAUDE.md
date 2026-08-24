@@ -15,6 +15,7 @@ Query frontend, Spring Boot backend, static JSON data validated at runtime.
 - Target directories with flags: `yarn --cwd frontend …`,
   `/home/user/github/LimbusPlanner/backend/gradlew -p backend …`. A bare
   `vitest`/`tsc`/`gradlew` at the repo root is hook-blocked, and `cd` is deny-listed.
+- Terraform runs through `scripts/ops/terraform-run.sh …`; a bare `terraform` is hook-blocked.
 - No exclamation marks in responses.
 
 ## Docs

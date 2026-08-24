@@ -1,7 +1,7 @@
 # Rewiring production from the management account to danteplanner-prod
 
 Prepares the vended `danteplanner-prod` account to receive production: its state bucket, its
-CI identity, copies of every secret value, and copies of the terraform state history. Nothing
+CI identity, copies of every secret value, and copies of the scripts/ops/terraform-run.sh state history. Nothing
 in the management account is modified or removed at any step — every copy leaves the original
 standing as the rollback path. Moving the *resources* (RDS, the fleets, the registries) is the
 prod-migration phase proper and is not this runbook.
@@ -18,14 +18,14 @@ terraform -chdir=terraform/state-backend workspace new danteplanner-prod
 # Create terraform/state-backend/danteplanner-prod.tfvars (gitignored, like its siblings):
 #   aws_account_id  = "<prod account id>"
 #   assume_role_arn = ""        # empty when the profile's credentials already land in prod
-AWS_PROFILE=<prod> terraform -chdir=terraform/state-backend apply -var-file=danteplanner-prod.tfvars
+AWS_PROFILE=<prod> scripts/ops/terraform-run.sh -chdir=terraform/state-backend apply -var-file=danteplanner-prod.tfvars
 ```
 
 ## 2. Backend config for the prod account
 
 ```bash
 terraform -chdir=terraform/state-backend output -raw tf_state_bucket
-# Copy terraform/backend.hcl.example to terraform/backend.prod.hcl (gitignored) and set that
+# Copy terraform/backend.account.hcl.example to terraform/backend.prod.hcl (gitignored) and set that
 # bucket. Add assume_role there too if the ambient credentials are not the prod account's —
 # a backend resolves credentials before any provider exists.
 ```
@@ -39,7 +39,7 @@ GitHub `production` environment.
 
 ```bash
 terraform -chdir=terraform/iam-bootstrap workspace new danteplanner-prod
-AWS_PROFILE=<prod> terraform -chdir=terraform/iam-bootstrap apply -var-file=danteplanner-prod.tfvars
+AWS_PROFILE=<prod> scripts/ops/terraform-run.sh -chdir=terraform/iam-bootstrap apply -var-file=danteplanner-prod.tfvars
 terraform -chdir=terraform/iam-bootstrap output -raw provisioner_role_arn
 ```
 
@@ -73,7 +73,7 @@ Verify: pick one secret and compare a checksum of its value between accounts.
 
 ```bash
 SRC_PROFILE=<management> DST_PROFILE=<prod> \
-  scripts/ops/provision/copy-state-across-accounts.sh terraform/backend.hcl terraform/backend.prod.hcl
+  scripts/ops/provision/copy-state-across-accounts.sh terraform/backend.management.hcl terraform/backend.prod.hcl
 # then re-run with --execute
 ```
 
@@ -87,7 +87,7 @@ The one stack whose resources live outside AWS entirely, so its state copy IS it
 
 ```bash
 AWS_PROFILE=<prod> terraform -chdir=terraform/cloudflare init -backend-config=../backend.prod.hcl -reconfigure
-AWS_PROFILE=<prod> terraform -chdir=terraform/cloudflare plan -var-file=terraform.tfvars
+AWS_PROFILE=<prod> scripts/ops/terraform-run.sh -chdir=terraform/cloudflare plan -var-file=prod.tfvars
 ```
 
 Expect one known, benign drift and nothing else: state written before secrets were driven out

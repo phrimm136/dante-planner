@@ -35,11 +35,15 @@ scripts/ops/access/logs-query.sh --day 2026-07-23 '{app="backend", cluster="seou
 3. Mint a Grafana Cloud access-policy token with `logs:read` + `metrics:read`
    scopes, then store
    it: `scripts/ops/provision/grafana-read-secrets.sh`.
-4. `terraform -chdir=terraform/secrets apply` — the secret names are enrolled in
+4. `scripts/ops/terraform-run.sh -chdir=terraform/secrets apply` — the secret names are enrolled in
    `secret_names`, so apply attaches the Seoul replica to each container.
 
 Workstation prerequisites: AWS CLI with credentials, `session-manager-plugin`,
 `docker`, `jq`.
+
+Terraform is run through `scripts/ops/terraform-run.sh`, never the raw binary. It refuses a
+command whose credentials belong to a different account than the state bucket it would write,
+and one whose directory holds an auto-loaded `terraform.tfvars`, then hands off unchanged.
 
 ## Credential handling
 

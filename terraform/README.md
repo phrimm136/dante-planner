@@ -42,7 +42,7 @@ terraform -chdir=terraform/<stack> init -backend-config=../backend.<account>.hcl
 ```
 
 Those config files are gitignored because a bucket name carries an account id; copy
-`backend.hcl.example`. One per account, not one shared — and a stack reaching into another account
+`backend.account.hcl.example`. One per account, not one shared — and a stack reaching into another account
 needs `assume_role` in **that file** as well as in its provider, because a backend resolves
 credentials before any provider exists and cannot use theirs.
 
@@ -111,7 +111,8 @@ own (`modules/fleet/network.tf`); `rds` takes `vpc_id` and `db_subnet_ids`, and 
 `rds_vpc_id`, all pointing at a VPC no stack manages. On an account without it there is nothing to
 supply.
 
-Every `terraform.tfvars` is gitignored. Each stack ships a tracked `terraform.tfvars.example`.
+Every `*.tfvars` is gitignored. Each stack ships a tracked `environment.tfvars.example` or
+`account.tfvars.example`; the auto-loaded name `terraform.tfvars` is not used anywhere.
 
 ## From scratch
 
@@ -149,3 +150,20 @@ isolate state and nothing else.
 `aws_db_instance.this` and the prod secrets carry `prevent_destroy` alongside RDS
 `deletion_protection`, so a destroy or a replacement errors instead of deleting data. The fleet
 stacks deliberately carry neither, so their destroy-and-rebuild cycle keeps working.
+
+`allowed_account_ids` covers only one direction: credentials that disagree with the var-file. The
+reverse — credentials agreeing with the var-file while the directory is initialized against
+another account's state bucket — reaches a plan unchallenged, because the backend lives in
+`.terraform/terraform.tfstate` and no command names it. `scripts/ops/lib/terraform-guard.sh`
+compares the two, reading the account id out of the `<prefix>-tfstate-<account_id>` bucket name,
+and also refuses a directory holding an auto-loaded `terraform.tfvars`.
+
+**Terraform runs through `scripts/ops/terraform-run.sh`, never the raw binary:**
+
+```bash
+scripts/ops/terraform-run.sh -chdir=terraform/oregon plan -var-file=prod.tfvars
+```
+
+It is transparent, handing off every argument, stdin and the exit status, so it substitutes for
+`terraform` anywhere. `init` is exempt, being the command that repairs a mismatch, and `GUARD=0`
+skips one invocation for an operator who has judged the guard wrong.

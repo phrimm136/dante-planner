@@ -46,8 +46,8 @@ docker exec danteplanner-mysql mysql -uroot -p -e \
 - [ ] SG: permanent EC2→RDS:3306 rule **and** a temporary RDS→source:3306 rule (RDS subnet CIDR only).
 ```bash
 cd terraform/rds
-terraform plan      # review: creating RDS + SG + subnet group + param group
-terraform apply
+scripts/ops/terraform-run.sh plan      # review: creating RDS + SG + subnet group + param group
+scripts/ops/terraform-run.sh apply
 terraform output rds_endpoint     # → put this value into SSM (next step)
 ```
 - [ ] RDS up. Endpoint: __________________________
@@ -55,7 +55,7 @@ terraform output rds_endpoint     # → put this value into SSM (next step)
       buffer pool, not connections, is the constraint at 50k MAU. A resize now is free; after promote
       it costs a failover/restart window.
 - [ ] **Destroy-guard test:** temporarily edit a replace-forcing attr (e.g. instance identifier) and
-      `terraform plan` → it MUST error on `prevent_destroy`. Revert the edit. (proves I4)
+      `scripts/ops/terraform-run.sh plan` → it MUST error on `prevent_destroy`. Revert the edit. (proves I4)
 
 ### 0.2 Capture the source @@sql_mode into the param group
 ```bash
@@ -311,7 +311,7 @@ on RDS. Only consider reverse-replication (RDS→local) if absolutely required �
 ## One-screen cheat sheet
 
 ```
-Zone 0 (days, live):  terraform apply → enable GTID → repl user → expose source
+Zone 0 (days, live):  scripts/ops/terraform-run.sh apply → enable GTID → repl user → expose source
                       → mysqldump --single-transaction --source-data=2 → load RDS
                       → rds_set_external_master_with_auto_position → wait lag≈0
                       → validate → prep Commit 2 (schema-neutral) → freeze schema

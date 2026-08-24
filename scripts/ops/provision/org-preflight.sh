@@ -102,6 +102,6 @@ if [[ $fatal -ne 0 ]]; then
 fi
 log_info "PRE-FLIGHT PASSED"
 echo "done. Next:"
-echo "  1. terraform -chdir=terraform/organization apply   # organization, units, policy types"
+echo "  1. scripts/ops/terraform-run.sh -chdir=terraform/organization apply   # organization, units, policy types"
 echo "  2. enable IAM Identity Center in the console (no API enables it)"
 echo "  3. scripts/ops/provision/org-verify.sh             # assert the RFC 0001 invariants"
