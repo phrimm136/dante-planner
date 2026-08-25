@@ -63,7 +63,7 @@ export function StyledSkillName({ name, attributeType }: StyledSkillNameProps) {
   const displayStyle = getDisplayFontForLanguage(i18n.language)
 
   return (
-    <div style={{ width: 'fit-content' }}>
+    <div className="w-fit">
       {/* Outer container: dark gradient background */}
       <div
         style={{
@@ -77,12 +77,12 @@ export function StyledSkillName({ name, attributeType }: StyledSkillNameProps) {
         <div
           style={{
             textShadow: '2px 2px 2px black',
-            padding: ' 0.1em 0 0 0.3em',
+            padding: '0.1em 3.75em 0 0.3em',
             textAlign: 'left',
             backgroundImage: generateStripeGradient(primary),
           }}
         >
-          <span style={{ marginRight: '3em', fontSize: '20px', ...displayStyle }}>{name}</span>
+          <span style={{ fontSize: '20px', ...displayStyle }}>{name}</span>
         </div>
       </div>
     </div>
@@ -97,7 +97,7 @@ export function StyledNameSkeleton({ attributeType }: { attributeType?: string |
   const { primary, dark } = getAttributeColors(attributeType)
 
   return (
-    <div style={{ width: 'fit-content' }}>
+    <div className="w-fit">
       <div
         style={{
           marginBottom: '5px',
@@ -108,14 +108,11 @@ export function StyledNameSkeleton({ attributeType }: { attributeType?: string |
       >
         <div
           style={{
-            padding: '0.3em 10px',
+            padding: '0.3em 3.75em 0.3em 10px',
             backgroundImage: generateStripeGradient(primary),
           }}
         >
-          <Skeleton
-            className="h-5 w-20"
-            style={{ marginRight: '3em', backgroundColor: TEXT_COLOR }}
-          />
+          <Skeleton className="h-5 w-20" style={{ backgroundColor: TEXT_COLOR }} />
         </div>
       </div>
     </div>

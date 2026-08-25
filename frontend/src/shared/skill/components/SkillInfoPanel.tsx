@@ -59,7 +59,7 @@ export function SkillInfoPanelWithSuspense({
   const atkWeight = skillData.targetNum ?? 1
 
   return (
-    <div className="flex flex-col -translate-x-5">
+    <div className="flex grow flex-col pb-4 -ml-5">
       {/* Coin display */}
       <div>
         <CoinDisplay coinEA={coinString} />
@@ -70,8 +70,8 @@ export function SkillInfoPanelWithSuspense({
         {nameSlot}
       </Suspense>
 
-      {/* Level and stats display - vertical on mobile, horizontal on desktop */}
-      <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-3 text-sm">
+      {/* Level and stats display */}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
         {/* Level */}
         <div className={SECTION_STYLES.LAYOUT.row}>
           <img
