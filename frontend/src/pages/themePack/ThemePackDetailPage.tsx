@@ -19,7 +19,6 @@ import { useThemePackDetailData } from '@/pages/themePack'
 import { useThemePackListData } from '@/pages/themePack'
 import { useEGOGiftListData } from '@/pages/egoGift'
 import { AbEventCard, useAbEventListData } from '@/pages/abEvent'
-import { findFusionGifts } from './lib/themePackFusion'
 import { getFeaturedBossImagePath } from '@/shared/assets'
 import {
   DUNGEON_IDX,
@@ -27,7 +26,7 @@ import {
   DUNGEON_FIXED_FLOOR_RANGE,
   THEME_PACK_FLOOR_LABELS,
 } from '@/shared/gameData'
-import type { DungeonIdx, ThemePackFloor, DifficultyLabel } from '@/shared/gameData'
+import type { AbEventId, DungeonIdx, ThemePackFloor, DifficultyLabel } from '@/shared/gameData'
 import type { ThemePackDetail } from '@/pages/themePack'
 import { Link } from '@tanstack/react-router'
 import { DIFFICULTY_COLORS, SECTION_STYLES } from '@/lib/constants'
@@ -179,23 +178,14 @@ export function FeaturedBoss({
 }
 
 /**
- * Specific EGO gifts grid (from specificEgoGiftPool + fusioned gifts)
+ * Specific EGO gifts grid (specificEgoGiftPool carries themed fusions too)
  */
 function SpecificEgoGifts({ giftIds }: { giftIds: EGOGiftId[] }) {
   const { spec } = useEGOGiftListData()
 
   if (giftIds.length === 0) return null
 
-  const poolIds = giftIds.map(String)
-
-  return (
-    <EGOGiftGrid
-      ids={[...poolIds, ...findFusionGifts(spec, poolIds)]}
-      spec={spec}
-      showName
-      className={GIFT_ROW}
-    />
-  )
+  return <EGOGiftGrid ids={giftIds.map(String)} spec={spec} showName className={GIFT_ROW} />
 }
 
 /**
@@ -208,34 +198,28 @@ function FixedRewardEgoGifts({ giftIds }: { giftIds: EGOGiftId[] }) {
 }
 
 /**
- * Exclusive abnormality events section — events only in this pack.
- * Self-contained: renders nothing if no exclusive events found.
+ * Exclusive abnormality events section — the pack's specialEventPool,
+ * rendered verbatim (exclusivity is decided by the data pipeline).
+ * Self-contained: renders nothing if the pool is empty.
  */
-function ExclusiveEventsSection({ eventPool, packId }: { eventPool: string[]; packId: string }) {
+function ExclusiveEventsSection({ eventIds }: { eventIds: AbEventId[] }) {
   const { t } = useTranslation('database')
   const { spec: abEventSpec } = useAbEventListData()
 
-  const exclusiveIds = eventPool.filter((eventId) => {
-    const entry = abEventSpec[String(eventId)]
-    if (!entry) return false
-    return entry.relatedThemePacks.length === 1 && entry.relatedThemePacks[0] === packId
-  })
-
-  if (exclusiveIds.length === 0) return null
+  if (eventIds.length === 0) return null
 
   return (
     <div className="space-y-3">
       <SectionTitle>{t('themePack.exclusiveEvents', 'Exclusive Dungeon Events')}</SectionTitle>
       <div className="flex flex-wrap gap-3">
-        {exclusiveIds.map((eventId) => {
-          const eid = String(eventId)
-          const entry = abEventSpec[eid]
+        {eventIds.map((eventId) => {
+          const entry = abEventSpec[eventId]
           if (!entry) return null
           return (
-            <Link key={eid} to="/ab-event/$id" params={{ id: eid }}>
+            <Link key={eventId} to="/ab-event/$id" params={{ id: eventId }}>
               <div className="w-40">
                 <AbEventCard
-                  eventId={eid}
+                  eventId={eventId}
                   hasImage={entry.hasImage}
                   illustId={entry.illustId}
                   enableHoverHighlight
@@ -261,20 +245,19 @@ function AllEgoGifts({ giftIds }: { giftIds: EGOGiftId[] }) {
 /**
  * All encounterable events grid — title below image
  */
-function AllEvents({ eventPool }: { eventPool: string[] }) {
+function AllEvents({ eventPool }: { eventPool: AbEventId[] }) {
   const { spec: abEventSpec } = useAbEventListData()
 
   return (
     <div className="flex flex-wrap gap-3">
       {eventPool.map((eventId) => {
-        const eid = String(eventId)
-        const entry = abEventSpec[eid]
+        const entry = abEventSpec[eventId]
         if (!entry) return null
         return (
-          <Link key={eid} to="/ab-event/$id" params={{ id: eid }}>
+          <Link key={eventId} to="/ab-event/$id" params={{ id: eventId }}>
             <div className="w-40">
               <AbEventCard
-                eventId={eid}
+                eventId={eventId}
                 hasImage={entry.hasImage}
                 illustId={entry.illustId}
                 enableHoverHighlight
@@ -373,7 +356,7 @@ function ThemePackDetailContent() {
 
       {/* Exclusive Events — rendered only if non-empty (checked inside component) */}
       <Suspense fallback={<Skeleton className="h-24 w-full" />}>
-        <ExclusiveEventsSection eventPool={allEventPool} packId={id} />
+        <ExclusiveEventsSection eventIds={spec.nodeOption.specialEventPool ?? []} />
       </Suspense>
 
       {/* All Acquirable EGO Gifts */}
