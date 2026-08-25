@@ -39,6 +39,15 @@ export const DETAIL_PAGE = {
 } as const
 
 /**
+ * Exclusive gift icon row under a theme pack card
+ * ThemePackExclusiveGifts: size-8 (32px) icons, gap-1 (4px)
+ */
+export const EXCLUSIVE_GIFT_ICONS = {
+  ICON_SIZE: 32,
+  GAP: 4,
+} as const
+
+/**
  * Card Grid Layout Constants
  * Used by ResponsiveCardGrid for consistent card sizing across browser pages
  */

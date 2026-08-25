@@ -5,8 +5,9 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
 import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { DUNGEON_IDX, DIFFICULTY_LABELS, type DungeonIdx, type MDCategory } from '@/shared/gameData'
-import { CARD_GRID, DIFFICULTY_COLORS } from '@/lib/constants'
+import { CARD_GRID, DIFFICULTY_COLORS, EXCLUSIVE_GIFT_ICONS } from '@/lib/constants'
 import { ThemePackViewer } from './ThemePackViewer'
+import { ThemePackExclusiveGifts } from './ThemePackExclusiveGifts'
 import type { ThemePackListType, ThemePackEntry } from '@/pages/themePack'
 
 interface ThemePackSelectorPaneProps {
@@ -95,6 +96,25 @@ function filterThemePacks(
   }
 
   return result
+}
+
+/**
+ * Grid-cell height for a pack card plus its exclusive-gift rows, derived
+ * from data before any image loads so the cell box is reserved up front.
+ */
+function themePackCellHeight(giftCount: number): number {
+  if (giftCount === 0) return CARD_GRID.HEIGHT.THEME_PACK
+  const perRow = Math.floor(
+    (CARD_GRID.WIDTH.THEME_PACK + EXCLUSIVE_GIFT_ICONS.GAP) /
+      (EXCLUSIVE_GIFT_ICONS.ICON_SIZE + EXCLUSIVE_GIFT_ICONS.GAP),
+  )
+  const rows = Math.ceil(giftCount / perRow)
+  return (
+    CARD_GRID.HEIGHT.THEME_PACK +
+    EXCLUSIVE_GIFT_ICONS.GAP +
+    rows * EXCLUSIVE_GIFT_ICONS.ICON_SIZE +
+    (rows - 1) * EXCLUSIVE_GIFT_ICONS.GAP
+  )
 }
 
 /**
@@ -202,11 +222,7 @@ export function ThemePackSelectorPane({
                     {t('pages.plannerMD.noThemePacksAvailable')}
                   </div>
                 ) : (
-                  <ResponsiveCardGrid
-                    cardWidth={CARD_GRID.WIDTH.THEME_PACK}
-                    cardHeight={CARD_GRID.HEIGHT.THEME_PACK}
-                    mobileScale={0.6}
-                  >
+                  <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.THEME_PACK} mobileScale={0.6}>
                     {packs.map(({ id, entry }) => {
                       const i18nData = themePackI18n[id]
                       const name = i18nData?.name || `Pack ${id}`
@@ -215,19 +231,22 @@ export function ThemePackSelectorPane({
                         <ScaledCardWrapper
                           key={id}
                           cardWidth={CARD_GRID.WIDTH.THEME_PACK}
-                          cardHeight={CARD_GRID.HEIGHT.THEME_PACK}
+                          cardHeight={themePackCellHeight(entry.specificEgoGiftPool.length)}
                           mobileScale={0.6}
                         >
-                          <ThemePackViewer
-                            packId={id}
-                            packEntry={entry}
-                            packName={name}
-                            specialName={i18nData?.specialName}
-                            onClick={() => {
-                              handlePackSelect(id)
-                            }}
-                            enableHoverHighlight
-                          />
+                          <div className="flex flex-col items-center gap-1">
+                            <ThemePackViewer
+                              packId={id}
+                              packEntry={entry}
+                              packName={name}
+                              specialName={i18nData?.specialName}
+                              onClick={() => {
+                                handlePackSelect(id)
+                              }}
+                              enableHoverHighlight
+                            />
+                            <ThemePackExclusiveGifts giftIds={entry.specificEgoGiftPool} />
+                          </div>
                         </ScaledCardWrapper>
                       )
                     })}
