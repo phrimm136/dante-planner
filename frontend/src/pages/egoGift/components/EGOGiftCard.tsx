@@ -1,10 +1,7 @@
 import { Suspense } from 'react'
-import {
-  getEGOGiftIconPath,
-  getEGOGiftOnHoverPath,
-  getEGOGiftSelectHighlightPath,
-} from '@/shared/assets'
+import { getEGOGiftOnHoverPath, getEGOGiftSelectHighlightPath } from '@/shared/assets'
 import { parseTier } from '../lib/egoGiftTier'
+import { EGOGiftIcon } from './EGOGiftIcon'
 import type { EGOGiftListItem } from '../types/EGOGiftTypes'
 import { EGOGiftCardBackground } from './EGOGiftCardBackground'
 import { EGOGiftTierIndicator } from './EGOGiftTierIndicator'
@@ -73,12 +70,9 @@ export const EGOGiftCard = function EGOGiftCard({
         <EGOGiftCardBackground enhancement={enhancement} size="mini" />
 
         {/* Gift Icon - centered */}
-        <img
-          src={getEGOGiftIconPath(id)}
-          alt={`EGO Gift ${id}`}
-          className="absolute inset-0 m-auto w-18 h-18 -translate-y-[3px]"
-          loading="lazy"
-        />
+        <div className="absolute inset-0 flex items-center justify-center -translate-y-[3px]">
+          <EGOGiftIcon giftId={id} className="w-18 h-18" />
+        </div>
 
         {/* Hover overlay - only shown in selection contexts */}
         {enableHoverHighlight && (
