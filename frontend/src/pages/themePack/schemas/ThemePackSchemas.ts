@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { DUNGEON_IDX } from '@/shared/gameData'
-import { EGOGiftIdSchema } from '@/shared/gameData'
+import { AbEventIdSchema, EGOGiftIdSchema } from '@/shared/gameData'
 
 /**
  * Theme Pack Schemas
@@ -75,8 +75,8 @@ const NodeOptionSchema = z.object({
   abBattlePool: z.array(z.string()),
   hardBattlePool: z.array(z.string()),
   hardAbBattlePool: z.array(z.string()),
-  eventPool: z.array(z.string()),
-  specialEventPool: z.array(z.string()).optional(),
+  eventPool: z.array(AbEventIdSchema),
+  specialEventPool: z.array(AbEventIdSchema).optional(),
 })
 
 // Individual theme pack detail schema (full data from themePack/{id}.json)

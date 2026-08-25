@@ -95,6 +95,7 @@ export {
   PassiveIdSchema,
   SkillIdSchema,
   ThemePackIdSchema,
+  AbEventIdSchema,
   IDENTITY_ID_PATTERN,
   EGO_ID_PATTERN,
   GIFT_ID_PATTERN,
@@ -112,6 +113,7 @@ export type {
   PassiveId,
   SkillId,
   ThemePackId,
+  AbEventId,
 } from './ids'
 
 export { SkillDescEntrySchema } from './schemas/SkillSchemas'

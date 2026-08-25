@@ -42,6 +42,9 @@ export const GIFT_ENHANCEMENT_PREFIX_PATTERN = '[12]?'
 /** Theme pack id. */
 export const THEME_PACK_ID_PATTERN = '\\d{4}'
 
+/** Abnormality event id. Sub-event ids are longer and stay outside the brand. */
+export const AB_EVENT_ID_PATTERN = '9\\d{5}'
+
 /** Passive and skill ids namespace by their owning entity, so only length is fixed. */
 export const ENTITY_MEMBER_ID_PATTERN = '\\d{6,}'
 
@@ -134,6 +137,11 @@ export const ThemePackIdSchema = entityIdSchema<'ThemePackId'>(
   'Theme Pack Id must match pattern {4 digits}',
 )
 
+export const AbEventIdSchema = entityIdSchema<'AbEventId'>(
+  AB_EVENT_ID_PATTERN,
+  'Ab Event ID must match pattern 9{5 digits}',
+)
+
 export type IdentityId = z.infer<typeof IdentityIdSchema>
 export type EGOId = z.infer<typeof EGOIdSchema>
 export type EGOGiftId = z.infer<typeof EGOGiftIdSchema>
@@ -141,3 +149,4 @@ export type EncodedGiftId = z.infer<typeof EncodedGiftIdSchema>
 export type PassiveId = z.infer<typeof PassiveIdSchema>
 export type SkillId = z.infer<typeof SkillIdSchema>
 export type ThemePackId = z.infer<typeof ThemePackIdSchema>
+export type AbEventId = z.infer<typeof AbEventIdSchema>

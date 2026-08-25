@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { AbEventIdSchema } from '@/shared/gameData'
 
 /**
  * AbEvent Schemas
@@ -18,7 +19,7 @@ export const AbEventSpecListEntrySchema = z.object({
   illustId: z.string().optional(),
 })
 
-export const AbEventSpecListSchema = z.record(z.string(), AbEventSpecListEntrySchema)
+export const AbEventSpecListSchema = z.record(AbEventIdSchema, AbEventSpecListEntrySchema)
 
 // =============================================================================
 // Mechanics (individual abEvent/{id}.json)

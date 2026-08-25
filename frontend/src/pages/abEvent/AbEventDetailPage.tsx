@@ -16,6 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
 import { useThemePackI18n } from '@/pages/themePack'
 import { getAbEventImagePath } from '@/shared/assets'
+import { AbEventIdSchema } from '@/shared/gameData'
 import {
   AbEventDetailSkeleton,
   ChoiceBranch,
@@ -93,12 +94,13 @@ function RelatedThemePacks({ packIds, label }: { packIds: string[]; label: strin
 // =============================================================================
 
 function AbEventDetailContent() {
-  const { id } = useParams({ strict: false })
+  const { id: rawId } = useParams({ strict: false })
   const { t } = useTranslation('database')
 
-  if (!id) {
+  if (!rawId) {
     throw new Error('AbEvent ID is required')
   }
+  const id = AbEventIdSchema.parse(rawId)
 
   const { spec, i18n } = useAbEventDetailData(id)
   const abEventSpec = useAbEventListSpec()
