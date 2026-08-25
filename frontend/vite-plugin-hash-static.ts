@@ -140,8 +140,8 @@ function scanFiles(dir: string, base = ''): string[] {
   for (const entry of entries) {
     const rel = base ? `${base}/${entry.name}` : entry.name
     if (entry.isDirectory()) {
-      // Skip scripts directory (excluded by another plugin)
-      if (entry.name === 'scripts') continue
+      // Skip scripts (excluded by another plugin) and local tooling like .venv
+      if (entry.name === 'scripts' || entry.name === '.venv') continue
       files.push(...scanFiles(path.join(dir, entry.name), rel))
     } else {
       files.push(rel)
