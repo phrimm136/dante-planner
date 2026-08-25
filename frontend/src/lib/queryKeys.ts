@@ -35,3 +35,17 @@ export function createEntityDetailQueryKeys<Ns extends string>(ns: Ns) {
     i18n: (id: string, language: string) => [ns, id, 'i18n', language] as const,
   }
 }
+
+/**
+ * Creates the query key factory for an entity's SHARED resources: one
+ * language-scoped file for the whole namespace, not per id.
+ *
+ * Shape: `[ns, 'shared', language]`
+ *
+ * @param ns - Entity namespace, e.g. `'abEvent'`
+ */
+export function createEntitySharedQueryKeys<Ns extends string>(ns: Ns) {
+  return {
+    shared: (language: string) => [ns, 'shared', language] as const,
+  }
+}

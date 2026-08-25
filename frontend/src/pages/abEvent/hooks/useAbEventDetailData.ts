@@ -1,7 +1,11 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { useTranslation } from 'react-i18next'
-import { createEntityDetailQueryKeys } from '@/lib/queryKeys'
-import { createStaticDataQueryOptions } from '@/lib/queryOptions'
+import { createEntityDetailQueryKeys, createEntitySharedQueryKeys } from '@/lib/queryKeys'
+import {
+  useEntityDetailData,
+  useEntityShared,
+  type EntityDetailDataConfig,
+  type EntitySharedDataConfig,
+} from '@/shared/entityCatalog'
+import type { z } from 'zod'
 import {
   AbEventDataSchema,
   AbEventI18nSchema,
@@ -10,63 +14,39 @@ import {
 
 export const abEventDetailQueryKeys = {
   ...createEntityDetailQueryKeys('abEvent'),
-  shared: (language: string) => ['abEvent', 'shared', language] as const,
+  ...createEntitySharedQueryKeys('abEvent'),
 }
 
-function createAbEventDataQueryOptions(id: string) {
-  return createStaticDataQueryOptions(
-    abEventDetailQueryKeys.detail(id),
-    () => import(`@static/data/abEvent/${id}.json`),
-    AbEventDataSchema,
-    `abEvent / ${id}`,
-  )
-}
-
-function createAbEventI18nQueryOptions(id: string, language: string) {
-  return createStaticDataQueryOptions(
-    abEventDetailQueryKeys.i18n(id, language),
-    () => import(`@static/i18n/${language}/abEvent/${id}.json`),
-    AbEventI18nSchema,
-    `abEvent i18n / ${id} / ${language}`,
-  )
-}
-
-function createAbEventSharedQueryOptions(language: string) {
-  return createStaticDataQueryOptions(
-    abEventDetailQueryKeys.shared(language),
-    () => import(`@static/i18n/${language}/abEvent/_shared.json`),
-    AbEventSharedSchema,
-    `abEvent shared / ${language}`,
-  )
+const AB_EVENT_DETAIL: EntityDetailDataConfig<
+  z.infer<typeof AbEventDataSchema>,
+  z.infer<typeof AbEventI18nSchema>
+> = {
+  kind: 'abEvent',
+  specImport: (id) => import(`@static/data/abEvent/${id}.json`),
+  specSchema: AbEventDataSchema,
+  i18nImport: (id, language) => import(`@static/i18n/${language}/abEvent/${id}.json`),
+  i18nSchema: AbEventI18nSchema,
 }
 
 /**
- * Hook that loads AbEvent detail data (spec + i18n)
- * Suspends while loading - wrap in Suspense boundary
+ * AbEvent mechanics + i18n; suspends while loading.
  *
- * @param id - AbEvent ID
- * @returns Validated AbEvent mechanics and i18n data
+ * @param id - AbEvent ID (must be defined - validate in route first)
  */
 export function useAbEventDetailData(id: string) {
-  const { i18n } = useTranslation()
+  return useEntityDetailData(AB_EVENT_DETAIL, id)
+}
 
-  const { data: spec } = useSuspenseQuery(createAbEventDataQueryOptions(id))
-  const { data: i18nData } = useSuspenseQuery(createAbEventI18nQueryOptions(id, i18n.language))
-
-  return {
-    spec,
-    i18n: i18nData,
-  }
+const AB_EVENT_SHARED: EntitySharedDataConfig<z.infer<typeof AbEventSharedSchema>> = {
+  kind: 'abEvent',
+  sharedImport: (language) => import(`@static/i18n/${language}/abEvent/_shared.json`),
+  sharedSchema: AbEventSharedSchema,
 }
 
 /**
- * Hook that loads shared AbEvent resources (effect templates, targets, keywords)
- * Suspends while loading - wrap in Suspense boundary
- *
- * @returns Validated shared resources
+ * Shared AbEvent resources (effect templates, targets, keywords);
+ * language-scoped, not per-id. Suspends while loading.
  */
 export function useAbEventShared() {
-  const { i18n } = useTranslation()
-  const { data: shared } = useSuspenseQuery(createAbEventSharedQueryOptions(i18n.language))
-  return shared
+  return useEntityShared(AB_EVENT_SHARED)
 }

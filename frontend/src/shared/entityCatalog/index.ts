@@ -12,3 +12,5 @@ export {
   useEntityDetailI18n,
 } from './hooks/useEntityDetailData'
 export type { EntityDetailDataConfig } from './hooks/useEntityDetailData'
+export { useEntityShared } from './hooks/useEntityShared'
+export type { EntitySharedDataConfig } from './hooks/useEntityShared'
