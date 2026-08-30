@@ -97,6 +97,10 @@ post_rule "eso-secret-not-ready" "15m" \
   'externalsecret_status_condition{condition="Ready",status="False"} == 1'
 post_rule "etcd-snapshot-deadman" "1m" \
   "(time() - kube_etcd_snapshot_creation_timestamp_seconds) > (1.5 * ${ETCD_INTERVAL})"
+# `== bool`: the threshold node fires on value > 0, so the expression must yield
+# 1 per down exporter rather than filter to the raw 0.
+post_rule "mysql-connectivity-lost" "5m" \
+  'mysql_up == bool 0'
 
-echo "== done: 6 rules in folder ${FOLDER}, group cluster-rules (1m interval)"
+echo "== done: 7 rules in folder ${FOLDER}, group cluster-rules (1m interval)"
 echo "   All noDataState=OK — non-paging while their series are absent. Staleness rules are created separately by create-staleness-rules.sh."
