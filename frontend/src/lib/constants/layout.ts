@@ -98,7 +98,7 @@ export const CARD_GRID = {
     /** ThemePackCard: h-104 (416px) */
     THEME_PACK: 416,
     /** AbEventCard: title (~30px) + 3:2 image (~205px) = ~235px */
-    AB_EVENT: 235,
+    AB_EVENT: 245,
     /** Keyword icon container: h-16 (64px) */
     KEYWORD_ICON: 64,
     /** SinnerSkillCard: p-2 (8px) + image (96px) + gap-1 (4px) + skill row (28px) + p-2 (8px) = 144px */

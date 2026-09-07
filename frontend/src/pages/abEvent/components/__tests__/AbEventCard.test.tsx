@@ -6,6 +6,10 @@ vi.mock('@/shared/assets', () => ({
   getAbEventImagePath: (id: string) => `/images/abEvent/${id}.webp`,
 }))
 
+vi.mock('../../hooks/useAbEventListData', () => ({
+  useAbEventListI18n: () => ({ '901001': 'A cold cement room.' }),
+}))
+
 function getImage(container: HTMLElement) {
   return container.querySelector('img')
 }
@@ -29,6 +33,20 @@ describe('AbEventCard', () => {
 
       expect(getImage(container)).toBeNull()
       expect(container.textContent).toContain('901001')
+    })
+  })
+
+  describe('Description', () => {
+    it('renders the event description below the art', () => {
+      const { container } = render(<AbEventCard eventId="901001" hasImage />)
+
+      expect(container.textContent).toContain('A cold cement room.')
+    })
+
+    it('renders no description text for an id the language has none for', () => {
+      const { container } = render(<AbEventCard eventId="999999" hasImage />)
+
+      expect(container.lastElementChild?.lastElementChild?.textContent).toBe('')
     })
   })
 

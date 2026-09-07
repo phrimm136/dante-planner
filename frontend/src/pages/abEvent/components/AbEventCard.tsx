@@ -1,5 +1,8 @@
+import { Suspense } from 'react'
 import { getAbEventImagePath } from '@/shared/assets'
+import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
+import { AbEventDesc } from './AbEventDesc'
 
 interface AbEventCardProps {
   eventId: string
@@ -11,7 +14,7 @@ interface AbEventCardProps {
 
 /**
  * Pure view component for rendering an abnormality event card.
- * Wide landscape image.
+ * Wide landscape image with a clamped description below.
  */
 export function AbEventCard({
   eventId,
@@ -21,7 +24,7 @@ export function AbEventCard({
   className,
 }: AbEventCardProps) {
   return (
-    <div className={cn('group relative flex flex-col', className)}>
+    <div className={cn('group relative flex flex-col gap-1.5', className)}>
       <div className="relative w-full aspect-[3/2] rounded-sm overflow-hidden bg-muted">
         {hasImage || illustId ? (
           <img
@@ -39,6 +42,12 @@ export function AbEventCard({
         {enableHoverHighlight && (
           <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
         )}
+      </div>
+
+      <div className="text-xs leading-tight text-muted-foreground line-clamp-2 px-1">
+        <Suspense fallback={<Skeleton className="h-8 w-full" />}>
+          <AbEventDesc id={eventId} />
+        </Suspense>
       </div>
     </div>
   )
