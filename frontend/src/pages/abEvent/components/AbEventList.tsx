@@ -1,9 +1,21 @@
-import type { AbEventSpecList } from '../schemas/AbEventSchemas'
+import type { AbEventNameList, AbEventSpecList } from '../schemas/AbEventSchemas'
 import { CARD_GRID } from '@/lib/constants'
 import type { FilterStore } from '@/components/hooks/useSetFilters'
-import { entriesSortedById, FilteredEntityGrid, type CardGeometry } from '@/shared/filter'
-import { matchesAbEvent, type AbEventFacetState } from '../lib/abEventFilter'
+import {
+  entriesSortedById,
+  FilteredEntityGrid,
+  useSearchTermSources,
+  type CardGeometry,
+} from '@/shared/filter'
+import { AB_EVENT_LIST } from '../hooks/useAbEventListData'
+import {
+  buildAbEventSearchTerms,
+  matchesAbEvent,
+  type AbEventFacetState,
+} from '../lib/abEventFilter'
 import { AbEventCardLink } from './AbEventCardLink'
+
+const EMPTY_DESCS: AbEventNameList = {}
 
 const AB_EVENT_GEOMETRY: CardGeometry = {
   cardWidth: CARD_GRID.WIDTH.AB_EVENT,
@@ -19,9 +31,11 @@ interface AbEventListProps {
 /**
  * The abnormality event browser's card grid.
  *
- * Filter logic: AND between filter types, OR within each type.
+ * Filter logic: AND between filter types, OR within each type; search matches the
+ * event description.
  */
 export function AbEventList({ spec, store }: AbEventListProps) {
+  const { names: descs } = useSearchTermSources(AB_EVENT_LIST, EMPTY_DESCS, false)
   const sortedEvents = entriesSortedById(spec)
 
   return (
@@ -29,7 +43,8 @@ export function AbEventList({ spec, store }: AbEventListProps) {
       items={sortedEvents}
       getKey={([eventId]) => eventId}
       store={store}
-      matches={([, entry], state) => matchesAbEvent(entry, state)}
+      matches={matchesAbEvent}
+      buildTerms={([eventId]) => buildAbEventSearchTerms(eventId, descs)}
       renderCard={([eventId, entry]) => (
         <AbEventCardLink eventId={eventId} hasImage={entry.hasImage} illustId={entry.illustId} />
       )}

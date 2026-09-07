@@ -1,9 +1,11 @@
+import { useTranslation } from 'react-i18next'
 import { ThemePackFilterDropdown } from '@/pages/themePack'
 import { calculateActiveFilterCount } from '@/shared/filter'
 import { useSetFilters } from '@/components/hooks/useSetFilters'
 import { EntityListPage } from '@/shared/filter'
 import { FilterPageLayout } from '@/shared/filter'
 import { FilterSectionList, filterSection } from '@/shared/filter'
+import { SearchBar } from '@/shared/filter'
 import { EGOGiftFilterDropdown } from '@/pages/egoGift'
 import { AbEventList, useAbEventListSpec } from '@/pages/abEvent'
 import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
@@ -12,12 +14,15 @@ import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
  * Shell component - loads spec, manages filter states.
  */
 function AbEventPageShell() {
+  const { t } = useTranslation('database')
   const spec = useAbEventListSpec()
 
   // Filter states
   const {
     values: filters,
     setters,
+    searchQuery,
+    setSearchQuery,
     resetAll,
     store,
   } = useSetFilters({
@@ -57,6 +62,13 @@ function AbEventPageShell() {
       secondaryFilters={<FilterSectionList sections={SECONDARY_FILTERS} />}
       activeFilterCount={activeFilterCount}
       onResetAll={resetAll}
+      searchBar={
+        <SearchBar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          placeholder={t('pages.abEvent.searchBar', 'Search Events...')}
+        />
+      }
     >
       <AbEventList spec={spec} store={store} />
     </FilterPageLayout>

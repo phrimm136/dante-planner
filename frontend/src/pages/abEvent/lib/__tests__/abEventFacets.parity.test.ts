@@ -78,7 +78,7 @@ describe('AB_EVENT_FACETS parity', () => {
       ITEMS,
       STATES,
       (item, state) => legacyMatches(item, state),
-      (item, state) => applyFacets(item.entry, state, AB_EVENT_FACETS),
+      (item, state) => applyFacets([item.id, item.entry], state, AB_EVENT_FACETS),
     )
     expect(mismatches).toEqual([])
   })
@@ -88,7 +88,9 @@ describe('AB_EVENT_FACETS parity', () => {
       ...BASE_STATE,
       selectedEgoGifts: new Set(['9001', '991002']),
     }
-    const survivors = ITEMS.filter((item) => applyFacets(item.entry, bothGifts, AB_EVENT_FACETS))
+    const survivors = ITEMS.filter((item) =>
+      applyFacets([item.id, item.entry], bothGifts, AB_EVENT_FACETS),
+    )
     expect(survivors.map((item) => item.id)).toEqual(['101', '102', '104'])
   })
 })

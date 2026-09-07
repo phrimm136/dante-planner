@@ -21,6 +21,8 @@ export const AbEventSpecListEntrySchema = z.object({
 
 export const AbEventSpecListSchema = z.record(AbEventIdSchema, AbEventSpecListEntrySchema)
 
+export const AbEventNameListSchema = z.record(z.string(), z.string())
+
 // =============================================================================
 // Mechanics (individual abEvent/{id}.json)
 // =============================================================================
@@ -171,6 +173,7 @@ export const AbEventSharedSchema = z.object({
 
 export type AbEventSpecListEntry = z.infer<typeof AbEventSpecListEntrySchema>
 export type AbEventSpecList = z.infer<typeof AbEventSpecListSchema>
+export type AbEventNameList = z.infer<typeof AbEventNameListSchema>
 export type AbEventData = z.infer<typeof AbEventDataSchema>
 export type AbEventEffect = z.infer<typeof AbEventEffectSchema>
 export type AbEventChoice = z.infer<typeof AbEventChoiceSchema>
