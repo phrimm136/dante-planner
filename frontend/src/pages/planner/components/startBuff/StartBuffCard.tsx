@@ -244,7 +244,12 @@ export function StartBuffCard({
         </div>
 
         {/* Description - center area */}
-        <div className={variant.description} style={{ color: variant.descriptionColor }}>
+        <div
+          role="presentation"
+          className={`relative z-20 ${variant.description}`}
+          style={{ color: variant.descriptionColor }}
+          onClick={handleCardClick}
+        >
           <div className="space-y-0.5" style={{ wordBreak: 'keep-all' }}>
             {formatBuffEffects(displayBuff.effects, i18n, battleKeywords)}
           </div>

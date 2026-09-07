@@ -83,6 +83,15 @@ describe('StartBuffCard', () => {
     expect(onSelect).toHaveBeenCalledWith(100, false)
   })
 
+  it('toggles selection when the description itself is clicked', () => {
+    const onSelect = vi.fn()
+    renderCard({ onSelect })
+
+    fireEvent.click(screen.getByText('Mock effect description'))
+
+    expect(onSelect).toHaveBeenCalledWith(100, true)
+  })
+
   it('shows selection highlight when selected', () => {
     const { container } = renderCard({ isSelected: true })
 
