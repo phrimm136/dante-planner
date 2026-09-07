@@ -1,0 +1,8 @@
+# 094 ab-event-card-hover-instant
+epic: none · pr: none
+
+## Decisions
+- @abEvent @hover @selectable — the dungeon event card draws its hover highlight with the shared `.selectable` class and zeroes `--selectable-transition-duration` on its image frame, so the gold ring and the translucent wash appear on the same frame. The class animates both on one ease-out duration at identical fractional progress, but a hairline edge registers to the eye at a fraction of its final contrast while a 12 percent uniform tint has to reach most of its strength before it clears the just-noticeable difference on a bright surface; on a 40px filter icon the tint never registers, on the 308px event image it lands roughly 150ms after the ring and the two read as staggered. Identity and EGO gift cards already toggle their highlight frames with no transition, so instant is the sibling entity cards' behaviour. REJECTED: a shorter wash duration inside `.selectable` — measured at 120ms it brought the wash to 80 percent as the ring reached 40 percent, but it changes every filter control to fix one card and leaves the card easing unlike its siblings. REJECTED: removing the transition from `.selectable` globally — the class documents smooth easing as a deliberate property of filter buttons, dropdown triggers and the sorter, none of which showed a defect. REJECTED: a card-only ring and wash without `.selectable` — reimplements the effect for one consumer.
+
+## Takeaway
+- takeaway: two properties on the same easing curve are synchronised only in the math. Perceived onset is where each crosses a detection threshold, and an edge crosses it far earlier than a faint fill, so a shared transition reads as staggered as soon as the fill covers enough area to be seen.

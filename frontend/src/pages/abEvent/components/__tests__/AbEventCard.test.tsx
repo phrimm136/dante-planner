@@ -50,6 +50,24 @@ describe('AbEventCard', () => {
     })
   })
 
+  describe('Hover highlight', () => {
+    it('opts the image frame into the selectable highlight only when enabled', () => {
+      const { container, rerender } = render(<AbEventCard eventId="901001" hasImage />)
+      expect(getImage(container)?.parentElement).not.toHaveClass('selectable')
+
+      rerender(<AbEventCard eventId="901001" hasImage enableHoverHighlight />)
+      expect(getImage(container)?.parentElement).toHaveClass('selectable')
+    })
+
+    it('snaps the highlight on with no transition, like the sibling entity cards', () => {
+      const { container } = render(<AbEventCard eventId="901001" hasImage enableHoverHighlight />)
+
+      expect(getImage(container)?.parentElement).toHaveClass(
+        '[--selectable-transition-duration:0ms]',
+      )
+    })
+  })
+
   describe('Lazy loading', () => {
     it('lazy-loads the event art so off-screen grid cards defer their fetch', () => {
       const { container } = render(<AbEventCard eventId="901001" hasImage />)

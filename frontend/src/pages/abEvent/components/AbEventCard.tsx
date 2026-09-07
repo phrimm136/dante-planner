@@ -25,7 +25,12 @@ export function AbEventCard({
 }: AbEventCardProps) {
   return (
     <div className={cn('group relative flex flex-col gap-1.5', className)}>
-      <div className="relative w-full aspect-[3/2] rounded-sm overflow-hidden bg-muted">
+      <div
+        className={cn(
+          'relative w-full aspect-[3/2] rounded-sm overflow-hidden bg-muted',
+          enableHoverHighlight && 'selectable [--selectable-transition-duration:0ms]',
+        )}
+      >
         {hasImage || illustId ? (
           <img
             src={getAbEventImagePath(illustId ?? eventId)}
@@ -37,10 +42,6 @@ export function AbEventCard({
           <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
             {eventId}
           </div>
-        )}
-
-        {enableHoverHighlight && (
-          <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
         )}
       </div>
 
