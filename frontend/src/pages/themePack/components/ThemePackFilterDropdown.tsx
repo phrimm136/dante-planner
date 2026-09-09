@@ -1,5 +1,5 @@
 import { ThemePackDropdown } from '@/shared/filter'
-import { useThemePackListData } from '../hooks/useThemePackListData'
+import { useThemePackListSpec, useThemePackListI18n } from '../hooks/useThemePackListData'
 
 interface ThemePackFilterDropdownProps {
   selected: Set<string>
@@ -14,7 +14,8 @@ export function ThemePackFilterDropdown({
   selected,
   onSelectionChange,
 }: ThemePackFilterDropdownProps) {
-  const { spec, i18n } = useThemePackListData()
+  const spec = useThemePackListSpec()
+  const i18n = useThemePackListI18n()
 
   return (
     <ThemePackDropdown

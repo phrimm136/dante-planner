@@ -5,15 +5,9 @@
  * Tests base calculation, buff effects, and edge cases.
  */
 
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { calculateMaxGiftSelection } from '../startGiftCalculator'
 import type { StartBuff } from '@/shared/gameText'
-
-// Mock getBuffById to return buffs from array
-vi.mock('../../hooks/useStartBuffData', () => ({
-  getBuffById: (buffs: StartBuff[] | undefined, id: number) =>
-    buffs?.find((b) => b.id === String(id)),
-}))
 
 describe('calculateMaxGiftSelection', () => {
   const mockBuffs: StartBuff[] = [

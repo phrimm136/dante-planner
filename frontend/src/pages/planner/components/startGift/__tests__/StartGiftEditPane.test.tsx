@@ -90,21 +90,26 @@ const mockI18n: EGOGiftNameList = {
   '9003': 'Burning Gift 3',
 }
 
-vi.mock('../../../hooks/useStartBuffData', () => ({
-  useStartBuffData: () => ({
-    data: [
-      { id: '100', baseId: 100, level: 1, name: 'Base Buff', cost: 0, effects: [] },
-      {
-        id: '200',
-        baseId: 100,
-        level: 2,
-        name: 'Enhanced Buff',
-        cost: 10,
-        effects: [{ type: 'ADDITIONAL_START_EGO_GIFT_SELECT', value: 1, isTypoExist: false }],
-      },
-    ],
-    i18n: {},
+vi.mock('../../../hooks/useStartBuffList', () => ({
+  useStartBuffListSpec: () => ({
+    '100': {
+      baseId: 100,
+      level: 1,
+      localizeId: 'buff100',
+      cost: 0,
+      effects: [],
+      uiConfig: { iconSpriteId: 'buff100' },
+    },
+    '200': {
+      baseId: 100,
+      level: 2,
+      localizeId: 'buff200',
+      cost: 10,
+      effects: [{ type: 'ADDITIONAL_START_EGO_GIFT_SELECT', value: 1, isTypoExist: false }],
+      uiConfig: { iconSpriteId: 'buff200' },
+    },
   }),
+  useStartBuffListI18n: () => ({ buff100: 'Base Buff', buff200: 'Enhanced Buff' }),
 }))
 
 vi.mock('../../../hooks/useStartGiftPools', () => ({
@@ -114,10 +119,16 @@ vi.mock('../../../hooks/useStartGiftPools', () => ({
 }))
 
 vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
-  useEGOGiftListData: () => ({
-    spec: mockSpec,
-    i18n: mockI18n,
-  }),
+  useEGOGiftListSpec: () =>
+    ({
+      spec: mockSpec,
+      i18n: mockI18n,
+    }).spec,
+  useEGOGiftListI18n: () =>
+    ({
+      spec: mockSpec,
+      i18n: mockI18n,
+    }).i18n,
 }))
 
 vi.mock('../../../lib/startGiftCalculator', () => ({

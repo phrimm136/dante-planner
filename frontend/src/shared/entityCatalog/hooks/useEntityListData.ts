@@ -63,20 +63,3 @@ export function useEntityListI18n<TSpec, TI18n>(cfg: EntityListDataConfig<TSpec,
   const { data } = useSuspenseQuery(entityListI18nOptions(cfg, i18n.language))
   return data
 }
-
-/**
- * Loads spec list + name list. Suspends while loading — wrap in Suspense.
- */
-export function useEntityListData<TSpec, TI18n>(
-  cfg: EntityListDataConfig<TSpec, TI18n>,
-): { spec: TSpec; i18n: TI18n } {
-  const { i18n } = useTranslation()
-
-  const { data: spec } = useSuspenseQuery(specOptions(cfg))
-  const { data: i18nData } = useSuspenseQuery(entityListI18nOptions(cfg, i18n.language))
-
-  return {
-    spec,
-    i18n: i18nData,
-  }
-}

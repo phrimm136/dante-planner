@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { DUNGEON_IDX } from '@/shared/gameData'
 import type { ThemePackEntry } from '../../types/ThemePackTypes'
 import { ThemePackCard } from '../ThemePackCard'
@@ -14,6 +14,10 @@ vi.mock('react-i18next', async (importOriginal) => {
     }),
   }
 })
+
+vi.mock('../../hooks/useThemePackListData', () => ({
+  useThemePackListI18n: () => ({ pack1: { name: 'Test Pack' } }),
+}))
 
 vi.mock('@/shared/assets', () => ({
   getThemePackImagePath: (id: string) => `/images/themePack/${id}.webp`,
@@ -55,7 +59,6 @@ describe('ThemePackCard', () => {
   const defaultProps = {
     packId: 'pack1',
     packEntry: normalPackEntry,
-    packName: 'Test Pack',
   }
 
   describe('Highlight Layers', () => {
@@ -64,7 +67,8 @@ describe('ThemePackCard', () => {
 
       const images = getImages(container)
       expect(images).toHaveLength(1)
-      expect(images[0]).toHaveAttribute('alt', 'Test Pack')
+      expect(images[0]).toHaveAttribute('alt', '')
+      expect(screen.getByText('Test Pack')).toBeInTheDocument()
     })
 
     it('renders hover highlight when enableHoverHighlight is true', () => {

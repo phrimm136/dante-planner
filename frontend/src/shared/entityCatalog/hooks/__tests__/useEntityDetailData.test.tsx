@@ -7,8 +7,8 @@ import { Suspense, type ReactNode } from 'react'
 
 import { STATIC_DATA_STALE_TIME } from '@/lib/constants'
 import {
-  useEntityDetailData,
   useEntityDetailSpec,
+  useEntityDetailI18n,
   type EntityDetailDataConfig,
 } from '../useEntityDetailData'
 
@@ -44,11 +44,17 @@ function createWrapper() {
   return { queryClient, wrapper }
 }
 
-describe('useEntityDetailData', () => {
+describe('entity detail hooks', () => {
   it('caches under the language-free detail tuple and the per-language i18n tuple', async () => {
     const { queryClient, wrapper } = createWrapper()
 
-    const { result } = renderHook(() => useEntityDetailData(createConfig(), '10101'), { wrapper })
+    const { result } = renderHook(
+      () => ({
+        spec: useEntityDetailSpec(createConfig(), '10101'),
+        i18n: useEntityDetailI18n(createConfig(), '10101'),
+      }),
+      { wrapper },
+    )
 
     await waitFor(() => {
       expect(result.current.spec).toEqual({ rank: 3 })
@@ -98,7 +104,13 @@ describe('useEntityDetailData', () => {
   it('uses the static staleTime and does not keep previous data', async () => {
     const { queryClient, wrapper } = createWrapper()
 
-    renderHook(() => useEntityDetailData(createConfig(), '10101'), { wrapper })
+    renderHook(
+      () => ({
+        spec: useEntityDetailSpec(createConfig(), '10101'),
+        i18n: useEntityDetailI18n(createConfig(), '10101'),
+      }),
+      { wrapper },
+    )
 
     await waitFor(() => {
       const query = queryClient.getQueryCache().find({ queryKey: ['identity', '10101'] })

@@ -1,5 +1,5 @@
 import { EgoGiftSearchDropdown } from '@/shared/filter'
-import { useEGOGiftListData } from '../hooks/useEGOGiftListData'
+import { useEGOGiftListSpec, useEGOGiftListI18n } from '../hooks/useEGOGiftListData'
 
 interface EGOGiftFilterDropdownProps {
   selected: Set<string>
@@ -11,7 +11,8 @@ interface EGOGiftFilterDropdownProps {
  * spec + name list load, so render it inside a Suspense boundary.
  */
 export function EGOGiftFilterDropdown({ selected, onSelectionChange }: EGOGiftFilterDropdownProps) {
-  const { spec, i18n } = useEGOGiftListData()
+  const spec = useEGOGiftListSpec()
+  const i18n = useEGOGiftListI18n()
 
   return (
     <EgoGiftSearchDropdown

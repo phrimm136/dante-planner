@@ -65,21 +65,3 @@ export function useEntityDetailI18n<TSpec, TI18n>(
   const { data } = useSuspenseQuery(i18nOptions(cfg, id, i18n.language))
   return data
 }
-
-/**
- * Loads spec + i18n for one entity. Suspends while loading — wrap in Suspense.
- */
-export function useEntityDetailData<TSpec, TI18n>(
-  cfg: EntityDetailDataConfig<TSpec, TI18n>,
-  id: string,
-): { spec: TSpec; i18n: TI18n } {
-  const { i18n } = useTranslation()
-
-  const { data: spec } = useSuspenseQuery(specOptions(cfg, id))
-  const { data: i18nData } = useSuspenseQuery(i18nOptions(cfg, id, i18n.language))
-
-  return {
-    spec,
-    i18n: i18nData,
-  }
-}

@@ -167,15 +167,16 @@ const GIFT_SPEC = {
 const GIFT_I18N = { '9001': 'Burning Gift', '9002': 'Bleeding Gift' }
 
 vi.mock('@/pages/identity/hooks/useIdentityListData', () => ({
-  useIdentityListData: () => ({ spec: IDENTITY_SPEC, i18n: IDENTITY_I18N }),
-  useIdentityListSpec: () => IDENTITY_SPEC,
+  useIdentityListSpec: () => ({ spec: IDENTITY_SPEC, i18n: IDENTITY_I18N }).spec,
+  useIdentityListI18n: () => ({ spec: IDENTITY_SPEC, i18n: IDENTITY_I18N }).i18n,
 }))
 vi.mock('@/pages/ego/hooks/useEGOListData', () => ({
-  useEGOListData: () => ({ spec: EGO_SPEC, i18n: {} }),
-  useEGOListSpec: () => EGO_SPEC,
+  useEGOListSpec: () => ({ spec: EGO_SPEC, i18n: {} }).spec,
+  useEGOListI18n: () => ({ spec: EGO_SPEC, i18n: {} }).i18n,
 }))
 vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
-  useEGOGiftListData: () => ({ spec: GIFT_SPEC, i18n: GIFT_I18N }),
+  useEGOGiftListSpec: () => ({ spec: GIFT_SPEC, i18n: GIFT_I18N }).spec,
+  useEGOGiftListI18n: () => ({ spec: GIFT_SPEC, i18n: GIFT_I18N }).i18n,
 }))
 vi.mock('@/pages/egoGift/hooks/useEGOGiftObservationData', () => ({
   useEGOGiftObservationData: () => ({

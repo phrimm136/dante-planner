@@ -1,6 +1,5 @@
 import type { z } from 'zod'
 import {
-  useEntityListData,
   useEntityListI18n,
   useEntityListSpec,
   type EntityListDataConfig,
@@ -26,9 +25,4 @@ export function useAbEventListSpec() {
 /** AbEvent description map; suspends while loading */
 export function useAbEventListI18n() {
   return useEntityListI18n(AB_EVENT_LIST)
-}
-
-/** AbEvent spec map and description map; suspends while loading */
-export function useAbEventListData() {
-  return useEntityListData(AB_EVENT_LIST)
 }

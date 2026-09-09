@@ -1,5 +1,5 @@
 /**
- * Runs the hook against the real static JSON — the shipped data serializes
+ * Runs the hooks against the real static JSON — the shipped data serializes
  * baseId as a string, so these tests fail unless the loader routes the module
  * through the schema instead of casting it.
  *
@@ -14,7 +14,9 @@ import { describe, it, expect, vi } from 'vitest'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { createTestQueryClient } from '@/test-utils/queryClient'
 import { BASE_BUFF_IDS } from '@/shared/gameText'
-import { useStartBuffData, getBaseBuffs, getBuffById } from '../useStartBuffData'
+import type { MDVersion } from '@/shared/gameData'
+import { useStartBuffListSpec, useStartBuffListI18n } from '../useStartBuffList'
+import { toStartBuffs, getBaseBuffs, getBuffById } from '../../lib/startBuffs'
 
 vi.mock('react-i18next', async (importOriginal) => {
   const actual = await importOriginal<typeof import('react-i18next')>()
@@ -38,16 +40,17 @@ function createWrapper() {
   }
 }
 
-async function renderBuffs(version: number) {
-  const { result } = renderHook(() => useStartBuffData(version), {
-    wrapper: createWrapper(),
-  })
+async function renderBuffs(version: MDVersion) {
+  const { result } = renderHook(
+    () => toStartBuffs(useStartBuffListSpec(version), useStartBuffListI18n(version)),
+    { wrapper: createWrapper() },
+  )
   await waitFor(() => expect(result.current).not.toBeNull())
-  return result.current!.data
+  return result.current!
 }
 
-describe('useStartBuffData', () => {
-  it.each([6, 7])('MD%i: parses every buff with a numeric baseId', async (version) => {
+describe('useStartBuffList', () => {
+  it.each([6, 7] as const)('MD%i: parses every buff with a numeric baseId', async (version) => {
     const data = await renderBuffs(version)
 
     expect(data).toHaveLength(30)
@@ -57,7 +60,7 @@ describe('useStartBuffData', () => {
     }
   })
 
-  it.each([6, 7])('MD%i: getBaseBuffs returns the ten level-1 buffs', async (version) => {
+  it.each([6, 7] as const)('MD%i: getBaseBuffs returns the ten level-1 buffs', async (version) => {
     const data = await renderBuffs(version)
     const baseBuffs = getBaseBuffs(data)
 

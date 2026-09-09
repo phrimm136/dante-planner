@@ -1,23 +1,19 @@
-import type { ReactNode } from 'react'
-import { useTranslation } from 'react-i18next'
+import { Suspense, type ReactNode } from 'react'
 import {
   getThemePackImagePath,
   getThemePackHoverHighlightPath,
   getThemePackSelectHighlightPath,
   getThemePackExtremeHighlightPath,
 } from '@/shared/assets'
-import { cn, getDisplayFontForLanguage, getLineHeightForLanguage } from '@/lib/utils'
+import { cn } from '@/lib/utils'
+import { Skeleton } from '@/components/ui/skeleton'
 import { isExtremePack } from '../types/ThemePackTypes'
 import type { ThemePackEntry } from '../types/ThemePackTypes'
-import { AutoSizeText } from '@/components/ui/AutoSizeText'
-import { parseColorTags, stripColorTags } from '@/shared/gameText'
+import { ThemePackName } from './ThemePackName'
 
 interface ThemePackCardProps {
   packId: string
   packEntry: ThemePackEntry
-  packName: string
-  /** Special name with embedded color codes (e.g., "<color=#XXXXXX>text</color>") */
-  specialName?: string | undefined
   /** Enable hover highlight overlay (for selection contexts) */
   enableHoverHighlight?: boolean
   /** Show persistent select highlight (for click-to-pin focus) */
@@ -34,17 +30,12 @@ interface ThemePackCardProps {
 export function ThemePackCard({
   packId,
   packEntry,
-  packName,
-  specialName,
   enableHoverHighlight = false,
   isSelected = false,
   overlay,
   className,
 }: ThemePackCardProps) {
-  const { i18n } = useTranslation()
   const isExtreme = isExtremePack(packEntry)
-  const displayStyle = getDisplayFontForLanguage(i18n.language)
-  const lineHeight = getLineHeightForLanguage(i18n.language)
 
   // Normal frame: 404x716, Extreme frame: 749x1247
   const normalStyle = { left: '3.22%', top: '0.8%', width: '94.06%', height: '97.2%' }
@@ -53,12 +44,7 @@ export function ThemePackCard({
   return (
     <div className={cn('group relative w-60 aspect-[416/684]', className)}>
       {/* Layer 1: Theme pack image - static to define container size */}
-      <img
-        src={getThemePackImagePath(packId)}
-        alt={packName}
-        loading="lazy"
-        className="w-full h-auto"
-      />
+      <img src={getThemePackImagePath(packId)} alt="" loading="lazy" className="w-full h-auto" />
 
       {/* Layer 2: Select highlight overlay */}
       {isSelected && (
@@ -88,20 +74,9 @@ export function ThemePackCard({
           height: !isExtreme ? '8.544%' : '10.010%',
         }}
       >
-        <AutoSizeText
-          text={specialName ? stripColorTags(specialName) : packName}
-          width={!isExtreme ? 168 : 154}
-          className="text-center"
-          style={{
-            ...displayStyle,
-            ...(!specialName && { color: `#${packEntry.themePackConfig.textColor}` }),
-            filter: 'drop-shadow(1.2px 1.2px 0 rgba(0,0,0,0.9))',
-          }}
-          minFontSize={!isExtreme ? 15 : 15}
-          maxFontSize={!isExtreme ? 24 : 24}
-          lineHeight={lineHeight}
-          coloredContent={specialName ? parseColorTags(specialName) : undefined}
-        />
+        <Suspense fallback={<Skeleton className="h-5 w-40 bg-foreground" />}>
+          <ThemePackName packId={packId} packEntry={packEntry} />
+        </Suspense>
       </div>
 
       {/* Layer 5: Custom overlay */}

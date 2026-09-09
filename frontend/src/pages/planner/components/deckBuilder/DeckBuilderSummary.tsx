@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { DEFAULT_DEPLOYMENT_MAX } from '@/shared/gameData'
 import { PlannerSection } from '@/components/layout/PlannerSection'
-import { useIdentityListData } from '@/pages/identity'
-import { useEGOListData } from '@/pages/ego'
+import { useIdentityListSpec, useIdentityListI18n } from '@/pages/identity'
+import { useEGOListSpec } from '@/pages/ego'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import type { EGOGiftId } from '@/shared/gameData'
 import type { SinnerEquipment, DeckState } from '../../types/DeckTypes'
@@ -59,8 +59,9 @@ export function DeckBuilderSummary({
   const { t } = useTranslation(['planner', 'common'])
 
   // Load identity and EGO data (shared cache with Pane)
-  const { spec: identitySpec, i18n: identityI18n } = useIdentityListData()
-  const { spec: egoSpec } = useEGOListData()
+  const identitySpec = useIdentityListSpec()
+  const identityI18n = useIdentityListI18n()
+  const egoSpec = useEGOListSpec()
 
   // Merge spec and i18n into IdentityListItem array for display
   const identities: IdentityListItem[] = typedEntries(identitySpec).map(([id, specData]) => ({

@@ -88,7 +88,7 @@ export function ListPageSkeleton({
   const { width: cardWidth, height: cardHeight, clipPath, mobileScale } = CARD_PRESETS[preset]
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6">
+    <div data-slot="page-skeleton" className="flex flex-col lg:flex-row gap-6">
       {/* Sidebar skeleton - hidden on mobile, visible on lg+ */}
       <aside className="hidden lg:block w-70 shrink-0">
         <div className="rounded-lg border bg-card p-3 space-y-2">

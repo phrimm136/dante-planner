@@ -1,4 +1,4 @@
-import { useEntityListData } from '@/shared/entityCatalog'
+import { useEntityListSpec, useEntityListI18n } from '@/shared/entityCatalog'
 import type { BattleKeywords } from '../types/StartBuffTypes'
 import { KEYWORD_LIST } from './useKeywordListData'
 
@@ -11,7 +11,8 @@ import { KEYWORD_LIST } from './useKeywordListData'
  * Used for translating buff keywords like ParryingResultUp, AttackDmgUp, Protection.
  */
 export function useBattleKeywords(): { data: BattleKeywords } {
-  const { spec: specData, i18n: i18nData } = useEntityListData(KEYWORD_LIST)
+  const specData = useEntityListSpec(KEYWORD_LIST)
+  const i18nData = useEntityListI18n(KEYWORD_LIST)
 
   // Merge i18n (name, desc) with spec (iconId, buffType) for each keyword
   const merged: BattleKeywords = {}

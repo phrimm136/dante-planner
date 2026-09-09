@@ -15,10 +15,10 @@ import { ThemePackCard } from '@/pages/themePack'
 import { ThemePackDetailSkeleton } from '@/pages/themePack'
 import { EGOGiftGrid } from '@/pages/egoGift'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useThemePackDetailData } from '@/pages/themePack'
-import { useThemePackListData } from '@/pages/themePack'
-import { useEGOGiftListData } from '@/pages/egoGift'
-import { AbEventCard, useAbEventListData } from '@/pages/abEvent'
+import { useThemePackDetailSpec } from '@/pages/themePack'
+import { useThemePackListSpec } from '@/pages/themePack'
+import { useEGOGiftListSpec } from '@/pages/egoGift'
+import { AbEventCard, useAbEventListSpec } from '@/pages/abEvent'
 import { getFeaturedBossImagePath } from '@/shared/assets'
 import {
   DUNGEON_IDX,
@@ -181,7 +181,7 @@ export function FeaturedBoss({
  * Specific EGO gifts grid (specificEgoGiftPool carries themed fusions too)
  */
 function SpecificEgoGifts({ giftIds }: { giftIds: EGOGiftId[] }) {
-  const { spec } = useEGOGiftListData()
+  const spec = useEGOGiftListSpec()
 
   if (giftIds.length === 0) return null
 
@@ -192,7 +192,7 @@ function SpecificEgoGifts({ giftIds }: { giftIds: EGOGiftId[] }) {
  * Fixed reward EGO gifts for hidden theme packs
  */
 function FixedRewardEgoGifts({ giftIds }: { giftIds: EGOGiftId[] }) {
-  const { spec } = useEGOGiftListData()
+  const spec = useEGOGiftListSpec()
 
   return <EGOGiftGrid ids={giftIds.map(String)} spec={spec} showName className={GIFT_ROW} />
 }
@@ -204,7 +204,7 @@ function FixedRewardEgoGifts({ giftIds }: { giftIds: EGOGiftId[] }) {
  */
 function ExclusiveEventsSection({ eventIds }: { eventIds: AbEventId[] }) {
   const { t } = useTranslation('database')
-  const { spec: abEventSpec } = useAbEventListData()
+  const abEventSpec = useAbEventListSpec()
 
   if (eventIds.length === 0) return null
 
@@ -237,7 +237,7 @@ function ExclusiveEventsSection({ eventIds }: { eventIds: AbEventId[] }) {
  * All acquirable EGO gifts grid (from egoGiftPool)
  */
 function AllEgoGifts({ giftIds }: { giftIds: EGOGiftId[] }) {
-  const { spec } = useEGOGiftListData()
+  const spec = useEGOGiftListSpec()
 
   return <EGOGiftGrid ids={giftIds.map(String)} spec={spec} />
 }
@@ -246,7 +246,7 @@ function AllEgoGifts({ giftIds }: { giftIds: EGOGiftId[] }) {
  * All encounterable events grid — title below image
  */
 function AllEvents({ eventPool }: { eventPool: AbEventId[] }) {
-  const { spec: abEventSpec } = useAbEventListData()
+  const abEventSpec = useAbEventListSpec()
 
   return (
     <div className="flex flex-wrap gap-3">
@@ -282,22 +282,15 @@ function ThemePackDetailContent() {
     throw new Error('Theme Pack ID is required')
   }
 
-  const { spec, i18n: themePackI18n } = useThemePackDetailData(id)
-  const { spec: listSpec } = useThemePackListData()
-  const listEntry = listSpec[id]
-  const i18nEntry = themePackI18n[id]
+  const spec = useThemePackDetailSpec(id)
+  const listEntry = useThemePackListSpec()[id]
 
   const leftColumn = (
     <div className="flex gap-4">
       {/* Theme Pack card image */}
       {listEntry && (
         <div className="shrink-0">
-          <ThemePackCard
-            packId={id}
-            packEntry={listEntry}
-            packName={i18nEntry?.name ?? id}
-            specialName={i18nEntry?.specialName}
-          />
+          <ThemePackCard packId={id} packEntry={listEntry} />
         </div>
       )}
 

@@ -5,8 +5,8 @@ import {
   PlannerEditorStoreProvider,
   usePlannerEditorStore,
 } from '../../stores/usePlannerEditorStore'
-import { useIdentityListData } from '@/pages/identity'
-import { useEGOListData } from '@/pages/ego'
+import { useIdentityListSpec, useIdentityListI18n } from '@/pages/identity'
+import { useEGOListSpec, useEGOListI18n } from '@/pages/ego'
 import { useSearchMappings } from '@/shared/filter'
 import { matchesDeckFilter } from '../../lib/deckFilter'
 import { collectOwnedGiftIds } from '../../lib/deckEA'
@@ -154,8 +154,10 @@ export function DeckBuilderContent({
   }, [equippedIdentityIds, equippedEgoIds, filterState.entityMode])
 
   // Load identity and EGO data (shared cache)
-  const { spec: identitySpec, i18n: identityI18n } = useIdentityListData()
-  const { spec: egoSpec, i18n: egoI18n } = useEGOListData()
+  const identitySpec = useIdentityListSpec()
+  const identityI18n = useIdentityListI18n()
+  const egoSpec = useEGOListSpec()
+  const egoI18n = useEGOListI18n()
 
   // Merge spec and i18n into identity/EGO arrays
   const identities: IdentityListItem[] = (() => {

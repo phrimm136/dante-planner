@@ -50,7 +50,8 @@ vi.mock('@/shared/auth', () => ({
 }))
 
 vi.mock('@/pages/egoGift', () => ({
-  useEGOGiftListData: () => ({ spec: {}, i18n: {} }),
+  useEGOGiftListSpec: () => ({ spec: {}, i18n: {} }).spec,
+  useEGOGiftListI18n: () => ({ spec: {}, i18n: {} }).i18n,
 }))
 
 vi.mock('@/shared/userSettings', () => ({

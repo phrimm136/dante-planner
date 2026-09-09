@@ -12,7 +12,6 @@ export {
   keywordListQueryKeys,
   useKeywordListSpec,
   useKeywordListI18n,
-  useKeywordListData,
   KEYWORD_LIST,
 } from './hooks/useKeywordListData'
 

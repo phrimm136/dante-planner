@@ -1,0 +1,14 @@
+id: no-combined-static-hook-tsx
+language: Tsx
+severity: error
+message: A static-data hook returns one thing. Split it into use…Spec and use…I18n so a page shell can read the spec without suspending on language change; merge the two reads in a pure function if a caller wants both.
+files:
+  - src/**/*.tsx
+rule:
+  any:
+    - pattern: function $NAME($$$) { $$$ }
+    - pattern: const $NAME = ($$$) => $$$
+    - pattern: $NAME($$$)
+constraints:
+  NAME:
+    regex: ^use\w+(List|Detail)Data$

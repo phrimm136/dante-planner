@@ -68,7 +68,8 @@ vi.mock('../../../hooks/usePlannerOwnerNotifications', () => ({
   useToggleOwnerNotifications: () => ({ mutate: vi.fn(), isPending: false }),
 }))
 vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
-  useEGOGiftListData: () => ({ spec: {}, i18n: {} }),
+  useEGOGiftListSpec: () => ({ spec: {}, i18n: {} }).spec,
+  useEGOGiftListI18n: () => ({ spec: {}, i18n: {} }).i18n,
 }))
 vi.mock('@/shared/assets', () => ({
   getKeywordIconPath: (keyword: string) => `/icons/${keyword}.webp`,

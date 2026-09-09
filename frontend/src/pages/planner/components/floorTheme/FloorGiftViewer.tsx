@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useEGOGiftListData } from '@/pages/egoGift'
+import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
 import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { EGOGiftCard } from '@/pages/egoGift'
 import { EGOGiftTooltip } from '@/pages/egoGift'
@@ -47,7 +47,8 @@ export function FloorGiftViewer({
   className,
 }: FloorGiftViewerProps) {
   const { t } = useTranslation(['planner', 'common'])
-  const { spec, i18n } = useEGOGiftListData()
+  const spec = useEGOGiftListSpec()
+  const i18n = useEGOGiftListI18n()
 
   const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
 

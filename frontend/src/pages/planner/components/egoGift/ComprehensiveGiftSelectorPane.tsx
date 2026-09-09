@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { applyGiftToggle } from '../../lib/giftToggle'
 import type { EGOGiftListItem } from '@/pages/egoGift'
 import type { EGOGiftId, EnhancementLevel } from '@/shared/gameData'
-import { useEGOGiftListData } from '@/pages/egoGift'
+import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import { sortEGOGifts } from '@/pages/egoGift'
 import { EGOGiftFilterBar } from '@/pages/egoGift'
@@ -35,7 +35,8 @@ export function ComprehensiveGiftSelectorPane({
   const selectedGiftIds = usePlannerEditorStore((s) => s.comprehensiveGiftIds)
   const setComprehensiveGiftIds = usePlannerEditorStore((s) => s.setComprehensiveGiftIds)
   const { t } = useTranslation(['planner', 'common'])
-  const { spec, i18n } = useEGOGiftListData()
+  const spec = useEGOGiftListSpec()
+  const i18n = useEGOGiftListI18n()
 
   // Filter states (local to pane UI - reset on reopen)
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())

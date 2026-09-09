@@ -1,6 +1,5 @@
 import { createEntityDetailQueryKeys } from '@/lib/queryKeys'
 import {
-  useEntityDetailData,
   useEntityDetailSpec,
   useEntityDetailI18n,
   type EntityDetailDataConfig,
@@ -37,13 +36,4 @@ export function useIdentityDetailSpec(id: string) {
  */
 export function useIdentityDetailI18n(id: string) {
   return useEntityDetailI18n(IDENTITY_DETAIL, id)
-}
-
-/**
- * Identity spec + i18n; suspends while loading.
- *
- * @param id - Identity ID (must be defined - validate in route first)
- */
-export function useIdentityDetailData(id: string) {
-  return useEntityDetailData(IDENTITY_DETAIL, id)
 }

@@ -166,10 +166,9 @@ describe('useIdentityDetailData backward compatibility - UT3', () => {
     // Dynamic import to get actual exports
     const module = await import('../useIdentityDetailData')
 
-    // Verify all three hooks are exported
+    // Verify both hooks are exported
     expect(typeof module.useIdentityDetailSpec).toBe('function')
     expect(typeof module.useIdentityDetailI18n).toBe('function')
-    expect(typeof module.useIdentityDetailData).toBe('function')
   })
 
   it('query key factory is exported', async () => {

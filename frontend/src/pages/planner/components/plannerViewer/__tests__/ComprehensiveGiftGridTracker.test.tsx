@@ -36,7 +36,8 @@ vi.mock('@/pages/egoGift/components/EGOGiftCard', () => ({
 // The factory may not import: `@/test-utils` reaches the `@/pages/egoGift` barrel, which
 // re-exports this very module, so an awaiting factory waits on its own pending promise.
 vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
-  useEGOGiftListData: () => GIFT_CATALOG,
+  useEGOGiftListSpec: () => GIFT_CATALOG.spec,
+  useEGOGiftListI18n: () => GIFT_CATALOG.i18n,
 }))
 
 // The spec entries pass through the boundary schema the catalog validates with, so a

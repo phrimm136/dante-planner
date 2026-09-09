@@ -1,0 +1,32 @@
+id: no-combined-static-hook-tsx
+snapshots:
+  const useEGOListData = () => useEntityListData(EGO_LIST):
+    labels:
+    - source: const useEGOListData = () => useEntityListData(EGO_LIST)
+      style: primary
+      start: 0
+      end: 56
+  const { spec } = useIdentityDetailData(id):
+    labels:
+    - source: useIdentityDetailData(id)
+      style: primary
+      start: 17
+      end: 42
+  const { spec, i18n } = useEGOGiftListData():
+    labels:
+    - source: useEGOGiftListData()
+      style: primary
+      start: 23
+      end: 43
+  export function useThemePackListData() { return useEntityListData(THEME_PACK_LIST) }:
+    labels:
+    - source: function useThemePackListData() { return useEntityListData(THEME_PACK_LIST) }
+      style: primary
+      start: 7
+      end: 84
+  function useEntityDetailData(cfg, id) { return { spec, i18n } }:
+    labels:
+    - source: function useEntityDetailData(cfg, id) { return { spec, i18n } }
+      style: primary
+      start: 0
+      end: 63

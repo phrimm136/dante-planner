@@ -4,7 +4,7 @@ import { LoadingState } from '@/components/feedback/LoadingState'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { useEGOGiftListData } from '@/pages/egoGift'
+import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
 import { EGOGiftFilterBar } from '@/pages/egoGift'
 import { EGOGiftSelectionList } from '@/pages/egoGift'
 import type { SortMode } from '@/shared/filter'
@@ -45,7 +45,8 @@ export function FloorGiftSelectorPane({
 }: FloorGiftSelectorPaneProps) {
   const { t } = useTranslation(['planner', 'common'])
 
-  const { spec, i18n } = useEGOGiftListData()
+  const spec = useEGOGiftListSpec()
+  const i18n = useEGOGiftListI18n()
 
   // Filter states (local to pane UI - reset on reopen)
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())

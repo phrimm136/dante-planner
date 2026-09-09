@@ -24,7 +24,7 @@ import {
 import { plannerApi } from '../lib/plannerApi'
 import { useAuthQuery } from '@/shared/auth'
 import { useUserSettingsQuery } from '@/shared/userSettings'
-import { useEGOGiftListData } from '@/pages/egoGift'
+import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
 import { validatePlannerForDraftSave, validatePlannerForPublish } from '../lib/plannerValidation'
 import { plannerValidationError, toUserFriendlyError } from '../lib/plannerValidationErrors'
 import {
@@ -191,7 +191,8 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
   )
 
   // EGO Gift spec for affordability validation in conflict resolution
-  const { spec: egoGiftSpec, i18n: egoGiftI18n } = useEGOGiftListData()
+  const egoGiftSpec = useEGOGiftListSpec()
+  const egoGiftI18n = useEGOGiftListI18n()
 
   // Query: Local planners only (fast initial render)
   const { data: allPlanners } = useSuspenseQuery(

@@ -62,10 +62,16 @@ const mockI18n: EGOGiftNameList = {
 }
 
 vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
-  useEGOGiftListData: () => ({
-    spec: mockSpec,
-    i18n: mockI18n,
-  }),
+  useEGOGiftListSpec: () =>
+    ({
+      spec: mockSpec,
+      i18n: mockI18n,
+    }).spec,
+  useEGOGiftListI18n: () =>
+    ({
+      spec: mockSpec,
+      i18n: mockI18n,
+    }).i18n,
 }))
 
 // Mock PlannerSection to simplify testing

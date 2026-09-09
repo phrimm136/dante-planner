@@ -401,7 +401,7 @@ asset pipeline.
   exposed them, so the public seam is already narrow. Un-exporting means the test-scale decision
   the user deferred.
 - 2026-08-15 — six static-i18n hooks still hand-roll createStaticDataQueryOptions instead of the
-  useEntityListData config path (useFilterI18nData, useSearchMappings, useSkillTagI18n,
+  useEntityListSpec/useEntityListI18n config path (useFilterI18nData, useSearchMappings, useSkillTagI18n,
   useSanityConditionData, useColorCodes, usePlannerKeywordsI18n); two of nine migrated before the
   pattern's marginal value flattened.
 - 2026-08-15 — the passive-id/themePack numeric realignment row is REVERSED, not deferred: the

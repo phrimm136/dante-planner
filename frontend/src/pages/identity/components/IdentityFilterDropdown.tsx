@@ -1,5 +1,5 @@
 import { EntitySearchDropdown } from '@/shared/filter'
-import { useIdentityListData } from '../hooks/useIdentityListData'
+import { useIdentityListSpec, useIdentityListI18n } from '../hooks/useIdentityListData'
 import { typedEntries } from '@/lib/utils'
 
 interface IdentityFilterDropdownProps {
@@ -18,7 +18,8 @@ export function IdentityFilterDropdown({
   onSelectionChange,
   placeholderKey,
 }: IdentityFilterDropdownProps) {
-  const { spec, i18n } = useIdentityListData()
+  const spec = useIdentityListSpec()
+  const i18n = useIdentityListI18n()
 
   return (
     <EntitySearchDropdown

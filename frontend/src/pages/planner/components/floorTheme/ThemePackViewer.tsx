@@ -7,9 +7,8 @@ import type { ThemePackEntry } from '@/pages/themePack'
 interface ThemePackViewerProps {
   packId: string
   packEntry: ThemePackEntry
+  /** Accessible label; the card prints the localized name itself */
   packName: string
-  /** Special name with embedded color codes */
-  specialName?: string | undefined
   onClick?: () => void
   readOnly?: boolean
   enableHoverHighlight?: boolean
@@ -26,7 +25,6 @@ export function ThemePackViewer({
   packId,
   packEntry,
   packName,
-  specialName,
   onClick,
   readOnly = false,
   enableHoverHighlight = false,
@@ -40,8 +38,6 @@ export function ThemePackViewer({
         <ThemePackCard
           packId={packId}
           packEntry={packEntry}
-          packName={packName}
-          {...(specialName !== undefined && { specialName })}
           enableHoverHighlight={enableHoverHighlight}
           isSelected={isSelected}
           overlay={overlay}
@@ -55,8 +51,6 @@ export function ThemePackViewer({
       <ThemePackCard
         packId={packId}
         packEntry={packEntry}
-        packName={packName}
-        {...(specialName !== undefined && { specialName })}
         enableHoverHighlight={enableHoverHighlight}
         overlay={overlay}
       />

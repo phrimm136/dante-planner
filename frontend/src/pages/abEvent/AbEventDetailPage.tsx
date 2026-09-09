@@ -14,13 +14,15 @@ import { ColoredText } from '@/shared/gameText'
 import { EGOGiftGrid } from '@/pages/egoGift'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
-import { useThemePackI18n } from '@/pages/themePack'
+import { useThemePackListI18n } from '@/pages/themePack'
 import { getAbEventImagePath } from '@/shared/assets'
 import { AbEventIdSchema } from '@/shared/gameData'
+import type { AbEventId } from '@/shared/gameData'
 import {
   AbEventDetailSkeleton,
   ChoiceBranch,
-  useAbEventDetailData,
+  useAbEventDetailSpec,
+  useAbEventDetailI18n,
   useAbEventShared,
   useAbEventListSpec,
   createEffectTextResolver,
@@ -66,7 +68,7 @@ function RelatedEgoGifts({ giftIds, label }: { giftIds: string[]; label: string 
 }
 
 function RelatedThemePacks({ packIds, label }: { packIds: string[]; label: string }) {
-  const themePackI18n = useThemePackI18n()
+  const themePackI18n = useThemePackListI18n()
 
   if (packIds.length === 0) return null
 
@@ -89,27 +91,50 @@ function RelatedThemePacks({ packIds, label }: { packIds: string[]; label: strin
   )
 }
 
-// =============================================================================
-// Main Page
-// =============================================================================
+/** Swaps the game's `{0}` sinner placeholder for the localized label. */
+function replaceSinnerPlaceholder(text: string, sinnerNameLabel: string): string {
+  return text.replace(/\[?\{0\}\]?/g, `{${sinnerNameLabel}}`)
+}
 
-function AbEventDetailContent() {
-  const { id: rawId } = useParams({ strict: false })
+function EventDescription({ id }: { id: AbEventId }) {
   const { t } = useTranslation('database')
+  const i18n = useAbEventDetailI18n(id)
 
-  if (!rawId) {
-    throw new Error('AbEvent ID is required')
-  }
-  const id = AbEventIdSchema.parse(rawId)
+  if (!i18n.desc) return null
 
-  const { spec, i18n } = useAbEventDetailData(id)
-  const abEventSpec = useAbEventListSpec()
-  const specEntry = abEventSpec[id]
+  return (
+    <div className="text-sm text-muted-foreground whitespace-pre-line border rounded p-4">
+      <ColoredText
+        text={replaceSinnerPlaceholder(i18n.desc, t('abEvent.sinnerName', 'Sinner Name'))}
+      />
+    </div>
+  )
+}
+
+// =============================================================================
+// Right Column Components
+// =============================================================================
+
+function getSelectionKey(choice: AbEventChoice): string | undefined {
+  if (!choice.nextEventId) return undefined
+  const lastTwo = choice.nextEventId.slice(-2)
+  return String(parseInt(lastTwo, 10))
+}
+
+function EventChoices({
+  id,
+  spec,
+}: {
+  id: AbEventId
+  spec: ReturnType<typeof useAbEventDetailSpec>
+}) {
+  const { t } = useTranslation('database')
+  const i18n = useAbEventDetailI18n(id)
   const shared = useAbEventShared()
   const giftNames = useEGOGiftListI18n()
 
   const sinnerNameLabel = t('abEvent.sinnerName', 'Sinner Name')
-  const processText = (text: string) => text.replace(/\[?\{0\}\]?/g, `{${sinnerNameLabel}}`)
+  const processText = (text: string) => replaceSinnerPlaceholder(text, sinnerNameLabel)
 
   const i18nCtx: CoinTossI18nContext = {
     affinityNames: shared.affinities ?? {},
@@ -122,51 +147,7 @@ function AbEventDetailContent() {
 
   const resolveEffectText = createEffectTextResolver(shared, giftNames)
 
-  const leftColumn = (
-    <div className="space-y-4">
-      <EventImage
-        eventId={id}
-        hasImage={specEntry?.hasImage ?? false}
-        illustId={specEntry?.illustId}
-      />
-
-      {i18n.desc && (
-        <div className="text-sm text-muted-foreground whitespace-pre-line border rounded p-4">
-          <ColoredText text={processText(i18n.desc)} />
-        </div>
-      )}
-
-      {specEntry &&
-        (specEntry.relatedEgoGifts.length > 0 || specEntry.relatedThemePacks.length > 0) && (
-          <div className="border rounded p-4 space-y-4">
-            {specEntry.relatedEgoGifts.length > 0 && (
-              <Suspense fallback={<Skeleton className="h-24 w-full" />}>
-                <RelatedEgoGifts
-                  giftIds={specEntry.relatedEgoGifts}
-                  label={t('abEvent.relatedEgoGifts', 'Related EGO Gifts')}
-                />
-              </Suspense>
-            )}
-            {specEntry.relatedThemePacks.length > 0 && (
-              <Suspense fallback={<Skeleton className="h-12 w-full" />}>
-                <RelatedThemePacks
-                  packIds={specEntry.relatedThemePacks}
-                  label={t('abEvent.relatedThemePacks', 'Related Theme Packs')}
-                />
-              </Suspense>
-            )}
-          </div>
-        )}
-    </div>
-  )
-
-  const getSelectionKey = (choice: AbEventChoice): string | undefined => {
-    if (!choice.nextEventId) return undefined
-    const lastTwo = choice.nextEventId.slice(-2)
-    return String(parseInt(lastTwo, 10))
-  }
-
-  const rightColumn = (
+  return (
     <div className="space-y-4">
       {spec.choices?.map((choice, idx) => {
         const option = i18n.options?.[idx]
@@ -199,6 +180,65 @@ function AbEventDetailContent() {
         )
       })}
     </div>
+  )
+}
+
+// =============================================================================
+// Main Page
+// =============================================================================
+
+function AbEventDetailContent() {
+  const { id: rawId } = useParams({ strict: false })
+  const { t } = useTranslation('database')
+
+  if (!rawId) {
+    throw new Error('AbEvent ID is required')
+  }
+  const id = AbEventIdSchema.parse(rawId)
+
+  const spec = useAbEventDetailSpec(id)
+  const specEntry = useAbEventListSpec()[id]
+
+  const leftColumn = (
+    <div className="space-y-4">
+      <EventImage
+        eventId={id}
+        hasImage={specEntry?.hasImage ?? false}
+        illustId={specEntry?.illustId}
+      />
+
+      <Suspense fallback={<Skeleton className="h-16 w-full" />}>
+        <EventDescription id={id} />
+      </Suspense>
+
+      {specEntry &&
+        (specEntry.relatedEgoGifts.length > 0 || specEntry.relatedThemePacks.length > 0) && (
+          <div className="border rounded p-4 space-y-4">
+            {specEntry.relatedEgoGifts.length > 0 && (
+              <Suspense fallback={<Skeleton className="h-24 w-full" />}>
+                <RelatedEgoGifts
+                  giftIds={specEntry.relatedEgoGifts}
+                  label={t('abEvent.relatedEgoGifts', 'Related EGO Gifts')}
+                />
+              </Suspense>
+            )}
+            {specEntry.relatedThemePacks.length > 0 && (
+              <Suspense fallback={<Skeleton className="h-12 w-full" />}>
+                <RelatedThemePacks
+                  packIds={specEntry.relatedThemePacks}
+                  label={t('abEvent.relatedThemePacks', 'Related Theme Packs')}
+                />
+              </Suspense>
+            )}
+          </div>
+        )}
+    </div>
+  )
+
+  const rightColumn = (
+    <Suspense fallback={<Skeleton className="h-40 w-full" />}>
+      <EventChoices id={id} spec={spec} />
+    </Suspense>
   )
 
   return (

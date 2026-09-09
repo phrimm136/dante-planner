@@ -1,6 +1,5 @@
 import { createEntityDetailQueryKeys } from '@/lib/queryKeys'
 import {
-  useEntityDetailData,
   useEntityDetailSpec,
   useEntityDetailI18n,
   type EntityDetailDataConfig,
@@ -37,13 +36,4 @@ export function useEGODetailSpec(id: string) {
  */
 export function useEGODetailI18n(id: string) {
   return useEntityDetailI18n(EGO_DETAIL, id)
-}
-
-/**
- * EGO spec + i18n; suspends while loading.
- *
- * @param id - EGO ID (must be defined - validate in route first)
- */
-export function useEGODetailData(id: string) {
-  return useEntityDetailData(EGO_DETAIL, id)
 }

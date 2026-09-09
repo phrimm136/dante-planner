@@ -4,7 +4,7 @@ One vertical folder per route slice: route components at the slice root plus `co
 
 ## Static data hooks
 
-- Paired singular `useSuspenseQuery` hooks per entity: `use<Entity>ListData` / `use<Entity>DetailData` in the slice's `hooks/`, built on the generic `useEntityListData` / `useEntityDetailData` from `@/shared/entityCatalog`.
+- Split `useSuspenseQuery` hooks per entity: `use<Entity>ListSpec` / `use<Entity>ListI18n` and `use<Entity>DetailSpec` / `use<Entity>DetailI18n` in the slice's `hooks/`, built on `useEntityListSpec` / `useEntityListI18n` / `useEntityDetailSpec` / `useEntityDetailI18n` from `@/shared/entityCatalog`. A hook never returns spec and i18n together; `no-combined-static-hook` (ast-grep) rejects any `use…ListData` / `use…DetailData`. A merged view is a pure function over the two reads.
 - Build query options with `createStaticDataQueryOptions` (`src/lib/queryOptions.ts`) wrapping a literal dynamic `import('@static/data/...')` — never `fetch('/data/...')`.
 - Query keys come from the factories in `src/lib/queryKeys.ts`; tuple shapes like `['identity', id]` and `['identity', id, 'i18n', language]` are load-bearing cache identities.
 - Spec and i18n staleTime is `STATIC_DATA_STALE_TIME` (7 days, `src/lib/constants/api.ts`); server-backed queries pick a named window from `STALE_TIME`/`GC_TIME` in the same module.

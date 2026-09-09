@@ -23,13 +23,11 @@ export { DifficultyFilter } from './components/DifficultyFilter'
 export { TierFilter } from './components/TierFilter'
 
 export {
-  useEGOGiftListData,
   useEGOGiftListSpec,
   useEGOGiftListI18n,
   egoGiftListQueryKeys,
 } from './hooks/useEGOGiftListData'
 export {
-  useEGOGiftDetailData,
   useEGOGiftDetailSpec,
   useEGOGiftDetailI18n,
   egoGiftDetailQueryKeys,

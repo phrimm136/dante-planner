@@ -3,7 +3,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { PlannerSection } from '@/components/layout/PlannerSection'
 import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { ThemePackTrackerCard } from './ThemePackTrackerCard'
-import { useThemePackListData } from '@/pages/themePack'
+import { useThemePackListSpec, useThemePackListI18n } from '@/pages/themePack'
 import { CARD_GRID, EMPTY_STATE } from '@/lib/constants'
 import { cn, getDisplayFontForLanguage } from '@/lib/utils'
 import { createEmptyNoteContent } from '@/shared/noteEditor'
@@ -36,7 +36,8 @@ export function HorizontalThemePackGallery({
   onHoverChange,
 }: HorizontalThemePackGalleryProps) {
   const { t, i18n: i18nInstance } = useTranslation(['planner', 'common'])
-  const { spec, i18n } = useThemePackListData()
+  const spec = useThemePackListSpec()
+  const i18n = useThemePackListI18n()
 
   const mobileScale = CARD_GRID.MOBILE_SCALE.DENSE
 
@@ -120,7 +121,6 @@ export function HorizontalThemePackGallery({
                     packId={packId}
                     packEntry={packEntry}
                     packName={packName}
-                    specialName={i18nData?.specialName}
                     floorNumber={floorIndex + 1}
                     noteContent={getNoteContentForPack(packId)}
                     isDone={isDone}

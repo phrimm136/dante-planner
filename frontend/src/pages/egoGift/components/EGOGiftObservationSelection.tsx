@@ -1,4 +1,4 @@
-import { useEGOGiftListData } from '../hooks/useEGOGiftListData'
+import { useEGOGiftListSpec, useEGOGiftListI18n } from '../hooks/useEGOGiftListData'
 import type { EGOGiftListItem } from '../types/EGOGiftTypes'
 import type { EncodedGiftId } from '@/shared/gameData'
 import { getBaseGiftId } from '../lib/egoGiftEncoding'
@@ -24,7 +24,8 @@ export function EGOGiftObservationSelection({
   selectedGiftIds,
   onGiftRemove,
 }: EGOGiftObservationSelectionProps) {
-  const { spec, i18n } = useEGOGiftListData()
+  const spec = useEGOGiftListSpec()
+  const i18n = useEGOGiftListI18n()
 
   // Merge spec and i18n into EGOGiftListItem array
   const gifts: EGOGiftListItem[] = toGiftListItems(spec, i18n)

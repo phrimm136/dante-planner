@@ -1,6 +1,7 @@
 import { createEntityDetailQueryKeys, createEntitySharedQueryKeys } from '@/lib/queryKeys'
 import {
-  useEntityDetailData,
+  useEntityDetailSpec,
+  useEntityDetailI18n,
   useEntityShared,
   type EntityDetailDataConfig,
   type EntitySharedDataConfig,
@@ -28,13 +29,14 @@ const AB_EVENT_DETAIL: EntityDetailDataConfig<
   i18nSchema: AbEventI18nSchema,
 }
 
-/**
- * AbEvent mechanics + i18n; suspends while loading.
- *
- * @param id - AbEvent ID (must be defined - validate in route first)
- */
-export function useAbEventDetailData(id: string) {
-  return useEntityDetailData(AB_EVENT_DETAIL, id)
+/** AbEvent mechanics; suspends on initial load, not on language change */
+export function useAbEventDetailSpec(id: string) {
+  return useEntityDetailSpec(AB_EVENT_DETAIL, id)
+}
+
+/** AbEvent texts for one event; suspends while loading */
+export function useAbEventDetailI18n(id: string) {
+  return useEntityDetailI18n(AB_EVENT_DETAIL, id)
 }
 
 const AB_EVENT_SHARED: EntitySharedDataConfig<z.infer<typeof AbEventSharedSchema>> = {

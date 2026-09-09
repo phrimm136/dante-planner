@@ -78,7 +78,8 @@ vi.mock('@/shared/userSettings', () => ({
 }))
 
 vi.mock('@/pages/egoGift', () => ({
-  useEGOGiftListData: () => ({ spec: syncMocks.egoGiftSpec, i18n: {} }),
+  useEGOGiftListSpec: () => ({ spec: syncMocks.egoGiftSpec, i18n: {} }).spec,
+  useEGOGiftListI18n: () => ({ spec: syncMocks.egoGiftSpec, i18n: {} }).i18n,
 }))
 
 // The validators have their own suites; what this one pins is the wiring around

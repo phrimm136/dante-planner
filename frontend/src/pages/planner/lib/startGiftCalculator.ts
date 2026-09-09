@@ -7,13 +7,13 @@
  */
 
 import type { StartBuff } from '@/shared/gameText'
-import { getBuffById } from '../hooks/useStartBuffData'
+import { getBuffById } from './startBuffs'
 
 /**
  * Calculates the number of selectable start gifts based on selected buffs
  * Base = 1, plus sum of ADDITIONAL_START_EGO_GIFT_SELECT effect values
  *
- * @param buffs - Array of start buffs (from useStartBuffData)
+ * @param buffs - Array of start buffs (from toStartBuffs)
  * @param selectedIds - Set of selected buff IDs
  * @returns Maximum number of gifts that can be selected (minimum 1)
  */

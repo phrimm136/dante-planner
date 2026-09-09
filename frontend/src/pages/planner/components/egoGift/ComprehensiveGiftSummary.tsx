@@ -6,7 +6,7 @@ import { EMPTY_STATE, CARD_GRID } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import type { EGOGiftListItem } from '@/pages/egoGift'
 import type { EncodedGiftId, EnhancementLevel } from '@/shared/gameData'
-import { useEGOGiftListData } from '@/pages/egoGift'
+import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import { PlannerSection } from '@/components/layout/PlannerSection'
 import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
@@ -70,7 +70,8 @@ export function ComprehensiveGiftSummary({
   selectedGiftIds,
 }: ComprehensiveGiftSummaryProps) {
   const { t } = useTranslation(['planner', 'common'])
-  const { spec, i18n } = useEGOGiftListData()
+  const spec = useEGOGiftListSpec()
+  const i18n = useEGOGiftListI18n()
 
   const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
 

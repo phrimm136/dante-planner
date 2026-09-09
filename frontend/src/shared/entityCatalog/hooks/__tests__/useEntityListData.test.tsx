@@ -7,7 +7,6 @@ import { Suspense, type ReactNode } from 'react'
 
 import { STATIC_DATA_STALE_TIME } from '@/lib/constants'
 import {
-  useEntityListData,
   useEntityListSpec,
   useEntityListI18n,
   type EntityListDataConfig,
@@ -47,11 +46,14 @@ function createWrapper() {
   return { queryClient, wrapper }
 }
 
-describe('useEntityListData', () => {
+describe('entity list hooks', () => {
   it('caches spec and i18n under the slice tuples the pages already use', async () => {
     const { queryClient, wrapper } = createWrapper()
 
-    const { result } = renderHook(() => useEntityListData(createConfig()), { wrapper })
+    const { result } = renderHook(
+      () => ({ spec: useEntityListSpec(createConfig()), i18n: useEntityListI18n(createConfig()) }),
+      { wrapper },
+    )
 
     await waitFor(() => {
       expect(result.current.spec).toEqual({ '10101': { rank: 3 } })

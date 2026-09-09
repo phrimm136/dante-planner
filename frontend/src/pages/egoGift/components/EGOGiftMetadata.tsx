@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next'
 import CostDisplay from './CostDisplay'
 import { LabeledPanel } from '@/components/layout/LabeledPanel'
 import { getEGOGiftEnhancementIconPath } from '@/shared/assets'
-import { useThemePackI18n } from '@/pages/themePack'
+import { useThemePackListI18n } from '@/pages/themePack'
 import { ENHANCEMENT_LABELS, type EnhancementLevel } from '@/shared/gameData'
 import { DIFFICULTY_BADGE_STYLES, SECTION_STYLES } from '@/lib/constants'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -64,7 +64,7 @@ function MetadataRow({
  */
 function ThemePackDisplay({ themePack }: { themePack: string[] }) {
   const { t } = useTranslation(['database', 'common'])
-  const themePackI18n = useThemePackI18n()
+  const themePackI18n = useThemePackListI18n()
 
   if (themePack.length === 0) {
     return <>{t('egoGift.general', 'General')}</>

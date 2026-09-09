@@ -7,7 +7,7 @@ import { usePlannerStorage } from './usePlannerStorage'
 import { usePlannerSyncAdapter } from './usePlannerSyncAdapter'
 import { userPlannersQueryKeys } from './useMDUserPlannersData'
 import { plannerQueryKeys } from '../lib/plannerQueryKeys'
-import { useEGOGiftListData } from '@/pages/egoGift'
+import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
 import { isMDPlanner } from '../types/PlannerTypes'
 import { queryClient } from '@/lib/queryClient'
 import { AUTO_SAVE_DEBOUNCE_MS, INITIAL_SYNC_VERSION } from '@/lib/constants'
@@ -329,7 +329,8 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   const syncAdapter = usePlannerSyncAdapter()
 
   // EGO Gift data for affordability validation
-  const { spec: egoGiftSpec, i18n: egoGiftI18n } = useEGOGiftListData()
+  const egoGiftSpec = useEGOGiftListSpec()
+  const egoGiftI18n = useEGOGiftListI18n()
 
   /**
    * The version the next write presents. Forward-only, and it writes nothing.

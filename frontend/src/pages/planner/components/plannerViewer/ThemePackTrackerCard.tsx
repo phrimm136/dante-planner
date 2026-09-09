@@ -12,7 +12,6 @@ interface ThemePackTrackerCardProps {
   packId: string
   packEntry: ThemePackEntry
   packName: string
-  specialName?: string | undefined
   floorNumber: number
   noteContent: NoteContent
   isDone: boolean
@@ -30,7 +29,6 @@ export function ThemePackTrackerCard({
   packId,
   packEntry,
   packName,
-  specialName,
   floorNumber,
   noteContent,
   isDone,
@@ -64,7 +62,6 @@ export function ThemePackTrackerCard({
           packId={packId}
           packEntry={packEntry}
           packName={packName}
-          specialName={specialName}
           enableHoverHighlight
           isSelected={isFocused}
           readOnly

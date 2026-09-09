@@ -4,7 +4,7 @@ import { useIsBreakpoint } from '@/components/hooks/use-is-breakpoint'
 import { PlannerSection } from '@/components/layout/PlannerSection'
 import { SinnerSkillCard } from './SinnerSkillCard'
 import { SkillExchangeModal } from './SkillExchangeModal'
-import { useIdentityListData } from '@/pages/identity'
+import { useIdentityListSpec } from '@/pages/identity'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { SINNERS, DEFAULT_SKILL_EA } from '@/shared/gameData'
@@ -40,7 +40,7 @@ export function SkillReplacementSection({
   const { t } = useTranslation(['planner', 'common'])
 
   // Fetch identity data internally
-  const { spec: identitySpec } = useIdentityListData()
+  const identitySpec = useIdentityListSpec()
 
   // Modal state
   const [selectedSinner, setSelectedSinner] = useState<string | null>(null)

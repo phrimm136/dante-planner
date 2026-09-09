@@ -104,16 +104,28 @@ const EGO_SPEC = Object.fromEntries(
 )
 
 vi.mock('@/pages/identity/hooks/useIdentityListData', () => ({
-  useIdentityListData: () => ({
-    spec: IDENTITY_SPEC,
-    i18n: Object.fromEntries(Object.keys(IDENTITY_SPEC).map((id) => [id, `Id ${id}`])),
-  }),
+  useIdentityListSpec: () =>
+    ({
+      spec: IDENTITY_SPEC,
+      i18n: Object.fromEntries(Object.keys(IDENTITY_SPEC).map((id) => [id, `Id ${id}`])),
+    }).spec,
+  useIdentityListI18n: () =>
+    ({
+      spec: IDENTITY_SPEC,
+      i18n: Object.fromEntries(Object.keys(IDENTITY_SPEC).map((id) => [id, `Id ${id}`])),
+    }).i18n,
 }))
 vi.mock('@/pages/ego/hooks/useEGOListData', () => ({
-  useEGOListData: () => ({
-    spec: EGO_SPEC,
-    i18n: Object.fromEntries(Object.keys(EGO_SPEC).map((id) => [id, `Ego ${id}`])),
-  }),
+  useEGOListSpec: () =>
+    ({
+      spec: EGO_SPEC,
+      i18n: Object.fromEntries(Object.keys(EGO_SPEC).map((id) => [id, `Ego ${id}`])),
+    }).spec,
+  useEGOListI18n: () =>
+    ({
+      spec: EGO_SPEC,
+      i18n: Object.fromEntries(Object.keys(EGO_SPEC).map((id) => [id, `Ego ${id}`])),
+    }).i18n,
 }))
 vi.mock('@/shared/filter/hooks/useSearchMappings', () => ({
   useSearchMappings: () => ({

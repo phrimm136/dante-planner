@@ -28,7 +28,6 @@ vi.mock('@/pages/identity/hooks/useIdentityDetailData', async () => {
   return {
     useIdentityDetailSpec: () => identitySpec10114,
     useIdentityDetailI18n: () => identityI18n10114,
-    useIdentityDetailData: () => ({ spec: identitySpec10114, i18n: identityI18n10114 }),
   }
 })
 

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useThemePackListData } from '@/pages/themePack'
+import { useThemePackListSpec } from '@/pages/themePack'
 import type { DungeonIdx, ThemePackFloor } from '@/shared/gameData'
 import { calculateActiveFilterCount } from '@/shared/filter'
 import { useSetFilters } from '@/components/hooks/useSetFilters'
@@ -14,12 +14,12 @@ import { ThemePackList } from '@/pages/themePack'
 import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
 
 /**
- * Shell component - loads spec + i18n, manages filter states.
+ * Shell component - loads spec, manages filter states.
  * Does not suspend on language change since spec query key has no language.
  */
 function ThemePackPageShell() {
   const { t } = useTranslation(['database', 'common'])
-  const { spec } = useThemePackListData()
+  const spec = useThemePackListSpec()
 
   // Filter states
   const {
@@ -93,7 +93,7 @@ function ThemePackPageShell() {
  * Granular loading architecture:
  * - Outer Suspense: ListPageSkeleton for spec loading (initial)
  * - EGO Gift dropdown: Own Suspense for i18n
- * - ThemePackList: Uses theme pack i18n for name search
+ * - ThemePackList: names suspend at the card, search terms never suspend
  */
 export default function ThemePackPage() {
   return (

@@ -18,7 +18,7 @@ import { usePlannerHeaderActions } from '../../hooks/usePlannerHeaderActions'
 import { usePlannerPublish } from '../../hooks/usePlannerPublish'
 import { usePlannerStorage } from '../../hooks/usePlannerStorage'
 import { usePlannerSyncAdapter, acknowledgedCopy } from '../../hooks/usePlannerSyncAdapter'
-import { useEGOGiftListData } from '@/pages/egoGift'
+import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
 import { plannerQueryKeys } from '../../lib/plannerQueryKeys'
 import { deriveSaveStatus, SAVE_STATUS_BADGE_VARIANT } from '../../lib/plannerBadges'
 import { decidePublishAction } from '../../lib/plannerPublishPolicy'
@@ -75,7 +75,8 @@ export function PersonalPlannerHeader({
   const publishMutation = usePlannerPublish()
   const { saveToLocal } = usePlannerStorage()
   const syncAdapter = usePlannerSyncAdapter()
-  const { spec: egoGiftSpec, i18n: egoGiftI18n } = useEGOGiftListData()
+  const egoGiftSpec = useEGOGiftListSpec()
+  const egoGiftI18n = useEGOGiftListI18n()
 
   const plannerId = planner.metadata.id
 

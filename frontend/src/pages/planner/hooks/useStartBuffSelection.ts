@@ -1,5 +1,6 @@
 import { startTransition } from 'react'
-import { useStartBuffData, getBaseBuffs } from './useStartBuffData'
+import { useStartBuffListSpec, useStartBuffListI18n } from './useStartBuffList'
+import { getBaseBuffs, toStartBuffs } from '../lib/startBuffs'
 import { useBattleKeywords } from '@/shared/gameText'
 import type { MDVersion } from '@/shared/gameData'
 import type { StartBuff, StartBuffI18n, BattleKeywords } from '@/shared/gameText'
@@ -55,7 +56,8 @@ export function useStartBuffSelection(
   selectedBuffIds: Set<number>,
   onSelectionChange: (buffIds: Set<number>) => void,
 ): UseStartBuffSelectionResult {
-  const { data: buffs, i18n } = useStartBuffData(mdVersion)
+  const i18n = useStartBuffListI18n(mdVersion)
+  const buffs = toStartBuffs(useStartBuffListSpec(mdVersion), i18n)
   const { data: battleKeywords } = useBattleKeywords()
 
   const enhancements = deriveEnhancements(selectedBuffIds)

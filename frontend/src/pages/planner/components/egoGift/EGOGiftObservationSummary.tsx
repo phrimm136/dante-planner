@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useEGOGiftObservationData } from '@/pages/egoGift'
-import { useEGOGiftListData, getBaseGiftId } from '@/pages/egoGift'
+import { useEGOGiftListSpec, useEGOGiftListI18n, getBaseGiftId } from '@/pages/egoGift'
 import type { EncodedGiftId } from '@/shared/gameData'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import { EMPTY_STATE, CARD_GRID } from '@/lib/constants'
@@ -39,7 +39,8 @@ export function EGOGiftObservationSummary({
 
   // Load observation data for cost calculation (suspends)
   const { data: observationData } = useEGOGiftObservationData(mdVersion)
-  const { spec, i18n } = useEGOGiftListData()
+  const spec = useEGOGiftListSpec()
+  const i18n = useEGOGiftListI18n()
 
   // Calculate current cost based on selection count
   const currentCost =

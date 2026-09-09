@@ -30,7 +30,7 @@ import { Input } from '@/components/ui/input'
 import { useIdentityListSpec, useIdentityListI18n } from '@/pages/identity'
 import { useEGOListSpec, useEGOListI18n } from '@/pages/ego'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
-import { useThemePackListData } from '@/pages/themePack'
+import { useThemePackListSpec, useThemePackListI18n } from '@/pages/themePack'
 import { usePlannerKeywordsI18n } from '../../hooks/usePlannerKeywordsI18n'
 
 import { PLANNER_KEYWORDS, SINNERS } from '@/shared/gameData'
@@ -369,7 +369,8 @@ function HeavySections({
   const egoI18n = useEGOListI18n()
   const egoGiftSpec = useEGOGiftListSpec()
   const egoGiftI18n = useEGOGiftListI18n()
-  const { spec: themePackSpec, i18n: themePackI18n } = useThemePackListData()
+  const themePackSpec = useThemePackListSpec()
+  const themePackI18n = useThemePackListI18n()
 
   // Build heavy FilterItem[] from loaded data
   const heavyItems: FilterItem[] = (() => {

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { useEGOGiftObservationData } from '@/pages/egoGift'
-import { useEGOGiftListData, encodeGiftSelection } from '@/pages/egoGift'
+import { useEGOGiftListSpec, useEGOGiftListI18n, encodeGiftSelection } from '@/pages/egoGift'
 import type { EGOGiftId } from '@/shared/gameData'
 import { useCappedSelection } from '../../hooks/useCappedSelection'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
@@ -44,7 +44,8 @@ export function EGOGiftObservationEditPane({
 
   // Load observation data (suspends while loading)
   const { data: observationData } = useEGOGiftObservationData(mdVersion)
-  const { spec, i18n } = useEGOGiftListData()
+  const spec = useEGOGiftListSpec()
+  const i18n = useEGOGiftListI18n()
 
   // LOCAL filter states
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())

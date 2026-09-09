@@ -1,0 +1,16 @@
+id: no-combined-static-hook-tsx
+valid:
+  - const spec = useEGOGiftListSpec()
+  - const names = useThemePackListI18n()
+  - const data = useEGOGiftDetailI18n(id)
+  - const buffs = toStartBuffs(useStartBuffListSpec(v), useStartBuffListI18n(v))
+  # Server-backed hooks share the suffix but have nothing to split.
+  - const { data } = useMDGesellschaftData(page)
+  - const { data } = useMDUserPlannersData(filters)
+  - export function useAbEventListSpec() { return useEntityListSpec(AB_EVENT_LIST) }
+invalid:
+  - const { spec, i18n } = useEGOGiftListData()
+  - const { spec } = useIdentityDetailData(id)
+  - export function useThemePackListData() { return useEntityListData(THEME_PACK_LIST) }
+  - const useEGOListData = () => useEntityListData(EGO_LIST)
+  - function useEntityDetailData(cfg, id) { return { spec, i18n } }

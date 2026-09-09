@@ -2,7 +2,7 @@ import { Suspense, useRef, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
 import { ChevronDown, ChevronUp } from 'lucide-react'
-import { useEGOGiftDetailData } from '../hooks/useEGOGiftDetailData'
+import { useEGOGiftDetailSpec, useEGOGiftDetailI18n } from '../hooks/useEGOGiftDetailData'
 import { getColorForAttributeType, useColorCodes } from '@/shared/gameText'
 import { FormattedDescription } from '@/shared/gameText'
 import type { EnhancementLevel } from '@/shared/gameData'
@@ -15,12 +15,13 @@ interface EGOGiftTooltipInnerProps {
 
 /**
  * Inner component that fetches and displays gift tooltip content
- * Uses useEGOGiftDetailData which is Suspense-ready
+ * Uses useEGOGiftDetailSpec, useEGOGiftDetailI18n which is Suspense-ready
  * Must be wrapped in Suspense boundary
  */
 function EGOGiftTooltipInner({ giftId, enhancement }: EGOGiftTooltipInnerProps) {
   const { t, i18n } = useTranslation('common')
-  const { spec, i18n: giftI18n } = useEGOGiftDetailData(giftId)
+  const spec = useEGOGiftDetailSpec(giftId)
+  const giftI18n = useEGOGiftDetailI18n(giftId)
   const { data: colorCodes } = useColorCodes()
   const nameColor = getColorForAttributeType(colorCodes, spec.attributeType)
   const description = giftI18n.descs[enhancement]

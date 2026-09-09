@@ -216,11 +216,6 @@ vi.mock('@tanstack/react-router', () => ({
 vi.mock('@/pages/identity/hooks/useIdentityDetailData', () => ({
   useIdentityDetailSpec: () => mockIdentityData,
   useIdentityDetailI18n: () => mockIdentityI18n,
-  // Keep backward compatible export
-  useIdentityDetailData: () => ({
-    spec: mockIdentityData,
-    i18n: mockIdentityI18n,
-  }),
 }))
 
 // Mock the useIsBreakpoint hook to simulate desktop by default

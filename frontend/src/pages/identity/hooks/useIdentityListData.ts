@@ -1,6 +1,5 @@
 import { createEntityListQueryKeys } from '@/lib/queryKeys'
 import {
-  useEntityListData,
   useEntityListSpec,
   useEntityListI18n,
   type EntityListDataConfig,
@@ -29,9 +28,4 @@ export function useIdentityListSpec() {
 /** Identity name map; suspends while loading */
 export function useIdentityListI18n() {
   return useEntityListI18n(IDENTITY_LIST)
-}
-
-/** Identity spec map and name map; suspends while loading */
-export function useIdentityListData() {
-  return useEntityListData(IDENTITY_LIST)
 }

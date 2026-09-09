@@ -80,7 +80,8 @@ vi.mock('@/shared/auth/hooks/useAuthQuery', () => ({
 }))
 
 vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
-  useEGOGiftListData: () => ({ spec: {}, i18n: {} }),
+  useEGOGiftListSpec: () => ({ spec: {}, i18n: {} }).spec,
+  useEGOGiftListI18n: () => ({ spec: {}, i18n: {} }).i18n,
 }))
 
 vi.mock('react-i18next', async (importOriginal) => {

@@ -1,5 +1,5 @@
 import { EntitySearchDropdown } from '@/shared/filter'
-import { useEGOListData } from '../hooks/useEGOListData'
+import { useEGOListSpec, useEGOListI18n } from '../hooks/useEGOListData'
 import { typedEntries } from '@/lib/utils'
 
 interface EGOFilterDropdownProps {
@@ -18,7 +18,8 @@ export function EGOFilterDropdown({
   onSelectionChange,
   placeholderKey,
 }: EGOFilterDropdownProps) {
-  const { spec, i18n } = useEGOListData()
+  const spec = useEGOListSpec()
+  const i18n = useEGOListI18n()
 
   return (
     <EntitySearchDropdown

@@ -1,7 +1,6 @@
 import type { z } from 'zod'
 import { createEntityListQueryKeys } from '@/lib/queryKeys'
 import {
-  useEntityListData,
   useEntityListI18n,
   useEntityListSpec,
   type EntityListDataConfig,
@@ -47,19 +46,4 @@ export function useKeywordListSpec(): Record<string, BattleKeywordSpecEntry> {
  */
 export function useKeywordListI18n(): Record<string, BattleKeywordI18nEntry> {
   return useEntityListI18n(KEYWORD_LIST)
-}
-
-/**
- * Hook that loads and validates keyword list data (spec list + i18n)
- * Suspends while loading - wrap in Suspense boundary
- *
- * Returns spec map and i18n map separately for flexible consumption.
- *
- * @returns Validated keyword spec map and i18n map
- */
-export function useKeywordListData(): {
-  spec: Record<string, BattleKeywordSpecEntry>
-  i18n: Record<string, BattleKeywordI18nEntry>
-} {
-  return useEntityListData(KEYWORD_LIST)
 }

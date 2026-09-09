@@ -1,6 +1,5 @@
 import { createEntityListQueryKeys } from '@/lib/queryKeys'
 import {
-  useEntityListData,
   useEntityListSpec,
   useEntityListI18n,
   type EntityListDataConfig,
@@ -29,9 +28,4 @@ export function useEGOGiftListSpec() {
 /** EGO Gift name map; suspends while loading */
 export function useEGOGiftListI18n() {
   return useEntityListI18n(EGO_GIFT_LIST)
-}
-
-/** EGO Gift spec map and name map; suspends while loading */
-export function useEGOGiftListData() {
-  return useEntityListData(EGO_GIFT_LIST)
 }

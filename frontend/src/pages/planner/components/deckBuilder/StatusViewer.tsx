@@ -1,8 +1,8 @@
 import React from 'react'
 import { EA_SURPLUS_THRESHOLD } from '@/shared/gameData'
 import { getAffinityIconPath, getBattleKeywordIconPath } from '@/shared/assets'
-import { useIdentityListData } from '@/pages/identity'
-import { useEGOListData } from '@/pages/ego'
+import { useIdentityListSpec } from '@/pages/identity'
+import { useEGOListSpec } from '@/pages/ego'
 import type { EGOGiftId } from '@/shared/gameData'
 import type { DeckState } from '../../types/DeckTypes'
 import { computeAffinityEA, computeKeywordEA } from '../../lib/deckEA'
@@ -15,8 +15,8 @@ interface StatusViewerProps {
 
 export const StatusViewer: React.FC<StatusViewerProps> = ({ deckState, ownedGiftIds }) => {
   // Load spec data using hooks (React Query caches shared across components)
-  const { spec: identitySpec } = useIdentityListData()
-  const { spec: egoSpec } = useEGOListData()
+  const identitySpec = useIdentityListSpec()
+  const egoSpec = useEGOListSpec()
 
   const affinityCounts = computeAffinityEA(deckState, identitySpec, egoSpec)
   const keywordCounts = computeKeywordEA(deckState, identitySpec, ownedGiftIds)

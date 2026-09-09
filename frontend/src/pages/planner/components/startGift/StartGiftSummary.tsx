@@ -8,7 +8,7 @@ import {
 } from '@/pages/egoGift'
 import type { EncodedGiftId } from '@/shared/gameData'
 import { getKeywordIconPath } from '@/shared/assets'
-import { useEGOGiftListData } from '@/pages/egoGift'
+import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { CARD_GRID, SECTION_STYLES } from '@/lib/constants'
@@ -36,7 +36,8 @@ export function StartGiftSummary({
   onViewNotes,
 }: StartGiftSummaryProps) {
   const { t } = useTranslation(['planner', 'common'])
-  const { spec, i18n } = useEGOGiftListData()
+  const spec = useEGOGiftListSpec()
+  const i18n = useEGOGiftListI18n()
 
   const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
 

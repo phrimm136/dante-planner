@@ -28,7 +28,6 @@ vi.mock('@/pages/ego/hooks/useEGODetailData', async () => {
   return {
     useEGODetailSpec: () => egoSpec20102,
     useEGODetailI18n: () => egoI18n20102,
-    useEGODetailData: () => ({ spec: egoSpec20102, i18n: egoI18n20102 }),
   }
 })
 

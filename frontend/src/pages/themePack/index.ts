@@ -9,11 +9,11 @@ export { ThemePackFilterDropdown } from './components/ThemePackFilterDropdown'
 
 // Hooks
 export {
-  useThemePackListData,
-  useThemePackI18n,
+  useThemePackListSpec,
+  useThemePackListI18n,
   themePackListQueryKeys,
 } from './hooks/useThemePackListData'
-export { useThemePackDetailData, themePackDetailQueryKeys } from './hooks/useThemePackDetailData'
+export { useThemePackDetailSpec, themePackDetailQueryKeys } from './hooks/useThemePackDetailData'
 
 // Types
 export type {

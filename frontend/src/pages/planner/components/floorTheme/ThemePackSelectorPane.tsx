@@ -239,7 +239,6 @@ export function ThemePackSelectorPane({
                               packId={id}
                               packEntry={entry}
                               packName={name}
-                              specialName={i18nData?.specialName}
                               onClick={() => {
                                 handlePackSelect(id)
                               }}

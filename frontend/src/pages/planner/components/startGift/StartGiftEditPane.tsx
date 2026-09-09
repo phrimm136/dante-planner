@@ -1,9 +1,10 @@
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { useStartGiftPools } from '../../hooks/useStartGiftPools'
-import { useEGOGiftListData, encodeGiftSelection } from '@/pages/egoGift'
+import { useEGOGiftListSpec, useEGOGiftListI18n, encodeGiftSelection } from '@/pages/egoGift'
 import type { EGOGiftId } from '@/shared/gameData'
-import { useStartBuffData } from '../../hooks/useStartBuffData'
+import { useStartBuffListSpec, useStartBuffListI18n } from '../../hooks/useStartBuffList'
+import { toStartBuffs } from '../../lib/startBuffs'
 import { useCappedSelection } from '../../hooks/useCappedSelection'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import type { MDVersion } from '@/shared/gameData'
@@ -40,8 +41,9 @@ export function StartGiftEditPane({ open, onOpenChange, mdVersion }: StartGiftEd
 
   // Load data
   const { data: pools } = useStartGiftPools(mdVersion)
-  const { spec, i18n } = useEGOGiftListData()
-  const { data: buffs } = useStartBuffData(mdVersion)
+  const spec = useEGOGiftListSpec()
+  const i18n = useEGOGiftListI18n()
+  const buffs = toStartBuffs(useStartBuffListSpec(mdVersion), useStartBuffListI18n(mdVersion))
 
   // Calculate max selectable gifts
   const maxSelectable = calculateMaxGiftSelection(buffs, selectedBuffIds)

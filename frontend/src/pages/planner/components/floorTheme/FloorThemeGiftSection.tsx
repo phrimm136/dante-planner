@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useShallow } from 'zustand/shallow'
-import { useThemePackListData } from '@/pages/themePack'
-import { useEGOGiftListData } from '@/pages/egoGift'
+import { useThemePackListSpec, useThemePackListI18n } from '@/pages/themePack'
+import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
 import { showWarning } from '@/lib/errorPresentation'
 import { usePlannerEditorStoreSafe } from '../../stores/usePlannerEditorStore'
 import { DifficultyIndicator, getFloorDifficultyLabel } from './DifficultyIndicator'
@@ -58,8 +58,10 @@ export function FloorThemeGiftSection({
   setSelectedGiftIdsOverride,
 }: FloorThemeGiftSectionProps) {
   const { t } = useTranslation(['planner', 'common'])
-  const { spec: themePackList, i18n: themePackI18n } = useThemePackListData()
-  const { spec: egoGiftSpec, i18n: egoGiftI18n } = useEGOGiftListData()
+  const themePackList = useThemePackListSpec()
+  const themePackI18n = useThemePackListI18n()
+  const egoGiftSpec = useEGOGiftListSpec()
+  const egoGiftI18n = useEGOGiftListI18n()
 
   const [isThemePackPaneOpen, setIsThemePackPaneOpen] = useState(false)
   const [isGiftPaneOpen, setIsGiftPaneOpen] = useState(false)
@@ -175,7 +177,6 @@ export function FloorThemeGiftSection({
   const selectedPackEntry = selectedThemePackId ? themePackList[selectedThemePackId] : null
   const selectedPackI18n = selectedThemePackId ? themePackI18n[selectedThemePackId] : null
   const selectedPackName = selectedPackI18n?.name ?? null
-  const selectedPackSpecialName = selectedPackI18n?.specialName
 
   // Get display difficulty label - map DungeonIdx to baseDifficulty for label calculation
   // For floors 6-15, getFloorDifficultyLabel returns INFINITY/EXTREME regardless of baseDifficulty
@@ -223,7 +224,6 @@ export function FloorThemeGiftSection({
                       packId={selectedThemePackId}
                       packEntry={selectedPackEntry}
                       packName={selectedPackName}
-                      specialName={selectedPackSpecialName}
                       onClick={handleOpenThemePackPane}
                       readOnly={isThemePackReadOnly}
                       enableHoverHighlight
