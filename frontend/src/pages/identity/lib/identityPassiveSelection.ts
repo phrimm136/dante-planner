@@ -12,15 +12,11 @@
 
 import { selectEffectivePassives, selectLockedPassives } from '@/shared/passiveSelection'
 import type { PassiveId } from '@/shared/gameData'
-import type { IdentityData } from '../types/IdentityTypes'
-
-type PassiveConditions = IdentityData['passives']['conditions']
-type PassiveCondition = PassiveConditions[string]
 
 /**
  * Extract passive type info from ID.
  * ID format: {identity_id:5}{type:1}{variant:1}1
- * Type: 0=battle, 1=enhanced battle, 2=support
+ * Type: 0=battle, 1=enhanced battle, 2=support, 3=enhanced support
  */
 export function getPassiveInfo(passiveId: PassiveId): { type: number; variant: number } {
   const suffix = passiveId.slice(-2)
@@ -50,26 +46,4 @@ export function getLockedPassives(
   return selectLockedPassives(passiveList, currentUptieIndex, (passiveId) => {
     return getPassiveInfo(passiveId).variant
   })
-}
-
-/**
- * Get the condition for a passive.
- * Enhanced passives (type=1) inherit conditions from the base (type=0) with
- * the same variant when they carry none of their own.
- */
-export function getPassiveCondition(
-  conditions: PassiveConditions,
-  passiveId: PassiveId,
-): PassiveCondition | undefined {
-  const directCondition = conditions[passiveId]
-  if (directCondition) return directCondition
-
-  const { type, variant } = getPassiveInfo(passiveId)
-  if (type === 1) {
-    // Same variant one type down: the enhanced passive's base counterpart.
-    const basePassiveId = `${passiveId.slice(0, -2)}0${variant}`
-    return conditions[basePassiveId]
-  }
-
-  return undefined
 }

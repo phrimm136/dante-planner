@@ -3,11 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { PASSIVE_INDICATOR_COLORS, SECTION_STYLES } from '@/lib/constants'
 import { getDisplayFontForLanguage } from '@/lib/utils'
 import { PassiveCardI18n } from './PassiveI18n'
-import {
-  getEffectivePassives,
-  getLockedPassives,
-  getPassiveCondition,
-} from '../lib/identityPassiveSelection'
+import { getEffectivePassives, getLockedPassives } from '../lib/identityPassiveSelection'
 
 import type { IdentityData, Uptie } from '../types/IdentityTypes'
 
@@ -52,7 +48,7 @@ export function IdentityPassivesPane({ id, passives, uptieLevel }: IdentityPassi
             key={passiveId}
             id={id}
             passiveId={passiveId}
-            condition={getPassiveCondition(passives.conditions, passiveId)}
+            condition={passives.conditions[passiveId]}
             isLocked={false}
           />
         ))}
@@ -61,7 +57,7 @@ export function IdentityPassivesPane({ id, passives, uptieLevel }: IdentityPassi
             key={passiveId}
             id={id}
             passiveId={passiveId}
-            condition={getPassiveCondition(passives.conditions, passiveId)}
+            condition={passives.conditions[passiveId]}
             isLocked={true}
           />
         ))}
@@ -91,7 +87,7 @@ export function IdentityPassivesPane({ id, passives, uptieLevel }: IdentityPassi
             key={passiveId}
             id={id}
             passiveId={passiveId}
-            condition={getPassiveCondition(passives.conditions, passiveId)}
+            condition={passives.conditions[passiveId]}
             isLocked={false}
           />
         ))}
@@ -100,7 +96,7 @@ export function IdentityPassivesPane({ id, passives, uptieLevel }: IdentityPassi
             key={passiveId}
             id={id}
             passiveId={passiveId}
-            condition={getPassiveCondition(passives.conditions, passiveId)}
+            condition={passives.conditions[passiveId]}
             isLocked={true}
           />
         ))}

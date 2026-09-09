@@ -19,11 +19,10 @@ import {
   getPassiveInfo,
   getEffectivePassives,
   getLockedPassives,
-  getPassiveCondition,
 } from '../identityPassiveSelection'
 import { getSkillSlotNumber, getSkillAttributeType } from '../identitySkillSlots'
 import type { SkillSlot } from '../identitySkillSlots'
-import type { IdentityData, IdentitySkillEntry } from '../../types/IdentityTypes'
+import type { IdentitySkillEntry } from '../../types/IdentityTypes'
 import { PassiveIdSchema, SkillIdSchema } from '@/shared/gameData'
 import type { PassiveId, SkillId } from '@/shared/gameData'
 
@@ -119,46 +118,6 @@ describe('getLockedPassives', () => {
 
   it('handles an identity with no passives gracefully', () => {
     expect(getLockedPassives([[], [], [], []], 0)).toEqual([])
-  })
-})
-
-describe('getPassiveCondition', () => {
-  const conditions: IdentityData['passives']['conditions'] = {
-    '1011401': { type: 'STOCK', values: { SHAMROCK: 5 } },
-    '1011421': { type: 'STOCK', values: { SHAMROCK: 4 } },
-  }
-
-  it('returns the passive own condition when it has one', () => {
-    expect(getPassiveCondition(conditions, pid('1011401'))).toEqual({
-      type: 'STOCK',
-      values: { SHAMROCK: 5 },
-    })
-  })
-
-  it('falls back to the base condition for an enhanced passive', () => {
-    expect(getPassiveCondition(conditions, pid('1011411'))).toEqual({
-      type: 'STOCK',
-      values: { SHAMROCK: 5 },
-    })
-  })
-
-  it('prefers the enhanced passive own condition over the base one', () => {
-    const withEnhanced = {
-      ...conditions,
-      '1011411': { type: 'RESONANCE', values: { SHAMROCK: 3 } },
-    }
-    expect(getPassiveCondition(withEnhanced, pid('1011411'))).toEqual({
-      type: 'RESONANCE',
-      values: { SHAMROCK: 3 },
-    })
-  })
-
-  it('returns undefined for a base passive with no condition', () => {
-    expect(getPassiveCondition(conditions, pid('1011403'))).toBeUndefined()
-  })
-
-  it('returns undefined for an enhanced passive whose base has no condition either', () => {
-    expect(getPassiveCondition(conditions, pid('1011413'))).toBeUndefined()
   })
 })
 

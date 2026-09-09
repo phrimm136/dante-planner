@@ -95,6 +95,7 @@ export const identitySpec10114 = {
     supportPassiveList: [[], [], ['1011421'], []],
     conditions: {
       '1011401': { type: 'STOCK', values: { SHAMROCK: 5 } },
+      '1011411': { type: 'STOCK', values: { SHAMROCK: 5 } },
       '1011421': { type: 'STOCK', values: { SHAMROCK: 4 } },
     },
   },
