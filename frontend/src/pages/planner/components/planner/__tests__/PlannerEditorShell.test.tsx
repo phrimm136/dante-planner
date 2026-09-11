@@ -1,9 +1,9 @@
 /**
- * PlannerEditorShell - unload warning.
+ * PlannerEditorShell - save surface.
  *
- * The shell's editing surface is stubbed out: only the beforeunload registration
- * is under test, over the real store and the real usePlannerSave (its two storage
- * adapters faked, as in usePlannerSave.test.ts).
+ * The shell's editing surface is stubbed out: only the save flow is under test,
+ * over the real store and the real usePlannerSave (its two storage adapters
+ * faked, as in usePlannerSave.test.ts).
  */
 
 import { describe, it, expect, vi, beforeEach, assert } from 'vitest'
@@ -13,10 +13,8 @@ import { ok } from '@/lib/result'
 import type { Result } from '@/lib/result'
 import type { SaveablePlanner } from '../../../types/PlannerTypes'
 import type { AppError } from '@/lib/apiErrorClassifier'
-import type { StorageReadError } from '@/lib/storage'
 
 const mockSaveToLocal = vi.fn<(planner: SaveablePlanner) => Promise<Result<void, AppError>>>()
-const mockGetOrCreateDeviceId = vi.fn<() => Promise<Result<string, StorageReadError>>>()
 const mockSyncToServer = vi.fn<(planner: SaveablePlanner, force?: boolean) => Promise<unknown>>()
 
 // Read at render time, so a test can put the shell on the far side of the two
@@ -26,7 +24,6 @@ let mockSyncEnabled = false
 
 vi.mock('@/pages/planner/hooks/usePlannerStorage', () => ({
   usePlannerStorage: () => ({
-    getOrCreateDeviceId: mockGetOrCreateDeviceId,
     saveToLocal: mockSaveToLocal,
     deleteFromLocal: vi.fn(),
     loadFromLocal: vi.fn(),
@@ -155,13 +152,6 @@ function StoreCapture({ onReady }: { onReady: (api: StoreApi<PlannerEditorStore>
   return null
 }
 
-/** Fire the event the browser fires on tab close, and report whether it was vetoed. */
-function fireBeforeUnload(): boolean {
-  const event = new Event('beforeunload', { cancelable: true })
-  window.dispatchEvent(event)
-  return event.defaultPrevented
-}
-
 function renderShell() {
   let storeApi: StoreApi<PlannerEditorStore> | null = null
   const utils = render(
@@ -180,7 +170,6 @@ function renderShell() {
 
 beforeEach(() => {
   vi.clearAllMocks()
-  mockGetOrCreateDeviceId.mockResolvedValue(ok('device-123'))
   mockSaveToLocal.mockResolvedValue(ok(undefined))
   mockAuthUser = null
   mockSyncEnabled = false
@@ -195,67 +184,6 @@ async function clickSave() {
   })
 }
 
-describe('PlannerEditorShell - unload warning', () => {
-  it('does not warn on a freshly mounted, untouched planner', () => {
-    renderShell()
-
-    expect(fireBeforeUnload()).toBe(false)
-  })
-
-  it('warns on a store write that has not re-rendered the shell', () => {
-    const { storeApi } = renderShell()
-
-    // deploymentOrder is not one of the slices the shell selects, so this write
-    // notifies the save subscription without producing a render.
-    storeApi.getState().setDeploymentOrder([3, 1, 2])
-
-    expect(fireBeforeUnload()).toBe(true)
-  })
-
-  it('stops warning once a manual save has adopted what it wrote', async () => {
-    const { storeApi } = renderShell()
-
-    storeApi.getState().setDeploymentOrder([3, 1, 2])
-    expect(fireBeforeUnload()).toBe(true)
-
-    await clickSave()
-
-    await waitFor(() => {
-      expect(mockSaveToLocal).toHaveBeenCalled()
-    })
-    expect(fireBeforeUnload()).toBe(false)
-  })
-
-  it('stops warning once the pending autosave has written', async () => {
-    const { storeApi } = renderShell()
-
-    // The first autosave only adopts a baseline; the second write is the one that
-    // reaches storage.
-    act(() => {
-      storeApi.getState().setDeploymentOrder([3, 1, 2])
-    })
-    await waitFor(() => {
-      expect(fireBeforeUnload()).toBe(false)
-    })
-
-    act(() => {
-      storeApi.getState().setDeploymentOrder([1, 2, 3])
-    })
-    expect(fireBeforeUnload()).toBe(true)
-
-    await waitFor(() => {
-      expect(mockSaveToLocal).toHaveBeenCalledTimes(1)
-    })
-    await waitFor(() => {
-      expect(fireBeforeUnload()).toBe(false)
-    })
-  })
-})
-
-/**
- * A rejected server write, over a signed-in account with sync on — the only
- * route by which the shell holds a conflict at all.
- */
 describe('PlannerEditorShell - a rejected server write', () => {
   beforeEach(() => {
     mockAuthUser = { id: 'user-1' }

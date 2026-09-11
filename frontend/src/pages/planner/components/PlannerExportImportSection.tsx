@@ -26,7 +26,6 @@ import {
   decompressImport,
   encodeExportEnvelope,
   exportFileName,
-  getValidDeviceId,
   importErrorToast,
   parseImportJson,
   partitionImport,
@@ -79,7 +78,7 @@ type SectionState =
  */
 function PlannerExportImportSectionContent() {
   const { t } = useTranslation(['common', 'planner'])
-  const { listLocal, loadFromLocal, saveToLocal, getOrCreateDeviceId } = usePlannerStorage()
+  const { listLocal, loadFromLocal, saveToLocal } = usePlannerStorage()
 
   const [state, setState] = useState<SectionState>({ k: 'idle' })
 
@@ -156,13 +155,7 @@ function PlannerExportImportSectionContent() {
       return
     }
 
-    const deviceId = await getOrCreateDeviceId()
-    if (!deviceId.ok) {
-      showErrorMessage('common:exportImport.exportFailed')
-      return
-    }
-
-    const envelope = buildExportEnvelope(planners, deviceId.value, new Date().toISOString())
+    const envelope = buildExportEnvelope(planners, new Date().toISOString())
 
     setState({ k: 'exporting', pct: 60 })
 
@@ -250,23 +243,11 @@ function PlannerExportImportSectionContent() {
 
     setState({ k: 'importing', pct: 60 })
 
-    const currentDeviceId = await getValidDeviceId(getOrCreateDeviceId)
-    if (!currentDeviceId.ok) {
-      showErrorMessage('common:exportImport.importFailed')
-      clearFileInput()
-      setState({ k: 'idle' })
-      return
-    }
-
     // Check for conflicts with existing planners
     const existingPlanners = await listLocal()
     const existingIds = new Set(existingPlanners.map((p) => p.id))
 
-    const { conflicting, fresh } = partitionImport(
-      envelope.value,
-      existingIds,
-      currentDeviceId.value,
-    )
+    const { conflicting, fresh } = partitionImport(envelope.value, existingIds)
 
     const conflictItems: ConflictItem[] = []
     const nonConflicting: SaveablePlanner[] = [...fresh]
@@ -399,7 +380,6 @@ function PlannerExportImportSectionContent() {
               ...conflict.serverPlanner.metadata,
               id: effect.metadata.id,
               title: sanitizePlannerTitle(effect.metadata.title),
-              deviceId: effect.metadata.deviceId,
               // The original keeps the publication; a copy of it starts unpublished.
               published: false,
             },
@@ -426,15 +406,7 @@ function PlannerExportImportSectionContent() {
   const handleConflictResolve = async (resolutions: ConflictResolution[]) => {
     setState({ k: 'resolving', pct: progress, conflicts })
 
-    const deviceId = await getValidDeviceId(getOrCreateDeviceId)
-    if (!deviceId.ok) {
-      showErrorMessage('common:exportImport.importFailed')
-      setState({ k: 'idle' })
-      return
-    }
-
     const resolutionContext = {
-      deviceId: deviceId.value,
       now: new Date().toISOString(),
       newId: generateUUID,
       copyTitle: (title: string) =>

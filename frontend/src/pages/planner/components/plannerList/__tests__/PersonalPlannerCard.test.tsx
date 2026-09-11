@@ -64,7 +64,6 @@ function createMockPlanner(overrides: Partial<PlannerSummary> = {}): PlannerSumm
     category: '5F',
     status: 'draft',
     lastModifiedAt: '2024-01-01T00:00:00.000Z',
-    savedAt: null,
     published: false,
     selectedKeywords: [],
     ...overrides,
@@ -83,7 +82,6 @@ describe('PersonalPlannerCard', () => {
       const planner = createMockPlanner({
         published: true,
         status: 'saved',
-        savedAt: '2024-01-01T00:00:00.000Z',
       })
       render(<PersonalPlannerCard planner={planner} isAuthenticated={true} syncEnabled={true} />)
       expect(screen.getByLabelText('Published')).toBeInTheDocument()
@@ -98,7 +96,6 @@ describe('PersonalPlannerCard', () => {
     it('shows synced icon when auth + sync ON + status=saved', () => {
       const planner = createMockPlanner({
         status: 'saved',
-        savedAt: '2024-01-01T00:00:00.000Z',
         published: false,
       })
       render(<PersonalPlannerCard planner={planner} isAuthenticated={true} syncEnabled={true} />)
@@ -123,7 +120,7 @@ describe('PersonalPlannerCard', () => {
     })
 
     it('shows nothing when guest with saved status', () => {
-      const planner = createMockPlanner({ status: 'saved', savedAt: '2024-01-01T00:00:00.000Z' })
+      const planner = createMockPlanner({ status: 'saved' })
       render(<PersonalPlannerCard planner={planner} isAuthenticated={false} syncEnabled={null} />)
       expect(screen.queryByText('Draft')).not.toBeInTheDocument()
       expect(screen.queryByText('Unsynced')).not.toBeInTheDocument()

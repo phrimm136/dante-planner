@@ -51,7 +51,6 @@ type MDPlanner = Extract<SaveablePlanner, { config: { type: 'MIRROR_DUNGEON' } }
 
 const FIXTURE_PLANNER_ID = '00000000-0000-4000-8000-000000000001'
 const FIXTURE_TIMESTAMP = '2026-01-01T00:00:00.000Z'
-const FIXTURE_DEVICE_ID = 'fixture-device'
 
 /** A floor selection parsed through the schema the drift guard pins to its type. */
 export function buildFloorSelection(
@@ -87,8 +86,6 @@ export function buildSaveablePlanner(
       syncVersion: 1,
       createdAt: FIXTURE_TIMESTAMP,
       lastModifiedAt: FIXTURE_TIMESTAMP,
-      savedAt: null,
-      deviceId: FIXTURE_DEVICE_ID,
       ...overrides.metadata,
     },
     config: {
@@ -123,7 +120,6 @@ export function buildPlannerSummary(overrides: Partial<PlannerSummary> = {}): Pl
     category: planner.config.category,
     status: planner.metadata.status,
     lastModifiedAt: planner.metadata.lastModifiedAt,
-    savedAt: planner.metadata.savedAt,
     syncVersion: planner.metadata.syncVersion,
     ...overrides,
   }

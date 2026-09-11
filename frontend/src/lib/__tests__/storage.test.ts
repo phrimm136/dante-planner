@@ -38,6 +38,7 @@ interface StubTransaction {
   onerror: Handler
   error: unknown
   objectStore: () => unknown
+  commit: () => void
 }
 
 /** A database whose object store answers `get` from a plain map and writes into it. */
@@ -52,6 +53,7 @@ function stubDb(rows: Map<string, string>, writeOutcome: WriteOutcome = 'commit'
         onerror: null,
         error: null,
         objectStore: () => store,
+        commit: () => {},
       }
 
       /** A write settles the request and then the transaction, as IndexedDB does. */
@@ -277,6 +279,19 @@ describe('storage connection lifecycle', () => {
 })
 
 describe('storage writes', () => {
+  it('creates the transaction before returning once the connection is open', async () => {
+    const rows = new Map<string, string>()
+    const { dbs } = installIndexedDB([{ kind: 'success', rows }])
+    const { storage } = await importStorage()
+    await storage.getItem('warm')
+    const transaction = vi.spyOn(firstDb(dbs), 'transaction')
+
+    const pending = storage.setItem('k', 'v')
+
+    expect(transaction).toHaveBeenCalledTimes(1)
+    await pending
+  })
+
   it('reports ok once the write transaction commits', async () => {
     const rows = new Map<string, string>()
     installIndexedDB([{ kind: 'success', rows }])

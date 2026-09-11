@@ -1,19 +1,20 @@
 import { useTranslation } from 'react-i18next'
+import { useStore } from 'zustand'
 import { SECTION_STYLES } from '@/lib/constants'
 import { formatRelativeTime } from '@/lib/formatDate'
+import type { SaveStatusStore } from '../../stores/saveStatus'
 
 interface LastSavedLabelProps {
-  /** ISO 8601 timestamp of the last successful save, or null when there is none. */
-  lastSavedAt: string | null
-  /** Render as a suffix inside an existing line instead of its own muted span. */
-  inline?: boolean
+  /** The write path's report; this label is its only subscriber. */
+  status: SaveStatusStore
 }
 
 /**
  * "Saved 2 minutes ago", or nothing when there is no usable timestamp.
  */
-export function LastSavedLabel({ lastSavedAt, inline = false }: LastSavedLabelProps) {
+export function LastSavedLabel({ status }: LastSavedLabelProps) {
   const { t, i18n } = useTranslation('planner')
+  const lastSavedAt = useStore(status, (s) => s.lastSavedAt)
 
   if (!lastSavedAt) return null
 
@@ -23,8 +24,6 @@ export function LastSavedLabel({ lastSavedAt, inline = false }: LastSavedLabelPr
   const text = t('sync.lastSaved', {
     time: formatRelativeTime(lastSavedAt, i18n.language),
   })
-
-  if (inline) return <>{` - ${text}`}</>
 
   return <span className={SECTION_STYLES.TEXT.caption}>{text}</span>
 }

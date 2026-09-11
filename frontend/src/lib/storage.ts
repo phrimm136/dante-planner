@@ -182,6 +182,10 @@ const isClient = typeof window !== 'undefined'
 
 let dbPromise: Promise<IDBDatabase> | null = null
 
+// The connection behind `dbPromise` once it has opened, so a write can be issued
+// inside the caller's task instead of after an await.
+let openedDb: IDBDatabase | null = null
+
 function getDB(): Promise<IDBDatabase> {
   if (!isClient) {
     return Promise.reject(new Error('IndexedDB not available on server'))
@@ -220,8 +224,12 @@ function getDB(): Promise<IDBDatabase> {
       }
       db.onversionchange = () => {
         db.close()
-        if (owns()) dbPromise = null
+        if (owns()) {
+          dbPromise = null
+          openedDb = null
+        }
       }
+      openedDb = db
       resolve(db)
     }
 
@@ -259,33 +267,50 @@ export async function openStorageDb(): Promise<IDBDatabase | null> {
   return getDB()
 }
 
+/** Issue a write on an open connection, resolving once its transaction commits. */
+function issueWrite(
+  db: IDBDatabase,
+  label: string,
+  issue: (store: IDBObjectStore) => IDBRequest,
+): Promise<Result<void, StorageReadError>> {
+  return new Promise<void>((resolve, reject) => {
+    const transaction = db.transaction(STORAGE_STORE_NAME, 'readwrite')
+    const request = issue(transaction.objectStore(STORAGE_STORE_NAME))
+
+    transaction.oncomplete = () => resolve()
+    transaction.onabort = () => reject(transaction.error ?? request.error)
+    transaction.onerror = () => reject(transaction.error ?? request.error)
+    request.onerror = () => reject(request.error)
+    // Auto-commit sends the commit only when the task ends, and a renderer killed
+    // before then takes the write with it.
+    transaction.commit()
+  }).then(
+    () => ok(undefined),
+    (error: unknown) => {
+      console.error(`IndexedDB.${label} failed`, error)
+      return err({ kind: 'ioError', cause: error })
+    },
+  )
+}
+
 /**
- * Run a write on the shared connection, resolving only once its transaction
- * commits.
+ * Run a write on the shared connection, reporting whether it committed: a
+ * request can report success and the transaction still abort, which is how a
+ * quota failure arrives.
  *
- * The commit is what makes a write durable: a request can report success and
- * the transaction still abort, which is exactly how a quota failure arrives.
- * Reporting on the request alone would tell the caller its data is saved when
- * the store dropped it.
+ * With the connection open the transaction is created before this returns,
+ * inside the caller's task; awaiting the connection promise would yield first
+ * even when it is already resolved.
  */
 async function runWrite(
   label: string,
   issue: (store: IDBObjectStore) => IDBRequest,
 ): Promise<Result<void, StorageReadError>> {
   if (!isClient) return err({ kind: 'notInBrowser' })
+  if (openedDb) return issueWrite(openedDb, label, issue)
 
   try {
-    const db = await getDB()
-    await new Promise<void>((resolve, reject) => {
-      const transaction = db.transaction(STORAGE_STORE_NAME, 'readwrite')
-      const request = issue(transaction.objectStore(STORAGE_STORE_NAME))
-
-      transaction.oncomplete = () => resolve()
-      transaction.onabort = () => reject(transaction.error ?? request.error)
-      transaction.onerror = () => reject(transaction.error ?? request.error)
-      request.onerror = () => reject(request.error)
-    })
-    return ok(undefined)
+    return await issueWrite(await getDB(), label, issue)
   } catch (error) {
     console.error(`IndexedDB.${label} failed`, error)
     return err({ kind: 'ioError', cause: error })

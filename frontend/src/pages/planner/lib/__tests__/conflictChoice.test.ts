@@ -15,7 +15,6 @@ const NOW = '2026-01-01T00:00:00.000Z'
 
 function context(overrides: Partial<ConflictResolutionContext> = {}): ConflictResolutionContext {
   return {
-    deviceId: 'device-1',
     now: NOW,
     newId: () => 'copy-id',
     copyTitle: (title) => `${title} [copy]`,
@@ -86,10 +85,8 @@ describe('planConflictResolution', () => {
         title: 'My Run [copy]',
         status: 'saved',
         syncVersion: 1,
-        deviceId: 'device-1',
         createdAt: NOW,
         lastModifiedAt: NOW,
-        savedAt: NOW,
       },
     })
   })
@@ -131,7 +128,7 @@ describe('interpretConflictPlan', () => {
   })
 
   function interpreterContext(newId: () => string = () => 'copy-id'): ConflictInterpreterContext {
-    return { deviceId: 'device-1', now: NOW, newId }
+    return { now: NOW, newId }
   }
 
   function operations(overrides: Partial<ConflictOps> = {}): ConflictOps {
@@ -280,7 +277,7 @@ describe('interpretConflictPlan', () => {
 
     expect(outcome).toEqual({ ok: true, value: undefined })
     const stored = saveLocal.mock.calls[0]![0]
-    expect(stored.metadata).toMatchObject({ id: PLANNER_ID, status: 'saved', savedAt: NOW })
+    expect(stored.metadata).toMatchObject({ id: PLANNER_ID, status: 'saved' })
   })
 
   it('reads the local side when the resolution runs, not when the plan was built', async () => {
@@ -380,7 +377,7 @@ describe('interpretConflictPlan', () => {
 
     const [storeCall] = saveLocal.mock.calls
     if (!storeCall) throw new Error('expected saveLocal to have been called')
-    expect(storeCall[0].metadata).toMatchObject({ status: 'saved', savedAt: NOW, syncVersion: 12 })
+    expect(storeCall[0].metadata).toMatchObject({ status: 'saved', syncVersion: 12 })
   })
 
   it('copies the side the plan names, not whichever side is cheapest to reach', async () => {

@@ -22,7 +22,6 @@ const storageMocks = vi.hoisted(() => ({
   listLocal: vi.fn(async (): Promise<unknown[]> => []),
   loadFromLocal: vi.fn(async (_id: string): Promise<unknown> => ({ ok: false, error: 'missing' })),
   saveToLocal: vi.fn(async (_planner: unknown): Promise<unknown> => ({ ok: true })),
-  getOrCreateDeviceId: vi.fn(async (): Promise<unknown> => ({ ok: true, value: 'device-1' })),
 }))
 
 vi.mock('../../hooks/usePlannerStorage', () => ({
@@ -59,11 +58,10 @@ function conflictingImportFile(): File {
   const envelope = {
     exportVersion: EXPORT_VERSION,
     exportedAt: '2026-01-01T00:00:00.000Z',
-    sourceDeviceId: 'other-device',
     planners: [
       {
         id: PLANNER_ID,
-        metadata: { ...EXISTING.metadata, title: 'Imported Run', deviceId: '' },
+        metadata: { ...EXISTING.metadata, title: 'Imported Run' },
         config: EXISTING.config,
         content: EXISTING.content,
       },
@@ -81,7 +79,6 @@ describe('PlannerExportImportSection conflict dismissal', () => {
     storageMocks.listLocal.mockResolvedValue([{ id: PLANNER_ID, title: 'Existing Run' }])
     storageMocks.loadFromLocal.mockResolvedValue({ ok: true, value: EXISTING })
     storageMocks.saveToLocal.mockResolvedValue({ ok: true })
-    storageMocks.getOrCreateDeviceId.mockResolvedValue({ ok: true, value: 'device-1' })
   })
 
   it('returns to idle when the user closes the conflict dialog', async () => {

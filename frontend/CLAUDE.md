@@ -37,7 +37,7 @@ Code-based routes only, defined in `src/lib/router.tsx` with `lazyRouteComponent
 ## Forms & debounce
 
 - Forms are hand-rolled controlled components (`useState` + submit handler + mutation). react-hook-form and @hookform/resolvers are NOT installed — do not introduce them.
-- No debounce library — debouncing is hand-rolled `setTimeout` + cleanup using `SEARCH_DEBOUNCE_DELAY` / `AUTO_SAVE_DEBOUNCE_MS` from `src/lib/constants.ts`. Don't add a library without a decision.
+- No debounce library — debouncing is hand-rolled `setTimeout` + cleanup using `SEARCH_DEBOUNCE_DELAY` from `src/lib/constants.ts`. Don't add a library without a decision. The planner editor does not debounce at all: every store change is written to IndexedDB inside its own task (`pages/planner/lib/writeThrough.ts`).
 
 ## Data & i18n
 

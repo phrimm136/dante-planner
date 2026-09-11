@@ -192,12 +192,15 @@ export const PlannerTypeSchema = z.enum(PLANNER_TYPES)
  * planners and old export files. Dropped before the strict gate so legacy rows
  * load while unknown keys keep failing.
  */
-const LEGACY_METADATA_KEYS = ['userId'] as const
+const LEGACY_METADATA_KEYS = ['userId', 'deviceId', 'savedAt'] as const
 
-function dropLegacyMetadataKeys(value: unknown): unknown {
+/** Export envelope keys written by earlier app versions, likewise dropped. */
+const LEGACY_ENVELOPE_KEYS = ['sourceDeviceId'] as const
+
+const dropLegacyKeys = (keys: readonly string[]) => (value: unknown) => {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return value
   const cleaned = { ...(value as Record<string, unknown>) }
-  for (const key of LEGACY_METADATA_KEYS) delete cleaned[key]
+  for (const key of keys) delete cleaned[key]
   return cleaned
 }
 
@@ -206,7 +209,7 @@ function dropLegacyMetadataKeys(value: unknown): unknown {
  * Contains tracking and identification data
  */
 export const PlannerMetadataSchema = z.preprocess(
-  dropLegacyMetadataKeys,
+  dropLegacyKeys(LEGACY_METADATA_KEYS),
   z
     .object({
       /** Unique identifier (UUID v4) */
@@ -227,10 +230,6 @@ export const PlannerMetadataSchema = z.preprocess(
       createdAt: z.string().datetime(),
       /** ISO 8601 timestamp when planner was last modified */
       lastModifiedAt: z.string().datetime(),
-      /** ISO 8601 timestamp when planner was explicitly saved */
-      savedAt: z.string().datetime().nullable(),
-      /** Device identifier for local storage namespacing */
-      deviceId: z.string(),
       /** Whether planner is published to Gesellschaft */
       published: z.boolean().optional(),
     })
@@ -688,15 +687,18 @@ export const PlannerExportItemSchema = z
  * Export envelope schema for validating imported .danteplanner files
  * Light structural validation - does not reject based on version mismatch
  */
-export const ExportEnvelopeSchema = z
+export const ExportEnvelopeShapeSchema = z
   .object({
     /** Export format version for future migration support */
     exportVersion: z.number().int().positive(),
     /** ISO 8601 timestamp when export was created */
     exportedAt: z.string(),
-    /** Device ID of the source device */
-    sourceDeviceId: z.string(),
     /** Array of exported planners */
     planners: z.array(PlannerExportItemSchema),
   })
   .strict()
+
+export const ExportEnvelopeSchema = z.preprocess(
+  dropLegacyKeys(LEGACY_ENVELOPE_KEYS),
+  ExportEnvelopeShapeSchema,
+)

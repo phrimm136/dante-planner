@@ -16,14 +16,11 @@ import {
   EXPORT_VERSION,
   INFLATE_INPUT_CHUNK_BYTES,
 } from '@/lib/constants'
-import { isValidUUID } from '@/lib/utils'
-import { generateUUID } from '@/lib/uuid'
 import { sanitizeToPlainText } from '@/shared/sanitize'
 import { ExportEnvelopeSchema, toSaveablePlanner } from '../schemas/PlannerSchemas'
 import { GZIP_OS_BYTE_OFFSET, GZIP_OS_TOPS20 } from './deckCode'
 
 import type { Result } from '@/lib/result'
-import type { StorageReadError } from '@/lib/storage'
 import type { ExportEnvelope, PlannerExportItem, SaveablePlanner } from '../types/PlannerTypes'
 import type { z } from 'zod'
 
@@ -42,34 +39,7 @@ export interface OutcomeToast<TCounts> extends ToastDescriptor {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Device id                                                                   */
 /* -------------------------------------------------------------------------- */
-
-/**
- * Resolve a usable device id: one retry of the supplied source, then a generated
- * UUID so imported planners always carry a well-formed owner key.
- *
- * A read that could not be performed is reported instead. Minting over it would
- * orphan every row already written under the id the read failed to see.
- */
-export async function getValidDeviceId(
-  source: () => Promise<Result<string, StorageReadError>>,
-): Promise<Result<string, StorageReadError>> {
-  let read = await source()
-  if (!read.ok) return read
-
-  if (!isValidUUID(read.value)) {
-    read = await source()
-    if (!read.ok) return read
-  }
-
-  if (!isValidUUID(read.value)) {
-    const fallback = generateUUID()
-    console.warn('Using fallback device ID:', fallback)
-    return ok(fallback)
-  }
-  return read
-}
 
 /* -------------------------------------------------------------------------- */
 /* Export stages                                                               */
@@ -78,11 +48,11 @@ export async function getValidDeviceId(
 /** Leading part of an export file name; the export date and extension close it. */
 const EXPORT_FILE_PREFIX = 'plans-'
 
-/** Drop the owning device so an exported planner can be read back anywhere. */
+/** An exported planner, its id lifted beside the metadata that also carries it. */
 export function toExportItem(planner: SaveablePlanner): PlannerExportItem {
   return {
     id: planner.metadata.id,
-    metadata: { ...planner.metadata, deviceId: '' },
+    metadata: planner.metadata,
     config: planner.config,
     content: planner.content,
   }
@@ -91,13 +61,11 @@ export function toExportItem(planner: SaveablePlanner): PlannerExportItem {
 /** Wrap the exported planners with the version and provenance a reader needs. */
 export function buildExportEnvelope(
   planners: PlannerExportItem[],
-  sourceDeviceId: string,
   exportedAt: string,
 ): ExportEnvelope {
   return {
     exportVersion: EXPORT_VERSION,
     exportedAt,
-    sourceDeviceId,
     planners,
   }
 }
@@ -255,16 +223,12 @@ export interface PartitionedImport {
   fresh: SaveablePlanner[]
 }
 
-/** Rebuild an exported planner as one this device owns. */
-function toImportedPlanner(
-  item: ImportEnvelope['planners'][number],
-  deviceId: string,
-): SaveablePlanner {
+/** Rebuild an exported planner as one this browser holds. */
+function toImportedPlanner(item: ImportEnvelope['planners'][number]): SaveablePlanner {
   return toSaveablePlanner(
     {
       ...item.metadata,
       title: sanitizePlannerTitle(item.metadata.title),
-      deviceId,
     },
     item.config,
     item.content,
@@ -280,13 +244,12 @@ function toImportedPlanner(
 export function partitionImport(
   envelope: ImportEnvelope,
   existingIds: ReadonlySet<string>,
-  deviceId: string,
 ): PartitionedImport {
   const conflicting: ImportConflictCandidate[] = []
   const fresh: SaveablePlanner[] = []
 
   for (const item of envelope.planners) {
-    const incoming = toImportedPlanner(item, deviceId)
+    const incoming = toImportedPlanner(item)
     if (existingIds.has(item.id)) {
       conflicting.push({ id: item.id, incoming })
     } else {

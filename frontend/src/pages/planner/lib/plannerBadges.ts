@@ -20,7 +20,6 @@ export type SaveStatus =
 export interface SaveStatusSource {
   published?: boolean | null | undefined
   status: PlannerStatus
-  savedAt?: string | null | undefined
 }
 
 /** Badge variant per save status, so a new status cannot ship unstyled. */
@@ -36,18 +35,13 @@ export const SAVE_STATUS_BADGE_VARIANT: Record<
   unpublishedChanges: 'destructive',
 }
 
-/**
- * Classify a planner's save state.
- *
- * `savedAt === null` counts as unsaved even when the status says otherwise:
- * a planner that has never been written has nothing to be in sync with.
- */
+/** Classify a planner's save state. */
 export function deriveSaveStatus(
   planner: SaveStatusSource,
   isAuthenticated: boolean,
   syncEnabled: boolean | null | undefined,
 ): SaveStatus {
-  const hasPendingChanges = planner.status === 'draft' || planner.savedAt === null
+  const hasPendingChanges = planner.status === 'draft'
 
   if (planner.published) {
     return planner.status === 'draft' ? 'unpublishedChanges' : 'published'

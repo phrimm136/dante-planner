@@ -76,8 +76,6 @@ export function serverResponseToSaveable(response: ServerPlannerResponse): Savea
       syncVersion: response.syncVersion,
       createdAt: response.createdAt,
       lastModifiedAt: response.lastModifiedAt,
-      savedAt: response.savedAt ?? null,
-      deviceId: response.deviceId ?? '',
       published: response.published,
     },
     PlannerConfigDiscriminatedSchema.parse({
@@ -99,7 +97,6 @@ function serverSummaryToLocal(summary: ServerPlannerSummary): PlannerSummary {
     category: summary.category,
     status: summary.status,
     lastModifiedAt: summary.lastModifiedAt,
-    savedAt: null,
     syncVersion: summary.syncVersion,
     ...(summary.deletedAt !== undefined && { deletedAt: summary.deletedAt }),
   }

@@ -101,8 +101,6 @@ function makePlanner(
       syncVersion: 1,
       createdAt: '2026-01-01T00:00:00Z',
       lastModifiedAt: '2026-01-01T00:00:00Z',
-      savedAt: '2026-01-01T00:00:00Z',
-      deviceId: 'd1',
       published: false,
     },
     config: { type: 'MIRROR_DUNGEON', category },

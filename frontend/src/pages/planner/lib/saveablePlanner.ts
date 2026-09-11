@@ -48,7 +48,6 @@ export interface PlannerState {
 export interface SaveablePlannerInput {
   state: PlannerState
   plannerId: string
-  deviceId: string
   schemaVersion: number
   contentVersion: number
   /** The editor state carries an MD category, so only the MD branch is buildable. */
@@ -100,9 +99,7 @@ export function createSaveablePlanner(input: SaveablePlannerInput): MDSaveablePl
     syncVersion: input.existingSyncVersion,
     createdAt: input.existingCreatedAt ?? now,
     lastModifiedAt: now,
-    savedAt: input.status === 'saved' ? now : null,
     published: input.published,
-    deviceId: input.deviceId,
   }
 
   const content: MDPlannerContent = {

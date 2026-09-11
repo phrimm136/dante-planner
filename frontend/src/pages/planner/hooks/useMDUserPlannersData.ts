@@ -409,14 +409,6 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
     setIsResolvingConflicts(true)
 
     try {
-      // The copy is stamped with this device, and the id lives in the same store
-      // the copy would be written to.
-      const deviceId = await storage.getOrCreateDeviceId()
-      if (!deviceId.ok) {
-        // Nothing was attempted, so this failed the submission, not its first row.
-        return [{ id: first.id, result: err({ step: 'precondition', error: { kind: 'unknown' } }) }]
-      }
-
       const outcomes: ConflictOutcome[] = []
       const resolved = new Set<string>()
 
@@ -424,7 +416,7 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
         const conflict = pendingConflicts.find((c) => c.id === resolution.id)
         if (!conflict) continue
 
-        const ctx = { deviceId: deviceId.value, now: new Date().toISOString(), newId: generateUUID }
+        const ctx = { now: new Date().toISOString(), newId: generateUUID }
         const held = heldPlans.current.get(conflict.id)
         const plan =
           held?.choice === resolution.choice

@@ -3,7 +3,6 @@ import { DB_NAME, DB_VERSION, STORAGE_STORE_NAME } from '@/lib/storage'
 import type { Page } from '@playwright/test'
 import { localPlannerContent } from './plannerContent'
 
-const DEVICE_ID = 'e2e-device'
 const SCHEMA_VERSION = 1
 const SYNC_VERSION = 1
 
@@ -45,8 +44,6 @@ export async function seedLocalPlanner(page: Page, seed: LocalPlannerSeed): Prom
       syncVersion: SYNC_VERSION,
       createdAt: timestamp,
       lastModifiedAt: timestamp,
-      savedAt: status === 'saved' ? timestamp : null,
-      deviceId: DEVICE_ID,
       published,
     },
     config: { type: 'MIRROR_DUNGEON', category: '5F' },
@@ -56,15 +53,7 @@ export async function seedLocalPlanner(page: Page, seed: LocalPlannerSeed): Prom
   const key = [PLANNER_STORAGE_KEYS.PLANNER, plannerId].join(':')
 
   await page.addInitScript(
-    (script: {
-      dbName: string
-      dbVersion: number
-      store: string
-      deviceIdKey: string
-      deviceId: string
-      key: string
-      value: string
-    }) => {
+    (script: { dbName: string; dbVersion: number; store: string; key: string; value: string }) => {
       const request = indexedDB.open(script.dbName, script.dbVersion)
       request.onupgradeneeded = () => {
         if (!request.result.objectStoreNames.contains(script.store)) {
@@ -78,7 +67,6 @@ export async function seedLocalPlanner(page: Page, seed: LocalPlannerSeed): Prom
         const existing = store.get(script.key)
         existing.onsuccess = () => {
           if (existing.result === undefined) {
-            store.put(script.deviceId, script.deviceIdKey)
             store.put(script.value, script.key)
           }
           // close() drains the queued puts first; a connection left open would block the
@@ -91,10 +79,36 @@ export async function seedLocalPlanner(page: Page, seed: LocalPlannerSeed): Prom
       dbName: DB_NAME,
       dbVersion: DB_VERSION,
       store: STORAGE_STORE_NAME,
-      deviceIdKey: PLANNER_STORAGE_KEYS.DEVICE_ID,
-      deviceId: DEVICE_ID,
       key,
       value: JSON.stringify(planner),
     },
+  )
+}
+
+/** Every planner row the store holds, read from a page on the app's origin. */
+export function readPlannerRows(page: Page): Promise<string[]> {
+  return page.evaluate(
+    ([db, version, store]) =>
+      new Promise<string[]>((resolve, reject) => {
+        // Opened at the app's version, so a profile the app has not written yet is not
+        // left holding an older, storeless database.
+        const request = indexedDB.open(db, version)
+        request.onupgradeneeded = () => {
+          if (!request.result.objectStoreNames.contains(store)) {
+            request.result.createObjectStore(store)
+          }
+        }
+        request.onerror = () => reject(request.error)
+        request.onblocked = () => reject(new Error('blocked'))
+        request.onsuccess = () => {
+          const transaction = request.result.transaction(store, 'readonly')
+          const values = transaction.objectStore(store).getAll()
+          // Rows are stored as JSON strings already; stringifying again would escape them.
+          transaction.oncomplete = () =>
+            resolve(values.result.map((v) => (typeof v === 'string' ? v : JSON.stringify(v))))
+          transaction.onerror = () => reject(transaction.error)
+        }
+      }),
+    [DB_NAME, DB_VERSION, STORAGE_STORE_NAME] as const,
   )
 }

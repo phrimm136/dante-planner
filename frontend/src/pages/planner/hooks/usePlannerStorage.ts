@@ -1,6 +1,5 @@
 import { storage, openStorageDb, STORAGE_STORE_NAME } from '@/lib/storage'
 import { PLANNER_STORAGE_KEYS } from '@/lib/constants'
-import { generateUUID } from '@/lib/uuid'
 import { ok, err } from '@/lib/result'
 import { validateDataOrNull } from '@/lib/validation'
 import { migrateKeywords } from '@/shared/gameData'
@@ -24,8 +23,6 @@ const isClient = typeof window !== 'undefined'
 export const storageKeys = {
   /** Planner row key: planner:{plannerId} */
   planner: (plannerId: string) => `${PLANNER_STORAGE_KEYS.PLANNER}:${plannerId}`,
-  /** Device ID key */
-  deviceId: () => PLANNER_STORAGE_KEYS.DEVICE_ID,
 }
 
 /**
@@ -90,8 +87,6 @@ export type LoadResult = Result<SaveablePlanner | null, StorageErrorCode>
  * Provides CRUD operations with Zod validation and guest draft limits
  */
 export interface PlannerStorageOperations {
-  /** Get device ID from storage or create new UUID; a read that broke reports why */
-  getOrCreateDeviceId: () => Promise<Result<string, StorageReadError>>
   /** Save planner to IndexedDB with proper key based on status, reporting why it failed */
   saveToLocal: (
     planner: SaveablePlanner,
@@ -109,8 +104,21 @@ export interface PlannerStorageOperations {
   clearCorruptedLocal: (id: string) => Promise<Result<void, AppError>>
 }
 
-// Promise cache for getOrCreateDeviceId to prevent race conditions
-let deviceIdPromise: Promise<Result<string, StorageReadError>> | null = null
+/** The row a planner is stored as, or null when it fails the schema. */
+function plannerRow(planner: SaveablePlanner): { key: string; json: string } | null {
+  const validated = validateDataOrNull(
+    planner,
+    SaveablePlannerSchema,
+    `planner save / ${planner.metadata?.id}`,
+  )
+  if (!validated) return null
+  return { key: storageKeys.planner(planner.metadata.id), json: JSON.stringify(validated) }
+}
+
+/** The error a caller reports for a write the storage layer refused. */
+function writeError(failure: StorageReadError): AppError {
+  return classifyAppError(failure.kind === 'ioError' ? failure.cause : failure)
+}
 
 /**
  * Hook that provides planner storage operations using IndexedDB
@@ -141,45 +149,8 @@ export function usePlannerStorage(): PlannerStorageOperations {
   // All functions only use module-level variables, no React state/props
   return (() => {
     /**
-     * Get device ID from storage or create a new one
-     * Device ID is used for namespacing storage keys
-     * Uses promise caching to prevent race conditions with concurrent calls
-     */
-    const getOrCreateDeviceId = async (): Promise<Result<string, StorageReadError>> => {
-      if (!isClient) return err({ kind: 'notInBrowser' })
-
-      // Return cached promise if already in progress (prevents race condition)
-      if (deviceIdPromise) return deviceIdPromise
-
-      deviceIdPromise = (async () => {
-        try {
-          const existingId = await storage.getItem(storageKeys.deviceId())
-          // A read that broke says nothing about whether an id exists. Minting
-          // one here would orphan every row written under the previous id.
-          if (!existingId.ok) return existingId
-          if (existingId.value) {
-            return ok(existingId.value)
-          }
-
-          const newId = generateUUID()
-          const written = await storage.setItem(storageKeys.deviceId(), newId)
-          // An id that did not persist would be minted again on the next read,
-          // scattering rows across a new identity every time.
-          if (!written.ok) return written
-          return ok(newId)
-        } finally {
-          // Clear promise cache after resolution to allow re-fetch if storage is cleared externally
-          deviceIdPromise = null
-        }
-      })()
-
-      return deviceIdPromise
-    }
-
-    /**
-     * Save planner to IndexedDB
-     * Uses unified key: planner:{plannerId}
-     * Validates planner data with Zod before saving
+     * Save planner to IndexedDB under planner:{plannerId}. With the connection
+     * open the write is issued inside the caller's task.
      * @returns the save error the caller reports to the user, or nothing on success
      */
     const saveToLocal = async (
@@ -190,25 +161,16 @@ export function usePlannerStorage(): PlannerStorageOperations {
         return err({ kind: 'unknown' })
       }
 
-      // Validate planner data before saving
-      const validated = validateDataOrNull(
-        planner,
-        SaveablePlannerSchema,
-        `planner save / ${planner.metadata?.id}`,
-      )
-      if (!validated) {
+      const row = plannerRow(planner)
+      if (!row) {
         options?.onError?.('validationFailed')
         return err({ kind: 'unknown' })
       }
 
       try {
-        const key = storageKeys.planner(planner.metadata.id)
-
-        const written = await storage.setItem(key, JSON.stringify(validated))
+        const written = await storage.setItem(row.key, row.json)
         if (!written.ok) {
-          const saveError = classifyAppError(
-            written.error.kind === 'ioError' ? written.error.cause : written.error,
-          )
+          const saveError = writeError(written.error)
           options?.onError?.(saveError.kind === 'quota' ? 'quotaExceeded' : 'saveFailed')
           return err(saveError)
         }
@@ -297,7 +259,7 @@ export function usePlannerStorage(): PlannerStorageOperations {
             const key = cursor.key as string
             const parsed = parseStorageKey(key)
 
-            // Only include planner rows; the deviceId singleton parses to null
+            // Only include planner rows; a key with no planner id parses to null
             if (parsed?.prefix === PLANNER_STORAGE_KEYS.PLANNER) {
               try {
                 const data = JSON.parse(cursor.value)
@@ -323,7 +285,6 @@ export function usePlannerStorage(): PlannerStorageOperations {
                     category: planner.config.category,
                     status: planner.metadata.status,
                     lastModifiedAt: planner.metadata.lastModifiedAt,
-                    savedAt: planner.metadata.savedAt,
                     syncVersion: planner.metadata.syncVersion,
                     ...(published !== undefined && { published }),
                     // Keywords are MD-only; RR summaries omit the field entirely.
@@ -429,11 +390,7 @@ export function usePlannerStorage(): PlannerStorageOperations {
         const removed = await storage.removeItem(storageKeys.planner(id))
         if (!removed.ok) {
           console.error('Failed to delete planner:', removed.error)
-          return err(
-            classifyAppError(
-              removed.error.kind === 'ioError' ? removed.error.cause : removed.error,
-            ),
-          )
+          return err(writeError(removed.error))
         }
         return ok(undefined)
       } catch (error) {
@@ -451,7 +408,6 @@ export function usePlannerStorage(): PlannerStorageOperations {
     }
 
     return {
-      getOrCreateDeviceId,
       saveToLocal,
       loadFromLocal,
       listLocal,

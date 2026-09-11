@@ -324,16 +324,9 @@ asset pipeline.
 - 2026-08-14 — BATCH_PULL_MAX_IDS is hand-mirrored (frontend constants vs backend
   PlannerConstants) with nothing cross-checking the two; the RFC 0003/0004 wrap-up verification
   should compare them, and a contract test would hold thereafter.
-- 2026-08-14 — PlannerSaveResult.hasLocalUnsavedChanges lost its last production reader when the
-  beforeunload handler moved onto isDirty() (stream 6); the field and its two test assertions
-  survive only because removal was not RFC-ordered. Fold into stream 8's usePlannerSave
-  decomposition row.
 - 2026-08-14 — a 404 on the comment SSE stream stops retrying silently (usePlannerCommentsSse
   passes no onStreamGone); the planner stream toasts. Inside stream 5's contract letter, but the
   "stop retrying and say so" prose is unmet for that consumer.
-- 2026-08-14 — NoteEditor treats Tiptap's mount-time update as a local change: a bare mount fires
-  one debounced onChange and briefly marks the planner dirty. Verified pre-existing (stream 6
-  probe); matters to stream 4's error/success gating and to any future clean-state assertion.
 - 2026-08-14 — RELEASE BLOCKER for RFC 0004: sync.removedOnAnotherDevice (planner ns) and the five
   errors.* keys (common ns) exist only as uncommitted edits in the static working tree; the
   submodule pointer on dev (b1c017c8) predates them, so both removal surfaces and the stream-4
@@ -348,10 +341,6 @@ asset pipeline.
   count is truthful about the file but a partial export reads as a clean one. Reporting it needs
   copy that does not exist yet (stream 4 flagged; fold into the export decode→partition→persist
   split in stream 8).
-- 2026-08-14 — the pagehide drain delivers into the in-memory store and arms a timer a discarded
-  tab never fires: it rescues bfcache restores only, not true mobile tab discard. Synchronous
-  persistence on pagehide would need a different storage strategy; note the commit prose
-  overstates the coverage.
 - 2026-08-14 — onServerReload's boolean cannot carry WHY a reload was refused, so the hook maps
   every refusal to {kind:'unknown'} and the user sees the specific toast plus a generic one.
   Becomes a real gap at the second refusal reason.
@@ -428,8 +417,7 @@ asset pipeline.
   brands (the latter needs a seventh primitive the RFC never defined); the gift enhancement
   prefix is restated inline in egoGiftEncoding; StartBuffSchemas patched the flip with
   z.coerce.number(); shared/noteEditor is a blanket deep-import exemption with nine deep
-  importers and a barrel that exports neither components nor the registry; the pagehide drain
-  lands text in the store a discarded tab never persists (probably irreducible); ADR
+  importers and a barrel that exports no components; ADR
   stale-write-noop's REJECTED clause and the shipped ToleratedContentDigestSchema disagree on
   who owns the field's removal; reportFailure can displace a live conflict where resolutionError
   was built for exactly that; the two held-plan callers key by different identities; the comment
@@ -482,13 +470,6 @@ asset pipeline.
   `deleteLocal`'s Result) and a failed background sync marks the session synced with no
   retry and no indicator (`hasSyncedRef` set on error; the `isSyncing` consumer is a TODO in
   `PersonalPlannerList.tsx`).
-- 2026-08-16 — Trailing keystrokes typed just before a client-side navigation out of the
-  editor are lost nondeterministically (reproduced ~25% on the rig): the note editor's
-  commit to the store and the unmount flush race, the internal-nav path has no guard (only
-  `beforeunload` drains editors, and it covers hard navigation alone), and `reportLostFlush`
-  surfaces the loss to the console only. A deterministic e2e spec for the unmount flush is
-  not writable until the editor commit is synchronous on unmount or a router blocker drains
-  it; a flaky attempt was written and deliberately removed.
 - 2026-08-16 — IndexedDB planner rows carry no account identity, and the tombstone-only purge
   (ADR 088) removed the accidental cleanup the old absence heuristic performed: on a shared
   device, account B's list renders account A's rows indefinitely, and B's pull pass will
@@ -526,3 +507,7 @@ asset pipeline.
   notification reads to the primary, or shorten the staleTime and accept the focus heal);
   `notification-push.spec.ts` asserts the push-driven refetch and the fresh-mount render, and
   should grow the push-then-badge assertion once this is decided.
+- 2026-09-11 — IndexedDB still holds the one-part `deviceId` singleton row in every browser
+  that ran a version before ADR 096; nothing reads it and the planner listing skips one-part
+  keys. Delete it inside `onupgradeneeded` at the next database version bump, whatever that
+  bump is for.

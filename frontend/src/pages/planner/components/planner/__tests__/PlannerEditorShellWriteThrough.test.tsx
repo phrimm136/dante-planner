@@ -1,26 +1,23 @@
 /**
- * PlannerEditorShell - teardown composition.
+ * PlannerEditorShell - write-through composition.
  *
- * The section notes are REAL here: the editor holds a keystroke for one debounce
- * interval before it reaches the store, and React destroys the shell's effects
- * before its descendants'. This file pins what the two flushes do together, which
- * neither of them can show on its own.
+ * The section notes are REAL here: a keystroke travels editor, store, storage,
+ * and this file pins that the whole path completes inside the task that made
+ * the keystroke, with no lifecycle event to help it along.
  */
 
-import { describe, it, expect, vi, beforeEach, beforeAll, afterAll, assert } from 'vitest'
-import { render, fireEvent, waitFor } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach, assert } from 'vitest'
+import { render, waitFor } from '@testing-library/react'
+import { flushMicrotask, pasteIntoNote, stubRangeRects } from '@/test-utils'
 import { ok } from '@/lib/result'
 import type { Result } from '@/lib/result'
 import type { SaveablePlanner } from '../../../types/PlannerTypes'
 import type { AppError } from '@/lib/apiErrorClassifier'
-import type { StorageReadError } from '@/lib/storage'
 
 const mockSaveToLocal = vi.fn<(planner: SaveablePlanner) => Promise<Result<void, AppError>>>()
-const mockGetOrCreateDeviceId = vi.fn<() => Promise<Result<string, StorageReadError>>>()
 
 vi.mock('@/pages/planner/hooks/usePlannerStorage', () => ({
   usePlannerStorage: () => ({
-    getOrCreateDeviceId: mockGetOrCreateDeviceId,
     saveToLocal: mockSaveToLocal,
     deleteFromLocal: vi.fn(),
     loadFromLocal: vi.fn(),
@@ -120,76 +117,19 @@ import {
   createDefaultSectionNotes,
 } from '../../../stores/usePlannerEditorStore'
 import type { PlannerEditorStore, PlannerEditorState } from '../../../stores/usePlannerEditorStore'
-import { AUTO_SAVE_DEBOUNCE_MS } from '@/lib/constants'
 import type { StoreApi } from 'zustand'
 
-// jsdom has no layout: ProseMirror's post-dispatch scrollToSelection calls
-// Range.getClientRects(), which returns empty and throws. Shim a zero rect.
-const zeroRect = {
-  top: 0,
-  left: 0,
-  bottom: 0,
-  right: 0,
-  width: 0,
-  height: 0,
-  x: 0,
-  y: 0,
-  toJSON: () => ({}),
-} as DOMRect
-let origBounding: typeof Range.prototype.getBoundingClientRect
-let origClientRects: typeof Range.prototype.getClientRects
-
-beforeAll(() => {
-  origBounding = Range.prototype.getBoundingClientRect
-  origClientRects = Range.prototype.getClientRects
-  Range.prototype.getBoundingClientRect = () => zeroRect
-  Range.prototype.getClientRects = () =>
-    ({
-      length: 1,
-      item: () => zeroRect,
-      0: zeroRect,
-      [Symbol.iterator]: () => [zeroRect][Symbol.iterator](),
-    }) as unknown as DOMRectList
-})
-
-afterAll(() => {
-  Range.prototype.getBoundingClientRect = origBounding
-  Range.prototype.getClientRects = origClientRects
-})
+stubRangeRects()
 
 beforeEach(() => {
   vi.clearAllMocks()
-  mockGetOrCreateDeviceId.mockResolvedValue(ok('device-123'))
   mockSaveToLocal.mockResolvedValue(ok(undefined))
 })
-
-/** Put text into the first mounted note editor, as a paste jsdom can carry. */
-function typeIntoNote(container: Element, text: string) {
-  // Enter the note first, as typing into one always follows.
-  fireEvent.focusIn(container)
-
-  const contentEl = container.querySelector('.note-editor-content')
-  expect(contentEl).toBeTruthy()
-  fireEvent.paste(contentEl as Element, {
-    clipboardData: {
-      getData: (type: string) => (type === 'text/plain' ? text : ''),
-      types: ['text/plain'],
-      files: [],
-    },
-  })
-}
 
 function typeIntoFirstNote(text: string) {
   const container = document.querySelector('.note-editor')
   expect(container).toBeTruthy()
-  typeIntoNote(container as Element, text)
-}
-
-/** Fire the event the browser fires on tab close, and report whether it was vetoed. */
-function fireBeforeUnload(): boolean {
-  const event = new Event('beforeunload', { cancelable: true })
-  window.dispatchEvent(event)
-  return event.defaultPrevented
+  pasteIntoNote(container as Element, text)
 }
 
 function StoreCapture({ onReady }: { onReady: (api: StoreApi<PlannerEditorStore>) => void }) {
@@ -213,9 +153,12 @@ function renderShell(initialState?: Partial<PlannerEditorState>) {
   return { ...utils, storeApi: storeApi as StoreApi<PlannerEditorStore> }
 }
 
+/** Long enough for every section to reveal and the storage session to open. */
+const MOUNT_SETTLE_MS = 800
+
 /**
- * Sections reveal one animation frame at a time, so wait for the whole set plus a
- * debounce interval: nothing the mount itself began is still in flight afterwards.
+ * Sections reveal one animation frame at a time, so wait for the whole set:
+ * nothing the mount itself began is still in flight afterwards.
  *
  * Deliberately no mockClear. Mounting an editor hands Tiptap's parsed document
  * over synchronously, which is not an edit and must not write; clearing here
@@ -223,83 +166,41 @@ function renderShell(initialState?: Partial<PlannerEditorState>) {
  */
 async function settleMount() {
   await waitFor(() => expect(document.querySelector('.note-editor-content')).toBeTruthy())
-  await new Promise((resolve) => setTimeout(resolve, AUTO_SAVE_DEBOUNCE_MS * 4))
+  await new Promise((resolve) => setTimeout(resolve, MOUNT_SETTLE_MS))
 }
 
-describe('PlannerEditorShell - teardown with real note editors', () => {
-  it('persists note text typed within one debounce of unmounting, exactly once', async () => {
-    const { unmount } = renderShell()
+const writtenJson = () => mockSaveToLocal.mock.calls.map(([planner]) => JSON.stringify(planner))
+
+describe('PlannerEditorShell - write-through with real note editors', () => {
+  it('writes note text in the task it was typed in, with no lifecycle event', async () => {
+    renderShell()
     await settleMount()
+    mockSaveToLocal.mockClear()
 
-    typeIntoFirstNote('typed just before leaving')
+    typeIntoFirstNote('typed and immediately gone')
+    await flushMicrotask()
 
-    // No await: the editor still holds the text, and nothing has reached the store.
-    unmount()
-
-    await waitFor(() => {
-      expect(mockSaveToLocal).toHaveBeenCalledTimes(1)
-    })
-    const [firstCall] = mockSaveToLocal.mock.calls
-    assert(firstCall, 'saveToLocal recorded no call')
-    const written = firstCall[0]
-    expect(JSON.stringify(written)).toContain('typed just before leaving')
+    expect(writtenJson()).toHaveLength(1)
+    expect(writtenJson()[0]).toContain('typed and immediately gone')
   })
 
-  it('persists note text typed before the planner has written anything at all', async () => {
-    // No settling: nothing has been written yet, and the editor's delivery lands
-    // after the subscription is already gone, so nothing marks the planner dirty.
-    // Only the baseline installed at mount can tell the flush there is work to do.
-    const { unmount } = renderShell()
-    await waitFor(() => expect(document.querySelector('.note-editor-content')).toBeTruthy())
-
-    typeIntoFirstNote('typed before any baseline')
-
-    unmount()
-
-    await waitFor(() => {
-      expect(mockSaveToLocal).toHaveBeenCalledTimes(1)
-    })
-    const [firstCall] = mockSaveToLocal.mock.calls
-    assert(firstCall, 'saveToLocal recorded no call')
-    expect(JSON.stringify(firstCall[0])).toContain('typed before any baseline')
-  })
-
-  it('warns for a note in a progressively revealed section, and keeps its text', async () => {
+  it('writes text typed in a progressively revealed section', async () => {
     // Sections reveal one animation frame at a time, so every note past the first
-    // mounts in a later commit than the shell. Anything that depended on an editor
-    // being registered before the shell is upside down for exactly these.
-    const { storeApi } = renderShell()
+    // mounts in a later commit than the shell.
+    renderShell()
     await waitFor(() => {
       expect(document.querySelectorAll('.note-editor').length).toBeGreaterThanOrEqual(3)
     })
-    // Settle first, so the only thing that can arm the warning is the text below.
     await settleMount()
-    expect(fireBeforeUnload()).toBe(false)
+    mockSaveToLocal.mockClear()
 
     const revealedNote = document.querySelectorAll('.note-editor')[2]
     assert(revealedNote, 'the shell revealed fewer than three notes')
-    typeIntoNote(revealedNote, 'typed in a revealed section')
+    pasteIntoNote(revealedNote, 'typed in a revealed section')
+    await flushMicrotask()
 
-    expect(fireBeforeUnload()).toBe(true)
-    expect(JSON.stringify(storeApi.getState().sectionNotes)).toContain(
-      'typed in a revealed section',
-    )
-  })
-
-  it('warns on a tab close within one debounce of typing a note', async () => {
-    renderShell()
-    await settleMount()
-
-    typeIntoFirstNote('unsaved keystrokes')
-
-    expect(fireBeforeUnload()).toBe(true)
-  })
-
-  it('does not warn on a tab close with nothing typed', async () => {
-    renderShell()
-    await settleMount()
-
-    expect(fireBeforeUnload()).toBe(false)
+    expect(writtenJson()).toHaveLength(1)
+    expect(writtenJson()[0]).toContain('typed in a revealed section')
   })
 
   it('writes nothing when a stored planner whose notes are empty strings is opened', async () => {
@@ -318,7 +219,6 @@ describe('PlannerEditorShell - teardown with real note editors', () => {
     await settleMount()
 
     expect(mockSaveToLocal).not.toHaveBeenCalled()
-    expect(fireBeforeUnload()).toBe(false)
   })
 
   it('writes nothing when a planner is only opened', async () => {
@@ -330,15 +230,16 @@ describe('PlannerEditorShell - teardown with real note editors', () => {
     expect(mockSaveToLocal).not.toHaveBeenCalled()
   })
 
-  it('delivers pending note text on pagehide, where no warning is possible', async () => {
-    const { storeApi } = renderShell()
+  it('registers no unload listener: nothing is ever held outside storage', async () => {
+    const addSpy = vi.spyOn(window, 'addEventListener')
+    renderShell()
     await settleMount()
 
-    typeIntoFirstNote('typed before the tab was discarded')
-    window.dispatchEvent(new Event('pagehide'))
+    const unloadListeners = addSpy.mock.calls
+      .map(([type]) => type)
+      .filter((type) => type === 'beforeunload' || type === 'pagehide')
 
-    expect(JSON.stringify(storeApi.getState().sectionNotes)).toContain(
-      'typed before the tab was discarded',
-    )
+    expect(unloadListeners).toEqual([])
+    addSpy.mockRestore()
   })
 })

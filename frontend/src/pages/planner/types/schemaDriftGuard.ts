@@ -28,7 +28,7 @@ import type {
   SerializableNoteContentSchema,
   SaveablePlannerSchema,
   PlannerExportItemSchema,
-  ExportEnvelopeSchema,
+  ExportEnvelopeShapeSchema,
 } from '../schemas/PlannerSchemas'
 import type {
   PlannerStatus,
@@ -129,7 +129,7 @@ export type PlannerSchemaDriftGuard = [
   Expect<
     Extends<
       Omit<ExportEnvelope, 'planners'> & { planners: ExportItemAsRecord[] },
-      z.input<typeof ExportEnvelopeSchema>
+      z.input<typeof ExportEnvelopeShapeSchema>
     >
   >,
 ]

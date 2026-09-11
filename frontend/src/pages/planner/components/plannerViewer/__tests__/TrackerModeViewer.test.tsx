@@ -245,8 +245,6 @@ describe('TrackerModeViewer', () => {
         syncVersion: 1,
         createdAt: '2025-01-01T00:00:00Z',
         lastModifiedAt: '2025-01-01T00:00:00Z',
-        savedAt: null,
-        deviceId: 'device-1',
       },
       config: {
         type: 'MIRROR_DUNGEON',

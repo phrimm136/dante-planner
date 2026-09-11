@@ -81,8 +81,6 @@ function createValidSaveablePlanner(configType: 'MIRROR_DUNGEON' | 'REFRACTED_RA
       syncVersion: 1,
       createdAt: now,
       lastModifiedAt: now,
-      savedAt: null,
-      deviceId: 'test-device-123',
     },
     config,
     content,

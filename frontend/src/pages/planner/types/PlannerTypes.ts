@@ -67,10 +67,6 @@ export interface PlannerMetadata {
   createdAt: string
   /** ISO 8601 timestamp when planner was last modified (auto-save or manual) */
   lastModifiedAt: string
-  /** ISO 8601 timestamp when planner was explicitly saved (null for drafts never saved) */
-  savedAt: string | null
-  /** Device identifier for local storage namespacing */
-  deviceId: string
   /** Whether planner is published (visible in community list) */
   published?: boolean | undefined
 }
@@ -213,8 +209,6 @@ export interface PlannerSummary {
   status: PlannerStatus
   /** Last modification timestamp for sorting */
   lastModifiedAt: string
-  /** Explicit save timestamp (null if never saved) */
-  savedAt: string | null
   /** Whether planner is published (visible in community list) */
   published?: boolean
   /** Server sync version for comparing local vs server state */
@@ -261,8 +255,6 @@ export interface UpsertPlannerRequest {
   contentVersion: number
   /** Type of planner (MIRROR_DUNGEON, REFRACTED_RAILWAY) */
   plannerType: PlannerType
-  /** Device identifier for tracking (optional) */
-  deviceId?: string
   /** Sync version for optimistic locking (upsert only, optional) */
   syncVersion?: number
   /** Selected keywords for display in list view (MD planners only) */
@@ -310,7 +302,6 @@ export type ConflictResolutionChoice = 'overwrite' | 'discard' | 'both'
 /**
  * Single planner item in export file
  * Essentially SaveablePlanner with id exposed at top level for clarity
- * Device-agnostic: deviceId is stripped from metadata on export
  */
 export interface PlannerExportItem {
   /** Planner ID (matches metadata.id) */
@@ -332,8 +323,6 @@ export interface ExportEnvelope {
   exportVersion: number
   /** ISO 8601 timestamp when export was created */
   exportedAt: string
-  /** Device ID of the source device (informational) */
-  sourceDeviceId: string
   /** Array of exported planners */
   planners: PlannerExportItem[]
 }

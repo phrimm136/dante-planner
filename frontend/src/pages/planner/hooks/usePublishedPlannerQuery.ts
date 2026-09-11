@@ -122,8 +122,6 @@ export async function fetchPublishedPlanner(
         syncVersion: apiData.syncVersion,
         createdAt: apiData.createdAt,
         lastModifiedAt: apiData.lastModifiedAt,
-        savedAt: apiData.createdAt,
-        deviceId: 'published',
         published: true,
       },
       config: { type: apiData.plannerType, category: apiData.category },

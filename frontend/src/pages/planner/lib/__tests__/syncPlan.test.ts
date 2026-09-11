@@ -16,7 +16,6 @@ function makeSummary(overrides: Partial<PlannerSummary> = {}): PlannerSummary {
     category: '5F',
     status: 'saved',
     lastModifiedAt: SAVED_AT,
-    savedAt: SAVED_AT,
     syncVersion: 1,
     ...overrides,
   }
@@ -80,19 +79,19 @@ describe('categorizeSync', () => {
     {
       name: 'a local row missing on the server is kept, whatever its witnesses say',
       server: [],
-      local: [makeSummary({ id: 'a', status: 'saved', savedAt: SAVED_AT })],
+      local: [makeSummary({ id: 'a', status: 'saved' })],
       expected: { pull: [], conflict: [], purge: [] },
     },
     {
       name: 'a server tombstone purges its saved local counterpart',
       server: [makeSummary({ id: 'a', deletedAt: SAVED_AT })],
-      local: [makeSummary({ id: 'a', status: 'saved', savedAt: SAVED_AT })],
+      local: [makeSummary({ id: 'a', status: 'saved' })],
       expected: { pull: [], conflict: [], purge: ['a'] },
     },
     {
       name: 'a server tombstone keeps a local draft',
       server: [makeSummary({ id: 'a', deletedAt: SAVED_AT, syncVersion: 9 })],
-      local: [makeSummary({ id: 'a', status: 'draft', savedAt: SAVED_AT })],
+      local: [makeSummary({ id: 'a', status: 'draft' })],
       expected: { pull: [], conflict: [], purge: [] },
     },
     {
@@ -114,9 +113,9 @@ describe('categorizeSync', () => {
         makeSummary({ id: 'pull-newer', syncVersion: 3, status: 'saved' }),
         makeSummary({ id: 'conflicting', syncVersion: 3, status: 'draft' }),
         makeSummary({ id: 'untouched', syncVersion: 2 }),
-        makeSummary({ id: 'deleted-elsewhere', status: 'saved', savedAt: SAVED_AT }),
-        makeSummary({ id: 'local-only', status: 'saved', savedAt: SAVED_AT }),
-        makeSummary({ id: 'local-draft', status: 'draft', savedAt: null }),
+        makeSummary({ id: 'deleted-elsewhere', status: 'saved' }),
+        makeSummary({ id: 'local-only', status: 'saved' }),
+        makeSummary({ id: 'local-draft', status: 'draft' }),
       ],
       expected: {
         pull: ['pull-new', 'pull-newer'],
@@ -224,8 +223,8 @@ describe('categorizePlanner', () => {
 
 describe('purge against rows the server never acknowledged', () => {
   // The row exactly as a manual save produces it when no push happened: performSave builds with
-  // status 'saved' before the sync gate, and createSaveablePlanner stamps savedAt from status
-  // alone — a signed-out or sync-off save, and a fork whose upload failed, all share this shape.
+  // status 'saved' before the sync gate — a signed-out or sync-off save, and a fork whose upload
+  // failed, all share this shape.
   function localOnlySavedSummary(): PlannerSummary {
     const planner = createSaveablePlanner({
       state: {
@@ -244,7 +243,6 @@ describe('purge against rows the server never acknowledged', () => {
         sectionNotes: {},
       },
       plannerId: '99999999-8888-7777-6666-555555555555',
-      deviceId: 'test-device',
       schemaVersion: 1,
       contentVersion: 1,
       plannerType: 'MIRROR_DUNGEON',
@@ -262,7 +260,6 @@ describe('purge against rows the server never acknowledged', () => {
       category: planner.config.category,
       status: planner.metadata.status,
       lastModifiedAt: planner.metadata.lastModifiedAt,
-      savedAt: planner.metadata.savedAt,
       syncVersion: planner.metadata.syncVersion,
     }
   }

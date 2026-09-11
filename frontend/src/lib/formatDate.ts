@@ -204,13 +204,21 @@ function relativeTimeParts(dateString: string): {
  * formatRelativeTime("2024-12-31T10:00:00Z") // => "5 hours ago"
  * formatRelativeTime("2024-12-31T10:00:00Z", "KR") // => "5시간 전"
  */
+const relativeTimeFormatters = new Map<string | undefined, Intl.RelativeTimeFormat>()
+
+function relativeTimeFormatter(locale: string | undefined): Intl.RelativeTimeFormat {
+  let formatter = relativeTimeFormatters.get(locale)
+  if (!formatter) {
+    formatter = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' })
+    relativeTimeFormatters.set(locale, formatter)
+  }
+  return formatter
+}
+
 export function formatRelativeTime(dateString: string, locale?: string): string {
   const { value, unit } = relativeTimeParts(dateString)
 
-  return new Intl.RelativeTimeFormat(toRelativeTimeLocale(locale), { numeric: 'auto' }).format(
-    value,
-    unit,
-  )
+  return relativeTimeFormatter(toRelativeTimeLocale(locale)).format(value, unit)
 }
 
 /**

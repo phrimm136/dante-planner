@@ -71,8 +71,6 @@ describe('PlannerViewer', () => {
       syncVersion: 1,
       createdAt: '2026-01-10T00:00:00Z',
       lastModifiedAt: '2026-01-10T00:00:00Z',
-      savedAt: null,
-      deviceId: 'device-123',
     },
     config: {
       type: 'MIRROR_DUNGEON',

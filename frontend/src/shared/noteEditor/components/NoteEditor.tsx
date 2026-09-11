@@ -8,9 +8,8 @@ import StarterKit from '@tiptap/starter-kit'
 import { cn } from '@/lib/utils'
 import { measureDocBytes, largestPrefixWithinLimit, isNoteEmpty } from '../lib/noteUtils'
 import { sanitizeUrl } from '../lib/tiptap-utils'
-import { AUTO_SAVE_DEBOUNCE_MS, MAX_NOTE_BYTES } from '@/lib/constants'
-import { env } from '@/lib/env'
-import { useNoteDelivery } from '../context/NoteDeliveryRegistry'
+import { MAX_NOTE_BYTES } from '@/lib/constants'
+import type { JSONContent } from '@tiptap/core'
 import type { NoteEditorProps } from '../types/NoteEditorTypes'
 import { SpoilerExtension } from './extensions/SpoilerExtension'
 import { ByteLimitExtension, BYTE_LIMIT_BYPASS } from './extensions/ByteLimitExtension'
@@ -65,73 +64,27 @@ function NoteEditorInner({
   // when no explicit prop is given, enforcing the limit wherever NoteEditor mounts.
   const byteLimit = maxBytes ?? MAX_NOTE_BYTES
 
-  // Local content state for fast typing - syncs to parent after debounce
-  // This prevents parent re-renders on every keystroke
-  const [localContent, setLocalContent] = useState(value.content)
-  const hasLocalChangesRef = useRef(false)
-
-  // What the armed debounce would have delivered, callable outside its timer.
-  const pendingRef = useRef<(() => void) | null>(null)
-
-  // Whether the note arrived empty, and whether anything has been handed to the
-  // owner since. Together they bound the window in which Tiptap's own reparse of
-  // the loaded note can be told apart from the user typing.
+  // Tiptap reports its own reparse of the loaded note as an update. Until this
+  // editor has emitted something, an empty note that is still empty is a load,
+  // not an edit.
   const [loadedEmpty] = useState(() => isNoteEmpty(value))
-  const hasDeliveredRef = useRef(false)
-
-  // Debounced sync to parent - fires AUTO_SAVE_DEBOUNCE_MS after typing stops
+  const hasEmittedRef = useRef(false)
+  const lastEmittedRef = useRef<JSONContent | null>(null)
+  const emit = (content: JSONContent) => {
+    if (!hasEmittedRef.current && loadedEmpty && isNoteEmpty({ content })) return
+    hasEmittedRef.current = true
+    lastEmittedRef.current = content
+    onChange?.({ content })
+  }
+  // Read by the mount hand-over below, which must not re-run per render.
+  const emitRef = useRef(emit)
   useEffect(() => {
-    pendingRef.current = null
-    if (!hasLocalChangesRef.current || !localContent) return
-
-    const flush = () => {
-      if (hasLocalChangesRef.current) {
-        hasDeliveredRef.current = true
-        onChange?.({ content: localContent })
-        hasLocalChangesRef.current = false
-      }
-    }
-    pendingRef.current = flush
-
-    const timer = setTimeout(() => {
-      pendingRef.current = null
-      flush()
-    }, AUTO_SAVE_DEBOUNCE_MS)
-
-    return () => clearTimeout(timer)
-  }, [localContent, onChange])
-
-  // The debounce effect re-runs on every keystroke and clears its timer each time,
-  // so unmount would otherwise drop the last edit. Flush it from an unmount-only
-  // effect, which runs after that cleanup.
-  useEffect(() => () => pendingRef.current?.(), [])
-
-  // An owner collecting pending text before the page goes away pulls it from
-  // here. Listening for the unload directly would put this editor's delivery at
-  // the mercy of listener registration order against the owner's own handler.
-  const delivery = useNoteDelivery()
-  useEffect(() => {
-    if (!delivery) return
-    return delivery.register(() => {
-      pendingRef.current?.()
-    })
-  }, [delivery])
-
-  // An editable editor with no owner to pull from it loses whatever the debounce
-  // is holding when the page closes, and nothing at runtime would say so.
-  useEffect(() => {
-    if (!env.DEV || delivery || readOnly || !onChange) return
-    console.warn(
-      'NoteEditor is editable but has no NoteDeliveryProvider above it: text still inside its debounce will be lost when the page closes.',
-    )
-  }, [delivery, readOnly, onChange])
+    emitRef.current = emit
+  })
 
   // Measure the same { content } shape the cap and schema enforce, so the
   // counter never disagrees with what the editor actually rejects.
-  const currentBytes = (() => {
-    if (!localContent) return 0
-    return measureDocBytes(localContent)
-  })()
+  const currentBytes = value.content ? measureDocBytes(value.content) : 0
 
   // Memoize extensions to prevent recreation on every render
   const extensions = [
@@ -157,20 +110,7 @@ function NoteEditorInner({
     extensions,
     content: value.content,
     editable: !readOnly,
-    onUpdate: ({ editor }) => {
-      // Update local state only - parent sync happens on blur
-      const newContent = editor.getJSON()
-      setLocalContent(newContent)
-
-      // Tiptap reparses the loaded note as it starts up and reports that as an
-      // update. A note stored without content arrives as `''` and parses into a
-      // document holding a single empty paragraph, so that first update looks
-      // like a change while nothing about the note has changed. Until this editor
-      // has handed something over, an empty note that is still empty is no edit.
-      if (!hasDeliveredRef.current && loadedEmpty && isNoteEmpty({ content: newContent })) return
-
-      hasLocalChangesRef.current = true
-    },
+    onUpdate: ({ editor }) => emit(editor.getJSON()),
     editorProps: {
       attributes: {
         class: 'note-editor-content prose prose-sm max-w-none focus:outline-none min-h-[100px] p-3',
@@ -219,25 +159,13 @@ function NoteEditorInner({
     },
   })
 
-  // Hand Tiptap's parsed document over at mount instead of letting it travel as a
-  // debounced edit: the stored form and the parsed form differ for anything that
-  // does not round-trip, and an owner that saw only the difference would read a
-  // plain load as an edit. This effect runs before the owner's own, which is when
-  // the owner takes the loaded planner as its baseline.
+  // The stored form and the parsed form differ for anything that does not
+  // round-trip, so the owner is handed the parsed form at mount, before it takes
+  // its own baseline.
   useEffect(() => {
-    if (!editor || hasDeliveredRef.current) return
-
-    // An empty note that parses into an empty document has not changed, however
-    // little the two shapes resemble each other — the stored form is `''` and the
-    // parsed one a document holding one empty paragraph. Sections reveal one frame
-    // at a time, long after the owner took its baseline, so reporting this would
-    // make merely opening a planner an edit for every note that was blank.
-    const loaded = editor.getJSON()
-    if (loadedEmpty && isNoteEmpty({ content: loaded })) return
-
-    hasDeliveredRef.current = true
-    onChange?.({ content: loaded })
-  }, [editor, onChange, loadedEmpty])
+    if (!editor || hasEmittedRef.current) return
+    emitRef.current(editor.getJSON())
+  }, [editor])
 
   // Whether a pointer is currently pressed, and the wait for its release if one is
   // already scheduled. Read by collapseToolbar, which must not reflow mid-gesture.
@@ -283,14 +211,13 @@ function NoteEditorInner({
     }
   }, [editor, readOnly])
 
-  // Sync from parent when value prop changes externally (load/import)
-  // Skip if we have local changes to avoid overwriting user's typing
+  // Sync from parent when value prop changes externally (load/import). The
+  // editor's own updates arrive back here as the same object and are skipped.
   useEffect(() => {
-    if (editor && value.content && !hasLocalChangesRef.current) {
+    if (editor && value.content && value.content !== lastEmittedRef.current) {
       const currentContent = JSON.stringify(editor.getJSON())
       const newContent = JSON.stringify(value.content)
       if (currentContent !== newContent) {
-        setLocalContent(value.content)
         // Trusted external load: exempt from the byte cap so an oversized
         // legacy/server note still populates the editor instead of being
         // silently rejected by ByteLimitExtension (which would desync the
@@ -346,19 +273,12 @@ function NoteEditorInner({
   }
 
   // Handle blur with relatedTarget for reliable focus tracking
-  // Syncs local changes to parent when focus leaves the editor
   const handleBlur = (e: React.FocusEvent) => {
     const relatedTarget = e.relatedTarget as HTMLElement | null
 
     if (containerRef.current && !containerRef.current.contains(relatedTarget)) {
       if (!linkDialogOpen) {
         collapseToolbar()
-
-        // Sync local changes to parent on blur
-        if (hasLocalChangesRef.current && localContent) {
-          onChange?.({ content: localContent })
-          hasLocalChangesRef.current = false
-        }
       }
     }
   }

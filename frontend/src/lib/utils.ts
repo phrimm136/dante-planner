@@ -152,16 +152,6 @@ export function getLineHeightForLanguage(language?: string): number {
 }
 
 /**
- * Validates if a string is a valid UUID v4 format
- * @param value - String to validate
- * @returns True if valid UUID v4 format
- */
-export function isValidUUID(value: string): boolean {
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-  return uuidRegex.test(value)
-}
-
-/**
  * Clamps a number into the [0, 1] probability range
  * @param value - Number to clamp
  * @returns value bounded to [0, 1]

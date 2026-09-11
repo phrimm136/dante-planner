@@ -73,40 +73,6 @@ beforeEach(() => {
   vi.clearAllMocks()
 })
 
-describe('getOrCreateDeviceId', () => {
-  it('returns the failure and writes nothing when the read could not be performed', async () => {
-    mockGetItem.mockResolvedValue(err({ kind: 'ioError', cause: new Error('disk gone') }))
-
-    const outcome = await storageHook().getOrCreateDeviceId()
-
-    expect(outcome.ok).toBe(false)
-    if (outcome.ok) throw new Error('expected a failed read')
-    expect(outcome.error.kind).toBe('ioError')
-    expect(mockSetItem).not.toHaveBeenCalled()
-  })
-
-  it('mints and persists an id when the store answers that it holds none', async () => {
-    mockGetItem.mockResolvedValue(ok(null))
-    mockSetItem.mockResolvedValue(ok(undefined))
-
-    const outcome = await storageHook().getOrCreateDeviceId()
-
-    expect(outcome.ok).toBe(true)
-    if (!outcome.ok) throw new Error('expected a successful read')
-    expect(outcome.value).not.toBe('')
-    expect(mockSetItem).toHaveBeenCalledWith('deviceId', outcome.value)
-  })
-
-  it('returns the stored id without writing when one is already held', async () => {
-    mockGetItem.mockResolvedValue(ok('an-existing-device-id'))
-
-    const outcome = await storageHook().getOrCreateDeviceId()
-
-    expect(outcome).toEqual({ ok: true, value: 'an-existing-device-id' })
-    expect(mockSetItem).not.toHaveBeenCalled()
-  })
-})
-
 describe('saveToLocal', () => {
   it('reports the failure when the underlying write could not be performed', async () => {
     mockSetItem.mockResolvedValue(err({ kind: 'ioError', cause: new Error('quota exceeded') }))

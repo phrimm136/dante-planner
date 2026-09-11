@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import i18n from '@/lib/i18n'
 import { useAuthQuery, authQueryKeys } from '@/shared/auth'
@@ -10,7 +10,11 @@ import { plannerQueryKeys } from '../lib/plannerQueryKeys'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
 import { isMDPlanner } from '../types/PlannerTypes'
 import { queryClient } from '@/lib/queryClient'
-import { AUTO_SAVE_DEBOUNCE_MS, INITIAL_SYNC_VERSION } from '@/lib/constants'
+import { INITIAL_SYNC_VERSION } from '@/lib/constants'
+import { openStorageDb } from '@/lib/storage'
+import { createWriteThrough } from '../lib/writeThrough'
+import { createSaveStatusStore } from '../stores/saveStatus'
+import type { SaveStatusStore } from '../stores/saveStatus'
 import { generateUUID } from '@/lib/uuid'
 import {
   validatePlannerForDraftSave,
@@ -79,7 +83,7 @@ export interface UsePlannerSaveOptions {
   initialPlannerId?: string
   /** Optional initial sync version (for editing) */
   initialSyncVersion?: number
-  /** Optional initial savedAt timestamp (for editing, to show sync status) */
+  /** Timestamp the last-saved label starts from (for editing) */
   initialSavedAt?: string
   /** Current published state (from component) */
   published?: boolean
@@ -121,8 +125,6 @@ interface PerformSaveOptions {
 export interface PlannerSaveResult {
   /** Current planner ID (creates new if none) */
   plannerId: string
-  /** Whether auto-save is in progress */
-  isAutoSaving: boolean
   /** Whether manual save is in progress */
   isSaving: boolean
   /** Why the last save failed, or null when it did not */
@@ -137,18 +139,8 @@ export interface PlannerSaveResult {
   resolveConflict: (choice: ConflictResolutionChoice) => Promise<boolean>
   /** Current sync version (for debugging) */
   syncVersion: number
-  /** Whether there are changes not yet synced to server */
-  hasUnsyncedChanges: boolean
-  /** Whether there are changes not yet auto-saved to IndexedDB (for beforeunload warning) */
-  hasLocalUnsavedChanges: boolean
-  /**
-   * Whether a store change has arrived since the last local write, read at call
-   * time. Stable across renders, so a listener registered once on mount keeps
-   * seeing current dirtiness.
-   */
-  isDirty: () => boolean
-  /** Last synced timestamp (ISO 8601, null if never synced) */
-  lastSavedAt: string | null
+  /** What the write path last reported, for the status label to subscribe to. */
+  saveStatus: SaveStatusStore
   /** Whether user is restricted (banned or timed out) - disables sync button */
   isRestricted: boolean
   /** Reason for restriction (ban or timeout reason) */
@@ -156,10 +148,10 @@ export interface PlannerSaveResult {
 }
 
 /**
- * Unified hook for saving planner state (auto-save + manual save)
+ * Unified hook for saving planner state (local write-through + manual save)
  *
  * Features:
- * - Auto-save with 2s debounce after state changes
+ * - Every store change is written to IndexedDB inside the task that made it
  * - Manual save() function with proper syncVersion tracking
  * - Conflict detection with typed ConflictError
  * - Resolution via resolveConflict('overwrite' | 'discard' | 'both')
@@ -167,7 +159,7 @@ export interface PlannerSaveResult {
  * @example
  * ```tsx
  * function PlannerPage() {
- *   const { isAutoSaving, isSaving, error, save, resolveConflict } = usePlannerSave({
+ *   const { isSaving, error, save, resolveConflict } = usePlannerSave({
  *     getState: () => storeApi.getState().getPlannerState(),
  *     subscribe: storeApi.subscribe,
  *     schemaVersion: 1,
@@ -178,7 +170,6 @@ export interface PlannerSaveResult {
  *
  *   return (
  *     <div>
- *       {isAutoSaving && <span>Saving...</span>}
  *       <button onClick={() => save()} disabled={isSaving}>Save</button>
  *       {isSyncConflict(error) && (
  *         <ConflictDialog
@@ -216,101 +207,31 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   // Planner ID - create once and persist
   const [plannerId] = useState<string>(() => initialPlannerId ?? generateUUID())
 
-  // Saving state indicators
-  const [isAutoSaving, setIsAutoSaving] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
-  const [lastSavedAt, setLastSavedAt] = useState<string | null>(initialSavedAt ?? null)
 
-  // Debounce timer ref
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // A store rather than state, so a write landing does not render the editor
+  // that owns this hook.
+  const [saveStatus] = useState(() => createSaveStatusStore(initialSavedAt ?? null))
 
-  // The autosave the debounce runs, and the run already under way. Both are refs
-  // so the subscription never has to re-subscribe to see the current one.
-  const autoSaveRef = useRef<(flushing?: boolean) => Promise<void>>(async () => {})
-  const inFlightRef = useRef<Promise<void>>(Promise.resolve())
-
-  // Whether a manual save owns the write right now. The state above cannot answer
-  // that after unmount: nothing re-renders this hook again, so every closure keeps
-  // whatever it captured while the save was still running.
-  const isSavingRef = useRef(false)
-
-  // How many nested owners hold that write.
+  // Owners of the write nest: a conflict resolution runs saves of its own.
   const saveHoldsRef = useRef(0)
 
-  // A teardown flush that arrives mid-save, waiting for that save to finish.
-  const pendingFlushRef = useRef(false)
+  // A store change that arrived while a save held the write.
+  const pendingWriteRef = useRef(false)
 
-  // Set once the subscription is torn down, so no timer outlives the editor.
-  const unmountedRef = useRef(false)
+  // Set while a write failure stands, so it is reported once rather than per keystroke.
+  const writeFailedRef = useRef(false)
 
-  // Read by isDirty, which must stay stable for a listener registered once.
+  // Read by the write path, which must stay stable for a subscription made once.
   const getStateRef = useRef(options.getState)
+  const writeNowRef = useRef<() => void>(() => {})
 
-  /** Arm, or re-arm, the debounce that runs the autosave. */
-  const armAutoSave = () => {
-    // Past teardown there is nobody left to save for, and a timer that re-arms
-    // itself would hold the store for the life of the tab.
-    if (unmountedRef.current) return
-
-    if (timerRef.current) {
-      clearTimeout(timerRef.current)
-    }
-
-    timerRef.current = setTimeout(() => {
-      timerRef.current = null
-      void autoSaveRef.current()
-    }, AUTO_SAVE_DEBOUNCE_MS)
-  }
-
-  // The planner as it stood at first render, so the dirty flags below have
-  // something to compare against before any effect has run. The subscription
-  // replaces it once the editors have handed over their loaded content.
+  // The planner as last written, so a store change that alters nothing
+  // persistable is not written. Taken at first render, replaced once the editors
+  // have handed over their loaded content.
   const [mountComparable] = useState(() => stateToComparableString(options.getState()))
-
-  // Whether that replacement has already happened.
+  const lastWrittenRef = useRef(mountComparable)
   const baselineSettledRef = useRef(false)
-
-  // Previous state for dirty checking
-  const previousStateRef = useRef<string>(mountComparable)
-
-  // Whether a store change has arrived since the last local write. Maintained by
-  // the subscription rather than by render, so an unload firing between a keystroke
-  // and the next render still sees the planner as dirty.
-  const dirtyRef = useRef(false)
-
-  // Last synced state for beforeunload warning detection
-  const lastSyncedStateRef = useRef<string>(mountComparable)
-
-  // The live planner's comparable, and whether the store has moved since it was
-  // computed. Serializing the whole planner is what the dirty flags cost, and
-  // they are read on every render while the store changes far less often.
-  const comparableRef = useRef<string>(mountComparable)
-  const comparableStaleRef = useRef(false)
-
-  /**
-   * The comparable of the planner as it stands now.
-   *
-   * Passing `state` recomputes unconditionally. The cache tracks staleness from
-   * the store subscription, and the subscription is gone by the time a teardown
-   * flush runs: React destroys this effect before the descendant editors that
-   * hand over their last note, so the final write of a planner's life arrives
-   * unobserved. Deciding from the cache there drops it as a no-op.
-   *
-   * The cached path serves the two dirty flags, which are read every render and
-   * hold the same assumption the `isDirty` fast path already makes.
-   */
-  const readComparable = (state?: PlannerState): string => {
-    if (state !== undefined) {
-      comparableRef.current = stateToComparableString(state)
-      comparableStaleRef.current = false
-      return comparableRef.current
-    }
-    if (comparableStaleRef.current) {
-      comparableRef.current = stateToComparableString(getStateRef.current())
-      comparableStaleRef.current = false
-    }
-    return comparableRef.current
-  }
 
   // Track the original createdAt timestamp
   const createdAtRef = useRef<string | null>(null)
@@ -366,14 +287,12 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     state: PlannerState,
     status: PlannerStatus,
     isPublished: boolean,
-    deviceId: string,
   ): SaveablePlanner => {
     createdAtRef.current ??= new Date().toISOString()
 
     return createSaveablePlanner({
       state,
       plannerId,
-      deviceId,
       schemaVersion,
       contentVersion,
       plannerType,
@@ -455,21 +374,12 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   ): Promise<Result<string, AppError>> => {
     if (!isClient) return err({ kind: 'unknown' })
 
-    // Get deviceId
-    const deviceId = await storage.getOrCreateDeviceId()
-    if (!deviceId.ok) return err({ kind: 'unknown' })
-
     const currentState = getState()
     // The snapshot this save is about to write. Everything after here may await,
     // so the live state can move on; the baseline must describe what was written.
-    const savedComparable = readComparable(currentState)
+    const savedComparable = stateToComparableString(currentState)
 
-    const saveable = buildSaveable(
-      currentState,
-      status,
-      opts.published ?? published,
-      deviceId.value,
-    )
+    const saveable = buildSaveable(currentState, status, opts.published ?? published)
 
     const invalid = validateForSave(saveable)
     if (invalid) return err(invalid)
@@ -504,142 +414,52 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     return ok(savedComparable)
   }
 
-  /**
-   * Adopt `comparable` as the local-write baseline.
-   *
-   * The baseline is deliberately older than the live state whenever a save
-   * overlapped an edit, so dirtiness is what the comparison says rather than a
-   * flat false — clearing it there would silence the unload warning over exactly
-   * the window where the edit is still unwritten.
-   */
-  const markLocalBaseline = (comparable: string) => {
-    previousStateRef.current = comparable
-    dirtyRef.current = readComparable(getStateRef.current()) !== comparable
+  /** Adopt the state a write landed as the local baseline. */
+  const markWritten = (comparable: string) => {
+    lastWrittenRef.current = comparable
+    saveStatus.setState({ lastSavedAt: new Date().toISOString() })
   }
 
   /**
-   * Adopt the state a save actually wrote as both dirty-check baselines. Reading
-   * the live state here instead would adopt edits typed during the save as clean.
+   * A manual save owns the write while it runs: an edit made meanwhile waits and
+   * is written when the save releases, so the save's snapshot never lands after
+   * something newer.
    */
-  const markSaved = (comparable: string) => {
-    markLocalBaseline(comparable)
-    lastSyncedStateRef.current = comparable
-    setLastSavedAt(new Date().toISOString())
-  }
-
-  /**
-   * A failed teardown flush has nowhere to surface: the editor is gone, so the
-   * error state and its toast reach nobody. Leave the loss in the console with
-   * enough to identify which planner lost what.
-   */
-  const reportLostFlush = (flushing: boolean, failure: AppError) => {
-    if (!flushing) return
-    console.error('Planner autosave flush lost after teardown', { plannerId, failure })
-  }
-
-  /**
-   * Debounced auto-save.
-   * Auto-saves ALWAYS go to IndexedDB only (local-first architecture);
-   * syncing to the server is manual-save only.
-   */
-  const runAutoSave = async (flushing: boolean) => {
-    // A manual save owns the write. Never just return: that loses every edit made
-    // between the save starting and it finishing. A teardown flush cannot wait on
-    // a timer, so it hands itself to the save to run when it is done.
-    if (isSavingRef.current) {
-      if (flushing) {
-        pendingFlushRef.current = true
-      } else {
-        armAutoSave()
-      }
+  const writeNow = (): void => {
+    if (saveHoldsRef.current > 0) {
+      pendingWriteRef.current = true
       return
     }
+    pendingWriteRef.current = false
 
-    const currentState = getState()
-    const currentStateString = readComparable(currentState)
+    const state = getStateRef.current()
+    const comparable = stateToComparableString(state)
+    if (comparable === lastWrittenRef.current) return
 
-    // Skip if state hasn't changed
-    if (currentStateString === previousStateRef.current) {
-      dirtyRef.current = false
-      return
-    }
-
-    setIsAutoSaving(true)
-
-    try {
-      if (!isClient) return
-
-      // Get deviceId
-      const deviceId = await storage.getOrCreateDeviceId()
-      if (!deviceId.ok) return
-
-      const saveable = buildSaveable(currentState, 'draft', published, deviceId.value)
-
-      // Save to IndexedDB only via SaveAdapter (never server for auto-save)
-      const result = await storage.saveToLocal(saveable)
-      if (!result.ok) {
-        reportFailure(result.error)
-        reportLostFlush(flushing, result.error)
+    void storage.saveToLocal(buildSaveable(state, 'draft', published)).then((result) => {
+      if (result.ok) {
+        writeFailedRef.current = false
+        markWritten(comparable)
         return
       }
-
-      markLocalBaseline(currentStateString)
-      setLastSavedAt(new Date().toISOString())
-    } catch (autoSaveError: unknown) {
-      const failure = classifyAppError(autoSaveError)
-      reportFailure(failure)
-      reportLostFlush(flushing, failure)
-    } finally {
-      setIsAutoSaving(false)
-    }
+      if (!writeFailedRef.current) reportFailure(result.error)
+      writeFailedRef.current = true
+    })
   }
 
-  /**
-   * Run autosaves one after another. The teardown flush can start while a
-   * debounced run is still awaiting storage, and two concurrent writes would
-   * race, the older snapshot landing last.
-   */
-  const autoSave = (flushing = false): Promise<void> => {
-    const chained = inFlightRef.current.then(() => runAutoSave(flushing)).catch(() => undefined)
-    inFlightRef.current = chained
-    return chained
-  }
-
-  /**
-   * Take ownership of the write for a manual save. Owners nest — a conflict
-   * resolution runs saves of its own — so the lock counts holds rather than
-   * flipping a flag the inner release would drop on the outer owner's behalf.
-   */
   const beginSave = () => {
     saveHoldsRef.current += 1
-    isSavingRef.current = true
     setIsSaving(true)
   }
 
-  /**
-   * Release one hold, and once the last is gone run a teardown flush that arrived
-   * while a save held it. Refs still work on an unmounted fiber, which is the only
-   * reason those last edits are still reachable at all.
-   */
+  // Refs still work on an unmounted fiber, which is what keeps an edit made
+  // during a save reachable after the editor is gone.
   const endSave = () => {
     saveHoldsRef.current = Math.max(0, saveHoldsRef.current - 1)
     if (saveHoldsRef.current > 0) return
 
-    isSavingRef.current = false
     setIsSaving(false)
-
-    if (pendingFlushRef.current) {
-      pendingFlushRef.current = false
-      void autoSaveRef.current(true)
-    }
-  }
-
-  /** Drop a pending auto-save so it cannot land on top of a manual write. */
-  const cancelPendingAutoSave = () => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current)
-      timerRef.current = null
-    }
+    if (pendingWriteRef.current) writeNowRef.current()
   }
 
   /**
@@ -648,9 +468,6 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
    */
   const save = async (saveOptions?: SaveOptions): Promise<boolean> => {
     if (!isClient) return false
-
-    // Prevents a race where auto-save overwrites with a stale syncVersion
-    cancelPendingAutoSave()
 
     beginSave()
 
@@ -664,7 +481,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
         return false
       }
 
-      markSaved(saved.value)
+      markWritten(saved.value)
       return true
     } catch (saveFailure: unknown) {
       reportFailure(classifyAppError(saveFailure))
@@ -693,8 +510,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   const untitled = (): string => t('pages.plannerMD.untitled', 'Untitled')
 
   /** The local side of the conflict, as the editor holds it right now. */
-  const localSide = (deviceId: string): SaveablePlanner =>
-    buildSaveable(getState(), 'saved', published, deviceId)
+  const localSide = (): SaveablePlanner => buildSaveable(getState(), 'saved', published)
 
   /**
    * Report a failed resolution.
@@ -723,14 +539,8 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     beginSave()
     setResolutionError(null)
 
-    // Prevents a race where the timer fires with stale state before React re-renders
-    cancelPendingAutoSave()
-
     try {
-      const deviceId = await storage.getOrCreateDeviceId()
-      if (!deviceId.ok) return failResolution({ kind: 'unknown' })
-
-      const ctx = { deviceId: deviceId.value, now: new Date().toISOString(), newId: generateUUID }
+      const ctx = { now: new Date().toISOString(), newId: generateUUID }
       const plan = resolutionPlan(heldPlan.current, error, choice, () =>
         planConflictResolution(
           choice,
@@ -759,8 +569,8 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       const handed: { comparable: string | null } = { comparable: null }
       const ops: ConflictOps = {
         local: async () => {
-          handed.comparable = readComparable(getState())
-          return ok(localSide(deviceId.value))
+          handed.comparable = stateToComparableString(getState())
+          return ok(localSide())
         },
         incoming: async () => {
           const incoming = await syncAdapter.fetchFromServer(plannerId)
@@ -799,11 +609,11 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
           if (!onServerReload(fetched.value.planner)) {
             return failResolution({ kind: 'unknown' })
           }
-          markSaved(readComparable(getState()))
+          markWritten(stateToComparableString(getState()))
         }
       }
       if (keepsLocal(plan) && handed.comparable !== null) {
-        markSaved(handed.comparable)
+        markWritten(handed.comparable)
       }
 
       // Write-through: every mounted consumer (publish header, list pages) must
@@ -834,73 +644,29 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     setResolutionError(null)
   }
 
-  // The subscription must survive re-renders, so the effect reads the auto-save
-  // and the state getter through refs instead of depending on closures that
-  // change every render.
   useEffect(() => {
-    autoSaveRef.current = autoSave
+    writeNowRef.current = writeNow
     getStateRef.current = getState
   })
 
-  // Debounced auto-save driven by store subscription rather than a state
-  // dependency, so the parent does not re-render on every state change.
   useEffect(() => {
     if (!isClient) return
 
-    unmountedRef.current = false
-
-    // Adopt the store as it stands now, not as it stood at render. Each editor
-    // hands Tiptap's reparse of its stored note over in its own mount effect, and
-    // those run before this one — a note stored without content arrives as `''`
-    // and reparses into an empty document, which is a load, not an edit. Compare
-    // against the render-time capture and every such planner opens dirty and gets
-    // written back as a draft.
+    // Each editor hands Tiptap's reparse of its stored note over in its own mount
+    // effect, before this one runs; that reparse is a load, not an edit.
     if (!baselineSettledRef.current) {
       baselineSettledRef.current = true
-      const settled = readComparable(getStateRef.current())
-      previousStateRef.current = settled
-      lastSyncedStateRef.current = settled
-      dirtyRef.current = false
+      lastWrittenRef.current = stateToComparableString(getStateRef.current())
     }
 
-    const unsubscribe = subscribe(() => {
-      dirtyRef.current = true
-      comparableStaleRef.current = true
-      armAutoSave()
+    // The first edit must find the connection open: a write issued before then
+    // waits on the open, and a discard in that gap loses it.
+    void openStorageDb().catch((failure: unknown) => {
+      console.error('Planner storage could not open', failure)
     })
 
-    return () => {
-      unmountedRef.current = true
-      unsubscribe()
-      if (timerRef.current) {
-        clearTimeout(timerRef.current)
-        timerRef.current = null
-      }
-
-      // A cancelled timer is silent data loss on unmount and on tab close. React
-      // destroys a parent's effects before its children's, so a descendant editor
-      // has not yet handed over its last keystrokes; a microtask runs after every
-      // destroy in the commit, and the flush reads the store rather than the
-      // subscription this cleanup just dropped.
-      queueMicrotask(() => void autoSaveRef.current(true))
-    }
+    return createWriteThrough(subscribe, () => writeNowRef.current())
   }, [subscribe])
-
-  // The ref is a fast path only: it arms on any store notification, including
-  // writes that change nothing persistable. Confirm before claiming dirtiness —
-  // the caller is an unload handler, so the comparison runs rarely.
-  const isDirty = useCallback(() => {
-    if (!dirtyRef.current) return false
-    return readComparable() !== previousStateRef.current
-  }, [])
-
-  // Dirty flags compare the live state against the two save baselines, both of
-  // which the subscription installs at mount. The baselines advance separately —
-  // an autosave moves the local one only — so each flag holds its own comparison
-  // over the one shared reading of the planner.
-  const currentComparable = readComparable()
-  const hasUnsyncedChanges = currentComparable !== lastSyncedStateRef.current
-  const hasLocalUnsavedChanges = currentComparable !== previousStateRef.current
 
   const restrictionReason = !isRestricted
     ? undefined
@@ -911,7 +677,6 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
 
   return {
     plannerId,
-    isAutoSaving,
     isSaving,
     error,
     resolutionError,
@@ -919,10 +684,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     save,
     resolveConflict,
     syncVersion: presentedVersion(),
-    hasUnsyncedChanges,
-    hasLocalUnsavedChanges,
-    isDirty,
-    lastSavedAt,
+    saveStatus,
     isRestricted,
     restrictionReason,
   }

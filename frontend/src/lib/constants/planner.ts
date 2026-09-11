@@ -36,12 +36,6 @@ export const PLANNER_CONFIG = {
 export const MAX_NOTE_BYTES = 2048
 
 /**
- * One interval for every editor-side debounce, so a flush window is never additive.
- * The editor to store hop and the store to IndexedDB autosave both wait this long.
- */
-export const AUTO_SAVE_DEBOUNCE_MS = 200
-
-/**
  * Current planner schema version for migration support
  * Increment when planner data structure changes
  */
@@ -93,8 +87,6 @@ export const PLANNER_STORAGE_KEYS = {
   PLANNER: 'planner',
   /** Mirror Dungeon planner type suffix */
   MD: 'md',
-  /** Key for unique device identifier */
-  DEVICE_ID: 'deviceId',
 } as const
 
 /**

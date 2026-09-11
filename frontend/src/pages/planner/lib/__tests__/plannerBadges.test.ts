@@ -4,7 +4,7 @@ import { categoryBadgeStyle, deriveSaveStatus, SAVE_STATUS_BADGE_VARIANT } from 
 
 import type { SaveStatus, SaveStatusSource } from '../plannerBadges'
 
-const SAVED: SaveStatusSource = { published: false, status: 'saved', savedAt: '2026-01-01T00:00Z' }
+const SAVED: SaveStatusSource = { published: false, status: 'saved' }
 
 /** The pre-dedup cascade, transcribed from PersonalPlannerCard. */
 function oracle(
@@ -16,24 +16,22 @@ function oracle(
     return planner.status === 'draft' ? 'unpublishedChanges' : 'published'
   }
   if (isAuthenticated && syncEnabled === true) {
-    return planner.status === 'draft' || planner.savedAt === null ? 'unsynced' : 'synced'
+    return planner.status === 'draft' ? 'unsynced' : 'synced'
   }
-  return planner.status === 'draft' || planner.savedAt === null ? 'draft' : 'saved'
+  return planner.status === 'draft' ? 'draft' : 'saved'
 }
 
 describe('deriveSaveStatus', () => {
   it('agrees with the pre-dedup cascade across the whole input space', () => {
     for (const published of [true, false, null, undefined]) {
       for (const status of ['draft', 'saved'] as const) {
-        for (const savedAt of ['2026-01-01T00:00Z', null, undefined]) {
-          for (const isAuthenticated of [true, false]) {
-            for (const syncEnabled of [true, false, null, undefined]) {
-              const source: SaveStatusSource = { published, status, savedAt }
+        for (const isAuthenticated of [true, false]) {
+          for (const syncEnabled of [true, false, null, undefined]) {
+            const source: SaveStatusSource = { published, status }
 
-              expect(deriveSaveStatus(source, isAuthenticated, syncEnabled)).toBe(
-                oracle(source, isAuthenticated, syncEnabled),
-              )
-            }
+            expect(deriveSaveStatus(source, isAuthenticated, syncEnabled)).toBe(
+              oracle(source, isAuthenticated, syncEnabled),
+            )
           }
         }
       }
@@ -42,7 +40,7 @@ describe('deriveSaveStatus', () => {
 
   it('reports publication ahead of sync state', () => {
     expect(deriveSaveStatus({ ...SAVED, published: true }, true, true)).toBe('published')
-    expect(deriveSaveStatus({ published: true, status: 'draft', savedAt: null }, true, true)).toBe(
+    expect(deriveSaveStatus({ published: true, status: 'draft' }, true, true)).toBe(
       'unpublishedChanges',
     )
   })
@@ -51,11 +49,6 @@ describe('deriveSaveStatus', () => {
     expect(deriveSaveStatus(SAVED, true, true)).toBe('synced')
     expect(deriveSaveStatus(SAVED, true, false)).toBe('saved')
     expect(deriveSaveStatus(SAVED, false, true)).toBe('saved')
-  })
-
-  it('treats a never-written planner as unsaved whatever its status says', () => {
-    expect(deriveSaveStatus({ ...SAVED, savedAt: null }, true, true)).toBe('unsynced')
-    expect(deriveSaveStatus({ ...SAVED, savedAt: null }, false, false)).toBe('draft')
   })
 })
 

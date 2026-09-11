@@ -4,16 +4,13 @@ import { seedLocalPlanner } from '../src/localPlanner'
 import { dropPlanner, seedPlanner } from '../src/plannerFixture'
 import { closeSeedPool } from '../src/seed'
 
-// The autosave invariant gestures.ts documents and nothing asserted: editing writes IndexedDB
-// only, the server PUT belongs to the manual Save button alone. Sync is ON here on purpose —
-// with it off, a push is impossible and the no-request half proves nothing.
+// The autosave invariant: editing writes IndexedDB only, the server PUT belongs to the manual
+// Save button alone. Sync is ON here on purpose — with it off, a push is impossible and the
+// no-request half proves nothing.
 
 test.afterAll(closeSeedPool)
 
-/** Covers both the hook's debounce and the fixture module's documented copy of it. */
-const AUTOSAVE_SETTLE_MS = 2_500
-
-test('an edit autosaves to IndexedDB only and survives a reload as a draft', async ({
+test('an edit reaches IndexedDB only, and survives an immediate reload as a draft', async ({
   page,
   context,
   baseURL,
@@ -39,19 +36,16 @@ test('an edit autosaves to IndexedDB only and survives a reload as a draft', asy
 
     await page.locator('.note-editor-content').last().click()
     await page.keyboard.type(editedText)
-    await page.waitForTimeout(AUTOSAVE_SETTLE_MS)
 
-    expect(writes, 'an edit reached the network without the Save button').toEqual([])
-
-    // The debounce landed in IndexedDB: the words are still there after the page dies.
+    // No wait between the last keystroke and the reload: the write is issued inside the
+    // keystroke's own task, so nothing is left for a timer to lose.
     await page.reload({ waitUntil: 'domcontentloaded' })
     await expect(page.getByRole('heading', { name: 'Closing Notes' })).toBeVisible({
       timeout: 20_000,
     })
     await expect(page.getByText(editedText)).toBeVisible()
-    expect(writes, 'the teardown flush left the browser').toEqual([])
+    expect(writes, 'an edit reached the network without the Save button').toEqual([])
   } finally {
     await dropPlanner(fixture)
   }
 })
-

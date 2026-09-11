@@ -1,11 +1,12 @@
 /**
- * Rendering rules for the last-saved label: the standalone span, the inline
- * suffix, and the timestamps that must render nothing at all.
+ * Rendering rules for the last-saved label: the span it renders, the timestamps
+ * that must render nothing, and the store subscription that moves it.
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { render } from '@testing-library/react'
+import { render, act } from '@testing-library/react'
 import { LastSavedLabel } from '../LastSavedLabel'
+import { createSaveStatusStore } from '../../../stores/saveStatus'
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -16,8 +17,6 @@ vi.mock('react-i18next', () => ({
 }))
 
 const NOW = new Date('2026-08-15T00:00:00.000Z')
-
-const AUTO_SAVING = 'pages.plannerMD.save.autoSaving'
 
 /** Timestamp, and the relative phrase the label must render for it. */
 const RENDERED_CASES: Array<[string, string, string]> = [
@@ -42,51 +41,29 @@ describe('LastSavedLabel', () => {
     vi.useRealTimers()
   })
 
-  it.each(RENDERED_CASES)(
-    'renders the standalone span for %s',
-    (_label, lastSavedAt, relativeTime) => {
-      const { container } = render(<LastSavedLabel lastSavedAt={lastSavedAt} />)
+  it.each(RENDERED_CASES)('renders the span for %s', (_label, lastSavedAt, relativeTime) => {
+    const { container } = render(<LastSavedLabel status={createSaveStatusStore(lastSavedAt)} />)
 
-      expect(container.innerHTML).toBe(
-        `<span class="text-sm text-muted-foreground">sync.lastSaved:${relativeTime}</span>`,
-      )
-    },
-  )
+    expect(container.innerHTML).toBe(
+      `<span class="text-sm text-muted-foreground">sync.lastSaved:${relativeTime}</span>`,
+    )
+  })
 
-  it.each(RENDERED_CASES)(
-    'renders the inline suffix for %s',
-    (_label, lastSavedAt, relativeTime) => {
-      const { container } = render(
-        <span className="text-sm text-muted-foreground">
-          {AUTO_SAVING}
-          <LastSavedLabel lastSavedAt={lastSavedAt} inline />
-        </span>,
-      )
-
-      const line = container.firstElementChild
-
-      expect(line?.childElementCount).toBe(0)
-      expect(line?.textContent).toBe(`${AUTO_SAVING} - sync.lastSaved:${relativeTime}`)
-    },
-  )
-
-  it.each(EMPTY_CASES)('renders nothing standalone for %s', (_label, lastSavedAt) => {
-    const { container } = render(<LastSavedLabel lastSavedAt={lastSavedAt} />)
+  it.each(EMPTY_CASES)('renders nothing for %s', (_label, lastSavedAt) => {
+    const { container } = render(<LastSavedLabel status={createSaveStatusStore(lastSavedAt)} />)
 
     expect(container.innerHTML).toBe('')
   })
 
-  it.each(EMPTY_CASES)('renders no inline suffix for %s', (_label, lastSavedAt) => {
-    const { container } = render(
-      <span className="text-sm text-muted-foreground">
-        {AUTO_SAVING}
-        <LastSavedLabel lastSavedAt={lastSavedAt} inline />
-      </span>,
-    )
+  it('follows the store without being re-rendered by a parent', () => {
+    const status = createSaveStatusStore(null)
+    const { container } = render(<LastSavedLabel status={status} />)
+    expect(container.innerHTML).toBe('')
 
-    const line = container.firstElementChild
+    act(() => {
+      status.setState({ lastSavedAt: new Date(NOW.getTime() - 120_000).toISOString() })
+    })
 
-    expect(line?.childElementCount).toBe(0)
-    expect(line?.textContent).toBe(AUTO_SAVING)
+    expect(container.textContent).toBe('sync.lastSaved:2 minutes ago')
   })
 })

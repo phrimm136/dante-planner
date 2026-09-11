@@ -32,7 +32,6 @@ export type PlannerConflict = {
 
 /** Inputs a resolution cannot derive, injected so the decision stays pure. */
 export type ConflictResolutionContext = {
-  deviceId: string
   /** ISO 8601 timestamp stamped on the copy. */
   now: string
   newId: () => string
@@ -46,10 +45,8 @@ export type ConflictForkMetadata = {
   title: string
   status: PlannerStatus
   syncVersion: number
-  deviceId: string
   createdAt: string
   lastModifiedAt: string
-  savedAt: string
 }
 
 /**
@@ -72,10 +69,8 @@ function forkMetadata(
     title: ctx.copyTitle(conflict.forkTitle),
     status: 'saved',
     syncVersion: INITIAL_SYNC_VERSION,
-    deviceId: ctx.deviceId,
     createdAt: ctx.now,
     lastModifiedAt: ctx.now,
-    savedAt: ctx.now,
   }
 }
 
@@ -143,7 +138,6 @@ export function reportedDelete(remove: (id: string) => Promise<void>): ConflictO
  */
 export interface ConflictInterpreterContext {
   newId: () => string
-  deviceId: string
   now: string
 }
 
@@ -152,10 +146,7 @@ function failed(step: ConflictFailure['step'], error: AppError): Result<never, C
 }
 
 /** Force-push the local side, then store what the server acknowledged. */
-async function keepLocal(
-  ops: ConflictOps,
-  ctx: ConflictInterpreterContext,
-): Promise<Result<void, ConflictFailure>> {
+async function keepLocal(ops: ConflictOps): Promise<Result<void, ConflictFailure>> {
   const planner = await ops.local()
   if (!planner.ok) return failed('saveLocal', planner.error)
 
@@ -171,7 +162,7 @@ async function keepLocal(
   const stored = synced.value ?? planner.value
   const saved = await ops.saveLocal({
     ...stored,
-    metadata: { ...stored.metadata, status: 'saved', savedAt: ctx.now },
+    metadata: { ...stored.metadata, status: 'saved' },
   })
   return saved.ok ? ok(undefined) : failed('saveLocal', saved.error)
 }
@@ -281,7 +272,7 @@ export async function interpretConflictPlan(
     case 'forkCopy':
       return forkCopy(effect, remaining, ops, ctx)
     case 'keepLocal': {
-      const kept = await keepLocal(ops, ctx)
+      const kept = await keepLocal(ops)
       if (!kept.ok) return kept
       break
     }

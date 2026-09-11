@@ -9,7 +9,6 @@ import {
   decompressImport,
   encodeExportEnvelope,
   exportFileName,
-  getValidDeviceId,
   importErrorToast,
   parseImportJson,
   partitionImport,
@@ -20,7 +19,6 @@ import {
 } from '../plannerExportImport'
 import { GZIP_OS_BYTE_OFFSET, GZIP_OS_TOPS20 } from '../deckCode'
 
-import { ok, err } from '@/lib/result'
 import { EXPORT_FILE_EXTENSION, EXPORT_VERSION, INFLATE_INPUT_CHUNK_BYTES } from '@/lib/constants'
 import { buildSaveablePlanner } from '@/test-utils'
 
@@ -28,8 +26,6 @@ import type { ImportEnvelope, ImportError } from '../plannerExportImport'
 import type { Result } from '@/lib/result'
 
 const VALID_UUID = '3f2504e0-4f89-41d3-9a0c-0305e82c3301'
-const OTHER_UUID = 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d'
-const FALLBACK_UUID = '11111111-2222-4333-8444-555555555555'
 
 const TIMESTAMP = '2026-01-01T00:00:00.000Z'
 
@@ -45,8 +41,6 @@ const EXPORT_ITEM = {
     syncVersion: 1,
     createdAt: TIMESTAMP,
     lastModifiedAt: TIMESTAMP,
-    savedAt: TIMESTAMP,
-    deviceId: '',
   },
   config: { type: 'MIRROR_DUNGEON', category: '5F' },
   content: {},
@@ -56,7 +50,6 @@ function envelope(planners: unknown[]) {
   return {
     exportVersion: 1,
     exportedAt: TIMESTAMP,
-    sourceDeviceId: '',
     planners,
   }
 }
@@ -76,72 +69,6 @@ function expectErr<T>(result: Result<T, ImportError>): ImportError {
   if (result.ok) throw new Error('expected a failed stage')
   return result.error
 }
-
-describe('getValidDeviceId', () => {
-  beforeEach(() => {
-    vi.spyOn(globalThis.crypto, 'randomUUID').mockReturnValue(FALLBACK_UUID)
-    vi.spyOn(console, 'warn').mockImplementation(() => {})
-  })
-
-  afterEach(() => {
-    vi.restoreAllMocks()
-    vi.unstubAllGlobals()
-  })
-
-  it('returns the first id when it is a valid UUID, without retrying', async () => {
-    const source = vi.fn(async () => ok(VALID_UUID))
-
-    await expect(getValidDeviceId(source)).resolves.toEqual(ok(VALID_UUID))
-    expect(source).toHaveBeenCalledTimes(1)
-    expect(console.warn).not.toHaveBeenCalled()
-  })
-
-  it('retries once when the first id is empty', async () => {
-    const source = vi.fn().mockResolvedValueOnce(ok('')).mockResolvedValueOnce(ok(OTHER_UUID))
-
-    await expect(getValidDeviceId(source)).resolves.toEqual(ok(OTHER_UUID))
-    expect(source).toHaveBeenCalledTimes(2)
-    expect(console.warn).not.toHaveBeenCalled()
-  })
-
-  it('retries once when the first id is not a UUID', async () => {
-    const source = vi
-      .fn()
-      .mockResolvedValueOnce(ok('not-a-uuid'))
-      .mockResolvedValueOnce(ok(OTHER_UUID))
-
-    await expect(getValidDeviceId(source)).resolves.toEqual(ok(OTHER_UUID))
-    expect(source).toHaveBeenCalledTimes(2)
-  })
-
-  it('falls back to a generated UUID and warns when both attempts fail', async () => {
-    const source = vi.fn(async () => ok('not-a-uuid'))
-
-    await expect(getValidDeviceId(source)).resolves.toEqual(ok(FALLBACK_UUID))
-    expect(source).toHaveBeenCalledTimes(2)
-    expect(crypto.randomUUID).toHaveBeenCalledTimes(1)
-    expect(console.warn).toHaveBeenCalledWith('Using fallback device ID:', FALLBACK_UUID)
-  })
-
-  it('reports a read that broke instead of minting over it', async () => {
-    const failure = err({ kind: 'ioError' as const, cause: new Error('disk gone') })
-    const source = vi.fn(async () => failure)
-
-    await expect(getValidDeviceId(source)).resolves.toBe(failure)
-    expect(source).toHaveBeenCalledTimes(1)
-    expect(crypto.randomUUID).not.toHaveBeenCalled()
-    expect(console.warn).not.toHaveBeenCalled()
-  })
-
-  it('reports a retry that broke after a first id that was not a UUID', async () => {
-    const failure = err({ kind: 'ioError' as const, cause: new Error('disk gone') })
-    const source = vi.fn().mockResolvedValueOnce(ok('not-a-uuid')).mockResolvedValueOnce(failure)
-
-    await expect(getValidDeviceId(source)).resolves.toBe(failure)
-    expect(source).toHaveBeenCalledTimes(2)
-    expect(crypto.randomUUID).not.toHaveBeenCalled()
-  })
-})
 
 describe('readGzipBytes', () => {
   it('passes bytes opening with the gzip header through', () => {
@@ -396,13 +323,12 @@ describe('classifyResolveOutcome', () => {
 })
 
 describe('toExportItem', () => {
-  it('lifts the id out and drops the owning device', () => {
-    const planner = buildSaveablePlanner({ metadata: { id: VALID_UUID, deviceId: OTHER_UUID } })
+  it('lifts the id out beside the metadata', () => {
+    const planner = buildSaveablePlanner({ metadata: { id: VALID_UUID } })
 
     const item = toExportItem(planner)
 
     expect(item.id).toBe(VALID_UUID)
-    expect(item.metadata.deviceId).toBe('')
     expect(item.metadata.title).toBe(planner.metadata.title)
     expect(item.config).toEqual(planner.config)
     expect(item.content).toEqual(planner.content)
@@ -410,21 +336,19 @@ describe('toExportItem', () => {
 })
 
 describe('buildExportEnvelope', () => {
-  it('stamps the export version and the device the file came from', () => {
+  it('stamps the export version and the time of export', () => {
     const items = [toExportItem(buildSaveablePlanner())]
 
-    expect(buildExportEnvelope(items, VALID_UUID, TIMESTAMP)).toEqual({
+    expect(buildExportEnvelope(items, TIMESTAMP)).toEqual({
       exportVersion: EXPORT_VERSION,
       exportedAt: TIMESTAMP,
-      sourceDeviceId: VALID_UUID,
       planners: items,
     })
   })
 })
 
 describe('encodeExportEnvelope', () => {
-  const envelopeOf = () =>
-    buildExportEnvelope([toExportItem(buildSaveablePlanner())], VALID_UUID, TIMESTAMP)
+  const envelopeOf = () => buildExportEnvelope([toExportItem(buildSaveablePlanner())], TIMESTAMP)
 
   it('stamps the OS byte the reader checks', () => {
     expect(encodeExportEnvelope(envelopeOf())[GZIP_OS_BYTE_OFFSET]).toBe(GZIP_OS_TOPS20)
@@ -473,27 +397,21 @@ describe('partitionImport', () => {
     return expectOk(readImportEnvelope(envelope(items)))
   }
 
-  it('rewrites an import with no local counterpart onto this device', () => {
-    const { conflicting, fresh } = partitionImport(envelopeOf([EXPORT_ITEM]), new Set(), OTHER_UUID)
+  it('accepts an import with no local counterpart as fresh', () => {
+    const { conflicting, fresh } = partitionImport(envelopeOf([EXPORT_ITEM]), new Set())
 
     expect(conflicting).toEqual([])
     expect(fresh).toHaveLength(1)
     expect(fresh[0]?.metadata.id).toBe(VALID_UUID)
-    expect(fresh[0]?.metadata.deviceId).toBe(OTHER_UUID)
     expect(fresh[0]?.metadata.title).toBe('Imported plan')
   })
 
   it('holds back an import whose id the local store already carries', () => {
-    const { conflicting, fresh } = partitionImport(
-      envelopeOf([EXPORT_ITEM]),
-      new Set([VALID_UUID]),
-      OTHER_UUID,
-    )
+    const { conflicting, fresh } = partitionImport(envelopeOf([EXPORT_ITEM]), new Set([VALID_UUID]))
 
     expect(fresh).toEqual([])
     expect(conflicting).toHaveLength(1)
     expect(conflicting[0]?.id).toBe(VALID_UUID)
-    expect(conflicting[0]?.incoming.metadata.deviceId).toBe(OTHER_UUID)
   })
 
   it('reduces an imported title to plain text', () => {
@@ -502,7 +420,7 @@ describe('partitionImport', () => {
       metadata: { ...EXPORT_ITEM.metadata, title: '<b>Run</b>' },
     }
 
-    const { fresh } = partitionImport(envelopeOf([scripted]), new Set(), OTHER_UUID)
+    const { fresh } = partitionImport(envelopeOf([scripted]), new Set())
 
     expect(fresh[0]?.metadata.title).toBe('Run')
   })

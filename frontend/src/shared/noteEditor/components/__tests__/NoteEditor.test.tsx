@@ -7,14 +7,9 @@
  * 3. Content rendering and controlled component pattern
  */
 
-import { useEffect } from 'react'
-import { describe, it, expect, vi, beforeEach, beforeAll, afterAll, type Mock } from 'vitest'
-import {
-  NoteDeliveryProvider,
-  useNoteDeliveryRegistry,
-  type NoteDeliveryRegistry,
-} from '../../context/NoteDeliveryRegistry'
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { pasteIntoNote, stubRangeRects } from '@/test-utils'
 import userEvent from '@testing-library/user-event'
 import { NoteEditor } from '../NoteEditor'
 import { calculateNoteByteLength } from '../../lib/noteUtils'
@@ -522,39 +517,7 @@ describe('NoteEditor - paste byte limit', () => {
     content: { type: 'doc', content: [{ type: 'paragraph' }] },
   }
 
-  // jsdom has no layout: ProseMirror's post-dispatch scrollToSelection calls
-  // Range.getClientRects(), which returns empty and throws. Shim a zero rect.
-  const zeroRect = {
-    top: 0,
-    left: 0,
-    bottom: 0,
-    right: 0,
-    width: 0,
-    height: 0,
-    x: 0,
-    y: 0,
-    toJSON: () => ({}),
-  } as DOMRect
-  let origBounding: typeof Range.prototype.getBoundingClientRect
-  let origClientRects: typeof Range.prototype.getClientRects
-
-  beforeAll(() => {
-    origBounding = Range.prototype.getBoundingClientRect
-    origClientRects = Range.prototype.getClientRects
-    Range.prototype.getBoundingClientRect = () => zeroRect
-    Range.prototype.getClientRects = () =>
-      ({
-        length: 1,
-        item: () => zeroRect,
-        0: zeroRect,
-        [Symbol.iterator]: () => [zeroRect][Symbol.iterator](),
-      }) as unknown as DOMRectList
-  })
-
-  afterAll(() => {
-    Range.prototype.getBoundingClientRect = origBounding
-    Range.prototype.getClientRects = origClientRects
-  })
+  stubRangeRects()
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -643,138 +606,40 @@ describe('NoteEditor - paste byte limit', () => {
   // exercising the exact call shape without jsdom/React/debounce flakiness.
 })
 
-describe('NoteEditor - debounce flush on unmount', () => {
+describe('NoteEditor - every update reaches its owner', () => {
   const emptyValue: NoteContent = {
     content: { type: 'doc', content: [{ type: 'paragraph' }] },
   }
 
-  // jsdom has no layout: ProseMirror's post-dispatch scrollToSelection calls
-  // Range.getClientRects(), which returns empty and throws. Shim a zero rect.
-  const zeroRect = {
-    top: 0,
-    left: 0,
-    bottom: 0,
-    right: 0,
-    width: 0,
-    height: 0,
-    x: 0,
-    y: 0,
-    toJSON: () => ({}),
-  } as DOMRect
-  let origBounding: typeof Range.prototype.getBoundingClientRect
-  let origClientRects: typeof Range.prototype.getClientRects
-
-  beforeAll(() => {
-    origBounding = Range.prototype.getBoundingClientRect
-    origClientRects = Range.prototype.getClientRects
-    Range.prototype.getBoundingClientRect = () => zeroRect
-    Range.prototype.getClientRects = () =>
-      ({
-        length: 1,
-        item: () => zeroRect,
-        0: zeroRect,
-        [Symbol.iterator]: () => [zeroRect][Symbol.iterator](),
-      }) as unknown as DOMRectList
-  })
-
-  afterAll(() => {
-    Range.prototype.getBoundingClientRect = origBounding
-    Range.prototype.getClientRects = origClientRects
-  })
+  stubRangeRects()
 
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  function typeText(text: string) {
-    const contentEl = document.querySelector('.note-editor-content')
-    expect(contentEl).toBeTruthy()
-    const clipboardData = {
-      getData: (type: string) => (type === 'text/plain' ? text : ''),
-      types: ['text/plain'],
-      files: [],
-    }
-    fireEvent.paste(contentEl as Element, { clipboardData })
-  }
-
-  it('calls onChange exactly once with the typed content when unmounted before the interval elapses', async () => {
+  it('calls onChange with the typed content in the same task as the edit', async () => {
     const onChange = vi.fn<(value: NoteContent) => void>()
-    const { unmount } = render(<NoteEditor value={emptyValue} onChange={onChange} />)
+    render(<NoteEditor value={emptyValue} onChange={onChange} />)
 
     const container = document.querySelector('.note-editor') as Element
     await waitFor(() => expect(container).toBeTruthy())
-    fireEvent.focusIn(container)
 
-    typeText('unflushed keystrokes')
+    pasteIntoNote(container, 'typed keystrokes')
 
-    // No await between the edit and the unmount, so the debounce cannot have
-    // elapsed: whatever onChange sees came from the teardown flush.
-    expect(onChange).not.toHaveBeenCalled()
-
-    unmount()
-
+    // No await between the edit and the assertion: nothing may hold the text.
     expect(onChange).toHaveBeenCalledTimes(1)
-    const flushed = lastChange(onChange)
-    expect(JSON.stringify(flushed.content)).toContain('unflushed keystrokes')
+    expect(JSON.stringify(lastChange(onChange).content)).toContain('typed keystrokes')
   })
 
-  it('calls onChange once in total when the debounce already fired before unmount', async () => {
+  it('reports nothing for the reparse of a note that loaded empty', async () => {
     const onChange = vi.fn<(value: NoteContent) => void>()
-    const { unmount } = render(<NoteEditor value={emptyValue} onChange={onChange} />)
+    render(<NoteEditor value={emptyValue} onChange={onChange} />)
+    await waitFor(() => expect(document.querySelector('.note-editor')).toBeTruthy())
 
-    const container = document.querySelector('.note-editor') as Element
-    await waitFor(() => expect(container).toBeTruthy())
-    fireEvent.focusIn(container)
-
-    typeText('settled content')
-
-    await waitFor(() => expect(onChange).toHaveBeenCalledTimes(1), { timeout: 2000 })
-
-    unmount()
-
-    expect(onChange).toHaveBeenCalledTimes(1)
-  })
-
-  it('hands pending text to its owner when the registry is drained', async () => {
-    const onChange = vi.fn<(value: NoteContent) => void>()
-    const captured: { registry: NoteDeliveryRegistry | null } = { registry: null }
-    const captureRegistry = (owned: NoteDeliveryRegistry) => {
-      captured.registry = owned
-    }
-
-    function Harness({ onReady }: { onReady: (owned: NoteDeliveryRegistry) => void }) {
-      const owned = useNoteDeliveryRegistry()
-      useEffect(() => {
-        onReady(owned)
-      }, [owned, onReady])
-      return (
-        <NoteDeliveryProvider registry={owned}>
-          <NoteEditor value={emptyValue} onChange={onChange} />
-        </NoteDeliveryProvider>
-      )
-    }
-
-    render(<Harness onReady={captureRegistry} />)
-
-    const container = document.querySelector('.note-editor') as Element
-    await waitFor(() => expect(container).toBeTruthy())
-    fireEvent.focusIn(container)
-
-    onChange.mockClear()
-    typeText('held by the debounce')
     expect(onChange).not.toHaveBeenCalled()
-
-    captured.registry?.drain()
-
-    expect(onChange).toHaveBeenCalledTimes(1)
-    const delivered = lastChange(onChange)
-    expect(JSON.stringify(delivered.content)).toContain('held by the debounce')
   })
 
   it('registers no unload listener of its own', async () => {
-    // Pushing from here would race the owner's own handler: at the window target
-    // listeners run in registration order, and an editor revealed later registers
-    // after it. The owner pulls instead, so there is nothing to order.
     const addSpy = vi.spyOn(window, 'addEventListener')
     render(<NoteEditor value={emptyValue} onChange={vi.fn()} />)
     await waitFor(() => expect(document.querySelector('.note-editor')).toBeTruthy())

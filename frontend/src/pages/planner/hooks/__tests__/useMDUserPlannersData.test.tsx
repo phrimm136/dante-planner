@@ -18,7 +18,6 @@ const syncMocks = vi.hoisted(() => ({
   syncEnabled: true,
   listFromServer: vi.fn(async (): Promise<unknown[]> => []),
   listLocal: vi.fn(async (): Promise<unknown[]> => []),
-  getOrCreateDeviceId: vi.fn(async (): Promise<unknown> => ({ ok: true, value: 'test-device' })),
   saveToLocal: vi.fn(async (_planner: unknown): Promise<unknown> => ({ ok: true })),
   loadFromLocal: vi.fn(async (_id: string): Promise<unknown> => null),
   fetchFromServer: vi.fn(async (_id: string): Promise<unknown> => null),
@@ -39,7 +38,6 @@ vi.mock('../../lib/plannerApi', () => ({
 // dependency-array stability must not rest on their identity.
 vi.mock('../usePlannerStorage', () => ({
   usePlannerStorage: () => ({
-    getOrCreateDeviceId: syncMocks.getOrCreateDeviceId,
     saveToLocal: syncMocks.saveToLocal,
     loadFromLocal: syncMocks.loadFromLocal,
     listLocal: syncMocks.listLocal,
@@ -192,7 +190,6 @@ describe('useMDUserPlannersData background sync', () => {
       category: '5F',
       status: 'saved',
       lastModifiedAt: '2026-01-01T00:00:00.000Z',
-      savedAt: '2026-01-01T00:00:00.000Z',
       syncVersion: 1,
     }))
   }
@@ -270,7 +267,6 @@ describe('useMDUserPlannersData background sync', () => {
       category: '5F',
       status: 'draft',
       lastModifiedAt: '2026-01-01T00:00:00.000Z',
-      savedAt: null,
       syncVersion: 1,
     }
     const localPlanner = {
@@ -306,11 +302,10 @@ describe('useMDUserPlannersData background sync', () => {
     return stored
   }
 
-  it('marks the kept local planner saved with a savedAt timestamp', async () => {
+  it('marks the kept local planner saved', async () => {
     const stored = await resolveKeepingLocal()
 
     expect(stored.metadata.status).toBe('saved')
-    expect(stored.metadata.savedAt).not.toBeNull()
     expect(stored.metadata.syncVersion).toBe(6)
   })
 
@@ -322,7 +317,6 @@ describe('useMDUserPlannersData background sync', () => {
       category: '5F',
       status: 'saved',
       lastModifiedAt: '2026-01-01T00:00:00.000Z',
-      savedAt: '2026-01-01T00:00:00.000Z',
       syncVersion: 1,
       ...overrides,
     }
@@ -409,7 +403,6 @@ describe('useMDUserPlannersData batch conflict resolution', () => {
     syncMocks.isAuthenticated = true
     syncMocks.syncEnabled = true
     syncMocks.egoGiftSpec = {}
-    syncMocks.getOrCreateDeviceId.mockResolvedValue({ ok: true, value: 'test-device' })
     syncMocks.saveToLocal.mockClear()
     syncMocks.syncToServer.mockClear()
     syncMocks.fetchFromServer.mockClear()
@@ -425,7 +418,6 @@ describe('useMDUserPlannersData batch conflict resolution', () => {
       category: '5F',
       status: 'draft',
       lastModifiedAt: '2026-01-01T00:00:00.000Z',
-      savedAt: null,
       syncVersion: 1,
     }))
   }
@@ -633,22 +625,6 @@ describe('useMDUserPlannersData batch conflict resolution', () => {
       .filter((id) => id !== 'planner-0')
     expect(copyIds).toHaveLength(2)
     expect(new Set(copyIds).size).toBe(1)
-  })
-
-  it('reports an unreadable device id against the submission, not its first row', async () => {
-    const result = await pendingThreeConflicts()
-    syncMocks.getOrCreateDeviceId.mockResolvedValueOnce({ ok: false, error: 'readFailed' })
-
-    let outcomes: ConflictOutcome[] = []
-    await act(async () => {
-      outcomes = await result.current.resolveConflicts([{ id: 'planner-0', choice: 'overwrite' }])
-    })
-
-    expect(outcomes[0]!.result).toEqual({
-      ok: false,
-      error: { step: 'precondition', error: { kind: 'unknown' } },
-    })
-    expect(result.current.pendingConflicts).toHaveLength(3)
   })
 
   it('clears the resolving flag when a step throws, so the dialog is usable again', async () => {

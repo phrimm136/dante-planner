@@ -93,13 +93,8 @@ export function usePlannerFork() {
         )
       }
 
-      // 1. Generate new planner ID and get device ID
+      // 1. Generate new planner ID
       const newPlannerId = generateUUID()
-      const deviceId = await storage.getOrCreateDeviceId()
-
-      if (!deviceId.ok) {
-        throw new Error('Failed to get device ID', { cause: deviceId.error })
-      }
 
       // 2. Apply i18n copySuffix to title
       const baseTitle = plannerData.title
@@ -123,8 +118,6 @@ export function usePlannerFork() {
           syncVersion: INITIAL_SYNC_VERSION,
           createdAt: now,
           lastModifiedAt: now,
-          savedAt: now,
-          deviceId: deviceId.value,
           published: false, // New copy is not published
         },
         PlannerConfigDiscriminatedSchema.parse({

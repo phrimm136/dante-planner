@@ -85,7 +85,6 @@ describe('fetchPublishedPlanner', () => {
     expect(isPlannerRemoved(state)).toBe(false)
     if (isPlannerRemoved(state)) throw new Error('expected a loaded planner')
     expect(state.planner.config).toEqual({ type: 'MIRROR_DUNGEON', category: '5F' })
-    expect(state.planner.metadata.deviceId).toBe('published')
     if (!isMDPlanner(state.planner)) throw new Error('expected a Mirror Dungeon planner')
     expect(state.planner.content.selectedGiftIds).toEqual(['9001'])
   })

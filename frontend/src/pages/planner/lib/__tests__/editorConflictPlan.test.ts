@@ -24,10 +24,8 @@ const forkCopy: ConflictEffect = {
     title: 'Planner (Copy)',
     status: 'saved',
     syncVersion: 1,
-    deviceId: 'device-1',
     createdAt: '2026-01-01T00:00:00.000Z',
     lastModifiedAt: '2026-01-01T00:00:00.000Z',
-    savedAt: '2026-01-01T00:00:00.000Z',
   },
 }
 

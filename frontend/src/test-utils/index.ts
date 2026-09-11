@@ -11,6 +11,7 @@ export {
   buildSaveablePlanner,
 } from './fixtures'
 export { buildMutationResult } from './mutationResult'
+export { flushMicrotask, pasteIntoNote, stubRangeRects } from './noteEditor'
 export { createTestQueryClient } from './queryClient'
 export { createTestRouter } from './router'
 export { renderWithProviders } from './renderWithProviders'

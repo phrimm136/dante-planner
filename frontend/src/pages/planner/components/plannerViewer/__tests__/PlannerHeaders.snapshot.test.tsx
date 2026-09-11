@@ -128,8 +128,6 @@ function savedPlanner(
       syncVersion: 1,
       createdAt: '2026-01-01T00:00:00Z',
       lastModifiedAt: '2026-01-01T10:30:00Z',
-      savedAt: '2026-01-01T10:30:00Z',
-      deviceId: 'device-123',
       published: false,
       ...metadata,
     },
@@ -216,10 +214,7 @@ interface PersonalRow {
 
 const PERSONAL_MATRIX: Array<[string, PersonalRow]> = [
   ['guest, saved', { planner: savedPlanner(), isAuthenticated: false }],
-  [
-    'guest, draft',
-    { planner: savedPlanner({ status: 'draft', savedAt: null }), isAuthenticated: false },
-  ],
+  ['guest, draft', { planner: savedPlanner({ status: 'draft' }), isAuthenticated: false }],
   [
     'authenticated, sync off, saved',
     { planner: savedPlanner(), isAuthenticated: true, syncEnabled: false },
@@ -237,8 +232,8 @@ const PERSONAL_MATRIX: Array<[string, PersonalRow]> = [
     },
   ],
   [
-    'authenticated, sync undecided, never saved',
-    { planner: savedPlanner({ savedAt: null }), isAuthenticated: true, syncEnabled: null },
+    'authenticated, sync undecided, saved',
+    { planner: savedPlanner(), isAuthenticated: true, syncEnabled: null },
   ],
   [
     'published and current',

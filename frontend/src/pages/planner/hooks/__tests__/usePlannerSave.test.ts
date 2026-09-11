@@ -13,14 +13,13 @@
  */
 
 import { renderHook, act, waitFor } from '@testing-library/react'
+import { flushMicrotask } from '@/test-utils'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { queryClient } from '@/lib/queryClient'
-import { AUTO_SAVE_DEBOUNCE_MS } from '@/lib/constants'
 import { createPlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import type { PlannerState, UsePlannerSaveOptions } from '../usePlannerSave'
 import type { AppError } from '@/lib/apiErrorClassifier'
 import type { Result } from '@/lib/result'
-import type { StorageReadError } from '@/lib/storage'
 import type { SaveablePlanner } from '../../types/PlannerTypes'
 import type { AcknowledgedPlanner } from '../usePlannerSyncAdapter'
 import { BannedError, ConflictError, WriteTemporarilyUnavailableError } from '@/lib/apiErrors'
@@ -29,16 +28,20 @@ import { ok, err } from '@/lib/result'
 // Shared call-order recorder: every adapter call pushes its label so order is assertable.
 const callOrder: string[] = []
 
-const mockGetOrCreateDeviceId = vi.fn<() => Promise<Result<string, StorageReadError>>>()
 const mockSaveToLocal = vi.fn<(planner: SaveablePlanner) => Promise<Result<void, AppError>>>()
 const mockSyncToServer =
   vi.fn<(planner: SaveablePlanner, force?: boolean) => Promise<AcknowledgedPlanner>>()
 const mockFetchFromServer = vi.fn()
 const mockDeleteFromLocal = vi.fn()
 
+const mockOpenStorageDb = vi.fn(async () => ({}) as IDBDatabase)
+vi.mock('@/lib/storage', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/storage')>()
+  return { ...actual, openStorageDb: () => mockOpenStorageDb() }
+})
+
 vi.mock('../usePlannerStorage', () => ({
   usePlannerStorage: () => ({
-    getOrCreateDeviceId: mockGetOrCreateDeviceId,
     saveToLocal: (planner: SaveablePlanner) => {
       callOrder.push('local')
       return mockSaveToLocal(planner)
@@ -143,7 +146,6 @@ function authenticated() {
 beforeEach(() => {
   vi.clearAllMocks()
   callOrder.length = 0
-  mockGetOrCreateDeviceId.mockResolvedValue(ok('device-123'))
   mockSaveToLocal.mockResolvedValue(ok(undefined))
   mockDeleteFromLocal.mockResolvedValue(ok(undefined))
   mockSyncToServer.mockImplementation((planner) => syncedFrom(planner, 5))
@@ -206,12 +208,13 @@ describe('usePlannerSave - save() golden master', () => {
   it('adopts the syncVersion returned by the server', async () => {
     authenticated()
     mockSyncToServer.mockImplementation((planner) => syncedFrom(planner, 42))
-    const { result } = renderHook(() => usePlannerSave(baseOptions()))
+    const { result, rerender } = renderHook(() => usePlannerSave(baseOptions()))
 
     await act(async () => {
       await result.current.save({ published: false })
     })
 
+    rerender()
     expect(result.current.syncVersion).toBe(42)
   })
 })
@@ -362,46 +365,6 @@ describe('usePlannerSave - error surface', () => {
   })
 })
 
-describe('usePlannerSave - dirty tracking surface', () => {
-  // Dirty tracking is NOT store state; it lives here as ref-baseline comparisons.
-  // Both baselines are installed when the subscription mounts, so an untouched
-  // planner is clean against them and an edit is what makes it dirty.
-  it('reports a freshly mounted planner clean, and an edit against it dirty', () => {
-    authenticated()
-    const store = manualStore()
-    let currentState = validState({ title: 'as loaded' })
-    const { result, rerender } = renderHook(() =>
-      usePlannerSave(baseOptions({ getState: () => currentState, subscribe: store.subscribe })),
-    )
-
-    expect(result.current.hasUnsyncedChanges).toBe(false)
-    expect(result.current.hasLocalUnsavedChanges).toBe(false)
-
-    currentState = validState({ title: 'edited' })
-    act(() => {
-      store.notify()
-    })
-    // These two are computed during render, so they answer for the last one. The
-    // reader that does not wait for a render is isDirty, covered separately.
-    rerender()
-
-    expect(result.current.hasUnsyncedChanges).toBe(true)
-    expect(result.current.hasLocalUnsavedChanges).toBe(true)
-  })
-
-  it('clears unsynced state after a successful manual save sets the synced baseline', async () => {
-    authenticated()
-    const { result } = renderHook(() => usePlannerSave(baseOptions()))
-
-    await act(async () => {
-      await result.current.save({ published: false })
-    })
-
-    expect(result.current.hasUnsyncedChanges).toBe(false)
-    expect(result.current.hasLocalUnsavedChanges).toBe(false)
-  })
-})
-
 describe('usePlannerSave - resolveConflict adapter ordering (golden master)', () => {
   /**
    * The conflict error is set only when a save throws a ConflictError. The single
@@ -470,10 +433,11 @@ describe('usePlannerSave - resolveConflict adapter ordering (golden master)', ()
 
     // Advance the ref to 12 through a confirmed ack, not through a prop.
     mockSyncToServer.mockImplementation((planner) => syncedFrom(planner, 12))
-    const { result } = renderHook(() => usePlannerSave(options))
+    const { result, rerender } = renderHook(() => usePlannerSave(options))
     await act(async () => {
       await result.current.save({ published: false })
     })
+    rerender()
     expect(result.current.syncVersion).toBe(12)
 
     // A conflict carrying no server version is what routes through the read.
@@ -491,6 +455,7 @@ describe('usePlannerSave - resolveConflict adapter ordering (golden master)', ()
     })
 
     expect(sentVersions).toEqual([12])
+    rerender()
     expect(result.current.syncVersion).toBe(12)
   })
 
@@ -498,7 +463,7 @@ describe('usePlannerSave - resolveConflict adapter ordering (golden master)', ()
     // Adopting before the write is confirmed would leave version=server with the
     // old local content still on disk.
     authenticated()
-    const { result } = await driveIntoConflict({ initialSyncVersion: 2 })
+    const { result, rerender } = await driveIntoConflict({ initialSyncVersion: 2 })
     mockFetchFromServer.mockResolvedValue(ok(fetchedAt(9)))
     mockSaveToLocal.mockResolvedValue(err({ kind: 'quota' }))
 
@@ -506,6 +471,7 @@ describe('usePlannerSave - resolveConflict adapter ordering (golden master)', ()
       await result.current.resolveConflict('discard')
     })
 
+    rerender()
     expect(result.current.syncVersion).toBe(2)
   })
 
@@ -684,7 +650,7 @@ describe('usePlannerSave - cross-surface version convergence', () => {
       // The server jumps the version rather than incrementing it.
       return syncedFrom(planner, 30)
     })
-    const { result } = renderHook(() =>
+    const { result, rerender } = renderHook(() =>
       usePlannerSave(baseOptions({ initialPlannerId: plannerId, initialSyncVersion: 4 })),
     )
 
@@ -696,6 +662,7 @@ describe('usePlannerSave - cross-surface version convergence', () => {
     })
 
     expect(sentVersions).toEqual([4, 30])
+    rerender()
     expect(result.current.syncVersion).toBe(30)
   })
 
@@ -735,111 +702,158 @@ function manualStore() {
   }
 }
 
-describe('usePlannerSave - autosave flush on teardown', () => {
-  it('writes to storage exactly once when unmounted with an armed autosave timer', async () => {
+/** Let the session open: the connection and the device id both resolve first. */
+async function sessionReady() {
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 0))
+  })
+}
+
+const writtenTitles = () => mockSaveToLocal.mock.calls.map(([planner]) => planner.metadata.title)
+
+/** A parked upload the test releases by hand. */
+function parkNextSync() {
+  let release: (() => void) | null = null
+  mockSyncToServer.mockImplementation(
+    (planner) =>
+      new Promise((resolve) => {
+        release = () => {
+          resolve({ planner, ack: { syncVersion: 5 } })
+        }
+      }),
+  )
+  return () => release?.()
+}
+
+describe('usePlannerSave - write-through', () => {
+  it('opens the storage connection at mount, before any edit can need it', async () => {
+    authenticated()
+    renderHook(() => usePlannerSave(baseOptions()))
+    await sessionReady()
+
+    expect(mockOpenStorageDb).toHaveBeenCalledTimes(1)
+  })
+
+  it('writes a store change once, inside the task that made it', async () => {
     authenticated()
     const store = manualStore()
     let currentState = validState({ title: 'before' })
-    const { result, unmount } = renderHook(() =>
+    renderHook(() =>
       usePlannerSave(baseOptions({ getState: () => currentState, subscribe: store.subscribe })),
     )
-
-    // A manual save adopts the current state as the autosave baseline; without one
-    // the first autosave only initializes that baseline and writes nothing.
-    await act(async () => {
-      await result.current.save({ published: false })
-    })
+    await sessionReady()
     mockSaveToLocal.mockClear()
 
     currentState = validState({ title: 'after' })
-    act(() => {
-      store.notify()
-    })
+    store.notify()
+    await flushMicrotask()
 
-    await act(async () => {
-      unmount()
-    })
-
-    expect(mockSaveToLocal).toHaveBeenCalledTimes(1)
+    expect(writtenTitles()).toEqual(['after'])
+    const [firstCall] = mockSaveToLocal.mock.calls
+    expect(firstCall?.[0].metadata.status).toBe('draft')
   })
 
-  it('writes nothing when unmounted with no armed timer', async () => {
+  it('collapses every notification in one task into one write of the last state', async () => {
     authenticated()
     const store = manualStore()
-    const currentState = validState({ title: 'untouched' })
-    const { result, unmount } = renderHook(() =>
+    let currentState = validState({ title: 'before' })
+    renderHook(() =>
       usePlannerSave(baseOptions({ getState: () => currentState, subscribe: store.subscribe })),
     )
-
-    await act(async () => {
-      await result.current.save({ published: false })
-    })
+    await sessionReady()
     mockSaveToLocal.mockClear()
 
-    await act(async () => {
-      unmount()
-    })
+    for (const title of ['one', 'two', 'three']) {
+      currentState = validState({ title })
+      store.notify()
+    }
+    await flushMicrotask()
+
+    expect(writtenTitles()).toEqual(['three'])
+  })
+
+  it('writes nothing for a notification that changed nothing persistable', async () => {
+    authenticated()
+    const store = manualStore()
+    const currentState = validState({ title: 'same' })
+    renderHook(() =>
+      usePlannerSave(baseOptions({ getState: () => currentState, subscribe: store.subscribe })),
+    )
+    await sessionReady()
+    mockSaveToLocal.mockClear()
+
+    store.notify()
+    await flushMicrotask()
 
     expect(mockSaveToLocal).not.toHaveBeenCalled()
+  })
+
+  it('writes nothing when a planner is only mounted', async () => {
+    authenticated()
+    const store = manualStore()
+    const currentState = validState({ title: 'opened' })
+    renderHook(() =>
+      usePlannerSave(baseOptions({ getState: () => currentState, subscribe: store.subscribe })),
+    )
+    await sessionReady()
+
+    expect(mockSaveToLocal).not.toHaveBeenCalled()
+  })
+
+  it('surfaces a failed write as the save error', async () => {
+    authenticated()
+    mockSaveToLocal.mockResolvedValue(err({ kind: 'quota' }))
+    const store = manualStore()
+    let currentState = validState({ title: 'before' })
+    const { result } = renderHook(() =>
+      usePlannerSave(baseOptions({ getState: () => currentState, subscribe: store.subscribe })),
+    )
+    await sessionReady()
+
+    currentState = validState({ title: 'after' })
+    store.notify()
+    await flushMicrotask()
+
+    await waitFor(() => {
+      expect(result.current.error?.kind).toBe('quota')
+    })
   })
 })
 
 describe('usePlannerSave - edits during an in-flight manual save', () => {
-  it('persists an edit made while a save is in flight, and keeps warning until it lands', async () => {
+  it('holds an edit made while a save is in flight, and writes it once the save lands', async () => {
     authenticated()
     const store = manualStore()
     let currentState = validState({ title: 'before' })
     const { result } = renderHook(() =>
       usePlannerSave(baseOptions({ getState: () => currentState, subscribe: store.subscribe })),
     )
+    await sessionReady()
 
-    // Land one save first, so the comparison baseline exists.
-    await act(async () => {
-      await result.current.save({ published: false })
-    })
-    mockSaveToLocal.mockClear()
-
-    // The next save parks on the server until the test releases it.
-    let releaseSync: (() => void) | null = null
-    mockSyncToServer.mockImplementation(
-      (planner) =>
-        new Promise((resolve) => {
-          releaseSync = () => {
-            resolve({ planner, ack: { syncVersion: 5 } })
-          }
-        }),
-    )
-
+    const releaseSync = parkNextSync()
     let savePromise: Promise<boolean> | undefined
     await act(async () => {
       savePromise = result.current.save({ published: false })
       // Let performSave capture its snapshot and reach the parked upload.
       await new Promise((resolve) => setTimeout(resolve, 0))
     })
+    mockSaveToLocal.mockClear()
 
-    // The user keeps typing while the save is still in flight.
+    // The user keeps typing while the save is still in flight. The save's own
+    // snapshot must land after nothing newer, so the edit waits.
     currentState = validState({ title: 'after' })
-    act(() => {
-      store.notify()
-    })
-
-    // The debounce elapses mid-save: it must re-arm rather than drop the edit.
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, AUTO_SAVE_DEBOUNCE_MS * 2))
-    })
-    expect(result.current.isDirty()).toBe(true)
+    store.notify()
+    await flushMicrotask()
+    expect(mockSaveToLocal).not.toHaveBeenCalled()
 
     await act(async () => {
-      releaseSync?.()
+      releaseSync()
       await savePromise
     })
 
+    // The save's own snapshot lands first, the held edit right after it.
     await waitFor(() => {
-      const titles = mockSaveToLocal.mock.calls.map(([planner]) => planner.metadata.title)
-      expect(titles).toContain('after')
-    })
-    await waitFor(() => {
-      expect(result.current.isDirty()).toBe(false)
+      expect(writtenTitles()).toEqual(['before', 'after'])
     })
   })
 })
@@ -852,32 +866,18 @@ describe('usePlannerSave - unmounting during a save', () => {
     const { result, unmount } = renderHook(() =>
       usePlannerSave(baseOptions({ getState: () => currentState, subscribe: store.subscribe })),
     )
+    await sessionReady()
 
-    await act(async () => {
-      await result.current.save({ published: false })
-    })
-    mockSaveToLocal.mockClear()
-
-    let releaseSync: (() => void) | null = null
-    mockSyncToServer.mockImplementation(
-      (planner) =>
-        new Promise((resolve) => {
-          releaseSync = () => {
-            resolve({ planner, ack: { syncVersion: 5 } })
-          }
-        }),
-    )
-
+    const releaseSync = parkNextSync()
     let savePromise: Promise<boolean> | undefined
     await act(async () => {
       savePromise = result.current.save({ published: false })
       await new Promise((resolve) => setTimeout(resolve, 0))
     })
+    mockSaveToLocal.mockClear()
 
     currentState = validState({ title: 'after' })
-    act(() => {
-      store.notify()
-    })
+    store.notify()
 
     // The editor closes while the save is still running. Nothing re-renders this
     // hook again, so anything reading save state off a render closure is frozen
@@ -887,19 +887,18 @@ describe('usePlannerSave - unmounting during a save', () => {
     })
 
     await act(async () => {
-      releaseSync?.()
+      releaseSync()
       await savePromise
     })
 
     await waitFor(() => {
-      const titles = mockSaveToLocal.mock.calls.map(([planner]) => planner.metadata.title)
-      expect(titles).toContain('after')
+      expect(writtenTitles()).toEqual(['before', 'after'])
     })
   })
 })
 
 describe('usePlannerSave - discard adoption', () => {
-  it('leaves the adopted server copy clean instead of queued for a draft rewrite', async () => {
+  it('leaves the adopted server copy clean instead of written back as a draft', async () => {
     authenticated()
     const store = manualStore()
     let currentState = validState({ title: 'local' })
@@ -917,6 +916,7 @@ describe('usePlannerSave - discard adoption', () => {
         baseOptions({ getState: () => currentState, subscribe: store.subscribe, onServerReload }),
       ),
     )
+    await sessionReady()
 
     await act(async () => {
       await result.current.save({ published: false })
@@ -929,17 +929,14 @@ describe('usePlannerSave - discard adoption', () => {
     await act(async () => {
       await result.current.resolveConflict('discard')
     })
+    await flushMicrotask()
 
-    expect(result.current.isDirty()).toBe(false)
-
-    // The debounce the reload armed must find nothing left to write.
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, AUTO_SAVE_DEBOUNCE_MS * 2))
-    })
+    // The reload's notification arrived while the resolution held the write, and
+    // the release found the store equal to what the resolution wrote.
     expect(mockSaveToLocal).toHaveBeenCalledTimes(1)
   })
 
-  it('stays dirty when the reload refused the server copy', async () => {
+  it('keeps the planner unsynced when the reload refused the server copy', async () => {
     authenticated()
     const store = manualStore()
     let currentState = validState({ title: 'local' })
@@ -952,6 +949,7 @@ describe('usePlannerSave - discard adoption', () => {
         baseOptions({ getState: () => currentState, subscribe: store.subscribe, onServerReload }),
       ),
     )
+    await sessionReady()
 
     await act(async () => {
       await result.current.save({ published: false })
@@ -968,75 +966,7 @@ describe('usePlannerSave - discard adoption', () => {
     })
 
     expect(onServerReload).toHaveBeenCalledTimes(1)
-    expect(result.current.isDirty()).toBe(true)
-  })
-})
-
-describe('usePlannerSave - isDirty', () => {
-  it('reads clean after a manual save adopts the state it wrote', async () => {
-    authenticated()
-    const store = manualStore()
-    let currentState = validState({ title: 'before' })
-    const { result } = renderHook(() =>
-      usePlannerSave(baseOptions({ getState: () => currentState, subscribe: store.subscribe })),
-    )
-
-    currentState = validState({ title: 'after' })
-    act(() => {
-      store.notify()
-    })
-    expect(result.current.isDirty()).toBe(true)
-
-    await act(async () => {
-      await result.current.save({ published: false })
-    })
-
-    expect(result.current.isDirty()).toBe(false)
-  })
-
-  it('reads dirty as soon as the store notifies, without an intervening render', async () => {
-    authenticated()
-    const store = manualStore()
-    let currentState = validState({ title: 'before' })
-    const { result } = renderHook(() =>
-      usePlannerSave(baseOptions({ getState: () => currentState, subscribe: store.subscribe })),
-    )
-
-    await act(async () => {
-      await result.current.save({ published: false })
-    })
-    expect(result.current.isDirty()).toBe(false)
-
-    const isDirty = result.current.isDirty
-    currentState = validState({ title: 'after' })
-    store.notify()
-
-    // Deliberately no act(): the reader must not depend on a re-render, and the
-    // reference taken before the write must observe the same dirtiness.
-    expect(isDirty()).toBe(true)
-  })
-
-  it('reads clean again once the pending autosave has written', async () => {
-    authenticated()
-    const store = manualStore()
-    let currentState = validState({ title: 'before' })
-    const { result, unmount } = renderHook(() =>
-      usePlannerSave(baseOptions({ getState: () => currentState, subscribe: store.subscribe })),
-    )
-
-    await act(async () => {
-      await result.current.save({ published: false })
-    })
-
-    currentState = validState({ title: 'after' })
-    act(() => {
-      store.notify()
-    })
-    await act(async () => {
-      unmount()
-    })
-
-    expect(result.current.isDirty()).toBe(false)
+    expect(result.current.error).not.toBeNull()
   })
 })
 

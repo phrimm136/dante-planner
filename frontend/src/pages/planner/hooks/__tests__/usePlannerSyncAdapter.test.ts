@@ -60,9 +60,7 @@ function createMockPlanner(
       syncVersion: overrides.syncVersion ?? 1,
       createdAt: '2024-01-01T00:00:00.000Z',
       lastModifiedAt: '2024-01-01T00:00:00.000Z',
-      savedAt: null,
       userId: overrides.userId ?? null,
-      deviceId: 'device-123',
     },
     config: {
       type: overrides.plannerType ?? 'MIRROR_DUNGEON',
@@ -263,7 +261,6 @@ describe('usePlannerSyncAdapter', () => {
         category: '5F',
         status: 'saved',
         lastModifiedAt: '2024-01-02T00:00:00.000Z',
-        savedAt: null,
         syncVersion: 3,
       })
     })

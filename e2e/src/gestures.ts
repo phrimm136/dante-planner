@@ -18,15 +18,6 @@ const SETTLE_DEADLINE_MS = 15_000
 /** Default window a gesture has to emit its request in. */
 const REQUEST_TIMEOUT_MS = 10_000
 
-/**
- * The planner editor's auto-save debounce, mirroring `AUTO_SAVE_DEBOUNCE_MS` in
- * `frontend/src/lib/constants/planner.ts`. `page.clock.runFor` this to reach the write.
- *
- * Auto-save writes IndexedDB and nothing else — the server PUT is the manual Save button's. A
- * spec that waits for a request after typing is waiting for one that will never come.
- */
-export const AUTO_SAVE_DEBOUNCE_MS = 1_000
-
 interface Growth {
   scrollY: number
   height: number
