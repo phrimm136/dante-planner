@@ -85,6 +85,8 @@ export const DECK_CODE_MAX_LENGTH = 512
 export const PLANNER_STORAGE_KEYS = {
   /** Common prefix for all planner types */
   PLANNER: 'planner',
+  /** Prefix of a local deletion the server has not been told about yet */
+  TOMBSTONE: 'tombstone',
   /** Mirror Dungeon planner type suffix */
   MD: 'md',
 } as const

@@ -56,6 +56,13 @@ export class NotFoundError extends Error {
   }
 }
 
+export class UnauthorizedError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'UnauthorizedError'
+  }
+}
+
 /**
  * Custom error class for 403 USER_BANNED responses
  * User account has been permanently banned

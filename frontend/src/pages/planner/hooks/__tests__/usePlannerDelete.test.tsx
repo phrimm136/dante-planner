@@ -26,7 +26,7 @@ vi.mock('@/lib/api', async () => {
 
 // Import after mocking
 import { ApiClient } from '@/lib/api'
-import { NotFoundError } from '@/lib/apiErrors'
+import { NotFoundError, UnauthorizedError } from '@/lib/apiErrors'
 
 /**
  * Create a wrapper component with QueryClientProvider
@@ -76,7 +76,7 @@ describe('usePlannerDelete', () => {
       )
     })
 
-    it('returns void on success (204 No Content)', async () => {
+    it('answers deleted on success (204 No Content)', async () => {
       vi.mocked(ApiClient.delete).mockResolvedValue(undefined)
       const { wrapper } = createWrapper()
 
@@ -87,7 +87,7 @@ describe('usePlannerDelete', () => {
         response = await result.current.mutateAsync('123e4567-e89b-12d3-a456-426614174000')
       })
 
-      expect(response).toBeUndefined()
+      expect(response).toBe('deleted')
     })
   })
 
@@ -154,6 +154,23 @@ describe('usePlannerDelete', () => {
         expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: gesellschaftQueryKeys.all })
       })
     })
+  })
+
+  it('answers unauthorized on 401 instead of failing', async () => {
+      vi.mocked(ApiClient.delete).mockRejectedValue(new UnauthorizedError('Authentication required'))
+      const { wrapper, queryClient } = createWrapper()
+      const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
+
+      const { result } = renderHook(() => usePlannerDelete(), { wrapper })
+
+      let response
+      await act(async () => {
+        response = await result.current.mutateAsync('123e4567-e89b-12d3-a456-426614174000')
+      })
+
+      expect(response).toBe('unauthorized')
+      expect(result.current.isError).toBe(false)
+      expect(invalidateSpy).toHaveBeenCalled()
   })
 
   describe('mutation state', () => {

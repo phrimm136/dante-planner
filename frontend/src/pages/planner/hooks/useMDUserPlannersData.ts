@@ -30,13 +30,13 @@ import { plannerValidationError, toUserFriendlyError } from '../lib/plannerValid
 import {
   planConflictResolution,
   interpretConflictPlan,
-  reportedDelete,
 } from '../lib/conflictChoice'
 import {
   categorizeSync,
   collectSyncConflicts,
   pullServerPlanners,
   purgeLocalPlanners,
+  settleTombstones,
 } from '../lib/syncPlan'
 import { classifyAppError } from '@/lib/apiErrorClassifier'
 import { ok, err } from '@/lib/result'
@@ -238,23 +238,30 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
         deleteLocal: storage.deleteFromLocal,
         loadLocal: storage.loadFromLocal,
         fetchServer: syncAdapter.fetchFromServer,
+        deleteServer: syncAdapter.deleteFromServer,
+        clearTombstone: storage.clearTombstone,
       }
 
       try {
-        // Fetch ALL server planner metadata
-        const serverPlanners = await syncAdapter.listFromServer()
-        const localPlanners = await storage.listLocal()
+        const [serverPlanners, localPlanners, tombstones] = await Promise.all([
+          syncAdapter.listFromServer(),
+          storage.listLocal(),
+          storage.listTombstones(),
+        ])
 
-        const plan = categorizeSync(serverPlanners, localPlanners)
+        const plan = categorizeSync(serverPlanners, localPlanners, tombstones)
 
         // Mark as synced even if nothing to pull
         hasSyncedRef.current = true
         lastSyncKeyRef.current = syncKey
 
-        const syncedCount = await pullServerPlanners(
-          plan.pull.map((p) => p.id),
-          ops,
-        )
+        const [, syncedCount] = await Promise.all([
+          settleTombstones(plan, ops),
+          pullServerPlanners(
+            plan.pull.map((p) => p.id),
+            ops,
+          ),
+        ])
         const purgedCount = await purgeLocalPlanners(plan.purge, ops)
 
         if (plan.conflict.length > 0) {
@@ -382,7 +389,7 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
     validate: validateBeforeSync,
     saveLocal: storage.saveToLocal,
     deleteLocal: storage.deleteFromLocal,
-    deleteRemote: reportedDelete((id) => syncAdapter.deleteFromServer(id)),
+    deleteRemote: syncAdapter.deleteFromServer,
     sync: async (planner, force) => {
       try {
         return ok(acknowledgedCopy(await syncAdapter.syncToServer(planner, force)))

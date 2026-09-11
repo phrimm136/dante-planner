@@ -15,6 +15,7 @@ import {
   WriteTemporarilyUnavailableError,
   AuthTemporarilyUnavailableError,
   BackendUnavailableError,
+  UnauthorizedError,
 } from '../apiErrors'
 
 // Mock the env module
@@ -121,7 +122,7 @@ describe('ApiClient', () => {
         status: 401,
       })
 
-      await expect(ApiClient.get('/api/planner/123')).rejects.toThrow('HTTP error! status: 401')
+      await expect(ApiClient.get('/api/planner/123')).rejects.toBeInstanceOf(UnauthorizedError)
 
       // Auth state should be cleared so UI shows logged-out state
       expect(mockSetQueryData).toHaveBeenCalledWith(['auth', 'me'], null)
@@ -134,7 +135,7 @@ describe('ApiClient', () => {
         status: 401,
       })
 
-      await expect(ApiClient.get('/api/auth/me')).rejects.toThrow('HTTP error! status: 401')
+      await expect(ApiClient.get('/api/auth/me')).rejects.toBeInstanceOf(UnauthorizedError)
 
       expect(mockSetQueryData).toHaveBeenCalledWith(['auth', 'me'], null)
     })
@@ -145,7 +146,7 @@ describe('ApiClient', () => {
         status: 401,
       })
 
-      await expect(ApiClient.post('/api/auth/logout')).rejects.toThrow('HTTP error! status: 401')
+      await expect(ApiClient.post('/api/auth/logout')).rejects.toBeInstanceOf(UnauthorizedError)
 
       expect(mockSetQueryData).toHaveBeenCalledWith(['auth', 'me'], null)
     })

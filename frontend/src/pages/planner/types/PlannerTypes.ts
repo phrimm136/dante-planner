@@ -219,6 +219,14 @@ export interface PlannerSummary {
   deletedAt?: string
 }
 
+/** A deletion made with no session to carry it; the next authenticated sync pass settles it. */
+export interface LocalTombstone {
+  id: string
+  /** The server version the local copy had when it was deleted */
+  syncVersion: number
+  deletedAt: string
+}
+
 // ============================================================================
 // Server API Types
 // ============================================================================

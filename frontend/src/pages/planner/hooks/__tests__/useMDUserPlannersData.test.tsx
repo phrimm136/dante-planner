@@ -22,6 +22,9 @@ const syncMocks = vi.hoisted(() => ({
   loadFromLocal: vi.fn(async (_id: string): Promise<unknown> => null),
   fetchFromServer: vi.fn(async (_id: string): Promise<unknown> => null),
   syncToServer: vi.fn(async (_planner: unknown, _force?: boolean): Promise<unknown> => null),
+  deleteFromServer: vi.fn(async (_id: string): Promise<unknown> => ({ ok: true })),
+  listTombstones: vi.fn(async (): Promise<unknown[]> => []),
+  clearTombstone: vi.fn(async (_id: string): Promise<unknown> => ({ ok: true })),
   /** Null stands for a gift spec that has not loaded, which now fails closed. */
   egoGiftSpec: {} as unknown,
   /** Stands in for the chunked pull: one yield per request. */
@@ -44,6 +47,8 @@ vi.mock('../usePlannerStorage', () => ({
     listLocalFull: vi.fn(async () => []),
     deleteFromLocal: vi.fn(async () => ({ ok: true })),
     clearCorruptedLocal: vi.fn(async () => undefined),
+    listTombstones: syncMocks.listTombstones,
+    clearTombstone: syncMocks.clearTombstone,
   }),
 }))
 
@@ -51,7 +56,7 @@ vi.mock('../usePlannerSyncAdapter', () => ({
   usePlannerSyncAdapter: () => ({
     syncToServer: syncMocks.syncToServer,
     fetchFromServer: syncMocks.fetchFromServer,
-    deleteFromServer: vi.fn(),
+    deleteFromServer: syncMocks.deleteFromServer,
     listFromServer: syncMocks.listFromServer,
   }),
   serverResponseToSaveable: (response: { id: string }) => ({ metadata: { id: response.id } }),
@@ -116,9 +121,32 @@ describe('useMDUserPlannersData background sync', () => {
     syncMocks.listLocal.mockResolvedValue([])
     syncMocks.loadFromLocal.mockResolvedValue(null)
     syncMocks.fetchFromServer.mockResolvedValue(null)
+    syncMocks.deleteFromServer.mockClear()
+    syncMocks.listTombstones.mockClear()
+    syncMocks.clearTombstone.mockClear()
+    syncMocks.listTombstones.mockResolvedValue([])
     syncMocks.batchChunks.mockImplementation(async function* (ids: string[]) {
       yield ids.map((id) => ({ id }))
     })
+  })
+
+  it('sweeps a tombstone and never pulls its row', async () => {
+    syncMocks.listFromServer.mockResolvedValue([
+      { id: 'gone', syncVersion: 3 },
+      { id: 'kept', syncVersion: 1 },
+    ])
+    syncMocks.listTombstones.mockResolvedValue([
+      { id: 'gone', syncVersion: 3, deletedAt: '2026-06-01T00:00:00.000Z' },
+    ])
+
+    const { result } = renderHook(() => useMDUserPlannersData({ page: 0 }), {
+      wrapper: createWrapper(),
+    })
+    await waitFor(() => expect(result.current.isSyncing).toBe(false))
+    await waitFor(() => expect(syncMocks.batchChunks).toHaveBeenCalledWith(['kept']))
+
+    expect(syncMocks.deleteFromServer).toHaveBeenCalledWith('gone')
+    expect(syncMocks.clearTombstone).toHaveBeenCalledWith('gone')
   })
 
   it('pulls from the server once and stays at once across re-renders', async () => {

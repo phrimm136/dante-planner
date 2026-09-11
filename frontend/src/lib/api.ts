@@ -10,6 +10,7 @@ import {
   RetryableUnavailableError,
   ServiceUpdatingError,
   TimedOutError,
+  UnauthorizedError,
   ValidationError,
   WriteTemporarilyUnavailableError,
 } from './apiErrors'
@@ -113,7 +114,7 @@ export class ApiClient {
     // If we get 401, auth has genuinely failed (no valid refresh token)
     if (response.status === 401) {
       queryClient.setQueryData(['auth', 'me'], null)
-      throw new Error(`HTTP error! status: 401`)
+      throw new UnauthorizedError('Authentication required')
     }
 
     // Handle 403 Forbidden with typed errors based on error code

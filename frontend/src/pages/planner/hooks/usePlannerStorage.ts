@@ -3,13 +3,18 @@ import { PLANNER_STORAGE_KEYS } from '@/lib/constants'
 import { ok, err } from '@/lib/result'
 import { validateDataOrNull } from '@/lib/validation'
 import { migrateKeywords } from '@/shared/gameData'
-import { SaveablePlannerSchema, toSaveablePlanner } from '../schemas/PlannerSchemas'
+import {
+  LocalTombstoneSchema,
+  SaveablePlannerSchema,
+  toSaveablePlanner,
+} from '../schemas/PlannerSchemas'
 import { classifyAppError } from '@/lib/apiErrorClassifier'
 import { isMDPlanner } from '../types/PlannerTypes'
 import type { Result } from '@/lib/result'
 import type { StorageReadError } from '@/lib/storage'
+import type { ZodType } from 'zod'
 import type { AppError } from '@/lib/apiErrorClassifier'
-import type { SaveablePlanner, PlannerSummary } from '../types/PlannerTypes'
+import type { SaveablePlanner, PlannerSummary, LocalTombstone } from '../types/PlannerTypes'
 
 /**
  * SSR safety check
@@ -23,6 +28,8 @@ const isClient = typeof window !== 'undefined'
 export const storageKeys = {
   /** Planner row key: planner:{plannerId} */
   planner: (plannerId: string) => `${PLANNER_STORAGE_KEYS.PLANNER}:${plannerId}`,
+  /** Tombstone row key: tombstone:{plannerId} */
+  tombstone: (plannerId: string) => `${PLANNER_STORAGE_KEYS.TOMBSTONE}:${plannerId}`,
 }
 
 /**
@@ -102,6 +109,12 @@ export interface PlannerStorageOperations {
   deleteFromLocal: (id: string) => Promise<Result<void, AppError>>
   /** Clear corrupted planner data by ID */
   clearCorruptedLocal: (id: string) => Promise<Result<void, AppError>>
+  /** Record a deletion the server has not been told about */
+  writeTombstone: (tombstone: LocalTombstone) => Promise<Result<void, AppError>>
+  /** Every deletion still awaiting the server */
+  listTombstones: () => Promise<LocalTombstone[]>
+  /** Forget a deletion the server has settled */
+  clearTombstone: (id: string) => Promise<Result<void, AppError>>
 }
 
 /** The row a planner is stored as, or null when it fails the schema. */
@@ -233,150 +246,92 @@ export function usePlannerStorage(): PlannerStorageOperations {
       return ok(withMigratedKeywords(planner))
     }
 
-    /**
-     * List all planners as summaries
-     * Iterates through IndexedDB to find all planner entries
-     * @returns Array of PlannerSummary sorted by lastModifiedAt (newest first)
-     */
-    const listLocal = async (): Promise<PlannerSummary[]> => {
+    /** Every row under one key prefix that passes its schema, newest first left to the caller. */
+    async function collectRows<T, R>(
+      prefix: string,
+      schema: ZodType<T>,
+      label: string,
+      map: (row: T) => R,
+    ): Promise<R[]> {
       if (!isClient) return []
-
-      // Access IndexedDB directly to iterate keys
-      // storage utility doesn't expose key iteration, so we need direct access
       const db = await openStorageDb()
       if (!db) return []
 
-      const transaction = db.transaction(STORAGE_STORE_NAME, 'readonly')
-      const store = transaction.objectStore(STORAGE_STORE_NAME)
-
+      const store = db.transaction(STORAGE_STORE_NAME, 'readonly').objectStore(STORAGE_STORE_NAME)
       return new Promise((resolve) => {
         const request = store.openCursor()
-        const results: PlannerSummary[] = []
+        const results: R[] = []
 
         request.onsuccess = (event) => {
           const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result
-          if (cursor) {
-            const key = cursor.key as string
-            const parsed = parseStorageKey(key)
-
-            // Only include planner rows; a key with no planner id parses to null
-            if (parsed?.prefix === PLANNER_STORAGE_KEYS.PLANNER) {
-              try {
-                const data = JSON.parse(cursor.value)
-                const validated = validateDataOrNull(
-                  data,
-                  SaveablePlannerSchema,
-                  `planner list / ${parsed.plannerId}`,
-                )
-
-                if (validated) {
-                  const planner = toSaveablePlanner(
-                    validated.metadata,
-                    validated.config,
-                    validated.content,
-                  )
-
-                  const { published } = planner.metadata
-
-                  results.push({
-                    id: planner.metadata.id,
-                    title: planner.metadata.title,
-                    plannerType: planner.config.type,
-                    category: planner.config.category,
-                    status: planner.metadata.status,
-                    lastModifiedAt: planner.metadata.lastModifiedAt,
-                    syncVersion: planner.metadata.syncVersion,
-                    ...(published !== undefined && { published }),
-                    // Keywords are MD-only; RR summaries omit the field entirely.
-                    ...(isMDPlanner(planner) && {
-                      selectedKeywords: migrateKeywords(planner.content.selectedKeywords),
-                    }),
-                  })
-                }
-              } catch {
-                // Skip invalid entries
-              }
-            }
-            cursor.continue()
-          } else {
-            // Sort by lastModifiedAt descending (newest first)
-            results.sort(
-              (a, b) => new Date(b.lastModifiedAt).getTime() - new Date(a.lastModifiedAt).getTime(),
-            )
+          if (!cursor) {
             resolve(results)
+            return
           }
+          const parsed = parseStorageKey(cursor.key as string)
+          if (parsed?.prefix === prefix) {
+            try {
+              const validated = validateDataOrNull(
+                JSON.parse(cursor.value),
+                schema,
+                `${label} / ${parsed.plannerId}`,
+              )
+              if (validated) results.push(map(validated))
+            } catch {
+              // Skip invalid entries
+            }
+          }
+          cursor.continue()
         }
 
         request.onerror = () => {
-          console.error('Failed to list planners')
+          console.error(`Failed to list ${label}`)
           resolve([])
         }
       })
     }
 
-    /**
-     * List all planners with full content, sorted by lastModifiedAt (newest first).
-     * Used for content-based filtering (personal plan search).
-     * Same cursor logic as listLocal but returns full SaveablePlanner objects.
-     */
-    const listLocalFull = async (): Promise<SaveablePlanner[]> => {
-      if (!isClient) return []
+    const newestFirst = (a: string, b: string) => new Date(b).getTime() - new Date(a).getTime()
 
-      const db = await openStorageDb()
-      if (!db) return []
-
-      const transaction = db.transaction(STORAGE_STORE_NAME, 'readonly')
-      const store = transaction.objectStore(STORAGE_STORE_NAME)
-
-      return new Promise((resolve) => {
-        const request = store.openCursor()
-        const results: SaveablePlanner[] = []
-
-        request.onsuccess = (event) => {
-          const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result
-          if (cursor) {
-            const key = cursor.key as string
-            const parsed = parseStorageKey(key)
-
-            if (parsed?.prefix === PLANNER_STORAGE_KEYS.PLANNER) {
-              try {
-                const data = JSON.parse(cursor.value)
-                const validated = validateDataOrNull(
-                  data,
-                  SaveablePlannerSchema,
-                  `planner listFull / ${parsed.plannerId}`,
-                )
-
-                if (validated) {
-                  const planner = toSaveablePlanner(
-                    validated.metadata,
-                    validated.config,
-                    validated.content,
-                  )
-                  // Migrate renamed keyword ids so downstream sync-validation and
-                  // keyword filtering see current ids (content is unvalidated here).
-                  results.push(withMigratedKeywords(planner))
-                }
-              } catch {
-                // Skip invalid entries
-              }
-            }
-            cursor.continue()
-          } else {
-            results.sort(
-              (a, b) =>
-                new Date(b.metadata.lastModifiedAt).getTime() -
-                new Date(a.metadata.lastModifiedAt).getTime(),
-            )
-            resolve(results)
+    const listLocal = async (): Promise<PlannerSummary[]> => {
+      const rows = await collectRows(
+        PLANNER_STORAGE_KEYS.PLANNER,
+        SaveablePlannerSchema,
+        'planner list',
+        (validated): PlannerSummary => {
+          const planner = toSaveablePlanner(validated.metadata, validated.config, validated.content)
+          const { published } = planner.metadata
+          return {
+            id: planner.metadata.id,
+            title: planner.metadata.title,
+            plannerType: planner.config.type,
+            category: planner.config.category,
+            status: planner.metadata.status,
+            lastModifiedAt: planner.metadata.lastModifiedAt,
+            syncVersion: planner.metadata.syncVersion,
+            ...(published !== undefined && { published }),
+            // Keywords are MD-only; RR summaries omit the field entirely.
+            ...(isMDPlanner(planner) && {
+              selectedKeywords: migrateKeywords(planner.content.selectedKeywords),
+            }),
           }
-        }
+        },
+      )
+      return rows.sort((a, b) => newestFirst(a.lastModifiedAt, b.lastModifiedAt))
+    }
 
-        request.onerror = () => {
-          console.error('Failed to list full planners')
-          resolve([])
-        }
-      })
+    /** Full rows for content-based filtering; keyword ids are migrated since content is unvalidated here. */
+    const listLocalFull = async (): Promise<SaveablePlanner[]> => {
+      const rows = await collectRows(
+        PLANNER_STORAGE_KEYS.PLANNER,
+        SaveablePlannerSchema,
+        'planner listFull',
+        (validated) =>
+          withMigratedKeywords(
+            toSaveablePlanner(validated.metadata, validated.config, validated.content),
+          ),
+      )
+      return rows.sort((a, b) => newestFirst(a.metadata.lastModifiedAt, b.metadata.lastModifiedAt))
     }
 
     /**
@@ -407,6 +362,24 @@ export function usePlannerStorage(): PlannerStorageOperations {
       return deleteFromLocal(id)
     }
 
+    const writeTombstone = async (tombstone: LocalTombstone): Promise<Result<void, AppError>> => {
+      if (!isClient) return err({ kind: 'unknown' })
+      const written = await storage.setItem(
+        storageKeys.tombstone(tombstone.id),
+        JSON.stringify(tombstone),
+      )
+      return written.ok ? ok(undefined) : err(writeError(written.error))
+    }
+
+    const listTombstones = (): Promise<LocalTombstone[]> =>
+      collectRows(PLANNER_STORAGE_KEYS.TOMBSTONE, LocalTombstoneSchema, 'tombstone list', (t) => t)
+
+    const clearTombstone = async (id: string): Promise<Result<void, AppError>> => {
+      if (!isClient) return err({ kind: 'unknown' })
+      const removed = await storage.removeItem(storageKeys.tombstone(id))
+      return removed.ok ? ok(undefined) : err(writeError(removed.error))
+    }
+
     return {
       saveToLocal,
       loadFromLocal,
@@ -414,6 +387,9 @@ export function usePlannerStorage(): PlannerStorageOperations {
       listLocalFull,
       deleteFromLocal,
       clearCorruptedLocal,
+      writeTombstone,
+      listTombstones,
+      clearTombstone,
     }
   })() // Empty deps: functions only use module-level variables
 }

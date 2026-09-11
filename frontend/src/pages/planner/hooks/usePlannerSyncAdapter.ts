@@ -33,7 +33,7 @@ export interface PlannerSyncAdapterOperations {
   /** Fetch planner from server by ID (GET), reporting why the fetch failed */
   fetchFromServer: (id: string) => Promise<Result<AcknowledgedPlanner, AppError>>
   /** Delete planner from server by ID (DELETE) */
-  deleteFromServer: (id: string) => Promise<void>
+  deleteFromServer: (id: string) => Promise<Result<void, AppError>>
   /** List user's server planners */
   listFromServer: () => Promise<PlannerSummary[]>
 }
@@ -173,8 +173,13 @@ export function usePlannerSyncAdapter(): PlannerSyncAdapterOperations {
       }
     },
 
-    deleteFromServer: async (id: string): Promise<void> => {
-      return plannerApi.delete(id)
+    deleteFromServer: async (id: string): Promise<Result<void, AppError>> => {
+      try {
+        await plannerApi.delete(id)
+        return ok(undefined)
+      } catch (error) {
+        return err(classifyAppError(error))
+      }
     },
 
     listFromServer: async (): Promise<PlannerSummary[]> => {

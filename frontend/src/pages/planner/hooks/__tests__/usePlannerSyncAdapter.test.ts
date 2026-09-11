@@ -343,9 +343,10 @@ describe('usePlannerSyncAdapter', () => {
       const adapter = hookResult.current
 
       // Act
-      await adapter.deleteFromServer('550e8400-e29b-41d4-a716-446655440000')
+      const result = await adapter.deleteFromServer('550e8400-e29b-41d4-a716-446655440000')
 
       // Assert
+      expect(result.ok).toBe(true)
       expect(mockDelete).toHaveBeenCalledWith('550e8400-e29b-41d4-a716-446655440000')
     })
   })

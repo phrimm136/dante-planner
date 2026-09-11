@@ -550,6 +550,15 @@ export function deserializeSets(state: SerializablePageState): PageStateWithSets
  */
 export const PlannerIdSchema = z.string().uuid().brand<'PlannerId'>()
 
+/** A local deletion awaiting an authenticated sync pass, as stored in IndexedDB. */
+export const LocalTombstoneSchema = z
+  .object({
+    id: z.string().uuid(),
+    syncVersion: z.number().int().positive(),
+    deletedAt: z.string(),
+  })
+  .strict()
+
 /**
  * Server response schema for a single planner
  * Validates full planner data from the backend

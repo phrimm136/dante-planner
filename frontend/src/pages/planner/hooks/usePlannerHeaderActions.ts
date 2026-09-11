@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 
-import { NotFoundError } from '@/lib/apiErrors'
-import { showSuccess } from '@/lib/errorPresentation'
+import { INITIAL_SYNC_VERSION } from '@/lib/constants'
+import { showAppError, showSuccess } from '@/lib/errorPresentation'
 import { showSyncFailure } from '../lib/syncFailure'
 import { plannerQueryKeys } from '../lib/plannerQueryKeys'
 import { publishedPlannerQueryKeys } from './usePublishedPlannerQuery'
@@ -52,7 +52,7 @@ export function usePlannerHeaderActions({
   const [isApplyingLatestMirror, setIsApplyingLatestMirror] = useState(false)
 
   const deleteMutation = usePlannerDelete()
-  const { saveToLocal, deleteFromLocal, loadFromLocal } = usePlannerStorage()
+  const { saveToLocal, deleteFromLocal, loadFromLocal, writeTombstone } = usePlannerStorage()
   const syncAdapter = usePlannerSyncAdapter()
 
   const handleBack = () => {
@@ -75,11 +75,28 @@ export function usePlannerHeaderActions({
       }, NAVIGATE_AFTER_DELETE_MS)
     }
 
+    const tombstoneThenCleanup = async () => {
+      const local = await loadFromLocal(plannerId)
+      const written = await writeTombstone({
+        id: plannerId,
+        syncVersion: local.ok && local.value ? local.value.metadata.syncVersion : INITIAL_SYNC_VERSION,
+        deletedAt: new Date().toISOString(),
+      })
+      if (written.ok) cleanup()
+      else showAppError(written.error)
+    }
+
+    // Local metadata cannot tell a never-synced row from one synced once: both carry the
+    // initial syncVersion.
+    if (!isAuthenticated) {
+      void tombstoneThenCleanup()
+      return
+    }
+
     deleteMutation.mutate(plannerId, {
-      onSuccess: cleanup,
-      onError: (error) => {
-        // Planner not on server (local-only or already deleted) — still clean up locally
-        if (error instanceof NotFoundError) cleanup()
+      onSuccess: (outcome) => {
+        if (outcome === 'unauthorized') void tombstoneThenCleanup()
+        else cleanup()
       },
     })
   }

@@ -511,3 +511,7 @@ asset pipeline.
   that ran a version before ADR 096; nothing reads it and the planner listing skips one-part
   keys. Delete it inside `onupgradeneeded` at the next database version bump, whatever that
   bump is for.
+- 2026-09-11 — `GlobalExceptionHandler` logs `PLANNER_NOT_FOUND` at WARN for a DELETE of a row
+  the server never received, a routine outcome the client already treats as success (about 5 a
+  day). Worth demoting that one method-and-code pair to INFO when the WARN stream is next used
+  for alerting, or when an ADR settles a client marker for never-synced rows.

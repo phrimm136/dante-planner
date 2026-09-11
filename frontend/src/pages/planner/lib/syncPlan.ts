@@ -1,10 +1,16 @@
 import type { Result } from '@/lib/result'
 import type { AppError } from '@/lib/apiErrorClassifier'
-import type { PlannerSummary, SaveablePlanner, ServerPlannerResponse } from '../types/PlannerTypes'
+import type {
+  LocalTombstone,
+  PlannerSummary,
+  SaveablePlanner,
+  ServerPlannerResponse,
+} from '../types/PlannerTypes'
 
 /**
- * Three-way partition of a sync pass, in the order the caller executes it.
- * `pull` and `conflict` carry server summaries, `purge` carries local ones.
+ * Partition of a sync pass, in the order the caller executes it.
+ * `pull` and `conflict` carry server summaries, `purge` carries local ones,
+ * `sweep` and `dropTombstone` carry local deletions the server has not heard.
  */
 export interface SyncPlan {
   /** Server rows to fetch and write over local: server-only, or newer than a saved local row. */
@@ -13,6 +19,10 @@ export interface SyncPlan {
   conflict: PlannerSummary[]
   /** Local rows whose server copy carries a tombstone. */
   purge: PlannerSummary[]
+  /** Local deletions whose server row has not moved: send the DELETE. */
+  sweep: LocalTombstone[]
+  /** Local deletions the server outran or already settled: forget them. */
+  dropTombstone: LocalTombstone[]
 }
 
 /** A summary's server sync version, absent meaning never synced. */
@@ -44,14 +54,31 @@ export function categorizePlanner(
  * A local row the server never listed is kept — absence also describes a row that was never
  * uploaded, and deleting on that reading destroys the only copy.
  */
-export function categorizeSync(server: PlannerSummary[], local: PlannerSummary[]): SyncPlan {
+export function categorizeSync(
+  server: PlannerSummary[],
+  local: PlannerSummary[],
+  tombstones: LocalTombstone[],
+): SyncPlan {
   const localById = new Map(local.map((p) => [p.id, p]))
+  const serverById = new Map(server.map((p) => [p.id, p]))
+
+  const sweep: LocalTombstone[] = []
+  const dropTombstone: LocalTombstone[] = []
+  for (const tombstone of tombstones) {
+    const server = serverById.get(tombstone.id)
+    const settled =
+      !server || server.deletedAt !== undefined || versionOf(server) > tombstone.syncVersion
+    ;(settled ? dropTombstone : sweep).push(tombstone)
+  }
+  const pendingDelete = new Set(sweep.map((t) => t.id))
 
   const pull: PlannerSummary[] = []
   const conflict: PlannerSummary[] = []
   const purge: PlannerSummary[] = []
 
   for (const serverPlanner of server) {
+    if (pendingDelete.has(serverPlanner.id)) continue
+
     const localPlanner = localById.get(serverPlanner.id)
 
     if (serverPlanner.deletedAt !== undefined) {
@@ -71,7 +98,7 @@ export function categorizeSync(server: PlannerSummary[], local: PlannerSummary[]
     }
   }
 
-  return { pull, conflict, purge }
+  return { pull, conflict, purge, sweep, dropTombstone }
 }
 
 /** The reads and writes a sync pass runs, injected so the phases stay testable. */
@@ -84,6 +111,27 @@ export interface SyncOps {
   /** The failure is unread: a row this pass cannot load is one it cannot offer. */
   loadLocal: (id: string) => Promise<Result<SaveablePlanner | null, unknown>>
   fetchServer: (id: string) => Promise<Result<{ planner: SaveablePlanner }, AppError>>
+  deleteServer: (id: string) => Promise<Result<void, AppError>>
+  clearTombstone: (id: string) => Promise<Result<void, AppError>>
+}
+
+/** A 403 is a row that was never this account's to delete. */
+const SETTLED_DELETE_KINDS: ReadonlySet<AppError['kind']> = new Set(['notFound', 'forbidden'])
+
+export async function settleTombstones(
+  plan: Pick<SyncPlan, 'sweep' | 'dropTombstone'>,
+  ops: SyncOps,
+): Promise<void> {
+  const swept = plan.sweep.map(async (tombstone) => {
+    const result = await ops.deleteServer(tombstone.id)
+    if (!result.ok && !SETTLED_DELETE_KINDS.has(result.error.kind)) {
+      console.error(`Deferred deletion of ${tombstone.id} stays pending:`, result.error)
+      return
+    }
+    await ops.clearTombstone(tombstone.id)
+  })
+  const dropped = plan.dropTombstone.map((tombstone) => ops.clearTombstone(tombstone.id))
+  await Promise.all([...swept, ...dropped])
 }
 
 /** The two sides of one planner the user has to choose between. */

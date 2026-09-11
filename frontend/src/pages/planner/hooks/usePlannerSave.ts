@@ -26,7 +26,6 @@ import { classifyAppError, isSyncConflict } from '@/lib/apiErrorClassifier'
 import {
   planConflictResolution,
   interpretConflictPlan,
-  reportedDelete,
 } from '../lib/conflictChoice'
 import {
   forkedPlannerId,
@@ -581,7 +580,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
         validate: validateForSave,
         saveLocal: storage.saveToLocal,
         deleteLocal: storage.deleteFromLocal,
-        deleteRemote: reportedDelete((id) => syncAdapter.deleteFromServer(id)),
+        deleteRemote: syncAdapter.deleteFromServer,
         sync: async (planner, force) => {
           // The user chose this resolution, so it uploads whatever the sync
           // setting says; a signed-out editor resolves locally and uploads

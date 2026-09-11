@@ -3,7 +3,6 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 import { PersonalPlannerHeader } from '../PersonalPlannerHeader'
-import { NotFoundError } from '@/lib/apiErrors'
 import type { SaveablePlanner, MDPlannerContent } from '../../../types/PlannerTypes'
 import type { AcknowledgedPlanner } from '../../../hooks/usePlannerSyncAdapter'
 
@@ -80,11 +79,13 @@ vi.mock('@/shared/auth/hooks/useAuthQuery', () => ({
 const mockSavePlanner = vi.fn().mockResolvedValue({ ok: true, value: undefined })
 const mockDeletePlanner = vi.fn().mockResolvedValue({ ok: true, value: undefined })
 const mockLoadPlanner = vi.fn().mockResolvedValue({ ok: true, value: null })
+const mockWriteTombstone = vi.fn().mockResolvedValue({ ok: true, value: undefined })
 vi.mock('../../../hooks/usePlannerStorage', () => ({
   usePlannerStorage: () => ({
     saveToLocal: mockSavePlanner,
     deleteFromLocal: mockDeletePlanner,
     loadFromLocal: mockLoadPlanner,
+    writeTombstone: mockWriteTombstone,
   }),
 }))
 
@@ -438,10 +439,10 @@ describe('PersonalPlannerHeader – delete with local cleanup', () => {
     })
   })
 
-  it('calls deleteFromLocal locally and navigates when server returns 404', async () => {
+  it('calls deleteFromLocal locally and navigates when the row was already gone', async () => {
     mockDeleteMutate.mockImplementation(
-      (_id: string, callbacks?: { onError?: (e: Error) => void }) => {
-        callbacks?.onError?.(new NotFoundError('not found'))
+      (_id: string, callbacks?: { onSuccess?: (outcome: string) => void }) => {
+        callbacks?.onSuccess?.('alreadyGone')
       },
     )
 
@@ -454,6 +455,63 @@ describe('PersonalPlannerHeader – delete with local cleanup', () => {
       expect(mockDeletePlanner).toHaveBeenCalledWith(PLANNER_ID)
       expect(mockNavigate).toHaveBeenCalledWith(expect.objectContaining({ to: '/planner/md' }))
     })
+  })
+
+  it('tombstones on a 401 delete', async () => {
+    mockDeleteMutate.mockImplementation(
+      (_id: string, callbacks?: { onSuccess?: (outcome: string) => void }) => {
+        callbacks?.onSuccess?.('unauthorized')
+      },
+    )
+    mockLoadPlanner.mockResolvedValueOnce({ ok: true, value: makePlanner({ syncVersion: 4 }) })
+
+    const { wrapper } = createWrapper()
+    render(
+      <PersonalPlannerHeader planner={makePlanner({ syncVersion: 4 })} isAuthenticated={true} />,
+      { wrapper },
+    )
+
+    await openAndConfirmDelete()
+
+    await waitFor(() => {
+      expect(mockWriteTombstone).toHaveBeenCalledWith(
+        expect.objectContaining({ id: PLANNER_ID, syncVersion: 4 }),
+      )
+      expect(mockDeletePlanner).toHaveBeenCalledWith(PLANNER_ID)
+      expect(mockNavigate).toHaveBeenCalledWith(expect.objectContaining({ to: '/planner/md' }))
+    })
+  })
+
+  it('tombstones a guest delete without calling the server', async () => {
+    mockLoadPlanner.mockResolvedValueOnce({ ok: true, value: makePlanner({ syncVersion: 4 }) })
+    const { wrapper } = createWrapper()
+    render(
+      <PersonalPlannerHeader planner={makePlanner({ syncVersion: 4 })} isAuthenticated={false} />,
+      { wrapper },
+    )
+
+    await openAndConfirmDelete()
+
+    await waitFor(() => {
+      expect(mockWriteTombstone).toHaveBeenCalledWith(
+        expect.objectContaining({ id: PLANNER_ID, syncVersion: 4 }),
+      )
+      expect(mockDeletePlanner).toHaveBeenCalledWith(PLANNER_ID)
+      expect(mockNavigate).toHaveBeenCalledWith(expect.objectContaining({ to: '/planner/md' }))
+    })
+    expect(mockDeleteMutate).not.toHaveBeenCalled()
+  })
+
+  it('keeps the local row when the tombstone cannot be written', async () => {
+    mockWriteTombstone.mockResolvedValueOnce({ ok: false, error: { kind: 'unknown' } })
+    const { wrapper } = createWrapper()
+    render(<PersonalPlannerHeader planner={makePlanner()} isAuthenticated={false} />, { wrapper })
+
+    await openAndConfirmDelete()
+
+    await waitFor(() => expect(mockWriteTombstone).toHaveBeenCalled())
+    expect(mockDeletePlanner).not.toHaveBeenCalled()
+    expect(mockNavigate).not.toHaveBeenCalled()
   })
 
   it('does not delete locally or navigate on non-404 server errors', async () => {

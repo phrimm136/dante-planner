@@ -1,10 +1,11 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
+import { ok, err } from '@/lib/result'
 import { INITIAL_SYNC_VERSION } from '@/lib/constants'
-import { categorizePlanner, categorizeSync } from '../syncPlan'
+import { categorizePlanner, categorizeSync, settleTombstones } from '../syncPlan'
 import { createSaveablePlanner } from '../saveablePlanner'
 
-import type { PlannerVerdict } from '../syncPlan'
-import type { PlannerSummary } from '../../types/PlannerTypes'
+import type { PlannerVerdict, SyncOps } from '../syncPlan'
+import type { LocalTombstone, PlannerSummary } from '../../types/PlannerTypes'
 
 const SAVED_AT = '2026-06-01T00:00:00.000Z'
 
@@ -126,7 +127,7 @@ describe('categorizeSync', () => {
   ]
 
   it.each(cases)('$name', ({ server, local, expected }) => {
-    const plan = categorizeSync(server, local)
+    const plan = categorizeSync(server, local, [])
 
     expect({
       pull: plan.pull.map((p) => p.id),
@@ -147,6 +148,7 @@ describe('categorizeSync', () => {
         makeSummary({ id: 'b', syncVersion: 1, status: 'draft', title: 'Local draft' }),
         localRow,
       ],
+      [],
     )
 
     expect(plan.pull[0]).toBe(serverRow)
@@ -158,7 +160,7 @@ describe('categorizeSync', () => {
     const server = [makeSummary({ id: 'a', syncVersion: 4 })]
     const local = [makeSummary({ id: 'a', syncVersion: 1, status: 'draft' })]
 
-    categorizeSync(server, local)
+    categorizeSync(server, local, [])
 
     expect(server).toEqual([makeSummary({ id: 'a', syncVersion: 4 })])
     expect(local).toEqual([makeSummary({ id: 'a', syncVersion: 1, status: 'draft' })])
@@ -265,7 +267,97 @@ describe('purge against rows the server never acknowledged', () => {
   }
 
   it('a saved row the server never acknowledged survives a pull pass that does not list it', () => {
-    const plan = categorizeSync([], [localOnlySavedSummary()])
+    const plan = categorizeSync([], [localOnlySavedSummary()], [])
     expect(plan.purge).toEqual([])
+  })
+})
+
+describe('categorizeSync against local tombstones', () => {
+  const tombstone = (id: string, syncVersion: number): LocalTombstone => ({
+    id,
+    syncVersion,
+    deletedAt: SAVED_AT,
+  })
+
+  const cases: {
+    name: string
+    server: PlannerSummary[]
+    tombstones: LocalTombstone[]
+    expected: { sweep: string[]; dropTombstone: string[]; pull: string[] }
+  }[] = [
+    {
+      name: 'an unchanged server row is swept, not pulled',
+      server: [makeSummary({ id: 'a', syncVersion: 3 })],
+      tombstones: [tombstone('a', 3)],
+      expected: { sweep: ['a'], dropTombstone: [], pull: [] },
+    },
+    {
+      name: 'a newer server row drops the tombstone and pulls',
+      server: [makeSummary({ id: 'a', syncVersion: 4 })],
+      tombstones: [tombstone('a', 3)],
+      expected: { sweep: [], dropTombstone: ['a'], pull: ['a'] },
+    },
+    {
+      name: 'an unlisted row drops the tombstone',
+      server: [],
+      tombstones: [tombstone('a', 3)],
+      expected: { sweep: [], dropTombstone: ['a'], pull: [] },
+    },
+    {
+      name: 'a server-tombstoned row drops the local one',
+      server: [makeSummary({ id: 'a', syncVersion: 3, deletedAt: SAVED_AT })],
+      tombstones: [tombstone('a', 3)],
+      expected: { sweep: [], dropTombstone: ['a'], pull: [] },
+    },
+  ]
+
+  it.each(cases)('$name', ({ server, tombstones, expected }) => {
+    const plan = categorizeSync(server, [], tombstones)
+
+    expect({
+      sweep: plan.sweep.map((t) => t.id),
+      dropTombstone: plan.dropTombstone.map((t) => t.id),
+      pull: plan.pull.map((p) => p.id),
+    }).toEqual(expected)
+  })
+})
+
+describe('settleTombstones', () => {
+  const tombstone: LocalTombstone = { id: 'a', syncVersion: 3, deletedAt: SAVED_AT }
+
+  function opsWith(deleteServer: SyncOps['deleteServer']) {
+    const clearTombstone = vi.fn(async () => ok(undefined))
+    const ops = { deleteServer, clearTombstone } as unknown as SyncOps
+    return { ops, clearTombstone }
+  }
+
+  it.each([
+    { name: 'a 204 clears the tombstone', result: ok(undefined) },
+    { name: 'a 404 clears it', result: err({ kind: 'notFound' as const }) },
+    { name: 'a 403 clears it', result: err({ kind: 'forbidden' as const, code: 'PLANNER_FORBIDDEN' }) },
+  ])('$name', async ({ result }) => {
+    const { ops, clearTombstone } = opsWith(async () => result)
+
+    await settleTombstones({ sweep: [tombstone], dropTombstone: [] }, ops)
+
+    expect(clearTombstone).toHaveBeenCalledWith('a')
+  })
+
+  it('keeps the tombstone when the server cannot be reached', async () => {
+    const { ops, clearTombstone } = opsWith(async () => err({ kind: 'unknown' as const }))
+
+    await settleTombstones({ sweep: [tombstone], dropTombstone: [] }, ops)
+
+    expect(clearTombstone).not.toHaveBeenCalled()
+  })
+
+  it('drops without a server call', async () => {
+    const deleteServer = vi.fn(async () => ok(undefined))
+    const { ops, clearTombstone } = opsWith(deleteServer)
+
+    await settleTombstones({ sweep: [], dropTombstone: [tombstone] }, ops)
+
+    expect(deleteServer).not.toHaveBeenCalled()
+    expect(clearTombstone).toHaveBeenCalledWith('a')
   })
 })
