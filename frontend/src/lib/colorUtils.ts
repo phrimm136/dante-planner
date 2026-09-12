@@ -37,3 +37,17 @@ export function darkenColor(hex: string, amount: number): HexColor {
   const toHex = (n: number) => n.toString(16).padStart(2, '0')
   return `#${toHex(newR)}${toHex(newG)}${toHex(newB)}`
 }
+
+/**
+ * Replaces the alpha channel of a hex color
+ * @param hex - Hex color string, 6 or 8 digits
+ * @param alpha - Coverage (0-1)
+ * @returns 8-digit hex color string
+ */
+export function withAlpha(hex: string, alpha: number): HexColor {
+  const rgb = hex.replace('#', '').substring(0, 6)
+  const a = Math.round(alpha * 255)
+    .toString(16)
+    .padStart(2, '0')
+  return `#${rgb}${a}`
+}

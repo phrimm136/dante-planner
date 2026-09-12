@@ -35,7 +35,7 @@ function generateStripeGradient(color: string): string {
 }
 
 /**
- * Generates CSS gradient for dark background
+ * Generates CSS gradient for the plate body
  * Creates angled background that starts after a transparent corner
  * @param darkColor - Background color (hex)
  * @returns CSS linear-gradient value
@@ -50,8 +50,8 @@ function generateBackgroundGradient(darkColor: string): string {
  *
  * Features:
  * - Attribute-based coloring (CRIMSON, AZURE, etc.)
- * - Dark gradient background with angled left edge
- * - Decorative diagonal stripes on right side
+ * - Dark gradient background with angled left edge, in the plate's ramp floor
+ * - Decorative diagonal stripes on right side in the type color
  * - Text shadow for readability
  * - Cream/gold text color
  *
@@ -90,7 +90,7 @@ export function StyledSkillName({ name, attributeType }: StyledSkillNameProps) {
 }
 
 /**
- * Skeleton matching StyledSkillName's gradient background.
+ * Skeleton matching StyledSkillName's plate.
  * Used as Suspense fallback for skill/passive name loading.
  */
 export function StyledNameSkeleton({ attributeType }: { attributeType?: string | undefined }) {

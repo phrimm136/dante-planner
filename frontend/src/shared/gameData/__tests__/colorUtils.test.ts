@@ -5,21 +5,17 @@ import { getAttributeColors, getSeasonColor } from '../colorUtils'
 import { darkenColor } from '@/lib/colorUtils'
 
 describe('getAttributeColors', () => {
-  it('paints an affinity with its background role', () => {
-    expect(getAttributeColors('CRIMSON').primary).toBe(attributeColorCode.CRIMSON.background)
-  })
-
-  it('falls back to the type role when the attribute has no background', () => {
-    expect(getAttributeColors('WHITE').primary).toBe(attributeColorCode.WHITE.type)
+  it('paints an attribute with its type role', () => {
+    expect(getAttributeColors('CRIMSON').primary).toBe(attributeColorCode.CRIMSON.type)
     expect(getAttributeColors('NEUTRAL').primary).toBe(attributeColorCode.NEUTRAL.type)
   })
 
-  it('darkens the primary for the gradient', () => {
+  it('darkens the type color to the plate ramp floor', () => {
     const { primary, dark } = getAttributeColors('AZURE')
-    expect(dark).toBe(darkenColor(primary, 0.5))
+    expect(dark).toBe(darkenColor(primary, 0.67))
   })
 
-  it('returns the fallback pair for a missing or unknown attribute', () => {
+  it('returns the fallback pair for a missing, unknown, or typeless attribute', () => {
     expect(getAttributeColors()).toEqual(getAttributeColors('azure'))
     expect(getAttributeColors('NONE')).toEqual(getAttributeColors())
   })

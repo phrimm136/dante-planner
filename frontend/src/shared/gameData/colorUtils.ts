@@ -10,9 +10,9 @@ import type { AttributeColorRoles } from './schemas/ColorSchemas'
  * Color pair for gradient styling
  */
 export interface AttributeColors {
-  /** Primary attribute color (for stripes) */
+  /** The attribute's type color (plates, tab fills, name text) */
   primary: HexColor
-  /** Darkened color (for background gradient) */
+  /** The floor of the skill name plate's right-hand ramp */
   dark: HexColor
 }
 
@@ -25,22 +25,24 @@ const FALLBACK_COLORS: AttributeColors = {
 const ATTRIBUTE_ROLES: Partial<Record<string, AttributeColorRoles>> =
   AttributeColorCodeSchema.parse(attributeColorCode)
 
+/** Brightness the skill name plate sprite ramps down to at its right end */
+const PLATE_RAMP_FLOOR = 0.33
+
 const SEASON_COLORS = SeasonColorCodeSchema.parse(seasonColorCode)
 
 /**
  * Gets color pair for an attribute type
  * @param attributeType - Attribute type as the client enum spells it (e.g., "AZURE", "NEUTRAL")
- * @returns Color pair with primary and dark variants
+ * @returns Type color and the plate ramp floor it darkens to
  */
 export function getAttributeColors(attributeType?: string): AttributeColors {
-  const roles = attributeType ? ATTRIBUTE_ROLES[attributeType] : undefined
-  const primary = roles?.background ?? roles?.type
+  const primary = attributeType ? ATTRIBUTE_ROLES[attributeType]?.type : undefined
   if (!primary) {
     return FALLBACK_COLORS
   }
   return {
     primary,
-    dark: darkenColor(primary, 0.5),
+    dark: darkenColor(primary, 1 - PLATE_RAMP_FLOOR),
   }
 }
 

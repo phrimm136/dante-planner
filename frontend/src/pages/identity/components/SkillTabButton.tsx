@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 
 import { getLockIconPath } from '@/shared/assets'
 import { getAttributeColors } from '@/shared/gameData'
+import { withAlpha } from '@/lib/colorUtils'
 import { cn, getDisplayFontForLanguage } from '@/lib/utils'
 
 interface SkillTabButtonProps {
@@ -23,35 +24,19 @@ interface SkillTabButtonProps {
  */
 const YELLOW_HIGHLIGHT = '#ffd700'
 
-/**
- * Darkens a hex color for hover/select states
- * @param hex - Hex color string (e.g., "#40A1B5")
- * @param amount - Darkening factor (0-1, where 0.15 = 15% darker)
- * @returns Darkened hex color string
- */
-function darkenColor(hex: string, amount: number): string {
-  const cleanHex = hex.replace('#', '')
-  const r = parseInt(cleanHex.substring(0, 2), 16)
-  const g = parseInt(cleanHex.substring(2, 4), 16)
-  const b = parseInt(cleanHex.substring(4, 6), 16)
+/** Coverage of one highlight overlay (hover or selected) */
+const OVERLAY_ALPHA = 0.5
 
-  // Darken by moving toward black (0)
-  const factor = 1 - amount
-  const newR = Math.round(r * factor)
-  const newG = Math.round(g * factor)
-  const newB = Math.round(b * factor)
-
-  const toHex = (n: number) => n.toString(16).padStart(2, '0')
-  return `#${toHex(newR)}${toHex(newG)}${toHex(newB)}`
-}
+/** Coverage of the hover overlay stacked on the selected one */
+const STACKED_OVERLAY_ALPHA = 1 - (1 - OVERLAY_ALPHA) ** 2
 
 /**
  * SkillTabButton - Game-authentic skill selector button
  *
  * Styling states match Limbus Company game aesthetics:
  * - **Default**: Standard bg-muted appearance
- * - **Hover OR Selected**: Darkened attribute color background, yellow text
- * - **Selected + Hover**: Original attribute color background (brighter), yellow text
+ * - **Hover OR Selected**: Half-coverage attribute overlay, yellow text
+ * - **Selected + Hover**: Both overlays stacked (three-quarter coverage), yellow text
  * - **Locked**: Reduced opacity with lock icon
  *
  * Pattern: Uses inline styles for dynamic attribute colors, Tailwind for base layout
@@ -65,20 +50,18 @@ export function SkillTabButton({
 }: SkillTabButtonProps) {
   const { i18n } = useTranslation(['database', 'common'])
   const { primary } = getAttributeColors(attributeType)
+  const overlay = withAlpha(primary, OVERLAY_ALPHA)
+  const stackedOverlay = withAlpha(primary, STACKED_OVERLAY_ALPHA)
 
-  // Darkened version for hover/select states (20% darker)
-  const darkenedPrimary = darkenColor(primary, 0.2)
-
-  // Base classes - bg-muted when not active
+  // Base classes - the muted panel shows through the overlays
   const baseClasses = cn(
-    'flex-1 py-2 px-4 rounded font-medium transition-all duration-200',
-    !isActive && 'bg-muted',
+    'flex-1 py-2 px-4 rounded font-medium transition-all duration-200 bg-muted',
   )
 
   const getButtonStyle = (): React.CSSProperties | undefined => {
     if (isActive) {
       return {
-        backgroundColor: darkenedPrimary,
+        backgroundColor: overlay,
         color: isLocked ? undefined : YELLOW_HIGHLIGHT,
         textShadow: isLocked ? undefined : '1px 1px 2px rgba(0, 0, 0, 0.8)',
       }
@@ -93,9 +76,9 @@ export function SkillTabButton({
       style={getButtonStyle()}
       onMouseEnter={(e) => {
         if (isActive) {
-          e.currentTarget.style.backgroundColor = primary
+          e.currentTarget.style.backgroundColor = stackedOverlay
         } else {
-          e.currentTarget.style.backgroundColor = darkenedPrimary
+          e.currentTarget.style.backgroundColor = overlay
           if (!isLocked) {
             e.currentTarget.style.color = YELLOW_HIGHLIGHT
             e.currentTarget.style.textShadow = '1px 1px 2px rgba(0, 0, 0, 0.8)'
@@ -104,7 +87,7 @@ export function SkillTabButton({
       }}
       onMouseLeave={(e) => {
         if (isActive) {
-          e.currentTarget.style.backgroundColor = darkenedPrimary
+          e.currentTarget.style.backgroundColor = overlay
         } else {
           e.currentTarget.style.backgroundColor = ''
           e.currentTarget.style.color = ''
