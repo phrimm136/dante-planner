@@ -31,7 +31,7 @@ export function LabeledPanel({
   className,
 }: LabeledPanelProps) {
   return (
-    <div className={cn('border rounded p-4 space-y-4', className)}>
+    <div className={cn('border rounded p-3 space-y-2', className)}>
       {title !== undefined && (
         <div className={cn('font-semibold text-sm', TITLE_ALIGN[titleAlign])}>{title}</div>
       )}
