@@ -68,6 +68,60 @@ export const AFFINITIES = [
 export type Affinity = (typeof AFFINITIES)[number]
 
 /**
+ * Keys of the attribute color table: the affinities plus the client's non-sin attribute types
+ */
+export const ATTRIBUTE_COLOR_TYPES = [...AFFINITIES, 'WHITE', 'BLACK', 'NEUTRAL', 'NONE'] as const
+
+/**
+ * Attribute color type derived from ATTRIBUTE_COLOR_TYPES array
+ */
+export type AttributeColorType = (typeof ATTRIBUTE_COLOR_TYPES)[number]
+
+/**
+ * Character names as the client's enum spells them (`Yisang`, `Merusault`), including
+ * the non-playable cast; distinct from SINNERS, which carries the display spelling
+ */
+export const SINNER_NAMES = [
+  'Yisang',
+  'Faust',
+  'DonQuixote',
+  'Ryoshu',
+  'Merusault',
+  'HongLu',
+  'Heathcliff',
+  'Ishmael',
+  'Rodion',
+  'Sinclair',
+  'Outis',
+  'Gregor',
+  'Dante',
+  'Charon',
+  'Vergilius',
+  'Another',
+] as const
+
+/**
+ * Sinner name derived from SINNER_NAMES array
+ */
+export type SinnerName = (typeof SINNER_NAMES)[number]
+
+/**
+ * Passive importance levels, keyed as the importance color table keys them
+ */
+export const PASSIVE_IMPORTANCE_LEVELS = ['1', '2', '3'] as const
+
+/**
+ * Season code of collaboration units
+ */
+export const COLLAB_SEASON_CODE = 8000
+
+/**
+ * Season codes of Walpurgisnacht units: 9100 + the event number
+ */
+export const WALPURGIS_SEASON_CODE_MIN = 9100
+export const WALPURGIS_SEASON_CODE_MAX = 9199
+
+/**
  * Skill attribute types including NEUTRAL (for defense skills) and all affinities
  */
 export const SKILL_ATTRIBUTE_TYPES = ['NEUTRAL', ...AFFINITIES] as const

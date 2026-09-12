@@ -1,13 +1,13 @@
 import { z } from 'zod'
+import { HexColorSchema } from '@/lib/colorUtils'
 
 /**
  * Color Code Schemas
  *
- * Zod schemas for runtime validation of color code mapping data.
- * Maps attribute types (e.g., "CRIMSON") to hex color codes (e.g., "#A0392B").
+ * Zod schemas for runtime validation of skill-description tints.
+ * Maps keyword ids (e.g., "Critical", "Positive") to hex color codes.
  */
 
-// ColorCodeMap schema - maps string keys to hex color values
-export const ColorCodeMapSchema = z.record(z.string(), z.string())
+export const ColorCodeMapSchema = z.record(z.string(), HexColorSchema)
 
 export type ColorCodeMap = z.infer<typeof ColorCodeMapSchema>

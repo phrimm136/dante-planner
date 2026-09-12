@@ -36,6 +36,12 @@ import {
   ColorCodeMapSchema,
 } from '@/shared/gameText'
 import { AnnouncementSpecListSchema, AnnouncementI18nSchema } from '@/pages/home'
+import {
+  AttributeColorCodeSchema,
+  SinnerColorCodeSchema,
+  SeasonColorCodeSchema,
+  ImportanceColorCodeSchema,
+} from '@/shared/gameData'
 import { StartBuffDataListSchema, StartBuffI18nSchema } from '@/shared/gameText'
 import {
   AbEventSpecListSchema,
@@ -106,8 +112,19 @@ describe('spec list files', () => {
     validateFile(path.join(DATA_DIR, 'abEventSpecList.json'), AbEventSpecListSchema))
   it('battleKeywordSpecList.json', () =>
     validateFile(path.join(DATA_DIR, 'battleKeywordSpecList.json'), BattleKeywordSpecListSchema))
-  it('colorCode.json', () =>
-    validateFile(path.join(DATA_DIR, 'colorCode.json'), ColorCodeMapSchema))
+  it('color/skillDescColorCode.json', () =>
+    validateFile(path.join(DATA_DIR, 'color', 'skillDescColorCode.json'), ColorCodeMapSchema))
+  it('color/attributeColorCode.json', () =>
+    validateFile(path.join(DATA_DIR, 'color', 'attributeColorCode.json'), AttributeColorCodeSchema))
+  it('color/sinnerColorCode.json', () =>
+    validateFile(path.join(DATA_DIR, 'color', 'sinnerColorCode.json'), SinnerColorCodeSchema))
+  it('color/seasonColorCode.json', () =>
+    validateFile(path.join(DATA_DIR, 'color', 'seasonColorCode.json'), SeasonColorCodeSchema))
+  it('color/importanceColorCode.json', () =>
+    validateFile(
+      path.join(DATA_DIR, 'color', 'importanceColorCode.json'),
+      ImportanceColorCodeSchema,
+    ))
   it('announcements.json', () =>
     validateFile(path.join(DATA_DIR, 'announcements.json'), AnnouncementSpecListSchema))
 })

@@ -23,7 +23,7 @@ import { useIdentityListI18n } from '@/pages/identity'
 import { useEGOListI18n } from '@/pages/ego'
 import { useEGOGiftListI18n } from '@/pages/egoGift'
 import { getSinnerFromId } from '@/shared/gameData'
-import colorCode from '@static/data/colorCode.json'
+import colorCode from '@static/data/color/skillDescColorCode.json'
 import { SECTION_STYLES } from '@/lib/constants'
 import type { EGOId, IdentityId, SinnerScopedId } from '@/shared/gameData'
 

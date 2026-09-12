@@ -5,7 +5,7 @@ export { KeywordsDisplay } from './components/KeywordsDisplay'
 export { FormattedSanityText } from './components/FormattedSanityText'
 export { StyledSkillName, StyledNameSkeleton } from './components/StyledName'
 
-export { useColorCodes, getColorForAttributeType } from './hooks/useColorCodes'
+export { useColorCodes } from './hooks/useColorCodes'
 export { useSanityConditionI18n } from './hooks/useSanityConditionData'
 export { useBattleKeywords, getKeywordName } from './hooks/useBattleKeywords'
 export {

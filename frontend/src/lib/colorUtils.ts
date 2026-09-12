@@ -1,10 +1,24 @@
+import { z } from 'zod'
+
 /**
- * Darkens a hex color by a given amount
- * @param hex - Hex color string (e.g., "#A0392B" or "A0392B")
- * @param amount - Darkening factor (0-1, where 0.5 = 50% darker)
- * @returns Darkened hex color string with # prefix
+ * CSS hex color: `#rrggbb` or `#rrggbbaa`
  */
-export function darkenColor(hex: string, amount: number): string {
+export type HexColor = `#${string}`
+
+const HEX_COLOR_RE = /^#(?:[0-9a-f]{6}|[0-9a-f]{8})$/i
+
+export const HexColorSchema = z.custom<HexColor>(
+  (value) => typeof value === 'string' && HEX_COLOR_RE.test(value),
+  'Expected a #rrggbb or #rrggbbaa color',
+)
+
+/**
+ * Darkens a hex color by a given amount; an alpha channel is dropped
+ * @param hex - Hex color string (e.g., "#A0392B" or "#A0392Bff")
+ * @param amount - Darkening factor (0-1, where 0.5 = 50% darker)
+ * @returns Opaque darkened hex color string with # prefix
+ */
+export function darkenColor(hex: string, amount: number): HexColor {
   // Remove # if present
   const cleanHex = hex.replace('#', '')
 

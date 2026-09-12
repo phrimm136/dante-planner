@@ -1,3 +1,4 @@
+import { getAttributeColors } from '@/shared/gameData'
 import type { SinnerEquipment } from '../../types/DeckTypes'
 import type { EgoType } from '@/shared/gameData'
 import type { IdentityListItem } from '@/pages/identity'
@@ -10,7 +11,6 @@ import {
   getBackupIndicatorPath,
 } from '@/shared/assets'
 import { IdentityCard } from '@/pages/identity'
-import colorCode from '@static/data/colorCode.json'
 import { getDisplayFontForNumeric } from '@/lib/utils'
 
 interface SinnerDeckCardProps {
@@ -104,7 +104,7 @@ export const SinnerDeckCard = function SinnerDeckCard({
         {[0, 1, 2].map((idx) => {
           const affinity = skillData.affinities[idx]
           const atkType = skillData.atkTypes[idx]
-          const bgColor = affinity ? (colorCode as Record<string, string>)[affinity] : undefined
+          const bgColor = affinity ? getAttributeColors(affinity).primary : undefined
 
           return (
             <div
@@ -132,9 +132,7 @@ export const SinnerDeckCard = function SinnerDeckCard({
         {EGO_RANKS.map((rank) => {
           const equippedEgo = equipment.egos[rank]
           const egoAffinity = equippedEgo ? egoAffinityMap[equippedEgo.id] : undefined
-          const egoBgColor = egoAffinity
-            ? (colorCode as Record<string, string>)[egoAffinity]
-            : undefined
+          const egoBgColor = egoAffinity ? getAttributeColors(egoAffinity).primary : undefined
           return (
             <div
               key={rank}

@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { useEGOGiftDetailSpec, useEGOGiftDetailI18n } from '../hooks/useEGOGiftDetailData'
-import { getColorForAttributeType, useColorCodes } from '@/shared/gameText'
 import { FormattedDescription } from '@/shared/gameText'
+import { getAttributeColors } from '@/shared/gameData'
 import type { EnhancementLevel } from '@/shared/gameData'
 import { getDisplayFontForLanguage } from '@/lib/utils'
 
@@ -22,8 +22,7 @@ function EGOGiftTooltipInner({ giftId, enhancement }: EGOGiftTooltipInnerProps) 
   const { t, i18n } = useTranslation('common')
   const spec = useEGOGiftDetailSpec(giftId)
   const giftI18n = useEGOGiftDetailI18n(giftId)
-  const { data: colorCodes } = useColorCodes()
-  const nameColor = getColorForAttributeType(colorCodes, spec.attributeType)
+  const { primary: nameColor } = getAttributeColors(spec.attributeType)
   const description = giftI18n.descs[enhancement]
   const displayStyle = getDisplayFontForLanguage(i18n.language)
 

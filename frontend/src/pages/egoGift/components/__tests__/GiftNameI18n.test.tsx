@@ -11,17 +11,6 @@ vi.mock('@/pages/egoGift/hooks/useEGOGiftDetailData', () => ({
   }),
 }))
 
-// Mock useColorCodes hook used by GiftName
-vi.mock('@/shared/gameText/hooks/useColorCodes', () => ({
-  useColorCodes: () => ({
-    // colorCode.json is keyed by affinity name, not by sin name.
-    data: {
-      CRIMSON: '#ff0000',
-      SCARLET: '#ff6600',
-    },
-  }),
-}))
-
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: {

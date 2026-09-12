@@ -1,3 +1,4 @@
+import { getAttributeColors } from '@/shared/gameData'
 import {
   getIdentityProfileImagePath,
   getIdentityImageFallbackPath,
@@ -6,7 +7,6 @@ import {
 import { OFFENSIVE_SKILL_SLOTS, DEFAULT_SKILL_EA } from '@/shared/gameData'
 import type { SkillEAState, UptieTier, SkillInfo } from '../../types/DeckTypes'
 import { cn } from '@/lib/utils'
-import colorCode from '@static/data/colorCode.json'
 
 interface SinnerSkillCardProps {
   identityId: string
@@ -77,7 +77,7 @@ export function SinnerSkillCard({
         {OFFENSIVE_SKILL_SLOTS.map((slot) => {
           const affinity = skillInfos[slot].attributeType
           const atkType = skillInfos[slot].atkType
-          const bgColor = affinity ? (colorCode as Record<string, string>)[affinity] : undefined
+          const bgColor = affinity ? getAttributeColors(affinity).primary : undefined
           const ea = skillEA[slot]
 
           return (

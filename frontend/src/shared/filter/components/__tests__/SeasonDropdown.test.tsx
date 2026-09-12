@@ -57,7 +57,7 @@ describe('SeasonDropdown', () => {
 
     for (const season of SEASONS) {
       expect(
-        screen.getByRole('option', { name: new RegExp(`Season ${season}`) }),
+        screen.getByRole('option', { name: new RegExp(`^Season ${season}$`) }),
       ).toBeInTheDocument()
     }
   })

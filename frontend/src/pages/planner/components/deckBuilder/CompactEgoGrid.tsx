@@ -1,8 +1,7 @@
-import { SINNERS } from '@/shared/gameData'
+import { SINNERS, getAttributeColors } from '@/shared/gameData'
 import { getEGOImagePath, getEGOTypeIconPath } from '@/shared/assets'
 import type { SinnerEquipment } from '../../types/DeckTypes'
 import type { EgoType } from '@/shared/gameData'
-import colorCode from '@static/data/colorCode.json'
 
 interface CompactEgoGridProps {
   equipment: Record<string, SinnerEquipment>
@@ -29,9 +28,7 @@ export function CompactEgoGrid({ equipment, egoAffinityMap }: CompactEgoGridProp
             {EGO_RANKS.map((rank) => {
               const equippedEgo = sinnerEquipment.egos[rank]
               const egoAffinity = equippedEgo ? egoAffinityMap[equippedEgo.id] : undefined
-              const egoBgColor = egoAffinity
-                ? (colorCode as Record<string, string>)[egoAffinity]
-                : undefined
+              const egoBgColor = egoAffinity ? getAttributeColors(egoAffinity).primary : undefined
               return (
                 <div
                   key={rank}

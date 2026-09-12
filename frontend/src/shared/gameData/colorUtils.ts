@@ -1,14 +1,19 @@
-import colorCode from '@static/data/colorCode.json'
+import attributeColorCode from '@static/data/color/attributeColorCode.json'
+import seasonColorCode from '@static/data/color/seasonColorCode.json'
 import { darkenColor } from '@/lib/colorUtils'
+import type { HexColor } from '@/lib/colorUtils'
+import { WALPURGIS_SEASON_CODE_MAX, WALPURGIS_SEASON_CODE_MIN } from './constants'
+import { AttributeColorCodeSchema, SeasonColorCodeSchema } from './schemas/ColorSchemas'
+import type { AttributeColorRoles } from './schemas/ColorSchemas'
 
 /**
  * Color pair for gradient styling
  */
 export interface AttributeColors {
   /** Primary attribute color (for stripes) */
-  primary: string
+  primary: HexColor
   /** Darkened color (for background gradient) */
-  dark: string
+  dark: HexColor
 }
 
 /** Fallback colors for unknown/missing attribute types */
@@ -17,39 +22,22 @@ const FALLBACK_COLORS: AttributeColors = {
   dark: '#444444',
 }
 
+const ATTRIBUTE_ROLES: Partial<Record<string, AttributeColorRoles>> =
+  AttributeColorCodeSchema.parse(attributeColorCode)
+
+const SEASON_COLORS = SeasonColorCodeSchema.parse(seasonColorCode)
+
 /**
- * Gets color pair for an attribute type with case-insensitive lookup
- * @param attributeType - Attribute type (e.g., "AZURE", "azure", "Azure")
+ * Gets color pair for an attribute type
+ * @param attributeType - Attribute type as the client enum spells it (e.g., "AZURE", "NEUTRAL")
  * @returns Color pair with primary and dark variants
  */
 export function getAttributeColors(attributeType?: string): AttributeColors {
-  if (!attributeType) {
-    return FALLBACK_COLORS
-  }
-
-  // Case-insensitive lookup: try original, uppercase, then title case
-  const colorMap = colorCode as Record<string, string>
-  const normalized = attributeType.toUpperCase()
-
-  // Try uppercase first (most attribute types are uppercase)
-  let primary = colorMap[normalized]
-
-  // If not found, try title case (e.g., "Neutral")
-  if (!primary) {
-    const titleCase = normalized.charAt(0) + normalized.slice(1).toLowerCase()
-    primary = colorMap[titleCase]
-  }
-
-  // If still not found, try original
-  if (!primary) {
-    primary = colorMap[attributeType]
-  }
-
-  // If no match, return fallback
+  const roles = attributeType ? ATTRIBUTE_ROLES[attributeType] : undefined
+  const primary = roles?.background ?? roles?.type
   if (!primary) {
     return FALLBACK_COLORS
   }
-
   return {
     primary,
     dark: darkenColor(primary, 0.5),
@@ -57,27 +45,14 @@ export function getAttributeColors(attributeType?: string): AttributeColors {
 }
 
 /**
- * Season color mapping
- * 0 = standard (no color)
- */
-const SEASON_COLORS_MAP: Record<number, string> = {
-  1: '#920000',
-  2: '#d3e3ea',
-  3: '#26babe',
-  4: '#714d95',
-  5: '#f8e925',
-  6: '#51dcbd',
-  7: '#ce1c18',
-  8000: '#a1bece',
-} as const
-
-/**
  * Get color for a season code
- * - Exact matches: 1-7, 8000
- * - Range: 9100-9199 → #85e800
+ * - Walpurgisnacht codes share one entry
  * - Returns undefined for 0 (standard) or unknown codes
  */
-export function getSeasonColor(code: number): string | undefined {
-  if (code >= 9100 && code <= 9199) return '#85e800'
-  return SEASON_COLORS_MAP[code]
+export function getSeasonColor(code: number): HexColor | undefined {
+  const key =
+    code >= WALPURGIS_SEASON_CODE_MIN && code <= WALPURGIS_SEASON_CODE_MAX
+      ? String(WALPURGIS_SEASON_CODE_MIN)
+      : String(code)
+  return SEASON_COLORS[key]
 }

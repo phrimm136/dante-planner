@@ -2,7 +2,7 @@ import { Suspense } from 'react'
 import { Link } from '@tanstack/react-router'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
-import colorCode from '@static/data/colorCode.json'
+import colorCode from '@static/data/color/skillDescColorCode.json'
 import { KeywordCard } from './KeywordCard'
 import { KeywordName } from './KeywordName'
 

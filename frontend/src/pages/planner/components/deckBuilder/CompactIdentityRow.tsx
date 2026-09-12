@@ -1,4 +1,4 @@
-import { SINNERS } from '@/shared/gameData'
+import { SINNERS, getAttributeColors } from '@/shared/gameData'
 import { CARD_GRID } from '@/lib/constants'
 import type { SinnerEquipment } from '../../types/DeckTypes'
 import type { SkillData } from './SinnerGrid'
@@ -8,7 +8,6 @@ import {
   getAttackTypeIconPath,
 } from '@/shared/assets'
 import { cn, getDisplayFontForNumeric } from '@/lib/utils'
-import colorCode from '@static/data/colorCode.json'
 
 interface CompactIdentityRowProps {
   equipment: Record<string, SinnerEquipment>
@@ -136,9 +135,7 @@ export const CompactIdentityRow = function CompactIdentityRow({
               {[0, 1, 2].map((idx) => {
                 const affinity = skillData.affinities[idx]
                 const atkType = skillData.atkTypes[idx]
-                const bgColor = affinity
-                  ? (colorCode as Record<string, string>)[affinity]
-                  : undefined
+                const bgColor = affinity ? getAttributeColors(affinity).primary : undefined
 
                 return (
                   <div
