@@ -21,9 +21,9 @@ vi.mock('../../hooks/useThemePackListData', () => ({
 
 vi.mock('@/shared/assets', () => ({
   getThemePackImagePath: (id: string) => `/images/themePack/${id}.webp`,
-  getThemePackHoverHighlightPath: () => '/images/UI/themePack/onHover.webp',
-  getThemePackSelectHighlightPath: () => '/images/UI/themePack/onSelect.webp',
-  getThemePackExtremeHighlightPath: () => '/images/UI/themePack/extremeHighlight.webp',
+  getThemePackHoverHighlightPath: () => '/images/UI/card/themePack/legacy/hover.webp',
+  getThemePackSelectHighlightPath: () => '/images/UI/card/themePack/legacy/focused.webp',
+  getThemePackExtremeHighlightPath: () => '/images/UI/card/themePack/legacy/hover-extreme.webp',
 }))
 
 vi.mock('@/components/ui/AutoSizeText', () => ({
@@ -76,7 +76,7 @@ describe('ThemePackCard', () => {
 
       const srcs = getSrcs(container)
       expect(srcs).toHaveLength(2)
-      expect(srcs).toContain('/images/UI/themePack/onHover.webp')
+      expect(srcs).toContain('/images/UI/card/themePack/legacy/hover.webp')
     })
 
     it('renders both select and hover layers when isSelected is true', () => {
@@ -84,8 +84,8 @@ describe('ThemePackCard', () => {
 
       const srcs = getSrcs(container)
       expect(srcs).toHaveLength(3)
-      expect(srcs).toContain('/images/UI/themePack/onSelect.webp')
-      expect(srcs).toContain('/images/UI/themePack/onHover.webp')
+      expect(srcs).toContain('/images/UI/card/themePack/legacy/focused.webp')
+      expect(srcs).toContain('/images/UI/card/themePack/legacy/hover.webp')
     })
 
     it('renders hover layer after select layer for z-order priority', () => {
@@ -96,8 +96,8 @@ describe('ThemePackCard', () => {
       const srcs = getSrcs(container)
       expect(srcs).toHaveLength(3)
       expect(srcs[0]).toBe('/images/themePack/pack1.webp')
-      expect(srcs[1]).toBe('/images/UI/themePack/onSelect.webp')
-      expect(srcs[2]).toBe('/images/UI/themePack/onHover.webp')
+      expect(srcs[1]).toBe('/images/UI/card/themePack/legacy/focused.webp')
+      expect(srcs[2]).toBe('/images/UI/card/themePack/legacy/hover.webp')
     })
 
     it('uses extreme highlight for both layers when pack is extreme', () => {
@@ -112,8 +112,8 @@ describe('ThemePackCard', () => {
 
       const srcs = getSrcs(container)
       expect(srcs).toHaveLength(3)
-      expect(srcs[1]).toBe('/images/UI/themePack/extremeHighlight.webp')
-      expect(srcs[2]).toBe('/images/UI/themePack/extremeHighlight.webp')
+      expect(srcs[1]).toBe('/images/UI/card/themePack/legacy/hover-extreme.webp')
+      expect(srcs[2]).toBe('/images/UI/card/themePack/legacy/hover-extreme.webp')
     })
 
     it('hover layer starts invisible with CSS hover transition', () => {
@@ -132,7 +132,7 @@ describe('ThemePackCard', () => {
       const images = getImages(container)
       const selectLayer = images[1]
       if (!selectLayer) throw new Error('expected a select highlight layer')
-      expect(selectLayer).toHaveAttribute('src', '/images/UI/themePack/onSelect.webp')
+      expect(selectLayer).toHaveAttribute('src', '/images/UI/card/themePack/legacy/focused.webp')
       expect(selectLayer.className).not.toContain('opacity-0')
     })
   })

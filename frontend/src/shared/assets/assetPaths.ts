@@ -17,6 +17,12 @@ const frameLevel = (skillTier: number): number => Math.max(1, Math.min(3, skillT
 const pascalWord = (word: string): string =>
   word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
 
+const camelEnum = (enumValue: string): string =>
+  enumValue
+    .split('_')
+    .map((word, index) => (index === 0 ? word.toLowerCase() : pascalWord(word)))
+    .join('')
+
 /**
  * The `hashStaticPlugin` build transform rewrites this file only, by regex: every `resolveAsset`
  * call taking a string or template literal becomes the content-hashed path (or a hash
@@ -25,16 +31,17 @@ const pascalWord = (word: string): string =>
  * splices the expression into `"" + expr`, which reassociates anything containing an operator.
  */
 export const PATHS = {
-  selectedIndicator: () => resolveAsset('/images/UI/formation/selected.webp'),
-  identityFrameHighlight: () => resolveAsset('/images/UI/formation/identityFrameHighlight.webp'),
-  egoFrame: () => resolveAsset('/images/UI/formation/egoFrame.webp'),
-  egoFrameHighlight: () => resolveAsset('/images/UI/formation/egoFrameHighlight.webp'),
-  backupIndicator: () => resolveAsset('/images/UI/formation/backup.webp'),
+  selectedIndicator: () => resolveAsset('/images/UI/card/common/indicator-selected.webp'),
+  identityFrameHighlight: () => resolveAsset('/images/UI/card/identity/legacy/hoverRing.webp'),
+  egoFrame: () => resolveAsset('/images/UI/card/ego/legacy/frame.webp'),
+  egoFrameHighlight: () => resolveAsset('/images/UI/card/ego/legacy/hoverRing.webp'),
+  backupIndicator: () => resolveAsset('/images/UI/card/common/indicator-backup.webp'),
   uptieFrame: (rank: number, uptie: number) =>
-    resolveAsset(`/images/UI/formation/${String(rank)}Rank${String(uptie)}UptieFrame.webp`),
-  sinnerBG: (rank: number) => resolveAsset(`/images/UI/formation/${String(rank)}RankSinnerBG.webp`),
+    resolveAsset(`/images/UI/card/identity/frame-rank${String(rank)}-uptie${String(uptie)}.webp`),
+  sinnerBG: (rank: number) =>
+    resolveAsset(`/images/UI/card/identity/legacy/iconRing-rank${String(rank)}.webp`),
   egoInfoPanel: (attribute: string) =>
-    resolveAsset(`/images/UI/formation/egoInfoPanel${attribute}.webp`),
+    resolveAsset(`/images/UI/card/ego/nameBg-${attribute.toLowerCase()}.webp`),
 
   identityInfoImage: (identityId: string, uptie: number) =>
     uptie < 3 || identityId.endsWith('01')
@@ -59,45 +66,47 @@ export const PATHS = {
   skillFrame: (attributeType: SkillAttributeType | undefined, skillTier: number) => {
     const attr = attributeType ?? 'NEUTRAL'
     const level = String(frameLevel(skillTier))
-    return resolveAsset(`/images/UI/skillFrame/${attr}${level}.webp`)
+    return resolveAsset(`/images/UI/skill/frame-${attr.toLowerCase()}-tier${level}.webp`)
   },
   skillFrameBG: (attributeType: SkillAttributeType | undefined, skillTier: number) => {
     const attr = attributeType ?? 'NEUTRAL'
     const level = String(frameLevel(skillTier))
-    return resolveAsset(`/images/UI/skillFrame/${attr}${level}BG.webp`)
+    return resolveAsset(`/images/UI/skill/frameBg-${attr.toLowerCase()}-tier${level}.webp`)
   },
   attackTypeFrame: (attributeType: SkillAttributeType) =>
-    resolveAsset(`/images/UI/skillFrame/attackType${attributeType}.webp`),
+    resolveAsset(`/images/UI/skill/attackType-${attributeType.toLowerCase()}.webp`),
   attackTypeFrameBG: (attributeType: SkillAttributeType) =>
-    resolveAsset(`/images/UI/skillFrame/attackTypeBG${attributeType}.webp`),
+    resolveAsset(`/images/UI/skill/attackTypeBg-${attributeType.toLowerCase()}.webp`),
 
-  rarityIcon: (grade: number) => resolveAsset(`/images/UI/identity/rarity${String(grade)}.webp`),
+  rarityIcon: (grade: number) =>
+    resolveAsset(`/images/UI/identity/grade-rank${String(grade)}.webp`),
   identityPassiveCountIcon: () => resolveAsset('/images/UI/identity/passiveCount.webp'),
-  attackLevelIcon: () => resolveAsset('/images/UI/identity/attack.webp'),
-  defenseLevelIcon: () => resolveAsset('/images/UI/identity/defense.webp'),
-  hpIcon: () => resolveAsset('/images/UI/identity/hp.webp'),
-  speedIcon: () => resolveAsset('/images/UI/identity/speed.webp'),
-  slashResistIcon: () => resolveAsset('/images/UI/identity/SLASH.webp'),
-  pierceResistIcon: () => resolveAsset('/images/UI/identity/PENETRATE.webp'),
-  bluntResistIcon: () => resolveAsset('/images/UI/identity/HIT.webp'),
-  sanityIncIcon: () => resolveAsset('/images/UI/identity/sanityInc.webp'),
-  sanityDecIcon: () => resolveAsset('/images/UI/identity/sanityDec.webp'),
+  attackLevelIcon: () => resolveAsset('/images/UI/identity/stat-attack.webp'),
+  defenseLevelIcon: () => resolveAsset('/images/UI/identity/stat-defense.webp'),
+  hpIcon: () => resolveAsset('/images/UI/identity/stat-hp.webp'),
+  speedIcon: () => resolveAsset('/images/UI/identity/stat-speed.webp'),
+  slashResistIcon: () => resolveAsset('/images/UI/identity/resist-slash.webp'),
+  pierceResistIcon: () => resolveAsset('/images/UI/identity/resist-penetrate.webp'),
+  bluntResistIcon: () => resolveAsset('/images/UI/identity/resist-hit.webp'),
+  sanityIncIcon: () => resolveAsset('/images/UI/identity/sanity-inc.webp'),
+  sanityDecIcon: () => resolveAsset('/images/UI/identity/sanity-dec.webp'),
   defenseTypeIcon: (defType: string) => {
-    const filename = defType.split('_').map(pascalWord).join('')
-    return resolveAsset(`/images/UI/identity/${filename}.webp`)
+    const filename = camelEnum(defType)
+    return resolveAsset(`/images/UI/identity/defenseType-${filename}.webp`)
   },
 
-  attackTypeIcon: (atkType: string) => resolveAsset(`/images/UI/common/${pascalWord(atkType)}.webp`),
+  attackTypeIcon: (atkType: string) =>
+    resolveAsset(`/images/UI/common/atkType-${atkType.toLowerCase()}.webp`),
   coinDescIcon: (coinIndex: number) =>
-    resolveAsset(`/images/UI/common/coin${String(coinIndex + 1)}.webp`),
-  egoTierIcon: (tier: number) => resolveAsset(`/images/UI/common/tier${String(tier)}.webp`),
+    resolveAsset(`/images/UI/common/coin-${String(coinIndex + 1)}.webp`),
+  egoTierIcon: (tier: number) => resolveAsset(`/images/UI/common/tier-${String(tier)}.webp`),
   attackWeightIcon: () => resolveAsset('/images/UI/common/atkWeight.webp'),
   lockIcon: () => resolveAsset('/images/UI/common/lock.webp'),
   buttonBase: () => resolveAsset('/images/UI/common/button.webp'),
-  buttonOnHover: () => resolveAsset('/images/UI/common/buttonOnHover.webp'),
-  buttonExpandImage: () => resolveAsset('/images/UI/common/buttonExpandImage.webp'),
-  buttonSwapImage: () => resolveAsset('/images/UI/common/buttonSwapImage.webp'),
-  buttonClose: () => resolveAsset('/images/UI/common/buttonClose.webp'),
+  buttonOnHover: () => resolveAsset('/images/UI/common/button-hover.webp'),
+  buttonExpandImage: () => resolveAsset('/images/UI/common/button-expand.webp'),
+  buttonSwapImage: () => resolveAsset('/images/UI/common/button-swap.webp'),
+  buttonClose: () => resolveAsset('/images/UI/common/button-close.webp'),
 
   sinnerIcon: (sinner: string) => resolveAsset(`/images/icon/sinners/${sinner}.webp`),
   affinityIcon: (affinity: string) => {
@@ -122,47 +131,49 @@ export const PATHS = {
     resolveAsset(`/images/ego/${egoId}/${egoId}_awaken_profile.webp`),
   egoSkillImage: (egoId: string, skillType: 'awaken' | 'erosion') =>
     resolveAsset(`/images/ego/${egoId}/${egoId}_${skillType}_profile.webp`),
-  egoRankIcon: (rank: string) => resolveAsset(`/images/UI/ego/${rank}.webp`),
+  egoRankIcon: (rank: string) => resolveAsset(`/images/UI/ego/rank-${rank.toLowerCase()}.webp`),
 
   egoGiftEnhancementIcon: (level: number) =>
-    resolveAsset(`/images/UI/egoGift/enhancement${String(level)}.webp`),
-  egoGiftCostIcon: () => resolveAsset('/images/UI/egoGift/cost.webp'),
-  egoGiftBackground: () => resolveAsset('/images/UI/egoGift/bg.webp'),
-  egoGiftOnHover: () => resolveAsset('/images/UI/egoGift/onHover.webp'),
-  egoGiftEnhancedBackground: () => resolveAsset('/images/UI/egoGift/bgEnhanced.webp'),
-  egoGiftEnhanced2Background: () => resolveAsset('/images/UI/egoGift/bgEnhanced2.webp'),
-  egoGiftTierEX: () => resolveAsset('/images/UI/egoGift/tierEX.webp'),
-  egoGiftSelectHighlight: () => resolveAsset('/images/UI/egoGift/onSelect.webp'),
-  atkTypeGiftIcon: (atkType: string) => resolveAsset(`/images/UI/egoGift/${atkType}.webp`),
+    resolveAsset(`/images/UI/card/egoGift/enhancement-${String(level)}.webp`),
+  egoGiftCostIcon: () => resolveAsset('/images/UI/card/egoGift/cost.webp'),
+  egoGiftBackground: () => resolveAsset('/images/UI/card/egoGift/bg.webp'),
+  egoGiftOnHover: () => resolveAsset('/images/UI/card/egoGift/hover.webp'),
+  egoGiftEnhancedBackground: () => resolveAsset('/images/UI/card/egoGift/bg-enhanced1.webp'),
+  egoGiftEnhanced2Background: () => resolveAsset('/images/UI/card/egoGift/bg-enhanced2.webp'),
+  egoGiftTierEX: () => resolveAsset('/images/UI/card/egoGift/tier-ex.webp'),
+  egoGiftSelectHighlight: () => resolveAsset('/images/UI/card/egoGift/focused.webp'),
+  atkTypeGiftIcon: (atkType: string) =>
+    resolveAsset(`/images/UI/card/egoGift/atkType-${atkType.toLowerCase()}.webp`),
 
   startBuffIcon: (baseId: number, version: number) =>
-    resolveAsset(`/images/UI/MD${String(version)}/StartBuffIcon_${String(baseId)}.webp`),
+    resolveAsset(`/images/UI/startBuff/md${String(version)}/icon-${String(baseId)}.webp`),
   startBuffPane: (version: number) =>
-    resolveAsset(`/images/UI/MD${String(version)}/startBuffPane.webp`),
+    resolveAsset(`/images/UI/startBuff/md${String(version)}/pane.webp`),
   startBuffHighlight: (version: number) =>
-    resolveAsset(`/images/UI/MD${String(version)}/startBuffHighlight.webp`),
+    resolveAsset(`/images/UI/startBuff/md${String(version)}/highlight.webp`),
   startBuffMini: (version: number) =>
-    resolveAsset(`/images/UI/MD${String(version)}/startBuffMini.webp`),
+    resolveAsset(`/images/UI/startBuff/md${String(version)}/mini.webp`),
   startBuffMiniHighlight: (version: number) =>
-    resolveAsset(`/images/UI/MD${String(version)}/startBuffMiniHighlight.webp`),
+    resolveAsset(`/images/UI/startBuff/md${String(version)}/miniHighlight.webp`),
   startBuffEnhancementBg: (level: 0 | 1 | 2, version: number) =>
     level === 0
-      ? resolveAsset(`/images/UI/MD${String(version)}/startBuffEnhancementUnselected.webp`)
+      ? resolveAsset(`/images/UI/startBuff/md${String(version)}/enhancement-unselected.webp`)
       : resolveAsset(
-          `/images/UI/MD${String(version)}/startBuffEnhancement${String(level)}Selected.webp`
+          `/images/UI/startBuff/md${String(version)}/enhancement-selected-${String(level)}.webp`
         ),
   startBuffEnhancementOverlay: (version: number) =>
-    resolveAsset(`/images/UI/MD${String(version)}/startBuffEnhancementSelected.webp`),
+    resolveAsset(`/images/UI/startBuff/md${String(version)}/enhancement-selected.webp`),
   startBuffEnhancementIcon: (level: 0 | 1 | 2) =>
     level === 0
-      ? resolveAsset('/images/UI/MD/startBuffEnhancementIcon.webp')
-      : resolveAsset(`/images/UI/egoGift/enhancement${String(level)}.webp`),
-  startBuffStarLight: () => resolveAsset('/images/UI/MD/starLight.webp'),
+      ? resolveAsset('/images/UI/startBuff/enhancementIcon.webp')
+      : resolveAsset(`/images/UI/card/egoGift/enhancement-${String(level)}.webp`),
+  startBuffStarLight: () => resolveAsset('/images/UI/startBuff/starLight.webp'),
 
   themePackImage: (packId: string) => resolveAsset(`/images/themePack/${packId}.webp`),
-  themePackHoverHighlight: () => resolveAsset('/images/UI/themePack/onHover.webp'),
-  themePackSelectHighlight: () => resolveAsset('/images/UI/themePack/onSelect.webp'),
-  themePackExtremeHighlight: () => resolveAsset('/images/UI/themePack/extremeHighlight.webp'),
+  themePackHoverHighlight: () => resolveAsset('/images/UI/card/themePack/legacy/hover.webp'),
+  themePackSelectHighlight: () => resolveAsset('/images/UI/card/themePack/legacy/focused.webp'),
+  themePackExtremeHighlight: () =>
+    resolveAsset('/images/UI/card/themePack/legacy/hover-extreme.webp'),
   featuredBossImage: (packId: string, portraitId: number | string) =>
     resolveAsset(`/images/featuredBoss/${packId}_${portraitId}.webp`),
 
