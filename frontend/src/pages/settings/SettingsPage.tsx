@@ -8,7 +8,7 @@ import { PlannerExportImportSection } from '@/pages/planner'
 import { NotificationSection } from './components/NotificationSection'
 import { AccountDeleteSection } from './components/AccountDeleteSection'
 import { LogoutEverywhereSection } from './components/LogoutEverywhereSection'
-import { Skeleton } from '@/components/ui/skeleton'
+import { SettingsPageSkeleton } from './components/SettingsPageSkeleton'
 import { SECTION_STYLES } from '@/lib/constants'
 
 /**
@@ -80,17 +80,6 @@ function SettingsPageContent() {
           </div>
         </section>
       )}
-    </div>
-  )
-}
-
-function SettingsPageSkeleton() {
-  return (
-    <div className={SECTION_STYLES.LAYOUT.page}>
-      <section className="rounded-lg border bg-card p-6">
-        <Skeleton className="h-6 w-32 mb-4" />
-        <Skeleton className="h-4 w-48" />
-      </section>
     </div>
   )
 }

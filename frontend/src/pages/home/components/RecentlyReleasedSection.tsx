@@ -32,6 +32,9 @@ import { getSeasonColor } from '@/shared/gameData'
 import type { ReactNode } from 'react'
 import type { DateGroup, RecentEntity } from '../hooks/useHomePageData'
 import { SECTION_STYLES } from '@/lib/constants'
+import { CardSlot } from '@/shared/cardLayout'
+import { TextSkeleton } from '@/components/feedback/TextSkeleton'
+import { RECENT_RELEASE_GEOMETRY } from '../lib/cardLayout'
 
 // ============================================================================
 // Helpers
@@ -97,9 +100,13 @@ function HomeEntityCard({
   const seasonColor = getSeasonColor(season)
 
   return (
-    <div className="flex flex-col items-center gap-1 w-28">
+    <div className="flex flex-col items-center gap-1">
       {/* Profile image */}
-      <div className="w-28 h-28 rounded-lg overflow-hidden bg-muted">
+      <CardSlot
+        size={RECENT_RELEASE_GEOMETRY.size}
+        mobileScale={RECENT_RELEASE_GEOMETRY.mobileScale}
+        className="rounded-lg overflow-hidden bg-muted"
+      >
         <FallbackImage
           src={imageSrc}
           fallbackSrc={imageFallbackSrc}
@@ -107,7 +114,7 @@ function HomeEntityCard({
           loading="lazy"
           className="w-full h-full object-cover"
         />
-      </div>
+      </CardSlot>
       {/* Icons row */}
       <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-background/80">
         <img src={gradeIconSrc} alt={gradeIconAlt} className="h-4" />
@@ -216,7 +223,7 @@ export function RecentlyReleasedSkeleton() {
       </div>
 
       {/* Content box with date groups */}
-      <div className={SECTION_STYLES.panel}>
+      <div className={cn(SECTION_STYLES.panel, 'flex-1')}>
         <div className={SECTION_STYLES.LAYOUT.column}>
           {Array.from({ length: 3 }).map((_, groupIdx) => (
             <div key={groupIdx}>
@@ -226,9 +233,14 @@ export function RecentlyReleasedSkeleton() {
                 style={{ gridTemplateColumns: 'repeat(auto-fit, 112px)', justifyContent: 'start' }}
               >
                 {Array.from({ length: 7 }).map((_, cardIdx) => (
-                  <div key={cardIdx} className="flex flex-col items-center gap-1 w-28">
-                    <Skeleton className="w-28 h-28 rounded-lg" />
-                    <Skeleton className="h-3 w-20" />
+                  <div key={cardIdx} className="flex flex-col items-center gap-1">
+                    <CardSlot
+                      size={RECENT_RELEASE_GEOMETRY.size}
+                      mobileScale={RECENT_RELEASE_GEOMETRY.mobileScale}
+                    >
+                      <Skeleton className="size-full rounded-lg" />
+                    </CardSlot>
+                    <TextSkeleton width="xs" />
                   </div>
                 ))}
               </div>
@@ -271,7 +283,7 @@ export function RecentlyReleasedSection({ dateGroups }: RecentlyReleasedSectionP
       </div>
 
       {/* Content grouped by date */}
-      <div className={SECTION_STYLES.panel}>
+      <div className={cn(SECTION_STYLES.panel, 'flex-1')}>
         <div className={SECTION_STYLES.LAYOUT.column}>
           {dateGroups.map((group) => (
             <div key={group.date}>

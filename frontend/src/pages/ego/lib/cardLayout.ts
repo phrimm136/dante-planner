@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react'
 
 import {
   aspectOf,
+  EGO_GEOMETRY,
   lineMetrics,
   pctStyle,
   type CardLayer,
@@ -9,17 +10,8 @@ import {
   type FontAdvanceTable,
   type LineMetrics,
   type PctRect,
-  type CardGeometry,
   type TrackingSpec,
 } from '@/shared/cardLayout'
-import { CARD_MOBILE_SCALE } from '@/lib/constants'
-
-/** `EGOCard`. */
-export const EGO_GEOMETRY: CardGeometry = {
-  size: { widthPx: 160, heightPx: 206 },
-  mobileScale: CARD_MOBILE_SCALE,
-  rows: 'card',
-}
 
 /**
  * The EGO card's sprite layers, as percentages of the card root.

@@ -1,0 +1,64 @@
+id: no-sized-skeleton-tsx
+snapshots:
+  const S = () => <Skeleton className="h-8 w-40" />:
+    labels:
+    - source: <Skeleton className="h-8 w-40" />
+      style: primary
+      start: 16
+      end: 49
+    - source: Skeleton
+      style: secondary
+      start: 17
+      end: 25
+    - source: '"h-8 w-40"'
+      style: secondary
+      start: 36
+      end: 46
+  const S = () => <Skeleton className="h-[178px] w-full" />:
+    labels:
+    - source: <Skeleton className="h-[178px] w-full" />
+      style: primary
+      start: 16
+      end: 57
+    - source: Skeleton
+      style: secondary
+      start: 17
+      end: 25
+    - source: '"h-[178px] w-full"'
+      style: secondary
+      start: 36
+      end: 54
+  const S = () => <Skeleton className="size-16" />:
+    labels:
+    - source: <Skeleton className="size-16" />
+      style: primary
+      start: 16
+      end: 48
+    - source: Skeleton
+      style: secondary
+      start: 17
+      end: 25
+    - source: '"size-16"'
+      style: secondary
+      start: 36
+      end: 45
+  const S = () => <Skeleton className="w-24 h-24 rounded-md" />:
+    labels:
+    - source: <Skeleton className="w-24 h-24 rounded-md" />
+      style: primary
+      start: 16
+      end: 61
+    - source: Skeleton
+      style: secondary
+      start: 17
+      end: 25
+    - source: '"w-24 h-24 rounded-md"'
+      style: secondary
+      start: 36
+      end: 58
+  const S = () => <Skeleton className={cn('w-full', extra)} />:
+    labels:
+    - source: <Skeleton className={cn('w-full', extra)} />
+      style: primary
+      start: 16
+      end: 60

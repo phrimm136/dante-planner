@@ -3,8 +3,9 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { PlannerSection } from '@/components/layout/PlannerSection'
 import { ThemePackTrackerCard } from './ThemePackTrackerCard'
 import { useThemePackListSpec, useThemePackListI18n } from '@/pages/themePack'
-import { CARD_MOBILE_SCALE_DENSE, EMPTY_STATE } from '@/lib/constants'
-import { cn, getDisplayFontForLanguage } from '@/lib/utils'
+import { CARD_MOBILE_SCALE_DENSE } from '@/lib/constants'
+import { getDisplayFontForLanguage } from '@/lib/utils'
+import { EmptyStatePlaceholder } from '@/components/feedback/EmptyStatePlaceholder'
 import { createEmptyNoteContent } from '@/shared/noteEditor'
 import type { SerializableFloorSelection } from '../../types/PlannerTypes'
 import type { NoteContent } from '@/shared/noteEditor'
@@ -75,23 +76,18 @@ export function HorizontalThemePackGallery({
   // No theme packs selected at all
   if (allThemePackIds.length === 0) {
     return (
-      <PlannerSection title={t('pages.plannerMD.floorThemes')}>
-        <div
-          className={cn(
-            'flex items-center justify-center p-4 text-muted-foreground md:h-[306px] lg:h-[481px]',
-            EMPTY_STATE.MIN_HEIGHT,
-            EMPTY_STATE.DASHED_BORDER,
-          )}
-        >
-          <span className="text-sm text-center">{t('pages.plannerMD.emptyState.noThemePack')}</span>
-        </div>
+      <PlannerSection title={t('pages.plannerMD.floorThemes')} fill>
+        <EmptyStatePlaceholder
+          label={t('pages.plannerMD.emptyState.noThemePack')}
+          className="flex-1 min-h-0"
+        />
       </PlannerSection>
     )
   }
 
   return (
-    <PlannerSection title={t('pages.plannerMD.floorThemes')}>
-      <ScrollArea className="md:h-[306px] lg:h-[481px] whitespace-nowrap">
+    <PlannerSection title={t('pages.plannerMD.floorThemes')} fill>
+      <ScrollArea className="flex-1 min-h-0 whitespace-nowrap">
         <div className="flex gap-4 p-2 pb-4">
           {allThemePackIds.map((packId) => {
             const packEntry = spec[packId]

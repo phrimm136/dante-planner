@@ -12,7 +12,7 @@ import { SearchBar } from '@/shared/filter'
 import { EGOGiftFilterDropdown } from '@/pages/egoGift'
 import { ThemePackList } from '@/pages/themePack'
 import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
-import { THEME_PACK_GEOMETRY } from './lib/cardLayout'
+import { THEME_PACK_GEOMETRY } from '@/shared/cardLayout'
 
 /**
  * Shell component - loads spec, manages filter states.

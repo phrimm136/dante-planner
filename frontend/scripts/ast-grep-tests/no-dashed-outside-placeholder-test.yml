@@ -1,0 +1,7 @@
+id: no-dashed-outside-placeholder
+valid:
+  - "export const EMPTY = { BORDER: 'border-2 border-solid' } as const"
+  - "const cls = 'rounded-lg border'"
+invalid:
+  - "export const EMPTY = { BORDER: 'border-2 border-dashed border-muted-foreground/50' } as const"
+  - "const cls = `border-dashed ${extra}`"

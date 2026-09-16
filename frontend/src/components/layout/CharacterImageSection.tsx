@@ -1,13 +1,26 @@
+import { lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { FallbackImage } from '@/components/ui/FallbackImage'
+import { Skeleton } from '@/components/ui/skeleton'
 import { getButtonSwapImagePath } from '@/shared/assets'
-import { ExpandImageButton } from './ExpandImageButton'
 import { OverlayButton } from './OverlayButton'
 
+/**
+ * The lightbox carries a pan/zoom engine and a dialog, which the placeholder branch and
+ * every skeleton that draws this box would otherwise ship without ever opening it.
+ */
+const ExpandImageButton = lazy(async () => {
+  const module = await import('./ExpandImageButton')
+
+  return { default: module.ExpandImageButton }
+})
+
 interface CharacterImageSectionProps {
-  src: string
-  alt: string
+  /** Omitted → the box is drawn as a placeholder */
+  src?: string | undefined
+  /** Required alongside `src`; unused by the placeholder */
+  alt?: string | undefined
   /** CSS aspect-ratio holding the box open while the image loads. */
   aspectRatio: string
   /** Rendered when `src` fails to load. */
@@ -21,16 +34,26 @@ interface CharacterImageSectionProps {
 /**
  * Character image panel shared by the identity and EGO detail headers:
  * the image itself (with optional fallback) and its overlay buttons.
+ *
+ * Without a `src` it is the placeholder the detail skeletons draw.
  */
 export function CharacterImageSection({
   src,
-  alt,
+  alt = '',
   aspectRatio,
   fallbackSrc,
   onFallback,
   swap,
 }: CharacterImageSectionProps) {
   const { t } = useTranslation()
+
+  if (src === undefined) {
+    return (
+      <div className="relative bg-muted rounded-lg overflow-hidden">
+        <Skeleton className="w-full" style={{ aspectRatio }} />
+      </div>
+    )
+  }
 
   return (
     <div className="relative bg-muted rounded-lg overflow-hidden">
@@ -56,7 +79,9 @@ export function CharacterImageSection({
             iconAlt={t('a11y.swapImage')}
           />
         )}
-        <ExpandImageButton src={src} alt={alt} />
+        <Suspense fallback={null}>
+          <ExpandImageButton src={src} alt={alt} />
+        </Suspense>
       </div>
     </div>
   )

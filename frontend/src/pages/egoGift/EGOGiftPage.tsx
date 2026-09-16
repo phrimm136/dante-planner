@@ -22,7 +22,7 @@ import { IconFilter } from '@/shared/filter'
 import { SearchBar } from '@/shared/filter'
 import { EGOGiftList } from '@/pages/egoGift'
 import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
-import { EGO_GIFT_GEOMETRY } from './lib/cardLayout'
+import { EGO_GIFT_GEOMETRY } from '@/shared/cardLayout'
 
 /** The Yes/No icon filter both boolean gift facets render. */
 function BooleanFilter({

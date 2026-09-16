@@ -48,7 +48,7 @@ describe('ResponsiveCardGrid', () => {
 
   it('leaves rows implicit when it is told to size them from their content', () => {
     const { container } = render(
-      <ResponsiveCardGrid size={BOXED_200} rows="auto">
+      <ResponsiveCardGrid size={BOXED_200} rows="content">
         <span />
       </ResponsiveCardGrid>,
     )

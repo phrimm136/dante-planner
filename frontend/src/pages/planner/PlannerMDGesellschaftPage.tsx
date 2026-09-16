@@ -39,7 +39,7 @@ import { PlannerFilterPane } from './components/plannerList/PlannerFilterPane'
 import { PublishedPlannerList } from './components/plannerList/PublishedPlannerList'
 import { LoadingState } from '@/components/feedback/LoadingState'
 import { PlannerGridSkeleton } from '@/components/feedback/ListPageSkeleton'
-import { PLANNER_GEOMETRY } from './lib/cardLayout'
+import { PLANNER_GEOMETRY } from '@/shared/cardLayout'
 import { CommunityPlansErrorFallback } from '@/components/feedback/CommunityPlansErrorFallback'
 import { SECTION_STYLES } from '@/lib/constants'
 

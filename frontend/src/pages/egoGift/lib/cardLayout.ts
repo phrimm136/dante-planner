@@ -1,11 +1,21 @@
-import type { CardGeometry } from '@/shared/cardLayout'
-import { CARD_MOBILE_SCALE } from '@/lib/constants'
+import { EGO_GIFT_GEOMETRY } from '@/shared/cardLayout'
 
-/** `EGOGiftCard`, which is square. */
-export const EGO_GIFT_GEOMETRY: CardGeometry = {
-  size: { widthPx: 96, heightPx: 96 },
-  mobileScale: CARD_MOBILE_SCALE,
-  rows: 'auto',
+/** The rows the observation selection column shows at and above `sm`. */
+export const OBSERVATION_LIST_ROWS = 3
+
+/** `gap-2` between the column's slots. */
+const OBSERVATION_LIST_GAP_PX = 8
+
+/** `p-4` around the column. */
+const OBSERVATION_LIST_PADDING_PX = 16
+
+/** The column's height: its rows, the gaps between them and its own padding. */
+export function observationListHeightPx(slotHeightPx: number): number {
+  return (
+    OBSERVATION_LIST_ROWS * slotHeightPx +
+    (OBSERVATION_LIST_ROWS - 1) * OBSERVATION_LIST_GAP_PX +
+    2 * OBSERVATION_LIST_PADDING_PX
+  )
 }
 
 /** The EGO gift card root's width, the base every number below is a share of. */

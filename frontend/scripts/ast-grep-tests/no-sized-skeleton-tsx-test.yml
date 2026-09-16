@@ -1,0 +1,14 @@
+id: no-sized-skeleton-tsx
+valid:
+  - "const S = () => <Skeleton className=\"size-full rounded-lg\" />"
+  - "const S = () => <Skeleton className=\"w-full rounded-md\" />"
+  - "const S = () => <Skeleton className=\"w-full aspect-[3/2] rounded-lg\" />"
+  - "const S = () => <Skeleton className=\"w-full\" style={{ minHeight }} />"
+  - "const S = () => <div className=\"w-8 h-8 rounded bg-muted\" />"
+  - "const S = () => <TextSkeleton size=\"xs\" width=\"sm\" />"
+invalid:
+  - "const S = () => <Skeleton className=\"h-8 w-40\" />"
+  - "const S = () => <Skeleton className=\"w-24 h-24 rounded-md\" />"
+  - "const S = () => <Skeleton className=\"h-[178px] w-full\" />"
+  - "const S = () => <Skeleton className=\"size-16\" />"
+  - "const S = () => <Skeleton className={cn('w-full', extra)} />"

@@ -1,8 +1,7 @@
 import type { CSSProperties } from 'react'
 
 import { getEGOGiftOnHoverPath, getEGOGiftSelectHighlightPath } from '@/shared/assets'
-import { aspectOf } from '@/shared/cardLayout'
-import { EGO_GIFT_GEOMETRY } from '../lib/cardLayout'
+import { EGO_GIFT_GEOMETRY, aspectOf } from '@/shared/cardLayout'
 import { cn } from '@/lib/utils'
 import { parseTier } from '../lib/egoGiftTier'
 import { EGO_GIFT_CARD, pct } from '../lib/cardLayout'

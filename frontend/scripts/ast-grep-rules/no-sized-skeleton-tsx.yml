@@ -1,0 +1,25 @@
+id: no-sized-skeleton-tsx
+language: Tsx
+severity: error
+message: A skeleton takes its box from the card slot or the flow, never from its own width/height token. TextSkeleton is the one place a Skeleton is sized.
+files:
+  - src/**/*Skeleton*.tsx
+  - src/pages/planner/components/plannerSkeletons.tsx
+  - src/components/feedback/RoutePendingFallback.tsx
+ignores:
+  - src/components/feedback/TextSkeleton.tsx
+rule:
+  any:
+    - all:
+        - any:
+            - kind: jsx_self_closing_element
+            - kind: jsx_opening_element
+        - has:
+            field: name
+            regex: '^Skeleton$'
+        - has:
+            stopBy: end
+            kind: string
+            regex: '\b(w|h|size)-(\[[0-9]+px\]|[0-9]+\b)'
+    - pattern: <Skeleton className={cn($$$ARGS)} />
+    - pattern: <Skeleton className={cn($$$ARGS)} $$$REST />

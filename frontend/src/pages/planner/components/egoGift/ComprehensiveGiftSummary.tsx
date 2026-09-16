@@ -2,15 +2,15 @@ import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { decodeAndOrderGiftSelections } from '@/pages/egoGift'
-import { CARD_MOBILE_SCALE, EMPTY_STATE } from '@/lib/constants'
-import { EGO_GIFT_GEOMETRY } from '@/pages/egoGift'
-import { cn } from '@/lib/utils'
+import { CARD_MOBILE_SCALE } from '@/lib/constants'
+import { EmptyStatePlaceholder } from '@/components/feedback/EmptyStatePlaceholder'
+import { GIFT_ROW_PADDING_PX, giftRowMinHeightPx } from '../../lib/cardLayout'
 import type { EGOGiftListItem } from '@/pages/egoGift'
 import type { EncodedGiftId, EnhancementLevel } from '@/shared/gameData'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import { PlannerSection } from '@/components/layout/PlannerSection'
-import { CardSlot } from '@/shared/cardLayout'
+import { CardSlot, EGO_GIFT_GEOMETRY, useSlotSizePx } from '@/shared/cardLayout'
 import { EGOGiftCard } from '@/pages/egoGift'
 import { EGOGiftTooltip } from '@/pages/egoGift'
 
@@ -71,6 +71,8 @@ export function ComprehensiveGiftSummary({
   const i18n = useEGOGiftListI18n()
 
   const mobileScale = CARD_MOBILE_SCALE
+  const { heightPx: giftSlotHeightPx } = useSlotSizePx(EGO_GIFT_GEOMETRY.size, mobileScale)
+  const minHeight = giftRowMinHeightPx(giftSlotHeightPx)
 
   const selectedGifts = decodeAndOrderGiftSelections(selectedGiftIds, spec, i18n, 'tier-first')
 
@@ -89,7 +91,7 @@ export function ComprehensiveGiftSummary({
         className="selectable w-full text-left cursor-pointer"
       >
         {hasSelectedGifts ? (
-          <div className="flex flex-wrap gap-2 p-2 min-h-28">
+          <div className="flex flex-wrap gap-2" style={{ padding: GIFT_ROW_PADDING_PX, minHeight }}>
             {selectedGifts.map(({ item, enhancement }) => (
               <SummaryGiftItem
                 key={item.id}
@@ -100,16 +102,11 @@ export function ComprehensiveGiftSummary({
             ))}
           </div>
         ) : (
-          <div
-            className={cn(
-              'flex items-center justify-center p-4 text-muted-foreground',
-              EMPTY_STATE.MIN_HEIGHT,
-              EMPTY_STATE.DASHED_BORDER,
-            )}
-          >
-            <span className="text-sm text-center">
-              {t('pages.plannerMD.selectComprehensiveEgoGifts')}
-            </span>
+          <div className="flex" style={{ minHeight }}>
+            <EmptyStatePlaceholder
+              label={t('pages.plannerMD.selectComprehensiveEgoGifts')}
+              className="flex-1"
+            />
           </div>
         )}
       </button>

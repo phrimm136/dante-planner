@@ -1,5 +1,9 @@
 import { DetailPageSkeleton } from '@/components/feedback/DetailPageSkeleton'
+import { TextSkeleton } from '@/components/feedback/TextSkeleton'
+import { LabeledPanel } from '@/components/layout/LabeledPanel'
+import { CardSlot } from '@/shared/cardLayout'
 import { Skeleton } from '@/components/ui/skeleton'
+import { KEYWORD_GEOMETRY } from '../lib/cardLayout'
 
 /**
  * Keyword detail: Icon + name + backlinks panel (left)
@@ -10,40 +14,34 @@ export function KeywordDetailSkeleton() {
     <DetailPageSkeleton
       left={
         <div className="space-y-4">
-          {/* Header: icon + name */}
           <div className="flex gap-4 items-center">
-            <Skeleton className="w-24 h-24 rounded-lg" />
-            <Skeleton className="h-8 w-32" />
+            <CardSlot size={KEYWORD_GEOMETRY.size} mobileScale={1}>
+              <Skeleton className="size-full rounded-md" />
+            </CardSlot>
+            <TextSkeleton size="2xl" width="md" />
           </div>
-          {/* Backlinks panel */}
-          <div className="border rounded p-4 space-y-4">
+          <LabeledPanel>
             <div className="space-y-1.5">
-              <Skeleton className="h-4 w-28" />
-              <Skeleton className="h-4 w-48" />
-              <Skeleton className="h-4 w-40" />
+              <TextSkeleton size="xs" width="sm" />
+              <TextSkeleton width="lg" />
             </div>
             <div className="space-y-1.5">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-4 w-44" />
+              <TextSkeleton size="xs" width="sm" />
+              <TextSkeleton width="lg" />
             </div>
             <div className="space-y-1.5">
-              <Skeleton className="h-4 w-32" />
-              <Skeleton className="h-4 w-36" />
+              <TextSkeleton size="xs" width="sm" />
+              <TextSkeleton width="lg" />
             </div>
-          </div>
+          </LabeledPanel>
         </div>
       }
       right={
         <div className="space-y-4">
-          {/* Description panel */}
-          <div className="border rounded p-4 space-y-3">
-            <Skeleton className="h-6 w-28" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-2/3" />
-          </div>
+          <LabeledPanel>
+            <TextSkeleton size="lg" width="sm" />
+            <TextSkeleton lines={4} width="full" />
+          </LabeledPanel>
         </div>
       }
     />

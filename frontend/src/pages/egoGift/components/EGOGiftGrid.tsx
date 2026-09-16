@@ -3,8 +3,7 @@ import { Link } from '@tanstack/react-router'
 
 import { Skeleton } from '@/components/ui/skeleton'
 import { CARD_MOBILE_SCALE_NONE, SECTION_STYLES } from '@/lib/constants'
-import { EGO_GIFT_GEOMETRY } from '../lib/cardLayout'
-import { CardSlot } from '@/shared/cardLayout'
+import { CardSlot, EGO_GIFT_GEOMETRY } from '@/shared/cardLayout'
 
 import { toEGOGiftCardProps } from '../lib/egoGiftCardProps'
 import type { EGOGiftSpec } from '../types/EGOGiftTypes'
@@ -49,7 +48,7 @@ export function EGOGiftGrid({
               <div className="flex flex-col items-center gap-1">
                 {card}
                 <span className={NAME_CLASS}>
-                  <Suspense fallback={<Skeleton className="h-5 w-full bg-foreground" />}>
+                  <Suspense fallback={<Skeleton className="h-5 w-full" />}>
                     <EGOGiftName id={id} />
                   </Suspense>
                 </span>

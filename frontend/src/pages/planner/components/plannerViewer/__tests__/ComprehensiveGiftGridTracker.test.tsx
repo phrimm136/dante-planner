@@ -103,11 +103,25 @@ describe('ComprehensiveGiftGridTracker', () => {
       expect(container.querySelector('[data-testid^="gift-card-"]')).toBeNull()
     })
 
-    // The populated grid reserves a fixed scroll height. The Suspense skeleton in
-    // GuideModeViewer / TrackerModeViewer hardcodes the same md:h-[178px]
-    // lg:h-[416px] so the section does not jump when the grid resolves. If this
-    // height changes, those two skeletons must change with it.
-    it('reserves the fixed scroll height that the Suspense skeleton mirrors', () => {
+    // The grid takes the box its caller gives it: a `height` from guide mode, and
+    // otherwise the height of the column it is stretched inside.
+    it('takes the caller height when one is given', () => {
+      const { container } = render(
+        <ComprehensiveGiftGridTracker
+          floorSelections={[buildFloorSelection({ giftIds: [ENCODED_9001] })]}
+          comprehensiveGiftIds={[ENCODED_9001]}
+          hoveredThemePackId={null}
+          height={416}
+        />,
+        { wrapper: createWrapper() },
+      )
+
+      const scrollArea = container.querySelector<HTMLElement>('[data-slot="scroll-area"]')
+      expect(scrollArea?.style.height).toBe('416px')
+      expect(scrollArea?.className).not.toContain('flex-1')
+    })
+
+    it('stretches to its column when no height is given', () => {
       const { container } = render(
         <ComprehensiveGiftGridTracker
           floorSelections={[buildFloorSelection({ giftIds: [ENCODED_9001] })]}
@@ -117,8 +131,10 @@ describe('ComprehensiveGiftGridTracker', () => {
         { wrapper: createWrapper() },
       )
 
-      expect(container.innerHTML).toContain('md:h-[178px]')
-      expect(container.innerHTML).toContain('lg:h-[416px]')
+      const scrollArea = container.querySelector<HTMLElement>('[data-slot="scroll-area"]')
+      expect(scrollArea?.style.height).toBe('')
+      expect(scrollArea?.className).toContain('flex-1')
+      expect(scrollArea?.className).toContain('min-h-0')
     })
   })
 

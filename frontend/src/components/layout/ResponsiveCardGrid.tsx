@@ -5,7 +5,7 @@ import { useSlotSizePx, type GridRowHeight, type CardSizePx } from '@/shared/car
 interface ResponsiveCardGridProps {
   /** The card's box */
   size: CardSizePx
-  /** Whether rows take the card's box or their own content (default: 'card') */
+  /** Whether rows take the card's box or their own content (default: 'slot') */
   rows?: GridRowHeight
   /** Gap between cards in pixels (default: CARD_GAP_PX = 16px) */
   gap?: number
@@ -39,7 +39,7 @@ interface ResponsiveCardGridProps {
  */
 export function ResponsiveCardGrid({
   size,
-  rows = 'card',
+  rows = 'slot',
   gap = CARD_GAP_PX,
   children,
   className,
@@ -52,7 +52,7 @@ export function ResponsiveCardGrid({
     gridTemplateColumns: `repeat(auto-fill, ${String(columnWidthPx)}px)`,
     gap: `${String(gap)}px`,
     justifyContent: 'center',
-    ...(rows === 'card' && {
+    ...(rows === 'slot' && {
       gridAutoRows: `${String(rowHeightPx)}px`,
     }),
   }

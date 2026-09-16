@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react'
 import {
   aspectOf,
   createAdvanceMeasure,
+  IDENTITY_GEOMETRY,
   layerStyle,
   levelShadow,
   pctStyle,
@@ -13,17 +14,8 @@ import {
   type FontTableLanguage,
   type PctRect,
   type TrackingSpec,
-  type CardGeometry,
   type Underlay,
 } from '@/shared/cardLayout'
-import { CARD_MOBILE_SCALE } from '@/lib/constants'
-
-/** `IdentityCard`. */
-export const IDENTITY_GEOMETRY: CardGeometry = {
-  size: { widthPx: 160, heightPx: 232 },
-  mobileScale: CARD_MOBILE_SCALE,
-  rows: 'card',
-}
 
 /** A block anchored to its ancestor's bottom edge, sized by its own content. */
 interface PctBottomBlock {

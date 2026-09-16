@@ -3,7 +3,7 @@ import { Link, useSearch } from '@tanstack/react-router'
 import { useMDGesellschaftData } from '../../hooks/useMDGesellschaftData'
 import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
 import { PROGRESSIVE_REVEAL } from '@/lib/constants'
-import { PLANNER_GEOMETRY } from '../../lib/cardLayout'
+import { PLANNER_GEOMETRY } from '@/shared/cardLayout'
 
 import { PublishedPlannerCard } from './PublishedPlannerCard'
 import { PlannerListPagination } from './PlannerListPagination'
@@ -79,7 +79,7 @@ export function PublishedPlannerList({
 
   return (
     <>
-      <ResponsiveCardGrid size={PLANNER_GEOMETRY.size} rows="auto">
+      <ResponsiveCardGrid size={PLANNER_GEOMETRY.size} rows="content">
         {data.content.slice(0, displayCount).map((planner) => (
           <Link
             key={planner.id}

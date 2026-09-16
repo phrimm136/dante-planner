@@ -4,57 +4,69 @@ import {
   CARD_MOBILE_SCALE_NONE,
   MD_ACCENT_COLORS,
 } from '@/lib/constants'
-import { aspectOf, type CardGeometry } from '@/shared/cardLayout'
-import { IDENTITY_GEOMETRY } from '@/pages/identity'
-import { EGO_GIFT_GEOMETRY } from '@/pages/egoGift'
-
-/** `PlannerCard`. */
-export const PLANNER_GEOMETRY: CardGeometry = {
-  size: { widthPx: 280, heightPx: 160 },
-  mobileScale: CARD_MOBILE_SCALE_NONE,
-  rows: 'auto',
-}
+import {
+  EGO_GIFT_GEOMETRY,
+  IDENTITY_GEOMETRY,
+  aspectOf,
+  type CardGeometry,
+} from '@/shared/cardLayout'
 
 /** Start-gift keyword icon, which is square. */
 export const KEYWORD_ICON_GEOMETRY: CardGeometry = {
   size: { widthPx: 64, heightPx: 64 },
   mobileScale: CARD_MOBILE_SCALE,
-  rows: 'card',
+  rows: 'slot',
 }
 
 /** `CompactIdentityRow` cell: square portrait over a skill row. */
 export const COMPACT_IDENTITY_GEOMETRY: CardGeometry = {
   size: { widthPx: 96, heightPx: 128 },
   mobileScale: CARD_MOBILE_SCALE_NONE,
-  rows: 'card',
+  rows: 'slot',
 }
 
 /** `SinnerSkillCard`: padding + portrait + skill row. */
 export const SINNER_SKILL_GEOMETRY: CardGeometry = {
   size: { widthPx: 112, heightPx: 144 },
   mobileScale: CARD_MOBILE_SCALE,
-  rows: 'card',
+  rows: 'slot',
 }
 
 /** `SkillImageSimple`, which is square. */
 export const SKILL_IMAGE_GEOMETRY: CardGeometry = {
   size: { widthPx: 128, heightPx: 128 },
   mobileScale: CARD_MOBILE_SCALE,
-  rows: 'card',
+  rows: 'slot',
 }
 
 /** `SkillExchangePane`: two skill images either side of an arrow, inside its border. */
 export const SKILL_EXCHANGE_GEOMETRY: CardGeometry = {
   size: { widthPx: 356, heightPx: 148 },
   mobileScale: CARD_MOBILE_SCALE,
-  rows: 'card',
+  rows: 'slot',
 }
 
 /** `StartBuffCard`'s pane. */
 export const START_BUFF_GEOMETRY: CardGeometry = {
   size: { widthPx: 272, heightPx: 320 },
   mobileScale: CARD_MOBILE_SCALE_DENSE,
-  rows: 'card',
+  rows: 'slot',
+}
+
+/** The padding around a gift row, in pixels of the desktop grid (`p-2`). */
+export const GIFT_ROW_PADDING_PX = 8
+
+/** The height a gift row keeps whether or not it holds a card. */
+export function giftRowMinHeightPx(slotHeightPx: number): number {
+  return slotHeightPx + 2 * GIFT_ROW_PADDING_PX
+}
+
+/** The rows the standalone comprehensive gift grid shows, by breakpoint. */
+export const GIFT_GRID_ROWS = { md: 2, lg: 4 } as const
+
+/** The height of a gift grid of `rows` rows (`gap-2`, `p-2`). */
+export function giftGridHeightPx(rows: number, slotHeightPx: number): number {
+  return rows * slotHeightPx + (rows - 1) * GIFT_ROW_PADDING_PX + 2 * GIFT_ROW_PADDING_PX
 }
 
 /** A pixel length on a card `base` wide, as a share of that card's root. */
@@ -137,7 +149,7 @@ export const DECK_CARD = {
 export const SINNER_DECK_GEOMETRY: CardGeometry = {
   size: { widthPx: 160, heightPx: 304 },
   mobileScale: CARD_MOBILE_SCALE,
-  rows: 'card',
+  rows: 'slot',
 }
 
 /** `CompactIdentityRow`: a square portrait over a skill row. */

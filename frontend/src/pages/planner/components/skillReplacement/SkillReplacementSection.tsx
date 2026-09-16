@@ -1,16 +1,14 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useIsBreakpoint } from '@/components/hooks/use-is-breakpoint'
 import { PlannerSection } from '@/components/layout/PlannerSection'
 import { SinnerSkillCard } from './SinnerSkillCard'
 import { SkillExchangeModal } from './SkillExchangeModal'
 import { useIdentityListSpec } from '@/pages/identity'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
-import { CardSlot, useSlotSizePx } from '@/shared/cardLayout'
+import { CardSlot } from '@/shared/cardLayout'
 import { SINNERS, DEFAULT_SKILL_EA } from '@/shared/gameData'
-import { CARD_MOBILE_SCALE, SM_BREAKPOINT_PX } from '@/lib/constants'
 import { SINNER_SKILL_GEOMETRY } from '../../lib/cardLayout'
-import { SKILL_REPLACEMENT_COLUMNS, SKILL_REPLACEMENT_GRID_GAP } from '../../lib/cardLayout'
+import { useSkillReplacementLayout } from '../../hooks/useSkillReplacementLayout'
 import type { IdentityId, OffensiveSkillSlot } from '@/shared/gameData'
 import type { SinnerEquipment, SkillEAState, SkillInfo } from '../../types/DeckTypes'
 
@@ -47,15 +45,7 @@ export function SkillReplacementSection({
   // Modal state
   const [selectedSinner, setSelectedSinner] = useState<string | null>(null)
 
-  const isSm = useIsBreakpoint('min', SM_BREAKPOINT_PX)
-
-  const mobileScale = CARD_MOBILE_SCALE
-  const { widthPx: columnWidth, heightPx: rowHeight } = useSlotSizePx(
-    SINNER_SKILL_GEOMETRY.size,
-    mobileScale,
-  )
-
-  const columnCount = isSm ? SKILL_REPLACEMENT_COLUMNS.wide : SKILL_REPLACEMENT_COLUMNS.narrow
+  const { gridStyle, mobileScale } = useSkillReplacementLayout()
 
   // Get skill infos for a sinner's equipped identity from spec data
   const getSkillInfos = (identityId: IdentityId): [SkillInfo, SkillInfo, SkillInfo] => {
@@ -115,15 +105,7 @@ export function SkillReplacementSection({
       {...(onViewNotes !== undefined && { onViewNotes })}
     >
       {/* Sinner Grid - Responsive: 6->4->3->2 columns */}
-      <div
-        className="grid mx-auto"
-        style={{
-          gridTemplateColumns: `repeat(${String(columnCount)}, ${String(columnWidth)}px)`,
-          gridAutoRows: `${String(rowHeight)}px`,
-          gap: `${String(SKILL_REPLACEMENT_GRID_GAP)}px`,
-          justifyContent: 'center',
-        }}
-      >
+      <div className="grid mx-auto" style={gridStyle}>
         {SINNERS.map((_, index) => {
           const sinnerCode = String(index + 1)
           const sinnerEquipment = equipment[sinnerCode]

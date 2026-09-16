@@ -1,14 +1,14 @@
 import { useTranslation } from 'react-i18next'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
-import { CardSlot } from '@/shared/cardLayout'
+import { CardSlot, EGO_GIFT_GEOMETRY } from '@/shared/cardLayout'
 import { EGOGiftCard } from '@/pages/egoGift'
 import { EGOGiftTooltip } from '@/pages/egoGift'
 import { decodeAndOrderGiftSelections } from '@/pages/egoGift'
 import { CARD_MOBILE_SCALE } from '@/lib/constants'
-import { EGO_GIFT_GEOMETRY } from '@/pages/egoGift'
 import type { EGOGiftListItem } from '@/pages/egoGift'
 import type { EncodedGiftId, EnhancementLevel } from '@/shared/gameData'
 import { cn } from '@/lib/utils'
+import { EmptyStatePlaceholder } from '@/components/feedback/EmptyStatePlaceholder'
 
 interface FloorGiftViewerProps {
   selectedGiftIds: Set<EncodedGiftId>
@@ -58,24 +58,16 @@ export function FloorGiftViewer({
   // Empty state
   if (selectedGifts.length === 0) {
     return (
-      <button
-        type="button"
-        onClick={readOnly ? undefined : onClick}
-        disabled={readOnly}
-        aria-label={t('pages.plannerMD.selectFloorEgoGifts')}
-        className={cn(
-          'w-full h-full p-4 rounded-lg border-2 border-dashed border-muted-foreground/50',
-          'flex items-center justify-center',
-          !readOnly && 'selectable',
-          className,
-        )}
-      >
-        <span className="text-sm text-muted-foreground text-center">
-          {readOnly
+      <EmptyStatePlaceholder
+        label={
+          readOnly
             ? t('pages.plannerMD.emptyState.noFloorGifts')
-            : t('pages.plannerMD.selectFloorEgoGifts')}
-        </span>
-      </button>
+            : t('pages.plannerMD.selectFloorEgoGifts')
+        }
+        onClick={onClick}
+        readOnly={readOnly}
+        className="w-full h-full"
+      />
     )
   }
 

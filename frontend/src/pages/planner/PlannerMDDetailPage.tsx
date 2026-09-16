@@ -2,7 +2,6 @@ import { Suspense } from 'react'
 import { Link, useNavigate, useParams } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorBoundary } from '@/components/feedback/ErrorBoundary'
 import { PlannerNotFound } from '@/components/feedback/PlannerNotFound'
 import { PlannerViewer } from './components/plannerViewer/PlannerViewer'
@@ -11,7 +10,8 @@ import { PersonalPlannerList } from './components/plannerList/PersonalPlannerLis
 import { MDPlannerToolbar } from './components/plannerList/MDPlannerToolbar'
 import { PlannerListFilterPills } from './components/plannerList/PlannerListFilterPills'
 import { PlannerGridSkeleton } from '@/components/feedback/ListPageSkeleton'
-import { PLANNER_GEOMETRY } from './lib/cardLayout'
+import { PlannerViewerSkeleton } from './components/plannerSkeletons'
+import { PLANNER_GEOMETRY } from '@/shared/cardLayout'
 import { useSavedPlannerQuery } from './hooks/useSavedPlannerQuery'
 import { isMDPlanner } from './types/PlannerTypes'
 import { useAuthQuery } from '@/shared/auth'
@@ -28,21 +28,7 @@ export default function PlannerMDDetailPage() {
   return (
     <ErrorBoundary>
       <div className={SECTION_STYLES.LAYOUT.page}>
-        <Suspense
-          fallback={
-            <div className="space-y-6">
-              <div className={SECTION_STYLES.LAYOUT.rowBetween}>
-                <Skeleton className="h-10 w-64" />
-                <Skeleton className="h-10 w-32" />
-              </div>
-              <div className="bg-background rounded-lg p-6 space-y-4">
-                <Skeleton className="h-64 w-full" />
-                <Skeleton className="h-48 w-full" />
-                <Skeleton className="h-96 w-full" />
-              </div>
-            </div>
-          }
-        >
+        <Suspense fallback={<PlannerViewerSkeleton />}>
           <PlannerDetailContent plannerId={id} />
         </Suspense>
       </div>

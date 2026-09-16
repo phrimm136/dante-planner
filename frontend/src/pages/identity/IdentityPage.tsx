@@ -21,7 +21,7 @@ import { UnitKeywordDropdown } from '@/shared/filter'
 import { BattleKeywordDropdown } from '@/shared/filter'
 import { SearchBar } from '@/shared/filter'
 import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
-import { IDENTITY_GEOMETRY } from './lib/cardLayout'
+import { IDENTITY_GEOMETRY } from '@/shared/cardLayout'
 import { buildFacetCounts } from './lib/identityFacetCounts'
 
 /**

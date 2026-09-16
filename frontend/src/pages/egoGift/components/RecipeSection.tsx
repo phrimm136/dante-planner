@@ -13,9 +13,8 @@ import { Suspense } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 
-import { CardSlot } from '@/shared/cardLayout'
+import { CardSlot, EGO_GIFT_GEOMETRY } from '@/shared/cardLayout'
 import { CARD_MOBILE_SCALE_NONE } from '@/lib/constants'
-import { EGO_GIFT_GEOMETRY } from '../lib/cardLayout'
 import { EGOGiftCard } from './EGOGiftCard'
 import { EGOGiftName } from './EGOGiftName'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -46,7 +45,7 @@ function IngredientCard({ gift }: { gift: EGOGiftListItem }) {
           <EGOGiftCard gift={gift} enhancement={0} enableHoverHighlight />
         </CardSlot>
         <span className="text-xs text-center text-foreground line-clamp-2 w-24 leading-tight font-medium">
-          <Suspense fallback={<Skeleton className="h-5 w-20 bg-foreground" />}>
+          <Suspense fallback={<Skeleton className="h-5 w-20" />}>
             <EGOGiftName id={gift.id} />
           </Suspense>
         </span>

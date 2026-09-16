@@ -1,13 +1,13 @@
 import { Skeleton } from '@/components/ui/skeleton'
-import { SECTION_STYLES } from '@/lib/constants'
+import { TextSkeleton } from '@/components/feedback/TextSkeleton'
+import { CARD_GAP_PX, SECTION_STYLES } from '@/lib/constants'
 import { useSlotSizePx, type CardGeometry } from '@/shared/cardLayout'
+import { useViewportFillCount } from '@/components/hooks/useViewportFillCount'
 import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
 
 interface ListPageSkeletonProps {
   /** The card's sizing, which the placeholder boxes take */
   geometry: CardGeometry
-  /** Number of skeleton cards */
-  cardCount?: number
   /** Number of filter section skeletons in sidebar */
   filterCount?: number
 }
@@ -21,13 +21,11 @@ interface ListPageSkeletonProps {
  *
  * Shows pulsing skeleton for filter sections and card grid.
  */
-export function ListPageSkeleton({
-  geometry,
-  cardCount = 12,
-  filterCount = 5,
-}: ListPageSkeletonProps) {
+export function ListPageSkeleton({ geometry, filterCount = 5 }: ListPageSkeletonProps) {
   const { size, mobileScale } = geometry
-  const { widthPx, heightPx } = useSlotSizePx(size, mobileScale)
+  const slotSize = useSlotSizePx(size, mobileScale)
+  const { widthPx, heightPx } = slotSize
+  const cardCount = useViewportFillCount(slotSize, CARD_GAP_PX)
 
   return (
     <div data-slot="page-skeleton" className="flex flex-col lg:flex-row gap-6">
@@ -37,14 +35,16 @@ export function ListPageSkeleton({
           {/* Filter section skeletons */}
           {Array.from({ length: filterCount }).map((_, i) => (
             <div key={i} className="space-y-2">
-              <Skeleton className="h-5 w-24" /> {/* Section title */}
-              <Skeleton className="h-10 w-full rounded-md" /> {/* Filter content */}
+              {/* FilterSection's text-xs title */}
+              <TextSkeleton size="xs" width="sm" />
+              {/* FilterSectionList's dropdown fallback box */}
+              <div className="h-10 w-full rounded-md bg-muted" />
             </div>
           ))}
-          {/* Search bar inside sidebar */}
-          <Skeleton className="h-10 w-full rounded-md" />
-          {/* Reset button */}
-          <Skeleton className="h-9 w-full rounded-md" />
+          {/* SearchBar, which is h-14 */}
+          <div className="h-14 w-full rounded-md bg-muted" />
+          {/* Reset All, a size="sm" Button */}
+          <div className="h-8 w-full rounded-md bg-muted" />
         </div>
       </aside>
 
@@ -53,17 +53,17 @@ export function ListPageSkeleton({
         <div className="rounded-lg border bg-card p-3 space-y-1">
           {/* Primary filter sections */}
           <div className="space-y-2">
-            <Skeleton className="h-5 w-20" />
-            <Skeleton className="h-10 w-full rounded-md" />
+            <TextSkeleton size="xs" width="sm" />
+            <div className="h-10 w-full rounded-md bg-muted" />
           </div>
           <div className="space-y-2">
-            <Skeleton className="h-5 w-20" />
-            <Skeleton className="h-10 w-full rounded-md" />
+            <TextSkeleton size="xs" width="sm" />
+            <div className="h-10 w-full rounded-md bg-muted" />
           </div>
-          {/* Search bar */}
-          <Skeleton className="h-10 w-full rounded-md" />
-          {/* Reset button */}
-          <Skeleton className="h-9 w-full rounded-md" />
+          {/* SearchBar, which is h-14 */}
+          <div className="h-14 w-full rounded-md bg-muted" />
+          {/* Reset All, a size="sm" Button */}
+          <div className="h-8 w-full rounded-md bg-muted" />
         </div>
       </div>
 
@@ -97,8 +97,6 @@ export function ListPageSkeleton({
 interface PlannerGridSkeletonProps {
   /** The card's sizing, which the placeholder boxes take */
   geometry: CardGeometry
-  /** Number of skeleton cards */
-  cardCount?: number
 }
 
 /**
@@ -107,9 +105,11 @@ interface PlannerGridSkeletonProps {
  * Simpler than ListPageSkeleton - just the card grid, no sidebar.
  * Used inside planner page content where toolbar/filters are already rendered.
  */
-export function PlannerGridSkeleton({ geometry, cardCount = 8 }: PlannerGridSkeletonProps) {
+export function PlannerGridSkeleton({ geometry }: PlannerGridSkeletonProps) {
   const { size, mobileScale } = geometry
-  const { widthPx, heightPx } = useSlotSizePx(size, mobileScale)
+  const slotSize = useSlotSizePx(size, mobileScale)
+  const { widthPx, heightPx } = slotSize
+  const cardCount = useViewportFillCount(slotSize, CARD_GAP_PX)
 
   return (
     <ResponsiveCardGrid size={size}>

@@ -28,6 +28,29 @@ import { syncTitleOnLanguageChange } from '@/lib/routerTitle'
 import { RouteErrorComponent } from '@/components/feedback/RouteErrorComponent'
 import { RoutePendingFallback } from '@/components/feedback/RoutePendingFallback'
 
+// Each listed route's pending component is that page's own skeleton, so one shape spans
+// the chunk fetch and the data read instead of a generic block giving way to a second
+// skeleton. `router.tsx` is the one module allowed to reach past a slice's public API.
+import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
+import { IdentityDetailSkeleton } from '@/pages/identity/components/IdentityDetailSkeleton'
+import { EGO_GIFT_GEOMETRY, IDENTITY_GEOMETRY, THEME_PACK_GEOMETRY } from '@/shared/cardLayout'
+import { EGODetailSkeleton } from '@/pages/ego/components/EGODetailSkeleton'
+import { EGOListSkeleton } from '@/pages/ego/components/EGOListSkeleton'
+import { EGOGiftDetailSkeleton } from '@/pages/egoGift/components/EGOGiftDetailSkeleton'
+import { ThemePackDetailSkeleton } from '@/pages/themePack/components/ThemePackDetailSkeleton'
+import { AbEventDetailSkeleton } from '@/pages/abEvent/components/AbEventDetailSkeleton'
+import { AB_EVENT_GEOMETRY } from '@/pages/abEvent/lib/cardLayout'
+import { KeywordDetailSkeleton } from '@/pages/keyword/components/KeywordDetailSkeleton'
+import { KEYWORD_GEOMETRY } from '@/pages/keyword/lib/cardLayout'
+import {
+  DeckBuilderPageSkeleton,
+  PlannerMDNewPageSkeleton,
+  PlannerMDPageSkeleton,
+  PlannerViewerSkeleton,
+} from '@/pages/planner/components/plannerSkeletons'
+import { SettingsPageSkeleton } from '@/pages/settings/components/SettingsPageSkeleton'
+import { SECTION_STYLES } from '@/lib/constants'
+
 // NotFoundPage is eagerly loaded as it's used as the default 404 component
 import NotFoundPage from '@/components/feedback/NotFoundPage'
 
@@ -142,6 +165,7 @@ const plannerMDRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md',
   component: lazyRouteComponent(() => import('@/pages/planner/PlannerMDPage')),
+  pendingComponent: PlannerMDPageSkeleton,
   validateSearch: zodValidator(mdUserSearchSchema),
   search: {
     middlewares: [stripSearchParams(mdUserDefaults)],
@@ -156,6 +180,7 @@ const plannerMDGesellschaftRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/gesellschaft',
   component: lazyRouteComponent(() => import('@/pages/planner/PlannerMDGesellschaftPage')),
+  pendingComponent: PlannerMDPageSkeleton,
   validateSearch: zodValidator(mdGesellschaftSearchSchema),
   search: {
     middlewares: [stripSearchParams(mdGesellschaftDefaults)],
@@ -170,6 +195,11 @@ const plannerMDGesellschaftDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/gesellschaft/$id',
   component: lazyRouteComponent(() => import('@/pages/planner/PlannerMDGesellschaftDetailPage')),
+  pendingComponent: () => (
+    <div className={SECTION_STYLES.LAYOUT.page}>
+      <PlannerViewerSkeleton />
+    </div>
+  ),
   validateSearch: zodValidator(mdGesellschaftSearchSchema),
   search: {
     middlewares: [stripSearchParams(mdGesellschaftDefaults)],
@@ -183,6 +213,7 @@ const plannerMDNewRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/new',
   component: lazyRouteComponent(() => import('@/pages/planner/PlannerMDNewPage')),
+  pendingComponent: PlannerMDNewPageSkeleton,
   head: () => ({
     meta: [{ title: pageTitle('pages.plannerMD.newPlan', 'planner') }],
   }),
@@ -193,6 +224,7 @@ const deckBuilderRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/deck',
   component: lazyRouteComponent(() => import('@/pages/planner/DeckBuilderPage')),
+  pendingComponent: DeckBuilderPageSkeleton,
   head: () => ({
     meta: [{ title: pageTitle('header.nav.deckBuilder') }],
   }),
@@ -203,6 +235,11 @@ const plannerMDDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/$id',
   component: lazyRouteComponent(() => import('@/pages/planner/PlannerMDDetailPage')),
+  pendingComponent: () => (
+    <div className={SECTION_STYLES.LAYOUT.page}>
+      <PlannerViewerSkeleton />
+    </div>
+  ),
   validateSearch: zodValidator(mdUserSearchSchema),
   search: {
     middlewares: [stripSearchParams(mdUserDefaults)],
@@ -216,6 +253,11 @@ const plannerMDEditRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/$id/edit',
   component: lazyRouteComponent(() => import('@/pages/planner/PlannerMDEditPage')),
+  pendingComponent: () => (
+    <div className={SECTION_STYLES.LAYOUT.page}>
+      <PlannerViewerSkeleton />
+    </div>
+  ),
   loader: loadPlannerTitleRoute,
   head: ({ loaderData }) => ({
     meta: [
@@ -241,6 +283,11 @@ const identityRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/identity',
   component: lazyRouteComponent(() => import('@/pages/identity/IdentityPage')),
+  pendingComponent: () => (
+    <div className={SECTION_STYLES.LAYOUT.page}>
+      <ListPageSkeleton geometry={IDENTITY_GEOMETRY} />
+    </div>
+  ),
 
   head: () => ({
     meta: [{ title: pageTitle('header.nav.identity') }],
@@ -252,6 +299,7 @@ const identityDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/identity/$id',
   component: lazyRouteComponent(() => import('@/pages/identity/IdentityDetailPage')),
+  pendingComponent: IdentityDetailSkeleton,
 
   loader: loadIdentityName,
   head: ({ loaderData }) => detailHead(loaderData?.name, 'Identity'),
@@ -262,6 +310,11 @@ const egoRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ego',
   component: lazyRouteComponent(() => import('@/pages/ego/EGOPage')),
+  pendingComponent: () => (
+    <div className={SECTION_STYLES.LAYOUT.page}>
+      <EGOListSkeleton />
+    </div>
+  ),
 
   head: () => ({
     meta: [{ title: pageTitle('header.nav.ego') }],
@@ -273,6 +326,7 @@ const egoDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ego/$id',
   component: lazyRouteComponent(() => import('@/pages/ego/EGODetailPage')),
+  pendingComponent: EGODetailSkeleton,
 
   loader: loadEgoName,
   head: ({ loaderData }) => detailHead(loaderData?.name, 'EGO'),
@@ -283,6 +337,11 @@ const egoGiftRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ego-gift',
   component: lazyRouteComponent(() => import('@/pages/egoGift/EGOGiftPage')),
+  pendingComponent: () => (
+    <div className={SECTION_STYLES.LAYOUT.page}>
+      <ListPageSkeleton geometry={EGO_GIFT_GEOMETRY} />
+    </div>
+  ),
 
   head: () => ({
     meta: [{ title: pageTitle('header.nav.egoGift') }],
@@ -294,6 +353,7 @@ const egoGiftDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ego-gift/$id',
   component: lazyRouteComponent(() => import('@/pages/egoGift/EGOGiftDetailPage')),
+  pendingComponent: EGOGiftDetailSkeleton,
 
   loader: loadEgoGiftName,
   head: ({ loaderData }) => detailHead(loaderData?.name, 'EGO Gift'),
@@ -304,6 +364,11 @@ const themePackRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/theme-pack',
   component: lazyRouteComponent(() => import('@/pages/themePack/ThemePackPage')),
+  pendingComponent: () => (
+    <div className={SECTION_STYLES.LAYOUT.page}>
+      <ListPageSkeleton geometry={THEME_PACK_GEOMETRY} />
+    </div>
+  ),
   head: () => ({
     meta: [{ title: pageTitle('header.nav.themePack') }],
   }),
@@ -314,6 +379,7 @@ const themePackDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/theme-pack/$id',
   component: lazyRouteComponent(() => import('@/pages/themePack/ThemePackDetailPage')),
+  pendingComponent: ThemePackDetailSkeleton,
   loader: loadThemePackName,
   head: ({ loaderData }) => detailHead(loaderData?.name, 'Theme Pack'),
 })
@@ -323,6 +389,11 @@ const abEventRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ab-event',
   component: lazyRouteComponent(() => import('@/pages/abEvent/AbEventPage')),
+  pendingComponent: () => (
+    <div className={SECTION_STYLES.LAYOUT.page}>
+      <ListPageSkeleton geometry={AB_EVENT_GEOMETRY} />
+    </div>
+  ),
   head: () => ({
     meta: [{ title: pageTitle('header.nav.abEvent') }],
   }),
@@ -333,6 +404,7 @@ const abEventDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ab-event/$id',
   component: lazyRouteComponent(() => import('@/pages/abEvent/AbEventDetailPage')),
+  pendingComponent: AbEventDetailSkeleton,
   loader: loadAbEventTitle,
   head: ({ loaderData }) => detailHead(loaderData?.title, 'Dungeon Event'),
 })
@@ -342,6 +414,11 @@ const keywordRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/keyword',
   component: lazyRouteComponent(() => import('@/pages/keyword/KeywordPage')),
+  pendingComponent: () => (
+    <div className={SECTION_STYLES.LAYOUT.page}>
+      <ListPageSkeleton geometry={KEYWORD_GEOMETRY} filterCount={4} />
+    </div>
+  ),
   head: () => ({
     meta: [{ title: pageTitle('header.nav.keyword') }],
   }),
@@ -352,6 +429,7 @@ const keywordDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/keyword/$id',
   component: lazyRouteComponent(() => import('@/pages/keyword/KeywordDetailPage')),
+  pendingComponent: KeywordDetailSkeleton,
   loader: loadKeywordName,
   head: ({ loaderData }) => detailHead(loaderData?.name, 'Keyword'),
 })
@@ -361,6 +439,7 @@ const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/settings',
   component: lazyRouteComponent(() => import('@/pages/settings/SettingsPage')),
+  pendingComponent: SettingsPageSkeleton,
   head: () => ({
     meta: [{ title: pageTitle('header.settings.settings') }],
   }),

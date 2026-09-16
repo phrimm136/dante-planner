@@ -286,7 +286,7 @@ export function StartBuffCard({
               transform: `translateY(${pct(variant.name.translateYSelf)})`,
             }}
           >
-            <Suspense fallback={<Skeleton className="h-5 w-full bg-foreground" />}>
+            <Suspense fallback={<Skeleton className="h-5 w-full" />}>
               <StartBuffName
                 text={nameText}
                 maxSize={variant.name.maxSize}

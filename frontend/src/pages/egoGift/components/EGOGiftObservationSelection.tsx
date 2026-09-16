@@ -2,9 +2,10 @@ import { useEGOGiftListSpec, useEGOGiftListI18n } from '../hooks/useEGOGiftListD
 import type { EGOGiftListItem } from '../types/EGOGiftTypes'
 import type { EncodedGiftId } from '@/shared/gameData'
 import { getBaseGiftId } from '../lib/egoGiftEncoding'
-import { CARD_MOBILE_SCALE } from '@/lib/constants'
-import { EGO_GIFT_GEOMETRY } from '../lib/cardLayout'
-import { CardSlot } from '@/shared/cardLayout'
+import { CARD_MOBILE_SCALE, SM_BREAKPOINT_PX } from '@/lib/constants'
+import { useIsBreakpoint } from '@/components/hooks/use-is-breakpoint'
+import { observationListHeightPx } from '../lib/cardLayout'
+import { CardSlot, EGO_GIFT_GEOMETRY, useSlotSizePx } from '@/shared/cardLayout'
 import { EGOGiftCard } from './EGOGiftCard'
 import { EGOGiftTooltip } from './EGOGiftTooltip'
 import { toGiftListItems } from '../lib/giftListItem'
@@ -16,10 +17,8 @@ interface EGOGiftObservationSelectionProps {
 
 /**
  * EGO Gift Observation Selection Display
- * Portrait phone: Stack below, horizontal scroll, 0.8 scale
- * Landscape phone + tablet: Right side, vertical, 0.8 scale, w-24
- * Desktop: Right side, vertical, full size, w-32
- * Click on gift to remove from selection
+ * Below `sm` it stacks under the list and scrolls horizontally; at and above `sm` it is a
+ * fixed-height column beside the list. Click on gift to remove from selection.
  */
 export function EGOGiftObservationSelection({
   selectedGiftIds,
@@ -32,9 +31,16 @@ export function EGOGiftObservationSelection({
   const gifts: EGOGiftListItem[] = toGiftListItems(spec, i18n)
 
   const mobileScale = CARD_MOBILE_SCALE
+  const isSm = useIsBreakpoint('min', SM_BREAKPOINT_PX)
+  const { heightPx: slotHeightPx } = useSlotSizePx(EGO_GIFT_GEOMETRY.size, mobileScale)
+
+  const height = isSm ? observationListHeightPx(slotHeightPx) : undefined
 
   return (
-    <div className="bg-muted border border-border rounded-md p-4 overflow-x-auto sm:overflow-x-visible sm:h-[350px] flex flex-row sm:flex-col gap-2 items-center justify-center">
+    <div
+      className="bg-muted border border-border rounded-md p-4 overflow-x-auto sm:overflow-x-visible flex flex-row sm:flex-col gap-2 items-center justify-center"
+      style={{ height }}
+    >
       {selectedGiftIds.map((giftId) => {
         const gift = gifts.find((g) => g.id === getBaseGiftId(giftId))
         if (!gift) return null

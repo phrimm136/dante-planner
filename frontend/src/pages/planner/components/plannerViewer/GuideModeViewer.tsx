@@ -15,11 +15,17 @@ import type { RevealSectionSpec } from '../RevealSection'
 import {
   DeckGridSkeleton,
   GiftGridSkeleton,
-  SectionBlockSkeleton,
+  GiftGridTrackerSkeleton,
   SkillGridSkeleton,
+  StartBuffSkeleton,
+  StartGiftSkeleton,
 } from '../plannerSkeletons'
 import { NoteEditor } from '@/shared/noteEditor/components/NoteEditor'
 import { useProgressiveReveal } from '@/components/hooks/useProgressiveReveal'
+import { useIsBreakpoint } from '@/components/hooks/use-is-breakpoint'
+import { LG_BREAKPOINT_PX, MD_BREAKPOINT_PX } from '@/lib/constants'
+import { EGO_GIFT_GEOMETRY, useSlotSizePx } from '@/shared/cardLayout'
+import { GIFT_GRID_ROWS, giftGridHeightPx } from '../../lib/cardLayout'
 import type { MDSaveablePlanner } from '../../types/PlannerTypes'
 import { FLOOR_COUNTS } from '@/shared/gameData'
 import type { NoteContent } from '@/shared/noteEditor'
@@ -42,6 +48,16 @@ interface GuideModeViewerProps {
 export function GuideModeViewer({ planner }: GuideModeViewerProps) {
   const { t } = useTranslation(['planner', 'common'])
   const visibleSections = useProgressiveReveal(SECTION_COUNT)
+
+  const isMd = useIsBreakpoint('min', MD_BREAKPOINT_PX)
+  const isLg = useIsBreakpoint('min', LG_BREAKPOINT_PX)
+  const { heightPx: giftSlotHeightPx } = useSlotSizePx(
+    EGO_GIFT_GEOMETRY.size,
+    EGO_GIFT_GEOMETRY.mobileScale,
+  )
+  const giftGridHeight = isMd
+    ? giftGridHeightPx(isLg ? GIFT_GRID_ROWS.lg : GIFT_GRID_ROWS.md, giftSlotHeightPx)
+    : undefined
 
   const { content } = planner
   const category = planner.config.category
@@ -90,7 +106,7 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
       id: 'startBuffs',
       node: (
         <>
-          <Suspense fallback={<SectionBlockSkeleton />}>
+          <Suspense fallback={<StartBuffSkeleton />}>
             <StartBuffSection
               mdVersion={planner.metadata.contentVersion}
               selectedBuffIds={deserialized.selectedBuffIds}
@@ -106,7 +122,7 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
       id: 'startGifts',
       node: (
         <>
-          <Suspense fallback={<SectionBlockSkeleton />}>
+          <Suspense fallback={<StartGiftSkeleton />}>
             <StartGiftSummary
               selectedKeyword={content.selectedGiftKeyword}
               selectedGiftIds={deserialized.selectedGiftIds}
@@ -122,11 +138,7 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
       id: 'observation',
       node: (
         <>
-          <Suspense
-            fallback={
-              <GiftGridSkeleton title={t('pages.plannerMD.egoGiftObservation')} showCount />
-            }
-          >
+          <Suspense fallback={<GiftGridSkeleton title={t('pages.plannerMD.egoGiftObservation')} />}>
             <EGOGiftObservationSummary
               mdVersion={planner.metadata.contentVersion}
               selectedGiftIds={deserialized.observationGiftIds}
@@ -161,15 +173,12 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
       node: (
         <>
           <PlannerSection title={t('pages.plannerMD.comprehensiveEgoGiftListView')}>
-            <Suspense
-              fallback={
-                <SectionBlockSkeleton className="w-full rounded-md md:h-[178px] lg:h-[416px]" />
-              }
-            >
+            <Suspense fallback={<GiftGridTrackerSkeleton height={giftGridHeight} />}>
               <ComprehensiveGiftGridTracker
                 floorSelections={content.floorSelections}
                 comprehensiveGiftIds={content.comprehensiveGiftIds}
                 hoveredThemePackId={null}
+                height={giftGridHeight}
                 readOnly
               />
             </Suspense>

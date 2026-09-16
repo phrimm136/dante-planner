@@ -2,7 +2,7 @@ import type { IdentityListItem } from '../types/IdentityTypes'
 import { useSearchTermSources } from '@/shared/filter'
 import { IDENTITY_LIST } from '../hooks/useIdentityListData'
 import type { FilterStore } from '@/components/hooks/filterStore'
-import { IDENTITY_GEOMETRY } from '../lib/cardLayout'
+import { IDENTITY_GEOMETRY } from '@/shared/cardLayout'
 import { FilteredEntityGrid, sortByReleaseDate } from '@/shared/filter'
 import {
   buildIdentitySearchTerms,

@@ -9,10 +9,14 @@ import {
 import type { EncodedGiftId } from '@/shared/gameData'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
-import { CardSlot } from '@/shared/cardLayout'
+import { CardSlot, EGO_GIFT_GEOMETRY, useSlotSizePx } from '@/shared/cardLayout'
 import { CARD_MOBILE_SCALE, SECTION_STYLES } from '@/lib/constants'
-import { KEYWORD_ICON_GEOMETRY } from '../../lib/cardLayout'
-import { EGO_GIFT_GEOMETRY } from '@/pages/egoGift'
+import { EmptyStatePlaceholder } from '@/components/feedback/EmptyStatePlaceholder'
+import {
+  GIFT_ROW_PADDING_PX,
+  giftRowMinHeightPx,
+  KEYWORD_ICON_GEOMETRY,
+} from '../../lib/cardLayout'
 import { StartGiftKeywordIcon } from './StartGiftKeywordIcon'
 import { cn } from '@/lib/utils'
 
@@ -42,6 +46,8 @@ export function StartGiftSummary({
   const i18n = useEGOGiftListI18n()
 
   const mobileScale = CARD_MOBILE_SCALE
+  const { heightPx: giftSlotHeightPx } = useSlotSizePx(EGO_GIFT_GEOMETRY.size, mobileScale)
+  const minHeight = giftRowMinHeightPx(giftSlotHeightPx)
 
   // Show selected state when keyword is chosen (gifts are optional)
   const hasKeywordSelected = selectedKeyword !== null
@@ -73,7 +79,10 @@ export function StartGiftSummary({
       >
         {hasKeywordSelected ? (
           /* Selected state: keyword icon + gift cards (if any) + EA counter */
-          <div className="flex items-center gap-4 p-2 min-h-28">
+          <div
+            className="flex items-center gap-4"
+            style={{ padding: GIFT_ROW_PADDING_PX, minHeight }}
+          >
             {/* Keyword icon */}
             <CardSlot
               size={KEYWORD_ICON_GEOMETRY.size}
@@ -99,13 +108,16 @@ export function StartGiftSummary({
             </div>
           </div>
         ) : (
-          /* Empty state: dashed border placeholder - min-h-28 matches selected state */
-          <div className="flex items-center justify-center min-h-28 border-2 border-dashed border-muted-foreground/50 rounded-lg">
-            <span className={SECTION_STYLES.TEXT.caption}>
-              {readOnly
-                ? t('pages.plannerMD.emptyState.noStartGifts')
-                : t('pages.plannerMD.selectStartEgoGift')}
-            </span>
+          /* Empty state: the dashed box, at the height the selected state keeps */
+          <div className="flex" style={{ minHeight }}>
+            <EmptyStatePlaceholder
+              label={
+                readOnly
+                  ? t('pages.plannerMD.emptyState.noStartGifts')
+                  : t('pages.plannerMD.selectStartEgoGift')
+              }
+              className="flex-1"
+            />
           </div>
         )}
       </button>

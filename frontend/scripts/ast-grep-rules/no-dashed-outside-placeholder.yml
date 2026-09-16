@@ -1,0 +1,12 @@
+id: no-dashed-outside-placeholder
+language: TypeScript
+severity: error
+message: The dashed empty-state box belongs to EmptyStatePlaceholder; compose that component instead of drawing border-dashed again.
+files:
+  - src/**/*.ts
+rule:
+  any:
+    - kind: string
+      regex: 'border-dashed'
+    - kind: template_string
+      regex: 'border-dashed'

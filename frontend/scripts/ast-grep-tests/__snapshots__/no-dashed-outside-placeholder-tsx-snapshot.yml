@@ -1,0 +1,32 @@
+id: no-dashed-outside-placeholder-tsx
+snapshots:
+  const Box = () => <div className="border-2 border-dashed border-muted-foreground/50 rounded-lg" />:
+    labels:
+    - source: className="border-2 border-dashed border-muted-foreground/50 rounded-lg"
+      style: primary
+      start: 23
+      end: 95
+    - source: '"border-2 border-dashed border-muted-foreground/50 rounded-lg"'
+      style: secondary
+      start: 33
+      end: 95
+  const Box = () => <div className={`border-dashed ${extra}`} />:
+    labels:
+    - source: className={`border-dashed ${extra}`}
+      style: primary
+      start: 23
+      end: 59
+    - source: '`border-dashed ${extra}`'
+      style: secondary
+      start: 34
+      end: 58
+  const Box = () => <div className={cn('flex', 'border-2 border-dashed')} />:
+    labels:
+    - source: className={cn('flex', 'border-2 border-dashed')}
+      style: primary
+      start: 23
+      end: 71
+    - source: '''border-2 border-dashed'''
+      style: secondary
+      start: 45
+      end: 69

@@ -1,0 +1,10 @@
+id: no-dashed-outside-placeholder-tsx
+valid:
+  - "const Box = () => <div className=\"border-2 border-solid border-muted-foreground/50\" />"
+  - "const Box = () => <EmptyStatePlaceholder label={label} className=\"size-full\" />"
+  - "const note = 'border-dashed'"
+  - "const Box = () => <div className={cn('rounded-lg', 'border')} />"
+invalid:
+  - "const Box = () => <div className=\"border-2 border-dashed border-muted-foreground/50 rounded-lg\" />"
+  - "const Box = () => <div className={cn('flex', 'border-2 border-dashed')} />"
+  - "const Box = () => <div className={`border-dashed ${extra}`} />"

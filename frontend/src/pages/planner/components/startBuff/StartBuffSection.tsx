@@ -1,9 +1,10 @@
 import { useTranslation } from 'react-i18next'
 import type { MDVersion } from '@/shared/gameData'
 import { useStartBuffSelection } from '../../hooks/useStartBuffSelection'
-import { CARD_MOBILE_SCALE_NONE, EMPTY_STATE } from '@/lib/constants'
-import { EGO_GIFT_GEOMETRY } from '@/pages/egoGift'
-import { CardSlot } from '@/shared/cardLayout'
+import { CARD_MOBILE_SCALE_NONE } from '@/lib/constants'
+import { CardSlot, EGO_GIFT_GEOMETRY, useSlotSizePx } from '@/shared/cardLayout'
+import { EmptyStatePlaceholder } from '@/components/feedback/EmptyStatePlaceholder'
+import { GIFT_ROW_PADDING_PX, giftRowMinHeightPx } from '../../lib/cardLayout'
 import { cn } from '@/lib/utils'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import { PlannerSection } from '@/components/layout/PlannerSection'
@@ -38,6 +39,12 @@ export function StartBuffSection({
 
   const { displayBuffs } = useStartBuffSelection(mdVersion, selectedBuffIds, IGNORE_SELECTION)
 
+  const { heightPx: buffSlotHeightPx } = useSlotSizePx(
+    EGO_GIFT_GEOMETRY.size,
+    CARD_MOBILE_SCALE_NONE,
+  )
+  const minHeight = giftRowMinHeightPx(buffSlotHeightPx)
+
   // Filter to only show selected buffs
   const selectedBuffs = displayBuffs.filter((buff) => {
     const buffId = Number(buff.id)
@@ -65,7 +72,7 @@ export function StartBuffSection({
         className={cn('w-full text-left', !readOnly && 'selectable cursor-pointer')}
       >
         {hasSelectedBuffs ? (
-          <div className="flex flex-wrap gap-2 min-h-28">
+          <div className="flex flex-wrap gap-2" style={{ padding: GIFT_ROW_PADDING_PX, minHeight }}>
             {selectedBuffs.map((buff) => (
               <CardSlot
                 key={buff.baseId}
@@ -81,16 +88,15 @@ export function StartBuffSection({
             ))}
           </div>
         ) : (
-          <div
-            className={cn(
-              'flex items-center justify-center p-2 text-sm text-muted-foreground',
-              EMPTY_STATE.MIN_HEIGHT,
-              EMPTY_STATE.DASHED_BORDER,
-            )}
-          >
-            {readOnly
-              ? t('pages.plannerMD.emptyState.noStartBuffs')
-              : t('pages.plannerMD.selectStartBuffs')}
+          <div className="flex" style={{ minHeight }}>
+            <EmptyStatePlaceholder
+              label={
+                readOnly
+                  ? t('pages.plannerMD.emptyState.noStartBuffs')
+                  : t('pages.plannerMD.selectStartBuffs')
+              }
+              className="flex-1"
+            />
           </div>
         )}
       </button>

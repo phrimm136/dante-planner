@@ -1,12 +1,4 @@
-import type { CardGeometry, CardLayer, PctRect, TrackingSpec } from '@/shared/cardLayout'
-import { CARD_MOBILE_SCALE } from '@/lib/constants'
-
-/** `ThemePackCard`. */
-export const THEME_PACK_GEOMETRY: CardGeometry = {
-  size: { widthPx: 240, heightPx: 395 },
-  mobileScale: CARD_MOBILE_SCALE,
-  rows: 'card',
-}
+import type { CardLayer, PctRect, TrackingSpec } from '@/shared/cardLayout'
 
 /** The composed pack art, which the static pipeline bakes every baseline layer into. */
 export const THEME_PACK_ART: CardLayer = {

@@ -1,0 +1,19 @@
+id: no-dashed-outside-placeholder-tsx
+language: Tsx
+severity: error
+message: The dashed empty-state box belongs to EmptyStatePlaceholder; compose that component instead of drawing border-dashed again.
+files:
+  - src/**/*.tsx
+ignores:
+  - src/components/feedback/EmptyStatePlaceholder.tsx
+  # A reserved decorative slot, not a selection's empty state.
+  - src/pages/home/components/SideLinkSection.tsx
+rule:
+  kind: jsx_attribute
+  has:
+    stopBy: end
+    any:
+      - kind: string
+        regex: 'border-dashed'
+      - kind: template_string
+        regex: 'border-dashed'

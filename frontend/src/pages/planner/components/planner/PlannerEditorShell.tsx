@@ -71,8 +71,9 @@ import type { RevealSectionSpec } from '../RevealSection'
 import {
   DeckGridSkeleton,
   GiftGridSkeleton,
-  SectionBlockSkeleton,
   SkillGridSkeleton,
+  StartBuffSkeleton,
+  StartGiftSkeleton,
 } from '../plannerSkeletons'
 import { DeckImportConfirmDialog } from '../deckBuilder/DeckImportConfirmDialog'
 import { StoreBoundSectionNote } from './StoreBoundSectionNote'
@@ -390,7 +391,7 @@ export function PlannerEditorShell({
     {
       id: 'startBuffs',
       node: (
-        <Suspense fallback={<SectionBlockSkeleton />}>
+        <Suspense fallback={<StartBuffSkeleton />}>
           <StoreBoundStartBuffSection
             mdVersion={mdVersion}
             onClick={() => {
@@ -413,7 +414,7 @@ export function PlannerEditorShell({
     {
       id: 'startGifts',
       node: (
-        <Suspense fallback={<SectionBlockSkeleton />}>
+        <Suspense fallback={<StartGiftSkeleton />}>
           <StoreBoundStartGiftSummary
             onClick={() => {
               setIsStartGiftPaneOpen(true)
@@ -436,11 +437,7 @@ export function PlannerEditorShell({
       id: 'observation',
       node: (
         <>
-          <Suspense
-            fallback={
-              <GiftGridSkeleton title={t('pages.plannerMD.egoGiftObservation')} showCount />
-            }
-          >
+          <Suspense fallback={<GiftGridSkeleton title={t('pages.plannerMD.egoGiftObservation')} />}>
             <StoreBoundEGOGiftObservationSummary
               mdVersion={mdVersion}
               onClick={() => {

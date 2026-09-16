@@ -132,8 +132,8 @@ export function EGOGiftObservationEditPane({
             />
           </div>
 
-          {/* Selected Gifts - w-24 for tablets, w-32 for desktop */}
-          <div className="sm:w-24 lg:w-32 sm:shrink-0 lg:shrink-0">
+          {/* Selected Gifts - the column is as wide as the card slots inside it */}
+          <div className="sm:shrink-0">
             <EGOGiftObservationSelection
               selectedGiftIds={Array.from(selectedGiftIds)}
               onGiftRemove={toggle}

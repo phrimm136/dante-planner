@@ -14,7 +14,7 @@ export function aspectOf(size: CardSizePx): number {
 }
 
 /** Whether a grid's rows take the card's box or their own content. */
-export type GridRowHeight = 'card' | 'auto'
+export type GridRowHeight = 'slot' | 'content'
 
 /**
  * A card's sizing, read by a grid and by every slot in it.

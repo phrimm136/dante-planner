@@ -6,8 +6,7 @@ import {
   getStartBuffMiniHighlightPath,
 } from '@/shared/assets'
 import { MD_ACCENT_COLORS } from '@/lib/constants'
-import { EGO_GIFT_GEOMETRY } from '@/pages/egoGift'
-import { aspectOf } from '@/shared/cardLayout'
+import { EGO_GIFT_GEOMETRY, aspectOf } from '@/shared/cardLayout'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   getEnhancementFromBuffId,
@@ -80,7 +79,7 @@ export function StartBuffMiniCard({ buffId, displayName, mdVersion }: StartBuffM
           className="flex-1 flex items-center justify-center overflow-hidden"
           style={{ paddingInline: cqw(START_BUFF_MINI_CARD.namePaddingX) }}
         >
-          <Suspense fallback={<Skeleton className="h-5 w-full bg-foreground" />}>
+          <Suspense fallback={<Skeleton className="h-5 w-full" />}>
             <StartBuffMiniName text={`${displayName}${suffix}`} color={accentColor} />
           </Suspense>
         </div>

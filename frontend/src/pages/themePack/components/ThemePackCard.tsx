@@ -5,8 +5,7 @@ import {
   getThemePackFocusedPath,
   getThemePackHoverExtremePath,
 } from '@/shared/assets'
-import { aspectOf, layerStyle, pctStyle } from '@/shared/cardLayout'
-import { THEME_PACK_GEOMETRY } from '../lib/cardLayout'
+import { THEME_PACK_GEOMETRY, aspectOf, layerStyle, pctStyle } from '@/shared/cardLayout'
 import { cn } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
 import { isExtremePack } from '../types/ThemePackTypes'
@@ -86,7 +85,7 @@ export function ThemePackCard({
         className="flex items-center justify-center pointer-events-none"
         style={pctStyle(layout.name)}
       >
-        <Suspense fallback={<Skeleton className="h-full w-full bg-foreground" />}>
+        <Suspense fallback={<Skeleton className="h-full w-full" />}>
           <ThemePackName packId={packId} packEntry={packEntry} rect={layout.name} />
         </Suspense>
       </div>

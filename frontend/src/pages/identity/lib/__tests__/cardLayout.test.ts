@@ -5,8 +5,9 @@ import enTable from '@static/data/fontAdvances/EN.json'
 import jpTable from '@static/data/fontAdvances/JP.json'
 import krTable from '@static/data/fontAdvances/KR.json'
 import {
-  createAdvanceMeasure,
   FontAdvanceTableSchema,
+  IDENTITY_GEOMETRY,
+  createAdvanceMeasure,
   layerStyle,
   levelShadow,
   type FontAdvanceTable,
@@ -46,7 +47,6 @@ import {
   portraitWindowStyle,
   relativeRect,
 } from '../cardLayout'
-import { IDENTITY_GEOMETRY } from '../cardLayout'
 import { aspectOf } from '@/shared/cardLayout'
 
 /** The display-face advance tables the site ships, keyed as the layout tables are. */

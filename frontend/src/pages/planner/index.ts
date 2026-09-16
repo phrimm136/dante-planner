@@ -11,7 +11,6 @@ export { userPlannersQueryKeys } from './hooks/useMDUserPlannersData'
 export { useMDGesellschaftData } from './hooks/useMDGesellschaftData'
 
 // Lib
-export { PLANNER_GEOMETRY } from './lib/cardLayout'
 export { loadPlannerTitle, untitledPlannerTitle } from './lib/loadPlannerTitle'
 export { plannerApi } from './lib/plannerApi'
 export { plannerQueryKeys } from './lib/plannerQueryKeys'

@@ -150,9 +150,7 @@ function KeywordPageShell() {
  */
 export default function KeywordPage() {
   return (
-    <EntityListPage
-      skeleton={<ListPageSkeleton geometry={KEYWORD_GEOMETRY} filterCount={4} cardCount={30} />}
-    >
+    <EntityListPage skeleton={<ListPageSkeleton geometry={KEYWORD_GEOMETRY} filterCount={4} />}>
       <KeywordPageShell />
     </EntityListPage>
   )

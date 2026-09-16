@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { FileText } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { SECTION_STYLES } from '@/lib/constants'
+import { cn } from '@/lib/utils'
 
 interface PlannerSectionProps {
   /** Section title - rendered as h2 */
@@ -11,6 +12,8 @@ interface PlannerSectionProps {
   children: ReactNode
   /** Optional "View Notes" button handler */
   onViewNotes?: () => void
+  /** Stretches the section and its container to the height of the row it sits in. */
+  fill?: boolean
 }
 
 /**
@@ -25,11 +28,11 @@ interface PlannerSectionProps {
  *   <DeckBuilderContent />
  * </PlannerSection>
  */
-export function PlannerSection({ title, children, onViewNotes }: PlannerSectionProps) {
+export function PlannerSection({ title, children, onViewNotes, fill }: PlannerSectionProps) {
   const { t } = useTranslation('common')
 
   return (
-    <section className="mb-4">
+    <section className={cn('mb-4', fill && 'h-full flex flex-col')}>
       <div className="flex items-center justify-between mb-2 h-8">
         <h2 className={SECTION_STYLES.TEXT.header}>{title}</h2>
         {onViewNotes && (
@@ -39,7 +42,9 @@ export function PlannerSection({ title, children, onViewNotes }: PlannerSectionP
           </Button>
         )}
       </div>
-      <div className={SECTION_STYLES.container}>{children}</div>
+      <div className={cn(SECTION_STYLES.container, fill && 'flex-1 min-h-0 flex flex-col')}>
+        {children}
+      </div>
     </section>
   )
 }

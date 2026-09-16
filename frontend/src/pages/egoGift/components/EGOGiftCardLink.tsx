@@ -36,7 +36,7 @@ export const EGOGiftCardLink = function EGOGiftCardLink({
       <div className="flex flex-col items-center gap-1.5">
         <EGOGiftCard gift={gift} enhancement={enhancement} enableHoverHighlight />
         <span className="text-xs text-center text-foreground line-clamp-2 w-full leading-tight font-medium">
-          <Suspense fallback={<Skeleton className="h-5 w-full bg-foreground" />}>
+          <Suspense fallback={<Skeleton className="h-5 w-full" />}>
             <EGOGiftName id={gift.id} />
           </Suspense>
         </span>

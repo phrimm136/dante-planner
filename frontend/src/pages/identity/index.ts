@@ -2,7 +2,7 @@
 
 export { IdentityCard } from './components/IdentityCard'
 export { FormationBadge } from './components/FormationBadge'
-export { FORMATION_SLOT_DIM, IDENTITY_GEOMETRY } from './lib/cardLayout'
+export { FORMATION_SLOT_DIM } from './lib/cardLayout'
 export type { FormationSlotState } from './lib/cardLayout'
 export { IdentityDetailSkeleton } from './components/IdentityDetailSkeleton'
 export { IdentityFilterDropdown } from './components/IdentityFilterDropdown'

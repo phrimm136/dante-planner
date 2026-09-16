@@ -48,7 +48,7 @@ const MANY_ITEMS: Item[] = Array.from({ length: 25 }, (_, index) => ({
 const GEOMETRY: CardGeometry = {
   size: { widthPx: 100, heightPx: 200 },
   mobileScale: 0.8,
-  rows: 'card',
+  rows: 'slot',
 }
 
 function renderGrid(
@@ -148,7 +148,7 @@ describe('FilteredEntityGrid', () => {
 
   it('leaves rows to their content when the geometry asks for auto rows', () => {
     const { container } = renderGrid({}, '', {
-      geometry: { ...GEOMETRY, rows: 'auto' },
+      geometry: { ...GEOMETRY, rows: 'content' },
     })
 
     expect((container.querySelector('div.grid') as HTMLElement).style.gridAutoRows).toBe('')

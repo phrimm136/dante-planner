@@ -1,0 +1,14 @@
+id: no-dashed-outside-placeholder
+snapshots:
+  const cls = `border-dashed ${extra}`:
+    labels:
+    - source: '`border-dashed ${extra}`'
+      style: primary
+      start: 12
+      end: 36
+  'export const EMPTY = { BORDER: ''border-2 border-dashed border-muted-foreground/50'' } as const':
+    labels:
+    - source: '''border-2 border-dashed border-muted-foreground/50'''
+      style: primary
+      start: 31
+      end: 82

@@ -46,7 +46,8 @@ vi.mock('@/shared/auth', () => ({
   authQueryKeys: { me: ['auth', 'me'] as const },
 }))
 
-vi.mock('@/pages/egoGift', () => ({
+vi.mock('@/pages/egoGift', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/pages/egoGift')>()),
   useEGOGiftListSpec: () => ({ spec: {}, i18n: {} }).spec,
   useEGOGiftListI18n: () => ({ spec: {}, i18n: {} }).i18n,
 }))

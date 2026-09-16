@@ -2,7 +2,6 @@ import { Suspense } from 'react'
 import { Link, useParams } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorBoundary } from '@/components/feedback/ErrorBoundary'
 import { PlannerNotFound } from '@/components/feedback/PlannerNotFound'
 import {
@@ -11,6 +10,7 @@ import {
 } from './stores/usePlannerEditorStore'
 import { deserializeSets } from './schemas/PlannerSchemas'
 import { PlannerEditEditor } from './components/planner/PlannerEditEditor'
+import { PlannerViewerSkeleton } from './components/plannerSkeletons'
 import { useSavedPlannerQuery } from './hooks/useSavedPlannerQuery'
 import { isMDPlanner } from './types/PlannerTypes'
 import type { FloorThemeSelection } from '@/pages/themePack'
@@ -25,23 +25,7 @@ export default function PlannerMDEditPage() {
 
   return (
     <ErrorBoundary>
-      <Suspense
-        fallback={
-          <div className="container mx-auto py-6">
-            <div className="space-y-6">
-              <div className={SECTION_STYLES.LAYOUT.rowBetween}>
-                <Skeleton className="h-10 w-64" />
-                <Skeleton className="h-10 w-32" />
-              </div>
-              <div className="bg-background rounded-lg p-6 space-y-4">
-                <Skeleton className="h-64 w-full" />
-                <Skeleton className="h-48 w-full" />
-                <Skeleton className="h-96 w-full" />
-              </div>
-            </div>
-          </div>
-        }
-      >
+      <Suspense fallback={<PlannerViewerSkeleton />}>
         <PlannerEditContent id={id} />
       </Suspense>
     </ErrorBoundary>

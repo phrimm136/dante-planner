@@ -4,11 +4,8 @@ import { Suspense, useId, useState } from 'react'
 // Third-party libraries
 import { showSuccess } from '@/lib/errorPresentation'
 
-// shadcn/ui components
-import { Skeleton } from '@/components/ui/skeleton'
-
 // Project constants
-import { DEFAULT_SKILL_EA, SINNERS } from '@/shared/gameData'
+import { DEFAULT_SKILL_EA } from '@/shared/gameData'
 
 // Store
 import {
@@ -25,49 +22,8 @@ import { StoreBoundDeckBuilderSummary } from './components/deckBuilder/DeckBuild
 import { DeckBuilderPane } from './components/deckBuilder/DeckBuilderPane'
 import { StoreBoundDeckBuilderContent } from './components/deckBuilder/DeckBuilderContent'
 import { DeckImportConfirmDialog } from './components/deckBuilder/DeckImportConfirmDialog'
-import { useSinnerGridLayout } from './components/deckBuilder/SinnerGrid'
-import { staggerDelay } from '@/lib/stagger'
+import { DeckBuilderPageSkeleton } from './components/plannerSkeletons'
 import { SECTION_STYLES } from '@/lib/constants'
-
-/**
- * Page-level skeleton matching DeckBuilderSummary structure
- */
-function DeckBuilderPageSkeleton() {
-  const { gridStyle, columnWidth, rowHeight } = useSinnerGridLayout()
-
-  return (
-    <div className={SECTION_STYLES.LAYOUT.page}>
-      <div className="space-y-4">
-        {/* Section header */}
-        <Skeleton className="h-8 w-40" />
-
-        {/* SinnerGrid placeholder */}
-        <div className="border-2 border-border rounded-lg p-4">
-          <div className="grid mx-auto" style={gridStyle}>
-            {SINNERS.map((sinnerName, i) => (
-              <Skeleton
-                key={sinnerName}
-                className="rounded-md"
-                style={{ width: columnWidth, height: rowHeight, ...staggerDelay(i) }}
-              />
-            ))}
-          </div>
-
-          {/* Status + Action bar placeholder */}
-          <div className="mt-5 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
-            <Skeleton className="h-20 w-full lg:w-96" />
-            <div className="flex gap-2">
-              <Skeleton className="h-10 w-24" />
-              <Skeleton className="h-10 w-24" />
-              <Skeleton className="h-10 w-24" />
-              <Skeleton className="h-10 w-24" />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 /**
  * Inner content component with store access and handlers.

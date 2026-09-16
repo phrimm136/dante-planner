@@ -5,7 +5,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
 import { DUNGEON_IDX, DIFFICULTY_LABELS, type DungeonIdx, type MDCategory } from '@/shared/gameData'
 import { CARD_MOBILE_SCALE_DENSE, DIFFICULTY_COLORS } from '@/lib/constants'
-import { THEME_PACK_GEOMETRY } from '@/pages/themePack'
+import { THEME_PACK_GEOMETRY } from '@/shared/cardLayout'
 import { ThemePackViewer } from './ThemePackViewer'
 import { ThemePackExclusiveGifts } from './ThemePackExclusiveGifts'
 import type { ThemePackListType, ThemePackEntry } from '@/pages/themePack'
@@ -206,7 +206,7 @@ export function ThemePackSelectorPane({
                 ) : (
                   <ResponsiveCardGrid
                     size={THEME_PACK_GEOMETRY.size}
-                    rows="auto"
+                    rows="content"
                     mobileScale={CARD_MOBILE_SCALE_DENSE}
                   >
                     {packs.map(({ id, entry }) => {

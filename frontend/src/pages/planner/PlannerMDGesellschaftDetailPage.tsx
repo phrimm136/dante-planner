@@ -3,7 +3,6 @@ import { Link, useNavigate, useParams } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorBoundary } from '@/components/feedback/ErrorBoundary'
 import { PlannerViewer } from './components/plannerViewer/PlannerViewer'
 import { PublishedPlannerHeader } from './components/plannerViewer/PublishedPlannerHeader'
@@ -13,7 +12,8 @@ import { PublishedPlannerList } from './components/plannerList/PublishedPlannerL
 import { MDPlannerToolbar } from './components/plannerList/MDPlannerToolbar'
 import { PlannerListFilterPills } from './components/plannerList/PlannerListFilterPills'
 import { PlannerGridSkeleton } from '@/components/feedback/ListPageSkeleton'
-import { PLANNER_GEOMETRY } from './lib/cardLayout'
+import { PlannerViewerSkeleton } from './components/plannerSkeletons'
+import { PLANNER_GEOMETRY } from '@/shared/cardLayout'
 import { CommunityPlansErrorFallback } from '@/components/feedback/CommunityPlansErrorFallback'
 import { usePublishedPlannerQuery, isPlannerRemoved } from './hooks/usePublishedPlannerQuery'
 import { isMDPlanner } from './types/PlannerTypes'
@@ -32,21 +32,7 @@ export default function PlannerMDGesellschaftDetailPage() {
   return (
     <ErrorBoundary>
       <div className={SECTION_STYLES.LAYOUT.page}>
-        <Suspense
-          fallback={
-            <div className="space-y-6">
-              <div className={SECTION_STYLES.LAYOUT.rowBetween}>
-                <Skeleton className="h-10 w-64" />
-                <Skeleton className="h-10 w-32" />
-              </div>
-              <div className="bg-background rounded-lg p-6 space-y-4">
-                <Skeleton className="h-64 w-full" />
-                <Skeleton className="h-48 w-full" />
-                <Skeleton className="h-96 w-full" />
-              </div>
-            </div>
-          }
-        >
+        <Suspense fallback={<PlannerViewerSkeleton />}>
           <PublishedPlannerDetailContent plannerId={id} />
         </Suspense>
       </div>

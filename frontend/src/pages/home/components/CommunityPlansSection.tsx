@@ -21,7 +21,7 @@ import { CommunityPlansErrorFallback } from '@/components/feedback/CommunityPlan
 
 import { useMDGesellschaftData } from '@/pages/planner'
 import { SECTION_STYLES } from '@/lib/constants'
-import { PLANNER_GEOMETRY } from '@/pages/planner'
+import { PLANNER_GEOMETRY } from '@/shared/cardLayout'
 import { cn } from '@/lib/utils'
 
 import type { MDGesellschaftMode } from '@/pages/planner'
@@ -61,7 +61,7 @@ function CommunityPlansContent({ mode }: CommunityPlansContentProps) {
   }
 
   return (
-    <ResponsiveCardGrid size={PLANNER_GEOMETRY.size} rows="auto">
+    <ResponsiveCardGrid size={PLANNER_GEOMETRY.size} rows="content">
       {planners.map((planner) => (
         <Link key={planner.id} to="/planner/md/gesellschaft/$id" params={{ id: planner.id }}>
           <PublishedPlannerCard planner={planner} />
@@ -114,7 +114,7 @@ export function CommunityPlansSection() {
       </div>
 
       {/* Content container */}
-      <div className={SECTION_STYLES.panel}>
+      <div className={cn(SECTION_STYLES.panel, 'flex-1')}>
         {/* Tab switcher */}
         <Tabs value={mode} onValueChange={(v) => setMode(v as MDGesellschaftMode)} className="mb-4">
           <TabsList>

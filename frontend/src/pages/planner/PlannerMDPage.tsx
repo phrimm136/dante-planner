@@ -34,7 +34,7 @@ import { PlannerListFilterPills } from './components/plannerList/PlannerListFilt
 import { PlannerFilterPane } from './components/plannerList/PlannerFilterPane'
 import { LoadingState } from '@/components/feedback/LoadingState'
 import { PlannerGridSkeleton } from '@/components/feedback/ListPageSkeleton'
-import { PLANNER_GEOMETRY } from './lib/cardLayout'
+import { PLANNER_GEOMETRY } from '@/shared/cardLayout'
 import { SECTION_STYLES } from '@/lib/constants'
 
 // ============================================================================

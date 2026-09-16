@@ -8,9 +8,8 @@ import type { SkillData } from './SinnerGrid'
 import { getAttackTypeIconPath, getEGOImagePath, getEGOTypeIconPath } from '@/shared/assets'
 import { FORMATION_SLOT_DIM, FormationBadge, IdentityCard } from '@/pages/identity'
 import type { FormationSlotState } from '@/pages/identity'
-import { CardSlot } from '@/shared/cardLayout'
+import { CardSlot, IDENTITY_GEOMETRY } from '@/shared/cardLayout'
 import { MAX_DEPLOYED_ORDER } from '@/lib/constants'
-import { IDENTITY_GEOMETRY } from '@/pages/identity'
 import { DECK_CARD, cqw } from '../../lib/cardLayout'
 
 interface SinnerDeckCardProps {

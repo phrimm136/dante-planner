@@ -13,10 +13,9 @@ import {
   getSinnerFacePath,
   getEGOIconRingPath,
 } from '@/shared/assets'
-import { aspectOf, layerStyle, pctStyle } from '@/shared/cardLayout'
+import { EGO_GEOMETRY, aspectOf, layerStyle, pctStyle } from '@/shared/cardLayout'
 import { getSinnerFromId } from '@/shared/gameData'
 import { cn } from '@/lib/utils'
-import { EGO_GEOMETRY } from '../lib/cardLayout'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { EGOListItem } from '../types/EGOTypes'
 import {
@@ -86,18 +85,25 @@ export function EGOCard({ ego, isSelected = false, overlay, className }: EGOCard
         className="pointer-events-none"
       />
 
+      {/* [Image]ClickedFrame: enabled on hover, tinted with the client's _hOverFrameColor. */}
       <img
         src={getEGOHoverRingPath()}
         alt=""
         loading="lazy"
         style={layerStyle(EGO_CARD_LAYERS.hoverRing)}
-        className={cn(
-          'pointer-events-none',
-          isSelected
-            ? 'opacity-100'
-            : 'opacity-0 group-hover:opacity-100 group-active:opacity-100 group-hover:brightness-[var(--ego-hover-ring-brightness)] group-active:brightness-[var(--ego-hover-ring-brightness)]',
-        )}
+        className="pointer-events-none opacity-0 group-hover:opacity-100 group-active:opacity-100 brightness-[var(--ego-hover-ring-brightness)]"
       />
+
+      {/* [Image]SelectedFrame: enabled while selected, opaque white, over the hover ring. */}
+      {isSelected && (
+        <img
+          src={getEGOHoverRingPath()}
+          alt=""
+          loading="lazy"
+          style={layerStyle(EGO_CARD_LAYERS.hoverRing)}
+          className="pointer-events-none"
+        />
+      )}
 
       <img
         src={getEGONameBgPath(primaryAttributeType)}
@@ -108,9 +114,7 @@ export function EGOCard({ ego, isSelected = false, overlay, className }: EGOCard
       />
 
       <Suspense
-        fallback={
-          <Skeleton style={pctStyle(EGO_NAME_RECT)} className="pointer-events-none bg-foreground" />
-        }
+        fallback={<Skeleton style={pctStyle(EGO_NAME_RECT)} className="pointer-events-none" />}
       >
         <EGOName id={id} />
       </Suspense>

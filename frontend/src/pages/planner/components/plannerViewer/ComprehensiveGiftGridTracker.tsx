@@ -5,14 +5,14 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { decodeGiftSelections } from '@/pages/egoGift'
 import { sortEGOGifts } from '@/pages/egoGift'
-import { CARD_MOBILE_SCALE, EMPTY_STATE } from '@/lib/constants'
-import { EGO_GIFT_GEOMETRY } from '@/pages/egoGift'
+import { CARD_MOBILE_SCALE } from '@/lib/constants'
+import { EmptyStatePlaceholder } from '@/components/feedback/EmptyStatePlaceholder'
 import { cn } from '@/lib/utils'
 import type { EGOGiftListItem } from '@/pages/egoGift'
 import type { EncodedGiftId, EnhancementLevel } from '@/shared/gameData'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
 import { useSearchMappings } from '@/shared/filter'
-import { CardSlot } from '@/shared/cardLayout'
+import { CardSlot, EGO_GIFT_GEOMETRY } from '@/shared/cardLayout'
 import { EGOGiftCard } from '@/pages/egoGift'
 import { EGOGiftTooltip } from '@/pages/egoGift'
 import { EGOGiftFilterBar } from '@/pages/egoGift'
@@ -27,6 +27,8 @@ interface ComprehensiveGiftGridTrackerProps {
   readOnly?: boolean
   /** Authoritative gift list from saved plan content. When provided, used as-is instead of aggregating from floorSelections. */
   comprehensiveGiftIds: EncodedGiftId[]
+  /** The box the grid takes; omitted → it stretches to the column it sits in. */
+  height?: number | undefined
 }
 
 interface DecodedGift {
@@ -47,6 +49,7 @@ export function ComprehensiveGiftGridTracker({
   onToggleEgoGiftDone,
   readOnly,
   comprehensiveGiftIds,
+  height,
 }: ComprehensiveGiftGridTrackerProps) {
   const { t } = useTranslation(['planner', 'common'])
   const spec = useEGOGiftListSpec()
@@ -140,6 +143,9 @@ export function ComprehensiveGiftGridTracker({
     return [...sortGroup(highlighted), ...sortGroup(regular), ...sortGroup(done)]
   })()
 
+  /** Without an explicit box the grid fills the column it is stretched inside. */
+  const stretch = height === undefined
+
   const hasAnyGifts = allComprehensiveGiftIds.size > 0
   const hasFilteredGifts = selectedGifts.length > 0
   const hasActiveFilters = selectedKeywords.size > 0 || searchQuery.length > 0
@@ -147,20 +153,17 @@ export function ComprehensiveGiftGridTracker({
   // No gifts in planner at all
   if (!hasAnyGifts) {
     return (
-      <div
-        className={cn(
-          'flex items-center justify-center p-4 text-muted-foreground md:h-[306px] lg:h-[481px]',
-          EMPTY_STATE.MIN_HEIGHT,
-          EMPTY_STATE.DASHED_BORDER,
-        )}
-      >
-        <span className="text-sm text-center">{t('pages.plannerMD.emptyState.noEgoGifts')}</span>
+      <div className={cn('flex', stretch && 'flex-1 min-h-0')} style={{ height }}>
+        <EmptyStatePlaceholder
+          label={t('pages.plannerMD.emptyState.noEgoGifts')}
+          className="flex-1"
+        />
       </div>
     )
   }
 
   return (
-    <div className="space-y-2">
+    <div className={cn('flex flex-col gap-2', stretch && 'flex-1 min-h-0')}>
       <EGOGiftFilterBar
         selectedKeywords={selectedKeywords}
         onKeywordsChange={setSelectedKeywords}
@@ -172,7 +175,7 @@ export function ComprehensiveGiftGridTracker({
 
       {/* Gift grid or no results message */}
       {hasFilteredGifts ? (
-        <ScrollArea className="md:h-[178px] lg:h-[416px]">
+        <ScrollArea className={cn(stretch && 'flex-1 min-h-0')} style={{ height }}>
           <div className="flex flex-wrap gap-2 p-2 min-h-24">
             {selectedGifts.map(({ item, enhancement, encodedId }) => {
               const isHighlighted = highlightedGiftIds.has(encodedId)
@@ -195,18 +198,15 @@ export function ComprehensiveGiftGridTracker({
           </div>
         </ScrollArea>
       ) : (
-        <div
-          className={cn(
-            'flex items-center justify-center p-4 text-muted-foreground md:h-[178px] lg:h-[353px]',
-            EMPTY_STATE.MIN_HEIGHT,
-            EMPTY_STATE.DASHED_BORDER,
-          )}
-        >
-          <span className="text-sm text-center">
-            {hasActiveFilters
-              ? t('pages.plannerMD.emptyState.noFilterResults')
-              : t('pages.plannerMD.emptyState.noEgoGifts')}
-          </span>
+        <div className={cn('flex', stretch && 'flex-1 min-h-0')} style={{ height }}>
+          <EmptyStatePlaceholder
+            label={
+              hasActiveFilters
+                ? t('pages.plannerMD.emptyState.noFilterResults')
+                : t('pages.plannerMD.emptyState.noEgoGifts')
+            }
+            className="flex-1"
+          />
         </div>
       )}
     </div>

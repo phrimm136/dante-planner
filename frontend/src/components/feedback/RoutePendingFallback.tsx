@@ -1,4 +1,4 @@
-import { Skeleton } from '@/components/ui/skeleton'
+import { TextSkeleton } from '@/components/feedback/TextSkeleton'
 import { SECTION_STYLES } from '@/lib/constants'
 
 /**
@@ -7,11 +7,11 @@ import { SECTION_STYLES } from '@/lib/constants'
 export function RoutePendingFallback() {
   return (
     <div className={SECTION_STYLES.LAYOUT.page}>
-      <Skeleton className="h-8 w-64" />
+      <TextSkeleton size="2xl" width="lg" />
       <div className="mt-6 space-y-3">
-        <Skeleton className="h-5 w-full max-w-3xl" />
-        <Skeleton className="h-5 w-full max-w-2xl" />
-        <Skeleton className="h-5 w-full max-w-xl" />
+        <TextSkeleton width="full" className="max-w-3xl" />
+        <TextSkeleton width="full" className="max-w-2xl" />
+        <TextSkeleton width="full" className="max-w-xl" />
       </div>
     </div>
   )

@@ -1,7 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { EGO_GIFT_GEOMETRY } from '@/pages/egoGift'
-import { aspectOf } from '@/shared/cardLayout'
+import { EGO_GIFT_GEOMETRY, aspectOf } from '@/shared/cardLayout'
 import { START_BUFF_MINI_CARD } from '../../../lib/cardLayout'
 import { StartBuffMiniCard } from '../StartBuffMiniCard'
 

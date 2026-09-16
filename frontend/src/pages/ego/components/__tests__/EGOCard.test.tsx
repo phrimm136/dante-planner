@@ -205,32 +205,34 @@ describe('EGOCard', () => {
     expect(iconRing.style.objectPosition).toBe(EGO_CARD_LAYERS.iconRing.origin)
   })
 
-  it('hides the ring until hover and holds it open when selected', () => {
-    const { container, rerender } = renderCard(<EGOCard ego={EGO} />)
-    const ring = () => container.querySelector('img[src="/mock/hoverRing.webp"]')
+  it('hides the hover ring until hover and holds its tint constant', () => {
+    const { container } = renderCard(<EGOCard ego={EGO} />)
+    const rings = [...container.querySelectorAll('img[src="/mock/hoverRing.webp"]')]
 
-    expect(ring()?.className).toContain('opacity-0')
-    expect(ring()?.className).toContain('group-hover:opacity-100')
-    expect(ring()?.className).not.toContain('transition')
-    expect(ring()?.className).toContain('brightness-[var(--ego-hover-ring-brightness)]')
+    expect(rings).toHaveLength(1)
+    const [hoverRing] = rings
+
+    expect(hoverRing?.className).toContain('opacity-0')
+    expect(hoverRing?.className).toContain('group-hover:opacity-100')
+    expect(hoverRing?.className).not.toContain('transition')
+    expect(hoverRing?.className).toContain('brightness-[var(--ego-hover-ring-brightness)]')
+    expect(hoverRing?.className).not.toContain('group-hover:brightness')
     expect(root(container).style.getPropertyValue('--ego-hover-ring-brightness')).toBe('0.784')
-
-    rerender(
-      <QueryClientProvider client={new QueryClient()}>
-        <EGOCard ego={EGO} isSelected />
-      </QueryClientProvider>,
-    )
-
-    expect(ring()?.className).toContain('opacity-100')
-    expect(ring()?.className).not.toContain('opacity-0')
   })
 
-  it('holds the selected ring at the sprite’s own white, hover included', () => {
+  it('adds the selected ring over the hover ring, at the sprite’s own white', () => {
     const { container } = renderCard(<EGOCard ego={EGO} isSelected />)
-    const ring = container.querySelector('img[src="/mock/hoverRing.webp"]')
+    const rings = [...container.querySelectorAll('img[src="/mock/hoverRing.webp"]')]
 
-    expect(ring?.className).toContain('opacity-100')
-    expect(ring?.className).not.toContain('brightness')
+    expect(rings).toHaveLength(2)
+    const [hoverRing, selectedRing] = rings
+
+    expect(hoverRing?.className).toContain('opacity-0')
+    expect(hoverRing?.className).toContain('brightness-[var(--ego-hover-ring-brightness)]')
+    expect(selectedRing?.className).not.toContain('brightness')
+    expect(selectedRing?.className).not.toContain('opacity-0')
+    // Both nodes carry the client's one ring rect, so the sprites sit on each other.
+    expect(selectedRing?.getAttribute('style')).toBe(hoverRing?.getAttribute('style'))
   })
 
   it('leaves the name plate out when the EGO has no attribute', () => {

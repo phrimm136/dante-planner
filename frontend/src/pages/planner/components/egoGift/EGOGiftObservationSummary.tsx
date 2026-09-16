@@ -3,13 +3,14 @@ import { useEGOGiftObservationData } from '@/pages/egoGift'
 import { useEGOGiftListSpec, useEGOGiftListI18n, getBaseGiftId } from '@/pages/egoGift'
 import type { EncodedGiftId } from '@/shared/gameData'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
-import { CARD_MOBILE_SCALE, EMPTY_STATE } from '@/lib/constants'
-import { EGO_GIFT_GEOMETRY } from '@/pages/egoGift'
+import { CARD_MOBILE_SCALE } from '@/lib/constants'
 import { cn } from '@/lib/utils'
+import { EmptyStatePlaceholder } from '@/components/feedback/EmptyStatePlaceholder'
+import { GIFT_ROW_PADDING_PX, giftRowMinHeightPx } from '../../lib/cardLayout'
 import type { EGOGiftListItem } from '@/pages/egoGift'
 import { PlannerSection } from '@/components/layout/PlannerSection'
 import { StarlightCostDisplay } from '../StarlightCostDisplay'
-import { CardSlot } from '@/shared/cardLayout'
+import { CardSlot, EGO_GIFT_GEOMETRY, useSlotSizePx } from '@/shared/cardLayout'
 import { EGOGiftCard } from '@/pages/egoGift'
 import { toGiftListItem } from '@/pages/egoGift'
 
@@ -37,6 +38,8 @@ export function EGOGiftObservationSummary({
   const { t } = useTranslation(['planner', 'common'])
 
   const mobileScale = CARD_MOBILE_SCALE
+  const { heightPx: giftSlotHeightPx } = useSlotSizePx(EGO_GIFT_GEOMETRY.size, mobileScale)
+  const minHeight = giftRowMinHeightPx(giftSlotHeightPx)
 
   // Load observation data for cost calculation (suspends)
   const { data: observationData } = useEGOGiftObservationData(mdVersion)
@@ -79,7 +82,7 @@ export function EGOGiftObservationSummary({
         className={cn('w-full text-left', !readOnly && 'selectable cursor-pointer')}
       >
         {hasSelectedGifts ? (
-          <div className="flex flex-wrap gap-2 p-2 min-h-28">
+          <div className="flex flex-wrap gap-2" style={{ padding: GIFT_ROW_PADDING_PX, minHeight }}>
             {selectedGifts.map((gift) => (
               <CardSlot key={gift.id} size={EGO_GIFT_GEOMETRY.size} mobileScale={mobileScale}>
                 <EGOGiftCard gift={gift} />
@@ -87,16 +90,15 @@ export function EGOGiftObservationSummary({
             ))}
           </div>
         ) : (
-          <div
-            className={cn(
-              'flex items-center justify-center p-2 text-sm text-muted-foreground',
-              EMPTY_STATE.MIN_HEIGHT,
-              EMPTY_STATE.DASHED_BORDER,
-            )}
-          >
-            {readOnly
-              ? t('pages.plannerMD.emptyState.noEgoGifts')
-              : t('pages.plannerMD.selectEgoGifts')}
+          <div className="flex" style={{ minHeight }}>
+            <EmptyStatePlaceholder
+              label={
+                readOnly
+                  ? t('pages.plannerMD.emptyState.noEgoGifts')
+                  : t('pages.plannerMD.selectEgoGifts')
+              }
+              className="flex-1"
+            />
           </div>
         )}
       </button>

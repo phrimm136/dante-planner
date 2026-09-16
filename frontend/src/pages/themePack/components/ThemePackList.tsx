@@ -1,7 +1,7 @@
 import type { z } from 'zod'
 import type { ThemePackList as ThemePackListType } from '../types/ThemePackTypes'
 import type { ThemePackI18nSchema } from '../schemas/ThemePackSchemas'
-import { THEME_PACK_GEOMETRY } from '../lib/cardLayout'
+import { THEME_PACK_GEOMETRY } from '@/shared/cardLayout'
 import type { FilterStore } from '@/components/hooks/filterStore'
 import { entriesSortedById, FilteredEntityGrid, useSearchTermSources } from '@/shared/filter'
 import { THEME_PACK_LIST } from '../hooks/useThemePackListData'

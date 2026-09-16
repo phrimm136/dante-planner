@@ -2,6 +2,13 @@ export { CardSlot } from './CardSlot'
 export { pctStyle, type PctRect } from './rect'
 export { layerStyle, type CardLayer } from './layer'
 export { aspectOf, type CardGeometry, type GridRowHeight, type CardSizePx } from './geometry'
+export {
+  IDENTITY_GEOMETRY,
+  EGO_GEOMETRY,
+  EGO_GIFT_GEOMETRY,
+  THEME_PACK_GEOMETRY,
+  PLANNER_GEOMETRY,
+} from './geometries'
 export { useSlotSizePx } from './useSlotSizePx'
 export {
   fitFontSize,

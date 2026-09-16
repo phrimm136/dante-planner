@@ -1,5 +1,5 @@
 import type { EGOGiftListItem } from '../types/EGOGiftTypes'
-import { EGO_GIFT_GEOMETRY } from '../lib/cardLayout'
+import { EGO_GIFT_GEOMETRY } from '@/shared/cardLayout'
 import { FilteredEntityGrid, useSearchTermSources } from '@/shared/filter'
 import { EGO_GIFT_LIST } from '../hooks/useEGOGiftListData'
 import type { FilterStore } from '@/components/hooks/filterStore'

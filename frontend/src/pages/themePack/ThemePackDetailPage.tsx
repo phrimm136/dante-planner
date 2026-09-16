@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next'
 import { DetailPageLayout } from '@/components/layout/DetailPageLayout'
 import { LabeledPanel } from '@/components/layout/LabeledPanel'
 import { ThemePackCard } from '@/pages/themePack'
-import { ThemePackDetailSkeleton } from '@/pages/themePack'
+import { ThemePackDetailSkeleton } from './components/ThemePackDetailSkeleton'
 import { EGOGiftGrid } from '@/pages/egoGift'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useThemePackDetailSpec } from '@/pages/themePack'
@@ -20,7 +20,7 @@ import { useThemePackListSpec } from '@/pages/themePack'
 import { useEGOGiftListSpec } from '@/pages/egoGift'
 import { AbEventCard, useAbEventListSpec } from '@/pages/abEvent'
 import { getFeaturedBossImagePath } from '@/shared/assets'
-import { CardSlot } from '@/shared/cardLayout'
+import { CardSlot, THEME_PACK_GEOMETRY } from '@/shared/cardLayout'
 import {
   DUNGEON_IDX,
   DIFFICULTY_LABELS,
@@ -31,7 +31,7 @@ import type { AbEventId, DungeonIdx, ThemePackFloor, DifficultyLabel } from '@/s
 import type { ThemePackDetail } from '@/pages/themePack'
 import { Link } from '@tanstack/react-router'
 import { DIFFICULTY_COLORS, SECTION_STYLES } from '@/lib/constants'
-import { THEME_PACK_GEOMETRY } from './lib/cardLayout'
+import { SectionTitle } from './components/SectionTitle'
 import type { EGOGiftId } from '@/shared/gameData'
 
 /** The theme pack box with its height left to the card. */
@@ -134,17 +134,6 @@ export function FloorDisplay({
 // =============================================================================
 // Right Column Components
 // =============================================================================
-
-/**
- * Section header for right column
- */
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide border-b border-border pb-2">
-      {children}
-    </h2>
-  )
-}
 
 /**
  * Featured boss panels — pre-composited webp per boss from the manifest.

@@ -5,7 +5,7 @@ import { useMDUserPlannersData } from '../../hooks/useMDUserPlannersData'
 import { useUserSettingsQuery } from '@/shared/userSettings'
 import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
 import { PROGRESSIVE_REVEAL, calculatePlannerPages } from '@/lib/constants'
-import { PLANNER_GEOMETRY } from '../../lib/cardLayout'
+import { PLANNER_GEOMETRY } from '@/shared/cardLayout'
 
 import { PersonalPlannerCard } from './PersonalPlannerCard'
 import { PlannerListPagination } from './PlannerListPagination'
@@ -159,7 +159,7 @@ export function PersonalPlannerList({
         <PlannerEmptyState view="my-plans" isFiltered={hasActiveFilters} />
       ) : (
         <>
-          <ResponsiveCardGrid size={PLANNER_GEOMETRY.size} rows="auto">
+          <ResponsiveCardGrid size={PLANNER_GEOMETRY.size} rows="content">
             {planners.slice(0, displayCount).map((planner: PlannerSummary) => (
               <PersonalPlannerCard
                 key={planner.id}

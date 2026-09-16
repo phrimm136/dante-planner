@@ -121,8 +121,8 @@ export function IdentityCard({
           <Suspense
             fallback={
               <span className="flex flex-col items-end gap-0.5">
-                <Skeleton className="w-14 h-2.5 bg-white/30" />
-                <Skeleton className="w-10 h-2.5 bg-white/30" />
+                <Skeleton className="w-14 h-2.5" />
+                <Skeleton className="w-10 h-2.5" />
               </span>
             }
           >

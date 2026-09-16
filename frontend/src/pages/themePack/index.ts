@@ -2,7 +2,6 @@
 
 // Components
 export { ThemePackCard } from './components/ThemePackCard'
-export { ThemePackDetailSkeleton } from './components/ThemePackDetailSkeleton'
 export { ThemePackList } from './components/ThemePackList'
 export { ThemePackCardLink } from './components/ThemePackCardLink'
 export { ThemePackFilterDropdown } from './components/ThemePackFilterDropdown'
@@ -37,7 +36,6 @@ export {
 export type { ThemePackDetail, FeaturedBoss } from './schemas/ThemePackSchemas'
 
 // Card layout
-export { THEME_PACK_GEOMETRY } from './lib/cardLayout'
 
 // Filters
 export type { ThemePackFacetState } from './lib/themePackFilter'

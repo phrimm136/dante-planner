@@ -9,18 +9,6 @@
 export const FILTER_SIDEBAR_WIDTH = 280
 
 /**
- * Empty State Styling Tokens
- * Consistent styling for clickable empty state placeholders in planner sections
- * Import: import { EMPTY_STATE } from '@/lib/constants'
- */
-export const EMPTY_STATE = {
-  /** Minimum height for empty state container (matches min-h-28 = 7rem) */
-  MIN_HEIGHT: 'min-h-28',
-  /** Dashed border styling for empty state visual indicator */
-  DASHED_BORDER: 'border-2 border-dashed border-muted-foreground/50 rounded-lg',
-} as const
-
-/**
  * Detail Page Layout Constants
  * Used for modular two-column detail page layout (Identity, EGO, EGO Gift)
  */

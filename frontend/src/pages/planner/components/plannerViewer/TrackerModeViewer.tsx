@@ -3,7 +3,14 @@ import { useTranslation } from 'react-i18next'
 import { PlannerSection } from '@/components/layout/PlannerSection'
 import { RevealSection } from '../RevealSection'
 import type { RevealSectionSpec } from '../RevealSection'
-import { GiftGridSkeleton, SectionBlockSkeleton, SkillGridSkeleton } from '../plannerSkeletons'
+import {
+  DeckGridSkeleton,
+  GiftGridSkeleton,
+  GiftGridTrackerSkeleton,
+  SkillGridSkeleton,
+  StartBuffSkeleton,
+  StartGiftSkeleton,
+} from '../plannerSkeletons'
 import { SectionNoteDialog } from '../SectionNoteDialog'
 import { StartBuffSection } from '../startBuff/StartBuffSection'
 import { StartGiftSummary } from '../startGift/StartGiftSummary'
@@ -106,7 +113,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
       // Equipment read-only, deployment editable
       id: 'deckBuilder',
       node: (
-        <Suspense fallback={<SectionBlockSkeleton className="h-64 w-full rounded-lg" />}>
+        <Suspense fallback={<DeckGridSkeleton />}>
           <DeckTrackerPanel
             equipment={trackerState.equipment}
             deploymentOrder={trackerState.deploymentOrder}
@@ -148,7 +155,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
     {
       id: 'startBuffs',
       node: (
-        <Suspense fallback={<SectionBlockSkeleton />}>
+        <Suspense fallback={<StartBuffSkeleton />}>
           <StartBuffSection
             mdVersion={planner.metadata.contentVersion}
             selectedBuffIds={deserialized.selectedBuffIds}
@@ -162,7 +169,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
     {
       id: 'startGifts',
       node: (
-        <Suspense fallback={<SectionBlockSkeleton />}>
+        <Suspense fallback={<StartGiftSkeleton />}>
           <StartGiftSummary
             selectedKeyword={content.selectedGiftKeyword}
             selectedGiftIds={deserialized.selectedGiftIds}
@@ -209,18 +216,15 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
       // EGO gift list and theme pack collection, side by side
       id: 'comprehensiveGifts',
       node: (
-        <div className="flex flex-col md:flex-row gap-2">
+        <div className="flex flex-col md:flex-row md:items-stretch gap-2">
           {/* Comprehensive Gifts from all floors */}
           <div className="md:w-1/2 md:min-w-0">
             <PlannerSection
               title={t('pages.plannerMD.comprehensiveEgoGiftListView')}
               onViewNotes={() => setOpenNote('comprehensiveGifts')}
+              fill
             >
-              <Suspense
-                fallback={
-                  <SectionBlockSkeleton className="w-full rounded-md md:h-[178px] lg:h-[416px]" />
-                }
-              >
+              <Suspense fallback={<GiftGridTrackerSkeleton />}>
                 <ComprehensiveGiftGridTracker
                   floorSelections={content.floorSelections}
                   comprehensiveGiftIds={content.comprehensiveGiftIds}

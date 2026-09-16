@@ -10,9 +10,7 @@ import {
   SKILL_EXCHANGE_GEOMETRY,
   SKILL_IMAGE_GEOMETRY,
 } from '../../lib/cardLayout'
-import { EGO_GIFT_GEOMETRY } from '@/pages/egoGift'
-import { IDENTITY_GEOMETRY } from '@/pages/identity'
-import { CardSlot, aspectOf } from '@/shared/cardLayout'
+import { CardSlot, EGO_GIFT_GEOMETRY, IDENTITY_GEOMETRY, aspectOf } from '@/shared/cardLayout'
 import {
   COMPACT_IDENTITY_CARD,
   DECK_CARD,

@@ -1,9 +1,8 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CARD_MOBILE_SCALE } from '@/lib/constants'
-import { THEME_PACK_GEOMETRY } from '@/pages/themePack'
-import { CardSlot } from '@/shared/cardLayout'
-import { cn } from '@/lib/utils'
+import { CardSlot, THEME_PACK_GEOMETRY } from '@/shared/cardLayout'
+import { EmptyStatePlaceholder } from '@/components/feedback/EmptyStatePlaceholder'
 import { ThemePackCard } from '@/pages/themePack'
 import type { ThemePackEntry } from '@/pages/themePack'
 
@@ -83,23 +82,16 @@ export function ThemePackPlaceholder({
 
   return (
     <CardSlot size={THEME_PACK_GEOMETRY.size} className={className}>
-      <button
-        type="button"
-        onClick={readOnly ? undefined : onClick}
-        disabled={readOnly}
-        aria-label={t('pages.plannerMD.selectThemePack')}
-        className={cn(
-          'size-full border-2 border-dashed border-muted-foreground/50',
-          'flex items-center justify-center',
-          !readOnly ? 'selectable' : 'rounded-md',
-        )}
-      >
-        <span className="text-sm text-muted-foreground text-center px-4">
-          {readOnly
+      <EmptyStatePlaceholder
+        label={
+          readOnly
             ? t('pages.plannerMD.emptyState.noThemePack')
-            : t('pages.plannerMD.selectThemePack')}
-        </span>
-      </button>
+            : t('pages.plannerMD.selectThemePack')
+        }
+        onClick={onClick}
+        readOnly={readOnly}
+        className="size-full"
+      />
     </CardSlot>
   )
 }
