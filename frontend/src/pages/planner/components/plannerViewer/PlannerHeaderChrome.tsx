@@ -8,6 +8,7 @@ import { categoryBadgeStyle } from '../../lib/plannerBadges'
 
 import type { ReactNode } from 'react'
 import { SECTION_STYLES } from '@/lib/constants'
+import { cn } from '@/lib/utils'
 
 interface PlannerHeaderChromeProps {
   onBack: () => void
@@ -78,7 +79,9 @@ export function PlannerHeaderChrome({
       </div>
 
       <div className="flex items-center justify-between gap-4">
-        <h1 className={SECTION_STYLES.TEXT.pageTitle}>{title || t('untitled')}</h1>
+        <h1 className={cn(SECTION_STYLES.TEXT.pageTitle, 'min-w-0 wrap-anywhere text-xl lg:text-2xl')}>
+          {title || t('untitled')}
+        </h1>
 
         <div className="flex items-center gap-1 shrink-0">{actions}</div>
       </div>
