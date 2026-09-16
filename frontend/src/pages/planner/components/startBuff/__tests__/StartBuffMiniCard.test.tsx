@@ -1,6 +1,20 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import { EGO_GIFT_GEOMETRY } from '@/pages/egoGift'
+import { aspectOf } from '@/shared/cardLayout'
+import { START_BUFF_MINI_CARD } from '../../../lib/cardLayout'
 import { StartBuffMiniCard } from '../StartBuffMiniCard'
+
+import krTable from '@static/data/fontAdvances/KR.json'
+import { FontAdvanceTableSchema } from '@/shared/cardLayout'
+
+/** The face the Korean cards are drawn in, as the site ships it. */
+const KR_TABLE = FontAdvanceTableSchema.parse(krTable)
+
+vi.mock('@/shared/cardLayout', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/shared/cardLayout')>()),
+  useFontAdvances: () => KR_TABLE,
+}))
 
 // Mock asset path functions
 vi.mock('@/shared/assets', () => ({
@@ -33,6 +47,7 @@ describe('StartBuffMiniCard', () => {
     buffId: 100,
     displayName: 'Test Buff',
     mdVersion: 6,
+    width: EGO_GIFT_GEOMETRY.size.widthPx,
   }
 
   describe('background and icon rendering', () => {
@@ -69,7 +84,6 @@ describe('StartBuffMiniCard', () => {
       // buffId 100: baseId = (100 % 100) + 100 = 100, enhancement = Math.floor(100/100) - 1 = 0
       render(<StartBuffMiniCard {...defaultProps} />)
 
-      // AutoSizeWrappedText renders text twice (hidden measurement + visible), use getAllByText
       const nameElements = screen.getAllByText('Test Buff')
       expect(nameElements.length).toBeGreaterThan(0)
       // No + or ++ suffix
@@ -154,7 +168,6 @@ describe('StartBuffMiniCard', () => {
     it('applies accent color to name text', () => {
       render(<StartBuffMiniCard {...defaultProps} />)
 
-      // AutoSizeWrappedText renders text twice, get all and check the visible one
       const nameElements = screen.getAllByText('Test Buff')
       // The visible element should have the color
       const visibleElement = nameElements.find((el) => !el.getAttribute('aria-hidden'))
@@ -163,12 +176,23 @@ describe('StartBuffMiniCard', () => {
       expect(visibleElement).toHaveStyle({ color: '#00ffcc' })
     })
 
-    it('has correct dimensions (w-24 h-24)', () => {
+    it('fills its slot at the gift card ratio', () => {
       const { container } = render(<StartBuffMiniCard {...defaultProps} />)
 
       const cardContainer = container.firstChild as HTMLElement
-      expect(cardContainer.className).toContain('w-24')
-      expect(cardContainer.className).toContain('h-24')
+      expect(cardContainer.className).toContain('w-full')
+      expect(cardContainer).toHaveStyle({
+        containerType: 'inline-size',
+        aspectRatio: String(aspectOf(EGO_GIFT_GEOMETRY.size)),
+      })
+    })
+
+    it('draws the buff icon at its share of the card', () => {
+      const { container } = render(<StartBuffMiniCard {...defaultProps} />)
+
+      const icon = container.querySelector<HTMLElement>('img[src="/mock/icon/100.webp"]')
+      expect(icon?.style.width).toBe(`${String(START_BUFF_MINI_CARD.icon)}%`)
+      expect(icon?.style.height).toBe(`${String(START_BUFF_MINI_CARD.icon)}%`)
     })
   })
 })

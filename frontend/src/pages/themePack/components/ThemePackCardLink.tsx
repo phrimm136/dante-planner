@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router'
+import { cn } from '@/lib/utils'
 import { ThemePackCard } from './ThemePackCard'
 import type { ThemePackEntry } from '../types/ThemePackTypes'
-import { cn } from '@/lib/utils'
 
 interface ThemePackCardLinkProps {
   packId: string
@@ -14,7 +14,7 @@ interface ThemePackCardLinkProps {
  */
 export function ThemePackCardLink({ packId, packEntry, className }: ThemePackCardLinkProps) {
   return (
-    <Link to="/theme-pack/$id" params={{ id: packId }} className={cn(className)}>
+    <Link to="/theme-pack/$id" params={{ id: packId }} className={cn('block', className)}>
       <ThemePackCard packId={packId} packEntry={packEntry} enableHoverHighlight />
     </Link>
   )

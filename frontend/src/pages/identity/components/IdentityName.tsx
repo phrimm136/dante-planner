@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { useIdentityListI18n } from '../hooks/useIdentityListData'
-import { getDisplayFontForLanguage, getLineHeightForLanguage } from '@/lib/utils'
-import { AutoSizeWrappedText } from '@/components/ui/AutoSizeWrappedText'
+import { getDisplayFontForLanguage } from '@/lib/utils'
+import { fontTableLanguage, nameShadow, useFontAdvances } from '@/shared/cardLayout'
+import { identityNameLines, nameLineStyle, nameTextStyle } from '../lib/cardLayout'
 import type { IdentityId } from '@/shared/gameData'
 
 interface IdentityNameProps {
@@ -10,11 +11,10 @@ interface IdentityNameProps {
 }
 
 /**
- * Component that fetches and displays Identity name.
- * Uses useSuspenseQuery internally - MUST be wrapped in Suspense boundary.
+ * An identity name, broken into lines by the display face's own advance table.
  *
- * This allows granular loading: card images stay visible while only
- * the name text shows skeleton during language change.
+ * Reads i18n and that table through `useSuspenseQuery` — render it inside a Suspense
+ * boundary.
  *
  * @example
  * <Suspense fallback={<Skeleton className="w-16 h-4" />}>
@@ -24,22 +24,28 @@ interface IdentityNameProps {
 export function IdentityName({ id }: IdentityNameProps) {
   const { i18n } = useTranslation()
   const i18nData = useIdentityListI18n()
-  const rawName = i18nData[id] || id
-  // Replace " - " with non-breaking space before hyphen to prevent orphaned hyphens
-  const name = rawName.replace(/ - /g, '\u00A0- ')
-  const displayStyle = getDisplayFontForLanguage(i18n.language)
-  const lineHeight = getLineHeightForLanguage(i18n.language)
+  const name = i18nData[id] || id
+  const fontTable = useFontAdvances(i18n.language)
+  const lines = identityNameLines(name, fontTable)
 
   return (
-    <AutoSizeWrappedText
-      text={name}
-      width={127}
-      maxLines={5}
-      className="text-right leading-4 text-identity-name"
-      style={{ ...displayStyle }}
-      minFontSize={8}
-      maxFontSize={18}
-      lineHeight={lineHeight}
-    />
+    <span
+      className="text-identity-name"
+      style={{
+        ...nameTextStyle(fontTable, fontTableLanguage(i18n.language)),
+        ...getDisplayFontForLanguage(i18n.language),
+        textShadow: nameShadow('identity', i18n.language),
+      }}
+    >
+      {lines.map((line, index) => (
+        <span
+          key={`${String(index)}:${line}`}
+          data-testid="identity-name-line"
+          style={nameLineStyle()}
+        >
+          {line}
+        </span>
+      ))}
+    </span>
   )
 }

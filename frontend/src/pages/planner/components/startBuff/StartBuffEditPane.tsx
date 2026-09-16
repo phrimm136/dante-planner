@@ -1,10 +1,12 @@
 import { useState } from 'react'
-import { useIsBreakpoint } from '@/components/hooks/use-is-breakpoint'
 import { useTranslation } from 'react-i18next'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { ENHANCEMENT_LABELS, type MDVersion } from '@/shared/gameData'
-import { CARD_GRID, START_BUFF_CARD_SIZE } from '@/lib/constants'
+import { CARD_MOBILE_SCALE_DENSE } from '@/lib/constants'
+import { START_BUFF_GEOMETRY } from '../../lib/cardLayout'
+import { CardSlot, useSlotSizePx } from '@/shared/cardLayout'
+import { START_BUFF_GRID_COLUMNS } from '../../lib/cardLayout'
 import { getStartBuffEnhancementIconPath } from '@/shared/assets'
 import { useStartBuffSelection } from '../../hooks/useStartBuffSelection'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
@@ -16,7 +18,6 @@ import {
 } from '@/shared/gameText'
 import type { EnhancementLevel } from '@/shared/gameText'
 import { StarlightCostDisplay } from '../StarlightCostDisplay'
-import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { StartBuffCard } from './StartBuffCard'
 
 interface StartBuffEditPaneProps {
@@ -42,14 +43,11 @@ export function StartBuffEditPane({ open, onOpenChange, mdVersion }: StartBuffEd
     setSelectedBuffIds,
   )
 
-  const isDesktop = useIsBreakpoint('min', CARD_GRID.LG_BREAKPOINT)
-
-  // Calculate scale and dimensions
-  const mobileScale = CARD_GRID.MOBILE_SCALE.DENSE
-  const scale = isDesktop ? 1 : mobileScale
-  const { width: cardWidth, height: cardHeight } = START_BUFF_CARD_SIZE
-  const scaledWidth = cardWidth * scale
-  const scaledHeight = cardHeight * scale
+  const mobileScale = CARD_MOBILE_SCALE_DENSE
+  const { widthPx: columnWidth, heightPx: rowHeight } = useSlotSizePx(
+    START_BUFF_GEOMETRY.size,
+    mobileScale,
+  )
 
   // Enhancement preview state for all cards (lifted from StartBuffCard)
   // Initialized from current selection; empty entries fall back to 0
@@ -203,8 +201,8 @@ export function StartBuffEditPane({ open, onOpenChange, mdVersion }: StartBuffEd
           <div
             className="bg-muted grid gap-2 w-max mx-auto"
             style={{
-              gridTemplateColumns: `repeat(5, ${scaledWidth}px)`,
-              gridAutoRows: `${scaledHeight}px`,
+              gridTemplateColumns: `repeat(${String(START_BUFF_GRID_COLUMNS)}, ${String(columnWidth)}px)`,
+              gridAutoRows: `${String(rowHeight)}px`,
             }}
           >
             {displayBuffs.map((buff) => {
@@ -213,11 +211,10 @@ export function StartBuffEditPane({ open, onOpenChange, mdVersion }: StartBuffEd
               const isSelected = selectedBuffIds.has(buffId)
 
               return (
-                <ScaledCardWrapper
+                <CardSlot
                   key={buff.baseId}
+                  size={START_BUFF_GEOMETRY.size}
                   mobileScale={mobileScale}
-                  cardWidth={cardWidth}
-                  cardHeight={cardHeight}
                 >
                   <StartBuffCard
                     mdVersion={mdVersion}
@@ -230,7 +227,7 @@ export function StartBuffEditPane({ open, onOpenChange, mdVersion }: StartBuffEd
                     enhancement={enhancement}
                     onEnhancementChange={handleEnhancementChange}
                   />
-                </ScaledCardWrapper>
+                </CardSlot>
               )
             })}
           </div>

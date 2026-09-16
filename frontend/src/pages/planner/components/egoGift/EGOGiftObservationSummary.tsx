@@ -3,12 +3,13 @@ import { useEGOGiftObservationData } from '@/pages/egoGift'
 import { useEGOGiftListSpec, useEGOGiftListI18n, getBaseGiftId } from '@/pages/egoGift'
 import type { EncodedGiftId } from '@/shared/gameData'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
-import { EMPTY_STATE, CARD_GRID } from '@/lib/constants'
+import { CARD_MOBILE_SCALE, EMPTY_STATE } from '@/lib/constants'
+import { EGO_GIFT_GEOMETRY } from '@/pages/egoGift'
 import { cn } from '@/lib/utils'
 import type { EGOGiftListItem } from '@/pages/egoGift'
 import { PlannerSection } from '@/components/layout/PlannerSection'
 import { StarlightCostDisplay } from '../StarlightCostDisplay'
-import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
+import { CardSlot } from '@/shared/cardLayout'
 import { EGOGiftCard } from '@/pages/egoGift'
 import { toGiftListItem } from '@/pages/egoGift'
 
@@ -35,7 +36,7 @@ export function EGOGiftObservationSummary({
 }: EGOGiftObservationSummaryProps) {
   const { t } = useTranslation(['planner', 'common'])
 
-  const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
+  const mobileScale = CARD_MOBILE_SCALE
 
   // Load observation data for cost calculation (suspends)
   const { data: observationData } = useEGOGiftObservationData(mdVersion)
@@ -80,20 +81,15 @@ export function EGOGiftObservationSummary({
         {hasSelectedGifts ? (
           <div className="flex flex-wrap gap-2 p-2 min-h-28">
             {selectedGifts.map((gift) => (
-              <ScaledCardWrapper
-                key={gift.id}
-                cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
-                cardHeight={CARD_GRID.HEIGHT.EGO_GIFT}
-                mobileScale={mobileScale}
-              >
+              <CardSlot key={gift.id} size={EGO_GIFT_GEOMETRY.size} mobileScale={mobileScale}>
                 <EGOGiftCard gift={gift} />
-              </ScaledCardWrapper>
+              </CardSlot>
             ))}
           </div>
         ) : (
           <div
             className={cn(
-              'flex items-center justify-center p-2 text-muted-foreground',
+              'flex items-center justify-center p-2 text-sm text-muted-foreground',
               EMPTY_STATE.MIN_HEIGHT,
               EMPTY_STATE.DASHED_BORDER,
             )}

@@ -1,5 +1,9 @@
+import type { CSSProperties } from 'react'
+
 import { SINNERS, getAttributeColors } from '@/shared/gameData'
-import { CARD_GRID } from '@/lib/constants'
+import { CARD_MOBILE_SCALE_NONE, MAX_DEPLOYED_ORDER } from '@/lib/constants'
+import { COMPACT_IDENTITY_GEOMETRY } from '../../lib/cardLayout'
+import { CardSlot } from '@/shared/cardLayout'
 import type { SinnerEquipment } from '../../types/DeckTypes'
 import type { SkillData } from './SinnerGrid'
 import {
@@ -8,6 +12,7 @@ import {
   getAttackTypeIconPath,
 } from '@/shared/assets'
 import { cn, getDisplayFontForNumeric } from '@/lib/utils'
+import { COMPACT_IDENTITY_CARD, COMPACT_IDENTITY_GRID_GAP, cqw } from '../../lib/cardLayout'
 
 interface CompactIdentityRowProps {
   equipment: Record<string, SinnerEquipment>
@@ -19,14 +24,24 @@ interface CompactIdentityRowProps {
 
 const EMPTY_SKILL_DATA: SkillData = { affinities: [], atkTypes: [] }
 
+const CELL_STYLE: CSSProperties = {
+  gap: cqw(COMPACT_IDENTITY_CARD.rowGap),
+}
+
+const SKILL_BOX_STYLE: CSSProperties = {
+  width: cqw(COMPACT_IDENTITY_CARD.skillBox),
+  height: cqw(COMPACT_IDENTITY_CARD.skillBox),
+}
+
+const ATK_ICON_STYLE: CSSProperties = {
+  width: cqw(COMPACT_IDENTITY_CARD.atkIcon),
+  height: cqw(COMPACT_IDENTITY_CARD.atkIcon),
+}
+
 /**
  * Compact grid of 12 identity thumbnails for the deck builder Identity tab.
  * Each thumbnail shows profile portrait, uptie icon, level, deployment number,
  * and 3 skill affinity boxes with attack type icons.
- *
- * memo: parent `DeckBuilderContent` re-renders on card hover due to
- * Compiler element-cache invalidation; shallow-equality memo here
- * blocks that cascade when props haven't actually changed.
  */
 export const CompactIdentityRow = function CompactIdentityRow({
   equipment,
@@ -47,8 +62,8 @@ export const CompactIdentityRow = function CompactIdentityRow({
     <div
       className="grid mx-auto"
       style={{
-        gridTemplateColumns: `repeat(auto-fill, ${String(CARD_GRID.WIDTH.COMPACT_IDENTITY)}px)`,
-        gap: '8px',
+        gridTemplateColumns: `repeat(auto-fill, ${String(COMPACT_IDENTITY_GEOMETRY.size.widthPx)}px)`,
+        gap: `${String(COMPACT_IDENTITY_GRID_GAP)}px`,
         justifyContent: 'center',
       }}
     >
@@ -62,102 +77,113 @@ export const CompactIdentityRow = function CompactIdentityRow({
         const level = sinnerEquipment.identity.level
         const skillData = skillDataMap[identityId] || EMPTY_SKILL_DATA
         const order = deploymentOrderMap[index] ?? null
-        const isDeployed = order !== null && order <= 7
+        const isDeployed = order !== null && order <= MAX_DEPLOYED_ORDER
 
         return (
-          <button
+          <CardSlot
             key={sinnerName}
-            type="button"
-            className="relative flex flex-col items-center gap-1"
-            style={{
-              width: `${String(CARD_GRID.WIDTH.COMPACT_IDENTITY)}px`,
-              height: `${String(CARD_GRID.HEIGHT.COMPACT_IDENTITY)}px`,
-              cursor: readOnly ? 'default' : 'pointer',
-            }}
-            disabled={readOnly || !onToggleDeploy}
-            aria-pressed={order !== null}
-            onClick={() => onToggleDeploy?.(index)}
+            size={COMPACT_IDENTITY_GEOMETRY.size}
+            mobileScale={CARD_MOBILE_SCALE_NONE}
           >
-            {/* Portrait container */}
-            <div
-              className="relative"
-              style={{
-                width: `${String(CARD_GRID.WIDTH.COMPACT_IDENTITY)}px`,
-                height: `${String(CARD_GRID.WIDTH.COMPACT_IDENTITY)}px`,
-              }}
+            <button
+              type="button"
+              className="relative w-full h-full flex flex-col items-center"
+              style={{ ...CELL_STYLE, cursor: readOnly ? 'default' : 'pointer' }}
+              disabled={readOnly || !onToggleDeploy}
+              aria-pressed={order !== null}
+              onClick={() => onToggleDeploy?.(index)}
             >
-              {/* Profile image - dimmed when deployed */}
-              <img
-                src={getIdentityProfileImagePath(identityId, uptie)}
-                alt={sinnerName}
-                loading="lazy"
-                className={cn(
-                  'w-full h-full object-cover rounded-sm',
-                  order !== null && 'brightness-50',
-                )}
-              />
-
-              {/* Uptie icon - upper-right */}
-              <div className="absolute top-0.5 right-0.5 pointer-events-none">
+              {/* Portrait container */}
+              <div className="relative w-full aspect-square">
+                {/* Profile image - dimmed when deployed */}
                 <img
-                  src={getEGOTierIconPath(uptie)}
-                  alt={`Uptie ${String(uptie)}`}
-                  className={cn('h-4', order !== null && 'brightness-50')}
+                  src={getIdentityProfileImagePath(identityId, uptie)}
+                  alt={sinnerName}
+                  loading="lazy"
+                  className={cn(
+                    'w-full h-full object-cover rounded-sm',
+                    order !== null && 'brightness-50',
+                  )}
                 />
-              </div>
 
-              {/* Level number - lower-right */}
-              <div
-                className={cn(
-                  'absolute bottom-0.5 right-1 pointer-events-none text-[16px] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]',
-                  order !== null && 'brightness-50',
-                )}
-                style={{ fontFamily: getDisplayFontForNumeric() }}
-              >
-                {`Lv.${String(level)}`}
-              </div>
-
-              {/* Deployment number overlay - NOT dimmed */}
-              {order !== null && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <span
-                    className={`text-[32px] ${isDeployed ? 'formation-number-deploy' : 'formation-number-backup'}`}
-                    style={{ fontFamily: getDisplayFontForNumeric() }}
-                  >
-                    {order}
-                  </span>
+                {/* Uptie icon - upper-right */}
+                <div
+                  className="absolute pointer-events-none"
+                  style={{
+                    top: cqw(COMPACT_IDENTITY_CARD.uptieInset),
+                    right: cqw(COMPACT_IDENTITY_CARD.uptieInset),
+                  }}
+                >
+                  <img
+                    src={getEGOTierIconPath(uptie)}
+                    alt={`Uptie ${String(uptie)}`}
+                    className={cn(order !== null && 'brightness-50')}
+                    style={{ height: cqw(COMPACT_IDENTITY_CARD.uptieIcon) }}
+                  />
                 </div>
-              )}
-            </div>
 
-            {/* Skill affinity row - 3 colored boxes with attack type icons */}
-            <div className="flex gap-1">
-              {[0, 1, 2].map((idx) => {
-                const affinity = skillData.affinities[idx]
-                const atkType = skillData.atkTypes[idx]
-                const bgColor = affinity ? getAttributeColors(affinity).primary : undefined
+                {/* Level number - lower-right */}
+                <div
+                  className={cn(
+                    'absolute pointer-events-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]',
+                    order !== null && 'brightness-50',
+                  )}
+                  style={{
+                    bottom: cqw(COMPACT_IDENTITY_CARD.levelBottom),
+                    right: cqw(COMPACT_IDENTITY_CARD.levelRight),
+                    fontSize: cqw(COMPACT_IDENTITY_CARD.levelFontSize),
+                    fontFamily: getDisplayFontForNumeric(),
+                  }}
+                >
+                  {`Lv.${String(level)}`}
+                </div>
 
-                return (
-                  <div
-                    key={idx}
-                    className="w-7 h-7 rounded-sm flex items-center justify-center"
-                    style={{ backgroundColor: bgColor || 'var(--muted)' }}
-                    title={`Skill ${String(idx + 1)}: ${atkType || '?'} (${affinity || '?'})`}
-                  >
-                    {atkType ? (
-                      <img
-                        src={getAttackTypeIconPath(atkType)}
-                        alt={atkType}
-                        className="w-5 h-5 object-contain"
-                      />
-                    ) : (
-                      <div className="w-5 h-5" />
-                    )}
+                {/* Deployment number overlay - NOT dimmed */}
+                {order !== null && (
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <span
+                      className={isDeployed ? 'formation-number-deploy' : 'formation-number-backup'}
+                      style={{
+                        fontSize: cqw(COMPACT_IDENTITY_CARD.orderFontSize),
+                        fontFamily: getDisplayFontForNumeric(),
+                      }}
+                    >
+                      {order}
+                    </span>
                   </div>
-                )
-              })}
-            </div>
-          </button>
+                )}
+              </div>
+
+              {/* Skill affinity row - 3 colored boxes with attack type icons */}
+              <div className="flex" style={{ gap: cqw(COMPACT_IDENTITY_CARD.skillGap) }}>
+                {[0, 1, 2].map((idx) => {
+                  const affinity = skillData.affinities[idx]
+                  const atkType = skillData.atkTypes[idx]
+                  const bgColor = affinity ? getAttributeColors(affinity).primary : undefined
+
+                  return (
+                    <div
+                      key={idx}
+                      className="rounded-sm flex items-center justify-center"
+                      style={{ ...SKILL_BOX_STYLE, backgroundColor: bgColor || 'var(--muted)' }}
+                      title={`Skill ${String(idx + 1)}: ${atkType || '?'} (${affinity || '?'})`}
+                    >
+                      {atkType ? (
+                        <img
+                          src={getAttackTypeIconPath(atkType)}
+                          alt={atkType}
+                          className="object-contain"
+                          style={ATK_ICON_STYLE}
+                        />
+                      ) : (
+                        <div style={ATK_ICON_STYLE} />
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </button>
+          </CardSlot>
         )
       })}
     </div>

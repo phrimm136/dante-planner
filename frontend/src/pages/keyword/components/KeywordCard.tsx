@@ -1,5 +1,5 @@
 import { getBattleKeywordIconPath } from '@/shared/assets'
-import { CARD_GRID } from '@/lib/constants'
+import { KEYWORD_GEOMETRY } from '../lib/cardLayout'
 
 interface KeywordCardProps {
   id: string
@@ -23,8 +23,8 @@ export const KeywordCard = function KeywordCard({
     <div
       className={`relative flex items-center justify-center rounded-md border border-border bg-card${enableHoverHighlight ? ' selectable' : ''}`}
       style={{
-        width: `${String(CARD_GRID.WIDTH.KEYWORD)}px`,
-        height: `${String(CARD_GRID.WIDTH.KEYWORD)}px`,
+        width: `${String(KEYWORD_GEOMETRY.size.widthPx)}px`,
+        height: `${String(KEYWORD_GEOMETRY.size.widthPx)}px`,
       }}
     >
       <img

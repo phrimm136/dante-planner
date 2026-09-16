@@ -129,7 +129,7 @@ export function DeckBuilderSummary({
         readOnly={readOnly}
       />
       {/* Status + Action Bar row */}
-      <div className="mt-3 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+      <div className="mt-5 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
         <StatusViewer deckState={deckState} ownedGiftIds={ownedGiftIds} />
         {!readOnly && (
           <div className="flex flex-col items-end gap-2">

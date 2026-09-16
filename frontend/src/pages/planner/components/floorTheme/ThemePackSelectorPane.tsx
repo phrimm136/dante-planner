@@ -3,13 +3,14 @@ import { useTranslation } from 'react-i18next'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
-import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { DUNGEON_IDX, DIFFICULTY_LABELS, type DungeonIdx, type MDCategory } from '@/shared/gameData'
-import { CARD_GRID, DIFFICULTY_COLORS, EXCLUSIVE_GIFT_ICONS } from '@/lib/constants'
+import { CARD_MOBILE_SCALE_DENSE, DIFFICULTY_COLORS } from '@/lib/constants'
+import { THEME_PACK_GEOMETRY } from '@/pages/themePack'
 import { ThemePackViewer } from './ThemePackViewer'
 import { ThemePackExclusiveGifts } from './ThemePackExclusiveGifts'
 import type { ThemePackListType, ThemePackEntry } from '@/pages/themePack'
 
+/** The theme pack box with its height left to the card. */
 interface ThemePackSelectorPaneProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -96,25 +97,6 @@ function filterThemePacks(
   }
 
   return result
-}
-
-/**
- * Grid-cell height for a pack card plus its exclusive-gift rows, derived
- * from data before any image loads so the cell box is reserved up front.
- */
-function themePackCellHeight(giftCount: number): number {
-  if (giftCount === 0) return CARD_GRID.HEIGHT.THEME_PACK
-  const perRow = Math.floor(
-    (CARD_GRID.WIDTH.THEME_PACK + EXCLUSIVE_GIFT_ICONS.GAP) /
-      (EXCLUSIVE_GIFT_ICONS.ICON_SIZE + EXCLUSIVE_GIFT_ICONS.GAP),
-  )
-  const rows = Math.ceil(giftCount / perRow)
-  return (
-    CARD_GRID.HEIGHT.THEME_PACK +
-    EXCLUSIVE_GIFT_ICONS.GAP +
-    rows * EXCLUSIVE_GIFT_ICONS.ICON_SIZE +
-    (rows - 1) * EXCLUSIVE_GIFT_ICONS.GAP
-  )
 }
 
 /**
@@ -222,31 +204,29 @@ export function ThemePackSelectorPane({
                     {t('pages.plannerMD.noThemePacksAvailable')}
                   </div>
                 ) : (
-                  <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.THEME_PACK} mobileScale={0.6}>
+                  <ResponsiveCardGrid
+                    size={THEME_PACK_GEOMETRY.size}
+                    rows="auto"
+                    mobileScale={CARD_MOBILE_SCALE_DENSE}
+                  >
                     {packs.map(({ id, entry }) => {
                       const i18nData = themePackI18n[id]
                       const name = i18nData?.name || `Pack ${id}`
 
                       return (
-                        <ScaledCardWrapper
-                          key={id}
-                          cardWidth={CARD_GRID.WIDTH.THEME_PACK}
-                          cardHeight={themePackCellHeight(entry.specificEgoGiftPool.length)}
-                          mobileScale={0.6}
-                        >
-                          <div className="flex flex-col items-center gap-1">
-                            <ThemePackViewer
-                              packId={id}
-                              packEntry={entry}
-                              packName={name}
-                              onClick={() => {
-                                handlePackSelect(id)
-                              }}
-                              enableHoverHighlight
-                            />
-                            <ThemePackExclusiveGifts giftIds={entry.specificEgoGiftPool} />
-                          </div>
-                        </ScaledCardWrapper>
+                        <div key={id} className="flex flex-col items-center gap-1">
+                          <ThemePackViewer
+                            packId={id}
+                            packEntry={entry}
+                            packName={name}
+                            onClick={() => {
+                              handlePackSelect(id)
+                            }}
+                            mobileScale={CARD_MOBILE_SCALE_DENSE}
+                            enableHoverHighlight
+                          />
+                          <ThemePackExclusiveGifts giftIds={entry.specificEgoGiftPool} />
+                        </div>
                       )
                     })}
                   </ResponsiveCardGrid>

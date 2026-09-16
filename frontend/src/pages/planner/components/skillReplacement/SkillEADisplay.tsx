@@ -1,6 +1,9 @@
+import type { CSSProperties } from 'react'
+
 import { SkillImageSimple } from './SkillImageSimple'
 import { getSkillImagePath } from '@/shared/assets'
 import type { SkillAttributeType, OffensiveSkillSlot } from '@/shared/gameData'
+import { SKILL_IMAGE_CARD, cqw } from '../../lib/cardLayout'
 
 interface SkillEADisplayProps {
   identityId: string
@@ -10,6 +13,14 @@ interface SkillEADisplayProps {
   ea: number
   currentEA?: number | undefined
 }
+
+const BADGE_STYLE: CSSProperties = {
+  width: cqw(SKILL_IMAGE_CARD.badge),
+  height: cqw(SKILL_IMAGE_CARD.badge),
+  fontSize: cqw(SKILL_IMAGE_CARD.badgeFontSize),
+}
+
+const BADGE_OFFSET = `-${cqw(SKILL_IMAGE_CARD.badgeOffset)}`
 
 /**
  * SkillEADisplay - Skill image with EA (Exchange Allowance) badge
@@ -30,7 +41,7 @@ export function SkillEADisplay({
   const skillImagePath = getSkillImagePath(identityId, skillId)
 
   return (
-    <div className="relative">
+    <div className="relative w-full">
       <SkillImageSimple
         skillImagePath={skillImagePath}
         attributeType={attributeType}
@@ -38,15 +49,21 @@ export function SkillEADisplay({
         atkType={atkType}
       />
 
-      {/* Planned EA Badge (오른쪽 위) */}
-      <div className="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-primary flex items-center justify-center">
-        <span className="text-sm font-bold text-primary-foreground">{ea}</span>
+      {/* Planned EA badge, upper-right */}
+      <div
+        className="absolute rounded-full bg-primary flex items-center justify-center"
+        style={{ ...BADGE_STYLE, top: BADGE_OFFSET, right: BADGE_OFFSET }}
+      >
+        <span className="font-bold text-primary-foreground">{ea}</span>
       </div>
 
-      {/* Current EA Badge (오른쪽 아래) */}
+      {/* Current EA badge, lower-right */}
       {currentEA !== undefined && (
-        <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-accent flex items-center justify-center">
-          <span className="text-sm font-bold text-accent-foreground">{currentEA}</span>
+        <div
+          className="absolute rounded-full bg-accent flex items-center justify-center"
+          style={{ ...BADGE_STYLE, bottom: BADGE_OFFSET, right: BADGE_OFFSET }}
+        >
+          <span className="font-bold text-accent-foreground">{currentEA}</span>
         </div>
       )}
     </div>

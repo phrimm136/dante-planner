@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { ThemePackFilterDropdown } from '@/pages/themePack'
 import { calculateActiveFilterCount } from '@/shared/filter'
-import { useSetFilters } from '@/components/hooks/useSetFilters'
+import { useFilterStore } from '@/components/hooks/filterStore'
+import { abEventFilterStore } from './stores/abEventFilterStore'
 import { EntityListPage } from '@/shared/filter'
 import { FilterPageLayout } from '@/shared/filter'
 import { FilterSectionList, filterSection } from '@/shared/filter'
@@ -9,6 +10,7 @@ import { SearchBar } from '@/shared/filter'
 import { EGOGiftFilterDropdown } from '@/pages/egoGift'
 import { AbEventList, useAbEventListSpec } from '@/pages/abEvent'
 import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
+import { AB_EVENT_GEOMETRY } from './lib/cardLayout'
 
 /**
  * Shell component - loads spec, manages filter states.
@@ -25,10 +27,7 @@ function AbEventPageShell() {
     setSearchQuery,
     resetAll,
     store,
-  } = useSetFilters({
-    selectedEgoGifts: new Set<string>(),
-    selectedThemePacks: new Set<string>(),
-  })
+  } = useFilterStore(abEventFilterStore)
 
   const activeFilterCount = calculateActiveFilterCount(...Object.values(filters))
 
@@ -85,7 +84,7 @@ function AbEventPageShell() {
  */
 export default function AbEventPage() {
   return (
-    <EntityListPage skeleton={<ListPageSkeleton preset="abEvent" />}>
+    <EntityListPage skeleton={<ListPageSkeleton geometry={AB_EVENT_GEOMETRY} />}>
       <AbEventPageShell />
     </EntityListPage>
   )

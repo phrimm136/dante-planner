@@ -1,10 +1,12 @@
+import type { CSSProperties } from 'react'
+
 import { getEGOGiftIconPath } from '@/shared/assets'
 import type { EGOGiftId } from '@/shared/gameData'
 
 interface EGOGiftIconProps {
   giftId: EGOGiftId
-  /** Sizing classes only; positioning belongs to the caller's layout */
-  className?: string
+  /** Sizing only; positioning belongs to the caller's layout */
+  style?: CSSProperties
 }
 
 /**
@@ -12,12 +14,12 @@ interface EGOGiftIconProps {
  * loading, and self-hide when the art is not shipped — while geometry
  * stays with the caller.
  */
-export function EGOGiftIcon({ giftId, className }: EGOGiftIconProps) {
+export function EGOGiftIcon({ giftId, style }: EGOGiftIconProps) {
   return (
     <img
       src={getEGOGiftIconPath(giftId)}
       alt={`EGO Gift ${giftId}`}
-      className={className}
+      style={style}
       loading="lazy"
       onError={(e) => {
         e.currentTarget.style.display = 'none'

@@ -1,9 +1,13 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { CARD_MOBILE_SCALE } from '@/lib/constants'
+import { THEME_PACK_GEOMETRY } from '@/pages/themePack'
+import { CardSlot } from '@/shared/cardLayout'
 import { cn } from '@/lib/utils'
 import { ThemePackCard } from '@/pages/themePack'
 import type { ThemePackEntry } from '@/pages/themePack'
 
+/** The theme pack box with its height left to the card. */
 interface ThemePackViewerProps {
   packId: string
   packEntry: ThemePackEntry
@@ -14,6 +18,8 @@ interface ThemePackViewerProps {
   enableHoverHighlight?: boolean
   isSelected?: boolean
   overlay?: ReactNode
+  /** The share of the desktop width the card takes below the desktop breakpoint */
+  mobileScale?: number
   className?: string
 }
 
@@ -30,31 +36,32 @@ export function ThemePackViewer({
   enableHoverHighlight = false,
   isSelected = false,
   overlay,
+  mobileScale = CARD_MOBILE_SCALE,
   className,
 }: ThemePackViewerProps) {
-  if (readOnly) {
-    return (
-      <div aria-label={packName} className={className}>
-        <ThemePackCard
-          packId={packId}
-          packEntry={packEntry}
-          enableHoverHighlight={enableHoverHighlight}
-          isSelected={isSelected}
-          overlay={overlay}
-        />
-      </div>
-    )
-  }
-
   return (
-    <button type="button" onClick={onClick} aria-label={packName} className={className}>
-      <ThemePackCard
-        packId={packId}
-        packEntry={packEntry}
-        enableHoverHighlight={enableHoverHighlight}
-        overlay={overlay}
-      />
-    </button>
+    <CardSlot size={THEME_PACK_GEOMETRY.size} mobileScale={mobileScale} className={className}>
+      {readOnly ? (
+        <div aria-label={packName}>
+          <ThemePackCard
+            packId={packId}
+            packEntry={packEntry}
+            enableHoverHighlight={enableHoverHighlight}
+            isSelected={isSelected}
+            overlay={overlay}
+          />
+        </div>
+      ) : (
+        <button type="button" onClick={onClick} aria-label={packName} className="block w-full">
+          <ThemePackCard
+            packId={packId}
+            packEntry={packEntry}
+            enableHoverHighlight={enableHoverHighlight}
+            overlay={overlay}
+          />
+        </button>
+      )}
+    </CardSlot>
   )
 }
 
@@ -75,23 +82,24 @@ export function ThemePackPlaceholder({
   const { t } = useTranslation(['planner', 'common'])
 
   return (
-    <button
-      type="button"
-      onClick={readOnly ? undefined : onClick}
-      disabled={readOnly}
-      aria-label={t('pages.plannerMD.selectThemePack')}
-      className={cn(
-        'relative top-2 w-56 h-100 border-2 border-dashed border-muted-foreground/50',
-        'flex items-center justify-center',
-        !readOnly ? 'selectable' : 'rounded-md',
-        className,
-      )}
-    >
-      <span className="text-sm text-muted-foreground text-center px-4">
-        {readOnly
-          ? t('pages.plannerMD.emptyState.noThemePack')
-          : t('pages.plannerMD.selectThemePack')}
-      </span>
-    </button>
+    <CardSlot size={THEME_PACK_GEOMETRY.size} className={className}>
+      <button
+        type="button"
+        onClick={readOnly ? undefined : onClick}
+        disabled={readOnly}
+        aria-label={t('pages.plannerMD.selectThemePack')}
+        className={cn(
+          'size-full border-2 border-dashed border-muted-foreground/50',
+          'flex items-center justify-center',
+          !readOnly ? 'selectable' : 'rounded-md',
+        )}
+      >
+        <span className="text-sm text-muted-foreground text-center px-4">
+          {readOnly
+            ? t('pages.plannerMD.emptyState.noThemePack')
+            : t('pages.plannerMD.selectThemePack')}
+        </span>
+      </button>
+    </CardSlot>
   )
 }

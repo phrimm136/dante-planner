@@ -1,70 +1,11 @@
 import { Skeleton } from '@/components/ui/skeleton'
-import { CARD_GRID, SECTION_STYLES } from '@/lib/constants'
+import { SECTION_STYLES } from '@/lib/constants'
+import { useSlotSizePx, type CardGeometry } from '@/shared/cardLayout'
 import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
 
-/**
- * Card dimension presets matching actual card components
- *
- * clipPath matches IdentityCard's octagonal shape:
- * polygon(4% 0%, 96% 0%, 100% 4%, 100% 96%, 96% 100%, 4% 100%, 0% 96%, 0% 4%)
- */
-const CARD_PRESETS = {
-  /** IdentityCard: w-40 (160px) × h-56 (224px), octagonal clipPath */
-  identity: {
-    width: CARD_GRID.WIDTH.IDENTITY,
-    height: CARD_GRID.HEIGHT.IDENTITY,
-    clipPath: 'polygon(4% 0%, 96% 0%, 100% 4%, 100% 96%, 96% 100%, 4% 100%, 0% 96%, 0% 4%)',
-    mobileScale: 0.8,
-  },
-  /** EGOCard: w-40 (160px) × h-48 (192px), circular center image */
-  ego: {
-    width: CARD_GRID.WIDTH.EGO,
-    height: CARD_GRID.HEIGHT.EGO,
-    clipPath: 'circle(45%)',
-    mobileScale: 0.8,
-  },
-  /** EGOGiftCard: w-24 (96px) × h-24 (96px), square */
-  egoGift: {
-    width: CARD_GRID.WIDTH.EGO_GIFT,
-    height: 96,
-    clipPath: undefined,
-    mobileScale: 0.8,
-  },
-  /** ThemePackCard: w-60 (240px) × h-104 (416px), tall rectangle */
-  themePack: {
-    width: CARD_GRID.WIDTH.THEME_PACK,
-    height: CARD_GRID.HEIGHT.THEME_PACK,
-    clipPath: undefined,
-    mobileScale: 0.8,
-  },
-  /** AbEventCard: 308px wide, title + 3:2 image */
-  abEvent: {
-    width: CARD_GRID.WIDTH.AB_EVENT,
-    height: CARD_GRID.HEIGHT.AB_EVENT,
-    clipPath: undefined,
-    mobileScale: 0.8,
-  },
-  /** KeywordCard: 96px × 96px square icon (name rendered below by wrapper) */
-  keyword: {
-    width: CARD_GRID.WIDTH.KEYWORD,
-    height: CARD_GRID.WIDTH.KEYWORD,
-    clipPath: undefined,
-    mobileScale: 0.8,
-  },
-  /** PlannerCard: 280px × 160px, rounded rectangle */
-  planner: {
-    width: CARD_GRID.WIDTH.PLANNER,
-    height: 160,
-    clipPath: undefined,
-    mobileScale: 1,
-  },
-} as const
-
-type CardPreset = keyof typeof CARD_PRESETS
-
 interface ListPageSkeletonProps {
-  /** Card preset for grid skeleton */
-  preset?: CardPreset
+  /** The card's sizing, which the placeholder boxes take */
+  geometry: CardGeometry
   /** Number of skeleton cards */
   cardCount?: number
   /** Number of filter section skeletons in sidebar */
@@ -81,11 +22,12 @@ interface ListPageSkeletonProps {
  * Shows pulsing skeleton for filter sections and card grid.
  */
 export function ListPageSkeleton({
-  preset = 'identity',
+  geometry,
   cardCount = 12,
   filterCount = 5,
 }: ListPageSkeletonProps) {
-  const { width: cardWidth, height: cardHeight, clipPath, mobileScale } = CARD_PRESETS[preset]
+  const { size, mobileScale } = geometry
+  const { widthPx, heightPx } = useSlotSizePx(size, mobileScale)
 
   return (
     <div data-slot="page-skeleton" className="flex flex-col lg:flex-row gap-6">
@@ -130,18 +72,13 @@ export function ListPageSkeleton({
         {/* Card grid skeleton */}
         <div className={SECTION_STYLES.panel}>
           <div className="pt-4">
-            <ResponsiveCardGrid
-              cardWidth={cardWidth}
-              cardHeight={cardHeight}
-              mobileScale={mobileScale}
-            >
+            <ResponsiveCardGrid size={size} mobileScale={mobileScale}>
               {Array.from({ length: cardCount }).map((_, i) => (
                 <Skeleton
                   key={i}
                   style={{
-                    width: cardWidth,
-                    height: cardHeight,
-                    clipPath,
+                    width: widthPx,
+                    height: heightPx,
                   }}
                 />
               ))}
@@ -158,6 +95,8 @@ export function ListPageSkeleton({
 // ============================================================================
 
 interface PlannerGridSkeletonProps {
+  /** The card's sizing, which the placeholder boxes take */
+  geometry: CardGeometry
   /** Number of skeleton cards */
   cardCount?: number
 }
@@ -168,18 +107,19 @@ interface PlannerGridSkeletonProps {
  * Simpler than ListPageSkeleton - just the card grid, no sidebar.
  * Used inside planner page content where toolbar/filters are already rendered.
  */
-export function PlannerGridSkeleton({ cardCount = 8 }: PlannerGridSkeletonProps) {
-  const { width: cardWidth, height: cardHeight } = CARD_PRESETS.planner
+export function PlannerGridSkeleton({ geometry, cardCount = 8 }: PlannerGridSkeletonProps) {
+  const { size, mobileScale } = geometry
+  const { widthPx, heightPx } = useSlotSizePx(size, mobileScale)
 
   return (
-    <ResponsiveCardGrid cardWidth={cardWidth} cardHeight={cardHeight}>
+    <ResponsiveCardGrid size={size}>
       {Array.from({ length: cardCount }).map((_, i) => (
         <Skeleton
           key={i}
           className="rounded-lg"
           style={{
-            width: cardWidth,
-            height: cardHeight,
+            width: widthPx,
+            height: heightPx,
           }}
         />
       ))}

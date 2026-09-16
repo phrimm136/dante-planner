@@ -92,12 +92,6 @@ export const PLANNER_STORAGE_KEYS = {
 } as const
 
 /**
- * Start Buff card dimensions; must match the actual pane image size used in
- * the card component.
- */
-export const START_BUFF_CARD_SIZE = { width: 272, height: 320 } as const
-
-/**
  * Planner List Constants
  * Used by PlannerListPage and related components
  */
@@ -151,3 +145,10 @@ export const COMMENT_MAX_VISUAL_DEPTH_MOBILE = 2
  * Maximum visual depth for comment indentation on desktop (>= lg breakpoint)
  */
 export const COMMENT_MAX_VISUAL_DEPTH_DESKTOP = 10
+
+/**
+ * The highest deployment order that counts as deployed; the rest of the order is backup.
+ *
+ * A Mirror Dungeon formation fields six identities and a seventh joins from the gate buff.
+ */
+export const MAX_DEPLOYED_ORDER = 7

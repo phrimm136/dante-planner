@@ -1,7 +1,9 @@
 import { useTranslation } from 'react-i18next'
 import type { MDVersion } from '@/shared/gameData'
 import { useStartBuffSelection } from '../../hooks/useStartBuffSelection'
-import { EMPTY_STATE } from '@/lib/constants'
+import { CARD_MOBILE_SCALE_NONE, EMPTY_STATE } from '@/lib/constants'
+import { EGO_GIFT_GEOMETRY } from '@/pages/egoGift'
+import { CardSlot } from '@/shared/cardLayout'
 import { cn } from '@/lib/utils'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import { PlannerSection } from '@/components/layout/PlannerSection'
@@ -65,18 +67,23 @@ export function StartBuffSection({
         {hasSelectedBuffs ? (
           <div className="flex flex-wrap gap-2 min-h-28">
             {selectedBuffs.map((buff) => (
-              <StartBuffMiniCard
+              <CardSlot
                 key={buff.baseId}
-                buffId={Number(buff.id)}
-                displayName={buff.name}
-                mdVersion={mdVersion}
-              />
+                size={EGO_GIFT_GEOMETRY.size}
+                mobileScale={CARD_MOBILE_SCALE_NONE}
+              >
+                <StartBuffMiniCard
+                  buffId={Number(buff.id)}
+                  displayName={buff.name}
+                  mdVersion={mdVersion}
+                />
+              </CardSlot>
             ))}
           </div>
         ) : (
           <div
             className={cn(
-              'flex items-center justify-center p-2 text-muted-foreground',
+              'flex items-center justify-center p-2 text-sm text-muted-foreground',
               EMPTY_STATE.MIN_HEIGHT,
               EMPTY_STATE.DASHED_BORDER,
             )}

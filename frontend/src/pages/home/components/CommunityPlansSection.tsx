@@ -20,11 +20,13 @@ import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
 import { CommunityPlansErrorFallback } from '@/components/feedback/CommunityPlansErrorFallback'
 
 import { useMDGesellschaftData } from '@/pages/planner'
-import { CARD_GRID, SECTION_STYLES } from '@/lib/constants'
+import { SECTION_STYLES } from '@/lib/constants'
+import { PLANNER_GEOMETRY } from '@/pages/planner'
 import { cn } from '@/lib/utils'
 
 import type { MDGesellschaftMode } from '@/pages/planner'
 
+/** The planner box with its height left to the card. */
 /** Number of plans to show on home page */
 const HOME_PLANS_LIMIT = 5
 
@@ -59,7 +61,7 @@ function CommunityPlansContent({ mode }: CommunityPlansContentProps) {
   }
 
   return (
-    <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.PLANNER}>
+    <ResponsiveCardGrid size={PLANNER_GEOMETRY.size} rows="auto">
       {planners.map((planner) => (
         <Link key={planner.id} to="/planner/md/gesellschaft/$id" params={{ id: planner.id }}>
           <PublishedPlannerCard planner={planner} />

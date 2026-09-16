@@ -12,7 +12,7 @@ import { validateData } from '@/lib/validation'
 import { CommentTreeSchema } from '../schemas/CommentSchemas'
 
 import type { CommentNode } from '../types/CommentTypes'
-import { STALE_TIME, GC_TIME } from '@/lib/constants'
+import { GC_TIME, STALE_TIME } from '@/lib/constants'
 
 // ============================================================================
 // Query Keys

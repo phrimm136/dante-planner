@@ -1,10 +1,11 @@
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { CARD_GRID, PROGRESSIVE_REVEAL, SECTION_STYLES } from '@/lib/constants'
+import { PROGRESSIVE_REVEAL, SECTION_STYLES } from '@/lib/constants'
+import { KEYWORD_GEOMETRY } from '../lib/cardLayout'
 import { KEYWORD_LIST, type BattleKeywordI18nEntry } from '@/shared/gameText'
 import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
-import type { FilterStore } from '@/components/hooks/useSetFilters'
+import type { FilterStore } from '@/components/hooks/filterStore'
 import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
 import { FilteredCardSlot } from '@/shared/filter'
 import { FilterEmptyState } from '@/shared/filter'
@@ -67,7 +68,11 @@ export function KeywordList({ keywords, store }: KeywordListProps) {
         <div className="text-center text-muted-foreground py-8">{t('keyword.emptyState')}</div>
       </FilterEmptyState>
 
-      <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.KEYWORD} mobileScale={0.8}>
+      <ResponsiveCardGrid
+        size={KEYWORD_GEOMETRY.size}
+        rows={KEYWORD_GEOMETRY.rows}
+        mobileScale={KEYWORD_GEOMETRY.mobileScale}
+      >
         {keywords.slice(0, displayCount).map((keyword) => (
           <KeywordCardCell
             key={keyword.id}
@@ -106,9 +111,8 @@ const KeywordCardCell = memo(function KeywordCardCell({
     <FilteredCardSlot
       store={store}
       selectVisible={(state) => matchesKeyword(keyword, state, terms)}
-      mobileScale={0.8}
-      cardWidth={CARD_GRID.WIDTH.KEYWORD}
-      cardHeight={CARD_GRID.HEIGHT.KEYWORD}
+      mobileScale={KEYWORD_GEOMETRY.mobileScale}
+      size={KEYWORD_GEOMETRY.size}
     >
       <KeywordCardLink id={keyword.id} iconId={keyword.iconId} buffType={keyword.buffType} />
     </FilteredCardSlot>

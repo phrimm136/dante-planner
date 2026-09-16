@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react'
+
 import {
   getSkillFramePath,
   getSkillFrameBGPath,
@@ -5,7 +7,10 @@ import {
   getAttackTypeFramePath,
   getAttackTypeFrameBGPath,
 } from '@/shared/assets'
+import { aspectOf } from '@/shared/cardLayout'
+import { SKILL_IMAGE_GEOMETRY } from '../../lib/cardLayout'
 import type { SkillAttributeType } from '@/shared/gameData'
+import { SKILL_IMAGE_CARD, pct } from '../../lib/cardLayout'
 
 interface SkillImageSimpleProps {
   skillImagePath: string
@@ -16,6 +21,28 @@ interface SkillImageSimpleProps {
   onImageError?: () => void
   showMissingPlaceholder?: boolean
 }
+
+const ROOT_STYLE: CSSProperties = {
+  containerType: 'inline-size',
+  aspectRatio: aspectOf(SKILL_IMAGE_GEOMETRY.size),
+}
+
+const ART_STYLE: CSSProperties = {
+  width: pct(SKILL_IMAGE_CARD.art),
+  height: pct(SKILL_IMAGE_CARD.art),
+}
+
+const ATK_COMPOSITE_STYLE: CSSProperties = {
+  width: pct(SKILL_IMAGE_CARD.atkComposite),
+  height: pct(SKILL_IMAGE_CARD.atkComposite),
+}
+
+const ATK_ICON_STYLE: CSSProperties = {
+  width: pct(SKILL_IMAGE_CARD.atkIcon),
+  height: pct(SKILL_IMAGE_CARD.atkIcon),
+}
+
+const SKILL_CLIP = 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)'
 
 /**
  * SkillImageSimple - Skill image with layers 1-4 only (no power text)
@@ -40,7 +67,7 @@ export function SkillImageSimple({
   const framePath = getSkillFramePath(attributeType, skillTier)
 
   return (
-    <div className="relative w-32 h-32 shrink-0">
+    <div className="relative w-full shrink-0" style={ROOT_STYLE}>
       {/* Layer 1: Skill frame background */}
       <img
         src={frameBGPath}
@@ -50,16 +77,13 @@ export function SkillImageSimple({
 
       {/* Layer 2: Skill image */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="relative w-16 h-16">
+        <div className="relative" style={ART_STYLE}>
           {!showMissingPlaceholder ? (
             <img
               src={skillImagePath}
               alt=""
               className="w-full h-full object-cover"
-              style={{
-                clipPath:
-                  'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)',
-              }}
+              style={{ clipPath: SKILL_CLIP }}
               onError={onImageError}
             />
           ) : (
@@ -79,12 +103,15 @@ export function SkillImageSimple({
 
       {/* Layer 4: Attack type composite (skills with attack type only) */}
       {atkType && (
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 -translate-y-3/8 w-8 h-8 pointer-events-none">
+        <div
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 -translate-y-3/8 pointer-events-none"
+          style={ATK_COMPOSITE_STYLE}
+        >
           {/* Attack type frame background */}
           <img
             src={getAttackTypeFrameBGPath(attributeType)}
             alt=""
-            className="absolute inset-0 w-lg h-lg object-contain"
+            className="absolute inset-0 w-full h-full object-contain"
           />
 
           {/* Attack type frame */}
@@ -99,7 +126,8 @@ export function SkillImageSimple({
             <img
               src={getAttackTypeIconPath(atkType)}
               alt={atkType}
-              className="w-4 h-4 -translate-x-1/16 object-contain"
+              className="-translate-x-1/16 object-contain"
+              style={ATK_ICON_STYLE}
             />
           </div>
         </div>

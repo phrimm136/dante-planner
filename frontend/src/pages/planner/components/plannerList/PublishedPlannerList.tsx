@@ -2,7 +2,8 @@ import { Link, useSearch } from '@tanstack/react-router'
 
 import { useMDGesellschaftData } from '../../hooks/useMDGesellschaftData'
 import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
-import { CARD_GRID, PROGRESSIVE_REVEAL } from '@/lib/constants'
+import { PROGRESSIVE_REVEAL } from '@/lib/constants'
+import { PLANNER_GEOMETRY } from '../../lib/cardLayout'
 
 import { PublishedPlannerCard } from './PublishedPlannerCard'
 import { PlannerListPagination } from './PlannerListPagination'
@@ -11,6 +12,7 @@ import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
 
 import type { MDGesellschaftFilters } from '../../types/MDPlannerListTypes'
 
+/** The planner box with its height left to the card. */
 export interface PublishedPlannerListProps {
   /** Every filter value the query runs under */
   filters: MDGesellschaftFilters
@@ -77,7 +79,7 @@ export function PublishedPlannerList({
 
   return (
     <>
-      <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.PLANNER}>
+      <ResponsiveCardGrid size={PLANNER_GEOMETRY.size} rows="auto">
         {data.content.slice(0, displayCount).map((planner) => (
           <Link
             key={planner.id}

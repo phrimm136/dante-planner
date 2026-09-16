@@ -1,10 +1,11 @@
 import { useTranslation } from 'react-i18next'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
-import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
+import { CardSlot } from '@/shared/cardLayout'
 import { EGOGiftCard } from '@/pages/egoGift'
 import { EGOGiftTooltip } from '@/pages/egoGift'
 import { decodeAndOrderGiftSelections } from '@/pages/egoGift'
-import { CARD_GRID } from '@/lib/constants'
+import { CARD_MOBILE_SCALE } from '@/lib/constants'
+import { EGO_GIFT_GEOMETRY } from '@/pages/egoGift'
 import type { EGOGiftListItem } from '@/pages/egoGift'
 import type { EncodedGiftId, EnhancementLevel } from '@/shared/gameData'
 import { cn } from '@/lib/utils'
@@ -28,7 +29,7 @@ interface DecodedGift {
 const FloorGiftItem = function FloorGiftItem({ item, enhancement }: DecodedGift) {
   return (
     <EGOGiftTooltip giftId={item.id} enhancement={enhancement}>
-      <div>
+      <div className="w-full">
         <EGOGiftCard gift={item} enhancement={enhancement} />
       </div>
     </EGOGiftTooltip>
@@ -50,7 +51,7 @@ export function FloorGiftViewer({
   const spec = useEGOGiftListSpec()
   const i18n = useEGOGiftListI18n()
 
-  const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
+  const mobileScale = CARD_MOBILE_SCALE
 
   const selectedGifts = decodeAndOrderGiftSelections(selectedGiftIds, spec, i18n, 'tier-first')
 
@@ -63,7 +64,7 @@ export function FloorGiftViewer({
         disabled={readOnly}
         aria-label={t('pages.plannerMD.selectFloorEgoGifts')}
         className={cn(
-          'translate-y-2 w-56 sm:w-full sm:h-100 p-4 rounded-lg border-2 border-dashed border-muted-foreground/50',
+          'w-full h-full p-4 rounded-lg border-2 border-dashed border-muted-foreground/50',
           'flex items-center justify-center',
           !readOnly && 'selectable',
           className,
@@ -85,21 +86,16 @@ export function FloorGiftViewer({
       disabled={readOnly}
       aria-label={t('pages.plannerMD.selectedEgoGifts')}
       className={cn(
-        'w-full sm:min-h-104 rounded-lg text-left flex items-start',
+        'w-full h-full rounded-lg text-left flex items-start',
         !readOnly && 'selectable',
         className,
       )}
     >
       <div className="flex flex-row flex-wrap items-start gap-2 p-2">
         {selectedGifts.map(({ item, enhancement }) => (
-          <ScaledCardWrapper
-            key={item.id}
-            cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
-            cardHeight={CARD_GRID.HEIGHT.EGO_GIFT}
-            mobileScale={mobileScale}
-          >
+          <CardSlot key={item.id} size={EGO_GIFT_GEOMETRY.size} mobileScale={mobileScale}>
             <FloorGiftItem item={item} enhancement={enhancement} />
-          </ScaledCardWrapper>
+          </CardSlot>
         ))}
       </div>
     </button>

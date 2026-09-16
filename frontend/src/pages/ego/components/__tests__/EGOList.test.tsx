@@ -5,8 +5,8 @@
  * Verifies filtering behavior and graceful handling of loading state.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { render, screen, act } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Suspense } from 'react'
 import { EGOList } from '../EGOList'
@@ -31,14 +31,17 @@ vi.mock('@tanstack/react-router', () => ({
 // Mock asset paths
 vi.mock('@/shared/assets', () => ({
   getEGOImagePath: (id: string) => `/mock/ego/${id}.png`,
-  getEGOFramePath: () => '/mock/frame.png',
-  getEGOFrameHighlightPath: () => '/mock/frame-highlight.png',
+  getEGOMaskPath: () => '/mock/mask.png',
+  getEGOCardFramePath: () => '/mock/frame.png',
+  getEGOHoverRingPath: () => '/mock/frame-highlight.png',
   getEGORankIconPath: () => '/mock/rank.png',
   getEGOSmallRankIconPath: () => '/mock/small-rank.png',
   getEGOTierIconPath: () => '/mock/tier.png',
-  getEGOInfoPanelPath: () => '/mock/panel.png',
-  getSinnerIconPath: () => '/mock/sinner.png',
-  getSinnerBGPath: () => '/mock/sinner-bg.png',
+  getEGOCardGradePath: () => '/mock/card-grade.png',
+  getEGOCardThreadspinPath: () => '/mock/card-threadspin.png',
+  getEGONameBgPath: () => '/mock/panel.png',
+  getSinnerFacePath: () => '/mock/face.png',
+  getEGOIconRingPath: () => '/mock/iconRing.png',
 }))
 
 // Mock search mappings - non-suspending version
@@ -137,6 +140,23 @@ function createWrapper() {
   }
 }
 
+// The grid's reveal window opens on the first animation frame; every slot is empty before it.
+function renderRevealed(...args: Parameters<typeof render>) {
+  const result = render(...args)
+  act(() => {
+    vi.advanceTimersToNextFrame()
+  })
+  return result
+}
+
+beforeEach(() => {
+  vi.useFakeTimers()
+})
+
+afterEach(() => {
+  vi.useRealTimers()
+})
+
 describe('EGOList', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -152,7 +172,7 @@ describe('EGOList', () => {
 
   describe('rendering', () => {
     it('renders all EGOs when no filters applied', () => {
-      render(<EGOList egos={mockEGOs} store={makeStore()} />, { wrapper: createWrapper() })
+      renderRevealed(<EGOList egos={mockEGOs} store={makeStore()} />, { wrapper: createWrapper() })
 
       // All EGOs should be visible (ResponsiveCardGrid renders twice: mobile + desktop)
       const cards = screen.getAllByRole('link')
@@ -160,7 +180,7 @@ describe('EGOList', () => {
     })
 
     it('shows empty state when no EGOs match filters', () => {
-      render(
+      renderRevealed(
         <EGOList
           egos={mockEGOs}
           store={makeStore({ selectedSinners: new Set(['NonExistentSinner']) })}
@@ -174,7 +194,7 @@ describe('EGOList', () => {
 
   describe('filtering', () => {
     it('filters by EGO type', () => {
-      const { container } = render(
+      const { container } = renderRevealed(
         <EGOList egos={mockEGOs} store={makeStore({ selectedEGOTypes: new Set(['ZAYIN']) })} />,
         { wrapper: createWrapper() },
       )
@@ -189,7 +209,7 @@ describe('EGOList', () => {
     })
 
     it('filters by skill attribute with AND logic (single)', () => {
-      const { container } = render(
+      const { container } = renderRevealed(
         <EGOList egos={mockEGOs} store={makeStore({ selectedAttributes: new Set(['AZURE']) })} />,
         { wrapper: createWrapper() },
       )
@@ -202,7 +222,7 @@ describe('EGOList', () => {
     })
 
     it('filters by skill attribute with AND logic (multiple)', () => {
-      const { container } = render(
+      const { container } = renderRevealed(
         <EGOList
           egos={mockEGOs}
           store={makeStore({ selectedAttributes: new Set(['CRIMSON', 'AZURE']) })}
@@ -218,7 +238,7 @@ describe('EGOList', () => {
     })
 
     it('filters by attack type with AND logic (single)', () => {
-      const { container } = render(
+      const { container } = renderRevealed(
         <EGOList egos={mockEGOs} store={makeStore({ selectedAtkTypes: new Set(['PENETRATE']) })} />,
         { wrapper: createWrapper() },
       )
@@ -231,7 +251,7 @@ describe('EGOList', () => {
     })
 
     it('filters by attack type with AND logic (multiple)', () => {
-      const { container } = render(
+      const { container } = renderRevealed(
         <EGOList
           egos={mockEGOs}
           store={makeStore({ selectedAtkTypes: new Set(['SLASH', 'PENETRATE']) })}
@@ -247,7 +267,7 @@ describe('EGOList', () => {
     })
 
     it('filters by season', () => {
-      const { container } = render(
+      const { container } = renderRevealed(
         <EGOList egos={mockEGOs} store={makeStore({ selectedSeasons: new Set([1]) })} />,
         { wrapper: createWrapper() },
       )
@@ -260,7 +280,7 @@ describe('EGOList', () => {
     })
 
     it('applies AND logic between filter types', () => {
-      const { container } = render(
+      const { container } = renderRevealed(
         <EGOList
           egos={mockEGOs}
           store={makeStore({
@@ -291,7 +311,7 @@ describe('EGOList', () => {
         },
       })
 
-      render(<EGOList egos={mockEGOs} store={makeStore({}, 'rupture')} />, {
+      renderRevealed(<EGOList egos={mockEGOs} store={makeStore({}, 'rupture')} />, {
         wrapper: createWrapper(),
       })
 
@@ -313,9 +333,12 @@ describe('EGOList', () => {
         },
       })
 
-      const { container } = render(<EGOList egos={mockEGOs} store={makeStore({}, 'rupture')} />, {
-        wrapper: createWrapper(),
-      })
+      const { container } = renderRevealed(
+        <EGOList egos={mockEGOs} store={makeStore({}, 'rupture')} />,
+        {
+          wrapper: createWrapper(),
+        },
+      )
 
       // EGOs with Burst keyword should be visible (hidden class is on parent div)
       const hiddenCards = container.querySelectorAll('div.hidden > a')
@@ -333,9 +356,12 @@ describe('EGOList', () => {
         },
       })
 
-      const { container } = render(<EGOList egos={mockEGOs} store={makeStore({}, 'CHARGE')} />, {
-        wrapper: createWrapper(),
-      })
+      const { container } = renderRevealed(
+        <EGOList egos={mockEGOs} store={makeStore({}, 'CHARGE')} />,
+        {
+          wrapper: createWrapper(),
+        },
+      )
 
       const hiddenCards = container.querySelectorAll('div.hidden > a')
       const totalCards = container.querySelectorAll('a')
@@ -354,7 +380,7 @@ describe('EGOList', () => {
         },
       })
 
-      const { container } = render(
+      const { container } = renderRevealed(
         <EGOList
           egos={mockEGOs}
           store={makeStore({ selectedEGOTypes: new Set(['ZAYIN']) }, 'rupture')}

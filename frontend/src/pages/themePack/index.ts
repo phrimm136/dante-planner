@@ -36,5 +36,8 @@ export {
 } from './schemas/ThemePackSchemas'
 export type { ThemePackDetail, FeaturedBoss } from './schemas/ThemePackSchemas'
 
+// Card layout
+export { THEME_PACK_GEOMETRY } from './lib/cardLayout'
+
 // Filters
 export type { ThemePackFacetState } from './lib/themePackFilter'

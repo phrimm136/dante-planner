@@ -1,12 +1,7 @@
 import type { AbEventNameList, AbEventSpecList } from '../schemas/AbEventSchemas'
-import { CARD_GRID } from '@/lib/constants'
-import type { FilterStore } from '@/components/hooks/useSetFilters'
-import {
-  entriesSortedById,
-  FilteredEntityGrid,
-  useSearchTermSources,
-  type CardGeometry,
-} from '@/shared/filter'
+import { AB_EVENT_GEOMETRY } from '../lib/cardLayout'
+import type { FilterStore } from '@/components/hooks/filterStore'
+import { entriesSortedById, FilteredEntityGrid, useSearchTermSources } from '@/shared/filter'
 import { AB_EVENT_LIST } from '../hooks/useAbEventListData'
 import {
   buildAbEventSearchTerms,
@@ -16,12 +11,6 @@ import {
 import { AbEventCardLink } from './AbEventCardLink'
 
 const EMPTY_DESCS: AbEventNameList = {}
-
-const AB_EVENT_GEOMETRY: CardGeometry = {
-  cardWidth: CARD_GRID.WIDTH.AB_EVENT,
-  cardHeight: CARD_GRID.HEIGHT.AB_EVENT,
-  mobileScale: 0.8,
-}
 
 interface AbEventListProps {
   spec: AbEventSpecList

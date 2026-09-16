@@ -32,11 +32,11 @@ export const EGOGiftCardLink = function EGOGiftCardLink({
   className,
 }: EGOGiftCardLinkProps) {
   return (
-    <Link to="/ego-gift/$id" params={{ id: gift.id }} className={cn(className)}>
+    <Link to="/ego-gift/$id" params={{ id: gift.id }} className={cn('block w-full', className)}>
       <div className="flex flex-col items-center gap-1.5">
         <EGOGiftCard gift={gift} enhancement={enhancement} enableHoverHighlight />
-        <span className="text-xs text-center text-foreground line-clamp-2 w-24 leading-tight font-medium">
-          <Suspense fallback={<Skeleton className="h-5 w-24 bg-foreground" />}>
+        <span className="text-xs text-center text-foreground line-clamp-2 w-full leading-tight font-medium">
+          <Suspense fallback={<Skeleton className="h-5 w-full bg-foreground" />}>
             <EGOGiftName id={gift.id} />
           </Suspense>
         </span>

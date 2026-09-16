@@ -109,7 +109,7 @@ export const EGOGiftSelectableCard = function EGOGiftSelectableCard({
   children,
 }: EGOGiftSelectableCardProps) {
   return (
-    <div className="relative inline-block cursor-pointer">
+    <div className="relative w-full cursor-pointer">
       <div className="pointer-events-none">{children}</div>
       <EGOGiftSelectableCardInner
         giftId={giftId}

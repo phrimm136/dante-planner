@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { Suspense, useEffect, useRef, useState, type CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   getStartBuffIconPath,
@@ -9,15 +9,21 @@ import {
   getStartBuffEnhancementOverlayPath,
   getStartBuffEnhancementIconPath,
 } from '@/shared/assets'
-import { MD_ACCENT_COLORS } from '@/lib/constants'
-import { getDisplayFontForLanguage, getDisplayFontForNumeric } from '@/lib/utils'
+import { ACCENT_COLORS, MD_ACCENT_COLORS } from '@/lib/constants'
+import { getDisplayFontForNumeric } from '@/lib/utils'
+import { Skeleton } from '@/components/ui/skeleton'
 import type { StartBuff, StartBuffI18n, BattleKeywords, EnhancementLevel } from '@/shared/gameText'
 import { getEnhancementSuffix, createBuffId } from '@/shared/gameText'
-import { AutoSizeText } from '@/components/ui/AutoSizeText'
 import { formatBuffEffects } from './formatBuffDescription'
-import { ACCENT_COLORS } from '@/lib/constants'
-import { CARD_VARIANTS, resolveStartBuffCardVersion } from './startBuffCardVariants'
-import type { StartBuffCardVariant } from './startBuffCardVariants'
+import { StartBuffName } from './StartBuffName'
+import {
+  START_BUFF_CARD,
+  START_BUFF_CARD_VARIANTS,
+  cqw,
+  pct,
+  resolveStartBuffCardVersion,
+  type StartBuffCardVariant,
+} from '../../lib/cardLayout'
 
 type EnhancementStateKey = keyof StartBuffCardVariant['enhancementStates']
 
@@ -25,13 +31,6 @@ type EnhancementStateKey = keyof StartBuffCardVariant['enhancementStates']
 const SELECTED_ENHANCEMENT_STATES: Record<1 | 2, EnhancementStateKey> = {
   1: 'plus1',
   2: 'plus2',
-}
-
-/** Icon height per enhancement-button state. */
-const ENHANCEMENT_ICON_HEIGHTS: Record<EnhancementStateKey, string> = {
-  unselected: 'h-4',
-  plus1: 'h-[16.9px]',
-  plus2: 'h-[20.8px]',
 }
 
 function EnhancementButton({
@@ -57,44 +56,56 @@ function EnhancementButton({
   const border = variant.enhancementStates[stateKey]
   const overlay = variant.enhancementOverlay
   return (
-    <div className={variant.enhancementSlot}>
+    <div
+      className="flex-1 relative overflow-visible"
+      style={{
+        height: cqw(variant.enhancementSlot.height),
+        marginInline: cqw(variant.enhancementSlot.marginX),
+        transform: `translateX(${cqw(variant.enhancementSlot.translateX)})`,
+      }}
+    >
       <button
         onClick={(e) => {
           e.stopPropagation()
           onEnhancementClick(lvl)
         }}
-        aria-label={`${t('tierLabel.enhancement')} ${lvl}`}
+        aria-label={`${t('tierLabel.enhancement')} ${String(lvl)}`}
         aria-pressed={isButtonSelected}
         className="absolute inset-0 overflow-visible"
         style={{
           borderStyle: 'solid',
-          borderWidth: `${border.width}px`,
+          borderWidth: cqw(border.width),
           borderImageSource: `url('${getStartBuffEnhancementBgPath(border.bgLevel, version)}')`,
-          borderImageSlice: `${border.slice} fill`,
-          borderImageOutset: `${border.outset}px`,
+          borderImageSlice: `${String(border.slice)} fill`,
+          borderImageOutset: cqw(border.outset),
           borderImageRepeat: 'stretch',
         }}
       />
       {overlay && isButtonSelected && (
         <div
-          className={overlay.className}
+          className="absolute inset-0 pointer-events-none overflow-visible"
           style={{
+            transform: `translate(${cqw(overlay.translateX)}, ${cqw(overlay.translateY)})`,
             borderStyle: 'solid',
-            borderWidth: `${overlay.width}px`,
+            borderWidth: cqw(overlay.width),
             borderImageSource: `url('${getStartBuffEnhancementOverlayPath(version)}')`,
-            borderImageSlice: `${overlay.slice} fill`,
-            borderImageOutset: `${overlay.outset}px`,
+            borderImageSlice: `${String(overlay.slice)} fill`,
+            borderImageOutset: cqw(overlay.outset),
             borderImageRepeat: 'stretch',
           }}
         />
       )}
-      <div className="absolute inset-0 flex items-center justify-center gap-0.5 pointer-events-none">
+      <div
+        className="absolute inset-0 flex items-center justify-center pointer-events-none"
+        style={{ gap: cqw(START_BUFF_CARD.enhancementIconGap) }}
+      >
         {Array.from({ length: iconCount }).map((_, i) => (
           <img
             key={i}
             src={iconPath}
             alt=""
-            className={`w-auto shrink-0 ${ENHANCEMENT_ICON_HEIGHTS[stateKey]}`}
+            className="w-auto shrink-0"
+            style={{ height: cqw(START_BUFF_CARD.enhancementIcon[stateKey]) }}
           />
         ))}
       </div>
@@ -121,8 +132,13 @@ interface StartBuffCardProps {
   onEnhancementChange: (baseId: number, level: EnhancementLevel) => void
 }
 
+const ROOT_STYLE: CSSProperties = {
+  containerType: 'inline-size',
+  aspectRatio: START_BUFF_CARD.aspect,
+}
+
 /**
- * Start buff card component (edit-only)
+ * Start buff card component (edit-only), filling the width its slot gives it.
  *
  * Enhancement is controlled by parent for batch operation support.
  *
@@ -143,11 +159,10 @@ export function StartBuffCard({
   enhancement,
   onEnhancementChange,
 }: StartBuffCardProps) {
-  const { i18n: i18nInstance } = useTranslation()
   const [isHovered, setIsHovered] = useState(false)
 
   const version = resolveStartBuffCardVersion(mdVersion)
-  const variant = CARD_VARIANTS[version]
+  const variant = START_BUFF_CARD_VARIANTS[version]
 
   // Show highlight on selection or hover
   const showHighlight = isSelected || isHovered
@@ -185,9 +200,12 @@ export function StartBuffCard({
     onSelect(currentBuffId, !isSelected)
   }
 
+  const nameText = `${displayBuff.name}${getEnhancementSuffix(enhancement)}`
+
   return (
     <div
-      className={`relative cursor-pointer ${variant.root ? `${variant.root} ` : ''}transition-transform duration-150 ${isPressed ? 'scale-95' : 'scale-100'} `}
+      className={`relative w-full cursor-pointer transition-transform duration-150 ${isPressed ? 'scale-95' : 'scale-100'}`}
+      style={ROOT_STYLE}
       onMouseEnter={() => {
         setIsHovered(true)
       }}
@@ -196,20 +214,48 @@ export function StartBuffCard({
       }}
     >
       {/* Pane background */}
-      <img src={getStartBuffPanePath(version)} alt="" className={variant.pane} />
+      <img
+        src={getStartBuffPanePath(version)}
+        alt=""
+        style={{
+          width: pct(variant.pane.width),
+          height: '100%',
+          objectFit: variant.pane.fit,
+        }}
+      />
 
       {/* Content overlay */}
-      <div className="absolute inset-0 flex flex-col pt-1">
+      <div
+        className="absolute inset-0 flex flex-col"
+        style={{ paddingTop: cqw(START_BUFF_CARD.contentPaddingTop) }}
+      >
         {/* Top black area: Cost with star (top-right) */}
-        <div className="relative" style={{ height: '15%' }}>
-          <div className={variant.costAnchor}>
-            <img src={getStartBuffStarLightPath()} alt="" className="w-6 h-6 object-contain" />
-            <span
-              className={variant.costText}
+        <div className="relative" style={{ height: pct(START_BUFF_CARD.costRowHeight) }}>
+          <div
+            className="absolute flex items-center"
+            style={{
+              left: pct(variant.cost.left),
+              top: pct(variant.cost.top),
+              gap: cqw(START_BUFF_CARD.costGap),
+              transform: `translate(${cqw(variant.cost.translateX)}, -50%)`,
+            }}
+          >
+            <img
+              src={getStartBuffStarLightPath()}
+              alt=""
+              className="object-contain"
               style={{
+                width: cqw(START_BUFF_CARD.starIcon),
+                height: cqw(START_BUFF_CARD.starIcon),
+              }}
+            />
+            <span
+              style={{
+                fontSize: cqw(variant.cost.fontSize),
+                transform: `translateY(-${cqw(variant.cost.lift)})`,
                 color: enhancement > 0 ? ACCENT_COLORS.ENHANCED : undefined,
                 fontFamily: getDisplayFontForNumeric(),
-                textShadow: variant.costTextShadow,
+                ...(variant.cost.shadow !== undefined && { textShadow: variant.cost.shadow }),
               }}
             >
               {displayBuff.cost}
@@ -218,45 +264,72 @@ export function StartBuffCard({
         </div>
 
         {/* Second black area: Icon (left) + Name (right) */}
-        <div className="flex items-center" style={{ height: variant.nameRowHeight }}>
+        <div className="flex items-center" style={{ height: pct(variant.nameRowHeight) }}>
           {/* Buff icon - upper left */}
           <img
             src={getStartBuffIconPath(buff.baseId, version)}
             alt=""
-            className={variant.buffIcon}
+            className="object-contain shrink-0"
+            style={{
+              width: cqw(variant.buffIcon.size),
+              height: cqw(variant.buffIcon.size),
+              marginLeft: cqw(variant.buffIcon.marginLeft),
+            }}
           />
 
           {/* Name */}
-          <div className={variant.nameWrapper}>
-            <AutoSizeText
-              text={`${displayBuff.name}${getEnhancementSuffix(enhancement)}`}
-              width={160}
-              minFontSize={12}
-              maxFontSize={variant.nameMaxFontSize}
-              className="text-center"
-              style={{
-                color: MD_ACCENT_COLORS[version],
-                textShadow: variant.nameTextShadow,
-                ...getDisplayFontForLanguage(i18nInstance.language),
-              }}
-            />
+          <div
+            className="overflow-hidden"
+            style={{
+              width: cqw(START_BUFF_CARD.nameWidth),
+              marginLeft: cqw(variant.name.marginLeft),
+              transform: `translateY(${pct(variant.name.translateYSelf)})`,
+            }}
+          >
+            <Suspense fallback={<Skeleton className="h-5 w-full bg-foreground" />}>
+              <StartBuffName
+                text={nameText}
+                maxSize={variant.name.maxSize}
+                color={MD_ACCENT_COLORS[version]}
+                shadow={variant.name.shadow}
+              />
+            </Suspense>
           </div>
         </div>
 
         {/* Description - center area */}
         <div
           role="presentation"
-          className={`relative z-20 ${variant.description}`}
-          style={{ color: variant.descriptionColor }}
+          className="relative z-20 flex-1 overflow-y-auto scrollbar-hide"
+          style={{
+            paddingInline: cqw(variant.description.paddingX),
+            paddingBlock: cqw(variant.description.paddingY),
+            margin: cqw(variant.description.margin),
+            marginTop: cqw(variant.description.marginTop),
+            marginRight: cqw(variant.description.marginRight),
+            fontSize: cqw(START_BUFF_CARD.effectFontSize),
+            lineHeight: cqw(START_BUFF_CARD.effectLineHeight),
+            ...(variant.description.color !== undefined && { color: variant.description.color }),
+          }}
           onClick={handleCardClick}
         >
-          <div className="space-y-0.5" style={{ wordBreak: 'keep-all' }}>
+          <div
+            className="flex flex-col"
+            style={{ wordBreak: 'keep-all', gap: cqw(START_BUFF_CARD.effectGap) }}
+          >
             {formatBuffEffects(displayBuff.effects, i18n, battleKeywords)}
           </div>
         </div>
 
         {/* Enhancement buttons - bottom */}
-        <div className={`relative z-20 ${variant.enhancementRow}`}>
+        <div
+          className="relative z-20 flex"
+          style={{
+            gap: cqw(variant.enhancementRow.gap),
+            paddingInline: cqw(variant.enhancementRow.paddingX),
+            paddingBottom: cqw(variant.enhancementRow.paddingBottom),
+          }}
+        >
           <EnhancementButton
             lvl={1}
             enhancement={enhancement}
@@ -287,7 +360,12 @@ export function StartBuffCard({
       <img
         src={getStartBuffHighlightPath(version)}
         alt=""
-        className={`${variant.highlight} z-30 ${showHighlight ? 'opacity-100' : 'opacity-0'}`}
+        className={`absolute inset-0 z-30 pointer-events-none transition-opacity duration-200 ${showHighlight ? 'opacity-100' : 'opacity-0'}`}
+        style={{
+          width: pct(variant.highlight.width),
+          height: pct(variant.highlight.height),
+          transform: `translate(${cqw(variant.highlight.translateX)}, ${cqw(variant.highlight.translateY)})`,
+        }}
       />
     </div>
   )

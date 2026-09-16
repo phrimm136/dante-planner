@@ -17,7 +17,7 @@ import { validateSaveablePlanner } from '../schemas/PlannerSchemas'
 
 import type { PublishedPlannerDetail } from '../types/PlannerListTypes'
 import type { SaveablePlanner } from '../types/PlannerTypes'
-import { STALE_TIME, GC_TIME } from '@/lib/constants'
+import { GC_TIME, STALE_TIME } from '@/lib/constants'
 
 /**
  * Return type for usePublishedPlannerQuery

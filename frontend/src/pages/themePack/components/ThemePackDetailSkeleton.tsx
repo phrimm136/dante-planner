@@ -1,6 +1,8 @@
 import { DetailPageSkeleton } from '@/components/feedback/DetailPageSkeleton'
 import { Skeleton } from '@/components/ui/skeleton'
 import { SECTION_STYLES } from '@/lib/constants'
+import { CardSlot } from '@/shared/cardLayout'
+import { THEME_PACK_GEOMETRY } from '../lib/cardLayout'
 
 /**
  * Theme Pack detail: Card image + difficulty/floor metadata (left)
@@ -12,7 +14,9 @@ export function ThemePackDetailSkeleton() {
       left={
         <div className="flex gap-4">
           {/* Theme pack card image */}
-          <Skeleton className="w-60 h-104 rounded-lg shrink-0" />
+          <CardSlot size={THEME_PACK_GEOMETRY.size} className="shrink-0">
+            <Skeleton className="size-full rounded-lg" />
+          </CardSlot>
           {/* Metadata panel: difficulty + floors */}
           <div className="flex-1 space-y-3">
             <Skeleton className="h-5 w-20" />

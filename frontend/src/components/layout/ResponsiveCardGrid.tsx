@@ -1,13 +1,13 @@
 import { cn } from '@/lib/utils'
-import { CARD_GRID } from '@/lib/constants'
-import { useIsBreakpoint } from '@/components/hooks/use-is-breakpoint'
+import { CARD_GAP_PX } from '@/lib/constants'
+import { useSlotSizePx, type GridRowHeight, type CardSizePx } from '@/shared/cardLayout'
 
 interface ResponsiveCardGridProps {
-  /** Card width in pixels - determines column size */
-  cardWidth: number
-  /** Card height in pixels - for consistent grid cell heights (optional, omit for variable-height cards) */
-  cardHeight?: number
-  /** Gap between cards in pixels (default: CARD_GRID.DEFAULT_GAP = 16px) */
+  /** The card's box */
+  size: CardSizePx
+  /** Whether rows take the card's box or their own content (default: 'card') */
+  rows?: GridRowHeight
+  /** Gap between cards in pixels (default: CARD_GAP_PX = 16px) */
   gap?: number
   /** Grid content (card components) */
   children: React.ReactNode
@@ -15,6 +15,8 @@ interface ResponsiveCardGridProps {
   className?: string
   /** Mobile scale factor (0-1) - scales column width for auto-fill calculation */
   mobileScale?: number
+  /** Handle on the grid element itself, for readers of its resolved track geometry */
+  ref?: React.Ref<HTMLDivElement>
 }
 
 /**
@@ -22,7 +24,7 @@ interface ResponsiveCardGridProps {
  *
  * Features:
  * - Columns auto-adjust based on container width (CSS Grid auto-fill)
- * - Rows created implicitly as content is added (grid-auto-rows)
+ * - Rows are pinned to the card's box, or left to their content
  * - Cards maintain fixed width (no stretching)
  * - Grid is centered horizontally with dynamic padding
  * - Consistent gap between all cards
@@ -31,44 +33,32 @@ interface ResponsiveCardGridProps {
  * Pattern: Uses CSS Grid auto-fill columns with implicit rows
  *
  * @example
- * // Identity/EGO page (160px cards)
- * <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.IDENTITY}>
+ * <ResponsiveCardGrid size={IDENTITY_GEOMETRY.size}>
  *   {identities.map(id => <IdentityCard key={id} ... />)}
- * </ResponsiveCardGrid>
- *
- * // EGO Gift selection (96px cards)
- * <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.EGO_GIFT}>
- *   {gifts.map(gift => <EGOGiftCard key={gift.id} ... />)}
  * </ResponsiveCardGrid>
  */
 export function ResponsiveCardGrid({
-  cardWidth,
-  cardHeight,
-  gap = CARD_GRID.DEFAULT_GAP,
+  size,
+  rows = 'card',
+  gap = CARD_GAP_PX,
   children,
   className,
   mobileScale = 1,
+  ref,
 }: ResponsiveCardGridProps) {
-  const isDesktop = useIsBreakpoint('min', CARD_GRID.LG_BREAKPOINT)
+  const { widthPx: columnWidthPx, heightPx: rowHeightPx } = useSlotSizePx(size, mobileScale)
 
-  const scaledCardWidth = cardWidth * mobileScale
-  const columnWidth = isDesktop ? cardWidth : scaledCardWidth
-
-  // Only apply fixed row height if cardHeight is provided
   const gridStyle: React.CSSProperties = {
-    gridTemplateColumns: `repeat(auto-fill, ${String(columnWidth)}px)`,
+    gridTemplateColumns: `repeat(auto-fill, ${String(columnWidthPx)}px)`,
     gap: `${String(gap)}px`,
     justifyContent: 'center',
-  }
-
-  if (cardHeight !== undefined) {
-    const scaledCardHeight = cardHeight * mobileScale
-    const rowHeight = isDesktop ? cardHeight : scaledCardHeight
-    gridStyle.gridAutoRows = `${String(rowHeight)}px`
+    ...(rows === 'card' && {
+      gridAutoRows: `${String(rowHeightPx)}px`,
+    }),
   }
 
   return (
-    <div className={cn('grid', className)} style={gridStyle}>
+    <div ref={ref} className={cn('grid', className)} style={gridStyle}>
       {children}
     </div>
   )

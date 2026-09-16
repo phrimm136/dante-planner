@@ -2,6 +2,18 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { StartBuffCard } from '../StartBuffCard'
 import type { StartBuff, StartBuffI18n, EnhancementLevel } from '@/shared/gameText'
+import { START_BUFF_GEOMETRY } from '../../../lib/cardLayout'
+
+import krTable from '@static/data/fontAdvances/KR.json'
+import { FontAdvanceTableSchema } from '@/shared/cardLayout'
+
+/** The face the Korean cards are drawn in, as the site ships it. */
+const KR_TABLE = FontAdvanceTableSchema.parse(krTable)
+
+vi.mock('@/shared/cardLayout', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/shared/cardLayout')>()),
+  useFontAdvances: () => KR_TABLE,
+}))
 
 // Mock react-i18next
 vi.mock('react-i18next', () => ({
@@ -23,11 +35,6 @@ vi.mock('@/shared/assets', () => ({
 // Mock formatBuffEffects to return simple text
 vi.mock('../formatBuffDescription', () => ({
   formatBuffEffects: () => <span>Mock effect description</span>,
-}))
-
-// Mock AutoSizeText to render plain text
-vi.mock('@/components/ui/AutoSizeText', () => ({
-  AutoSizeText: ({ text }: { text: string }) => <span>{text}</span>,
 }))
 
 const mockBuff: StartBuff = {
@@ -52,6 +59,7 @@ function renderCard(overrides: Partial<Parameters<typeof StartBuffCard>[0]> = {}
     onSelect: vi.fn(),
     enhancement: 0 as EnhancementLevel,
     onEnhancementChange: vi.fn(),
+    width: START_BUFF_GEOMETRY.size.widthPx,
     ...overrides,
   }
   return { props, ...render(<StartBuffCard {...props} />) }

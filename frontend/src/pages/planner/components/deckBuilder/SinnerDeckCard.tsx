@@ -1,17 +1,17 @@
+import type { CSSProperties } from 'react'
+
 import { getAttributeColors } from '@/shared/gameData'
 import type { SinnerEquipment } from '../../types/DeckTypes'
 import type { EgoType } from '@/shared/gameData'
 import type { IdentityListItem } from '@/pages/identity'
 import type { SkillData } from './SinnerGrid'
-import {
-  getAttackTypeIconPath,
-  getEGOImagePath,
-  getEGOTypeIconPath,
-  getSelectedIndicatorPath,
-  getBackupIndicatorPath,
-} from '@/shared/assets'
-import { IdentityCard } from '@/pages/identity'
-import { getDisplayFontForNumeric } from '@/lib/utils'
+import { getAttackTypeIconPath, getEGOImagePath, getEGOTypeIconPath } from '@/shared/assets'
+import { FORMATION_SLOT_DIM, FormationBadge, IdentityCard } from '@/pages/identity'
+import type { FormationSlotState } from '@/pages/identity'
+import { CardSlot } from '@/shared/cardLayout'
+import { MAX_DEPLOYED_ORDER } from '@/lib/constants'
+import { IDENTITY_GEOMETRY } from '@/pages/identity'
+import { DECK_CARD, cqw } from '../../lib/cardLayout'
 
 interface SinnerDeckCardProps {
   sinnerName: string
@@ -21,16 +21,32 @@ interface SinnerDeckCardProps {
   skillData: SkillData
   egoAffinityMap: Record<string, string>
   deploymentOrder: number | null
+  /** The share of the desktop width the identity card takes below the desktop breakpoint */
+  mobileScale: number
   onToggleDeploy?: ((sinnerIndex: number) => void) | undefined
   readOnly?: boolean
 }
 
 const EGO_RANKS: EgoType[] = ['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH']
 
+const ROOT_STYLE: CSSProperties = {
+  padding: `${cqw(DECK_CARD.padding)} ${cqw(DECK_CARD.padding)} 0`,
+  gap: cqw(DECK_CARD.rowGap),
+}
+
+const SLOT_BOX_STYLE: CSSProperties = {
+  width: cqw(DECK_CARD.skillBox),
+  height: cqw(DECK_CARD.skillBox),
+}
+
+const ATK_ICON_STYLE: CSSProperties = {
+  width: cqw(DECK_CARD.atkIcon),
+  height: cqw(DECK_CARD.atkIcon),
+}
+
 /**
  * Deck card showing equipped identity with deployment status, skills, and EGOs.
  * Uses IdentityCard for identity display with deployment order overlay.
- * Memoized to prevent re-renders when sibling sinners' data changes.
  */
 export const SinnerDeckCard = function SinnerDeckCard({
   sinnerIndex,
@@ -39,30 +55,15 @@ export const SinnerDeckCard = function SinnerDeckCard({
   skillData,
   egoAffinityMap,
   deploymentOrder,
+  mobileScale,
   onToggleDeploy,
   readOnly = false,
 }: SinnerDeckCardProps) {
-  const isDeployed = deploymentOrder !== null && deploymentOrder <= 7
+  const isDeployed = deploymentOrder !== null && deploymentOrder <= MAX_DEPLOYED_ORDER
+  const slotState: FormationSlotState = isDeployed ? 'deployed' : 'backup'
 
-  // Create deployment overlay for IdentityCard
   const deploymentOverlay =
-    deploymentOrder !== null ? (
-      <div className="absolute flex inset-0 items-center justify-center">
-        <div className="flex flex-col items-center -translate-y-[18px] gap-2">
-          <span
-            className={`w-12 h-12 flex items-center justify-center text-[48px] ${isDeployed ? 'formation-number-deploy' : 'formation-number-backup'}`}
-            style={{ fontFamily: getDisplayFontForNumeric() }}
-          >
-            {deploymentOrder}
-          </span>
-          <img
-            src={isDeployed ? getSelectedIndicatorPath() : getBackupIndicatorPath()}
-            alt={isDeployed ? 'Selected' : 'Backup'}
-            className="w-37 object-contain"
-          />
-        </div>
-      </div>
-    ) : null
+    deploymentOrder !== null ? <FormationBadge state={slotState} order={deploymentOrder} /> : null
 
   // Build a minimal identity object for IdentityCard if missing
   const displayIdentity: IdentityListItem = identityData ?? {
@@ -80,7 +81,10 @@ export const SinnerDeckCard = function SinnerDeckCard({
   }
 
   return (
-    <div className="relative flex flex-col items-center gap-1 p-2 transition-colors">
+    <div
+      className="relative w-full flex flex-col items-center transition-colors"
+      style={ROOT_STYLE}
+    >
       {/* Identity Card with deployment overlay - click here to toggle deploy */}
       <button
         type="button"
@@ -90,17 +94,19 @@ export const SinnerDeckCard = function SinnerDeckCard({
         onClick={() => onToggleDeploy?.(sinnerIndex)}
         style={{ cursor: readOnly ? 'default' : 'pointer' }}
       >
-        <IdentityCard
-          identity={displayIdentity}
-          uptie={equipment.identity.uptie}
-          level={equipment.identity.level}
-          isSelected={deploymentOrder !== null}
-          overlay={deploymentOverlay}
-        />
+        <CardSlot size={IDENTITY_GEOMETRY.size} mobileScale={mobileScale}>
+          <IdentityCard
+            identity={displayIdentity}
+            uptie={equipment.identity.uptie}
+            level={equipment.identity.level}
+            dim={deploymentOrder === null ? undefined : FORMATION_SLOT_DIM}
+            overlay={deploymentOverlay}
+          />
+        </CardSlot>
       </button>
 
       {/* Skill Info Row - atkType icon on affinity-colored background */}
-      <div className="flex gap-1">
+      <div className="flex" style={{ gap: cqw(DECK_CARD.skillGap) }}>
         {[0, 1, 2].map((idx) => {
           const affinity = skillData.affinities[idx]
           const atkType = skillData.atkTypes[idx]
@@ -109,18 +115,19 @@ export const SinnerDeckCard = function SinnerDeckCard({
           return (
             <div
               key={idx}
-              className="w-7 h-7 rounded-sm flex items-center justify-center"
-              style={{ backgroundColor: bgColor || 'var(--muted)' }}
+              className="rounded-sm flex items-center justify-center"
+              style={{ ...SLOT_BOX_STYLE, backgroundColor: bgColor || 'var(--muted)' }}
               title={`Skill ${idx + 1}: ${atkType || '?'} (${affinity || '?'})`}
             >
               {atkType ? (
                 <img
                   src={getAttackTypeIconPath(atkType)}
                   alt={atkType}
-                  className="w-5 h-5 object-contain"
+                  className="object-contain"
+                  style={ATK_ICON_STYLE}
                 />
               ) : (
-                <div className="w-5 h-5" />
+                <div style={ATK_ICON_STYLE} />
               )}
             </div>
           )
@@ -128,7 +135,7 @@ export const SinnerDeckCard = function SinnerDeckCard({
       </div>
 
       {/* EGO Slots Row (5 ranks) */}
-      <div className="flex gap-0.5">
+      <div className="flex" style={{ gap: cqw(DECK_CARD.egoGap) }}>
         {EGO_RANKS.map((rank) => {
           const equippedEgo = equipment.egos[rank]
           const egoAffinity = equippedEgo ? egoAffinityMap[equippedEgo.id] : undefined
@@ -136,8 +143,12 @@ export const SinnerDeckCard = function SinnerDeckCard({
           return (
             <div
               key={rank}
-              className="w-7 h-7 rounded-sm border border-border flex items-center justify-center overflow-hidden"
-              style={{ backgroundColor: egoBgColor || 'var(--muted)' }}
+              className="rounded-sm border border-border flex items-center justify-center overflow-hidden"
+              style={{
+                width: cqw(DECK_CARD.egoBox),
+                height: cqw(DECK_CARD.egoBox),
+                backgroundColor: egoBgColor || 'var(--muted)',
+              }}
               title={rank}
             >
               {equippedEgo ? (
@@ -147,7 +158,12 @@ export const SinnerDeckCard = function SinnerDeckCard({
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <img src={getEGOTypeIconPath(rank)} alt={rank} className="h-4 object-cover" />
+                <img
+                  src={getEGOTypeIconPath(rank)}
+                  alt={rank}
+                  className="object-cover"
+                  style={{ height: cqw(DECK_CARD.egoFallbackIcon) }}
+                />
               )}
             </div>
           )

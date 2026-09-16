@@ -1,9 +1,24 @@
 import { useTranslation } from 'react-i18next'
-import { useEGOListI18n } from '../hooks/useEGOListData'
-import { getDisplayFontForLanguage, getLineHeightForLanguage } from '@/lib/utils'
-import { AutoSizeWrappedText } from '@/components/ui/AutoSizeWrappedText'
-import { EGO_CARD_INFO_ROW } from '@/lib/constants'
+
+import {
+  createAdvanceMeasure,
+  fitText,
+  lineMetrics,
+  midlineOffsetEm,
+  nameShadow,
+  pctStyle,
+  useFontAdvances,
+} from '@/shared/cardLayout'
+import { getDisplayFontForLanguage } from '@/lib/utils'
 import type { EGOId } from '@/shared/gameData'
+import { useEGOListI18n } from '../hooks/useEGOListData'
+import {
+  EGO_NAME_CQW,
+  EGO_NAME_RECT,
+  EGO_NAME_TRACKING,
+  egoNameFitSpec,
+  egoNameLineHeight,
+} from '../lib/cardLayout'
 
 interface EGONameProps {
   /** EGO ID to look up name */
@@ -11,48 +26,47 @@ interface EGONameProps {
 }
 
 /**
- * Component that fetches and displays EGO name.
- * Uses useSuspenseQuery internally - MUST be wrapped in Suspense boundary.
+ * The EGO name plate's text, broken into lines and sized to fit its box.
  *
- * This allows granular loading: card images stay visible while only
- * the name text shows skeleton during language change.
- *
- * @example
- * <Suspense fallback={<Skeleton className="w-16 h-4" />}>
- *   <EGOName id={ego.id} />
- * </Suspense>
+ * Reads i18n and the display face's advance table through `useSuspenseQuery` — render it
+ * inside a Suspense boundary.
  */
-/**
- * Inserts zero-width spaces between CJK ideographs (kanji/hanzi) to enable
- * character-level line breaking while preserving Korean word boundaries.
- * Unicode range U+4E00-U+9FFF covers CJK Unified Ideographs.
- */
-function insertKanjiBreaks(text: string): string {
-  // Match sequences of CJK ideographs and insert zero-width space between each
-  return text.replace(/[\u4E00-\u9FFF]+/g, (match) => match.split('').join('\u200B'))
-}
-
 export function EGOName({ id }: EGONameProps) {
   const { i18n } = useTranslation()
   const i18nData = useEGOListI18n()
-  const rawName = i18nData[id] || id
-  // Replace " - " with non-breaking space before hyphen to prevent orphaned hyphens
-  // Insert zero-width spaces between kanji for character-level breaking
-  const name = insertKanjiBreaks(rawName.replace(/ - /g, '\u00A0- '))
-  const displayStyle = getDisplayFontForLanguage(i18n.language)
-  const lineHeight = getLineHeightForLanguage(i18n.language)
+  const name = i18nData[id] ?? id
+
+  const fontTable = useFontAdvances(i18n.language)
+  const measure = createAdvanceMeasure(fontTable, EGO_NAME_TRACKING)
+  const fitted = fitText(name, egoNameFitSpec(fontTable), measure)
 
   return (
-    <AutoSizeWrappedText
-      text={name}
-      width={EGO_CARD_INFO_ROW.NAME_SLOT}
-      maxLines={3}
-      className="text-center"
-      style={{ ...displayStyle }}
-      minFontSize={6}
-      maxFontSize={12}
-      lineHeight={lineHeight}
-      wordBreak="keep-all"
-    />
+    <div
+      data-testid="ego-name"
+      style={{
+        ...pctStyle(EGO_NAME_RECT),
+        transform: `translateY(${String(midlineOffsetEm(fontTable) * fitted.fontSize)}cqw)`,
+      }}
+      className="flex flex-col items-center justify-center pointer-events-none"
+    >
+      {fitted.lines.map((line, index) => (
+        <span
+          key={`${String(index)}:${line}`}
+          data-testid="ego-name-line"
+          className="text-center"
+          style={{
+            ...getDisplayFontForLanguage(i18n.language),
+            fontSize: `${String(fitted.fontSize)}cqw`,
+            lineHeight: egoNameLineHeight(lineMetrics(fontTable, line)),
+            letterSpacing: `${String(EGO_NAME_CQW.letterSpacingEm)}em`,
+            wordSpacing: `${String(EGO_NAME_CQW.wordSpacingEm)}em`,
+            whiteSpace: 'nowrap',
+            textShadow: nameShadow('ego', i18n.language),
+          }}
+        >
+          {line}
+        </span>
+      ))}
+    </div>
   )
 }

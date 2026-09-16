@@ -11,6 +11,9 @@ import { useParams } from '@tanstack/react-router'
 import { Suspense } from 'react'
 
 import { EGOGiftCard } from '@/pages/egoGift'
+import { CardSlot } from '@/shared/cardLayout'
+import { CARD_MOBILE_SCALE_NONE } from '@/lib/constants'
+import { EGO_GIFT_GEOMETRY } from './lib/cardLayout'
 import { GiftNameI18n } from '@/pages/egoGift'
 import { EGOGiftMetadata } from '@/pages/egoGift'
 import { EnhancementsPanelI18n } from '@/pages/egoGift'
@@ -65,7 +68,13 @@ function EGOGiftDetailContent() {
     <div className="space-y-4">
       {/* Header row: Card + Name (vertically centered) */}
       <div className="flex gap-4 items-center">
-        <EGOGiftCard gift={gift} enhancement={0} />
+        <CardSlot
+          size={EGO_GIFT_GEOMETRY.size}
+          mobileScale={CARD_MOBILE_SCALE_NONE}
+          className="shrink-0"
+        >
+          <EGOGiftCard gift={gift} enhancement={0} />
+        </CardSlot>
         {/* Name with internal Suspense - does not suspend parent */}
         <GiftNameI18n
           id={id}

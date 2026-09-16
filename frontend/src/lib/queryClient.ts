@@ -7,11 +7,11 @@ import {
 } from './apiErrors'
 import { showError, showSuccess, showUnavailable } from './errorPresentation'
 import {
-  STALE_TIME,
   GC_TIME,
   MAX_RETRYABLE_ATTEMPTS,
   RETRY_BASE_MS,
   RETRY_MAX_MS,
+  STALE_TIME,
 } from '@/lib/constants'
 
 declare module '@tanstack/react-query' {

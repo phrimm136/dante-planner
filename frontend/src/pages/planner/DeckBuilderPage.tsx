@@ -8,7 +8,7 @@ import { showSuccess } from '@/lib/errorPresentation'
 import { Skeleton } from '@/components/ui/skeleton'
 
 // Project constants
-import { DEFAULT_SKILL_EA } from '@/shared/gameData'
+import { DEFAULT_SKILL_EA, SINNERS } from '@/shared/gameData'
 
 // Store
 import {
@@ -25,16 +25,16 @@ import { StoreBoundDeckBuilderSummary } from './components/deckBuilder/DeckBuild
 import { DeckBuilderPane } from './components/deckBuilder/DeckBuilderPane'
 import { StoreBoundDeckBuilderContent } from './components/deckBuilder/DeckBuilderContent'
 import { DeckImportConfirmDialog } from './components/deckBuilder/DeckImportConfirmDialog'
+import { useSinnerGridLayout } from './components/deckBuilder/SinnerGrid'
 import { staggerDelay } from '@/lib/stagger'
 import { SECTION_STYLES } from '@/lib/constants'
-
-/** Sinner card dimensions for skeleton (matches SinnerGrid) */
-const SINNER_CARD = { width: 96, height: 128 }
 
 /**
  * Page-level skeleton matching DeckBuilderSummary structure
  */
 function DeckBuilderPageSkeleton() {
+  const { gridStyle, columnWidth, rowHeight } = useSinnerGridLayout()
+
   return (
     <div className={SECTION_STYLES.LAYOUT.page}>
       <div className="space-y-4">
@@ -43,22 +43,18 @@ function DeckBuilderPageSkeleton() {
 
         {/* SinnerGrid placeholder */}
         <div className="border-2 border-border rounded-lg p-4">
-          <div className={SECTION_STYLES.LAYOUT.wrap}>
-            {Array.from({ length: 12 }).map((_, i) => (
+          <div className="grid mx-auto" style={gridStyle}>
+            {SINNERS.map((sinnerName, i) => (
               <Skeleton
-                key={i}
+                key={sinnerName}
                 className="rounded-md"
-                style={{
-                  width: SINNER_CARD.width,
-                  height: SINNER_CARD.height,
-                  ...staggerDelay(i),
-                }}
+                style={{ width: columnWidth, height: rowHeight, ...staggerDelay(i) }}
               />
             ))}
           </div>
 
           {/* Status + Action bar placeholder */}
-          <div className="mt-3 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+          <div className="mt-5 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
             <Skeleton className="h-20 w-full lg:w-96" />
             <div className="flex gap-2">
               <Skeleton className="h-10 w-24" />

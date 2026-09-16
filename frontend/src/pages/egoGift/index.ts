@@ -37,6 +37,7 @@ export {
   egoGiftObservationQueryKeys,
 } from './hooks/useEGOGiftObservationData'
 
+export { EGO_GIFT_GEOMETRY } from './lib/cardLayout'
 export { sortEGOGifts } from './lib/egoGiftSort'
 export { calculateEnhancementCost, isMixedRecipe } from './lib/egoGiftUtils'
 export { parseTier, toRomanTier } from './lib/egoGiftTier'

@@ -5,13 +5,14 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { decodeGiftSelections } from '@/pages/egoGift'
 import { sortEGOGifts } from '@/pages/egoGift'
-import { EMPTY_STATE, CARD_GRID } from '@/lib/constants'
+import { CARD_MOBILE_SCALE, EMPTY_STATE } from '@/lib/constants'
+import { EGO_GIFT_GEOMETRY } from '@/pages/egoGift'
 import { cn } from '@/lib/utils'
 import type { EGOGiftListItem } from '@/pages/egoGift'
 import type { EncodedGiftId, EnhancementLevel } from '@/shared/gameData'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
 import { useSearchMappings } from '@/shared/filter'
-import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
+import { CardSlot } from '@/shared/cardLayout'
 import { EGOGiftCard } from '@/pages/egoGift'
 import { EGOGiftTooltip } from '@/pages/egoGift'
 import { EGOGiftFilterBar } from '@/pages/egoGift'
@@ -57,7 +58,7 @@ export function ComprehensiveGiftGridTracker({
   const [searchQuery, setSearchQuery] = useState('')
   const [sortMode, setSortMode] = useState<SortMode>('tier-first')
 
-  const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
+  const mobileScale = CARD_MOBILE_SCALE
 
   // Use authoritative comprehensiveGiftIds when provided; fall back to aggregating from floors
   const allComprehensiveGiftIds = (() => {
@@ -256,14 +257,10 @@ function EgoGiftCardWithOverlayImpl({
   const [isHovered, setIsHovered] = useState(false)
 
   return (
-    <ScaledCardWrapper
-      mobileScale={mobileScale}
-      cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
-      cardHeight={CARD_GRID.HEIGHT.EGO_GIFT}
-    >
+    <CardSlot size={EGO_GIFT_GEOMETRY.size} mobileScale={mobileScale}>
       <EGOGiftTooltip giftId={item.id} enhancement={enhancement}>
         <div
-          className="relative"
+          className="relative w-full"
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
@@ -292,6 +289,6 @@ function EgoGiftCardWithOverlayImpl({
           )}
         </div>
       </EGOGiftTooltip>
-    </ScaledCardWrapper>
+    </CardSlot>
   )
 }

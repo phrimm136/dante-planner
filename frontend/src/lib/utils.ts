@@ -66,12 +66,12 @@ export function calculateByteLength(str: string | null | undefined): number {
  *
  * Font mapping:
  * - KR (Korean): KOTRA Bold
- * - EN (English): Mikodacs Regular + letter-spacing
+ * - EN (English): Mikodacs Regular
  * - JP (Japanese): Corporate Logo Bold
  * - CN (Chinese): Chinese Font
  *
  * @param language - Optional language code. If not provided, uses current i18n language
- * @returns CSS style object with fontFamily and optional letterSpacing
+ * @returns CSS style object with fontFamily
  * @example
  * // In component with useTranslation
  * const { i18n } = useTranslation()
@@ -84,7 +84,7 @@ export function getDisplayFontForLanguage(language?: string): React.CSSPropertie
     case 'KR':
       return { fontFamily: 'var(--font-kotra)' }
     case 'EN':
-      return { fontFamily: 'var(--font-mikodacs)', letterSpacing: '0.05em' }
+      return { fontFamily: 'var(--font-mikodacs)' }
     case 'JP':
       return { fontFamily: 'var(--font-corporate)' }
     case 'CN':

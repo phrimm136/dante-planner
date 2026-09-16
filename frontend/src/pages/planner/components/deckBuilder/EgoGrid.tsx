@@ -1,16 +1,17 @@
 import { memo, type Ref } from 'react'
 import type { EGOId } from '@/shared/gameData'
 
-import { CARD_GRID } from '@/lib/constants'
-import { getSelectedIndicatorPath } from '@/shared/assets'
+import { CARD_MOBILE_SCALE } from '@/lib/constants'
+import { EGO_GEOMETRY } from '@/pages/ego'
 import { useDeckVisibleCount } from '../../stores/usePlannerEditorStore'
 import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
-import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
-import { EGOCard } from '@/pages/ego'
+import { CardSlot } from '@/shared/cardLayout'
+import { EGOCard, EGOSelectedTag } from '@/pages/ego'
 import { EgoThreadspinSelector } from './EntityTierSelectors'
 import type { EGOListItem } from '@/pages/ego'
 import type { ThreadspinTier } from '../../types/DeckTypes'
 
+/** The ego box with its height left to the card. */
 interface EgoGridProps {
   sortedEgos: EGOListItem[]
   visibleIds: Set<string>
@@ -54,12 +55,7 @@ export function EgoGrid({
         className="bg-muted border border-border rounded-md p-3 lg:p-6 max-h-[600px] overflow-y-auto"
       >
         <div className="pt-4">
-          <ResponsiveCardGrid
-            cardWidth={CARD_GRID.WIDTH.EGO}
-            cardHeight={CARD_GRID.HEIGHT.EGO}
-            mobileScale={0.8}
-            gap={8}
-          >
+          <ResponsiveCardGrid size={EGO_GEOMETRY.size} mobileScale={CARD_MOBILE_SCALE} gap={8}>
             {displayEgos.map((ego) => (
               <EgoGridCard
                 key={ego.id}
@@ -112,25 +108,13 @@ const EgoGridCard = memo(function EgoGridCard({
         onConfirm={onEquip}
         onUnequip={onUnequip}
       >
-        <ScaledCardWrapper
-          mobileScale={0.8}
-          cardWidth={CARD_GRID.WIDTH.EGO}
-          cardHeight={CARD_GRID.HEIGHT.EGO}
-        >
+        <CardSlot size={EGO_GEOMETRY.size}>
           <EGOCard
             ego={ego}
             isSelected={isSelected}
-            overlay={
-              isSelected ? (
-                <img
-                  src={getSelectedIndicatorPath()}
-                  alt="Selected"
-                  className="absolute inset-0 m-auto w-28 object-contain pointer-events-none"
-                />
-              ) : undefined
-            }
+            overlay={isSelected ? <EGOSelectedTag /> : undefined}
           />
-        </ScaledCardWrapper>
+        </CardSlot>
       </EgoThreadspinSelector>
     </div>
   )

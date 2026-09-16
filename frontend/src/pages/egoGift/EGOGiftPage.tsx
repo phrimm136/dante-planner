@@ -4,11 +4,11 @@ import { toGiftListItems } from './lib/giftListItem'
 
 import type { EGOGiftListItem, EGOGiftSpecListSchema, EGOGiftFacetState } from '@/pages/egoGift'
 import type { z } from 'zod'
-import type { EGOGiftDifficulty, EGOGiftTier, EGOGiftAttributeType } from '@/shared/gameData'
 import { BOOLEAN_FILTER_OPTIONS } from '@/lib/constants'
 import { calculateActiveFilterCount } from '@/shared/filter'
-import { useSetFilters } from '@/components/hooks/useSetFilters'
-import type { FilterStore } from '@/components/hooks/useSetFilters'
+import { useFilterStore } from '@/components/hooks/filterStore'
+import type { FilterStore } from '@/components/hooks/filterStore'
+import { egoGiftFilterStore } from './stores/egoGiftFilterStore'
 import { EntityListPage } from '@/shared/filter'
 import { FilterPageLayout } from '@/shared/filter'
 import { FilterSectionList, filterSection } from '@/shared/filter'
@@ -22,6 +22,7 @@ import { IconFilter } from '@/shared/filter'
 import { SearchBar } from '@/shared/filter'
 import { EGOGiftList } from '@/pages/egoGift'
 import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
+import { EGO_GIFT_GEOMETRY } from './lib/cardLayout'
 
 /** The Yes/No icon filter both boolean gift facets render. */
 function BooleanFilter({
@@ -73,16 +74,7 @@ function EGOGiftPageShell() {
     setSearchQuery,
     resetAll,
     store,
-  } = useSetFilters({
-    selectedKeywords: new Set<string>(),
-    selectedBattleKeywords: new Set<string>(),
-    selectedDifficulties: new Set<EGOGiftDifficulty>(),
-    selectedTiers: new Set<EGOGiftTier>(),
-    selectedThemePacks: new Set<string>(),
-    selectedAttributeTypes: new Set<EGOGiftAttributeType>(),
-    selectedFusioned: new Set<string>(),
-    selectedExclusive: new Set<string>(),
-  })
+  } = useFilterStore(egoGiftFilterStore)
 
   // Calculate active filter count for mobile badge
   const activeFilterCount = calculateActiveFilterCount(...Object.values(filters))
@@ -191,7 +183,7 @@ function EGOGiftPageShell() {
  */
 export default function EGOGiftPage() {
   return (
-    <EntityListPage skeleton={<ListPageSkeleton preset="egoGift" />}>
+    <EntityListPage skeleton={<ListPageSkeleton geometry={EGO_GIFT_GEOMETRY} />}>
       <EGOGiftPageShell />
     </EntityListPage>
   )

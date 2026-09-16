@@ -34,6 +34,7 @@ import { PlannerListFilterPills } from './components/plannerList/PlannerListFilt
 import { PlannerFilterPane } from './components/plannerList/PlannerFilterPane'
 import { LoadingState } from '@/components/feedback/LoadingState'
 import { PlannerGridSkeleton } from '@/components/feedback/ListPageSkeleton'
+import { PLANNER_GEOMETRY } from './lib/cardLayout'
 import { SECTION_STYLES } from '@/lib/constants'
 
 // ============================================================================
@@ -89,7 +90,7 @@ function PlannerMDPageContent() {
       </div>
 
       {/* Content Grid with inner Suspense for data loading */}
-      <Suspense fallback={<PlannerGridSkeleton />}>
+      <Suspense fallback={<PlannerGridSkeleton geometry={PLANNER_GEOMETRY} />}>
         <PersonalPlannerList
           category={category}
           page={page}

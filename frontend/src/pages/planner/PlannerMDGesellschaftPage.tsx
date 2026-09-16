@@ -39,6 +39,7 @@ import { PlannerFilterPane } from './components/plannerList/PlannerFilterPane'
 import { PublishedPlannerList } from './components/plannerList/PublishedPlannerList'
 import { LoadingState } from '@/components/feedback/LoadingState'
 import { PlannerGridSkeleton } from '@/components/feedback/ListPageSkeleton'
+import { PLANNER_GEOMETRY } from './lib/cardLayout'
 import { CommunityPlansErrorFallback } from '@/components/feedback/CommunityPlansErrorFallback'
 import { SECTION_STYLES } from '@/lib/constants'
 
@@ -104,7 +105,7 @@ function GesellschaftPageContent() {
 
       {/* Content Grid with ErrorBoundary + Suspense for data loading */}
       <ReactErrorBoundary FallbackComponent={CommunityPlansErrorFallback}>
-        <Suspense fallback={<PlannerGridSkeleton />}>
+        <Suspense fallback={<PlannerGridSkeleton geometry={PLANNER_GEOMETRY} />}>
           <PublishedPlannerList
             filters={filters}
             isAuthenticated={isAuthenticated}

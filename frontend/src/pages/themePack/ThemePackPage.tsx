@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { useThemePackListSpec } from '@/pages/themePack'
-import type { DungeonIdx, ThemePackFloor } from '@/shared/gameData'
 import { calculateActiveFilterCount } from '@/shared/filter'
-import { useSetFilters } from '@/components/hooks/useSetFilters'
+import { useFilterStore } from '@/components/hooks/filterStore'
+import { themePackFilterStore } from './stores/themePackFilterStore'
 import { EntityListPage } from '@/shared/filter'
 import { FilterPageLayout } from '@/shared/filter'
 import { FilterSectionList, filterSection } from '@/shared/filter'
@@ -12,6 +12,7 @@ import { SearchBar } from '@/shared/filter'
 import { EGOGiftFilterDropdown } from '@/pages/egoGift'
 import { ThemePackList } from '@/pages/themePack'
 import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
+import { THEME_PACK_GEOMETRY } from './lib/cardLayout'
 
 /**
  * Shell component - loads spec, manages filter states.
@@ -29,11 +30,7 @@ function ThemePackPageShell() {
     setSearchQuery,
     resetAll,
     store,
-  } = useSetFilters({
-    selectedDifficulties: new Set<DungeonIdx>(),
-    selectedFloors: new Set<ThemePackFloor>(),
-    selectedEgoGifts: new Set<string>(),
-  })
+  } = useFilterStore(themePackFilterStore)
 
   const activeFilterCount = calculateActiveFilterCount(...Object.values(filters))
 
@@ -97,7 +94,7 @@ function ThemePackPageShell() {
  */
 export default function ThemePackPage() {
   return (
-    <EntityListPage skeleton={<ListPageSkeleton preset="themePack" />}>
+    <EntityListPage skeleton={<ListPageSkeleton geometry={THEME_PACK_GEOMETRY} />}>
       <ThemePackPageShell />
     </EntityListPage>
   )

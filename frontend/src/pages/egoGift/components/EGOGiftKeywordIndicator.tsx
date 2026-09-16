@@ -1,5 +1,6 @@
 import { getKeywordIconPath } from '@/shared/assets'
 import { getKeywordDisplayName } from '@/lib/utils'
+import { EGO_GIFT_CARD, pct } from '../lib/cardLayout'
 
 interface EGOGiftKeywordIndicatorProps {
   keyword?: string | null
@@ -15,13 +16,12 @@ export function EGOGiftKeywordIndicator({ keyword }: EGOGiftKeywordIndicatorProp
     return null
   }
 
-  const iconSize = 'h-6 bottom-0 right-0'
-
   return (
     <img
       src={getKeywordIconPath(keyword)}
       alt={getKeywordDisplayName(keyword)}
-      className={`absolute ${iconSize} pointer-events-none`}
+      className="absolute bottom-0 right-0 pointer-events-none"
+      style={{ height: pct(EGO_GIFT_CARD.keywordIcon) }}
       onError={(e) => {
         e.currentTarget.style.display = 'none'
       }}

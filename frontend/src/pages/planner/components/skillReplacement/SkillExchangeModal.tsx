@@ -3,9 +3,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button'
 import { SkillEADisplay } from './SkillEADisplay'
 import { SkillExchangePane } from './SkillExchangePane'
-import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
+import { CardSlot } from '@/shared/cardLayout'
 import { OFFENSIVE_SKILL_SLOTS } from '@/shared/gameData'
-import { CARD_GRID, SECTION_STYLES } from '@/lib/constants'
+import { CARD_MOBILE_SCALE, SECTION_STYLES } from '@/lib/constants'
+import { SKILL_EXCHANGE_GEOMETRY, SKILL_IMAGE_GEOMETRY } from '../../lib/cardLayout'
 import type { OffensiveSkillSlot } from '@/shared/gameData'
 import type { SkillEAState, SkillInfo } from '../../types/DeckTypes'
 
@@ -50,7 +51,7 @@ export function SkillExchangeModal({
 }: SkillExchangeModalProps) {
   const { t } = useTranslation(['planner', 'common', 'sinnerNames'])
 
-  const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
+  const mobileScale = CARD_MOBILE_SCALE
 
   const handleExchange = (source: OffensiveSkillSlot, target: OffensiveSkillSlot) => {
     const ea = currentEA || skillEA
@@ -99,12 +100,7 @@ export function SkillExchangeModal({
               </h3>
               <div className="flex gap-3 justify-center">
                 {OFFENSIVE_SKILL_SLOTS.map((slot) => (
-                  <ScaledCardWrapper
-                    key={slot}
-                    mobileScale={mobileScale}
-                    cardWidth={CARD_GRID.WIDTH.SKILL_IMAGE}
-                    cardHeight={CARD_GRID.HEIGHT.SKILL_IMAGE}
-                  >
+                  <CardSlot key={slot} size={SKILL_IMAGE_GEOMETRY.size} mobileScale={mobileScale}>
                     <SkillEADisplay
                       identityId={identityId}
                       skillSlot={slot}
@@ -113,7 +109,7 @@ export function SkillExchangeModal({
                       ea={skillEA[slot]}
                       currentEA={currentEA?.[slot]}
                     />
-                  </ScaledCardWrapper>
+                  </CardSlot>
                 ))}
               </div>
             </div>
@@ -127,11 +123,10 @@ export function SkillExchangeModal({
                 {EXCHANGE_PAIRS.map(([source, target]) => {
                   const ea = currentEA || skillEA
                   return (
-                    <ScaledCardWrapper
+                    <CardSlot
                       key={`${source}-${target}`}
+                      size={SKILL_EXCHANGE_GEOMETRY.size}
                       mobileScale={mobileScale}
-                      cardWidth={CARD_GRID.WIDTH.SKILL_EXCHANGE}
-                      cardHeight={CARD_GRID.HEIGHT.SKILL_EXCHANGE}
                     >
                       <SkillExchangePane
                         identityId={identityId}
@@ -146,7 +141,7 @@ export function SkillExchangeModal({
                           handleExchange(source, target)
                         }}
                       />
-                    </ScaledCardWrapper>
+                    </CardSlot>
                   )
                 })}
               </div>

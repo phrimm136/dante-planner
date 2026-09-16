@@ -11,6 +11,7 @@ import { PersonalPlannerList } from './components/plannerList/PersonalPlannerLis
 import { MDPlannerToolbar } from './components/plannerList/MDPlannerToolbar'
 import { PlannerListFilterPills } from './components/plannerList/PlannerListFilterPills'
 import { PlannerGridSkeleton } from '@/components/feedback/ListPageSkeleton'
+import { PLANNER_GEOMETRY } from './lib/cardLayout'
 import { useSavedPlannerQuery } from './hooks/useSavedPlannerQuery'
 import { isMDPlanner } from './types/PlannerTypes'
 import { useAuthQuery } from '@/shared/auth'
@@ -134,7 +135,7 @@ function PlannerDetailContent({ plannerId }: { plannerId: string }) {
         </div>
 
         {/* Planner List Grid */}
-        <Suspense fallback={<PlannerGridSkeleton />}>
+        <Suspense fallback={<PlannerGridSkeleton geometry={PLANNER_GEOMETRY} />}>
           <PersonalPlannerList
             category={category}
             page={page}

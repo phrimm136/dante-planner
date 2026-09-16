@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { ThemePackTrackerCard } from '../ThemePackTrackerCard'
 import type { ThemePackEntry } from '@/pages/themePack'
 import type { NoteContent } from '@/shared/noteEditor'
+import { CARD_MOBILE_SCALE_DENSE } from '@/lib/constants'
 
 // Mock react-i18next with initReactI18next for proper module loading
 vi.mock('react-i18next', async (importOriginal) => {
@@ -73,6 +74,7 @@ describe('ThemePackTrackerCard', () => {
   }
 
   const defaultProps = {
+    mobileScale: CARD_MOBILE_SCALE_DENSE,
     packId: 'pack1',
     packEntry: mockPackEntry,
     packName: 'Test Pack',

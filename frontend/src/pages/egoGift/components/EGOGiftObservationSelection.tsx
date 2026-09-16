@@ -2,8 +2,9 @@ import { useEGOGiftListSpec, useEGOGiftListI18n } from '../hooks/useEGOGiftListD
 import type { EGOGiftListItem } from '../types/EGOGiftTypes'
 import type { EncodedGiftId } from '@/shared/gameData'
 import { getBaseGiftId } from '../lib/egoGiftEncoding'
-import { CARD_GRID } from '@/lib/constants'
-import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
+import { CARD_MOBILE_SCALE } from '@/lib/constants'
+import { EGO_GIFT_GEOMETRY } from '../lib/cardLayout'
+import { CardSlot } from '@/shared/cardLayout'
 import { EGOGiftCard } from './EGOGiftCard'
 import { EGOGiftTooltip } from './EGOGiftTooltip'
 import { toGiftListItems } from '../lib/giftListItem'
@@ -30,7 +31,7 @@ export function EGOGiftObservationSelection({
   // Merge spec and i18n into EGOGiftListItem array
   const gifts: EGOGiftListItem[] = toGiftListItems(spec, i18n)
 
-  const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
+  const mobileScale = CARD_MOBILE_SCALE
 
   return (
     <div className="bg-muted border border-border rounded-md p-4 overflow-x-auto sm:overflow-x-visible sm:h-[350px] flex flex-row sm:flex-col gap-2 items-center justify-center">
@@ -39,24 +40,19 @@ export function EGOGiftObservationSelection({
         if (!gift) return null
 
         return (
-          <ScaledCardWrapper
-            key={giftId}
-            cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
-            cardHeight={CARD_GRID.HEIGHT.EGO_GIFT}
-            mobileScale={mobileScale}
-          >
+          <CardSlot key={giftId} size={EGO_GIFT_GEOMETRY.size} mobileScale={mobileScale}>
             <EGOGiftTooltip giftId={giftId} className="max-w-[320px]">
               <button
                 type="button"
                 onClick={() => {
                   onGiftRemove(giftId)
                 }}
-                className="cursor-pointer"
+                className="block w-full cursor-pointer"
               >
                 <EGOGiftCard gift={gift} isSelected={true} enableHoverHighlight />
               </button>
             </EGOGiftTooltip>
-          </ScaledCardWrapper>
+          </CardSlot>
         )
       })}
     </div>

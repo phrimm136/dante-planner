@@ -1,18 +1,22 @@
+import { Suspense, type CSSProperties } from 'react'
+
 import {
   getStartBuffIconPath,
   getStartBuffMiniPath,
   getStartBuffMiniHighlightPath,
 } from '@/shared/assets'
 import { MD_ACCENT_COLORS } from '@/lib/constants'
+import { EGO_GIFT_GEOMETRY } from '@/pages/egoGift'
+import { aspectOf } from '@/shared/cardLayout'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   getEnhancementFromBuffId,
   getBaseIdFromBuffId,
   getEnhancementSuffix,
 } from '@/shared/gameText'
 import { EGOGiftEnhancementIndicator } from '@/pages/egoGift'
-import { useTranslation } from 'react-i18next'
-import { getDisplayFontForLanguage, getLineHeightForLanguage } from '@/lib/utils'
-import { AutoSizeWrappedText } from '@/components/ui/AutoSizeWrappedText'
+import { START_BUFF_MINI_CARD, cqw, pct } from '../../lib/cardLayout'
+import { StartBuffMiniName } from './StartBuffName'
 
 interface StartBuffMiniCardProps {
   /** Full buff ID including enhancement (e.g., 101, 202, 303) */
@@ -23,27 +27,29 @@ interface StartBuffMiniCardProps {
   mdVersion: number
 }
 
+const ROOT_STYLE: CSSProperties = {
+  containerType: 'inline-size',
+  aspectRatio: aspectOf(EGO_GIFT_GEOMETRY.size),
+}
+
+const ICON_STYLE: CSSProperties = {
+  width: pct(START_BUFF_MINI_CARD.icon),
+  height: pct(START_BUFF_MINI_CARD.icon),
+}
+
 /**
- * Compact 96x96px card for displaying selected start buffs in summary view.
+ * Compact summary card for a selected start buff, filling the width its slot gives it.
  * Shows buff icon (upper half), name with enhancement suffix (lower half),
  * enhancement indicator (top-right), and hover highlight overlay.
- *
- * @example
- * const config = usePlannerConfig()
- * <StartBuffMiniCard buffId={202} displayName="Starlight of Eden" mdVersion={config.mdCurrentVersion} />
- * // Renders: icon + "Starlight of Eden++" with +2 indicator
  */
 export function StartBuffMiniCard({ buffId, displayName, mdVersion }: StartBuffMiniCardProps) {
   const baseId = getBaseIdFromBuffId(buffId)
   const enhancement = getEnhancementFromBuffId(buffId)
   const suffix = getEnhancementSuffix(enhancement)
   const accentColor = MD_ACCENT_COLORS[mdVersion]
-  const { i18n } = useTranslation()
-  const displayStyle = getDisplayFontForLanguage(i18n.language)
-  const lineHeight = getLineHeightForLanguage(i18n.language)
 
   return (
-    <div className="group relative w-24 h-24">
+    <div className="group relative w-full" style={ROOT_STYLE}>
       {/* Background image */}
       <img
         src={getStartBuffMiniPath(mdVersion)}
@@ -52,34 +58,40 @@ export function StartBuffMiniCard({ buffId, displayName, mdVersion }: StartBuffM
       />
 
       {/* Content container - flex column for vertical layout */}
-      <div className="absolute inset-0 flex flex-col gap-2">
+      <div
+        className="absolute inset-0 flex flex-col"
+        style={{ gap: cqw(START_BUFF_MINI_CARD.rowGap) }}
+      >
         {/* Upper half: Buff icon (centered) */}
-        <div className="flex-1 flex items-center justify-center pt-1">
+        <div
+          className="flex-1 flex items-center justify-center"
+          style={{ paddingTop: cqw(START_BUFF_MINI_CARD.iconPaddingTop) }}
+        >
           <img
             src={getStartBuffIconPath(baseId, mdVersion)}
             alt=""
-            className="w-12 h-12 object-contain"
+            className="object-contain"
+            style={ICON_STYLE}
           />
         </div>
 
         {/* Lower half: Name + enhancement suffix */}
-        <div className="flex-1 flex items-center justify-center px-1">
-          <AutoSizeWrappedText
-            text={`${displayName}${suffix}`}
-            width={80}
-            maxLines={2}
-            className="text-center leading-tight overflow-hidden text-ellipsis whitespace-nowrap max-w-full"
-            style={{ color: accentColor, ...displayStyle }}
-            minFontSize={12}
-            maxFontSize={12}
-            lineHeight={lineHeight}
-            wordBreak="keep-all"
-          />
+        <div
+          className="flex-1 flex items-center justify-center overflow-hidden"
+          style={{ paddingInline: cqw(START_BUFF_MINI_CARD.namePaddingX) }}
+        >
+          <Suspense fallback={<Skeleton className="h-5 w-full bg-foreground" />}>
+            <StartBuffMiniName text={`${displayName}${suffix}`} color={accentColor} />
+          </Suspense>
         </div>
       </div>
 
       {/* Enhancement indicator - top-right */}
-      <div className="scale-50 translate-x-4 translate-y-1">
+      <div
+        style={{
+          transform: `scale(${String(START_BUFF_MINI_CARD.enhancementScale)}) translate(${cqw(START_BUFF_MINI_CARD.enhancementTranslateX)}, ${cqw(START_BUFF_MINI_CARD.enhancementTranslateY)})`,
+        }}
+      >
         <EGOGiftEnhancementIndicator enhancement={enhancement} />
       </div>
 

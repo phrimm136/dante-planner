@@ -1,31 +1,34 @@
 import { Suspense, type ReactNode } from 'react'
 import {
   getThemePackImagePath,
-  getThemePackHoverHighlightPath,
-  getThemePackSelectHighlightPath,
-  getThemePackExtremeHighlightPath,
+  getThemePackHoverPath,
+  getThemePackFocusedPath,
+  getThemePackHoverExtremePath,
 } from '@/shared/assets'
+import { aspectOf, layerStyle, pctStyle } from '@/shared/cardLayout'
+import { THEME_PACK_GEOMETRY } from '../lib/cardLayout'
 import { cn } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
 import { isExtremePack } from '../types/ThemePackTypes'
 import type { ThemePackEntry } from '../types/ThemePackTypes'
+import { THEME_PACK_ART, THEME_PACK_HOVER_FADE_MS, THEME_PACK_LAYOUT } from '../lib/cardLayout'
 import { ThemePackName } from './ThemePackName'
 
 interface ThemePackCardProps {
   packId: string
   packEntry: ThemePackEntry
-  /** Enable hover highlight overlay (for selection contexts) */
+  /** Fade the hover sprite in while the pointer is over the card. */
   enableHoverHighlight?: boolean
-  /** Show persistent select highlight (for click-to-pin focus) */
+  /** Hold the focused sprite on, for click-to-pin selection. */
   isSelected?: boolean
-  /** Custom overlay content (e.g., selected indicator) */
+  /** Extra content drawn above every card layer. */
   overlay?: ReactNode
   className?: string
 }
 
 /**
- * Pure view component for rendering a theme pack card.
- * Does NOT include any interaction logic.
+ * A theme pack card at the game's geometry: the root is the game's `[Rect]Cards`, filled
+ * by the composed pack art, with the name and the highlight sprites over it.
  */
 export function ThemePackCard({
   packId,
@@ -36,50 +39,58 @@ export function ThemePackCard({
   className,
 }: ThemePackCardProps) {
   const isExtreme = isExtremePack(packEntry)
-
-  // Normal frame: 404x716, Extreme frame: 749x1247
-  const normalStyle = { left: '3.22%', top: '0.8%', width: '94.06%', height: '97.2%' }
-  const extremeStyle = { left: '-2.22%', top: '-1.3%', width: '104.06%', height: '101.37%' }
+  const layout = isExtreme ? THEME_PACK_LAYOUT.extreme : THEME_PACK_LAYOUT.normal
+  const hoverSrc = isExtreme ? getThemePackHoverExtremePath() : getThemePackHoverPath()
+  const focusedSrc = isExtreme ? getThemePackHoverExtremePath() : getThemePackFocusedPath()
 
   return (
-    <div className={cn('group relative w-60 aspect-[416/684]', className)}>
-      {/* Layer 1: Theme pack image - static to define container size */}
-      <img src={getThemePackImagePath(packId)} alt="" loading="lazy" className="w-full h-auto" />
+    <div
+      className={cn('group relative w-full', className)}
+      style={{
+        containerType: 'inline-size',
+        aspectRatio: aspectOf(THEME_PACK_GEOMETRY.size),
+      }}
+    >
+      <img
+        src={getThemePackImagePath(packId)}
+        alt=""
+        loading="lazy"
+        style={layerStyle(THEME_PACK_ART)}
+      />
 
-      {/* Layer 2: Select highlight overlay */}
+      {enableHoverHighlight && (
+        <img
+          src={hoverSrc}
+          alt=""
+          className={cn(
+            'pointer-events-none opacity-0 transition-opacity',
+            'group-hover:opacity-100 group-active:opacity-100',
+          )}
+          style={{
+            ...layerStyle(layout.overlay),
+            transitionDuration: `${String(THEME_PACK_HOVER_FADE_MS)}ms`,
+          }}
+        />
+      )}
+
       {isSelected && (
         <img
-          src={isExtreme ? getThemePackExtremeHighlightPath() : getThemePackSelectHighlightPath()}
+          src={focusedSrc}
           alt=""
-          className="absolute max-w-none object-fill pointer-events-none"
-          style={isExtreme ? extremeStyle : normalStyle}
+          className="pointer-events-none"
+          style={layerStyle(layout.overlay)}
         />
       )}
 
-      {/* Layer 3: Hover highlight overlay */}
-      {(enableHoverHighlight || isSelected) && (
-        <img
-          src={isExtreme ? getThemePackExtremeHighlightPath() : getThemePackHoverHighlightPath()}
-          alt=""
-          className="absolute max-w-none object-fill pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"
-          style={isExtreme ? extremeStyle : normalStyle}
-        />
-      )}
-
-      {/* Layer 4: Theme pack name */}
       <div
-        className="absolute left-0 right-0 flex justify-center items-center pointer-events-none leading-4"
-        style={{
-          top: !isExtreme ? '74.586%' : '81.960%',
-          height: !isExtreme ? '8.544%' : '10.010%',
-        }}
+        className="flex items-center justify-center pointer-events-none"
+        style={pctStyle(layout.name)}
       >
-        <Suspense fallback={<Skeleton className="h-5 w-40 bg-foreground" />}>
-          <ThemePackName packId={packId} packEntry={packEntry} />
+        <Suspense fallback={<Skeleton className="h-full w-full bg-foreground" />}>
+          <ThemePackName packId={packId} packEntry={packEntry} rect={layout.name} />
         </Suspense>
       </div>
 
-      {/* Layer 5: Custom overlay */}
       {overlay}
     </div>
   )

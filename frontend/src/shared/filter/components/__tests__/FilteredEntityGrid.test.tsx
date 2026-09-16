@@ -5,10 +5,13 @@
  * the term-less variant the abnormality event list uses, and the two layout switches.
  */
 
-import { describe, it, expect } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { render, screen, act } from '@testing-library/react'
 
-import { FilteredEntityGrid, type CardGeometry } from '../FilteredEntityGrid'
+import { PROGRESSIVE_REVEAL } from '@/lib/constants'
+
+import type { CardGeometry } from '@/shared/cardLayout'
+import { FilteredEntityGrid } from '../FilteredEntityGrid'
 import { createTestFilterStore } from '@/test-utils/filterStore'
 
 interface Item {
@@ -37,7 +40,16 @@ function matches(
   return terms.includes(state.searchQuery)
 }
 
-const GEOMETRY: CardGeometry = { cardWidth: 100, cardHeight: 200, mobileScale: 0.8 }
+const MANY_ITEMS: Item[] = Array.from({ length: 25 }, (_, index) => ({
+  id: `item-${String(index)}`,
+  keyword: 'Burst',
+}))
+
+const GEOMETRY: CardGeometry = {
+  size: { widthPx: 100, heightPx: 200 },
+  mobileScale: 0.8,
+  rows: 'card',
+}
 
 function renderGrid(
   values: Partial<State> = {},
@@ -49,7 +61,7 @@ function renderGrid(
     searchQuery,
   )
 
-  return render(
+  const result = render(
     <FilteredEntityGrid
       items={ITEMS}
       getKey={(item) => item.id}
@@ -62,9 +74,24 @@ function renderGrid(
       {...overrides}
     />,
   )
+
+  // The reveal window opens on the first frame; before it, every slot is empty.
+  act(() => {
+    vi.advanceTimersToNextFrame()
+  })
+
+  return result
 }
 
 describe('FilteredEntityGrid', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
   it('renders one card per item', () => {
     renderGrid()
 
@@ -119,13 +146,100 @@ describe('FilteredEntityGrid', () => {
     expect(container.querySelector('div.pt-4 > div.grid')).not.toBeNull()
   })
 
-  it('pins row height only when asked', () => {
-    const { container: loose } = renderGrid()
-    expect(loose.querySelector('div.grid')).not.toHaveStyle({ gridAutoRows: '200px' })
-
-    const { container: pinned } = renderGrid({}, '', {
-      geometry: { ...GEOMETRY, fixedRowHeight: true },
+  it('leaves rows to their content when the geometry asks for auto rows', () => {
+    const { container } = renderGrid({}, '', {
+      geometry: { ...GEOMETRY, rows: 'auto' },
     })
-    expect(pinned.querySelector('div.grid')).toHaveStyle({ gridAutoRows: '200px' })
+
+    expect((container.querySelector('div.grid') as HTMLElement).style.gridAutoRows).toBe('')
+  })
+
+  it('pins rows to the column width over the card box it is given', () => {
+    const { container } = renderGrid()
+
+    expect(container.querySelector('div.grid')).toHaveStyle({ gridAutoRows: '200px' })
+  })
+
+  it('sizes every slot from the same card box', () => {
+    const { container } = renderGrid()
+
+    expect(container.querySelector('div.grid > div')).toHaveStyle({
+      width: '100px',
+      aspectRatio: '0.5',
+    })
+  })
+})
+
+describe('FilteredEntityGrid reveal window', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  function renderManyItems() {
+    const store = createTestFilterStore<State>({ selectedKeywords: new Set() })
+
+    return render(
+      <FilteredEntityGrid
+        items={MANY_ITEMS}
+        getKey={(item) => item.id}
+        store={store}
+        matches={matches}
+        renderCard={(item) => <span data-testid={item.id}>{item.id}</span>}
+        emptyStateKey="test.emptyState"
+        emptyStateFallback="Nothing matches."
+        geometry={GEOMETRY}
+      />,
+    )
+  }
+
+  it('reserves every item a slot on the first commit', () => {
+    const { container } = renderManyItems()
+
+    expect(container.querySelectorAll('div.grid > div')).toHaveLength(MANY_ITEMS.length)
+  })
+
+  it('holds every card back until the window opens', () => {
+    renderManyItems()
+
+    expect(screen.queryAllByText(/^item-/)).toHaveLength(0)
+  })
+
+  it('fills the first batch on the frame the window opens', () => {
+    renderManyItems()
+
+    act(() => {
+      vi.advanceTimersToNextFrame()
+    })
+
+    expect(screen.queryAllByText(/^item-/)).toHaveLength(PROGRESSIVE_REVEAL.CARD_BATCH)
+  })
+
+  it('fills further slots on later frames', () => {
+    renderManyItems()
+
+    act(() => {
+      vi.advanceTimersToNextFrame()
+    })
+    act(() => {
+      vi.advanceTimersToNextFrame()
+    })
+
+    expect(screen.queryAllByText(/^item-/)).toHaveLength(PROGRESSIVE_REVEAL.CARD_BATCH * 2)
+  })
+
+  it('fills every slot once the window has grown out', () => {
+    renderManyItems()
+
+    for (let frame = 0; frame < 6; frame += 1) {
+      act(() => {
+        vi.advanceTimersToNextFrame()
+      })
+    }
+
+    expect(screen.queryAllByText(/^item-/)).toHaveLength(MANY_ITEMS.length)
   })
 })

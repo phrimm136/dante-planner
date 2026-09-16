@@ -1,0 +1,16 @@
+id: no-hover-scale
+language: TypeScript
+severity: error
+message: The card layers are transcribed at the game geometry; a hover scale moves them off it. Reveal the hover ring instead of scaling the card.
+files:
+  - src/**/*.ts
+rule:
+  any:
+    - kind: string
+      regex: 'hover:scale-'
+    - kind: template_string
+      regex: 'hover:scale-'
+    - kind: string
+      regex: '(?s)(:hover.*scale\(|scale\(.*:hover)'
+    - kind: template_string
+      regex: '(?s)(:hover.*scale\(|scale\(.*:hover)'

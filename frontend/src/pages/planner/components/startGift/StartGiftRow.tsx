@@ -1,9 +1,11 @@
-import { getKeywordIconPath } from '@/shared/assets'
 import type { EGOGiftSpec, EGOGiftNameList } from '@/pages/egoGift'
 import { EGOGiftCard } from '@/pages/egoGift'
 import { EGOGiftTooltip } from '@/pages/egoGift'
-import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
-import { CARD_GRID } from '@/lib/constants'
+import { CardSlot } from '@/shared/cardLayout'
+import { CARD_MOBILE_SCALE } from '@/lib/constants'
+import { KEYWORD_ICON_GEOMETRY } from '../../lib/cardLayout'
+import { EGO_GIFT_GEOMETRY } from '@/pages/egoGift'
+import { StartGiftKeywordIcon } from './StartGiftKeywordIcon'
 import { toGiftListItem, toUnknownGiftListItem } from '@/pages/egoGift'
 import type { EGOGiftId } from '@/shared/gameData'
 
@@ -35,7 +37,7 @@ export function StartGiftRow({
   onGiftClick,
 }: StartGiftRowProps) {
   // Calculate scaled dimensions
-  const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
+  const mobileScale = CARD_MOBILE_SCALE
 
   const handleRowClick = () => {
     onRowSelect(keyword)
@@ -59,21 +61,13 @@ export function StartGiftRow({
       />
 
       {/* Keyword icon */}
-      <ScaledCardWrapper
+      <CardSlot
+        size={KEYWORD_ICON_GEOMETRY.size}
         mobileScale={mobileScale}
-        cardWidth={CARD_GRID.WIDTH.KEYWORD_ICON}
-        cardHeight={CARD_GRID.HEIGHT.KEYWORD_ICON}
         className="flex-shrink-0"
       >
-        <div className="w-16 h-16 flex items-center justify-center">
-          <img
-            src={getKeywordIconPath(keyword)}
-            alt={keyword}
-            className="w-12 h-12 object-contain"
-            title={keyword}
-          />
-        </div>
-      </ScaledCardWrapper>
+        <StartGiftKeywordIcon keyword={keyword} title={keyword} />
+      </CardSlot>
 
       {/* Gift cards - horizontal layout */}
       <div className="relative z-10 flex items-start gap-2 lg:gap-4">
@@ -90,22 +84,18 @@ export function StartGiftRow({
 
           return (
             <EGOGiftTooltip key={giftId} giftId={giftId}>
-              <ScaledCardWrapper
-                mobileScale={mobileScale}
-                cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
-                cardHeight={CARD_GRID.HEIGHT.EGO_GIFT}
-              >
+              <CardSlot size={EGO_GIFT_GEOMETRY.size} mobileScale={mobileScale}>
                 <button
                   type="button"
                   onClick={() => {
                     handleGiftCardClick(giftId)
                   }}
                   disabled={!canSelect}
-                  className={`group ${!canSelect ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                  className={`group block w-full ${!canSelect ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                 >
                   <EGOGiftCard gift={gift} isSelected={isSelected} enableHoverHighlight />
                 </button>
-              </ScaledCardWrapper>
+              </CardSlot>
             </EGOGiftTooltip>
           )
         })}

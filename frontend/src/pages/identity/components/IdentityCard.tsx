@@ -7,15 +7,24 @@ import { IdentityName } from './IdentityName'
 import {
   getIdentityInfoImagePath,
   getIdentityImageFallbackPath,
+  getIdentityMaskPath,
   getUptieFramePath,
-  getIdentityFrameHighlightPath,
-  getSinnerBGPath,
-  getSinnerIconPath,
+  getIdentityHoverRingPath,
+  getSinnerIconRingPath,
+  getSinnerFacePath,
+  getIdentityGradePath,
 } from '@/shared/assets'
-import { MAX_LEVEL } from '@/shared/gameData'
-import { getSinnerFromId } from '@/shared/gameData'
+import { MAX_LEVEL, getSinnerFromId } from '@/shared/gameData'
+import { layerStyle } from '@/shared/cardLayout'
 import { cn, getDisplayFontForNumeric } from '@/lib/utils'
-import { getRarityIconPath } from '@/shared/assets'
+import {
+  IDENTITY_CARD_LAYERS,
+  cardRootStyle,
+  levelStyle,
+  nameBlockStyle,
+  portraitStyle,
+  portraitWindowStyle,
+} from '../lib/cardLayout'
 
 interface IdentityCardProps {
   identity: IdentityListItem
@@ -25,8 +34,8 @@ interface IdentityCardProps {
   level?: number
   /** Dim the entire card (selected/equipped state) */
   isSelected?: boolean
-  /** Show highlight frame (hover state) */
-  isHighlighted?: boolean
+  /** What the card's graphics multiply by, as `PersonalitySlotGraphics.SetColor` writes it */
+  dim?: number | undefined
   /** Custom overlay content (e.g., selected indicator, deployment badge) */
   overlay?: ReactNode
   /** Additional CSS classes */
@@ -34,32 +43,20 @@ interface IdentityCardProps {
 }
 
 /**
- * Pure view-only component for rendering an identity card.
- * Does NOT include any interaction logic (Link, onClick, etc.)
- * Parent component is responsible for wrapping with Link, button, or other interactive elements.
+ * View-only identity card. It fills the width its parent gives it and carries no
+ * interaction; wrap it in a Link, button or trigger for that.
  *
  * @example
- * // As a link (use IdentityCardLink)
- * <IdentityCardLink identity={identity} />
- *
- * // With custom wrapper
- * <button onClick={handleSelect}>
- *   <IdentityCard identity={identity} isSelected={true} />
- * </button>
- *
- * // Inside a popover trigger
- * <PopoverTrigger asChild>
- *   <div className="cursor-pointer">
- *     <IdentityCard identity={identity} />
- *   </div>
- * </PopoverTrigger>
+ * <div style={{ width: IDENTITY_GEOMETRY.size.widthPx }}>
+ *   <IdentityCard identity={identity} />
+ * </div>
  */
 export function IdentityCard({
   identity,
   uptie = 4,
   level = MAX_LEVEL,
   isSelected = false,
-  isHighlighted: _isHighlighted = false,
+  dim = 1,
   overlay,
   className,
 }: IdentityCardProps) {
@@ -68,12 +65,16 @@ export function IdentityCard({
   const sinner = getSinnerFromId(id)
 
   return (
-    <div className={cn('relative w-40 h-56 shrink-0', className)}>
-      {/* Card content wrapper - dimmed when selected */}
-      <div className={cn('absolute inset-0', isSelected && 'brightness-50')}>
-        {/* Clipping container for identity image to fit within frame */}
-        <div className="absolute inset-0 flex items-start justify-center overflow-hidden">
-          {/* Layer 1: Identity Image (cropped to fit frame) */}
+    <div className={cn('group', className)} style={cardRootStyle()}>
+      <div
+        data-testid="identity-card-graphics"
+        className={cn('absolute inset-0', isSelected && 'brightness-50')}
+        style={dim === 1 ? undefined : { filter: `brightness(${String(dim)})` }}
+      >
+        <div
+          data-testid="identity-portrait-window"
+          style={portraitWindowStyle(getIdentityMaskPath())}
+        >
           <img
             src={getIdentityInfoImagePath(id, uptie)}
             onError={(e) => {
@@ -85,74 +86,75 @@ export function IdentityCard({
             }}
             alt={identity.name}
             loading="lazy"
-            className="w-[88%] h-[96%] object-cover mt-1.5"
-            style={{
-              clipPath:
-                'polygon(4% 0%, 96% 0%, 100% 4%, 100% 96%, 96% 100%, 4% 100%, 0% 96%, 0% 4%)',
-            }}
+            style={portraitStyle()}
           />
         </div>
 
-        {/* Layer 2: Uptie Frame (transparent border overlay) */}
         <img
           src={getUptieFramePath(rank, uptie)}
-          alt={`${rank} star frame`}
+          alt={`${String(rank)} star frame`}
           loading="lazy"
-          className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+          className="pointer-events-none"
+          style={layerStyle(IDENTITY_CARD_LAYERS.frame)}
         />
 
-        {/* Layer 2.5: Identity Highlight Frame (glowing border) */}
         <img
-          src={getIdentityFrameHighlightPath()}
+          src={getIdentityGradePath(rank)}
+          alt={String(rank)}
+          loading="lazy"
+          className="pointer-events-none"
+          style={layerStyle(IDENTITY_CARD_LAYERS.grade)}
+        />
+
+        <div
+          data-testid="identity-name-block"
+          className="pointer-events-none"
+          style={nameBlockStyle()}
+        >
+          <div
+            data-testid="identity-level"
+            style={{ ...levelStyle(), fontFamily: getDisplayFontForNumeric() }}
+          >
+            {`Lv. ${String(level)}`}
+          </div>
+
+          <Suspense
+            fallback={
+              <span className="flex flex-col items-end gap-0.5">
+                <Skeleton className="w-14 h-2.5 bg-white/30" />
+                <Skeleton className="w-10 h-2.5 bg-white/30" />
+              </span>
+            }
+          >
+            <IdentityName id={id} />
+          </Suspense>
+        </div>
+
+        <img
+          src={getIdentityHoverRingPath(rank, uptie)}
           alt=""
           loading="lazy"
-          className="absolute inset-0 w-full h-full object-contain pointer-events-none opacity-0 group-hover:opacity-100 group-active:opacity-100"
+          className="pointer-events-none opacity-0 group-hover:opacity-100 group-active:opacity-100"
+          style={layerStyle(IDENTITY_CARD_LAYERS.hoverRing)}
         />
 
-        {/* Layer 3: Sinner BG (upper-right corner, not cropped) */}
         <img
-          src={getSinnerBGPath(rank)}
+          src={getSinnerIconRingPath(rank)}
           alt={t('a11y.sinnerBackground')}
           loading="lazy"
-          className="absolute -top-2 -right-2 w-14 h-14 object-contain pointer-events-none"
+          className="pointer-events-none"
+          style={layerStyle(IDENTITY_CARD_LAYERS.iconRing)}
         />
 
-        {/* Layer 4: Sinner Icon (upper-right corner, topmost) */}
         <img
-          src={getSinnerIconPath(sinner)}
+          src={getSinnerFacePath(sinner)}
           alt={sinner}
           loading="lazy"
-          className="absolute -top-1 -right-1 w-12 h-12 object-contain pointer-events-none"
+          className="pointer-events-none"
+          style={layerStyle(IDENTITY_CARD_LAYERS.face)}
         />
-
-        {/* Layer 5: Info Panel (bottom-right, game-style) */}
-        <div className="absolute bottom-3 right-5 flex flex-col items-end pointer-events-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
-          {/* Level */}
-          <div className="text-[24px] mb-[2px]" style={{ fontFamily: getDisplayFontForNumeric() }}>
-            {`Lv. ${level}`}
-          </div>
-          {/* Name - suspends independently for granular loading */}
-          <span>
-            <Suspense
-              fallback={
-                <span className="flex flex-col items-end gap-0.5">
-                  <Skeleton className="w-14 h-2.5 bg-white/30" />
-                  <Skeleton className="w-10 h-2.5 bg-white/30" />
-                </span>
-              }
-            >
-              <IdentityName id={id} />
-            </Suspense>
-          </span>
-        </div>
-
-        {/* Layer 6 - Identity Rank Indicator (top-left) */}
-        <div className="absolute top-3.5 left-3.5 pointer-events-none">
-          <img src={getRarityIconPath(rank)} alt={String(rank)} className="h-6" />
-        </div>
       </div>
 
-      {/* Layer 7: Custom Overlay (topmost layer, not dimmed) */}
       {overlay}
     </div>
   )

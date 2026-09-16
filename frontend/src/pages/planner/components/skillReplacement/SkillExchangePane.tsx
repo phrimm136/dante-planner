@@ -1,9 +1,27 @@
+import type { CSSProperties } from 'react'
 import { ArrowRight, RotateCcw } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { SkillImageSimple } from './SkillImageSimple'
 import { getSkillImagePath } from '@/shared/assets'
+import { aspectOf } from '@/shared/cardLayout'
+import { SKILL_EXCHANGE_GEOMETRY } from '../../lib/cardLayout'
 import { cn } from '@/lib/utils'
 import type { SkillAttributeType, OffensiveSkillSlot } from '@/shared/gameData'
+import { SKILL_EXCHANGE_CARD, cqw } from '../../lib/cardLayout'
+
+const ROOT_STYLE: CSSProperties = {
+  aspectRatio: aspectOf(SKILL_EXCHANGE_GEOMETRY.size),
+  padding: cqw(SKILL_EXCHANGE_CARD.padding),
+  gap: cqw(SKILL_EXCHANGE_CARD.gap),
+  borderWidth: cqw(SKILL_EXCHANGE_CARD.border),
+}
+
+const SKILL_STYLE: CSSProperties = { width: cqw(SKILL_EXCHANGE_CARD.skill) }
+
+const ARROW_STYLE: CSSProperties = {
+  width: cqw(SKILL_EXCHANGE_CARD.arrowWidth),
+  height: cqw(SKILL_EXCHANGE_CARD.arrowHeight),
+}
 
 interface SkillExchangePaneProps {
   identityId: string
@@ -53,14 +71,15 @@ export function SkillExchangePane({
       onClick={onClick}
       disabled={isDisabled}
       className={cn(
-        'inline-flex items-center justify-center gap-2 p-2 rounded-lg border-2',
+        'w-full flex items-center justify-center rounded-lg border-solid',
         isDisabled
           ? 'border-muted bg-muted/50 opacity-50 cursor-not-allowed'
           : 'selectable border-border bg-card cursor-pointer',
       )}
+      style={ROOT_STYLE}
     >
-      {/* Source skill (smaller size) */}
-      <div className="origin-center">
+      {/* Source skill */}
+      <div className="origin-center shrink-0" style={SKILL_STYLE}>
         <SkillImageSimple
           skillImagePath={sourceImagePath}
           attributeType={sourceAttributeType}
@@ -70,10 +89,10 @@ export function SkillExchangePane({
       </div>
 
       {/* Arrow */}
-      <ArrowRight className="w-16 h-8 text-muted-foreground shrink-0" />
+      <ArrowRight className="text-muted-foreground shrink-0" style={ARROW_STYLE} />
 
-      {/* Target skill (smaller size) */}
-      <div className="origin-center">
+      {/* Target skill */}
+      <div className="origin-center shrink-0" style={SKILL_STYLE}>
         <SkillImageSimple
           skillImagePath={targetImagePath}
           attributeType={targetAttributeType}

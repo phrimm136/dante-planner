@@ -1,9 +1,11 @@
 import { SINNERS, type Affinity, type AtkType } from '@/shared/gameData'
 import { useIsBreakpoint } from '@/components/hooks/use-is-breakpoint'
-import { CARD_GRID } from '@/lib/constants'
+import type { CSSProperties } from 'react'
+import { LG_BREAKPOINT_PX, MD_BREAKPOINT_PX, SM_BREAKPOINT_PX } from '@/lib/constants'
+import { CardSlot, useSlotSizePx } from '@/shared/cardLayout'
+import { SINNER_DECK_GEOMETRY, SINNER_GRID_COLUMNS, SINNER_GRID_GAP } from '../../lib/cardLayout'
 import type { SinnerEquipment } from '../../types/DeckTypes'
 import type { Identity, IdentityListItem } from '@/pages/identity'
-import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { SinnerDeckCard } from './SinnerDeckCard'
 
 export interface SkillData {
@@ -23,6 +25,41 @@ interface SinnerGridProps {
 
 const EMPTY_SKILL_DATA: SkillData = { affinities: [], atkTypes: [] }
 
+/** The twelve-sinner grid's column count, slot box and CSS grid style at the current breakpoint. */
+export function useSinnerGridLayout(): {
+  columnWidth: number
+  rowHeight: number
+  mobileScale: number
+  gridStyle: CSSProperties
+} {
+  const isLg = useIsBreakpoint('min', LG_BREAKPOINT_PX)
+  const isMd = useIsBreakpoint('min', MD_BREAKPOINT_PX)
+  const isSm = useIsBreakpoint('min', SM_BREAKPOINT_PX)
+
+  const { size, mobileScale } = SINNER_DECK_GEOMETRY
+  const { widthPx: columnWidth, heightPx: rowHeight } = useSlotSizePx(size, mobileScale)
+  const columnCount = isLg
+    ? SINNER_GRID_COLUMNS.lg
+    : isMd
+      ? SINNER_GRID_COLUMNS.md
+      : isSm
+        ? SINNER_GRID_COLUMNS.sm
+        : SINNER_GRID_COLUMNS.base
+
+  return {
+    columnWidth,
+    rowHeight,
+    mobileScale,
+    gridStyle: {
+      gridTemplateColumns: `repeat(${String(columnCount)}, ${String(columnWidth)}px)`,
+      gridAutoRows: `${String(rowHeight)}px`,
+      columnGap: `${String(SINNER_GRID_GAP)}px`,
+      rowGap: '0px',
+      justifyContent: 'center',
+    },
+  }
+}
+
 /**
  * Grid of all 12 sinners with their equipped identities and deployment order.
  */
@@ -35,18 +72,7 @@ export const SinnerGrid = function SinnerGrid({
   onToggleDeploy,
   readOnly = false,
 }: SinnerGridProps) {
-  const isLg = useIsBreakpoint('min', CARD_GRID.LG_BREAKPOINT)
-  const isMd = useIsBreakpoint('min', CARD_GRID.MD_BREAKPOINT)
-  const isSm = useIsBreakpoint('min', CARD_GRID.SM_BREAKPOINT)
-
-  // Calculate scale and dimensions
-  const isDesktop = isLg
-  const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
-  const scale = isDesktop ? 1 : mobileScale
-  const scaledWidth = CARD_GRID.WIDTH.IDENTITY * scale
-  const scaledHeight = CARD_GRID.HEIGHT.DECK * scale
-
-  const columnCount = isLg ? 6 : isMd ? 4 : isSm ? 3 : 2
+  const { gridStyle, mobileScale } = useSinnerGridLayout()
 
   // Memoize identity lookup map - only recompute when identities change
   const identityMap = (() => {
@@ -69,12 +95,7 @@ export const SinnerGrid = function SinnerGrid({
   return (
     <div
       className="grid mx-auto"
-      style={{
-        gridTemplateColumns: `repeat(${columnCount}, ${scaledWidth}px)`,
-        gridAutoRows: `${scaledHeight}px`,
-        gap: '8px',
-        justifyContent: 'center',
-      }}
+      style={gridStyle}
     >
       {SINNERS.map((sinnerName, index) => {
         const sinnerCode = String(index + 1)
@@ -86,12 +107,7 @@ export const SinnerGrid = function SinnerGrid({
         const order = deploymentOrderMap[index] ?? null
 
         return (
-          <ScaledCardWrapper
-            key={sinnerName}
-            mobileScale={mobileScale}
-            cardWidth={CARD_GRID.WIDTH.IDENTITY}
-            cardHeight={CARD_GRID.HEIGHT.DECK}
-          >
+          <CardSlot key={sinnerName} size={SINNER_DECK_GEOMETRY.size} mobileScale={mobileScale}>
             <SinnerDeckCard
               sinnerName={sinnerName}
               sinnerIndex={index}
@@ -102,8 +118,9 @@ export const SinnerGrid = function SinnerGrid({
               deploymentOrder={order}
               onToggleDeploy={onToggleDeploy}
               readOnly={readOnly}
+              mobileScale={mobileScale}
             />
-          </ScaledCardWrapper>
+          </CardSlot>
         )
       })}
     </div>

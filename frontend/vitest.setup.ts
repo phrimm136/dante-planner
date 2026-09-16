@@ -61,6 +61,13 @@ if (hasDom) {
 
   // Mock scrollIntoView (used by cmdk Command component)
   Element.prototype.scrollIntoView = vi.fn<() => void>()
+
+  // jsdom ships no FontFaceSet; the auto-sizing text boxes wait on one.
+  Object.defineProperty(document, 'fonts', {
+    configurable: true,
+    writable: true,
+    value: { load: () => Promise.resolve([]), status: 'loaded' },
+  })
 }
 
 // Mock env.ts to prevent Zod validation from requiring real env vars

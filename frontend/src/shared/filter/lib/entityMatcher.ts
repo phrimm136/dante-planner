@@ -5,7 +5,7 @@
  * search box.
  */
 
-import type { FilterState } from '@/components/hooks/useSetFilters'
+import type { FilterState } from '@/components/hooks/filterStore'
 import { applyFacets, type Facet } from './applyFacets'
 import { matchesSearch } from './searchTerms'
 

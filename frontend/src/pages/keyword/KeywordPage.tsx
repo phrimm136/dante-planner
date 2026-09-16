@@ -1,10 +1,10 @@
 import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useKeywordListSpec } from '@/shared/gameText'
-import type { BuffType } from '@/shared/gameData'
 import { calculateActiveFilterCount } from '@/shared/filter'
-import { useSetFilters } from '@/components/hooks/useSetFilters'
-import type { FilterStore } from '@/components/hooks/useSetFilters'
+import { useFilterStore } from '@/components/hooks/filterStore'
+import type { FilterStore } from '@/components/hooks/filterStore'
+import { keywordFilterStore } from './stores/keywordFilterStore'
 import type { KeywordFacetState } from './lib/keywordFilter'
 import { EntityListPage } from '@/shared/filter'
 import { FilterPageLayout } from '@/shared/filter'
@@ -16,6 +16,7 @@ import { EGOFilterDropdown } from '@/pages/ego'
 import { EGOGiftFilterDropdown } from '@/pages/egoGift'
 import { KeywordList } from './components/KeywordList'
 import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
+import { KEYWORD_GEOMETRY } from './lib/cardLayout'
 import { Skeleton } from '@/components/ui/skeleton'
 
 /**
@@ -72,12 +73,7 @@ function KeywordPageShell() {
     setSearchQuery,
     resetAll,
     store,
-  } = useSetFilters({
-    selectedBuffTypes: new Set<BuffType>(),
-    selectedIdentities: new Set<string>(),
-    selectedEgos: new Set<string>(),
-    selectedEgoGifts: new Set<string>(),
-  })
+  } = useFilterStore(keywordFilterStore)
 
   const activeFilterCount = calculateActiveFilterCount(...Object.values(filters))
 
@@ -154,7 +150,9 @@ function KeywordPageShell() {
  */
 export default function KeywordPage() {
   return (
-    <EntityListPage skeleton={<ListPageSkeleton preset="keyword" filterCount={4} cardCount={30} />}>
+    <EntityListPage
+      skeleton={<ListPageSkeleton geometry={KEYWORD_GEOMETRY} filterCount={4} cardCount={30} />}
+    >
       <KeywordPageShell />
     </EntityListPage>
   )

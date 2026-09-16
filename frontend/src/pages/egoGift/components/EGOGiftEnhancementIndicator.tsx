@@ -1,4 +1,5 @@
 import { getEGOGiftEnhancementIconPath } from '@/shared/assets'
+import { EGO_GIFT_CARD, pct } from '../lib/cardLayout'
 
 interface EGOGiftEnhancementIndicatorProps {
   enhancement: 0 | 1 | 2
@@ -14,13 +15,14 @@ export function EGOGiftEnhancementIndicator({ enhancement }: EGOGiftEnhancementI
     return null
   }
 
-  const iconPosition = enhancement === 2 ? 'h-[26px] top-1.5 right-1.5' : 'h-[22px] top-2 right-2'
+  const { height, top, right } = EGO_GIFT_CARD.enhancement[enhancement]
 
   return (
     <img
       src={getEGOGiftEnhancementIconPath(enhancement)}
       alt={`+${enhancement}`}
-      className={`absolute ${iconPosition} pointer-events-none`}
+      className="absolute pointer-events-none"
+      style={{ height: pct(height), top: pct(top), right: pct(right) }}
     />
   )
 }

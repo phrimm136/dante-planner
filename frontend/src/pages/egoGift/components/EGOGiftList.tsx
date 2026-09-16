@@ -1,8 +1,8 @@
 import type { EGOGiftListItem } from '../types/EGOGiftTypes'
-import { CARD_GRID } from '@/lib/constants'
-import { FilteredEntityGrid, useSearchTermSources, type CardGeometry } from '@/shared/filter'
+import { EGO_GIFT_GEOMETRY } from '../lib/cardLayout'
+import { FilteredEntityGrid, useSearchTermSources } from '@/shared/filter'
 import { EGO_GIFT_LIST } from '../hooks/useEGOGiftListData'
-import type { FilterStore } from '@/components/hooks/useSetFilters'
+import type { FilterStore } from '@/components/hooks/filterStore'
 import { sortEGOGifts } from '../lib/egoGiftSort'
 import {
   buildEGOGiftSearchTerms,
@@ -12,12 +12,6 @@ import {
 import { EGOGiftCardLink } from './EGOGiftCardLink'
 
 const EMPTY_NAMES: Record<string, string> = {}
-
-const EGO_GIFT_GEOMETRY: CardGeometry = {
-  cardWidth: CARD_GRID.WIDTH.EGO_GIFT,
-  cardHeight: CARD_GRID.HEIGHT.EGO_GIFT,
-  mobileScale: 0.8,
-}
 
 interface EGOGiftListProps {
   gifts: EGOGiftListItem[]

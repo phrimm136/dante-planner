@@ -1,0 +1,12 @@
+id: no-hover-scale
+valid:
+  - "const className = 'group-hover:opacity-100 group-active:opacity-100'"
+  - "const className = 'hover:brightness-125'"
+  - "const transform = `scale(${String(EGO_CARD_ROOT_SCALE)})`"
+  - "const css = '.identity-card:hover{opacity:1}'"
+  - "const css = `.card{transform:scale(1.02)}`"
+invalid:
+  - "const className = 'hover:scale-105'"
+  - "const className = `group-hover:scale-110`"
+  - "const css = '.identity-card:hover{transform:scale(1.05)}'"
+  - "const css = `@media (hover:hover){.card:hover{transform:scale(${String(hoverScale)})}}`"

@@ -4,7 +4,7 @@ import {
   getEGORankIconPath,
   getEGODetailImagePath,
   getSinnerIconPath,
-  getSinnerBGPath,
+  getSinnerIconRingPath,
 } from '@/shared/assets'
 import { CharacterImageSection } from '@/components/layout/CharacterImageSection'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -58,7 +58,7 @@ export function EGOHeader({ egoId, name, rank, skillType }: EGOHeaderProps) {
           <div className="relative w-12 h-12 flex-shrink-0">
             {/* Background layer */}
             <img
-              src={getSinnerBGPath(frameRank)}
+              src={getSinnerIconRingPath(frameRank)}
               alt=""
               className="absolute inset-0 w-full h-full object-contain"
             />

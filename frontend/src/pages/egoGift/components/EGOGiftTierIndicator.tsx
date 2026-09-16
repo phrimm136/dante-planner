@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { getEGOGiftTierEXPath } from '@/shared/assets'
 import { getDisplayFontForLabel } from '@/lib/utils'
 import { ACCENT_COLORS } from '@/lib/constants'
+import { EGO_GIFT_CARD, cqw, pct } from '../lib/cardLayout'
 
 interface EGOGiftTierIndicatorProps {
   tier: string
@@ -20,23 +21,31 @@ export function EGOGiftTierIndicator({ tier }: EGOGiftTierIndicatorProps) {
   const isEXTier = tier === 'EX'
 
   if (isEXTier) {
-    const iconSize = 'w-7 h-7'
+    const { size, top, left } = EGO_GIFT_CARD.tierIcon
     return (
       <img
         src={getEGOGiftTierEXPath()}
         alt={t('a11y.exTier')}
-        className={`absolute top-1.5 left-1 ${iconSize} pointer-events-none`}
+        className="absolute pointer-events-none"
+        style={{ width: pct(size), height: pct(size), top: pct(top), left: pct(left) }}
       />
     )
   }
 
   const tierText = tierTexts[parseInt(tier) - 1]
-  const textSize = 'text-[34px]'
+  const { fontSize, top, left, liftY } = EGO_GIFT_CARD.tierText
 
   return (
     <div
-      className={`absolute ${textSize}  pointer-events-none top-0 left-2 -translate-y-1`}
-      style={{ color: ACCENT_COLORS.TIER, fontFamily: getDisplayFontForLabel() }}
+      className="absolute pointer-events-none"
+      style={{
+        top: pct(top),
+        left: pct(left),
+        fontSize: cqw(fontSize),
+        transform: `translateY(-${cqw(liftY)})`,
+        color: ACCENT_COLORS.TIER,
+        fontFamily: getDisplayFontForLabel(),
+      }}
     >
       {tierText}
     </div>

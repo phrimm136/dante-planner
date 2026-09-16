@@ -2,7 +2,8 @@ import { useTranslation } from 'react-i18next'
 
 import type { EGOGiftListItem } from '../types/EGOGiftTypes'
 import type { EGOGiftId, EncodedGiftId, EnhancementLevel } from '@/shared/gameData'
-import { CARD_GRID, PROGRESSIVE_REVEAL, SECTION_STYLES } from '@/lib/constants'
+import { CARD_MOBILE_SCALE, PROGRESSIVE_REVEAL, SECTION_STYLES } from '@/lib/constants'
+import { EGO_GIFT_GEOMETRY } from '../lib/cardLayout'
 import { applyFacets, useSearchMappings } from '@/shared/filter'
 import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
 import { buildSelectionLookup, encodeGiftSelection } from '../lib/egoGiftEncoding'
@@ -85,12 +86,7 @@ export function EGOGiftSelectionList({
 
   return (
     <div className="bg-muted border border-border rounded-md p-6 max-h-[600px] overflow-y-auto">
-      <ResponsiveCardGrid
-        cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
-        cardHeight={CARD_GRID.HEIGHT.EGO_GIFT}
-        mobileScale={CARD_GRID.MOBILE_SCALE.STANDARD}
-        gap={8}
-      >
+      <ResponsiveCardGrid size={EGO_GIFT_GEOMETRY.size} mobileScale={CARD_MOBILE_SCALE} gap={8}>
         {gifts.slice(0, displayCount).map((gift) => {
           if (enableEnhancementSelection && onEnhancementSelect && selectionLookup) {
             const entry = selectionLookup.get(gift.id)

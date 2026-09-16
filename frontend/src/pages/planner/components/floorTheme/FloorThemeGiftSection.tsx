@@ -206,11 +206,12 @@ export function FloorThemeGiftSection({
     >
       <div
         className={cn(
-          'flex flex-col landscape:flex-row sm:flex-row items-center landscape:items-start sm:items-start gap-4',
+          'flex flex-col items-stretch w-fit mx-auto gap-4',
+          'landscape:flex-row landscape:w-auto sm:flex-row sm:w-auto',
           className,
         )}
       >
-        <div className="flex flex-col w-56 h-104 items-center landscape:shrink-0 sm:shrink-0">
+        <div className="flex flex-col items-center landscape:shrink-0 sm:shrink-0">
           {/* Difficulty indicator */}
           <DifficultyIndicator difficulty={difficultyLabel} />
 
@@ -246,7 +247,7 @@ export function FloorThemeGiftSection({
         </div>
 
         {/* Gift viewer */}
-        <div className="flex-1 mt-5 min-w-0">
+        <div className="flex-1 landscape:mt-6 sm:mt-6 min-w-0">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>

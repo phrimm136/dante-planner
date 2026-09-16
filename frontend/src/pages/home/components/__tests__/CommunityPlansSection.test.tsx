@@ -43,7 +43,8 @@ vi.mock('react-i18next', async (importOriginal) => {
 
 // Mock the planner public API (PublishedPlannerCard + useMDGesellschaftData)
 const mockUseMDGesellschaftData = vi.fn()
-vi.mock('@/pages/planner', () => ({
+vi.mock('@/pages/planner', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/pages/planner')>()),
   PublishedPlannerCard: ({ planner }: { planner: { id: string; title: string } }) => (
     <div data-testid={`planner-card-${planner.id}`}>{planner.title}</div>
   ),

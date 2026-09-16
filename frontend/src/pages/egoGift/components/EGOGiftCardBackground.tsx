@@ -3,19 +3,17 @@ import {
   getEGOGiftEnhancedBackgroundPath,
   getEGOGiftEnhanced2BackgroundPath,
 } from '@/shared/assets'
+import { EGO_GIFT_CARD, pct } from '../lib/cardLayout'
 
 interface EGOGiftCardBackgroundProps {
   enhancement: 0 | 1 | 2
-  size: 'full' | 'mini'
 }
 
 /**
  * Background layers for EGO gift cards
  * Handles base background and enhanced overlays based on enhancement level
  */
-export function EGOGiftCardBackground({ enhancement, size }: EGOGiftCardBackgroundProps) {
-  const overlaySize = size === 'full' ? 'w-24 h-24' : 'w-18 h-18'
-
+export function EGOGiftCardBackground({ enhancement }: EGOGiftCardBackgroundProps) {
   return (
     <>
       {/* Base background - bg.webp for enhancement 0 and 1, bgEnhanced2.webp for enhancement 2 */}
@@ -31,7 +29,11 @@ export function EGOGiftCardBackground({ enhancement, size }: EGOGiftCardBackgrou
         <img
           src={getEGOGiftEnhancedBackgroundPath()}
           alt=""
-          className={`absolute inset-0 ${overlaySize} m-auto object-contain`}
+          className="absolute inset-0 m-auto object-contain"
+          style={{
+            width: pct(EGO_GIFT_CARD.enhancedOverlay),
+            height: pct(EGO_GIFT_CARD.enhancedOverlay),
+          }}
           loading="lazy"
         />
       )}

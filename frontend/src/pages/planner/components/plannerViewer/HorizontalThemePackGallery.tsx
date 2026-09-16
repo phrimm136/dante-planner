@@ -1,10 +1,9 @@
 import { useTranslation } from 'react-i18next'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { PlannerSection } from '@/components/layout/PlannerSection'
-import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { ThemePackTrackerCard } from './ThemePackTrackerCard'
 import { useThemePackListSpec, useThemePackListI18n } from '@/pages/themePack'
-import { CARD_GRID, EMPTY_STATE } from '@/lib/constants'
+import { CARD_MOBILE_SCALE_DENSE, EMPTY_STATE } from '@/lib/constants'
 import { cn, getDisplayFontForLanguage } from '@/lib/utils'
 import { createEmptyNoteContent } from '@/shared/noteEditor'
 import type { SerializableFloorSelection } from '../../types/PlannerTypes'
@@ -39,7 +38,7 @@ export function HorizontalThemePackGallery({
   const spec = useThemePackListSpec()
   const i18n = useThemePackListI18n()
 
-  const mobileScale = CARD_GRID.MOBILE_SCALE.DENSE
+  const mobileScale = CARD_MOBILE_SCALE_DENSE
 
   // Collect selected theme pack IDs from all floors
   const allThemePackIds = (() => {
@@ -112,24 +111,19 @@ export function HorizontalThemePackGallery({
                 >
                   {t('pages.plannerMD.floor', { number: floorIndex + 1 })}
                 </span>
-                <ScaledCardWrapper
+                <ThemePackTrackerCard
+                  packId={packId}
+                  packEntry={packEntry}
+                  packName={packName}
+                  floorNumber={floorIndex + 1}
+                  noteContent={getNoteContentForPack(packId)}
+                  isDone={isDone}
+                  isFocused={focusedThemePackId === packId}
                   mobileScale={mobileScale}
-                  cardWidth={CARD_GRID.WIDTH.THEME_PACK}
-                  cardHeight={CARD_GRID.HEIGHT.THEME_PACK}
-                >
-                  <ThemePackTrackerCard
-                    packId={packId}
-                    packEntry={packEntry}
-                    packName={packName}
-                    floorNumber={floorIndex + 1}
-                    noteContent={getNoteContentForPack(packId)}
-                    isDone={isDone}
-                    isFocused={focusedThemePackId === packId}
-                    onFocusToggle={() => onFocusToggle(packId)}
-                    onToggleDone={() => onTogglePackDone(floorIndex, packId, giftIds)}
-                    onHoverChange={(hovering) => onHoverChange(hovering ? packId : null)}
-                  />
-                </ScaledCardWrapper>
+                  onFocusToggle={() => onFocusToggle(packId)}
+                  onToggleDone={() => onTogglePackDone(floorIndex, packId, giftIds)}
+                  onHoverChange={(hovering) => onHoverChange(hovering ? packId : null)}
+                />
               </div>
             )
           })}

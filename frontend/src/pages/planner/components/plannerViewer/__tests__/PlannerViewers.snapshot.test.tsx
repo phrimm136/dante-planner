@@ -67,8 +67,14 @@ vi.mock('@/shared/noteEditor/components/NoteEditor', () => ({
     <div data-testid="note-editor">{JSON.stringify(value)}</div>
   ),
 }))
-vi.mock('@/pages/identity', () => ({ useIdentityListSpec: () => ({}) }))
-vi.mock('@/pages/ego', () => ({ useEGOListSpec: () => ({}) }))
+vi.mock('@/pages/identity', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/pages/identity')>()),
+  useIdentityListSpec: () => ({}),
+}))
+vi.mock('@/pages/ego', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/pages/ego')>()),
+  useEGOListSpec: () => ({}),
+}))
 
 // All sections revealed, so every branch of the descriptor loop is exercised.
 vi.mock('@/components/hooks/useProgressiveReveal', () => ({

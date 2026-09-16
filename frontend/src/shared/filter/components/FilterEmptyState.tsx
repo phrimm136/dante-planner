@@ -1,5 +1,5 @@
 import { useStore } from 'zustand'
-import type { FilterState, FilterStore } from '@/components/hooks/useSetFilters'
+import type { FilterState, FilterStore } from '@/components/hooks/filterStore'
 
 interface FilterEmptyStateProps<T> {
   store: FilterStore<T>

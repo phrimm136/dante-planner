@@ -20,6 +20,7 @@ import { useThemePackListSpec } from '@/pages/themePack'
 import { useEGOGiftListSpec } from '@/pages/egoGift'
 import { AbEventCard, useAbEventListSpec } from '@/pages/abEvent'
 import { getFeaturedBossImagePath } from '@/shared/assets'
+import { CardSlot } from '@/shared/cardLayout'
 import {
   DUNGEON_IDX,
   DIFFICULTY_LABELS,
@@ -30,8 +31,10 @@ import type { AbEventId, DungeonIdx, ThemePackFloor, DifficultyLabel } from '@/s
 import type { ThemePackDetail } from '@/pages/themePack'
 import { Link } from '@tanstack/react-router'
 import { DIFFICULTY_COLORS, SECTION_STYLES } from '@/lib/constants'
+import { THEME_PACK_GEOMETRY } from './lib/cardLayout'
 import type { EGOGiftId } from '@/shared/gameData'
 
+/** The theme pack box with its height left to the card. */
 const GIFT_ROW = 'flex flex-wrap gap-3'
 
 /** Difficulties in display order; the label also keys DIFFICULTY_COLORS. */
@@ -289,9 +292,9 @@ function ThemePackDetailContent() {
     <div className="flex gap-4">
       {/* Theme Pack card image */}
       {listEntry && (
-        <div className="shrink-0">
+        <CardSlot size={THEME_PACK_GEOMETRY.size} className="shrink-0">
           <ThemePackCard packId={id} packEntry={listEntry} />
-        </div>
+        </CardSlot>
       )}
 
       {/* Difficulty + Floors + Hidden Theme Rate */}

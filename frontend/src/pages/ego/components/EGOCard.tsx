@@ -1,31 +1,40 @@
-import { Suspense, type ReactNode } from 'react'
+import { Suspense, type CSSProperties, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { EGOListItem } from '../types/EGOTypes'
 import {
+  getEGOCardFramePath,
+  getEGOHoverRingPath,
   getEGOImagePath,
-  getEGOFramePath,
-  getEGOFrameHighlightPath,
+  getEGOMaskPath,
+  getEGONameBgPath,
+  getEGOCardGradePath,
+  getEGOCardThreadspinPath,
   getEGORankIconPath,
-  getEGOSmallRankIconPath,
-  getEGOTierIconPath,
-  getEGOInfoPanelPath,
-  getSinnerIconPath,
-  getSinnerBGPath,
+  getSinnerFacePath,
+  getEGOIconRingPath,
 } from '@/shared/assets'
+import { aspectOf, layerStyle, pctStyle } from '@/shared/cardLayout'
 import { getSinnerFromId } from '@/shared/gameData'
 import { cn } from '@/lib/utils'
-import { EGO_CARD_INFO_ROW } from '@/lib/constants'
-import { EGOName } from './EGOName'
+import { EGO_GEOMETRY } from '../lib/cardLayout'
 import { Skeleton } from '@/components/ui/skeleton'
+import type { EGOListItem } from '../types/EGOTypes'
+import {
+  EGO_CARD_BADGE_SKEW,
+  EGO_CARD_BADGE_SKEW_ORIGIN,
+  EGO_CARD_LAYERS,
+  EGO_CARD_ROOT_SCALE,
+  EGO_HOVER_RING_BRIGHTNESS,
+  EGO_NAME_RECT,
+  egoPortraitWindowStyle,
+} from '../lib/cardLayout'
+import { EGOName } from './EGOName'
 
 interface EGOCardProps {
   /** The EGO data to display */
   ego: EGOListItem
-  /** Show highlight frame at full brightness (selected state) */
+  /** Show the ring at full brightness (selected state) */
   isSelected?: boolean
-  /** Show highlight frame at dimmed brightness (hover/preview state) */
-  isHighlighted?: boolean
   /** Custom overlay content (e.g., selected indicator) */
   overlay?: ReactNode
   /** Additional CSS classes for styling flexibility */
@@ -33,154 +42,128 @@ interface EGOCardProps {
 }
 
 /**
- * Pure view-only component for rendering an EGO card.
- * Does NOT include any interaction logic (Link, onClick, etc.)
- * Parent component is responsible for wrapping with Link, button, or other interactive elements.
+ * View-only EGO card in the game's geometry.
  *
- * @example
- * // As a link (use EGOCardLink)
- * <EGOCardLink ego={ego} />
- *
- * // With custom wrapper
- * <button onClick={handleSelect}>
- *   <EGOCard ego={ego} isSelected={true} />
- * </button>
- *
- * // Inside a popover trigger
- * <PopoverTrigger asChild>
- *   <div className="cursor-pointer">
- *     <EGOCard ego={ego} />
- *   </div>
- * </PopoverTrigger>
+ * Carries no interaction of its own; a parent wraps it in a `Link`, a button, or a trigger.
  */
-export function EGOCard({
-  ego,
-  isSelected = false,
-  isHighlighted: _isHighlighted = false,
-  overlay,
-  className,
-}: EGOCardProps) {
+export function EGOCard({ ego, isSelected = false, overlay, className }: EGOCardProps) {
   const { t } = useTranslation(['common', 'database'])
-  const { id, egoType: rank, attributeTypes } = ego
+  const { id, egoType: rank, attributeTypes, maxThreadspin } = ego
   const [primaryAttributeType] = attributeTypes
   const sinner = getSinnerFromId(id)
+  const maskPath = getEGOMaskPath()
+
+  const rootStyle: CSSProperties = {
+    containerType: 'inline-size',
+    aspectRatio: aspectOf(EGO_GEOMETRY.size),
+    transform: `scale(${String(EGO_CARD_ROOT_SCALE)})`,
+    '--ego-hover-ring-brightness': EGO_HOVER_RING_BRIGHTNESS,
+  } as CSSProperties
 
   return (
-    <div className={cn('relative w-40 h-48 shrink-0', className)}>
-      {/* Layer 1: Circular EGO Image */}
-      <div className="absolute inset-0 flex items-center justify-center">
+    <div className={cn('group relative w-full', className)} style={rootStyle}>
+      <img
+        src={maskPath}
+        alt=""
+        loading="lazy"
+        style={layerStyle(EGO_CARD_LAYERS.portraitWindow)}
+        className="pointer-events-none"
+      />
+      <div data-testid="ego-portrait-window" style={egoPortraitWindowStyle(maskPath)}>
         <img
           src={getEGOImagePath(id)}
           alt=""
           loading="lazy"
-          className="w-36 h-36 object-cover rounded-full"
+          className="absolute inset-0 w-full h-full object-cover"
         />
       </div>
 
-      {/* Custom Overlay - above image */}
-      {overlay}
-
-      {/* Layer 2: Static EGO Frame */}
       <img
-        src={getEGOFramePath()}
+        src={getEGOCardFramePath()}
         alt={t('a11y.egoFrame')}
         loading="lazy"
-        className="absolute inset-0 w-38 h-38 object-cover top-5 left-0.5 pointer-events-none"
+        style={layerStyle(EGO_CARD_LAYERS.frame)}
+        className="pointer-events-none"
       />
 
-      {/* Layer 2.5: EGO Highlight Frame (glowing ring around portrait) */}
-      <div
-        className={cn(
-          'absolute inset-0 flex items-center justify-center pointer-events-none',
-          isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 group-active:opacity-100',
-          !isSelected && 'group-hover:brightness-75 group-active:brightness-75',
-          isSelected && 'group-hover:brightness-125 group-active:brightness-125',
-        )}
-      >
-        <img
-          src={getEGOFrameHighlightPath()}
-          alt=""
-          loading="lazy"
-          className="w-39 h-39 object-contain"
-        />
-      </div>
-
-      {/* Layer 3: Sinner Background (upper-center) */}
       <img
-        src={getSinnerBGPath(1)}
+        src={getEGOHoverRingPath()}
+        alt=""
+        loading="lazy"
+        style={layerStyle(EGO_CARD_LAYERS.hoverRing)}
+        className={cn(
+          'pointer-events-none',
+          isSelected
+            ? 'opacity-100'
+            : 'opacity-0 group-hover:opacity-100 group-active:opacity-100 group-hover:brightness-[var(--ego-hover-ring-brightness)] group-active:brightness-[var(--ego-hover-ring-brightness)]',
+        )}
+      />
+
+      <img
+        src={getEGONameBgPath(primaryAttributeType)}
+        alt={t('a11y.infoPanel')}
+        loading="lazy"
+        style={layerStyle(EGO_CARD_LAYERS.namePlate)}
+        className="pointer-events-none"
+      />
+
+      <Suspense
+        fallback={
+          <Skeleton style={pctStyle(EGO_NAME_RECT)} className="pointer-events-none bg-foreground" />
+        }
+      >
+        <EGOName id={id} />
+      </Suspense>
+
+      <img
+        src={getEGOCardThreadspinPath(maxThreadspin)}
+        alt={`${t('database:filters.tier')} ${String(maxThreadspin)}`}
+        loading="lazy"
+        style={{
+          ...layerStyle(EGO_CARD_LAYERS.threadspinBadge),
+          transform: `skewY(${String(EGO_CARD_BADGE_SKEW.threadspin)}deg)`,
+          transformOrigin: EGO_CARD_BADGE_SKEW_ORIGIN.threadspin,
+        }}
+        className="pointer-events-none"
+      />
+
+      <img
+        src={getEGOCardGradePath(rank)}
+        alt={rank}
+        loading="lazy"
+        style={{
+          ...layerStyle(EGO_CARD_LAYERS.gradeBadge),
+          transform: `skewY(${String(EGO_CARD_BADGE_SKEW.grade)}deg)`,
+          transformOrigin: EGO_CARD_BADGE_SKEW_ORIGIN.grade,
+        }}
+        className="pointer-events-none"
+      />
+
+      <img
+        src={getEGORankIconPath(rank)}
+        alt=""
+        loading="lazy"
+        style={layerStyle(EGO_CARD_LAYERS.typeLabel)}
+        className="pointer-events-none"
+      />
+
+      <img
+        src={getEGOIconRingPath()}
         alt={t('a11y.sinnerBackground')}
         loading="lazy"
-        className="absolute top-1 left-1/2 -translate-x-1/2 w-11 h-11 object-contain pointer-events-none"
+        style={layerStyle(EGO_CARD_LAYERS.iconRing)}
+        className="pointer-events-none"
       />
 
-      {/* Layer 4: Sinner Icon (upper-center) */}
       <img
-        src={getSinnerIconPath(sinner)}
+        src={getSinnerFacePath(sinner)}
         alt={sinner}
         loading="lazy"
-        className="absolute top-2 left-1/2 -translate-x-1/2 w-9 h-9 object-contain pointer-events-none"
+        style={layerStyle(EGO_CARD_LAYERS.face)}
+        className="pointer-events-none"
       />
 
-      {/* Layer 5: Info Panel (bottom) with sin-colored background */}
-      <div className="absolute bottom-3 left-0 right-0 h-12 w-36 translate-x-2 pointer-events-none">
-        {/* Sin-colored panel background */}
-        {primaryAttributeType !== undefined && (
-          <img
-            src={getEGOInfoPanelPath(primaryAttributeType)}
-            alt={t('a11y.infoPanel')}
-            loading="lazy"
-            className="absolute inset-0 items-center object-cover"
-          />
-        )}
-
-        {/* Panel content - three sections */}
-        <div
-          className="absolute left-0 translate-y-4.5 inset-0 flex items-center h-8"
-          style={{ width: EGO_CARD_INFO_ROW.WIDTH }}
-        >
-          {/* Left: Small Rank Icon */}
-          <div className="items-center h-8 pl-1" style={{ width: EGO_CARD_INFO_ROW.ICON_SLOT }}>
-            <img
-              src={getEGOSmallRankIconPath(rank)}
-              alt={rank}
-              loading="lazy"
-              className="w-4 h-4 translate-x-1.5 translate-y-1.5 object-contain"
-              style={{ transform: 'skewY(20deg)' }}
-            />
-          </div>
-
-          {/* Center: EGO Name */}
-          <div
-            className="flex text-center justify-center items-center h-8 text-shadow-black text-shadow-xs translate-x-[8px] translate-y-1"
-            style={{ width: EGO_CARD_INFO_ROW.NAME_SLOT }}
-          >
-            <Suspense fallback={<Skeleton className="w-12 h-3 inline-block bg-foreground" />}>
-              <EGOName id={id} />
-            </Suspense>
-          </div>
-
-          {/* Right: Tier Icon (stretched/tilted) */}
-          <div className="items-center h-8 pl-1" style={{ width: EGO_CARD_INFO_ROW.ICON_SLOT }}>
-            <img
-              src={getEGOTierIconPath(ego.maxThreadspin)}
-              alt={`${t('database:filters.tier')} ${ego.maxThreadspin}`}
-              loading="lazy"
-              className="w-5 h-5 translate-x-2.5 translate-y-1 object-contain"
-              style={{ transform: 'skewY(-20deg)' }}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Layer 6: Large Rank Indicator (above info panel) */}
-      <div className="absolute bottom-5.75 left-1/2 -translate-x-1/2 w-12 h-12 pointer-events-none">
-        <img
-          src={getEGORankIconPath(rank)}
-          alt=""
-          loading="lazy"
-          className="w-12 h-12 object-contain"
-        />
-      </div>
+      {overlay}
     </div>
   )
 }

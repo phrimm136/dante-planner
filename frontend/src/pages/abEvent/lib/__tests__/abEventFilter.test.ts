@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import type { FilterState } from '@/components/hooks/useSetFilters'
+import type { FilterState } from '@/components/hooks/filterStore'
 import {
   buildAbEventSearchTerms,
   matchesAbEvent,

@@ -1,9 +1,9 @@
 import type { IdentityListItem } from '../types/IdentityTypes'
 import { useSearchTermSources } from '@/shared/filter'
 import { IDENTITY_LIST } from '../hooks/useIdentityListData'
-import type { FilterStore } from '@/components/hooks/useSetFilters'
-import { CARD_GRID } from '@/lib/constants'
-import { FilteredEntityGrid, sortByReleaseDate, type CardGeometry } from '@/shared/filter'
+import type { FilterStore } from '@/components/hooks/filterStore'
+import { IDENTITY_GEOMETRY } from '../lib/cardLayout'
+import { FilteredEntityGrid, sortByReleaseDate } from '@/shared/filter'
 import {
   buildIdentitySearchTerms,
   matchesIdentity,
@@ -12,13 +12,6 @@ import {
 import { IdentityCardLink } from './IdentityCardLink'
 
 const EMPTY_NAMES: Record<string, string> = {}
-
-const IDENTITY_GEOMETRY: CardGeometry = {
-  cardWidth: CARD_GRID.WIDTH.IDENTITY,
-  cardHeight: CARD_GRID.HEIGHT.IDENTITY,
-  mobileScale: 0.8,
-  fixedRowHeight: true,
-}
 
 interface IdentityListProps {
   identities: IdentityListItem[]

@@ -25,7 +25,7 @@ export const EGOGiftObservationCard = function EGOGiftObservationCard({
         onClick={() => {
           onSelect(giftId)
         }}
-        className="cursor-pointer"
+        className="block w-full cursor-pointer"
       >
         {children}
       </button>

@@ -1,13 +1,14 @@
 import { useStore } from 'zustand'
-import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
-import type { FilterState, FilterStore } from '@/components/hooks/useSetFilters'
+
+import { CardSlot, type CardSizePx } from '@/shared/cardLayout'
+import type { FilterState, FilterStore } from '@/components/hooks/filterStore'
 
 interface FilteredCardSlotProps<T> {
   store: FilterStore<T>
   /** Whether this one card survives the current filters */
   selectVisible: (state: FilterState<T>) => boolean
-  cardWidth: number
-  cardHeight: number
+  /** The card's box */
+  size: CardSizePx
   mobileScale: number
   children: React.ReactNode
 }
@@ -24,8 +25,7 @@ interface FilteredCardSlotProps<T> {
  *   key={identity.id}
  *   store={store}
  *   selectVisible={(state) => matchesIdentity(identity, state, terms)}
- *   cardWidth={CARD_GRID.WIDTH.IDENTITY}
- *   cardHeight={CARD_GRID.HEIGHT.IDENTITY}
+ *   size={IDENTITY_GEOMETRY.size}
  *   mobileScale={0.8}
  * >
  *   <IdentityCardLink identity={identity} />
@@ -34,21 +34,15 @@ interface FilteredCardSlotProps<T> {
 export function FilteredCardSlot<T>({
   store,
   selectVisible,
-  cardWidth,
-  cardHeight,
+  size,
   mobileScale,
   children,
 }: FilteredCardSlotProps<T>) {
   const visible = useStore(store, selectVisible)
 
   return (
-    <ScaledCardWrapper
-      mobileScale={mobileScale}
-      cardWidth={cardWidth}
-      cardHeight={cardHeight}
-      className={visible ? '' : 'hidden'}
-    >
+    <CardSlot size={size} mobileScale={mobileScale} className={visible ? '' : 'hidden'}>
       {children}
-    </ScaledCardWrapper>
+    </CardSlot>
   )
 }

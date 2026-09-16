@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { useMDUserPlannersData } from '../../hooks/useMDUserPlannersData'
 import { useUserSettingsQuery } from '@/shared/userSettings'
 import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
-import { CARD_GRID, PROGRESSIVE_REVEAL, calculatePlannerPages } from '@/lib/constants'
+import { PROGRESSIVE_REVEAL, calculatePlannerPages } from '@/lib/constants'
+import { PLANNER_GEOMETRY } from '../../lib/cardLayout'
 
 import { PersonalPlannerCard } from './PersonalPlannerCard'
 import { PlannerListPagination } from './PlannerListPagination'
@@ -19,6 +20,7 @@ import type { MDCategory } from '@/shared/gameData'
 import type { PlannerSummary } from '../../types/PlannerTypes'
 import type { PlannerSearchFilters } from '../../types/PlannerSearchTypes'
 
+/** The planner box with its height left to the card. */
 export interface PersonalPlannerListProps {
   /** MD category filter (optional) */
   category?: MDCategory | undefined
@@ -157,7 +159,7 @@ export function PersonalPlannerList({
         <PlannerEmptyState view="my-plans" isFiltered={hasActiveFilters} />
       ) : (
         <>
-          <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.PLANNER}>
+          <ResponsiveCardGrid size={PLANNER_GEOMETRY.size} rows="auto">
             {planners.slice(0, displayCount).map((planner: PlannerSummary) => (
               <PersonalPlannerCard
                 key={planner.id}

@@ -1,5 +1,5 @@
 import { createStore } from 'zustand'
-import type { FilterState, FilterStore } from '@/components/hooks/useSetFilters'
+import type { FilterState, FilterStore } from '@/components/hooks/filterStore'
 
 /**
  * A filter store pinned to one state, for driving list components that subscribe to

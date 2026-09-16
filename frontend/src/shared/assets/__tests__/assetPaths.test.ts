@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest'
 
+import { AFFINITIES, SINNERS } from '@/shared/gameData'
+
 import { resolveAsset } from '../assetManifest'
 import * as assetPaths from '../assetPaths'
 import { PATHS, path } from '../assetPaths'
@@ -10,15 +12,26 @@ type Case = [name: string, args: unknown[], expected: string]
 const getters = assetPaths as unknown as Record<string, PathGetter>
 
 const CASES: Case[] = [
-  ['getSelectedIndicatorPath', [], '/images/UI/card/common/indicator-selected.webp'],
-  ['getIdentityFrameHighlightPath', [], '/images/UI/card/identity/legacy/hoverRing.webp'],
-  ['getEGOFramePath', [], '/images/UI/card/ego/legacy/frame.webp'],
-  ['getEGOFrameHighlightPath', [], '/images/UI/card/ego/legacy/hoverRing.webp'],
-  ['getBackupIndicatorPath', [], '/images/UI/card/common/indicator-backup.webp'],
+  ['getFormationBadgePath', ['selected'], '/images/UI/card/identity/deploy-selected.webp'],
+  ['getFormationBadgePath', ['backup'], '/images/UI/card/identity/deploy-backup.webp'],
+  ['getIdentityMaskPath', [], '/images/UI/card/identity/mask.webp'],
+  ['getEGOCardFramePath', [], '/images/UI/card/ego/frame.webp'],
+  ['getEGOHoverRingPath', [], '/images/UI/card/ego/hoverRing.webp'],
+  ['getEGOMaskPath', [], '/images/UI/card/ego/mask.webp'],
   ['getUptieFramePath', [1], '/images/UI/card/identity/frame-rank1-uptie4.webp'],
   ['getUptieFramePath', [3, 2], '/images/UI/card/identity/frame-rank3-uptie2.webp'],
-  ['getSinnerBGPath', [2], '/images/UI/card/identity/legacy/iconRing-rank2.webp'],
-  ['getEGOInfoPanelPath', ['CRIMSON'], '/images/UI/card/ego/nameBg-crimson.webp'],
+  ['getIdentityHoverRingPath', [1], '/images/UI/card/identity/hoverRing-rank1-uptie4.webp'],
+  ['getIdentityHoverRingPath', [3, 2], '/images/UI/card/identity/hoverRing-rank3-uptie2.webp'],
+  ['getSinnerIconRingPath', [2], '/images/UI/card/identity/iconRing-rank2.webp'],
+  ['getIdentityGradePath', [3], '/images/UI/card/identity/grade-rank3.webp'],
+  ['getEGOIconRingPath', [], '/images/UI/card/ego/iconRing.webp'],
+  ['getSinnerFacePath', ['Faust'], '/images/UI/card/identity/face-Faust.webp'],
+  ['getEGONameBgPath', ['CRIMSON'], '/images/UI/card/ego/nameBg-crimson.webp'],
+  ['getEGOCardGradePath', ['ZAYIN'], '/images/UI/card/ego/grade-zayin.webp'],
+  ['getEGOCardGradePath', ['ALEPH'], '/images/UI/card/ego/grade-aleph.webp'],
+  ['getEGOCardThreadspinPath', [4], '/images/UI/card/ego/threadspin-4.webp'],
+  ['getEGOCardThreadspinPath', [5], '/images/UI/card/ego/threadspin-5.webp'],
+  ['getEGONameBgPath', [], '/images/UI/card/ego/nameBg.webp'],
 
   ['getIdentityInfoImagePath', ['10102'], '/images/identity/10102/10102_gacksung_info.webp'],
   ['getIdentityInfoImagePath', ['10102', 2], '/images/identity/10102/10102_normal_info.webp'],
@@ -53,7 +66,11 @@ const CASES: Case[] = [
   ['getSanityIncIconPath', [], '/images/UI/identity/sanity-inc.webp'],
   ['getSanityDecIconPath', [], '/images/UI/identity/sanity-dec.webp'],
   ['getDefenseTypeIconPath', ['EVADE'], '/images/UI/identity/defenseType-evade.webp'],
-  ['getDefenseTypeIconPath', ['CLASHABLE_GUARD'], '/images/UI/identity/defenseType-clashableGuard.webp'],
+  [
+    'getDefenseTypeIconPath',
+    ['CLASHABLE_GUARD'],
+    '/images/UI/identity/defenseType-clashableGuard.webp',
+  ],
 
   ['getAttackTypeIconPath', ['slash'], '/images/UI/common/atkType-slash.webp'],
   ['getAttackTypeIconPath', ['PENETRATE'], '/images/UI/common/atkType-penetrate.webp'],
@@ -121,9 +138,9 @@ const CASES: Case[] = [
   ['getStartBuffStarLightPath', [], '/images/UI/startBuff/starLight.webp'],
 
   ['getThemePackImagePath', ['1001'], '/images/themePack/1001.webp'],
-  ['getThemePackHoverHighlightPath', [], '/images/UI/card/themePack/legacy/hover.webp'],
-  ['getThemePackSelectHighlightPath', [], '/images/UI/card/themePack/legacy/focused.webp'],
-  ['getThemePackExtremeHighlightPath', [], '/images/UI/card/themePack/legacy/hover-extreme.webp'],
+  ['getThemePackHoverPath', [], '/images/UI/card/themePack/hover.webp'],
+  ['getThemePackFocusedPath', [], '/images/UI/card/themePack/focused.webp'],
+  ['getThemePackHoverExtremePath', [], '/images/UI/card/themePack/hover-extreme.webp'],
   ['getFeaturedBossImagePath', ['1001', 91001], '/images/featuredBoss/1001_91001.webp'],
   ['getFeaturedBossImagePath', ['1001', '91001'], '/images/featuredBoss/1001_91001.webp'],
 
@@ -156,6 +173,37 @@ describe('asset path getters', () => {
       (expected) => resolveAsset(expected) === expected,
     )
     expect(missing).toEqual([])
+  })
+})
+
+const UPTIE_RANKS = [1, 2, 3]
+const UPTIE_LEVELS = [1, 2, 3, 4]
+const ICON_RING_RANKS = [1, 2, 3]
+const IDENTITY_GRADE_RANKS = [1, 2, 3]
+
+/** Every path a card family enumerates, by the game vocabulary that enumerates it. */
+const FAMILIES: [name: string, paths: string[]][] = [
+  [
+    'uptieFrame',
+    UPTIE_RANKS.flatMap((rank) =>
+      UPTIE_LEVELS.map((uptie) => assetPaths.getUptieFramePath(rank, uptie)),
+    ),
+  ],
+  ['sinnerIconRing', ICON_RING_RANKS.map((rank) => assetPaths.getSinnerIconRingPath(rank))],
+  ['identityGrade', IDENTITY_GRADE_RANKS.map((rank) => assetPaths.getIdentityGradePath(rank))],
+  ['sinnerFace', SINNERS.map((sinner) => assetPaths.getSinnerFacePath(sinner))],
+  [
+    'egoNameBg',
+    [
+      ...AFFINITIES.map((affinity) => assetPaths.getEGONameBgPath(affinity)),
+      assetPaths.getEGONameBgPath(),
+    ],
+  ],
+]
+
+describe('enumerable card asset families', () => {
+  it.each(FAMILIES)('ships every %s member as a real static asset', (_name, paths) => {
+    expect(paths.filter((resolved) => resolved.startsWith('/images/'))).toEqual([])
   })
 })
 

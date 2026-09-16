@@ -7,11 +7,13 @@ import {
   toUnknownGiftListItem,
 } from '@/pages/egoGift'
 import type { EncodedGiftId } from '@/shared/gameData'
-import { getKeywordIconPath } from '@/shared/assets'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
-import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
-import { CARD_GRID, SECTION_STYLES } from '@/lib/constants'
+import { CardSlot } from '@/shared/cardLayout'
+import { CARD_MOBILE_SCALE, SECTION_STYLES } from '@/lib/constants'
+import { KEYWORD_ICON_GEOMETRY } from '../../lib/cardLayout'
+import { EGO_GIFT_GEOMETRY } from '@/pages/egoGift'
+import { StartGiftKeywordIcon } from './StartGiftKeywordIcon'
 import { cn } from '@/lib/utils'
 
 export interface StartGiftSummaryProps {
@@ -39,7 +41,7 @@ export function StartGiftSummary({
   const spec = useEGOGiftListSpec()
   const i18n = useEGOGiftListI18n()
 
-  const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
+  const mobileScale = CARD_MOBILE_SCALE
 
   // Show selected state when keyword is chosen (gifts are optional)
   const hasKeywordSelected = selectedKeyword !== null
@@ -73,33 +75,21 @@ export function StartGiftSummary({
           /* Selected state: keyword icon + gift cards (if any) + EA counter */
           <div className="flex items-center gap-4 p-2 min-h-28">
             {/* Keyword icon */}
-            <ScaledCardWrapper
+            <CardSlot
+              size={KEYWORD_ICON_GEOMETRY.size}
               mobileScale={mobileScale}
-              cardWidth={CARD_GRID.WIDTH.KEYWORD_ICON}
-              cardHeight={CARD_GRID.HEIGHT.KEYWORD_ICON}
               className="shrink-0"
             >
-              <div className="w-16 h-16 flex items-center justify-center">
-                <img
-                  src={getKeywordIconPath(selectedKeyword)}
-                  alt={selectedKeyword}
-                  className="w-12 h-12 object-contain"
-                />
-              </div>
-            </ScaledCardWrapper>
+              <StartGiftKeywordIcon keyword={selectedKeyword} />
+            </CardSlot>
 
             {/* Selected gift cards (if any) */}
             <div className={SECTION_STYLES.LAYOUT.wrap}>
               {selectedGifts.length > 0 ? (
                 selectedGifts.map((gift) => (
-                  <ScaledCardWrapper
-                    key={gift.id}
-                    mobileScale={mobileScale}
-                    cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
-                    cardHeight={CARD_GRID.HEIGHT.EGO_GIFT}
-                  >
+                  <CardSlot key={gift.id} size={EGO_GIFT_GEOMETRY.size} mobileScale={mobileScale}>
                     <EGOGiftCard gift={gift} />
-                  </ScaledCardWrapper>
+                  </CardSlot>
                 ))
               ) : (
                 <span className={SECTION_STYLES.TEXT.caption}>
@@ -111,7 +101,7 @@ export function StartGiftSummary({
         ) : (
           /* Empty state: dashed border placeholder - min-h-28 matches selected state */
           <div className="flex items-center justify-center min-h-28 border-2 border-dashed border-muted-foreground/50 rounded-lg">
-            <span className={SECTION_STYLES.TEXT.muted}>
+            <span className={SECTION_STYLES.TEXT.caption}>
               {readOnly
                 ? t('pages.plannerMD.emptyState.noStartGifts')
                 : t('pages.plannerMD.selectStartEgoGift')}

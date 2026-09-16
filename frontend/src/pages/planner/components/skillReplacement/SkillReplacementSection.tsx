@@ -6,9 +6,11 @@ import { SinnerSkillCard } from './SinnerSkillCard'
 import { SkillExchangeModal } from './SkillExchangeModal'
 import { useIdentityListSpec } from '@/pages/identity'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
-import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
+import { CardSlot, useSlotSizePx } from '@/shared/cardLayout'
 import { SINNERS, DEFAULT_SKILL_EA } from '@/shared/gameData'
-import { CARD_GRID } from '@/lib/constants'
+import { CARD_MOBILE_SCALE, SM_BREAKPOINT_PX } from '@/lib/constants'
+import { SINNER_SKILL_GEOMETRY } from '../../lib/cardLayout'
+import { SKILL_REPLACEMENT_COLUMNS, SKILL_REPLACEMENT_GRID_GAP } from '../../lib/cardLayout'
 import type { IdentityId, OffensiveSkillSlot } from '@/shared/gameData'
 import type { SinnerEquipment, SkillEAState, SkillInfo } from '../../types/DeckTypes'
 
@@ -45,18 +47,15 @@ export function SkillReplacementSection({
   // Modal state
   const [selectedSinner, setSelectedSinner] = useState<string | null>(null)
 
-  const isDesktop = useIsBreakpoint('min', CARD_GRID.LG_BREAKPOINT)
-  const isSm = useIsBreakpoint('min', CARD_GRID.SM_BREAKPOINT)
+  const isSm = useIsBreakpoint('min', SM_BREAKPOINT_PX)
 
-  // Calculate scale and dimensions
-  const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
-  const scale = isDesktop ? 1 : mobileScale
-  const scaledWidth = CARD_GRID.WIDTH.SINNER_SKILL * scale
-  const scaledHeight = CARD_GRID.HEIGHT.SINNER_SKILL * scale
+  const mobileScale = CARD_MOBILE_SCALE
+  const { widthPx: columnWidth, heightPx: rowHeight } = useSlotSizePx(
+    SINNER_SKILL_GEOMETRY.size,
+    mobileScale,
+  )
 
-  const getColumnCount = () => (isSm ? 6 : 3)
-
-  const columnCount = getColumnCount()
+  const columnCount = isSm ? SKILL_REPLACEMENT_COLUMNS.wide : SKILL_REPLACEMENT_COLUMNS.narrow
 
   // Get skill infos for a sinner's equipped identity from spec data
   const getSkillInfos = (identityId: IdentityId): [SkillInfo, SkillInfo, SkillInfo] => {
@@ -117,10 +116,11 @@ export function SkillReplacementSection({
     >
       {/* Sinner Grid - Responsive: 6->4->3->2 columns */}
       <div
-        className="grid mx-auto gap-0.5"
+        className="grid mx-auto"
         style={{
-          gridTemplateColumns: `repeat(${columnCount}, ${scaledWidth}px)`,
-          gridAutoRows: `${scaledHeight}px`,
+          gridTemplateColumns: `repeat(${String(columnCount)}, ${String(columnWidth)}px)`,
+          gridAutoRows: `${String(rowHeight)}px`,
+          gap: `${String(SKILL_REPLACEMENT_GRID_GAP)}px`,
           justifyContent: 'center',
         }}
       >
@@ -136,12 +136,7 @@ export function SkillReplacementSection({
           const current = currentEAState?.[sinnerCode]
 
           return (
-            <ScaledCardWrapper
-              key={sinnerCode}
-              mobileScale={mobileScale}
-              cardWidth={CARD_GRID.WIDTH.SINNER_SKILL}
-              cardHeight={CARD_GRID.HEIGHT.SINNER_SKILL}
-            >
+            <CardSlot key={sinnerCode} size={SINNER_SKILL_GEOMETRY.size} mobileScale={mobileScale}>
               <SinnerSkillCard
                 identityId={identityId}
                 uptie={sinnerEquipment.identity.uptie}
@@ -154,7 +149,7 @@ export function SkillReplacementSection({
                 }}
                 readOnly={readOnly}
               />
-            </ScaledCardWrapper>
+            </CardSlot>
           )
         })}
       </div>

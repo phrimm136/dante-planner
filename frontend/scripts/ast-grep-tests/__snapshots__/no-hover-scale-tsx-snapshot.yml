@@ -1,0 +1,32 @@
+id: no-hover-scale-tsx
+snapshots:
+  const Card = () => <div className="hover:scale-105" />:
+    labels:
+    - source: '"hover:scale-105"'
+      style: primary
+      start: 34
+      end: 51
+  const className = 'hover:scale-105':
+    labels:
+    - source: '''hover:scale-105'''
+      style: primary
+      start: 18
+      end: 35
+  const className = `group-hover:scale-110`:
+    labels:
+    - source: '`group-hover:scale-110`'
+      style: primary
+      start: 18
+      end: 41
+  const css = '.identity-card:hover{transform:scale(1.05)}':
+    labels:
+    - source: '''.identity-card:hover{transform:scale(1.05)}'''
+      style: primary
+      start: 12
+      end: 57
+  const css = `@media (hover:hover){.card:hover{transform:scale(${String(hoverScale)})}}`:
+    labels:
+    - source: '`@media (hover:hover){.card:hover{transform:scale(${String(hoverScale)})}}`'
+      style: primary
+      start: 12
+      end: 87

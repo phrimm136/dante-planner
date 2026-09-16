@@ -23,7 +23,7 @@ export function DifficultyIndicator({ difficulty, className }: DifficultyIndicat
   const color = DIFFICULTY_COLORS[difficulty]
 
   return (
-    <div className={cn('flex justify-center', className)}>
+    <div className={cn('h-6 flex items-center justify-center', className)}>
       <span className="text-sm font-semibold tracking-wide" style={{ color }}>
         {difficulty}
       </span>

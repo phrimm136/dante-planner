@@ -14,8 +14,6 @@ interface EGOCardLinkProps {
  * Navigation wrapper for EGOCard that links to the EGO detail page.
  * Use this when clicking the card should navigate to `/ego/$id`.
  *
- * Memoized by ego.id to prevent re-renders during list filtering.
- *
  * @example
  * // In a list view with navigation
  * <EGOCardLink ego={ego} />

@@ -1,8 +1,9 @@
 import { memo } from 'react'
 
 import type { EGOGiftId, EnhancementLevel } from '@/shared/gameData'
-import { CARD_GRID } from '@/lib/constants'
-import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
+import { CARD_MOBILE_SCALE } from '@/lib/constants'
+import { EGO_GIFT_GEOMETRY } from '../lib/cardLayout'
+import { CardSlot } from '@/shared/cardLayout'
 import type { EGOGiftListItem } from '../types/EGOGiftTypes'
 import { EGOGiftCard } from './EGOGiftCard'
 import { EGOGiftObservationCard } from './EGOGiftObservationCard'
@@ -64,10 +65,9 @@ function EGOGiftEnhancementCellImpl({
   onEnhancementSelect,
 }: EnhancementCellProps) {
   return (
-    <ScaledCardWrapper
-      cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
-      cardHeight={CARD_GRID.HEIGHT.EGO_GIFT}
-      mobileScale={CARD_GRID.MOBILE_SCALE.STANDARD}
+    <CardSlot
+      size={EGO_GIFT_GEOMETRY.size}
+      mobileScale={CARD_MOBILE_SCALE}
       className={isVisible ? '' : 'hidden'}
     >
       <EGOGiftSelectableCard
@@ -84,7 +84,7 @@ function EGOGiftEnhancementCellImpl({
           enableHoverHighlight
         />
       </EGOGiftSelectableCard>
-    </ScaledCardWrapper>
+    </CardSlot>
   )
 }
 
@@ -101,15 +101,14 @@ function EGOGiftObservationCellImpl({
   onSelect,
 }: ObservationCellProps) {
   return (
-    <ScaledCardWrapper
-      cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
-      cardHeight={CARD_GRID.HEIGHT.EGO_GIFT}
-      mobileScale={CARD_GRID.MOBILE_SCALE.STANDARD}
+    <CardSlot
+      size={EGO_GIFT_GEOMETRY.size}
+      mobileScale={CARD_MOBILE_SCALE}
       className={isVisible ? '' : 'hidden'}
     >
       <EGOGiftObservationCard giftId={gift.id} isSelected={isSelected} onSelect={onSelect}>
         <EGOGiftCard gift={gift} isSelected={isSelected} enableHoverHighlight />
       </EGOGiftObservationCard>
-    </ScaledCardWrapper>
+    </CardSlot>
   )
 }

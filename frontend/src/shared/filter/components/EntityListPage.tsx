@@ -13,7 +13,7 @@ interface EntityListPageProps {
  * Suspense boundary that covers initial spec loading.
  *
  * @example
- * <EntityListPage skeleton={<ListPageSkeleton preset="identity" />}>
+ * <EntityListPage skeleton={<ListPageSkeleton geometry={IDENTITY_GEOMETRY} />}>
  *   <IdentityPageShell />
  * </EntityListPage>
  */

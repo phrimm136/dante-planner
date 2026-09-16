@@ -1,5 +1,5 @@
 import { useIsBreakpoint } from '@/components/hooks/use-is-breakpoint'
-import { DETAIL_PAGE, SECTION_STYLES } from '@/lib/constants'
+import { LG_BREAKPOINT_PX, DETAIL_PAGE, SECTION_STYLES } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 
 interface DetailPageLayoutProps {
@@ -24,7 +24,7 @@ export function DetailPageLayout({
   rightColumn,
   mobileTabsContent,
 }: DetailPageLayoutProps) {
-  const isMobile = useIsBreakpoint('max', DETAIL_PAGE.BREAKPOINT_LG)
+  const isMobile = useIsBreakpoint('max', LG_BREAKPOINT_PX)
 
   if (isMobile) {
     // Mobile: Single column with Info at top, then tabs

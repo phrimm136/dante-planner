@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 import { cn } from '@/lib/utils'
 import { calculateActiveFilterCount } from '@/shared/filter'
-import { DETAIL_PAGE } from '@/lib/constants'
+import { LG_BREAKPOINT_PX } from '@/lib/constants'
 import { useIsBreakpoint } from '@/components/hooks/use-is-breakpoint'
 
 import { useDeckFilterState, useSetDeckFilterState } from '../../stores/usePlannerEditorStore'
@@ -242,7 +242,7 @@ export function DeckFilterBar() {
   const filterState = useDeckFilterState()
   const setFilterState = useSetDeckFilterState()
   const [isExpanded, setIsExpanded] = useState(false)
-  const isDesktop = useIsBreakpoint('min', DETAIL_PAGE.BREAKPOINT_LG)
+  const isDesktop = useIsBreakpoint('min', LG_BREAKPOINT_PX)
 
   const activeFilterCount = calculateActiveFilterCount(
     ...FILTER_SET_KEYS.map((key) => filterState[key]),

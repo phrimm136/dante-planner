@@ -4,11 +4,11 @@ import type { EGOListItem, EGOFacetState } from '@/pages/ego'
 import type { EgoType } from '@/shared/gameData'
 import { typedEntries } from '@/lib/utils'
 import { SearchBar } from '@/shared/filter'
-import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
-import type { Season, SkillAttributeType, AtkType } from '@/shared/gameData'
+import { EGOListSkeleton } from './components/EGOListSkeleton'
 import { calculateActiveFilterCount } from '@/shared/filter'
-import { useSetFilters } from '@/components/hooks/useSetFilters'
-import type { FilterStore } from '@/components/hooks/useSetFilters'
+import { useFilterStore } from '@/components/hooks/filterStore'
+import type { FilterStore } from '@/components/hooks/filterStore'
+import { egoFilterStore } from './stores/egoFilterStore'
 import { FilterSectionList, filterSection } from '@/shared/filter'
 import { SinnerFilter } from '@/shared/filter'
 import { KeywordFilter } from '@/shared/filter'
@@ -74,15 +74,7 @@ function EGOPageShell() {
     setSearchQuery,
     resetAll,
     store,
-  } = useSetFilters({
-    selectedSinners: new Set<string>(),
-    selectedKeywords: new Set<string>(),
-    selectedBattleKeywords: new Set<string>(),
-    selectedAttributes: new Set<SkillAttributeType>(),
-    selectedAtkTypes: new Set<AtkType>(),
-    selectedEGOTypes: new Set<EgoType>(),
-    selectedSeasons: new Set<Season>(),
-  })
+  } = useFilterStore(egoFilterStore)
 
   // Calculate active filter count for mobile badge
   const activeFilterCount = calculateActiveFilterCount(...Object.values(filters))
@@ -183,13 +175,13 @@ function EGOPageShell() {
  * Title and description remain visible during loading via Suspense boundary.
  *
  * Suspense Strategy:
- * - Outer Suspense: ListPageSkeleton for spec loading (initial)
+ * - Outer Suspense: EGOListSkeleton for spec loading (initial)
  * - Season dropdown: Own Suspense for dropdown i18n
  * - EGOList: name lookups suspend at the card name, not the grid
  */
 export default function EGOPage() {
   return (
-    <EntityListPage skeleton={<ListPageSkeleton preset="ego" />}>
+    <EntityListPage skeleton={<EGOListSkeleton />}>
       <EGOPageShell />
     </EntityListPage>
   )

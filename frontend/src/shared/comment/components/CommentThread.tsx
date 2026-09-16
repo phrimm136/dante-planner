@@ -8,7 +8,7 @@
  */
 
 import { cn } from '@/lib/utils'
-import { COMMENT_MAX_VISUAL_DEPTH_MOBILE, COMMENT_MAX_VISUAL_DEPTH_DESKTOP } from '@/lib/constants'
+import { COMMENT_MAX_VISUAL_DEPTH_DESKTOP, COMMENT_MAX_VISUAL_DEPTH_MOBILE } from '@/lib/constants'
 import { CommentCard } from './CommentCard'
 
 import type { CommentNode } from '../types/CommentTypes'

@@ -92,7 +92,9 @@ vi.mock('@/pages/identity/components/IdentityInfoPane', async (importOriginal) =
 vi.mock('@/pages/identity/components/IdentityPassivesPane', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../components/IdentityPassivesPane')>()
   const { countRenders } = await import('@/test-utils/renderCounter')
-  return { IdentityPassivesPane: countRenders('IdentityPassivesPane', actual.IdentityPassivesPane) }
+  return {
+    IdentityPassivesPane: countRenders('IdentityPassivesPane', actual.IdentityPassivesPane),
+  }
 })
 
 vi.mock('@/pages/identity/components/IdentitySanityPane', async (importOriginal) => {

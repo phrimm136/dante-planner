@@ -4,7 +4,7 @@
  */
 
 import { Skeleton } from '@/components/ui/skeleton'
-import { STAGGER_STEP_MS, SECTION_STYLES } from '@/lib/constants'
+import { SECTION_STYLES, STAGGER_STEP_MS } from '@/lib/constants'
 import { staggerDelay } from '@/lib/stagger'
 
 import { PlannerSection } from '@/components/layout/PlannerSection'

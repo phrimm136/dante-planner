@@ -13,6 +13,7 @@ import { PublishedPlannerList } from './components/plannerList/PublishedPlannerL
 import { MDPlannerToolbar } from './components/plannerList/MDPlannerToolbar'
 import { PlannerListFilterPills } from './components/plannerList/PlannerListFilterPills'
 import { PlannerGridSkeleton } from '@/components/feedback/ListPageSkeleton'
+import { PLANNER_GEOMETRY } from './lib/cardLayout'
 import { CommunityPlansErrorFallback } from '@/components/feedback/CommunityPlansErrorFallback'
 import { usePublishedPlannerQuery, isPlannerRemoved } from './hooks/usePublishedPlannerQuery'
 import { isMDPlanner } from './types/PlannerTypes'
@@ -174,7 +175,7 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
 
         {/* Planner List Grid */}
         <ReactErrorBoundary FallbackComponent={CommunityPlansErrorFallback}>
-          <Suspense fallback={<PlannerGridSkeleton />}>
+          <Suspense fallback={<PlannerGridSkeleton geometry={PLANNER_GEOMETRY} />}>
             <PublishedPlannerList
               filters={{
                 ...filters,

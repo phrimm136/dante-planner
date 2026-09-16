@@ -2,11 +2,11 @@ import { useTranslation } from 'react-i18next'
 import { useIdentityListSpec, IdentityList } from '@/pages/identity'
 import type { IdentityListItem, IdentitySpecListSchema, IdentityFacetState } from '@/pages/identity'
 import type { z } from 'zod'
-import type { Season, SkillAttributeType, AtkType, DefType } from '@/shared/gameData'
 import { typedEntries } from '@/lib/utils'
 import { calculateActiveFilterCount } from '@/shared/filter'
-import { useSetFilters } from '@/components/hooks/useSetFilters'
-import type { FilterStore } from '@/components/hooks/useSetFilters'
+import { useFilterStore } from '@/components/hooks/filterStore'
+import type { FilterStore } from '@/components/hooks/filterStore'
+import { identityFilterStore } from './stores/identityFilterStore'
 import { EntityListPage } from '@/shared/filter'
 import { FilterPageLayout } from '@/shared/filter'
 import { FilterSectionList, filterSection } from '@/shared/filter'
@@ -21,6 +21,7 @@ import { UnitKeywordDropdown } from '@/shared/filter'
 import { BattleKeywordDropdown } from '@/shared/filter'
 import { SearchBar } from '@/shared/filter'
 import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
+import { IDENTITY_GEOMETRY } from './lib/cardLayout'
 import { buildFacetCounts } from './lib/identityFacetCounts'
 
 /**
@@ -68,17 +69,7 @@ function IdentityPageShell() {
     setSearchQuery,
     resetAll,
     store,
-  } = useSetFilters({
-    selectedSinners: new Set<string>(),
-    selectedKeywords: new Set<string>(),
-    selectedBattleKeywords: new Set<string>(),
-    selectedAttributes: new Set<SkillAttributeType>(),
-    selectedAtkTypes: new Set<AtkType>(),
-    selectedDefTypes: new Set<DefType>(),
-    selectedRaritys: new Set<number>(),
-    selectedSeasons: new Set<Season>(),
-    selectedUnitKeywords: new Set<string>(),
-  })
+  } = useFilterStore(identityFilterStore)
 
   // Calculate active filter count for mobile badge
   const activeFilterCount = calculateActiveFilterCount(...Object.values(filters))
@@ -198,7 +189,7 @@ function IdentityPageShell() {
  */
 export default function IdentityPage() {
   return (
-    <EntityListPage skeleton={<ListPageSkeleton preset="identity" />}>
+    <EntityListPage skeleton={<ListPageSkeleton geometry={IDENTITY_GEOMETRY} />}>
       <IdentityPageShell />
     </EntityListPage>
   )

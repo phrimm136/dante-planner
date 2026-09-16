@@ -2,14 +2,15 @@ import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { decodeAndOrderGiftSelections } from '@/pages/egoGift'
-import { EMPTY_STATE, CARD_GRID } from '@/lib/constants'
+import { CARD_MOBILE_SCALE, EMPTY_STATE } from '@/lib/constants'
+import { EGO_GIFT_GEOMETRY } from '@/pages/egoGift'
 import { cn } from '@/lib/utils'
 import type { EGOGiftListItem } from '@/pages/egoGift'
 import type { EncodedGiftId, EnhancementLevel } from '@/shared/gameData'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import { PlannerSection } from '@/components/layout/PlannerSection'
-import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
+import { CardSlot } from '@/shared/cardLayout'
 import { EGOGiftCard } from '@/pages/egoGift'
 import { EGOGiftTooltip } from '@/pages/egoGift'
 
@@ -45,17 +46,13 @@ function SummaryGiftItemImpl({
   mobileScale,
 }: DecodedGift & { mobileScale: number }) {
   return (
-    <ScaledCardWrapper
-      cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
-      cardHeight={CARD_GRID.HEIGHT.EGO_GIFT}
-      mobileScale={mobileScale}
-    >
+    <CardSlot size={EGO_GIFT_GEOMETRY.size} mobileScale={mobileScale}>
       <EGOGiftTooltip giftId={item.id} enhancement={enhancement}>
-        <div>
+        <div className="w-full">
           <EGOGiftCard gift={item} enhancement={enhancement} />
         </div>
       </EGOGiftTooltip>
-    </ScaledCardWrapper>
+    </CardSlot>
   )
 }
 
@@ -73,7 +70,7 @@ export function ComprehensiveGiftSummary({
   const spec = useEGOGiftListSpec()
   const i18n = useEGOGiftListI18n()
 
-  const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
+  const mobileScale = CARD_MOBILE_SCALE
 
   const selectedGifts = decodeAndOrderGiftSelections(selectedGiftIds, spec, i18n, 'tier-first')
 

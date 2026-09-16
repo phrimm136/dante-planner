@@ -1,10 +1,12 @@
 // Public API of the ego entity. Import from '@/pages/ego', not internal paths.
 
 export { EGOList } from './components/EGOList'
+export { EGO_GEOMETRY } from './lib/cardLayout'
 export { EGOCard } from './components/EGOCard'
 export { EGODetailSkeleton } from './components/EGODetailSkeleton'
 export { EGOFilterDropdown } from './components/EGOFilterDropdown'
 export { EGOHeader } from './components/EGOHeader'
+export { EGOSelectedTag } from './components/EGOSelectedTag'
 export { EGOHeaderWithI18n } from './components/EGOHeaderI18n'
 export { SinCostPanel } from './components/SinCostPanel'
 export { SinResistancePanel } from './components/SinResistancePanel'

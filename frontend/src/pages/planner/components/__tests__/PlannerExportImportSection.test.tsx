@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event'
 import { gzip } from 'pako'
 
 import { buildSaveablePlanner } from '@/test-utils/fixtures'
-import { EXPORT_VERSION, EXPORT_FILE_EXTENSION } from '@/lib/constants'
+import { EXPORT_FILE_EXTENSION, EXPORT_VERSION } from '@/lib/constants'
 import { GZIP_OS_BYTE_OFFSET, GZIP_OS_TOPS20 } from '../../lib/deckCode'
 
 import type { SaveablePlanner } from '../../types/PlannerTypes'

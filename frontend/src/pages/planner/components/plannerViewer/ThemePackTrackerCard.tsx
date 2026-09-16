@@ -16,6 +16,8 @@ interface ThemePackTrackerCardProps {
   noteContent: NoteContent
   isDone: boolean
   onToggleDone: () => void
+  /** The share of the desktop width the card takes below the desktop breakpoint */
+  mobileScale: number
   isFocused?: boolean
   onFocusToggle?: () => void
   onHoverChange?: (hovering: boolean) => void
@@ -32,6 +34,7 @@ export function ThemePackTrackerCard({
   floorNumber,
   noteContent,
   isDone,
+  mobileScale,
   isFocused = false,
   onFocusToggle,
   onToggleDone,
@@ -65,6 +68,7 @@ export function ThemePackTrackerCard({
           enableHoverHighlight
           isSelected={isFocused}
           readOnly
+          mobileScale={mobileScale}
           className={cn(isDone && 'brightness-50')}
         />
         <button

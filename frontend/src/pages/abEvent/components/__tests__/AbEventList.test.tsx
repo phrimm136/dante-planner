@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { render, screen, act } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Suspense } from 'react'
 import { AbEventList } from '../AbEventList'
@@ -82,7 +82,7 @@ function createWrapper() {
 }
 
 function renderList(store: ReturnType<typeof makeStore>) {
-  const { container } = render(<AbEventList spec={SPEC} store={store} />, {
+  const { container } = renderRevealed(<AbEventList spec={SPEC} store={store} />, {
     wrapper: createWrapper(),
   })
   return {
@@ -90,6 +90,23 @@ function renderList(store: ReturnType<typeof makeStore>) {
     hidden: container.querySelectorAll('div.hidden > a').length,
   }
 }
+
+// The grid's reveal window opens on the first animation frame; every slot is empty before it.
+function renderRevealed(...args: Parameters<typeof render>) {
+  const result = render(...args)
+  act(() => {
+    vi.advanceTimersToNextFrame()
+  })
+  return result
+}
+
+beforeEach(() => {
+  vi.useFakeTimers()
+})
+
+afterEach(() => {
+  vi.useRealTimers()
+})
 
 describe('AbEventList', () => {
   beforeEach(() => {

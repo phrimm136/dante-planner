@@ -1,17 +1,19 @@
 import { memo, type Ref } from 'react'
 
 import { MAX_LEVEL } from '@/shared/gameData'
-import { CARD_GRID } from '@/lib/constants'
-import { getSelectedIndicatorPath } from '@/shared/assets'
+import { CARD_MOBILE_SCALE } from '@/lib/constants'
+import { IDENTITY_GEOMETRY } from '@/pages/identity'
+import { getFormationBadgePath } from '@/shared/assets'
 import { useDeckVisibleCount } from '../../stores/usePlannerEditorStore'
 import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
-import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
+import { CardSlot } from '@/shared/cardLayout'
 import { IdentityCard } from '@/pages/identity'
 import { IdentityTierSelector } from './EntityTierSelectors'
 import type { IdentityListItem } from '@/pages/identity'
 import type { UptieTier } from '../../types/DeckTypes'
 import type { IdentityId } from '@/shared/gameData'
 
+/** The identity box with its height left to the card. */
 interface IdentityGridProps {
   sortedIdentities: IdentityListItem[]
   visibleIds: Set<string>
@@ -51,12 +53,7 @@ export function IdentityGrid({
         className="bg-muted border border-border rounded-md p-3 lg:p-6 max-h-[600px] overflow-y-auto"
       >
         <div className="pt-4">
-          <ResponsiveCardGrid
-            cardWidth={CARD_GRID.WIDTH.IDENTITY}
-            cardHeight={CARD_GRID.HEIGHT.IDENTITY}
-            mobileScale={0.8}
-            gap={8}
-          >
+          <ResponsiveCardGrid size={IDENTITY_GEOMETRY.size} mobileScale={CARD_MOBILE_SCALE} gap={8}>
             {displayIdentities.map((identity) => (
               <IdentityGridCard
                 key={identity.id}
@@ -101,25 +98,21 @@ const IdentityGridCard = memo(function IdentityGridCard({
         currentLevel={MAX_LEVEL}
         onConfirm={onEquip}
       >
-        <ScaledCardWrapper
-          mobileScale={0.8}
-          cardWidth={CARD_GRID.WIDTH.IDENTITY}
-          cardHeight={CARD_GRID.HEIGHT.IDENTITY}
-        >
+        <CardSlot size={IDENTITY_GEOMETRY.size}>
           <IdentityCard
             identity={identity}
             isSelected={isSelected}
             overlay={
               isSelected ? (
                 <img
-                  src={getSelectedIndicatorPath()}
+                  src={getFormationBadgePath('selected')}
                   alt="Selected"
                   className="absolute inset-0 m-auto w-38 object-contain pointer-events-none"
                 />
               ) : undefined
             }
           />
-        </ScaledCardWrapper>
+        </CardSlot>
       </IdentityTierSelector>
     </div>
   )

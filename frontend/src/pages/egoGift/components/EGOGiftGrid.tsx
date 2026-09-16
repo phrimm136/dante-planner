@@ -2,14 +2,17 @@ import { Suspense } from 'react'
 import { Link } from '@tanstack/react-router'
 
 import { Skeleton } from '@/components/ui/skeleton'
-import { SECTION_STYLES } from '@/lib/constants'
+import { CARD_MOBILE_SCALE_NONE, SECTION_STYLES } from '@/lib/constants'
+import { EGO_GIFT_GEOMETRY } from '../lib/cardLayout'
+import { CardSlot } from '@/shared/cardLayout'
 
 import { toEGOGiftCardProps } from '../lib/egoGiftCardProps'
 import type { EGOGiftSpec } from '../types/EGOGiftTypes'
 import { EGOGiftCard } from './EGOGiftCard'
 import { EGOGiftName } from './EGOGiftName'
 
-const NAME_CLASS = 'text-xs text-center text-foreground line-clamp-2 w-24 leading-tight font-medium'
+const NAME_CLASS =
+  'text-xs text-center text-foreground line-clamp-2 w-full leading-tight font-medium'
 
 interface EGOGiftGridProps {
   /** Gift ids in render order; ids missing from `spec` are skipped. */
@@ -34,7 +37,11 @@ export function EGOGiftGrid({
         const giftSpec = spec[id]
         if (!giftSpec) return null
 
-        const card = <EGOGiftCard gift={toEGOGiftCardProps(id, giftSpec)} enableHoverHighlight />
+        const card = (
+          <CardSlot size={EGO_GIFT_GEOMETRY.size} mobileScale={CARD_MOBILE_SCALE_NONE}>
+            <EGOGiftCard gift={toEGOGiftCardProps(id, giftSpec)} enableHoverHighlight />
+          </CardSlot>
+        )
 
         return (
           <Link key={id} to="/ego-gift/$id" params={{ id }}>
@@ -42,7 +49,7 @@ export function EGOGiftGrid({
               <div className="flex flex-col items-center gap-1">
                 {card}
                 <span className={NAME_CLASS}>
-                  <Suspense fallback={<Skeleton className="h-5 w-24 bg-foreground" />}>
+                  <Suspense fallback={<Skeleton className="h-5 w-full bg-foreground" />}>
                     <EGOGiftName id={id} />
                   </Suspense>
                 </span>

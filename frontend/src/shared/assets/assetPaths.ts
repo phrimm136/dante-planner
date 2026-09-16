@@ -31,17 +31,31 @@ const camelEnum = (enumValue: string): string =>
  * splices the expression into `"" + expr`, which reassociates anything containing an operator.
  */
 export const PATHS = {
-  selectedIndicator: () => resolveAsset('/images/UI/card/common/indicator-selected.webp'),
-  identityFrameHighlight: () => resolveAsset('/images/UI/card/identity/legacy/hoverRing.webp'),
-  egoFrame: () => resolveAsset('/images/UI/card/ego/legacy/frame.webp'),
-  egoFrameHighlight: () => resolveAsset('/images/UI/card/ego/legacy/hoverRing.webp'),
-  backupIndicator: () => resolveAsset('/images/UI/card/common/indicator-backup.webp'),
+  formationBadge: (state: string) => resolveAsset(`/images/UI/card/identity/deploy-${state}.webp`),
+  identityMask: () => resolveAsset('/images/UI/card/identity/mask.webp'),
+  egoCardFrame: () => resolveAsset('/images/UI/card/ego/frame.webp'),
+  egoHoverRing: () => resolveAsset('/images/UI/card/ego/hoverRing.webp'),
+  egoMask: () => resolveAsset('/images/UI/card/ego/mask.webp'),
   uptieFrame: (rank: number, uptie: number) =>
     resolveAsset(`/images/UI/card/identity/frame-rank${String(rank)}-uptie${String(uptie)}.webp`),
-  sinnerBG: (rank: number) =>
-    resolveAsset(`/images/UI/card/identity/legacy/iconRing-rank${String(rank)}.webp`),
-  egoInfoPanel: (attribute: string) =>
-    resolveAsset(`/images/UI/card/ego/nameBg-${attribute.toLowerCase()}.webp`),
+  identityHoverRing: (rank: number, uptie: number) =>
+    resolveAsset(
+      `/images/UI/card/identity/hoverRing-rank${String(rank)}-uptie${String(uptie)}.webp`,
+    ),
+  sinnerIconRing: (rank: number) =>
+    resolveAsset(`/images/UI/card/identity/iconRing-rank${String(rank)}.webp`),
+  identityGrade: (rank: number) =>
+    resolveAsset(`/images/UI/card/identity/grade-rank${String(rank)}.webp`),
+  egoIconRing: () => resolveAsset('/images/UI/card/ego/iconRing.webp'),
+  sinnerFace: (sinner: string) => resolveAsset(`/images/UI/card/identity/face-${sinner}.webp`),
+  egoCardGrade: (grade: string) =>
+    resolveAsset(`/images/UI/card/ego/grade-${grade.toLowerCase()}.webp`),
+  egoCardThreadspin: (level: number) =>
+    resolveAsset(`/images/UI/card/ego/threadspin-${String(level)}.webp`),
+  egoNameBg: (attribute: string) =>
+    attribute.length === 0
+      ? resolveAsset('/images/UI/card/ego/nameBg.webp')
+      : resolveAsset(`/images/UI/card/ego/nameBg-${attribute.toLowerCase()}.webp`),
 
   identityInfoImage: (identityId: string, uptie: number) =>
     uptie < 3 || identityId.endsWith('01')
@@ -159,7 +173,7 @@ export const PATHS = {
     level === 0
       ? resolveAsset(`/images/UI/startBuff/md${String(version)}/enhancement-unselected.webp`)
       : resolveAsset(
-          `/images/UI/startBuff/md${String(version)}/enhancement-selected-${String(level)}.webp`
+          `/images/UI/startBuff/md${String(version)}/enhancement-selected-${String(level)}.webp`,
         ),
   startBuffEnhancementOverlay: (version: number) =>
     resolveAsset(`/images/UI/startBuff/md${String(version)}/enhancement-selected.webp`),
@@ -170,10 +184,9 @@ export const PATHS = {
   startBuffStarLight: () => resolveAsset('/images/UI/startBuff/starLight.webp'),
 
   themePackImage: (packId: string) => resolveAsset(`/images/themePack/${packId}.webp`),
-  themePackHoverHighlight: () => resolveAsset('/images/UI/card/themePack/legacy/hover.webp'),
-  themePackSelectHighlight: () => resolveAsset('/images/UI/card/themePack/legacy/focused.webp'),
-  themePackExtremeHighlight: () =>
-    resolveAsset('/images/UI/card/themePack/legacy/hover-extreme.webp'),
+  themePackHover: () => resolveAsset('/images/UI/card/themePack/hover.webp'),
+  themePackFocused: () => resolveAsset('/images/UI/card/themePack/focused.webp'),
+  themePackHoverExtreme: () => resolveAsset('/images/UI/card/themePack/hover-extreme.webp'),
   featuredBossImage: (packId: string, portraitId: number | string) =>
     resolveAsset(`/images/featuredBoss/${packId}_${portraitId}.webp`),
 
@@ -190,14 +203,20 @@ export function path<K extends PathKey>(key: K, ...args: Parameters<PathTable[K]
   return build(...args)
 }
 
-export const getSelectedIndicatorPath = (): string => path('selectedIndicator')
-export const getIdentityFrameHighlightPath = (): string => path('identityFrameHighlight')
-export const getEGOFramePath = (): string => path('egoFrame')
-export const getEGOFrameHighlightPath = (): string => path('egoFrameHighlight')
-export const getBackupIndicatorPath = (): string => path('backupIndicator')
-export const getUptieFramePath = (rank: number, uptie = 4): string => path('uptieFrame', rank, uptie)
-export const getSinnerBGPath = (rank: number): string => path('sinnerBG', rank)
-export const getEGOInfoPanelPath = (attribute: string): string => path('egoInfoPanel', attribute)
+export const getFormationBadgePath = (state: string): string => path('formationBadge', state)
+export const getIdentityMaskPath = (): string => path('identityMask')
+export const getEGOCardFramePath = (): string => path('egoCardFrame')
+export const getEGOHoverRingPath = (): string => path('egoHoverRing')
+export const getEGOMaskPath = (): string => path('egoMask')
+export const getUptieFramePath = (rank: number, uptie = 4): string =>
+  path('uptieFrame', rank, uptie)
+export const getIdentityHoverRingPath = (rank: number, uptie = 4): string =>
+  path('identityHoverRing', rank, uptie)
+export const getSinnerIconRingPath = (rank: number): string => path('sinnerIconRing', rank)
+export const getIdentityGradePath = (rank: number): string => path('identityGrade', rank)
+export const getEGOIconRingPath = (): string => path('egoIconRing')
+export const getSinnerFacePath = (sinner: string): string => path('sinnerFace', sinner)
+export const getEGONameBgPath = (attribute = ''): string => path('egoNameBg', attribute)
 
 export const getIdentityInfoImagePath = (identityId: string, identityUptie = 4): string =>
   path('identityInfoImage', identityId, identityUptie)
@@ -207,7 +226,7 @@ export const getIdentityImageFallbackPath = (identityId: string): string =>
   path('identityFallbackImage', identityId)
 export const getIdentityDetailImagePath = (
   identityId: string,
-  variant: 'gacksung' | 'normal' = 'gacksung'
+  variant: 'gacksung' | 'normal' = 'gacksung',
 ): string => path('identityDetailImage', identityId, variant)
 export const getSkillImagePath = (identityId: string, skillId: string): string =>
   path('skillImage', identityId, skillId)
@@ -216,11 +235,11 @@ export const getSkillImagePathFromIconID = (iconID: string): string =>
 
 export const getSkillFramePath = (
   attributeType: SkillAttributeType | undefined,
-  skillTier: number
+  skillTier: number,
 ): string => path('skillFrame', attributeType, skillTier)
 export const getSkillFrameBGPath = (
   attributeType: SkillAttributeType | undefined,
-  skillTier: number
+  skillTier: number,
 ): string => path('skillFrameBG', attributeType, skillTier)
 export const getAttackTypeFramePath = (attributeType: SkillAttributeType): string =>
   path('attackTypeFrame', attributeType)
@@ -264,12 +283,14 @@ export const getPanicIconPath = (panicType: string): string => path('panicIcon',
 export const getEGOImagePath = (egoId: string): string => path('egoCg', egoId, 'awaken')
 export const getEGODetailImagePath = (
   egoId: string,
-  variant: 'awaken' | 'erosion' = 'awaken'
+  variant: 'awaken' | 'erosion' = 'awaken',
 ): string => path('egoCg', egoId, variant)
 export const getEGOProfileImagePath = (egoId: string): string => path('egoProfileImage', egoId)
 export const getEGOSkillImagePath = (egoId: string, skillType: 'awaken' | 'erosion'): string =>
   path('egoSkillImage', egoId, skillType)
 export const getEGORankIconPath = (rank: string): string => path('egoRankIcon', rank)
+export const getEGOCardGradePath = (grade: string): string => path('egoCardGrade', grade)
+export const getEGOCardThreadspinPath = (level: number): string => path('egoCardThreadspin', level)
 
 export const getEGOGiftEnhancementIconPath = (level: number): string =>
   path('egoGiftEnhancementIcon', level)
@@ -298,9 +319,9 @@ export const getStartBuffEnhancementIconPath = (level: 0 | 1 | 2): string =>
 export const getStartBuffStarLightPath = (): string => path('startBuffStarLight')
 
 export const getThemePackImagePath = (packId: string): string => path('themePackImage', packId)
-export const getThemePackHoverHighlightPath = (): string => path('themePackHoverHighlight')
-export const getThemePackSelectHighlightPath = (): string => path('themePackSelectHighlight')
-export const getThemePackExtremeHighlightPath = (): string => path('themePackExtremeHighlight')
+export const getThemePackHoverPath = (): string => path('themePackHover')
+export const getThemePackFocusedPath = (): string => path('themePackFocused')
+export const getThemePackHoverExtremePath = (): string => path('themePackHoverExtreme')
 export const getFeaturedBossImagePath = (packId: string, portraitId: number | string): string =>
   path('featuredBossImage', packId, portraitId)
 
