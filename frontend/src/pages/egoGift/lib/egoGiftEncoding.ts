@@ -1,4 +1,4 @@
-import { GIFT_ID_PATTERN, EGOGiftIdSchema, EncodedGiftIdSchema } from '@/shared/gameData'
+import { GIFT_ID_LENGTH, EGOGiftIdSchema, EncodedGiftIdSchema } from '@/shared/gameData'
 import type { EGOGiftId, EncodedGiftId } from '@/shared/gameData'
 import type { EnhancementLevel } from '@/shared/gameData'
 import type { EGOGiftRecipe, EGOGiftEntity, EGOGiftSpec } from '@/pages/egoGift'
@@ -27,11 +27,6 @@ export function encodeGiftSelection(
 }
 
 /**
- * Encoded selection: an optional enhancement digit followed by the gift base id.
- */
-export const ENCODED_SELECTION_PATTERN = new RegExp(`^([12])?(${GIFT_ID_PATTERN})$`)
-
-/**
  * A decoded gift selection
  */
 export interface GiftSelection {
@@ -40,23 +35,17 @@ export interface GiftSelection {
 }
 
 /**
- * Decodes an encoded gift selection string into enhancement level and gift ID
+ * Decodes an encoded gift selection into enhancement level and gift ID
  * Handles both enhanced (19001) and base (9001) formats
  *
- * @param encodedId - Encoded gift selection string
- * @returns Decoded selection, or null when the string is not a valid encoding
+ * @param encodedId - Encoded gift selection
+ * @returns Decoded selection
  */
-export function decodeGiftSelection(encodedId: string): GiftSelection | null {
-  const match = encodedId.match(ENCODED_SELECTION_PATTERN)
-  if (!match) return null
-
-  const [, enhancementDigit, giftId] = match
-  if (giftId === undefined) return null
-
-  return {
-    enhancement: enhancementDigit ? (Number(enhancementDigit) as EnhancementLevel) : 0,
-    giftId: EGOGiftIdSchema.parse(giftId),
-  }
+export function decodeGiftSelection(encodedId: EncodedGiftId): GiftSelection {
+  const giftId = EGOGiftIdSchema.parse(encodedId.slice(-GIFT_ID_LENGTH))
+  const enhancement =
+    encodedId.length === GIFT_ID_LENGTH ? 0 : (Number(encodedId[0]) as EnhancementLevel)
+  return { enhancement, giftId }
 }
 
 /**
@@ -67,9 +56,7 @@ export function decodeGiftSelection(encodedId: string): GiftSelection | null {
  * @returns Base gift ID
  */
 export function getBaseGiftId(encodedId: EncodedGiftId): EGOGiftId {
-  const decoded = decodeGiftSelection(encodedId)
-  if (!decoded) throw new Error(`Encoded gift id failed to decode: ${encodedId}`)
-  return decoded.giftId
+  return decodeGiftSelection(encodedId).giftId
 }
 
 /**
@@ -118,7 +105,6 @@ export function buildSelectionLookup(
   const map = new Map<EGOGiftId, GiftSelectionEntry>()
   for (const encodedId of selectedIds) {
     const decoded = decodeGiftSelection(encodedId)
-    if (!decoded) continue
     map.set(decoded.giftId, { encodedId, enhancement: decoded.enhancement })
   }
   return map
@@ -153,10 +139,7 @@ export function decodeGiftSelections(
   const decoded: DecodedGiftSelection[] = []
 
   for (const encodedId of encodedIds) {
-    const selection = decodeGiftSelection(encodedId)
-    if (!selection) continue
-
-    const { giftId, enhancement } = selection
+    const { giftId, enhancement } = decodeGiftSelection(encodedId)
     const giftSpec = spec[giftId]
     if (!giftSpec) continue
 

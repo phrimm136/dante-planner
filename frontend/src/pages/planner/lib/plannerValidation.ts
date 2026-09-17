@@ -14,6 +14,7 @@ import {
   DUNGEON_NAME_BY_IDX,
   PLANNER_KEYWORDS,
   migrateKeywords,
+  EncodedGiftIdSchema,
 } from '@/shared/gameData'
 import { MAX_NOTE_BYTES } from '@/lib/constants'
 import { decodeGiftSelection, giftDisplayName, hasGiftId } from '@/pages/egoGift'
@@ -333,8 +334,8 @@ export function validateGiftIdArray(
     seen.add(giftId)
 
     if (egoGiftSpec) {
-      const decoded = decodeGiftSelection(giftId)
-      if (!decoded || !(decoded.giftId in egoGiftSpec)) {
+      const parsed = EncodedGiftIdSchema.safeParse(giftId)
+      if (!parsed.success || !(decodeGiftSelection(parsed.data).giftId in egoGiftSpec)) {
         errors.push({
           code: 'GIFT_UNKNOWN_ID',
           message: `Gift ID '${giftId}' not found in ${fieldName}`,

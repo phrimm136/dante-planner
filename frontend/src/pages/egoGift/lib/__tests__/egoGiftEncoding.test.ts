@@ -13,7 +13,6 @@ import {
   findEncodedGiftId,
   buildSelectionLookup,
   getCascadeIngredients,
-  ENCODED_SELECTION_PATTERN,
 } from '../egoGiftEncoding'
 import type { EGOGiftRecipe } from '@/pages/egoGift'
 import { EGOGiftRecipeSchema } from '@/pages/egoGift'
@@ -47,30 +46,16 @@ describe('encodeGiftSelection', () => {
 
 describe('decodeGiftSelection', () => {
   it('decodes 4-digit ID as enhancement 0', () => {
-    const result = decodeGiftSelection('9001')
-    expect(result).toEqual({ enhancement: 0, giftId: '9001' })
+    expect(decodeGiftSelection(ENCODED_9001)).toEqual({ enhancement: 0, giftId: '9001' })
   })
 
   it('decodes 5-digit ID starting with 1 as enhancement 1', () => {
-    const result = decodeGiftSelection('19001')
-    expect(result).toEqual({ enhancement: 1, giftId: '9001' })
+    expect(decodeGiftSelection(ENCODED_19001)).toEqual({ enhancement: 1, giftId: '9001' })
   })
 
   it('decodes 5-digit ID starting with 2 as enhancement 2', () => {
-    const result = decodeGiftSelection('29001')
-    expect(result).toEqual({ enhancement: 2, giftId: '9001' })
+    expect(decodeGiftSelection(ENCODED_29001)).toEqual({ enhancement: 2, giftId: '9001' })
   })
-
-  it('rejects an unsupported enhancement prefix', () => {
-    expect(decodeGiftSelection('39001')).toBeNull()
-  })
-
-  it.each(['', '900', '900a', '90011', 'gift1', ' 9001', '9001 ', '-9001'])(
-    'rejects the malformed encoding %j',
-    (encodedId) => {
-      expect(decodeGiftSelection(encodedId)).toBeNull()
-    },
-  )
 })
 
 describe('getBaseGiftId', () => {
@@ -81,10 +66,6 @@ describe('getBaseGiftId', () => {
   it('extracts giftId from enhanced selection', () => {
     expect(getBaseGiftId(ENCODED_19001)).toBe('9001')
     expect(getBaseGiftId(ENCODED_29001)).toBe('9001')
-  })
-
-  it('has no base id for a malformed encoding', () => {
-    expect(decodeGiftSelection('39001')).toBeNull()
   })
 })
 
@@ -228,12 +209,10 @@ describe('getCascadeIngredients', () => {
   })
 })
 
-describe('ENCODED_SELECTION_PATTERN vs EncodedGiftIdSchema', () => {
-  // A superset of the schema's current domain: every optional single-digit prefix
-  // against every four-digit body. The assertions below quantify over what the
-  // schema accepts rather than over a hardcoded list, so widening EncodedGiftIdSchema
-  // beyond what the decoder pattern matches fails here instead of stranding the
-  // new ids as undecodable.
+describe('decodeGiftSelection over the EncodedGiftIdSchema domain', () => {
+  // Every optional single-digit prefix against every four-digit body, filtered to
+  // what the schema accepts, so widening EncodedGiftIdSchema past what the decoder
+  // handles fails here instead of stranding the new ids.
   function candidateIds(): string[] {
     const ids: string[] = []
     for (const prefix of ['', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']) {
@@ -244,24 +223,17 @@ describe('ENCODED_SELECTION_PATTERN vs EncodedGiftIdSchema', () => {
     return ids
   }
 
-  const candidates = candidateIds()
-  const accepted = candidates.filter((id) => EncodedGiftIdSchema.safeParse(id).success)
+  const accepted = candidateIds().flatMap((id) => {
+    const parsed = EncodedGiftIdSchema.safeParse(id)
+    return parsed.success ? [parsed.data] : []
+  })
 
-  it('spans a superset of what the schema accepts', () => {
-    expect(candidates).toHaveLength(110000)
+  it('round-trips every schema-valid gift id', () => {
     // '9000'-'9999', plus the same bodies behind each of the two permitted prefixes.
     expect(accepted).toHaveLength(3000)
-  })
-
-  it('accepts every string EncodedGiftIdSchema accepts', () => {
-    const undecodable = accepted.filter((id) => !ENCODED_SELECTION_PATTERN.test(id))
-    expect(undecodable).toEqual([])
-  })
-
-  it('decodes every schema-valid gift id back to its base id', () => {
     const roundTripFailures = accepted.filter((id) => {
       const decoded = decodeGiftSelection(id)
-      return decoded === null || encodeGiftSelection(decoded.enhancement, decoded.giftId) !== id
+      return encodeGiftSelection(decoded.enhancement, decoded.giftId) !== id
     })
     expect(roundTripFailures).toEqual([])
   })

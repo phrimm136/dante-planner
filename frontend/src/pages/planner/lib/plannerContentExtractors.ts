@@ -13,6 +13,7 @@
  */
 
 import { decodeGiftSelection } from '@/pages/egoGift'
+import { EncodedGiftIdSchema } from '@/shared/gameData'
 import { isMDPlanner } from '../types/PlannerTypes'
 import type { MDPlannerContent, SaveablePlanner } from '../types/PlannerTypes'
 import type { PlannerSearchFilters } from '../types/PlannerSearchTypes'
@@ -78,8 +79,8 @@ export function extractGiftIds(content: MDPlannerContent): Set<string> {
   const addIds = (source: Iterable<string> | undefined | null) => {
     if (!source) return
     for (const id of source) {
-      const base = decodeGiftSelection(String(id))?.giftId
-      if (base) ids.add(base)
+      const parsed = EncodedGiftIdSchema.safeParse(id)
+      if (parsed.success) ids.add(decodeGiftSelection(parsed.data).giftId)
     }
   }
 

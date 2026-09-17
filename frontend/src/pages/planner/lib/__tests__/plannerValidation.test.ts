@@ -476,6 +476,16 @@ describe('validateGiftIdArray', () => {
     expect(at(errors, 0).context?.giftId).toBe('9999')
   })
 
+  it.each(['39001', '', '900', '900a', 'gift1', ' 9001'])(
+    'malformed gift ID %j returns GIFT_UNKNOWN_ID when egoGiftSpec is provided',
+    (giftId) => {
+      const spec: Record<string, EGOGiftSpec> = { '9001': makeGiftSpec([]) }
+      const errors = validateGiftIdArray([giftId], 'selectedGiftIds', spec)
+      expect(errors).toHaveLength(1)
+      expect(at(errors, 0).code).toBe('GIFT_UNKNOWN_ID')
+    },
+  )
+
   it('all valid gift IDs return no errors when egoGiftSpec is provided', () => {
     const spec: Record<string, EGOGiftSpec> = {
       '9001': makeGiftSpec([]),

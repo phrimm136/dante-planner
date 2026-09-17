@@ -35,6 +35,7 @@ export const SINNER_SCOPED_ID_PATTERN = sinnerScopedIdPattern('[12]')
 
 /** Gift base id, without an enhancement prefix. */
 export const GIFT_ID_PATTERN = '9\\d{3}'
+export const GIFT_ID_LENGTH = 4
 
 /** Enhancement prefix a gift id may carry in its encoded form. */
 export const GIFT_ENHANCEMENT_PREFIX_PATTERN = '[12]?'

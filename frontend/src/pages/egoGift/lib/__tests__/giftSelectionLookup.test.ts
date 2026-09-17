@@ -3,7 +3,7 @@
  * across the floor viewer and the comprehensive summary, and the
  * decode-then-index-a-map guard across the planner rules and validator. The
  * originals are transcribed here and asserted equal over ids that exercise every
- * branch: valid, enhanced, unknown to the spec, and unencodable.
+ * branch: valid, enhanced, and unknown to the spec.
  */
 
 import { describe, it, expect } from 'vitest'
@@ -20,7 +20,7 @@ import {
 import { sortEGOGifts } from '../egoGiftSort'
 
 import type { EGOGiftEntity, EGOGiftSpec } from '../../index'
-import type { EnhancementLevel } from '@/shared/gameData'
+import type { EncodedGiftId, EnhancementLevel } from '@/shared/gameData'
 import { toEGOGiftEntity } from '../egoGiftEntity'
 import { asEncodedGiftId } from '@/test-utils/fixtures'
 
@@ -60,7 +60,7 @@ const SPEC: Record<string, EGOGiftSpec> = {
 
 const I18N: Record<string, string> = { '9001': 'First Gift', '9003': 'Third Gift' }
 
-/** Every id shape the callers can hold, including ones that must be dropped. */
+/** Every id shape the callers can hold, including ones the spec must drop. */
 const IDS = [
   ENCODED_9001, // base, in spec, translated
   ENCODED_19001, // enhancement 1, in spec
@@ -72,9 +72,6 @@ const IDS = [
   ENCODED_19999, // decodes enhanced, absent from spec
 ]
 
-/** Ids the callers can still be handed from storage, which no encoding accepts. */
-const UNDECODABLE_IDS = ['abcd', '', '900', '390001']
-
 interface LegacyDecoded {
   item: EGOGiftEntity
   enhancement: EnhancementLevel
@@ -82,15 +79,13 @@ interface LegacyDecoded {
 
 /** Verbatim transcription of the duplicated component block. */
 function legacyDecodeAndSort(
-  selectedGiftIds: Iterable<string>,
+  selectedGiftIds: Iterable<EncodedGiftId>,
   spec: Record<string, EGOGiftSpec>,
   i18n: Record<string, string>,
 ) {
   const gifts: LegacyDecoded[] = []
   for (const encodedId of selectedGiftIds) {
-    const decoded = decodeGiftSelection(encodedId)
-    if (!decoded) continue
-    const { giftId, enhancement } = decoded
+    const { giftId, enhancement } = decodeGiftSelection(encodedId)
     const giftSpec = spec[giftId]
     if (giftSpec) {
       gifts.push({
@@ -114,7 +109,7 @@ describe('decodeGiftSelections + orderSelectionsByGiftOrder', () => {
     expect(next.map(({ item, enhancement }) => ({ item, enhancement }))).toEqual(legacy)
   })
 
-  it('drops ids that do not decode and ids the spec does not carry', () => {
+  it('drops ids the spec does not carry', () => {
     expect(decodeGiftSelections(IDS, SPEC, I18N).map((s) => s.encodedId)).toEqual([
       '9001',
       '19001',
@@ -123,9 +118,6 @@ describe('decodeGiftSelections + orderSelectionsByGiftOrder', () => {
       '19002',
       '9003',
     ])
-    for (const id of UNDECODABLE_IDS) {
-      expect(decodeGiftSelection(id)).toBeNull()
-    }
   })
 
   it('falls back to the gift id when untranslated', () => {
@@ -138,7 +130,7 @@ describe('decodeGiftSelections + orderSelectionsByGiftOrder', () => {
     const sorted = orderSelectionsByGiftOrder(decodeGiftSelections(IDS, SPEC, I18N), 'tier-first')
     for (const { encodedId, item, enhancement } of sorted) {
       expect(getBaseGiftId(encodedId)).toBe(item.id)
-      expect(enhancement).toBe(decodeGiftSelection(encodedId)?.enhancement)
+      expect(enhancement).toBe(decodeGiftSelection(encodedId).enhancement)
     }
   })
 
