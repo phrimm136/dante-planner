@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 import { parseTier } from '../lib/egoGiftTier'
 import { EGO_GIFT_CARD, pct } from '../lib/cardLayout'
 import { EGOGiftIcon } from './EGOGiftIcon'
-import type { EGOGiftListItem } from '../types/EGOGiftTypes'
+import type { EGOGiftEntity } from '../types/EGOGiftTypes'
 import { EGOGiftCardBackground } from './EGOGiftCardBackground'
 import { EGOGiftTierIndicator } from './EGOGiftTierIndicator'
 import { EGOGiftEnhancementIndicator } from './EGOGiftEnhancementIndicator'
@@ -14,7 +14,7 @@ import { EGOGiftKeywordIndicator } from './EGOGiftKeywordIndicator'
 
 interface EGOGiftCardProps {
   /** The EGO gift data to display */
-  gift: EGOGiftListItem
+  gift: EGOGiftEntity
   /** Enhancement level (0, 1, or 2) */
   enhancement?: 0 | 1 | 2
   /** Whether the card is selected */

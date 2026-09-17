@@ -1,8 +1,7 @@
 /**
  * egoGiftCardProps.test.ts
  *
- * Unit tests for the spec-to-card-props builder, including the defaults it
- * applies to spec entries that omit a list field.
+ * Unit tests for the spec-to-card-props builder.
  */
 
 import { describe, it, expect } from 'vitest'
@@ -35,18 +34,12 @@ describe('toEGOGiftCardProps', () => {
     })
   })
 
-  const defaultCases: {
+  const passthroughCases: {
     name: string
     spec: EGOGiftSpec
     field: keyof ReturnType<typeof toEGOGiftCardProps>
     expected: unknown
   }[] = [
-    {
-      name: 'defaults a missing battleKeywordList to empty',
-      spec: makeSpec({ battleKeywordList: undefined as unknown as string[] }),
-      field: 'battleKeywordList',
-      expected: [],
-    },
     {
       name: 'keeps an empty battleKeywordList empty',
       spec: makeSpec({ battleKeywordList: [] }),
@@ -73,7 +66,7 @@ describe('toEGOGiftCardProps', () => {
     },
   ]
 
-  it.each(defaultCases)('$name', ({ spec, field, expected }) => {
+  it.each(passthroughCases)('$name', ({ spec, field, expected }) => {
     expect(toEGOGiftCardProps('9001', spec)[field]).toEqual(expected)
   })
 

@@ -7,12 +7,12 @@ import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
 import { CardSlot, EGO_GEOMETRY } from '@/shared/cardLayout'
 import { EGOCard, EGOSelectedTag } from '@/pages/ego'
 import { EgoThreadspinSelector } from './EntityTierSelectors'
-import type { EGOListItem } from '@/pages/ego'
+import type { EGOEntity } from '@/pages/ego'
 import type { ThreadspinTier } from '../../types/DeckTypes'
 
 /** The ego box with its height left to the card. */
 interface EgoGridProps {
-  sortedEgos: EGOListItem[]
+  sortedEgos: EGOEntity[]
   visibleIds: Set<string>
   equippedIds: Set<string>
   equippedThreadspinMap: Record<string, ThreadspinTier>
@@ -74,7 +74,7 @@ export function EgoGrid({
 }
 
 interface EgoGridCardProps {
-  ego: EGOListItem
+  ego: EGOEntity
   visibleIds: Set<string>
   equippedIds: Set<string>
   equippedThreadspinMap: Record<string, ThreadspinTier>

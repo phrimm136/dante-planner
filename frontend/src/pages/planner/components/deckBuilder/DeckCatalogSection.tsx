@@ -6,8 +6,8 @@ import { scheduleIdle } from '@/lib/scheduleIdle'
 import { usePlannerEditorStoreApiSafe } from '../../stores/usePlannerEditorStore'
 import type { EntityMode, ThreadspinTier, UptieTier } from '../../types/DeckTypes'
 import type { EGOId, IdentityId } from '@/shared/gameData'
-import type { IdentityListItem } from '@/pages/identity'
-import type { EGOListItem } from '@/pages/ego'
+import type { IdentityEntity } from '@/pages/identity'
+import type { EGOEntity } from '@/pages/ego'
 import { DeckFilterBar } from './DeckFilterBar'
 import { IdentityGrid } from './IdentityGrid'
 import { EgoGrid } from './EgoGrid'
@@ -18,12 +18,12 @@ interface DeckCatalogSectionProps {
   /** False while a closing dialog is still painting its exit animation. */
   isActive: boolean
   entityMode: EntityMode
-  sortedIdentities: IdentityListItem[]
+  sortedIdentities: IdentityEntity[]
   visibleIdentityIds: Set<string>
   equippedIdentityIds: Set<string>
   identityScrollRef: Ref<HTMLDivElement>
   onEquipIdentity: (identityId: IdentityId, data: { uptie?: UptieTier; level?: number }) => void
-  sortedEgos: EGOListItem[]
+  sortedEgos: EGOEntity[]
   visibleEgoIds: Set<string>
   equippedEgoIds: Set<string>
   equippedThreadspinMap: Record<string, ThreadspinTier>

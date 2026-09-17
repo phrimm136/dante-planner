@@ -7,15 +7,13 @@
 
 import { describe, it, expect } from 'vitest'
 import { applyFacets } from '@/shared/filter'
-import type { BuffType } from '@/shared/gameData'
+import { EGOIdSchema, IdentityIdSchema, type BuffType } from '@/shared/gameData'
 import { enumerateSelectionStates, findParityMismatches } from '@/test-utils/facetParity'
-import { KEYWORD_FACETS, type KeywordFacetItem, type KeywordFacetState } from '../keywordFilter'
+import { KEYWORD_FACETS, type KeywordFacetState } from '../keywordFilter'
+import type { KeywordEntity } from '../../types/KeywordTypes'
+import { toKeywordEntity } from '../keywordEntity'
 
-interface KeywordFixture extends KeywordFacetItem {
-  id: string
-}
-
-function legacyMatches(keyword: KeywordFixture, state: KeywordFacetState): boolean {
+function legacyMatches(keyword: KeywordEntity, state: KeywordFacetState): boolean {
   const { selectedBuffTypes, selectedIdentities, selectedEgos, selectedEgoGifts } = state
 
   if (selectedBuffTypes.size > 0 && !selectedBuffTypes.has(keyword.buffType as BuffType)) {
@@ -37,36 +35,27 @@ function legacyMatches(keyword: KeywordFixture, state: KeywordFacetState): boole
   return true
 }
 
-const ITEMS: KeywordFixture[] = [
-  {
-    id: 'Combustion',
-    buffType: 'Negative',
-    identities: ['10101'],
-    egos: ['20101'],
-    egoGifts: ['9001'],
-  },
-  {
-    id: 'Laceration',
-    buffType: 'Positive',
-    identities: ['10101', '10201'],
-    egos: ['20101', '20201'],
-    egoGifts: ['9001', '9002'],
-  },
-  { id: 'Tremor', buffType: 'Negative', identities: [], egos: [], egoGifts: [] },
-  {
-    id: 'Poise',
-    buffType: 'Positive',
-    identities: ['10201'],
-    egos: ['20201'],
-    egoGifts: ['9002'],
-  },
-  {
-    id: 'Sinking',
-    buffType: 'Neutral',
-    identities: ['10301'],
-    egos: [],
-    egoGifts: ['9001', '9003'],
-  },
+const makeKeyword = (
+  id: string,
+  buffType: string,
+  identities: string[],
+  egos: string[],
+  egoGifts: string[],
+): KeywordEntity =>
+  toKeywordEntity(id, {
+    iconId: null,
+    buffType,
+    identities: identities.map((identityId) => IdentityIdSchema.parse(identityId)),
+    egos: egos.map((egoId) => EGOIdSchema.parse(egoId)),
+    egoGifts,
+  })
+
+const ITEMS: KeywordEntity[] = [
+  makeKeyword('Combustion', 'Negative', ['10101'], ['20101'], ['9001']),
+  makeKeyword('Laceration', 'Positive', ['10101', '10201'], ['20101', '20201'], ['9001', '9002']),
+  makeKeyword('Tremor', 'Negative', [], [], []),
+  makeKeyword('Poise', 'Positive', ['10201'], ['20201'], ['9002']),
+  makeKeyword('Sinking', 'Neutral', ['10301'], [], ['9001', '9003']),
 ]
 
 const BASE_STATE: KeywordFacetState = {

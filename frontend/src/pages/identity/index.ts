@@ -21,7 +21,9 @@ export { TraitsDisplay } from './components/TraitsDisplay'
 export { useIdentityListSpec, useIdentityListI18n } from './hooks/useIdentityListData'
 export { useIdentityDetailSpec, useIdentityDetailI18n } from './hooks/useIdentityDetailData'
 
-export type { Identity, IdentityListItem, Uptie, IdentitySkillEntry } from './types/IdentityTypes'
+export type { IdentityEntity, IdentitySpec, Uptie, IdentitySkillEntry } from './types/IdentityTypes'
+
+export { toIdentityEntity } from './lib/identityEntity'
 
 export type { IdentityFacetState } from './lib/identityFilter'
 

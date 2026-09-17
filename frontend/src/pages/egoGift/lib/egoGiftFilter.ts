@@ -8,7 +8,7 @@
 import type { EntityMatcher, Facet, SearchMappings } from '@/shared/filter'
 import { collectKeywordTerms, createEntityMatcher } from '@/shared/filter'
 import type { EGOGiftAttributeType, EGOGiftDifficulty, EGOGiftTier } from '@/shared/gameData'
-import type { EGOGiftListItem } from '../types/EGOGiftTypes'
+import type { EGOGiftEntity } from '../types/EGOGiftTypes'
 import { parseTier, toRomanTier } from './egoGiftTier'
 
 /**
@@ -44,13 +44,13 @@ export interface EGOGiftSelectionFacetState {
   selectedKeywords: ReadonlySet<string>
 }
 
-export const EGO_GIFT_FACETS: readonly Facet<EGOGiftListItem, EGOGiftFacetState>[] = [
+export const EGO_GIFT_FACETS: readonly Facet<EGOGiftEntity, EGOGiftFacetState>[] = [
   {
     sel: (s) => s.selectedKeywords,
     get: (g) => (g.keyword === null ? 'None' : g.keyword),
     mode: 'any',
   },
-  { sel: (s) => s.selectedBattleKeywords, get: (g) => g.battleKeywordList ?? [], mode: 'any' },
+  { sel: (s) => s.selectedBattleKeywords, get: (g) => g.battleKeywordList, mode: 'any' },
   { sel: (s) => s.selectedDifficulties, get: (g) => deriveDifficulty(g), mode: 'any' },
   { sel: (s) => s.selectedTiers, get: (g) => toRomanTier(parseTier(g.tag)), mode: 'any' },
   { sel: (s) => s.selectedThemePacks, get: (g) => (g.themePack ?? []).map(String), mode: 'any' },
@@ -64,7 +64,7 @@ export const EGO_GIFT_FACETS: readonly Facet<EGOGiftListItem, EGOGiftFacetState>
 ]
 
 export const EGO_GIFT_SELECTION_FACETS: readonly Facet<
-  EGOGiftListItem,
+  EGOGiftEntity,
   EGOGiftSelectionFacetState
 >[] = [{ sel: (s) => s.selectedKeywords, get: (g) => g.keyword ?? 'None', mode: 'any' }]
 
@@ -75,7 +75,7 @@ export const EGO_GIFT_SELECTION_FACETS: readonly Facet<
  * Depends only on the i18n payloads, so a filter toggle never invalidates it.
  */
 export function buildEGOGiftSearchTerms(
-  gift: EGOGiftListItem,
+  gift: EGOGiftEntity,
   giftNames: Record<string, string>,
   mappings: SearchMappings,
 ): string[] {
@@ -90,5 +90,5 @@ export function buildEGOGiftSearchTerms(
 }
 
 /** Whether one gift survives the current facets and search query. */
-export const matchesEGOGift: EntityMatcher<EGOGiftListItem, EGOGiftFacetState> =
+export const matchesEGOGift: EntityMatcher<EGOGiftEntity, EGOGiftFacetState> =
   createEntityMatcher(EGO_GIFT_FACETS)

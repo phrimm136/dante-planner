@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { ThemePackTrackerCard } from '../ThemePackTrackerCard'
-import type { ThemePackEntry } from '@/pages/themePack'
+import type { ThemePackSpec } from '@/pages/themePack'
 import type { NoteContent } from '@/shared/noteEditor'
 import { CARD_MOBILE_SCALE_DENSE } from '@/lib/constants'
 
@@ -58,7 +58,7 @@ vi.mock('../FloorNoteDialog', () => ({
 }))
 
 describe('ThemePackTrackerCard', () => {
-  const mockPackEntry: ThemePackEntry = {
+  const mockPackEntry: ThemePackSpec = {
     themePackConfig: {
       textColor: 'FFFFFF',
     },

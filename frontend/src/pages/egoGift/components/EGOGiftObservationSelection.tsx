@@ -1,5 +1,5 @@
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '../hooks/useEGOGiftListData'
-import type { EGOGiftListItem } from '../types/EGOGiftTypes'
+import type { EGOGiftEntity } from '../types/EGOGiftTypes'
 import type { EncodedGiftId } from '@/shared/gameData'
 import { getBaseGiftId } from '../lib/egoGiftEncoding'
 import { CARD_MOBILE_SCALE, SM_BREAKPOINT_PX } from '@/lib/constants'
@@ -8,7 +8,7 @@ import { observationListHeightPx } from '../lib/cardLayout'
 import { CardSlot, EGO_GIFT_GEOMETRY, useSlotSizePx } from '@/shared/cardLayout'
 import { EGOGiftCard } from './EGOGiftCard'
 import { EGOGiftTooltip } from './EGOGiftTooltip'
-import { toGiftListItems } from '../lib/giftListItem'
+import { toEGOGiftEntity } from '../lib/egoGiftEntity'
 
 interface EGOGiftObservationSelectionProps {
   selectedGiftIds: EncodedGiftId[]
@@ -27,8 +27,10 @@ export function EGOGiftObservationSelection({
   const spec = useEGOGiftListSpec()
   const i18n = useEGOGiftListI18n()
 
-  // Merge spec and i18n into EGOGiftListItem array
-  const gifts: EGOGiftListItem[] = toGiftListItems(spec, i18n)
+  // Merge spec and i18n into EGOGiftEntity array
+  const gifts: EGOGiftEntity[] = Object.entries(spec).map(([id, entry]) =>
+    toEGOGiftEntity(id, entry, i18n[id] || id),
+  )
 
   const mobileScale = CARD_MOBILE_SCALE
   const isSm = useIsBreakpoint('min', SM_BREAKPOINT_PX)

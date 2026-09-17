@@ -16,11 +16,11 @@ import {
   THEME_PACK_NAME_TRACKING,
   themePackCardName,
 } from '../lib/cardLayout'
-import type { ThemePackEntry } from '../types/ThemePackTypes'
+import type { ThemePackSpec } from '../types/ThemePackTypes'
 
 interface ThemePackNameProps {
   packId: string
-  packEntry: ThemePackEntry
+  packEntry: ThemePackSpec
   /** The name box, as a percentage of the card root. */
   rect: PctRect
 }

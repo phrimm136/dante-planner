@@ -8,13 +8,13 @@ import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
 import { CardSlot, IDENTITY_GEOMETRY } from '@/shared/cardLayout'
 import { IdentityCard } from '@/pages/identity'
 import { IdentityTierSelector } from './EntityTierSelectors'
-import type { IdentityListItem } from '@/pages/identity'
+import type { IdentityEntity } from '@/pages/identity'
 import type { UptieTier } from '../../types/DeckTypes'
 import type { IdentityId } from '@/shared/gameData'
 
 /** The identity box with its height left to the card. */
 interface IdentityGridProps {
-  sortedIdentities: IdentityListItem[]
+  sortedIdentities: IdentityEntity[]
   visibleIds: Set<string>
   equippedIds: Set<string>
   onEquip: (identityId: IdentityId, data: { uptie?: UptieTier; level?: number }) => void
@@ -70,7 +70,7 @@ export function IdentityGrid({
 }
 
 interface IdentityGridCardProps {
-  identity: IdentityListItem
+  identity: IdentityEntity
   visibleIds: Set<string>
   equippedIds: Set<string>
   onEquip: (identityId: IdentityId, data: { uptie?: UptieTier; level?: number }) => void

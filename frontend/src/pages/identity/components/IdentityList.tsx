@@ -1,4 +1,4 @@
-import type { IdentityListItem } from '../types/IdentityTypes'
+import type { IdentityEntity } from '../types/IdentityTypes'
 import { useSearchTermSources } from '@/shared/filter'
 import { IDENTITY_LIST } from '../hooks/useIdentityListData'
 import type { FilterStore } from '@/components/hooks/filterStore'
@@ -14,7 +14,7 @@ import { IdentityCardLink } from './IdentityCardLink'
 const EMPTY_NAMES: Record<string, string> = {}
 
 interface IdentityListProps {
-  identities: IdentityListItem[]
+  identities: IdentityEntity[]
   store: FilterStore<IdentityFacetState>
 }
 

@@ -5,7 +5,7 @@ import { LoadingState } from '@/components/feedback/LoadingState'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { applyGiftToggle } from '../../lib/giftToggle'
-import type { EGOGiftListItem } from '@/pages/egoGift'
+import type { EGOGiftEntity } from '@/pages/egoGift'
 import type { EGOGiftId, EnhancementLevel } from '@/shared/gameData'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
@@ -14,7 +14,7 @@ import { EGOGiftFilterBar } from '@/pages/egoGift'
 import { EGOGiftSelectionList } from '@/pages/egoGift'
 import type { SortMode } from '@/shared/filter'
 import { SECTION_STYLES } from '@/lib/constants'
-import { toGiftListItems } from '@/pages/egoGift'
+import { toEGOGiftEntity } from '@/pages/egoGift'
 
 interface ComprehensiveGiftSelectorPaneProps {
   open: boolean
@@ -52,9 +52,9 @@ export function ComprehensiveGiftSelectorPane({
     }
   }, [open])
 
-  // Convert to EGOGiftListItem array
-  const gifts: EGOGiftListItem[] = (() => {
-    return toGiftListItems(spec, i18n)
+  // Convert to EGOGiftEntity array
+  const gifts: EGOGiftEntity[] = (() => {
+    return Object.entries(spec).map(([id, entry]) => toEGOGiftEntity(id, entry, i18n[id] || id))
   })()
 
   // Build O(1) lookup map for recipe cascade selection

@@ -8,7 +8,7 @@ import {
   EGO_CARD_LAYERS,
   EGO_CARD_ROOT_SCALE,
 } from '../../lib/cardLayout'
-import type { EGOListItem } from '../../types/EGOTypes'
+import type { EGOEntity } from '../../types/EGOTypes'
 import { EGOCard } from '../EGOCard'
 
 vi.mock('@/shared/assets', () => ({
@@ -48,13 +48,14 @@ vi.mock('../../hooks/useEGOListData', () => ({
 
 const EGO_20101 = asEGOId('20101')
 
-const EGO: EGOListItem = {
+const EGO: EGOEntity = {
   id: EGO_20101,
   egoType: 'ZAYIN',
   skillKeywordList: [],
   battleKeywordList: [],
-  attributeTypes: ['CRIMSON', 'AZURE'],
-  atkTypes: ['SLASH'],
+  requirements: {},
+  attributeType: ['CRIMSON', 'AZURE'],
+  atkType: ['SLASH'],
   updateDate: 20240101,
   season: 1,
   maxThreadspin: 4,
@@ -236,7 +237,7 @@ describe('EGOCard', () => {
   })
 
   it('leaves the name plate out when the EGO has no attribute', () => {
-    const { container } = renderCard(<EGOCard ego={{ ...EGO, attributeTypes: [] }} />)
+    const { container } = renderCard(<EGOCard ego={{ ...EGO, attributeType: [] }} />)
 
     expect(layerSources(container)).not.toContain('/mock/nameBg-CRIMSON.webp')
   })

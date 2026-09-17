@@ -8,17 +8,17 @@
 import { describe, it, expect } from 'vitest'
 import { matchesDeckFilter } from '../deckFilter'
 import type { DeckFilterState, EntityMode } from '../../types/DeckTypes'
-import type { IdentityListItem } from '@/pages/identity'
-import type { EGOListItem } from '@/pages/ego'
+import type { IdentityEntity } from '@/pages/identity'
+import type { EGOEntity } from '@/pages/ego'
 import type { SearchMappings } from '@/shared/filter'
 import type { EGOId, IdentityId, Keyword } from '@/shared/gameData'
 import { getSinnerFromId } from '@/shared/gameData'
 import { enumerateSelectionStates, findParityMismatches } from '@/test-utils/facetParity'
 import { asEGOId, asIdentityId } from '@/test-utils/fixtures'
 
-type DeckFilterItem = IdentityListItem | EGOListItem
-type IdentityOverrides = Omit<Partial<IdentityListItem>, 'id'> & { id: IdentityId }
-type EgoOverrides = Omit<Partial<EGOListItem>, 'id'> & { id: EGOId }
+type DeckFilterItem = IdentityEntity | EGOEntity
+type IdentityOverrides = Omit<Partial<IdentityEntity>, 'id'> & { id: IdentityId }
+type EgoOverrides = Omit<Partial<EGOEntity>, 'id'> & { id: EGOId }
 
 const IDENTITY_10101 = asIdentityId('10101')
 const IDENTITY_10201 = asIdentityId('10201')
@@ -52,12 +52,12 @@ function legacyMatches(
   }
 
   if (state.selectedAttributes.size > 0) {
-    const hasAny = item.attributeTypes.some((attr) => state.selectedAttributes.has(attr))
+    const hasAny = item.attributeType.some((attr) => state.selectedAttributes.has(attr))
     if (!hasAny) return false
   }
 
   if (state.selectedAtkTypes.size > 0) {
-    const hasAny = item.atkTypes.some((atk) => state.selectedAtkTypes.has(atk))
+    const hasAny = item.atkType.some((atk) => state.selectedAtkTypes.has(atk))
     if (!hasAny) return false
   }
 
@@ -66,15 +66,15 @@ function legacyMatches(
   }
 
   if (state.selectedBattleKeywords.size > 0) {
-    const hasAny = (item.battleKeywordList ?? []).some((kw) => state.selectedBattleKeywords.has(kw))
+    const hasAny = item.battleKeywordList.some((kw) => state.selectedBattleKeywords.has(kw))
     if (!hasAny) return false
   }
 
   if (mode === 'identity') {
-    const identity = item as IdentityListItem
+    const identity = item as IdentityEntity
 
     if (state.selectedDefTypes.size > 0) {
-      const hasAny = identity.defenseTypes.some((def) => state.selectedDefTypes.has(def))
+      const hasAny = identity.defenseType.some((def) => state.selectedDefTypes.has(def))
       if (!hasAny) return false
     }
 
@@ -87,7 +87,7 @@ function legacyMatches(
       if (!hasAny) return false
     }
   } else {
-    const ego = item as EGOListItem
+    const ego = item as EGOEntity
 
     if (state.selectedEgoTypes.size > 0) {
       if (!state.selectedEgoTypes.has(ego.egoType)) return false
@@ -107,7 +107,7 @@ function legacyMatches(
 
     let unitKeywordMatch = false
     if (mode === 'identity') {
-      const identity = item as IdentityListItem
+      const identity = item as IdentityEntity
       unitKeywordMatch = Array.from(searchMappings.unitKeywordToValue.entries()).some(
         ([naturalLang, internalCodes]) => {
           if (!naturalLang.includes(lowerQuery)) return false
@@ -122,7 +122,7 @@ function legacyMatches(
   return true
 }
 
-function makeIdentity(overrides: IdentityOverrides): IdentityListItem {
+function makeIdentity(overrides: IdentityOverrides): IdentityEntity {
   return {
     name: 'Fixture Identity',
     rank: 0,
@@ -130,22 +130,23 @@ function makeIdentity(overrides: IdentityOverrides): IdentityListItem {
     unitKeywordList: [],
     skillKeywordList: [],
     battleKeywordList: [],
-    attributeTypes: [],
-    atkTypes: [],
-    defenseTypes: [],
+    attributeType: [],
+    atkType: [],
+    defenseType: [],
     season: 0,
     ...overrides,
   }
 }
 
-function makeEgo(overrides: EgoOverrides): EGOListItem {
+function makeEgo(overrides: EgoOverrides): EGOEntity {
   return {
     name: 'Fixture EGO',
     egoType: 'ZAYIN',
     skillKeywordList: [],
     battleKeywordList: [],
-    attributeTypes: [],
-    atkTypes: [],
+    requirements: {},
+    attributeType: [],
+    atkType: [],
     updateDate: 20240101,
     season: 0,
     maxThreadspin: 4,
@@ -153,14 +154,14 @@ function makeEgo(overrides: EgoOverrides): EGOListItem {
   }
 }
 
-const IDENTITIES: IdentityListItem[] = [
+const IDENTITIES: IdentityEntity[] = [
   makeIdentity({
     id: IDENTITY_10101,
     skillKeywordList: ['Combustion', 'Laceration'],
     battleKeywordList: ['Poise'],
-    attributeTypes: ['AZURE', 'VIOLET'],
-    atkTypes: ['SLASH', 'PENETRATE'],
-    defenseTypes: ['GUARD', 'EVADE'],
+    attributeType: ['AZURE', 'VIOLET'],
+    atkType: ['SLASH', 'PENETRATE'],
+    defenseType: ['GUARD', 'EVADE'],
     rank: 0,
     season: 1,
     unitKeywordList: ['BLADE_LINEAGE'],
@@ -169,9 +170,9 @@ const IDENTITIES: IdentityListItem[] = [
     id: IDENTITY_10201,
     skillKeywordList: ['Combustion'],
     battleKeywordList: ['Poise', 'Sinking'],
-    attributeTypes: ['AZURE'],
-    atkTypes: ['SLASH'],
-    defenseTypes: ['GUARD'],
+    attributeType: ['AZURE'],
+    atkType: ['SLASH'],
+    defenseType: ['GUARD'],
     rank: 2,
     season: 5,
     unitKeywordList: ['BLADE_LINEAGE', 'KURO_NAMI'],
@@ -179,11 +180,11 @@ const IDENTITIES: IdentityListItem[] = [
   makeIdentity({ id: IDENTITY_10301, rank: 3, season: 0 }),
   makeIdentity({
     id: IDENTITY_10401,
-    battleKeywordList: undefined as unknown as string[],
+    battleKeywordList: [],
     skillKeywordList: ['Laceration'],
-    attributeTypes: ['VIOLET'],
-    atkTypes: ['PENETRATE'],
-    defenseTypes: ['EVADE'],
+    attributeType: ['VIOLET'],
+    atkType: ['PENETRATE'],
+    defenseType: ['EVADE'],
     rank: 0,
     season: 1,
     unitKeywordList: ['KURO_NAMI'],
@@ -192,32 +193,32 @@ const IDENTITIES: IdentityListItem[] = [
     id: IDENTITY_11201,
     skillKeywordList: ['Combustion', 'Laceration', 'Tremor'],
     battleKeywordList: ['Sinking'],
-    attributeTypes: ['AMBER'],
-    atkTypes: ['HIT'],
-    defenseTypes: ['COUNTER'],
+    attributeType: ['AMBER'],
+    atkType: ['HIT'],
+    defenseType: ['COUNTER'],
     rank: 2,
     season: 5,
     unitKeywordList: [],
   }),
 ]
 
-const EGOS: EGOListItem[] = [
+const EGOS: EGOEntity[] = [
   makeEgo({
     id: EGO_20101,
     egoType: 'ZAYIN',
     skillKeywordList: ['Combustion', 'Laceration'],
     battleKeywordList: ['Poise'],
-    attributeTypes: ['AZURE', 'VIOLET'],
-    atkTypes: ['SLASH', 'PENETRATE'],
+    attributeType: ['AZURE', 'VIOLET'],
+    atkType: ['SLASH', 'PENETRATE'],
     season: 1,
   }),
   makeEgo({
     id: EGO_20201,
     egoType: 'ALEPH',
     skillKeywordList: ['Combustion'],
-    battleKeywordList: undefined as unknown as string[],
-    attributeTypes: ['AZURE'],
-    atkTypes: ['SLASH'],
+    battleKeywordList: [],
+    attributeType: ['AZURE'],
+    atkType: ['SLASH'],
     season: 5,
   }),
   makeEgo({ id: EGO_20301, egoType: 'TETH' }),
@@ -226,8 +227,8 @@ const EGOS: EGOListItem[] = [
     egoType: 'ALEPH',
     skillKeywordList: ['Tremor'],
     battleKeywordList: ['Sinking'],
-    attributeTypes: ['AMBER'],
-    atkTypes: ['HIT'],
+    attributeType: ['AMBER'],
+    atkType: ['HIT'],
     season: 1,
   }),
 ]

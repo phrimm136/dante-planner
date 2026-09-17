@@ -6,7 +6,7 @@ import { useEGOGiftListSpec, useEGOGiftListI18n, encodeGiftSelection } from '@/p
 import type { EGOGiftId } from '@/shared/gameData'
 import { useCappedSelection } from '../../hooks/useCappedSelection'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
-import type { EGOGiftListItem } from '@/pages/egoGift'
+import type { EGOGiftEntity } from '@/pages/egoGift'
 import type { SortMode } from '@/shared/filter'
 import { EGOGiftFilterBar } from '@/pages/egoGift'
 import { SelectorPaneShell } from '../SelectorPaneShell'
@@ -15,7 +15,7 @@ import { sortEGOGifts } from '@/pages/egoGift'
 import { EGOGiftSelectionList } from '@/pages/egoGift'
 import { EGOGiftObservationSelection } from '@/pages/egoGift'
 import { MAX_OBSERVABLE_GIFTS } from '@/shared/gameData'
-import { toGiftListItems } from '@/pages/egoGift'
+import { toEGOGiftEntity } from '@/pages/egoGift'
 
 interface EGOGiftObservationEditPaneProps {
   open: boolean
@@ -52,9 +52,9 @@ export function EGOGiftObservationEditPane({
   const [searchQuery, setSearchQuery] = useState('')
   const [sortMode, setSortMode] = useState<SortMode>('tier-first')
 
-  // Merge spec and i18n into EGOGiftListItem array
-  const gifts: EGOGiftListItem[] = (() => {
-    return toGiftListItems(spec, i18n)
+  // Merge spec and i18n into EGOGiftEntity array
+  const gifts: EGOGiftEntity[] = (() => {
+    return Object.entries(spec).map(([id, entry]) => toEGOGiftEntity(id, entry, i18n[id] || id))
   })()
 
   // Sort gifts (apply giftIdFilter + sort)

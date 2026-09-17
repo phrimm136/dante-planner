@@ -12,7 +12,7 @@ interface BattleKeywordDropdownProps {
   className?: string
 }
 
-/** Map entity type to the backlink field in BattleKeywordSpecEntry */
+/** Map entity type to the backlink field in BattleKeywordSpec */
 const BACKLINK_FIELD: Record<EntityType, 'identities' | 'egos' | 'egoGifts'> = {
   identity: 'identities',
   ego: 'egos',

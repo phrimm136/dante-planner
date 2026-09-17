@@ -13,7 +13,7 @@ import { EGOList } from '../EGOList'
 import { createTestFilterStore } from '@/test-utils/filterStore'
 import { asEGOId } from '@/test-utils/fixtures'
 import type { EGOFacetState } from '../../lib/egoFilter'
-import type { EGOListItem } from '../../types/EGOTypes'
+import type { EGOEntity } from '../../types/EGOTypes'
 
 // Mock TanStack Router Link component
 vi.mock('@tanstack/react-router', () => ({
@@ -71,15 +71,16 @@ const EGO_NAMES = {
   '20301': 'Test EGO 3',
 }
 
-const mockEGOs: EGOListItem[] = [
+const mockEGOs: EGOEntity[] = [
   {
     id: EGO_20101,
     name: 'Test EGO 1',
     egoType: 'ZAYIN',
     skillKeywordList: ['Burst', 'Combustion'],
     battleKeywordList: ['Burst', 'Combustion'],
-    attributeTypes: ['CRIMSON', 'AZURE'],
-    atkTypes: ['SLASH', 'PENETRATE'],
+    requirements: {},
+    attributeType: ['CRIMSON', 'AZURE'],
+    atkType: ['SLASH', 'PENETRATE'],
     updateDate: 20240101,
     season: 1,
     maxThreadspin: 4,
@@ -90,8 +91,9 @@ const mockEGOs: EGOListItem[] = [
     egoType: 'TETH',
     skillKeywordList: ['Charge'],
     battleKeywordList: ['Charge'],
-    attributeTypes: ['AZURE'],
-    atkTypes: ['PENETRATE'],
+    requirements: {},
+    attributeType: ['AZURE'],
+    atkType: ['PENETRATE'],
     updateDate: 20240102,
     season: 2,
     maxThreadspin: 4,
@@ -102,8 +104,9 @@ const mockEGOs: EGOListItem[] = [
     egoType: 'HE',
     skillKeywordList: ['Burst'],
     battleKeywordList: ['Burst'],
-    attributeTypes: ['VIOLET'],
-    atkTypes: ['HIT'],
+    requirements: {},
+    attributeType: ['VIOLET'],
+    atkType: ['HIT'],
     updateDate: 20240103,
     season: 1,
     maxThreadspin: 4,

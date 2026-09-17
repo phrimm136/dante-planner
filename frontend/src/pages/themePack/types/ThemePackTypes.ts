@@ -1,10 +1,14 @@
 import type { z } from 'zod'
+import type { Entity } from '@/shared/filter'
 import type { DungeonIdx, EncodedGiftId } from '@/shared/gameData'
-import type { ThemePackEntrySchema, ThemePackListSchema } from '../schemas/ThemePackSchemas'
+import type { ThemePackSpecSchema, ThemePackListSchema } from '../schemas/ThemePackSchemas'
 import type { ThemePackId } from '@/shared/gameData'
 
 /** Theme pack entry from themePackList.json */
-export type ThemePackEntry = z.infer<typeof ThemePackEntrySchema>
+export type ThemePackSpec = z.infer<typeof ThemePackSpecSchema>
+
+/** Theme pack entity: the spec entry plus its branded id */
+export type ThemePackEntity = Entity<ThemePackId, ThemePackSpec>
 
 /** Theme pack list - Record keyed by pack ID */
 export type ThemePackList = z.infer<typeof ThemePackListSchema>
@@ -21,7 +25,7 @@ export interface FloorThemeSelection {
  * True only if ALL conditions are for extreme difficulty (dungeonIdx: 3);
  * mixed packs (available on normal/hard AND extreme) return false.
  */
-export function isExtremePack(entry: ThemePackEntry): boolean {
+export function isExtremePack(entry: ThemePackSpec): boolean {
   return (
     entry.exceptionConditions.length > 0 &&
     entry.exceptionConditions.every(

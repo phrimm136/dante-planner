@@ -447,7 +447,7 @@ export type DetailEntityType = 'identity' | 'ego' | 'egoGift'
 
 /**
  * Maximum uptie/threadspin/enhancement levels by entity type (global ceiling).
- * Per-EGO threadspin max is carried by EGOListItem.maxThreadspin / EGOData.maxThreadspin.
+ * Per-EGO threadspin max is carried by EGOEntity.maxThreadspin / EGOData.maxThreadspin.
  * - Identity: Uptie 1-4
  * - EGO: Threadspin 1-5
  * - EGO Gift: Enhancement 0-2 (displayed as base/+/++)

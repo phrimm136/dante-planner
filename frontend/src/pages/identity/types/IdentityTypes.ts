@@ -1,59 +1,17 @@
 import type { z } from 'zod'
-import type { AtkType, DefType, IdentityId, Season, SkillAttributeType } from '@/shared/gameData'
+import type { Entity } from '@/shared/filter'
+import type { IdentityId } from '@/shared/gameData'
 import type {
   IdentitySkillEntrySchema,
   IdentityDataSchema,
   IdentityI18nSchema,
+  IdentitySpecSchema,
 } from '../schemas/IdentitySchemas'
 
-/**
- * Identity list item for list/grid views.
- *
- * Assembled in IdentityPage from already-validated spec + name list — not a
- * direct boundary shape, so it stays a plain TS type (deliberately uses plural
- * `attributeTypes`/`atkTypes`, unlike IdentitySpecListItemSchema's singular keys).
- * Name is optional - populated when i18n is loaded, but components should prefer
- * IdentityName component for granular Suspense boundaries.
- */
-export interface IdentityListItem {
-  id: IdentityId
-  /** Optional - populated when i18n is loaded */
-  name?: string
-  rank: number
-  updateDate: number
-  unitKeywordList: string[]
-  skillKeywordList: string[]
-  battleKeywordList: string[]
-  /** Skill attribute types (affinities) - e.g. ['AZURE', 'VIOLET', 'AMBER'] */
-  attributeTypes: SkillAttributeType[]
-  /** Attack types per skill - e.g. ['SLASH', 'PENETRATE', 'HIT'] */
-  atkTypes: AtkType[]
-  /** Defense types - e.g. ['GUARD'] or ['EVADE', 'COUNTER'] */
-  defenseTypes: DefType[]
-  /** Season identifier (0=Standard, 1-6=Seasons, 8000=Collab, 9101+=Walpurgis) */
-  season: Season
-}
+export type IdentitySpec = z.infer<typeof IdentitySpecSchema>
 
-/**
- * @deprecated Use IdentityListItem instead. Kept for backwards compatibility.
- */
-export interface Identity {
-  id: IdentityId
-  /** Optional - only populated when i18n is loaded. Display uses IdentityName component. */
-  name?: string
-  rank: number
-  updateDate: number
-  unitKeywordList: string[]
-  skillKeywordList: string[]
-  /** Skill attribute types (affinities) - e.g. ['AZURE', 'VIOLET', 'AMBER'] */
-  attributeTypes: SkillAttributeType[]
-  /** Attack types per skill - e.g. ['SLASH', 'PENETRATE', 'HIT'] */
-  atkTypes: AtkType[]
-  /** Defense types - e.g. ['GUARD'] or ['EVADE', 'COUNTER'] */
-  defenseTypes: DefType[]
-  /** Season identifier (0=Standard, 1-6=Seasons, 8000=Collab, 9101+=Walpurgis) */
-  season: Season
-}
+/** Identity entity for list/grid views: the spec entry plus its branded id. */
+export type IdentityEntity = Entity<IdentityId, IdentitySpec>
 
 export type { Uptie } from '@/shared/gameData'
 

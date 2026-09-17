@@ -5,7 +5,7 @@ import { CardSlot, EGO_GIFT_GEOMETRY } from '@/shared/cardLayout'
 import { CARD_MOBILE_SCALE } from '@/lib/constants'
 import { KEYWORD_ICON_GEOMETRY } from '../../lib/cardLayout'
 import { StartGiftKeywordIcon } from './StartGiftKeywordIcon'
-import { toGiftListItem, toUnknownGiftListItem } from '@/pages/egoGift'
+import { toEGOGiftEntity, toUnknownEGOGiftEntity } from '@/pages/egoGift'
 import type { EGOGiftId } from '@/shared/gameData'
 
 interface StartGiftRowProps {
@@ -78,8 +78,8 @@ export function StartGiftRow({
 
           // Build gift object for EGOGiftCard
           const gift = spec
-            ? toGiftListItem(giftId, spec, name)
-            : toUnknownGiftListItem(giftId, name)
+            ? toEGOGiftEntity(giftId, spec, name)
+            : toUnknownEGOGiftEntity(giftId, name)
 
           return (
             <EGOGiftTooltip key={giftId} giftId={giftId}>

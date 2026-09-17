@@ -23,7 +23,7 @@ export { SanityConditionI18nSchema } from './schemas/SanityConditionSchemas'
 export type { SanityConditionI18n } from './schemas/SanityConditionSchemas'
 export { BattleKeywordsSchema, BattleKeywordEntrySchema } from './schemas/BattleKeywordsSchemas'
 export {
-  BattleKeywordSpecEntrySchema,
+  BattleKeywordSpecSchema,
   BattleKeywordSpecListSchema,
   BattleKeywordNameListSchema,
 } from './schemas/KeywordSchemas'
@@ -46,4 +46,4 @@ export type {
   EnhancementLevel,
   BuffEffect,
 } from './types/StartBuffTypes'
-export type { BattleKeywordSpecEntry } from './types/KeywordTypes'
+export type { BattleKeywordSpec } from './types/KeywordTypes'

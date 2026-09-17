@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { useEGOGiftListSpec } from '@/pages/egoGift'
-import { toGiftListItems } from './lib/giftListItem'
+import { toEGOGiftEntity } from './lib/egoGiftEntity'
 
-import type { EGOGiftListItem, EGOGiftSpecListSchema, EGOGiftFacetState } from '@/pages/egoGift'
+import type { EGOGiftEntity, EGOGiftSpecListSchema, EGOGiftFacetState } from '@/pages/egoGift'
 import type { z } from 'zod'
 import { BOOLEAN_FILTER_OPTIONS } from '@/lib/constants'
 import { calculateActiveFilterCount } from '@/shared/filter'
@@ -52,8 +52,10 @@ function EGOGiftCardGrid({
   spec: z.infer<typeof EGOGiftSpecListSchema>
   store: FilterStore<EGOGiftFacetState>
 }) {
-  // Build EGOGiftListItem array from spec directly
-  const gifts: EGOGiftListItem[] = toGiftListItems(spec)
+  // Build EGOGiftEntity array from spec directly
+  const gifts: EGOGiftEntity[] = Object.entries(spec).map(([id, entry]) =>
+    toEGOGiftEntity(id, entry),
+  )
 
   return <EGOGiftList gifts={gifts} store={store} />
 }

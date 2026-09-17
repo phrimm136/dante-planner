@@ -11,9 +11,9 @@ import { getSinnerFromId } from '@/shared/gameData'
 import { enumerateSelectionStates, findParityMismatches } from '@/test-utils/facetParity'
 import { asIdentityId } from '@/test-utils/fixtures'
 import { IDENTITY_FACETS, type IdentityFacetState } from '../identityFilter'
-import type { IdentityListItem } from '../../types/IdentityTypes'
+import type { IdentityEntity } from '../../types/IdentityTypes'
 
-function legacyMatches(identity: IdentityListItem, state: IdentityFacetState): boolean {
+function legacyMatches(identity: IdentityEntity, state: IdentityFacetState): boolean {
   const {
     selectedSinners,
     selectedKeywords,
@@ -38,7 +38,7 @@ function legacyMatches(identity: IdentityListItem, state: IdentityFacetState): b
   }
 
   if (selectedBattleKeywords.size > 0) {
-    const hasAnyBattleKeyword = (identity.battleKeywordList ?? []).some((keyword) =>
+    const hasAnyBattleKeyword = identity.battleKeywordList.some((keyword) =>
       selectedBattleKeywords.has(keyword),
     )
     if (!hasAnyBattleKeyword) return false
@@ -46,21 +46,21 @@ function legacyMatches(identity: IdentityListItem, state: IdentityFacetState): b
 
   if (selectedAttributes.size > 0) {
     const hasAllAttributes = Array.from(selectedAttributes).every((attr) =>
-      identity.attributeTypes.includes(attr),
+      identity.attributeType.some((attribute) => attribute === attr),
     )
     if (!hasAllAttributes) return false
   }
 
   if (selectedAtkTypes.size > 0) {
     const hasAllAtkTypes = Array.from(selectedAtkTypes).every((atkType) =>
-      identity.atkTypes.includes(atkType),
+      identity.atkType.includes(atkType),
     )
     if (!hasAllAtkTypes) return false
   }
 
   if (selectedDefTypes.size > 0) {
     const hasAllDefTypes = Array.from(selectedDefTypes).every((defType) =>
-      identity.defenseTypes.includes(defType),
+      identity.defenseType.includes(defType),
     )
     if (!hasAllDefTypes) return false
   }
@@ -83,7 +83,7 @@ function legacyMatches(identity: IdentityListItem, state: IdentityFacetState): b
   return true
 }
 
-function makeIdentity(overrides: Partial<IdentityListItem> & { id: string }): IdentityListItem {
+function makeIdentity(overrides: Partial<IdentityEntity> & { id: string }): IdentityEntity {
   return {
     name: 'Fixture',
     rank: 0,
@@ -91,9 +91,9 @@ function makeIdentity(overrides: Partial<IdentityListItem> & { id: string }): Id
     unitKeywordList: [],
     skillKeywordList: [],
     battleKeywordList: [],
-    attributeTypes: [],
-    atkTypes: [],
-    defenseTypes: [],
+    attributeType: [],
+    atkType: [],
+    defenseType: [],
     season: 0,
     ...overrides,
   }
@@ -108,14 +108,14 @@ const IDENTITY_10601 = asIdentityId('10601')
 const IDENTITY_10901 = asIdentityId('10901')
 const IDENTITY_11201 = asIdentityId('11201')
 
-const ITEMS: IdentityListItem[] = [
+const ITEMS: IdentityEntity[] = [
   makeIdentity({
     id: IDENTITY_10101,
     skillKeywordList: ['Combustion', 'Laceration'],
     battleKeywordList: ['Poise'],
-    attributeTypes: ['AZURE', 'VIOLET'],
-    atkTypes: ['SLASH', 'PENETRATE'],
-    defenseTypes: ['GUARD', 'EVADE'],
+    attributeType: ['AZURE', 'VIOLET'],
+    atkType: ['SLASH', 'PENETRATE'],
+    defenseType: ['GUARD', 'EVADE'],
     rank: 0,
     season: 1,
     unitKeywordList: ['BLADE_LINEAGE'],
@@ -124,9 +124,9 @@ const ITEMS: IdentityListItem[] = [
     id: IDENTITY_10201,
     skillKeywordList: ['Combustion'],
     battleKeywordList: ['Poise', 'Sinking'],
-    attributeTypes: ['AZURE'],
-    atkTypes: ['SLASH'],
-    defenseTypes: ['GUARD'],
+    attributeType: ['AZURE'],
+    atkType: ['SLASH'],
+    defenseType: ['GUARD'],
     rank: 2,
     season: 5,
     unitKeywordList: ['BLADE_LINEAGE', 'KURO_NAMI'],
@@ -134,11 +134,11 @@ const ITEMS: IdentityListItem[] = [
   makeIdentity({ id: IDENTITY_10301, rank: 3, season: 0 }),
   makeIdentity({
     id: IDENTITY_10401,
-    battleKeywordList: undefined as unknown as string[],
+    battleKeywordList: [],
     skillKeywordList: ['Laceration'],
-    attributeTypes: ['VIOLET'],
-    atkTypes: ['PENETRATE'],
-    defenseTypes: ['EVADE'],
+    attributeType: ['VIOLET'],
+    atkType: ['PENETRATE'],
+    defenseType: ['EVADE'],
     rank: 0,
     season: 1,
     unitKeywordList: ['KURO_NAMI'],
@@ -147,9 +147,9 @@ const ITEMS: IdentityListItem[] = [
     id: IDENTITY_10501,
     skillKeywordList: ['Combustion', 'Laceration', 'Tremor'],
     battleKeywordList: ['Sinking'],
-    attributeTypes: ['AZURE', 'VIOLET', 'AMBER'],
-    atkTypes: ['SLASH', 'PENETRATE', 'HIT'],
-    defenseTypes: ['GUARD', 'EVADE', 'COUNTER'],
+    attributeType: ['AZURE', 'VIOLET', 'AMBER'],
+    atkType: ['SLASH', 'PENETRATE', 'HIT'],
+    defenseType: ['GUARD', 'EVADE', 'COUNTER'],
     rank: 2,
     season: 1,
     unitKeywordList: ['BLADE_LINEAGE', 'KURO_NAMI'],
@@ -158,9 +158,9 @@ const ITEMS: IdentityListItem[] = [
     id: IDENTITY_10601,
     skillKeywordList: ['Tremor'],
     battleKeywordList: ['Poise'],
-    attributeTypes: ['AMBER'],
-    atkTypes: ['HIT'],
-    defenseTypes: ['COUNTER'],
+    attributeType: ['AMBER'],
+    atkType: ['HIT'],
+    defenseType: ['COUNTER'],
     rank: 3,
     season: 5,
     unitKeywordList: ['KURO_NAMI'],
@@ -169,9 +169,9 @@ const ITEMS: IdentityListItem[] = [
     id: IDENTITY_11201,
     skillKeywordList: ['Laceration', 'Combustion'],
     battleKeywordList: ['Sinking', 'Poise'],
-    attributeTypes: ['VIOLET', 'AZURE'],
-    atkTypes: ['PENETRATE', 'SLASH'],
-    defenseTypes: ['EVADE', 'GUARD'],
+    attributeType: ['VIOLET', 'AZURE'],
+    atkType: ['PENETRATE', 'SLASH'],
+    defenseType: ['EVADE', 'GUARD'],
     rank: 0,
     season: 5,
     unitKeywordList: ['BLADE_LINEAGE'],

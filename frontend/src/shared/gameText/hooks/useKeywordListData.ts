@@ -7,7 +7,7 @@ import {
 } from '@/shared/entityCatalog'
 import { BattleKeywordSpecListSchema } from '../schemas/KeywordSchemas'
 import { BattleKeywordsSchema } from '../schemas/BattleKeywordsSchemas'
-import type { BattleKeywordSpecEntry } from '../types/KeywordTypes'
+import type { BattleKeywordSpec } from '../types/KeywordTypes'
 import type { BattleKeywordI18nEntry } from '../types/StartBuffTypes'
 
 export const keywordListQueryKeys = createEntityListQueryKeys('keyword')
@@ -29,9 +29,9 @@ export const KEYWORD_LIST: EntityListDataConfig<
  *
  * Use this in shell components that should stay stable during language change.
  *
- * @returns Validated keyword spec map (id -> BattleKeywordSpecEntry)
+ * @returns Validated keyword spec map (id -> BattleKeywordSpec)
  */
-export function useKeywordListSpec(): Record<string, BattleKeywordSpecEntry> {
+export function useKeywordListSpec(): Record<string, BattleKeywordSpec> {
   return useEntityListSpec(KEYWORD_LIST)
 }
 

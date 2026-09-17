@@ -5,12 +5,12 @@ import { Button } from '@/components/ui/button'
 import { ThemePackViewer } from '../floorTheme/ThemePackViewer'
 import { FloorNoteDialog } from './FloorNoteDialog'
 import { cn } from '@/lib/utils'
-import type { ThemePackEntry } from '@/pages/themePack'
+import type { ThemePackSpec } from '@/pages/themePack'
 import type { NoteContent } from '@/shared/noteEditor'
 
 interface ThemePackTrackerCardProps {
   packId: string
-  packEntry: ThemePackEntry
+  packEntry: ThemePackSpec
   packName: string
   floorNumber: number
   noteContent: NoteContent

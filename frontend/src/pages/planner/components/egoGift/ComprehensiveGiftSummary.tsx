@@ -5,7 +5,7 @@ import { decodeAndOrderGiftSelections } from '@/pages/egoGift'
 import { CARD_MOBILE_SCALE } from '@/lib/constants'
 import { EmptyStatePlaceholder } from '@/components/feedback/EmptyStatePlaceholder'
 import { GIFT_ROW_PADDING_PX, giftRowMinHeightPx } from '../../lib/cardLayout'
-import type { EGOGiftListItem } from '@/pages/egoGift'
+import type { EGOGiftEntity } from '@/pages/egoGift'
 import type { EncodedGiftId, EnhancementLevel } from '@/shared/gameData'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
@@ -20,7 +20,7 @@ export interface ComprehensiveGiftSummaryProps {
 }
 
 interface DecodedGift {
-  item: EGOGiftListItem
+  item: EGOGiftEntity
   enhancement: EnhancementLevel
 }
 

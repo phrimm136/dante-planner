@@ -129,8 +129,8 @@ export const EGOI18nSchema = z.object({
 // Attack type enum for spec list
 export const EGOAtkTypeSchema = z.enum(['SLASH', 'PENETRATE', 'HIT'])
 
-// Spec list item schema
-export const EGOSpecListItemSchema = z.object({
+// Spec entry schema
+export const EGOSpecSchema = z.object({
   updateDate: z.number(),
   skillKeywordList: z.array(z.string()),
   battleKeywordList: z.array(z.string()),
@@ -143,6 +143,6 @@ export const EGOSpecListItemSchema = z.object({
 })
 
 // Record types for spec and name lists
-export const EGOSpecListSchema = z.record(EGOIdSchema, EGOSpecListItemSchema)
+export const EGOSpecListSchema = z.record(EGOIdSchema, EGOSpecSchema)
 /** Keys stay unbranded: the game ships i18n-only ids with no spec entry. */
 export const EGONameListSchema = z.record(z.string(), z.string())

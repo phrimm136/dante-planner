@@ -23,7 +23,7 @@ import { KeywordsDisplay } from '@/shared/gameText'
 import { useEGOGiftDetailSpec } from '@/pages/egoGift'
 import { ENHANCEMENT_LEVELS } from '@/shared/gameData'
 import { calculateEnhancementCost, parseTier } from '@/pages/egoGift'
-import type { EGOGiftListItem } from '@/pages/egoGift'
+import type { EGOGiftEntity } from '@/pages/egoGift'
 
 /**
  * Inner content component that uses Suspense-aware hooks
@@ -60,7 +60,7 @@ function EGOGiftDetailContent() {
     themePack: giftData.themePack,
     hardOnly: giftData.hardOnly,
     extremeOnly: giftData.extremeOnly,
-  } as EGOGiftListItem
+  } as EGOGiftEntity
 
   // Left column: Header (card + name), Metadata
   const leftColumn = (

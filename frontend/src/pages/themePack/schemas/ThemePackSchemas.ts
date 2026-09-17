@@ -46,7 +46,7 @@ export const ThemePackI18nEntrySchema = z
 export const ThemePackI18nSchema = z.record(z.string(), ThemePackI18nEntrySchema)
 
 // Theme pack entry schema
-export const ThemePackEntrySchema = z
+export const ThemePackSpecSchema = z
   .object({
     exceptionConditions: z.array(ExceptionConditionSchema),
     specificEgoGiftPool: z.array(EGOGiftIdSchema),
@@ -56,7 +56,7 @@ export const ThemePackEntrySchema = z
   .strict()
 
 // Theme pack list schema (Record keyed by pack ID)
-export const ThemePackListSchema = z.record(z.string(), ThemePackEntrySchema)
+export const ThemePackListSchema = z.record(z.string(), ThemePackSpecSchema)
 
 // Featured boss schema (unitId + portrait reference for a theme pack's boss roster)
 export const FeaturedBossSchema = z

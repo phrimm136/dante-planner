@@ -5,8 +5,8 @@ import {
   PlannerEditorStoreProvider,
   usePlannerEditorStore,
 } from '../../stores/usePlannerEditorStore'
-import { useIdentityListSpec, useIdentityListI18n } from '@/pages/identity'
-import { useEGOListSpec, useEGOListI18n } from '@/pages/ego'
+import { useIdentityListSpec, useIdentityListI18n, toIdentityEntity } from '@/pages/identity'
+import { useEGOListSpec, useEGOListI18n, toEGOEntity } from '@/pages/ego'
 import { useSearchMappings } from '@/shared/filter'
 import { matchesDeckFilter } from '../../lib/deckFilter'
 import { collectOwnedGiftIds } from '../../lib/deckEA'
@@ -16,9 +16,9 @@ import type {
   SinnerEquipment,
   DeckFilterState,
 } from '../../types/DeckTypes'
-import type { IdentityListItem } from '@/pages/identity'
-import type { EGOListItem } from '@/pages/ego'
-import { getSinnerCodeFromId, typedEntries } from '@/lib/utils'
+import type { IdentityEntity } from '@/pages/identity'
+import type { EGOEntity } from '@/pages/ego'
+import { getSinnerCodeFromId } from '@/lib/utils'
 import { type SkillData } from './SinnerGrid'
 import { DeckLoadoutSection } from './DeckLoadoutSection'
 import { DeckCatalogSection } from './DeckCatalogSection'
@@ -160,36 +160,13 @@ export function DeckBuilderContent({
   const egoI18n = useEGOListI18n()
 
   // Merge spec and i18n into identity/EGO arrays
-  const identities: IdentityListItem[] = (() => {
-    return typedEntries(identitySpec).map(([id, specData]) => ({
-      id,
-      name: identityI18n[id] || id,
-      rank: specData.rank,
-      updateDate: specData.updateDate,
-      unitKeywordList: specData.unitKeywordList,
-      skillKeywordList: specData.skillKeywordList,
-      battleKeywordList: specData.battleKeywordList ?? [],
-      attributeTypes: specData.attributeType,
-      atkTypes: specData.atkType,
-      defenseTypes: specData.defenseType,
-      season: specData.season,
-    }))
-  })()
+  const identities: IdentityEntity[] = Object.entries(identitySpec).map(([id, entry]) =>
+    toIdentityEntity(id, entry, identityI18n[id] || id),
+  )
 
-  const egos: EGOListItem[] = (() => {
-    return typedEntries(egoSpec).map(([id, specData]) => ({
-      id,
-      name: egoI18n[id] || id,
-      egoType: specData.egoType,
-      skillKeywordList: specData.skillKeywordList,
-      battleKeywordList: specData.battleKeywordList ?? [],
-      attributeTypes: specData.attributeType,
-      atkTypes: specData.atkType,
-      updateDate: specData.updateDate,
-      season: specData.season,
-      maxThreadspin: specData.maxThreadspin,
-    }))
-  })()
+  const egos: EGOEntity[] = Object.entries(egoSpec).map(([id, entry]) =>
+    toEGOEntity(id, entry, egoI18n[id] || id),
+  )
 
   // Get skill data for the compact identity row
   const skillDataMap: Record<string, SkillData> = (() => {
@@ -278,7 +255,7 @@ export function DeckBuilderContent({
 
   // Create EGO lookup map
   const egoMap = (() => {
-    const map: Record<string, EGOListItem> = {}
+    const map: Record<string, EGOEntity> = {}
     egos.forEach((e) => {
       map[e.id] = e
     })

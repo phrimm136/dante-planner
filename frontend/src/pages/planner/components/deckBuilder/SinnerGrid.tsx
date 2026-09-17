@@ -3,7 +3,7 @@ import { CardSlot } from '@/shared/cardLayout'
 import { SINNER_DECK_GEOMETRY } from '../../lib/cardLayout'
 import { useSinnerGridLayout } from '../../hooks/useSinnerGridLayout'
 import type { SinnerEquipment } from '../../types/DeckTypes'
-import type { Identity, IdentityListItem } from '@/pages/identity'
+import type { IdentityEntity } from '@/pages/identity'
 import { SinnerDeckCard } from './SinnerDeckCard'
 
 export interface SkillData {
@@ -14,7 +14,7 @@ export interface SkillData {
 interface SinnerGridProps {
   equipment: Record<string, SinnerEquipment>
   deploymentOrder: number[]
-  identities: Identity[]
+  identities: IdentityEntity[]
   skillDataMap: Record<string, SkillData>
   egoAffinityMap: Record<string, string>
   onToggleDeploy?: ((sinnerIndex: number) => void) | undefined
@@ -39,9 +39,9 @@ export const SinnerGrid = function SinnerGrid({
 
   // Memoize identity lookup map - only recompute when identities change
   const identityMap = (() => {
-    const map: Record<string, IdentityListItem> = {}
+    const map: Record<string, IdentityEntity> = {}
     identities.forEach((id) => {
-      map[id.id] = { ...id, battleKeywordList: (id as IdentityListItem).battleKeywordList ?? [] }
+      map[id.id] = id
     })
     return map
   })()
@@ -56,10 +56,7 @@ export const SinnerGrid = function SinnerGrid({
   })()
 
   return (
-    <div
-      className="grid mx-auto"
-      style={gridStyle}
-    >
+    <div className="grid mx-auto" style={gridStyle}>
       {SINNERS.map((sinnerName, index) => {
         const sinnerCode = String(index + 1)
         const sinnerEquipment = equipment[sinnerCode]

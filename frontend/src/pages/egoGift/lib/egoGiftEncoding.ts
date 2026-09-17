@@ -1,11 +1,11 @@
 import { GIFT_ID_PATTERN, EGOGiftIdSchema, EncodedGiftIdSchema } from '@/shared/gameData'
 import type { EGOGiftId, EncodedGiftId } from '@/shared/gameData'
 import type { EnhancementLevel } from '@/shared/gameData'
-import type { EGOGiftRecipe, EGOGiftListItem, EGOGiftSpec } from '@/pages/egoGift'
+import type { EGOGiftRecipe, EGOGiftEntity, EGOGiftSpec } from '@/pages/egoGift'
 import type { SortMode } from '@/shared/filter'
 import { sortEGOGifts } from './egoGiftSort'
 import { isMixedRecipe } from './egoGiftUtils'
-import { toGiftListItem } from './giftListItem'
+import { toEGOGiftEntity } from './egoGiftEntity'
 
 /**
  * Encodes a gift selection into a numeric string format
@@ -130,7 +130,7 @@ export function buildSelectionLookup(
  */
 export interface DecodedGiftSelection {
   encodedId: EncodedGiftId
-  item: EGOGiftListItem & { name: string }
+  item: EGOGiftEntity & { name: string }
   enhancement: EnhancementLevel
 }
 
@@ -160,10 +160,11 @@ export function decodeGiftSelections(
     const giftSpec = spec[giftId]
     if (!giftSpec) continue
 
+    const name = i18n[giftId] || giftId
     decoded.push({
       encodedId,
       enhancement,
-      item: toGiftListItem(giftId, giftSpec, i18n[giftId] || giftId),
+      item: { ...toEGOGiftEntity(giftId, giftSpec), name },
     })
   }
 

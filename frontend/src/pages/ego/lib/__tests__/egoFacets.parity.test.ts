@@ -11,9 +11,9 @@ import { getSinnerFromId } from '@/shared/gameData'
 import { enumerateSelectionStates, findParityMismatches } from '@/test-utils/facetParity'
 import { asEGOId } from '@/test-utils/fixtures'
 import { EGO_FACETS, type EGOFacetState } from '../egoFilter'
-import type { EGOListItem } from '../../types/EGOTypes'
+import type { EGOEntity } from '../../types/EGOTypes'
 
-function legacyMatches(ego: EGOListItem, state: EGOFacetState): boolean {
+function legacyMatches(ego: EGOEntity, state: EGOFacetState): boolean {
   const {
     selectedSinners,
     selectedKeywords,
@@ -36,7 +36,7 @@ function legacyMatches(ego: EGOListItem, state: EGOFacetState): boolean {
   }
 
   if (selectedBattleKeywords.size > 0) {
-    const hasAnyBattleKeyword = (ego.battleKeywordList ?? []).some((keyword) =>
+    const hasAnyBattleKeyword = ego.battleKeywordList.some((keyword) =>
       selectedBattleKeywords.has(keyword),
     )
     if (!hasAnyBattleKeyword) return false
@@ -44,14 +44,14 @@ function legacyMatches(ego: EGOListItem, state: EGOFacetState): boolean {
 
   if (selectedAttributes.size > 0) {
     const hasAllAttributes = Array.from(selectedAttributes).every((attr) =>
-      ego.attributeTypes.includes(attr),
+      ego.attributeType.some((value) => value === attr),
     )
     if (!hasAllAttributes) return false
   }
 
   if (selectedAtkTypes.size > 0) {
     const hasAllAtkTypes = Array.from(selectedAtkTypes).every((atkType) =>
-      ego.atkTypes.includes(atkType),
+      ego.atkType.includes(atkType),
     )
     if (!hasAllAtkTypes) return false
   }
@@ -67,14 +67,15 @@ function legacyMatches(ego: EGOListItem, state: EGOFacetState): boolean {
   return true
 }
 
-function makeEgo(overrides: Partial<EGOListItem> & { id: string }): EGOListItem {
+function makeEgo(overrides: Partial<EGOEntity> & { id: string }): EGOEntity {
   return {
     name: 'Fixture',
     egoType: 'ZAYIN',
     skillKeywordList: [],
     battleKeywordList: [],
-    attributeTypes: [],
-    atkTypes: [],
+    requirements: {},
+    attributeType: [],
+    atkType: [],
     updateDate: 20240101,
     season: 0,
     maxThreadspin: 4,
@@ -89,14 +90,14 @@ const EGO_20401 = asEGOId('20401')
 const EGO_20501 = asEGOId('20501')
 const EGO_21201 = asEGOId('21201')
 
-const ITEMS: EGOListItem[] = [
+const ITEMS: EGOEntity[] = [
   makeEgo({
     id: EGO_20101,
     egoType: 'ZAYIN',
     skillKeywordList: ['Combustion', 'Laceration'],
     battleKeywordList: ['Poise'],
-    attributeTypes: ['AZURE', 'VIOLET'],
-    atkTypes: ['SLASH', 'PENETRATE'],
+    attributeType: ['AZURE', 'VIOLET'],
+    atkType: ['SLASH', 'PENETRATE'],
     season: 1,
   }),
   makeEgo({
@@ -104,18 +105,18 @@ const ITEMS: EGOListItem[] = [
     egoType: 'ALEPH',
     skillKeywordList: ['Combustion'],
     battleKeywordList: ['Poise', 'Sinking'],
-    attributeTypes: ['AZURE'],
-    atkTypes: ['SLASH'],
+    attributeType: ['AZURE'],
+    atkType: ['SLASH'],
     season: 5,
   }),
   makeEgo({ id: EGO_20301, egoType: 'TETH' }),
   makeEgo({
     id: EGO_20401,
     egoType: 'ALEPH',
-    battleKeywordList: undefined as unknown as string[],
+    battleKeywordList: [],
     skillKeywordList: ['Laceration'],
-    attributeTypes: ['VIOLET'],
-    atkTypes: ['PENETRATE'],
+    attributeType: ['VIOLET'],
+    atkType: ['PENETRATE'],
     season: 1,
   }),
   makeEgo({
@@ -123,8 +124,8 @@ const ITEMS: EGOListItem[] = [
     egoType: 'ZAYIN',
     skillKeywordList: ['Combustion', 'Laceration', 'Tremor'],
     battleKeywordList: ['Sinking'],
-    attributeTypes: ['AZURE', 'VIOLET', 'AMBER'],
-    atkTypes: ['SLASH', 'PENETRATE', 'HIT'],
+    attributeType: ['AZURE', 'VIOLET', 'AMBER'],
+    atkType: ['SLASH', 'PENETRATE', 'HIT'],
     season: 5,
   }),
   makeEgo({
@@ -132,8 +133,8 @@ const ITEMS: EGOListItem[] = [
     egoType: 'WAW',
     skillKeywordList: ['Tremor'],
     battleKeywordList: ['Poise'],
-    attributeTypes: ['AMBER'],
-    atkTypes: ['HIT'],
+    attributeType: ['AMBER'],
+    atkType: ['HIT'],
     season: 1,
   }),
 ]

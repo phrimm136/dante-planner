@@ -6,7 +6,7 @@ import { CardSlot, EGO_GIFT_GEOMETRY, aspectOf } from '@/shared/cardLayout'
 import { getKeywordIconPath } from '@/shared/assets'
 import { EGO_GIFT_CARD, cqw, pct } from '../../lib/cardLayout'
 import { EGOGiftCard } from '../EGOGiftCard'
-import type { EGOGiftListItem } from '../../types/EGOGiftTypes'
+import type { EGOGiftEntity } from '../../types/EGOGiftTypes'
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'EN' } }),
@@ -19,7 +19,7 @@ const GIFT = {
   tag: ['TIER_2'],
   keyword: 'Burn',
   maxEnhancement: 2,
-} as unknown as EGOGiftListItem
+} as unknown as EGOGiftEntity
 
 function setViewport(width: number): void {
   Object.defineProperty(window, 'innerWidth', { configurable: true, value: width })

@@ -9,8 +9,8 @@
 import { describe, it, expect } from 'vitest'
 import { matchesDeckFilter } from '../deckFilter'
 import type { DeckFilterState, EntityMode } from '../../types/DeckTypes'
-import type { IdentityListItem } from '@/pages/identity'
-import type { EGOListItem } from '@/pages/ego'
+import type { IdentityEntity } from '@/pages/identity'
+import type { EGOEntity } from '@/pages/ego'
 import type { SearchMappings } from '@/shared/filter'
 import { asEGOId, asIdentityId } from '@/test-utils/fixtures'
 
@@ -41,7 +41,7 @@ function makeState(overrides: Partial<DeckFilterState> = {}): DeckFilterState {
 }
 
 // id 10101 -> sinner index 0 -> YiSang
-function makeIdentity(overrides: Partial<IdentityListItem> = {}): IdentityListItem {
+function makeIdentity(overrides: Partial<IdentityEntity> = {}): IdentityEntity {
   return {
     id: IDENTITY_10101,
     name: 'LCB Sinner Yi Sang',
@@ -50,24 +50,25 @@ function makeIdentity(overrides: Partial<IdentityListItem> = {}): IdentityListIt
     unitKeywordList: ['BLADE_LINEAGE'],
     skillKeywordList: ['Combustion', 'Laceration'],
     battleKeywordList: ['Poise'],
-    attributeTypes: ['AZURE', 'VIOLET'],
-    atkTypes: ['SLASH', 'PENETRATE'],
-    defenseTypes: ['GUARD'],
+    attributeType: ['AZURE', 'VIOLET'],
+    atkType: ['SLASH', 'PENETRATE'],
+    defenseType: ['GUARD'],
     season: 1,
     ...overrides,
   }
 }
 
 // id 20301 -> sinner index 2 -> DonQuixote
-function makeEgo(overrides: Partial<EGOListItem> = {}): EGOListItem {
+function makeEgo(overrides: Partial<EGOEntity> = {}): EGOEntity {
   return {
     id: EGO_20301,
     name: 'Dimension Shredder',
     egoType: 'ZAYIN',
     skillKeywordList: ['Combustion'],
     battleKeywordList: [],
-    attributeTypes: ['CRIMSON'],
-    atkTypes: ['SLASH'],
+    requirements: {},
+    attributeType: ['CRIMSON'],
+    atkType: ['SLASH'],
     updateDate: 20240101,
     season: 1,
     maxThreadspin: 4,

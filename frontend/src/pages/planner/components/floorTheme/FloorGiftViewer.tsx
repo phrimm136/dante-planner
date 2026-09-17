@@ -5,7 +5,7 @@ import { EGOGiftCard } from '@/pages/egoGift'
 import { EGOGiftTooltip } from '@/pages/egoGift'
 import { decodeAndOrderGiftSelections } from '@/pages/egoGift'
 import { CARD_MOBILE_SCALE } from '@/lib/constants'
-import type { EGOGiftListItem } from '@/pages/egoGift'
+import type { EGOGiftEntity } from '@/pages/egoGift'
 import type { EncodedGiftId, EnhancementLevel } from '@/shared/gameData'
 import { cn } from '@/lib/utils'
 import { EmptyStatePlaceholder } from '@/components/feedback/EmptyStatePlaceholder'
@@ -18,7 +18,7 @@ interface FloorGiftViewerProps {
 }
 
 interface DecodedGift {
-  item: EGOGiftListItem
+  item: EGOGiftEntity
   enhancement: EnhancementLevel
 }
 

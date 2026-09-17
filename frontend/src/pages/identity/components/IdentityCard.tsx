@@ -1,7 +1,7 @@
 import { Suspense, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { IdentityListItem } from '../types/IdentityTypes'
+import type { IdentityEntity } from '../types/IdentityTypes'
 import { Skeleton } from '@/components/ui/skeleton'
 import { IdentityName } from './IdentityName'
 import {
@@ -27,7 +27,7 @@ import {
 } from '../lib/cardLayout'
 
 interface IdentityCardProps {
-  identity: IdentityListItem
+  identity: IdentityEntity
   /** Override uptie level for image display (uses gacksung at 3+) */
   uptie?: number
   /** Override level display (defaults to MAX_LEVEL) */

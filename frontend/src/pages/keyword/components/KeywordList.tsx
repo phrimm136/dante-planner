@@ -13,20 +13,15 @@ import { useSearchTermSources } from '@/shared/filter'
 import {
   buildKeywordSearchTerms,
   matchesKeyword,
-  type KeywordFacetItem,
   type KeywordFacetState,
 } from '../lib/keywordFilter'
+import type { KeywordEntity } from '../types/KeywordTypes'
 import { KeywordCardLink } from './KeywordCardLink'
 
 const EMPTY_NAMES: Record<string, BattleKeywordI18nEntry> = {}
 
-interface KeywordListItem extends KeywordFacetItem {
-  id: string
-  iconId: string | null
-}
-
 interface KeywordListProps {
-  keywords: KeywordListItem[]
+  keywords: KeywordEntity[]
   store: FilterStore<KeywordFacetState>
 }
 
@@ -87,7 +82,7 @@ export function KeywordList({ keywords, store }: KeywordListProps) {
 }
 
 interface KeywordCardCellProps {
-  keyword: KeywordListItem
+  keyword: KeywordEntity
   keywordNames: Record<string, BattleKeywordI18nEntry>
   store: FilterStore<KeywordFacetState>
 }

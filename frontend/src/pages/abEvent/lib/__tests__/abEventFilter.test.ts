@@ -1,16 +1,14 @@
 import { describe, it, expect } from 'vitest'
 import type { FilterState } from '@/components/hooks/filterStore'
-import {
-  buildAbEventSearchTerms,
-  matchesAbEvent,
-  type AbEventFacetState,
-  type AbEventListItem,
-} from '../abEventFilter'
+import { buildAbEventSearchTerms, matchesAbEvent, type AbEventFacetState } from '../abEventFilter'
+import { toAbEventEntity } from '../abEventEntity'
+import type { AbEventEntity } from '../../types/AbEventTypes'
 
-const ITEM: AbEventListItem = [
-  '901001',
-  { relatedEgoGifts: ['9001'], relatedThemePacks: ['1002'], hasImage: true },
-]
+const ITEM: AbEventEntity = toAbEventEntity('901001', {
+  relatedEgoGifts: ['9001'],
+  relatedThemePacks: ['1002'],
+  hasImage: true,
+})
 
 function state(
   searchQuery = '',

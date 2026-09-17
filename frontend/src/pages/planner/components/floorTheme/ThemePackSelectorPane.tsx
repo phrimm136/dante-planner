@@ -8,7 +8,7 @@ import { CARD_MOBILE_SCALE_DENSE, DIFFICULTY_COLORS } from '@/lib/constants'
 import { THEME_PACK_GEOMETRY } from '@/shared/cardLayout'
 import { ThemePackViewer } from './ThemePackViewer'
 import { ThemePackExclusiveGifts } from './ThemePackExclusiveGifts'
-import type { ThemePackListType, ThemePackEntry } from '@/pages/themePack'
+import type { ThemePackListType, ThemePackSpec } from '@/pages/themePack'
 
 /** The theme pack box with its height left to the card. */
 interface ThemePackSelectorPaneProps {
@@ -64,8 +64,8 @@ function filterThemePacks(
   floorNumber: number,
   difficulty: DungeonIdx,
   usedThemePackIds: Set<string>,
-): { id: string; entry: ThemePackEntry }[] {
-  const result: { id: string; entry: ThemePackEntry }[] = []
+): { id: string; entry: ThemePackSpec }[] {
+  const result: { id: string; entry: ThemePackSpec }[] = []
 
   // Convert floor number to selectableFloors index
   // 1 → 0, 2 → 1, 3 → 2, 4 → 3, 5-10 → 4

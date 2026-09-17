@@ -5,8 +5,12 @@
  * not directly represented in JSON data files.
  */
 
+import type { Entity } from '@/shared/filter'
+import type { AbEventId } from '@/shared/gameData'
+import type { AbEventSpec } from '../schemas/AbEventSchemas'
+
 export type {
-  AbEventSpecListEntry,
+  AbEventSpec,
   AbEventSpecList,
   AbEventData,
   AbEventEffect,
@@ -17,3 +21,5 @@ export type {
   AbEventI18n,
   AbEventShared,
 } from '../schemas/AbEventSchemas'
+
+export type AbEventEntity = Entity<AbEventId, AbEventSpec>

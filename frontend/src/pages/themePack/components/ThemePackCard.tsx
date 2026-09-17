@@ -9,13 +9,13 @@ import { THEME_PACK_GEOMETRY, aspectOf, layerStyle, pctStyle } from '@/shared/ca
 import { cn } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
 import { isExtremePack } from '../types/ThemePackTypes'
-import type { ThemePackEntry } from '../types/ThemePackTypes'
+import type { ThemePackSpec } from '../types/ThemePackTypes'
 import { THEME_PACK_ART, THEME_PACK_HOVER_FADE_MS, THEME_PACK_LAYOUT } from '../lib/cardLayout'
 import { ThemePackName } from './ThemePackName'
 
 interface ThemePackCardProps {
   packId: string
-  packEntry: ThemePackEntry
+  packEntry: ThemePackSpec
   /** Fade the hover sprite in while the pointer is over the card. */
   enableHoverHighlight?: boolean
   /** Hold the focused sprite on, for click-to-pin selection. */

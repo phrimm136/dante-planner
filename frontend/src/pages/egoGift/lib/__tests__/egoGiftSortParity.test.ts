@@ -10,7 +10,7 @@ import { describe, it, expect } from 'vitest'
 import { sortEGOGifts } from '../egoGiftSort'
 import { KEYWORD_ORDER } from '@/shared/gameData'
 
-import type { EGOGiftListItem } from '../../types/EGOGiftTypes'
+import type { EGOGiftEntity } from '../../types/EGOGiftTypes'
 import type { SortMode } from '@/shared/filter'
 import { EGOGiftIdSchema } from '@/shared/gameData'
 
@@ -35,7 +35,7 @@ function getTierValue(tag: string[]): number {
 }
 
 /** Verbatim transcription of the pre-table comparator. */
-function legacySort(gifts: EGOGiftListItem[], sortMode: SortMode): EGOGiftListItem[] {
+function legacySort(gifts: EGOGiftEntity[], sortMode: SortMode): EGOGiftEntity[] {
   return [...gifts].sort((a, b) => {
     const aCategoryIndex = getCategoryIndex(a.keyword)
     const bCategoryIndex = getCategoryIndex(b.keyword)
@@ -74,12 +74,12 @@ const TAGS: string[][] = [
 ]
 
 /** Every keyword × tag pair, each at two ids, so ties break at each ladder level. */
-const GIFTS: EGOGiftListItem[] = KEYWORDS.flatMap((keyword, k) =>
+const GIFTS: EGOGiftEntity[] = KEYWORDS.flatMap((keyword, k) =>
   TAGS.flatMap((tag, t) =>
     [0, 1].map((n) => ({
       id: EGOGiftIdSchema.parse(String(9000 + k * 20 + t * 2 + n)),
       name: `Gift ${k}-${t}-${n}`,
-      tag: tag as EGOGiftListItem['tag'],
+      tag: tag as EGOGiftEntity['tag'],
       keyword,
       battleKeywordList: [],
       attributeType: 'CRIMSON',

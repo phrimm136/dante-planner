@@ -5,7 +5,7 @@ import {
   IdentityDataSchema,
   IdentityPassiveI18nSchema,
   IdentitySkillI18nSchema,
-  IdentitySpecListItemSchema,
+  IdentitySpecSchema,
 } from '../IdentitySchemas'
 
 describe('DefenseTypeSchema', () => {
@@ -25,7 +25,7 @@ describe('DefenseTypeSchema', () => {
   })
 })
 
-describe('IdentitySpecListItemSchema with defenseType', () => {
+describe('IdentitySpecSchema with defenseType', () => {
   const baseSpec = {
     updateDate: 20260101,
     skillKeywordList: ['keyword1'],
@@ -38,7 +38,7 @@ describe('IdentitySpecListItemSchema with defenseType', () => {
   }
 
   it('valid spec item with single defense type', () => {
-    const result = IdentitySpecListItemSchema.safeParse({
+    const result = IdentitySpecSchema.safeParse({
       ...baseSpec,
       defenseType: ['GUARD'],
     })
@@ -46,7 +46,7 @@ describe('IdentitySpecListItemSchema with defenseType', () => {
   })
 
   it('valid spec item with multiple defense types', () => {
-    const result = IdentitySpecListItemSchema.safeParse({
+    const result = IdentitySpecSchema.safeParse({
       ...baseSpec,
       defenseType: ['EVADE', 'COUNTER'],
     })
@@ -54,7 +54,7 @@ describe('IdentitySpecListItemSchema with defenseType', () => {
   })
 
   it('spec item with invalid defense type fails', () => {
-    const result = IdentitySpecListItemSchema.safeParse({
+    const result = IdentitySpecSchema.safeParse({
       ...baseSpec,
       defenseType: ['INVALID'],
     })
@@ -62,7 +62,7 @@ describe('IdentitySpecListItemSchema with defenseType', () => {
   })
 
   it('spec item with empty defenseType array passes', () => {
-    const result = IdentitySpecListItemSchema.safeParse({
+    const result = IdentitySpecSchema.safeParse({
       ...baseSpec,
       defenseType: [],
     })

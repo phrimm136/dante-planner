@@ -52,7 +52,7 @@ export type {
   EGOGiftSpec,
   EGOGiftData,
   EGOGiftI18n,
-  EGOGiftListItem,
+  EGOGiftEntity,
   EGOGiftNameList,
 } from './types/EGOGiftTypes'
 export {
@@ -83,4 +83,4 @@ export {
   giftDisplayName,
 } from './lib/egoGiftEncoding'
 export type { GiftSelectionEntry, DecodedGiftSelection } from './lib/egoGiftEncoding'
-export { toGiftListItem, toGiftListItems, toUnknownGiftListItem } from './lib/giftListItem'
+export { toEGOGiftEntity, toUnknownEGOGiftEntity } from './lib/egoGiftEntity'

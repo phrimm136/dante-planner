@@ -1,19 +1,18 @@
 import { useTranslation } from 'react-i18next'
 import { DEFAULT_DEPLOYMENT_MAX } from '@/shared/gameData'
 import { PlannerSection } from '@/components/layout/PlannerSection'
-import { useIdentityListSpec, useIdentityListI18n } from '@/pages/identity'
+import { useIdentityListSpec, useIdentityListI18n, toIdentityEntity } from '@/pages/identity'
 import { useEGOListSpec } from '@/pages/ego'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import type { EGOGiftId } from '@/shared/gameData'
 import type { SinnerEquipment, DeckState } from '../../types/DeckTypes'
-import type { IdentityListItem } from '@/pages/identity'
+import type { IdentityEntity } from '@/pages/identity'
 import { SinnerGrid, type SkillData } from './SinnerGrid'
 import { collectOwnedGiftIds } from '../../lib/deckEA'
 import { StatusViewer } from './StatusViewer'
 import { DeckBuilderActionBar } from './DeckBuilderActionBar'
 import type { DeckBuilderActions } from './DeckBuilderContent'
 import { SECTION_STYLES } from '@/lib/constants'
-import { typedEntries } from '@/lib/utils'
 
 /**
  * Everything the summary renders that it does not fetch for itself.
@@ -63,20 +62,10 @@ export function DeckBuilderSummary({
   const identityI18n = useIdentityListI18n()
   const egoSpec = useEGOListSpec()
 
-  // Merge spec and i18n into IdentityListItem array for display
-  const identities: IdentityListItem[] = typedEntries(identitySpec).map(([id, specData]) => ({
-    id,
-    name: identityI18n[id] || id,
-    rank: specData.rank,
-    updateDate: specData.updateDate,
-    unitKeywordList: specData.unitKeywordList,
-    skillKeywordList: specData.skillKeywordList,
-    battleKeywordList: specData.battleKeywordList ?? [],
-    attributeTypes: specData.attributeType,
-    atkTypes: specData.atkType,
-    defenseTypes: specData.defenseType,
-    season: specData.season,
-  }))
+  // Merge spec and i18n into IdentityEntity array for display
+  const identities: IdentityEntity[] = Object.entries(identitySpec).map(([id, entry]) =>
+    toIdentityEntity(id, entry, identityI18n[id] || id),
+  )
 
   // Get skill data (affinities and attack types) for each equipped identity
   const skillDataMap: Record<string, SkillData> = (() => {

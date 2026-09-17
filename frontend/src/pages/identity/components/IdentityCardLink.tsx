@@ -1,12 +1,12 @@
 import { type ReactNode } from 'react'
 import { Link } from '@tanstack/react-router'
-import type { IdentityListItem } from '../types/IdentityTypes'
+import type { IdentityEntity } from '../types/IdentityTypes'
 import { cn } from '@/lib/utils'
 import { IdentityCard } from './IdentityCard'
 
 interface IdentityCardLinkProps {
   /** The identity data to display */
-  identity: IdentityListItem
+  identity: IdentityEntity
   /** Custom overlay content (e.g., selected indicator) */
   overlay?: ReactNode
   /** Additional CSS classes for the link wrapper */

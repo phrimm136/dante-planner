@@ -1,4 +1,5 @@
 import type { z } from 'zod'
+import type { Entity } from '@/shared/filter'
 import type { EGOGiftId } from '@/shared/gameData'
 import type {
   StandardRecipeSchema,
@@ -19,26 +20,12 @@ export type EGOGiftData = z.infer<typeof EGOGiftDataSchema>
 export type EGOGiftI18n = z.infer<typeof EGOGiftI18nSchema>
 
 /**
- * EGO Gift list item for list/grid views.
+ * EGO Gift entity for list/grid views.
  *
  * Assembled in list components from already-validated spec + name list — not a
  * direct boundary shape, so it stays a plain TS type. Components should prefer
  * EGOGiftName for granular Suspense boundaries.
  */
-export interface EGOGiftListItem {
-  id: EGOGiftId
-  /** Optional - populated when i18n is loaded */
-  name?: string
-  tag: string[]
-  keyword: string | null
-  battleKeywordList: string[]
-  attributeType: string
-  themePack: string[]
-  maxEnhancement: 0 | 1 | 2
-  recipe?: EGOGiftRecipe
-  hardOnly?: boolean
-  extremeOnly?: boolean
-  fusioned?: boolean
-}
+export type EGOGiftEntity = Entity<EGOGiftId, EGOGiftSpec>
 
 export type EGOGiftNameList = z.infer<typeof EGOGiftNameListSchema>

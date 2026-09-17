@@ -1,13 +1,14 @@
 import type { AbEventNameList, AbEventSpecList } from '../schemas/AbEventSchemas'
 import { AB_EVENT_GEOMETRY } from '../lib/cardLayout'
 import type { FilterStore } from '@/components/hooks/filterStore'
-import { entriesSortedById, FilteredEntityGrid, useSearchTermSources } from '@/shared/filter'
+import { FilteredEntityGrid, useSearchTermSources } from '@/shared/filter'
 import { AB_EVENT_LIST } from '../hooks/useAbEventListData'
 import {
   buildAbEventSearchTerms,
   matchesAbEvent,
   type AbEventFacetState,
 } from '../lib/abEventFilter'
+import { toAbEventEntity } from '../lib/abEventEntity'
 import { AbEventCardLink } from './AbEventCardLink'
 
 const EMPTY_DESCS: AbEventNameList = {}
@@ -25,17 +26,19 @@ interface AbEventListProps {
  */
 export function AbEventList({ spec, store }: AbEventListProps) {
   const { names: descs } = useSearchTermSources(AB_EVENT_LIST, EMPTY_DESCS, false)
-  const sortedEvents = entriesSortedById(spec)
+  const sortedEvents = Object.entries(spec)
+    .map(([id, entry]) => toAbEventEntity(id, entry))
+    .sort((a, b) => a.id.localeCompare(b.id))
 
   return (
     <FilteredEntityGrid
       items={sortedEvents}
-      getKey={([eventId]) => eventId}
+      getKey={(item) => item.id}
       store={store}
       matches={matchesAbEvent}
-      buildTerms={([eventId]) => buildAbEventSearchTerms(eventId, descs)}
-      renderCard={([eventId, entry]) => (
-        <AbEventCardLink eventId={eventId} hasImage={entry.hasImage} illustId={entry.illustId} />
+      buildTerms={(item) => buildAbEventSearchTerms(item.id, descs)}
+      renderCard={(item) => (
+        <AbEventCardLink eventId={item.id} hasImage={item.hasImage} illustId={item.illustId} />
       )}
       emptyStateKey="abEvent.emptyState"
       emptyStateFallback="No events found."

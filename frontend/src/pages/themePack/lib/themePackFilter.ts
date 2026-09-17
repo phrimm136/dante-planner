@@ -10,7 +10,7 @@ import type { EntityMatcher, Facet } from '@/shared/filter'
 import { createEntityMatcher } from '@/shared/filter'
 import type { DungeonIdx, ThemePackFloor } from '@/shared/gameData'
 import type { ThemePackI18nSchema } from '../schemas/ThemePackSchemas'
-import type { ThemePackEntry } from '../types/ThemePackTypes'
+import type { ThemePackEntity } from '../types/ThemePackTypes'
 
 export interface ThemePackFacetState {
   selectedDifficulties: ReadonlySet<DungeonIdx>
@@ -18,7 +18,7 @@ export interface ThemePackFacetState {
   selectedEgoGifts: ReadonlySet<string>
 }
 
-export const THEME_PACK_FACETS: readonly Facet<ThemePackEntry, ThemePackFacetState>[] = [
+export const THEME_PACK_FACETS: readonly Facet<ThemePackEntity, ThemePackFacetState>[] = [
   {
     sel: (s) => s.selectedDifficulties,
     get: (e) => e.exceptionConditions.map((c) => c.dungeonIdx),
@@ -49,5 +49,5 @@ export function buildThemePackSearchTerms(
 }
 
 /** Whether one theme pack survives the current facets and search query. */
-export const matchesThemePack: EntityMatcher<ThemePackEntry, ThemePackFacetState> =
+export const matchesThemePack: EntityMatcher<ThemePackEntity, ThemePackFacetState> =
   createEntityMatcher(THEME_PACK_FACETS)

@@ -1,4 +1,4 @@
-import type { EGOListItem } from '../types/EGOTypes'
+import type { EGOEntity } from '../types/EGOTypes'
 import { useSearchTermSources } from '@/shared/filter'
 import { EGO_LIST } from '../hooks/useEGOListData'
 import type { FilterStore } from '@/components/hooks/filterStore'
@@ -10,7 +10,7 @@ import { EGOCardLink } from './EGOCardLink'
 const EMPTY_NAMES: Record<string, string> = {}
 
 interface EGOListProps {
-  egos: EGOListItem[]
+  egos: EGOEntity[]
   store: FilterStore<EGOFacetState>
 }
 

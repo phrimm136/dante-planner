@@ -1,11 +1,11 @@
 import { Link } from '@tanstack/react-router'
 import { cn } from '@/lib/utils'
 import { ThemePackCard } from './ThemePackCard'
-import type { ThemePackEntry } from '../types/ThemePackTypes'
+import type { ThemePackSpec } from '../types/ThemePackTypes'
 
 interface ThemePackCardLinkProps {
   packId: string
-  packEntry: ThemePackEntry
+  packEntry: ThemePackSpec
   className?: string
 }
 

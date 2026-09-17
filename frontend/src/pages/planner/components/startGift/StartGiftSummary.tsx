@@ -4,7 +4,7 @@ import {
   EGOGiftCard,
   getBaseGiftId,
   toEGOGiftCardProps,
-  toUnknownGiftListItem,
+  toUnknownEGOGiftEntity,
 } from '@/pages/egoGift'
 import type { EncodedGiftId } from '@/shared/gameData'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
@@ -61,7 +61,7 @@ export function StartGiftSummary({
       const giftSpec = spec[giftId]
       const name = i18n[giftId] || `Gift ${giftId}`
 
-      if (!giftSpec) return toUnknownGiftListItem(giftId, name)
+      if (!giftSpec) return toUnknownEGOGiftEntity(giftId, name)
 
       return { ...toEGOGiftCardProps(giftId, giftSpec), name }
     })

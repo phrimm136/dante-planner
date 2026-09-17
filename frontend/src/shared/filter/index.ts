@@ -40,6 +40,8 @@ export type { SearchMappings } from './hooks/useSearchMappings'
 
 export { applyFacets } from './lib/applyFacets'
 export type { Facet, FacetMode } from './lib/applyFacets'
+export { createEntityBuilder } from './lib/entitySection'
+export type { AnyEntitySection, IdSchema, Entity, EntitySection } from './lib/entitySection'
 export { createEntityMatcher } from './lib/entityMatcher'
 export type { EntityMatcher } from './lib/entityMatcher'
 export { calculateActiveFilterCount } from './lib/filterUtils'

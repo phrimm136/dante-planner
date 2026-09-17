@@ -4,12 +4,15 @@
   "jsPlugins": [
     "eslint-plugin-react-refresh",
     "eslint-plugin-react-you-might-not-need-an-effect",
-    { "name": "reacthooks", "specifier": "eslint-plugin-react-hooks" }
+    { "name": "reacthooks", "specifier": "eslint-plugin-react-hooks" },
+    "./lint/entity-plugin.js"
   ],
   "categories": {
     "correctness": "error"
   },
   "rules": {
+    "entity/singular-builder": "error",
+    "entity/no-plural-builder": "error",
     "jsx-a11y/prefer-tag-over-role": "off",
     "react-hooks/rules-of-hooks": "error",
     "reacthooks/capitalized-calls": "error",

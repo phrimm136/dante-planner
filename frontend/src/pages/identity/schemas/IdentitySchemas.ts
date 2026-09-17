@@ -151,8 +151,8 @@ export const AtkTypeSchema = z.enum(ATK_TYPES)
 // Defense type enum for spec list
 export const DefenseTypeSchema = z.enum(DEF_TYPES)
 
-// Spec list item schema
-export const IdentitySpecListItemSchema = z.object({
+// Spec entry schema
+export const IdentitySpecSchema = z.object({
   updateDate: z.number(),
   skillKeywordList: z.array(z.string()),
   battleKeywordList: z.array(z.string()),
@@ -165,6 +165,6 @@ export const IdentitySpecListItemSchema = z.object({
 })
 
 // Record types for spec and name lists
-export const IdentitySpecListSchema = z.record(IdentityIdSchema, IdentitySpecListItemSchema)
+export const IdentitySpecListSchema = z.record(IdentityIdSchema, IdentitySpecSchema)
 /** Keys stay unbranded: the game ships i18n-only ids (e.g. 40501) with no spec entry. */
 export const IdentityNameListSchema = z.record(z.string(), z.string())

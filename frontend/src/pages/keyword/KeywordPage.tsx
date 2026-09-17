@@ -6,6 +6,8 @@ import { useFilterStore } from '@/components/hooks/filterStore'
 import type { FilterStore } from '@/components/hooks/filterStore'
 import { keywordFilterStore } from './stores/keywordFilterStore'
 import type { KeywordFacetState } from './lib/keywordFilter'
+import { toKeywordEntity } from './lib/keywordEntity'
+import type { BattleKeywordSpecList } from './types/KeywordTypes'
 import { EntityListPage } from '@/shared/filter'
 import { FilterPageLayout } from '@/shared/filter'
 import { FilterSection } from '@/shared/filter'
@@ -30,28 +32,12 @@ function KeywordCardGrid({
   spec,
   store,
 }: {
-  spec: Record<
-    string,
-    {
-      iconId: string | null
-      buffType: string
-      identities: string[]
-      egos: string[]
-      egoGifts: string[]
-    }
-  >
+  spec: BattleKeywordSpecList
   store: FilterStore<KeywordFacetState>
 }) {
   const keywords = Object.entries(spec)
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([id, entry]) => ({
-      id,
-      iconId: entry.iconId,
-      buffType: entry.buffType,
-      identities: entry.identities,
-      egos: entry.egos,
-      egoGifts: entry.egoGifts,
-    }))
+    .map(([id, entry]) => toKeywordEntity(id, entry))
+    .sort((a, b) => a.id.localeCompare(b.id))
 
   return <KeywordList keywords={keywords} store={store} />
 }

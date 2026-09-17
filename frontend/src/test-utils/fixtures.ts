@@ -8,7 +8,7 @@ import {
 import {
   EGOGiftSpecSchema,
   toEGOGiftCardProps,
-  type EGOGiftListItem,
+  type EGOGiftEntity,
   type EGOGiftSpec,
 } from '@/pages/egoGift'
 import {
@@ -126,10 +126,10 @@ export function buildPlannerSummary(overrides: Partial<PlannerSummary> = {}): Pl
 }
 
 /**
- * A gift list item assembled the way production assembles one: a spec parsed at
- * the boundary schema, then merged into a list item by `toEGOGiftCardProps`.
+ * A gift entity assembled the way production assembles one: a spec parsed at
+ * the boundary schema, then merged into an entity by `toEGOGiftCardProps`.
  */
-export function buildEgoGiftListItem(overrides: Partial<EGOGiftListItem> = {}): EGOGiftListItem {
+export function buildEgoGiftEntity(overrides: Partial<EGOGiftEntity> = {}): EGOGiftEntity {
   const { id = '9001', name = 'Fixture Gift', ...specOverrides } = overrides
   const spec = EGOGiftSpecSchema.parse({
     tag: ['TIER_3'],

@@ -4,12 +4,12 @@ import { CARD_MOBILE_SCALE } from '@/lib/constants'
 import { CardSlot, THEME_PACK_GEOMETRY } from '@/shared/cardLayout'
 import { EmptyStatePlaceholder } from '@/components/feedback/EmptyStatePlaceholder'
 import { ThemePackCard } from '@/pages/themePack'
-import type { ThemePackEntry } from '@/pages/themePack'
+import type { ThemePackSpec } from '@/pages/themePack'
 
 /** The theme pack box with its height left to the card. */
 interface ThemePackViewerProps {
   packId: string
-  packEntry: ThemePackEntry
+  packEntry: ThemePackSpec
   /** Accessible label; the card prints the localized name itself */
   packName: string
   onClick?: () => void

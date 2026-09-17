@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest'
 import {
-  BattleKeywordSpecEntrySchema,
+  BattleKeywordSpecSchema,
   BattleKeywordSpecListSchema,
   BattleKeywordNameListSchema,
 } from '../KeywordSchemas'
 
-describe('BattleKeywordSpecEntrySchema', () => {
+describe('BattleKeywordSpecSchema', () => {
   const validEntry = {
     iconId: 'Sinking',
     buffType: 'Negative',
@@ -15,12 +15,12 @@ describe('BattleKeywordSpecEntrySchema', () => {
   }
 
   it('accepts valid entry with all fields', () => {
-    const result = BattleKeywordSpecEntrySchema.safeParse(validEntry)
+    const result = BattleKeywordSpecSchema.safeParse(validEntry)
     expect(result.success).toBe(true)
   })
 
   it('accepts entry with null iconId', () => {
-    const result = BattleKeywordSpecEntrySchema.safeParse({
+    const result = BattleKeywordSpecSchema.safeParse({
       ...validEntry,
       iconId: null,
     })
@@ -28,7 +28,7 @@ describe('BattleKeywordSpecEntrySchema', () => {
   })
 
   it('accepts entry with empty arrays', () => {
-    const result = BattleKeywordSpecEntrySchema.safeParse({
+    const result = BattleKeywordSpecSchema.safeParse({
       iconId: null,
       buffType: 'Neutral',
       identities: [],
@@ -40,30 +40,30 @@ describe('BattleKeywordSpecEntrySchema', () => {
 
   it('rejects entry missing buffType', () => {
     const { buffType: _, ...incomplete } = validEntry
-    const result = BattleKeywordSpecEntrySchema.safeParse(incomplete)
+    const result = BattleKeywordSpecSchema.safeParse(incomplete)
     expect(result.success).toBe(false)
   })
 
   it('rejects entry missing identities', () => {
     const { identities: _, ...incomplete } = validEntry
-    const result = BattleKeywordSpecEntrySchema.safeParse(incomplete)
+    const result = BattleKeywordSpecSchema.safeParse(incomplete)
     expect(result.success).toBe(false)
   })
 
   it('rejects entry missing egos', () => {
     const { egos: _, ...incomplete } = validEntry
-    const result = BattleKeywordSpecEntrySchema.safeParse(incomplete)
+    const result = BattleKeywordSpecSchema.safeParse(incomplete)
     expect(result.success).toBe(false)
   })
 
   it('rejects entry missing egoGifts', () => {
     const { egoGifts: _, ...incomplete } = validEntry
-    const result = BattleKeywordSpecEntrySchema.safeParse(incomplete)
+    const result = BattleKeywordSpecSchema.safeParse(incomplete)
     expect(result.success).toBe(false)
   })
 
   it('rejects extra fields (strict mode)', () => {
-    const result = BattleKeywordSpecEntrySchema.safeParse({
+    const result = BattleKeywordSpecSchema.safeParse({
       ...validEntry,
       name: 'Sinking',
     })

@@ -12,14 +12,14 @@ import { AbEventIdSchema } from '@/shared/gameData'
 // Spec List (aggregated, for list page)
 // =============================================================================
 
-export const AbEventSpecListEntrySchema = z.object({
+export const AbEventSpecSchema = z.object({
   relatedEgoGifts: z.array(z.string()),
   relatedThemePacks: z.array(z.string()),
   hasImage: z.boolean(),
   illustId: z.string().optional(),
 })
 
-export const AbEventSpecListSchema = z.record(AbEventIdSchema, AbEventSpecListEntrySchema)
+export const AbEventSpecListSchema = z.record(AbEventIdSchema, AbEventSpecSchema)
 
 export const AbEventNameListSchema = z.record(z.string(), z.string())
 
@@ -171,7 +171,7 @@ export const AbEventSharedSchema = z.object({
 // Derived Types
 // =============================================================================
 
-export type AbEventSpecListEntry = z.infer<typeof AbEventSpecListEntrySchema>
+export type AbEventSpec = z.infer<typeof AbEventSpecSchema>
 export type AbEventSpecList = z.infer<typeof AbEventSpecListSchema>
 export type AbEventNameList = z.infer<typeof AbEventNameListSchema>
 export type AbEventData = z.infer<typeof AbEventDataSchema>

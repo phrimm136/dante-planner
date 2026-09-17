@@ -17,7 +17,7 @@ import { EGO_GEOMETRY, aspectOf, layerStyle, pctStyle } from '@/shared/cardLayou
 import { getSinnerFromId } from '@/shared/gameData'
 import { cn } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
-import type { EGOListItem } from '../types/EGOTypes'
+import type { EGOEntity } from '../types/EGOTypes'
 import {
   EGO_CARD_BADGE_SKEW,
   EGO_CARD_BADGE_SKEW_ORIGIN,
@@ -31,7 +31,7 @@ import { EGOName } from './EGOName'
 
 interface EGOCardProps {
   /** The EGO data to display */
-  ego: EGOListItem
+  ego: EGOEntity
   /** Show the ring at full brightness (selected state) */
   isSelected?: boolean
   /** Custom overlay content (e.g., selected indicator) */
@@ -47,8 +47,8 @@ interface EGOCardProps {
  */
 export function EGOCard({ ego, isSelected = false, overlay, className }: EGOCardProps) {
   const { t } = useTranslation(['common', 'database'])
-  const { id, egoType: rank, attributeTypes, maxThreadspin } = ego
-  const [primaryAttributeType] = attributeTypes
+  const { id, egoType: rank, attributeType, maxThreadspin } = ego
+  const [primaryAttributeType] = attributeType
   const sinner = getSinnerFromId(id)
   const maskPath = getEGOMaskPath()
 

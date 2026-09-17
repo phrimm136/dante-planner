@@ -111,12 +111,14 @@ export {
   SkillIdSchema,
   ThemePackIdSchema,
   AbEventIdSchema,
+  BattleKeywordIdSchema,
   IDENTITY_ID_PATTERN,
   EGO_ID_PATTERN,
   GIFT_ID_PATTERN,
   GIFT_ENHANCEMENT_PREFIX_PATTERN,
   THEME_PACK_ID_PATTERN,
   ENTITY_MEMBER_ID_PATTERN,
+  BATTLE_KEYWORD_ID_PATTERN,
 } from './ids'
 export type {
   EntityId,
@@ -129,6 +131,7 @@ export type {
   SkillId,
   ThemePackId,
   AbEventId,
+  BattleKeywordId,
 } from './ids'
 
 export { SkillDescEntrySchema } from './schemas/SkillSchemas'

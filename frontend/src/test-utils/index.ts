@@ -4,7 +4,7 @@
  */
 export { createTestFilterStore } from './filterStore'
 export {
-  buildEgoGiftListItem,
+  buildEgoGiftEntity,
   buildEgoGiftSpecList,
   buildFloorSelection,
   buildPlannerSummary,

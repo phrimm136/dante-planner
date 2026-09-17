@@ -19,9 +19,9 @@ import {
 } from '../egoGiftEncoding'
 import { sortEGOGifts } from '../egoGiftSort'
 
-import type { EGOGiftListItem, EGOGiftSpec } from '../../index'
+import type { EGOGiftEntity, EGOGiftSpec } from '../../index'
 import type { EnhancementLevel } from '@/shared/gameData'
-import { toGiftListItem } from '../giftListItem'
+import { toEGOGiftEntity } from '../egoGiftEntity'
 import { asEncodedGiftId } from '@/test-utils/fixtures'
 
 const ENCODED_9001 = asEncodedGiftId('9001')
@@ -76,7 +76,7 @@ const IDS = [
 const UNDECODABLE_IDS = ['abcd', '', '900', '390001']
 
 interface LegacyDecoded {
-  item: EGOGiftListItem
+  item: EGOGiftEntity
   enhancement: EnhancementLevel
 }
 
@@ -94,7 +94,7 @@ function legacyDecodeAndSort(
     const giftSpec = spec[giftId]
     if (giftSpec) {
       gifts.push({
-        item: toGiftListItem(giftId, giftSpec, i18n[giftId] || giftId),
+        item: toEGOGiftEntity(giftId, giftSpec, i18n[giftId] || giftId),
         enhancement,
       })
     }

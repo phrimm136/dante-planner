@@ -1,4 +1,4 @@
-import type { EGOGiftListItem } from '@/pages/egoGift'
+import type { EGOGiftEntity } from '@/pages/egoGift'
 import type { SortMode } from '@/shared/filter'
 import type { DungeonIdx } from '@/shared/gameData'
 import { DUNGEON_IDX } from '@/shared/gameData'
@@ -18,19 +18,19 @@ import { sortEGOGifts } from '@/pages/egoGift'
  * dropped when the floor's dungeon index is below their requirement.
  */
 export function bucketAndSortFloorGifts(
-  gifts: EGOGiftListItem[],
+  gifts: EGOGiftEntity[],
   themePackId: string,
   difficulty: DungeonIdx,
   sortMode: SortMode,
-): EGOGiftListItem[] {
+): EGOGiftEntity[] {
   const difficultyFiltered = gifts.filter((gift) => {
     if (gift.extremeOnly && difficulty < DUNGEON_IDX.EXTREME) return false
     if (gift.hardOnly && difficulty < DUNGEON_IDX.HARD) return false
     return true
   })
 
-  const themedToThis: EGOGiftListItem[] = []
-  const general: EGOGiftListItem[] = []
+  const themedToThis: EGOGiftEntity[] = []
+  const general: EGOGiftEntity[] = []
 
   for (const g of difficultyFiltered) {
     const themed = g.themePack ?? []

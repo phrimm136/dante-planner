@@ -13,7 +13,7 @@ import { IdentityList } from '../IdentityList'
 import { createTestFilterStore } from '@/test-utils/filterStore'
 import { asIdentityId } from '@/test-utils/fixtures'
 import type { IdentityFacetState } from '../../lib/identityFilter'
-import type { IdentityListItem } from '../../types/IdentityTypes'
+import type { IdentityEntity } from '../../types/IdentityTypes'
 
 // Mock TanStack Router Link component
 vi.mock('@tanstack/react-router', () => ({
@@ -67,7 +67,7 @@ const IDENTITY_NAMES = {
   '10301': 'Test Identity 3',
 }
 
-const mockIdentities: IdentityListItem[] = [
+const mockIdentities: IdentityEntity[] = [
   {
     id: IDENTITY_10101,
     name: 'Test Identity 1',
@@ -75,9 +75,9 @@ const mockIdentities: IdentityListItem[] = [
     skillKeywordList: ['Burst', 'Combustion'],
     battleKeywordList: ['Burst', 'Combustion', 'Aggro'],
     unitKeywordList: ['TheBlueReverberation'],
-    attributeTypes: ['CRIMSON', 'AZURE'],
-    atkTypes: ['SLASH', 'PENETRATE'],
-    defenseTypes: ['GUARD'],
+    attributeType: ['CRIMSON', 'AZURE'],
+    atkType: ['SLASH', 'PENETRATE'],
+    defenseType: ['GUARD'],
     updateDate: 20240101,
     season: 1,
   },
@@ -88,9 +88,9 @@ const mockIdentities: IdentityListItem[] = [
     skillKeywordList: ['Charge'],
     battleKeywordList: ['Charge'],
     unitKeywordList: ['SevenAssociation'],
-    attributeTypes: ['AZURE'],
-    atkTypes: ['PENETRATE'],
-    defenseTypes: ['EVADE'],
+    attributeType: ['AZURE'],
+    atkType: ['PENETRATE'],
+    defenseType: ['EVADE'],
     updateDate: 20240102,
     season: 2,
   },
@@ -101,9 +101,9 @@ const mockIdentities: IdentityListItem[] = [
     skillKeywordList: ['Burst'],
     battleKeywordList: ['Burst', 'Aggro'],
     unitKeywordList: ['TheBlueReverberation'],
-    attributeTypes: ['VIOLET'],
-    atkTypes: ['HIT'],
-    defenseTypes: ['COUNTER'],
+    attributeType: ['VIOLET'],
+    atkType: ['HIT'],
+    defenseType: ['COUNTER'],
     updateDate: 20240103,
     season: 1,
   },

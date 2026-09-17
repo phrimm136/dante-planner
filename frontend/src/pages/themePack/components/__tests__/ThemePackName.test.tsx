@@ -7,7 +7,7 @@ import {
   type FontAdvanceTable,
 } from '@/shared/cardLayout'
 import { DUNGEON_IDX } from '@/shared/gameData'
-import type { ThemePackEntry } from '../../types/ThemePackTypes'
+import type { ThemePackSpec } from '../../types/ThemePackTypes'
 import {
   THEME_PACK_LAYOUT,
   THEME_PACK_NAME_MAX_CQW,
@@ -53,7 +53,7 @@ const RECT = THEME_PACK_LAYOUT.normal.name
 const MAX_CQW = THEME_PACK_NAME_MAX_CQW
 const TRACK_CQW = RECT.width
 
-const packEntry: ThemePackEntry = {
+const packEntry: ThemePackSpec = {
   themePackConfig: { textColor: 'AABBCC' },
   exceptionConditions: [{ dungeonIdx: DUNGEON_IDX.HARD }],
   specificEgoGiftPool: [],

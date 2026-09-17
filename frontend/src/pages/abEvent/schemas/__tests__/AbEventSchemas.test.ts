@@ -1,15 +1,15 @@
 import { describe, it, expect } from 'vitest'
 import {
-  AbEventSpecListEntrySchema,
+  AbEventSpecSchema,
   AbEventSpecListSchema,
   AbEventDataSchema,
   AbEventI18nSchema,
   AbEventSharedSchema,
 } from '../AbEventSchemas'
 
-describe('AbEventSpecListEntrySchema', () => {
+describe('AbEventSpecSchema', () => {
   it('accepts valid entry', () => {
-    const result = AbEventSpecListEntrySchema.safeParse({
+    const result = AbEventSpecSchema.safeParse({
       relatedEgoGifts: ['9001', '991002'],
       relatedThemePacks: ['1002', '1003'],
       hasImage: true,
@@ -18,7 +18,7 @@ describe('AbEventSpecListEntrySchema', () => {
   })
 
   it('accepts entry with empty arrays', () => {
-    const result = AbEventSpecListEntrySchema.safeParse({
+    const result = AbEventSpecSchema.safeParse({
       relatedEgoGifts: [],
       relatedThemePacks: [],
       hasImage: false,
@@ -27,7 +27,7 @@ describe('AbEventSpecListEntrySchema', () => {
   })
 
   it('rejects missing hasImage', () => {
-    const result = AbEventSpecListEntrySchema.safeParse({
+    const result = AbEventSpecSchema.safeParse({
       relatedEgoGifts: [],
       relatedThemePacks: [],
     })
@@ -35,7 +35,7 @@ describe('AbEventSpecListEntrySchema', () => {
   })
 
   it('rejects an unknown key under strict parsing', () => {
-    const result = AbEventSpecListEntrySchema.strict().safeParse({
+    const result = AbEventSpecSchema.strict().safeParse({
       relatedEgoGifts: [],
       relatedThemePacks: [],
       hasImage: false,

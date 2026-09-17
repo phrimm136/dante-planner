@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { DUNGEON_IDX } from '@/shared/gameData'
 import type { PctRect } from '@/shared/cardLayout'
-import type { ThemePackEntry } from '../../types/ThemePackTypes'
+import type { ThemePackSpec } from '../../types/ThemePackTypes'
 import { THEME_PACK_HOVER_FADE_MS, THEME_PACK_LAYOUT } from '../../lib/cardLayout'
 import { ThemePackCard } from '../ThemePackCard'
 
@@ -77,13 +77,13 @@ function asRendered(rect: PctRect): PctRect {
   }
 }
 
-const normalPackEntry: ThemePackEntry = {
+const normalPackEntry: ThemePackSpec = {
   themePackConfig: { textColor: 'FFFFFF' },
   exceptionConditions: [{ dungeonIdx: DUNGEON_IDX.HARD }],
   specificEgoGiftPool: [],
 }
 
-const extremePackEntry: ThemePackEntry = {
+const extremePackEntry: ThemePackSpec = {
   themePackConfig: { textColor: 'FF0000' },
   exceptionConditions: [{ dungeonIdx: DUNGEON_IDX.EXTREME }],
   specificEgoGiftPool: [],

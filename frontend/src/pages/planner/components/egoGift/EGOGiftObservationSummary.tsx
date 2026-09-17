@@ -7,12 +7,12 @@ import { CARD_MOBILE_SCALE } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { EmptyStatePlaceholder } from '@/components/feedback/EmptyStatePlaceholder'
 import { GIFT_ROW_PADDING_PX, giftRowMinHeightPx } from '../../lib/cardLayout'
-import type { EGOGiftListItem } from '@/pages/egoGift'
+import type { EGOGiftEntity } from '@/pages/egoGift'
 import { PlannerSection } from '@/components/layout/PlannerSection'
 import { StarlightCostDisplay } from '../StarlightCostDisplay'
 import { CardSlot, EGO_GIFT_GEOMETRY, useSlotSizePx } from '@/shared/cardLayout'
 import { EGOGiftCard } from '@/pages/egoGift'
-import { toGiftListItem } from '@/pages/egoGift'
+import { toEGOGiftEntity } from '@/pages/egoGift'
 
 export interface EGOGiftObservationSummaryProps {
   mdVersion: number
@@ -52,13 +52,13 @@ export function EGOGiftObservationSummary({
       (cost) => cost.egogiftCount === selectedGiftIds.size,
     )?.starlightCost || 0
 
-  // Build gift list items for selected gifts
-  const selectedGifts: EGOGiftListItem[] = (() => {
-    const gifts: EGOGiftListItem[] = []
+  // Build gift entities for selected gifts
+  const selectedGifts: EGOGiftEntity[] = (() => {
+    const gifts: EGOGiftEntity[] = []
     for (const id of selectedGiftIds) {
       const baseId = getBaseGiftId(id)
       const specData = spec[baseId]
-      if (specData) gifts.push(toGiftListItem(baseId, specData, i18n[baseId] || baseId))
+      if (specData) gifts.push(toEGOGiftEntity(baseId, specData, i18n[baseId] || baseId))
     }
     return gifts
   })()

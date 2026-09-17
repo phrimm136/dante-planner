@@ -1,8 +1,7 @@
 import { useTranslation } from 'react-i18next'
-import { useEGOListSpec, EGOList } from '@/pages/ego'
-import type { EGOListItem, EGOFacetState } from '@/pages/ego'
+import { useEGOListSpec, EGOList, toEGOEntity } from '@/pages/ego'
+import type { EGOEntity, EGOFacetState } from '@/pages/ego'
 import type { EgoType } from '@/shared/gameData'
-import { typedEntries } from '@/lib/utils'
 import { SearchBar } from '@/shared/filter'
 import { EGOListSkeleton } from './components/EGOListSkeleton'
 import { calculateActiveFilterCount } from '@/shared/filter'
@@ -33,18 +32,7 @@ function EGOCardGrid({
   spec: z.infer<typeof EGOSpecListSchema>
   store: FilterStore<EGOFacetState>
 }) {
-  // Build EGOListItem array from spec directly (no transformation needed)
-  const egos: EGOListItem[] = typedEntries(spec).map(([id, specData]) => ({
-    id,
-    egoType: specData.egoType,
-    skillKeywordList: specData.skillKeywordList,
-    battleKeywordList: specData.battleKeywordList,
-    attributeTypes: specData.attributeType,
-    atkTypes: specData.atkType,
-    updateDate: specData.updateDate,
-    season: specData.season,
-    maxThreadspin: specData.maxThreadspin,
-  }))
+  const egos: EGOEntity[] = Object.entries(spec).map(([id, entry]) => toEGOEntity(id, entry))
 
   return <EGOList egos={egos} store={store} />
 }

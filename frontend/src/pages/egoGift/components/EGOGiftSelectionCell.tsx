@@ -3,13 +3,13 @@ import { memo } from 'react'
 import type { EGOGiftId, EnhancementLevel } from '@/shared/gameData'
 import { CARD_MOBILE_SCALE } from '@/lib/constants'
 import { CardSlot, EGO_GIFT_GEOMETRY } from '@/shared/cardLayout'
-import type { EGOGiftListItem } from '../types/EGOGiftTypes'
+import type { EGOGiftEntity } from '../types/EGOGiftTypes'
 import { EGOGiftCard } from './EGOGiftCard'
 import { EGOGiftObservationCard } from './EGOGiftObservationCard'
 import { EGOGiftSelectableCard } from './EGOGiftSelectableCard'
 
 interface GiftCellProps {
-  gift: EGOGiftListItem
+  gift: EGOGiftEntity
   isSelected: boolean
   /** Whether the gift survives the current filters */
   isVisible: boolean

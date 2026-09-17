@@ -10,14 +10,15 @@ import { applyFacets } from '@/shared/filter'
 import { DUNGEON_IDX, type DungeonIdx, type ThemePackFloor } from '@/shared/gameData'
 import { enumerateSelectionStates, findParityMismatches } from '@/test-utils/facetParity'
 import { THEME_PACK_FACETS, type ThemePackFacetState } from '../themePackFilter'
-import type { ThemePackEntry } from '../../types/ThemePackTypes'
+import { toThemePackEntity } from '../themePackEntity'
+import type { ThemePackSpec, ThemePackEntity } from '../../types/ThemePackTypes'
 import { EGOGiftIdSchema } from '@/shared/gameData'
 import type { EGOGiftId } from '@/shared/gameData'
 
 const gid = (id: string): EGOGiftId => EGOGiftIdSchema.parse(id)
 
 function legacyDungeonDifficulty(
-  entry: ThemePackEntry,
+  entry: ThemePackSpec,
   selectedDifficulties: ReadonlySet<DungeonIdx>,
 ): boolean {
   if (selectedDifficulties.size === 0) return true
@@ -25,7 +26,7 @@ function legacyDungeonDifficulty(
   return Array.from(selectedDifficulties).every((d) => packDifficulties.has(d))
 }
 
-function legacyFloor(entry: ThemePackEntry, selectedFloors: ReadonlySet<ThemePackFloor>): boolean {
+function legacyFloor(entry: ThemePackSpec, selectedFloors: ReadonlySet<ThemePackFloor>): boolean {
   if (selectedFloors.size === 0) return true
   const packFloors = new Set<number>()
   for (const cond of entry.exceptionConditions) {
@@ -36,38 +37,30 @@ function legacyFloor(entry: ThemePackEntry, selectedFloors: ReadonlySet<ThemePac
   return Array.from(selectedFloors).every((f) => packFloors.has(f))
 }
 
-function legacyEgoGift(entry: ThemePackEntry, selectedEgoGifts: ReadonlySet<string>): boolean {
+function legacyEgoGift(entry: ThemePackSpec, selectedEgoGifts: ReadonlySet<string>): boolean {
   if (selectedEgoGifts.size === 0) return true
   if (entry.specificEgoGiftPool.some((giftId) => selectedEgoGifts.has(String(giftId)))) return true
   if (entry.fixedRewardEgoGifts?.some((giftId) => selectedEgoGifts.has(String(giftId)))) return true
   return false
 }
 
-interface PackFixture {
-  id: string
-  entry: ThemePackEntry
-}
-
-function legacyMatches(pack: PackFixture, state: ThemePackFacetState): boolean {
-  if (!legacyDungeonDifficulty(pack.entry, state.selectedDifficulties)) return false
-  if (!legacyFloor(pack.entry, state.selectedFloors)) return false
-  if (!legacyEgoGift(pack.entry, state.selectedEgoGifts)) return false
+function legacyMatches(pack: ThemePackEntity, state: ThemePackFacetState): boolean {
+  if (!legacyDungeonDifficulty(pack, state.selectedDifficulties)) return false
+  if (!legacyFloor(pack, state.selectedFloors)) return false
+  if (!legacyEgoGift(pack, state.selectedEgoGifts)) return false
   return true
 }
 
-function makePack(id: string, overrides: Partial<ThemePackEntry> = {}): PackFixture {
-  return {
-    id,
-    entry: {
-      exceptionConditions: [],
-      specificEgoGiftPool: [],
-      themePackConfig: { textColor: 'af241c' },
-      ...overrides,
-    },
-  }
+function makePack(id: string, overrides: Partial<ThemePackSpec> = {}): ThemePackEntity {
+  return toThemePackEntity(id, {
+    exceptionConditions: [],
+    specificEgoGiftPool: [],
+    themePackConfig: { textColor: 'af241c' },
+    ...overrides,
+  })
 }
 
-const ITEMS: PackFixture[] = [
+const ITEMS: ThemePackEntity[] = [
   makePack('1001', {
     exceptionConditions: [
       { dungeonIdx: DUNGEON_IDX.NORMAL, selectableFloors: [0, 1] },
@@ -130,7 +123,7 @@ describe('THEME_PACK_FACETS parity', () => {
       ITEMS,
       STATES,
       (item, state) => legacyMatches(item, state),
-      (item, state) => applyFacets(item.entry, state, THEME_PACK_FACETS),
+      (item, state) => applyFacets(item, state, THEME_PACK_FACETS),
     )
     expect(mismatches).toEqual([])
   })
@@ -141,7 +134,7 @@ describe('THEME_PACK_FACETS parity', () => {
       selectedDifficulties: new Set<DungeonIdx>([DUNGEON_IDX.NORMAL, DUNGEON_IDX.HARD]),
     }
     const byDifficulty = ITEMS.filter((item) =>
-      applyFacets(item.entry, bothDifficulties, THEME_PACK_FACETS),
+      applyFacets(item, bothDifficulties, THEME_PACK_FACETS),
     )
     expect(byDifficulty.map((item) => item.id)).toEqual(['1001', '1005'])
 
@@ -149,15 +142,13 @@ describe('THEME_PACK_FACETS parity', () => {
       ...BASE_STATE,
       selectedFloors: new Set<ThemePackFloor>([0, 1]),
     }
-    const byFloor = ITEMS.filter((item) => applyFacets(item.entry, bothFloors, THEME_PACK_FACETS))
+    const byFloor = ITEMS.filter((item) => applyFacets(item, bothFloors, THEME_PACK_FACETS))
     expect(byFloor.map((item) => item.id)).toEqual(['1001', '1005'])
   })
 
   it('matches ego gifts across both pools', () => {
     const fixedReward: ThemePackFacetState = { ...BASE_STATE, selectedEgoGifts: new Set(['9242']) }
-    const survivors = ITEMS.filter((item) =>
-      applyFacets(item.entry, fixedReward, THEME_PACK_FACETS),
-    )
+    const survivors = ITEMS.filter((item) => applyFacets(item, fixedReward, THEME_PACK_FACETS))
     expect(survivors.map((item) => item.id)).toEqual(['1003', '1005'])
   })
 })

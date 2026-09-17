@@ -8,7 +8,7 @@ import {
   IDENTITY_PORTRAIT_WINDOW,
 } from '../../lib/cardLayout'
 import { asIdentityId } from '@/test-utils/fixtures'
-import type { IdentityListItem } from '../../types/IdentityTypes'
+import type { IdentityEntity } from '../../types/IdentityTypes'
 
 vi.mock('@/shared/assets', () => ({
   getIdentityInfoImagePath: (id: string, uptie: number) =>
@@ -28,7 +28,7 @@ vi.mock('../IdentityName', () => ({
   IdentityName: ({ id }: { id: string }) => <span data-testid="identity-name">{id}</span>,
 }))
 
-const identity: IdentityListItem = {
+const identity: IdentityEntity = {
   id: asIdentityId('10101'),
   name: 'Test Identity',
   rank: 3,
@@ -36,9 +36,9 @@ const identity: IdentityListItem = {
   unitKeywordList: [],
   skillKeywordList: [],
   battleKeywordList: [],
-  attributeTypes: [],
-  atkTypes: [],
-  defenseTypes: [],
+  attributeType: [],
+  atkType: [],
+  defenseType: [],
   season: 1,
 }
 

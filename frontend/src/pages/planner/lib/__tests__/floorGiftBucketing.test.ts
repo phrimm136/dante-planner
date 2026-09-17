@@ -21,15 +21,13 @@
 import { describe, it, expect } from 'vitest'
 import { bucketAndSortFloorGifts } from '../floorGiftBucketing'
 import { DUNGEON_IDX } from '@/shared/gameData'
-import type { EGOGiftListItem } from '@/pages/egoGift'
+import type { EGOGiftEntity } from '@/pages/egoGift'
 import { EGOGiftIdSchema } from '@/shared/gameData'
 
-// EGOGiftListItem resolves to an error/any type under oxlint's type-aware pass because test
+// EGOGiftEntity resolves to an error/any type under oxlint's type-aware pass because test
 // files are excluded from tsconfig; the intersection is well-typed under tsc. False positive.
 // oxlint-disable-next-line typescript/no-redundant-type-constituents
-function makeGift(
-  overrides: Omit<Partial<EGOGiftListItem>, 'id'> & { id: string },
-): EGOGiftListItem {
+function makeGift(overrides: Omit<Partial<EGOGiftEntity>, 'id'> & { id: string }): EGOGiftEntity {
   return {
     tag: ['TIER_2'],
     keyword: null,

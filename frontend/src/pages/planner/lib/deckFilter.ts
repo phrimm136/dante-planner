@@ -8,40 +8,40 @@
  */
 
 import type { DeckFilterState, EntityMode } from '../types/DeckTypes'
-import type { IdentityListItem } from '@/pages/identity'
-import type { EGOListItem } from '@/pages/ego'
+import type { IdentityEntity } from '@/pages/identity'
+import type { EGOEntity } from '@/pages/ego'
 import type { Facet, SearchMappings } from '@/shared/filter'
 import { applyFacets } from '@/shared/filter'
 import type { Keyword } from '@/shared/gameData'
 import { getSinnerFromId } from '@/shared/gameData'
 
-type DeckFilterItem = IdentityListItem | EGOListItem
+type DeckFilterItem = IdentityEntity | EGOEntity
 
 const DECK_FACETS: readonly Facet<DeckFilterItem, DeckFilterState>[] = [
   { sel: (s) => s.selectedSinners, get: (i) => getSinnerFromId(i.id), mode: 'any' },
   { sel: (s) => s.selectedKeywords, get: (i) => i.skillKeywordList, mode: 'all' },
-  { sel: (s) => s.selectedAttributes, get: (i) => i.attributeTypes, mode: 'any' },
-  { sel: (s) => s.selectedAtkTypes, get: (i) => i.atkTypes, mode: 'any' },
+  { sel: (s) => s.selectedAttributes, get: (i) => i.attributeType, mode: 'any' },
+  { sel: (s) => s.selectedAtkTypes, get: (i) => i.atkType, mode: 'any' },
   { sel: (s) => s.selectedSeasons, get: (i) => i.season, mode: 'any' },
-  { sel: (s) => s.selectedBattleKeywords, get: (i) => i.battleKeywordList ?? [], mode: 'any' },
+  { sel: (s) => s.selectedBattleKeywords, get: (i) => i.battleKeywordList, mode: 'any' },
   {
     sel: (s) => (s.entityMode === 'identity' ? s.selectedDefTypes : undefined),
-    get: (i) => (i as IdentityListItem).defenseTypes,
+    get: (i) => (i as IdentityEntity).defenseType,
     mode: 'any',
   },
   {
     sel: (s) => (s.entityMode === 'identity' ? s.selectedRaritys : undefined),
-    get: (i) => (i as IdentityListItem).rank,
+    get: (i) => (i as IdentityEntity).rank,
     mode: 'any',
   },
   {
     sel: (s) => (s.entityMode === 'identity' ? s.selectedUnitKeywords : undefined),
-    get: (i) => (i as IdentityListItem).unitKeywordList,
+    get: (i) => (i as IdentityEntity).unitKeywordList,
     mode: 'any',
   },
   {
     sel: (s) => (s.entityMode === 'ego' ? s.selectedEgoTypes : undefined),
-    get: (i) => (i as EGOListItem).egoType,
+    get: (i) => (i as EGOEntity).egoType,
     mode: 'any',
   },
 ]
@@ -59,7 +59,7 @@ const DECK_FACETS: readonly Facet<DeckFilterItem, DeckFilterState>[] = [
  * - Search: lowercased match against item.name, skill-keyword display names, and
  *   (identity mode only) unit-keyword display names.
  *
- * @param item - IdentityListItem or EGOListItem to evaluate
+ * @param item - IdentityEntity or EGOEntity to evaluate
  * @param state - Current deck filter state (from Zustand slice)
  * @param mode - Entity mode gate; controls which id/ego-specific fields apply
  * @param searchMappings - Reverse mappings from display name to internal codes
@@ -86,7 +86,7 @@ export function matchesDeckFilter(
 
     let unitKeywordMatch = false
     if (mode === 'identity') {
-      const identity = item as IdentityListItem
+      const identity = item as IdentityEntity
       unitKeywordMatch = Array.from(searchMappings.unitKeywordToValue.entries()).some(
         ([naturalLang, internalCodes]) => {
           if (!naturalLang.includes(lowerQuery)) return false

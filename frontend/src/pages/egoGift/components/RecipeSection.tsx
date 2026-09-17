@@ -21,14 +21,14 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useEGOGiftListSpec } from '../hooks/useEGOGiftListData'
 import type {
   EGOGiftRecipe,
-  EGOGiftListItem,
+  EGOGiftEntity,
   StandardRecipe,
   MixedRecipe,
 } from '../types/EGOGiftTypes'
 import { isMixedRecipe } from '../lib/egoGiftUtils'
 import { SECTION_STYLES } from '@/lib/constants'
 import type { EGOGiftId } from '@/shared/gameData'
-import { toGiftListItem } from '../lib/giftListItem'
+import { toEGOGiftEntity } from '../lib/egoGiftEntity'
 
 interface RecipeSectionProps {
   recipe: EGOGiftRecipe
@@ -37,7 +37,7 @@ interface RecipeSectionProps {
 /**
  * Single ingredient card with link and name
  */
-function IngredientCard({ gift }: { gift: EGOGiftListItem }) {
+function IngredientCard({ gift }: { gift: EGOGiftEntity }) {
   return (
     <Link to="/ego-gift/$id" params={{ id: gift.id }} className="block">
       <div className="flex flex-col items-center gap-1">
@@ -81,7 +81,7 @@ function StandardRecipeRow({
         const spec = specMap[String(id)]
         if (!spec) return null
 
-        const gift: EGOGiftListItem = toGiftListItem(String(id), spec)
+        const gift: EGOGiftEntity = toEGOGiftEntity(String(id), spec)
 
         return (
           <div key={id} className="flex items-start">
@@ -125,7 +125,7 @@ function MixedRecipeDisplay({
             const spec = specMap[String(id)]
             if (!spec) return null
 
-            const gift: EGOGiftListItem = toGiftListItem(String(id), spec)
+            const gift: EGOGiftEntity = toEGOGiftEntity(String(id), spec)
 
             return <IngredientCard key={id} gift={gift} />
           })}
@@ -149,7 +149,7 @@ function MixedRecipeDisplay({
             const spec = specMap[String(id)]
             if (!spec) return null
 
-            const gift: EGOGiftListItem = toGiftListItem(String(id), spec)
+            const gift: EGOGiftEntity = toEGOGiftEntity(String(id), spec)
 
             return <IngredientCard key={id} gift={gift} />
           })}

@@ -1,4 +1,4 @@
-import type { EGOGiftListItem } from '../types/EGOGiftTypes'
+import type { EGOGiftEntity } from '../types/EGOGiftTypes'
 import { EGO_GIFT_GEOMETRY } from '@/shared/cardLayout'
 import { FilteredEntityGrid, useSearchTermSources } from '@/shared/filter'
 import { EGO_GIFT_LIST } from '../hooks/useEGOGiftListData'
@@ -14,7 +14,7 @@ import { EGOGiftCardLink } from './EGOGiftCardLink'
 const EMPTY_NAMES: Record<string, string> = {}
 
 interface EGOGiftListProps {
-  gifts: EGOGiftListItem[]
+  gifts: EGOGiftEntity[]
   store: FilterStore<EGOGiftFacetState>
 }
 

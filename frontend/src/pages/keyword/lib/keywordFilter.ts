@@ -9,13 +9,7 @@ import type { EntityMatcher, Facet } from '@/shared/filter'
 import { createEntityMatcher } from '@/shared/filter'
 import type { BuffType } from '@/shared/gameData'
 import type { BattleKeywordI18nEntry } from '@/shared/gameText'
-
-export interface KeywordFacetItem {
-  buffType: string
-  identities: string[]
-  egos: string[]
-  egoGifts: string[]
-}
+import type { KeywordEntity } from '../types/KeywordTypes'
 
 export interface KeywordFacetState {
   selectedBuffTypes: ReadonlySet<BuffType>
@@ -24,7 +18,7 @@ export interface KeywordFacetState {
   selectedEgoGifts: ReadonlySet<string>
 }
 
-export const KEYWORD_FACETS: readonly Facet<KeywordFacetItem, KeywordFacetState>[] = [
+export const KEYWORD_FACETS: readonly Facet<KeywordEntity, KeywordFacetState>[] = [
   { sel: (s) => s.selectedBuffTypes, get: (k) => k.buffType, mode: 'any' },
   { sel: (s) => s.selectedIdentities, get: (k) => k.identities, mode: 'any' },
   { sel: (s) => s.selectedEgos, get: (k) => k.egos, mode: 'any' },
@@ -44,5 +38,5 @@ export function buildKeywordSearchTerms(
 }
 
 /** Whether one keyword survives the current facets and search query. */
-export const matchesKeyword: EntityMatcher<KeywordFacetItem, KeywordFacetState> =
+export const matchesKeyword: EntityMatcher<KeywordEntity, KeywordFacetState> =
   createEntityMatcher(KEYWORD_FACETS)

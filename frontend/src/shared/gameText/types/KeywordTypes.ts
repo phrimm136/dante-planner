@@ -26,7 +26,7 @@ export type BuffType = 'Positive' | 'Negative' | 'Neutral' | (string & {})
  * Spec entry for a battle keyword from battleKeywordSpecList.json
  * Contains language-independent metadata and entity backlinks
  */
-export type { BattleKeywordSpecEntry } from '../schemas/KeywordSchemas'
+export type { BattleKeywordSpec } from '../schemas/KeywordSchemas'
 
 /**
  * Resolved keyword with all data needed for rendering

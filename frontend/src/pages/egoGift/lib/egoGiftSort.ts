@@ -1,4 +1,4 @@
-import type { EGOGiftListItem } from '../types/EGOGiftTypes'
+import type { EGOGiftEntity } from '../types/EGOGiftTypes'
 import type { SortMode } from '@/shared/filter'
 import { KEYWORD_ORDER } from '@/shared/gameData'
 import { parseTier } from './egoGiftTier'
@@ -27,7 +27,7 @@ function getTierValue(tag: string[]): number {
   return isNaN(tierNum) ? 999 : 6 - tierNum // 5->1, 4->2, 3->3, 2->4, 1->5
 }
 
-type SortKey = (gift: EGOGiftListItem) => number
+type SortKey = (gift: EGOGiftEntity) => number
 
 const categoryKey: SortKey = (gift) => getCategoryIndex(gift.keyword)
 const tierKey: SortKey = (gift) => getTierValue(gift.tag)
@@ -42,7 +42,7 @@ const SORT_KEYS: Record<SortMode, readonly SortKey[]> = {
 /**
  * Sort EGO Gifts based on sort mode
  */
-export function sortEGOGifts(gifts: EGOGiftListItem[], sortMode: SortMode): EGOGiftListItem[] {
+export function sortEGOGifts(gifts: EGOGiftEntity[], sortMode: SortMode): EGOGiftEntity[] {
   const keys = SORT_KEYS[sortMode]
 
   return [...gifts].sort((a, b) => {

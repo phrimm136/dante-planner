@@ -10,10 +10,10 @@ import { EGOGiftSelectionList } from '@/pages/egoGift'
 import type { SortMode } from '@/shared/filter'
 import { bucketAndSortFloorGifts } from '../../lib/floorGiftBucketing'
 import { applyGiftToggle } from '../../lib/giftToggle'
-import type { EGOGiftListItem } from '@/pages/egoGift'
+import type { EGOGiftEntity } from '@/pages/egoGift'
 import type { EGOGiftId, EncodedGiftId, EnhancementLevel, DungeonIdx } from '@/shared/gameData'
 import { SECTION_STYLES } from '@/lib/constants'
-import { toGiftListItems } from '@/pages/egoGift'
+import { toEGOGiftEntity } from '@/pages/egoGift'
 
 interface FloorGiftSelectorPaneProps {
   open: boolean
@@ -62,9 +62,9 @@ export function FloorGiftSelectorPane({
     }
   }, [open])
 
-  // Convert to EGOGiftListItem array
-  const gifts: EGOGiftListItem[] = (() => {
-    return toGiftListItems(spec, i18n)
+  // Convert to EGOGiftEntity array
+  const gifts: EGOGiftEntity[] = (() => {
+    return Object.entries(spec).map(([id, entry]) => toEGOGiftEntity(id, entry, i18n[id] || id))
   })()
 
   // Build O(1) lookup map for recipe cascade selection

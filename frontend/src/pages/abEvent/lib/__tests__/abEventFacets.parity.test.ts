@@ -9,18 +9,16 @@ import { describe, it, expect } from 'vitest'
 import { applyFacets } from '@/shared/filter'
 import { enumerateSelectionStates, findParityMismatches } from '@/test-utils/facetParity'
 import { AB_EVENT_FACETS, type AbEventFacetState } from '../abEventFilter'
-import type { AbEventSpecListEntry } from '../../schemas/AbEventSchemas'
+import { toAbEventEntity } from '../abEventEntity'
+import type { AbEventSpec } from '../../schemas/AbEventSchemas'
 
-function legacyRelatedEgoGift(
-  entry: AbEventSpecListEntry,
-  selectedEgoGifts: ReadonlySet<string>,
-): boolean {
+function legacyRelatedEgoGift(entry: AbEventSpec, selectedEgoGifts: ReadonlySet<string>): boolean {
   if (selectedEgoGifts.size === 0) return true
   return entry.relatedEgoGifts.some((giftId) => selectedEgoGifts.has(giftId))
 }
 
 function legacyRelatedThemePack(
-  entry: AbEventSpecListEntry,
+  entry: AbEventSpec,
   selectedThemePacks: ReadonlySet<string>,
 ): boolean {
   if (selectedThemePacks.size === 0) return true
@@ -29,7 +27,7 @@ function legacyRelatedThemePack(
 
 interface EventFixture {
   id: string
-  entry: AbEventSpecListEntry
+  entry: AbEventSpec
 }
 
 function legacyMatches(event: EventFixture, state: AbEventFacetState): boolean {
@@ -38,7 +36,7 @@ function legacyMatches(event: EventFixture, state: AbEventFacetState): boolean {
   return true
 }
 
-function makeEvent(id: string, overrides: Partial<AbEventSpecListEntry> = {}): EventFixture {
+function makeEvent(id: string, overrides: Partial<AbEventSpec> = {}): EventFixture {
   return {
     id,
     entry: {
@@ -51,11 +49,11 @@ function makeEvent(id: string, overrides: Partial<AbEventSpecListEntry> = {}): E
 }
 
 const ITEMS: EventFixture[] = [
-  makeEvent('101', { relatedEgoGifts: ['9001', '991002'], relatedThemePacks: ['1002', '1003'] }),
-  makeEvent('102', { relatedEgoGifts: ['9001'], relatedThemePacks: ['1002'] }),
-  makeEvent('103', { relatedEgoGifts: [], relatedThemePacks: ['1003'] }),
-  makeEvent('104', { relatedEgoGifts: ['991002'], relatedThemePacks: [] }),
-  makeEvent('105'),
+  makeEvent('901101', { relatedEgoGifts: ['9001', '991002'], relatedThemePacks: ['1002', '1003'] }),
+  makeEvent('901102', { relatedEgoGifts: ['9001'], relatedThemePacks: ['1002'] }),
+  makeEvent('901103', { relatedEgoGifts: [], relatedThemePacks: ['1003'] }),
+  makeEvent('901104', { relatedEgoGifts: ['991002'], relatedThemePacks: [] }),
+  makeEvent('901105'),
 ]
 
 const BASE_STATE: AbEventFacetState = {
@@ -78,7 +76,7 @@ describe('AB_EVENT_FACETS parity', () => {
       ITEMS,
       STATES,
       (item, state) => legacyMatches(item, state),
-      (item, state) => applyFacets([item.id, item.entry], state, AB_EVENT_FACETS),
+      (item, state) => applyFacets(toAbEventEntity(item.id, item.entry), state, AB_EVENT_FACETS),
     )
     expect(mismatches).toEqual([])
   })
@@ -89,8 +87,8 @@ describe('AB_EVENT_FACETS parity', () => {
       selectedEgoGifts: new Set(['9001', '991002']),
     }
     const survivors = ITEMS.filter((item) =>
-      applyFacets([item.id, item.entry], bothGifts, AB_EVENT_FACETS),
+      applyFacets(toAbEventEntity(item.id, item.entry), bothGifts, AB_EVENT_FACETS),
     )
-    expect(survivors.map((item) => item.id)).toEqual(['101', '102', '104'])
+    expect(survivors.map((item) => item.id)).toEqual(['901101', '901102', '901104'])
   })
 })

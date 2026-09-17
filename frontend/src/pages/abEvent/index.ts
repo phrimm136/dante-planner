@@ -14,9 +14,10 @@ export {
 
 export { createEffectTextResolver } from './lib/abEventTextResolver'
 export type { AbEventFacetState } from './lib/abEventFilter'
+export type { AbEventEntity } from './types/AbEventTypes'
 
 export {
-  AbEventSpecListEntrySchema,
+  AbEventSpecSchema,
   AbEventSpecListSchema,
   AbEventDataSchema,
   AbEventI18nSchema,

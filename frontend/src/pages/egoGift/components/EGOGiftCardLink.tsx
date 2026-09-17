@@ -1,14 +1,14 @@
 import { Suspense } from 'react'
 import { Link } from '@tanstack/react-router'
 import { Skeleton } from '@/components/ui/skeleton'
-import type { EGOGiftListItem } from '../types/EGOGiftTypes'
+import type { EGOGiftEntity } from '../types/EGOGiftTypes'
 import { EGOGiftCard } from './EGOGiftCard'
 import { EGOGiftName } from './EGOGiftName'
 import { cn } from '@/lib/utils'
 
 interface EGOGiftCardLinkProps {
   /** The EGO gift data to display */
-  gift: EGOGiftListItem
+  gift: EGOGiftEntity
   /** Enhancement level (0, 1, or 2) */
   enhancement?: 0 | 1 | 2
   /** Additional CSS classes for the link wrapper */

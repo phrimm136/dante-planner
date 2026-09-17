@@ -11,9 +11,9 @@ import { EGOIdSchema, IdentityIdSchema } from '@/shared/gameData'
  */
 
 /**
- * BattleKeywordSpecEntry schema - individual keyword spec entry
+ * BattleKeywordSpec schema - individual keyword spec entry
  */
-export const BattleKeywordSpecEntrySchema = z
+export const BattleKeywordSpecSchema = z
   .object({
     iconId: z.string().nullable(),
     buffType: z.string(),
@@ -26,7 +26,7 @@ export const BattleKeywordSpecEntrySchema = z
 /**
  * BattleKeywordSpecList schema - Record of keyword spec entries
  */
-export const BattleKeywordSpecListSchema = z.record(z.string(), BattleKeywordSpecEntrySchema)
+export const BattleKeywordSpecListSchema = z.record(z.string(), BattleKeywordSpecSchema)
 
 /**
  * BattleKeywordNameList schema - Record of keyword names for lookup
@@ -37,4 +37,4 @@ export const BattleKeywordNameListSchema = z.record(z.string(), z.string())
 // Inferred Types
 // ============================================================================
 
-export type BattleKeywordSpecEntry = z.infer<typeof BattleKeywordSpecEntrySchema>
+export type BattleKeywordSpec = z.infer<typeof BattleKeywordSpecSchema>

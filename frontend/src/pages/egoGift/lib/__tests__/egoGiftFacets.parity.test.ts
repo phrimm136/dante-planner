@@ -11,7 +11,7 @@ import type { EGOGiftAttributeType, EGOGiftDifficulty, EGOGiftTier } from '@/sha
 import { enumerateSelectionStates, findParityMismatches } from '@/test-utils/facetParity'
 import { EGO_GIFT_FACETS, deriveDifficulty, type EGOGiftFacetState } from '../egoGiftFilter'
 import { parseTier, toRomanTier } from '../egoGiftTier'
-import type { EGOGiftListItem } from '../../types/EGOGiftTypes'
+import type { EGOGiftEntity } from '../../types/EGOGiftTypes'
 import { EGOGiftIdSchema } from '@/shared/gameData'
 
 function legacyKeyword(giftKeyword: string | null, selectedKeywords: ReadonlySet<string>): boolean {
@@ -21,7 +21,7 @@ function legacyKeyword(giftKeyword: string | null, selectedKeywords: ReadonlySet
 }
 
 function legacyDifficulty(
-  gift: { hardOnly?: boolean; extremeOnly?: boolean },
+  gift: { hardOnly?: boolean | undefined; extremeOnly?: boolean | undefined },
   selectedDifficulties: ReadonlySet<EGOGiftDifficulty>,
 ): boolean {
   if (selectedDifficulties.size === 0) return true
@@ -73,7 +73,7 @@ function legacyExclusive(
   return false
 }
 
-function legacyMatches(gift: EGOGiftListItem, state: EGOGiftFacetState): boolean {
+function legacyMatches(gift: EGOGiftEntity, state: EGOGiftFacetState): boolean {
   if (!legacyKeyword(gift.keyword, state.selectedKeywords)) return false
 
   if (state.selectedBattleKeywords.size > 0) {
@@ -93,7 +93,7 @@ function legacyMatches(gift: EGOGiftListItem, state: EGOGiftFacetState): boolean
   return true
 }
 
-function makeGift(overrides: Partial<EGOGiftListItem> & { id: string }): EGOGiftListItem {
+function makeGift(overrides: Partial<EGOGiftEntity> & { id: string }): EGOGiftEntity {
   return {
     name: 'Fixture',
     tag: [],
@@ -106,7 +106,7 @@ function makeGift(overrides: Partial<EGOGiftListItem> & { id: string }): EGOGift
   }
 }
 
-const ITEMS: EGOGiftListItem[] = [
+const ITEMS: EGOGiftEntity[] = [
   makeGift({
     id: EGOGiftIdSchema.parse('9001'),
     tag: ['TIER_1', 'GIFT'],

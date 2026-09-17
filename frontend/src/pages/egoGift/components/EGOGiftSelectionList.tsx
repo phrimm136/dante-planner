@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 
-import type { EGOGiftListItem } from '../types/EGOGiftTypes'
+import type { EGOGiftEntity } from '../types/EGOGiftTypes'
 import type { EGOGiftId, EncodedGiftId, EnhancementLevel } from '@/shared/gameData'
 import { CARD_MOBILE_SCALE, PROGRESSIVE_REVEAL, SECTION_STYLES } from '@/lib/constants'
 import { EGO_GIFT_GEOMETRY } from '@/shared/cardLayout'
@@ -12,7 +12,7 @@ import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
 import { EGOGiftEnhancementCell, EGOGiftObservationCell } from './EGOGiftSelectionCell'
 
 interface EGOGiftSelectionListProps {
-  gifts: EGOGiftListItem[]
+  gifts: EGOGiftEntity[]
   selectedKeywords: Set<string>
   searchQuery: string
   selectedGiftIds: ReadonlySet<EncodedGiftId>

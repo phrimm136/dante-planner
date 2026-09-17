@@ -9,10 +9,10 @@ import { describe, it, expect } from 'vitest'
 import { applyFacets } from '@/shared/filter'
 import { enumerateSelectionStates, findParityMismatches } from '@/test-utils/facetParity'
 import { EGO_GIFT_SELECTION_FACETS, type EGOGiftSelectionFacetState } from '../egoGiftFilter'
-import type { EGOGiftListItem } from '../../types/EGOGiftTypes'
+import type { EGOGiftEntity } from '../../types/EGOGiftTypes'
 import { EGOGiftIdSchema } from '@/shared/gameData'
 
-function legacyMatches(gift: EGOGiftListItem, state: EGOGiftSelectionFacetState): boolean {
+function legacyMatches(gift: EGOGiftEntity, state: EGOGiftSelectionFacetState): boolean {
   if (state.selectedKeywords.size > 0) {
     const giftKeyword = gift.keyword ?? 'None'
     if (!state.selectedKeywords.has(giftKeyword)) return false
@@ -20,7 +20,7 @@ function legacyMatches(gift: EGOGiftListItem, state: EGOGiftSelectionFacetState)
   return true
 }
 
-function makeGift(overrides: Partial<EGOGiftListItem> & { id: string }): EGOGiftListItem {
+function makeGift(overrides: Partial<EGOGiftEntity> & { id: string }): EGOGiftEntity {
   return {
     name: 'Fixture',
     tag: [],
@@ -33,7 +33,7 @@ function makeGift(overrides: Partial<EGOGiftListItem> & { id: string }): EGOGift
   }
 }
 
-const ITEMS: EGOGiftListItem[] = [
+const ITEMS: EGOGiftEntity[] = [
   makeGift({ id: EGOGiftIdSchema.parse('9001'), keyword: 'Burn' }),
   makeGift({ id: EGOGiftIdSchema.parse('9002'), keyword: 'Bleed' }),
   makeGift({ id: EGOGiftIdSchema.parse('9003'), keyword: null }),

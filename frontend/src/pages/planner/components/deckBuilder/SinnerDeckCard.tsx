@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react'
 import { getAttributeColors } from '@/shared/gameData'
 import type { SinnerEquipment } from '../../types/DeckTypes'
 import type { EgoType } from '@/shared/gameData'
-import type { IdentityListItem } from '@/pages/identity'
+import type { IdentityEntity } from '@/pages/identity'
 import type { SkillData } from './SinnerGrid'
 import { getAttackTypeIconPath, getEGOImagePath, getEGOTypeIconPath } from '@/shared/assets'
 import { FORMATION_SLOT_DIM, FormationBadge, IdentityCard } from '@/pages/identity'
@@ -16,7 +16,7 @@ interface SinnerDeckCardProps {
   sinnerName: string
   sinnerIndex: number
   equipment: SinnerEquipment
-  identityData: IdentityListItem | undefined
+  identityData: IdentityEntity | undefined
   skillData: SkillData
   egoAffinityMap: Record<string, string>
   deploymentOrder: number | null
@@ -65,7 +65,7 @@ export const SinnerDeckCard = function SinnerDeckCard({
     deploymentOrder !== null ? <FormationBadge state={slotState} order={deploymentOrder} /> : null
 
   // Build a minimal identity object for IdentityCard if missing
-  const displayIdentity: IdentityListItem = identityData ?? {
+  const displayIdentity: IdentityEntity = identityData ?? {
     id: equipment.identity.id,
     name: 'Identity',
     rank: 1,
@@ -73,9 +73,9 @@ export const SinnerDeckCard = function SinnerDeckCard({
     unitKeywordList: [],
     skillKeywordList: [],
     battleKeywordList: [],
-    attributeTypes: [],
-    atkTypes: [],
-    defenseTypes: [],
+    attributeType: [],
+    atkType: [],
+    defenseType: [],
     season: 0,
   }
 

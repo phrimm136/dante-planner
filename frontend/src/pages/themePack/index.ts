@@ -16,17 +16,19 @@ export { useThemePackDetailSpec, themePackDetailQueryKeys } from './hooks/useThe
 
 // Types
 export type {
-  ThemePackEntry,
+  ThemePackSpec,
+  ThemePackEntity,
   ThemePackList as ThemePackListType,
   FloorThemeSelection,
 } from './types/ThemePackTypes'
 export { isExtremePack } from './types/ThemePackTypes'
+export { toThemePackEntity } from './lib/themePackEntity'
 
 // Schemas
 export {
   ExceptionConditionSchema,
   ThemePackConfigSchema,
-  ThemePackEntrySchema,
+  ThemePackSpecSchema,
   ThemePackListSchema,
   ThemePackI18nEntrySchema,
   ThemePackI18nSchema,

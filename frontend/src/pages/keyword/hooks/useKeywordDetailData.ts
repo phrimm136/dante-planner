@@ -2,7 +2,7 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { createStaticDataQueryOptions } from '@/lib/queryOptions'
 import { BattleKeywordSpecListSchema, BattleKeywordsSchema } from '@/shared/gameText'
-import type { BattleKeywordSpecEntry } from '@/shared/gameText'
+import type { BattleKeywordSpec } from '@/shared/gameText'
 import type { BattleKeywordI18nEntry } from '@/shared/gameText'
 import { keywordListQueryKeys } from '@/shared/gameText'
 
@@ -34,7 +34,7 @@ function createKeywordI18nQueryOptions(language: string) {
  * @param id - Keyword ID (e.g., "Combustion")
  * @returns Single keyword spec entry, or undefined if not found
  */
-export function useKeywordDetailSpec(id: string): BattleKeywordSpecEntry | undefined {
+export function useKeywordDetailSpec(id: string): BattleKeywordSpec | undefined {
   const { data: specList } = useSuspenseQuery(createKeywordSpecListQueryOptions())
   return specList[id]
 }
