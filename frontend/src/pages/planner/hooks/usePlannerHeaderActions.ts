@@ -79,7 +79,8 @@ export function usePlannerHeaderActions({
       const local = await loadFromLocal(plannerId)
       const written = await writeTombstone({
         id: plannerId,
-        syncVersion: local.ok && local.value ? local.value.metadata.syncVersion : INITIAL_SYNC_VERSION,
+        syncVersion:
+          local.ok && local.value ? local.value.metadata.syncVersion : INITIAL_SYNC_VERSION,
         deletedAt: new Date().toISOString(),
       })
       if (written.ok) cleanup()

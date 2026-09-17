@@ -211,8 +211,7 @@ describe('width-driven planner cards', () => {
 
 /** The height the deck composite stacks up to at `widthPx`, from the parts it draws. */
 function deckCompositeHeight(widthPx: number): number {
-  const shares =
-    DECK_CARD.padding + 2 * DECK_CARD.rowGap + DECK_CARD.skillBox + DECK_CARD.egoBox
+  const shares = DECK_CARD.padding + 2 * DECK_CARD.rowGap + DECK_CARD.skillBox + DECK_CARD.egoBox
 
   return widthPx / aspectOf(IDENTITY_GEOMETRY.size) + (shares / 100) * widthPx
 }

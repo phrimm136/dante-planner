@@ -79,7 +79,9 @@ export function PlannerHeaderChrome({
       </div>
 
       <div className="flex items-center justify-between gap-4">
-        <h1 className={cn(SECTION_STYLES.TEXT.pageTitle, 'min-w-0 wrap-anywhere text-xl lg:text-2xl')}>
+        <h1
+          className={cn(SECTION_STYLES.TEXT.pageTitle, 'min-w-0 wrap-anywhere text-xl lg:text-2xl')}
+        >
           {title || t('untitled')}
         </h1>
 

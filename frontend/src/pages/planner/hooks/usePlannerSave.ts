@@ -23,10 +23,7 @@ import {
 } from '../lib/plannerValidation'
 import { plannerValidationError, toUserFriendlyError } from '../lib/plannerValidationErrors'
 import { classifyAppError, isSyncConflict } from '@/lib/apiErrorClassifier'
-import {
-  planConflictResolution,
-  interpretConflictPlan,
-} from '../lib/conflictChoice'
+import { planConflictResolution, interpretConflictPlan } from '../lib/conflictChoice'
 import {
   forkedPlannerId,
   keepsLocal,

@@ -157,20 +157,20 @@ describe('usePlannerDelete', () => {
   })
 
   it('answers unauthorized on 401 instead of failing', async () => {
-      vi.mocked(ApiClient.delete).mockRejectedValue(new UnauthorizedError('Authentication required'))
-      const { wrapper, queryClient } = createWrapper()
-      const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
+    vi.mocked(ApiClient.delete).mockRejectedValue(new UnauthorizedError('Authentication required'))
+    const { wrapper, queryClient } = createWrapper()
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
 
-      const { result } = renderHook(() => usePlannerDelete(), { wrapper })
+    const { result } = renderHook(() => usePlannerDelete(), { wrapper })
 
-      let response
-      await act(async () => {
-        response = await result.current.mutateAsync('123e4567-e89b-12d3-a456-426614174000')
-      })
+    let response
+    await act(async () => {
+      response = await result.current.mutateAsync('123e4567-e89b-12d3-a456-426614174000')
+    })
 
-      expect(response).toBe('unauthorized')
-      expect(result.current.isError).toBe(false)
-      expect(invalidateSpy).toHaveBeenCalled()
+    expect(response).toBe('unauthorized')
+    expect(result.current.isError).toBe(false)
+    expect(invalidateSpy).toHaveBeenCalled()
   })
 
   describe('mutation state', () => {

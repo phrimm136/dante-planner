@@ -27,10 +27,7 @@ import { useUserSettingsQuery } from '@/shared/userSettings'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
 import { validatePlannerForDraftSave, validatePlannerForPublish } from '../lib/plannerValidation'
 import { plannerValidationError, toUserFriendlyError } from '../lib/plannerValidationErrors'
-import {
-  planConflictResolution,
-  interpretConflictPlan,
-} from '../lib/conflictChoice'
+import { planConflictResolution, interpretConflictPlan } from '../lib/conflictChoice'
 import {
   categorizeSync,
   collectSyncConflicts,

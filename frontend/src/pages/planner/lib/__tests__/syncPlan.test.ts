@@ -334,7 +334,10 @@ describe('settleTombstones', () => {
   it.each([
     { name: 'a 204 clears the tombstone', result: ok(undefined) },
     { name: 'a 404 clears it', result: err({ kind: 'notFound' as const }) },
-    { name: 'a 403 clears it', result: err({ kind: 'forbidden' as const, code: 'PLANNER_FORBIDDEN' }) },
+    {
+      name: 'a 403 clears it',
+      result: err({ kind: 'forbidden' as const, code: 'PLANNER_FORBIDDEN' }),
+    },
   ])('$name', async ({ result }) => {
     const { ops, clearTombstone } = opsWith(async () => result)
 
