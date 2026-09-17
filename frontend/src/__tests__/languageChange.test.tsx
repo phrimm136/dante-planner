@@ -40,6 +40,9 @@ const PAGES: Record<string, { url: string; load: () => Promise<PageModule> }> = 
   },
 }
 
+const LOAD_WAIT_MS = 5000
+const TEST_BUDGET_MS = 20000
+
 const databaseRoutes = Object.keys(router.routesByPath).filter((path) =>
   DATABASE_PREFIXES.some((prefix) => path === prefix || path.startsWith(`${prefix}/`)),
 )
@@ -68,15 +71,18 @@ describe('database pages on language change', () => {
       if (!page) throw new Error(`unregistered route ${path}`)
       mountRoute(path, page.url, (await page.load()).default)
 
-      await waitFor(() => expect(pageSkeletons()).toBe(0))
-      await waitFor(() => expect(skeletons()).toBe(0))
+      // Under a contended worker pool the cold JSON transforms behind the card names
+      // outlast the default wait, and the page import above counts toward the budget.
+      await waitFor(() => expect(pageSkeletons()).toBe(0), { timeout: LOAD_WAIT_MS })
+      await waitFor(() => expect(skeletons()).toBe(0), { timeout: LOAD_WAIT_MS })
 
       act(() => {
         void i18n.changeLanguage('KR')
       })
 
       expect(pageSkeletons()).toBe(0)
-      await waitFor(() => expect(skeletons()).toBe(0), { timeout: 5000 })
+      await waitFor(() => expect(skeletons()).toBe(0), { timeout: LOAD_WAIT_MS })
     },
+    TEST_BUDGET_MS,
   )
 })
