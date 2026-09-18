@@ -93,7 +93,7 @@ class ValidatorGoldenCorpusTest {
         idReferenceValidator.validateGiftIds(root, context);
 
         assertThat(context.getErrors())
-                .extracting(PlannerValidationException::getOriginalCode, PlannerValidationException::getLogDetail)
+                .extracting(PlannerValidationException::getOriginalCode, PlannerValidationException::getMessage)
                 .containsExactly(
                         tuple("INVALID_FIELD_TYPE",
                                 "Field 'selectedGiftIds[1]' must be string, got number 42"),
@@ -197,7 +197,7 @@ class ValidatorGoldenCorpusTest {
         } catch (PlannerValidationException ex) {
             StringBuilder block = new StringBuilder()
                     .append("code: ").append(ex.getOriginalCode()).append("\n")
-                    .append("message: ").append(render(ex.getLogDetail()));
+                    .append("message: ").append(render(ex.getMessage()));
             int index = 1;
             for (ValidationError sub : ex.getSubErrors()) {
                 block.append("\nsub ").append(index++).append(": ")

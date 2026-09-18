@@ -21,8 +21,5 @@ public enum ErrorKind {
     UNAUTHENTICATED,
 
     /** The caller has spent an allowance and must wait before asking again. */
-    OVER_QUOTA,
-
-    /** The server could not hold up its end. */
-    INTERNAL
+    OVER_QUOTA
 }

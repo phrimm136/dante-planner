@@ -16,7 +16,7 @@ class PlannerValidationExceptionTest {
         PlannerValidationException ex = new PlannerValidationException("MY_CODE", "My message");
 
         assertEquals("MY_CODE", ex.getOriginalCode());
-        assertEquals("My message", ex.getLogDetail());
+        assertEquals("My message", ex.getMessage());
         assertTrue(ex.getSubErrors().isEmpty());
     }
 
@@ -36,8 +36,8 @@ class PlannerValidationExceptionTest {
         assertEquals("First error", combined.getSubErrors().get(0).message());
         assertEquals("CODE_B", combined.getSubErrors().get(1).code());
         assertEquals("Second error", combined.getSubErrors().get(1).message());
-        assertTrue(combined.getLogDetail().contains("[CODE_A] First error"));
-        assertTrue(combined.getLogDetail().contains("[CODE_B] Second error"));
+        assertTrue(combined.getMessage().contains("[CODE_A] First error"));
+        assertTrue(combined.getMessage().contains("[CODE_B] Second error"));
     }
 
     @Test

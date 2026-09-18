@@ -26,8 +26,7 @@ public class SessionRevokedException extends DomainException {
      * @param familyId the revoked token family identifier
      */
     public SessionRevokedException(String familyId) {
-        super(ErrorKind.UNAUTHENTICATED, ERROR_CODE, CLIENT_DETAIL,
-                String.format("Refresh token family %s has been revoked", familyId), null);
+        super(ErrorKind.UNAUTHENTICATED, ERROR_CODE, CLIENT_DETAIL);
         this.familyId = familyId;
     }
 
@@ -36,9 +35,14 @@ public class SessionRevokedException extends DomainException {
      * did not name.
      */
     public SessionRevokedException() {
-        super(ErrorKind.UNAUTHENTICATED, ERROR_CODE, CLIENT_DETAIL,
-                "Refresh token family has been revoked", null);
-        this.familyId = null;
+        this((String) null);
+    }
+
+    @Override
+    public String getMessage() {
+        return familyId == null
+                ? "Refresh token family has been revoked"
+                : String.format("Refresh token family %s has been revoked", familyId);
     }
 
     @Override

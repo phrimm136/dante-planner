@@ -13,9 +13,13 @@ public class AccountDeletedException extends DomainException {
     private final Long userId;
 
     public AccountDeletedException(Long userId) {
-        super(ErrorKind.UNAUTHENTICATED, ERROR_CODE, CLIENT_DETAIL,
-                "Account with ID " + userId + " has been deleted", null);
+        super(ErrorKind.UNAUTHENTICATED, ERROR_CODE, CLIENT_DETAIL);
         this.userId = userId;
+    }
+
+    @Override
+    public String getMessage() {
+        return "Account with ID " + userId + " has been deleted";
     }
 
     @Override

@@ -39,6 +39,8 @@ public class PlannerValidationException extends DomainException {
 
     private final String originalCode;
 
+    private final String originalMessage;
+
     private final List<ValidationError> subErrors;
 
     /**
@@ -61,10 +63,10 @@ public class PlannerValidationException extends DomainException {
      */
     public static PlannerValidationException combined(List<PlannerValidationException> errors) {
         List<ValidationError> sub = errors.stream()
-                .map(e -> new ValidationError(e.getOriginalCode(), e.getLogDetail()))
+                .map(e -> new ValidationError(e.getOriginalCode(), e.getMessage()))
                 .toList();
         String message = errors.stream()
-                .map(e -> "[" + e.getOriginalCode() + "] " + e.getLogDetail())
+                .map(e -> "[" + e.getOriginalCode() + "] " + e.getMessage())
                 .collect(Collectors.joining("; "));
         return new PlannerValidationException(GENERIC_CODE, message, sub);
     }
@@ -72,11 +74,15 @@ public class PlannerValidationException extends DomainException {
     private PlannerValidationException(String errorCode, String message, List<ValidationError> sub) {
         super(ErrorKind.INVALID_REQUEST,
                 USER_FACING_ERROR_CODES.contains(errorCode) ? errorCode : GENERIC_CODE,
-                USER_FACING_ERROR_CODES.contains(errorCode) ? message : GENERIC_DETAIL,
-                message,
-                null);
+                USER_FACING_ERROR_CODES.contains(errorCode) ? message : GENERIC_DETAIL);
         this.originalCode = errorCode;
+        this.originalMessage = message;
         this.subErrors = sub;
+    }
+
+    @Override
+    public String getMessage() {
+        return originalMessage;
     }
 
     @Override

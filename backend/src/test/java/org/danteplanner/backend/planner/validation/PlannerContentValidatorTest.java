@@ -1435,8 +1435,8 @@ class PlannerContentValidatorTest {
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
                     () -> validator.validate(content, "5F"));
-            assertTrue(ex.getLogDetail().contains("threadspin"),
-                    "Exception message should mention threadspin: " + ex.getLogDetail());
+            assertTrue(ex.getMessage().contains("threadspin"),
+                    "Exception message should mention threadspin: " + ex.getMessage());
         }
 
         @Test

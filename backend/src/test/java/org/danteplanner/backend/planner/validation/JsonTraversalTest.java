@@ -45,7 +45,7 @@ class JsonTraversalTest {
 
         assertThat(visited).containsExactly("a");
         assertThat(context.getErrors())
-                .extracting(PlannerValidationException::getOriginalCode, PlannerValidationException::getLogDetail)
+                .extracting(PlannerValidationException::getOriginalCode, PlannerValidationException::getMessage)
                 .containsExactly(tuple("INVALID_FIELD_TYPE", "Field 'ids[1]' must be string, got number 42"));
     }
 
@@ -56,7 +56,7 @@ class JsonTraversalTest {
 
         assertThat(visited).containsExactly("0:a");
         assertThat(context.getErrors())
-                .extracting(PlannerValidationException::getOriginalCode, PlannerValidationException::getLogDetail)
+                .extracting(PlannerValidationException::getOriginalCode, PlannerValidationException::getMessage)
                 .containsExactly(tuple("DUPLICATE_VALUE", "Duplicate value 'a' in ids"));
     }
 
@@ -76,7 +76,7 @@ class JsonTraversalTest {
 
         assertThat(visited).containsExactly("0:7");
         assertThat(context.getErrors())
-                .extracting(PlannerValidationException::getOriginalCode, PlannerValidationException::getLogDetail)
+                .extracting(PlannerValidationException::getOriginalCode, PlannerValidationException::getMessage)
                 .containsExactly(tuple("INVALID_FIELD_TYPE", "Field 'order[1]' must be number, got string \"x\""));
     }
 

@@ -19,9 +19,13 @@ public class UserBannedException extends DomainException {
     private final Instant bannedAt;
 
     public UserBannedException(Long userId, Instant bannedAt) {
-        super(ErrorKind.FORBIDDEN, ERROR_CODE, CLIENT_DETAIL,
-                "User " + userId + " is banned since " + bannedAt, null);
+        super(ErrorKind.FORBIDDEN, ERROR_CODE, CLIENT_DETAIL);
         this.userId = userId;
         this.bannedAt = bannedAt;
+    }
+
+    @Override
+    public String getMessage() {
+        return "User " + userId + " is banned since " + bannedAt;
     }
 }

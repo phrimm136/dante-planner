@@ -21,9 +21,13 @@ public class TokenRevokedException extends DomainException {
      * @param tokenType the type of token that was revoked ("access" or "refresh")
      */
     public TokenRevokedException(String tokenType) {
-        super(ErrorKind.UNAUTHENTICATED, ERROR_CODE, CLIENT_DETAIL,
-                String.format("%s token has been revoked", tokenType), null);
+        super(ErrorKind.UNAUTHENTICATED, ERROR_CODE, CLIENT_DETAIL);
         this.tokenType = tokenType;
+    }
+
+    @Override
+    public String getMessage() {
+        return String.format("%s token has been revoked", tokenType);
     }
 
     @Override

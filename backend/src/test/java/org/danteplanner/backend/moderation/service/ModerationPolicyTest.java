@@ -34,7 +34,7 @@ class ModerationPolicyTest {
         assertThatThrownBy(() -> POLICY.requireCanRestrict(
                 timedOutModerator(), normalUser(), ModerationAction.ActionType.TIMEOUT))
                 .isInstanceOf(ModerationForbiddenException.class)
-                .hasMessageContaining("A timed-out account cannot timeout users");
+                .hasMessage("A timed-out account cannot timeout users");
     }
 
     @Test
@@ -57,7 +57,7 @@ class ModerationPolicyTest {
         assertThatThrownBy(() -> POLICY.requireCanRestrict(
                 actor, normalUser(), ModerationAction.ActionType.BAN))
                 .isInstanceOf(ModerationForbiddenException.class)
-                .hasMessageContaining("A banned account cannot ban users");
+                .hasMessage("A banned account cannot ban users");
     }
 
     @Test
@@ -66,7 +66,7 @@ class ModerationPolicyTest {
         assertThatThrownBy(() -> POLICY.requireCanRestrict(
                 user(1L, UserRole.MODERATOR), normalUser(), ModerationAction.ActionType.BAN))
                 .isInstanceOf(ModerationForbiddenException.class)
-                .hasMessageContaining("Only administrators can ban users");
+                .hasMessage("Only administrators can ban users");
     }
 
     @Test
@@ -76,7 +76,7 @@ class ModerationPolicyTest {
                 user(1L, UserRole.MODERATOR), user(2L, UserRole.MODERATOR),
                 ModerationAction.ActionType.TIMEOUT))
                 .isInstanceOf(ModerationForbiddenException.class)
-                .hasMessageContaining("Cannot timeout a user of equal or higher rank");
+                .hasMessage("Cannot timeout a user of equal or higher rank");
     }
 
     @Test
@@ -94,7 +94,7 @@ class ModerationPolicyTest {
         assertThatThrownBy(() -> POLICY.requireCanChangeRole(
                 user(1L, UserRole.MODERATOR), normalUser(), UserRole.ADMIN))
                 .isInstanceOf(ModerationForbiddenException.class)
-                .hasMessageContaining("Cannot grant role higher than your own");
+                .hasMessage("Cannot grant role higher than your own");
     }
 
     @Test

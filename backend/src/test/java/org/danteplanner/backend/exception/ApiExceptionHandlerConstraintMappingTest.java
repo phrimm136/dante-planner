@@ -2,7 +2,7 @@ package org.danteplanner.backend.exception;
 
 import io.sentry.Sentry;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
-import org.danteplanner.backend.shared.exception.DomainException;
+import org.danteplanner.backend.shared.exception.Problems;
 import org.danteplanner.backend.shared.exception.KnownConstraint;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.hibernate.exception.ConstraintViolationException;
@@ -221,7 +221,7 @@ class ApiExceptionHandlerConstraintMappingTest {
     }
 
     private static String codeOf(ResponseEntity<Object> response) {
-        return (String) body(response).getProperties().get(DomainException.CODE_PROPERTY);
+        return (String) body(response).getProperties().get(Problems.CODE);
     }
 
     private static String detailOf(ResponseEntity<Object> response) {

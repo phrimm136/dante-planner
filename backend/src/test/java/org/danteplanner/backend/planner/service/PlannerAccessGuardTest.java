@@ -68,7 +68,7 @@ class PlannerAccessGuardTest {
 
             assertThatThrownBy(() -> accessGuard.checkPublished(plannerId))
                     .isInstanceOf(PlannerNotFoundException.class)
-                    .hasMessageContaining("Planner not found with id: " + plannerId)
+                    .hasMessage("Planner not found with id: " + plannerId)
                     .extracting(e -> ((PlannerNotFoundException) e).getPlannerId())
                     .isEqualTo(plannerId);
         }
@@ -85,7 +85,7 @@ class PlannerAccessGuardTest {
 
             assertThatThrownBy(() -> accessGuard.requirePublished(plannerId))
                     .isInstanceOf(PlannerNotFoundException.class)
-                    .hasMessageContaining("Planner not found with id: " + plannerId);
+                    .hasMessage("Planner not found with id: " + plannerId);
         }
 
         @Test

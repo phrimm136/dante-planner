@@ -19,9 +19,13 @@ public class UserTimedOutException extends DomainException {
 
     public UserTimedOutException(Long userId, Instant timeoutUntil) {
         super(ErrorKind.FORBIDDEN, ERROR_CODE,
-                "Your account is temporarily restricted until " + timeoutUntil,
-                "User " + userId + " is timed out until " + timeoutUntil, null);
+                "Your account is temporarily restricted until " + timeoutUntil);
         this.userId = userId;
         this.timeoutUntil = timeoutUntil;
+    }
+
+    @Override
+    public String getMessage() {
+        return "User " + userId + " is timed out until " + timeoutUntil;
     }
 }

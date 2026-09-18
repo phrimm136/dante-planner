@@ -53,8 +53,13 @@ public class InvalidTokenException extends DomainException {
      * @param cause the underlying cause
      */
     public InvalidTokenException(Reason reason, Throwable cause) {
-        super(ErrorKind.UNAUTHENTICATED, ERROR_CODE, CLIENT_DETAIL, reason.getDescription(), cause);
+        super(ErrorKind.UNAUTHENTICATED, ERROR_CODE, CLIENT_DETAIL, cause);
         this.reason = reason;
+    }
+
+    @Override
+    public String getMessage() {
+        return reason.getDescription();
     }
 
     @Override
