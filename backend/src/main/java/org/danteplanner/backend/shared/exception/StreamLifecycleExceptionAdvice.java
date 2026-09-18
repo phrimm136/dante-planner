@@ -9,8 +9,7 @@ import org.springframework.web.context.request.async.AsyncRequestNotUsableExcept
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 
 /**
- * Swallows the exceptions Spring dispatches after an SseEmitter has committed the response; the
- * emitter callbacks are the handling.
+ * Spring dispatches exceptions to an advice after an SseEmitter has committed the response.
  */
 @RestControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)

@@ -7,16 +7,6 @@ import org.springframework.dao.DuplicateKeyException;
 
 import org.hibernate.exception.ConstraintViolationException;
 
-/**
- * Classifies a database integrity failure into the response the client receives.
- *
- * <p>Uniqueness is decided from typed signals only, in descending order of specificity: Spring's
- * {@link DuplicateKeyException} subclass, Hibernate's {@code ConstraintKind}, then the SQLState and
- * vendor error code carried by the {@link SQLException} in the cause chain. The violated
- * constraint's identifier comes from
- * {@code org.hibernate.exception.ConstraintViolationException#getConstraintName()}, so the one
- * place a driver message is parsed is inside Hibernate's dialect, which owns that knowledge.</p>
- */
 public final class ConstraintViolationClassifier {
 
     /** MySQL's duplicate-entry error, reported under the integrity-constraint SQLState. */
@@ -26,18 +16,11 @@ public final class ConstraintViolationClassifier {
     /** The SQL:2011 SQLState for a unique violation, used by drivers that do not overload 23000. */
     private static final String UNIQUE_VIOLATION_SQLSTATE = "23505";
 
-    /** Bounds the cause walk so a self-referencing chain cannot spin. */
     private static final int MAX_CAUSE_DEPTH = 16;
 
     private ConstraintViolationClassifier() {
     }
 
-    /**
-     * Determines how a constraint violation is reported to the client.
-     *
-     * @param ex the translated data-access exception
-     * @return the outcome carrying status, error code, message and Sentry reporting
-     */
     public static ConstraintViolationOutcome classify(DataIntegrityViolationException ex) {
         ConstraintViolationException hibernateViolation = causeOfType(ex, ConstraintViolationException.class);
         if (!isUniquenessViolation(ex, hibernateViolation)) {

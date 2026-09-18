@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.net.URI;
 
 /**
- * Writes a problem document from outside the DispatcherServlet, where no message converter runs.
+ * Outside the DispatcherServlet no message converter runs.
  */
 @Component
 @RequiredArgsConstructor

@@ -17,13 +17,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-/**
- * Decides what an access token proves, and establishes the security context when it proves enough.
- *
- * <p>Answers only "is this credential good"; what the request then becomes — refreshed, downgraded
- * to guest, or answered with a 503 — is the filter's decision, carried back as a
- * {@link AccessTokenVerdict}.</p>
- */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -32,29 +25,14 @@ public class AccessTokenAuthenticator {
     private final TokenValidator tokenValidator;
     private final TokenBlacklistService tokenBlacklistService;
 
-    /**
-     * What an access token turned out to prove.
-     */
     public enum AccessTokenVerdict {
-        /** The token is good and the security context now carries its subject. */
         AUTHENTICATED,
-        /** The token names the sentinel account, which is not a person and never authenticates. */
         SENTINEL_BLOCKED,
-        /** The token was withdrawn, by its own revocation or by the subject's. */
         REVOKED,
-        /** The token is past its expiry and a refresh may still succeed. */
         EXPIRED,
-        /** The token is unusable for a reason no refresh can repair. */
         REJECTED
     }
 
-    /**
-     * Verify an access token and, when it holds, authenticate the request as its subject.
-     *
-     * @param token   the access token from the request's cookie
-     * @param request the request, for authentication details and security-event context
-     * @return what the token proved
-     */
     public AccessTokenVerdict verify(String token, HttpServletRequest request) {
         TokenClaims claims;
         try {
@@ -73,8 +51,6 @@ public class AccessTokenAuthenticator {
             return AccessTokenVerdict.REVOKED;
         }
 
-        // Rejects tokens issued before the subject's tokens were invalidated: a role demotion,
-        // a logout-everywhere, or an account deletion.
         if (tokenBlacklistService.isUserTokenInvalidated(claims.userId(), claims.issuedAt().getTime())) {
             logSecurityEvent("TOKEN_REVOKED", request);
             return AccessTokenVerdict.REVOKED;
@@ -90,21 +66,10 @@ public class AccessTokenAuthenticator {
             return AccessTokenVerdict.SENTINEL_BLOCKED;
         }
 
-        // Authenticate from token claims alone — no per-request DB lookup. Deleted users are
-        // rejected by the in-memory isUserTokenInvalidated check above, so auth keeps working
-        // when the DB is briefly unavailable (maintenance window).
         authenticateAs(userId, claims.getEffectiveRole(), request);
         return AccessTokenVerdict.AUTHENTICATED;
     }
 
-    /**
-     * Establish the security context for a subject whose credentials have already been accepted,
-     * whether from a presented access token or from a completed refresh.
-     *
-     * @param userId  the authenticated subject
-     * @param role    the role its authorities are built from
-     * @param request the request, for authentication details
-     */
     public void authenticateAs(Long userId, UserRole role, HttpServletRequest request) {
         List<SimpleGrantedAuthority> authorities = List.of(
                 new SimpleGrantedAuthority("ROLE_" + role.getValue())
@@ -122,9 +87,6 @@ public class AccessTokenAuthenticator {
         return AccessTokenVerdict.REJECTED;
     }
 
-    /**
-     * Logs security events for audit and attack detection.
-     */
     private void logSecurityEvent(String event, HttpServletRequest request) {
         log.warn("Security event: {} - IP: {}, URI: {}, UA: {}",
                 event,

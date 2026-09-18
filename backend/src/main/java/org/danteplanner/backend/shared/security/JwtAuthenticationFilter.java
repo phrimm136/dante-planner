@@ -37,20 +37,11 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.TransactionException;
 import org.danteplanner.backend.shared.config.JwtProperties;
 
-/**
- * JWT authentication filter that validates access tokens from cookies.
- * Checks token validity and blacklist status before setting authentication.
- */
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    /**
-     * Paths excluded from JWT validation.
-     * - OAuth callbacks: User is logging in, existing token state is irrelevant
-     * - Logout: Should work even with expired/invalid tokens
-     */
     private static final Set<String> EXCLUDED_PATHS = Set.of(
             "/api/auth/google/start",
             "/api/auth/google/callback",
@@ -69,14 +60,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final LineageRotationFlag lineageRotationFlag;
     private final JwtProperties jwtProperties;
 
-    /**
-     * Skip JWT validation for:
-     * - Endpoints that don't use access tokens (refresh, logout)
-     * - ASYNC_DISPATCH requests (SSE continuations) - SecurityContext already set on initial request
-     */
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        // Skip on async dispatch - security context preserved from initial request
+        // The security context is preserved from the initial request across an ASYNC dispatch.
         if (request.getDispatcherType() == DispatcherType.ASYNC) {
             return true;
         }
@@ -91,8 +77,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
-        // MdcLoggingFilter runs after this filter (to read authenticated userId).
-        // Set method+path early so WARN/ERROR logs from this filter include request context.
         MDC.put("method", request.getMethod());
         MDC.put("path", request.getRequestURI().replaceAll("[\r\n]", "_"));
 
@@ -104,25 +88,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    /**
-     * Settle what the request's credentials make it: authenticated, guest, or answered already.
-     *
-     * <p>The verdict switch carries no default arm, so a verdict added to
-     * {@link AccessTokenAuthenticator.AccessTokenVerdict} fails to compile here rather than
-     * defaulting into whatever authentication the request arrived with.</p>
-     *
-     * @param request  the request whose credentials are read
-     * @param response the response new cookies or a 503 are written to
-     * @return false when a datastore outage has already been answered and the chain must not continue
-     * @throws IOException if writing the outage response fails
-     */
     private boolean establishAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         Optional<String> accessToken = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN);
 
         if (accessToken.isEmpty()) {
-            // Cookie expiry (MaxAge) and token expiry (JWT) desync: the access cookie can be gone
-            // while a refresh cookie still carries a live session.
             return refreshOrReportOutage(request, response) != RefreshOutcome.OUTAGE_REPORTED;
         }
 
@@ -130,8 +100,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             case AUTHENTICATED -> true;
             case EXPIRED -> refreshExpiredSession(request, response);
             case SENTINEL_BLOCKED, REVOKED, REJECTED -> {
-                // A revocation is respected rather than refreshed, no refresh repairs a malformed or
-                // wrongly-signed token, and the sentinel account never authenticates at all.
                 SecurityContextHolder.clearContext();
                 yield true;
             }
@@ -149,29 +117,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return outcome != RefreshOutcome.OUTAGE_REPORTED;
     }
 
-    /**
-     * What a refresh attempt left the request as.
-     */
     private enum RefreshOutcome {
-        /** New tokens were minted and the security context is populated. */
         AUTHENTICATED,
-        /** No usable refresh credential; the request continues unauthenticated. */
         GUEST,
-        /** A datastore is down, the 503 is already written, and the chain must not continue. */
         OUTAGE_REPORTED
     }
 
-    /**
-     * Refresh, or answer the request with a 503 when the attempt met a datastore outage.
-     *
-     * <p>An outage must not downgrade the caller to guest: that reads to the client as a logout
-     * caused by a dependency being briefly unreachable.</p>
-     *
-     * @param request  HTTP request to extract the refresh token from
-     * @param response HTTP response to set new cookies or write the 503 to
-     * @return what the request should now be treated as
-     * @throws IOException if writing the outage response fails
-     */
     private RefreshOutcome refreshOrReportOutage(
             HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
@@ -185,17 +136,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
     }
 
-    /**
-     * Attempts to transparently refresh expired access tokens using refresh token.
-     *
-     * <p>The credential checks and the access-token minting are the same whichever rotation the
-     * {@code jwt.rotation.lineage-enabled} flag selects; only how the refresh cookie is rotated
-     * differs, which is all {@link #rotateRefreshCookie} decides.</p>
-     *
-     * @param request  HTTP request to extract refresh token from
-     * @param response HTTP response to set new cookies
-     * @return true if refresh succeeded and authentication is set, false otherwise
-     */
     private boolean attemptAutoRefresh(
             HttpServletRequest request,
             HttpServletResponse response
@@ -238,7 +178,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return false;
             }
 
-            // Fresh role from the user entity, not from the presented token's claims.
             String newAccessToken = tokenGenerator.generateAccessToken(user.getId(), user.getRole());
             cookieUtils.setCookie(response, CookieConstants.ACCESS_TOKEN, newAccessToken,
                     jwtProperties.getAccessTokenExpirySeconds());
@@ -249,36 +188,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return true;
 
         } catch (DataAccessException | TransactionException e) {
-            // Any datastore failure during refresh propagates so the caller returns 503. Narrower
-            // types let a Redis command timeout fall through to the catch below, which downgraded
-            // the session to guest and reported it only at DEBUG.
             throw e;
         } catch (Exception e) {
-            // Deliberately total: this runs before the handler chain, so anything escaping here
-            // becomes a 500 on an endpoint the caller may be entitled to reach as a guest.
             log.debug("Auto-refresh failed: {}", e.getMessage());
             return false;
         }
     }
 
-    /**
-     * Replace the presented refresh cookie with its successor.
-     *
-     * <p>With lineage rotation on, {@link RefreshRotationService} owns both the successor and the
-     * theft detection, and this method writes the successor it hands back. With it off, the
-     * presented token is blacklisted for the rotation grace period and a successor is minted
-     * here.</p>
-     *
-     * <p>Every outcome that is not a rotation withdraws the auth cookies, so a client is never
-     * left re-presenting credentials this filter has already refused.</p>
-     *
-     * @param refreshToken the presented refresh JWT
-     * @param claims       its verified claims
-     * @param user         the active account it names
-     * @param request      HTTP request to name a rejection on
-     * @param response     HTTP response to set the successor cookie on
-     * @return true if the cookie was rotated, false if the session was abandoned instead
-     */
     private boolean rotateRefreshCookie(
             String refreshToken,
             TokenClaims claims,
@@ -307,25 +223,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     /**
-     * Abandon a session whose credentials can never succeed again: a revoked or blacklisted token,
-     * one belonging to a deleted account, or one that is not a refresh token at all.
-     *
-     * <p>Clearing is the point. A client left holding dead cookies re-presents them on every
-     * subsequent request, and each one repeats this rejection, so the session never resolves to
-     * either authenticated or guest. Infrastructure failures deliberately do not come through here:
-     * a Redis outage propagates to the caller as a 503 instead, because logging every user out is
-     * the wrong answer to a dependency being down.</p>
-     *
-     * <p>The error code rides a request attribute rather than an exception because an exception
-     * thrown here would leave the filter chain entirely, missing both the entry point and every
-     * {@code @ControllerAdvice}. A permitAll endpoint ignores the attribute and serves the request
-     * as a guest; a protected one reaches
-     * {@link CustomAuthenticationEntryPoint}, which reads it.</p>
-     *
-     * @param request   the request to name the failure on
-     * @param response  the response to clear auth cookies on
-     * @param errorCode the code the entry point reports to the client
-     * @return false, so callers can {@code return abandonSession(...)}
+     * An exception thrown inside the filter chain leaves it entirely, missing both the entry point
+     * and every {@code @ControllerAdvice}.
      */
     private boolean abandonSession(
             HttpServletRequest request, HttpServletResponse response, String errorCode) {

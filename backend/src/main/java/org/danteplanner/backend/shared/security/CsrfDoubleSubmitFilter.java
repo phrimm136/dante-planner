@@ -26,40 +26,18 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Self-enforcing CSRF protection via the double-submit cookie pattern.
- *
- * <p>Two responsibilities run per request, before {@code JwtAuthenticationFilter}:</p>
- * <ol>
- *   <li><b>Ensure-cookie:</b> if the request carries no cookie this server minted, a fresh
- *       keyed token replaces whatever was there. Browsers load the SPA with a GET first,
- *       so they always obtain a token before any mutation.</li>
- *   <li><b>Enforce:</b> for unsafe methods (POST/PUT/PATCH/DELETE) the cookie must be one
- *       this server minted and the {@code X-CSRF-Token} header must equal it (constant-time
- *       compare), or the request is rejected with 403 and the chain is not continued.</li>
- * </ol>
- *
- * <p>Safe methods (GET/HEAD/OPTIONS) are exempt from enforcement.</p>
- *
- * @see <a href="https://owasp.org/www-community/attacks/csrf">OWASP CSRF</a>
+ * On an unsafe method the cookie must be one this server minted and the {@code X-CSRF-Token}
+ * header must equal it under a constant-time compare.
  */
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class CsrfDoubleSubmitFilter extends OncePerRequestFilter {
 
-    /**
-     * HTTP header the SPA echoes the {@code csrf} cookie value back in.
-     */
     public static final String CSRF_HEADER = "X-CSRF-Token";
 
-    /**
-     * Error code returned when CSRF validation fails.
-     */
     static final String CSRF_ERROR_CODE = "CSRF_TOKEN_INVALID";
 
-    /**
-     * Lifetime of the {@code csrf} cookie in seconds (7 days), matching the refresh window.
-     */
     static final int COOKIE_MAX_AGE_SECONDS = 604800;
 
     private static final Set<String> SAFE_METHODS = Set.of("GET", "HEAD", "OPTIONS");
@@ -69,8 +47,8 @@ public class CsrfDoubleSubmitFilter extends OncePerRequestFilter {
     private final CsrfTokenService csrfTokenService;
 
     /**
-     * Skip ASYNC dispatch (SSE continuations): the response is already committed there,
-     * so setting a cookie would throw. The initial request already ran this filter.
+     * On an ASYNC dispatch (an SSE continuation) the response is already committed, so setting a
+     * cookie throws.
      */
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -86,11 +64,6 @@ public class CsrfDoubleSubmitFilter extends OncePerRequestFilter {
         Optional<String> cookieToken = cookieUtils.getCookieValue(request, CookieConstants.CSRF);
         boolean serverIssued = cookieToken.map(csrfTokenService::isValid).orElse(false);
 
-        // Ensure-cookie: guarantee the browser holds a token before it can mutate.
-        // Runs before enforcement, so a guest's first mutation receives a Set-Cookie
-        // and is still rejected (the request-side cookie is still absent). A cookie
-        // that fails verification is replaced rather than left in place, which is what
-        // carries browsers holding a token minted before this scheme.
         if (!serverIssued) {
             cookieUtils.setReadableCookie(
                     response, CookieConstants.CSRF, csrfTokenService.mint(), COOKIE_MAX_AGE_SECONDS);

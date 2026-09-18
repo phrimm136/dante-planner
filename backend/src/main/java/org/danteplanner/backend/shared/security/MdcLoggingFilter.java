@@ -14,19 +14,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-/**
- * Populates SLF4J MDC with per-request context so every WARN/ERROR log entry
- * automatically carries userId, method, and path.
- * Must run after JwtAuthenticationFilter so SecurityContext is populated.
- */
 @Component
 @Slf4j
 public class MdcLoggingFilter extends OncePerRequestFilter {
 
     /**
-     * Skip MDC population for ASYNC dispatch (SSE continuations).
-     * MDC is thread-local; async continuations run on a different thread
-     * where the MDC is already empty.
+     * MDC is thread-local; async continuations run on a different thread, where the MDC is
+     * already empty.
      */
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {

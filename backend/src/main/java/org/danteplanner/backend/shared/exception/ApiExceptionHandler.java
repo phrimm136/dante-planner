@@ -57,9 +57,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     private final CookieUtils cookieUtils;
 
     /**
-     * The single rendering path. Clearing the matched endpoint's producible media types is what
-     * keeps an event-stream endpoint's 4xx from being negotiated as {@code text/event-stream},
-     * for which no converter can write a body.
+     * Clearing the matched endpoint's producible media types keeps an event-stream endpoint's 4xx
+     * from being negotiated as {@code text/event-stream}, for which no converter can write a body.
      */
     private ResponseEntity<Object> respond(
             Exception ex, ProblemDetail body, HttpHeaders headers, WebRequest request) {
@@ -136,10 +135,6 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
                 NOT_FOUND_CODE, NOT_FOUND_DETAIL), headers, request);
     }
 
-    /**
-     * The one owned error with its own handler: the response carries a cookie clear that no body
-     * can express.
-     */
     @ExceptionHandler(SessionRevokedException.class)
     public ResponseEntity<Object> handleSessionRevoked(
             SessionRevokedException ex, HttpServletResponse response, WebRequest request) {
@@ -147,14 +142,6 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         return respond(ex, ex.getBody(), ex.getHeaders(), request);
     }
 
-    /**
-     * Handle database constraint violations (PRIMARY KEY, UNIQUE, FOREIGN KEY, NOT NULL).
-     *
-     * <p>{@link ConstraintViolationClassifier} decides the outcome from typed driver signals and the
-     * {@link KnownConstraint} table; this method only renders it. Expected races (a UUID collision, a
-     * repeated user action) return 409 without an alert; anything else is a defect and reaches
-     * Sentry.</p>
-     */
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Object> handleDataIntegrityViolation(
             DataIntegrityViolationException ex, WebRequest request) {
@@ -184,18 +171,11 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Handle the database being briefly unreachable (RDS maintenance reboot, failover, network blip).
-     *
-     * <p>When the DB is down, HikariCP cannot hand out a connection. Spring surfaces this as one of
+     * When the DB is down, HikariCP cannot hand out a connection. Spring surfaces this as one of
      * two unrelated hierarchies depending on WHERE the connection was needed: a query that runs
      * outside a transaction yields DataAccessResourceFailureException (CannotGetJdbcConnectionException
      * is a subclass); a {@code @Transactional} method fails at transaction-begin and yields
-     * CannotCreateTransactionException (a TransactionException, NOT a DataAccessException). Both mean
-     * the same thing — the DB is unreachable — so both map to 503 here. This is transient and
-     * self-healing — the pool reconnects when the DB returns. Deliberately NOT sent to Sentry: it is
-     * expected during the weekly single-AZ
-     * maintenance window and would otherwise alert-storm. Scoped to the resource-failure branch
-     * only, so query/constraint bugs keep their own handlers and are never masked as 503.</p>
+     * CannotCreateTransactionException (a TransactionException, NOT a DataAccessException).
      */
     @ExceptionHandler({
             DataAccessResourceFailureException.class,
@@ -207,14 +187,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Handle Redis being briefly unreachable during authentication (failover, network blip, maintenance).
-     *
-     * <p>The auth path touches Redis for session/token lookups. When Redis is unreachable, Spring Data
-     * surfaces a RedisConnectionFailureException. This is more specific than the DB
-     * DataAccessResourceFailureException above (it is a subclass of DataAccessResourceFailureException),
-     * so Spring dispatches Redis-connection failures here by type specificity. Transient and
-     * self-healing — deliberately NOT sent to Sentry for the same reason as the DB handler: it is
-     * expected during a Redis outage and would otherwise alert-storm.</p>
+     * When Redis is unreachable, Spring Data surfaces a RedisConnectionFailureException, a subclass
+     * of DataAccessResourceFailureException; Spring dispatches it here by type specificity.
      */
     @ExceptionHandler(RedisConnectionFailureException.class)
     public ResponseEntity<Object> handleRedisUnavailable(
@@ -224,17 +198,12 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Handle the rate-limit Redis being briefly unreachable or slow (failover, network blip, maintenance).
-     *
-     * <p>The rate limiter uses a RAW Lettuce client (only {@code RedisConnectionConfig} does — bucket4j's
+     * The rate limiter uses a RAW Lettuce client (only {@code RedisConnectionConfig} does — bucket4j's
      * {@code LettuceBasedProxyManager} is handed a raw {@code RedisClient.connect(...)}), so a rate-limit
      * Redis outage does NOT surface as Spring Data's {@code RedisConnectionFailureException}. It rethrows
      * the raw {@code RedisException} (RedisConnectionException / RedisCommandTimeoutException /
      * RedisSystemException) unwrapped — or bucket4j's own {@code TimeoutException} when its request
-     * timeout fires before Lettuce's equal command timeout. Mapping both covers every cut variant.
-     * Transient and self-healing — the client reconnects when Redis returns. Deliberately NOT sent to
-     * Sentry, for the same reason as the DB and auth-Redis handlers: it is expected during a Redis
-     * outage and would otherwise alert-storm.</p>
+     * timeout fires before Lettuce's equal command timeout.
      */
     @ExceptionHandler({RedisException.class, io.github.bucket4j.TimeoutException.class})
     public ResponseEntity<Object> handleRateLimitRedisUnavailable(RuntimeException ex, WebRequest request) {
@@ -258,26 +227,6 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
                 CONCURRENT_WRITE_CODE, CONCURRENT_WRITE_DETAIL), new HttpHeaders(), request);
     }
 
-    /**
-     * Handle SSE client disconnections (broken pipe, connection reset).
-     *
-     * <p>When clients disconnect from SSE endpoints (browser close, network interruption),
-     * Spring may throw IOException when attempting to write to the closed socket.
-     * This is expected behavior and should be logged at DEBUG level, not ERROR.</p>
-     *
-     * <p>Common scenarios:
-     * <ul>
-     *   <li>User closes browser tab</li>
-     *   <li>Network interruption</li>
-     *   <li>Client timeout</li>
-     *   <li>Explicit connection close from client</li>
-     * </ul>
-     * </p>
-     *
-     * <p>Any other IOException is a server failure and answers 500 — unless the response is
-     * already committed, where a null return marks the request handled because no status or body
-     * can still be written.</p>
-     */
     @ExceptionHandler(IOException.class)
     public ResponseEntity<Object> handleIOException(
             IOException ex, HttpServletResponse response, WebRequest request) {
@@ -301,7 +250,6 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     /**
      * Socket teardown reaches the JVM as a plain {@link IOException} carrying the OS strerror text
      * and nothing else — no subclass, no code — so these phrases are the only available signal.
-     * {@code Locale.ROOT} keeps the default locale out of the decision.
      */
     private static final List<String> CLIENT_DISCONNECT_STRERRORS = List.of(
             "broken pipe",

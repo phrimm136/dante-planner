@@ -13,16 +13,8 @@ import java.security.SecureRandom;
 import java.util.Base64;
 
 /**
- * Mints and verifies CSRF tokens the server can recognise as its own.
- *
- * <p>A token is {@code <nonce>.<issuedAtMs>.<mac>}, where the MAC covers the two fields
- * ahead of it under a key derived for this purpose alone. Recognition is the property
- * that matters: an unkeyed random token proves only that the cookie and the header agree,
- * which an attacker who can write either one satisfies trivially.</p>
- *
- * <p>The signing key is HKDF-expanded from the shared secret rather than used directly,
- * so a token key compromise does not extend to the sealing key and either can be rotated
- * without the other.</p>
+ * A token is {@code <nonce>.<issuedAtMs>.<mac>}, where the MAC covers the two fields ahead of it
+ * under a key derived for this purpose alone.
  */
 @Component
 @Slf4j
@@ -33,13 +25,8 @@ public class CsrfTokenService {
     private static final int NONCE_BYTE_LENGTH = 16;
     private static final char FIELD_SEPARATOR = '.';
 
-    /** Rejects a token older than the cookie it rides in, so a stale one cannot be replayed forever. */
     static final long MAX_AGE_MS = 604800_000L;
 
-    /**
-     * Tolerance for a token minted on a pod whose clock leads the one verifying it. Without it a
-     * few milliseconds of fleet skew rejects a token the same request just received.
-     */
     static final long CLOCK_SKEW_MS = 60_000L;
 
     private final byte[] signingKey;
@@ -50,11 +37,6 @@ public class CsrfTokenService {
         this.signingKey = expand(jwtProperties.getEncryptionKeyBytes());
     }
 
-    /**
-     * Mint a fresh token carrying the current time.
-     *
-     * @return the token to place in both the cookie and, by the client, the header
-     */
     public String mint() {
         byte[] nonce = new byte[NONCE_BYTE_LENGTH];
         secureRandom.nextBytes(nonce);
@@ -62,12 +44,6 @@ public class CsrfTokenService {
         return payload + FIELD_SEPARATOR + encoder.encodeToString(mac(payload));
     }
 
-    /**
-     * Whether this server minted the token and it is still inside its lifetime.
-     *
-     * @param token the presented token, or null
-     * @return true when the MAC verifies and the token has not aged out
-     */
     public boolean isValid(String token) {
         if (token == null || token.isEmpty()) {
             return false;
@@ -115,7 +91,7 @@ public class CsrfTokenService {
 
     /**
      * HKDF-Expand with a purpose label, taking the shared secret as an already-uniform
-     * pseudorandom key so no extract step is needed.
+     * pseudorandom key.
      */
     private static byte[] expand(byte[] sharedSecret) {
         try {

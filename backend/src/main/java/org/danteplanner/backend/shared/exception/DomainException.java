@@ -4,10 +4,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.ErrorResponseException;
 
-/**
- * A business error that carries its own HTTP status, headers and RFC 9457 body; the code rides as
- * the {@code code} property.
- */
 public abstract class DomainException extends ErrorResponseException {
 
     protected DomainException(ErrorKind kind, String code, String detail) {
@@ -24,7 +20,6 @@ public abstract class DomainException extends ErrorResponseException {
         return getBody().getDetail();
     }
 
-    /** True when reaching the client with this error is a defect worth an alert. */
     public boolean reportable() {
         return false;
     }
