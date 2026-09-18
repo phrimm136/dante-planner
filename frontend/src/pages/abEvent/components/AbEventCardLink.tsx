@@ -9,10 +9,6 @@ interface AbEventCardLinkProps {
   className?: string
 }
 
-/**
- * Navigation wrapper for AbEventCard that links to the ab-event detail page.
- * Memoized by eventId to prevent re-renders during list filtering.
- */
 export const AbEventCardLink = function AbEventCardLink({
   eventId,
   hasImage,

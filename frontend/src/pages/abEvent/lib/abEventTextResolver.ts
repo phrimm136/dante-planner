@@ -1,10 +1,3 @@
-/**
- * abEventTextResolver.ts
- *
- * Effect text resolution for abnormality event detail page.
- * Resolves effect templates, conditions, and targets from _shared.json data.
- */
-
 import { AFFINITY_COLORS } from '@/lib/constants'
 
 import type { AbEventShared } from '../schemas/AbEventSchemas'
@@ -65,9 +58,6 @@ export function resolveCondition(condition: string, shared: AbEventShared): stri
   return condition
 }
 
-/**
- * Resolve effect type to display text with template substitution.
- */
 export function createEffectTextResolver(shared: AbEventShared, giftNames: Record<string, string>) {
   return function resolveEffectText(
     effectType: string,
@@ -167,9 +157,6 @@ const ADDER_RESOLVERS: Array<[string, (rest: string, ctx: AdderNameContext) => s
   ],
 ]
 
-/**
- * Format adder info with i18n lookups.
- */
 export function formatAdderInfo(
   adderInfo: { correctionCase: string; adder: number }[],
   unitKeywords: Record<string, string>,

@@ -18,12 +18,6 @@ interface AbEventListProps {
   store: FilterStore<AbEventFacetState>
 }
 
-/**
- * The abnormality event browser's card grid.
- *
- * Filter logic: AND between filter types, OR within each type; search matches the
- * event description.
- */
 export function AbEventList({ spec, store }: AbEventListProps) {
   const { names: descs } = useSearchTermSources(AB_EVENT_LIST, EMPTY_DESCS, false)
   const sortedEvents = Object.entries(spec)

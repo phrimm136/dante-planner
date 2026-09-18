@@ -1,10 +1,3 @@
-/**
- * Abnormality Event Types
- *
- * Re-exports schema-derived types and defines composite types
- * not directly represented in JSON data files.
- */
-
 import type { Entity } from '@/shared/filter'
 import type { AbEventId } from '@/shared/gameData'
 import type { AbEventSpec } from '../schemas/AbEventSchemas'

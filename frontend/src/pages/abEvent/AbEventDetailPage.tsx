@@ -1,10 +1,3 @@
-/**
- * AbEventDetailPage - Abnormality event detail page with two-column layout
- *
- * Desktop: 4:6 ratio (left: image + related gifts/packs, right: choices expanded)
- * Mobile: Single column, left on top, right below
- */
-
 import { useParams, Link } from '@tanstack/react-router'
 import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -28,10 +21,6 @@ import {
   createEffectTextResolver,
 } from '@/pages/abEvent'
 import type { CoinTossI18nContext, AbEventChoice } from '@/pages/abEvent'
-
-// =============================================================================
-// Left Column Components
-// =============================================================================
 
 function EventImage({
   eventId,
@@ -111,10 +100,6 @@ function EventDescription({ id }: { id: AbEventId }) {
   )
 }
 
-// =============================================================================
-// Right Column Components
-// =============================================================================
-
 function getSelectionKey(choice: AbEventChoice): string | undefined {
   if (!choice.nextEventId) return undefined
   const lastTwo = choice.nextEventId.slice(-2)
@@ -153,10 +138,8 @@ function EventChoices({
         const option = i18n.options?.[idx]
         const nextId = choice.nextEventId
 
-        // Check if nextEventId maps to a sub-event (full ID match)
         const subEventId = nextId && spec.subEvents?.[String(nextId)] ? String(nextId) : undefined
 
-        // Otherwise check for coin toss (last 2 digits)
         const selKey = !subEventId ? getSelectionKey(choice) : undefined
         const selectionEvent = selKey ? spec.selectionEvents?.[selKey] : undefined
         const selectionText = selKey ? i18n.selectionTexts?.[selKey] : undefined
@@ -182,10 +165,6 @@ function EventChoices({
     </div>
   )
 }
-
-// =============================================================================
-// Main Page
-// =============================================================================
 
 function AbEventDetailContent() {
   const { id: rawId } = useParams({ strict: false })

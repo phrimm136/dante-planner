@@ -32,7 +32,6 @@ interface TFunc {
 type SubEventMap = NonNullable<AbEventData['subEvents']>
 type SubEventTextMap = NonNullable<AbEventI18n['subEventTexts']>
 
-/** Shared rendering context passed through the recursive tree */
 interface RenderContext {
   processText: (text: string) => string
   resolveEffectText: ResolveEffectText
@@ -42,10 +41,6 @@ interface RenderContext {
   subEventTexts?: SubEventTextMap | undefined
   i18nCtx: CoinTossI18nContext
 }
-
-// =============================================================================
-// Condition Label Formatting
-// =============================================================================
 
 const CONDITION_KEY_MAP: Record<string, string> = {
   MpAverage_Under: 'abEvent.condMpAverageUnder',
@@ -75,10 +70,6 @@ export function formatConditionLabel(condition: string, t: TFunc): string {
   }
   return condition
 }
-
-// =============================================================================
-// Shared Rendering Helpers
-// =============================================================================
 
 function EffectList({ effects, ctx }: { effects: AbEventEffect[]; ctx: RenderContext }) {
   return (
@@ -111,7 +102,6 @@ function NothingHappened({ ctx }: { ctx: RenderContext }) {
   )
 }
 
-/** Render a branching result card (probability or conditional) */
 function BranchCard({
   label,
   narrativeText,
@@ -180,12 +170,6 @@ function resolveNextTarget(nextId: string, ctx: RenderContext): NextTarget {
   return { kind: 'none' }
 }
 
-/**
- * Render what a nextEventId leads to.
- *
- * `selectionCtx` carries the selection events in scope for the coin toss lookup, which a
- * sub-event widens with its own; the sub-event branch keeps rendering under `ctx`.
- */
 function NextEventBlock({
   nextId,
   ctx,
@@ -213,10 +197,6 @@ function NextEventBlock({
 
   return className ? <div className={className}>{block}</div> : block
 }
-
-// =============================================================================
-// ChoiceBranch (Top-level)
-// =============================================================================
 
 export function ChoiceBranch({
   choice,
@@ -265,7 +245,6 @@ export function ChoiceBranch({
 
   return (
     <div className="border border-border rounded-lg overflow-hidden">
-      {/* Choice header */}
       <div className="bg-muted/50 px-4 py-3 border-b border-border">
         <div className="font-medium text-sm text-foreground">
           <ColoredText text={option?.message ?? `Choice ${choice.index}`} />
@@ -305,7 +284,6 @@ export function ChoiceBranch({
   )
 }
 
-/** Renders the result section of a choice (multi-result branching or single narrative) */
 function ChoiceResults({
   choice,
   option,
@@ -360,10 +338,6 @@ function ChoiceResults({
     </>
   )
 }
-
-// =============================================================================
-// SubEventBlock (Recursive)
-// =============================================================================
 
 function SubEventBlock({ subEventId, ctx }: { subEventId: string; ctx: RenderContext }) {
   const { t } = useTranslation('database')
@@ -447,14 +421,12 @@ function SubEventChoice({
         )}
       </div>
       <div className="p-3 space-y-2">
-        {/* Single result */}
         {singleResult !== undefined && (
           <div className="text-sm text-muted-foreground whitespace-pre-line">
             <ColoredText text={ctx.processText(singleResult)} />
           </div>
         )}
 
-        {/* Multi-result branching */}
         {option?.result &&
           option.result.length > 1 &&
           option.result.map((text, ri) => {
@@ -473,15 +445,12 @@ function SubEventChoice({
             )
           })}
 
-        {/* Direct effects */}
         {choice.directEffects && choice.directEffects.length > 0 && (
           <EffectList effects={choice.directEffects} ctx={ctx} />
         )}
 
-        {/* Nothing happened */}
         {outcomes.length === 0 && <NothingHappened ctx={ctx} />}
 
-        {/* Coin toss or nested sub-event via nextEventId */}
         {choice.nextEventId && choice.nextEventId !== subEventId && (
           <NextEventBlock nextId={choice.nextEventId} ctx={ctx} selectionCtx={selectionCtx} />
         )}
@@ -489,10 +458,6 @@ function SubEventChoice({
     </div>
   )
 }
-
-// =============================================================================
-// CoinTossSection
-// =============================================================================
 
 function CoinTossSection({
   selectionEvent,
@@ -518,7 +483,6 @@ function CoinTossSection({
 
   return (
     <div className="border border-border rounded-md overflow-hidden">
-      {/* Coin toss header */}
       <div className="bg-muted/30 px-3 py-2 border-b border-border">
         <div className={SECTION_STYLES.LAYOUT.row}>
           <span className="text-xs font-medium text-muted-foreground">
@@ -552,7 +516,6 @@ function CoinTossSection({
         )}
       </div>
 
-      {/* SUCCESS / FAILURE outcomes */}
       {selectionEvent.results?.map((result) => (
         <CoinTossOutcome
           key={result.outcome}

@@ -1,5 +1,3 @@
-// Public API of the abEvent entity. Import from '@/pages/abEvent', not internal paths.
-
 export { AbEventList } from './components/AbEventList'
 export { AbEventCard } from './components/AbEventCard'
 export { AbEventDetailSkeleton } from './components/AbEventDetailSkeleton'

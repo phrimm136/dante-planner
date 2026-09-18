@@ -12,14 +12,10 @@ import { AbEventList, useAbEventListSpec } from '@/pages/abEvent'
 import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
 import { AB_EVENT_GEOMETRY } from './lib/cardLayout'
 
-/**
- * Shell component - loads spec, manages filter states.
- */
 function AbEventPageShell() {
   const { t } = useTranslation('database')
   const spec = useAbEventListSpec()
 
-  // Filter states
   const {
     values: filters,
     setters,
@@ -74,14 +70,6 @@ function AbEventPageShell() {
   )
 }
 
-/**
- * AbEventPage - Abnormality event browser with responsive filter sidebar
- *
- * Granular loading architecture:
- * - Outer Suspense: ListPageSkeleton for spec loading (initial)
- * - EGO Gift / Theme Pack dropdowns: Own Suspense for i18n
- * - AbEventList: Uses deferred hook for name search
- */
 export default function AbEventPage() {
   return (
     <EntityListPage skeleton={<ListPageSkeleton geometry={AB_EVENT_GEOMETRY} />}>

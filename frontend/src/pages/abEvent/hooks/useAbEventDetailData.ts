@@ -29,12 +29,10 @@ const AB_EVENT_DETAIL: EntityDetailDataConfig<
   i18nSchema: AbEventI18nSchema,
 }
 
-/** AbEvent mechanics; suspends on initial load, not on language change */
 export function useAbEventDetailSpec(id: string) {
   return useEntityDetailSpec(AB_EVENT_DETAIL, id)
 }
 
-/** AbEvent texts for one event; suspends while loading */
 export function useAbEventDetailI18n(id: string) {
   return useEntityDetailI18n(AB_EVENT_DETAIL, id)
 }
@@ -45,10 +43,6 @@ const AB_EVENT_SHARED: EntitySharedDataConfig<z.infer<typeof AbEventSharedSchema
   sharedSchema: AbEventSharedSchema,
 }
 
-/**
- * Shared AbEvent resources (effect templates, targets, keywords);
- * language-scoped, not per-id. Suspends while loading.
- */
 export function useAbEventShared() {
   return useEntityShared(AB_EVENT_SHARED)
 }

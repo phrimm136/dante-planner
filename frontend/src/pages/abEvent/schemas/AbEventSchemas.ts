@@ -1,17 +1,6 @@
 import { z } from 'zod'
 import { AbEventIdSchema } from '@/shared/gameData'
 
-/**
- * AbEvent Schemas
- *
- * Zod schemas for runtime validation of abnormality event data.
- * Types are derived from schemas via z.infer — schemas are the single source of truth.
- */
-
-// =============================================================================
-// Spec List (aggregated, for list page)
-// =============================================================================
-
 export const AbEventSpecSchema = z.object({
   relatedEgoGifts: z.array(z.string()),
   relatedThemePacks: z.array(z.string()),
@@ -22,10 +11,6 @@ export const AbEventSpecSchema = z.object({
 export const AbEventSpecListSchema = z.record(AbEventIdSchema, AbEventSpecSchema)
 
 export const AbEventNameListSchema = z.record(z.string(), z.string())
-
-// =============================================================================
-// Mechanics (individual abEvent/{id}.json)
-// =============================================================================
 
 export const AbEventRewardSchema = z.object({
   type: z.string(),
@@ -92,7 +77,6 @@ export const AbEventSelectionEventSchema = z.object({
   results: z.array(AbEventResultSchema).optional(),
 })
 
-// Sub-event schema (recursive — sub-events have the same structure as parent but no further subEvents)
 const AbEventSubEventSchema = z.object({
   canSkip: z.boolean().optional(),
   eventType: z.string().optional(),
@@ -108,10 +92,6 @@ export const AbEventDataSchema = z.object({
   selectionEvents: z.record(z.string(), AbEventSelectionEventSchema).optional(),
   subEvents: z.record(z.string(), AbEventSubEventSchema).optional(),
 })
-
-// =============================================================================
-// i18n (individual i18n/{lang}/abEvent/{id}.json)
-// =============================================================================
 
 export const AbEventOptionI18nSchema = z.object({
   message: z.string(),
@@ -152,10 +132,6 @@ export const AbEventI18nSchema = z.object({
     .optional(),
 })
 
-// =============================================================================
-// Shared resources (i18n/{lang}/abEvent/_shared.json)
-// =============================================================================
-
 export const AbEventSharedSchema = z.object({
   effects: z.record(z.string(), z.string()),
   targets: z.record(z.string(), z.string()),
@@ -166,10 +142,6 @@ export const AbEventSharedSchema = z.object({
   identityNames: z.record(z.string(), z.string()).optional(),
   resultLogs: z.record(z.string(), z.string()).optional(),
 })
-
-// =============================================================================
-// Derived Types
-// =============================================================================
 
 export type AbEventSpec = z.infer<typeof AbEventSpecSchema>
 export type AbEventSpecList = z.infer<typeof AbEventSpecListSchema>

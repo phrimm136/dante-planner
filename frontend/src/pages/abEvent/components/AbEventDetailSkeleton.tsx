@@ -4,10 +4,6 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { CARD_MOBILE_SCALE_NONE } from '@/lib/constants'
 import { CardSlot, EGO_GIFT_GEOMETRY } from '@/shared/cardLayout'
 
-/**
- * Ab Event detail: event image, description and related gifts/packs (left)
- * Choice branches with effects (right)
- */
 export function AbEventDetailSkeleton() {
   return (
     <DetailPageSkeleton

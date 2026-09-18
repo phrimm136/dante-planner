@@ -17,12 +17,10 @@ export const AB_EVENT_LIST: EntityListDataConfig<
   i18nSchema: AbEventNameListSchema,
 }
 
-/** AbEvent spec map; suspends on initial load, not on language change */
 export function useAbEventListSpec() {
   return useEntityListSpec(AB_EVENT_LIST)
 }
 
-/** AbEvent description map; suspends while loading */
 export function useAbEventListI18n() {
   return useEntityListI18n(AB_EVENT_LIST)
 }

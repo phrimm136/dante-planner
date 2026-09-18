@@ -12,10 +12,6 @@ interface AbEventCardProps {
   className?: string
 }
 
-/**
- * Pure view component for rendering an abnormality event card.
- * Wide landscape image with a clamped description below.
- */
 export function AbEventCard({
   eventId,
   hasImage,
