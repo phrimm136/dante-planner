@@ -26,7 +26,7 @@ import java.util.Optional;
 /**
  * <p>The scratchpad is <b>encrypt-then-sign</b>: the {@code {state, codeVerifier}} JSON is
  * AES-256-GCM encrypted (confidential at rest — the verifier never leaves the server in the
- * clear, INV5) and embedded as a claim in a short-lived RS256-signed JWT (tamper-proof,
+ * clear) and embedded as a claim in a short-lived RS256-signed JWT (tamper-proof,
  * 90-second expiry).
  * {@link #open} fails closed on any signature, expiry, or decryption error.</p>
  */
