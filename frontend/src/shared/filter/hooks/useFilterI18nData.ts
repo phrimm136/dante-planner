@@ -4,8 +4,6 @@ import { createStaticDataQueryOptions } from '@/lib/queryOptions'
 import { SeasonsI18nSchema } from '../schemas/FilterSchemas'
 import { useUnitKeywords } from './useUnitKeywords'
 
-// Query key factory for filter i18n data
-// Hand-rolled: tuples deviate from the shared list/detail factory shapes
 export const filterI18nQueryKeys = {
   all: () => ['filter', 'i18n'] as const,
   seasons: (language: string) => ['filter', 'i18n', 'seasons', language] as const,
@@ -20,12 +18,6 @@ function createSeasonsI18nQueryOptions(language: string) {
   )
 }
 
-/**
- * Hook that loads and validates filter i18n data (seasons + unitKeywords)
- * Suspends while loading - wrap in Suspense boundary
- *
- * @returns Validated seasons and unitKeywords i18n data
- */
 export function useFilterI18nData() {
   const { i18n } = useTranslation()
 

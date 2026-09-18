@@ -27,53 +27,15 @@ const COMMENT_SSE_POLICY: SseReconnectPolicy = {
   stableAfterMs: COMMENT_SSE_CONNECTION.STABLE_CONNECTION_THRESHOLD,
 }
 
-/** The count belongs to one planner, so a different planner reads zero. */
 interface PlannerCommentCount {
   plannerId: string
   count: number
 }
 
-/**
- * Hook that subscribes to real-time comment notifications for a specific planner.
- *
- * When a new comment is posted on the planner by another user, the count increments
- * and the comment is grafted into the loaded tree. The author's own browser is
- * excluded (handled server-side via device ID).
- *
- * Works for both authenticated users and guests.
- *
- * @param plannerId - The planner UUID to subscribe to
- * @returns Object with newCommentsCount and resetCount function
- *
- * @example
- * ```tsx
- * function CommentSection({ plannerId }) {
- *   const { newCommentsCount, resetCount } = usePlannerCommentsSse(plannerId)
- *
- *   const handleRefresh = () => {
- *     resetCount()
- *     queryClient.invalidateQueries({ queryKey: ['comments', plannerId] })
- *   }
- *
- *   return (
- *     <>
- *       {newCommentsCount > 0 && (
- *         <button onClick={handleRefresh}>
- *           {newCommentsCount} new comments
- *         </button>
- *       )}
- *     </>
- *   )
- * }
- * ```
- */
 export function usePlannerCommentsSse(plannerId: string) {
   const queryClient = useQueryClient()
   const [counted, setCounted] = useState<PlannerCommentCount>({ plannerId, count: 0 })
 
-  // This stream is one planner's, not the app's, so it keeps its own attempt
-  // counter: sharing the store's would let a flapping comment stream spend the
-  // app stream's attempt budget and stretch its backoff.
   const attemptsRef = useRef(0)
   const connectionState: SseConnectionState = {
     getAttempts: () => attemptsRef.current,
@@ -120,11 +82,6 @@ export function usePlannerCommentsSse(plannerId: string) {
     )
   }
 
-  /**
-   * This stream's path names one planner, so a 404 means that planner is gone
-   * — deleted or unpublished on another device — and no amount of retrying
-   * brings it back.
-   */
   const handleStreamGone = () => {
     showErrorMessage('planner:sync.removedOnAnotherDevice')
   }

@@ -25,10 +25,6 @@ function renderToken(token: RichTextToken): ReactNode {
  *
  * Flat parser, balanced pairs only. Nested <s> is not supported.
  * Orphan <s> or </s> with no partner render as literal text.
- *
- * @example
- * applyStrikethrough('Apply 2 <s>Sinking</s> potency')
- *   // => 'Apply 2 ' + <s>Sinking</s> + ' potency'
  */
 export function applyStrikethrough(text: string): ReactNode {
   if (!text.includes('<s>')) return text

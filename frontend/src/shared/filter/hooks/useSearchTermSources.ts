@@ -10,19 +10,9 @@ const EMPTY_MAPPINGS: SearchMappings = {
   unitKeywordToValue: new Map(),
 }
 
-/**
- * The localized sources a list turns into per-item search terms.
- *
- * Every item's terms are built before any card renders, because the grid needs
- * them to decide which cards are visible at all — so this read must not suspend.
- * Until the active language resolves, terms come out empty and the search box
- * matches nothing; the names themselves are rendered by the card, which suspends
- * against its own name-sized boundary.
- */
 export function useSearchTermSources<TSpec, TI18n>(
   cfg: EntityListDataConfig<TSpec, TI18n>,
   emptyNames: TI18n,
-  /** Lists whose terms are names only leave the keyword maps unfetched. */
   withKeywordMappings = true,
 ): { names: TI18n; mappings: SearchMappings } {
   const { i18n } = useTranslation()

@@ -8,12 +8,10 @@ export interface CardSizePx {
   heightPx: number
 }
 
-/** A card's width over its height. */
 export function aspectOf(size: CardSizePx): number {
   return size.widthPx / size.heightPx
 }
 
-/** Whether a grid's rows take the card's box or their own content. */
 export type GridRowHeight = 'slot' | 'content'
 
 /**

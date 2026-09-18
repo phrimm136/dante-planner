@@ -7,34 +7,15 @@ interface IconFilterProps<T extends string = string> {
   options: readonly T[]
   selectedOptions: Set<T>
   onSelectionChange: (options: Set<T>) => void
-  /** Icon path getter - if undefined, renders text labels instead of icons */
   getIconPath?: (option: T) => string
-  /** Label getter for text mode (defaults to getKeywordDisplayName) */
   getLabel?: (option: string) => string
-  /** Size variant: 'sm' for 24px icons, 'md' for 32px icons */
   size?: 'sm' | 'md'
-  /** Use flex layout with fixed height and auto width for icons (for varying-width images like rank) */
   flexIcons?: boolean
-  /** 'wrap' fills the sidebar column; 'bar' is a single scrolling row on a card */
   layout?: 'wrap' | 'bar'
-  /** Renders a clear-all control; omit where a parent "Reset All" owns the reset */
   onClearAll?: () => void
   children?: ReactNode
 }
 
-/**
- * Filter for filter sidebar - supports both icon and text modes
- *
- * Modes:
- * - Icon mode (getIconPath provided): Renders icon buttons
- * - Text mode (no getIconPath): Renders text label buttons
- *
- * Layouts:
- * - 'wrap' (default): flex-wrap with fixed-size items, for the sidebar column
- * - 'bar': a single scrolling row on a card
- *
- * Reset is the parent's "Reset All" unless onClearAll is passed.
- */
 export function IconFilter<T extends string>({
   options,
   selectedOptions,
@@ -49,7 +30,6 @@ export function IconFilter<T extends string>({
 }: IconFilterProps<T>) {
   const { t } = useTranslation()
   const clearAllLabel = t('filters.resetAll', 'Reset All')
-  // Determine mode: icon vs text
   const isTextMode = !getIconPath
   const resolveLabel = getLabel ?? getKeywordDisplayName
   const toggleOption = (option: T) => {
@@ -62,8 +42,6 @@ export function IconFilter<T extends string>({
     onSelectionChange(newSelection)
   }
 
-  // Responsive sizes: larger on mobile, smaller on desktop
-  // Mobile-first: default is larger, lg breakpoint is smaller
   const iconSize = size === 'sm' ? 'size-8 lg:size-6' : 'size-10 lg:size-8'
   const buttonSize = size === 'sm' ? 'size-10 lg:size-8' : 'size-12 lg:size-10'
 

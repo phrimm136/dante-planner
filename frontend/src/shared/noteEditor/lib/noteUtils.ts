@@ -1,9 +1,3 @@
-/**
- * Note Utilities
- *
- * Pure functions for checking note content state.
- */
-
 import { calculateByteLength } from '@/lib/utils'
 import type { NoteContent } from '../types/NoteEditorTypes'
 import type { JSONContent } from '@tiptap/core'
@@ -15,9 +9,6 @@ import type { JSONContent } from '@tiptap/core'
  * the backend serializes each section's note value object ({ content: ... })
  * and measures its UTF-8 byte length. Serializing the same { content } shape
  * here yields the identical byte count regardless of key ordering.
- *
- * @param note - the note content object ({ content: ... })
- * @returns UTF-8 byte length of the JSON-serialized note
  */
 export function calculateNoteByteLength(note: { content: unknown }): number {
   return calculateByteLength(JSON.stringify(note))
@@ -31,9 +22,6 @@ export function calculateNoteByteLength(note: { content: unknown }): number {
  * `JSONContent` parameter type makes "bare doc in" a compile-time contract, so
  * passing an already-wrapped NoteContent (which would double-wrap to
  * { content: { content: ... } }) is a type error rather than a silent bug.
- *
- * @param doc - the bare Tiptap document (editor.getJSON() / node.toJSON())
- * @returns UTF-8 byte length the backend will measure for this note
  */
 export function measureDocBytes(doc: JSONContent): number {
   return calculateNoteByteLength({ content: doc })
@@ -46,11 +34,6 @@ export function measureDocBytes(doc: JSONContent): number {
  *
  * `measure` is monotonic in prefix length (more text never serializes smaller),
  * which is what makes the binary search valid.
- *
- * @param text - the full candidate string (e.g. pasted plain text)
- * @param measure - maps a prefix to its resulting size
- * @param limit - inclusive maximum the measured size may reach
- * @returns the largest prefix length that fits (0 if nothing fits)
  */
 export function largestPrefixWithinLimit(
   text: string,
@@ -78,18 +61,6 @@ export function largestPrefixWithinLimit(
   return best
 }
 
-/**
- * Checks whether a note is effectively empty.
- *
- * Handles all empty states:
- * - null/undefined input
- * - Missing or empty doc content
- * - Single empty paragraph (the default from createEmptyNoteContent)
- * - Whitespace-only text nodes
- *
- * @param note - NoteContent to check, or null/undefined
- * @returns true if the note has no meaningful content
- */
 export function isNoteEmpty(note: NoteContent | null | undefined): boolean {
   if (!note?.content) return true
 
@@ -100,10 +71,6 @@ export function isNoteEmpty(note: NoteContent | null | undefined): boolean {
   return doc.content.every((node: JSONContent) => isNodeEmpty(node))
 }
 
-/**
- * Checks whether a single JSONContent node is empty.
- * A node is empty if it has no content children, or all children are whitespace-only text.
- */
 function isNodeEmpty(node: JSONContent): boolean {
   if (!node.content || node.content.length === 0) {
     if (node.type === 'text') {

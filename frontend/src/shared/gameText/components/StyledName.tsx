@@ -4,24 +4,13 @@ import { getDisplayFontForLanguage } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
 
 interface StyledSkillNameProps {
-  /** Skill or passive name to display */
   name: string
-  /** Attribute type for color (e.g., "CRIMSON", "AZURE") - case-insensitive */
   attributeType?: string
 }
 
-/** Text color for all styled skill names (cream/gold) */
 const TEXT_COLOR = '#eecea4'
 
-/**
- * Generates CSS gradient for decorative diagonal stripes
- * Creates 4 stripes at the right edge of the component
- * @param color - Stripe color (hex)
- * @returns CSS linear-gradient value
- */
 function generateStripeGradient(color: string): string {
-  // Stripe pattern: 4 stripes starting at 2.5em, each 0.15em wide with 0.15em gaps
-  // Angle: 290deg (diagonal from bottom-right)
   return `linear-gradient(290deg,
     transparent 2.5em,
     ${color} 2.5em, ${color} 2.65em,
@@ -34,29 +23,10 @@ function generateStripeGradient(color: string): string {
   )`
 }
 
-/**
- * Generates CSS gradient for the plate body
- * Creates angled background that starts after a transparent corner
- * @param darkColor - Background color (hex)
- * @returns CSS linear-gradient value
- */
 function generateBackgroundGradient(darkColor: string): string {
-  // Angle: 255deg creates diagonal cut at the left edge
   return `linear-gradient(255deg, transparent 1.5em, ${darkColor} 1.5em)`
 }
 
-/**
- * StyledSkillName - Wiki-style gradient banner for skill/passive names
- *
- * Features:
- * - Attribute-based coloring (CRIMSON, AZURE, etc.)
- * - Dark gradient background with angled left edge, in the plate's ramp floor
- * - Decorative diagonal stripes on right side in the type color
- * - Text shadow for readability
- * - Cream/gold text color
- *
- * Pattern: Standalone display component with inline styles for dynamic gradients
- */
 export function StyledSkillName({ name, attributeType }: StyledSkillNameProps) {
   const { i18n } = useTranslation()
   const { primary, dark } = getAttributeColors(attributeType)
@@ -64,7 +34,6 @@ export function StyledSkillName({ name, attributeType }: StyledSkillNameProps) {
 
   return (
     <div className="w-fit">
-      {/* Outer container: dark gradient background */}
       <div
         style={{
           color: TEXT_COLOR,
@@ -73,7 +42,6 @@ export function StyledSkillName({ name, attributeType }: StyledSkillNameProps) {
           backgroundImage: generateBackgroundGradient(dark),
         }}
       >
-        {/* Inner container: stripe decoration + text */}
         <div
           style={{
             textShadow: '2px 2px 2px black',
@@ -89,10 +57,6 @@ export function StyledSkillName({ name, attributeType }: StyledSkillNameProps) {
   )
 }
 
-/**
- * Skeleton matching StyledSkillName's plate.
- * Used as Suspense fallback for skill/passive name loading.
- */
 export function StyledNameSkeleton({ attributeType }: { attributeType?: string | undefined }) {
   const { primary, dark } = getAttributeColors(attributeType)
 

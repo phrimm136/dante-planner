@@ -6,16 +6,11 @@ import { Button } from '@/components/ui/button'
 import { LinkifyText } from '@/components/ui/LinkifyText'
 import { useRestrictionStatus } from '../hooks/useRestrictionStatus'
 
-/**
- * Global banner displaying account suspension status (ban or timeout).
- * Shows reason and contact email. Dismissible but persists across page loads.
- */
 export function BanStatusBanner() {
   const { t } = useTranslation(['common'])
   const { isRestricted, reason } = useRestrictionStatus()
   const [isDismissed, setIsDismissed] = useState(false)
 
-  // Only show if user is restricted and not dismissed
   if (!isRestricted || isDismissed) {
     return null
   }

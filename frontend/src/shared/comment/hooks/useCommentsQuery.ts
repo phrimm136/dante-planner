@@ -1,10 +1,3 @@
-/**
- * Comments Query Hook
- *
- * Fetches hierarchical comment tree for a planner using Suspense.
- * Tree is built server-side with deleted comments without children pruned.
- */
-
 import { useSuspenseQuery } from '@tanstack/react-query'
 
 import { ApiClient } from '@/lib/api'
@@ -14,25 +7,11 @@ import { CommentTreeSchema } from '../schemas/CommentSchemas'
 import type { CommentNode } from '../types/CommentTypes'
 import { GC_TIME, STALE_TIME } from '@/lib/constants'
 
-// ============================================================================
-// Query Keys
-// ============================================================================
-
 export const commentsQueryKeys = {
   all: ['comments'] as const,
   list: (plannerId: string) => ['comments', plannerId] as const,
 }
 
-// ============================================================================
-// Main Hook
-// ============================================================================
-
-/**
- * Hook to load comment tree for a planner using Suspense
- *
- * @param plannerId - The planner ID to load comments for
- * @returns Hierarchical tree of comments (server-built)
- */
 export function useCommentsQuery(plannerId: string): CommentNode[] {
   const query = useSuspenseQuery({
     queryKey: commentsQueryKeys.list(plannerId),

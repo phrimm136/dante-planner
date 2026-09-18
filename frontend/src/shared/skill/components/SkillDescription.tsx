@@ -6,29 +6,18 @@ import { FLAVOR_TEXT_COLOR } from '@/lib/constants'
 
 interface SkillDescriptionProps {
   descData: SkillDescEntry
-  /** Per-skill lore line — sibling to descData, since raw flavor is not per-level. */
   flavor?: string
 }
 
-/**
- * SkillDescription - Displays skill description and coin descriptions
- *
- * Layout:
- * 1. Skill description (desc)
- * 2. Coin descriptions (coinDescs) with numbered coin icons, tabbed
- * 3. Flavor lore line (mirrors in-game `[Text]SkillInfoFlavor` TMP)
- */
 export function SkillDescription({ descData, flavor }: SkillDescriptionProps) {
   const { desc, coinDescs } = descData
 
   return (
     <div className="text-sm space-y-2">
-      {/* Main skill description */}
       <div className="pb-1">
         <FormattedDescription text={desc ?? ''} />
       </div>
 
-      {/* Coin descriptions */}
       {coinDescs && coinDescs.length > 0 && (
         <div className="space-y-1">
           {coinDescs.map((coinDesc: string, index: number) => {
@@ -52,7 +41,6 @@ export function SkillDescription({ descData, flavor }: SkillDescriptionProps) {
         </div>
       )}
 
-      {/* Flavor text — mirrors in-game [Text]SkillInfoFlavor TMP */}
       {flavor && (
         <p
           data-testid="skill-flavor"
@@ -66,9 +54,6 @@ export function SkillDescription({ descData, flavor }: SkillDescriptionProps) {
   )
 }
 
-/**
- * Skeleton stand-in while a slice's description slot suspends for i18n.
- */
 export function SkillDescriptionSkeleton() {
   return (
     <div className="text-sm space-y-2">
@@ -78,10 +63,6 @@ export function SkillDescriptionSkeleton() {
   )
 }
 
-/**
- * Merge skill-description entries up to the given level. Earlier levels provide
- * base values, later levels override.
- */
 export function getMergedSkillDesc(descs: SkillDescEntry[], level: number): SkillDescEntry {
   const merged: SkillDescEntry = {}
   for (let i = 0; i < level; i++) {

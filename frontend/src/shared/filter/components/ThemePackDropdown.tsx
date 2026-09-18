@@ -5,20 +5,10 @@ import { SearchableMultiSelect } from './SearchableMultiSelect'
 interface ThemePackDropdownProps {
   selected: Set<string>
   onSelectionChange: (themePacks: Set<string>) => void
-  /** Structural shape only — the dropdown reads each pack's gift-pool length for the count. */
   packs: Record<string, { specificEgoGiftPool?: unknown[] }>
   names: Record<string, { name?: string } | undefined>
 }
 
-/**
- * Multi-select searchable dropdown for theme pack filtering.
- *
- * The themePack slice fetches packs/names and renders this inside its own
- * Suspense boundary, keeping `shared/filter` free of any `@/pages/*` import
- * (sink rule).
- *
- * Pattern: Follows SeasonDropdown.tsx structure
- */
 export function ThemePackDropdown({
   selected,
   onSelectionChange,

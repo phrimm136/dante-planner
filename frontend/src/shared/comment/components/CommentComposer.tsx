@@ -1,11 +1,3 @@
-/**
- * CommentComposer
- *
- * Comment writer slot at the foot of the comment list. Renders the editor only
- * for an authenticated user on a published planner; otherwise the matching
- * notice.
- */
-
 import { useTranslation } from 'react-i18next'
 
 import { CommentEditor } from './CommentEditor'

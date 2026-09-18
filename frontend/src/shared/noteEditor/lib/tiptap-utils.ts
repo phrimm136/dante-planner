@@ -17,21 +17,10 @@ const MAC_SYMBOLS: Record<string, string> = {
   capslock: '⇪',
 } as const
 
-/**
- * Determines if the current platform is macOS
- * @returns boolean indicating if the current platform is Mac
- */
 function isMac(): boolean {
   return typeof navigator !== 'undefined' && navigator.platform.toLowerCase().includes('mac')
 }
 
-/**
- * Formats a shortcut key based on the platform (Mac or non-Mac)
- * @param key - The key to format (e.g., "ctrl", "alt", "shift")
- * @param isMac - Boolean indicating if the platform is Mac
- * @param capitalize - Whether to capitalize the key (default: true)
- * @returns Formatted shortcut key symbol
- */
 const formatShortcutKey = (key: string, isMac: boolean, capitalize: boolean = true) => {
   if (isMac) {
     const lowerKey = key.toLowerCase()
@@ -41,13 +30,6 @@ const formatShortcutKey = (key: string, isMac: boolean, capitalize: boolean = tr
   return capitalize ? key.charAt(0).toUpperCase() + key.slice(1) : key
 }
 
-/**
- * Parses a shortcut key string into an array of formatted key symbols
- * @param shortcutKeys - The string of shortcut keys (e.g., "ctrl-alt-shift")
- * @param delimiter - The delimiter used to split the keys (default: "-")
- * @param capitalize - Whether to capitalize the keys (default: true)
- * @returns Array of formatted shortcut key symbols
- */
 export const parseShortcutKeys = (props: {
   shortcutKeys: string | undefined
   delimiter?: string
@@ -63,11 +45,6 @@ export const parseShortcutKeys = (props: {
     .map((key) => formatShortcutKey(key, isMac(), capitalize))
 }
 
-/**
- * Moves the focus to the next node in the editor
- * @param editor - The editor instance
- * @returns boolean indicating if the focus was moved
- */
 export function focusNextNode(editor: Editor) {
   const { state, view } = editor
   const { doc, selection } = state
@@ -88,28 +65,16 @@ export function focusNextNode(editor: Editor) {
   const para = paragraphType.create()
   let tr = state.tr.insert(end, para)
 
-  // Place the selection inside the new paragraph
   const $inside = tr.doc.resolve(end + 1)
   tr = tr.setSelection(TextSelection.near($inside)).scrollIntoView()
   view.dispatch(tr)
   return true
 }
 
-/**
- * Checks if a value is a valid number (not null, undefined, or NaN)
- * @param value - The value to check
- * @returns boolean indicating if the value is a valid number
- */
 export function isValidPosition(pos: number | null | undefined): pos is number {
   return typeof pos === 'number' && pos >= 0
 }
 
-/**
- * Checks if one or more extensions are registered in the Tiptap editor.
- * @param editor - The Tiptap editor instance
- * @param extensionNames - A single extension name or an array of names to check
- * @returns True if at least one of the extensions is available, false otherwise
- */
 export function isExtensionAvailable(
   editor: Editor | null,
   extensionNames: string | string[],
@@ -132,19 +97,8 @@ export function isExtensionAvailable(
 }
 
 type ProtocolOptions = {
-  /**
-   * The protocol scheme to be registered.
-   * @default '''
-   * @example 'ftp'
-   * @example 'git'
-   */
   scheme: string
 
-  /**
-   * If enabled, it allows optional slashes after the protocol.
-   * @default false
-   * @example true
-   */
   optionalSlashes?: boolean
 }
 

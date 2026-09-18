@@ -1,8 +1,3 @@
-/**
- * The shape every database section's entity shares: the spec entry copied key
- * for key, plus a branded id and an optional localized name.
- */
-
 import type { z } from 'zod'
 import type { Facet } from './applyFacets'
 
@@ -12,12 +7,9 @@ export type Entity<TId extends string, TSpec extends object> = TSpec & {
 }
 
 export interface EntitySection<TId extends string, TSpec extends object, TState> {
-  /** The pages/<dir> name. */
   name: string
-  /** Basename under static/data. */
   specFile: string
   specListSchema: z.ZodType<Record<string, TSpec>>
-  /** The entry object schema; the conformance test reads its `.shape` keys. */
   specEntrySchema: z.ZodObject<z.ZodRawShape>
   idSchema: IdSchema<TId>
   toEntity: (id: string, spec: TSpec, name?: string) => Entity<TId, TSpec>

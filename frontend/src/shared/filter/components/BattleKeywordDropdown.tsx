@@ -12,19 +12,12 @@ interface BattleKeywordDropdownProps {
   className?: string
 }
 
-/** Map entity type to the backlink field in BattleKeywordSpec */
 const BACKLINK_FIELD: Record<EntityType, 'identities' | 'egos' | 'egoGifts'> = {
   identity: 'identities',
   ego: 'egos',
   egoGift: 'egoGifts',
 }
 
-/**
- * Searchable multi-select dropdown for battle keyword filtering.
- * Scopes options to keywords that have at least one entity of the given type.
- *
- * Suspends while loading - wrap in Suspense boundary.
- */
 export function BattleKeywordDropdown({
   entityType,
   selected,

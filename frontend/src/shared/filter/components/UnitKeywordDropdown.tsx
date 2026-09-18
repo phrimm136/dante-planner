@@ -8,12 +8,10 @@ import { SearchableMultiSelect } from './SearchableMultiSelect'
 interface UnitKeywordDropdownProps {
   selected: Set<string>
   onSelectionChange: (unitKeywords: Set<string>) => void
-  /** Entity count per unit keyword for display */
   counts?: Record<string, number>
   className?: string
 }
 
-/** Parse Unity rich text tags (color, strikethrough) to React elements. */
 function formatUnitKeywordLabel(label: string) {
   const { color, text } = extractLeadingColor(label)
   if (color === undefined) return applyStrikethrough(text)
@@ -21,11 +19,6 @@ function formatUnitKeywordLabel(label: string) {
   return <span style={{ color }}>{applyStrikethrough(text)}</span>
 }
 
-/**
- * Multi-select searchable dropdown for unit keyword (association/affiliation) filtering.
- *
- * Fetches i18n data internally - wrap in Suspense boundary.
- */
 export function UnitKeywordDropdown({
   selected,
   onSelectionChange,

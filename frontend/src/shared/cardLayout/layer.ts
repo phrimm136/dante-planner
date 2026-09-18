@@ -15,7 +15,6 @@ export interface CardLayer {
   origin: string
 }
 
-/** Absolute positioning and sprite fit for one card layer. */
 export function layerStyle(layer: CardLayer): CSSProperties {
   return {
     ...pctStyle(layer.rect),

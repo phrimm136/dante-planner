@@ -1,11 +1,3 @@
-/**
- * In-app Notification Toast
- *
- * Shows notification popup in bottom-right when tab is focused.
- * Clicking navigates to the relevant content.
- * Used instead of browser notification when tab is visible.
- */
-
 import { toast } from 'sonner'
 import { Bell, FileText, MessageSquare, Star } from 'lucide-react'
 
@@ -15,13 +7,9 @@ import type { ReactNode } from 'react'
 import type { NotificationType } from '../schemas/NotificationSchemas'
 
 interface NotificationToastData {
-  /** Notification type for icon selection */
   type: NotificationType
-  /** Toast title */
   title: string
-  /** Toast body text */
   body: string
-  /** URL to navigate on click */
   url?: string
 }
 
@@ -33,9 +21,6 @@ const TOAST_ICON: Record<NotificationType, ReactNode> = {
   REPORT_RECEIVED: <Bell className="size-5 text-primary" />,
 }
 
-/**
- * Notification toast content component
- */
 function NotificationToastContent({
   data,
   toastId,
@@ -46,7 +31,6 @@ function NotificationToastContent({
   const handleClick = () => {
     toast.dismiss(toastId)
     if (data.url) {
-      // Use window.location for navigation to handle hash fragments properly
       window.location.href = data.url
     }
   }
@@ -72,10 +56,6 @@ function NotificationToastContent({
   )
 }
 
-/**
- * Show in-app notification toast in bottom-right corner.
- * Use this when tab is visible instead of browser notification.
- */
 export function showNotificationToast(data: NotificationToastData): void {
   toast.custom((id) => <NotificationToastContent data={data} toastId={id} />, {
     duration: 5000,

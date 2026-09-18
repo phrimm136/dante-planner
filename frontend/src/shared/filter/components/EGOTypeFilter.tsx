@@ -7,12 +7,6 @@ interface EGOTypeFilterProps {
   onSelectionChange: (types: Set<string>) => void
 }
 
-/**
- * EGO type icon filter for filter sidebar
- * 5 EGO type icons displayed in a 7-column grid (matches keyword/skill attribute filters)
- * Icons stay small and left-aligned, not stretching to fill container width
- *
- */
 export function EGOTypeFilter({ selected, onSelectionChange }: EGOTypeFilterProps) {
   return (
     <IconFilter

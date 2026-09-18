@@ -1,20 +1,10 @@
-/**
- * NewCommentsBar
- *
- * Banner shown when new comments are available via SSE.
- * Appears between comment list and comment writer.
- * Persists until user clicks to refresh.
- */
-
 import { useTranslation } from 'react-i18next'
 import { RefreshCw } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 
 interface NewCommentsBarProps {
-  /** Number of new comments available */
   count: number
-  /** Callback when user clicks to refresh */
   onRefresh: () => void
 }
 

@@ -1,12 +1,3 @@
-/**
- * FormattedKeyword - Renders a single resolved keyword with icon, color, and popover
- *
- * Supports three keyword types:
- * - battleKeyword: Icon + colored name + click popover with description
- * - skillTag: Colored display text only (no icon, no popover)
- * - unknown: Plain text with brackets preserved [Key]
- */
-
 import { useState } from 'react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { getBattleKeywordIconPath } from '@/shared/assets'
@@ -16,30 +7,18 @@ import type { ResolvedKeyword } from '../types/KeywordTypes'
 import { FLAVOR_TEXT_COLOR, SECTION_STYLES } from '@/lib/constants'
 
 interface FormattedKeywordProps {
-  /** Resolved keyword data from useKeywordFormatter */
   keyword: ResolvedKeyword
-  /** Additional CSS classes */
   className?: string | undefined
 }
 
-/**
- * Renders a formatted keyword based on its type.
- *
- * Battle keywords: Icon (if iconId exists) + colored name + click popover
- * Skill tags: Colored display text only
- * Unknown: Plain text with brackets [key]
- */
 export function FormattedKeyword({ keyword, className }: FormattedKeywordProps) {
   const { type, key, displayText, description, flavor, iconId, color } = keyword
-  // Icon error state kept for future use when icon loading is implemented
   const [_iconError, _setIconError] = useState(false)
 
-  // Unknown keywords: render as plain text with brackets
   if (type === 'unknown') {
     return <span className={className}>[{key}]</span>
   }
 
-  // Skill tags: styled text only (no icon, no popover)
   if (type === 'skillTag') {
     return (
       <span className={cn('font-medium', className)} style={{ color }}>
@@ -48,11 +27,8 @@ export function FormattedKeyword({ keyword, className }: FormattedKeywordProps) 
     )
   }
 
-  // Path for the images
   const path = iconId ?? key
 
-  // Battle keywords: icon + colored name + popover
-  // Using button for keyboard accessibility (focus, enter/space to open)
   return (
     <Popover>
       <PopoverTrigger asChild>

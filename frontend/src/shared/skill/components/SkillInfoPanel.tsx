@@ -12,7 +12,6 @@ import {
 } from '@/shared/assets'
 import { CoinDisplay } from './CoinDisplay'
 
-/** Minimal structural shape of the per-level skill stats this panel reads. */
 interface SkillInfoPanelData {
   attributeType?: string | undefined
   skillLevelCorrection?: number | undefined
@@ -22,30 +21,11 @@ interface SkillInfoPanelData {
 interface SkillInfoPanelWithSuspenseProps {
   skillData: SkillInfoPanelData
   coinString: string
-  /**
-   * The owning slice's skill-name element. It calls the slice's own detail-i18n
-   * hook and suspends inside this panel's boundary, so `shared/skill` stays free
-   * of any `@/pages/*` import (sink rule).
-   */
   nameSlot: ReactNode
-  /** Identity-only: renders the defense level icon instead of attack. EGO skills are always attack. */
   isDefenseSkill?: boolean
-  /** EGO-only: sanity (MP) cost. When provided, renders the sanity-cost stat. */
   sanityCost?: number | undefined
 }
 
-/**
- * SkillInfoPanel with granular i18n Suspense — shared by identity and ego.
- *
- * Layout (vertical):
- * 1. Coin display
- * 2. Skill name (suspends for i18n)
- * 3. Attack/Defense level with icon
- * 4. Attack-weight indicator (game icons) [+ sanity cost when supplied]
- *
- * Domain differences are injected: `isDefenseSkill` picks the level icon,
- * `sanityCost` opts into the ego-only sanity stat.
- */
 export function SkillInfoPanelWithSuspense({
   skillData,
   coinString,
@@ -60,19 +40,15 @@ export function SkillInfoPanelWithSuspense({
 
   return (
     <div className="flex grow flex-col pb-4 -ml-5">
-      {/* Coin display */}
       <div>
         <CoinDisplay coinEA={coinString} />
       </div>
 
-      {/* Skill name - suspends for i18n */}
       <Suspense fallback={<StyledNameSkeleton attributeType={skillData.attributeType} />}>
         {nameSlot}
       </Suspense>
 
-      {/* Level and stats display */}
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-        {/* Level */}
         <div className={SECTION_STYLES.LAYOUT.row}>
           <img
             src={isDefenseSkill ? getDefenseLevelIconPath() : getAttackLevelIconPath()}
@@ -87,7 +63,6 @@ export function SkillInfoPanelWithSuspense({
           </span>
         </div>
 
-        {/* Attack weight indicator (game icons) */}
         <div className="flex items-center gap-2 text-yellow-400">
           <span>{t('identity.atkWeight')}</span>
           <div className="flex gap-1 h-3.5">
@@ -97,7 +72,6 @@ export function SkillInfoPanelWithSuspense({
           </div>
         </div>
 
-        {/* Sanity cost (ego only) */}
         {sanityCost !== undefined && (
           <div style={{ color: SANITY_INDICATOR_COLORS.INCREMENT }}>
             {t('ego.sanityCost')} {sanityCost}

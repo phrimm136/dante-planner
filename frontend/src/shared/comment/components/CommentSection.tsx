@@ -1,13 +1,3 @@
-/**
- * CommentSection
- *
- * Main container that orchestrates the comment system:
- * - Fetches hierarchical comment tree via useCommentsQuery (Suspense)
- * - Tree is built server-side (no useCommentTree needed)
- * - Handles all mutations (create, edit, delete, vote, report, notifications)
- * - Shows empty state, loading skeleton, and new comments banner
- */
-
 import { Suspense, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
@@ -71,17 +61,13 @@ function CommentSectionContent({ plannerId, isPublished, isAuthenticated }: Comm
   const { t } = useTranslation(['planner', 'common'])
   const queryClient = useQueryClient()
 
-  // Who is reading the thread: a guest, a signed-in user, or a moderator
   const { data: currentUser } = useAuthQuery()
   const viewer = toCommentViewer(isAuthenticated, isStaff(currentUser?.role))
 
-  // Real-time new comment notifications via SSE
   const { newCommentsCount, resetCount } = usePlannerCommentsSse(plannerId)
 
-  // Fetch tree (already built server-side)
   const tree = useCommentsQuery(plannerId)
 
-  // Shared delete confirmation dialog state
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null)
   const [moderatorDeleteTarget, setModeratorDeleteTarget] = useState<{
     id: string
@@ -89,7 +75,6 @@ function CommentSectionContent({ plannerId, isPublished, isAuthenticated }: Comm
   } | null>(null)
   const totalCount = countComments(tree)
 
-  // Scroll to comment from URL hash (e.g., #comment-uuid from notification link)
   // Instant scroll - let browser scroll anchoring maintain position as content above loads
   const hasScrolled = useRef(false)
   useEffect(() => {
@@ -102,14 +87,12 @@ function CommentSectionContent({ plannerId, isPublished, isAuthenticated }: Comm
       // Instant scroll to comment - browser scroll anchoring handles content loading above
       element.scrollIntoView({ behavior: 'instant', block: 'center', inline: 'nearest' })
 
-      // Highlight the comment briefly with fade-out transition
       element.classList.add('bg-accent', 'transition-colors', 'duration-500')
       setTimeout(() => element.classList.remove('bg-accent'), 800)
       hasScrolled.current = true
     }
   }, [tree])
 
-  // Mutations
   const createComment = useCreateComment()
   const editComment = useEditComment()
   const deleteComment = useDeleteComment()
@@ -130,12 +113,10 @@ function CommentSectionContent({ plannerId, isPublished, isAuthenticated }: Comm
     editComment.mutate({ commentId, content, plannerId })
   }
 
-  // Opens delete confirmation dialog
   const handleDelete = (commentId: string) => {
     setDeleteTarget({ id: commentId, title: t('pages.plannerMD.comments.deleteConfirm.title') })
   }
 
-  // Actually performs the delete after confirmation
   const handleDeleteConfirm = () => {
     if (deleteTarget) {
       deleteComment.mutate({ commentId: deleteTarget.id, plannerId })
@@ -155,12 +136,10 @@ function CommentSectionContent({ plannerId, isPublished, isAuthenticated }: Comm
     reportComment.mutate({ commentId, reason, plannerId })
   }
 
-  // Moderator delete - opens confirmation dialog
   const handleModeratorDelete = (commentId: string) => {
     setModeratorDeleteTarget({ id: commentId, title: '' })
   }
 
-  // Actually performs moderator delete after confirmation (with reason)
   const handleModeratorDeleteConfirm = (reason: string) => {
     if (moderatorDeleteTarget) {
       moderatorDeleteComment.mutate({
@@ -187,7 +166,6 @@ function CommentSectionContent({ plannerId, isPublished, isAuthenticated }: Comm
     void queryClient.invalidateQueries({ queryKey: commentsQueryKeys.list(plannerId) })
   }
 
-  // Unpublished with no comments - hide section entirely
   if (!isPublished && tree.length === 0) {
     return null
   }
@@ -198,7 +176,6 @@ function CommentSectionContent({ plannerId, isPublished, isAuthenticated }: Comm
         {t('pages.plannerMD.comments.title', 'Comments')} ({totalCount})
       </h2>
 
-      {/* Comment list */}
       {tree.length === 0 ? (
         <p className="text-muted-foreground text-sm py-4">
           {t('pages.plannerMD.comments.empty', 'No comments yet. Be the first to comment.')}
@@ -217,10 +194,8 @@ function CommentSectionContent({ plannerId, isPublished, isAuthenticated }: Comm
         </div>
       )}
 
-      {/* New comments banner */}
       <NewCommentsBar count={newCommentsCount} onRefresh={handleRefresh} />
 
-      {/* Comment writer */}
       <CommentComposer
         isPublished={isPublished}
         isAuthenticated={isAuthenticated}
@@ -228,7 +203,6 @@ function CommentSectionContent({ plannerId, isPublished, isAuthenticated }: Comm
         isSubmitting={createComment.isPending}
       />
 
-      {/* Shared delete confirmation dialog */}
       <Dialog open={deleteTarget !== null} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <DialogContent>
           <DialogHeader>
@@ -253,7 +227,6 @@ function CommentSectionContent({ plannerId, isPublished, isAuthenticated }: Comm
         </DialogContent>
       </Dialog>
 
-      {/* Moderator delete confirmation dialog with reason */}
       <CommentDeleteDialog
         open={moderatorDeleteTarget !== null}
         onOpenChange={(open) => !open && setModeratorDeleteTarget(null)}

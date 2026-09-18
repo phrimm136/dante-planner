@@ -2,7 +2,6 @@ import { z } from 'zod'
 
 import { SSE_EVENTS, type SseEventType } from '@/lib/constants'
 
-/** Derived from SSE_EVENTS so the enum cannot drift from the transport's vocabulary. */
 export const SseEventTypeSchema = z.enum(
   Object.values(SSE_EVENTS) as [SseEventType, ...SseEventType[]],
 )

@@ -22,9 +22,7 @@ export interface SseFrame {
 }
 
 export interface SseStreamCallbacks {
-  /** The response is a live event stream. */
   onOpen: () => void
-  /** A complete frame was decoded. */
   onFrame: (frame: SseFrame) => void
   /** The server refused with 429; the argument is its cooldown, when parseable. */
   onRateLimited: (retryAfterMs: number | null) => void
@@ -122,12 +120,6 @@ async function pumpFrames(
   }
 }
 
-/**
- * Opens `path` as an event stream and drives `callbacks` until it ends.
- *
- * Resolves once the connection is over. An abort resolves silently: the caller
- * asked for the teardown, so neither `onClosed` nor `onRateLimited` fires.
- */
 export async function runSseStream(
   path: string,
   signal: AbortSignal,

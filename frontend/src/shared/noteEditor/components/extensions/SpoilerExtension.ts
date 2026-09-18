@@ -20,17 +20,8 @@ import { Mark, mergeAttributes } from '@tiptap/core'
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     spoiler: {
-      /**
-       * Set spoiler mark
-       */
       setSpoiler: () => ReturnType
-      /**
-       * Toggle spoiler mark
-       */
       toggleSpoiler: () => ReturnType
-      /**
-       * Unset spoiler mark
-       */
       unsetSpoiler: () => ReturnType
     }
   }
@@ -39,13 +30,10 @@ declare module '@tiptap/core' {
 export const SpoilerExtension = Mark.create({
   name: 'spoiler',
 
-  // Can coexist with other marks (bold, italic, etc.)
   inclusive: true,
 
-  // Allow spanning across multiple nodes
   spanning: true,
 
-  // Parse from HTML
   parseHTML() {
     return [
       {
@@ -57,7 +45,6 @@ export const SpoilerExtension = Mark.create({
     ]
   },
 
-  // Render to HTML
   renderHTML({ HTMLAttributes }) {
     return [
       'span',
@@ -69,7 +56,6 @@ export const SpoilerExtension = Mark.create({
     ]
   },
 
-  // Add commands
   addCommands() {
     return {
       setSpoiler:
@@ -90,7 +76,6 @@ export const SpoilerExtension = Mark.create({
     }
   },
 
-  // Add keyboard shortcut
   addKeyboardShortcuts() {
     return {
       'Mod-Shift-s': () => this.editor.commands.toggleSpoiler(),

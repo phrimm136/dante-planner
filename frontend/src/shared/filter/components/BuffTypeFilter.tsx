@@ -9,13 +9,6 @@ interface BuffTypeFilterProps {
   onBuffTypesChange: (types: Set<BuffType>) => void
 }
 
-/**
- * Buff type filter for keyword filter sidebar.
- * Three text-label buttons: Positive, Negative, Neutral.
- *
- * Pattern: Wraps IconFilter in text mode (no getIconPath)
- * like AttributeTypeFilter wraps it in icon mode.
- */
 export function BuffTypeFilter({ selected, onBuffTypesChange }: BuffTypeFilterProps) {
   const { t } = useTranslation('database')
 

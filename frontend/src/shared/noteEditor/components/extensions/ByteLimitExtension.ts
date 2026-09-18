@@ -46,16 +46,11 @@ export const ByteLimitExtension = Extension.create<ByteLimitOptions>({
         filterTransaction(tr, state) {
           if (!tr.docChanged) return true
 
-          // Trusted programmatic loads (server reload, import, legacy oversized
-          // note from storage) carry this meta. They must not be gated as user
-          // input — rejecting them silently desyncs the editor from React state.
           if (tr.getMeta(BYTE_LIMIT_BYPASS)) return true
 
           const nextSize = measureDocBytes(tr.doc.toJSON())
           if (nextSize <= limit) return true
 
-          // Still over the cap: permit it only if it shrinks the note, so an
-          // already-oversized note remains editable down to a valid size.
           const prevSize = measureDocBytes(state.doc.toJSON())
           return nextSize < prevSize
         },

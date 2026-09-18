@@ -10,9 +10,6 @@ import { KEYWORD_RENAME_MAP } from './constants'
  * reject them loudly (mirroring GIFT_UNKNOWN_ID / EQUIPMENT_INVALID_EGO_TYPES), rather
  * than being silently swallowed. Defensive against non-array input since it runs on
  * unvalidated (`z.unknown`) content. Dedupes to collapse an alias-and-current collision.
- *
- * @param raw - selectedKeywords as loaded/parsed (may be unknown/legacy)
- * @returns deduped array with legacy aliases remapped, unknown ids preserved
  */
 export function migrateKeywords(raw: unknown): string[] {
   if (!Array.isArray(raw)) {

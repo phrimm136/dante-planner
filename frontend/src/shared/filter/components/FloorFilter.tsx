@@ -8,10 +8,6 @@ interface FloorFilterProps {
   onSelectionChange: (floors: Set<ThemePackFloor>) => void
 }
 
-/**
- * Floor filter for theme pack filtering.
- * 5 text buttons: 1F / 2F / 3F / 4F / 5F
- */
 export function FloorFilter({ selected, onSelectionChange }: FloorFilterProps) {
   return (
     <IconFilter

@@ -1,15 +1,3 @@
-/**
- * CommentCard
- *
- * Single comment display with arca.live-inspired layout:
- * - Row 1: Author name + date + action buttons
- * - Row 2: Content (or edit editor)
- * - Row 3: Reply editor (inline, when active)
- *
- * Shows DeletedCommentPlaceholder for deleted comments.
- * Content is sanitized with DOMPurify before rendering.
- */
-
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { sanitizeUserHtml } from '@/shared/sanitize'
@@ -26,7 +14,6 @@ import type { CommentActions, CommentViewer } from '../lib/commentViewer'
 
 interface CommentCardProps {
   comment: CommentNode
-  /** Whether the planner carrying the comment is published. */
   isPublished: boolean
   viewer: CommentViewer
   actions: CommentActions
@@ -44,13 +31,11 @@ export const CommentCard = function CommentCard({
   const [showReplyEditor, setShowReplyEditor] = useState(false)
   const [showEditEditor, setShowEditEditor] = useState(false)
 
-  // Format author name with i18n translation for epithet
   const authorName =
     comment.authorEpithet && comment.authorSuffix
       ? formatUsername(comment.authorEpithet, comment.authorSuffix, i18n.language)
       : t('pages.plannerMD.comments.deletedUser')
 
-  // Format relative dates (short format with i18n)
   const formattedCreatedAt = formatCompactRelativeTime(comment.createdAt, i18n.language)
 
   const sanitizedContent = comment.content ? sanitizeUserHtml(comment.content) : ''
@@ -68,14 +53,12 @@ export const CommentCard = function CommentCard({
     setShowEditEditor(false)
   }
 
-  // Show deleted placeholder for deleted comments
   if (comment.isDeleted) {
     return <DeletedCommentPlaceholder />
   }
 
   return (
     <div id={`comment-${comment.id}`} className="py-3 scroll-mt-20">
-      {/* Row 1: Author + date + actions */}
       <div className="flex items-center justify-between gap-2 mb-1">
         <div className="flex items-center gap-2 text-sm">
           <span className="font-medium">{authorName}</span>
@@ -94,7 +77,6 @@ export const CommentCard = function CommentCard({
         />
       </div>
 
-      {/* Row 2: Content or Edit editor */}
       {showEditEditor ? (
         <CommentEditor
           initialContent={comment.content ?? ''}
@@ -116,7 +98,6 @@ export const CommentCard = function CommentCard({
         </>
       )}
 
-      {/* Reply editor (inline, indented to match reply position) */}
       {showReplyEditor && (
         <div
           className="mt-3 border-l-2 border-border pl-3"

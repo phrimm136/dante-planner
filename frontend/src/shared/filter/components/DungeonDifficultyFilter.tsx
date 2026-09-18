@@ -8,10 +8,6 @@ interface DungeonDifficultyFilterProps {
   onSelectionChange: (difficulties: Set<DungeonIdx>) => void
 }
 
-/**
- * Dungeon difficulty filter for theme pack filtering.
- * 4 text buttons: Normal / Hard / Infinity / Extreme
- */
 export function DungeonDifficultyFilter({
   selected,
   onSelectionChange,

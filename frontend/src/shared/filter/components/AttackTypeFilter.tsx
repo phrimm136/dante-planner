@@ -7,12 +7,6 @@ interface AttackTypeFilterProps {
   onSelectionChange: (types: Set<AtkType>) => void
 }
 
-/**
- * Attack type icon filter for filter sidebar
- * 3 attack type icons displayed in a 7-column grid (matches keyword/skill attribute filters)
- * Icons stay small and left-aligned, not stretching to fill container width
- *
- */
 export function AttackTypeFilter({ selected, onSelectionChange }: AttackTypeFilterProps) {
   return (
     <IconFilter

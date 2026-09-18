@@ -28,11 +28,9 @@ export const SearchBar = function SearchBar({
     setInputValue(searchQuery)
   }
 
-  // Debounce the search query, using startTransition to keep UI responsive
   useEffect(() => {
     const trimmedInput = inputValue.trim()
 
-    // Skip if value hasn't actually changed from the current searchQuery
     if (trimmedInput === searchQuery) {
       return
     }
@@ -53,7 +51,6 @@ export const SearchBar = function SearchBar({
         className,
       )}
     >
-      {/* Magnifier Icon */}
       <div className="shrink-0 w-8 h-8 flex items-center justify-center text-muted-foreground">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -71,7 +68,6 @@ export const SearchBar = function SearchBar({
         </svg>
       </div>
 
-      {/* Search Input */}
       <input
         type="text"
         value={inputValue}

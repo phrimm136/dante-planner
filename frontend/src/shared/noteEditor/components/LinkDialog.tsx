@@ -12,20 +12,11 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import type { LinkDialogProps } from '../types/NoteEditorTypes'
 
-/**
- * LinkDialog - Dialog for inserting/editing links in the editor
- *
- * Features:
- * - URL input with basic validation
- * - Optional display text (pre-populated from selected text)
- * - Confirm/Cancel actions
- */
 export function LinkDialog({ open, onClose, onConfirm, initialText = '' }: LinkDialogProps) {
   const { t } = useTranslation(['planner', 'common'])
   const [url, setUrl] = useState('')
   const [displayText, setDisplayText] = useState('')
 
-  // Reset form when dialog opens
   useEffect(() => {
     if (open) {
       setUrl('')
@@ -36,7 +27,6 @@ export function LinkDialog({ open, onClose, onConfirm, initialText = '' }: LinkD
   const handleConfirm = () => {
     if (!url.trim()) return
 
-    // Pass raw URL to parent - sanitization and protocol handling done in NoteEditor
     onConfirm(url.trim(), displayText.trim() || undefined)
   }
 

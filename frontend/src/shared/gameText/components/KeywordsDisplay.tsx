@@ -4,15 +4,9 @@ import { LabeledPanel } from '@/components/layout/LabeledPanel'
 import { KeywordString } from './KeywordString'
 
 interface KeywordsDisplayProps {
-  /** Battle keyword keys to render as clickable chips */
   keywords: string[]
 }
 
-/**
- * Labeled detail-page panel of clickable battle keyword chips.
- * Each chip suspends independently via KeywordString, so the panel
- * label stays visible while keyword i18n loads.
- */
 export function KeywordsDisplay({ keywords }: KeywordsDisplayProps) {
   const { t } = useTranslation('database')
 

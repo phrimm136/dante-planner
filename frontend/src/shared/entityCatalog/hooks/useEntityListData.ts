@@ -4,15 +4,7 @@ import type { z } from 'zod'
 import { createEntityListQueryKeys } from '@/lib/queryKeys'
 import { createStaticDataQueryOptions } from '@/lib/queryOptions'
 
-/**
- * Describes one entity's list data: the spec map (language-independent) and
- * the id → localized-name map.
- *
- * Importers stay in the owning slice so each `import('@static/…')` remains a
- * literal Vite can code-split; only the query wiring is shared.
- */
 export interface EntityListDataConfig<TSpec, TI18n> {
-  /** Entity namespace — drives the query key tuples and validation labels */
   kind: string
   specImport: () => Promise<{ default: unknown }>
   specSchema: z.ZodType<TSpec>
@@ -41,23 +33,11 @@ export function entityListI18nOptions<TSpec, TI18n>(
   )
 }
 
-/**
- * Loads the spec list only (no language dependency).
- * Suspends on initial load, but NOT on language change.
- *
- * Use this in shell components that should stay stable during language change.
- */
 export function useEntityListSpec<TSpec, TI18n>(cfg: EntityListDataConfig<TSpec, TI18n>): TSpec {
   const { data } = useSuspenseQuery(specOptions(cfg))
   return data
 }
 
-/**
- * Loads the name list only. Suspends while loading — wrap in Suspense.
- *
- * Use this in components wrapped in their own Suspense boundary for granular
- * loading states on language change.
- */
 export function useEntityListI18n<TSpec, TI18n>(cfg: EntityListDataConfig<TSpec, TI18n>): TI18n {
   const { i18n } = useTranslation()
   const { data } = useSuspenseQuery(entityListI18nOptions(cfg, i18n.language))

@@ -44,10 +44,6 @@ const NOTIFICATION_CONFIG: Record<
   },
 }
 
-/**
- * Single notification row with icon, content preview, and delete action.
- * Clicking the row navigates and deletes (arca.live style).
- */
 export function NotificationItem({ notification, onNavigate, onDelete }: NotificationItemProps) {
   const { t, i18n } = useTranslation(['common'])
   const config = NOTIFICATION_CONFIG[notification.notificationType]
@@ -55,12 +51,9 @@ export function NotificationItem({ notification, onNavigate, onDelete }: Notific
 
   const formattedTime = formatRelativeTime(notification.createdAt, i18n.language)
 
-  // For PLANNER_RECOMMENDED, contentId is the plannerId
-  // For COMMENT/REPLY, use plannerId field
   const plannerId = notification.plannerId ?? notification.contentId
 
   const handleClick = () => {
-    // Delete on click (mark as read = delete, arca.live style)
     onDelete(notification.id)
     onNavigate(plannerId, notification.commentPublicId ?? null)
   }
@@ -82,21 +75,17 @@ export function NotificationItem({ notification, onNavigate, onDelete }: Notific
         className="flex flex-1 items-start gap-3 min-w-0 text-left cursor-pointer"
         onClick={handleClick}
       >
-        {/* Icon */}
         <div className={cn('shrink-0 mt-0.5', config.color)}>
           <Icon className="size-5" />
         </div>
 
-        {/* Content */}
         <div className="flex-1 min-w-0">
           <p className={cn('text-sm', !notification.read && 'font-medium')}>{t(config.labelKey)}</p>
-          {/* Plan title */}
           {notification.plannerTitle && (
             <p className="text-sm text-foreground/80 truncate mt-0.5">
               {notification.plannerTitle}
             </p>
           )}
-          {/* Comment snippet */}
           {notification.commentSnippet && (
             <p className="text-xs text-muted-foreground truncate mt-0.5">
               {notification.commentSnippet}
@@ -106,7 +95,6 @@ export function NotificationItem({ notification, onNavigate, onDelete }: Notific
         </div>
       </button>
 
-      {/* Delete button */}
       <Button
         variant="ghost"
         size="icon-sm"

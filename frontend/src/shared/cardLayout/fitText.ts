@@ -165,13 +165,6 @@ function fitsHeight(lines: string[], size: number, spec: FitSpec): boolean {
   return height * size <= spec.height
 }
 
-/**
- * The lines and size a wrapping name is drawn at.
- *
- * The size steps down from the band's top while a line overruns the box on its own or the
- * wrapped text stands taller than the box, and overflows at the floor rather than
- * shrinking further.
- */
 export function fitText(text: string, spec: FitSpec, measure: Measure): FittedText {
   for (let size = spec.max; size > spec.min; size -= spec.step) {
     const { lines, overran } = wrapText(text, size, spec, measure)
@@ -180,11 +173,6 @@ export function fitText(text: string, spec: FitSpec, measure: Measure): FittedTe
   return { fontSize: spec.min, lines: wrapText(text, spec.min, spec, measure).lines }
 }
 
-/**
- * The size a one-line name is drawn at.
- *
- * It scales by the ratio it overruns by, so it always fits until it hits the floor.
- */
 export function fitFontSize(text: string, spec: ScaleSpec, measure: Measure): number {
   const width = measure(text, spec.max)
   if (width <= spec.width) return spec.max

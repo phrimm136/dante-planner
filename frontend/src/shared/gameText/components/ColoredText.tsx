@@ -37,19 +37,11 @@ function renderTokens(tokens: RichTextToken[]): React.ReactNode[] {
   })
 }
 
-/**
- * Parse Unity color and size tags into React nodes, nesting included.
- *
- * This is the single consolidated tag processing function.
- * All color tag parsing in the codebase should use this.
- */
 export function parseColorTags(text: string): React.ReactNode[] {
   return renderTokens(tokenizeRichText(text, NESTED_HEX_COLOR_GRAMMAR))
 }
 
-/** Strip all color tags, keeping inner text */
 export function stripColorTags(text: string): string {
-  // Repeatedly strip until no tags remain (handles nested)
   let result = text
   let prev = ''
   while (result !== prev) {
@@ -59,10 +51,6 @@ export function stripColorTags(text: string): string {
   return result
 }
 
-/**
- * ColoredText component — renders Unity rich text as JSX.
- * Handles <color>, <size>, nested tags, and malformed close tags.
- */
 export function ColoredText({ text }: { text: string }) {
   return <>{parseColorTags(text)}</>
 }

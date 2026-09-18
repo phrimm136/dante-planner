@@ -12,43 +12,18 @@ import { FilteredCardSlot } from './FilteredCardSlot'
 const NO_TERMS: readonly string[] = []
 
 interface FilteredEntityGridProps<TItem, TState> {
-  /** Items in final render order — the grid sorts nothing. */
   items: readonly TItem[]
-  /** One item's stable identity: its React key and its search-term cache key. */
   getKey: (item: TItem) => string
   store: FilterStore<TState>
-  /** Whether one item survives the current filter state. */
   matches: (item: TItem, state: FilterState<TState>, terms: readonly string[]) => boolean
-  /** One item's lowercased search terms. Omitted by lists with no search box. */
   buildTerms?: (item: TItem) => string[]
-  /** The card that fills one item's slot. */
   renderCard: (item: TItem) => ReactNode
-  /** Message shown while nothing matches, keyed in the `database` namespace. */
   emptyStateKey: string
   emptyStateFallback?: string
   geometry: CardGeometry
-  /** Class of the element wrapping the grid. Omitted leaves the grid unwrapped. */
   gridWrapperClassName?: string
 }
 
-/**
- * A filtered card grid: reserves every item's slot on the first commit, fills the slots
- * from the row the viewport starts on outward, and lets each card subscribe to its own
- * visibility, so a filter toggle re-renders only the cards that changed.
- *
- * @example
- * <FilteredEntityGrid
- *   items={sortedEGOs}
- *   getKey={(ego) => ego.id}
- *   store={store}
- *   matches={matchesEGO}
- *   buildTerms={(ego) => buildEGOSearchTerms(ego, egoNames, mappings)}
- *   renderCard={(ego) => <EGOCardLink ego={ego} />}
- *   emptyStateKey="ego.emptyState"
- *   geometry={EGO_GEOMETRY}
- *   gridWrapperClassName="pt-4"
- * />
- */
 export function FilteredEntityGrid<TItem, TState>({
   items,
   getKey,
@@ -123,7 +98,6 @@ interface FilteredEntityCellProps<TItem, TState> {
   buildTerms?: ((item: TItem) => string[]) | undefined
   renderCard: (item: TItem) => ReactNode
   geometry: CardGeometry
-  /** Whether the slot holds its card yet */
   revealed: boolean
 }
 

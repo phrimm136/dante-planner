@@ -18,9 +18,6 @@ import { LinkDialog } from './LinkDialog'
 
 import './NoteEditor.css'
 
-/**
- * EditorErrorFallback - Simple inline fallback when editor crashes
- */
 function EditorErrorFallback({ resetErrorBoundary }: FallbackProps) {
   const { t } = useTranslation(['planner', 'common'])
   return (
@@ -33,17 +30,6 @@ function EditorErrorFallback({ resetErrorBoundary }: FallbackProps) {
   )
 }
 
-/**
- * NoteEditor - WYSIWYG rich text editor using Tiptap
- *
- * Features:
- * - Focus-revealed toolbar (unfocused shows a bare preview)
- * - Controlled component pattern (value + onChange)
- * - Text formatting: bold, italic, strikethrough, headings, lists, quotes, code
- * - Custom spoiler mark extension
- * - Image upload using Tiptap's ImageUploadNode
- * - Link insertion dialog
- */
 function NoteEditorInner({
   value,
   onChange,
@@ -59,9 +45,6 @@ function NoteEditorInner({
   const [linkDialogOpen, setLinkDialogOpen] = useState(false)
   const [selectedText, setSelectedText] = useState('')
 
-  // Editor cap aligns with the persistence gate (Zod refine / backend),
-  // so an accepted edit is always saveable. Falls back to MAX_NOTE_BYTES
-  // when no explicit prop is given, enforcing the limit wherever NoteEditor mounts.
   const byteLimit = maxBytes ?? MAX_NOTE_BYTES
 
   // Tiptap reports its own reparse of the loaded note as an update. Until this
@@ -76,17 +59,13 @@ function NoteEditorInner({
     lastEmittedRef.current = content
     onChange?.({ content })
   }
-  // Read by the mount hand-over below, which must not re-run per render.
   const emitRef = useRef(emit)
   useEffect(() => {
     emitRef.current = emit
   })
 
-  // Measure the same { content } shape the cap and schema enforce, so the
-  // counter never disagrees with what the editor actually rejects.
   const currentBytes = value.content ? measureDocBytes(value.content) : 0
 
-  // Memoize extensions to prevent recreation on every render
   const extensions = [
     // StarterKit includes Link by default in Tiptap v3
     // Configure Link through StarterKit to avoid duplicate extension warning
@@ -105,7 +84,6 @@ function NoteEditorInner({
     ByteLimitExtension.configure({ limit: byteLimit }),
   ]
 
-  // Initialize Tiptap editor
   const editor = useEditor({
     extensions,
     content: value.content,
@@ -115,12 +93,9 @@ function NoteEditorInner({
       attributes: {
         class: 'note-editor-content prose prose-sm max-w-none focus:outline-none min-h-[100px] p-3',
       },
-      // Disable drag-and-drop to allow normal text selection by dragging
       handleDOMEvents: {
         dragstart: () => true, // Return true to prevent default drag behavior
       },
-      // In-limit pastes keep default rich behavior; an over-limit paste is
-      // truncated to the largest plain-text prefix that still fits the cap.
       handlePaste: (view, event, slice) => {
         const { state } = view
         const prospective = state.tr.replaceSelection(slice)
@@ -132,9 +107,6 @@ function NoteEditorInner({
           event.clipboardData?.getData('text/plain') ||
           slice.content.textBetween(0, slice.content.size, '\n')
 
-        // No plain text to truncate (image-only / unsupported clipboard):
-        // hand back to the default handler rather than silently swallowing —
-        // ByteLimitExtension still gates whatever it inserts.
         if (!rawText) {
           return false
         }
@@ -159,16 +131,11 @@ function NoteEditorInner({
     },
   })
 
-  // The stored form and the parsed form differ for anything that does not
-  // round-trip, so the owner is handed the parsed form at mount, before it takes
-  // its own baseline.
   useEffect(() => {
     if (!editor || hasEmittedRef.current) return
     emitRef.current(editor.getJSON())
   }, [editor])
 
-  // Whether a pointer is currently pressed, and the wait for its release if one is
-  // already scheduled. Read by collapseToolbar, which must not reflow mid-gesture.
   const gestureRef = useRef<{
     down: boolean
     pending: AbortController | null
@@ -204,30 +171,22 @@ function NoteEditorInner({
     }
   }, [])
 
-  // Update editable state when readOnly changes
   useEffect(() => {
     if (editor) {
       editor.setEditable(!readOnly)
     }
   }, [editor, readOnly])
 
-  // Sync from parent when value prop changes externally (load/import). The
-  // editor's own updates arrive back here as the same object and are skipped.
   useEffect(() => {
     if (editor && value.content && value.content !== lastEmittedRef.current) {
       const currentContent = JSON.stringify(editor.getJSON())
       const newContent = JSON.stringify(value.content)
       if (currentContent !== newContent) {
-        // Trusted external load: exempt from the byte cap so an oversized
-        // legacy/server note still populates the editor instead of being
-        // silently rejected by ByteLimitExtension (which would desync the
-        // editor from the React state set just above).
         editor.chain().setMeta(BYTE_LIMIT_BYPASS, true).setContent(value.content).run()
       }
     }
   }, [editor, value.content])
 
-  // Reveal the editing chrome once focus reaches anything inside the editor.
   const handleFocus = () => {
     if (!readOnly && !isFocused) {
       setIsFocused(true)
@@ -272,7 +231,6 @@ function NoteEditorInner({
     document.addEventListener('pointercancel', finish, { signal: controller.signal })
   }
 
-  // Handle blur with relatedTarget for reliable focus tracking
   const handleBlur = (e: React.FocusEvent) => {
     const relatedTarget = e.relatedTarget as HTMLElement | null
 
@@ -283,7 +241,6 @@ function NoteEditorInner({
     }
   }
 
-  // Link dialog handlers
   const handleLinkClick = () => {
     if (!editor) return
     const { from, to } = editor.state.selection
@@ -292,11 +249,9 @@ function NoteEditorInner({
     setLinkDialogOpen(true)
   }
 
-  // XSS-safe link insertion using structured content instead of raw HTML
   const handleLinkConfirm = (url: string, text?: string) => {
     if (!editor) return
 
-    // Add protocol if missing, then sanitize to prevent XSS
     let processedUrl = url
     if (!/^https?:\/\//i.test(processedUrl)) {
       processedUrl = `https://${processedUrl}`
@@ -309,7 +264,6 @@ function NoteEditorInner({
     }
 
     if (text && text !== selectedText) {
-      // Use structured content instead of raw HTML to prevent XSS
       editor
         .chain()
         .focus()
@@ -348,10 +302,8 @@ function NoteEditorInner({
         onFocus={handleFocus}
         onBlur={handleBlur}
       >
-        {/* Toolbar - only visible when focused */}
         <Toolbar editor={editor} visible={isFocused && !readOnly} onLinkClick={handleLinkClick} />
 
-        {/* Editor content with error boundary */}
         <ReactErrorBoundary
           FallbackComponent={EditorErrorFallback}
           onError={(error) => {
@@ -360,7 +312,6 @@ function NoteEditorInner({
         >
           <EditorContent editor={editor} />
 
-          {/* Show placeholder in preview mode when empty */}
           {!isFocused && editor?.isEmpty && (
             <div className="absolute top-0 left-0 p-3 text-muted-foreground pointer-events-none">
               {readOnly
@@ -370,7 +321,6 @@ function NoteEditorInner({
           )}
         </ReactErrorBoundary>
 
-        {/* Link dialog */}
         <LinkDialog
           open={linkDialogOpen}
           onClose={handleLinkClose}
@@ -378,7 +328,6 @@ function NoteEditorInner({
           initialText={selectedText}
         />
 
-        {/* Byte counter - shown wherever the cap is enforced (editable) */}
         {!readOnly && byteLimit > 0 && (
           <div className="px-3 pb-2 text-right">
             <span
@@ -396,5 +345,4 @@ function NoteEditorInner({
   )
 }
 
-// Wrap with memo using custom prop comparison to prevent unnecessary re-renders
 export const NoteEditor = NoteEditorInner

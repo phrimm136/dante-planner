@@ -1,4 +1,3 @@
-// Public API of the user settings concept. Import from '@/shared/userSettings'.
 export {
   userSettingsKeys,
   useUserSettingsQuery,

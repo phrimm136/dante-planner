@@ -1,17 +1,3 @@
-/**
- * CommentActionButtons
- *
- * Action buttons row for comments (arca.live style).
- * Shows different buttons based on:
- * - isPublished: All buttons hidden if planner is unpublished
- * - comment.isAuthor: Edit, delete, notification toggle only for comment author
- * - viewer: Reply requires an account, the moderator delete requires the role
- *
- * Responsive:
- * - Wide screens (sm+): Inline buttons
- * - Narrow screens: Dropdown menu with hamburger
- */
-
 import type { ReactNode } from 'react'
 import { Reply, Edit, Trash2, ThumbsUp, Bell, BellOff, MoreHorizontal } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -32,18 +18,14 @@ import type { CommentActions, CommentViewer } from '../lib/commentViewer'
 
 interface CommentActionButtonsProps {
   comment: CommentNode
-  /** Whether the planner carrying the comment is published. */
   isPublished: boolean
   viewer: CommentViewer
   actions: CommentActions
-  /** Opens the card's inline reply editor. */
   onStartReply: () => void
-  /** Opens the card's inline edit editor. */
   onStartEdit: () => void
   isUpvoting?: boolean
 }
 
-/** One action rendered by both the inline row and the dropdown menu. */
 interface CommentAction {
   key: string
   onSelect: () => void
@@ -64,7 +46,6 @@ export function CommentActionButtons({
   isUpvoting = false,
 }: CommentActionButtonsProps) {
   const { t } = useTranslation()
-  // Don't show any actions if planner is unpublished
   if (!isPublished) return null
 
   const hasMenuItems = canReply(viewer) || comment.isAuthor
@@ -133,7 +114,6 @@ export function CommentActionButtons({
 
   return (
     <div className="flex items-center gap-1 text-muted-foreground">
-      {/* Upvote button + count (always visible) */}
       <Button
         variant="ghost"
         size="sm"
@@ -145,7 +125,6 @@ export function CommentActionButtons({
         <span className="text-xs">{comment.upvoteCount}</span>
       </Button>
 
-      {/* Desktop: Inline buttons (hidden on mobile) */}
       <div className="hidden sm:flex items-center gap-1">
         {rendered.map((action) => (
           <Button
@@ -160,7 +139,6 @@ export function CommentActionButtons({
         ))}
       </div>
 
-      {/* Mobile: Dropdown menu (visible only on mobile) */}
       {hasMenuItems && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

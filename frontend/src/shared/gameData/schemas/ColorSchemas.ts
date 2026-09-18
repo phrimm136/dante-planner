@@ -3,12 +3,6 @@ import { HexColorSchema } from '@/lib/colorUtils'
 import { ATTRIBUTE_COLOR_TYPES, PASSIVE_IMPORTANCE_LEVELS, SINNER_NAMES } from '../constants'
 
 /**
- * Color Schemas
- *
- * Zod schemas for the color tables under static/data/color/.
- */
-
-/**
  * The roles one attribute type is painted in; NEUTRAL and NONE lack a saturated variant,
  * NONE lacks a type color, and WHITE and BLACK lack a background
  */
@@ -33,9 +27,6 @@ export const AttributeColorCodeSchema = z.record(
 
 export const SinnerColorCodeSchema = z.record(z.enum(SINNER_NAMES), HexColorSchema)
 
-/**
- * Keyed by season code as a string, plus `default`
- */
 export const SeasonColorCodeSchema = z.record(z.string(), HexColorSchema)
 
 const ImportanceColorRolesSchema = z

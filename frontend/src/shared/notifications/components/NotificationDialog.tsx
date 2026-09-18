@@ -97,14 +97,6 @@ function NotificationList({
   )
 }
 
-/**
- * Discovery CTA offering to enable desktop (OS) notifications.
- *
- * Gates only on the browser permission global (`default`) — never on the user's
- * server-side notification prefs, which live in the settings page and would
- * violate the sink rule if read here. Backed by the shared permission hook, so
- * granting here also updates the settings notice (and vice versa).
- */
 function DesktopNotificationCta() {
   const { t } = useTranslation(['common'])
   const { state, request } = useNotificationPermission()
@@ -123,17 +115,11 @@ function DesktopNotificationCta() {
   )
 }
 
-/**
- * Notification dialog component.
- * Displays user notifications in a scrollable dialog.
- * Clicking a notification navigates to the planner/comment and deletes it (arca.live style).
- */
 export function NotificationDialog({ open, onOpenChange }: NotificationDialogProps) {
   const { t } = useTranslation(['common'])
   const navigate = useNavigate()
 
   const handleNavigate = (plannerId: string, commentPublicId: string | null) => {
-    // Navigate to planner detail page with optional comment hash anchor
     const hash = commentPublicId ? `#comment-${commentPublicId}` : ''
     void navigate({
       to: '/planner/md/gesellschaft/$id',

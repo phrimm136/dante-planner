@@ -12,7 +12,6 @@ import { SKILL_FRAME_GLOW_COLORS } from '@/lib/constants'
 interface SkillImageCompositeProps {
   skillImagePath: string
   attributeType: SkillAttributeType
-  /** Skill tier (1-3) determines frame appearance */
   skillTier: number
   atkType?: string | undefined
   basePower: number
@@ -21,19 +20,6 @@ interface SkillImageCompositeProps {
   showMissingPlaceholder?: boolean
 }
 
-/**
- * SkillImageComposite - Reusable skill image with layered composition
- *
- * Layer structure (bottom to top):
- * 1. Skill frame background (colored by attribute)
- * 2. Skill image (octagonal clip-path)
- * 3. Skill frame (colored by attribute)
- * 4. Attack type composite (for offensive skills):
- *    - Attack type frame background (colored)
- *    - Attack type icon
- *    - Attack type frame (colored)
- * 5. Power text overlays (basePower left, coinPower top)
- */
 export function SkillImageComposite({
   skillImagePath,
   attributeType,
@@ -50,9 +36,7 @@ export function SkillImageComposite({
 
   return (
     <div className="relative w-32 h-32 shrink-0 ml-2">
-      {/* Layer 0: Coin Power background*/}
       <div className="absolute top-1/64 left-1/2 transform -translate-x-9/16 w-8 h-8 flex items-center justify-center">
-        {/* Hexagonal/diamond background with attribute color */}
         <div
           className="absolute w-12 h-9"
           style={{
@@ -61,14 +45,12 @@ export function SkillImageComposite({
           }}
         />
       </div>
-      {/* Layer 1: Skill frame background */}
       <img
         src={frameBGPath}
         alt=""
         className="absolute inset-0 w-full h-full object-contain pointer-events-none"
       />
 
-      {/* Layer 2: Skill image */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div className="relative w-16 h-16">
           {!showMissingPlaceholder ? (
@@ -90,31 +72,26 @@ export function SkillImageComposite({
         </div>
       </div>
 
-      {/* Layer 3: Skill frame */}
       <img
         src={framePath}
         alt=""
         className="absolute inset-0 w-full h-full object-contain pointer-events-none"
       />
 
-      {/* Layer 4: Attack type composite (skills with attack type only) */}
       {atkType && atkType !== 'NONE' && (
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 -translate-y-3/8 w-8 h-8 pointer-events-none">
-          {/* Attack type frame background */}
           <img
             src={getAttackTypeFrameBGPath(attributeType)}
             alt=""
             className="absolute inset-0 w-lg h-lg object-contain"
           />
 
-          {/* Attack type frame */}
           <img
             src={getAttackTypeFramePath(attributeType)}
             alt=""
             className="absolute inset-0 w-full h-full object-contain"
           />
 
-          {/* Attack type icon - centered with reserved size */}
           <div className="absolute inset-0 flex items-center justify-center">
             <img
               src={getAttackTypeIconPath(atkType)}
@@ -125,7 +102,6 @@ export function SkillImageComposite({
         </div>
       )}
 
-      {/* Layer 5: Base power (left side) */}
       <div className="absolute left-0 top-1/2 -translate-x-5/16 -translate-y-6/8 w-16 h-16 flex justify-end pr-[24px]">
         <div
           className="text-[48px] [-webkit-text-stroke:0.01px_black] text-power"
@@ -135,9 +111,7 @@ export function SkillImageComposite({
         </div>
       </div>
 
-      {/* Layer 5: Coin power (top side) */}
       <div className="absolute top-0 left-1/2 -translate-x-9/16 -translate-y-1/8 w-14 h-8 flex items-center justify-center">
-        {/* Text on top */}
         <div
           className="relative text-[28px] stroke-black font-bold [-webkit-text-stroke:0.01px_black]"
           style={{ fontFamily: getDisplayFontForNumeric() }}

@@ -10,19 +10,10 @@ import type {
 } from '../schemas/UserSettingsSchemas'
 import { STALE_TIME } from '@/lib/constants'
 
-/**
- * Query keys for user settings queries
- */
 export const userSettingsKeys = {
   settings: () => ['user', 'settings'] as const,
 }
 
-/**
- * Hook to fetch user settings (sync and notification preferences).
- * Only enabled when authenticated.
- *
- * @returns Query result with settings data, loading state, and error
- */
 export function useUserSettingsQuery() {
   const { data: user } = useAuthQueryNonBlocking()
   const isAuthenticated = !!user
@@ -38,10 +29,6 @@ export function useUserSettingsQuery() {
   })
 }
 
-/**
- * Hook for updating user settings mutation.
- * Invalidates settings cache on success.
- */
 export function useUpdateUserSettingsMutation() {
   const queryClient = useQueryClient()
 

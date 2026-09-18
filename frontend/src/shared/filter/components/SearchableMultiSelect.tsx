@@ -18,11 +18,8 @@ import type { ReactNode } from 'react'
 
 interface SearchableMultiSelectOption {
   value: string
-  /** Plain text label used for search matching */
   label: string
-  /** Custom render content - falls back to label when omitted */
   renderLabel?: ReactNode
-  /** Count displayed on the right side of the option */
   count?: number | undefined
 }
 
@@ -34,16 +31,11 @@ interface SearchableMultiSelectProps {
   searchPlaceholder: string
   emptyMessage?: string
   className?: string | undefined
-  /** Sort options alphabetically by label using locale collation (default: true) */
   sortByLabel?: boolean
 }
 
 const BATCH_SIZE = 50
 
-/**
- * Multi-select dropdown with search, built on shadcn Command + Popover.
- * Sorts options by current locale and progressively renders large lists.
- */
 export function SearchableMultiSelect({
   options,
   selectedValues,

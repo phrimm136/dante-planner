@@ -5,26 +5,16 @@ import {
   type ActionDialogBaseProps,
 } from '@/components/feedback/ConfirmActionDialog'
 
-/** Server-side cap on a moderation reason */
 const REASON_MAX_LENGTH = 500
 
 interface ModerationReasonDialogProps extends ActionDialogBaseProps {
-  /** Label above the reason textarea */
   reasonLabel: ReactNode
   reasonPlaceholder: string
-  /** DOM id of the textarea, tying it to its label */
   reasonInputId: string
   onConfirm: (reason: string) => void
-  /** Extra controls rendered above the reason field */
   children?: ReactNode
 }
 
-/**
- * Moderation dialog with a mandatory free-text reason.
- *
- * Confirm stays disabled until the reason has non-whitespace content; the
- * reason resets on both confirm and cancel so the next open starts empty.
- */
 export function ModerationReasonDialog({
   open,
   onOpenChange,

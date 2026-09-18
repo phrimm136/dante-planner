@@ -1,12 +1,3 @@
-/**
- * Mark Notification Read Mutation Hook
- *
- * Marks a single notification as read.
- * Invalidates notification queries on success.
- *
- * Pattern: usePlannerVote.ts (useMutation + query invalidation)
- */
-
 import { ApiClient } from '@/lib/api'
 import { validateData } from '@/lib/validation'
 import { NotificationResponseSchema } from '../schemas/NotificationSchemas'
@@ -15,44 +6,16 @@ import { notificationQueryKeys } from './useNotificationsQuery'
 
 import type { NotificationResponse } from '../types/NotificationTypes'
 
-// ============================================================================
-// Mutation Input
-// ============================================================================
-
 export interface MarkReadInput {
-  /** Public UUID of the notification to mark as read */
   notificationId: string
 }
 
-// ============================================================================
-// Main Hook
-// ============================================================================
-
-/**
- * Hook for marking notification as read
- *
- * @example
- * ```tsx
- * function NotificationItem({ notification }) {
- *   const markRead = useMarkReadMutation();
- *
- *   const handleClick = () => {
- *     if (!notification.read) {
- *       markRead.mutate({ notificationId: notification.id });
- *     }
- *   };
- *
- *   return <div onClick={handleClick}>...</div>;
- * }
- * ```
- */
 export function useMarkReadMutation() {
   return useApiMutation<NotificationResponse, MarkReadInput>({
     mutationFn: async ({ notificationId }: MarkReadInput): Promise<NotificationResponse> => {
       const data = await ApiClient.post(`/api/notifications/${notificationId}/mark-read`, {})
       return validateData(data, NotificationResponseSchema, 'notifications markRead')
     },
-    // Invalidate notifications list and unread count
     invalidateKeys: () => [notificationQueryKeys.all],
   })
 }

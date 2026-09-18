@@ -23,27 +23,10 @@ export const KEYWORD_LIST: EntityListDataConfig<
   i18nSchema: BattleKeywordsSchema,
 }
 
-/**
- * Hook that loads keyword spec list only (no language dependency)
- * Suspends on initial load, but NOT on language change (key has no language)
- *
- * Use this in shell components that should stay stable during language change.
- *
- * @returns Validated keyword spec map (id -> BattleKeywordSpec)
- */
 export function useKeywordListSpec(): Record<string, BattleKeywordSpec> {
   return useEntityListSpec(KEYWORD_LIST)
 }
 
-/**
- * Hook that loads and validates keyword i18n list only
- * Suspends while loading - wrap in Suspense boundary
- *
- * Use this in components wrapped in their own Suspense boundary
- * for granular loading states on language change.
- *
- * @returns Validated keyword i18n map (id -> { name, desc })
- */
 export function useKeywordListI18n(): Record<string, BattleKeywordI18nEntry> {
   return useEntityListI18n(KEYWORD_LIST)
 }

@@ -7,17 +7,10 @@ import { SearchableMultiSelect } from './SearchableMultiSelect'
 interface SeasonDropdownProps {
   selected: Set<Season>
   onSelectionChange: (seasons: Set<Season>) => void
-  /** Entity count per season ID for display */
   counts?: Record<string, number>
   className?: string
 }
 
-/**
- * Multi-select searchable dropdown for season filtering.
- * Options sorted by season ID (SEASONS array order), not alphabetically.
- *
- * Fetches i18n data internally - wrap in Suspense boundary.
- */
 export function SeasonDropdown({
   selected,
   onSelectionChange,
@@ -33,7 +26,6 @@ export function SeasonDropdown({
     count: counts?.[String(season)],
   }))
 
-  // Bridge string Set <-> Season Set
   const selectedStrings = new Set(Array.from(selected).map(String))
 
   const handleChange = (values: Set<string>) => {

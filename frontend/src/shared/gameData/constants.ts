@@ -1,21 +1,10 @@
-/**
- * Game vocabulary constants for Limbus Company domain facts
- */
-
 import seasonsJson from '@static/i18n/EN/seasons.json'
 import unitKeywordsJson from '@static/i18n/EN/unitKeywords.json'
 import { EGOGiftIdSchema, EGOIdSchema, IdentityIdSchema } from './ids'
 import type { EGOGiftId, EGOId, IdentityId, SinnerScopedId } from './ids'
 
-/**
- * Max level - used to calculate actual defense values and cap level inputs
- * Current value: 60
- */
 export const MAX_LEVEL = 60
 
-/**
- * Sinner names
- */
 export const SINNERS = [
   'YiSang',
   'Faust',
@@ -31,14 +20,8 @@ export const SINNERS = [
   'Gregor',
 ] as const
 
-/**
- * Sinner type derived from SINNERS array
- */
 export type Sinner = (typeof SINNERS)[number]
 
-/**
- * Status effects (keywords)
- */
 export const STATUS_EFFECTS = [
   'Combustion',
   'Laceration',
@@ -49,9 +32,6 @@ export const STATUS_EFFECTS = [
   'Charge',
 ] as const
 
-/**
- * Affinity types for internal computation (data format names)
- */
 export const AFFINITIES = [
   'CRIMSON',
   'SCARLET',
@@ -62,19 +42,10 @@ export const AFFINITIES = [
   'VIOLET',
 ] as const
 
-/**
- * Affinity type derived from AFFINITIES array
- */
 export type Affinity = (typeof AFFINITIES)[number]
 
-/**
- * Keys of the attribute color table: the affinities plus the client's non-sin attribute types
- */
 export const ATTRIBUTE_COLOR_TYPES = [...AFFINITIES, 'WHITE', 'BLACK', 'NEUTRAL', 'NONE'] as const
 
-/**
- * Attribute color type derived from ATTRIBUTE_COLOR_TYPES array
- */
 export type AttributeColorType = (typeof ATTRIBUTE_COLOR_TYPES)[number]
 
 /**
@@ -100,19 +71,10 @@ export const SINNER_NAMES = [
   'Another',
 ] as const
 
-/**
- * Sinner name derived from SINNER_NAMES array
- */
 export type SinnerName = (typeof SINNER_NAMES)[number]
 
-/**
- * Passive importance levels, keyed as the importance color table keys them
- */
 export const PASSIVE_IMPORTANCE_LEVELS = ['1', '2', '3'] as const
 
-/**
- * Season code of collaboration units
- */
 export const COLLAB_SEASON_CODE = 8000
 
 /**
@@ -121,24 +83,12 @@ export const COLLAB_SEASON_CODE = 8000
 export const WALPURGIS_SEASON_CODE_MIN = 9100
 export const WALPURGIS_SEASON_CODE_MAX = 9199
 
-/**
- * Skill attribute types including NEUTRAL (for defense skills) and all affinities
- */
 export const SKILL_ATTRIBUTE_TYPES = ['NEUTRAL', ...AFFINITIES] as const
 
-/**
- * Skill attribute type derived from SKILL_ATTRIBUTE_TYPES array
- */
 export type SkillAttributeType = (typeof SKILL_ATTRIBUTE_TYPES)[number]
 
-/**
- * Attack types
- */
 export const ATK_TYPES = ['SLASH', 'PENETRATE', 'HIT'] as const
 
-/**
- * Attack type derived from ATK_TYPES array
- */
 export type AtkType = (typeof ATK_TYPES)[number]
 
 export const DEF_TYPES = [
@@ -150,20 +100,10 @@ export const DEF_TYPES = [
 ] as const
 export type DefType = (typeof DEF_TYPES)[number]
 
-/**
- * EGO types (Hebrew letters from Lobotomy Corp lore)
- * Order: Lowest risk to highest risk
- */
 export const EGO_TYPES = ['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH'] as const
 
-/**
- * EGO type derived from EGO_TYPES array
- */
 export type EgoType = (typeof EGO_TYPES)[number]
 
-/**
- * EGO Gift keyword order for filtering and sorting (PascalCase internal format)
- */
 export const KEYWORD_ORDER = [
   'Combustion',
   'Laceration',
@@ -178,34 +118,16 @@ export const KEYWORD_ORDER = [
   'None',
 ] as const
 
-/**
- * Keyword type derived from KEYWORD_ORDER array
- */
 export type Keyword = (typeof KEYWORD_ORDER)[number]
 
-/**
- * Mirror Dungeon categories (floor counts)
- */
 export const MD_CATEGORIES = ['5F', '10F', '15F'] as const
 
-/**
- * MD Category type
- */
 export type MDCategory = (typeof MD_CATEGORIES)[number]
 
-/**
- * Refracted Railway categories (placeholder for future implementation)
- */
 export const RR_CATEGORIES = ['RR_PLACEHOLDER'] as const
 
-/**
- * RR Category type
- */
 export type RRCategory = (typeof RR_CATEGORIES)[number]
 
-/**
- * Synergy keywords for planner
- */
 export const SYNERGY_KEYWORDS = [
   'Assemble',
   'KnowledgeExplored',
@@ -226,9 +148,6 @@ export const SYNERGY_KEYWORDS = [
   'DawnTeam',
 ] as const
 
-/**
- * Planner keywords for MD - combines KEYWORD_ORDER (excluding None), AFFINITIES, and SYNERGY_KEYWORDS
- */
 export const PLANNER_KEYWORDS = [
   ...KEYWORD_ORDER.filter((k) => k !== 'None'),
   ...AFFINITIES,
@@ -248,10 +167,6 @@ export const KEYWORD_RENAME_MAP: Readonly<Record<string, string>> = {
   ChargeLoad: 'EmergencyChargeForceField',
 } as const
 
-/**
- * A skill keyword granted to one identity while a source (EGO or gift) is
- * present in the deck.
- */
 export interface KeywordGrant {
   identityId: IdentityId
   keyword: (typeof STATUS_EFFECTS)[number]
@@ -261,68 +176,33 @@ function grant(identityId: string, keyword: KeywordGrant['keyword']): KeywordGra
   return { identityId: IdentityIdSchema.parse(identityId), keyword }
 }
 
-/**
- * Skill keywords granted to an identity while the source EGO is equipped at
- * KEYWORD_GRANT_MIN_THREADSPIN or above.
- */
 export const EGO_KEYWORD_GRANTS: ReadonlyMap<EGOId, KeywordGrant> = new Map([
   [EGOIdSchema.parse('20109'), grant('10110', 'Vibration')],
   [EGOIdSchema.parse('20509'), grant('10508', 'Laceration')],
 ])
 
-/**
- * Skill keywords granted to an identity while the source gift is owned by the
- * plan.
- */
 export const GIFT_KEYWORD_GRANTS: ReadonlyMap<EGOGiftId, KeywordGrant> = new Map([
   [EGOGiftIdSchema.parse('9282'), grant('11009', 'Vibration')],
 ])
 
-/**
- * Minimum threadspin at which an EGO's keyword grant takes effect
- */
 export const KEYWORD_GRANT_MIN_THREADSPIN = 2
 
-/**
- * Max number of deployment
- */
 export const DEFAULT_DEPLOYMENT_MAX = 7
 
-/**
- * Max number of observable EGO gifts
- */
 export const MAX_OBSERVABLE_GIFTS = 3
 
-/**
- * EGO Gift enhancement levels for comprehensive gift selection
- * 0 = base, 1 = +1, 2 = +2
- */
 export const ENHANCEMENT_LEVELS = [0, 1, 2] as const
 
-/**
- * Enhancement level type
- */
 export type EnhancementLevel = (typeof ENHANCEMENT_LEVELS)[number]
 
-/**
- * Display labels for enhancement levels
- * Used in EGOGiftEnhancementSelector overlay
- */
 export const ENHANCEMENT_LABELS: Record<EnhancementLevel, string> = {
   0: '-',
   1: '+',
   2: '++',
 } as const
 
-/**
- * Offensive skill slots for skill replacement (0=S1, 1=S2, 2=S3)
- * Defense skill (slot 3) is not part of skill replacement
- */
 export const OFFENSIVE_SKILL_SLOTS = [0, 1, 2] as const
 
-/**
- * Offensive skill slot type
- */
 export type OffensiveSkillSlot = (typeof OFFENSIVE_SKILL_SLOTS)[number]
 
 /**
@@ -335,9 +215,6 @@ export const DEFAULT_SKILL_EA: Record<OffensiveSkillSlot, number> = {
   2: 1,
 } as const
 
-/**
- * EA count from which a deck's affinity or keyword tally reads as a surplus
- */
 export const EA_SURPLUS_THRESHOLD = 5
 
 /**
@@ -351,14 +228,8 @@ export const DUNGEON_IDX = {
   EXTREME: 3,
 } as const
 
-/**
- * Dungeon difficulty index type
- */
 export type DungeonIdx = (typeof DUNGEON_IDX)[keyof typeof DUNGEON_IDX]
 
-/**
- * Difficulty labels for floor indicator display (not i18n - game terminology)
- */
 export const DIFFICULTY_LABELS = {
   NORMAL: 'NORMAL',
   HARD: 'HARD',
@@ -366,14 +237,8 @@ export const DIFFICULTY_LABELS = {
   EXTREME_MIRROR: 'EXTREME MIRROR',
 } as const
 
-/**
- * Difficulty label type
- */
 export type DifficultyLabel = (typeof DIFFICULTY_LABELS)[keyof typeof DIFFICULTY_LABELS]
 
-/**
- * Floor counts per MD category
- */
 export const FLOOR_COUNTS: Record<MDCategory, number> = {
   '5F': 5,
   '10F': 10,
@@ -393,29 +258,14 @@ export const ALLOWED_FLOOR_DIFFICULTIES: Record<MDCategory, readonly (readonly D
   ),
 }
 
-/**
- * Dungeon index to its constant name, for developer-facing validation messages.
- */
 export const DUNGEON_NAME_BY_IDX = new Map<DungeonIdx, string>(
   Object.entries(DUNGEON_IDX).map(([name, idx]) => [idx, name]),
 )
 
-/**
- * Planner types for different game content
- * - MIRROR_DUNGEON: Mirror Dungeon mode (single current version)
- * - REFRACTED_RAILWAY: Refracted Railway mode (multiple parallel versions)
- */
 export const PLANNER_TYPES = ['MIRROR_DUNGEON', 'REFRACTED_RAILWAY'] as const
 
-/**
- * Planner type derived from PLANNER_TYPES array
- */
 export type PlannerType = (typeof PLANNER_TYPES)[number]
 
-/**
- * Mirror Dungeon version type
- * Valid versions are determined at runtime by the backend config (mdAvailableVersions)
- */
 export type MDVersion = number
 
 /**
@@ -424,9 +274,6 @@ export type MDVersion = number
  */
 export const SEASONS = Object.keys(seasonsJson).map(Number)
 
-/**
- * Season type derived from SEASONS array
- */
 export type Season = (typeof SEASONS)[number]
 
 /**
@@ -435,14 +282,8 @@ export type Season = (typeof SEASONS)[number]
  */
 export const ASSOCIATIONS = Object.keys(unitKeywordsJson)
 
-/**
- * Association type derived from ASSOCIATIONS array
- */
 export type Association = (typeof ASSOCIATIONS)[number]
 
-/**
- * Entity types for detail pages
- */
 export type DetailEntityType = 'identity' | 'ego' | 'egoGift'
 
 /**
@@ -458,41 +299,21 @@ export const MAX_ENTITY_TIER: Record<DetailEntityType, number> = {
   egoGift: 2,
 }
 
-/**
- * Minimum tier/enhancement levels by entity type
- * - Identity/EGO: Start at 1
- * - EGO Gift: Start at 0 (base level)
- */
 export const MIN_ENTITY_TIER: Record<DetailEntityType, number> = {
   identity: 1,
   ego: 1,
   egoGift: 0,
 }
 
-/**
- * Buff type categories for battle keywords
- */
 export const BUFF_TYPES = ['Positive', 'Negative', 'Neutral'] as const
 
-/**
- * Buff type derived from BUFF_TYPES array
- */
 export type BuffType = (typeof BUFF_TYPES)[number]
 
-/**
- * Sanity condition types for increment/decrement conditions
- * Used in formatSanityCondition and related hooks
- */
 export const SANITY_CONDITION_TYPE = {
-  /** Sanity increase condition */
   INCREMENT: 'inc',
-  /** Sanity decrease condition */
   DECREMENT: 'dec',
 } as const
 
-/**
- * Sanity condition type derived from SANITY_CONDITION_TYPE
- */
 export type SanityConditionType = (typeof SANITY_CONDITION_TYPE)[keyof typeof SANITY_CONDITION_TYPE]
 
 /**
@@ -501,9 +322,6 @@ export type SanityConditionType = (typeof SANITY_CONDITION_TYPE)[keyof typeof SA
  */
 export const EGO_GIFT_TIERS = ['I', 'II', 'III', 'IV', 'V', 'EX'] as const
 
-/**
- * EGO Gift tier type (display format)
- */
 export type EGOGiftTier = (typeof EGO_GIFT_TIERS)[number]
 
 /**
@@ -525,20 +343,10 @@ export const EGO_GIFT_TIER_TAGS = [
  */
 export const EGO_GIFT_DIFFICULTIES = ['normal', 'hard', 'extreme'] as const
 
-/**
- * EGO Gift difficulty type
- */
 export type EGOGiftDifficulty = (typeof EGO_GIFT_DIFFICULTIES)[number]
 
-/**
- * EGO Gift attribute types for filtering
- * All 7 affinities - reuses AFFINITIES constant
- */
 export const EGO_GIFT_ATTRIBUTE_TYPES = AFFINITIES
 
-/**
- * EGO Gift attribute type (same as Affinity)
- */
 export type EGOGiftAttributeType = Affinity
 
 /**
@@ -552,9 +360,6 @@ export const THEME_PACK_DIFFICULTIES = [
   DUNGEON_IDX.EXTREME,
 ] as const
 
-/**
- * Display labels for theme pack dungeon difficulties
- */
 export const THEME_PACK_DIFFICULTY_LABELS: Record<DungeonIdx, string> = {
   [DUNGEON_IDX.NORMAL]: 'Normal',
   [DUNGEON_IDX.HARD]: 'Hard',
@@ -569,9 +374,6 @@ export const THEME_PACK_FLOORS = [0, 1, 2, 3, 4] as const
 
 export type ThemePackFloor = (typeof THEME_PACK_FLOORS)[number]
 
-/**
- * Display labels for theme pack floors
- */
 export const THEME_PACK_FLOOR_LABELS: Record<ThemePackFloor, string> = {
   0: '1F',
   1: '2F',
@@ -611,8 +413,6 @@ export const EGO_GIFT_ENHANCEMENT_BASE_COSTS: Record<string, number> = {
  *   II: Entity index within sinner
  * Example: 10101 -> type 1, sinner 01 -> YiSang
  * Example: 20305 -> type 2, sinner 03 -> DonQuixote
- * @param id - Entity ID (identity or EGO)
- * @returns Sinner name (e.g., "YiSang", "Faust")
  */
 export function getSinnerFromId(id: SinnerScopedId): string {
   const sinnerIndex = parseInt(id.substring(1, 3), 10) - 1

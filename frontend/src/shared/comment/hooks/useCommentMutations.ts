@@ -1,10 +1,3 @@
-/**
- * Comment Mutations Hooks
- *
- * Handles all comment mutations: create, edit, delete, upvote, report, toggle notifications.
- * Most mutations use cache invalidation. Notification toggle uses direct cache update (no refetch).
- */
-
 import { ApiClient } from '@/lib/api'
 import { ConflictError } from '@/lib/apiErrors'
 import { showError, showErrorMessage } from '@/lib/errorPresentation'
@@ -15,41 +8,30 @@ import { commentsQueryKeys } from './useCommentsQuery'
 
 import type { CommentNode, CommentReportReason } from '../types/CommentTypes'
 
-// ============================================================================
-// Create Comment
-// ============================================================================
-
 interface CreateCommentInput {
   plannerId: string
   content: string
-  parentCommentId?: string // UUID
+  parentCommentId?: string
 }
 
 export function useCreateComment() {
   return useApiMutation<void, CreateCommentInput>({
     mutationFn: async ({ plannerId, content, parentCommentId }) => {
       if (parentCommentId) {
-        // Reply to existing comment
         await ApiClient.post(`/api/comments/${parentCommentId}/replies`, { content })
       } else {
-        // Top-level comment
         await ApiClient.post(`/api/planner/${plannerId}/comments`, { content })
       }
     },
     invalidateKeys: ({ plannerId }) => [commentsQueryKeys.list(plannerId)],
-    // Request browser notification permission on successful comment
     onSuccess: () => {
       void requestNotificationPermission()
     },
   })
 }
 
-// ============================================================================
-// Edit Comment
-// ============================================================================
-
 interface EditCommentInput {
-  commentId: string // UUID
+  commentId: string
   content: string
   plannerId: string
 }
@@ -59,7 +41,6 @@ export function useEditComment() {
     mutationFn: async ({ commentId, content }) => {
       await ApiClient.put(`/api/comments/${commentId}`, { content })
     },
-    // Direct cache update - update content and mark as updated
     onSuccess: (_, { commentId, content, plannerId }, queryClient) => {
       queryClient.setQueryData<CommentNode[]>(commentsQueryKeys.list(plannerId), (oldTree) => {
         if (!oldTree) return oldTree
@@ -73,12 +54,8 @@ export function useEditComment() {
   })
 }
 
-// ============================================================================
-// Delete Comment
-// ============================================================================
-
 interface DeleteCommentInput {
-  commentId: string // UUID
+  commentId: string
   plannerId: string
 }
 
@@ -87,18 +64,13 @@ export function useDeleteComment() {
     mutationFn: async ({ commentId }) => {
       await ApiClient.delete(`/api/comments/${commentId}`)
     },
-    // Invalidate to refetch from server - backend prunes deleted leaf comments
     invalidateKeys: ({ plannerId }) => [commentsQueryKeys.list(plannerId)],
     successToastKey: 'common:comments.toast.deletedSuccess',
   })
 }
 
-// ============================================================================
-// Upvote Comment
-// ============================================================================
-
 interface UpvoteCommentInput {
-  commentId: string // UUID
+  commentId: string
   plannerId: string
 }
 
@@ -107,7 +79,6 @@ export function useUpvoteComment() {
     mutationFn: async ({ commentId }) => {
       await ApiClient.post(`/api/comments/${commentId}/upvote`, {})
     },
-    // Direct cache update - increment upvotes and mark as upvoted
     onSuccess: (_, { commentId, plannerId }, queryClient) => {
       queryClient.setQueryData<CommentNode[]>(commentsQueryKeys.list(plannerId), (oldTree) => {
         if (!oldTree) return oldTree
@@ -118,9 +89,6 @@ export function useUpvoteComment() {
         }))
       })
     },
-    // The 409 code the server sends for a duplicate upvote is the same one it
-    // sends for a duplicate planner vote, so only this call site knows which
-    // resource the user is being told about.
     suppressErrorToast: true,
     onError: (error) => {
       if (error instanceof ConflictError) {
@@ -132,12 +100,8 @@ export function useUpvoteComment() {
   })
 }
 
-// ============================================================================
-// Report Comment
-// ============================================================================
-
 interface ReportCommentInput {
-  commentId: string // UUID
+  commentId: string
   reason: CommentReportReason
   plannerId: string
 }
@@ -160,12 +124,8 @@ export function useReportComment() {
   })
 }
 
-// ============================================================================
-// Toggle Notifications
-// ============================================================================
-
 interface ToggleNotificationsInput {
-  commentId: string // UUID
+  commentId: string
   enabled: boolean
   plannerId: string
 }
@@ -175,7 +135,6 @@ export function useToggleCommentNotifications() {
     mutationFn: async ({ commentId, enabled }) => {
       await ApiClient.patch(`/api/comments/${commentId}/notifications`, { enabled })
     },
-    // Direct cache update instead of full refetch
     onSuccess: (_, { commentId, enabled, plannerId }, queryClient) => {
       queryClient.setQueryData<CommentNode[]>(commentsQueryKeys.list(plannerId), (oldTree) => {
         if (!oldTree) return oldTree

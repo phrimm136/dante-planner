@@ -4,15 +4,7 @@ import type { z } from 'zod'
 import { createEntityDetailQueryKeys } from '@/lib/queryKeys'
 import { createStaticDataQueryOptions } from '@/lib/queryOptions'
 
-/**
- * Describes one entity's detail data: the per-id spec file and its per-id,
- * per-language i18n file.
- *
- * Importers stay in the owning slice so each `import('@static/…')` keeps its
- * own glob and chunking; only the query wiring is shared.
- */
 export interface EntityDetailDataConfig<TSpec, TI18n> {
-  /** Entity namespace — drives the query key tuples and validation labels */
   kind: string
   specImport: (id: string) => Promise<{ default: unknown }>
   specSchema: z.ZodType<TSpec>
@@ -42,10 +34,6 @@ function i18nOptions<TSpec, TI18n>(
   )
 }
 
-/**
- * Loads the spec data only (no language dependency).
- * Suspends on initial load, but NOT on language change.
- */
 export function useEntityDetailSpec<TSpec, TI18n>(
   cfg: EntityDetailDataConfig<TSpec, TI18n>,
   id: string,
@@ -54,9 +42,6 @@ export function useEntityDetailSpec<TSpec, TI18n>(
   return data
 }
 
-/**
- * Loads the i18n data only. Suspends while loading — wrap in Suspense.
- */
 export function useEntityDetailI18n<TSpec, TI18n>(
   cfg: EntityDetailDataConfig<TSpec, TI18n>,
   id: string,

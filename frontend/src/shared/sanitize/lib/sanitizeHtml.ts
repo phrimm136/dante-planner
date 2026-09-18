@@ -37,15 +37,8 @@ const TIPTAP_ALLOWED_TAGS = [
   'span',
 ] as const
 
-/** Attributes those tags carry: link targets and the spoiler mark's hooks. */
 const TIPTAP_ALLOWED_ATTR = ['href', 'target', 'rel', 'class', 'data-spoiler'] as const
 
-/**
- * Sanitize editor-authored HTML for rendering.
- *
- * @param html - Untrusted HTML from a user
- * @returns HTML carrying only editor-schema tags and attributes
- */
 export function sanitizeUserHtml(html: string): string {
   return DOMPurify.sanitize(html, {
     ALLOWED_TAGS: [...TIPTAP_ALLOWED_TAGS],
@@ -58,12 +51,6 @@ export function sanitizeUserHtml(html: string): string {
   })
 }
 
-/**
- * Strip every tag, leaving the text content.
- *
- * @param html - Untrusted HTML from a user
- * @returns The text content, with no markup
- */
 export function sanitizeToPlainText(html: string): string {
   return DOMPurify.sanitize(html, { ALLOWED_TAGS: [], FORBID_CONTENTS: ['script', 'style'] })
 }

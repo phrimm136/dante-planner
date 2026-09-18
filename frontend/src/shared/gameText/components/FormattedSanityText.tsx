@@ -46,9 +46,6 @@ function renderTokens(tokens: RichTextToken[], small: boolean): React.ReactNode[
   })
 }
 
-/**
- * Renders sanity condition text with size/color formatting preserved
- */
 export function FormattedSanityText({ text, className }: FormattedSanityTextProps) {
   if (!text) return null
 

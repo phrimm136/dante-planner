@@ -1,14 +1,3 @@
-/**
- * CommentEditor
- *
- * Simplified WYSIWYG editor for comments based on NoteEditor pattern.
- * Differences from NoteEditor:
- * - No images or spoilers - just StarterKit (bold, italic, lists, etc.)
- * - Submit button pattern instead of auto-save
- * - Character counter (always visible)
- * - Cancel/Submit buttons when focused
- */
-
 import { useState, useRef } from 'react'
 import { useEditor, EditorContent, EditorContext, type Editor } from '@tiptap/react'
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
@@ -22,19 +11,12 @@ import { COMMENT_MAX_CHARS } from '@/lib/constants'
 import './CommentEditor.css'
 
 interface CommentEditorProps {
-  /** Placeholder text */
   placeholder?: string
-  /** Whether the editor is disabled */
   disabled?: boolean
-  /** Called when user submits */
   onSubmit: (content: string) => void
-  /** Called when user cancels */
   onCancel?: () => void
-  /** Initial HTML content (for editing existing comments) */
   initialContent?: string
-  /** Whether this is a reply (always shows cancel button) */
   isReply?: boolean
-  /** Loading state for submit button */
   isSubmitting?: boolean
 }
 
@@ -64,7 +46,6 @@ export function CommentEditor({
     setIsEmpty(editor.getText().trim().length === 0)
   }
 
-  // Extensions - StarterKit only (no images, no spoilers)
   const extensions = [
     StarterKit.configure({
       heading: { levels: [1, 2, 3] },
@@ -101,9 +82,7 @@ export function CommentEditor({
   const handleBlur = (e: React.FocusEvent) => {
     const relatedTarget = e.relatedTarget as HTMLElement | null
 
-    // Keep focused if clicking within container (e.g., buttons)
     if (containerRef.current && !containerRef.current.contains(relatedTarget)) {
-      // Empty content: collapse buttons (both main and reply editors)
       if (isEmpty) {
         setIsFocused(false)
       }
@@ -148,7 +127,6 @@ export function CommentEditor({
           <div className="relative">
             <EditorContent editor={editor} />
 
-            {/* Placeholder when empty and not focused */}
             {!isFocused && editor.isEmpty && (
               <div className="absolute top-0 left-0 p-3 text-muted-foreground pointer-events-none">
                 {placeholder || t('pages.plannerMD.comments.placeholder', 'Write a comment...')}
@@ -158,7 +136,6 @@ export function CommentEditor({
         </EditorContext.Provider>
       </ReactErrorBoundary>
 
-      {/* Footer: character count + buttons */}
       <div className="flex items-center justify-end gap-3 px-3 py-2 border-t border-input">
         <span className={cn('text-xs', isOverLimit ? 'text-destructive' : 'text-muted-foreground')}>
           {charCount}/{COMMENT_MAX_CHARS}

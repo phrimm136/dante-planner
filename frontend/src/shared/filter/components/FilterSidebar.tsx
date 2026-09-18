@@ -6,29 +6,14 @@ import { cn } from '@/lib/utils'
 import { FILTER_SIDEBAR_WIDTH } from '@/lib/constants'
 
 interface FilterSidebarProps {
-  /** All filter sections (desktop sidebar uses this) */
   children: React.ReactNode
-  /** Primary filters always visible on mobile (Sinner, Keyword) */
   primaryFilters?: React.ReactNode
-  /** Secondary filters shown when mobile expanded (Skill Attribute, Attack Type, etc.) */
   secondaryFilters?: React.ReactNode
-  /** Search bar - visible in mobile collapsed state next to Reset All */
   searchBar?: React.ReactNode
   activeFilterCount?: number
   onResetAll?: (() => void) | undefined
 }
 
-/**
- * Responsive filter sidebar wrapper for list pages
- *
- * Desktop (lg+): Sticky sidebar on LEFT side with fixed width
- * Mobile (<lg): Inline expandable filter header at top of page
- *   - Collapsed: primaryFilters + Reset All + Expand button
- *   - Expanded: primaryFilters + secondaryFilters + Reset All + Collapse button
- *
- * Pattern: Named slots composition - primaryFilters/secondaryFilters for mobile, children for desktop
- * Reusable for Identity, EGO, and EGOGift pages
- */
 export function FilterSidebar({
   children,
   primaryFilters,
@@ -44,7 +29,6 @@ export function FilterSidebar({
 
   return (
     <>
-      {/* Desktop sidebar - visible on lg+ */}
       <aside
         className={cn(
           'hidden lg:block',
@@ -55,13 +39,10 @@ export function FilterSidebar({
         style={{ width: `${FILTER_SIDEBAR_WIDTH}px`, minWidth: `${FILTER_SIDEBAR_WIDTH}px` }}
       >
         <div className="space-y-2">
-          {/* Filter sections passed as children */}
           <div className="space-y-1">{children}</div>
 
-          {/* Search Bar */}
           {searchBar && <div>{searchBar}</div>}
 
-          {/* Reset All button */}
           {onResetAll && (
             <Button
               variant="outline"
@@ -83,20 +64,15 @@ export function FilterSidebar({
         </div>
       </aside>
 
-      {/* Mobile expandable filter header - visible below lg */}
       <div className="lg:hidden w-full relative">
         <div className="rounded-lg border bg-card p-3">
           <div className="space-y-1">
-            {/* Primary filters - always visible */}
             {primaryFilters && <div className="space-y-1">{primaryFilters}</div>}
 
-            {/* Secondary filters - expand in the middle (no separator) */}
             {isExpanded && secondaryFilters && <div className="space-y-1">{secondaryFilters}</div>}
 
-            {/* Search Bar */}
             {searchBar && <div>{searchBar}</div>}
 
-            {/* Reset All button */}
             {onResetAll && (
               <Button
                 variant="outline"
@@ -118,7 +94,6 @@ export function FilterSidebar({
           </div>
         </div>
 
-        {/* Expand/Collapse circle button - centered on bottom border */}
         {secondaryFilters && (
           <button
             type="button"

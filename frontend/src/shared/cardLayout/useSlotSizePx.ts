@@ -2,7 +2,6 @@ import { LG_BREAKPOINT_PX } from '@/lib/constants'
 import { useIsBreakpoint } from '@/components/hooks/use-is-breakpoint'
 import type { CardSizePx } from './geometry'
 
-/** The box a slot takes at the current breakpoint: `size` on desktop, scaled below it. */
 export function useSlotSizePx(size: CardSizePx, mobileScale: number): CardSizePx {
   const isDesktop = useIsBreakpoint('min', LG_BREAKPOINT_PX)
   const scale = isDesktop ? 1 : mobileScale

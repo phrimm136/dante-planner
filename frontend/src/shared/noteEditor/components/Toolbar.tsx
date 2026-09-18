@@ -57,13 +57,6 @@ function ToolbarButton({ icon, label, isActive, onClick, disabled }: ToolbarButt
   )
 }
 
-/**
- * Toolbar - Formatting toolbar for NoteEditor
- *
- * Buttons for: bold, italic, strikethrough, headings (H1-H3),
- * bullet list, ordered list, blockquote, code, code block,
- * link, spoiler
- */
 export function Toolbar({ editor, visible, onLinkClick }: ToolbarProps) {
   const { t } = useTranslation(['planner', 'common'])
 
@@ -73,7 +66,6 @@ export function Toolbar({ editor, visible, onLinkClick }: ToolbarProps) {
 
   return (
     <div className="flex flex-wrap items-center gap-0.5 border-b border-input p-1">
-      {/* Text formatting */}
       <ToolbarButton
         icon={<Bold className="h-4 w-4" />}
         label={t('pages.plannerMD.noteEditor.toolbar.bold')}
@@ -95,7 +87,6 @@ export function Toolbar({ editor, visible, onLinkClick }: ToolbarProps) {
 
       <Separator orientation="vertical" className="mx-1 h-6" />
 
-      {/* Headings */}
       <ToolbarButton
         icon={<Heading1 className="h-4 w-4" />}
         label={t('pages.plannerMD.noteEditor.toolbar.heading1')}
@@ -117,7 +108,6 @@ export function Toolbar({ editor, visible, onLinkClick }: ToolbarProps) {
 
       <Separator orientation="vertical" className="mx-1 h-6" />
 
-      {/* Lists */}
       <ToolbarButton
         icon={<List className="h-4 w-4" />}
         label={t('pages.plannerMD.noteEditor.toolbar.bulletList')}
@@ -133,7 +123,6 @@ export function Toolbar({ editor, visible, onLinkClick }: ToolbarProps) {
 
       <Separator orientation="vertical" className="mx-1 h-6" />
 
-      {/* Block elements */}
       <ToolbarButton
         icon={<Quote className="h-4 w-4" />}
         label={t('pages.plannerMD.noteEditor.toolbar.blockquote')}
@@ -155,7 +144,6 @@ export function Toolbar({ editor, visible, onLinkClick }: ToolbarProps) {
 
       <Separator orientation="vertical" className="mx-1 h-6" />
 
-      {/* Link */}
       <ToolbarButton
         icon={<Link className="h-4 w-4" />}
         label={t('pages.plannerMD.noteEditor.toolbar.link')}
@@ -165,7 +153,6 @@ export function Toolbar({ editor, visible, onLinkClick }: ToolbarProps) {
 
       <Separator orientation="vertical" className="mx-1 h-6" />
 
-      {/* Spoiler */}
       <ToolbarButton
         icon={<EyeOff className="h-4 w-4" />}
         label={t('pages.plannerMD.noteEditor.toolbar.spoiler')}

@@ -7,7 +7,6 @@ import { SkillCardLayout } from './SkillCardLayout'
 import { SkillInfoPanelWithSuspense } from './SkillInfoPanel'
 import { SkillDescriptionSkeleton } from './SkillDescription'
 
-/** Minimal structural shape of the per-level skill stats a card reads. */
 interface SkillCardData {
   attributeType?: string | undefined
   atkType?: string | undefined
@@ -20,31 +19,15 @@ interface SkillCardData {
 interface SkillCardProps {
   skillData: SkillCardData
   coinString: string
-  /** Domain-resolved skill image path (identity id/iconID, ego awaken/erosion). */
   skillImagePath: string
-  /** Frame tier (identity per-skill, ego fixed at 3). */
   skillTier: number
-  /** The owning slice's skill-name element; suspends inside the info panel. */
   nameSlot: ReactNode
-  /** The owning slice's skill-description element; suspends inside the card. */
   descriptionSlot: ReactNode
-  /** Identity-only: renders the defense level icon. EGO skills are always attack. */
   isDefenseSkill?: boolean
-  /** EGO-only: sanity (MP) cost. When provided, renders the sanity-cost stat. */
   sanityCost?: number
-  /** Identity-only: dims the card and overlays a lock icon. */
   isLocked?: boolean
 }
 
-/**
- * SkillCard — the single skill-card surface shared by identity and ego.
- *
- * Owns the full assembly (image composite, info panel, description, layout,
- * lock overlay) as an invariant. Callers supply only domain contexts as args:
- * the resolved image path/tier, the name/description slots, and the optional
- * feature flags (`isDefenseSkill`, `sanityCost`, `isLocked`). Structure (image,
- * stats) stays visible while name/description suspend for i18n.
- */
 export function SkillCard({
   skillData,
   coinString,
