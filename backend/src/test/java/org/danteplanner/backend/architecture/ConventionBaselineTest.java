@@ -1,5 +1,6 @@
 package org.danteplanner.backend.architecture;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -191,8 +192,7 @@ class ConventionBaselineTest {
                     .should(new ArchCondition<JavaMethod>("take no owned error back") {
                         @Override
                         public void check(JavaMethod method, ConditionEvents events) {
-                            for (JavaParameter parameter : method.getParameters()) {
-                                JavaClass type = parameter.getRawType();
+                            for (JavaClass type : mappedTypes(method)) {
                                 if (!type.isAssignableTo(DOMAIN_EXCEPTION)
                                         || DOMAIN_EXCEPTION_HANDLERS_FROZEN.contains(type.getName())) {
                                     continue;
@@ -206,6 +206,24 @@ class ConventionBaselineTest {
                         }
                     })
                     .as("owned errors render through the base advice");
+
+    /**
+     * The types a handler answers for: what {@code @ExceptionHandler} names, plus the parameter
+     * types Spring reads when it names nothing.
+     */
+    private static Set<JavaClass> mappedTypes(JavaMethod method) {
+        Set<JavaClass> types = new LinkedHashSet<>();
+        method.getAnnotationOfType(EXCEPTION_HANDLER).get("value")
+                .ifPresent(declared -> {
+                    for (Object type : (Object[]) declared) {
+                        types.add((JavaClass) type);
+                    }
+                });
+        for (JavaParameter parameter : method.getParameters()) {
+            types.add(parameter.getRawType());
+        }
+        return types;
+    }
 
     /**
      * The controllers that dereference a mapped entity a service handed back — state read from the
