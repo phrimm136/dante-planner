@@ -2,7 +2,6 @@ import { Profiler, type ComponentType, type ProfilerOnRenderCallback, type React
 
 const counts = new Map<string, number>()
 
-/** Tally one render under `label`. */
 export function recordRender(label: string): void {
   counts.set(label, (counts.get(label) ?? 0) + 1)
 }
@@ -19,10 +18,6 @@ export function snapshotRenderCounts(): Record<string, number> {
   return Object.fromEntries(counts)
 }
 
-/**
- * Renders tallied since `baseline` was taken, one entry per label seen either
- * then or now, so a label absent from the result never means "not measured".
- */
 export function rendersSince(baseline: Record<string, number>): Record<string, number> {
   const labels = new Set([...counts.keys(), ...Object.keys(baseline)])
   const delta: Record<string, number> = {}
@@ -38,13 +33,6 @@ export function rendersSince(baseline: Record<string, number>): Record<string, n
  * Pair with `vi.mock` + `importOriginal` to measure a real component without
  * editing it. A parent that hands the wrapper an unchanged element bails out
  * before the wrapper runs, so the tally counts genuine re-render work.
- *
- * @example
- * vi.mock('@/pages/identity/components/StatusPanel', async (importOriginal) => {
- *   const actual = await importOriginal<typeof import('.../StatusPanel')>()
- *   const { countRenders } = await import('@/test-utils/renderCounter')
- *   return { StatusPanel: countRenders('StatusPanel', actual.StatusPanel) }
- * })
  */
 export function countRenders<P extends object>(
   label: string,
@@ -59,17 +47,10 @@ export function countRenders<P extends object>(
 }
 
 interface RenderProbeProps {
-  /** Label the subtree's commits are tallied under */
   label: string
   children: ReactNode
 }
 
-/**
- * Tallies every commit of the wrapped subtree under `label`.
- *
- * Use for subtrees a test composes itself; `countRenders` is the tool for a
- * component the test cannot wrap from the outside.
- */
 export function RenderProbe({ label, children }: RenderProbeProps) {
   const onRender: ProfilerOnRenderCallback = () => {
     recordRender(label)

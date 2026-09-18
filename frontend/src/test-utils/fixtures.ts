@@ -21,38 +21,31 @@ import {
 } from '@/shared/gameData'
 import type { IdentityId, EGOId, EGOGiftId, EncodedGiftId, SinnerScopedId } from '@/shared/gameData'
 
-/** Branded identity id for fixtures; rejects malformed literals at test time. */
 export function asIdentityId(id: string): IdentityId {
   return IdentityIdSchema.parse(id)
 }
 
-/** Branded EGO id for fixtures; rejects malformed literals at test time. */
 export function asEGOId(id: string): EGOId {
   return EGOIdSchema.parse(id)
 }
 
-/** Branded sinner-scoped id for fixtures; rejects malformed literals at test time. */
 export function asSinnerScopedId(id: string): SinnerScopedId {
   return SinnerScopedIdSchema.parse(id)
 }
 
-/** Branded base gift id for fixtures; rejects malformed literals at test time. */
 export function asEGOGiftId(id: string): EGOGiftId {
   return EGOGiftIdSchema.parse(id)
 }
 
-/** Branded encoded gift selection for fixtures; rejects malformed literals at test time. */
 export function asEncodedGiftId(id: string): EncodedGiftId {
   return EncodedGiftIdSchema.parse(id)
 }
 
-/** The Mirror Dungeon branch of the planner union, which these factories build. */
 type MDPlanner = Extract<SaveablePlanner, { config: { type: 'MIRROR_DUNGEON' } }>
 
 const FIXTURE_PLANNER_ID = '00000000-0000-4000-8000-000000000001'
 const FIXTURE_TIMESTAMP = '2026-01-01T00:00:00.000Z'
 
-/** A floor selection parsed through the schema the drift guard pins to its type. */
 export function buildFloorSelection(
   overrides: Partial<SerializableFloorSelection> = {},
 ): SerializableFloorSelection {
@@ -64,10 +57,6 @@ export function buildFloorSelection(
   })
 }
 
-/**
- * A Mirror Dungeon planner validated by `validateSaveablePlanner`, whose content
- * schemas are strict where the storage read path accepts a loose record.
- */
 export function buildSaveablePlanner(
   overrides: {
     metadata?: Partial<MDPlanner['metadata']>
@@ -110,7 +99,6 @@ export function buildSaveablePlanner(
   })
 }
 
-/** A planner summary composed from a planner that parses; the summary has no schema. */
 export function buildPlannerSummary(overrides: Partial<PlannerSummary> = {}): PlannerSummary {
   const planner = buildSaveablePlanner()
   return {
@@ -125,10 +113,6 @@ export function buildPlannerSummary(overrides: Partial<PlannerSummary> = {}): Pl
   }
 }
 
-/**
- * A gift entity assembled the way production assembles one: a spec parsed at
- * the boundary schema, then merged into an entity by `toEGOGiftCardProps`.
- */
 export function buildEgoGiftEntity(overrides: Partial<EGOGiftEntity> = {}): EGOGiftEntity {
   const { id = '9001', name = 'Fixture Gift', ...specOverrides } = overrides
   const spec = EGOGiftSpecSchema.parse({
@@ -140,8 +124,6 @@ export function buildEgoGiftEntity(overrides: Partial<EGOGiftEntity> = {}): EGOG
     maxEnhancement: 2,
     ...specOverrides,
   })
-  // toEGOGiftCardProps carries only the fields a card renders, so the optionals a
-  // caller overrode have to be put back or the fixture silently drops them.
   return {
     ...toEGOGiftCardProps(id, spec),
     name,
@@ -151,7 +133,6 @@ export function buildEgoGiftEntity(overrides: Partial<EGOGiftEntity> = {}): EGOG
   }
 }
 
-/** A gift spec keyed by base id, parsed at the boundary schema the catalog validates with. */
 export function buildEgoGiftSpecList(
   entries: Record<string, Partial<EGOGiftSpec>>,
 ): Record<string, EGOGiftSpec> {

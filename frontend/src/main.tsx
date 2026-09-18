@@ -36,13 +36,11 @@ const app = (
           },
         }}
       />
-      {/* Dev tools - only in development */}
       {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>
   </StrictMode>
 )
 
-// Rendering waits on the active language so a non-EN visitor never sees English.
 void i18nReady.then(() => {
   createRoot(document.getElementById('root')!).render(app)
 })

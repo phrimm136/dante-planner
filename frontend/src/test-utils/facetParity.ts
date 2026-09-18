@@ -1,10 +1,3 @@
-/**
- * Facet Parity Support
- *
- * Enumerates filter-selection combinations and compares two predicates over a
- * fixture item set, used by the per-list facet parity suites.
- */
-
 export type SelectionDomains<TState> = {
   [K in keyof TState]?: readonly (readonly unknown[])[]
 }
@@ -19,12 +12,6 @@ function gcd(a: number, b: number): number {
   return b === 0 ? a : gcd(b, a % b)
 }
 
-/**
- * Builds the cartesian product of the per-facet selection domains on top of
- * `base`. Above `cap` combinations the product is sampled with a stride coprime
- * to its size, and every single-facet selection is appended so each facet keeps
- * full coverage.
- */
 export function enumerateSelectionStates<TState extends object>(
   base: TState,
   domains: SelectionDomains<TState>,
@@ -65,7 +52,6 @@ export function enumerateSelectionStates<TState extends object>(
   return states
 }
 
-/** Collects every state where the two predicates disagree on the surviving ids. */
 export function findParityMismatches<TItem extends { id: string }, TState>(
   items: readonly TItem[],
   states: readonly TState[],

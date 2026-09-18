@@ -6,11 +6,6 @@ import type {
   UseMutationResult,
 } from '@tanstack/react-query'
 
-/**
- * A complete `useMutation` return value, overridable field by field. A mocked
- * mutation hook has to return the whole shape its component consumes, not the
- * two or three flags the test asserts on.
- */
 export function buildMutationResult<
   TData,
   TError = Error,

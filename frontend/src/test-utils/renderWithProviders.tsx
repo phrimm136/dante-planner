@@ -10,15 +10,6 @@ interface RenderWithProvidersOptions extends Omit<RenderOptions, 'wrapper'> {
   initialRoute?: string
 }
 
-/**
- * Custom render function that wraps components with TanStack providers
- * Use this for testing components that use TanStack Query or Router
- *
- * @example
- * const { router } = renderWithProviders(<HomePage />)
- * await user.click(screen.getByRole('link'))
- * expect(router.state.location.pathname).toBe('/about')
- */
 export function renderWithProviders(
   ui: ReactElement,
   { queryClient, router, initialRoute = '/', ...renderOptions }: RenderWithProvidersOptions = {},
@@ -37,6 +28,5 @@ export function renderWithProviders(
   }
 }
 
-// Re-export everything from Testing Library for convenience
 export * from '@testing-library/react'
 export { renderWithProviders as render }

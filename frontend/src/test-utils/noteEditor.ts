@@ -42,7 +42,6 @@ export function stubRangeRects(): void {
   })
 }
 
-/** Put text into a mounted note editor, as a paste jsdom can carry. */
 export function pasteIntoNote(container: Element, text: string): void {
   fireEvent.focusIn(container)
   const contentEl = container.querySelector('.note-editor-content')
@@ -56,7 +55,6 @@ export function pasteIntoNote(container: Element, text: string): void {
   })
 }
 
-/** Run the microtask the write-through scheduled, and nothing later. */
 export async function flushMicrotask(): Promise<void> {
   await act(async () => {
     await Promise.resolve()

@@ -1,7 +1,3 @@
-/**
- * Test utilities for LimbusPlanner frontend
- * Import from this file to get render with providers and test utilities
- */
 export { createTestFilterStore } from './filterStore'
 export {
   buildEgoGiftEntity,
@@ -25,6 +21,5 @@ export {
   snapshotRenderCounts,
 } from './renderCounter'
 
-// Re-export Testing Library utilities
 export * from '@testing-library/react'
 export { userEvent } from '@testing-library/user-event'

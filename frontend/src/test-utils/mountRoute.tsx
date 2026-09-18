@@ -10,10 +10,6 @@ import {
 } from '@tanstack/react-router'
 import { createTestQueryClient } from './queryClient'
 
-/**
- * Mounts one route component under a real router at `url`, so `useParams`
- * and `<Link>` resolve the way they do in the app.
- */
 export function mountRoute(path: string, url: string, component: () => ReactNode) {
   const rootRoute = createRootRoute()
   const route = createRoute({ getParentRoute: () => rootRoute, path, component })

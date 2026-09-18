@@ -11,11 +11,6 @@ interface CreateTestRouterOptions {
   component?: () => ReactNode
 }
 
-/**
- * Creates a router configured for testing
- * - Uses memory history (no real browser navigation)
- * - Sets defaultPendingMs to 0 to prevent slow tests (critical!)
- */
 export function createTestRouter({
   initialEntries = ['/'],
   component,
