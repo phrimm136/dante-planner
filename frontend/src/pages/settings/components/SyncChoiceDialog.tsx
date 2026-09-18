@@ -10,37 +10,11 @@ import {
 import { Button } from '@/components/ui/button'
 import { useUpdateUserSettingsMutation } from '@/shared/userSettings'
 
-/**
- * Props for SyncChoiceDialog
- */
 export interface SyncChoiceDialogProps {
-  /** Whether the dialog is open */
   open: boolean
-  /** Callback when user makes a choice */
   onChoice: (syncEnabled: boolean) => void
 }
 
-/**
- * First-login sync choice dialog (GDPR compliant)
- *
- * Non-dismissible dialog that forces users to explicitly choose their sync preference.
- * Shown when the sync prompt has not been answered (first login).
- *
- * Features:
- * - No X button, no click-outside close, no Escape key dismissal
- * - Two clear options: Keep Local Only or Enable Cloud Sync
- * - Privacy-focused messaging explaining data handling
- *
- * @example
- * ```tsx
- * <SyncChoiceDialog
- *   open={settings ? !settings.syncChoiceMade : false}
- *   onChoice={(enabled) => {
- *     if (enabled) triggerPendingSync()
- *   }}
- * />
- * ```
- */
 export function SyncChoiceDialog({ open, onChoice }: SyncChoiceDialogProps) {
   const { t } = useTranslation('common')
   const updateSettings = useUpdateUserSettingsMutation()

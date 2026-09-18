@@ -14,15 +14,10 @@ import { ThemePackList } from '@/pages/themePack'
 import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
 import { THEME_PACK_GEOMETRY } from '@/shared/cardLayout'
 
-/**
- * Shell component - loads spec, manages filter states.
- * Does not suspend on language change since spec query key has no language.
- */
 function ThemePackPageShell() {
   const { t } = useTranslation(['database', 'common'])
   const spec = useThemePackListSpec()
 
-  // Filter states
   const {
     values: filters,
     setters,
@@ -84,14 +79,6 @@ function ThemePackPageShell() {
   )
 }
 
-/**
- * ThemePackPage - Theme pack browser with responsive filter sidebar
- *
- * Granular loading architecture:
- * - Outer Suspense: ListPageSkeleton for spec loading (initial)
- * - EGO Gift dropdown: Own Suspense for i18n
- * - ThemePackList: names suspend at the card, search terms never suspend
- */
 export default function ThemePackPage() {
   return (
     <EntityListPage skeleton={<ListPageSkeleton geometry={THEME_PACK_GEOMETRY} />}>

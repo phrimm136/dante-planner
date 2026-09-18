@@ -51,7 +51,6 @@ export const THEME_PACK_NAME_TEXT = {
 
 const NEWLINE = /\n/g
 
-/** A theme pack name as the card draws it: one line, whatever breaks the source carries. */
 export function themePackCardName(raw: string): string {
   return raw.replace(NEWLINE, ' ')
 }

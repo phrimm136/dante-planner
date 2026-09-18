@@ -16,11 +16,8 @@ import { ThemePackName } from './ThemePackName'
 interface ThemePackCardProps {
   packId: string
   packEntry: ThemePackSpec
-  /** Fade the hover sprite in while the pointer is over the card. */
   enableHoverHighlight?: boolean
-  /** Hold the focused sprite on, for click-to-pin selection. */
   isSelected?: boolean
-  /** Extra content drawn above every card layer. */
   overlay?: ReactNode
   className?: string
 }

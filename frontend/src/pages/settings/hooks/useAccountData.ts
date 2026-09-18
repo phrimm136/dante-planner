@@ -12,17 +12,10 @@ import type {
 import type { User } from '@/shared/auth'
 import { STALE_TIME } from '@/lib/constants'
 
-/**
- * Query keys for account queries
- */
 export const accountQueryKeys = {
   epithets: () => ['user', 'epithets'] as const,
 }
 
-/**
- * Query options for fetching all available epithets.
- * This is a public endpoint - no auth required.
- */
 function createEpithetsQueryOptions() {
   return queryOptions({
     queryKey: accountQueryKeys.epithets(),
@@ -34,52 +27,11 @@ function createEpithetsQueryOptions() {
   })
 }
 
-/**
- * Hook to fetch all available username epithets.
- * Uses Suspense for SSR-compatible loading states.
- *
- * @example
- * ```tsx
- * function UsernameDropdown() {
- *   const { epithets } = useEpithetsQuery();
- *
- *   return (
- *     <select>
- *       {epithets.map(epithet => (
- *         <option key={epithet} value={epithet}>
- *           {t(epithet, { ns: 'epithet' })}
- *         </option>
- *       ))}
- *     </select>
- *   );
- * }
- * ```
- */
 export function useEpithetsQuery() {
   const { data } = useSuspenseQuery(createEpithetsQueryOptions())
   return { epithets: data.epithets }
 }
 
-/**
- * Hook for updating username epithet mutation.
- * Invalidates auth cache on success so Header updates with new username.
- *
- * @example
- * ```tsx
- * function SaveButton({ epithet }: { epithet: string }) {
- *   const updateEpithet = useUpdateEpithetMutation();
- *
- *   return (
- *     <button
- *       onClick={() => updateEpithet.mutate({ epithet })}
- *       disabled={updateEpithet.isPending}
- *     >
- *       Save
- *     </button>
- *   );
- * }
- * ```
- */
 export function useUpdateEpithetMutation() {
   const queryClient = useQueryClient()
 
@@ -89,7 +41,6 @@ export function useUpdateEpithetMutation() {
       return validateData(data, UserSchema, 'user usernameEpithet')
     },
     onSuccess: (user) => {
-      // Update auth cache so Header reflects the new username
       queryClient.setQueryData(authQueryKeys.me, user)
     },
     onError: (error) => {
@@ -98,26 +49,6 @@ export function useUpdateEpithetMutation() {
   })
 }
 
-/**
- * Hook for deleting user account mutation.
- * Invalidates auth cache on success to trigger logout.
- *
- * @example
- * ```tsx
- * function DeleteButton() {
- *   const deleteAccount = useDeleteAccountMutation();
- *
- *   return (
- *     <button
- *       onClick={() => deleteAccount.mutate()}
- *       disabled={deleteAccount.isPending}
- *     >
- *       Delete Account
- *     </button>
- *   );
- * }
- * ```
- */
 export function useDeleteAccountMutation() {
   return useMutation({
     mutationFn: async (): Promise<UserDeletionResponse> => {

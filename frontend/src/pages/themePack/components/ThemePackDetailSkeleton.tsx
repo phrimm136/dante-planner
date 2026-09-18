@@ -8,7 +8,6 @@ import { CARD_MOBILE_SCALE_NONE } from '@/lib/constants'
 import { CardSlot, EGO_GIFT_GEOMETRY, THEME_PACK_GEOMETRY } from '@/shared/cardLayout'
 import { SectionTitle } from './SectionTitle'
 
-/** One labelled metadata row of the left column's panel. */
 function MetadataBlock() {
   return (
     <div className="space-y-1">
@@ -21,7 +20,6 @@ function MetadataBlock() {
   )
 }
 
-/** One named EGO gift card of a gift row. */
 function NamedGiftBlock() {
   return (
     <div className="flex flex-col items-center gap-1">
@@ -33,7 +31,6 @@ function NamedGiftBlock() {
   )
 }
 
-/** One abnormality event card: landscape image with a clamped description below. */
 function EventBlock() {
   return (
     <div className="w-40">
@@ -45,10 +42,6 @@ function EventBlock() {
   )
 }
 
-/**
- * Theme Pack detail: Card image + difficulty/floor metadata (left)
- * Specific gifts + events sections (right)
- */
 export function ThemePackDetailSkeleton() {
   const { t } = useTranslation('database')
 
@@ -56,11 +49,9 @@ export function ThemePackDetailSkeleton() {
     <DetailPageSkeleton
       left={
         <div className="flex gap-4">
-          {/* Theme pack card image */}
           <CardSlot size={THEME_PACK_GEOMETRY.size} className="shrink-0">
             <Skeleton className="size-full rounded-lg" />
           </CardSlot>
-          {/* Metadata panel: difficulty + floors + hidden theme rate */}
           <LabeledPanel className="flex-1">
             <MetadataBlock />
             <MetadataBlock />
@@ -70,7 +61,6 @@ export function ThemePackDetailSkeleton() {
       }
       right={
         <div className="space-y-6">
-          {/* Section: Exclusive EGO gifts */}
           <div className="space-y-3">
             <SectionTitle>{t('themePack.exclusiveGifts', 'Exclusive EGO Gifts')}</SectionTitle>
             <div className="flex flex-wrap gap-3">
@@ -79,7 +69,6 @@ export function ThemePackDetailSkeleton() {
               <NamedGiftBlock />
             </div>
           </div>
-          {/* Section: Exclusive events */}
           <div className="space-y-3">
             <SectionTitle>
               {t('themePack.exclusiveEvents', 'Exclusive Dungeon Events')}
@@ -89,7 +78,6 @@ export function ThemePackDetailSkeleton() {
               <EventBlock />
             </div>
           </div>
-          {/* Section: All acquirable EGO gifts */}
           <div className="space-y-3">
             <SectionTitle>{t('themePack.allGifts', 'All Acquirable EGO Gifts')}</SectionTitle>
             <div className="flex flex-wrap gap-2">
@@ -104,7 +92,6 @@ export function ThemePackDetailSkeleton() {
               ))}
             </div>
           </div>
-          {/* Section: All encounterable events */}
           <div className="space-y-3">
             <SectionTitle>{t('themePack.allEvents', 'All Encounterable Events')}</SectionTitle>
             <div className="flex flex-wrap gap-3">

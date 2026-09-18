@@ -10,16 +10,11 @@ import { AccountDeleteDialog } from './AccountDeleteDialog'
 import { startGoogleLogin } from '@/shared/auth'
 import { GoogleIcon } from '@/components/ui/GoogleIcon'
 
-/**
- * Inner component that uses Suspense hooks.
- * Must be wrapped in Suspense boundary.
- */
 function AccountDeleteSectionContent() {
   const { t } = useTranslation()
   const { data: user } = useAuthQuery()
   const { dialogOpen, openDialog, closeDialog, confirmDelete, isPending } = useDeleteAccountFlow()
 
-  // Unauthenticated state - show sign-in prompt
   if (!user) {
     return (
       <div className="space-y-4">
@@ -33,7 +28,6 @@ function AccountDeleteSectionContent() {
     )
   }
 
-  // Authenticated state - show delete button
   return (
     <div className="space-y-4">
       <h2 className={SECTION_STYLES.TEXT.sectionTitle}>{t('settings.deleteAccount.title')}</h2>
@@ -52,10 +46,6 @@ function AccountDeleteSectionContent() {
   )
 }
 
-/**
- * Account deletion section with Suspense boundary.
- * Public component for use in SettingsPage.
- */
 export function AccountDeleteSection() {
   return (
     <Suspense fallback={<AccountDeleteSectionSkeleton />}>
@@ -64,9 +54,6 @@ export function AccountDeleteSection() {
   )
 }
 
-/**
- * Loading skeleton for account delete section.
- */
 function AccountDeleteSectionSkeleton() {
   return (
     <div className="space-y-4">

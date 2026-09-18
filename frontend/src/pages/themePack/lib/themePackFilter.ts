@@ -1,10 +1,3 @@
-/**
- * themePackFilter.ts
- *
- * Facet descriptors for the theme pack browser, plus the per-item predicate the grid's
- * card slots subscribe through.
- */
-
 import type { z } from 'zod'
 import type { EntityMatcher, Facet } from '@/shared/filter'
 import { createEntityMatcher } from '@/shared/filter'
@@ -36,11 +29,6 @@ export const THEME_PACK_FACETS: readonly Facet<ThemePackEntity, ThemePackFacetSt
   },
 ]
 
-/**
- * Every lowercased string the search box matches a theme pack on: its localized name.
- *
- * Depends only on the i18n payload, so a filter toggle never invalidates it.
- */
 export function buildThemePackSearchTerms(
   packId: string,
   themePackI18n: z.infer<typeof ThemePackI18nSchema>,
@@ -48,6 +36,5 @@ export function buildThemePackSearchTerms(
   return [(themePackI18n[packId]?.name ?? '').toLowerCase()]
 }
 
-/** Whether one theme pack survives the current facets and search query. */
 export const matchesThemePack: EntityMatcher<ThemePackEntity, ThemePackFacetState> =
   createEntityMatcher(THEME_PACK_FACETS)

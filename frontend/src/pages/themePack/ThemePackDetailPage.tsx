@@ -1,10 +1,3 @@
-/**
- * ThemePackDetailPage - Theme pack detail page with two-column layout
- *
- * Desktop: 4:6 ratio (left: image + metadata, right: gifts + events)
- * Mobile: Single column, left on top, right below
- */
-
 import { useParams } from '@tanstack/react-router'
 import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -34,10 +27,8 @@ import { DIFFICULTY_COLORS, SECTION_STYLES } from '@/lib/constants'
 import { SectionTitle } from './components/SectionTitle'
 import type { EGOGiftId } from '@/shared/gameData'
 
-/** The theme pack box with its height left to the card. */
 const GIFT_ROW = 'flex flex-wrap gap-3'
 
-/** Difficulties in display order; the label also keys DIFFICULTY_COLORS. */
 const DUNGEON_DIFFICULTIES: { idx: DungeonIdx; label: DifficultyLabel }[] = [
   { idx: DUNGEON_IDX.NORMAL, label: DIFFICULTY_LABELS.NORMAL },
   { idx: DUNGEON_IDX.HARD, label: DIFFICULTY_LABELS.HARD },
@@ -45,13 +36,6 @@ const DUNGEON_DIFFICULTIES: { idx: DungeonIdx; label: DifficultyLabel }[] = [
   { idx: DUNGEON_IDX.EXTREME, label: DIFFICULTY_LABELS.EXTREME_MIRROR },
 ]
 
-// =============================================================================
-// Left Column Components
-// =============================================================================
-
-/**
- * Difficulty badges with colored text matching DIFFICULTY_COLORS
- */
 function DifficultyBadges({ conditions }: { conditions: ThemePackDetail['exceptionConditions'] }) {
   const dungeonIdxSet = new Set(conditions.map((c) => c.dungeonIdx))
   const shownDifficulties = DUNGEON_DIFFICULTIES.filter((d) => dungeonIdxSet.has(d.idx))
@@ -131,10 +115,6 @@ export function FloorDisplay({
   )
 }
 
-// =============================================================================
-// Right Column Components
-// =============================================================================
-
 /**
  * Featured boss panels — pre-composited webp per boss from the manifest.
  * Self-contained: renders nothing when the roster is empty.
@@ -180,9 +160,6 @@ function SpecificEgoGifts({ giftIds }: { giftIds: EGOGiftId[] }) {
   return <EGOGiftGrid ids={giftIds.map(String)} spec={spec} showName className={GIFT_ROW} />
 }
 
-/**
- * Fixed reward EGO gifts for hidden theme packs
- */
 function FixedRewardEgoGifts({ giftIds }: { giftIds: EGOGiftId[] }) {
   const spec = useEGOGiftListSpec()
 
@@ -225,18 +202,12 @@ function ExclusiveEventsSection({ eventIds }: { eventIds: AbEventId[] }) {
   )
 }
 
-/**
- * All acquirable EGO gifts grid (from egoGiftPool)
- */
 function AllEgoGifts({ giftIds }: { giftIds: EGOGiftId[] }) {
   const spec = useEGOGiftListSpec()
 
   return <EGOGiftGrid ids={giftIds.map(String)} spec={spec} />
 }
 
-/**
- * All encounterable events grid — title below image
- */
 function AllEvents({ eventPool }: { eventPool: AbEventId[] }) {
   const abEventSpec = useAbEventListSpec()
 
@@ -262,10 +233,6 @@ function AllEvents({ eventPool }: { eventPool: AbEventId[] }) {
   )
 }
 
-// =============================================================================
-// Main Page
-// =============================================================================
-
 function ThemePackDetailContent() {
   const { id } = useParams({ strict: false })
   const { t } = useTranslation('database')
@@ -279,14 +246,12 @@ function ThemePackDetailContent() {
 
   const leftColumn = (
     <div className="flex gap-4">
-      {/* Theme Pack card image */}
       {listEntry && (
         <CardSlot size={THEME_PACK_GEOMETRY.size} className="shrink-0">
           <ThemePackCard packId={id} packEntry={listEntry} />
         </CardSlot>
       )}
 
-      {/* Difficulty + Floors + Hidden Theme Rate */}
       <LabeledPanel className="flex-1">
         <div className="space-y-1">
           <div className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
@@ -312,14 +277,12 @@ function ThemePackDetailContent() {
     </div>
   )
 
-  // Merge eventPool + specialEventPool for full event list
   const allEventPool = [...spec.nodeOption.eventPool, ...(spec.nodeOption.specialEventPool ?? [])]
 
   const rightColumn = (
     <div className="space-y-6">
       <FeaturedBoss packId={id} bosses={spec.featuredBosses} />
 
-      {/* Fixed Reward EGO Gifts — hidden theme only */}
       {spec.fixedRewardEgoGifts && spec.fixedRewardEgoGifts.length > 0 && (
         <div className="space-y-3">
           <SectionTitle>{t('themePack.fixedRewards')}</SectionTitle>
@@ -329,7 +292,6 @@ function ThemePackDetailContent() {
         </div>
       )}
 
-      {/* Specific EGO Gifts — skip if empty */}
       {spec.specificEgoGiftPool.length > 0 && (
         <div className="space-y-3">
           <SectionTitle>{t('themePack.exclusiveGifts', 'Exclusive EGO Gifts')}</SectionTitle>
@@ -339,12 +301,10 @@ function ThemePackDetailContent() {
         </div>
       )}
 
-      {/* Exclusive Events — rendered only if non-empty (checked inside component) */}
       <Suspense fallback={<Skeleton className="h-24 w-full" />}>
         <ExclusiveEventsSection eventIds={spec.nodeOption.specialEventPool ?? []} />
       </Suspense>
 
-      {/* All Acquirable EGO Gifts */}
       <div className="space-y-3">
         <SectionTitle>{t('themePack.allGifts', 'All Acquirable EGO Gifts')}</SectionTitle>
         <Suspense fallback={<Skeleton className="h-24 w-full" />}>
@@ -352,7 +312,6 @@ function ThemePackDetailContent() {
         </Suspense>
       </div>
 
-      {/* All Encounterable Events */}
       {allEventPool.length > 0 && (
         <div className="space-y-3">
           <SectionTitle>{t('themePack.allEvents', 'All Encounterable Events')}</SectionTitle>

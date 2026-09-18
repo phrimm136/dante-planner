@@ -9,9 +9,6 @@ interface ThemePackCardLinkProps {
   className?: string
 }
 
-/**
- * Navigation wrapper for ThemePackCard that links to the theme pack detail page.
- */
 export function ThemePackCardLink({ packId, packEntry, className }: ThemePackCardLinkProps) {
   return (
     <Link to="/theme-pack/$id" params={{ id: packId }} className={cn('block', className)}>

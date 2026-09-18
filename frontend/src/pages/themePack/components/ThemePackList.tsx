@@ -20,11 +20,6 @@ interface ThemePackListProps {
   store: FilterStore<ThemePackFacetState>
 }
 
-/**
- * The theme pack browser's card grid.
- *
- * Filter logic: AND between filter types, OR within each type.
- */
 export function ThemePackList({ spec, store }: ThemePackListProps) {
   const { names } = useSearchTermSources(THEME_PACK_LIST, EMPTY_NAMES, false)
 

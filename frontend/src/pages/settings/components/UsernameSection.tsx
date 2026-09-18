@@ -19,26 +19,18 @@ import { ChevronDown } from 'lucide-react'
 import { GoogleIcon } from '@/components/ui/GoogleIcon'
 import { SECTION_STYLES } from '@/lib/constants'
 
-/**
- * Inner component that uses Suspense hooks.
- * Must be wrapped in Suspense boundary.
- */
 function UsernameSectionContent() {
   const { t, i18n } = useTranslation(['common', 'epithet'])
   const { data: user } = useAuthQuery()
   const { epithets } = useEpithetsQuery()
   const updateEpithet = useUpdateEpithetMutation()
 
-  // Local state for preview - initialized from user's current epithet
   const [selectedEpithet, setSelectedEpithet] = useState<string | null>(null)
 
-  // The effective epithet: local selection or user's current
   const effectiveEpithet = selectedEpithet ?? user?.usernameEpithet ?? ''
 
-  // Get translated display name for effective epithet
   const displayName = t(effectiveEpithet, { ns: 'epithet', defaultValue: effectiveEpithet })
 
-  // Save epithet to server
   const handleSave = () => {
     if (!selectedEpithet) return
 
@@ -47,16 +39,14 @@ function UsernameSectionContent() {
       {
         onSuccess: () => {
           showSuccess('common:settings.username.saveSuccess')
-          setSelectedEpithet(null) // Reset to sync with server state
+          setSelectedEpithet(null)
         },
       }
     )
   }
 
-  // Check if save should be enabled
   const isSaveEnabled = selectedEpithet !== null && selectedEpithet !== user?.usernameEpithet
 
-  // Unauthenticated state - show sign-in prompt
   if (!user) {
     return (
       <div className="space-y-4">
@@ -72,17 +62,14 @@ function UsernameSectionContent() {
     )
   }
 
-  // Authenticated state - show dropdown and preview
   return (
     <div className="space-y-4">
       <h2 className={SECTION_STYLES.TEXT.sectionTitle}>{t('settings.username.title', 'Username')}</h2>
 
-      {/* Current username preview */}
       <div className={SECTION_STYLES.TEXT.caption}>
         {t('settings.username.current')}: {formatUsername(user.usernameEpithet, user.usernameSuffix, i18n.language)}
       </div>
 
-      {/* Epithet dropdown */}
       <div className="flex items-center gap-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -115,7 +102,6 @@ function UsernameSectionContent() {
         </Button>
       </div>
 
-      {/* Live preview when changed */}
       {isSaveEnabled && selectedEpithet && (
         <div className="text-sm">
           {t('settings.username.preview')}: {formatUsername(selectedEpithet, user.usernameSuffix, i18n.language)}
@@ -125,10 +111,6 @@ function UsernameSectionContent() {
   )
 }
 
-/**
- * Username section with Suspense boundary.
- * Public component for use in SettingsPage.
- */
 export function UsernameSection() {
   return (
     <Suspense fallback={<UsernameSectionSkeleton />}>
@@ -137,9 +119,6 @@ export function UsernameSection() {
   )
 }
 
-/**
- * Loading skeleton for username section.
- */
 function UsernameSectionSkeleton() {
   return (
     <div className="space-y-4">

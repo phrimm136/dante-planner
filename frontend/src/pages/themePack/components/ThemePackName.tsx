@@ -21,14 +21,9 @@ import type { ThemePackSpec } from '../types/ThemePackTypes'
 interface ThemePackNameProps {
   packId: string
   packEntry: ThemePackSpec
-  /** The name box, as a percentage of the card root. */
   rect: PctRect
 }
 
-/**
- * The localized name printed on a theme pack card. Suspends while the name list and the
- * display face's advance table load — the card wraps it in a name-sized boundary.
- */
 export function ThemePackName({ packId, packEntry, rect }: ThemePackNameProps) {
   const { i18n } = useTranslation()
   const names = useThemePackListI18n()

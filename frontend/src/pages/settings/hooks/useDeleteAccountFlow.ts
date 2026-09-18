@@ -11,29 +11,18 @@ import { useDeleteAccountMutation } from './useAccountData'
 
 const UNKNOWN_DATE_PLACEHOLDER = 'unknown date'
 
-/** Grace period reported when the response carries none. */
 const DEFAULT_GRACE_PERIOD_DAYS = 30
 
-/** Time the success toast holds the page before the redirect takes it. */
 const REDIRECT_DELAY_MS = 2000
 
 interface DeleteAccountFlow {
-  /** Whether the confirmation dialog is up. */
   dialogOpen: boolean
   openDialog: () => void
   closeDialog: () => void
-  /** Deletes the account, then arms the redirect the toast is read during. */
   confirmDelete: () => void
   isPending: boolean
 }
 
-/**
- * The account-deletion flow: confirmation, the deletion itself, and the delayed
- * redirect that follows it.
- *
- * The redirect is cancelled when the section unmounts, so a user who navigates
- * away during the grace window is not pulled back to the landing page.
- */
 export function useDeleteAccountFlow(): DeleteAccountFlow {
   const { i18n } = useTranslation()
   const deleteAccount = useDeleteAccountMutation()
@@ -67,7 +56,6 @@ export function useDeleteAccountFlow(): DeleteAccountFlow {
 
         setDialogOpen(false)
 
-        // Emptying the auth cache is what logs the deleted account out.
         queryClient.setQueryData(authQueryKeys.me, null)
 
         redirectTimer.current = setTimeout(() => {

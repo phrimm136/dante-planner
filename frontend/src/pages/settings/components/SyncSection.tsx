@@ -9,22 +9,16 @@ import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { SECTION_STYLES } from '@/lib/constants'
 
-/**
- * Inner component that uses Suspense hooks.
- * Must be wrapped in Suspense boundary.
- */
 function SyncSectionContent() {
   const { t } = useTranslation()
   const { data: user } = useAuthQuery()
   const { data: settings, isLoading } = useUserSettingsQuery()
   const updateSettings = useUpdateUserSettingsMutation()
 
-  // Unauthenticated state - don't render
   if (!user) {
     return null
   }
 
-  // Loading state
   if (isLoading || !settings) {
     return <SyncSectionSkeleton />
   }
@@ -72,10 +66,6 @@ function SyncSectionContent() {
   )
 }
 
-/**
- * Sync section with Suspense boundary.
- * Public component for use in SettingsPage.
- */
 export function SyncSection() {
   return (
     <Suspense fallback={<SyncSectionSkeleton />}>
@@ -84,9 +74,6 @@ export function SyncSection() {
   )
 }
 
-/**
- * Loading skeleton for sync section.
- */
 function SyncSectionSkeleton() {
   return (
     <div className="space-y-4">

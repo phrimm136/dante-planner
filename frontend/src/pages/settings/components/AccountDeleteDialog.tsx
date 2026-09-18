@@ -13,37 +13,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { SECTION_STYLES } from '@/lib/constants'
 
-/**
- * Props for AccountDeleteDialog
- */
 export interface AccountDeleteDialogProps {
-  /** Whether the dialog is open */
   open: boolean
-  /** Callback when user confirms deletion */
   onConfirm: () => void
-  /** Callback when user cancels */
   onCancel: () => void
-  /** Whether deletion is in progress */
   isPending: boolean
 }
 
-/**
- * Dialog for confirming account deletion
- *
- * Requires user to type "DELETE" exactly to enable the delete button.
- * Cannot be dismissed with ESC key or clicking outside.
- * Shows warning about consequences and grace period information.
- *
- * @example
- * \`\`\`tsx
- * <AccountDeleteDialog
- *   open={dialogOpen}
- *   onConfirm={handleDelete}
- *   onCancel={() => setDialogOpen(false)}
- *   isPending={deleteAccount.isPending}
- * />
- * \`\`\`
- */
 export function AccountDeleteDialog({
   open,
   onConfirm,
@@ -53,7 +29,6 @@ export function AccountDeleteDialog({
   const { t } = useTranslation()
   const [confirmationInput, setConfirmationInput] = useState('')
 
-  // Prevent dismissal via ESC key or clicking outside
   const preventDismissal = (e: Event) => {
     e.preventDefault()
   }

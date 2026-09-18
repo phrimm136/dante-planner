@@ -10,17 +10,6 @@ import { Button } from '@/components/ui/button'
 import { LogoutEverywhereDialog } from './LogoutEverywhereDialog'
 import { SECTION_STYLES } from '@/lib/constants'
 
-/**
- * Settings section for logging out of every device.
- *
- * Renders a title, description, and button that opens a confirmation dialog.
- * On confirm it calls the logout-all endpoint, shows a toast, clears the auth
- * cache to trigger logged-out state, and redirects to the home page. Mirrors
- * the {@link AccountDeleteSection} pattern.
- *
- * Rendered only inside the authenticated-only block of SettingsPage, so no
- * sign-in prompt is needed here.
- */
 export function LogoutEverywhereSection() {
   const { t } = useTranslation()
   const logoutEverywhere = useLogoutEverywhere()

@@ -6,10 +6,6 @@ interface ThemePackFilterDropdownProps {
   onSelectionChange: (themePacks: Set<string>) => void
 }
 
-/**
- * Theme pack binding of the shared theme-pack dropdown. Suspends while the pack
- * list + names load, so render it inside a Suspense boundary.
- */
 export function ThemePackFilterDropdown({
   selected,
   onSelectionChange,

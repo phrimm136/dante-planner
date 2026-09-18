@@ -11,10 +11,6 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { SECTION_STYLES } from '@/lib/constants'
 
-/**
- * Inner component that uses Suspense hooks.
- * Must be wrapped in Suspense boundary.
- */
 function NotificationSectionContent() {
   const { t } = useTranslation()
   const { data: user } = useAuthQuery()
@@ -22,12 +18,10 @@ function NotificationSectionContent() {
   const updateSettings = useUpdateUserSettingsMutation()
   const { state: permissionState, request: requestPermission } = useNotificationPermission()
 
-  // Unauthenticated state - don't render
   if (!user) {
     return null
   }
 
-  // Loading state
   if (isLoading || !settings) {
     return <NotificationSectionSkeleton />
   }
@@ -40,12 +34,10 @@ function NotificationSectionContent() {
   const showPermissionNotice =
     anyNotificationEnabled && (permissionState === 'default' || permissionState === 'denied')
 
-  // Generic handler for notification toggles
   const handleToggle = (
     key: 'notifyComments' | 'notifyRecommendations' | 'notifyNewPublications',
     checked: boolean,
   ) => {
-    // Request browser notification permission when enabling any notification
     if (checked) {
       requestPermission()
     }
@@ -90,7 +82,6 @@ function NotificationSectionContent() {
       )}
 
       <div className="space-y-4">
-        {/* Comments notification */}
         <div className={SECTION_STYLES.LAYOUT.rowBetween}>
           <div className="space-y-1">
             <Label htmlFor="notify-comments" className="text-base">
@@ -111,7 +102,6 @@ function NotificationSectionContent() {
           />
         </div>
 
-        {/* Recommendations notification */}
         <div className={SECTION_STYLES.LAYOUT.rowBetween}>
           <div className="space-y-1">
             <Label htmlFor="notify-recommendations" className="text-base">
@@ -132,7 +122,6 @@ function NotificationSectionContent() {
           />
         </div>
 
-        {/* New publications notification */}
         <div className={SECTION_STYLES.LAYOUT.rowBetween}>
           <div className="space-y-1">
             <Label htmlFor="notify-new-publications" className="text-base">
@@ -157,10 +146,6 @@ function NotificationSectionContent() {
   )
 }
 
-/**
- * Notification section with Suspense boundary.
- * Public component for use in SettingsPage.
- */
 export function NotificationSection() {
   return (
     <Suspense fallback={<NotificationSectionSkeleton />}>
@@ -169,9 +154,6 @@ export function NotificationSection() {
   )
 }
 
-/**
- * Loading skeleton for notification section.
- */
 function NotificationSectionSkeleton() {
   return (
     <div className="space-y-4">

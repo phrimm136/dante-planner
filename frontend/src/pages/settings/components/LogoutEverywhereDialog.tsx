@@ -10,36 +10,13 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 
-/**
- * Props for LogoutEverywhereDialog
- */
 export interface LogoutEverywhereDialogProps {
-  /** Whether the dialog is open */
   open: boolean
-  /** Callback when user confirms logging out everywhere */
   onConfirm: () => void
-  /** Callback when user cancels */
   onCancel: () => void
-  /** Whether the logout request is in progress */
   isPending: boolean
 }
 
-/**
- * Dialog for confirming "log out everywhere".
- *
- * Explains that the user will be signed out of every device, including the
- * current one. Cannot be dismissed with ESC or clicking outside while pending.
- *
- * @example
- * ```tsx
- * <LogoutEverywhereDialog
- *   open={dialogOpen}
- *   onConfirm={handleLogoutEverywhere}
- *   onCancel={() => setDialogOpen(false)}
- *   isPending={logoutEverywhere.isPending}
- * />
- * ```
- */
 export function LogoutEverywhereDialog({
   open,
   onConfirm,
