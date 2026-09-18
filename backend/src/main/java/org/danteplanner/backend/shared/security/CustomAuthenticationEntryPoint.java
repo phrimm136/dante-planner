@@ -1,15 +1,18 @@
 package org.danteplanner.backend.shared.security;
 
 import lombok.RequiredArgsConstructor;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.danteplanner.backend.shared.exception.ProblemWriter;
+import org.danteplanner.backend.shared.exception.Problems;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * Custom authentication entry point that returns 401 with error details.
@@ -39,7 +42,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     private static final String DEFAULT_ERROR_CODE = "UNAUTHORIZED";
     private static final String DEFAULT_ERROR_MESSAGE = "Authentication required";
 
-    private final ObjectMapper objectMapper;
+    private final ProblemWriter problemWriter;
 
     @Override
     public void commence(
@@ -50,9 +53,8 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         Object attribute = request.getAttribute(AUTH_ERROR_ATTRIBUTE);
         String code = attribute instanceof String named ? named : DEFAULT_ERROR_CODE;
 
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType("application/json");
-        response.getWriter().write(objectMapper.writeValueAsString(
-                Map.of("code", code, "message", DEFAULT_ERROR_MESSAGE)));
+        problemWriter.write(request, response,
+                Problems.fill(ProblemDetail.forStatus(HttpStatus.UNAUTHORIZED), code, DEFAULT_ERROR_MESSAGE),
+                new HttpHeaders());
     }
 }

@@ -24,6 +24,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.shared.exception.ProblemWriter;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -50,14 +52,14 @@ class RespondDenialReaches429Test {
     @BeforeEach
     void setUp() {
         rateLimitService = mock(RateLimitService.class);
-        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().build();
 
         RateLimitInterceptor interceptor = new RateLimitInterceptor(
                 rateLimitService,
                 mock(SecurityProperties.class),
                 new DeviceIdResolver(new CookieUtils(false, "", "Lax")),
                 new FrontendProperties("https://planner.example"),
-                objectMapper);
+                new ProblemWriter(objectMapper));
 
         mockMvc = MockMvcBuilders.standaloneSetup(new DeclaredHandlerFixture())
                 .addInterceptors(interceptor)

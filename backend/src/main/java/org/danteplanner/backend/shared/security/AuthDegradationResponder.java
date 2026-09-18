@@ -1,14 +1,18 @@
 package org.danteplanner.backend.shared.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.shared.exception.DegradationErrorConstants;
+import org.danteplanner.backend.shared.exception.ProblemWriter;
+import org.danteplanner.backend.shared.exception.Problems;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * Reports a datastore outage met while authenticating, before the request reaches any
@@ -21,39 +25,41 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuthDegradationResponder {
 
-    private final ObjectMapper objectMapper;
+    private final ProblemWriter problemWriter;
 
     /**
      * Report the database as unreachable.
      *
+     * @param request  the request the outage was met on
      * @param response the response to write the 503 to
      * @throws IOException if the response is already committed or the client is gone
      */
-    public void writeDbUnavailable(HttpServletResponse response) throws IOException {
-        write(response, DegradationErrorConstants.DB_UNAVAILABLE);
+    public void writeDbUnavailable(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        write(request, response, DegradationErrorConstants.DB_UNAVAILABLE);
     }
 
     /**
      * Report the auth store (Redis) as unreachable, a distinct retryable condition from a database
      * outage.
      *
+     * @param request  the request the outage was met on
      * @param response the response to write the 503 to
      * @throws IOException if the response is already committed or the client is gone
      */
-    public void writeAuthUnavailable(HttpServletResponse response) throws IOException {
-        write(response, DegradationErrorConstants.AUTH_UNAVAILABLE);
+    public void writeAuthUnavailable(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        write(request, response, DegradationErrorConstants.AUTH_UNAVAILABLE);
     }
 
-    /**
-     * Writes the JSON body through the ObjectMapper so a code or message can never escape unescaped.
-     */
-    private void write(HttpServletResponse response, DegradationErrorConstants.Entry entry)
-            throws IOException {
+    private void write(HttpServletRequest request, HttpServletResponse response,
+            DegradationErrorConstants.Entry entry) throws IOException {
         SecurityContextHolder.clearContext();
-        response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
-        response.setContentType("application/json");
-        response.getWriter().write(
-                objectMapper.writeValueAsString(Map.of("error", entry.code(), "message", entry.message()))
-        );
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.RETRY_AFTER, DegradationErrorConstants.RETRY_AFTER_SECONDS);
+        problemWriter.write(request, response,
+                Problems.fill(ProblemDetail.forStatus(HttpStatus.SERVICE_UNAVAILABLE),
+                        entry.code(), entry.message()),
+                headers);
     }
 }

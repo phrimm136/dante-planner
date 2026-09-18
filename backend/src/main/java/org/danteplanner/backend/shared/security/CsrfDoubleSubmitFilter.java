@@ -1,7 +1,5 @@
 package org.danteplanner.backend.shared.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -11,15 +9,19 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.danteplanner.backend.shared.exception.ProblemWriter;
+import org.danteplanner.backend.shared.exception.Problems;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -63,7 +65,7 @@ public class CsrfDoubleSubmitFilter extends OncePerRequestFilter {
     private static final Set<String> SAFE_METHODS = Set.of("GET", "HEAD", "OPTIONS");
 
     private final CookieUtils cookieUtils;
-    private final ObjectMapper objectMapper;
+    private final ProblemWriter problemWriter;
     private final CsrfTokenService csrfTokenService;
 
     /**
@@ -98,7 +100,7 @@ public class CsrfDoubleSubmitFilter extends OncePerRequestFilter {
             String headerToken = request.getHeader(CSRF_HEADER);
             boolean echoed = cookieToken.map(cookie -> tokensMatch(cookie, headerToken)).orElse(false);
             if (!serverIssued || !echoed) {
-                reject(response);
+                reject(request, response);
                 return;
             }
         }
@@ -119,11 +121,11 @@ public class CsrfDoubleSubmitFilter extends OncePerRequestFilter {
                 headerToken.getBytes(StandardCharsets.UTF_8));
     }
 
-    private void reject(HttpServletResponse response) throws IOException {
+    private void reject(HttpServletRequest request, HttpServletResponse response) throws IOException {
         log.warn("CSRF validation failed: missing or mismatched X-CSRF-Token");
-        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-        response.setContentType("application/json");
-        response.getWriter().write(objectMapper.writeValueAsString(
-                Map.of("error", CSRF_ERROR_CODE, "message", "Missing or invalid CSRF token")));
+        problemWriter.write(request, response,
+                Problems.fill(ProblemDetail.forStatus(HttpStatus.FORBIDDEN), CSRF_ERROR_CODE,
+                        "Missing or invalid CSRF token"),
+                new HttpHeaders());
     }
 }

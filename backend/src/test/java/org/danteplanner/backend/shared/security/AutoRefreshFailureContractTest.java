@@ -1,6 +1,7 @@
 package org.danteplanner.backend.shared.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.shared.exception.ProblemWriter;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import jakarta.servlet.http.Cookie;
 
 import org.danteplanner.backend.auth.entity.AuthProviderType;
@@ -58,7 +59,6 @@ class AutoRefreshFailureContractTest {
     @Mock private TokenValidator tokenValidator;
     @Mock private TokenBlacklistService tokenBlacklistService;
     @Mock private UserService userService;
-    @Mock private ObjectMapper objectMapper;
     @Mock private TokenGenerator tokenGenerator;
     @Mock private RefreshRotationService refreshRotationService;
     @Mock private JwtProperties jwtProperties;
@@ -124,7 +124,7 @@ class AutoRefreshFailureContractTest {
         return new JwtAuthenticationFilter(
                 tokenValidator, tokenBlacklistService,
                 new AccessTokenAuthenticator(tokenValidator, tokenBlacklistService), cookieUtils, userService,
-                new AuthDegradationResponder(objectMapper), tokenGenerator, refreshRotationService,
+                new AuthDegradationResponder(new ProblemWriter(Jackson2ObjectMapperBuilder.json().build())), tokenGenerator, refreshRotationService,
                 new LineageRotationFlag(lineageEnabled), jwtProperties);
     }
 

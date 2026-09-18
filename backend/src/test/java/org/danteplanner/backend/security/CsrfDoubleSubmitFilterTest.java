@@ -1,7 +1,10 @@
 package org.danteplanner.backend.security;
 import org.danteplanner.backend.shared.security.CsrfDoubleSubmitFilter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.shared.exception.ProblemWriter;
+import com.jayway.jsonpath.JsonPath;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.Cookie;
@@ -42,7 +45,10 @@ class CsrfDoubleSubmitFilterTest {
         token = csrfTokenService.mint();
 
         CookieUtils cookieUtils = new CookieUtils(true, "", "Lax");
-        filter = new CsrfDoubleSubmitFilter(cookieUtils, new ObjectMapper(), csrfTokenService);
+        filter = new CsrfDoubleSubmitFilter(
+                cookieUtils,
+                new ProblemWriter(Jackson2ObjectMapperBuilder.json().build()),
+                csrfTokenService);
     }
 
     private MockHttpServletRequest request(String method, String uri) {
@@ -75,6 +81,13 @@ class CsrfDoubleSubmitFilterTest {
 
             assertThat(res.getStatus()).isEqualTo(HttpServletResponse.SC_FORBIDDEN);
             assertThat(chain.getRequest()).isNull();
+            assertThat(res.getContentType()).isEqualTo(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
+            String body = res.getContentAsString();
+            assertThat((String) JsonPath.read(body, "$.code")).isEqualTo("CSRF_TOKEN_INVALID");
+            assertThat((String) JsonPath.read(body, "$.detail"))
+                    .isEqualTo("Missing or invalid CSRF token");
+            assertThat((String) JsonPath.read(body, "$.message"))
+                    .isEqualTo("Missing or invalid CSRF token");
         }
 
         @Test

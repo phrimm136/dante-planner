@@ -24,7 +24,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Isolated;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.shared.exception.ProblemWriter;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -36,6 +38,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -66,7 +70,7 @@ class BackstopDeniesWhenTheGateWasSkippedTest {
                 mock(SecurityProperties.class),
                 new DeviceIdResolver(new CookieUtils(false, "", "Lax")),
                 new FrontendProperties("https://planner.example"),
-                new ObjectMapper());
+                new ProblemWriter(Jackson2ObjectMapperBuilder.json().build()));
 
         mockMvc = MockMvcBuilders.standaloneSetup(bareFixture, new DeclaredHandlerFixture())
                 .addInterceptors(interceptor)
@@ -88,7 +92,11 @@ class BackstopDeniesWhenTheGateWasSkippedTest {
     @DisplayName("An undeclared handler is denied with 500, logged by name, and its body never runs")
     void undeclaredHandler_WhenRequested_IsDeniedAndNeverReached() throws Exception {
         mockMvc.perform(get("/api/fixture/bare"))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.code").value("RATE_LIMIT_UNDECLARED"))
+                .andExpect(jsonPath("$.detail").value("Request rejected"))
+                .andExpect(jsonPath("$.message").value("Request rejected"));
 
         assertThat(bareFixture.bodyRan()).isFalse();
         verifyNoInteractions(rateLimitService);

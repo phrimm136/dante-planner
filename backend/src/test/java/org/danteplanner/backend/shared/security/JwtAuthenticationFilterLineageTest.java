@@ -2,6 +2,8 @@ package org.danteplanner.backend.shared.security;
 
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.shared.exception.ProblemWriter;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import jakarta.servlet.http.Cookie;
 
 import java.util.List;
@@ -70,7 +72,7 @@ class JwtAuthenticationFilterLineageTest {
     @Mock
     private RefreshRotationService refreshRotationService;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().build();
     private final CookieUtils cookieUtils = new CookieUtils(true, "", "Lax");
     private final JwtProperties jwtProperties = new JwtProperties();
 
@@ -98,7 +100,7 @@ class JwtAuthenticationFilterLineageTest {
         return new JwtAuthenticationFilter(
                 tokenValidator, tokenBlacklistService,
                 new AccessTokenAuthenticator(tokenValidator, tokenBlacklistService), cookieUtils, userService,
-                new AuthDegradationResponder(objectMapper), tokenGenerator, refreshRotationService, new LineageRotationFlag(lineageEnabled),
+                new AuthDegradationResponder(new ProblemWriter(objectMapper)), tokenGenerator, refreshRotationService, new LineageRotationFlag(lineageEnabled),
                 jwtProperties);
     }
 

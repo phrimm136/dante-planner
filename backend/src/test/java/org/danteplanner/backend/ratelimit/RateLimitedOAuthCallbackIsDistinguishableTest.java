@@ -25,7 +25,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Isolated;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.shared.exception.ProblemWriter;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -72,7 +73,7 @@ class RateLimitedOAuthCallbackIsDistinguishableTest {
                 mock(SecurityProperties.class),
                 new DeviceIdResolver(new CookieUtils(false, "", "Lax")),
                 frontendProperties,
-                new ObjectMapper());
+                new ProblemWriter(Jackson2ObjectMapperBuilder.json().build()));
 
         mockMvc = MockMvcBuilders.standaloneSetup(authController)
                 .addInterceptors(interceptor)

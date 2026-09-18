@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -20,9 +20,9 @@ import org.danteplanner.backend.shared.config.DeviceIdResolver;
 import org.danteplanner.backend.shared.config.FrontendProperties;
 import org.danteplanner.backend.shared.config.LoginRedirect;
 import org.danteplanner.backend.shared.config.SecurityProperties;
+import org.danteplanner.backend.shared.exception.ProblemWriter;
+import org.danteplanner.backend.shared.exception.Problems;
 import org.danteplanner.backend.shared.util.ClientIpResolver;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Charges a request against the rate-limit policy its handler declares, before the handler runs.
@@ -45,7 +45,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     private final SecurityProperties securityProperties;
     private final DeviceIdResolver deviceIdResolver;
     private final FrontendProperties frontendProperties;
-    private final ObjectMapper objectMapper;
+    private final ProblemWriter problemWriter;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
@@ -68,7 +68,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         if (isExempt(handlerMethod)) {
             return true;
         }
-        return deny(handlerMethod, response);
+        return deny(handlerMethod, request, response);
     }
 
     /**
@@ -141,18 +141,16 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         return userId;
     }
 
-    private boolean deny(HandlerMethod handlerMethod, HttpServletResponse response) throws IOException {
+    private boolean deny(HandlerMethod handlerMethod, HttpServletRequest request,
+            HttpServletResponse response) throws IOException {
         String handlerName = handlerMethod.getBeanType().getName()
                 + "." + handlerMethod.getMethod().getName();
         log.error("Denying request: handler {} declares no rate-limit policy", handlerName);
 
-        response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.getWriter().write(objectMapper.writeValueAsString(
-                new UndeclaredRateLimit(UNDECLARED_CODE, "Request rejected")));
+        problemWriter.write(request, response,
+                Problems.fill(ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR),
+                        UNDECLARED_CODE, "Request rejected"),
+                new HttpHeaders());
         return false;
-    }
-
-    private record UndeclaredRateLimit(String code, String message) {
     }
 }

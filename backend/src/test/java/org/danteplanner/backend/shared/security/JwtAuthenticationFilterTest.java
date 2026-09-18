@@ -14,6 +14,11 @@ import org.danteplanner.backend.auth.token.TokenValidator;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.shared.exception.ProblemWriter;
+import com.jayway.jsonpath.JsonPath;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
@@ -94,9 +99,9 @@ class JwtAuthenticationFilterTest {
 
     @BeforeEach
     void setUp() {
-        objectMapper = new ObjectMapper();
+        objectMapper = Jackson2ObjectMapperBuilder.json().build();
         filter = new JwtAuthenticationFilter(tokenValidator, tokenBlacklistService,
-                new AccessTokenAuthenticator(tokenValidator, tokenBlacklistService), cookieUtils, userService, new AuthDegradationResponder(objectMapper), tokenGenerator, refreshRotationService, new LineageRotationFlag(false), new JwtProperties());
+                new AccessTokenAuthenticator(tokenValidator, tokenBlacklistService), cookieUtils, userService, new AuthDegradationResponder(new ProblemWriter(objectMapper)), tokenGenerator, refreshRotationService, new LineageRotationFlag(false), new JwtProperties());
         SecurityContextHolder.clearContext();
         request = new MockHttpServletRequest("GET", "/test");
         response = new MockHttpServletResponse();
@@ -347,8 +352,10 @@ class JwtAuthenticationFilterTest {
             String body = response.getContentAsString();
             assertEquals(HttpServletResponse.SC_SERVICE_UNAVAILABLE, response.getStatus());
             verify(filterChain, never()).doFilter(any(), any());
-            assertTrue(body.contains("AUTH_TEMPORARILY_UNAVAILABLE"),
-                    "Redis auth-write failure must write AUTH_TEMPORARILY_UNAVAILABLE, got: " + body);
+            assertEquals(MediaType.APPLICATION_PROBLEM_JSON_VALUE, response.getContentType());
+            assertEquals("AUTH_TEMPORARILY_UNAVAILABLE", (String) JsonPath.read(body, "$.code"));
+            assertEquals((String) JsonPath.read(body, "$.detail"), (String) JsonPath.read(body, "$.message"));
+            assertEquals("10", response.getHeader(HttpHeaders.RETRY_AFTER));
         }
 
         @Test
@@ -369,8 +376,9 @@ class JwtAuthenticationFilterTest {
             filter.doFilterInternal(request, response, filterChain);
 
             String body = response.getContentAsString();
-            assertTrue(body.contains("WRITE_TEMPORARILY_UNAVAILABLE"),
-                    "DB-down refresh must write WRITE_TEMPORARILY_UNAVAILABLE body code, got: " + body);
+            assertEquals(MediaType.APPLICATION_PROBLEM_JSON_VALUE, response.getContentType());
+            assertEquals("WRITE_TEMPORARILY_UNAVAILABLE", (String) JsonPath.read(body, "$.code"));
+            assertEquals((String) JsonPath.read(body, "$.detail"), (String) JsonPath.read(body, "$.message"));
         }
     }
 

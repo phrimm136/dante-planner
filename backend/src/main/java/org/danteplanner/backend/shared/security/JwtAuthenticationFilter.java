@@ -177,10 +177,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             return attemptAutoRefresh(request, response) ? RefreshOutcome.AUTHENTICATED : RefreshOutcome.GUEST;
         } catch (RedisConnectionFailureException | QueryTimeoutException e) {
-            degradationResponder.writeAuthUnavailable(response);
+            degradationResponder.writeAuthUnavailable(request, response);
             return RefreshOutcome.OUTAGE_REPORTED;
         } catch (DataAccessException | TransactionException e) {
-            degradationResponder.writeDbUnavailable(response);
+            degradationResponder.writeDbUnavailable(request, response);
             return RefreshOutcome.OUTAGE_REPORTED;
         }
     }
