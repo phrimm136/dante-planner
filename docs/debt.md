@@ -536,18 +536,11 @@ asset pipeline.
 
 ## 2026-09-18 problem-details migration (adr/113, adr/114)
 
-- **`Problem.message` in `frontend/src/lib/api.ts`** is the deploy-window fallback for
-  backends still emitting `{code, message}`; it is `@deprecated` and `typescript/no-deprecated`
-  flags every read except the one inside `readErrorBody`. Delete the field, the fallback
-  line, and the disable comment once both the rendering advice (adr/114) and the
-  filter-level `ProblemWriter` are deployed in both regions; before the second lands, the
-  security filters still emit the old shape.
-- **`ProblemWriter` for the filter chain** (authentication entry point, CSRF filter, auth
-  degradation responder, rate-limit interceptor's undeclared-policy branch) is the second
-  unit of the migration: the four sites serialize their own maps with two different keys
-  (`code` and `error`), so the CSRF 403 has never matched a typed frontend error. Each site
-  needs a test through the security chain, and two sit in the user-internals freeze. Worth
-  doing as soon as `DomainException` carries a `ProblemDetail`, which is what it reuses.
+- **`Problems.MESSAGE_MIRROR`** (`backend/.../shared/exception/Problems.java`) copies `detail`
+  into a `message` property on every error body so a frontend release still reading `message`
+  keeps working through the deploy window. Delete the constant and its line in `fill` once the
+  frontend release that reads `detail` only is live in both regions; nothing else changes and
+  no test asserts the mirror.
 
 ## 2026-09-18 nginx retired, references remain (adr/011)
 
