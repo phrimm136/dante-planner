@@ -486,7 +486,7 @@ class PlannerPublishingServiceTest {
                     PlannerValidationException.class,
                     () -> publishingService.publish(testUser.getId(), planner.getId()));
 
-            assertEquals("MISSING_TITLE", thrown.getErrorCode());
+            assertEquals("MISSING_TITLE", thrown.getOriginalCode());
             assertFalse(planner.isPublished());
             assertNull(planner.getFirstPublishedAt());
         }

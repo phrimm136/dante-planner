@@ -1,9 +1,9 @@
 package org.danteplanner.backend.exception;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.auth.exception.SessionRevokedException;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
-import org.danteplanner.backend.shared.exception.GlobalExceptionHandler;
+import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
+import org.danteplanner.backend.shared.exception.StreamLifecycleExceptionAdvice;
 import org.danteplanner.backend.shared.ratelimit.RateLimitExceededException;
 import org.danteplanner.backend.shared.sse.SseCapacityExceededException;
 import org.danteplanner.backend.shared.sse.SseConstants;
@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.UUID;
@@ -79,6 +80,11 @@ class ApiExceptionHandlerEventStreamTest {
             throw new SessionRevokedException("family-7");
         }
 
+        @GetMapping(value = "/probe/expired", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+        public SseEmitter expired() {
+            throw new AsyncRequestTimeoutException();
+        }
+
         @GetMapping(value = "/probe/unexpected", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
         public SseEmitter unexpected() {
             throw new IllegalStateException("something nobody mapped");
@@ -92,7 +98,7 @@ class ApiExceptionHandlerEventStreamTest {
     void setUp() {
         cookieUtils = mock(CookieUtils.class);
         mockMvc = standaloneSetup(new EventStreamThrowingController())
-                .setControllerAdvice(new GlobalExceptionHandler(cookieUtils, new ObjectMapper()))
+                .setControllerAdvice(new ApiExceptionHandler(cookieUtils), new StreamLifecycleExceptionAdvice())
                 .build();
     }
 
@@ -157,5 +163,13 @@ class ApiExceptionHandlerEventStreamTest {
         mockMvc.perform(get("/probe/unexpected").accept(MediaType.TEXT_EVENT_STREAM))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.code").value("INTERNAL_ERROR"));
+    }
+
+    @Test
+    @DisplayName("a timed-out stream is swallowed, leaving the response untouched")
+    void timedOutStream_WhenAcceptIsEventStream_WritesNothing() throws Exception {
+        mockMvc.perform(get("/probe/expired").accept(MediaType.TEXT_EVENT_STREAM))
+                .andExpect(status().isOk())
+                .andExpect(content().string(""));
     }
 }

@@ -1,5 +1,5 @@
 package org.danteplanner.backend.exception;
-import org.danteplanner.backend.shared.exception.GlobalExceptionHandler;
+import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +18,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 
 /**
  * Verifies that a rate-limit Redis stall is mapped to the typed 503 by
- * {@link GlobalExceptionHandler} regardless of which timeout fires first, through real
+ * {@link ApiExceptionHandler} regardless of which timeout fires first, through real
  * {@code @ExceptionHandler} dispatch.
  *
  * <p>The rate-limit path arms two equal timers per command: Lettuce's command timeout throws
@@ -29,7 +29,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  * a direct call to the handler method would prove the body but not that the annotation routes
  * both types here.</p>
  */
-class GlobalExceptionHandlerRateLimitRedisTest {
+class ApiExceptionHandlerRateLimitRedisTest {
 
     private MockMvc mockMvc;
 
@@ -49,7 +49,7 @@ class GlobalExceptionHandlerRateLimitRedisTest {
     @BeforeEach
     void setUp() {
         mockMvc = standaloneSetup(new ThrowingController())
-                .setControllerAdvice(new GlobalExceptionHandler(mock(CookieUtils.class), new com.fasterxml.jackson.databind.ObjectMapper()))
+                .setControllerAdvice(new ApiExceptionHandler(mock(CookieUtils.class)))
                 .build();
     }
 

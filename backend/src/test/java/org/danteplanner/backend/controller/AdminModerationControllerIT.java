@@ -197,7 +197,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
                             .contentType(APPLICATION_JSON)
                             .content(hideRequest))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.message").value(containsString("Reason must be at most 500 characters")));
+                    .andExpect(jsonPath("$.detail").value(containsString("Reason must be at most 500 characters")));
         }
 
         @Test

@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Ties {@link KnownConstraint}'s table names to the migrated schema.
  *
  * <p>Those names are strings matched against what MySQL reports for error 1062, and
- * {@code GlobalExceptionHandlerConstraintMappingTest} pins the response each produces without ever
+ * {@code ApiExceptionHandlerConstraintMappingTest} pins the response each produces without ever
  * connecting to a database. So a migration renaming a table leaves both green while, in production,
  * the violation stops classifying and a duplicate action surfaces as an unexpected conflict.</p>
  *

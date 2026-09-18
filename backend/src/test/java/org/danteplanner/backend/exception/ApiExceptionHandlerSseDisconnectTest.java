@@ -1,11 +1,12 @@
 package org.danteplanner.backend.exception;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.sentry.Sentry;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.catalina.connector.ClientAbortException;
-import org.danteplanner.backend.shared.exception.GlobalExceptionHandler;
+import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 import org.danteplanner.backend.shared.util.CookieUtils;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
@@ -24,7 +25,7 @@ import static org.mockito.Mockito.never;
  * <p>The container signals the abort by type, while the JVM signals a socket teardown only through
  * the OS strerror text on a plain IOException, so both arms have to hold.</p>
  */
-class GlobalExceptionHandlerSseDisconnectTest {
+class ApiExceptionHandlerSseDisconnectTest {
 
     @Test
     void clientAbort_WhenWithoutMessage_RaisesNoAlert() {
@@ -54,7 +55,11 @@ class GlobalExceptionHandlerSseDisconnectTest {
     }
 
     private static void handle(IOException ex) {
-        new GlobalExceptionHandler(mock(CookieUtils.class), new ObjectMapper())
-                .handleIOException(ex, mock(HttpServletResponse.class));
+        new ApiExceptionHandler(mock(CookieUtils.class))
+                .handleIOException(ex, mock(HttpServletResponse.class), webRequest());
+    }
+
+    private static ServletWebRequest webRequest() {
+        return new ServletWebRequest(new MockHttpServletRequest());
     }
 }

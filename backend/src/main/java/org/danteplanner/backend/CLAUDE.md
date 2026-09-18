@@ -21,7 +21,7 @@ Package-by-feature: feature roots (`admin`, `auth`, `comment`, `moderation`, `no
 - Return `ResponseEntity<T>`; POST create → 201, DELETE → 204.
 - `@Valid` on every `@RequestBody`, and on nested DTO/list fields — Jakarta does not cascade without it.
 - DTOs only at the API boundary, never entities; separate request and response DTOs; mapping via a static `from(entity)` on the DTO, not in Controller/Service.
-- Never `.get()` on Optional — `.orElseThrow()` with a domain exception in the Service; `GlobalExceptionHandler` maps it.
+- Never `.get()` on Optional — `.orElseThrow()` with a domain exception in the Service; `ApiExceptionHandler` maps it.
 - SSE and REST endpoints live in separate controllers.
 
 ## Repositories & entities
@@ -44,8 +44,9 @@ Package-by-feature: feature roots (`admin`, `auth`, `comment`, `moderation`, `no
 
 ## Exceptions
 
-- One class per business error, extending `RuntimeException`, with `@Getter` fields the handler reads: PlannerNotFound→404, PlannerForbidden→403, PlannerConflict→409, PlannerLimitExceeded→409, RateLimitExceeded→429, InvalidToken→401, UserBanned/UserTimedOut→403.
-- `PlannerConflictException`'s field is `actualVersion`, surfaced in JSON as `serverVersion`.
+- One class per business error, extending `DomainException`, which builds its own RFC 9457 body: PlannerNotFound→404, PlannerForbidden→403, PlannerConflict→409, PlannerLimitExceeded→409, RateLimitExceeded→429, InvalidToken→401, UserBanned/UserTimedOut→403. `ApiExceptionHandler` renders; it adds a handler only for a response a body cannot express.
+- `PlannerConflictException`'s field is `actualVersion`, surfaced in JSON as the `serverVersion` problem property.
+- Errors answer `application/problem+json`: the code rides as the `code` property, the text as `detail`.
 - Typed degradation: DB/Redis/Lettuce failures map to 503 with `DB_UNAVAILABLE` / `AUTH_UNAVAILABLE` / `RATE_LIMIT_UNAVAILABLE` — deliberately not sent to Sentry.
 - Expected user errors: `log.warn`, no stack, no Sentry. Unexpected errors: `log.error` + Sentry. SSE disconnect/async timeout: `log.debug`.
 - Never expose internals: structural validation errors map to a generic `VALIDATION_ERROR`; expose only user-fixable codes.

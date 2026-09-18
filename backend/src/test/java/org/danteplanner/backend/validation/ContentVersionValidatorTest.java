@@ -42,7 +42,7 @@ class ContentVersionValidatorTest {
                     PlannerValidationException.class,
                     () -> validator.validateVersionForCreate(PlannerType.MIRROR_DUNGEON, 5)
             );
-            assertEquals("INVALID_CONTENT_VERSION", ex.getErrorCode());
+            assertEquals("INVALID_CONTENT_VERSION", ex.getOriginalCode());
         }
 
         @Test
@@ -52,7 +52,7 @@ class ContentVersionValidatorTest {
                     PlannerValidationException.class,
                     () -> validator.validateVersionForCreate(PlannerType.MIRROR_DUNGEON, 99)
             );
-            assertEquals("INVALID_CONTENT_VERSION", ex.getErrorCode());
+            assertEquals("INVALID_CONTENT_VERSION", ex.getOriginalCode());
         }
 
         @Test
@@ -74,7 +74,7 @@ class ContentVersionValidatorTest {
                     PlannerValidationException.class,
                     () -> validator.validateVersionForCreate(PlannerType.REFRACTED_RAILWAY, 3)
             );
-            assertEquals("INVALID_CONTENT_VERSION", ex.getErrorCode());
+            assertEquals("INVALID_CONTENT_VERSION", ex.getOriginalCode());
         }
 
         @Test
@@ -84,7 +84,7 @@ class ContentVersionValidatorTest {
                     PlannerValidationException.class,
                     () -> validator.validateVersionForCreate(PlannerType.MIRROR_DUNGEON, null)
             );
-            assertEquals("CONTENT_VERSION_REQUIRED", ex.getErrorCode());
+            assertEquals("CONTENT_VERSION_REQUIRED", ex.getOriginalCode());
         }
     }
 

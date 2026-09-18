@@ -476,7 +476,7 @@ class PlannerContentValidatorTest {
                     () -> validator.validate(createValidContent(), "20F")
             );
 
-            assertEquals("INVALID_CATEGORY", exception.getErrorCode());
+            assertEquals("INVALID_CATEGORY", exception.getOriginalCode());
         }
 
         @Test
@@ -564,7 +564,7 @@ class PlannerContentValidatorTest {
             );
 
             // Granular error code for unknown fields
-            assertEquals("UNKNOWN_FIELD", exception.getErrorCode());
+            assertEquals("UNKNOWN_FIELD", exception.getOriginalCode());
         }
 
         @Test
@@ -606,7 +606,7 @@ class PlannerContentValidatorTest {
             );
 
             // Granular error code for size limit exceeded
-            assertEquals("SIZE_EXCEEDED", exception.getErrorCode());
+            assertEquals("SIZE_EXCEEDED", exception.getOriginalCode());
         }
 
         @Test
@@ -658,7 +658,7 @@ class PlannerContentValidatorTest {
                     () -> validator.validate(content, "5F")
             );
 
-            assertEquals("SIZE_EXCEEDED", exception.getErrorCode());
+            assertEquals("SIZE_EXCEEDED", exception.getOriginalCode());
         }
 
         @Test
@@ -696,7 +696,7 @@ class PlannerContentValidatorTest {
                     () -> validator.validate(null, "5F")
             );
 
-            assertEquals("EMPTY_CONTENT", exception.getErrorCode());
+            assertEquals("EMPTY_CONTENT", exception.getOriginalCode());
         }
 
         @Test
@@ -1336,7 +1336,7 @@ class PlannerContentValidatorTest {
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
                     () -> validator.validate(content, "5F"));
 
-            assertEquals("VALIDATION_ERROR", ex.getErrorCode());
+            assertEquals("VALIDATION_ERROR", ex.getOriginalCode());
             assertTrue(ex.getSubErrors().size() >= 2, "Expected at least 2 sub-errors");
             assertTrue(ex.getSubErrors().stream().anyMatch(e -> "VALUE_OUT_OF_RANGE".equals(e.code())),
                     "Expected VALUE_OUT_OF_RANGE in sub-errors");
@@ -1352,7 +1352,7 @@ class PlannerContentValidatorTest {
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
                     () -> validator.validate(createValidContent(), "5F"));
 
-            assertEquals("VALIDATION_ERROR", ex.getErrorCode());
+            assertEquals("VALIDATION_ERROR", ex.getOriginalCode());
             assertEquals(1, ex.getSubErrors().size());
             assertEquals("GIFT_NOT_AFFORDABLE", ex.getSubErrors().get(0).code());
         }
@@ -1435,8 +1435,8 @@ class PlannerContentValidatorTest {
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
                     () -> validator.validate(content, "5F"));
-            assertTrue(ex.getMessage().contains("threadspin"),
-                    "Exception message should mention threadspin: " + ex.getMessage());
+            assertTrue(ex.getLogDetail().contains("threadspin"),
+                    "Exception message should mention threadspin: " + ex.getLogDetail());
         }
 
         @Test

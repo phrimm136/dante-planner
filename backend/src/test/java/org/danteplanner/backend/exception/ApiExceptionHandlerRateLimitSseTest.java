@@ -1,7 +1,6 @@
 package org.danteplanner.backend.exception;
-import org.danteplanner.backend.shared.exception.GlobalExceptionHandler;
+import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.shared.ratelimit.RateLimitExceededException;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,7 +28,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  * {@code standaloneSetup} exercises real {@code @ExceptionHandler} dispatch, so the negotiation
  * step is reproduced — a direct handler call would not surface the bug.</p>
  */
-class GlobalExceptionHandlerRateLimitSseTest {
+class ApiExceptionHandlerRateLimitSseTest {
 
     private MockMvc mockMvc;
 
@@ -44,7 +43,7 @@ class GlobalExceptionHandlerRateLimitSseTest {
     @BeforeEach
     void setUp() {
         mockMvc = standaloneSetup(new SseThrowingController())
-                .setControllerAdvice(new GlobalExceptionHandler(mock(CookieUtils.class), new ObjectMapper()))
+                .setControllerAdvice(new ApiExceptionHandler(mock(CookieUtils.class)))
                 .build();
     }
 

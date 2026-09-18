@@ -15,8 +15,8 @@ class PlannerValidationExceptionTest {
     void singleErrorConstructor_WhenUsed_HasEmptySubErrors() {
         PlannerValidationException ex = new PlannerValidationException("MY_CODE", "My message");
 
-        assertEquals("MY_CODE", ex.getErrorCode());
-        assertEquals("My message", ex.getMessage());
+        assertEquals("MY_CODE", ex.getOriginalCode());
+        assertEquals("My message", ex.getLogDetail());
         assertTrue(ex.getSubErrors().isEmpty());
     }
 
@@ -30,14 +30,14 @@ class PlannerValidationExceptionTest {
 
         PlannerValidationException combined = PlannerValidationException.combined(errors);
 
-        assertEquals("VALIDATION_ERROR", combined.getErrorCode());
+        assertEquals("VALIDATION_ERROR", combined.getOriginalCode());
         assertEquals(2, combined.getSubErrors().size());
         assertEquals("CODE_A", combined.getSubErrors().get(0).code());
         assertEquals("First error", combined.getSubErrors().get(0).message());
         assertEquals("CODE_B", combined.getSubErrors().get(1).code());
         assertEquals("Second error", combined.getSubErrors().get(1).message());
-        assertTrue(combined.getMessage().contains("[CODE_A] First error"));
-        assertTrue(combined.getMessage().contains("[CODE_B] Second error"));
+        assertTrue(combined.getLogDetail().contains("[CODE_A] First error"));
+        assertTrue(combined.getLogDetail().contains("[CODE_B] Second error"));
     }
 
     @Test
@@ -47,7 +47,7 @@ class PlannerValidationExceptionTest {
                 List.of(new PlannerValidationException("ONLY_CODE", "Only message"))
         );
 
-        assertEquals("VALIDATION_ERROR", combined.getErrorCode());
+        assertEquals("VALIDATION_ERROR", combined.getOriginalCode());
         assertEquals(1, combined.getSubErrors().size());
         assertEquals("ONLY_CODE", combined.getSubErrors().get(0).code());
         assertEquals("Only message", combined.getSubErrors().get(0).message());

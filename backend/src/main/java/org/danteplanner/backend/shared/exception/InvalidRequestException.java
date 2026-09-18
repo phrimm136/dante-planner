@@ -2,7 +2,7 @@ package org.danteplanner.backend.shared.exception;
 
 /**
  * A client supplied a value the endpoint cannot accept, mapped to HTTP 400 by
- * {@link GlobalExceptionHandler}.
+ * {@link ApiExceptionHandler}.
  *
  * <p>Lives in {@code shared} for the rejections no feature exception already covers. A feature
  * that owns a richer error — planner content, moderation authority, vote immutability — throws its

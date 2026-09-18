@@ -1,8 +1,8 @@
 package org.danteplanner.backend.exception;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.sentry.Sentry;
-import org.danteplanner.backend.shared.exception.GlobalExceptionHandler;
+import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
+import org.danteplanner.backend.shared.exception.DomainException;
 import org.danteplanner.backend.shared.exception.KnownConstraint;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.hibernate.exception.ConstraintViolationException;
@@ -14,7 +14,10 @@ import org.mockito.MockedStatic;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.web.context.request.ServletWebRequest;
 
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
@@ -46,7 +49,7 @@ import static org.mockito.Mockito.never;
  * matching its row and turn an expected duplicate-key race into an unexpected conflict plus an
  * alert.</p>
  */
-class GlobalExceptionHandlerConstraintMappingTest {
+class ApiExceptionHandlerConstraintMappingTest {
 
     private static final String SQL = "insert into planner_votes (user_id,planner_id) values (?,?)";
 
@@ -70,11 +73,11 @@ class GlobalExceptionHandlerConstraintMappingTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("frozenContract")
     void listedConstraint_WhenMapped_KeepsFrozenResponse(ContractRow row) {
-        ResponseEntity<GlobalExceptionHandler.ErrorResponse> response = handle(duplicateKey(row.constraintName()));
+        ResponseEntity<Object> response = handle(duplicateKey(row.constraintName()));
 
         assertEquals(row.status(), response.getStatusCode());
-        assertEquals(row.code(), response.getBody().code());
-        assertEquals(row.message(), response.getBody().message());
+        assertEquals(row.code(), codeOf(response));
+        assertEquals(row.message(), detailOf(response));
     }
 
     /**
@@ -94,21 +97,21 @@ class GlobalExceptionHandlerConstraintMappingTest {
 
     @Test
     void unlistedUniqueKey_WhenMapped_IsReportedAsConflict() {
-        ResponseEntity<GlobalExceptionHandler.ErrorResponse> response = handle(duplicateKey("planner_stats.PRIMARY"));
+        ResponseEntity<Object> response = handle(duplicateKey("planner_stats.PRIMARY"));
 
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertEquals("CONFLICT", response.getBody().code());
-        assertEquals("Resource conflict", response.getBody().message());
+        assertEquals("CONFLICT", codeOf(response));
+        assertEquals("Resource conflict", detailOf(response));
     }
 
     @Test
     void foreignKeyViolation_WhenMapped_IsReportedAsInvalidData() {
-        ResponseEntity<GlobalExceptionHandler.ErrorResponse> response = handle(otherIntegrityFailure(
+        ResponseEntity<Object> response = handle(otherIntegrityFailure(
                 "Cannot add or update a child row: a foreign key constraint fails", 1452, "fk_vote_planner"));
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("INVALID_REQUEST", response.getBody().code());
-        assertEquals("Invalid data", response.getBody().message());
+        assertEquals("INVALID_REQUEST", codeOf(response));
+        assertEquals("Invalid data", detailOf(response));
     }
 
     /**
@@ -117,11 +120,11 @@ class GlobalExceptionHandlerConstraintMappingTest {
      */
     @Test
     void notNullViolation_WhenOnListedTable_StaysInvalidData() {
-        ResponseEntity<GlobalExceptionHandler.ErrorResponse> response = handle(otherIntegrityFailure(
+        ResponseEntity<Object> response = handle(otherIntegrityFailure(
                 "Column 'planner_id' cannot be null", 1048, "planner_votes.PRIMARY"));
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("INVALID_REQUEST", response.getBody().code());
+        assertEquals("INVALID_REQUEST", codeOf(response));
     }
 
     /**
@@ -135,19 +138,19 @@ class GlobalExceptionHandlerConstraintMappingTest {
                 new SQLIntegrityConstraintViolationException(
                         "Duplicate entry '1-2' for key 'planner_views.PRIMARY'", "23000", 1062));
 
-        ResponseEntity<GlobalExceptionHandler.ErrorResponse> response = handle(ex);
+        ResponseEntity<Object> response = handle(ex);
 
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertEquals("CONFLICT", response.getBody().code());
+        assertEquals("CONFLICT", codeOf(response));
     }
 
     @Test
     void duplicateKeySubclass_WhenMapped_IsRecognisedAsUnique() {
-        ResponseEntity<GlobalExceptionHandler.ErrorResponse> response =
+        ResponseEntity<Object> response =
                 handle(new DuplicateKeyException("a row with that key already exists"));
 
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertEquals("CONFLICT", response.getBody().code());
+        assertEquals("CONFLICT", codeOf(response));
     }
 
     @Test
@@ -171,21 +174,21 @@ class GlobalExceptionHandlerConstraintMappingTest {
     @Test
     @DisplayName("a UNIQUE violation maps to 409 under a Turkish default locale")
     void handleDataIntegrityViolation_WhenTurkishLocale_MapsUniqueToConflict() {
-        ResponseEntity<GlobalExceptionHandler.ErrorResponse> response =
+        ResponseEntity<Object> response =
                 handleUnder(Locale.forLanguageTag("tr"), duplicateKey("planner_votes.PRIMARY"));
 
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertEquals("DUPLICATE_ACTION", response.getBody().code());
+        assertEquals("DUPLICATE_ACTION", codeOf(response));
     }
 
     @Test
     @DisplayName("a UNIQUE violation maps identically under the root locale")
     void handleDataIntegrityViolation_WhenRootLocale_MapsUniqueToConflict() {
-        ResponseEntity<GlobalExceptionHandler.ErrorResponse> response =
+        ResponseEntity<Object> response =
                 handleUnder(Locale.ROOT, duplicateKey("planner_votes.PRIMARY"));
 
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertEquals("DUPLICATE_ACTION", response.getBody().code());
+        assertEquals("DUPLICATE_ACTION", codeOf(response));
     }
 
     /**
@@ -194,19 +197,19 @@ class GlobalExceptionHandlerConstraintMappingTest {
      */
     @Test
     void capitalIInKeyName_WhenTurkishLocale_Survives() {
-        ResponseEntity<GlobalExceptionHandler.ErrorResponse> response =
+        ResponseEntity<Object> response =
                 handleUnder(Locale.forLanguageTag("tr"), duplicateKey("planner.PRIMARY"));
 
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertEquals("UUID_COLLISION", response.getBody().code());
+        assertEquals("UUID_COLLISION", codeOf(response));
     }
 
-    private static ResponseEntity<GlobalExceptionHandler.ErrorResponse> handle(DataIntegrityViolationException ex) {
-        return new GlobalExceptionHandler(mock(CookieUtils.class), new ObjectMapper())
-                .handleDataIntegrityViolation(ex);
+    private static ResponseEntity<Object> handle(DataIntegrityViolationException ex) {
+        return new ApiExceptionHandler(mock(CookieUtils.class))
+                .handleDataIntegrityViolation(ex, new ServletWebRequest(new MockHttpServletRequest()));
     }
 
-    private static ResponseEntity<GlobalExceptionHandler.ErrorResponse> handleUnder(
+    private static ResponseEntity<Object> handleUnder(
             Locale locale, DataIntegrityViolationException ex) {
         Locale original = Locale.getDefault();
         try {
@@ -215,6 +218,18 @@ class GlobalExceptionHandlerConstraintMappingTest {
         } finally {
             Locale.setDefault(original);
         }
+    }
+
+    private static String codeOf(ResponseEntity<Object> response) {
+        return (String) body(response).getProperties().get(DomainException.CODE_PROPERTY);
+    }
+
+    private static String detailOf(ResponseEntity<Object> response) {
+        return body(response).getDetail();
+    }
+
+    private static ProblemDetail body(ResponseEntity<Object> response) {
+        return (ProblemDetail) response.getBody();
     }
 
     /** Reproduces MySQL error 1062 as Spring delivers it after Hibernate's dialect conversion. */

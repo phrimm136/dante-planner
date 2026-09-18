@@ -27,10 +27,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * <p>The universal edges {@code * -> shared} and {@code * -> auth} (AuthenticationService, token
  * infrastructure) are permitted everywhere and therefore never appear in any disallowed list.</p>
  *
- * <p>{@code shared} is intended as a dependency sink. It is not a <em>pure</em> sink today:
- * {@code GlobalExceptionHandler} references every feature's exceptions, the security filter reaches
- * {@code user}/{@code auth.token}, and a few config classes read {@code user}/{@code planner} types
- * — those out-edges are inherent while those classes live in {@code shared}. The
+ * <p>{@code shared} is intended as a dependency sink. It is not a <em>pure</em> sink today: the
+ * security filter reaches {@code user}/{@code auth.token}, and a few config classes read
+ * {@code user}/{@code planner} types — those out-edges are inherent while those classes live in
+ * {@code shared}. The
  * {@link #shared_should_not_depend_on_admin_or_notification} rule freezes the sink in its true,
  * currently-passing form: {@code shared} must not grow edges into {@code admin} or
  * {@code notification}.</p>
@@ -39,8 +39,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * {@link #shared_readpath_must_not_depend_on_planner}: it dereferences entities through opaque
  * suppliers and a base {@code EntityNotFoundException}, so it must carry no dependency on
  * {@code planner} (or any feature). The broader {@code shared}-wide planner edges that remain
- * ({@code GlobalExceptionHandler} handling planner exceptions, a config class reading a planner
- * entity) are inherent to those classes living in {@code shared} and are out of this rule's scope.</p>
+ * (a config class reading a planner entity) are inherent to those classes living in
+ * {@code shared} and are out of this rule's scope.</p>
  *
  * <p>The rules above constrain which features may see each other at all. The internals rules below
  * constrain how: a feature's {@code ..repository..}, {@code ..validation..} and {@code ..entity..}
@@ -73,8 +73,7 @@ class FeatureBoundaryTest {
             MAIN + "moderation.controller.ModerationController",
             MAIN + "moderation.dto.ModerationResponse",
             MAIN + "moderation.service.PlannerModerationService",
-            MAIN + "shared.config.WebConfig",
-            MAIN + "shared.exception.GlobalExceptionHandler");
+            MAIN + "shared.config.WebConfig");
 
     /**
      * The widest of the lists: {@code user.entity} carries the account types the whole tree reads —

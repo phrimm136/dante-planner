@@ -283,7 +283,7 @@ class PlannerCommandServiceTest {
                     () -> commandService.createPlanner(testUser.getId(), deviceId, request)
             );
 
-            assertEquals("INVALID_CONTENT", exception.getErrorCode());
+            assertEquals("INVALID_CONTENT", exception.getOriginalCode());
             verify(plannerRepository, never()).insert(any());
         }
 
@@ -302,7 +302,7 @@ class PlannerCommandServiceTest {
                     () -> commandService.createPlanner(testUser.getId(), deviceId, request)
             );
 
-            assertEquals("INVALID_CONTENT_VERSION", exception.getErrorCode());
+            assertEquals("INVALID_CONTENT_VERSION", exception.getOriginalCode());
             verify(plannerRepository, never()).insert(any());
             verify(contentValidator, never()).validate(anyString(), anyString());
         }
@@ -394,7 +394,7 @@ class PlannerCommandServiceTest {
                     () -> commandService.updatePlanner(testUser.getId(), deviceId, planner.getId(), request, false)
             );
 
-            assertEquals("INVALID_CONTENT", exception.getErrorCode());
+            assertEquals("INVALID_CONTENT", exception.getOriginalCode());
             assertNotEquals(request.content(), planner.getContentJson());
         }
 

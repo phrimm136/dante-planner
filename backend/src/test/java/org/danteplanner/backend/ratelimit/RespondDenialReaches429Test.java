@@ -10,7 +10,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.danteplanner.backend.shared.config.DeviceIdResolver;
 import org.danteplanner.backend.shared.config.FrontendProperties;
 import org.danteplanner.backend.shared.config.SecurityProperties;
-import org.danteplanner.backend.shared.exception.GlobalExceptionHandler;
+import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 import org.danteplanner.backend.shared.ratelimit.RateLimitExceededException;
 import org.danteplanner.backend.shared.ratelimit.RateLimitInterceptor;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
@@ -61,7 +61,7 @@ class RespondDenialReaches429Test {
 
         mockMvc = MockMvcBuilders.standaloneSetup(new DeclaredHandlerFixture())
                 .addInterceptors(interceptor)
-                .setControllerAdvice(new GlobalExceptionHandler(new CookieUtils(false, "", "Lax"), objectMapper))
+                .setControllerAdvice(new ApiExceptionHandler(new CookieUtils(false, "", "Lax")))
                 .build();
 
         SecurityContextHolder.getContext().setAuthentication(

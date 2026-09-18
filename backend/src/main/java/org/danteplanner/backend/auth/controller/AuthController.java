@@ -120,7 +120,7 @@ public class AuthController {
         cookieUtils.clearCookie(response, CookieConstants.OAUTH_TX);
 
         // This is a top-level browser-redirect endpoint: any failure must land the user back on the
-        // SPA error route, never a JSON error body from GlobalExceptionHandler.
+        // SPA error route, never a JSON error body from ApiExceptionHandler.
         try {
             if (error != null || code == null || code.isBlank() || state == null) {
                 return redirect(frontendProperties.getUrl() + LoginRedirect.ERROR);

@@ -1,7 +1,7 @@
 package org.danteplanner.backend.shared.exception;
 
 /**
- * Base "entity absent by id" error, answered as a not-found outcome by {@link GlobalExceptionHandler}.
+ * Base "entity absent by id" error, answered as a not-found outcome by {@link ApiExceptionHandler}.
  *
  * <p>Lives in {@code shared} so the read seam and the exception handler can express "not found"
  * without depending on any feature package. Feature-specific not-found exceptions extend this to

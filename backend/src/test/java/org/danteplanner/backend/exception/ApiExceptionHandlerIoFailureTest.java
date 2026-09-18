@@ -1,14 +1,15 @@
 package org.danteplanner.backend.exception;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.catalina.connector.ClientAbortException;
-import org.danteplanner.backend.shared.exception.GlobalExceptionHandler;
+import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,7 +32,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  * told so: an uncommitted response carries the standard error envelope under 500, while a
  * committed one can only be marked handled.
  */
-class GlobalExceptionHandlerIoFailureTest {
+class ApiExceptionHandlerIoFailureTest {
 
     private MockMvc mockMvc;
 
@@ -64,7 +65,7 @@ class GlobalExceptionHandlerIoFailureTest {
         HttpServletResponse response = mock(HttpServletResponse.class);
         when(response.isCommitted()).thenReturn(true);
 
-        assertThat(handler().handleIOException(new IOException("No space left on device"), response)).isNull();
+        assertThat(handler().handleIOException(new IOException("No space left on device"), response, webRequest())).isNull();
         verify(response, never()).getWriter();
         verify(response, never()).setStatus(anyInt());
     }
@@ -74,11 +75,15 @@ class GlobalExceptionHandlerIoFailureTest {
     void clientDisconnect_WhenSeen_IsHandledWithoutABody() {
         HttpServletResponse response = mock(HttpServletResponse.class);
 
-        assertThat(handler().handleIOException(new ClientAbortException(), response)).isNull();
+        assertThat(handler().handleIOException(new ClientAbortException(), response, webRequest())).isNull();
         verify(response, never()).isCommitted();
     }
 
-    private static GlobalExceptionHandler handler() {
-        return new GlobalExceptionHandler(mock(CookieUtils.class), new ObjectMapper());
+    private static ApiExceptionHandler handler() {
+        return new ApiExceptionHandler(mock(CookieUtils.class));
+    }
+
+    private static ServletWebRequest webRequest() {
+        return new ServletWebRequest(new MockHttpServletRequest());
     }
 }

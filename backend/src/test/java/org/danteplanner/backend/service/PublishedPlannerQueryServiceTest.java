@@ -571,7 +571,7 @@ class PublishedPlannerQueryServiceTest {
                     () -> publishedQueryService.searchPlanners(query, PageRequest.of(0, 10), null));
 
             // Assert
-            assertEquals("INVALID_FILTER_ID", thrown.getErrorCode());
+            assertEquals("INVALID_FILTER_ID", thrown.getOriginalCode());
         }
     }
 }

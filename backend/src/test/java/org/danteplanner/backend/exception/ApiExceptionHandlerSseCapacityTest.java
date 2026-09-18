@@ -1,7 +1,6 @@
 package org.danteplanner.backend.exception;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.danteplanner.backend.shared.exception.GlobalExceptionHandler;
+import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 import org.danteplanner.backend.shared.sse.SseCapacityExceededException;
 import org.danteplanner.backend.shared.sse.SseConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
@@ -31,7 +30,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  * converter for that Accept header and the 429 would escape as a 500. {@code standaloneSetup}
  * exercises real {@code @ExceptionHandler} dispatch, so the negotiation step is reproduced.</p>
  */
-class GlobalExceptionHandlerSseCapacityTest {
+class ApiExceptionHandlerSseCapacityTest {
 
     private MockMvc mockMvc;
 
@@ -46,7 +45,7 @@ class GlobalExceptionHandlerSseCapacityTest {
     @BeforeEach
     void setUp() {
         mockMvc = standaloneSetup(new FullRegistryController())
-                .setControllerAdvice(new GlobalExceptionHandler(mock(CookieUtils.class), new ObjectMapper()))
+                .setControllerAdvice(new ApiExceptionHandler(mock(CookieUtils.class)))
                 .build();
     }
 

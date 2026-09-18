@@ -245,7 +245,7 @@ public class PlannerCommandService {
      * @return the created planner response
      * @throws PlannerLimitExceededException if user has reached max planners
      * @throws PlannerValidationException    if content exceeds size limit or category is invalid
-     * @throws org.springframework.dao.DataIntegrityViolationException if UUID collision (handled by GlobalExceptionHandler)
+     * @throws org.springframework.dao.DataIntegrityViolationException if UUID collision (handled by ApiExceptionHandler)
      */
     @Transactional
     PlannerResponse createPlanner(Long userId, UUID deviceId, UpsertPlannerRequest request) {

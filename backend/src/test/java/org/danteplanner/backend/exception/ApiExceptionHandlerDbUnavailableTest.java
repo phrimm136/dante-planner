@@ -1,5 +1,5 @@
 package org.danteplanner.backend.exception;
-import org.danteplanner.backend.shared.exception.GlobalExceptionHandler;
+import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,7 +19,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 
 /**
  * Verifies that a DB outage on the controller/service path is mapped to 503 by
- * {@link GlobalExceptionHandler}, through real {@code @ExceptionHandler} dispatch.
+ * {@link ApiExceptionHandler}, through real {@code @ExceptionHandler} dispatch.
  *
  * <p>When the DB is down, the failure surfaces as one of two unrelated hierarchies depending on
  * where the connection was needed: a non-transactional query yields
@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  * exception dispatch — a direct call to the handler method would prove the body but not that the
  * {@code @ExceptionHandler} annotation actually routes both exception types here.</p>
  */
-class GlobalExceptionHandlerDbUnavailableTest {
+class ApiExceptionHandlerDbUnavailableTest {
 
     private MockMvc mockMvc;
 
@@ -55,7 +55,7 @@ class GlobalExceptionHandlerDbUnavailableTest {
     @BeforeEach
     void setUp() {
         mockMvc = standaloneSetup(new ThrowingController())
-                .setControllerAdvice(new GlobalExceptionHandler(mock(CookieUtils.class), new com.fasterxml.jackson.databind.ObjectMapper()))
+                .setControllerAdvice(new ApiExceptionHandler(mock(CookieUtils.class)))
                 .build();
     }
 

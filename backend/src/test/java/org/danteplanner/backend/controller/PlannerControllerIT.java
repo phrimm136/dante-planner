@@ -408,7 +408,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             UpsertPlannerRequest request = createValidPlannerRequest();
             request = withCategory(request, "INVALID_CATEGORY");
 
-            // Note: INVALID_CATEGORY is mapped to generic VALIDATION_ERROR in GlobalExceptionHandler
+            // Note: INVALID_CATEGORY is mapped to generic VALIDATION_ERROR in ApiExceptionHandler
             // to prevent schema probing attacks
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(session())
@@ -424,7 +424,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             UpsertPlannerRequest request = createValidPlannerRequest();
             request = withCategory(withPlannerType(request, PlannerType.REFRACTED_RAILWAY), "5F"); // MD category, invalid for RR
 
-            // Note: INVALID_CATEGORY is mapped to generic VALIDATION_ERROR in GlobalExceptionHandler
+            // Note: INVALID_CATEGORY is mapped to generic VALIDATION_ERROR in ApiExceptionHandler
             // to prevent schema probing attacks
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(session())
@@ -1366,7 +1366,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             mockMvc.perform(get("/api/planner/md/published/{id}", "not-a-uuid"))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.code").value("NOT_FOUND"))
-                    .andExpect(jsonPath("$.message").value("Resource not found"));
+                    .andExpect(jsonPath("$.detail").value("Resource not found"));
         }
 
         @Test
@@ -1385,7 +1385,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             mockMvc.perform(get("/api/planner/md/published/{id}", "123e4567"))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.code").value("NOT_FOUND"))
-                    .andExpect(jsonPath("$.message").value("Resource not found"));
+                    .andExpect(jsonPath("$.detail").value("Resource not found"));
         }
 
         @Test
