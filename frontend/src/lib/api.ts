@@ -1,4 +1,3 @@
-import { z } from 'zod'
 import { env } from './env'
 import {
   AuthTemporarilyUnavailableError,
@@ -15,7 +14,10 @@ import {
   ValidationError,
   WriteTemporarilyUnavailableError,
 } from './apiErrors'
+import { ProblemSchema, type Problem } from './problem'
 import { queryClient } from './queryClient'
+
+export { ProblemSchema, type Problem }
 
 const API_BASE_URL = env.VITE_API_BASE_URL
 
@@ -37,15 +39,6 @@ function readCsrfToken(): string | null {
     document.cookie.match(new RegExp(`(?:^|;\\s*)${CSRF_COOKIE_NAME}=([^;]*)`)) ?? []
   return encoded === undefined ? null : decodeURIComponent(encoded)
 }
-
-/** Shape every backend error body is read through; every field is best-effort. */
-export const ProblemSchema = z.object({
-  detail: z.string().optional(),
-  code: z.string().optional(),
-  serverVersion: z.number().nullable().optional(),
-})
-
-export type Problem = z.infer<typeof ProblemSchema>
 
 type ApiErrorConstructor = new (message: string) => Error
 
