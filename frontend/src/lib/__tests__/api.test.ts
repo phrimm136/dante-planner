@@ -9,6 +9,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { ApiClient } from '../api'
 import {
   ConflictError,
+  ForbiddenError,
   RateLimitError,
   RetryableUnavailableError,
   ValidationError,
@@ -158,7 +159,6 @@ describe('ApiClient', () => {
         ok: false,
         status: 409,
         json: vi.fn().mockResolvedValue({
-          status: 409,
           code: 'VERSION_CONFLICT',
           detail: 'Version conflict',
           serverVersion: 5,
@@ -191,7 +191,6 @@ describe('ApiClient', () => {
         ok: false,
         status: 409,
         json: vi.fn().mockResolvedValue({
-          status: 409,
           code: 'CONCURRENT_WRITE',
           detail: 'The resource was modified concurrently',
           serverVersion: null,
@@ -206,13 +205,45 @@ describe('ApiClient', () => {
     })
   })
 
+  describe('403 Forbidden handling', () => {
+    it('throws ForbiddenError carrying the code and detail', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 403,
+        json: vi.fn().mockResolvedValue({
+          code: 'PLANNER_FORBIDDEN',
+          detail: 'This planner belongs to someone else',
+        }),
+      })
+
+      const error = await ApiClient.get('/api/planner/md/123').catch((e: unknown) => e)
+
+      expect(error).toBeInstanceOf(ForbiddenError)
+      expect((error as ForbiddenError).code).toBe('PLANNER_FORBIDDEN')
+      expect((error as ForbiddenError).message).toBe('This planner belongs to someone else')
+    })
+
+    it('falls back to a generic error when the body fails the problem schema', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 403,
+        json: vi.fn().mockResolvedValue({ code: 5 }),
+      })
+
+      const error = await ApiClient.get('/api/planner/md/123').catch((e: unknown) => e)
+
+      expect(error).toBeInstanceOf(Error)
+      expect(error).not.toBeInstanceOf(ForbiddenError)
+      expect((error as Error).message).toBe('Forbidden')
+    })
+  })
+
   describe('400 / 429 typed errors', () => {
     it('400 throws ValidationError carrying the backend code', async () => {
       mockFetch.mockResolvedValue({
         ok: false,
         status: 400,
         json: vi.fn().mockResolvedValue({
-          status: 400,
           code: 'VALIDATION_ERROR',
           detail: 'Invalid planner content structure',
         }),
@@ -225,47 +256,11 @@ describe('ApiClient', () => {
       expect((error as ValidationError).message).toBe('Invalid planner content structure')
     })
 
-    it('400 falls back to a body that carries only the pre-RFC 9457 message', async () => {
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 400,
-        json: vi.fn().mockResolvedValue({
-          status: 400,
-          code: 'VALIDATION_ERROR',
-          message: 'Invalid planner content structure',
-        }),
-      })
-
-      const error = await ApiClient.post('/api/planner/md', {}).catch((e: unknown) => e)
-
-      expect(error).toBeInstanceOf(ValidationError)
-      expect((error as ValidationError).message).toBe('Invalid planner content structure')
-    })
-
-    it('400 prefers detail over message when the body carries both', async () => {
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 400,
-        json: vi.fn().mockResolvedValue({
-          status: 400,
-          code: 'VALIDATION_ERROR',
-          detail: 'From detail',
-          message: 'From message',
-        }),
-      })
-
-      const error = await ApiClient.post('/api/planner/md', {}).catch((e: unknown) => e)
-
-      expect(error).toBeInstanceOf(ValidationError)
-      expect((error as ValidationError).message).toBe('From detail')
-    })
-
     it('429 throws RateLimitError', async () => {
       mockFetch.mockResolvedValue({
         ok: false,
         status: 429,
         json: vi.fn().mockResolvedValue({
-          status: 429,
           code: 'RATE_LIMIT_EXCEEDED',
           detail: 'Too many requests',
         }),
@@ -283,7 +278,7 @@ describe('ApiClient', () => {
         mockFetch.mockResolvedValue({
           ok: false,
           status: 503,
-          json: vi.fn().mockResolvedValue({ status: 503, code, detail: 'please retry' }),
+          json: vi.fn().mockResolvedValue({ code, detail: 'please retry' }),
         })
 
         await expect(ApiClient.post('/api/planner/md', {})).rejects.toBeInstanceOf(
@@ -299,7 +294,6 @@ describe('ApiClient', () => {
         ok: false,
         status: 503,
         json: vi.fn().mockResolvedValue({
-          status: 503,
           code: 'WRITE_TEMPORARILY_UNAVAILABLE',
           detail: 'Database temporarily unavailable, please retry',
         }),
@@ -315,7 +309,6 @@ describe('ApiClient', () => {
         ok: false,
         status: 503,
         json: vi.fn().mockResolvedValue({
-          status: 503,
           code: 'AUTH_TEMPORARILY_UNAVAILABLE',
           detail: 'Authentication service temporarily unavailable, please retry',
         }),
@@ -331,7 +324,6 @@ describe('ApiClient', () => {
         ok: false,
         status: 503,
         json: vi.fn().mockResolvedValue({
-          status: 503,
           code: 'BACKEND_UNAVAILABLE',
           detail: 'Service temporarily unavailable',
         }),

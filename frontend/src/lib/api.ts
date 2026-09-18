@@ -39,22 +39,13 @@ function readCsrfToken(): string | null {
 }
 
 /** Shape every backend error body is read through; every field is best-effort. */
-export interface Problem {
-  status: number
-  detail?: string | undefined
-  /** @deprecated read `detail`; the pre-RFC 9457 field the security filters still send */
-  message?: string | undefined
-  code?: string | undefined
-  serverVersion?: number | null | undefined
-}
-
-const ProblemSchema: z.ZodType<Problem> = z.object({
-  status: z.number(),
+export const ProblemSchema = z.object({
   detail: z.string().optional(),
-  message: z.string().optional(),
   code: z.string().optional(),
   serverVersion: z.number().nullable().optional(),
 })
+
+export type Problem = z.infer<typeof ProblemSchema>
 
 type ApiErrorConstructor = new (message: string) => Error
 
@@ -84,9 +75,7 @@ const DEFAULT_CONFLICT_CODE = 'CONFLICT'
  */
 async function readErrorBody(response: Response): Promise<Problem | null> {
   const parsed = ProblemSchema.safeParse(await response.json().catch(() => null))
-  if (!parsed.success) return null
-  // oxlint-disable-next-line typescript/no-deprecated
-  return { ...parsed.data, detail: parsed.data.detail ?? parsed.data.message }
+  return parsed.success ? parsed.data : null
 }
 
 export class ApiClient {
