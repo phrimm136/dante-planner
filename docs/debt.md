@@ -72,12 +72,27 @@ asset pipeline.
   routing target for PRIMARY is the `GtidCapturingDataSource` wrapper, not a
   `HikariDataSource`, so the helper's instanceof walk skips it. Replica and bulkhead are
   covered since the lazy-proxy descent fix; the primary needs an unwrap step.
-- `user.entity` is a de facto shared domain model: `User`, `UserRole` and `RestrictionState`
-  are read by 25 classes across every feature, including `shared.security` and
-  `auth.token`. The entity half of the user-internals boundary rule is therefore a freeze
-  against new edges, not a boundary anything is close to satisfying — closing it means
-  deciding what the account types look like outside the `user` feature (a shared value type,
-  a projection, or an id plus a lookup), which is design-lane work, not a mechanical move.
+- The `FeatureBoundaryTest` frozen internal edges (34 entries on 2026-09-18) resolve to
+  eight types reached across a boundary, and thaw in three lanes. Mechanical, one commit
+  each, the staleness test deletes the entry: `WebConfig` reaches `planner.entity.MDCategory`
+  for a converter that Boot would register itself as a planner-owned `Converter` bean;
+  `CommentEngagementService` reaches `planner.validation.VoteUniquenessValidator`;
+  `AdminService` builds a `moderation.entity.ModerationAction` that a moderation `record`
+  operation should own. Seam design, an RFC each: two moderation services mutate
+  `comment.entity.PlannerComment` and call `comment.validation.CommentStateValidator`, so
+  comment needs hide, delete and restore operations for moderation; four moderation and
+  comment classes read `planner.entity.Planner`, so planner needs a moderation read model and
+  an access check comment can call. Worth doing when the owning feature's service is next
+  edited for another reason.
+- `user.entity` is a de facto shared domain model: `User`, `UserRole`, `RestrictionState`
+  and `UserSettings` are read by 24 frozen origins across every feature, including
+  `shared.security` and `auth.token`. The enum half (7 origins reach only `UserRole` or
+  `RestrictionState`) is a mechanical move once a shared account vocabulary exists. The
+  `User` half (17 origins) is not: `Planner` maps `User` as a JPA association, so the
+  alternative is id-valued references across aggregates, a schema and query change. Closing
+  it means deciding what a planner knows about its owner, the row or the id — a shared
+  kernel the rule permits by design, or the ADR 015 decomposition applied to users. Argue
+  that before moving anything; a thaw done to satisfy the rule is the wrong reason.
 - The backend patterns still declared in `.claude/hooks/forbidden-patterns.json` predate
   ADR 070 and should be audited for migration to checkstyle: field injection
   (`@Autowired private`), entity-typed `ResponseEntity` returns from controllers, `.get()`
@@ -331,12 +346,15 @@ asset pipeline.
   errors.* keys (common ns) exist only as uncommitted edits in the static working tree; the
   submodule pointer on dev (b1c017c8) predates them, so both removal surfaces and the stream-4
   error copy render raw keys until static commits land and the gitlink bumps.
-- 2026-08-14 — unverified premise: PlannerCommentSseController answers PlannerNotFoundException
-  through the generic JSON handler while declaring produces=text/event-stream; the sibling
-  handler hand-writes its response citing exactly that converter gap. If the 404 degrades to
-  406/500, stopOnNotFound never fires and the comment stream burns its retry budget silently.
-  One backend MockMvc case (404 on /api/planner/{id}/comments/events for an unpublished planner)
-  settles it — backend session's lane.
+- 2026-08-14, verified 2026-09-18 — PlannerCommentSseController answers PlannerNotFoundException
+  through the generic JSON handler while declaring produces=text/event-stream, so the 404
+  degrades to a 500 (prod Loki, oregon, 00:26–00:53Z: 50 triplets of PLANNER_NOT_FOUND,
+  HttpMediaTypeNotAcceptableException in the handler, and a Tomcat ERROR for one guest and one
+  unpublished planner). stopOnNotFound never sees the 404 and the comment stream runs its full
+  retry budget every idle reset. The same degradation hits every entity-returning handler on
+  both event-stream routes. Closes with the problem-details migration of the advice, whose
+  red test is a MockMvc 404 on /api/planner/{id}/comments/events with Accept:
+  text/event-stream.
 - 2026-08-14 — the planner export silently drops rows whose local load failed: the success toast's
   count is truthful about the file but a partial export reads as a clean one. Reporting it needs
   copy that does not exist yet (stream 4 flagged; fold into the export decode→partition→persist
@@ -515,6 +533,21 @@ asset pipeline.
   the server never received, a routine outcome the client already treats as success (about 5 a
   day). Worth demoting that one method-and-code pair to INFO when the WARN stream is next used
   for alerting, or when an ADR settles a client marker for never-synced rows.
+
+## 2026-09-18 problem-details migration (adr/113, adr/114)
+
+- **`Problem.message` in `frontend/src/lib/api.ts`** is the deploy-window fallback for
+  backends still emitting `{code, message}`; it is `@deprecated` and `typescript/no-deprecated`
+  flags every read except the one inside `readErrorBody`. Delete the field, the fallback
+  line, and the disable comment once both the rendering advice (adr/114) and the
+  filter-level `ProblemWriter` are deployed in both regions; before the second lands, the
+  security filters still emit the old shape.
+- **`ProblemWriter` for the filter chain** (authentication entry point, CSRF filter, auth
+  degradation responder, rate-limit interceptor's undeclared-policy branch) is the second
+  unit of the migration: the four sites serialize their own maps with two different keys
+  (`code` and `error`), so the CSRF 403 has never matched a typed frontend error. Each site
+  needs a test through the security chain, and two sit in the user-internals freeze. Worth
+  doing as soon as `DomainException` carries a `ProblemDetail`, which is what it reuses.
 
 ## 2026-09-18 nginx retired, references remain (adr/011)
 
