@@ -9,8 +9,6 @@ import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.entity.PlannerVoteId;
 import org.danteplanner.backend.planner.entity.VoteType;
-import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
-import org.danteplanner.backend.planner.exception.VoteAlreadyExistsException;
 import org.danteplanner.backend.moderation.service.PlannerReportService;
 import org.danteplanner.backend.planner.repository.PlannerBookmarkRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
@@ -25,7 +23,6 @@ import java.util.UUID;
 
 /**
  * Service for social engagement actions on planners.
- * Handles immutable upvotes, reports, and the viewer's bookmark state.
  */
 @Service
 @Slf4j
@@ -63,23 +60,6 @@ public class PlannerEngagementService {
         this.recommendedThreshold = recommendedThreshold;
     }
 
-    /**
-     * Cast an immutable upvote on a planner.
-     * Votes are permanent - users can upvote ONCE, with no changes or removal allowed.
-     * Uses atomic increment operations and threshold detection for notifications.
-     *
-     * <p>Crossing the threshold records a {@code PLANNER_RECOMMENDED} row in the outbox, inside
-     * this transaction. The notification and its push are derived from that row by
-     * {@link org.danteplanner.backend.planner.effect.PlannerRecommendedEffect}, so the vote pays
-     * for the record and nothing else.</p>
-     *
-     * @param userId    the user ID
-     * @param plannerId the planner ID
-     * @param voteType  the vote type (UP only, cannot be null)
-     * @return the updated vote response with counts
-     * @throws PlannerNotFoundException if planner not found or not published
-     * @throws VoteAlreadyExistsException if user has already voted (409 Conflict)
-     */
     @Transactional
     public VoteResponse castVote(Long userId, UUID plannerId, VoteType voteType) {
         accessGuard.checkNotBanned(userId);
@@ -90,25 +70,18 @@ public class PlannerEngagementService {
         voteUniquenessValidator.requireFirstVote(
                 plannerVoteRepository.existsById(voteId), plannerId, userId);
 
-        // Create new immutable vote
         PlannerVote newVote = new PlannerVote(userId, plannerId, voteType);
         plannerVoteRepository.insert(newVote);
 
-        // Atomic increment for upvote
         plannerStatsService.incrementUpvotes(plannerId);
 
         int upvotesAfter = plannerStatsService.upvotesOf(plannerId);
         int upvotesBefore = upvotesAfter - 1;
 
-        // Check threshold crossing for notification (9→10 net votes)
         if (upvotesBefore < recommendedThreshold && upvotesAfter >= recommendedThreshold) {
-            // Keep the catalog's derived flag in step with the crossing
             plannerCatalogService.refreshRecommended(plannerId);
-            // Try to atomically set notification flag (prevents race condition duplicates)
             int rowsUpdated = plannerStatsService.trySetRecommendedNotified(plannerId, recommendedThreshold);
             if (rowsUpdated > 0) {
-                // The latch and the event row commit together, so the obligation to notify cannot
-                // be lost to a latch that is never reset.
                 domainEventRecorder.recordDomainEvent(DomainEventType.PLANNER_RECOMMENDED, plannerId,
                         Map.of("ownerId", planner.getUser().getId()));
                 log.debug("Planner {} crossed threshold ({}→{}), notification recorded",
@@ -122,7 +95,6 @@ public class PlannerEngagementService {
         log.debug("User {} cast immutable {} vote on planner {} (upvotes: {}→{})",
                 userId, voteType, plannerId, upvotesBefore, upvotesAfter);
 
-        // Return updated counts and user's vote state
         return VoteResponse.builder()
                 .plannerId(plannerId)
                 .upvoteCount(upvotesAfter)
@@ -130,26 +102,10 @@ public class PlannerEngagementService {
                 .build();
     }
 
-    /**
-     * Report a published planner on a user's behalf.
-     *
-     * @param userId    the reporting user ID
-     * @param plannerId the planner ID being reported
-     * @throws PlannerNotFoundException if planner not found or not published
-     * @throws org.danteplanner.backend.moderation.exception.ReportAlreadyExistsException
-     *         if the user has already reported this planner
-     */
     public void reportPlanner(Long userId, UUID plannerId) {
         reportService.createReport(userId, plannerId);
     }
 
-    /**
-     * Check if a user has bookmarked a planner.
-     *
-     * @param userId    the user ID
-     * @param plannerId the planner ID
-     * @return true if bookmarked, false otherwise
-     */
     @Transactional(readOnly = true)
     public boolean isBookmarked(Long userId, UUID plannerId) {
         return plannerBookmarkRepository.existsByUserIdAndPlannerId(userId, plannerId);

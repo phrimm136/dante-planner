@@ -11,13 +11,6 @@ import org.danteplanner.backend.planner.repository.PlannerSummaryRow;
 import java.time.Instant;
 import java.util.UUID;
 
-/**
- * Summary response DTO for planner list views.
- *
- * <p>{@code deletedAt} is omitted when null so the live-row wire shape is byte-identical to what
- * strict clients already parse; it appears only on the tombstoned rows an includeDeleted listing
- * adds.</p>
- */
 @Builder
 public record PlannerSummaryResponse(
     UUID id,
@@ -30,12 +23,6 @@ public record PlannerSummaryResponse(
     @JsonInclude(JsonInclude.Include.NON_NULL) Instant deletedAt
 ) {
 
-    /**
-     * Create a PlannerSummaryResponse from a Planner entity.
-     *
-     * @param planner the planner entity
-     * @return the summary response DTO
-     */
     public static PlannerSummaryResponse fromEntity(Planner planner) {
         return PlannerSummaryResponse.builder()
                 .id(planner.getId())
@@ -48,12 +35,6 @@ public record PlannerSummaryResponse(
                 .build();
     }
 
-    /**
-     * Create a PlannerSummaryResponse from an owner-list projection row.
-     *
-     * @param row the projection row
-     * @return the summary response DTO
-     */
     public static PlannerSummaryResponse from(PlannerSummaryRow row) {
         return PlannerSummaryResponse.builder()
                 .id(row.getId())

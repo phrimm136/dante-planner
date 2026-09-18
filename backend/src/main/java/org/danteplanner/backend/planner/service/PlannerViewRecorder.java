@@ -20,11 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-/**
- * Buffers view records per pod and drains them on flush. A view is one row per
- * (planner, viewer, day); the flush dedups on that composite key so a repeated view in the
- * same window and a replayed flush persist a single row and increment the counter once.
- */
 @Service
 public class PlannerViewRecorder {
 
@@ -44,14 +39,6 @@ public class PlannerViewRecorder {
         buffer.add(new PlannerViewId(plannerId, viewerHash, viewDate));
     }
 
-    /**
-     * Drains the buffer, persists the new views and advances each planner's counter.
-     *
-     * <p>The counters are advanced in ascending planner-id order rather than in the order the
-     * views were buffered. Two pods flushing batches that share planners take the
-     * {@code planner_stats} row locks in the same order, which is what makes an AB-BA deadlock
-     * between their flushes impossible.</p>
-     */
     @Scheduled(fixedDelay = FLUSH_INTERVAL_MS, scheduler = ViewFlushSchedulerConfig.VIEW_FLUSH_SCHEDULER)
     @Transactional
     public void flush() {

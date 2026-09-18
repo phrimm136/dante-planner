@@ -11,10 +11,6 @@ import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 
-/**
- * Response DTO for single published planner detail view.
- * Extends PublicPlannerResponse fields with content and metadata needed for rendering.
- */
 @Builder
 public record PublishedPlannerDetailResponse(
     UUID id,
@@ -45,19 +41,6 @@ public record PublishedPlannerDetailResponse(
         selectedKeywords = selectedKeywords == null ? Set.of() : Set.copyOf(selectedKeywords);
     }
 
-    /**
-     * Create a PublishedPlannerDetailResponse for a viewer with no account.
-     *
-     * <p>An anonymous viewer has no account to have upvoted, bookmarked, subscribed, or
-     * reported with, so all four are false.</p>
-     *
-     * @param planner the planner aggregate root
-     * @param commentCount total non-deleted comment count for this planner
-     * @param ownerNotificationsEnabled whether owner has notifications enabled (false for non-owners)
-     * @param viewCount the planner's view count (from planner_stats)
-     * @param upvotes the planner's upvote count (from planner_stats)
-     * @return the published planner detail response DTO
-     */
     public static PublishedPlannerDetailResponse forAnonymous(
             Planner planner,
             long commentCount,
@@ -68,21 +51,6 @@ public record PublishedPlannerDetailResponse(
                 commentCount, ownerNotificationsEnabled, viewCount, upvotes);
     }
 
-    /**
-     * Create a PublishedPlannerDetailResponse from a planner aggregate with user
-     * context and stats-sourced counters.
-     *
-     * @param planner the planner aggregate root
-     * @param hasUpvoted whether the current user has upvoted
-     * @param isBookmarked whether the current user has bookmarked
-     * @param isSubscribed whether the current user is subscribed
-     * @param hasReported whether the current user has reported
-     * @param commentCount total non-deleted comment count for this planner
-     * @param ownerNotificationsEnabled whether owner has notifications enabled (false for non-owners)
-     * @param viewCount the planner's view count (from planner_stats)
-     * @param upvotes the planner's upvote count (from planner_stats)
-     * @return the published planner detail response DTO
-     */
     public static PublishedPlannerDetailResponse fromEntity(
             Planner planner,
             boolean hasUpvoted,

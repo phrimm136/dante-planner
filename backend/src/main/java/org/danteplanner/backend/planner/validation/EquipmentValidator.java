@@ -10,11 +10,6 @@ import static org.danteplanner.backend.planner.validation.JsonTraversal.arrayFie
 import static org.danteplanner.backend.planner.validation.JsonTraversal.eachNumber;
 import static org.danteplanner.backend.planner.validation.SinnerKeys.forEachSinnerEntry;
 
-/**
- * Validates equipment structure: sinner-index keys, presence of all 12
- * sinners, each sinner's identity, the required ZAYIN EGO, EGO types, and
- * the deployment order array.
- */
 @Component
 class EquipmentValidator {
 

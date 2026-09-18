@@ -9,9 +9,7 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 
 /**
- * Sinner-key constants and iteration shared by equipment and skill-state validation.
- *
- * <p>Equipment and skillEAState are both keyed by 1-indexed sinner number
+ * Equipment and skillEAState are both keyed by 1-indexed sinner number
  * (1-12) and both require all 12 sinners present.
  */
 final class SinnerKeys {
@@ -26,19 +24,6 @@ final class SinnerKeys {
     private SinnerKeys() {
     }
 
-    /**
-     * Run {@code body} over every sinner entry of a sinner-keyed object, rejecting unusable keys
-     * and entries on the way. The body sees a zero-padded key and an object value; it does not run
-     * at all unless all 12 sinners are present.
-     *
-     * <p>A container that is not an object at all is passed over in silence, its type having been
-     * reported already by whoever owns that field's type.
-     *
-     * @param container the sinner-keyed object
-     * @param field     the container's field name, as errors and logs address it
-     * @param context   collects the failures
-     * @param body      what to validate inside one sinner's entry
-     */
     static void forEachSinnerEntry(JsonNode container, String field, ValidationContext context,
                                    BiConsumer<String, JsonNode> body) {
         if (!container.isObject()) {

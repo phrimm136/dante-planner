@@ -8,10 +8,6 @@ import java.util.Set;
 
 import static org.danteplanner.backend.planner.validation.SinnerKeys.forEachSinnerEntry;
 
-/**
- * Validates the optional skillEAState map: sinner-index keys, presence of all
- * 12 sinners, valid skill-slot keys, and each sinner's slot total.
- */
 @Component
 class SkillStateValidator {
 

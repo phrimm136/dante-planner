@@ -5,10 +5,6 @@ import org.danteplanner.backend.shared.entity.ValuedEnum;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-/**
- * Vote type enum for planner voting system.
- * Only UP (upvote) is supported.
- */
 public enum VoteType implements ValuedEnum {
     UP("UP");
 

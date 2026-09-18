@@ -9,30 +9,14 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Pure extraction of content-entity references from planner content JSON.
- * Deliberately framework-free: the runtime filter maintenance and the one-shot
- * migration backfill both call this, so the inverted index is always built by
- * the same code path. All entity ids are integers; non-numeric values are dropped.
- */
 public final class PlannerContentEntityExtractor {
 
-    /**
-     * A single (type, id) content-entity reference.
-     */
     public record EntityRef(ContentEntityType type, int id) {
     }
 
     private PlannerContentEntityExtractor() {
     }
 
-    /**
-     * Extract all content-entity references from a parsed content document:
-     * identities from {@code equipment[*].identity.id}, EGOs from
-     * {@code equipment[*].egos[*].id}, gifts from the three gift-id arrays and
-     * {@code floorSelections[*].giftIds}, theme packs from
-     * {@code floorSelections[*].themePackId}. Deduplicated, insertion-ordered.
-     */
     public static Set<EntityRef> extract(JsonNode root) {
         Set<EntityRef> refs = new LinkedHashSet<>();
         if (root == null || !root.isObject()) {
@@ -109,22 +93,13 @@ public final class PlannerContentEntityExtractor {
             int id = Integer.parseInt(raw);
             refs.add(new EntityRef(type, type == ContentEntityType.EGO_GIFT ? baseGiftId(id) : id));
         } catch (NumberFormatException ignored) {
-            // entity ids are integers by contract; anything else is not indexable
         }
     }
 
     /**
-     * The base gift a stored id refers to, whatever enhancement it carries.
-     *
-     * <p>Content stores an enhanced gift as the enhancement level prefixed onto the four-digit
+     * Content stores an enhanced gift as the enhancement level prefixed onto the four-digit
      * base id, so {@code 19154} and {@code 29154} both denote gift {@code 9154}. An id outside
-     * those bands is returned unchanged.</p>
-     *
-     * <p>Must agree with the same collapse in the {@code rebuild_planner_filters} procedure;
-     * the two write the same index from different engines.</p>
-     *
-     * @param id a stored gift id in either base or enhanced form
-     * @return the base gift id
+     * those bands is returned unchanged.
      */
     static int baseGiftId(int id) {
         boolean enhanced = (id >= 19000 && id <= 19999) || (id >= 29000 && id <= 29999);

@@ -3,7 +3,6 @@ package org.danteplanner.backend.planner.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.planner.entity.PlannerSubscription;
-import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerSubscriptionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,7 +12,6 @@ import java.util.UUID;
 
 /**
  * Service for managing planner subscriptions.
- * Handles subscription toggle, status checks, and subscriber retrieval.
  */
 @Service
 @RequiredArgsConstructor
@@ -23,15 +21,6 @@ public class PlannerSubscriptionService {
     private final PlannerSubscriptionRepository subscriptionRepository;
     private final PlannerAccessGuard accessGuard;
 
-    /**
-     * Toggle subscription state for a user on a planner.
-     * Creates new subscription if not exists, toggles enabled state if exists.
-     *
-     * @param userId    the user ID
-     * @param plannerId the planner ID
-     * @return the subscription with updated state
-     * @throws PlannerNotFoundException if planner not found or not published
-     */
     @Transactional
     public PlannerSubscription toggleSubscription(Long userId, UUID plannerId) {
         accessGuard.checkPublished(plannerId);
@@ -52,13 +41,6 @@ public class PlannerSubscriptionService {
         }
     }
 
-    /**
-     * Check if a user is subscribed (and enabled) to a planner.
-     *
-     * @param userId    the user ID
-     * @param plannerId the planner ID
-     * @return true if subscribed and enabled, false otherwise
-     */
     @Transactional(readOnly = true)
     public boolean isSubscribed(Long userId, UUID plannerId) {
         return subscriptionRepository.findByUserIdAndPlannerId(userId, plannerId)
@@ -66,14 +48,6 @@ public class PlannerSubscriptionService {
                 .orElse(false);
     }
 
-    /**
-     * Create a subscription for a user on a planner.
-     * Used for auto-subscribing owner when publishing.
-     * No-op if subscription already exists.
-     *
-     * @param userId    the user ID
-     * @param plannerId the planner ID
-     */
     @Transactional
     public void createSubscription(Long userId, UUID plannerId) {
         if (subscriptionRepository.existsByUserIdAndPlannerId(userId, plannerId)) {
@@ -86,13 +60,6 @@ public class PlannerSubscriptionService {
         log.debug("Auto-created subscription for user {} on planner {}", userId, plannerId);
     }
 
-    /**
-     * Get all user IDs subscribed (and enabled) to a planner.
-     * Used by notification service to send notifications.
-     *
-     * @param plannerId the planner ID
-     * @return list of user IDs with enabled subscriptions
-     */
     @Transactional(readOnly = true)
     public List<Long> getSubscriberUserIds(UUID plannerId) {
         return subscriptionRepository.findByPlannerIdAndEnabledTrue(plannerId)

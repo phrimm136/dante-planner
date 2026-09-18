@@ -18,32 +18,12 @@ import static org.danteplanner.backend.planner.validation.JsonTraversal.eachObje
 import static org.danteplanner.backend.planner.validation.JsonTraversal.eachObjectProperty;
 import static org.danteplanner.backend.planner.validation.JsonTraversal.eachUniqueString;
 
-/**
- * Validates that equipment, EGO, gift and floor-selection IDs exist in game
- * data and are consistent with their sinner keys.
- *
- * <p>Every failure accumulates on the context, so one document reports all of its
- * problems in a single pass.
- */
 @Component
 @RequiredArgsConstructor
 class IdReferenceValidator {
 
-    /**
-     * The difficulty a floor must carry, as the inclusive range a client value has to fall in.
-     *
-     * @param min lowest accepted difficulty
-     * @param max highest accepted difficulty
-     */
     private record DifficultyRule(int min, int max) {}
 
-    /**
-     * What one MD category demands of its floor list: how many floors count, and which difficulty
-     * each of them must carry.
-     *
-     * @param floorCount   floors validated; entries beyond it are ignored
-     * @param difficultyAt the rule for a floor, by its zero-based index
-     */
     private record FloorRules(int floorCount, IntFunction<DifficultyRule> difficultyAt) {}
 
     private static final DifficultyRule NORMAL_OR_HARD = new DifficultyRule(0, 1);
@@ -97,9 +77,6 @@ class IdReferenceValidator {
         validateIdentityLevelAndUptie(sinnerKey, identity, context);
     }
 
-    /**
-     * @return false when the identity is not in game data, so its sinner and levels say nothing
-     */
     private boolean validateIdentityIsKnown(String identityId, ValidationContext context) {
         if (gameDataRegistry.hasIdentity(identityId)) {
             return true;
@@ -109,9 +86,6 @@ class IdReferenceValidator {
         return false;
     }
 
-    /**
-     * @return false when the identity belongs to another sinner, so its levels are beside the point
-     */
     private boolean validateIdentityBelongsToSinner(String sinnerKey, String identityId,
                                                     ValidationContext context) {
         if (sinnerIdValidator.validateMatch(sinnerKey, identityId)) {
@@ -171,9 +145,6 @@ class IdReferenceValidator {
         validateThreadspin(ego, sinnerKey, egoType, egoId, context);
     }
 
-    /**
-     * @return false when the EGO is not in game data, so its sinner and ceiling say nothing
-     */
     private boolean validateEgoIsKnown(String egoId, ValidationContext context) {
         if (gameDataRegistry.hasEgo(egoId)) {
             return true;
@@ -183,9 +154,6 @@ class IdReferenceValidator {
         return false;
     }
 
-    /**
-     * @return false when the EGO belongs to another sinner, so its threadspin is beside the point
-     */
     private boolean validateEgoBelongsToSinner(String sinnerKey, String egoId, ValidationContext context) {
         if (sinnerIdValidator.validateMatch(sinnerKey, egoId)) {
             return true;
@@ -212,9 +180,6 @@ class IdReferenceValidator {
         validateThreadspinUnderEgoCeiling(threadspinPath, threadspin, egoId, context);
     }
 
-    /**
-     * @return false when the threadspin is outside what any EGO allows, so no per-EGO ceiling applies
-     */
     private boolean validateThreadspinInRange(String threadspinPath, int threadspin, ValidationContext context) {
         if (threadspin >= GameConstants.MIN_THREADSPIN && threadspin <= GameConstants.MAX_THREADSPIN) {
             return true;
@@ -272,10 +237,6 @@ class IdReferenceValidator {
         });
     }
 
-    /**
-     * @return false when the floor's theme pack is unusable and the rest of the floor is not worth
-     *         validating
-     */
     private boolean validateThemePackPresence(String floorPath, JsonNode themePackNode, boolean themePackChosen,
                                               ValidationContext context) {
         boolean publishable = context.policy().requiresPublishableContent();
@@ -347,9 +308,6 @@ class IdReferenceValidator {
         });
     }
 
-    /**
-     * @return false when the gift is not in game data, so no theme pack can price it
-     */
     private boolean validateGiftIsKnown(String giftsPath, String giftId, ValidationContext context) {
         if (gameDataRegistry.hasEgoGift(giftId)) {
             return true;

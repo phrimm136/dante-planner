@@ -9,48 +9,18 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Repository for planner subscription operations.
- * Uses composite key (userId, plannerId) via PlannerSubscriptionId.
- */
 @Repository
 public interface PlannerSubscriptionRepository extends JpaRepository<PlannerSubscription, PlannerSubscriptionId> {
 
-    /**
-     * Find a subscription by user ID and planner ID.
-     *
-     * @param userId    the user ID
-     * @param plannerId the planner ID
-     * @return the subscription if exists
-     */
     Optional<PlannerSubscription> findByUserIdAndPlannerId(Long userId, UUID plannerId);
 
-    /**
-     * Find all active (enabled) subscriptions for a planner.
-     * Used for sending notifications to subscribers.
-     *
-     * @param plannerId the planner ID
-     * @return list of active subscriptions
-     */
     List<PlannerSubscription> findByPlannerIdAndEnabledTrue(UUID plannerId);
 
-    /**
-     * Check if a subscription exists for a user and planner.
-     *
-     * @param userId    the user ID
-     * @param plannerId the planner ID
-     * @return true if subscription exists
-     */
     boolean existsByUserIdAndPlannerId(Long userId, UUID plannerId);
 
     /**
-     * Persists a subscription that does not exist yet.
-     *
-     * <p>The key is the (user, planner) pair the caller supplies, so no id-null guard can tell a
-     * new row from an existing one: passing a row that already exists overwrites it.</p>
-     *
-     * @param subscription the subscription to insert
-     * @return the persisted subscription
+     * The key is the (user, planner) pair the caller supplies, so no id-null guard can tell a
+     * new row from an existing one: passing a row that already exists overwrites it.
      */
     default PlannerSubscription insert(PlannerSubscription subscription) {
         return save(subscription);

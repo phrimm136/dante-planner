@@ -9,17 +9,6 @@ import org.danteplanner.backend.shared.sanitize.SanitizerKind;
 
 import java.util.Set;
 
-/**
- * Request DTO for partial planner updates. Null fields are left unchanged.
- *
- * @param title            updated title; null leaves the title unchanged
- * @param status           updated status; null leaves the status unchanged
- * @param category         updated category; null leaves the category unchanged. Must be valid for
- *                         the planner's type (MD categories for MIRROR_DUNGEON, RR for REFRACTED_RAILWAY)
- * @param content          updated content (JSON string); null leaves the content unchanged
- * @param syncVersion      required for optimistic locking; must match the current syncVersion
- * @param selectedKeywords updated selected keywords; null leaves the keywords unchanged
- */
 public record UpdatePlannerRequest(
     @Sanitized(SanitizerKind.PLAIN)
     String title,
@@ -32,7 +21,6 @@ public record UpdatePlannerRequest(
     Long syncVersion,
     Set<String> selectedKeywords
 ) {
-    /** A null {@code selectedKeywords} is preserved: it means "leave unchanged", which an empty set does not. */
     public UpdatePlannerRequest {
         selectedKeywords = selectedKeywords == null ? null : Set.copyOf(selectedKeywords);
     }

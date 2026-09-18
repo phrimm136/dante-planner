@@ -18,10 +18,6 @@ import lombok.Setter;
 import java.time.Instant;
 import java.util.UUID;
 
-/**
- * Owner publication lifecycle: the published toggle, the first-publish stamp that
- * anchors the catalog's recency sort, and the owner's comment-notification preference.
- */
 @Entity
 @Table(name = "planner_publication")
 @Getter
@@ -53,14 +49,6 @@ public class PlannerPublication {
     @Builder.Default
     private boolean ownerNotificationsEnabled = true;
 
-    /**
-     * Enter public view, stamping firstPublishedAt on the first entry.
-     *
-     * <p>Idempotent by construction rather than by the caller checking first: publishing a planner
-     * already published changes nothing, so a retry or a failover cannot flip it back.</p>
-     *
-     * @return what the transition turned out to be
-     */
     PublicationChange publish() {
         if (published) {
             return PublicationChange.NONE;
@@ -74,13 +62,6 @@ public class PlannerPublication {
         return PublicationChange.REPUBLISH;
     }
 
-    /**
-     * Leave public view, keeping the first-publish stamp that anchors the catalog's recency sort.
-     *
-     * <p>Idempotent by construction, for the same reason {@link #publish()} is.</p>
-     *
-     * @return what the transition turned out to be
-     */
     PublicationChange unpublish() {
         if (!published) {
             return PublicationChange.NONE;

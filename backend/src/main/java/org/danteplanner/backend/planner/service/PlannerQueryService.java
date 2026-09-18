@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.PlannerSummaryResponse;
 import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerSummaryRow;
@@ -32,14 +31,6 @@ public class PlannerQueryService {
     private final PlannerStatsRepository statsRepository;
     private final PlannerAccessGuard accessGuard;
 
-    /**
-     * Get all planners for a user with pagination.
-     *
-     * @param userId         the user ID
-     * @param pageable       pagination information
-     * @param includeDeleted whether tombstoned rows ride along carrying their deletedAt
-     * @return page of planner summaries
-     */
     @Transactional(readOnly = true)
     public Page<PlannerSummaryResponse> getPlanners(
             Long userId, Pageable pageable, boolean includeDeleted) {
@@ -49,16 +40,6 @@ public class PlannerQueryService {
         return rows.map(PlannerSummaryResponse::from);
     }
 
-    /**
-     * Get several of a user's planners in one round trip.
-     *
-     * <p>An id naming no planner, a deleted one, or another user's is absent from the result
-     * rather than an error, so the result is not positionally aligned with the argument.</p>
-     *
-     * @param userId the user ID
-     * @param ids    the planner IDs to pull
-     * @return the responses for the owned, live planners among the ids
-     */
     @Transactional(readOnly = true)
     public List<PlannerResponse> getPlanners(Long userId, List<UUID> ids) {
         Map<UUID, Integer> upvotes = statsRepository.upvoteCounts(ids).stream()
@@ -69,14 +50,6 @@ public class PlannerQueryService {
                 .toList();
     }
 
-    /**
-     * Get a specific planner by ID.
-     *
-     * @param userId the user ID
-     * @param id the planner ID
-     * @return the planner response
-     * @throws PlannerNotFoundException if planner not found
-     */
     @Transactional(readOnly = true)
     public PlannerResponse getPlanner(Long userId, UUID id) {
         Planner planner = accessGuard.findPlannerOrThrow(userId, id);

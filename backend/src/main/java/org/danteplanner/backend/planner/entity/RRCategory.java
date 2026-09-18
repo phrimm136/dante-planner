@@ -5,10 +5,6 @@ import org.danteplanner.backend.shared.entity.ValuedEnum;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-/**
- * Refracted Railway category enum.
- * Placeholder for future RR-specific categories.
- */
 public enum RRCategory implements ValuedEnum {
     RR_PLACEHOLDER("RR_PLACEHOLDER");
 
@@ -28,12 +24,6 @@ public enum RRCategory implements ValuedEnum {
         return EnumLookup.fromValue(RRCategory.class, value);
     }
 
-    /**
-     * Check if a string value is a valid RR category.
-     *
-     * @param value the category value to check
-     * @return true if valid, false otherwise
-     */
     public static boolean isValid(String value) {
         return EnumLookup.isValid(RRCategory.class, value);
     }

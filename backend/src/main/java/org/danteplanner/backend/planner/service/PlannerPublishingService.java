@@ -7,9 +7,6 @@ import org.danteplanner.backend.planner.dto.ToggleOwnerNotificationsResponse;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PublicationChange;
-import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
-import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
-import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
@@ -29,7 +26,6 @@ import java.util.function.Consumer;
 
 /**
  * Service for the publish lifecycle of a planner.
- * Handles the publish and unpublish intents and owner notification settings.
  */
 @Service
 @RequiredArgsConstructor
@@ -53,46 +49,16 @@ public class PlannerPublishingService {
     @FunctionalInterface
     public interface Withdrawal {
 
-        /**
-         * Apply the transition.
-         *
-         * @param planner the loaded aggregate
-         * @return what the transition turned out to be
-         */
         PublicationChange apply(Planner planner);
     }
 
-    /**
-     * Publish a planner the owner has already stored.
-     *
-     * <p>Idempotent: publishing an already-published planner leaves it untouched, so a retried or
-     * failed-over mutation never flips it back.</p>
-     *
-     * @param userId    the user ID (must be owner)
-     * @param plannerId the planner ID
-     * @return the published planner response
-     * @throws PlannerNotFoundException   if planner not found
-     * @throws PlannerForbiddenException  if user is not the owner, or the planner was taken down
-     * @throws PlannerValidationException if the planner is not publishable
-     */
     @Transactional
     public PlannerResponse publish(Long userId, UUID plannerId) {
-        // Before the lookup, not inside applyPublish: a restricted actor must learn nothing about
-        // which planners exist, and the entry points load through different paths.
         accessGuard.checkNotRestricted(userId);
 
         return applyPublish(userId, accessGuard.requireExisting(plannerId));
     }
 
-    /**
-     * Upsert the carried document and publish it in one request, so a client-side draft costs one
-     * round trip.
-     *
-     * @param userId    the user ID (must be owner)
-     * @param plannerId the planner ID
-     * @param content   the document to store before publishing
-     * @return the published planner response
-     */
     @Transactional
     public PlannerResponse publish(Long userId, UUID plannerId, UpsertPlannerRequest content) {
         accessGuard.checkNotRestricted(userId);
@@ -100,17 +66,6 @@ public class PlannerPublishingService {
         return applyPublish(userId, upserted(userId, plannerId, content));
     }
 
-    /**
-     * Withdraw a planner from public view on its owner's authority.
-     *
-     * <p>Idempotent, for the same reason {@link #publish(Long, UUID)} is.</p>
-     *
-     * @param userId    the user ID (must be owner)
-     * @param plannerId the planner ID
-     * @return the withdrawn planner response
-     * @throws PlannerNotFoundException  if planner not found
-     * @throws PlannerForbiddenException if user is not the owner
-     */
     @Transactional
     public PlannerResponse unpublish(Long userId, UUID plannerId) {
         accessGuard.checkNotRestricted(userId);
@@ -118,14 +73,6 @@ public class PlannerPublishingService {
         return applyUnpublish(userId, accessGuard.requireExisting(plannerId));
     }
 
-    /**
-     * Upsert the carried document and withdraw the planner from public view in one request.
-     *
-     * @param userId    the user ID (must be owner)
-     * @param plannerId the planner ID
-     * @param content   the document to store before withdrawing
-     * @return the withdrawn planner response
-     */
     @Transactional
     public PlannerResponse unpublish(Long userId, UUID plannerId, UpsertPlannerRequest content) {
         accessGuard.checkNotRestricted(userId);
@@ -139,16 +86,6 @@ public class PlannerPublishingService {
                 .planner();
     }
 
-    /**
-     * Publish an already-loaded aggregate.
-     *
-     * <p>Both entry points cross this method, so the ownership check lives here rather than at each
-     * of them. The restriction check cannot: it has to precede the lookup so a restricted actor
-     * learns nothing about which planners exist.</p>
-     *
-     * <p>Publishability is decided before the aggregate moves, so a refusal leaves the planner in
-     * the state the caller found it in rather than relying on the rollback to put it back.</p>
-     */
     private PlannerResponse applyPublish(Long userId, Planner planner) {
         UUID plannerId = planner.getId();
         ownershipValidator.requireOwner(planner, userId);
@@ -173,10 +110,6 @@ public class PlannerPublishingService {
         return describe(planner);
     }
 
-    /**
-     * Withdraw an already-loaded aggregate from public view, on the same terms as
-     * {@link #applyPublish(Long, Planner)}.
-     */
     private PlannerResponse applyUnpublish(Long userId, Planner planner) {
         UUID plannerId = planner.getId();
         ownershipValidator.requireOwner(planner, userId);
@@ -195,21 +128,6 @@ public class PlannerPublishingService {
         return PlannerResponse.fromEntity(planner, plannerStatsRepository.upvotesOf(planner.getId()));
     }
 
-    /**
-     * Withdraw a planner from public view on a moderator's authority and drop the catalog row that
-     * makes it listable.
-     *
-     * <p>The caller supplies the aggregate transition it wants (takedown, unpublish); which
-     * projection has to follow is not the caller's to remember.</p>
-     *
-     * <p>Idempotent on the transition's own report: a planner already in the withdrawn state is
-     * neither rewritten nor re-projected.</p>
-     *
-     * @param plannerId  the planner to withdraw
-     * @param withdrawal the transition to apply to the aggregate
-     * @return the persisted planner, or the untouched one when it was already withdrawn
-     * @throws PlannerNotFoundException if no non-deleted planner carries the id
-     */
     @Transactional
     public Planner withdrawFromPublicView(UUID plannerId, Withdrawal withdrawal) {
         Planner planner = accessGuard.requireExisting(plannerId);
@@ -222,15 +140,6 @@ public class PlannerPublishingService {
         return planner;
     }
 
-    /**
-     * Apply a moderator's change to a planner's standing in the recommended list and recompute the
-     * derived flag the public list reads. The planner stays reachable by direct link either way.
-     *
-     * @param plannerId the planner whose standing changes
-     * @param change    the transition to apply to the aggregate
-     * @return the persisted planner
-     * @throws PlannerNotFoundException if no non-deleted planner carries the id
-     */
     @Transactional
     public Planner changeRecommendedListing(UUID plannerId, Consumer<Planner> change) {
         Planner planner = accessGuard.requireExisting(plannerId);
@@ -240,40 +149,17 @@ public class PlannerPublishingService {
         return planner;
     }
 
-    /**
-     * The planners a moderator has taken off the recommended list.
-     *
-     * @param pageable the page to read
-     * @return one page of hidden planners
-     */
     @Transactional(readOnly = true)
     public Page<Planner> listHiddenFromRecommended(Pageable pageable) {
         return plannerRepository.findHiddenFromRecommended(pageable);
     }
 
-    /**
-     * The upvote count shown alongside a planner.
-     *
-     * @param plannerId the planner ID
-     * @return the upvote count, zero when the planner has no stats row yet
-     */
     @Transactional(readOnly = true)
     public int upvoteCount(UUID plannerId) {
         return plannerStatsRepository.upvotesOf(plannerId);
     }
 
 
-    /**
-     * Toggle owner notifications for a planner.
-     * Only the planner owner can toggle this setting.
-     *
-     * @param userId    the authenticated user ID (must be owner)
-     * @param plannerId the planner UUID
-     * @param enabled   the new notification setting
-     * @return the toggle result
-     * @throws PlannerNotFoundException if planner doesn't exist
-     * @throws PlannerForbiddenException if user is not the owner
-     */
     @Transactional
     public ToggleOwnerNotificationsResponse toggleOwnerNotifications(Long userId, UUID plannerId, boolean enabled) {
         Planner planner = accessGuard.requireExisting(plannerId);

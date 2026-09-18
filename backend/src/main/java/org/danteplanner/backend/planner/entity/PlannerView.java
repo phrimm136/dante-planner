@@ -16,10 +16,6 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 /**
- * Entity representing a unique view of a planner.
- * Uses composite key (plannerId, viewerHash, viewDate) to ensure one view per viewer per day.
- *
- * Implements Persistable to handle composite key persistence correctly.
  * JPA's save() uses merge() for entities with composite keys where IDs are set,
  * which doesn't insert new entities properly without this interface.
  */

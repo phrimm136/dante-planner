@@ -6,10 +6,6 @@ import java.util.UUID;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
 
-/**
- * Projection of one owner-list row: a planner's identity and type joined with the summary columns
- * of its content row.
- */
 public interface PlannerSummaryRow {
 
     UUID getId();

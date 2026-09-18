@@ -26,12 +26,6 @@ public enum MDCategory implements ValuedEnum {
         return EnumLookup.fromValue(MDCategory.class, value);
     }
 
-    /**
-     * Check if a string value is a valid MD category.
-     *
-     * @param value the category value to check
-     * @return true if valid, false otherwise
-     */
     public static boolean isValid(String value) {
         return EnumLookup.isValid(MDCategory.class, value);
     }

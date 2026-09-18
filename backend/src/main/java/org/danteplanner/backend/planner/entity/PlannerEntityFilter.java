@@ -20,10 +20,6 @@ import org.hibernate.type.SqlTypes;
 import java.util.UUID;
 
 /**
- * Inverted index from a content entity (identity, EGO, gift, theme pack) to the
- * published planners containing it. All entity ids are integers.
- *
- * Implements Persistable to handle composite key persistence correctly.
  * JPA's save() uses merge() for entities with composite keys where IDs are set,
  * which doesn't insert new entities properly without this interface.
  */

@@ -24,12 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * REST controller for reading the authenticated user's own planners.
- *
- * <p>Provides paginated listing and single-planner retrieval scoped to
- * the owning user.</p>
- */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/planner/md")
@@ -38,14 +32,6 @@ public class PlannerQueryController {
     private final PlannerQueryService plannerQueryService;
     private final ByIdReadGuard byIdReadGuard;
 
-    /**
-     * Get all planners for the authenticated user with pagination.
-     *
-     * @param userId         the authenticated user ID
-     * @param pageable       pagination parameters (page, size, sort)
-     * @param includeDeleted whether tombstoned rows ride along for a sync pull
-     * @return page of planner summaries
-     */
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "list")
     @GetMapping
     public ResponseEntity<Page<PlannerSummaryResponse>> getPlanners(
@@ -58,16 +44,6 @@ public class PlannerQueryController {
         return ResponseEntity.ok(planners);
     }
 
-    /**
-     * Get several of the authenticated user's planners in one round trip.
-     *
-     * <p>An id naming no planner, a deleted one, or another user's is absent from the response
-     * array rather than an error, so the array is not positionally aligned with the request.</p>
-     *
-     * @param userId  the authenticated user ID
-     * @param request the planner ids to pull
-     * @return the owned, live planners among the requested ids
-     */
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "batch")
     @PostMapping("/batch")
     public ResponseEntity<List<PlannerResponse>> getPlannerBatch(
@@ -77,13 +53,6 @@ public class PlannerQueryController {
         return ResponseEntity.ok(plannerQueryService.getPlanners(userId, request.ids()));
     }
 
-    /**
-     * Get a specific planner by ID.
-     *
-     * @param userId the authenticated user ID
-     * @param id     the planner ID
-     * @return the planner details
-     */
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "get")
     @GetMapping("/{id}")
     public ResponseEntity<PlannerResponse> getPlanner(

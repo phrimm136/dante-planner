@@ -1,11 +1,5 @@
 package org.danteplanner.backend.planner.validation;
 
-/**
- * Client-facing error codes produced by planner content validation.
- *
- * <p>Each constant's wire string is the contract the frontend depends on and
- * must never change without a coordinated client update.
- */
 public enum ErrorCode {
     EMPTY_CONTENT("EMPTY_CONTENT"),
     SIZE_EXCEEDED("SIZE_EXCEEDED"),

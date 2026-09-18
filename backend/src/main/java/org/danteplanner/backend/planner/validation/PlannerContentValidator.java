@@ -8,14 +8,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-/**
- * Orchestrates planner content validation by delegating each concern to a
- * focused sub-validator and threading a single {@link ValidationContext}
- * through the call chain.
- *
- * <p>Structural failures throw and abort; reference failures accumulate into the
- * context and are combined once at the end.
- */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -28,22 +20,10 @@ public class PlannerContentValidator {
     private final IdReferenceValidator idReferenceValidator;
     private final StartBuffValidator startBuffValidator;
 
-    /**
-     * Validate planner content with relaxed rules (for save/draft).
-     * Allows empty title and themepack.
-     */
     public JsonNode validate(String content, String category) {
         return validate(content, category, ValidationPolicy.DRAFT);
     }
 
-    /**
-     * Validate planner content.
-     *
-     * @param content  the content JSON
-     * @param category the planner category
-     * @param policy   how completely the document must be filled in; {@link ValidationPolicy#PUBLISH}
-     *                 additionally requires every floor to name a resolvable theme pack
-     */
     public JsonNode validate(String content, String category, ValidationPolicy policy) {
         try {
             return doValidate(content, category, policy);

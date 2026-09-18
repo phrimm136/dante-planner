@@ -16,12 +16,6 @@ import org.springframework.data.domain.Persistable;
 import java.time.Instant;
 import java.util.UUID;
 
-/**
- * Authoritative planner counters. Every viewer/voter/commenter write lands here as an
- * atomic increment — never load-mutate-save — so counter traffic cannot contend with
- * the owner's content row. Carries the recommended-notification CAS stamp because the
- * vote path that crosses the threshold is the only writer interested in it.
- */
 @Entity
 @Table(name = "planner_stats")
 @Getter

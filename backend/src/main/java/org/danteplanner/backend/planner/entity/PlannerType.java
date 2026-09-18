@@ -5,10 +5,6 @@ import org.danteplanner.backend.shared.entity.ValuedEnum;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-/**
- * Enum representing the type of planner.
- * Used to distinguish between different game content types.
- */
 public enum PlannerType implements ValuedEnum {
     MIRROR_DUNGEON("MIRROR_DUNGEON") {
         @Override
@@ -29,12 +25,6 @@ public enum PlannerType implements ValuedEnum {
         this.value = value;
     }
 
-    /**
-     * Whether a category string belongs to this planner type's category set.
-     *
-     * @param category the category value to check
-     * @return true if the category is valid for this type
-     */
     public abstract boolean isValidCategory(String category);
 
     @JsonValue

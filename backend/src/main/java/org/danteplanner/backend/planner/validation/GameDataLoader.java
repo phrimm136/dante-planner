@@ -17,10 +17,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
-/**
- * Loads game data IDs from static JSON files.
- * Single responsibility: File I/O operations only.
- */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -28,13 +24,6 @@ public class GameDataLoader {
 
     private final ObjectMapper objectMapper;
 
-    /**
-     * Load all top-level keys from a JSON object file.
-     *
-     * @param filePath Path to the JSON file
-     * @return Set of keys, empty set if the file doesn't exist
-     * @throws GameDataLoadException if the file exists but cannot be read or parsed
-     */
     public Set<String> loadKeysFromFile(Path filePath) {
         Set<String> keys = new HashSet<>();
         forEachField(filePath, (key, value) -> keys.add(key));
@@ -44,12 +33,7 @@ public class GameDataLoader {
     }
 
     /**
-     * Load start gift pools from JSON file.
      * Format: { "keyword": [giftId1, giftId2, ...], ... }
-     *
-     * @param filePath Path to the startEgoGiftPools.json file
-     * @return Map of keyword to set of gift IDs, empty map if the file doesn't exist
-     * @throws GameDataLoadException if the file exists but cannot be read or parsed
      */
     public Map<String, Set<String>> loadStartGiftPools(Path filePath) {
         Map<String, Set<String>> pools = new HashMap<>();
@@ -69,12 +53,7 @@ public class GameDataLoader {
     }
 
     /**
-     * Load EGO Gift theme pack availability map from egoGiftSpecList.json.
      * Format: { "giftId": { "themePack": ["packId1", "packId2", ...], ... }, ... }
-     *
-     * @param filePath Path to the egoGiftSpecList.json file
-     * @return Map of gift ID to list of theme pack IDs (empty list means universal availability)
-     * @throws GameDataLoadException if the file exists but cannot be read or parsed
      */
     public Map<String, List<String>> loadEgoGiftThemePackMap(Path filePath) {
         Map<String, List<String>> themePackMap = new HashMap<>();
@@ -102,12 +81,7 @@ public class GameDataLoader {
     }
 
     /**
-     * Load per-EGO max threadspin from egoSpecList.json.
      * Format: { "egoId": { ..., "maxThreadspin": 4|5 }, ... }
-     *
-     * @param filePath Path to the egoSpecList.json file
-     * @return Map of EGO ID to maxThreadspin, empty map if the file doesn't exist
-     * @throws GameDataLoadException if the file exists but cannot be read or parsed
      */
     public Map<String, Integer> loadEgoMaxThreadspin(Path filePath) {
         Map<String, Integer> maxThreadspinMap = new HashMap<>();

@@ -34,16 +34,8 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Write-once planner core: identity, owner, type, creation time. Everything mutable
- * lives on the satellite rows ({@link PlannerContent}, {@link PlannerPublication},
- * {@link PlannerModeration}) sharing this row's PK, so FKs pointing here never
- * contend with owner writes.
- *
- * <p>As the aggregate root it coordinates cross-entity invariants (a taken-down
- * planner cannot be republished) and fronts the satellites with delegating readers.</p>
- *
- * <p>Implements Persistable so client-assigned ids take the persist path
- * (batchable INSERTs) instead of merge's SELECT-then-INSERT.</p>
+ * Implements Persistable so client-assigned ids take the persist path
+ * (batchable INSERTs) instead of merge's SELECT-then-INSERT.
  */
 @Entity
 @Table(name = "planner")
@@ -103,10 +95,6 @@ public class Planner implements Persistable<UUID> {
         }
     }
 
-    /**
-     * Attach the three satellite rows on aggregate creation. Each satellite derives
-     * its PK from this root via {@code @MapsId}.
-     */
     public void attach(PlannerContent content, PlannerPublication publication, PlannerModeration moderation) {
         content.setPlanner(this);
         publication.setPlanner(this);
@@ -116,7 +104,6 @@ public class Planner implements Persistable<UUID> {
         this.moderation = moderation;
     }
 
-    // --- delegating readers (aggregate facade) ---
 
     public String getTitle() {
         return content.getTitle();
@@ -134,10 +121,6 @@ public class Planner implements Persistable<UUID> {
         return content.getContent();
     }
 
-    /**
-     * The content document as it was read from storage, before any field this
-     * transaction applied.
-     */
     public String getLoadedContentJson() {
         return content.getLoadedContent();
     }
@@ -166,10 +149,6 @@ public class Planner implements Persistable<UUID> {
         return content.getSelectedKeywords();
     }
 
-    /**
-     * The keyword set as it was read from storage, before any field this
-     * transaction applied.
-     */
     public Set<String> getLoadedKeywords() {
         return content.getLoadedSelectedKeywords();
     }
@@ -202,71 +181,32 @@ public class Planner implements Persistable<UUID> {
         return moderation.isTakenDown();
     }
 
-    /**
-     * Check if this planner is owned by the given user.
-     *
-     * @param userId the user ID to check ownership against
-     * @return true if this planner belongs to the user, false otherwise
-     */
     public boolean isOwnedBy(Long userId) {
         return user.getId().equals(userId);
     }
 
-    /**
-     * Soft delete this planner.
-     */
     public void softDelete() {
         content.markDeleted();
     }
 
-    /**
-     * Take this planner down as a moderator. Unpublishing is part of the takedown.
-     *
-     * <p>A takedown that newly stamps the planner reports {@link PublicationChange#WITHDRAWN} even
-     * when the planner was already unpublished: the stamp pins it unpublishable, which is a
-     * departure from public view the caller still has to persist and project.</p>
-     *
-     * @return what the takedown turned out to be
-     */
     public PublicationChange takeDown() {
         boolean moderated = moderation.takeDown();
         PublicationChange withdrawal = publication.unpublish();
         return moderated ? PublicationChange.WITHDRAWN : withdrawal;
     }
 
-    /**
-     * Hide this planner from the recommended list.
-     *
-     * @param moderatorId the moderator performing the action
-     * @param reason      the reason for hiding
-     */
     public void hideFromRecommended(Long moderatorId, String reason) {
         moderation.hide(moderatorId, reason);
     }
 
-    /**
-     * Restore this planner to the recommended list.
-     */
     public void unhideFromRecommended() {
         moderation.unhide();
     }
 
-    /**
-     * Update the owner's comment-notification preference.
-     */
     public void setOwnerNotificationsEnabled(boolean enabled) {
         publication.setOwnerNotificationsEnabled(enabled);
     }
 
-    /**
-     * Publish this planner, stamping firstPublishedAt on the first transition into published.
-     *
-     * <p>Idempotent: publishing a planner already published changes nothing, so a retry or a
-     * failover cannot flip it back.</p>
-     *
-     * @return what the transition turned out to be
-     * @throws PlannerForbiddenException if the planner was taken down by a moderator
-     */
     public PublicationChange publish() {
         if (moderation.isTakenDown()) {
             throw new PlannerForbiddenException(id);
@@ -274,21 +214,10 @@ public class Planner implements Persistable<UUID> {
         return publication.publish();
     }
 
-    /**
-     * Record a save: bump the sync version on the content row.
-     */
     public void recordSave() {
         content.recordSave();
     }
 
-    /**
-     * Withdraw this planner from public view. No moderation side effects, and a takedown does not
-     * block it.
-     *
-     * <p>Idempotent: withdrawing a planner already withdrawn changes nothing.</p>
-     *
-     * @return what the transition turned out to be
-     */
     public PublicationChange unpublish() {
         return publication.unpublish();
     }

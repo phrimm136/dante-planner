@@ -28,13 +28,6 @@ import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 
-/**
- * Owner-mutated planner content row. The only writer is the owning user's save path,
- * making {@code row_lock_version} the aggregate's single optimistic-lock boundary.
- * Deliberately bare: no secondary index, no inbound FK (INV6), so a concurrent
- * same-row write can only serialize on the row's X lock — never deadlock via a
- * child's shared lock.
- */
 @Entity
 @Table(name = "planner_content")
 @Getter
@@ -106,10 +99,8 @@ public class PlannerContent {
     private Instant deletedAt;
 
     /**
-     * The searchable values as this row was read. MySQL re-serializes a JSON column,
-     * so the stored form is not the string that was written and a comparison made
-     * after the flush always reports a change; only a value captured at load answers
-     * whether the transaction actually moved the document or the keyword set.
+     * MySQL re-serializes a JSON column, so the stored form is not the string that was
+     * written and a comparison made after the flush always reports a change.
      */
     @Transient
     private String loadedContent;
@@ -139,17 +130,10 @@ public class PlannerContent {
         return deletedAt != null;
     }
 
-    /**
-     * Soft delete: stamped here (not on the core row) so cross-device sync pulls
-     * see the deletion without a join.
-     */
     public void markDeleted() {
         this.deletedAt = Instant.now();
     }
 
-    /**
-     * Record a save: bump the sync version handed back to clients.
-     */
     public void recordSave() {
         this.syncVersion = this.syncVersion + 1;
     }

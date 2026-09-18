@@ -12,12 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * REST controller for planner configuration.
- *
- * <p>Exposes the public planner configuration (schema and content versions)
- * used by clients when creating planners.</p>
- */
 @RestController
 @RequestMapping("/api/planner/md")
 public class PlannerController {
@@ -45,14 +39,6 @@ public class PlannerController {
                 .toList();
     }
 
-    /**
-     * Get planner configuration including current content versions.
-     *
-     * <p>This endpoint is public and does not require authentication.
-     * Returns current MD version and available RR versions.</p>
-     *
-     * @return the planner configuration
-     */
     @RateLimited(RateLimitPolicy.PUBLIC_READ)
     @GetMapping("/config")
     public ResponseEntity<PlannerConfigResponse> getConfig() {

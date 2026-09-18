@@ -6,9 +6,6 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
 
-/**
- * Composite primary key for PlannerEntityFilter: (entityType, entityId, plannerId).
- */
 public class PlannerEntityFilterId implements Serializable {
 
     private static final long serialVersionUID = 1L;

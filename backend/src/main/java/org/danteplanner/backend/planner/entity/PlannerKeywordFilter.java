@@ -13,11 +13,6 @@ import org.springframework.data.domain.Persistable;
 import java.util.UUID;
 
 /**
- * Inverted index from a keyword slug to the published planners carrying it.
- * Keyword facet filtering reads this table; the JSON keyword array on the
- * content/catalog rows is display-only.
- *
- * Implements Persistable to handle composite key persistence correctly.
  * JPA's save() uses merge() for entities with composite keys where IDs are set,
  * which doesn't insert new entities properly without this interface.
  */

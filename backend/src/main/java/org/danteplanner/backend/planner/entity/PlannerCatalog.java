@@ -22,11 +22,6 @@ import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 
-/**
- * Visible-only browse projection: a row exists exactly while the planner is
- * published, not deleted, and not taken down. Deliberately dumb — scalar copies
- * maintained by the write side, read by the public list/search paths only.
- */
 @Entity
 @Table(name = "planner_catalog")
 @Getter

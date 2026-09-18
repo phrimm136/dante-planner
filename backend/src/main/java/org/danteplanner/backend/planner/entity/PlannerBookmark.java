@@ -15,10 +15,6 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Entity representing a user's bookmark on a planner.
- * Uses composite key (userId, plannerId) to ensure one bookmark per user per planner.
- *
- * Implements Persistable to handle composite key persistence correctly.
  * JPA's save() uses merge() for entities with composite keys where IDs are set,
  * which doesn't insert new entities properly without this interface.
  */
@@ -71,7 +67,6 @@ public class PlannerBookmark implements Persistable<PlannerBookmarkId> {
         this.isNew = false;
     }
 
-    // Getters and Setters
 
     public Long getUserId() {
         return userId;

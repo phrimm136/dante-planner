@@ -16,7 +16,6 @@ import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerBookmark;
 import org.danteplanner.backend.planner.entity.PlannerCatalog;
 import org.danteplanner.backend.planner.entity.PlannerVote;
-import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.repository.PlannerBookmarkRepository;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
@@ -40,22 +39,14 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.danteplanner.backend.planner.exception.PlannerValidationException;
 
 /**
  * Service for the public planner catalog read model (CQRS read side).
- * Listings, search, and facets read only the catalog projection and its filter
- * tables; counters come from planner_stats; the single-planner detail reads the
- * write aggregate. Ordering is recency-only (first published, newest first).
  */
 @Service
 @Slf4j
 public class PublishedPlannerQueryService {
 
-    /**
-     * Stand-ins for a planner whose counter row or core projection is missing, so the response
-     * assembly reads one shape. Neither instance is ever persisted.
-     */
     private static final PlannerStats NO_STATS = PlannerStats.builder().build();
     private static final PlannerCoreInfo NO_CORE = PlannerCoreInfo.absent();
 
@@ -96,27 +87,11 @@ public class PublishedPlannerQueryService {
         this.catalogReadValidator = catalogReadValidator;
     }
 
-    /**
-     * Resolve what a notification about a planner needs to know about it.
-     *
-     * <p>Publication state is deliberately not part of the predicate: a comment already exists on
-     * the planner, and withdrawing it from public view does not withdraw the notification its
-     * author is owed. A soft-deleted planner has nothing left to announce and comes back empty.</p>
-     *
-     * @param plannerId the planner ID
-     * @return the notification target, empty when no live planner carries the id
-     */
     @Transactional(readOnly = true)
     public Optional<PlannerNotificationTarget> notificationTargetOf(UUID plannerId) {
         return plannerRepository.findNotificationTarget(plannerId);
     }
 
-    /**
-     * Atomically increment the view count for a planner.
-     *
-     * @param plannerId the planner ID
-     * @throws PlannerNotFoundException if planner not found
-     */
     @Transactional
     public void incrementViewCount(UUID plannerId) {
         catalogReadValidator.requireActivePlanner(plannerRepository.existsActiveById(plannerId), plannerId);
@@ -124,17 +99,6 @@ public class PublishedPlannerQueryService {
         log.debug("Incremented view count for planner {}", plannerId);
     }
 
-    /**
-     * List published or recommended planners using composable Specifications over the catalog
-     * projection, ordered by recency. Applies AND semantics across all provided filters; a query
-     * carrying no filter at all is the plain browse listing.
-     *
-     * @param catalogQuery the filter set to compose
-     * @param pageable     pagination information
-     * @param userId       optional user ID for vote/bookmark context
-     * @return page of public planner responses with user context
-     * @throws PlannerValidationException if a content-entity id is not numeric
-     */
     @Transactional(readOnly = true)
     public Page<PublicPlannerResponse> searchPlanners(
             CatalogQuery catalogQuery, Pageable pageable, Long userId) {
@@ -165,22 +129,11 @@ public class PublishedPlannerQueryService {
         return mapCatalogWithUserContext(rows, userId);
     }
 
-    /**
-     * Specification queries order via the Pageable; pin it to recency.
-     */
     private static Pageable recencySorted(Pageable pageable) {
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
                 Sort.by(Sort.Direction.DESC, "firstPublishedAt"));
     }
 
-    /**
-     * Map catalog rows to responses with author info, counters, and user context
-     * (votes, bookmarks, comment counts). Uses batch queries to prevent N+1 issues.
-     *
-     * @param rows   the page of catalog rows
-     * @param userId the user ID (null for anonymous users)
-     * @return page of public planner responses with user context
-     */
     private Page<PublicPlannerResponse> mapCatalogWithUserContext(Page<PlannerCatalog> rows, Long userId) {
         List<UUID> plannerIds = rows.getContent().stream()
                 .map(PlannerCatalog::getPlannerId)
@@ -198,14 +151,12 @@ public class PublishedPlannerQueryService {
             upvotedIds = Set.of();
             bookmarkedIds = Set.of();
         } else {
-            // Batch query: 1 query for all votes (immutable - no deleted_at check needed)
             upvotedIds = plannerVoteRepository
                     .findByUserIdAndPlannerIdIn(userId, plannerIds)
                     .stream()
                     .map(PlannerVote::getPlannerId)
                     .collect(Collectors.toSet());
 
-            // Batch query: 1 query for all bookmarks
             bookmarkedIds = plannerBookmarkRepository
                     .findByUserIdAndPlannerIdIn(userId, plannerIds)
                     .stream()
@@ -225,36 +176,10 @@ public class PublishedPlannerQueryService {
         });
     }
 
-    /**
-     * Check if the user has upvoted a planner.
-     * Used for single-planner lookups (not for list queries - use batch method).
-     *
-     * @param plannerId the planner ID
-     * @param userId    the user ID
-     * @return true if upvoted, false if not
-     */
     private boolean hasUpvoted(UUID plannerId, Long userId) {
         return plannerVoteRepository.findByUserIdAndPlannerId(userId, plannerId).isPresent();
     }
 
-    /**
-     * Get a single published planner with full content, user context, and view recording.
-     *
-     * <p>Buffers a view for asynchronous recording with daily deduplication:
-     * same viewer (by userId or IP+UA hash) counts at most once per UTC day,
-     * applied when the buffer flushes. The response carries the view count as of
-     * this request (from {@code planner_stats}), so the just-buffered view is not
-     * yet reflected.</p>
-     *
-     * @param plannerId the planner ID
-     * @param userId    optional user ID for vote/bookmark/subscription context (null for anonymous)
-     * @param viewerIdentity opaque per-viewer identity for anonymous deduplication, as produced by
-     *                  {@code ClientIpResolver.resolveClientIdentifier} ({@code ip:<addr>} or
-     *                  {@code device:<uuid>}) — never parsed, only hashed
-     * @param userAgent viewer's User-Agent header (used for anonymous deduplication)
-     * @return the published planner detail response with content, user context, and current view count
-     * @throws PlannerNotFoundException if planner not found or not published
-     */
     @Transactional(readOnly = true)
     public PublishedPlannerDetailResponse getPublishedPlanner(
             UUID plannerId, Long userId, String viewerIdentity, String userAgent) {
@@ -270,9 +195,6 @@ public class PublishedPlannerQueryService {
         int upvotes = stats.getUpvotes();
         long commentCount = stats.getCommentCount();
 
-        // Determine owner notification setting:
-        // - For owner: actual setting (defaults to true)
-        // - For non-owner/anonymous: false (they can't toggle it anyway)
         boolean isOwner = userId != null && planner.isOwnedBy(userId);
         boolean ownerNotificationsEnabled = isOwner && planner.isOwnerNotificationsEnabled();
 

@@ -12,15 +12,9 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * Whether applying a write would leave every persisted field of a content row as it stands.
- *
- * <p>Content is compared as a parsed tree rather than as bytes. MySQL re-serializes a JSON column
+ * MySQL re-serializes a JSON column
  * and the request sanitizer re-renders what a client sends, so a client saving back the document it
- * pulled never resends the stored string; a byte comparison would report that as a change and
- * refuse a write that moves nothing.</p>
- *
- * <p>A document that fails to parse on either side answers false, so a write is never acknowledged
- * on the strength of a comparison that could not be made.</p>
+ * pulled never resends the stored string.
  */
 @Component
 @RequiredArgsConstructor
@@ -28,13 +22,6 @@ public class EffectiveNoOpPredicate {
 
     private final ObjectMapper objectMapper;
 
-    /**
-     * Whether applying {@code carried} to {@code stored} would move no field.
-     *
-     * @param stored  the content row as it stands
-     * @param carried the values the request would apply
-     * @return true when every carried field already holds the stored value
-     */
     public boolean isEffectiveNoOp(PlannerContent stored, CarriedWrite carried) {
         return unchanged(carried.title(), stored.getTitle())
                 && unchanged(carried.status(), stored.getStatus())
@@ -50,10 +37,6 @@ public class EffectiveNoOpPredicate {
         return carried == null || Objects.equals(carried, storedValue);
     }
 
-    /**
-     * Keywords are normalized before comparison because the write path normalizes them before
-     * assignment, so a client spelling of a set the row already holds moves nothing.
-     */
     private static boolean keywordsUnchanged(Set<String> carried, Set<String> storedValue) {
         return carried == null
                 || Objects.equals(PlannerKeywords.fromClient(carried).asSet(), storedValue);

@@ -7,17 +7,9 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 /**
- * Schedulers for the application's periodic work.
- *
- * <p>Both are declared here because declaring either one suppresses the framework's own scheduler:
- * its auto-configuration backs off as soon as any {@code TaskScheduler} bean exists, which would
- * otherwise leave {@code spring.task.scheduling.pool.size} unread and route every scheduled task
- * onto the single-threaded flush scheduler below.</p>
- *
- * <p>The shared scheduler carries more than one thread so a task blocked on a cross-region write
- * cannot stop SSE heartbeats. The planner view-buffer flush runs every 500ms and writes
- * cross-region on every tick, so it is isolated onto its own thread: it can stall without reaching
- * the others, and a slow neighbour cannot delay it.</p>
+ * Declaring either scheduler suppresses the framework's own: its auto-configuration backs off as
+ * soon as any {@code TaskScheduler} bean exists, which would otherwise leave
+ * {@code spring.task.scheduling.pool.size} unread.
  */
 @Configuration
 public class ViewFlushSchedulerConfig {

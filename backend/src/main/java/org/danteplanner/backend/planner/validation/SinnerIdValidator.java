@@ -5,10 +5,6 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-/**
- * Validates sinner-ID consistency in equipment data.
- * Single responsibility: Extract and validate sinner indices from entity IDs.
- */
 @Component
 public class SinnerIdValidator {
 
@@ -19,15 +15,7 @@ public class SinnerIdValidator {
     private static final Pattern EGO_PATTERN = Pattern.compile("^2(0[1-9]|1[0-2])\\d{2,}$");
 
     /**
-     * Validate that equipment key matches the sinner encoded in entity ID.
-     *
-     * <p>Equipment keys are 2-digit 1-indexed ("01"-"12"), matching ID sinner indices. An ID that
-     * encodes no sinner at all fails the same way one encoding the wrong sinner does, so the
-     * caller records one element error against the path either way.
-     *
-     * @param equipmentKey Equipment key (e.g., "01", "02", "12")
-     * @param entityId     Identity or EGO ID (e.g., "10101", "20101")
-     * @return true if sinner indices match
+     * Equipment keys are 2-digit 1-indexed ("01"-"12"), matching ID sinner indices.
      */
     public boolean validateMatch(String equipmentKey, String entityId) {
         String normalizedKey = equipmentKey.length() == 1

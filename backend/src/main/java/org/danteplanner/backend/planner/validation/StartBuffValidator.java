@@ -11,12 +11,6 @@ import static org.danteplanner.backend.planner.validation.JsonTraversal.arrayFie
 import static org.danteplanner.backend.planner.validation.JsonTraversal.eachNumber;
 import static org.danteplanner.backend.planner.validation.JsonTraversal.eachUniqueString;
 
-/**
- * Validates start-buff and start-gift selections against game data.
- *
- * <p>Start buffs: max 10, each ID must exist, base IDs (00-09) unique.
- * Start gifts: keyword-gated, each gift must belong to the keyword's pool.
- */
 @Component
 @RequiredArgsConstructor
 class StartBuffValidator {
@@ -47,9 +41,6 @@ class StartBuffValidator {
         });
     }
 
-    /**
-     * @return false when the buff is not in game data, so the base id it would carry is a guess
-     */
     private boolean validateBuffIsKnown(int buffId, ValidationContext context) {
         if (gameDataRegistry.hasStartBuff(String.valueOf(buffId))) {
             return true;
@@ -101,9 +92,6 @@ class StartBuffValidator {
                 p -> ValidationErrors.invalidSequence(p + " requires selectedGiftKeyword"));
     }
 
-    /**
-     * @return false when the keyword is not in game data, so it names no pool to check gifts against
-     */
     private boolean validateKeywordIsKnown(String keyword, ValidationContext context) {
         if (gameDataRegistry.hasStartGiftKeyword(keyword)) {
             return true;

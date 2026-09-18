@@ -4,10 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.springframework.stereotype.Component;
 
-/**
- * Validates the planner category parameter against {@link MDCategory},
- * the single source of truth for valid MD categories.
- */
 @Component
 @Slf4j
 class CategoryValidator {

@@ -19,7 +19,6 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Moderator-only planner state: takedown and the hidden-from-recommended audit trail.
  * A row with {@code hiddenAt} set but a NULL {@code hiddenByModeratorId} means the
  * moderator account was deleted (FK ON DELETE SET NULL).
  */

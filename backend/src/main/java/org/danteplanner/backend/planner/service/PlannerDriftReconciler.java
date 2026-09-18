@@ -27,17 +27,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**
- * Scheduled drift reconciler over the planner projections and counters: detects
- * divergence between planner_stats and the authoritative child aggregates,
- * catalog membership vs visibility, the catalog's scalar and keyword copies vs
- * the content row they were taken from, the filter indexes vs a rebuild of the
- * stored content (same extraction path as runtime maintenance), the derived
- * recommended flag, and recommendation latches whose announcement nothing
- * carries. Emits one structured drift record (log event + metric) per
- * finding and repairs NOTHING — drift means a maintenance bug to fix, not a
- * table to quietly patch.
- */
 @Service
 @Slf4j
 public class PlannerDriftReconciler {
@@ -63,31 +52,17 @@ public class PlannerDriftReconciler {
         this.recommendedThreshold = recommendedThreshold;
     }
 
-    /**
-     * One detected divergence for one planner.
-     */
     public record DriftRecord(UUID plannerId, String kind, String expected, String actual) {
     }
 
-    /**
-     * The filter index state a rebuild of the stored documents implies, beside the planners whose
-     * document could not be read and whose expected state is therefore unknown.
-     */
     private record ExpectedIndexes(Map<UUID, Set<String>> entities, Map<UUID, Set<String>> keywords,
             Set<UUID> unreadable) {
     }
 
     /**
-     * Run every audit and emit a record per finding.
-     *
-     * <p>The read-only boundary spans the whole pass: every audit read routes to the replica, and
-     * one transaction gives them a single snapshot to disagree against.</p>
-     *
-     * <p>Multi-pod safe: {@code @SchedulerLock} over the shared auth Redis lock store ensures the
+     * {@code @SchedulerLock} over the shared auth Redis lock store ensures the
      * pass fires once across the fleet, not once per pod. A refused pod's call returns null rather
-     * than an empty list — the scheduler discards it, and nothing else calls this method.</p>
-     *
-     * @return the drift records found in this pass
+     * than an empty list.
      */
     @Scheduled(cron = "${planner.reconciler.cron:0 0 4 * * *}")
     @SchedulerLock(name = "reconcilePlannerDrift", lockAtMostFor = "PT10M", lockAtLeastFor = "PT30S")
@@ -147,17 +122,6 @@ public class PlannerDriftReconciler {
                 .toList();
     }
 
-    /**
-     * Compare the catalog's keyword copy against the content row's, as the runtime serves each.
-     *
-     * <p>Drift confined to invalid or legacy members is invisible here by construction:
-     * {@link PlannerKeywords#fromStorage} drops unknown ids and remaps renamed ones, so the audit
-     * compares the valid subsets and a difference the runtime itself normalizes away is not
-     * reported. That is the intended reading — the question is whether the two columns serve the
-     * same keywords, not whether they hold the same bytes.</p>
-     *
-     * @return one record per planner whose two keyword sets disagree
-     */
     private List<DriftRecord> auditCatalogKeywords() {
         return auditRepository.catalogKeywordPairs().stream()
                 .map(row -> {
@@ -172,20 +136,6 @@ public class PlannerDriftReconciler {
                 .toList();
     }
 
-    /**
-     * Read one keyword column the way a reader of this planner gets it.
-     *
-     * <p>{@code KeywordSetConverter} is total: a column it cannot parse is served as the empty set,
-     * and that is what the page shows. The observation therefore takes a corrupt column at face
-     * value where {@link #parseKeywords} abstains, and the split is deliberate — a column served as
-     * no keywords while the other side has some is a divergence a user can see, whereas rebuilding
-     * an index from it would delete rows nothing has shown to be wrong.</p>
-     *
-     * @param plannerId   the planner whose column is being read
-     * @param side        which of the two columns, for the log line
-     * @param keywordsJson the stored array
-     * @return the keywords that column denotes to a reader
-     */
     private Set<String> keywordsAsServed(UUID plannerId, String side, String keywordsJson) {
         return parseKeywords(plannerId, side, keywordsJson).orElseGet(Set::of);
     }
@@ -201,12 +151,6 @@ public class PlannerDriftReconciler {
                 .toList();
     }
 
-    /**
-     * Rebuild the index state every visible planner's stored content and keywords imply, by the same
-     * extraction the runtime maintenance runs.
-     *
-     * @return the rebuilt sets per planner, plus the planners that could not be rebuilt
-     */
     private ExpectedIndexes rebuildExpectedIndexes() {
         Map<UUID, Set<String>> entitiesByPlanner = new HashMap<>();
         Map<UUID, Set<String>> keywordsByPlanner = new HashMap<>();
@@ -228,11 +172,6 @@ public class PlannerDriftReconciler {
         return new ExpectedIndexes(entitiesByPlanner, keywordsByPlanner, unreadable);
     }
 
-    /**
-     * @param plannerId   the planner whose document is being read
-     * @param contentJson the stored document
-     * @return the entity keys the stored document carries, or empty when it cannot be read
-     */
     private Optional<Set<String>> extractEntityKeys(UUID plannerId, String contentJson) {
         if (contentJson == null || contentJson.isBlank()) {
             return Optional.of(Set.of());
@@ -251,12 +190,6 @@ public class PlannerDriftReconciler {
         }
     }
 
-    /**
-     * @param plannerId    the planner whose column is being read
-     * @param side         which of the stored columns, for the log line
-     * @param keywordsJson the stored array
-     * @return the keywords the stored column carries, or empty when it cannot be read
-     */
     private Optional<Set<String>> parseKeywords(UUID plannerId, String side, String keywordsJson) {
         if (keywordsJson == null || keywordsJson.isBlank()) {
             return Optional.of(Set.of());
@@ -271,9 +204,6 @@ public class PlannerDriftReconciler {
         }
     }
 
-    /**
-     * @return the indexed entity references each planner currently carries
-     */
     private Map<UUID, Set<String>> actualEntityIndex() {
         return auditRepository.entityFilterEntries().stream()
                 .collect(Collectors.groupingBy(EntityFilterRow::plannerId,
@@ -281,20 +211,12 @@ public class PlannerDriftReconciler {
                                 Collectors.toSet())));
     }
 
-    /**
-     * @return the indexed keywords each planner currently carries
-     */
     private Map<UUID, Set<String>> actualKeywordIndex() {
         return auditRepository.keywordFilterEntries().stream()
                 .collect(Collectors.groupingBy(KeywordFilterRow::plannerId,
                         Collectors.mapping(KeywordFilterRow::keyword, Collectors.toSet())));
     }
 
-    /**
-     * Compare one index against its rebuild.
-     *
-     * @return one record per planner whose indexed rows disagree with the rebuild
-     */
     private List<DriftRecord> compareIndex(String kind, Map<UUID, Set<String>> expected,
             Map<UUID, Set<String>> actual, Set<UUID> unreadable) {
         return comparablePlannerIds(expected, actual, unreadable).stream()
@@ -305,12 +227,6 @@ public class PlannerDriftReconciler {
                 .toList();
     }
 
-    /**
-     * <p>A planner whose stored document could not be rebuilt is left out entirely: its expected
-     * set is unknown, and treating unknown as empty reports every indexed row it has as drift.</p>
-     *
-     * @return the planners whose two sides can be held against each other
-     */
     private Set<UUID> comparablePlannerIds(Map<UUID, Set<String>> expected,
             Map<UUID, Set<String>> actual, Set<UUID> unreadable) {
         Set<UUID> plannerIds = new HashSet<>(expected.keySet());
@@ -319,9 +235,6 @@ public class PlannerDriftReconciler {
         return plannerIds;
     }
 
-    /**
-     * @return the record for one planner's index, or empty when the two sides agree
-     */
     private Optional<DriftRecord> indexDrift(String kind, UUID plannerId, Set<String> want,
             Set<String> have) {
         return want.equals(have)

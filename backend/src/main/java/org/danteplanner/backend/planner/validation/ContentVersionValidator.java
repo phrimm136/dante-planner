@@ -11,9 +11,6 @@ import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-/**
- * Validates the content version a new planner declares against what its type accepts.
- */
 @Component
 @Slf4j
 public class ContentVersionValidator {
@@ -21,12 +18,6 @@ public class ContentVersionValidator {
     private static final String INVALID_CONTENT_VERSION = "INVALID_CONTENT_VERSION";
     private static final String CONTENT_VERSION_REQUIRED = "CONTENT_VERSION_REQUIRED";
 
-    /**
-     * The versions one planner type accepts, and the name its rejection message carries.
-     *
-     * @param forCreate   versions a new planner may declare
-     * @param displayName the type's name as the client sees it
-     */
     private record VersionRule(List<Integer> forCreate, String displayName) {}
 
     private final Map<PlannerType, VersionRule> rules;
@@ -48,10 +39,6 @@ public class ContentVersionValidator {
                 mdCurrentVersion, rrAvailableVersions);
     }
 
-    /**
-     * A planner type with no rule would pass every version unchecked, so its absence has to stop
-     * the context from starting rather than surface as accepted bad content later.
-     */
     private void requireEveryTypeCovered() {
         List<PlannerType> uncovered = Arrays.stream(PlannerType.values())
                 .filter(type -> !rules.containsKey(type))
@@ -73,13 +60,6 @@ public class ContentVersionValidator {
         }
     }
 
-    /**
-     * Validates the content version a new planner declares.
-     *
-     * @param plannerType    the planner type
-     * @param contentVersion the content version to validate
-     * @throws PlannerValidationException if the version is absent or the type does not accept it
-     */
     public void validateVersionForCreate(PlannerType plannerType, Integer contentVersion) {
         if (contentVersion == null) {
             log.warn("Validation failed: content version is null");

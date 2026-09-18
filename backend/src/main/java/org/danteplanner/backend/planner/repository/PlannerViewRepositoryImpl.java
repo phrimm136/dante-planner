@@ -24,8 +24,7 @@ public class PlannerViewRepositoryImpl implements PlannerViewRepositoryCustom {
     private final JdbcTemplate jdbcTemplate;
 
     // Build over the @Primary (routing) datasource rather than an autoconfigured JdbcTemplate,
-    // which backs off when multiple datasources are present. The batch insert is non-read-only,
-    // so the routing datasource sends it to the primary. Mirrors GtidWriteCapture.
+    // which backs off when multiple datasources are present.
     public PlannerViewRepositoryImpl(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }

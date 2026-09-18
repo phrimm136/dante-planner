@@ -15,10 +15,6 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Entity representing a user's subscription to a planner.
- * Uses composite key (userId, plannerId) to ensure one subscription per user per planner.
- *
- * Implements Persistable to handle composite key persistence correctly.
  * JPA's save() uses merge() for entities with composite keys where IDs are set,
  * which doesn't insert new entities properly without this interface.
  */
@@ -44,9 +40,6 @@ public class PlannerSubscription implements Persistable<PlannerSubscriptionId> {
     @Transient
     private boolean isNew = true;
 
-    /**
-     * No-arg constructor for JPA.
-     */
     protected PlannerSubscription() {
     }
 
@@ -78,16 +71,11 @@ public class PlannerSubscription implements Persistable<PlannerSubscriptionId> {
         this.isNew = false;
     }
 
-    // Business methods
 
-    /**
-     * Toggle the enabled state of this subscription.
-     */
     public void toggle() {
         this.enabled = !this.enabled;
     }
 
-    // Getters
 
     public Long getUserId() {
         return userId;

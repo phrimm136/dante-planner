@@ -14,11 +14,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
-/**
- * Validates the structural shape of planner content: byte-size limits,
- * JSON well-formedness, the allowed/required field set, field types, and
- * per-note size limits.
- */
 @Component
 @Slf4j
 class StructuralValidator {

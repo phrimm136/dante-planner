@@ -4,10 +4,6 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
 
-/**
- * Composite primary key for PlannerBookmark entity.
- * Combines userId and plannerId to ensure one bookmark per user per planner.
- */
 public class PlannerBookmarkId implements Serializable {
 
     private static final long serialVersionUID = 1L;

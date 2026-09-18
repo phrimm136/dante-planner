@@ -30,13 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * REST controller for reading published planners.
- *
- * <p>Public endpoints for browsing published and recommended planners and
- * viewing a single published planner. Authenticated callers additionally
- * receive their vote, bookmark, and subscription context.</p>
- */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/planner/md")
@@ -46,21 +39,6 @@ public class PublishedPlannerController {
     private final SecurityProperties securityProperties;
     private final ByIdReadGuard byIdReadGuard;
 
-    /**
-     * Get all published planners with pagination, ordered by release date
-     * (first published, newest first).
-     *
-     * <p>This endpoint is public and does not require authentication.
-     * Returns planners that have been published by their owners.
-     * If the user is authenticated, includes their vote and bookmark state.</p>
-     *
-     * @param page     page number (0-indexed)
-     * @param size     page size
-     * @param category optional category filter (e.g., "5F", "10F", "15F" for MD)
-     * @param q        optional search term for title/keywords
-     * @param userId   optional authenticated user ID (null for anonymous)
-     * @return page of public planner summaries with optional user context
-     */
     @RateLimited(RateLimitPolicy.PUBLIC_READ)
     @GetMapping("/published")
     public ResponseEntity<Page<PublicPlannerResponse>> getPublishedPlanners(
@@ -79,20 +57,6 @@ public class PublishedPlannerController {
                 entityFilters(identity, ego, gift, themePack), userId);
     }
 
-    /**
-     * Get recommended planners with pagination.
-     *
-     * <p>This endpoint is public and does not require authentication.
-     * Returns planners with net votes (upvotes - downvotes) >= threshold.
-     * If the user is authenticated, includes their vote and bookmark state.</p>
-     *
-     * @param page     page number (0-indexed)
-     * @param size     page size
-     * @param category optional category filter (e.g., "5F", "10F", "15F" for MD)
-     * @param q        optional search term for title/keywords
-     * @param userId   optional authenticated user ID (null for anonymous)
-     * @return page of recommended public planner summaries with optional user context
-     */
     @RateLimited(RateLimitPolicy.PUBLIC_READ)
     @GetMapping("/recommended")
     public ResponseEntity<Page<PublicPlannerResponse>> getRecommendedPlanners(
@@ -111,19 +75,6 @@ public class PublishedPlannerController {
                 entityFilters(identity, ego, gift, themePack), userId);
     }
 
-    /**
-     * Get a single published planner by ID.
-     *
-     * <p>This endpoint is public and does not require authentication.
-     * Records a view for the planner in the same request (daily deduplication applies).
-     * The response includes the already-updated view count.
-     * If the user is authenticated, includes their vote, bookmark, and subscription state.</p>
-     *
-     * @param request the HTTP request (for IP and User-Agent extraction used in view deduplication)
-     * @param id      the planner ID
-     * @param userId  optional authenticated user ID (null for anonymous)
-     * @return the public planner response with user context and updated view count
-     */
     @RateLimited(RateLimitPolicy.PUBLIC_READ)
     @GetMapping("/published/{id}")
     public ResponseEntity<PublishedPlannerDetailResponse> getPublishedPlanner(
@@ -141,20 +92,6 @@ public class PublishedPlannerController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Shared body of the two catalog listings: every request composes one filter set, an empty one
-     * being the plain recency listing.
-     *
-     * @param recommendedOnly       restrict the result to the recommended subset
-     * @param page                  page number (0-indexed)
-     * @param size                  page size
-     * @param category              optional category filter
-     * @param q                     optional search term for title/keywords
-     * @param keyword               optional comma-separated keyword facet values
-     * @param entityFilters         entity filter ids, keyed by the type each filters on
-     * @param userId                optional authenticated user ID (null for anonymous)
-     * @return page of public planner summaries with optional user context
-     */
     private ResponseEntity<Page<PublicPlannerResponse>> listPlanners(
             boolean recommendedOnly,
             int page,
@@ -173,20 +110,10 @@ public class PublishedPlannerController {
                 publishedPlannerQueryService.searchPlanners(catalogQuery, pageable, userId));
     }
 
-    /**
-     * Create a capped, unsorted Pageable; the read side pins the recency order.
-     *
-     * @param page page number (0-indexed)
-     * @param size page size
-     * @return Pageable for the catalog queries
-     */
     private Pageable createPageable(int page, int size) {
         return PageRequest.of(page, Math.min(size, 100));
     }
 
-    /**
-     * Key each entity filter parameter by the content type it filters on.
-     */
     private Map<ContentEntityType, List<String>> entityFilters(
             String identity, String ego, String gift, String themePack) {
         Map<ContentEntityType, List<String>> filters = new EnumMap<>(ContentEntityType.class);

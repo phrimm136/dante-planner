@@ -25,12 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
-/**
- * REST controller for planner write operations.
- *
- * <p>Handles create/update (upsert), delete, and bulk import of planners,
- * with real-time cross-device notifications via Server-Sent Events.</p>
- */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/planner/md")
@@ -38,18 +32,6 @@ public class PlannerCommandController {
 
     private final PlannerCommandService plannerCommandService;
 
-    /**
-     * Upsert a planner (create if not exists, update if exists).
-     *
-     * <p>Idempotent sync endpoint. If planner with given ID exists for the user,
-     * updates it (200 OK). Otherwise creates a new planner with that ID (201 Created).</p>
-     *
-     * @param userId   the authenticated user ID
-     * @param deviceId the device identifier (from HTTP-only cookie)
-     * @param id       the planner ID
-     * @param request  the planner data (full data for create, partial updates supported)
-     * @return the created (201) or updated (200) planner
-     */
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "upsert")
     @PutMapping("/{id}")
     public ResponseEntity<PlannerResponse> upsertPlanner(
@@ -65,13 +47,6 @@ public class PlannerCommandController {
         return ResponseEntity.status(status).body(result.response());
     }
 
-    /**
-     * Delete a planner (soft delete).
-     *
-     * @param userId   the authenticated user ID
-     * @param id       the planner ID
-     * @return no content
-     */
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "delete")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePlanner(
@@ -82,15 +57,6 @@ public class PlannerCommandController {
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * Bulk import planners.
-     * <p>Note: Does not trigger SSE notifications. Imported planners
-     * appear on other devices after page refresh.</p>
-     *
-     * @param userId  the authenticated user ID
-     * @param request the import request containing planners
-     * @return the import result
-     */
     @RateLimited(RateLimitPolicy.IMPORT)
     @PostMapping("/import")
     public ResponseEntity<ImportPlannersResponse> importPlanners(

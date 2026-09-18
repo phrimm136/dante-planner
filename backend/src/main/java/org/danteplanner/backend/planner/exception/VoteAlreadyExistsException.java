@@ -7,10 +7,6 @@ import lombok.Getter;
 
 import java.util.UUID;
 
-/**
- * Exception thrown when a user attempts to vote on a planner they've already voted on.
- * Votes are immutable - users can only vote once per planner.
- */
 @Getter
 public class VoteAlreadyExistsException extends DomainException {
 

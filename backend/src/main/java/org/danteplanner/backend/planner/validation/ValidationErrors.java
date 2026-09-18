@@ -6,13 +6,6 @@ import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import java.util.Set;
 import java.util.Locale;
 
-/**
- * Factory for {@link PlannerValidationException} instances.
- *
- * <p>Centralizes the mapping from a validation failure to its client-facing
- * {@link ErrorCode} and human-readable message. Messages are part of the API
- * contract and must stay byte-identical.
- */
 final class ValidationErrors {
 
     private static final int MAX_VALUE_LOG_LENGTH = 100;

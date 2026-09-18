@@ -5,10 +5,6 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.UUID;
 
-/**
- * Composite primary key for PlannerView entity.
- * Combines plannerId, viewerHash, and viewDate to ensure one view per viewer per day per planner.
- */
 public class PlannerViewId implements Serializable {
 
     private static final long serialVersionUID = 1L;

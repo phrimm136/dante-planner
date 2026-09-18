@@ -11,10 +11,6 @@ import org.springframework.data.jpa.domain.Specification;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-/**
- * Composable JPA Specifications over the catalog projection. Visibility is row
- * presence, so no predicate here checks published/deleted/taken-down.
- */
 public final class CatalogSpecifications {
 
     private CatalogSpecifications() {
@@ -29,8 +25,7 @@ public final class CatalogSpecifications {
     }
 
     /**
-     * Free-text search: ngram FULLTEXT relevance on the title OR exact membership
-     * in the keyword inverted index. Terms shorter than the ngram token size (2)
+     * Terms shorter than the ngram token size (2)
      * match no title; boolean-mode operators in the input are neutralized by
      * quoting each term as a phrase.
      */
@@ -45,16 +40,10 @@ public final class CatalogSpecifications {
         );
     }
 
-    /**
-     * Exact keyword facet via the inverted index.
-     */
     public static Specification<PlannerCatalog> hasKeyword(String keyword) {
         return (root, query, cb) -> keywordExists(root, query, cb, keyword);
     }
 
-    /**
-     * Content-entity facet via the inverted index.
-     */
     public static Specification<PlannerCatalog> containsEntity(ContentEntityType entityType, Integer entityId) {
         return (root, query, cb) -> {
             Subquery<Integer> subquery = query.subquery(Integer.class);
@@ -84,11 +73,6 @@ public final class CatalogSpecifications {
         return cb.exists(subquery);
     }
 
-    /**
-     * Build a boolean-mode query from raw user input: strip FULLTEXT operators by
-     * quoting each whitespace-separated term; terms are OR-combined (any match
-     * ranks), preserving order-independent multi-word search.
-     */
     static String toBooleanQuery(String raw) {
         return Arrays.stream(raw.trim().split("\\s+"))
                 .filter(t -> !t.isEmpty())

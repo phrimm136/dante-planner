@@ -4,10 +4,6 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
 
-/**
- * Composite primary key for PlannerSubscription entity.
- * Combines userId and plannerId to ensure one subscription per user per planner.
- */
 public class PlannerSubscriptionId implements Serializable {
 
     private static final long serialVersionUID = 1L;

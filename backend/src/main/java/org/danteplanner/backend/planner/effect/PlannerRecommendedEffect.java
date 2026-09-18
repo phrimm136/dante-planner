@@ -16,13 +16,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-/**
- * Announces a planner crossing the recommendation threshold to its owner.
- *
- * <p>The event row committed with the vote that latched {@code recommended_notified_at}, so the
- * latch and the obligation it creates are inseparable: the notification no longer depends on a
- * listener firing after a latch that is never reset.</p>
- */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -39,8 +32,6 @@ public class PlannerRecommendedEffect implements DomainEffect {
 
     @Override
     public void applyEffect(DomainEvent event, EffectPushQueue pushes) {
-        // A recommendation is a fact about a public planner; one withdrawn since the vote crossed
-        // the threshold has nothing to recommend.
         Optional<Planner> found = plannerRepository.findPublishedAggregate(event.getAggregateId());
         if (found.isEmpty()) {
             log.info("Planner {} is no longer published; its recommendation goes unannounced",

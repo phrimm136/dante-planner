@@ -14,13 +14,6 @@ import java.util.Set;
 
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * JPA AttributeConverter for the {@code selected_keywords} JSON column: a thin
- * format adapter between {@code Set<String>} and a JSON string array. Keyword
- * validation and rename normalization are {@link PlannerKeywords}' rules —
- * this class only serializes, deserializes, and surfaces drops in logs.
- * Reading is total: malformed storage yields an empty set.
- */
 @Slf4j
 @Converter
 public class KeywordSetConverter implements AttributeConverter<Set<String>, String> {
@@ -37,8 +30,6 @@ public class KeywordSetConverter implements AttributeConverter<Set<String>, Stri
         }
         PlannerKeywords keywords = PlannerKeywords.fromClient(attribute);
         if (!keywords.dropped().isEmpty()) {
-            // Persistence-layer cannot reject (would fail the sync), so surface the drop
-            // in logs — an unknown here means an unmigrated/unknown id slipped past the client.
             log.warn("Dropping unknown planner keywords on write: {}", keywords.dropped());
         }
         if (keywords.isEmpty()) {

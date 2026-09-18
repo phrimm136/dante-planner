@@ -16,9 +16,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-/**
- * Announces a first publication: one fan-out of notification rows, then the site-wide broadcast.
- */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -35,8 +32,6 @@ public class PlannerPublishedEffect implements DomainEffect {
 
     @Override
     public void applyEffect(DomainEvent event, EffectPushQueue pushes) {
-        // The predicate of the raise site, not merely the row: a planner withdrawn between the vote
-        // to publish and this dispatch has nothing left to announce.
         Optional<Planner> found = plannerRepository.findPublishedAggregate(event.getAggregateId());
         if (found.isEmpty()) {
             log.info("Planner {} is no longer published; its publication goes unannounced",

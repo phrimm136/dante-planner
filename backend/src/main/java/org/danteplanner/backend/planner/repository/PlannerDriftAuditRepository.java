@@ -10,95 +10,42 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-/**
- * The audit reads behind planner drift reconciliation: each query returns the rows of one audited
- * dimension — counters, catalog membership, the filter indexes, the derived recommended flag —
- * and leaves the comparison and the reporting to its caller.
- *
- * <p>Moderation is joined outer throughout: a planner with no moderation row is nothing-hidden and
- * not-taken-down, the same reading the catalog write side and {@link RecommendedSql} take. An inner
- * join would drop exactly those planners from every audit, which is the state most in need of
- * one.</p>
- *
- * <p>Naming convention within this class. A query method is named for the row set it returns and the
- * predicate that selects it, never for the audit that consumes it: {@code drifted*} for rows whose
- * stored value disagrees with a recomputation, {@code visible*} for rows passing the visibility
- * predicate the catalog is built on, {@code *Entries} for a whole index read unfiltered, and an
- * {@code xWithoutY} phrase for a set difference between two of those. Each {@code *Row} component
- * name mirrors its SQL column alias exactly, so the SELECT list and the mapper read as one list and
- * an alias rename is a component rename — which is why the two counter queries alias their columns
- * to the shared record's shape rather than to the columns they read.</p>
- */
 @Repository
 public class PlannerDriftAuditRepository {
 
-    /**
-     * How far back {@link #stampedRecommendationsWithoutEffect()} treats a missing carrier as
-     * evidence. Well inside both notification retention windows (90 days to soft delete, 365 more
-     * to hard delete) and inside any plausible {@code domain_events} retention, so a stamp within
-     * it that has neither row never had one.
-     */
     private static final int RECOMMENDED_AUDIT_WINDOW_DAYS = 30;
 
     private final JdbcTemplate jdbc;
     private final NamedParameterJdbcTemplate namedJdbc;
 
     // Build over the @Primary (routing) datasource rather than an autoconfigured JdbcTemplate,
-    // which backs off when multiple datasources are present. The audit reads under the caller's
-    // read-only transaction, so the routing datasource sends it to the replica. Mirrors
-    // PlannerViewRepositoryImpl.
+    // which backs off when multiple datasources are present.
     public PlannerDriftAuditRepository(DataSource dataSource) {
         this.jdbc = new JdbcTemplate(dataSource);
         this.namedJdbc = new NamedParameterJdbcTemplate(this.jdbc);
     }
 
-    /**
-     * One counter row whose stored value disagrees with a recount of its authoritative child rows.
-     */
     public record CounterDriftRow(UUID plannerId, long counter, long recounted) {
     }
 
-    /**
-     * One catalog row's stored recommended flag beside the flag derived from current state.
-     */
     public record RecommendedDriftRow(UUID plannerId, boolean recommended, boolean derived) {
     }
 
-    /**
-     * One visible planner's stored content document and keyword column, as written.
-     */
     public record ContentDocumentRow(UUID plannerId, String content, String selectedKeywords) {
     }
 
-    /**
-     * One catalog scalar copy that disagrees with the content row it was copied from.
-     */
     public record CatalogScalarDriftRow(UUID plannerId, String field, String expected, String actual) {
     }
 
-    /**
-     * One catalog row's stored keyword array beside its content row's, both as written.
-     */
     public record CatalogKeywordRow(UUID plannerId, String catalogKeywords, String contentKeywords) {
     }
 
-    /**
-     * One indexed entity reference.
-     */
     public record EntityFilterRow(UUID plannerId, String entityType, int entityId) {
     }
 
-    /**
-     * One indexed keyword.
-     */
     public record KeywordFilterRow(UUID plannerId, String keyword) {
     }
 
-    /**
-     * Stat rows whose upvote counter disagrees with the vote rows.
-     *
-     * @return one row per disagreeing planner
-     */
     public List<CounterDriftRow> driftedUpvoteCounters() {
         return jdbc.query("""
                 SELECT BIN_TO_UUID(s.planner_id) AS planner_id, s.upvotes AS counter,
@@ -112,11 +59,6 @@ public class PlannerDriftAuditRepository {
                         rs.getLong("counter"), rs.getLong("recounted")));
     }
 
-    /**
-     * Stat rows whose comment counter disagrees with the live comment rows.
-     *
-     * @return one row per disagreeing planner
-     */
     public List<CounterDriftRow> driftedCommentCounters() {
         return jdbc.query("""
                 SELECT BIN_TO_UUID(s.planner_id) AS planner_id, s.comment_count AS counter,
@@ -130,11 +72,6 @@ public class PlannerDriftAuditRepository {
                         rs.getLong("counter"), rs.getLong("recounted")));
     }
 
-    /**
-     * Planners that are visible on every state the catalog consults, yet carry no catalog row.
-     *
-     * @return the planner ids
-     */
     public List<UUID> visiblePlannersWithoutCatalogRow() {
         return jdbc.query("""
                 SELECT BIN_TO_UUID(p.id) AS planner_id
@@ -149,11 +86,6 @@ public class PlannerDriftAuditRepository {
                 (rs, rowNum) -> UUID.fromString(rs.getString("planner_id")));
     }
 
-    /**
-     * Catalog rows whose planner is no longer visible.
-     *
-     * @return the planner ids
-     */
     public List<UUID> catalogRowsWithoutVisiblePlanner() {
         return jdbc.query("""
                 SELECT BIN_TO_UUID(cat.planner_id) AS planner_id
@@ -168,16 +100,10 @@ public class PlannerDriftAuditRepository {
     }
 
     /**
-     * Catalog scalar copies that disagree with the content row they were copied from, one row per
-     * disagreeing column.
-     *
-     * <p>Compared under {@code utf8mb4_0900_bin} rather than the columns' own
-     * {@code utf8mb4_unicode_ci}, which is case-insensitive, accent-insensitive and PAD SPACE: a
+     * {@code utf8mb4_unicode_ci} is case-insensitive, accent-insensitive and PAD SPACE: a
      * copy left behind by a rename that only changed capitalization, or one carrying a trailing
      * space, is byte-stale and collation-equal. The {@code _0900_} form is the one that answers
-     * the trailing space — {@code utf8mb4_bin} is itself PAD SPACE.</p>
-     *
-     * @return one row per disagreeing catalog column
+     * the trailing space — {@code utf8mb4_bin} is itself PAD SPACE.
      */
     public List<CatalogScalarDriftRow> driftedCatalogScalars() {
         return jdbc.query("""
@@ -199,19 +125,6 @@ public class PlannerDriftAuditRepository {
                         rs.getString("field"), rs.getString("expected"), rs.getString("actual")));
     }
 
-    /**
-     * Both stored keyword arrays of every catalogued planner, raw.
-     *
-     * <p>Returned uncompared where the scalar copies are compared in SQL. Not because the JPA
-     * converter's output would disagree — it sorts ascending and nulls an empty set on both
-     * columns, so a byte comparison holds for every row it wrote — but because these two columns
-     * are also written from outside JPA, by backfill migrations and by manual repair, and because
-     * {@code PlannerKeywords} remaps renamed ids on read: an array carrying a legacy alias and one
-     * carrying its current id denote the same keywords and differ as strings. Normalization is the
-     * caller's, through the path the runtime reads these columns with.</p>
-     *
-     * @return one row per catalogued planner
-     */
     public List<CatalogKeywordRow> catalogKeywordPairs() {
         return jdbc.query("""
                 SELECT BIN_TO_UUID(cat.planner_id) AS planner_id,
@@ -225,12 +138,6 @@ public class PlannerDriftAuditRepository {
                         rs.getString("catalog_keywords"), rs.getString("content_keywords")));
     }
 
-    /**
-     * The stored content and keyword columns of every visible planner, for a rebuild of the filter
-     * indexes.
-     *
-     * @return one row per visible planner
-     */
     public List<ContentDocumentRow> visibleContentDocuments() {
         return jdbc.query("""
                 SELECT BIN_TO_UUID(c.planner_id) AS planner_id, c.content, c.selected_keywords
@@ -243,11 +150,6 @@ public class PlannerDriftAuditRepository {
                         rs.getString("content"), rs.getString("selected_keywords")));
     }
 
-    /**
-     * Every row of the entity filter index.
-     *
-     * @return one row per indexed entity reference
-     */
     public List<EntityFilterRow> entityFilterEntries() {
         return jdbc.query("""
                 SELECT BIN_TO_UUID(planner_id) AS planner_id, entity_type, entity_id
@@ -257,11 +159,6 @@ public class PlannerDriftAuditRepository {
                         rs.getString("entity_type"), rs.getInt("entity_id")));
     }
 
-    /**
-     * Every row of the keyword filter index.
-     *
-     * @return one row per indexed keyword
-     */
     public List<KeywordFilterRow> keywordFilterEntries() {
         return jdbc.query(
                 "SELECT BIN_TO_UUID(planner_id) AS planner_id, keyword FROM planner_keyword_filter",
@@ -270,23 +167,9 @@ public class PlannerDriftAuditRepository {
     }
 
     /**
-     * Planners whose recommendation latch was taken while neither an event row nor a notification
-     * row exists to carry the announcement it committed to.
-     *
-     * <p>Both sides must be absent: an event row aged out of retention after its notification
-     * landed is not drift, and neither is a dispatched event whose recipient deleted the row.</p>
-     *
-     * <p>Bounded to {@link #RECOMMENDED_AUDIT_WINDOW_DAYS} for the same reason. Past that age an
-     * absent carrier stops being evidence — every latch taken before the outbox existed has no
-     * event row at all, and the notification rows that once carried them are hard-deleted at 465
-     * days — so an unbounded audit converts the whole back catalogue into permanent findings that
-     * no repair can clear.</p>
-     *
-     * <p>The cutoff is computed from the database clock because the stamp is written with
-     * {@code CURRENT_TIMESTAMP(6)}; a cutoff bound as an {@code Instant} would be rendered by the
-     * driver in the JVM's zone and land hours off on any non-UTC host.</p>
-     *
-     * @return the planner ids
+     * The stamp is written with {@code CURRENT_TIMESTAMP(6)}; a cutoff bound as an
+     * {@code Instant} would be rendered by the driver in the JVM's zone and land hours off on any
+     * non-UTC host.
      */
     public List<UUID> stampedRecommendationsWithoutEffect() {
         return namedJdbc.query("""
@@ -306,12 +189,6 @@ public class PlannerDriftAuditRepository {
                 (rs, rowNum) -> UUID.fromString(rs.getString("planner_id")));
     }
 
-    /**
-     * Catalog rows whose stored recommended flag disagrees with the derived one.
-     *
-     * @param threshold upvotes at which a planner counts as recommended
-     * @return one row per disagreeing catalog row
-     */
     public List<RecommendedDriftRow> driftedRecommendedFlags(int threshold) {
         return namedJdbc.query(RecommendedSql.DRIFTED_ROWS, Map.of("threshold", threshold),
                 (rs, rowNum) -> new RecommendedDriftRow(UUID.fromString(rs.getString("planner_id")),

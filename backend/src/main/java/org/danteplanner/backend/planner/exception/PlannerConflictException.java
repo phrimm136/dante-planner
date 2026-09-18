@@ -4,9 +4,6 @@ import lombok.Getter;
 import org.danteplanner.backend.shared.exception.DomainException;
 import org.danteplanner.backend.shared.exception.ErrorKind;
 
-/**
- * A write that names a stored version the planner has already moved past.
- */
 @Getter
 public class PlannerConflictException extends DomainException {
 
