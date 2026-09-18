@@ -534,6 +534,34 @@ asset pipeline.
   day). Worth demoting that one method-and-code pair to INFO when the WARN stream is next used
   for alerting, or when an ADR settles a client marker for never-synced rows.
 
+## 2026-09-18 comment sweep follow-ups
+
+- **Surviving comments are untested claims.** The sweep left only comments stating a dependency
+  behaviour or a hand-parsed format (about 90 in `backend/src/main`, about 470 in
+  `frontend/src`); each is a claim a test could pin, after which the comment is redundant.
+  Worth doing per package when that package is next edited: turn the fact into a named test,
+  delete the comment. The candidate list is the set of remaining `/** */` and `//` blocks.
+- **Three deleted invariants have no home.** `PlannerViewRecorder.flush` orders planner-id
+  locks to avoid AB-BA deadlock across pods; `RecommendedSql` exposes `c`/`s`/`m` aliases
+  callers splice against; `PlannerDriftAuditRepository` followed a naming convention. All three
+  were rationale under the sweep rubric. The first two are invariants: record each in an ADR
+  or pin it with a test before the next change to those files.
+- **`shared/gtid/GtidGateConfig.java` and `GtidReadGate.java` were not swept**: both carried
+  uncommitted edits in another checkout at merge time. Sweep them with the same rubric once
+  those edits land.
+- **Comment discipline has no gate.** Nothing fails when a restating javadoc is added. Worth
+  adding when the next sweep-worthy file appears: a hook flagging javadoc whose first sentence
+  starts with "Handle", "Returns", "Gets", "Sets", "Creates", or repeats the declaration name,
+  plus the provenance verifier over every worker diff before merge.
+- **Doc reference check.** Every backticked Java identifier in `docs/adr`, `docs/runbooks` and
+  each `CLAUDE.md` should resolve against the ArchUnit-imported classes (an `@ArchTest` in the
+  architecture package, `Class#method` included); paths and TypeScript symbols need a shell
+  half. Worth adding at the next rename that leaves a document stale.
+- **Rules ship without negatives.** `owned_errors_need_no_handler` was negative-checked by a
+  throwaway probe and the probe discarded. Worth keeping a synthetic violator per architecture
+  rule under a `fixtures` package that the production rules exclude, starting with the next rule
+  added.
+
 ## 2026-09-18 problem-details migration (adr/113, adr/114)
 
 - **`Problems.MESSAGE_MIRROR`** (`backend/.../shared/exception/Problems.java`) copies `detail`
