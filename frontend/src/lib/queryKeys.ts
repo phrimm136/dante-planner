@@ -6,13 +6,6 @@
  * cache lookups and invalidation break silently.
  */
 
-/**
- * Creates the query key factory for an entity LIST domain.
- *
- * Shapes: `[ns, 'list']` / `[ns, 'list', 'spec']` / `[ns, 'list', 'i18n', language]`
- *
- * @param ns - Entity namespace, e.g. `'identity'`
- */
 export function createEntityListQueryKeys<Ns extends string>(ns: Ns) {
   return {
     all: () => [ns, 'list'] as const,
@@ -21,13 +14,6 @@ export function createEntityListQueryKeys<Ns extends string>(ns: Ns) {
   }
 }
 
-/**
- * Creates the query key factory for an entity DETAIL domain.
- *
- * Shapes: `[ns]` / `[ns, id]` / `[ns, id, 'i18n', language]`
- *
- * @param ns - Entity namespace, e.g. `'identity'`
- */
 export function createEntityDetailQueryKeys<Ns extends string>(ns: Ns) {
   return {
     all: () => [ns] as const,
@@ -36,14 +22,6 @@ export function createEntityDetailQueryKeys<Ns extends string>(ns: Ns) {
   }
 }
 
-/**
- * Creates the query key factory for an entity's SHARED resources: one
- * language-scoped file for the whole namespace, not per id.
- *
- * Shape: `[ns, 'shared', language]`
- *
- * @param ns - Entity namespace, e.g. `'abEvent'`
- */
 export function createEntitySharedQueryKeys<Ns extends string>(ns: Ns) {
   return {
     shared: (language: string) => [ns, 'shared', language] as const,

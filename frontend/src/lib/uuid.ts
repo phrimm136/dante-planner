@@ -6,8 +6,7 @@
  *   2. crypto.getRandomValues()           — fallback; ubiquitous, available outside secure contexts
  *   3. throw                              — refuse to produce a weak ID
  *
- * Math.random() is never used. Weak IDs caused cross-user collisions on planner upsert
- * (server-side ID-collision warns) before this module existed.
+ * Math.random() is never used.
  *
  * @see RFC 4122 §4.4 for the v4 bit layout this fallback constructs by hand.
  */

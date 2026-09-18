@@ -1,4 +1,3 @@
-/** How long the browser may defer an idle callback before running it anyway. */
 const IDLE_TIMEOUT_MS = 500
 
 /** Delay used where requestIdleCallback is unavailable (Safari). */
@@ -10,12 +9,6 @@ const IDLE_FALLBACK_DELAY_MS = 100
  */
 type IdleScheduler = Partial<Pick<Window, 'requestIdleCallback' | 'cancelIdleCallback'>>
 
-/**
- * Run `callback` after the next frame has painted and the main thread is idle.
- *
- * Returns a canceller that unwinds whichever stage is still pending, so a
- * caller that unmounts mid-flight leaves nothing scheduled.
- */
 export function scheduleIdle(callback: () => void): () => void {
   let cancelPending: () => void
 

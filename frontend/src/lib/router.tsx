@@ -28,9 +28,6 @@ import { syncTitleOnLanguageChange } from '@/lib/routerTitle'
 import { RouteErrorComponent } from '@/components/feedback/RouteErrorComponent'
 import { RoutePendingFallback } from '@/components/feedback/RoutePendingFallback'
 
-// Each listed route's pending component is that page's own skeleton, so one shape spans
-// the chunk fetch and the data read instead of a generic block giving way to a second
-// skeleton. `router.tsx` is the one module allowed to reach past a slice's public API.
 import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
 import { IdentityDetailSkeleton } from '@/pages/identity/components/IdentityDetailSkeleton'
 import { EGO_GIFT_GEOMETRY, IDENTITY_GEOMETRY, THEME_PACK_GEOMETRY } from '@/shared/cardLayout'
@@ -51,36 +48,18 @@ import {
 import { SettingsPageSkeleton } from '@/pages/settings/components/SettingsPageSkeleton'
 import { SECTION_STYLES } from '@/lib/constants'
 
-// NotFoundPage is eagerly loaded as it's used as the default 404 component
 import NotFoundPage from '@/components/feedback/NotFoundPage'
 
-// Note: All route components are lazy loaded for code splitting
-// Each route will load its JS bundle only when navigated to
-// pendingComponent shows while the JS bundle loads (before component mounts)
-
-/** Helper to create page title with site suffix */
 const pageTitle = (key: string, ns = 'common') => `${i18n.t(key, { ns })} | Dante's Planner`
 
-/**
- * Head meta for a detail route. `fallback` covers the window before the route's
- * loader has resolved, when `head()` still runs with no loader data.
- */
 const detailHead = (title: string | undefined, fallback: string) => ({
   meta: [{ title: `${title ?? fallback} | Dante's Planner` }],
 })
-
-// ============================================================================
-// Search Param Schemas
-// ============================================================================
 
 const mdUserDefaults = {
   page: 0,
 }
 
-/**
- * Search params schema for /planner/md (personal planners)
- * Minimal params - category filter, pagination, and search
- */
 const mdUserSearchSchema = z.object({
   category: z.enum(MD_CATEGORIES).optional(),
   page: z.coerce.number().int().min(0).default(mdUserDefaults.page),
@@ -97,10 +76,6 @@ const mdGesellschaftDefaults = {
   mode: 'published' as const,
 }
 
-/**
- * Search params schema for /planner/md/gesellschaft (community planners)
- * Includes mode parameter for all published vs recommended
- */
 const mdGesellschaftSearchSchema = z.object({
   category: z.enum(MD_CATEGORIES).optional(),
   page: z.coerce.number().int().min(0).default(mdGesellschaftDefaults.page),
@@ -113,7 +88,6 @@ const mdGesellschaftSearchSchema = z.object({
   themePack: z.string().max(500).optional(),
 })
 
-// Root route - contains layout for all routes
 function RootLayout() {
   return (
     <>
@@ -140,7 +114,6 @@ const rootRoute = createRootRoute({
   component: RootLayout,
 })
 
-// Home route - path: "/"
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
@@ -150,7 +123,6 @@ const indexRoute = createRoute({
   }),
 })
 
-// Planner route - path: "/planner" (Planner page)
 const plannerRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner',
@@ -160,7 +132,6 @@ const plannerRoute = createRoute({
   }),
 })
 
-// Planner MD route - path: "/planner/md" (Personal planners)
 const plannerMDRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md',
@@ -175,7 +146,6 @@ const plannerMDRoute = createRoute({
   }),
 })
 
-// Planner MD Gesellschaft route - path: "/planner/md/gesellschaft" (Community planners)
 const plannerMDGesellschaftRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/gesellschaft',
@@ -190,7 +160,6 @@ const plannerMDGesellschaftRoute = createRoute({
   }),
 })
 
-// Planner MD Gesellschaft Detail route - path: "/planner/md/gesellschaft/$id" (View published planner)
 const plannerMDGesellschaftDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/gesellschaft/$id',
@@ -208,7 +177,6 @@ const plannerMDGesellschaftDetailRoute = createRoute({
   head: ({ loaderData }) => detailHead(loaderData?.title, untitledPlannerTitle()),
 })
 
-// Planner MD New route - path: "/planner/md/new" (Create new MD planner)
 const plannerMDNewRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/new',
@@ -219,7 +187,6 @@ const plannerMDNewRoute = createRoute({
   }),
 })
 
-// Deck Builder route - path: "/planner/deck" (Standalone deck builder)
 const deckBuilderRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/deck',
@@ -230,7 +197,6 @@ const deckBuilderRoute = createRoute({
   }),
 })
 
-// Planner MD Detail route - path: "/planner/md/$id" (View planner)
 const plannerMDDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/$id',
@@ -248,7 +214,6 @@ const plannerMDDetailRoute = createRoute({
   head: ({ loaderData }) => detailHead(loaderData?.title, untitledPlannerTitle()),
 })
 
-// Planner MD Edit route - path: "/planner/md/$id/edit" (Edit planner)
 const plannerMDEditRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/$id/edit',
@@ -268,7 +233,6 @@ const plannerMDEditRoute = createRoute({
   }),
 })
 
-// Extraction Planner route - path: "/planner/extraction" (Extraction probability calculator)
 const extractionPlannerRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/extraction',
@@ -278,7 +242,6 @@ const extractionPlannerRoute = createRoute({
   }),
 })
 
-// Identity route - path: "/identity" (Identity browser page)
 const identityRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/identity',
@@ -294,7 +257,6 @@ const identityRoute = createRoute({
   }),
 })
 
-// Identity detail route - path: "/identity/$id" (Identity detail page)
 const identityDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/identity/$id',
@@ -305,7 +267,6 @@ const identityDetailRoute = createRoute({
   head: ({ loaderData }) => detailHead(loaderData?.name, 'Identity'),
 })
 
-// EGO route - path: "/ego" (EGO browser page)
 const egoRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ego',
@@ -321,7 +282,6 @@ const egoRoute = createRoute({
   }),
 })
 
-// EGO detail route - path: "/ego/$id" (EGO detail page)
 const egoDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ego/$id',
@@ -332,7 +292,6 @@ const egoDetailRoute = createRoute({
   head: ({ loaderData }) => detailHead(loaderData?.name, 'EGO'),
 })
 
-// EGO Gift route - path: "/ego-gift" (EGO Gift browser page)
 const egoGiftRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ego-gift',
@@ -348,7 +307,6 @@ const egoGiftRoute = createRoute({
   }),
 })
 
-// EGO Gift detail route - path: "/ego-gift/$id" (EGO Gift detail page)
 const egoGiftDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ego-gift/$id',
@@ -359,7 +317,6 @@ const egoGiftDetailRoute = createRoute({
   head: ({ loaderData }) => detailHead(loaderData?.name, 'EGO Gift'),
 })
 
-// Theme Pack route - path: "/theme-pack" (Theme Pack browser page)
 const themePackRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/theme-pack',
@@ -374,7 +331,6 @@ const themePackRoute = createRoute({
   }),
 })
 
-// Theme Pack detail route - path: "/theme-pack/$id"
 const themePackDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/theme-pack/$id',
@@ -384,7 +340,6 @@ const themePackDetailRoute = createRoute({
   head: ({ loaderData }) => detailHead(loaderData?.name, 'Theme Pack'),
 })
 
-// Ab Event route - path: "/ab-event" (Abnormality Event browser page)
 const abEventRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ab-event',
@@ -399,7 +354,6 @@ const abEventRoute = createRoute({
   }),
 })
 
-// Ab Event detail route - path: "/ab-event/$id"
 const abEventDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ab-event/$id',
@@ -409,7 +363,6 @@ const abEventDetailRoute = createRoute({
   head: ({ loaderData }) => detailHead(loaderData?.title, 'Dungeon Event'),
 })
 
-// Keyword route - path: "/keyword" (Keyword browser page)
 const keywordRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/keyword',
@@ -424,7 +377,6 @@ const keywordRoute = createRoute({
   }),
 })
 
-// Keyword detail route - path: "/keyword/$id" (Keyword detail page)
 const keywordDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/keyword/$id',
@@ -434,7 +386,6 @@ const keywordDetailRoute = createRoute({
   head: ({ loaderData }) => detailHead(loaderData?.name, 'Keyword'),
 })
 
-// Settings route - path: "/settings" (User settings page)
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/settings',
@@ -445,7 +396,6 @@ const settingsRoute = createRoute({
   }),
 })
 
-// Moderation dashboard route - path: "/moderation" (Moderator/Admin only)
 const moderationRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/moderation',
@@ -455,7 +405,6 @@ const moderationRoute = createRoute({
   }),
 })
 
-// Privacy Policy route - path: "/privacy"
 const privacyRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/privacy',
@@ -465,7 +414,6 @@ const privacyRoute = createRoute({
   }),
 })
 
-// Terms of Service route - path: "/terms"
 const termsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/terms',
@@ -475,7 +423,6 @@ const termsRoute = createRoute({
   }),
 })
 
-// Create route tree
 // Note: TanStack Router handles route specificity automatically
 // More specific routes like /planner/md/new will match before /planner/md
 const routeTree = rootRoute.addChildren([
@@ -507,7 +454,6 @@ const routeTree = rootRoute.addChildren([
   termsRoute,
 ])
 
-// Create and export router instance
 /**
  * Custom search serializer that preserves commas in query strings.
  * Default encodeURIComponent encodes commas to %2C which is ugly for CSV params
@@ -526,11 +472,9 @@ function stringifySearchWith(obj: Record<string, unknown>): string {
   }
   const str = params.toString()
   if (!str) return ''
-  // Restore commas that URLSearchParams encoded
   return '?' + str.replace(/%2C/gi, ',')
 }
 
-// Keys that should be parsed as numbers (pagination)
 const NUMERIC_SEARCH_KEYS = new Set(['page'])
 
 function parseSearchWith(searchStr: string): Record<string, unknown> {
@@ -552,16 +496,9 @@ export const router = createRouter({
   defaultNotFoundComponent: NotFoundPage,
   defaultErrorComponent: RouteErrorComponent,
   defaultPendingComponent: RoutePendingFallback,
-  // Preload a route's chunk + loader on link hover/touch so the ~100ms serial
-  // chunk-fetch window is paid before the click, not after it. Loaders are
-  // cache-idempotent (query-cache prefetch with staleTime), so a hover that
-  // never converts to a navigation only warms the cache.
   defaultPreload: 'intent',
-  // Scroll to top on navigation; hash fragments (e.g., #comment-uuid) auto-scroll to element
   scrollRestoration: true,
-  // Show pending component immediately on navigation (no delay)
   defaultPendingMs: 0,
-  // Minimum time to show pending component (prevents flash on very fast loads)
   defaultPendingMinMs: 200,
   stringifySearch: stringifySearchWith,
   parseSearch: parseSearchWith,
@@ -569,7 +506,6 @@ export const router = createRouter({
 
 syncTitleOnLanguageChange(router)
 
-// Register router for type safety
 declare module '@tanstack/react-router' {
   interface Register {
     router: typeof router

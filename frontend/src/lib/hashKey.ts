@@ -8,6 +8,5 @@ export function hashKey(input: string): string {
     hash ^= input.charCodeAt(i)
     hash = Math.imul(hash, 0x01000193)
   }
-  // Convert to unsigned 32-bit, then to 8-char hex
   return (hash >>> 0).toString(16).padStart(8, '0')
 }

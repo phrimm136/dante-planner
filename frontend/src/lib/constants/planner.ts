@@ -1,12 +1,3 @@
-/**
- * Planner-domain configuration: versioning, local persistence, export format,
- * list paging, and the comment thread attached to a published planner.
- */
-
-/**
- * Recommended planner threshold (upvotes)
- * Planners with upvotes >= this value show star indicator
- */
 export const RECOMMENDED_THRESHOLD = 10
 
 /**
@@ -35,27 +26,12 @@ export const PLANNER_CONFIG = {
  */
 export const MAX_NOTE_BYTES = 2048
 
-/**
- * Current planner schema version for migration support
- * Increment when planner data structure changes
- */
 export const PLANNER_SCHEMA_VERSION = 2
 
-/**
- * Current export file format version for migration support
- * Increment when export envelope structure changes
- */
 export const EXPORT_VERSION = 1
 
-/**
- * File extension for planner export files
- */
 export const EXPORT_FILE_EXTENSION = '.danteplanner'
 
-/**
- * Maximum file size for import in bytes (10MB)
- * Prevents memory exhaustion from large malicious files
- */
 export const EXPORT_MAX_FILE_SIZE = 10 * 1024 * 1024
 
 /**
@@ -67,48 +43,22 @@ export const EXPORT_MAX_FILE_SIZE = 10 * 1024 * 1024
  */
 export const EXPORT_MAX_DECOMPRESSED_SIZE = EXPORT_MAX_FILE_SIZE * 20
 
-/** Compressed bytes fed to the inflater per step, so the cap is checked as it grows. */
 export const INFLATE_INPUT_CHUNK_BYTES = 64 * 1024
 
-/**
- * Maximum characters a pasted deck code may carry.
- *
- * A real deck code is around 150 characters; the clipboard path bounded nothing
- * before handing the string to atob and then to the inflater.
- */
 export const DECK_CODE_MAX_LENGTH = 512
 
-/**
- * IndexedDB storage key prefixes for planner data
- * All planner-related keys use these prefixes for namespacing
- */
 export const PLANNER_STORAGE_KEYS = {
-  /** Common prefix for all planner types */
   PLANNER: 'planner',
-  /** Prefix of a local deletion the server has not been told about yet */
   TOMBSTONE: 'tombstone',
-  /** Mirror Dungeon planner type suffix */
   MD: 'md',
 } as const
 
-/**
- * Planner List Constants
- * Used by PlannerListPage and related components
- */
 export const PLANNER_LIST = {
-  /** Number of planners per page */
   PAGE_SIZE: 20,
-  /** Maximum keywords to display on a card before truncating */
   MAX_KEYWORDS_DISPLAY: 3,
-  /** Available sort options */
   SORT_OPTIONS: ['recent', 'popular', 'votes'] as const,
 } as const
 
-/**
- * Maximum planner ids accepted by one batch pull request.
- * Mirrors PlannerConstants.BATCH_PULL_MAX_IDS; the server rejects a longer list
- * outright, so callers chunk to this size rather than truncate.
- */
 export const BATCH_PULL_MAX_IDS = 50
 
 /**
@@ -117,38 +67,16 @@ export const BATCH_PULL_MAX_IDS = 50
  */
 export const INITIAL_SYNC_VERSION = 1
 
-/**
- * Calculate total pages from item count
- * Uses PLANNER_LIST.PAGE_SIZE as divisor
- */
 export function calculatePlannerPages(totalCount: number): number {
   return Math.ceil(totalCount / PLANNER_LIST.PAGE_SIZE)
 }
 
-/**
- * Maximum character count for comments (matches backend validation)
- */
 export const COMMENT_MAX_CHARS = 10000
 
-/**
- * Comment thread indentation in pixels per depth level
- */
 export const COMMENT_INDENT_PER_LEVEL = 2
 
-/**
- * Maximum visual depth for comment indentation on mobile (< lg breakpoint)
- * Comments deeper than this still exist but don't indent further
- */
 export const COMMENT_MAX_VISUAL_DEPTH_MOBILE = 2
 
-/**
- * Maximum visual depth for comment indentation on desktop (>= lg breakpoint)
- */
 export const COMMENT_MAX_VISUAL_DEPTH_DESKTOP = 10
 
-/**
- * The highest deployment order that counts as deployed; the rest of the order is backup.
- *
- * A Mirror Dungeon formation fields six identities and a seventh joins from the gate buff.
- */
 export const MAX_DEPLOYED_ORDER = 7

@@ -42,13 +42,11 @@ function readCsrfToken(): string | null {
 
 type ApiErrorConstructor = new (message: string) => Error
 
-/** 403 bodies whose code maps to a dedicated restriction error. */
 const RESTRICTION_ERROR_BY_CODE: Record<string, ApiErrorConstructor> = {
   USER_BANNED: BannedError,
   USER_TIMED_OUT: TimedOutError,
 }
 
-/** 503 bodies whose code maps to a dedicated unavailability error. */
 const UNAVAILABLE_ERROR_BY_CODE: Record<string, ApiErrorConstructor> = {
   SERVICE_UPDATING: ServiceUpdatingError,
   WRITE_TEMPORARILY_UNAVAILABLE: WriteTemporarilyUnavailableError,
@@ -63,9 +61,6 @@ const DEFAULT_VALIDATION_MESSAGE = 'Invalid request'
 const DEFAULT_VALIDATION_CODE = 'VALIDATION_ERROR'
 const DEFAULT_CONFLICT_CODE = 'CONFLICT'
 
-/**
- * Read an error response body, yielding null when it is absent or not JSON.
- */
 async function readErrorBody(response: Response): Promise<Problem | null> {
   const parsed = ProblemSchema.safeParse(await response.json().catch(() => null))
   return parsed.success ? parsed.data : null
@@ -75,12 +70,9 @@ export class ApiClient {
   static async fetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const method = (options.method ?? 'GET').toUpperCase()
     // HeadersInit is a Headers instance, a tuple array, or a record; asserting the
-    // record shape made the Content-Type check below miss a caller-set header on
-    // the other two, and the spread produce garbage.
     const headers = new Headers(options.headers)
 
     // Bodyless GET/HEAD must stay CORS "simple" — a request Content-Type would force a
-    // preflight OPTIONS that blocks the cold-load request burst.
     const isBodylessMethod = method === 'GET' || method === 'HEAD'
     const isFormDataBody = typeof FormData !== 'undefined' && options.body instanceof FormData
     const callerSetContentType = headers.has('Content-Type')
@@ -89,7 +81,6 @@ export class ApiClient {
     }
 
     // Double-submit CSRF: echo the readable `csrf` cookie on state-changing
-    // methods. GET/HEAD stay header-free to remain CORS "simple" requests.
     if (!isBodylessMethod) {
       const csrfToken = readCsrfToken()
       if (csrfToken) {
@@ -103,14 +94,11 @@ export class ApiClient {
       credentials: 'include', // Include HttpOnly cookies
     })
 
-    // Backend handles token refresh automatically via JwtAuthenticationFilter
-    // If we get 401, auth has genuinely failed (no valid refresh token)
     if (response.status === 401) {
       queryClient.setQueryData(['auth', 'me'], null)
       throw new UnauthorizedError('Authentication required')
     }
 
-    // Handle 403 Forbidden with typed errors based on error code
     if (response.status === 403) {
       const body = await readErrorBody(response)
       if (!body) {
@@ -120,11 +108,9 @@ export class ApiClient {
       if (RestrictionError) {
         throw new RestrictionError(body.detail ?? '')
       }
-      // Other 403 errors (PLANNER_FORBIDDEN, COMMENT_FORBIDDEN, etc.)
       throw new ForbiddenError(body.code ?? '', body.detail ?? '')
     }
 
-    // Handle 400 Bad Request with the code the backend classified it under
     if (response.status === 400) {
       const body = await readErrorBody(response)
       throw new ValidationError(
@@ -133,12 +119,10 @@ export class ApiClient {
       )
     }
 
-    // Handle 404 Not Found with typed error
     if (response.status === 404) {
       throw new NotFoundError('Resource not found')
     }
 
-    // Handle 409 conflict with typed error
     if (response.status === 409) {
       const body = await readErrorBody(response)
       throw new ConflictError(
@@ -148,13 +132,11 @@ export class ApiClient {
       )
     }
 
-    // Handle 429 Too Many Requests with typed error
     if (response.status === 429) {
       const body = await readErrorBody(response)
       throw new RateLimitError(body?.detail || DEFAULT_RATE_LIMIT_MESSAGE)
     }
 
-    // Handle 503 Service Unavailable - distinguish planned deploy vs crash
     if (response.status === 503) {
       const body = await readErrorBody(response)
       const message = body?.detail || DEFAULT_UNAVAILABLE_MESSAGE
@@ -167,7 +149,6 @@ export class ApiClient {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
 
-    // Handle 204 No Content (e.g., logout, DELETE operations)
     if (response.status === 204) {
       return undefined as T
     }

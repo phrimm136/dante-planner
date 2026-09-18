@@ -19,7 +19,6 @@ declare module '@tanstack/react-query' {
     mutationMeta: {
       successMessage?: string
       successParams?: Record<string, unknown>
-      /** Opt out where the mutation renders its own failure surface. */
       suppressErrorToast?: boolean
     }
   }
@@ -29,8 +28,6 @@ export function createQueryCache(): QueryCache {
   return new QueryCache({
     onError: (error) => {
       console.error('Query failed:', error)
-      // Queries stay narrow: a thrown query error already reaches the route
-      // error component, so toasting anything else would double-report it.
       showUnavailable(error)
     },
   })
@@ -39,8 +36,6 @@ export function createQueryCache(): QueryCache {
 export function createMutationCache(): MutationCache {
   return new MutationCache({
     onError: (error, _variables, _onMutateResult, mutation) => {
-      // Logging precedes the opt-out: a mutation that renders its own failure
-      // surface still belongs in the console.
       console.error('Mutation failed:', error)
       if (mutation.meta?.suppressErrorToast === true) return
       showError(error)

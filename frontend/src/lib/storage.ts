@@ -1,24 +1,8 @@
-/**
- * SSR-safe storage utility using IndexedDB
- *
- * Provides persistent storage with SSR compatibility.
- * Uses IndexedDB for better security and larger storage capacity.
- *
- * Used for guest's planner data.
- *
- * @example
- * import { storage } from '@/lib/storage'
- *
- * await storage.setItem('plannerData', '...')
- * const data = await storage.getItem('plannerData')
- */
-
 import { ok, err } from './result'
 import { PLANNER_STORAGE_KEYS } from './constants'
 import type { Result, Tagged } from './result'
 
 export const DB_NAME = 'danteplanner'
-/** Object store holding every persisted row; exported for direct cursor access. */
 export const STORAGE_STORE_NAME = 'planner'
 export const DB_VERSION = 2
 
@@ -35,7 +19,6 @@ function flatKeyFor(key: string): string | null {
   return `${PLANNER_STORAGE_KEYS.PLANNER}:${parts[3]}`
 }
 
-/** Epoch millis of a row's `metadata.lastModifiedAt`; 0 when it carries none readable. */
 function lastModifiedAtOf(value: string): number {
   try {
     const millis = Date.parse(JSON.parse(value)?.metadata?.lastModifiedAt)
@@ -45,7 +28,6 @@ function lastModifiedAtOf(value: string): number {
   }
 }
 
-/** One v1 row considered for migration. */
 interface MigrationRow {
   key: string
   value: string
@@ -95,8 +77,6 @@ export function migrateToFlatKeys(transaction: IDBTransaction): void {
     if (cursor) {
       const key: IDBValidKey = cursor.key
       const value: unknown = cursor.value
-      // Every row this store holds is a string under a string key; anything
-      // else is not something the old key format could have produced.
       if (typeof key === 'string' && typeof value === 'string') {
         const flatKey = flatKeyFor(key)
         if (flatKey) {
@@ -115,9 +95,6 @@ export function migrateToFlatKeys(transaction: IDBTransaction): void {
       incumbentRequest.onsuccess = () => {
         const existing: unknown = incumbentRequest.result
 
-        // A row already at the flat key is a candidate like any other, and it is
-        // listed first so it wins a tie: whatever is already being read there
-        // must never be replaced by a leftover that is no newer than it.
         const candidates: MigrationRow[] =
           typeof existing === 'string'
             ? [{ key: flatKey, value: existing, modifiedAt: lastModifiedAtOf(existing) }, ...rows]
@@ -127,7 +104,6 @@ export function migrateToFlatKeys(transaction: IDBTransaction): void {
           row.modifiedAt > best.modifiedAt ? row : best,
         )
 
-        /** Drop the source rows the winner makes safe to lose. */
         const dropSources = () => {
           for (const row of rows) {
             const identical = row.value === winner.value
@@ -147,8 +123,6 @@ export function migrateToFlatKeys(transaction: IDBTransaction): void {
         }
 
         if (winner.key === flatKey) {
-          // The flat row already holds the winning content; there is nothing to
-          // copy, only sources to retire.
           dropSources()
           return
         }
@@ -175,15 +149,12 @@ export function migrateToFlatKeys(transaction: IDBTransaction): void {
   }
 }
 
-/** Why a read could not be performed. Absence is not a failure — it is `ok(null)`. */
 export type StorageReadError = Tagged<'notInBrowser'> | Tagged<'ioError', { cause: unknown }>
 
 const isClient = typeof window !== 'undefined'
 
 let dbPromise: Promise<IDBDatabase> | null = null
 
-// The connection behind `dbPromise` once it has opened, so a write can be issued
-// inside the caller's task instead of after an await.
 let openedDb: IDBDatabase | null = null
 
 function getDB(): Promise<IDBDatabase> {
@@ -200,11 +171,8 @@ function getDB(): Promise<IDBDatabase> {
   pending = new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION)
 
-    /** Whether this request still owns the shared promise. */
     const owns = () => dbPromise === pending
 
-    // Every failure path drops the shared promise, but only while this request
-    // still owns it: a stale request's late event must not clear a newer one.
     request.onerror = () => {
       if (owns()) dbPromise = null
       reject(request.error)
@@ -216,8 +184,6 @@ function getDB(): Promise<IDBDatabase> {
     request.onsuccess = () => {
       const db = request.result
       if (!owns()) {
-        // A newer open already replaced this one. Closing keeps the connection
-        // from outliving the promise nobody holds any more.
         db.close()
         reject(new Error('IndexedDB connection superseded before it opened'))
         return
@@ -245,8 +211,6 @@ function getDB(): Promise<IDBDatabase> {
       }
       if (oldVersion < 2) {
         const upgrade = openRequest.transaction
-        // Committing v2 with no migration would strand every row under a key
-        // nothing reads, so refuse the upgrade instead.
         if (!upgrade) throw new Error('IndexedDB upgrade ran without its transaction')
         migrateToFlatKeys(upgrade)
       }
@@ -258,16 +222,11 @@ function getDB(): Promise<IDBDatabase> {
   return dbPromise
 }
 
-/**
- * Open the shared IndexedDB connection for operations the key/value API cannot
- * express, such as cursor iteration. Resolves null during SSR.
- */
 export async function openStorageDb(): Promise<IDBDatabase | null> {
   if (!isClient) return null
   return getDB()
 }
 
-/** Issue a write on an open connection, resolving once its transaction commits. */
 function issueWrite(
   db: IDBDatabase,
   label: string,
@@ -318,13 +277,6 @@ async function runWrite(
 }
 
 export const storage = {
-  /**
-   * Get item from IndexedDB (SSR-safe).
-   *
-   * A key the store does not hold is `ok(null)`; only a read that could not be
-   * performed is `err`, so a caller that ignores absence does not also ignore
-   * a broken database.
-   */
   async getItem(key: string): Promise<Result<string | null, StorageReadError>> {
     if (!isClient) return err({ kind: 'notInBrowser' })
 
@@ -342,28 +294,19 @@ export const storage = {
       })
       return ok(value)
     } catch (error) {
-      // Log for debugging in production (Sentry will auto-capture console.error)
       console.error(`IndexedDB.getItem failed for key: ${key}`, error)
       return err({ kind: 'ioError', cause: error })
     }
   },
 
-  /**
-   * Set item in IndexedDB (SSR-safe).
-   *
-   * Reports whether the write committed. A caller told a save succeeded when it
-   * did not will happily discard the only copy it still had.
-   */
   async setItem(key: string, value: string): Promise<Result<void, StorageReadError>> {
     return runWrite(`setItem for key: ${key}`, (store) => store.put(value, key))
   },
 
-  /** Remove item from IndexedDB (SSR-safe), reporting whether the delete committed. */
   async removeItem(key: string): Promise<Result<void, StorageReadError>> {
     return runWrite(`removeItem for key: ${key}`, (store) => store.delete(key))
   },
 
-  /** Clear all items from IndexedDB (SSR-safe), reporting whether the clear committed. */
   async clear(): Promise<Result<void, StorageReadError>> {
     return runWrite('clear', (store) => store.clear())
   },

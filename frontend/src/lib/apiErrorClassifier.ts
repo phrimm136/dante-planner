@@ -1,10 +1,3 @@
-/**
- * One vocabulary for "a request failed", shared by every consumer of the API.
- *
- * Pure: every reaction a failure deserves — cache invalidation, logging, toasts —
- * belongs to the caller that knows which surface is failing.
- */
-
 import { CONFLICT_CODE } from '@/lib/constants'
 
 import {
@@ -24,13 +17,10 @@ import {
 
 type Tagged<K extends string, P = unknown> = { kind: K } & P
 
-/** Which account restriction blocked the request. */
 export type RestrictionKind = 'banned' | 'timedOut'
 
-/** Which half of the service could not serve the request. */
 export type UnavailableScope = 'service' | 'backend' | 'auth' | 'write'
 
-/** Every failure the API layer can hand a consumer, as one closed union. */
 export type AppError =
   | Tagged<'conflict', { code: string; serverVersion: number | null }>
   | Tagged<'validation', { key: string; params?: Record<string, string | number> }>
@@ -43,22 +33,14 @@ export type AppError =
   | Tagged<'quota'>
   | Tagged<'unknown'>
 
-/** The failure a write is answered with when the server's copy has moved on. */
 export type ConflictAppError = Extract<AppError, { kind: 'conflict' }>
 
-/**
- * Whether a failure is the conflict a resolution flow can act on.
- *
- * Every other 409 shares the kind but carries no version to resolve against,
- * so a caller that opens a resolution surface has to ask for this one by name.
- */
 export function isSyncConflict(error: AppError | null): error is ConflictAppError {
   return error !== null && error.kind === 'conflict' && error.code === CONFLICT_CODE.SYNC_CONFLICT
 }
 
 const API_VALIDATION_KEY = 'common:errors.validation.message'
 
-/** Carry a validator's i18n key and params into the app error vocabulary. */
 export function validationAppError(friendly: {
   key: string
   params?: Record<string, string | number>
@@ -70,7 +52,6 @@ export function validationAppError(friendly: {
   }
 }
 
-/** Map a thrown value onto the app error vocabulary. */
 export function classifyAppError(error: unknown): AppError {
   if (error instanceof ConflictError) {
     return { kind: 'conflict', code: error.code, serverVersion: error.serverVersion }

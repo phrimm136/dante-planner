@@ -11,7 +11,6 @@ import { loadPlannerTitle, untitledPlannerTitle } from '@/pages/planner/lib/load
  */
 
 export async function loadPublishedPlanner({ params }: { params: { id: string } }) {
-  // Dynamic so the published-planner schemas stay out of the entry chunk.
   const {
     publishedPlannerQueryKeys,
     fetchPublishedPlanner,

@@ -5,10 +5,6 @@ interface TitleSyncRouter {
   state: { matches: ReadonlyArray<{ meta?: unknown }> }
 }
 
-/**
- * The title the deepest matched route published, or null when no match carries
- * one. Matches are ordered root-first, so the search runs from the end.
- */
 export function titleFromMatches(matches: ReadonlyArray<{ meta?: unknown }>): string | null {
   for (const match of [...matches].reverse()) {
     const meta = match.meta
@@ -35,8 +31,6 @@ export function titleFromMatches(matches: ReadonlyArray<{ meta?: unknown }>): st
  */
 export function syncTitleOnLanguageChange(router: TitleSyncRouter): void {
   i18n.on('languageChanged', async () => {
-    // Invalidating re-runs the loaders so detail pages re-fetch localized data,
-    // and re-evaluates head(), which republishes each match's meta.
     await router.invalidate()
 
     const title = titleFromMatches(router.state.matches)

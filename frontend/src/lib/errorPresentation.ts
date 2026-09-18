@@ -1,11 +1,3 @@
-/**
- * How a classified failure is shown to the user.
- *
- * Splitting presentation from `classifyAppError` keeps the vocabulary usable by
- * callers that react to a failure without reporting it, and leaves exactly one
- * place that decides what an error looks like.
- */
-
 import { toast } from 'sonner'
 
 import i18n from '@/lib/i18n'
@@ -20,7 +12,6 @@ export interface ErrorPresentation {
   key: string
   params?: Record<string, string | number>
   severity: 'error' | 'warning'
-  /** Append the contact-on-repeat description. Opt-in, per error. */
   supportHint: boolean
 }
 
@@ -45,12 +36,6 @@ const UNAVAILABLE_KEY: Record<UnavailableScope, string> = {
   write: 'common:errors.writeUnavailable.message',
 }
 
-/**
- * How a rejected write is shown, given the code the server rejected it with.
- *
- * The code is a bare string: an unlisted one is a code this client predates,
- * and it is reported like any other failure rather than swallowed.
- */
 function presentConflict(code: string): ErrorPresentation | null {
   if (code === CONFLICT_CODE.SYNC_CONFLICT) return null
   if (code === CONFLICT_CODE.CONCURRENT_WRITE) {
@@ -59,13 +44,6 @@ function presentConflict(code: string): ErrorPresentation | null {
   return { key: GENERIC_KEY, severity: 'error', supportHint: true }
 }
 
-/**
- * How an error is shown, or null when a mounted surface owns it.
- *
- * A null is a delegation, never a disposal: only the sync conflict returns one,
- * and only because the resolution dialog renders it. A caller that can carry
- * that conflict without the dialog mounted has to present it itself.
- */
 export function presentError(error: AppError): ErrorPresentation | null {
   switch (error.kind) {
     case 'conflict':
@@ -115,7 +93,6 @@ function emit(presentation: ErrorPresentation): void {
   toast.error(message, options)
 }
 
-/** Report a failure that is already classified. */
 export function showAppError(error: AppError): void {
   const presentation = presentError(error)
   if (presentation === null) return
@@ -126,7 +103,6 @@ export function showError(error: unknown): void {
   showAppError(classifyAppError(error))
 }
 
-/** Only the unavailable family, for the query cache's deliberately narrow toasting. */
 export function showUnavailable(error: unknown): void {
   const classified = classifyAppError(error)
   if (classified.kind !== 'unavailable') return
@@ -136,7 +112,6 @@ export function showUnavailable(error: unknown): void {
   emit(presentation)
 }
 
-/** Report a failure under a message the caller chose, not one the classifier picked. */
 export function showErrorMessage(key: string, params?: Record<string, string | number>): void {
   showAppError(validationAppError({ key, ...(params !== undefined && { params }) }))
 }
@@ -145,12 +120,10 @@ export function showSuccess(key: string, params?: Record<string, unknown>): void
   toast.success(translate(key, params))
 }
 
-/** An outcome that is neither a failure nor a clean success. */
 export function showWarning(key: string, params?: Record<string, unknown>): void {
   toast.warning(translate(key, params))
 }
 
-/** A neutral notice. Carried here so no other module needs the toast import. */
 export function showInfo(key: string, params?: Record<string, unknown>): void {
   toast.info(translate(key, params))
 }

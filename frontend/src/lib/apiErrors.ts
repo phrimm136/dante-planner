@@ -7,9 +7,7 @@
  * needs the version has to read it back rather than assume one.
  */
 export class ConflictError extends Error {
-  /** The backend's conflict code (`SYNC_CONFLICT`, `CONCURRENT_WRITE`) */
   readonly code: string
-  /** Server's current version for sync resolution, or null when unreported */
   readonly serverVersion: number | null
 
   constructor(code: string, message: string, serverVersion: number | null) {
@@ -20,9 +18,6 @@ export class ConflictError extends Error {
   }
 }
 
-/**
- * Custom error class for 429 Too Many Requests responses
- */
 export class RateLimitError extends Error {
   readonly code = 'RATE_LIMIT_EXCEEDED'
 
@@ -32,9 +27,6 @@ export class RateLimitError extends Error {
   }
 }
 
-/**
- * Custom error class for 400 Bad Request responses the backend classified
- */
 export class ValidationError extends Error {
   readonly code: string
 
@@ -45,10 +37,6 @@ export class ValidationError extends Error {
   }
 }
 
-/**
- * Custom error class for 404 Not Found responses
- * Enables typed error handling with instanceof checks
- */
 export class NotFoundError extends Error {
   constructor(message: string) {
     super(message)
@@ -63,10 +51,6 @@ export class UnauthorizedError extends Error {
   }
 }
 
-/**
- * Custom error class for 403 USER_BANNED responses
- * User account has been permanently banned
- */
 export class BannedError extends Error {
   readonly code = 'USER_BANNED'
 
@@ -76,10 +60,6 @@ export class BannedError extends Error {
   }
 }
 
-/**
- * Custom error class for 403 USER_TIMED_OUT responses
- * User account is temporarily restricted
- */
 export class TimedOutError extends Error {
   readonly code = 'USER_TIMED_OUT'
 
@@ -89,10 +69,6 @@ export class TimedOutError extends Error {
   }
 }
 
-/**
- * Custom error class for 403 Forbidden with error code
- * Used for PLANNER_FORBIDDEN, COMMENT_FORBIDDEN, etc.
- */
 export class ForbiddenError extends Error {
   readonly code: string
 
@@ -103,10 +79,6 @@ export class ForbiddenError extends Error {
   }
 }
 
-/**
- * Custom error class for 503 during planned deploy
- * Mapped from a SERVICE_UPDATING body; nothing in the current serving path emits it
- */
 export class ServiceUpdatingError extends Error {
   readonly code = 'SERVICE_UPDATING'
 
@@ -116,10 +88,6 @@ export class ServiceUpdatingError extends Error {
   }
 }
 
-/**
- * Custom error class for 503 during unexpected backend downtime
- * The fallback for any 503 whose body carries no mapped code
- */
 export class BackendUnavailableError extends Error {
   readonly code = 'BACKEND_UNAVAILABLE'
 
@@ -129,10 +97,6 @@ export class BackendUnavailableError extends Error {
   }
 }
 
-/**
- * Custom error class for 503 when a write cannot be served during regional failover
- * Thrown when the backend returns WRITE_TEMPORARILY_UNAVAILABLE
- */
 export class WriteTemporarilyUnavailableError extends Error {
   readonly code = 'WRITE_TEMPORARILY_UNAVAILABLE'
 
@@ -142,10 +106,6 @@ export class WriteTemporarilyUnavailableError extends Error {
   }
 }
 
-/**
- * Custom error class for 503 when auth cannot be served during regional failover
- * Thrown when the backend returns AUTH_TEMPORARILY_UNAVAILABLE
- */
 export class AuthTemporarilyUnavailableError extends Error {
   readonly code = 'AUTH_TEMPORARILY_UNAVAILABLE'
 
@@ -155,10 +115,6 @@ export class AuthTemporarilyUnavailableError extends Error {
   }
 }
 
-/**
- * Custom error class for 503 responses the backend says to retry unchanged —
- * a database deadlock or an unreachable rate limiter.
- */
 export class RetryableUnavailableError extends Error {
   constructor(message: string) {
     super(message)

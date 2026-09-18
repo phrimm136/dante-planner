@@ -2,7 +2,6 @@ import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 import LanguageDetector from 'i18next-browser-languagedetector'
 
-// EN is the fallback language, so it is needed on every load and stays bundled.
 import enCommon from '@static/i18n/EN/common.json'
 import enDatabase from '@static/i18n/EN/database.json'
 import enPlanner from '@static/i18n/EN/planner.json'
@@ -71,7 +70,6 @@ const translationChunks: Record<string, Record<Namespace, () => Promise<{ defaul
 
 const loaded = new Set<string>(['EN'])
 
-/** Adds every namespace of `language` to the i18next store, once. */
 async function loadLanguage(language: string | undefined): Promise<void> {
   if (!language || loaded.has(language)) return
   const chunks = translationChunks[language]
@@ -85,8 +83,6 @@ async function loadLanguage(language: string | undefined): Promise<void> {
       i18n.addResourceBundle(language, ns, resource, true, true)
     }
   } catch (error) {
-    // A failed fetch must not keep the app from rendering: EN is already in the
-    // store, so the UI degrades to the fallback language instead of to nothing.
     loaded.delete(language)
     console.error(`[i18n] failed to load ${language} translations`, error)
   }
@@ -111,8 +107,6 @@ const initPromise = i18n
     ns: [...NAMESPACES],
     defaultNS: 'common',
     partialBundledLanguages: true,
-    // Note: fallbackNS removed intentionally. Components must explicitly declare
-    // their namespace dependencies via useTranslation(['namespace', 'common']).
 
     detection: {
       order: ['localStorage', 'navigator'],
@@ -126,7 +120,6 @@ const initPromise = i18n
 
     react: {
       useSuspense: false,
-      // Re-render once a lazily added language bundle reaches the store.
       bindI18nStore: 'added',
     },
   })
@@ -135,10 +128,6 @@ i18n.on('languageChanged', () => {
   void loadLanguage(requestedLanguage())
 })
 
-/**
- * Resolves once the active language's translations are in the store. Awaited
- * before the first render so a non-EN visitor never sees English text.
- */
 export const i18nReady: Promise<void> = initPromise
   .then(() => loadLanguage(requestedLanguage()))
   .catch((error: unknown) => {

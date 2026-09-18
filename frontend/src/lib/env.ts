@@ -22,16 +22,6 @@ if (!envValidation.success) {
   }
 }
 
-/**
- * Type-safe environment variables
- *
- * Usage:
- * ```typescript
- * import { env } from '@/lib/env';
- *
- * const apiBaseUrl = env.VITE_API_BASE_URL; // Type-safe!
- * ```
- */
 const testFallback = {
   VITE_API_BASE_URL: 'http://localhost:8080',
   DEV: false,

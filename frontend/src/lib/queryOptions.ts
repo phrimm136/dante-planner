@@ -10,19 +10,6 @@ import { STATIC_DATA_STALE_TIME } from './constants'
  * The importer MUST be a thunk wrapping a literal or template
  * `import('@static/…')` expression — a fully variable `import(path)`
  * defeats Vite's static analysis and breaks code-splitting.
- *
- * @param queryKey - Cache key tuple from a query key factory
- * @param importer - Thunk returning the dynamic import promise
- * @param schema - Zod schema for the module's default export
- * @param context - Validation error label, e.g. `identity specList`
- *
- * @example
- * createStaticDataQueryOptions(
- *   identityListQueryKeys.spec(),
- *   () => import('@static/data/identitySpecList.json'),
- *   IdentitySpecListSchema,
- *   'identity specList',
- * )
  */
 export function createStaticDataQueryOptions<T, TKey extends readonly unknown[]>(
   queryKey: TKey,
