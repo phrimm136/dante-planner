@@ -43,10 +43,6 @@ public class SecurityConfig {
         return bean;
     }
 
-    /**
-     * Spring Boot auto-registers a filter bean in the servlet container, where it runs a second
-     * time ahead of the Spring Security chain and outside its ordering.
-     */
     @Bean
     public FilterRegistrationBean<JwtAuthenticationFilter> jwtFilterRegistration(
             JwtAuthenticationFilter filter) {
@@ -55,10 +51,6 @@ public class SecurityConfig {
         return bean;
     }
 
-    /**
-     * Spring Boot auto-registers a filter bean in the servlet container, where it runs a second
-     * time ahead of the Spring Security chain and outside its ordering.
-     */
     @Bean
     public FilterRegistrationBean<MdcLoggingFilter> mdcFilterRegistration(MdcLoggingFilter filter) {
         FilterRegistrationBean<MdcLoggingFilter> bean = new FilterRegistrationBean<>(filter);

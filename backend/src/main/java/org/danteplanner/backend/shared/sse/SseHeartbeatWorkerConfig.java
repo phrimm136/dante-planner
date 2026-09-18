@@ -4,10 +4,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
-/**
- * A heartbeat writes to a client socket, so it blocks for as long as that peer's receive window
- * stays full. The {@code @Scheduled} thread is shared with every other scheduled task in the pod.
- */
 @Configuration
 public class SseHeartbeatWorkerConfig {
 

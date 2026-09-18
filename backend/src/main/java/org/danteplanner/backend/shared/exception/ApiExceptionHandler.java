@@ -56,10 +56,6 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
     private final CookieUtils cookieUtils;
 
-    /**
-     * Clearing the matched endpoint's producible media types keeps an event-stream endpoint's 4xx
-     * from being negotiated as {@code text/event-stream}, for which no converter can write a body.
-     */
     private ResponseEntity<Object> respond(
             Exception ex, ProblemDetail body, HttpHeaders headers, WebRequest request) {
         return handleExceptionInternal(ex, body, headers, HttpStatus.valueOf(body.getStatus()), request);
