@@ -24,9 +24,6 @@ import { IDENTITY_GEOMETRY } from '@/shared/cardLayout'
 import { buildFacetCounts } from './lib/identityFacetCounts'
 import { toIdentityEntity } from './lib/identityEntity'
 
-/**
- * Card grid section.
- */
 function IdentityCardGrid({
   spec,
   store,
@@ -41,17 +38,12 @@ function IdentityCardGrid({
   return <IdentityList identities={identities} store={store} />
 }
 
-/**
- * Shell component - uses spec data only (no language dependency)
- * Does not suspend on language change since spec query key has no language.
- */
 function IdentityPageShell() {
   const { t } = useTranslation(['database', 'common'])
   const spec = useIdentityListSpec()
 
   const { seasonCounts, unitKeywordCounts } = buildFacetCounts(spec)
 
-  // Filter states
   const {
     values: filters,
     setters,
@@ -61,10 +53,8 @@ function IdentityPageShell() {
     store,
   } = useFilterStore(identityFilterStore)
 
-  // Calculate active filter count for mobile badge
   const activeFilterCount = calculateActiveFilterCount(...Object.values(filters))
 
-  // Primary filters (always visible on mobile): Sinner and Keyword
   const PRIMARY_FILTERS = [
     filterSection({
       key: 'selectedSinners',
@@ -84,7 +74,6 @@ function IdentityPageShell() {
     }),
   ]
 
-  // Secondary filters (shown when mobile expanded): Skill Attribute, Attack Type, Rarity, Season, Unit Keywords
   const SECONDARY_FILTERS = [
     filterSection({
       key: 'selectedAttributes',
@@ -169,14 +158,6 @@ function IdentityPageShell() {
   )
 }
 
-/**
- * IdentityPage - Identity browser with responsive filter sidebar
- *
- * Granular loading architecture:
- * - Outer Suspense: ListPageSkeleton for spec loading (initial)
- * - Season/UnitKeyword dropdowns: Own Suspense for dropdown i18n
- * - IdentityList: name lookups suspend at the card name, not the grid
- */
 export default function IdentityPage() {
   return (
     <EntityListPage skeleton={<ListPageSkeleton geometry={IDENTITY_GEOMETRY} />}>

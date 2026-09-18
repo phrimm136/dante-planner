@@ -10,10 +10,6 @@ interface TraitsDisplayProps {
   traits: string[]
 }
 
-/**
- * Wrapper component for trait badges with labeled container.
- * Uses TraitsI18n internally with Suspense for granular loading.
- */
 export function TraitsDisplay({ traits }: TraitsDisplayProps) {
   const { t } = useTranslation(['database', 'common'])
 

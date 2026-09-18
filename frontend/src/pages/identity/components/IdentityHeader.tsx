@@ -24,12 +24,6 @@ interface IdentityHeaderProps {
   uptie: number
 }
 
-/**
- * IdentityHeader - Two-row header matching game UI style
- *
- * Row 1: Rank icon (right-aligned)
- * Row 2: Sinner icon with rank+uptie frame (left) + Identity name (right)
- */
 export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeaderProps) {
   const { i18n } = useTranslation()
   // Gacksung image only available for rank > 1 AND uptie >= 3
@@ -39,13 +33,11 @@ export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeader
   )
   const [appliedGacksung, setAppliedGacksung] = useState(canShowGacksung)
 
-  // Availability changing discards a manual swap and re-picks the default.
   if (canShowGacksung !== appliedGacksung) {
     setAppliedGacksung(canShowGacksung)
     setImageVariant(canShowGacksung ? 'gacksung' : 'normal')
   }
 
-  // Derive sinner from identity ID and get color
   const sinner = getSinnerFromId(identityId) as Sinner
   const sinnerColor = SINNER_COLORS[sinner] || '#333333'
   const displayStyle = getDisplayFontForLanguage(i18n.language)
@@ -58,30 +50,23 @@ export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeader
 
   return (
     <div className="space-y-4">
-      {/* Title Area: Two rows */}
       <div>
-        {/* Row 1: Rank icon on the right */}
         <div className="flex justify-end">
           <img src={getRarityIconPath(rank)} alt={`${rank} rank`} className="h-6 object-contain" />
         </div>
-        {/* Row 2: Sinner icon + Identity name */}
         <div className="flex items-center gap-3">
-          {/* Sinner Icon with layered frame (rank aware) */}
           <div className="relative w-12 h-12 flex-shrink-0">
-            {/* Background layer */}
             <img
               src={getSinnerIconRingPath(rank)}
               alt=""
               className="absolute inset-0 w-full h-full object-contain"
             />
-            {/* Sinner icon layer */}
             <img
               src={getSinnerIconPath(sinner)}
               alt={sinner}
               className="absolute inset-0 w-full h-full object-contain p-1"
             />
           </div>
-          {/* Identity name with sinner color */}
           {name ? (
             <h1
               className={SECTION_STYLES.TEXT.pageTitle}
@@ -95,7 +80,6 @@ export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeader
         </div>
       </div>
 
-      {/* Character Image with overlay buttons */}
       <CharacterImageSection
         src={currentImagePath}
         fallbackSrc={getIdentityDetailImagePath(identityId, 'normal')}

@@ -8,15 +8,11 @@ import { getEffectivePassives, getLockedPassives } from '../lib/identityPassiveS
 import type { IdentityData, Uptie } from '../types/IdentityTypes'
 
 interface IdentityPassivesPaneProps {
-  /** Identity ID for i18n lookup */
   id: string
-  /** Passive lists and their conditions */
   passives: IdentityData['passives']
-  /** Current uptie level (1-4) */
   uptieLevel: Uptie
 }
 
-/** Battle and support passives effective at the current uptie, plus locked previews. */
 export function IdentityPassivesPane({ id, passives, uptieLevel }: IdentityPassivesPaneProps) {
   const { t, i18n } = useTranslation(['database', 'common'])
   const displayStyle = getDisplayFontForLanguage(i18n.language)
@@ -29,7 +25,6 @@ export function IdentityPassivesPane({ id, passives, uptieLevel }: IdentityPassi
 
   return (
     <div className="border rounded p-4 space-y-4">
-      {/* Battle Passive Section */}
       <div className="space-y-3">
         <div className="mb-4">
           <span
@@ -68,7 +63,6 @@ export function IdentityPassivesPane({ id, passives, uptieLevel }: IdentityPassi
         )}
       </div>
 
-      {/* Support Passive Section */}
       <div className="space-y-3">
         <div className="mb-4 mt-8">
           <span

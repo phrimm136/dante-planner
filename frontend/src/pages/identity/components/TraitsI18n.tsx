@@ -3,7 +3,6 @@ import type { ReactNode } from 'react'
 import { useUnitKeywords } from '@/shared/filter'
 import { applyStrikethrough, extractLeadingColor } from '@/shared/gameText'
 
-/** Keywords to skip in trait display (internal/visual only) */
 const HIDDEN_TRAITS = new Set(['BASE_APPEARANCE', 'SMALL'])
 
 interface ParsedTrait {
@@ -30,30 +29,14 @@ function renderTrait(parsed: ParsedTrait): ReactNode {
 }
 
 interface TraitsI18nProps {
-  /** Trait IDs to translate */
   traits: string[]
 }
 
-/**
- * Suspending component that renders translated trait badges.
- * Uses useSuspenseQuery internally - MUST be wrapped in Suspense boundary.
- *
- * Filters hidden traits and parses Unity-style rich text.
- * This allows granular loading: trait container stays visible while only
- * the trait badges show skeleton during language change.
- *
- * @example
- * <Suspense fallback={<Skeleton className="h-6 w-full" />}>
- *   <TraitsI18n traits={identity.unitKeywordList} />
- * </Suspense>
- */
 export function TraitsI18n({ traits }: TraitsI18nProps) {
   const traitsI18n = useUnitKeywords()
 
-  // Filter out hidden traits
   const visibleTraits = traits.filter((trait) => !HIDDEN_TRAITS.has(trait))
 
-  // Map to translated and parsed traits, filtering out traits without translations
   const translatedTraits = visibleTraits.flatMap((trait) => {
     const translated = traitsI18n[trait]
     return translated === undefined ? [] : [parseUnityRichText(trait, translated)]

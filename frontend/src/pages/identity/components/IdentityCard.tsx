@@ -28,29 +28,15 @@ import {
 
 interface IdentityCardProps {
   identity: IdentityEntity
-  /** Override uptie level for image display (uses gacksung at 3+) */
   uptie?: number
-  /** Override level display (defaults to MAX_LEVEL) */
   level?: number
-  /** Dim the entire card (selected/equipped state) */
   isSelected?: boolean
   /** What the card's graphics multiply by, as `PersonalitySlotGraphics.SetColor` writes it */
   dim?: number | undefined
-  /** Custom overlay content (e.g., selected indicator, deployment badge) */
   overlay?: ReactNode
-  /** Additional CSS classes */
   className?: string
 }
 
-/**
- * View-only identity card. It fills the width its parent gives it and carries no
- * interaction; wrap it in a Link, button or trigger for that.
- *
- * @example
- * <div style={{ width: IDENTITY_GEOMETRY.size.widthPx }}>
- *   <IdentityCard identity={identity} />
- * </div>
- */
 export function IdentityCard({
   identity,
   uptie = 4,

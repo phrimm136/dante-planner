@@ -1,10 +1,3 @@
-/**
- * Identity List Facets
- *
- * Facet descriptors for the identity browser, plus the per-item predicate the grid's
- * card slots subscribe through.
- */
-
 import type { EntityMatcher, Facet, SearchMappings } from '@/shared/filter'
 import { collectKeywordTerms, createEntityMatcher } from '@/shared/filter'
 import type { AtkType, DefType, Season, SkillAttributeType } from '@/shared/gameData'
@@ -35,12 +28,6 @@ export const IDENTITY_FACETS: readonly Facet<IdentityEntity, IdentityFacetState>
   { sel: (s) => s.selectedUnitKeywords, get: (i) => i.unitKeywordList, mode: 'any' },
 ]
 
-/**
- * Every lowercased string the search box matches an identity on: its display name plus
- * the natural-language reading of each keyword and unit keyword it carries.
- *
- * Depends only on the i18n payloads, so a filter toggle never invalidates it.
- */
 export function buildIdentitySearchTerms(
   identity: IdentityEntity,
   identityNames: Record<string, string>,
@@ -57,6 +44,5 @@ export function buildIdentitySearchTerms(
   ]
 }
 
-/** Whether one identity survives the current facets and search query. */
 export const matchesIdentity: EntityMatcher<IdentityEntity, IdentityFacetState> =
   createEntityMatcher(IDENTITY_FACETS)

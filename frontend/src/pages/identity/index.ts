@@ -1,5 +1,3 @@
-// Public API of the identity entity. Import from '@/pages/identity', not internal paths.
-
 export { IdentityCard } from './components/IdentityCard'
 export { FormationBadge } from './components/FormationBadge'
 export { FORMATION_SLOT_DIM } from './lib/cardLayout'

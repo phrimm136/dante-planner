@@ -17,7 +17,6 @@ import {
   type Underlay,
 } from '@/shared/cardLayout'
 
-/** A block anchored to its ancestor's bottom edge, sized by its own content. */
 interface PctBottomBlock {
   left: number
   width: number
@@ -162,7 +161,6 @@ export function identityNameLines(name: string, table: FontAdvanceTable): string
 export const IDENTITY_LEVEL_FACE_MEASURED = {
   ascent: 0.731951,
   descent: 0.21528,
-  /** How far the drawn digits reach above the baseline. */
   inkAscent: 0.688895,
 } as const
 
@@ -214,7 +212,6 @@ export function nameLinePitch(table: FontAdvanceTable, language: FontTableLangua
 /** The card root's own scale in the game's scroll view. */
 export const IDENTITY_CARD_ROOT_SCALE = 1.02
 
-/** Re-expresses `child` — both rects in root percentages — as a percentage of `parent`. */
 export function relativeRect(child: PctRect, parent: PctRect): PctRect {
   return {
     left: ((child.left - parent.left) / parent.width) * 100,
@@ -309,7 +306,6 @@ export function nameTextStyle(table: FontAdvanceTable, language: FontTableLangua
   }
 }
 
-/** One drawn line of a name; `identityNameLines` has already decided where it ends. */
 export function nameLineStyle(): CSSProperties {
   return { display: 'block', whiteSpace: 'nowrap' }
 }
@@ -329,7 +325,6 @@ interface FormationInk {
   bloom?: string
 }
 
-/** The banner and order number one formation state draws. */
 export interface FormationSlotLayers {
   /** The `deploy-<sprite>` file `PersonalityUILabel.GetLabelSprite` returns for the state */
   sprite: string
@@ -420,7 +415,6 @@ const FORMATION_ORDER_UNDERLAY: Underlay = {
   dilate: 1.02382,
 }
 
-/** The banner, its sprite and the order number's box and ink for one formation state. */
 export function formationSlotLayers(state: FormationSlotState): FormationSlotLayers {
   return {
     sprite: FORMATION_SPRITES[state],

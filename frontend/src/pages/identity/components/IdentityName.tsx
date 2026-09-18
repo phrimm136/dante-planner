@@ -6,21 +6,9 @@ import { identityNameLines, nameLineStyle, nameTextStyle } from '../lib/cardLayo
 import type { IdentityId } from '@/shared/gameData'
 
 interface IdentityNameProps {
-  /** Identity ID to look up name */
   id: IdentityId
 }
 
-/**
- * An identity name, broken into lines by the display face's own advance table.
- *
- * Reads i18n and that table through `useSuspenseQuery` — render it inside a Suspense
- * boundary.
- *
- * @example
- * <Suspense fallback={<Skeleton className="w-16 h-4" />}>
- *   <IdentityName id={identity.id} />
- * </Suspense>
- */
 export function IdentityName({ id }: IdentityNameProps) {
   const { i18n } = useTranslation()
   const i18nData = useIdentityListI18n()

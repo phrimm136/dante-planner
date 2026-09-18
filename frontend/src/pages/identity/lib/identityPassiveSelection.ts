@@ -34,11 +34,6 @@ export function getEffectivePassives(
   return selectEffectivePassives(passiveList, currentUptieIndex)
 }
 
-/**
- * Get locked passives: passives from higher tiers not available at the current
- * tier. A higher-tier passive sharing a variant with an already-shown one is
- * hidden, not previewed.
- */
 export function getLockedPassives(
   passiveList: PassiveId[][],
   currentUptieIndex: number,

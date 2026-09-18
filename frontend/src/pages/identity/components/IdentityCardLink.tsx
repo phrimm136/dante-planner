@@ -5,27 +5,11 @@ import { cn } from '@/lib/utils'
 import { IdentityCard } from './IdentityCard'
 
 interface IdentityCardLinkProps {
-  /** The identity data to display */
   identity: IdentityEntity
-  /** Custom overlay content (e.g., selected indicator) */
   overlay?: ReactNode
-  /** Additional CSS classes for the link wrapper */
   className?: string
 }
 
-/**
- * Navigation wrapper for IdentityCard that links to the identity detail page.
- * Use this when clicking the card should navigate to `/identity/$id`.
- *
- * Memoized by identity.id to prevent re-renders during list filtering.
- *
- * @example
- * // In a list view with navigation
- * <IdentityCardLink identity={identity} />
- *
- * // With selection overlay
- * <IdentityCardLink identity={identity} overlay={<SelectedIndicator />} />
- */
 export const IdentityCardLink = function IdentityCardLink({
   identity,
   overlay,

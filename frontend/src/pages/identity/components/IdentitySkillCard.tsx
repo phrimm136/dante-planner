@@ -33,10 +33,6 @@ export function getFirstDefinedUptie(skillData: IdentitySkillEntry['skillData'])
   return 1
 }
 
-/**
- * Identity adapter over the shared SkillCard: merges uptie data and resolves the
- * identity skill image path (iconID cross-reference or id), then delegates.
- */
 export function IdentitySkillCardWithGranularI18n({
   identityId,
   skillSlot,
@@ -75,9 +71,6 @@ export function IdentitySkillCardWithGranularI18n({
   )
 }
 
-/**
- * Suspending name slot — resolves the skill name from identity detail i18n.
- */
 function IdentitySkillName({
   identityId,
   skillId,
@@ -96,9 +89,6 @@ function IdentitySkillName({
   )
 }
 
-/**
- * Suspending description slot — merges identity skill descriptions up to the uptie.
- */
 function IdentitySkillDescription({
   identityId,
   skillId,

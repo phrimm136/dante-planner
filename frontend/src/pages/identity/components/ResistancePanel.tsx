@@ -23,7 +23,6 @@ export function ResistancePanel({ slash, pierce, blunt }: ResistancePanelProps) 
   return (
     <LabeledPanel title={t('identity.resistances')}>
       <div className="flex justify-around items-center">
-        {/* Slash */}
         <div className="flex flex-col items-center gap-2">
           <img src={getSlashResistIconPath()} alt="Slash" className="w-6 h-6 object-contain" />
           <div className="flex flex-col items-center">
@@ -34,7 +33,6 @@ export function ResistancePanel({ slash, pierce, blunt }: ResistancePanelProps) 
           </div>
         </div>
 
-        {/* Pierce */}
         <div className="flex flex-col items-center gap-2">
           <img src={getPierceResistIconPath()} alt="Pierce" className="w-6 h-6 object-contain" />
           <div className="flex flex-col items-center">
@@ -45,7 +43,6 @@ export function ResistancePanel({ slash, pierce, blunt }: ResistancePanelProps) 
           </div>
         </div>
 
-        {/* Blunt */}
         <div className="flex flex-col items-center gap-2">
           <img src={getBluntResistIconPath()} alt="Blunt" className="w-6 h-6 object-contain" />
           <div className="flex flex-col items-center">

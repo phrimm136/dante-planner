@@ -3,7 +3,6 @@ import type { IdentitySkillEntry } from '../types/IdentityTypes'
 
 export type SkillSlot = 'skill1' | 'skill2' | 'skill3' | 'skillDef'
 
-/** Slot number used in skill image paths. */
 export function getSkillSlotNumber(slot: SkillSlot): number {
   switch (slot) {
     case 'skill1':
@@ -19,10 +18,6 @@ export function getSkillSlotNumber(slot: SkillSlot): number {
   }
 }
 
-/**
- * Get attribute type for a skill slot.
- * Merges all skillData levels to get attributeType regardless of current uptie.
- */
 export function getSkillAttributeType(
   skills: Record<SkillSlot, IdentitySkillEntry[]>,
   slot: SkillSlot,

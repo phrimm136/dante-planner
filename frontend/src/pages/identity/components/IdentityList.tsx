@@ -18,24 +18,9 @@ interface IdentityListProps {
   store: FilterStore<IdentityFacetState>
 }
 
-/**
- * The identity browser's card grid.
- *
- * Filter Logic:
- * - All filter types use AND between each other
- * - Sinner: OR logic (any selected sinner)
- * - Keyword: AND logic (must have ALL selected keywords)
- * - Attribute: AND logic (must have ALL selected attributes)
- * - Attack Type: AND logic (must have ALL selected attack types)
- * - Rank: OR logic (any selected rank)
- * - Season: OR logic (any selected season)
- * - Association: OR logic (any selected association)
- * - Search: OR logic (name OR keyword OR trait)
- */
 export function IdentityList({ identities, store }: IdentityListProps) {
   const { names: identityNames, mappings } = useSearchTermSources(IDENTITY_LIST, EMPTY_NAMES)
 
-  // Sort all identities once (stable order for CSS-based filtering)
   const sortedIdentities = sortByReleaseDate(identities)
 
   return (

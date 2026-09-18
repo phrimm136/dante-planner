@@ -13,22 +13,12 @@ import type { IdentityData, Uptie } from '../types/IdentityTypes'
 import type { IdentityId } from '@/shared/gameData'
 
 interface IdentityInfoPaneProps {
-  /** Identity ID for i18n lookup */
   id: IdentityId
-  /** Identity spec data */
   identity: IdentityData
-  /** Current uptie level (1-4) */
   uptie: Uptie
-  /** Current level (1-MAX_LEVEL) */
   level: number
 }
 
-/**
- * Left pane of the identity detail page: header, stats, traits and metadata.
- *
- * Reads uptie and level but owns neither, so a right-pane interaction leaves
- * this subtree untouched.
- */
 export function IdentityInfoPane({ id, identity, uptie, level }: IdentityInfoPaneProps) {
   const calculatedHp = Math.floor(identity.hp.defaultStat + identity.hp.incrementByLevel * level)
   const calculatedDefense = Math.max(1, level + identity.defCorrection)
@@ -42,16 +32,13 @@ export function IdentityInfoPane({ id, identity, uptie, level }: IdentityInfoPan
 
   return (
     <>
-      {/* Header Area */}
       <div className="space-y-4">
-        {/* Header with rank, name, and image - Suspends for i18n name */}
         <Suspense
           fallback={<IdentityHeader identityId={id} name="" rank={identity.rank} uptie={uptie} />}
         >
           <IdentityHeaderWithI18n id={id} rank={identity.rank} uptie={uptie} />
         </Suspense>
 
-        {/* Status, Resistance, and Stagger Panels */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
           <StatusPanel
             hp={calculatedHp}
@@ -72,13 +59,10 @@ export function IdentityInfoPane({ id, identity, uptie, level }: IdentityInfoPan
           </div>
         </div>
 
-        {/* Traits Panel - Already has granular Suspense internally */}
         <TraitsDisplay traits={identity.unitKeywordList} />
 
-        {/* Battle Keywords Panel - each chip suspends internally */}
         <KeywordsDisplay keywords={identity.battleKeywordList} />
 
-        {/* Season and Release Date - Suspense for i18n data */}
         <Suspense
           fallback={
             <div className="grid grid-cols-2 gap-2">

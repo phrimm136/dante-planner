@@ -13,24 +13,15 @@ import type { SanityConditionType } from '@/shared/gameData'
 import { getDisplayFontForLanguage } from '@/lib/utils'
 
 interface PanicTypeSectionI18nProps {
-  /** Panic type ID */
   panicType: string
 }
 
-/**
- * Panic type section with granular i18n Suspense.
- * Structure stays visible, only name and description suspend.
- *
- * @example
- * <PanicTypeSectionI18n panicType={identity.panicType} />
- */
 export function PanicTypeSectionI18n({ panicType }: PanicTypeSectionI18nProps) {
   const { t, i18n } = useTranslation(['database', 'common'])
   const displayStyle = getDisplayFontForLanguage(i18n.language)
 
   return (
     <div className="flex gap-3">
-      {/* Left column: centered header + image + name */}
       <div className="flex flex-col items-center">
         <div className="mb-2">
           <span
@@ -56,7 +47,6 @@ export function PanicTypeSectionI18n({ panicType }: PanicTypeSectionI18nProps) {
         </div>
       </div>
 
-      {/* Right column: description */}
       <div className="flex-1 text-sm">
         <div className="mt-8">
           <span>·{t('sanity.panicEffect')}</span>
@@ -71,10 +61,6 @@ export function PanicTypeSectionI18n({ panicType }: PanicTypeSectionI18nProps) {
   )
 }
 
-/**
- * Internal component that fetches and renders panic description.
- * Returns empty FormattedDescription if panic entry not found.
- */
 function SanityDescContent({ panicType }: { panicType: string }) {
   const { data: panicInfo } = usePanicInfo()
   const panicEntry = getPanicEntry(panicInfo, panicType)
@@ -82,29 +68,10 @@ function SanityDescContent({ panicType }: { panicType: string }) {
   return <FormattedDescription text={desc} />
 }
 
-// =============================================================================
-// Granular I18n Components (text primitives)
-// =============================================================================
-
 interface SanityNameI18nProps {
-  /** Panic type ID */
   panicType: string
 }
 
-/**
- * Suspending component that fetches and displays panic type name.
- * Uses useSuspenseQuery internally - MUST be wrapped in Suspense boundary.
- *
- * Returns just the panic name - caller handles styling.
- * Returns empty string if panic entry not found (defensive fallback).
- * This allows granular loading: sanity structure stays visible while only
- * the name shows skeleton during language change.
- *
- * @example
- * <Suspense fallback={<Skeleton className="h-4 w-16" />}>
- *   <SanityNameI18n panicType={identity.panicType} />
- * </Suspense>
- */
 function SanityNameI18n({ panicType }: SanityNameI18nProps) {
   const { i18n } = useTranslation()
   const { data: panicInfo } = usePanicInfo()
@@ -115,27 +82,11 @@ function SanityNameI18n({ panicType }: SanityNameI18nProps) {
   return <span style={{ ...displayStyle, color: SANITY_INDICATOR_COLORS.INCREMENT }}>{name}</span>
 }
 
-// =============================================================================
-// Sanity Conditions Section (increment/decrement factors)
-// =============================================================================
-
 interface SanityConditionsSectionI18nProps {
-  /** Array of encoded sanity condition names */
   addConditions: string[]
-  /** Array of encoded sanity condition names */
   minConditions: string[]
 }
 
-/**
- * Sanity conditions section with granular i18n Suspense.
- * Structure stays visible, only condition text suspends.
- *
- * @example
- * <SanityConditionsSectionI18n
- *   addConditions={mentalConditionInfo.add}
- *   minConditions={mentalConditionInfo.min}
- * />
- */
 export function SanityConditionsSectionI18n({
   addConditions,
   minConditions,
@@ -145,7 +96,6 @@ export function SanityConditionsSectionI18n({
 
   return (
     <>
-      {/* Sanity Increment Section */}
       <div className="relative">
         <div className="mb-2">
           <span
@@ -180,7 +130,6 @@ export function SanityConditionsSectionI18n({
         />
       </div>
 
-      {/* Sanity Decrement Section */}
       <div className="relative">
         <div className="mb-2">
           <span
@@ -218,9 +167,6 @@ export function SanityConditionsSectionI18n({
   )
 }
 
-/**
- * Internal component that fetches and renders condition list.
- */
 function ConditionListContent({
   conditions,
   type,
@@ -241,9 +187,6 @@ function ConditionListContent({
   )
 }
 
-/**
- * Skeleton for condition list.
- */
 function ConditionListSkeleton({ count }: { count: number }) {
   return (
     <>

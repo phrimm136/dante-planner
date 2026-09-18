@@ -20,33 +20,21 @@ interface PassiveCondition {
 }
 
 interface PassiveCardProps {
-  /** Passive name */
   name: string
-  /** Passive description */
   desc: string
   /** Passive lore line; mirrors in-game `[Text]SkillInfoFlavor`-style TMP shown beneath the description */
   flavor?: string
-  /** Passive activation condition (affinity requirements) */
   condition?: PassiveCondition
-  /** Whether this passive is locked (from higher tier) */
   isLocked: boolean
 }
 
 interface PassiveCardWithSuspenseProps {
-  /** Identity ID for i18n lookup */
   id: string
-  /** Passive ID */
   passiveId: PassiveId
-  /** Passive activation condition (affinity requirements) */
   condition?: PassiveCondition | undefined
-  /** Whether this passive is locked (from higher tier) */
   isLocked: boolean
 }
 
-/**
- * PassiveCard - Base component that displays passive information.
- * Takes name and desc as props directly.
- */
 export function PassiveCard({ name, desc, flavor, condition, isLocked }: PassiveCardProps) {
   const { t } = useTranslation(['database', 'common'])
 
@@ -90,15 +78,6 @@ export function PassiveCard({ name, desc, flavor, condition, isLocked }: Passive
   )
 }
 
-// =============================================================================
-// Granular I18n Version
-// =============================================================================
-
-/**
- * PassiveCard with granular i18n Suspense.
- * Structure (condition icons, locked indicator) stays visible,
- * only name and description suspend.
- */
 export function PassiveCardWithSuspense({
   id,
   passiveId,
@@ -152,28 +131,18 @@ export function PassiveCardWithSuspense({
   )
 }
 
-/**
- * Internal: Fetches and renders passive name with styled formatting.
- */
 function PassiveNameContent({ id, passiveId }: { id: string; passiveId: PassiveId }) {
   const i18n = useIdentityDetailI18n(id)
   const passiveI18n = i18n.passives[passiveId]
   return <StyledSkillName name={passiveI18n?.name ?? ''} attributeType="NEUTRAL" />
 }
 
-/**
- * Internal: Fetches and renders passive description.
- */
 function PassiveDescContent({ id, passiveId }: { id: string; passiveId: PassiveId }) {
   const i18n = useIdentityDetailI18n(id)
   const passiveI18n = i18n.passives[passiveId]
   return <FormattedDescription text={passiveI18n?.desc ?? ''} />
 }
 
-/**
- * Internal: Fetches and renders passive flavor lore.
- * Returns null when the passive has no flavor (most do not).
- */
 function PassiveFlavorContent({ id, passiveId }: { id: string; passiveId: PassiveId }) {
   const i18n = useIdentityDetailI18n(id)
   const passiveI18n = i18n.passives[passiveId]
@@ -190,9 +159,4 @@ function PassiveFlavorContent({ id, passiveId }: { id: string; passiveId: Passiv
   )
 }
 
-/**
- * Alias for PassiveCardWithSuspense.
- * Used in IdentityDetailPage.tsx - kept for semantic clarity
- * (I18n suffix indicates this component handles its own i18n fetching).
- */
 export { PassiveCardWithSuspense as PassiveCardI18n }

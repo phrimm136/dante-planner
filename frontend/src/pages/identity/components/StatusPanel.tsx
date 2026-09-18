@@ -19,13 +19,11 @@ export function StatusPanel({ hp, minSpeed, maxSpeed, defLevel, defCorrection }:
   return (
     <LabeledPanel title={t('identity.status')}>
       <div className="grid grid-cols-3">
-        {/* HP */}
         <div className="flex flex-col items-center gap-1">
           <img src={getHPIconPath()} alt="HP" className="w-6 h-6 object-contain" />
           <span className="text-xs tabular-nums">{hp}</span>
         </div>
 
-        {/* Speed */}
         <div className="flex flex-col items-center gap-1">
           <img src={getSpeedIconPath()} alt="Speed" className="w-6 h-6 object-contain" />
           <span className="text-xs tabular-nums">
@@ -33,7 +31,6 @@ export function StatusPanel({ hp, minSpeed, maxSpeed, defLevel, defCorrection }:
           </span>
         </div>
 
-        {/* Defense */}
         <div className="flex flex-col items-center gap-1">
           <img src={getDefenseLevelIconPath()} alt="Defense" className="w-6 h-6 object-contain" />
           <span className="text-xs tabular-nums">

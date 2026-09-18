@@ -7,33 +7,22 @@ import {
   IdentityIdSchema,
 } from '@/shared/gameData'
 
-/**
- * Identity Schemas
- *
- * Zod schemas for runtime validation of Identity data structures.
- * These schemas mirror the TypeScript interfaces in types/IdentityTypes.ts.
- */
-
-// HP data schema
 export const IdentityHpDataSchema = z.object({
   defaultStat: z.number(),
   incrementByLevel: z.number(),
 })
 
-// Resist info schema
 export const IdentityResistInfoSchema = z.object({
   SLASH: z.number(),
   PENETRATE: z.number(),
   HIT: z.number(),
 })
 
-// Mental condition info schema
 export const IdentityMentalConditionInfoSchema = z.object({
   add: z.array(z.string()),
   min: z.array(z.string()),
 })
 
-// Skill data entry schema - all fields optional for flexibility
 export const IdentitySkillDataEntrySchema = z.object({
   attributeType: z.string().optional(),
   atkType: z.string().optional(),
@@ -46,7 +35,6 @@ export const IdentitySkillDataEntrySchema = z.object({
   coinString: z.string().optional(),
 })
 
-// Skill data tuple - 4 entries for uptie levels 0-3
 export const IdentitySkillDataTupleSchema = z.tuple([
   IdentitySkillDataEntrySchema,
   IdentitySkillDataEntrySchema,
@@ -54,7 +42,6 @@ export const IdentitySkillDataTupleSchema = z.tuple([
   IdentitySkillDataEntrySchema,
 ])
 
-// Skill entry schema
 export const IdentitySkillEntrySchema = z.object({
   id: SkillIdSchema,
   textID: SkillIdSchema.optional(),
@@ -62,7 +49,6 @@ export const IdentitySkillEntrySchema = z.object({
   skillData: IdentitySkillDataTupleSchema,
 })
 
-// Skills data schema
 export const IdentitySkillsDataSchema = z.object({
   skill1: z.array(IdentitySkillEntrySchema),
   skill2: z.array(IdentitySkillEntrySchema),
@@ -70,13 +56,11 @@ export const IdentitySkillsDataSchema = z.object({
   skillDef: z.array(IdentitySkillEntrySchema),
 })
 
-// Passive condition schema
 export const IdentityPassiveConditionSchema = z.object({
   type: z.string(),
   values: z.record(z.string(), z.number()),
 })
 
-// Passive list tuple - 4 entries for uptie levels 0-3
 export const IdentityPassiveListTupleSchema = z.tuple([
   z.array(PassiveIdSchema),
   z.array(PassiveIdSchema),
@@ -84,14 +68,12 @@ export const IdentityPassiveListTupleSchema = z.tuple([
   z.array(PassiveIdSchema),
 ])
 
-// Passives data schema
 export const IdentityPassivesDataSchema = z.object({
   battlePassiveList: IdentityPassiveListTupleSchema,
   supportPassiveList: IdentityPassiveListTupleSchema,
   conditions: z.record(z.string(), IdentityPassiveConditionSchema),
 })
 
-// Main identity detail data schema
 export const IdentityDataSchema = z.object({
   updatedDate: z.number(),
   skillKeywordList: z.array(z.string()),
@@ -111,14 +93,8 @@ export const IdentityDataSchema = z.object({
   passives: IdentityPassivesDataSchema,
 })
 
-/**
- * Identity i18n schemas
- */
-
-// Skill description entry — inherits the shared base shape
 export const IdentitySkillDescEntrySchema = SkillDescEntrySchema
 
-// Skill i18n schema
 // `flavor` is a per-skill lore line (not per uptie) — raw game data ships the
 // same flavor on every level entry, so we collapse it at the skill level.
 export const IdentitySkillI18nSchema = z.object({
@@ -127,31 +103,22 @@ export const IdentitySkillI18nSchema = z.object({
   descs: z.array(IdentitySkillDescEntrySchema),
 })
 
-// Passive i18n schema
 export const IdentityPassiveI18nSchema = z.object({
   name: z.string(),
   desc: z.string(),
   flavor: z.string().optional(),
 })
 
-// Main identity i18n schema
 export const IdentityI18nSchema = z.object({
   name: z.string(),
   skills: z.record(z.string(), IdentitySkillI18nSchema),
   passives: z.record(z.string(), IdentityPassiveI18nSchema),
 })
 
-/**
- * Identity spec list schemas (for list views)
- */
-
-// Attack type enum for spec list
 export const AtkTypeSchema = z.enum(ATK_TYPES)
 
-// Defense type enum for spec list
 export const DefenseTypeSchema = z.enum(DEF_TYPES)
 
-// Spec entry schema
 export const IdentitySpecSchema = z.object({
   updateDate: z.number(),
   skillKeywordList: z.array(z.string()),
@@ -164,7 +131,6 @@ export const IdentitySpecSchema = z.object({
   defenseType: z.array(DefenseTypeSchema),
 })
 
-// Record types for spec and name lists
 export const IdentitySpecListSchema = z.record(IdentityIdSchema, IdentitySpecSchema)
 /** Keys stay unbranded: the game ships i18n-only ids (e.g. 40501) with no spec entry. */
 export const IdentityNameListSchema = z.record(z.string(), z.string())

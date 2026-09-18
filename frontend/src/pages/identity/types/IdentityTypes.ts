@@ -10,7 +10,6 @@ import type {
 
 export type IdentitySpec = z.infer<typeof IdentitySpecSchema>
 
-/** Identity entity for list/grid views: the spec entry plus its branded id. */
 export type IdentityEntity = Entity<IdentityId, IdentitySpec>
 
 export type { Uptie } from '@/shared/gameData'

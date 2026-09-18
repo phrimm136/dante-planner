@@ -20,12 +20,10 @@ export const IDENTITY_LIST: EntityListDataConfig<
   i18nSchema: IdentityNameListSchema,
 }
 
-/** Identity spec map; suspends on initial load, not on language change */
 export function useIdentityListSpec() {
   return useEntityListSpec(IDENTITY_LIST)
 }
 
-/** Identity name map; suspends while loading */
 export function useIdentityListI18n() {
   return useEntityListI18n(IDENTITY_LIST)
 }

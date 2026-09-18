@@ -8,23 +8,14 @@ import { getSkillAttributeType, getSkillSlotNumber } from '../lib/identitySkillS
 import type { SkillSlot } from '../lib/identitySkillSlots'
 import type { IdentityData, Uptie } from '../types/IdentityTypes'
 
-/** Uptie at which the third skill unlocks. */
 const SKILL3_UNLOCK_UPTIE = 3
 
 interface IdentitySkillsPaneProps {
-  /** Identity ID for i18n lookup */
   id: string
-  /** Skills data keyed by slot */
   skills: IdentityData['skills']
-  /** Current uptie level (1-4) */
   uptieLevel: Uptie
 }
 
-/**
- * Skill selector and skill panel.
- *
- * Owns the selected slot, so switching skills re-renders nothing outside it.
- */
 export function IdentitySkillsPane({ id, skills, uptieLevel }: IdentitySkillsPaneProps) {
   const { t } = useTranslation(['database', 'common'])
   const [activeSkillSlot, setActiveSkillSlot] = useState<SkillSlot>('skill1')
@@ -33,7 +24,6 @@ export function IdentitySkillsPane({ id, skills, uptieLevel }: IdentitySkillsPan
 
   return (
     <div className="space-y-4">
-      {/* Skill Selector */}
       <div className="flex gap-2">
         <SkillTabButton
           attributeType={getSkillAttributeType(skills, 'skill1')}
@@ -70,7 +60,6 @@ export function IdentitySkillsPane({ id, skills, uptieLevel }: IdentitySkillsPan
         />
       </div>
 
-      {/* Skill Display - uses internal granular Suspense for name/description */}
       <SkillsSectionI18n
         id={id}
         skills={skills}

@@ -20,20 +20,10 @@ const IDENTITY_DETAIL: EntityDetailDataConfig<
   i18nSchema: IdentityI18nSchema,
 }
 
-/**
- * Identity spec data; suspends on initial load, not on language change.
- *
- * @param id - Identity ID (must be defined - validate in route first)
- */
 export function useIdentityDetailSpec(id: string) {
   return useEntityDetailSpec(IDENTITY_DETAIL, id)
 }
 
-/**
- * Identity i18n data; suspends while loading.
- *
- * @param id - Identity ID (must be defined - validate in route first)
- */
 export function useIdentityDetailI18n(id: string) {
   return useEntityDetailI18n(IDENTITY_DETAIL, id)
 }
