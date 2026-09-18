@@ -27,6 +27,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -104,8 +105,31 @@ class PlannerCommentSseControllerIT extends SharedMySqlContainerSupport {
                 .andExpect(request().asyncStarted());
 
         mockMvc.perform(get("/api/planner/{plannerId}/comments/events", publishedPlannerId)
+                        .accept(MediaType.TEXT_EVENT_STREAM)
                         .header(CF_CONNECTING_IP, ATTACKER_IP))
                 .andExpect(status().isTooManyRequests())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
                 .andExpect(jsonPath("$.code").value("RATE_LIMIT_EXCEEDED"));
+    }
+
+    @Test
+    @DisplayName("answers 404 with the domain code when the planner is not published")
+    void subscribeToComments_WhenPlannerUnpublished_NotFound() throws Exception {
+        mockMvc.perform(get("/api/planner/{plannerId}/comments/events", UUID.randomUUID())
+                        .accept(MediaType.TEXT_EVENT_STREAM)
+                        .cookie(AuthCookies.freshDeviceId()))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.code").value("PLANNER_NOT_FOUND"))
+                .andExpect(jsonPath("$.detail").exists());
+    }
+
+    @Test
+    @DisplayName("answers 404 for a malformed planner id")
+    void subscribeToComments_WhenIdMalformed_NotFound() throws Exception {
+        mockMvc.perform(get("/api/planner/{plannerId}/comments/events", "not-a-uuid")
+                        .accept(MediaType.TEXT_EVENT_STREAM))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("NOT_FOUND"));
     }
 }
