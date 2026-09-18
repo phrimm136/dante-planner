@@ -4,14 +4,9 @@ import { useInvalidatePlannerLists } from './useInvalidatePlannerLists'
 
 interface ModeratorDeleteRequest {
   plannerId: string
-  /** Recorded in the moderation audit trail; the server rejects a blank one. */
   reason: string
 }
 
-/**
- * Hook for moderator planner takedown (POST /api/moderation/planner/{id}/takedown).
- * Takes down planner from public but allows owner to keep syncing their local copy.
- */
 export function useModeratorPlannerDelete() {
   const invalidatePlannerLists = useInvalidatePlannerLists()
 

@@ -23,29 +23,20 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import type { FloorThemeSelection } from '@/pages/themePack'
 import { ThemePackIdSchema } from '@/shared/gameData'
 
-/** Shared empty result so a closed picker's selector keeps one identity. */
 const EMPTY_PACK_IDS: string[] = []
 
 interface FloorThemeGiftSectionProps {
-  floorNumber: number // 1-indexed (1-15)
-  floorIndex: number // 0-indexed (0-14)
-  /** MD category for difficulty restrictions (optional, uses store if not provided) */
+  floorNumber: number
+  floorIndex: number
   category?: MDCategory
   readOnly?: boolean
   className?: string
   onViewNotes?: () => void
-  /** Override floorSelections from store (for tracker mode) */
   floorSelectionsOverride?: FloorThemeSelection[]
-  /** Override handler for theme pack selection (for tracker mode) */
   onThemePackSelectOverride?: (packId: string, difficulty: DungeonIdx) => void
-  /** Override handler for gift selection (for tracker mode) */
   setSelectedGiftIdsOverride?: (giftIds: Set<EncodedGiftId>) => void
 }
 
-/**
- * Container for a single floor's theme pack and gift selection
- * Layout: Floor label | Difficulty indicator | Theme pack viewer | Gift viewer
- */
 export function FloorThemeGiftSection({
   floorNumber,
   floorIndex,
@@ -66,9 +57,6 @@ export function FloorThemeGiftSection({
   const [isThemePackPaneOpen, setIsThemePackPaneOpen] = useState(false)
   const [isGiftPaneOpen, setIsGiftPaneOpen] = useState(false)
 
-  // Only this floor's own selection plus the two cross-floor facts it reads: the
-  // previous floor's difficulty and whether that floor has a pack at all. Every
-  // member is a primitive or an entry whose identity survives a sibling's edit.
   const storeSlice = usePlannerEditorStoreSafe(
     useShallow((s) => ({
       selection: s?.floorSelections?.[floorIndex],
@@ -81,8 +69,6 @@ export function FloorThemeGiftSection({
     })),
   )
 
-  // Which packs the other floors occupy is read only while the picker is open,
-  // so a closed picker never subscribes to a sibling floor.
   const usedThemePackIdsFromStore = usePlannerEditorStoreSafe(
     useShallow((s) =>
       isThemePackPaneOpen && !floorSelectionsOverride
@@ -96,7 +82,6 @@ export function FloorThemeGiftSection({
   const updateFloorSelection = storeSlice?.updateFloorSelection
   const category = categoryProp ?? storeSlice?.storeCategory ?? '5F'
 
-  // Tracker mode drives the whole floor list in as a prop; the editor reads the store.
   const selection = floorSelectionsOverride
     ? floorSelectionsOverride[floorIndex]
     : storeSlice?.selection
@@ -116,15 +101,12 @@ export function FloorThemeGiftSection({
       : (usedThemePackIdsFromStore ?? EMPTY_PACK_IDS),
   )
 
-  // Handlers - use override if provided (tracker mode), otherwise use store action
   const handleThemePackSelect = (packId: string, difficulty: DungeonIdx) => {
     if (onThemePackSelectOverride) {
       onThemePackSelectOverride(packId, difficulty)
     } else if (updateFloorSelection) {
-      // Preserve existing gifts
       const existingGifts = selection?.giftIds ?? new Set<EncodedGiftId>()
 
-      // Remove gifts that are unaffordable for the new theme pack
       let newGiftIds = existingGifts
       if (existingGifts.size > 0) {
         const { ids, names } = getUnaffordableGiftNames(
@@ -165,21 +147,16 @@ export function FloorThemeGiftSection({
   const selectedDifficulty = selection?.difficulty ?? null
   const selectedGiftIds = selection?.giftIds ?? new Set<EncodedGiftId>()
 
-  // Hints explain why an editable surface is locked, so they only apply when the
-  // section itself is editable.
   const showThemePackLockHint = !readOnly && !canSelectThemePack
   const showGiftLockHint = !readOnly && !selectedThemePackId
 
   const isThemePackReadOnly = readOnly || showThemePackLockHint
   const isGiftReadOnly = readOnly || showGiftLockHint
 
-  // Get the selected theme pack entry and name
   const selectedPackEntry = selectedThemePackId ? themePackList[selectedThemePackId] : null
   const selectedPackI18n = selectedThemePackId ? themePackI18n[selectedThemePackId] : null
   const selectedPackName = selectedPackI18n?.name ?? null
 
-  // Get display difficulty label - map DungeonIdx to baseDifficulty for label calculation
-  // For floors 6-15, getFloorDifficultyLabel returns INFINITY/EXTREME regardless of baseDifficulty
   const getBaseDifficulty = (dungeonIdx: DungeonIdx): 'NORMAL' | 'HARD' => {
     return dungeonIdx === DUNGEON_IDX.NORMAL ? 'NORMAL' : 'HARD'
   }
@@ -193,7 +170,6 @@ export function FloorThemeGiftSection({
   }
 
   const handleOpenGiftPane = () => {
-    // Only open gift pane if theme pack is selected
     if (selectedThemePackId) {
       setIsGiftPaneOpen(true)
     }
@@ -212,10 +188,8 @@ export function FloorThemeGiftSection({
         )}
       >
         <div className="flex flex-col items-center landscape:shrink-0 sm:shrink-0">
-          {/* Difficulty indicator */}
           <DifficultyIndicator difficulty={difficultyLabel} />
 
-          {/* Theme pack viewer */}
           <div className="shrink-0">
             <TooltipProvider>
               <Tooltip>
@@ -246,7 +220,6 @@ export function FloorThemeGiftSection({
           </div>
         </div>
 
-        {/* Gift viewer */}
         <div className="flex-1 landscape:mt-6 sm:mt-6 min-w-0">
           <TooltipProvider>
             <Tooltip>
@@ -266,7 +239,6 @@ export function FloorThemeGiftSection({
           </TooltipProvider>
         </div>
 
-        {/* Theme pack selector pane */}
         <ThemePackSelectorPane
           open={isThemePackPaneOpen}
           onOpenChange={setIsThemePackPaneOpen}
@@ -279,7 +251,6 @@ export function FloorThemeGiftSection({
           category={category}
         />
 
-        {/* Gift selector pane */}
         {selectedThemePackId && selectedDifficulty !== null && (
           <FloorGiftSelectorPane
             open={isGiftPaneOpen}

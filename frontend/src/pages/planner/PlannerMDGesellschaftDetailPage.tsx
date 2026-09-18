@@ -22,10 +22,6 @@ import { useUserSettingsQuery } from '@/shared/userSettings'
 import { useMDGesellschaftFilters } from './hooks/useMDGesellschaftFilters'
 import { SECTION_STYLES } from '@/lib/constants'
 
-/**
- * Planner MD Gesellschaft Detail Page - View a published community planner
- * Displays full header with author info, stats, and engagement actions.
- */
 export default function PlannerMDGesellschaftDetailPage() {
   const { id } = useParams({ from: '/planner/md/gesellschaft/$id' })
 
@@ -45,19 +41,14 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
   const navigate = useNavigate()
   const commentsRef = useRef<HTMLDivElement>(null)
 
-  // Load published planner from API via Suspense query
-  // Returns both apiData (for header/footer) and planner (for viewer)
   const queryState = usePublishedPlannerQuery(plannerId)
 
-  // Get auth state for ownership check and gating actions
   const { data: user } = useAuthQuery()
   const isAuthenticated = user !== null
 
-  // Get sync setting — needed for Apply Latest Mirror handler
   const { data: userSettings } = useUserSettingsQuery()
   const syncEnabled = userSettings?.syncEnabled
 
-  // URL search params for list section
   const { filters, setFilters } = useMDGesellschaftFilters()
 
   if (isPlannerRemoved(queryState)) {
@@ -73,14 +64,12 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
 
   const { apiData, planner } = queryState
 
-  // Determine ownership by comparing author username with current user's username
   const isOwner =
     isAuthenticated &&
     user !== null &&
     user.usernameEpithet === apiData.authorUsernameEpithet &&
     user.usernameSuffix === apiData.authorUsernameSuffix
 
-  // Validate planner type - viewer only supports Mirror Dungeon planners
   if (!isMDPlanner(planner)) {
     return (
       <div className="space-y-6 text-center py-12">
@@ -109,7 +98,6 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
 
   return (
     <div className="space-y-4">
-      {/* Header with author info, stats, and actions */}
       <PublishedPlannerHeader
         planner={apiData}
         isOwner={isOwner}
@@ -120,13 +108,10 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
         onCommentClick={scrollToComments}
       />
 
-      {/* Planner Viewer */}
       <PlannerViewer planner={planner} />
 
-      {/* Footer with engagement actions */}
       <PlannerDetailFooter planner={apiData} isOwner={isOwner} isAuthenticated={isAuthenticated} />
 
-      {/* Comment Section */}
       <div ref={commentsRef}>
         <CommentSection
           plannerId={plannerId}
@@ -135,12 +120,9 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
         />
       </div>
 
-      {/* Separator */}
       <div className="border-t border-border my-8" />
 
-      {/* Community Planners List Section */}
       <div className={SECTION_STYLES.SPACING.section}>
-        {/* Toolbar: Search + Mode Toggle */}
         <div className="mb-4">
           <MDPlannerToolbar
             search={filters.search}
@@ -151,7 +133,6 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
           />
         </div>
 
-        {/* Category Filter Pills */}
         <div className="mb-6">
           <PlannerListFilterPills
             selectedCategory={filters.category}
@@ -159,14 +140,11 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
           />
         </div>
 
-        {/* Planner List Grid */}
         <ReactErrorBoundary FallbackComponent={CommunityPlansErrorFallback}>
           <Suspense fallback={<PlannerGridSkeleton geometry={PLANNER_GEOMETRY} />}>
             <PublishedPlannerList
               filters={{
                 ...filters,
-                // The list under a plan is not narrowed by the entity filters the
-                // gesellschaft page applies; only category, mode, search and page carry over.
                 keyword: undefined,
                 identity: undefined,
                 ego: undefined,

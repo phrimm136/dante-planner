@@ -7,17 +7,11 @@ import { LoadingState } from '@/components/feedback/LoadingState'
 interface SelectorPaneShellProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  /** Heading for the pane. */
   title: ReactNode
-  /** Counters and per-pane controls, placed ahead of Done. */
   headerActions?: ReactNode
   children: ReactNode
 }
 
-/**
- * Dialog chrome for a full-width selection pane. Knows nothing about what is
- * being selected; the caller supplies the heading, its controls and the body.
- */
 export function SelectorPaneShell({
   open,
   onOpenChange,
@@ -50,7 +44,6 @@ export function SelectorPaneShell({
           </div>
         </DialogHeader>
 
-        {/* Scrollable content area with visual margin */}
         <div className="flex-1 overflow-y-auto py-4 -mx-6 px-6">
           <Suspense fallback={<LoadingState />}>{children}</Suspense>
         </div>

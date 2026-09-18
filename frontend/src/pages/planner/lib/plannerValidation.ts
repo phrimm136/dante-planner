@@ -1,11 +1,3 @@
-/**
- * Planner Validation
- *
- * Validation functions for planner content, covering equipment, deployment,
- * skill EA, gift IDs, start buffs, start gifts, floor theme packs, difficulty,
- * and note sizes. Mirrors backend PlannerContentValidator validation rules.
- */
-
 import {
   EGO_TYPES,
   OFFENSIVE_SKILL_SLOTS,
@@ -40,10 +32,6 @@ import type {
   KeywordValidationError,
 } from './plannerValidationErrors'
 
-// ============================================================================
-// Constants (Match Backend Validation Rules)
-// ============================================================================
-
 /** Equipment keys are 1-indexed (1-12) */
 const MIN_EQUIPMENT_SINNER = 1
 const MAX_EQUIPMENT_SINNER = 12
@@ -68,31 +56,19 @@ const ALL_SINNER_KEYS = [
   '12',
 ] as const
 
-/** Required EGO type for each sinner */
 const REQUIRED_EGO_TYPE = 'ZAYIN'
 
 /** Valid skill slots (0=S1, 1=S2, 2=S3) */
 const VALID_SKILL_SLOTS = new Set(['0', '1', '2'])
 
-/** Current selectable planner keyword ids */
 const VALID_PLANNER_KEYWORDS = new Set<string>(PLANNER_KEYWORDS)
 
-/** Skill EA total must equal 6 (3+2+1 default distribution) */
 const SKILL_EA_TOTAL = 6
 
-/** Start buff constraints */
 const MAX_START_BUFFS = 10
 const MIN_BUFF_BASE_ID = 0
 const MAX_BUFF_BASE_ID = 9
 
-// ============================================================================
-// Validation Functions
-// ============================================================================
-
-/**
- * Collect the sinner keys present in a per-sinner record, normalized to the
- * 2-digit format. Keys that are not integers in the sinner range are ignored.
- */
 function collectPresentSinnerKeys(source: Record<string, unknown>): Set<string> {
   const presentKeys = new Set<string>()
 
@@ -106,14 +82,6 @@ function collectPresentSinnerKeys(source: Record<string, unknown>): Set<string> 
   return presentKeys
 }
 
-/**
- * Validate equipment configuration
- * Rules:
- * - All 12 sinners must be present (keys 1-12 or 01-12)
- * - Each sinner must have an identity with valid ID
- * - Each sinner must have a ZAYIN EGO with valid ID
- * - Max 5 EGO types, all unique, from valid set
- */
 export function validateEquipment(
   equipment: Record<string, SinnerEquipment>,
 ): EquipmentValidationError[] {
@@ -121,7 +89,6 @@ export function validateEquipment(
 
   const presentKeys = collectPresentSinnerKeys(equipment)
 
-  // Check all 12 sinners are present
   const missingSinners = ALL_SINNER_KEYS.filter((key) => !presentKeys.has(key))
   if (missingSinners.length > 0) {
     errors.push({
@@ -132,13 +99,10 @@ export function validateEquipment(
     })
   }
 
-  // Validate each sinner's equipment
   for (const sinnerKey of presentKeys) {
-    // Try both formats (with and without leading zero)
     const sinnerEquipment = equipment[sinnerKey] || equipment[String(parseInt(sinnerKey, 10))]
     if (!sinnerEquipment) continue
 
-    // Check identity exists and has ID
     if (!sinnerEquipment.identity || !sinnerEquipment.identity.id) {
       errors.push({
         code: 'EQUIPMENT_MISSING_IDENTITY',
@@ -148,7 +112,6 @@ export function validateEquipment(
       })
     }
 
-    // Check EGOs exist
     if (!sinnerEquipment.egos) {
       errors.push({
         code: 'EQUIPMENT_MISSING_ZAYIN',
@@ -159,7 +122,6 @@ export function validateEquipment(
       continue
     }
 
-    // Validate EGO types: max 5, unique, from valid set
     const egoTypes = Object.keys(sinnerEquipment.egos)
     const validEGOTypes = new Set(EGO_TYPES)
     const invalidTypes = egoTypes.filter(
@@ -184,7 +146,6 @@ export function validateEquipment(
       })
     }
 
-    // Check ZAYIN EGO is required
     if (!sinnerEquipment.egos[REQUIRED_EGO_TYPE]) {
       errors.push({
         code: 'EQUIPMENT_MISSING_ZAYIN',
@@ -205,11 +166,6 @@ export function validateEquipment(
   return errors
 }
 
-/**
- * Validate deployment order
- * Rules:
- * - All values must be numbers in range 0-11
- */
 export function validateDeploymentOrder(deploymentOrder: number[]): DeploymentValidationError[] {
   const errors: DeploymentValidationError[] = []
 
@@ -232,14 +188,6 @@ export function validateDeploymentOrder(deploymentOrder: number[]): DeploymentVa
   return errors
 }
 
-/**
- * Validate skill EA state
- * Rules:
- * - All 12 sinners must be present
- * - Valid skill slot keys (0, 1, 2)
- * - No duplicate slots per sinner
- * - Each sinner's skill slots sum to SKILL_EA_TOTAL (6)
- */
 export function validateSkillEAState(
   skillEAState: Record<string, SkillEAState>,
 ): SkillEAValidationError[] {
@@ -247,7 +195,6 @@ export function validateSkillEAState(
 
   const presentKeys = collectPresentSinnerKeys(skillEAState)
 
-  // Check all 12 sinners are present
   const missingSinners = ALL_SINNER_KEYS.filter((key) => !presentKeys.has(key))
   if (missingSinners.length > 0) {
     errors.push({
@@ -258,7 +205,6 @@ export function validateSkillEAState(
     })
   }
 
-  // Validate each sinner's skill slots
   for (const sinnerKey of presentKeys) {
     const sinnerSkills = skillEAState[sinnerKey] || skillEAState[String(parseInt(sinnerKey, 10))]
     if (!sinnerSkills) continue
@@ -267,7 +213,6 @@ export function validateSkillEAState(
     let total = 0
 
     for (const slotKey of Object.keys(sinnerSkills)) {
-      // Check valid skill slot key
       if (!VALID_SKILL_SLOTS.has(slotKey)) {
         errors.push({
           code: 'SKILL_EA_INVALID_SLOT',
@@ -278,7 +223,6 @@ export function validateSkillEAState(
         continue
       }
 
-      // Check for duplicates
       if (seenSlots.has(slotKey)) {
         errors.push({
           code: 'SKILL_EA_DUPLICATE_SLOT',
@@ -296,7 +240,6 @@ export function validateSkillEAState(
       total += ea
     }
 
-    // Check total equals SKILL_EA_TOTAL
     if (total !== SKILL_EA_TOTAL) {
       errors.push({
         code: 'SKILL_EA_INVALID_TOTAL',
@@ -310,9 +253,6 @@ export function validateSkillEAState(
   return errors
 }
 
-/**
- * Validate gift ID array for duplicates and existence
- */
 export function validateGiftIdArray(
   giftIds: string[],
   fieldName: string,
@@ -359,7 +299,6 @@ export function validateGiftIdArray(
 export function validateStartBuffIds(buffIds: number[]): BuffValidationError[] {
   const errors: BuffValidationError[] = []
 
-  // Check max count
   if (buffIds.length > MAX_START_BUFFS) {
     errors.push({
       code: 'BUFF_EXCEEDS_MAX',
@@ -369,11 +308,9 @@ export function validateStartBuffIds(buffIds: number[]): BuffValidationError[] {
     })
   }
 
-  // Track base IDs to detect duplicates
   const seenBaseIds = new Set<number>()
 
   for (const [i, buffId] of buffIds.entries()) {
-    // Extract base ID (00-09 part)
     const baseId = buffId % 100
 
     if (baseId < MIN_BUFF_BASE_ID || baseId > MAX_BUFF_BASE_ID) {
@@ -386,7 +323,6 @@ export function validateStartBuffIds(buffIds: number[]): BuffValidationError[] {
       continue
     }
 
-    // Check for duplicate base IDs
     if (seenBaseIds.has(baseId)) {
       errors.push({
         code: 'BUFF_DUPLICATE_BASE_ID',
@@ -401,20 +337,12 @@ export function validateStartBuffIds(buffIds: number[]): BuffValidationError[] {
   return errors
 }
 
-/**
- * Validate start gift selection
- * Rules:
- * - If no keyword, selectedGiftIds must be empty
- * - If keyword present, it must be valid (frontend can't check this without game data)
- * - No duplicate gift IDs
- */
 export function validateStartGiftSelection(
   selectedGiftKeyword: string | null,
   selectedGiftIds: string[],
 ): StartGiftValidationError[] {
   const errors: StartGiftValidationError[] = []
 
-  // If no keyword, selectedGiftIds must be empty
   if (!selectedGiftKeyword && selectedGiftIds.length > 0) {
     errors.push({
       code: 'START_GIFT_NO_KEYWORD_BUT_HAS_GIFTS',
@@ -424,7 +352,6 @@ export function validateStartGiftSelection(
     })
   }
 
-  // Check for duplicates
   const seen = new Set<string>()
   for (const [i, giftId] of selectedGiftIds.entries()) {
     if (seen.has(giftId)) {
@@ -441,52 +368,18 @@ export function validateStartGiftSelection(
   return errors
 }
 
-/**
- * Validates that all floor theme pack selections meet save requirements
- *
- * Rules enforced:
- * 1. Each floor must have a theme pack selected (no null values)
- * 2. Progressive prerequisite: Floor N can only have a theme pack if floor N-1 has one
- * 3. No duplicate theme pack IDs across floors (each floor must use a different theme pack)
- * 4. No duplicate gift IDs per floor
- *
- * @param floorSelections - Array of floor selections to validate
- * @param floorCount - Number of active floors (5, 10, or 15)
- * @returns Array of validation errors (empty if valid)
- *
- * @example
- * // Valid: All floors have distinct theme packs
- * const floors = [
- *   { themePackId: '1001', difficulty: 0, giftIds: new Set() },
- *   { themePackId: '1002', difficulty: 0, giftIds: new Set() },
- * ]
- * validateFloorThemePacksForSave(floors, 2) // Returns []
- *
- * @example
- * // Invalid: Floors 1 and 2 have duplicate theme pack
- * const floors = [
- *   { themePackId: '1001', difficulty: 0, giftIds: new Set() },
- *   { themePackId: '1001', difficulty: 0, giftIds: new Set() }, // Duplicate!
- * ]
- * validateFloorThemePacksForSave(floors, 2)
- * // Returns [{ code: 'FLOOR_DUPLICATE_THEME_PACK', floorIndex: 1, floorNumber: 2, ... }]
- */
 export function validateFloorThemePacksForSave(
   floorSelections: FloorThemeSelection[],
   floorCount: number,
 ): FloorValidationError[] {
   const errors: FloorValidationError[] = []
 
-  // Track seen theme pack IDs to detect duplicates across floors
-  const seenThemePackIds = new Map<string, number>() // themePackId -> first floor index
+  const seenThemePackIds = new Map<string, number>()
 
-  // Check only the active floors based on category (5F, 10F, 15F)
   for (let i = 0; i < floorCount; i++) {
     const floor = floorSelections[i]
     const floorNumber = i + 1
 
-    // Rule 1: Each floor must have a theme pack. A floor absent from the array
-    // has none either, so it reports the same way.
     if (!floor?.themePackId) {
       errors.push({
         code: 'FLOOR_MISSING_THEME_PACK',
@@ -495,10 +388,9 @@ export function validateFloorThemePacksForSave(
         floorIndex: i,
         floorNumber,
       })
-      continue // Skip other checks if floor is missing theme pack
+      continue
     }
 
-    // Rule 2: Progressive prerequisite (skip for floor 1)
     if (i > 0) {
       const previousFloor = floorSelections[i - 1]
       if (!previousFloor?.themePackId) {
@@ -513,7 +405,6 @@ export function validateFloorThemePacksForSave(
       }
     }
 
-    // Rule 3: No duplicate theme pack IDs across floors
     const firstFloorWithThisPack = seenThemePackIds.get(floor.themePackId)
     if (firstFloorWithThisPack !== undefined) {
       errors.push({
@@ -532,7 +423,6 @@ export function validateFloorThemePacksForSave(
       seenThemePackIds.set(floor.themePackId, i)
     }
 
-    // Rule 4: No duplicate gift IDs within this floor's gifts
     const giftIds = Array.from(floor.giftIds)
     const seenGiftIds = new Set<string>()
     for (const [j, giftId] of giftIds.entries()) {
@@ -553,9 +443,6 @@ export function validateFloorThemePacksForSave(
   return errors
 }
 
-/**
- * Validates floor difficulty requirements based on category
- */
 function validateFloorDifficulties(
   floorSelections: FloorThemeSelection[],
   category: MDCategory,
@@ -585,14 +472,6 @@ function validateFloorDifficulties(
   return errors
 }
 
-/**
- * Validates that all selected ego gift IDs exist in the spec list
- *
- * @param floorSelections - Floor selections to validate
- * @param floorCount - Number of active floors based on category
- * @param egoGiftSpec - EGO Gift spec data keyed by gift ID
- * @returns Array of validation errors (one per floor with unknown gift IDs)
- */
 function validateFloorGiftExistence(
   floorSelections: FloorThemeSelection[],
   floorCount: number,
@@ -623,10 +502,6 @@ function validateFloorGiftExistence(
   })
 }
 
-/**
- * Validates that all selected ego gifts are affordable for their floor's theme pack.
- * Assumes all gift IDs exist in the spec (run validateFloorGiftExistence first).
- */
 function validateFloorGiftAffordability(
   floorSelections: FloorThemeSelection[],
   floorCount: number,
@@ -656,12 +531,6 @@ function validateFloorGiftAffordability(
   })
 }
 
-/**
- * Strict keyword membership check (publish tier).
- * Rejects any selected keyword id not in the current planner keyword set. The publish
- * path migrates renamed ids before calling this, so anything still unknown here is
- * genuine corruption and is surfaced loudly as KEYWORD_INVALID.
- */
 export function validateSelectedKeywords(keywords: string[]): KeywordValidationError[] {
   const errors: KeywordValidationError[] = []
   for (const keyword of keywords) {
@@ -677,31 +546,6 @@ export function validateSelectedKeywords(keywords: string[]): KeywordValidationE
   return errors
 }
 
-/**
- * Comprehensive planner validation for save operations
- * Runs all validation checks and returns consolidated errors
- *
- * This function mirrors the backend PlannerContentValidator validation logic:
- * - Equipment: All 12 sinners, identity + ZAYIN EGO, valid EGO types
- * - Deployment: Valid sinner indices (0-11)
- * - Skill EA: All 12 sinners, valid slots, correct totals
- * - Gift IDs: No duplicates in selectedGiftIds, observationGiftIds, comprehensiveGiftIds
- * - Start Buffs: Max 10, valid format, no duplicate base IDs
- * - Start Gifts: Keyword/gifts consistency, no duplicates
- * - Floor Selections: Required theme packs, progressive prerequisites, no duplicate theme packs across floors, no duplicate gifts per floor
- *
- * @param content - MD planner content to validate
- * @param category - MD category (5F, 10F, or 15F) to determine active floor count
- * @returns Object with isValid flag and array of all validation errors
- *
- * @example
- * const result = validatePlannerForPublish('My Plan', plannerContent, '5F')
- * if (!result.isValid) {
- *   console.error('Validation failed:', result.errors)
- *   // Show first error to user
- *   showErrorMessage(`planner:${toUserFriendlyError(result.errors[0]).key}`)
- * }
- */
 export function validatePlannerForPublish(
   title: string | undefined,
   content: MDPlannerContent,
@@ -711,7 +555,6 @@ export function validatePlannerForPublish(
 ): { isValid: boolean; errors: PlannerValidationError[] } {
   const errors: PlannerValidationError[] = []
 
-  // 0. Title validation (strict mode — required for publish)
   if (!title || title.trim() === '') {
     errors.push({
       code: 'MISSING_TITLE',
@@ -720,36 +563,25 @@ export function validatePlannerForPublish(
     })
   }
 
-  // 1. Equipment validation
   errors.push(...validateEquipment(content.equipment))
 
-  // 2. Deployment order validation
   errors.push(...validateDeploymentOrder(content.deploymentOrder))
 
-  // 3. Skill EA state validation
   errors.push(...validateSkillEAState(content.skillEAState))
 
-  // 4. Gift IDs validation (all three arrays)
   errors.push(...validateGiftIdArray(content.selectedGiftIds, 'selectedGiftIds', egoGiftSpec))
   errors.push(...validateGiftIdArray(content.observationGiftIds, 'observationGiftIds', egoGiftSpec))
   errors.push(
     ...validateGiftIdArray(content.comprehensiveGiftIds, 'comprehensiveGiftIds', egoGiftSpec),
   )
 
-  // 5. Start buffs validation
   errors.push(...validateStartBuffIds(content.selectedBuffIds))
 
-  // 6. Start gifts validation
   errors.push(...validateStartGiftSelection(content.selectedGiftKeyword, content.selectedGiftIds))
 
-  // 6b. Migrate renamed keyword ids, then strict-reject any that remain unknown. Read
-  // boundaries already migrate stored keywords; migrating a local copy here keeps a rename
-  // from being mis-rejected without mutating caller state, while a residual unknown fails loudly.
   errors.push(...validateSelectedKeywords(migrateKeywords(content.selectedKeywords)))
 
-  // 7. Floor selections validation
   const floorCount = FLOOR_COUNTS[category]
-  // Deserialize floor selections (convert giftIds from string[] to Set<string>)
   const deserializedFloorSelections: FloorThemeSelection[] = content.floorSelections.map(
     (floor) => ({
       ...floor,
@@ -758,15 +590,12 @@ export function validatePlannerForPublish(
   )
   errors.push(...validateFloorThemePacksForSave(deserializedFloorSelections, floorCount))
 
-  // 8. Difficulty validation (full rules based on category)
   errors.push(...validateFloorDifficulties(deserializedFloorSelections, category, floorCount))
 
-  // 9. Gift existence validation (if egoGiftSpec is provided)
   if (egoGiftSpec) {
     errors.push(...validateFloorGiftExistence(deserializedFloorSelections, floorCount, egoGiftSpec))
   }
 
-  // 10. Gift affordability validation (if egoGiftSpec is provided; assumes existence check passed)
   if (egoGiftSpec) {
     errors.push(
       ...validateFloorGiftAffordability(
@@ -784,21 +613,6 @@ export function validatePlannerForPublish(
   }
 }
 
-/**
- * Non-strict validation for sync/draft-save operations
- * Runs all structural checks but allows missing title and missing theme packs.
- * Returns the first error as an i18n key+params, or null if valid.
- *
- * Mirrors BE relaxed mode: title and theme packs are optional; all other checks
- * (equipment, deployment, skill EA, gift IDs, start buffs, start gifts,
- * floor prerequisites, gift affordability) run identically to strict mode.
- *
- * @param content - MD planner content to validate
- * @param category - MD category (5F, 10F, or 15F)
- * @param egoGiftSpec - EGO Gift spec data (optional, skips affordability check if not provided)
- * @param egoGiftI18n - EGO Gift i18n names (optional, uses IDs if not provided)
- * @returns Object with i18n key and params, or null if valid
- */
 export function validatePlannerForDraftSave(
   content: MDPlannerContent,
   category: MDCategory,
@@ -806,28 +620,21 @@ export function validatePlannerForDraftSave(
   egoGiftI18n?: Record<string, string>,
 ): { key: string; params?: Record<string, string> } | null {
   const errors: PlannerValidationError[] = [
-    // 1. Equipment validation
     ...validateEquipment(content.equipment),
 
-    // 2. Deployment order validation
     ...validateDeploymentOrder(content.deploymentOrder),
 
-    // 3. Skill EA state validation
     ...validateSkillEAState(content.skillEAState),
 
-    // 4. Gift IDs validation (all three arrays)
     ...validateGiftIdArray(content.selectedGiftIds, 'selectedGiftIds', egoGiftSpec),
     ...validateGiftIdArray(content.observationGiftIds, 'observationGiftIds', egoGiftSpec),
     ...validateGiftIdArray(content.comprehensiveGiftIds, 'comprehensiveGiftIds', egoGiftSpec),
 
-    // 5. Start buffs validation
     ...validateStartBuffIds(content.selectedBuffIds),
 
-    // 6. Start gifts validation
     ...validateStartGiftSelection(content.selectedGiftKeyword, content.selectedGiftIds),
   ]
 
-  // 7. Floor selections validation (non-strict: theme packs optional)
   const floorCount = FLOOR_COUNTS[category]
   const deserializedFloorSelections: FloorThemeSelection[] = content.floorSelections.map(
     (floor) => ({
@@ -836,16 +643,12 @@ export function validatePlannerForDraftSave(
     }),
   )
   const floorErrors = validateFloorThemePacksForSave(deserializedFloorSelections, floorCount)
-  // Filter out FLOOR_MISSING_THEME_PACK — theme packs are optional in non-strict mode.
-  // Prerequisites and duplicates still fire when a floor *does* have a pack.
   errors.push(...floorErrors.filter((e) => e.code !== 'FLOOR_MISSING_THEME_PACK'))
 
-  // 8. Gift existence validation
   if (egoGiftSpec) {
     errors.push(...validateFloorGiftExistence(deserializedFloorSelections, floorCount, egoGiftSpec))
   }
 
-  // 9. Gift affordability (assumes existence check passed; guards on themePackId being set)
   if (egoGiftSpec) {
     errors.push(
       ...validateFloorGiftAffordability(
@@ -862,17 +665,6 @@ export function validatePlannerForDraftSave(
   return toUserFriendlyError(firstError)
 }
 
-/**
- * Validates that no section note exceeds the byte cap.
- *
- * Returns the first offending section as a user-friendly error so save can be
- * blocked with an actionable message, rather than relying on schema discard
- * (which would silently drop the whole planner). The editor enforces the same
- * cap on input; this is the save-time backstop for legacy oversized notes.
- *
- * @param sectionNotes - serialized section notes keyed by section identifier
- * @returns user-friendly error for the first oversized note, or null if all fit
- */
 export function validateNoteSizes(
   sectionNotes: Record<string, { content: unknown }>,
 ): { key: string; params?: Record<string, string> } | null {

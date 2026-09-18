@@ -11,75 +11,62 @@ import {
   type CardGeometry,
 } from '@/shared/cardLayout'
 
-/** Start-gift keyword icon, which is square. */
 export const KEYWORD_ICON_GEOMETRY: CardGeometry = {
   size: { widthPx: 64, heightPx: 64 },
   mobileScale: CARD_MOBILE_SCALE,
   rows: 'slot',
 }
 
-/** `CompactIdentityRow` cell: square portrait over a skill row. */
 export const COMPACT_IDENTITY_GEOMETRY: CardGeometry = {
   size: { widthPx: 96, heightPx: 128 },
   mobileScale: CARD_MOBILE_SCALE_NONE,
   rows: 'slot',
 }
 
-/** `SinnerSkillCard`: padding + portrait + skill row. */
 export const SINNER_SKILL_GEOMETRY: CardGeometry = {
   size: { widthPx: 112, heightPx: 144 },
   mobileScale: CARD_MOBILE_SCALE,
   rows: 'slot',
 }
 
-/** `SkillImageSimple`, which is square. */
 export const SKILL_IMAGE_GEOMETRY: CardGeometry = {
   size: { widthPx: 128, heightPx: 128 },
   mobileScale: CARD_MOBILE_SCALE,
   rows: 'slot',
 }
 
-/** `SkillExchangePane`: two skill images either side of an arrow, inside its border. */
 export const SKILL_EXCHANGE_GEOMETRY: CardGeometry = {
   size: { widthPx: 356, heightPx: 148 },
   mobileScale: CARD_MOBILE_SCALE,
   rows: 'slot',
 }
 
-/** `StartBuffCard`'s pane. */
 export const START_BUFF_GEOMETRY: CardGeometry = {
   size: { widthPx: 272, heightPx: 320 },
   mobileScale: CARD_MOBILE_SCALE_DENSE,
   rows: 'slot',
 }
 
-/** The padding around a gift row, in pixels of the desktop grid (`p-2`). */
 export const GIFT_ROW_PADDING_PX = 8
 
-/** The height a gift row keeps whether or not it holds a card. */
 export function giftRowMinHeightPx(slotHeightPx: number): number {
   return slotHeightPx + 2 * GIFT_ROW_PADDING_PX
 }
 
-/** The rows the standalone comprehensive gift grid shows, by breakpoint. */
 export const GIFT_GRID_ROWS = { md: 2, lg: 4 } as const
 
-/** The height of a gift grid of `rows` rows (`gap-2`, `p-2`). */
 export function giftGridHeightPx(rows: number, slotHeightPx: number): number {
   return rows * slotHeightPx + (rows - 1) * GIFT_ROW_PADDING_PX + 2 * GIFT_ROW_PADDING_PX
 }
 
-/** A pixel length on a card `base` wide, as a share of that card's root. */
 function pxToCardPercent(px: number, base: number): number {
   return (px / base) * 100
 }
 
-/** A share of a card root, as a CSS percentage. */
 export function pct(value: number): string {
   return `${String(value)}%`
 }
 
-/** A share of a card root, as a CSS length in container-query width units. */
 export function cqw(value: number): string {
   return `${String(value)}cqw`
 }
@@ -93,12 +80,10 @@ const compactIdentity = (px: number) => pxToCardPercent(px, COMPACT_IDENTITY_GEO
 const startBuff = (px: number) => pxToCardPercent(px, START_BUFF_GEOMETRY.size.widthPx)
 const startBuffTall = (px: number) => pxToCardPercent(px, START_BUFF_GEOMETRY.size.heightPx)
 
-/** The start-gift keyword icon, a square box holding a smaller sprite. */
 export const KEYWORD_ICON_CARD = {
   icon: keywordIcon(48),
 } as const
 
-/** `SinnerSkillCard`: a portrait over a row of three skill boxes. */
 export const SINNER_SKILL_CARD = {
   padding: sinnerSkill(8),
   rowGap: sinnerSkill(4),
@@ -111,19 +96,15 @@ export const SINNER_SKILL_CARD = {
   badgeFontSize: sinnerSkill(10),
 } as const
 
-/** `SkillImageSimple`: the framed skill art and its attack-type composite. */
 export const SKILL_IMAGE_CARD = {
   art: skillImage(64),
   atkComposite: skillImage(32),
-  /** The attack-type icon, as a share of the composite it sits in */
   atkIcon: pxToCardPercent(16, 32),
-  /** The EA badges `SkillEADisplay` hangs off the corners */
   badge: skillImage(28),
   badgeOffset: skillImage(4),
   badgeFontSize: skillImage(14),
 } as const
 
-/** `SkillExchangePane`: two skill images either side of an arrow. */
 export const SKILL_EXCHANGE_CARD = {
   padding: skillExchange(8),
   gap: skillExchange(8),
@@ -133,7 +114,6 @@ export const SKILL_EXCHANGE_CARD = {
   arrowHeight: skillExchange(32),
 } as const
 
-/** `SinnerDeckCard`: an identity card over a skill row and an EGO row. */
 export const DECK_CARD = {
   padding: deck(8),
   rowGap: deck(4),
@@ -145,14 +125,12 @@ export const DECK_CARD = {
   egoFallbackIcon: deck(16),
 } as const
 
-/** `SinnerDeckCard`: an identity card over a skill row and an EGO row. */
 export const SINNER_DECK_GEOMETRY: CardGeometry = {
   size: { widthPx: 160, heightPx: 304 },
   mobileScale: CARD_MOBILE_SCALE,
   rows: 'slot',
 }
 
-/** `CompactIdentityRow`: a square portrait over a skill row. */
 export const COMPACT_IDENTITY_CARD = {
   rowGap: compactIdentity(4),
   uptieIcon: compactIdentity(16),
@@ -166,32 +144,23 @@ export const COMPACT_IDENTITY_CARD = {
   atkIcon: compactIdentity(20),
 } as const
 
-/** The gap between `CompactIdentityRow`'s cells, in pixels of the desktop grid. */
 export const COMPACT_IDENTITY_GRID_GAP = 8
 
-/** The columns `SkillReplacementSection` lays its twelve sinners out in. */
 export const SKILL_REPLACEMENT_COLUMNS = { wide: 6, narrow: 3 } as const
 
-/** The gap between `SkillReplacementSection`'s cells, in pixels of the desktop grid. */
 export const SKILL_REPLACEMENT_GRID_GAP = 2
 
-/** The gap between `SinnerGrid`'s cells, in pixels of the desktop grid. */
 export const SINNER_GRID_GAP = 8
 
-/** The columns `SinnerGrid` lays its twelve sinners out in, by breakpoint. */
 export const SINNER_GRID_COLUMNS = { lg: 6, md: 4, sm: 3, base: 2 } as const
 
-/** Border-image geometry of one enhancement button state, in shares of the card root. */
 export interface EnhancementBorder {
-  /** Enhancement level whose background frame is drawn */
   bgLevel: 0 | 1 | 2
   width: number
-  /** `border-image-slice`, in pixels of the source sprite */
   slice: number
   outset: number
 }
 
-/** `StartBuffCard`'s parts that differ between Mirror Dungeon card artworks. */
 export interface StartBuffCardVariant {
   pane: { width: number; fit: 'cover' | 'fill' }
   cost: {
@@ -220,7 +189,6 @@ export interface StartBuffCardVariant {
     plus1: EnhancementBorder
     plus2: EnhancementBorder
   }
-  /** Extra frame drawn over a selected enhancement button */
   enhancementOverlay?: {
     width: number
     slice: number
@@ -231,13 +199,10 @@ export interface StartBuffCardVariant {
   highlight: { width: number; height: number; translateX: number; translateY: number }
 }
 
-/** The columns `StartBuffEditPane` lays its buff cards out in. */
 export const START_BUFF_GRID_COLUMNS = 5
 
-/** Mirror Dungeon versions with their own card artwork and layout */
 export type StartBuffCardVersion = 6 | 7
 
-/** `StartBuffCard`'s parts that every artwork shares. */
 export const START_BUFF_CARD = {
   aspect: aspectOf(START_BUFF_GEOMETRY.size),
   contentPaddingTop: startBuff(4),
@@ -253,7 +218,6 @@ export const START_BUFF_CARD = {
   effectFontSize: startBuff(16.9),
   effectLineHeight: startBuff(20),
   effectGap: startBuff(2),
-  /** The band the name is fitted in: the box it may fill, and its ceiling per artwork */
   nameWidth: startBuff(160),
 } as const
 
@@ -346,12 +310,10 @@ function hasCardVariant(mdVersion: number): mdVersion is StartBuffCardVersion {
   return mdVersion in START_BUFF_CARD_VARIANTS
 }
 
-/** Narrows an arbitrary MD version to one the card can actually draw. */
 export function resolveStartBuffCardVersion(mdVersion: number): StartBuffCardVersion {
   return hasCardVariant(mdVersion) ? mdVersion : FALLBACK_MD_VERSION
 }
 
-/** `StartBuffMiniCard`: an icon over a two-line name, on the 96px summary card. */
 export const START_BUFF_MINI_CARD = {
   icon: pxToCardPercent(48, EGO_GIFT_GEOMETRY.size.widthPx),
   rowGap: pxToCardPercent(8, EGO_GIFT_GEOMETRY.size.widthPx),

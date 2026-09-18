@@ -17,44 +17,15 @@ import { usePlannerFork } from '../../hooks/usePlannerFork'
 import type { PublicPlanner, PlannerListView } from '../../types/PlannerListTypes'
 
 interface PlannerCardContextMenuProps {
-  /** Planner data for context menu actions */
   planner: PublicPlanner
-  /** Current view mode */
   view: PlannerListView
-  /** Whether user is authenticated */
   isAuthenticated: boolean
-  /** Child element (PlannerCard) */
   children: React.ReactNode
-  /** Optional callback when publish/unpublish is clicked */
   onPublishToggle?: (plannerId: string) => void
-  /** Optional callback when delete is clicked */
   onDelete?: (plannerId: string) => void
-  /** Optional callback when duplicate is clicked */
   onDuplicate?: (plannerId: string) => void
 }
 
-/**
- * Context menu wrapper for PlannerCard.
- * Shows different actions based on view mode and auth state.
- *
- * My Plans view:
- * - Edit, Duplicate, Publish/Unpublish, Delete
- *
- * Community view (authenticated):
- * - View, Fork, Upvote
- *
- * Community view (guest):
- * - View only
- *
- * @example
- * <PlannerCardContextMenu
- *   planner={planner}
- *   view="community"
- *   isAuthenticated={true}
- * >
- *   <PlannerCard planner={planner} />
- * </PlannerCardContextMenu>
- */
 export function PlannerCardContextMenu({
   planner,
   view,
@@ -71,8 +42,6 @@ export function PlannerCardContextMenu({
   const voteMutation = usePlannerVote()
   const forkMutation = usePlannerFork()
 
-  // Double-click protection: Track if vote is in progress
-  // Prevents race condition between click event and mutation.isPending becoming true
   const voteInProgressRef = useRef(false)
 
   const handleView = () => {
@@ -84,9 +53,7 @@ export function PlannerCardContextMenu({
     setOpen(false)
   }
 
-  // Left-click handler for community view - navigate directly
   const handleLeftClick = (e: React.MouseEvent) => {
-    // Don't navigate if clicking on interactive elements inside the card
     if ((e.target as HTMLElement).closest('button, a, [role="menuitem"]')) {
       return
     }
@@ -138,9 +105,8 @@ export function PlannerCardContextMenu({
   }
 
   const handleUpvote = () => {
-    // Double-click protection: Prevent multiple vote attempts
     if (voteInProgressRef.current) {
-      return // Ignore rapid clicks
+      return
     }
 
     voteInProgressRef.current = true
@@ -148,7 +114,6 @@ export function PlannerCardContextMenu({
       { plannerId: planner.id, voteType: 'UP' },
       {
         onSettled: () => {
-          // Reset flag after mutation completes (success or error)
           voteInProgressRef.current = false
         },
       },
@@ -156,7 +121,6 @@ export function PlannerCardContextMenu({
     setOpen(false)
   }
 
-  // Render My Plans actions
   if (view === 'my-plans') {
     return (
       <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -194,8 +158,6 @@ export function PlannerCardContextMenu({
     )
   }
 
-  // Render Community actions
-  // Left click = navigate, Right click = context menu
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
       <DropdownMenuTrigger asChild>
@@ -203,8 +165,6 @@ export function PlannerCardContextMenu({
           type="button"
           onClick={handleLeftClick}
           onPointerDown={(e) => {
-            // Prevent DropdownMenuTrigger from opening on left click
-            // Only allow right-click (button 2) to trigger menu via onContextMenu
             if (e.button === 0) {
               e.preventDefault()
             }

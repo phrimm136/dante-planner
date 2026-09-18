@@ -1,6 +1,3 @@
-/**
- * Query key factory for locally stored planner queries.
- */
 export const plannerQueryKeys = {
   all: ['planners'] as const,
   list: () => [...plannerQueryKeys.all, 'list'] as const,

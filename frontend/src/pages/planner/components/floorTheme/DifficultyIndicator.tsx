@@ -7,10 +7,6 @@ interface DifficultyIndicatorProps {
   className?: string
 }
 
-/**
- * Displays the floor difficulty level with appropriate color coding
- * NORMAL (yellow), HARD (orange), INFINITY MIRROR (red), EXTREME MIRROR (white)
- */
 export function DifficultyIndicator({ difficulty, className }: DifficultyIndicatorProps) {
   if (!difficulty) {
     return (
@@ -31,12 +27,6 @@ export function DifficultyIndicator({ difficulty, className }: DifficultyIndicat
   )
 }
 
-/**
- * Gets the difficulty label for a floor based on floor number and user's base difficulty choice
- * @param floorNumber - 1-indexed floor number (1-15)
- * @param baseDifficulty - User's chosen difficulty for floors 1-5 (NORMAL or HARD)
- * @returns Appropriate difficulty label for display
- */
 export function getFloorDifficultyLabel(
   floorNumber: number,
   baseDifficulty: 'NORMAL' | 'HARD',

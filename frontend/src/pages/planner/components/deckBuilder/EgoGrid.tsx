@@ -10,7 +10,6 @@ import { EgoThreadspinSelector } from './EntityTierSelectors'
 import type { EGOEntity } from '@/pages/ego'
 import type { ThreadspinTier } from '../../types/DeckTypes'
 
-/** The ego box with its height left to the card. */
 interface EgoGridProps {
   sortedEgos: EGOEntity[]
   visibleIds: Set<string>
@@ -22,17 +21,6 @@ interface EgoGridProps {
   isActive: boolean
 }
 
-/**
- * EGO card grid with progressive rendering.
- *
- * Subscribes atomically to deckVisibleCount so rAF-driven progressive
- * ticks re-render only this component and its sibling IdentityGrid,
- * not the rest of the deck builder.
- *
- * The rows take the filter and equip sets whole and read their own entry, so a
- * progressive tick — which changes neither — leaves every already-revealed card
- * at zero.
- */
 export function EgoGrid({
   sortedEgos,
   visibleIds,

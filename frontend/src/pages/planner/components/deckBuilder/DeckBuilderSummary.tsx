@@ -14,19 +14,11 @@ import { DeckBuilderActionBar } from './DeckBuilderActionBar'
 import type { DeckBuilderActions } from './DeckBuilderContent'
 import { SECTION_STYLES } from '@/lib/constants'
 
-/**
- * Everything the summary renders that it does not fetch for itself.
- *
- * The summary edits no identity, so it takes the deck-wide commands without
- * `onIdentityChange`, and takes them optionally because the read-only viewer
- * supplies none.
- */
 export interface DeckBuilderSummaryProps extends Partial<
   Omit<DeckBuilderActions, 'onIdentityChange'>
 > {
   equipment: Record<string, SinnerEquipment>
   deploymentOrder: number[]
-  /** Base ids of gifts the plan owns, for keyword grants in the status readout. */
   ownedGiftIds: ReadonlySet<EGOGiftId>
   onToggleDeploy?: ((sinnerIndex: number) => void) | undefined
   onEditDeck?: (() => void) | undefined
@@ -36,11 +28,6 @@ export interface DeckBuilderSummaryProps extends Partial<
   onViewNotes?: (() => void) | undefined
 }
 
-/**
- * Summary view of deck builder for main planner page.
- * Shows SinnerGrid, StatusViewer, and action buttons.
- * Clicking "Edit Deck" opens the DeckBuilderPane.
- */
 export function DeckBuilderSummary({
   equipment,
   deploymentOrder,
@@ -57,17 +44,14 @@ export function DeckBuilderSummary({
 }: DeckBuilderSummaryProps) {
   const { t } = useTranslation(['planner', 'common'])
 
-  // Load identity and EGO data (shared cache with Pane)
   const identitySpec = useIdentityListSpec()
   const identityI18n = useIdentityListI18n()
   const egoSpec = useEGOListSpec()
 
-  // Merge spec and i18n into IdentityEntity array for display
   const identities: IdentityEntity[] = Object.entries(identitySpec).map(([id, entry]) =>
     toIdentityEntity(id, entry, identityI18n[id] || id),
   )
 
-  // Get skill data (affinities and attack types) for each equipped identity
   const skillDataMap: Record<string, SkillData> = (() => {
     const map: Record<string, SkillData> = {}
     Object.values(equipment).forEach((eq) => {
@@ -82,7 +66,6 @@ export function DeckBuilderSummary({
     return map
   })()
 
-  // Get EGO affinity data (first affinity for background color)
   const egoAffinityMap: Record<string, string> = (() => {
     const map: Record<string, string> = {}
     Object.entries(egoSpec).forEach(([id, spec]) => {
@@ -93,7 +76,6 @@ export function DeckBuilderSummary({
     return map
   })()
 
-  // Construct deckState for StatusViewer
   const deckState: DeckState = {
     equipment,
     deploymentOrder,
@@ -107,7 +89,6 @@ export function DeckBuilderSummary({
       title={t('pages.plannerMD.deckBuilder')}
       {...(onViewNotes !== undefined && { onViewNotes })}
     >
-      {/* Sinner Grid */}
       <SinnerGrid
         equipment={equipment}
         deploymentOrder={deploymentOrder}
@@ -117,7 +98,6 @@ export function DeckBuilderSummary({
         onToggleDeploy={onToggleDeploy}
         readOnly={readOnly}
       />
-      {/* Status + Action Bar row */}
       <div className="mt-5 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
         <StatusViewer deckState={deckState} ownedGiftIds={ownedGiftIds} />
         {!readOnly && (
@@ -143,13 +123,11 @@ export function DeckBuilderSummary({
   )
 }
 
-/** Props a store-bound caller supplies; the deck itself comes from the store. */
 export type StoreBoundDeckBuilderSummaryProps = Omit<
   DeckBuilderSummaryProps,
   'equipment' | 'deploymentOrder' | 'ownedGiftIds'
 >
 
-/** Renders the summary against the deck held by the planner editor store. */
 export function StoreBoundDeckBuilderSummary(props: StoreBoundDeckBuilderSummaryProps) {
   const equipment = usePlannerEditorStore((s) => s.equipment)
   const deploymentOrder = usePlannerEditorStore((s) => s.deploymentOrder)

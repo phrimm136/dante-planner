@@ -3,64 +3,32 @@ import { DEFAULT_SKILL_EA, SINNERS } from '@/shared/gameData'
 import type { OffensiveSkillSlot } from '@/shared/gameData'
 import type { SinnerEquipment } from '../types/DeckTypes'
 
-/**
- * Tracker state for planner viewer tracker mode
- * Session-only state, resets on unmount/refresh
- *
- * Reset behavior:
- * - equipment: Restored to planner's initial equipment
- * - deploymentOrder: Restored to planner's initial deployment
- * - currentSkillCounts: Reset to DEFAULT_SKILL_EA (3/2/1)
- * - doneMarks: Cleared (empty object)
- */
 export interface TrackerState {
-  /** Temporary equipment (can change during gameplay) */
   equipment: Record<string, SinnerEquipment>
-  /** Temporary deployment order (sinner indices 0-11). User can modify to track actual gameplay order. */
   deploymentOrder: number[]
-  /** Current skill counts (sinnerID -> skillSlot -> count) */
   currentSkillCounts: Record<string, Record<OffensiveSkillSlot, number>>
-  /** Theme pack done marks per floor (floorIndex 0-based -> Set<themePackID>). Independent of gift marks. */
   doneMarks: Record<number, Set<string>>
-  /** Individual ego gift done marks (encodedId). Source of truth for gift-level dimming. */
   egoGiftDoneMarks: Set<string>
 }
 
-/**
- * Return type for useTrackerState hook
- */
 export interface TrackerStateResult {
-  /** Current tracker state */
   state: TrackerState
-  /** Set equipment */
   setEquipment: React.Dispatch<React.SetStateAction<Record<string, SinnerEquipment>>>
-  /** Set deployment order (user can set to empty array to track cleared deployment) */
   setDeploymentOrder: React.Dispatch<React.SetStateAction<number[]>>
-  /** Set current skill counts */
   setCurrentSkillCounts: React.Dispatch<
     React.SetStateAction<Record<string, Record<OffensiveSkillSlot, number>>>
   >
-  /** Update a single skill count */
   updateCurrentSkillCount: (sinnerId: string, skillSlot: OffensiveSkillSlot, count: number) => void
-  /** Toggle done mark for an individual ego gift (by encodedId). Does not affect theme pack state. */
   toggleEgoGiftDoneMark: (encodedId: string) => void
-  /** Toggle theme pack done mark and sync its gifts. Writes to both doneMarks and egoGiftDoneMarks. */
   togglePackDone: (floorIndex: number, themePackId: string, giftIds: string[]) => void
-  /** Reset all state to initial values (equipment and deployment from planner, skills to default, done marks cleared) */
   resetState: (
     initialEquipment: Record<string, SinnerEquipment>,
     initialDeployment: number[],
   ) => void
 }
 
-/**
- * Theme pack and individual gift done marks. They are one state because
- * marking a pack rewrites both halves in a single transition.
- */
 interface DoneMarkState {
-  /** Theme pack done marks per floor (floorIndex 0-based -> Set<themePackID>) */
   packs: Record<number, Set<string>>
-  /** Individual ego gift done marks (encodedId) */
   gifts: Set<string>
 }
 
@@ -68,7 +36,6 @@ function createInitialDoneMarks(): DoneMarkState {
   return { packs: {}, gifts: new Set() }
 }
 
-/** One sinner's untouched skill counts: 3/2/1 for slots 0/1/2 */
 function defaultSkillCounts(): Record<OffensiveSkillSlot, number> {
   return {
     0: DEFAULT_SKILL_EA[0],
@@ -77,10 +44,6 @@ function defaultSkillCounts(): Record<OffensiveSkillSlot, number> {
   }
 }
 
-/**
- * Create initial skill counts
- * Keys are numeric strings ("1", "2", ...) matching equipment/plannedEAState format
- */
 function createInitialSkillCounts(): Record<string, Record<OffensiveSkillSlot, number>> {
   const currentSkillCounts: Record<string, Record<OffensiveSkillSlot, number>> = {}
 
@@ -91,47 +54,6 @@ function createInitialSkillCounts(): Record<string, Record<OffensiveSkillSlot, n
   return currentSkillCounts
 }
 
-/**
- * Session state management for tracker mode
- *
- * Features:
- * - Deployment order: Temporary changes to deck deployment
- * - Current skill counts: User-tracked during MD run (default: 3/2/1)
- * - Done marks: Theme packs marked as done
- * - Hover state: Which theme pack is currently hovered
- *
- * State behavior:
- * - Preserved between guide ↔ tracker mode switches
- * - Resets only on unmount/refresh, NOT on mode switch
- * - Session-only (no IndexedDB, no localStorage, no server sync)
- *
- * @example
- * ```tsx
- * function TrackerModeViewer({ planner }) {
- *   const {
- *     state,
- *     setDeploymentOrder,
- *     updateCurrentSkillCount,
- *     toggleDoneMark,
- *     setHoveredThemePack,
- *     resetState,
- *   } = useTrackerState()
- *
- *   return (
- *     <div>
- *       <DeckTrackerPanel
- *         deploymentOrder={state.deploymentOrder}
- *         onDeploymentChange={setDeploymentOrder}
- *       />
- *       <SkillTrackerPanel
- *         currentCounts={state.currentSkillCounts}
- *         onCountChange={updateCurrentSkillCount}
- *       />
- *     </div>
- *   )
- * }
- * ```
- */
 export function useTrackerState(
   initialEquipment: Record<string, SinnerEquipment>,
   initialDeployment: number[],
@@ -148,8 +70,6 @@ export function useTrackerState(
     count: number,
   ) => {
     setCurrentSkillCounts((prev) => {
-      // A sinner absent from the map has never been tracked, so its other slots
-      // are still at the defaults rather than blank.
       const sinnerCounts = prev[sinnerId] ?? defaultSkillCounts()
       return {
         ...prev,
@@ -183,7 +103,6 @@ export function useTrackerState(
         floorMarks.add(themePackId)
       }
 
-      // Sync gift marks: marking pack → add all gifts, unmarking pack → remove all gifts
       const gifts = new Set(prev.gifts)
       for (const id of giftIds) {
         if (wasDone) {

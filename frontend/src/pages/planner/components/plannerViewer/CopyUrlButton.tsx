@@ -7,23 +7,12 @@ import { Button } from '@/components/ui/button'
 const isClient = typeof window !== 'undefined'
 
 interface CopyUrlButtonProps {
-  /** URL to copy. Defaults to window.location.href */
   url?: string
 }
 
-/**
- * Button that copies a URL to the clipboard.
- * Shows URL text on desktop, icon-only on mobile.
- * Shows toast notification on success.
- *
- * @example
- * <CopyUrlButton />
- * <CopyUrlButton url="https://example.com/planner/123" />
- */
 export function CopyUrlButton({ url }: CopyUrlButtonProps) {
   const { t } = useTranslation(['planner', 'common'])
 
-  // Get URL without hash fragment (comment anchors shouldn't be in copied URL)
   const getBaseUrl = () => {
     if (!isClient) return ''
     const { origin, pathname } = window.location

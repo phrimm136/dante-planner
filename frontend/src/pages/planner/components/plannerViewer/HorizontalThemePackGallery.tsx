@@ -22,10 +22,6 @@ interface HorizontalThemePackGalleryProps {
   onHoverChange: (themePackId: string | null) => void
 }
 
-/**
- * Horizontal scrolling gallery of theme pack cards for tracker mode
- * Shows all theme packs from all floors in single unified collection
- */
 export function HorizontalThemePackGallery({
   floorSelections,
   sectionNotes,
@@ -41,7 +37,6 @@ export function HorizontalThemePackGallery({
 
   const mobileScale = CARD_MOBILE_SCALE_DENSE
 
-  // Collect selected theme pack IDs from all floors
   const allThemePackIds = (() => {
     const packIds: string[] = []
     floorSelections.forEach((selection) => {
@@ -52,7 +47,6 @@ export function HorizontalThemePackGallery({
     return packIds
   })()
 
-  // Get all done marks across all floors
   const allDoneMarks = (() => {
     const marks = new Set<string>()
     Object.values(doneMarks).forEach((floorMarks) => {
@@ -61,19 +55,16 @@ export function HorizontalThemePackGallery({
     return marks
   })()
 
-  // Find floor index for a given theme pack from floorSelections
   const getFloorIndexForPack = (themePackId: string): number => {
     return floorSelections.findIndex((sel) => sel.themePackId === themePackId)
   }
 
-  // Get note content for a theme pack based on its floor
   const getNoteContentForPack = (themePackId: string): NoteContent => {
     const floorIndex = getFloorIndexForPack(themePackId)
     const floorNoteKey = `floor-${floorIndex}`
     return sectionNotes[floorNoteKey] ?? EMPTY_NOTE
   }
 
-  // No theme packs selected at all
   if (allThemePackIds.length === 0) {
     return (
       <PlannerSection title={t('pages.plannerMD.floorThemes')} fill>

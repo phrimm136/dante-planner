@@ -7,24 +7,10 @@ import { MdCategoryLabel } from '../MdCategoryLabel'
 import type { MDCategory } from '@/shared/gameData'
 
 interface PlannerListFilterPillsProps {
-  /** Currently selected category (undefined = All) */
   selectedCategory: MDCategory | undefined
-  /** Callback when category changes */
   onCategoryChange: (category: MDCategory | undefined) => void
 }
 
-/**
- * Inline category filter pills for planner list.
- * Shows: All, 5F, 10F, 15F
- *
- * @example
- * const { category, setFilters } = usePlannerListFilters();
- *
- * <PlannerListFilterPills
- *   selectedCategory={category}
- *   onCategoryChange={(c) => setFilters({ category: c, page: 0 })}
- * />
- */
 export function PlannerListFilterPills({
   selectedCategory,
   onCategoryChange,
@@ -33,7 +19,6 @@ export function PlannerListFilterPills({
 
   return (
     <div className="flex gap-2 flex-wrap">
-      {/* All pill */}
       <button
         onClick={() => {
           onCategoryChange(undefined)
@@ -44,7 +29,6 @@ export function PlannerListFilterPills({
         {t('pages.plannerList.filter.all')}
       </button>
 
-      {/* Category pills */}
       {MD_CATEGORIES.map((category) => (
         <button
           key={category}

@@ -12,12 +12,6 @@ interface FloorNoteDialogProps {
   noteContent: NoteContent
 }
 
-/**
- * Read-only dialog for viewing theme pack notes in tracker mode
- *
- * Pattern: Dialog wrapper with disabled NoteEditor (read-only display)
- * Empty state: Shows placeholder text when no notes exist
- */
 export function FloorNoteDialog({
   open,
   onOpenChange,

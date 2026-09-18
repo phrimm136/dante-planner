@@ -8,10 +8,6 @@ interface DeckBuilderPaneProps {
   children: ReactNode
 }
 
-/**
- * Dialog chrome for the deck builder. Knows nothing about the deck it hosts;
- * the caller supplies whichever builder its surface owns.
- */
 export function DeckBuilderPane({ open, onOpenChange, children }: DeckBuilderPaneProps) {
   const { t } = useTranslation(['planner', 'common'])
 

@@ -9,7 +9,6 @@ import {
   SKILL_REPLACEMENT_GRID_GAP,
 } from '../lib/cardLayout'
 
-/** The twelve-sinner skill grid's column count, slot box and CSS grid style at the current breakpoint. */
 export function useSkillReplacementLayout(): {
   columnWidth: number
   rowHeight: number

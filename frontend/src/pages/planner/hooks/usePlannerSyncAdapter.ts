@@ -14,49 +14,26 @@ import type {
   UpsertPlannerRequest,
 } from '../types/PlannerTypes'
 
-/**
- * A planner as the server holds it, with the version the response assigned.
- * Awaiting the response is what ties the ack to the request that produced it.
- */
 export interface AcknowledgedPlanner {
   planner: SaveablePlanner
   ack: ServerAck
 }
 
-/**
- * Return type for usePlannerSyncAdapter hook
- * Provides server API operations only - no IndexedDB
- */
 export interface PlannerSyncAdapterOperations {
-  /** Sync planner to server (PUT). Uses force param for conflict override */
   syncToServer: (planner: SaveablePlanner, force?: boolean) => Promise<AcknowledgedPlanner>
-  /** Fetch planner from server by ID (GET), reporting why the fetch failed */
   fetchFromServer: (id: string) => Promise<Result<AcknowledgedPlanner, AppError>>
-  /** Delete planner from server by ID (DELETE) */
   deleteFromServer: (id: string) => Promise<Result<void, AppError>>
-  /** List user's server planners */
   listFromServer: () => Promise<PlannerSummary[]>
 }
 
-/** The version a response assigned, lifted out of the full payload. */
 function ackOf(response: ServerPlannerResponse): ServerAck {
   return { syncVersion: response.syncVersion }
 }
 
-/**
- * The server's copy as it must be persisted: its content under the version the
- * ack assigned. Content and version travel together, because a version names
- * the server's bytes — the sanitizer can normalize a write, and keeping local
- * bytes under the server's version would hide that divergence from a sync that
- * compares versions alone.
- */
 export function acknowledgedCopy({ planner, ack }: AcknowledgedPlanner): SaveablePlanner {
   return { ...planner, metadata: { ...planner.metadata, syncVersion: ack.syncVersion } }
 }
 
-/**
- * Convert server response to SaveablePlanner format
- */
 export function serverResponseToSaveable(response: ServerPlannerResponse): SaveablePlanner {
   let content
   try {
@@ -86,9 +63,6 @@ export function serverResponseToSaveable(response: ServerPlannerResponse): Savea
   )
 }
 
-/**
- * Convert server summary to PlannerSummary format
- */
 function serverSummaryToLocal(summary: ServerPlannerSummary): PlannerSummary {
   return {
     id: summary.id,
@@ -102,40 +76,12 @@ function serverSummaryToLocal(summary: ServerPlannerSummary): PlannerSummary {
   }
 }
 
-/**
- * Adapter hook for server-only planner operations
- *
- * This adapter wraps plannerApi and provides a focused interface
- * for server synchronization. Manual save uses this adapter when
- * authenticated and sync is enabled.
- *
- * @example
- * ```tsx
- * function PlannerEditor() {
- *   const syncAdapter = usePlannerSyncAdapter()
- *
- *   const handleManualSave = async (planner: SaveablePlanner, force?: boolean) => {
- *     try {
- *       const synced = await syncAdapter.syncToServer(planner, force)
- *       console.log('Synced version:', synced.ack.syncVersion)
- *     } catch (error) {
- *       if (error instanceof ConflictError) {
- *         // Handle conflict
- *       }
- *     }
- *   }
- * }
- * ```
- */
 export function usePlannerSyncAdapter(): PlannerSyncAdapterOperations {
-  // Memoize to return stable function references
-  // All functions only use module-level imports, no React state/props
   return {
     syncToServer: async (
       planner: SaveablePlanner,
       force?: boolean,
     ): Promise<AcknowledgedPlanner> => {
-      // Guard: Server currently only supports MD planners
       if (planner.config.type !== 'MIRROR_DUNGEON') {
         throw new Error('Server sync only supports MIRROR_DUNGEON planners')
       }
@@ -143,7 +89,6 @@ export function usePlannerSyncAdapter(): PlannerSyncAdapterOperations {
       const content = JSON.stringify(planner.content)
       const metadata = planner.metadata
 
-      // Extract keywords from content for dedicated column storage
       const mdContent = planner.content as import('../types/PlannerTypes').MDPlannerContent
       const selectedKeywords = mdContent.selectedKeywords ?? []
 
@@ -186,5 +131,5 @@ export function usePlannerSyncAdapter(): PlannerSyncAdapterOperations {
       const serverPlanners = await plannerApi.listAll()
       return serverPlanners.map(serverSummaryToLocal)
     },
-  } // Empty deps: functions only use module-level imports
+  }
 }

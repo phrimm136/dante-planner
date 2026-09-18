@@ -26,14 +26,9 @@ interface StartBuffEditPaneProps {
   mdVersion: MDVersion
 }
 
-/**
- * Dialog for editing start buff selection
- * Renders cards directly without intermediate Grid component
- */
 export function StartBuffEditPane({ open, onOpenChange, mdVersion }: StartBuffEditPaneProps) {
   const { t } = useTranslation(['planner', 'common'])
 
-  // Store state
   const selectedBuffIds = usePlannerEditorStore((s) => s.selectedBuffIds)
   const setSelectedBuffIds = usePlannerEditorStore((s) => s.setSelectedBuffIds)
 
@@ -49,24 +44,19 @@ export function StartBuffEditPane({ open, onOpenChange, mdVersion }: StartBuffEd
     mobileScale,
   )
 
-  // Enhancement preview state for all cards (lifted from StartBuffCard)
-  // Initialized from current selection; empty entries fall back to 0
   const [enhancementPreviews, setEnhancementPreviews] = useState<Record<number, EnhancementLevel>>(
     () => {
       return deriveEnhancements(selectedBuffIds)
     },
   )
 
-  // Get enhancement for a given base buff
   const getEnhancement = (baseId: number): EnhancementLevel => {
     return enhancementPreviews[baseId] ?? 0
   }
 
-  // Single card enhancement change (from card's +/++ buttons)
   const handleEnhancementChange = (baseId: number, level: EnhancementLevel) => {
     setEnhancementPreviews((prev) => ({ ...prev, [baseId]: level }))
 
-    // If this buff is selected, update its ID in the selection
     const newSelection = new Set(selectedBuffIds)
     let wasSelected = false
     for (let l = 0; l <= 2; l++) {
@@ -80,7 +70,6 @@ export function StartBuffEditPane({ open, onOpenChange, mdVersion }: StartBuffEd
     }
   }
 
-  // Calculate total cost using preview enhancements for selected buffs
   const totalCost = (() => {
     let sum = 0
     for (const buffId of selectedBuffIds) {
@@ -90,7 +79,6 @@ export function StartBuffEditPane({ open, onOpenChange, mdVersion }: StartBuffEd
     return sum
   })()
 
-  // Batch select all buffs at their current preview enhancement
   const handleSelectAll = () => {
     const newSelection = new Set<number>()
     for (const baseId of BASE_BUFF_IDS) {
@@ -99,7 +87,6 @@ export function StartBuffEditPane({ open, onOpenChange, mdVersion }: StartBuffEd
     setSelectedBuffIds(newSelection)
   }
 
-  // Batch set all enhancement previews (only updates selection for already-selected buffs)
   const handleBatchEnhancement = (level: EnhancementLevel) => {
     const newPreviews: Record<number, EnhancementLevel> = {}
     for (const baseId of BASE_BUFF_IDS) {
@@ -107,7 +94,6 @@ export function StartBuffEditPane({ open, onOpenChange, mdVersion }: StartBuffEd
     }
     setEnhancementPreviews(newPreviews)
 
-    // Update IDs for already-selected buffs to match new enhancement
     if (selectedBuffIds.size > 0) {
       const newSelection = new Set<number>()
       for (const buffId of selectedBuffIds) {
@@ -153,7 +139,6 @@ export function StartBuffEditPane({ open, onOpenChange, mdVersion }: StartBuffEd
           </div>
         </DialogHeader>
 
-        {/* Batch action row */}
         <div className="flex items-center gap-2 py-2 flex-wrap">
           <button
             type="button"

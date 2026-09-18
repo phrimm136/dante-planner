@@ -4,7 +4,6 @@ interface MdCategoryLabelProps {
   category: string
 }
 
-/** Localized name of a Mirror Dungeon category, as bare text. */
 export function MdCategoryLabel({ category }: MdCategoryLabelProps) {
   const { t } = useTranslation('planner')
 

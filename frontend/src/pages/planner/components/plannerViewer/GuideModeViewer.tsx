@@ -33,18 +33,12 @@ import { isNoteEmpty } from '@/shared/noteEditor'
 import { deserializeSets } from '../../schemas/PlannerSchemas'
 import { NOTE_SECTIONS } from './viewerSections'
 
-/** Note-bearing sections plus the trailing floor gallery, which has none. */
 const SECTION_COUNT = NOTE_SECTIONS.length + 1
 
 interface GuideModeViewerProps {
   planner: MDSaveablePlanner
 }
 
-/**
- * Read-only viewer for planner in guide mode.
- * Displays all sections from editor without editing capabilities.
- * Section order matches the editor exactly.
- */
 export function GuideModeViewer({ planner }: GuideModeViewerProps) {
   const { t } = useTranslation(['planner', 'common'])
   const visibleSections = useProgressiveReveal(SECTION_COUNT)
@@ -210,7 +204,6 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
 
   return (
     <div className="bg-background rounded-lg space-y-2">
-      {/* Intro */}
       {!isNoteEmpty(content.sectionNotes?.intro) && (
         <PlannerSection title={t('pages.plannerMD.introduction')}>
           {readOnlyNote(content.sectionNotes.intro)}
@@ -223,7 +216,6 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
         </RevealSection>
       ))}
 
-      {/* Outro */}
       {!isNoteEmpty(content.sectionNotes?.outro) && (
         <PlannerSection title={t('pages.plannerMD.closingNotes')}>
           {readOnlyNote(content.sectionNotes.outro)}

@@ -8,10 +8,6 @@ interface ModeratorDeleteDialogProps extends ActionDialogControl {
   onConfirm: (reason: string) => void
 }
 
-/**
- * Dialog for moderator planner takedown with reason input.
- * Takedown removes planner from public but allows owner to keep syncing.
- */
 export function ModeratorDeleteDialog({
   open,
   onOpenChange,

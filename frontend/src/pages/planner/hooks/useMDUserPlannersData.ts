@@ -1,16 +1,3 @@
-/**
- * MD User Planners Data Hook
- *
- * Fetches personal planners for the /planner/md route.
- * - Guests: IndexedDB only via usePlannerStorage
- * - Authenticated + sync ON: Auto-pull from server when:
- *   - Planner doesn't exist locally (server-only)
- *   - Local is not a draft AND local syncVersion < server syncVersion
- * - Drafts are never overwritten by server pulls
- *
- * Pattern: Split adapters + TanStack Query
- */
-
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSuspenseQuery, useQuery, queryOptions, useQueryClient } from '@tanstack/react-query'
@@ -52,104 +39,36 @@ import type { ConflictItem, ConflictResolution } from '../components/BatchConfli
 import type { ConflictResolutionChoice } from '../types/PlannerTypes'
 import type { MDCategory } from '@/shared/gameData'
 
-// ============================================================================
-// Query Keys
-// ============================================================================
-
-/**
- * Query key factory for user planner queries
- * Includes auth state to invalidate cache on login/logout
- *
- * Note: syncEnabled is NOT in the key - it only affects background sync,
- * not the query result (IndexedDB data is the same regardless)
- */
 export const userPlannersQueryKeys = {
-  /** Base key for all user planner queries */
   all: ['userPlanners'] as const,
 
-  /** Key for user's planner list (auth state for cache separation on login/logout) */
   list: (isAuthenticated: boolean) =>
     [...userPlannersQueryKeys.all, 'list', { isAuthenticated }] as const,
 
-  /** Key for user's full planner list with content (for content-based filtering) */
   listFull: (isAuthenticated: boolean) =>
     [...userPlannersQueryKeys.all, 'listFull', { isAuthenticated }] as const,
 }
 
-// ============================================================================
-// Hook Options Interface
-// ============================================================================
-
 export interface UseMDUserPlannersDataOptions {
-  /** MD category filter (optional) */
   category?: MDCategory
-  /** Current page number (0-indexed) */
   page: number
-  /** Search query for title filtering (optional) */
   search?: string
-  /** Content search filters for local filtering (optional) */
   contentFilters?: PlannerSearchFilters
 }
 
-// ============================================================================
-// Hook Return Type
-// ============================================================================
-
 export interface MDUserPlannersResult {
-  /** Filtered planners for current page */
   planners: PlannerSummary[]
-  /** Total number of planners (after category filter) */
   totalCount: number
-  /** Whether user is authenticated */
   isAuthenticated: boolean
-  /** Whether background sync is in progress */
   isSyncing: boolean
-  /** Pending conflicts that need user resolution (local draft vs server newer) */
   pendingConflicts: ConflictItem[]
-  /** Resolve batch conflicts - call after user chooses resolutions, one outcome per attempt */
   resolveConflicts: (resolutions: ConflictResolution[]) => Promise<ConflictOutcome[]>
-  /** Whether conflict resolution is in progress */
   isResolvingConflicts: boolean
 }
 
-// ============================================================================
-// Main Hook
-// ============================================================================
-
-/**
- * Hook that fetches user's personal planners
- * Suspends while loading - wrap in Suspense boundary
- *
- * Data source is automatically selected based on authentication:
- * - Guest: IndexedDB via usePlannerStorage
- * - Authenticated: Server API via usePlannerSync
- *
- * Note: Client-side filtering and pagination (not server-side for local data)
- *
- * @param options - Category filter and pagination options
- * @returns Personal planners with metadata
- *
- * @example
- * ```tsx
- * function MyPlansList() {
- *   const { planners, totalCount, isAuthenticated } = useMDUserPlannersData({
- *     category: '5F',
- *     page: 0,
- *   });
- *
- *   return (
- *     <div>
- *       {isAuthenticated ? 'Cloud synced' : 'Local only'}
- *       <PlannerGrid planners={planners} />
- *     </div>
- *   );
- * }
- * ```
- */
 export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MDUserPlannersResult {
   const { category, page, search, contentFilters } = options
 
-  // Whether content-based filters are active (requires full planner data)
   const hasContentFilters = !!(
     contentFilters &&
     (contentFilters.keywords.length > 0 ||
@@ -167,61 +86,44 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
   const isAuthenticated = !!user
   const syncEnabled = settings?.syncEnabled === true
 
-  // Sync state
   const [isSyncing, setIsSyncing] = useState(false)
   const syncInProgressRef = useRef(false)
   const hasSyncedRef = useRef(false)
   const lastSyncKeyRef = useRef('')
 
-  // Conflict resolution state
   const [pendingConflicts, setPendingConflicts] = useState<ConflictItem[]>([])
   const [isResolvingConflicts, setIsResolvingConflicts] = useState(false)
 
-  /**
-   * The plan built for each pending conflict, held across resubmissions.
-   *
-   * Re-planning after a partial failure would mint a second copy for every item
-   * the user resubmits, so a retry re-interprets what its item already built.
-   */
   const heldPlans = useRef(
     new Map<string, { choice: ConflictResolutionChoice; plan: ConflictEffect[] }>(),
   )
 
-  // EGO Gift spec for affordability validation in conflict resolution
   const egoGiftSpec = useEGOGiftListSpec()
   const egoGiftI18n = useEGOGiftListI18n()
 
-  // Query: Local planners only (fast initial render)
   const { data: allPlanners } = useSuspenseQuery(
     queryOptions({
       queryKey: userPlannersQueryKeys.list(isAuthenticated),
       queryFn: () => storage.listLocal(),
       staleTime: STALE_TIME.FREQUENT,
-      // The source is local storage, so regaining focus says nothing about it.
       refetchOnWindowFocus: false,
     }),
   )
 
-  // Query: Full planners with content (for content-based filtering)
-  // Only fetched when content filters are active. For 1-5 plans, IndexedDB read is near-instant.
   const { data: allFullPlanners } = useQuery({
     queryKey: userPlannersQueryKeys.listFull(isAuthenticated),
     queryFn: () => storage.listLocalFull(),
     staleTime: STALE_TIME.FREQUENT,
     enabled: hasContentFilters,
-    // The source is local storage, so regaining focus says nothing about it.
     refetchOnWindowFocus: false,
   })
 
-  // Background sync: Pull missing planners from server
-  // Uses syncKey to run once per auth+sync state change
   const syncKey = `${isAuthenticated}-${syncEnabled}`
 
   useEffect(() => {
     if (!isAuthenticated || !syncEnabled) return
     if (syncInProgressRef.current) return
 
-    // Skip if already synced for this state
     if (hasSyncedRef.current && lastSyncKeyRef.current === syncKey) return
 
     const runSync = async () => {
@@ -248,7 +150,6 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
 
         const plan = categorizeSync(serverPlanners, localPlanners, tombstones)
 
-        // Mark as synced even if nothing to pull
         hasSyncedRef.current = true
         lastSyncKeyRef.current = syncKey
 
@@ -269,18 +170,15 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
           }
         }
 
-        // Directly update cache with synced planners (avoids re-suspension)
         if (syncedCount > 0 || purgedCount > 0) {
           const updatedLocal = await storage.listLocal()
           queryClient.setQueryData(userPlannersQueryKeys.list(isAuthenticated), updatedLocal)
-          // Invalidate full planners cache so content filters pick up synced data
           void queryClient.invalidateQueries({
             queryKey: userPlannersQueryKeys.listFull(isAuthenticated),
           })
         }
       } catch (error) {
         console.error('Background sync failed:', error)
-        // Mark as synced even on error - no retry
         hasSyncedRef.current = true
         lastSyncKeyRef.current = syncKey
       }
@@ -295,10 +193,7 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
   const { paginatedPlanners, totalCount } = (() => {
     const normalizedSearch = search?.toLowerCase().trim()
 
-    // When content filters are active, filter against full planners using matchesPlannerFilters
-    // then map matched IDs back to summaries for consistent return type
     if (hasContentFilters) {
-      // While full planners are loading, show empty to avoid flash of unfiltered results
       if (!allFullPlanners) {
         return { paginatedPlanners: [], totalCount: 0 }
       }
@@ -320,14 +215,12 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
       }
     }
 
-    // Client-side filtering by category and search (no content filters)
     const filtered = allPlanners.filter((p) => {
       if (category && p.category !== category) return false
       if (normalizedSearch && !p.title.toLowerCase().includes(normalizedSearch)) return false
       return true
     })
 
-    // Client-side pagination
     const startIndex = page * PLANNER_LIST.PAGE_SIZE
     return {
       paginatedPlanners: filtered.slice(startIndex, startIndex + PLANNER_LIST.PAGE_SIZE),
@@ -335,14 +228,8 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
     }
   })()
 
-  /**
-   * Why a local planner may not be synced, or null when it may be.
-   * Mirrors performSave: strict when published, structural checks otherwise.
-   */
   const validateBeforeSync = (planner: SaveablePlanner): AppError | null => {
     if (!isMDPlanner(planner)) return null
-    // Without the gift spec the affordability rules cannot run at all, and a
-    // resolution that skips them pushes content no validator ever checked.
     if (!egoGiftSpec) return { kind: 'retryable' }
 
     const { content } = planner
@@ -365,21 +252,13 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
     return friendlyError ? plannerValidationError(friendlyError) : null
   }
 
-  /** The effects one conflict's resolution runs against storage and the server. */
   const conflictOps = (conflict: ConflictItem): ConflictOps => ({
     local: async () => {
-      // Read now, not when the sync pass raised this conflict: a write that
-      // landed since is exactly what the force push would destroy, and a parked
-      // dialog leaves that window open indefinitely.
       const loaded = await storage.loadFromLocal(conflict.id)
       if (!loaded.ok) return err({ kind: 'unknown' })
-      // A row that is gone resolves to nothing; pushing that would erase the
-      // server's copy on the user's behalf.
       return loaded.value ? ok(loaded.value) : err({ kind: 'notFound' })
     },
     incoming: async () => {
-      // Read at resolution time: the copy captured during sync can be minutes
-      // stale, and discarding local changes for a stale server copy loses both.
       const fetched = await syncAdapter.fetchFromServer(conflict.id)
       return fetched.ok ? ok(fetched.value.planner) : err(fetched.error)
     },
@@ -397,13 +276,6 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
     sanitizeTitle: (title) => title.trim() || t('pages.plannerMD.untitled', 'Untitled'),
   })
 
-  /**
-   * Resolve batch conflicts based on user choices.
-   *
-   * Stops at the first failure: the resolutions after it are the user's to
-   * re-submit once they know what went wrong, and only what resolved leaves the
-   * pending list.
-   */
   const resolveConflicts = async (
     resolutions: ConflictResolution[],
   ): Promise<ConflictOutcome[]> => {
@@ -444,7 +316,6 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
       }
 
       setPendingConflicts((pending) => pending.filter((conflict) => !resolved.has(conflict.id)))
-      // A plan outlives only the conflict it belongs to.
       for (const id of resolved) heldPlans.current.delete(id)
 
       const updatedLocal = await storage.listLocal()
@@ -455,7 +326,6 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
 
       return outcomes
     } finally {
-      // Left set by a throw, the dialog's buttons stay disabled for good.
       setIsResolvingConflicts(false)
     }
   }

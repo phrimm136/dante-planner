@@ -13,24 +13,9 @@ interface PlannerViewerProps {
   planner: MDSaveablePlanner
 }
 
-/**
- * Container component for planner viewer with mode switching.
- * Manages mode state (guide ↔ tracker) and routes to appropriate viewer.
- *
- * Uses lazy mounting with CSS visibility toggle:
- * - TrackerModeViewer only mounts when first accessed (prevents initial render freeze)
- * - Once mounted, both viewers stay mounted for instant switching
- * - Preserves tracker state across mode changes
- *
- * State resets only on page refresh or component unmount.
- *
- * @example
- * <PlannerViewer planner={loadedPlanner} />
- */
 export function PlannerViewer({ planner }: PlannerViewerProps) {
   const { t } = useTranslation(['planner', 'common'])
   const [mode, setMode] = useState<ViewerMode>('guide')
-  // Track if tracker has ever been accessed - once true, stays mounted for instant switching
   const [trackerMounted, setTrackerMounted] = useState(false)
 
   const handleModeChange = (newMode: ViewerMode) => {
@@ -61,12 +46,10 @@ export function PlannerViewer({ planner }: PlannerViewerProps) {
         </Button>
       </div>
 
-      {/* Guide mode - always mounted */}
       <div className={cn(mode !== 'guide' && 'hidden')} aria-hidden={mode !== 'guide'}>
         <GuideModeViewer planner={planner} />
       </div>
 
-      {/* Tracker mode - lazy mounted on first access, then stays mounted */}
       {trackerMounted && (
         <div className={cn(mode !== 'tracker' && 'hidden')} aria-hidden={mode !== 'tracker'}>
           <TrackerModeViewer planner={planner} />

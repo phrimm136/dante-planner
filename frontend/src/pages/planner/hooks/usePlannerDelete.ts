@@ -4,7 +4,6 @@ import { ApiClient } from '@/lib/api'
 import { NotFoundError, UnauthorizedError } from '@/lib/apiErrors'
 import { useInvalidatePlannerLists } from './useInvalidatePlannerLists'
 
-/** The server's answer; only `deleted` means the row was there and is now gone. */
 export type DeleteOutcome = 'deleted' | 'alreadyGone' | 'unauthorized'
 
 export function usePlannerDelete() {

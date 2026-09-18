@@ -35,36 +35,19 @@ function replacePlaceholders(
   return result
 }
 
-/**
- * Formats a single buff effect into displayable text with colors
- * @param effect - Buff effect data
- * @param i18n - i18n translations
- * @param battleKeywords - Battle keywords for translating buff keywords
- * @returns Formatted React node with color styling
- */
 export function formatEffect(
   effect: BuffEffect,
   i18n: StartBuffI18n,
   battleKeywords?: BattleKeywords,
 ): React.ReactNode {
-  // Use customLocalizeTextId if present (for enhanced effects), otherwise use type
   const translationKey = effect.customLocalizeTextId || effect.type
   const template = i18n[translationKey] || translationKey
 
-  // Replace placeholders with values (including translated buffKeyword)
   const text = replacePlaceholders(template, effect, battleKeywords)
 
-  // Parse color tags and return React elements
   return parseColorTags(text)
 }
 
-/**
- * Formats all buff effects into a list of displayable items
- * @param effects - Array of buff effects
- * @param i18n - i18n translations
- * @param battleKeywords - Battle keywords for translating buff keywords
- * @returns Array of formatted React nodes
- */
 export function formatBuffEffects(
   effects: BuffEffect[],
   i18n: StartBuffI18n,

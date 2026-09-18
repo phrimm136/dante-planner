@@ -20,7 +20,6 @@ interface SinnerDeckCardProps {
   skillData: SkillData
   egoAffinityMap: Record<string, string>
   deploymentOrder: number | null
-  /** The share of the desktop width the identity card takes below the desktop breakpoint */
   mobileScale: number
   onToggleDeploy?: ((sinnerIndex: number) => void) | undefined
   readOnly?: boolean
@@ -43,10 +42,6 @@ const ATK_ICON_STYLE: CSSProperties = {
   height: cqw(DECK_CARD.atkIcon),
 }
 
-/**
- * Deck card showing equipped identity with deployment status, skills, and EGOs.
- * Uses IdentityCard for identity display with deployment order overlay.
- */
 export const SinnerDeckCard = function SinnerDeckCard({
   sinnerIndex,
   equipment,
@@ -64,7 +59,6 @@ export const SinnerDeckCard = function SinnerDeckCard({
   const deploymentOverlay =
     deploymentOrder !== null ? <FormationBadge state={slotState} order={deploymentOrder} /> : null
 
-  // Build a minimal identity object for IdentityCard if missing
   const displayIdentity: IdentityEntity = identityData ?? {
     id: equipment.identity.id,
     name: 'Identity',
@@ -84,7 +78,6 @@ export const SinnerDeckCard = function SinnerDeckCard({
       className="relative w-full flex flex-col items-center transition-colors"
       style={ROOT_STYLE}
     >
-      {/* Identity Card with deployment overlay - click here to toggle deploy */}
       <button
         type="button"
         className="group"
@@ -104,7 +97,6 @@ export const SinnerDeckCard = function SinnerDeckCard({
         </CardSlot>
       </button>
 
-      {/* Skill Info Row - atkType icon on affinity-colored background */}
       <div className="flex" style={{ gap: cqw(DECK_CARD.skillGap) }}>
         {[0, 1, 2].map((idx) => {
           const affinity = skillData.affinities[idx]
@@ -133,7 +125,6 @@ export const SinnerDeckCard = function SinnerDeckCard({
         })}
       </div>
 
-      {/* EGO Slots Row (5 ranks) */}
       <div className="flex" style={{ gap: cqw(DECK_CARD.egoGap) }}>
         {EGO_RANKS.map((rank) => {
           const equippedEgo = equipment.egos[rank]

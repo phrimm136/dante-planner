@@ -48,10 +48,6 @@ import type {
 } from './PlannerTypes'
 import type { isMDPlanner } from './PlannerTypes'
 
-// ============================================================================
-// Type-level assertion helpers
-// ============================================================================
-
 type Equal<X, Y> =
   (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2 ? true : false
 
@@ -66,17 +62,11 @@ type Expect<T extends true> = T
  */
 type AsRecord<T> = { [K in keyof T]: T[K] }
 
-/** MDPlannerContent as a structural record (see AsRecord) */
 type MDContentAsRecord = AsRecord<MDPlannerContent>
 
-/** PlannerExportItem with its content normalized to a structural record */
 type ExportItemAsRecord = Omit<PlannerExportItem, 'content'> & {
   content: MDContentAsRecord
 }
-
-// ============================================================================
-// Assertions (exported so noUnusedLocals does not flag them)
-// ============================================================================
 
 /**
  * Reaching an MD-only content field without selecting a branch must not compile.
@@ -87,18 +77,15 @@ type ExportItemAsRecord = Omit<PlannerExportItem, 'content'> & {
 export type UnguardedMDContentField = SaveablePlanner['content']['selectedKeywords']
 
 export type PlannerRootDiscriminationGuard = [
-  // config.type selects the branch, and content comes along with it.
   Expect<Equal<Extract<SaveablePlanner, { config: MDConfig }>, MDSaveablePlanner>>,
   Expect<Equal<MDSaveablePlanner['content'], MDPlannerContent>>,
   Expect<Equal<Extract<SaveablePlanner, { config: RRConfig }>, RRSaveablePlanner>>,
   Expect<Equal<RRSaveablePlanner['content'], RRPlannerContent>>,
 
-  // The predicate is what carries the discriminant across; pin what it narrows to.
   Expect<Equal<typeof isMDPlanner, (planner: SaveablePlanner) => planner is MDSaveablePlanner>>,
 ]
 
 export type PlannerSchemaDriftGuard = [
-  // --- Leaves: schema and hand-written type must agree exactly ---
   Expect<Equal<z.infer<typeof PlannerStatusSchema>, PlannerStatus>>,
   Expect<Equal<z.infer<typeof FloorSelectionDraftSchema>, SerializableFloorSelection>>,
   Expect<Equal<z.infer<typeof PlannerMetadataSchema>, PlannerMetadata>>,
@@ -106,14 +93,10 @@ export type PlannerSchemaDriftGuard = [
   Expect<Equal<z.infer<typeof RRConfigSchema>, RRConfig>>,
   Expect<Equal<z.infer<typeof PlannerConfigDiscriminatedSchema>, PlannerEditorConfig>>,
 
-  // --- Composites: one-directional BY DESIGN ---
   // JSONContentSchema is z.ZodType<unknown> (structural Tiptap validation),
   // so the schema side of note content is wider than the type.
   Expect<Extends<SerializableNoteContent, z.input<typeof SerializableNoteContentSchema>>>,
 
-  // SaveablePlanner: metadata/config are pinned exactly by the leaf Equals
-  // above; content must be ACCEPTED by the loose z.record(string, unknown)
-  // gate — never equal to it.
   Expect<
     Extends<
       { metadata: PlannerMetadata; config: PlannerEditorConfig; content: MDContentAsRecord },
@@ -121,10 +104,8 @@ export type PlannerSchemaDriftGuard = [
     >
   >,
 
-  // PlannerContent (MD half) is accepted by SaveablePlannerSchema's content gate.
   Expect<Extends<MDContentAsRecord, z.input<typeof SaveablePlannerSchema>['content']>>,
 
-  // Export format: every exported planner satisfies the import gate.
   Expect<Extends<ExportItemAsRecord, z.input<typeof PlannerExportItemSchema>>>,
   Expect<
     Extends<

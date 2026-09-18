@@ -1,24 +1,3 @@
-/**
- * Planner Filter Pane
- *
- * Collapsible panel with 5 filter categories for searching planners by content items.
- * Categories: Keywords, Identity, EGO, EGO Gift, Theme Pack
- *
- * - Row 1: Search input to narrow displayed filter items across all categories
- * - Row 2: Selected item chips (removable)
- * - Row 3: Category navigation buttons with match counts
- * - Section content: Icon-button grids per category
- *
- * Reusable across published plan list and personal plan list pages.
- * Composes with usePlannerSearchFilters hook for URL param sync.
- *
- * Pattern: Collapsible (shadcn/ui) + selectable buttons (data-selected pattern)
- *
- * Architecture: Two-component split for progressive loading.
- * - PlannerFilterPane (outer): No suspense. Renders keywords immediately.
- * - HeavySections (inner): Suspense-wrapped. Loads identity/ego/gift/themePack data.
- */
-
 import { useState, useRef, useEffect, forwardRef, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronDown, ChevronUp, X } from 'lucide-react'
@@ -48,14 +27,9 @@ import {
 import type { PlannerSearchFilters } from '../../types/PlannerSearchTypes'
 import { SECTION_STYLES } from '@/lib/constants'
 
-// ============================================================================
-// Constants
-// ============================================================================
-
 const FILTER_CATEGORIES = ['keywords', 'identity', 'ego', 'gift', 'themePack'] as const
 type FilterCategory = (typeof FILTER_CATEGORIES)[number]
 
-/** The filter field each category selects into. */
 const CATEGORY_TO_FILTER_KEY = {
   keywords: 'keywords',
   identity: 'identityIds',
@@ -63,10 +37,6 @@ const CATEGORY_TO_FILTER_KEY = {
   gift: 'giftIds',
   themePack: 'themePackIds',
 } as const satisfies Record<FilterCategory, keyof PlannerSearchFilters>
-
-// ============================================================================
-// Types
-// ============================================================================
 
 interface FilterItem {
   id: string
@@ -80,19 +50,6 @@ interface PlannerFilterPaneProps {
   onFiltersChange: (updates: Partial<PlannerSearchFilters>) => void
 }
 
-// ============================================================================
-// Component (outer, no suspense)
-// ============================================================================
-
-/**
- * Collapsible filter pane for searching planners by content items.
- *
- * @example
- * ```tsx
- * const { filters, setFilters } = usePlannerSearchFilters()
- * <PlannerFilterPane filters={filters} onFiltersChange={setFilters} />
- * ```
- */
 export function PlannerFilterPane({ filters, onFiltersChange }: PlannerFilterPaneProps) {
   const { t } = useTranslation(['planner', 'sinnerNames'])
   const [isOpen, setIsOpen] = useState(false)
@@ -107,18 +64,15 @@ export function PlannerFilterPane({ filters, onFiltersChange }: PlannerFilterPan
 
   const keywordsI18n = usePlannerKeywordsI18n()
 
-  // Keyword items (always available)
   const keywordItems: FilterItem[] = PLANNER_KEYWORDS.map((kw) => ({
     id: kw,
     label: keywordsI18n[kw]?.label ?? kw,
     category: 'keywords' as FilterCategory,
   }))
 
-  // Heavy items populated by HeavySections via callback
   const [heavyItems, setHeavyItems] = useState<FilterItem[]>([])
   const allItems = [...keywordItems, ...heavyItems]
 
-  // Filter items by search query
   const lowerQuery = searchQuery.toLowerCase()
   const filteredItems = (() => {
     if (!lowerQuery) return allItems
@@ -128,7 +82,6 @@ export function PlannerFilterPane({ filters, onFiltersChange }: PlannerFilterPan
     )
   })()
 
-  // Match counts per category
   const matchCounts = (() => {
     const counts: Record<FilterCategory, number> = {
       keywords: 0,
@@ -143,16 +96,13 @@ export function PlannerFilterPane({ filters, onFiltersChange }: PlannerFilterPan
     return counts
   })()
 
-  // Get items for a specific category
   const getItemsForCategory = (category: FilterCategory) => {
     return filteredItems.filter((item) => item.category === category)
   }
 
-  // Check if an item is selected
   const isSelected = (category: FilterCategory, id: string): boolean =>
     filters[CATEGORY_TO_FILTER_KEY[category]].includes(id)
 
-  // Toggle selection of an item
   const toggleItem = (category: FilterCategory, id: string) => {
     const key = CATEGORY_TO_FILTER_KEY[category]
     const current = filters[key]
@@ -161,7 +111,6 @@ export function PlannerFilterPane({ filters, onFiltersChange }: PlannerFilterPan
     onFiltersChange({ [key]: next })
   }
 
-  // Build selected chips — uses allItems for label lookup, falls back to raw ID
   const selectedChips = (() => {
     const itemMap = new Map(allItems.map((item) => [`${item.category}-${item.id}`, item]))
 
@@ -180,7 +129,6 @@ export function PlannerFilterPane({ filters, onFiltersChange }: PlannerFilterPan
     sectionRefs.current[category] = el
   }
 
-  // Scroll to category section within the pane's scroll container
   const scrollToCategory = (category: FilterCategory) => {
     const el = sectionRefs.current[category]
     const container = scrollContainerRef.current
@@ -191,7 +139,6 @@ export function PlannerFilterPane({ filters, onFiltersChange }: PlannerFilterPan
     })
   }
 
-  // Category display labels
   const categoryLabels: Record<FilterCategory, string> = {
     keywords: t('filterPane.keywords'),
     identity: t('filterPane.identity'),
@@ -202,7 +149,6 @@ export function PlannerFilterPane({ filters, onFiltersChange }: PlannerFilterPan
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      {/* Toggle trigger */}
       <CollapsibleTrigger className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer py-1">
         {t('filterPane.toggle')}
         {isOpen ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
@@ -210,7 +156,6 @@ export function PlannerFilterPane({ filters, onFiltersChange }: PlannerFilterPan
 
       <CollapsibleContent>
         <div className="mt-2 rounded-lg border border-border bg-card p-3 space-y-3">
-          {/* Row 1: Search input */}
           <Input
             type="text"
             placeholder={t('filterPane.searchPlaceholder')}
@@ -221,7 +166,6 @@ export function PlannerFilterPane({ filters, onFiltersChange }: PlannerFilterPan
             className="h-8 text-sm"
           />
 
-          {/* Row 2: Selected chips (always visible to preserve layout) */}
           <div className="flex flex-wrap items-center gap-1.5 min-h-[1.75rem]">
             <Badge
               variant="outline"
@@ -253,7 +197,6 @@ export function PlannerFilterPane({ filters, onFiltersChange }: PlannerFilterPan
             ))}
           </div>
 
-          {/* Category navigation buttons */}
           <div className="flex gap-1.5 flex-wrap">
             {FILTER_CATEGORIES.map((category) => (
               <button
@@ -272,10 +215,8 @@ export function PlannerFilterPane({ filters, onFiltersChange }: PlannerFilterPan
             ))}
           </div>
 
-          {/* Section content: scrollable area with category grids */}
           <div ref={scrollContainerRef} className="max-h-[30vh] overflow-y-auto p-0.5">
             <div className="space-y-4 pr-1.5">
-              {/* Keywords section (always rendered, no suspense) */}
               <FilterSection
                 ref={(el) => {
                   registerSection('keywords', el)
@@ -306,7 +247,6 @@ export function PlannerFilterPane({ filters, onFiltersChange }: PlannerFilterPan
                 </div>
               </FilterSection>
 
-              {/* Heavy sections (identity, ego, gift, themePack) — suspense-wrapped */}
               {isOpen && (
                 <Suspense
                   fallback={
@@ -335,10 +275,6 @@ export function PlannerFilterPane({ filters, onFiltersChange }: PlannerFilterPan
   )
 }
 
-// ============================================================================
-// HeavySections (inner, suspense-based)
-// ============================================================================
-
 interface HeavySectionsProps {
   searchQuery: string
   getItemsForCategory: (category: FilterCategory) => FilterItem[]
@@ -362,7 +298,6 @@ function HeavySections({
 }: HeavySectionsProps) {
   const { t } = useTranslation(['sinnerNames'])
 
-  // Suspense hooks — these suspend until data is loaded
   const identitySpec = useIdentityListSpec()
   const identityI18n = useIdentityListI18n()
   const egoSpec = useEGOListSpec()
@@ -372,7 +307,6 @@ function HeavySections({
   const themePackSpec = useThemePackListSpec()
   const themePackI18n = useThemePackListI18n()
 
-  // Build heavy FilterItem[] from loaded data
   const heavyItems: FilterItem[] = (() => {
     const items: FilterItem[] = []
 
@@ -419,14 +353,12 @@ function HeavySections({
     return items
   })()
 
-  // Report heavy items to parent so allItems/matchCounts update
   useEffect(() => {
     onItemsReady(heavyItems)
   }, [heavyItems, onItemsReady])
 
   return (
     <>
-      {/* Identity section (grouped by sinner) */}
       <FilterSection
         ref={(el) => {
           registerSection('identity', el)
@@ -451,7 +383,6 @@ function HeavySections({
         />
       </FilterSection>
 
-      {/* EGO section (grouped by sinner) */}
       <FilterSection
         ref={(el) => {
           registerSection('ego', el)
@@ -476,7 +407,6 @@ function HeavySections({
         />
       </FilterSection>
 
-      {/* EGO Gift section */}
       <FilterSection
         ref={(el) => {
           registerSection('gift', el)
@@ -507,7 +437,6 @@ function HeavySections({
         </div>
       </FilterSection>
 
-      {/* Theme Pack section */}
       <FilterSection
         ref={(el) => {
           registerSection('themePack', el)
@@ -541,14 +470,6 @@ function HeavySections({
   )
 }
 
-// ============================================================================
-// Subcomponents
-// ============================================================================
-
-/**
- * Filter section wrapper with title and visibility control
- */
-
 interface FilterSectionProps {
   title: string
   visible: boolean
@@ -569,10 +490,6 @@ const FilterSection = forwardRef<HTMLDivElement, FilterSectionProps>(function Fi
   )
 })
 
-/**
- * Grid of icon buttons grouped by sinner name.
- * Used for Identity and EGO categories.
- */
 interface SinnerGroupedGridProps {
   items: FilterItem[]
   isSelected: (id: string) => boolean
@@ -583,7 +500,6 @@ interface SinnerGroupedGridProps {
 function SinnerGroupedGrid({ items, isSelected, onToggle, renderIcon }: SinnerGroupedGridProps) {
   const { t } = useTranslation(['sinnerNames'])
 
-  // Group items by sinner, preserving SINNERS order
   const grouped = (() => {
     const byGroup = new Map<string, FilterItem[]>()
     for (const item of items) {
@@ -591,7 +507,6 @@ function SinnerGroupedGrid({ items, isSelected, onToggle, renderIcon }: SinnerGr
       if (!byGroup.has(group)) byGroup.set(group, [])
       byGroup.get(group)!.push(item)
     }
-    // Return in SINNERS order
     const result: { sinner: string; items: FilterItem[] }[] = []
     for (const sinner of SINNERS) {
       const sinnerItems = byGroup.get(sinner)

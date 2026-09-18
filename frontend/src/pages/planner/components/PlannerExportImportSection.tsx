@@ -44,7 +44,6 @@ import type { ImportError, ResolveCounts, ToastDescriptor } from '../lib/planner
 
 const MIME_TYPE = 'application/gzip'
 
-/** Stable empty list so a closed dialog keeps a single conflicts identity. */
 const NO_CONFLICTS: ConflictItem[] = []
 
 /**
@@ -61,10 +60,6 @@ async function attempt<T>(run: () => Promise<T>): Promise<Result<T, unknown>> {
   }
 }
 
-/**
- * What the section is doing. `awaitingChoice` and `resolving` hold the progress
- * the import reached, which stays on screen while the dialog is up.
- */
 type SectionState =
   | { k: 'idle' }
   | { k: 'exporting'; pct: number }
@@ -72,17 +67,12 @@ type SectionState =
   | { k: 'awaitingChoice'; pct: number; conflicts: ConflictItem[] }
   | { k: 'resolving'; pct: number; conflicts: ConflictItem[] }
 
-/**
- * Inner component that contains the export/import logic.
- * Must be wrapped in Suspense boundary.
- */
 function PlannerExportImportSectionContent() {
   const { t } = useTranslation(['common', 'planner'])
   const { listLocal, loadFromLocal, saveToLocal } = usePlannerStorage()
 
   const [state, setState] = useState<SectionState>({ k: 'idle' })
 
-  // File input ref
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const isProcessing = state.k !== 'idle'
@@ -110,20 +100,13 @@ function PlannerExportImportSectionContent() {
     }
   }
 
-  /**
-   * Release the file input so the same file can be picked again
-   */
   const clearFileInput = () => {
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
   }
 
-  /**
-   * Collect every stored planner, encode the file, and hand it to the browser
-   */
   const writeExportFile = async () => {
-    // Get all planner summaries
     const summaries = await listLocal()
 
     if (summaries.length === 0) {
@@ -131,7 +114,6 @@ function PlannerExportImportSectionContent() {
       return
     }
 
-    // Load full planner data in parallel batches
     const BATCH_SIZE = 10
     const planners: PlannerExportItem[] = []
 
@@ -177,9 +159,6 @@ function PlannerExportImportSectionContent() {
     showSuccess('common:exportImport.exportSuccess', { count: planners.length })
   }
 
-  /**
-   * Export all planners to a compressed .danteplanner file
-   */
   const handleExport = async () => {
     setState({ k: 'exporting', pct: 0 })
 
@@ -192,21 +171,13 @@ function PlannerExportImportSectionContent() {
     setState({ k: 'idle' })
   }
 
-  /**
-   * Report an import stage that rejected the file and stand the section down
-   */
   const failImport = (error: ImportError) => {
     showToast(importErrorToast(error))
     clearFileInput()
     setState({ k: 'idle' })
   }
 
-  /**
-   * Decode the picked file, partition it against the stored planners, and save
-   * the ones that collide with nothing
-   */
   const runImport = async (file: File) => {
-    // Read file as ArrayBuffer
     const arrayBuffer = await file.arrayBuffer()
 
     setState({ k: 'importing', pct: 10 })
@@ -243,7 +214,6 @@ function PlannerExportImportSectionContent() {
 
     setState({ k: 'importing', pct: 60 })
 
-    // Check for conflicts with existing planners
     const existingPlanners = await listLocal()
     const existingIds = new Set(existingPlanners.map((p) => p.id))
 
@@ -253,7 +223,6 @@ function PlannerExportImportSectionContent() {
     const nonConflicting: SaveablePlanner[] = [...fresh]
 
     for (const candidate of conflicting) {
-      // Load existing planner for conflict comparison
       const existing = await loadFromLocal(candidate.id)
       if (existing.ok && existing.value) {
         conflictItems.push({
@@ -262,14 +231,12 @@ function PlannerExportImportSectionContent() {
           serverPlanner: candidate.incoming, // "Server" will be relabeled to "Imported" in dialog
         })
       } else {
-        // Existing ID but failed to load - treat as non-conflicting
         nonConflicting.push(candidate.incoming)
       }
     }
 
     setState({ k: 'importing', pct: 80 })
 
-    // Save non-conflicting planners immediately
     let imported = 0
     let skipped = 0
     for (const planner of nonConflicting) {
@@ -281,14 +248,12 @@ function PlannerExportImportSectionContent() {
       }
     }
 
-    // Calculate actual progress based on success ratio
     const processed = imported + skipped + conflictItems.length
     const successRatio = processed > 0 ? (imported / processed) * 100 : 0
-    const pct = 80 + Math.round(successRatio * 0.2) // 80-100% based on success
+    const pct = 80 + Math.round(successRatio * 0.2)
 
     const counts = { imported, skipped, conflicts: conflictItems.length }
 
-    // Keep the section busy while the dialog is open; progress stays put
     if (counts.conflicts > 0) {
       setState({ k: 'awaitingChoice', pct, conflicts: conflictItems })
     } else {
@@ -303,23 +268,17 @@ function PlannerExportImportSectionContent() {
     }
   }
 
-  /**
-   * Handle file selection for import
-   */
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
 
-    // Reset file input for re-selection
     clearFileInput()
 
-    // Validate file extension
     if (!file.name.endsWith(EXPORT_FILE_EXTENSION)) {
       showErrorMessage('common:exportImport.invalidFileFormat')
       return
     }
 
-    // Validate file size to prevent memory exhaustion
     if (file.size > EXPORT_MAX_FILE_SIZE) {
       showErrorMessage('common:exportImport.fileTooLarge')
       return
@@ -336,9 +295,6 @@ function PlannerExportImportSectionContent() {
     }
   }
 
-  /**
-   * Write one resolved conflict to local storage, counting what each effect did
-   */
   const applyResolution = async (
     conflict: ConflictItem,
     resolution: ConflictResolution,
@@ -361,10 +317,8 @@ function PlannerExportImportSectionContent() {
     for (const effect of plan) {
       switch (effect.kind) {
         case 'keepLocal':
-          // Keep local — the local planner already exists, nothing to write
           break
         case 'adoptIncoming': {
-          // Use imported - save the imported planner
           const adopted = await saveToLocal(conflict.serverPlanner)
           if (adopted.ok) {
             saved++
@@ -380,7 +334,6 @@ function PlannerExportImportSectionContent() {
               ...conflict.serverPlanner.metadata,
               id: effect.metadata.id,
               title: sanitizePlannerTitle(effect.metadata.title),
-              // The original keeps the publication; a copy of it starts unpublished.
               published: false,
             },
           }
@@ -400,9 +353,6 @@ function PlannerExportImportSectionContent() {
     return { saved, errors }
   }
 
-  /**
-   * Handle conflict resolution from BatchConflictDialog
-   */
   const handleConflictResolve = async (resolutions: ConflictResolution[]) => {
     setState({ k: 'resolving', pct: progress, conflicts })
 
@@ -438,12 +388,6 @@ function PlannerExportImportSectionContent() {
     showToast(descriptor, descriptor.params(counts))
   }
 
-  /**
-   * Closing the dialog cancels the import's conflict step.
-   *
-   * The section owns a run, not a pending list: left in `awaitingChoice` behind a
-   * closed dialog it would refuse every later export and import.
-   */
   const handleConflictDismiss = () => {
     clearFileInput()
     setState({ k: 'idle' })
@@ -466,7 +410,6 @@ function PlannerExportImportSectionContent() {
         )}
       </p>
 
-      {/* Progress indicator */}
       {isProcessing && progress > 0 && (
         <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
           <div
@@ -476,7 +419,6 @@ function PlannerExportImportSectionContent() {
         </div>
       )}
 
-      {/* Action buttons */}
       <div className="flex gap-3">
         <Button variant="outline" onClick={handleExport} disabled={isProcessing}>
           {state.k === 'exporting'
@@ -494,7 +436,6 @@ function PlannerExportImportSectionContent() {
             : t('exportImport.import', 'Import')}
         </Button>
 
-        {/* Hidden file input */}
         <input
           ref={fileInputRef}
           type="file"
@@ -504,7 +445,6 @@ function PlannerExportImportSectionContent() {
         />
       </div>
 
-      {/* Conflict resolution dialog */}
       <BatchConflictDialog
         open={conflicts.length >= 1}
         conflicts={conflicts}
@@ -516,10 +456,6 @@ function PlannerExportImportSectionContent() {
   )
 }
 
-/**
- * Export/Import section with Suspense boundary.
- * Public component for use in SettingsPage.
- */
 export function PlannerExportImportSection() {
   return (
     <Suspense fallback={<PlannerExportImportSectionSkeleton />}>
@@ -528,9 +464,6 @@ export function PlannerExportImportSection() {
   )
 }
 
-/**
- * Loading skeleton for export/import section.
- */
 function PlannerExportImportSectionSkeleton() {
   return (
     <div className="space-y-4">

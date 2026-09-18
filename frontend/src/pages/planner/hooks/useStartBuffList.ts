@@ -29,13 +29,11 @@ function createI18nQueryOptions(version: MDVersion, language: string) {
   )
 }
 
-/** Start buff specs for one Mirror Dungeon version; suspends on initial load, not on language change */
 export function useStartBuffListSpec(version: MDVersion) {
   const { data } = useSuspenseQuery(createSpecQueryOptions(version))
   return data
 }
 
-/** Start buff names (localizeId -> text); suspends while loading */
 export function useStartBuffListI18n(version: MDVersion) {
   const { i18n } = useTranslation()
   const { data } = useSuspenseQuery(createI18nQueryOptions(version, i18n.language))

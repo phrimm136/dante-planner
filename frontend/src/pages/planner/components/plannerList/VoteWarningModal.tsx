@@ -11,18 +11,6 @@ interface VoteWarningModalProps extends ActionDialogControl {
   plannerId: string
 }
 
-/**
- * VoteWarningModal - Pre-vote confirmation dialog
- *
- * Warns users that votes are PERMANENT before they cast their first vote on a planner.
- * Shows once per planner (tracked via localStorage: `vote-warning-shown-${plannerId}`).
- *
- * @param open - Whether dialog is open
- * @param onOpenChange - Callback when open state changes
- * @param onConfirm - Callback when user clicks "I Understand"
- * @param voteDirection - Vote direction ('UP' or 'DOWN') to show appropriate message
- * @param plannerId - Planner ID for localStorage tracking
- */
 export function VoteWarningModal({
   open,
   onOpenChange,

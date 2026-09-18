@@ -19,9 +19,6 @@ import { useUserSettingsQuery } from '@/shared/userSettings'
 import { useMDUserFilters } from './hooks/useMDUserFilters'
 import { SECTION_STYLES } from '@/lib/constants'
 
-/**
- * Planner MD Detail Page - View a saved planner in guide or tracker mode
- */
 export default function PlannerMDDetailPage() {
   const { id } = useParams({ from: '/planner/md/$id' })
 
@@ -40,26 +37,20 @@ function PlannerDetailContent({ plannerId }: { plannerId: string }) {
   const { t } = useTranslation(['planner', 'common'])
   const navigate = useNavigate()
 
-  // Load planner from storage via Suspense query
   const planner = useSavedPlannerQuery(plannerId)
 
-  // Get auth state (personal planners are always owned by current user)
   const { data: user } = useAuthQuery()
   const isAuthenticated = user !== null
 
-  // Get sync setting
   const { data: userSettings } = useUserSettingsQuery()
   const syncEnabled = userSettings?.syncEnabled
 
-  // URL search params for list section
   const { category, page, search, setFilters } = useMDUserFilters()
 
-  // Handle not found
   if (!planner) {
     return <PlannerNotFound listPath="/planner/md" />
   }
 
-  // Validate planner type - viewer only supports Mirror Dungeon planners
   if (!isMDPlanner(planner)) {
     return (
       <div className="space-y-6 text-center py-12">
@@ -91,7 +82,6 @@ function PlannerDetailContent({ plannerId }: { plannerId: string }) {
 
   return (
     <div className="space-y-4">
-      {/* Header with status badge and edit action */}
       <PersonalPlannerHeader
         planner={planner}
         isAuthenticated={isAuthenticated}
@@ -99,20 +89,15 @@ function PlannerDetailContent({ plannerId }: { plannerId: string }) {
         onEdit={handleEdit}
       />
 
-      {/* Planner Viewer */}
       <PlannerViewer planner={planner} />
 
-      {/* Separator */}
       <div className="border-t border-border my-8" />
 
-      {/* Personal Planners List Section */}
       <div className={SECTION_STYLES.SPACING.section}>
-        {/* Toolbar: Search */}
         <div className="mb-4">
           <MDPlannerToolbar search={search} onSearchChange={(q) => setFilters({ q, page: 0 })} />
         </div>
 
-        {/* Category Filter Pills */}
         <div className="mb-6">
           <PlannerListFilterPills
             selectedCategory={category}
@@ -120,7 +105,6 @@ function PlannerDetailContent({ plannerId }: { plannerId: string }) {
           />
         </div>
 
-        {/* Planner List Grid */}
         <Suspense fallback={<PlannerGridSkeleton geometry={PLANNER_GEOMETRY} />}>
           <PersonalPlannerList
             category={category}

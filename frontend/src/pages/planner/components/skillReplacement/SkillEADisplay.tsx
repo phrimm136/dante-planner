@@ -22,12 +22,6 @@ const BADGE_STYLE: CSSProperties = {
 
 const BADGE_OFFSET = `-${cqw(SKILL_IMAGE_CARD.badgeOffset)}`
 
-/**
- * SkillEADisplay - Skill image with EA (Exchange Allowance) badge
- *
- * Shows the skill image (layers 1-4) with an EA count badge overlay.
- * Used in skill replacement section and exchange modal.
- */
 export function SkillEADisplay({
   identityId,
   skillSlot,
@@ -36,7 +30,6 @@ export function SkillEADisplay({
   ea,
   currentEA,
 }: SkillEADisplayProps) {
-  // Construct skill ID
   const skillId = identityId + (skillSlot + 1).toString().padStart(2, '0')
   const skillImagePath = getSkillImagePath(identityId, skillId)
 
@@ -49,7 +42,6 @@ export function SkillEADisplay({
         atkType={atkType}
       />
 
-      {/* Planned EA badge, upper-right */}
       <div
         className="absolute rounded-full bg-primary flex items-center justify-center"
         style={{ ...BADGE_STYLE, top: BADGE_OFFSET, right: BADGE_OFFSET }}
@@ -57,7 +49,6 @@ export function SkillEADisplay({
         <span className="font-bold text-primary-foreground">{ea}</span>
       </div>
 
-      {/* Current EA badge, lower-right */}
       {currentEA !== undefined && (
         <div
           className="absolute rounded-full bg-accent flex items-center justify-center"

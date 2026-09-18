@@ -18,11 +18,8 @@ import { START_BUFF_MINI_CARD, cqw, pct } from '../../lib/cardLayout'
 import { StartBuffMiniName } from './StartBuffName'
 
 interface StartBuffMiniCardProps {
-  /** Full buff ID including enhancement (e.g., 101, 202, 303) */
   buffId: number
-  /** Localized display name (e.g., "Starlight of Eden") */
   displayName: string
-  /** Mirror Dungeon version (from usePlannerConfig) */
   mdVersion: number
 }
 
@@ -36,11 +33,6 @@ const ICON_STYLE: CSSProperties = {
   height: pct(START_BUFF_MINI_CARD.icon),
 }
 
-/**
- * Compact summary card for a selected start buff, filling the width its slot gives it.
- * Shows buff icon (upper half), name with enhancement suffix (lower half),
- * enhancement indicator (top-right), and hover highlight overlay.
- */
 export function StartBuffMiniCard({ buffId, displayName, mdVersion }: StartBuffMiniCardProps) {
   const baseId = getBaseIdFromBuffId(buffId)
   const enhancement = getEnhancementFromBuffId(buffId)
@@ -49,19 +41,16 @@ export function StartBuffMiniCard({ buffId, displayName, mdVersion }: StartBuffM
 
   return (
     <div className="group relative w-full" style={ROOT_STYLE}>
-      {/* Background image */}
       <img
         src={getStartBuffMiniPath(mdVersion)}
         alt=""
         className="absolute inset-0 w-full h-full object-contain"
       />
 
-      {/* Content container - flex column for vertical layout */}
       <div
         className="absolute inset-0 flex flex-col"
         style={{ gap: cqw(START_BUFF_MINI_CARD.rowGap) }}
       >
-        {/* Upper half: Buff icon (centered) */}
         <div
           className="flex-1 flex items-center justify-center"
           style={{ paddingTop: cqw(START_BUFF_MINI_CARD.iconPaddingTop) }}
@@ -74,7 +63,6 @@ export function StartBuffMiniCard({ buffId, displayName, mdVersion }: StartBuffM
           />
         </div>
 
-        {/* Lower half: Name + enhancement suffix */}
         <div
           className="flex-1 flex items-center justify-center overflow-hidden"
           style={{ paddingInline: cqw(START_BUFF_MINI_CARD.namePaddingX) }}
@@ -85,7 +73,6 @@ export function StartBuffMiniCard({ buffId, displayName, mdVersion }: StartBuffM
         </div>
       </div>
 
-      {/* Enhancement indicator - top-right */}
       <div
         style={{
           transform: `scale(${String(START_BUFF_MINI_CARD.enhancementScale)}) translate(${cqw(START_BUFF_MINI_CARD.enhancementTranslateX)}, ${cqw(START_BUFF_MINI_CARD.enhancementTranslateY)})`,
@@ -94,7 +81,6 @@ export function StartBuffMiniCard({ buffId, displayName, mdVersion }: StartBuffM
         <EGOGiftEnhancementIndicator enhancement={enhancement} />
       </div>
 
-      {/* Hover overlay */}
       <img
         src={getStartBuffMiniHighlightPath(mdVersion)}
         alt=""

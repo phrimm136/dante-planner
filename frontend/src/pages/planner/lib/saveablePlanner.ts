@@ -11,55 +11,34 @@ import type {
   PlannerStatus,
 } from '../types/PlannerTypes'
 
-/**
- * Planner state interface matching PlannerMDNewPage state structure
- * Uses Set types for in-memory representation
- */
 export interface PlannerState {
-  /** Planner title */
   title: string
-  /** MD category (5F, 10F, 15F) */
   category: MDCategory
-  /** Selected planner keywords */
   selectedKeywords: Set<string>
-  /** Selected start buff IDs */
   selectedBuffIds: Set<number>
-  /** Currently selected gift keyword filter */
   selectedGiftKeyword: string | null
-  /** Selected start gift IDs */
   selectedGiftIds: Set<EncodedGiftId>
-  /** Observation gift IDs */
   observationGiftIds: Set<EncodedGiftId>
-  /** Comprehensive gift IDs with enhancement encoding */
   comprehensiveGiftIds: Set<EncodedGiftId>
-  /** Equipment configuration per sinner */
   equipment: Record<string, SinnerEquipment>
-  /** Deployment order as array of sinner indices */
   deploymentOrder: number[]
-  /** Skill EA state per sinner */
   skillEAState: Record<string, SkillEAState>
-  /** Floor theme selections (has Set inside) */
   floorSelections: FloorThemeSelection[]
-  /** Section notes keyed by section identifier */
   sectionNotes: Record<string, NoteContent>
 }
 
-/** Everything a `SaveablePlanner` needs that is not derived from the editor state. */
 export interface SaveablePlannerInput {
   state: PlannerState
   plannerId: string
   schemaVersion: number
   contentVersion: number
-  /** The editor state carries an MD category, so only the MD branch is buildable. */
   plannerType: MDConfig['type']
-  /** Original creation timestamp, or null for a planner being created now. */
   existingCreatedAt: string | null
   existingSyncVersion: number
   published: boolean
   status: PlannerStatus
 }
 
-/** The Set-valued half of the editor state, as arrays. */
 function serializedSets(state: PlannerState) {
   return serializeSets({
     selectedKeywords: state.selectedKeywords,
@@ -71,16 +50,12 @@ function serializedSets(state: PlannerState) {
   })
 }
 
-/**
- * Serialize PlannerState to SaveablePlanner format
- */
 export function createSaveablePlanner(input: SaveablePlannerInput): MDSaveablePlanner {
   const { state } = input
   const now = new Date().toISOString()
 
   const serialized = serializedSets(state)
 
-  // Convert NoteContent to SerializableNoteContent
   const serializableNotes: Record<
     string,
     { content: (typeof state.sectionNotes)[string]['content'] }
@@ -119,9 +94,6 @@ export function createSaveablePlanner(input: SaveablePlannerInput): MDSaveablePl
   return { metadata, config: { type: input.plannerType, category: state.category }, content }
 }
 
-/**
- * Deep comparison for dirty state detection
- */
 export function stateToComparableString(state: PlannerState): string {
   return JSON.stringify({
     title: state.title,

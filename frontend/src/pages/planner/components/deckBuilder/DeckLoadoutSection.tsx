@@ -22,10 +22,6 @@ interface DeckLoadoutSectionProps {
   onResetOrder: () => void
 }
 
-/**
- * What the current deck holds: the equipped identities or EGOs for the active
- * entity mode, the deployment status, and the deck-wide commands.
- */
 export function DeckLoadoutSection({
   entityMode,
   equipment,
@@ -58,7 +54,6 @@ export function DeckLoadoutSection({
       ) : (
         <CompactEgoGrid equipment={equipment} egoAffinityMap={egoAffinityMap} />
       )}
-      {/* Status + Action Bar row */}
       <div className="mt-3 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
         <StatusViewer deckState={deckState} ownedGiftIds={ownedGiftIds} />
         <DeckBuilderActionBar onImport={onImport} onExport={onExport} onResetOrder={onResetOrder} />

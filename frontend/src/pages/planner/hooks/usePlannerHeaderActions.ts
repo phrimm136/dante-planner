@@ -15,25 +15,17 @@ import { usePlannerConfig } from './usePlannerConfig'
 
 import type { SaveablePlanner } from '../types/PlannerTypes'
 
-/** Delay before leaving, so the dialog's close animation is not cut off. */
 const NAVIGATE_AFTER_DELETE_MS = 150
 
 interface UsePlannerHeaderActionsOptions {
   plannerId: string | undefined
-  /** List route this header navigates back to, and lands on after a delete. */
   listRoute: '/planner/md' | '/planner/md/gesellschaft'
-  /** Planner the "apply latest mirror" upgrade rewrites, when one is available. */
   plannerToUpdate: SaveablePlanner | undefined
   isAuthenticated: boolean
   syncEnabled?: boolean | null
-  /** Overrides the built-in delete when the page owns deletion. */
   onDelete?: () => void
 }
 
-/**
- * Back navigation, deletion and the content-version upgrade — the actions both
- * planner detail headers offer, with the dialog state they drive.
- */
 export function usePlannerHeaderActions({
   plannerId,
   listRoute,
@@ -87,8 +79,6 @@ export function usePlannerHeaderActions({
       else showAppError(written.error)
     }
 
-    // Local metadata cannot tell a never-synced row from one synced once: both carry the
-    // initial syncVersion.
     if (!isAuthenticated) {
       void tombstoneThenCleanup()
       return
@@ -118,13 +108,8 @@ export function usePlannerHeaderActions({
       }
 
       if (isAuthenticated && (syncEnabled === true || !!plannerToUpdate.metadata.published)) {
-        // The server's copy is persisted under the version its ack assigned;
-        // keeping the pre-sync version would make every later non-forced
-        // upload conflict (409).
         const synced = await syncAdapter.syncToServer(updatedPlanner)
 
-        // A local draft keeps its own bytes: only the stamps move — the mirror version, and
-        // the acked syncVersion so this upgrade's own bump cannot 409 the next manual save.
         const localRead = await loadFromLocal(plannerId)
         const localDraft =
           localRead.ok && localRead.value?.metadata.status === 'draft' ? localRead.value : null
@@ -141,8 +126,6 @@ export function usePlannerHeaderActions({
           await saveToLocal(acknowledgedCopy(synced))
         }
       } else {
-        // Local-only save (personal, sync disabled / unauthenticated)
-        // syncVersion unchanged — server-assigned, must not drift without server confirmation
         await saveToLocal(updatedPlanner)
       }
 

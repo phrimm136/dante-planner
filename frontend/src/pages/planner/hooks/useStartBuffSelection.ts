@@ -7,50 +7,14 @@ import type { StartBuff, StartBuffI18n, BattleKeywords } from '@/shared/gameText
 import { deriveEnhancements, getBaseIdFromBuffId, createBuffId } from '@/shared/gameText'
 import type { EnhancementLevel } from '@/shared/gameText'
 
-/**
- * Return type for useStartBuffSelection hook
- */
 export interface UseStartBuffSelectionResult {
-  /** All buffs for the current MD version */
   buffs: StartBuff[]
-  /** i18n translations */
   i18n: StartBuffI18n
-  /** Battle keywords for tooltip display */
   battleKeywords: BattleKeywords
-  /** Buffs to display (base buffs with current enhancement level applied) */
   displayBuffs: StartBuff[]
-  /** Handler for buff selection/deselection */
   handleSelect: (buffId: number, selected: boolean) => void
 }
 
-/**
- * Hook that provides start buff selection logic
- * Encapsulates displayBuffs calculation and handleSelect behavior
- *
- * @param mdVersion - Mirror Dungeon version (5 or 6)
- * @param selectedBuffIds - Currently selected buff IDs
- * @param onSelectionChange - Callback when selection changes
- *
- * @example
- * ```tsx
- * function BuffSelector({ mdVersion, selectedBuffIds, onSelectionChange }) {
- *   const { displayBuffs, handleSelect, buffs, i18n, battleKeywords } =
- *     useStartBuffSelection(mdVersion, selectedBuffIds, onSelectionChange)
- *
- *   return displayBuffs.map(buff => (
- *     <StartBuffCard
- *       key={buff.baseId}
- *       buff={buff}
- *       allBuffs={buffs}
- *       i18n={i18n}
- *       battleKeywords={battleKeywords}
- *       isSelected={selectedBuffIds.has(Number(buff.id))}
- *       onSelect={handleSelect}
- *     />
- *   ))
- * }
- * ```
- */
 export function useStartBuffSelection(
   mdVersion: MDVersion,
   selectedBuffIds: Set<number>,
@@ -76,7 +40,6 @@ export function useStartBuffSelection(
 
       const newSelection = new Set(selectedBuffIds)
 
-      // Remove any existing selection for this base buff (any enhancement level)
       for (let level = 0; level <= 2; level++) {
         newSelection.delete(createBuffId(baseId, level as EnhancementLevel))
       }

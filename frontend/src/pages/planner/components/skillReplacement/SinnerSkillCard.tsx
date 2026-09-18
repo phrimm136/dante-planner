@@ -40,13 +40,6 @@ const BADGE_OFFSET = `-${cqw(SINNER_SKILL_CARD.badgeOffset)}`
 
 const ICON_SIZE = cqw(SINNER_SKILL_CARD.atkIcon)
 
-/**
- * SinnerSkillCard - Clickable card showing identity and skill info with EA
- *
- * Layout (vertical):
- * - Identity image with uptie frame (top)
- * - Skill row with attack type icons on affinity-colored backgrounds + EA badges (bottom)
- */
 export function SinnerSkillCard({
   identityId,
   uptie,
@@ -77,7 +70,6 @@ export function SinnerSkillCard({
       )}
       style={ROOT_STYLE}
     >
-      {/* Identity image */}
       <div
         className="relative"
         style={{
@@ -100,7 +92,6 @@ export function SinnerSkillCard({
         </div>
       </div>
 
-      {/* Skill Info Row - atkType icon on affinity background with EA badge */}
       <div className="flex" style={{ gap: cqw(SINNER_SKILL_CARD.skillGap) }}>
         {OFFENSIVE_SKILL_SLOTS.map((slot) => {
           const affinity = skillInfos[slot].attributeType
@@ -130,14 +121,12 @@ export function SinnerSkillCard({
                   <div style={{ width: ICON_SIZE, height: ICON_SIZE }} />
                 )}
               </div>
-              {/* Planned EA badge, upper-right */}
               <div
                 className="absolute rounded-full bg-primary flex items-center justify-center"
                 style={{ ...BADGE_STYLE, top: BADGE_OFFSET, right: BADGE_OFFSET }}
               >
                 <span className="font-bold text-primary-foreground">{ea}</span>
               </div>
-              {/* Current EA badge, lower-right — tracker mode only */}
               {currentEA !== undefined && (
                 <div
                   className="absolute rounded-full bg-accent flex items-center justify-center"

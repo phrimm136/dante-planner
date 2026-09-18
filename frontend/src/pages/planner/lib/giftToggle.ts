@@ -3,26 +3,11 @@ import { buildSelectionLookup, encodeGiftSelection, getCascadeIngredients } from
 import type { EGOGiftSpec } from '@/pages/egoGift'
 import type { EGOGiftId, EncodedGiftId, EnhancementLevel } from '@/shared/gameData'
 
-/** What the toggle cannot read off the selection itself. */
 export interface GiftToggleOptions {
-  /** Gift specs keyed by base gift id, read for the recipe cascade. */
   specById: ReadonlyMap<string, EGOGiftSpec>
-  /**
-   * Whether a cascaded ingredient may join the selection. A selector that can
-   * reach every gift leaves it out; one restricted to a theme pack supplies it.
-   */
   canCascade?: (ingredientId: EGOGiftId) => boolean
 }
 
-/**
- * Select a gift at an enhancement level, or drop it when that level is already
- * the selected one.
- *
- * Selecting a gift nothing has selected yet also selects the ingredients its
- * recipe fuses, so the selection carries what building it consumes. Changing the
- * enhancement of a selected gift cascades nothing: its ingredients were settled
- * when it was first selected, and re-adding them would undo a later deselection.
- */
 export function applyGiftToggle(
   selected: ReadonlySet<EncodedGiftId>,
   giftId: EGOGiftId,

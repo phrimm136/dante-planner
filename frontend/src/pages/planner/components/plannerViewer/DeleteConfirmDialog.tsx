@@ -6,28 +6,11 @@ import {
 } from '@/components/feedback/ConfirmActionDialog'
 
 interface DeleteConfirmDialogProps extends ActionDialogControl {
-  /** ID of the planner to delete */
   plannerId: string
-  /** Title of the planner to delete (for display) */
   plannerTitle: string
-  /** Callback when user confirms deletion */
   onConfirm: () => void
 }
 
-/**
- * Confirmation dialog for planner deletion.
- * Warns user that deletion is permanent.
- *
- * @example
- * <DeleteConfirmDialog
- *   open={showDeleteDialog}
- *   onOpenChange={setShowDeleteDialog}
- *   plannerId={planner.id}
- *   plannerTitle={planner.title}
- *   onConfirm={handleDelete}
- *   isPending={deleteMutation.isPending}
- * />
- */
 export function DeleteConfirmDialog({
   open,
   onOpenChange,

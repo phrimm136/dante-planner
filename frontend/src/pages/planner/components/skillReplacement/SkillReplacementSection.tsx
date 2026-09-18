@@ -15,20 +15,12 @@ import type { SinnerEquipment, SkillEAState, SkillInfo } from '../../types/DeckT
 export interface SkillReplacementSectionProps {
   equipment: Record<string, SinnerEquipment>
   plannedEAState: Record<string, SkillEAState>
-  /** Current EA state for tracker mode (shows difference from planned) */
   currentEAState?: Record<string, SkillEAState>
-  /** Absent in read-only surfaces, which never open the exchange modal. */
   setSkillEAState?: (state: Record<string, SkillEAState>) => void
   readOnly?: boolean
   onViewNotes?: () => void
 }
 
-/**
- * SkillReplacementSection - Section for skill EA exchange
- *
- * Displays a 12-sinner responsive grid. Clicking a sinner opens the exchange modal.
- * Fetches identity data internally for skill attribute/attack type display.
- */
 export function SkillReplacementSection({
   equipment,
   plannedEAState,
@@ -39,19 +31,15 @@ export function SkillReplacementSection({
 }: SkillReplacementSectionProps) {
   const { t } = useTranslation(['planner', 'common'])
 
-  // Fetch identity data internally
   const identitySpec = useIdentityListSpec()
 
-  // Modal state
   const [selectedSinner, setSelectedSinner] = useState<string | null>(null)
 
   const { gridStyle, mobileScale } = useSkillReplacementLayout()
 
-  // Get skill infos for a sinner's equipped identity from spec data
   const getSkillInfos = (identityId: IdentityId): [SkillInfo, SkillInfo, SkillInfo] => {
     const spec = identitySpec[identityId]
     if (!spec) {
-      // Default fallback for missing identity
       return [
         { attributeType: 'NEUTRAL' },
         { attributeType: 'NEUTRAL' },
@@ -66,7 +54,6 @@ export function SkillReplacementSection({
     ]
   }
 
-  // Handle exchange: transfer 1 EA from source to target
   const handleExchange = (
     sinnerCode: string,
     sourceSlot: OffensiveSkillSlot,
@@ -86,7 +73,6 @@ export function SkillReplacementSection({
     })
   }
 
-  // Handle reset: restore EA to defaults (3/2/1)
   const handleReset = (sinnerCode: string) => {
     setSkillEAState?.({
       ...plannedEAState,
@@ -94,7 +80,6 @@ export function SkillReplacementSection({
     })
   }
 
-  // Get current modal data (selectedSinner is now a sinner code)
   const selectedSinnerEquipment = selectedSinner ? equipment[selectedSinner] : null
   const selectedIdentityId = selectedSinnerEquipment?.identity.id
   const selectedSinnerName = selectedSinner ? SINNERS[parseInt(selectedSinner, 10) - 1] : undefined
@@ -104,7 +89,6 @@ export function SkillReplacementSection({
       title={t('pages.plannerMD.skillReplacement.title')}
       {...(onViewNotes !== undefined && { onViewNotes })}
     >
-      {/* Sinner Grid - Responsive: 6->4->3->2 columns */}
       <div className="grid mx-auto" style={gridStyle}>
         {SINNERS.map((_, index) => {
           const sinnerCode = String(index + 1)
@@ -136,7 +120,6 @@ export function SkillReplacementSection({
         })}
       </div>
 
-      {/* Exchange Modal - Don't render when readOnly */}
       {!readOnly && selectedSinner && selectedIdentityId && selectedSinnerName && (
         <SkillExchangeModal
           open={!!selectedSinner}
@@ -158,13 +141,11 @@ export function SkillReplacementSection({
   )
 }
 
-/** Props a store-bound caller supplies; deck and planned EA come from the store. */
 export type StoreBoundSkillReplacementSectionProps = Omit<
   SkillReplacementSectionProps,
   'equipment' | 'plannedEAState' | 'setSkillEAState'
 >
 
-/** Renders the section against the deck and skill EA held by the planner editor store. */
 export function StoreBoundSkillReplacementSection(props: StoreBoundSkillReplacementSectionProps) {
   const equipment = usePlannerEditorStore((s) => s.equipment)
   const plannedEAState = usePlannerEditorStore((s) => s.skillEAState)

@@ -6,22 +6,9 @@ import {
 } from '@/components/feedback/ConfirmActionDialog'
 
 interface ApplyLatestMirrorDialogProps extends ActionDialogControl {
-  /** Callback when user confirms */
   onConfirm: () => void
 }
 
-/**
- * Confirmation dialog for applying the latest Mirror Dungeon content version.
- * Warns user that the action is permanent.
- *
- * @example
- * <ApplyLatestMirrorDialog
- *   open={showDialog}
- *   onOpenChange={setShowDialog}
- *   onConfirm={handleApply}
- *   isPending={isApplying}
- * />
- */
 export function ApplyLatestMirrorDialog({
   open,
   onOpenChange,

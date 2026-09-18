@@ -76,25 +76,15 @@ function reconstructEgoId(sinnerIndex: number, entityIndex: number): EGOId {
   return EGOIdSchema.parse(`2${sinnerPart}${entityPart}`)
 }
 
-/**
- * Convert a number to a binary string with specified bit length
- */
 function toBinary(num: number, bits: number): string {
   return num.toString(2).padStart(bits, '0')
 }
 
-/**
- * Convert a binary string to a number
- */
 function fromBinary(binary: string): number {
   return parseInt(binary, 2)
 }
 
-/**
- * Convert binary string to Uint8Array
- */
 function binaryToBytes(binary: string): Uint8Array {
-  // Pad to multiple of 8
   const padded = binary.padEnd(Math.ceil(binary.length / 8) * 8, '0')
   const bytes = new Uint8Array(padded.length / 8)
   for (let i = 0; i < bytes.length; i++) {
@@ -103,9 +93,6 @@ function binaryToBytes(binary: string): Uint8Array {
   return bytes
 }
 
-/**
- * Convert Uint8Array to binary string
- */
 function bytesToBinary(bytes: Uint8Array): string {
   let binary = ''
   for (const byte of bytes) {
@@ -114,9 +101,6 @@ function bytesToBinary(bytes: Uint8Array): string {
   return binary
 }
 
-/**
- * Encode equipment and deployment order into a deck code
- */
 export function encodeDeckCode(
   equipment: Record<string, SinnerEquipment>,
   deploymentOrder: number[],
@@ -127,15 +111,12 @@ export function encodeDeckCode(
     const sinnerCode = String(sinnerIndex + 1)
     const sinnerEquipment = equipment[sinnerCode]
 
-    // Identity ID (8 bits, 1-indexed)
     const identityIndex = sinnerEquipment ? getEntityIndex(sinnerEquipment.identity.id) : 0
     binary += toBinary(identityIndex, 8)
 
-    // Deployment order (4 bits, 0=not deployed, 1-12=position)
     const deploymentPosition = deploymentOrder.indexOf(sinnerIndex) + 1
     binary += toBinary(deploymentPosition, 4)
 
-    // EGO slots (ZAYIN, TETH, HE, WAW, ALEPH)
     for (const { rank, bits } of EGO_SLOTS) {
       const ego = sinnerEquipment?.egos[rank]
       const egoIndex = ego ? getEntityIndex(ego.id) : 0
@@ -143,13 +124,10 @@ export function encodeDeckCode(
     }
   }
 
-  // Pad to 560 bits
   binary = binary.padEnd(TOTAL_BITS, '0')
 
-  // Convert to bytes
   const bytes = binaryToBytes(binary)
 
-  // First base64 encode
   const firstBase64 = btoa(String.fromCharCode(...bytes))
 
   // pako 3 ignores a `header` option on the one-shot gzip(), so the OS byte is
@@ -157,15 +135,11 @@ export function encodeDeckCode(
   const compressed = gzip(firstBase64)
   compressed[GZIP_OS_BYTE_OFFSET] = GZIP_OS_TOPS20
 
-  // Second base64 encode
   const secondBase64 = btoa(String.fromCharCode(...compressed))
 
   return secondBase64
 }
 
-/**
- * Decode a deck code into equipment and deployment order
- */
 export function decodeDeckCode(
   code: string,
   identitySpecMap: Record<string, unknown>,
@@ -183,53 +157,43 @@ export function decodeDeckCode(
     }
   }
 
-  // Second base64 decode
   const compressedStr = atob(code)
   const compressed = new Uint8Array(compressedStr.length)
   for (let i = 0; i < compressedStr.length; i++) {
     compressed[i] = compressedStr.charCodeAt(i)
   }
 
-  // Gzip decompress
   const firstBase64 = ungzip(compressed, { toText: true })
 
-  // First base64 decode
   const bytesStr = atob(firstBase64)
   const bytes = new Uint8Array(bytesStr.length)
   for (let i = 0; i < bytesStr.length; i++) {
     bytes[i] = bytesStr.charCodeAt(i)
   }
 
-  // Convert to binary
   const binary = bytesToBinary(bytes)
 
-  // Parse equipment and deployment order
   const equipment: Record<string, SinnerEquipment> = {}
   const deploymentMap: { position: number; sinnerIndex: number }[] = []
 
   for (let sinnerIndex = 0; sinnerIndex < 12; sinnerIndex++) {
     const sinnerCode = String(sinnerIndex + 1)
-    const sinnerName = SINNERS[sinnerIndex] // For display in warnings
+    const sinnerName = SINNERS[sinnerIndex]
     const offset = sinnerIndex * BITS_PER_SINNER
 
-    // Identity ID (8 bits)
     const identityIndex = fromBinary(binary.slice(offset, offset + 8))
 
-    // Deployment order (4 bits)
     const deploymentPosition = fromBinary(binary.slice(offset + 8, offset + 12))
     if (deploymentPosition > 0) {
       deploymentMap.push({ position: deploymentPosition, sinnerIndex })
     }
 
-    // Reconstruct identity
     const identityId = reconstructIdentityId(sinnerIndex, identityIndex)
 
-    // Validate identity
     if (identityIndex > 0 && !identitySpecMap[identityId]) {
       warnings.push(`Invalid identity ID ${identityId} for ${sinnerName}`)
     }
 
-    // Parse EGO slots
     const egos: SinnerEquipment['egos'] = {}
     let egoOffset = offset + 12
 
@@ -240,7 +204,6 @@ export function decodeDeckCode(
       if (egoIndex > 0) {
         const egoId = reconstructEgoId(sinnerIndex, egoIndex)
 
-        // Validate EGO
         if (!egoSpecMap[egoId]) {
           warnings.push(`Invalid EGO ID ${egoId} for ${sinnerName}`)
         } else {
@@ -252,7 +215,6 @@ export function decodeDeckCode(
       }
     }
 
-    // Only set equipment if identity is valid
     if (identityIndex > 0 && identitySpecMap[identityId]) {
       equipment[sinnerCode] = {
         identity: {
@@ -263,7 +225,6 @@ export function decodeDeckCode(
         egos,
       }
     } else if (identityIndex > 0) {
-      // Invalid identity, use default
       const defaultIdentityId = reconstructIdentityId(sinnerIndex, 1)
       equipment[sinnerCode] = {
         identity: {
@@ -274,7 +235,6 @@ export function decodeDeckCode(
         egos,
       }
     } else {
-      // No identity specified, use default
       const defaultIdentityId = reconstructIdentityId(sinnerIndex, 1)
       const defaultEgoId = reconstructEgoId(sinnerIndex, 1)
       equipment[sinnerCode] = {
@@ -293,7 +253,6 @@ export function decodeDeckCode(
     }
   }
 
-  // Sort deployment order by position
   deploymentMap.sort((a, b) => a.position - b.position)
   const deploymentOrder = deploymentMap.map((d) => d.sinnerIndex)
 
@@ -304,26 +263,20 @@ export function decodeDeckCode(
   }
 }
 
-/**
- * Validate a deck code string
- */
 export function validateDeckCode(code: string): ValidationResult {
   if (code.length > DECK_CODE_MAX_LENGTH) {
     return { isValid: false, warnings: ['Invalid deck code format'] }
   }
 
   try {
-    // Second base64 decode
     const compressedStr = atob(code)
     const compressed = new Uint8Array(compressedStr.length)
     for (let i = 0; i < compressedStr.length; i++) {
       compressed[i] = compressedStr.charCodeAt(i)
     }
 
-    // Gzip decompress
     const firstBase64 = ungzip(compressed, { toText: true })
 
-    // First base64 decode
     atob(firstBase64)
 
     return { isValid: true, warnings: [] }

@@ -17,38 +17,12 @@ import { categoryBadgeStyle } from '../../lib/plannerBadges'
 import type { PublicPlanner } from '../../types/PlannerListTypes'
 
 interface PublishedPlannerCardProps {
-  /** Planner data to display */
   planner: PublicPlanner
-  /** Whether to show bookmark indicator (only in community view for logged-in users) */
   showBookmark?: boolean
-  /** Optional context menu handler */
   onContextMenu?: (e: React.MouseEvent) => void
-  /** Additional className */
   className?: string
 }
 
-/**
- * Pure view-only card component for displaying planner summary.
- * Does NOT include interactive logic (Link, onClick, etc.)
- * Parent component is responsible for wrapping with Link or handling clicks.
- *
- * Status badge logic (determined by parent):
- * - null/undefined = Normal/synced (no badge)
- * - DRAFT = planner.metadata.status === 'draft' or never manually saved
- * - UNSYNCED = authenticated + syncEnabled + local changes not pushed
- * - UNPUBLISHED = published + local differs from server version
- *
- * @example
- * // In PlannerList
- * <Link to="/planner/md/gesellschaft/$id" params={{ id: planner.id }}>
- *   <PublishedPlannerCard planner={planner} showBookmark={isAuthenticated} />
- * </Link>
- *
- * // With context menu
- * <PlannerCardContextMenu planner={planner}>
- *   <PublishedPlannerCard planner={planner} />
- * </PlannerCardContextMenu>
- */
 export function PublishedPlannerCard({
   planner,
   showBookmark = false,
@@ -70,7 +44,6 @@ export function PublishedPlannerCard({
     isBookmarked,
   } = planner
 
-  // Limit displayed keywords (handle nullable)
   const keywords = selectedKeywords ?? []
   const displayedKeywords = keywords.slice(0, PLANNER_LIST.MAX_KEYWORDS_DISPLAY)
   const hasMoreKeywords = keywords.length > PLANNER_LIST.MAX_KEYWORDS_DISPLAY
@@ -83,9 +56,7 @@ export function PublishedPlannerCard({
       )}
       onContextMenu={onContextMenu}
     >
-      {/* Top row: Floor badge + keywords (left), indicator (right) */}
       <div className="flex items-center justify-between gap-2 mb-2">
-        {/* Left: Floor badge + keywords inline */}
         <div className="flex items-center gap-2 flex-wrap min-w-0">
           <span
             className="px-2 py-0.5 text-xs font-medium rounded shrink-0 whitespace-nowrap"
@@ -94,7 +65,6 @@ export function PublishedPlannerCard({
             <MdCategoryLabel category={category} />
           </span>
 
-          {/* Keywords (icons inline with floor badge) */}
           {displayedKeywords.map((keyword) => (
             <img
               key={keyword}
@@ -110,7 +80,6 @@ export function PublishedPlannerCard({
           )}
         </div>
 
-        {/* Right: Indicator (reserve space for layout stability) */}
         <div className="shrink-0 min-w-[1rem] flex justify-end">
           {upvotes >= RECOMMENDED_THRESHOLD && <Star className={cn('size-4', STAR_ICON_CLASS)} />}
           {showBookmark && isBookmarked && (
@@ -119,39 +88,28 @@ export function PublishedPlannerCard({
         </div>
       </div>
 
-      {/* Title (text-sm for consistency with PersonalPlannerCard) */}
       <h3 className="line-clamp-2 text-sm font-medium min-h-[2.5rem] mb-2">{title}</h3>
 
-      {/* Stats row */}
       <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
-        {/* Upvotes */}
         <span className={SECTION_STYLES.LAYOUT.rowTight}>
           <ThumbsUp className="size-3" />
           {upvotes}
         </span>
 
         {/* Downvotes - TODO: Add when backend supports it */}
-        {/* <span className={SECTION_STYLES.LAYOUT.rowTight}>
-          <ThumbsDown className="size-3" />
-          {downvotes}
-        </span> */}
 
-        {/* Views */}
         <span className={SECTION_STYLES.LAYOUT.rowTight}>
           <Eye className="size-3" />
           {viewCount}
         </span>
 
-        {/* Comments */}
         <span className={SECTION_STYLES.LAYOUT.rowTight}>
           <MessageSquare className="size-3" />
           {commentCount}
         </span>
       </div>
 
-      {/* Date & Author */}
       <div className="flex items-center justify-between text-xs text-muted-foreground">
-        {/* formatCompactDate: <24h shows HH:mm, >=24h shows MM/DD */}
         <span className={SECTION_STYLES.LAYOUT.rowTight}>
           <Clock className="size-3" />
           {createdAt ? formatCompactDate(createdAt) : '-'}

@@ -23,44 +23,31 @@ interface EGOGiftObservationEditPaneProps {
   mdVersion: number
 }
 
-/**
- * Dialog for editing EGO Gift Observation selection
- * Desktop: 9:1 grid (selection list left, selected gifts right)
- * Mobile: stacked layout
- * Local filter state resets on dialog close
- * Suspends while loading - wrap in Suspense boundary
- */
 export function EGOGiftObservationEditPane({
   open,
   onOpenChange,
   mdVersion,
 }: EGOGiftObservationEditPaneProps) {
-  // Store state
   const selectedGiftIds = usePlannerEditorStore((s) => s.observationGiftIds)
   const setObservationGiftIds = usePlannerEditorStore((s) => s.setObservationGiftIds)
   const comprehensiveGiftIds = usePlannerEditorStore((s) => s.comprehensiveGiftIds)
   const setComprehensiveGiftIds = usePlannerEditorStore((s) => s.setComprehensiveGiftIds)
   const { t } = useTranslation(['planner', 'common'])
 
-  // Load observation data (suspends while loading)
   const { data: observationData } = useEGOGiftObservationData(mdVersion)
   const spec = useEGOGiftListSpec()
   const i18n = useEGOGiftListI18n()
 
-  // LOCAL filter states
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
   const [searchQuery, setSearchQuery] = useState('')
   const [sortMode, setSortMode] = useState<SortMode>('tier-first')
 
-  // Merge spec and i18n into EGOGiftEntity array
   const gifts: EGOGiftEntity[] = (() => {
     return Object.entries(spec).map(([id, entry]) => toEGOGiftEntity(id, entry, i18n[id] || id))
   })()
 
-  // Sort gifts (apply giftIdFilter + sort)
   const sortedGifts = (() => {
     let filtered = gifts
-    // Apply ID filter (observation eligible gifts)
     if (observationData.observationEgoGiftDataList.length > 0) {
       const idSet = new Set(observationData.observationEgoGiftDataList.map(String))
       filtered = filtered.filter((gift) => idSet.has(gift.id))
@@ -68,7 +55,6 @@ export function EGOGiftObservationEditPane({
     return sortEGOGifts(filtered, sortMode)
   })()
 
-  // Reset filters when dialog closes
   useEffect(() => {
     if (!open) {
       setSelectedKeywords(new Set())
@@ -89,7 +75,6 @@ export function EGOGiftObservationEditPane({
     toggle(encodeGiftSelection(0, giftId))
   }
 
-  // Calculate current cost from observation data
   const currentCost =
     observationData.observationEgoGiftCostDataList.find(
       (cost) => cost.egogiftCount === selectedGiftIds.size,
@@ -119,9 +104,7 @@ export function EGOGiftObservationEditPane({
           onSearchChange={setSearchQuery}
         />
 
-        {/* Main content: Portrait phones stacked, ≥640px side-by-side */}
         <div className="flex flex-col sm:flex-row gap-2">
-          {/* Selection List - takes remaining space */}
           <div className="flex-1 min-w-0">
             <EGOGiftSelectionList
               gifts={sortedGifts}
@@ -132,7 +115,6 @@ export function EGOGiftObservationEditPane({
             />
           </div>
 
-          {/* Selected Gifts - the column is as wide as the card slots inside it */}
           <div className="sm:shrink-0">
             <EGOGiftObservationSelection
               selectedGiftIds={Array.from(selectedGiftIds)}

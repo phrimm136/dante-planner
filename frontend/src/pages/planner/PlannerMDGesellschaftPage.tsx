@@ -1,24 +1,3 @@
-/**
- * PlannerMDGesellschaftPage - Community planners view (Gesellschaft)
- *
- * Route: /planner/md/gesellschaft
- *
- * Features:
- * - Shows community planners (published/recommended from API)
- * - Mode toggle: All Published vs Best Only
- * - Category filter pills (5F, 10F, 15F)
- * - Search controls
- * - Paginated card grid with context menus
- * - Voting and bookmark functionality (authenticated only)
- * - Empty states for no results
- * - Navigation buttons to switch to My Plans view
- *
- * URL state managed via useMDGesellschaftFilters hook
- * Data fetched via useMDGesellschaftData hook
- *
- * Pattern: PlannerMDPage.tsx (Suspense wrapping, filter layout)
- */
-
 import { Skeleton } from '@/components/ui/skeleton'
 import { Suspense } from 'react'
 import { Link } from '@tanstack/react-router'
@@ -43,14 +22,6 @@ import { PLANNER_GEOMETRY } from '@/shared/cardLayout'
 import { CommunityPlansErrorFallback } from '@/components/feedback/CommunityPlansErrorFallback'
 import { SECTION_STYLES } from '@/lib/constants'
 
-// ============================================================================
-// Page Content Component
-// ============================================================================
-
-/**
- * Page content with all filter controls and data fetching.
- * Wrapped in Suspense by the outer page component.
- */
 function GesellschaftPageContent() {
   const { t } = useTranslation(['planner', 'common'])
   const { data: user } = useAuthQuery()
@@ -62,7 +33,6 @@ function GesellschaftPageContent() {
 
   return (
     <div className={SECTION_STYLES.LAYOUT.page}>
-      {/* Create New Button */}
       <div className="flex justify-end mb-6">
         <Button asChild>
           <Link to="/planner/md/new">
@@ -72,12 +42,10 @@ function GesellschaftPageContent() {
         </Button>
       </div>
 
-      {/* Navigation: My Plans / Gesellschaft */}
       <div className="mb-6">
         <MDPlannerNavButtons />
       </div>
 
-      {/* Toolbar: Search + Mode Toggle */}
       <div className="mb-4">
         <MDPlannerToolbar
           search={filters.search}
@@ -88,7 +56,6 @@ function GesellschaftPageContent() {
         />
       </div>
 
-      {/* Category Filter Pills */}
       <div className="mb-4">
         <PlannerListFilterPills
           selectedCategory={filters.category}
@@ -96,14 +63,12 @@ function GesellschaftPageContent() {
         />
       </div>
 
-      {/* Content Search Filter Pane */}
       <div className="mb-4">
         <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
           <PlannerFilterPane filters={searchFilters} onFiltersChange={setSearchFilters} />
         </Suspense>
       </div>
 
-      {/* Content Grid with ErrorBoundary + Suspense for data loading */}
       <ReactErrorBoundary FallbackComponent={CommunityPlansErrorFallback}>
         <Suspense fallback={<PlannerGridSkeleton geometry={PLANNER_GEOMETRY} />}>
           <PublishedPlannerList
@@ -117,16 +82,6 @@ function GesellschaftPageContent() {
   )
 }
 
-// ============================================================================
-// Main Page Component
-// ============================================================================
-
-/**
- * PlannerMDGesellschaftPage - Community planners page with Suspense boundary
- *
- * Pattern: PlannerMDPage.tsx
- * Outer component wraps inner content in Suspense for loading state
- */
 export default function PlannerMDGesellschaftPage() {
   return (
     <Suspense fallback={<LoadingState />}>

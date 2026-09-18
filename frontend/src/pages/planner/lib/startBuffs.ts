@@ -1,7 +1,6 @@
 import type { StartBuff, StartBuffDataList, StartBuffI18n } from '@/shared/gameText'
 import { BASE_BUFF_IDS } from '@/shared/gameText'
 
-/** Joins the version's buff specs with the active language's names. */
 export function toStartBuffs(spec: StartBuffDataList, names: StartBuffI18n): StartBuff[] {
   return Object.entries(spec).map(([id, buff]) => ({
     id,
@@ -18,7 +17,6 @@ export function getBuffById(buffs: StartBuff[] | undefined, id: number): StartBu
   return buffs?.find((b) => b.id === String(id))
 }
 
-/** The 10 base buffs (level 1) for initial display */
 export function getBaseBuffs(buffs: StartBuff[] | undefined): StartBuff[] {
   return (
     buffs?.filter(

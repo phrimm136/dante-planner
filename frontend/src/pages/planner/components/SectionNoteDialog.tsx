@@ -10,20 +10,11 @@ interface SectionNoteDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   sectionTitle: string
-  /** Absent when the section has no note recorded yet. */
   noteContent: NoteContent | undefined
   onChange?: ((content: NoteContent) => void) | undefined
   readOnly?: boolean
 }
 
-/**
- * Generic dialog for viewing/editing section notes
- *
- * Pattern: Dialog wrapper with NoteEditor
- * - readOnly mode: For viewer pages (guide/tracker)
- * - Edit mode: For planner editor
- * Empty state: Shows placeholder text when no notes exist
- */
 export function SectionNoteDialog({
   open,
   onOpenChange,

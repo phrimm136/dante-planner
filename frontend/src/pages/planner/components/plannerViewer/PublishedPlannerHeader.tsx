@@ -36,32 +36,19 @@ import { plannerQueryKeys } from '../../lib/plannerQueryKeys'
 import type { PublishedPlannerDetail } from '../../types/PlannerListTypes'
 import type { SaveablePlanner } from '../../types/PlannerTypes'
 
-/** Delay before leaving, so the dialog's close animation is not cut off. */
 const NAVIGATE_AFTER_TAKEDOWN_MS = 150
 
 interface PublishedPlannerHeaderProps {
-  /** Planner as the community sees it */
   planner: PublishedPlannerDetail
-  /** Whether current user is the planner owner */
   isOwner: boolean
-  /** Whether user is authenticated */
   isAuthenticated: boolean
-  /** Whether sync is enabled (null = not chosen, true = enabled, false = disabled) */
   syncEnabled?: boolean | null | undefined
-  /** Owner's local copy — enables Apply Latest Mirror */
   savedPlannerData?: SaveablePlanner | undefined
-  /** Callback when edit is clicked */
   onEdit?: (() => void) | undefined
-  /** Callback when delete is confirmed (optional, uses internal mutation if not provided) */
   onDelete?: (() => void) | undefined
-  /** Callback when comment count is clicked (scrolls to comments) */
   onCommentClick?: (() => void) | undefined
 }
 
-/**
- * Header for a planner viewed on the community list: author, stats,
- * subscription bell, and the moderator takedown.
- */
 export function PublishedPlannerHeader({
   planner,
   isOwner,
@@ -258,7 +245,6 @@ export function PublishedPlannerHeader({
         </>
       }
     >
-      {/* Row 3: Stats | Copy URL */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <span className={SECTION_STYLES.LAYOUT.rowTight}>
@@ -283,7 +269,6 @@ export function PublishedPlannerHeader({
         <CopyUrlButton />
       </div>
 
-      {/* Delete Confirmation Dialog */}
       <DeleteConfirmDialog
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
@@ -293,7 +278,6 @@ export function PublishedPlannerHeader({
         isPending={isDeletePending}
       />
 
-      {/* Apply Latest Mirror Dialog */}
       <ApplyLatestMirrorDialog
         open={showApplyLatestMirrorDialog}
         onOpenChange={setShowApplyLatestMirrorDialog}
@@ -303,7 +287,6 @@ export function PublishedPlannerHeader({
         isPending={isApplyingLatestMirror}
       />
 
-      {/* Moderator Delete Dialog */}
       <ModeratorDeleteDialog
         open={showModeratorDeleteDialog}
         onOpenChange={setShowModeratorDeleteDialog}

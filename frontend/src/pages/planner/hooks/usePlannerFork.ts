@@ -1,13 +1,3 @@
-/**
- * Planner Fork Mutation Hook
- *
- * Handles forking (copying) a published planner.
- * Creates a local copy with optional server sync (similar to conflict resolution).
- * Works for both authenticated and unauthenticated users.
- *
- * Pattern: Conflict resolution "Save as Copy" (usePlannerSave.ts)
- */
-
 import { useMutation } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { INITIAL_SYNC_VERSION } from '@/lib/constants'
@@ -25,51 +15,15 @@ import { toSaveablePlanner, PlannerConfigDiscriminatedSchema } from '../schemas/
 
 import type { PublishedPlannerDetail } from '../types/PlannerListTypes'
 
-// ============================================================================
-// Types
-// ============================================================================
-
 interface ForkInput {
-  /** Planner ID to fork (required) */
   plannerId: string
-  /** Published planner data (optional - will fetch if not provided) */
   planner?: PublishedPlannerDetail
 }
 
 interface ForkResult {
-  /** ID of the newly created planner copy */
   newPlannerId: string
 }
 
-// ============================================================================
-// Main Hook
-// ============================================================================
-
-/**
- * Hook for forking (copying) published planners
- *
- * @example
- * ```tsx
- * function PlannerDetailFooter({ planner }) {
- *   const fork = usePlannerFork();
- *   const navigate = useNavigate();
- *
- *   const handleFork = () => {
- *     fork.mutate({ planner }, {
- *       onSuccess: (result) => {
- *         navigate({ to: '/planner/md/$id/edit', params: { id: result.newPlannerId } });
- *       },
- *     });
- *   };
- *
- *   return (
- *     <button onClick={handleFork} disabled={fork.isPending}>
- *       Copy
- *     </button>
- *   );
- * }
- * ```
- */
 export function usePlannerFork() {
   const invalidatePlannerLists = useInvalidatePlannerLists()
   const storage = usePlannerStorage()
@@ -82,7 +36,6 @@ export function usePlannerFork() {
 
   return useMutation({
     mutationFn: async ({ plannerId, planner }: ForkInput): Promise<ForkResult> => {
-      // 0. Fetch planner if not provided (context menu case)
       let plannerData = planner
       if (!plannerData) {
         const data = await ApiClient.get(`/api/planner/md/published/${plannerId}`)
@@ -93,19 +46,15 @@ export function usePlannerFork() {
         )
       }
 
-      // 1. Generate new planner ID
       const newPlannerId = generateUUID()
 
-      // 2. Apply i18n copySuffix to title
       const baseTitle = plannerData.title
       const copyTitle = t('pages.plannerMD.conflict.copySuffix', '{{title}} (Copy)', {
         title: baseTitle,
       })
 
-      // 3. Parse content from JSON string
       const contentData = JSON.parse(plannerData.content)
 
-      // 4. Create new SaveablePlanner with correct metadata structure
       const now = new Date().toISOString()
       const newPlanner = toSaveablePlanner(
         {
@@ -127,16 +76,12 @@ export function usePlannerFork() {
         contentData, // Parsed content object
       )
 
-      // 5. Save to local storage
       await storage.saveToLocal(newPlanner)
 
-      // 6. Optionally sync to server if authenticated AND sync enabled
-      // This follows the same pattern as conflict resolution's keepBoth
       if (isAuthenticated && syncEnabled) {
         try {
           await syncAdapter.syncToServer(newPlanner)
         } catch (syncError) {
-          // Log but don't fail - user can sync later via normal save flow
           console.warn('Failed to sync forked planner to server:', syncError)
         }
       }

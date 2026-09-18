@@ -7,11 +7,6 @@ interface StarlightCostDisplayProps {
   size?: 'sm' | 'md' | 'lg'
 }
 
-/**
- * Starlight cost display component
- * Shows starlight icon + cost number (right-aligned)
- * Number grows to the right to prevent icon shifting
- */
 export function StarlightCostDisplay({
   cost,
   isEnhanced = false,

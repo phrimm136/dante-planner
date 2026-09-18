@@ -10,29 +10,11 @@ import { usePlannerFork } from '../../hooks/usePlannerFork'
 import type { PublishedPlannerDetail } from '../../types/PlannerListTypes'
 
 interface PlannerDetailFooterProps {
-  /** Published planner data */
   planner: PublishedPlannerDetail
-  /** Whether current user is the planner owner (unused - copy available for all) */
   isOwner: boolean
-  /** Whether user is authenticated */
   isAuthenticated: boolean
 }
 
-/**
- * Footer component for published planner detail page.
- * Contains engagement actions: Upvote, Copy, Back to Top.
- *
- * - Upvote: Disabled after voting (immutable)
- * - Copy: Creates local copy with optional server sync
- * - Back to Top: Always visible
- *
- * @example
- * <PlannerDetailFooter
- *   planner={publishedPlanner}
- *   isOwner={false}
- *   isAuthenticated={true}
- * />
- */
 export function PlannerDetailFooter({ planner, isAuthenticated }: PlannerDetailFooterProps) {
   const { t } = useTranslation('planner')
   const navigate = useNavigate()
@@ -40,7 +22,6 @@ export function PlannerDetailFooter({ planner, isAuthenticated }: PlannerDetailF
   const voteMutation = usePlannerVote()
   const forkMutation = usePlannerFork()
 
-  // Double-click protection for vote
   const voteInProgressRef = useRef(false)
 
   const handleUpvote = () => {
@@ -83,7 +64,6 @@ export function PlannerDetailFooter({ planner, isAuthenticated }: PlannerDetailF
 
   return (
     <footer className="flex flex-wrap items-center justify-center gap-3 pt-8 border-t">
-      {/* Upvote */}
       {isAuthenticated && (
         <Button
           variant="outline"
@@ -105,7 +85,6 @@ export function PlannerDetailFooter({ planner, isAuthenticated }: PlannerDetailF
         </Button>
       )}
 
-      {/* Copy (Fork) - Available for all users */}
       <Button
         variant="outline"
         onClick={handleDuplicate}
@@ -116,7 +95,6 @@ export function PlannerDetailFooter({ planner, isAuthenticated }: PlannerDetailF
         <span className="hidden lg:inline">{t('pages.plannerList.contextMenu.copy')}</span>
       </Button>
 
-      {/* Back to Top - Always visible */}
       <Button variant="outline" onClick={handleBackToTop} aria-label={t('pages.detail.backToTop')}>
         <ArrowUp className="size-4" />
         <span className="hidden lg:inline">{t('pages.detail.backToTop')}</span>

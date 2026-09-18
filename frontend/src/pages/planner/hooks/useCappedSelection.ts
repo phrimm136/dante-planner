@@ -1,19 +1,15 @@
 import { useEffect, useRef, useState, startTransition } from 'react'
 
 interface CappedSelectionOptions<Id extends string> {
-  /** Upper bound on the selection size. */
   cap: number
   selected: Set<Id>
   onSelectedChange: (next: Set<Id>) => void
-  /** Superset the selection mirrors into: entries enter and leave alongside. */
   mirror: Set<Id>
   onMirrorChange: (next: Set<Id>) => void
 }
 
 interface CappedSelection<Id extends string> {
-  /** Adds the id while the cap allows it, or removes it if already selected. */
   toggle: (id: Id) => void
-  /** Empties the selection and withdraws its ids from the mirror. */
   clear: () => void
 }
 

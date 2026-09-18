@@ -23,7 +23,6 @@ import { type SkillData } from './SinnerGrid'
 import { DeckLoadoutSection } from './DeckLoadoutSection'
 import { DeckCatalogSection } from './DeckCatalogSection'
 
-/** The deck the builder edits, and the writers that own it. */
 export interface DeckBuilderDeck {
   equipment: Record<string, SinnerEquipment>
   setEquipment: (
@@ -33,27 +32,19 @@ export interface DeckBuilderDeck {
   setDeploymentOrder: (order: number[]) => void
 }
 
-/** Deck-wide commands owned by the surrounding page. */
 export interface DeckBuilderActions {
   onImport: () => void
   onExport: () => void
   onResetOrder: () => void
-  /** Fires when a sinner's identity id changes, so callers can reset its skill EA. */
   onIdentityChange?: (sinnerCode: string) => void
 }
 
 export interface DeckBuilderContentProps extends DeckBuilderDeck, DeckBuilderActions {
   filterState: DeckFilterState
-  /** False while a closing dialog is still painting its exit animation. */
   isActive: boolean
-  /** Base ids of gifts the plan owns, for keyword grants in the status readout. */
   ownedGiftIds: ReadonlySet<EGOGiftId>
 }
 
-/**
- * Core deck builder UI content.
- * Contains all filtering, sorting, selection, and rendering logic.
- */
 export function DeckBuilderContent({
   equipment,
   setEquipment,
@@ -67,12 +58,10 @@ export function DeckBuilderContent({
   onResetOrder,
   onIdentityChange,
 }: DeckBuilderContentProps) {
-  // Scroll position preservation
   const identityScrollRef = useRef<HTMLDivElement>(null)
   const egoScrollRef = useRef<HTMLDivElement>(null)
   const savedScrollPositionRef = useRef<number>(0)
 
-  // Get equipped IDs for selection display
   const equippedIdentityIds = (() => {
     return new Set(Object.values(equipment).map((eq) => eq.identity.id))
   })()
@@ -97,8 +86,6 @@ export function DeckBuilderContent({
     return map
   })()
 
-  // Sorting snapshot - captured on activation for stable sorting during session
-  // Equipped items stay at top even if user unequips them (prevents jarring re-sort)
   const [sortingSnapshot, setSortingSnapshot] = useState<{
     identityIds: Set<string>
     egoIds: Set<string>
@@ -107,20 +94,17 @@ export function DeckBuilderContent({
 
   const prevActiveRef = useRef(isActive)
 
-  // Capture snapshot when component activates or entity mode changes
   useEffect(() => {
     const justActivated = isActive && !prevActiveRef.current
     prevActiveRef.current = isActive
 
     if (!isActive) {
-      // Dialog closed - clear snapshot for fresh state on next open
       if (sortingSnapshot !== null) {
         setSortingSnapshot(null)
       }
       return
     }
 
-    // Take snapshot if: first time, just reopened, or entity mode changed
     const needsSnapshot =
       sortingSnapshot === null ||
       justActivated ||
@@ -135,11 +119,9 @@ export function DeckBuilderContent({
     }
   }, [isActive, filterState.entityMode, equippedIdentityIds, equippedEgoIds, sortingSnapshot])
 
-  // Extract snapshot sets for sorting (fall back to current equipped if no snapshot)
   const sortingIdentityIds = sortingSnapshot?.identityIds ?? equippedIdentityIds
   const sortingEgoIds = sortingSnapshot?.egoIds ?? equippedEgoIds
 
-  // Restore scroll position after equipment changes
   // Effect runs after render, so DOM is ready - no rAF needed
   useEffect(() => {
     if (savedScrollPositionRef.current === 0) return
@@ -153,13 +135,11 @@ export function DeckBuilderContent({
     }
   }, [equippedIdentityIds, equippedEgoIds, filterState.entityMode])
 
-  // Load identity and EGO data (shared cache)
   const identitySpec = useIdentityListSpec()
   const identityI18n = useIdentityListI18n()
   const egoSpec = useEGOListSpec()
   const egoI18n = useEGOListI18n()
 
-  // Merge spec and i18n into identity/EGO arrays
   const identities: IdentityEntity[] = Object.entries(identitySpec).map(([id, entry]) =>
     toIdentityEntity(id, entry, identityI18n[id] || id),
   )
@@ -168,7 +148,6 @@ export function DeckBuilderContent({
     toEGOEntity(id, entry, egoI18n[id] || id),
   )
 
-  // Get skill data for the compact identity row
   const skillDataMap: Record<string, SkillData> = (() => {
     const map: Record<string, SkillData> = {}
     Object.values(equipment).forEach((eq) => {
@@ -183,7 +162,6 @@ export function DeckBuilderContent({
     return map
   })()
 
-  // Get EGO affinity data
   const egoAffinityMap: Record<string, string> = (() => {
     const map: Record<string, string> = {}
     Object.entries(egoSpec).forEach(([id, spec]) => {
@@ -194,47 +172,35 @@ export function DeckBuilderContent({
     return map
   })()
 
-  // Sort identities ONCE (stable order - sorting doesn't change on filter)
-  // Uses snapshot of equipped IDs to keep equipped items at top
   const searchMappings = useSearchMappings()
 
   const sortedIdentities = (() => {
     return [...identities].sort((a, b) => {
-      // Primary: equipped first (using snapshot)
       const aEquipped = sortingIdentityIds.has(a.id) ? 0 : 1
       const bEquipped = sortingIdentityIds.has(b.id) ? 0 : 1
       if (aEquipped !== bEquipped) return aEquipped - bEquipped
-      // Secondary: updateDate descending (newer first)
       if (a.updateDate !== b.updateDate) return b.updateDate - a.updateDate
-      // Tertiary: rank descending (higher rarity first)
       if (a.rank !== b.rank) return b.rank - a.rank
-      // Quaternary: id descending
       return parseInt(b.id, 10) - parseInt(a.id, 10)
     })
   })()
 
   const sortedEgos = (() => {
     return [...egos].sort((a, b) => {
-      // Primary: equipped first (using snapshot)
       const aEquipped = sortingEgoIds.has(a.id) ? 0 : 1
       const bEquipped = sortingEgoIds.has(b.id) ? 0 : 1
       if (aEquipped !== bEquipped) return aEquipped - bEquipped
-      // Secondary: updateDate descending (newer first)
       if (a.updateDate !== b.updateDate) return b.updateDate - a.updateDate
-      // Tertiary: egoType tier descending (ALEPH > WAW > HE > TETH > ZAYIN)
       const tierA = EGO_TYPES.indexOf(a.egoType)
       const tierB = EGO_TYPES.indexOf(b.egoType)
       if (tierA !== tierB) return tierB - tierA
-      // Quaternary: sinner descending (sinner 12 > sinner 01)
       const sinnerA = parseInt(a.id.substring(1, 3), 10)
       const sinnerB = parseInt(b.id.substring(1, 3), 10)
       if (sinnerA !== sinnerB) return sinnerB - sinnerA
-      // Quinary: id descending
       return parseInt(b.id, 10) - parseInt(a.id, 10)
     })
   })()
 
-  // Compute visible IDs based on filters (fast O(n), no React reconciliation)
   const visibleIdentityIds = (() => {
     const ids = new Set<string>()
     for (const identity of sortedIdentities) {
@@ -253,7 +219,6 @@ export function DeckBuilderContent({
     return ids
   })()
 
-  // Create EGO lookup map
   const egoMap = (() => {
     const map: Record<string, EGOEntity> = {}
     egos.forEach((e) => {
@@ -262,7 +227,6 @@ export function DeckBuilderContent({
     return map
   })()
 
-  // Handlers
   const handleToggleDeploy = (sinnerIndex: number) => {
     startTransition(() => {
       const currentIndex = deploymentOrder.indexOf(sinnerIndex)
@@ -280,7 +244,6 @@ export function DeckBuilderContent({
     identityId: IdentityId,
     data: { uptie?: UptieTier; level?: number },
   ) => {
-    // Save scroll position before state update
     if (identityScrollRef.current) {
       savedScrollPositionRef.current = identityScrollRef.current.scrollTop
     }
@@ -312,7 +275,6 @@ export function DeckBuilderContent({
   }
 
   const handleEquipEgo = (egoId: EGOId, data: { threadspin?: ThreadspinTier }) => {
-    // Save scroll position before state update
     if (egoScrollRef.current) {
       savedScrollPositionRef.current = egoScrollRef.current.scrollTop
     }
@@ -343,7 +305,6 @@ export function DeckBuilderContent({
   }
 
   const handleUnequipEgo = (egoId: string) => {
-    // Save scroll position before state update
     if (egoScrollRef.current) {
       savedScrollPositionRef.current = egoScrollRef.current.scrollTop
     }
@@ -353,7 +314,6 @@ export function DeckBuilderContent({
     startTransition(() => {
       if (!ego) return
       const rank = ego.egoType
-      // When unequipping ZAYIN, revert to default ZAYIN ego
       if (rank === 'ZAYIN') {
         const sinnerIdPart = sinnerCode.padStart(2, '0')
         const defaultEgoId = EGOIdSchema.parse(`2${sinnerIdPart}01`)
@@ -425,10 +385,8 @@ export function DeckBuilderContent({
   )
 }
 
-/** Props a store-bound caller supplies; the deck and filter come from the store. */
 export type StoreBoundDeckBuilderContentProps = DeckBuilderActions & { isActive: boolean }
 
-/** Renders the builder against the deck and filter held by the planner editor store. */
 export function StoreBoundDeckBuilderContent(props: StoreBoundDeckBuilderContentProps) {
   const equipment = usePlannerEditorStore((s) => s.equipment)
   const setEquipment = usePlannerEditorStore((s) => s.setEquipment)
@@ -459,18 +417,8 @@ export function StoreBoundDeckBuilderContent(props: StoreBoundDeckBuilderContent
   )
 }
 
-/** Props the tracker supplies; its filter state is session-only. */
 export type TrackerDeckBuilderContentProps = Omit<DeckBuilderContentProps, 'filterState'>
 
-/**
- * Renders the builder against a caller-owned session deck.
- *
- * The catalog subtree — filter bar and both grids — reads its own UI state from
- * the planner editor store, so the tracker gives it a private one. Only the
- * filter and the progressive render counter are read from that store; the deck
- * stays with the caller. It lives and dies with this mount, so each visit to
- * the pane starts from the default filters.
- */
 export function TrackerDeckBuilderContent(props: TrackerDeckBuilderContentProps) {
   return (
     <PlannerEditorStoreProvider>

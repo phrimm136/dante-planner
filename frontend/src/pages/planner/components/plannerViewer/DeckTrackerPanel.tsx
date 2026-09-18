@@ -15,13 +15,6 @@ interface DeckTrackerPanelProps {
   onViewNotes?: (() => void) | undefined
 }
 
-/**
- * Deck tracker panel for tracker mode
- *
- * Equipment display: uses DeckBuilderSummary with tracker mode
- * Deployment order: editable via toggle and arrow buttons
- * Changes are temporary (session state only)
- */
 export function DeckTrackerPanel({
   equipment,
   deploymentOrder,
@@ -50,7 +43,6 @@ export function DeckTrackerPanel({
 
   return (
     <div className="space-y-4">
-      {/* Equipment Display */}
       <DeckBuilderSummary
         equipment={equipment}
         deploymentOrder={deploymentOrder}

@@ -4,19 +4,6 @@ import type { DungeonIdx } from '@/shared/gameData'
 import { DUNGEON_IDX } from '@/shared/gameData'
 import { sortEGOGifts } from '@/pages/egoGift'
 
-/**
- * Bucket and sort gifts for a floor's selector dialog.
- *
- * Bucketing under themed-reachability semantics of `gift.themePack`:
- *   1. themed to this pack (pack-exclusive + recipe-derived themed fusions)
- *   2. general (empty themePack — acquirable in any pack via random fusion)
- *
- * Hidden: gifts whose themePack is non-empty but does not include this pack —
- * those are themed-restricted to other packs and genuinely unobtainable here.
- *
- * Difficulty filter precedes bucketing: gifts marked extremeOnly/hardOnly are
- * dropped when the floor's dungeon index is below their requirement.
- */
 export function bucketAndSortFloorGifts(
   gifts: EGOGiftEntity[],
   themePackId: string,

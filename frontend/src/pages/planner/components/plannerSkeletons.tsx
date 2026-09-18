@@ -1,8 +1,3 @@
-/**
- * Suspense fallbacks shared by the planner editor and both viewers, so a
- * section's loading shape is described once wherever that section is hosted.
- */
-
 import { useTranslation } from 'react-i18next'
 
 import { Skeleton } from '@/components/ui/skeleton'
@@ -37,21 +32,16 @@ const GIFT_TILES = 6
 const SKILL_TILES = 12
 const START_GIFT_TILES = 2
 const FILTER_CONTROLS = 3
-/** All, plus one per Mirror Dungeon category. */
 const CATEGORY_PILLS = MD_CATEGORIES.length + 1
-/** Keyword icons the planner header carries, at a typical plan's count. */
 const HEADER_KEYWORD_ICONS = 2
-/** Note-bearing blocks of the create form below the deck. */
 const CREATE_FORM_SECTIONS = 3
 
-/** The gift row's height at the current breakpoint, shared by every gift-bearing fallback. */
 function useGiftRowMinHeightPx(): number {
   const { heightPx } = useSlotSizePx(EGO_GIFT_GEOMETRY.size, EGO_GIFT_GEOMETRY.mobileScale)
 
   return giftRowMinHeightPx(heightPx)
 }
 
-/** The starlight-cost row every gift-bearing section carries above its row. */
 function CostRow() {
   return (
     <div className="flex justify-end mb-4">
@@ -61,7 +51,6 @@ function CostRow() {
   )
 }
 
-/** Sinner cards of the deck summary, before the deck data resolves. */
 export function DeckGridSkeleton() {
   const { t } = useTranslation(['planner', 'common'])
   const { gridStyle } = useSinnerGridLayout()
@@ -89,7 +78,6 @@ export function DeckGridSkeleton() {
   )
 }
 
-/** The Grace of Stars section, before the buff data resolves. */
 export function StartBuffSkeleton() {
   const { t } = useTranslation(['planner', 'common'])
   const minHeight = useGiftRowMinHeightPx()
@@ -102,7 +90,6 @@ export function StartBuffSkeleton() {
   )
 }
 
-/** The start-gift keyword and its gifts, before the gift data resolves. */
 export function StartGiftSkeleton() {
   const { t } = useTranslation(['planner', 'common'])
   const minHeight = useGiftRowMinHeightPx()
@@ -133,7 +120,6 @@ export function StartGiftSkeleton() {
   )
 }
 
-/** Wrapping grid of gift tiles inside its titled section. */
 export function GiftGridSkeleton({ title }: { title: string }) {
   const minHeight = useGiftRowMinHeightPx()
 
@@ -159,11 +145,9 @@ export function GiftGridSkeleton({ title }: { title: string }) {
 }
 
 interface GiftGridTrackerSkeletonProps {
-  /** The box the grid takes; omitted → it stretches to the column it sits in. */
   height?: number | undefined
 }
 
-/** The filtered comprehensive gift grid, before the gift data resolves. */
 export function GiftGridTrackerSkeleton({ height }: GiftGridTrackerSkeletonProps) {
   const stretch = height === undefined
 
@@ -181,7 +165,6 @@ export function GiftGridTrackerSkeleton({ height }: GiftGridTrackerSkeletonProps
   )
 }
 
-/** One card per sinner, each with its three skill slots. */
 export function SkillGridSkeleton({ title }: { title: string }) {
   const { gridStyle } = useSkillReplacementLayout()
 
@@ -205,20 +188,13 @@ export function SkillGridSkeleton({ title }: { title: string }) {
   )
 }
 
-// ============================================================================
-// Page-level skeletons
-// ============================================================================
-
-/** The `/planner/md` list page, before its chunk and its planner list resolve. */
 export function PlannerMDPageSkeleton() {
   return (
     <div className={SECTION_STYLES.LAYOUT.page}>
-      {/* Create New, a default-size Button */}
       <div className="flex justify-end mb-6">
         <div className="h-9 w-32 rounded-md bg-muted" />
       </div>
 
-      {/* My Plans / Gesellschaft, two size="sm" Buttons */}
       <div className="mb-6">
         <div className="flex gap-2">
           <div className="h-8 w-25 rounded-md bg-muted" />
@@ -226,12 +202,10 @@ export function PlannerMDPageSkeleton() {
         </div>
       </div>
 
-      {/* MDPlannerToolbar, whose SearchBar is h-8 */}
       <div className="mb-4">
         <div className="h-8 w-full rounded-md bg-muted" />
       </div>
 
-      {/* PlannerListFilterPills, four text-sm py-1.5 pills */}
       <div className="mb-4">
         <div className="flex gap-2 flex-wrap">
           {Array.from({ length: CATEGORY_PILLS }).map((_, i) => (
@@ -240,7 +214,6 @@ export function PlannerMDPageSkeleton() {
         </div>
       </div>
 
-      {/* PlannerFilterPane */}
       <div className="mb-4">
         <div className="h-10 w-full rounded-md bg-muted" />
       </div>
@@ -250,24 +223,19 @@ export function PlannerMDPageSkeleton() {
   )
 }
 
-/** The header rows both planner detail headers share, as `PlannerHeaderChrome` draws them. */
 function PlannerHeaderSkeleton() {
   return (
     <header className="space-y-3">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
-          {/* Back, an icon-sm Button */}
           <div className="size-8 rounded-md bg-muted" />
-          {/* Category badge */}
           <div className="h-6 w-12 rounded bg-muted" />
-          {/* Keyword icons */}
           <div className="flex items-center gap-1.5">
             {Array.from({ length: HEADER_KEYWORD_ICONS }).map((_, i) => (
               <div key={i} className="size-6 rounded bg-muted" />
             ))}
           </div>
         </div>
-        {/* Variant meta block */}
         <div className="flex items-center gap-3 shrink-0">
           <div className="h-6 w-24 rounded bg-muted" />
         </div>
@@ -275,7 +243,6 @@ function PlannerHeaderSkeleton() {
 
       <div className="flex items-center justify-between gap-4">
         <TextSkeleton size="2xl" width="lg" />
-        {/* Variant actions */}
         <div className="flex items-center gap-1 shrink-0">
           <div className="size-8 rounded-md bg-muted" />
           <div className="size-8 rounded-md bg-muted" />
@@ -285,12 +252,6 @@ function PlannerHeaderSkeleton() {
   )
 }
 
-/**
- * A saved planner's header and its viewer sections, before the planner resolves.
- *
- * The three planner detail routes show it while their chunk loads and again while the
- * planner is read, so one shape spans both waits.
- */
 export function PlannerViewerSkeleton() {
   const { t } = useTranslation(['planner', 'common'])
   const isMd = useIsBreakpoint('min', MD_BREAKPOINT_PX)
@@ -321,7 +282,6 @@ export function PlannerViewerSkeleton() {
   )
 }
 
-/** The `/planner/md/new` create form, before its static data resolves. */
 export function PlannerMDNewPageSkeleton() {
   return (
     <div className={SECTION_STYLES.LAYOUT.page}>
@@ -352,7 +312,6 @@ export function PlannerMDNewPageSkeleton() {
   )
 }
 
-/** The `/planner/deck` page, before the deck's static data resolves. */
 export function DeckBuilderPageSkeleton() {
   return (
     <div className={SECTION_STYLES.LAYOUT.page}>

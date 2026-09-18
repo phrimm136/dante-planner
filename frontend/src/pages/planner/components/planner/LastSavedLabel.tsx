@@ -5,13 +5,9 @@ import { formatRelativeTime } from '@/lib/formatDate'
 import type { SaveStatusStore } from '../../stores/saveStatus'
 
 interface LastSavedLabelProps {
-  /** The write path's report; this label is its only subscriber. */
   status: SaveStatusStore
 }
 
-/**
- * "Saved 2 minutes ago", or nothing when there is no usable timestamp.
- */
 export function LastSavedLabel({ status }: LastSavedLabelProps) {
   const { t, i18n } = useTranslation('planner')
   const lastSavedAt = useStore(status, (s) => s.lastSavedAt)

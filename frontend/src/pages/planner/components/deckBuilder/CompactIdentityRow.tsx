@@ -38,11 +38,6 @@ const ATK_ICON_STYLE: CSSProperties = {
   height: cqw(COMPACT_IDENTITY_CARD.atkIcon),
 }
 
-/**
- * Compact grid of 12 identity thumbnails for the deck builder Identity tab.
- * Each thumbnail shows profile portrait, uptie icon, level, deployment number,
- * and 3 skill affinity boxes with attack type icons.
- */
 export const CompactIdentityRow = function CompactIdentityRow({
   equipment,
   deploymentOrder,
@@ -93,9 +88,7 @@ export const CompactIdentityRow = function CompactIdentityRow({
               aria-pressed={order !== null}
               onClick={() => onToggleDeploy?.(index)}
             >
-              {/* Portrait container */}
               <div className="relative w-full aspect-square">
-                {/* Profile image - dimmed when deployed */}
                 <img
                   src={getIdentityProfileImagePath(identityId, uptie)}
                   alt={sinnerName}
@@ -106,7 +99,6 @@ export const CompactIdentityRow = function CompactIdentityRow({
                   )}
                 />
 
-                {/* Uptie icon - upper-right */}
                 <div
                   className="absolute pointer-events-none"
                   style={{
@@ -122,7 +114,6 @@ export const CompactIdentityRow = function CompactIdentityRow({
                   />
                 </div>
 
-                {/* Level number - lower-right */}
                 <div
                   className={cn(
                     'absolute pointer-events-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]',
@@ -138,7 +129,6 @@ export const CompactIdentityRow = function CompactIdentityRow({
                   {`Lv.${String(level)}`}
                 </div>
 
-                {/* Deployment number overlay - NOT dimmed */}
                 {order !== null && (
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                     <span
@@ -154,7 +144,6 @@ export const CompactIdentityRow = function CompactIdentityRow({
                 )}
               </div>
 
-              {/* Skill affinity row - 3 colored boxes with attack type icons */}
               <div className="flex" style={{ gap: cqw(COMPACT_IDENTITY_CARD.skillGap) }}>
                 {[0, 1, 2].map((idx) => {
                   const affinity = skillData.affinities[idx]

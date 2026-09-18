@@ -34,14 +34,6 @@ const DEFAULT_ZAYIN_MAX_THREADSPIN: Record<string, ThreadspinTier> = (() => {
   return out
 })()
 
-// ============================================================================
-// Default State Factories
-// ============================================================================
-
-/**
- * Creates default equipment for all 12 sinners
- * Each sinner gets their base identity (uptie 4, max level) and ZAYIN EGO
- */
 export function createDefaultEquipment(): Record<string, SinnerEquipment> {
   const equipment: Record<string, SinnerEquipment> = {}
   SINNERS.forEach((_, index) => {
@@ -59,10 +51,6 @@ export function createDefaultEquipment(): Record<string, SinnerEquipment> {
   return equipment
 }
 
-/**
- * Creates default skill EA state for all 12 sinners
- * Each sinner gets default EA values: S1=3, S2=2, S3=1
- */
 /**
  * Rebuild the skill-EA record from whatever survived storage.
  *
@@ -100,10 +88,6 @@ export function createDefaultSkillEAState(): Record<string, SkillEAState> {
   return state
 }
 
-/**
- * Creates default floor selections for 15 floors
- * All floors start with no theme pack selected and normal difficulty
- */
 export function createDefaultFloorSelections(): FloorThemeSelection[] {
   return Array.from({ length: 15 }, () => ({
     themePackId: null,
@@ -112,10 +96,6 @@ export function createDefaultFloorSelections(): FloorThemeSelection[] {
   }))
 }
 
-/**
- * Creates default section notes for all planner sections
- * Includes 6 fixed sections + 15 floor sections
- */
 export function createDefaultSectionNotes(): Record<string, NoteContent> {
   const notes: Record<string, NoteContent> = {
     intro: createEmptyNoteContent(),
@@ -133,9 +113,6 @@ export function createDefaultSectionNotes(): Record<string, NoteContent> {
   return notes
 }
 
-/**
- * Creates default deck filter state
- */
 export function createDefaultDeckFilterState(): DeckFilterState {
   return {
     entityMode: 'identity',
@@ -144,18 +121,12 @@ export function createDefaultDeckFilterState(): DeckFilterState {
   }
 }
 
-// ============================================================================
-// Codec
-// ============================================================================
-
-/** Planner identity fields that travel beside the content, not inside it. */
 export interface EditorMetadata {
   title: string
   category: MDCategory
   isPublished: boolean
 }
 
-/** Editor fields a stored planner determines, in their in-memory (Set-bearing) form. */
 export interface HydratedEditorState extends EditorMetadata {
   equipment: Record<string, SinnerEquipment>
   floorSelections: FloorThemeSelection[]
@@ -171,7 +142,6 @@ export interface HydratedEditorState extends EditorMetadata {
   sectionNotes: Record<string, NoteContent>
 }
 
-/** Fields the projection reads; editor state is a superset of it. */
 export type ProjectableEditorState = Pick<
   HydratedEditorState,
   | 'title'
@@ -189,17 +159,6 @@ export type ProjectableEditorState = Pick<
   | 'sectionNotes'
 >
 
-/**
- * Read a stored planner into editor state.
- *
- * Content that reaches this point has survived IndexedDB or a server round trip
- * across schema versions, so every array field is re-checked rather than
- * trusted: a missing or non-array value falls back to the default for that
- * field. Keyword ids are migrated through their renames, section notes are
- * merged over the full default key set so plans written before a section
- * existed still get an entry for it, and the deck filter — which no stored
- * field feeds — is reset.
- */
 export function hydrateEditorState(
   content: MDPlannerContent,
   metadata: EditorMetadata,
@@ -246,7 +205,6 @@ export function hydrateEditorState(
   }
 }
 
-/** Project editor state onto the save-facing planner state, dropping editor-only fields. */
 export function projectEditorState(state: ProjectableEditorState): PlannerState {
   return {
     title: state.title,

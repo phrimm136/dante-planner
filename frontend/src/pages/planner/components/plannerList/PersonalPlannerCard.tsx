@@ -13,29 +13,10 @@ import type { PlannerSummary } from '../../types/PlannerTypes'
 
 interface PersonalPlannerCardProps {
   planner: PlannerSummary
-  /** Whether user is authenticated */
   isAuthenticated: boolean
-  /** Whether sync is enabled (null = not chosen, true = enabled, false = disabled) */
   syncEnabled: boolean | null | undefined
 }
 
-/**
- * Card for displaying personal planner summary in My Plans view.
- * Different from PublishedPlannerCard (community) - shows sync status instead of votes.
- *
- * Layout:
- * - Top row: Floor badge + keywords (left), indicator (right)
- * - Title: text-sm, line-clamp-2
- * - Bottom: Date only
- *
- * Indicator states (mutually exclusive, priority order):
- * 1. Published + draft changes → unpublishedChanges (AlertCircle)
- * 2. Published + saved → published (Globe)
- * 3. Auth + sync ON + draft → unsynced (CloudUpload)
- * 4. Auth + sync ON + saved → synced (CheckCircle)
- * 5. Guest or sync OFF + draft → draft (Circle outline)
- * 6. Guest or sync OFF + saved → saved (Circle filled)
- */
 export function PersonalPlannerCard({
   planner,
   isAuthenticated,
@@ -44,7 +25,6 @@ export function PersonalPlannerCard({
   const { t } = useTranslation(['planner', 'common'])
   const search = useSearch({ strict: false })
 
-  // Keywords display (max 3 icons + overflow indicator)
   const keywords = planner.selectedKeywords ?? []
   const displayedKeywords = keywords.slice(0, PLANNER_LIST.MAX_KEYWORDS_DISPLAY)
   const hasMoreKeywords = keywords.length > PLANNER_LIST.MAX_KEYWORDS_DISPLAY
@@ -54,9 +34,7 @@ export function PersonalPlannerCard({
   return (
     <Link to="/planner/md/$id" params={{ id: planner.id }} search={search} className="block">
       <div className="bg-card border border-border rounded-lg p-4 h-full hover:border-primary/50 transition-colors cursor-pointer">
-        {/* Top row: Floor badge + keywords (left), indicator (right) */}
         <div className="flex items-center justify-between gap-2 mb-2">
-          {/* Left: Floor badge + keywords inline */}
           <div className="flex items-center gap-1 flex-wrap min-w-0">
             <span
               className="px-2 py-0.5 text-xs font-medium rounded shrink-0 whitespace-nowrap"
@@ -65,7 +43,6 @@ export function PersonalPlannerCard({
               <MdCategoryLabel category={planner.category} />
             </span>
 
-            {/* Keywords (icons inline with floor badge) */}
             {displayedKeywords.map((keyword) => (
               <img
                 key={keyword}
@@ -81,18 +58,15 @@ export function PersonalPlannerCard({
             )}
           </div>
 
-          {/* Right: Status indicator icon */}
           <div className="shrink-0 flex justify-end">
             <PlannerStatusIcon status={status} />
           </div>
         </div>
 
-        {/* Title (text-sm for consistency with PlannerCard) */}
         <h3 className="line-clamp-2 text-sm font-medium min-h-[2.5rem] mb-2">
           {planner.title || t('untitled')}
         </h3>
 
-        {/* Last modified */}
         <p className="flex items-center gap-1 text-xs text-muted-foreground">
           <Clock className="size-3" />
           {formatCompactDate(planner.lastModifiedAt)}

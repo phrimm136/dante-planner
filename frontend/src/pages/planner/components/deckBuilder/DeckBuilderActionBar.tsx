@@ -6,24 +6,12 @@ interface DeckBuilderActionBarProps {
   onImport?: (() => void) | undefined
   onExport?: (() => void) | undefined
   onResetOrder?: (() => void) | undefined
-  /** Show "Edit Deck" button (Summary view only) */
   showEditDeck?: boolean
-  /** Callback when "Edit Deck" is clicked */
   onEditDeck?: (() => void) | undefined
-  /** Tracker mode flag - shows "Reset to Initial" instead of "Reset Order" */
   trackerMode?: boolean
-  /** Reset to planner's original deployment (tracker mode only) */
   onResetToInitial?: (() => void) | undefined
 }
 
-/**
- * Shared action bar for DeckBuilder Summary and Pane
- * Contains Import, Export, Reset Order buttons
- * Optionally shows "Edit Deck" button in Summary view
- *
- * memo: render only depends on boolean flags; callback identities
- * change across parent renders but behavior is stable.
- */
 export const DeckBuilderActionBar = function DeckBuilderActionBar({
   onImport,
   onExport,

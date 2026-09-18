@@ -20,10 +20,6 @@ interface StartGiftRowProps {
   onGiftClick: (keyword: string, giftId: EGOGiftId) => void
 }
 
-/**
- * Horizontal row showing keyword icon and 3 EGO gifts for start gift selection
- * Layout: keyword icon (left) | 3 gift cards (right, horizontal)
- */
 export function StartGiftRow({
   keyword,
   giftIds,
@@ -35,7 +31,6 @@ export function StartGiftRow({
   onRowSelect,
   onGiftClick,
 }: StartGiftRowProps) {
-  // Calculate scaled dimensions
   const mobileScale = CARD_MOBILE_SCALE
 
   const handleRowClick = () => {
@@ -59,7 +54,6 @@ export function StartGiftRow({
         onClick={handleRowClick}
       />
 
-      {/* Keyword icon */}
       <CardSlot
         size={KEYWORD_ICON_GEOMETRY.size}
         mobileScale={mobileScale}
@@ -68,7 +62,6 @@ export function StartGiftRow({
         <StartGiftKeywordIcon keyword={keyword} title={keyword} />
       </CardSlot>
 
-      {/* Gift cards - horizontal layout */}
       <div className="relative z-10 flex items-start gap-2 lg:gap-4">
         {giftIds.map((giftId) => {
           const spec = giftSpecMap[giftId]
@@ -76,7 +69,6 @@ export function StartGiftRow({
           const isSelected = selectedGiftIds.has(giftId)
           const canSelect = isRowSelected && (isSelected || selectedGiftIds.size < maxSelectable)
 
-          // Build gift object for EGOGiftCard
           const gift = spec
             ? toEGOGiftEntity(giftId, spec, name)
             : toUnknownEGOGiftEntity(giftId, name)

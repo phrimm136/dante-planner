@@ -28,12 +28,6 @@ export interface StartGiftSummaryProps {
   onViewNotes?: () => void
 }
 
-/**
- * Summary view for start gift selection.
- * Shows selected keyword + gift cards when selection exists,
- * or a dashed border placeholder when empty.
- * Clicking opens the StartGiftEditPane dialog.
- */
 export function StartGiftSummary({
   selectedKeyword,
   selectedGiftIds,
@@ -49,10 +43,8 @@ export function StartGiftSummary({
   const { heightPx: giftSlotHeightPx } = useSlotSizePx(EGO_GIFT_GEOMETRY.size, mobileScale)
   const minHeight = giftRowMinHeightPx(giftSlotHeightPx)
 
-  // Show selected state when keyword is chosen (gifts are optional)
   const hasKeywordSelected = selectedKeyword !== null
 
-  // Build gift objects for display
   const selectedGifts = (() => {
     if (!hasKeywordSelected || !spec || !i18n || selectedGiftIds.size === 0) return []
 
@@ -78,12 +70,10 @@ export function StartGiftSummary({
         className={cn('w-full text-left', !readOnly && 'selectable cursor-pointer')}
       >
         {hasKeywordSelected ? (
-          /* Selected state: keyword icon + gift cards (if any) + EA counter */
           <div
             className="flex items-center gap-4"
             style={{ padding: GIFT_ROW_PADDING_PX, minHeight }}
           >
-            {/* Keyword icon */}
             <CardSlot
               size={KEYWORD_ICON_GEOMETRY.size}
               mobileScale={mobileScale}
@@ -92,7 +82,6 @@ export function StartGiftSummary({
               <StartGiftKeywordIcon keyword={selectedKeyword} />
             </CardSlot>
 
-            {/* Selected gift cards (if any) */}
             <div className={SECTION_STYLES.LAYOUT.wrap}>
               {selectedGifts.length > 0 ? (
                 selectedGifts.map((gift) => (
@@ -108,7 +97,6 @@ export function StartGiftSummary({
             </div>
           </div>
         ) : (
-          /* Empty state: the dashed box, at the height the selected state keeps */
           <div className="flex" style={{ minHeight }}>
             <EmptyStatePlaceholder
               label={
@@ -125,13 +113,11 @@ export function StartGiftSummary({
   )
 }
 
-/** Props a store-bound caller supplies; the selection comes from the store. */
 export type StoreBoundStartGiftSummaryProps = Omit<
   StartGiftSummaryProps,
   'selectedKeyword' | 'selectedGiftIds'
 >
 
-/** Renders the summary against the gift selection held by the planner editor store. */
 export function StoreBoundStartGiftSummary(props: StoreBoundStartGiftSummaryProps) {
   const selectedKeyword = usePlannerEditorStore((s) => s.selectedGiftKeyword)
   const selectedGiftIds = usePlannerEditorStore((s) => s.selectedGiftIds)

@@ -12,7 +12,6 @@ import type { IdentityEntity } from '@/pages/identity'
 import type { UptieTier } from '../../types/DeckTypes'
 import type { IdentityId } from '@/shared/gameData'
 
-/** The identity box with its height left to the card. */
 interface IdentityGridProps {
   sortedIdentities: IdentityEntity[]
   visibleIds: Set<string>
@@ -22,17 +21,6 @@ interface IdentityGridProps {
   isActive: boolean
 }
 
-/**
- * Identity card grid with progressive rendering.
- *
- * Subscribes atomically to deckVisibleCount so rAF-driven progressive
- * ticks re-render only this component and its sibling EgoGrid,
- * not the rest of the deck builder.
- *
- * The rows take the filter and equip sets whole and read their own entry, so a
- * progressive tick — which changes neither — leaves every already-revealed card
- * at zero.
- */
 export function IdentityGrid({
   sortedIdentities,
   visibleIds,

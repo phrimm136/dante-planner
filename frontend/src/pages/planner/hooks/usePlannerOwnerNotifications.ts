@@ -1,12 +1,3 @@
-/**
- * Planner Owner Notifications Toggle Hook
- *
- * Allows planner owner to enable/disable comment notifications.
- * Only owners can toggle this setting.
- *
- * Pattern: usePlannerSubscription.ts (toggle mutation + cache invalidation)
- */
-
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { z } from 'zod'
@@ -28,29 +19,6 @@ const ToggleOwnerNotificationsResponseSchema = z
 
 type ToggleOwnerNotificationsResponse = z.infer<typeof ToggleOwnerNotificationsResponseSchema>
 
-/**
- * Hook for toggling owner notification settings on a planner
- *
- * @example
- * ```tsx
- * function OwnerNotificationButton({ planner }) {
- *   const toggle = useToggleOwnerNotifications();
- *
- *   const handleToggle = () => {
- *     toggle.mutate({
- *       plannerId: planner.id,
- *       enabled: !planner.ownerNotificationsEnabled
- *     });
- *   };
- *
- *   return (
- *     <button onClick={handleToggle} disabled={toggle.isPending}>
- *       {planner.ownerNotificationsEnabled ? 'Disable' : 'Enable'}
- *     </button>
- *   );
- * }
- * ```
- */
 export function useToggleOwnerNotifications() {
   const queryClient = useQueryClient()
 

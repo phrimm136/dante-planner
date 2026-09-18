@@ -7,30 +7,13 @@ import { Button } from '@/components/ui/button'
 import type { PlannerListView } from '../../types/PlannerListTypes'
 
 interface PlannerEmptyStateProps {
-  /** Current view mode */
   view: PlannerListView
-  /** Whether any filters are applied */
   isFiltered: boolean
 }
 
-/**
- * Empty state messaging for planner list.
- *
- * Shows different messages based on context:
- * - My Plans (no filters): "No plans yet. Create your first plan!"
- * - My Plans (filtered): "No plans match your filters."
- * - Community (no filters): "No plans yet. Be the first to share!"
- * - Community (filtered): "No plans match your filters."
- *
- * @example
- * {planners.length === 0 && (
- *   <PlannerEmptyState view={view} isFiltered={hasFilters} />
- * )}
- */
 export function PlannerEmptyState({ view, isFiltered }: PlannerEmptyStateProps) {
   const { t } = useTranslation(['planner', 'common'])
 
-  // Filtered state - show search message for both views
   if (isFiltered) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
@@ -43,7 +26,6 @@ export function PlannerEmptyState({ view, isFiltered }: PlannerEmptyStateProps) 
     )
   }
 
-  // My Plans - no planners yet
   if (view === 'my-plans') {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
@@ -62,7 +44,6 @@ export function PlannerEmptyState({ view, isFiltered }: PlannerEmptyStateProps) 
     )
   }
 
-  // Community - no planners yet
   return (
     <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
       <FileText className="size-12 text-muted-foreground mb-4" />

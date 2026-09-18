@@ -34,7 +34,6 @@ import { EntityToggle } from './EntityToggle'
 
 const FILTER_BOX = 'rounded-md border border-border/60 p-1'
 
-/** Writes one field of the filter state, leaving the rest alone. */
 type SetFilterField = <K extends keyof DeckFilterState>(
   key: K,
 ) => (value: DeckFilterState[K]) => void
@@ -42,7 +41,6 @@ type SetFilterField = <K extends keyof DeckFilterState>(
 interface FilterControlProps {
   state: DeckFilterState
   setField: SetFilterField
-  /** Applied to dropdown controls, which size themselves per layout. */
   className?: string
 }
 
@@ -148,11 +146,8 @@ interface DeckFilterChip {
   labelKey: string
   label: string
   Control: ComponentType<FilterControlProps>
-  /** Rendered in this entity mode only; both modes when absent. */
   mode?: EntityMode
-  /** Mobile: sits above the chevron, expanded on first paint. */
   primary?: boolean
-  /** Suspends on i18n data and takes a width per layout. */
   dropdown?: boolean
 }
 
@@ -218,25 +213,8 @@ const CHIPS: Record<FilterSetKey, DeckFilterChip> = {
   },
 }
 
-/** Render order, shared by both layouts. */
 const FILTERS = FILTER_SET_KEYS.map((key) => ({ key, ...CHIPS[key] }))
 
-/**
- * Single-row filter bar for the deck builder.
- *
- * Desktop (>= lg): horizontal flex-wrap row of all mode-applicable filters,
- * Search, and Reset All. EntityToggle is the first element.
- *
- * Mobile (< lg): card wrapper with always-visible primary (Toggle + Sinner +
- * Keyword) section; secondary filters collapse behind a centered chevron.
- * SearchBar and Reset All always sit at the bottom.
- *
- * Filter state is read from and written to the planner editor store via
- * useDeckFilterState / useSetDeckFilterState. Inert fields (id-only or
- * ego-only) stay in the store across mode toggles; the UI hides chips for
- * the inactive mode while the predicate in matchesDeckFilter ignores them.
- * Reset All clears every filter set and searchQuery but preserves entityMode.
- */
 export function DeckFilterBar() {
   const { t } = useTranslation(['database', 'planner', 'common'])
   const filterState = useDeckFilterState()

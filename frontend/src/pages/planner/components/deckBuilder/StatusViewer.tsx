@@ -14,7 +14,6 @@ interface StatusViewerProps {
 }
 
 export const StatusViewer: React.FC<StatusViewerProps> = ({ deckState, ownedGiftIds }) => {
-  // Load spec data using hooks (React Query caches shared across components)
   const identitySpec = useIdentityListSpec()
   const egoSpec = useEGOListSpec()
 
@@ -23,7 +22,6 @@ export const StatusViewer: React.FC<StatusViewerProps> = ({ deckState, ownedGift
 
   return (
     <div className="border rounded-lg p-3 space-y-2">
-      {/* Affinity EA */}
       <div className={SECTION_STYLES.LAYOUT.wrap}>
         {affinityCounts.map(({ affinity, generated, consumed }) => (
           <div
@@ -42,10 +40,8 @@ export const StatusViewer: React.FC<StatusViewerProps> = ({ deckState, ownedGift
           </div>
         ))}
       </div>
-      {/* Keyword EA */}
       <div className="flex flex-wrap gap-2 min-h-7 items-center">
         {keywordCounts.map(({ keyword, count, deployedCount, allCount }) => {
-          // Determine text color based on EA thresholds
           const textColorClass =
             deployedCount >= EA_SURPLUS_THRESHOLD
               ? 'text-yellow-400'

@@ -23,9 +23,6 @@ interface SinnerGridProps {
 
 const EMPTY_SKILL_DATA: SkillData = { affinities: [], atkTypes: [] }
 
-/**
- * Grid of all 12 sinners with their equipped identities and deployment order.
- */
 export const SinnerGrid = function SinnerGrid({
   equipment,
   deploymentOrder,
@@ -37,7 +34,6 @@ export const SinnerGrid = function SinnerGrid({
 }: SinnerGridProps) {
   const { gridStyle, mobileScale } = useSinnerGridLayout()
 
-  // Memoize identity lookup map - only recompute when identities change
   const identityMap = (() => {
     const map: Record<string, IdentityEntity> = {}
     identities.forEach((id) => {
@@ -46,7 +42,6 @@ export const SinnerGrid = function SinnerGrid({
     return map
   })()
 
-  // Memoize deployment order map - only recompute when deploymentOrder changes
   const deploymentOrderMap = (() => {
     const map: Record<number, number> = {}
     deploymentOrder.forEach((sinnerIndex, orderIndex) => {

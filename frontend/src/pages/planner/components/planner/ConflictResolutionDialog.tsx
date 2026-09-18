@@ -14,41 +14,14 @@ import type { AppError } from '@/lib/apiErrorClassifier'
 import type { ConflictState, ConflictResolutionChoice } from '../../types/PlannerTypes'
 import { SECTION_STYLES } from '@/lib/constants'
 
-/**
- * Props for ConflictResolutionDialog
- */
 export interface ConflictResolutionDialogProps {
-  /** Whether the dialog is open */
   open: boolean
-  /** Conflict information (serverVersion, detectedAt) */
   conflictState: ConflictState | null
-  /** Callback when user makes a choice */
   onChoice: (choice: ConflictResolutionChoice) => void
-  /** Whether resolution is in progress */
   isResolving?: boolean
-  /** Why the last attempt at this conflict failed, or null when none has */
   resolutionError?: AppError | null
 }
 
-/**
- * Dialog for resolving save conflicts (409 errors)
- *
- * Shown when the server version has changed since the user started editing.
- * Offers three choices:
- * - Keep Local (overwrite): Force-save local changes, discarding server changes
- * - Use Server (discard): Reload server version, losing local changes
- * - Keep Both: Create copy of server version with new UUID and "(Copy)" suffix
- *
- * @example
- * ```tsx
- * <ConflictResolutionDialog
- *   open={isSyncConflict(saveError)}
- *   conflictState={conflictState}
- *   onChoice={resolveConflict}
- *   isResolving={isSaving}
- * />
- * ```
- */
 export function ConflictResolutionDialog({
   open,
   conflictState,
@@ -58,12 +31,9 @@ export function ConflictResolutionDialog({
 }: ConflictResolutionDialogProps) {
   const { t } = useTranslation(['planner', 'common'])
 
-  // Format the conflict detection time for display
   const formatTime = (isoString: string): string =>
     formatPlannerDate(isoString, undefined, DATE_FORMATS.TIME_ONLY) ?? ''
 
-  // This dialog is the mounted owner of the conflict, so a failure it caused is
-  // reported here rather than through a toast the conflict itself never gets.
   const failure = resolutionError && presentError(resolutionError)
   const failureMessage = !resolutionError
     ? null
@@ -71,13 +41,11 @@ export function ConflictResolutionDialog({
       ? failure.params
         ? t(failure.key, failure.params)
         : t(failure.key)
-      : // The presenter yields nothing for a conflict, and this dialog is what owns it.
-        t(
+      : t(
           'pages.plannerMD.conflict.conflictAgain',
           'The planner changed again while this conflict was open. Choose again.',
         )
 
-  // Prevent dismissal via ESC key or clicking outside
   const preventDismissal = (e: Event) => {
     e.preventDefault()
   }

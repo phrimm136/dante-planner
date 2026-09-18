@@ -7,36 +7,20 @@ import type {
   ServerPlannerResponse,
 } from '../types/PlannerTypes'
 
-/**
- * Partition of a sync pass, in the order the caller executes it.
- * `pull` and `conflict` carry server summaries, `purge` carries local ones,
- * `sweep` and `dropTombstone` carry local deletions the server has not heard.
- */
 export interface SyncPlan {
-  /** Server rows to fetch and write over local: server-only, or newer than a saved local row. */
   pull: PlannerSummary[]
-  /** Server rows that are newer than a local draft, so the user has to choose. */
   conflict: PlannerSummary[]
-  /** Local rows whose server copy carries a tombstone. */
   purge: PlannerSummary[]
-  /** Local deletions whose server row has not moved: send the DELETE. */
   sweep: LocalTombstone[]
-  /** Local deletions the server outran or already settled: forget them. */
   dropTombstone: LocalTombstone[]
 }
 
-/** A summary's server sync version, absent meaning never synced. */
 function versionOf(planner: PlannerSummary): number {
   return planner.syncVersion ?? 0
 }
 
 export type PlannerVerdict = 'pull' | 'conflict' | 'skip'
 
-/**
- * What one server row means against its local counterpart. A row the server
- * has not advanced is left alone; an advanced row over a local draft is a
- * conflict, since pulling it would discard unsaved edits.
- */
 export function categorizePlanner(
   local: PlannerSummary | undefined,
   server: PlannerSummary,
@@ -46,14 +30,6 @@ export function categorizePlanner(
   return local.status === 'draft' ? 'conflict' : 'pull'
 }
 
-/**
- * Partition a sync pass over the two summary lists it compares.
- *
- * A purge takes positive evidence: only a server tombstone (`deletedAt`) removes a local row,
- * and a local draft survives even that, since pulling the deletion would discard unsaved edits.
- * A local row the server never listed is kept — absence also describes a row that was never
- * uploaded, and deleting on that reading destroys the only copy.
- */
 export function categorizeSync(
   server: PlannerSummary[],
   local: PlannerSummary[],
@@ -101,21 +77,17 @@ export function categorizeSync(
   return { pull, conflict, purge, sweep, dropTombstone }
 }
 
-/** The reads and writes a sync pass runs, injected so the phases stay testable. */
 export interface SyncOps {
-  /** The pulled rows, in the chunks the api client fetches them in. */
   fetchChunks: (ids: string[]) => AsyncIterable<ServerPlannerResponse[]>
   toSaveable: (response: ServerPlannerResponse) => SaveablePlanner
   saveLocal: (planner: SaveablePlanner) => Promise<Result<void, AppError>>
   deleteLocal: (id: string) => Promise<Result<void, AppError>>
-  /** The failure is unread: a row this pass cannot load is one it cannot offer. */
   loadLocal: (id: string) => Promise<Result<SaveablePlanner | null, unknown>>
   fetchServer: (id: string) => Promise<Result<{ planner: SaveablePlanner }, AppError>>
   deleteServer: (id: string) => Promise<Result<void, AppError>>
   clearTombstone: (id: string) => Promise<Result<void, AppError>>
 }
 
-/** A 403 is a row that was never this account's to delete. */
 const SETTLED_DELETE_KINDS: ReadonlySet<AppError['kind']> = new Set(['notFound', 'forbidden'])
 
 export async function settleTombstones(
@@ -134,21 +106,12 @@ export async function settleTombstones(
   await Promise.all([...swept, ...dropped])
 }
 
-/** The two sides of one planner the user has to choose between. */
 export interface SyncConflict {
   id: string
   localPlanner: SaveablePlanner
   serverPlanner: SaveablePlanner
 }
 
-/**
- * Write every pulled row as it arrives, answering how many landed.
- *
- * Each chunk is written as it arrives, so a later chunk failing keeps what came
- * before; the response is not positionally aligned, so omitted rows stay
- * local-untouched. An empty residue asks for nothing, which is what the server
- * would reject.
- */
 export async function pullServerPlanners(ids: string[], ops: SyncOps): Promise<number> {
   if (ids.length === 0) return 0
 
@@ -174,7 +137,6 @@ export async function pullServerPlanners(ids: string[], ops: SyncOps): Promise<n
   return pulled
 }
 
-/** Drop local rows the server no longer has. The delete is idempotent. */
 export async function purgeLocalPlanners(
   planners: PlannerSummary[],
   ops: SyncOps,
@@ -191,10 +153,6 @@ export async function purgeLocalPlanners(
   return purged
 }
 
-/**
- * Read both sides of every conflicting row, dropping the ones neither side can
- * produce: a conflict the user cannot see both halves of is not one they can decide.
- */
 export async function collectSyncConflicts(
   planners: PlannerSummary[],
   ops: SyncOps,

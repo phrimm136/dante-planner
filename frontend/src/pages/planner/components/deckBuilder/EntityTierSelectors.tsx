@@ -7,32 +7,22 @@ import { getEGOTierIconPath } from '@/shared/assets'
 
 const UPTIE_TIERS: UptieTier[] = [1, 2, 3, 4]
 
-/** Distance before the viewport at which a selector starts mounting. */
 const LAZY_MOUNT_MARGIN = '100px'
 
 /** Base EGOs cannot be unequipped; their ids end in the first slot. */
 const BASE_EGO_ID_SUFFIX = '01'
 
-/**
- * What a confirmed selection reports. Identity selectors fill uptie and level,
- * EGO selectors fill threadspin.
- */
 export interface TierSelection {
   uptie?: UptieTier
   threadspin?: ThreadspinTier
   level?: number
 }
 
-/**
- * Hover/touch shell shared by both selectors: it owns open state, the
- * outside-click dismissal, and the absolutely positioned popover.
- */
 function HoverSelectorShell({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const isTouchDeviceRef = useRef(false)
 
-  // Handle clicks outside to close on mobile
   useEffect(() => {
     if (!isOpen) return
 
@@ -139,14 +129,9 @@ function ConfirmButton({
 
 interface LazySelectorProps {
   children: React.ReactNode
-  /** Rendered once the card scrolls near the viewport. */
   selector: React.ReactNode
 }
 
-/**
- * Defers mounting the selector until its card approaches the viewport; a full
- * deck grid would otherwise mount hundreds of popovers up front.
- */
 function LazySelector({ children, selector }: LazySelectorProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [isVisible, setIsVisible] = useState(false)
@@ -159,7 +144,7 @@ function LazySelector({ children, selector }: LazySelectorProps) {
       ([entry]) => {
         if (entry?.isIntersecting) {
           setIsVisible(true)
-          observer.disconnect() // Once visible, stop observing
+          observer.disconnect()
         }
       },
       { rootMargin: LAZY_MOUNT_MARGIN },
@@ -188,9 +173,6 @@ interface IdentityTierSelectorProps {
   children: React.ReactNode
 }
 
-/**
- * Uptie and level picker overlaid on an identity card.
- */
 export function IdentityTierSelector({
   entityId,
   currentUptie = 4,
@@ -271,7 +253,6 @@ function IdentityTierSelectorInner({
 interface EgoThreadspinSelectorProps {
   entityId: EGOId
   currentThreadspin?: ThreadspinTier
-  /** Per-EGO threadspin ceiling (4 or 5). */
   maxThreadspin?: ThreadspinTier
   isSelected?: boolean
   onConfirm: (entityId: EGOId, data: TierSelection) => void
@@ -279,10 +260,6 @@ interface EgoThreadspinSelectorProps {
   children: React.ReactNode
 }
 
-/**
- * Threadspin picker overlaid on an EGO card. An already-equipped EGO at its
- * current threadspin offers unequip instead of equip.
- */
 export function EgoThreadspinSelector({
   entityId,
   currentThreadspin = 4,

@@ -16,9 +16,6 @@ import type { ZodType } from 'zod'
 import type { AppError } from '@/lib/apiErrorClassifier'
 import type { SaveablePlanner, PlannerSummary, LocalTombstone } from '../types/PlannerTypes'
 
-/**
- * SSR safety check
- */
 const isClient = typeof window !== 'undefined'
 
 /**
@@ -43,12 +40,6 @@ function parseStorageKey(key: string): { prefix: string; plannerId: string } | n
   return { prefix, plannerId }
 }
 
-/**
- * A planner whose keyword ids are the current ones.
- *
- * Rebuilt rather than assigned into: the input is parse output shared with the
- * caller, so migrating in place would rewrite a value someone else still holds.
- */
 function withMigratedKeywords(planner: SaveablePlanner): SaveablePlanner {
   if (!isMDPlanner(planner)) return planner
 
@@ -61,18 +52,10 @@ function withMigratedKeywords(planner: SaveablePlanner): SaveablePlanner {
   }
 }
 
-/**
- * Options for storage operations with error handling
- */
 export interface StorageOperationOptions {
-  /** Callback for error notification with error code (for i18n translation) */
   onError?: (errorCode: StorageErrorCode) => void
 }
 
-/**
- * Error codes for storage operations
- * Page components use these to display translated error messages
- */
 export type StorageErrorCode =
   | 'quotaExceeded'
   | 'saveFailed'
@@ -81,43 +64,23 @@ export type StorageErrorCode =
   | 'corruptedData'
   | 'notInBrowser'
 
-/**
- * Result of a load operation.
- *
- * A successful load of a key that holds nothing carries `null`; a load that
- * could not be performed carries the code that says why.
- */
 export type LoadResult = Result<SaveablePlanner | null, StorageErrorCode>
 
-/**
- * Planner storage operations for IndexedDB
- * Provides CRUD operations with Zod validation and guest draft limits
- */
 export interface PlannerStorageOperations {
-  /** Save planner to IndexedDB with proper key based on status, reporting why it failed */
   saveToLocal: (
     planner: SaveablePlanner,
     options?: StorageOperationOptions,
   ) => Promise<Result<void, AppError>>
-  /** Load and validate a planner; absent reads succeed with null, broken ones report a code */
   loadFromLocal: (id: string, options?: StorageOperationOptions) => Promise<LoadResult>
-  /** List all planners as summaries, sorted by lastModifiedAt (newest first) */
   listLocal: () => Promise<PlannerSummary[]>
-  /** List all planners with full content, sorted by lastModifiedAt (newest first) */
   listLocalFull: () => Promise<SaveablePlanner[]>
-  /** Delete a planner by ID, reporting why the delete failed */
   deleteFromLocal: (id: string) => Promise<Result<void, AppError>>
-  /** Clear corrupted planner data by ID */
   clearCorruptedLocal: (id: string) => Promise<Result<void, AppError>>
-  /** Record a deletion the server has not been told about */
   writeTombstone: (tombstone: LocalTombstone) => Promise<Result<void, AppError>>
-  /** Every deletion still awaiting the server */
   listTombstones: () => Promise<LocalTombstone[]>
-  /** Forget a deletion the server has settled */
   clearTombstone: (id: string) => Promise<Result<void, AppError>>
 }
 
-/** The row a planner is stored as, or null when it fails the schema. */
 function plannerRow(planner: SaveablePlanner): { key: string; json: string } | null {
   const validated = validateDataOrNull(
     planner,
@@ -128,44 +91,12 @@ function plannerRow(planner: SaveablePlanner): { key: string; json: string } | n
   return { key: storageKeys.planner(planner.metadata.id), json: JSON.stringify(validated) }
 }
 
-/** The error a caller reports for a write the storage layer refused. */
 function writeError(failure: StorageReadError): AppError {
   return classifyAppError(failure.kind === 'ioError' ? failure.cause : failure)
 }
 
-/**
- * Hook that provides planner storage operations using IndexedDB
- *
- * All operations are SSR-safe and use Zod validation for loaded data.
- * Keys follow the format: {prefix}:{plannerId}
- *
- * @example
- * ```tsx
- * function PlannerPage() {
- *   const storage = usePlannerStorage()
- *
- *   const handleSave = async (planner: SaveablePlanner) => {
- *     await storage.saveToLocal(planner)
- *   }
- *
- *   const handleLoad = async (id: string) => {
- *     const result = await storage.loadFromLocal(id)
- *     if (result.ok && result.value) {
- *       // Use planner data
- *     }
- *   }
- * }
- * ```
- */
 export function usePlannerStorage(): PlannerStorageOperations {
-  // Memoize to return stable function references
-  // All functions only use module-level variables, no React state/props
   return (() => {
-    /**
-     * Save planner to IndexedDB under planner:{plannerId}. With the connection
-     * open the write is issued inside the caller's task.
-     * @returns the save error the caller reports to the user, or nothing on success
-     */
     const saveToLocal = async (
       planner: SaveablePlanner,
       options?: StorageOperationOptions,
@@ -198,11 +129,6 @@ export function usePlannerStorage(): PlannerStorageOperations {
       }
     }
 
-    /**
-     * Load planner by ID with Zod validation
-     * @returns the validated planner, null when the key holds nothing, or the code
-     *          that says why the read could not be performed
-     */
     const loadFromLocal = async (
       id: string,
       options?: StorageOperationOptions,
@@ -242,11 +168,9 @@ export function usePlannerStorage(): PlannerStorageOperations {
       }
 
       const planner = toSaveablePlanner(validated.metadata, validated.config, validated.content)
-      // Migrate renamed keyword ids so the detail/view page renders current icons.
       return ok(withMigratedKeywords(planner))
     }
 
-    /** Every row under one key prefix that passes its schema, newest first left to the caller. */
     async function collectRows<T, R>(
       prefix: string,
       schema: ZodType<T>,
@@ -320,7 +244,6 @@ export function usePlannerStorage(): PlannerStorageOperations {
       return rows.sort((a, b) => newestFirst(a.lastModifiedAt, b.lastModifiedAt))
     }
 
-    /** Full rows for content-based filtering; keyword ids are migrated since content is unvalidated here. */
     const listLocalFull = async (): Promise<SaveablePlanner[]> => {
       const rows = await collectRows(
         PLANNER_STORAGE_KEYS.PLANNER,
@@ -334,10 +257,6 @@ export function usePlannerStorage(): PlannerStorageOperations {
       return rows.sort((a, b) => newestFirst(a.metadata.lastModifiedAt, b.metadata.lastModifiedAt))
     }
 
-    /**
-     * Delete a planner by ID
-     * @returns the delete error the caller reports to the user, or nothing on success
-     */
     const deleteFromLocal = async (id: string): Promise<Result<void, AppError>> => {
       if (!isClient) return err({ kind: 'unknown' })
 
@@ -354,10 +273,6 @@ export function usePlannerStorage(): PlannerStorageOperations {
       }
     }
 
-    /**
-     * Clear corrupted planner data by ID
-     * Used when validation fails on load to clean up invalid data
-     */
     async function clearCorruptedLocal(id: string): Promise<Result<void, AppError>> {
       return deleteFromLocal(id)
     }
@@ -391,5 +306,5 @@ export function usePlannerStorage(): PlannerStorageOperations {
       listTombstones,
       clearTombstone,
     }
-  })() // Empty deps: functions only use module-level variables
+  })()
 }

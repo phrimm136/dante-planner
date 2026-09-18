@@ -17,9 +17,6 @@ import type { FloorThemeSelection } from '@/pages/themePack'
 import type { PlannerEditorState } from './stores/usePlannerEditorStore'
 import { SECTION_STYLES } from '@/lib/constants'
 
-/**
- * Planner MD Edit Page - Edit an existing planner
- */
 export default function PlannerMDEditPage() {
   const { id } = useParams({ from: '/planner/md/$id/edit' })
 
@@ -62,7 +59,6 @@ function PlannerEditContent({ id }: { id: string }) {
     )
   }
 
-  // Build initial state from planner data for the store
   const { content } = planner
   const deserialized = deserializeSets(content)
 
@@ -93,8 +89,6 @@ function PlannerEditContent({ id }: { id: string }) {
     },
   }
 
-  // key forces remount when planner ID changes (e.g., after "Keep Both" navigation)
-  // This ensures plannerId state resets and auto-save writes to the correct planner
   return (
     <PlannerEditorStoreProvider key={planner.metadata.id} initialState={initialState}>
       <PlannerEditEditor planner={planner} />

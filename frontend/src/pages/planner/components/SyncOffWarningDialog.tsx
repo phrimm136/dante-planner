@@ -27,26 +27,10 @@ const SYNC_OFF_KEYS: Record<
 }
 
 interface SyncOffWarningDialogProps extends ActionDialogControl {
-  /** Which mutation the user is about to run with sync disabled */
   action: SyncOffAction
   onConfirm: () => void
 }
 
-/**
- * Warning dialog shown when the user saves or publishes a plan while sync is
- * disabled — the action will push local content to the server.
- *
- * @example
- * ```tsx
- * <SyncOffWarningDialog
- *   action="save"
- *   open={showSaveWarning}
- *   onOpenChange={setShowSaveWarning}
- *   onConfirm={handleSaveWithSync}
- *   isPending={isSaving}
- * />
- * ```
- */
 export function SyncOffWarningDialog({
   action,
   open,

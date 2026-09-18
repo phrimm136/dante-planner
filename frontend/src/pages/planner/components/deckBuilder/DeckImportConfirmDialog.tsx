@@ -14,16 +14,11 @@ import { WARNING_CALLOUT_STYLES } from '@/lib/constants'
 import type { DecodedDeck } from '../../lib/deckCode'
 
 interface DeckImportConfirmDialogProps {
-  /** The decoded deck awaiting confirmation; `null` keeps the dialog closed. */
   pendingImport: DecodedDeck | null
   onConfirm: () => void
   onCancel: () => void
 }
 
-/**
- * Confirmation for a deck code read off the clipboard, listing the warnings the
- * decode produced before the caller applies it.
- */
 export function DeckImportConfirmDialog({
   pendingImport,
   onConfirm,

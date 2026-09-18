@@ -12,28 +12,12 @@ import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
 
 import type { MDGesellschaftFilters } from '../../types/MDPlannerListTypes'
 
-/** The planner box with its height left to the card. */
 export interface PublishedPlannerListProps {
-  /** Every filter value the query runs under */
   filters: MDGesellschaftFilters
-  /** Whether user is authenticated (for bookmark display) */
   isAuthenticated: boolean
-  /** Callback when page changes */
   onPageChange: (page: number) => void
 }
 
-/**
- * Published planner list component with pagination
- * Displays community planners from API
- *
- * Features:
- * - Progressive rendering
- * - Direct navigation on click
- * - Pagination support
- * - Empty state handling
- *
- * Usage: Gesellschaft list page and detail page bottom section
- */
 export function PublishedPlannerList({
   filters,
   isAuthenticated,
@@ -54,14 +38,12 @@ export function PublishedPlannerList({
 
   const currentSearch = useSearch({ strict: false })
 
-  // Progressive rendering: start with one batch, add a batch per frame
   const displayCount = useProgressiveCount({
     total: data.content.length,
     step: PROGRESSIVE_REVEAL.CARD_BATCH,
     initial: PROGRESSIVE_REVEAL.CARD_BATCH,
   })
 
-  // Determine if any filters are active (for empty state messaging)
   const hasActiveFilters =
     !!filters.category ||
     !!filters.search ||
@@ -72,7 +54,6 @@ export function PublishedPlannerList({
     !!filters.gift ||
     !!filters.themePack
 
-  // Handle empty state
   if (data.content.length === 0) {
     return <PlannerEmptyState view="community" isFiltered={hasActiveFilters} />
   }

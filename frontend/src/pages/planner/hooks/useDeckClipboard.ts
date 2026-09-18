@@ -8,32 +8,22 @@ import { encodeDeckCode, decodeDeckCode, validateDeckCode } from '../lib/deckCod
 import type { DecodedDeck } from '../lib/deckCode'
 import type { SinnerEquipment } from '../types/DeckTypes'
 
-/** The deck an export writes out, read at the moment the export runs. */
 export interface DeckSnapshot {
   equipment: Record<string, SinnerEquipment>
   deploymentOrder: number[]
 }
 
 export interface UseDeckClipboardOptions {
-  /** Reads the deck to encode. Called per export, never during render. */
   readDeck: () => DeckSnapshot
 }
 
 export interface DeckClipboard {
-  /** Decodes the clipboard into `pendingImport`, or toasts why it could not. */
   handleImport: () => Promise<void>
-  /** Writes the deck code to the clipboard. */
   handleExport: () => Promise<void>
-  /** The decoded deck awaiting the reader's confirmation; `null` while none is. */
   pendingImport: DecodedDeck | null
   clearPending: () => void
 }
 
-/**
- * Clipboard import/export of a deck code, plus the decoded deck a caller must
- * confirm before applying. `pendingImport` is the whole dialog state: it is
- * non-null exactly while the confirmation is open.
- */
 export function useDeckClipboard({ readDeck }: UseDeckClipboardOptions): DeckClipboard {
   const identitySpec = useIdentityListSpec()
   const egoSpec = useEGOListSpec()

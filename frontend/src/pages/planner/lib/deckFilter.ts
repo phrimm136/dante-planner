@@ -1,12 +1,3 @@
-/**
- * Deck Builder Filter Predicate
- *
- * Pure function that evaluates whether an identity or EGO matches the
- * current deck filter state. Mode-gated: identity-only fields (def type,
- * rank, unit keywords) are ignored when mode is 'ego'; ego-only field
- * (ego type) is ignored when mode is 'identity'.
- */
-
 import type { DeckFilterState, EntityMode } from '../types/DeckTypes'
 import type { IdentityEntity } from '@/pages/identity'
 import type { EGOEntity } from '@/pages/ego'
@@ -46,25 +37,6 @@ const DECK_FACETS: readonly Facet<DeckFilterItem, DeckFilterState>[] = [
   },
 ]
 
-/**
- * Evaluates whether an item passes all active deck filters for the given mode.
- *
- * Semantics:
- * - Empty filter sets match everything.
- * - Sinner: derived from entity ID; item's sinner must be in the selected set.
- * - Skill keywords: item must have ALL selected keywords (AND).
- * - Attribute / Atk / Def / Rank / Season / Unit / Battle keywords: ANY match (OR).
- * - EGO type: item.egoType in set (EGO mode only).
- * - Mode gating: identity-only fields skipped when mode is 'ego' and vice versa.
- * - Search: lowercased match against item.name, skill-keyword display names, and
- *   (identity mode only) unit-keyword display names.
- *
- * @param item - IdentityEntity or EGOEntity to evaluate
- * @param state - Current deck filter state (from Zustand slice)
- * @param mode - Entity mode gate; controls which id/ego-specific fields apply
- * @param searchMappings - Reverse mappings from display name to internal codes
- * @returns true if item passes every active filter for this mode
- */
 export function matchesDeckFilter(
   item: DeckFilterItem,
   state: DeckFilterState,

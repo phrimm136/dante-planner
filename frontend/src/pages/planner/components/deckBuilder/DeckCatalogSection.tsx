@@ -15,7 +15,6 @@ import { EgoGrid } from './EgoGrid'
 const BATCH_SIZE = 10
 
 interface DeckCatalogSectionProps {
-  /** False while a closing dialog is still painting its exit animation. */
   isActive: boolean
   entityMode: EntityMode
   sortedIdentities: IdentityEntity[]
@@ -32,13 +31,6 @@ interface DeckCatalogSectionProps {
   onUnequipEgo: (egoId: EGOId) => void
 }
 
-/**
- * The browsable catalog: filter bar plus the identity and EGO grids.
- *
- * Cards are rendered once and hidden with CSS rather than unmounted, so filter
- * changes cost no React reconciliation. Rendering is fed in by a progressive
- * counter the grids subscribe to atomically.
- */
 export function DeckCatalogSection({
   isActive,
   entityMode,
@@ -58,7 +50,6 @@ export function DeckCatalogSection({
   // Inactive grid renders nothing until after first paint; latches true until close
   const [hasWarmedInactive, setHasWarmedInactive] = useState(false)
 
-  // Store API for imperative progressive-count updates (no subscription → no re-render here)
   const storeApi = usePlannerEditorStoreApiSafe()
 
   // Reset progressive state on unmount so the next mount starts cold.
@@ -81,7 +72,6 @@ export function DeckCatalogSection({
   const totalIdentities = sortedIdentities.length
   const totalEgos = sortedEgos.length
 
-  // Progressive loading via rAF chain - imperative store writes (no subscription here)
   useEffect(() => {
     if (!isActive || !storeApi) return
     const totalCount = Math.max(totalIdentities, totalEgos)

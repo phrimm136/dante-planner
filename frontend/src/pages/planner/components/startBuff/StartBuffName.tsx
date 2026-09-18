@@ -15,18 +15,11 @@ const TRACKING: TrackingSpec = { letterSpacingEm: 0, wordSpacingEm: 0 }
 
 interface StartBuffNameProps {
   text: string
-  /** The name's ceiling on this artwork, in cqw of the card root */
   maxSize: number
   color: string | undefined
   shadow?: string | undefined
 }
 
-/**
- * The start buff card's name, on one line, scaled down until it fits its box.
- *
- * Reads the display face's advance table through `useSuspenseQuery` — render it inside a
- * Suspense boundary.
- */
 export function StartBuffName({ text, maxSize, color, shadow }: StartBuffNameProps) {
   const { i18n } = useTranslation()
   const fontTable = useFontAdvances(i18n.language)
@@ -60,12 +53,6 @@ interface StartBuffMiniNameProps {
   color: string | undefined
 }
 
-/**
- * The summary mini card's name, wrapped into lines at a fixed size.
- *
- * Reads the display face's advance table through `useSuspenseQuery` — render it inside a
- * Suspense boundary.
- */
 export function StartBuffMiniName({ text, color }: StartBuffMiniNameProps) {
   const { i18n } = useTranslation()
   const fontTable = useFontAdvances(i18n.language)

@@ -1,22 +1,6 @@
-/**
- * Start Gift Selection Calculator
- *
- * Pure function for calculating max gift selection based on start buff effects.
- *
- * @see StartBuffTypes.ts for StartBuff definition
- */
-
 import type { StartBuff } from '@/shared/gameText'
 import { getBuffById } from './startBuffs'
 
-/**
- * Calculates the number of selectable start gifts based on selected buffs
- * Base = 1, plus sum of ADDITIONAL_START_EGO_GIFT_SELECT effect values
- *
- * @param buffs - Array of start buffs (from toStartBuffs)
- * @param selectedIds - Set of selected buff IDs
- * @returns Maximum number of gifts that can be selected (minimum 1)
- */
 export function calculateMaxGiftSelection(
   buffs: StartBuff[] | undefined,
   selectedIds: Set<number>,

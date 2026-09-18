@@ -15,10 +15,6 @@ interface StatusIconSpec {
   label: string
 }
 
-/**
- * Icon, colour and accessible name per save status. Total over `SaveStatus`, so
- * a new status cannot ship without one.
- */
 const STATUS_ICONS: Record<SaveStatus, StatusIconSpec> = {
   draft: {
     Icon: Circle,
@@ -52,10 +48,6 @@ const STATUS_ICONS: Record<SaveStatus, StatusIconSpec> = {
   },
 }
 
-/**
- * Symbol indicator for planner status (used in cards).
- * Displays minimal icon without text for compact representation.
- */
 export function PlannerStatusIcon({ status, className }: PlannerStatusIconProps) {
   const { Icon, className: statusClass, label } = STATUS_ICONS[status]
 

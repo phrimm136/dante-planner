@@ -21,29 +21,20 @@ interface ComprehensiveGiftSelectorPaneProps {
   onOpenChange: (open: boolean) => void
 }
 
-/**
- * Dialog for selecting EGO gifts with cascade selection logic.
- * Shows ALL gifts (no theme pack restriction, but applies keyword/search filters).
- * Supports enhancement selection (0-3 levels) with automatic cascade for recipes.
- * State is managed by store.
- */
 export function ComprehensiveGiftSelectorPane({
   open,
   onOpenChange,
 }: ComprehensiveGiftSelectorPaneProps) {
-  // Store state
   const selectedGiftIds = usePlannerEditorStore((s) => s.comprehensiveGiftIds)
   const setComprehensiveGiftIds = usePlannerEditorStore((s) => s.setComprehensiveGiftIds)
   const { t } = useTranslation(['planner', 'common'])
   const spec = useEGOGiftListSpec()
   const i18n = useEGOGiftListI18n()
 
-  // Filter states (local to pane UI - reset on reopen)
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
   const [searchQuery, setSearchQuery] = useState('')
   const [sortMode, setSortMode] = useState<SortMode>('tier-first')
 
-  // Reset filters when dialog closes
   useEffect(() => {
     if (!open) {
       setSelectedKeywords(new Set())
@@ -52,17 +43,14 @@ export function ComprehensiveGiftSelectorPane({
     }
   }, [open])
 
-  // Convert to EGOGiftEntity array
   const gifts: EGOGiftEntity[] = (() => {
     return Object.entries(spec).map(([id, entry]) => toEGOGiftEntity(id, entry, i18n[id] || id))
   })()
 
-  // Build O(1) lookup map for recipe cascade selection
   const specById = (() => {
     return new Map(Object.entries(spec))
   })()
 
-  // Sort gifts (no ID filter for comprehensive list)
   const sortedGifts = (() => {
     return sortEGOGifts(gifts, sortMode)
   })()
@@ -75,9 +63,6 @@ export function ComprehensiveGiftSelectorPane({
     latest.current = { selectedGiftIds, specById, setComprehensiveGiftIds }
   })
 
-  /**
-   * Handle enhancement selection with toggle logic and cascade
-   */
   const [handleEnhancementSelect] = useState(
     () => (giftId: EGOGiftId, enhancement: EnhancementLevel) => {
       startTransition(() => {
@@ -133,7 +118,6 @@ export function ComprehensiveGiftSelectorPane({
           onSearchChange={setSearchQuery}
         />
 
-        {/* Gift selection list */}
         <div className="flex-1 overflow-y-auto">
           <Suspense fallback={<LoadingState />}>
             <EGOGiftSelectionList

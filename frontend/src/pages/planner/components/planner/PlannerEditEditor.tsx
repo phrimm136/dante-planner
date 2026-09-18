@@ -27,9 +27,6 @@ interface PlannerEditEditorProps {
   planner: SaveablePlanner
 }
 
-/**
- * Editor for a stored planner.
- */
 export function PlannerEditEditor({ planner }: PlannerEditEditorProps) {
   const config = usePlannerConfig()
 

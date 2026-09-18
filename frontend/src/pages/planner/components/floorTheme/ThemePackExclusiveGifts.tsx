@@ -6,10 +6,6 @@ interface ThemePackExclusiveGiftsProps {
   giftIds: readonly EGOGiftId[]
 }
 
-/**
- * Non-interactive row of a theme pack's exclusive EGO gift icons.
- * Renders nothing for packs without exclusive gifts.
- */
 export function ThemePackExclusiveGifts({ giftIds }: ThemePackExclusiveGiftsProps) {
   if (giftIds.length === 0) return null
 

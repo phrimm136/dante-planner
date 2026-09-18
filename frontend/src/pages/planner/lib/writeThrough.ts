@@ -1,4 +1,3 @@
-/** Coalesce store notifications into one `onChange` per task, run as a microtask. */
 export function createWriteThrough(
   subscribe: (listener: () => void) => () => void,
   onChange: () => void,

@@ -22,10 +22,6 @@ interface DecodedGift {
   enhancement: EnhancementLevel
 }
 
-/**
- * Individual gift item in floor viewer.
- * Memoized to prevent re-renders when other gifts are added/removed.
- */
 const FloorGiftItem = function FloorGiftItem({ item, enhancement }: DecodedGift) {
   return (
     <EGOGiftTooltip giftId={item.id} enhancement={enhancement}>
@@ -36,11 +32,6 @@ const FloorGiftItem = function FloorGiftItem({ item, enhancement }: DecodedGift)
   )
 }
 
-/**
- * Displays only the selected EGO gifts for a floor with their enhancement levels
- * Shows placeholder when empty, clicking opens selector pane
- * ReadOnly mode prevents interaction
- */
 export function FloorGiftViewer({
   selectedGiftIds,
   onClick,
@@ -55,7 +46,6 @@ export function FloorGiftViewer({
 
   const selectedGifts = decodeAndOrderGiftSelections(selectedGiftIds, spec, i18n, 'tier-first')
 
-  // Empty state
   if (selectedGifts.length === 0) {
     return (
       <EmptyStatePlaceholder

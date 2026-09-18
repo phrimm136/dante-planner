@@ -1,23 +1,17 @@
-// React core
 import { Suspense, useId, useState } from 'react'
 
-// Third-party libraries
 import { showSuccess } from '@/lib/errorPresentation'
 
-// Project constants
 import { DEFAULT_SKILL_EA } from '@/shared/gameData'
 
-// Store
 import {
   PlannerEditorStoreProvider,
   usePlannerEditorStore,
   usePlannerEditorStoreApi,
 } from './stores/usePlannerEditorStore'
 
-// Project hooks
 import { useDeckClipboard } from './hooks/useDeckClipboard'
 
-// Project components (@/components)
 import { StoreBoundDeckBuilderSummary } from './components/deckBuilder/DeckBuilderSummary'
 import { DeckBuilderPane } from './components/deckBuilder/DeckBuilderPane'
 import { StoreBoundDeckBuilderContent } from './components/deckBuilder/DeckBuilderContent'
@@ -25,20 +19,14 @@ import { DeckImportConfirmDialog } from './components/deckBuilder/DeckImportConf
 import { DeckBuilderPageSkeleton } from './components/plannerSkeletons'
 import { SECTION_STYLES } from '@/lib/constants'
 
-/**
- * Inner content component with store access and handlers.
- * Uses Summary + Pane pattern: SinnerGrid viewer + Edit dialog.
- */
 function DeckBuilderPageContent() {
   const storeApi = usePlannerEditorStoreApi()
 
-  // Store actions
   const setEquipment = usePlannerEditorStore((s) => s.setEquipment)
   const setDeploymentOrder = usePlannerEditorStore((s) => s.setDeploymentOrder)
   const deploymentOrder = usePlannerEditorStore((s) => s.deploymentOrder)
   const updateSinnerSkillEA = usePlannerEditorStore((s) => s.updateSinnerSkillEA)
 
-  // Pane (edit dialog) state
   const [isDeckPaneOpen, setIsDeckPaneOpen] = useState(false)
 
   const { handleImport, handleExport, pendingImport, clearPending } = useDeckClipboard({
@@ -72,7 +60,6 @@ function DeckBuilderPageContent() {
 
   return (
     <div className={SECTION_STYLES.LAYOUT.page}>
-      {/* Summary view: SinnerGrid + StatusViewer + ActionBar */}
       <StoreBoundDeckBuilderSummary
         onToggleDeploy={handleToggleDeploy}
         onImport={handleImport}
@@ -81,7 +68,6 @@ function DeckBuilderPageContent() {
         onEditDeck={() => setIsDeckPaneOpen(true)}
       />
 
-      {/* Edit dialog: full card selection grid */}
       <DeckBuilderPane open={isDeckPaneOpen} onOpenChange={setIsDeckPaneOpen}>
         <StoreBoundDeckBuilderContent
           isActive={isDeckPaneOpen}
@@ -103,11 +89,6 @@ function DeckBuilderPageContent() {
   )
 }
 
-/**
- * Standalone deck builder page with ephemeral state.
- * Uses Summary + Pane pattern: rich SinnerGrid viewer with Edit dialog.
- * State resets on navigation (fresh store per mount).
- */
 export default function DeckBuilderPage() {
   const storeKey = useId()
 

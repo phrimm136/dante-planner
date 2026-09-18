@@ -5,7 +5,6 @@ import { LG_BREAKPOINT_PX, MD_BREAKPOINT_PX, SM_BREAKPOINT_PX } from '@/lib/cons
 import { useSlotSizePx } from '@/shared/cardLayout'
 import { SINNER_DECK_GEOMETRY, SINNER_GRID_COLUMNS, SINNER_GRID_GAP } from '../lib/cardLayout'
 
-/** The twelve-sinner grid's column count, slot box and CSS grid style at the current breakpoint. */
 export function useSinnerGridLayout(): {
   columnWidth: number
   rowHeight: number

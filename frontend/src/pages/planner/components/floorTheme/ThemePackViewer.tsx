@@ -6,26 +6,19 @@ import { EmptyStatePlaceholder } from '@/components/feedback/EmptyStatePlacehold
 import { ThemePackCard } from '@/pages/themePack'
 import type { ThemePackSpec } from '@/pages/themePack'
 
-/** The theme pack box with its height left to the card. */
 interface ThemePackViewerProps {
   packId: string
   packEntry: ThemePackSpec
-  /** Accessible label; the card prints the localized name itself */
   packName: string
   onClick?: () => void
   readOnly?: boolean
   enableHoverHighlight?: boolean
   isSelected?: boolean
   overlay?: ReactNode
-  /** The share of the desktop width the card takes below the desktop breakpoint */
   mobileScale?: number
   className?: string
 }
 
-/**
- * Interactive wrapper for ThemePackCard.
- * Use this when clicking the card should trigger an action.
- */
 export function ThemePackViewer({
   packId,
   packEntry,
@@ -70,9 +63,6 @@ interface ThemePackPlaceholderProps {
   className?: string
 }
 
-/**
- * Placeholder shown when no theme pack is selected
- */
 export function ThemePackPlaceholder({
   onClick,
   readOnly = false,

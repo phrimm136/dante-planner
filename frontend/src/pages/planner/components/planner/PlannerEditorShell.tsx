@@ -1,17 +1,13 @@
-// React core
 import { useState, useEffect, useMemo, Suspense, startTransition } from 'react'
 
-// TanStack
 import { useNavigate } from '@tanstack/react-router'
 import { queryClient } from '@/lib/queryClient'
 import { plannerQueryKeys } from '../../lib/plannerQueryKeys'
 import { publishedPlannerQueryKeys } from '../../hooks/usePublishedPlannerQuery'
 
-// Third-party libraries
 import { useTranslation } from 'react-i18next'
 import { ChevronDown, Save } from 'lucide-react'
 
-// shadcn/ui components
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -20,7 +16,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
-// Project utilities (@/lib)
 import {
   MD_CATEGORIES,
   PLANNER_KEYWORDS,
@@ -36,22 +31,18 @@ import { MdCategoryLabel } from '../MdCategoryLabel'
 import { showAppError, showErrorMessage, showSuccess, showWarning } from '@/lib/errorPresentation'
 import { isSyncConflict } from '@/lib/apiErrorClassifier'
 
-// Project types & schemas
 import type { MDCategory } from '@/shared/gameData'
 import { isMDPlanner } from '../../types/PlannerTypes'
 import type { SaveablePlanner, ConflictResolutionChoice } from '../../types/PlannerTypes'
 
-// Store
 import { usePlannerEditorStore, usePlannerEditorStoreApi } from '../../stores/usePlannerEditorStore'
 
-// Project hooks
 import { useDeckClipboard } from '../../hooks/useDeckClipboard'
 import { usePlannerSave } from '../../hooks/usePlannerSave'
 import type { SaveOptions } from '../../hooks/usePlannerSave'
 import { usePlannerConfig } from '../../hooks/usePlannerConfig'
 import { useUserSettingsQuery } from '@/shared/userSettings'
 
-// Project components (@/components)
 import { StoreBoundDeckBuilderSummary } from '../deckBuilder/DeckBuilderSummary'
 import { DeckBuilderPane } from '../deckBuilder/DeckBuilderPane'
 import { StoreBoundDeckBuilderContent } from '../deckBuilder/DeckBuilderContent'
@@ -84,25 +75,13 @@ import { LastSavedLabel } from './LastSavedLabel'
 
 const MAX_TITLE_BYTES = 256
 
-/**
- * The parts of an editing session the shell cannot derive for itself: which
- * planner is being edited, at which content and sync version.
- */
 export interface PlannerEditorSession {
-  /** Game content version the planner is authored against. */
   contentVersion: number
-  /** Existing planner id; absent means the shell mints one. */
   initialPlannerId?: string | undefined
-  /** Server version to present on the next sync. */
   initialSyncVersion?: number | undefined
-  /** Timestamp to seed the "last saved" label with. */
   initialSavedAt?: string | undefined
 }
 
-/**
- * Every editing surface of an MD planner. Both the create and the edit route
- * render this; they differ only in the session they hand it.
- */
 export function PlannerEditorShell({
   contentVersion: mdVersion,
   initialPlannerId,
@@ -114,25 +93,15 @@ export function PlannerEditorShell({
   const config = usePlannerConfig()
   const navigate = useNavigate()
 
-  // Get user settings for sync preference
   const { data: userSettings } = useUserSettingsQuery()
   const syncEnabled = userSettings?.syncEnabled ?? false
 
-  // Callback for "Keep Both" - navigate to the newly created copy
   const handleKeepBothCreated = (newPlannerId: string) => {
-    // Navigate to forked planner edit page, replacing current history entry
-    // Back button will go to original view (which now shows server version)
     void navigate({ to: '/planner/md/$id/edit', params: { id: newPlannerId }, replace: true })
   }
 
-  // ============================================================================
-  // Store API (for imperative access in handlers)
-  // ============================================================================
   const storeApi = usePlannerEditorStoreApi()
 
-  // ============================================================================
-  // Store Subscriptions (RENDER-ONLY state - causes re-render when changed)
-  // ============================================================================
   const title = usePlannerEditorStore((s) => s.title)
   const setTitle = usePlannerEditorStore((s) => s.setTitle)
   const category = usePlannerEditorStore((s) => s.category)
@@ -143,15 +112,11 @@ export function PlannerEditorShell({
   const selectedKeywords = usePlannerEditorStore((s) => s.selectedKeywords)
   const setSelectedKeywords = usePlannerEditorStore((s) => s.setSelectedKeywords)
 
-  // Actions (stable references, no re-render)
   const setEquipment = usePlannerEditorStore((s) => s.setEquipment)
   const setDeploymentOrder = usePlannerEditorStore((s) => s.setDeploymentOrder)
   const updateSinnerSkillEA = usePlannerEditorStore((s) => s.updateSinnerSkillEA)
   const initializeFromPlannerAction = usePlannerEditorStore((s) => s.initializeFromPlanner)
 
-  // ============================================================================
-  // Local useState (Dialog states - per spec)
-  // ============================================================================
   const [isStartBuffPaneOpen, setIsStartBuffPaneOpen] = useState(false)
   const [isStartGiftPaneOpen, setIsStartGiftPaneOpen] = useState(false)
   const [isObservationPaneOpen, setIsObservationPaneOpen] = useState(false)
@@ -159,14 +124,8 @@ export function PlannerEditorShell({
   const [isDeckPaneOpen, setIsDeckPaneOpen] = useState(false)
   const [showSaveWarning, setShowSaveWarning] = useState(false)
 
-  // ============================================================================
-  // Derived State
-  // ============================================================================
   const floorCount = FLOOR_COUNTS[category]
 
-  // ============================================================================
-  // SSE Reload Handler - Uses store batch action
-  // ============================================================================
   const handleServerReload = (reloadedPlanner: SaveablePlanner): boolean => {
     if (!isMDPlanner(reloadedPlanner)) {
       console.error('Attempted to load non-MD planner in MD editor:', reloadedPlanner.config.type)
@@ -182,14 +141,10 @@ export function PlannerEditorShell({
     return true
   }
 
-  // ============================================================================
-  // Category Change Handler
-  // ============================================================================
   const handleCategoryChange = (newCategory: MDCategory) => {
     const currentCategory = storeApi.getState().category
     const floorSelections = storeApi.getState().floorSelections
 
-    // Warn if changing from 5F to 10F/15F with Normal difficulty on floors 1-5
     if (currentCategory === '5F' && (newCategory === '10F' || newCategory === '15F')) {
       const hasNormalDifficulty = floorSelections
         .slice(0, 5)
@@ -203,7 +158,6 @@ export function PlannerEditorShell({
     setCategory(newCategory)
   }
 
-  // Stable getter function - must not be recreated on each render
   const getState = () => storeApi.getState().getPlannerState()
 
   const {
@@ -230,8 +184,6 @@ export function PlannerEditorShell({
     syncEnabled,
   })
 
-  // The classified error carries no timestamp, so the dialog's "detected at"
-  // is minted once per conflict rather than on every render.
   const conflictState = useMemo(
     () =>
       isSyncConflict(saveError)
@@ -240,13 +192,9 @@ export function PlannerEditorShell({
     [saveError],
   )
 
-  // Show error toasts. The sync conflict is the one failure with a surface of
-  // its own, so it is also the one that stays set instead of being reported.
   useEffect(() => {
     if (!saveError) return
 
-    // Kept set so the dialog keeps rendering it; every other failure, including
-    // the rest of the 409 codes, is reported and cleared.
     if (isSyncConflict(saveError)) return
 
     showAppError(saveError)
@@ -295,7 +243,6 @@ export function PlannerEditorShell({
     showSuccess('planner:deckBuilder.importSuccess')
   }
 
-  // Drop the stale editor caches, then land on whichever viewer owns this plan.
   const navigateToViewer = () => {
     queryClient.removeQueries({ queryKey: plannerQueryKeys.detail(plannerId) })
     if (isPublished) {
@@ -315,7 +262,6 @@ export function PlannerEditorShell({
   }
 
   const handleSave = async () => {
-    // A published plan whose sync is off needs the warning dialog first
     if (syncEnabled === false && isPublished) {
       setShowSaveWarning(true)
       return
@@ -341,16 +287,12 @@ export function PlannerEditorShell({
         navigateToViewer()
         break
       case 'both':
-        // onKeepBothCreated navigates to the newly created planner
         break
       default:
         assertNever(choice)
     }
   }
 
-  // ============================================================================
-  // Sections, in reveal order
-  // ============================================================================
   const regularSections: RevealSectionSpec[] = [
     {
       id: 'deckBuilder',
@@ -509,13 +451,11 @@ export function PlannerEditorShell({
 
   const regularSectionCount = regularSections.length
 
-  /** Slot of the first floor block; the floors take the slots after the regular sections. */
   const floorSlotStart = regularSectionCount + 1
 
   const sections: RevealSectionSpec[] = [
     ...regularSections,
     {
-      // Unlike the others this entry spans one reveal slot per floor of the category
       id: 'floorThemes',
       node: (
         <PlannerSection title={t('pages.plannerMD.floorThemes')}>
@@ -552,7 +492,6 @@ export function PlannerEditorShell({
 
   const totalSections = regularSectionCount + floorCount
 
-  // Progressive section rendering
   useEffect(() => {
     if (visibleSections < totalSections) {
       const rafId = requestAnimationFrame(() => {
@@ -562,7 +501,6 @@ export function PlannerEditorShell({
     }
   }, [visibleSections, totalSections, setVisibleSections])
 
-  // Reduce visible sections when category changes to fewer floors
   useEffect(() => {
     const newTotalSections = regularSectionCount + FLOOR_COUNTS[category]
     if (visibleSections > newTotalSections) {

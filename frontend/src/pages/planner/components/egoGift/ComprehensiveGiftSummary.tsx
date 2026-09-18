@@ -56,12 +56,6 @@ function SummaryGiftItemImpl({
   )
 }
 
-/**
- * Displays selected EGO gifts for the comprehensive gift section.
- * Shows placeholder when empty, clicking opens selector pane.
- * Pattern: FloorGiftViewer (grid + tooltips) + PlannerSection wrapper
- * Suspends while loading - wrap in Suspense boundary
- */
 export function ComprehensiveGiftSummary({
   onClick,
   selectedGiftIds,
@@ -114,13 +108,11 @@ export function ComprehensiveGiftSummary({
   )
 }
 
-/** Props a store-bound caller supplies; the selection comes from the store. */
 export type StoreBoundComprehensiveGiftSummaryProps = Omit<
   ComprehensiveGiftSummaryProps,
   'selectedGiftIds'
 >
 
-/** Renders the summary against the comprehensive gifts held by the planner editor store. */
 export function StoreBoundComprehensiveGiftSummary(props: StoreBoundComprehensiveGiftSummaryProps) {
   const selectedGiftIds = usePlannerEditorStore((s) => s.comprehensiveGiftIds)
 

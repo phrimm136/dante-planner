@@ -29,14 +29,6 @@ export {
   createDefaultSkillEAState,
 }
 
-// ============================================================================
-// State Interfaces (Sliced by Mutation Frequency)
-// ============================================================================
-
-/**
- * Hot State - 70% of mutations
- * Most frequently changed fields during editing
- */
 interface HotState {
   equipment: Record<string, SinnerEquipment>
   floorSelections: FloorThemeSelection[]
@@ -44,10 +36,6 @@ interface HotState {
   deploymentOrder: number[]
 }
 
-/**
- * Warm State - 25% of mutations
- * Moderately changed fields
- */
 interface WarmState {
   selectedKeywords: Set<string>
   selectedBuffIds: Set<number>
@@ -56,14 +44,9 @@ interface WarmState {
   selectedGiftKeyword: string | null
   skillEAState: Record<string, SkillEAState>
   deckFilterState: DeckFilterState
-  /** Progressive-render counter for deck builder grids. Isolated via atomic selector so rAF ticks don't cascade to sibling sections. */
   deckVisibleCount: number
 }
 
-/**
- * Cold State - 5% of mutations
- * Rarely changed fields (metadata, config)
- */
 interface ColdState {
   title: string
   category: MDCategory
@@ -72,20 +55,9 @@ interface ColdState {
   sectionNotes: Record<string, NoteContent>
 }
 
-/**
- * Combined Planner Editor State
- */
 export interface PlannerEditorState extends HotState, WarmState, ColdState {}
 
-// ============================================================================
-// Actions Interface
-// ============================================================================
-
-/**
- * Planner Editor Actions
- */
 export interface PlannerEditorActions {
-  // Hot state setters
   setEquipment: (
     equipment:
       | Record<string, SinnerEquipment>
@@ -97,7 +69,6 @@ export interface PlannerEditorActions {
   setComprehensiveGiftIds: (ids: Set<EncodedGiftId>) => void
   setDeploymentOrder: (order: number[]) => void
 
-  // Warm state setters
   setSelectedKeywords: (keywords: Set<string>) => void
   setSelectedBuffIds: (ids: Set<number>) => void
   setSelectedGiftIds: (ids: Set<EncodedGiftId>) => void
@@ -110,7 +81,6 @@ export interface PlannerEditorActions {
   ) => void
   setDeckVisibleCount: (count: number | ((prev: number) => number)) => void
 
-  // Cold state setters
   setTitle: (title: string) => void
   setCategory: (category: MDCategory) => void
   setIsPublished: (published: boolean) => void
@@ -118,37 +88,23 @@ export interface PlannerEditorActions {
   setSectionNotes: (notes: Record<string, NoteContent>) => void
   updateSectionNote: (sectionKey: string, content: NoteContent) => void
 
-  // Batch operations
   initializeFromPlanner: (
     content: MDPlannerContent,
     metadata: { title: string; category: MDCategory; isPublished: boolean },
   ) => void
   reset: () => void
 
-  // Derived state (imperative access)
   getPlannerState: () => PlannerState
 }
 
-/**
- * Combined Store Type
- */
 export type PlannerEditorStore = PlannerEditorState & PlannerEditorActions
 
-// ============================================================================
-// Store Factory
-// ============================================================================
-
-/**
- * Initial state for a new planner
- */
 const createInitialState = (overrides?: Partial<PlannerEditorState>): PlannerEditorState => ({
-  // Hot state
   equipment: overrides?.equipment ?? createDefaultEquipment(),
   floorSelections: overrides?.floorSelections ?? createDefaultFloorSelections(),
   comprehensiveGiftIds: overrides?.comprehensiveGiftIds ?? new Set(),
   deploymentOrder: overrides?.deploymentOrder ?? [],
 
-  // Warm state
   selectedKeywords: overrides?.selectedKeywords ?? new Set(),
   selectedBuffIds: overrides?.selectedBuffIds ?? new Set(),
   selectedGiftIds: overrides?.selectedGiftIds ?? new Set(),
@@ -158,7 +114,6 @@ const createInitialState = (overrides?: Partial<PlannerEditorState>): PlannerEdi
   deckFilterState: overrides?.deckFilterState ?? createDefaultDeckFilterState(),
   deckVisibleCount: overrides?.deckVisibleCount ?? 10,
 
-  // Cold state
   title: overrides?.title ?? '',
   category: overrides?.category ?? '5F',
   isPublished: overrides?.isPublished ?? false,
@@ -166,23 +121,14 @@ const createInitialState = (overrides?: Partial<PlannerEditorState>): PlannerEdi
   sectionNotes: overrides?.sectionNotes ?? createDefaultSectionNotes(),
 })
 
-/**
- * Creates an instance-scoped Zustand store for the planner editor
- * Use with PlannerEditorStoreProvider for component-level scoping
- *
- * @param initialState - Optional partial state to override defaults
- * @returns Zustand store instance
- */
 export const createPlannerEditorStore = (initialState?: Partial<PlannerEditorState>) => {
   const state = createInitialState(initialState)
 
   return createStore<PlannerEditorStore>()(
     devtools(
       (set, get) => ({
-        // Initial state
         ...state,
 
-        // Hot state actions
         setEquipment: (equipment) => {
           if (typeof equipment === 'function') {
             set((state) => ({ equipment: equipment(state.equipment) }), false, 'setEquipment')
@@ -219,7 +165,6 @@ export const createPlannerEditorStore = (initialState?: Partial<PlannerEditorSta
 
         setDeploymentOrder: (order) => set({ deploymentOrder: order }, false, 'setDeploymentOrder'),
 
-        // Warm state actions
         setSelectedKeywords: (keywords) =>
           set({ selectedKeywords: keywords }, false, 'setSelectedKeywords'),
 
@@ -264,7 +209,6 @@ export const createPlannerEditorStore = (initialState?: Partial<PlannerEditorSta
           }
         },
 
-        // Cold state actions
         setTitle: (title) => set({ title }, false, 'setTitle'),
 
         setCategory: (category) => set({ category }, false, 'setCategory'),
@@ -284,13 +228,11 @@ export const createPlannerEditorStore = (initialState?: Partial<PlannerEditorSta
             'updateSectionNote',
           ),
 
-        // Batch operations
         initializeFromPlanner: (content, metadata) =>
           set(hydrateEditorState(content, metadata), false, 'initializeFromPlanner'),
 
         reset: () => set(createInitialState(), false, 'reset'),
 
-        // Derived state - compose PlannerState without subscription
         getPlannerState: () => projectEditorState(get()),
       }),
       { name: 'PlannerEditorStore', enabled: import.meta.env.DEV },
@@ -298,35 +240,13 @@ export const createPlannerEditorStore = (initialState?: Partial<PlannerEditorSta
   )
 }
 
-// ============================================================================
-// React Context & Provider
-// ============================================================================
-
-/**
- * Context for planner editor store instance
- * Allows component-level scoping of store state
- */
 const PlannerEditorStoreContext = createContext<StoreApi<PlannerEditorStore> | null>(null)
 
-/**
- * Props for PlannerEditorStoreProvider
- */
 interface PlannerEditorStoreProviderProps {
   children: ReactNode
   initialState?: Partial<PlannerEditorState> | undefined
 }
 
-/**
- * Provider component for planner editor store
- * Creates a single store instance for the component tree
- *
- * @example
- * ```tsx
- * <PlannerEditorStoreProvider initialState={{ category: '15F' }}>
- *   <PlannerCreateEditor />
- * </PlannerEditorStoreProvider>
- * ```
- */
 export function PlannerEditorStoreProvider({
   children,
   initialState,
@@ -340,24 +260,6 @@ export function PlannerEditorStoreProvider({
   )
 }
 
-// ============================================================================
-// Hooks
-// ============================================================================
-
-/**
- * Hook to access planner editor store with selector
- * Must be used within PlannerEditorStoreProvider
- *
- * @param selector - Function to select state slice
- * @returns Selected state slice
- *
- * @example
- * ```tsx
- * // Subscribe to single field (prevents cascading rerenders)
- * const equipment = usePlannerEditorStore((s) => s.equipment)
- * const setEquipment = usePlannerEditorStore((s) => s.setEquipment)
- * ```
- */
 export function usePlannerEditorStore<T>(selector: (state: PlannerEditorStore) => T): T {
   const store = useContext(PlannerEditorStoreContext)
 
@@ -368,11 +270,6 @@ export function usePlannerEditorStore<T>(selector: (state: PlannerEditorStore) =
   return useStore(store, selector)
 }
 
-/**
- * Stand-in store for components rendered outside a provider. One instance for
- * the whole app: it exists only so `useStore` is always called, its value is
- * never returned, and nothing ever writes to it.
- */
 let placeholderStore: StoreApi<PlannerEditorStore> | null = null
 
 function getPlaceholderStore(): StoreApi<PlannerEditorStore> {
@@ -380,14 +277,6 @@ function getPlaceholderStore(): StoreApi<PlannerEditorStore> {
   return placeholderStore
 }
 
-/**
- * Hook to safely access planner editor store with selector
- * Returns undefined if used outside PlannerEditorStoreProvider (instead of throwing)
- * Use this for components that may be rendered both inside and outside the provider
- *
- * @param selector - Function to select state slice
- * @returns Selected state slice, or undefined if outside provider
- */
 export function usePlannerEditorStoreSafe<T>(
   selector: (state: PlannerEditorStore) => T,
 ): T | undefined {
@@ -397,12 +286,6 @@ export function usePlannerEditorStoreSafe<T>(
   return store ? value : undefined
 }
 
-/**
- * Hook to access the raw store instance
- * Use for imperative operations outside React lifecycle
- *
- * @returns Store API instance
- */
 export function usePlannerEditorStoreApiSafe(): StoreApi<PlannerEditorStore> | null {
   return useContext(PlannerEditorStoreContext)
 }
@@ -416,10 +299,6 @@ export function usePlannerEditorStoreApi(): StoreApi<PlannerEditorStore> {
 
   return store
 }
-
-// ============================================================================
-// Selector Hooks (Granular Subscriptions)
-// ============================================================================
 
 export const useDeckFilterState = () => usePlannerEditorStore((s) => s.deckFilterState)
 export const useDeckVisibleCount = () => usePlannerEditorStore((s) => s.deckVisibleCount)

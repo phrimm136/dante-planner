@@ -2,11 +2,9 @@ import i18n from '@/lib/i18n'
 import { storage } from '@/lib/storage'
 import { storageKeys } from '../hooks/usePlannerStorage'
 
-/** Title shown for a planner that carries none of its own. */
 export const untitledPlannerTitle = (): string =>
   i18n.t('pages.plannerMD.untitled', { ns: 'planner' })
 
-/** Title for a planner route's head, read from local storage. */
 export async function loadPlannerTitle(plannerId: string): Promise<string> {
   const rawData = await storage.getItem(storageKeys.planner(plannerId))
   if (!rawData.ok) {

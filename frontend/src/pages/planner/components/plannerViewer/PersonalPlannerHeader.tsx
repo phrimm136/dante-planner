@@ -30,7 +30,6 @@ import { toUserFriendlyError } from '../../lib/plannerValidationErrors'
 import { isMDPlanner } from '../../types/PlannerTypes'
 import type { SaveablePlanner } from '../../types/PlannerTypes'
 
-/** Publish-button label, by mutation state and by which direction the toggle goes. */
 const PUBLISH_LABEL_KEYS = {
   idle: {
     publish: 'pages.plannerMD.publish.button',
@@ -43,22 +42,13 @@ const PUBLISH_LABEL_KEYS = {
 } as const
 
 interface PersonalPlannerHeaderProps {
-  /** The user's own copy of the planner */
   planner: SaveablePlanner
-  /** Whether user is authenticated */
   isAuthenticated: boolean
-  /** Whether sync is enabled (null = not chosen, true = enabled, false = disabled) */
   syncEnabled?: boolean | null | undefined
-  /** Callback when edit is clicked */
   onEdit?: (() => void) | undefined
-  /** Callback when delete is confirmed (optional, uses internal mutation if not provided) */
   onDelete?: (() => void) | undefined
 }
 
-/**
- * Header for a planner viewed in "My Plans": save status, last edit time, and
- * the publish toggle.
- */
 export function PersonalPlannerHeader({
   planner,
   isAuthenticated,
@@ -100,9 +90,6 @@ export function PersonalPlannerHeader({
     ...(onDelete !== undefined && { onDelete }),
   })
 
-  // `base` is the planner the local save is derived from: for publish it's the
-  // server-synced planner (carries the server-bumped syncVersion); for unpublish
-  // it's the current planner (unpublishing never bumps syncVersion).
   const callPublishMutation = (wasPublished: boolean, base: SaveablePlanner) => {
     if (!plannerId) return
 
@@ -117,9 +104,6 @@ export function PersonalPlannerHeader({
               published: response.published,
             },
           }
-          // Server toggle already succeeded; the local mirror is best-effort. Surface
-          // a local-save failure instead of swallowing it (the personal view reads
-          // from IndexedDB, so a failed save leaves it stale until the next save).
           const saveResult = await saveToLocal(updatedPlanner)
 
           void queryClient.invalidateQueries({
@@ -128,8 +112,6 @@ export function PersonalPlannerHeader({
 
           setIsUploadingForPublish(false)
 
-          // The personal view reads the local mirror, so a failed save leaves it
-          // stale; reporting the toggle as done would be a lie about what is shown.
           if (!saveResult.ok) {
             showAppError(saveResult.error)
             return
@@ -155,9 +137,6 @@ export function PersonalPlannerHeader({
     setShowPublishWarning(false)
 
     try {
-      // Upload current content first (the publish PUT carries none), then toggle.
-      // The server's copy carries the bumped syncVersion its ack assigned —
-      // thread it in so the next toggle doesn't send a stale version (409).
       const synced = await syncAdapter.syncToServer(planner)
       callPublishMutation(false, acknowledgedCopy(synced))
     } catch (error) {
@@ -286,7 +265,6 @@ export function PersonalPlannerHeader({
         </>
       }
     >
-      {/* Delete Confirmation Dialog */}
       <DeleteConfirmDialog
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
@@ -296,7 +274,6 @@ export function PersonalPlannerHeader({
         isPending={isDeletePending}
       />
 
-      {/* Apply Latest Mirror Dialog */}
       <ApplyLatestMirrorDialog
         open={showApplyLatestMirrorDialog}
         onOpenChange={setShowApplyLatestMirrorDialog}
@@ -306,7 +283,6 @@ export function PersonalPlannerHeader({
         isPending={isApplyingLatestMirror}
       />
 
-      {/* Publish Sync-Off Warning Dialog */}
       <SyncOffWarningDialog
         action="publish"
         open={showPublishWarning}

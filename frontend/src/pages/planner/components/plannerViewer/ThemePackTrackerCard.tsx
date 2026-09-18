@@ -16,17 +16,12 @@ interface ThemePackTrackerCardProps {
   noteContent: NoteContent
   isDone: boolean
   onToggleDone: () => void
-  /** The share of the desktop width the card takes below the desktop breakpoint */
   mobileScale: number
   isFocused?: boolean
   onFocusToggle?: () => void
   onHoverChange?: (hovering: boolean) => void
 }
 
-/**
- * Theme pack card for tracker mode with hover actions.
- * Wraps ThemePackViewer with done-mark and notes overlays.
- */
 export function ThemePackTrackerCard({
   packId,
   packEntry,

@@ -1,21 +1,3 @@
-/**
- * PlannerMDPage - Personal planners view (My Plans)
- *
- * Route: /planner/md
- *
- * Features:
- * - Shows user's personal planners (IndexedDB for guests, server for auth)
- * - Category filter pills (5F, 10F, 15F)
- * - Paginated card grid
- * - Empty states for no results
- * - Navigation buttons to switch to Gesellschaft view
- *
- * URL state managed via useMDUserFilters hook
- * Data fetched via useMDUserPlannersData hook
- *
- * Pattern: IdentityPage.tsx (Suspense wrapping, filter layout)
- */
-
 import { Skeleton } from '@/components/ui/skeleton'
 import { Suspense } from 'react'
 import { Link } from '@tanstack/react-router'
@@ -37,14 +19,6 @@ import { PlannerGridSkeleton } from '@/components/feedback/ListPageSkeleton'
 import { PLANNER_GEOMETRY } from '@/shared/cardLayout'
 import { SECTION_STYLES } from '@/lib/constants'
 
-// ============================================================================
-// Page Content Component
-// ============================================================================
-
-/**
- * Page content with all filter controls and data fetching.
- * Wrapped in Suspense by the outer PlannerMDPage component.
- */
 function PlannerMDPageContent() {
   const { t } = useTranslation(['planner', 'common'])
 
@@ -54,7 +28,6 @@ function PlannerMDPageContent() {
 
   return (
     <div className={SECTION_STYLES.LAYOUT.page}>
-      {/* Create New Button */}
       <div className="flex justify-end mb-6">
         <Button asChild>
           <Link to="/planner/md/new">
@@ -64,17 +37,14 @@ function PlannerMDPageContent() {
         </Button>
       </div>
 
-      {/* Navigation: My Plans / Gesellschaft */}
       <div className="mb-6">
         <MDPlannerNavButtons />
       </div>
 
-      {/* Toolbar: Search only (no mode toggle for personal planners) */}
       <div className="mb-4">
         <MDPlannerToolbar search={search} onSearchChange={(q) => setFilters({ q, page: 0 })} />
       </div>
 
-      {/* Category Filter Pills */}
       <div className="mb-4">
         <PlannerListFilterPills
           selectedCategory={category}
@@ -82,14 +52,12 @@ function PlannerMDPageContent() {
         />
       </div>
 
-      {/* Content Search Filter Pane */}
       <div className="mb-4">
         <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
           <PlannerFilterPane filters={searchFilters} onFiltersChange={setSearchFilters} />
         </Suspense>
       </div>
 
-      {/* Content Grid with inner Suspense for data loading */}
       <Suspense fallback={<PlannerGridSkeleton geometry={PLANNER_GEOMETRY} />}>
         <PersonalPlannerList
           category={category}
@@ -103,16 +71,6 @@ function PlannerMDPageContent() {
   )
 }
 
-// ============================================================================
-// Main Page Component
-// ============================================================================
-
-/**
- * PlannerMDPage - Personal planners page with Suspense boundary
- *
- * Pattern: IdentityPage.tsx
- * Outer component wraps inner content in Suspense for loading state
- */
 export default function PlannerMDPage() {
   return (
     <Suspense fallback={<LoadingState />}>

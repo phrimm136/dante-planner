@@ -25,9 +25,7 @@ interface ComprehensiveGiftGridTrackerProps {
   egoGiftDoneMarks?: Set<string>
   onToggleEgoGiftDone?: (encodedId: string) => void
   readOnly?: boolean
-  /** Authoritative gift list from saved plan content. When provided, used as-is instead of aggregating from floorSelections. */
   comprehensiveGiftIds: EncodedGiftId[]
-  /** The box the grid takes; omitted → it stretches to the column it sits in. */
   height?: number | undefined
 }
 
@@ -37,11 +35,6 @@ interface DecodedGift {
   encodedId: string
 }
 
-/**
- * Comprehensive gift grid for tracker mode
- * Shows all gifts from all floors with dimming for done theme packs
- * Includes keyword filter and search bar for easy navigation
- */
 export function ComprehensiveGiftGridTracker({
   floorSelections,
   hoveredThemePackId,
@@ -56,14 +49,12 @@ export function ComprehensiveGiftGridTracker({
   const i18n = useEGOGiftListI18n()
   const { keywordToValue } = useSearchMappings()
 
-  // Filter and sort states
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
   const [searchQuery, setSearchQuery] = useState('')
   const [sortMode, setSortMode] = useState<SortMode>('tier-first')
 
   const mobileScale = CARD_MOBILE_SCALE
 
-  // Use authoritative comprehensiveGiftIds when provided; fall back to aggregating from floors
   const allComprehensiveGiftIds = (() => {
     const allGifts = new Set(comprehensiveGiftIds)
     floorSelections.forEach((selection) => {
@@ -72,14 +63,11 @@ export function ComprehensiveGiftGridTracker({
     return allGifts
   })()
 
-  // Get gift IDs to highlight based on hovered theme pack
   const highlightedGiftIds = (() => {
     const ids = new Set<string>()
     if (hoveredThemePackId) {
-      // Find which floor has this theme pack
       floorSelections.forEach((selection) => {
         if (selection.themePackId === hoveredThemePackId) {
-          // Highlight all gifts from this floor
           selection.giftIds.forEach((giftId) => ids.add(giftId))
         }
       })
@@ -87,7 +75,6 @@ export function ComprehensiveGiftGridTracker({
     return ids
   })()
 
-  // Decode selected IDs and convert to gift items with enhancement
   const selectedGifts = (() => {
     const highlighted: DecodedGift[] = []
     const regular: DecodedGift[] = []
@@ -97,12 +84,10 @@ export function ComprehensiveGiftGridTracker({
       const { encodedId, item } = gift
       const giftKeyword = item.keyword ?? 'None'
 
-      // Apply keyword filter
       if (selectedKeywords.size > 0 && !selectedKeywords.has(giftKeyword)) {
         continue
       }
 
-      // Apply search filter
       if (searchQuery) {
         const lowerQuery = searchQuery.toLowerCase()
         const nameMatch = item.name.toLowerCase().includes(lowerQuery)
@@ -117,7 +102,6 @@ export function ComprehensiveGiftGridTracker({
         if (!nameMatch && !keywordMatch) continue
       }
 
-      // Separate into highlighted, regular, and done arrays
       const isHighlighted = highlightedGiftIds.has(encodedId)
       const isDone = egoGiftDoneMarks?.has(encodedId) ?? false
 
@@ -130,7 +114,6 @@ export function ComprehensiveGiftGridTracker({
       }
     }
 
-    // Sort each group by tier-then-keyword (matching edit page order)
     const sortGroup = (gifts: DecodedGift[]) => {
       const itemToGift = new Map(gifts.map((g) => [g.item, g]))
       return sortEGOGifts(
@@ -139,18 +122,15 @@ export function ComprehensiveGiftGridTracker({
       ).map((item) => itemToGift.get(item)!)
     }
 
-    // Concatenate: highlighted first, then regular, then done
     return [...sortGroup(highlighted), ...sortGroup(regular), ...sortGroup(done)]
   })()
 
-  /** Without an explicit box the grid fills the column it is stretched inside. */
   const stretch = height === undefined
 
   const hasAnyGifts = allComprehensiveGiftIds.size > 0
   const hasFilteredGifts = selectedGifts.length > 0
   const hasActiveFilters = selectedKeywords.size > 0 || searchQuery.length > 0
 
-  // No gifts in planner at all
   if (!hasAnyGifts) {
     return (
       <div className={cn('flex', stretch && 'flex-1 min-h-0')} style={{ height }}>
@@ -173,7 +153,6 @@ export function ComprehensiveGiftGridTracker({
         onSearchChange={setSearchQuery}
       />
 
-      {/* Gift grid or no results message */}
       {hasFilteredGifts ? (
         <ScrollArea className={cn(stretch && 'flex-1 min-h-0')} style={{ height }}>
           <div className="flex flex-wrap gap-2 p-2 min-h-24">

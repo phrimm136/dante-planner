@@ -27,7 +27,6 @@ import {
 
 type EnhancementStateKey = keyof StartBuffCardVariant['enhancementStates']
 
-/** State an enhancement button is in, keyed by the level it toggles. */
 const SELECTED_ENHANCEMENT_STATES: Record<1 | 2, EnhancementStateKey> = {
   1: 'plus1',
   2: 'plus2',
@@ -113,22 +112,17 @@ function EnhancementButton({
   )
 }
 
-/** Duration of the card press-down animation */
 const PRESS_ANIMATION_MS = 100
 
 interface StartBuffCardProps {
-  /** Mirror Dungeon version selecting the card artwork and layout */
   mdVersion: number
-  /** The buff to display (contains enhancement level from displayBuffs) */
   buff: StartBuff
   allBuffs: StartBuff[]
   i18n: StartBuffI18n
   battleKeywords?: BattleKeywords
   isSelected: boolean
   onSelect: (buffId: number, selected: boolean) => void
-  /** Current enhancement level (controlled by parent) */
   enhancement: EnhancementLevel
-  /** Callback when enhancement changes via card's +/++ buttons */
   onEnhancementChange: (baseId: number, level: EnhancementLevel) => void
 }
 
@@ -137,17 +131,6 @@ const ROOT_STYLE: CSSProperties = {
   aspectRatio: START_BUFF_CARD.aspect,
 }
 
-/**
- * Start buff card component (edit-only), filling the width its slot gives it.
- *
- * Enhancement is controlled by parent for batch operation support.
- *
- * Layout:
- * - Top black area: star light + cost (top-right)
- * - Second black area: buff icon (left) + buff name (right)
- * - Center area: description
- * - Bottom: enhancement buttons
- */
 export function StartBuffCard({
   mdVersion,
   buff,
@@ -164,33 +147,26 @@ export function StartBuffCard({
   const version = resolveStartBuffCardVersion(mdVersion)
   const variant = START_BUFF_CARD_VARIANTS[version]
 
-  // Show highlight on selection or hover
   const showHighlight = isSelected || isHovered
 
-  // Get the buff data for current enhancement level
   const currentBuffId = createBuffId(buff.baseId, enhancement)
   const displayBuff = allBuffs.find((b) => Number(b.id) === currentBuffId) ?? buff
 
-  // Enhancement button click: toggle enhancement via parent
   const handleEnhancementClick = (level: 1 | 2) => {
     const newEnhancement: EnhancementLevel = enhancement === level ? 0 : level
     onEnhancementChange(buff.baseId, newEnhancement)
   }
 
-  // Press animation state
   const [isPressed, setIsPressed] = useState(false)
   const pressTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Clear the press-animation timer on unmount so it cannot fire after teardown
   useEffect(() => {
     return () => {
       if (pressTimeoutRef.current !== null) clearTimeout(pressTimeoutRef.current)
     }
   }, [])
 
-  // Card click: toggle selection with current enhancement
   const handleCardClick = () => {
-    // Trigger press animation
     setIsPressed(true)
     if (pressTimeoutRef.current !== null) clearTimeout(pressTimeoutRef.current)
     pressTimeoutRef.current = setTimeout(() => {
@@ -213,7 +189,6 @@ export function StartBuffCard({
         setIsHovered(false)
       }}
     >
-      {/* Pane background */}
       <img
         src={getStartBuffPanePath(version)}
         alt=""
@@ -224,12 +199,10 @@ export function StartBuffCard({
         }}
       />
 
-      {/* Content overlay */}
       <div
         className="absolute inset-0 flex flex-col"
         style={{ paddingTop: cqw(START_BUFF_CARD.contentPaddingTop) }}
       >
-        {/* Top black area: Cost with star (top-right) */}
         <div className="relative" style={{ height: pct(START_BUFF_CARD.costRowHeight) }}>
           <div
             className="absolute flex items-center"
@@ -263,9 +236,7 @@ export function StartBuffCard({
           </div>
         </div>
 
-        {/* Second black area: Icon (left) + Name (right) */}
         <div className="flex items-center" style={{ height: pct(variant.nameRowHeight) }}>
-          {/* Buff icon - upper left */}
           <img
             src={getStartBuffIconPath(buff.baseId, version)}
             alt=""
@@ -277,7 +248,6 @@ export function StartBuffCard({
             }}
           />
 
-          {/* Name */}
           <div
             className="overflow-hidden"
             style={{
@@ -297,7 +267,6 @@ export function StartBuffCard({
           </div>
         </div>
 
-        {/* Description - center area */}
         <div
           role="presentation"
           className="relative z-20 flex-1 overflow-y-auto scrollbar-hide"
@@ -321,7 +290,6 @@ export function StartBuffCard({
           </div>
         </div>
 
-        {/* Enhancement buttons - bottom */}
         <div
           className="relative z-20 flex"
           style={{
@@ -347,7 +315,6 @@ export function StartBuffCard({
         </div>
       </div>
 
-      {/* Card click target */}
       <button
         type="button"
         className="absolute inset-0 z-10"
@@ -356,7 +323,6 @@ export function StartBuffCard({
         onClick={handleCardClick}
       />
 
-      {/* Highlight overlay */}
       <img
         src={getStartBuffHighlightPath(version)}
         alt=""

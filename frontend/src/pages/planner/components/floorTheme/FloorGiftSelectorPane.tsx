@@ -48,12 +48,10 @@ export function FloorGiftSelectorPane({
   const spec = useEGOGiftListSpec()
   const i18n = useEGOGiftListI18n()
 
-  // Filter states (local to pane UI - reset on reopen)
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
   const [searchQuery, setSearchQuery] = useState('')
   const [sortMode, setSortMode] = useState<SortMode>('tier-first')
 
-  // Reset filters when dialog closes
   useEffect(() => {
     if (!open) {
       setSelectedKeywords(new Set())
@@ -62,12 +60,10 @@ export function FloorGiftSelectorPane({
     }
   }, [open])
 
-  // Convert to EGOGiftEntity array
   const gifts: EGOGiftEntity[] = (() => {
     return Object.entries(spec).map(([id, entry]) => toEGOGiftEntity(id, entry, i18n[id] || id))
   })()
 
-  // Build O(1) lookup map for recipe cascade selection
   const specById = (() => {
     return new Map(Object.entries(spec))
   })()
@@ -82,9 +78,6 @@ export function FloorGiftSelectorPane({
     latest.current = { selectedGiftIds, specById, themePackId, onGiftSelectionChange }
   })
 
-  /**
-   * Handle enhancement selection with toggle logic and cascade
-   */
   const [handleEnhancementSelect] = useState(
     () => (giftId: EGOGiftId, enhancement: EnhancementLevel) => {
       startTransition(() => {
@@ -95,7 +88,6 @@ export function FloorGiftSelectorPane({
           onGiftSelectionChange: notify,
         } = latest.current
 
-        // A floor only carries what this theme pack can hand out
         const canCascade = (ingredientId: string) => {
           const ingredientSpec = specs.get(ingredientId)
           return (
@@ -153,7 +145,6 @@ export function FloorGiftSelectorPane({
           onSearchChange={setSearchQuery}
         />
 
-        {/* Gift selection list */}
         <div className="flex-1 overflow-y-auto">
           <Suspense fallback={<LoadingState />}>
             <EGOGiftSelectionList

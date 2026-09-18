@@ -20,16 +20,7 @@ interface StartGiftEditPaneProps {
   mdVersion: MDVersion
 }
 
-/**
- * Dialog for editing start gift selection
- * - Displays 10 keyword rows (vertical)
- * - Each row has keyword icon + 3 gift cards (horizontal)
- * - Single keyword selection at a time
- * - Gift selection gated by keyword selection
- * - Selection count = 1 + ADDITIONAL_START_EGO_GIFT_SELECT effects
- */
 export function StartGiftEditPane({ open, onOpenChange, mdVersion }: StartGiftEditPaneProps) {
-  // Store state
   const selectedBuffIds = usePlannerEditorStore((s) => s.selectedBuffIds)
   const selectedKeyword = usePlannerEditorStore((s) => s.selectedGiftKeyword)
   const selectedGiftIds = usePlannerEditorStore((s) => s.selectedGiftIds)
@@ -39,13 +30,11 @@ export function StartGiftEditPane({ open, onOpenChange, mdVersion }: StartGiftEd
   const setComprehensiveGiftIds = usePlannerEditorStore((s) => s.setComprehensiveGiftIds)
   const { t } = useTranslation(['planner', 'common'])
 
-  // Load data
   const { data: pools } = useStartGiftPools(mdVersion)
   const spec = useEGOGiftListSpec()
   const i18n = useEGOGiftListI18n()
   const buffs = toStartBuffs(useStartBuffListSpec(mdVersion), useStartBuffListI18n(mdVersion))
 
-  // Calculate max selectable gifts
   const maxSelectable = calculateMaxGiftSelection(buffs, selectedBuffIds)
 
   const { toggle, clear } = useCappedSelection({
@@ -56,23 +45,18 @@ export function StartGiftEditPane({ open, onOpenChange, mdVersion }: StartGiftEd
     onMirrorChange: setComprehensiveGiftIds,
   })
 
-  // Row click (not gift) - just toggle row selection
   const handleRowSelect = (keyword: string) => {
     clear()
     setSelectedKeyword(selectedKeyword === keyword ? null : keyword)
   }
 
-  // Gift click - combined row + gift selection in ONE update
   const handleGiftClick = (rowKeyword: string, giftId: EGOGiftId) => {
     const encodedId = encodeGiftSelection(0, giftId)
-    // Different row - select row AND gift together
     if (selectedKeyword !== rowKeyword) {
       const newComprehensive = new Set(comprehensiveGiftIds)
-      // Remove old row's gifts from comprehensive
       for (const id of selectedGiftIds) {
         newComprehensive.delete(id)
       }
-      // Add new gift to comprehensive
       newComprehensive.add(encodedId)
       setComprehensiveGiftIds(newComprehensive)
       setSelectedKeyword(rowKeyword)
@@ -92,7 +76,6 @@ export function StartGiftEditPane({ open, onOpenChange, mdVersion }: StartGiftEd
       title={t('pages.plannerMD.startEgoGift')}
       headerActions={
         <>
-          {/* EA Counter */}
           <span className={SECTION_STYLES.TEXT.caption}>
             {t('pages.plannerMD.egoGiftSelection')}: {selectedGiftIds.size}/{maxSelectable}
           </span>
@@ -109,7 +92,6 @@ export function StartGiftEditPane({ open, onOpenChange, mdVersion }: StartGiftEd
         </>
       }
     >
-      {/* 10 Keyword Rows */}
       <div className="space-y-2">
         {keywordPools.map(([keyword, giftIds]) => (
           <StartGiftRow

@@ -1,29 +1,12 @@
-/**
- * Planner Validation Error Types
- *
- * The structured validation error hierarchy produced by planner validators,
- * plus the mapping from a structured error to a user-facing i18n key + params.
- */
-
 import { validationAppError } from '@/lib/apiErrorClassifier'
 
-/**
- * Base validation error with context
- */
 export interface ValidationError {
-  /** Error code for programmatic handling */
   code: string
-  /** Human-readable error message */
   message: string
-  /** Optional field path for locating the error */
   field?: string
-  /** Optional additional context */
   context?: Record<string, unknown>
 }
 
-/**
- * Equipment validation error
- */
 export interface EquipmentValidationError extends ValidationError {
   code:
     | 'EQUIPMENT_MISSING_SINNER'
@@ -33,16 +16,10 @@ export interface EquipmentValidationError extends ValidationError {
     | 'EQUIPMENT_INVALID_ID_FORMAT'
 }
 
-/**
- * Deployment order validation error
- */
 export interface DeploymentValidationError extends ValidationError {
   code: 'DEPLOYMENT_INVALID_INDEX'
 }
 
-/**
- * Skill EA validation error
- */
 export interface SkillEAValidationError extends ValidationError {
   code:
     | 'SKILL_EA_MISSING_SINNER'
@@ -51,30 +28,18 @@ export interface SkillEAValidationError extends ValidationError {
     | 'SKILL_EA_INVALID_TOTAL'
 }
 
-/**
- * Gift IDs validation error
- */
 export interface GiftValidationError extends ValidationError {
   code: 'GIFT_DUPLICATE_ID' | 'GIFT_UNKNOWN_ID'
 }
 
-/**
- * Start buff validation error
- */
 export interface BuffValidationError extends ValidationError {
   code: 'BUFF_EXCEEDS_MAX' | 'BUFF_DUPLICATE_BASE_ID' | 'BUFF_INVALID_FORMAT'
 }
 
-/**
- * Start gift validation error
- */
 export interface StartGiftValidationError extends ValidationError {
   code: 'START_GIFT_NO_KEYWORD_BUT_HAS_GIFTS' | 'START_GIFT_DUPLICATE_ID'
 }
 
-/**
- * Floor validation error — carries the failing floor and offending gift/theme-pack context.
- */
 export interface FloorValidationError extends ValidationError {
   code:
     | 'FLOOR_MISSING_THEME_PACK'
@@ -83,41 +48,24 @@ export interface FloorValidationError extends ValidationError {
     | 'FLOOR_DUPLICATE_THEME_PACK'
     | 'FLOOR_UNAFFORDABLE_GIFT'
     | 'FLOOR_UNKNOWN_GIFT_ID'
-  /** 0-indexed floor that failed validation */
   floorIndex?: number
-  /** 1-indexed floor number for display */
   floorNumber?: number
 }
 
-/**
- * Difficulty validation error (for published planners)
- */
 export interface DifficultyValidationError extends ValidationError {
   code: 'DIFFICULTY_INVALID_FOR_CATEGORY'
-  /** 0-indexed floor that failed validation */
   floorIndex?: number
-  /** 1-indexed floor number for display */
   floorNumber?: number
 }
 
-/**
- * Title validation error (strict/publish mode only)
- */
 export interface TitleValidationError extends ValidationError {
   code: 'MISSING_TITLE'
 }
 
-/**
- * Keyword validation error (strict/publish mode only) — a selected keyword id is
- * not a current planner keyword (e.g. an un-remapped legacy id).
- */
 export interface KeywordValidationError extends ValidationError {
   code: 'KEYWORD_INVALID'
 }
 
-/**
- * Union type of all validation errors
- */
 export type PlannerValidationError =
   | EquipmentValidationError
   | DeploymentValidationError
@@ -130,7 +78,6 @@ export type PlannerValidationError =
   | TitleValidationError
   | KeywordValidationError
 
-/** Planner validators name their keys inside the planner namespace. */
 export function plannerValidationError(friendly: { key: string; params?: Record<string, string> }) {
   return validationAppError({
     key: `planner:${friendly.key}`,
@@ -138,14 +85,6 @@ export function plannerValidationError(friendly: { key: string; params?: Record<
   })
 }
 
-/**
- * Maps a structured validation error to an i18n key + params for toast display
- *
- * Structural errors (equipment, deployment, skill EA, gift IDs, buffs, start gifts)
- * indicate corrupted planner state — the user cannot meaningfully act on them, so
- * they collapse to a single generic key. Actionable errors (title, theme pack,
- * difficulty, affordability) get their own specific keys.
- */
 export function toUserFriendlyError(error: PlannerValidationError): {
   key: string
   params?: Record<string, string>

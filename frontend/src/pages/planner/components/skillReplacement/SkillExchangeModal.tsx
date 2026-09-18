@@ -15,29 +15,19 @@ interface SkillExchangeModalProps {
   onOpenChange: (open: boolean) => void
   sinnerName: string
   identityId: string
-  skillInfos: [SkillInfo, SkillInfo, SkillInfo] // S1, S2, S3
+  skillInfos: [SkillInfo, SkillInfo, SkillInfo]
   skillEA: SkillEAState
   currentEA?: SkillEAState | undefined
   onExchange: (sourceSlot: OffensiveSkillSlot, targetSlot: OffensiveSkillSlot) => void
   onReset: () => void
 }
 
-/**
- * Exchange pairs allowed by the spec: S1→S2, S2→S3, S1→S3
- */
 const EXCHANGE_PAIRS: [OffensiveSkillSlot, OffensiveSkillSlot][] = [
   [0, 1], // S1 → S2
   [1, 2], // S2 → S3
   [0, 2], // S1 → S3
 ]
 
-/**
- * SkillExchangeModal - Dialog for skill EA exchange
- *
- * Layout:
- * - Left: Current EA display for each skill
- * - Right: Exchange options (S1→S2, S2→S3, S1→S3) and Reset button
- */
 export function SkillExchangeModal({
   open,
   onOpenChange,
@@ -93,7 +83,6 @@ export function SkillExchangeModal({
 
         <div className="flex-1 overflow-y-auto py-4">
           <div className={SECTION_STYLES.LAYOUT.column}>
-            {/* Top: Current EA display */}
             <div className="flex flex-col gap-2">
               <h3 className="text-sm font-medium text-muted-foreground">
                 {t('pages.plannerMD.skillReplacement.currentSkills')}
@@ -114,7 +103,6 @@ export function SkillExchangeModal({
               </div>
             </div>
 
-            {/* Bottom: Exchange options */}
             <div className={SECTION_STYLES.LAYOUT.column}>
               <h3 className="text-sm font-medium text-muted-foreground">
                 {t('pages.plannerMD.skillReplacement.exchangeOptions')}

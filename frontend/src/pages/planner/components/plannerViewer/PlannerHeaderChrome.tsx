@@ -12,23 +12,15 @@ import { cn } from '@/lib/utils'
 
 interface PlannerHeaderChromeProps {
   onBack: () => void
-  /** Sits between the back button and the category badge. */
   leading?: ReactNode
   category: string
   keywords: readonly string[]
-  /** Right-hand side of the first row. */
   meta: ReactNode
   title: string
-  /** Right-hand side of the title row. */
   actions: ReactNode
-  /** Rows and dialogs specific to one variant. */
   children?: ReactNode
 }
 
-/**
- * The rows both planner detail headers share: back / category / keywords with a
- * variant-supplied meta block, then the title with variant-supplied actions.
- */
 export function PlannerHeaderChrome({
   onBack,
   leading,

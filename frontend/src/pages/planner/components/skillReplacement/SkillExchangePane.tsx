@@ -40,12 +40,6 @@ interface ResetPaneProps {
   onClick: () => void
 }
 
-/**
- * SkillExchangePane - Clickable exchange option showing source → target skill
- *
- * Displays source skill card → arrow → target skill card.
- * Disabled when source skill has 0 EA remaining.
- */
 export function SkillExchangePane({
   identityId,
   sourceSlot,
@@ -78,7 +72,6 @@ export function SkillExchangePane({
       )}
       style={ROOT_STYLE}
     >
-      {/* Source skill */}
       <div className="origin-center shrink-0" style={SKILL_STYLE}>
         <SkillImageSimple
           skillImagePath={sourceImagePath}
@@ -88,10 +81,8 @@ export function SkillExchangePane({
         />
       </div>
 
-      {/* Arrow */}
       <ArrowRight className="text-muted-foreground shrink-0" style={ARROW_STYLE} />
 
-      {/* Target skill */}
       <div className="origin-center shrink-0" style={SKILL_STYLE}>
         <SkillImageSimple
           skillImagePath={targetImagePath}
@@ -104,9 +95,6 @@ export function SkillExchangePane({
   )
 }
 
-/**
- * ResetPane - Clickable reset button to restore EA to defaults
- */
 export function ResetPane({ onClick }: ResetPaneProps) {
   const { t } = useTranslation(['planner', 'common'])
 

@@ -11,23 +11,16 @@ import { PlannerSection } from '@/components/layout/PlannerSection'
 import { StarlightCostDisplay } from '../StarlightCostDisplay'
 import { StartBuffMiniCard } from './StartBuffMiniCard'
 
-/** `useStartBuffSelection` demands a writer; this summary only ever displays. */
 const IGNORE_SELECTION = () => {}
 
 export interface StartBuffSectionProps {
   mdVersion: MDVersion
   selectedBuffIds: Set<number>
-  /** Callback when section is clicked (opens edit pane) */
   onClick?: () => void
   readOnly?: boolean
   onViewNotes?: () => void
 }
 
-/**
- * Start buff section container with PlannerSection wrapper.
- * Displays mini cards for selected buffs in summary view.
- * Clicking the section opens the edit dialog.
- */
 export function StartBuffSection({
   mdVersion,
   selectedBuffIds,
@@ -45,13 +38,11 @@ export function StartBuffSection({
   )
   const minHeight = giftRowMinHeightPx(buffSlotHeightPx)
 
-  // Filter to only show selected buffs
   const selectedBuffs = displayBuffs.filter((buff) => {
     const buffId = Number(buff.id)
     return selectedBuffIds.has(buffId)
   })
 
-  // Calculate total star cost of selected buffs
   const totalCost = selectedBuffs.reduce((sum, buff) => sum + buff.cost, 0)
 
   const hasSelectedBuffs = selectedBuffs.length > 0
@@ -61,7 +52,6 @@ export function StartBuffSection({
       title={t('pages.plannerMD.startBuffs')}
       {...(onViewNotes !== undefined && { onViewNotes })}
     >
-      {/* Star cost display */}
       <div className="flex justify-end mb-4">
         <StarlightCostDisplay cost={totalCost} size="lg" />
       </div>
@@ -104,10 +94,8 @@ export function StartBuffSection({
   )
 }
 
-/** Props a store-bound caller supplies; the selection comes from the store. */
 export type StoreBoundStartBuffSectionProps = Omit<StartBuffSectionProps, 'selectedBuffIds'>
 
-/** Renders the section against the buff selection held by the planner editor store. */
 export function StoreBoundStartBuffSection(props: StoreBoundStartBuffSectionProps) {
   const selectedBuffIds = usePlannerEditorStore((s) => s.selectedBuffIds)
 

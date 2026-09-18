@@ -1,11 +1,3 @@
-/**
- * Planner Subscription Mutation Hook
- *
- * Handles subscribing/unsubscribing to community planners.
- * Toggle endpoint - calling again removes the subscription.
- * Invalidates planner list cache on success.
- */
-
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { ApiClient } from '@/lib/api'
@@ -15,34 +7,6 @@ import { publishedPlannerQueryKeys } from './usePublishedPlannerQuery'
 
 import type { SubscriptionResponse } from '../types/PlannerListTypes'
 
-// ============================================================================
-// Main Hook
-// ============================================================================
-
-/**
- * Hook for subscribing to community planners
- *
- * @example
- * ```tsx
- * function PlannerCard({ planner }) {
- *   const subscription = usePlannerSubscription();
- *
- *   const handleSubscribe = () => {
- *     subscription.mutate(planner.id);
- *   };
- *
- *   return (
- *     <button
- *       onClick={handleSubscribe}
- *       disabled={subscription.isPending}
- *       aria-pressed={planner.isSubscribed}
- *     >
- *       {planner.isSubscribed ? 'Subscribed' : 'Subscribe'}
- *     </button>
- *   );
- * }
- * ```
- */
 export function usePlannerSubscription() {
   const queryClient = useQueryClient()
 
@@ -52,8 +16,6 @@ export function usePlannerSubscription() {
       return validateData(data, SubscriptionResponseSchema, 'planner subscription')
     },
     onSuccess: (_data, plannerId) => {
-      // Invalidate only the specific planner detail query
-      // Subscription state is not displayed in list view, so no need to invalidate list
       void queryClient.invalidateQueries({ queryKey: publishedPlannerQueryKeys.detail(plannerId) })
     },
     onError: (error) => {

@@ -40,13 +40,6 @@ interface TrackerModeViewerProps {
   planner: MDSaveablePlanner
 }
 
-/**
- * Tracker mode viewer for planner
- *
- * Single column layout with same section order as editor
- * Selective editability: deployment order and current skill counts are editable (session-only)
- * All other sections are read-only
- */
 export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
   const { t } = useTranslation(['planner', 'common'])
   const visibleSections = useProgressiveReveal(SECTION_COUNT)
@@ -58,11 +51,9 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
   const introNote = content.sectionNotes?.intro
   const outroNote = content.sectionNotes?.outro
 
-  // At most one section note dialog is open at a time
   const [openNote, setOpenNote] = useState<NoteSectionId | null>(null)
   const [deckEditPaneOpen, setDeckEditPaneOpen] = useState(false)
 
-  // Initialize tracker state (session-only, resets on unmount/refresh)
   const {
     state: trackerState,
     setEquipment,
@@ -103,14 +94,12 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
   }
 
   const handleResetToPreset = () => {
-    // Reset deployment order and equipment to planner's preset
     setDeploymentOrder(content.deploymentOrder)
     setEquipment(content.equipment)
   }
 
   const sections: RevealSectionSpec[] = [
     {
-      // Equipment read-only, deployment editable
       id: 'deckBuilder',
       node: (
         <Suspense fallback={<DeckGridSkeleton />}>
@@ -128,7 +117,6 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
           />
         </Suspense>
       ),
-      // Session-only deck, not the planner editor store
       aside: (
         <DeckBuilderPane open={deckEditPaneOpen} onOpenChange={setDeckEditPaneOpen}>
           <TrackerDeckBuilderContent
@@ -195,7 +183,6 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
     },
 
     {
-      // Current skill counts editable
       id: 'skillReplacement',
       node: (
         <Suspense
@@ -213,11 +200,9 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
     },
 
     {
-      // EGO gift list and theme pack collection, side by side
       id: 'comprehensiveGifts',
       node: (
         <div className="flex flex-col md:flex-row md:items-stretch gap-2">
-          {/* Comprehensive Gifts from all floors */}
           <div className="md:w-1/2 md:min-w-0">
             <PlannerSection
               title={t('pages.plannerMD.comprehensiveEgoGiftListView')}
@@ -236,7 +221,6 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
             </PlannerSection>
           </div>
 
-          {/* Theme Pack Gallery - All floors in single horizontal scroll */}
           <div className="md:w-1/2 md:min-w-0 overflow-hidden">
             <Suspense
               fallback={
@@ -265,7 +249,6 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
 
   return (
     <div className="bg-background rounded-lg space-y-2">
-      {/* Intro */}
       {introNote && !isNoteEmpty(introNote) && (
         <PlannerSection title={t('pages.plannerMD.introduction')}>
           <NoteEditor
@@ -285,7 +268,6 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
         </Fragment>
       ))}
 
-      {/* Outro */}
       {outroNote && !isNoteEmpty(outroNote) && (
         <PlannerSection title={t('pages.plannerMD.closingNotes')}>
           <NoteEditor
@@ -296,7 +278,6 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
         </PlannerSection>
       )}
 
-      {/* Section Note Dialogs */}
       {NOTE_SECTIONS.map((section) => (
         <SectionNoteDialog
           key={section.id}

@@ -13,10 +13,6 @@ interface FloorGalleryTrackerProps {
   floorCount: number
 }
 
-/**
- * Floor-by-floor gallery for guide mode (separate PlannerSection)
- * Shows theme pack and gifts for each floor without hover highlighting
- */
 export function FloorGalleryTracker({
   floorSelections,
   sectionNotes,
@@ -26,7 +22,6 @@ export function FloorGalleryTracker({
 
   const floorIndices = Array.from({ length: floorCount }, (_, i) => i)
 
-  // Deserialize floor selections (convert giftIds from string[] to Set<string>)
   const deserializedFloorSelections: FloorThemeSelection[] = floorSelections.map((floor) => ({
     ...floor,
     giftIds: new Set(floor.giftIds),
