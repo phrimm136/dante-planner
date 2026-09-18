@@ -1,3 +1,4 @@
+import { z } from 'zod'
 import { env } from './env'
 import {
   AuthTemporarilyUnavailableError,
@@ -38,11 +39,22 @@ function readCsrfToken(): string | null {
 }
 
 /** Shape every backend error body is read through; every field is best-effort. */
-interface ErrorBody {
-  code?: string
-  message?: string
-  serverVersion?: number
+export interface Problem {
+  status: number
+  detail?: string | undefined
+  /** @deprecated read `detail`; the pre-RFC 9457 field the security filters still send */
+  message?: string | undefined
+  code?: string | undefined
+  serverVersion?: number | null | undefined
 }
+
+const ProblemSchema: z.ZodType<Problem> = z.object({
+  status: z.number(),
+  detail: z.string().optional(),
+  message: z.string().optional(),
+  code: z.string().optional(),
+  serverVersion: z.number().nullable().optional(),
+})
 
 type ApiErrorConstructor = new (message: string) => Error
 
@@ -70,12 +82,11 @@ const DEFAULT_CONFLICT_CODE = 'CONFLICT'
 /**
  * Read an error response body, yielding null when it is absent or not JSON.
  */
-async function readErrorBody(response: Response): Promise<ErrorBody | null> {
-  try {
-    return (await response.json()) as ErrorBody
-  } catch {
-    return null
-  }
+async function readErrorBody(response: Response): Promise<Problem | null> {
+  const parsed = ProblemSchema.safeParse(await response.json().catch(() => null))
+  if (!parsed.success) return null
+  // oxlint-disable-next-line typescript/no-deprecated
+  return { ...parsed.data, detail: parsed.data.detail ?? parsed.data.message }
 }
 
 export class ApiClient {
@@ -125,10 +136,10 @@ export class ApiClient {
       }
       const RestrictionError = RESTRICTION_ERROR_BY_CODE[body.code ?? '']
       if (RestrictionError) {
-        throw new RestrictionError(body.message ?? '')
+        throw new RestrictionError(body.detail ?? '')
       }
       // Other 403 errors (PLANNER_FORBIDDEN, COMMENT_FORBIDDEN, etc.)
-      throw new ForbiddenError(body.code ?? '', body.message ?? '')
+      throw new ForbiddenError(body.code ?? '', body.detail ?? '')
     }
 
     // Handle 400 Bad Request with the code the backend classified it under
@@ -136,7 +147,7 @@ export class ApiClient {
       const body = await readErrorBody(response)
       throw new ValidationError(
         body?.code ?? DEFAULT_VALIDATION_CODE,
-        body?.message || DEFAULT_VALIDATION_MESSAGE,
+        body?.detail || DEFAULT_VALIDATION_MESSAGE,
       )
     }
 
@@ -150,7 +161,7 @@ export class ApiClient {
       const body = await readErrorBody(response)
       throw new ConflictError(
         body?.code ?? DEFAULT_CONFLICT_CODE,
-        body?.message || 'Conflict',
+        body?.detail || 'Conflict',
         body?.serverVersion ?? null,
       )
     }
@@ -158,13 +169,13 @@ export class ApiClient {
     // Handle 429 Too Many Requests with typed error
     if (response.status === 429) {
       const body = await readErrorBody(response)
-      throw new RateLimitError(body?.message || DEFAULT_RATE_LIMIT_MESSAGE)
+      throw new RateLimitError(body?.detail || DEFAULT_RATE_LIMIT_MESSAGE)
     }
 
     // Handle 503 Service Unavailable - distinguish planned deploy vs crash
     if (response.status === 503) {
       const body = await readErrorBody(response)
-      const message = body?.message || DEFAULT_UNAVAILABLE_MESSAGE
+      const message = body?.detail || DEFAULT_UNAVAILABLE_MESSAGE
       const UnavailableError =
         UNAVAILABLE_ERROR_BY_CODE[body?.code ?? ''] ?? BackendUnavailableError
       throw new UnavailableError(message)

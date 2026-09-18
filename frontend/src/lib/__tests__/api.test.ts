@@ -158,8 +158,9 @@ describe('ApiClient', () => {
         ok: false,
         status: 409,
         json: vi.fn().mockResolvedValue({
+          status: 409,
           code: 'VERSION_CONFLICT',
-          message: 'Version conflict',
+          detail: 'Version conflict',
           serverVersion: 5,
         }),
       })
@@ -190,8 +191,9 @@ describe('ApiClient', () => {
         ok: false,
         status: 409,
         json: vi.fn().mockResolvedValue({
+          status: 409,
           code: 'CONCURRENT_WRITE',
-          message: 'The resource was modified concurrently',
+          detail: 'The resource was modified concurrently',
           serverVersion: null,
         }),
       })
@@ -210,8 +212,9 @@ describe('ApiClient', () => {
         ok: false,
         status: 400,
         json: vi.fn().mockResolvedValue({
+          status: 400,
           code: 'VALIDATION_ERROR',
-          message: 'Invalid planner content structure',
+          detail: 'Invalid planner content structure',
         }),
       })
 
@@ -222,13 +225,49 @@ describe('ApiClient', () => {
       expect((error as ValidationError).message).toBe('Invalid planner content structure')
     })
 
+    it('400 falls back to a body that carries only the pre-RFC 9457 message', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 400,
+        json: vi.fn().mockResolvedValue({
+          status: 400,
+          code: 'VALIDATION_ERROR',
+          message: 'Invalid planner content structure',
+        }),
+      })
+
+      const error = await ApiClient.post('/api/planner/md', {}).catch((e: unknown) => e)
+
+      expect(error).toBeInstanceOf(ValidationError)
+      expect((error as ValidationError).message).toBe('Invalid planner content structure')
+    })
+
+    it('400 prefers detail over message when the body carries both', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 400,
+        json: vi.fn().mockResolvedValue({
+          status: 400,
+          code: 'VALIDATION_ERROR',
+          detail: 'From detail',
+          message: 'From message',
+        }),
+      })
+
+      const error = await ApiClient.post('/api/planner/md', {}).catch((e: unknown) => e)
+
+      expect(error).toBeInstanceOf(ValidationError)
+      expect((error as ValidationError).message).toBe('From detail')
+    })
+
     it('429 throws RateLimitError', async () => {
       mockFetch.mockResolvedValue({
         ok: false,
         status: 429,
         json: vi.fn().mockResolvedValue({
+          status: 429,
           code: 'RATE_LIMIT_EXCEEDED',
-          message: 'Too many requests',
+          detail: 'Too many requests',
         }),
       })
 
@@ -244,7 +283,7 @@ describe('ApiClient', () => {
         mockFetch.mockResolvedValue({
           ok: false,
           status: 503,
-          json: vi.fn().mockResolvedValue({ code, message: 'please retry' }),
+          json: vi.fn().mockResolvedValue({ status: 503, code, detail: 'please retry' }),
         })
 
         await expect(ApiClient.post('/api/planner/md', {})).rejects.toBeInstanceOf(
@@ -260,8 +299,9 @@ describe('ApiClient', () => {
         ok: false,
         status: 503,
         json: vi.fn().mockResolvedValue({
+          status: 503,
           code: 'WRITE_TEMPORARILY_UNAVAILABLE',
-          message: 'Database temporarily unavailable, please retry',
+          detail: 'Database temporarily unavailable, please retry',
         }),
       })
 
@@ -275,8 +315,9 @@ describe('ApiClient', () => {
         ok: false,
         status: 503,
         json: vi.fn().mockResolvedValue({
+          status: 503,
           code: 'AUTH_TEMPORARILY_UNAVAILABLE',
-          message: 'Authentication service temporarily unavailable, please retry',
+          detail: 'Authentication service temporarily unavailable, please retry',
         }),
       })
 
@@ -290,8 +331,9 @@ describe('ApiClient', () => {
         ok: false,
         status: 503,
         json: vi.fn().mockResolvedValue({
+          status: 503,
           code: 'BACKEND_UNAVAILABLE',
-          message: 'Service temporarily unavailable',
+          detail: 'Service temporarily unavailable',
         }),
       })
 
