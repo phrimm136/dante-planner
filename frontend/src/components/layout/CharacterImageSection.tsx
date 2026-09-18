@@ -6,10 +6,6 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { getButtonSwapImagePath } from '@/shared/assets'
 import { OverlayButton } from './OverlayButton'
 
-/**
- * The lightbox carries a pan/zoom engine and a dialog, which the placeholder branch and
- * every skeleton that draws this box would otherwise ship without ever opening it.
- */
 const ExpandImageButton = lazy(async () => {
   const module = await import('./ExpandImageButton')
 
@@ -17,26 +13,14 @@ const ExpandImageButton = lazy(async () => {
 })
 
 interface CharacterImageSectionProps {
-  /** Omitted → the box is drawn as a placeholder */
   src?: string | undefined
-  /** Required alongside `src`; unused by the placeholder */
   alt?: string | undefined
-  /** CSS aspect-ratio holding the box open while the image loads. */
   aspectRatio: string
-  /** Rendered when `src` fails to load. */
   fallbackSrc?: string | undefined
-  /** Fired on the fallback swap, for callers that mirror the resolved source. */
   onFallback?: (() => void) | undefined
-  /** Renders a swap button above the expand button. */
   swap?: { onSwap: () => void; disabled?: boolean } | undefined
 }
 
-/**
- * Character image panel shared by the identity and EGO detail headers:
- * the image itself (with optional fallback) and its overlay buttons.
- *
- * Without a `src` it is the placeholder the detail skeletons draw.
- */
 export function CharacterImageSection({
   src,
   alt = '',

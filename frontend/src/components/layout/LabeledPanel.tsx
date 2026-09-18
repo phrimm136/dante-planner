@@ -12,18 +12,12 @@ const TITLE_ALIGN: Record<TitleAlign, string> = {
 }
 
 interface LabeledPanelProps {
-  /** Already-translated heading; omitted → no title row */
   title?: string
   titleAlign?: TitleAlign
   children: ReactNode
-  /** Parent-context layout, e.g. "h-full", "flex-1" */
   className?: string
 }
 
-/**
- * Bordered detail-page panel with an optional aligned title row.
- * The shared shell behind stat panels, metadata boxes, and keyword rows.
- */
 export function LabeledPanel({
   title,
   titleAlign = 'center',

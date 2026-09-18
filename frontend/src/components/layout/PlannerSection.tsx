@@ -6,28 +6,12 @@ import { SECTION_STYLES } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 
 interface PlannerSectionProps {
-  /** Section title - rendered as h2 */
   title: string
-  /** Content inside the container */
   children: ReactNode
-  /** Optional "View Notes" button handler */
   onViewNotes?: () => void
-  /** Stretches the section and its container to the height of the row it sits in. */
   fill?: boolean
 }
 
-/**
- * Unified section wrapper for planner pages.
- * Provides consistent h2 header + bordered container styling.
- *
- * Uses SECTION_STYLES tokens for typography and container styling.
- * Optional "View Notes" button appears next to title when onViewNotes is provided.
- *
- * @example
- * <PlannerSection title={t('deckBuilder')} onViewNotes={() => setNotesOpen(true)}>
- *   <DeckBuilderContent />
- * </PlannerSection>
- */
 export function PlannerSection({ title, children, onViewNotes, fill }: PlannerSectionProps) {
   const { t } = useTranslation('common')
 

@@ -6,38 +6,23 @@ import { Button } from '@/components/ui/button'
 import { NotFoundError } from '@/lib/apiErrors'
 import NotFoundPage from './NotFoundPage'
 
-/**
- * RouteErrorComponent - Error component for TanStack Router
- *
- * Displayed when a route-level error occurs (e.g., data loading errors)
- * Different from ErrorBoundary which catches React render errors
- *
- * Dev mode: Shows detailed error message for debugging
- * Production: Shows user-friendly generic message
- */
 export function RouteErrorComponent({ error, reset }: ErrorComponentProps) {
   const { t } = useTranslation()
   const isDev = import.meta.env.DEV
   const location = useLocation()
 
-  // Special handling for 404 Not Found errors
   if (error instanceof NotFoundError) {
-    // For public/community planner pages
     if (location.pathname.startsWith('/planner/md/gesellschaft')) {
       return <PlannerNotFound listPath="/planner/md/gesellschaft" />
     }
 
-    // For personal planner pages
     if (location.pathname.startsWith('/planner/md/')) {
       return <PlannerNotFound listPath="/planner/md" />
     }
 
-    // For database pages (identity, ego, ego gift), show general 404
     return <NotFoundPage />
   }
 
-  // In dev: show actual error for debugging
-  // In production: show generic user-friendly message
   const errorMessage = isDev
     ? error instanceof Error
       ? error.message

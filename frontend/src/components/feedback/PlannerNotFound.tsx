@@ -4,15 +4,9 @@ import { Button } from '@/components/ui/button'
 import { SECTION_STYLES } from '@/lib/constants'
 
 interface PlannerNotFoundProps {
-  /** Path to the list page (e.g., "/planner/md" or "/planner/md/gesellschaft") */
   listPath: string
 }
 
-/**
- * PlannerNotFound - Reusable not found component for planner pages
- *
- * Shows a consistent "planner not found" message with a link back to the list
- */
 export function PlannerNotFound({ listPath }: PlannerNotFoundProps) {
   const { t } = useTranslation('planner')
 

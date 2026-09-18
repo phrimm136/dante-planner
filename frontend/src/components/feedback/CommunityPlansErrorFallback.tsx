@@ -2,14 +2,6 @@ import type { FallbackProps } from 'react-error-boundary'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 
-/**
- * CommunityPlansErrorFallback - Custom error fallback for community plans section
- *
- * Displays thematic Faust connection error message from game story (E618B.json)
- * instead of generic error message.
- *
- * Pattern: ErrorBoundary.tsx ErrorFallback component
- */
 export function CommunityPlansErrorFallback({ resetErrorBoundary }: FallbackProps) {
   const { t } = useTranslation('common')
 

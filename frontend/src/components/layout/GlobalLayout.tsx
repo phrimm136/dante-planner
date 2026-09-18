@@ -7,11 +7,6 @@ import { useDragToScroll } from '@/components/hooks/useDragToScroll'
 import { useAuthQueryNonBlocking } from '@/shared/auth'
 import { useUserSettingsQuery, useFirstLoginStore } from '@/shared/userSettings'
 
-/**
- * `useAppSse` reaches the planner storage, validation and EGO Gift graphs.
- * Behind `lazy` those land in a chunk fetched after the first paint instead of
- * in the entry chunk of every route.
- */
 const AppSse = lazy(async () => {
   const { useAppSse } = await import('@/pages/planner')
   return {
@@ -35,7 +30,6 @@ export function GlobalLayout({ children }: GlobalLayoutProps) {
   const openSyncChoiceDialog = useFirstLoginStore((s) => s.openSyncChoiceDialog)
   const closeSyncChoiceDialog = useFirstLoginStore((s) => s.closeSyncChoiceDialog)
 
-  // Check on mount if user needs to configure sync preference
   useEffect(() => {
     if (user && settings && !settings.syncChoiceMade) {
       openSyncChoiceDialog()
@@ -60,7 +54,6 @@ export function GlobalLayout({ children }: GlobalLayoutProps) {
         <Footer />
       </div>
 
-      {/* First-login sync choice dialog (GDPR compliant) */}
       <SyncChoiceDialog open={showSyncChoiceDialog} onChoice={handleSyncChoice} />
     </div>
   )

@@ -13,13 +13,6 @@ function getInitialMatches(mode: BreakpointMode, breakpoint: number): boolean {
   return window.matchMedia(buildQuery(mode, breakpoint)).matches
 }
 
-/**
- * Hook to detect whether the current viewport matches a given breakpoint rule.
- * Initial value is computed synchronously to avoid a layout flash on mount.
- * Example:
- *   useIsBreakpoint("max", 768)   // true when width < 768
- *   useIsBreakpoint("min", 1024)  // true when width >= 1024
- */
 export function useIsBreakpoint(mode: BreakpointMode = 'max', breakpoint = 768) {
   const [matches, setMatches] = useState<boolean>(() => getInitialMatches(mode, breakpoint))
 

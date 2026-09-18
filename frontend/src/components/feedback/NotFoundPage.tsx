@@ -3,11 +3,6 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { SECTION_STYLES } from '@/lib/constants'
 
-/**
- * NotFoundPage - 404 error page
- *
- * Displayed when user navigates to a route that doesn't exist
- */
 export default function NotFoundPage() {
   const { t } = useTranslation()
 

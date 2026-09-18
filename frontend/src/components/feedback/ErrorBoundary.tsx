@@ -10,29 +10,16 @@ interface ErrorFallbackProps {
   resetErrorBoundary: (...args: unknown[]) => void
 }
 
-/**
- * ErrorFallback - Fallback UI for error boundary
- *
- * Displays error message with reset button
- *
- * Dev mode: Shows detailed error message and stack trace for debugging
- * Production: Shows user-friendly generic message
- *
- * Special handling for NotFoundError: Shows dedicated "not found" page
- */
 function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
   const { t } = useTranslation()
   const isDev = import.meta.env.DEV
 
-  // Special handling for 404 Not Found errors - use NotFoundPage component
   if (error instanceof NotFoundError) {
     return <NotFoundPage />
   }
 
   const errorObj = error instanceof Error ? error : new Error(String(error))
 
-  // In dev: show actual error for debugging
-  // In production: show generic user-friendly message
   const errorMessage = isDev ? errorObj.message : t('errors.generic.message')
 
   return (
@@ -60,11 +47,6 @@ interface ErrorBoundaryProps {
   children: ReactNode
 }
 
-/**
- * ErrorBoundary - Wrapper component for react-error-boundary
- *
- * Catches unexpected render and logic errors in child components
- */
 export function ErrorBoundary({ children }: ErrorBoundaryProps) {
   return (
     <ReactErrorBoundary
@@ -73,7 +55,6 @@ export function ErrorBoundary({ children }: ErrorBoundaryProps) {
         console.error('Error boundary caught error:', error, info)
       }}
       onReset={() => {
-        // Reset any global state if needed
         window.location.href = '/'
       }}
     >

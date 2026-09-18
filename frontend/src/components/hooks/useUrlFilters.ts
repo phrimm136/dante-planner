@@ -2,11 +2,8 @@ import { useCallback } from 'react'
 import { useSearch, useNavigate } from '@tanstack/react-router'
 
 export interface UrlFilters<TParams> {
-  /** Current search params, or undefined before the route has any. */
   params: Partial<TParams> | undefined
-  /** Merges updates into the current params; an undefined value drops its key. */
   setParams: (updates: Partial<TParams>) => void
-  /** Drops every search param on the route. */
   clearParams: () => void
 }
 

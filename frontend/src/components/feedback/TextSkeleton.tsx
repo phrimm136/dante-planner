@@ -24,18 +24,11 @@ const LINE_WIDTH: Record<TextWidth, string> = {
 
 interface TextSkeletonProps {
   lines?: number
-  /** The text class the stub stands in for */
   size?: TextSize
-  /** Applies to every line */
   width?: TextWidth
   className?: string
 }
 
-/**
- * The stand-in for a run of text, sized by the text class it replaces.
- *
- * The only place a `Skeleton` carries a width or height token.
- */
 export function TextSkeleton({
   lines = 1,
   size = 'sm',

@@ -12,11 +12,6 @@ interface ExpandImageButtonProps {
   alt: string
 }
 
-/**
- * Expand button plus the in-page lightbox it opens: the page dims, the image
- * renders centered at its natural width capped to the viewport, with
- * pinch/wheel/double-click zoom and drag panning.
- */
 export function ExpandImageButton({ src, alt }: ExpandImageButtonProps) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)

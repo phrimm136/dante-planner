@@ -1,20 +1,8 @@
 interface DetailRightPanelProps {
-  /** Sticky selector component at top */
   selector: React.ReactNode
-  /** Scrollable content below selector */
   children: React.ReactNode
 }
 
-/**
- * DetailRightPanel - Scrollable right panel for detail pages
- *
- * Features:
- * - Sticky selector at top that stays visible while scrolling
- * - Scrollable content area with max height constraint
- * - Uses ScrollArea for custom scrollbar styling
- *
- * Pattern: Follows DetailPageLayout.tsx container structure
- */
 export function DetailRightPanel({ selector, children }: DetailRightPanelProps) {
   return (
     <div className="flex flex-col h-full">

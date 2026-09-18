@@ -9,9 +9,6 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { cn } from '@/lib/utils'
 import { SECTION_STYLES } from '@/lib/constants'
 
-/**
- * Navigation structure with categories and items
- */
 const NAV_STRUCTURE = {
   database: {
     labelKey: 'header.nav.categories.database',
@@ -41,9 +38,6 @@ const NAV_STRUCTURE = {
 
 type CategoryKey = keyof typeof NAV_STRUCTURE
 
-/**
- * Desktop navigation with hover dropdowns
- */
 function DesktopNav() {
   const { t } = useTranslation()
   const { data: user } = useAuthQueryNonBlocking()
@@ -53,7 +47,6 @@ function DesktopNav() {
     <nav className="hidden lg:flex items-center gap-1 ml-8">
       {(Object.entries(NAV_STRUCTURE) as [CategoryKey, (typeof NAV_STRUCTURE)[CategoryKey]][]).map(
         ([categoryKey, category]) => {
-          // Filter moderator section based on role
           if ('staffOnly' in category && !isStaff(user?.role)) {
             return null
           }
@@ -68,7 +61,6 @@ function DesktopNav() {
                 setOpenCategory(null)
               }}
             >
-              {/* Category trigger */}
               <Button
                 variant="ghost"
                 className={SECTION_STYLES.LAYOUT.rowTight}
@@ -85,7 +77,6 @@ function DesktopNav() {
                 />
               </Button>
 
-              {/* Dropdown menu */}
               <div
                 className={cn(
                   'absolute left-0 top-full pt-1 transition-all duration-200 z-50',
@@ -115,9 +106,6 @@ function DesktopNav() {
   )
 }
 
-/**
- * Mobile navigation with sheet overlay
- */
 function MobileNav() {
   const { t } = useTranslation()
   const { data: user } = useAuthQueryNonBlocking()
@@ -139,19 +127,16 @@ function MobileNav() {
           {(
             Object.entries(NAV_STRUCTURE) as [CategoryKey, (typeof NAV_STRUCTURE)[CategoryKey]][]
           ).map(([categoryKey, category]) => {
-            // Filter moderator section based on role
             if ('staffOnly' in category && !isStaff(user?.role)) {
               return null
             }
 
             return (
               <div key={categoryKey} className="space-y-2">
-                {/* Category label */}
                 <div className="text-sm font-semibold text-muted-foreground px-2">
                   {t(category.labelKey)}
                 </div>
 
-                {/* Items (always expanded, indented) */}
                 <div className="flex flex-col gap-1 pl-4">
                   {category.items.map((item) => (
                     <Link
@@ -178,11 +163,6 @@ function MobileNav() {
   )
 }
 
-/**
- * Header navigation namespace
- * - HeaderNav.Desktop: Inline dropdown menus with hover (lg+)
- * - HeaderNav.Mobile: Hamburger button that opens sheet overlay (<lg)
- */
 export const HeaderNav = {
   Desktop: DesktopNav,
   Mobile: MobileNav,

@@ -29,15 +29,6 @@ function isInteractiveTarget(target: HTMLElement): boolean {
   return !!target.closest(INTERACTIVE_SELECTORS)
 }
 
-/**
- * Global drag-to-scroll hook.
- *
- * Attaches document-level mouse listeners that detect scrollable panes
- * and enable click-drag scrolling. Ignores interactive elements (buttons,
- * inputs, links) and the root page scroll.
- *
- * Call once in GlobalLayout — no per-component wiring needed.
- */
 export function useDragToScroll() {
   useEffect(() => {
     let isDragging = false
@@ -91,7 +82,6 @@ export function useDragToScroll() {
       }
       isDragging = false
       container = null
-      // Delay reset so the capturing click handler can still read hasMoved
       if (hasMoved) {
         setTimeout(() => {
           hasMoved = false
@@ -99,7 +89,6 @@ export function useDragToScroll() {
       }
     }
 
-    // Suppress click events that fire after a drag gesture
     const onClickCapture = (e: MouseEvent) => {
       if (hasMoved) {
         e.stopPropagation()

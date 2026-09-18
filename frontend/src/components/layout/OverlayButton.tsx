@@ -7,10 +7,6 @@ interface OverlayButtonProps {
   iconAlt: string
 }
 
-/**
- * Game-styled button for overlaying on a character image: textured base,
- * hover/press highlight layer, and an icon on top.
- */
 export function OverlayButton({ onClick, disabled, iconSrc, iconAlt }: OverlayButtonProps) {
   return (
     <button

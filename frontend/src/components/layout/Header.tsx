@@ -24,10 +24,6 @@ import { HeaderNav } from '@/components/HeaderNav'
 import { startGoogleLogin } from '@/shared/auth'
 import { SECTION_STYLES } from '@/lib/constants'
 
-/**
- * UnreadBadge - Renders unread notification count badge on User icon.
- * Must only be rendered when user is authenticated (useSuspenseQuery).
- */
 function UnreadBadge() {
   const { unreadCount } = useUnreadCountQuery()
   if (unreadCount === 0) return null
@@ -44,12 +40,6 @@ function UnreadBadge() {
   )
 }
 
-/**
- * AuthSection - Auth-dependent header section wrapped in Suspense.
- *
- * Contains: notification bell, user dropdown, OAuth handling.
- * Uses useAuthQuery (suspends) - must be wrapped in Suspense boundary.
- */
 function AuthSection() {
   const { t, i18n } = useTranslation(['common'])
   const { data: user } = useAuthQuery()
@@ -59,7 +49,6 @@ function AuthSection() {
 
   return (
     <>
-      {/* User Authentication Dropdown (with integrated notifications) */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
@@ -143,7 +132,6 @@ function AuthSection() {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Notification dialog - opened from dropdown menu item */}
       {user && (
         <NotificationDialog
           open={notificationDialogOpen}
@@ -154,9 +142,6 @@ function AuthSection() {
   )
 }
 
-/**
- * AuthSectionFallback - Loading state for auth section
- */
 function AuthSectionFallback() {
   const { t } = useTranslation('common')
   return (
@@ -166,18 +151,6 @@ function AuthSectionFallback() {
   )
 }
 
-/**
- * Header component with two-section layout:
- * - Left: Clickable title + Desktop navigation (dropdown menus)
- * - Right: Mobile menu button + Settings buttons (Language, Settings, Sign In)
- *
- * Navigation structure:
- * - Database: Identity, EGO, EGO Gifts
- * - Planner: Mirror Dungeon
- *
- * Note: Background and border styling provided by GlobalLayout wrapper.
- * Auth-dependent UI is isolated in AuthSection with Suspense boundary.
- */
 export function Header() {
   const { t, i18n } = useTranslation('common')
   const displayFont = getDisplayFontForLabel()
@@ -189,7 +162,6 @@ export function Header() {
   return (
     <header className="px-6 py-4">
       <div className="flex items-center justify-between gap-4">
-        {/* Left Section: Logo + Title + Desktop Navigation */}
         <div className="flex items-center shrink-0">
           <Link
             to="/"
@@ -206,11 +178,9 @@ export function Header() {
           <HeaderNav.Desktop />
         </div>
 
-        {/* Right Section: Mobile Menu + Settings Buttons */}
         <div className="shrink-0 flex items-center gap-2">
           <HeaderNav.Mobile />
 
-          {/* Language Selector Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" aria-label={t('header.settings.language')}>
@@ -227,7 +197,6 @@ export function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Auth Section - Suspense boundary isolates auth loading */}
           <Suspense fallback={<AuthSectionFallback />}>
             <AuthSection />
           </Suspense>

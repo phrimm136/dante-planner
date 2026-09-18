@@ -1,9 +1,6 @@
 import { TextSkeleton } from '@/components/feedback/TextSkeleton'
 import { SECTION_STYLES } from '@/lib/constants'
 
-/**
- * Route-shaped placeholder shown while a lazy route chunk and its loader resolve.
- */
 export function RoutePendingFallback() {
   return (
     <div className={SECTION_STYLES.LAYOUT.page}>

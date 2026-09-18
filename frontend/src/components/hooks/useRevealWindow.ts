@@ -2,17 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import type { RefObject } from 'react'
 
 export interface RevealWindow {
-  /** Index of the first item on the row the viewport starts at */
   start: number
-  /** How many indices past `start` are revealed */
   down: number
-  /** How many indices before `start` are revealed */
   up: number
 }
 
 interface RevealWindowOptions {
   total: number
-  /** Indices added to each edge of the window per animation frame */
   step: number
   gridRef: RefObject<HTMLElement | null>
 }
@@ -49,7 +45,6 @@ export function isWindowComplete(revealWindow: RevealWindow, total: number): boo
 }
 
 // A browser resolves `grid-template-columns` to the used track list, one length per
-// column; jsdom leaves the `repeat()` shorthand, which yields no tracks.
 export function columnCountFor(gridTemplateColumns: string): number {
   const tracks = gridTemplateColumns.split(/\s+/).filter((track) => /^[\d.]+px$/.test(track))
   return Math.max(tracks.length, 1)
@@ -66,13 +61,6 @@ function openWindowAt(grid: HTMLElement | null, step: number): RevealWindow {
   return { start: startIndexFor(window.scrollY, gridTop, rowHeight, columns), down: step, up: 0 }
 }
 
-/**
- * Decides which of a grid's slots hold their card yet.
- *
- * The window opens on the first animation frame at the row the viewport starts on —
- * after the router has replayed a saved offset — and grows by `step` toward both ends
- * of the list, one frame at a time.
- */
 export function useRevealWindow({ total, step, gridRef }: RevealWindowOptions) {
   const [revealWindow, setRevealWindow] = useState<RevealWindow>({ start: 0, down: 0, up: 0 })
   const openedRef = useRef(false)

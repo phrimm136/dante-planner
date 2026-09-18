@@ -4,27 +4,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
 
 interface MobileDetailTabsProps {
-  /** Content for Skills tab */
   skillsContent: React.ReactNode
-  /** Content for Passives tab */
   passivesContent: React.ReactNode
-  /** Optional: Content for third tab (Sanity for Identity only) */
   thirdTabContent?: React.ReactNode
-  /** Default active tab */
   defaultTab?: 'skills' | 'passives' | 'sanity'
 }
 
-/**
- * MobileDetailTabs - Tab navigation for mobile detail page layout
- *
- * On mobile, Info content is shown at top (outside tabs).
- * This component only handles the tabbed content below:
- * - Skills: Skill cards with slot/type selector
- * - Passives: Effective and locked passives
- * - Third tab (optional): Sanity (Identity only)
- *
- * Pattern: Uses shadcn/ui Tabs component
- */
 export function MobileDetailTabs({
   skillsContent,
   passivesContent,

@@ -7,17 +7,11 @@ import { SCORE_DREAM_VALID_SYLLABLES } from './scoreDreamGlyphs'
 const HANGUL_SYLLABLE_START = 0xac00
 const HANGUL_SYLLABLE_END = 0xd7a3
 
-/**
- * Checks if a character is a Korean syllable
- */
 function isKoreanSyllable(char: string): boolean {
   const code = char.charCodeAt(0)
   return code >= HANGUL_SYLLABLE_START && code <= HANGUL_SYLLABLE_END
 }
 
-/**
- * Checks if S-Core Dream font has a valid glyph for this character
- */
 function hasValidGlyph(char: string): boolean {
   const code = char.charCodeAt(0)
   return SCORE_DREAM_VALID_SYLLABLES.has(code)
@@ -34,10 +28,6 @@ interface KoreanTextProps {
  *
  * S-Core Dream only has ~2,350 of 11,172 Korean syllables.
  * This component wraps unsupported characters in Pretendard font.
- *
- * @example
- * <KoreanText>크랲게 뇌수 담금주</KoreanText>
- * // "랲" will render in Pretendard, rest in S-Core Dream
  */
 export const KoreanText = memo(function KoreanText({ children, className }: KoreanTextProps) {
   const result: ReactNode[] = []
@@ -48,7 +38,6 @@ export const KoreanText = memo(function KoreanText({ children, className }: Kore
     const needsFallback = isKoreanSyllable(char) && !hasValidGlyph(char)
 
     if (needsFallback !== currentNeedsFallback && currentRun) {
-      // Flush current run
       if (currentNeedsFallback) {
         result.push(
           <span key={result.length} style={{ fontFamily: 'var(--font-pretendard)' }}>
@@ -65,7 +54,6 @@ export const KoreanText = memo(function KoreanText({ children, className }: Kore
     currentNeedsFallback = needsFallback
   }
 
-  // Flush remaining run
   if (currentRun) {
     if (currentNeedsFallback) {
       result.push(

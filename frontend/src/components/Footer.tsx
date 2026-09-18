@@ -9,10 +9,8 @@ export function Footer() {
   return (
     <footer className="px-6 py-8 border-t border-border">
       <div className="max-w-4xl mx-auto space-y-6">
-        {/* Disclaimer */}
         <p className="text-sm text-muted-foreground text-center">{t('footer.disclaimer')}</p>
 
-        {/* CN Translation Credit */}
         <p className="text-sm text-muted-foreground text-center">
           {t('footer.cnCredits')}{' '}
           <a
@@ -25,7 +23,6 @@ export function Footer() {
           </a>
         </p>
 
-        {/* Links */}
         <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
           <Link
             to="/privacy"
@@ -59,7 +56,6 @@ export function Footer() {
           </a>
         </div>
 
-        {/* Copyright */}
         <p className="text-xs text-muted-foreground/70 text-center">{t('footer.copyright')}</p>
       </div>
     </footer>

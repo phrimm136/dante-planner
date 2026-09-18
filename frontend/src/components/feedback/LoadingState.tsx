@@ -3,11 +3,6 @@ interface LoadingStateProps {
   message?: string
 }
 
-/**
- * LoadingState - Reusable loading state component
- *
- * Displays a centered loading message with consistent styling
- */
 export function LoadingState({ message = 'Loading...' }: LoadingStateProps) {
   return (
     <div className={SECTION_STYLES.LAYOUT.page}>

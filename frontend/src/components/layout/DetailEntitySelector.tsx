@@ -7,31 +7,17 @@ import { MAX_LEVEL } from '@/shared/gameData'
 import { SECTION_STYLES } from '@/lib/constants'
 
 interface DetailEntitySelectorProps {
-  /** Heading for the tier row, already resolved by the caller */
   tierLabel: ReactNode
-  /** Lowest selectable tier */
   minTier: number
-  /** Highest selectable tier */
   maxTier: number
-  /** Current tier/uptie/threadspin/enhancement level */
   tier: number
-  /** Callback when tier changes */
   onTierChange: (tier: number) => void
-  /** Icon shown on a tier button */
   tierIconPath: (tier: number) => string
-  /** Current level; the level slider renders only when `onLevelChange` is given */
   level?: number
-  /** Callback when level changes */
   onLevelChange?: (level: number) => void
-  /** Whether the selector should be sticky */
   sticky?: boolean
 }
 
-/**
- * DetailEntitySelector - Tier selector for detail pages, with an optional level slider.
- *
- * Pattern: TierLevelSelector.tsx (tier icons), EGOGiftEnhancementSelector.tsx (enhancement icons)
- */
 export function DetailEntitySelector({
   tierLabel,
   minTier,
@@ -48,7 +34,6 @@ export function DetailEntitySelector({
   const [appliedLevel, setAppliedLevel] = useState(level)
   const displayStyle = getDisplayFontForLanguage(i18n.language)
 
-  // A level set from outside replaces whatever is being typed.
   if (level !== appliedLevel) {
     setAppliedLevel(level)
     setInputValue(String(level))
@@ -70,7 +55,6 @@ export function DetailEntitySelector({
       )}
     >
       <div className="flex flex-col sm:flex-row sm:items-center sm:gap-6">
-        {/* Tier selector */}
         <div className={SECTION_STYLES.LAYOUT.row}>
           <span className="text-lg font-medium" style={displayStyle}>
             {tierLabel}
@@ -99,7 +83,6 @@ export function DetailEntitySelector({
           </div>
         </div>
 
-        {/* Level selector */}
         {onLevelChange && (
           <div
             className="flex items-center gap-3 flex-1"
