@@ -74,6 +74,7 @@
       { "allowDefaultCaseForExhaustiveSwitch": true, "considerDefaultExhaustiveForUnions": true }
     ],
     "typescript/no-unsafe-enum-comparison": "error",
+    "typescript/no-deprecated": "warn",
     "no-param-reassign": ["error", { "props": false }],
     "prefer-const": "error",
     "typescript/require-array-sort-compare": ["error", { "ignoreStringArrays": true }],
