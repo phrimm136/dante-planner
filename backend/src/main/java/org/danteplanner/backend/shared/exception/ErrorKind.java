@@ -2,9 +2,6 @@ package org.danteplanner.backend.shared.exception;
 
 /**
  * The kind of failure a {@link DomainException} reports, named in transport-neutral terms.
- *
- * <p>A domain exception states what went wrong; which HTTP status carries that outcome is the web
- * layer's decision, so the mapping lives in {@code GlobalExceptionHandler} and not here.</p>
  */
 public enum ErrorKind {
 
@@ -18,5 +15,14 @@ public enum ErrorKind {
     CONFLICT,
 
     /** The caller supplied something the endpoint cannot accept. */
-    INVALID_REQUEST
+    INVALID_REQUEST,
+
+    /** The caller has not established who it is, or no longer holds a valid credential. */
+    UNAUTHENTICATED,
+
+    /** The caller has spent an allowance and must wait before asking again. */
+    OVER_QUOTA,
+
+    /** The server could not hold up its end. */
+    INTERNAL
 }

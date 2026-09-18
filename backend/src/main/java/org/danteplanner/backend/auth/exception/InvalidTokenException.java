@@ -1,10 +1,17 @@
 package org.danteplanner.backend.auth.exception;
 
+import lombok.Getter;
+import org.danteplanner.backend.shared.exception.DomainException;
+import org.danteplanner.backend.shared.exception.ErrorKind;
+
 /**
  * Exception thrown when a token is invalid, expired, or malformed.
- * Results in HTTP 401 with code INVALID_TOKEN.
  */
-public class InvalidTokenException extends RuntimeException {
+@Getter
+public class InvalidTokenException extends DomainException {
+
+    private static final String ERROR_CODE = "UNAUTHORIZED";
+    private static final String CLIENT_DETAIL = "Authentication required";
 
     /**
      * Reasons for token invalidity.
@@ -36,8 +43,7 @@ public class InvalidTokenException extends RuntimeException {
      * @param reason the reason the token is invalid
      */
     public InvalidTokenException(Reason reason) {
-        super(reason.getDescription());
-        this.reason = reason;
+        this(reason, null);
     }
 
     /**
@@ -47,14 +53,12 @@ public class InvalidTokenException extends RuntimeException {
      * @param cause the underlying cause
      */
     public InvalidTokenException(Reason reason, Throwable cause) {
-        super(reason.getDescription(), cause);
+        super(ErrorKind.UNAUTHENTICATED, ERROR_CODE, CLIENT_DETAIL, reason.getDescription(), cause);
         this.reason = reason;
     }
 
-    /**
-     * Returns the reason for token invalidity.
-     */
-    public Reason getReason() {
-        return reason;
+    @Override
+    public boolean reportable() {
+        return true;
     }
 }

@@ -1,24 +1,52 @@
 package org.danteplanner.backend.shared.exception;
 
 import lombok.Getter;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.ErrorResponseException;
 
 /**
- * A business error whose whole response is its kind, its code, and its message.
- *
- * <p>{@code GlobalExceptionHandler} answers every subclass through one handler, so a new business
- * error is a new class here and no edit there. An error needing more of the response than the
- * triple below — a cleared cookie, an extra body field, a message that must hide what the
- * exception carries — extends {@link RuntimeException} and keeps its own handler instead.</p>
+ * A business error that carries its own HTTP status, headers and RFC 9457 body; the code rides as
+ * the {@code code} property.
  */
 @Getter
-public abstract class DomainException extends RuntimeException {
+public abstract class DomainException extends ErrorResponseException {
+
+    public static final String CODE_PROPERTY = "code";
 
     private final ErrorKind kind;
     private final String errorCode;
 
-    protected DomainException(ErrorKind kind, String errorCode, String message) {
-        super(message);
+    /**
+     * The text the log carries, which is the client-facing detail unless the client's is narrower.
+     */
+    private final String logDetail;
+
+    protected DomainException(ErrorKind kind, String errorCode, String detail) {
+        this(kind, errorCode, detail, detail, null);
+    }
+
+    protected DomainException(
+            ErrorKind kind, String errorCode, String detail, String logDetail, Throwable cause) {
+        super(statusOf(kind), Problems.problem(statusOf(kind), errorCode, detail), cause);
         this.kind = kind;
         this.errorCode = errorCode;
+        this.logDetail = logDetail;
+    }
+
+    /** True when reaching the client with this error is a defect worth an alert. */
+    public boolean reportable() {
+        return kind == ErrorKind.INTERNAL;
+    }
+
+    static HttpStatus statusOf(ErrorKind kind) {
+        return switch (kind) {
+            case NOT_FOUND -> HttpStatus.NOT_FOUND;
+            case FORBIDDEN -> HttpStatus.FORBIDDEN;
+            case CONFLICT -> HttpStatus.CONFLICT;
+            case INVALID_REQUEST -> HttpStatus.BAD_REQUEST;
+            case UNAUTHENTICATED -> HttpStatus.UNAUTHORIZED;
+            case OVER_QUOTA -> HttpStatus.TOO_MANY_REQUESTS;
+            case INTERNAL -> HttpStatus.INTERNAL_SERVER_ERROR;
+        };
     }
 }

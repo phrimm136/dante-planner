@@ -1,5 +1,9 @@
 package org.danteplanner.backend.auth.exception;
 
+import lombok.Getter;
+import org.danteplanner.backend.shared.exception.DomainException;
+import org.danteplanner.backend.shared.exception.ErrorKind;
+
 /**
  * Exception thrown when a refresh token's lineage family has been revoked,
  * either by theft detection or an explicit logout.
@@ -8,7 +12,11 @@ package org.danteplanner.backend.auth.exception;
  * {@link TokenRevokedException} so the frontend's existing revocation handling
  * applies unchanged.</p>
  */
-public class SessionRevokedException extends RuntimeException {
+@Getter
+public class SessionRevokedException extends DomainException {
+
+    private static final String ERROR_CODE = "UNAUTHORIZED";
+    private static final String CLIENT_DETAIL = "Authentication required";
 
     private final String familyId;
 
@@ -18,7 +26,8 @@ public class SessionRevokedException extends RuntimeException {
      * @param familyId the revoked token family identifier
      */
     public SessionRevokedException(String familyId) {
-        super(String.format("Refresh token family %s has been revoked", familyId));
+        super(ErrorKind.UNAUTHENTICATED, ERROR_CODE, CLIENT_DETAIL,
+                String.format("Refresh token family %s has been revoked", familyId), null);
         this.familyId = familyId;
     }
 
@@ -27,14 +36,13 @@ public class SessionRevokedException extends RuntimeException {
      * did not name.
      */
     public SessionRevokedException() {
-        super("Refresh token family has been revoked");
+        super(ErrorKind.UNAUTHENTICATED, ERROR_CODE, CLIENT_DETAIL,
+                "Refresh token family has been revoked", null);
         this.familyId = null;
     }
 
-    /**
-     * Returns the revoked token family identifier.
-     */
-    public String getFamilyId() {
-        return familyId;
+    @Override
+    public boolean reportable() {
+        return true;
     }
 }

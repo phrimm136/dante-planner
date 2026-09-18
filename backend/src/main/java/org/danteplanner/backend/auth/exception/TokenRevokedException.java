@@ -1,10 +1,17 @@
 package org.danteplanner.backend.auth.exception;
 
+import lombok.Getter;
+import org.danteplanner.backend.shared.exception.DomainException;
+import org.danteplanner.backend.shared.exception.ErrorKind;
+
 /**
  * Exception thrown when a token has been revoked/blacklisted.
- * Results in HTTP 401 with code TOKEN_REVOKED.
  */
-public class TokenRevokedException extends RuntimeException {
+@Getter
+public class TokenRevokedException extends DomainException {
+
+    private static final String ERROR_CODE = "UNAUTHORIZED";
+    private static final String CLIENT_DETAIL = "Authentication required";
 
     private final String tokenType;
 
@@ -14,14 +21,13 @@ public class TokenRevokedException extends RuntimeException {
      * @param tokenType the type of token that was revoked ("access" or "refresh")
      */
     public TokenRevokedException(String tokenType) {
-        super(String.format("%s token has been revoked", tokenType));
+        super(ErrorKind.UNAUTHENTICATED, ERROR_CODE, CLIENT_DETAIL,
+                String.format("%s token has been revoked", tokenType), null);
         this.tokenType = tokenType;
     }
 
-    /**
-     * Returns the type of token that was revoked.
-     */
-    public String getTokenType() {
-        return tokenType;
+    @Override
+    public boolean reportable() {
+        return true;
     }
 }

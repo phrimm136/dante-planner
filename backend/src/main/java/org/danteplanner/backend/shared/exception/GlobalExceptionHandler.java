@@ -62,15 +62,6 @@ public class GlobalExceptionHandler {
 
     public record ConflictErrorResponse(String code, String message, Long serverVersion) {}
 
-    private static HttpStatus statusOf(ErrorKind kind) {
-        return switch (kind) {
-            case NOT_FOUND -> HttpStatus.NOT_FOUND;
-            case FORBIDDEN -> HttpStatus.FORBIDDEN;
-            case CONFLICT -> HttpStatus.CONFLICT;
-            case INVALID_REQUEST -> HttpStatus.BAD_REQUEST;
-        };
-    }
-
     /**
      * Answers every business error whose response is fully described by its kind, code, and
      * message. A subclass needing more of the response than that keeps its own handler below,
@@ -82,8 +73,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DomainException.class)
     public ResponseEntity<ErrorResponse> handleDomain(DomainException ex) {
         log.warn("{}: {}", ex.getErrorCode(), ex.getMessage());
-        return ResponseEntity.status(statusOf(ex.getKind()))
-            .body(new ErrorResponse(ex.getErrorCode(), ex.getMessage()));
+        return ResponseEntity.status(ex.getStatusCode())
+            .body(new ErrorResponse(ex.getErrorCode(), ex.getLogDetail()));
     }
 
 
