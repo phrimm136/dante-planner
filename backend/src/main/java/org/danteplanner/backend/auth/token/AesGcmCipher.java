@@ -11,14 +11,10 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 
 /**
- * AES-256-GCM authenticated encryption helper.
- *
- * <p>Single source of the project's symmetric crypto: a fresh 96-bit IV is generated per
+ * <p>A fresh 96-bit IV is generated per
  * encryption and prepended to the ciphertext, so the same key never reuses an IV (GCM IV
  * reuse is catastrophic). Decryption fails closed — a tampered ciphertext or tag throws
- * {@link AEADBadTagException}. Reused by token and OAuth-transaction sealing.</p>
- *
- * @see <a href="https://owasp.org/www-community/Cryptographic_Storage_Cheat_Sheet">OWASP Cryptographic Storage</a>
+ * {@link AEADBadTagException}.</p>
  */
 @Component
 public class AesGcmCipher {
@@ -29,14 +25,6 @@ public class AesGcmCipher {
 
     private final SecureRandom secureRandom = new SecureRandom();
 
-    /**
-     * Encrypts plaintext under the given key, returning {@code IV || ciphertext+tag}.
-     *
-     * @param key       AES-256 key (32 bytes)
-     * @param plaintext data to encrypt
-     * @return IV-prefixed ciphertext
-     * @throws GeneralSecurityException if encryption fails
-     */
     public byte[] encrypt(byte[] key, byte[] plaintext) throws GeneralSecurityException {
         byte[] iv = new byte[IV_LENGTH];
         secureRandom.nextBytes(iv);
@@ -50,14 +38,6 @@ public class AesGcmCipher {
         return result;
     }
 
-    /**
-     * Decrypts an {@code IV || ciphertext+tag} payload produced by {@link #encrypt}.
-     *
-     * @param key     AES-256 key (32 bytes)
-     * @param payload IV-prefixed ciphertext
-     * @return the original plaintext
-     * @throws GeneralSecurityException if the payload is malformed, tampered, or the tag fails
-     */
     public byte[] decrypt(byte[] key, byte[] payload) throws GeneralSecurityException {
         if (payload.length <= IV_LENGTH) {
             throw new AEADBadTagException("Ciphertext too short to contain IV and tag");

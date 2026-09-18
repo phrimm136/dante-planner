@@ -5,13 +5,6 @@ import jakarta.persistence.Converter;
 
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 
-/**
- * JPA AttributeConverter mapping {@link AuthProviderType} to the lowercase
- * {@code google}/{@code apple} values persisted in the {@code provider} VARCHAR column.
- *
- * <p>Used instead of {@code @Enumerated(STRING)}, which would persist {@code GOOGLE}/{@code APPLE}
- * and break the existing lowercase data and {@code UNIQUE(provider, providerId)} constraint.</p>
- */
 @Converter
 public class AuthProviderTypeConverter implements AttributeConverter<AuthProviderType, String> {
 

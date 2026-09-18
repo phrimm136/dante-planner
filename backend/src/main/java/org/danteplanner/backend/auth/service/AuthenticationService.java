@@ -29,9 +29,6 @@ import java.util.Optional;
 /**
  * The session lifecycle: opening one against an OAuth provider, renewing it, and closing it on one
  * device or on all of them.
- *
- * <p>Its collaborators are many because a session touches many parts, but they serve one
- * responsibility, and a change to the token format reaches every operation here alike.</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -48,66 +45,40 @@ public class AuthenticationService {
 
     /**
      * Result of authentication containing user and token pair.
-     *
-     * @param user         Authenticated user entity
-     * @param accessToken  JWT access token
-     * @param refreshToken JWT refresh token
-     * @param reactivated  Whether the account was reactivated from soft-deleted state
      */
     public record AuthResult(User user, String accessToken, String refreshToken, boolean reactivated) {
     }
 
-    /**
-     * Authenticate user via OAuth provider.
-     * Exchanges authorization code for tokens, retrieves user info,
-     * finds or creates user, and generates JWT token pair.
-     * If the user was previously soft-deleted, reactivates their account.
-     *
-     * @param providerName OAuth provider name (e.g., "google")
-     * @param code         Authorization code from OAuth callback
-     * @param redirectUri  Redirect URI used in authorization request
-     * @param codeVerifier PKCE code verifier
-     * @return Authentication result with user, tokens, and reactivation status
-     */
     public AuthResult authenticateWithOAuth(String providerName, String code,
                                             String redirectUri, String codeVerifier) {
         log.info("Processing OAuth authentication for provider: {}", providerName);
 
-        // Get provider from registry
         OAuthProvider provider = providerRegistry.getProvider(providerName);
 
-        // Exchange code for OAuth tokens
         OAuthTokens oauthTokens = provider.exchangeCodeForTokens(code, redirectUri, codeVerifier);
 
-        // Get user info — provider extracts from id_token if available, else network call
         OAuthUserInfo userInfo = provider.getUserInfo(oauthTokens);
 
         String providerId = userInfo.providerId();
         AuthProviderType providerType = AuthProviderType.fromValue(providerName);
         boolean reactivated = false;
 
-        // 1. Try to find active user
         Optional<User> activeUser = userService.findActiveByProvider(providerType, providerId);
 
         User user;
         if (activeUser.isPresent()) {
-            // Normal login for active user
             user = activeUser.get();
         } else {
-            // 2. Try to find soft-deleted user (for reactivation)
             Optional<User> deletedUser = userService.findByProvider(providerType, providerId);
 
             if (deletedUser.isPresent() && deletedUser.get().isDeleted()) {
-                // Reactivate the soft-deleted account
                 user = deletedUser.get();
                 lifecycleService.reactivateAccount(user.getId());
                 reactivated = true;
                 log.info("Reactivated soft-deleted account for user: {}", user.getId());
             } else if (deletedUser.isPresent()) {
-                // User exists but not deleted - use as-is
                 user = deletedUser.get();
             } else {
-                // 3. Create new user
                 Map<String, String> userInfoMap = Map.of(
                         "id", providerId,
                         "email", userInfo.email()
@@ -116,7 +87,6 @@ public class AuthenticationService {
             }
         }
 
-        // Generate JWT tokens
         String accessToken = tokenGenerator.generateAccessToken(user.getId(), user.getRole());
         String refreshToken = tokenGenerator.generateRefreshToken(user.getId());
 
@@ -125,23 +95,10 @@ public class AuthenticationService {
         return new AuthResult(user, accessToken, refreshToken, reactivated);
     }
 
-    /**
-     * The profile of the account a request is authenticated as.
-     *
-     * @param userId the authenticated user's ID
-     * @return the user's DTO projection
-     * @throws org.danteplanner.backend.user.exception.UserNotFoundException if no user carries the id
-     */
     public UserResponse currentUser(Long userId) {
         return userService.toResponse(userService.findById(userId));
     }
 
-    /**
-     * Logout user by blacklisting both tokens.
-     *
-     * @param accessToken  Access token to blacklist (nullable)
-     * @param refreshToken Refresh token to blacklist (nullable)
-     */
     public void logout(String accessToken, String refreshToken) {
         log.info("Processing logout");
 
@@ -162,8 +119,6 @@ public class AuthenticationService {
                 revocations.add(new LogoutRevocation.TokenRevocation(
                         refreshToken, refreshClaims.expiration()));
                 if (lineageRotationFlag.isEnabled()) {
-                    // A legacy token carries no family, but admission synthesizes one
-                    // deterministically, so the same value is revocable here.
                     String familyId = refreshClaims.familyId() != null
                             ? refreshClaims.familyId()
                             : RefreshRotationService.legacyFamilyId(
@@ -180,17 +135,6 @@ public class AuthenticationService {
         log.info("Logout completed");
     }
 
-    /**
-     * Logs the user out of every device by invalidating all tokens issued for them.
-     *
-     * <p>Marks the user's tokens invalid via {@link TokenBlacklistService#invalidateUserTokens(Long)}
-     * so any token issued before now is rejected at the filter, and immediately blacklists the
-     * current request's access token (no grace period). Existing lineage rotation entries are left
-     * untouched — they become irrelevant because the user-wide invalidation check rejects them first.</p>
-     *
-     * @param userId      the authenticated user whose sessions are being terminated
-     * @param accessToken the current request's access token to blacklist immediately (nullable)
-     */
     public void logoutAll(Long userId, String accessToken) {
         log.info("Processing logout-all for user: {}", userId);
 

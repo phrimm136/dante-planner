@@ -22,12 +22,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-/**
- * Google OAuth provider implementation.
- *
- * Handles Google-specific OAuth 2.0 token exchange with PKCE support
- * and user info retrieval via Google's userinfo endpoint.
- */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -98,7 +92,6 @@ public class GoogleOAuthProvider implements OAuthProvider {
             );
             return parseTokenResponse(response.getBody());
         } catch (HttpStatusCodeException e) {
-            // Log Google's actual error response for debugging
             log.error(
                 "Google OAuth token exchange failed. Status: {}, Response: {}",
                 e.getStatusCode(),

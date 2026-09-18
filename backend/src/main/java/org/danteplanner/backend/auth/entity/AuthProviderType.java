@@ -21,11 +21,6 @@ public enum AuthProviderType implements ValuedEnum {
         return value;
     }
 
-    /**
-     * @param value the stored value, or null for an absent JSON field
-     * @return the matching constant, or null when the field was absent
-     * @throws IllegalArgumentException if the value names no constant
-     */
     @JsonCreator
     public static AuthProviderType fromValue(String value) {
         // Jackson passes null for an absent field; returning null keeps the property optional,

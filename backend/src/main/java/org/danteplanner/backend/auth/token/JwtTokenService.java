@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * JWT token service implementing both generation and validation.
  * Tokens are RS256-signed with cleartext claims and {@code sub}=userId.
  */
 @Service
@@ -74,8 +73,6 @@ public class JwtTokenService implements TokenGenerator, TokenValidator {
                 .build();
     }
 
-    // ==================== TokenGenerator Implementation ====================
-
     @Override
     public String generateAccessToken(Long userId, UserRole role) {
         Assert.notNull(userId, "userId must not be null");
@@ -108,8 +105,6 @@ public class JwtTokenService implements TokenGenerator, TokenValidator {
 
         return buildToken(claims, userId.toString(), jwtProperties.getRefreshTokenExpiry());
     }
-
-    // ==================== TokenValidator Implementation ====================
 
     @Override
     public TokenClaims validateToken(String token) {
@@ -144,7 +139,6 @@ public class JwtTokenService implements TokenGenerator, TokenValidator {
         String familyId = claims.get(CLAIM_FAMILY_ID, String.class);
         String parentJti = claims.get(CLAIM_PARENT_JTI, String.class);
 
-        // Parse role - null for old tokens or refresh tokens (backward compat)
         UserRole role = null;
         if (roleValue != null && UserRole.isValid(roleValue)) {
             role = UserRole.fromValue(roleValue);
@@ -174,26 +168,14 @@ public class JwtTokenService implements TokenGenerator, TokenValidator {
             TokenClaims claims = validateToken(token);
             return claims.isExpired();
         } catch (InvalidTokenException e) {
-            // Invalid tokens are treated as expired
             return true;
         }
     }
 
-    // ==================== Additional Methods ====================
-
-    /**
-     * Gets the token type (access or refresh).
-     *
-     * @param token JWT token string
-     * @return token type
-     * @throws InvalidTokenException if token is invalid
-     */
     public String getTokenType(String token) {
         TokenClaims claims = validateToken(token);
         return claims.type();
     }
-
-    // ==================== Private Helpers ====================
 
     private String buildToken(Map<String, Object> claims, String subject, Long expiryMs) {
         Date now = Date.from(clock.instant());

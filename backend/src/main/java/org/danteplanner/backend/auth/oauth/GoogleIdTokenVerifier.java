@@ -18,10 +18,6 @@ import java.util.List;
 
 /**
  * Verifies Google-issued {@code id_token}s before any claim inside one is trusted.
- *
- * <p>The token arrives over the provider's token endpoint, which is deployment
- * configuration, so the transport proves nothing about who minted the token. The
- * signature is the only evidence, checked against Google's published keys.</p>
  */
 @Component
 @Slf4j
@@ -43,16 +39,8 @@ public class GoogleIdTokenVerifier {
     }
 
     /**
-     * Verify an {@code id_token} and return its claims.
-     *
      * <p>Rejects on a bad signature, an unexpected issuer, an audience that is not this
-     * client, or expiry. A token that fails is never downgraded to another lookup path:
-     * a genuine Google flow always yields a verifiable token, so a failure means either
-     * an attack or a misconfiguration and both should be loud.</p>
-     *
-     * @param idToken the raw compact JWT
-     * @return the verified claims
-     * @throws OAuthException if the token cannot be verified
+     * client, or expiry.</p>
      */
     public Jwt verify(String idToken) {
         try {

@@ -37,10 +37,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Optional;
 
-/**
- * REST controller for authentication endpoints.
- * Delegates business logic to AuthenticationService.
- */
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -57,14 +53,10 @@ public class AuthController {
     private final FrontendProperties frontendProperties;
 
     /**
-     * Begins the server-side Google OAuth flow: mints {@code state} + PKCE, seals them into the
-     * transient {@code oauth_tx} cookie, and 302-redirects the browser to Google's authorize URL.
      * The PKCE {@code code_verifier} stays server-side inside the encrypted cookie (INV5).
      *
      * @param returnTo the SPA URL the user started from, redirected back to after login; honored
      *                 only if its origin is allowlisted (open-redirect guard), else the default origin
-     * @param response HTTP response the {@code oauth_tx} cookie is set on
-     * @return 302 redirect to Google's authorization endpoint
      */
     @RateLimitExempt
     @GetMapping("/google/start")
@@ -75,8 +67,6 @@ public class AuthController {
         String codeVerifier = oAuthStateService.generateCodeVerifier();
         String codeChallenge = oAuthStateService.generateCodeChallenge(codeVerifier);
 
-        // Validate the client-supplied returnTo against the origin allowlist (open-redirect guard)
-        // and seal the safe value into oauth_tx so it survives the Google round-trip.
         String safeReturnTo = frontendProperties.resolveReturnTo(returnTo);
         String oauthTx = oAuthStateService.seal(state, codeVerifier, safeReturnTo);
         cookieUtils.setCookie(
@@ -92,18 +82,8 @@ public class AuthController {
     }
 
     /**
-     * Completes the server-side Google OAuth flow. Verifies the {@code oauth_tx} cookie and its
-     * {@code state} against the query {@code state} (INV2 login-fixation defense), exchanges the
-     * code, sets the auth cookies, clears {@code oauth_tx}, and 302s back to the SPA. The
-     * {@code csrf} cookie is ensured by {@link org.danteplanner.backend.shared.security.CsrfDoubleSubmitFilter}
+     * The {@code csrf} cookie is ensured by {@link org.danteplanner.backend.shared.security.CsrfDoubleSubmitFilter}
      * on this GET response.
-     *
-     * @param code     authorization code from Google (absent on user denial)
-     * @param state    state echoed back by Google
-     * @param error    error code if the user denied consent or Google failed
-     * @param request  HTTP request for reading {@code oauth_tx}
-     * @param response HTTP response for setting/clearing cookies
-     * @return 302 redirect to the SPA root on success, or to the SPA error route on rejection
      */
     @RateLimited(value = RateLimitPolicy.AUTH, denial = RateLimitDenial.REDIRECT_LOGIN)
     @GetMapping("/google/callback")
@@ -114,13 +94,9 @@ public class AuthController {
             HttpServletRequest request,
             HttpServletResponse response) {
 
-        // Read and clear the transient oauth_tx up front so it is cleared on EVERY exit path
-        // (success, rejection, or exchange failure).
         Optional<String> oauthTx = cookieUtils.getCookieValue(request, CookieConstants.OAUTH_TX);
         cookieUtils.clearCookie(response, CookieConstants.OAUTH_TX);
 
-        // This is a top-level browser-redirect endpoint: any failure must land the user back on the
-        // SPA error route, never a JSON error body from ApiExceptionHandler.
         try {
             if (error != null || code == null || code.isBlank() || state == null) {
                 return redirect(frontendProperties.getUrl() + LoginRedirect.ERROR);
@@ -141,11 +117,8 @@ public class AuthController {
 
             setAuthCookies(response, result);
 
-            // Return the user to where they started auth (validated + sealed at /start).
             return redirect(transaction.get().returnTo());
         } catch (Exception e) {
-            // The redirect is deliberate for a browser endpoint, but it makes a total login outage
-            // indistinguishable from a user declining consent, so the cause is reported here.
             io.sentry.Sentry.captureException(e);
             log.warn("OAuth callback failed: {}", e.getMessage());
             return redirect(frontendProperties.getUrl() + LoginRedirect.ERROR);
@@ -155,23 +128,18 @@ public class AuthController {
     @RateLimited(RateLimitPolicy.AUTH)
     @PostMapping("/apple/callback")
     public ResponseEntity<UserResponse> appleCallback() {
-        // Apple OAuth not yet implemented
         return ResponseEntity.badRequest().build();
     }
 
     @RateLimitExempt
     @GetMapping("/me")
     public ResponseEntity<UserResponse> getCurrentUser() {
-        // Trust SecurityContext set by JwtAuthenticationFilter
-        // Filter handles token validation, expiry, and auto-refresh
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        // No authentication or anonymous user = guest (valid state)
         if (auth == null || auth instanceof AnonymousAuthenticationToken) {
             return ResponseEntity.noContent().build();
         }
 
-        // Get user ID from SecurityContext (set by filter as Long)
         Object principal = auth.getPrincipal();
         if (!(principal instanceof Long)) {
             log.warn("Unexpected principal type: {}", principal.getClass().getName());
@@ -228,9 +196,6 @@ public class AuthController {
                 .build();
     }
 
-    /**
-     * Sets auth cookies from authentication result.
-     */
     private void setAuthCookies(HttpServletResponse response, AuthResult result) {
         int cookieExpiry = jwtProperties.getCookieExpirySeconds();
         cookieUtils.setCookie(

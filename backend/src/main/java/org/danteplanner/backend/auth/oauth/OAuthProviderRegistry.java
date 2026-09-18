@@ -9,28 +9,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.Locale;
 
-/**
- * Registry for OAuth provider lookup.
- *
- * Automatically discovers all {@link OAuthProvider} beans and builds
- * a name-to-provider map for runtime lookup.
- *
- * Usage:
- * <pre>
- * OAuthProvider provider = registry.getProvider("google");
- * OAuthTokens tokens = provider.exchangeCodeForTokens(code, redirectUri, verifier);
- * </pre>
- */
 @Service
 public class OAuthProviderRegistry {
 
     private final Map<String, OAuthProvider> providers;
 
-    /**
-     * Constructs registry from all discovered OAuthProvider beans.
-     *
-     * @param providerList All OAuthProvider implementations (auto-injected by Spring)
-     */
     public OAuthProviderRegistry(List<OAuthProvider> providerList) {
         this.providers = providerList.stream()
                 .collect(Collectors.toMap(
@@ -39,13 +22,6 @@ public class OAuthProviderRegistry {
                 ));
     }
 
-    /**
-     * Get provider by name.
-     *
-     * @param name Provider name in lowercase (e.g., "google", "apple")
-     * @return The OAuth provider implementation
-     * @throws InvalidRequestException if no provider carries the name
-     */
     public OAuthProvider getProvider(String name) {
         OAuthProvider provider = providers.get(name.toLowerCase(Locale.ROOT));
         if (provider == null) {
@@ -54,12 +30,6 @@ public class OAuthProviderRegistry {
         return provider;
     }
 
-    /**
-     * Check if a provider is registered.
-     *
-     * @param name Provider name to check
-     * @return true if provider exists
-     */
     public boolean hasProvider(String name) {
         return providers.containsKey(name.toLowerCase(Locale.ROOT));
     }

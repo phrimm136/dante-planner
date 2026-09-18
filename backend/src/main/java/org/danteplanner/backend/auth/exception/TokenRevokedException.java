@@ -4,9 +4,6 @@ import lombok.Getter;
 import org.danteplanner.backend.shared.exception.DomainException;
 import org.danteplanner.backend.shared.exception.ErrorKind;
 
-/**
- * Exception thrown when a token has been revoked/blacklisted.
- */
 @Getter
 public class TokenRevokedException extends DomainException {
 
@@ -15,11 +12,6 @@ public class TokenRevokedException extends DomainException {
 
     private final String tokenType;
 
-    /**
-     * Creates a new TokenRevokedException.
-     *
-     * @param tokenType the type of token that was revoked ("access" or "refresh")
-     */
     public TokenRevokedException(String tokenType) {
         super(ErrorKind.UNAUTHENTICATED, ERROR_CODE, CLIENT_DETAIL);
         this.tokenType = tokenType;
