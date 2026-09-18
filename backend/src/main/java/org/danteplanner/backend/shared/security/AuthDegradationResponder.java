@@ -15,8 +15,7 @@ import java.util.Map;
  * {@code @ControllerAdvice}.
  *
  * <p>The status is the point. A 503 tells the client the condition is transient and retryable,
- * where a 500 or a silent downgrade to guest would not; nginx rewrites the body for external
- * clients, so only the status and code cross the edge intact.</p>
+ * where a 500 or a silent downgrade to guest would not.</p>
  */
 @Component
 @RequiredArgsConstructor

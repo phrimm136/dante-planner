@@ -105,7 +105,7 @@ export class ForbiddenError extends Error {
 
 /**
  * Custom error class for 503 during planned deploy
- * Thrown when nginx returns SERVICE_UPDATING (maintenance flag present)
+ * Mapped from a SERVICE_UPDATING body; nothing in the current serving path emits it
  */
 export class ServiceUpdatingError extends Error {
   readonly code = 'SERVICE_UPDATING'
@@ -118,7 +118,7 @@ export class ServiceUpdatingError extends Error {
 
 /**
  * Custom error class for 503 during unexpected backend downtime
- * Thrown when nginx returns BACKEND_UNAVAILABLE (no maintenance flag)
+ * The fallback for any 503 whose body carries no mapped code
  */
 export class BackendUnavailableError extends Error {
   readonly code = 'BACKEND_UNAVAILABLE'

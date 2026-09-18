@@ -55,9 +55,9 @@ Measured after the fix, identical under both fault models:
 With the fix in, both locally-injectable scenarios go green against genuinely stopped dependencies
 (`/tmp/e2e-f-local-run2.log`, `/tmp/e2e-f-local-ratelimit2.log`) — suite F's first non-vacuous runs.
 The rate-limit scenario needed a corrected assertion: it expected `RATE_LIMIT_TEMPORARILY_UNAVAILABLE`,
-but `GlobalExceptionHandler` states that code is **internal-only** — the edge runs
-`proxy_intercept_errors`, so every backend 5xx reaches a client as `BACKEND_UNAVAILABLE`. The suite
-was asserting something no client can observe.
+but at the time the nginx edge rewrote every backend 5xx body to `BACKEND_UNAVAILABLE`, so no
+client could observe it. That edge is retired (ADR 011); a backend 503 body now reaches the client
+unmodified, so resuming the suite can restore the original assertion.
 
 Two follow-ups this leaves open: the 6s is two sequential 3s commands on that path (worth deciding
 whether they should share one budget), and §10's six rows still do not all map to distinct typed

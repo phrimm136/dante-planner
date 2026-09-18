@@ -515,3 +515,18 @@ asset pipeline.
   the server never received, a routine outcome the client already treats as success (about 5 a
   day). Worth demoting that one method-and-code pair to INFO when the WARN stream is next used
   for alerting, or when an ADR settles a client marker for never-synced rows.
+
+## 2026-09-18 nginx retired, references remain (adr/011)
+
+- **`ServiceUpdatingError` and the `SERVICE_UPDATING` entry of `UNAVAILABLE_ERROR_BY_CODE`**
+  (`frontend/src/lib/api.ts`, `apiErrors.ts`) map a body nothing emits since the nginx
+  maintenance flag left with the edge. Delete both when the error module is next touched;
+  the problem-details migration of the backend advice is the natural moment.
+- **`docs/runbooks/rds-migration.md` Zone 1 step 1** raises maintenance through
+  `docker exec danteplanner-nginx`, a container that no longer exists. Restate the step when
+  a maintenance mechanism exists on the tunnel path, or archive the runbook under
+  `docs/legacy/` once the decommission gate it guards is closed.
+- **`docs/runbooks/environment-setup.md`** describes an nginx-fronted compose topology
+  (container IPs, `TRUSTED_PROXY_IPS` for the nginx range, CORS pass-through checks), and
+  `SecurityProperties` and `ClientIpResolver` javadoc name nginx as the trusted proxy. Rewrite
+  against the current local stack when that runbook is next followed and found wrong.

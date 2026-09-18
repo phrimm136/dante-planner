@@ -331,14 +331,6 @@ public class GlobalExceptionHandler {
      * expected during the weekly single-AZ
      * maintenance window and would otherwise alert-storm. Scoped to the resource-failure branch
      * only, so query/constraint bugs keep their own handlers and are never masked as 503.</p>
-     *
-     * <p>The point of returning 503 (not letting it fall to the catch-all 500) is the edge contract:
-     * nginx has {@code proxy_intercept_errors on; error_page 502 503 504 = @backend_error}, so it
-     * rewrites any backend 5xx body to {@code BACKEND_UNAVAILABLE} (or {@code SERVICE_UPDATING}).
-     * A 500 would NOT be intercepted and would leak through as a raw INTERNAL_ERROR. So this handler
-     * exists to (a) emit 503 so nginx maps it cleanly to BACKEND_UNAVAILABLE for the client, and
-     * (b) keep it out of Sentry. The {@code WRITE_TEMPORARILY_UNAVAILABLE} code below is internal-only (logs /
-     * direct backend access); external clients always see BACKEND_UNAVAILABLE.</p>
      */
     @ExceptionHandler({
             DataAccessResourceFailureException.class,
@@ -382,14 +374,9 @@ public class GlobalExceptionHandler {
      * the raw {@code RedisException} (RedisConnectionException / RedisCommandTimeoutException /
      * RedisSystemException) unwrapped — or bucket4j's own {@code TimeoutException} when its request
      * timeout fires before Lettuce's equal command timeout. Mapping both covers every cut variant.
-     * Transient and self-healing — the client reconnects when Redis returns.</p>
-     *
-     * <p>Returning 503 (not letting it fall to the catch-all 500) honours the edge contract: nginx has
-     * {@code proxy_intercept_errors on}, so it rewrites any backend 5xx to {@code BACKEND_UNAVAILABLE}.
-     * A 500 would leak through as a raw INTERNAL_ERROR. Deliberately NOT sent to Sentry, for the same reason
-     * as the DB and auth-Redis handlers: it is expected during a Redis outage and would otherwise alert-storm.
-     * The {@code RATE_LIMIT_TEMPORARILY_UNAVAILABLE} code is internal-only; external clients see
-     * BACKEND_UNAVAILABLE.</p>
+     * Transient and self-healing — the client reconnects when Redis returns. Deliberately NOT sent to
+     * Sentry, for the same reason as the DB and auth-Redis handlers: it is expected during a Redis
+     * outage and would otherwise alert-storm.</p>
      */
     @ExceptionHandler({RedisException.class, io.github.bucket4j.TimeoutException.class})
     public ResponseEntity<ErrorResponse> handleRateLimitRedisUnavailable(RuntimeException ex) {
