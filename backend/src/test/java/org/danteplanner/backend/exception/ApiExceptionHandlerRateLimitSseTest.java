@@ -20,11 +20,8 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 /**
  * Regression: a rate-limited SSE subscription must map to 429, not 500.
  *
- * <p>SSE controllers declare {@code produces=text/event-stream}. When
- * {@link RateLimitExceededException} is thrown there and the handler returns a JSON
- * {@code ResponseEntity}, content negotiation finds no converter for the request's
- * {@code Accept: text/event-stream}, throws {@code HttpMediaTypeNotAcceptableException}, and the
- * original 429 escapes to Tomcat as a 500. Writing the response directly bypasses negotiation.
+ * <p>SSE controllers declare {@code produces=text/event-stream}, which outranks the request's
+ * Accept header, so no converter can write the error body and the 429 escapes to Tomcat as a 500.
  * {@code standaloneSetup} exercises real {@code @ExceptionHandler} dispatch, so the negotiation
  * step is reproduced — a direct handler call would not surface the bug.</p>
  */

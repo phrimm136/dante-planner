@@ -25,10 +25,10 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 /**
  * A subscription refused because the planner's registry is full must reach the client as 429.
  *
- * <p>The endpoint declares {@code produces=text/event-stream}, so the response is written directly
- * rather than returned as a JSON {@code ResponseEntity}: content negotiation would find no
- * converter for that Accept header and the 429 would escape as a 500. {@code standaloneSetup}
- * exercises real {@code @ExceptionHandler} dispatch, so the negotiation step is reproduced.</p>
+ * <p>The endpoint declares {@code produces=text/event-stream}, which outranks the request's Accept
+ * header, so no converter can write the error body and the 429 would escape as a 500.
+ * {@code standaloneSetup} exercises real {@code @ExceptionHandler} dispatch, so the negotiation
+ * step is reproduced.</p>
  */
 class ApiExceptionHandlerSseCapacityTest {
 

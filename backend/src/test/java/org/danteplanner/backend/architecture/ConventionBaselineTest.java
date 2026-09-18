@@ -44,6 +44,14 @@ class ConventionBaselineTest {
     private static final String VALID = "jakarta.validation.Valid";
     private static final String ENTITY = "jakarta.persistence.Entity";
     private static final String TRANSACTIONAL = "org.springframework.transaction.annotation.Transactional";
+    private static final String EXCEPTION_HANDLER = "org.springframework.web.bind.annotation.ExceptionHandler";
+    private static final String DOMAIN_EXCEPTION = "org.danteplanner.backend.shared.exception.DomainException";
+
+    /**
+     * The one owned error whose response needs more than its body can carry: the cookie clear.
+     */
+    private static final Set<String> DOMAIN_EXCEPTION_HANDLERS_FROZEN = Set.of(
+            "org.danteplanner.backend.auth.exception.SessionRevokedException");
 
     /**
      * The one method allowed to leave the calling thread, and the one class allowed to give it
@@ -169,6 +177,35 @@ class ConventionBaselineTest {
                         }
                     })
                     .as("@Valid beside every @RequestBody");
+
+    /**
+     * An owned error builds its own status, headers and body, so the advice renders it without
+     * being told how. A handler taking one back is a second mapping for the same error, and the
+     * two drift.
+     */
+    @ArchTest
+    static final ArchRule owned_errors_need_no_handler =
+            methods()
+                    .that().areDeclaredInClassesThat().resideInAPackage("..shared.exception..")
+                    .and().areAnnotatedWith(EXCEPTION_HANDLER)
+                    .should(new ArchCondition<JavaMethod>("take no owned error back") {
+                        @Override
+                        public void check(JavaMethod method, ConditionEvents events) {
+                            for (JavaParameter parameter : method.getParameters()) {
+                                JavaClass type = parameter.getRawType();
+                                if (!type.isAssignableTo(DOMAIN_EXCEPTION)
+                                        || DOMAIN_EXCEPTION_HANDLERS_FROZEN.contains(type.getName())) {
+                                    continue;
+                                }
+                                events.add(SimpleConditionEvent.violated(method,
+                                        method.getFullName() + " handles " + type.getName()
+                                                + "; owned errors render through the base advice, and"
+                                                + " a DomainException handler is the residue for a"
+                                                + " response mutation only"));
+                            }
+                        }
+                    })
+                    .as("owned errors render through the base advice");
 
     /**
      * The controllers that dereference a mapped entity a service handed back — state read from the
