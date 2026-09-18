@@ -3,25 +3,14 @@ import { useEGOListSpec } from '@/pages/ego'
 import { I18N_LOCALE_MAP } from '@/lib/constants'
 import { formatEntityReleaseDate } from '@/lib/formatDate'
 
-/**
- * Maximum number of items to show in recently released section.
- * Designed to fill ~3 date groups with ~5 items each while fitting
- * comfortably in the home page layout without excessive scrolling.
- */
 const MAX_RECENT_ITEMS = 16
 
-/**
- * Maximum number of date groups to show.
- * Shows recent releases from the last 3 update dates, typically
- * covering 1-2 weeks of content releases.
- */
 const MAX_DATE_GROUPS = 4
 
 import type { EgoType } from '@/shared/gameData'
 import { typedEntries } from '@/lib/utils'
 import type { EGOId, IdentityId } from '@/shared/gameData'
 
-/** Identity data needed for card display */
 export interface RecentIdentityData {
   id: IdentityId
   updateDate: number
@@ -29,7 +18,6 @@ export interface RecentIdentityData {
   season: number
 }
 
-/** EGO data needed for card display */
 export interface RecentEGOData {
   id: EGOId
   updateDate: number
@@ -37,21 +25,16 @@ export interface RecentEGOData {
   season: number
 }
 
-/** Union type for mixed entity display */
 export type RecentEntity =
   | { type: 'identity'; data: RecentIdentityData }
   | { type: 'ego'; data: RecentEGOData }
 
-/** Date group with entities */
 export interface DateGroup {
   date: number
   formattedDate: string
   entities: RecentEntity[]
 }
 
-/**
- * Group entities by updateDate and limit to MAX_DATE_GROUPS
- */
 function groupEntitiesByDate(entities: RecentEntity[], language: string): DateGroup[] {
   const groupMap = new Map<number, RecentEntity[]>()
 
@@ -65,10 +48,8 @@ function groupEntitiesByDate(entities: RecentEntity[], language: string): DateGr
     }
   }
 
-  // Sort dates descending (newest first)
   const sortedDates = [...groupMap.keys()].sort((a, b) => b - a)
 
-  // Take only MAX_DATE_GROUPS
   const limitedDates = sortedDates.slice(0, MAX_DATE_GROUPS)
 
   return limitedDates.map((date) => ({
@@ -78,21 +59,11 @@ function groupEntitiesByDate(entities: RecentEntity[], language: string): DateGr
   }))
 }
 
-/**
- * Hook that loads recently released Identity and EGO entities
- * Returns entities grouped by release date for the home page
- *
- * Uses spec-only hooks (no i18n) - names loaded via IdentityName/EGOName components
- * Suspends on initial load - wrap in Suspense boundary
- *
- * @param language - Current i18n language code for date formatting
- */
 export function useRecentlyReleasedData(language: string) {
   const identitySpecs = useIdentityListSpec()
   const egoSpecs = useEGOListSpec()
 
   const dateGroups = (() => {
-    // Convert to RecentEntity array with id from record key
     const identities: RecentEntity[] = typedEntries(identitySpecs).map(([id, spec]) => ({
       type: 'identity' as const,
       data: { id, updateDate: spec.updateDate, rank: spec.rank, season: spec.season },
@@ -102,13 +73,10 @@ export function useRecentlyReleasedData(language: string) {
       data: { id, updateDate: spec.updateDate, egoType: spec.egoType, season: spec.season },
     }))
 
-    // Combine and sort by updateDate descending
     const combined = [...identities, ...egos].sort((a, b) => b.data.updateDate - a.data.updateDate)
 
-    // Limit total items
     const limited = combined.slice(0, MAX_RECENT_ITEMS)
 
-    // Group by date
     return groupEntitiesByDate(limited, language)
   })()
 

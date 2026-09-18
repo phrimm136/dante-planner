@@ -1,18 +1,3 @@
-/**
- * Extraction Calculator Input Controls
- *
- * Input section for configuring banner settings:
- * - Number of pulls
- * - Featured item counts (3-star IDs, EGO, Announcers)
- * - Target item counts (how many of each you want)
- * - "All EGO collected" modifier
- *
- * Real-time updates via onChange - no submit button.
- *
- * @see ExtractionCalculator.tsx for state management
- * @see extractionCalculator.ts for calculation logic
- */
-
 import { useTranslation } from 'react-i18next'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -20,7 +5,6 @@ import { SECTION_STYLES } from '@/lib/constants'
 import { EXTRACTION_RATES } from '../lib/extractionRates'
 import { cn } from '@/lib/utils'
 
-/** Input limits - centralized for maintainability */
 const INPUT_LIMITS = {
   PULLS: { MIN: 0, MAX: 2000 },
   FEATURED_ID: { MIN: 0, MAX: 10 },
@@ -30,48 +14,26 @@ const INPUT_LIMITS = {
 } as const
 
 interface ExtractionInputsProps {
-  /** Number of planned pulls */
   pulls: number
-  /** Number of featured 3-star IDs on banner */
   featuredIds: number
-  /** Number of 3-star IDs user wants */
   wantedIds: number
-  /** Number of featured EGO on banner */
   featuredEgos: number
-  /** Number of EGO user wants */
   wantedEgos: number
-  /** Number of featured Announcers on banner */
   featuredAnnouncers: number
-  /** Number of Announcers user wants */
   wantedAnnouncers: number
-  /** User has collected all EGO from banner */
   allEgoCollected: boolean
-  /** Current pity counter */
   currentPity: number
-  /** Callback when pulls changes */
   onPullsChange: (value: number) => void
-  /** Callback when featured IDs count changes */
   onFeaturedIdsChange: (value: number) => void
-  /** Callback when wanted IDs count changes */
   onWantedIdsChange: (value: number) => void
-  /** Callback when featured EGO count changes */
   onFeaturedEgosChange: (value: number) => void
-  /** Callback when wanted EGO count changes */
   onWantedEgosChange: (value: number) => void
-  /** Callback when featured Announcer count changes */
   onFeaturedAnnouncersChange: (value: number) => void
-  /** Callback when wanted Announcer count changes */
   onWantedAnnouncersChange: (value: number) => void
-  /** Callback when allEgoCollected toggle changes */
   onAllEgoCollectedChange: (value: boolean) => void
-  /** Callback when current pity changes */
   onCurrentPityChange: (value: number) => void
 }
 
-/**
- * Input field group with label
- * Wraps Input with consistent Label styling
- */
 function InputField({
   label,
   value,
@@ -97,7 +59,6 @@ function InputField({
     if (isNaN(parsed)) {
       return
     }
-    // Clamp to valid range
     const clamped = Math.max(min, max !== undefined ? Math.min(max, parsed) : parsed)
     onChange(clamped)
   }
@@ -118,10 +79,6 @@ function InputField({
   )
 }
 
-/**
- * Checkbox field with label
- * Custom checkbox since shadcn/ui checkbox not available
- */
 function CheckboxField({
   label,
   checked,
@@ -168,7 +125,6 @@ export function ExtractionInputs({
 
   return (
     <div className={cn(SECTION_STYLES.container, 'space-y-6')}>
-      {/* Pull Configuration */}
       <div className="space-y-4">
         <h3 className={SECTION_STYLES.TEXT.subHeader}>{t('inputs.pullConfig')}</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -189,11 +145,9 @@ export function ExtractionInputs({
         </div>
       </div>
 
-      {/* Banner Configuration */}
       <div className="space-y-4">
         <h3 className={SECTION_STYLES.TEXT.subHeader}>{t('inputs.bannerConfig')}</h3>
 
-        {/* 3-Star Identity */}
         <div className="space-y-2">
           <h4 className={SECTION_STYLES.TEXT.label}>{t('inputs.threeStarId')}</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -214,7 +168,6 @@ export function ExtractionInputs({
           </div>
         </div>
 
-        {/* EGO */}
         <div className="space-y-2">
           <h4 className={SECTION_STYLES.TEXT.label}>{t('inputs.ego')}</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -233,7 +186,6 @@ export function ExtractionInputs({
               max={featuredEgos}
             />
           </div>
-          {/* All EGO Collected = all NON-RATE-UP EGO owned, rate-up EGO still targetable */}
           <CheckboxField
             label={t('inputs.allEgoCollected')}
             checked={allEgoCollected}
@@ -241,7 +193,6 @@ export function ExtractionInputs({
           />
         </div>
 
-        {/* Announcer */}
         <div className="space-y-2">
           <h4 className={SECTION_STYLES.TEXT.label}>{t('inputs.announcer')}</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -1,10 +1,3 @@
-/**
- * Keyword List Facets
- *
- * Facet descriptors for the keyword browser, plus the per-item predicate the grid's
- * card slots subscribe through.
- */
-
 import type { EntityMatcher, Facet } from '@/shared/filter'
 import { createEntityMatcher } from '@/shared/filter'
 import type { BuffType } from '@/shared/gameData'
@@ -25,11 +18,6 @@ export const KEYWORD_FACETS: readonly Facet<KeywordEntity, KeywordFacetState>[] 
   { sel: (s) => s.selectedEgoGifts, get: (k) => k.egoGifts, mode: 'any' },
 ]
 
-/**
- * Every lowercased string the search box matches a keyword on: its localized name.
- *
- * Depends only on the i18n payload, so a filter toggle never invalidates it.
- */
 export function buildKeywordSearchTerms(
   keywordId: string,
   keywordNames: Record<string, BattleKeywordI18nEntry>,
@@ -37,6 +25,5 @@ export function buildKeywordSearchTerms(
   return [(keywordNames[keywordId]?.name ?? '').toLowerCase()]
 }
 
-/** Whether one keyword survives the current facets and search query. */
 export const matchesKeyword: EntityMatcher<KeywordEntity, KeywordFacetState> =
   createEntityMatcher(KEYWORD_FACETS)

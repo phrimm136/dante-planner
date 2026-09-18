@@ -72,7 +72,6 @@ function TableHeaderRow({ labelKeys }: { labelKeys: readonly string[] }) {
   )
 }
 
-/** What one moderation dialog renders and which toast its mutation resolves to. */
 interface ModerationDialogSpec {
   Dialog: (props: ModerationDialogProps) => React.ReactNode
   successKey: string
@@ -99,14 +98,12 @@ const MODERATION_DIALOGS: Record<ModerationDialogKind, ModerationDialogSpec> = {
 
 const MODERATION_DIALOG_KINDS = Object.keys(MODERATION_DIALOGS) as ModerationDialogKind[]
 
-/** Widest variable shape across the four mutations; a duration is ignored where unused. */
 interface ModerationVariables {
   usernameSuffix: string
   reason: string
   durationMinutes: number
 }
 
-/** The slice of a mutation result the row buttons and dialogs need. */
 interface ModerationMutation {
   mutate: (variables: ModerationVariables, options: { onSuccess: () => void }) => void
   isPending: boolean
@@ -115,14 +112,10 @@ interface ModerationMutation {
 
 type ModerationMutations = Record<ModerationDialogKind, ModerationMutation>
 
-/** One mutation serves every row, so pending belongs to the user it was fired for. */
 function isPendingFor(mutation: ModerationMutation, usernameSuffix: string) {
   return mutation.isPending && mutation.variables?.usernameSuffix === usernameSuffix
 }
 
-/**
- * User table row with action buttons
- */
 function UserRow({
   user,
   currentUserSuffix,
@@ -204,12 +197,6 @@ function UserRow({
   )
 }
 
-/**
- * User management table.
- *
- * Holds the one mutation set and the one dialog set the whole table shares; the
- * dialogs are keyed by target so a reason typed for one user never carries to another.
- */
 function UserTable({
   users,
   currentUserSuffix,
@@ -273,7 +260,6 @@ function UserTable({
         </table>
       </div>
 
-      {/* Dialogs */}
       {target !== null &&
         MODERATION_DIALOG_KINDS.map((kind) => {
           const { Dialog } = MODERATION_DIALOGS[kind]
@@ -296,9 +282,6 @@ function UserTable({
   )
 }
 
-/**
- * Moderation history row
- */
 function HistoryRow({ action }: { action: ModerationAction }) {
   const { i18n } = useTranslation()
   const actorName = formatUsername(
@@ -325,11 +308,6 @@ function HistoryRow({ action }: { action: ModerationAction }) {
   )
 }
 
-/**
- * Moderator dashboard tables
- *
- * Suspends on the moderation queries, so it stays behind the staff gate.
- */
 function ModeratorDashboard({ currentUserSuffix }: { currentUserSuffix: string }) {
   const { t } = useTranslation(['moderation'])
   const users = useModeratorUsers()
@@ -337,13 +315,11 @@ function ModeratorDashboard({ currentUserSuffix }: { currentUserSuffix: string }
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
-      {/* User List */}
       <section className="space-y-4">
         <h2 className={SECTION_STYLES.TEXT.pageTitle}>{t('dashboard.userManagement')}</h2>
         <UserTable users={users} currentUserSuffix={currentUserSuffix} />
       </section>
 
-      {/* Moderation History */}
       <section className="space-y-4">
         <h2 className={SECTION_STYLES.TEXT.pageTitle}>{t('dashboard.moderationHistory')}</h2>
         <div className="border rounded-lg overflow-hidden">
@@ -363,12 +339,6 @@ function ModeratorDashboard({ currentUserSuffix }: { currentUserSuffix: string }
   )
 }
 
-/**
- * Moderator Dashboard Page
- *
- * Displays user list with ban/timeout controls and moderation action history.
- * Only accessible to MODERATOR and ADMIN roles.
- */
 export default function ModeratorPage() {
   const { t } = useTranslation(['moderation'])
   const { data: currentUser } = useAuthQuery()

@@ -5,10 +5,6 @@ import { CardSlot } from '@/shared/cardLayout'
 import { Skeleton } from '@/components/ui/skeleton'
 import { KEYWORD_GEOMETRY } from '../lib/cardLayout'
 
-/**
- * Keyword detail: Icon + name + backlinks panel (left)
- * Description panel (right)
- */
 export function KeywordDetailSkeleton() {
   return (
     <DetailPageSkeleton

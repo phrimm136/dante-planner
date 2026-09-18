@@ -5,8 +5,6 @@ import { AnnouncementSpecListSchema, AnnouncementI18nSchema } from '../schemas/A
 import { mergeAnnouncements } from '../lib/mergeAnnouncements'
 import type { Announcement } from '../types/AnnouncementTypes'
 
-// Query key factory for announcement data
-// Hand-rolled: tuples lack the 'list' segment the shared factory produces
 export const announcementQueryKeys = {
   all: () => ['announcements'] as const,
   spec: () => [...announcementQueryKeys.all(), 'spec'] as const,
@@ -39,16 +37,6 @@ function createI18nQueryOptions(language: string) {
   )
 }
 
-/**
- * Hook that loads announcement data with i18n translations.
- * Suspends while loading — wrap in Suspense boundary.
- *
- * - Filters out expired entries (expiresAt < today; timezone edge at day boundary is accepted)
- * - Sorts newest-first by date
- * - Skips entries missing from i18n (logs error, does not crash)
- *
- * @returns Sorted, filtered array of merged announcements ready for rendering
- */
 export function useAnnouncementData(): Announcement[] {
   const { i18n } = useTranslation()
 

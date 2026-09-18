@@ -4,10 +4,8 @@ import { DISCORD_BLURPLE, DISCORD_INVITE_URL, SECTION_STYLES } from '@/lib/const
 export function SideLinkSection() {
   return (
     <section className={SECTION_STYLES.LAYOUT.column}>
-      {/* Spacer matching announcement header row */}
       <div className="h-7" aria-hidden />
       <div className="flex flex-1 flex-col gap-2">
-        {/* Discord invite */}
         <a
           href={DISCORD_INVITE_URL}
           target="_blank"
@@ -19,7 +17,6 @@ export function SideLinkSection() {
           <span className="text-sm font-semibold">Discord (new!)</span>
         </a>
 
-        {/* Ko-fi placeholder */}
         <div className="flex flex-1 items-center justify-center rounded-md border border-dashed border-border" />
       </div>
     </section>

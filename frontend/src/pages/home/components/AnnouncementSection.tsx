@@ -5,10 +5,6 @@ import { ANNOUNCEMENT_PREVIEW_COUNT, SECTION_STYLES } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import type { Announcement } from '../types/AnnouncementTypes'
 
-// ============================================================================
-// Loading Skeleton
-// ============================================================================
-
 export function AnnouncementSkeleton() {
   return (
     <section className={SECTION_STYLES.LAYOUT.column}>
@@ -30,10 +26,6 @@ export function AnnouncementSkeleton() {
     </section>
   )
 }
-
-// ============================================================================
-// Main Section Component
-// ============================================================================
 
 interface AnnouncementSectionProps {
   announcements: Announcement[]

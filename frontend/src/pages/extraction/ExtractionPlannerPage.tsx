@@ -1,24 +1,9 @@
-/**
- * Extraction Planner Page
- *
- * Main page for the extraction probability calculator.
- * Wraps content in ErrorBoundary + Suspense for proper error/loading handling.
- *
- * Route: /planner/extraction
- *
- * @see ExtractionCalculator.tsx for calculator logic
- * @see router.tsx for route registration
- */
-
 import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
 import { ExtractionCalculator } from './components/ExtractionCalculator'
 import { SECTION_STYLES } from '@/lib/constants'
 
-/**
- * Error fallback component for calculator errors
- */
 function ErrorFallback({
   error,
   resetErrorBoundary,
@@ -43,9 +28,6 @@ function ErrorFallback({
   )
 }
 
-/**
- * Loading fallback for Suspense
- */
 function LoadingFallback() {
   const { t } = useTranslation('common')
 
@@ -59,7 +41,6 @@ function LoadingFallback() {
 export default function ExtractionPlannerPage() {
   return (
     <div className={SECTION_STYLES.LAYOUT.page}>
-      {/* Calculator Section */}
       <div className="bg-background rounded-lg">
         <ReactErrorBoundary FallbackComponent={ErrorFallback}>
           <Suspense fallback={<LoadingFallback />}>

@@ -1,16 +1,3 @@
-/**
- * HomePage - Landing page for Limbus Planner
- *
- * Route: /
- *
- * Layout:
- * - Banner carousel at top (MD planner + Extraction calculator)
- * - Two columns: Recently Released (left) + Community Plans (right)
- * - Responsive: side-by-side on desktop (≥1024px), stacked on mobile
- *
- * Pattern: PlannerMDGesellschaftPage.tsx (Suspense wrapping)
- */
-
 import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -29,14 +16,6 @@ import { CommunityPlansSection } from './components/CommunityPlansSection'
 import { useRecentlyReleasedData } from './hooks/useHomePageData'
 import { SECTION_STYLES } from '@/lib/constants'
 
-// ============================================================================
-// Inner Content Component
-// ============================================================================
-
-/**
- * Recently Released content that uses Suspense-aware hook.
- * Must be wrapped in Suspense boundary.
- */
 function RecentlyReleasedContent() {
   const { i18n } = useTranslation()
   const { dateGroups } = useRecentlyReleasedData(i18n.language)
@@ -44,19 +23,13 @@ function RecentlyReleasedContent() {
   return <RecentlyReleasedSection dateGroups={dateGroups} />
 }
 
-// ============================================================================
-// Page Content Component
-// ============================================================================
-
 function HomePageContent() {
   return (
     <div className={SECTION_STYLES.LAYOUT.page}>
-      {/* Banner carousel */}
       <div className="mb-8">
         <BannerSection />
       </div>
 
-      {/* Announcement + side links */}
       <div className="mb-8 grid grid-cols-1 lg:grid-cols-[7fr_1fr] gap-4">
         <Suspense fallback={<AnnouncementSkeleton />}>
           <AnnouncementContent />
@@ -64,27 +37,17 @@ function HomePageContent() {
         <SideLinkSection />
       </div>
 
-      {/* Two-column layout: Recently Released + Community Plans */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left column: Recently Released */}
         <Suspense fallback={<RecentlyReleasedSkeleton />}>
           <RecentlyReleasedContent />
         </Suspense>
 
-        {/* Right column: Community Plans */}
         <CommunityPlansSection />
       </div>
     </div>
   )
 }
 
-// ============================================================================
-// Main Page Component
-// ============================================================================
-
-/**
- * HomePage - Landing page with ErrorBoundary and Suspense
- */
 export default function HomePage() {
   return (
     <ErrorBoundary>

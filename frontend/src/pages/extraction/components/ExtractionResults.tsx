@@ -1,54 +1,24 @@
-/**
- * Extraction Calculator Results Display
- *
- * Display section for calculated probabilities:
- * - P(all targets): highlighted at top
- * - Successive probabilities: P(n-1+), P(n-2+), ..., P(1+) in collapsible
- * - Per-target breakdown
- * - Cost estimates
- *
- * @see ExtractionCalculator.tsx for state management
- * @see extractionCalculator.ts for calculation logic
- */
-
 import { useTranslation } from 'react-i18next'
 import { SECTION_STYLES } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import type { ExtractionResult, TargetProbability } from '../types/ExtractionTypes'
 
 interface ExtractionResultsProps {
-  /** Calculation results from extractionCalculator */
   result: ExtractionResult
-  /** Number of planned pulls (for pity display logic) */
   plannedPulls: number
-  /** Current pity counter */
   currentPity: number
-  /** Whether user has any targets configured */
   hasTargets: boolean
 }
 
-/**
- * Format probability as percentage with 1 decimal place
- * @param probability - Value 0-1
- * @returns Formatted string like "76.5%"
- */
 function formatProbability(probability: number): string {
   const percentage = probability * 100
   return `${percentage.toFixed(1)}%`
 }
 
-/**
- * Format number with comma separators
- * @param value - Number to format
- * @returns Formatted string like "13,000"
- */
 function formatNumber(value: number): string {
   return value.toLocaleString()
 }
 
-/**
- * Single result row with label and value
- */
 function ResultRow({
   label,
   value,
@@ -78,9 +48,6 @@ function ResultRow({
   )
 }
 
-/**
- * Target-specific probability display
- */
 function TargetResultCard({
   result,
   t,
@@ -91,7 +58,6 @@ function TargetResultCard({
   const { target, probability, expectedPulls, pityApplies } = result
   const copiesNeeded = Math.max(0, target.wantedCopies - target.currentCopies)
 
-  // Get target type display name
   const typeLabels: Record<string, string> = {
     threeStarId: t('results.targetTypes.threeStarId'),
     ego: t('results.targetTypes.ego'),
@@ -135,19 +101,16 @@ function TargetResultCard({
 export function ExtractionResults({ result, currentPity, hasTargets }: ExtractionResultsProps) {
   const { t } = useTranslation('extraction')
 
-  // Filter to targets that actually need copies
   const activeTargetResults = result.targetResults.filter(
     (r) => r.target.wantedCopies - r.target.currentCopies > 0,
   )
 
-  // Get successive probabilities excluding the "all" case (which is shown separately)
   const successiveProbs = result.successiveProbabilities.filter(
     (sp) => sp.count < result.totalItemsWanted,
   )
 
   return (
     <div className={cn(SECTION_STYLES.container, 'space-y-6')}>
-      {/* Summary Section - All Targets at top (highlighted), successive probs below */}
       <div className="space-y-2">
         <h3 className={SECTION_STYLES.TEXT.subHeader}>{t('results.summary')}</h3>
 
@@ -157,14 +120,12 @@ export function ExtractionResults({ result, currentPity, hasTargets }: Extractio
           </p>
         ) : (
           <div className="space-y-1">
-            {/* P(All Targets) - highlighted, primary metric */}
             <ResultRow
               label={t('results.allTargetsCount', { count: result.totalItemsWanted })}
               value={formatProbability(result.allTargetProbability)}
               highlight
             />
 
-            {/* Successive probabilities: P(n-1+), P(n-2+), ..., P(1+) */}
             {successiveProbs.length > 0 && (
               <details className="pt-1">
                 <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground transition-colors py-1">
@@ -185,7 +146,6 @@ export function ExtractionResults({ result, currentPity, hasTargets }: Extractio
         )}
       </div>
 
-      {/* Per-Target Breakdown */}
       {hasTargets && activeTargetResults.length > 0 && (
         <div className="space-y-3">
           <h3 className={SECTION_STYLES.TEXT.subHeader}>{t('results.breakdown')}</h3>
@@ -197,7 +157,6 @@ export function ExtractionResults({ result, currentPity, hasTargets }: Extractio
         </div>
       )}
 
-      {/* Cost Section */}
       <div className="space-y-2">
         <h3 className={SECTION_STYLES.TEXT.subHeader}>{t('results.cost')}</h3>
         <div className="space-y-1">
@@ -210,7 +169,6 @@ export function ExtractionResults({ result, currentPity, hasTargets }: Extractio
         </div>
       </div>
 
-      {/* Rate Table Info */}
       <div className="text-center">
         <span className={SECTION_STYLES.TEXT.caption}>
           {t('results.rateTable', {

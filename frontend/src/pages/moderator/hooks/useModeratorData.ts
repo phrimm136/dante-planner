@@ -1,12 +1,3 @@
-/**
- * Moderator Dashboard Data Hooks
- *
- * Fetches user list and moderation action history for moderator dashboard.
- * Uses useSuspenseQuery for consistent loading states with Suspense boundaries.
- *
- * Pattern: useNotificationsQuery.ts
- */
-
 import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
 
 import { ApiClient } from '@/lib/api'
@@ -16,19 +7,11 @@ import { UserForModSchema, ModerationActionSchema } from '../schemas/ModeratorSc
 import type { UserForMod, ModerationAction } from '../types/ModeratorTypes'
 import { STALE_TIME } from '@/lib/constants'
 
-// ============================================================================
-// Query Key Factory
-// ============================================================================
-
 export const moderatorQueryKeys = {
   all: ['moderator'] as const,
   users: () => ['moderator', 'users'] as const,
   actions: () => ['moderator', 'actions'] as const,
 }
-
-// ============================================================================
-// Query Options
-// ============================================================================
 
 function createModeratorUsersQueryOptions() {
   return queryOptions({
@@ -52,38 +35,11 @@ function createModerationHistoryQueryOptions() {
   })
 }
 
-// ============================================================================
-// Hooks
-// ============================================================================
-
-/**
- * Hook for fetching all users for moderation dashboard
- *
- * Uses useSuspenseQuery - wrap in Suspense boundary for loading states.
- *
- * @example
- * ```tsx
- * function UserList() {
- *   const users = useModeratorUsers();
- *   return <div>{users.length} users</div>;
- * }
- *
- * // Wrap in Suspense
- * <Suspense fallback={<LoadingSpinner />}>
- *   <UserList />
- * </Suspense>
- * ```
- */
 export function useModeratorUsers() {
   const { data } = useSuspenseQuery(createModeratorUsersQueryOptions())
   return data
 }
 
-/**
- * Hook for fetching moderation action history
- *
- * Uses useSuspenseQuery - wrap in Suspense boundary for loading states.
- */
 export function useModerationHistory() {
   const { data } = useSuspenseQuery(createModerationHistoryQueryOptions())
   return data

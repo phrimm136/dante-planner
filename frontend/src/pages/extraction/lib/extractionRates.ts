@@ -26,7 +26,6 @@ export const EXTRACTION_RATES = {
     EGO: 0.013,
     ANNOUNCER: 0,
   },
-  /** Rates when Announcer is featured (takes from 1★ pool) */
   WITH_ANNOUNCER: {
     THREE_STAR_ID: 0.029,
     TWO_STAR_ID: 0.128,
@@ -50,7 +49,6 @@ export const EXTRACTION_RATES = {
     EGO: 0.0, // No pik-tteul possible; rate-up handled separately
     ANNOUNCER: 0,
   },
-  /** Rates with both All EGO + Announcer */
   ALL_EGO_WITH_ANNOUNCER: {
     THREE_STAR_ID: 0.03,
     TWO_STAR_ID: 0.13,
@@ -73,16 +71,10 @@ export const EXTRACTION_RATES = {
     EGO_ALL_COLLECTED: 0.013,
     ANNOUNCER: 0.013,
   },
-  /** Pity system - guaranteed at this pull count */
   PITY_PULLS: 200,
-  /** Lunacy cost per single pull */
   LUNACY_PER_PULL: 130,
 } as const
 
-/**
- * Extraction rate table type - base rates for each item type
- * Values are 0-1 probabilities
- */
 export interface ExtractionRateTable {
   THREE_STAR_ID: number
   TWO_STAR_ID: number

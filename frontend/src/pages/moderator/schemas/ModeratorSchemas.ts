@@ -1,9 +1,6 @@
 import { z } from 'zod'
 import { UserRoleSchema } from '@/shared/auth'
 
-/**
- * User data for moderation dashboard
- */
 export const UserForModSchema = z.object({
   usernameEpithet: z.string(),
   usernameSuffix: z.string(),
@@ -14,10 +11,6 @@ export const UserForModSchema = z.object({
   timeoutUntil: z.string().optional(),
 })
 
-/**
- * Every action the audit log can record, mirroring the backend
- * `ModerationAction.ActionType` constants.
- */
 export const ModerationActionTypeSchema = z.enum([
   'BAN',
   'UNBAN',
@@ -32,9 +25,6 @@ export const ModerationActionTypeSchema = z.enum([
   'UNHIDE_FROM_RECOMMENDED',
 ])
 
-/**
- * Moderation action audit log entry
- */
 export const ModerationActionSchema = z.object({
   actionType: ModerationActionTypeSchema,
   targetType: z.enum(['USER', 'PLANNER', 'COMMENT']),

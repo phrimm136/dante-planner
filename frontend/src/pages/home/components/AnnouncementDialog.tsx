@@ -8,19 +8,11 @@ import type { Announcement } from '../types/AnnouncementTypes'
 import { LinkifyText } from '@/components/ui/LinkifyText'
 import { SECTION_STYLES } from '@/lib/constants'
 
-// ============================================================================
-// Inner Content Component
-// ============================================================================
-
 interface AnnouncementDialogContentProps {
   announcements: Announcement[]
   initialSelectedId: string | null
 }
 
-/**
- * Inner component owning list/detail selection state.
- * Separated from the Dialog shell so selection re-renders stay isolated.
- */
 function AnnouncementDialogContent({
   announcements,
   initialSelectedId,
@@ -76,22 +68,13 @@ function AnnouncementDialogContent({
   )
 }
 
-// ============================================================================
-// Dialog Shell
-// ============================================================================
-
 interface AnnouncementDialogProps {
   announcements: Announcement[]
   open: boolean
   onOpenChange: (open: boolean) => void
-  /** When set, dialog opens directly in detail view for this id */
   initialSelectedId?: string | null
 }
 
-/**
- * Announcement dialog — shell component.
- * Owns open/close and seeds the initial selection; content state lives in AnnouncementDialogContent.
- */
 export function AnnouncementDialog({
   announcements,
   open,
@@ -100,7 +83,6 @@ export function AnnouncementDialog({
 }: AnnouncementDialogProps) {
   const { t } = useTranslation('common')
 
-  // Derive seed: null when closed so content resets to list view on reopen
   const seed = open ? (initialSelectedId ?? null) : null
 
   return (
@@ -111,7 +93,6 @@ export function AnnouncementDialog({
         </DialogHeader>
 
         <div className="overflow-y-auto max-h-[60vh]">
-          {/* Keyed on the seed so a new seed restarts selection state. */}
           <AnnouncementDialogContent
             key={seed ?? ''}
             announcements={announcements}

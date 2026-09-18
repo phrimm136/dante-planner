@@ -4,7 +4,6 @@ import { moderatorQueryKeys } from './useModeratorData'
 
 interface BanUserRequest {
   usernameSuffix: string
-  /** Recorded in the moderation audit trail; the server rejects a blank one. */
   reason: string
 }
 
@@ -24,9 +23,6 @@ interface UntimeoutUserRequest {
   reason: string
 }
 
-/**
- * Hook for banning a user
- */
 export function useBanUser() {
   const queryClient = useQueryClient()
 
@@ -41,9 +37,6 @@ export function useBanUser() {
   })
 }
 
-/**
- * Hook for unbanning a user
- */
 export function useUnbanUser() {
   const queryClient = useQueryClient()
 
@@ -58,9 +51,6 @@ export function useUnbanUser() {
   })
 }
 
-/**
- * Hook for timing out a user
- */
 export function useTimeoutUser() {
   const queryClient = useQueryClient()
 
@@ -78,9 +68,6 @@ export function useTimeoutUser() {
   })
 }
 
-/**
- * Hook for removing timeout from a user
- */
 export function useUntimeoutUser() {
   const queryClient = useQueryClient()
 

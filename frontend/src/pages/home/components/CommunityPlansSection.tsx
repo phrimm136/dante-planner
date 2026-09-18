@@ -1,12 +1,3 @@
-/**
- * CommunityPlansSection - Home page right column
- *
- * Displays community planner cards with Latest/Recommended tabs.
- * Uses useMDGesellschaftData hook and PublishedPlannerCard component.
- *
- * Pattern: PlannerMDGesellschaftPage.tsx (tabs, data fetching)
- */
-
 import { Suspense, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
@@ -26,22 +17,12 @@ import { cn } from '@/lib/utils'
 
 import type { MDGesellschaftMode } from '@/pages/planner'
 
-/** The planner box with its height left to the card. */
-/** Number of plans to show on home page */
 const HOME_PLANS_LIMIT = 5
-
-// ============================================================================
-// Inner Content Component
-// ============================================================================
 
 interface CommunityPlansContentProps {
   mode: MDGesellschaftMode
 }
 
-/**
- * Inner component that uses Suspense-aware query hook.
- * Must be wrapped in Suspense boundary.
- */
 function CommunityPlansContent({ mode }: CommunityPlansContentProps) {
   const { t } = useTranslation('common')
   const { data } = useMDGesellschaftData({
@@ -49,7 +30,6 @@ function CommunityPlansContent({ mode }: CommunityPlansContentProps) {
     page: 0,
   })
 
-  // Limit to HOME_PLANS_LIMIT items
   const planners = data.content.slice(0, HOME_PLANS_LIMIT)
 
   if (planners.length === 0) {
@@ -71,10 +51,6 @@ function CommunityPlansContent({ mode }: CommunityPlansContentProps) {
   )
 }
 
-// ============================================================================
-// Loading Skeleton
-// ============================================================================
-
 function CommunityPlansSkeleton() {
   return (
     <div className={SECTION_STYLES.LAYOUT.column}>
@@ -85,21 +61,12 @@ function CommunityPlansSkeleton() {
   )
 }
 
-// ============================================================================
-// Main Section Component
-// ============================================================================
-
-/**
- * Community Plans section for home page.
- * Shows planner cards with Latest/Recommended tab switcher.
- */
 export function CommunityPlansSection() {
   const { t } = useTranslation('common')
   const [mode, setMode] = useState<MDGesellschaftMode>('published')
 
   return (
     <section className={SECTION_STYLES.LAYOUT.column}>
-      {/* Header with browse link */}
       <div className={SECTION_STYLES.LAYOUT.rowBetween}>
         <h2 className="text-xl font-semibold">{t('pages.home.communityPlans.title')}</h2>
         <Link
@@ -113,9 +80,7 @@ export function CommunityPlansSection() {
         </Link>
       </div>
 
-      {/* Content container */}
       <div className={cn(SECTION_STYLES.panel, 'flex-1')}>
-        {/* Tab switcher */}
         <Tabs value={mode} onValueChange={(v) => setMode(v as MDGesellschaftMode)} className="mb-4">
           <TabsList>
             <TabsTrigger value="published">{t('pages.home.communityPlans.tabLatest')}</TabsTrigger>
@@ -123,7 +88,6 @@ export function CommunityPlansSection() {
           </TabsList>
         </Tabs>
 
-        {/* Content with ErrorBoundary + Suspense */}
         <ReactErrorBoundary FallbackComponent={CommunityPlansErrorFallback}>
           <Suspense fallback={<CommunityPlansSkeleton />}>
             <CommunityPlansContent mode={mode} />

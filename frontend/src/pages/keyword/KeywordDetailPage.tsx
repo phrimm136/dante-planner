@@ -1,12 +1,3 @@
-/**
- * KeywordDetailPage - Keyword detail page with two-column layout
- *
- * Desktop: 4:6 ratio with description in right column
- * Mobile: Single column with all content stacked
- *
- * Pattern Source: EGOGiftDetailPage.tsx
- */
-
 import { useParams } from '@tanstack/react-router'
 import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -30,12 +21,6 @@ import type { EGOId, IdentityId, SinnerScopedId } from '@/shared/gameData'
 const colorMap = colorCode as Record<string, string>
 const NEUTRAL_NAME_COLOR = colorCode.Neutral
 
-/**
- * Keyword name display with buffType color.
- * Internal Suspense — does NOT suspend parent.
- *
- * Pattern Source: GiftNameI18n.tsx
- */
 function KeywordNameI18n({ id, buffType }: { id: string; buffType: string }) {
   const nameColor = colorMap[buffType] ?? NEUTRAL_NAME_COLOR
 
@@ -55,9 +40,6 @@ function KeywordNameContent({ id, nameColor }: { id: string; nameColor: string }
   )
 }
 
-/**
- * Entry label for backlinks to sinner-owned entities: name, then the sinner.
- */
 function useSinnerScopedLabel() {
   const { t } = useTranslation('sinnerNames')
 
@@ -71,10 +53,6 @@ function useSinnerScopedLabel() {
   }
 }
 
-/**
- * Backlink section for Related Identities.
- * Internal Suspense for independent language switching.
- */
 function KeywordRelatedIdentities({ ids }: { ids: IdentityId[] }) {
   const names = useIdentityListI18n()
   const formatLabel = useSinnerScopedLabel()
@@ -90,10 +68,6 @@ function KeywordRelatedIdentities({ ids }: { ids: IdentityId[] }) {
   )
 }
 
-/**
- * Backlink section for Related E.G.O.
- * Internal Suspense for independent language switching.
- */
 function KeywordRelatedEgos({ ids }: { ids: EGOId[] }) {
   const names = useEGOListI18n()
   const formatLabel = useSinnerScopedLabel()
@@ -109,10 +83,6 @@ function KeywordRelatedEgos({ ids }: { ids: EGOId[] }) {
   )
 }
 
-/**
- * Backlink section for Related E.G.O Gifts.
- * Internal Suspense for independent language switching.
- */
 function KeywordRelatedEgoGifts({ ids }: { ids: string[] }) {
   const names = useEGOGiftListI18n()
 
@@ -126,10 +96,6 @@ function KeywordRelatedEgoGifts({ ids }: { ids: string[] }) {
   )
 }
 
-/**
- * Keyword description section with formatted keyword rendering.
- * Internal Suspense for independent language switching.
- */
 function KeywordDescriptionContent({ id }: { id: string }) {
   const { t } = useTranslation('database')
   const i18nData = useKeywordDetailI18n(id)
@@ -156,11 +122,6 @@ const BacklinkSkeleton = () => (
   </div>
 )
 
-/**
- * Inner content component that uses Suspense-aware hooks.
- *
- * Pattern Source: EGOGiftDetailContent in EGOGiftDetailPage.tsx
- */
 function KeywordDetailContent() {
   const { id } = useParams({ strict: false })
 
@@ -174,16 +135,13 @@ function KeywordDetailContent() {
     throw new Error(`Keyword not found: ${id}`)
   }
 
-  // Left column: Header (card + name), Metadata (backlinks)
   const leftColumn = (
     <div className="space-y-4">
-      {/* Header row: Card + Name (vertically centered) */}
       <div className="flex gap-4 items-center">
         <KeywordCard id={id} iconId={spec.iconId} />
         <KeywordNameI18n id={id} buffType={spec.buffType} />
       </div>
 
-      {/* Backlinks panel */}
       <LabeledPanel>
         <Suspense fallback={<BacklinkSkeleton />}>
           <KeywordRelatedIdentities ids={spec.identities} />
@@ -198,7 +156,6 @@ function KeywordDetailContent() {
     </div>
   )
 
-  // Right column: Description
   const rightColumn = (
     <div className="space-y-4">
       <Suspense fallback={<Skeleton className="h-32 w-full rounded-lg" />}>
@@ -218,11 +175,6 @@ function KeywordDetailContent() {
   )
 }
 
-/**
- * KeywordDetailPage - Main export with Suspense boundary
- *
- * Pattern Source: EGOGiftDetailPage.tsx
- */
 export default function KeywordDetailPage() {
   return (
     <Suspense fallback={<KeywordDetailSkeleton />}>

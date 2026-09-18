@@ -25,21 +25,10 @@ interface KeywordListProps {
   store: FilterStore<KeywordFacetState>
 }
 
-/**
- * KeywordList - Renders every keyword card once and lets each one subscribe to its own
- * visibility, so a filter toggle re-renders only the cards that changed.
- *
- * Filter Logic:
- * - All filter types use AND between each other
- * - BuffType: OR logic (any selected buffType)
- * - Identity/EGO/EGOGift: OR logic within each, AND across entity types
- * - Search: case-insensitive substring on localized name
- */
 export function KeywordList({ keywords, store }: KeywordListProps) {
   const { t } = useTranslation('database')
   const { names: keywordNames } = useSearchTermSources(KEYWORD_LIST, EMPTY_NAMES, false)
 
-  // Progressive rendering: start with one batch, add a batch per frame
   const displayCount = useProgressiveCount({
     total: keywords.length,
     step: PROGRESSIVE_REVEAL.KEYWORD_CARD_BATCH,

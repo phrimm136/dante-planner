@@ -7,13 +7,6 @@ interface KeywordCardProps {
   enableHoverHighlight?: boolean
 }
 
-/**
- * Presentational card for keyword browser grid.
- * Renders keyword icon centered with selectable hover highlight.
- *
- * Pattern Source: EGOGiftCard.tsx
- * Memoized by id to prevent re-renders during list filtering.
- */
 export const KeywordCard = function KeywordCard({
   id,
   iconId,

@@ -1,12 +1,3 @@
-/**
- * RecentlyReleasedSection - Home page left column
- *
- * Displays mixed Identity/EGO cards grouped by release date.
- * Simple profile images with rank/type and sinner indicators.
- *
- * Pattern: IdentityList.tsx (grid rendering)
- */
-
 import { Suspense } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
@@ -36,10 +27,6 @@ import { CardSlot } from '@/shared/cardLayout'
 import { TextSkeleton } from '@/components/feedback/TextSkeleton'
 import { RECENT_RELEASE_GEOMETRY } from '../lib/cardLayout'
 
-// ============================================================================
-// Helpers
-// ============================================================================
-
 /**
  * Format season number to display string
  * - 0: empty (standard)
@@ -56,11 +43,6 @@ function formatSeason(season: number): string {
   return `S${season}`
 }
 
-// ============================================================================
-// Mini Card Components
-// ============================================================================
-
-/** Plain text entity name with suspense, bound to one entity kind's i18n hook. */
 function createEntityNameText(useNames: () => Record<string, string>) {
   return function EntityNameText({ id }: { id: SinnerScopedId }) {
     const names = useNames()
@@ -75,17 +57,12 @@ interface HomeEntityCardProps {
   id: SinnerScopedId
   season: number
   imageSrc: string
-  /** Used when `imageSrc` fails; equal to `imageSrc` for kinds with no alternative. */
   imageFallbackSrc: string
-  /** Rarity for an identity, rank for an EGO. */
   gradeIconSrc: string
   gradeIconAlt: string
   nameText: ReactNode
 }
 
-/**
- * Simple entity card: profile image, icons below, then name
- */
 function HomeEntityCard({
   id,
   season,
@@ -101,7 +78,6 @@ function HomeEntityCard({
 
   return (
     <div className="flex flex-col items-center gap-1">
-      {/* Profile image */}
       <CardSlot
         size={RECENT_RELEASE_GEOMETRY.size}
         mobileScale={RECENT_RELEASE_GEOMETRY.mobileScale}
@@ -115,7 +91,6 @@ function HomeEntityCard({
           className="w-full h-full object-cover"
         />
       </CardSlot>
-      {/* Icons row */}
       <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-background/80">
         <img src={gradeIconSrc} alt={gradeIconAlt} className="h-4" />
         <img src={getSinnerIconPath(sinner)} alt={sinner} className="w-5 h-5" />
@@ -128,7 +103,6 @@ function HomeEntityCard({
           </span>
         )}
       </div>
-      {/* Name */}
       <div className="text-xs text-center text-muted-foreground">
         <Suspense fallback={<Skeleton className="w-16 h-3" />}>{nameText}</Suspense>
       </div>
@@ -136,16 +110,11 @@ function HomeEntityCard({
   )
 }
 
-// ============================================================================
-// Entity Card Link
-// ============================================================================
-
 const ENTITY_ROUTES: Record<RecentEntity['type'], '/identity/$id' | '/ego/$id'> = {
   identity: '/identity/$id',
   ego: '/ego/$id',
 }
 
-/** Per-kind assets and name source for one recently released entity. */
 function entityCardProps(entity: RecentEntity): HomeEntityCardProps {
   if (entity.type === 'identity') {
     const { id, rank, season } = entity.data
@@ -176,9 +145,6 @@ interface EntityCardLinkProps {
   entity: RecentEntity
 }
 
-/**
- * Link wrapper that renders the appropriate card based on entity type.
- */
 function EntityCardLink({ entity }: EntityCardLinkProps) {
   return (
     <Link
@@ -191,29 +157,13 @@ function EntityCardLink({ entity }: EntityCardLinkProps) {
   )
 }
 
-// ============================================================================
-// Main Section Component
-// ============================================================================
-
 interface RecentlyReleasedSectionProps {
   dateGroups: DateGroup[]
 }
 
-/**
- * Recently Released section for home page.
- * Shows Identity and EGO cards grouped by release date.
- */
-/**
- * Loading placeholder for RecentlyReleasedSection. Mirrors the real layout —
- * header row, bordered content box, and date-grouped 112px card cells — so the
- * home left column reserves its height and does not shove the footer when the
- * data resolves. Card count/rows are representative, not exact; the goal is a
- * stable row height for the two-column grid, not pixel identity.
- */
 export function RecentlyReleasedSkeleton() {
   return (
     <section className={SECTION_STYLES.LAYOUT.column}>
-      {/* Header: title + browse links */}
       <div className={SECTION_STYLES.LAYOUT.rowBetween}>
         <Skeleton className="h-7 w-40" />
         <div className="flex items-center gap-4">
@@ -222,7 +172,6 @@ export function RecentlyReleasedSkeleton() {
         </div>
       </div>
 
-      {/* Content box with date groups */}
       <div className={cn(SECTION_STYLES.panel, 'flex-1')}>
         <div className={SECTION_STYLES.LAYOUT.column}>
           {Array.from({ length: 3 }).map((_, groupIdx) => (
@@ -257,7 +206,6 @@ export function RecentlyReleasedSection({ dateGroups }: RecentlyReleasedSectionP
 
   return (
     <section className={SECTION_STYLES.LAYOUT.column}>
-      {/* Header with browse links */}
       <div className={SECTION_STYLES.LAYOUT.rowBetween}>
         <h2 className="text-xl font-semibold">{t('pages.home.recentlyReleased.title')}</h2>
         <div className="flex items-center gap-4 text-sm">
@@ -282,14 +230,11 @@ export function RecentlyReleasedSection({ dateGroups }: RecentlyReleasedSectionP
         </div>
       </div>
 
-      {/* Content grouped by date */}
       <div className={cn(SECTION_STYLES.panel, 'flex-1')}>
         <div className={SECTION_STYLES.LAYOUT.column}>
           {dateGroups.map((group) => (
             <div key={group.date}>
-              {/* Date header */}
               <div className="text-sm text-muted-foreground mb-3">{group.formattedDate}</div>
-              {/* Card grid - auto-fit creates only columns needed */}
               <div
                 className="grid gap-2"
                 style={{ gridTemplateColumns: 'repeat(auto-fit, 112px)', justifyContent: 'start' }}

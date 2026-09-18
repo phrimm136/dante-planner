@@ -4,12 +4,6 @@ import { useAnnouncementData } from '../hooks/useAnnouncementData'
 import { AnnouncementSection } from './AnnouncementSection'
 import { AnnouncementDialog } from './AnnouncementDialog'
 
-/**
- * Announcement orchestrator component.
- * Calls useAnnouncementData — must be wrapped in Suspense boundary.
- *
- * Returns null when no active announcements exist (empty list or all expired).
- */
 export function AnnouncementContent() {
   const announcements = useAnnouncementData()
   const [dialogOpen, setDialogOpen] = useState(false)

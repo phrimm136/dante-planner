@@ -3,9 +3,7 @@ import { formatAnnouncementDate } from '@/lib/formatDate'
 import type { Announcement, AnnouncementI18n, AnnouncementSpec } from '../types/AnnouncementTypes'
 
 export interface AnnouncementMerge {
-  /** Regular entries newest-first, then permanent entries newest-first. */
   announcements: Announcement[]
-  /** Spec ids the i18n file has no entry for, in spec order. */
   missingIds: string[]
 }
 

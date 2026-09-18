@@ -15,13 +15,6 @@ interface KeywordCardLinkProps {
   className?: string
 }
 
-/**
- * Navigation wrapper for KeywordCard that links to the keyword detail page.
- * Renders card + colored name below.
- *
- * Pattern Source: EGOGiftCardLink.tsx
- * Memoized by id to prevent re-renders during list filtering.
- */
 export const KeywordCardLink = function KeywordCardLink({
   id,
   iconId,

@@ -21,13 +21,6 @@ import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
 import { KEYWORD_GEOMETRY } from './lib/cardLayout'
 import { Skeleton } from '@/components/ui/skeleton'
 
-/**
- * Card grid section - builds keyword items from spec and passes to KeywordList.
- * The name list suspends into this section's own boundary, so the sidebar and
- * search bar stay on screen through a language change.
- *
- * Pattern Source: EGOGiftCardGrid in EGOGiftPage.tsx
- */
 function KeywordCardGrid({
   spec,
   store,
@@ -42,12 +35,6 @@ function KeywordCardGrid({
   return <KeywordList keywords={keywords} store={store} />
 }
 
-/**
- * Shell component - uses spec data only (no language dependency).
- * Does not suspend on language change since spec query key has no language.
- *
- * Pattern Source: EGOGiftPageShell in EGOGiftPage.tsx
- */
 function KeywordPageShell() {
   const { t } = useTranslation(['database', 'common'])
   const spec = useKeywordListSpec()
@@ -129,11 +116,6 @@ function KeywordPageShell() {
   )
 }
 
-/**
- * KeywordPage - Keyword browser with responsive filter sidebar
- *
- * Pattern Source: EGOGiftPage.tsx
- */
 export default function KeywordPage() {
   return (
     <EntityListPage skeleton={<ListPageSkeleton geometry={KEYWORD_GEOMETRY} filterCount={4} />}>

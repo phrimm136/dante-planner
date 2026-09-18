@@ -2,27 +2,16 @@ import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
-/** Detail routes a keyword backlink can point at. */
 type KeywordBacklinkRoute = '/identity/$id' | '/ego/$id' | '/ego-gift/$id'
 
 interface KeywordBacklinkListProps<Id extends string> {
-  /** Section label key in the `database` namespace */
   labelKey: string
-  /** Entity ids to link, in display order */
   ids: Id[]
-  /** Localized names keyed by entity id */
   names: Record<string, string>
-  /** Detail route the entries link to */
   to: KeywordBacklinkRoute
-  /** Entry text; the localized name alone when omitted */
   formatLabel?: (id: Id, name: string) => ReactNode
 }
 
-/**
- * Labeled row of comma-separated entity links for one keyword backlink kind.
- * Renders `-` when the keyword has no entities of that kind, and falls back to
- * the raw id for an entity the active language has no name for.
- */
 export function KeywordBacklinkList<Id extends string>({
   labelKey,
   ids,
