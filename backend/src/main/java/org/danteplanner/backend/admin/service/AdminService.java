@@ -12,13 +12,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
-import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
 import org.danteplanner.backend.moderation.service.ModerationAuditService;
 import org.danteplanner.backend.moderation.service.ModerationPolicy;
 
 /**
  * Service for administrative operations.
- * Only ADMIN users can perform these operations (enforced at controller level).
  */
 @Service
 @RequiredArgsConstructor
@@ -30,19 +28,8 @@ public class AdminService {
     private final ModerationAuditService auditService;
     private final ModerationPolicy moderationPolicy;
 
-    /**
-     * Change a user's role with safeguards.
-     *
-     * @param actorId   the admin performing the action
-     * @param targetId  the user whose role is being changed
-     * @param newRole   the new role to assign
-     * @return the updated user
-     * @throws UserNotFoundException        if target user not found
-     * @throws ModerationForbiddenException if a rank safeguard rejects the change
-     */
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public User changeRole(Long actorId, Long targetId, UserRole newRole) {
-        // Use pessimistic locking to prevent TOCTOU race conditions
         User actor = userService.lockActiveById(actorId);
         User target = userService.lockActiveById(targetId);
 
@@ -54,7 +41,6 @@ public class AdminService {
             moderationPolicy.requireAnotherAdministratorRemains(userService.countByRole(UserRole.ADMIN));
         }
 
-        // Apply role change
         UserRole oldRole = target.getRole();
         target.setRole(newRole);
 
@@ -63,7 +49,6 @@ public class AdminService {
                 demotion ? ModerationAction.ActionType.DEMOTE : ModerationAction.ActionType.PROMOTE,
                 ModerationAction.TargetType.USER, oldRole + " -> " + newRole);
 
-        // Credentials issued under the old role are withdrawn after this commits
         if (demotion) {
             eventPublisher.publishEvent(new UserDemotedEvent(this, targetId, oldRole, newRole));
             log.info("User {} demoted from {} to {} by admin {}", targetId, oldRole, newRole, actorId);
@@ -75,13 +60,6 @@ public class AdminService {
         return target;
     }
 
-    /**
-     * Get a user's current role.
-     *
-     * @param userId the user ID
-     * @return the user's role
-     * @throws UserNotFoundException if user not found
-     */
     @Transactional(readOnly = true)
     public UserRole getUserRole(Long userId) {
         User user = userService.findActiveById(userId)

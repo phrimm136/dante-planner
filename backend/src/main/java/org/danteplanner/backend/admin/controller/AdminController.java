@@ -18,12 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * REST controller for administrative operations.
- *
- * <p>All endpoints require ADMIN role (enforced by SecurityConfig).
- * Provides role management capabilities for administrators.</p>
- */
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
@@ -32,21 +26,6 @@ public class AdminController {
 
     private final AdminService adminService;
 
-    /**
-     * Change a user's role.
-     *
-     * <p>Only administrators can change roles. Safeguards prevent:
-     * <ul>
-     *   <li>Granting a role higher than the actor's own role</li>
-     *   <li>Modifying users of equal or higher rank</li>
-     *   <li>Demoting the last administrator</li>
-     * </ul></p>
-     *
-     * @param actorId  the admin user ID (from token)
-     * @param targetId the user whose role is being changed
-     * @param request  the role change request
-     * @return the updated user role information
-     */
     @RateLimitExempt
     @PutMapping("/user/{targetId}/role")
     public ResponseEntity<UserRoleResponse> changeRole(
@@ -60,15 +39,6 @@ public class AdminController {
         return ResponseEntity.ok(UserRoleResponse.fromUser(updated));
     }
 
-    /**
-     * Get a user's current role.
-     *
-     * <p>Returns role information for any user. Does not expose
-     * sensitive user data beyond role and basic identifiers.</p>
-     *
-     * @param targetId the user ID
-     * @return the user's role information
-     */
     @RateLimitExempt
     @GetMapping("/user/{targetId}/role")
     public ResponseEntity<UserRoleResponse> getUserRole(@PathVariable Long targetId) {
