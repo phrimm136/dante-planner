@@ -7,11 +7,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
- * Scheduled job for ageing out notifications nobody will read again.
- * Runs daily at 2 AM.
- *
- * <p>Multi-pod safe: {@code @SchedulerLock} over the shared auth Redis lock store ensures
- * the job fires once across the fleet, not once per pod.</p>
+ * {@code @SchedulerLock} over the shared auth Redis lock store ensures the job fires once across
+ * the fleet, not once per pod.
  */
 @Component
 @RequiredArgsConstructor

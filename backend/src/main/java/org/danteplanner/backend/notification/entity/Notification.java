@@ -18,11 +18,6 @@ import lombok.NoArgsConstructor;
 import java.time.Instant;
 import java.util.UUID;
 
-/**
- * Entity representing a user notification.
- * Supports notifications for planner milestones, comments, and replies.
- * Uses UNIQUE constraint (user_id, content_id, notification_type) for deduplication.
- */
 @Entity
 @Table(name = "notifications",
        indexes = {
@@ -65,7 +60,6 @@ public class Notification {
     @Column(name = "deleted_at")
     private Instant deletedAt;
 
-    // Rich content fields for display and navigation
     @Column(name = "planner_id", columnDefinition = "BINARY(16)")
     private UUID plannerId;
 
@@ -78,9 +72,6 @@ public class Notification {
     @Column(name = "comment_public_id", columnDefinition = "BINARY(16)")
     private UUID commentPublicId;
 
-    /**
-     * Constructor for PLANNER_RECOMMENDED notifications.
-     */
     public Notification(Long userId, String contentId, NotificationType notificationType) {
         this.userId = userId;
         this.contentId = contentId;
@@ -88,17 +79,6 @@ public class Notification {
         this.read = false;
     }
 
-    /**
-     * Constructor for comment/reply notifications with rich content.
-     *
-     * @param userId           the user to notify
-     * @param contentId        unique ID for deduplication (comment internal ID)
-     * @param notificationType COMMENT_RECEIVED or REPLY_RECEIVED
-     * @param plannerId        the planner UUID for navigation
-     * @param plannerTitle     the planner title (truncated to 100 chars)
-     * @param commentSnippet   snippet of comment content (truncated to 100 chars)
-     * @param commentPublicId  the comment's public UUID for anchor link
-     */
     public Notification(
             Long userId,
             String contentId,
@@ -118,17 +98,6 @@ public class Notification {
         this.read = false;
     }
 
-    /**
-     * Builds a notification about a planner rather than a comment on one, so it carries no comment
-     * snippet or comment link.
-     *
-     * @param userId           the user to notify
-     * @param contentId        unique ID for deduplication
-     * @param notificationType the planner-scoped notification type
-     * @param plannerId        the planner UUID for navigation
-     * @param plannerTitle     the planner title (truncated to 100 chars)
-     * @return the notification
-     */
     public static Notification plannerScoped(
             Long userId,
             String contentId,
@@ -155,11 +124,7 @@ public class Notification {
         createdAt = Instant.now();
     }
 
-    // Business methods
 
-    /**
-     * Mark this notification as read.
-     */
     public void markAsRead() {
         if (!this.read) {
             this.read = true;
@@ -167,32 +132,18 @@ public class Notification {
         }
     }
 
-    /**
-     * Soft delete this notification.
-     */
     public void softDelete() {
         this.deletedAt = Instant.now();
     }
 
-    /**
-     * Check if this notification has been soft deleted.
-     */
     public boolean isDeleted() {
         return deletedAt != null;
     }
 
-    /**
-     * Set the creation timestamp. Used for testing to create deterministic ordering.
-     * Note: createdAt has updatable=false in JPA, but this setter allows test manipulation
-     * before the entity is managed or via direct field access in tests.
-     */
     public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
     }
 
-    /**
-     * Set public ID. Used for testing.
-     */
     public void setPublicId(UUID publicId) {
         this.publicId = publicId;
     }

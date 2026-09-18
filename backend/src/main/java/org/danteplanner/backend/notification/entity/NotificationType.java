@@ -3,9 +3,6 @@ package org.danteplanner.backend.notification.entity;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-/**
- * Notification type enum for user notification system.
- */
 import org.danteplanner.backend.shared.entity.ValuedEnum;
 import org.danteplanner.backend.shared.entity.EnumLookup;
 

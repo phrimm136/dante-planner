@@ -27,9 +27,6 @@ public class NotificationInboxService {
 
     private final NotificationRepository notificationRepository;
 
-    /**
-     * Get notification inbox for a user with pagination.
-     */
     @Transactional(readOnly = true)
     public NotificationInboxResponse getInbox(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -49,18 +46,12 @@ public class NotificationInboxService {
         );
     }
 
-    /**
-     * Get unread notification count for a user.
-     */
     @Transactional(readOnly = true)
     public UnreadCountResponse getUnreadCount(Long userId) {
         long count = notificationRepository.countByUserIdAndReadFalseAndDeletedAtIsNull(userId);
         return new UnreadCountResponse(count);
     }
 
-    /**
-     * Mark a notification as read.
-     */
     @Transactional
     public NotificationResponse markAsRead(UUID publicId, Long userId) {
         Notification notification = requireOwned(publicId, userId);
@@ -70,17 +61,11 @@ public class NotificationInboxService {
         return NotificationResponse.fromEntity(notification);
     }
 
-    /**
-     * Mark all unread notifications as read for a user.
-     */
     @Transactional
     public int markAllAsRead(Long userId) {
         return notificationRepository.markAllAsRead(userId, Instant.now());
     }
 
-    /**
-     * Soft-delete a notification.
-     */
     @Transactional
     public void deleteNotification(UUID publicId, Long userId) {
         Notification notification = requireOwned(publicId, userId);
@@ -88,25 +73,11 @@ public class NotificationInboxService {
         notification.softDelete();
     }
 
-    /**
-     * Soft-delete all notifications for a user.
-     */
     @Transactional
     public int deleteAllNotifications(Long userId) {
         return notificationRepository.softDeleteAllByUserId(userId, Instant.now());
     }
 
-    /**
-     * Resolve a notification the caller owns.
-     *
-     * <p>A notification belonging to someone else reports as missing, so walking public ids cannot
-     * reveal which ones exist.</p>
-     *
-     * @param publicId the notification's public id
-     * @param userId   the caller
-     * @return the caller's notification
-     * @throws EntityNotFoundException if no such notification belongs to this caller
-     */
     private Notification requireOwned(UUID publicId, Long userId) {
         return notificationRepository.findByPublicId(publicId)
                 .filter(notification -> notification.getUserId().equals(userId))

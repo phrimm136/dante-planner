@@ -22,11 +22,6 @@ public class NotificationRetentionService {
 
     private final NotificationRepository notificationRepository;
 
-    /**
-     * Soft-delete read notifications past their retention window, then drop soft-deleted rows past
-     * theirs. Both sweeps settle together, so a partial purge cannot leave the two windows
-     * disagreeing about the same row.
-     */
     @Transactional
     public void purgeExpired() {
         Instant softDeleteCutoff = Instant.now().minus(SOFT_DELETE_AFTER_DAYS, ChronoUnit.DAYS);
