@@ -5,12 +5,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 /**
- * The pool that carries out an SSE heartbeat send.
- *
- * <p>A heartbeat writes to a client socket, so it blocks for as long as that peer's receive window
- * stays full. The scheduled sweep therefore only submits: a stalled peer occupies one of these
- * workers, while the scheduler thread — shared with every other {@code @Scheduled} task in the pod
- * — returns immediately.</p>
+ * A heartbeat writes to a client socket, so it blocks for as long as that peer's receive window
+ * stays full. The {@code @Scheduled} thread is shared with every other scheduled task in the pod.
  */
 @Configuration
 public class SseHeartbeatWorkerConfig {

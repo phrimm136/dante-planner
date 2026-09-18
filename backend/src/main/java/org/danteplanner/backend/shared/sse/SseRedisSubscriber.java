@@ -14,14 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import java.nio.charset.StandardCharsets;
 
-/**
- * Redis pub/sub listener that fans SSE envelopes out to this node's local emitters.
- *
- * <p>Deserializes each {@link SseEnvelope} received on the subscribed channel and
- * dispatches it to the local {@link SseService}, carrying the full envelope so the
- * recipient patches its cache from the payload rather than refetching. Parse failures
- * are logged and swallowed so a poison message never kills the listener thread.</p>
- */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -66,10 +58,6 @@ public class SseRedisSubscriber implements MessageListener {
                 clientPayload(envelope), envelope.excludeUserId());
     }
 
-    /**
-     * The event type names its own delivery, so a type added without one fails to compile here
-     * rather than falling through to the emitters by default.
-     */
     private void dispatchUser(SseEnvelope envelope) {
         switch (envelope.type().userDelivery()) {
             case SETTINGS_CACHE -> sseService.invalidateSettingsCache(envelope.userId());
@@ -87,11 +75,6 @@ public class SseRedisSubscriber implements MessageListener {
                 envelope.type().getValue(), clientPayload(envelope));
     }
 
-    /**
-     * What the client receives: the payload alone for event types whose client schema expects the
-     * payload's fields at the top level, and the client-facing event for the ones that read its
-     * routing fields.
-     */
     private static Object clientPayload(SseEnvelope envelope) {
         return envelope.type().deliversRawPayload()
                 ? envelope.payload()

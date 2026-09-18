@@ -8,22 +8,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-/**
- * Template base for SSE services managing per-key emitter connections.
- *
- * <p>Owns the shared connection lifecycle — registration with per-device
- * de-duplication, dead-emitter removal, heartbeat probing, and zombie cleanup —
- * over a registry keyed by {@code K} (user ID or planner ID). Subclasses supply
- * routing, event dispatch, registry-specific behavior (settings cache, capacity
- * limits), and all logging; log level, message, and logger name stay
- * per-service via the protected hooks.</p>
- *
- * <p>Not a Spring bean. Concrete subclasses carry {@code @Service} and the
- * {@code @Scheduled} entry points, whose intervals differ per service and so
- * cannot live on the (annotation-non-inheriting) base.</p>
- *
- * @param <K> the registry key type ({@code Long} user ID or {@code UUID} planner ID)
- */
 public abstract class AbstractSseService<K> {
 
     protected static final long SSE_TIMEOUT_MS = 3600_000L;
@@ -39,39 +23,15 @@ public abstract class AbstractSseService<K> {
     }
 
     /**
-     * A live connection. {@code deviceId} de-duplicates a client's own reconnects and is
-     * client-supplied; {@code userId} comes from the authenticated principal and is null
-     * for a guest, so only it is safe to address or exclude by.
+     * {@code deviceId} is client-supplied; {@code userId} comes from the authenticated principal
+     * and is null for a guest, so only it is safe to address or exclude by.
      */
     protected record EmitterEntry(UUID deviceId, Long userId, SseEmitter emitter) {}
 
-    /**
-     * Register an emitter for a key/device with no associated account.
-     *
-     * @param key      the registry key
-     * @param deviceId the device identifier
-     * @return the registered emitter
-     * @throws IOException if the initial connected event cannot be written
-     */
     protected SseEmitter register(K key, UUID deviceId) throws IOException {
         return register(key, deviceId, null);
     }
 
-    /**
-     * Register an emitter for a key/device, replacing any prior emitter for the
-     * same device and wiring the lifecycle callbacks plus the initial connected event.
-     *
-     * <p>The whole registry mutation runs inside {@code compute} so it cannot interleave with the
-     * unregistration that drops an emptied key: an emitter added to a list already unmapped would
-     * be reachable from nothing and would linger until its one-hour timeout. {@code afterRegister}
-     * stays outside, since a subclass may load state from the database there.</p>
-     *
-     * @param key      the registry key
-     * @param deviceId the device identifier
-     * @param userId   the authenticated account, or null for a guest
-     * @return the registered emitter
-     * @throws IOException if the initial connected event cannot be written
-     */
     protected SseEmitter register(K key, UUID deviceId, Long userId) throws IOException {
         SseEmitter emitter = new SseEmitter(SSE_TIMEOUT_MS);
 
@@ -93,13 +53,6 @@ public abstract class AbstractSseService<K> {
         return emitter;
     }
 
-    /**
-     * Remove the connection for a key/device, dropping the key entry once its last
-     * connection is gone.
-     *
-     * @param key      the registry key
-     * @param deviceId the device identifier
-     */
     public void removeConnection(K key, UUID deviceId) {
         boolean[] keyRemoved = {false};
         emitters.compute(key, (k, connections) -> {
@@ -125,12 +78,7 @@ public abstract class AbstractSseService<K> {
     }
 
     /**
-     * Hand every connection's heartbeat to the worker pool and return.
-     *
-     * <p>The send itself blocks for as long as the peer's receive window stays full, so it runs on
-     * a worker rather than on the caller's thread: the sweep is driven by the scheduler shared with
-     * every other {@code @Scheduled} task in the pod, which one unresponsive client would otherwise
-     * hold for the whole sweep.</p>
+     * An SSE send blocks for as long as the peer's receive window stays full.
      */
     protected void sweepHeartbeatConnections() {
         emitters.forEach((key, connections) -> {
@@ -149,11 +97,6 @@ public abstract class AbstractSseService<K> {
         }
     }
 
-    /**
-     * Probe every connection and remove the dead ones.
-     *
-     * @return the number of connections removed
-     */
     protected int cleanupConnections() {
         int removed = 0;
         for (var entry : emitters.entrySet()) {

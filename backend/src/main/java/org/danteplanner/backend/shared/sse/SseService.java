@@ -19,20 +19,6 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.danteplanner.backend.shared.entity.SseEventType;
 
-/**
- * Central SSE service managing connections and settings-aware event dispatch.
- *
- * <p>Each user can have multiple connected devices. Events are filtered based on
- * user settings cached per connection to avoid DB queries on every event.</p>
- *
- * <p>Event types and their setting checks:
- * <ul>
- *   <li>{@code notify:comment} - requires notifyComments == true</li>
- *   <li>{@code notify:recommended} - requires notifyRecommendations == true</li>
- *   <li>{@code notify:published} - requires notifyNewPublications == true</li>
- * </ul>
- * </p>
- */
 @Service
 @Slf4j
 public class SseService extends AbstractSseService<Long> {
@@ -54,11 +40,6 @@ public class SseService extends AbstractSseService<Long> {
         this.userSettingsService = userSettingsService;
     }
 
-    /**
-     * Per-node cache of the settings that gate event delivery. Entries expire on their own so a node
-     * that misses an invalidation — its Redis hop dropped, or it joined after the change — serves
-     * stale settings for a bounded time instead of until restart.
-     */
     private final Cache<Long, CachedSettings> settingsCache = Caffeine.newBuilder()
             .expireAfterWrite(SETTINGS_CACHE_TTL)
             .maximumSize(SETTINGS_CACHE_MAX_ENTRIES)
@@ -78,40 +59,16 @@ public class SseService extends AbstractSseService<Long> {
         }
     }
 
-    /**
-     * Subscribe a device to receive SSE events for a user.
-     * Caches user settings for efficient event filtering.
-     *
-     * @param userId   the user ID
-     * @param deviceId the device identifier (UUID)
-     * @return the SSE emitter for the connection
-     * @throws IOException if the initial connected event cannot be written
-     */
     public SseEmitter subscribe(Long userId, UUID deviceId) throws IOException {
         SseEmitter emitter = register(userId, deviceId);
         log.info("SSE subscribed: user={}, device={}", userId, deviceId);
         return emitter;
     }
 
-    /**
-     * Send an event to a user if their settings allow it.
-     *
-     * @param userId    the user ID
-     * @param eventType the event type (e.g., "comment:added", "notify:comment")
-     * @param data      the event data object
-     */
     public void sendToUser(Long userId, String eventType, Object data) {
         sendToUser(userId, null, eventType, data);
     }
 
-    /**
-     * Send an event to a user if their settings allow it, excluding a specific device.
-     *
-     * @param userId          the user ID
-     * @param excludeDeviceId the device ID to exclude (can be null)
-     * @param eventType       the event type
-     * @param data            the event data object
-     */
     public void sendToUser(Long userId, UUID excludeDeviceId, String eventType, Object data) {
         if (!isEventAllowed(userId, eventType)) {
             log.debug("Event {} blocked by settings for user {}", eventType, userId);
@@ -146,14 +103,6 @@ public class SseService extends AbstractSseService<Long> {
         }
     }
 
-    /**
-     * Broadcast an event to all connected users whose settings allow it.
-     * Used for site-wide notifications like new planner publications.
-     *
-     * @param excludeUserId the user ID to exclude (e.g., the author), can be null
-     * @param eventType     the event type (e.g., "notify:published")
-     * @param data          the event data object
-     */
     public void broadcastToAll(Long excludeUserId, String eventType, Object data) {
         String jsonData;
         try {
@@ -167,17 +116,14 @@ public class SseService extends AbstractSseService<Long> {
         for (var entry : emitters.entrySet()) {
             Long userId = entry.getKey();
 
-            // Skip excluded user (author)
             if (excludeUserId != null && excludeUserId.equals(userId)) {
                 continue;
             }
 
-            // Check user settings
             if (!isEventAllowed(userId, eventType)) {
                 continue;
             }
 
-            // Send to all devices for this user
             for (EmitterEntry emitterEntry : entry.getValue()) {
                 try {
                     emitterEntry.emitter().send(SseEmitter.event().name(eventType).data(jsonData));
@@ -194,50 +140,25 @@ public class SseService extends AbstractSseService<Long> {
                 eventType, sentCount, excludeUserId, emitters.size());
     }
 
-    /**
-     * Notify a user that their account has been suspended (banned or timed out).
-     * This sends an SSE event to all of the user's connected devices.
-     *
-     * @param userId  the user ID
-     * @param payload the suspension detail prepared by the publisher
-     */
     public void notifyAccountSuspended(Long userId, Object payload) {
         sendToUser(userId, SseEventType.ACCOUNT_SUSPENDED.getValue(), payload);
         log.info("Sent account_suspended notification to user {}", userId);
     }
 
-    /**
-     * Invalidate settings cache for a user when their settings change.
-     * Next event dispatch will refresh from the database.
-     *
-     * @param userId the user ID
-     */
     public void invalidateSettingsCache(Long userId) {
         settingsCache.invalidate(userId);
         log.debug("Invalidated settings cache for user {}", userId);
     }
 
-    /**
-     * Get the count of active connections for a user.
-     *
-     * @param userId the user ID
-     * @return the number of active SSE connections
-     */
     public int getActiveConnectionCount(Long userId) {
         return connectionCount(userId);
     }
 
-    /**
-     * Submit a heartbeat for every connected emitter to the heartbeat worker pool.
-     */
     @Scheduled(fixedRate = HEARTBEAT_INTERVAL_MS)
     public void sweepSseHeartbeats() {
         sweepHeartbeatConnections();
     }
 
-    /**
-     * Cleanup zombie connections by probing all emitters.
-     */
     @Scheduled(fixedRate = CLEANUP_INTERVAL_MS)
     public void cleanupZombieConnections() {
         int removed = cleanupConnections();
@@ -266,13 +187,6 @@ public class SseService extends AbstractSseService<Long> {
         log.debug("Heartbeat failed for user {} device {}, removing emitter", userId, deviceId);
     }
 
-    /**
-     * Whether the user's settings admit an event of this type.
-     *
-     * <p>The switch carries no default arm, so a type added to {@link SseEventType} fails to compile
-     * here rather than inheriting delivery it was never granted. A value naming no type at all is
-     * not delivered: it can only be a client this node does not understand.</p>
-     */
     private boolean isEventAllowed(Long userId, String eventType) {
         SseEventType type = SseEventType.fromValue(eventType);
         if (type == null) {

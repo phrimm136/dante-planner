@@ -25,14 +25,8 @@ import org.danteplanner.backend.shared.exception.Problems;
 import org.danteplanner.backend.shared.util.ClientIpResolver;
 
 /**
- * Charges a request against the rate-limit policy its handler declares, before the handler runs.
- *
- * <p>Runs inside the DispatcherServlet and therefore after the security filter chain, so the
- * authenticated principal is available to policies keyed by user.</p>
- *
- * <p>A handler that declares nothing is denied rather than passed through. The architecture rule
- * makes that state unreachable in a build that ran the tests; this branch covers the deploy where
- * it did not, because a gate is worth only what its last run proved.</p>
+ * An interceptor runs inside the DispatcherServlet and therefore after the security filter chain,
+ * where the authenticated principal is available.
  */
 @Component
 @RequiredArgsConstructor
@@ -55,8 +49,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        // An SSE stream completing re-dispatches the same request through the same handler; the
-        // charge belongs to the request, and it already happened on the initial dispatch.
+        // An SSE stream completing re-dispatches the same request through the same handler.
         if (request.getDispatcherType() != DispatcherType.REQUEST) {
             return true;
         }
@@ -71,11 +64,6 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         return deny(handlerMethod, request, response);
     }
 
-    /**
-     * The declaration governing this handler, with a method-level one overriding its controller's.
-     *
-     * @return the governing {@link RateLimited}, or null when the handler is exempt or undeclared
-     */
     private RateLimited declarationOn(HandlerMethod handlerMethod) {
         RateLimited onMethod = handlerMethod.getMethodAnnotation(RateLimited.class);
         if (onMethod != null) {
@@ -91,10 +79,6 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         return handlerMethod.hasMethodAnnotation(RateLimitExempt.class);
     }
 
-    /**
-     * @return true when the request may proceed, false when the refusal was already rendered
-     * @throws RateLimitExceededException if the declaration asks for the refusal to be responded to
-     */
     private boolean charge(RateLimited declaration, HttpServletRequest request, HttpServletResponse response) {
         try {
             chargeBucket(declaration, request, response);
@@ -128,10 +112,6 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         }
     }
 
-    /**
-     * @throws IllegalStateException if the handler is reachable without authentication, which would
-     *                               otherwise charge every anonymous caller to one shared bucket
-     */
     private long authenticatedUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !(authentication.getPrincipal() instanceof Long userId)) {

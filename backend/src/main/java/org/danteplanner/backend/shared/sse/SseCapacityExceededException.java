@@ -8,13 +8,6 @@ import org.springframework.web.ErrorResponseException;
 
 import java.util.UUID;
 
-/**
- * Raised when a planner's SSE registry is full and the arriving subscriber cannot be admitted.
- *
- * <p>Extends {@link ErrorResponseException} rather than {@code DomainException} because the
- * subscription service raises it directly, and a {@code DomainException} constructed inside a
- * {@code ..service..} class is a rule stated outside a rule component.</p>
- */
 @Getter
 public class SseCapacityExceededException extends ErrorResponseException {
 

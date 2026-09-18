@@ -13,15 +13,8 @@ import org.springframework.data.redis.listener.adapter.RedisListenerExecutionFai
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Wires the SSE fan-out subscription against this pod's local Redis endpoint.
- *
- * <p>Registers {@link SseRedisSubscriber} on the {@code sse:user} channel of the
- * {@code sse-local} connection factory (the regional replica in a multi-region
- * deployment), so events published on the primary reach local emitters.</p>
- *
- * <p>The container tolerates an unreachable local Redis at startup: its initial
- * subscription bypasses the recovery backoff and would otherwise fail context load,
- * so a boot-time connection failure is logged rather than propagated.</p>
+ * A listener container's initial subscription bypasses the recovery backoff, so an unreachable
+ * local Redis at startup fails context load unless the failure is caught.
  */
 @Configuration
 @Slf4j

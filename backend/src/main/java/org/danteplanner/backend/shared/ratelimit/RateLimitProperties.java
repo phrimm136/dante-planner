@@ -6,13 +6,6 @@ import org.springframework.context.annotation.Configuration;
 import lombok.Getter;
 import lombok.Setter;
 
-/**
- * Token-bucket sizes bound from the {@code rate-limit} property prefix.
- *
- * <p>Each field is one bucket family. Which family a request consumes from is decided by
- * {@link RateLimitPolicy}; this class only carries the numbers, so a limit is retuned by editing
- * {@code application.properties} alone.</p>
- */
 @Configuration
 @ConfigurationProperties(prefix = "rate-limit")
 @Getter
@@ -28,10 +21,6 @@ public class RateLimitProperties {
     private BucketConfig moderation;
     private BucketConfig publicRead;
 
-    /**
-     * One bucket's shape: it holds {@code capacity} tokens and regains {@code refillTokens} of
-     * them every {@code refillDurationSeconds}.
-     */
     @Getter
     @Setter
     public static class BucketConfig {
