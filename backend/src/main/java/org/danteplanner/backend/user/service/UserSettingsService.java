@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service for user notification and preference settings.
- * Handles retrieval and updates with lazy creation of default settings.
  */
 @Service
 @RequiredArgsConstructor
@@ -33,13 +32,6 @@ public class UserSettingsService {
     private final UserSettingsRepository userSettingsRepository;
     private final UserRepository userRepository;
 
-    /**
-     * Get user settings with lazy creation.
-     * If no settings exist for the user, creates default settings.
-     *
-     * @param userId the user ID
-     * @return the user settings response
-     */
     @Transactional(readOnly = true)
     public UserSettingsResponse getSettings(Long userId) {
         return userSettingsRepository.findByUserId(userId)
@@ -52,14 +44,6 @@ public class UserSettingsService {
                         DEFAULT_NOTIFY_NEW_PUBLICATIONS));
     }
 
-    /**
-     * Update user settings with partial update semantics.
-     * Only non-null fields in the request will be updated.
-     *
-     * @param userId  the user ID
-     * @param request the update request with optional fields
-     * @return the updated user settings response
-     */
     @Transactional
     public UserSettingsResponse updateSettings(Long userId, UpdateUserSettingsRequest request) {
         UserSettings settings = getOrCreateEntity(userId);
@@ -80,13 +64,6 @@ public class UserSettingsService {
         }
     }
 
-    /**
-     * Get or create user settings entity.
-     * Creates default settings if none exist for the user.
-     *
-     * @param userId the user ID
-     * @return the existing or newly created settings entity
-     */
     @Transactional
     public UserSettings getOrCreateEntity(Long userId) {
         return userSettingsRepository.findByUserId(userId)

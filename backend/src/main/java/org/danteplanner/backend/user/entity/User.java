@@ -109,40 +109,20 @@ public class User {
         updatedAt = Instant.now();
     }
 
-    /**
-     * Check if this user account has been soft deleted.
-     */
     public boolean isDeleted() {
         return deletedAt != null;
     }
 
-    /**
-     * Soft delete this user account and schedule permanent deletion.
-     *
-     * @param scheduledDeleteAt when the account should be permanently deleted
-     */
     public void softDelete(Instant scheduledDeleteAt) {
         this.deletedAt = Instant.now();
         this.permanentDeleteScheduledAt = scheduledDeleteAt;
     }
 
-    /**
-     * Reactivate a soft-deleted account (during grace period).
-     */
     public void reactivate() {
         this.deletedAt = null;
         this.permanentDeleteScheduledAt = null;
     }
 
-    /**
-     * The restriction in force on this account at {@code clock}'s instant.
-     *
-     * <p>A live timeout is reported ahead of a ban, so {@link RestrictionState#BANNED} comes back
-     * only for an account that is not also serving one.</p>
-     *
-     * @param clock the clock a timeout's expiry is measured against
-     * @return the restriction in force
-     */
     public RestrictionState restrictionState(Clock clock) {
         if (timeoutUntil != null && clock.instant().isBefore(timeoutUntil)) {
             return RestrictionState.TIMED_OUT;
@@ -150,20 +130,10 @@ public class User {
         return bannedAt != null ? RestrictionState.BANNED : RestrictionState.ACTIVE;
     }
 
-    /**
-     * Check if this user is currently timed out.
-     *
-     * @return true if user has an active timeout, false otherwise
-     */
     public boolean isTimedOut() {
         return restrictionState(Clock.systemUTC()) == RestrictionState.TIMED_OUT;
     }
 
-    /**
-     * Check if this user is currently banned.
-     *
-     * @return true if user is banned, false otherwise
-     */
     public boolean isBanned() {
         return bannedAt != null;
     }

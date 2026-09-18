@@ -8,28 +8,11 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Generates unique usernames in the format: {Epithet}{Sinner}#{5-char suffix}.
- *
- * <p>Epithet selection uses time-decay weighted random:
- * <ul>
- *   <li>Newer epithets (0-30 days) get 3x weight</li>
- *   <li>Recent epithets (31-60 days) get 2x weight</li>
- *   <li>Old epithets (61+ days) get 1x weight</li>
- * </ul>
- *
- * <p>Suffix uses 31 safe alphanumeric characters (excludes ambiguous: 0, 1, O, I, L),
- * providing ~28.6 million unique combinations (31^5).
- */
 @Service
 @Slf4j
 public class RandomUsernameGenerator {
 
 
-    /**
-     * Safe alphanumeric characters for suffix generation.
-     * Excludes ambiguous characters: 0, 1, O, I, L (both cases).
-     */
     private static final String SAFE_CHARS = "23456789abcdefghjkmnpqrstuvwxyz";
 
     private static final int SUFFIX_LENGTH = 5;
@@ -42,28 +25,14 @@ public class RandomUsernameGenerator {
         this.secureRandom = new SecureRandom();
     }
 
-    /**
-     * Result of username generation containing epithet and suffix.
-     */
     public record UsernameComponents(String epithet, String suffix) {}
 
-    /**
-     * Generate a new username with weighted random epithet and unique suffix.
-     *
-     * @return username components (epithet and suffix)
-     */
     public UsernameComponents generate() {
         String epithet = selectWeightedEpithet();
         String suffix = generateSuffix();
         return new UsernameComponents(epithet, suffix);
     }
 
-    /**
-     * Select an epithet using time-decay weighted random selection.
-     * Epithets with higher weights appear more frequently in the selection pool.
-     *
-     * @return selected epithet
-     */
     String selectWeightedEpithet() {
         List<String> epithets = epithetProvider.getEpithets();
         List<String> weightedPool = new ArrayList<>();
@@ -84,11 +53,6 @@ public class RandomUsernameGenerator {
         return weightedPool.get(randomIndex);
     }
 
-    /**
-     * Generate a 5-character suffix from safe alphanumeric characters.
-     *
-     * @return 5-character lowercase suffix
-     */
     String generateSuffix() {
         StringBuilder suffix = new StringBuilder(SUFFIX_LENGTH);
         for (int i = 0; i < SUFFIX_LENGTH; i++) {

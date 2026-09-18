@@ -2,11 +2,6 @@ package org.danteplanner.backend.user.exception;
 
 import lombok.Getter;
 
-/**
- * Exception thrown when username generation fails after exhausting retry attempts.
- * This is a server-side error (not user's fault) indicating potential namespace exhaustion
- * or random generator issues.
- */
 @Getter
 public class UsernameGenerationException extends RuntimeException {
 

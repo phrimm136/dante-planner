@@ -13,9 +13,6 @@ import java.time.Instant;
 import java.util.List;
 
 /**
- * Scheduled job for permanently deleting users whose grace period has expired.
- * Runs daily at 3 AM by default (configurable via app.user.cleanup.cron).
- *
  * <p>Multi-pod safe: {@code @SchedulerLock} over the shared auth Redis lock store ensures
  * the job fires once across the fleet, not once per pod.</p>
  */
@@ -27,12 +24,6 @@ public class UserCleanupScheduler {
     private final UserRepository userRepository;
     private final UserAccountLifecycleService lifecycleService;
 
-    /**
-     * Find and permanently delete all users whose grace period has expired.
-     * Each user's votes are reassigned to the sentinel user before deletion
-     * to anonymize the voter. Upvote counts are denormalized counters, so they
-     * are unaffected by the reassignment.
-     */
     @Scheduled(cron = "${app.user.cleanup.cron:0 0 3 * * *}")
     @SchedulerLock(name = "cleanupExpiredUsers", lockAtMostFor = "PT10M", lockAtLeastFor = "PT30S")
     public void cleanupExpiredUsers() {
@@ -65,7 +56,6 @@ public class UserCleanupScheduler {
                     log.info("Skipped user {}: no longer eligible for deletion", userId);
                 }
             } catch (RuntimeException e) {
-                // One unusable row must not strand the rest of the batch until the next run.
                 failureCount++;
                 log.error("Failed to hard-delete user {}: {}", userId, e.getMessage(), e);
             }

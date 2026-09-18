@@ -33,9 +33,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
 
-/**
- * REST controller for user account management endpoints.
- */
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
@@ -68,26 +65,12 @@ public class UserController {
         this.gracePeriodDays = gracePeriodDays;
     }
 
-    /**
-     * Get all available username epithets.
-     * This is a public endpoint - no authentication required.
-     *
-     * @return list of all 27 epithet keywords
-     */
     @RateLimitExempt
     @GetMapping("/epithets")
     public ResponseEntity<EpithetListResponse> getEpithets() {
         return ResponseEntity.ok(new EpithetListResponse(epithetConfig.getEpithets()));
     }
 
-    /**
-     * Update the authenticated user's username epithet.
-     * Validates the epithet against allowed epithets.
-     *
-     * @param userId the authenticated user's ID
-     * @param request the update request containing the new epithet
-     * @return the updated user DTO
-     */
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "user-epithet-update")
     @PutMapping("/me/username-epithet")
     public ResponseEntity<UserResponse> updateUsernameEpithet(
@@ -98,18 +81,6 @@ public class UserController {
         return ResponseEntity.ok(userService.toResponse(updatedUser));
     }
 
-    /**
-     * Delete the authenticated user's account.
-     * This performs a soft-delete with a grace period for reactivation.
-     * The account will be permanently deleted after the grace period
-     * unless the user re-authenticates via OAuth.
-     * Also blacklists current tokens and clears auth cookies (same as logout).
-     *
-     * @param userId the authenticated user's ID
-     * @param request HTTP request to extract tokens from cookies
-     * @param response HTTP response to clear cookies
-     * @return Response with deletion details and scheduled permanent delete date
-     */
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "user-delete")
     @DeleteMapping("/me")
     public ResponseEntity<UserDeletionResponse> deleteMyAccount(
@@ -118,7 +89,6 @@ public class UserController {
             HttpServletResponse response) {
         Instant permanentDeleteAt = lifecycleService.deleteAccount(userId);
 
-        // Blacklist tokens and clear cookies (same as logout)
         String accessToken = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)
                 .orElse(null);
         String refreshToken = cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)
@@ -134,13 +104,6 @@ public class UserController {
         ));
     }
 
-    /**
-     * Get the authenticated user's settings.
-     * Creates default settings if none exist (lazy creation).
-     *
-     * @param userId the authenticated user's ID
-     * @return the user settings
-     */
     @RateLimitExempt
     @GetMapping("/settings")
     public ResponseEntity<UserSettingsResponse> getSettings(@AuthenticationPrincipal Long userId) {
@@ -148,15 +111,6 @@ public class UserController {
         return ResponseEntity.ok(settings);
     }
 
-    /**
-     * Update the authenticated user's settings.
-     * Supports partial updates - only non-null fields are updated.
-     * Invalidates SSE settings cache for immediate effect.
-     *
-     * @param userId the authenticated user's ID
-     * @param request the update request with optional fields
-     * @return the updated user settings
-     */
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "user-settings-update")
     @PutMapping("/settings")
     public ResponseEntity<UserSettingsResponse> updateSettings(

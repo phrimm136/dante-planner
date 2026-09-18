@@ -13,12 +13,6 @@ public class UserSessionService {
 
     private final AuthenticationService authenticationService;
 
-    /**
-     * Revoke the session the request arrived on.
-     *
-     * @param accessToken  the request's access token, or {@code null}
-     * @param refreshToken the request's refresh token, or {@code null}
-     */
     public void logout(String accessToken, String refreshToken) {
         authenticationService.logout(accessToken, refreshToken);
     }

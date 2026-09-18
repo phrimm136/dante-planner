@@ -57,12 +57,8 @@ public class UserSettings {
     private boolean notifyNewPublications = false;
 
     /**
-     * Records the user's answer to the sync prompt.
-     *
      * <p>Sync can only be on once it has been chosen, an invariant the
      * {@code ck_user_settings_sync_choice} check constraint also enforces.</p>
-     *
-     * @param enabled whether cloud sync is enabled
      */
     public void chooseSync(boolean enabled) {
         this.syncEnabled = enabled;

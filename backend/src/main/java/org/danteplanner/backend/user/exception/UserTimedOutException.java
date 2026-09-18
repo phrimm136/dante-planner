@@ -6,9 +6,6 @@ import org.danteplanner.backend.shared.exception.ErrorKind;
 
 import java.time.Instant;
 
-/**
- * Exception thrown when a timed-out user attempts a write operation.
- */
 @Getter
 public class UserTimedOutException extends DomainException {
 

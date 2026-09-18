@@ -3,7 +3,6 @@ package org.danteplanner.backend.user.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
-import org.danteplanner.backend.shared.exception.InvalidRequestException;
 import org.danteplanner.backend.user.dto.UserResponse;
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.user.entity.User;
@@ -28,8 +27,6 @@ import java.util.Optional;
 
 /**
  * Service for user account operations.
- * Handles OAuth-based user lookup and creation, unique username generation,
- * profile retrieval, and epithet updates.
  */
 @Service
 @RequiredArgsConstructor
@@ -37,14 +34,8 @@ import java.util.Optional;
 public class UserService {
 
 
-    /**
-     * Maximum retry attempts for username generation.
-     * With 28.6M possible suffixes (31^5), collisions are statistically improbable,
-     * but we cap retries to prevent infinite loops in edge cases.
-     */
     private static final int MAX_USERNAME_RETRIES = 100;
 
-    /** The unique key on {@code users.username_suffix}, as the schema names it. */
     private static final String USERNAME_SUFFIX_CONSTRAINT = "uk_users_username_suffix";
 
     private final UserRepository userRepository;
@@ -80,17 +71,6 @@ public class UserService {
         return user;
     }
 
-    /**
-     * Create a new user with a unique username, retrying on suffix collision.
-     * With 28.6M possible suffixes (31^5), collisions are extremely rare.
-     *
-     * <p>Only a suffix collision is retried. Any other integrity violation — a lost create race on
-     * the provider id above all — propagates, because no new suffix can satisfy the constraint that
-     * rejected the insert.</p>
-     *
-     * @throws UsernameGenerationException  if unable to generate unique username after max retries
-     * @throws DataIntegrityViolationException if any other constraint rejects the insert
-     */
     private User createUserWithUniqueUsername(AuthProviderType provider, Map<String, String> userInfo) {
         for (int attempt = 1; attempt <= MAX_USERNAME_RETRIES; attempt++) {
             UsernameComponents username = usernameGenerator.generate();
@@ -120,12 +100,9 @@ public class UserService {
     }
 
     /**
-     * Whether an integrity violation is the username-suffix constraint rather than another key.
-     *
      * <p>Spring hands every constraint on the table back as the same exception type, so the key has
      * to be read off the {@link ConstraintViolationException} Hibernate wraps the driver's failure
-     * in. A violation reaching here under any other shape names no key, and is not a collision this
-     * method claims.</p>
+     * in.</p>
      */
     static boolean isUsernameSuffixCollision(DataIntegrityViolationException e) {
         for (Throwable cause = e.getCause(); cause != null; cause = cause.getCause()) {
@@ -172,79 +149,54 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
 
-    /** Resolves an id to an account, deleted ones included; empty when none carries the id. */
     @Transactional(readOnly = true)
     public Optional<User> findOptionalById(Long id) {
         return userRepository.findById(id);
     }
 
-    /** Whether an account row carries the given id, deleted or not. */
     @Transactional(readOnly = true)
     public boolean existsById(Long id) {
         return userRepository.existsById(id);
     }
 
-    /** Finds a non-deleted account by id; empty when it is missing or deleted. */
     @Transactional(readOnly = true)
     public Optional<User> findActiveById(Long userId) {
         return userRepository.findByIdAndDeletedAtIsNull(userId);
     }
 
-    /** Finds the non-deleted account an OAuth identity resolves to. */
     @Transactional(readOnly = true)
     public Optional<User> findActiveByProvider(AuthProviderType providerType, String providerId) {
         return userRepository.findByProviderAndProviderIdAndDeletedAtIsNull(providerType, providerId);
     }
 
-    /**
-     * Finds the account an OAuth identity resolves to, soft-deleted ones included, so a returning
-     * user can be offered reactivation rather than a second account.
-     */
     @Transactional(readOnly = true)
     public Optional<User> findByProvider(AuthProviderType providerType, String providerId) {
         return userRepository.findByProviderAndProviderId(providerType, providerId);
     }
 
-    /** Finds the non-deleted account behind a username suffix, the handle the API exposes. */
     @Transactional(readOnly = true)
     public Optional<User> findActiveBySuffix(String usernameSuffix) {
         return userRepository.findByUsernameSuffixAndDeletedAtIsNull(usernameSuffix);
     }
 
-    /**
-     * Lists the accounts a moderator may act on: every active one except the sentinel that owns
-     * anonymized content, which is not a person and cannot be restricted.
-     */
     @Transactional(readOnly = true)
     public List<User> listActiveAccounts() {
         return userRepository.findByDeletedAtIsNullAndIdNot(UserAccountLifecycleService.SENTINEL_USER_ID);
     }
 
-    /** Lists the accounts whose timeout has not yet expired. */
     @Transactional(readOnly = true)
     public List<User> listTimedOutAccounts() {
         return userRepository.findByTimeoutUntilAfterAndDeletedAtIsNull(Instant.now());
     }
 
-    /**
-     * Resolves a batch of ids in one query. Deleted accounts are included: an audit trail still
-     * has to name the actor who left it.
-     */
     @Transactional(readOnly = true)
     public List<User> findAllByIds(Collection<Long> ids) {
         return userRepository.findAllById(ids);
     }
 
     /**
-     * Read an active account under a write lock, so a rank check and the write it guards cannot be
-     * interleaved by a concurrent role change.
-     *
      * <p>The lock lives only as long as the transaction that took it, which is the caller's:
      * MANDATORY rejects a call made outside one rather than handing back an unguarded row.</p>
-     *
-     * @param userId the account id
-     * @return the locked active account
-     * @throws UserNotFoundException if no active account carries the id
      */
     @Transactional(propagation = Propagation.MANDATORY)
     public User lockActiveById(Long userId) {
@@ -252,22 +204,11 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException(userId));
     }
 
-    /** Counts the accounts holding a role, deleted ones included. */
     @Transactional(readOnly = true)
     public long countByRole(UserRole role) {
         return userRepository.countByRole(role);
     }
 
-    /**
-     * Update a user's username epithet.
-     * Validates the epithet against the allowed epithets before updating.
-     *
-     * @param userId  the user ID
-     * @param epithet the new epithet (must be a valid epithet)
-     * @return the updated user
-     * @throws InvalidRequestException if epithet is not valid
-     * @throws UserNotFoundException    if user not found
-     */
     @Transactional
     public User updateUsernameEpithet(Long userId, String epithet) {
         epithetValidator.requireValidEpithet(epithet);

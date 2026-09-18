@@ -22,26 +22,11 @@ import java.util.UUID;
 
 /**
  * Service responsible for user account lifecycle operations.
- *
- * <p>Handles:
- * <ul>
- *   <li>Soft-delete: Mark account as deleted with grace period</li>
- *   <li>Reactivation: Restore soft-deleted account during grace period</li>
- *   <li>Hard-delete: Permanently remove user and reassign votes</li>
- * </ul>
- *
- * <p>Separated from {@link UserService} to follow Single Responsibility Principle.
  */
 @Service
 @Slf4j
 public class UserAccountLifecycleService {
 
-    /**
-     * Sentinel user that inherits a deleted user's votes and comments to anonymize them.
-     * Upvote counts are denormalized counter columns, independent of vote rows, so
-     * reassignment does not change them.
-     * This user is created in the migration V009__add_user_soft_delete.sql.
-     */
     public static final Long SENTINEL_USER_ID = 0L;
 
     private final UserRepository userRepository;
@@ -69,30 +54,18 @@ public class UserAccountLifecycleService {
         this.gracePeriodDays = gracePeriodDays;
     }
 
-    /**
-     * Soft-delete a user account with a scheduled permanent deletion date.
-     * The account is immediately blocked from authentication, but data is preserved
-     * for the grace period to allow reactivation via re-login.
-     *
-     * @param userId the user ID
-     * @return the scheduled permanent delete date
-     * @throws UserNotFoundException if user not found
-     */
     @Transactional
     public Instant deleteAccount(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         if (user.isDeleted()) {
-            // Idempotent: return existing scheduled date
             return user.getPermanentDeleteScheduledAt();
         }
 
         Instant scheduledDeleteAt = Instant.now().plus(Duration.ofDays(gracePeriodDays));
         user.softDelete(scheduledDeleteAt);
 
-        // Withdrawn from the public listing, not unpublished: reactivation within the grace
-        // period restores the same set without the owner republishing.
         plannerCatalogService.hideAllOwnedBy(userId);
 
         // Immediately revoke existing tokens via the in-memory invalidation check.
@@ -104,41 +77,19 @@ public class UserAccountLifecycleService {
         return scheduledDeleteAt;
     }
 
-    /**
-     * Reactivate a soft-deleted user account during the grace period.
-     * Called when a deleted user re-authenticates via OAuth.
-     *
-     * @param userId the user ID
-     * @throws UserNotFoundException if user not found
-     */
     @Transactional
     public void reactivateAccount(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         if (!user.isDeleted()) {
-            return; // Already active, idempotent no-op
+            return;
         }
 
         user.reactivate();
         plannerCatalogService.restoreAllOwnedBy(userId);
     }
 
-    /**
-     * Permanently delete a user and reassign their votes, comments, and moderation actions to
-     * the sentinel user. This anonymizes the author while preserving comment content. Upvote
-     * counts are denormalized counters, independent of vote rows, so they are unaffected.
-     * Planner satellite/projection/filter rows are swept app-side; the user-row
-     * CASCADE removes the planner cores and FK-bearing children.
-     *
-     * <p>Eligibility is re-read under a row lock rather than trusted from the caller: the
-     * candidate list is built outside this transaction and may be served by a replica, so an
-     * account reactivated in between is still listed. A no-longer-eligible account is skipped.</p>
-     *
-     * @param userId the account to permanently delete
-     * @param cutoff the instant the grace period must have expired before
-     * @return true if the account was deleted, false if it was no longer eligible
-     */
     @Transactional
     public boolean performHardDelete(Long userId, Instant cutoff) {
         Optional<User> purgeable = userRepository.findWithLockPurgeable(userId, cutoff);
@@ -147,10 +98,6 @@ public class UserAccountLifecycleService {
         }
         User user = purgeable.get();
 
-        // Auth is token-only, so a surviving cookie would outlive the row it names. Guarded
-        // here rather than inside the service: logout-everywhere depends on this write failing
-        // loudly, while a purge blocked on an unreachable Redis would strand every candidate
-        // past its retention deadline.
         try {
             tokenBlacklistService.invalidateUserTokens(userId);
         } catch (DataAccessException e) {
