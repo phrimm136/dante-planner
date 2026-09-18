@@ -10,15 +10,6 @@ import org.danteplanner.backend.moderation.util.ModerationConstants;
 import org.danteplanner.backend.shared.sanitize.Sanitized;
 import org.danteplanner.backend.shared.sanitize.SanitizerKind;
 
-/**
- * Request DTO for timing out a user.
- *
- * <p>Duration is validated to be between 1 minute and 30 days (43200 minutes).
- * This prevents both instant timeouts and excessively long ones.</p>
- *
- * @param durationMinutes duration of the timeout in minutes (1-43200)
- * @param reason          reason for the timeout (required for audit trail, 1-500 characters)
- */
 public record TimeoutRequest(
     @NotNull(message = "Duration is required")
     @Min(value = 1, message = "Duration must be at least 1 minute")

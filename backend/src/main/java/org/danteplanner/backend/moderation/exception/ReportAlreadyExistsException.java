@@ -7,10 +7,6 @@ import lombok.Getter;
 
 import java.util.UUID;
 
-/**
- * Exception thrown when a user attempts to report a planner they've already reported.
- * Reports are immutable - users can only report once per planner.
- */
 @Getter
 public class ReportAlreadyExistsException extends DomainException {
 

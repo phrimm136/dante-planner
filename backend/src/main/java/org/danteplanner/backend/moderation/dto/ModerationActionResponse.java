@@ -5,10 +5,6 @@ import java.time.Instant;
 import lombok.Builder;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
 
-/**
- * DTO for moderation action with actor information.
- * Includes actor username (no internal IDs exposed).
- */
 @Builder
 public record ModerationActionResponse(
     String actionType,
@@ -21,14 +17,6 @@ public record ModerationActionResponse(
     String actorUsernameSuffix
 ) {
 
-    /**
-     * Convert entity to DTO with actor information.
-     *
-     * @param action the moderation action entity
-     * @param actorEpithet the actor's username epithet
-     * @param actorSuffix the actor's username suffix
-     * @return the DTO
-     */
     public static ModerationActionResponse fromEntity(ModerationAction action, String actorEpithet, String actorSuffix) {
         return ModerationActionResponse.builder()
                 .actionType(action.getActionType().name())

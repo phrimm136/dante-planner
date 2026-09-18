@@ -7,9 +7,6 @@ import org.danteplanner.backend.moderation.util.ModerationConstants;
 import org.danteplanner.backend.shared.sanitize.Sanitized;
 import org.danteplanner.backend.shared.sanitize.SanitizerKind;
 
-/**
- * Request DTO for hiding a planner from recommended list.
- */
 public record HidePlannerRequest(
     @NotBlank(message = "Reason is required")
     @Size(max = ModerationConstants.ACTION_REASON_MAX_LENGTH,

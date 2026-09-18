@@ -5,10 +5,6 @@ import org.danteplanner.backend.shared.exception.ErrorKind;
 
 import lombok.Getter;
 
-/**
- * Exception thrown when a user attempts to report a comment they've already reported.
- * Reports are immutable - users can only report once per comment.
- */
 @Getter
 public class CommentReportAlreadyExistsException extends DomainException {
 

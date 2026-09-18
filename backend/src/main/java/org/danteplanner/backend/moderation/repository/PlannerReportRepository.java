@@ -11,30 +11,11 @@ import org.springframework.util.Assert;
 import java.util.Collection;
 import java.util.UUID;
 
-/**
- * Repository for planner report operations.
- * Reports are immutable - create-only, no updates.
- */
 @Repository
 public interface PlannerReportRepository extends JpaRepository<PlannerReport, Long> {
 
-    /**
-     * Check if a user has already reported a planner.
-     * Used to prevent duplicate reports.
-     *
-     * @param userId    the user ID
-     * @param plannerId the planner ID
-     * @return true if report already exists
-     */
     boolean existsByUserIdAndPlannerId(Long userId, UUID plannerId);
 
-    /**
-     * Count total reports for a planner.
-     * Used for moderation dashboard.
-     *
-     * @param plannerId the planner ID
-     * @return report count
-     */
     long countByPlannerId(UUID plannerId);
 
     /**
@@ -45,13 +26,6 @@ public interface PlannerReportRepository extends JpaRepository<PlannerReport, Lo
     @Query("DELETE FROM PlannerReport r WHERE r.plannerId IN :plannerIds")
     void deleteAllByPlannerIds(@Param("plannerIds") Collection<UUID> plannerIds);
 
-    /**
-     * Persists a report that does not exist yet.
-     *
-     * @param report the report to insert, carrying no id
-     * @return the persisted report, carrying its generated id
-     * @throws IllegalArgumentException if the report already carries an id
-     */
     default PlannerReport insert(PlannerReport report) {
         Assert.isNull(report.getId(), "insert() takes new rows only");
         return save(report);

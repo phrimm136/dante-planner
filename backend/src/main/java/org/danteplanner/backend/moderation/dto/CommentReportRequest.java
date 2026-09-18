@@ -7,10 +7,6 @@ import org.danteplanner.backend.moderation.util.ModerationConstants;
 import org.danteplanner.backend.shared.sanitize.Sanitized;
 import org.danteplanner.backend.shared.sanitize.SanitizerKind;
 
-/**
- * Request DTO for reporting a comment.
- * Valid reasons: SPAM, HARASSMENT, OFF_TOPIC, OTHER
- */
 public record CommentReportRequest(
     @NotBlank(message = "Report reason is required")
     @Size(min = ModerationConstants.REPORT_REASON_MIN_LENGTH,

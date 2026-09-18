@@ -17,10 +17,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 
-/**
- * Entity representing a moderation action (ban, timeout, role change).
- * Provides immutable audit trail for all moderation decisions.
- */
 @Entity
 @Table(name = "moderation_actions",
        indexes = {
@@ -66,9 +62,6 @@ public class ModerationAction {
         createdAt = Instant.now();
     }
 
-    /**
-     * Types of moderation actions that can be performed.
-     */
     public enum ActionType {
         BAN,
         UNBAN,
@@ -83,9 +76,6 @@ public class ModerationAction {
         UNHIDE_FROM_RECOMMENDED
     }
 
-    /**
-     * Types of targets for moderation actions.
-     */
     public enum TargetType {
         USER,
         PLANNER,

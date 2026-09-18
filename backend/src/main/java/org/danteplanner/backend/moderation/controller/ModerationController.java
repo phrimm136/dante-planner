@@ -33,12 +33,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * REST controller for moderation operations.
- *
- * <p>All endpoints require MODERATOR or higher role (enforced by SecurityConfig).
- * Provides timeout and content moderation capabilities.</p>
- */
 @RestController
 @RequestMapping("/api/moderation")
 @RequiredArgsConstructor
@@ -51,17 +45,6 @@ public class ModerationController {
     private final CommentModerationService commentModerationService;
     private final ModerationQueryService moderationQueryService;
 
-    /**
-     * Timeout a user for a specified duration.
-     *
-     * <p>Timed-out users cannot create, edit, or publish planners.
-     * Administrators cannot be timed out.</p>
-     *
-     * @param actorId  the moderator/admin user ID (from token)
-     * @param usernameSuffix the username suffix of the user to timeout
-     * @param request  the timeout request containing duration
-     * @return the timeout information
-     */
     @PostMapping("/user/{usernameSuffix}/timeout")
     public ResponseEntity<TimeoutResponse> timeoutUser(
             @AuthenticationPrincipal Long actorId,
@@ -75,16 +58,6 @@ public class ModerationController {
         return ResponseEntity.ok(TimeoutResponse.fromUser(user, "User timed out successfully"));
     }
 
-    /**
-     * Remove timeout from a user.
-     *
-     * <p>Allows the user to resume normal operations immediately.</p>
-     *
-     * @param actorId  the moderator/admin user ID (from token)
-     * @param usernameSuffix the username suffix of the user to remove timeout from
-     * @param request  reason for clearing timeout (required for audit trail)
-     * @return the updated timeout information
-     */
     @PostMapping("/user/{usernameSuffix}/clear-timeout")
     public ResponseEntity<TimeoutResponse> removeTimeout(
             @AuthenticationPrincipal Long actorId,
@@ -97,16 +70,6 @@ public class ModerationController {
         return ResponseEntity.ok(TimeoutResponse.fromUser(user, "Timeout removed successfully"));
     }
 
-    /**
-     * Unpublish a planner.
-     *
-     * <p>Sets the planner's published status to false. The owner
-     * can republish it later if they wish.</p>
-     *
-     * @param actorId   the moderator/admin user ID (from token)
-     * @param plannerId the planner to unpublish
-     * @return success message with planner status
-     */
     @PutMapping("/planner/{plannerId}/unpublish")
     public ResponseEntity<UnpublishPlannerResponse> unpublishPlanner(
             @AuthenticationPrincipal Long actorId,
@@ -119,17 +82,6 @@ public class ModerationController {
                 planner.getId(), planner.isPublished(), "Planner unpublished successfully"));
     }
 
-    /**
-     * Ban a user permanently.
-     *
-     * <p>Banned users cannot create, edit, publish planners, or submit comments.
-     * Only admins can ban users. Administrators cannot be banned.</p>
-     *
-     * @param actorId  the admin user ID (from token)
-     * @param usernameSuffix the username suffix of the user to ban
-     * @param request  the ban request containing optional reason
-     * @return success message
-     */
     @PostMapping("/user/{usernameSuffix}/ban")
     public ResponseEntity<BanStatusResponse> banUser(
             @AuthenticationPrincipal Long actorId,
@@ -142,16 +94,6 @@ public class ModerationController {
         return ResponseEntity.ok(new BanStatusResponse(user.isBanned(), "User banned successfully"));
     }
 
-    /**
-     * Unban a user.
-     *
-     * <p>Removes permanent ban, allowing the user to resume normal operations.</p>
-     *
-     * @param actorId  the admin user ID (from token)
-     * @param usernameSuffix the username suffix of the user to unban
-     * @param request  reason for unbanning (required for audit trail)
-     * @return success message
-     */
     @PostMapping("/user/{usernameSuffix}/unban")
     public ResponseEntity<BanStatusResponse> unbanUser(
             @AuthenticationPrincipal Long actorId,
@@ -164,13 +106,6 @@ public class ModerationController {
         return ResponseEntity.ok(new BanStatusResponse(user.isBanned(), "User unbanned successfully"));
     }
 
-    /**
-     * Get all users for moderation dashboard.
-     *
-     * <p>Returns paginated list of all users with their restriction status.</p>
-     *
-     * @return list of users
-     */
     @RateLimitExempt
     @GetMapping("/users")
     public ResponseEntity<List<ModeratedUserResponse>> getAllUsers() {
@@ -180,14 +115,6 @@ public class ModerationController {
         return ResponseEntity.ok(responses);
     }
 
-    /**
-     * Get all currently timed-out users.
-     *
-     * <p>Returns a list of users with active timeouts.
-     * Useful for moderation dashboards.</p>
-     *
-     * @return list of timed-out users
-     */
     @RateLimitExempt
     @GetMapping("/users/timed-out")
     public ResponseEntity<List<TimeoutResponse>> getTimedOutUsers() {
@@ -198,13 +125,6 @@ public class ModerationController {
         return ResponseEntity.ok(responses);
     }
 
-    /**
-     * Get moderation action history.
-     *
-     * <p>Returns recent moderation actions for audit trail.</p>
-     *
-     * @return list of moderation actions
-     */
     @RateLimitExempt
     @GetMapping("/actions")
     public ResponseEntity<List<ModerationActionResponse>> getModerationActions() {
@@ -212,17 +132,6 @@ public class ModerationController {
         return ResponseEntity.ok(actions);
     }
 
-    /**
-     * Take down a planner (moderator deletion).
-     *
-     * <p>Removes planner from public view but allows owner to sync their local copy.
-     * Planner cannot be re-published once taken down.</p>
-     *
-     * @param actorId   the moderator/admin user ID (from token)
-     * @param plannerId the planner to take down
-     * @param request   reason for takedown (required for audit trail)
-     * @return success message
-     */
     @PostMapping("/planner/{plannerId}/takedown")
     public ResponseEntity<PlannerActionResponse> takedownPlanner(
             @AuthenticationPrincipal Long actorId,
@@ -236,17 +145,6 @@ public class ModerationController {
                 new PlannerActionResponse(plannerId, "Planner taken down successfully"));
     }
 
-    /**
-     * Delete a comment as a moderator.
-     *
-     * <p>Soft-deletes the comment, preserving thread structure.
-     * Content is cleared but placeholder remains.</p>
-     *
-     * @param actorId   the moderator/admin user ID (from token)
-     * @param commentPublicId the comment public ID (UUID) to delete
-     * @param request   reason for deletion (required for audit trail)
-     * @return 204 No Content on success
-     */
     @PostMapping("/comments/{commentPublicId}/delete")
     public ResponseEntity<Void> deleteComment(
             @AuthenticationPrincipal Long actorId,

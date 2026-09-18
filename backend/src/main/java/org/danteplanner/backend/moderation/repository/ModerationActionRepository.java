@@ -16,52 +16,26 @@ import java.util.Optional;
 public interface ModerationActionRepository extends JpaRepository<ModerationAction, Long> {
 
     /**
-     * Read the newest audit records, newest first, bounded by the requested page.
-     *
      * <p>Ties on {@code createdAt} break by insertion order so the page is stable across reads
      * rather than left to the storage engine.</p>
-     *
-     * @param pageable the page to read
-     * @return the requested page of records, newest first
      */
     @Query("SELECT a FROM ModerationAction a ORDER BY a.createdAt DESC, a.id ASC")
     List<ModerationAction> findRecent(Pageable pageable);
 
-    /**
-     * Find the most recent moderation action of a specific type for a target.
-     * Used to retrieve ban/timeout reasons for display to users.
-     *
-     * @param targetUuid the target's public UUID
-     * @param actionType the type of action to find
-     * @return the most recent action if found
-     */
     Optional<ModerationAction> findFirstByTargetUuidAndActionTypeOrderByCreatedAtDesc(
             String targetUuid,
             ModerationAction.ActionType actionType
     );
 
     /**
-     * Reassign the actor of every recorded action to the sentinel account.
-     *
      * <p>The actor foreign key is {@code ON DELETE RESTRICT}, so an account that ever moderated
      * cannot be removed while it owns rows here. The rows themselves are the audit record and
      * outlive the account.</p>
-     *
-     * @param userId     the departing account
-     * @param sentinelId the account that inherits the actions
-     * @return the number of actions reassigned
      */
     @Modifying
     @Query("UPDATE ModerationAction a SET a.actorId = :sentinelId WHERE a.actorId = :userId")
     int reassignActorToSentinel(@Param("userId") Long userId, @Param("sentinelId") Long sentinelId);
 
-    /**
-     * Persists an audit record that does not exist yet.
-     *
-     * @param action the record to insert, carrying no id
-     * @return the persisted record, carrying its generated id
-     * @throws IllegalArgumentException if the record already carries an id
-     */
     default ModerationAction insert(ModerationAction action) {
         Assert.isNull(action.getId(), "insert() takes new rows only");
         return save(action);

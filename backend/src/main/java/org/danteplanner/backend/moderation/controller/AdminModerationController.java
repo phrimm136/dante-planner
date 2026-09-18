@@ -18,9 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.UUID;
 
 /**
- * REST controller for moderation operations.
- *
- * <p>Manages planner visibility in the recommended list. The {@code /api/moderation/**} matcher in
+ * <p>The {@code /api/moderation/**} matcher in
  * {@code SecurityConfig} requires MODERATOR, and the role hierarchy admits ADMIN through it.</p>
  */
 @RestController
@@ -31,17 +29,6 @@ public class AdminModerationController {
 
     private final PlannerModerationService plannerModerationService;
 
-    /**
-     * Hide a planner from the recommended list.
-     *
-     * <p>Moderator/Admin endpoint. Hidden planners remain accessible via direct link
-     * but are removed from public recommended queries. Vote counts are preserved.</p>
-     *
-     * @param moderatorId the authenticated moderator/admin user ID
-     * @param plannerId   the planner ID to hide
-     * @param request     the hide request containing reason
-     * @return moderation response with updated status
-     */
     @RateLimitExempt
     @PostMapping("/{id}/hide-from-recommended")
     public ResponseEntity<ModerationResponse> hideFromRecommended(
@@ -55,16 +42,6 @@ public class AdminModerationController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Unhide a planner, restoring it to the recommended list.
-     *
-     * <p>Moderator/Admin endpoint. Removes the hidden flag, making the planner
-     * appear in recommended queries again if it meets the vote threshold.</p>
-     *
-     * @param moderatorId the authenticated moderator/admin user ID
-     * @param plannerId   the planner ID to unhide
-     * @return moderation response with updated status
-     */
     @RateLimitExempt
     @PostMapping("/{id}/unhide-from-recommended")
     public ResponseEntity<ModerationResponse> unhideFromRecommended(

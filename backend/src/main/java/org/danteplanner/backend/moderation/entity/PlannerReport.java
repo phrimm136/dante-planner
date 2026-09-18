@@ -15,11 +15,6 @@ import lombok.NoArgsConstructor;
 import java.time.Instant;
 import java.util.UUID;
 
-/**
- * Entity representing a user's report on a planner.
- * Reports are immutable once created - no business methods needed.
- * One report per user per planner (enforced at database level).
- */
 @Entity
 @Table(name = "planner_reports",
        uniqueConstraints = {

@@ -6,9 +6,6 @@ import org.danteplanner.backend.moderation.dto.CommentReportRequest;
 import org.danteplanner.backend.moderation.dto.CommentReportResponse;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.moderation.entity.PlannerCommentReport;
-import org.danteplanner.backend.comment.exception.CommentForbiddenException;
-import org.danteplanner.backend.comment.exception.CommentNotFoundException;
-import org.danteplanner.backend.moderation.exception.CommentReportAlreadyExistsException;
 import org.danteplanner.backend.moderation.repository.PlannerCommentReportRepository;
 import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator;
 import org.danteplanner.backend.comment.service.CommentQueryService;
@@ -21,7 +18,6 @@ import java.util.UUID;
 
 /**
  * Service for managing comment reports.
- * Reports are immutable - create-only, no updates or deletes.
  */
 @Service
 @RequiredArgsConstructor
@@ -34,23 +30,10 @@ public class CommentReportService {
     private final CommentStateValidator commentStateValidator;
     private final ReportUniquenessValidator reportUniquenessValidator;
 
-    /**
-     * Create a report for a comment.
-     * One-time action - throws exception if already reported.
-     *
-     * @param commentPublicId the comment public UUID being reported
-     * @param userId          the user ID submitting the report
-     * @param request         the report request with reason
-     * @return the report timestamp
-     * @throws CommentNotFoundException            if comment not found
-     * @throws CommentForbiddenException           if comment is deleted
-     * @throws CommentReportAlreadyExistsException if user has already reported this comment
-     */
     @Transactional
     public CommentReportResponse createReport(UUID commentPublicId, Long userId, CommentReportRequest request) {
         accessGuard.checkNotBanned(userId);
 
-        // Verify comment exists
         PlannerComment comment = commentQueryService.requireByPublicId(commentPublicId);
 
         Long internalId = comment.getId();
@@ -66,13 +49,6 @@ public class CommentReportService {
         return new CommentReportResponse(saved.getCreatedAt());
     }
 
-    /**
-     * Check if a user has already reported a comment.
-     *
-     * @param userId    the user ID
-     * @param commentId the comment ID
-     * @return true if already reported, false otherwise
-     */
     @Transactional(readOnly = true)
     public boolean hasReported(Long userId, Long commentId) {
         return reportRepository.existsByReporterIdAndCommentId(userId, commentId);

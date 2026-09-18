@@ -14,11 +14,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 
-/**
- * Entity representing a user's report on a comment.
- * Reports are immutable once created - no business methods needed.
- * One report per user per comment (enforced at database level).
- */
 @Entity
 @Table(name = "planner_comment_reports",
        uniqueConstraints = {

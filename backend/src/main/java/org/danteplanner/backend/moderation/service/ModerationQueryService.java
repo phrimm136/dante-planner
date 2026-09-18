@@ -22,41 +22,21 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ModerationQueryService {
 
-    /** Newest audit records returned to the dashboard. */
     private static final int RECENT_ACTION_LIMIT = 100;
 
     private final UserService userService;
     private final ModerationActionRepository moderationActionRepository;
 
-    /**
-     * Get all users for moderation dashboard.
-     * Excludes soft-deleted users and the sentinel account that owns anonymized content.
-     *
-     * @return list of all active users
-     */
     @Transactional(readOnly = true)
     public List<User> getAllUsers() {
         return userService.listActiveAccounts();
     }
 
-    /**
-     * Get all moderation actions for audit trail.
-     * Returns the most recent actions, newest first.
-     *
-     * @return list of moderation actions
-     */
     @Transactional(readOnly = true)
     public List<ModerationAction> getModerationActions() {
         return moderationActionRepository.findRecent(PageRequest.ofSize(RECENT_ACTION_LIMIT));
     }
 
-    /**
-     * Get moderation actions with actor information for API response.
-     * Batch-fetches all actors to avoid N+1 queries, and exposes actor usernames rather than
-     * internal IDs.
-     *
-     * @return list of moderation action DTOs with actor information
-     */
     @Transactional(readOnly = true)
     public List<ModerationActionResponse> getModerationActionsWithActors() {
         List<ModerationAction> actions = getModerationActions();
@@ -79,12 +59,6 @@ public class ModerationQueryService {
                 .toList();
     }
 
-    /**
-     * Get all currently timed-out users.
-     * Uses the V014 partial index on timeout_until for efficient lookup.
-     *
-     * @return list of users with active timeouts
-     */
     @Transactional(readOnly = true)
     public List<User> getTimedOutUsers() {
         return userService.listTimedOutAccounts();
