@@ -35,12 +35,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * REST controller for comment operations.
- *
- * <p>Provides CRUD operations for planner comments and upvote toggling.
- * Comments on published planners are publicly readable, but writing requires authentication.</p>
- */
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -51,17 +45,6 @@ public class CommentController {
     private final CommentCommandService commentCommandService;
     private final CommentEngagementService commentEngagementService;
 
-    /**
-     * Get all comments for a planner.
-     *
-     * <p>Returns a flat list of comments ordered by creation time.
-     * Frontend builds tree structure from parentCommentId.
-     * Includes deleted comments to preserve thread structure.</p>
-     *
-     * @param userId    the current user ID (null if unauthenticated)
-     * @param plannerId the planner ID
-     * @return list of comments with vote status
-     */
     @RateLimitExempt
     @GetMapping("/planner/{plannerId}/comments")
     public ResponseEntity<List<CommentTreeNode>> getComments(
@@ -72,20 +55,6 @@ public class CommentController {
         return ResponseEntity.ok(comments);
     }
 
-    /**
-     * Create a new comment on a planner.
-     *
-     * <p>Supports both top-level comments and threaded replies. Nesting stops at
-     * {@link org.danteplanner.backend.shared.util.CommentConstants#MAX_DEPTH}, where a reply
-     * becomes a sibling instead of a child.
-     * Rate limited to prevent spam.</p>
-     *
-     * @param userId    the authenticated user ID
-     * @param deviceId  the device identifier (for SSE broadcast exclusion)
-     * @param plannerId the planner ID
-     * @param request   the comment content and optional parent ID
-     * @return the created comment id and timestamp
-     */
     @PostMapping("/planner/{plannerId}/comments")
     public ResponseEntity<CreateCommentResponse> createComment(
             @AuthenticationPrincipal Long userId,
@@ -97,20 +66,6 @@ public class CommentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    /**
-     * Create a reply to an existing comment.
-     *
-     * <p>Creates a threaded reply under the specified parent comment. Nesting stops at
-     * {@link org.danteplanner.backend.shared.util.CommentConstants#MAX_DEPTH}, where a reply
-     * becomes a sibling instead of a child.
-     * Rate limited to prevent spam.</p>
-     *
-     * @param userId          the authenticated user ID
-     * @param deviceId        the device identifier (for SSE broadcast exclusion)
-     * @param parentCommentId the parent comment's public UUID
-     * @param request         the reply content
-     * @return the created reply id and timestamp
-     */
     @PostMapping("/comments/{parentCommentId}/replies")
     public ResponseEntity<CreateCommentResponse> createReply(
             @AuthenticationPrincipal Long userId,
@@ -122,17 +77,6 @@ public class CommentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    /**
-     * Edit a comment.
-     *
-     * <p>Only the comment author can edit. Sets editedAt timestamp.
-     * Rate limited to prevent spam.</p>
-     *
-     * @param userId    the authenticated user ID (must be author)
-     * @param commentId the comment ID
-     * @param request   the new content
-     * @return the edit timestamp
-     */
     @PutMapping("/comments/{commentId}")
     public ResponseEntity<UpdateCommentResponse> updateComment(
             @AuthenticationPrincipal Long userId,
@@ -143,16 +87,6 @@ public class CommentController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Delete a comment (soft-delete).
-     *
-     * <p>Only the comment author can delete their own comment.
-     * Content is cleared but comment structure is preserved for thread integrity.</p>
-     *
-     * @param userId    the authenticated user ID (must be author)
-     * @param commentId the comment ID
-     * @return 204 No Content on success
-     */
     @DeleteMapping("/comments/{commentId}")
     public ResponseEntity<Void> deleteComment(
             @AuthenticationPrincipal Long userId,
@@ -162,17 +96,6 @@ public class CommentController {
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * Toggle upvote on a comment.
-     *
-     * <p>Clicking upvote on an already-upvoted comment removes the vote.
-     * Uses atomic counter operations to prevent race conditions.
-     * Rate limited to prevent vote manipulation.</p>
-     *
-     * @param userId    the authenticated user ID
-     * @param commentId the comment ID
-     * @return updated vote count and user's vote status
-     */
     @PostMapping("/comments/{commentId}/upvote")
     public ResponseEntity<CommentVoteResponse> toggleUpvote(
             @AuthenticationPrincipal Long userId,
@@ -182,17 +105,6 @@ public class CommentController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Submit a report for a comment.
-     *
-     * <p>Requires authentication. One report per user per comment: a repeat report is
-     * 409 Conflict. Reporting a deleted comment is 403 Forbidden.</p>
-     *
-     * @param userId    the authenticated user ID
-     * @param commentId the comment public UUID
-     * @param request   the report request with reason
-     * @return the report timestamp
-     */
     @RateLimited(RateLimitPolicy.REPORT)
     @PostMapping("/comments/{commentId}/report")
     public ResponseEntity<CommentReportResponse> reportComment(
@@ -204,17 +116,6 @@ public class CommentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    /**
-     * Toggle notification setting for a comment.
-     *
-     * <p>Only the comment author can toggle their notification setting.
-     * When disabled, the author will not receive notifications for replies to this comment.</p>
-     *
-     * @param userId    the authenticated user ID (must be author)
-     * @param commentId the comment public UUID
-     * @param request   the toggle request with enabled flag
-     * @return the toggle result
-     */
     @PatchMapping("/comments/{commentId}/notifications")
     public ResponseEntity<ToggleNotificationResponse> toggleNotification(
             @AuthenticationPrincipal Long userId,

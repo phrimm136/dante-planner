@@ -12,21 +12,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Repository for planner comment operations.
- * Includes atomic counter operations for upvote tracking.
- */
 @Repository
 public interface PlannerCommentRepository extends JpaRepository<PlannerComment, Long> {
 
-    /**
-     * Find all comments for a planner (flat list for frontend tree building).
-     * Includes deleted comments to preserve thread structure.
-     * Ordered by createdAt ASC for chronological display.
-     *
-     * @param plannerId the planner ID
-     * @return list of all comments for the planner
-     */
     @Query("""
         SELECT c FROM PlannerComment c
         WHERE c.plannerId = :plannerId
@@ -34,68 +22,22 @@ public interface PlannerCommentRepository extends JpaRepository<PlannerComment, 
         """)
     List<PlannerComment> findByPlannerId(@Param("plannerId") UUID plannerId);
 
-    /**
-     * Atomically increment the upvote count for a comment.
-     * Uses UPDATE query to prevent race conditions from concurrent votes.
-     *
-     * @param commentId the comment ID
-     * @return number of rows updated (1 if successful, 0 if comment not found)
-     */
     @Modifying(clearAutomatically = true)
     @Query("UPDATE PlannerComment c SET c.upvoteCount = c.upvoteCount + 1 WHERE c.id = :commentId")
     int incrementUpvoteCount(@Param("commentId") Long commentId);
 
-    /**
-     * Atomically decrement the upvote count for a comment.
-     * Uses WHERE clause to prevent negative values.
-     *
-     * @param commentId the comment ID
-     * @return number of rows updated (1 if successful, 0 if comment not found or upvoteCount already 0)
-     */
     @Modifying(clearAutomatically = true)
     @Query("UPDATE PlannerComment c SET c.upvoteCount = c.upvoteCount - 1 WHERE c.id = :commentId AND c.upvoteCount > 0")
     int decrementUpvoteCount(@Param("commentId") Long commentId);
 
-    /**
-     * Reassign a user's comments to the sentinel user and clear their text.
-     *
-     * <p>The row survives so replies keep their parent; the content does not. {@code content} is
-     * NOT NULL, so it is emptied rather than nulled, matching {@link
-     * org.danteplanner.backend.comment.entity.PlannerComment#softDelete()}.</p>
-     *
-     * @param userId     the user ID whose comments should be anonymized
-     * @param sentinelId the sentinel user ID to reassign comments to
-     * @return the number of comments anonymized
-     */
     @Modifying
     @Query("UPDATE PlannerComment c SET c.userId = :sentinelId, c.content = '' WHERE c.userId = :userId")
     int anonymizeCommentsToSentinel(@Param("userId") Long userId, @Param("sentinelId") Long sentinelId);
 
-    /**
-     * Count non-deleted comments for a planner.
-     * Used for displaying comment count in planner detail header.
-     *
-     * @param plannerId the planner ID
-     * @return count of non-deleted comments
-     */
     long countByPlannerIdAndDeletedAtIsNull(UUID plannerId);
 
-    /**
-     * Find a comment by its public UUID.
-     * Used for resolving frontend UUIDs to internal entities.
-     *
-     * @param publicId the public UUID
-     * @return the comment if found
-     */
     Optional<PlannerComment> findByPublicId(UUID publicId);
 
-    /**
-     * Persists a comment that does not exist yet.
-     *
-     * @param comment the comment to insert, carrying no id
-     * @return the persisted comment, carrying its generated id
-     * @throws IllegalArgumentException if the comment already carries an id
-     */
     default PlannerComment insert(PlannerComment comment) {
         Assert.isNull(comment.getId(), "insert() takes new rows only");
         return save(comment);

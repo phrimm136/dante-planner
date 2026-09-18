@@ -20,10 +20,6 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Announces a reply: the parent author's notification when they are owed one, and the thread push
- * every reader of the planner gets.
- */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -50,8 +46,6 @@ public class ReplyReceivedEffect implements DomainEffect {
         }
 
         PlannerComment reply = found.get();
-        // A withdrawal replaces the content with a placeholder and the lookup is unfiltered, so
-        // announcing here would deliver the placeholder as though it were what the author wrote.
         if (reply.isDeleted()) {
             log.info("Reply {} was withdrawn before it was announced", replyId);
             return;

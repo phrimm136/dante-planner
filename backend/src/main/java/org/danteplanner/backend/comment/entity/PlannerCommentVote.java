@@ -18,10 +18,6 @@ import org.springframework.util.Assert;
 import java.time.Instant;
 
 /**
- * Entity representing a user's vote on a comment.
- * Uses composite key (commentId, userId) to ensure one vote per user per comment.
- *
- * Implements Persistable to handle composite key persistence correctly.
  * JPA's save() uses merge() for entities with composite keys where IDs are set,
  * which doesn't insert new entities properly without this interface.
  */
@@ -38,15 +34,6 @@ public class PlannerCommentVote implements Persistable<PlannerCommentVoteId> {
     @Column(name = "comment_id", nullable = false)
     private Long commentId;
 
-    /**
-     * User ID who cast the vote.
-     * IMMUTABILITY EXCEPTION: This field is normally immutable, but can be updated
-     * via {@link org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository#reassignUserVotes}
-     * during user hard-delete to anonymize the voter. The comment's upvote count is a
-     * denormalized counter, independent of these rows, so the displayed count is
-     * unaffected by reassignment.
-     * Never modify directly outside of reassignment operations.
-     */
     @Id
     @Column(name = "user_id", nullable = false)
     private Long userId;
@@ -61,10 +48,6 @@ public class PlannerCommentVote implements Persistable<PlannerCommentVoteId> {
     @Transient
     private boolean isNew = true;
 
-    /**
-     * No-arg constructor for JPA.
-     * Sets voteType to null - should only be used by JPA for entity loading.
-     */
     public PlannerCommentVote() {
         this.voteType = null;
     }
@@ -72,7 +55,7 @@ public class PlannerCommentVote implements Persistable<PlannerCommentVoteId> {
     public PlannerCommentVote(Long commentId, Long userId, CommentVoteType voteType) {
         this.commentId = commentId;
         this.userId = userId;
-        this.voteType = voteType; // final field assignment
+        this.voteType = voteType;
         this.isNew = true;
     }
 
@@ -95,12 +78,10 @@ public class PlannerCommentVote implements Persistable<PlannerCommentVoteId> {
     @PostLoad
     protected void markNotNew() {
         this.isNew = false;
-        // Validate entity integrity after loading from database
         Assert.notNull(this.voteType,
                 () -> "Comment vote loaded with null voteType - data corruption detected for vote: " + getId());
     }
 
-    // Getters only - votes are immutable
 
     public Long getCommentId() {
         return commentId;

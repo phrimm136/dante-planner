@@ -3,10 +3,6 @@ package org.danteplanner.backend.comment.entity;
 import java.io.Serializable;
 import java.util.Objects;
 
-/**
- * Composite primary key for PlannerCommentVote entity.
- * Combines commentId and userId to ensure one vote per user per comment.
- */
 public class PlannerCommentVoteId implements Serializable {
 
     private static final long serialVersionUID = 1L;

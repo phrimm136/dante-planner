@@ -16,11 +16,6 @@ import org.danteplanner.backend.shared.util.CommentConstants;
 import java.time.Instant;
 import java.util.UUID;
 
-/**
- * Entity representing a comment on a planner.
- * Supports threaded replies with parent-child relationship and depth tracking.
- * Uses soft-delete pattern for comment deletion.
- */
 @Entity
 @Table(name = "planner_comments",
        indexes = {
@@ -86,33 +81,21 @@ public class PlannerComment {
         createdAt = Instant.now();
     }
 
-    // Soft delete helpers
 
-    /**
-     * Check if this comment has been soft deleted.
-     */
     public boolean isDeleted() {
         return deletedAt != null;
     }
 
-    /**
-     * Soft delete this comment.
-     * Sets deletedAt timestamp and clears content for privacy.
-     */
     public void softDelete() {
         this.deletedAt = Instant.now();
         this.content = CommentConstants.DELETED_CONTENT;
     }
 
-    /**
-     * Edit the comment content and track edit time.
-     */
     public void edit(String newContent) {
         this.content = newContent;
         this.editedAt = Instant.now();
     }
 
-    // Getters and Setters
 
     public Long getId() {
         return id;

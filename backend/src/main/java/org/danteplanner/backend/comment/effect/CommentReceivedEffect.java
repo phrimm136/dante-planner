@@ -19,13 +19,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-/**
- * Announces a top-level comment: the owner's notification when they are owed one, and the thread
- * push every reader of the planner gets.
- *
- * <p>The thread push is unconditional, including for a comment the planner's owner wrote
- * themselves — it is what keeps an open thread current, not a notification.</p>
- */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -52,8 +45,6 @@ public class CommentReceivedEffect implements DomainEffect {
         }
 
         PlannerComment comment = found.get();
-        // A withdrawal replaces the content with a placeholder and the lookup is unfiltered, so
-        // announcing here would deliver the placeholder as though it were what the author wrote.
         if (comment.isDeleted()) {
             log.info("Comment {} was withdrawn before it was announced", commentId);
             return;

@@ -5,11 +5,6 @@ import org.danteplanner.backend.shared.entity.ValuedEnum;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-/**
- * Vote type enum for comment voting system.
- * Currently UP only (upvote-only to reduce echo chamber effect).
- * Enum allows future expansion (HELPFUL, INSIGHTFUL, etc.).
- */
 public enum CommentVoteType implements ValuedEnum {
     UP("UP");
 

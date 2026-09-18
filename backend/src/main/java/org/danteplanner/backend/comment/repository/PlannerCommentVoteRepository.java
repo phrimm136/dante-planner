@@ -11,31 +11,11 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Repository for comment vote operations.
- * Uses composite key (commentId, userId) via PlannerCommentVoteId.
- */
 @Repository
 public interface PlannerCommentVoteRepository extends JpaRepository<PlannerCommentVote, PlannerCommentVoteId> {
 
-    /**
-     * Find a vote by comment ID and user ID.
-     * Votes are immutable (no soft-delete), so this returns the vote if it exists.
-     *
-     * @param commentId the comment ID
-     * @param userId    the user ID
-     * @return the vote if exists
-     */
     Optional<PlannerCommentVote> findByCommentIdAndUserId(Long commentId, Long userId);
 
-    /**
-     * Find which comments from a list the user has upvoted.
-     * Used for batch fetching vote status to prevent N+1 queries.
-     *
-     * @param commentIds list of comment IDs to check
-     * @param userId     the user ID
-     * @return list of comment IDs that the user has upvoted
-     */
     @Query("""
         SELECT v.commentId FROM PlannerCommentVote v
         WHERE v.commentId IN :commentIds AND v.userId = :userId
@@ -46,17 +26,8 @@ public interface PlannerCommentVoteRepository extends JpaRepository<PlannerComme
     );
 
     /**
-     * Delete the user's comment votes that collide with the sentinel user's existing votes.
-     * A collision occurs when both the user and the sentinel voted on the same comment;
-     * reassigning such a vote would violate the composite PRIMARY KEY (comment_id, user_id).
-     * Must run before {@link #reassignUserVotes} during hard-delete.
-     *
-     * <p>Native self-join DELETE: MySQL forbids a subquery on the delete target table
-     * (error 1093), which a JPQL {@code DELETE ... WHERE commentId IN (SELECT ...)} would emit.
-     *
-     * @param userId     the user ID whose colliding votes should be removed
-     * @param sentinelId the sentinel user ID to compare against
-     * @return the number of votes deleted
+     * MySQL forbids a subquery on the delete target table (error 1093), which a JPQL
+     * {@code DELETE ... WHERE commentId IN (SELECT ...)} would emit.
      */
     @Modifying(clearAutomatically = true)
     @Query(value = "DELETE v FROM planner_comment_votes v "
@@ -65,31 +36,13 @@ public interface PlannerCommentVoteRepository extends JpaRepository<PlannerComme
             nativeQuery = true)
     int deleteVotesCollidingWithSentinel(@Param("userId") Long userId, @Param("sentinelId") Long sentinelId);
 
-    /**
-     * Reassign all comment votes from a user to the sentinel user.
-     * Used during hard-delete to anonymize the voter while keeping the vote rows.
-     * The comment's upvote count is a denormalized counter, independent of these rows,
-     * so the displayed count is unaffected.
-     *
-     * <p>Callers must first invoke {@link #deleteVotesCollidingWithSentinel} to remove
-     * votes that would duplicate an existing sentinel vote on the same comment.
-     *
-     * @param userId     the user ID whose votes should be reassigned
-     * @param sentinelId the sentinel user ID to reassign votes to
-     * @return the number of votes reassigned
-     */
     @Modifying
     @Query("UPDATE PlannerCommentVote v SET v.userId = :sentinelId WHERE v.userId = :userId")
     int reassignUserVotes(@Param("userId") Long userId, @Param("sentinelId") Long sentinelId);
 
     /**
-     * Persists a vote that does not exist yet.
-     *
-     * <p>The key is the (comment, user) pair the caller supplies, so no id-null guard can tell a
-     * new row from an existing one: passing a row that already exists overwrites it.</p>
-     *
-     * @param vote the vote to insert
-     * @return the persisted vote
+     * The key is the (comment, user) pair the caller supplies, so no id-null guard can tell a new
+     * row from an existing one: passing a row that already exists overwrites it.
      */
     default PlannerCommentVote insert(PlannerCommentVote vote) {
         return save(vote);

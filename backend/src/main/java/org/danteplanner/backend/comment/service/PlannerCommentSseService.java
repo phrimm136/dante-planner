@@ -20,19 +20,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * SSE service for planner comment notifications.
- *
- * <p>Unlike {@link org.danteplanner.backend.shared.sse.SseService} which is user-centric, this service is planner-centric.
- * Any device (authenticated or guest) can subscribe to a planner's comment feed
- * and receive notifications when new comments are posted.</p>
- *
- * <p>Key differences from SseService:
- * <ul>
- *   <li>Keyed by plannerId instead of userId</li>
- *   <li>No authentication required (guests can subscribe)</li>
- *   <li>No settings filtering (all subscribers receive all events)</li>
- *   <li>Author's device is excluded when broadcasting</li>
- * </ul>
- * </p>
  */
 @Service
 @Slf4j
@@ -41,7 +28,7 @@ public class PlannerCommentSseService extends AbstractSseService<UUID> {
     private static final long HEARTBEAT_INTERVAL_MS = SseConstants.COMMENT_STREAM_HEARTBEAT_INTERVAL_MS;
     private static final long HEARTBEAT_INITIAL_DELAY_MS = 5_000L;
     private static final long CLEANUP_INITIAL_DELAY_MS = 30_000L;
-    private static final int MAX_CONNECTIONS_PER_PLANNER = 500; // Prevent DoS
+    private static final int MAX_CONNECTIONS_PER_PLANNER = 500;
 
     private final ObjectMapper objectMapper;
     private final PlannerAccessGuard plannerAccessGuard;
@@ -55,18 +42,6 @@ public class PlannerCommentSseService extends AbstractSseService<UUID> {
         this.plannerAccessGuard = plannerAccessGuard;
     }
 
-    /**
-     * Subscribe a device to receive comment notifications for a planner.
-     *
-     * @param plannerId the planner ID to subscribe to
-     * @param deviceId  the device identifier (from cookie)
-     * @param userId    the authenticated account, or null for a guest
-     * @return the SSE emitter for the connection
-     * @throws org.danteplanner.backend.planner.exception.PlannerNotFoundException
-     *         if no published planner carries the id
-     * @throws SseCapacityExceededException if the planner already holds its maximum connections
-     * @throws IOException if the initial connected event cannot be written
-     */
     public SseEmitter subscribe(UUID plannerId, UUID deviceId, Long userId) throws IOException {
         plannerAccessGuard.checkPublished(plannerId);
         SseEmitter emitter = register(plannerId, deviceId, userId);
@@ -74,17 +49,6 @@ public class PlannerCommentSseService extends AbstractSseService<UUID> {
         return emitter;
     }
 
-    /**
-     * Send a serialized event to the given subscribers of a planner, skipping every connection of an optional account
-     * and removing emitters that fail on send.
-     *
-     * @param plannerId       the planner ID whose subscribers receive the event
-     * @param subscribers     the subscriber list to send to
-     * @param eventName       the SSE event name
-     * @param jsonData        the serialized event payload
-     * @param excludeUserId the account to skip, or {@code null} to send to all
-     * @return the number of subscribers the event was sent to
-     */
     private int sendToSubscribers(UUID plannerId, CopyOnWriteArrayList<EmitterEntry> subscribers,
                                   String eventName, String jsonData, Long excludeUserId) {
         int sent = 0;
@@ -105,17 +69,6 @@ public class PlannerCommentSseService extends AbstractSseService<UUID> {
         return sent;
     }
 
-    /**
-     * Broadcast a payload-carrying comment event to every subscriber of a planner.
-     *
-     * <p>Serializes {@code payload} and sends it under the given event name; dead emitters
-     * are removed on send failure. Used by the cross-node fan-out subscriber.</p>
-     *
-     * @param plannerId the planner ID whose subscribers receive the event
-     * @param eventType the SSE event name
-     * @param payload   the event payload
-     * @param excludeUserId the account whose action raised the event, or null
-     */
     public void broadcast(UUID plannerId, String eventType, Object payload, Long excludeUserId) {
         var subscribers = emitters.get(plannerId);
         if (subscribers == null || subscribers.isEmpty()) {
@@ -134,39 +87,21 @@ public class PlannerCommentSseService extends AbstractSseService<UUID> {
         sendToSubscribers(plannerId, subscribers, eventType, jsonData, excludeUserId);
     }
 
-    /**
-     * Get the count of active subscribers for a planner.
-     *
-     * @param plannerId the planner ID
-     * @return the number of active SSE connections
-     */
     public int getSubscriberCount(UUID plannerId) {
         return connectionCount(plannerId);
     }
 
-    /**
-     * Get total connection count across all planners (for monitoring).
-     *
-     * @return total number of active connections
-     */
     public int getTotalConnectionCount() {
         return emitters.values().stream()
                 .mapToInt(CopyOnWriteArrayList::size)
                 .sum();
     }
 
-    /**
-     * Submit a heartbeat for every connected emitter to the heartbeat worker pool.
-     * Uses different fixedRate to avoid collision with SseService heartbeats.
-     */
     @Scheduled(fixedRate = HEARTBEAT_INTERVAL_MS, initialDelay = HEARTBEAT_INITIAL_DELAY_MS)
     public void sweepSseHeartbeats() {
         sweepHeartbeatConnections();
     }
 
-    /**
-     * Cleanup zombie connections by probing all emitters.
-     */
     @Scheduled(fixedRate = CLEANUP_INTERVAL_MS, initialDelay = CLEANUP_INITIAL_DELAY_MS)
     public void cleanupZombieConnections() {
         int removed = cleanupConnections();
