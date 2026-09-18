@@ -5,47 +5,20 @@ import type { EgoSkillType } from '../types/EGOTypes'
 import type { EGOId } from '@/shared/gameData'
 
 interface EGOHeaderI18nProps {
-  /** EGO ID to look up name */
   id: EGOId
 }
 
 interface EGOHeaderWithI18nProps {
-  /** EGO ID for i18n lookup */
   id: EGOId
-  /** EGO rank (ZAYIN, TETH, HE, WAW, ALEPH) */
   rank: EgoType
-  /** Selected skill type, driving the CG variant */
   skillType: EgoSkillType
 }
 
-/**
- * Header with i18n name - suspends for language change.
- * Wraps EGOHeader with i18n data fetching.
- * MUST be wrapped in Suspense boundary.
- *
- * @example
- * <Suspense fallback={<EGOHeader egoId={id} name="" rank={rank} skillType={skillType} />}>
- *   <EGOHeaderWithI18n id={id} rank={rank} skillType={skillType} />
- * </Suspense>
- */
 export function EGOHeaderWithI18n({ id, rank, skillType }: EGOHeaderWithI18nProps) {
   const i18n = useEGODetailI18n(id)
   return <EGOHeader egoId={id} name={i18n.name} rank={rank} skillType={skillType} />
 }
 
-/**
- * Suspending component that fetches EGO name from detail i18n.
- * Uses useSuspenseQuery internally - MUST be wrapped in Suspense boundary.
- *
- * Returns just the name string - caller handles styling.
- * This allows granular loading: header layout stays visible while only
- * the name text shows skeleton during language change.
- *
- * @example
- * <Suspense fallback={<Skeleton className="h-8 w-48" />}>
- *   <EGOHeaderI18n id={ego.id} />
- * </Suspense>
- */
 export function EGOHeaderI18n({ id }: EGOHeaderI18nProps) {
   const i18n = useEGODetailI18n(id)
 

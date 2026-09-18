@@ -1,14 +1,3 @@
-/**
- * RecipeSection - Displays EGO Gift fusion recipes
- *
- * Shows ingredient cards joined with "+" separator using game-style numeric font.
- * Handles two recipe types:
- * - Standard: Fixed ingredient combinations (materials array)
- * - Mixed (Lunar Memory): Pick N from pool A + M from pool B
- *
- * Multiple recipes are displayed vertically.
- */
-
 import { Suspense } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
@@ -34,9 +23,6 @@ interface RecipeSectionProps {
   recipe: EGOGiftRecipe
 }
 
-/**
- * Single ingredient card with link and name
- */
 function IngredientCard({ gift }: { gift: EGOGiftEntity }) {
   return (
     <Link to="/ego-gift/$id" params={{ id: gift.id }} className="block">
@@ -54,9 +40,6 @@ function IngredientCard({ gift }: { gift: EGOGiftEntity }) {
   )
 }
 
-/**
- * Plus separator using game-style numeric font
- */
 function PlusSeparator() {
   return (
     <span className="text-3xl font-bold text-muted-foreground self-center text-center mx-1 -translate-y-2.5">
@@ -65,9 +48,6 @@ function PlusSeparator() {
   )
 }
 
-/**
- * Displays a single standard recipe row (ingredient + ingredient + ...)
- */
 function StandardRecipeRow({
   ingredients,
   specMap,
@@ -94,10 +74,6 @@ function StandardRecipeRow({
   )
 }
 
-/**
- * Displays mixed recipe (Lunar Memory special case)
- * Shows: "Select N of M" for pool A + all cards from pool B (when count === total)
- */
 function MixedRecipeDisplay({
   recipe,
   specMap,
@@ -107,13 +83,11 @@ function MixedRecipeDisplay({
 }) {
   const { t } = useTranslation()
 
-  // Only show label when count !== total (selection required)
   const showPoolALabel = recipe.a.count !== recipe.a.ids.length
   const showPoolBLabel = recipe.b.count !== recipe.b.ids.length
 
   return (
     <div className="space-y-4">
-      {/* Pool A */}
       <div className="space-y-2">
         {showPoolALabel && (
           <p className={SECTION_STYLES.TEXT.caption}>
@@ -132,12 +106,10 @@ function MixedRecipeDisplay({
         </div>
       </div>
 
-      {/* Plus between pools */}
       <div className="flex translate-x-9 translate-y-2">
         <PlusSeparator />
       </div>
 
-      {/* Pool B */}
       <div className="space-y-2">
         {showPoolBLabel && (
           <p className={SECTION_STYLES.TEXT.caption}>
@@ -159,9 +131,6 @@ function MixedRecipeDisplay({
   )
 }
 
-/**
- * Recipe content - fetches spec data for ingredient lookup
- */
 function RecipeSectionContent({ recipe }: RecipeSectionProps) {
   const specMap = useEGOGiftListSpec()
 
@@ -173,7 +142,6 @@ function RecipeSectionContent({ recipe }: RecipeSectionProps) {
     )
   }
 
-  // Standard recipe - may have multiple alternatives
   const standardRecipe = recipe as StandardRecipe
 
   return (
@@ -185,9 +153,6 @@ function RecipeSectionContent({ recipe }: RecipeSectionProps) {
   )
 }
 
-/**
- * RecipeSection - Main export with Suspense boundary
- */
 export function RecipeSection({ recipe }: RecipeSectionProps) {
   return (
     <Suspense fallback={<Skeleton className="h-40 w-full" />}>

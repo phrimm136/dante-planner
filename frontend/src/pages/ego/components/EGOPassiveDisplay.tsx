@@ -5,11 +5,6 @@ interface EGOPassiveDisplayProps {
   passives: EGOPassiveI18n[]
 }
 
-/**
- * EGOPassiveDisplay - Displays EGO passive abilities
- *
- * Shows all passives from the array without category labels or support passive section
- */
 export function EGOPassiveDisplay({ passives }: EGOPassiveDisplayProps) {
   if (!passives || passives.length === 0) {
     return null

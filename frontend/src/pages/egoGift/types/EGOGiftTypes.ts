@@ -19,13 +19,6 @@ export type EGOGiftSpec = z.infer<typeof EGOGiftSpecSchema>
 export type EGOGiftData = z.infer<typeof EGOGiftDataSchema>
 export type EGOGiftI18n = z.infer<typeof EGOGiftI18nSchema>
 
-/**
- * EGO Gift entity for list/grid views.
- *
- * Assembled in list components from already-validated spec + name list — not a
- * direct boundary shape, so it stays a plain TS type. Components should prefer
- * EGOGiftName for granular Suspense boundaries.
- */
 export type EGOGiftEntity = Entity<EGOGiftId, EGOGiftSpec>
 
 export type EGOGiftNameList = z.infer<typeof EGOGiftNameListSchema>

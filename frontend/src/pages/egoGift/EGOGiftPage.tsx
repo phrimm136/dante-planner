@@ -24,7 +24,6 @@ import { EGOGiftList } from '@/pages/egoGift'
 import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
 import { EGO_GIFT_GEOMETRY } from '@/shared/cardLayout'
 
-/** The Yes/No icon filter both boolean gift facets render. */
 function BooleanFilter({
   selected,
   onSelectionChange,
@@ -42,9 +41,6 @@ function BooleanFilter({
   )
 }
 
-/**
- * Card grid section.
- */
 function EGOGiftCardGrid({
   spec,
   store,
@@ -52,7 +48,6 @@ function EGOGiftCardGrid({
   spec: z.infer<typeof EGOGiftSpecListSchema>
   store: FilterStore<EGOGiftFacetState>
 }) {
-  // Build EGOGiftEntity array from spec directly
   const gifts: EGOGiftEntity[] = Object.entries(spec).map(([id, entry]) =>
     toEGOGiftEntity(id, entry),
   )
@@ -60,15 +55,10 @@ function EGOGiftCardGrid({
   return <EGOGiftList gifts={gifts} store={store} />
 }
 
-/**
- * Shell component - uses spec data only (no language dependency)
- * Does not suspend on language change since spec query key has no language.
- */
 function EGOGiftPageShell() {
   const { t } = useTranslation(['database', 'common'])
   const spec = useEGOGiftListSpec()
 
-  // Filter states
   const {
     values: filters,
     setters,
@@ -78,10 +68,8 @@ function EGOGiftPageShell() {
     store,
   } = useFilterStore(egoGiftFilterStore)
 
-  // Calculate active filter count for mobile badge
   const activeFilterCount = calculateActiveFilterCount(...Object.values(filters))
 
-  // Primary filters (always visible on mobile): Keyword and Difficulty
   const PRIMARY_FILTERS = [
     filterSection({
       key: 'selectedKeywords',
@@ -101,7 +89,6 @@ function EGOGiftPageShell() {
     }),
   ]
 
-  // Secondary filters (shown when mobile expanded): Tier, Theme Pack, Attribute Type
   const SECONDARY_FILTERS = [
     filterSection({
       key: 'selectedTiers',
@@ -175,14 +162,6 @@ function EGOGiftPageShell() {
   )
 }
 
-/**
- * EGOGiftPage - EGO Gift browser with responsive filter sidebar
- *
- * Granular loading architecture:
- * - Outer Suspense: ListPageSkeleton for spec loading (initial)
- * - Theme pack dropdown: Own Suspense for dropdown i18n
- * - EGOGiftList: name lookups suspend at the card name, not the grid
- */
 export default function EGOGiftPage() {
   return (
     <EntityListPage skeleton={<ListPageSkeleton geometry={EGO_GIFT_GEOMETRY} />}>

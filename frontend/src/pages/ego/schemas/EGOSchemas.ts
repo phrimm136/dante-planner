@@ -9,14 +9,6 @@ import {
 
 export { EgoTypeSchema }
 
-/**
- * EGO Schemas
- *
- * Zod schemas for runtime validation of EGO data structures.
- * These schemas mirror the TypeScript interfaces in types/EGOTypes.ts.
- */
-
-// Skill data entry schema - all fields optional for flexibility
 export const EGOSkillDataEntrySchema = z.object({
   attributeType: z.string().optional(),
   atkType: z.string().optional(),
@@ -28,7 +20,6 @@ export const EGOSkillDataEntrySchema = z.object({
   coinString: z.string().optional(),
 })
 
-// Skill data tuple - 4 or 5 entries (per-EGO threadspin levels)
 export const EGOSkillDataTupleSchema = z.union([
   z.tuple([
     EGOSkillDataEntrySchema,
@@ -45,20 +36,16 @@ export const EGOSkillDataTupleSchema = z.union([
   ]),
 ])
 
-// Skill entry schema
 export const EGOSkillEntrySchema = z.object({
   id: SkillIdSchema,
   skillData: EGOSkillDataTupleSchema,
 })
 
-// Skills data schema
 export const EGOSkillsDataSchema = z.object({
   awaken: z.array(EGOSkillEntrySchema),
   erosion: z.array(EGOSkillEntrySchema),
 })
 
-// Passive list tuple - 4 or 5 entries (per-EGO threadspin levels)
-// Each element is an array of passive IDs active at that level
 export const EGOPassiveListTupleSchema = z.union([
   z.tuple([
     z.array(PassiveIdSchema),
@@ -75,12 +62,10 @@ export const EGOPassiveListTupleSchema = z.union([
   ]),
 ])
 
-// Passives data schema
 export const EGOPassivesDataSchema = z.object({
   passiveList: EGOPassiveListTupleSchema,
 })
 
-// Main EGO detail data schema
 export const EGODataSchema = z.object({
   updatedDate: z.number(),
   egoType: EgoTypeSchema,
@@ -93,14 +78,8 @@ export const EGODataSchema = z.object({
   maxThreadspin: z.union([z.literal(4), z.literal(5)]),
 })
 
-/**
- * EGO i18n schemas
- */
-
-// Skill description entry — inherits the shared base shape
 export const EGOSkillDescEntrySchema = SkillDescEntrySchema
 
-// Skill i18n schema
 // `flavor` is forward-compat for when raw EGO data starts shipping it.
 export const EGOSkillI18nSchema = z.object({
   name: z.string(),
@@ -108,28 +87,20 @@ export const EGOSkillI18nSchema = z.object({
   descs: z.array(EGOSkillDescEntrySchema),
 })
 
-// Passive i18n schema
 export const EGOPassiveI18nSchema = z.object({
   name: z.string(),
   desc: z.string(),
   flavor: z.string().optional(),
 })
 
-// Main EGO i18n schema
 export const EGOI18nSchema = z.object({
   name: z.string(),
   skills: z.record(z.string(), EGOSkillI18nSchema),
   passives: z.record(z.string(), EGOPassiveI18nSchema),
 })
 
-/**
- * EGO list schemas (for list views)
- */
-
-// Attack type enum for spec list
 export const EGOAtkTypeSchema = z.enum(['SLASH', 'PENETRATE', 'HIT'])
 
-// Spec entry schema
 export const EGOSpecSchema = z.object({
   updateDate: z.number(),
   skillKeywordList: z.array(z.string()),
@@ -142,7 +113,6 @@ export const EGOSpecSchema = z.object({
   maxThreadspin: z.union([z.literal(4), z.literal(5)]),
 })
 
-// Record types for spec and name lists
 export const EGOSpecListSchema = z.record(EGOIdSchema, EGOSpecSchema)
 /** Keys stay unbranded: the game ships i18n-only ids with no spec entry. */
 export const EGONameListSchema = z.record(z.string(), z.string())

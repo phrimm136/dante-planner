@@ -5,16 +5,11 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { CardSlot, EGO_GIFT_GEOMETRY } from '@/shared/cardLayout'
 import { CARD_MOBILE_SCALE_NONE } from '@/lib/constants'
 
-/**
- * EGO Gift detail: Card + name + metadata (left)
- * Enhancement descriptions panel (right)
- */
 export function EGOGiftDetailSkeleton() {
   return (
     <DetailPageSkeleton
       left={
         <div className="space-y-4">
-          {/* Header: card + name */}
           <div className="flex gap-4 items-center">
             <CardSlot
               size={EGO_GIFT_GEOMETRY.size}
@@ -26,7 +21,6 @@ export function EGOGiftDetailSkeleton() {
             <TextSkeleton size="2xl" width="md" />
           </div>
 
-          {/* Metadata panel: price, max enhancement, theme pack */}
           <LabeledPanel>
             <div className="space-y-1">
               <TextSkeleton size="xs" width="sm" />
@@ -42,7 +36,6 @@ export function EGOGiftDetailSkeleton() {
             </div>
           </LabeledPanel>
 
-          {/* Battle keywords */}
           <LabeledPanel>
             <TextSkeleton size="xs" width="full" />
           </LabeledPanel>
@@ -50,7 +43,6 @@ export function EGOGiftDetailSkeleton() {
       }
       right={
         <div className="space-y-4">
-          {/* Enhancement rows: base, +, ++ */}
           <div className="border rounded-lg p-4 space-y-4">
             <div className="pb-4 border-b">
               <div className="flex items-center gap-3 mb-3">

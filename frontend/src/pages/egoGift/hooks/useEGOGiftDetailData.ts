@@ -20,20 +20,10 @@ const EGO_GIFT_DETAIL: EntityDetailDataConfig<
   i18nSchema: EGOGiftI18nSchema,
 }
 
-/**
- * EGO Gift spec data; suspends on initial load, not on language change.
- *
- * @param id - EGO Gift ID (must be defined - validate in route first)
- */
 export function useEGOGiftDetailSpec(id: string) {
   return useEntityDetailSpec(EGO_GIFT_DETAIL, id)
 }
 
-/**
- * EGO Gift i18n data; suspends while loading.
- *
- * @param id - EGO Gift ID (must be defined - validate in route first)
- */
 export function useEGOGiftDetailI18n(id: string) {
   return useEntityDetailI18n(EGO_GIFT_DETAIL, id)
 }

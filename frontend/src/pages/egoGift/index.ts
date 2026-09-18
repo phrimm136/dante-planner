@@ -1,5 +1,3 @@
-// Public API of the egoGift entity. Import from '@/pages/egoGift', not internal paths.
-
 export { EGOGiftCard } from './components/EGOGiftCard'
 export { EGOGiftIcon } from './components/EGOGiftIcon'
 export { EGOGiftCardLink } from './components/EGOGiftCardLink'

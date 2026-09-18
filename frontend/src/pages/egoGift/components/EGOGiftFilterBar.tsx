@@ -16,11 +16,6 @@ interface EGOGiftFilterBarProps {
   className?: string
 }
 
-/**
- * Reusable filter bar for EGO gift selection contexts.
- * Row 1: Keyword filter (full width)
- * Row 2: Sorter + SearchBar
- */
 export function EGOGiftFilterBar({
   selectedKeywords,
   onKeywordsChange,

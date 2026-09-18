@@ -16,37 +16,26 @@ import { EGOSkillsPane } from './components/EGOSkillsPane'
 import { EGOPassivesPane } from './components/EGOPassivesPane'
 import type { EgoSkillType, Threadspin } from '@/pages/ego'
 
-/**
- * Inner content component that uses Suspense-aware hooks
- */
 function EGODetailContent() {
   const { id } = useParams({ strict: false })
   const { t } = useTranslation('database')
 
-  // Progressive rendering: render sections one-by-one (start immediately)
-  // Sections: 1=Skills, 2=Passives
   const totalSections = 2
   const visibleSections = useProgressiveCount({ total: totalSections, step: 1, initial: 0 })
 
-  // Route validation - id must be defined and well-formed
   if (!id) {
     throw new Error('EGO ID is required')
   }
   const egoId = EGOIdSchema.parse(id)
 
-  // Spec data only - no language key, won't re-suspend on language change
   const spec = useEGODetailSpec(egoId)
 
-  // Controllable threadspin state — defaults to this EGO's max.
   const [threadspin, setThreadspin] = useState<number>(spec.maxThreadspin)
 
-  // Selected skill type — read by the skills pane and the header image.
   const [skillType, setSkillType] = useState<EgoSkillType>('awaken')
 
-  // Cast to Threadspin type for component props
   const threadspinLevel = threadspin as Threadspin
 
-  // Selector component (shared between desktop and mobile)
   const selector = (
     <DetailEntitySelector
       tierLabel={t('tierLabel.threadspin')}
@@ -59,10 +48,8 @@ function EGODetailContent() {
     />
   )
 
-  // Left column: Header (with i18n), Sin Cost, Sin Resistance
   const leftColumn = <EGOInfoPane id={egoId} ego={spec} skillType={skillType} />
 
-  // Skills content (shared between desktop and mobile)
   const skillsContent = (
     <EGOSkillsPane
       id={id}
@@ -73,13 +60,10 @@ function EGODetailContent() {
     />
   )
 
-  // Passives content - PassiveCardWithSuspense uses internal granular Suspense
   const passivesContent = (
     <EGOPassivesPane id={id} passives={spec.passives} threadspinLevel={threadspinLevel} />
   )
 
-  // Desktop right column: Selector (sticky) + Skills + Passives
-  // Progressive rendering: show sections one-by-one
   const rightColumn = (
     <DetailRightPanel selector={selector}>
       {visibleSections >= 1 && skillsContent}
@@ -87,18 +71,14 @@ function EGODetailContent() {
     </DetailRightPanel>
   )
 
-  // Mobile tabs: Skills, Passives (no third tab for EGO)
-  // Progressive rendering: show tabs when all sections loaded
   const mobileTabsContent =
     visibleSections >= totalSections ? (
       <>
-        {/* Selector above tabs on mobile */}
         <div className="mb-4">{selector}</div>
         <MobileDetailTabs skillsContent={skillsContent} passivesContent={passivesContent} />
       </>
     ) : (
       <>
-        {/* Show selector while loading, then skills when available */}
         <div className="mb-4">{selector}</div>
         {visibleSections >= 1 && skillsContent}
       </>
@@ -113,12 +93,6 @@ function EGODetailContent() {
   )
 }
 
-/**
- * EGODetailPage - EGO detail page with two-column layout
- *
- * Desktop: 4:6 ratio two-column grid
- * Mobile: Single column layout with tabs
- */
 export default function EGODetailPage() {
   return (
     <Suspense fallback={<EGODetailSkeleton />}>

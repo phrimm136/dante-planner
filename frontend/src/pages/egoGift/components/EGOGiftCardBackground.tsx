@@ -9,14 +9,9 @@ interface EGOGiftCardBackgroundProps {
   enhancement: 0 | 1 | 2
 }
 
-/**
- * Background layers for EGO gift cards
- * Handles base background and enhanced overlays based on enhancement level
- */
 export function EGOGiftCardBackground({ enhancement }: EGOGiftCardBackgroundProps) {
   return (
     <>
-      {/* Base background - bg.webp for enhancement 0 and 1, bgEnhanced2.webp for enhancement 2 */}
       <img
         src={enhancement === 2 ? getEGOGiftEnhanced2BackgroundPath() : getEGOGiftBackgroundPath()}
         alt=""
@@ -24,7 +19,6 @@ export function EGOGiftCardBackground({ enhancement }: EGOGiftCardBackgroundProp
         loading="lazy"
       />
 
-      {/* Enhanced overlay - bgEnhanced.webp for enhancement 1 and 2 */}
       {(enhancement === 1 || enhancement === 2) && (
         <img
           src={getEGOGiftEnhancedBackgroundPath()}

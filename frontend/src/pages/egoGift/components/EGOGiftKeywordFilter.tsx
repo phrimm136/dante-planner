@@ -7,18 +7,9 @@ import { KEYWORD_ORDER } from '@/shared/gameData'
 interface EGOGiftKeywordFilterProps {
   selected: Set<string>
   onSelectionChange: (keywords: Set<string>) => void
-  /** 'bar' adds the scrolling card row and its own clear control */
   layout?: 'wrap' | 'bar'
 }
 
-/**
- * EGO Gift keyword filter: the status effects and attack types of
- * KEYWORD_ORDER as icons, plus a "None" button for gifts carrying no
- * keyword.
- *
- * In 'wrap' the sidebar's "Reset All" owns the reset; in 'bar' the filter
- * carries its own.
- */
 export function EGOGiftKeywordFilter({
   selected,
   onSelectionChange,
@@ -26,7 +17,6 @@ export function EGOGiftKeywordFilter({
 }: EGOGiftKeywordFilterProps) {
   const { t } = useTranslation()
 
-  // Filter out "None" - it needs special button treatment
   const iconKeywords = KEYWORD_ORDER.filter((k) => k !== 'None')
 
   const handleNoneClick = () => {

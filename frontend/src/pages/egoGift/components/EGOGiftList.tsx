@@ -18,23 +18,9 @@ interface EGOGiftListProps {
   store: FilterStore<EGOGiftFacetState>
 }
 
-/**
- * The EGO Gift browser's card grid.
- *
- * Filter Logic:
- * - All filter types use AND between each other
- * - Keyword: OR logic (any selected keyword)
- * - Difficulty: OR logic (any selected difficulty)
- * - Tier: OR logic (any selected tier)
- * - Theme Pack: OR logic (any selected theme pack)
- * - Attribute Type: OR logic (any selected attribute type)
- * - Search: OR logic (name OR keyword)
- */
 export function EGOGiftList({ gifts, store }: EGOGiftListProps) {
   const { names: giftNames, mappings } = useSearchTermSources(EGO_GIFT_LIST, EMPTY_NAMES)
 
-  // Sort all gifts once (stable order for CSS-based filtering)
-  // Default sort: tier-first (higher tier first, then by keyword)
   const sortedGifts = sortEGOGifts(gifts, 'tier-first')
 
   return (

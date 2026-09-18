@@ -20,12 +20,10 @@ export const EGO_GIFT_LIST: EntityListDataConfig<
   i18nSchema: EGOGiftNameListSchema,
 }
 
-/** EGO Gift spec map; suspends on initial load, not on language change */
 export function useEGOGiftListSpec() {
   return useEntityListSpec(EGO_GIFT_LIST)
 }
 
-/** EGO Gift name map; suspends while loading */
 export function useEGOGiftListI18n() {
   return useEntityListI18n(EGO_GIFT_LIST)
 }

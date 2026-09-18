@@ -1,23 +1,12 @@
-/** The single constructor turning a gift spec entry into an entity. */
-
 import { createEntityBuilder } from '@/shared/filter'
 import { EGOGiftIdSchema } from '@/shared/gameData'
 
 import type { EGOGiftId } from '@/shared/gameData'
 import type { EGOGiftEntity, EGOGiftSpec } from '../types/EGOGiftTypes'
 
-/** What a placeholder claims when the catalogue cannot say. */
 const UNKNOWN_GIFT_TIER_TAG = 'TIER_1'
 const UNKNOWN_GIFT_ATTRIBUTE_TYPE = 'CRIMSON'
 
-/**
- * Build an entity from a spec entry.
- *
- * @param id - Base gift ID, as the spec record keys it
- * @param spec - The gift's spec entry
- * @param name - Localized name; omitted where no name catalogue is loaded
- * @returns The entity, carrying every field the spec provides
- */
 export const toEGOGiftEntity = createEntityBuilder<EGOGiftId, EGOGiftSpec>(EGOGiftIdSchema)
 
 /**

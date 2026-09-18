@@ -1,12 +1,3 @@
-/**
- * EGOGiftDetailPage - EGO Gift detail page with two-column layout
- *
- * Desktop: 4:6 ratio with all enhancement descriptions in right column
- * Mobile: Single column with all content stacked
- *
- * Pattern Source: IdentityDetailPage.tsx
- */
-
 import { useParams } from '@tanstack/react-router'
 import { Suspense } from 'react'
 
@@ -25,31 +16,23 @@ import { ENHANCEMENT_LEVELS } from '@/shared/gameData'
 import { calculateEnhancementCost, parseTier } from '@/pages/egoGift'
 import type { EGOGiftEntity } from '@/pages/egoGift'
 
-/**
- * Inner content component that uses Suspense-aware hooks
- */
 function EGOGiftDetailContent() {
   const { id } = useParams({ strict: false })
 
-  // Throw error if id is missing - ErrorBoundary will catch this
   if (!id) {
     throw new Error('EGO Gift ID is required')
   }
 
-  // Fetch spec data only (stable - no language dependency)
   const giftData = useEGOGiftDetailSpec(id)
 
   const tier = parseTier(giftData.tag)
 
-  // Max enhancement from spec data (language-independent)
   const maxEnhancement = giftData.maxEnhancement
 
-  // An unreadable tier prices no enhancement level
   const enhancementCosts = ENHANCEMENT_LEVELS.map((level) =>
     tier === null ? null : calculateEnhancementCost(tier, level),
   )
 
-  // Construct gift object for EGOGiftCard (spec data only for stable card display)
   // Type assertion needed: Zod validates tag has TIER_* at runtime,
   // but schema outputs string[] not the branded type
   const gift = {
@@ -62,10 +45,8 @@ function EGOGiftDetailContent() {
     extremeOnly: giftData.extremeOnly,
   } as EGOGiftEntity
 
-  // Left column: Header (card + name), Metadata
   const leftColumn = (
     <div className="space-y-4">
-      {/* Header row: Card + Name (vertically centered) */}
       <div className="flex gap-4 items-center">
         <CardSlot
           size={EGO_GIFT_GEOMETRY.size}
@@ -74,14 +55,12 @@ function EGOGiftDetailContent() {
         >
           <EGOGiftCard gift={gift} enhancement={0} />
         </CardSlot>
-        {/* Name with internal Suspense - does not suspend parent */}
         <GiftNameI18n
           id={id}
           attributeType={giftData.attributeType as import('@/shared/gameData').EGOGiftAttributeType}
         />
       </div>
 
-      {/* Metadata panel - internal Suspense for theme pack names only */}
       <EGOGiftMetadata
         price={giftData.price}
         themePack={giftData.themePack}
@@ -90,12 +69,10 @@ function EGOGiftDetailContent() {
         maxEnhancement={maxEnhancement}
       />
 
-      {/* Battle Keywords Panel - each chip suspends internally */}
       <KeywordsDisplay keywords={giftData.battleKeywordList} />
     </div>
   )
 
-  // Right column: All enhancement descriptions + recipe section
   const rightColumn = (
     <div className="space-y-4">
       <EnhancementsPanelI18n giftId={id} maxEnhancement={maxEnhancement} costs={enhancementCosts} />
@@ -103,7 +80,6 @@ function EGOGiftDetailContent() {
     </div>
   )
 
-  // Mobile: Same content as desktop
   const mobileContent = rightColumn
 
   return (
@@ -115,9 +91,6 @@ function EGOGiftDetailContent() {
   )
 }
 
-/**
- * EGOGiftDetailPage - Main export with Suspense boundary
- */
 export default function EGOGiftDetailPage() {
   return (
     <Suspense fallback={<EGOGiftDetailSkeleton />}>

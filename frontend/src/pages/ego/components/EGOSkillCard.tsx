@@ -17,11 +17,6 @@ interface EGOSkillCardWithGranularI18nProps {
   threadspin: Threadspin
 }
 
-/**
- * EGO adapter over the shared SkillCard: merges threadspin data and resolves the
- * awaken/erosion skill image path, then delegates. Fixed frame tier 3; supplies
- * the sanity (MP) cost stat.
- */
 export function EGOSkillCardWithGranularI18n({
   egoId,
   skillType,
@@ -52,9 +47,6 @@ export function EGOSkillCardWithGranularI18n({
   )
 }
 
-/**
- * Suspending name slot — resolves the skill name from EGO detail i18n.
- */
 function EGOSkillName({
   egoId,
   skillId,
@@ -73,9 +65,6 @@ function EGOSkillName({
   )
 }
 
-/**
- * Suspending description slot — merges EGO skill descriptions up to the threadspin.
- */
 function EGOSkillDescription({
   egoId,
   skillId,

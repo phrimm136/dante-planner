@@ -21,14 +21,6 @@ interface EGOGiftSelectionListProps {
   onEnhancementSelect?: (giftId: EGOGiftId, enhancement: EnhancementLevel) => void
 }
 
-/**
- * EGO gift selection list - CSS-based filtering with progressive rendering
- * Renders 10 cards initially, then 10 more per frame via requestAnimationFrame
- *
- * The map below is one compiler scope keyed on the selection and the reveal count,
- * so it re-runs on every toggle and every frame. Each cell carries its own memo
- * boundary, which is what keeps that from costing one render per gift.
- */
 export function EGOGiftSelectionList({
   gifts,
   selectedKeywords,
@@ -41,7 +33,6 @@ export function EGOGiftSelectionList({
   const { t } = useTranslation('database')
   const { keywordToValue } = useSearchMappings()
 
-  // Progressive rendering: start with one batch, add a batch per frame
   const displayCount = useProgressiveCount({
     total: gifts.length,
     step: PROGRESSIVE_REVEAL.CARD_BATCH,

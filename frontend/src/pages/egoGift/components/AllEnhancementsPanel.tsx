@@ -1,12 +1,3 @@
-/**
- * AllEnhancementsPanel - Displays all enhancement levels stacked vertically
- *
- * Shows base, +, and ++ enhancement descriptions in a single view.
- * Renders structure for all levels up to maxEnhancement, with descriptions in Suspense.
- *
- * Pattern Source: PassiveI18n.tsx (granular Suspense per text element)
- */
-
 import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -17,17 +8,11 @@ import { ENHANCEMENT_LABELS, ENHANCEMENT_LEVELS, type EnhancementLevel } from '@
 import { SECTION_STYLES } from '@/lib/constants'
 
 interface AllEnhancementsPanelProps {
-  /** Maximum enhancement level to display (0, 1, or 2) */
   maxEnhancement: EnhancementLevel
-  /** Array of costs per level (null if enhancement not available for that level) */
   costs: (number | null)[]
-  /** Array of description strings (empty strings render as empty text) */
   descriptions?: string[]
 }
 
-/**
- * Single enhancement row - displays structure with Suspense for description
- */
 function EnhancementRow({
   level,
   description,
@@ -43,9 +28,7 @@ function EnhancementRow({
 
   return (
     <div className={!isLast ? 'pb-4 border-b' : ''}>
-      {/* Structure - always visible (icon + cost) */}
       <div className="flex items-center gap-3 mb-3">
-        {/* Enhancement Level Icon */}
         <div className="h-12 w-12 flex items-center justify-center bg-muted">
           {level === 0 ? (
             <span className="text-lg font-bold">{ENHANCEMENT_LABELS[level]}</span>
@@ -58,7 +41,6 @@ function EnhancementRow({
           )}
         </div>
 
-        {/* Enhancement Cost */}
         {cost !== null && (
           <div className={SECTION_STYLES.LAYOUT.row}>
             <img src={getEGOGiftCostIconPath()} alt={t('egoGift.price')} className="w-6 h-6" />
@@ -67,7 +49,6 @@ function EnhancementRow({
         )}
       </div>
 
-      {/* Description - in Suspense to isolate useSkillTagI18n suspend */}
       <div className="text-sm">
         <Suspense fallback={<Skeleton className="h-24 w-full" />}>
           <FormattedDescription text={description} />
@@ -82,7 +63,6 @@ export function AllEnhancementsPanel({
   descriptions = [],
   costs,
 }: AllEnhancementsPanelProps) {
-  // Render all levels from 0 to maxEnhancement (structure stays visible)
   const levelsToRender = ENHANCEMENT_LEVELS.filter((level) => level <= maxEnhancement)
 
   return (

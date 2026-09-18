@@ -39,11 +39,6 @@ export function getEffectiveEgoPassives(
   return selectEffectivePassives(passiveList, threadspinIndex)
 }
 
-/**
- * Get locked passives — those from higher tiers that aren't part of the
- * effective set. A higher-tier passive that simply *replaces* an effective
- * one (same slot key) is hidden, not shown as a dimmed preview.
- */
 export function getLockedEgoPassives(
   passiveList: PassiveId[][],
   threadspinIndex: number,

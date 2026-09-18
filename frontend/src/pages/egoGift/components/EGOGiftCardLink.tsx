@@ -7,25 +7,11 @@ import { EGOGiftName } from './EGOGiftName'
 import { cn } from '@/lib/utils'
 
 interface EGOGiftCardLinkProps {
-  /** The EGO gift data to display */
   gift: EGOGiftEntity
-  /** Enhancement level (0, 1, or 2) */
   enhancement?: 0 | 1 | 2
-  /** Additional CSS classes for the link wrapper */
   className?: string
 }
 
-/**
- * Navigation wrapper for EGOGiftCard that links to the EGO gift detail page.
- * Use this when clicking the card should navigate to `/ego-gift/$id`.
- *
- * @example
- * // In a list view with navigation
- * <EGOGiftCardLink gift={gift} />
- *
- * // With enhancement level
- * <EGOGiftCardLink gift={gift} enhancement={1} />
- */
 export const EGOGiftCardLink = function EGOGiftCardLink({
   gift,
   enhancement = 0,

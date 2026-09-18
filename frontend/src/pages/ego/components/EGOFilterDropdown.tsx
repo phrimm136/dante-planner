@@ -5,14 +5,9 @@ import { typedEntries } from '@/lib/utils'
 interface EGOFilterDropdownProps {
   selected: Set<string>
   onSelectionChange: (ids: Set<string>) => void
-  /** `database` namespace key for the collapsed-state placeholder */
   placeholderKey: string
 }
 
-/**
- * EGO binding of the shared entity search dropdown. Suspends while the EGO spec
- * + name list load, so render it inside a Suspense boundary.
- */
 export function EGOFilterDropdown({
   selected,
   onSelectionChange,

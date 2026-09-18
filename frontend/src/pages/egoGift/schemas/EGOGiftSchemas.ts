@@ -1,25 +1,12 @@
 import { z } from 'zod'
 import { EGOGiftIdSchema } from '@/shared/gameData'
 
-/**
- * EGO Gift Schemas
- *
- * Zod schemas for runtime validation of EGO Gift data structures.
- * These schemas mirror the TypeScript interfaces in types/EGOGiftTypes.ts
- * and provide strict runtime validation with comprehensive error collection.
- *
- * MAINTENANCE: When TypeScript interfaces change, regenerate schemas using
- * the shared source generation tooling to maintain synchronization.
- */
-
-// Tag array validator - ensures at least one "TIER_*" tag exists
 const tagArraySchema = z
   .array(z.string())
   .refine((tags) => tags.some((tag) => tag.startsWith('TIER_')), {
     message: 'tag array must contain at least one "TIER_*" string',
   })
 
-// Recipe schemas for EGO Gift fusion/combination
 // Standard recipe: multiple recipe options, each with fixed ingredient IDs
 export const StandardRecipeSchema = z
   .object({
@@ -36,10 +23,8 @@ export const MixedRecipeSchema = z
   })
   .strict()
 
-// Union type - discriminated by presence of 'type' field
 export const EGOGiftRecipeSchema = z.union([MixedRecipeSchema, StandardRecipeSchema])
 
-// EGOGiftSpec schema - specification data from egoGiftSpecList.json
 export const EGOGiftSpecSchema = z
   .object({
     tag: tagArraySchema,
@@ -55,7 +40,6 @@ export const EGOGiftSpecSchema = z
   })
   .strict()
 
-// EGOGiftData schema - detail data from egoGift/{id}.json
 export const EGOGiftDataSchema = z
   .object({
     tag: tagArraySchema,
@@ -71,7 +55,6 @@ export const EGOGiftDataSchema = z
   })
   .strict()
 
-// EGOGiftI18n schema - i18n data from egoGift/{id}.json (i18n folder)
 export const EGOGiftI18nSchema = z
   .object({
     name: z.string(),
@@ -80,7 +63,6 @@ export const EGOGiftI18nSchema = z
   })
   .strict()
 
-// Record types for spec and name lists
 export const EGOGiftSpecListSchema = z.record(EGOGiftIdSchema, EGOGiftSpecSchema)
 /** Keys stay unbranded: the game may ship i18n-only ids with no spec entry. */
 export const EGOGiftNameListSchema = z.record(z.string(), z.string())

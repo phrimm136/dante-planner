@@ -30,21 +30,12 @@ import {
 import { EGOName } from './EGOName'
 
 interface EGOCardProps {
-  /** The EGO data to display */
   ego: EGOEntity
-  /** Show the ring at full brightness (selected state) */
   isSelected?: boolean
-  /** Custom overlay content (e.g., selected indicator) */
   overlay?: ReactNode
-  /** Additional CSS classes for styling flexibility */
   className?: string
 }
 
-/**
- * View-only EGO card in the game's geometry.
- *
- * Carries no interaction of its own; a parent wraps it in a `Link`, a button, or a trigger.
- */
 export function EGOCard({ ego, isSelected = false, overlay, className }: EGOCardProps) {
   const { t } = useTranslation(['common', 'database'])
   const { id, egoType: rank, attributeType, maxThreadspin } = ego

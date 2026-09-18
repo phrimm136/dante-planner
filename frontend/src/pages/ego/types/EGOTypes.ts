@@ -11,18 +11,10 @@ import type {
 
 export type { Threadspin } from '@/shared/gameData'
 
-/** Skill families an EGO can have; erosion also selects the corrosion CG. */
 export type EgoSkillType = 'awaken' | 'erosion'
 
 export type EGOSpec = z.infer<typeof EGOSpecSchema>
 
-/**
- * EGO entity for list/grid views.
- *
- * Assembled in list components from already-validated spec + name list — not a
- * direct boundary shape, so it stays a plain TS type. Components should prefer
- * EGOName for granular Suspense boundaries.
- */
 export type EGOEntity = Entity<EGOId, EGOSpec>
 
 export type EGOSkillEntry = z.infer<typeof EGOSkillEntrySchema>

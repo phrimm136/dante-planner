@@ -3,28 +3,20 @@ import type { SortMode } from '@/shared/filter'
 import { KEYWORD_ORDER } from '@/shared/gameData'
 import { parseTier } from './egoGiftTier'
 
-/** Unrecognized and absent keywords both sort where 'None' sits. */
 const NONE_CATEGORY_INDEX = KEYWORD_ORDER.indexOf('None')
 
-/**
- * Get the category index for sorting
- * Returns index in KEYWORD_ORDER, or None index if no match
- */
 function getCategoryIndex(keyword: string | null): number {
   if (!keyword) return NONE_CATEGORY_INDEX
   const index = KEYWORD_ORDER.indexOf(keyword as (typeof KEYWORD_ORDER)[number])
   return index !== -1 ? index : NONE_CATEGORY_INDEX
 }
 
-/**
- * Get tier sort value (EX = highest, then 5, 4, 3, 2, 1)
- */
 function getTierValue(tag: string[]): number {
   const tier = parseTier(tag)
   if (!tier) return 999
   if (tier === 'EX') return 0
   const tierNum = parseInt(tier, 10)
-  return isNaN(tierNum) ? 999 : 6 - tierNum // 5->1, 4->2, 3->3, 2->4, 1->5
+  return isNaN(tierNum) ? 999 : 6 - tierNum
 }
 
 type SortKey = (gift: EGOGiftEntity) => number
@@ -33,15 +25,11 @@ const categoryKey: SortKey = (gift) => getCategoryIndex(gift.keyword)
 const tierKey: SortKey = (gift) => getTierValue(gift.tag)
 const idKey: SortKey = (gift) => parseInt(gift.id, 10)
 
-/** Ascending key ladder per sort mode; the first key that differs decides. */
 const SORT_KEYS: Record<SortMode, readonly SortKey[]> = {
   'tier-first': [tierKey, categoryKey, idKey],
   'keyword-first': [categoryKey, tierKey, idKey],
 }
 
-/**
- * Sort EGO Gifts based on sort mode
- */
 export function sortEGOGifts(gifts: EGOGiftEntity[], sortMode: SortMode): EGOGiftEntity[] {
   const keys = SORT_KEYS[sortMode]
 

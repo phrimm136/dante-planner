@@ -11,7 +11,6 @@ interface EGOGiftSelectableCardProps {
   children: React.ReactNode
 }
 
-// Inner component props (without children)
 interface EGOGiftSelectableCardInnerProps {
   giftId: EGOGiftId
   enhancement: EnhancementLevel
@@ -20,10 +19,6 @@ interface EGOGiftSelectableCardInnerProps {
   onEnhancementSelect: (giftId: EGOGiftId, enhancement: EnhancementLevel) => void
 }
 
-/**
- * Inner component that handles hover state and enhancement selector overlay
- * Separated from outer wrapper to prevent card re-renders on hover
- */
 const EGOGiftSelectableCardInner = function EGOGiftSelectableCardInner({
   giftId,
   enhancement,
@@ -35,7 +30,6 @@ const EGOGiftSelectableCardInner = function EGOGiftSelectableCardInner({
   const containerRef = useRef<HTMLDivElement>(null)
   const isTouchDeviceRef = useRef(false)
 
-  // Handle clicks outside to close on mobile
   useEffect(() => {
     if (!isOpen) return
 
@@ -94,12 +88,6 @@ const EGOGiftSelectableCardInner = function EGOGiftSelectableCardInner({
   )
 }
 
-/**
- * Gift card with enhancement selector overlay (for comprehensive list)
- *
- * The card sits in `children` under `pointer-events-none`, and the hover state lives
- * in the sibling inner component, so opening the overlay re-renders only the overlay.
- */
 export const EGOGiftSelectableCard = function EGOGiftSelectableCard({
   giftId,
   enhancement,

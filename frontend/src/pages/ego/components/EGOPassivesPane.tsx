@@ -7,15 +7,11 @@ import { getEffectiveEgoPassives, getLockedEgoPassives } from '../lib/egoPassive
 import type { EGOData, Threadspin } from '../types/EGOTypes'
 
 interface EGOPassivesPaneProps {
-  /** EGO ID for i18n lookup */
   id: string
-  /** Passive lists per threadspin */
   passives: EGOData['passives']
-  /** Current threadspin level */
   threadspinLevel: Threadspin
 }
 
-/** Passives effective at the current threadspin, plus locked previews. */
 export function EGOPassivesPane({ id, passives, threadspinLevel }: EGOPassivesPaneProps) {
   const { t } = useTranslation(['database', 'common'])
 

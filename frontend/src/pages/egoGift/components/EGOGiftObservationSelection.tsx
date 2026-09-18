@@ -15,11 +15,6 @@ interface EGOGiftObservationSelectionProps {
   onGiftRemove: (giftId: EncodedGiftId) => void
 }
 
-/**
- * EGO Gift Observation Selection Display
- * Below `sm` it stacks under the list and scrolls horizontally; at and above `sm` it is a
- * fixed-height column beside the list. Click on gift to remove from selection.
- */
 export function EGOGiftObservationSelection({
   selectedGiftIds,
   onGiftRemove,
@@ -27,7 +22,6 @@ export function EGOGiftObservationSelection({
   const spec = useEGOGiftListSpec()
   const i18n = useEGOGiftListI18n()
 
-  // Merge spec and i18n into EGOGiftEntity array
   const gifts: EGOGiftEntity[] = Object.entries(spec).map(([id, entry]) =>
     toEGOGiftEntity(id, entry, i18n[id] || id),
   )

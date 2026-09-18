@@ -117,7 +117,6 @@ export const EGO_CARD_BADGE_SKEW_ORIGIN = {
   grade: 'center',
 } as const
 
-/** The hover ring's grey tint while the card is hovered. */
 export const EGO_HOVER_RING_BRIGHTNESS = 0.784
 
 /**
@@ -135,13 +134,11 @@ export const EGO_NAME_CQW = {
   lineSpacing: -0.2,
 } as const
 
-/** The tracking the EGO name is measured and drawn with. */
 export const EGO_NAME_TRACKING: TrackingSpec = {
   letterSpacingEm: EGO_NAME_CQW.letterSpacingEm,
   wordSpacingEm: EGO_NAME_CQW.wordSpacingEm,
 }
 
-/** The band and box an EGO name is fitted into, in cqw of the card root. */
 export function egoNameFitSpec(table: FontAdvanceTable): FitSpec {
   return {
     max: EGO_NAME_CQW.maxSize,
@@ -154,12 +151,10 @@ export function egoNameFitSpec(table: FontAdvanceTable): FitSpec {
   }
 }
 
-/** One line's pitch, as a CSS `line-height`. */
 export function egoNameLineHeight(metrics: LineMetrics): number {
   return metrics.lineHeight + EGO_NAME_CQW.lineSpacing
 }
 
-/** The stencilled box the EGO portrait is drawn inside, masked by the window sprite. */
 export function egoPortraitWindowStyle(maskUrl: string): CSSProperties {
   return {
     ...pctStyle(EGO_CARD_LAYERS.portraitWindow.rect),

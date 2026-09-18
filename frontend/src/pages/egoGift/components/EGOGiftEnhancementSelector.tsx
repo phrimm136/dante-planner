@@ -14,11 +14,6 @@ interface EGOGiftEnhancementSelectorProps {
   onSelect: (giftId: EGOGiftId, enhancement: EnhancementLevel) => void
 }
 
-/**
- * Enhancement level selector overlay for EGO gift cards
- * Shows enhancement options (-, +, ++) up to maxEnhancement
- * Follows TierLevelSelector hover pattern with absolute positioning
- */
 export function EGOGiftEnhancementSelector({
   giftId,
   currentEnhancement,
@@ -32,7 +27,6 @@ export function EGOGiftEnhancementSelector({
     onSelect(giftId, level)
   }
 
-  // Filter to only show levels up to maxEnhancement
   const availableLevels = ENHANCEMENT_LEVELS.filter((level) => level <= maxEnhancement)
 
   return (

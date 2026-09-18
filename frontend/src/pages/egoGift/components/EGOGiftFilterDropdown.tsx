@@ -6,10 +6,6 @@ interface EGOGiftFilterDropdownProps {
   onSelectionChange: (gifts: Set<string>) => void
 }
 
-/**
- * EGO Gift binding of the shared gift search dropdown. Suspends while the gift
- * spec + name list load, so render it inside a Suspense boundary.
- */
 export function EGOGiftFilterDropdown({ selected, onSelectionChange }: EGOGiftFilterDropdownProps) {
   const spec = useEGOGiftListSpec()
   const i18n = useEGOGiftListI18n()

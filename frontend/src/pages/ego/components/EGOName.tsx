@@ -21,16 +21,9 @@ import {
 } from '../lib/cardLayout'
 
 interface EGONameProps {
-  /** EGO ID to look up name */
   id: EGOId
 }
 
-/**
- * The EGO name plate's text, broken into lines and sized to fit its box.
- *
- * Reads i18n and the display face's advance table through `useSuspenseQuery` — render it
- * inside a Suspense boundary.
- */
 export function EGOName({ id }: EGONameProps) {
   const { i18n } = useTranslation()
   const i18nData = useEGOListI18n()

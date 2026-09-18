@@ -1,25 +1,9 @@
-/**
- * egoGiftFilter.ts
- *
- * EGO Gift value derivations and facet descriptors, plus the per-item predicate the
- * grid's card slots subscribe through.
- */
-
 import type { EntityMatcher, Facet, SearchMappings } from '@/shared/filter'
 import { collectKeywordTerms, createEntityMatcher } from '@/shared/filter'
 import type { EGOGiftAttributeType, EGOGiftDifficulty, EGOGiftTier } from '@/shared/gameData'
 import type { EGOGiftEntity } from '../types/EGOGiftTypes'
 import { parseTier, toRomanTier } from './egoGiftTier'
 
-/**
- * Derive difficulty from hardOnly/extremeOnly flags
- * Priority: extremeOnly > hardOnly > normal
- *
- * @example
- * deriveDifficulty({ extremeOnly: true }) // Returns 'extreme'
- * deriveDifficulty({ hardOnly: true }) // Returns 'hard'
- * deriveDifficulty({}) // Returns 'normal'
- */
 export function deriveDifficulty(gift: {
   hardOnly?: boolean | undefined
   extremeOnly?: boolean | undefined
@@ -68,12 +52,6 @@ export const EGO_GIFT_SELECTION_FACETS: readonly Facet<
   EGOGiftSelectionFacetState
 >[] = [{ sel: (s) => s.selectedKeywords, get: (g) => g.keyword ?? 'None', mode: 'any' }]
 
-/**
- * Every lowercased string the search box matches a gift on: its display name plus the
- * natural-language reading of the keyword it carries.
- *
- * Depends only on the i18n payloads, so a filter toggle never invalidates it.
- */
 export function buildEGOGiftSearchTerms(
   gift: EGOGiftEntity,
   giftNames: Record<string, string>,
@@ -89,6 +67,5 @@ export function buildEGOGiftSearchTerms(
   return terms
 }
 
-/** Whether one gift survives the current facets and search query. */
 export const matchesEGOGift: EntityMatcher<EGOGiftEntity, EGOGiftFacetState> =
   createEntityMatcher(EGO_GIFT_FACETS)

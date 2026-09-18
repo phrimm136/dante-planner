@@ -4,22 +4,13 @@ import { EGOGiftTooltipContent } from './EGOGiftTooltipContent'
 import { cn } from '@/lib/utils'
 
 interface EGOGiftTooltipProps {
-  /** Trigger element (button, div, etc.) */
   children: React.ReactNode
-  /** Gift ID for tooltip content */
   giftId: string
-  /** Enhancement level (0, 1, or 2) */
   enhancement?: EnhancementLevel
-  /** Tooltip placement side */
   side?: 'top' | 'right' | 'bottom' | 'left'
-  /** Additional className for TooltipContent */
   className?: string
 }
 
-/**
- * Standardized tooltip wrapper for EGO gift cards
- * Provides consistent styling across all gift tooltips
- */
 export function EGOGiftTooltip({
   children,
   giftId,

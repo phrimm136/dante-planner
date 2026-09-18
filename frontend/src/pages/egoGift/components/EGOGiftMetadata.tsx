@@ -1,15 +1,3 @@
-/**
- * EGOGiftMetadata - Vertical metadata display for EGO Gift detail page
- *
- * Displays gift metadata in a vertical stack layout with internal Suspense:
- * - Price (with coin icon) - always visible
- * - Max Enhancement (icon) - always visible
- * - Theme Pack (names or "General") - suspends for i18n
- * - Difficulty (Hard/Extreme badges) - always visible
- *
- * Pattern Source: TraitsDisplay.tsx (internal Suspense for i18n content)
- */
-
 import { Suspense } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
@@ -24,21 +12,13 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 
 interface EGOGiftMetadataProps {
-  /** Gift price */
   price: number
-  /** Theme pack IDs */
   themePack: string[]
-  /** Whether gift is hard mode only */
   hardOnly?: boolean | undefined
-  /** Whether gift is extreme mode only */
   extremeOnly?: boolean | undefined
-  /** Maximum enhancement level (0 = base, 1 = +, 2 = ++) */
   maxEnhancement: EnhancementLevel
 }
 
-/**
- * Single metadata row with label and value
- */
 function MetadataRow({
   label,
   children,
@@ -58,10 +38,6 @@ function MetadataRow({
   )
 }
 
-/**
- * Theme pack names display - suspends for i18n.
- * Renders comma-separated clickable links to theme pack detail pages.
- */
 function ThemePackDisplay({ themePack }: { themePack: string[] }) {
   const { t } = useTranslation(['database', 'common'])
   const themePackI18n = useThemePackListI18n()
@@ -95,12 +71,10 @@ export function EGOGiftMetadata({
 
   return (
     <LabeledPanel>
-      {/* Price row - always visible */}
       <MetadataRow label={t('egoGift.price', 'Price')}>
         <CostDisplay cost={price} />
       </MetadataRow>
 
-      {/* Max Enhancement row - always visible */}
       <MetadataRow label={t('egoGift.maxEnhancement', 'Max Enhancement')}>
         <div className={SECTION_STYLES.LAYOUT.row}>
           {maxEnhancement === 0 ? (
@@ -115,14 +89,12 @@ export function EGOGiftMetadata({
         </div>
       </MetadataRow>
 
-      {/* Theme Pack row - label visible, content suspends */}
       <MetadataRow label={t('egoGift.relatedThemePack', 'Related Theme Pack')}>
         <Suspense fallback={<Skeleton className="h-4 w-24" />}>
           <ThemePackDisplay themePack={themePack} />
         </Suspense>
       </MetadataRow>
 
-      {/* Difficulty row - always visible */}
       {(hardOnly || extremeOnly) && (
         <MetadataRow label={t('egoGift.difficulty', 'Difficulty')}>
           <div className="flex gap-2">

@@ -14,16 +14,12 @@ const NAME_CLASS =
   'text-xs text-center text-foreground line-clamp-2 w-full leading-tight font-medium'
 
 interface EGOGiftGridProps {
-  /** Gift ids in render order; ids missing from `spec` are skipped. */
   ids: readonly string[]
   spec: Record<string, EGOGiftSpec>
-  /** Show the gift name under each card. */
   showName?: boolean
-  /** Wrapper classes for the row. */
   className?: string
 }
 
-/** Wrapping row of EGO gift cards, each linking to its detail page. */
 export function EGOGiftGrid({
   ids,
   spec,

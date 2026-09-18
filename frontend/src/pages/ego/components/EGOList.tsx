@@ -14,11 +14,9 @@ interface EGOListProps {
   store: FilterStore<EGOFacetState>
 }
 
-/** The EGO browser's card grid. */
 export function EGOList({ egos, store }: EGOListProps) {
   const { names: egoNames, mappings } = useSearchTermSources(EGO_LIST, EMPTY_NAMES)
 
-  // Sort all EGOs once (stable order for CSS-based filtering)
   const sortedEGOs = sortEGOByDate(egos)
 
   return (

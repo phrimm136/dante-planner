@@ -11,7 +11,6 @@ import { EGOGiftSelectableCard } from './EGOGiftSelectableCard'
 interface GiftCellProps {
   gift: EGOGiftEntity
   isSelected: boolean
-  /** Whether the gift survives the current filters */
   isVisible: boolean
 }
 
@@ -87,7 +86,6 @@ function EGOGiftEnhancementCellImpl({
   )
 }
 
-/** One gift's seat in an observation-selection grid, on the same terms. */
 export const EGOGiftObservationCell = memo(
   EGOGiftObservationCellImpl,
   (prev, next) => sameGift(prev, next) && prev.onSelect === next.onSelect,

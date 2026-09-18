@@ -11,11 +11,6 @@ interface EGOGiftTierIndicatorProps {
 
 const tierTexts = ['I', 'II', 'III', 'IV', 'V']
 
-/**
- * Tier indicator for EGO gift cards
- * Shows EX icon or letter representation (I, II, III, IV, V)
- * Positioned in upper-left corner
- */
 export function EGOGiftTierIndicator({ tier }: EGOGiftTierIndicatorProps) {
   const { t } = useTranslation()
   const isEXTier = tier === 'EX'

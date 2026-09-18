@@ -6,11 +6,6 @@ interface EGOGiftKeywordIndicatorProps {
   keyword?: string | null
 }
 
-/**
- * Keyword indicator for EGO gift cards
- * Shows keyword icon in lower-right corner
- * Not displayed for null or "None" keywords
- */
 export function EGOGiftKeywordIndicator({ keyword }: EGOGiftKeywordIndicatorProps) {
   if (!keyword || keyword === 'None') {
     return null

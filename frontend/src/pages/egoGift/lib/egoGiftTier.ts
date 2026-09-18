@@ -1,10 +1,3 @@
-/**
- * egoGiftTier.ts
- *
- * The one reading of a gift's TIER_ tags, plus the Roman-numeral view the tier
- * chips and the tier facet select on.
- */
-
 import { EGO_GIFT_TIER_TAGS } from '@/shared/gameData'
 import type { EGOGiftTier } from '@/shared/gameData'
 
@@ -39,7 +32,6 @@ export function parseTier(tags: readonly string[]): EGOGiftTierValue | null {
   return null
 }
 
-/** Roman numeral for a tier; an absent tier passes straight through. */
 export function toRomanTier(tier: EGOGiftTierValue | null): EGOGiftTier | undefined {
   return tier === null ? undefined : ROMAN_BY_TIER[tier]
 }

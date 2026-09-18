@@ -13,11 +13,6 @@ interface EGOGiftTooltipInnerProps {
   enhancement: EnhancementLevel
 }
 
-/**
- * Inner component that fetches and displays gift tooltip content
- * Uses useEGOGiftDetailSpec, useEGOGiftDetailI18n which is Suspense-ready
- * Must be wrapped in Suspense boundary
- */
 function EGOGiftTooltipInner({ giftId, enhancement }: EGOGiftTooltipInnerProps) {
   const { t, i18n } = useTranslation('common')
   const spec = useEGOGiftDetailSpec(giftId)
@@ -30,7 +25,6 @@ function EGOGiftTooltipInner({ giftId, enhancement }: EGOGiftTooltipInnerProps) 
   const [canScrollUp, setCanScrollUp] = useState(false)
   const [canScrollDown, setCanScrollDown] = useState(false)
 
-  // Check if content is scrollable and update indicator state
   const updateScrollState = () => {
     const el = scrollRef.current
     if (!el) return
@@ -40,19 +34,16 @@ function EGOGiftTooltipInner({ giftId, enhancement }: EGOGiftTooltipInnerProps) 
     setCanScrollDown(hasMoreBelow)
   }
 
-  // Initial check after render
   useEffect(() => {
     updateScrollState()
   }, [description])
 
   return (
     <>
-      {/* Name with attribute color */}
       <p className="font-semibold text-[15px] mb-2" style={{ color: nameColor, ...displayStyle }}>
         {giftI18n.name}
       </p>
 
-      {/* Description based on enhancement level */}
       {description ? (
         <div className="relative h-[200px]">
           <div
@@ -65,7 +56,6 @@ function EGOGiftTooltipInner({ giftId, enhancement }: EGOGiftTooltipInnerProps) 
           >
             <FormattedDescription text={description} />
           </div>
-          {/* Scroll indicators - absolute positioned to avoid layout shift */}
           {canScrollUp && (
             <div className="absolute top-0 left-0 right-0 flex justify-center pointer-events-none">
               <ChevronUp className="w-4 h-4 text-muted-foreground animate-bounce" />
@@ -84,17 +74,11 @@ function EGOGiftTooltipInner({ giftId, enhancement }: EGOGiftTooltipInnerProps) 
   )
 }
 
-/**
- * Loading fallback for tooltip content
- */
 function TooltipLoading() {
   const { t } = useTranslation('common')
   return <p className="text-sm">{t('loading')}</p>
 }
 
-/**
- * Error fallback for tooltip content - lightweight, no reset button
- */
 function TooltipError() {
   const { t } = useTranslation('common')
   return <p className="text-sm">{t('loadError')}</p>
@@ -105,14 +89,6 @@ interface EGOGiftTooltipContentProps {
   enhancement: EnhancementLevel
 }
 
-/**
- * Tooltip content for EGO gift cards and enhancement buttons
- * Shows colored name + description with Suspense for lazy loading
- *
- * Usage:
- * - Observation list: Render on card hover
- * - Comprehensive list: Render on enhancement button hover
- */
 export function EGOGiftTooltipContent({ giftId, enhancement }: EGOGiftTooltipContentProps) {
   return (
     <ReactErrorBoundary fallback={<TooltipError />}>

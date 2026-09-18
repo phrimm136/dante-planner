@@ -5,11 +5,6 @@ interface EGOGiftEnhancementIndicatorProps {
   enhancement: 0 | 1 | 2
 }
 
-/**
- * Enhancement level indicator for EGO gift cards
- * Shows +1 or +2 icon in upper-right corner
- * Not displayed for base level (0)
- */
 export function EGOGiftEnhancementIndicator({ enhancement }: EGOGiftEnhancementIndicatorProps) {
   if (enhancement === 0) {
     return null

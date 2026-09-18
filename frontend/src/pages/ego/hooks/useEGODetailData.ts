@@ -20,20 +20,10 @@ const EGO_DETAIL: EntityDetailDataConfig<
   i18nSchema: EGOI18nSchema,
 }
 
-/**
- * EGO spec data; suspends on initial load, not on language change.
- *
- * @param id - EGO ID (must be defined - validate in route first)
- */
 export function useEGODetailSpec(id: string) {
   return useEntityDetailSpec(EGO_DETAIL, id)
 }
 
-/**
- * EGO i18n data; suspends while loading.
- *
- * @param id - EGO ID (must be defined - validate in route first)
- */
 export function useEGODetailI18n(id: string) {
   return useEntityDetailI18n(EGO_DETAIL, id)
 }

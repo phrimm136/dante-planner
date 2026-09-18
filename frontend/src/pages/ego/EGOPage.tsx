@@ -22,9 +22,6 @@ import { FilterPageLayout } from '@/shared/filter'
 import type { z } from 'zod'
 import type { EGOSpecListSchema } from '@/pages/ego'
 
-/**
- * Card grid section.
- */
 function EGOCardGrid({
   spec,
   store,
@@ -37,10 +34,6 @@ function EGOCardGrid({
   return <EGOList egos={egos} store={store} />
 }
 
-/**
- * Shell component - uses spec data only (no language dependency)
- * Does not suspend on language change since spec query key has no language.
- */
 function EGOPageShell() {
   const { t } = useTranslation(['database', 'common'])
   const spec = useEGOListSpec()
@@ -54,7 +47,6 @@ function EGOPageShell() {
     return sc
   })()
 
-  // Filter states
   const {
     values: filters,
     setters,
@@ -64,10 +56,8 @@ function EGOPageShell() {
     store,
   } = useFilterStore(egoFilterStore)
 
-  // Calculate active filter count for mobile badge
   const activeFilterCount = calculateActiveFilterCount(...Object.values(filters))
 
-  // Primary filters (always visible on mobile): Sinner and Keyword
   const PRIMARY_FILTERS = [
     filterSection({
       key: 'selectedSinners',
@@ -87,7 +77,6 @@ function EGOPageShell() {
     }),
   ]
 
-  // Secondary filters (shown when mobile expanded): Skill Attributes, Attack Types, EGO Types, Season
   const SECONDARY_FILTERS = [
     filterSection({
       key: 'selectedAttributes',
@@ -156,17 +145,6 @@ function EGOPageShell() {
   )
 }
 
-/**
- * EGOPage - EGO browser with responsive filter sidebar
- *
- * Uses FilterPageLayout for responsive desktop sidebar / mobile sheet layout.
- * Title and description remain visible during loading via Suspense boundary.
- *
- * Suspense Strategy:
- * - Outer Suspense: EGOListSkeleton for spec loading (initial)
- * - Season dropdown: Own Suspense for dropdown i18n
- * - EGOList: name lookups suspend at the card name, not the grid
- */
 export default function EGOPage() {
   return (
     <EntityListPage skeleton={<EGOListSkeleton />}>

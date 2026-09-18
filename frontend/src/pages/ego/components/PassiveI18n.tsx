@@ -8,19 +8,11 @@ import { FLAVOR_TEXT_COLOR, SECTION_STYLES } from '@/lib/constants'
 import type { PassiveId } from '@/shared/gameData'
 
 interface PassiveCardWithSuspenseProps {
-  /** EGO ID for i18n lookup */
   id: string
-  /** Passive ID */
   passiveId: PassiveId
-  /** Whether this passive is locked (from higher threadspin) */
   isLocked: boolean
 }
 
-/**
- * EGO Passive card with granular i18n Suspense.
- * Structure (locked indicator) stays visible,
- * only name and description suspend.
- */
 export function PassiveCardWithSuspense({ id, passiveId, isLocked }: PassiveCardWithSuspenseProps) {
   return (
     <div className={cn('space-y-1', isLocked && 'opacity-50')}>
@@ -42,28 +34,18 @@ export function PassiveCardWithSuspense({ id, passiveId, isLocked }: PassiveCard
   )
 }
 
-/**
- * Internal: Fetches and renders passive name with styled formatting.
- */
 function PassiveNameContent({ id, passiveId }: { id: string; passiveId: PassiveId }) {
   const i18n = useEGODetailI18n(id)
   const passive = i18n.passives[passiveId]
   return <StyledSkillName name={passive?.name || passiveId} attributeType="NEUTRAL" />
 }
 
-/**
- * Internal: Fetches and renders passive description with keyword formatting.
- */
 function PassiveDescContent({ id, passiveId }: { id: string; passiveId: PassiveId }) {
   const i18n = useEGODetailI18n(id)
   const passive = i18n.passives[passiveId]
   return <FormattedDescription text={passive?.desc ?? ''} />
 }
 
-/**
- * Internal: Fetches and renders passive flavor lore.
- * Returns null when the passive has no flavor (most do not).
- */
 function PassiveFlavorContent({ id, passiveId }: { id: string; passiveId: PassiveId }) {
   const i18n = useEGODetailI18n(id)
   const passive = i18n.passives[passiveId]
@@ -80,8 +62,4 @@ function PassiveFlavorContent({ id, passiveId }: { id: string; passiveId: Passiv
   )
 }
 
-/**
- * Alias for PassiveCardWithSuspense.
- * Used in EGODetailPage.tsx - kept for semantic clarity.
- */
 export { PassiveCardWithSuspense as PassiveCardI18n }
