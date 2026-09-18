@@ -11,9 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
 
-/**
- * Reads the caller's device id from its cookie, minting one when the cookie carries none.
- */
 @Component
 @RequiredArgsConstructor
 public class DeviceIdResolver {
@@ -24,17 +21,6 @@ public class DeviceIdResolver {
 
     private final CookieUtils cookieUtils;
 
-    /**
-     * Resolves the device id this request is identified by.
-     *
-     * <p>The answer is memoised on the request because minting is a {@code Set-Cookie}: two mints
-     * in one request would hand the caller two identities, and whichever cookie landed second
-     * would silently orphan the bucket charged under the first.</p>
-     *
-     * @param request  the request whose device cookie is read
-     * @param response the response a minted device id is set on
-     * @return the caller's device id, never null
-     */
     public UUID resolve(HttpServletRequest request, HttpServletResponse response) {
         if (request.getAttribute(REQUEST_ATTRIBUTE) instanceof UUID memoised) {
             return memoised;

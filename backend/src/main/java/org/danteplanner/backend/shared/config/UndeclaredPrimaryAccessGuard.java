@@ -11,14 +11,8 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 
 /**
- * Watches for a PRIMARY connection acquired while no transaction is active.
- *
- * <p>Such an acquisition is undeclared: it carries no read-only flag, so it cannot be routed to the
- * replica and it holds a primary connection for whatever the caller does next. Under fail-fast the
- * acquisition throws; otherwise it is counted and served.</p>
- *
- * <p>The guard arms at {@link ApplicationReadyEvent}. Flyway, Hibernate schema validation and the
- * pool-metrics unwrap all acquire before that point.</p>
+ * Flyway, Hibernate schema validation and the pool-metrics unwrap all acquire a connection before
+ * {@link ApplicationReadyEvent}.
  */
 public class UndeclaredPrimaryAccessGuard implements ApplicationListener<ApplicationReadyEvent> {
 
@@ -38,11 +32,6 @@ public class UndeclaredPrimaryAccessGuard implements ApplicationListener<Applica
         armed.set(true);
     }
 
-    /**
-     * Judges one resolved-to-PRIMARY acquisition. Never changes the routing decision.
-     *
-     * @throws IllegalStateException when fail-fast is on and the acquisition is undeclared
-     */
     public void checkDeclared() {
         if (!armed.get() || TransactionSynchronizationManager.isActualTransactionActive()) {
             return;

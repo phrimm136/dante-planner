@@ -16,16 +16,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Security configuration properties.
- *
- * <p>Properties bound from application.properties:
- * <ul>
- *   <li>security.trusted-proxy-ips: Comma-separated list of trusted reverse proxy IPs
- *       (e.g., nginx). Only X-Forwarded-For headers from these IPs are trusted.</li>
- * </ul>
- *
- * <p>Security note: If trusted-proxy-ips is misconfigured, rate limiting may be
- * bypassed via X-Forwarded-For spoofing. In production, set this to your nginx IP(s).
+ * Only X-Forwarded-For headers from the configured proxy IPs are honoured; a misconfigured list
+ * lets rate limiting be bypassed by X-Forwarded-For spoofing.
  */
 @Configuration
 @ConfigurationProperties(prefix = "security")
@@ -34,26 +26,12 @@ import java.util.Set;
 @Slf4j
 public class SecurityProperties {
 
-    /**
-     * Comma-separated list of trusted proxy IP addresses.
-     * Default: "127.0.0.1" for local development.
-     */
     private String trustedProxyIps = "127.0.0.1";
 
-    /**
-     * Parsed set of trusted proxy IPs for efficient lookup (exact matches).
-     */
     private Set<String> trustedProxyIpSet;
 
-    /**
-     * Parsed list of CIDR subnets for range matching.
-     */
     private List<CidrRange> trustedProxyCidrRanges;
 
-    /**
-     * Parses the comma-separated trusted proxy IPs into a Set on startup.
-     * Supports both individual IPs and CIDR notation (e.g., 172.18.0.0/16).
-     */
     @PostConstruct
     public void parseTrustedProxyIps() {
         if (trustedProxyIps == null || trustedProxyIps.isBlank()) {
@@ -89,23 +67,15 @@ public class SecurityProperties {
                 trustedProxyIpSet.size(), trustedProxyCidrRanges.size());
     }
 
-    /**
-     * Checks if the given IP is trusted (exact match or within CIDR range).
-     *
-     * @param ip IP address to check
-     * @return true if trusted
-     */
     public boolean isTrustedProxy(String ip) {
         if (ip == null || ip.isBlank()) {
             return false;
         }
 
-        // Check exact match first (fast path)
         if (trustedProxyIpSet.contains(ip)) {
             return true;
         }
 
-        // Check CIDR ranges
         for (CidrRange range : trustedProxyCidrRanges) {
             if (range.contains(ip)) {
                 return true;
@@ -115,18 +85,10 @@ public class SecurityProperties {
         return false;
     }
 
-    /**
-     * Returns the set of trusted proxy IPs for X-Forwarded-For validation.
-     *
-     * @return immutable set of trusted proxy IP addresses
-     */
     public Set<String> getTrustedProxyIpSet() {
         return trustedProxyIpSet;
     }
 
-    /**
-     * An IPv4 subnet in CIDR notation, answering whether it contains a given address.
-     */
     public static final class CidrRange {
         private final byte[] networkAddress;
         private final int prefixLength;
@@ -136,13 +98,6 @@ public class SecurityProperties {
             this.prefixLength = prefixLength;
         }
 
-        /**
-         * Parses a subnet.
-         *
-         * @param cidr the subnet in {@code address/prefix} notation
-         * @return the parsed range
-         * @throws IllegalArgumentException if the notation, the address, or the prefix is invalid
-         */
         public static CidrRange parse(String cidr) {
             String[] parts = cidr.split("/");
             if (parts.length != 2) {
@@ -163,12 +118,6 @@ public class SecurityProperties {
             }
         }
 
-        /**
-         * Whether this subnet contains an address.
-         *
-         * @param ip the address to test
-         * @return true when the address falls inside the subnet
-         */
         public boolean contains(String ip) {
             try {
                 byte[] ipBytes = InetAddress.getByName(ip).getAddress();
@@ -180,14 +129,12 @@ public class SecurityProperties {
                 int fullBytes = prefixLength / 8;
                 int remainingBits = prefixLength % 8;
 
-                // Compare full bytes
                 for (int i = 0; i < fullBytes; i++) {
                     if (ipBytes[i] != networkAddress[i]) {
                         return false;
                     }
                 }
 
-                // Compare remaining bits
                 if (remainingBits > 0 && fullBytes < ipBytes.length) {
                     int mask = 0xFF << (8 - remainingBits);
                     if ((ipBytes[fullBytes] & mask) != (networkAddress[fullBytes] & mask)) {

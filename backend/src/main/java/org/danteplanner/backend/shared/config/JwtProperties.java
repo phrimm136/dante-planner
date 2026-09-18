@@ -24,17 +24,6 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.nio.charset.StandardCharsets;
 
-/**
- * JWT configuration properties with startup validation.
- * Loads RSA keys from PEM files and AES encryption key at startup.
- *
- * Properties bound from application.properties:
- * - jwt.private-key-path: Path to RSA private key (PKCS#8 PEM format)
- * - jwt.public-key-path: Path to RSA public key (X.509 PEM format)
- * - jwt.encryption-key: Base64-encoded AES-256 key (32 bytes)
- * - jwt.access-token-expiry: Access token lifetime in milliseconds
- * - jwt.refresh-token-expiry: Refresh token lifetime in milliseconds
- */
 @Configuration
 @ConfigurationProperties(prefix = "jwt")
 @Validated
@@ -54,47 +43,24 @@ public class JwtProperties {
     private PublicKey publicKey;
     private byte[] encryptionKeyBytes;
 
-    /**
-     * Access token expiry time in milliseconds.
-     * Default: 900000 (15 minutes)
-     */
     @Min(value = 1, message = "Access token expiry must be positive")
     private long accessTokenExpiry = 900000L;
 
-    /**
-     * Refresh token expiry time in milliseconds.
-     * Default: 604800000 (7 days)
-     */
     @Min(value = 1, message = "Refresh token expiry must be positive")
     private long refreshTokenExpiry = 604800000L;
 
-    /**
-     * Returns access token expiry in seconds (for cookie max-age).
-     */
     public int getAccessTokenExpirySeconds() {
         return (int) (accessTokenExpiry / 1000);
     }
 
-    /**
-     * Returns refresh token expiry in seconds (for cookie max-age).
-     */
     public int getRefreshTokenExpirySeconds() {
         return (int) (refreshTokenExpiry / 1000);
     }
 
-    /**
-     * Returns cookie expiry in seconds for both access and refresh token cookies.
-     * Uses refresh token lifetime (7 days) so cookies survive for refresh flow.
-     * JWT tokens expire independently; server validates actual token expiry.
-     */
     public int getCookieExpirySeconds() {
         return (int) (refreshTokenExpiry / 1000);
     }
 
-    /**
-     * Loads RSA keys from PEM files and validates encryption key at startup.
-     * Fails fast if any key is missing or invalid.
-     */
     @PostConstruct
     public void loadKeys() {
         requireConfigured(privateKeyPath, "private key path", "JWT_PRIVATE_KEY_PATH");

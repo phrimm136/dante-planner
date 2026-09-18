@@ -7,19 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.time.ZoneOffset;
 
-/**
- * Configuration for username generation epithets.
- * Tracks when each epithet was added for time-decay weighted random selection.
- * Frontend maps keywords to display names via i18n.
- *
- * <p>Selection is weighted by {@link WeightDecay}.</p>
- */
 @Component
 public class EpithetConfig implements EpithetProvider {
 
-    /**
-     * Epithet keywords mapped to their added dates.
-     */
     private static final Map<String, LocalDate> EPITHETS = Map.ofEntries(
             Map.entry("NAIVE", LocalDate.of(2026, 1, 21)),
             Map.entry("STUPID", LocalDate.of(2026, 1, 21)),
@@ -49,46 +39,20 @@ public class EpithetConfig implements EpithetProvider {
             Map.entry("BLIND", LocalDate.of(2026, 1, 21))
     );
 
-    /**
-     * Get all valid epithet keywords.
-     *
-     * @return unmodifiable list of valid keywords
-     */
     @Override
     public List<String> getEpithets() {
         return List.copyOf(EPITHETS.keySet());
     }
 
-    /**
-     * Calculate the weight for an epithet based on time-decay.
-     * Newer epithets have higher weights to increase their selection probability.
-     *
-     * @param keyword the epithet keyword
-     * @return weight value (1, 2, or 3)
-     */
     @Override
     public int getWeight(String keyword) {
         return getWeight(keyword, LocalDate.now(ZoneOffset.UTC));
     }
 
-    /**
-     * Calculate the weight for an epithet based on time-decay.
-     * Package-private for testing.
-     *
-     * @param keyword the epithet keyword
-     * @param referenceDate the date to calculate from
-     * @return weight value (1, 2, or 3)
-     */
     int getWeight(String keyword, LocalDate referenceDate) {
         return WeightDecay.weightOf(EPITHETS.get(keyword), referenceDate);
     }
 
-    /**
-     * Check if a keyword is a valid epithet.
-     *
-     * @param keyword the keyword to check
-     * @return true if valid
-     */
     public boolean isValidEpithet(String keyword) {
         return EPITHETS.containsKey(keyword);
     }

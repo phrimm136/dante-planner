@@ -14,13 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * Records the observer effect a write owes, inside the transaction of that write.
- *
- * <p>{@code MANDATORY} rather than {@code REQUIRED}: an event recorded in a transaction of its own
- * would survive a rollback of the write that occasioned it, and the whole point of the row is that
- * it commits with its cause or not at all.</p>
- */
 @Service
 @RequiredArgsConstructor
 public class DomainEventRecorder {
@@ -29,13 +22,6 @@ public class DomainEventRecorder {
     private final ObjectMapper objectMapper;
     private final ApplicationEventPublisher eventPublisher;
 
-    /**
-     * Record one event and arm the eager dispatch that follows the caller's commit.
-     *
-     * @param type        the kind of effect owed
-     * @param aggregateId the aggregate the effect is about
-     * @param payload     the ids the effect needs to re-read its subject
-     */
     @Transactional(propagation = Propagation.MANDATORY)
     public void recordDomainEvent(DomainEventType type, UUID aggregateId, Map<String, Object> payload) {
         DomainEvent saved = events.insert(DomainEvent.of(type, aggregateId, serializePayload(payload)));

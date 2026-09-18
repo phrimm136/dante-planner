@@ -12,9 +12,6 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 import java.util.UUID;
 
-/**
- * Resolves {@link DeviceId} annotated parameters from HTTP-only cookies.
- */
 @Component
 @RequiredArgsConstructor
 public class DeviceIdArgumentResolver implements HandlerMethodArgumentResolver {

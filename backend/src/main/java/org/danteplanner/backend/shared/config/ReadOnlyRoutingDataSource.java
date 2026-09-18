@@ -4,20 +4,8 @@ import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
- * Routes read-only transactions to the local replica pool and writes to the primary.
- *
- * <p>The lookup key is read lazily via {@code LazyConnectionDataSourceProxy} so the
- * read-only flag is already set when the physical connection is acquired.</p>
- *
- * <p>A per-thread override takes precedence over the read-only rule: the replica-miss re-check
- * pins the current thread to {@link RoutingKey#BULKHEAD} before re-running the dereference, so the
- * re-check reaches the primary through the isolated bulkhead pool. The override is a static
- * {@link ThreadLocal} — like {@link TransactionSynchronizationManager} itself — because the routing
- * datasource is otherwise unreachable beneath the lazy-connection proxy.</p>
- *
- * <p>Every acquisition that lands on {@link RoutingKey#PRIMARY} without an override passes through
- * {@link UndeclaredPrimaryAccessGuard}, which observes it and may reject it but never redirects
- * it.</p>
+ * The lookup key is read lazily via {@code LazyConnectionDataSourceProxy}, so the read-only flag
+ * is already set when the physical connection is acquired.
  */
 public class ReadOnlyRoutingDataSource extends AbstractRoutingDataSource {
 

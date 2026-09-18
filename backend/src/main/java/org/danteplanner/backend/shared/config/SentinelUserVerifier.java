@@ -9,13 +9,6 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-/**
- * Verifies that the sentinel user (id=0) exists in the database at application startup.
- * The sentinel user is required for vote reassignment during user hard-delete operations.
- *
- * @see org.danteplanner.backend.planner.repository.PlannerVoteRepository#reassignUserVotes
- * @see org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository#reassignUserVotes
- */
 @Component
 @RequiredArgsConstructor
 @Slf4j

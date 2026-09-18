@@ -17,14 +17,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.danteplanner.backend.shared.config.ReadOnlyRoutingDataSource;
 import org.danteplanner.backend.shared.config.RoutingKey;
 
-/**
- * Enforces read-your-writes consistency around each request.
- *
- * <p>On safe reads (GET/HEAD) carrying the {@link GtidCookie#NAME} cookie, consults the
- * {@link GtidReadGate}: if the replica has applied the GTID the cookie is cleared, otherwise the
- * request is pinned to the primary for the duration of the chain. On writes it echoes the
- * just-committed GTID from {@link GtidWriteCapture} back into the response cookie.</p>
- */
 public class GtidCookieFilter extends OncePerRequestFilter {
 
     private final GtidReadGate readGate;
@@ -45,8 +37,7 @@ public class GtidCookieFilter extends OncePerRequestFilter {
             } else {
                 filterChain.doFilter(request, response);
             }
-            // Reached only for responses without a JSON body (204s): a bodied response is already
-            // committed by the converter's flush, and GtidCookieResponseAdvice minted before it.
+            // A bodied response is already committed by the converter's flush.
             writeCapture.takeCapturedGtid()
                     .ifPresent(gtid -> addCookie(response, GtidCookie.of(gtid)));
         } finally {

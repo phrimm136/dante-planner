@@ -34,34 +34,12 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Wires the three logical Redis roles as distinct {@link LettuceConnectionFactory} beans.
+ * <p>Defining an explicit {@link Primary} {@code stringRedisTemplate} makes Spring Boot's
+ * auto-configured template back off, so every by-type {@code StringRedisTemplate} injection
+ * resolves to it.</p>
  *
- * <ul>
- *   <li>{@code authRedisConnectionFactory} — the auth Redis (Oregon primary, durable):
- *       token-family rotation, blacklist, delete tombstones, SSE pub/sub. Marked
- *       {@link Primary} so Spring Data's auto-configured {@code RedisTemplate} resolves
- *       against the auth store when it autowires a single {@code RedisConnectionFactory}
- *       by type.</li>
- *   <li>{@code rateLimitRedisConnectionFactory} — the per-region local ephemeral Redis
- *       backing rate-limit buckets (no persistence, no replication).</li>
- *   <li>{@code sseLocalRedisConnectionFactory} — the per-region local Redis a pod
- *       subscribes to for SSE fan-out; single-region it is the same host as auth,
- *       multi-region it is the regional replica.</li>
- *   <li>{@code authLocalRedisConnectionFactory} — the per-region auth read replica;
- *       single-region it is the same host as auth, multi-region it is the regional
- *       replica serving local reads.</li>
- * </ul>
- *
- * <p>The explicit {@link Primary} {@code stringRedisTemplate} is the auth write template:
- * defining it makes Spring Boot's auto-configured template back off, so every by-type
- * {@code StringRedisTemplate} injection resolves deterministically to the auth (write-global)
- * store, while the non-{@code @Primary} {@code authLocalStringRedisTemplate} serves the
- * read-local path.</p>
- *
- * <p>Each endpoint's host/port is environment-specific and bound from
- * {@code application.properties} under the {@code redis} prefix. The factories connect
- * lazily — the default {@code LettuceConnectionFactory} opens no connection at startup —
- * so the beans exist without a live Redis behind them.</p>
+ * <p>The default {@code LettuceConnectionFactory} opens no connection at startup, so the beans
+ * exist without a live Redis behind them.</p>
  */
 @Configuration
 @ConfigurationProperties(prefix = "redis")
@@ -103,12 +81,6 @@ public class RedisConnectionConfig {
         return BoundedRedisConnections.connectionFactory(standaloneConfiguration(authLocal));
     }
 
-    /**
-     * Maps an {@link Endpoint} to a {@link RedisStandaloneConfiguration}. An empty
-     * password means the endpoint runs without AUTH (single-region default); a
-     * non-empty one is sent on connect ({@code requirepass}-protected endpoints,
-     * e.g. the cross-region-exposed auth primary and its replicas).
-     */
     private static RedisStandaloneConfiguration standaloneConfiguration(Endpoint endpoint) {
         RedisStandaloneConfiguration configuration =
                 new RedisStandaloneConfiguration(endpoint.getHost(), endpoint.getPort());
@@ -130,9 +102,7 @@ public class RedisConnectionConfig {
     }
 
     /**
-     * Building the underlying proxy manager opens a Lettuce connection, and the context must
-     * boot without a live Redis (same invariant as the lazy connection factories above), so
-     * the returned manager defers that connection to the first rate-limit check.
+     * Building the underlying proxy manager opens a Lettuce connection.
      */
     @Bean
     public ProxyManager<byte[]> rateLimitProxyManager() {
@@ -140,15 +110,6 @@ public class RedisConnectionConfig {
                 rateLimit.getHost(), rateLimit.getPort(), Duration.ofSeconds(rateLimit.getBucketTtlSeconds())));
     }
 
-    /**
-     * Builds a bucket4j {@link ProxyManager} whose buckets live in the local ephemeral
-     * rate-limit Redis, keyed by the UTF-8 bytes of the rate-limit key.
-     *
-     * @param host      rate-limit Redis host
-     * @param port      rate-limit Redis port
-     * @param bucketTtl per-bucket time-to-live for the Redis key
-     * @return a byte[]-keyed proxy manager backed by the given Redis endpoint
-     */
     public static ProxyManager<byte[]> buildRateLimitProxyManager(String host, int port, Duration bucketTtl) {
         RedisClient client = BoundedRedisConnections.redisClient(host, port);
         StatefulRedisConnection<byte[], byte[]> connection;
@@ -165,11 +126,6 @@ public class RedisConnectionConfig {
                 .build();
     }
 
-    /**
-     * Connects on first use instead of at construction. A failed connection attempt is not
-     * cached — the next call retries, and the raw Lettuce exception propagates so the
-     * degradation handler can map it to a typed 503 rather than a context-boot failure.
-     */
     private static final class LazyConnectingProxyManager implements ProxyManager<byte[]> {
 
         private final Supplier<ProxyManager<byte[]>> connector;

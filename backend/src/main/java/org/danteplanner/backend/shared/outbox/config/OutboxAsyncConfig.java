@@ -8,18 +8,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.ThreadPoolExecutor;
 
-/**
- * The pool the eager outbox dispatch runs on.
- *
- * <p>The tree's async model is otherwise {@code @Scheduled} plus after-commit listeners plus Redis
- * pub/sub, and this is the one exception: the dispatch has to leave the request thread, because a
- * fan-out with no bound on its size would otherwise be paid by the response.</p>
- *
- * <p>A saturated queue discards rather than throwing or borrowing the caller. Throwing would
- * escape the after-commit callback into a request whose write already committed, and borrowing the
- * caller would put the fan-out back on the thread this pool exists to spare. A discarded hop costs
- * at most one relay interval, because the row it would have dispatched is still open.</p>
- */
 @Configuration
 @EnableAsync
 @EnableRetry

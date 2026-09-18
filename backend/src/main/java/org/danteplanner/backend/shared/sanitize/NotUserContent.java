@@ -7,11 +7,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Declares that a request-DTO String property carries no user-authored text, and is the only
- * opt-out the sanitization coverage guard accepts in place of {@link Sanitized}.
- *
- * <p>It holds for an identifier, an enum name, or another value the server itself checks against a
- * closed set before use — never for a value a caller may fill with arbitrary text.</p>
+ * Holds for an identifier, an enum name, or another value the server itself checks against a
+ * closed set before use — never for a value a caller may fill with arbitrary text.
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

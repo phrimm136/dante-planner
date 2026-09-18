@@ -14,9 +14,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
 
-/**
- * Web MVC configuration for custom argument resolvers and converters.
- */
 @Configuration
 @RequiredArgsConstructor
 @EnableSpringDataWebSupport(pageSerializationMode = PageSerializationMode.VIA_DTO)
@@ -40,10 +37,6 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addConverter(new StringToMDCategoryConverter());
     }
 
-    /**
-     * Converter for MDCategory that uses the JSON value format (e.g., "5F", "10F", "15F")
-     * instead of enum constant names.
-     */
     private static class StringToMDCategoryConverter implements Converter<String, MDCategory> {
         @Override
         public MDCategory convert(String source) {

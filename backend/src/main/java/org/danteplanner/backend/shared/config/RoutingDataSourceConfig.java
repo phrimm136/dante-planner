@@ -28,15 +28,8 @@ import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
 import org.danteplanner.backend.shared.readpath.PrimaryReCheck;
 
 /**
- * Builds the replica-aware routing datasource per mechanics §5/§6.
- *
- * <p>Each HikariCP pool is sized from the shared {@link PoolLedger} constants — the same ledger
- * the INV9 config assertion reads — so production and the assertion never drift. The primary pool
- * is sized per region (Seoul 10 / Oregon 15); the Seoul-local replica pool is 15.</p>
- *
- * <p>The pools are beans rather than locals so Boot's pool-metrics post-processor can reach them:
- * it binds {@code hikaricp_*} meters onto {@code DataSource} beans only, tagged with the pool
- * name.</p>
+ * Boot's pool-metrics post-processor binds {@code hikaricp_*} meters onto {@code DataSource}
+ * beans only, tagged with the pool name.
  */
 @Configuration
 @ConditionalOnProperty(name = "datasource.routing.enabled", havingValue = "true")
@@ -150,9 +143,7 @@ public class RoutingDataSourceConfig {
             @Qualifier("primaryPool") HikariDataSource primaryPool,
             @Qualifier("replicaPool") ObjectProvider<HikariDataSource> replicaPool,
             @Qualifier("bulkheadPool") ObjectProvider<HikariDataSource> bulkheadPool) {
-        // Wrapped BELOW the routing and lazy proxies: the committed GTID lives as session state on
-        // the physical connection, and this is the only layer where "the connection that committed"
-        // is held rather than looked up. The replica pool takes no writes, so it stays bare.
+        // The committed GTID lives as session state on the physical connection.
         DataSource primary = new GtidCapturingDataSource(primaryPool, gtidWriteCapture);
         Map<Object, Object> targets = new HashMap<>();
         targets.put(RoutingKey.PRIMARY, primary);

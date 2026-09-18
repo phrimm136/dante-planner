@@ -17,13 +17,6 @@ import lombok.NoArgsConstructor;
 import java.time.Instant;
 import java.util.UUID;
 
-/**
- * One observer effect, recorded by the transaction that caused it and applied by a later one.
- *
- * <p>The payload carries ids and nothing else. Everything an effect announces is re-read at
- * dispatch time, so a row that waited out a relay interval cannot announce a value the database no
- * longer holds.</p>
- */
 @Entity
 @Table(name = "domain_events",
        indexes = {
@@ -62,14 +55,6 @@ public class DomainEvent {
         this.payload = payload;
     }
 
-    /**
-     * Build an unrecorded event.
-     *
-     * @param eventType   the kind of effect
-     * @param aggregateId the aggregate the effect is about
-     * @param payload     the serialized id-only payload
-     * @return the event, carrying no id until it is inserted
-     */
     public static DomainEvent of(DomainEventType eventType, UUID aggregateId, String payload) {
         return new DomainEvent(eventType, aggregateId, payload);
     }
@@ -79,18 +64,10 @@ public class DomainEvent {
         createdAt = Instant.now();
     }
 
-    /**
-     * Whether the effect has already been applied.
-     *
-     * @return true once a dispatch marked this row
-     */
     public boolean isDispatched() {
         return dispatchedAt != null;
     }
 
-    /**
-     * Close the row so no later dispatch derives its effect a second time.
-     */
     public void markDispatched() {
         this.dispatchedAt = Instant.now();
     }

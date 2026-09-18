@@ -32,9 +32,8 @@ public class SecurityConfig {
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
     /**
-     * Prevents Spring Boot from auto-registering CsrfDoubleSubmitFilter in the servlet container.
-     * Without this, the filter runs twice: once at the servlet level, ahead of the Spring Security
-     * chain and outside its ordering, and once inside it.
+     * Spring Boot auto-registers a filter bean in the servlet container, where it runs a second
+     * time ahead of the Spring Security chain and outside its ordering.
      */
     @Bean
     public FilterRegistrationBean<CsrfDoubleSubmitFilter> csrfFilterRegistration(
@@ -45,9 +44,8 @@ public class SecurityConfig {
     }
 
     /**
-     * Prevents Spring Boot from auto-registering JwtAuthenticationFilter in the servlet container.
-     * Without this, the filter runs twice: once at the servlet level, where it authenticates ahead
-     * of the CSRF check that is meant to precede it, and once inside the Spring Security chain.
+     * Spring Boot auto-registers a filter bean in the servlet container, where it runs a second
+     * time ahead of the Spring Security chain and outside its ordering.
      */
     @Bean
     public FilterRegistrationBean<JwtAuthenticationFilter> jwtFilterRegistration(
@@ -58,10 +56,8 @@ public class SecurityConfig {
     }
 
     /**
-     * Prevents Spring Boot from auto-registering MdcLoggingFilter in the servlet container.
-     * Without this, the filter runs twice: once at the servlet level (before JwtAuthenticationFilter,
-     * so SecurityContext is empty and userId = "guest") and once inside the Spring Security chain.
-     * We manage the filter exclusively via addFilterAfter() in securityFilterChain().
+     * Spring Boot auto-registers a filter bean in the servlet container, where it runs a second
+     * time ahead of the Spring Security chain and outside its ordering.
      */
     @Bean
     public FilterRegistrationBean<MdcLoggingFilter> mdcFilterRegistration(MdcLoggingFilter filter) {
@@ -70,10 +66,6 @@ public class SecurityConfig {
         return bean;
     }
 
-    /**
-     * Defines the role hierarchy: ADMIN > MODERATOR > NORMAL.
-     * This means ADMIN automatically has all MODERATOR and NORMAL permissions.
-     */
     @Bean
     public RoleHierarchy roleHierarchy() {
         return RoleHierarchyImpl.withDefaultRolePrefix()
@@ -85,82 +77,57 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // CSRF: Spring's built-in CSRF is disabled; we enforce our own self-enforcing
-            // double-submit cookie via CsrfDoubleSubmitFilter (registered below). SameSite=Lax
-            // stays as a belt-and-suspenders layer on the auth cookies.
             .csrf(AbstractHttpConfigurer::disable)
 
-            // CORS: Allow frontend origin to make API calls
             .cors(cors -> {})
 
-            // Stateless session: No server-side session storage
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-            // Authorization rules
             .authorizeHttpRequests(auth -> auth
-                // CORS preflight requests - must be allowed before other rules
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                // ASYNC dispatch (SSE continuations) - already authenticated on initial request
                 .dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll()
 
-                // Log out everywhere requires an authenticated session (must precede /api/auth/** permitAll)
                 .requestMatchers(HttpMethod.POST, "/api/auth/logout-all").authenticated()
 
-                // Public endpoints: OAuth callbacks, health checks
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers("/actuator/health/readiness").permitAll()
                 .requestMatchers("/actuator/health/liveness").permitAll()
                 .requestMatchers("/actuator/prometheus").permitAll()
 
-                // Public planner endpoints (no auth required for config and browsing)
                 .requestMatchers("/api/planner/md/config").permitAll()
                 .requestMatchers("/api/planner/md/published").permitAll()
                 .requestMatchers("/api/planner/md/published/{id}").permitAll()
                 .requestMatchers("/api/planner/md/recommended").permitAll()
 
-                // Public user endpoints (association list for settings page)
                 .requestMatchers(HttpMethod.GET, "/api/user/associations").permitAll()
 
-                // Public comment endpoints (reading comments on published planners)
                 .requestMatchers(HttpMethod.GET, "/api/planner/{plannerId}/comments").permitAll()
 
-                // Public SSE for comment notifications (guests can subscribe)
                 .requestMatchers(HttpMethod.GET, "/api/planner/{plannerId}/comments/events").permitAll()
 
-                // Role-protected endpoints (ADMIN > MODERATOR > NORMAL hierarchy)
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/moderation/**").hasRole("MODERATOR")
 
-                // All other endpoints require authentication
                 .anyRequest().authenticated()
             )
 
-            // Add JWT filter before Spring Security's authentication filter
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-            // CSRF double-submit enforcement runs before authentication so unsafe
-            // requests are rejected ahead of any token validation
             .addFilterBefore(csrfDoubleSubmitFilter, JwtAuthenticationFilter.class)
-            // MDC runs after JWT so SecurityContext is populated and userId is available
             .addFilterAfter(mdcLoggingFilter, JwtAuthenticationFilter.class)
 
-            // Security headers
             .headers(headers -> headers
                 .xssProtection(xss -> xss.headerValue(
                     XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK
                 ))
                 .frameOptions(frame -> frame.deny())
-                // HSTS: Force HTTPS for 1 year, include subdomains
-                // Prevents SSL stripping attacks after first secure connection
                 .httpStrictTransportSecurity(hsts -> hsts
                     .maxAgeInSeconds(31536000)
                     .includeSubDomains(true)
                 )
             )
 
-            // Exception handling: Return 401 with error details for unauthenticated access
-            // CustomAuthenticationEntryPoint reads error code from request attribute (set by JwtAuthenticationFilter)
             .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint));
 
         return http.build();

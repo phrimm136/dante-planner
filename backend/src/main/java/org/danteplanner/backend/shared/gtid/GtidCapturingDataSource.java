@@ -21,21 +21,14 @@ import com.mysql.cj.protocol.ServerSessionStateController;
 import com.mysql.cj.protocol.ServerSessionStateController.SessionStateChange;
 
 /**
- * Lends connections that report their own committed GTID to {@link GtidWriteCapture}.
- *
  * <p>The GTID a transaction commits is announced on the OK packet of that transaction's
  * {@code COMMIT}, and the driver keeps it as session state on the connection that received it.
- * Reading it therefore requires the connection that committed — not a connection, not the
- * transaction's nominal connection, but that physical one. Intercepting {@code commit()} is the one
- * place where holding it is guaranteed rather than inferred: the code runs on the connection, so no
- * lookup can resolve to the wrong one.</p>
+ * Reading it requires the connection that committed — not a connection, not the transaction's
+ * nominal connection, but that physical one.</p>
  *
- * <p>That is why this sits below the routing and lazy-connection proxies rather than reading the
- * connection back out of them. A lookup through {@code DataSourceUtils} answers "give me a
- * connection", which under JPA is not the connection Hibernate committed on — its handle is never
- * materialised, so unwrapping it borrows a fresh pooled connection carrying no session state.</p>
- *
- * <p>Wraps the PRIMARY pool only; the replica takes no writes.</p>
+ * <p>A lookup through {@code DataSourceUtils} answers "give me a connection", which under JPA is
+ * not the connection Hibernate committed on — its handle is never materialised, so unwrapping it
+ * borrows a fresh pooled connection carrying no session state.</p>
  */
 @Slf4j
 public class GtidCapturingDataSource extends AbstractDataSource {
@@ -49,9 +42,8 @@ public class GtidCapturingDataSource extends AbstractDataSource {
     private final GtidWriteCapture capture;
 
     /**
-     * Whether {@code session_track_gtids} is active, per physical connection. The variable is
-     * seeded at connect time, so one probe per connection is authoritative for its lifetime; weak
-     * keys let entries die with the pooled connection.
+     * {@code session_track_gtids} is seeded at connect time, so one probe per connection is
+     * authoritative for its lifetime.
      */
     private final Map<JdbcConnection, Boolean> trackerActiveByConnection =
             Collections.synchronizedMap(new WeakHashMap<>());
@@ -102,11 +94,6 @@ public class GtidCapturingDataSource extends AbstractDataSource {
         return result;
     }
 
-    /**
-     * Records what this connection just committed. Skipped entirely outside a capture window, so a
-     * scheduled task or a Flyway migration costs nothing, and on a read-only connection, which
-     * commits no GTID and would otherwise pay for the fallback query.
-     */
     private void captureCommittedGtid(Connection target) {
         if (!capture.isWindowOpen()) {
             return;
@@ -121,15 +108,9 @@ public class GtidCapturingDataSource extends AbstractDataSource {
                 capture.recordCommit(ownGtid, true);
                 return;
             }
-            // Safe here, and only worth paying for to skip the fallback query on a read-only
-            // connection, which commits no GTID.
             if (target.isReadOnly()) {
                 return;
             }
-            // With the tracker verified active on this connection, a commit that named no GTID
-            // wrote nothing and gates no read; recording the fallback superset here would pin the
-            // requester's next read to the primary for a no-op. The fallback survives only for
-            // connections whose tracker is actually off.
             if (trackerActive(target)) {
                 return;
             }
@@ -141,9 +122,7 @@ public class GtidCapturingDataSource extends AbstractDataSource {
 
     /**
      * The GTID the server attributed to this transaction, or null when it named none — which means
-     * either that the transaction wrote nothing or that {@code session_track_gtids} is off. The
-     * caller tells the two apart with {@link #trackerActive}, probed strictly after this read so
-     * the probe's OK packet cannot wipe the tracker state it is judging.
+     * either that the transaction wrote nothing or that {@code session_track_gtids} is off.
      */
     private String readOwnGtid(Connection target) throws SQLException {
         ServerSessionStateController controller =
@@ -174,7 +153,6 @@ public class GtidCapturingDataSource extends AbstractDataSource {
         return active;
     }
 
-    /** The primary's entire executed set: correct because it is a superset, wide for the same reason. */
     private String readGlobalGtidExecuted(Connection target) throws SQLException {
         try (Statement statement = target.createStatement();
                 java.sql.ResultSet rs = statement.executeQuery(GLOBAL_GTID_SQL)) {

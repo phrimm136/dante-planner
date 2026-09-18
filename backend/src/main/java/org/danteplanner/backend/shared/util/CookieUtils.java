@@ -9,37 +9,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
- * Spring bean for HTTP cookie operations.
- * All cookies are created with secure defaults:
- * - HttpOnly: true (prevents JavaScript access)
- * - Secure: configurable (HTTPS only in production)
- * - Path: "/" (available to entire domain)
- * - SameSite: Lax (CSRF protection while allowing external link navigation)
- *
- * <p>SameSite=Lax allows cookies on top-level navigation (clicking links) but blocks them for
- * embedded requests and cross-site form POSTs. It is a belt-and-suspenders layer alongside the
- * double-submit CSRF filter ({@code CsrfDoubleSubmitFilter}); it is not the sole CSRF defense.</p>
+ * SameSite=Lax allows cookies on top-level navigation (clicking links) but blocks them for
+ * embedded requests and cross-site form POSTs.
  */
 @Component
 public class CookieUtils {
 
-    /**
-     * Whether cookies should require HTTPS.
-     * Set to false for local development without HTTPS.
-     */
     private final boolean secureCookies;
 
-    /**
-     * Cookie domain for cross-origin setups.
-     * Set to parent domain (e.g., ".limbusplanner.com") for cross-subdomain sharing.
-     * Leave empty for same-origin (default).
-     */
     private final String cookieDomain;
 
-    /**
-     * SameSite policy for cookies.
-     * "Lax" for same-origin, "None" for cross-origin (requires secure=true).
-     */
     private final String sameSite;
 
     public CookieUtils(
@@ -51,29 +30,10 @@ public class CookieUtils {
         this.sameSite = sameSite;
     }
 
-    /**
-     * Sets a secure HTTP-only cookie.
-     *
-     * @param response HTTP response to add cookie to
-     * @param name cookie name
-     * @param value cookie value
-     * @param maxAgeSeconds cookie lifetime in seconds
-     */
     public void setCookie(HttpServletResponse response, String name, String value, int maxAgeSeconds) {
         response.addCookie(buildCookie(name, value, maxAgeSeconds, true));
     }
 
-    /**
-     * Sets a secure, JavaScript-readable (non-HttpOnly) cookie.
-     * Used for the double-submit CSRF token, which the SPA must read and echo
-     * back in the {@code X-CSRF-Token} header. Secure/SameSite/domain/path match
-     * {@link #setCookie}.
-     *
-     * @param response HTTP response to add cookie to
-     * @param name cookie name
-     * @param value cookie value
-     * @param maxAgeSeconds cookie lifetime in seconds
-     */
     public void setReadableCookie(HttpServletResponse response, String name, String value, int maxAgeSeconds) {
         response.addCookie(buildCookie(name, value, maxAgeSeconds, false));
     }
@@ -91,35 +51,17 @@ public class CookieUtils {
         return cookie;
     }
 
-    /**
-     * Clears a cookie by setting its max age to 0.
-     *
-     * @param response HTTP response to add cookie to
-     * @param name cookie name to clear
-     */
     public void clearCookie(HttpServletResponse response, String name) {
         // A browser drops the stored cookie only when the expiring one matches it on
         // domain/path/secure, so the attributes must come from the same builder that set it.
         response.addCookie(buildCookie(name, "", 0, true));
     }
 
-    /**
-     * Clears both authentication cookies (access and refresh).
-     *
-     * @param response HTTP response to add the expiring cookies to
-     */
     public void clearAuthCookies(HttpServletResponse response) {
         clearCookie(response, CookieConstants.ACCESS_TOKEN);
         clearCookie(response, CookieConstants.REFRESH_TOKEN);
     }
 
-    /**
-     * Retrieves a cookie value from the request.
-     *
-     * @param request HTTP request containing cookies
-     * @param name cookie name to find
-     * @return the cookie value, empty if the request carries no cookie of that name
-     */
     public Optional<String> getCookieValue(HttpServletRequest request, String name) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {

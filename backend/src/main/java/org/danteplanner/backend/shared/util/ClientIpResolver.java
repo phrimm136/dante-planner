@@ -9,14 +9,8 @@ import org.danteplanner.backend.shared.config.SecurityProperties;
 import org.danteplanner.backend.shared.config.SecurityProperties.CidrRange;
 
 /**
- * Resolves client IP addresses and rate-limit identifiers from HTTP requests.
- *
- * <p>An {@code X-Forwarded-For} or {@code CF-Connecting-IP} header is honoured only when the
- * direct peer is a configured trusted proxy. Both headers are attacker-controlled otherwise, and
- * trusting either would let any caller choose its own rate-limit bucket.</p>
- *
- * <p>Where every request arrives from a private address — nginx behind Docker NAT — the IP
- * identifies the proxy rather than the caller, so the identifier falls back to the device id.</p>
+ * An {@code X-Forwarded-For} or {@code CF-Connecting-IP} header is honoured only when the direct
+ * peer is a configured trusted proxy. Both headers are attacker-controlled otherwise.
  */
 public final class ClientIpResolver {
 
@@ -31,7 +25,6 @@ public final class ClientIpResolver {
             "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
     );
 
-    /** Covers the full, compressed, leading-{@code ::} and trailing-{@code ::} spellings. */
     private static final Pattern IPV6_PATTERN = Pattern.compile(
             "^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$|"
             + "^::([0-9a-fA-F]{1,4}:){0,6}[0-9a-fA-F]{1,4}$|"
@@ -52,17 +45,6 @@ public final class ClientIpResolver {
     private ClientIpResolver() {
     }
 
-    /**
-     * Resolves the caller's IP address.
-     *
-     * <p>Reads the leftmost {@code X-Forwarded-For} hop when the direct peer is a trusted proxy
-     * and that hop is a well-formed address; otherwise reports the direct peer, which cannot be
-     * spoofed.</p>
-     *
-     * @param request            the HTTP request
-     * @param securityProperties the trusted-proxy configuration
-     * @return the caller's IP address
-     */
     public static String resolve(HttpServletRequest request, SecurityProperties securityProperties) {
         String directIp = request.getRemoteAddr();
         if (!securityProperties.isTrustedProxy(directIp)) {
@@ -78,18 +60,6 @@ public final class ClientIpResolver {
         return isValidIp(claimedIp) ? claimedIp : directIp;
     }
 
-    /**
-     * Resolves the identifier a request is rate-limited under.
-     *
-     * <p>Cloudflare's {@code CF-Connecting-IP} wins over {@code X-Forwarded-For} when the peer is
-     * trusted. A private resolved address means the proxy, not the caller, so the device id
-     * identifies the caller instead.</p>
-     *
-     * @param request            the HTTP request
-     * @param securityProperties the trusted-proxy configuration
-     * @param deviceId           the caller's device id from its cookie, may be null
-     * @return {@code ip:<address>} or {@code device:<id>}
-     */
     public static String resolveClientIdentifier(
             HttpServletRequest request,
             SecurityProperties securityProperties,
@@ -106,12 +76,6 @@ public final class ClientIpResolver {
         return IP_IDENTIFIER_PREFIX + ip;
     }
 
-    /**
-     * Whether the string is a well-formed IPv4 or IPv6 address.
-     *
-     * @param ip the string to check
-     * @return true when it is an address
-     */
     static boolean isValidIp(String ip) {
         if (ip == null || ip.isEmpty()) {
             return false;
@@ -119,13 +83,6 @@ public final class ClientIpResolver {
         return IPV4_PATTERN.matcher(ip).matches() || IPV6_PATTERN.matcher(ip).matches();
     }
 
-    /**
-     * Whether the address is private (RFC 1918 or loopback) and therefore identifies a network
-     * rather than a caller.
-     *
-     * @param ip the address to check
-     * @return true when the address is private
-     */
     public static boolean isPrivateIp(String ip) {
         if (!isValidIp(ip)) {
             return false;

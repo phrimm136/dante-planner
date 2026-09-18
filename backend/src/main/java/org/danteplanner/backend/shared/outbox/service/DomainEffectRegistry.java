@@ -10,12 +10,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/**
- * Routes a committed event to the arm that answers for its type.
- *
- * <p>Two arms declaring the same type fail the context at startup rather than letting one silently
- * shadow the other.</p>
- */
 @Component
 public class DomainEffectRegistry {
 
@@ -26,13 +20,6 @@ public class DomainEffectRegistry {
                 .collect(Collectors.toUnmodifiableMap(DomainEffect::type, Function.identity()));
     }
 
-    /**
-     * Apply the arm registered for this event's type.
-     *
-     * @param event  the event being dispatched
-     * @param pushes the queue the arm enqueues its announcements on
-     * @throws IllegalStateException if no arm answers for the event's type
-     */
     public void applyEffectFor(DomainEvent event, EffectPushQueue pushes) {
         Optional.ofNullable(effectsByType.get(event.getEventType()))
                 .orElseThrow(() -> new IllegalStateException(

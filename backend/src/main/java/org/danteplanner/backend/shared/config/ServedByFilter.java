@@ -10,9 +10,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-/**
- * Stamps every response with the region that served it.
- */
 @Component
 public class ServedByFilter extends OncePerRequestFilter {
 
@@ -30,8 +27,8 @@ public class ServedByFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
-        // Set before the chain: an SSE response commits as soon as it starts streaming, and headers
-        // added after commit are silently dropped.
+        // An SSE response commits as soon as it starts streaming, and headers added after commit
+        // are silently dropped.
         response.setHeader(SERVED_BY_HEADER, region);
         filterChain.doFilter(request, response);
     }

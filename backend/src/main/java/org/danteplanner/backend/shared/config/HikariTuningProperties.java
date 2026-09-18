@@ -6,10 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * The subset of {@code spring.datasource.hikari.*} the hand-built routing pools honour.
- *
- * <p>Spring Boot binds that prefix only onto a {@code DataSource} it constructs itself, so pools
- * built from {@code new HikariConfig()} silently miss it.</p>
+ * Spring Boot binds {@code spring.datasource.hikari.*} only onto a {@code DataSource} it
+ * constructs itself, so pools built from {@code new HikariConfig()} silently miss it.
  */
 @ConfigurationProperties(prefix = "spring.datasource.hikari")
 @Getter

@@ -8,13 +8,8 @@ import java.util.Optional;
 import org.springframework.http.ResponseCookie;
 
 /**
- * Builds the read-your-writes GTID cookie emitted via the {@code Set-Cookie} header.
- * The cookie carries the client's last-written GTID so subsequent reads can be routed
- * for causal consistency; a caught-up read clears it.
- *
- * <p>The value is Base64url-encoded: a raw GTID set is not cookie-safe, because a set
- * spanning multiple source UUIDs is comma-separated and RFC 6265 forbids commas in
- * cookie values.</p>
+ * A raw GTID set is not cookie-safe: a set spanning multiple source UUIDs is comma-separated and
+ * RFC 6265 forbids commas in cookie values.
  */
 public final class GtidCookie {
 
@@ -34,12 +29,6 @@ public final class GtidCookie {
         return base("").maxAge(Duration.ZERO).build();
     }
 
-    /**
-     * Decodes a cookie value produced by {@link #of(String)} back into the raw GTID set.
-     *
-     * <p>Returns empty for blank or undecodable values so a tampered cookie degrades to
-     * "no cookie" rather than an error.</p>
-     */
     public static Optional<String> decode(String cookieValue) {
         if (cookieValue == null || cookieValue.isBlank()) {
             return Optional.empty();

@@ -15,11 +15,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.io.IOException;
 import java.util.UUID;
 
-/**
- * REST controller for Server-Sent Events subscriptions.
- *
- * <p>Provides a unified SSE endpoint for all real-time user notifications.</p>
- */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/sse")
@@ -27,17 +22,6 @@ public class SseController {
 
     private final SseService sseService;
 
-    /**
-     * Subscribe to Server-Sent Events for all user notifications.
-     *
-     * <p>Returns an SSE stream that sends events based on user settings:
-     * sync:planner, notify:comment, notify:recommended, notify:published.</p>
-     *
-     * @param userId   the authenticated user ID
-     * @param deviceId the device identifier (from HTTP-only cookie)
-     * @return the SSE emitter
-     * @throws IOException if the initial connected event cannot be written
-     */
     @RateLimited(RateLimitPolicy.SSE)
     @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter subscribe(

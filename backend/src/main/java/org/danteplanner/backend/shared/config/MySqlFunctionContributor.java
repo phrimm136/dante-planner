@@ -5,9 +5,6 @@ import org.hibernate.boot.model.FunctionContributor;
 import org.hibernate.type.StandardBasicTypes;
 
 /**
- * Exposes MySQL's FULLTEXT relevance operator to HQL/Criteria as
- * {@code match_against(column, query)} so Specifications can compose the ngram
- * title search with ordinary predicates.
  * Registered via {@code META-INF/services/org.hibernate.boot.model.FunctionContributor}.
  */
 public class MySqlFunctionContributor implements FunctionContributor {

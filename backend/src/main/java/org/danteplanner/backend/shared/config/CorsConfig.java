@@ -25,9 +25,6 @@ public class CorsConfig {
         configuration.setAllowedOrigins(allowedOrigins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         // Explicit header whitelist - no wildcards for security
-        // Content-Type: Required for JSON API calls
-        // Cache-Control: Client cache control
-        // X-CSRF-Token: Double-submit CSRF token echoed by the SPA on mutating requests
         configuration.setAllowedHeaders(List.of("Content-Type", "Cache-Control", "X-CSRF-Token"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);

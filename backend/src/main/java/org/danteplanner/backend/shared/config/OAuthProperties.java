@@ -8,18 +8,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
-/**
- * OAuth configuration properties with startup validation.
- * Fails fast if required OAuth credentials are missing.
- *
- * Properties bound from application.properties:
- * - oauth.google.client-id: Google OAuth client ID
- * - oauth.google.client-secret: Google OAuth client secret
- * - oauth.google.redirect-uri: OAuth redirect URI
- * - oauth.google.authorize-url: authorization endpoint
- * - oauth.google.token-url: token endpoint
- * - oauth.google.user-info-url: userinfo endpoint
- */
 @Configuration
 @ConfigurationProperties(prefix = "oauth")
 @Validated

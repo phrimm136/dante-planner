@@ -7,23 +7,12 @@ import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.springframework.stereotype.Component;
 
-/**
- * Reads the ids an effect arm needs out of a recorded payload.
- */
 @Component
 @RequiredArgsConstructor
 public class DomainEventPayloadReader {
 
     private final ObjectMapper objectMapper;
 
-    /**
-     * The numeric id stored under a payload field.
-     *
-     * @param event the event being dispatched
-     * @param field the payload field naming the id
-     * @return the id
-     * @throws IllegalStateException if the payload cannot be parsed or carries no such field
-     */
     public long requireId(DomainEvent event, String field) {
         JsonNode payload;
         try {
