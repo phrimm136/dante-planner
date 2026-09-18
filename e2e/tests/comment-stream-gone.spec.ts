@@ -55,6 +55,7 @@ test('a stream whose planner was deleted reports gone once and stops reconnectin
     // The delete leaves the open stream untouched, so the client has learned nothing yet.
     expect(streamStatuses).toHaveLength(openedResponses)
 
+    const droppedAt = streamStatuses.length
     await context.setOffline(true)
     await page.waitForTimeout(OFFLINE_DWELL_MS)
     await context.setOffline(false)
@@ -63,12 +64,18 @@ test('a stream whose planner was deleted reports gone once and stops reconnectin
       deadlineMs: STREAM_GONE_DEADLINE_MS,
       what: 'the reconnect reading the planner as gone',
     })
-    await expect(page.getByText(REMOVED_COPY)).toBeVisible({ timeout: 20_000 })
+    // The page's own heading carries the same copy, so the toast is read as the list item sonner
+    // renders it in.
+    const toast = page.getByRole('listitem').filter({ hasText: REMOVED_COPY })
+    await expect(toast).toBeVisible({ timeout: 20_000 })
 
-    const goneAt = streamStatuses.indexOf(404)
+    // Either recovery may win the race: the query refetch that tears the stream down, or the
+    // reconnect that reads the planner as gone. Both leave the same trace — the stream learns it
+    // is gone at most once, and never reads anything else afterwards.
     await page.waitForTimeout(RECONNECT_WINDOW_MS)
-    expect(streamStatuses.filter((status) => status === 404)).toHaveLength(1)
-    expect(streamStatuses.slice(goneAt + 1)).toEqual([])
+    const afterDrop = streamStatuses.slice(droppedAt)
+    expect(afterDrop.filter((status) => status !== 404)).toEqual([])
+    expect(afterDrop.filter((status) => status === 404).length).toBeLessThanOrEqual(1)
   } finally {
     await dropPlanner(owner)
   }
