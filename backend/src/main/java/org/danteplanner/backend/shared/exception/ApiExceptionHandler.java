@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.ClientAbortException;
 import org.danteplanner.backend.auth.exception.SessionRevokedException;
-import org.danteplanner.backend.planner.exception.PlannerValidationException;
+import org.danteplanner.backend.shared.sse.SseCapacityExceededException;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.dao.CannotAcquireLockException;
@@ -23,7 +23,6 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.beans.TypeMismatchException;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -32,12 +31,11 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -55,8 +53,6 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     private static final String DEADLOCK_DETAIL = "Database temporarily busy, please retry";
     private static final String CONCURRENT_WRITE_CODE = "CONCURRENT_WRITE";
     private static final String CONCURRENT_WRITE_DETAIL = "The resource was modified concurrently";
-    private static final String SERVER_VERSION_PROPERTY = "serverVersion";
-    private static final String DEGRADED_RETRY_AFTER_SECONDS = "10";
 
     private final CookieUtils cookieUtils;
 
@@ -77,31 +73,16 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         request.removeAttribute(
                 HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
 
-        ownedCode(ex).ifPresent(code -> log.warn("{}: {}", code, loggedDetail(ex)));
-
-        if (ex instanceof PlannerValidationException validation && !validation.getSubErrors().isEmpty()) {
-            validation.getSubErrors()
-                    .forEach(e -> log.warn("Planner validation error [{}]: {}", e.code(), e.message()));
-        }
-
-        if (ex instanceof DomainException domain && domain.reportable()) {
-            Sentry.captureException(domain);
+        if (ex instanceof DomainException domain) {
+            log.warn("{}", domain.getMessage());
+            if (domain.reportable()) {
+                Sentry.captureException(domain);
+            }
+        } else if (ex instanceof SseCapacityExceededException) {
+            log.warn("{}", ex.getMessage());
         }
 
         return super.handleExceptionInternal(ex, body, headers, status, request);
-    }
-
-    private static Optional<Object> ownedCode(Exception ex) {
-        if (!(ex instanceof ErrorResponse owned)) {
-            return Optional.empty();
-        }
-        Map<String, Object> properties = owned.getBody().getProperties();
-        return Optional.ofNullable(properties)
-                .map(p -> p.get(Problems.CODE));
-    }
-
-    private static String loggedDetail(Exception ex) {
-        return ex.getMessage();
     }
 
     @Override
@@ -115,14 +96,14 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
         if (UUID.class.equals(requiredType)) {
             log.warn("Invalid UUID format for parameter '{}': {}", name, ex.getValue());
-            return respond(ex, Problems.fill(ProblemDetail.forStatus(HttpStatus.NOT_FOUND), NOT_FOUND_CODE, NOT_FOUND_DETAIL),
-                    headers, request);
+            return respond(ex, Problems.fill(ProblemDetail.forStatus(HttpStatus.NOT_FOUND),
+                    NOT_FOUND_CODE, NOT_FOUND_DETAIL), headers, request);
         }
 
         log.warn("Type mismatch for parameter '{}': expected {}, got {}",
                 name, requiredType != null ? requiredType.getSimpleName() : "unknown", ex.getValue());
-        return respond(ex, Problems.fill(ProblemDetail.forStatus(HttpStatus.BAD_REQUEST), VALIDATION_ERROR_CODE,
-                "Invalid parameter format"), headers, request);
+        return respond(ex, Problems.fill(ProblemDetail.forStatus(HttpStatus.BAD_REQUEST),
+                VALIDATION_ERROR_CODE, "Invalid parameter format"), headers, request);
     }
 
     @Override
@@ -133,8 +114,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
                 .map(e -> e.getField() + ": " + e.getDefaultMessage())
                 .collect(Collectors.joining(", "));
         log.warn("Validation error: {} | body: {}", detail, ex.getBindingResult().getTarget());
-        return respond(ex, Problems.fill(ProblemDetail.forStatus(HttpStatus.BAD_REQUEST), VALIDATION_ERROR_CODE, detail),
-                headers, request);
+        return respond(ex, Problems.fill(ProblemDetail.forStatus(HttpStatus.BAD_REQUEST),
+                VALIDATION_ERROR_CODE, detail), headers, request);
     }
 
     @Override
@@ -142,8 +123,17 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
             HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
         log.warn("Unreadable request body");
-        return respond(ex, Problems.fill(ProblemDetail.forStatus(HttpStatus.BAD_REQUEST), VALIDATION_ERROR_CODE,
-                "Invalid request body"), headers, request);
+        return respond(ex, Problems.fill(ProblemDetail.forStatus(HttpStatus.BAD_REQUEST),
+                VALIDATION_ERROR_CODE, "Invalid request body"), headers, request);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleNoResourceFoundException(NoResourceFoundException ex,
+            HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+
+        log.debug("No handler found: {} {}", ex.getHttpMethod(), ex.getResourcePath());
+        return respond(ex, Problems.fill(ProblemDetail.forStatus(HttpStatus.NOT_FOUND),
+                NOT_FOUND_CODE, NOT_FOUND_DETAIL), headers, request);
     }
 
     /**
@@ -182,15 +172,15 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
             Sentry.captureException(ex);
         }
 
-        return respond(ex, Problems.fill(ProblemDetail.forStatus(outcome.status()), outcome.code(), outcome.clientMessage()),
-                new HttpHeaders(), request);
+        return respond(ex, Problems.fill(ProblemDetail.forStatus(outcome.status()),
+                outcome.code(), outcome.clientMessage()), new HttpHeaders(), request);
     }
 
     @ExceptionHandler(CannotAcquireLockException.class)
     public ResponseEntity<Object> handleCannotAcquireLock(CannotAcquireLockException ex, WebRequest request) {
         log.warn("Database deadlock detected: {}", ex.getMessage());
-        return respond(ex, Problems.fill(ProblemDetail.forStatus(HttpStatus.SERVICE_UNAVAILABLE), DEADLOCK_CODE, DEADLOCK_DETAIL),
-                new HttpHeaders(), request);
+        return respond(ex, Problems.fill(ProblemDetail.forStatus(HttpStatus.SERVICE_UNAVAILABLE),
+                DEADLOCK_CODE, DEADLOCK_DETAIL), new HttpHeaders(), request);
     }
 
     /**
@@ -213,8 +203,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     })
     public ResponseEntity<Object> handleDatabaseUnavailable(NestedRuntimeException ex, WebRequest request) {
         log.warn("Database unavailable (transient): {}", ex.getMessage());
-        return degraded(ex, DegradationErrorConstants.DB_UNAVAILABLE_CODE,
-                DegradationErrorConstants.DB_UNAVAILABLE_MESSAGE, request);
+        return degraded(ex, DegradationErrorConstants.DB_UNAVAILABLE, request);
     }
 
     /**
@@ -231,8 +220,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleRedisUnavailable(
             RedisConnectionFailureException ex, WebRequest request) {
         log.warn("Redis unavailable during authentication (transient): {}", ex.getMessage());
-        return degraded(ex, DegradationErrorConstants.AUTH_UNAVAILABLE_CODE,
-                DegradationErrorConstants.AUTH_UNAVAILABLE_MESSAGE, request);
+        return degraded(ex, DegradationErrorConstants.AUTH_UNAVAILABLE, request);
     }
 
     /**
@@ -251,23 +239,23 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler({RedisException.class, io.github.bucket4j.TimeoutException.class})
     public ResponseEntity<Object> handleRateLimitRedisUnavailable(RuntimeException ex, WebRequest request) {
         log.warn("Rate-limit Redis unavailable (transient): {}", ex.getMessage());
-        return degraded(ex, DegradationErrorConstants.RATE_LIMIT_UNAVAILABLE_CODE,
-                DegradationErrorConstants.RATE_LIMIT_UNAVAILABLE_MESSAGE, request);
+        return degraded(ex, DegradationErrorConstants.RATE_LIMIT_UNAVAILABLE, request);
     }
 
-    private ResponseEntity<Object> degraded(Exception ex, String code, String detail, WebRequest request) {
+    private ResponseEntity<Object> degraded(
+            Exception ex, DegradationErrorConstants.Entry entry, WebRequest request) {
         HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.RETRY_AFTER, DEGRADED_RETRY_AFTER_SECONDS);
-        return respond(ex, Problems.fill(ProblemDetail.forStatus(HttpStatus.SERVICE_UNAVAILABLE), code, detail), headers, request);
+        headers.set(HttpHeaders.RETRY_AFTER, DegradationErrorConstants.RETRY_AFTER_SECONDS);
+        return respond(ex, Problems.fill(ProblemDetail.forStatus(HttpStatus.SERVICE_UNAVAILABLE),
+                entry.code(), entry.message()), headers, request);
     }
 
     @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
     public ResponseEntity<Object> handleOptimisticLocking(
             ObjectOptimisticLockingFailureException ex, WebRequest request) {
         log.warn("Concurrent write conflict: {}", ex.getMessage());
-        ProblemDetail body = Problems.fill(ProblemDetail.forStatus(HttpStatus.CONFLICT), CONCURRENT_WRITE_CODE, CONCURRENT_WRITE_DETAIL);
-        body.setProperty(SERVER_VERSION_PROPERTY, null);
-        return respond(ex, body, new HttpHeaders(), request);
+        return respond(ex, Problems.fill(ProblemDetail.forStatus(HttpStatus.CONFLICT),
+                CONCURRENT_WRITE_CODE, CONCURRENT_WRITE_DETAIL), new HttpHeaders(), request);
     }
 
     /**
@@ -306,8 +294,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
             return null;
         }
 
-        return respond(ex, Problems.fill(ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR), INTERNAL_ERROR_CODE,
-                INTERNAL_ERROR_DETAIL), new HttpHeaders(), request);
+        return respond(ex, Problems.fill(ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR),
+                INTERNAL_ERROR_CODE, INTERNAL_ERROR_DETAIL), new HttpHeaders(), request);
     }
 
     /**
@@ -330,7 +318,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleUnexpected(Exception ex, WebRequest request) {
         Sentry.captureException(ex);
         log.error("Unexpected error", ex);
-        return respond(ex, Problems.fill(ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR), INTERNAL_ERROR_CODE,
-                INTERNAL_ERROR_DETAIL), new HttpHeaders(), request);
+        return respond(ex, Problems.fill(ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR),
+                INTERNAL_ERROR_CODE, INTERNAL_ERROR_DETAIL), new HttpHeaders(), request);
     }
 }

@@ -8,21 +8,26 @@ import org.danteplanner.backend.shared.ratelimit.RateLimitExceededException;
 import org.danteplanner.backend.shared.sse.SseCapacityExceededException;
 import org.danteplanner.backend.shared.sse.SseConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
+import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -85,6 +90,11 @@ class ApiExceptionHandlerEventStreamTest {
             throw new AsyncRequestTimeoutException();
         }
 
+        @GetMapping(value = "/probe/missing", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+        public SseEmitter missing() throws NoResourceFoundException {
+            throw new NoResourceFoundException(HttpMethod.GET, "/probe/missing");
+        }
+
         @GetMapping(value = "/probe/unexpected", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
         public SseEmitter unexpected() {
             throw new IllegalStateException("something nobody mapped");
@@ -102,6 +112,21 @@ class ApiExceptionHandlerEventStreamTest {
                 .build();
     }
 
+    /**
+     * The {@code message} property mirrors {@code detail} for the deploy window, and the body
+     * always names its own status.
+     */
+    private static ResultMatcher rendersOperableBody() {
+        return result -> {
+            String content = result.getResponse().getContentAsString();
+            String detail = JsonPath.read(content, "$.detail");
+            String message = JsonPath.read(content, "$.message");
+            int status = JsonPath.read(content, "$.status");
+            assertEquals(detail, message, "message mirrors detail");
+            assertEquals(result.getResponse().getStatus(), status, "the body names its own status");
+        };
+    }
+
     @Test
     @DisplayName("an absent planner answers 404 as a problem document")
     void absentPlanner_WhenAcceptIsEventStream_AnswersProblemNotFound() throws Exception {
@@ -109,7 +134,8 @@ class ApiExceptionHandlerEventStreamTest {
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
                 .andExpect(jsonPath("$.code").value("PLANNER_NOT_FOUND"))
-                .andExpect(jsonPath("$.detail").exists());
+                .andExpect(jsonPath("$.detail").exists())
+                .andExpect(rendersOperableBody());
     }
 
     @Test
@@ -117,7 +143,8 @@ class ApiExceptionHandlerEventStreamTest {
     void malformedPathId_WhenAcceptIsEventStream_AnswersNotFound() throws Exception {
         mockMvc.perform(get("/probe/{id}/typed", "not-a-uuid").accept(MediaType.TEXT_EVENT_STREAM))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value("NOT_FOUND"));
+                .andExpect(jsonPath("$.code").value("NOT_FOUND"))
+                .andExpect(rendersOperableBody());
     }
 
     @Test
@@ -127,7 +154,8 @@ class ApiExceptionHandlerEventStreamTest {
                 .andExpect(status().isTooManyRequests())
                 .andExpect(header().string(HttpHeaders.RETRY_AFTER,
                         String.valueOf(SseConstants.CAPACITY_RETRY_AFTER_SECONDS)))
-                .andExpect(jsonPath("$.code").value("SSE_CAPACITY_EXCEEDED"));
+                .andExpect(jsonPath("$.code").value("SSE_CAPACITY_EXCEEDED"))
+                .andExpect(rendersOperableBody());
     }
 
     @Test
@@ -135,7 +163,8 @@ class ApiExceptionHandlerEventStreamTest {
     void exhaustedBucket_WhenAcceptIsEventStream_AnswersTooManyRequests() throws Exception {
         mockMvc.perform(get("/probe/throttled").accept(MediaType.TEXT_EVENT_STREAM))
                 .andExpect(status().isTooManyRequests())
-                .andExpect(jsonPath("$.code").value("RATE_LIMIT_EXCEEDED"));
+                .andExpect(jsonPath("$.code").value("RATE_LIMIT_EXCEEDED"))
+                .andExpect(rendersOperableBody());
     }
 
     @Test
@@ -144,7 +173,8 @@ class ApiExceptionHandlerEventStreamTest {
         mockMvc.perform(get("/probe/degraded").accept(MediaType.TEXT_EVENT_STREAM))
                 .andExpect(status().isServiceUnavailable())
                 .andExpect(header().string(HttpHeaders.RETRY_AFTER, DEGRADED_RETRY_AFTER))
-                .andExpect(jsonPath("$.code").value("WRITE_TEMPORARILY_UNAVAILABLE"));
+                .andExpect(jsonPath("$.code").value("WRITE_TEMPORARILY_UNAVAILABLE"))
+                .andExpect(rendersOperableBody());
     }
 
     @Test
@@ -152,7 +182,8 @@ class ApiExceptionHandlerEventStreamTest {
     void revokedSession_WhenAcceptIsEventStream_AnswersUnauthorizedAndClearsCookies() throws Exception {
         mockMvc.perform(get("/probe/revoked").accept(MediaType.TEXT_EVENT_STREAM))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"))
+                .andExpect(rendersOperableBody());
 
         verify(cookieUtils).clearAuthCookies(any());
     }
@@ -162,7 +193,19 @@ class ApiExceptionHandlerEventStreamTest {
     void unmappedFailure_WhenAcceptIsEventStream_AnswersInternalError() throws Exception {
         mockMvc.perform(get("/probe/unexpected").accept(MediaType.TEXT_EVENT_STREAM))
                 .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.code").value("INTERNAL_ERROR"));
+                .andExpect(jsonPath("$.code").value("INTERNAL_ERROR"))
+                .andExpect(rendersOperableBody());
+    }
+
+    @Test
+    @DisplayName("an unrouted path answers 404 as a problem document")
+    void unroutedPath_WhenAcceptIsEventStream_AnswersProblemNotFound() throws Exception {
+        mockMvc.perform(get("/probe/missing").accept(MediaType.TEXT_EVENT_STREAM))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.code").value("NOT_FOUND"))
+                .andExpect(jsonPath("$.detail").value("Resource not found"))
+                .andExpect(rendersOperableBody());
     }
 
     @Test

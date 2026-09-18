@@ -30,8 +30,7 @@ public class AuthDegradationResponder {
      * @throws IOException if the response is already committed or the client is gone
      */
     public void writeDbUnavailable(HttpServletResponse response) throws IOException {
-        write(response, DegradationErrorConstants.DB_UNAVAILABLE_CODE,
-                DegradationErrorConstants.DB_UNAVAILABLE_MESSAGE);
+        write(response, DegradationErrorConstants.DB_UNAVAILABLE);
     }
 
     /**
@@ -42,19 +41,19 @@ public class AuthDegradationResponder {
      * @throws IOException if the response is already committed or the client is gone
      */
     public void writeAuthUnavailable(HttpServletResponse response) throws IOException {
-        write(response, DegradationErrorConstants.AUTH_UNAVAILABLE_CODE,
-                DegradationErrorConstants.AUTH_UNAVAILABLE_MESSAGE);
+        write(response, DegradationErrorConstants.AUTH_UNAVAILABLE);
     }
 
     /**
      * Writes the JSON body through the ObjectMapper so a code or message can never escape unescaped.
      */
-    private void write(HttpServletResponse response, String code, String message) throws IOException {
+    private void write(HttpServletResponse response, DegradationErrorConstants.Entry entry)
+            throws IOException {
         SecurityContextHolder.clearContext();
         response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
         response.setContentType("application/json");
         response.getWriter().write(
-                objectMapper.writeValueAsString(Map.of("error", code, "message", message))
+                objectMapper.writeValueAsString(Map.of("error", entry.code(), "message", entry.message()))
         );
     }
 }
