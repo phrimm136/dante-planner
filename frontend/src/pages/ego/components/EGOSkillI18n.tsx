@@ -1,27 +1,23 @@
+import { orderEgoSkills } from '@/shared/skill'
+import type { SkillMap } from '@/shared/gameData'
 import { EGOSkillCardWithGranularI18n } from './EGOSkillCard'
-import type { EGOSkillEntry, Threadspin } from '../types/EGOTypes'
+import type { Threadspin } from '../types/EGOTypes'
 
 interface SkillsSectionI18nProps {
   egoId: string
-  skillType: 'awaken' | 'erosion'
-  skills: EGOSkillEntry[]
+  skills: SkillMap
   threadspin: Threadspin
 }
 
-export function SkillsSectionI18n({
-  egoId,
-  skillType,
-  skills,
-  threadspin,
-}: SkillsSectionI18nProps) {
+export function SkillsSectionI18n({ egoId, skills, threadspin }: SkillsSectionI18nProps) {
   return (
     <div className="border rounded divide-y">
-      {skills.map((skillEntry) => (
+      {orderEgoSkills(skills).map(({ id: skillId, entry }) => (
         <EGOSkillCardWithGranularI18n
-          key={skillEntry.id}
+          key={skillId}
           egoId={egoId}
-          skillType={skillType}
-          skillEntry={skillEntry}
+          skillId={skillId}
+          entry={entry}
           threadspin={threadspin}
         />
       ))}

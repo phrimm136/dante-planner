@@ -47,20 +47,9 @@ vi.mock('@/components/layout/EntityMetaInfoI18n', () => ({
   ),
 }))
 
-const SKILL_TABS = [/awakening/i, /corrosion/i] as const
-
-/** The passives pane is the last section the page reveals; every threadspin lists this passive. */
-const LAST_SECTION_TEXT = Object.values(egoI18n20102.passives)[0]!.name
-
-/** Imported lazily under a null Suspense fallback, so the skeleton check cannot see it pending. */
-const EXPAND_IMAGE_BUTTON = 'a11y.expandImage'
-const SKILL_TAB_NAMES = ['awaken', 'erosion'] as const
-
 /** Radix stamps a transient presence-animation style that has no bearing on structure. */
 function normalize(html: string): string {
-  return html
-    .replaceAll(' style="animation-duration: 0s;"', '')
-    .replace(/radix-_r_[0-9a-z]+_/g, 'radix-_r_')
+  return html.replaceAll(' style="animation-duration: 0s;"', '').replace(/_r_[0-9a-z]+_/g, '_r_')
 }
 
 /** Every granular i18n boundary has resolved, so no skeleton is captured mid-flight. */
@@ -72,9 +61,8 @@ async function waitForI18nSettled(container: HTMLElement) {
   })
 }
 
-/** One matrix cell: mount, settle the reveal, drive threadspin + skill type, return the DOM. */
-async function renderCell(threadspin: number, tab: RegExp, isMobile = false): Promise<string> {
-  vi.mocked(useIsBreakpoint).mockReturnValue(isMobile)
+/** One matrix cell: mount, settle the reveal, drive threadspin, return the DOM. */
+async function renderCell(threadspin: number): Promise<string> {
   const queryClient = createTestQueryClient()
   await prefetchDescriptionData(queryClient, 'EN')
   const { container, unmount } = render(
@@ -86,17 +74,11 @@ async function renderCell(threadspin: number, tab: RegExp, isMobile = false): Pr
   )
 
   await waitFor(() => {
-    const revealed =
-      (isMobile
-        ? screen.getAllByRole('tab').length === 2
-        : screen.queryAllByRole('button', { name: /corrosion/i }).length > 0 &&
-          screen.queryAllByText(LAST_SECTION_TEXT).length > 0) &&
-      screen.queryAllByRole('button', { name: EXPAND_IMAGE_BUTTON }).length > 0
+    const revealed = screen.queryAllByRole('region', { name: 'Passives' }).length > 0
     if (!revealed) throw new Error('last section not revealed yet')
   })
 
   fireEvent.click(screen.getByRole('button', { name: new RegExp(`tier ${threadspin}`, 'i') }))
-  fireEvent.click(screen.getByRole('button', { name: tab }))
   await waitForI18nSettled(container)
 
   const html = normalize(container.innerHTML)
@@ -133,21 +115,17 @@ beforeEach(() => {
 describe('EGODetailPage DOM parity', () => {
   describe('desktop', () => {
     for (const threadspin of [1, 2, 4, 5]) {
-      for (const [index, tab] of SKILL_TABS.entries()) {
-        it(`renders threadspin ${threadspin} with ${SKILL_TAB_NAMES[index]} selected`, async () => {
-          expect(await cellSnapshot(threadspin, tab, false)).toMatchSnapshot()
-        })
-      }
+      it(`renders threadspin ${threadspin} with every skill`, async () => {
+        expect(await renderCell(threadspin)).toMatchSnapshot()
+      })
     }
   })
 
   describe('mobile', () => {
     for (const threadspin of [1, 5]) {
-      for (const [index, tab] of SKILL_TABS.entries()) {
-        it(`renders threadspin ${threadspin} with ${SKILL_TAB_NAMES[index]} selected`, async () => {
-          expect(await cellSnapshot(threadspin, tab, true)).toMatchSnapshot()
-        })
-      }
+      it(`renders threadspin ${threadspin} with every skill`, async () => {
+        expect(await renderCell(threadspin)).toMatchSnapshot()
+      })
     }
   })
 })

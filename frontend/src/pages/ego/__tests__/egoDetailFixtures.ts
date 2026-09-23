@@ -1,5 +1,12 @@
 /** Shared spec/i18n fixtures for the EGO detail page tests, mirroring EGO 20102. */
 
+import ego20102 from '@static/data/ego/20102.json'
+
+function skillMap(skills: Record<string, unknown>) {
+  const { awaken: _awaken, erosion: _erosion, ...map } = skills
+  return map
+}
+
 export const egoSpec20102 = {
   updatedDate: 20230227,
   egoType: 'TETH',
@@ -16,61 +23,7 @@ export const egoSpec20102 = {
     BLACK: 2,
   },
   requirements: { CRIMSON: 5, AMBER: 1, SHAMROCK: 1 },
-  skills: {
-    awaken: [
-      {
-        id: 2010211,
-        skillData: [
-          {
-            attributeType: 'CRIMSON',
-            atkType: 'SLASH',
-            targetNum: 3,
-            mpUsage: 20,
-            skillLevelCorrection: 2,
-            defaultValue: 12,
-            scale: 8,
-            coinString: 'C',
-          },
-          {},
-          { defaultValue: 12, scale: 8 },
-          { targetNum: 5, scale: 8 },
-          {
-            targetNum: 5,
-            defaultValue: 14,
-            skillLevelCorrection: 3,
-            scale: 12,
-          },
-        ],
-      },
-    ],
-    erosion: [
-      {
-        id: 2010221,
-        skillData: [
-          {
-            attributeType: 'CRIMSON',
-            atkType: 'SLASH',
-            targetNum: 3,
-            mpUsage: 20,
-            skillLevelCorrection: 2,
-            defaultValue: 24,
-            scale: -12,
-            coinString: 'C',
-          },
-          {},
-          { defaultValue: 24, scale: -12 },
-          { targetNum: 5, scale: -12 },
-          {
-            targetNum: 5,
-            defaultValue: 26,
-            skillLevelCorrection: 3,
-            scale: -12,
-            coinString: 'U',
-          },
-        ],
-      },
-    ],
-  },
+  skills: skillMap(ego20102.skills),
   maxThreadspin: 5,
   passives: { passiveList: [[], ['2010211'], [], [], ['2010212']] },
   skillKeywordList: ['Combustion'],
@@ -115,4 +68,8 @@ export const egoTranslations: Record<string, string> = {
   'passive.battle': 'Battle Passives',
   'meta.season': 'Season',
   'meta.releaseDate': 'Release Date',
+  'section.skills': 'Skills',
+  'section.passives': 'Passives',
+  'section.ego': 'E.G.O',
+  'section.sanity': 'Sanity',
 }

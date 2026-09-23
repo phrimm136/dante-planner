@@ -1,5 +1,42 @@
 /** Shared spec/i18n fixtures for the identity detail page tests. */
 
+import identity10310 from '@static/data/identity/10310.json'
+import identityI18nEN10310 from '@static/i18n/EN/identity/10310.json'
+
+function handSkill(
+  skillTier: number,
+  defType: string,
+  attributeType: string,
+  atkType: string,
+  firstLevel: number,
+) {
+  return {
+    skillTier,
+    skillType: 'SKILL',
+    importanceLevel: 0,
+    mpUsage: 0,
+    isArea: false,
+    levels: [
+      {
+        level: firstLevel,
+        defType,
+        attributeType,
+        atkType,
+        defaultValue: 0,
+        targetNum: 1,
+        skillLevelCorrection: 0,
+        coins: [],
+        coinString: '',
+      },
+    ],
+  }
+}
+
+function skillMap(skills: Record<string, unknown>) {
+  const { skill1: _skill1, skill2: _skill2, skill3: _skill3, skillDef: _skillDef, ...map } = skills
+  return map
+}
+
 /** Identity 10101 — LCB Sinner, the minimal base identity. */
 export const identitySpec10101 = {
   updatedDate: 20230227,
@@ -20,12 +57,10 @@ export const identitySpec10101 = {
     min: ['OnDieAllyAsLevelRatio10'],
   },
   skills: {
-    skill1: [{ id: '1010101', skillData: [{ attributeType: 'AZURE', atkType: 'SLASH' }] }],
-    skill2: [{ id: '1010102', skillData: [{ attributeType: 'VIOLET', atkType: 'PENETRATE' }] }],
-    skill3: [
-      { id: '1010103', skillData: [{}, {}, { attributeType: 'AMBER', atkType: 'SLASH' }, {}] },
-    ],
-    skillDef: [{ id: '1010104', skillData: [{ attributeType: 'NEUTRAL', atkType: 'NONE' }] }],
+    '1010101': handSkill(1, 'ATTACK', 'AZURE', 'SLASH', 1),
+    '1010102': handSkill(2, 'ATTACK', 'VIOLET', 'PENETRATE', 1),
+    '1010103': handSkill(3, 'ATTACK', 'AMBER', 'SLASH', 3),
+    '1010104': handSkill(4, 'GUARD', 'NEUTRAL', 'NONE', 1),
   },
   passives: {
     battlePassiveList: [['1010101'], [], [], []],
@@ -78,12 +113,10 @@ export const identitySpec10114 = {
     min: ['OnDieAllyAsLevelRatio10'],
   },
   skills: {
-    skill1: [{ id: '1011401', skillData: [{ attributeType: 'AMBER', atkType: 'SLASH' }] }],
-    skill2: [{ id: '1011402', skillData: [{ attributeType: 'VIOLET', atkType: 'SLASH' }] }],
-    skill3: [
-      { id: '1011403', skillData: [{}, {}, { attributeType: 'SHAMROCK', atkType: 'SLASH' }, {}] },
-    ],
-    skillDef: [{ id: '1011404', skillData: [{ attributeType: 'NEUTRAL', atkType: 'NONE' }] }],
+    '1011401': handSkill(1, 'ATTACK', 'AMBER', 'SLASH', 1),
+    '1011402': handSkill(2, 'ATTACK', 'VIOLET', 'SLASH', 1),
+    '1011403': handSkill(3, 'ATTACK', 'SHAMROCK', 'SLASH', 3),
+    '1011404': handSkill(4, 'GUARD', 'NEUTRAL', 'NONE', 1),
   },
   passives: {
     battlePassiveList: [
@@ -149,4 +182,12 @@ export const identityTranslations: Record<string, string> = {
   'sanity.increaseHeader': 'Factors increasing Sanity',
   'sanity.decreaseHeader': 'Factors decreasing Sanity',
   'identity.unitKeyword': 'Unit Keywords',
+  'section.skills': 'Skills',
+  'section.passives': 'Passives',
+  'section.ego': 'E.G.O',
+  'section.sanity': 'Sanity',
 }
+
+export const identitySpec10310 = { ...identity10310, skills: skillMap(identity10310.skills) }
+
+export const identityI18n10310 = identityI18nEN10310

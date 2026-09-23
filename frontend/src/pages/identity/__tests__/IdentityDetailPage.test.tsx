@@ -3,7 +3,8 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { Suspense } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { createTestQueryClient } from '@/test-utils/queryClient'
-import { SkillIdSchema, PassiveIdSchema } from '@/shared/gameData'
+import { MAX_LEVEL, SkillIdSchema, PassiveIdSchema } from '@/shared/gameData'
+import type { SkillEntry } from '@/shared/gameData'
 import IdentityDetailPage from '../IdentityDetailPage'
 import type { IdentityData, IdentityI18n } from '../types/IdentityTypes'
 
@@ -37,6 +38,35 @@ vi.mock('react-i18next', async (importOriginal) => {
   }
 })
 
+function handSkill(
+  skillTier: number,
+  defType: string,
+  attributeType: string,
+  atkType: string,
+  firstLevel: number,
+): SkillEntry {
+  return {
+    skillTier,
+    skillType: 'SKILL',
+    importanceLevel: 0,
+    mpUsage: 0,
+    isArea: false,
+    levels: [
+      {
+        level: firstLevel,
+        defType,
+        attributeType,
+        atkType,
+        defaultValue: 0,
+        targetNum: 1,
+        skillLevelCorrection: 0,
+        coins: [],
+        coinString: '',
+      },
+    ],
+  }
+}
+
 // Mock static data based on identity 10101 (LCB Sinner - base identity)
 const mockIdentityData10101: IdentityData = {
   updatedDate: 20230227,
@@ -57,30 +87,10 @@ const mockIdentityData10101: IdentityData = {
     min: ['OnDieAllyAsLevelRatio10'],
   },
   skills: {
-    skill1: [
-      {
-        id: SkillIdSchema.parse('1010101'),
-        skillData: [{ attributeType: 'AZURE', atkType: 'SLASH' }, {}, {}, {}],
-      },
-    ],
-    skill2: [
-      {
-        id: SkillIdSchema.parse('1010102'),
-        skillData: [{ attributeType: 'VIOLET', atkType: 'PENETRATE' }, {}, {}, {}],
-      },
-    ],
-    skill3: [
-      {
-        id: SkillIdSchema.parse('1010103'),
-        skillData: [{}, {}, { attributeType: 'AMBER', atkType: 'SLASH' }, {}],
-      },
-    ],
-    skillDef: [
-      {
-        id: SkillIdSchema.parse('1010104'),
-        skillData: [{ attributeType: 'NEUTRAL', atkType: 'NONE' }, {}, {}, {}],
-      },
-    ],
+    [SkillIdSchema.parse('1010101')]: handSkill(1, 'ATTACK', 'AZURE', 'SLASH', 1),
+    [SkillIdSchema.parse('1010102')]: handSkill(2, 'ATTACK', 'VIOLET', 'PENETRATE', 1),
+    [SkillIdSchema.parse('1010103')]: handSkill(3, 'ATTACK', 'AMBER', 'SLASH', 3),
+    [SkillIdSchema.parse('1010104')]: handSkill(1, 'GUARD', 'NEUTRAL', 'NONE', 1),
   },
   passives: {
     battlePassiveList: [[PassiveIdSchema.parse('1010101')], [], [], []], // Only uptie 1 has battle passive
@@ -133,30 +143,10 @@ const mockIdentityData10114: IdentityData = {
     min: ['OnDieAllyAsLevelRatio10'],
   },
   skills: {
-    skill1: [
-      {
-        id: SkillIdSchema.parse('1011401'),
-        skillData: [{ attributeType: 'AMBER', atkType: 'SLASH' }, {}, {}, {}],
-      },
-    ],
-    skill2: [
-      {
-        id: SkillIdSchema.parse('1011402'),
-        skillData: [{ attributeType: 'VIOLET', atkType: 'SLASH' }, {}, {}, {}],
-      },
-    ],
-    skill3: [
-      {
-        id: SkillIdSchema.parse('1011403'),
-        skillData: [{}, {}, { attributeType: 'SHAMROCK', atkType: 'SLASH' }, {}],
-      },
-    ],
-    skillDef: [
-      {
-        id: SkillIdSchema.parse('1011404'),
-        skillData: [{ attributeType: 'NEUTRAL', atkType: 'NONE' }, {}, {}, {}],
-      },
-    ],
+    [SkillIdSchema.parse('1011401')]: handSkill(1, 'ATTACK', 'AMBER', 'SLASH', 1),
+    [SkillIdSchema.parse('1011402')]: handSkill(2, 'ATTACK', 'VIOLET', 'SLASH', 1),
+    [SkillIdSchema.parse('1011403')]: handSkill(3, 'ATTACK', 'SHAMROCK', 'SLASH', 3),
+    [SkillIdSchema.parse('1011404')]: handSkill(1, 'GUARD', 'NEUTRAL', 'NONE', 1),
   },
   passives: {
     battlePassiveList: [
@@ -334,17 +324,6 @@ describe('IdentityDetailPage', () => {
     expect(slider).toHaveAttribute('aria-valuenow', '65')
   })
 
-  it('renders skill slot buttons', async () => {
-    renderWithProviders(<IdentityDetailPage />)
-
-    await waitFor(() => {
-      expect(screen.getByRole('button', { name: /skill 1/i })).toBeDefined()
-      expect(screen.getByRole('button', { name: /skill 2/i })).toBeDefined()
-      expect(screen.getByRole('button', { name: /skill 3/i })).toBeDefined()
-      expect(screen.getByRole('button', { name: /defense/i })).toBeDefined()
-    })
-  })
-
   it('updates uptie when tier button clicked', async () => {
     renderWithProviders(<IdentityDetailPage />)
 
@@ -381,87 +360,6 @@ describe('IdentityDetailPage', () => {
       const sanityElements = screen.getAllByText(/Sanity/i)
       expect(sanityElements.length).toBeGreaterThan(0)
       expect(screen.getByText(/Panic Type/i)).toBeDefined()
-    })
-  })
-
-  it('switches skill slots when buttons clicked', async () => {
-    renderWithProviders(<IdentityDetailPage />)
-
-    await waitFor(() => {
-      expect(screen.getByRole('button', { name: /skill 2/i })).toBeDefined()
-    })
-
-    // Click Skill 2 button
-    fireEvent.click(screen.getByRole('button', { name: /skill 2/i }))
-
-    // Skill 2 button should now be active (has inline background color style)
-    await waitFor(() => {
-      const skill2Button = screen.getByRole('button', { name: /skill 2/i })
-      expect(skill2Button.style.backgroundColor).toBeTruthy()
-    })
-  })
-
-  describe('with a skill level correction of -2', () => {
-    beforeEach(() => {
-      const [firstSkill] = mockIdentityData10114.skills.skill1
-      mockIdentityData = {
-        ...mockIdentityData10114,
-        skills: {
-          ...mockIdentityData10114.skills,
-          skill1: [
-            {
-              ...firstSkill!,
-              skillData: [
-                { attributeType: 'AMBER', atkType: 'SLASH', skillLevelCorrection: -2 },
-                {},
-                {},
-                {},
-              ],
-            },
-          ],
-        },
-      }
-    })
-
-    afterEach(() => {
-      mockIdentityData = mockIdentityData10114
-    })
-
-    function offenseLevel(): string | null | undefined {
-      return screen.getByAltText('Attack').nextElementSibling?.textContent
-    }
-
-    it('shows the offense level at the slider level plus the correction', async () => {
-      renderWithProviders(<IdentityDetailPage />)
-
-      await waitFor(() => {
-        expect(offenseLevel()).toBe('63')
-      })
-
-      const slider = screen.getByRole('slider')
-      for (let step = 0; step < 15; step++) {
-        fireEvent.keyDown(slider, { key: 'ArrowLeft' })
-      }
-
-      await waitFor(() => {
-        expect(screen.getByText('Lv. 50')).toBeDefined()
-      })
-      expect(offenseLevel()).toBe('48')
-    })
-
-    it('floors the offense level at 1 when the correction would take it lower', async () => {
-      renderWithProviders(<IdentityDetailPage />)
-
-      await waitFor(() => {
-        expect(offenseLevel()).toBe('63')
-      })
-
-      fireEvent.keyDown(screen.getByRole('slider'), { key: 'Home' })
-
-      await waitFor(() => {
-        expect(screen.getByText('Lv. 1')).toBeDefined()
-      })
-      expect(offenseLevel()).toBe('1')
     })
   })
 

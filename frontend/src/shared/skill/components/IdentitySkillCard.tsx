@@ -1,34 +1,17 @@
 import type { ReactNode } from 'react'
 
 import { getSkillImagePath, getSkillImagePathFromIconID } from '@/shared/assets'
-import type { SkillId, Uptie } from '@/shared/gameData'
-import { mergeSkillDataUpToLevel } from '../lib/mergeSkillData'
+import type { SkillId } from '@/shared/gameData'
+import { toSkillCardData } from '../lib/skillLevel'
+import type { SkillEntry, SkillLevel } from '@/shared/gameData'
 import { SkillCard } from './SkillCard'
-
-interface IdentitySkillLevelData {
-  attributeType?: string | undefined
-  atkType?: string | undefined
-  targetNum?: number | undefined
-  mpUsage?: number | undefined
-  skillLevelCorrection?: number | undefined
-  defaultValue?: number | undefined
-  scale?: number | undefined
-  iconID?: string | undefined
-  coinString?: string | undefined
-}
-
-interface IdentitySkillCardEntry {
-  id: SkillId
-  skillTier?: number | undefined
-  skillData: IdentitySkillLevelData[]
-}
 
 interface IdentitySkillCardProps {
   identityId: string
-  skillSlot: number
-  skillEntry: IdentitySkillCardEntry
-  uptie: Uptie
-  level: number
+  skillId: SkillId
+  entry: SkillEntry
+  level: SkillLevel
+  unitLevel: number
   renderName: (attributeType: string | undefined) => ReactNode
   descriptionSlot: ReactNode
   isLocked?: boolean
@@ -36,30 +19,30 @@ interface IdentitySkillCardProps {
 
 export function IdentitySkillCard({
   identityId,
-  skillSlot,
-  skillEntry,
-  uptie,
+  skillId,
+  entry,
   level,
+  unitLevel,
   renderName,
   descriptionSlot,
   isLocked = false,
 }: IdentitySkillCardProps) {
-  const mergedData = mergeSkillDataUpToLevel(skillEntry.skillData, uptie)
-  const isDefenseSkill = mergedData.atkType === 'NONE' || !mergedData.atkType
-  const coinString = mergedData.coinString ?? ''
+  const cardData = toSkillCardData(entry, level)
+  const isDefenseSkill = cardData.atkType === 'NONE' || !cardData.atkType
 
-  const skillImagePath = mergedData.iconID
-    ? getSkillImagePathFromIconID(mergedData.iconID)
-    : getSkillImagePath(identityId, String(skillEntry.id))
+  const skillImagePath = level.iconID
+    ? getSkillImagePathFromIconID(level.iconID)
+    : getSkillImagePath(identityId, skillId)
 
   return (
     <SkillCard
-      skillData={mergedData}
-      coinString={coinString}
+      skillId={skillId}
+      skillData={cardData}
+      coinString={level.coinString}
       skillImagePath={skillImagePath}
-      level={level}
-      skillTier={skillEntry.skillTier ?? skillSlot}
-      nameSlot={renderName(mergedData.attributeType)}
+      skillTier={entry.skillTier}
+      level={unitLevel}
+      nameSlot={renderName(cardData.attributeType)}
       descriptionSlot={descriptionSlot}
       isDefenseSkill={isDefenseSkill}
       isLocked={isLocked}

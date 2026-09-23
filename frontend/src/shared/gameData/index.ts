@@ -21,6 +21,9 @@ export {
   SKILL_ATTRIBUTE_TYPES,
   ATK_TYPES,
   DEF_TYPES,
+  SKILL_DEF_TYPE_ATTACK,
+  EGO_SKILL_TYPES,
+  COIN_OPERATOR_SUB,
   EGO_TYPES,
   REQUIRED_EGO_TYPE,
   KEYWORD_ORDER,
@@ -146,5 +149,20 @@ export type {
   BattleKeywordId,
 } from './ids'
 
-export { SkillDescEntrySchema } from './schemas/SkillSchemas'
-export type { SkillDescEntry, Uptie, Threadspin } from './schemas/SkillSchemas'
+export {
+  SkillDescEntrySchema,
+  SkillCoinSchema,
+  SkillLevelSchema,
+  SkillEntrySchema,
+  SkillMapSchema,
+  skillMapWithRetiredKeys,
+} from './schemas/SkillSchemas'
+export type {
+  SkillDescEntry,
+  Uptie,
+  Threadspin,
+  SkillCoin,
+  SkillLevel,
+  SkillEntry,
+  SkillMap,
+} from './schemas/SkillSchemas'

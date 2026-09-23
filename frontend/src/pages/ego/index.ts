@@ -13,14 +13,7 @@ export { useEGODetailSpec, useEGODetailI18n } from './hooks/useEGODetailData'
 
 export { toEGOEntity } from './lib/egoEntity'
 
-export type {
-  EGOEntity,
-  EGOSpec,
-  EgoSkillType,
-  Threadspin,
-  EGOSkillEntry,
-  EGOPassiveI18n,
-} from './types/EGOTypes'
+export type { EGOEntity, EGOSpec, EgoSkillType, Threadspin, EGOPassiveI18n } from './types/EGOTypes'
 
 export type { EGOFacetState } from './lib/egoFilter'
 

@@ -5,6 +5,13 @@ export const DETAIL_PAGE = {
   COLUMN_RIGHT: 'lg:col-span-6',
 } as const
 
+export const ENTITY_DETAIL_LAYOUT = {
+  PAGE_MOBILE: 'container mx-auto p-4 sm:p-6',
+  HEADER_ROW: 'grid grid-cols-10 gap-6',
+  HEADER_COLUMN: 'col-span-4',
+  METADATA_COLUMN: 'col-span-6',
+} as const
+
 export const EXCLUSIVE_GIFT_ICONS = {
   ICON_SIZE: 32,
   GAP: 4,

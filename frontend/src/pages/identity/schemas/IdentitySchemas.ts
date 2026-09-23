@@ -2,9 +2,9 @@ import { z } from 'zod'
 import { AffinitySchema, ATK_TYPES, DEF_TYPES } from '@/shared/gameData'
 import {
   SkillDescEntrySchema,
-  SkillIdSchema,
   PassiveIdSchema,
   IdentityIdSchema,
+  skillMapWithRetiredKeys,
 } from '@/shared/gameData'
 
 export const IdentityHpDataSchema = z.object({
@@ -23,38 +23,12 @@ export const IdentityMentalConditionInfoSchema = z.object({
   min: z.array(z.string()),
 })
 
-export const IdentitySkillDataEntrySchema = z.object({
-  attributeType: z.string().optional(),
-  atkType: z.string().optional(),
-  targetNum: z.number().optional(),
-  mpUsage: z.number().optional(),
-  skillLevelCorrection: z.number().optional(),
-  defaultValue: z.number().optional(),
-  scale: z.number().optional(),
-  iconID: z.string().optional(),
-  coinString: z.string().optional(),
-})
-
-export const IdentitySkillDataTupleSchema = z.tuple([
-  IdentitySkillDataEntrySchema,
-  IdentitySkillDataEntrySchema,
-  IdentitySkillDataEntrySchema,
-  IdentitySkillDataEntrySchema,
+export const IdentitySkillsDataSchema = skillMapWithRetiredKeys([
+  'skill1',
+  'skill2',
+  'skill3',
+  'skillDef',
 ])
-
-export const IdentitySkillEntrySchema = z.object({
-  id: SkillIdSchema,
-  textID: SkillIdSchema.optional(),
-  skillTier: z.number().optional(),
-  skillData: IdentitySkillDataTupleSchema,
-})
-
-export const IdentitySkillsDataSchema = z.object({
-  skill1: z.array(IdentitySkillEntrySchema),
-  skill2: z.array(IdentitySkillEntrySchema),
-  skill3: z.array(IdentitySkillEntrySchema),
-  skillDef: z.array(IdentitySkillEntrySchema),
-})
 
 export const IdentityPassiveConditionSchema = z.object({
   type: z.string(),

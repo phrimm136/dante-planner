@@ -100,6 +100,12 @@ export const DEF_TYPES = [
 ] as const
 export type DefType = (typeof DEF_TYPES)[number]
 
+export const SKILL_DEF_TYPE_ATTACK = 'ATTACK'
+
+export const EGO_SKILL_TYPES = { AWAKEN: 'EGO_AWAKEN', EROSION: 'EGO_EROSION' } as const
+
+export const COIN_OPERATOR_SUB = 'SUB'
+
 export const EGO_TYPES = ['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH'] as const
 
 export type EgoType = (typeof EGO_TYPES)[number]

@@ -2,8 +2,6 @@ import { Suspense } from 'react'
 
 import { EntityMetaInfoWithI18n } from '@/components/layout/EntityMetaInfoI18n'
 import { KeywordsDisplay } from '@/shared/gameText'
-import { IdentityHeader } from './IdentityHeader'
-import { IdentityHeaderWithI18n } from './IdentityHeaderI18n'
 import { StatusPanel, ResistancePanel, StaggerPanel, TraitsDisplay } from '@/shared/unitStatus'
 
 import type { IdentityData, Uptie } from '../types/IdentityTypes'
@@ -28,49 +26,41 @@ export function IdentityInfoPane({ id, identity, uptie, level }: IdentityInfoPan
   }
 
   return (
-    <>
-      <div className="space-y-4">
-        <Suspense
-          fallback={<IdentityHeader identityId={id} name="" rank={identity.rank} uptie={uptie} />}
-        >
-          <IdentityHeaderWithI18n id={id} rank={identity.rank} uptie={uptie} />
-        </Suspense>
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+        <StatusPanel
+          hp={calculatedHp}
+          minSpeed={minSpeed}
+          maxSpeed={maxSpeed}
+          defLevel={calculatedDefense}
+          defCorrection={identity.defCorrection}
+        />
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-          <StatusPanel
-            hp={calculatedHp}
-            minSpeed={minSpeed}
-            maxSpeed={maxSpeed}
-            defLevel={calculatedDefense}
-            defCorrection={identity.defCorrection}
-          />
+        <ResistancePanel
+          slash={identity.ResistInfo.SLASH}
+          pierce={identity.ResistInfo.PENETRATE}
+          blunt={identity.ResistInfo.HIT}
+        />
 
-          <ResistancePanel
-            slash={identity.ResistInfo.SLASH}
-            pierce={identity.ResistInfo.PENETRATE}
-            blunt={identity.ResistInfo.HIT}
-          />
-
-          <div className="col-span-2 md:col-span-1">
-            <StaggerPanel maxHP={calculatedHp} staggerThresholds={identity.staggerList} />
-          </div>
+        <div className="col-span-2 md:col-span-1">
+          <StaggerPanel maxHP={calculatedHp} staggerThresholds={identity.staggerList} />
         </div>
-
-        <TraitsDisplay traits={identity.unitKeywordList} />
-
-        <KeywordsDisplay keywords={identity.battleKeywordList} />
-
-        <Suspense
-          fallback={
-            <div className="grid grid-cols-2 gap-2">
-              <div className="border rounded p-3 h-16 animate-pulse bg-muted" />
-              <div className="border rounded p-3 h-16 animate-pulse bg-muted" />
-            </div>
-          }
-        >
-          <EntityMetaInfoWithI18n season={identity.season} updateDate={identity.updatedDate} />
-        </Suspense>
       </div>
-    </>
+
+      <TraitsDisplay traits={identity.unitKeywordList} />
+
+      <KeywordsDisplay keywords={identity.battleKeywordList} />
+
+      <Suspense
+        fallback={
+          <div className="grid grid-cols-2 gap-2">
+            <div className="border rounded p-3 h-16 animate-pulse bg-muted" />
+            <div className="border rounded p-3 h-16 animate-pulse bg-muted" />
+          </div>
+        }
+      >
+        <EntityMetaInfoWithI18n season={identity.season} updateDate={identity.updatedDate} />
+      </Suspense>
+    </div>
   )
 }

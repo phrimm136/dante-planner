@@ -2,49 +2,14 @@ import { z } from 'zod'
 import { AffinitySchema, EgoTypeSchema } from '@/shared/gameData'
 import {
   SkillDescEntrySchema,
-  SkillIdSchema,
   PassiveIdSchema,
   EGOIdSchema,
+  skillMapWithRetiredKeys,
 } from '@/shared/gameData'
 
 export { EgoTypeSchema }
 
-export const EGOSkillDataEntrySchema = z.object({
-  attributeType: z.string().optional(),
-  atkType: z.string().optional(),
-  targetNum: z.number().optional(),
-  mpUsage: z.number().optional(),
-  skillLevelCorrection: z.number().optional(),
-  defaultValue: z.number().optional(),
-  scale: z.number().optional(),
-  coinString: z.string().optional(),
-})
-
-export const EGOSkillDataTupleSchema = z.union([
-  z.tuple([
-    EGOSkillDataEntrySchema,
-    EGOSkillDataEntrySchema,
-    EGOSkillDataEntrySchema,
-    EGOSkillDataEntrySchema,
-  ]),
-  z.tuple([
-    EGOSkillDataEntrySchema,
-    EGOSkillDataEntrySchema,
-    EGOSkillDataEntrySchema,
-    EGOSkillDataEntrySchema,
-    EGOSkillDataEntrySchema,
-  ]),
-])
-
-export const EGOSkillEntrySchema = z.object({
-  id: SkillIdSchema,
-  skillData: EGOSkillDataTupleSchema,
-})
-
-export const EGOSkillsDataSchema = z.object({
-  awaken: z.array(EGOSkillEntrySchema),
-  erosion: z.array(EGOSkillEntrySchema),
-})
+export const EGOSkillsDataSchema = skillMapWithRetiredKeys(['awaken', 'erosion'])
 
 export const EGOPassiveListTupleSchema = z.union([
   z.tuple([

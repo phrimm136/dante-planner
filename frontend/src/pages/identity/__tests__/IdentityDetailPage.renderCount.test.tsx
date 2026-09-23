@@ -19,15 +19,18 @@ vi.mock('react-i18next', async (importOriginal) => {
   }
 })
 
+const route = vi.hoisted(() => ({ id: '10114' }))
+
 vi.mock('@tanstack/react-router', () => ({
-  useParams: () => ({ id: '10114' }),
+  useParams: () => ({ id: route.id }),
 }))
 
 vi.mock('@/pages/identity/hooks/useIdentityDetailData', async () => {
-  const { identitySpec10114, identityI18n10114 } = await import('./identityDetailFixtures')
+  const { identitySpec10114, identityI18n10114, identitySpec10310, identityI18n10310 } =
+    await import('./identityDetailFixtures')
   return {
-    useIdentityDetailSpec: () => identitySpec10114,
-    useIdentityDetailI18n: () => identityI18n10114,
+    useIdentityDetailSpec: (id: string) => (id === '10310' ? identitySpec10310 : identitySpec10114),
+    useIdentityDetailI18n: (id: string) => (id === '10310' ? identityI18n10310 : identityI18n10114),
   }
 })
 
@@ -122,33 +125,6 @@ vi.mock('@/shared/sanity/components/SanityI18n', async (importOriginal) => {
   }
 })
 
-const LEFT_PANE_LABELS = [
-  'IdentityInfoPane',
-  'StatusPanel',
-  'ResistancePanel',
-  'StaggerPanel',
-  'TraitsDisplay',
-]
-
-const UNRELATED_RIGHT_PANE_LABELS = [
-  'IdentityPassivesPane',
-  'IdentitySanityPane',
-  'PassiveCardI18n',
-  'PanicTypeSectionI18n',
-]
-
-function pick(delta: Record<string, number>, labels: string[]): Record<string, number> {
-  return Object.fromEntries(
-    labels.map((label) => {
-      const count = delta[label]
-      if (count === undefined) {
-        throw new Error(`no render count recorded for ${label}`)
-      }
-      return [label, count]
-    }),
-  )
-}
-
 function renderDetailPage() {
   const queryClient = createTestQueryClient()
   render(
@@ -185,6 +161,7 @@ async function renderSettledDetailPage() {
 }
 
 beforeEach(() => {
+  route.id = '10114'
   resetRenderCounts()
   vi.spyOn(global, 'fetch').mockImplementation(
     () => Promise.resolve({ ok: true, json: () => Promise.resolve({}) }) as Promise<Response>,
@@ -192,30 +169,23 @@ beforeEach(() => {
 })
 
 describe('IdentityDetailPage render isolation', () => {
-  it('does not re-render the left pane when a skill tab is clicked', async () => {
+  it('renders every 10310 skill at once in attack-before-defense, tier, id order', async () => {
+    route.id = '10310'
     await renderSettledDetailPage()
 
-    const baseline = snapshotRenderCounts()
-    fireEvent.click(screen.getByRole('button', { name: /skill 2/i }))
-    await waitFor(() => {
-      expect(screen.getByRole('button', { name: /skill 2/i }).style.backgroundColor).toBeTruthy()
-    })
-
-    const delta = rendersSince(baseline)
-    expect(delta.SkillsSectionI18n).toBe(1)
-    expect(pick(delta, LEFT_PANE_LABELS)).toEqual({
-      IdentityInfoPane: 0,
-      StatusPanel: 0,
-      ResistancePanel: 0,
-      StaggerPanel: 0,
-      TraitsDisplay: 0,
-    })
-    expect(pick(delta, UNRELATED_RIGHT_PANE_LABELS)).toEqual({
-      IdentityPassivesPane: 0,
-      IdentitySanityPane: 0,
-      PassiveCardI18n: 0,
-      PanicTypeSectionI18n: 0,
-    })
+    const renderedSkillIds = [...document.querySelectorAll('[data-skill-id]')].map((card) =>
+      card.getAttribute('data-skill-id'),
+    )
+    expect(renderedSkillIds).toEqual([
+      '1031001',
+      '1031005',
+      '1031002',
+      '1031006',
+      '1031003',
+      '1031007',
+      '1031004',
+      '1031008',
+    ])
   })
 
   it('re-renders both panes when uptie changes, since both read it', async () => {

@@ -4,16 +4,17 @@ import { Suspense, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useIdentityDetailSpec } from '@/pages/identity'
-import { DetailPageLayout } from '@/components/layout/DetailPageLayout'
+import { EntityDetailLayout } from '@/components/layout/EntityDetailLayout'
+import { DetailSection } from '@/components/layout/DetailSection'
 import { DetailEntitySelector } from '@/components/layout/DetailEntitySelector'
-import { DetailRightPanel } from '@/components/layout/DetailRightPanel'
-import { MobileDetailTabs } from '@/components/layout/MobileDetailTabs'
 import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
 import { getEGOTierIconPath } from '@/shared/assets'
 import { IDENTITY_LEVEL_CAP, MAX_ENTITY_TIER, MIN_ENTITY_TIER } from '@/shared/gameData'
 import { IdentityDetailSkeleton } from './components/IdentityDetailSkeleton'
+import { IdentityHeader } from './components/IdentityHeader'
+import { IdentityHeaderWithI18n } from './components/IdentityHeaderI18n'
 import { IdentityInfoPane } from './components/IdentityInfoPane'
-import { IdentitySkillsPane } from './components/IdentitySkillsPane'
+import { SkillsSectionI18n } from './components/IdentitySkillI18n'
 import { PassiveCardI18n } from './components/PassiveI18n'
 import { IdentityPassivesPane } from '@/shared/passive'
 import { IdentitySanityPane } from '@/shared/sanity'
@@ -38,6 +39,21 @@ function IdentityDetailContent() {
 
   const uptieLevel = uptie as Uptie
 
+  const header = (
+    <Suspense
+      fallback={
+        <IdentityHeader
+          identityId={identityId}
+          name=""
+          rank={identityData.rank}
+          uptie={uptieLevel}
+        />
+      }
+    >
+      <IdentityHeaderWithI18n id={identityId} rank={identityData.rank} uptie={uptieLevel} />
+    </Suspense>
+  )
+
   const selector = (
     <DetailEntitySelector
       tierLabel={t('tierLabel.uptie')}
@@ -53,72 +69,49 @@ function IdentityDetailContent() {
     />
   )
 
-  const leftColumn = (
-    <IdentityInfoPane id={identityId} identity={identityData} uptie={uptieLevel} level={level} />
-  )
-
-  const skillsContent = (
-    <IdentitySkillsPane
-      id={id}
-      skills={identityData.skills}
-      uptieLevel={uptieLevel}
-      level={level}
-    />
-  )
-
-  const passivesContent = (
-    <IdentityPassivesPane
-      passives={identityData.passives}
-      uptieLevel={uptieLevel}
-      renderPassive={(passiveId, isLocked) => (
-        <PassiveCardI18n
-          id={id}
-          passiveId={passiveId}
-          condition={identityData.passives.conditions[passiveId]}
-          isLocked={isLocked}
-        />
-      )}
-    />
-  )
-
-  const sanityContent = (
-    <IdentitySanityPane
-      panicType={identityData.panicType}
-      mentalConditionInfo={identityData.mentalConditionInfo}
-    />
-  )
-
-  const rightColumn = (
-    <DetailRightPanel selector={selector}>
-      {visibleSections >= 1 && skillsContent}
-      {visibleSections >= 2 && passivesContent}
-      {visibleSections >= 3 && sanityContent}
-    </DetailRightPanel>
-  )
-
-  const mobileTabsContent =
-    visibleSections >= totalSections ? (
-      <>
-        <div className="mb-4">{selector}</div>
-        <MobileDetailTabs
-          skillsContent={skillsContent}
-          passivesContent={passivesContent}
-          thirdTabContent={sanityContent}
-        />
-      </>
-    ) : (
-      <>
-        <div className="mb-4">{selector}</div>
-        {visibleSections >= 1 && skillsContent}
-      </>
-    )
-
   return (
-    <DetailPageLayout
-      leftColumn={leftColumn}
-      rightColumn={rightColumn}
-      mobileTabsContent={mobileTabsContent}
-    />
+    <EntityDetailLayout
+      header={header}
+      metadata={
+        <IdentityInfoPane
+          id={identityId}
+          identity={identityData}
+          uptie={uptieLevel}
+          level={level}
+        />
+      }
+      selector={selector}
+    >
+      {visibleSections >= 1 && (
+        <DetailSection title={t('section.skills')}>
+          <SkillsSectionI18n id={id} skills={identityData.skills} uptieLevel={uptieLevel} level={level} />
+        </DetailSection>
+      )}
+      {visibleSections >= 2 && (
+        <DetailSection title={t('section.passives')}>
+          <IdentityPassivesPane
+            passives={identityData.passives}
+            uptieLevel={uptieLevel}
+            renderPassive={(passiveId, isLocked) => (
+              <PassiveCardI18n
+                id={id}
+                passiveId={passiveId}
+                condition={identityData.passives.conditions[passiveId]}
+                isLocked={isLocked}
+              />
+            )}
+          />
+        </DetailSection>
+      )}
+      {visibleSections >= 3 && (
+        <DetailSection title={t('section.sanity')}>
+          <IdentitySanityPane
+            panicType={identityData.panicType}
+            mentalConditionInfo={identityData.mentalConditionInfo}
+          />
+        </DetailSection>
+      )}
+    </EntityDetailLayout>
   )
 }
 

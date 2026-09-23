@@ -1,44 +1,28 @@
-import { IdentitySkillCardWithGranularI18n, getFirstDefinedUptie } from './IdentitySkillCard'
-import type { IdentitySkillEntry, Uptie } from '../types/IdentityTypes'
-
-type SkillSlot = 'skill1' | 'skill2' | 'skill3' | 'skillDef'
+import { orderIdentitySkills } from '@/shared/skill'
+import type { SkillMap } from '@/shared/gameData'
+import { IdentitySkillCardWithGranularI18n } from './IdentitySkillCard'
+import type { Uptie } from '../types/IdentityTypes'
 
 interface SkillsSectionI18nProps {
   id: string
-  skills: Record<SkillSlot, IdentitySkillEntry[]>
-  activeSkillSlot: SkillSlot
+  skills: SkillMap
   uptieLevel: Uptie
   level: number
-  getSkillSlotNumber: (slot: SkillSlot) => number
 }
 
-export function SkillsSectionI18n({
-  id,
-  skills,
-  activeSkillSlot,
-  uptieLevel,
-  level,
-  getSkillSlotNumber,
-}: SkillsSectionI18nProps) {
+export function SkillsSectionI18n({ id, skills, uptieLevel, level }: SkillsSectionI18nProps) {
   return (
     <div className="border rounded divide-y">
-      {skills[activeSkillSlot].map((skill) => {
-        const firstDefinedUptie = getFirstDefinedUptie(skill.skillData)
-        const isLocked = uptieLevel < firstDefinedUptie
-        const displayUptie = isLocked ? firstDefinedUptie : uptieLevel
-
-        return (
-          <IdentitySkillCardWithGranularI18n
-            key={skill.id}
-            identityId={id}
-            skillSlot={getSkillSlotNumber(activeSkillSlot)}
-            skillEntry={skill}
-            uptie={displayUptie}
-            level={level}
-            isLocked={isLocked}
-          />
-        )
-      })}
+      {orderIdentitySkills(skills).map(({ id: skillId, entry }) => (
+        <IdentitySkillCardWithGranularI18n
+          key={skillId}
+          identityId={id}
+          skillId={skillId}
+          entry={entry}
+          uptie={uptieLevel}
+          unitLevel={level}
+        />
+      ))}
     </div>
   )
 }

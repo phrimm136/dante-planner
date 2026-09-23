@@ -84,26 +84,12 @@ vi.mock('@/pages/ego/components/PassiveI18n', async (importOriginal) => {
   }
 })
 
-const LEFT_PANE_LABELS = ['EGOHeaderWithI18n', 'SinCostPanel', 'SinResistancePanel']
-
-function pick(delta: Record<string, number>, labels: string[]): Record<string, number> {
-  return Object.fromEntries(
-    labels.map((label) => {
-      const count = delta[label]
-      if (count === undefined) {
-        throw new Error(`no render count recorded for ${label}`)
-      }
-      return [label, count]
-    }),
-  )
-}
-
 /**
  * Waits out the progressive reveal so its per-frame renders never land in a
  * measurement.
  *
  * The idle-cache wait is load-bearing: the skill descriptions resolve their
- * keyword data after the skill tabs are on screen, and `act` flushes a render
+ * keyword data after the skill cards are on screen, and `act` flushes a render
  * that is still suspended in a synchronous loop that starves the very promise
  * it is waiting on.
  */
@@ -118,7 +104,7 @@ async function renderSettledDetailPage() {
   )
 
   await waitFor(() => {
-    expect(screen.getByRole('button', { name: /corrosion/i })).toBeDefined()
+    expect(screen.getByRole('region', { name: 'Passives' })).toBeDefined()
   })
   await waitFor(() => {
     expect(queryClient.isFetching()).toBe(0)
@@ -136,23 +122,13 @@ beforeEach(() => {
 })
 
 describe('EGODetailPage render isolation', () => {
-  it('re-renders only the header and skills when the skill type is switched', async () => {
+  it('renders every 20102 skill at once, awaken before erosion', async () => {
     await renderSettledDetailPage()
 
-    const baseline = snapshotRenderCounts()
-    fireEvent.click(screen.getByRole('button', { name: /corrosion/i }))
-    await waitFor(() => {
-      expect(rendersSince(baseline).SkillsSectionI18n).toBeGreaterThan(0)
-    })
-
-    const delta = rendersSince(baseline)
-    expect(delta.SkillsSectionI18n).toBe(1)
-    expect(pick(delta, LEFT_PANE_LABELS)).toEqual({
-      EGOHeaderWithI18n: 1,
-      SinCostPanel: 0,
-      SinResistancePanel: 0,
-    })
-    expect(delta.PassiveCardWithSuspense).toBe(0)
+    const renderedSkillIds = [...document.querySelectorAll('[data-skill-id]')].map((card) =>
+      card.getAttribute('data-skill-id'),
+    )
+    expect(renderedSkillIds).toEqual(['2010211', '2010221'])
   })
 
   it('re-renders both panes when threadspin changes, since both read it', async () => {

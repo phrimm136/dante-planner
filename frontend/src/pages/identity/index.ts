@@ -8,7 +8,6 @@ export { IdentityList } from './components/IdentityList'
 export { IdentityHeader } from './components/IdentityHeader'
 export { IdentityHeaderWithI18n } from './components/IdentityHeaderI18n'
 export { SkillsSectionI18n } from './components/IdentitySkillI18n'
-export { SkillTabButton } from './components/SkillTabButton'
 export { PassiveCardI18n } from './components/PassiveI18n'
 
 export {
@@ -18,7 +17,7 @@ export {
 } from './hooks/useIdentityListData'
 export { useIdentityDetailSpec, useIdentityDetailI18n } from './hooks/useIdentityDetailData'
 
-export type { IdentityEntity, IdentitySpec, Uptie, IdentitySkillEntry } from './types/IdentityTypes'
+export type { IdentityEntity, IdentitySpec, Uptie } from './types/IdentityTypes'
 
 export { toIdentityEntity } from './lib/identityEntity'
 

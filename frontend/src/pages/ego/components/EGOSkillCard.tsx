@@ -1,36 +1,41 @@
 import { useEGODetailI18n } from '../hooks/useEGODetailData'
-import { EGOSkillCard, SkillDescription, getMergedSkillDesc } from '@/shared/skill'
+import {
+  EGOSkillCard,
+  SkillDescription,
+  getMergedSkillDesc,
+  selectSkillLevel,
+} from '@/shared/skill'
 import { StyledSkillName } from '@/shared/gameText'
-import type { EGOSkillEntry, Threadspin } from '../types/EGOTypes'
+import type { Threadspin } from '../types/EGOTypes'
 import { IDENTITY_LEVEL_CAP } from '@/shared/gameData'
-import type { SkillId } from '@/shared/gameData'
+import type { SkillEntry, SkillId } from '@/shared/gameData'
 
 interface EGOSkillCardWithGranularI18nProps {
   egoId: string
-  skillType: 'awaken' | 'erosion'
-  skillEntry: EGOSkillEntry
+  skillId: SkillId
+  entry: SkillEntry
   threadspin: Threadspin
 }
 
 export function EGOSkillCardWithGranularI18n({
   egoId,
-  skillType,
-  skillEntry,
+  skillId,
+  entry,
   threadspin,
 }: EGOSkillCardWithGranularI18nProps) {
+  const { level } = selectSkillLevel(entry.levels, threadspin)
+
   return (
     <EGOSkillCard
       egoId={egoId}
-      skillType={skillType}
-      skillEntry={skillEntry}
-      threadspin={threadspin}
-      level={IDENTITY_LEVEL_CAP}
+      skillId={skillId}
+      entry={entry}
+      level={level}
+      unitLevel={IDENTITY_LEVEL_CAP}
       renderName={(attributeType) => (
-        <EGOSkillName egoId={egoId} skillId={skillEntry.id} attributeType={attributeType} />
+        <EGOSkillName egoId={egoId} skillId={skillId} attributeType={attributeType} />
       )}
-      descriptionSlot={
-        <EGOSkillDescription egoId={egoId} skillId={skillEntry.id} level={threadspin} />
-      }
+      descriptionSlot={<EGOSkillDescription egoId={egoId} skillId={skillId} level={threadspin} />}
     />
   )
 }

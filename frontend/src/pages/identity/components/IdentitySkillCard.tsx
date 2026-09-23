@@ -1,55 +1,52 @@
 import { useIdentityDetailI18n } from '../hooks/useIdentityDetailData'
-import { IdentitySkillCard, SkillDescription, getMergedSkillDesc } from '@/shared/skill'
+import {
+  IdentitySkillCard,
+  SkillDescription,
+  getMergedSkillDesc,
+  selectSkillLevel,
+} from '@/shared/skill'
 import { StyledSkillName } from '@/shared/gameText'
-import type { IdentitySkillEntry, Uptie } from '../types/IdentityTypes'
-import type { SkillId } from '@/shared/gameData'
+import type { Uptie } from '../types/IdentityTypes'
+import type { SkillEntry, SkillId } from '@/shared/gameData'
 
 interface IdentitySkillCardWithGranularI18nProps {
   identityId: string
-  skillSlot: number
-  skillEntry: IdentitySkillEntry
+  skillId: SkillId
+  entry: SkillEntry
   uptie: Uptie
-  level: number
-  isLocked?: boolean
-}
-
-/**
- * Smallest 1-based uptie at which the skill is first defined.
- * Empty `{}` slots before that level mean "not yet introduced" (not "inherit"),
- * so the renderer should lock and display this skill at its first defined level.
- * Falls back to 1 when no slot has data — keeps the card visible rather than blank.
- */
-export function getFirstDefinedUptie(skillData: IdentitySkillEntry['skillData']): Uptie {
-  for (const [i, levelData] of skillData.entries()) {
-    if (Object.keys(levelData).length > 0) {
-      return (i + 1) as Uptie
-    }
-  }
-  return 1
+  unitLevel: number
 }
 
 export function IdentitySkillCardWithGranularI18n({
   identityId,
-  skillSlot,
-  skillEntry,
+  skillId,
+  entry,
   uptie,
-  level,
-  isLocked = false,
+  unitLevel,
 }: IdentitySkillCardWithGranularI18nProps) {
-  const textId = skillEntry.textID ?? skillEntry.id
+  const { level, isLocked } = selectSkillLevel(entry.levels, uptie)
+  const descriptionLevel = isLocked ? (level.level as Uptie) : uptie
 
   return (
     <IdentitySkillCard
       identityId={identityId}
-      skillSlot={skillSlot}
-      skillEntry={skillEntry}
-      uptie={uptie}
+      skillId={skillId}
+      entry={entry}
       level={level}
+      unitLevel={unitLevel}
       renderName={(attributeType) => (
-        <IdentitySkillName identityId={identityId} skillId={textId} attributeType={attributeType} />
+        <IdentitySkillName
+          identityId={identityId}
+          skillId={skillId}
+          attributeType={attributeType}
+        />
       )}
       descriptionSlot={
-        <IdentitySkillDescription identityId={identityId} skillId={textId} level={uptie} />
+        <IdentitySkillDescription
+          identityId={identityId}
+          skillId={skillId}
+          level={descriptionLevel}
+        />
       }
       isLocked={isLocked}
     />

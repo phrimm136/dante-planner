@@ -66,23 +66,10 @@ vi.mock('@/components/layout/EntityMetaInfoI18n', () => ({
   ),
 }))
 
-const SKILL_TABS = [/skill 1/i, /skill 2/i, /skill 3/i, /defense/i] as const
-const SKILL_TAB_NAMES = ['skill1', 'skill2', 'skill3', 'skillDef'] as const
-
-/** Imported lazily under a null Suspense fallback, so the skeleton check cannot see it pending. */
-const EXPAND_IMAGE_BUTTON = 'a11y.expandImage'
-
-/**
- * Waits out the progressive reveal. Desktop stacks every section, mobile
- * collapses them into tabs, so each layout gets its own last-section signal.
- */
-async function waitForFullReveal(isMobile: boolean) {
+/** Waits out the progressive reveal: both layouts stack every section, Sanity last. */
+async function waitForFullReveal() {
   await waitFor(() => {
-    const revealed =
-      (isMobile
-        ? screen.getAllByRole('tab').length === 3
-        : screen.getAllByText(/Panic Type/i).length > 0) &&
-      screen.queryAllByRole('button', { name: EXPAND_IMAGE_BUTTON }).length > 0
+    const revealed = screen.getAllByText(/Panic Type/i).length > 0
     if (!revealed) throw new Error('last section not revealed yet')
   })
 }
@@ -102,14 +89,11 @@ async function waitForI18nSettled(container: HTMLElement) {
  * suspense resolution order across runs.
  */
 function normalize(html: string): string {
-  return html
-    .replaceAll(' style="animation-duration: 0s;"', '')
-    .replace(/radix-_r_[0-9a-z]+_/g, 'radix-_r_')
+  return html.replaceAll(' style="animation-duration: 0s;"', '').replace(/_r_[0-9a-z]+_/g, '_r_')
 }
 
-/** One matrix cell: mount, settle the reveal, drive uptie + skill slot, return the DOM. */
-async function renderCell(uptie: number, tab: RegExp, isMobile = false): Promise<string> {
-  vi.mocked(useIsBreakpoint).mockReturnValue(isMobile)
+/** One matrix cell: mount, settle the reveal, drive uptie, return the DOM. */
+async function renderCell(uptie: number): Promise<string> {
   const queryClient = createTestQueryClient()
   await prefetchDescriptionData(queryClient, 'EN')
   const { container, unmount } = render(
@@ -120,10 +104,9 @@ async function renderCell(uptie: number, tab: RegExp, isMobile = false): Promise
     </QueryClientProvider>,
   )
 
-  await waitForFullReveal(isMobile)
+  await waitForFullReveal()
 
   fireEvent.click(screen.getByRole('button', { name: new RegExp(`tier ${uptie}`, 'i') }))
-  fireEvent.click(screen.getByRole('button', { name: tab }))
   await waitForI18nSettled(container)
 
   const html = normalize(container.innerHTML)
@@ -161,22 +144,17 @@ beforeEach(() => {
 describe('IdentityDetailPage DOM parity', () => {
   describe('desktop', () => {
     for (const uptie of [1, 2, 3, 4]) {
-      for (const [index, tab] of SKILL_TABS.entries()) {
-        it(`renders uptie ${uptie} with ${SKILL_TAB_NAMES[index]} selected`, async () => {
-          expect(await cellSnapshot(uptie, tab, false)).toMatchSnapshot()
-        })
-      }
+      it(`renders uptie ${uptie} with every skill`, async () => {
+        expect(await renderCell(uptie)).toMatchSnapshot()
+      })
     }
   })
 
   describe('mobile', () => {
     for (const uptie of [1, 4]) {
-      for (const [index, tab] of SKILL_TABS.entries()) {
-        if (index !== 0 && index !== 2) continue
-        it(`renders uptie ${uptie} with ${SKILL_TAB_NAMES[index]} selected`, async () => {
-          expect(await cellSnapshot(uptie, tab, true)).toMatchSnapshot()
-        })
-      }
+      it(`renders uptie ${uptie} with every skill`, async () => {
+        expect(await renderCell(uptie)).toMatchSnapshot()
+      })
     }
   })
 
@@ -193,7 +171,7 @@ describe('IdentityDetailPage DOM parity', () => {
       </QueryClientProvider>,
     )
 
-    await waitForFullReveal(false)
+    await waitForFullReveal()
 
     const slider = screen.getByRole('slider')
     fireEvent.keyDown(slider, { key: 'ArrowLeft' })

@@ -17,6 +17,7 @@ interface SkillCardData {
 }
 
 interface SkillCardProps {
+  skillId: string
   skillData: SkillCardData
   coinString: string
   skillImagePath: string
@@ -30,6 +31,7 @@ interface SkillCardProps {
 }
 
 export function SkillCard({
+  skillId,
   skillData,
   coinString,
   skillImagePath,
@@ -50,6 +52,7 @@ export function SkillCard({
 
   const card = (
     <SkillCardLayout
+      skillId={skillId}
       imageComposite={
         <SkillImageComposite
           skillImagePath={skillImagePath}
