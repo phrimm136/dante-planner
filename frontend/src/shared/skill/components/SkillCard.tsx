@@ -2,6 +2,8 @@ import { Suspense, useState, type ReactNode } from 'react'
 
 import { getLockIconPath } from '@/shared/assets'
 import { type SkillAttributeType } from '@/shared/gameData'
+import type { ImportancePalette, SkillCoin } from '@/shared/gameData'
+import { ImportanceDecoration, hasImportance } from '@/shared/importance'
 import { SkillImageComposite } from './SkillImageComposite'
 import { SkillCardLayout } from './SkillCardLayout'
 import { SkillInfoPanelWithSuspense } from './SkillInfoPanel'
@@ -19,7 +21,7 @@ interface SkillCardData {
 interface SkillCardProps {
   skillId: string
   skillData: SkillCardData
-  coinString: string
+  coins: readonly SkillCoin[]
   skillImagePath: string
   skillTier: number
   level: number
@@ -28,12 +30,14 @@ interface SkillCardProps {
   isDefenseSkill?: boolean
   sanityCost?: number
   isLocked?: boolean
+  importanceLevel: number
+  palette: ImportancePalette
 }
 
 export function SkillCard({
   skillId,
   skillData,
-  coinString,
+  coins,
   skillImagePath,
   skillTier,
   level,
@@ -42,6 +46,8 @@ export function SkillCard({
   isDefenseSkill = false,
   sanityCost,
   isLocked = false,
+  importanceLevel,
+  palette,
 }: SkillCardProps) {
   const [showMissing, setShowMissing] = useState(false)
 
@@ -50,7 +56,7 @@ export function SkillCard({
   const basePower = skillData.defaultValue ?? 0
   const coinPower = skillData.scale ?? 0
 
-  const card = (
+  const layout = (
     <SkillCardLayout
       skillId={skillId}
       imageComposite={
@@ -69,7 +75,7 @@ export function SkillCard({
         <SkillInfoPanelWithSuspense
           skillData={skillData}
           level={level}
-          coinString={coinString}
+          coins={coins}
           nameSlot={nameSlot}
           isDefenseSkill={isDefenseSkill}
           sanityCost={sanityCost}
@@ -77,6 +83,15 @@ export function SkillCard({
       }
       description={<Suspense fallback={<SkillDescriptionSkeleton />}>{descriptionSlot}</Suspense>}
     />
+  )
+
+  const card = hasImportance(importanceLevel) ? (
+    <div className="relative isolate">
+      {layout}
+      <ImportanceDecoration level={importanceLevel} palette={palette} variant="skill" />
+    </div>
+  ) : (
+    layout
   )
 
   if (!isLocked) return card

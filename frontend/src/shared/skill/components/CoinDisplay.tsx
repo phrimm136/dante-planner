@@ -1,35 +1,29 @@
-import { getCoinIconPath } from '@/shared/assets'
+import { getCoinSpritePath } from '@/shared/assets'
+import type { CoinColor, SkillCoin } from '@/shared/gameData'
+import { isCoinColor } from '../lib/coinColor'
 
-interface CoinDisplayProps {
-  coinEA: string
+const COIN_ALT: Record<CoinColor, string> = {
+  GOLD: 'Coin',
+  GREY: 'Unbreakable coin',
+  GREEN: 'Green coin',
+  PURPLE: 'Purple coin',
 }
 
-/**
- * CoinDisplay - Renders coin icons based on coin EA string
- *
- * Coin EA format: 'C' for normal coin, 'U' for unbreakable coin
- * Example: "CCU" renders two normal coins and one unbreakable coin
- */
-export function CoinDisplay({ coinEA }: CoinDisplayProps) {
-  if (!coinEA || coinEA.length === 0) {
+interface CoinDisplayProps {
+  coins: readonly SkillCoin[]
+}
+
+export function CoinDisplay({ coins }: CoinDisplayProps) {
+  const colors = coins.map((coin) => coin.color).filter(isCoinColor)
+  if (colors.length === 0) {
     return null
   }
 
   return (
     <div className="flex items-center mb-0.5">
-      {Array.from(coinEA).map((coin, index) => {
-        const isUnbreakable = coin === 'U'
-        const iconPath = getCoinIconPath(isUnbreakable ? 'U' : 'C')
-
-        return (
-          <img
-            key={index}
-            src={iconPath}
-            alt={isUnbreakable ? 'Unbreakable coin' : 'Coin'}
-            className="w-6 h-6"
-          />
-        )
-      })}
+      {colors.map((color, index) => (
+        <img key={index} src={getCoinSpritePath(color)} alt={COIN_ALT[color]} className="w-6 h-6" />
+      ))}
     </div>
   )
 }

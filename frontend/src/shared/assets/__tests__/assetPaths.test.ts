@@ -1,6 +1,12 @@
 import { describe, it, expect } from 'vitest'
 
-import { AFFINITIES, SINNERS } from '@/shared/gameData'
+import {
+  AFFINITIES,
+  COIN_COLORS,
+  IMPORTANCE_PALETTES,
+  PASSIVE_IMPORTANCE_LEVELS,
+  SINNERS,
+} from '@/shared/gameData'
 
 import { resolveAsset } from '../assetManifest'
 import * as assetPaths from '../assetPaths'
@@ -94,8 +100,6 @@ const CASES: Case[] = [
   ['getAffinityIconPath', ['INDIGO'], '/images/icon/sin/Pride.webp'],
   ['getAffinityIconPath', ['VIOLET'], '/images/icon/sin/Envy.webp'],
   ['getAffinityIconPath', ['Envy'], '/images/icon/sin/Envy.webp'],
-  ['getCoinIconPath', ['C'], '/images/icon/coin.webp'],
-  ['getCoinIconPath', ['U'], '/images/icon/superCoin.webp'],
   ['getEGOSmallRankIconPath', ['ZAYIN'], '/images/icon/ego/ZAYIN.webp'],
   ['getEGOTypeIconPath', ['ALEPH'], '/images/icon/ego/ALEPH.webp'],
   ['getEGOGiftIconPath', ['9001'], '/images/icon/egoGift/9001.webp'],
@@ -150,6 +154,16 @@ const CASES: Case[] = [
   ['getKeywordIconPath', ['Hit'], '/images/UI/card/egoGift/atkType-hit.webp'],
   ['getKeywordIconPath', ['9001'], '/images/icon/egoGift/9001.webp'],
   ['getKeywordIconPath', ['AStrokeOfDeath'], '/images/icon/battleKeywords/AStrokeOfDeath.webp'],
+
+  ['getCoinSpritePath', ['GOLD'], '/images/UI/common/coin-gold.webp'],
+  ['getCoinSpritePath', ['GREY'], '/images/UI/common/coin-grey.webp'],
+  ['getCoinSpritePath', ['GREEN'], '/images/UI/common/coin-green.webp'],
+  ['getCoinSpritePath', ['PURPLE'], '/images/UI/common/coin-purple.webp'],
+  ['getImportanceIconPath', ['player', '1'], '/images/UI/common/importance-player-1.webp'],
+  ['getImportanceIconPath', ['enemy', '3'], '/images/UI/common/importance-enemy-3.webp'],
+  ['getImportanceGlowPath', ['player', '2'], '/images/UI/common/importance-glow-player-2.webp'],
+  ['getImportanceGlowPath', ['enemy', '3'], '/images/UI/common/importance-glow-enemy-3.webp'],
+  ['getCautionStripePath', [], '/images/UI/common/caution-stripe.webp'],
 ]
 
 describe('asset path getters', () => {
@@ -194,6 +208,19 @@ const FAMILIES: [name: string, paths: string[]][] = [
       ...AFFINITIES.map((affinity) => assetPaths.getEGONameBgPath(affinity)),
       assetPaths.getEGONameBgPath(),
     ],
+  ],
+  ['coinSprite', COIN_COLORS.map((color) => assetPaths.getCoinSpritePath(color))],
+  [
+    'importanceIcon',
+    IMPORTANCE_PALETTES.flatMap((palette) =>
+      PASSIVE_IMPORTANCE_LEVELS.map((tier) => assetPaths.getImportanceIconPath(palette, tier)),
+    ),
+  ],
+  [
+    'importanceGlow',
+    IMPORTANCE_PALETTES.flatMap((palette) =>
+      (['2', '3'] as const).map((tier) => assetPaths.getImportanceGlowPath(palette, tier)),
+    ),
   ],
 ]
 

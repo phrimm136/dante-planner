@@ -10,6 +10,8 @@ import {
 } from '@/shared/assets'
 import { cn, getDisplayFontForNumeric, getDisplayFontForLanguage } from '@/lib/utils'
 import { SECTION_STYLES } from '@/lib/constants'
+import type { ImportancePalette } from '@/shared/gameData'
+import { ImportanceDecoration, importanceNameStyle } from '@/shared/importance'
 
 interface IdentityPassiveCondition {
   type: string
@@ -22,6 +24,8 @@ interface IdentityPassiveCardProps {
   flavorSlot: ReactNode
   condition?: IdentityPassiveCondition | undefined
   isLocked: boolean
+  importanceLevel: number
+  palette: ImportancePalette
 }
 
 export function IdentityPassiveCard({
@@ -30,12 +34,21 @@ export function IdentityPassiveCard({
   flavorSlot,
   condition,
   isLocked,
+  importanceLevel,
+  palette,
 }: IdentityPassiveCardProps) {
   const { t, i18n } = useTranslation(['database', 'common'])
+  const nameStyle = importanceNameStyle(importanceLevel, palette)
 
   return (
-    <div className={cn('relative space-y-1', isLocked && 'opacity-50')}>
-      <div className={SECTION_STYLES.LAYOUT.row}>
+    <div className={cn('relative space-y-1', isLocked && 'opacity-50', nameStyle && 'isolate')}>
+      <ImportanceDecoration level={importanceLevel} palette={palette} variant="passive" />
+      <div
+        className={
+          nameStyle ? cn(SECTION_STYLES.LAYOUT.row, 'importance-name') : SECTION_STYLES.LAYOUT.row
+        }
+        style={nameStyle}
+      >
         <Suspense fallback={<StyledNameSkeleton attributeType="NEUTRAL" />}>{nameSlot}</Suspense>
       </div>
       {isLocked && (

@@ -10,6 +10,7 @@ import {
   getAttackLevelIconPath,
   getDefenseLevelIconPath,
 } from '@/shared/assets'
+import type { SkillCoin } from '@/shared/gameData'
 import { CoinDisplay } from './CoinDisplay'
 
 interface SkillInfoPanelData {
@@ -21,7 +22,7 @@ interface SkillInfoPanelData {
 interface SkillInfoPanelWithSuspenseProps {
   skillData: SkillInfoPanelData
   level: number
-  coinString: string
+  coins: readonly SkillCoin[]
   nameSlot: ReactNode
   isDefenseSkill?: boolean
   sanityCost?: number | undefined
@@ -30,7 +31,7 @@ interface SkillInfoPanelWithSuspenseProps {
 export function SkillInfoPanelWithSuspense({
   skillData,
   level,
-  coinString,
+  coins,
   nameSlot,
   isDefenseSkill = false,
   sanityCost,
@@ -43,7 +44,7 @@ export function SkillInfoPanelWithSuspense({
   return (
     <div className="flex grow flex-col pb-4 -ml-5">
       <div>
-        <CoinDisplay coinEA={coinString} />
+        <CoinDisplay coins={coins} />
       </div>
 
       <Suspense fallback={<StyledNameSkeleton attributeType={skillData.attributeType} />}>

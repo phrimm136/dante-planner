@@ -18,6 +18,8 @@ export function PassiveCardWithSuspense({ id, passiveId, isLocked }: PassiveCard
       descSlot={<PassiveDescContent id={id} passiveId={passiveId} />}
       flavorSlot={<PassiveFlavorContent id={id} passiveId={passiveId} />}
       isLocked={isLocked}
+      importanceLevel={0}
+      palette="player"
     />
   )
 }

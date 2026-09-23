@@ -75,6 +75,12 @@ export type SinnerName = (typeof SINNER_NAMES)[number]
 
 export const PASSIVE_IMPORTANCE_LEVELS = ['1', '2', '3'] as const
 
+export type ImportanceTier = (typeof PASSIVE_IMPORTANCE_LEVELS)[number]
+
+export const IMPORTANCE_PALETTES = ['player', 'enemy'] as const
+
+export type ImportancePalette = (typeof IMPORTANCE_PALETTES)[number]
+
 export const COLLAB_SEASON_CODE = 8000
 
 /**
@@ -105,6 +111,10 @@ export const SKILL_DEF_TYPE_ATTACK = 'ATTACK'
 export const EGO_SKILL_TYPES = { AWAKEN: 'EGO_AWAKEN', EROSION: 'EGO_EROSION' } as const
 
 export const COIN_OPERATOR_SUB = 'SUB'
+
+export const COIN_COLORS = ['GOLD', 'GREY', 'GREEN', 'PURPLE'] as const
+
+export type CoinColor = (typeof COIN_COLORS)[number]
 
 export const EGO_TYPES = ['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH'] as const
 

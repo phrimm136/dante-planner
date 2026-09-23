@@ -49,6 +49,8 @@ export function IdentitySkillCardWithGranularI18n({
         />
       }
       isLocked={isLocked}
+      importanceLevel={entry.importanceLevel}
+      palette="player"
     />
   )
 }

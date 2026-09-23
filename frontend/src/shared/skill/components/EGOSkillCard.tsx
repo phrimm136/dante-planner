@@ -4,7 +4,7 @@ import { getEGOSkillImagePath } from '@/shared/assets'
 import { EGO_SKILL_TYPES } from '@/shared/gameData'
 import type { SkillId } from '@/shared/gameData'
 import { toSkillCardData } from '../lib/skillLevel'
-import type { SkillEntry, SkillLevel } from '@/shared/gameData'
+import type { ImportancePalette, SkillEntry, SkillLevel } from '@/shared/gameData'
 import { SkillCard } from './SkillCard'
 
 interface EGOSkillCardProps {
@@ -15,6 +15,8 @@ interface EGOSkillCardProps {
   unitLevel: number
   renderName: (attributeType: string | undefined) => ReactNode
   descriptionSlot: ReactNode
+  importanceLevel: number
+  palette: ImportancePalette
 }
 
 export function EGOSkillCard({
@@ -25,6 +27,8 @@ export function EGOSkillCard({
   unitLevel,
   renderName,
   descriptionSlot,
+  importanceLevel,
+  palette,
 }: EGOSkillCardProps) {
   const cardData = toSkillCardData(entry, level)
   const imageType = entry.skillType === EGO_SKILL_TYPES.EROSION ? 'erosion' : 'awaken'
@@ -33,12 +37,14 @@ export function EGOSkillCard({
     <SkillCard
       skillId={skillId}
       skillData={cardData}
-      coinString={level.coinString}
+      coins={level.coins}
       skillImagePath={getEGOSkillImagePath(egoId, imageType)}
       skillTier={entry.skillTier}
       level={unitLevel}
       nameSlot={renderName(cardData.attributeType)}
       descriptionSlot={descriptionSlot}
+      importanceLevel={importanceLevel}
+      palette={palette}
       sanityCost={cardData.mpUsage}
     />
   )

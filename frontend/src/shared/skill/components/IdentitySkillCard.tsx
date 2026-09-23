@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import { getSkillImagePath, getSkillImagePathFromIconID } from '@/shared/assets'
 import type { SkillId } from '@/shared/gameData'
 import { toSkillCardData } from '../lib/skillLevel'
-import type { SkillEntry, SkillLevel } from '@/shared/gameData'
+import type { ImportancePalette, SkillEntry, SkillLevel } from '@/shared/gameData'
 import { SkillCard } from './SkillCard'
 
 interface IdentitySkillCardProps {
@@ -14,6 +14,8 @@ interface IdentitySkillCardProps {
   unitLevel: number
   renderName: (attributeType: string | undefined) => ReactNode
   descriptionSlot: ReactNode
+  importanceLevel: number
+  palette: ImportancePalette
   isLocked?: boolean
 }
 
@@ -25,6 +27,8 @@ export function IdentitySkillCard({
   unitLevel,
   renderName,
   descriptionSlot,
+  importanceLevel,
+  palette,
   isLocked = false,
 }: IdentitySkillCardProps) {
   const cardData = toSkillCardData(entry, level)
@@ -38,12 +42,14 @@ export function IdentitySkillCard({
     <SkillCard
       skillId={skillId}
       skillData={cardData}
-      coinString={level.coinString}
+      coins={level.coins}
       skillImagePath={skillImagePath}
       skillTier={entry.skillTier}
       level={unitLevel}
       nameSlot={renderName(cardData.attributeType)}
       descriptionSlot={descriptionSlot}
+      importanceLevel={importanceLevel}
+      palette={palette}
       isDefenseSkill={isDefenseSkill}
       isLocked={isLocked}
     />

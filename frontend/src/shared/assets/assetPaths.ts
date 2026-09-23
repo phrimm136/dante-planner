@@ -1,5 +1,10 @@
 import { AFFINITIES, ATK_TYPES } from '@/shared/gameData'
-import type { SkillAttributeType } from '@/shared/gameData'
+import type {
+  CoinColor,
+  ImportancePalette,
+  ImportanceTier,
+  SkillAttributeType,
+} from '@/shared/gameData'
 import { resolveAsset } from './assetManifest'
 
 const AFFINITY_TO_SIN_NAME: Record<string, string> = {
@@ -10,6 +15,13 @@ const AFFINITY_TO_SIN_NAME: Record<string, string> = {
   AZURE: 'Gloom',
   INDIGO: 'Pride',
   VIOLET: 'Envy',
+}
+
+const COIN_SPRITES: Record<CoinColor, string> = {
+  GOLD: 'gold',
+  GREY: 'grey',
+  GREEN: 'green',
+  PURPLE: 'purple',
 }
 
 const frameLevel = (skillTier: number): number => Math.max(1, Math.min(3, skillTier))
@@ -113,6 +125,15 @@ export const PATHS = {
     resolveAsset(`/images/UI/common/atkType-${atkType.toLowerCase()}.webp`),
   coinDescIcon: (coinIndex: number) =>
     resolveAsset(`/images/UI/common/coin-${String(coinIndex + 1)}.webp`),
+  coinSprite: (color: CoinColor) => {
+    const sprite = COIN_SPRITES[color]
+    return resolveAsset(`/images/UI/common/coin-${sprite}.webp`)
+  },
+  importanceIcon: (palette: ImportancePalette, tier: ImportanceTier) =>
+    resolveAsset(`/images/UI/common/importance-${palette}-${tier}.webp`),
+  importanceGlow: (palette: ImportancePalette, tier: ImportanceTier) =>
+    resolveAsset(`/images/UI/common/importance-glow-${palette}-${tier}.webp`),
+  cautionStripe: () => resolveAsset('/images/UI/common/caution-stripe.webp'),
   egoTierIcon: (tier: number) => resolveAsset(`/images/UI/common/tier-${String(tier)}.webp`),
   attackWeightIcon: () => resolveAsset('/images/UI/common/atkWeight.webp'),
   lockIcon: () => resolveAsset('/images/UI/common/lock.webp'),
@@ -126,10 +147,6 @@ export const PATHS = {
   affinityIcon: (affinity: string) => {
     const sinName = AFFINITY_TO_SIN_NAME[affinity] || affinity
     return resolveAsset(`/images/icon/sin/${sinName}.webp`)
-  },
-  coinIcon: (coinType: 'C' | 'U') => {
-    const iconName = coinType === 'U' ? 'superCoin' : 'coin'
-    return resolveAsset(`/images/icon/${iconName}.webp`)
   },
   egoTypeIcon: (egoType: string) => resolveAsset(`/images/icon/ego/${egoType}.webp`),
   egoGiftIcon: (giftId: string) => resolveAsset(`/images/icon/egoGift/${giftId}.webp`),
@@ -245,6 +262,12 @@ export const getDefenseTypeIconPath = (defType: string): string => path('defense
 
 export const getAttackTypeIconPath = (atkType: string): string => path('attackTypeIcon', atkType)
 export const getCoinDescIconPath = (coinIndex: number): string => path('coinDescIcon', coinIndex)
+export const getCoinSpritePath = (color: CoinColor): string => path('coinSprite', color)
+export const getImportanceIconPath = (palette: ImportancePalette, tier: ImportanceTier): string =>
+  path('importanceIcon', palette, tier)
+export const getImportanceGlowPath = (palette: ImportancePalette, tier: ImportanceTier): string =>
+  path('importanceGlow', palette, tier)
+export const getCautionStripePath = (): string => path('cautionStripe')
 export const getEGOTierIconPath = (tier: number): string => path('egoTierIcon', tier)
 export const getAttackWeightIconPath = (): string => path('attackWeightIcon')
 export const getLockIconPath = (): string => path('lockIcon')
@@ -256,7 +279,6 @@ export const getButtonClosePath = (): string => path('buttonClose')
 
 export const getSinnerIconPath = (sinner: string): string => path('sinnerIcon', sinner)
 export const getAffinityIconPath = (affinity: string): string => path('affinityIcon', affinity)
-export const getCoinIconPath = (coinType: 'C' | 'U'): string => path('coinIcon', coinType)
 export const getEGOSmallRankIconPath = (rank: string): string => path('egoTypeIcon', rank)
 export const getEGOTypeIconPath = (egoType: string): string => path('egoTypeIcon', egoType)
 export const getEGOGiftIconPath = (giftId: string): string => path('egoGiftIcon', giftId)

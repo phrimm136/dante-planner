@@ -360,6 +360,109 @@
   opacity: var(--selectable-shimmer-opacity);
 }
 
+/* ==========================================================================
+   Importance Decoration
+   ========================================================================== */
+
+@keyframes importance-flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes importance-glow-fade {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes importance-blink {
+  from {
+    opacity: var(--importance-blink-min);
+  }
+  to {
+    opacity: var(--importance-blink-max);
+  }
+}
+
+@keyframes importance-scroll {
+  from {
+    mask-position: 0 0;
+  }
+  to {
+    mask-position: var(--tile-w) 0;
+  }
+}
+
+@keyframes importance-panel-glow {
+  from {
+    box-shadow: 0 0 0 var(--importance-panel-glow);
+  }
+  to {
+    box-shadow: 0 0 var(--importance-panel-glow-blur) var(--importance-panel-glow);
+  }
+}
+
+.importance-icon {
+  opacity: var(--importance-icon-alpha);
+}
+
+.importance-flicker {
+  animation: importance-flicker var(--importance-flicker-period) ease-in-out infinite;
+}
+
+.importance-glow-fade {
+  animation: importance-glow-fade var(--importance-glow-fade) linear infinite;
+}
+
+.importance-band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: var(--importance-band-height);
+  container-type: size;
+}
+
+.importance-stripe {
+  position: absolute;
+  inset: 0;
+  background-color: var(--importance-stripe-color);
+  mask-repeat: repeat-x;
+  mask-size: auto 100%;
+  animation:
+    importance-scroll var(--importance-stripe-scroll) linear infinite,
+    importance-blink var(--importance-flicker-period) ease-in-out infinite alternate;
+}
+
+.importance-stripe-top {
+  animation-direction: reverse, alternate;
+}
+
+.importance-panel {
+  background-color: var(--importance-panel);
+  animation: importance-panel-glow var(--importance-panel-pulse) ease-in-out infinite alternate;
+}
+
+.importance-name * {
+  color: var(--importance-name);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .importance-flicker,
+  .importance-glow-fade,
+  .importance-stripe,
+  .importance-panel {
+    animation: none;
+  }
+}
+
 /* Enhancement button - CSS variables for border-image */
 :root {
   /* slice: how much to cut from source image edges */

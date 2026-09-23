@@ -36,6 +36,8 @@ export function EGOSkillCardWithGranularI18n({
         <EGOSkillName egoId={egoId} skillId={skillId} attributeType={attributeType} />
       )}
       descriptionSlot={<EGOSkillDescription egoId={egoId} skillId={skillId} level={threadspin} />}
+      importanceLevel={entry.importanceLevel}
+      palette="player"
     />
   )
 }
