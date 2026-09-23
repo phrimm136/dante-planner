@@ -496,7 +496,6 @@ export const router = createRouter({
   defaultNotFoundComponent: NotFoundPage,
   defaultErrorComponent: RouteErrorComponent,
   defaultPendingComponent: RoutePendingFallback,
-  defaultPreload: 'intent',
   scrollRestoration: true,
   defaultPendingMs: 0,
   defaultPendingMinMs: 200,
