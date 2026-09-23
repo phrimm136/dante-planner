@@ -1,12 +1,6 @@
 import { useEGODetailI18n } from '../hooks/useEGODetailData'
-import {
-  SkillCard,
-  SkillDescription,
-  getMergedSkillDesc,
-  mergeSkillDataUpToLevel,
-} from '@/shared/skill'
+import { EGOSkillCard, SkillDescription, getMergedSkillDesc } from '@/shared/skill'
 import { StyledSkillName } from '@/shared/gameText'
-import { getEGOSkillImagePath } from '@/shared/assets'
 import type { EGOSkillEntry, Threadspin } from '../types/EGOTypes'
 import { IDENTITY_LEVEL_CAP } from '@/shared/gameData'
 import type { SkillId } from '@/shared/gameData'
@@ -24,27 +18,19 @@ export function EGOSkillCardWithGranularI18n({
   skillEntry,
   threadspin,
 }: EGOSkillCardWithGranularI18nProps) {
-  const mergedData = mergeSkillDataUpToLevel(skillEntry.skillData, threadspin)
-  const coinString = mergedData.coinString ?? ''
-
   return (
-    <SkillCard
-      skillData={mergedData}
-      coinString={coinString}
-      skillImagePath={getEGOSkillImagePath(egoId, skillType)}
-      skillTier={3}
+    <EGOSkillCard
+      egoId={egoId}
+      skillType={skillType}
+      skillEntry={skillEntry}
+      threadspin={threadspin}
       level={IDENTITY_LEVEL_CAP}
-      nameSlot={
-        <EGOSkillName
-          egoId={egoId}
-          skillId={skillEntry.id}
-          attributeType={mergedData.attributeType}
-        />
-      }
+      renderName={(attributeType) => (
+        <EGOSkillName egoId={egoId} skillId={skillEntry.id} attributeType={attributeType} />
+      )}
       descriptionSlot={
         <EGOSkillDescription egoId={egoId} skillId={skillEntry.id} level={threadspin} />
       }
-      sanityCost={mergedData.mpUsage ?? 0}
     />
   )
 }

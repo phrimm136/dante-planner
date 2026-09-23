@@ -45,14 +45,16 @@ vi.mock('@/components/layout/EntityMetaInfoI18n', () => ({
 }))
 
 // Left-pane leaves, tallied through the real components
-vi.mock('@/pages/ego/components/SinCostPanel', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../components/SinCostPanel')>()
+vi.mock('@/shared/unitStatus/components/SinCostPanel', async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import('@/shared/unitStatus/components/SinCostPanel')>()
   const { countRenders } = await import('@/test-utils/renderCounter')
   return { SinCostPanel: countRenders('SinCostPanel', actual.SinCostPanel) }
 })
 
-vi.mock('@/pages/ego/components/SinResistancePanel', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../components/SinResistancePanel')>()
+vi.mock('@/shared/unitStatus/components/SinResistancePanel', async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import('@/shared/unitStatus/components/SinResistancePanel')>()
   const { countRenders } = await import('@/test-utils/renderCounter')
   return { SinResistancePanel: countRenders('SinResistancePanel', actual.SinResistancePanel) }
 })

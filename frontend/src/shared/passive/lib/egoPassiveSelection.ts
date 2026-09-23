@@ -11,7 +11,7 @@
  * lower-tier one rather than appearing alongside it.
  */
 
-import { selectEffectivePassives, selectLockedPassives } from '@/shared/passiveSelection'
+import { selectEffectivePassives, selectLockedPassives } from './passiveSelection'
 import type { PassiveId } from '@/shared/gameData'
 
 /**

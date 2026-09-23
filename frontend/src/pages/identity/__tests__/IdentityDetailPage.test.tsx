@@ -224,7 +224,7 @@ vi.mock('@/components/hooks/use-is-breakpoint', () => ({
 }))
 
 // Mock usePanicInfo hook (used in PanicTypeSectionI18n)
-vi.mock('@/pages/identity/hooks/usePanicInfo', () => ({
+vi.mock('@/shared/sanity/hooks/usePanicInfo', () => ({
   usePanicInfo: () => ({
     data: {
       '9999': { name: 'Standard Panic', panicDesc: 'Standard panic effect' },
@@ -248,14 +248,14 @@ vi.mock('@/shared/assets', async (importOriginal) => {
 })
 
 // Mock sanity condition formatter
-vi.mock('@/pages/identity/hooks/useSanityConditionFormatter', () => ({
+vi.mock('@/shared/sanity/hooks/useSanityConditionFormatter', () => ({
   useSanityConditionFormatter: () => ({
     formatAll: (conditions: string[]) => conditions.map(() => 'Formatted condition'),
   }),
 }))
 
 // Mock TraitsDisplay component to avoid fetch
-vi.mock('@/pages/identity/components/TraitsDisplay', () => ({
+vi.mock('@/shared/unitStatus/components/TraitsDisplay', () => ({
   TraitsDisplay: ({ traits }: { traits: string[] }) => (
     <div data-testid="traits-display">Traits: {traits.length}</div>
   ),

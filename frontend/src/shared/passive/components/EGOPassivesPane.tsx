@@ -1,18 +1,26 @@
+import { Fragment, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { SECTION_STYLES } from '@/lib/constants'
-import { PassiveCardWithSuspense } from './PassiveI18n'
 import { getEffectiveEgoPassives, getLockedEgoPassives } from '../lib/egoPassiveSelection'
 
-import type { EGOData, Threadspin } from '../types/EGOTypes'
+import type { PassiveId, Threadspin } from '@/shared/gameData'
 
-interface EGOPassivesPaneProps {
-  id: string
-  passives: EGOData['passives']
-  threadspinLevel: Threadspin
+interface EGOPassiveLists {
+  passiveList: PassiveId[][]
 }
 
-export function EGOPassivesPane({ id, passives, threadspinLevel }: EGOPassivesPaneProps) {
+interface EGOPassivesPaneProps {
+  passives: EGOPassiveLists
+  threadspinLevel: Threadspin
+  renderPassive: (passiveId: PassiveId, isLocked: boolean) => ReactNode
+}
+
+export function EGOPassivesPane({
+  passives,
+  threadspinLevel,
+  renderPassive,
+}: EGOPassivesPaneProps) {
   const { t } = useTranslation(['database', 'common'])
 
   const threadspinIndex = threadspinLevel - 1
@@ -23,10 +31,10 @@ export function EGOPassivesPane({ id, passives, threadspinLevel }: EGOPassivesPa
     <div className="border rounded p-4 space-y-4">
       <div className="space-y-3">
         {effectivePassives.map((passiveId) => (
-          <PassiveCardWithSuspense key={passiveId} id={id} passiveId={passiveId} isLocked={false} />
+          <Fragment key={passiveId}>{renderPassive(passiveId, false)}</Fragment>
         ))}
         {lockedPassives.map((passiveId) => (
-          <PassiveCardWithSuspense key={passiveId} id={id} passiveId={passiveId} isLocked={true} />
+          <Fragment key={passiveId}>{renderPassive(passiveId, true)}</Fragment>
         ))}
         {effectivePassives.length === 0 && lockedPassives.length === 0 && (
           <div className={SECTION_STYLES.TEXT.caption}>{t('passive.none', 'No passives')}</div>

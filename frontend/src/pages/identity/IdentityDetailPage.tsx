@@ -14,8 +14,9 @@ import { IDENTITY_LEVEL_CAP, MAX_ENTITY_TIER, MIN_ENTITY_TIER } from '@/shared/g
 import { IdentityDetailSkeleton } from './components/IdentityDetailSkeleton'
 import { IdentityInfoPane } from './components/IdentityInfoPane'
 import { IdentitySkillsPane } from './components/IdentitySkillsPane'
-import { IdentityPassivesPane } from './components/IdentityPassivesPane'
-import { IdentitySanityPane } from './components/IdentitySanityPane'
+import { PassiveCardI18n } from './components/PassiveI18n'
+import { IdentityPassivesPane } from '@/shared/passive'
+import { IdentitySanityPane } from '@/shared/sanity'
 import type { Uptie } from '@/pages/identity'
 
 function IdentityDetailContent() {
@@ -66,7 +67,18 @@ function IdentityDetailContent() {
   )
 
   const passivesContent = (
-    <IdentityPassivesPane id={id} passives={identityData.passives} uptieLevel={uptieLevel} />
+    <IdentityPassivesPane
+      passives={identityData.passives}
+      uptieLevel={uptieLevel}
+      renderPassive={(passiveId, isLocked) => (
+        <PassiveCardI18n
+          id={id}
+          passiveId={passiveId}
+          condition={identityData.passives.conditions[passiveId]}
+          isLocked={isLocked}
+        />
+      )}
+    />
   )
 
   const sanityContent = (

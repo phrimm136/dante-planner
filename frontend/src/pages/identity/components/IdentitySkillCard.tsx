@@ -1,12 +1,6 @@
 import { useIdentityDetailI18n } from '../hooks/useIdentityDetailData'
-import {
-  SkillCard,
-  SkillDescription,
-  getMergedSkillDesc,
-  mergeSkillDataUpToLevel,
-} from '@/shared/skill'
+import { IdentitySkillCard, SkillDescription, getMergedSkillDesc } from '@/shared/skill'
 import { StyledSkillName } from '@/shared/gameText'
-import { getSkillImagePath, getSkillImagePathFromIconID } from '@/shared/assets'
 import type { IdentitySkillEntry, Uptie } from '../types/IdentityTypes'
 import type { SkillId } from '@/shared/gameData'
 
@@ -42,33 +36,21 @@ export function IdentitySkillCardWithGranularI18n({
   level,
   isLocked = false,
 }: IdentitySkillCardWithGranularI18nProps) {
-  const mergedData = mergeSkillDataUpToLevel(skillEntry.skillData, uptie)
-  const isDefenseSkill = mergedData.atkType === 'NONE' || !mergedData.atkType
-  const coinString = mergedData.coinString ?? ''
   const textId = skillEntry.textID ?? skillEntry.id
 
-  const skillImagePath = mergedData.iconID
-    ? getSkillImagePathFromIconID(mergedData.iconID)
-    : getSkillImagePath(identityId, String(skillEntry.id))
-
   return (
-    <SkillCard
-      skillData={mergedData}
-      coinString={coinString}
-      skillImagePath={skillImagePath}
-      skillTier={skillEntry.skillTier ?? skillSlot}
+    <IdentitySkillCard
+      identityId={identityId}
+      skillSlot={skillSlot}
+      skillEntry={skillEntry}
+      uptie={uptie}
       level={level}
-      nameSlot={
-        <IdentitySkillName
-          identityId={identityId}
-          skillId={textId}
-          attributeType={mergedData.attributeType}
-        />
-      }
+      renderName={(attributeType) => (
+        <IdentitySkillName identityId={identityId} skillId={textId} attributeType={attributeType} />
+      )}
       descriptionSlot={
         <IdentitySkillDescription identityId={identityId} skillId={textId} level={uptie} />
       }
-      isDefenseSkill={isDefenseSkill}
       isLocked={isLocked}
     />
   )

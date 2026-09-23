@@ -1,19 +1,28 @@
+import { Fragment, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { PASSIVE_INDICATOR_COLORS, SECTION_STYLES } from '@/lib/constants'
 import { getDisplayFontForLanguage } from '@/lib/utils'
-import { PassiveCardI18n } from './PassiveI18n'
 import { getEffectivePassives, getLockedPassives } from '../lib/identityPassiveSelection'
 
-import type { IdentityData, Uptie } from '../types/IdentityTypes'
+import type { PassiveId, Uptie } from '@/shared/gameData'
 
-interface IdentityPassivesPaneProps {
-  id: string
-  passives: IdentityData['passives']
-  uptieLevel: Uptie
+interface IdentityPassiveLists {
+  battlePassiveList: PassiveId[][]
+  supportPassiveList: PassiveId[][]
 }
 
-export function IdentityPassivesPane({ id, passives, uptieLevel }: IdentityPassivesPaneProps) {
+interface IdentityPassivesPaneProps {
+  passives: IdentityPassiveLists
+  uptieLevel: Uptie
+  renderPassive: (passiveId: PassiveId, isLocked: boolean) => ReactNode
+}
+
+export function IdentityPassivesPane({
+  passives,
+  uptieLevel,
+  renderPassive,
+}: IdentityPassivesPaneProps) {
   const { t, i18n } = useTranslation(['database', 'common'])
   const displayStyle = getDisplayFontForLanguage(i18n.language)
 
@@ -39,22 +48,10 @@ export function IdentityPassivesPane({ id, passives, uptieLevel }: IdentityPassi
           </span>
         </div>
         {effectiveBattlePassives.map((passiveId) => (
-          <PassiveCardI18n
-            key={passiveId}
-            id={id}
-            passiveId={passiveId}
-            condition={passives.conditions[passiveId]}
-            isLocked={false}
-          />
+          <Fragment key={passiveId}>{renderPassive(passiveId, false)}</Fragment>
         ))}
         {lockedBattlePassives.map((passiveId) => (
-          <PassiveCardI18n
-            key={passiveId}
-            id={id}
-            passiveId={passiveId}
-            condition={passives.conditions[passiveId]}
-            isLocked={true}
-          />
+          <Fragment key={passiveId}>{renderPassive(passiveId, true)}</Fragment>
         ))}
         {effectiveBattlePassives.length === 0 && lockedBattlePassives.length === 0 && (
           <div className={SECTION_STYLES.TEXT.caption}>
@@ -77,22 +74,10 @@ export function IdentityPassivesPane({ id, passives, uptieLevel }: IdentityPassi
           </span>
         </div>
         {effectiveSupportPassives.map((passiveId) => (
-          <PassiveCardI18n
-            key={passiveId}
-            id={id}
-            passiveId={passiveId}
-            condition={passives.conditions[passiveId]}
-            isLocked={false}
-          />
+          <Fragment key={passiveId}>{renderPassive(passiveId, false)}</Fragment>
         ))}
         {lockedSupportPassives.map((passiveId) => (
-          <PassiveCardI18n
-            key={passiveId}
-            id={id}
-            passiveId={passiveId}
-            condition={passives.conditions[passiveId]}
-            isLocked={true}
-          />
+          <Fragment key={passiveId}>{renderPassive(passiveId, true)}</Fragment>
         ))}
         {effectiveSupportPassives.length === 0 && lockedSupportPassives.length === 0 && (
           <div className={SECTION_STYLES.TEXT.caption}>

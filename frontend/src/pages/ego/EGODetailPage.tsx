@@ -13,7 +13,8 @@ import { MIN_ENTITY_TIER } from '@/shared/gameData'
 import { EGODetailSkeleton } from './components/EGODetailSkeleton'
 import { EGOInfoPane } from './components/EGOInfoPane'
 import { EGOSkillsPane } from './components/EGOSkillsPane'
-import { EGOPassivesPane } from './components/EGOPassivesPane'
+import { PassiveCardWithSuspense } from './components/PassiveI18n'
+import { EGOPassivesPane } from '@/shared/passive'
 import type { EgoSkillType, Threadspin } from '@/pages/ego'
 
 function EGODetailContent() {
@@ -61,7 +62,13 @@ function EGODetailContent() {
   )
 
   const passivesContent = (
-    <EGOPassivesPane id={id} passives={spec.passives} threadspinLevel={threadspinLevel} />
+    <EGOPassivesPane
+      passives={spec.passives}
+      threadspinLevel={threadspinLevel}
+      renderPassive={(passiveId, isLocked) => (
+        <PassiveCardWithSuspense id={id} passiveId={passiveId} isLocked={isLocked} />
+      )}
+    />
   )
 
   const rightColumn = (

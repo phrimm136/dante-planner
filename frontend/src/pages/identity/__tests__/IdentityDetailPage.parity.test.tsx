@@ -37,7 +37,7 @@ vi.mock('@/components/hooks/use-is-breakpoint', () => ({
   useIsBreakpoint: vi.fn(() => false),
 }))
 
-vi.mock('@/pages/identity/hooks/usePanicInfo', () => ({
+vi.mock('@/shared/sanity/hooks/usePanicInfo', () => ({
   usePanicInfo: () => ({
     data: { '9999': { name: 'Standard Panic', panicDesc: 'Standard panic effect' } },
   }),
@@ -51,7 +51,7 @@ vi.mock('@/shared/filter/hooks/useUnitKeywords', async (importOriginal) => {
   return { ...actual, useUnitKeywords: () => identityTraitLabels }
 })
 
-vi.mock('@/pages/identity/hooks/useSanityConditionFormatter', () => ({
+vi.mock('@/shared/sanity/hooks/useSanityConditionFormatter', () => ({
   useSanityConditionFormatter: () => ({
     formatAll: (conditions: string[]) => conditions.map(() => 'Formatted condition'),
   }),

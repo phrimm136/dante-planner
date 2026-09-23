@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 import * as identity from '@/pages/identity/schemas/IdentitySchemas'
-import * as panicInfo from '@/pages/identity/schemas/PanicInfoSchemas'
+import * as panicInfo from '@/shared/sanity/schemas/PanicInfoSchemas'
 import * as ego from '@/pages/ego/schemas/EGOSchemas'
 import * as egoGift from '@/pages/egoGift/schemas/EGOGiftSchemas'
 import * as egoGiftObservation from '@/pages/egoGift/schemas/EGOGiftObservationSchemas'

@@ -35,7 +35,7 @@ vi.mock('@/components/hooks/use-is-breakpoint', () => ({
   useIsBreakpoint: vi.fn(() => false),
 }))
 
-vi.mock('@/pages/identity/hooks/usePanicInfo', () => ({
+vi.mock('@/shared/sanity/hooks/usePanicInfo', () => ({
   usePanicInfo: () => ({
     data: { '9999': { name: 'Standard Panic', panicDesc: 'Standard panic effect' } },
   }),
@@ -43,32 +43,34 @@ vi.mock('@/pages/identity/hooks/usePanicInfo', () => ({
     panicType === 9999 ? { name: 'Standard Panic', panicDesc: 'Standard panic effect' } : null,
 }))
 
-vi.mock('@/pages/identity/hooks/useSanityConditionFormatter', () => ({
+vi.mock('@/shared/sanity/hooks/useSanityConditionFormatter', () => ({
   useSanityConditionFormatter: () => ({
     formatAll: (conditions: string[]) => conditions.map(() => 'Formatted condition'),
   }),
 }))
 
 // Left-pane leaves, tallied through the real components
-vi.mock('@/pages/identity/components/StatusPanel', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../components/StatusPanel')>()
+vi.mock('@/shared/unitStatus/components/StatusPanel', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/shared/unitStatus/components/StatusPanel')>()
   const { countRenders } = await import('@/test-utils/renderCounter')
   return { StatusPanel: countRenders('StatusPanel', actual.StatusPanel) }
 })
 
-vi.mock('@/pages/identity/components/ResistancePanel', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../components/ResistancePanel')>()
+vi.mock('@/shared/unitStatus/components/ResistancePanel', async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import('@/shared/unitStatus/components/ResistancePanel')>()
   const { countRenders } = await import('@/test-utils/renderCounter')
   return { ResistancePanel: countRenders('ResistancePanel', actual.ResistancePanel) }
 })
 
-vi.mock('@/pages/identity/components/StaggerPanel', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../components/StaggerPanel')>()
+vi.mock('@/shared/unitStatus/components/StaggerPanel', async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import('@/shared/unitStatus/components/StaggerPanel')>()
   const { countRenders } = await import('@/test-utils/renderCounter')
   return { StaggerPanel: countRenders('StaggerPanel', actual.StaggerPanel) }
 })
 
-vi.mock('@/pages/identity/components/TraitsDisplay', async () => {
+vi.mock('@/shared/unitStatus/components/TraitsDisplay', async () => {
   const { countRenders } = await import('@/test-utils/renderCounter')
   function TraitsDisplayStub({ traits }: { traits: string[] }) {
     return <div data-testid="traits-display">Traits: {traits.length}</div>
@@ -89,16 +91,18 @@ vi.mock('@/pages/identity/components/IdentityInfoPane', async (importOriginal) =
   return { IdentityInfoPane: countRenders('IdentityInfoPane', actual.IdentityInfoPane) }
 })
 
-vi.mock('@/pages/identity/components/IdentityPassivesPane', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../components/IdentityPassivesPane')>()
+vi.mock('@/shared/passive/components/IdentityPassivesPane', async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import('@/shared/passive/components/IdentityPassivesPane')>()
   const { countRenders } = await import('@/test-utils/renderCounter')
   return {
     IdentityPassivesPane: countRenders('IdentityPassivesPane', actual.IdentityPassivesPane),
   }
 })
 
-vi.mock('@/pages/identity/components/IdentitySanityPane', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../components/IdentitySanityPane')>()
+vi.mock('@/shared/sanity/components/IdentitySanityPane', async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import('@/shared/sanity/components/IdentitySanityPane')>()
   const { countRenders } = await import('@/test-utils/renderCounter')
   return { IdentitySanityPane: countRenders('IdentitySanityPane', actual.IdentitySanityPane) }
 })
@@ -109,8 +113,8 @@ vi.mock('@/pages/identity/components/PassiveI18n', async (importOriginal) => {
   return { ...actual, PassiveCardI18n: countRenders('PassiveCardI18n', actual.PassiveCardI18n) }
 })
 
-vi.mock('@/pages/identity/components/SanityI18n', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../components/SanityI18n')>()
+vi.mock('@/shared/sanity/components/SanityI18n', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/shared/sanity/components/SanityI18n')>()
   const { countRenders } = await import('@/test-utils/renderCounter')
   return {
     ...actual,

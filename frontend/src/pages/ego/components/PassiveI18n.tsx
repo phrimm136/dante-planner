@@ -1,10 +1,8 @@
-import { Suspense } from 'react'
 import { useEGODetailI18n } from '../hooks/useEGODetailData'
 import { FormattedDescription } from '@/shared/gameText'
-import { StyledSkillName, StyledNameSkeleton } from '@/shared/gameText'
-import { Skeleton } from '@/components/ui/skeleton'
-import { cn } from '@/lib/utils'
-import { FLAVOR_TEXT_COLOR, SECTION_STYLES } from '@/lib/constants'
+import { StyledSkillName } from '@/shared/gameText'
+import { EGOPassiveCard } from '@/shared/passive'
+import { FLAVOR_TEXT_COLOR } from '@/lib/constants'
 import type { PassiveId } from '@/shared/gameData'
 
 interface PassiveCardWithSuspenseProps {
@@ -15,22 +13,12 @@ interface PassiveCardWithSuspenseProps {
 
 export function PassiveCardWithSuspense({ id, passiveId, isLocked }: PassiveCardWithSuspenseProps) {
   return (
-    <div className={cn('space-y-1', isLocked && 'opacity-50')}>
-      <div className={SECTION_STYLES.LAYOUT.row}>
-        <Suspense fallback={<StyledNameSkeleton attributeType="NEUTRAL" />}>
-          <PassiveNameContent id={id} passiveId={passiveId} />
-        </Suspense>
-        {isLocked && <span className="text-xs">🔒</span>}
-      </div>
-      <div className="text-sm">
-        <Suspense fallback={<Skeleton className="h-4 w-full" />}>
-          <PassiveDescContent id={id} passiveId={passiveId} />
-        </Suspense>
-      </div>
-      <Suspense fallback={null}>
-        <PassiveFlavorContent id={id} passiveId={passiveId} />
-      </Suspense>
-    </div>
+    <EGOPassiveCard
+      nameSlot={<PassiveNameContent id={id} passiveId={passiveId} />}
+      descSlot={<PassiveDescContent id={id} passiveId={passiveId} />}
+      flavorSlot={<PassiveFlavorContent id={id} passiveId={passiveId} />}
+      isLocked={isLocked}
+    />
   )
 }
 

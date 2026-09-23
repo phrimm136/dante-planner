@@ -10,11 +10,6 @@ export { IdentityHeaderWithI18n } from './components/IdentityHeaderI18n'
 export { SkillsSectionI18n } from './components/IdentitySkillI18n'
 export { SkillTabButton } from './components/SkillTabButton'
 export { PassiveCardI18n } from './components/PassiveI18n'
-export { PanicTypeSectionI18n, SanityConditionsSectionI18n } from './components/SanityI18n'
-export { StatusPanel } from './components/StatusPanel'
-export { ResistancePanel } from './components/ResistancePanel'
-export { StaggerPanel } from './components/StaggerPanel'
-export { TraitsDisplay } from './components/TraitsDisplay'
 
 export {
   useIdentityListSpec,

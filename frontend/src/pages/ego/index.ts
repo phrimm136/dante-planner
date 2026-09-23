@@ -5,8 +5,6 @@ export { EGOFilterDropdown } from './components/EGOFilterDropdown'
 export { EGOHeader } from './components/EGOHeader'
 export { EGOSelectedTag } from './components/EGOSelectedTag'
 export { EGOHeaderWithI18n } from './components/EGOHeaderI18n'
-export { SinCostPanel } from './components/SinCostPanel'
-export { SinResistancePanel } from './components/SinResistancePanel'
 export { SkillsSectionI18n } from './components/EGOSkillI18n'
 export { PassiveCardWithSuspense } from './components/PassiveI18n'
 

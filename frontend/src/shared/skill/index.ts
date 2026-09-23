@@ -1,3 +1,5 @@
 export { SkillCard } from './components/SkillCard'
 export { SkillDescription, getMergedSkillDesc } from './components/SkillDescription'
 export { mergeSkillDataUpToLevel } from './lib/mergeSkillData'
+export { IdentitySkillCard } from './components/IdentitySkillCard'
+export { EGOSkillCard } from './components/EGOSkillCard'

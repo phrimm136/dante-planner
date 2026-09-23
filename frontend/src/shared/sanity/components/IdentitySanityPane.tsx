@@ -1,10 +1,13 @@
 import { PanicTypeSectionI18n, SanityConditionsSectionI18n } from './SanityI18n'
 
-import type { IdentityData } from '../types/IdentityTypes'
+interface MentalConditionInfo {
+  add: string[]
+  min: string[]
+}
 
 interface IdentitySanityPaneProps {
   panicType: string
-  mentalConditionInfo: IdentityData['mentalConditionInfo']
+  mentalConditionInfo: MentalConditionInfo
 }
 
 export function IdentitySanityPane({ panicType, mentalConditionInfo }: IdentitySanityPaneProps) {
