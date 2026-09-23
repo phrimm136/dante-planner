@@ -88,7 +88,7 @@ vi.mock('../usePlannerIdRegistry', async () => {
   return { usePlannerIdRegistry: () => () => EVERY_ID_REGISTRY }
 })
 
-vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
+vi.mock('@/shared/egoGift/hooks/useEGOGiftListData', () => ({
   useEGOGiftListSpec: () => ({ spec: {}, i18n: {} }).spec,
   useEGOGiftListI18n: () => ({ spec: {}, i18n: {} }).i18n,
 }))

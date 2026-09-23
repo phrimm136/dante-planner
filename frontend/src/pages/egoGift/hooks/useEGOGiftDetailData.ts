@@ -5,7 +5,7 @@ import {
   type EntityDetailDataConfig,
 } from '@/shared/entityCatalog'
 import type { z } from 'zod'
-import { EGOGiftDataSchema, EGOGiftI18nSchema } from '../schemas/EGOGiftSchemas'
+import { EGOGiftDataSchema, EGOGiftI18nSchema } from '@/shared/egoGift'
 
 export const egoGiftDetailQueryKeys = createEntityDetailQueryKeys('egoGift')
 

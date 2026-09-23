@@ -64,6 +64,15 @@ describe('entity lint plugin', () => {
     ])
   })
 
+  it('reports every violation in a non-conforming shared entity module', () => {
+    expect(findings(diagnostics, 'shared/bad/lib/badEntity.ts')).toEqual([
+      { file: 'shared/bad/lib/badEntity.ts', rule: 'no-plural-builder', name: 'toBadEntities' },
+      { file: 'shared/bad/lib/badEntity.ts', rule: 'singular-builder', name: 'helper' },
+      { file: 'shared/bad/lib/badEntity.ts', rule: 'singular-builder', name: 'toBadEntities' },
+      { file: 'shared/bad/lib/badEntity.ts', rule: 'singular-builder', name: 'toBadEntity' },
+    ])
+  })
+
   it('reports a plural builder outside the entity modules', () => {
     expect(findings(diagnostics, 'plural.ts')).toEqual([
       { file: 'plural.ts', rule: 'no-plural-builder', name: 'toThingEntities' },

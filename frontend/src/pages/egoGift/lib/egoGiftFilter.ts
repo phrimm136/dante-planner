@@ -1,8 +1,8 @@
 import type { EntityMatcher, Facet, SearchMappings } from '@/shared/filter'
 import { collectKeywordTerms, createEntityMatcher } from '@/shared/filter'
 import type { EGOGiftAttributeType, EGOGiftDifficulty, EGOGiftTier } from '@/shared/gameData'
-import type { EGOGiftEntity } from '../types/EGOGiftTypes'
-import { parseTier, toRomanTier } from './egoGiftTier'
+import type { EGOGiftEntity } from '@/shared/egoGift'
+import { parseTier, toRomanTier } from '@/shared/egoGift'
 
 export function deriveDifficulty(gift: {
   hardOnly?: boolean | undefined

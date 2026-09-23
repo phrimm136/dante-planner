@@ -10,7 +10,7 @@ import { describe, it, expect } from 'vitest'
 import { sortEGOGifts } from '../egoGiftSort'
 import { KEYWORD_ORDER } from '@/shared/gameData'
 
-import type { EGOGiftEntity } from '../../types/EGOGiftTypes'
+import type { EGOGiftEntity } from '@/shared/egoGift'
 import type { SortMode } from '@/shared/filter'
 import { EGOGiftIdSchema } from '@/shared/gameData'
 

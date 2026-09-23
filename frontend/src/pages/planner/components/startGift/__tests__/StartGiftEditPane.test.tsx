@@ -9,7 +9,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { StartGiftEditPane } from '../StartGiftEditPane'
-import type { EGOGiftSpec, EGOGiftNameList } from '@/pages/egoGift'
+import type { EGOGiftSpec, EGOGiftNameList } from '@/shared/egoGift'
 import { PLANNER_CONFIG } from '@/lib/constants'
 import { buildEgoGiftSpecList } from '@/test-utils'
 
@@ -118,7 +118,7 @@ vi.mock('../../../hooks/useStartGiftPools', () => ({
   }),
 }))
 
-vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
+vi.mock('@/shared/egoGift/hooks/useEGOGiftListData', () => ({
   useEGOGiftListSpec: () =>
     ({
       spec: mockSpec,

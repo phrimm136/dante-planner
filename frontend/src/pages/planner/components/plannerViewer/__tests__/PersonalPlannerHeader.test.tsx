@@ -148,7 +148,7 @@ vi.mock('../../../lib/validation/plannerValidationErrors', () => ({
 vi.mock('../../../hooks/usePlannerOwnerNotifications', () => ({
   useToggleOwnerNotifications: () => ({ mutate: vi.fn(), isPending: false }),
 }))
-vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
+vi.mock('@/shared/egoGift/hooks/useEGOGiftListData', () => ({
   useEGOGiftListSpec: () => ({ spec: {}, i18n: {} }).spec,
   useEGOGiftListI18n: () => ({ spec: {}, i18n: {} }).i18n,
 }))

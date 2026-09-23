@@ -1,9 +1,9 @@
 import { Suspense } from 'react'
 import { Link } from '@tanstack/react-router'
 import { Skeleton } from '@/components/ui/skeleton'
-import type { EGOGiftEntity } from '../types/EGOGiftTypes'
-import { EGOGiftCard } from './EGOGiftCard'
-import { EGOGiftName } from './EGOGiftName'
+import type { EGOGiftEntity } from '@/shared/egoGift'
+import { EGOGiftCard } from '@/shared/egoGift'
+import { EGOGiftName } from '@/shared/egoGift'
 import { cn } from '@/lib/utils'
 
 interface EGOGiftCardLinkProps {

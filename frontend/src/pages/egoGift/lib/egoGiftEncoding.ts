@@ -1,11 +1,11 @@
 import { GIFT_ID_LENGTH, EGOGiftIdSchema, EncodedGiftIdSchema } from '@/shared/gameData'
 import type { EGOGiftId, EncodedGiftId } from '@/shared/gameData'
 import type { EnhancementLevel } from '@/shared/gameData'
-import type { EGOGiftRecipe, EGOGiftEntity, EGOGiftSpec } from '@/pages/egoGift'
+import type { EGOGiftRecipe, EGOGiftEntity, EGOGiftSpec } from '@/shared/egoGift'
 import type { SortMode } from '@/shared/filter'
 import { sortEGOGifts } from './egoGiftSort'
 import { isMixedRecipe } from './egoGiftUtils'
-import { toEGOGiftEntity } from './egoGiftEntity'
+import { toEGOGiftEntity } from '@/shared/egoGift'
 
 /**
  * Encodes a gift selection into a numeric string format

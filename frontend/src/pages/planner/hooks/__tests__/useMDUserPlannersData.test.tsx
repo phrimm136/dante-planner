@@ -87,7 +87,8 @@ vi.mock('@/shared/userSettings', () => ({
   useUserSettingsQuery: () => ({ data: { syncEnabled: syncMocks.syncEnabled } }),
 }))
 
-vi.mock('@/pages/egoGift', () => ({
+vi.mock('@/shared/egoGift', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/shared/egoGift')>()),
   useEGOGiftListSpec: () => ({ spec: syncMocks.egoGiftSpec, i18n: {} }).spec,
   useEGOGiftListI18n: () => ({ spec: syncMocks.egoGiftSpec, i18n: {} }).i18n,
 }))

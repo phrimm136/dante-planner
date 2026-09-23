@@ -1,8 +1,9 @@
 import { useTranslation } from 'react-i18next'
-import { useEGOGiftListSpec } from '@/pages/egoGift'
-import { toEGOGiftEntity } from './lib/egoGiftEntity'
+import { useEGOGiftListSpec } from '@/shared/egoGift'
+import { toEGOGiftEntity } from '@/shared/egoGift'
 
-import type { EGOGiftEntity, EGOGiftSpecListSchema, EGOGiftFacetState } from '@/pages/egoGift'
+import type { EGOGiftEntity, EGOGiftSpecListSchema } from '@/shared/egoGift'
+import type { EGOGiftFacetState } from '@/pages/egoGift'
 import type { z } from 'zod'
 import { BOOLEAN_FILTER_OPTIONS } from '@/lib/constants'
 import { calculateActiveFilterCount } from '@/shared/filter'

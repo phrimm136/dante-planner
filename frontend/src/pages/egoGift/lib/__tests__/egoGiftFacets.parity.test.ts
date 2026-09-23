@@ -10,8 +10,8 @@ import { applyFacets } from '@/shared/filter'
 import type { EGOGiftAttributeType, EGOGiftDifficulty, EGOGiftTier } from '@/shared/gameData'
 import { enumerateSelectionStates, findParityMismatches } from '@/test-utils/facetParity'
 import { EGO_GIFT_FACETS, deriveDifficulty, type EGOGiftFacetState } from '../egoGiftFilter'
-import { parseTier, toRomanTier } from '../egoGiftTier'
-import type { EGOGiftEntity } from '../../types/EGOGiftTypes'
+import { parseTier, toRomanTier } from '@/shared/egoGift'
+import type { EGOGiftEntity } from '@/shared/egoGift'
 import { EGOGiftIdSchema } from '@/shared/gameData'
 
 function legacyKeyword(giftKeyword: string | null, selectedKeywords: ReadonlySet<string>): boolean {

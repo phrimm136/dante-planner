@@ -9,7 +9,7 @@ import { describe, it, expect } from 'vitest'
 import { applyFacets } from '@/shared/filter'
 import { enumerateSelectionStates, findParityMismatches } from '@/test-utils/facetParity'
 import { EGO_GIFT_SELECTION_FACETS, type EGOGiftSelectionFacetState } from '../egoGiftFilter'
-import type { EGOGiftEntity } from '../../types/EGOGiftTypes'
+import type { EGOGiftEntity } from '@/shared/egoGift'
 import { EGOGiftIdSchema } from '@/shared/gameData'
 
 function legacyMatches(gift: EGOGiftEntity, state: EGOGiftSelectionFacetState): boolean {

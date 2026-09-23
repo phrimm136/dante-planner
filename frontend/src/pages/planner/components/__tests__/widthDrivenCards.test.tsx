@@ -32,7 +32,7 @@ import { SinnerDeckCard } from '../deckBuilder/SinnerDeckCard'
 import { SinnerGrid } from '../deckBuilder/SinnerGrid'
 import { SkillExchangeModal } from '../skillReplacement/SkillExchangeModal'
 import { CompactIdentityRow } from '../deckBuilder/CompactIdentityRow'
-import { EGOGiftCard } from '@/pages/egoGift'
+import { EGOGiftCard } from '@/shared/egoGift'
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'EN' } }),

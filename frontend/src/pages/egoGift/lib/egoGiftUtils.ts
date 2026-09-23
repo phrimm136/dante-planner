@@ -1,5 +1,5 @@
 import { EGO_GIFT_ENHANCEMENT_BASE_COSTS } from '@/shared/gameData'
-import type { EGOGiftRecipe, MixedRecipe } from '../types/EGOGiftTypes'
+import type { EGOGiftRecipe, MixedRecipe } from '@/shared/egoGift'
 
 export function calculateEnhancementCost(tier: string, level: number): number | null {
   if (level === 0 || tier === '5' || tier === 'EX') {

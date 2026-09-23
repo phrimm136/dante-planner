@@ -19,9 +19,9 @@ import {
 } from '../egoGiftEncoding'
 import { sortEGOGifts } from '../egoGiftSort'
 
-import type { EGOGiftEntity, EGOGiftSpec } from '../../index'
+import type { EGOGiftEntity, EGOGiftSpec } from '@/shared/egoGift'
 import type { EncodedGiftId, EnhancementLevel } from '@/shared/gameData'
-import { toEGOGiftEntity } from '../egoGiftEntity'
+import { toEGOGiftEntity } from '@/shared/egoGift'
 import { asEncodedGiftId } from '@/test-utils/fixtures'
 
 const ENCODED_9001 = asEncodedGiftId('9001')

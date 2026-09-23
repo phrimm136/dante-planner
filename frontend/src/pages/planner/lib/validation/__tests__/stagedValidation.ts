@@ -1,4 +1,4 @@
-import type { EGOGiftSpec } from '@/pages/egoGift'
+import type { EGOGiftSpec } from '@/shared/egoGift'
 import { MAX_ENTITY_TIER } from '@/shared/gameData'
 import type { MDCategory } from '@/shared/gameData'
 import { validatePlannerForSync } from '../plannerValidation'

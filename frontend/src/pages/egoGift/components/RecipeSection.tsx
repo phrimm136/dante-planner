@@ -4,20 +4,15 @@ import { useTranslation } from 'react-i18next'
 
 import { CardSlot, EGO_GIFT_GEOMETRY } from '@/shared/cardLayout'
 import { CARD_MOBILE_SCALE_NONE } from '@/lib/constants'
-import { EGOGiftCard } from './EGOGiftCard'
-import { EGOGiftName } from './EGOGiftName'
+import { EGOGiftCard } from '@/shared/egoGift'
+import { EGOGiftName } from '@/shared/egoGift'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useEGOGiftListSpec } from '../hooks/useEGOGiftListData'
-import type {
-  EGOGiftRecipe,
-  EGOGiftEntity,
-  StandardRecipe,
-  MixedRecipe,
-} from '../types/EGOGiftTypes'
+import { useEGOGiftListSpec } from '@/shared/egoGift'
+import type { EGOGiftRecipe, EGOGiftEntity, StandardRecipe, MixedRecipe } from '@/shared/egoGift'
 import { isMixedRecipe } from '../lib/egoGiftUtils'
 import { SECTION_STYLES } from '@/lib/constants'
 import type { EGOGiftId } from '@/shared/gameData'
-import { toEGOGiftEntity } from '../lib/egoGiftEntity'
+import { toEGOGiftEntity } from '@/shared/egoGift'
 
 interface RecipeSectionProps {
   recipe: EGOGiftRecipe
@@ -53,7 +48,7 @@ function StandardRecipeRow({
   specMap,
 }: {
   ingredients: EGOGiftId[]
-  specMap: Record<string, import('../types/EGOGiftTypes').EGOGiftSpec>
+  specMap: Record<string, import('@/shared/egoGift').EGOGiftSpec>
 }) {
   return (
     <div className="flex flex-wrap items-start">
@@ -79,7 +74,7 @@ function MixedRecipeDisplay({
   specMap,
 }: {
   recipe: MixedRecipe
-  specMap: Record<string, import('../types/EGOGiftTypes').EGOGiftSpec>
+  specMap: Record<string, import('@/shared/egoGift').EGOGiftSpec>
 }) {
   const { t } = useTranslation()
 

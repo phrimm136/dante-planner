@@ -9,7 +9,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { StartGiftSummary } from '../StartGiftSummary'
-import type { EGOGiftSpec, EGOGiftNameList } from '@/pages/egoGift'
+import type { EGOGiftSpec, EGOGiftNameList } from '@/shared/egoGift'
 import { buildEgoGiftSpecList } from '@/test-utils'
 import { asEncodedGiftId } from '@/test-utils/fixtures'
 import type { EncodedGiftId } from '@/shared/gameData'
@@ -61,7 +61,7 @@ const mockI18n: EGOGiftNameList = {
   '9002': 'Burning Gift 2',
 }
 
-vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
+vi.mock('@/shared/egoGift/hooks/useEGOGiftListData', () => ({
   useEGOGiftListSpec: () =>
     ({
       spec: mockSpec,
@@ -85,7 +85,7 @@ vi.mock('@/components/layout/PlannerSection', () => ({
 }))
 
 // Mock EGOGiftCard to simplify testing
-vi.mock('@/pages/egoGift/components/EGOGiftCard', () => ({
+vi.mock('@/shared/egoGift/components/EGOGiftCard', () => ({
   EGOGiftCard: ({ gift }: { gift: { id: string; name: string } }) => (
     <div data-testid={`gift-card-${gift.id}`}>{gift.name}</div>
   ),

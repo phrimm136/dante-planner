@@ -11,7 +11,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { EGOGiftObservationSummary } from '../EGOGiftObservationSummary'
 import { buildEgoGiftSpecList } from '@/test-utils'
-import type { EGOGiftNameList } from '@/pages/egoGift'
+import type { EGOGiftNameList } from '@/shared/egoGift'
 
 import { asEncodedGiftId } from '@/test-utils/fixtures'
 import type { EncodedGiftId } from '@/shared/gameData'
@@ -78,7 +78,7 @@ vi.mock('@/pages/egoGift/hooks/useEGOGiftObservationData', () => ({
   }),
 }))
 
-vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
+vi.mock('@/shared/egoGift/hooks/useEGOGiftListData', () => ({
   useEGOGiftListSpec: () =>
     ({
       spec: mockSpec,
@@ -111,7 +111,7 @@ vi.mock('../../StarlightCostDisplay', () => ({
 }))
 
 // Mock EGOGiftCard to simplify testing
-vi.mock('@/pages/egoGift/components/EGOGiftCard', () => ({
+vi.mock('@/shared/egoGift/components/EGOGiftCard', () => ({
   EGOGiftCard: ({
     gift,
     isSelected,

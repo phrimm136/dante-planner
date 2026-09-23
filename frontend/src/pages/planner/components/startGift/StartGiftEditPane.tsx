@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { useStartGiftPools } from '../../hooks/useStartGiftPools'
-import { useEGOGiftListSpec, useEGOGiftListI18n, encodeGiftSelection } from '@/pages/egoGift'
+import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/shared/egoGift'
+import { encodeGiftSelection } from '@/pages/egoGift'
 import type { EGOGiftId } from '@/shared/gameData'
 import { useStartBuffListSpec, useStartBuffListI18n } from '../../hooks/useStartBuffList'
 import { toStartBuffs } from '../../lib/startBuffs'
@@ -11,7 +12,7 @@ import type { MDVersion } from '@/shared/gameData'
 import { calculateMaxGiftSelection } from '../../lib/startGiftCalculator'
 import { SelectorPaneShell } from '../SelectorPaneShell'
 import { StartGiftRow } from './StartGiftRow'
-import type { EGOGiftSpec, EGOGiftNameList } from '@/pages/egoGift'
+import type { EGOGiftSpec, EGOGiftNameList } from '@/shared/egoGift'
 import { SECTION_STYLES } from '@/lib/constants'
 
 interface StartGiftEditPaneProps {

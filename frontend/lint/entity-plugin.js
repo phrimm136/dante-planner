@@ -1,4 +1,4 @@
-const ENTITY_FILE = /\/pages\/[^/]+\/lib\/[^/]+Entity\.ts$/
+const ENTITY_FILE = /\/(pages|shared)\/[^/]+\/lib\/[^/]+Entity\.ts$/
 const ENTITY_EXPORT = /^to(Unknown)?[A-Z]\w*Entity$/
 const UNKNOWN_EXPORT = /^toUnknown[A-Z]\w*Entity$/
 const PLURAL_BUILDER = /^to[A-Z]\w*Entities$/

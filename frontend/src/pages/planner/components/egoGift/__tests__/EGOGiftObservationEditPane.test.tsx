@@ -11,7 +11,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { EGOGiftObservationEditPane } from '../EGOGiftObservationEditPane'
 import { buildEgoGiftSpecList } from '@/test-utils'
-import type { EGOGiftNameList } from '@/pages/egoGift'
+import type { EGOGiftNameList } from '@/shared/egoGift'
 
 // Mock react-i18next with initReactI18next for proper module loading
 vi.mock('react-i18next', async (importOriginal) => {
@@ -85,7 +85,7 @@ vi.mock('@/pages/egoGift/hooks/useEGOGiftObservationData', () => ({
   }),
 }))
 
-vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
+vi.mock('@/shared/egoGift/hooks/useEGOGiftListData', () => ({
   useEGOGiftListSpec: () =>
     ({
       spec: mockSpec,

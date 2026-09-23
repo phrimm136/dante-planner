@@ -1,7 +1,7 @@
 import { useParams } from '@tanstack/react-router'
 import { Suspense } from 'react'
 
-import { EGOGiftCard } from '@/pages/egoGift'
+import { EGOGiftCard } from '@/shared/egoGift'
 import { CardSlot, EGO_GIFT_GEOMETRY } from '@/shared/cardLayout'
 import { CARD_MOBILE_SCALE_NONE } from '@/lib/constants'
 import { GiftNameI18n } from '@/pages/egoGift'
@@ -13,8 +13,9 @@ import { DetailPageLayout } from '@/components/layout/DetailPageLayout'
 import { KeywordsDisplay } from '@/shared/gameText'
 import { useEGOGiftDetailSpec } from '@/pages/egoGift'
 import { ENHANCEMENT_LEVELS } from '@/shared/gameData'
-import { calculateEnhancementCost, parseTier } from '@/pages/egoGift'
-import type { EGOGiftEntity } from '@/pages/egoGift'
+import { parseTier } from '@/shared/egoGift'
+import { calculateEnhancementCost } from '@/pages/egoGift'
+import type { EGOGiftEntity } from '@/shared/egoGift'
 
 function EGOGiftDetailContent() {
   const { id } = useParams({ strict: false })

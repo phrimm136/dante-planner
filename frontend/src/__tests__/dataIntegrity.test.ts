@@ -26,8 +26,8 @@ import {
   EGOGiftI18nSchema,
   EGOGiftSpecListSchema,
   EGOGiftNameListSchema,
-  EGOGiftObservationDataSchema,
-} from '@/pages/egoGift'
+} from '@/shared/egoGift'
+import { EGOGiftObservationDataSchema } from '@/pages/egoGift'
 import { StartEgoGiftPoolsSchema } from '@/pages/planner'
 import { ThemePackDetailSchema, ThemePackListSchema, ThemePackI18nSchema } from '@/pages/themePack'
 import {

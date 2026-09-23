@@ -1,4 +1,4 @@
-import { EGOGiftIcon } from '@/pages/egoGift'
+import { EGOGiftIcon } from '@/shared/egoGift'
 import { EXCLUSIVE_GIFT_ICONS } from '@/lib/constants'
 import type { EGOGiftId } from '@/shared/gameData'
 

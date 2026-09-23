@@ -3,7 +3,7 @@ import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import type { MDCategory } from '@/shared/gameData'
-import type { EGOGiftSpec } from '@/pages/egoGift'
+import type { EGOGiftSpec } from '@/shared/egoGift'
 import { clipToSeason } from '../../plannerIdNormalize'
 import { renderContentPath } from '../contentPath'
 import type { PlannerIdRegistry } from '../plannerValidation'

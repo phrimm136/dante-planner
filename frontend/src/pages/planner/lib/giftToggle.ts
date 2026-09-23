@@ -1,6 +1,6 @@
 import { buildSelectionLookup, encodeGiftSelection, getCascadeIngredients } from '@/pages/egoGift'
 
-import type { EGOGiftSpec } from '@/pages/egoGift'
+import type { EGOGiftSpec } from '@/shared/egoGift'
 import type { EGOGiftId, EncodedGiftId, EnhancementLevel } from '@/shared/gameData'
 
 export interface GiftToggleOptions {

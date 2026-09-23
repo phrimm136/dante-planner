@@ -1,11 +1,11 @@
-import type { EGOGiftSpec, EGOGiftNameList } from '@/pages/egoGift'
-import { EGOGiftCard } from '@/pages/egoGift'
+import type { EGOGiftSpec, EGOGiftNameList } from '@/shared/egoGift'
+import { EGOGiftCard } from '@/shared/egoGift'
 import { EGOGiftTooltip } from '@/pages/egoGift'
 import { CardSlot, EGO_GIFT_GEOMETRY } from '@/shared/cardLayout'
 import { CARD_MOBILE_SCALE } from '@/lib/constants'
 import { KEYWORD_ICON_GEOMETRY } from '../../lib/cardLayout'
 import { StartGiftKeywordIcon } from './StartGiftKeywordIcon'
-import { toEGOGiftEntity, toUnknownEGOGiftEntity } from '@/pages/egoGift'
+import { toEGOGiftEntity, toUnknownEGOGiftEntity } from '@/shared/egoGift'
 import type { EGOGiftId } from '@/shared/gameData'
 
 interface StartGiftRowProps {

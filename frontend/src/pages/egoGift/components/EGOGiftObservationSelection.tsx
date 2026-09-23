@@ -1,14 +1,14 @@
-import { useEGOGiftListSpec, useEGOGiftListI18n } from '../hooks/useEGOGiftListData'
-import type { EGOGiftEntity } from '../types/EGOGiftTypes'
+import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/shared/egoGift'
+import type { EGOGiftEntity } from '@/shared/egoGift'
 import type { EncodedGiftId } from '@/shared/gameData'
 import { getBaseGiftId } from '../lib/egoGiftEncoding'
 import { CARD_MOBILE_SCALE, SM_BREAKPOINT_PX } from '@/lib/constants'
 import { useIsBreakpoint } from '@/components/hooks/use-is-breakpoint'
-import { observationListHeightPx } from '../lib/cardLayout'
+import { observationListHeightPx } from '@/shared/egoGift'
 import { CardSlot, EGO_GIFT_GEOMETRY, useSlotSizePx } from '@/shared/cardLayout'
-import { EGOGiftCard } from './EGOGiftCard'
+import { EGOGiftCard } from '@/shared/egoGift'
 import { EGOGiftTooltip } from './EGOGiftTooltip'
-import { toEGOGiftEntity } from '../lib/egoGiftEntity'
+import { toEGOGiftEntity } from '@/shared/egoGift'
 
 interface EGOGiftObservationSelectionProps {
   selectedGiftIds: EncodedGiftId[]

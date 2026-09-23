@@ -1,13 +1,9 @@
 import { useTranslation } from 'react-i18next'
 import { PlannerSection } from '@/components/layout/PlannerSection'
-import {
-  EGOGiftCard,
-  getBaseGiftId,
-  toEGOGiftCardProps,
-  toUnknownEGOGiftEntity,
-} from '@/pages/egoGift'
+import { EGOGiftCard, toEGOGiftCardProps, toUnknownEGOGiftEntity } from '@/shared/egoGift'
+import { getBaseGiftId } from '@/pages/egoGift'
 import type { EncodedGiftId } from '@/shared/gameData'
-import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
+import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/shared/egoGift'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import { CardSlot, EGO_GIFT_GEOMETRY, useSlotSizePx } from '@/shared/cardLayout'
 import { CARD_MOBILE_SCALE, SECTION_STYLES } from '@/lib/constants'

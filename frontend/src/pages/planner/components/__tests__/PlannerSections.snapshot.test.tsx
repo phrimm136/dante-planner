@@ -94,7 +94,7 @@ vi.mock('../skillReplacement/SinnerSkillCard', () => ({ SinnerSkillCard: stub('s
 vi.mock('../skillReplacement/SkillExchangeModal', () => ({
   SkillExchangeModal: stub('skill-exchange'),
 }))
-vi.mock('@/pages/egoGift/components/EGOGiftCard', () => ({ EGOGiftCard: stub('gift-card') }))
+vi.mock('@/shared/egoGift/components/EGOGiftCard', () => ({ EGOGiftCard: stub('gift-card') }))
 vi.mock('@/pages/egoGift/components/EGOGiftTooltip', () => ({
   EGOGiftTooltip: ({ children }: { children: ReactNode }) => (
     <div data-testid="gift-tooltip">{children}</div>
@@ -174,7 +174,7 @@ vi.mock('@/pages/ego/hooks/useEGOListData', () => ({
   useEGOListSpec: () => ({ spec: EGO_SPEC, i18n: {} }).spec,
   useEGOListI18n: () => ({ spec: EGO_SPEC, i18n: {} }).i18n,
 }))
-vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
+vi.mock('@/shared/egoGift/hooks/useEGOGiftListData', () => ({
   useEGOGiftListSpec: () => ({ spec: GIFT_SPEC, i18n: GIFT_I18N }).spec,
   useEGOGiftListI18n: () => ({ spec: GIFT_SPEC, i18n: GIFT_I18N }).i18n,
 }))

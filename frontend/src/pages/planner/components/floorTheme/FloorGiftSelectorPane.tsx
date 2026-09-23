@@ -4,16 +4,16 @@ import { LoadingState } from '@/components/feedback/LoadingState'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
+import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/shared/egoGift'
 import { EGOGiftFilterBar } from '@/pages/egoGift'
 import { EGOGiftSelectionList } from '@/pages/egoGift'
 import type { SortMode } from '@/shared/filter'
 import { bucketAndSortFloorGifts } from '../../lib/floorGiftBucketing'
 import { applyGiftToggle } from '../../lib/giftToggle'
-import type { EGOGiftEntity } from '@/pages/egoGift'
+import type { EGOGiftEntity } from '@/shared/egoGift'
 import type { EGOGiftId, EncodedGiftId, EnhancementLevel, DungeonIdx } from '@/shared/gameData'
 import { SECTION_STYLES } from '@/lib/constants'
-import { toEGOGiftEntity } from '@/pages/egoGift'
+import { toEGOGiftEntity } from '@/shared/egoGift'
 
 interface FloorGiftSelectorPaneProps {
   open: boolean

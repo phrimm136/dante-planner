@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 
 import { useIdentityListSpec, useIdentityListI18n } from '@/pages/identity'
 import { useEGOListSpec, useEGOListI18n } from '@/pages/ego'
-import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
+import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/shared/egoGift'
 import { useThemePackListSpec, useThemePackListI18n } from '@/pages/themePack'
 import { usePlannerKeywordsI18n } from '../../hooks/usePlannerKeywordsI18n'
 

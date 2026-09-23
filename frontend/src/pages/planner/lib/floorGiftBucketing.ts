@@ -1,4 +1,4 @@
-import type { EGOGiftEntity } from '@/pages/egoGift'
+import type { EGOGiftEntity } from '@/shared/egoGift'
 import type { SortMode } from '@/shared/filter'
 import type { DungeonIdx } from '@/shared/gameData'
 import { DUNGEON_IDX } from '@/shared/gameData'

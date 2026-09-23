@@ -51,7 +51,7 @@ function egoListSpec() {
 
 function egoGiftListSpec() {
   return ensureListSpec(
-    import('@/pages/egoGift/hooks/useEGOGiftListData').then((m) => m.EGO_GIFT_LIST),
+    import('@/shared/egoGift/hooks/useEGOGiftListData').then((m) => m.EGO_GIFT_LIST),
   )
 }
 

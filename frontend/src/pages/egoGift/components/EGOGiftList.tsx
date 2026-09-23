@@ -1,7 +1,7 @@
-import type { EGOGiftEntity } from '../types/EGOGiftTypes'
+import type { EGOGiftEntity } from '@/shared/egoGift'
 import { EGO_GIFT_GEOMETRY } from '@/shared/cardLayout'
 import { FilteredEntityGrid, useSearchTermSources } from '@/shared/filter'
-import { EGO_GIFT_LIST } from '../hooks/useEGOGiftListData'
+import { EGO_GIFT_LIST } from '@/shared/egoGift'
 import type { FilterStore } from '@/components/hooks/filterStore'
 import { sortEGOGifts } from '../lib/egoGiftSort'
 import {

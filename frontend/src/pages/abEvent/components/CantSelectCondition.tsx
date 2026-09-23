@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useEGOGiftListI18n } from '@/pages/egoGift'
+import { useEGOGiftListI18n } from '@/shared/egoGift'
 
 /**
  * Render cantSelectInThisCase condition as readable text.

@@ -13,7 +13,7 @@ import {
 import { DUNGEON_IDX, ThemePackIdSchema } from '@/shared/gameData'
 import type { DungeonIdx, EncodedGiftId, ThemePackId } from '@/shared/gameData'
 import type { FloorThemeSelection } from '@/pages/themePack'
-import type { EGOGiftSpec } from '@/pages/egoGift'
+import type { EGOGiftSpec } from '@/shared/egoGift'
 import { asEncodedGiftId } from '@/test-utils/fixtures'
 
 const ENCODED_9220 = asEncodedGiftId('9220')

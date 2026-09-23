@@ -1,18 +1,19 @@
 import { useTranslation } from 'react-i18next'
 import { useEGOGiftObservationData } from '@/pages/egoGift'
-import { useEGOGiftListSpec, useEGOGiftListI18n, getBaseGiftId } from '@/pages/egoGift'
+import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/shared/egoGift'
+import { getBaseGiftId } from '@/pages/egoGift'
 import type { EncodedGiftId } from '@/shared/gameData'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import { CARD_MOBILE_SCALE } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { EmptyStatePlaceholder } from '@/components/feedback/EmptyStatePlaceholder'
 import { GIFT_ROW_PADDING_PX, giftRowMinHeightPx } from '../../lib/cardLayout'
-import type { EGOGiftEntity } from '@/pages/egoGift'
+import type { EGOGiftEntity } from '@/shared/egoGift'
 import { PlannerSection } from '@/components/layout/PlannerSection'
 import { StarlightCostDisplay } from '../StarlightCostDisplay'
 import { CardSlot, EGO_GIFT_GEOMETRY, useSlotSizePx } from '@/shared/cardLayout'
-import { EGOGiftCard } from '@/pages/egoGift'
-import { toEGOGiftEntity } from '@/pages/egoGift'
+import { EGOGiftCard } from '@/shared/egoGift'
+import { toEGOGiftEntity } from '@/shared/egoGift'
 
 export interface EGOGiftObservationSummaryProps {
   mdVersion: number

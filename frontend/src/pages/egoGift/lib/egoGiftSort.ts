@@ -1,7 +1,7 @@
-import type { EGOGiftEntity } from '../types/EGOGiftTypes'
+import type { EGOGiftEntity } from '@/shared/egoGift'
 import type { SortMode } from '@/shared/filter'
 import { KEYWORD_ORDER } from '@/shared/gameData'
-import { parseTier } from './egoGiftTier'
+import { parseTier } from '@/shared/egoGift'
 
 const NONE_CATEGORY_INDEX = KEYWORD_ORDER.indexOf('None')
 

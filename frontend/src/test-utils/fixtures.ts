@@ -10,7 +10,7 @@ import {
   toEGOGiftCardProps,
   type EGOGiftEntity,
   type EGOGiftSpec,
-} from '@/pages/egoGift'
+} from '@/shared/egoGift'
 import {
   DEFAULT_SKILL_EA,
   DUNGEON_IDX,

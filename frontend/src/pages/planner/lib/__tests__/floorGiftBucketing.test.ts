@@ -21,7 +21,7 @@
 import { describe, it, expect } from 'vitest'
 import { bucketAndSortFloorGifts } from '../floorGiftBucketing'
 import { DUNGEON_IDX } from '@/shared/gameData'
-import type { EGOGiftEntity } from '@/pages/egoGift'
+import type { EGOGiftEntity } from '@/shared/egoGift'
 import { EGOGiftIdSchema } from '@/shared/gameData'
 
 // EGOGiftEntity resolves to an error/any type under oxlint's type-aware pass because test

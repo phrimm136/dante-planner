@@ -14,8 +14,8 @@ import {
   buildSelectionLookup,
   getCascadeIngredients,
 } from '../egoGiftEncoding'
-import type { EGOGiftRecipe } from '@/pages/egoGift'
-import { EGOGiftRecipeSchema } from '@/pages/egoGift'
+import type { EGOGiftRecipe } from '@/shared/egoGift'
+import { EGOGiftRecipeSchema } from '@/shared/egoGift'
 import { EncodedGiftIdSchema } from '@/shared/gameData'
 import { asEGOGiftId, asEncodedGiftId } from '@/test-utils/fixtures'
 

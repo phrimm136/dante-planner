@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 
-import type { EGOGiftEntity } from '../types/EGOGiftTypes'
+import type { EGOGiftEntity } from '@/shared/egoGift'
 import type { EGOGiftId, EncodedGiftId, EnhancementLevel } from '@/shared/gameData'
 import { CARD_MOBILE_SCALE, PROGRESSIVE_REVEAL, SECTION_STYLES } from '@/lib/constants'
 import { EGO_GIFT_GEOMETRY } from '@/shared/cardLayout'

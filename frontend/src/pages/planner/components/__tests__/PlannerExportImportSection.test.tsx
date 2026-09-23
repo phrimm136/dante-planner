@@ -65,8 +65,8 @@ vi.mock('../../hooks/usePlannerIdRegistry', () => ({
   usePlannerIdRegistry: () => () => undefined,
 }))
 
-vi.mock('@/pages/egoGift', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/pages/egoGift')>()),
+vi.mock('@/shared/egoGift', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/shared/egoGift')>()),
   useEGOGiftListSpec: () => ({}),
 }))
 

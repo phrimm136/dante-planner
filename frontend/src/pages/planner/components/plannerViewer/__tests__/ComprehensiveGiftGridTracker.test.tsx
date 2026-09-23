@@ -14,7 +14,7 @@ const ENCODED_9003 = asEncodedGiftId('9003')
 
 // The card is the seam the grid renders through, so the mock surfaces the three
 // values the grid computes: which gift, at which enhancement, and highlighted or not.
-vi.mock('@/pages/egoGift/components/EGOGiftCard', () => ({
+vi.mock('@/shared/egoGift/components/EGOGiftCard', () => ({
   EGOGiftCard: ({
     gift,
     enhancement,
@@ -34,9 +34,9 @@ vi.mock('@/pages/egoGift/components/EGOGiftCard', () => ({
   ),
 }))
 
-// The factory may not import: `@/test-utils` reaches the `@/pages/egoGift` barrel, which
+// The factory may not import: `@/test-utils` reaches the `@/shared/egoGift` barrel, which
 // re-exports this very module, so an awaiting factory waits on its own pending promise.
-vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
+vi.mock('@/shared/egoGift/hooks/useEGOGiftListData', () => ({
   useEGOGiftListSpec: () => GIFT_CATALOG.spec,
   useEGOGiftListI18n: () => GIFT_CATALOG.i18n,
 }))

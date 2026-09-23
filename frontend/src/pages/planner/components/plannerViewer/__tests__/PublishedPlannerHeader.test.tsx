@@ -46,7 +46,7 @@ vi.mock('@/shared/auth/hooks/useAuthQuery', () => ({
 
 const pending = new Promise<never>(() => {})
 const useSuspendForever = (): never => use(pending)
-vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
+vi.mock('@/shared/egoGift/hooks/useEGOGiftListData', () => ({
   useEGOGiftListSpec: () => useSuspendForever(),
   useEGOGiftListI18n: () => useSuspendForever(),
 }))

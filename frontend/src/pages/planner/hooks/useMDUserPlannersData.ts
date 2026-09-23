@@ -11,7 +11,7 @@ import {
 import { plannerApi } from '../lib/plannerApi'
 import { useAuthQuery } from '@/shared/auth'
 import { useUserSettingsQuery } from '@/shared/userSettings'
-import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
+import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/shared/egoGift'
 import { usePlannerIdRegistry } from './usePlannerIdRegistry'
 import { validatePlannerForSync } from '../lib/validation/plannerValidation'
 import {
