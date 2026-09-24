@@ -58,6 +58,13 @@ Never health-check through the proxied public hostname — bot protection answer
 you will chase an outage that is not happening. The load balancer's own monitors are internal
 probes and are exempt; deploy-time verification stays on SSM and kubectl.
 
+`write_forwarding` stages the load-balancer rule that sends every request other than GET, HEAD
+and OPTIONS to the first `default_pool_order` region's pool, falling back to the next pool in
+that order when it is unhealthy; a fallback write then reaches the primary over the peering
+link. Stages: `off` (no rule), `probe` (only requests carrying `x-write-probe: 1`), then `all`.
+Advance one stage per apply; `off` is the rollback. It has no effect where
+`enable_load_balancer` is false.
+
 The window sequence, drills, and teardown ledger live in
 `../../docs/runbooks/schema-decomposition-migration.md`.
 

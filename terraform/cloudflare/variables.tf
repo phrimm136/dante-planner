@@ -181,3 +181,13 @@ variable "e2e_endpoints" {
   type        = map(string)
   default     = {}
 }
+
+variable "write_forwarding" {
+  description = "Stage of the non-GET routing rule: off, probe (x-write-probe: 1 only), or all."
+  type        = string
+  default     = "off"
+  validation {
+    condition     = contains(["off", "probe", "all"], var.write_forwarding)
+    error_message = "write_forwarding must be off, probe, or all."
+  }
+}

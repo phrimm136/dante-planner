@@ -26,6 +26,18 @@ resource "cloudflare_load_balancer_monitor" "through_tunnel" {
   header = { Host = [var.api_hostname] }
 }
 
+locals {
+  write_pool_order = [
+    for region in var.default_pool_order : cloudflare_load_balancer_pool.region[region].id
+    if var.enable_load_balancer
+  ]
+  writes = "not http.request.method in {\"GET\" \"HEAD\" \"OPTIONS\"}"
+  write_condition = {
+    probe = "${local.writes} and any(http.request.headers[\"x-write-probe\"][*] eq \"1\")"
+    all   = local.writes
+  }
+}
+
 resource "cloudflare_load_balancer_pool" "region" {
   for_each = { for region, config in var.regions : region => config if var.enable_load_balancer }
 
@@ -75,4 +87,17 @@ resource "cloudflare_load_balancer" "api" {
     for code, preference in var.steering_region_pools :
     code => [for region in preference : cloudflare_load_balancer_pool.region[region].id]
   }
+
+  rules = var.write_forwarding == "off" ? [] : [{
+    name       = "writes-to-primary"
+    priority   = 0
+    terminates = true
+    condition  = local.write_condition[var.write_forwarding]
+    overrides = {
+      session_affinity = "none"
+      default_pools    = local.write_pool_order
+      # Geo steering reads region_pools before default_pools, so default_pools alone routes nothing.
+      region_pools = { for code, _ in var.steering_region_pools : code => local.write_pool_order }
+    }
+  }]
 }
