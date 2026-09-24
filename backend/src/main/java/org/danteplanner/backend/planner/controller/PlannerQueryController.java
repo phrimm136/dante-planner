@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -57,6 +58,14 @@ public class PlannerQueryController {
         return byIdReadGuard.readAll(ByIdReadGuard.PLANNER_ENTITY_TYPE, ids,
                 requested -> plannerQueryService.getPlanners(userId, List.copyOf(requested)),
                 PlannerResponse::id);
+    }
+
+    @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "batch")
+    @GetMapping("/batch")
+    public ResponseEntity<List<PlannerResponse>> pullPlannerBatch(
+            @AuthenticationPrincipal Long userId,
+            @Valid @ModelAttribute PlannerBatchRequest request) {
+        return ResponseEntity.ok(readBatch(userId, request.ids()));
     }
 
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "get")

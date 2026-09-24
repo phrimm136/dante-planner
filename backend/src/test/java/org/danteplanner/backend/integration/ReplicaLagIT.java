@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 import javax.sql.DataSource;
 
 import io.micrometer.core.instrument.Counter;
@@ -414,10 +415,11 @@ class ReplicaLagIT extends CausalHarnessSupport {
         }
     }
 
-    @Test
+    @ParameterizedTest
+    @ValueSource(strings = {"GET", "POST"})
     @DisplayName("INV2 batch: a planner deleted on the primary is omitted from the batch pull while the paused replica still holds it")
-    void batchPull_WhenAPlannerIsTombstoned_OmitsItWhileKeepingTheLiveOne() throws Exception {
-        User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-batch-tombstone@example.com");
+    void batchPull_WhenAPlannerIsTombstoned_OmitsItWhileKeepingTheLiveOne(String method) throws Exception {
+        User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-batch-tombstone-" + method + "@example.com");
         Planner live = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
         Planner doomed = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
         replicationControl.awaitCaughtUp();
@@ -435,7 +437,7 @@ class ReplicaLagIT extends CausalHarnessSupport {
                     .as("the paused replica must still hold the row un-soft-deleted, so the omission comes from the tombstone")
                     .isNull();
 
-            List<String> served = batchPull(owner, List.of(doomed.getId(), live.getId()));
+            List<String> served = batchPull(method, owner, List.of(doomed.getId(), live.getId()));
 
             assertThat(served)
                     .as("the tombstoned planner must be masked and the live one served")
@@ -446,10 +448,11 @@ class ReplicaLagIT extends CausalHarnessSupport {
         }
     }
 
-    @Test
+    @ParameterizedTest
+    @ValueSource(strings = {"GET", "POST"})
     @DisplayName("INV1 batch: a planner the paused replica lacks is promoted from the primary into the owner's batch pull")
-    void batchPull_WhenReplicaLacksAnOwnedPlanner_PromotesItFromThePrimary() throws Exception {
-        User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-batch-miss@example.com");
+    void batchPull_WhenReplicaLacksAnOwnedPlanner_PromotesItFromThePrimary(String method) throws Exception {
+        User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-batch-miss-" + method + "@example.com");
         replicationControl.awaitCaughtUp();
 
         try {
@@ -458,7 +461,7 @@ class ReplicaLagIT extends CausalHarnessSupport {
             Planner primaryOnly = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
             double before = promotedCount();
 
-            List<String> served = batchPull(owner, List.of(primaryOnly.getId(), UUID.randomUUID()));
+            List<String> served = batchPull(method, owner, List.of(primaryOnly.getId(), UUID.randomUUID()));
 
             assertThat(served)
                     .as("a batch-pull miss on the replica must be re-checked on the primary; an id absent there too stays omitted")
@@ -472,14 +475,15 @@ class ReplicaLagIT extends CausalHarnessSupport {
         }
     }
 
-    @Test
+    @ParameterizedTest
+    @ValueSource(strings = {"GET", "POST"})
     @DisplayName("batch: ids that exist nowhere are omitted without promoting anything")
-    void batchPull_WhenIdsExistNowhere_ReturnsAnEmptyArray() throws Exception {
-        User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-batch-unknown@example.com");
+    void batchPull_WhenIdsExistNowhere_ReturnsAnEmptyArray(String method) throws Exception {
+        User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-batch-unknown-" + method + "@example.com");
         replicationControl.awaitCaughtUp();
         double before = promotedCount();
 
-        List<String> served = batchPull(owner, List.of(UUID.randomUUID(), UUID.randomUUID()));
+        List<String> served = batchPull(method, owner, List.of(UUID.randomUUID(), UUID.randomUUID()));
 
         assertThat(served).isEmpty();
         assertThat(promotedCount() - before).isEqualTo(0.0);
@@ -557,20 +561,23 @@ class ReplicaLagIT extends CausalHarnessSupport {
         }
     }
 
-    private List<String> batchPull(User owner, List<UUID> ids) throws Exception {
+    private List<String> batchPull(String method, User owner, List<UUID> ids) throws Exception {
         String accessToken = TestDataFactory.generateAccessToken(jwtTokenService, owner);
         String csrf = csrfTokenService.mint();
-        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/planner/md/batch"))
-                .header("Content-Type", "application/json")
-                .header(CsrfDoubleSubmitFilter.CSRF_HEADER, csrf)
-                .header("Cookie", CookieConstants.ACCESS_TOKEN + "=" + accessToken
-                        + "; " + CookieConstants.CSRF + "=" + csrf)
-                .POST(HttpRequest.BodyPublishers.ofString(
-                        objectMapper.writeValueAsString(new PlannerBatchRequest(ids))))
-                .build();
+        String base = "http://localhost:" + port + "/api/planner/md/batch";
+        HttpRequest.Builder request = "GET".equals(method)
+                ? HttpRequest.newBuilder(URI.create(base + "?ids="
+                        + ids.stream().map(UUID::toString).collect(Collectors.joining(",")))).GET()
+                : HttpRequest.newBuilder(URI.create(base))
+                        .header("Content-Type", "application/json")
+                        .header(CsrfDoubleSubmitFilter.CSRF_HEADER, csrf)
+                        .POST(HttpRequest.BodyPublishers.ofString(
+                                objectMapper.writeValueAsString(new PlannerBatchRequest(ids))));
+        request.header("Cookie", CookieConstants.ACCESS_TOKEN + "=" + accessToken
+                + "; " + CookieConstants.CSRF + "=" + csrf);
 
         try (HttpClient client = HttpClient.newHttpClient()) {
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = client.send(request.build(), HttpResponse.BodyHandlers.ofString());
             assertThat(response.statusCode()).as(response.body()).isEqualTo(200);
             List<String> served = new ArrayList<>();
             for (JsonNode planner : objectMapper.readTree(response.body())) {

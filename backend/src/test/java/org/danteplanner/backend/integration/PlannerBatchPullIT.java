@@ -26,11 +26,13 @@ import org.springframework.test.web.servlet.ResultActions;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.danteplanner.backend.support.AuthCookies.performAuthed;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -64,6 +66,7 @@ class PlannerBatchPullIT extends SharedMySqlContainerSupport {
 
     private String token;
     private Planner owned;
+    private Planner ownedToo;
     private Planner deleted;
     private Planner foreign;
 
@@ -74,6 +77,7 @@ class PlannerBatchPullIT extends SharedMySqlContainerSupport {
         token = TestDataFactory.generateAccessToken(jwtTokenService, owner);
 
         owned = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
+        ownedToo = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
         deleted = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
         deleted.softDelete();
         plannerRepository.save(deleted);
@@ -85,6 +89,11 @@ class PlannerBatchPullIT extends SharedMySqlContainerSupport {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new PlannerBatchRequest(ids))),
                 token);
+    }
+
+    private ResultActions pullByQuery(List<UUID> ids) throws Exception {
+        String joined = ids.stream().map(UUID::toString).collect(Collectors.joining(","));
+        return performAuthed(mockMvc, get("/api/planner/md/batch?ids=" + joined), token);
     }
 
     private static List<String> idsOf(JsonNode array) {
@@ -130,6 +139,44 @@ class PlannerBatchPullIT extends SharedMySqlContainerSupport {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"ids\":[null]}"),
                 token)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    void batchGet_WhenIdsAreCommaSeparated_ReturnsTheCallersPlanners() throws Exception {
+        String json = pullByQuery(List.of(owned.getId(), ownedToo.getId()))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        assertThat(idsOf(objectMapper.readTree(json)))
+                .containsExactlyInAnyOrder(owned.getId().toString(), ownedToo.getId().toString());
+    }
+
+    @Test
+    void batchGet_WhenAnIdBelongsToAnotherOwner_DropsIt() throws Exception {
+        String json = pullByQuery(List.of(owned.getId(), foreign.getId()))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        assertThat(idsOf(objectMapper.readTree(json)))
+                .containsExactly(owned.getId().toString());
+    }
+
+    @Test
+    void batchGet_WhenIdsExceedTheBound_Returns400() throws Exception {
+        List<UUID> ids = Stream.generate(UUID::randomUUID)
+                .limit(PlannerConstants.BATCH_PULL_MAX_IDS + 1L)
+                .toList();
+
+        pullByQuery(ids)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    void batchGet_WhenIdsParameterIsMissing_Returns400() throws Exception {
+        performAuthed(mockMvc, get("/api/planner/md/batch"), token)
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
     }
