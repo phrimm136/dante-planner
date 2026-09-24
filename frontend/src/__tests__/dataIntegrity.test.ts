@@ -29,7 +29,8 @@ import {
 } from '@/shared/egoGift'
 import { EGOGiftObservationDataSchema } from '@/pages/egoGift'
 import { StartEgoGiftPoolsSchema } from '@/pages/planner'
-import { ThemePackDetailSchema, ThemePackListSchema, ThemePackI18nSchema } from '@/pages/themePack'
+import { ThemePackDetailSchema, ThemePackListSchema } from '@/pages/themePack'
+import { ThemePackI18nSchema } from '@/shared/themePack'
 import {
   BattleKeywordsSchema,
   BattleKeywordSpecListSchema,
@@ -49,6 +50,15 @@ import {
   AbEventI18nSchema,
   AbEventSharedSchema,
 } from '@/pages/abEvent'
+import {
+  EnemySpecListSchema,
+  EnemyNameListSchema,
+  AssistantSpecListSchema,
+  AssistantNameListSchema,
+  SinnerEventSpecListSchema,
+  SinnerEventNameListSchema,
+  BattleFacetNamesSchema,
+} from '@/pages/battle'
 
 const STATIC_DIR = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../../../static')
 const DATA_DIR = path.join(STATIC_DIR, 'data')
@@ -127,6 +137,12 @@ describe('spec list files', () => {
     ))
   it('announcements.json', () =>
     validateFile(path.join(DATA_DIR, 'announcements.json'), AnnouncementSpecListSchema))
+  it('enemySpecList.json', () =>
+    validateFile(path.join(DATA_DIR, 'enemySpecList.json'), EnemySpecListSchema))
+  it('assistantSpecList.json', () =>
+    validateFile(path.join(DATA_DIR, 'assistantSpecList.json'), AssistantSpecListSchema))
+  it('sinnerEventSpecList.json', () =>
+    validateFile(path.join(DATA_DIR, 'sinnerEventSpecList.json'), SinnerEventSpecListSchema))
 })
 
 // --- Mirror Dungeon versioned data files ---
@@ -169,6 +185,10 @@ describe.each(LANGS)('i18n [%s]', (lang) => {
   testFileIfExists(path.join(langDir, 'themePack.json'), ThemePackI18nSchema)
   testFileIfExists(path.join(langDir, 'abEvent', '_shared.json'), AbEventSharedSchema)
   testFileIfExists(path.join(langDir, 'announcements.json'), AnnouncementI18nSchema)
+  testFileIfExists(path.join(langDir, 'enemyNameList.json'), EnemyNameListSchema)
+  testFileIfExists(path.join(langDir, 'assistantNameList.json'), AssistantNameListSchema)
+  testFileIfExists(path.join(langDir, 'sinnerEventNameList.json'), SinnerEventNameListSchema)
+  testFileIfExists(path.join(langDir, 'battleFacetNames.json'), BattleFacetNamesSchema)
   for (const mdDir of MD_DIRS) {
     testFileIfExists(path.join(langDir, mdDir, 'startBuffs.json'), StartBuffI18nSchema)
   }

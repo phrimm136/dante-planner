@@ -115,4 +115,24 @@ describe('entity list hooks', () => {
     const options = query?.options as QueryObserverOptions | undefined
     expect(options?.staleTime).toBe(STATIC_DATA_STALE_TIME)
   })
+
+  it('reads the i18n list from a config carrying only its i18n half', async () => {
+    const { queryClient, wrapper } = createWrapper()
+    const i18nOnly = {
+      kind: 'themePack',
+      i18nImport: (lang: string) => Promise.resolve({ default: { '1001': `Pack ${lang}` } }),
+      i18nSchema: NameSchema,
+    }
+
+    const { result } = renderHook(() => useEntityListI18n(i18nOnly), { wrapper })
+
+    await waitFor(() => {
+      expect(result.current).toEqual({ '1001': 'Pack EN' })
+    })
+    const keys = queryClient
+      .getQueryCache()
+      .getAll()
+      .map((query) => query.queryKey)
+    expect(keys).toEqual([['themePack', 'list', 'i18n', 'EN']])
+  })
 })

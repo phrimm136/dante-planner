@@ -21,8 +21,8 @@ export function entityListSpecOptions<TSpec, TI18n>(cfg: EntityListDataConfig<TS
   )
 }
 
-export function entityListI18nOptions<TSpec, TI18n>(
-  cfg: EntityListDataConfig<TSpec, TI18n>,
+export function entityListI18nOptions<TI18n>(
+  cfg: Pick<EntityListDataConfig<unknown, TI18n>, 'kind' | 'i18nImport' | 'i18nSchema'>,
   language: string,
 ) {
   return createStaticDataQueryOptions(
@@ -38,7 +38,9 @@ export function useEntityListSpec<TSpec, TI18n>(cfg: EntityListDataConfig<TSpec,
   return data
 }
 
-export function useEntityListI18n<TSpec, TI18n>(cfg: EntityListDataConfig<TSpec, TI18n>): TI18n {
+export function useEntityListI18n<TI18n>(
+  cfg: Pick<EntityListDataConfig<unknown, TI18n>, 'kind' | 'i18nImport' | 'i18nSchema'>,
+): TI18n {
   const { i18n } = useTranslation()
   const { data } = useSuspenseQuery(entityListI18nOptions(cfg, i18n.language))
   return data

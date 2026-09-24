@@ -18,6 +18,7 @@ const NAV_STRUCTURE = {
       { key: 'egoGift', path: '/ego-gift', labelKey: 'header.nav.egoGift' },
       { key: 'themePack', path: '/theme-pack', labelKey: 'header.nav.themePack' },
       { key: 'abEvent', path: '/ab-event', labelKey: 'header.nav.abEvent' },
+      { key: 'battle', path: '/battle', labelKey: 'header.nav.battle' },
       { key: 'keyword', path: '/keyword', labelKey: 'header.nav.keyword' },
     ],
   },

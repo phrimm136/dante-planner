@@ -1,5 +1,6 @@
 import { ThemePackDropdown } from '@/shared/filter'
-import { useThemePackListSpec, useThemePackListI18n } from '../hooks/useThemePackListData'
+import { useThemePackListI18n } from '@/shared/themePack'
+import { useThemePackListSpec } from '../hooks/useThemePackListData'
 
 interface ThemePackFilterDropdownProps {
   selected: Set<string>

@@ -40,7 +40,8 @@ vi.mock('react-i18next', async (importOriginal) => ({
 
 const names: Record<string, { name?: string; specialName?: string }> = {}
 
-vi.mock('../../hooks/useThemePackListData', () => ({
+vi.mock('@/shared/themePack', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/shared/themePack')>()),
   useThemePackListI18n: () => names,
 }))
 

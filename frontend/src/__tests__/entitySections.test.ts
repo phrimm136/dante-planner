@@ -18,7 +18,7 @@ const STATIC_DIR = path.resolve(path.dirname(new URL(import.meta.url).pathname),
 const DATA_DIR = path.join(STATIC_DIR, 'data')
 
 const SECTIONS = Object.values(
-  import.meta.glob<{ section: AnyEntitySection }>('/src/pages/*/lib/entitySection.ts', {
+  import.meta.glob<{ section: AnyEntitySection }>('/src/pages/*/lib{,/*}/entitySection.ts', {
     eager: true,
   }),
 ).map((m) => m.section)
@@ -30,9 +30,23 @@ const SECTIONS = Object.values(
 const dirsOf = (pattern: Record<string, unknown>): string[] =>
   Object.keys(pattern).map((p) => p.split('/')[3] ?? '')
 
-const FACET_DIRS = dirsOf(import.meta.glob('/src/pages/*/lib/*Filter.ts')).filter((dir) =>
-  dirsOf(import.meta.glob('/src/pages/*/components/*List.tsx')).includes(dir),
-)
+const LIST_FILES = Object.keys(import.meta.glob('/src/pages/*/components/*List.tsx'))
+
+const familyListFile = (slice: string, family: string): string =>
+  `/src/pages/${slice}/components/${family.charAt(0).toUpperCase()}${family.slice(1)}List.tsx`
+
+const NESTED_FACET_SECTIONS = Object.keys(import.meta.glob('/src/pages/*/lib/*/*Filter.ts'))
+  .map((p) => p.split('/'))
+  .map((parts) => [parts[3] ?? '', parts[5] ?? ''] as const)
+  .filter(([slice, family]) => LIST_FILES.includes(familyListFile(slice, family)))
+  .map(([slice, family]) => `${slice}/${family}`)
+
+const FACET_DIRS = [
+  ...dirsOf(import.meta.glob('/src/pages/*/lib/*Filter.ts')).filter((dir) =>
+    dirsOf(import.meta.glob('/src/pages/*/components/*List.tsx')).includes(dir),
+  ),
+  ...NESTED_FACET_SECTIONS,
+]
 
 function readSpecList(section: AnyEntitySection): [string, Record<string, unknown>][] {
   const raw: unknown = JSON.parse(

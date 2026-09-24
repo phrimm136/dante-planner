@@ -11,7 +11,8 @@ vi.mock('react-i18next', async (importOriginal) => ({
   useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'EN' } }),
 }))
 
-vi.mock('../../hooks/useThemePackListData', () => ({
+vi.mock('@/shared/themePack', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/shared/themePack')>()),
   useThemePackListI18n: () => ({ pack1: { name: 'Test Pack' } }),
 }))
 

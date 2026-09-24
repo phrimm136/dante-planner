@@ -9,7 +9,7 @@ import {
 } from '@/shared/cardLayout'
 import { getDisplayFontForLanguage } from '@/lib/utils'
 import { parseColorTags, stripColorTags } from '@/shared/gameText'
-import { useThemePackListI18n } from '../hooks/useThemePackListData'
+import { useThemePackListI18n } from '@/shared/themePack'
 import {
   THEME_PACK_NAME_MAX_CQW,
   THEME_PACK_NAME_TEXT,

@@ -73,6 +73,27 @@ describe('entity lint plugin', () => {
     ])
   })
 
+  it('reports every violation in an entity module one directory under lib', () => {
+    expect(findings(diagnostics, 'pages/bad/lib/nested/nestedEntity.ts')).toEqual([
+      {
+        file: 'pages/bad/lib/nested/nestedEntity.ts',
+        rule: 'no-plural-builder',
+        name: 'toBadEntities',
+      },
+      { file: 'pages/bad/lib/nested/nestedEntity.ts', rule: 'singular-builder', name: 'helper' },
+      {
+        file: 'pages/bad/lib/nested/nestedEntity.ts',
+        rule: 'singular-builder',
+        name: 'toBadEntities',
+      },
+      {
+        file: 'pages/bad/lib/nested/nestedEntity.ts',
+        rule: 'singular-builder',
+        name: 'toBadEntity',
+      },
+    ])
+  })
+
   it('reports a plural builder outside the entity modules', () => {
     expect(findings(diagnostics, 'plural.ts')).toEqual([
       { file: 'plural.ts', rule: 'no-plural-builder', name: 'toThingEntities' },

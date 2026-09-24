@@ -131,6 +131,9 @@ export {
   ThemePackIdSchema,
   AbEventIdSchema,
   BattleKeywordIdSchema,
+  EnemyIdSchema,
+  AssistantIdSchema,
+  SinnerEventIdSchema,
   IDENTITY_ID_PATTERN,
   EGO_ID_PATTERN,
   GIFT_ID_PATTERN,
@@ -152,6 +155,9 @@ export type {
   ThemePackId,
   AbEventId,
   BattleKeywordId,
+  EnemyId,
+  AssistantId,
+  SinnerEventId,
 } from './ids'
 
 export {

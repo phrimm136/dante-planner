@@ -1,29 +1,20 @@
 import { createEntityListQueryKeys } from '@/lib/queryKeys'
-import {
-  useEntityListSpec,
-  useEntityListI18n,
-  type EntityListDataConfig,
-} from '@/shared/entityCatalog'
+import { useEntityListSpec, type EntityListDataConfig } from '@/shared/entityCatalog'
+import { THEME_PACK_LIST_I18N, type ThemePackI18n } from '@/shared/themePack'
 import type { z } from 'zod'
-import { ThemePackListSchema, ThemePackI18nSchema } from '../schemas/ThemePackSchemas'
+import { ThemePackListSchema } from '../schemas/ThemePackSchemas'
 
 export const themePackListQueryKeys = createEntityListQueryKeys('themePack')
 
 export const THEME_PACK_LIST: EntityListDataConfig<
   z.infer<typeof ThemePackListSchema>,
-  z.infer<typeof ThemePackI18nSchema>
+  ThemePackI18n
 > = {
-  kind: 'themePack',
+  ...THEME_PACK_LIST_I18N,
   specImport: () => import('@static/data/themePackList.json'),
   specSchema: ThemePackListSchema,
-  i18nImport: (language) => import(`@static/i18n/${language}/themePack.json`),
-  i18nSchema: ThemePackI18nSchema,
 }
 
 export function useThemePackListSpec() {
   return useEntityListSpec(THEME_PACK_LIST)
-}
-
-export function useThemePackListI18n() {
-  return useEntityListI18n(THEME_PACK_LIST)
 }

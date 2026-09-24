@@ -28,6 +28,7 @@ const STATIC_ROUTES: SitemapUrl[] = [
   { loc: '/identity', priority: 0.9, changefreq: 'weekly' },
   { loc: '/ego', priority: 0.9, changefreq: 'weekly' },
   { loc: '/ego-gift', priority: 0.9, changefreq: 'weekly' },
+  { loc: '/battle', priority: 0.9, changefreq: 'weekly' },
   { loc: '/planner/md', priority: 0.8, changefreq: 'daily' },
   { loc: '/planner/md/gesellschaft', priority: 0.8, changefreq: 'daily' },
   { loc: '/planner/extraction', priority: 0.7, changefreq: 'monthly' },

@@ -145,6 +145,11 @@ const CASES: Case[] = [
   ['getFeaturedBossImagePath', ['1001', '91001'], '/images/featuredBoss/1001_91001.webp'],
 
   ['getAbEventImagePath', ['901001'], '/images/abEvent/901001.webp'],
+  [
+    'getBattleSpritePath',
+    ['enemy', '8101_WalkingPearlAppearance'],
+    '/images/enemy/8101_WalkingPearlAppearance.webp',
+  ],
   ['getBannerImagePath', [], '/images/banner/MD.webp'],
   ['getLogoPath', [], '/images/logo/LCMC.webp'],
 

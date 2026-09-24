@@ -44,6 +44,7 @@ import { EGOGiftDetailSkeleton } from '@/pages/egoGift/components/EGOGiftDetailS
 import { ThemePackDetailSkeleton } from '@/pages/themePack/components/ThemePackDetailSkeleton'
 import { AbEventDetailSkeleton } from '@/pages/abEvent/components/AbEventDetailSkeleton'
 import { AB_EVENT_GEOMETRY } from '@/pages/abEvent/lib/cardLayout'
+import { BATTLE_GEOMETRY } from '@/pages/battle/lib/cardLayout'
 import { KeywordDetailSkeleton } from '@/pages/keyword/components/KeywordDetailSkeleton'
 import { KEYWORD_GEOMETRY } from '@/pages/keyword/lib/cardLayout'
 import {
@@ -376,6 +377,20 @@ const abEventDetailRoute = createRoute({
   head: ({ loaderData }) => detailHead(loaderData?.title, 'Dungeon Event'),
 })
 
+const battleRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/battle',
+  component: lazyRouteComponent(() => import('@/pages/battle/BattlePage')),
+  pendingComponent: () => (
+    <div className={SECTION_STYLES.LAYOUT.page}>
+      <ListPageSkeleton geometry={BATTLE_GEOMETRY} />
+    </div>
+  ),
+  head: () => ({
+    meta: [{ title: pageTitle('header.nav.battle') }],
+  }),
+})
+
 const keywordRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/keyword',
@@ -451,6 +466,7 @@ const routeTree = rootRoute.addChildren([
   themePackDetailRoute,
   abEventRoute,
   abEventDetailRoute,
+  battleRoute,
   keywordRoute,
   keywordDetailRoute,
   plannerRoute,

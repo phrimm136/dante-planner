@@ -6,7 +6,15 @@ import i18n from '@/lib/i18n'
 import { router } from '@/lib/router'
 import { mountRoute } from '@/test-utils/mountRoute'
 
-const DATABASE_PREFIXES = ['/identity', '/ego', '/ego-gift', '/theme-pack', '/ab-event', '/keyword']
+const DATABASE_PREFIXES = [
+  '/identity',
+  '/ego',
+  '/ego-gift',
+  '/theme-pack',
+  '/ab-event',
+  '/battle',
+  '/keyword',
+]
 
 type PageModule = { default: () => ReactNode }
 
@@ -33,6 +41,7 @@ const PAGES: Record<string, { url: string; load: () => Promise<PageModule> }> = 
     url: '/ab-event/901001',
     load: () => import('@/pages/abEvent/AbEventDetailPage'),
   },
+  '/battle': { url: '/battle', load: () => import('@/pages/battle/BattlePage') },
   '/keyword': { url: '/keyword', load: () => import('@/pages/keyword/KeywordPage') },
   '/keyword/$id': {
     url: '/keyword/A1c971a',

@@ -1,6 +1,6 @@
 import type { z } from 'zod'
 import type { ThemePackList as ThemePackListType } from '../types/ThemePackTypes'
-import type { ThemePackI18nSchema } from '../schemas/ThemePackSchemas'
+import type { ThemePackI18nSchema } from '@/shared/themePack'
 import { THEME_PACK_GEOMETRY } from '@/shared/cardLayout'
 import type { FilterStore } from '@/components/hooks/filterStore'
 import { FilteredEntityGrid, useSearchTermSources } from '@/shared/filter'

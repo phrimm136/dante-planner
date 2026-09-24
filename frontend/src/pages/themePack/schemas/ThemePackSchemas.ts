@@ -23,15 +23,6 @@ export const ThemePackConfigSchema = z
   })
   .strict()
 
-export const ThemePackI18nEntrySchema = z
-  .object({
-    name: z.string(),
-    specialName: z.string().optional(),
-  })
-  .strict()
-
-export const ThemePackI18nSchema = z.record(z.string(), ThemePackI18nEntrySchema)
-
 export const ThemePackSpecSchema = z
   .object({
     exceptionConditions: z.array(ExceptionConditionSchema),

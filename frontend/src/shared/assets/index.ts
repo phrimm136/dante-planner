@@ -58,6 +58,7 @@ export {
   getThemePackFocusedPath,
   getThemePackHoverExtremePath,
   getAbEventImagePath,
+  getBattleSpritePath,
   getEGOTypeIconPath,
   getBattleKeywordIconPath,
   getPanicIconPath,

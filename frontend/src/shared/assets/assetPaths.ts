@@ -192,6 +192,8 @@ export const PATHS = {
     resolveAsset(`/images/featuredBoss/${packId}_${portraitId}.webp`),
 
   abEventImage: (eventId: string) => resolveAsset(`/images/abEvent/${eventId}.webp`),
+  battleSprite: (family: string, spriteId: string) =>
+    resolveAsset(`/images/${family}/${spriteId}.webp`),
   bannerImage: () => resolveAsset('/images/banner/MD.webp'),
   logo: () => resolveAsset('/images/logo/LCMC.webp'),
 }
@@ -322,6 +324,8 @@ export const getFeaturedBossImagePath = (packId: string, portraitId: number | st
   path('featuredBossImage', packId, portraitId)
 
 export const getAbEventImagePath = (eventId: string): string => path('abEventImage', eventId)
+export const getBattleSpritePath = (family: string, spriteId: string): string =>
+  path('battleSprite', family, spriteId)
 export const getBannerImagePath = (): string => path('bannerImage')
 export const getLogoPath = (): string => path('logo')
 

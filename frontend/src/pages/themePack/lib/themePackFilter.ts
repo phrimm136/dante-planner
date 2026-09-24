@@ -2,7 +2,7 @@ import type { z } from 'zod'
 import type { EntityMatcher, Facet } from '@/shared/filter'
 import { createEntityMatcher } from '@/shared/filter'
 import type { DungeonIdx, ThemePackFloor } from '@/shared/gameData'
-import type { ThemePackI18nSchema } from '../schemas/ThemePackSchemas'
+import type { ThemePackI18nSchema } from '@/shared/themePack'
 import type { ThemePackEntity } from '../types/ThemePackTypes'
 
 export interface ThemePackFacetState {

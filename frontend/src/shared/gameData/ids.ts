@@ -46,6 +46,12 @@ export const THEME_PACK_ID_PATTERN = '\\d{4}'
 /** Abnormality event id. Sub-event ids are longer and stay outside the brand. */
 export const AB_EVENT_ID_PATTERN = '9\\d{5}'
 
+export const ENEMY_ID_PATTERN = '\\d{4,5}'
+
+export const ASSISTANT_ID_PATTERN = '4\\d{5}'
+
+export const SINNER_EVENT_ID_PATTERN = '\\d{5,6}'
+
 /** Battle keyword id: the spec record keys it by a word. */
 export const BATTLE_KEYWORD_ID_PATTERN = '\\w+'
 
@@ -151,6 +157,21 @@ export const AbEventIdSchema = entityIdSchema<'AbEventId'>(
   'Ab Event ID must match pattern 9{5 digits}',
 )
 
+export const EnemyIdSchema = entityIdSchema<'EnemyId'>(
+  ENEMY_ID_PATTERN,
+  'Enemy ID must match pattern {4-5 digits}',
+)
+
+export const AssistantIdSchema = entityIdSchema<'AssistantId'>(
+  ASSISTANT_ID_PATTERN,
+  'Assistant ID must match pattern 4{5 digits}',
+)
+
+export const SinnerEventIdSchema = entityIdSchema<'SinnerEventId'>(
+  SINNER_EVENT_ID_PATTERN,
+  'Event sinner ID must match pattern {5-6 digits}',
+)
+
 export type IdentityId = z.infer<typeof IdentityIdSchema>
 export type EGOId = z.infer<typeof EGOIdSchema>
 export type EGOGiftId = z.infer<typeof EGOGiftIdSchema>
@@ -160,3 +181,6 @@ export type SkillId = z.infer<typeof SkillIdSchema>
 export type ThemePackId = z.infer<typeof ThemePackIdSchema>
 export type AbEventId = z.infer<typeof AbEventIdSchema>
 export type BattleKeywordId = z.infer<typeof BattleKeywordIdSchema>
+export type EnemyId = z.infer<typeof EnemyIdSchema>
+export type AssistantId = z.infer<typeof AssistantIdSchema>
+export type SinnerEventId = z.infer<typeof SinnerEventIdSchema>

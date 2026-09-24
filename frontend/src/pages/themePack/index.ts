@@ -5,7 +5,6 @@ export { ThemePackFilterDropdown } from './components/ThemePackFilterDropdown'
 
 export {
   useThemePackListSpec,
-  useThemePackListI18n,
   themePackListQueryKeys,
   THEME_PACK_LIST,
 } from './hooks/useThemePackListData'
@@ -25,8 +24,6 @@ export {
   ThemePackConfigSchema,
   ThemePackSpecSchema,
   ThemePackListSchema,
-  ThemePackI18nEntrySchema,
-  ThemePackI18nSchema,
   ThemePackDetailSchema,
   FeaturedBossSchema,
 } from './schemas/ThemePackSchemas'
