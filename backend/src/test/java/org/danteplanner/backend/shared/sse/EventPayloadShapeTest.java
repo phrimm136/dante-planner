@@ -1,14 +1,15 @@
 package org.danteplanner.backend.shared.sse;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.json.JsonTest;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.notification.dto.NotificationEventPayload;
 import org.danteplanner.backend.planner.dto.PlannerPublishedPayload;
-import org.danteplanner.backend.shared.config.JacksonConfig;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.junit.jupiter.api.Test;
 
@@ -19,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * the browser reads by name, so the Java type carrying a payload may change while the emitted
  * keys may not.
  */
+@JsonTest
 class EventPayloadShapeTest {
 
     private static final UUID PLANNER_ID = UUID.fromString("11111111-2222-3333-4444-555555555555");
@@ -26,7 +28,8 @@ class EventPayloadShapeTest {
     private static final UUID NOTIFICATION_PUBLIC_ID = UUID.fromString("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee");
 
     /** The application's own mapper: the shape asserted here is the one clients receive. */
-    private final ObjectMapper objectMapper = new JacksonConfig().objectMapper(List.of());
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Test
     void accountSuspended_WhenTimeout_CarriesSuspensionTypeReasonAndDuration() {

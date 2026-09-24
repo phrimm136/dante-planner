@@ -7,8 +7,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.github.bucket4j.distributed.BucketProxy;
 import io.github.bucket4j.distributed.proxy.ProxyManager;
 import io.github.bucket4j.distributed.proxy.RemoteBucketBuilder;
@@ -20,24 +18,9 @@ import static org.mockito.Mockito.when;
 
 /**
  * Test configuration class providing beans needed for integration tests.
- *
- * <p>This configuration provides a Jackson 2.x ObjectMapper since the application
- * code uses com.fasterxml.jackson while Spring Boot 4.0.0-SNAPSHOT auto-configures
- * Jackson 3.x (tools.jackson).</p>
  */
 @TestConfiguration
 public class TestConfig {
-
-    /**
-     * Provides a Jackson 2.x ObjectMapper for use in tests.
-     *
-     * @return configured ObjectMapper instance
-     */
-    @Bean
-    @Primary
-    public ObjectMapper objectMapper() {
-        return new ObjectMapper();
-    }
 
     /**
      * Inert rate-limit proxy manager for the hermetic {@code test} profile: every bucket

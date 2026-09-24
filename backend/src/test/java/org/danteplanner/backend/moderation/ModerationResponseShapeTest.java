@@ -1,9 +1,11 @@
 package org.danteplanner.backend.moderation;
 
-import java.util.List;
 import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.json.JsonTest;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,7 +13,6 @@ import org.danteplanner.backend.moderation.dto.BanStatusResponse;
 import org.danteplanner.backend.moderation.dto.ModeratedUserResponse;
 import org.danteplanner.backend.moderation.dto.PlannerActionResponse;
 import org.danteplanner.backend.moderation.dto.UnpublishPlannerResponse;
-import org.danteplanner.backend.shared.config.JacksonConfig;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Freezes the JSON the moderation endpoints put on the wire, field name by field name, so a
  * change of the Java type carrying a response cannot change what a client receives.
  */
+@JsonTest
 class ModerationResponseShapeTest {
 
     private static final UUID PLANNER_ID = UUID.fromString("11111111-2222-3333-4444-555555555555");
@@ -27,7 +29,8 @@ class ModerationResponseShapeTest {
     private static final Instant TIMEOUT_UNTIL = Instant.parse("2026-03-05T06:07:08Z");
 
     /** The application's own mapper: the shape asserted here is the one clients receive. */
-    private final ObjectMapper objectMapper = new JacksonConfig().objectMapper(List.of());
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Test
     void unpublishPlanner_WhenModeratorUnpublishes_CarriesPlannerIdPublishedAndMessage() {
