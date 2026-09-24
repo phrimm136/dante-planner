@@ -252,7 +252,7 @@ public class PlannerCommandService {
         statsRepository.insert(PlannerStats.builder().plannerId(saved.getId()).build());
         log.info("Created planner {} for user {}", saved.getId(), userId);
 
-        PlannerResponse response = PlannerResponse.fromEntity(saved, 0);
+        PlannerResponse response = PlannerResponse.fromEntity(saved);
 
         return new UpsertedPlanner(saved, response, true);
     }
@@ -302,7 +302,7 @@ public class PlannerCommandService {
                 countTopLevelCopy(request.selectedKeywords(),
                         PlannerKeywords.fromContent(planner.getContentJson()).asSet());
                 PlannerResponse acknowledged =
-                        PlannerResponse.fromEntity(planner, statsRepository.upvotesOf(id));
+                        PlannerResponse.fromEntity(planner);
                 return new UpsertedPlanner(planner, acknowledged, false);
             }
 
@@ -319,7 +319,7 @@ public class PlannerCommandService {
                 plannerCatalogService.onVisibleEditCommitted(planner);
             }
 
-            PlannerResponse response = PlannerResponse.fromEntity(planner, statsRepository.upvotesOf(id));
+            PlannerResponse response = PlannerResponse.fromEntity(planner);
             return new UpsertedPlanner(planner, response, false);
         }
 

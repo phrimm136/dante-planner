@@ -10,7 +10,6 @@ import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
-import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerSummaryRow;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.service.UserService;
@@ -47,9 +46,6 @@ class PlannerQueryServiceTest {
     private PlannerRepository plannerRepository;
 
     @Mock
-    private PlannerStatsRepository plannerStatsRepository;
-
-    @Mock
     private UserService userService;
 
     private PlannerQueryService queryService;
@@ -61,7 +57,7 @@ class PlannerQueryServiceTest {
         MockitoAnnotations.openMocks(this);
 
         PlannerAccessGuard accessGuard = new PlannerAccessGuard(userService, plannerRepository);
-        queryService = new PlannerQueryService(plannerRepository, plannerStatsRepository, accessGuard);
+        queryService = new PlannerQueryService(plannerRepository, accessGuard);
 
         testUser = TestDataFactory.unsavedUser(1L);
     }
@@ -206,8 +202,6 @@ class PlannerQueryServiceTest {
             Planner planner = createTestPlanner();
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
-            when(plannerStatsRepository.findById(planner.getId()))
-                    .thenReturn(Optional.empty());
 
             // Act
             PlannerResponse response = queryService.getPlanner(testUser.getId(), planner.getId());

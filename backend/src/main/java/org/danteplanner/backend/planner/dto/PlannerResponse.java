@@ -24,11 +24,10 @@ public record PlannerResponse(
     Instant createdAt,
     Instant lastModifiedAt,
     Instant savedAt,
-    boolean published,
-    int upvotes
+    boolean published
 ) {
 
-    public static PlannerResponse fromEntity(Planner planner, int upvotes) {
+    public static PlannerResponse fromEntity(Planner planner) {
         return PlannerResponse.builder()
                 .id(planner.getId())
                 .title(planner.getTitle())
@@ -44,7 +43,6 @@ public record PlannerResponse(
                 .lastModifiedAt(planner.getLastModifiedAt())
                 .savedAt(planner.getLastModifiedAt())
                 .published(planner.isPublished())
-                .upvotes(upvotes)
                 .build();
     }
 }

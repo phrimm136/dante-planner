@@ -130,7 +130,7 @@ public class PlannerPublishingService {
     }
 
     private PlannerResponse describe(Planner planner) {
-        return PlannerResponse.fromEntity(planner, plannerStatsRepository.upvotesOf(planner.getId()));
+        return PlannerResponse.fromEntity(planner);
     }
 
     @Transactional

@@ -1,7 +1,6 @@
 package org.danteplanner.backend.planner.repository;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
 
 import org.danteplanner.backend.planner.entity.PlannerStats;
@@ -15,10 +14,6 @@ public interface PlannerStatsRepository extends JpaRepository<PlannerStats, UUID
     default int upvotesOf(UUID plannerId) {
         return findById(plannerId).map(PlannerStats::getUpvotes).orElse(0);
     }
-
-    @Query("SELECT s.plannerId AS plannerId, s.upvotes AS upvotes "
-            + "FROM PlannerStats s WHERE s.plannerId IN :plannerIds")
-    List<PlannerUpvoteRow> upvoteCounts(@Param("plannerIds") Collection<UUID> plannerIds);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query(value = "INSERT INTO planner_stats (planner_id, view_count, upvotes, comment_count) "

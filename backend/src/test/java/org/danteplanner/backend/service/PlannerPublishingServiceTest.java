@@ -304,7 +304,7 @@ class PlannerPublishingServiceTest {
             when(plannerCommandService.upsertAggregate(
                     testUser.getId(), deviceId, planner.getId(), request, false))
                     .thenReturn(new PlannerCommandService.UpsertedPlanner(
-                            planner, PlannerResponse.fromEntity(planner, 0), false));
+                            planner, PlannerResponse.fromEntity(planner), false));
             // Decoys: a reload by either route would succeed and stay silent, so the prohibitions
             // below fail on the reload itself rather than on a null downstream.
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
@@ -331,9 +331,6 @@ class PlannerPublishingServiceTest {
             Planner planner = testPlannerBuilder().published(false).build();
 
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
-            // An upvote count no other source could supply, so the response can only carry it by
-            // having read this planner's own stats row.
-            when(plannerStatsRepository.upvotesOf(planner.getId())).thenReturn(12);
 
             // Act
             PlannerResponse result = publishingService.publish(testUser.getId(), planner.getId());
@@ -342,7 +339,6 @@ class PlannerPublishingServiceTest {
             assertTrue(result.published());
             assertEquals(planner.getId(), result.id());
             assertEquals("Test Planner", result.title());
-            assertEquals(12, result.upvotes());
         }
 
         @Test

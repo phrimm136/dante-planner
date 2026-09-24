@@ -26,7 +26,11 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.danteplanner.backend.support.AuthCookies.performAuthed;
+import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.entity.PlannerStats;
@@ -35,6 +39,12 @@ import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
+import org.danteplanner.backend.planner.dto.PlannerBatchRequest;
+import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
+import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.support.AuthCookies;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.ResultActions;
 
 /**
  * Wire-contract pin for the detail and owner-list planner DTOs: the serialized field
@@ -134,7 +144,7 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
                 "id", "title", "category", "status", "content",
                 "schemaVersion", "contentVersion", "plannerType", "syncVersion",
                 "deviceId", "createdAt", "lastModifiedAt", "savedAt",
-                "published", "upvotes");
+                "published");
     }
 
     @Test
@@ -260,5 +270,71 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
         assertThat(flag(detail, "hasReported"))
                 .as("the viewer holds no report row")
                 .isFalse();
+    }
+
+    private ResultActions upsert(UUID id, Long syncVersion) throws Exception {
+        UpsertPlannerRequest request = new UpsertPlannerRequest(
+                id.toString(), "5F", "Contract Upsert", PlannerStatus.DRAFT, TestDataFactory.VALID_CONTENT,
+                7, PlannerType.MIRROR_DUNGEON, syncVersion, null);
+        return performAuthed(mockMvc, put("/api/planner/md/{id}", id).with(withCsrf())
+                        .cookie(AuthCookies.deviceId(UUID.randomUUID()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)),
+                token);
+    }
+
+    @Test
+    @DisplayName("no-upvotes-on-planner-response: the owner detail carries no upvotes key")
+    void noUpvotes_WhenOwnerDetail_KeyAbsent() throws Exception {
+        performAuthed(mockMvc, get("/api/planner/md/{id}", published.getId()), token)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(published.getId().toString()))
+                .andExpect(jsonPath("$.upvotes").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("no-upvotes-on-planner-response: the upsert response carries no upvotes key on create or update")
+    void noUpvotes_WhenUpserted_KeyAbsent() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        upsert(id, null)
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(id.toString()))
+                .andExpect(jsonPath("$.upvotes").doesNotExist());
+
+        upsert(id, 1L)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(id.toString()))
+                .andExpect(jsonPath("$.upvotes").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("no-upvotes-on-planner-response: the batch pull elements carry no upvotes key")
+    void noUpvotes_WhenBatchPulled_KeyAbsent() throws Exception {
+        performAuthed(mockMvc, post("/api/planner/md/batch").with(withCsrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                new PlannerBatchRequest(List.of(published.getId())))),
+                token)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].id").value(published.getId().toString()))
+                .andExpect(jsonPath("$[0].upvotes").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("no-upvotes-on-planner-response: the GET batch pull elements carry no upvotes key")
+    void noUpvotes_WhenBatchPulledByGet_KeyAbsent() throws Exception {
+        Planner draft = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
+
+        performAuthed(mockMvc, get("/api/planner/md/batch")
+                        .param("ids", published.getId() + "," + draft.getId()),
+                token)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].id").exists())
+                .andExpect(jsonPath("$[0].upvotes").doesNotExist())
+                .andExpect(jsonPath("$[1].id").exists())
+                .andExpect(jsonPath("$[1].upvotes").doesNotExist());
     }
 }
