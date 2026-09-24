@@ -1,18 +1,29 @@
 package org.danteplanner.backend.integration;
 
+import java.io.InputStream;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.UUID;
-
 import javax.sql.DataSource;
 
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.moderation.service.ModerationAuditService;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.support.TestDataFactory;
+import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.test.context.ActiveProfiles;
@@ -38,6 +49,7 @@ class UndeclaredPrimaryAccessIT extends SharedMySqlContainerSupport {
 
     private static final String PROBE_QUERY = "SELECT 1";
     private static final String UNDECLARED_MESSAGE = "outside a transaction";
+    private static final Duration RESPONSE_HEADERS_TIMEOUT = Duration.ofSeconds(10);
 
     @DynamicPropertySource
     static void routingProperties(DynamicPropertyRegistry registry) {
@@ -57,6 +69,23 @@ class UndeclaredPrimaryAccessIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private ModerationAuditService moderationAuditService;
+
+    @Autowired
+    private PlannerRepository plannerRepository;
+
+    @LocalServerPort
+    private int port;
+
+    private UUID publishedPlannerId;
+
+    @BeforeEach
+    void setUp() {
+        User owner = TestDataFactory.createTestUser(userRepository, "undeclared-primary-owner@example.com");
+        publishedPlannerId = TestDataFactory.planner(owner)
+                .published(true)
+                .save(plannerRepository)
+                .getId();
+    }
 
     @Test
     void primaryAcquisition_WhenNoTransactionIsActive_IsRejected() {
@@ -101,6 +130,25 @@ class UndeclaredPrimaryAccessIT extends SharedMySqlContainerSupport {
     @Test
     void replicaAcquisition_WhenInsideAReadOnlyTransaction_IsServed() {
         assertThat(probeInTransaction(true)).isEqualTo(1);
+    }
+
+    @Test
+    void subscribeToComments_WhenAnonymousOnPublishedPlanner_StartsEventStream() throws Exception {
+        HttpRequest request = HttpRequest.newBuilder(URI.create(
+                        "http://localhost:" + port + "/api/planner/" + publishedPlannerId + "/comments/events"))
+                .header("Accept", MediaType.TEXT_EVENT_STREAM_VALUE)
+                .timeout(RESPONSE_HEADERS_TIMEOUT)
+                .GET()
+                .build();
+
+        try (HttpClient client = HttpClient.newHttpClient()) {
+            HttpResponse<InputStream> response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            try (InputStream ignored = response.body()) {
+                assertThat(response.statusCode()).isEqualTo(200);
+                assertThat(response.headers().firstValue("Content-Type"))
+                        .hasValueSatisfying(type -> assertThat(type).contains(MediaType.TEXT_EVENT_STREAM_VALUE));
+            }
+        }
     }
 
     private Integer probeInTransaction(boolean readOnly) {

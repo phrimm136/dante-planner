@@ -9,6 +9,7 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.util.UUID;
@@ -72,6 +73,7 @@ public class PlannerAccessGuard {
                 .orElseThrow(() -> new PlannerNotFoundException(id));
     }
 
+    @Transactional(readOnly = true)
     public void checkPublished(UUID plannerId) {
         if (!plannerRepository.existsPublishedById(plannerId)) {
             throw new PlannerNotFoundException(plannerId);
