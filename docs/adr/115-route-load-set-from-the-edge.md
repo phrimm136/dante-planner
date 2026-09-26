@@ -1,0 +1,19 @@
+# 115 route-load-set-from-the-edge
+epic: none · pr: none
+
+## Decisions
+- @waterfall @edge @preload — Each route's load set (its route chunks, the game-data chunks it renders with, and the API response it opens with) is declared to the browser by `Link` headers in the Pages `_headers` file, generated per route by the build. One `index.html` answers every URL and chunk names are content hashes that change with every build, so only something produced per build and applied per path can tell the browser what a URL needs before the application runs; Pages matches header rules by requested path, SPA-fallback responses included.
+  REJECTED: an inline boot script in `index.html` mapping the path to its preloads — it runs only after the HTML is parsed, needs the same build-time injection of hashed names, and puts the route table in a second place the application must agree with.
+  REJECTED: prerendering detail pages to HTML — removes JavaScript from first paint, but makes the HTML itself cached content that a takedown must reach (ADR 008's ghost read, moved to the edge) and needs a rendering runtime the site does not have.
+  REJECTED: folding the route chunks into the entry graph — removes a wave for one route by charging every other page its bytes.
+- @preload @format (taste) — Script chunks are hinted as `modulepreload` and the API origin as `preconnect`. Chromium fetches a `modulepreload` named only in a response header, and Pages' Early Hints carry only `preload` and `preconnect`, so chunk hints arrive with the HTML rather than ahead of it; the HTML is static and served from the edge, so the head start forgone is small.
+  REJECTED: hinting chunks as `preload; as=script` to make them eligible for the 103 — Early Hints are replayed from cached responses, so a per-planner URL's first visit in a colo is unlikely to receive one, and a script preloaded without module semantics is fetched but not compiled early.
+- @preload @api — The API response is hinted only for the cookieless content endpoint, as `preload; as=fetch; crossorigin=anonymous` with the planner id substituted from the path placeholder. A preload is reused only by a fetch with the same credentials mode, and the content endpoint is the one read that is both cookieless and free of side effects.
+  REJECTED: hinting the current detail endpoint — it is credentialed, so the hint would need `use-credentials`, and it records a view, so every hint the page does not consume would count a visit that did not happen.
+- @preload @derivation — The load set is computed by the build, never listed by hand: the URL-to-page table is read from the router's own route definitions, and the bundle manifest maps each page to its chunks. Render-time `import()` of game data moves into route loaders so a route's declared imports are its whole load set. A wrong or stale list fails silently, as lost speed rather than a broken page, so only a list derived from the code that routes stays correct.
+  REJECTED: a hand-maintained per-route list — correct on the day it is written and stale after the first refactor that moves a module between chunks.
+  REJECTED: a declarative route table that both the router and the build read — restructures how every route is defined to serve one build step, where reading the existing definitions leaves the router as the only table.
+- @preload @budget — One `_headers` rule per route pattern, with a long chunk list split across repeated `Link` lines. Pages allows 100 rules and 2,000 characters per line and joins repeated headers with commas.
+
+## Takeaway
+- takeaway: code splitting trades bytes for discovery depth, and on a 300 ms path each level of depth costs more than the bytes it saved. Declaring the load set where the URL is first answered buys the depth back without giving up the split.
