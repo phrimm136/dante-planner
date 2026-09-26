@@ -3,7 +3,7 @@
 Provisions the **Oregon (`us-west-2`) primary-region k3s fleet** for the multi-region
 architecture (task 034, Phase 13): a dedicated VPC, one k3s server (CP), one Traefik ingress
 node, an app ASG, one data node, the backend ECR repo, the etcd-snapshot bucket, and the
-CloudWatch billing/auto-recovery alarms. The cluster is GitOps-managed by ArgoCD core, which
+CloudWatch auto-recovery alarms. The cluster is GitOps-managed by ArgoCD core, which
 the CP bootstraps from `deploy/`.
 
 This stack is **Oregon-only**. Global Accelerator, VPC peering, ECR cross-region replication,
@@ -58,7 +58,7 @@ terraform output backend_ecr_repository_url
   allowlist on 3306 (via `terraform/rds` inputs), so app/data nodes can reach the primary.
 - **ECR repo collision:** if `danteplanner-backend` already exists from the task-014 single-region
   deploy, `terraform import aws_ecr_repository.backend danteplanner-backend` before apply.
-- **Alarm notifications:** set `alarm_sns_topic_arn` to receive billing/auto-recovery alerts;
+- **Alarm notifications:** set `alarm_sns_topic_arn` to receive auto-recovery alerts;
   empty leaves the alarms visible but silent.
 
 ## Deliberate deviations (portfolio deviation table)

@@ -12,11 +12,6 @@ moved {
 }
 
 moved {
-  from = aws_cloudwatch_metric_alarm.billing
-  to   = module.fleet.aws_cloudwatch_metric_alarm.billing
-}
-
-moved {
   from = aws_eip_association.ingress
   to   = module.fleet.aws_eip_association.ingress
 }

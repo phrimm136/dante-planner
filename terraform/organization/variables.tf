@@ -107,3 +107,14 @@ variable "tags" {
     Project = "danteplanner"
   }
 }
+
+variable "monthly_budget_usd" {
+  description = "Organization-wide monthly spend, in USD, above which the budget alerts on actual and forecast."
+  type        = number
+  default     = 200
+}
+
+variable "anomaly_monitor_arn" {
+  description = "ARN of the account's existing services-dimension Cost Anomaly Detection monitor, from `aws ce get-anomaly-monitors`."
+  type        = string
+}

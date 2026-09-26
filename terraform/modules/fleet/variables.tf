@@ -195,14 +195,8 @@ variable "rs256_private_key_secret_name" {
 
 # --- Observability & ops ----------------------------------------------------
 
-variable "billing_alarm_threshold" {
-  description = "CloudWatch billing alarm threshold in USD (steady-state bill is ~$145-190/mo)."
-  type        = number
-  default     = 200
-}
-
 variable "alarm_sns_topic_arn" {
-  description = "Optional SNS topic ARN for billing + instance auto-recovery alarm notifications. Empty = alarms visible in console but send no notification."
+  description = "Optional SNS topic ARN for instance auto-recovery alarm notifications. Empty = alarms visible in console but send no notification."
   type        = string
   default     = ""
 }

@@ -1,22 +1,3 @@
-# --- Billing alarm (~$200) --------------------------------------------------
-# EstimatedCharges is published only in us-east-1, so this alarm uses the
-# us_east_1 provider alias regardless of the fleet region.
-resource "aws_cloudwatch_metric_alarm" "billing" {
-  provider            = aws.us_east_1
-  alarm_name          = "${var.name_prefix}-${var.region_name_suffix}-billing"
-  alarm_description   = "Estimated monthly AWS charges exceeded threshold (steady state ~$145-190/mo)"
-  namespace           = "AWS/Billing"
-  metric_name         = "EstimatedCharges"
-  statistic           = "Maximum"
-  period              = 21600
-  evaluation_periods  = 1
-  threshold           = var.billing_alarm_threshold
-  comparison_operator = "GreaterThanThreshold"
-  dimensions          = { Currency = "USD" }
-  alarm_actions       = var.alarm_sns_topic_arn != "" ? [var.alarm_sns_topic_arn] : []
-  tags                = var.tags
-}
-
 # --- EC2 auto-recovery for the pets (CP, ingress, data) ---------------------
 # App nodes are cattle (the ASG replaces them); the singleton infra nodes
 # recover in place on a failed system status check. No autonomous writer

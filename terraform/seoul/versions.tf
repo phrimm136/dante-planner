@@ -27,14 +27,6 @@ provider "aws" {
   region              = var.region
 }
 
-# Billing alarm's EstimatedCharges metric is us-east-1-only (module passes this
-# through). Kept even in the Seoul stack so the module's monitoring.tf resolves.
-provider "aws" {
-  allowed_account_ids = [var.aws_account_id]
-  alias               = "us_east_1"
-  region              = "us-east-1"
-}
-
 # The RDS (prod) region — us-west-2. Holds the accepter side of the cross-region
 # Seoul-VPC <-> RDS-VPC peering, which cannot auto_accept (AWS requires the
 # accepter to run in the peer's region). This is what keeps peering a single

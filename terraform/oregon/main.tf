@@ -2,8 +2,7 @@ module "fleet" {
   source = "../modules/fleet"
 
   providers = {
-    aws           = aws
-    aws.us_east_1 = aws.us_east_1
+    aws = aws
   }
 
   region                          = var.region
@@ -29,7 +28,6 @@ module "fleet" {
   external_secrets_chart_version  = var.external_secrets_chart_version
   ecr_credential_provider_version = var.ecr_credential_provider_version
   rs256_private_key_secret_name   = var.rs256_private_key_secret_name
-  billing_alarm_threshold         = var.billing_alarm_threshold
   alarm_sns_topic_arn             = var.alarm_sns_topic_arn
   etcd_snapshot_retention         = var.etcd_snapshot_retention
   tags                            = var.tags

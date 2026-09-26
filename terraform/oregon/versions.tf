@@ -28,11 +28,3 @@ provider "aws" {
   allowed_account_ids = [var.aws_account_id]
   region              = var.region
 }
-
-# AWS/Billing EstimatedCharges is published only in us-east-1; the billing alarm
-# must watch the metric there regardless of the fleet's region.
-provider "aws" {
-  allowed_account_ids = [var.aws_account_id]
-  alias               = "us_east_1"
-  region              = "us-east-1"
-}
