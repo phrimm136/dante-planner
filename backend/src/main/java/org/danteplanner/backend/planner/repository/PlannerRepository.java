@@ -21,7 +21,7 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
 
     String AGGREGATE_LOAD = "SELECT p FROM Planner p "
             + "JOIN FETCH p.content c JOIN FETCH p.publication JOIN FETCH p.moderation "
-            + "JOIN FETCH p.user ";
+            + "JOIN FETCH p.user u ";
 
     @Query(value = "SELECT p.id AS id, c.title AS title, c.category AS category, "
             + "p.plannerType AS plannerType, c.status AS status, c.syncVersion AS syncVersion, "
@@ -54,7 +54,8 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
     @Query(AGGREGATE_LOAD + "WHERE p.id = :id AND c.deletedAt IS NULL")
     Optional<Planner> findAggregate(@Param("id") UUID id);
 
-    @Query(AGGREGATE_LOAD + "WHERE p.id = :id AND p.publication.published = TRUE AND c.deletedAt IS NULL")
+    @Query(AGGREGATE_LOAD + "WHERE p.id = :id AND p.publication.published = TRUE AND c.deletedAt IS NULL "
+            + "AND u.deletedAt IS NULL")
     Optional<Planner> findPublishedAggregate(@Param("id") UUID id);
 
     @Query("""
@@ -71,8 +72,8 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
     @Query("SELECT COUNT(p) > 0 FROM Planner p JOIN p.content c WHERE p.id = :id AND c.deletedAt IS NULL")
     boolean existsActiveById(@Param("id") UUID id);
 
-    @Query("SELECT COUNT(p) > 0 FROM Planner p JOIN p.content c JOIN p.publication pub "
-            + "WHERE p.id = :id AND pub.published = TRUE AND c.deletedAt IS NULL")
+    @Query("SELECT COUNT(p) > 0 FROM Planner p JOIN p.content c JOIN p.publication pub JOIN p.user u "
+            + "WHERE p.id = :id AND pub.published = TRUE AND c.deletedAt IS NULL AND u.deletedAt IS NULL")
     boolean existsPublishedById(@Param("id") UUID id);
 
     @Query("SELECT p.user.id AS userId, c.deletedAt AS deletedAt "

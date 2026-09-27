@@ -78,9 +78,10 @@ public class PlannerDriftAuditRepository {
                 FROM planner p
                 JOIN planner_content c ON c.planner_id = p.id
                 JOIN planner_publication pub ON pub.planner_id = p.id
+                JOIN users u ON u.id = p.user_id
                 LEFT JOIN planner_moderation m ON m.planner_id = p.id
                 LEFT JOIN planner_catalog cat ON cat.planner_id = p.id
-                WHERE pub.published = TRUE AND c.deleted_at IS NULL
+                WHERE pub.published = TRUE AND c.deleted_at IS NULL AND u.deleted_at IS NULL
                   AND m.taken_down_at IS NULL AND cat.planner_id IS NULL
                 """,
                 (rs, rowNum) -> UUID.fromString(rs.getString("planner_id")));
@@ -93,8 +94,11 @@ public class PlannerDriftAuditRepository {
                 LEFT JOIN planner_content c ON c.planner_id = cat.planner_id
                 LEFT JOIN planner_publication pub ON pub.planner_id = cat.planner_id
                 LEFT JOIN planner_moderation m ON m.planner_id = cat.planner_id
+                LEFT JOIN planner p ON p.id = cat.planner_id
+                LEFT JOIN users u ON u.id = p.user_id
                 WHERE pub.planner_id IS NULL OR pub.published = FALSE
                    OR c.deleted_at IS NOT NULL OR m.taken_down_at IS NOT NULL
+                   OR u.deleted_at IS NOT NULL
                 """,
                 (rs, rowNum) -> UUID.fromString(rs.getString("planner_id")));
     }
