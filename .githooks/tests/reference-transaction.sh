@@ -135,17 +135,19 @@ check 'empty commit: lands without a record entry' eq "$(tip dev):$rc" "$(tip fe
 g switch -q -c feat/w
 change w.txt w 'feat(w): add w'
 H=$(tip feat/w)
-record feat__w.md patch-ids "$H"
 g switch -q --detach
 g worktree add -q "$WT" dev
+record feat__w.md patch-ids "$H"
+mkdir -p "$WT/.claude/reports/reviews"
+mv "$REVIEWS/feat__w.md" "$WT/.claude/reports/reviews/"
 before=$(tip dev)
 git -C "$WT" merge -q --ff-only feat/w 2>"$ERR"; rc=$?
-check 'worktree without the record: refused' eq "$(tip dev):$((rc != 0))" "$before:1"
-check 'worktree without the record: names the commit' has 'feat(w): add w'
-mkdir -p "$WT/.claude/reports/reviews"
-cp "$REVIEWS/feat__w.md" "$WT/.claude/reports/reviews/"
+check 'worktree landing reads the main checkout: refused with the record only in the worktree' eq "$(tip dev):$((rc != 0))" "$before:1"
+check 'worktree landing reads the main checkout: names the commit' has 'feat(w): add w'
+mv "$WT/.claude/reports/reviews/feat__w.md" "$REVIEWS/"
+rm -rf "$WT/.claude"
 git -C "$WT" merge -q --ff-only feat/w 2>"$ERR"; rc=$?
-check 'worktree with the record: lands' eq "$(tip dev):$rc" "$H:0"
+check 'worktree landing reads the main checkout: lands with the record only in the main checkout' eq "$(tip dev):$rc" "$H:0"
 g worktree remove --force "$WT"
 
 g switch -q -c unreviewed "$A"
