@@ -8,6 +8,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+
 /**
  * Checks whether the local replica has applied a given GTID.
  * Returns {@code true} once the replica has caught up (the WAIT query returned success),
@@ -31,21 +34,34 @@ public class GtidReadGate {
     private final JdbcTemplate jdbcTemplate;
     private final TransactionTemplate readOnlyTransaction;
 
-    public GtidReadGate(DataSource dataSource) {
+    /**
+     * Where each gated read was routed, tagged {@code replica} or {@code primary}. A pinned read
+     * is correct but pays the cross-region round trip, so watch the primary share, not the
+     * absolute.
+     */
+    private final Counter replicaServed;
+    private final Counter primaryPinned;
+
+    public GtidReadGate(DataSource dataSource, MeterRegistry meterRegistry) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.readOnlyTransaction = new TransactionTemplate(new DataSourceTransactionManager(dataSource));
         this.readOnlyTransaction.setReadOnly(true);
+        this.replicaServed = meterRegistry.counter("gtid.gate", "outcome", "replica");
+        this.primaryPinned = meterRegistry.counter("gtid.gate", "outcome", "primary");
     }
 
     public boolean isCaughtUp(String gtid) {
+        boolean caughtUp;
         try {
             Integer result = readOnlyTransaction.execute(status ->
                     jdbcTemplate.queryForObject(
                             WAIT_GTID_SQL, Integer.class, gtid, PROBE_TIMEOUT_SECONDS));
-            return result != null && result == APPLIED;
+            caughtUp = result != null && result == APPLIED;
         } catch (DataAccessException e) {
             log.warn("GTID wait probe failed for gtid={}, routing to primary", gtid, e);
-            return false;
+            caughtUp = false;
         }
+        (caughtUp ? replicaServed : primaryPinned).increment();
+        return caughtUp;
     }
 }

@@ -29,8 +29,8 @@ public class GtidGateConfig {
     private static final String GATE_URL_PATTERN = "/api/*";
 
     @Bean
-    public GtidReadGate gtidReadGate(DataSource dataSource) {
-        return new GtidReadGate(dataSource);
+    public GtidReadGate gtidReadGate(DataSource dataSource, MeterRegistry meterRegistry) {
+        return new GtidReadGate(dataSource, meterRegistry);
     }
 
     /**

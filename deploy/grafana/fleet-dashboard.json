@@ -698,12 +698,70 @@
    ]
   },
   {
+   "id": 19,
+   "type": "timeseries",
+   "title": "GTID capture fallback share (read-your-writes cookie)",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+   },
+   "gridPos": {
+    "x": 16,
+    "y": 39,
+    "w": 8,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "sum(rate(gtid_capture_total{source=\"fallback\"}[5m])) by (cluster) / clamp_min(sum(rate(gtid_capture_total[5m])) by (cluster), 1e-9)",
+     "legendFormat": "{{cluster}}"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "percentunit",
+     "max": 1
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 22,
+   "type": "timeseries",
+   "title": "RYW gate \u2014 reads pinned to primary (share)",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 47,
+    "w": 8,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "sum(rate(gtid_gate_total{outcome=\"primary\"}[5m])) by (cluster) / clamp_min(sum(rate(gtid_gate_total[5m])) by (cluster), 1e-9)",
+     "legendFormat": "{{cluster}}"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "percentunit",
+     "max": 1
+    },
+    "overrides": []
+   }
+  },
+  {
    "id": 40,
    "type": "row",
    "title": "Redis",
    "gridPos": {
     "x": 0,
-    "y": 47,
+    "y": 55,
     "w": 24,
     "h": 1
    },
@@ -719,7 +777,7 @@
    },
    "gridPos": {
     "x": 0,
-    "y": 48,
+    "y": 56,
     "w": 8,
     "h": 8
    },
@@ -769,7 +827,7 @@
    },
    "gridPos": {
     "x": 8,
-    "y": 48,
+    "y": 56,
     "w": 8,
     "h": 8
    },
@@ -791,7 +849,7 @@
    },
    "gridPos": {
     "x": 16,
-    "y": 48,
+    "y": 56,
     "w": 8,
     "h": 8
    },
@@ -820,7 +878,7 @@
    },
    "gridPos": {
     "x": 0,
-    "y": 56,
+    "y": 64,
     "w": 8,
     "h": 8
    },
@@ -847,7 +905,7 @@
    },
    "gridPos": {
     "x": 8,
-    "y": 56,
+    "y": 64,
     "w": 8,
     "h": 8
    },
@@ -869,7 +927,7 @@
    },
    "gridPos": {
     "x": 16,
-    "y": 56,
+    "y": 64,
     "w": 8,
     "h": 8
    },
@@ -893,7 +951,7 @@
    "title": "Database",
    "gridPos": {
     "x": 0,
-    "y": 64,
+    "y": 72,
     "w": 24,
     "h": 1
    },
@@ -909,7 +967,7 @@
    },
    "gridPos": {
     "x": 0,
-    "y": 65,
+    "y": 73,
     "w": 8,
     "h": 8
    },
@@ -927,7 +985,7 @@
    "title": "Temp tables \u2014 disk spill vs in-memory (per min)",
    "gridPos": {
     "x": 8,
-    "y": 65,
+    "y": 73,
     "w": 8,
     "h": 8
    },
@@ -961,7 +1019,7 @@
    "title": "Sort pathology (per min)",
    "gridPos": {
     "x": 16,
-    "y": 65,
+    "y": 73,
     "w": 8,
     "h": 8
    },
@@ -1004,7 +1062,7 @@
    },
    "gridPos": {
     "x": 0,
-    "y": 73,
+    "y": 81,
     "w": 8,
     "h": 8
    },
@@ -1057,7 +1115,7 @@
    },
    "gridPos": {
     "x": 8,
-    "y": 73,
+    "y": 81,
     "w": 8,
     "h": 8
    },
@@ -1112,7 +1170,7 @@
    "title": "Row reads \u2014 scan share (read_rnd_next / all handler reads)",
    "gridPos": {
     "x": 16,
-    "y": 73,
+    "y": 81,
     "w": 8,
     "h": 8
    },
@@ -1145,7 +1203,7 @@
    },
    "gridPos": {
     "x": 0,
-    "y": 81,
+    "y": 89,
     "w": 24,
     "h": 9
    },
@@ -1171,7 +1229,7 @@
    },
    "gridPos": {
     "x": 0,
-    "y": 90,
+    "y": 98,
     "w": 24,
     "h": 8
    },
@@ -1224,7 +1282,7 @@
    },
    "gridPos": {
     "x": 0,
-    "y": 98,
+    "y": 106,
     "w": 24,
     "h": 10
    },
@@ -1250,7 +1308,7 @@
    },
    "gridPos": {
     "x": 0,
-    "y": 108,
+    "y": 116,
     "w": 12,
     "h": 8
    },
@@ -1295,7 +1353,7 @@
    },
    "gridPos": {
     "x": 12,
-    "y": 108,
+    "y": 116,
     "w": 12,
     "h": 8
    },
