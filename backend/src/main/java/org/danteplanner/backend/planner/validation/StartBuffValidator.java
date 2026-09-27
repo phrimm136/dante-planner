@@ -2,6 +2,7 @@ package org.danteplanner.backend.planner.validation;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
+import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
@@ -21,7 +22,18 @@ class StartBuffValidator {
 
     private final GameDataRegistry gameDataRegistry;
 
-    void validateStartBuffIds(JsonNode root, ValidationContext context) {
+    boolean validateSeasonExists(int version, ValidationContext context) {
+        if (gameDataRegistry.hasSeason(version)) {
+            return true;
+        }
+
+        context.reject("content version", p -> new PlannerValidationException(
+                ErrorCode.UNKNOWN_CONTENT_VERSION.getCode(),
+                "No game data for content version " + version));
+        return false;
+    }
+
+    void validateStartBuffIds(JsonNode root, int version, ValidationContext context) {
         JsonNode buffIds = arrayField(root, "selectedBuffIds");
 
         if (buffIds.size() > MAX_START_BUFFS) {
@@ -33,7 +45,7 @@ class StartBuffValidator {
         Set<Integer> seenBaseIds = new HashSet<>();
 
         eachNumber(buffIds, "selectedBuffIds", context, (buffId, index) -> {
-            if (!validateBuffIsKnown(buffId, context)) {
+            if (!validateBuffIsKnown(version, buffId, context)) {
                 return;
             }
 
@@ -41,12 +53,13 @@ class StartBuffValidator {
         });
     }
 
-    private boolean validateBuffIsKnown(int buffId, ValidationContext context) {
-        if (gameDataRegistry.hasStartBuff(String.valueOf(buffId))) {
+    private boolean validateBuffIsKnown(int version, int buffId, ValidationContext context) {
+        if (gameDataRegistry.hasStartBuff(version, String.valueOf(buffId))) {
             return true;
         }
 
-        context.reject("selectedBuffIds", p -> ValidationErrors.invalidIdReference(p, String.valueOf(buffId)));
+        context.reject("selectedBuffIds",
+                p -> ValidationErrors.unknownId(ErrorCode.START_BUFF_UNKNOWN_ID, p, String.valueOf(buffId)));
         return false;
     }
 
@@ -65,7 +78,7 @@ class StartBuffValidator {
         }
     }
 
-    void validateStartGiftIds(JsonNode root, ValidationContext context) {
+    void validateStartGiftIds(JsonNode root, int version, ValidationContext context) {
         JsonNode keywordNode = root.path("selectedGiftKeyword");
         JsonNode giftIds = arrayField(root, "selectedGiftIds");
 
@@ -76,11 +89,11 @@ class StartBuffValidator {
 
         String keyword = keywordNode.asText();
 
-        if (!validateKeywordIsKnown(keyword, context)) {
+        if (!validateKeywordIsKnown(version, keyword, context)) {
             return;
         }
 
-        validateGiftsAreInKeywordPool(keyword, giftIds, context);
+        validateGiftsAreInKeywordPool(version, keyword, giftIds, context);
     }
 
     private void validateGiftsWaitForTheirKeyword(JsonNode giftIds, ValidationContext context) {
@@ -92,8 +105,8 @@ class StartBuffValidator {
                 p -> ValidationErrors.invalidSequence(p + " requires selectedGiftKeyword"));
     }
 
-    private boolean validateKeywordIsKnown(String keyword, ValidationContext context) {
-        if (gameDataRegistry.hasStartGiftKeyword(keyword)) {
+    private boolean validateKeywordIsKnown(int version, String keyword, ValidationContext context) {
+        if (gameDataRegistry.hasStartGiftKeyword(version, keyword)) {
             return true;
         }
 
@@ -101,8 +114,9 @@ class StartBuffValidator {
         return false;
     }
 
-    private void validateGiftsAreInKeywordPool(String keyword, JsonNode giftIds, ValidationContext context) {
-        Set<String> pool = gameDataRegistry.getStartGiftPool(keyword);
+    private void validateGiftsAreInKeywordPool(int version, String keyword, JsonNode giftIds,
+                                               ValidationContext context) {
+        Set<String> pool = gameDataRegistry.getStartGiftPool(version, keyword);
 
         eachUniqueString(giftIds, "selectedGiftIds", context, (giftId, index) -> {
             if (!pool.contains(giftId)) {

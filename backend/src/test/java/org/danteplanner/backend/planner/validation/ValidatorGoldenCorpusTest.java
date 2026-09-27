@@ -75,9 +75,9 @@ class ValidatorGoldenCorpusTest {
                 new EquipmentValidator(),
                 new SkillStateValidator(),
                 idReferenceValidator,
-                new StartBuffValidator(registry));
-        versionValidator = new ContentVersionValidator(
-                ValidatorGoldenCorpus.MD_CURRENT_VERSION, ValidatorGoldenCorpus.RR_AVAILABLE_VERSIONS);
+                new StartBuffValidator(registry),
+                registry);
+        versionValidator = new ContentVersionValidator(registry);
     }
 
     /**
@@ -106,7 +106,7 @@ class ValidatorGoldenCorpusTest {
         ValidatorGoldenCorpus.ContentEntry entry = CONTENT_ENTRIES.get(name);
 
         assertThat(outcomeOf(() -> contentValidator.validate(
-                entry.content(), entry.category(), entry.policy())))
+                entry.content(), entry.category(), ValidatorGoldenCorpus.MD_CURRENT_VERSION, entry.policy())))
                 .as(OUTPUT_CHANGED, name)
                 .isEqualTo(snapshot().get(name));
     }
@@ -142,7 +142,7 @@ class ValidatorGoldenCorpusTest {
         StringBuilder file = new StringBuilder();
         for (ValidatorGoldenCorpus.ContentEntry entry : ValidatorGoldenCorpus.contentEntries()) {
             appendSection(file, entry.name(), outcomeOf(() -> contentValidator.validate(
-                    entry.content(), entry.category(), entry.policy())));
+                    entry.content(), entry.category(), ValidatorGoldenCorpus.MD_CURRENT_VERSION, entry.policy())));
         }
         for (ValidatorGoldenCorpus.VersionEntry entry : ValidatorGoldenCorpus.versionEntries()) {
             appendSection(file, entry.name(), outcomeOf(() -> versionValidator.validateVersionForCreate(
@@ -366,6 +366,17 @@ class ValidatorGoldenCorpusTest {
                 case "startBuffs.json" -> ValidatorGoldenCorpus.START_BUFF_IDS;
                 default -> throw new IllegalStateException("no fixture for " + filePath);
             };
+        }
+
+        @Override
+        public PlannerVersions loadPlannerVersions(Path filePath) {
+            return new PlannerVersions(ValidatorGoldenCorpus.SCHEMA_VERSION,
+                    List.of(ValidatorGoldenCorpus.MD_CURRENT_VERSION), ValidatorGoldenCorpus.RR_AVAILABLE_VERSIONS);
+        }
+
+        @Override
+        public Path seasonDirectory(Path dataDir, int version) {
+            return dataDir.resolve(SEASON_DIRECTORY_PREFIX + version);
         }
 
         @Override

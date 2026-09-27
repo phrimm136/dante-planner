@@ -17,11 +17,13 @@ import org.danteplanner.backend.planner.entity.PlannerModeration;
 import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
+import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.validation.CarriedWrite;
 import org.danteplanner.backend.planner.validation.ContentVersionValidator;
+import org.danteplanner.backend.planner.validation.GameDataRegistry;
 import org.danteplanner.backend.planner.validation.PlannerCategoryValidator;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
 import org.danteplanner.backend.planner.validation.PlannerLimitValidator;
@@ -97,7 +99,27 @@ public class PlannerCommandService {
             SyncVersionValidator syncVersionValidator,
             Optional<ContentTombstoneStore> tombstoneStore,
             @Value("${planner.max-per-user}") int maxPlannersPerUser,
-            @Value("${planner.schema-version}") int currentSchemaVersion) {
+            GameDataRegistry gameDataRegistry) {
+        this(plannerRepository, statsRepository, contentValidator, contentVersionValidator,
+                plannerCatalogService, accessGuard, categoryValidator, limitValidator, ownershipValidator,
+                syncVersionValidator, tombstoneStore,
+                maxPlannersPerUser, gameDataRegistry.plannerVersions().schemaVersion());
+    }
+
+    private PlannerCommandService(
+            PlannerRepository plannerRepository,
+            PlannerStatsRepository statsRepository,
+            PlannerContentValidator contentValidator,
+            ContentVersionValidator contentVersionValidator,
+            PlannerCatalogService plannerCatalogService,
+            PlannerAccessGuard accessGuard,
+            PlannerCategoryValidator categoryValidator,
+            PlannerLimitValidator limitValidator,
+            PlannerOwnershipValidator ownershipValidator,
+            SyncVersionValidator syncVersionValidator,
+            Optional<ContentTombstoneStore> tombstoneStore,
+            int maxPlannersPerUser,
+            int currentSchemaVersion) {
         this.plannerRepository = plannerRepository;
         this.statsRepository = statsRepository;
         this.contentValidator = contentValidator;
@@ -122,11 +144,13 @@ public class PlannerCommandService {
             applyCategory(planner, request.category());
         }
 
-        if (request.content() != null) {
-            applyContent(planner, request.content());
-        } else if (categoryChanged) {
-            contentValidator.validate(contentRow.getContent(), contentRow.getCategory(),
-                    ValidationPolicy.forPublicationState(planner.isPublished()));
+        boolean categoryOnly = categoryChanged && request.content() != null
+                && contentValidator.isSameDocument(request.content(), contentRow.getContent());
+        if (request.content() != null && !categoryOnly) {
+            int version = request.contentVersion() != null
+                    ? request.contentVersion()
+                    : contentRow.getGameContentVersion();
+            applyContent(planner, request.content(), version);
         }
 
         applyKeywordsAndDeviceId(contentRow, request.selectedKeywords(), deviceId);
@@ -140,7 +164,7 @@ public class PlannerCommandService {
             applyCategory(planner, request.category());
         }
         if (request.content() != null) {
-            applyContent(planner, request.content());
+            applyContent(planner, request.content(), contentRow.getGameContentVersion());
         }
 
         applyKeywordsAndDeviceId(contentRow, request.selectedKeywords(), deviceId);
@@ -160,11 +184,10 @@ public class PlannerCommandService {
         planner.getContent().setCategory(category);
     }
 
-    private void applyContent(Planner planner, String content) {
+    private void applyContent(Planner planner, String content, int version) {
         PlannerContent contentRow = planner.getContent();
-        contentValidator.validate(content, contentRow.getCategory(),
-                ValidationPolicy.forPublicationState(planner.isPublished()));
-        contentRow.setContent(content);
+        contentRow.setContent(contentValidator.validate(content, contentRow.getCategory(), version,
+                ValidationPolicy.forPublicationState(planner.isPublished())));
     }
 
     private void applyKeywordsAndDeviceId(PlannerContent contentRow, Set<String> selectedKeywords, UUID deviceId) {
@@ -176,11 +199,7 @@ public class PlannerCommandService {
         }
     }
 
-    private Planner buildAggregate(UUID id, User user, UpsertPlannerRequest request) {
-        return buildAggregate(id, user, request, null);
-    }
-
-    private Planner buildAggregate(UUID id, User user, UpsertPlannerRequest request, UUID deviceId) {
+    private Planner buildAggregate(UUID id, User user, UpsertPlannerRequest request, String content, UUID deviceId) {
         Planner planner = Planner.builder()
                 .id(id)
                 .user(user)
@@ -194,7 +213,7 @@ public class PlannerCommandService {
                         .selectedKeywords(request.selectedKeywords() != null
                                 ? PlannerKeywords.fromClient(request.selectedKeywords()).asSet()
                                 : null)
-                        .content(request.content())
+                        .content(content)
                         .gameContentVersion(request.contentVersion())
                         .deviceId(deviceId)
                         .build(),
@@ -217,10 +236,10 @@ public class PlannerCommandService {
 
         categoryValidator.requireCategoryForType(request.plannerType(), request.category());
 
-        contentValidator.validate(request.content(), request.category());
+        String content = contentValidator.validate(request.content(), request.category(), request.contentVersion());
 
         Planner saved = plannerRepository.insert(
-                buildAggregate(UUID.fromString(request.id()), user, request, deviceId));
+                buildAggregate(UUID.fromString(request.id()), user, request, content, deviceId));
         statsRepository.insert(PlannerStats.builder().plannerId(saved.getId()).build());
         log.info("Created planner {} for user {}", saved.getId(), userId);
 
@@ -372,26 +391,40 @@ public class PlannerCommandService {
                 plannerRepository.countActiveByUserId(userId), requestedCount, maxPlannersPerUser);
 
         List<PlannerSummaryResponse> importedPlanners = new ArrayList<>();
+        List<ImportPlannersResponse.SkippedPlanner> skippedPlanners = new ArrayList<>();
 
         for (UpsertPlannerRequest plannerRequest : request.planners()) {
-            contentVersionValidator.validateVersionForCreate(plannerRequest.plannerType(), plannerRequest.contentVersion());
-
-            categoryValidator.requireCategoryForType(plannerRequest.plannerType(), plannerRequest.category());
-
-            contentValidator.validate(plannerRequest.content(), plannerRequest.category());
+            String content;
+            try {
+                content = validateImported(plannerRequest);
+            } catch (PlannerValidationException ex) {
+                skippedPlanners.add(ImportPlannersResponse.SkippedPlanner.from(plannerRequest, ex));
+                continue;
+            }
 
             Planner saved = plannerRepository.insert(
-                    buildAggregate(UUID.randomUUID(), user, plannerRequest));
+                    buildAggregate(UUID.randomUUID(), user, plannerRequest, content, null));
             statsRepository.insert(PlannerStats.builder().plannerId(saved.getId()).build());
             importedPlanners.add(PlannerSummaryResponse.fromEntity(saved));
         }
 
-        log.info("Imported {} planners for user {}", importedPlanners.size(), userId);
+        log.info("Imported {} planners for user {}, skipped {}",
+                importedPlanners.size(), userId, skippedPlanners.size());
 
         return ImportPlannersResponse.builder()
                 .imported(importedPlanners.size())
                 .total(requestedCount)
                 .planners(importedPlanners)
+                .skipped(skippedPlanners)
                 .build();
+    }
+
+    private String validateImported(UpsertPlannerRequest plannerRequest) {
+        contentVersionValidator.validateVersionForCreate(plannerRequest.plannerType(), plannerRequest.contentVersion());
+
+        categoryValidator.requireCategoryForType(plannerRequest.plannerType(), plannerRequest.category());
+
+        return contentValidator.validate(
+                plannerRequest.content(), plannerRequest.category(), plannerRequest.contentVersion());
     }
 }

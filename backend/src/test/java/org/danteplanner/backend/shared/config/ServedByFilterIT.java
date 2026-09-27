@@ -50,7 +50,7 @@ class ServedByFilterIT extends SharedMySqlContainerSupport {
 
     @Test
     void servedBy_WhenRequestSucceeds_AppearsExactlyOnce() throws Exception {
-        mockMvc.perform(get("/api/planner/md/config"))
+        mockMvc.perform(get("/api/planner/md/recommended"))
                 .andExpect(status().isOk())
                 .andExpect(header().stringValues(ServedByFilter.SERVED_BY_HEADER, contains(region)));
     }

@@ -88,7 +88,6 @@ public class SecurityConfig {
                 .requestMatchers("/actuator/health/liveness").permitAll()
                 .requestMatchers("/actuator/prometheus").permitAll()
 
-                .requestMatchers("/api/planner/md/config").permitAll()
                 .requestMatchers("/api/planner/md/published").permitAll()
                 .requestMatchers("/api/planner/md/published/{id}").permitAll()
                 .requestMatchers("/api/planner/md/recommended").permitAll()

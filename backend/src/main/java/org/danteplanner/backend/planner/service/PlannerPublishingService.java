@@ -87,7 +87,11 @@ public class PlannerPublishingService {
         ownershipValidator.requireOwner(planner, userId);
 
         publishValidator.requireTitle(planner.getTitle());
-        contentValidator.validate(planner.getContentJson(), planner.getCategory(), ValidationPolicy.PUBLISH);
+        String normalized = contentValidator.validate(planner.getContentJson(), planner.getCategory(),
+                planner.getContentVersion(), ValidationPolicy.PUBLISH);
+        if (!normalized.equals(planner.getContentJson())) {
+            planner.getContent().setContent(normalized);
+        }
 
         PublicationChange change = planner.publish();
         if (!change.changed()) {

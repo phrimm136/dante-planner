@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.IntFunction;
 
 import static org.danteplanner.backend.planner.validation.JsonTraversal.arrayField;
@@ -83,7 +82,7 @@ class IdReferenceValidator {
             return true;
         }
 
-        context.reject("identity", p -> ValidationErrors.invalidIdReference(p, identityId));
+        context.reject("identity", p -> ValidationErrors.unknownId(ErrorCode.IDENTITY_UNKNOWN_ID, p, identityId));
         return false;
     }
 
@@ -155,7 +154,7 @@ class IdReferenceValidator {
             return true;
         }
 
-        context.reject("EGO", p -> ValidationErrors.invalidIdReference(p, egoId));
+        context.reject("EGO", p -> ValidationErrors.unknownId(ErrorCode.EGO_UNKNOWN_ID, p, egoId));
         return false;
     }
 
@@ -222,7 +221,7 @@ class IdReferenceValidator {
     private void validateGiftIdArray(JsonNode root, String fieldName, ValidationContext context) {
         eachUniqueString(arrayField(root, fieldName), fieldName, context, (giftId, index) -> {
             if (!gameDataRegistry.hasEgoGift(giftId)) {
-                context.reject(fieldName, p -> ValidationErrors.invalidIdReference(p, giftId));
+                context.reject(fieldName, p -> ValidationErrors.unknownId(ErrorCode.GIFT_UNKNOWN_ID, p, giftId));
             }
         });
     }
@@ -236,7 +235,7 @@ class IdReferenceValidator {
             JsonNode themePackNode = floor.path("themePackId");
             boolean themePackChosen = themePackNode.isTextual();
 
-            if (!validateThemePackPresence(floorPath, themePackNode, themePackChosen, context)) {
+            if (!validateThemePackPresence(floorPath, themePackNode, context)) {
                 return;
             }
 
@@ -246,25 +245,23 @@ class IdReferenceValidator {
         });
     }
 
-    private boolean validateThemePackPresence(String floorPath, JsonNode themePackNode, boolean themePackChosen,
-                                              ValidationContext context) {
-        boolean publishable = context.policy().requiresPublishableContent();
+    private boolean validateThemePackPresence(String floorPath, JsonNode themePackNode, ValidationContext context) {
+        String themePackId = themePackNode.isTextual() ? themePackNode.asText() : "";
 
-        if (!themePackChosen) {
-            if (!publishable) {
+        if (themePackId.isEmpty()) {
+            if (!context.policy().requiresPublishableContent()) {
                 return true;
             }
-            context.reject(floorPath + ".themePackId", p -> ValidationErrors.missingRequiredField(Set.of(p)));
+            context.reject(floorPath, ValidationErrors::floorMissingThemePack);
             return false;
         }
 
-        String themePackId = themePackNode.asText();
-        boolean known = !themePackId.isEmpty() && gameDataRegistry.hasThemePack(themePackId);
-        if (known || (!publishable && themePackId.isEmpty())) {
+        if (gameDataRegistry.hasThemePack(themePackId)) {
             return true;
         }
 
-        context.reject(floorPath + ".themePackId", p -> ValidationErrors.invalidIdReference(p, themePackId));
+        context.reject(floorPath + ".themePackId",
+                p -> ValidationErrors.unknownId(ErrorCode.THEME_PACK_UNKNOWN_ID, p, themePackId));
         return false;
     }
 
@@ -322,7 +319,7 @@ class IdReferenceValidator {
             return true;
         }
 
-        context.reject(giftsPath, p -> ValidationErrors.invalidIdReference(p, giftId));
+        context.reject(giftsPath, p -> ValidationErrors.unknownId(ErrorCode.FLOOR_UNKNOWN_GIFT_ID, p, giftId));
         return false;
     }
 

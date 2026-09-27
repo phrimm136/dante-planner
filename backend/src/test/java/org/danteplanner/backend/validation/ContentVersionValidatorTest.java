@@ -1,5 +1,7 @@
 package org.danteplanner.backend.validation;
 import org.danteplanner.backend.planner.validation.ContentVersionValidator;
+import org.danteplanner.backend.planner.validation.GameDataRegistry;
+import org.danteplanner.backend.planner.validation.PlannerVersions;
 
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
@@ -8,7 +10,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for ContentVersionValidator.
@@ -17,12 +23,13 @@ class ContentVersionValidatorTest {
 
     private ContentVersionValidator validator;
 
-    private static final int MD_CURRENT_VERSION = 7;
-    private static final String RR_AVAILABLE_VERSIONS_RAW = "1,5";
+    private static final PlannerVersions PLANNER_VERSIONS = new PlannerVersions(2, List.of(6, 7), List.of(1, 5));
 
     @BeforeEach
     void setUp() {
-        validator = new ContentVersionValidator(MD_CURRENT_VERSION, RR_AVAILABLE_VERSIONS_RAW);
+        GameDataRegistry registry = mock(GameDataRegistry.class);
+        when(registry.plannerVersions()).thenReturn(PLANNER_VERSIONS);
+        validator = new ContentVersionValidator(registry);
     }
 
     @Nested
@@ -89,17 +96,27 @@ class ContentVersionValidatorTest {
     }
 
     @Nested
-    @DisplayName("Constructor Edge Cases")
-    class ConstructorTests {
+    @DisplayName("Versions from plannerVersions.json")
+    class PlannerVersionsFileTests {
 
         @Test
-        @DisplayName("Should fail fast with clear error for non-numeric versions")
-        void constructor_WhenInvalidVersionFormat_ThrowsIllegalArgumentException() {
-            IllegalArgumentException ex = assertThrows(
-                    IllegalArgumentException.class,
-                    () -> new ContentVersionValidator(6, "1,five,8")
+        @DisplayName("MD: rejects a listed season that is not the last one")
+        void validateVersionForCreate_WhenMdVersionIsAnEarlierListedSeason_ThrowsInvalidContentVersion() {
+            PlannerValidationException ex = assertThrows(
+                    PlannerValidationException.class,
+                    () -> validator.validateVersionForCreate(PlannerType.MIRROR_DUNGEON, 6)
             );
-            assertTrue(ex.getMessage().contains("Invalid version list format"));
+            assertEquals("INVALID_CONTENT_VERSION", ex.getOriginalCode());
+        }
+
+        @Test
+        @DisplayName("RR: rejects a version between the listed ones")
+        void validateVersionForCreate_WhenRrVersionIsNotListed_ThrowsInvalidContentVersion() {
+            PlannerValidationException ex = assertThrows(
+                    PlannerValidationException.class,
+                    () -> validator.validateVersionForCreate(PlannerType.REFRACTED_RAILWAY, 2)
+            );
+            assertEquals("INVALID_CONTENT_VERSION", ex.getOriginalCode());
         }
     }
 

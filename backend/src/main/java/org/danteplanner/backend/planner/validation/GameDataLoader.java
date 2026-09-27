@@ -22,7 +22,50 @@ import java.util.function.BiConsumer;
 @Slf4j
 public class GameDataLoader {
 
+    static final String SEASON_DIRECTORY_PREFIX = "MD";
+
     private final ObjectMapper objectMapper;
+
+    public PlannerVersions loadPlannerVersions(Path filePath) {
+        if (!Files.exists(filePath)) {
+            throw new IllegalStateException("Planner versions file not found: " + filePath);
+        }
+
+        JsonNode root;
+        try {
+            root = objectMapper.readTree(Files.readString(filePath));
+        } catch (IOException e) {
+            throw new GameDataLoadException(filePath, e);
+        }
+
+        try {
+            return PlannerVersions.parse(root);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalStateException("Invalid planner versions file " + filePath + ": " + e.getMessage(), e);
+        }
+    }
+
+    public Path seasonDirectory(Path dataDir, int version) {
+        Path seasonDir = dataDir.resolve(SEASON_DIRECTORY_PREFIX + version);
+        if (!Files.isDirectory(seasonDir)) {
+            throw new IllegalStateException("Season " + version + " is listed in "
+                    + GameDataRegistry.PLANNER_VERSIONS_FILE + " but has no data directory: " + seasonDir);
+        }
+        return seasonDir;
+    }
+
+    public PlannerIdMigrations loadIdMigrations(Path filePath) {
+        if (!Files.exists(filePath)) {
+            log.info("No id migration table at {}; normalizing with an empty table", filePath);
+            return PlannerIdMigrations.EMPTY;
+        }
+
+        try {
+            return PlannerIdMigrations.parse(objectMapper.readTree(Files.readString(filePath)));
+        } catch (IOException | IllegalArgumentException e) {
+            throw new GameDataLoadException(filePath, e);
+        }
+    }
 
     public Set<String> loadKeysFromFile(Path filePath) {
         Set<String> keys = new HashSet<>();

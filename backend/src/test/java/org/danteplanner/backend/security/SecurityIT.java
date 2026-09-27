@@ -142,12 +142,12 @@ class SecurityIT extends SharedMySqlContainerSupport {
         @Test
         @DisplayName("Should allow actual GET request after successful preflight")
         void actualRequest_WhenPreflightSucceeded_Works() throws Exception {
-            mockMvc.perform(options("/api/planner/md/config")
+            mockMvc.perform(options("/api/planner/md/recommended")
                             .header("Origin", "http://localhost:5173")
                             .header("Access-Control-Request-Method", "GET"))
                     .andExpect(status().isOk());
 
-            mockMvc.perform(get("/api/planner/md/config")
+            mockMvc.perform(get("/api/planner/md/recommended")
                             .header("Origin", "http://localhost:5173"))
                     .andExpect(status().isOk())
                     .andExpect(header().exists("Access-Control-Allow-Origin"));
@@ -185,7 +185,7 @@ class SecurityIT extends SharedMySqlContainerSupport {
         @Test
         @DisplayName("Should return 200 for public endpoint without authentication")
         void publicEndpoint_WhenNoAuth_Returns200() throws Exception {
-            mockMvc.perform(get("/api/planner/md/config"))
+            mockMvc.perform(get("/api/planner/md/recommended"))
                     .andExpect(status().isOk());
         }
 

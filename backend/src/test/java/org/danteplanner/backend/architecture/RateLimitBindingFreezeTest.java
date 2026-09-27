@@ -68,7 +68,6 @@ class RateLimitBindingFreezeTest {
             "PlannerCommandController.importPlanners -> IMPORT (RESPOND)",
             "PlannerCommandController.upsertPlanner -> CRUD:upsert (RESPOND)",
             "PlannerCommentSseController.subscribeToComments -> PLANNER_COMMENT_SSE (RESPOND)",
-            "PlannerController.getConfig -> PUBLIC_READ (RESPOND)",
             "PlannerEngagementController.castUpvote -> CRUD:vote (RESPOND)",
             "PlannerEngagementController.submitReport -> REPORT (RESPOND)",
             "PlannerEngagementController.toggleSubscription -> CRUD:subscribe (RESPOND)",

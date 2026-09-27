@@ -1,4 +1,6 @@
 package org.danteplanner.backend.service;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
@@ -25,6 +27,7 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
+import org.danteplanner.backend.planner.validation.PlannerIdMigrations;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,13 +39,17 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -110,6 +117,7 @@ class PlannerPublishingServiceTest {
         testUser = TestDataFactory.unsavedUser(1L);
 
         when(userService.findById(testUser.getId())).thenReturn(testUser);
+        when(contentValidator.validate(any(), any(), anyInt(), any())).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     private TestDataFactory.PlannerBuilder testPlannerBuilder() {
@@ -148,6 +156,48 @@ class PlannerPublishingServiceTest {
 
             assertFalse(result.published());
             verify(plannerCatalogService, never()).onBecameInvisible(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("publish normalization Tests")
+    class PublishNormalizationTests {
+
+        private final ObjectMapper mapper = new ObjectMapper();
+
+        @Test
+        @DisplayName("publishing stored content that holds a renamed gift stores the replacement id")
+        void publish_WhenStoredContentHoldsARenamedGift_StoresTheNewId() throws Exception {
+            PlannerIdMigrations table = PlannerIdMigrations.parse(
+                    mapper.readTree("{\"egoGift\":{\"rename\":{\"9247\":\"9002\"}}}"));
+            String stored = TestDataFactory.VALID_CONTENT.replace(
+                    "\"selectedGiftIds\":[\"9001\"]", "\"selectedGiftIds\":[\"9001\"],\"observationGiftIds\":[\"19247\"]");
+            Planner planner = testPlannerBuilder().published(false).content(stored).build();
+            when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            when(contentValidator.validate(eq(stored), any(), anyInt(), eq(ValidationPolicy.PUBLISH)))
+                    .thenAnswer(invocation -> table.normalize(mapper.readTree(stored)).toString());
+            List<String> indexedContent = new ArrayList<>();
+            doAnswer(invocation -> indexedContent.add(((Planner) invocation.getArgument(0)).getContentJson()))
+                    .when(plannerCatalogService).onBecameVisible(any());
+
+            publishingService.publish(testUser.getId(), planner.getId());
+
+            JsonNode published = mapper.readTree(planner.getContentJson());
+            assertEquals(mapper.createArrayNode().add("19002"), published.path("observationGiftIds"));
+            assertEquals(List.of(planner.getContentJson()), indexedContent);
+            assertTrue(planner.isPublished());
+        }
+
+        @Test
+        @DisplayName("publishing content no migration touches leaves the stored string as it was")
+        void publish_WhenNothingIsMigrated_KeepsTheStoredString() {
+            Planner planner = testPlannerBuilder().published(false).build();
+            String stored = planner.getContentJson();
+            when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+
+            publishingService.publish(testUser.getId(), planner.getId());
+
+            assertSame(stored, planner.getContentJson());
         }
     }
 
@@ -514,7 +564,7 @@ class PlannerPublishingServiceTest {
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
             doThrow(new PlannerValidationException("EMPTY_CONTENT", "Content is required"))
                     .when(contentValidator)
-                    .validate(any(), any(), eq(ValidationPolicy.PUBLISH));
+                    .validate(any(), any(), anyInt(), eq(ValidationPolicy.PUBLISH));
 
             assertThrows(
                     PlannerValidationException.class,

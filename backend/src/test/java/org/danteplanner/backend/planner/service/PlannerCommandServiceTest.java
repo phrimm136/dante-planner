@@ -6,7 +6,6 @@ import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.ImportPlannersResponse;
 import org.danteplanner.backend.planner.dto.ImportPlannersRequest;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.planner.dto.PlannerSummaryResponse;
 import org.danteplanner.backend.planner.entity.Planner;
@@ -91,8 +90,7 @@ class PlannerCommandServiceTest {
     @Value("${planner.max-per-user}")
     private int maxPlannersPerUser;
 
-    @Value("${planner.schema-version}")
-    private int currentSchemaVersion;
+    private static final int CURRENT_SCHEMA_VERSION = 2;
 
     private User testUser;
     private UUID deviceId;
@@ -115,7 +113,7 @@ class PlannerCommandServiceTest {
                 new PlannerOwnershipValidator(),
                 new SyncVersionValidator(new EffectiveNoOpPredicate(new ObjectMapper())),
                 maxPlannersPerUser,
-                currentSchemaVersion
+                CURRENT_SCHEMA_VERSION
         );
 
         testUser = TestDataFactory.unsavedUser(1L);
@@ -123,6 +121,8 @@ class PlannerCommandServiceTest {
         deviceId = UUID.randomUUID();
 
         when(userService.findById(testUser.getId())).thenReturn(testUser);
+        when(contentValidator.validate(any(), any(), anyInt())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(contentValidator.validate(any(), any(), anyInt(), any())).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     private UpsertPlannerRequest createValidRequest() {
@@ -146,6 +146,11 @@ class PlannerCommandServiceTest {
     private UpsertPlannerRequest withContentVersion(UpsertPlannerRequest r, Integer contentVersion) {
         return new UpsertPlannerRequest(r.id(), r.category(), r.title(), r.status(),
                 r.content(), contentVersion, r.plannerType(), r.syncVersion(), r.selectedKeywords());
+    }
+
+    private UpsertPlannerRequest withContent(UpsertPlannerRequest r, String content) {
+        return new UpsertPlannerRequest(r.id(), r.category(), r.title(), r.status(),
+                content, r.contentVersion(), r.plannerType(), r.syncVersion(), r.selectedKeywords());
     }
 
     private Planner testPlanner(long syncVersion, boolean published) {
@@ -227,7 +232,6 @@ class PlannerCommandServiceTest {
             UpsertPlannerRequest request = createValidRequest();
             Long nonExistentUserId = 999L;
             when(plannerRepository.countActiveByUserId(nonExistentUserId)).thenReturn(0L);
-            when(contentValidator.validate(anyString(), anyString())).thenReturn(mock(JsonNode.class));
             when(userService.findById(nonExistentUserId)).thenThrow(new UserNotFoundException(nonExistentUserId));
 
             // Act & Assert
@@ -248,7 +252,6 @@ class PlannerCommandServiceTest {
             UpsertPlannerRequest request = withTitle(createValidRequest(), null);
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(0L);
             when(userService.findById(testUser.getId())).thenReturn(testUser);
-            when(contentValidator.validate(anyString(), anyString())).thenReturn(mock(JsonNode.class));
 
             ArgumentCaptor<Planner> plannerCaptor = ArgumentCaptor.forClass(Planner.class);
             when(plannerRepository.insert(plannerCaptor.capture())).thenAnswer(invocation -> {
@@ -274,7 +277,7 @@ class PlannerCommandServiceTest {
             when(userService.findById(testUser.getId())).thenReturn(testUser);
             // Only this exact content-and-category pair is rejected, so a validation call carrying
             // anything else leaves the stub unmatched and the create completes without throwing.
-            when(contentValidator.validate(request.content(), request.category()))
+            when(contentValidator.validate(request.content(), request.category(), request.contentVersion()))
                     .thenThrow(new PlannerValidationException("INVALID_CONTENT", "Rejected content"));
 
             // Act & Assert
@@ -304,7 +307,7 @@ class PlannerCommandServiceTest {
 
             assertEquals("INVALID_CONTENT_VERSION", exception.getOriginalCode());
             verify(plannerRepository, never()).insert(any());
-            verify(contentValidator, never()).validate(anyString(), anyString());
+            verify(contentValidator, never()).validate(anyString(), anyString(), anyInt());
         }
     }
 
@@ -384,7 +387,7 @@ class PlannerCommandServiceTest {
                     .thenReturn(Optional.of(planner));
             // A request without a category must validate against the planner's own. Only that exact
             // triple is rejected, so any other combination leaves the stub unmatched and succeeds.
-            when(contentValidator.validate(request.content(), planner.getCategory(),
+            when(contentValidator.validate(request.content(), planner.getCategory(), planner.getContentVersion(),
                     ValidationPolicy.forPublicationState(planner.isPublished())))
                     .thenThrow(new PlannerValidationException("INVALID_CONTENT", "Rejected content"));
 
@@ -419,6 +422,65 @@ class PlannerCommandServiceTest {
             // Assert
             assertEquals("New Title", response.title());
             assertEquals(PlannerStatus.DRAFT, response.status()); // Original status preserved
+        }
+    }
+
+    @Nested
+    @DisplayName("upsertPlanner category Tests")
+    class UpsertCategoryTests {
+
+        private UpsertPlannerRequest resending(Planner planner, String category, String content) {
+            return new UpsertPlannerRequest(planner.getId().toString(), category, planner.getTitle(), null,
+                    content, null, PlannerType.MIRROR_DUNGEON, planner.getSyncVersion(), null);
+        }
+
+        @Test
+        @DisplayName("A category change resending the stored content does not re-validate it")
+        void upsertPlanner_WhenOnlyTheCategoryChanges_SkipsContentValidation() {
+            Planner planner = createTestPlanner();
+            String stored = planner.getContentJson();
+            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+                    .thenReturn(Optional.of(planner));
+            when(contentValidator.isSameDocument(stored, stored)).thenReturn(true);
+
+            UpsertResult result = commandService.upsertPlanner(
+                    testUser.getId(), deviceId, planner.getId(), resending(planner, "10F", stored), false);
+
+            assertEquals("10F", result.response().category());
+            assertEquals(stored, planner.getContentJson());
+            verify(contentValidator, never()).validate(any(), any(), anyInt(), any());
+        }
+
+        @Test
+        @DisplayName("A category change carrying edited content validates the content")
+        void upsertPlanner_WhenCategoryAndContentChange_ValidatesTheContent() {
+            Planner planner = createTestPlanner();
+            String edited = "{\"edited\": true}";
+            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+                    .thenReturn(Optional.of(planner));
+
+            commandService.upsertPlanner(
+                    testUser.getId(), deviceId, planner.getId(), resending(planner, "10F", edited), false);
+
+            verify(contentValidator).validate(edited, "10F", planner.getContentVersion(),
+                    ValidationPolicy.forPublicationState(false));
+        }
+
+        @Test
+        @DisplayName("Resending the stored content without a category change still validates it")
+        void upsertPlanner_WhenCategoryIsUnchanged_ValidatesTheContent() {
+            Planner planner = createTestPlanner();
+            String stored = planner.getContentJson();
+            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+                    .thenReturn(Optional.of(planner));
+            when(contentValidator.isSameDocument(stored, stored)).thenReturn(true);
+            UpsertPlannerRequest retitled = new UpsertPlannerRequest(planner.getId().toString(), "5F", "Renamed",
+                    null, stored, null, PlannerType.MIRROR_DUNGEON, planner.getSyncVersion(), null);
+
+            commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(), retitled, false);
+
+            verify(contentValidator).validate(stored, "5F", planner.getContentVersion(),
+                    ValidationPolicy.forPublicationState(false));
         }
     }
 
@@ -517,7 +579,55 @@ class PlannerCommandServiceTest {
                     response.planners().stream().map(PlannerSummaryResponse::title).toList());
             // Validation of a batch member leaves no state behind on the success path; proving each
             // one was screened as an outcome needs a rejected member and a real validator.
-            verify(contentValidator, times(3)).validate(anyString(), anyString());
+            verify(contentValidator, times(3)).validate(anyString(), anyString(), anyInt());
+        }
+
+        @Test
+        @DisplayName("Should save the valid planners and report the invalid one as skipped")
+        void importPlanners_WhenOnePlannerIsInvalid_SavesTheRestAndReportsItSkipped() {
+            when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(0L);
+            UpsertPlannerRequest first = withTitle(createValidRequest(), "First");
+            UpsertPlannerRequest invalid = withContent(withTitle(createValidRequest(), "Stale"), "{\"stale\": true}");
+            UpsertPlannerRequest third = withTitle(createValidRequest(), "Third");
+            when(contentValidator.validate(invalid.content(), invalid.category(), invalid.contentVersion()))
+                    .thenThrow(PlannerValidationException.combined(List.of(new PlannerValidationException(
+                            "GIFT_UNKNOWN_ID", "Invalid observationGiftIds: 9899"))));
+            when(plannerRepository.insert(any(Planner.class))).thenAnswer(invocation -> {
+                Planner planner = invocation.getArgument(0);
+                planner.setCreatedAt(Instant.now());
+                planner.getContent().setLastModifiedAt(Instant.now());
+                return PlannerContentLifecycle.asPersisted(planner);
+            });
+
+            ImportPlannersResponse response = commandService.importPlanners(
+                    testUser.getId(), new ImportPlannersRequest(List.of(first, invalid, third)));
+
+            assertEquals(2, response.imported());
+            assertEquals(3, response.total());
+            assertEquals(List.of("First", "Third"),
+                    response.planners().stream().map(PlannerSummaryResponse::title).toList());
+            assertEquals(List.of(new ImportPlannersResponse.SkippedPlanner(invalid.id(), "Stale",
+                            List.of(new ImportPlannersResponse.SkipReason("GIFT_UNKNOWN_ID")))),
+                    response.skipped());
+            verify(plannerRepository, times(2)).insert(any());
+        }
+
+        @Test
+        @DisplayName("Should report a planner rejected before content validation as skipped with its code")
+        void importPlanners_WhenVersionIsRejected_ReportsTheTopLevelCode() {
+            when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(0L);
+            UpsertPlannerRequest stale = withContentVersion(withTitle(createValidRequest(), "Old"), 5);
+            doThrow(new PlannerValidationException("INVALID_CONTENT_VERSION", "Invalid content version"))
+                    .when(contentVersionValidator).validateVersionForCreate(any(), eq(5));
+
+            ImportPlannersResponse response = commandService.importPlanners(
+                    testUser.getId(), new ImportPlannersRequest(List.of(stale)));
+
+            assertEquals(0, response.imported());
+            assertEquals(List.of(new ImportPlannersResponse.SkippedPlanner(stale.id(), "Old",
+                            List.of(new ImportPlannersResponse.SkipReason("INVALID_CONTENT_VERSION")))),
+                    response.skipped());
+            verify(plannerRepository, never()).insert(any());
         }
 
         @Test

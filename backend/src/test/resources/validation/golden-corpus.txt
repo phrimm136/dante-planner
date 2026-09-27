@@ -173,9 +173,9 @@ sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].identity' has wrong type, expec
 
 ### equipment-identity-id-blank
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'equipment[05].identity.id' has wrong type, expected non-empty string; [INVALID_ID_REFERENCE] identity ID '  ' not found or invalid
+message: [INVALID_FIELD_TYPE] Field 'equipment[05].identity.id' has wrong type, expected non-empty string; [IDENTITY_UNKNOWN_ID] identity ID '  ' not found or invalid
 sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].identity.id' has wrong type, expected non-empty string
-sub 2: INVALID_ID_REFERENCE | identity ID '  ' not found or invalid
+sub 2: IDENTITY_UNKNOWN_ID | identity ID '  ' not found or invalid
 
 ### equipment-egos-missing
 code: VALIDATION_ERROR
@@ -194,9 +194,9 @@ sub 1: MISSING_REQUIRED_FIELD | Missing required fields: [equipment[05].egos.ZAY
 
 ### equipment-zayin-id-blank
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'equipment[05].egos.ZAYIN.id' has wrong type, expected non-empty string; [INVALID_ID_REFERENCE] EGO ID '' not found or invalid
+message: [INVALID_FIELD_TYPE] Field 'equipment[05].egos.ZAYIN.id' has wrong type, expected non-empty string; [EGO_UNKNOWN_ID] EGO ID '' not found or invalid
 sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].egos.ZAYIN.id' has wrong type, expected non-empty string
-sub 2: INVALID_ID_REFERENCE | EGO ID '' not found or invalid
+sub 2: EGO_UNKNOWN_ID | EGO ID '' not found or invalid
 
 ### deployment-order-non-number
 code: VALIDATION_ERROR
@@ -238,8 +238,8 @@ sub 1: INVALID_FIELD_TYPE | Field 'skillEAState[05]' has wrong type, expected ob
 
 ### identity-id-unknown
 code: VALIDATION_ERROR
-message: [INVALID_ID_REFERENCE] identity ID '10599' not found or invalid
-sub 1: INVALID_ID_REFERENCE | identity ID '10599' not found or invalid
+message: [IDENTITY_UNKNOWN_ID] identity ID '10599' not found or invalid
+sub 1: IDENTITY_UNKNOWN_ID | identity ID '10599' not found or invalid
 
 ### identity-sinner-mismatch
 code: VALIDATION_ERROR
@@ -284,8 +284,8 @@ sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].egos.ZAYIN.id' has wrong type, 
 
 ### ego-id-unknown
 code: VALIDATION_ERROR
-message: [INVALID_ID_REFERENCE] EGO ID '20599' not found or invalid
-sub 1: INVALID_ID_REFERENCE | EGO ID '20599' not found or invalid
+message: [EGO_UNKNOWN_ID] EGO ID '20599' not found or invalid
+sub 1: EGO_UNKNOWN_ID | EGO ID '20599' not found or invalid
 
 ### ego-sinner-mismatch
 code: VALIDATION_ERROR
@@ -322,8 +322,8 @@ sub 4: DUPLICATE_VALUE | Duplicate value 'gift_a' in selectedGiftIds
 
 ### selected-gift-id-unknown
 code: VALIDATION_ERROR
-message: [INVALID_ID_REFERENCE] selectedGiftIds ID '9999' not found or invalid; [INVALID_ID_REFERENCE] selectedGiftIds (not in keyword 'Combustion' pool) ID '9999' not found or invalid
-sub 1: INVALID_ID_REFERENCE | selectedGiftIds ID '9999' not found or invalid
+message: [GIFT_UNKNOWN_ID] selectedGiftIds ID '9999' not found or invalid; [INVALID_ID_REFERENCE] selectedGiftIds (not in keyword 'Combustion' pool) ID '9999' not found or invalid
+sub 1: GIFT_UNKNOWN_ID | selectedGiftIds ID '9999' not found or invalid
 sub 2: INVALID_ID_REFERENCE | selectedGiftIds (not in keyword 'Combustion' pool) ID '9999' not found or invalid
 
 ### observation-gift-duplicate
@@ -338,29 +338,29 @@ sub 1: INVALID_FIELD_TYPE | Field 'observationGiftIds[0]' must be string, got nu
 
 ### comprehensive-gift-unknown
 code: VALIDATION_ERROR
-message: [INVALID_ID_REFERENCE] comprehensiveGiftIds ID '9999' not found or invalid
-sub 1: INVALID_ID_REFERENCE | comprehensiveGiftIds ID '9999' not found or invalid
+message: [GIFT_UNKNOWN_ID] comprehensiveGiftIds ID '9999' not found or invalid
+sub 1: GIFT_UNKNOWN_ID | comprehensiveGiftIds ID '9999' not found or invalid
 
 ### comprehensive-gift-enhancement-prefix-accepted
 accepted
 
 ### floor-theme-pack-unknown
 code: VALIDATION_ERROR
-message: [INVALID_ID_REFERENCE] floorSelections[0].themePackId ID '9999' not found or invalid
-sub 1: INVALID_ID_REFERENCE | floorSelections[0].themePackId ID '9999' not found or invalid
+message: [THEME_PACK_UNKNOWN_ID] floorSelections[0].themePackId ID '9999' not found or invalid
+sub 1: THEME_PACK_UNKNOWN_ID | floorSelections[0].themePackId ID '9999' not found or invalid
 
 ### floor-theme-pack-empty-accepted-as-draft
 accepted
 
 ### floor-theme-pack-empty-rejected-on-publish
 code: VALIDATION_ERROR
-message: [INVALID_ID_REFERENCE] floorSelections[0].themePackId ID '' not found or invalid
-sub 1: INVALID_ID_REFERENCE | floorSelections[0].themePackId ID '' not found or invalid
+message: [FLOOR_MISSING_THEME_PACK] floorSelections[0] must have a theme pack selected
+sub 1: FLOOR_MISSING_THEME_PACK | floorSelections[0] must have a theme pack selected
 
 ### floor-theme-pack-absent-rejected-on-publish
 code: VALIDATION_ERROR
-message: [MISSING_REQUIRED_FIELD] Missing required fields: [floorSelections[0].themePackId]
-sub 1: MISSING_REQUIRED_FIELD | Missing required fields: [floorSelections[0].themePackId]
+message: [FLOOR_MISSING_THEME_PACK] floorSelections[0] must have a theme pack selected
+sub 1: FLOOR_MISSING_THEME_PACK | floorSelections[0] must have a theme pack selected
 
 ### floor-difficulty-out-of-range
 code: VALIDATION_ERROR
@@ -399,8 +399,8 @@ sub 1: INVALID_FIELD_TYPE | Field 'floorSelections[0].giftIds[0]' must be string
 
 ### floor-gift-unknown
 code: VALIDATION_ERROR
-message: [INVALID_ID_REFERENCE] floorSelections[0].giftIds ID '9999' not found or invalid
-sub 1: INVALID_ID_REFERENCE | floorSelections[0].giftIds ID '9999' not found or invalid
+message: [FLOOR_UNKNOWN_GIFT_ID] floorSelections[0].giftIds ID '9999' not found or invalid
+sub 1: FLOOR_UNKNOWN_GIFT_ID | floorSelections[0].giftIds ID '9999' not found or invalid
 
 ### floor-gift-not-affordable
 code: VALIDATION_ERROR
@@ -419,8 +419,8 @@ sub 1: INVALID_FIELD_TYPE | Field 'selectedBuffIds[1]' must be number, got strin
 
 ### buff-id-unknown
 code: VALIDATION_ERROR
-message: [INVALID_ID_REFERENCE] selectedBuffIds ID '999' not found or invalid
-sub 1: INVALID_ID_REFERENCE | selectedBuffIds ID '999' not found or invalid
+message: [START_BUFF_UNKNOWN_ID] selectedBuffIds ID '999' not found or invalid
+sub 1: START_BUFF_UNKNOWN_ID | selectedBuffIds ID '999' not found or invalid
 
 ### buff-base-id-out-of-range
 code: VALIDATION_ERROR

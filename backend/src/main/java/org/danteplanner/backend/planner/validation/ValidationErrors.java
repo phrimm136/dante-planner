@@ -66,8 +66,17 @@ final class ValidationErrors {
     }
 
     static PlannerValidationException invalidIdReference(String context, String id) {
-        return new PlannerValidationException(ErrorCode.INVALID_ID_REFERENCE.getCode(),
+        return unknownId(ErrorCode.INVALID_ID_REFERENCE, context, id);
+    }
+
+    static PlannerValidationException unknownId(ErrorCode code, String context, String id) {
+        return new PlannerValidationException(code.getCode(),
                 String.format("%s ID '%s' not found or invalid", context, id));
+    }
+
+    static PlannerValidationException floorMissingThemePack(String floorPath) {
+        return new PlannerValidationException(ErrorCode.FLOOR_MISSING_THEME_PACK.getCode(),
+                String.format("%s must have a theme pack selected", floorPath));
     }
 
     static PlannerValidationException valueOutOfRange(String field, int value, int min, int max) {

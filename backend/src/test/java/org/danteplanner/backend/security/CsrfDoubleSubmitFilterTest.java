@@ -163,7 +163,7 @@ class CsrfDoubleSubmitFilterTest {
         @Test
         @DisplayName("Request with no csrf cookie receives a Set-Cookie for csrf")
         void safeMethod_WhenNoCsrfCookie_SetsCookieOnResponse() throws Exception {
-            MockHttpServletRequest req = request("GET", "/api/planner/md/config");
+            MockHttpServletRequest req = request("GET", "/api/planner/md/recommended");
             MockHttpServletResponse res = new MockHttpServletResponse();
             MockFilterChain chain = new MockFilterChain();
 

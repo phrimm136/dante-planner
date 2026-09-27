@@ -1,6 +1,5 @@
 package org.danteplanner.backend.planner.validation;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
@@ -23,6 +22,7 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
@@ -66,6 +66,8 @@ class PlannerContentValidatorTest {
     private static final int MAX_CONTENT_SIZE_BYTES = 51200;
     private static final int MAX_NOTE_SIZE_BYTES = 1024;
 
+    private static final int VERSION = 7;
+
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
@@ -75,12 +77,23 @@ class PlannerContentValidatorTest {
                 new EquipmentValidator(),
                 new SkillStateValidator(),
                 new IdReferenceValidator(gameDataRegistry, sinnerIdValidator),
-                new StartBuffValidator(gameDataRegistry));
+                new StartBuffValidator(gameDataRegistry),
+                gameDataRegistry);
 
         // Default per-EGO max so existing tests reach gift/buff/etc. validations
         // without stubbing maxThreadspin individually. Tests that exercise the
         // per-EGO threadspin rule override this with a specific stub.
         lenient().when(gameDataRegistry.getEgoMaxThreadspin(anyString())).thenReturn(4);
+        lenient().when(gameDataRegistry.idMigrations()).thenReturn(PlannerIdMigrations.EMPTY);
+        lenient().when(gameDataRegistry.hasSeason(VERSION)).thenReturn(true);
+    }
+
+    private String validate(String content, String category) {
+        return validator.validate(content, category, VERSION);
+    }
+
+    private String validate(String content, String category, ValidationPolicy policy) {
+        return validator.validate(content, category, VERSION, policy);
     }
 
     // ========================================================================
@@ -103,7 +116,7 @@ class PlannerContentValidatorTest {
      * Setup mocks for start buff validation.
      */
     private void setupStartBuffMocks() {
-        when(gameDataRegistry.hasStartBuff(anyString())).thenReturn(true);
+        when(gameDataRegistry.hasStartBuff(anyInt(), anyString())).thenReturn(true);
     }
 
     /**
@@ -111,8 +124,8 @@ class PlannerContentValidatorTest {
      * Uses Combustion pool: [9001, 9009, 9103]
      */
     private void setupStartGiftMocks() {
-        when(gameDataRegistry.hasStartGiftKeyword(anyString())).thenReturn(true);
-        when(gameDataRegistry.getStartGiftPool(anyString())).thenReturn(Set.of("9001", "9009", "9103"));
+        when(gameDataRegistry.hasStartGiftKeyword(anyInt(), anyString())).thenReturn(true);
+        when(gameDataRegistry.getStartGiftPool(anyInt(), anyString())).thenReturn(Set.of("9001", "9009", "9103"));
     }
 
     /**
@@ -179,9 +192,9 @@ class PlannerContentValidatorTest {
         when(gameDataRegistry.hasEgoGift(anyString())).thenReturn(true);
         when(gameDataRegistry.hasThemePack(anyString())).thenReturn(true);
         when(gameDataRegistry.isGiftAffordableForThemePack(anyString(), anyString())).thenReturn(false);
-        when(gameDataRegistry.hasStartBuff(anyString())).thenReturn(true);
-        when(gameDataRegistry.hasStartGiftKeyword(anyString())).thenReturn(true);
-        when(gameDataRegistry.getStartGiftPool(anyString())).thenReturn(Set.of("9001", "9009", "9103"));
+        when(gameDataRegistry.hasStartBuff(anyInt(), anyString())).thenReturn(true);
+        when(gameDataRegistry.hasStartGiftKeyword(anyInt(), anyString())).thenReturn(true);
+        when(gameDataRegistry.getStartGiftPool(anyInt(), anyString())).thenReturn(Set.of("9001", "9009", "9103"));
         when(sinnerIdValidator.validateMatch(anyString(), anyString())).thenReturn(true);
     }
 
@@ -318,17 +331,18 @@ class PlannerContentValidatorTest {
         @DisplayName("Should pass validation with all required fields")
         void validate_WhenAllRequiredFields_Passes() {
             setupMocksForValidIds();
-            JsonNode result = assertDoesNotThrow(() -> validator.validate(createValidContent(), "5F"));
-            assertNotNull(result);
-            assertTrue(result.isObject());
+            String content = createValidContent();
+            String result = assertDoesNotThrow(() -> validate(content, "5F"));
+            assertEquals(content, result);
         }
 
         @Test
         @DisplayName("Should pass validation with required and optional fields")
         void validate_WhenRequiredAndOptionalFields_Passes() {
             setupMocksForValidIds();
-            JsonNode result = assertDoesNotThrow(() -> validator.validate(createFullContent(), "5F"));
-            assertNotNull(result);
+            String content = createFullContent();
+            String result = assertDoesNotThrow(() -> validate(content, "5F"));
+            assertEquals(content, result);
         }
 
         @Test
@@ -341,7 +355,7 @@ class PlannerContentValidatorTest {
                     "\"selectedKeywords\": [\"Combustion\", \"Slash\"],\n                \"selectedGiftKeyword\": null"
             );
 
-            assertDoesNotThrow(() -> validator.validate(content, "5F"));
+            assertDoesNotThrow(() -> validate(content, "5F"));
         }
 
         @ParameterizedTest
@@ -349,7 +363,7 @@ class PlannerContentValidatorTest {
         void validate_WhenCategoryIsValid_Passes(MDCategory category) {
             setupMocksForValidIds();
 
-            assertThatCode(() -> validator.validate(createValidContent(), category.getValue()))
+            assertThatCode(() -> validate(createValidContent(), category.getValue()))
                     .doesNotThrowAnyException();
         }
 
@@ -367,7 +381,7 @@ class PlannerContentValidatorTest {
                 """;
 
             assertThrows(PlannerValidationException.class,
-                    () -> validator.validate(content, "5F"));
+                    () -> validate(content, "5F"));
         }
 
         @Test
@@ -381,7 +395,7 @@ class PlannerContentValidatorTest {
                     "\"deploymentOrder\": []"
             );
 
-            assertDoesNotThrow(() -> validator.validate(content, "5F"));
+            assertDoesNotThrow(() -> validate(content, "5F"));
         }
     }
 
@@ -401,7 +415,7 @@ class PlannerContentValidatorTest {
                 }
                 """;
 
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
 
         @Test
@@ -416,7 +430,7 @@ class PlannerContentValidatorTest {
                 }
                 """;
 
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
 
         @Test
@@ -431,7 +445,7 @@ class PlannerContentValidatorTest {
                 }
                 """;
 
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
 
         @Test
@@ -446,7 +460,7 @@ class PlannerContentValidatorTest {
                 }
                 """;
 
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
 
         @Test
@@ -461,7 +475,7 @@ class PlannerContentValidatorTest {
                 }
                 """;
 
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
     }
 
@@ -474,7 +488,7 @@ class PlannerContentValidatorTest {
         void validate_WhenInvalidCategoryParam_ThrowsException() {
             PlannerValidationException exception = assertThrows(
                     PlannerValidationException.class,
-                    () -> validator.validate(createValidContent(), "20F")
+                    () -> validate(createValidContent(), "20F")
             );
 
             assertEquals("INVALID_CATEGORY", exception.getOriginalCode());
@@ -484,21 +498,21 @@ class PlannerContentValidatorTest {
         @DisplayName("Should throw exception for lowercase category parameter")
         void validate_WhenLowercaseCategoryParam_ThrowsException() {
             assertThrows(PlannerValidationException.class,
-                    () -> validator.validate(createValidContent(), "5f"));
+                    () -> validate(createValidContent(), "5f"));
         }
 
         @Test
         @DisplayName("Should throw exception for null category parameter")
         void validate_WhenNullCategoryParam_ThrowsException() {
             assertThrows(PlannerValidationException.class,
-                    () -> validator.validate(createValidContent(), null));
+                    () -> validate(createValidContent(), null));
         }
 
         @Test
         @DisplayName("Should throw exception for empty category parameter")
         void validate_WhenEmptyCategoryParam_ThrowsException() {
             assertThrows(PlannerValidationException.class,
-                    () -> validator.validate(createValidContent(), ""));
+                    () -> validate(createValidContent(), ""));
         }
     }
 
@@ -520,7 +534,7 @@ class PlannerContentValidatorTest {
         void validate_WhenFieldHasWrongType_ThrowsException(String field, String wrongTypedValue) {
             String content = contentWithWrongType(field, wrongTypedValue);
 
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
 
         /**
@@ -561,7 +575,7 @@ class PlannerContentValidatorTest {
 
             PlannerValidationException exception = assertThrows(
                     PlannerValidationException.class,
-                    () -> validator.validate(content, "5F")
+                    () -> validate(content, "5F")
             );
 
             // Granular error code for unknown fields
@@ -583,7 +597,7 @@ class PlannerContentValidatorTest {
                 }
                 """;
 
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
     }
 
@@ -603,7 +617,7 @@ class PlannerContentValidatorTest {
 
             PlannerValidationException exception = assertThrows(
                     PlannerValidationException.class,
-                    () -> validator.validate(sb.toString(), "5F")
+                    () -> validate(sb.toString(), "5F")
             );
 
             // Granular error code for size limit exceeded
@@ -615,7 +629,7 @@ class PlannerContentValidatorTest {
         void validate_WhenContentUnderLimit_Passes() {
             setupMocksForValidIds();
             // Use createValidContent which is well under 50KB
-            assertDoesNotThrow(() -> validator.validate(createValidContent(), "5F"));
+            assertDoesNotThrow(() -> validate(createValidContent(), "5F"));
         }
     }
 
@@ -656,7 +670,7 @@ class PlannerContentValidatorTest {
 
             PlannerValidationException exception = assertThrows(
                     PlannerValidationException.class,
-                    () -> validator.validate(content, "5F")
+                    () -> validate(content, "5F")
             );
 
             assertEquals("SIZE_EXCEEDED", exception.getOriginalCode());
@@ -673,7 +687,7 @@ class PlannerContentValidatorTest {
                     "\"sectionNotes\": {\"floor-1\": {\"content\": {\"type\": \"doc\", \"text\": \"" + noteContent + "\"}}}"
             );
 
-            assertDoesNotThrow(() -> validator.validate(content, "5F"));
+            assertDoesNotThrow(() -> validate(content, "5F"));
         }
 
         @Test
@@ -681,7 +695,7 @@ class PlannerContentValidatorTest {
         void validate_WhenEmptySectionNotes_Passes() {
             setupMocksForValidIds();
             // createValidContent already has empty sectionNotes
-            assertDoesNotThrow(() -> validator.validate(createValidContent(), "5F"));
+            assertDoesNotThrow(() -> validate(createValidContent(), "5F"));
         }
     }
 
@@ -694,7 +708,7 @@ class PlannerContentValidatorTest {
         void validate_WhenNullContent_ThrowsException() {
             PlannerValidationException exception = assertThrows(
                     PlannerValidationException.class,
-                    () -> validator.validate(null, "5F")
+                    () -> validate(null, "5F")
             );
 
             assertEquals("EMPTY_CONTENT", exception.getOriginalCode());
@@ -703,31 +717,31 @@ class PlannerContentValidatorTest {
         @Test
         @DisplayName("Should throw exception for empty content")
         void validate_WhenEmptyContent_ThrowsException() {
-            assertThrows(PlannerValidationException.class, () -> validator.validate("", "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate("", "5F"));
         }
 
         @Test
         @DisplayName("Should throw exception for blank content")
         void validate_WhenBlankContent_ThrowsException() {
-            assertThrows(PlannerValidationException.class, () -> validator.validate("   ", "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate("   ", "5F"));
         }
 
         @Test
         @DisplayName("Should throw exception for non-JSON content")
         void validate_WhenNonJsonContent_ThrowsException() {
-            assertThrows(PlannerValidationException.class, () -> validator.validate("not json", "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate("not json", "5F"));
         }
 
         @Test
         @DisplayName("Should throw exception for JSON array instead of object")
         void validate_WhenJsonArrayContent_ThrowsException() {
-            assertThrows(PlannerValidationException.class, () -> validator.validate("[]", "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate("[]", "5F"));
         }
 
         @Test
         @DisplayName("Should throw exception for JSON primitive instead of object")
         void validate_WhenJsonPrimitiveContent_ThrowsException() {
-            assertThrows(PlannerValidationException.class, () -> validator.validate("\"string\"", "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate("\"string\"", "5F"));
         }
     }
 
@@ -739,7 +753,7 @@ class PlannerContentValidatorTest {
         @DisplayName("Should pass with valid sinner indices (01-12) in equipment keys")
         void validate_WhenValidSinnerIndicesInEquipment_Passes() {
             setupMocksForValidIds();
-            assertDoesNotThrow(() -> validator.validate(createValidContent(), "5F"));
+            assertDoesNotThrow(() -> validate(createValidContent(), "5F"));
         }
 
         @Test
@@ -758,7 +772,7 @@ class PlannerContentValidatorTest {
                 }
                 """;
 
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
 
         @Test
@@ -777,7 +791,7 @@ class PlannerContentValidatorTest {
                 }
                 """;
 
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
 
         @Test
@@ -795,7 +809,7 @@ class PlannerContentValidatorTest {
                 }
                 """;
 
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
 
         @Test
@@ -808,7 +822,7 @@ class PlannerContentValidatorTest {
                     "\"deploymentOrder\": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]"
             );
 
-            assertDoesNotThrow(() -> validator.validate(content, "5F"));
+            assertDoesNotThrow(() -> validate(content, "5F"));
         }
 
         @Test
@@ -824,7 +838,7 @@ class PlannerContentValidatorTest {
                 }
                 """;
 
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
 
         @Test
@@ -840,7 +854,7 @@ class PlannerContentValidatorTest {
                 }
                 """;
 
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
 
         @Test
@@ -856,7 +870,7 @@ class PlannerContentValidatorTest {
                 }
                 """;
 
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
     }
 
@@ -869,7 +883,7 @@ class PlannerContentValidatorTest {
         void validate_WhenValidStartBuffIds_Passes() {
             setupMocksForValidIds();
             // createFullContent has selectedBuffIds: [100, 201, 302]
-            assertDoesNotThrow(() -> validator.validate(createFullContent(), "5F"));
+            assertDoesNotThrow(() -> validate(createFullContent(), "5F"));
         }
 
         @Test
@@ -880,7 +894,7 @@ class PlannerContentValidatorTest {
                     "\"selectedBuffIds\": [100, 201],",
                     "\"selectedBuffIds\": [],"
             );
-            assertDoesNotThrow(() -> validator.validate(content, "5F"));
+            assertDoesNotThrow(() -> validate(content, "5F"));
         }
 
         @Test
@@ -892,7 +906,7 @@ class PlannerContentValidatorTest {
                     "\"selectedBuffIds\": [100, 201],",
                     "\"selectedBuffIds\": [100, 201, 302, 103, 204, 305, 106, 207, 308, 109],"
             );
-            assertDoesNotThrow(() -> validator.validate(content, "5F"));
+            assertDoesNotThrow(() -> validate(content, "5F"));
         }
 
         @Test
@@ -905,7 +919,7 @@ class PlannerContentValidatorTest {
                     "\"selectedBuffIds\": [100, 201],",
                     "\"selectedBuffIds\": [100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 200],"
             );
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
 
         @Test
@@ -917,7 +931,7 @@ class PlannerContentValidatorTest {
                     "\"selectedBuffIds\": [100, 201],",
                     "\"selectedBuffIds\": [100, 200],"
             );
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
 
         @Test
@@ -929,7 +943,7 @@ class PlannerContentValidatorTest {
                     "\"selectedBuffIds\": [100, 201],",
                     "\"selectedBuffIds\": [101, 301],"
             );
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
 
         @Test
@@ -940,7 +954,7 @@ class PlannerContentValidatorTest {
                     "\"selectedBuffIds\": [100, 201],",
                     "\"selectedBuffIds\": [100, \"invalid\"],"
             );
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
 
         @Test
@@ -951,7 +965,7 @@ class PlannerContentValidatorTest {
             );
 
             PlannerValidationException thrown = assertThrows(PlannerValidationException.class,
-                    () -> validator.validate(content, "5F"));
+                    () -> validate(content, "5F"));
 
             assertThat(thrown.getSubErrors()).contains(new PlannerValidationException.ValidationError(
                     "INVALID_FIELD_TYPE", "Field 'selectedBuffIds[1]' must be number, got number 101.0"));
@@ -962,13 +976,13 @@ class PlannerContentValidatorTest {
         void validate_WhenBuffIdNotInGameData_ThrowsException() {
             // Fails in buff validation, never reaches gift validation
             setupMocksForValidIdsWithoutGifts();
-            when(gameDataRegistry.hasStartBuff("999")).thenReturn(false);
+            when(gameDataRegistry.hasStartBuff(VERSION, "999")).thenReturn(false);
 
             String content = createValidContent().replace(
                     "\"selectedBuffIds\": [100, 201],",
                     "\"selectedBuffIds\": [100, 999],"
             );
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
 
         @Test
@@ -981,7 +995,7 @@ class PlannerContentValidatorTest {
                     "\"selectedBuffIds\": [100, 201],",
                     "\"selectedBuffIds\": [115],"
             );
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
     }
 
@@ -994,7 +1008,7 @@ class PlannerContentValidatorTest {
         void validate_WhenValidKeywordAndGiftIds_Passes() {
             setupMocksForValidIds();
             // createValidContent has Combustion keyword with 9001 which is in the pool
-            assertDoesNotThrow(() -> validator.validate(createValidContent(), "5F"));
+            assertDoesNotThrow(() -> validate(createValidContent(), "5F"));
         }
 
         @Test
@@ -1004,7 +1018,7 @@ class PlannerContentValidatorTest {
             String content = createValidContent()
                     .replace("\"selectedGiftKeyword\": \"Combustion\",", "\"selectedGiftKeyword\": null,")
                     .replace("\"selectedGiftIds\": [\"9001\"],", "\"selectedGiftIds\": [],");
-            assertDoesNotThrow(() -> validator.validate(content, "5F"));
+            assertDoesNotThrow(() -> validate(content, "5F"));
         }
 
         @Test
@@ -1015,7 +1029,7 @@ class PlannerContentValidatorTest {
             String content = createValidContent()
                     .replace("\"selectedGiftKeyword\": \"Combustion\",", "")
                     .replace("\"selectedGiftIds\": [\"9001\"],", "\"selectedGiftIds\": [],");
-            assertDoesNotThrow(() -> validator.validate(content, "5F"));
+            assertDoesNotThrow(() -> validate(content, "5F"));
         }
 
         @Test
@@ -1027,7 +1041,7 @@ class PlannerContentValidatorTest {
                     "\"selectedGiftIds\": [\"9001\"],",
                     "\"selectedGiftIds\": [\"9001\", \"9009\", \"9103\"],"
             );
-            assertDoesNotThrow(() -> validator.validate(content, "5F"));
+            assertDoesNotThrow(() -> validate(content, "5F"));
         }
 
         @Test
@@ -1038,7 +1052,7 @@ class PlannerContentValidatorTest {
             String content = createValidContent()
                     .replace("\"selectedGiftKeyword\": \"Combustion\",", "\"selectedGiftKeyword\": null,");
             // Still has selectedGiftIds: ["9001"]
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
 
         @Test
@@ -1046,13 +1060,13 @@ class PlannerContentValidatorTest {
         void validate_WhenInvalidKeyword_ThrowsException() {
             setupBaseMocks();
             setupStartBuffMocks();
-            when(gameDataRegistry.hasStartGiftKeyword("InvalidKeyword")).thenReturn(false);
+            when(gameDataRegistry.hasStartGiftKeyword(VERSION, "InvalidKeyword")).thenReturn(false);
 
             String content = createValidContent().replace(
                     "\"selectedGiftKeyword\": \"Combustion\",",
                     "\"selectedGiftKeyword\": \"InvalidKeyword\","
             );
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
 
         @Test
@@ -1060,15 +1074,15 @@ class PlannerContentValidatorTest {
         void validate_WhenGiftIdNotInPool_ThrowsException() {
             setupBaseMocks();
             setupStartBuffMocks();
-            when(gameDataRegistry.hasStartGiftKeyword(anyString())).thenReturn(true);
+            when(gameDataRegistry.hasStartGiftKeyword(anyInt(), anyString())).thenReturn(true);
             // Pool only contains 9001, 9009, 9103 - but content has 9999
-            when(gameDataRegistry.getStartGiftPool(anyString())).thenReturn(Set.of("9001", "9009", "9103"));
+            when(gameDataRegistry.getStartGiftPool(anyInt(), anyString())).thenReturn(Set.of("9001", "9009", "9103"));
 
             String content = createValidContent().replace(
                     "\"selectedGiftIds\": [\"9001\"],",
                     "\"selectedGiftIds\": [\"9001\", \"9999\"],"
             );
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
 
         @Test
@@ -1080,7 +1094,7 @@ class PlannerContentValidatorTest {
                     "\"selectedGiftIds\": [\"9001\"],",
                     "\"selectedGiftIds\": [\"9001\", \"9001\"],"
             );
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
 
         @Test
@@ -1092,7 +1106,7 @@ class PlannerContentValidatorTest {
                     "\"selectedGiftIds\": [\"9001\"],",
                     "\"selectedGiftIds\": [9001],"
             );
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
     }
 
@@ -1105,7 +1119,7 @@ class PlannerContentValidatorTest {
         void validate_WhenValidComprehensiveGiftIds_Passes() {
             setupMocksForValidIds();
             String content = createFullContent();
-            assertDoesNotThrow(() -> validator.validate(content, "5F"));
+            assertDoesNotThrow(() -> validate(content, "5F"));
         }
 
         @Test
@@ -1117,7 +1131,7 @@ class PlannerContentValidatorTest {
                     "\"comprehensiveGiftIds\": [\"19050\"]",
                     "\"comprehensiveGiftIds\": [\"19050\", \"19050\"]"
             );
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
 
         @Test
@@ -1129,7 +1143,7 @@ class PlannerContentValidatorTest {
                     "\"comprehensiveGiftIds\": [\"19050\"]",
                     "\"comprehensiveGiftIds\": [19050]"
             );
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
 
         @Test
@@ -1143,7 +1157,7 @@ class PlannerContentValidatorTest {
                     "\"comprehensiveGiftIds\": [\"19050\"]",
                     "\"comprehensiveGiftIds\": [\"99999\"]"
             );
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
 
         @Test
@@ -1155,7 +1169,7 @@ class PlannerContentValidatorTest {
                     "\"observationGiftIds\": [\"9100\"]",
                     "\"observationGiftIds\": [\"9100\", \"9100\"]"
             );
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
 
         @Test
@@ -1167,7 +1181,7 @@ class PlannerContentValidatorTest {
                     "\"observationGiftIds\": [\"9100\"]",
                     "\"observationGiftIds\": [9100]"
             );
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
     }
 
@@ -1180,7 +1194,7 @@ class PlannerContentValidatorTest {
         void validate_WhenValidFloorGiftIds_Passes() {
             setupMocksForValidIds();
             String content = createValidContent();
-            assertDoesNotThrow(() -> validator.validate(content, "5F"));
+            assertDoesNotThrow(() -> validate(content, "5F"));
         }
 
         @Test
@@ -1192,7 +1206,7 @@ class PlannerContentValidatorTest {
                     "\"giftIds\": [\"9002\"]",
                     "\"giftIds\": [\"9002\", \"9002\"]"
             );
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
 
         @Test
@@ -1204,7 +1218,7 @@ class PlannerContentValidatorTest {
                     "\"giftIds\": [\"9002\"]",
                     "\"giftIds\": [9002]"
             );
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
 
         @Test
@@ -1218,7 +1232,7 @@ class PlannerContentValidatorTest {
                     "\"giftIds\": [\"9002\"]",
                     "\"giftIds\": [\"99999\"]"
             );
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
 
         @Test
@@ -1229,7 +1243,7 @@ class PlannerContentValidatorTest {
                     "\"floorSelections\": [{\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}]",
                     "\"floorSelections\": [{\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}, {\"themePackId\": \"1002\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}]"
             );
-            assertDoesNotThrow(() -> validator.validate(content, "5F"));
+            assertDoesNotThrow(() -> validate(content, "5F"));
         }
     }
 
@@ -1243,7 +1257,7 @@ class PlannerContentValidatorTest {
             setupMocksForUnaffordableGifts();
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validator.validate(createValidContent(), "5F"));
+                    () -> validate(createValidContent(), "5F"));
 
             assertTrue(ex.getSubErrors().stream().anyMatch(e -> "GIFT_NOT_AFFORDABLE".equals(e.code())),
                     "Expected GIFT_NOT_AFFORDABLE in sub-errors");
@@ -1259,7 +1273,7 @@ class PlannerContentValidatorTest {
             );
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validator.validate(content, "5F"));
+                    () -> validate(content, "5F"));
 
             assertTrue(ex.getSubErrors().stream().anyMatch(e -> "DUPLICATE_VALUE".equals(e.code())),
                     "Expected DUPLICATE_VALUE in sub-errors");
@@ -1276,7 +1290,7 @@ class PlannerContentValidatorTest {
             );
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validator.validate(content, "5F"));
+                    () -> validate(content, "5F"));
 
             assertTrue(ex.getSubErrors().stream().anyMatch(e -> "DUPLICATE_VALUE".equals(e.code())),
                     "Expected DUPLICATE_VALUE in sub-errors");
@@ -1292,7 +1306,7 @@ class PlannerContentValidatorTest {
             );
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validator.validate(content, "5F"));
+                    () -> validate(content, "5F"));
 
             assertTrue(ex.getSubErrors().stream().anyMatch(e -> "DUPLICATE_VALUE".equals(e.code())),
                     "Expected DUPLICATE_VALUE in sub-errors");
@@ -1309,7 +1323,7 @@ class PlannerContentValidatorTest {
             );
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validator.validate(content, "5F"));
+                    () -> validate(content, "5F"));
 
             assertTrue(ex.getSubErrors().stream().anyMatch(e -> "INVALID_SEQUENCE".equals(e.code())),
                     "Expected INVALID_SEQUENCE in sub-errors");
@@ -1326,7 +1340,7 @@ class PlannerContentValidatorTest {
             );
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validator.validate(content, "5F"));
+                    () -> validate(content, "5F"));
 
             assertTrue(ex.getSubErrors().stream().anyMatch(e -> "INVALID_SEQUENCE".equals(e.code())),
                     "Expected INVALID_SEQUENCE in sub-errors");
@@ -1349,7 +1363,7 @@ class PlannerContentValidatorTest {
             );
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validator.validate(content, "5F"));
+                    () -> validate(content, "5F"));
 
             assertEquals("VALIDATION_ERROR", ex.getOriginalCode());
             assertTrue(ex.getSubErrors().size() >= 2, "Expected at least 2 sub-errors");
@@ -1365,7 +1379,7 @@ class PlannerContentValidatorTest {
             setupMocksForUnaffordableGifts();
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validator.validate(createValidContent(), "5F"));
+                    () -> validate(createValidContent(), "5F"));
 
             assertEquals("VALIDATION_ERROR", ex.getOriginalCode());
             assertEquals(1, ex.getSubErrors().size());
@@ -1389,14 +1403,14 @@ class PlannerContentValidatorTest {
                     "\"deploymentOrder\": [0, 11]"  // Boundary values 0 and 11
             );
 
-            assertDoesNotThrow(() -> validator.validate(content, "5F"));
+            assertDoesNotThrow(() -> validate(content, "5F"));
         }
 
         @Test
         @DisplayName("Should throw exception for malformed JSON")
         void validate_WhenMalformedJson_ThrowsException() {
             assertThrows(PlannerValidationException.class,
-                    () -> validator.validate("{\"title\": \"unclosed string}", "5F"));
+                    () -> validate("{\"title\": \"unclosed string}", "5F"));
         }
 
         @Test
@@ -1404,7 +1418,7 @@ class PlannerContentValidatorTest {
         void validate_WhenValidDeepNesting_Passes() {
             setupMocksForValidIds();
             // Use createFullContent which has all optional fields and complete equipment
-            assertDoesNotThrow(() -> validator.validate(createFullContent(), "5F"));
+            assertDoesNotThrow(() -> validate(createFullContent(), "5F"));
         }
 
         @Test
@@ -1417,7 +1431,7 @@ class PlannerContentValidatorTest {
                     "\"title\": \"유니코드 테스트 タイトル\""
             );
 
-            assertDoesNotThrow(() -> validator.validate(content, "5F"));
+            assertDoesNotThrow(() -> validate(content, "5F"));
         }
     }
 
@@ -1435,7 +1449,7 @@ class PlannerContentValidatorTest {
                     "\"egos\": {\"ZAYIN\": {\"id\": \"20101\", \"threadspin\": 5}}"
             );
 
-            assertDoesNotThrow(() -> validator.validate(content, "5F"));
+            assertDoesNotThrow(() -> validate(content, "5F"));
         }
 
         @Test
@@ -1449,7 +1463,7 @@ class PlannerContentValidatorTest {
             );
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validator.validate(content, "5F"));
+                    () -> validate(content, "5F"));
             assertTrue(ex.getMessage().contains("threadspin"),
                     "Exception message should mention threadspin: " + ex.getMessage());
         }
@@ -1461,7 +1475,7 @@ class PlannerContentValidatorTest {
             lenient().when(gameDataRegistry.getEgoMaxThreadspin(anyString())).thenReturn(null);
 
             assertThrows(PlannerValidationException.class,
-                    () -> validator.validate(createValidContent(), "5F"));
+                    () -> validate(createValidContent(), "5F"));
         }
     }
 
@@ -1478,7 +1492,7 @@ class PlannerContentValidatorTest {
                     "\"identity\": {\"id\": \"10101\", \"uptie\": 99, \"level\": 999}");
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validator.validate(content, "5F"));
+                    () -> validate(content, "5F"));
 
             assertTrue(ex.getSubErrors().stream().anyMatch(e -> e.message().contains("level")),
                     "Expected the level range failure in sub-errors: " + ex.getSubErrors());
@@ -1494,7 +1508,7 @@ class PlannerContentValidatorTest {
                     "\"identity\": {\"id\": \"10101\", \"uptie\": 4, \"level\": \"abc\"}");
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validator.validate(content, "5F"));
+                    () -> validate(content, "5F"));
 
             assertThat(ex.getSubErrors()).containsExactly(new PlannerValidationException.ValidationError(
                     "INVALID_FIELD_TYPE", "Field 'equipment[01].identity.level' must be number, got string \"abc\""));
@@ -1508,7 +1522,7 @@ class PlannerContentValidatorTest {
                     "\"identity\": {\"id\": \"10101\", \"uptie\": 4, \"level\": 45.0}");
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validator.validate(content, "5F"));
+                    () -> validate(content, "5F"));
 
             assertThat(ex.getSubErrors()).containsExactly(new PlannerValidationException.ValidationError(
                     "INVALID_FIELD_TYPE", "Field 'equipment[01].identity.level' must be number, got number 45.0"));
@@ -1522,7 +1536,7 @@ class PlannerContentValidatorTest {
                     "\"egos\": {\"ZAYIN\": {\"id\": \"20101\", \"threadspin\": 4.0}}");
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validator.validate(content, "5F"));
+                    () -> validate(content, "5F"));
 
             assertThat(ex.getSubErrors()).containsExactly(new PlannerValidationException.ValidationError(
                     "INVALID_FIELD_TYPE", "Field 'equipment[01].egos.ZAYIN.threadspin' must be number, got number 4.0"));
@@ -1540,7 +1554,7 @@ class PlannerContentValidatorTest {
                             "\"identity\": {\"id\": \"10201\", \"uptie\": 99, \"level\": 45}");
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validator.validate(content, "5F"));
+                    () -> validate(content, "5F"));
 
             assertTrue(ex.getSubErrors().stream().anyMatch(e -> e.message().contains("threadspin")),
                     "Expected the threadspin range failure in sub-errors: " + ex.getSubErrors());
@@ -1558,7 +1572,7 @@ class PlannerContentValidatorTest {
                     "{\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": [\"9002\"]},\n"
                             + "                    {\"difficulty\": 0, \"giftIds\": [\"9004\"]}");
 
-            assertDoesNotThrow(() -> validator.validate(content, "5F"));
+            assertDoesNotThrow(() -> validate(content, "5F"));
         }
     }
 
@@ -1571,9 +1585,9 @@ class PlannerContentValidatorTest {
             when(gameDataRegistry.hasEgo(anyString())).thenReturn(true);
             when(gameDataRegistry.hasEgoGift(anyString())).thenReturn(true);
             when(sinnerIdValidator.validateMatch(anyString(), anyString())).thenReturn(true);
-            when(gameDataRegistry.hasStartBuff(anyString())).thenReturn(true);
-            when(gameDataRegistry.hasStartGiftKeyword(anyString())).thenReturn(true);
-            when(gameDataRegistry.getStartGiftPool(anyString())).thenReturn(Set.of("9001", "9009", "9103"));
+            when(gameDataRegistry.hasStartBuff(anyInt(), anyString())).thenReturn(true);
+            when(gameDataRegistry.hasStartGiftKeyword(anyInt(), anyString())).thenReturn(true);
+            when(gameDataRegistry.getStartGiftPool(anyInt(), anyString())).thenReturn(Set.of("9001", "9009", "9103"));
         }
 
         @Test
@@ -1582,35 +1596,35 @@ class PlannerContentValidatorTest {
             setupMocksForValidIds();
 
             assertDoesNotThrow(() ->
-                    validator.validate(createValidContent(), "5F", ValidationPolicy.PUBLISH));
+                    validate(createValidContent(), "5F", ValidationPolicy.PUBLISH));
         }
 
         @Test
         @DisplayName("Should reject a floor without a theme pack")
-        void validate_WhenPublishPolicyAndFloorHasNoThemePack_ReportsMissingField() {
+        void validate_WhenPublishPolicyAndFloorHasNoThemePack_ReportsFloorMissingThemePack() {
             setupMocksWithoutThemePack();
             String content = createValidContent().replace(
                     "{\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}",
                     "{\"difficulty\": 0, \"giftIds\": []}");
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validator.validate(content, "5F", ValidationPolicy.PUBLISH));
+                    () -> validate(content, "5F", ValidationPolicy.PUBLISH));
 
-            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "MISSING_REQUIRED_FIELD".equals(e.code())
-                            && "Missing required fields: [floorSelections[0].themePackId]".equals(e.message())),
+            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "FLOOR_MISSING_THEME_PACK".equals(e.code())
+                            && "floorSelections[0] must have a theme pack selected".equals(e.message())),
                     "Expected the missing themePackId failure in sub-errors: " + ex.getSubErrors());
         }
 
         @Test
         @DisplayName("Should reject a floor whose theme pack is unknown to game data")
-        void validate_WhenPublishPolicyAndThemePackUnknown_ReportsInvalidIdReference() {
+        void validate_WhenPublishPolicyAndThemePackUnknown_ReportsThemePackUnknownId() {
             setupMocksWithoutThemePack();
             when(gameDataRegistry.hasThemePack(anyString())).thenReturn(false);
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validator.validate(createValidContent(), "5F", ValidationPolicy.PUBLISH));
+                    () -> validate(createValidContent(), "5F", ValidationPolicy.PUBLISH));
 
-            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "INVALID_ID_REFERENCE".equals(e.code())
+            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "THEME_PACK_UNKNOWN_ID".equals(e.code())
                             && "floorSelections[0].themePackId ID '1001' not found or invalid".equals(e.message())),
                     "Expected the unknown themePackId failure in sub-errors: " + ex.getSubErrors());
         }
@@ -1623,7 +1637,7 @@ class PlannerContentValidatorTest {
             when(gameDataRegistry.isGiftAffordableForThemePack(anyString(), anyString())).thenReturn(true);
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validator.validate(createValidContent(), "10F", ValidationPolicy.PUBLISH));
+                    () -> validate(createValidContent(), "10F", ValidationPolicy.PUBLISH));
 
             assertTrue(ex.getSubErrors().stream().anyMatch(e -> "VALUE_OUT_OF_RANGE".equals(e.code())
                             && "floorSelections[0].difficulty value 0 is out of range [1-1]".equals(e.message())),
@@ -1640,10 +1654,31 @@ class PlannerContentValidatorTest {
                     "{\"themePackId\": \"1001\", \"difficulty\": 1.0, \"giftIds\": [\"9002\"]}");
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validator.validate(content, "10F", ValidationPolicy.PUBLISH));
+                    () -> validate(content, "10F", ValidationPolicy.PUBLISH));
 
             assertThat(ex.getSubErrors()).contains(new PlannerValidationException.ValidationError(
                     "VALUE_OUT_OF_RANGE", "floorSelections[0].difficulty value -1 is out of range [1-1]"));
+        }
+    }
+
+    @Nested
+    @DisplayName("isSameDocument Tests")
+    class IsSameDocumentTests {
+
+        @Test
+        void isSameDocument_WhenOnlyFormattingDiffers_IsTrue() {
+            assertTrue(validator.isSameDocument("{\"a\": [1, 2], \"b\": 1.0}", "{\"b\":1,\"a\":[1,2]}"));
+        }
+
+        @Test
+        void isSameDocument_WhenAValueDiffers_IsFalse() {
+            assertFalse(validator.isSameDocument("{\"a\":[1,2]}", "{\"a\":[2,1]}"));
+        }
+
+        @Test
+        void isSameDocument_WhenNothingIsStoredOrContentIsMalformed_IsFalse() {
+            assertFalse(validator.isSameDocument("{}", null));
+            assertFalse(validator.isSameDocument("{", "{}"));
         }
     }
 }

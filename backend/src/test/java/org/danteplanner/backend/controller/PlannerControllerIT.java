@@ -58,7 +58,7 @@ import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 
 /**
- * Integration tests for PlannerController.
+ * Integration tests for the planner endpoints under /api/planner/md.
  *
  * <p>Tests all REST API endpoints including authentication,
  * validation, error handling, and business logic.</p>
@@ -158,6 +158,9 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
      * Create an upsert request pre-populated with existing planner's required fields.
      * Use this for update tests to satisfy validation while testing specific field changes.
      */
+    private static final String UNKNOWN_GIFT_CONTENT = TestDataFactory.VALID_CONTENT.replace(
+            "\"selectedGiftIds\":[\"9001\"]", "\"selectedGiftIds\":[\"9001\"],\"observationGiftIds\":[\"9899\"]");
+
     private UpsertPlannerRequest createUpsertRequestFromPlanner(Planner planner) {
         return new UpsertPlannerRequest(
                 planner.getId().toString(),
@@ -390,6 +393,19 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
         }
 
         @Test
+        @DisplayName("Should return 400 when contentVersion is a listed season other than the current one")
+        void createPlanner_WhenContentVersionIsThePreviousSeason_Returns400() throws Exception {
+            UpsertPlannerRequest request = withContentVersion(createValidPlannerRequest(), 6);
+
+            mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
+                            .cookie(session())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+        }
+
+        @Test
         @DisplayName("Should return 409 when user exceeds 100 planner limit")
         void createPlanner_WhenExceedsLimit_Returns409() throws Exception {
             // Create 100 planners for the test user
@@ -592,6 +608,38 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
         }
 
         @Test
+        @DisplayName("Should change only the category of a planner whose stored content holds a retired id")
+        void updatePlanner_WhenOnlyCategoryChangesOverARetiredId_Returns200() throws Exception {
+            Planner planner = TestDataFactory.planner(testUser)
+                    .status(PlannerStatus.DRAFT)
+                    .content(UNKNOWN_GIFT_CONTENT)
+                    .save(plannerRepository);
+            UpsertPlannerRequest request = withCategory(createUpsertRequestFromPlanner(planner), "10F");
+
+            mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
+                            .cookie(session())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.category").value("10F"));
+        }
+
+        @Test
+        @DisplayName("Should validate edited content that carries a retired id alongside a category change")
+        void updatePlanner_WhenCategoryAndContentChangeOverARetiredId_Returns400() throws Exception {
+            Planner planner = createTestPlanner(testUser);
+            UpsertPlannerRequest request = withContent(
+                    withCategory(createUpsertRequestFromPlanner(planner), "10F"), UNKNOWN_GIFT_CONTENT);
+
+            mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
+                            .cookie(session())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+        }
+
+        @Test
         @DisplayName("Should return 409 on syncVersion mismatch")
         void updatePlanner_WhenVersionMismatch_Returns409() throws Exception {
             Planner planner = createTestPlanner(testUser);
@@ -755,6 +803,31 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
         }
 
         @Test
+        @DisplayName("Should save the valid planners and list the one holding an unknown id as skipped")
+        void importPlanners_WhenOnePlannerHoldsAnUnknownId_SavesTheOthersAndSkipsIt() throws Exception {
+            UpsertPlannerRequest invalid = withContent(
+                    withTitle(createValidPlannerRequest(), "Stale Planner"), UNKNOWN_GIFT_CONTENT);
+            ImportPlannersRequest request = new ImportPlannersRequest(List.of(
+                    withTitle(createValidPlannerRequest(), "Kept Planner 1"),
+                    invalid,
+                    withTitle(createValidPlannerRequest(), "Kept Planner 2")));
+
+            mockMvc.perform(post("/api/planner/md/import").with(withCsrf())
+                            .cookie(accessTokenCookie())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.imported").value(2))
+                    .andExpect(jsonPath("$.total").value(3))
+                    .andExpect(jsonPath("$.planners[*].title", contains("Kept Planner 1", "Kept Planner 2")))
+                    .andExpect(jsonPath("$.skipped", hasSize(1)))
+                    .andExpect(jsonPath("$.skipped[0].id").value(invalid.id()))
+                    .andExpect(jsonPath("$.skipped[0].title").value("Stale Planner"))
+                    .andExpect(jsonPath("$.skipped[0].errors[0].code").value("GIFT_UNKNOWN_ID"))
+                    .andExpect(jsonPath("$.skipped[0].errors[0].message").doesNotExist());
+        }
+
+        @Test
         @DisplayName("Should return 409 when import would exceed 100 planner limit")
         void importPlanners_WhenExceedsLimit_Returns409() throws Exception {
             // Create 98 existing planners
@@ -872,37 +945,6 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{}"))
                     .andExpect(status().isUnauthorized());
-        }
-    }
-
-    @Nested
-    @DisplayName("GET /api/planner/md/config - Get Planner Config")
-    class GetConfigTests {
-
-        @Test
-        @DisplayName("Should return 200 with config values (public endpoint)")
-        void getConfig_WhenPublic_Returns200WithConfig() throws Exception {
-            // Config endpoint returns version info for planner creation:
-            // - schemaVersion: data format version (for migration support)
-            // - mdCurrentVersion: current Mirror Dungeon version (for MIRROR_DUNGEON planners)
-            // - rrAvailableVersions: available Refracted Railway versions (for REFRACTED_RAILWAY planners)
-            mockMvc.perform(get("/api/planner/md/config"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.schemaVersion").isNumber())
-                    .andExpect(jsonPath("$.schemaVersion").value(2))
-                    .andExpect(jsonPath("$.mdCurrentVersion").isNumber())
-                    .andExpect(jsonPath("$.rrAvailableVersions").isArray());
-        }
-
-        @Test
-        @DisplayName("Should be accessible without authentication")
-        void getConfig_WhenNoAuth_Success() throws Exception {
-            // Config endpoint is public - no auth cookie needed
-            mockMvc.perform(get("/api/planner/md/config"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.schemaVersion").exists())
-                    .andExpect(jsonPath("$.mdCurrentVersion").exists())
-                    .andExpect(jsonPath("$.rrAvailableVersions").exists());
         }
     }
 
@@ -1168,6 +1210,29 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.published").value(true));
+        }
+
+        @Test
+        @DisplayName("a floor without a theme pack saves as a draft and is refused on publish")
+        void publishIntent_WhenAFloorHasNoThemePack_Returns400AfterTheDraftSaved() throws Exception {
+            ObjectNode document = (ObjectNode) objectMapper.readTree(TestDataFactory.VALID_CONTENT);
+            document.set("floorSelections", objectMapper.readTree("[{\"difficulty\":0,\"giftIds\":[]}]"));
+            UpsertPlannerRequest request = withContent(createValidPlannerRequest(),
+                    objectMapper.writeValueAsString(document));
+            UUID plannerId = UUID.fromString(request.id());
+
+            mockMvc.perform(put("/api/planner/md/{id}", plannerId).with(withCsrf())
+                            .cookie(session())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isCreated());
+
+            mockMvc.perform(post("/api/planner/md/{id}/publish", plannerId).with(withCsrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .cookie(accessTokenCookie()))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+            assertFalse(plannerRepository.findById(plannerId).orElseThrow().isPublished());
         }
 
         @Test

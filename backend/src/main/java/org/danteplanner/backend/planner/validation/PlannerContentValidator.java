@@ -19,21 +19,33 @@ public class PlannerContentValidator {
     private final SkillStateValidator skillStateValidator;
     private final IdReferenceValidator idReferenceValidator;
     private final StartBuffValidator startBuffValidator;
+    private final GameDataRegistry gameDataRegistry;
 
-    public JsonNode validate(String content, String category) {
-        return validate(content, category, ValidationPolicy.DRAFT);
+    public String validate(String content, String category, int version) {
+        return validate(content, category, version, ValidationPolicy.DRAFT);
     }
 
-    public JsonNode validate(String content, String category, ValidationPolicy policy) {
+    public String validate(String content, String category, int version, ValidationPolicy policy) {
         try {
-            return doValidate(content, category, policy);
+            return doValidate(content, category, version, policy);
         } catch (PlannerValidationException ex) {
             ex.setFailedContent(content);
             throw ex;
         }
     }
 
-    private JsonNode doValidate(String content, String category, ValidationPolicy policy) {
+    public boolean isSameDocument(String content, String stored) {
+        if (stored == null) {
+            return false;
+        }
+        try {
+            return JsonDocuments.sameDocument(structuralValidator.parseJson(content), structuralValidator.parseJson(stored));
+        } catch (PlannerValidationException ex) {
+            return false;
+        }
+    }
+
+    private String doValidate(String content, String category, int version, ValidationPolicy policy) {
         if (content == null || content.isBlank()) {
             log.warn("Validation failed: content is null or empty");
             throw ValidationErrors.emptyContent();
@@ -43,13 +55,15 @@ public class PlannerContentValidator {
 
         ValidationContext context = new ValidationContext(policy);
 
-        JsonNode root = structuralValidator.parseJson(content);
-        structuralValidator.validateContentSize(root);
+        JsonNode parsed = structuralValidator.parseJson(content);
+        structuralValidator.validateContentSize(parsed);
 
-        if (!root.isObject()) {
+        if (!parsed.isObject()) {
             log.warn("Validation failed: content is not a JSON object");
             throw ValidationErrors.malformedJson("root element is not an object");
         }
+
+        JsonNode root = gameDataRegistry.idMigrations().normalize(parsed);
 
         structuralValidator.validateNoUnknownFields(root);
         structuralValidator.validateRequiredFields(root);
@@ -62,14 +76,16 @@ public class PlannerContentValidator {
         idReferenceValidator.validateEquipmentIds(root, context);
         idReferenceValidator.validateGiftIds(root, context);
         idReferenceValidator.validateFloorSelectionIds(root, category, context);
-        startBuffValidator.validateStartBuffIds(root, context);
-        startBuffValidator.validateStartGiftIds(root, context);
+        if (startBuffValidator.validateSeasonExists(version, context)) {
+            startBuffValidator.validateStartBuffIds(root, version, context);
+            startBuffValidator.validateStartGiftIds(root, version, context);
+        }
 
         List<PlannerValidationException> errors = context.getErrors();
         if (!errors.isEmpty()) {
             throw PlannerValidationException.combined(errors);
         }
 
-        return root;
+        return root.equals(parsed) ? content : root.toString();
     }
 }

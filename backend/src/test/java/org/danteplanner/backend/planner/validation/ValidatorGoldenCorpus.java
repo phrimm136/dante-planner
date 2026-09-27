@@ -52,7 +52,8 @@ final class ValidatorGoldenCorpus {
     static final int MAX_NOTE_SIZE_BYTES = 1024;
 
     static final int MD_CURRENT_VERSION = 7;
-    static final String RR_AVAILABLE_VERSIONS = "1,5";
+    static final List<Integer> RR_AVAILABLE_VERSIONS = List.of(1, 5);
+    static final int SCHEMA_VERSION = 2;
 
     static final Set<String> IDENTITY_IDS = sinnerScopedIds("1", "01");
     static final Set<String> EGO_IDS = union(sinnerScopedIds("2", "01"), Set.of("20502"));

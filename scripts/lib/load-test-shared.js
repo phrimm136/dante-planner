@@ -56,11 +56,6 @@ export function runEndpoints(data) {
   const params = { cookies: { accessToken: token } };
 
   group('public reads', () => {
-    // Config — lightweight, likely no heavy query. Baseline reference point.
-    check(http.get(`${base}/api/planner/md/config`), {
-      'config 200': (r) => r.status === 200,
-    });
-
     // Published list — paginated DB read, likely JOIN for upvote/view counts.
     check(http.get(`${base}/api/planner/md/published?size=20&page=0`), {
       'published list 200': (r) => r.status === 200,

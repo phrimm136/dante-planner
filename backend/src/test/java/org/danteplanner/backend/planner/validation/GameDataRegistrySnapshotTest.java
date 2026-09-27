@@ -31,6 +31,9 @@ class GameDataRegistrySnapshotTest {
     private static final int GENERATIONS = 50_000;
     private static final int READ_ROUNDS = 20_000;
     private static final long JOIN_TIMEOUT_MS = 60_000;
+    private static final int SEASON = 7;
+    private static final int SCHEMA_VERSION = 2;
+    private static final int RR_VERSION = 1;
 
     @Test
     @DisplayName("a lookup round spanning a reload sees one load's data or the other's, never both")
@@ -86,9 +89,9 @@ class GameDataRegistrySnapshotTest {
                 && registry.hasEgo("ego-" + generation)
                 && registry.hasEgoGift("gift-" + generation)
                 && registry.hasThemePack("pack-" + generation)
-                && registry.hasStartBuff("buff-" + generation)
-                && registry.hasStartGiftKeyword("keyword-" + generation)
-                && registry.getStartGiftPool("keyword-" + generation) != null
+                && registry.hasStartBuff(SEASON, "buff-" + generation)
+                && registry.hasStartGiftKeyword(SEASON, "keyword-" + generation)
+                && registry.getStartGiftPool(SEASON, "keyword-" + generation) != null
                 && registry.isGiftAffordableForThemePack("themed-gift-" + generation, "pack-" + generation)
                 && registry.isPopulated();
     }
@@ -115,6 +118,16 @@ class GameDataRegistrySnapshotTest {
                 case "startBuffs.json" -> Set.of("buff-" + generation);
                 default -> throw new IllegalStateException("no fixture for " + filePath);
             };
+        }
+
+        @Override
+        public PlannerVersions loadPlannerVersions(Path filePath) {
+            return new PlannerVersions(SCHEMA_VERSION, List.of(SEASON), List.of(RR_VERSION));
+        }
+
+        @Override
+        public Path seasonDirectory(Path dataDir, int version) {
+            return dataDir.resolve(SEASON_DIRECTORY_PREFIX + version);
         }
 
         @Override
