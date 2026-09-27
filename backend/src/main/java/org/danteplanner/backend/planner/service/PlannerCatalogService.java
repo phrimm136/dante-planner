@@ -8,6 +8,7 @@ import org.danteplanner.backend.planner.entity.PlannerCatalog;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.RecommendedSql;
+import org.danteplanner.backend.planner.validation.JsonDocuments;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -84,7 +85,7 @@ public class PlannerCatalogService {
             return Objects.equals(current, loaded);
         }
         try {
-            return objectMapper.readTree(current).equals(objectMapper.readTree(loaded));
+            return JsonDocuments.sameDocument(objectMapper.readTree(current), objectMapper.readTree(loaded));
         } catch (JsonProcessingException e) {
             return false;
         }

@@ -73,7 +73,7 @@ const EquippedEGOSchema = z
 
 const EGOSlotsSchema = z.partialRecord(EgoTypeSchema, EquippedEGOSchema)
 
-const SkillEAStateSchema = z.record(z.string(), z.number())
+const SkillEAStateSchema = z.record(z.string(), z.number().int())
 
 const SinnerEquipmentSchema = z
   .object({
@@ -158,7 +158,7 @@ export const PlannerConfigDiscriminatedSchema = z.discriminatedUnion('type', [
 
 const MDPlannerContentBaseFields = {
   selectedKeywords: z.array(z.string()),
-  selectedBuffIds: z.array(z.number()),
+  selectedBuffIds: z.array(z.number().int()),
   selectedGiftKeyword: z.string().nullable(),
   selectedGiftIds: z.array(EncodedGiftIdSchema),
   observationGiftIds: z.array(EncodedGiftIdSchema),

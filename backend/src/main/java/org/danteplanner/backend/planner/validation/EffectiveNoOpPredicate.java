@@ -50,7 +50,7 @@ public class EffectiveNoOpPredicate {
             return false;
         }
         try {
-            return objectMapper.readTree(carried).equals(objectMapper.readTree(storedValue));
+            return JsonDocuments.sameDocument(objectMapper.readTree(carried), objectMapper.readTree(storedValue));
         } catch (JsonProcessingException e) {
             return false;
         }

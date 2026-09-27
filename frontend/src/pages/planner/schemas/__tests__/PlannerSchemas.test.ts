@@ -10,6 +10,7 @@ import { describe, it, expect, assert } from 'vitest'
 import { ZodError } from 'zod'
 import {
   MDConfigSchema,
+  MDPlannerContentDraftSchema,
   RRConfigSchema,
   PlannerConfigDiscriminatedSchema,
   SaveablePlannerSchema,
@@ -222,6 +223,34 @@ describe('PlannerConfigDiscriminatedSchema', () => {
 // ============================================================================
 // validateSaveablePlanner Tests
 // ============================================================================
+
+describe('MDPlannerContentDraftSchema integer fields', () => {
+  function mdContent(overrides: Record<string, unknown>) {
+    return { ...createValidSaveablePlanner('MIRROR_DUNGEON').content, ...overrides }
+  }
+
+  it('accepts integer skillEAState slot values', () => {
+    const content = mdContent({ skillEAState: { '5': { '0': 1, '1': 2, '2': 3 } } })
+    expect(MDPlannerContentDraftSchema.safeParse(content).success).toBe(true)
+  })
+
+  it('rejects a fractional skillEAState slot value', () => {
+    const content = mdContent({ skillEAState: { '5': { '0': 1.5, '1': 2, '2': 3 } } })
+    expect(MDPlannerContentDraftSchema.safeParse(content).success).toBe(false)
+  })
+
+  it('accepts integer selectedBuffIds', () => {
+    expect(MDPlannerContentDraftSchema.safeParse(mdContent({ selectedBuffIds: [1] })).success).toBe(
+      true,
+    )
+  })
+
+  it('rejects a fractional selectedBuffIds entry', () => {
+    expect(
+      MDPlannerContentDraftSchema.safeParse(mdContent({ selectedBuffIds: [1.5] })).success,
+    ).toBe(false)
+  })
+})
 
 describe('validateSaveablePlanner', () => {
   describe('two-step validation', () => {

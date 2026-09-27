@@ -81,6 +81,28 @@ class JsonTraversalTest {
     }
 
     @Test
+    void eachNumber_WhenElementIsAnIntegralValuedFraction_RejectsAtTheIndexedPathAndSkipsIt() {
+        eachNumber(arrayField(root("{\"order\":[7,1.0]}"), "order"), "order", context,
+                (value, index) -> visited.add(index + ":" + value));
+
+        assertThat(visited).containsExactly("0:7");
+        assertThat(context.getErrors())
+                .extracting(PlannerValidationException::getOriginalCode, PlannerValidationException::getMessage)
+                .containsExactly(tuple("INVALID_FIELD_TYPE", "Field 'order[1]' must be number, got number 1.0"));
+    }
+
+    @Test
+    void eachNumber_WhenElementExceedsTheIntRange_RejectsItInsteadOfWrapping() {
+        eachNumber(arrayField(root("{\"order\":[4294967296]}"), "order"), "order", context,
+                (value, index) -> visited.add(index + ":" + value));
+
+        assertThat(visited).isEmpty();
+        assertThat(context.getErrors())
+                .extracting(PlannerValidationException::getOriginalCode, PlannerValidationException::getMessage)
+                .containsExactly(tuple("INVALID_FIELD_TYPE", "Field 'order[0]' must be number, got number 4294967296"));
+    }
+
+    @Test
     void eachNumber_WhenElementRepeats_VisitsItAgain() {
         eachNumber(arrayField(root("{\"order\":[7,7]}"), "order"), "order", context,
                 (value, index) -> visited.add(index + ":" + value));

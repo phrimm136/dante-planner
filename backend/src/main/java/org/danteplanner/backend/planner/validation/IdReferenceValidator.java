@@ -17,6 +17,7 @@ import static org.danteplanner.backend.planner.validation.JsonTraversal.arrayFie
 import static org.danteplanner.backend.planner.validation.JsonTraversal.eachObject;
 import static org.danteplanner.backend.planner.validation.JsonTraversal.eachObjectProperty;
 import static org.danteplanner.backend.planner.validation.JsonTraversal.eachUniqueString;
+import static org.danteplanner.backend.planner.validation.JsonTraversal.isInt;
 
 @Component
 @RequiredArgsConstructor
@@ -106,7 +107,11 @@ class IdReferenceValidator {
     private void requireInRange(JsonNode owner, String ownerPath, String field, int min, int max,
                                 ValidationContext context) {
         JsonNode node = owner.path(field);
-        if (!node.isNumber()) {
+        if (node.isMissingNode()) {
+            return;
+        }
+        if (!isInt(node)) {
+            context.reject(ownerPath + "." + field, p -> ValidationErrors.invalidFieldType(p, "number", node));
             return;
         }
 
@@ -166,11 +171,15 @@ class IdReferenceValidator {
     private void validateThreadspin(JsonNode ego, String sinnerKey, String egoType, String egoId,
                                     ValidationContext context) {
         JsonNode threadspinNode = ego.path("threadspin");
-        if (!threadspinNode.isNumber()) {
+        if (threadspinNode.isMissingNode()) {
             return;
         }
 
         String threadspinPath = "equipment[" + sinnerKey + "].egos." + egoType + ".threadspin";
+        if (!isInt(threadspinNode)) {
+            context.reject(threadspinPath, p -> ValidationErrors.invalidFieldType(p, "number", threadspinNode));
+            return;
+        }
         int threadspin = threadspinNode.asInt();
 
         if (!validateThreadspinInRange(threadspinPath, threadspin, context)) {
@@ -266,7 +275,7 @@ class IdReferenceValidator {
         }
 
         JsonNode difficultyNode = floor.path("difficulty");
-        int difficulty = difficultyNode.isNumber() ? difficultyNode.asInt() : -1;
+        int difficulty = isInt(difficultyNode) ? difficultyNode.asInt() : -1;
 
         if (difficulty < expected.min() || difficulty > expected.max()) {
             context.reject(floorPath + ".difficulty",

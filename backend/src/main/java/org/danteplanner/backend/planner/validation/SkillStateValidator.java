@@ -44,7 +44,7 @@ class SkillStateValidator {
                 continue;
             }
 
-            if (!slotValue.isNumber()) {
+            if (!JsonTraversal.isInt(slotValue)) {
                 context.reject(sinnerPath + "[" + slotKey + "]",
                         p -> ValidationErrors.invalidFieldType(p, "number", slotValue));
                 continue;

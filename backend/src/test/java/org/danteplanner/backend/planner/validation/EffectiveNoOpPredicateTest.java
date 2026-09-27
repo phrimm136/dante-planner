@@ -85,6 +85,18 @@ class EffectiveNoOpPredicateTest {
     }
 
     @Test
+    void effectiveNoOp_WhenContentDiffersOnlyInNumberRendering_IsTrue() {
+        PlannerContent stored = PlannerContent.builder()
+                .content("{\"deploymentOrder\":[5.0],\"equipment\":{}}")
+                .build();
+        CarriedWrite carried = CarriedWrite.builder()
+                .content("{\"equipment\":{},\"deploymentOrder\":[5]}")
+                .build();
+
+        assertThat(predicate.isEffectiveNoOp(stored, carried)).isTrue();
+    }
+
+    @Test
     @DisplayName("stale-different-content-conflicts: a document that is not tree-equal is not a no-op")
     void effectiveNoOp_WhenContentTreeDiffers_IsFalse() {
         CarriedWrite carried = carryingStoredValues().content(OTHER_DOCUMENT).build();

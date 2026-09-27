@@ -37,6 +37,10 @@ final class JsonTraversal {
         return node.isArray() ? node : MissingNode.getInstance();
     }
 
+    static boolean isInt(JsonNode node) {
+        return node.isIntegralNumber() && node.canConvertToInt();
+    }
+
     static void eachUniqueString(JsonNode array, String path, ValidationContext context, StringElement body) {
         if (!array.isArray()) {
             return;
@@ -72,7 +76,7 @@ final class JsonTraversal {
         for (int index = 0; index < array.size(); index++) {
             JsonNode element = array.get(index);
 
-            if (!element.isNumber()) {
+            if (!isInt(element)) {
                 context.reject(path + "[" + index + "]",
                         p -> ValidationErrors.invalidFieldType(p, "number", element));
                 continue;

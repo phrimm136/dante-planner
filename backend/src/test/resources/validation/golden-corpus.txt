@@ -256,6 +256,21 @@ code: VALIDATION_ERROR
 message: [VALUE_OUT_OF_RANGE] uptie value 9 is out of range [1-4]
 sub 1: VALUE_OUT_OF_RANGE | uptie value 9 is out of range [1-4]
 
+### identity-level-string-rejected
+code: VALIDATION_ERROR
+message: [INVALID_FIELD_TYPE] Field 'equipment[05].identity.level' must be number, got string "45"
+sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].identity.level' must be number, got string "45"
+
+### identity-level-null-rejected
+code: VALIDATION_ERROR
+message: [INVALID_FIELD_TYPE] Field 'equipment[05].identity.level' must be number, got null
+sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].identity.level' must be number, got null
+
+### identity-uptie-string-rejected
+code: VALIDATION_ERROR
+message: [INVALID_FIELD_TYPE] Field 'equipment[05].identity.uptie' must be number, got string "4"
+sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].identity.uptie' must be number, got string "4"
+
 ### ego-id-not-string
 code: VALIDATION_ERROR
 message: [INVALID_FIELD_TYPE] Field 'equipment[05].egos.ZAYIN.id' has wrong type, expected non-empty string; [INVALID_FIELD_TYPE] Field 'equipment.05.egos.ZAYIN.id' must be string, got number 20501
@@ -281,6 +296,11 @@ sub 1: INVALID_ID_REFERENCE | EGO for sinner 05 ID '20601' not found or invalid
 code: VALIDATION_ERROR
 message: [VALUE_OUT_OF_RANGE] threadspin value 9 is out of range [1-5]
 sub 1: VALUE_OUT_OF_RANGE | threadspin value 9 is out of range [1-5]
+
+### threadspin-string-rejected
+code: VALIDATION_ERROR
+message: [INVALID_FIELD_TYPE] Field 'equipment[05].egos.ZAYIN.threadspin' must be number, got string "4"
+sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].egos.ZAYIN.threadspin' must be number, got string "4"
 
 ### ego-threadspin-above-ego-ceiling
 code: VALIDATION_ERROR
@@ -469,12 +489,6 @@ code: VALIDATION_ERROR
 message: [INVALID_FIELD_TYPE] Field 'equipment[05].identity.id' has wrong type, expected non-empty string
 sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].identity.id' has wrong type, expected non-empty string
 
-### silence-identity-level-not-number
-accepted
-
-### silence-identity-uptie-not-number
-accepted
-
 ### silence-egos-not-object
 code: VALIDATION_ERROR
 message: [INVALID_FIELD_TYPE] Field 'equipment[05].egos' has wrong type, expected object
@@ -484,9 +498,6 @@ sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].egos' has wrong type, expected 
 code: VALIDATION_ERROR
 message: [MISSING_REQUIRED_FIELD] Missing required fields: [equipment[05].egos.ZAYIN]
 sub 1: MISSING_REQUIRED_FIELD | Missing required fields: [equipment[05].egos.ZAYIN]
-
-### silence-threadspin-not-number
-accepted
 
 ### baseline-accepted
 accepted

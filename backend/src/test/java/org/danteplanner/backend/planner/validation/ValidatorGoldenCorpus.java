@@ -325,6 +325,15 @@ final class ValidatorGoldenCorpus {
         entries.add(draft("identity-uptie-out-of-range", valid().with("equipment", equipmentWith(
                 Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":9},"
                         + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":4}}}")))));
+        entries.add(draft("identity-level-string-rejected", valid().with("equipment", equipmentWith(
+                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":\"45\",\"uptie\":4},"
+                        + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":4}}}")))));
+        entries.add(draft("identity-level-null-rejected", valid().with("equipment", equipmentWith(
+                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":null,\"uptie\":4},"
+                        + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":4}}}")))));
+        entries.add(draft("identity-uptie-string-rejected", valid().with("equipment", equipmentWith(
+                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":\"4\"},"
+                        + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":4}}}")))));
         entries.add(draft("ego-id-not-string", valid().with("equipment", equipmentWith(
                 Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
                         + "\"egos\":{\"ZAYIN\":{\"id\":20501,\"threadspin\":4}}}")))));
@@ -340,6 +349,9 @@ final class ValidatorGoldenCorpus {
         entries.add(draft("ego-threadspin-out-of-range", valid().with("equipment", equipmentWith(
                 Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
                         + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":9}}}")))));
+        entries.add(draft("threadspin-string-rejected", valid().with("equipment", equipmentWith(
+                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
+                        + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":\"4\"}}}")))));
         entries.add(draft("ego-threadspin-above-ego-ceiling", valid().with("equipment", equipmentWith(
                 Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
                         + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":5}}}")))));
@@ -431,21 +443,12 @@ final class ValidatorGoldenCorpus {
         entries.add(draft("silence-identity-id-not-textual", valid().with("equipment", equipmentWith(
                 Map.of("05", "\"05\":{\"identity\":{\"id\":10501,\"level\":45,\"uptie\":4},"
                         + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":4}}}")))));
-        entries.add(draft("silence-identity-level-not-number", valid().with("equipment", equipmentWith(
-                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":\"45\",\"uptie\":4},"
-                        + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":4}}}")))));
-        entries.add(draft("silence-identity-uptie-not-number", valid().with("equipment", equipmentWith(
-                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":\"4\"},"
-                        + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":4}}}")))));
         entries.add(draft("silence-egos-not-object", valid().with("equipment", equipmentWith(
                 Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
                         + "\"egos\":5}")))));
         entries.add(draft("silence-ego-value-not-object", valid().with("equipment", equipmentWith(
                 Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
                         + "\"egos\":{\"ZAYIN\":5}}")))));
-        entries.add(draft("silence-threadspin-not-number", valid().with("equipment", equipmentWith(
-                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
-                        + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":\"4\"}}}")))));
 
         entries.add(draft("baseline-accepted", valid()));
         entries.add(publish("baseline-accepted-on-publish", valid()));

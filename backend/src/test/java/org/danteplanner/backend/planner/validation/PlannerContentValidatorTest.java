@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -943,6 +944,20 @@ class PlannerContentValidatorTest {
         }
 
         @Test
+        void validate_WhenBuffIdIsAnIntegralValuedFraction_RejectsItAsANonNumberIs() {
+            String content = createValidContent().replace(
+                    "\"selectedBuffIds\": [100, 201],",
+                    "\"selectedBuffIds\": [100, 101.0],"
+            );
+
+            PlannerValidationException thrown = assertThrows(PlannerValidationException.class,
+                    () -> validator.validate(content, "5F"));
+
+            assertThat(thrown.getSubErrors()).contains(new PlannerValidationException.ValidationError(
+                    "INVALID_FIELD_TYPE", "Field 'selectedBuffIds[1]' must be number, got number 101.0"));
+        }
+
+        @Test
         @DisplayName("Should throw exception for buff ID not found in game data")
         void validate_WhenBuffIdNotInGameData_ThrowsException() {
             // Fails in buff validation, never reaches gift validation
@@ -1472,6 +1487,48 @@ class PlannerContentValidatorTest {
         }
 
         @Test
+        void validate_WhenLevelIsAString_RejectsItAsANonNumber() {
+            setupMocksForValidIds();
+            String content = createValidContent().replace(
+                    "\"identity\": {\"id\": \"10101\", \"uptie\": 4, \"level\": 45}",
+                    "\"identity\": {\"id\": \"10101\", \"uptie\": 4, \"level\": \"abc\"}");
+
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
+                    () -> validator.validate(content, "5F"));
+
+            assertThat(ex.getSubErrors()).containsExactly(new PlannerValidationException.ValidationError(
+                    "INVALID_FIELD_TYPE", "Field 'equipment[01].identity.level' must be number, got string \"abc\""));
+        }
+
+        @Test
+        void validate_WhenLevelIsAnIntegralValuedFraction_RejectsItAsANonNumber() {
+            setupMocksForValidIds();
+            String content = createValidContent().replace(
+                    "\"identity\": {\"id\": \"10101\", \"uptie\": 4, \"level\": 45}",
+                    "\"identity\": {\"id\": \"10101\", \"uptie\": 4, \"level\": 45.0}");
+
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
+                    () -> validator.validate(content, "5F"));
+
+            assertThat(ex.getSubErrors()).containsExactly(new PlannerValidationException.ValidationError(
+                    "INVALID_FIELD_TYPE", "Field 'equipment[01].identity.level' must be number, got number 45.0"));
+        }
+
+        @Test
+        void validate_WhenThreadspinIsAnIntegralValuedFraction_RejectsItAsANonNumber() {
+            setupMocksForValidIds();
+            String content = createValidContent().replace(
+                    "\"egos\": {\"ZAYIN\": {\"id\": \"20101\", \"threadspin\": 4}}",
+                    "\"egos\": {\"ZAYIN\": {\"id\": \"20101\", \"threadspin\": 4.0}}");
+
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
+                    () -> validator.validate(content, "5F"));
+
+            assertThat(ex.getSubErrors()).containsExactly(new PlannerValidationException.ValidationError(
+                    "INVALID_FIELD_TYPE", "Field 'equipment[01].egos.ZAYIN.threadspin' must be number, got number 4.0"));
+        }
+
+        @Test
         @DisplayName("Should report an out-of-range threadspin alongside a failure on another sinner")
         void validate_WhenThreadspinAndUptieOutOfRange_ReportsBoth() {
             setupMocksForValidIds();
@@ -1571,6 +1628,22 @@ class PlannerContentValidatorTest {
             assertTrue(ex.getSubErrors().stream().anyMatch(e -> "VALUE_OUT_OF_RANGE".equals(e.code())
                             && "floorSelections[0].difficulty value 0 is out of range [1-1]".equals(e.message())),
                     "Expected the difficulty range failure in sub-errors: " + ex.getSubErrors());
+        }
+
+        @Test
+        void validate_WhenPublishPolicyAndDifficultyIsAnIntegralValuedFraction_ReportsItAsANonNumberIs() {
+            setupMocksWithoutThemePack();
+            when(gameDataRegistry.hasThemePack(anyString())).thenReturn(true);
+            when(gameDataRegistry.isGiftAffordableForThemePack(anyString(), anyString())).thenReturn(true);
+            String content = createValidContent().replace(
+                    "{\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}",
+                    "{\"themePackId\": \"1001\", \"difficulty\": 1.0, \"giftIds\": [\"9002\"]}");
+
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
+                    () -> validator.validate(content, "10F", ValidationPolicy.PUBLISH));
+
+            assertThat(ex.getSubErrors()).contains(new PlannerValidationException.ValidationError(
+                    "VALUE_OUT_OF_RANGE", "floorSelections[0].difficulty value -1 is out of range [1-1]"));
         }
     }
 }
