@@ -47,13 +47,15 @@ principle without a corresponding entry is an untested claim rather than a settl
 | File | Operation |
 |---|---|
 | `runbooks/environment-setup.md` | Standing up a working environment from scratch |
+| `runbooks/prod-account-rewire.md` | Preparing the vended prod account to receive production |
 | `runbooks/rds-migration.md` | Managed-database migration and the decommission gate |
 | `runbooks/schema-decomposition-migration.md` | The stop-the-world schema window |
-| `runbooks/oregon-cutover.md` | Primary-region cutover |
+| `runbooks/staging-e2e-park-report.md` | Where the staging end-to-end loop was parked, and what resuming it needs |
 
 ## Legacy
 
 `legacy/` holds a retired process: task directories carrying spec, plan, research and review
 documents, and the decision index generated from them. Decisions worth keeping were harvested into
 `adr/`, live procedures were promoted into `runbooks/`, and the rest stays only for the record git
-already keeps. Nothing there is maintained, and nothing outside it should point into it.
+already keeps. It also takes runbooks whose operation no longer exists, under `legacy/runbooks/`.
+Nothing there is maintained, and nothing outside it should point into it.
