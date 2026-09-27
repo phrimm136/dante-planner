@@ -1,8 +1,9 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 
-import { ApiClient } from '@/lib/api'
 import { NotFoundError } from '@/lib/apiErrors'
 import { validateData } from '@/lib/validation'
+import { fetchPublishedPlannerRaw } from '../lib/fetchPublishedPlannerRaw'
+import { publishedPlannerQueryKeys } from '../lib/publishedPlannerQueryKeys'
 import { PublishedPlannerDetailSchema } from '../schemas/PlannerListSchemas'
 import { validateSaveablePlanner } from '../schemas/PlannerSchemas'
 
@@ -41,19 +42,22 @@ export function publishedPlannerStaleTime(data: PublishedPlannerQueryState | und
   return data !== undefined && isPlannerRemoved(data) ? 0 : STALE_TIME.MEDIUM
 }
 
-export const publishedPlannerQueryKeys = {
-  detail: (id: string) => ['publishedPlanner', id] as const,
-}
+export { publishedPlannerQueryKeys }
 
 export async function fetchPublishedPlanner(
   plannerId: string,
   signal?: AbortSignal,
 ): Promise<PublishedPlannerQueryState> {
+  return parsePublishedPlanner(plannerId, fetchPublishedPlannerRaw(plannerId, signal))
+}
+
+export async function parsePublishedPlanner(
+  plannerId: string,
+  raw: Promise<unknown>,
+): Promise<PublishedPlannerQueryState> {
   let data: unknown
   try {
-    data = await ApiClient.get(`/api/planner/md/published/${plannerId}`, {
-      ...(signal !== undefined && { signal }),
-    })
+    data = await raw
   } catch (error) {
     if (error instanceof NotFoundError) return { removed: true }
     throw error

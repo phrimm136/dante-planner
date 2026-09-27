@@ -1,6 +1,8 @@
 import i18n from '@/lib/i18n'
 import { queryClient } from '@/lib/queryClient'
+import { fetchPublishedPlannerRaw } from '@/pages/planner/lib/fetchPublishedPlannerRaw'
 import { loadPlannerTitle, untitledPlannerTitle } from '@/pages/planner/lib/loadPlannerTitle'
+import { publishedPlannerQueryKeys } from '@/pages/planner/lib/publishedPlannerQueryKeys'
 
 /**
  * Route loaders. Each resolves the one localized string its route's head()
@@ -10,16 +12,29 @@ import { loadPlannerTitle, untitledPlannerTitle } from '@/pages/planner/lib/load
  * bundler needs the shape to enumerate the matching files.
  */
 
-export async function loadPublishedPlanner({ params }: { params: { id: string } }) {
-  const {
-    publishedPlannerQueryKeys,
-    fetchPublishedPlanner,
-    isPlannerRemoved,
-    publishedPlannerStaleTime,
-  } = await import('@/pages/planner/hooks/usePublishedPlannerQuery')
+export async function loadPublishedPlanner({
+  params,
+  abortController,
+}: {
+  params: { id: string }
+  abortController: AbortController
+}) {
+  const queryKey = publishedPlannerQueryKeys.detail(params.id)
+  const cached = queryClient.getQueryState(queryKey)
+  let early =
+    cached?.data === undefined && cached?.fetchStatus !== 'fetching'
+      ? fetchPublishedPlannerRaw(params.id, abortController.signal)
+      : undefined
+  void early?.catch(() => undefined)
+  const { parsePublishedPlanner, isPlannerRemoved, publishedPlannerStaleTime } =
+    await import('@/pages/planner/hooks/usePublishedPlannerQuery')
   const result = await queryClient.fetchQuery({
-    queryKey: publishedPlannerQueryKeys.detail(params.id),
-    queryFn: ({ signal }) => fetchPublishedPlanner(params.id, signal),
+    queryKey,
+    queryFn: ({ signal }) => {
+      const raw = early ?? fetchPublishedPlannerRaw(params.id, signal)
+      early = undefined
+      return parsePublishedPlanner(params.id, raw)
+    },
     staleTime: (query) => publishedPlannerStaleTime(query.state.data),
   })
   if (isPlannerRemoved(result)) return { title: untitledPlannerTitle() }
