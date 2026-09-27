@@ -21,6 +21,7 @@ import org.danteplanner.backend.shared.entity.ContentEntityType;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.service.PlannerViewRecorder;
+import org.danteplanner.backend.planner.service.RedisViewRecorder;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,6 +50,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -106,6 +108,7 @@ class PublishedPlannerQueryServiceTest {
                 subscriptionService,
                 reportService,
                 plannerViewRecorder,
+                mock(RedisViewRecorder.class),
                 plannerStatsRepository,
                 accessGuard,
                 new CatalogReadValidator()

@@ -19,6 +19,8 @@ public class RateLimitProperties {
     private BucketConfig report;
     private BucketConfig moderation;
     private BucketConfig publicRead;
+    private BucketConfig plannerStats;
+    private BucketConfig viewRecord;
 
     @Getter
     @Setter

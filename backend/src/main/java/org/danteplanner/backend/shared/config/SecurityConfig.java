@@ -90,6 +90,9 @@ public class SecurityConfig {
 
                 .requestMatchers("/api/planner/md/published").permitAll()
                 .requestMatchers("/api/planner/md/published/{id}").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/planner/md/published/{id}/stats").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/planner/md/published/{id}/flags").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/planner/md/published/{id}/viewcount").permitAll()
                 .requestMatchers("/api/planner/md/recommended").permitAll()
 
                 .requestMatchers(HttpMethod.GET, "/api/user/associations").permitAll()

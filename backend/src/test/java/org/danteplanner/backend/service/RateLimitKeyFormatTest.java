@@ -56,6 +56,8 @@ class RateLimitKeyFormatTest {
     private static final long REPORT_CAPACITY = 16;
     private static final long MODERATION_CAPACITY = 17;
     private static final long PUBLIC_READ_CAPACITY = 18;
+    private static final long PLANNER_STATS_CAPACITY = 19;
+    private static final long VIEW_RECORD_CAPACITY = 20;
 
     private static final Long USER_ID = 7L;
 
@@ -92,7 +94,13 @@ class RateLimitKeyFormatTest {
                             RateLimitPolicy.PLANNER_COMMENT_SSE, "device:" + DEVICE_ID)),
             new FrozenKey(RateLimitPolicy.PUBLIC_READ, "ip:203.0.113.9:public-read",
                     PUBLIC_READ_CAPACITY, null, "public-read",
-                    service -> service.check(RateLimitPolicy.PUBLIC_READ, "ip:203.0.113.9")));
+                    service -> service.check(RateLimitPolicy.PUBLIC_READ, "ip:203.0.113.9")),
+            new FrozenKey(RateLimitPolicy.PLANNER_STATS, "ip:203.0.113.9:planner-stats",
+                    PLANNER_STATS_CAPACITY, null, "planner-stats",
+                    service -> service.check(RateLimitPolicy.PLANNER_STATS, "ip:203.0.113.9")),
+            new FrozenKey(RateLimitPolicy.VIEW_RECORD, "ip:203.0.113.9:view-record",
+                    VIEW_RECORD_CAPACITY, null, "view-record",
+                    service -> service.check(RateLimitPolicy.VIEW_RECORD, "ip:203.0.113.9")));
 
     @TestFactory
     Stream<DynamicTest> policy_WhenCharged_ConsumesFrozenBucketKey() {
@@ -125,6 +133,19 @@ class RateLimitKeyFormatTest {
         assertThat(frozen).isEqualTo(EnumSet.allOf(RateLimitPolicy.class));
     }
 
+    @Test
+    void policy_WhenFrozenForTheSameClient_OwnsADistinctKey() {
+        List<String> clientKeys = FROZEN_KEYS.stream()
+                .map(FrozenKey::key)
+                .filter(key -> key.startsWith("ip:203.0.113.9:"))
+                .toList();
+
+        assertThat(clientKeys)
+                .contains("ip:203.0.113.9:public-read", "ip:203.0.113.9:planner-stats",
+                        "ip:203.0.113.9:view-record")
+                .doesNotHaveDuplicates();
+    }
+
     /**
      * Distinct capacities so a policy drawing from the wrong configured bucket is visible rather
      * than indistinguishable.
@@ -138,6 +159,8 @@ class RateLimitKeyFormatTest {
         properties.setReport(bucket(REPORT_CAPACITY));
         properties.setModeration(bucket(MODERATION_CAPACITY));
         properties.setPublicRead(bucket(PUBLIC_READ_CAPACITY));
+        properties.setPlannerStats(bucket(PLANNER_STATS_CAPACITY));
+        properties.setViewRecord(bucket(VIEW_RECORD_CAPACITY));
         return properties;
     }
 

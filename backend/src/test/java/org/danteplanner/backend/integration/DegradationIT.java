@@ -23,6 +23,7 @@ import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.config.FrontendProperties;
 import org.danteplanner.backend.shared.config.LoginRedirect;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
@@ -66,6 +67,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -133,6 +135,7 @@ class DegradationIT {
 
     private static final String COUNTER_NAME = "blacklist_check_skipped_total";
     private static final String RATE_LIMIT_SKIP_COUNTER_NAME = "rate_limit.charge_skipped";
+    private static final String VIEW_RECORD_FAILED_COUNTER_NAME = "views.record.failed";
     private static final long ONE_HOUR_MS = 3_600_000L;
 
     /**
@@ -248,6 +251,9 @@ class DegradationIT {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PlannerRepository plannerRepository;
 
     @Autowired
     private JwtTokenService jwtTokenService;
@@ -644,6 +650,30 @@ class DegradationIT {
         mockMvc.perform(get("/api/auth/google/callback").param("code", "any").param("state", "any"))
                 .andExpect(status().isFound())
                 .andExpect(header().string("Location", frontendProperties.getUrl() + LoginRedirect.UNAVAILABLE));
+    }
+
+    @Test
+    @DisplayName("Scenario 5: auth Redis cut → a viewcount post still answers 204 and views.record.failed increments")
+    void viewCount_WhenAuthRedisUnreachable_Returns204AndCountsTheFailure() throws Exception {
+        User author = TestDataFactory.createTestUser(
+                userRepository, "degradation-views-" + UUID.randomUUID() + "@example.com");
+        UUID plannerId = TestDataFactory.createTestPlanner(plannerRepository, author, true).getId();
+        new ReplicationControl(degradationPrimaryJdbcTemplate, degradationReplicaJdbcTemplate)
+                .awaitCaughtUp();
+        double before = viewRecordFailedCount();
+
+        cutAuthRedis();
+
+        mockMvc.perform(post("/api/planner/md/published/{id}/viewcount", plannerId).with(withCsrf())
+                        .cookie(AuthCookies.freshDeviceId()))
+                .andExpect(status().isNoContent());
+
+        assertThat(viewRecordFailedCount() - before).isEqualTo(1.0);
+    }
+
+    private double viewRecordFailedCount() {
+        Counter counter = meterRegistry.find(VIEW_RECORD_FAILED_COUNTER_NAME).counter();
+        return counter == null ? 0.0 : counter.count();
     }
 
     private double rateLimitSkipCount(RateLimitPolicy policy) {

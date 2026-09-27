@@ -4,7 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.moderation.service.PlannerReportService;
 import org.danteplanner.backend.planner.dto.CatalogQuery;
 import org.danteplanner.backend.planner.dto.PlannerCoreInfo;
+import org.danteplanner.backend.planner.dto.PlannerFlagsResponse;
 import org.danteplanner.backend.planner.dto.PlannerNotificationTarget;
+import org.danteplanner.backend.planner.dto.PlannerStatsResponse;
 import org.danteplanner.backend.planner.dto.PublicPlannerResponse;
 import org.danteplanner.backend.planner.dto.PublishedPlannerDetailResponse;
 import org.danteplanner.backend.shared.entity.ContentEntityType;
@@ -54,6 +56,7 @@ public class PublishedPlannerQueryService {
     private final PlannerSubscriptionService subscriptionService;
     private final PlannerReportService reportService;
     private final PlannerViewRecorder plannerViewRecorder;
+    private final RedisViewRecorder redisViewRecorder;
     private final PlannerStatsRepository plannerStatsRepository;
     private final PlannerAccessGuard accessGuard;
     private final CatalogReadValidator catalogReadValidator;
@@ -65,6 +68,7 @@ public class PublishedPlannerQueryService {
             PlannerSubscriptionService subscriptionService,
             PlannerReportService reportService,
             PlannerViewRecorder plannerViewRecorder,
+            RedisViewRecorder redisViewRecorder,
             PlannerStatsRepository plannerStatsRepository,
             PlannerAccessGuard accessGuard,
             CatalogReadValidator catalogReadValidator) {
@@ -74,6 +78,7 @@ public class PublishedPlannerQueryService {
         this.subscriptionService = subscriptionService;
         this.reportService = reportService;
         this.plannerViewRecorder = plannerViewRecorder;
+        this.redisViewRecorder = redisViewRecorder;
         this.plannerStatsRepository = plannerStatsRepository;
         this.accessGuard = accessGuard;
         this.catalogReadValidator = catalogReadValidator;
@@ -193,5 +198,37 @@ public class PublishedPlannerQueryService {
         return PublishedPlannerDetailResponse.fromEntity(
                 planner, hasUpvoted, isSubscribed, hasReported,
                 commentCount, ownerNotificationsEnabled, viewCount, upvotes);
+    }
+
+    @Transactional(readOnly = true)
+    public PlannerStatsResponse getPublishedPlannerStats(UUID plannerId) {
+        accessGuard.checkPublished(plannerId);
+        return PlannerStatsResponse.from(plannerStatsRepository.findById(plannerId).orElse(NO_STATS));
+    }
+
+    @Transactional(readOnly = true)
+    public PlannerFlagsResponse getPublishedPlannerFlags(UUID plannerId, Long userId) {
+        if (userId == null) {
+            accessGuard.checkPublished(plannerId);
+            return PlannerFlagsResponse.ANONYMOUS;
+        }
+        Planner planner = accessGuard.requirePublished(plannerId);
+        return new PlannerFlagsResponse(
+                hasUpvoted(plannerId, userId),
+                subscriptionService.isSubscribed(userId, plannerId),
+                planner.isOwnedBy(userId) && planner.isOwnerNotificationsEnabled());
+    }
+
+    @Transactional(readOnly = true)
+    public UUID requirePublished(UUID plannerId) {
+        accessGuard.checkPublished(plannerId);
+        return plannerId;
+    }
+
+    public void recordView(UUID plannerId, Long userId, String viewerIdentity, String userAgent) {
+        String viewerHash = userId != null
+                ? ViewerHashUtil.hashForAuthenticatedUser(userId, plannerId)
+                : ViewerHashUtil.hashForAnonymousUser(viewerIdentity, userAgent, plannerId);
+        redisViewRecorder.record(plannerId, viewerHash, LocalDate.now(ZoneOffset.UTC));
     }
 }

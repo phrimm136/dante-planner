@@ -5,6 +5,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.shared.config.SecurityProperties;
 import org.danteplanner.backend.planner.dto.CatalogQuery;
+import org.danteplanner.backend.planner.dto.PlannerFlagsResponse;
+import org.danteplanner.backend.planner.dto.PlannerStatsResponse;
 import org.danteplanner.backend.planner.dto.PublicPlannerResponse;
 import org.danteplanner.backend.planner.dto.PublishedPlannerDetailResponse;
 import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
@@ -17,10 +19,13 @@ import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.CacheControl;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -94,6 +99,40 @@ public class PublishedPlannerController {
                 ByIdReadGuard.PUBLISHED_PLANNER_SCOPE, id,
                 () -> publishedPlannerQueryService.getPublishedPlanner(id, userId, viewerIdentity, userAgent));
         return ResponseEntity.ok(response);
+    }
+
+    @RateLimited(RateLimitPolicy.PLANNER_STATS)
+    @GetMapping("/published/{id}/stats")
+    public ResponseEntity<PlannerStatsResponse> getPublishedPlannerStats(@PathVariable UUID id) {
+        PlannerStatsResponse response = byIdReadGuard.read(ByIdReadGuard.PLANNER_ENTITY_TYPE, id,
+                () -> publishedPlannerQueryService.getPublishedPlannerStats(id));
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(response);
+    }
+
+    @RateLimited(RateLimitPolicy.PLANNER_STATS)
+    @GetMapping("/published/{id}/flags")
+    public ResponseEntity<PlannerFlagsResponse> getPublishedPlannerFlags(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal Long userId) {
+        PlannerFlagsResponse response = byIdReadGuard.read(ByIdReadGuard.PLANNER_ENTITY_TYPE, id,
+                () -> publishedPlannerQueryService.getPublishedPlannerFlags(id, userId));
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(response);
+    }
+
+    @RateLimited(RateLimitPolicy.VIEW_RECORD)
+    @PostMapping("/published/{id}/viewcount")
+    public ResponseEntity<Void> recordView(
+            HttpServletRequest request,
+            HttpServletResponse servletResponse,
+            @PathVariable UUID id,
+            @AuthenticationPrincipal Long userId) {
+        UUID plannerId = byIdReadGuard.read(ByIdReadGuard.PLANNER_ENTITY_TYPE, id,
+                () -> publishedPlannerQueryService.requirePublished(id));
+        String viewerIdentity = ClientIpResolver.resolveClientIdentifier(
+                request, securityProperties, () -> deviceIdResolver.resolve(request, servletResponse));
+        publishedPlannerQueryService.recordView(
+                plannerId, userId, viewerIdentity, request.getHeader(HttpHeaders.USER_AGENT));
+        return ResponseEntity.noContent().build();
     }
 
     private ResponseEntity<Page<PublicPlannerResponse>> listPlanners(

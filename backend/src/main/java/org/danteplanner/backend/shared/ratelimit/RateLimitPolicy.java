@@ -24,7 +24,11 @@ public enum RateLimitPolicy {
 
     PLANNER_COMMENT_SSE(RateLimitProperties::getSse, "planner-comment-sse", "", Subject.CLIENT, false),
 
-    PUBLIC_READ(RateLimitProperties::getPublicRead, "public-read", "", Subject.CLIENT, false);
+    PUBLIC_READ(RateLimitProperties::getPublicRead, "public-read", "", Subject.CLIENT, false),
+
+    PLANNER_STATS(RateLimitProperties::getPlannerStats, "planner-stats", "", Subject.CLIENT, false),
+
+    VIEW_RECORD(RateLimitProperties::getViewRecord, "view-record", "", Subject.CLIENT, false);
 
     public enum Subject {
 

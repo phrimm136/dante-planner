@@ -15,12 +15,12 @@
 --   - ENUM/JSON values must match the schema after all MERGED migrations
 --   - Every keyword and ENUM value should appear in at least one row
 --
--- Schema version: V061 (planner aggregate + projections; planners table gone;
+-- Schema version: V063 (planner aggregate + projections; planners table gone;
 --                       user_settings sync choice split into two non-null flags;
 --                       planner_views no longer foreign-keys the planner core;
 --                       planner_content no longer carries content_digest;
 --                       domain_events outbox; entity filter indexes only the
---                       floors the category renders)
+--                       floors the category renders; view_flush_batches)
 --
 -- Coverage:
 --   - selected_keywords: all 35 keywords across 4 planners (JSON arrays)
@@ -37,6 +37,7 @@
 --   - planner_views: several view_date values, and a row whose planner_id
 --     matches no planner row — legal since V057 dropped fk_view_planner
 --   - domain_events: every event_type, dispatched and undispatched
+--   - view_flush_batches: one applied batch id
 
 -- ============================================================================
 -- users (sentinel id=0 already exists from V009)
@@ -370,3 +371,10 @@ VALUES
      JSON_OBJECT('commentId', 1), NOW(6), NOW(6), 1),
     (4, 'REPLY_RECEIVED', UNHEX('AAAA0001000000000000000000000001'),
      JSON_OBJECT('replyId', 2), NOW(6), NOW(6), 1);
+
+-- ============================================================================
+-- view_flush_batches
+-- ============================================================================
+
+INSERT IGNORE INTO view_flush_batches (batch_id, applied_at)
+VALUES (UNHEX('BBBB0001000000000000000000000001'), NOW(6));
