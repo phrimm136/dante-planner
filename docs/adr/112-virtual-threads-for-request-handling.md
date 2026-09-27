@@ -11,8 +11,8 @@
   primary-only pod and the routing pod, and every fixed cap is wrong on the side that saturates first.
 - @threads @pinning — The switch is safe on JDK 21 because every blocking path unmounts: Connector/J
   9.x replaced its I/O monitors with `ReentrantLock` (9.0.0), Lettuce runs on Netty and never blocks a
-  request thread, and the only remaining `synchronized` on a blocking path is the one-time lazy Redis
-  connect in the rate-limit proxy.
+  request thread, and the rate-limit proxy's lazy Redis connect holds a `ReentrantLock` that concurrent
+  callers skip rather than wait on.
   REJECTED: waiting for the JDK release that lifts monitor pinning — nothing in this codebase waits
   on it.
 - @threads @schedulers — The hand-built pools (shared scheduler, view-flush scheduler, SSE heartbeat

@@ -2,6 +2,7 @@ package org.danteplanner.backend.shared.config;
 
 import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -28,6 +29,7 @@ import io.github.bucket4j.distributed.proxy.ProxyManager;
 import io.github.bucket4j.distributed.proxy.RemoteBucketBuilder;
 import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager;
 import io.lettuce.core.RedisClient;
+import io.lettuce.core.RedisConnectionException;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.codec.ByteArrayCodec;
 import lombok.Getter;
@@ -126,27 +128,34 @@ public class RedisConnectionConfig {
                 .build();
     }
 
-    private static final class LazyConnectingProxyManager implements ProxyManager<byte[]> {
+    static final class LazyConnectingProxyManager implements ProxyManager<byte[]> {
 
         private final Supplier<ProxyManager<byte[]>> connector;
+        private final ReentrantLock connectLock = new ReentrantLock();
         private volatile ProxyManager<byte[]> target;
 
-        private LazyConnectingProxyManager(Supplier<ProxyManager<byte[]>> connector) {
+        LazyConnectingProxyManager(Supplier<ProxyManager<byte[]>> connector) {
             this.connector = connector;
         }
 
         private ProxyManager<byte[]> target() {
             ProxyManager<byte[]> connected = target;
-            if (connected == null) {
-                synchronized (this) {
-                    connected = target;
-                    if (connected == null) {
-                        connected = connector.get();
-                        target = connected;
-                    }
-                }
+            if (connected != null) {
+                return connected;
             }
-            return connected;
+            if (!connectLock.tryLock()) {
+                throw new RedisConnectionException("Rate-limit store connect already in progress");
+            }
+            try {
+                connected = target;
+                if (connected == null) {
+                    connected = connector.get();
+                    target = connected;
+                }
+                return connected;
+            } finally {
+                connectLock.unlock();
+            }
         }
 
         @Override

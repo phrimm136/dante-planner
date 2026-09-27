@@ -23,6 +23,8 @@ import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.shared.config.FrontendProperties;
+import org.danteplanner.backend.shared.config.LoginRedirect;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.shared.ratelimit.RateLimitService;
 import org.danteplanner.backend.support.AuthCookies;
@@ -65,6 +67,7 @@ import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -236,6 +239,9 @@ class DegradationIT {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private FrontendProperties frontendProperties;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -631,13 +637,13 @@ class DegradationIT {
     }
 
     @Test
-    @DisplayName("F4: rate-limit Redis cut → the OAuth callback answers 503 RATE_LIMIT_TEMPORARILY_UNAVAILABLE")
-    void rateLimitRedisCut_WhenOAuthCallbackCalled_ReturnsRateLimitTemporarilyUnavailable() throws Exception {
+    @DisplayName("F4: rate-limit Redis cut → the OAuth callback redirects to the SPA with login=unavailable")
+    void rateLimitRedisCut_WhenOAuthCallbackCalled_RedirectsToLoginUnavailable() throws Exception {
         cutRateLimitRedis();
 
         mockMvc.perform(get("/api/auth/google/callback").param("code", "any").param("state", "any"))
-                .andExpect(status().isServiceUnavailable())
-                .andExpect(jsonPath("$.code").value("RATE_LIMIT_TEMPORARILY_UNAVAILABLE"));
+                .andExpect(status().isFound())
+                .andExpect(header().string("Location", frontendProperties.getUrl() + LoginRedirect.UNAVAILABLE));
     }
 
     private double rateLimitSkipCount(RateLimitPolicy policy) {

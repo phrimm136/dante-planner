@@ -21,6 +21,7 @@ import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
 import org.danteplanner.backend.shared.config.DeviceIdResolver;
 import org.danteplanner.backend.shared.config.FrontendProperties;
 import org.danteplanner.backend.shared.config.JwtProperties;
+import org.danteplanner.backend.shared.config.LoginRedirect;
 import org.danteplanner.backend.shared.config.OAuthProperties;
 import org.danteplanner.backend.shared.config.RedisConnectionConfig;
 import org.danteplanner.backend.shared.config.SecurityProperties;
@@ -70,6 +71,7 @@ class RateLimitStoreOutageTest {
     private static final String UNAVAILABLE_CODE = "RATE_LIMIT_TEMPORARILY_UNAVAILABLE";
     private static final String TRUSTED_PROXY_IP = "127.0.0.1";
     private static final Duration BUCKET_TTL = Duration.ofHours(1);
+    private static final String FRONTEND_URL = "https://planner.example";
 
     private final SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
     private final Logger interceptorLogger = (Logger) LoggerFactory.getLogger(RateLimitInterceptor.class);
@@ -119,14 +121,13 @@ class RateLimitStoreOutageTest {
     }
 
     @Test
-    @DisplayName("Store unreachable: the Google OAuth callback answers the typed 503 and nothing is skipped")
-    void googleCallback_WhenStoreUnreachable_AnswersTypedServiceUnavailable() throws Exception {
+    @DisplayName("Store unreachable: the Google OAuth callback redirects to login-unavailable and nothing is skipped")
+    void googleCallback_WhenStoreUnreachable_RedirectsToLoginUnavailable() throws Exception {
         MockMvc mockMvc = mvcAgainst(new RateLimitService(unreachableProxyManager(), bucketProperties()));
 
         mockMvc.perform(get("/api/auth/google/callback").param("code", "any").param("state", "any"))
-                .andExpect(status().isServiceUnavailable())
-                .andExpect(header().string("Retry-After", "10"))
-                .andExpect(jsonPath("$.code").value(UNAVAILABLE_CODE));
+                .andExpect(status().isFound())
+                .andExpect(header().string("Location", FRONTEND_URL + LoginRedirect.UNAVAILABLE));
 
         assertThat(meterRegistry.find(SKIPPED_COUNTER).counter()).isNull();
     }
@@ -202,7 +203,7 @@ class RateLimitStoreOutageTest {
 
     private MockMvc mvcAgainst(RateLimitService rateLimitService) {
         CookieUtils cookieUtils = new CookieUtils(false, "", "Lax");
-        FrontendProperties frontendProperties = new FrontendProperties("https://planner.example");
+        FrontendProperties frontendProperties = new FrontendProperties(FRONTEND_URL);
         SecurityProperties securityProperties = new SecurityProperties();
         securityProperties.setTrustedProxyIps(TRUSTED_PROXY_IP);
         securityProperties.parseTrustedProxyIps();

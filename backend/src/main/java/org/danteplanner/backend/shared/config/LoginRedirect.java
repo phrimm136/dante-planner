@@ -6,6 +6,8 @@ public final class LoginRedirect {
 
     public static final String RATE_LIMITED = "/?login=rate_limited";
 
+    public static final String UNAVAILABLE = "/?login=unavailable";
+
     private LoginRedirect() {
     }
 }

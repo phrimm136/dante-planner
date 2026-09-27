@@ -94,21 +94,30 @@ public class RateLimitInterceptor implements HandlerInterceptor {
             markStoreAvailable();
             return true;
         } catch (RedisException | TimeoutException unavailable) {
-            return skipCharge(declaration.value(), unavailable);
+            return skipCharge(declaration, response, unavailable);
         } catch (RateLimitExceededException refused) {
             if (declaration.denial() != RateLimitDenial.REDIRECT_LOGIN) {
                 throw refused;
             }
             log.warn("Rate limit exceeded on a browser-navigation endpoint: {}", refused.getMessage());
-            response.setStatus(HttpStatus.FOUND.value());
-            response.setHeader(HttpHeaders.LOCATION, frontendProperties.getUrl() + LoginRedirect.RATE_LIMITED);
-            return false;
+            return redirectToLogin(response, LoginRedirect.RATE_LIMITED);
         }
     }
 
-    private boolean skipCharge(RateLimitPolicy policy, RuntimeException unavailable) {
+    private boolean redirectToLogin(HttpServletResponse response, String loginRedirect) {
+        response.setStatus(HttpStatus.FOUND.value());
+        response.setHeader(HttpHeaders.LOCATION, frontendProperties.getUrl() + loginRedirect);
+        return false;
+    }
+
+    private boolean skipCharge(RateLimited declaration, HttpServletResponse response, RuntimeException unavailable) {
+        RateLimitPolicy policy = declaration.value();
         if (policy.failsClosed()) {
-            throw unavailable;
+            if (declaration.denial() != RateLimitDenial.REDIRECT_LOGIN) {
+                throw unavailable;
+            }
+            log.warn("Rate-limit store unavailable on a browser-navigation endpoint: {}", unavailable.getMessage());
+            return redirectToLogin(response, LoginRedirect.UNAVAILABLE);
         }
         meterRegistry.counter(CHARGE_SKIPPED_COUNTER, POLICY_TAG, policy.name()).increment();
         if (storeUnavailable.compareAndSet(false, true)) {

@@ -13,6 +13,8 @@ import java.util.function.BooleanSupplier;
 import javax.sql.DataSource;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.config.TestConfig;
+import org.danteplanner.backend.shared.config.FrontendProperties;
+import org.danteplanner.backend.shared.config.LoginRedirect;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.shared.sse.SseService;
@@ -24,9 +26,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -46,6 +50,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -194,6 +199,9 @@ class RedisConnectionRecoveryIT {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private FrontendProperties frontendProperties;
+
     @DynamicPropertySource
     static void harnessProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", PRIMARY::getJdbcUrl);
@@ -292,21 +300,24 @@ class RedisConnectionRecoveryIT {
     }
 
     @Test
-    @DisplayName("Rate-limit Redis restored: the OAuth callback's typed 503 gives way to normal request handling")
-    void oauthCallback_WhenRateLimitRedisRestored_StopsReturning503() throws Exception {
+    @DisplayName("Rate-limit Redis restored: the OAuth callback's login-unavailable redirect gives way to normal request handling")
+    void oauthCallback_WhenRateLimitRedisRestored_StopsRedirectingToLoginUnavailable() throws Exception {
+        String unavailable = frontendProperties.getUrl() + LoginRedirect.UNAVAILABLE;
         RATE_LIMIT_REDIS_PROXY.disable();
 
         mockMvc.perform(get("/api/auth/google/callback").param("code", "any").param("state", "any"))
-                .andExpect(status().isServiceUnavailable());
+                .andExpect(status().isFound())
+                .andExpect(header().string(HttpHeaders.LOCATION, unavailable));
 
         RATE_LIMIT_REDIS_PROXY.enable();
 
         assertThat(awaitTrue(() -> {
             try {
-                int status = mockMvc.perform(get("/api/auth/google/callback")
+                MockHttpServletResponse response = mockMvc.perform(get("/api/auth/google/callback")
                                 .param("code", "any").param("state", "any"))
-                        .andReturn().getResponse().getStatus();
-                return status == HttpStatus.FOUND.value();
+                        .andReturn().getResponse();
+                return response.getStatus() == HttpStatus.FOUND.value()
+                        && !unavailable.equals(response.getHeader(HttpHeaders.LOCATION));
             } catch (Exception e) {
                 return false;
             }
