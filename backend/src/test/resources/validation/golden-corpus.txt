@@ -354,13 +354,13 @@ accepted
 
 ### floor-theme-pack-empty-rejected-on-publish
 code: VALIDATION_ERROR
-message: [FLOOR_MISSING_THEME_PACK] floorSelections[0] must have a theme pack selected
-sub 1: FLOOR_MISSING_THEME_PACK | floorSelections[0] must have a theme pack selected
+message: [FLOOR_MISSING_THEME_PACK] floorSelections[4] must have a theme pack selected
+sub 1: FLOOR_MISSING_THEME_PACK | floorSelections[4] must have a theme pack selected
 
 ### floor-theme-pack-absent-rejected-on-publish
 code: VALIDATION_ERROR
-message: [FLOOR_MISSING_THEME_PACK] floorSelections[0] must have a theme pack selected
-sub 1: FLOOR_MISSING_THEME_PACK | floorSelections[0] must have a theme pack selected
+message: [FLOOR_MISSING_THEME_PACK] floorSelections[4] must have a theme pack selected
+sub 1: FLOOR_MISSING_THEME_PACK | floorSelections[4] must have a theme pack selected
 
 ### floor-difficulty-out-of-range
 code: VALIDATION_ERROR

@@ -1236,6 +1236,53 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
         }
 
         @Test
+        @DisplayName("a five-floor planner holding three floors saves as a draft and is refused on publish")
+        void publishIntent_WhenFewerFloorsThanTheCategoryNeeds_Returns400AfterTheDraftSaved() throws Exception {
+            ObjectNode document = (ObjectNode) objectMapper.readTree(TestDataFactory.VALID_CONTENT);
+            document.set("floorSelections", objectMapper.readTree(
+                    "[{\"themePackId\":\"1001\",\"difficulty\":0,\"giftIds\":[]},"
+                            + "{\"themePackId\":\"1002\",\"difficulty\":0,\"giftIds\":[]},"
+                            + "{\"themePackId\":\"1003\",\"difficulty\":0,\"giftIds\":[]}]"));
+            UpsertPlannerRequest request = withContent(createValidPlannerRequest(),
+                    objectMapper.writeValueAsString(document));
+            UUID plannerId = UUID.fromString(request.id());
+
+            mockMvc.perform(put("/api/planner/md/{id}", plannerId).with(withCsrf())
+                            .cookie(session())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isCreated());
+
+            mockMvc.perform(post("/api/planner/md/{id}/publish", plannerId).with(withCsrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .cookie(accessTokenCookie()))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+            assertFalse(plannerRepository.findById(plannerId).orElseThrow().isPublished());
+        }
+
+        @Test
+        @DisplayName("a draft whose floor repeats an earlier theme pack is refused")
+        void saveDraft_WhenAFloorRepeatsAnEarlierThemePack_Returns400() throws Exception {
+            ObjectNode document = (ObjectNode) objectMapper.readTree(TestDataFactory.VALID_CONTENT);
+            document.set("floorSelections", objectMapper.readTree(
+                    "[{\"themePackId\":\"1001\",\"difficulty\":0,\"giftIds\":[]},"
+                            + "{\"themePackId\":\"1002\",\"difficulty\":0,\"giftIds\":[]},"
+                            + "{\"themePackId\":\"1001\",\"difficulty\":0,\"giftIds\":[]},"
+                            + "{\"themePackId\":\"1003\",\"difficulty\":0,\"giftIds\":[]},"
+                            + "{\"themePackId\":\"1004\",\"difficulty\":0,\"giftIds\":[]}]"));
+            UpsertPlannerRequest request = withContent(createValidPlannerRequest(),
+                    objectMapper.writeValueAsString(document));
+
+            mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
+                            .cookie(session())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+        }
+
+        @Test
         @DisplayName("the unpublish intent refuses a non-owner")
         void unpublishIntent_WhenNonOwner_Returns403() throws Exception {
             Planner planner = createPublishedPlanner(testUser, "Someone Else's", "5F", 0);

@@ -79,6 +79,12 @@ final class ValidationErrors {
                 String.format("%s must have a theme pack selected", floorPath));
     }
 
+    static PlannerValidationException floorDuplicateThemePack(String path, String themePackId, int firstFloorIndex) {
+        return new PlannerValidationException(ErrorCode.FLOOR_DUPLICATE_THEME_PACK.getCode(),
+                String.format("%s repeats theme pack '%s' from floorSelections[%d]",
+                        path, themePackId, firstFloorIndex));
+    }
+
     static PlannerValidationException valueOutOfRange(String field, int value, int min, int max) {
         return new PlannerValidationException(ErrorCode.VALUE_OUT_OF_RANGE.getCode(),
                 String.format("%s value %d is out of range [%d-%d]", field, value, min, max));

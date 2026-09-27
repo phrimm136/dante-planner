@@ -262,7 +262,11 @@ class PlannerContentValidatorTest {
                 "selectedGiftKeyword": "Combustion",
                 "selectedGiftIds": ["9001"],
                 "floorSelections": [
-                    {"themePackId": "1001", "difficulty": 0, "giftIds": ["9002"]}
+                    {"themePackId": "1001", "difficulty": 0, "giftIds": ["9002"]},
+                    {"themePackId": "1002", "difficulty": 0, "giftIds": []},
+                    {"themePackId": "1003", "difficulty": 0, "giftIds": []},
+                    {"themePackId": "1004", "difficulty": 0, "giftIds": []},
+                    {"themePackId": "1005", "difficulty": 0, "giftIds": []}
                 ],
                 "sectionNotes": {}
             }
@@ -1568,8 +1572,8 @@ class PlannerContentValidatorTest {
             setupMocksForValidIds();
 
             String content = createValidContent().replace(
-                    "{\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}",
-                    "{\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": [\"9002\"]},\n"
+                    "{\"themePackId\": \"1004\", \"difficulty\": 0, \"giftIds\": []}",
+                    "{\"themePackId\": \"1004\", \"difficulty\": 0, \"giftIds\": []},\n"
                             + "                    {\"difficulty\": 0, \"giftIds\": [\"9004\"]}");
 
             assertDoesNotThrow(() -> validate(content, "5F"));

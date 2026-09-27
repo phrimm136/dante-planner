@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.IntFunction;
@@ -230,6 +231,9 @@ class IdReferenceValidator {
         JsonNode floorSelections = arrayField(root, "floorSelections");
         FloorRules rules = FLOOR_RULES.get(MDCategory.fromValue(category));
 
+        validateEveryFloorPresent(floorSelections, rules.floorCount(), context);
+
+        Map<String, Integer> firstFloorByThemePack = new HashMap<>();
         eachObject(floorSelections, rules.floorCount(), (floor, index) -> {
             String floorPath = "floorSelections[" + index + "]";
             JsonNode themePackNode = floor.path("themePackId");
@@ -239,10 +243,23 @@ class IdReferenceValidator {
                 return;
             }
 
+            validateThemePackNotRepeated(floorPath, themePackNode, index, firstFloorByThemePack, context);
             validateDifficultyRange(floorPath, floor, rules.difficultyAt().apply(index), context);
             validateThemePackSequence(floorPath, floorSelections, index, themePackChosen, context);
             validateFloorGiftIds(floorPath, floor, themePackChosen ? themePackNode.asText() : null, context);
         });
+    }
+
+    private void validateEveryFloorPresent(JsonNode floorSelections, int floorCount, ValidationContext context) {
+        if (!floorSelections.isArray() || !context.policy().requiresPublishableContent()) {
+            return;
+        }
+
+        for (int index = 0; index < floorCount; index++) {
+            if (!floorSelections.path(index).isObject()) {
+                context.reject("floorSelections[" + index + "]", ValidationErrors::floorMissingThemePack);
+            }
+        }
     }
 
     private boolean validateThemePackPresence(String floorPath, JsonNode themePackNode, ValidationContext context) {
@@ -263,6 +280,21 @@ class IdReferenceValidator {
         context.reject(floorPath + ".themePackId",
                 p -> ValidationErrors.unknownId(ErrorCode.THEME_PACK_UNKNOWN_ID, p, themePackId));
         return false;
+    }
+
+    private void validateThemePackNotRepeated(String floorPath, JsonNode themePackNode, int index,
+                                              Map<String, Integer> firstFloorByThemePack,
+                                              ValidationContext context) {
+        String themePackId = themePackNode.isTextual() ? themePackNode.asText() : "";
+        if (themePackId.isEmpty()) {
+            return;
+        }
+
+        Integer firstFloorIndex = firstFloorByThemePack.putIfAbsent(themePackId, index);
+        if (firstFloorIndex != null) {
+            context.reject(floorPath + ".themePackId",
+                    p -> ValidationErrors.floorDuplicateThemePack(p, themePackId, firstFloorIndex));
+        }
     }
 
     private void validateDifficultyRange(String floorPath, JsonNode floor, DifficultyRule expected,

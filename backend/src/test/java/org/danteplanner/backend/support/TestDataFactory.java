@@ -24,7 +24,7 @@ public class TestDataFactory {
     /**
      * Planner content that passes {@code PlannerContentValidator}: twelve equipped sinners, a
      * deployment order over them, buff ids and a gift selection drawn from the Combustion pool,
-     * and one floor selection.
+     * and a floor selection for each of a 5F planner's five floors.
      */
     public static final String VALID_CONTENT = """
         {
@@ -47,7 +47,13 @@ public class TestDataFactory {
                 "12":{"identity":{"id":"11201","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"21201","threadspin":4}}}
             },
             "deploymentOrder":[0,1,2,3,4,5],
-            "floorSelections":[{"themePackId":"1001","difficulty":0,"giftIds":["9002"]}],
+            "floorSelections":[
+                {"themePackId":"1001","difficulty":0,"giftIds":["9002"]},
+                {"themePackId":"1002","difficulty":0,"giftIds":[]},
+                {"themePackId":"1003","difficulty":0,"giftIds":[]},
+                {"themePackId":"1004","difficulty":0,"giftIds":[]},
+                {"themePackId":"1005","difficulty":0,"giftIds":[]}
+            ],
             "sectionNotes":{}
         }
         """.trim().replace("\n", "").replace(" ", "");

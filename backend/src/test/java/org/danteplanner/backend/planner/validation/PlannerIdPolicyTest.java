@@ -1,6 +1,8 @@
 package org.danteplanner.backend.planner.validation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.planner.exception.PlannerValidationException.ValidationError;
@@ -161,7 +163,7 @@ class PlannerIdPolicyTest {
     void validate_WhenAFloorHasNoThemePack_RejectsThePublishAndAcceptsTheDraft() throws IOException {
         PlannerContentValidator validator = validatorOver(null);
         ObjectNode content = validContent();
-        content.set("floorSelections", MAPPER.readTree("[{\"difficulty\":0,\"giftIds\":[]}]"));
+        ((ArrayNode) content.path("floorSelections")).set(4, MAPPER.readTree("{\"difficulty\":0,\"giftIds\":[]}"));
 
         String stored = validator.validate(content.toString(), "5F", CURRENT_SEASON, ValidationPolicy.DRAFT);
         PlannerValidationException ex = rejection(
@@ -170,6 +172,124 @@ class PlannerIdPolicyTest {
         assertThat(stored).isEqualTo(content.toString());
         assertThat(ex.getStatusCode().value()).isEqualTo(400);
         assertThat(ex.getSubErrors()).extracting(ValidationError::code).containsExactly("FLOOR_MISSING_THEME_PACK");
+    }
+
+    @Test
+    void validate_WhenAFiveFloorPlannerPublishesThreeFloors_ReportsTheTwoMissingFloors() throws IOException {
+        PlannerContentValidator validator = validatorOver(null);
+        ObjectNode content = validContent();
+        content.set("floorSelections", completeFloors(3));
+
+        PlannerValidationException ex = rejection(
+                () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, ValidationPolicy.PUBLISH));
+
+        assertThat(ex.getSubErrors()).containsExactly(
+                new ValidationError("FLOOR_MISSING_THEME_PACK", "floorSelections[3] must have a theme pack selected"),
+                new ValidationError("FLOOR_MISSING_THEME_PACK", "floorSelections[4] must have a theme pack selected"));
+    }
+
+    @Test
+    void validate_WhenAFloorEntryIsNullOnPublish_ReportsItAsAMissingFloor() throws IOException {
+        PlannerContentValidator validator = validatorOver(null);
+        ObjectNode content = validContent();
+        ArrayNode floors = completeFloors(5);
+        floors.set(1, NullNode.getInstance());
+        content.set("floorSelections", floors);
+
+        PlannerValidationException ex = rejection(
+                () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, ValidationPolicy.PUBLISH));
+
+        assertThat(ex.getSubErrors()).containsExactly(
+                new ValidationError("FLOOR_MISSING_THEME_PACK", "floorSelections[1] must have a theme pack selected"));
+    }
+
+    @Test
+    void validate_WhenADraftHoldsFewerFloorsThanItsCategory_StoresIt() throws IOException {
+        PlannerContentValidator validator = validatorOver(null);
+        ObjectNode content = validContent();
+        content.set("floorSelections", completeFloors(3));
+
+        String stored = validator.validate(content.toString(), "5F", CURRENT_SEASON, ValidationPolicy.DRAFT);
+
+        assertThat(stored).isEqualTo(content.toString());
+    }
+
+    @Test
+    void validate_WhenFloorSelectionsIsEmptyOnPublish_ReportsEveryFloorMissing() throws IOException {
+        PlannerContentValidator validator = validatorOver(null);
+        ObjectNode content = validContent();
+        content.set("floorSelections", completeFloors(0));
+
+        PlannerValidationException ex = rejection(
+                () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, ValidationPolicy.PUBLISH));
+
+        assertThat(ex.getSubErrors()).containsExactly(
+                new ValidationError("FLOOR_MISSING_THEME_PACK", "floorSelections[0] must have a theme pack selected"),
+                new ValidationError("FLOOR_MISSING_THEME_PACK", "floorSelections[1] must have a theme pack selected"),
+                new ValidationError("FLOOR_MISSING_THEME_PACK", "floorSelections[2] must have a theme pack selected"),
+                new ValidationError("FLOOR_MISSING_THEME_PACK", "floorSelections[3] must have a theme pack selected"),
+                new ValidationError("FLOOR_MISSING_THEME_PACK", "floorSelections[4] must have a theme pack selected"));
+    }
+
+    @ParameterizedTest
+    @EnumSource(ValidationPolicy.class)
+    void validate_WhenAFloorRepeatsAnEarlierThemePack_ReportsTheRepeat(ValidationPolicy policy) throws IOException {
+        PlannerContentValidator validator = validatorOver(null);
+        ObjectNode content = validContent();
+        content.set("floorSelections", floorsOn("1001", "1002", "1001", "1003", "1004"));
+
+        PlannerValidationException ex = rejection(
+                () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, policy));
+
+        assertThat(ex.getSubErrors()).containsExactly(new ValidationError("FLOOR_DUPLICATE_THEME_PACK",
+                "floorSelections[2].themePackId repeats theme pack '1001' from floorSelections[0]"));
+    }
+
+    @Test
+    void validate_WhenThreeFloorsShareAThemePack_ReportsEveryRepeatAgainstTheFirst() throws IOException {
+        PlannerContentValidator validator = validatorOver(null);
+        ObjectNode content = validContent();
+        content.set("floorSelections", floorsOn("1001", "1001", "1001"));
+
+        PlannerValidationException ex = rejection(
+                () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, ValidationPolicy.DRAFT));
+
+        assertThat(ex.getSubErrors()).containsExactly(
+                new ValidationError("FLOOR_DUPLICATE_THEME_PACK",
+                        "floorSelections[1].themePackId repeats theme pack '1001' from floorSelections[0]"),
+                new ValidationError("FLOOR_DUPLICATE_THEME_PACK",
+                        "floorSelections[2].themePackId repeats theme pack '1001' from floorSelections[0]"));
+    }
+
+    @Test
+    void validate_WhenTwoDraftFloorsHaveNoThemePack_StoresThem() throws IOException {
+        PlannerContentValidator validator = validatorOver(null);
+        ObjectNode content = validContent();
+        content.set("floorSelections",
+                MAPPER.readTree("[{\"difficulty\":0,\"giftIds\":[]},{\"difficulty\":0,\"giftIds\":[]}]"));
+
+        String stored = validator.validate(content.toString(), "5F", CURRENT_SEASON, ValidationPolicy.DRAFT);
+
+        assertThat(stored).isEqualTo(content.toString());
+    }
+
+    private static ArrayNode floorsOn(String... themePackIds) {
+        ArrayNode floors = MAPPER.createArrayNode();
+        for (String themePackId : themePackIds) {
+            floors.addObject().put("themePackId", themePackId).put("difficulty", 0).putArray("giftIds");
+        }
+        return floors;
+    }
+
+    private static ArrayNode completeFloors(int count) {
+        ArrayNode floors = MAPPER.createArrayNode();
+        for (int floor = 0; floor < count; floor++) {
+            floors.addObject()
+                    .put("themePackId", String.valueOf(1001 + floor))
+                    .put("difficulty", 0)
+                    .putArray("giftIds");
+        }
+        return floors;
     }
 
     private PlannerContentValidator validatorWithPreviousSeasonLackingBuff(String buffId) throws IOException {

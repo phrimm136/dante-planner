@@ -7,6 +7,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.IntUnaryOperator;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.danteplanner.backend.planner.entity.PlannerType;
 
@@ -65,7 +68,9 @@ final class ValidatorGoldenCorpus {
     static final Map<String, Integer> EGO_MAX_THREADSPIN = maxThreadspinForAllBut("20502");
 
     static final Set<String> EGO_GIFT_IDS = Set.of("9001", "9002", "9003", "9004", "gift_a", "gift_b");
-    static final Set<String> THEME_PACK_IDS = Set.of("1001", "1002");
+    static final Set<String> THEME_PACK_IDS = IntStream.rangeClosed(1001, 1015)
+            .mapToObj(String::valueOf)
+            .collect(Collectors.toUnmodifiableSet());
     static final Set<String> START_BUFF_IDS = Set.of("100", "101", "115", "200", "201", "302");
 
     static final Map<String, Set<String>> START_GIFT_POOLS = Map.of(
@@ -166,7 +171,7 @@ final class ValidatorGoldenCorpus {
                 .with("equipment", equipment())
                 .with("deploymentOrder", "[0,1,2,3,4,5,6,7,8,9,10,11]")
                 .with("skillEAState", skillEAState())
-                .with("floorSelections", "[{\"themePackId\":\"1001\",\"difficulty\":0,\"giftIds\":[\"9002\"]}]")
+                .with("floorSelections", fiveFloorsWith(0, "{\"themePackId\":\"1001\",\"difficulty\":0,\"giftIds\":[\"9002\"]}"))
                 .with("sectionNotes", "{}");
     }
 
@@ -216,13 +221,17 @@ final class ValidatorGoldenCorpus {
         return "{" + String.join(",", entries) + "}";
     }
 
-    private static String floors(int count, Map<Integer, String> replacements) {
+    private static String fiveFloorsWith(int index, String floor) {
+        return floors(5, level -> 0, index, floor);
+    }
+
+    private static String floors(int count, IntUnaryOperator difficultyAt, int index, String floor) {
         List<String> entries = new ArrayList<>();
-        for (int floor = 0; floor < count; floor++) {
-            String replacement = replacements.get(floor);
-            entries.add(replacement == null
-                    ? "{\"themePackId\":\"1001\",\"difficulty\":1}"
-                    : replacement);
+        for (int level = 0; level < count; level++) {
+            entries.add(level == index
+                    ? floor
+                    : "{\"themePackId\":\"" + (1001 + level) + "\",\"difficulty\":"
+                            + difficultyAt.applyAsInt(level) + ",\"giftIds\":[]}");
         }
         return "[" + String.join(",", entries) + "]";
     }
@@ -378,18 +387,19 @@ final class ValidatorGoldenCorpus {
         entries.add(draft("floor-theme-pack-empty-accepted-as-draft", valid().with("floorSelections",
                 "[{\"themePackId\":\"\",\"difficulty\":0,\"giftIds\":[]}]")));
         entries.add(publish("floor-theme-pack-empty-rejected-on-publish", valid().with("floorSelections",
-                "[{\"themePackId\":\"\",\"difficulty\":0,\"giftIds\":[]}]")));
+                fiveFloorsWith(4, "{\"themePackId\":\"\",\"difficulty\":0,\"giftIds\":[]}"))));
         entries.add(publish("floor-theme-pack-absent-rejected-on-publish", valid().with("floorSelections",
-                "[{\"difficulty\":0,\"giftIds\":[]}]")));
+                fiveFloorsWith(4, "{\"difficulty\":0,\"giftIds\":[]}"))));
         entries.add(publish("floor-difficulty-out-of-range", valid().with("floorSelections",
-                "[{\"themePackId\":\"1001\",\"difficulty\":5,\"giftIds\":[]}]")));
+                fiveFloorsWith(0, "{\"themePackId\":\"1001\",\"difficulty\":5,\"giftIds\":[]}"))));
         entries.add(publish("floor-difficulty-absent", valid().with("floorSelections",
-                "[{\"themePackId\":\"1001\",\"giftIds\":[]}]")));
+                fiveFloorsWith(0, "{\"themePackId\":\"1001\",\"giftIds\":[]}"))));
         entries.add(new ContentEntry("floor-difficulty-hard-required-on-10f", "10F", ValidationPolicy.PUBLISH,
-                valid().with("floorSelections",
-                        "[{\"themePackId\":\"1001\",\"difficulty\":0,\"giftIds\":[]}]").json()));
+                valid().with("floorSelections", floors(10, level -> 1, 0,
+                        "{\"themePackId\":\"1001\",\"difficulty\":0,\"giftIds\":[]}")).json()));
         entries.add(new ContentEntry("floor-difficulty-extreme-required-on-15f", "15F", ValidationPolicy.PUBLISH,
-                valid().with("floorSelections", floors(11, Map.of())).json()));
+                valid().with("floorSelections", floors(15, level -> level < 10 ? 1 : 3, 10,
+                        "{\"themePackId\":\"1011\",\"difficulty\":1,\"giftIds\":[]}")).json()));
         entries.add(draft("floor-sequence-gap", valid().with("floorSelections",
                 "[{\"difficulty\":0,\"giftIds\":[]},{\"themePackId\":\"1002\",\"difficulty\":0,\"giftIds\":[]}]")));
         entries.add(draft("floor-gift-duplicate", valid().with("floorSelections",
@@ -433,10 +443,10 @@ final class ValidatorGoldenCorpus {
         // check a floor reaches, so widening or dropping that bound surfaces here.
         entries.add(draft("silence-floor-beyond-category-count", valid().with("floorSelections",
                 "[{\"themePackId\":\"1001\",\"difficulty\":0,\"giftIds\":[]},"
-                        + "{\"themePackId\":\"1001\",\"difficulty\":0,\"giftIds\":[]},"
-                        + "{\"themePackId\":\"1001\",\"difficulty\":0,\"giftIds\":[]},"
-                        + "{\"themePackId\":\"1001\",\"difficulty\":0,\"giftIds\":[]},"
-                        + "{\"themePackId\":\"1001\",\"difficulty\":0,\"giftIds\":[]},"
+                        + "{\"themePackId\":\"1002\",\"difficulty\":0,\"giftIds\":[]},"
+                        + "{\"themePackId\":\"1003\",\"difficulty\":0,\"giftIds\":[]},"
+                        + "{\"themePackId\":\"1004\",\"difficulty\":0,\"giftIds\":[]},"
+                        + "{\"themePackId\":\"1005\",\"difficulty\":0,\"giftIds\":[]},"
                         + "{\"themePackId\":\"1001\",\"difficulty\":0,\"giftIds\":[\"9004\"]}]")));
         entries.add(draft("silence-identity-not-object", valid().with("equipment", equipmentWith(
                 Map.of("05", "\"05\":{\"identity\":5,"
