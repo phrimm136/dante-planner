@@ -1,1 +1,1 @@
-export { sanitizeUserHtml, sanitizeToPlainText } from './lib/sanitizeHtml'
+export { sanitizeUserHtml, sanitizeToPlainText, isSafeUserHref } from './lib/sanitizeHtml'

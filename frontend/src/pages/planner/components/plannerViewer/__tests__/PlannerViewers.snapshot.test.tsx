@@ -62,8 +62,8 @@ vi.mock('../../SectionNoteDialog', () => ({
   SectionNoteDialog: ({ open, sectionTitle }: { open: boolean; sectionTitle: string }) =>
     open ? <div data-testid={`note-dialog-${sectionTitle}`} /> : null,
 }))
-vi.mock('@/shared/noteEditor/components/NoteEditor', () => ({
-  NoteEditor: ({ value }: { value: NoteContent }) => (
+vi.mock('@/shared/noteEditor/components/ReadOnlyNote', () => ({
+  ReadOnlyNote: ({ value }: { value: NoteContent }) => (
     <div data-testid="note-editor">{JSON.stringify(value)}</div>
   ),
 }))

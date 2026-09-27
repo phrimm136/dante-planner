@@ -141,3 +141,16 @@
 .note-editor-content .ProseMirror-selectednode {
   outline: 2px solid hsl(var(--primary));
 }
+
+.note-read-only {
+  position: relative;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  white-space: break-spaces;
+  font-variant-ligatures: none;
+  font-feature-settings: 'liga' 0;
+}
+
+.note-read-only pre {
+  white-space: pre-wrap;
+}

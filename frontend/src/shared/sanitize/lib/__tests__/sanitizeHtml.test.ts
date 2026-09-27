@@ -7,7 +7,7 @@
  */
 
 import { describe, it, expect } from 'vitest'
-import { sanitizeUserHtml, sanitizeToPlainText } from '../sanitizeHtml'
+import { sanitizeUserHtml, sanitizeToPlainText, isSafeUserHref } from '../sanitizeHtml'
 
 describe('sanitizeUserHtml', () => {
   it('keeps the tags the editors produce', () => {
@@ -70,4 +70,17 @@ describe('sanitizeToPlainText', () => {
   it('returns an empty string for markup carrying no text', () => {
     expect(sanitizeToPlainText('<img src=x onerror=alert(1)>')).toBe('')
   })
+})
+
+describe('isSafeUserHref', () => {
+  it.each(['https://a.b/c', 'mailto:a@b', '/rel', 'ftp://x'])('accepts %s', (href) => {
+    expect(isSafeUserHref(href)).toBe(true)
+  })
+
+  it.each(['javascript:alert(1)', ' JaVaScRiPt:x', 'data:text/html,x', 'vbscript:x'])(
+    'rejects %s',
+    (href) => {
+      expect(isSafeUserHref(href)).toBe(false)
+    },
+  )
 })

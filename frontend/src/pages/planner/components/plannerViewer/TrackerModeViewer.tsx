@@ -22,7 +22,7 @@ import { collectOwnedGiftIds } from '../../lib/deckEA'
 import { DeckImportConfirmDialog } from '../deckBuilder/DeckImportConfirmDialog'
 import { SkillReplacementSection } from '../skillReplacement/SkillReplacementSection'
 import { ComprehensiveGiftGridTracker } from './ComprehensiveGiftGridTracker'
-import { NoteEditor } from '@/shared/noteEditor/components/NoteEditor'
+import { ReadOnlyNote } from '@/shared/noteEditor/components/ReadOnlyNote'
 import { HorizontalThemePackGallery } from './HorizontalThemePackGallery'
 import { useTrackerState } from '../../hooks/useTrackerState'
 import { useDeckClipboard } from '../../hooks/useDeckClipboard'
@@ -251,11 +251,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
     <div className="bg-background rounded-lg space-y-2">
       {introNote && !isNoteEmpty(introNote) && (
         <PlannerSection title={t('pages.plannerMD.introduction')}>
-          <NoteEditor
-            value={introNote}
-            placeholder={t('pages.plannerMD.noteEditor.placeholder')}
-            readOnly={true}
-          />
+          <ReadOnlyNote value={introNote} />
         </PlannerSection>
       )}
 
@@ -270,11 +266,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
 
       {outroNote && !isNoteEmpty(outroNote) && (
         <PlannerSection title={t('pages.plannerMD.closingNotes')}>
-          <NoteEditor
-            value={outroNote}
-            placeholder={t('pages.plannerMD.noteEditor.placeholder')}
-            readOnly={true}
-          />
+          <ReadOnlyNote value={outroNote} />
         </PlannerSection>
       )}
 
@@ -285,7 +277,6 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
           onOpenChange={(next) => setOpenNote(next ? section.id : null)}
           sectionTitle={t(section.titleKey)}
           noteContent={content.sectionNotes[section.noteKey]}
-          readOnly={true}
         />
       ))}
 

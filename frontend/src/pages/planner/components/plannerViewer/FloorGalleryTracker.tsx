@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { PlannerSection } from '@/components/layout/PlannerSection'
 import { FloorThemeGiftSection } from '../floorTheme/FloorThemeGiftSection'
-import { NoteEditor } from '@/shared/noteEditor/components/NoteEditor'
+import { ReadOnlyNote } from '@/shared/noteEditor/components/ReadOnlyNote'
 import type { SerializableFloorSelection } from '../../types/PlannerTypes'
 import type { FloorThemeSelection } from '@/pages/themePack'
 import type { NoteContent } from '@/shared/noteEditor'
@@ -42,13 +42,7 @@ export function FloorGalleryTracker({
                 floorSelectionsOverride={deserializedFloorSelections}
                 readOnly={true}
               />
-              {floorNote && !isNoteEmpty(floorNote) && (
-                <NoteEditor
-                  value={floorNote}
-                  placeholder={t('pages.plannerMD.noteEditor.placeholder')}
-                  readOnly={true}
-                />
-              )}
+              {floorNote && !isNoteEmpty(floorNote) && <ReadOnlyNote value={floorNote} />}
             </div>
           )
         })}

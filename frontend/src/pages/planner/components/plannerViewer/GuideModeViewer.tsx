@@ -20,7 +20,7 @@ import {
   StartBuffSkeleton,
   StartGiftSkeleton,
 } from '../plannerSkeletons'
-import { NoteEditor } from '@/shared/noteEditor/components/NoteEditor'
+import { ReadOnlyNote } from '@/shared/noteEditor/components/ReadOnlyNote'
 import { useProgressiveReveal } from '@/components/hooks/useProgressiveReveal'
 import { useIsBreakpoint } from '@/components/hooks/use-is-breakpoint'
 import { LG_BREAKPOINT_PX, MD_BREAKPOINT_PX } from '@/lib/constants'
@@ -69,13 +69,7 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
   const readOnlyNote = (note: NoteContent | undefined) => {
     if (!note || isNoteEmpty(note)) return null
 
-    return (
-      <NoteEditor
-        value={note}
-        placeholder={t('pages.plannerMD.noteEditor.placeholder')}
-        readOnly={true}
-      />
-    )
+    return <ReadOnlyNote value={note} />
   }
 
   const sections: RevealSectionSpec[] = [

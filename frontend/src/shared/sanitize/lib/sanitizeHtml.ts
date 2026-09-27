@@ -54,3 +54,7 @@ export function sanitizeUserHtml(html: string): string {
 export function sanitizeToPlainText(html: string): string {
   return DOMPurify.sanitize(html, { ALLOWED_TAGS: [], FORBID_CONTENTS: ['script', 'style'] })
 }
+
+export function isSafeUserHref(href: string): boolean {
+  return DOMPurify.isValidAttribute('a', 'href', href)
+}

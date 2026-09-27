@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { NoteEditor } from '@/shared/noteEditor/components/NoteEditor'
+import { ReadOnlyNote } from '@/shared/noteEditor/components/ReadOnlyNote'
 import type { NoteContent } from '@/shared/noteEditor'
 import { isNoteEmpty } from '@/shared/noteEditor'
 
@@ -38,7 +38,7 @@ export function FloorNoteDialog({
               {t('pages.plannerMD.noteEditor.noNotes', 'No notes for this theme pack')}
             </div>
           ) : (
-            <NoteEditor value={noteContent} readOnly={true} placeholder="" />
+            <ReadOnlyNote value={noteContent} />
           )}
         </div>
       </DialogContent>

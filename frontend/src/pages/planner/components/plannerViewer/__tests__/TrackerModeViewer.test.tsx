@@ -129,8 +129,8 @@ vi.mock('../../egoGift/ComprehensiveGiftSummary', () => ({
   ),
 }))
 
-vi.mock('@/shared/noteEditor/components/NoteEditor', () => ({
-  NoteEditor: ({ disabled }: { disabled?: boolean }) => (
+vi.mock('@/shared/noteEditor/components/ReadOnlyNote', () => ({
+  ReadOnlyNote: ({ disabled }: { disabled?: boolean }) => (
     <div data-testid="note-editor" data-disabled={disabled}>
       NoteEditor
     </div>
