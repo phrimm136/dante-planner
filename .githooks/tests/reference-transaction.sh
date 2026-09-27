@@ -175,6 +175,17 @@ g switch -q -f feat/x
 g branch -f dev "$B" 2>"$ERR"; rc=$?
 check 'branch -f to a reviewed commit: lands' eq "$(tip dev):$rc" "$B:0"
 
+g switch -q -c feat/p dev
+change p.txt p 'feat(p): add p'
+g switch -q --detach
+before=$(tip dev)
+g push -q . feat/p:dev 2>"$ERR"; rc=$?
+check 'local push without the record: refused' eq "$(tip dev):$((rc != 0))" "$before:1"
+check 'local push without the record: names the commit' has 'feat(p): add p'
+record feat__p.md patch-ids feat/p
+g push -q . feat/p:dev 2>"$ERR"; rc=$?
+check 'local push with the record: lands' eq "$(tip dev):$rc" "$(tip feat/p):0"
+
 R2=$TMP/fresh
 git init -q -b main "$R2"
 mkdir -p "$R2/.githooks"

@@ -16,7 +16,14 @@ missing=()
 
 load_reviewed() {
   shopt -s nullglob
-  local records=("$(git rev-parse --show-toplevel)"/.claude/reports/reviews/*.md)
+  local top gitdir
+  gitdir=$(git rev-parse --absolute-git-dir)
+  top=$(git rev-parse --show-toplevel 2>/dev/null) || top=
+  # Under receive-pack (git push .) GIT_DIR=. and --show-toplevel prints the git dir itself.
+  case "$top/" in
+    / | "$gitdir"/*) top=$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)") ;;
+  esac
+  local records=("$top"/.claude/reports/reviews/*.md)
   if [ ${#records[@]} -gt 0 ]; then
     reviewed=$(awk '
       /^[^ \t]/ { listed = ($0 ~ /^(patch-ids|delta):[ \t]*$/) }
