@@ -125,7 +125,7 @@ public class AuthController {
         }
     }
 
-    @RateLimited(RateLimitPolicy.AUTH)
+    @RateLimited(value = RateLimitPolicy.AUTH, denial = RateLimitDenial.REDIRECT_LOGIN)
     @PostMapping("/apple/callback")
     public ResponseEntity<UserResponse> appleCallback() {
         return ResponseEntity.badRequest().build();

@@ -61,14 +61,12 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Isolated
 class RateLimitStoreOutageTest {
 
     private static final String SKIPPED_COUNTER = "rate_limit.charge_skipped";
-    private static final String UNAVAILABLE_CODE = "RATE_LIMIT_TEMPORARILY_UNAVAILABLE";
     private static final String TRUSTED_PROXY_IP = "127.0.0.1";
     private static final Duration BUCKET_TTL = Duration.ofHours(1);
     private static final String FRONTEND_URL = "https://planner.example";
@@ -133,13 +131,15 @@ class RateLimitStoreOutageTest {
     }
 
     @Test
-    @DisplayName("Store unreachable: the Apple OAuth callback answers the typed 503")
-    void appleCallback_WhenStoreUnreachable_AnswersTypedServiceUnavailable() throws Exception {
+    @DisplayName("Store unreachable: the Apple OAuth callback redirects to login-unavailable and nothing is skipped")
+    void appleCallback_WhenStoreUnreachable_RedirectsToLoginUnavailable() throws Exception {
         MockMvc mockMvc = mvcAgainst(new RateLimitService(unreachableProxyManager(), bucketProperties()));
 
         mockMvc.perform(post("/api/auth/apple/callback"))
-                .andExpect(status().isServiceUnavailable())
-                .andExpect(jsonPath("$.code").value(UNAVAILABLE_CODE));
+                .andExpect(status().isFound())
+                .andExpect(header().string("Location", FRONTEND_URL + LoginRedirect.UNAVAILABLE));
+
+        assertThat(meterRegistry.find(SKIPPED_COUNTER).counter()).isNull();
     }
 
     @Test
@@ -157,16 +157,16 @@ class RateLimitStoreOutageTest {
     }
 
     @Test
-    @DisplayName("A bucket4j request timeout on an AUTH charge answers the typed 503")
-    void appleCallback_WhenChargeTimesOut_AnswersTypedServiceUnavailable() throws Exception {
+    @DisplayName("A bucket4j request timeout on the Apple callback's AUTH charge redirects to login-unavailable")
+    void appleCallback_WhenChargeTimesOut_RedirectsToLoginUnavailable() throws Exception {
         RateLimitService rateLimitService = mock(RateLimitService.class);
         doThrow(new io.github.bucket4j.TimeoutException(
                 "Violated timeout while waiting for redis future", 3_000_000_000L, 3_000_000_000L))
                 .when(rateLimitService).check(eq(RateLimitPolicy.AUTH), anyString());
 
         mvcAgainst(rateLimitService).perform(post("/api/auth/apple/callback"))
-                .andExpect(status().isServiceUnavailable())
-                .andExpect(jsonPath("$.code").value(UNAVAILABLE_CODE));
+                .andExpect(status().isFound())
+                .andExpect(header().string("Location", FRONTEND_URL + LoginRedirect.UNAVAILABLE));
     }
 
     @Test

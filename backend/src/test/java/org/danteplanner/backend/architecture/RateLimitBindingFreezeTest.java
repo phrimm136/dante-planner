@@ -34,7 +34,7 @@ class RateLimitBindingFreezeTest {
             "AdminController.getUserRole -> EXEMPT",
             "AdminModerationController.hideFromRecommended -> EXEMPT",
             "AdminModerationController.unhideFromRecommended -> EXEMPT",
-            "AuthController.appleCallback -> AUTH (RESPOND)",
+            "AuthController.appleCallback -> AUTH (REDIRECT_LOGIN)",
             "AuthController.getCurrentUser -> EXEMPT",
             "AuthController.googleCallback -> AUTH (REDIRECT_LOGIN)",
             "AuthController.googleStart -> EXEMPT",

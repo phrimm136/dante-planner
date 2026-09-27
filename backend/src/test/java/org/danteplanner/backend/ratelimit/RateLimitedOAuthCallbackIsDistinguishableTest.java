@@ -36,6 +36,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -90,6 +91,17 @@ class RateLimitedOAuthCallbackIsDistinguishableTest {
                 .when(rateLimitService).check(eq(RateLimitPolicy.AUTH), anyString());
 
         mockMvc.perform(get("/api/auth/google/callback").param("code", "any").param("state", "any"))
+                .andExpect(status().isFound())
+                .andExpect(header().string("Location", FRONTEND_URL + LoginRedirect.RATE_LIMITED));
+    }
+
+    @Test
+    @DisplayName("An exhausted AUTH bucket redirects the Apple callback under the rate-limit code")
+    void exhaustedAuthBucket_WhenAppleCallbackPosted_RedirectsWithTheRateLimitCode() throws Exception {
+        doThrow(new RateLimitExceededException(null, "auth"))
+                .when(rateLimitService).check(eq(RateLimitPolicy.AUTH), anyString());
+
+        mockMvc.perform(post("/api/auth/apple/callback"))
                 .andExpect(status().isFound())
                 .andExpect(header().string("Location", FRONTEND_URL + LoginRedirect.RATE_LIMITED));
     }
