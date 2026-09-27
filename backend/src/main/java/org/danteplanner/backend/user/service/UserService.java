@@ -56,9 +56,8 @@ public class UserService {
         try {
             return transactionTemplate.execute(status -> createOrRecover(providerType, userInfo));
         } catch (DataIntegrityViolationException e) {
-            // Lost the create race on uk_provider_provider_id. The winner committed on the primary,
-            // so the recovery re-lookup must run read-write to route there — a bare finder is
-            // readOnly and would hit a replica that may not have caught up yet.
+            // A declared finder runs in no transaction of its own, so a bare call reaches the
+            // primary as undeclared access.
             return transactionTemplate.execute(status ->
                     userRepository.findByProviderAndProviderId(providerType, providerId)
                             .orElseThrow(() -> e));

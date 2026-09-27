@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -39,18 +40,16 @@ public class ModerationAuditService {
                 .build());
     }
 
+    @Transactional(readOnly = true)
     public Optional<String> latestBanReason(UUID targetPublicId) {
         return latestReason(targetPublicId, ModerationAction.ActionType.BAN);
     }
 
+    @Transactional(readOnly = true)
     public Optional<String> latestTimeoutReason(UUID targetPublicId) {
         return latestReason(targetPublicId, ModerationAction.ActionType.TIMEOUT);
     }
 
-    /**
-     * Unannotated like {@link #record}: a caller rendering an account it just restricted would read
-     * a replica under readOnly routing and miss the record its own transaction wrote.
-     */
     private Optional<String> latestReason(UUID targetPublicId, ModerationAction.ActionType type) {
         return moderationActionRepository
                 .findFirstByTargetUuidAndActionTypeOrderByCreatedAtDesc(targetPublicId.toString(), type)
