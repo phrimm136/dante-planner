@@ -1,0 +1,24 @@
+# 137 harness-checks-artifacts-not-behavior
+epic: none · pr: none
+
+## Decisions
+- @harness @hooks — A Claude hook checks an artifact's presence and format at a transition (a worker spawn, a landing on the integration branch) or a destructive command, and never the agent's behavior: what it read, in what order, which skill it invoked, or how well a report is written. Every behavior-tracking hook this repository has carried (read trackers, skill activators, pattern enforcers, build-trigger resolvers) went dead or unwired while the command inspectors kept firing, and a hook that judges behavior makes the agent shape its work around the hook instead of the task.
+  REJECTED: keyword-triggered skill injection on prompt submit — fires on the wrong prompts, is silent when its rule file empties, and is the exact shape that died here.
+  REJECTED: judging content quality in a hook — an LLM judging an LLM's prose is the same judgment twice, and a format check on prose fills with boilerplate.
+- @harness @landing — The integration branch's ref is guarded by a git `reference-transaction` hook: an update of that ref is refused in the prepared phase unless every commit in the landed range has its patch-id listed in a review record under the repository's reports directory, with rollbacks (new tip an ancestor of the old) and syncs from the release branch exempt. Units land by fast-forward merge and by direct commit in roughly equal numbers, so a hook matching command text sees neither; a tip-sha key goes stale on every rebase and every fix commit, which invites rewriting the key instead of re-reviewing. Bypass is the human's own command with the hooks path unset for that one invocation; the Bash-tool hook denies that form, so only a hand-typed command can take it.
+  REJECTED: matching `git merge` in the Bash hook — the landing command carries a shell variable the hook cannot resolve, and direct commits never say merge.
+  REJECTED: keying the record on the tip sha — stale after each rebase, and a one-line rewrite is cheaper than a review.
+  REJECTED: an environment-variable bypass — the agent can set it as easily as the human, and a bypass log is a second artifact to maintain when the reflog already shows an unreviewed update.
+- @harness @review — The reviewer agent writes the review record itself, listing the range's patch-ids and its findings; the main loop appends one verdict per finding and never the reviewer, so review and judgment stay in separate contexts. Fix commits made after the review are admitted by a delta entry naming their patch-ids, not a full re-review.
+  REJECTED: the main loop transcribing the reviewer's rows into the record — one more hand between finding and record is one more place a row is dropped.
+  REJECTED: the reviewer assigning verdicts — collapses the fresh-context review into the build conversation it was separated from.
+- @harness @brief — A spawn of an implementation worker is refused unless its prompt carries four headings: Scenarios, Dependents holding at least one fenced block of pasted search output, Boundary cases, and Relies on. Presence is checked, content is not; a recorded `no-design:` reason bypasses. Most review findings traced to briefs that never listed who consumes the changed code, which boundary cases exist, or which decisions the brief leaned on, and a pasted search result cannot be written without running the search.
+  REJECTED: token-level requirements inside scenarios (a `then:` or `negative:` marker) — cheap to sprinkle, and a negative scenario is not a boundary case.
+  REJECTED: gating only the implementor agent type — any other agent type would skip it; the existing implementation-verb heuristic stays as the second trigger.
+- @harness @gates — Mutation testing blocks from its first run at the score that run measures, and the threshold only rises; there is no report-mode period. The report-mode-first plan was declared twice and never executed, so a gate that starts in report mode here starts never.
+  REJECTED: report mode with a later promotion — the promotion is the step that does not happen.
+- @harness @gates — Every build-side check (shared case corpus, derived-subject invariant tests, boundary lints, contract scripts) joins the per-unit local gates, since the pull-request workflow runs only against the release branch and would see a unit at range end, which is the latency being removed. Corollary of the landing decision.
+- @harness @hooks — Codebase rules that the deleted forbidden-patterns hook declared are debt against 070, listed there for migration to the build's linters; the hook, its enforcer chain, its read tracker, and the skill-activation files leave with their wiring and their documentation. Forced by 070.
+
+## Takeaway
+- takeaway: a hook that can be satisfied by changing how you work, rather than what you produce, will be satisfied that way; check the artifact at the transition and leave the work alone.

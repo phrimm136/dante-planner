@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# Refuses an update of refs/heads/dev that lands a non-merge commit whose patch-id is
+# absent from every review record under .claude/reports/reviews/ of the invoking checkout.
+# Rollbacks, syncs from origin/main, creation or deletion of dev, and empty commits pass.
+# An all-zero old value also arrives for an existing dev (update-ref, branch -f, checkout -B).
+set -euo pipefail
+
+[ "${1:-}" = prepared ] || exit 0
+
+zero=0000000000000000000000000000000000000000
+reviewed=
+loaded=0
+missing=()
+
+load_reviewed() {
+  shopt -s nullglob
+  local records=("$(git rev-parse --show-toplevel)"/.claude/reports/reviews/*.md)
+  if [ ${#records[@]} -gt 0 ]; then
+    reviewed=$(awk '
+      /^[^ \t]/ { listed = ($0 ~ /^(patch-ids|delta):[ \t]*$/) }
+      listed && $1 == "-" && length($2) == 40 && $2 !~ /[^0-9a-f]/ { print $2 }
+    ' "${records[@]}")
+  fi
+  loaded=1
+}
+
+while read -r old new ref; do
+  [ "$ref" = refs/heads/dev ] || continue
+  [ "$new" = "$zero" ] && continue
+  if [ "$old" = "$zero" ]; then
+    old=$(git rev-parse -q --verify refs/heads/dev) || continue
+  fi
+  if git merge-base --is-ancestor "$new" "$old"; then continue; fi
+
+  commits=$(git rev-list --reverse --no-merges "$old..$new")
+
+  if main=$(git rev-parse -q --verify refs/remotes/origin/main); then
+    synced=1
+    for c in $commits; do
+      git merge-base --is-ancestor "$c" "$main" || { synced=0; break; }
+    done
+    [ "$synced" = 1 ] && continue
+  fi
+
+  [ "$loaded" = 1 ] || load_reviewed
+  for c in $commits; do
+    id=$(git diff-tree -p "$c" | git patch-id --stable | cut -d' ' -f1)
+    [ -n "$id" ] || continue
+    printf '%s\n' "$reviewed" | awk -v id="$id" '$0 == id { found = 1 } END { exit !found }' || missing+=("$c")
+  done
+done
+
+[ ${#missing[@]} -eq 0 ] && exit 0
+
+echo "landing: ${#missing[@]} commit(s) without a review record" >&2
+for c in "${missing[@]}"; do
+  git log -1 --format='  %h %s' "$c" >&2
+done
+echo "run it yourself: git -c core.hooksPath= <your command>" >&2
+exit 1
