@@ -54,8 +54,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * make the count grow with row count, failing the slope assertion.</p>
  *
  * <p>The database is this class's own: the measured calls are list reads over every published
- * planner, so a neighbour publishing between the two measurements adds rows to the same page and
- * with them the per-row {@code UserSettings} load, which is the slope the assertion bounds.</p>
+ * planner, so a neighbour publishing between the two measurements would add rows to the page
+ * whose statement-count slope the assertion bounds.</p>
  *
  * <p>The class is deliberately NOT {@code @Transactional}: each measured service call runs in
  * its own fresh read-only transaction (a new Hibernate session), so the author and the
@@ -240,15 +240,9 @@ class PlannerQueryCountIT {
         seedPlanners(LARGE_SET - SMALL_SET, crossRecommendedThreshold);
         long largeCount = measure.getAsLong();
 
-        // Regression guard on the read-path SQL count. The four core queries (planners+author via
-        // JOIN, plus batched comment-count / vote / bookmark IN-queries) are constant w.r.t. row
-        // count. One known pre-existing N+1 remains: the author's UserSettings (LAZY @OneToOne) is
-        // loaded once per result row, so the count grows by exactly one statement per added row.
-        // Locking the slope at <= one-per-row catches a NEW N+1 (a second per-row query from a B6/B10
-        // change pushes the delta past rowDelta) while tolerating the documented existing one.
         int rowDelta = LARGE_SET - SMALL_SET;
         assertThat(largeCount - smallCount)
-                .as("no new per-row SQL beyond the known UserSettings load")
+                .as("statement growth is at most one per added row")
                 .isLessThanOrEqualTo(rowDelta);
     }
 
