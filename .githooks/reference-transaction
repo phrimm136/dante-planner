@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Refuses an update of refs/heads/dev that lands a non-merge commit whose patch-id is
-# absent from every review record under .claude/reports/reviews/ of the invoking checkout.
-# Rollbacks, syncs from origin/main, creation or deletion of dev, and empty commits pass.
+# Refuses a deletion of refs/heads/dev, and an update that lands a non-merge commit whose
+# patch-id is absent from every review record under .claude/reports/reviews/ of the invoking
+# checkout. Rollbacks, syncs from origin/main, creating dev on a remote-tracked commit, and
+# empty commits pass.
 # An all-zero old value also arrives for an existing dev (update-ref, branch -f, checkout -B).
 set -euo pipefail
 
@@ -10,6 +11,7 @@ set -euo pipefail
 zero=0000000000000000000000000000000000000000
 reviewed=
 loaded=0
+deleted=0
 missing=()
 
 load_reviewed() {
@@ -24,22 +26,34 @@ load_reviewed() {
   loaded=1
 }
 
+on_a_remote() {
+  local tip
+  for tip in $(git for-each-ref refs/remotes --format='%(objectname)'); do
+    git merge-base --is-ancestor "$1" "$tip" && return 0
+  done
+  return 1
+}
+
 while read -r old new ref; do
   [ "$ref" = refs/heads/dev ] || continue
-  [ "$new" = "$zero" ] && continue
+  if [ "$new" = "$zero" ]; then deleted=1; continue; fi
   if [ "$old" = "$zero" ]; then
-    old=$(git rev-parse -q --verify refs/heads/dev) || continue
+    old=$(git rev-parse -q --verify refs/heads/dev) || old=
   fi
-  if git merge-base --is-ancestor "$new" "$old"; then continue; fi
 
-  commits=$(git rev-list --reverse --no-merges "$old..$new")
-
-  if main=$(git rev-parse -q --verify refs/remotes/origin/main); then
-    synced=1
-    for c in $commits; do
-      git merge-base --is-ancestor "$c" "$main" || { synced=0; break; }
-    done
-    [ "$synced" = 1 ] && continue
+  if [ -z "$old" ]; then
+    on_a_remote "$new" && continue
+    commits=$(git rev-list --reverse --no-merges "$new" --not --remotes)
+  else
+    if git merge-base --is-ancestor "$new" "$old"; then continue; fi
+    commits=$(git rev-list --reverse --no-merges "$old..$new")
+    if main=$(git rev-parse -q --verify refs/remotes/origin/main); then
+      synced=1
+      for c in $commits; do
+        git merge-base --is-ancestor "$c" "$main" || { synced=0; break; }
+      done
+      [ "$synced" = 1 ] && continue
+    fi
   fi
 
   [ "$loaded" = 1 ] || load_reviewed
@@ -50,11 +64,14 @@ while read -r old new ref; do
   done
 done
 
-[ ${#missing[@]} -eq 0 ] && exit 0
+[ "$deleted" = 0 ] && [ ${#missing[@]} -eq 0 ] && exit 0
 
-echo "landing: ${#missing[@]} commit(s) without a review record" >&2
-for c in "${missing[@]}"; do
-  git log -1 --format='  %h %s' "$c" >&2
-done
+[ "$deleted" = 1 ] && echo "landing: deleting refs/heads/dev is never a landing" >&2
+if [ ${#missing[@]} -gt 0 ]; then
+  echo "landing: ${#missing[@]} commit(s) without a review record" >&2
+  for c in "${missing[@]}"; do
+    git log -1 --format='  %h %s' "$c" >&2
+  done
+fi
 echo "run it yourself: git -c core.hooksPath= <your command>" >&2
 exit 1

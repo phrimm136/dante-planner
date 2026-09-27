@@ -41,7 +41,7 @@ printf '.githooks/\n.claude/\n' >> "$R/.git/info/exclude"
 g config core.hooksPath "$R/.githooks"
 
 change a.txt a 'feat: root'
-check 'creating dev (zero old sha) is exempt' eq "$(subject dev)" 'feat: root'
+check 'creating dev at a root commit (empty patch-id): exempt' eq "$(subject dev)" 'feat: root'
 A=$(tip dev)
 
 g switch -q -c feat/x
@@ -152,9 +152,9 @@ g switch -q -c unreviewed "$A"
 change u.txt u 'feat: never reviewed'
 U=$(tip unreviewed)
 g branch -q -D dev 2>"$ERR"; rc=$?
-check 'deleting dev (zero new sha): exempt' [ "$rc" -eq 0 ] 
-g branch -q dev "$U" 2>"$ERR"; rc=$?
-check 'creating dev at an unreviewed commit: exempt' eq "$(tip dev):$rc" "$U:0"
+check 'deleting dev: refused' eq "$(tip dev):$((rc != 0))" "$H:1"
+check 'deleting dev: says so' has 'landing: deleting refs/heads/dev is never a landing'
+check 'deleting dev: bypass line' has 'run it yourself: git -c core.hooksPath= <your command>'
 
 g switch -q feat/x
 change x.txt x2 'feat(x): unreviewed follow-up'
@@ -163,7 +163,7 @@ g update-ref refs/remotes/origin/dev "$A"
 g update-ref refs/remotes/origin/dev "$(tip feat/x)" "$A" 2>"$ERR"; rc=$?
 check 'other ref refs/remotes/origin/dev: untouched' eq "$(tip origin/dev):$rc" "$(tip feat/x):0"
 
-g update-ref refs/heads/dev "$A" "$U"
+g update-ref refs/heads/dev "$A" "$H"
 g update-ref refs/heads/dev "$U" 2>"$ERR"; rc=$?
 check 'update-ref without old value to an unreviewed commit: refused' eq "$(tip dev):$((rc != 0))" "$A:1"
 check 'update-ref without old value: names the commit' has 'feat: never reviewed'
@@ -183,7 +183,11 @@ git -C "$R2" config core.hooksPath "$R2/.githooks"
 echo f > "$R2/f.txt"; git -C "$R2" add f.txt; git -C "$R2" commit -q -m 'feat: fresh'
 echo g >> "$R2/f.txt"; git -C "$R2" commit -q -am 'feat: fresh two'
 git -C "$R2" branch dev 2>"$ERR"; rc=$?
-check 'real create of dev in a repo without it: exempt' eq "$(git -C "$R2" rev-parse dev):$rc" "$(git -C "$R2" rev-parse main):0"
+check 'creating dev at an unreviewed local-only commit: refused' eq "$(git -C "$R2" rev-parse -q --verify dev):$((rc != 0))" ":1"
+check 'creating dev at an unreviewed local-only commit: names it, not the root' eq "$(rg -c 'feat: fresh' "$ERR"):$(rg -c 'feat: fresh two' "$ERR")" "1:1"
+git -C "$R2" update-ref refs/remotes/origin/main main
+git -C "$R2" branch dev 2>"$ERR"; rc=$?
+check 'creating dev at a commit reachable from a remote ref: exempt' eq "$(git -C "$R2" rev-parse dev):$rc" "$(git -C "$R2" rev-parse main):0"
 
 rm -rf "$REVIEWS"
 g switch -q dev
