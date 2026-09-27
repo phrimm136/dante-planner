@@ -39,12 +39,12 @@ public class PlannerContentValidator {
             throw ValidationErrors.emptyContent();
         }
 
-        structuralValidator.validateContentSize(content);
         categoryValidator.validateCategory(category);
 
         ValidationContext context = new ValidationContext(policy);
 
         JsonNode root = structuralValidator.parseJson(content);
+        structuralValidator.validateContentSize(root);
 
         if (!root.isObject()) {
             log.warn("Validation failed: content is not a JSON object");

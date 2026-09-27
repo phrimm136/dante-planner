@@ -43,8 +43,8 @@ class StructuralValidator {
         this.maxNoteSizeBytes = maxNoteSizeBytes;
     }
 
-    void validateContentSize(String content) {
-        int size = content.getBytes(StandardCharsets.UTF_8).length;
+    void validateContentSize(JsonNode root) {
+        int size = canonicalSize(root, "content");
         if (size > maxContentSizeBytes) {
             log.warn("Validation failed: content size {} exceeds limit {}", size, maxContentSizeBytes);
             throw ValidationErrors.sizeExceeded("Content", size, maxContentSizeBytes);
@@ -125,18 +125,21 @@ class StructuralValidator {
 
         for (Map.Entry<String, JsonNode> entry : sectionNotes.properties()) {
             String sectionKey = entry.getKey();
-            try {
-                String noteJson = objectMapper.writeValueAsString(entry.getValue());
-                int noteSize = noteJson.getBytes(StandardCharsets.UTF_8).length;
+            int noteSize = canonicalSize(entry.getValue(), "note '" + sectionKey + "'");
 
-                if (noteSize > maxNoteSizeBytes) {
-                    log.warn("Validation failed: note '{}' size {} exceeds limit {}", sectionKey, noteSize, maxNoteSizeBytes);
-                    throw ValidationErrors.sizeExceeded("Note '" + sectionKey + "'", noteSize, maxNoteSizeBytes);
-                }
-            } catch (JsonProcessingException e) {
-                log.warn("Validation failed: cannot serialize note '{}'", sectionKey);
-                throw ValidationErrors.malformedJson("cannot serialize note '" + sectionKey + "'");
+            if (noteSize > maxNoteSizeBytes) {
+                log.warn("Validation failed: note '{}' size {} exceeds limit {}", sectionKey, noteSize, maxNoteSizeBytes);
+                throw ValidationErrors.sizeExceeded("Note '" + sectionKey + "'", noteSize, maxNoteSizeBytes);
             }
+        }
+    }
+
+    private int canonicalSize(JsonNode node, String subject) {
+        try {
+            return objectMapper.writeValueAsString(node).getBytes(StandardCharsets.UTF_8).length;
+        } catch (JsonProcessingException e) {
+            log.warn("Validation failed: cannot serialize {}", subject);
+            throw ValidationErrors.malformedJson("cannot serialize " + subject);
         }
     }
 }

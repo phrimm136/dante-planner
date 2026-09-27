@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.danteplanner.backend.config.TestConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -42,6 +43,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -100,6 +102,9 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private PlannerCatalogService catalogService;
+
+    @Value("${planner.validation.max-content-size}")
+    private int maxContentSizeBytes;
 
     private User testUser;
     private User otherUser;
@@ -1134,6 +1139,35 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.published").value(false));
             assertFalse(plannerRepository.findById(planner.getId()).orElseThrow().isPublished());
+        }
+
+        @Test
+        @DisplayName("publish-measures-the-document: content accepted at save publishes although MySQL stores it wider")
+        void publishIntent_WhenStoredRenderingExceedsLimit_PublishesWhatSaveAccepted() throws Exception {
+            ObjectNode document = (ObjectNode) objectMapper.readTree(TestDataFactory.VALID_CONTENT);
+            ObjectNode notes = document.putObject("sectionNotes");
+            for (int i = 0; i < 45; i++) {
+                notes.set("n" + i, objectMapper.valueToTree(new int[500]));
+            }
+            String content = objectMapper.writeValueAsString(document);
+            UpsertPlannerRequest request = withContent(createValidPlannerRequest(), content);
+            UUID plannerId = UUID.fromString(request.id());
+
+            mockMvc.perform(put("/api/planner/md/{id}", plannerId).with(withCsrf())
+                            .cookie(session())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isCreated());
+
+            String stored = plannerRepository.findById(plannerId).orElseThrow().getContentJson();
+            assertTrue(content.getBytes(StandardCharsets.UTF_8).length < maxContentSizeBytes);
+            assertTrue(stored.getBytes(StandardCharsets.UTF_8).length > maxContentSizeBytes);
+
+            mockMvc.perform(post("/api/planner/md/{id}/publish", plannerId).with(withCsrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .cookie(accessTokenCookie()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.published").value(true));
         }
 
         @Test
