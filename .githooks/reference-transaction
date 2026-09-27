@@ -26,14 +26,6 @@ load_reviewed() {
   loaded=1
 }
 
-on_a_remote() {
-  local tip
-  for tip in $(git for-each-ref refs/remotes --format='%(objectname)'); do
-    git merge-base --is-ancestor "$1" "$tip" && return 0
-  done
-  return 1
-}
-
 while read -r old new ref; do
   [ "$ref" = refs/heads/dev ] || continue
   if [ "$new" = "$zero" ]; then deleted=1; continue; fi
@@ -42,7 +34,6 @@ while read -r old new ref; do
   fi
 
   if [ -z "$old" ]; then
-    on_a_remote "$new" && continue
     commits=$(git rev-list --reverse --no-merges "$new" --not --remotes)
   else
     if git merge-base --is-ancestor "$new" "$old"; then continue; fi

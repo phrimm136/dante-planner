@@ -156,7 +156,7 @@ def released_commits(repo_path):
 
 def gate_floor(repo_path, since_sha):
     if since_sha:
-        return since_sha
+        return run_git(repo_path, ["rev-parse", "--verify", f"{since_sha}^{{commit}}"]).strip()
     adding_shas = run_git(repo_path, ["log", "dev", "--diff-filter=A", "--format=%H", "--", LANDING_HOOK]).split()
     return adding_shas[-1] if adding_shas else None
 
@@ -436,6 +436,12 @@ class ReviewMeasuresTest(unittest.TestCase):
         self.assertEqual(script_run.returncode, 0, script_run.stderr)
         self.assertEqual(script_run.stdout.splitlines()[4:],
                          [f"unreviewed: {self.fixture.short_sha(late_sha)} feat: late"])
+
+    def test_unresolvable_since_fails(self):
+        script_run = self.fixture.run_script(extra_args=("--since", "notasha"))
+        self.assertEqual(script_run.returncode, 1)
+        self.assertEqual(script_run.stdout, "")
+        self.assertIn("rev-parse", script_run.stderr)
 
     def test_no_floor_walks_everything(self):
         early_sha = self.fixture.commit_file("early.txt", "feat: early")
