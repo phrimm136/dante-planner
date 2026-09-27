@@ -68,15 +68,11 @@ public class PlannerPublishingService {
 
     @Transactional
     public PlannerResponse unpublish(Long userId, UUID plannerId) {
-        accessGuard.checkNotRestricted(userId);
-
         return applyUnpublish(userId, accessGuard.requireExisting(plannerId));
     }
 
     @Transactional
     public PlannerResponse unpublish(Long userId, UUID deviceId, UUID plannerId, UpsertPlannerRequest content) {
-        accessGuard.checkNotRestricted(userId);
-
         return applyUnpublish(userId, upserted(userId, deviceId, plannerId, content));
     }
 

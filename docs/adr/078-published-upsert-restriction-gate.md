@@ -12,6 +12,8 @@ epic: none · pr: none
   only in the bypassable client. REJECTED: blocking all sync for restricted users — withdraws
   the private work the guard's contract preserves. REJECTED: status quo — the one public
   mutation without a server-side check.
+- @planner @moderation @unpublish — A restricted owner, banned or timed out, may unpublish: withdrawing a planner from public view only reduces distribution, which is what a restriction withholds, while publishing and writing content into a published planner stay blocked.
+  REJECTED: blocking unpublish while restricted — leaves a banned owner unable to take down their own public content.
 
 ## Takeaway
 

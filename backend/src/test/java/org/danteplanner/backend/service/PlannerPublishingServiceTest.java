@@ -425,6 +425,21 @@ class PlannerPublishingServiceTest {
             );
             verify(plannerCatalogService, never()).onBecameVisible(any());
         }
+
+        @Test
+        @DisplayName("a ban withdraws distribution, so a banned owner may still unpublish")
+        void unpublish_WhenBannedOwner_Unpublishes() {
+            testUser.setBannedAt(java.time.Instant.now());
+            testUser.setBannedBy(1L);
+            when(userService.findById(testUser.getId())).thenReturn(testUser);
+            Planner planner = testPlannerBuilder().published(true).build();
+            when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+
+            PlannerResponse result = publishingService.unpublish(testUser.getId(), planner.getId());
+
+            assertFalse(result.published());
+            verify(plannerCatalogService).onBecameInvisible(planner.getId());
+        }
     }
 
     @Nested
