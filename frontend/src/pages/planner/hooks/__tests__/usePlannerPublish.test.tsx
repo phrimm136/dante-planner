@@ -95,6 +95,7 @@ describe('usePlannerPublish', () => {
     await waitFor(() => expect(seen).toHaveLength(1))
     expect(seen[0]).toMatchObject({ method: 'POST', path: `/api/planner/md/${plannerId}/publish` })
     expect(JSON.parse(seen[0]!.body)).toEqual(toUpsertRequest(planner))
+    expect(JSON.parse(seen[0]!.body)).not.toHaveProperty('selectedKeywords')
     expect(outcome.published).toBe(true)
     expect(outcome.acknowledged?.metadata.syncVersion).toBe(4)
   })

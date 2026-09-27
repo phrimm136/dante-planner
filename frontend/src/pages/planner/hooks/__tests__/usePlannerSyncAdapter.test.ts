@@ -363,58 +363,21 @@ describe('usePlannerSyncAdapter', () => {
     })
   })
 
-  describe('syncToServer keyword extraction', () => {
-    it('extracts selectedKeywords from content and includes in request', async () => {
-      // Arrange
-      const mockPlanner = createMockPlanner({ syncVersion: 1, userId: null })
-      // Add keywords to content
-      mockPlanner.content = {
-        ...mockPlanner.content,
-        selectedKeywords: ['Burn', 'Slash', 'Pierce'],
-      } as typeof mockPlanner.content
-      const mockResponse = createMockServerResponse()
-      mockUpsert.mockResolvedValue(mockResponse)
-
-      const { result: hookResult } = renderHook(() => usePlannerSyncAdapter())
-      const adapter = hookResult.current
-
-      // Act
-      await adapter.syncToServer(mockPlanner)
-
-      // Assert
-      expect(mockUpsert).toHaveBeenCalledWith(
-        '550e8400-e29b-41d4-a716-446655440000',
-        expect.objectContaining({
-          selectedKeywords: ['Burn', 'Slash', 'Pierce'],
-        }),
-        undefined,
-      )
-    })
-
-    it('sends empty array when no keywords selected', async () => {
-      // Arrange
+  describe('syncToServer keywords', () => {
+    it('sends keywords only inside content, with no top-level copy', async () => {
       const mockPlanner = createMockPlanner({ syncVersion: 1, userId: null })
       mockPlanner.content = {
         ...mockPlanner.content,
-        selectedKeywords: [],
+        selectedKeywords: ['Combustion', 'Slash'],
       } as typeof mockPlanner.content
-      const mockResponse = createMockServerResponse()
-      mockUpsert.mockResolvedValue(mockResponse)
+      mockUpsert.mockResolvedValue(createMockServerResponse())
 
       const { result: hookResult } = renderHook(() => usePlannerSyncAdapter())
-      const adapter = hookResult.current
+      await hookResult.current.syncToServer(mockPlanner)
 
-      // Act
-      await adapter.syncToServer(mockPlanner)
-
-      // Assert
-      expect(mockUpsert).toHaveBeenCalledWith(
-        '550e8400-e29b-41d4-a716-446655440000',
-        expect.objectContaining({
-          selectedKeywords: [],
-        }),
-        undefined,
-      )
+      const body = JSON.parse(JSON.stringify(mockUpsert.mock.calls[0]![1]))
+      expect(body).not.toHaveProperty('selectedKeywords')
+      expect(JSON.parse(body.content).selectedKeywords).toEqual(['Combustion', 'Slash'])
     })
   })
 

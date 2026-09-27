@@ -87,9 +87,6 @@ export function toUpsertRequest(planner: ValidatedPlanner): UpsertPlannerRequest
 
   const metadata = planner.metadata
 
-  const mdContent = planner.content as import('../types/PlannerTypes').MDPlannerContent
-  const selectedKeywords = mdContent.selectedKeywords ?? []
-
   return {
     id: metadata.id,
     category: planner.config.category,
@@ -99,7 +96,6 @@ export function toUpsertRequest(planner: ValidatedPlanner): UpsertPlannerRequest
     contentVersion: metadata.contentVersion,
     plannerType: metadata.plannerType,
     syncVersion: metadata.syncVersion,
-    selectedKeywords,
   }
 }
 

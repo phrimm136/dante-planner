@@ -135,7 +135,6 @@ export interface UpsertPlannerRequest {
   contentVersion: number
   plannerType: PlannerType
   syncVersion?: number
-  selectedKeywords?: string[]
 }
 
 export interface ConflictState {
