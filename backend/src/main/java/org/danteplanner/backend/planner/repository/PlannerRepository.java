@@ -76,6 +76,10 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
             + "WHERE p.id = :id AND pub.published = TRUE AND c.deletedAt IS NULL AND u.deletedAt IS NULL")
     boolean existsPublishedById(@Param("id") UUID id);
 
+    @Query("SELECT p.id FROM Planner p JOIN p.content c JOIN p.publication pub "
+            + "WHERE p.user.id = :userId AND pub.published = TRUE AND c.deletedAt IS NULL")
+    List<UUID> findPublishedIdsOwnedBy(@Param("userId") Long userId);
+
     @Query("SELECT p.user.id AS userId, c.deletedAt AS deletedAt "
             + "FROM Planner p JOIN p.content c WHERE p.id = :id")
     Optional<PlannerOwnershipRow> findOwnershipById(@Param("id") UUID id);

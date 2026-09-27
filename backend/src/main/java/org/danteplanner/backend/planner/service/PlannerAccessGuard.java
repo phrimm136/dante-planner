@@ -45,6 +45,10 @@ public class PlannerAccessGuard {
         }
     }
 
+    public void holdActiveAccount(Long userId) {
+        userService.holdActiveById(userId);
+    }
+
     public void checkNotBanned(Long userId) {
         User user = getUser(userId);
 

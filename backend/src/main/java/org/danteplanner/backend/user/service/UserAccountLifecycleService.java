@@ -56,7 +56,7 @@ public class UserAccountLifecycleService {
 
     @Transactional
     public Instant deleteAccount(Long userId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findWithLockById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         if (user.isDeleted()) {

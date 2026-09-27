@@ -6,9 +6,14 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.dao.QueryTimeoutException;
+import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,8 +21,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -88,5 +97,44 @@ class ContentTombstoneStoreTest {
         store.clearTombstone("published-planner", live);
 
         verify(sharedTemplate).delete("del:published-planner:" + live);
+    }
+
+    private List<ILoggingEvent> warningsDuring(Runnable action) {
+        Logger logger = (Logger) LoggerFactory.getLogger(ContentTombstoneStore.class);
+        ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
+        try {
+            assertThatCode(action::run).doesNotThrowAnyException();
+        } finally {
+            logger.detachAppender(appender);
+        }
+        return appender.list.stream().filter(e -> e.getLevel() == Level.WARN).toList();
+    }
+
+    @Test
+    void writeTombstones_WhenRedisFails_LogsAndDoesNotThrow() {
+        when(sharedTemplate.executePipelined(any(SessionCallback.class)))
+                .thenThrow(new QueryTimeoutException("down"));
+
+        List<ILoggingEvent> warnings = warningsDuring(
+                () -> store.writeTombstones("published-planner", List.of(live, deleted)));
+
+        assertThat(warnings).hasSize(1);
+        assertThat(warnings.get(0).getThrowableProxy().getClassName())
+                .isEqualTo(QueryTimeoutException.class.getName());
+    }
+
+    @Test
+    void clearTombstones_WhenRedisFails_LogsAndDoesNotThrow() {
+        when(sharedTemplate.delete(anyCollection())).thenThrow(new QueryTimeoutException("down"));
+
+        List<ILoggingEvent> warnings = warningsDuring(
+                () -> store.clearTombstones("published-planner", List.of(live, deleted)));
+
+        assertThat(warnings).hasSize(1);
+        assertThat(warnings.get(0).getThrowableProxy().getClassName())
+                .isEqualTo(QueryTimeoutException.class.getName());
+        verify(sharedTemplate).delete(List.of("del:published-planner:" + live, "del:published-planner:" + deleted));
     }
 }

@@ -7,6 +7,7 @@ import org.danteplanner.backend.user.dto.UserResponse;
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.user.exception.AccountDeletedException;
 import org.danteplanner.backend.user.exception.UsernameGenerationException;
 import org.danteplanner.backend.user.exception.UserNotFoundException;
 import org.danteplanner.backend.moderation.service.ModerationAuditService;
@@ -201,6 +202,12 @@ public class UserService {
     public User lockActiveById(Long userId) {
         return userRepository.findWithLockByIdAndDeletedAtIsNull(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    public User holdActiveById(Long userId) {
+        return userRepository.findWithSharedLockByIdAndDeletedAtIsNull(userId)
+                .orElseThrow(() -> new AccountDeletedException(userId));
     }
 
     @Transactional(readOnly = true)

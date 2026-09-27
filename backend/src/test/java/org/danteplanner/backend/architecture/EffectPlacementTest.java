@@ -415,7 +415,8 @@ class EffectPlacementTest {
     }
 
     private static final Map<String, Set<String>> TOMBSTONE_WRITES = Map.of(
-            "org.danteplanner.backend.shared.readpath.ContentTombstoneStore", Set.of("writeTombstone", "clearTombstone"));
+            "org.danteplanner.backend.shared.readpath.ContentTombstoneStore",
+            Set.of("writeTombstone", "clearTombstone", "writeTombstones", "clearTombstones"));
 
     @Test
     @DisplayName("a transactional method reaches no tombstone write before its commit")

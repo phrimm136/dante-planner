@@ -104,7 +104,8 @@ public class PublishedPlannerController {
     @RateLimited(RateLimitPolicy.PLANNER_STATS)
     @GetMapping("/published/{id}/stats")
     public ResponseEntity<PlannerStatsResponse> getPublishedPlannerStats(@PathVariable UUID id) {
-        PlannerStatsResponse response = byIdReadGuard.read(ByIdReadGuard.PLANNER_ENTITY_TYPE, id,
+        PlannerStatsResponse response = byIdReadGuard.readPublicView(ByIdReadGuard.PLANNER_ENTITY_TYPE,
+                ByIdReadGuard.PUBLISHED_PLANNER_SCOPE, id,
                 () -> publishedPlannerQueryService.getPublishedPlannerStats(id));
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(response);
     }
@@ -114,7 +115,8 @@ public class PublishedPlannerController {
     public ResponseEntity<PlannerFlagsResponse> getPublishedPlannerFlags(
             @PathVariable UUID id,
             @AuthenticationPrincipal Long userId) {
-        PlannerFlagsResponse response = byIdReadGuard.read(ByIdReadGuard.PLANNER_ENTITY_TYPE, id,
+        PlannerFlagsResponse response = byIdReadGuard.readPublicView(ByIdReadGuard.PLANNER_ENTITY_TYPE,
+                ByIdReadGuard.PUBLISHED_PLANNER_SCOPE, id,
                 () -> publishedPlannerQueryService.getPublishedPlannerFlags(id, userId));
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(response);
     }
@@ -126,7 +128,8 @@ public class PublishedPlannerController {
             HttpServletResponse servletResponse,
             @PathVariable UUID id,
             @AuthenticationPrincipal Long userId) {
-        UUID plannerId = byIdReadGuard.read(ByIdReadGuard.PLANNER_ENTITY_TYPE, id,
+        UUID plannerId = byIdReadGuard.readPublicView(ByIdReadGuard.PLANNER_ENTITY_TYPE,
+                ByIdReadGuard.PUBLISHED_PLANNER_SCOPE, id,
                 () -> publishedPlannerQueryService.requirePublished(id));
         String viewerIdentity = ClientIpResolver.resolveClientIdentifier(
                 request, securityProperties, () -> deviceIdResolver.resolve(request, servletResponse));

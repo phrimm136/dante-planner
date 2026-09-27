@@ -33,6 +33,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findWithLockByIdAndDeletedAtIsNull(Long id);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Optional<User> findWithLockById(Long id);
+
+    @Lock(LockModeType.PESSIMISTIC_READ)
+    Optional<User> findWithSharedLockByIdAndDeletedAtIsNull(Long id);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT u FROM User u WHERE u.id = :id AND u.deletedAt IS NOT NULL "
             + "AND u.permanentDeleteScheduledAt IS NOT NULL "
             + "AND u.permanentDeleteScheduledAt < :cutoff")

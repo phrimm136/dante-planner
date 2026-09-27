@@ -189,6 +189,10 @@ public class Planner implements Persistable<UUID> {
         return user.getId().equals(userId);
     }
 
+    public boolean isOwnerDeactivated() {
+        return user.isDeleted();
+    }
+
     public void softDelete() {
         content.markDeleted();
     }

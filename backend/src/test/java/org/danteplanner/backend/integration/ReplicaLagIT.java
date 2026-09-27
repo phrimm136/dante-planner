@@ -32,6 +32,7 @@ import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -124,6 +125,9 @@ class ReplicaLagIT extends CausalHarnessSupport {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private UserAccountLifecycleService userAccountLifecycleService;
 
     @LocalServerPort
     private int port;
@@ -587,5 +591,99 @@ class ReplicaLagIT extends CausalHarnessSupport {
     private double promotedCount() {
         Counter counter = meterRegistry.find(PROMOTED_COUNTER).counter();
         return counter == null ? 0.0 : counter.count();
+    }
+
+    @Test
+    @DisplayName("INV2 published read: a deactivated owner's planners answer on the paused replica the 404 a caught-up replica gives")
+    void publishedRead_WhenOwnerDeactivatedOnPausedReplica_Returns404LikeACaughtUpReplica() throws Exception {
+        User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-deactivate@example.com");
+        Planner first = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        Planner second = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        replicationControl.awaitCaughtUp();
+
+        try {
+            replicationControl.stopReplica();
+
+            userAccountLifecycleService.deleteAccount(owner.getId());
+
+            Timestamp replicaOwnerDeletedAt = replicaJdbcTemplate.queryForObject(
+                    "SELECT deleted_at FROM users WHERE id = ?", Timestamp.class, owner.getId());
+            assertThat(replicaOwnerDeletedAt)
+                    .as("the paused replica must still hold the owner active, so a 404 comes from the read path, not replication")
+                    .isNull();
+            for (Planner planner : List.of(first, second)) {
+                assertThat(replicaStillPublished(planner.getId())).isTrue();
+                assertNotFoundLikeACaughtUpReplica(getPublished(planner.getId()), planner.getId());
+            }
+        } finally {
+            replicationControl.startReplica();
+            replicationControl.awaitCaughtUp();
+        }
+    }
+
+    @Test
+    @DisplayName("INV2 published read: once a deactivated owner reactivates, a read on the caught-up replica issues no bulkhead query")
+    void publishedRead_WhenOwnerReactivatedOnCaughtUpReplica_IssuesNoBulkheadQuery() throws Exception {
+        User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-reactivate@example.com");
+        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+
+        userAccountLifecycleService.deleteAccount(owner.getId());
+        assertThat(stringRedisTemplate.hasKey("del:published-planner:" + planner.getId()))
+                .as("the deactivation must have marked the planner, or clearing it proves nothing")
+                .isTrue();
+        userAccountLifecycleService.reactivateAccount(owner.getId());
+        replicationControl.awaitCaughtUp();
+        double before = bulkheadQueries();
+
+        HttpResponse<String> response = getPublished(planner.getId());
+
+        assertThat(response.statusCode()).as(response.body()).isEqualTo(200);
+        assertThat(bulkheadQueries() - before)
+                .as("a reactivation must lift the withdrawal markers, so the caught-up replica's hit is served as-is")
+                .isEqualTo(0.0);
+    }
+
+    @Test
+    @DisplayName("INV2 split reads: a deactivated owner's planner answers stats, flags and viewcount on the paused replica with the detail read's 404 and records no view")
+    void splitReads_WhenOwnerDeactivatedOnPausedReplica_Return404AndRecordNoView() throws Exception {
+        User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-split-owner@example.com");
+        User viewer = TestDataFactory.createTestUser(userRepository, "replica-lag-split-viewer@example.com");
+        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        UUID plannerId = planner.getId();
+        replicationControl.awaitCaughtUp();
+
+        try {
+            replicationControl.stopReplica();
+
+            userAccountLifecycleService.deleteAccount(owner.getId());
+
+            assertThat(replicaStillPublished(plannerId)).isTrue();
+            String base = "http://localhost:" + port + "/api/planner/md/published/" + plannerId;
+            String viewerCookie = CookieConstants.ACCESS_TOKEN + "="
+                    + TestDataFactory.generateAccessToken(jwtTokenService, viewer);
+            assertNotFoundLikeACaughtUpReplica(send(HttpRequest.newBuilder(URI.create(base + "/stats")).GET()),
+                    plannerId);
+            assertNotFoundLikeACaughtUpReplica(send(HttpRequest.newBuilder(URI.create(base + "/flags")).GET()),
+                    plannerId);
+            assertNotFoundLikeACaughtUpReplica(send(HttpRequest.newBuilder(URI.create(base + "/flags"))
+                    .header("Cookie", viewerCookie).GET()), plannerId);
+            String csrf = csrfTokenService.mint();
+            assertNotFoundLikeACaughtUpReplica(send(HttpRequest.newBuilder(URI.create(base + "/viewcount"))
+                    .header(CsrfDoubleSubmitFilter.CSRF_HEADER, csrf)
+                    .header("Cookie", CookieConstants.CSRF + "=" + csrf)
+                    .POST(HttpRequest.BodyPublishers.noBody())), plannerId);
+
+            assertThat(stringRedisTemplate.opsForHash().hasKey("views:buffer", plannerId.toString())).isFalse();
+            assertThat(stringRedisTemplate.keys("views:seen:*:" + plannerId + ":*")).isEmpty();
+        } finally {
+            replicationControl.startReplica();
+            replicationControl.awaitCaughtUp();
+        }
+    }
+
+    private HttpResponse<String> send(HttpRequest.Builder request) throws Exception {
+        try (HttpClient client = HttpClient.newHttpClient()) {
+            return client.send(request.build(), HttpResponse.BodyHandlers.ofString());
+        }
     }
 }

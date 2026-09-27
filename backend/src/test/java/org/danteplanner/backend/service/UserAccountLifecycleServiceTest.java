@@ -84,7 +84,7 @@ class UserAccountLifecycleServiceTest {
         @DisplayName("Should set deletedAt and scheduledDate on first deletion")
         void deleteAccount_WhenFirstDeletion_SetsDeletedAtAndScheduledDate() {
             // Arrange
-            when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+            when(userRepository.findWithLockById(testUser.getId())).thenReturn(Optional.of(testUser));
 
             // Act
             Instant scheduledDate = lifecycleService.deleteAccount(testUser.getId());
@@ -114,7 +114,7 @@ class UserAccountLifecycleServiceTest {
             Instant existingScheduledAt = Instant.now().plus(Duration.ofDays(25));
             testUser.softDelete(existingScheduledAt);
 
-            when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+            when(userRepository.findWithLockById(testUser.getId())).thenReturn(Optional.of(testUser));
 
             // Act
             Instant scheduledDate = lifecycleService.deleteAccount(testUser.getId());
@@ -129,7 +129,7 @@ class UserAccountLifecycleServiceTest {
         void deleteAccount_WhenUserNotFound_ThrowsException() {
             // Arrange
             Long nonExistentId = 999L;
-            when(userRepository.findById(nonExistentId)).thenReturn(Optional.empty());
+            when(userRepository.findWithLockById(nonExistentId)).thenReturn(Optional.empty());
 
             // Act & Assert
             UserNotFoundException exception = assertThrows(

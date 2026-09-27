@@ -10,6 +10,8 @@ import java.util.stream.IntStream;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.core.RedisOperations;
+import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.stereotype.Component;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
@@ -45,12 +47,46 @@ public class ContentTombstoneStore {
         }
     }
 
+    public void writeTombstones(String entityType, Collection<UUID> ids) {
+        if (ids.isEmpty()) {
+            return;
+        }
+        List<String> keys = ids.stream().map(id -> tombstoneKey(entityType, id)).toList();
+        try {
+            stringRedisTemplate.executePipelined(new SessionCallback<Object>() {
+                @Override
+                @SuppressWarnings("unchecked")
+                public <K, V> Object execute(RedisOperations<K, V> operations) {
+                    RedisOperations<String, String> strings = (RedisOperations<String, String>) operations;
+                    keys.forEach(key -> strings.opsForValue().set(key, TOMBSTONE_MARKER, TOMBSTONE_TTL));
+                    return null;
+                }
+            });
+        } catch (DataAccessException e) {
+            log.warn("tombstone write failed for {} {} ids — falling back to primary re-check gate",
+                    ids.size(), entityType, e);
+        }
+    }
+
     public void clearTombstone(String entityType, UUID id) {
         String key = tombstoneKey(entityType, id);
         try {
             stringRedisTemplate.delete(key);
         } catch (DataAccessException e) {
             log.warn("tombstone clear failed for {}:{} — reads re-check the primary until it expires", entityType, id, e);
+        }
+    }
+
+    public void clearTombstones(String entityType, Collection<UUID> ids) {
+        if (ids.isEmpty()) {
+            return;
+        }
+        List<String> keys = ids.stream().map(id -> tombstoneKey(entityType, id)).toList();
+        try {
+            stringRedisTemplate.delete(keys);
+        } catch (DataAccessException e) {
+            log.warn("tombstone clear failed for {} {} ids — reads re-check the primary until they expire",
+                    ids.size(), entityType, e);
         }
     }
 
