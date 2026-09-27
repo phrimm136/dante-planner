@@ -3,7 +3,6 @@ package org.danteplanner.backend.planner.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 
-import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.repository.PlannerSummaryRow;
@@ -22,18 +21,6 @@ public record PlannerSummaryResponse(
     Instant lastModifiedAt,
     @JsonInclude(JsonInclude.Include.NON_NULL) Instant deletedAt
 ) {
-
-    public static PlannerSummaryResponse fromEntity(Planner planner) {
-        return PlannerSummaryResponse.builder()
-                .id(planner.getId())
-                .title(planner.getTitle())
-                .category(planner.getCategory())
-                .plannerType(planner.getPlannerType())
-                .status(planner.getStatus())
-                .syncVersion(planner.getSyncVersion())
-                .lastModifiedAt(planner.getLastModifiedAt())
-                .build();
-    }
 
     public static PlannerSummaryResponse from(PlannerSummaryRow row) {
         return PlannerSummaryResponse.builder()

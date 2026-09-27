@@ -92,6 +92,11 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
     private DataSource dataSource;
 
     private JdbcTemplate jdbc;
+
+    private static final String SIX_FLOOR_CONTENT = TestDataFactory.VALID_CONTENT.replace(
+            "{\"themePackId\":\"1005\",\"difficulty\":0,\"giftIds\":[]}",
+            "{\"themePackId\":\"1005\",\"difficulty\":0,\"giftIds\":[]},"
+                    + "{\"themePackId\":\"1006\",\"difficulty\":0,\"giftIds\":[\"9004\"]}");
     private User owner;
 
     static LockProvider lockProvider() {
@@ -408,5 +413,20 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
     private void stampRecommended(Planner planner) {
         jdbc.update("UPDATE planner_stats SET recommended_notified_at = NOW(6) "
                 + "WHERE planner_id = UUID_TO_BIN(?)", planner.getId().toString());
+    }
+
+    @Test
+    void reconcile_WhenAFiveFloorPlannerStoresASixthFloor_ReportsNoEntityFilterDrift() {
+        Planner planner = TestDataFactory.planner(owner)
+                .title("Hidden Floor")
+                .selectedKeywords(Set.of("Sinking"))
+                .content(SIX_FLOOR_CONTENT)
+                .published(true)
+                .save(plannerRepository);
+        statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
+        catalogService.add(planner);
+        filterService.rebuildFilters(planner.getId());
+
+        assertThat(kindsFor(reconciler.reconcile(), planner.getId())).doesNotContain("entity_filter");
     }
 }

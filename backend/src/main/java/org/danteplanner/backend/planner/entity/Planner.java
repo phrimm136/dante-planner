@@ -153,6 +153,10 @@ public class Planner implements Persistable<UUID> {
         return content.getLoadedSelectedKeywords();
     }
 
+    public String getLoadedCategory() {
+        return content.getLoadedCategory();
+    }
+
     public boolean isPublished() {
         return publication.isPublished();
     }

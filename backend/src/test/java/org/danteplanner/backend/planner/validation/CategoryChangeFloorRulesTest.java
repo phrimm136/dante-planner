@@ -35,6 +35,8 @@ class CategoryChangeFloorRulesTest {
     private static final String STATIC_DATA = "../static/data";
     private static final String UNKNOWN_EGO_CONTENT = TestDataFactory.VALID_CONTENT.replace(
             "\"ZAYIN\":{\"id\":\"20101\"", "\"ZAYIN\":{\"id\":\"20199\"");
+    private static final String UNKNOWN_START_BUFF_CONTENT = TestDataFactory.VALID_CONTENT.replace(
+            "\"selectedBuffIds\":[100,201]", "\"selectedBuffIds\":[400,201]");
 
     @Mock
     private PlannerRepository plannerRepository;
@@ -130,5 +132,22 @@ class CategoryChangeFloorRulesTest {
 
         assertThat(planner.getCategory()).isEqualTo("10F");
         assertThat(planner.getContentJson()).isEqualTo(UNKNOWN_EGO_CONTENT);
+    }
+
+    @Test
+    void upsertPlanner_WhenACategoryChangeAlsoMovesTheContentVersion_RunsTheStartBuffChecks() {
+        Planner planner = stored(TestDataFactory.planner(owner)
+                .content(UNKNOWN_START_BUFF_CONTENT).contentVersion(6).build());
+        UpsertPlannerRequest request = new UpsertPlannerRequest(planner.getId().toString(), "10F",
+                planner.getTitle(), null, planner.getContentJson(), 7, PlannerType.MIRROR_DUNGEON,
+                planner.getSyncVersion(), null);
+
+        assertThatThrownBy(() -> commandService.upsertPlanner(owner.getId(), null, planner.getId(), request, false))
+                .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
+                    assertThat(ex.getStatusCode().value()).isEqualTo(400);
+                    assertThat(ex.getOriginalCode()).isEqualTo("VALIDATION_ERROR");
+                    assertThat(ex.getSubErrors()).extracting(ValidationError::code)
+                            .contains("START_BUFF_UNKNOWN_ID");
+                });
     }
 }

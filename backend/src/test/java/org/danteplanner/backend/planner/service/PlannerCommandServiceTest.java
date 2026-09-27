@@ -2,11 +2,8 @@ package org.danteplanner.backend.planner.service;
 import org.danteplanner.backend.planner.dto.UpsertResult;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
-import org.danteplanner.backend.planner.dto.ImportPlannersResponse;
-import org.danteplanner.backend.planner.dto.ImportPlannersRequest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.danteplanner.backend.planner.dto.PlannerSummaryResponse;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.validation.PlannerCategoryValidator;
 import org.danteplanner.backend.planner.validation.PlannerLimitValidator;
@@ -46,8 +43,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -59,7 +54,7 @@ import org.danteplanner.backend.user.exception.UserBannedException;
 
 /**
  * Unit tests for PlannerCommandService (owner CRUD write operations:
- * create/upsert/update/delete/import).
+ * create/upsert/update/delete).
  */
 @ExtendWith(SpringExtension.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
@@ -319,8 +314,8 @@ class PlannerCommandServiceTest {
         }
 
         @Test
-        @DisplayName("A category change resending the stored content does not re-validate it")
-        void upsertPlanner_WhenOnlyTheCategoryChanges_SkipsContentValidation() {
+        @DisplayName("A category change resending the stored content checks only the floor rules")
+        void upsertPlanner_WhenOnlyTheCategoryChanges_ChecksOnlyTheFloorRules() {
             Planner planner = createTestPlanner();
             String stored = planner.getContentJson();
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
@@ -333,6 +328,7 @@ class PlannerCommandServiceTest {
             assertEquals("10F", result.response().category());
             assertEquals(stored, planner.getContentJson());
             verify(contentValidator, never()).validate(any(), any(), anyInt(), any());
+            verify(contentValidator).validateFloorRules(stored, "10F", ValidationPolicy.forPublicationState(false));
         }
 
         @Test
@@ -348,6 +344,22 @@ class PlannerCommandServiceTest {
 
             verify(contentValidator).validate(edited, "10F", planner.getContentVersion(),
                     ValidationPolicy.forPublicationState(false));
+        }
+
+        @Test
+        @DisplayName("A category change resending the stored content under a new content version validates it")
+        void upsertPlanner_WhenCategoryAndContentVersionChange_ValidatesTheContent() {
+            Planner planner = createTestPlanner();
+            String stored = planner.getContentJson();
+            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+                    .thenReturn(Optional.of(planner));
+            when(contentValidator.isSameDocument(stored, stored)).thenReturn(true);
+            UpsertPlannerRequest request = withContentVersion(resending(planner, "10F", stored), 7);
+
+            commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(), request, false);
+
+            verify(contentValidator).validate(stored, "10F", 7, ValidationPolicy.forPublicationState(false));
+            verify(contentValidator, never()).validateFloorRules(any(), any(), any());
         }
 
         @Test
@@ -422,204 +434,6 @@ class PlannerCommandServiceTest {
             // Assert
             assertFalse(planner.isPublished()); // Still unpublished
             assertNotNull(planner.getContent().getDeletedAt());
-        }
-    }
-
-    @Nested
-    @DisplayName("importPlanners Tests")
-    class ImportPlannersTests {
-
-        @Test
-        @DisplayName("Should import planners successfully when within limit")
-        void importPlanners_WhenWithinLimit_Succeeds() {
-            // Arrange
-            when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(50L);
-            when(userService.findById(testUser.getId())).thenReturn(testUser);
-
-            List<UpsertPlannerRequest> requests = new ArrayList<>();
-            for (int i = 0; i < 3; i++) {
-                UpsertPlannerRequest req = createValidRequest();
-                req = withTitle(req, "Imported " + i);
-                requests.add(req);
-            }
-
-            ImportPlannersRequest importRequest = new ImportPlannersRequest(requests);
-
-            when(plannerRepository.insert(any(Planner.class))).thenAnswer(invocation -> {
-                Planner planner = invocation.getArgument(0);
-                planner.setCreatedAt(Instant.now());
-                planner.getContent().setLastModifiedAt(Instant.now());
-                return PlannerContentLifecycle.asPersisted(planner);
-            });
-
-            // Act
-            ImportPlannersResponse response = commandService.importPlanners(testUser.getId(), importRequest);
-
-            // Assert
-            assertEquals(3, response.imported());
-            assertEquals(3, response.total());
-            assertEquals(3, response.planners().size());
-            assertEquals(List.of("Imported 0", "Imported 1", "Imported 2"),
-                    response.planners().stream().map(PlannerSummaryResponse::title).toList());
-            // Validation of a batch member leaves no state behind on the success path; proving each
-            // one was screened as an outcome needs a rejected member and a real validator.
-            verify(contentValidator, times(3)).validate(anyString(), anyString(), anyInt());
-        }
-
-        @Test
-        @DisplayName("Should save the valid planners and report the invalid one as skipped")
-        void importPlanners_WhenOnePlannerIsInvalid_SavesTheRestAndReportsItSkipped() {
-            when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(0L);
-            UpsertPlannerRequest first = withTitle(createValidRequest(), "First");
-            UpsertPlannerRequest invalid = withContent(withTitle(createValidRequest(), "Stale"), "{\"stale\": true}");
-            UpsertPlannerRequest third = withTitle(createValidRequest(), "Third");
-            when(contentValidator.validate(invalid.content(), invalid.category(), invalid.contentVersion()))
-                    .thenThrow(PlannerValidationException.combined(List.of(new PlannerValidationException(
-                            "GIFT_UNKNOWN_ID", "Invalid observationGiftIds: 9899"))));
-            when(plannerRepository.insert(any(Planner.class))).thenAnswer(invocation -> {
-                Planner planner = invocation.getArgument(0);
-                planner.setCreatedAt(Instant.now());
-                planner.getContent().setLastModifiedAt(Instant.now());
-                return PlannerContentLifecycle.asPersisted(planner);
-            });
-
-            ImportPlannersResponse response = commandService.importPlanners(
-                    testUser.getId(), new ImportPlannersRequest(List.of(first, invalid, third)));
-
-            assertEquals(2, response.imported());
-            assertEquals(3, response.total());
-            assertEquals(List.of("First", "Third"),
-                    response.planners().stream().map(PlannerSummaryResponse::title).toList());
-            assertEquals(List.of(new ImportPlannersResponse.SkippedPlanner(invalid.id(), "Stale",
-                            List.of(new ImportPlannersResponse.SkipReason("GIFT_UNKNOWN_ID")))),
-                    response.skipped());
-            verify(plannerRepository, times(2)).insert(any());
-        }
-
-        @Test
-        @DisplayName("Should report a planner rejected before content validation as skipped with its code")
-        void importPlanners_WhenVersionIsRejected_ReportsTheTopLevelCode() {
-            when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(0L);
-            UpsertPlannerRequest stale = withContentVersion(withTitle(createValidRequest(), "Old"), 5);
-            doThrow(new PlannerValidationException("INVALID_CONTENT_VERSION", "Invalid content version"))
-                    .when(contentVersionValidator).validateVersionForCreate(any(), eq(5));
-
-            ImportPlannersResponse response = commandService.importPlanners(
-                    testUser.getId(), new ImportPlannersRequest(List.of(stale)));
-
-            assertEquals(0, response.imported());
-            assertEquals(List.of(new ImportPlannersResponse.SkippedPlanner(stale.id(), "Old",
-                            List.of(new ImportPlannersResponse.SkipReason("INVALID_CONTENT_VERSION")))),
-                    response.skipped());
-            verify(plannerRepository, never()).insert(any());
-        }
-
-        @Test
-        @DisplayName("Should reject import when would exceed limit")
-        void importPlanners_WhenExceedsLimit_ThrowsException() {
-            // Arrange
-            when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn((long) (maxPlannersPerUser - 2));
-
-            List<UpsertPlannerRequest> requests = new ArrayList<>();
-            for (int i = 0; i < 5; i++) {
-                requests.add(createValidRequest());
-            }
-
-            ImportPlannersRequest importRequest = new ImportPlannersRequest(requests);
-
-            // Act & Assert
-            assertThrows(
-                    PlannerLimitExceededException.class,
-                    () -> commandService.importPlanners(testUser.getId(), importRequest)
-            );
-
-            verify(plannerRepository, never()).insert(any());
-        }
-
-        @Test
-        @DisplayName("Should throw UserNotFoundException when user not found during import")
-        void importPlanners_WhenUserNotFound_ThrowsException() {
-            // Arrange
-            Long nonExistentUserId = 999L;
-            when(plannerRepository.countActiveByUserId(nonExistentUserId)).thenReturn(0L);
-            when(userService.findById(nonExistentUserId)).thenThrow(new UserNotFoundException(nonExistentUserId));
-
-            List<UpsertPlannerRequest> requests = new ArrayList<>();
-            requests.add(createValidRequest());
-
-            ImportPlannersRequest importRequest = new ImportPlannersRequest(requests);
-
-            // Act & Assert
-            UserNotFoundException exception = assertThrows(
-                    UserNotFoundException.class,
-                    () -> commandService.importPlanners(nonExistentUserId, importRequest)
-            );
-
-            assertEquals(nonExistentUserId, exception.getUserId());
-            verify(plannerRepository, never()).insert(any());
-        }
-
-        @Test
-        @DisplayName("Should allow import up to exactly max planners")
-        void importPlanners_WhenExactlyToLimit_Success() {
-            // Arrange
-            when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn((long) (maxPlannersPerUser - 5));
-            when(userService.findById(testUser.getId())).thenReturn(testUser);
-
-            List<UpsertPlannerRequest> requests = new ArrayList<>();
-            for (int i = 0; i < 5; i++) {
-                requests.add(createValidRequest());
-            }
-
-            ImportPlannersRequest importRequest = new ImportPlannersRequest(requests);
-
-            when(plannerRepository.insert(any(Planner.class))).thenAnswer(invocation -> {
-                Planner planner = invocation.getArgument(0);
-                planner.setCreatedAt(Instant.now());
-                planner.getContent().setLastModifiedAt(Instant.now());
-                return PlannerContentLifecycle.asPersisted(planner);
-            });
-
-            // Act
-            ImportPlannersResponse response = commandService.importPlanners(testUser.getId(), importRequest);
-
-            // Assert
-            assertEquals(5, response.imported());
-            assertEquals(5, response.total());
-            assertEquals(5, response.planners().size());
-        }
-
-        @Test
-        @DisplayName("Should count only the planners that pass validation against the limit")
-        void importPlanners_WhenOnlyTheValidPlannersFitTheLimit_SavesThemAndSkipsTheRest() {
-            when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn((long) (maxPlannersPerUser - 5));
-            List<UpsertPlannerRequest> requests = new ArrayList<>();
-            for (int i = 0; i < 10; i++) {
-                UpsertPlannerRequest request = withTitle(createValidRequest(), "Planner " + i);
-                if (i >= 4) {
-                    request = withContent(request, "{\"stale\": " + i + "}");
-                    when(contentValidator.validate(request.content(), request.category(), request.contentVersion()))
-                            .thenThrow(PlannerValidationException.combined(List.of(new PlannerValidationException(
-                                    "GIFT_UNKNOWN_ID", "Invalid observationGiftIds: 9899"))));
-                }
-                requests.add(request);
-            }
-            when(plannerRepository.insert(any(Planner.class))).thenAnswer(invocation -> {
-                Planner planner = invocation.getArgument(0);
-                planner.setCreatedAt(Instant.now());
-                planner.getContent().setLastModifiedAt(Instant.now());
-                return PlannerContentLifecycle.asPersisted(planner);
-            });
-
-            ImportPlannersResponse response = commandService.importPlanners(
-                    testUser.getId(), new ImportPlannersRequest(requests));
-
-            assertEquals(4, response.imported());
-            assertEquals(10, response.total());
-            assertEquals(List.of("Planner 0", "Planner 1", "Planner 2", "Planner 3"),
-                    response.planners().stream().map(PlannerSummaryResponse::title).toList());
-            assertEquals(6, response.skipped().size());
-            verify(plannerRepository, times(4)).insert(any());
         }
     }
 

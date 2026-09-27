@@ -65,7 +65,6 @@ class RateLimitBindingFreezeTest {
             "NotificationController.markAllAsRead -> CRUD:notifications-mark-all-read (RESPOND)",
             "NotificationController.markAsRead -> CRUD:notifications-mark-read (RESPOND)",
             "PlannerCommandController.deletePlanner -> CRUD:delete (RESPOND)",
-            "PlannerCommandController.importPlanners -> IMPORT (RESPOND)",
             "PlannerCommandController.upsertPlanner -> CRUD:upsert (RESPOND)",
             "PlannerCommentSseController.subscribeToComments -> PLANNER_COMMENT_SSE (RESPOND)",
             "PlannerEngagementController.castUpvote -> CRUD:vote (RESPOND)",

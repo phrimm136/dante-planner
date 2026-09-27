@@ -12,8 +12,6 @@ public enum RateLimitPolicy {
 
     CRUD(RateLimitProperties::getCrud, null, "", Subject.USER, false),
 
-    IMPORT(RateLimitProperties::getImportConfig, "import", "", Subject.USER, false),
-
     SSE(RateLimitProperties::getSse, "sse", "", Subject.USER, false),
 
     COMMENT(RateLimitProperties::getComment, "comment", "", Subject.USER, false),

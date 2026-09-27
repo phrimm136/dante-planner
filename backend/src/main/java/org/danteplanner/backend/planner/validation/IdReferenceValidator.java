@@ -25,7 +25,7 @@ class IdReferenceValidator {
 
     private record DifficultyRule(int min, int max) {}
 
-    private record FloorRules(int floorCount, IntFunction<DifficultyRule> difficultyAt) {}
+    private record FloorRules(IntFunction<DifficultyRule> difficultyAt) {}
 
     private static final DifficultyRule NORMAL_OR_HARD = new DifficultyRule(0, 1);
     private static final DifficultyRule HARD = new DifficultyRule(1, 1);
@@ -35,9 +35,9 @@ class IdReferenceValidator {
 
     static {
         Map<MDCategory, FloorRules> byCategory = new EnumMap<>(MDCategory.class);
-        byCategory.put(MDCategory.F5, new FloorRules(5, floor -> NORMAL_OR_HARD));
-        byCategory.put(MDCategory.F10, new FloorRules(10, floor -> HARD));
-        byCategory.put(MDCategory.F15, new FloorRules(15, floor -> floor < 10 ? HARD : EXTREME));
+        byCategory.put(MDCategory.F5, new FloorRules(floor -> NORMAL_OR_HARD));
+        byCategory.put(MDCategory.F10, new FloorRules(floor -> HARD));
+        byCategory.put(MDCategory.F15, new FloorRules(floor -> floor < MDCategory.F10.floorCount() ? HARD : EXTREME));
 
         List<MDCategory> uncovered = Arrays.stream(MDCategory.values())
                 .filter(category -> !byCategory.containsKey(category))
@@ -237,12 +237,13 @@ class IdReferenceValidator {
 
     private void validateFloors(JsonNode root, String category, boolean checkIds, ValidationContext context) {
         JsonNode floorSelections = arrayField(root, "floorSelections");
-        FloorRules rules = FLOOR_RULES.get(MDCategory.fromValue(category));
+        MDCategory mdCategory = MDCategory.fromValue(category);
+        FloorRules rules = FLOOR_RULES.get(mdCategory);
 
-        validateEveryFloorPresent(floorSelections, rules.floorCount(), context);
+        validateEveryFloorPresent(floorSelections, mdCategory.floorCount(), context);
 
         Map<String, Integer> firstFloorByThemePack = new HashMap<>();
-        eachObject(floorSelections, rules.floorCount(), (floor, index) -> {
+        eachObject(floorSelections, mdCategory.floorCount(), (floor, index) -> {
             String floorPath = "floorSelections[" + index + "]";
             JsonNode themePackNode = floor.path("themePackId");
             boolean themePackChosen = themePackNode.isTextual();

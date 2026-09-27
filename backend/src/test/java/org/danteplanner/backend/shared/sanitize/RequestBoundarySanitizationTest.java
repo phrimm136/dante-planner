@@ -2,14 +2,12 @@ package org.danteplanner.backend.shared.sanitize;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.moderation.dto.BanRequest;
-import org.danteplanner.backend.planner.dto.ImportPlannersRequest;
 import org.danteplanner.backend.planner.dto.LegacyPublishRequest;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 
@@ -54,22 +52,6 @@ class RequestBoundarySanitizationTest {
         assertThat(request.title()).isEqualTo(SAFE_TITLE);
         assertThat(linkIn(request.content())).isEqualTo("#");
         assertThat(linkIn(request.toUpsertRequest().content())).isEqualTo("#");
-    }
-
-    @Test
-    @DisplayName("a bulk import sanitizes every planner it carries")
-    void importRequest_WhenAnElementIsHostile_ArrivesSanitized() throws Exception {
-        ArrayNode planners = MAPPER.createArrayNode();
-        planners.add(hostileUpsertPayload());
-        ObjectNode payload = MAPPER.createObjectNode();
-        payload.set("planners", planners);
-
-        ImportPlannersRequest request =
-                MAPPER.treeToValue(payload, ImportPlannersRequest.class);
-
-        UpsertPlannerRequest imported = request.planners().getFirst();
-        assertThat(imported.title()).isEqualTo(SAFE_TITLE);
-        assertThat(linkIn(imported.content())).isEqualTo("#");
     }
 
     @Test

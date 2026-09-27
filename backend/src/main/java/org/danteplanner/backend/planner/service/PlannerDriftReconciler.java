@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
+import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.entity.PlannerKeywords;
 import org.danteplanner.backend.planner.repository.PlannerDriftAuditRepository;
 import org.danteplanner.backend.planner.repository.PlannerDriftAuditRepository.ContentDocumentRow;
@@ -157,7 +158,7 @@ public class PlannerDriftReconciler {
         Set<UUID> unreadable = new HashSet<>();
         for (ContentDocumentRow row : auditRepository.visibleContentDocuments()) {
             UUID plannerId = row.plannerId();
-            Set<String> entities = extractEntityKeys(plannerId, row.content()).orElse(null);
+            Set<String> entities = extractEntityKeys(plannerId, row.category(), row.content()).orElse(null);
             Set<String> keywords = parseKeywords(plannerId, "content", row.selectedKeywords()).orElse(null);
 
             if (entities == null || keywords == null) {
@@ -172,14 +173,15 @@ public class PlannerDriftReconciler {
         return new ExpectedIndexes(entitiesByPlanner, keywordsByPlanner, unreadable);
     }
 
-    private Optional<Set<String>> extractEntityKeys(UUID plannerId, String contentJson) {
+    private Optional<Set<String>> extractEntityKeys(UUID plannerId, String category, String contentJson) {
         if (contentJson == null || contentJson.isBlank()) {
             return Optional.of(Set.of());
         }
         try {
             Set<String> keys = new HashSet<>();
             for (PlannerContentEntityExtractor.EntityRef ref
-                    : PlannerContentEntityExtractor.extract(objectMapper.readTree(contentJson))) {
+                    : PlannerContentEntityExtractor.extract(objectMapper.readTree(contentJson),
+                            MDCategory.fromValue(category))) {
                 keys.add(ref.type().name() + ":" + ref.id());
             }
             return Optional.of(keys);

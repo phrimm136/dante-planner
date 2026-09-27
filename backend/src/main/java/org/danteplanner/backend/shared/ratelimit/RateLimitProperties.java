@@ -13,7 +13,6 @@ import lombok.Setter;
 public class RateLimitProperties {
 
     private BucketConfig crud;
-    private BucketConfig importConfig;
     private BucketConfig sse;
     private BucketConfig auth;
     private BucketConfig comment;

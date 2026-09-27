@@ -31,7 +31,7 @@ public class PlannerDriftAuditRepository {
     public record RecommendedDriftRow(UUID plannerId, boolean recommended, boolean derived) {
     }
 
-    public record ContentDocumentRow(UUID plannerId, String content, String selectedKeywords) {
+    public record ContentDocumentRow(UUID plannerId, String category, String content, String selectedKeywords) {
     }
 
     public record CatalogScalarDriftRow(UUID plannerId, String field, String expected, String actual) {
@@ -144,14 +144,14 @@ public class PlannerDriftAuditRepository {
 
     public List<ContentDocumentRow> visibleContentDocuments() {
         return jdbc.query("""
-                SELECT BIN_TO_UUID(c.planner_id) AS planner_id, c.content, c.selected_keywords
+                SELECT BIN_TO_UUID(c.planner_id) AS planner_id, c.category, c.content, c.selected_keywords
                 FROM planner_content c
                 JOIN planner_publication pub ON pub.planner_id = c.planner_id
                 LEFT JOIN planner_moderation m ON m.planner_id = c.planner_id
                 WHERE pub.published = TRUE AND c.deleted_at IS NULL AND m.taken_down_at IS NULL
                 """,
                 (rs, rowNum) -> new ContentDocumentRow(UUID.fromString(rs.getString("planner_id")),
-                        rs.getString("content"), rs.getString("selected_keywords")));
+                        rs.getString("category"), rs.getString("content"), rs.getString("selected_keywords")));
     }
 
     public List<EntityFilterRow> entityFilterEntries() {

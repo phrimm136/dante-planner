@@ -2,6 +2,7 @@ package org.danteplanner.backend.planner.validation;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.shared.entity.ContentEntityType;
 
 import java.util.Iterator;
@@ -17,7 +18,7 @@ public final class PlannerContentEntityExtractor {
     private PlannerContentEntityExtractor() {
     }
 
-    public static Set<EntityRef> extract(JsonNode root) {
+    public static Set<EntityRef> extract(JsonNode root, MDCategory category) {
         Set<EntityRef> refs = new LinkedHashSet<>();
         if (root == null || !root.isObject()) {
             return refs;
@@ -26,7 +27,7 @@ public final class PlannerContentEntityExtractor {
         addIdsFromArray(root.get("selectedGiftIds"), ContentEntityType.EGO_GIFT, refs);
         addIdsFromArray(root.get("observationGiftIds"), ContentEntityType.EGO_GIFT, refs);
         addIdsFromArray(root.get("comprehensiveGiftIds"), ContentEntityType.EGO_GIFT, refs);
-        extractFromFloorSelections(root, refs);
+        extractFromFloorSelections(root, category.floorCount(), refs);
         return refs;
     }
 
@@ -58,12 +59,13 @@ public final class PlannerContentEntityExtractor {
         }
     }
 
-    private static void extractFromFloorSelections(JsonNode root, Set<EntityRef> refs) {
+    private static void extractFromFloorSelections(JsonNode root, int floorCount, Set<EntityRef> refs) {
         JsonNode floorSelections = root.get("floorSelections");
         if (floorSelections == null || !floorSelections.isArray()) {
             return;
         }
-        for (JsonNode floor : floorSelections) {
+        for (int index = 0; index < floorSelections.size() && index < floorCount; index++) {
+            JsonNode floor = floorSelections.get(index);
             if (floor == null || !floor.isObject()) {
                 continue;
             }

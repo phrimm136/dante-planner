@@ -42,7 +42,7 @@ import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
  * A ban withdraws distribution, never possession.
  *
  * <p>Blocked: publishing a planner, and every way of putting text or a score on someone else's
- * content. Everything else stays reachable, including private planner CRUD and import.</p>
+ * content. Everything else stays reachable, including private planner CRUD.</p>
  *
  * <p>The endpoint axis comes from {@link RequestMappingHandlerMapping}, so both arms grow on their
  * own. A newly added endpoint lands in the must-not-be-blocked arm, which is the direction where a

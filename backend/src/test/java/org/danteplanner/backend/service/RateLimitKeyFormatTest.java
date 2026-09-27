@@ -50,7 +50,6 @@ class RateLimitKeyFormatTest {
     private static final UUID DEVICE_ID = UUID.fromString("3f2504e0-4f89-41d3-9a0c-0305e82c3301");
 
     private static final long CRUD_CAPACITY = 11;
-    private static final long IMPORT_CAPACITY = 12;
     private static final long SSE_CAPACITY = 13;
     private static final long AUTH_CAPACITY = 14;
     private static final long COMMENT_CAPACITY = 15;
@@ -76,8 +75,6 @@ class RateLimitKeyFormatTest {
     private static final List<FrozenKey> FROZEN_KEYS = List.of(
             new FrozenKey(RateLimitPolicy.CRUD, "7:vote", CRUD_CAPACITY, USER_ID, "vote",
                     service -> service.check(RateLimitPolicy.CRUD, USER_ID, "vote")),
-            new FrozenKey(RateLimitPolicy.IMPORT, "7:import", IMPORT_CAPACITY, USER_ID, "import",
-                    service -> service.check(RateLimitPolicy.IMPORT, USER_ID)),
             new FrozenKey(RateLimitPolicy.SSE, "7:sse", SSE_CAPACITY, USER_ID, "sse",
                     service -> service.check(RateLimitPolicy.SSE, USER_ID)),
             new FrozenKey(RateLimitPolicy.COMMENT, "7:comment", COMMENT_CAPACITY, USER_ID, "comment",
@@ -135,7 +132,6 @@ class RateLimitKeyFormatTest {
     private static RateLimitProperties properties() {
         RateLimitProperties properties = new RateLimitProperties();
         properties.setCrud(bucket(CRUD_CAPACITY));
-        properties.setImportConfig(bucket(IMPORT_CAPACITY));
         properties.setSse(bucket(SSE_CAPACITY));
         properties.setAuth(bucket(AUTH_CAPACITY));
         properties.setComment(bucket(COMMENT_CAPACITY));

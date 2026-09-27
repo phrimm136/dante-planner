@@ -2,7 +2,7 @@
 epic: none · pr: none · supersedes: 134
 
 ## Decisions
-- @planner @category @floors — A change of category re-runs the category-dependent floor rules (floor count, difficulty per floor, every floor present on publish, theme pack order and repeats) against the stored content, while the game-data id checks stay skipped when the content itself is unchanged. Floor validity became a function of the category, so skipping all validation let a category change store content the new category forbids, such as a published 15F planner holding five floors.
+- @planner @category @floors — A change of category re-runs the category-dependent floor rules (floor count, difficulty per floor, every floor present on publish, theme pack order and repeats) against the stored content, while the game-data id checks stay skipped when the content itself is unchanged; a category change that also moves the content version runs full validation, since start buffs depend on the season. Floor validity became a function of the category, so skipping all validation let a category change store content the new category forbids, such as a published 15F planner holding five floors.
   REJECTED: re-validating everything on a category change — brings back the failure the skip removed, a data release turning an unrelated edit into an id error.
   REJECTED: keeping the skip — publishes content the publish rules reject.
 - @planner @floors @index — Only floors below the category's floor count are validated and indexed for entity search; floors past it stay stored untouched. The editor keeps all fifteen floors whatever the category so that switching back restores them, while indexing the hidden ones made search return planners that render none of the matched ids.

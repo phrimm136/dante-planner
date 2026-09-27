@@ -3,6 +3,7 @@ package org.danteplanner.backend.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
+import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerCatalog;
 import org.danteplanner.backend.planner.entity.PlannerEntityFilter;
@@ -38,6 +39,8 @@ import org.springframework.test.context.ActiveProfiles;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -70,6 +73,11 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
     private static final int UNREACHABLE_ENTITY_ID = 424242;
 
     private static final String PLANTED_ROW = ContentEntityType.THEME_PACK + ":" + UNREACHABLE_ENTITY_ID;
+
+    private static final String SIX_FLOOR_CONTENT = TestDataFactory.VALID_CONTENT.replace(
+            "{\"themePackId\":\"1005\",\"difficulty\":0,\"giftIds\":[]}",
+            "{\"themePackId\":\"1005\",\"difficulty\":0,\"giftIds\":[]},"
+                    + "{\"themePackId\":\"1006\",\"difficulty\":0,\"giftIds\":[\"9004\"]}");
 
     @Autowired
     private UserRepository userRepository;
@@ -158,8 +166,9 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
                 .collect(Collectors.toSet());
     }
 
-    private Set<String> extractorOracle(String contentJson) throws Exception {
-        return PlannerContentEntityExtractor.extract(objectMapper.readTree(contentJson)).stream()
+    private Set<String> extractorOracle(Planner planner) throws Exception {
+        return PlannerContentEntityExtractor.extract(objectMapper.readTree(planner.getContentJson()),
+                        MDCategory.fromValue(planner.getCategory())).stream()
                 .map(ref -> ref.type() + ":" + ref.id())
                 .collect(Collectors.toSet());
     }
@@ -224,7 +233,7 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
                 .as("the entity index is re-extracted from the committed content, "
                         + "dropping the planted row the content does not yield")
                 .doesNotContain(PLANTED_ROW)
-                .isEqualTo(extractorOracle(planner.getContentJson()));
+                .isEqualTo(extractorOracle(planner));
         assertThat(catalogRepository.findById(plannerId).orElseThrow().getSelectedKeywords())
                 .as("the catalog scalar copy carries the normalized keyword set")
                 .containsExactlyInAnyOrder("Combustion", "Burst");
@@ -257,5 +266,86 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
                 .isFalse();
         assertThat(entityIndex(plannerId)).isEmpty();
         assertThat(keywordIndex(plannerId)).isEmpty();
+    }
+
+    @Test
+    void edit_WhenAFiveFloorPlannerSavesASixthFloor_IndexesOnlyTheRenderedFloors() throws Exception {
+        UUID plannerId = publishedPlanner("Hidden Floor", Set.of("Sinking")).getId();
+        Planner planner = plannerRepository.findById(plannerId).orElseThrow();
+
+        commandService.upsertPlanner(owner.getId(), deviceId, plannerId, new UpsertPlannerRequest(
+                plannerId.toString(), "5F", planner.getTitle(), PlannerStatus.SAVED, SIX_FLOOR_CONTENT,
+                planner.getContentVersion(), PlannerType.MIRROR_DUNGEON, planner.getSyncVersion(), null), false);
+
+        Planner saved = plannerRepository.findById(plannerId).orElseThrow();
+        assertThat(saved.getContentJson()).contains("1006");
+        assertThat(entityIndex(plannerId))
+                .doesNotContain("THEME_PACK:1006", "EGO_GIFT:9004")
+                .contains("THEME_PACK:1001", "THEME_PACK:1002", "THEME_PACK:1003", "THEME_PACK:1004",
+                        "THEME_PACK:1005", "EGO_GIFT:9002")
+                .isEqualTo(extractorOracle(saved));
+    }
+
+    private static final String FIFTEEN_FLOOR_CONTENT = TestDataFactory.VALID_CONTENT.replaceFirst(
+            "\"floorSelections\":\\[.*?]}\\]",
+            IntStream.range(0, 15)
+                    .mapToObj(floor -> "{\"themePackId\":\"" + (1001 + floor) + "\",\"difficulty\":"
+                            + (floor < 10 ? 1 : 3) + ",\"giftIds\":[\"" + (9101 + floor) + "\"]}")
+                    .collect(Collectors.joining(",", "\"floorSelections\":[", "]")));
+
+    private static final Set<String> FLOORS_SIX_TO_FIFTEEN = IntStream.range(5, 15)
+            .boxed()
+            .flatMap(floor -> Stream.of("THEME_PACK:" + (1001 + floor), "EGO_GIFT:" + (9101 + floor)))
+            .collect(Collectors.toSet());
+
+    private Planner fifteenFloorPlanner(String category) {
+        Planner planner = TestDataFactory.planner(owner)
+                .title("Category Switch " + category)
+                .category(category)
+                .content(FIFTEEN_FLOOR_CONTENT)
+                .published(true)
+                .save(plannerRepository);
+        statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
+        catalogService.add(planner);
+        filterService.rebuildFilters(planner.getId());
+        return plannerRepository.findById(planner.getId()).orElseThrow();
+    }
+
+    private void switchCategory(Planner planner, String category) {
+        commandService.upsertPlanner(owner.getId(), deviceId, planner.getId(), new UpsertPlannerRequest(
+                planner.getId().toString(), category, planner.getTitle(), PlannerStatus.SAVED,
+                planner.getContentJson(), planner.getContentVersion(), PlannerType.MIRROR_DUNGEON,
+                planner.getSyncVersion(), null), false);
+    }
+
+    @Test
+    void edit_WhenAFifteenFloorPlannerSwitchesToFiveFloorsWithIdenticalContent_DropsFloorsSixToFifteen()
+            throws Exception {
+        Planner planner = fifteenFloorPlanner("15F");
+        assertThat(entityIndex(planner.getId())).containsAll(FLOORS_SIX_TO_FIFTEEN);
+
+        switchCategory(planner, "5F");
+
+        Planner saved = plannerRepository.findById(planner.getId()).orElseThrow();
+        assertThat(saved.getCategory()).isEqualTo("5F");
+        assertThat(entityIndex(planner.getId()))
+                .doesNotContainAnyElementsOf(FLOORS_SIX_TO_FIFTEEN)
+                .contains("THEME_PACK:1001", "THEME_PACK:1005", "EGO_GIFT:9101", "EGO_GIFT:9105")
+                .isEqualTo(extractorOracle(saved));
+    }
+
+    @Test
+    void edit_WhenAFiveFloorPlannerSwitchesToFifteenFloorsWithIdenticalContent_IndexesFloorsSixToFifteen()
+            throws Exception {
+        Planner planner = fifteenFloorPlanner("5F");
+        assertThat(entityIndex(planner.getId())).doesNotContainAnyElementsOf(FLOORS_SIX_TO_FIFTEEN);
+
+        switchCategory(planner, "15F");
+
+        Planner saved = plannerRepository.findById(planner.getId()).orElseThrow();
+        assertThat(saved.getCategory()).isEqualTo("15F");
+        assertThat(entityIndex(planner.getId()))
+                .containsAll(FLOORS_SIX_TO_FIFTEEN)
+                .isEqualTo(extractorOracle(saved));
     }
 }

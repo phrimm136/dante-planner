@@ -3,10 +3,7 @@ package org.danteplanner.backend.planner.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.danteplanner.backend.planner.dto.ImportPlannersRequest;
-import org.danteplanner.backend.planner.dto.ImportPlannersResponse;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
-import org.danteplanner.backend.planner.dto.PlannerSummaryResponse;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.dto.UpsertResult;
 import org.danteplanner.backend.planner.entity.Planner;
@@ -16,7 +13,6 @@ import org.danteplanner.backend.planner.entity.PlannerModeration;
 import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
-import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
@@ -37,8 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -140,6 +134,7 @@ public class PlannerCommandService {
 
         boolean categoryChanged = !request.category().equals(contentRow.getCategory());
         boolean categoryOnly = categoryChanged
+                && request.contentVersion() == contentRow.getGameContentVersion()
                 && contentValidator.isSameDocument(request.content(), contentRow.getContent());
         if (categoryOnly) {
             applyCategoryOverStoredContent(planner, request.category());
@@ -334,56 +329,5 @@ public class PlannerCommandService {
             tombstoneStore.ifPresent(store -> store.writeTombstone(ByIdReadGuard.PLANNER_ENTITY_TYPE, id));
         }
         log.info("Soft deleted planner {} for user {}", id, userId);
-    }
-
-    @Transactional
-    public ImportPlannersResponse importPlanners(Long userId, ImportPlannersRequest request) {
-        User user = accessGuard.getUser(userId);
-
-        int requestedCount = request.planners().size();
-
-        List<ValidatedImport> validImports = new ArrayList<>();
-        List<ImportPlannersResponse.SkippedPlanner> skippedPlanners = new ArrayList<>();
-
-        for (UpsertPlannerRequest plannerRequest : request.planners()) {
-            try {
-                validImports.add(new ValidatedImport(plannerRequest, validateImported(plannerRequest)));
-            } catch (PlannerValidationException ex) {
-                skippedPlanners.add(ImportPlannersResponse.SkippedPlanner.from(plannerRequest, ex));
-            }
-        }
-
-        limitValidator.requireRoomFor(
-                plannerRepository.countActiveByUserId(userId), validImports.size(), maxPlannersPerUser);
-
-        List<PlannerSummaryResponse> importedPlanners = new ArrayList<>();
-        for (ValidatedImport validImport : validImports) {
-            Planner saved = plannerRepository.insert(
-                    buildAggregate(UUID.randomUUID(), user, validImport.request(), validImport.content(), null));
-            statsRepository.insert(PlannerStats.builder().plannerId(saved.getId()).build());
-            importedPlanners.add(PlannerSummaryResponse.fromEntity(saved));
-        }
-
-        log.info("Imported {} planners for user {}, skipped {}",
-                importedPlanners.size(), userId, skippedPlanners.size());
-
-        return ImportPlannersResponse.builder()
-                .imported(importedPlanners.size())
-                .total(requestedCount)
-                .planners(importedPlanners)
-                .skipped(skippedPlanners)
-                .build();
-    }
-
-    private record ValidatedImport(UpsertPlannerRequest request, String content) {
-    }
-
-    private String validateImported(UpsertPlannerRequest plannerRequest) {
-        contentVersionValidator.validateVersionForCreate(plannerRequest.plannerType(), plannerRequest.contentVersion());
-
-        categoryValidator.requireCategoryForType(plannerRequest.plannerType(), plannerRequest.category());
-
-        return contentValidator.validate(
-                plannerRequest.content(), plannerRequest.category(), plannerRequest.contentVersion());
     }
 }

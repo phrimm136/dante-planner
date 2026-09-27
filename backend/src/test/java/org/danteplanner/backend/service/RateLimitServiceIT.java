@@ -101,13 +101,6 @@ class RateLimitServiceIT {
         crudConfig.setRefillDurationSeconds(60);
         properties.setCrud(crudConfig);
 
-        // Set up import config for IMPORT policy tests
-        RateLimitProperties.BucketConfig importConfig = new RateLimitProperties.BucketConfig();
-        importConfig.setCapacity(3);
-        importConfig.setRefillTokens(3);
-        importConfig.setRefillDurationSeconds(300);
-        properties.setImportConfig(importConfig);
-
         // Set up SSE config for SSE policy tests
         RateLimitProperties.BucketConfig sseConfig = new RateLimitProperties.BucketConfig();
         sseConfig.setCapacity(2);
@@ -143,18 +136,6 @@ class RateLimitServiceIT {
             for (int i = 0; i < 10; i++) {
                 assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.CRUD, userId, "planners"),
                         "CRUD request " + (i + 1) + " should succeed");
-            }
-        }
-
-        @Test
-        @DisplayName("Should allow import requests within limit")
-        void checkImportLimit_WhenWithinLimit_Succeeds() {
-            Long userId = 1L;
-
-            // Should not throw for 3 requests (import capacity = 3)
-            for (int i = 0; i < 3; i++) {
-                assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.IMPORT, userId),
-                        "Import request " + (i + 1) + " should succeed");
             }
         }
 
@@ -220,26 +201,6 @@ class RateLimitServiceIT {
         }
 
         @Test
-        @DisplayName("Should throw RateLimitExceededException for import when limit exceeded")
-        void checkImportLimit_WhenExceedsLimit_ThrowsException() {
-            Long userId = 1L;
-
-            // Consume all 3 tokens
-            for (int i = 0; i < 3; i++) {
-                rateLimitService.check(RateLimitPolicy.IMPORT, userId);
-            }
-
-            // 4th request should fail
-            RateLimitExceededException exception = assertThrows(
-                    RateLimitExceededException.class,
-                    () -> rateLimitService.check(RateLimitPolicy.IMPORT, userId)
-            );
-
-            assertEquals(userId, exception.getUserId());
-            assertEquals("import", exception.getEndpoint());
-        }
-
-        @Test
         @DisplayName("Should throw RateLimitExceededException for SSE when limit exceeded")
         void checkSseLimit_WhenExceedsLimit_ThrowsException() {
             Long userId = 1L;
@@ -281,24 +242,6 @@ class RateLimitServiceIT {
             // endpoint1 should still be exhausted
             assertThrows(RateLimitExceededException.class,
                     () -> rateLimitService.check(RateLimitPolicy.CRUD, userId, "endpoint1"));
-        }
-
-        @Test
-        @DisplayName("Should maintain separate buckets for CRUD vs import")
-        void checkRateLimit_WhenCrudVsImport_SeparateBuckets() {
-            Long userId = 1L;
-
-            // Exhaust CRUD capacity
-            for (int i = 0; i < 10; i++) {
-                rateLimitService.check(RateLimitPolicy.CRUD, userId, "planners");
-            }
-
-            // Import should still work (separate bucket)
-            assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.IMPORT, userId));
-
-            // CRUD should still be exhausted
-            assertThrows(RateLimitExceededException.class,
-                    () -> rateLimitService.check(RateLimitPolicy.CRUD, userId, "planners"));
         }
 
         @Test
@@ -358,25 +301,6 @@ class RateLimitServiceIT {
             // User1 should still be exhausted
             assertThrows(RateLimitExceededException.class,
                     () -> rateLimitService.check(RateLimitPolicy.CRUD, user1, "planners"));
-        }
-
-        @Test
-        @DisplayName("Should maintain separate import buckets for different users")
-        void checkImportLimit_WhenDifferentUsers_SeparateBuckets() {
-            Long user1 = 1L;
-            Long user2 = 2L;
-
-            // Exhaust user1's import capacity
-            for (int i = 0; i < 3; i++) {
-                rateLimitService.check(RateLimitPolicy.IMPORT, user1);
-            }
-
-            // User2 should still be able to import
-            assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.IMPORT, user2));
-
-            // User1 should still be exhausted
-            assertThrows(RateLimitExceededException.class,
-                    () -> rateLimitService.check(RateLimitPolicy.IMPORT, user1));
         }
 
         @Test

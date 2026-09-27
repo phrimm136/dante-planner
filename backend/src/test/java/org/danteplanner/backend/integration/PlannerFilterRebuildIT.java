@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.danteplanner.backend.config.TestConfig;
+import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerKeywordFilter;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
@@ -29,6 +30,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -74,6 +77,11 @@ class PlannerFilterRebuildIT {
     private ObjectMapper objectMapper;
 
     private User owner;
+
+    private static final String SIX_FLOOR_CONTENT = TestDataFactory.VALID_CONTENT.replace(
+            "{\"themePackId\":\"1005\",\"difficulty\":0,\"giftIds\":[]}",
+            "{\"themePackId\":\"1005\",\"difficulty\":0,\"giftIds\":[]},"
+                    + "{\"themePackId\":\"1006\",\"difficulty\":0,\"giftIds\":[\"9004\"]}");
 
     @BeforeEach
     void setUp() {
@@ -150,7 +158,7 @@ class PlannerFilterRebuildIT {
         filterService.rebuildFilters(planner.getId());
 
         Set<String> expected = PlannerContentEntityExtractor
-                .extract(objectMapper.readTree(planner.getContentJson()))
+                .extract(objectMapper.readTree(planner.getContentJson()), MDCategory.fromValue(planner.getCategory()))
                 .stream()
                 .map(ref -> ref.type().name() + ":" + ref.id())
                 .collect(Collectors.toSet());
@@ -190,11 +198,84 @@ class PlannerFilterRebuildIT {
         assertThat(gifts).containsExactlyInAnyOrder(9154, 9001, 9002);
 
         Set<String> oracle = PlannerContentEntityExtractor
-                .extract(objectMapper.readTree(content))
+                .extract(objectMapper.readTree(content), MDCategory.fromValue(planner.getCategory()))
                 .stream()
                 .filter(ref -> ref.type().name().equals("EGO_GIFT"))
                 .map(ref -> String.valueOf(ref.id()))
                 .collect(Collectors.toSet());
         assertThat(oracle).isEqualTo(gifts.stream().map(String::valueOf).collect(Collectors.toSet()));
+    }
+
+    private Set<String> indexedRows(Planner planner) {
+        return entityFilterRepository.findAll().stream()
+                .filter(f -> f.getPlannerId().equals(planner.getId()))
+                .map(f -> f.getEntityType().name() + ":" + f.getEntityId())
+                .collect(Collectors.toSet());
+    }
+
+    private Set<String> oracleRows(Planner planner) throws Exception {
+        return PlannerContentEntityExtractor
+                .extract(objectMapper.readTree(planner.getContentJson()), MDCategory.fromValue(planner.getCategory()))
+                .stream()
+                .map(ref -> ref.type().name() + ":" + ref.id())
+                .collect(Collectors.toSet());
+    }
+
+    @Test
+    void rebuildFilters_WhenAFiveFloorPlannerStoresASixthFloor_SkipsItsThemePackAndGifts() throws Exception {
+        Planner planner = TestDataFactory.planner(owner)
+                .category("5F")
+                .content(SIX_FLOOR_CONTENT)
+                .published(true)
+                .save(plannerRepository);
+
+        filterService.rebuildFilters(planner.getId());
+
+        assertThat(indexedRows(planner))
+                .doesNotContain("THEME_PACK:1006", "EGO_GIFT:9004")
+                .contains("THEME_PACK:1001", "THEME_PACK:1002", "THEME_PACK:1003", "THEME_PACK:1004",
+                        "THEME_PACK:1005", "EGO_GIFT:9002")
+                .isEqualTo(oracleRows(planner));
+    }
+
+    @Test
+    void rebuildFilters_WhenAFifteenFloorPlannerStoresTheSameSixthFloor_IndexesItsThemePackAndGifts() throws Exception {
+        Planner planner = TestDataFactory.planner(owner)
+                .category("15F")
+                .content(SIX_FLOOR_CONTENT)
+                .published(true)
+                .save(plannerRepository);
+
+        filterService.rebuildFilters(planner.getId());
+
+        assertThat(indexedRows(planner))
+                .contains("THEME_PACK:1006", "EGO_GIFT:9004")
+                .isEqualTo(oracleRows(planner));
+    }
+
+    @Test
+    void rebuildFilters_WhenEachCategoryStoresFifteenFloors_IndexesExactlyTheJavaFloorCount() throws Exception {
+        String fifteenFloors = IntStream.range(0, 15)
+                .mapToObj(floor -> "{\"themePackId\":\"" + (1001 + floor) + "\",\"giftIds\":[\"" + (9001 + floor) + "\"]}")
+                .collect(Collectors.joining(",", "{\"floorSelections\":[", "]}"));
+
+        for (MDCategory category : MDCategory.values()) {
+            Planner planner = TestDataFactory.planner(owner)
+                    .category(category.getValue())
+                    .content(fifteenFloors)
+                    .published(true)
+                    .save(plannerRepository);
+
+            filterService.rebuildFilters(planner.getId());
+
+            Set<String> rendered = IntStream.range(0, category.floorCount())
+                    .boxed()
+                    .flatMap(floor -> Stream.of(
+                            "THEME_PACK:" + (1001 + floor), "EGO_GIFT:" + (9001 + floor)))
+                    .collect(Collectors.toSet());
+            assertThat(indexedRows(planner)).as(category.getValue())
+                    .isEqualTo(rendered)
+                    .isEqualTo(oracleRows(planner));
+        }
     }
 }

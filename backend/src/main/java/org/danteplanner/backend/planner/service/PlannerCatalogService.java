@@ -77,7 +77,8 @@ public class PlannerCatalogService {
 
     private boolean searchableCompositionChanged(Planner planner) {
         return !sameDocument(planner.getContentJson(), planner.getLoadedContentJson())
-                || !orEmpty(planner.getSelectedKeywords()).equals(orEmpty(planner.getLoadedKeywords()));
+                || !orEmpty(planner.getSelectedKeywords()).equals(orEmpty(planner.getLoadedKeywords()))
+                || !Objects.equals(planner.getCategory(), planner.getLoadedCategory());
     }
 
     private boolean sameDocument(String current, String loaded) {

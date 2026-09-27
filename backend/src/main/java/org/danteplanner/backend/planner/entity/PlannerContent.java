@@ -108,10 +108,14 @@ public class PlannerContent {
     @Transient
     private Set<String> loadedSelectedKeywords;
 
+    @Transient
+    private String loadedCategory;
+
     @PostLoad
     protected void onLoad() {
         loadedContent = content;
         loadedSelectedKeywords = selectedKeywords;
+        loadedCategory = category;
     }
 
     @PrePersist

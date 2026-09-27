@@ -15,11 +15,12 @@
 --   - ENUM/JSON values must match the schema after all MERGED migrations
 --   - Every keyword and ENUM value should appear in at least one row
 --
--- Schema version: V060 (planner aggregate + projections; planners table gone;
+-- Schema version: V061 (planner aggregate + projections; planners table gone;
 --                       user_settings sync choice split into two non-null flags;
 --                       planner_views no longer foreign-keys the planner core;
 --                       planner_content no longer carries content_digest;
---                       domain_events outbox)
+--                       domain_events outbox; entity filter indexes only the
+--                       floors the category renders)
 --
 -- Coverage:
 --   - selected_keywords: all 35 keywords across 4 planners (JSON arrays)
@@ -30,6 +31,8 @@
 --   - EGO_GIFT ids: base (9xxx) and both enhanced encodings (19xxx, 29xxx),
 --     including a base/enhanced pair of one gift on the same planner
 --   - content: JSON with equipment, gifts, floorSelections structure
+--   - floorSelections past the category's floor count (planner 5), absent
+--     from planner_entity_filter
 --   - planner_catalog: visible rows only; one recommended (upvotes >= 10)
 --   - planner_views: several view_date values, and a row whose planner_id
 --     matches no planner row — legal since V057 dropped fk_view_planner
@@ -64,7 +67,8 @@ VALUES
     (UNHEX('AAAA0001000000000000000000000001'), 1, 'MIRROR_DUNGEON',    NOW(6)),
     (UNHEX('AAAA0002000000000000000000000002'), 2, 'REFRACTED_RAILWAY', NOW(6)),
     (UNHEX('AAAA0003000000000000000000000003'), 1, 'MIRROR_DUNGEON',    NOW(6)),
-    (UNHEX('AAAA0004000000000000000000000004'), 3, 'MIRROR_DUNGEON',    NOW(6));
+    (UNHEX('AAAA0004000000000000000000000004'), 3, 'MIRROR_DUNGEON',    NOW(6)),
+    (UNHEX('AAAA0005000000000000000000000005'), 1, 'MIRROR_DUNGEON',    NOW(6));
 
 -- ============================================================================
 -- planner_content — exercises JSON keywords, JSON content, VARCHAR columns
@@ -150,6 +154,29 @@ VALUES (
     1, 6, 1, 0, NOW(6)
 );
 
+-- Planner 5: 5F planner keeping a sixth floor the category does not render
+INSERT IGNORE INTO planner_content (planner_id, title, status, category, selected_keywords, content, content_schema_version, game_content_version, sync_version, row_lock_version, last_modified_at)
+VALUES (
+    UNHEX('AAAA0005000000000000000000000005'),
+    'Seed MD Planner - Hidden Floor', 'saved', '5F',
+    '[]',
+    JSON_OBJECT(
+        'equipment', JSON_OBJECT(),
+        'selectedGiftIds', JSON_ARRAY(),
+        'observationGiftIds', JSON_ARRAY(),
+        'comprehensiveGiftIds', JSON_ARRAY(),
+        'floorSelections', JSON_ARRAY(
+            JSON_OBJECT('giftIds', JSON_ARRAY('9002'), 'themePackId', '1001'),
+            JSON_OBJECT('giftIds', JSON_ARRAY(), 'themePackId', '1002'),
+            JSON_OBJECT('giftIds', JSON_ARRAY(), 'themePackId', '1003'),
+            JSON_OBJECT('giftIds', JSON_ARRAY(), 'themePackId', '1004'),
+            JSON_OBJECT('giftIds', JSON_ARRAY(), 'themePackId', '1005'),
+            JSON_OBJECT('giftIds', JSON_ARRAY('9004'), 'themePackId', '1006')
+        )
+    ),
+    1, 6, 1, 0, NOW(6)
+);
+
 -- ============================================================================
 -- planner_publication
 -- ============================================================================
@@ -159,7 +186,8 @@ VALUES
     (UNHEX('AAAA0001000000000000000000000001'), TRUE,  NOW(6), TRUE),
     (UNHEX('AAAA0002000000000000000000000002'), TRUE,  NOW(6), TRUE),
     (UNHEX('AAAA0003000000000000000000000003'), TRUE,  NOW(6), TRUE),
-    (UNHEX('AAAA0004000000000000000000000004'), FALSE, NULL,   TRUE);
+    (UNHEX('AAAA0004000000000000000000000004'), FALSE, NULL,   TRUE),
+    (UNHEX('AAAA0005000000000000000000000005'), TRUE,  NOW(6), TRUE);
 
 -- ============================================================================
 -- planner_moderation
@@ -170,7 +198,8 @@ VALUES
     (UNHEX('AAAA0001000000000000000000000001'), NULL, FALSE),
     (UNHEX('AAAA0002000000000000000000000002'), NULL, FALSE),
     (UNHEX('AAAA0003000000000000000000000003'), NULL, FALSE),
-    (UNHEX('AAAA0004000000000000000000000004'), NULL, FALSE);
+    (UNHEX('AAAA0004000000000000000000000004'), NULL, FALSE),
+    (UNHEX('AAAA0005000000000000000000000005'), NULL, FALSE);
 
 -- ============================================================================
 -- planner_stats — comment_count matches the live planner_comments rows below
@@ -181,7 +210,8 @@ VALUES
     (UNHEX('AAAA0001000000000000000000000001'), 42, 5,  2),
     (UNHEX('AAAA0002000000000000000000000002'), 18, 3,  0),
     (UNHEX('AAAA0003000000000000000000000003'), 87, 12, 0),
-    (UNHEX('AAAA0004000000000000000000000004'), 0,  0,  0);
+    (UNHEX('AAAA0004000000000000000000000004'), 0,  0,  0),
+    (UNHEX('AAAA0005000000000000000000000005'), 0,  0,  0);
 
 -- ============================================================================
 -- planner_catalog — visible rows only; planner 3 is recommended (12 >= 10)
@@ -194,7 +224,9 @@ VALUES
     (UNHEX('AAAA0002000000000000000000000002'), 'REFRACTED_RAILWAY', '10F', 'Seed RR Planner - Affinities',
      '["CRIMSON","SCARLET","AMBER","SHAMROCK","AZURE","INDIGO","VIOLET"]', NOW(6), FALSE),
     (UNHEX('AAAA0003000000000000000000000003'), 'MIRROR_DUNGEON', '15F', 'Seed MD Planner - Synergy Keywords',
-     '["Assemble","KnowledgeExplored","AaCePcBt","SwordPlayOfTheHomeland","EchoOfMansion","TimeSuspend","EmergencyChargeForceField","BloodDinner","BlackCloud","RetaliationBook","HeishouSynergy","Bullet","BlessingOfIndexPrescriptAlly","Inspire","9828","SojiRyoshuEntangle","DawnTeam"]', NOW(6), TRUE);
+     '["Assemble","KnowledgeExplored","AaCePcBt","SwordPlayOfTheHomeland","EchoOfMansion","TimeSuspend","EmergencyChargeForceField","BloodDinner","BlackCloud","RetaliationBook","HeishouSynergy","Bullet","BlessingOfIndexPrescriptAlly","Inspire","9828","SojiRyoshuEntangle","DawnTeam"]', NOW(6), TRUE),
+    (UNHEX('AAAA0005000000000000000000000005'), 'MIRROR_DUNGEON', '5F', 'Seed MD Planner - Hidden Floor',
+     '[]', NOW(6), FALSE);
 
 -- ============================================================================
 -- planner_entity_filter — exercises entity_type ENUM (integer entity ids)
@@ -210,7 +242,13 @@ VALUES
     ('EGO_GIFT',  19001, UNHEX('AAAA0001000000000000000000000001')),
     ('EGO_GIFT',   9002, UNHEX('AAAA0001000000000000000000000001')),
     ('EGO_GIFT',  29004, UNHEX('AAAA0001000000000000000000000001')),
-    ('THEME_PACK', 1001, UNHEX('AAAA0001000000000000000000000001'));
+    ('THEME_PACK', 1001, UNHEX('AAAA0001000000000000000000000001')),
+    ('EGO_GIFT',   9002, UNHEX('AAAA0005000000000000000000000005')),
+    ('THEME_PACK', 1001, UNHEX('AAAA0005000000000000000000000005')),
+    ('THEME_PACK', 1002, UNHEX('AAAA0005000000000000000000000005')),
+    ('THEME_PACK', 1003, UNHEX('AAAA0005000000000000000000000005')),
+    ('THEME_PACK', 1004, UNHEX('AAAA0005000000000000000000000005')),
+    ('THEME_PACK', 1005, UNHEX('AAAA0005000000000000000000000005'));
 
 -- ============================================================================
 -- planner_keyword_filter

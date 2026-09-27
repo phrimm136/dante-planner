@@ -8,7 +8,6 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
-import org.danteplanner.backend.planner.dto.ImportPlannersRequest;
 import org.danteplanner.backend.planner.dto.VoteRequest;
 import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.planner.entity.Planner;
@@ -793,118 +792,6 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("POST /api/planner/md/import - Import Planners")
-    class ImportPlannersTests {
-
-        @Test
-        @DisplayName("Should return 201 when importing planners within limit")
-        void importPlanners_WhenWithinLimit_Returns201() throws Exception {
-            List<UpsertPlannerRequest> planners = new ArrayList<>();
-            for (int i = 0; i < 3; i++) {
-                UpsertPlannerRequest req = createValidPlannerRequest();
-                req = withTitle(req, "Imported Planner " + i);
-                planners.add(req);
-            }
-
-            ImportPlannersRequest request = new ImportPlannersRequest(planners);
-
-            mockMvc.perform(post("/api/planner/md/import").with(withCsrf())
-                            .cookie(accessTokenCookie())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isCreated())
-                    .andExpect(jsonPath("$.imported").value(3))
-                    .andExpect(jsonPath("$.total").value(3))
-                    .andExpect(jsonPath("$.planners", hasSize(3)));
-        }
-
-        @Test
-        @DisplayName("Should save the valid planners and list the one holding an unknown id as skipped")
-        void importPlanners_WhenOnePlannerHoldsAnUnknownId_SavesTheOthersAndSkipsIt() throws Exception {
-            UpsertPlannerRequest invalid = withContent(
-                    withTitle(createValidPlannerRequest(), "Stale Planner"), UNKNOWN_GIFT_CONTENT);
-            ImportPlannersRequest request = new ImportPlannersRequest(List.of(
-                    withTitle(createValidPlannerRequest(), "Kept Planner 1"),
-                    invalid,
-                    withTitle(createValidPlannerRequest(), "Kept Planner 2")));
-
-            mockMvc.perform(post("/api/planner/md/import").with(withCsrf())
-                            .cookie(accessTokenCookie())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isCreated())
-                    .andExpect(jsonPath("$.imported").value(2))
-                    .andExpect(jsonPath("$.total").value(3))
-                    .andExpect(jsonPath("$.planners[*].title", contains("Kept Planner 1", "Kept Planner 2")))
-                    .andExpect(jsonPath("$.skipped", hasSize(1)))
-                    .andExpect(jsonPath("$.skipped[0].id").value(invalid.id()))
-                    .andExpect(jsonPath("$.skipped[0].title").value("Stale Planner"))
-                    .andExpect(jsonPath("$.skipped[0].errors[0].code").value("GIFT_UNKNOWN_ID"))
-                    .andExpect(jsonPath("$.skipped[0].errors[0].message").doesNotExist());
-        }
-
-        @Test
-        @DisplayName("Should return 409 when import would exceed 100 planner limit")
-        void importPlanners_WhenExceedsLimit_Returns409() throws Exception {
-            // Create 98 existing planners
-            for (int i = 0; i < 98; i++) {
-                createTestPlanner(testUser);
-            }
-
-            // Try to import 5 more (would exceed 100)
-            List<UpsertPlannerRequest> planners = new ArrayList<>();
-            for (int i = 0; i < 5; i++) {
-                UpsertPlannerRequest req = createValidPlannerRequest();
-                req = withTitle(req, "Imported Planner " + i);
-                planners.add(req);
-            }
-
-            ImportPlannersRequest request = new ImportPlannersRequest(planners);
-
-            mockMvc.perform(post("/api/planner/md/import").with(withCsrf())
-                            .cookie(accessTokenCookie())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isConflict())
-                    .andExpect(jsonPath("$.code").value("PLANNER_LIMIT_EXCEEDED"));
-        }
-
-        @Test
-        @DisplayName("Should return 400 when importing more than 50 planners at once")
-        void importPlanners_WhenExceedsBatchLimit_Returns400() throws Exception {
-            List<UpsertPlannerRequest> planners = new ArrayList<>();
-            for (int i = 0; i < 51; i++) {
-                UpsertPlannerRequest req = createValidPlannerRequest();
-                req = withTitle(req, "Imported Planner " + i);
-                planners.add(req);
-            }
-
-            ImportPlannersRequest request = new ImportPlannersRequest(planners);
-
-            mockMvc.perform(post("/api/planner/md/import").with(withCsrf())
-                            .cookie(accessTokenCookie())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
-        }
-
-        @Test
-        @DisplayName("Should return 401 without authentication")
-        void importPlanners_WhenNoAuth_Returns401() throws Exception {
-            List<UpsertPlannerRequest> planners = new ArrayList<>();
-            planners.add(createValidPlannerRequest());
-
-            ImportPlannersRequest request = new ImportPlannersRequest(planners);
-
-            mockMvc.perform(post("/api/planner/md/import").with(withCsrf())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isUnauthorized());
-        }
-    }
-
-    @Nested
     @DisplayName("Authentication Tests")
     class AuthenticationTests {
 
@@ -954,12 +841,6 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
             // DELETE /api/planner/md/{id}
             mockMvc.perform(delete("/api/planner/md/{id}", randomId).with(withCsrf()))
-                    .andExpect(status().isUnauthorized());
-
-            // POST /api/planner/md/import
-            mockMvc.perform(post("/api/planner/md/import").with(withCsrf())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("{}"))
                     .andExpect(status().isUnauthorized());
         }
     }

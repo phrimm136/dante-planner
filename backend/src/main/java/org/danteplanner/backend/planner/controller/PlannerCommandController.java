@@ -4,8 +4,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.shared.config.DeviceId;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
-import org.danteplanner.backend.planner.dto.ImportPlannersRequest;
-import org.danteplanner.backend.planner.dto.ImportPlannersResponse;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.dto.UpsertResult;
@@ -16,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,15 +52,5 @@ public class PlannerCommandController {
 
         plannerCommandService.deletePlanner(userId, id);
         return ResponseEntity.noContent().build();
-    }
-
-    @RateLimited(RateLimitPolicy.IMPORT)
-    @PostMapping("/import")
-    public ResponseEntity<ImportPlannersResponse> importPlanners(
-            @AuthenticationPrincipal Long userId,
-            @Valid @RequestBody ImportPlannersRequest request) {
-
-        ImportPlannersResponse response = plannerCommandService.importPlanners(userId, request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }
