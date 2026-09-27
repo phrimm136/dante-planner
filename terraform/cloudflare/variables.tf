@@ -166,7 +166,7 @@ variable "steering_region_pools" {
 }
 
 variable "default_pool_order" {
-  description = "Pool preference for traffic from regions not named in steering_region_pools."
+  description = "Pool preference for traffic from regions not named in steering_region_pools. Its first entry must be the region holding the primary database: the write-forwarding rule routes every write there."
   type        = list(string)
   default     = ["oregon", "seoul"]
 }
