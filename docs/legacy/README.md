@@ -44,3 +44,6 @@ that is gone.
 - `runbooks/oregon-cutover.md` — cutting production from the single hand-provisioned EC2 to the
   Oregon k3s fleet. The `terraform/oregon-edge` stack it allocates the ingress EIP from no longer
   exists, and the Cloudflare `api` A-record it swings is no longer the entry plane.
+- `runbooks/prod-account-cutover.md` — moving production from the management account onto the
+  fleet standing in the vended prod account. Production now runs in that account, so there is no
+  management-account production left to move.
