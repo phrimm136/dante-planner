@@ -55,8 +55,16 @@ for name in $names; do
   fi
 
   # Value rides stdin, never argv: /proc/PID/cmdline is world-readable.
+  #
+  # `--output text` is a display format, not a byte channel: it appends a newline that
+  # file:///dev/stdin then stores verbatim, so every value lands one byte longer than the
+  # original. RDS rejects such a password outright ("Input can't contain control
+  # characters"), and a base64 key or credential silently authenticates as the wrong
+  # string. Exactly one trailing newline is removed, which is right even for values that
+  # legitimately end in one (PEMs arrive here with two).
   src secretsmanager get-secret-value --secret-id "$name" \
     --query SecretString --output text \
+    | python3 -c 'import sys; d = sys.stdin.buffer.read(); sys.stdout.buffer.write(d[:-1] if d.endswith(b"\n") else d)' \
     | dst secretsmanager put-secret-value --secret-id "$name" \
         --secret-string file:///dev/stdin >/dev/null
   copied=$((copied + 1))
