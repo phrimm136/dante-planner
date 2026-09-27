@@ -7,10 +7,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
@@ -18,6 +15,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.convention.TestBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.redis.testcontainers.RedisContainer;
@@ -54,7 +52,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Tag("containerized")
-@Import({TestConfig.class, LogoutRevocationIT.RoundTripCountingConfig.class})
+@Import(TestConfig.class)
 class LogoutRevocationIT {
 
     private static final String REDIS_IMAGE = "redis:7-alpine";
@@ -82,32 +80,29 @@ class LogoutRevocationIT {
      * client resources carry a command-counting latency recorder, so the test can observe how
      * many commands the logout path sends to the auth store over the wire.
      */
-    @TestConfiguration
-    static class RoundTripCountingConfig {
+    @TestBean(name = "stringRedisTemplate")
+    private StringRedisTemplate stringRedisTemplate;
 
-        @Bean
-        @Primary
-        StringRedisTemplate stringRedisTemplate() {
-            CommandLatencyRecorder recorder = new CommandLatencyRecorder() {
-                @Override
-                public void recordCommandLatency(SocketAddress local, SocketAddress remote,
-                        ProtocolKeyword commandType, long firstResponseLatency, long completionLatency) {
-                    AUTH_COMMAND_COUNT.incrementAndGet();
-                }
-            };
-            ClientResources resources = DefaultClientResources.builder()
-                    .commandLatencyRecorder(recorder)
-                    .build();
-            LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
-                    .clientResources(resources)
-                    .build();
-            LettuceConnectionFactory factory = new LettuceConnectionFactory(
-                    new RedisStandaloneConfiguration(
-                            AUTH_REDIS.getRedisHost(), AUTH_REDIS.getRedisPort()),
-                    clientConfig);
-            factory.afterPropertiesSet();
-            return new StringRedisTemplate(factory);
-        }
+    static StringRedisTemplate stringRedisTemplate() {
+        CommandLatencyRecorder recorder = new CommandLatencyRecorder() {
+            @Override
+            public void recordCommandLatency(SocketAddress local, SocketAddress remote,
+                    ProtocolKeyword commandType, long firstResponseLatency, long completionLatency) {
+                AUTH_COMMAND_COUNT.incrementAndGet();
+            }
+        };
+        ClientResources resources = DefaultClientResources.builder()
+                .commandLatencyRecorder(recorder)
+                .build();
+        LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
+                .clientResources(resources)
+                .build();
+        LettuceConnectionFactory factory = new LettuceConnectionFactory(
+                new RedisStandaloneConfiguration(
+                        AUTH_REDIS.getRedisHost(), AUTH_REDIS.getRedisPort()),
+                clientConfig);
+        factory.afterPropertiesSet();
+        return new StringRedisTemplate(factory);
     }
 
     @Autowired

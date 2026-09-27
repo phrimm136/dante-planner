@@ -24,13 +24,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.convention.TestBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -62,7 +61,7 @@ import static org.mockito.Mockito.verify;
         properties = "outbox.relay.grace=PT0S")
 @ActiveProfiles("it")
 @Tag("containerized")
-@Import({TestConfig.class, EffectPlacementIT.OutboxHarness.class})
+@Import(TestConfig.class)
 class EffectPlacementIT extends SharedMySqlContainerSupport {
 
     /**
@@ -73,30 +72,17 @@ class EffectPlacementIT extends SharedMySqlContainerSupport {
      * relay directly, and fleet arbitration is {@code ShedLockMultiPodIT}'s subject, not this
      * one's.</p>
      */
-    @TestConfiguration
-    static class OutboxHarness {
+    @MockitoBean
+    private SsePublisher ssePublisher;
 
-        @Bean
-        @Primary
-        SsePublisher ssePublisher() {
-            return Mockito.mock(SsePublisher.class);
-        }
-
-        @Bean
-        @Primary
-        LockProvider lockProvider() {
-            return configuration -> Optional.of(() -> { });
-        }
-    }
+    @TestBean
+    private LockProvider lockProvider;
 
     @Autowired
     private CommentCommandService commentCommandService;
 
     @Autowired
     private DomainEventRelay domainEventRelay;
-
-    @Autowired
-    private SsePublisher ssePublisher;
 
     @Autowired
     private UserRepository userRepository;
@@ -119,6 +105,10 @@ class EffectPlacementIT extends SharedMySqlContainerSupport {
     private User owner;
     private User commenter;
     private Planner planner;
+
+    static LockProvider lockProvider() {
+        return configuration -> Optional.of(() -> { });
+    }
 
     @BeforeEach
     void setUp() {

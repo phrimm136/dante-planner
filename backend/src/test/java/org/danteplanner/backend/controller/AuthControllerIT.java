@@ -6,14 +6,7 @@ import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.auth.service.AuthenticationService;
-import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
-import org.danteplanner.backend.auth.token.TokenBlacklistService;
-import org.danteplanner.backend.auth.token.TokenGenerator;
-import org.danteplanner.backend.auth.token.TokenValidator;
-import org.danteplanner.backend.shared.config.LineageRotationFlag;
 import org.danteplanner.backend.user.repository.UserRepository;
-import org.danteplanner.backend.user.service.UserAccountLifecycleService;
-import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -24,13 +17,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 
@@ -45,31 +36,8 @@ import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 @AutoConfigureMockMvc
 @ActiveProfiles("it")
 @Tag("containerized")
-@Import({TestConfig.class, AuthControllerIT.MockAuthFacadeConfig.class})
+@Import(TestConfig.class)
 class AuthControllerIT extends SharedMySqlContainerSupport {
-
-    @TestConfiguration
-    static class MockAuthFacadeConfig {
-        @Bean
-        @Primary
-        public AuthenticationService authenticationService(
-                OAuthProviderRegistry providerRegistry,
-                TokenGenerator tokenGenerator,
-                TokenValidator tokenValidator,
-                TokenBlacklistService tokenBlacklistService,
-                UserService userService,
-                UserAccountLifecycleService lifecycleService,
-                LineageRotationFlag lineageRotationFlag) {
-            return Mockito.spy(new AuthenticationService(
-                    providerRegistry,
-                    tokenGenerator,
-                    tokenValidator,
-                    tokenBlacklistService,
-                    userService,
-                    lifecycleService,
-                    lineageRotationFlag));
-        }
-    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -80,7 +48,7 @@ class AuthControllerIT extends SharedMySqlContainerSupport {
     @Autowired
     private JwtTokenService jwtTokenService;
 
-    @Autowired
+    @MockitoSpyBean
     private AuthenticationService authService;
 
     private User testUser;

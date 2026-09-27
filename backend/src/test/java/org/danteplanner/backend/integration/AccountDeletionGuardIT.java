@@ -16,12 +16,10 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,22 +43,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("it")
 @Tag("containerized")
-@Import({TestConfig.class, AccountDeletionGuardIT.UnreachableRevocationConfig.class})
+@Import(TestConfig.class)
 class AccountDeletionGuardIT extends SharedMySqlContainerSupport {
-
-    @TestConfiguration
-    static class UnreachableRevocationConfig {
-        @Bean
-        @Primary
-        TokenBlacklistService tokenBlacklistService() {
-            return Mockito.mock(TokenBlacklistService.class);
-        }
-    }
 
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
+    @MockitoBean
     private TokenBlacklistService tokenBlacklistService;
 
     @Autowired

@@ -23,13 +23,10 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.mockito.Mockito;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -53,18 +50,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @ActiveProfiles("it")
 @Tag("containerized")
-@Import({TestConfig.class, DomainEventPoisonIT.SilentPublisherConfig.class})
+@Import(TestConfig.class)
 class DomainEventPoisonIT extends SharedMySqlContainerSupport {
 
-    @TestConfiguration
-    static class SilentPublisherConfig {
-
-        @Bean
-        @Primary
-        SsePublisher ssePublisher() {
-            return Mockito.mock(SsePublisher.class);
-        }
-    }
+    @MockitoBean
+    private SsePublisher ssePublisher;
 
     @Autowired
     private DomainEventDispatcher dispatcher;

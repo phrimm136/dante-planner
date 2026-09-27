@@ -23,12 +23,10 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.convention.TestBean;
 
 import javax.sql.DataSource;
 import java.util.List;
@@ -46,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @ActiveProfiles("it")
 @Tag("containerized")
-@Import({TestConfig.class, PlannerReconcilerIT.ReconcilerLockHarness.class})
+@Import(TestConfig.class)
 class PlannerReconcilerIT extends SharedMySqlContainerSupport {
 
     /**
@@ -57,15 +55,8 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
      * release, and a refused call returns null rather than a record list. Fleet arbitration is
      * {@code ShedLockMultiPodIT}'s subject, not this one's.</p>
      */
-    @TestConfiguration
-    static class ReconcilerLockHarness {
-
-        @Bean
-        @Primary
-        LockProvider lockProvider() {
-            return configuration -> Optional.of(() -> { });
-        }
-    }
+    @TestBean
+    private LockProvider lockProvider;
 
     @Autowired
     private UserRepository userRepository;
@@ -102,6 +93,10 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
 
     private JdbcTemplate jdbc;
     private User owner;
+
+    static LockProvider lockProvider() {
+        return configuration -> Optional.of(() -> { });
+    }
 
     @BeforeEach
     void setUp() {
@@ -399,6 +394,15 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
                 .as("both carriers are swept on their own retention, so an old stamp with neither "
                         + "row is the expected end state rather than a finding")
                 .doesNotContain("recommended_notification");
+    }
+
+    @Test
+    @DisplayName("lock stand-in: back-to-back passes both run inside lockAtLeastFor")
+    void reconcile_WhenCalledTwiceInsideLockAtLeastFor_RunsBothPasses() {
+        assertThat(reconciler.reconcile()).isNotNull();
+        assertThat(reconciler.reconcile())
+                .as("the real provider refuses a second pass inside lockAtLeastFor and the call returns null")
+                .isNotNull();
     }
 
     private void stampRecommended(Planner planner) {
