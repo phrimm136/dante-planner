@@ -36,6 +36,7 @@ __pycache__/
 
 # Node
 node_modules/
+.vite/
 
 # Local dev JWT keys (docker-compose.local.yml)
 backend/jwt-keys-local/
