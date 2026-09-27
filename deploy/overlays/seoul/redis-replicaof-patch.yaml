@@ -4,12 +4,10 @@
 # (replica-read-only), so a Seoul write correctly routes to the primary via
 # REDIS_AUTH_HOST instead of silently landing on a stale replica.
 #
-# REPLICAOF_ENDPOINT is the Oregon primary redis reachable over peering. Same
-# injected value as the ConfigMap's REDIS_AUTH_HOST (both point at the Oregon
-# primary). It CANNOT be committed (a dynamic private IP), so the Seoul CP's
-# ArgoCD Application patches it at sync from terraform/seoul state — the same
-# mechanism the ECR registry host uses. Until injected, Seoul redis-auth is a
-# standalone primary (safe: no REPLICAOF pointing at a dead host).
+# The replicaof target redis-auth.oregon.danteplanner.internal:31637 is the
+# same host and port as configmap-patch.yaml's REDIS_AUTH_HOST/REDIS_AUTH_PORT;
+# the name resolves over the peering through Oregon's private zone
+# (terraform/seoul/internal-dns.tf).
 #
 # OREGON-SIDE PREREQUISITE: Oregon exposes redis-auth at a peering-reachable
 # endpoint (deploy/overlays/oregon/redis-auth-nodeport.yaml, nodePort 31637) and
@@ -19,9 +17,7 @@
 # requires AUTH: this replica sends --masterauth to replicate from it and sets
 # its own --requirepass so the Seoul copy of that state is equally protected.
 # Both come from the same AUTH_REDIS_PASSWORD key (Secrets Manager replicates
-# the runtime-config bundle to Seoul). The password gate mirrors
-# base/redis-auth.yaml: env absent/empty = no AUTH (pre-provisioning fallback;
-# replication to a requirepass master will not sync until the key lands).
+# the runtime-config bundle to Seoul).
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -35,28 +31,12 @@ spec:
             - sh
             - -c
             - |
-              if [ -n "$REDIS_AUTH_PASSWORD" ]; then
-                # Password provisioned: REPLICAOF the Oregon primary over peering,
-                # authenticated (masterauth) and password-protected (requirepass),
-                # protected-mode yes. This is the only path that replicates
-                # cross-region — never without auth.
-                exec docker-entrypoint.sh redis-server \
-                  --appendonly yes \
-                  --appendfsync everysec \
-                  --aof-use-rdb-preamble yes \
-                  --replica-read-only yes \
-                  --replicaof redis-auth.oregon.danteplanner.internal 31637 \
-                  --protected-mode yes \
-                  --requirepass "$REDIS_AUTH_PASSWORD" \
-                  --masterauth "$REDIS_AUTH_PASSWORD"
-              else
-                # No password yet: run STANDALONE (no cross-region REPLICAOF) so an
-                # unprovisioned Seoul never replicates the auth store over the
-                # peering without auth. Serves as a local store until the password
-                # rollout, then the if-branch takes over on restart.
-                exec docker-entrypoint.sh redis-server \
-                  --appendonly yes \
-                  --appendfsync everysec \
-                  --aof-use-rdb-preamble yes \
-                  --protected-mode no
-              fi
+              exec docker-entrypoint.sh redis-server \
+                --appendonly yes \
+                --appendfsync everysec \
+                --aof-use-rdb-preamble yes \
+                --replica-read-only yes \
+                --replicaof redis-auth.oregon.danteplanner.internal 31637 \
+                --protected-mode yes \
+                --requirepass "$REDIS_AUTH_PASSWORD" \
+                --masterauth "$REDIS_AUTH_PASSWORD"

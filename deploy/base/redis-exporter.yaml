@@ -1,8 +1,7 @@
 # One redis_exporter per Redis instance: annotation-based discovery cannot carry
 # per-target query params, so multi-target mode is out and each instance gets its
 # own exporter under its own job label. Auth instance password rides the same
-# optional backend-runtime-config key the server itself uses — absent key means
-# passwordless, matching the server's gated AUTH bootstrap. Observers live on the
+# backend-runtime-config key the server itself uses. Observers live on the
 # data node, untouched by the surge pipeline.
 apiVersion: apps/v1
 kind: Deployment
@@ -36,7 +35,6 @@ spec:
                 secretKeyRef:
                   name: backend-runtime-config
                   key: AUTH_REDIS_PASSWORD
-                  optional: true
           ports:
             - name: metrics
               containerPort: 9121

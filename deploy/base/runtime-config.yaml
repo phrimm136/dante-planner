@@ -2,11 +2,11 @@
 # requirepass-protected auth Redis, and any OAuth/other keys) sourced from ONE JSON
 # secret in AWS Secrets Manager via the aws-secrets-manager SecretStore.
 # dataFrom.extract pulls every JSON key into the k8s secret; the daemonset
-# envFrom-injects them, and the redis-auth StatefulSet reads AUTH_REDIS_PASSWORD
-# via an optional secretKeyRef (absent key = passwordless redis, see
-# redis-auth.yaml). Environment-specific and secret values thus never live in the
-# committed overlay, and Secrets Manager replicates them to Seoul for the
-# multi-region flip.
+# envFrom-injects them, and the redis-auth StatefulSet and its exporter read
+# AUTH_REDIS_PASSWORD via a required secretKeyRef, so an absent key holds those
+# pods in CreateContainerConfigError. Environment-specific and secret values
+# thus never live in the committed overlay, and Secrets Manager replicates them
+# to Seoul for the multi-region flip.
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
 metadata:

@@ -37,11 +37,6 @@ spec:
       containers:
         - name: redis
           image: redis:7-alpine
-          # AUTH is gated on the REDIS_AUTH_PASSWORD env (optional secretKeyRef): the
-          # shell test, not k8s $(VAR) expansion, decides — an absent Secret key would
-          # otherwise pass the literal "$(REDIS_AUTH_PASSWORD)" as the password.
-          # Empty/absent password = protected-mode no with no requirepass, byte-for-byte
-          # today's flags, so single-region Oregon keeps working with no Secret.
           # Re-invoking docker-entrypoint.sh keeps the image's chown + drop to the
           # redis user.
           #
@@ -55,27 +50,18 @@ spec:
             - sh
             - -c
             - |
-              if [ -n "$REDIS_AUTH_PASSWORD" ]; then
-                exec docker-entrypoint.sh redis-server \
-                  --appendonly yes \
-                  --appendfsync everysec \
-                  --aof-use-rdb-preamble yes \
-                  --protected-mode yes \
-                  --requirepass "$REDIS_AUTH_PASSWORD"
-              else
-                exec docker-entrypoint.sh redis-server \
-                  --appendonly yes \
-                  --appendfsync everysec \
-                  --aof-use-rdb-preamble yes \
-                  --protected-mode no
-              fi
+              exec docker-entrypoint.sh redis-server \
+                --appendonly yes \
+                --appendfsync everysec \
+                --aof-use-rdb-preamble yes \
+                --protected-mode yes \
+                --requirepass "$REDIS_AUTH_PASSWORD"
           env:
             - name: REDIS_AUTH_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: backend-runtime-config
                   key: AUTH_REDIS_PASSWORD
-                  optional: true
           ports:
             - name: redis
               containerPort: 6379

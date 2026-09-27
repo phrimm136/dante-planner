@@ -44,8 +44,8 @@ code=${folders##*$'\n'}
 FOLDER_UID=$(printf '%s' "${folders%$'\n'*}" |
   jq -r --arg t "$FOLDER" '[.[] | select(.title==$t)][0].uid // empty')
 if [ -z "$FOLDER_UID" ]; then
-  created=$(curl -s -w '\n%{http_code}' "${auth[@]}" -X POST "${GRAFANA_URL}/api/folders" \
-    -d '{"title":"${GRAFANA_ALERT_FOLDER:-danteplanner-alerts}"}')
+  created=$(jq -n --arg title "$FOLDER" '{title: $title}' |
+    curl -s -w '\n%{http_code}' "${auth[@]}" -X POST "${GRAFANA_URL}/api/folders" -d @-)
   code=${created##*$'\n'}
   [ "$code" = 200 ] || { echo "   creating folder failed (HTTP ${code}): ${created%$'\n'*}"; exit 1; }
   FOLDER_UID=$(printf '%s' "${created%$'\n'*}" | jq -r .uid)
@@ -90,7 +90,7 @@ post_rule "node-not-ready" "15m" \
 post_rule "backend-daemonset-unready" "5m" \
   'kube_daemonset_status_number_ready{daemonset="backend"} == 0'
 post_rule "container-waiting-backoff" "10m" \
-  'kube_pod_container_status_waiting_reason{reason=~"CrashLoopBackOff|ImagePullBackOff"} == 1'
+  'kube_pod_container_status_waiting_reason{reason=~"CrashLoopBackOff|ImagePullBackOff|CreateContainerConfigError"} == 1'
 post_rule "argocd-app-drift" "30m" \
   'argocd_app_info{sync_status="OutOfSync"} == 1 or argocd_app_info{health_status="Degraded"} == 1'
 post_rule "eso-secret-not-ready" "15m" \
@@ -101,6 +101,10 @@ post_rule "etcd-snapshot-deadman" "1m" \
 # 1 per down exporter rather than filter to the raw 0.
 post_rule "mysql-connectivity-lost" "5m" \
   'mysql_up == bool 0'
+post_rule "redis-auth-replica-unsynced" "15m" \
+  'max(redis_master_repl_offset{job="redis-auth",cluster="seoul"}) == bool 0'
+post_rule "redis-auth-replica-link-down" "5m" \
+  'max(redis_master_link_up{job="redis-auth",cluster="seoul"}) == bool 0'
 
-echo "== done: 7 rules in folder ${FOLDER}, group cluster-rules (1m interval)"
+echo "== done: 9 rules in folder ${FOLDER}, group cluster-rules (1m interval)"
 echo "   All noDataState=OK — non-paging while their series are absent. Staleness rules are created separately by create-staleness-rules.sh."
