@@ -228,6 +228,14 @@ class IdReferenceValidator {
     }
 
     void validateFloorSelectionIds(JsonNode root, String category, ValidationContext context) {
+        validateFloors(root, category, true, context);
+    }
+
+    void validateFloorRules(JsonNode root, String category, ValidationContext context) {
+        validateFloors(root, category, false, context);
+    }
+
+    private void validateFloors(JsonNode root, String category, boolean checkIds, ValidationContext context) {
         JsonNode floorSelections = arrayField(root, "floorSelections");
         FloorRules rules = FLOOR_RULES.get(MDCategory.fromValue(category));
 
@@ -239,14 +247,16 @@ class IdReferenceValidator {
             JsonNode themePackNode = floor.path("themePackId");
             boolean themePackChosen = themePackNode.isTextual();
 
-            if (!validateThemePackPresence(floorPath, themePackNode, context)) {
+            if (!validateThemePackPresence(floorPath, themePackNode, checkIds, context)) {
                 return;
             }
 
             validateThemePackNotRepeated(floorPath, themePackNode, index, firstFloorByThemePack, context);
             validateDifficultyRange(floorPath, floor, rules.difficultyAt().apply(index), context);
             validateThemePackSequence(floorPath, floorSelections, index, themePackChosen, context);
-            validateFloorGiftIds(floorPath, floor, themePackChosen ? themePackNode.asText() : null, context);
+            if (checkIds) {
+                validateFloorGiftIds(floorPath, floor, themePackChosen ? themePackNode.asText() : null, context);
+            }
         });
     }
 
@@ -262,7 +272,8 @@ class IdReferenceValidator {
         }
     }
 
-    private boolean validateThemePackPresence(String floorPath, JsonNode themePackNode, ValidationContext context) {
+    private boolean validateThemePackPresence(String floorPath, JsonNode themePackNode, boolean checkIds,
+                                              ValidationContext context) {
         String themePackId = themePackNode.isTextual() ? themePackNode.asText() : "";
 
         if (themePackId.isEmpty()) {
@@ -273,7 +284,7 @@ class IdReferenceValidator {
             return false;
         }
 
-        if (gameDataRegistry.hasThemePack(themePackId)) {
+        if (!checkIds || gameDataRegistry.hasThemePack(themePackId)) {
             return true;
         }
 

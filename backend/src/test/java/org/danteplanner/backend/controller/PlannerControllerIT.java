@@ -722,6 +722,22 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.contentVersion").value(7));
         }
+
+        @Test
+        @DisplayName("Should reject a published planner's category change that leaves floors missing")
+        void updatePlanner_WhenPublishedCategoryGrowsPastItsFloors_Returns400AndKeepsTheCategory() throws Exception {
+            Planner planner = createPublishedPlanner(testUser, "Five Floors", "5F", 0);
+            UpsertPlannerRequest request = withCategory(createUpsertRequestFromPlanner(planner), "15F");
+
+            mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
+                            .cookie(session())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+
+            assertEquals("5F", plannerRepository.findAggregate(planner.getId()).orElseThrow().getCategory());
+        }
     }
 
     @Nested

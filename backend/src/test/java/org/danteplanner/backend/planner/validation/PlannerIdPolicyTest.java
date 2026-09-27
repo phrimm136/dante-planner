@@ -18,6 +18,7 @@ import java.nio.file.Path;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class PlannerIdPolicyTest {
@@ -271,6 +272,19 @@ class PlannerIdPolicyTest {
         String stored = validator.validate(content.toString(), "5F", CURRENT_SEASON, ValidationPolicy.DRAFT);
 
         assertThat(stored).isEqualTo(content.toString());
+    }
+
+    @Test
+    void init_WhenTheTableDropsAThemePack_ThrowsNamingTheDrop() {
+        assertThatThrownBy(() -> validatorOver("{\"themePack\":{\"drop\":[\"1001\"]}}"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("themePack drop 1001: a floor's theme pack has no empty form");
+    }
+
+    @Test
+    void init_WhenTheTableRenamesAThemePack_Loads() {
+        assertThatCode(() -> validatorOver("{\"themePack\":{\"rename\":{\"1001\":\"1002\"}}}"))
+                .doesNotThrowAnyException();
     }
 
     private static ArrayNode floorsOn(String... themePackIds) {

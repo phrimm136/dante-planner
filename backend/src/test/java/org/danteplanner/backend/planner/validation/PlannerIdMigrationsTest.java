@@ -23,7 +23,7 @@ class PlannerIdMigrationsTest {
               "identity": { "rename": { "10199": "10101" } },
               "ego": { "rename": { "20199": "20101" }, "drop": ["20198", "20197"] },
               "egoGift": { "rename": { "9247": "9001" }, "drop": ["9248"] },
-              "themePack": { "rename": { "9999": "1001" }, "drop": ["9998"] },
+              "themePack": { "rename": { "9999": "1001" } },
               "startBuff": { "rename": { "150": "100" }, "drop": ["151"] }
             }
             """;
@@ -104,18 +104,27 @@ class PlannerIdMigrationsTest {
     }
 
     @Test
-    void normalize_WhenThemePackAndBuffsAreMigrated_RewritesThemAndNullsADroppedPack() throws IOException {
+    void normalize_WhenThemePackAndBuffsAreMigrated_RewritesThemAndDropsAFloorGift() throws IOException {
         JsonNode content = json("""
                 {"selectedBuffIds":[150,151,201],
-                 "floorSelections":[{"themePackId":"9999","giftIds":[]},{"themePackId":"9998","giftIds":[]}]}
+                 "floorSelections":[{"themePackId":"9999","giftIds":[]},{"themePackId":"1002","giftIds":["9248"]}]}
                 """);
 
         JsonNode normalized = table().normalize(content);
 
         assertThat(normalized).isEqualTo(json("""
                 {"selectedBuffIds":[100,201],
-                 "floorSelections":[{"themePackId":"1001","giftIds":[]},{"themePackId":null,"giftIds":[]}]}
+                 "floorSelections":[{"themePackId":"1001","giftIds":[]},{"themePackId":"1002","giftIds":[]}]}
                 """));
+    }
+
+    @Test
+    void normalize_WhenThemePackIsListedAsDropped_LeavesTheFloorForValidation() throws IOException {
+        JsonNode content = json("{\"floorSelections\":[{\"themePackId\":\"9998\",\"giftIds\":[]}]}");
+
+        PlannerIdMigrations table = PlannerIdMigrations.parse(json("{\"themePack\":{\"drop\":[\"9998\"]}}"));
+
+        assertThat(table.normalize(content)).isEqualTo(content);
     }
 
     @Test
@@ -204,6 +213,14 @@ class PlannerIdMigrationsTest {
 
         assertThat(table.inconsistenciesWith(knowing(Set.of())))
                 .containsExactly("identity drop 10199: an equipped identity has no empty form; supply a rename");
+    }
+
+    @Test
+    void inconsistenciesWith_WhenAThemePackIsDropped_NamesIt() throws IOException {
+        PlannerIdMigrations table = PlannerIdMigrations.parse(json("{\"themePack\":{\"drop\":[\"9998\"]}}"));
+
+        assertThat(table.inconsistenciesWith(knowing(Set.of())))
+                .containsExactly("themePack drop 9998: a floor's theme pack has no empty form; supply a rename");
     }
 
     @Test

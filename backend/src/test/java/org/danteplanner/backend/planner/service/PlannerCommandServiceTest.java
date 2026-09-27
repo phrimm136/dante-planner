@@ -1,7 +1,6 @@
 package org.danteplanner.backend.planner.service;
 import org.danteplanner.backend.planner.dto.UpsertResult;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
-import org.danteplanner.backend.planner.dto.UpdatePlannerRequest;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.ImportPlannersResponse;
 import org.danteplanner.backend.planner.dto.ImportPlannersRequest;
@@ -22,7 +21,6 @@ import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.planner.exception.PlannerConflictException;
 import org.danteplanner.backend.planner.exception.PlannerLimitExceededException;
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
@@ -312,126 +310,12 @@ class PlannerCommandServiceTest {
     }
 
     @Nested
-    @DisplayName("updatePlanner Tests")
-    class UpdatePlannerTests {
-
-        @Test
-        @DisplayName("Should increment syncVersion on successful update")
-        void updatePlanner_WhenSuccess_IncrementsSyncVersion() {
-            // Arrange
-            Planner planner = testPlanner(5L, false);
-
-            UpdatePlannerRequest request = new UpdatePlannerRequest(
-                    "Updated Title", null, null, null, 5L, null);
-
-            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
-                    .thenReturn(Optional.of(planner));
-
-            // Act
-            PlannerResponse response = commandService.updatePlanner(testUser.getId(), deviceId, planner.getId(), request, false);
-
-            // Assert
-            assertEquals(6L, response.syncVersion());
-            assertEquals("Updated Title", response.title());
-        }
-
-        @Test
-        @DisplayName("Should throw PlannerConflictException on version mismatch")
-        void updatePlanner_WhenVersionMismatch_ThrowsException() {
-            // Arrange
-            Planner planner = testPlanner(5L, false);
-
-            UpdatePlannerRequest request = new UpdatePlannerRequest(
-                    "Updated Title", null, null, null, 3L, null); // Wrong version
-
-            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
-                    .thenReturn(Optional.of(planner));
-
-            // Act & Assert
-            PlannerConflictException exception = assertThrows(
-                    PlannerConflictException.class,
-                    () -> commandService.updatePlanner(testUser.getId(), deviceId, planner.getId(), request, false)
-            );
-
-            assertEquals(5L, exception.getActualVersion());
-            assertEquals(5L, planner.getSyncVersion());
-        }
-
-        @Test
-        @DisplayName("Should throw PlannerNotFoundException when planner not found")
-        void updatePlanner_WhenNotFound_ThrowsException() {
-            // Arrange
-            UUID plannerId = UUID.randomUUID();
-            UpdatePlannerRequest request = new UpdatePlannerRequest(
-                    null, null, null, null, 1L, null);
-
-            when(plannerRepository.findAggregateForOwner(plannerId, testUser.getId()))
-                    .thenReturn(Optional.empty());
-
-            // Act & Assert
-            assertThrows(
-                    PlannerNotFoundException.class,
-                    () -> commandService.updatePlanner(testUser.getId(), deviceId, plannerId, request, false)
-            );
-        }
-
-        @Test
-        @DisplayName("Should validate content on update when provided")
-        void updatePlanner_WhenContent_ValidatesContent() {
-            // Arrange
-            Planner planner = createTestPlanner();
-            UpdatePlannerRequest request = new UpdatePlannerRequest(
-                    null, null, null, "{\"updated\": \"content\"}", planner.getSyncVersion(), null);
-
-            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
-                    .thenReturn(Optional.of(planner));
-            // A request without a category must validate against the planner's own. Only that exact
-            // triple is rejected, so any other combination leaves the stub unmatched and succeeds.
-            when(contentValidator.validate(request.content(), planner.getCategory(), planner.getContentVersion(),
-                    ValidationPolicy.forPublicationState(planner.isPublished())))
-                    .thenThrow(new PlannerValidationException("INVALID_CONTENT", "Rejected content"));
-
-            // Act & Assert
-            PlannerValidationException exception = assertThrows(
-                    PlannerValidationException.class,
-                    () -> commandService.updatePlanner(testUser.getId(), deviceId, planner.getId(), request, false)
-            );
-
-            assertEquals("INVALID_CONTENT", exception.getOriginalCode());
-            assertNotEquals(request.content(), planner.getContentJson());
-        }
-
-        @Test
-        @DisplayName("Should only update provided fields")
-        void updatePlanner_WhenPartialUpdate_OnlyUpdatesProvidedFields() {
-            // Arrange
-            Planner planner = createTestPlanner();
-            planner.getContent().setTitle("Original Title");
-            planner.getContent().setStatus(PlannerStatus.DRAFT);
-
-            UpdatePlannerRequest request = new UpdatePlannerRequest(
-                    "New Title", null, null, null, planner.getSyncVersion(), null);
-            // status not provided
-
-            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
-                    .thenReturn(Optional.of(planner));
-
-            // Act
-            PlannerResponse response = commandService.updatePlanner(testUser.getId(), deviceId, planner.getId(), request, false);
-
-            // Assert
-            assertEquals("New Title", response.title());
-            assertEquals(PlannerStatus.DRAFT, response.status()); // Original status preserved
-        }
-    }
-
-    @Nested
     @DisplayName("upsertPlanner category Tests")
     class UpsertCategoryTests {
 
         private UpsertPlannerRequest resending(Planner planner, String category, String content) {
             return new UpsertPlannerRequest(planner.getId().toString(), category, planner.getTitle(), null,
-                    content, null, PlannerType.MIRROR_DUNGEON, planner.getSyncVersion(), null);
+                    content, planner.getContentVersion(), PlannerType.MIRROR_DUNGEON, planner.getSyncVersion(), null);
         }
 
         @Test
@@ -475,7 +359,7 @@ class PlannerCommandServiceTest {
                     .thenReturn(Optional.of(planner));
             when(contentValidator.isSameDocument(stored, stored)).thenReturn(true);
             UpsertPlannerRequest retitled = new UpsertPlannerRequest(planner.getId().toString(), "5F", "Renamed",
-                    null, stored, null, PlannerType.MIRROR_DUNGEON, planner.getSyncVersion(), null);
+                    null, stored, planner.getContentVersion(), PlannerType.MIRROR_DUNGEON, planner.getSyncVersion(), null);
 
             commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(), retitled, false);
 
@@ -703,6 +587,39 @@ class PlannerCommandServiceTest {
             assertEquals(5, response.imported());
             assertEquals(5, response.total());
             assertEquals(5, response.planners().size());
+        }
+
+        @Test
+        @DisplayName("Should count only the planners that pass validation against the limit")
+        void importPlanners_WhenOnlyTheValidPlannersFitTheLimit_SavesThemAndSkipsTheRest() {
+            when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn((long) (maxPlannersPerUser - 5));
+            List<UpsertPlannerRequest> requests = new ArrayList<>();
+            for (int i = 0; i < 10; i++) {
+                UpsertPlannerRequest request = withTitle(createValidRequest(), "Planner " + i);
+                if (i >= 4) {
+                    request = withContent(request, "{\"stale\": " + i + "}");
+                    when(contentValidator.validate(request.content(), request.category(), request.contentVersion()))
+                            .thenThrow(PlannerValidationException.combined(List.of(new PlannerValidationException(
+                                    "GIFT_UNKNOWN_ID", "Invalid observationGiftIds: 9899"))));
+                }
+                requests.add(request);
+            }
+            when(plannerRepository.insert(any(Planner.class))).thenAnswer(invocation -> {
+                Planner planner = invocation.getArgument(0);
+                planner.setCreatedAt(Instant.now());
+                planner.getContent().setLastModifiedAt(Instant.now());
+                return PlannerContentLifecycle.asPersisted(planner);
+            });
+
+            ImportPlannersResponse response = commandService.importPlanners(
+                    testUser.getId(), new ImportPlannersRequest(requests));
+
+            assertEquals(4, response.imported());
+            assertEquals(10, response.total());
+            assertEquals(List.of("Planner 0", "Planner 1", "Planner 2", "Planner 3"),
+                    response.planners().stream().map(PlannerSummaryResponse::title).toList());
+            assertEquals(6, response.skipped().size());
+            verify(plannerRepository, times(4)).insert(any());
         }
     }
 

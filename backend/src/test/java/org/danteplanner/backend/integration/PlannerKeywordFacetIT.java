@@ -188,8 +188,8 @@ class PlannerKeywordFacetIT {
 
         // A stale client syncs the pre-rename name plus an unknown keyword
         UpsertPlannerRequest req = new UpsertPlannerRequest(
-                planner.getId().toString(), null, null, null, null, null,
-                PlannerType.MIRROR_DUNGEON, planner.getSyncVersion(),
+                planner.getId().toString(), planner.getCategory(), null, null, planner.getContentJson(),
+                planner.getContentVersion(), PlannerType.MIRROR_DUNGEON, planner.getSyncVersion(),
                 Set.of("AccelBullet", "NotAKeyword"));
         commandService.upsertPlanner(owner.getId(), null, planner.getId(), req, false);
 

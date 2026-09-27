@@ -3,7 +3,6 @@ package org.danteplanner.backend.planner.validation;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.IntNode;
-import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 
@@ -148,6 +147,9 @@ public record PlannerIdMigrations(Map<Kind, Map<String, String>> renames, Map<Ki
                 if (kind == Kind.IDENTITY) {
                     problems.add("identity drop " + id + ": an equipped identity has no empty form; supply a rename");
                 }
+                if (kind == Kind.THEME_PACK) {
+                    problems.add("themePack drop " + id + ": a floor's theme pack has no empty form; supply a rename");
+                }
                 if (exists.test(id)) {
                     problems.add(kind.key() + " drop " + id + ": id is still in the game data");
                 }
@@ -276,10 +278,7 @@ public record PlannerIdMigrations(Map<Kind, Map<String, String>> renames, Map<Ki
             }
             JsonNode themePackNode = floor.path("themePackId");
             if (themePackNode.isTextual()) {
-                String themePackId = themePackNode.asText();
-                ((ObjectNode) floor).set("themePackId", isDropped(Kind.THEME_PACK, themePackId)
-                        ? NullNode.getInstance()
-                        : TextNode.valueOf(renamed(Kind.THEME_PACK, themePackId)));
+                ((ObjectNode) floor).put("themePackId", renamed(Kind.THEME_PACK, themePackNode.asText()));
             }
             normalizeGiftArray(floor.path("giftIds"));
         }

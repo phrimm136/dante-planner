@@ -7,7 +7,6 @@ import org.danteplanner.backend.planner.dto.ImportPlannersRequest;
 import org.danteplanner.backend.planner.dto.ImportPlannersResponse;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.PlannerSummaryResponse;
-import org.danteplanner.backend.planner.dto.UpdatePlannerRequest;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.dto.UpsertResult;
 import org.danteplanner.backend.planner.entity.Planner;
@@ -139,32 +138,17 @@ public class PlannerCommandService {
         PlannerContent contentRow = planner.getContent();
         applyTitleAndStatus(contentRow, request.title(), request.status());
 
-        boolean categoryChanged = request.category() != null && !request.category().equals(contentRow.getCategory());
-        if (categoryChanged) {
-            applyCategory(planner, request.category());
-        }
-
-        boolean categoryOnly = categoryChanged && request.content() != null
+        boolean categoryChanged = !request.category().equals(contentRow.getCategory());
+        boolean categoryOnly = categoryChanged
                 && contentValidator.isSameDocument(request.content(), contentRow.getContent());
-        if (request.content() != null && !categoryOnly) {
-            int version = request.contentVersion() != null
-                    ? request.contentVersion()
-                    : contentRow.getGameContentVersion();
-            applyContent(planner, request.content(), version);
-        }
-
-        applyKeywordsAndDeviceId(contentRow, request.selectedKeywords(), deviceId);
-    }
-
-    private void applyUpdateFields(Planner planner, UpdatePlannerRequest request, UUID deviceId) {
-        PlannerContent contentRow = planner.getContent();
-        applyTitleAndStatus(contentRow, request.title(), request.status());
-
-        if (request.category() != null) {
+        if (categoryOnly) {
+            applyCategoryOverStoredContent(planner, request.category());
+        } else if (categoryChanged) {
             applyCategory(planner, request.category());
         }
-        if (request.content() != null) {
-            applyContent(planner, request.content(), contentRow.getGameContentVersion());
+
+        if (!categoryOnly) {
+            applyContent(planner, request.content(), request.contentVersion());
         }
 
         applyKeywordsAndDeviceId(contentRow, request.selectedKeywords(), deviceId);
@@ -181,6 +165,13 @@ public class PlannerCommandService {
 
     private void applyCategory(Planner planner, String category) {
         categoryValidator.requireCategoryForType(planner.getPlannerType(), category);
+        planner.getContent().setCategory(category);
+    }
+
+    private void applyCategoryOverStoredContent(Planner planner, String category) {
+        categoryValidator.requireCategoryForType(planner.getPlannerType(), category);
+        contentValidator.validateFloorRules(planner.getContent().getContent(), category,
+                ValidationPolicy.forPublicationState(planner.isPublished()));
         planner.getContent().setCategory(category);
     }
 
@@ -298,9 +289,7 @@ public class PlannerCommandService {
 
             applyUpsertFields(planner, request, deviceId);
 
-            if (request.contentVersion() != null) {
-                planner.getContent().setGameContentVersion(request.contentVersion());
-            }
+            planner.getContent().setGameContentVersion(request.contentVersion());
 
             planner.getContent().setContentSchemaVersion(currentSchemaVersion);
             planner.recordSave();
@@ -321,40 +310,6 @@ public class PlannerCommandService {
         log.info("Planner {} not found, creating for user {}", id, userId);
 
         return createAggregate(userId, deviceId, request.withId(id.toString()));
-    }
-
-    @Transactional
-    public PlannerResponse updatePlanner(Long userId, UUID deviceId, UUID id, UpdatePlannerRequest request, boolean force) {
-        Planner planner = accessGuard.findPlannerOrThrow(userId, id);
-
-        CarriedWrite carried = CarriedWrite.builder()
-                .title(request.title())
-                .status(request.status())
-                .category(request.category())
-                .content(request.content())
-                .selectedKeywords(request.selectedKeywords())
-                .deviceId(deviceId)
-                .build();
-
-        WriteArbitration arbitration = syncVersionValidator.arbitrate(
-                force, request.syncVersion(), planner.getSyncVersion(), planner.getContent(), carried);
-        if (arbitration == WriteArbitration.ACK_NO_OP) {
-            log.info("Update of planner {} would move no field, acknowledging syncVersion {} without a write",
-                    id, planner.getSyncVersion());
-            return PlannerResponse.fromEntity(planner, statsRepository.upvotesOf(id));
-        }
-
-        applyUpdateFields(planner, request, deviceId);
-
-        planner.recordSave();
-
-        log.info("Updated planner {} for user {}, new syncVersion: {}", id, userId, planner.getSyncVersion());
-
-        if (planner.isPublished()) {
-            plannerCatalogService.onVisibleEditCommitted(planner);
-        }
-
-        return PlannerResponse.fromEntity(planner, statsRepository.upvotesOf(id));
     }
 
     @Transactional
@@ -387,23 +342,24 @@ public class PlannerCommandService {
 
         int requestedCount = request.planners().size();
 
-        limitValidator.requireRoomFor(
-                plannerRepository.countActiveByUserId(userId), requestedCount, maxPlannersPerUser);
-
-        List<PlannerSummaryResponse> importedPlanners = new ArrayList<>();
+        List<ValidatedImport> validImports = new ArrayList<>();
         List<ImportPlannersResponse.SkippedPlanner> skippedPlanners = new ArrayList<>();
 
         for (UpsertPlannerRequest plannerRequest : request.planners()) {
-            String content;
             try {
-                content = validateImported(plannerRequest);
+                validImports.add(new ValidatedImport(plannerRequest, validateImported(plannerRequest)));
             } catch (PlannerValidationException ex) {
                 skippedPlanners.add(ImportPlannersResponse.SkippedPlanner.from(plannerRequest, ex));
-                continue;
             }
+        }
 
+        limitValidator.requireRoomFor(
+                plannerRepository.countActiveByUserId(userId), validImports.size(), maxPlannersPerUser);
+
+        List<PlannerSummaryResponse> importedPlanners = new ArrayList<>();
+        for (ValidatedImport validImport : validImports) {
             Planner saved = plannerRepository.insert(
-                    buildAggregate(UUID.randomUUID(), user, plannerRequest, content, null));
+                    buildAggregate(UUID.randomUUID(), user, validImport.request(), validImport.content(), null));
             statsRepository.insert(PlannerStats.builder().plannerId(saved.getId()).build());
             importedPlanners.add(PlannerSummaryResponse.fromEntity(saved));
         }
@@ -417,6 +373,9 @@ public class PlannerCommandService {
                 .planners(importedPlanners)
                 .skipped(skippedPlanners)
                 .build();
+    }
+
+    private record ValidatedImport(UpsertPlannerRequest request, String content) {
     }
 
     private String validateImported(UpsertPlannerRequest plannerRequest) {

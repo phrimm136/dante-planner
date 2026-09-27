@@ -34,6 +34,15 @@ public class PlannerContentValidator {
         }
     }
 
+    public void validateFloorRules(String content, String category, ValidationPolicy policy) {
+        try {
+            doValidateFloorRules(content, category, policy);
+        } catch (PlannerValidationException ex) {
+            ex.setFailedContent(content);
+            throw ex;
+        }
+    }
+
     public boolean isSameDocument(String content, String stored) {
         if (stored == null) {
             return false;
@@ -42,6 +51,18 @@ public class PlannerContentValidator {
             return JsonDocuments.sameDocument(structuralValidator.parseJson(content), structuralValidator.parseJson(stored));
         } catch (PlannerValidationException ex) {
             return false;
+        }
+    }
+
+    private void doValidateFloorRules(String content, String category, ValidationPolicy policy) {
+        categoryValidator.validateCategory(category);
+
+        ValidationContext context = new ValidationContext(policy);
+        idReferenceValidator.validateFloorRules(structuralValidator.parseJson(content), category, context);
+
+        List<PlannerValidationException> errors = context.getErrors();
+        if (!errors.isEmpty()) {
+            throw PlannerValidationException.combined(errors);
         }
     }
 

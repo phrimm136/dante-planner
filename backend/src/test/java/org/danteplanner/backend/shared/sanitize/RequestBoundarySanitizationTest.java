@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.danteplanner.backend.moderation.dto.BanRequest;
 import org.danteplanner.backend.planner.dto.ImportPlannersRequest;
 import org.danteplanner.backend.planner.dto.LegacyPublishRequest;
-import org.danteplanner.backend.planner.dto.UpdatePlannerRequest;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,20 +38,6 @@ class RequestBoundarySanitizationTest {
     void upsertRequest_WhenPayloadIsHostile_ArrivesSanitized() throws Exception {
         UpsertPlannerRequest request =
                 MAPPER.treeToValue(hostileUpsertPayload(), UpsertPlannerRequest.class);
-
-        assertThat(request.title()).isEqualTo(SAFE_TITLE);
-        assertThat(linkIn(request.content())).isEqualTo("#");
-    }
-
-    @Test
-    @DisplayName("a partial update arrives with its title stripped and its document neutralized")
-    void updateRequest_WhenPayloadIsHostile_ArrivesSanitized() throws Exception {
-        ObjectNode payload = MAPPER.createObjectNode();
-        payload.put("title", HOSTILE_TITLE);
-        payload.put("content", HOSTILE_DOCUMENT);
-        payload.put("syncVersion", 1);
-
-        UpdatePlannerRequest request = MAPPER.treeToValue(payload, UpdatePlannerRequest.class);
 
         assertThat(request.title()).isEqualTo(SAFE_TITLE);
         assertThat(linkIn(request.content())).isEqualTo("#");
