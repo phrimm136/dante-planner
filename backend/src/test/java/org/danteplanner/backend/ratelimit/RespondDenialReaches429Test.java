@@ -25,6 +25,8 @@ import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.shared.exception.ProblemWriter;
+
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import static org.mockito.ArgumentMatchers.anyString;
@@ -59,7 +61,8 @@ class RespondDenialReaches429Test {
                 mock(SecurityProperties.class),
                 new DeviceIdResolver(new CookieUtils(false, "", "Lax")),
                 new FrontendProperties("https://planner.example"),
-                new ProblemWriter(objectMapper));
+                new ProblemWriter(objectMapper),
+                new SimpleMeterRegistry());
 
         mockMvc = MockMvcBuilders.standaloneSetup(new DeclaredHandlerFixture())
                 .addInterceptors(interceptor)

@@ -129,6 +129,7 @@ class DegradationIT {
     private static final String TOXIPROXY_IMAGE = "ghcr.io/shopify/toxiproxy:2.5.0";
 
     private static final String COUNTER_NAME = "blacklist_check_skipped_total";
+    private static final String RATE_LIMIT_SKIP_COUNTER_NAME = "rate_limit.charge_skipped";
     private static final long ONE_HOUR_MS = 3_600_000L;
 
     /**
@@ -350,8 +351,8 @@ class DegradationIT {
      *
      * <p>Re-enabling the proxy restores the route, but bucket4j's proxy manager holds a Lettuce
      * connection the cut killed and reconnects on its own schedule. Until it does, the next test's
-     * first rate-limited write degrades to 503 — the code F2 asserts — and reads as a broken write
-     * path. The subject comes from a sequence, so no probe ever drains a bucket a test uses.</p>
+     * first rate-limited request skips its charge or, on an authentication endpoint, degrades to
+     * 503. The subject comes from a sequence, so no probe ever drains a bucket a test uses.</p>
      */
     private void awaitLiveRateLimitRedis() {
         if (!awaitTrue(this::rateLimiterAnswers)) {
@@ -594,34 +595,54 @@ class DegradationIT {
         }
     }
 
-    /**
-     * F2: with the rate-limit Redis route severed (Toxiproxy proxy disabled) and every other path
-     * healthy, a rate-limited write endpoint must degrade by operation — the raw-Lettuce failure the
-     * bucket4j {@code tryConsume} raises at controller entry must be mapped to a typed
-     * {@code RATE_LIMIT_TEMPORARILY_UNAVAILABLE} (503), NOT fall through to the catch-all 500
-     * INTERNAL_ERROR + Sentry. The auth Redis and both datasources stay healthy so the request
-     * clears the JWT filter and reaches {@code checkCrudLimit} before any service/DB work; the 503 +
-     * typed code structurally proves {@code handleUnexpected} (the only Sentry path for this
-     * exception) was never reached.
-     */
     @Test
-    @DisplayName("F2: rate-limit Redis cut → rate-limited write returns 503 RATE_LIMIT_TEMPORARILY_UNAVAILABLE, not 500")
-    void rateLimitRedisCut_WhenRateLimitedEndpointCalled_ReturnsRateLimitTemporarilyUnavailable() throws Exception {
+    @DisplayName("F2: rate-limit Redis cut → a CRUD write proceeds unmetered and the skip is counted")
+    void rateLimitRedisCut_WhenCrudWriteCalled_ProceedsAndCountsTheSkippedCharge() throws Exception {
         User author = TestDataFactory.createTestUser(
                 userRepository, "degradation-f2-" + UUID.randomUUID() + "@example.com");
         Cookie auth = AuthCookies.accessToken(
                 TestDataFactory.generateAccessToken(jwtTokenService, author));
         Cookie device = AuthCookies.freshDeviceId();
         UUID plannerId = UUID.randomUUID();
+        double before = rateLimitSkipCount(RateLimitPolicy.CRUD);
 
         cutRateLimitRedis();
 
         mockMvc.perform(put("/api/planner/md/" + plannerId).with(withCsrf())
                         .cookie(auth, device)
                         .contentType(APPLICATION_JSON)
-                        .content(upsertBody(plannerId, "degradation-f2-blocked-by-ratelimit-outage")))
+                        .content(upsertBody(plannerId, "degradation-f2-unmetered-during-ratelimit-outage")))
+                .andExpect(status().isCreated());
+
+        assertThat(rateLimitSkipCount(RateLimitPolicy.CRUD) - before).isEqualTo(1.0);
+    }
+
+    @Test
+    @DisplayName("F3: rate-limit Redis cut → the published list is served and the PUBLIC_READ skip is counted")
+    void rateLimitRedisCut_WhenPublishedListRead_ServesAndCountsTheSkippedCharge() throws Exception {
+        double before = rateLimitSkipCount(RateLimitPolicy.PUBLIC_READ);
+
+        cutRateLimitRedis();
+
+        mockMvc.perform(get("/api/planner/md/published"))
+                .andExpect(status().isOk());
+
+        assertThat(rateLimitSkipCount(RateLimitPolicy.PUBLIC_READ) - before).isEqualTo(1.0);
+    }
+
+    @Test
+    @DisplayName("F4: rate-limit Redis cut → the OAuth callback answers 503 RATE_LIMIT_TEMPORARILY_UNAVAILABLE")
+    void rateLimitRedisCut_WhenOAuthCallbackCalled_ReturnsRateLimitTemporarilyUnavailable() throws Exception {
+        cutRateLimitRedis();
+
+        mockMvc.perform(get("/api/auth/google/callback").param("code", "any").param("state", "any"))
                 .andExpect(status().isServiceUnavailable())
                 .andExpect(jsonPath("$.code").value("RATE_LIMIT_TEMPORARILY_UNAVAILABLE"));
+    }
+
+    private double rateLimitSkipCount(RateLimitPolicy policy) {
+        Counter counter = meterRegistry.find(RATE_LIMIT_SKIP_COUNTER_NAME).tag("policy", policy.name()).counter();
+        return counter == null ? 0.0 : counter.count();
     }
 
     private double skipCounterValue() {

@@ -10,23 +10,23 @@ import org.danteplanner.backend.shared.ratelimit.RateLimitProperties.BucketConfi
  */
 public enum RateLimitPolicy {
 
-    CRUD(RateLimitProperties::getCrud, null, "", Subject.USER),
+    CRUD(RateLimitProperties::getCrud, null, "", Subject.USER, false),
 
-    IMPORT(RateLimitProperties::getImportConfig, "import", "", Subject.USER),
+    IMPORT(RateLimitProperties::getImportConfig, "import", "", Subject.USER, false),
 
-    SSE(RateLimitProperties::getSse, "sse", "", Subject.USER),
+    SSE(RateLimitProperties::getSse, "sse", "", Subject.USER, false),
 
-    COMMENT(RateLimitProperties::getComment, "comment", "", Subject.USER),
+    COMMENT(RateLimitProperties::getComment, "comment", "", Subject.USER, false),
 
-    REPORT(RateLimitProperties::getReport, "report", "", Subject.USER),
+    REPORT(RateLimitProperties::getReport, "report", "", Subject.USER, false),
 
-    MODERATION(RateLimitProperties::getModeration, "moderation", "", Subject.USER),
+    MODERATION(RateLimitProperties::getModeration, "moderation", "", Subject.USER, false),
 
-    AUTH(RateLimitProperties::getAuth, "auth", "", Subject.CLIENT),
+    AUTH(RateLimitProperties::getAuth, "auth", "", Subject.CLIENT, true),
 
-    PLANNER_COMMENT_SSE(RateLimitProperties::getSse, "planner-comment-sse", "", Subject.CLIENT),
+    PLANNER_COMMENT_SSE(RateLimitProperties::getSse, "planner-comment-sse", "", Subject.CLIENT, false),
 
-    PUBLIC_READ(RateLimitProperties::getPublicRead, "public-read", "", Subject.CLIENT);
+    PUBLIC_READ(RateLimitProperties::getPublicRead, "public-read", "", Subject.CLIENT, false);
 
     public enum Subject {
 
@@ -39,20 +39,27 @@ public enum RateLimitPolicy {
     private final String endpoint;
     private final String subjectPrefix;
     private final Subject subject;
+    private final boolean failClosed;
 
     RateLimitPolicy(
             Function<RateLimitProperties, BucketConfig> bucket,
             String endpoint,
             String subjectPrefix,
-            Subject subject) {
+            Subject subject,
+            boolean failClosed) {
         this.bucket = bucket;
         this.endpoint = endpoint;
         this.subjectPrefix = subjectPrefix;
         this.subject = subject;
+        this.failClosed = failClosed;
     }
 
     public Subject subject() {
         return subject;
+    }
+
+    public boolean failsClosed() {
+        return failClosed;
     }
 
     public boolean requiresCallerNamedEndpoint() {

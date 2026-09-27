@@ -1,6 +1,7 @@
 package org.danteplanner.backend.shared.ratelimit;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,10 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
+import io.github.bucket4j.TimeoutException;
+import io.lettuce.core.RedisException;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.DeviceIdResolver;
@@ -34,12 +39,16 @@ import org.danteplanner.backend.shared.util.ClientIpResolver;
 public class RateLimitInterceptor implements HandlerInterceptor {
 
     private static final String UNDECLARED_CODE = "RATE_LIMIT_UNDECLARED";
+    private static final String CHARGE_SKIPPED_COUNTER = "rate_limit.charge_skipped";
+    private static final String POLICY_TAG = "policy";
 
     private final RateLimitService rateLimitService;
     private final SecurityProperties securityProperties;
     private final DeviceIdResolver deviceIdResolver;
     private final FrontendProperties frontendProperties;
     private final ProblemWriter problemWriter;
+    private final MeterRegistry meterRegistry;
+    private final AtomicBoolean storeUnavailable = new AtomicBoolean();
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
@@ -82,7 +91,10 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     private boolean charge(RateLimited declaration, HttpServletRequest request, HttpServletResponse response) {
         try {
             chargeBucket(declaration, request, response);
+            markStoreAvailable();
             return true;
+        } catch (RedisException | TimeoutException unavailable) {
+            return skipCharge(declaration.value(), unavailable);
         } catch (RateLimitExceededException refused) {
             if (declaration.denial() != RateLimitDenial.REDIRECT_LOGIN) {
                 throw refused;
@@ -91,6 +103,26 @@ public class RateLimitInterceptor implements HandlerInterceptor {
             response.setStatus(HttpStatus.FOUND.value());
             response.setHeader(HttpHeaders.LOCATION, frontendProperties.getUrl() + LoginRedirect.RATE_LIMITED);
             return false;
+        }
+    }
+
+    private boolean skipCharge(RateLimitPolicy policy, RuntimeException unavailable) {
+        if (policy.failsClosed()) {
+            throw unavailable;
+        }
+        meterRegistry.counter(CHARGE_SKIPPED_COUNTER, POLICY_TAG, policy.name()).increment();
+        if (storeUnavailable.compareAndSet(false, true)) {
+            log.warn("Rate-limit store unavailable, serving fail-open policies unmetered: {}",
+                    unavailable.getMessage());
+        } else {
+            log.debug("Rate-limit store still unavailable, {} charge skipped: {}", policy, unavailable.getMessage());
+        }
+        return true;
+    }
+
+    private void markStoreAvailable() {
+        if (storeUnavailable.get()) {
+            storeUnavailable.set(false);
         }
     }
 

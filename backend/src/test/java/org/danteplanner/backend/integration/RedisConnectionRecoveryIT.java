@@ -1,11 +1,9 @@
 package org.danteplanner.backend.integration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.rekawek.toxiproxy.Proxy;
 import eu.rekawek.toxiproxy.ToxiproxyClient;
 import eu.rekawek.toxiproxy.model.Toxic;
 import eu.rekawek.toxiproxy.model.ToxicDirection;
-import jakarta.servlet.http.Cookie;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Date;
@@ -13,19 +11,11 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.BooleanSupplier;
 import javax.sql.DataSource;
-import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
-import org.danteplanner.backend.planner.entity.PlannerStatus;
-import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.shared.sse.SseService;
-import org.danteplanner.backend.support.AuthCookies;
-import org.danteplanner.backend.support.TestDataFactory;
-import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -34,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.test.context.ActiveProfiles;
@@ -48,15 +39,13 @@ import org.testcontainers.toxiproxy.ToxiproxyContainer;
 import org.testcontainers.utility.DockerImageName;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -73,8 +62,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *       after its subscription connection is severed, or cross-node fan-out silently dies
  *       until the pod restarts (the startup-unreachable case is documented as fatal in
  *       {@code SseSubscriberConfig}; the mid-life case must self-heal).</li>
- *   <li><b>Rate limiting</b>: the typed 503 during the outage must give way to normal
- *       request handling, not persist.</li>
+ *   <li><b>Rate limiting</b>: the typed 503 an authentication endpoint answers during the
+ *       outage must give way to normal request handling, not persist.</li>
  * </ul>
  *
  * <p>Self-contained harness per the {@code DegradationIT} precedent: the JVM-shared
@@ -205,15 +194,6 @@ class RedisConnectionRecoveryIT {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private JwtTokenService jwtTokenService;
-
     @DynamicPropertySource
     static void harnessProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", PRIMARY::getJdbcUrl);
@@ -312,39 +292,26 @@ class RedisConnectionRecoveryIT {
     }
 
     @Test
-    @DisplayName("Rate-limit Redis restored: the typed 503 gives way to normal request handling")
-    void rateLimitedWrite_WhenRateLimitRedisRestored_StopsReturning503() throws Exception {
-        User author = TestDataFactory.createTestUser(
-                userRepository, "recovery-rate-limit-" + UUID.randomUUID() + "@example.com");
-        Cookie auth = AuthCookies.accessToken(
-                TestDataFactory.generateAccessToken(jwtTokenService, author));
-        Cookie device = AuthCookies.freshDeviceId();
-
+    @DisplayName("Rate-limit Redis restored: the OAuth callback's typed 503 gives way to normal request handling")
+    void oauthCallback_WhenRateLimitRedisRestored_StopsReturning503() throws Exception {
         RATE_LIMIT_REDIS_PROXY.disable();
 
-        UUID blockedPlannerId = UUID.randomUUID();
-        mockMvc.perform(put("/api/planner/md/" + blockedPlannerId).with(withCsrf())
-                        .cookie(auth, device)
-                        .contentType(APPLICATION_JSON)
-                        .content(upsertBody(blockedPlannerId, "recovery-during-outage")))
+        mockMvc.perform(get("/api/auth/google/callback").param("code", "any").param("state", "any"))
                 .andExpect(status().isServiceUnavailable());
 
         RATE_LIMIT_REDIS_PROXY.enable();
 
         assertThat(awaitTrue(() -> {
             try {
-                UUID plannerId = UUID.randomUUID();
-                int status = mockMvc.perform(put("/api/planner/md/" + plannerId).with(withCsrf())
-                                .cookie(auth, device)
-                                .contentType(APPLICATION_JSON)
-                                .content(upsertBody(plannerId, "recovery-after-restore")))
+                int status = mockMvc.perform(get("/api/auth/google/callback")
+                                .param("code", "any").param("state", "any"))
                         .andReturn().getResponse().getStatus();
-                return status >= 200 && status < 300;
+                return status == HttpStatus.FOUND.value();
             } catch (Exception e) {
                 return false;
             }
         }))
-                .as("rate-limited writes must succeed again once rate-limit Redis is reachable")
+                .as("the OAuth callback must redirect again once rate-limit Redis is reachable")
                 .isTrue();
     }
 
@@ -367,13 +334,6 @@ class RedisConnectionRecoveryIT {
             }
         }
         return condition.getAsBoolean();
-    }
-
-    private String upsertBody(UUID id, String title) throws IOException {
-        UpsertPlannerRequest request = new UpsertPlannerRequest(
-                id.toString(), "5F", title, PlannerStatus.DRAFT, TestDataFactory.VALID_CONTENT, 7,
-                PlannerType.MIRROR_DUNGEON, null, null);
-        return objectMapper.writeValueAsString(request);
     }
 
     private static Proxy createRedisProxy(String name, int listenPort) {

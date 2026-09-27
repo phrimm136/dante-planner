@@ -25,6 +25,8 @@ import org.junit.jupiter.api.parallel.Isolated;
 import org.slf4j.LoggerFactory;
 
 import org.danteplanner.backend.shared.exception.ProblemWriter;
+
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
@@ -70,7 +72,8 @@ class BackstopDeniesWhenTheGateWasSkippedTest {
                 mock(SecurityProperties.class),
                 new DeviceIdResolver(new CookieUtils(false, "", "Lax")),
                 new FrontendProperties("https://planner.example"),
-                new ProblemWriter(Jackson2ObjectMapperBuilder.json().build()));
+                new ProblemWriter(Jackson2ObjectMapperBuilder.json().build()),
+                new SimpleMeterRegistry());
 
         mockMvc = MockMvcBuilders.standaloneSetup(bareFixture, new DeclaredHandlerFixture())
                 .addInterceptors(interceptor)

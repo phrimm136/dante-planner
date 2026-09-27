@@ -19,6 +19,8 @@ import org.danteplanner.backend.shared.config.DeviceIdResolver;
 import org.danteplanner.backend.shared.config.FrontendProperties;
 import org.danteplanner.backend.shared.config.SecurityProperties;
 import org.danteplanner.backend.shared.exception.ProblemWriter;
+
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.danteplanner.backend.shared.ratelimit.RateLimitInterceptor;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.shared.ratelimit.RateLimitService;
@@ -66,7 +68,8 @@ class PublishedPlannerClientBucketTest {
                 securityProperties,
                 deviceIdResolver,
                 new FrontendProperties("https://planner.example"),
-                new ProblemWriter(objectMapper));
+                new ProblemWriter(objectMapper),
+                new SimpleMeterRegistry());
         PublishedPlannerController controller = new PublishedPlannerController(
                 queryService, securityProperties, new ByIdReadGuard(), deviceIdResolver);
 
