@@ -1,7 +1,7 @@
 variable "cloudflare_api_token" {
   description = <<-EOT
     Scoped API token: Tunnel edit, Load Balancer edit, DNS edit. Custody in an untracked
-    terraform.tfvars (see terraform/.gitignore) — never a default here.
+    the stack's var-file (see terraform/.gitignore) — never a default here.
   EOT
   type        = string
   sensitive   = true
@@ -151,11 +151,15 @@ variable "steering_region_pools" {
   description = <<-EOT
     Cloudflare region code -> ordered pool preference. The first entry serves; the rest are the
     failover chain, which is how a region loss degrades to a cross-region hop rather than to an
-    error page. NEAS is Northeast Asia; WNAM and ENAM are western and eastern North America.
+    error page. Seoul serves all of Asia-Pacific (NEAS/SEAS Northeast/Southeast Asia, SAS South
+    Asia, OC Oceania); every other code deliberately falls to default_pool_order.
   EOT
   type        = map(list(string))
   default = {
     NEAS = ["seoul", "oregon"]
+    SEAS = ["seoul", "oregon"]
+    SAS  = ["seoul", "oregon"]
+    OC   = ["seoul", "oregon"]
     WNAM = ["oregon", "seoul"]
     ENAM = ["oregon", "seoul"]
   }
