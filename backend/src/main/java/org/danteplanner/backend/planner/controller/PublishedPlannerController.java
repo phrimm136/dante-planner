@@ -1,6 +1,7 @@
 package org.danteplanner.backend.planner.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.shared.config.SecurityProperties;
 import org.danteplanner.backend.planner.dto.CatalogQuery;
@@ -8,7 +9,7 @@ import org.danteplanner.backend.planner.dto.PublicPlannerResponse;
 import org.danteplanner.backend.planner.dto.PublishedPlannerDetailResponse;
 import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
 import org.danteplanner.backend.shared.entity.ContentEntityType;
-import org.danteplanner.backend.shared.config.DeviceId;
+import org.danteplanner.backend.shared.config.DeviceIdResolver;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.shared.util.ClientIpResolver;
 import org.danteplanner.backend.shared.ratelimit.RateLimited;
@@ -38,6 +39,7 @@ public class PublishedPlannerController {
     private final PublishedPlannerQueryService publishedPlannerQueryService;
     private final SecurityProperties securityProperties;
     private final ByIdReadGuard byIdReadGuard;
+    private final DeviceIdResolver deviceIdResolver;
 
     @RateLimited(RateLimitPolicy.PUBLIC_READ)
     @GetMapping("/published")
@@ -79,13 +81,14 @@ public class PublishedPlannerController {
     @GetMapping("/published/{id}")
     public ResponseEntity<PublishedPlannerDetailResponse> getPublishedPlanner(
             HttpServletRequest request,
+            HttpServletResponse servletResponse,
             @PathVariable UUID id,
-            @AuthenticationPrincipal Long userId,
-            @DeviceId UUID deviceId) {
+            @AuthenticationPrincipal Long userId) {
 
         // Cloudflare appends to X-Forwarded-For rather than replacing it, so its leftmost entry is
         // caller-controlled.
-        String viewerIdentity = ClientIpResolver.resolveClientIdentifier(request, securityProperties, deviceId);
+        String viewerIdentity = ClientIpResolver.resolveClientIdentifier(
+                request, securityProperties, () -> deviceIdResolver.resolve(request, servletResponse));
         String userAgent = request.getHeader("User-Agent");
         PublishedPlannerDetailResponse response = byIdReadGuard.read(ByIdReadGuard.PLANNER_ENTITY_TYPE, id,
                 () -> publishedPlannerQueryService.getPublishedPlanner(id, userId, viewerIdentity, userAgent));

@@ -28,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Proves both byId GET endpoints route their service dereference through
@@ -88,7 +89,7 @@ class ByIdReadSeamTest {
                 .thenReturn(expected);
 
         ResponseEntity<PublishedPlannerDetailResponse> result =
-                publishedPlannerController.getPublishedPlanner(request, id, userId, UUID.randomUUID());
+                publishedPlannerController.getPublishedPlanner(request, mock(HttpServletResponse.class), id, userId);
 
         assertThat(result.getBody()).isSameAs(expected);
         verify(byIdReadGuard).read(eq("planner"), eq(id), any());

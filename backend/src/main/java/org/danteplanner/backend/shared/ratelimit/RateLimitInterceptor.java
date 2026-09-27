@@ -99,7 +99,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
         if (policy.subject() == RateLimitPolicy.Subject.CLIENT) {
             String identifier = ClientIpResolver.resolveClientIdentifier(
-                    request, securityProperties, deviceIdResolver.resolve(request, response));
+                    request, securityProperties, () -> deviceIdResolver.resolve(request, response));
             rateLimitService.check(policy, identifier);
             return;
         }

@@ -202,7 +202,7 @@ class ClientIpResolverTest {
         @Test
         void resolveClientIdentifier_WhenPublicIpBehindTrustedProxy_KeysOnTheIp() {
             String result = ClientIpResolver.resolveClientIdentifier(
-                    request(TRUSTED_PROXY_IP, PUBLIC_CLIENT_IP), properties(TRUSTED_PROXY_IP), DEVICE_ID);
+                    request(TRUSTED_PROXY_IP, PUBLIC_CLIENT_IP), properties(TRUSTED_PROXY_IP), () -> DEVICE_ID);
 
             assertThat(result).isEqualTo("ip:" + PUBLIC_CLIENT_IP);
         }
@@ -210,7 +210,7 @@ class ClientIpResolverTest {
         @Test
         void resolveClientIdentifier_WhenProxyIsTrustedByCidrRange_KeysOnTheForwardedIp() {
             String result = ClientIpResolver.resolveClientIdentifier(
-                    request(PROXY_IN_CIDR, PUBLIC_CLIENT_IP), properties("172.18.0.0/16"), DEVICE_ID);
+                    request(PROXY_IN_CIDR, PUBLIC_CLIENT_IP), properties("172.18.0.0/16"), () -> DEVICE_ID);
 
             assertThat(result).isEqualTo("ip:" + PUBLIC_CLIENT_IP);
         }
@@ -219,7 +219,7 @@ class ClientIpResolverTest {
         void resolveClientIdentifier_WhenCloudflareHeaderArrivesFromTrustedProxy_KeysOnIt() {
             String result = ClientIpResolver.resolveClientIdentifier(
                     request(PROXY_IN_CIDR, OTHER_PUBLIC_IP, PUBLIC_CLIENT_IP),
-                    properties("172.18.0.0/16"), DEVICE_ID);
+                    properties("172.18.0.0/16"), () -> DEVICE_ID);
 
             assertThat(result).isEqualTo("ip:" + PUBLIC_CLIENT_IP);
         }
@@ -227,7 +227,7 @@ class ClientIpResolverTest {
         @Test
         void resolveClientIdentifier_WhenCloudflareHeaderArrivesFromUntrustedPeer_IgnoresIt() {
             String result = ClientIpResolver.resolveClientIdentifier(
-                    request(UNTRUSTED_IP, null, PUBLIC_CLIENT_IP), properties("172.18.0.0/16"), DEVICE_ID);
+                    request(UNTRUSTED_IP, null, PUBLIC_CLIENT_IP), properties("172.18.0.0/16"), () -> DEVICE_ID);
 
             assertThat(result).isEqualTo("ip:" + UNTRUSTED_IP);
         }
@@ -235,7 +235,7 @@ class ClientIpResolverTest {
         @Test
         void resolveClientIdentifier_WhenResolvedIpIsPrivate_FallsBackToTheDeviceId() {
             String result = ClientIpResolver.resolveClientIdentifier(
-                    request(PROXY_IN_CIDR, PRIVATE_CLIENT_IP), properties("172.18.0.0/16"), DEVICE_ID);
+                    request(PROXY_IN_CIDR, PRIVATE_CLIENT_IP), properties("172.18.0.0/16"), () -> DEVICE_ID);
 
             assertThat(result).isEqualTo("device:" + DEVICE_ID);
         }
@@ -243,9 +243,20 @@ class ClientIpResolverTest {
         @Test
         void resolveClientIdentifier_WhenResolvedIpIsPrivateAndNoDeviceId_FallsBackToUnknown() {
             String result = ClientIpResolver.resolveClientIdentifier(
-                    request(PROXY_IN_CIDR, PRIVATE_CLIENT_IP), properties("172.18.0.0/16"), null);
+                    request(PROXY_IN_CIDR, PRIVATE_CLIENT_IP), properties("172.18.0.0/16"), () -> null);
 
             assertThat(result).isEqualTo("device:unknown");
+        }
+
+        @Test
+        void resolveClientIdentifier_WhenResolvedIpIsPublic_NeverAsksForTheDeviceId() {
+            String result = ClientIpResolver.resolveClientIdentifier(
+                    request(PROXY_IN_CIDR, OTHER_PUBLIC_IP, PUBLIC_CLIENT_IP), properties("172.18.0.0/16"),
+                    () -> {
+                        throw new AssertionError("a public caller must not be handed a device id");
+                    });
+
+            assertThat(result).isEqualTo("ip:" + PUBLIC_CLIENT_IP);
         }
     }
 }

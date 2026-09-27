@@ -2,6 +2,7 @@ package org.danteplanner.backend.shared.util;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -63,7 +64,7 @@ public final class ClientIpResolver {
     public static String resolveClientIdentifier(
             HttpServletRequest request,
             SecurityProperties securityProperties,
-            UUID deviceId
+            Supplier<UUID> deviceId
     ) {
         String ip = cloudflareIp(request, securityProperties);
         if (ip == null) {
@@ -71,7 +72,8 @@ public final class ClientIpResolver {
         }
 
         if (isPrivateIp(ip)) {
-            return DEVICE_IDENTIFIER_PREFIX + (deviceId != null ? deviceId.toString() : UNKNOWN_DEVICE);
+            UUID resolvedDeviceId = deviceId.get();
+            return DEVICE_IDENTIFIER_PREFIX + (resolvedDeviceId != null ? resolvedDeviceId.toString() : UNKNOWN_DEVICE);
         }
         return IP_IDENTIFIER_PREFIX + ip;
     }
