@@ -12,6 +12,7 @@ import { plannerApi } from '../lib/plannerApi'
 import { useAuthQuery } from '@/shared/auth'
 import { useUserSettingsQuery } from '@/shared/userSettings'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
+import { usePlannerIdRegistry } from './usePlannerIdRegistry'
 import { validatePlannerForDraftSave, validatePlannerForPublish } from '../lib/plannerValidation'
 import { plannerValidationError, toUserFriendlyError } from '../lib/plannerValidationErrors'
 import { planConflictResolution, interpretConflictPlan } from '../lib/conflictChoice'
@@ -100,6 +101,7 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
 
   const egoGiftSpec = useEGOGiftListSpec()
   const egoGiftI18n = useEGOGiftListI18n()
+  const idRegistryFor = usePlannerIdRegistry()
 
   const { data: allPlanners } = useSuspenseQuery(
     queryOptions({
@@ -235,6 +237,7 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
     const { content } = planner
     const { category } = planner.config
     const { title, published } = planner.metadata
+    const registry = idRegistryFor(planner.metadata.contentVersion)
 
     if (published) {
       const { errors } = validatePlannerForPublish(
@@ -243,12 +246,19 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
         category,
         egoGiftSpec,
         egoGiftI18n,
+        registry,
       )
       const [firstError] = errors
       return firstError ? plannerValidationError(toUserFriendlyError(firstError)) : null
     }
 
-    const friendlyError = validatePlannerForDraftSave(content, category, egoGiftSpec, egoGiftI18n)
+    const friendlyError = validatePlannerForDraftSave(
+      content,
+      category,
+      egoGiftSpec,
+      egoGiftI18n,
+      registry,
+    )
     return friendlyError ? plannerValidationError(friendlyError) : null
   }
 

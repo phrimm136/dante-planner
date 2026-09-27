@@ -46,6 +46,10 @@ vi.mock('@/shared/auth', () => ({
   authQueryKeys: { me: ['auth', 'me'] as const },
 }))
 
+vi.mock('../../../hooks/usePlannerIdRegistry', () => ({
+  usePlannerIdRegistry: () => () => undefined,
+}))
+
 vi.mock('@/pages/egoGift', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/pages/egoGift')>()),
   useEGOGiftListSpec: () => ({ spec: {}, i18n: {} }).spec,

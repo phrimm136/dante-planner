@@ -237,6 +237,22 @@ describe('extractGiftIds', () => {
     expect(result).toEqual(new Set(['9154']))
   })
 
+  it.each([
+    ['9123', ['9123']],
+    ['19123', ['9123']],
+    ['29123', ['9123']],
+    ['39123', []],
+  ])('reads %s through the backend enhancement band as %j', (stored, expected) => {
+    const content = createMockMDContent({
+      selectedGiftIds: [stored] as unknown as MDPlannerContent['selectedGiftIds'],
+      observationGiftIds: [],
+      comprehensiveGiftIds: [],
+      floorSelections: [],
+    })
+
+    expect(extractGiftIds(content)).toEqual(new Set(expected))
+  })
+
   it('drops ids that are not a valid gift encoding', () => {
     const content = createMockMDContent({
       selectedGiftIds: [ENCODED_9001, ...MALFORMED_GIFT_IDS],

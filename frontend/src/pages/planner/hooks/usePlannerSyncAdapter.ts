@@ -1,8 +1,10 @@
 import { plannerApi } from '../lib/plannerApi'
-import { PLANNER_SCHEMA_VERSION } from '@/lib/constants'
+import { PLANNER_CONFIG } from '@/lib/constants'
 import { ok, err } from '@/lib/result'
 import { classifyAppError } from '@/lib/apiErrorClassifier'
 import { toSaveablePlanner, PlannerConfigDiscriminatedSchema } from '../schemas/PlannerSchemas'
+import { loadIdMigrationTable } from './loadIdMigrationTable'
+import { withNormalizedIds } from '../lib/plannerIdNormalize'
 import type { Result } from '@/lib/result'
 import type { AppError } from '@/lib/apiErrorClassifier'
 import type {
@@ -47,7 +49,7 @@ export function serverResponseToSaveable(response: ServerPlannerResponse): Savea
       id: response.id,
       title: response.title,
       status: response.status,
-      schemaVersion: response.schemaVersion ?? PLANNER_SCHEMA_VERSION,
+      schemaVersion: response.schemaVersion ?? PLANNER_CONFIG.schemaVersion,
       contentVersion: response.contentVersion,
       plannerType: response.plannerType,
       syncVersion: response.syncVersion,
@@ -106,13 +108,21 @@ export function usePlannerSyncAdapter(): PlannerSyncAdapterOperations {
       force?: boolean,
     ): Promise<AcknowledgedPlanner> => {
       const response = await plannerApi.upsert(planner.metadata.id, toUpsertRequest(planner), force)
-      return { planner: serverResponseToSaveable(response), ack: ackOf(response) }
+      const table = await loadIdMigrationTable()
+      return {
+        planner: withNormalizedIds(serverResponseToSaveable(response), table),
+        ack: ackOf(response),
+      }
     },
 
     fetchFromServer: async (id: string): Promise<Result<AcknowledgedPlanner, AppError>> => {
       try {
         const response = await plannerApi.get(id)
-        return ok({ planner: serverResponseToSaveable(response), ack: ackOf(response) })
+        const table = await loadIdMigrationTable()
+        return ok({
+          planner: withNormalizedIds(serverResponseToSaveable(response), table),
+          ack: ackOf(response),
+        })
       } catch (error) {
         console.error(`fetchFromServer failed for ${id}:`, error)
         return err(classifyAppError(error))

@@ -20,6 +20,9 @@ import {
   validateNoteSizes,
   validateSelectedKeywords,
 } from '../plannerValidation'
+import { normalizePlannerIds } from '../plannerIdNormalize'
+import type { IdMigrationTable } from '../idMigrationTable'
+import type { PlannerIdRegistry } from '../plannerValidation'
 import { MAX_NOTE_BYTES } from '@/lib/constants'
 import { calculateNoteByteLength } from '@/shared/noteEditor'
 import type { FloorValidationError, DifficultyValidationError } from '../plannerValidationErrors'
@@ -993,5 +996,209 @@ describe('validateNoteSizes', () => {
     const result = validateNoteSizes({ 'floor-3': noteWithText('가'.repeat(koreanCharCount)) })
 
     expect(result?.params?.section).toBe('floor-3')
+  })
+})
+
+// ============================================================================
+// Entity id registry checks (IDENTITY/EGO/THEME_PACK/START_BUFF_UNKNOWN_ID)
+// ============================================================================
+
+describe('entity id registry checks', () => {
+  function registryFor(content: MDPlannerContent): PlannerIdRegistry {
+    const equipment = Object.values(content.equipment)
+    return {
+      identityIds: new Set(equipment.map((e) => e.identity.id)),
+      egoIds: new Set(equipment.flatMap((e) => Object.values(e.egos).map((ego) => ego.id))),
+      themePackIds: new Set(content.floorSelections.map((f) => f.themePackId ?? '')),
+      startBuffIds: new Set(['100', '101', '200']),
+    }
+  }
+
+  function contentWithBuffs(): MDPlannerContent {
+    return { ...makeValidContent('5F'), selectedBuffIds: [100, 201] }
+  }
+
+  const cases = [
+    {
+      code: 'IDENTITY_UNKNOWN_ID',
+      key: 'pages.plannerMD.validation.unknownIdentityId',
+      id: '10199',
+      corrupt: (c: MDPlannerContent) => {
+        c.equipment['01'] = {
+          ...c.equipment['01']!,
+          identity: { id: asIdentityId('10199'), uptie: 1, level: 1 },
+        }
+      },
+    },
+    {
+      code: 'EGO_UNKNOWN_ID',
+      key: 'pages.plannerMD.validation.unknownEgoId',
+      id: '20199',
+      corrupt: (c: MDPlannerContent) => {
+        c.equipment['01'] = {
+          ...c.equipment['01']!,
+          egos: { ZAYIN: { id: asEGOId('20199'), threadspin: 1 } },
+        }
+      },
+    },
+    {
+      code: 'THEME_PACK_UNKNOWN_ID',
+      key: 'pages.plannerMD.validation.unknownThemePackId',
+      id: '9999',
+      corrupt: (c: MDPlannerContent) => {
+        floorAt(c, 2).themePackId = ThemePackIdSchema.parse('9999')
+      },
+    },
+    {
+      code: 'START_BUFF_UNKNOWN_ID',
+      key: 'pages.plannerMD.validation.unknownStartBuffId',
+      id: '201',
+      corrupt: () => {},
+    },
+  ] as const
+
+  it.each(cases)(
+    'a known planner passes, so $code comes from the corrupted id alone',
+    ({ code }) => {
+      const content = { ...makeValidContent('5F'), selectedBuffIds: [100] }
+      const registry = registryFor(content)
+
+      expect(validatePlannerForDraftSave(content, '5F', undefined, undefined, registry)).toBeNull()
+      expect(
+        validatePlannerForPublish(
+          'My Plan',
+          content,
+          '5F',
+          undefined,
+          undefined,
+          registry,
+        ).errors.map((e) => e.code),
+      ).not.toContain(code)
+    },
+  )
+
+  it.each(cases)('draft save is blocked with $code', ({ key, id, corrupt }) => {
+    const content = contentWithBuffs()
+    const registry = registryFor(makeValidContent('5F'))
+    corrupt(content)
+
+    expect(validatePlannerForDraftSave(content, '5F', undefined, undefined, registry)).toEqual({
+      key,
+      params: { id },
+    })
+  })
+
+  it.each(cases)('publish reports $code with the offending id', ({ code, id, corrupt }) => {
+    const content = contentWithBuffs()
+    const registry = registryFor(makeValidContent('5F'))
+    corrupt(content)
+
+    const { errors } = validatePlannerForPublish(
+      'My Plan',
+      content,
+      '5F',
+      undefined,
+      undefined,
+      registry,
+    )
+    expect(errors.find((e) => e.code === code)?.context).toEqual({ id })
+  })
+
+  it('checks theme packs only on the floors the category plays', () => {
+    const content = { ...makeValidContent('5F'), selectedBuffIds: [100] }
+    const registry = registryFor(content)
+    content.floorSelections.push({
+      themePackId: ThemePackIdSchema.parse('9999'),
+      difficulty: 1,
+      giftIds: [],
+    })
+
+    expect(validatePlannerForDraftSave(content, '5F', undefined, undefined, registry)).toBeNull()
+  })
+})
+
+// ============================================================================
+// Gift enhancement band (backend GameDataRegistry ^[12]?(9\d{3})$)
+// ============================================================================
+
+describe('gift enhancement band', () => {
+  const spec: Record<string, EGOGiftSpec> = { '9123': makeGiftSpec([]) }
+
+  it.each(['9123', '19123', '29123'])('%s resolves to gift 9123 in every gift field', (id) => {
+    const content = makeValidContent('5F')
+    content.observationGiftIds = [id as EncodedGiftId]
+    floorAt(content, 0).giftIds = [id as EncodedGiftId]
+
+    expect(validatePlannerForDraftSave(content, '5F', spec)).toBeNull()
+  })
+
+  it('39123 is outside the band and unknown in every gift field', () => {
+    const content = makeValidContent('5F')
+    content.observationGiftIds = ['39123' as EncodedGiftId]
+    floorAt(content, 0).giftIds = ['39123' as EncodedGiftId]
+
+    const codes = validatePlannerForPublish('My Plan', content, '5F', spec).errors.map(
+      (e) => e.code,
+    )
+    expect(codes).toContain('GIFT_UNKNOWN_ID')
+    expect(codes).toContain('FLOOR_UNKNOWN_GIFT_ID')
+  })
+})
+
+// ============================================================================
+// Retired E.G.O after id normalization (backend PlannerIdMigrations)
+// ============================================================================
+
+describe('retired E.G.O after id normalization', () => {
+  const RETIRED_EGO = '20199'
+  const TABLE: IdMigrationTable = { ego: { rename: {}, drop: [RETIRED_EGO] } }
+
+  function normalizedContentWith(egos: SinnerEquipment['egos']): MDPlannerContent {
+    const content = { ...makeValidContent('5F'), selectedBuffIds: [100] }
+    content.equipment['01'] = { ...content.equipment['01']!, egos }
+    return normalizePlannerIds(
+      content as unknown as Record<string, unknown>,
+      TABLE,
+    ) as unknown as MDPlannerContent
+  }
+
+  function registry(): PlannerIdRegistry {
+    const content = makeValidContent('5F')
+    const equipment = Object.values(content.equipment)
+    return {
+      identityIds: new Set(equipment.map((e) => e.identity.id)),
+      egoIds: new Set(equipment.flatMap((e) => Object.values(e.egos).map((ego) => ego.id))),
+      themePackIds: new Set(content.floorSelections.map((f) => f.themePackId ?? '')),
+      startBuffIds: new Set(['100']),
+    }
+  }
+
+  it('keeps it in the ZAYIN slot and reports one EGO_UNKNOWN_ID, not a missing ZAYIN', () => {
+    const content = normalizedContentWith({ ZAYIN: { id: asEGOId(RETIRED_EGO), threadspin: 1 } })
+
+    expect(content.equipment['01']?.egos.ZAYIN?.id).toBe(RETIRED_EGO)
+    const { errors } = validatePlannerForPublish(
+      'My Plan',
+      content,
+      '5F',
+      undefined,
+      undefined,
+      registry(),
+    )
+    expect(errors.filter((e) => e.code === 'EGO_UNKNOWN_ID')).toHaveLength(1)
+    expect(errors.find((e) => e.code === 'EGO_UNKNOWN_ID')?.context).toEqual({ id: RETIRED_EGO })
+    expect(errors.map((e) => e.code)).not.toContain('EQUIPMENT_MISSING_ZAYIN')
+  })
+
+  it('empties the TETH slot and reports nothing for it', () => {
+    const content = normalizedContentWith({
+      ZAYIN: { id: asEGOId('20101'), threadspin: 1 },
+      TETH: { id: asEGOId(RETIRED_EGO), threadspin: 1 },
+    })
+
+    expect(content.equipment['01']?.egos.TETH).toBeUndefined()
+    expect(
+      validatePlannerForPublish('My Plan', content, '5F', undefined, undefined, registry()).errors,
+    ).toEqual([])
   })
 })

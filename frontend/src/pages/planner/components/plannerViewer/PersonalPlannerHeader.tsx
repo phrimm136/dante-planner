@@ -17,6 +17,7 @@ import { SyncOffWarningDialog } from '../SyncOffWarningDialog'
 import { usePlannerHeaderActions } from '../../hooks/usePlannerHeaderActions'
 import { usePlannerPublish } from '../../hooks/usePlannerPublish'
 import { usePlannerStorage } from '../../hooks/usePlannerStorage'
+import { usePlannerIdRegistry } from '../../hooks/usePlannerIdRegistry'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
 import { plannerQueryKeys } from '../../lib/plannerQueryKeys'
 import { deriveSaveStatus, SAVE_STATUS_BADGE_VARIANT } from '../../lib/plannerBadges'
@@ -63,6 +64,7 @@ export function PersonalPlannerHeader({
   const { saveToLocal } = usePlannerStorage()
   const egoGiftSpec = useEGOGiftListSpec()
   const egoGiftI18n = useEGOGiftListI18n()
+  const idRegistryFor = usePlannerIdRegistry()
 
   const plannerId = planner.metadata.id
 
@@ -135,6 +137,7 @@ export function PersonalPlannerHeader({
           planner.config.category,
           egoGiftSpec,
           egoGiftI18n,
+          idRegistryFor(planner.metadata.contentVersion),
         ).errors
       : []
 

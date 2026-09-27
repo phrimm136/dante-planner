@@ -10,6 +10,8 @@ import {
 } from '../schemas/PlannerSchemas'
 import { classifyAppError } from '@/lib/apiErrorClassifier'
 import { isMDPlanner } from '../types/PlannerTypes'
+import { loadIdMigrationTable } from './loadIdMigrationTable'
+import { withNormalizedIds } from '../lib/plannerIdNormalize'
 import type { Result } from '@/lib/result'
 import type { StorageReadError } from '@/lib/storage'
 import type { ZodType } from 'zod'
@@ -168,7 +170,8 @@ export function usePlannerStorage(): PlannerStorageOperations {
       }
 
       const planner = toSaveablePlanner(validated.metadata, validated.config, validated.content)
-      return ok(withMigratedKeywords(planner))
+      const table = await loadIdMigrationTable()
+      return ok(withNormalizedIds(withMigratedKeywords(planner), table))
     }
 
     async function collectRows<T, R>(
@@ -245,13 +248,17 @@ export function usePlannerStorage(): PlannerStorageOperations {
     }
 
     const listLocalFull = async (): Promise<SaveablePlanner[]> => {
+      const table = await loadIdMigrationTable()
       const rows = await collectRows(
         PLANNER_STORAGE_KEYS.PLANNER,
         SaveablePlannerSchema,
         'planner listFull',
         (validated) =>
-          withMigratedKeywords(
-            toSaveablePlanner(validated.metadata, validated.config, validated.content),
+          withNormalizedIds(
+            withMigratedKeywords(
+              toSaveablePlanner(validated.metadata, validated.config, validated.content),
+            ),
+            table,
           ),
       )
       return rows.sort((a, b) => newestFirst(a.metadata.lastModifiedAt, b.metadata.lastModifiedAt))

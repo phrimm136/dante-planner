@@ -12,6 +12,8 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { BatchConflictDialog } from './BatchConflictDialog'
 import { usePlannerStorage } from '../hooks/usePlannerStorage'
+import { usePlannerIdRegistry } from '../hooks/usePlannerIdRegistry'
+import { useEGOGiftListSpec } from '@/pages/egoGift'
 import { EXPORT_FILE_EXTENSION, EXPORT_MAX_FILE_SIZE, SECTION_STYLES } from '@/lib/constants'
 import { downloadBlob } from '@/lib/downloadBlob'
 import { generateUUID } from '@/lib/uuid'
@@ -35,12 +37,19 @@ import {
   toExportItem,
 } from '../lib/plannerExportImport'
 import { planConflictResolution } from '../lib/conflictChoice'
+import { loadIdMigrationTable } from '../hooks/loadIdMigrationTable'
+import { validatePlannerForImport } from '../lib/plannerValidation'
 
 import type { Result } from '@/lib/result'
 import type { ConflictItem, ConflictResolution } from './BatchConflictDialog'
 import type { ConflictResolutionContext } from '../lib/conflictChoice'
 import type { PlannerExportItem, SaveablePlanner } from '../types/PlannerTypes'
-import type { ImportError, ResolveCounts, ToastDescriptor } from '../lib/plannerExportImport'
+import type {
+  ImportError,
+  ResolveCounts,
+  SkippedImport,
+  ToastDescriptor,
+} from '../lib/plannerExportImport'
 
 const MIME_TYPE = 'application/gzip'
 
@@ -70,6 +79,8 @@ type SectionState =
 function PlannerExportImportSectionContent() {
   const { t } = useTranslation(['common', 'planner'])
   const { listLocal, loadFromLocal, saveToLocal } = usePlannerStorage()
+  const egoGiftSpec = useEGOGiftListSpec()
+  const idRegistryFor = usePlannerIdRegistry()
 
   const [state, setState] = useState<SectionState>({ k: 'idle' })
 
@@ -98,6 +109,14 @@ function PlannerExportImportSectionContent() {
       default:
         assertNever(descriptor.severity)
     }
+  }
+
+  const warnSkipped = (skipped: SkippedImport[]) => {
+    if (skipped.length === 0) return
+    showWarning('common:exportImport.skippedInvalid', {
+      count: skipped.length,
+      titles: skipped.map((s) => s.title).join(', '),
+    })
   }
 
   const clearFileInput = () => {
@@ -217,7 +236,18 @@ function PlannerExportImportSectionContent() {
     const existingPlanners = await listLocal()
     const existingIds = new Set(existingPlanners.map((p) => p.id))
 
-    const { conflicting, fresh } = partitionImport(envelope.value, existingIds)
+    const table = await loadIdMigrationTable()
+    const {
+      conflicting,
+      fresh,
+      skipped: rejected,
+    } = partitionImport(envelope.value, existingIds, table, (planner) =>
+      validatePlannerForImport(
+        planner,
+        egoGiftSpec,
+        idRegistryFor(planner.metadata.contentVersion),
+      ),
+    )
 
     const conflictItems: ConflictItem[] = []
     const nonConflicting: SaveablePlanner[] = [...fresh]
@@ -266,6 +296,7 @@ function PlannerExportImportSectionContent() {
       const descriptor = IMPORT_OUTCOME_TOASTS[outcome]
       showToast(descriptor, descriptor.params(counts))
     }
+    warnSkipped(rejected)
   }
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {

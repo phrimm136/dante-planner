@@ -392,17 +392,6 @@ export const ImportPlannersResponseSchema = z
   })
   .strict()
 
-export const PlannerConfigSchema = z
-  .object({
-    schemaVersion: z.number().int().positive(),
-    mdCurrentVersion: z.number().int().positive(),
-    mdAvailableVersions: z.array(z.number().int().positive()).min(1).readonly(),
-    rrAvailableVersions: z.array(z.number().int().positive()).min(1).readonly(),
-  })
-  .strict()
-
-export type PlannerConfig = z.infer<typeof PlannerConfigSchema>
-
 export const PlannerExportItemSchema = z
   .object({
     id: z.string(),

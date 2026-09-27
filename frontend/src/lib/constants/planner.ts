@@ -1,18 +1,34 @@
+import plannerVersionsJson from '@static/data/plannerVersions.json'
+import { z } from 'zod'
+
 export const RECOMMENDED_THRESHOLD = 10
 
+const AscendingVersionsSchema = z
+  .array(z.number().int().positive())
+  .min(1)
+  .refine((versions) => versions.every((v, i) => i === 0 || v > versions[i - 1]!), {
+    message: 'versions must be strictly ascending',
+  })
+  .readonly()
+
+export const PlannerVersionsFileSchema = z
+  .object({
+    schemaVersion: z.number().int().positive(),
+    mdAvailableVersions: AscendingVersionsSchema,
+    rrAvailableVersions: AscendingVersionsSchema,
+  })
+  .strict()
+
+const plannerVersions = PlannerVersionsFileSchema.parse(plannerVersionsJson)
+
 /**
- * Planner configuration for version management
- * Authoritative source: scripts/sync-planner-config.py
- * Also kept in backend application.properties for server-side validation
- *
- * @see PlannerConfigSchema for runtime validation
+ * Planner version values, parsed from static/data/plannerVersions.json.
+ * The current Mirror Dungeon season is the last of mdAvailableVersions.
  */
 export const PLANNER_CONFIG = {
-  schemaVersion: 2,
-  mdCurrentVersion: 7,
-  mdAvailableVersions: [6, 7],
-  rrAvailableVersions: [1, 5],
-} as const
+  ...plannerVersions,
+  mdCurrentVersion: plannerVersions.mdAvailableVersions.at(-1)!,
+}
 
 /**
  * Maximum byte length for note content (matches backend validation)
@@ -25,8 +41,6 @@ export const PLANNER_CONFIG = {
  * Users should stay below red threshold to avoid save failures.
  */
 export const MAX_NOTE_BYTES = 2048
-
-export const PLANNER_SCHEMA_VERSION = 2
 
 export const EXPORT_VERSION = 1
 

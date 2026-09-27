@@ -66,6 +66,11 @@ export interface KeywordValidationError extends ValidationError {
   code: 'KEYWORD_INVALID'
 }
 
+export interface EntityIdValidationError extends ValidationError {
+  code: 'IDENTITY_UNKNOWN_ID' | 'EGO_UNKNOWN_ID' | 'THEME_PACK_UNKNOWN_ID' | 'START_BUFF_UNKNOWN_ID'
+  context: { id: string }
+}
+
 export type PlannerValidationError =
   | EquipmentValidationError
   | DeploymentValidationError
@@ -77,6 +82,14 @@ export type PlannerValidationError =
   | DifficultyValidationError
   | TitleValidationError
   | KeywordValidationError
+  | EntityIdValidationError
+
+const UNKNOWN_ENTITY_ID_KEYS = {
+  IDENTITY_UNKNOWN_ID: 'pages.plannerMD.validation.unknownIdentityId',
+  EGO_UNKNOWN_ID: 'pages.plannerMD.validation.unknownEgoId',
+  THEME_PACK_UNKNOWN_ID: 'pages.plannerMD.validation.unknownThemePackId',
+  START_BUFF_UNKNOWN_ID: 'pages.plannerMD.validation.unknownStartBuffId',
+} as const satisfies Record<EntityIdValidationError['code'], string>
 
 export function plannerValidationError(friendly: { key: string; params?: Record<string, string> }) {
   return validationAppError({
@@ -125,6 +138,11 @@ export function toUserFriendlyError(error: PlannerValidationError): {
         params: { keyword: ctx?.keyword ?? '' },
       }
     }
+    case 'IDENTITY_UNKNOWN_ID':
+    case 'EGO_UNKNOWN_ID':
+    case 'THEME_PACK_UNKNOWN_ID':
+    case 'START_BUFF_UNKNOWN_ID':
+      return { key: UNKNOWN_ENTITY_ID_KEYS[error.code], params: { id: error.context.id } }
     default:
       return { key: 'pages.plannerMD.validation.corruptedState' }
   }

@@ -11,7 +11,7 @@ export const startBuffQueryKeys = {
     [...startBuffQueryKeys.all(version), 'i18n', language] as const,
 }
 
-function createSpecQueryOptions(version: MDVersion) {
+export function startBuffSpecQueryOptions(version: MDVersion) {
   return createStaticDataQueryOptions(
     startBuffQueryKeys.data(version),
     () => import(`@static/data/MD${version}/startBuffs.json`),
@@ -30,7 +30,7 @@ function createI18nQueryOptions(version: MDVersion, language: string) {
 }
 
 export function useStartBuffListSpec(version: MDVersion) {
-  const { data } = useSuspenseQuery(createSpecQueryOptions(version))
+  const { data } = useSuspenseQuery(startBuffSpecQueryOptions(version))
   return data
 }
 

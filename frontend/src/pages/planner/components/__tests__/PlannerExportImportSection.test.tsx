@@ -28,6 +28,26 @@ vi.mock('../../hooks/usePlannerStorage', () => ({
   usePlannerStorage: () => storageMocks,
 }))
 
+const validationMocks = vi.hoisted(() => ({
+  validatePlannerForImport: vi.fn(
+    (_planner: unknown): { key: string; params?: Record<string, string> } | null => null,
+  ),
+}))
+
+vi.mock('../../lib/plannerValidation', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../lib/plannerValidation')>()),
+  validatePlannerForImport: validationMocks.validatePlannerForImport,
+}))
+
+vi.mock('../../hooks/usePlannerIdRegistry', () => ({
+  usePlannerIdRegistry: () => () => undefined,
+}))
+
+vi.mock('@/pages/egoGift', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/pages/egoGift')>()),
+  useEGOGiftListSpec: () => ({}),
+}))
+
 vi.mock('@/lib/errorPresentation', () => ({
   showError: vi.fn(),
   showErrorMessage: vi.fn(),
@@ -47,6 +67,7 @@ vi.mock('react-i18next', async (importOriginal) => {
 })
 
 import { PlannerExportImportSection } from '../PlannerExportImportSection'
+import { showSuccess, showWarning } from '@/lib/errorPresentation'
 
 /** The planner both sides hold, which makes the import a conflict. */
 const EXISTING: SaveablePlanner = buildSaveablePlanner({
@@ -55,17 +76,21 @@ const EXISTING: SaveablePlanner = buildSaveablePlanner({
 
 /** A .danteplanner file carrying one planner the local store already has. */
 function conflictingImportFile(): File {
+  return importFile([
+    {
+      id: PLANNER_ID,
+      metadata: { ...EXISTING.metadata, title: 'Imported Run' },
+      config: EXISTING.config,
+      content: EXISTING.content,
+    },
+  ])
+}
+
+function importFile(planners: unknown[]): File {
   const envelope = {
     exportVersion: EXPORT_VERSION,
     exportedAt: '2026-01-01T00:00:00.000Z',
-    planners: [
-      {
-        id: PLANNER_ID,
-        metadata: { ...EXISTING.metadata, title: 'Imported Run' },
-        config: EXISTING.config,
-        content: EXISTING.content,
-      },
-    ],
+    planners,
   }
 
   const compressed = gzip(JSON.stringify(envelope))
@@ -100,5 +125,45 @@ describe('PlannerExportImportSection conflict dismissal', () => {
     expect(screen.getByRole('button', { name: 'Export' })).toBeEnabled()
     expect(screen.getByRole('button', { name: 'Import' })).toBeEnabled()
     expect(storageMocks.saveToLocal).not.toHaveBeenCalled()
+  })
+})
+
+describe('PlannerExportImportSection invalid planners', () => {
+  beforeEach(() => {
+    storageMocks.listLocal.mockResolvedValue([])
+    storageMocks.saveToLocal.mockReset()
+    storageMocks.saveToLocal.mockResolvedValue({ ok: true })
+    validationMocks.validatePlannerForImport.mockImplementation((planner) =>
+      (planner as SaveablePlanner).metadata.title === 'Plan 3'
+        ? { key: 'pages.plannerMD.validation.unknownIdentityId', params: { id: '10199' } }
+        : null,
+    )
+  })
+
+  it('imports the valid planners and warns about the one it skipped', async () => {
+    const user = userEvent.setup()
+    const items = [1, 2, 3].map((n) => {
+      const id = `00000000-0000-4000-8000-00000000001${n}`
+      return {
+        id,
+        metadata: { ...EXISTING.metadata, id, title: `Plan ${n}` },
+        config: EXISTING.config,
+        content: EXISTING.content,
+      }
+    })
+    const { container } = render(<PlannerExportImportSection />)
+
+    const input = container.querySelector('input[type="file"]')!
+    await user.upload(input as HTMLInputElement, importFile(items))
+
+    await waitFor(() => expect(showWarning).toHaveBeenCalled())
+    expect(
+      storageMocks.saveToLocal.mock.calls.map(([p]) => (p as SaveablePlanner).metadata.title),
+    ).toEqual(['Plan 1', 'Plan 2'])
+    expect(showSuccess).toHaveBeenCalledWith('common:exportImport.importSuccess', { count: 2 })
+    expect(showWarning).toHaveBeenCalledWith('common:exportImport.skippedInvalid', {
+      count: 1,
+      titles: 'Plan 3',
+    })
   })
 })

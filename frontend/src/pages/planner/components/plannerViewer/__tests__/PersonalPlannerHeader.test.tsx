@@ -100,6 +100,10 @@ vi.mock('../../../hooks/usePlannerSyncAdapter', async (importOriginal) => ({
 
 // ── Config ────────────────────────────────────────────────────
 const CURRENT_VERSION = 7
+vi.mock('../../../hooks/usePlannerIdRegistry', () => ({
+  usePlannerIdRegistry: () => () => undefined,
+}))
+
 vi.mock('../../../hooks/usePlannerConfig', () => ({
   usePlannerConfig: () => ({
     mdCurrentVersion: CURRENT_VERSION,

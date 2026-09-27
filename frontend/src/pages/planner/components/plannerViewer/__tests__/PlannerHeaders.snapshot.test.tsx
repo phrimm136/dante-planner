@@ -49,6 +49,10 @@ vi.mock('../../../hooks/usePlannerSyncAdapter', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../../../hooks/usePlannerSyncAdapter')>()),
   usePlannerSyncAdapter: () => ({ syncToServer: vi.fn() }),
 }))
+vi.mock('../../../hooks/usePlannerIdRegistry', () => ({
+  usePlannerIdRegistry: () => () => undefined,
+}))
+
 vi.mock('../../../hooks/usePlannerConfig', () => ({
   usePlannerConfig: () => ({ mdCurrentVersion: 7, schemaVersion: 2 }),
 }))

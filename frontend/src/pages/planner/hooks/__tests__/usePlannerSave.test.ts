@@ -82,6 +82,10 @@ vi.mock('@/shared/auth/hooks/useAuthQuery', () => ({
   authQueryKeys: { me: ['auth', 'me'] as const },
 }))
 
+vi.mock('../usePlannerIdRegistry', () => ({
+  usePlannerIdRegistry: () => () => undefined,
+}))
+
 vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
   useEGOGiftListSpec: () => ({ spec: {}, i18n: {} }).spec,
   useEGOGiftListI18n: () => ({ spec: {}, i18n: {} }).i18n,

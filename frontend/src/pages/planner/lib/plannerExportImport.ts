@@ -10,6 +10,8 @@ import {
 import { sanitizeToPlainText } from '@/shared/sanitize'
 import { ExportEnvelopeSchema, toSaveablePlanner } from '../schemas/PlannerSchemas'
 import { GZIP_OS_BYTE_OFFSET, GZIP_OS_TOPS20 } from './deckCode'
+import { withNormalizedIds } from './plannerIdNormalize'
+import type { IdMigrationTable } from './idMigrationTable'
 
 import type { Result } from '@/lib/result'
 import type { ExportEnvelope, PlannerExportItem, SaveablePlanner } from '../types/PlannerTypes'
@@ -172,9 +174,25 @@ export interface ImportConflictCandidate {
   incoming: SaveablePlanner
 }
 
+export interface SkippedImport {
+  id: string
+  title: string
+}
+
+export type ImportValidator = (planner: SaveablePlanner) => object | null
+
 export interface PartitionedImport {
   conflicting: ImportConflictCandidate[]
   fresh: SaveablePlanner[]
+  skipped: SkippedImport[]
+}
+
+function isRejected(planner: SaveablePlanner, validate: ImportValidator): boolean {
+  try {
+    return validate(planner) !== null
+  } catch {
+    return true
+  }
 }
 
 function toImportedPlanner(item: ImportEnvelope['planners'][number]): SaveablePlanner {
@@ -191,20 +209,25 @@ function toImportedPlanner(item: ImportEnvelope['planners'][number]): SaveablePl
 export function partitionImport(
   envelope: ImportEnvelope,
   existingIds: ReadonlySet<string>,
+  table: IdMigrationTable,
+  validate: ImportValidator,
 ): PartitionedImport {
   const conflicting: ImportConflictCandidate[] = []
   const fresh: SaveablePlanner[] = []
+  const skipped: SkippedImport[] = []
 
   for (const item of envelope.planners) {
-    const incoming = toImportedPlanner(item)
-    if (existingIds.has(item.id)) {
+    const incoming = withNormalizedIds(toImportedPlanner(item), table)
+    if (isRejected(incoming, validate)) {
+      skipped.push({ id: item.id, title: incoming.metadata.title })
+    } else if (existingIds.has(item.id)) {
       conflicting.push({ id: item.id, incoming })
     } else {
       fresh.push(incoming)
     }
   }
 
-  return { conflicting, fresh }
+  return { conflicting, fresh, skipped }
 }
 
 export interface ImportCounts {

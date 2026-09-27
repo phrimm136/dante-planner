@@ -18,6 +18,7 @@ import {
   toExportItem,
 } from '../plannerExportImport'
 import { GZIP_OS_BYTE_OFFSET, GZIP_OS_TOPS20 } from '../deckCode'
+import { EMPTY_ID_MIGRATION_TABLE } from '../idMigrationTable'
 
 import { EXPORT_FILE_EXTENSION, EXPORT_VERSION, INFLATE_INPUT_CHUNK_BYTES } from '@/lib/constants'
 import { buildSaveablePlanner } from '@/test-utils'
@@ -45,6 +46,8 @@ const EXPORT_ITEM = {
   config: { type: 'MIRROR_DUNGEON', category: '5F' },
   content: {},
 }
+
+const ACCEPT_ALL = () => null
 
 function envelope(planners: unknown[]) {
   return {
@@ -398,7 +401,12 @@ describe('partitionImport', () => {
   }
 
   it('accepts an import with no local counterpart as fresh', () => {
-    const { conflicting, fresh } = partitionImport(envelopeOf([EXPORT_ITEM]), new Set())
+    const { conflicting, fresh } = partitionImport(
+      envelopeOf([EXPORT_ITEM]),
+      new Set(),
+      EMPTY_ID_MIGRATION_TABLE,
+      ACCEPT_ALL,
+    )
 
     expect(conflicting).toEqual([])
     expect(fresh).toHaveLength(1)
@@ -407,7 +415,12 @@ describe('partitionImport', () => {
   })
 
   it('holds back an import whose id the local store already carries', () => {
-    const { conflicting, fresh } = partitionImport(envelopeOf([EXPORT_ITEM]), new Set([VALID_UUID]))
+    const { conflicting, fresh } = partitionImport(
+      envelopeOf([EXPORT_ITEM]),
+      new Set([VALID_UUID]),
+      EMPTY_ID_MIGRATION_TABLE,
+      ACCEPT_ALL,
+    )
 
     expect(fresh).toEqual([])
     expect(conflicting).toHaveLength(1)
@@ -420,9 +433,68 @@ describe('partitionImport', () => {
       metadata: { ...EXPORT_ITEM.metadata, title: '<b>Run</b>' },
     }
 
-    const { fresh } = partitionImport(envelopeOf([scripted]), new Set())
+    const { fresh } = partitionImport(
+      envelopeOf([scripted]),
+      new Set(),
+      EMPTY_ID_MIGRATION_TABLE,
+      ACCEPT_ALL,
+    )
 
     expect(fresh[0]?.metadata.title).toBe('Run')
+  })
+
+  it('skips the planner its validator rejects and names it, importing the rest', () => {
+    const items = [1, 2, 3].map((n) => {
+      const id = `3f2504e0-4f89-41d3-9a0c-0305e82c330${n}`
+      return { ...EXPORT_ITEM, id, metadata: { ...EXPORT_ITEM.metadata, id, title: `Plan ${n}` } }
+    })
+    const rejection = {
+      key: 'pages.plannerMD.validation.unknownIdentityId',
+      params: { id: '10199' },
+    }
+
+    const { fresh, conflicting, skipped } = partitionImport(
+      envelopeOf(items),
+      new Set(),
+      EMPTY_ID_MIGRATION_TABLE,
+      (planner) => (planner.metadata.title === 'Plan 3' ? rejection : null),
+    )
+
+    expect(fresh.map((p) => p.metadata.title)).toEqual(['Plan 1', 'Plan 2'])
+    expect(conflicting).toEqual([])
+    expect(skipped).toEqual([{ id: items[2]?.id, title: 'Plan 3' }])
+  })
+
+  it('skips a planner whose content the validator cannot read', () => {
+    const { fresh, skipped } = partitionImport(
+      envelopeOf([EXPORT_ITEM]),
+      new Set(),
+      EMPTY_ID_MIGRATION_TABLE,
+      () => {
+        throw new TypeError('content.equipment is undefined')
+      },
+    )
+
+    expect(fresh).toEqual([])
+    expect(skipped).toEqual([{ id: VALID_UUID, title: 'Imported plan' }])
+  })
+
+  it('validates the planner after applying the id-migration table', () => {
+    const withGift = { ...EXPORT_ITEM, content: { selectedGiftIds: ['19001'] } }
+    const seen: unknown[] = []
+
+    const { fresh } = partitionImport(
+      envelopeOf([withGift]),
+      new Set(),
+      { egoGift: { rename: { '9001': '9002' }, drop: [] } },
+      (planner) => {
+        seen.push((planner.content as { selectedGiftIds?: unknown }).selectedGiftIds)
+        return null
+      },
+    )
+
+    expect(seen).toEqual([['19002']])
+    expect(fresh[0]?.content).toMatchObject({ selectedGiftIds: ['19002'] })
   })
 })
 

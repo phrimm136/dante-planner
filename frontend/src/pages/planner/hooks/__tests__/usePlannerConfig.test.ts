@@ -2,15 +2,14 @@
  * usePlannerConfig.test.ts
  *
  * Tests for planner config hook.
- * Validates that the hook returns the static config from constants
- * and that the config satisfies the schema.
+ * Validates that the hook returns the config parsed from plannerVersions.json
+ * and that the file schema rejects malformed version lists.
  */
 
 import { describe, it, expect } from 'vitest'
 import { renderHook } from '@testing-library/react'
 import { usePlannerConfig } from '../usePlannerConfig'
-import { PLANNER_CONFIG } from '@/lib/constants'
-import { PlannerConfigSchema } from '../../schemas/PlannerSchemas'
+import { PLANNER_CONFIG, PlannerVersionsFileSchema } from '@/lib/constants'
 
 describe('usePlannerConfig', () => {
   it('returns PLANNER_CONFIG from constants', () => {
@@ -18,10 +17,14 @@ describe('usePlannerConfig', () => {
     expect(result.current).toBe(PLANNER_CONFIG)
   })
 
-  it('returns config matching PlannerConfigSchema', () => {
+  it('returns the versions parsed from plannerVersions.json, current season last', () => {
     const { result } = renderHook(() => usePlannerConfig())
-    const parsed = PlannerConfigSchema.safeParse(result.current)
-    expect(parsed.success).toBe(true)
+    expect(result.current).toEqual({
+      schemaVersion: 2,
+      mdAvailableVersions: [6, 7],
+      mdCurrentVersion: 7,
+      rrAvailableVersions: [1, 5],
+    })
   })
 
   it('has positive schemaVersion', () => {
@@ -50,99 +53,56 @@ describe('usePlannerConfig', () => {
   })
 })
 
-describe('PlannerConfigSchema', () => {
-  it('validates correct config response', () => {
-    const result = PlannerConfigSchema.safeParse({
-      schemaVersion: 2,
-      mdCurrentVersion: 7,
-      mdAvailableVersions: [6, 7],
-      rrAvailableVersions: [1, 5],
-    })
-    expect(result.success).toBe(true)
+const VALID_FILE = {
+  schemaVersion: 2,
+  mdAvailableVersions: [6, 7],
+  rrAvailableVersions: [1, 5],
+}
+
+describe('PlannerVersionsFileSchema', () => {
+  it('validates the versions file', () => {
+    expect(PlannerVersionsFileSchema.safeParse(VALID_FILE).success).toBe(true)
   })
 
-  it('rejects config without schemaVersion', () => {
-    const result = PlannerConfigSchema.safeParse({
-      mdCurrentVersion: 6,
-      mdAvailableVersions: [6],
-      rrAvailableVersions: [1, 5],
-    })
-    expect(result.success).toBe(false)
-  })
-
-  it('rejects config without mdCurrentVersion', () => {
-    const result = PlannerConfigSchema.safeParse({
-      schemaVersion: 1,
-      mdAvailableVersions: [6],
-      rrAvailableVersions: [1, 5],
-    })
-    expect(result.success).toBe(false)
-  })
-
-  it('rejects config without mdAvailableVersions', () => {
-    const result = PlannerConfigSchema.safeParse({
-      schemaVersion: 1,
-      mdCurrentVersion: 6,
-      rrAvailableVersions: [1, 5],
-    })
-    expect(result.success).toBe(false)
-  })
-
-  it('rejects config without rrAvailableVersions', () => {
-    const result = PlannerConfigSchema.safeParse({
-      schemaVersion: 1,
-      mdCurrentVersion: 6,
-      mdAvailableVersions: [6],
-    })
-    expect(result.success).toBe(false)
-  })
+  it.each(['schemaVersion', 'mdAvailableVersions', 'rrAvailableVersions'] as const)(
+    'rejects a file without %s',
+    (field) => {
+      const { [field]: _omitted, ...rest } = VALID_FILE
+      expect(PlannerVersionsFileSchema.safeParse(rest).success).toBe(false)
+    },
+  )
 
   it('rejects non-positive schemaVersion', () => {
-    const result = PlannerConfigSchema.safeParse({
-      schemaVersion: 0,
-      mdCurrentVersion: 6,
-      mdAvailableVersions: [6],
-      rrAvailableVersions: [1, 5],
+    const result = PlannerVersionsFileSchema.safeParse({ ...VALID_FILE, schemaVersion: 0 })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects a non-integer season', () => {
+    const result = PlannerVersionsFileSchema.safeParse({
+      ...VALID_FILE,
+      mdAvailableVersions: [6, 6.5],
     })
     expect(result.success).toBe(false)
   })
 
-  it('rejects non-integer mdCurrentVersion', () => {
-    const result = PlannerConfigSchema.safeParse({
-      schemaVersion: 1,
-      mdCurrentVersion: 6.5,
-      mdAvailableVersions: [6],
-      rrAvailableVersions: [1, 5],
-    })
-    expect(result.success).toBe(false)
+  it.each([
+    { name: 'descending mdAvailableVersions', patch: { mdAvailableVersions: [7, 6] } },
+    { name: 'repeated mdAvailableVersions', patch: { mdAvailableVersions: [6, 6] } },
+    { name: 'empty mdAvailableVersions', patch: { mdAvailableVersions: [] } },
+    { name: 'descending rrAvailableVersions', patch: { rrAvailableVersions: [5, 1] } },
+    { name: 'empty rrAvailableVersions', patch: { rrAvailableVersions: [] } },
+  ])('rejects $name', ({ patch }) => {
+    expect(PlannerVersionsFileSchema.safeParse({ ...VALID_FILE, ...patch }).success).toBe(false)
   })
 
-  it('rejects empty mdAvailableVersions array', () => {
-    const result = PlannerConfigSchema.safeParse({
-      schemaVersion: 1,
-      mdCurrentVersion: 6,
-      mdAvailableVersions: [],
-      rrAvailableVersions: [1, 5],
-    })
-    expect(result.success).toBe(false)
-  })
-
-  it('rejects empty rrAvailableVersions array', () => {
-    const result = PlannerConfigSchema.safeParse({
-      schemaVersion: 1,
-      mdCurrentVersion: 6,
-      mdAvailableVersions: [6],
-      rrAvailableVersions: [],
-    })
+  it('rejects a file carrying mdCurrentVersion (strict schema)', () => {
+    const result = PlannerVersionsFileSchema.safeParse({ ...VALID_FILE, mdCurrentVersion: 7 })
     expect(result.success).toBe(false)
   })
 
   it('rejects extra unknown fields (strict schema)', () => {
-    const result = PlannerConfigSchema.safeParse({
-      schemaVersion: 1,
-      mdCurrentVersion: 6,
-      mdAvailableVersions: [6],
-      rrAvailableVersions: [1, 5],
+    const result = PlannerVersionsFileSchema.safeParse({
+      ...VALID_FILE,
       unknownField: 'should fail',
     })
     expect(result.success).toBe(false)

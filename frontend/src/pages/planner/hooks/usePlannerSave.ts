@@ -8,6 +8,7 @@ import { usePlannerSyncAdapter } from './usePlannerSyncAdapter'
 import { userPlannersQueryKeys } from './useMDUserPlannersData'
 import { plannerQueryKeys } from '../lib/plannerQueryKeys'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
+import { usePlannerIdRegistry } from './usePlannerIdRegistry'
 import { isMDPlanner } from '../types/PlannerTypes'
 import { queryClient } from '@/lib/queryClient'
 import { INITIAL_SYNC_VERSION } from '@/lib/constants'
@@ -146,6 +147,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
 
   const egoGiftSpec = useEGOGiftListSpec()
   const egoGiftI18n = useEGOGiftListI18n()
+  const idRegistryFor = usePlannerIdRegistry()
 
   const presentedVersion = (): number =>
     Math.max(syncVersionRef.current, initialSyncVersion ?? INITIAL_SYNC_VERSION)
@@ -179,6 +181,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
 
     const { content } = saveable
     const { category } = saveable.config
+    const registry = idRegistryFor(saveable.metadata.contentVersion)
 
     const noteSizeError = validateNoteSizes(content.sectionNotes)
     if (noteSizeError) return plannerValidationError(noteSizeError)
@@ -190,12 +193,19 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
         category,
         egoGiftSpec,
         egoGiftI18n,
+        registry,
       )
       const [firstError] = errors
       return firstError ? plannerValidationError(toUserFriendlyError(firstError)) : null
     }
 
-    const validationError = validatePlannerForDraftSave(content, category, egoGiftSpec, egoGiftI18n)
+    const validationError = validatePlannerForDraftSave(
+      content,
+      category,
+      egoGiftSpec,
+      egoGiftI18n,
+      registry,
+    )
     return validationError ? plannerValidationError(validationError) : null
   }
 

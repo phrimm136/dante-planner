@@ -14,7 +14,8 @@ import { measureDocBytes } from '@/shared/noteEditor'
 import { getUnaffordableGiftIds } from './plannerRules'
 import { toUserFriendlyError } from './plannerValidationErrors'
 import type { JSONContent } from '@tiptap/core'
-import type { MDPlannerContent } from '../types/PlannerTypes'
+import { isMDPlanner } from '../types/PlannerTypes'
+import type { MDPlannerContent, SaveablePlanner } from '../types/PlannerTypes'
 import type { FloorThemeSelection } from '@/pages/themePack'
 import type { SinnerEquipment, SkillEAState } from '../types/DeckTypes'
 import type { MDCategory } from '@/shared/gameData'
@@ -30,7 +31,15 @@ import type {
   FloorValidationError,
   DifficultyValidationError,
   KeywordValidationError,
+  EntityIdValidationError,
 } from './plannerValidationErrors'
+
+export interface PlannerIdRegistry {
+  identityIds: ReadonlySet<string>
+  egoIds: ReadonlySet<string>
+  themePackIds: ReadonlySet<string>
+  startBuffIds: ReadonlySet<string>
+}
 
 /** Equipment keys are 1-indexed (1-12) */
 const MIN_EQUIPMENT_SINNER = 1
@@ -56,7 +65,7 @@ const ALL_SINNER_KEYS = [
   '12',
 ] as const
 
-const REQUIRED_EGO_TYPE = 'ZAYIN'
+export const REQUIRED_EGO_TYPE = 'ZAYIN'
 
 /** Valid skill slots (0=S1, 1=S2, 2=S3) */
 const VALID_SKILL_SLOTS = new Set(['0', '1', '2'])
@@ -481,7 +490,8 @@ function validateFloorGiftExistence(
     const unknownIds: string[] = []
 
     for (const giftId of floor.giftIds) {
-      if (!hasGiftId(giftId, egoGiftSpec)) {
+      const parsed = EncodedGiftIdSchema.safeParse(giftId)
+      if (!parsed.success || !hasGiftId(parsed.data, egoGiftSpec)) {
         unknownIds.push(giftId)
       }
     }
@@ -546,12 +556,70 @@ export function validateSelectedKeywords(keywords: string[]): KeywordValidationE
   return errors
 }
 
+export function validateEntityIds(
+  content: MDPlannerContent,
+  category: MDCategory,
+  registry: PlannerIdRegistry,
+): EntityIdValidationError[] {
+  const errors: EntityIdValidationError[] = []
+
+  for (const [sinnerKey, sinnerEquipment] of Object.entries(content.equipment ?? {})) {
+    const identityId = sinnerEquipment?.identity?.id
+    if (identityId && !registry.identityIds.has(identityId)) {
+      errors.push({
+        code: 'IDENTITY_UNKNOWN_ID',
+        message: `Sinner ${sinnerKey} has unknown identity ID '${identityId}'`,
+        field: `equipment.${sinnerKey}.identity.id`,
+        context: { id: identityId },
+      })
+    }
+
+    for (const [egoType, ego] of Object.entries(sinnerEquipment?.egos ?? {})) {
+      const egoId = ego?.id
+      if (egoId && !registry.egoIds.has(egoId)) {
+        errors.push({
+          code: 'EGO_UNKNOWN_ID',
+          message: `Sinner ${sinnerKey} has unknown ${egoType} EGO ID '${egoId}'`,
+          field: `equipment.${sinnerKey}.egos.${egoType}.id`,
+          context: { id: egoId },
+        })
+      }
+    }
+  }
+
+  for (const [i, floor] of content.floorSelections.slice(0, FLOOR_COUNTS[category]).entries()) {
+    const themePackId = floor?.themePackId
+    if (themePackId && !registry.themePackIds.has(themePackId)) {
+      errors.push({
+        code: 'THEME_PACK_UNKNOWN_ID',
+        message: `Floor ${i + 1} has unknown theme pack ID '${themePackId}'`,
+        field: `floorSelections[${i}].themePackId`,
+        context: { id: themePackId },
+      })
+    }
+  }
+
+  for (const [i, buffId] of content.selectedBuffIds.entries()) {
+    if (!registry.startBuffIds.has(String(buffId))) {
+      errors.push({
+        code: 'START_BUFF_UNKNOWN_ID',
+        message: `Start buff ID ${buffId} is unknown`,
+        field: `selectedBuffIds[${i}]`,
+        context: { id: String(buffId) },
+      })
+    }
+  }
+
+  return errors
+}
+
 export function validatePlannerForPublish(
   title: string | undefined,
   content: MDPlannerContent,
   category: MDCategory,
   egoGiftSpec?: Record<string, EGOGiftSpec>,
   egoGiftI18n?: Record<string, string>,
+  registry?: PlannerIdRegistry,
 ): { isValid: boolean; errors: PlannerValidationError[] } {
   const errors: PlannerValidationError[] = []
 
@@ -564,6 +632,10 @@ export function validatePlannerForPublish(
   }
 
   errors.push(...validateEquipment(content.equipment))
+
+  if (registry) {
+    errors.push(...validateEntityIds(content, category, registry))
+  }
 
   errors.push(...validateDeploymentOrder(content.deploymentOrder))
 
@@ -618,9 +690,12 @@ export function validatePlannerForDraftSave(
   category: MDCategory,
   egoGiftSpec?: Record<string, EGOGiftSpec>,
   egoGiftI18n?: Record<string, string>,
+  registry?: PlannerIdRegistry,
 ): { key: string; params?: Record<string, string> } | null {
   const errors: PlannerValidationError[] = [
     ...validateEquipment(content.equipment),
+
+    ...(registry ? validateEntityIds(content, category, registry) : []),
 
     ...validateDeploymentOrder(content.deploymentOrder),
 
@@ -663,6 +738,31 @@ export function validatePlannerForDraftSave(
   const [firstError] = errors
   if (firstError === undefined) return null
   return toUserFriendlyError(firstError)
+}
+
+export function validatePlannerForImport(
+  planner: SaveablePlanner,
+  egoGiftSpec: Record<string, EGOGiftSpec>,
+  registry: PlannerIdRegistry,
+): { key: string; params?: Record<string, string> } | null {
+  if (!isMDPlanner(planner)) return null
+
+  const { content } = planner
+  const { category } = planner.config
+
+  if (planner.metadata.published) {
+    const [firstError] = validatePlannerForPublish(
+      planner.metadata.title,
+      content,
+      category,
+      egoGiftSpec,
+      undefined,
+      registry,
+    ).errors
+    return firstError ? toUserFriendlyError(firstError) : null
+  }
+
+  return validatePlannerForDraftSave(content, category, egoGiftSpec, undefined, registry)
 }
 
 export function validateNoteSizes(
