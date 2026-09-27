@@ -3,20 +3,15 @@
 # the legacy DantePlanner-* CloudWatch alarms that watched the retired single-EC2
 # host. Thresholds carry over 1:1 from the legacy alarms; per-node values were
 # tuned for a t3.medium, so retune if fleet nodes diverge from that profile.
-# Billing is CW-only data: AWS/Billing lives exclusively in us-east-1, queried
-# through the CloudWatch datasource; the legacy CW billing/auto-recovery alarms
-# stay CW-native (EC2 recover is a CW-alarm-only action) per requirements.
 #
 # Usage:
 #   GRAFANA_URL=https://<slug>.grafana.net \
 #   GRAFANA_TOKEN=<service-account token, Editor role> \
-#   DS_CW_UID=<CloudWatch datasource uid, from /connections/datasources/edit/<uid>> \
 #   bash import-app-alert-rules.sh
 set -euo pipefail
 
 : "${GRAFANA_URL:?set GRAFANA_URL, e.g. https://yourslug.grafana.net (no trailing slash)}"
 : "${GRAFANA_TOKEN:?set GRAFANA_TOKEN (service-account token with Editor role)}"
-: "${DS_CW_UID:?set DS_CW_UID (CloudWatch datasource uid)}"
 DS_UID="${DS_UID:-grafanacloud-prom}"
 
 auth=(-H "Authorization: Bearer ${GRAFANA_TOKEN}" -H "Content-Type: application/json")
@@ -120,37 +115,5 @@ post_rule "node-high-network-out" "0s" \
 TRAFFIC_DROP_EXPR='sum by (cluster) (increase(http_server_requests_seconds_count[5m])) < 1'
 post_rule "traffic-drop" "10m" "$TRAFFIC_DROP_EXPR"
 
-echo "== creating billing rule (CW-only metric via CloudWatch datasource)"
-# AWS/Billing EstimatedCharges exists only in us-east-1 and updates a few times a
-# day, hence the wide time range and 6h period. Legacy threshold: $200.
-jq -n --arg cw "$DS_CW_UID" --arg folder "$FOLDER_UID" '
-  { title: "billing-estimated-charges", ruleGroup: "app-rules", folderUID: $folder,
-    condition: "C", for: "0s", noDataState: "OK", execErrState: "OK",
-    data: [
-      { refId: "A", relativeTimeRange: {from: 86400, to: 0}, datasourceUid: $cw,
-        model: {refId: "A", queryMode: "Metrics", namespace: "AWS/Billing",
-                metricName: "EstimatedCharges", statistic: "Maximum",
-                dimensions: {Currency: "USD"}, region: "us-east-1",
-                period: "21600", matchExact: true,
-                datasource: {type: "cloudwatch", uid: $cw}} },
-      { refId: "B", relativeTimeRange: {from: 0, to: 0}, datasourceUid: "__expr__",
-        model: {refId: "B", type: "reduce", reducer: "last", expression: "A",
-                datasource: {type: "__expr__", uid: "__expr__"}} },
-      { refId: "C", relativeTimeRange: {from: 0, to: 0}, datasourceUid: "__expr__",
-        model: {refId: "C", type: "threshold", expression: "B",
-                conditions: [{evaluator: {type: "gt", params: [200]}}],
-                datasource: {type: "__expr__", uid: "__expr__"}} }
-    ]
-  }' |
-curl -s -w '\n%{http_code}' "${auth[@]}" "${noprov[@]}" -X POST \
-  "${GRAFANA_URL}/api/v1/provisioning/alert-rules" -d @- | {
-  resp=$(cat); code=${resp##*$'\n'}; body=${resp%$'\n'*}
-  if [ "$code" = 201 ]; then
-    printf '%s' "$body" | jq -r '"   created: " + .title + "  (uid " + .uid + ")"'
-  else
-    echo "   FAILED billing-estimated-charges (HTTP ${code}): ${body}"; exit 1
-  fi
-}
-
-echo "== done: 14 rules in folder ${FOLDER}, group app-rules"
+echo "== done: 13 rules in folder ${FOLDER}, group app-rules"
 echo "   All noDataState=OK — non-paging while a series is absent; staleness-meta owns absence."

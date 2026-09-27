@@ -55,11 +55,20 @@ echo "   folder uid: ${FOLDER_UID}"
 # post_rule TITLE FOR_DURATION PROMQL
 post_rule() {
   local title=$1 for_dur=$2 expr=$3
+  local uid method path want verb code
+  uid=$(printf '%s' "$title" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9-' '-')
+  path="${GRAFANA_URL}/api/v1/provisioning/alert-rules/${uid}"
+  code=$(curl -s -o /dev/null -w '%{http_code}' "${auth[@]}" "$path") || code=000
+  case "$code" in
+    200) method=PUT want=200 verb=updated ;;
+    404) method=POST want=201 verb=created path="${GRAFANA_URL}/api/v1/provisioning/alert-rules" ;;
+    *) echo "   FAILED ${title}: looking up uid ${uid} returned HTTP ${code}"; exit 1 ;;
+  esac
   jq -n \
-    --arg title "$title" --arg for "$for_dur" --arg expr "$expr" \
+    --arg uid "$uid" --arg title "$title" --arg for "$for_dur" --arg expr "$expr" \
     --arg ds "$DS_UID" --arg folder "$FOLDER_UID" '
     {
-      title: $title, ruleGroup: "cluster-rules", folderUID: $folder,
+      uid: $uid, title: $title, ruleGroup: "cluster-rules", folderUID: $folder,
       condition: "C", for: $for, noDataState: "OK", execErrState: "OK",
       data: [
         { refId: "A", relativeTimeRange: {from: 600, to: 0}, datasourceUid: $ds,
@@ -73,18 +82,17 @@ post_rule() {
                   datasource: {type: "__expr__", uid: "__expr__"}} }
       ]
     }' |
-  curl -s -w '\n%{http_code}' "${auth[@]}" "${noprov[@]}" -X POST \
-    "${GRAFANA_URL}/api/v1/provisioning/alert-rules" -d @- | {
+  curl -s -w '\n%{http_code}' "${auth[@]}" "${noprov[@]}" -X "$method" "$path" -d @- | {
     resp=$(cat); code=${resp##*$'\n'}; body=${resp%$'\n'*}
-    if [ "$code" = 201 ]; then
-      printf '%s' "$body" | jq -r '"   created: " + .title + "  (uid " + .uid + ")"'
+    if [ "$code" = "$want" ]; then
+      printf '%s' "$body" | jq -r --arg v "$verb" '"   " + $v + ": " + .title + "  (uid " + .uid + ")"'
     else
       echo "   FAILED ${title} (HTTP ${code}): ${body}"; exit 1
     fi
   }
 }
 
-echo "== creating rules"
+echo "== creating or updating rules"
 post_rule "node-not-ready" "15m" \
   'kube_node_status_condition{condition="Ready",status="true"} == 0'
 post_rule "backend-daemonset-unready" "5m" \

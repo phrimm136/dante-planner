@@ -21,6 +21,10 @@ rds_vpc_id = "vpc-REPLACE_WITH_RDS_VPC_ID"
 # gate; this SG is defense-in-depth.
 ingress_allowed_cidrs = ["REPLACE_WITH_CLOUDFLARE_CIDRS"]
 
+# The replica's fully-qualified MySQL minor. Must be >= the primary's (terraform/rds engine_version);
+# RDS upgrades replicas before the source.
+rds_engine_version = "8.4.11"
+
 # --- Optional overrides (defaults in variables.tf are sensible) --------------
 
 # region      = "ap-northeast-2"

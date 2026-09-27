@@ -16,8 +16,9 @@ aws_account_id = "REPLACE_WITH_ACCOUNT_ID"
 vpc_id        = "vpc-REPLACE_WITH_RDS_VPC_ID"
 db_subnet_ids = ["subnet-REPLACE_WITH_SUBNET_A", "subnet-REPLACE_WITH_SUBNET_B"]
 
-# Pin to >= the source's @@version (runbook 0.2). A coarse "8.0" would let AWS pick a minor BELOW
-# the source, which stalls replication silently; the variable's validation rejects it.
+# A fully-qualified MySQL 8.4 minor: the variable's validation rejects a coarse "8.4", which would let
+# AWS pick the minor. Keep it <= every read replica's version (terraform/seoul rds_engine_version):
+# replication only runs low->high, so a replica is upgraded before this primary, never after.
 engine_version = "8.4.11"
 
 # The master password is NOT set here. It is read at plan time from Secrets Manager; seed the entry

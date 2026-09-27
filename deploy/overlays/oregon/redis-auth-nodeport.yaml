@@ -4,8 +4,8 @@
 # (blacklist/rotation/tombstone). Reachability is scoped by the cluster SG rule
 # in terraform/modules/fleet/network.tf (redis_cross_region_cidr, Seoul's fleet
 # CIDR only — never 0.0.0.0/0); the nodePort here and that rule's port
-# (redis_auth_nodeport, default 31637) MUST match. The exposed server requires
-# AUTH once the password secret is provisioned (see base/redis-auth.yaml).
+# (redis_auth_nodeport, default 31637) MUST match. The exposed server always
+# requires AUTH (see base/redis-auth.yaml).
 apiVersion: v1
 kind: Service
 metadata:

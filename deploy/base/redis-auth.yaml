@@ -39,13 +39,6 @@ spec:
           image: redis:7-alpine
           # Re-invoking docker-entrypoint.sh keeps the image's chown + drop to the
           # redis user.
-          #
-          # Coordinated password rollout:
-          #   1. Add AUTH_REDIS_PASSWORD to the danteplanner/backend/runtime-config
-          #      Secrets Manager JSON; wait for ESO to refresh backend-runtime-config.
-          #   2. Restart this StatefulSet (redis now requires AUTH).
-          #   3. Rollout-restart the backend DaemonSet (pods pick up the env). Between
-          #      2 and 3 blacklist checks fail-open per INV6; keep the gap short.
           command:
             - sh
             - -c
