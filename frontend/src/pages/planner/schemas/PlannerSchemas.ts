@@ -384,14 +384,6 @@ export const ServerPlannerSummaryPageSchema = pagedModelSchema(ServerPlannerSumm
  */
 export const ServerPlannerBatchResponseSchema = z.array(ServerPlannerResponseSchema)
 
-export const ImportPlannersResponseSchema = z
-  .object({
-    imported: z.number().int().nonnegative(),
-    total: z.number().int().nonnegative(),
-    planners: z.array(ServerPlannerSummarySchema),
-  })
-  .strict()
-
 export const PlannerExportItemSchema = z
   .object({
     id: z.string(),

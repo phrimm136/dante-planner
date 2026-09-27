@@ -33,12 +33,21 @@ function migrateGiftId(encoded: string, entry: IdMigrationEntry | undefined): st
 
 function migrateArray(raw: unknown, migrate: (item: unknown) => unknown): unknown {
   if (!Array.isArray(raw)) return raw
-  const seen = new Set<unknown>()
+  const migrated: unknown[] = []
+  const renamedValues = new Set<unknown>()
   for (const item of raw) {
-    const migrated = migrate(item)
-    if (migrated !== null) seen.add(migrated)
+    const result = migrate(item)
+    if (result === null) continue
+    if (result !== item) renamedValues.add(result)
+    migrated.push(result)
   }
-  return Array.from(seen)
+  const kept = new Set<unknown>()
+  return migrated.filter((value) => {
+    if (!renamedValues.has(value)) return true
+    if (kept.has(value)) return false
+    kept.add(value)
+    return true
+  })
 }
 
 function migrateGiftArray(raw: unknown, entry: IdMigrationEntry | undefined): unknown {
@@ -101,7 +110,7 @@ function migrateFloor(raw: unknown, table: IdMigrationTable): unknown {
   const next: Loose = { ...raw }
   if ('giftIds' in raw) next.giftIds = migrateGiftArray(raw.giftIds, table.egoGift)
   if (typeof raw.themePackId === 'string') {
-    next.themePackId = migrateId(raw.themePackId, table.themePack)
+    next.themePackId = table.themePack?.rename[raw.themePackId] ?? raw.themePackId
   }
   return next
 }

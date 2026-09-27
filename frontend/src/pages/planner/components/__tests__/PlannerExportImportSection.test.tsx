@@ -166,4 +166,38 @@ describe('PlannerExportImportSection invalid planners', () => {
       titles: 'Plan 3',
     })
   })
+
+  it('reports no success when every planner in the file is rejected', async () => {
+    validationMocks.validatePlannerForImport.mockReturnValue({
+      key: 'pages.plannerMD.validation.unknownIdentityId',
+      params: { id: '10199' },
+    })
+    vi.mocked(showSuccess).mockClear()
+    const user = userEvent.setup()
+    const items = [4, 5].map((n) => {
+      const id = `00000000-0000-4000-8000-00000000002${n}`
+      return {
+        id,
+        metadata: { ...EXISTING.metadata, id, title: `Plan ${n}` },
+        config: EXISTING.config,
+        content: EXISTING.content,
+      }
+    })
+    const { container } = render(<PlannerExportImportSection />)
+
+    const input = container.querySelector('input[type="file"]')!
+    await user.upload(input as HTMLInputElement, importFile(items))
+
+    await waitFor(() =>
+      expect(showWarning).toHaveBeenCalledWith('common:exportImport.skippedInvalid', {
+        count: 2,
+        titles: 'Plan 4, Plan 5',
+      }),
+    )
+    expect(storageMocks.saveToLocal).not.toHaveBeenCalled()
+    expect(showSuccess).not.toHaveBeenCalledWith(
+      'common:exportImport.importSuccess',
+      expect.anything(),
+    )
+  })
 })

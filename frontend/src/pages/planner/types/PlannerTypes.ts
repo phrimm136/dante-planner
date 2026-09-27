@@ -11,7 +11,6 @@ import type {
   PlannerIdSchema,
   ServerPlannerResponseSchema,
   ServerPlannerSummarySchema,
-  ImportPlannersResponseSchema,
 } from '../schemas/PlannerSchemas'
 import type { SinnerEquipment, SkillEAState } from './DeckTypes'
 import type { ThemePackId } from '@/shared/gameData'
@@ -138,12 +137,6 @@ export interface UpsertPlannerRequest {
   syncVersion?: number
   selectedKeywords?: string[]
 }
-
-export interface ImportPlannersRequest {
-  planners: UpsertPlannerRequest[]
-}
-
-export type ImportPlannersResponse = z.infer<typeof ImportPlannersResponseSchema>
 
 export interface ConflictState {
   serverVersion: number | null

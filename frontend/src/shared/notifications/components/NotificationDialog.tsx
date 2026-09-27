@@ -16,7 +16,7 @@ import { useNotificationPermission } from '../hooks/useNotificationPermission'
 import { useNotificationsQuery } from '../hooks/useNotificationsQuery'
 import { useDeleteNotificationMutation } from '../hooks/useDeleteNotificationMutation'
 import { useClearAllNotificationsMutation } from '../hooks/useClearAllNotificationsMutation'
-import { SECTION_STYLES } from '@/lib/constants'
+import { COMMENT_ANCHOR_PREFIX, SECTION_STYLES } from '@/lib/constants'
 
 interface NotificationDialogProps {
   open: boolean
@@ -120,11 +120,10 @@ export function NotificationDialog({ open, onOpenChange }: NotificationDialogPro
   const navigate = useNavigate()
 
   const handleNavigate = (plannerId: string, commentPublicId: string | null) => {
-    const hash = commentPublicId ? `#comment-${commentPublicId}` : ''
     void navigate({
       to: '/planner/md/gesellschaft/$id',
       params: { id: plannerId },
-      hash,
+      ...(commentPublicId ? { hash: `${COMMENT_ANCHOR_PREFIX}${commentPublicId}` } : {}),
     })
     onOpenChange(false)
   }

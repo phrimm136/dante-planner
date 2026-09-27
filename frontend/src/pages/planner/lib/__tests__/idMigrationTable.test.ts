@@ -53,6 +53,26 @@ describe('IdMigrationTableSchema', () => {
     expect(IdMigrationTableSchema.safeParse(identityDrop).success).toBe(false)
   })
 
+  it('rejects a theme-pack drop, a floor having no empty form', () => {
+    const themePackDrop = { themePack: { rename: {}, drop: ['1001'] } }
+
+    const parsed = IdMigrationTableSchema.safeParse(themePackDrop)
+
+    expect(parsed.success).toBe(false)
+    expect(parsed.error?.issues).toEqual([
+      expect.objectContaining({
+        path: ['themePack', 'drop'],
+        message: expect.stringContaining('theme pack'),
+      }),
+    ])
+  })
+
+  it('accepts a theme-pack rename', () => {
+    const themePackRename = { themePack: { rename: { '1001': '1002' } } }
+
+    expect(IdMigrationTableSchema.safeParse(themePackRename).success).toBe(true)
+  })
+
   it('accepts an identity rename', () => {
     const identityRename = { identity: { rename: { '10199': '10101' } } }
 
@@ -60,7 +80,7 @@ describe('IdMigrationTableSchema', () => {
   })
 
   it('rejects a rename onto a dropped id', () => {
-    const intoDrop = { themePack: { rename: { '1001': '1002' }, drop: ['1002'] } }
+    const intoDrop = { egoGift: { rename: { '9247': '9300' }, drop: ['9300'] } }
 
     expect(IdMigrationTableSchema.safeParse(intoDrop).success).toBe(false)
   })

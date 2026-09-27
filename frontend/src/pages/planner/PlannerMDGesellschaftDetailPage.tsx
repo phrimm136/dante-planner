@@ -1,5 +1,5 @@
 import { Suspense, lazy, useRef } from 'react'
-import { Link, useNavigate, useParams } from '@tanstack/react-router'
+import { Link, useLocation, useNavigate, useParams } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
 import { Button } from '@/components/ui/button'
@@ -19,7 +19,7 @@ import { useAuthQuery } from '@/shared/auth'
 import { useUserSettingsQuery } from '@/shared/userSettings'
 import { useMDGesellschaftFilters } from './hooks/useMDGesellschaftFilters'
 import type { UseMDGesellschaftFiltersResult } from './hooks/useMDGesellschaftFilters'
-import { SECTION_STYLES } from '@/lib/constants'
+import { COMMENT_ANCHOR_PREFIX, SECTION_STYLES } from '@/lib/constants'
 
 const CommentSection = lazy(() =>
   import('@/shared/comment').then((m) => ({ default: m.CommentSection })),
@@ -58,6 +58,9 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
   const { t } = useTranslation(['planner', 'common'])
   const navigate = useNavigate()
   const commentsRef = useRef<HTMLDivElement>(null)
+  const targetsComment = useLocation({
+    select: (location) => location.hash.startsWith(COMMENT_ANCHOR_PREFIX),
+  })
 
   const queryState = usePublishedPlannerQuery(plannerId)
 
@@ -131,7 +134,7 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
       <PlannerDetailFooter planner={apiData} isOwner={isOwner} isAuthenticated={isAuthenticated} />
 
       <div ref={commentsRef}>
-        <NearViewportGate placeholder={commentPlaceholder}>
+        <NearViewportGate placeholder={commentPlaceholder} open={targetsComment}>
           <Suspense fallback={commentPlaceholder}>
             <CommentSection
               plannerId={plannerId}

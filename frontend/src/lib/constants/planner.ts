@@ -87,6 +87,8 @@ export function calculatePlannerPages(totalCount: number): number {
 
 export const COMMENT_MAX_CHARS = 10000
 
+export const COMMENT_ANCHOR_PREFIX = 'comment-'
+
 export const COMMENT_INDENT_PER_LEVEL = 2
 
 export const COMMENT_MAX_VISUAL_DEPTH_MOBILE = 2

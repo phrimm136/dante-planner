@@ -29,12 +29,16 @@ const publishedPlanner = vi.hoisted(
     }) as unknown as PublishedPlannerQueryResult,
 )
 
+const routerLocation = vi.hoisted(() => ({ hash: '' }))
+
 vi.mock('@tanstack/react-router', () => ({
   Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
     <a href={to}>{children}</a>
   ),
   useParams: () => ({ id: 'published-planner-1' }),
   useNavigate: () => vi.fn<() => void>(),
+  useLocation: <T,>(opts?: { select?: (location: { hash: string }) => T }) =>
+    opts?.select ? opts.select(routerLocation) : routerLocation,
 }))
 
 vi.mock('react-i18next', async (importOriginal) => {
@@ -147,6 +151,7 @@ beforeEach(() => {
   lazyState.reset()
   mockLazySections()
   observerCallbacks = []
+  routerLocation.hash = ''
   globalThis.IntersectionObserver =
     ControlledIntersectionObserver as unknown as typeof IntersectionObserver
 })
@@ -194,5 +199,18 @@ describe('PlannerMDGesellschaftDetailPage deferred sections', () => {
 
     expect(await screen.findByTestId('comment-section')).toBeDefined()
     expect(await screen.findByTestId('published-planner-list')).toBeDefined()
+  })
+})
+
+describe('PlannerMDGesellschaftDetailPage comment deep link', () => {
+  it('renders the comment section at mount when the location targets a comment', async () => {
+    routerLocation.hash = 'comment-abc'
+    lazyState.release()
+    await renderPage()
+
+    expect(await screen.findByTestId('comment-section')).toBeDefined()
+    expect(screen.queryByTestId('comment-section-placeholder')).toBeNull()
+    expect(screen.getByTestId('planner-list-placeholder')).toBeDefined()
+    expect(lazyState.loaded.list).toBe(false)
   })
 })

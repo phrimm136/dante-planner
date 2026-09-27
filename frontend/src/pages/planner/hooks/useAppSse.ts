@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import type { z } from 'zod'
 
 import i18n from '@/lib/i18n'
-import { SSE_EVENTS } from '@/lib/constants'
+import { COMMENT_ANCHOR_PREFIX, SSE_EVENTS } from '@/lib/constants'
 import { formatUsername } from '@/lib/formatUsername'
 import { validateDataOrNull } from '@/lib/validation'
 import { useSseEngine, useSseStore, SseAccountSuspendedSchema } from '@/shared/sse'
@@ -59,7 +59,7 @@ function showNotificationForEvent(data: SseNotificationEvent): void {
   if (data.plannerId) {
     url = `/planner/md/gesellschaft/${data.plannerId}`
     if (data.commentPublicId) {
-      url += `#comment-${data.commentPublicId}`
+      url += `#${COMMENT_ANCHOR_PREFIX}${data.commentPublicId}`
     }
   }
 

@@ -242,7 +242,8 @@ export function classifyImportOutcome(counts: ImportCounts): ImportOutcome | nul
   if (counts.conflicts > 0) {
     return counts.imported > 0 || counts.skipped > 0 ? 'partialImport' : null
   }
-  return counts.skipped > 0 ? 'partialSuccess' : 'success'
+  if (counts.skipped > 0) return 'partialSuccess'
+  return counts.imported > 0 ? 'success' : null
 }
 
 export const IMPORT_OUTCOME_TOASTS: Record<ImportOutcome, OutcomeToast<ImportCounts>> = {

@@ -33,7 +33,7 @@ import {
 
 import type { CommentReportReason } from '../types/CommentTypes'
 import type { CommentActions } from '../lib/commentViewer'
-import { SECTION_STYLES } from '@/lib/constants'
+import { COMMENT_ANCHOR_PREFIX, SECTION_STYLES } from '@/lib/constants'
 
 interface CommentSectionProps {
   plannerId: string
@@ -80,7 +80,7 @@ function CommentSectionContent({ plannerId, isPublished, isAuthenticated }: Comm
   useEffect(() => {
     if (hasScrolled.current || tree.length === 0) return
     const hash = window.location.hash
-    if (!hash.startsWith('#comment-')) return
+    if (!hash.startsWith(`#${COMMENT_ANCHOR_PREFIX}`)) return
 
     const element = document.getElementById(hash.slice(1))
     if (element) {

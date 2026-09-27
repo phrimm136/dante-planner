@@ -5,14 +5,11 @@ import {
   ServerPlannerResponseSchema,
   ServerPlannerBatchResponseSchema,
   ServerPlannerSummaryPageSchema,
-  ImportPlannersResponseSchema,
 } from '../schemas/PlannerSchemas'
 import type {
   UpsertPlannerRequest,
-  ImportPlannersRequest,
   ServerPlannerResponse,
   ServerPlannerSummary,
-  ImportPlannersResponse,
   PlannerId,
 } from '../types/PlannerTypes'
 
@@ -74,10 +71,5 @@ export const plannerApi = {
 
   async delete(id: PlannerId | string): Promise<void> {
     await ApiClient.delete(`${PLANNERS_BASE}/${id}`)
-  },
-
-  async import(request: ImportPlannersRequest): Promise<ImportPlannersResponse> {
-    const data = await ApiClient.post(`${PLANNERS_BASE}/import`, request)
-    return validateData(data, ImportPlannersResponseSchema, 'planner import')
   },
 }

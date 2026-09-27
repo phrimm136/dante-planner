@@ -44,6 +44,9 @@ vi.mock('@/shared/notifications/hooks/useDeleteNotificationMutation', () => ({
 }))
 
 import { useNotificationsQuery } from '../../hooks/useNotificationsQuery'
+import { useNavigate } from '@tanstack/react-router'
+import userEvent from '@testing-library/user-event'
+import { COMMENT_ANCHOR_PREFIX } from '@/lib/constants'
 import { NotificationDialog } from '../NotificationDialog'
 
 function createWrapper() {
@@ -155,6 +158,60 @@ describe('NotificationDialog', () => {
       })
 
       expect(screen.getByRole('button', { name: /clear all/i })).toBeInTheDocument()
+    })
+  })
+
+  describe('navigation', () => {
+    const PLANNER_ID = '550e8400-e29b-41d4-a716-446655440001'
+
+    function notificationsWith(notification: Record<string, unknown>) {
+      vi.mocked(useNotificationsQuery).mockReturnValue({
+        notifications: [
+          {
+            id: '550e8400-e29b-41d4-a716-446655440000',
+            plannerId: PLANNER_ID,
+            createdAt: new Date('2025-01-10T10:00:00Z').toISOString(),
+            ...notification,
+          },
+        ],
+        page: 0,
+        size: 20,
+        totalElements: 1,
+        totalPages: 1,
+      } as unknown as ReturnType<typeof useNotificationsQuery>)
+    }
+
+    it('targets the comment through the router hash, without a leading #', async () => {
+      const navigate = vi.fn()
+      vi.mocked(useNavigate).mockReturnValue(navigate)
+      notificationsWith({ notificationType: 'COMMENT_RECEIVED', commentPublicId: 'abc' })
+      const user = userEvent.setup()
+      render(<NotificationDialog open={true} onOpenChange={vi.fn()} />, {
+        wrapper: createWrapper(),
+      })
+
+      await user.click(screen.getByText('notifications.types.commentReceived'))
+
+      expect(navigate).toHaveBeenCalledWith({
+        to: '/planner/md/gesellschaft/$id',
+        params: { id: PLANNER_ID },
+        hash: `${COMMENT_ANCHOR_PREFIX}abc`,
+      })
+    })
+
+    it('navigates with no hash when the notification names no comment', async () => {
+      const navigate = vi.fn()
+      vi.mocked(useNavigate).mockReturnValue(navigate)
+      notificationsWith({ notificationType: 'PLANNER_RECOMMENDED', commentPublicId: null })
+      const user = userEvent.setup()
+      render(<NotificationDialog open={true} onOpenChange={vi.fn()} />, {
+        wrapper: createWrapper(),
+      })
+
+      await user.click(screen.getByText('notifications.types.plannerRecommended'))
+
+      expect(navigate).toHaveBeenCalledTimes(1)
+      expect(navigate.mock.calls[0]?.[0]?.hash).toBeUndefined()
     })
   })
 })

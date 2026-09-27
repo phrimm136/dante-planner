@@ -29,15 +29,19 @@ const IdMigrationEntrySchema = z
 
 export type IdMigrationEntry = z.infer<typeof IdMigrationEntrySchema>
 
+function renameOnlyEntrySchema(entity: string) {
+  return IdMigrationEntrySchema.refine((entry) => entry.drop.length === 0, {
+    message: `${entity} cannot be dropped, only renamed`,
+    path: ['drop'],
+  })
+}
+
 export const IdMigrationTableSchema = z
   .object({
-    identity: IdMigrationEntrySchema.refine((entry) => entry.drop.length === 0, {
-      message: 'an identity cannot be dropped, only renamed',
-      path: ['drop'],
-    }).optional(),
+    identity: renameOnlyEntrySchema('an identity').optional(),
     ego: IdMigrationEntrySchema.optional(),
     egoGift: IdMigrationEntrySchema.optional(),
-    themePack: IdMigrationEntrySchema.optional(),
+    themePack: renameOnlyEntrySchema('a theme pack').optional(),
     startBuff: IdMigrationEntrySchema.optional(),
   })
   .strict()

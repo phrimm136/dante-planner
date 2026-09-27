@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { sanitizeUserHtml } from '@/shared/sanitize'
 
-import { COMMENT_INDENT_PER_LEVEL } from '@/lib/constants'
+import { COMMENT_ANCHOR_PREFIX, COMMENT_INDENT_PER_LEVEL } from '@/lib/constants'
 import { formatCompactRelativeTime } from '@/lib/formatDate'
 import { formatUsername } from '@/lib/formatUsername'
 import { DeletedCommentPlaceholder } from './DeletedCommentPlaceholder'
@@ -58,7 +58,7 @@ export const CommentCard = function CommentCard({
   }
 
   return (
-    <div id={`comment-${comment.id}`} className="py-3 scroll-mt-20">
+    <div id={`${COMMENT_ANCHOR_PREFIX}${comment.id}`} className="py-3 scroll-mt-20">
       <div className="flex items-center justify-between gap-2 mb-1">
         <div className="flex items-center gap-2 text-sm">
           <span className="font-medium">{authorName}</span>

@@ -8,7 +8,7 @@ const TABLE: IdMigrationTable = {
   identity: { rename: { '10199': '10101' }, drop: [] },
   ego: { rename: { '20199': '20101' }, drop: ['20299'] },
   egoGift: { rename: { '9247': '9300' }, drop: ['9666'] },
-  themePack: { rename: { '1099': '1001' }, drop: ['1098'] },
+  themePack: { rename: { '1099': '1001' }, drop: [] },
   startBuff: { rename: { '109': '108' }, drop: ['209'] },
 }
 
@@ -34,7 +34,7 @@ function staleContent(): Record<string, unknown> {
     skillEAState: {},
     floorSelections: [
       { themePackId: '1099', difficulty: 1, giftIds: ['9247', '19666'] },
-      { themePackId: '1098', difficulty: 1, giftIds: [] },
+      { themePackId: '1002', difficulty: 1, giftIds: ['9666'] },
       { themePackId: null, difficulty: 1, giftIds: [] },
     ],
     sectionNotes: {},
@@ -64,7 +64,7 @@ describe('normalizePlannerIds', () => {
       skillEAState: {},
       floorSelections: [
         { themePackId: '1001', difficulty: 1, giftIds: ['9300'] },
-        { themePackId: null, difficulty: 1, giftIds: [] },
+        { themePackId: '1002', difficulty: 1, giftIds: [] },
         { themePackId: null, difficulty: 1, giftIds: [] },
       ],
       sectionNotes: {},
@@ -81,6 +81,20 @@ describe('normalizePlannerIds', () => {
     const content = { selectedGiftIds: ['9247', '9300'] }
 
     expect(normalizePlannerIds(content, TABLE).selectedGiftIds).toEqual(['9300'])
+  })
+
+  it('leaves a repeated id no rename produced for validation to report', () => {
+    const content = { selectedGiftIds: ['9001', '9001'] }
+
+    expect(normalizePlannerIds(content, EMPTY_ID_MIGRATION_TABLE)).toEqual(content)
+  })
+
+  it('collapses a rename onto the id it repeats', () => {
+    const table: IdMigrationTable = { egoGift: { rename: { '9002': '9001' }, drop: [] } }
+
+    expect(normalizePlannerIds({ selectedGiftIds: ['9001', '9002'] }, table)).toEqual({
+      selectedGiftIds: ['9001'],
+    })
   })
 
   it('leaves content unchanged under an empty table', () => {

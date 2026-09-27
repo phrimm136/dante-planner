@@ -283,6 +283,10 @@ describe('classifyImportOutcome', () => {
   it('reports success when everything landed', () => {
     expect(classifyImportOutcome({ imported: 3, skipped: 0, conflicts: 0 })).toBe('success')
   })
+
+  it('reports no success when nothing was imported', () => {
+    expect(classifyImportOutcome({ imported: 0, skipped: 0, conflicts: 0 })).not.toBe('success')
+  })
 })
 
 describe('IMPORT_OUTCOME_TOASTS', () => {
