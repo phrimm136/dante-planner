@@ -14,7 +14,7 @@ resource "cloudflare_zero_trust_access_service_token" "e2e" {
   account_id = var.account_id
   name       = "${var.name_prefix}-e2e"
   # The secret is readable only at creation; rotating means replacing the token and re-storing it.
-  duration   = "8760h"
+  duration = "8760h"
 }
 
 resource "cloudflare_zero_trust_access_application" "guarded" {

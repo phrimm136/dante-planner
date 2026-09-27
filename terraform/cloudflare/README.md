@@ -21,12 +21,18 @@ assumed floor, not a measured one.
 
 ## Applying
 
+Each environment has its own state bucket and var-file; prod also keeps its state in the
+`prod-fleet` workspace. From the repo root, through the guard:
+
 ```bash
-cp environment.tfvars.example prod.tfvars   # fill in token, account, zone
-terraform init
-terraform plan                                  # expect creates only
-terraform apply
+cp terraform/cloudflare/environment.tfvars.example terraform/cloudflare/prod.tfvars   # fill in token, account, zone
+AWS_PROFILE=<prod> scripts/ops/terraform-run.sh -chdir=terraform/cloudflare init -reconfigure -backend-config=../backend.prod.hcl
+AWS_PROFILE=<prod> scripts/ops/terraform-run.sh -chdir=terraform/cloudflare workspace select prod-fleet
+AWS_PROFILE=<prod> scripts/ops/terraform-run.sh -chdir=terraform/cloudflare plan -var-file=prod.tfvars    # expect creates only
+AWS_PROFILE=<prod> scripts/ops/terraform-run.sh -chdir=terraform/cloudflare apply -var-file=prod.tfvars
 ```
+
+Staging uses `backend.staging.hcl`, the default workspace, and `-var-file=staging.tfvars`.
 
 Point `api_hostname` at a throwaway hostname for the first apply. Both paths then run at once
 and production traffic is untouched while you confirm each tunnel reports **≥4 edge
