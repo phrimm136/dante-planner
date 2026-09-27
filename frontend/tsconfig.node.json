@@ -29,7 +29,9 @@
     "vite-plugin-hash-static.ts",
     "vite-plugin-hash-static.test.ts",
     "vite-plugin-route-headers.ts",
-    "vite-plugin-route-headers.test.ts"
+    "vite-plugin-route-headers.test.ts",
+    "scripts/check-bundle-budget.ts",
+    "scripts/lib/*.ts"
   ],
   "references": [{ "path": "./tsconfig.app.json" }]
 }

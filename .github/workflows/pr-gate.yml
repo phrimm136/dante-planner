@@ -265,6 +265,7 @@ jobs:
         run: |
           yarn install --frozen-lockfile
           yarn build
+          yarn check:bundle-budget
         env:
           NODE_OPTIONS: '--max-old-space-size=6144'
 

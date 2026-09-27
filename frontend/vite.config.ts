@@ -256,7 +256,11 @@ export default defineConfig({
         extends: true,
         test: {
           name: 'plugin',
-          include: ['vite-plugin-hash-static.test.ts', 'vite-plugin-route-headers.test.ts'],
+          include: [
+            'vite-plugin-hash-static.test.ts',
+            'vite-plugin-route-headers.test.ts',
+            'scripts/lib/*.test.ts',
+          ],
           pool: 'forks',
           environment: 'node',
         },
