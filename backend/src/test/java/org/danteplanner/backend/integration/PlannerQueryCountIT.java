@@ -17,6 +17,7 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.user.service.UserSettingsService;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -112,6 +113,9 @@ class PlannerQueryCountIT {
     private UserRepository userRepository;
 
     @Autowired
+    private UserSettingsService userSettingsService;
+
+    @Autowired
     private PlannerStatsRepository plannerStatsRepository;
 
     @Autowired
@@ -194,6 +198,19 @@ class PlannerQueryCountIT {
     void searchListing_WhenOneRowPage_IssuesFixedStatementCount() {
         seedPlanners(SMALL_SET, false);
         assertFixedStatementCount(PlannerQueryCountIT::titleSearch, SEARCH_LIST_STATEMENTS);
+    }
+
+    @Test
+    @DisplayName("loading a user by id issues one statement")
+    void userLoad_WhenFoundById_PreparesOneStatement() {
+        userSettingsService.getOrCreateEntity(viewerId);
+
+        statistics.clear();
+        assertThat(userRepository.findById(viewerId)).isPresent();
+
+        assertThat(statistics.getPrepareStatementCount())
+                .as("statements prepared by findById")
+                .isEqualTo(1);
     }
 
     private long measure(CatalogQuery catalogQuery, Pageable pageable) {

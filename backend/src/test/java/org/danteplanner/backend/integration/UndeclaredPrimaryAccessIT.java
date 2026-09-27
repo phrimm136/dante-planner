@@ -1,8 +1,13 @@
 package org.danteplanner.backend.integration;
 
+import java.util.UUID;
+
 import javax.sql.DataSource;
 
+import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.config.TestConfig;
+import org.danteplanner.backend.moderation.service.ModerationAuditService;
+import org.danteplanner.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +21,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
@@ -31,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class UndeclaredPrimaryAccessIT extends SharedMySqlContainerSupport {
 
     private static final String PROBE_QUERY = "SELECT 1";
+    private static final String UNDECLARED_MESSAGE = "outside a transaction";
 
     @DynamicPropertySource
     static void routingProperties(DynamicPropertyRegistry registry) {
@@ -45,13 +52,45 @@ class UndeclaredPrimaryAccessIT extends SharedMySqlContainerSupport {
     @Autowired
     private DataSource dataSource;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private ModerationAuditService moderationAuditService;
+
     @Test
     void primaryAcquisition_WhenNoTransactionIsActive_IsRejected() {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 
         assertThatThrownBy(() -> jdbcTemplate.queryForObject(PROBE_QUERY, Integer.class))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("outside a transaction");
+                .hasMessageContaining(UNDECLARED_MESSAGE);
+    }
+
+    @Test
+    void declaredFinder_WhenCalledOutsideATransaction_IsRejected() {
+        assertThatThrownBy(() -> userRepository.findByProviderAndProviderId(
+                        AuthProviderType.GOOGLE, UUID.randomUUID().toString()))
+                .rootCause()
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining(UNDECLARED_MESSAGE);
+    }
+
+    @Test
+    void inheritedFindById_WhenCalledOutsideATransaction_IsServed() {
+        assertThatCode(() -> userRepository.findById(Long.MAX_VALUE)).doesNotThrowAnyException();
+    }
+
+    @Test
+    void latestBanReason_WhenCalledOutsideATransaction_IsServed() {
+        assertThatCode(() -> moderationAuditService.latestBanReason(UUID.randomUUID()))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void latestTimeoutReason_WhenCalledOutsideATransaction_IsServed() {
+        assertThatCode(() -> moderationAuditService.latestTimeoutReason(UUID.randomUUID()))
+                .doesNotThrowAnyException();
     }
 
     @Test

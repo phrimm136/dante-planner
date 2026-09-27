@@ -11,7 +11,9 @@ import org.danteplanner.backend.planner.service.PlannerFilterService;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.user.repository.UserSettingsRepository;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
+import org.danteplanner.backend.user.service.UserSettingsService;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -75,6 +77,12 @@ class PlannerUserDeleteSweepIT {
 
     @Autowired
     private UserAccountLifecycleService lifecycleService;
+
+    @Autowired
+    private UserSettingsService userSettingsService;
+
+    @Autowired
+    private UserSettingsRepository userSettingsRepository;
 
     @Autowired
     private DataSource dataSource;
@@ -279,6 +287,18 @@ class PlannerUserDeleteSweepIT {
         assertThat(commentVoterIds(comment))
                 .as("the comment vote moved to the sentinel and the third party's own vote stayed put")
                 .containsExactlyInAnyOrder(UserAccountLifecycleService.SENTINEL_USER_ID, other.getId());
+    }
+
+    @Test
+    @DisplayName("hard delete removes the purged user's settings row")
+    void settingsRow_WhenUserHardDeleted_IsRemoved() {
+        userSettingsService.getOrCreateEntity(owner.getId());
+        assertThat(userSettingsRepository.findByUserId(owner.getId())).as("the settings row exists").isPresent();
+
+        purgeOwner(owner.getId());
+
+        assertThat(userRepository.findById(owner.getId())).as("the user row is gone").isEmpty();
+        assertThat(userSettingsRepository.findByUserId(owner.getId())).as("the settings row is gone").isEmpty();
     }
 
     @Test
