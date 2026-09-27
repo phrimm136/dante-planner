@@ -639,6 +639,43 @@ describe('NoteEditor - every update reaches its owner', () => {
     expect(onChange).not.toHaveBeenCalled()
   })
 
+  const loadedValue: NoteContent = {
+    content: {
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'saved note' }] }],
+    },
+  }
+
+  it('reports a loaded non-empty note exactly once', async () => {
+    const onChange = vi.fn<(value: NoteContent) => void>()
+    render(<NoteEditor value={loadedValue} onChange={onChange} />)
+    await waitFor(() => expect(document.querySelector('.ProseMirror')).toBeTruthy())
+
+    expect(onChange).toHaveBeenCalledTimes(1)
+    expect(JSON.stringify(lastChange(onChange).content)).toContain('saved note')
+  })
+
+  it.each([
+    { from: true, to: false },
+    { from: false, to: true },
+  ])('reports nothing when readOnly flips from $from to $to', async ({ from, to }) => {
+    const onChange = vi.fn<(value: NoteContent) => void>()
+    const { rerender } = render(
+      <NoteEditor value={loadedValue} onChange={onChange} readOnly={from} />,
+    )
+    await waitFor(() => expect(document.querySelector('.ProseMirror')).toBeTruthy())
+    const mountCalls = onChange.mock.calls.length
+
+    rerender(<NoteEditor value={loadedValue} onChange={onChange} readOnly={to} />)
+    await waitFor(() =>
+      expect(document.querySelector('.ProseMirror')!.getAttribute('contenteditable')).toBe(
+        String(!to),
+      ),
+    )
+
+    expect(onChange).toHaveBeenCalledTimes(mountCalls)
+  })
+
   it('registers no unload listener of its own', async () => {
     const addSpy = vi.spyOn(window, 'addEventListener')
     render(<NoteEditor value={emptyValue} onChange={vi.fn()} />)
