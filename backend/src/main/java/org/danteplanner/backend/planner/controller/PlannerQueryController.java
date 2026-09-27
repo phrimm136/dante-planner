@@ -50,7 +50,13 @@ public class PlannerQueryController {
             @AuthenticationPrincipal Long userId,
             @Valid @RequestBody PlannerBatchRequest request) {
 
-        return ResponseEntity.ok(plannerQueryService.getPlanners(userId, request.ids()));
+        return ResponseEntity.ok(readBatch(userId, request.ids()));
+    }
+
+    private List<PlannerResponse> readBatch(Long userId, List<UUID> ids) {
+        return byIdReadGuard.readAll(ByIdReadGuard.PLANNER_ENTITY_TYPE, ids,
+                requested -> plannerQueryService.getPlanners(userId, List.copyOf(requested)),
+                PlannerResponse::id);
     }
 
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "get")

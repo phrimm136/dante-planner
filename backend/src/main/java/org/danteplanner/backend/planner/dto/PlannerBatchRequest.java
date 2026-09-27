@@ -1,6 +1,7 @@
 package org.danteplanner.backend.planner.dto;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import org.danteplanner.backend.shared.util.PlannerConstants;
@@ -13,5 +14,5 @@ public record PlannerBatchRequest(
     @Size(max = PlannerConstants.BATCH_PULL_MAX_IDS,
             message = "Cannot pull more than " + PlannerConstants.BATCH_PULL_MAX_IDS
                     + " planners at once")
-    List<UUID> ids
+    List<@NotNull(message = "Planner ids must not be null") UUID> ids
 ) {}

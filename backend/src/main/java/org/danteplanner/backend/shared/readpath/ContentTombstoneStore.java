@@ -1,7 +1,12 @@
 package org.danteplanner.backend.shared.readpath;
 
 import java.time.Duration;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
@@ -40,6 +45,15 @@ public class ContentTombstoneStore {
         }
     }
 
+    public void clearTombstone(String entityType, UUID id) {
+        String key = tombstoneKey(entityType, id);
+        try {
+            stringRedisTemplate.delete(key);
+        } catch (DataAccessException e) {
+            log.warn("tombstone clear failed for {}:{} — reads re-check the primary until it expires", entityType, id, e);
+        }
+    }
+
     public boolean isTombstoned(String entityType, UUID id) {
         String key = tombstoneKey(entityType, id);
         try {
@@ -48,6 +62,25 @@ public class ContentTombstoneStore {
             skipped.increment();
             log.warn("tombstone check failed for {}:{} — serving the row unmasked", entityType, id, e);
             return false;
+        }
+    }
+
+    public Set<UUID> tombstonedAmong(String entityType, Collection<UUID> ids) {
+        if (ids.isEmpty()) {
+            return Set.of();
+        }
+        List<UUID> ordered = List.copyOf(ids);
+        List<String> keys = ordered.stream().map(id -> tombstoneKey(entityType, id)).toList();
+        try {
+            List<String> markers = authLocalStringRedisTemplate.opsForValue().multiGet(keys);
+            return IntStream.range(0, ordered.size())
+                    .filter(i -> markers.get(i) != null)
+                    .mapToObj(ordered::get)
+                    .collect(Collectors.toSet());
+        } catch (DataAccessException e) {
+            skipped.increment();
+            log.warn("tombstone check failed for {} {} ids — serving the rows unmasked", ids.size(), entityType, e);
+            return Set.of();
         }
     }
 

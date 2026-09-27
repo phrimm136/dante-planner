@@ -413,4 +413,45 @@ class EffectPlacementTest {
     private static String qualifiedName(JavaCodeUnit method) {
         return method.getOwner().getFullName() + "." + method.getName();
     }
+
+    private static final Map<String, Set<String>> TOMBSTONE_WRITES = Map.of(
+            "org.danteplanner.backend.shared.readpath.ContentTombstoneStore", Set.of("writeTombstone", "clearTombstone"));
+
+    @Test
+    @DisplayName("a transactional method reaches no tombstone write before its commit")
+    void tombstoneWrite_WhenReachedFromATransactionalMethod_IsRejected() {
+        Set<String> offenders = new TreeSet<>();
+
+        for (JavaMethod root : transactionalMethods()) {
+            List<String> reached = new ArrayList<>();
+            Set<String> visited = new HashSet<>();
+            Deque<JavaCodeUnit> pending = new ArrayDeque<>();
+            pending.push(root);
+            visited.add(qualifiedName(root));
+
+            while (!pending.isEmpty()) {
+                for (JavaMethodCall call : pending.pop().getMethodCallsFromSelf()) {
+                    String owner = call.getTargetOwner().getFullName();
+                    if (isEffect(TOMBSTONE_WRITES, owner, call.getTarget().getName())) {
+                        reached.add(owner + "." + call.getTarget().getName());
+                        continue;
+                    }
+                    if (!owner.startsWith("org.danteplanner.backend")) {
+                        continue;
+                    }
+                    for (JavaMethod callee : calleesOf(call)) {
+                        if (!isTransactional(callee) && visited.add(qualifiedName(callee))) {
+                            pending.push(callee);
+                        }
+                    }
+                }
+            }
+            reached.forEach(target -> offenders.add(qualifiedName(root) + " -> " + target));
+        }
+
+        assertThat(offenders)
+                .as("a tombstone written before the commit outlives a rollback and masks a live row "
+                        + "for its whole TTL; register it in an afterCommit synchronization")
+                .isEmpty();
+    }
 }

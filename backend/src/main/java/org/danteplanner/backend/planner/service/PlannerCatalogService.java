@@ -9,9 +9,13 @@ import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.RecommendedSql;
 import org.danteplanner.backend.planner.validation.JsonDocuments;
+import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
+import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Objects;
 import java.util.Set;
@@ -28,6 +32,7 @@ public class PlannerCatalogService {
     private final PlannerStatsRepository statsRepository;
     private final PlannerFilterService filterService;
     private final ObjectMapper objectMapper;
+    private final ContentTombstoneStore tombstoneStore;
     private final int recommendedThreshold;
 
     public PlannerCatalogService(
@@ -35,11 +40,13 @@ public class PlannerCatalogService {
             PlannerStatsRepository statsRepository,
             PlannerFilterService filterService,
             ObjectMapper objectMapper,
+            ContentTombstoneStore tombstoneStore,
             @Value("${planner.recommended-threshold}") int recommendedThreshold) {
         this.catalogRepository = catalogRepository;
         this.statsRepository = statsRepository;
         this.filterService = filterService;
         this.objectMapper = objectMapper;
+        this.tombstoneStore = tombstoneStore;
         this.recommendedThreshold = recommendedThreshold;
     }
 
@@ -47,12 +54,25 @@ public class PlannerCatalogService {
     public void onBecameVisible(Planner planner) {
         add(planner);
         filterService.requestRebuild(planner.getId());
+        UUID plannerId = planner.getId();
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                tombstoneStore.clearTombstone(ByIdReadGuard.PUBLISHED_PLANNER_SCOPE, plannerId);
+            }
+        });
     }
 
     @Transactional
     public void onBecameInvisible(UUID plannerId) {
         remove(plannerId);
         filterService.requestClear(plannerId);
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                tombstoneStore.writeTombstone(ByIdReadGuard.PUBLISHED_PLANNER_SCOPE, plannerId);
+            }
+        });
     }
 
     @Transactional

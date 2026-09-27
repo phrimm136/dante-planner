@@ -1,5 +1,6 @@
 package org.danteplanner.backend.readpath;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -36,6 +37,20 @@ class ByIdReadGuardTest {
             return "value";
         });
 
+        assertThat(calls.get()).isEqualTo(1);
+    }
+
+    @Test
+    void readAll_WhenNoReCheckIsWired_ReturnsTheDereferenceResultFromOneCall() {
+        List<UUID> ids = List.of(UUID.randomUUID(), UUID.randomUUID());
+        AtomicInteger calls = new AtomicInteger(0);
+
+        List<UUID> result = guard.readAll("planner", ids, requested -> {
+            calls.incrementAndGet();
+            return List.copyOf(requested);
+        }, id -> id);
+
+        assertThat(result).isEqualTo(ids);
         assertThat(calls.get()).isEqualTo(1);
     }
 }

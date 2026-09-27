@@ -90,7 +90,8 @@ public class PublishedPlannerController {
         String viewerIdentity = ClientIpResolver.resolveClientIdentifier(
                 request, securityProperties, () -> deviceIdResolver.resolve(request, servletResponse));
         String userAgent = request.getHeader("User-Agent");
-        PublishedPlannerDetailResponse response = byIdReadGuard.read(ByIdReadGuard.PLANNER_ENTITY_TYPE, id,
+        PublishedPlannerDetailResponse response = byIdReadGuard.readPublicView(ByIdReadGuard.PLANNER_ENTITY_TYPE,
+                ByIdReadGuard.PUBLISHED_PLANNER_SCOPE, id,
                 () -> publishedPlannerQueryService.getPublishedPlanner(id, userId, viewerIdentity, userAgent));
         return ResponseEntity.ok(response);
     }

@@ -123,4 +123,14 @@ class PlannerBatchPullIT extends SharedMySqlContainerSupport {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
     }
+
+    @Test
+    void batchPull_WhenAnIdIsNull_Returns400() throws Exception {
+        performAuthed(mockMvc, post("/api/planner/md/batch").with(withCsrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"ids\":[null]}"),
+                token)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+    }
 }

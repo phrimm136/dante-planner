@@ -318,16 +318,13 @@ public class PlannerCommandService {
 
         planner.softDelete();
         plannerCatalogService.onBecameInvisible(id);
-        if (TransactionSynchronizationManager.isSynchronizationActive()) {
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-                @Override
-                public void afterCommit() {
-                    tombstoneStore.ifPresent(store -> store.writeTombstone(ByIdReadGuard.PLANNER_ENTITY_TYPE, id));
-                }
-            });
-        } else {
-            tombstoneStore.ifPresent(store -> store.writeTombstone(ByIdReadGuard.PLANNER_ENTITY_TYPE, id));
-        }
+        tombstoneStore.ifPresent(store -> TransactionSynchronizationManager.registerSynchronization(
+                new TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                        store.writeTombstone(ByIdReadGuard.PLANNER_ENTITY_TYPE, id);
+                    }
+                }));
         log.info("Soft deleted planner {} for user {}", id, userId);
     }
 }

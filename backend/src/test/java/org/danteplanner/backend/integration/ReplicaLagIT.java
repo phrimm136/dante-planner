@@ -1,28 +1,46 @@
 package org.danteplanner.backend.integration;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.sql.DataSource;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.config.TestConfig;
+import org.danteplanner.backend.moderation.service.PlannerModerationService;
+import org.danteplanner.backend.planner.dto.PlannerBatchRequest;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
+import org.danteplanner.backend.planner.service.PlannerPublishingService;
 import org.danteplanner.backend.planner.service.PlannerQueryService;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
+import org.danteplanner.backend.shared.security.CsrfDoubleSubmitFilter;
+import org.danteplanner.backend.shared.security.CsrfTokenService;
+import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -91,6 +109,24 @@ class ReplicaLagIT extends CausalHarnessSupport {
 
     @Autowired
     private org.springframework.data.redis.core.StringRedisTemplate stringRedisTemplate;
+
+    @Autowired
+    private PlannerModerationService plannerModerationService;
+
+    @Autowired
+    private PlannerPublishingService plannerPublishingService;
+
+    @Autowired
+    private JwtTokenService jwtTokenService;
+
+    @Autowired
+    private CsrfTokenService csrfTokenService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @LocalServerPort
+    private int port;
 
     @DynamicPropertySource
     static void routingProperties(DynamicPropertyRegistry registry) {
@@ -270,6 +306,274 @@ class ReplicaLagIT extends CausalHarnessSupport {
                 .as("the tombstone must carry a bounded ~1h TTL (PX 3600000), not persist forever")
                 .isGreaterThan(0L)
                 .isLessThanOrEqualTo(3600L);
+    }
+
+    @Test
+    @DisplayName("INV2 published read: an owner soft-delete on the primary masks the published read from the paused replica with the tombstone's 404")
+    void publishedRead_WhenOwnerSoftDeletesOnPausedReplica_Returns404FromTheTombstone() throws Exception {
+        User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-published-delete@example.com");
+        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        UUID plannerId = planner.getId();
+        replicationControl.awaitCaughtUp();
+
+        try {
+            replicationControl.stopReplica();
+
+            plannerCommandService.deletePlanner(owner.getId(), plannerId);
+
+            assertThat(replicaStillPublished(plannerId))
+                    .as("the paused replica must still hold the planner published and live")
+                    .isTrue();
+            assertMaskedLikeASoftDelete(getPublished(plannerId), plannerId);
+        } finally {
+            replicationControl.startReplica();
+            replicationControl.awaitCaughtUp();
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"moderator-takedown", "moderator-unpublish", "owner-unpublish"})
+    @DisplayName("INV2 published read: a planner withdrawn from public view on the primary answers on the paused replica the 404 a caught-up replica gives")
+    void publishedRead_WhenWithdrawnFromPublicViewOnPausedReplica_Returns404LikeACaughtUpReplica(String withdrawal)
+            throws Exception {
+        User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-withdraw-" + withdrawal + "@example.com");
+        User moderator = TestDataFactory.createModerator(userRepository, "replica-lag-withdraw-mod-" + withdrawal + "@example.com");
+        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        UUID plannerId = planner.getId();
+        replicationControl.awaitCaughtUp();
+
+        try {
+            replicationControl.stopReplica();
+
+            withdraw(withdrawal, owner, moderator, plannerId);
+
+            assertThat(replicaStillPublished(plannerId))
+                    .as("the paused replica must still hold the planner published, so a 404 comes from the read path, not replication")
+                    .isTrue();
+            assertNotFoundLikeACaughtUpReplica(getPublished(plannerId), plannerId);
+        } finally {
+            replicationControl.startReplica();
+            replicationControl.awaitCaughtUp();
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"moderator-takedown", "moderator-unpublish", "owner-unpublish"})
+    @DisplayName("INV2 owner read: withdrawing a planner from public view leaves the owner's own by-id read served")
+    void ownerRead_WhenWithdrawnFromPublicViewOnPausedReplica_StillServesTheOwner(String withdrawal) {
+        User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-owner-read-" + withdrawal + "@example.com");
+        User moderator = TestDataFactory.createModerator(userRepository, "replica-lag-owner-read-mod-" + withdrawal + "@example.com");
+        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        UUID plannerId = planner.getId();
+        Long userId = owner.getId();
+        replicationControl.awaitCaughtUp();
+
+        try {
+            replicationControl.stopReplica();
+
+            withdraw(withdrawal, owner, moderator, plannerId);
+
+            PlannerResponse served = byIdReadGuard.read(ByIdReadGuard.PLANNER_ENTITY_TYPE, plannerId,
+                    () -> plannerQueryService.getPlanner(userId, plannerId));
+            assertThat(served.id())
+                    .as("a planner out of public view is still the owner's planner")
+                    .isEqualTo(plannerId);
+        } finally {
+            replicationControl.startReplica();
+            replicationControl.awaitCaughtUp();
+        }
+    }
+
+    @Test
+    @DisplayName("INV2 published read: a planner unpublished and republished on the primary is served while the replica is paused")
+    void publishedRead_WhenRepublishedOnPausedReplica_ServesThePlanner() throws Exception {
+        User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-republish@example.com");
+        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        UUID plannerId = planner.getId();
+        replicationControl.awaitCaughtUp();
+
+        try {
+            replicationControl.stopReplica();
+
+            plannerPublishingService.unpublish(owner.getId(), plannerId);
+            plannerPublishingService.publish(owner.getId(), plannerId);
+
+            HttpResponse<String> response = getPublished(plannerId);
+            assertThat(response.statusCode())
+                    .as("a republished planner must be visible at once: " + response.body())
+                    .isEqualTo(200);
+            assertThat(objectMapper.readTree(response.body()).get("id").asText())
+                    .isEqualTo(plannerId.toString());
+        } finally {
+            replicationControl.startReplica();
+            replicationControl.awaitCaughtUp();
+        }
+    }
+
+    @Test
+    @DisplayName("INV2 batch: a planner deleted on the primary is omitted from the batch pull while the paused replica still holds it")
+    void batchPull_WhenAPlannerIsTombstoned_OmitsItWhileKeepingTheLiveOne() throws Exception {
+        User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-batch-tombstone@example.com");
+        Planner live = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
+        Planner doomed = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
+        replicationControl.awaitCaughtUp();
+
+        try {
+            replicationControl.stopReplica();
+
+            plannerCommandService.deletePlanner(owner.getId(), doomed.getId());
+
+            Timestamp replicaDeletedAt = replicaJdbcTemplate.queryForObject(
+                    "SELECT deleted_at FROM planner_content WHERE planner_id = UUID_TO_BIN(?)",
+                    Timestamp.class,
+                    doomed.getId().toString());
+            assertThat(replicaDeletedAt)
+                    .as("the paused replica must still hold the row un-soft-deleted, so the omission comes from the tombstone")
+                    .isNull();
+
+            List<String> served = batchPull(owner, List.of(doomed.getId(), live.getId()));
+
+            assertThat(served)
+                    .as("the tombstoned planner must be masked and the live one served")
+                    .containsExactly(live.getId().toString());
+        } finally {
+            replicationControl.startReplica();
+            replicationControl.awaitCaughtUp();
+        }
+    }
+
+    @Test
+    @DisplayName("INV1 batch: a planner the paused replica lacks is promoted from the primary into the owner's batch pull")
+    void batchPull_WhenReplicaLacksAnOwnedPlanner_PromotesItFromThePrimary() throws Exception {
+        User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-batch-miss@example.com");
+        replicationControl.awaitCaughtUp();
+
+        try {
+            replicationControl.stopReplica();
+
+            Planner primaryOnly = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
+            double before = promotedCount();
+
+            List<String> served = batchPull(owner, List.of(primaryOnly.getId(), UUID.randomUUID()));
+
+            assertThat(served)
+                    .as("a batch-pull miss on the replica must be re-checked on the primary; an id absent there too stays omitted")
+                    .containsExactly(primaryOnly.getId().toString());
+            assertThat(promotedCount() - before)
+                    .as("one promoted row must increment " + PROMOTED_COUNTER + " by 1")
+                    .isEqualTo(1.0);
+        } finally {
+            replicationControl.startReplica();
+            replicationControl.awaitCaughtUp();
+        }
+    }
+
+    @Test
+    @DisplayName("batch: ids that exist nowhere are omitted without promoting anything")
+    void batchPull_WhenIdsExistNowhere_ReturnsAnEmptyArray() throws Exception {
+        User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-batch-unknown@example.com");
+        replicationControl.awaitCaughtUp();
+        double before = promotedCount();
+
+        List<String> served = batchPull(owner, List.of(UUID.randomUUID(), UUID.randomUUID()));
+
+        assertThat(served).isEmpty();
+        assertThat(promotedCount() - before).isEqualTo(0.0);
+    }
+
+    private void withdraw(String withdrawal, User owner, User moderator, UUID plannerId) {
+        switch (withdrawal) {
+            case "moderator-takedown" -> plannerModerationService.deletePlanner(moderator.getId(), plannerId, "replica lag");
+            case "moderator-unpublish" -> plannerModerationService.unpublishPlanner(moderator.getId(), plannerId);
+            case "owner-unpublish" -> plannerPublishingService.unpublish(owner.getId(), plannerId);
+            default -> throw new IllegalArgumentException(withdrawal);
+        }
+    }
+
+    private boolean replicaStillPublished(UUID plannerId) {
+        Boolean published = replicaJdbcTemplate.queryForObject(
+                "SELECT published FROM planner_publication WHERE planner_id = UUID_TO_BIN(?)",
+                Boolean.class,
+                plannerId.toString());
+        Timestamp deletedAt = replicaJdbcTemplate.queryForObject(
+                "SELECT deleted_at FROM planner_content WHERE planner_id = UUID_TO_BIN(?)",
+                Timestamp.class,
+                plannerId.toString());
+        return Boolean.TRUE.equals(published) && deletedAt == null;
+    }
+
+    private void assertMaskedLikeASoftDelete(HttpResponse<String> response, UUID plannerId) throws Exception {
+        assertThat(response.statusCode())
+                .as("the published read must be masked, not served: " + response.body())
+                .isEqualTo(404);
+        JsonNode problem = objectMapper.readTree(response.body());
+        assertThat(problem.path("code").asText()).isEqualTo("NOT_FOUND");
+        assertThat(problem.path("detail").asText()).isEqualTo("planner not found with id: " + plannerId);
+    }
+
+    @Test
+    @DisplayName("INV2 published read: once a withdrawn planner is republished, a read on the caught-up replica issues no bulkhead query")
+    void publishedRead_WhenRepublishedAfterWithdrawalOnCaughtUpReplica_IssuesNoBulkheadQuery() throws Exception {
+        User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-republish-bulkhead@example.com");
+        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        UUID plannerId = planner.getId();
+
+        plannerPublishingService.unpublish(owner.getId(), plannerId);
+        plannerPublishingService.publish(owner.getId(), plannerId);
+        replicationControl.awaitCaughtUp();
+        double before = bulkheadQueries();
+
+        HttpResponse<String> response = getPublished(plannerId);
+
+        assertThat(response.statusCode()).as(response.body()).isEqualTo(200);
+        assertThat(bulkheadQueries() - before)
+                .as("a republish must lift the withdrawal marker, so the caught-up replica's hit is served as-is")
+                .isEqualTo(0.0);
+    }
+
+    private void assertNotFoundLikeACaughtUpReplica(HttpResponse<String> response, UUID plannerId) throws Exception {
+        assertThat(response.statusCode())
+                .as("the published read must be masked, not served: " + response.body())
+                .isEqualTo(404);
+        JsonNode problem = objectMapper.readTree(response.body());
+        assertThat(problem.path("code").asText()).isEqualTo("PLANNER_NOT_FOUND");
+        assertThat(problem.path("detail").asText()).isEqualTo("Planner not found with id: " + plannerId);
+    }
+
+    private double bulkheadQueries() {
+        Counter counter = meterRegistry.find("replica_bulkhead_queries_total").counter();
+        return counter == null ? 0.0 : counter.count();
+    }
+
+    private HttpResponse<String> getPublished(UUID plannerId) throws Exception {
+        HttpRequest request = HttpRequest.newBuilder(
+                URI.create("http://localhost:" + port + "/api/planner/md/published/" + plannerId)).GET().build();
+        try (HttpClient client = HttpClient.newHttpClient()) {
+            return client.send(request, HttpResponse.BodyHandlers.ofString());
+        }
+    }
+
+    private List<String> batchPull(User owner, List<UUID> ids) throws Exception {
+        String accessToken = TestDataFactory.generateAccessToken(jwtTokenService, owner);
+        String csrf = csrfTokenService.mint();
+        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/planner/md/batch"))
+                .header("Content-Type", "application/json")
+                .header(CsrfDoubleSubmitFilter.CSRF_HEADER, csrf)
+                .header("Cookie", CookieConstants.ACCESS_TOKEN + "=" + accessToken
+                        + "; " + CookieConstants.CSRF + "=" + csrf)
+                .POST(HttpRequest.BodyPublishers.ofString(
+                        objectMapper.writeValueAsString(new PlannerBatchRequest(ids))))
+                .build();
+
+        try (HttpClient client = HttpClient.newHttpClient()) {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            assertThat(response.statusCode()).as(response.body()).isEqualTo(200);
+            List<String> served = new ArrayList<>();
+            for (JsonNode planner : objectMapper.readTree(response.body())) {
+                served.add(planner.get("id").asText());
+            }
+            return served;
+        }
     }
 
     private String readProbeViaRouting() {
