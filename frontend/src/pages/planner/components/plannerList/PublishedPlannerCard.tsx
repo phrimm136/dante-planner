@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { ThumbsUp, Eye, Bookmark, Star, Clock, MessageSquare } from 'lucide-react'
+import { ThumbsUp, Eye, Star, Clock, MessageSquare } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import { formatCompactDate } from '@/lib/formatDate'
@@ -18,14 +18,12 @@ import type { PublicPlanner } from '../../types/PlannerListTypes'
 
 interface PublishedPlannerCardProps {
   planner: PublicPlanner
-  showBookmark?: boolean
   onContextMenu?: (e: React.MouseEvent) => void
   className?: string
 }
 
 export function PublishedPlannerCard({
   planner,
-  showBookmark = false,
   onContextMenu,
   className,
 }: PublishedPlannerCardProps) {
@@ -41,7 +39,6 @@ export function PublishedPlannerCard({
     authorUsernameEpithet,
     authorUsernameSuffix,
     createdAt,
-    isBookmarked,
   } = planner
 
   const keywords = selectedKeywords ?? []
@@ -82,9 +79,6 @@ export function PublishedPlannerCard({
 
         <div className="shrink-0 min-w-[1rem] flex justify-end">
           {upvotes >= RECOMMENDED_THRESHOLD && <Star className={cn('size-4', STAR_ICON_CLASS)} />}
-          {showBookmark && isBookmarked && (
-            <Bookmark className="size-4 fill-primary text-primary" />
-          )}
         </div>
       </div>
 

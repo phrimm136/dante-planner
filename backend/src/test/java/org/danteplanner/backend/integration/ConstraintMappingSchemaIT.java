@@ -44,7 +44,6 @@ class ConstraintMappingSchemaIT extends SharedMySqlContainerSupport {
      */
     private static final Map<String, String> ACTOR_COLUMN = Map.of(
             "planner_votes", "user_id",
-            "planner_bookmarks", "user_id",
             "planner_reports", "user_id",
             "planner_comment_reports", "reporter_id");
 

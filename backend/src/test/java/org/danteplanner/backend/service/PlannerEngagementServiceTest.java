@@ -6,7 +6,6 @@ import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.planner.repository.PlannerBookmarkRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.moderation.service.PlannerReportService;
@@ -48,7 +47,7 @@ import org.danteplanner.backend.planner.dto.VoteResponse;
 import org.danteplanner.backend.planner.entity.VoteType;
 
 /**
- * Unit tests for PlannerEngagementService (immutable voting and bookmark reads).
+ * Unit tests for PlannerEngagementService (immutable voting).
  */
 @ExtendWith(SpringExtension.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
@@ -62,9 +61,6 @@ class PlannerEngagementServiceTest {
 
     @Mock
     private PlannerVoteRepository plannerVoteRepository;
-
-    @Mock
-    private PlannerBookmarkRepository plannerBookmarkRepository;
 
     @Mock
     private DomainEventRecorder domainEventRecorder;
@@ -91,7 +87,6 @@ class PlannerEngagementServiceTest {
 
         engagementService = new PlannerEngagementService(
                 plannerVoteRepository,
-                plannerBookmarkRepository,
                 plannerStatsService,
                 plannerCatalogService,
                 domainEventRecorder,
@@ -245,35 +240,6 @@ class PlannerEngagementServiceTest {
             engagementService.castVote(testUser.getId(), plannerId, VoteType.UP);
 
             verifyNoInteractions(domainEventRecorder);
-        }
-    }
-
-    @Nested
-    @DisplayName("isBookmarked Tests")
-    class IsBookmarkedTests {
-
-        @Test
-        @DisplayName("Should return true when bookmark exists")
-        void isBookmarked_WhenExists_ReturnsTrue() {
-            // Arrange
-            UUID plannerId = UUID.randomUUID();
-            when(plannerBookmarkRepository.existsByUserIdAndPlannerId(testUser.getId(), plannerId))
-                    .thenReturn(true);
-
-            // Act & Assert
-            assertTrue(engagementService.isBookmarked(testUser.getId(), plannerId));
-        }
-
-        @Test
-        @DisplayName("Should return false when bookmark does not exist")
-        void isBookmarked_WhenNotExists_ReturnsFalse() {
-            // Arrange
-            UUID plannerId = UUID.randomUUID();
-            when(plannerBookmarkRepository.existsByUserIdAndPlannerId(testUser.getId(), plannerId))
-                    .thenReturn(false);
-
-            // Act & Assert
-            assertFalse(engagementService.isBookmarked(testUser.getId(), plannerId));
         }
     }
 }

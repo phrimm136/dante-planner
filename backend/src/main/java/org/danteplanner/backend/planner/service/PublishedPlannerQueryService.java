@@ -13,11 +13,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.entity.PlannerBookmark;
 import org.danteplanner.backend.planner.entity.PlannerCatalog;
 import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.entity.PlannerStats;
-import org.danteplanner.backend.planner.repository.PlannerBookmarkRepository;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
@@ -53,10 +51,8 @@ public class PublishedPlannerQueryService {
     private final PlannerRepository plannerRepository;
     private final PlannerCatalogRepository catalogRepository;
     private final PlannerVoteRepository plannerVoteRepository;
-    private final PlannerBookmarkRepository plannerBookmarkRepository;
     private final PlannerSubscriptionService subscriptionService;
     private final PlannerReportService reportService;
-    private final PlannerEngagementService engagementService;
     private final PlannerViewRecorder plannerViewRecorder;
     private final PlannerStatsRepository plannerStatsRepository;
     private final PlannerAccessGuard accessGuard;
@@ -66,10 +62,8 @@ public class PublishedPlannerQueryService {
             PlannerRepository plannerRepository,
             PlannerCatalogRepository catalogRepository,
             PlannerVoteRepository plannerVoteRepository,
-            PlannerBookmarkRepository plannerBookmarkRepository,
             PlannerSubscriptionService subscriptionService,
             PlannerReportService reportService,
-            PlannerEngagementService engagementService,
             PlannerViewRecorder plannerViewRecorder,
             PlannerStatsRepository plannerStatsRepository,
             PlannerAccessGuard accessGuard,
@@ -77,10 +71,8 @@ public class PublishedPlannerQueryService {
         this.plannerRepository = plannerRepository;
         this.catalogRepository = catalogRepository;
         this.plannerVoteRepository = plannerVoteRepository;
-        this.plannerBookmarkRepository = plannerBookmarkRepository;
         this.subscriptionService = subscriptionService;
         this.reportService = reportService;
-        this.engagementService = engagementService;
         this.plannerViewRecorder = plannerViewRecorder;
         this.plannerStatsRepository = plannerStatsRepository;
         this.accessGuard = accessGuard;
@@ -146,21 +138,13 @@ public class PublishedPlannerQueryService {
                         .collect(Collectors.toMap(PlannerStats::getPlannerId, Function.identity()));
 
         Set<UUID> upvotedIds;
-        Set<UUID> bookmarkedIds;
         if (userId == null) {
             upvotedIds = Set.of();
-            bookmarkedIds = Set.of();
         } else {
             upvotedIds = plannerVoteRepository
                     .findByUserIdAndPlannerIdIn(userId, plannerIds)
                     .stream()
                     .map(PlannerVote::getPlannerId)
-                    .collect(Collectors.toSet());
-
-            bookmarkedIds = plannerBookmarkRepository
-                    .findByUserIdAndPlannerIdIn(userId, plannerIds)
-                    .stream()
-                    .map(PlannerBookmark::getPlannerId)
                     .collect(Collectors.toSet());
         }
 
@@ -171,8 +155,7 @@ public class PublishedPlannerQueryService {
             PlannerStats stats = statsMap.getOrDefault(id, NO_STATS);
             return anonymous
                     ? PublicPlannerResponse.forAnonymous(row, core, stats)
-                    : PublicPlannerResponse.fromCatalog(row, core, stats,
-                            upvotedIds.contains(id), bookmarkedIds.contains(id));
+                    : PublicPlannerResponse.fromCatalog(row, core, stats, upvotedIds.contains(id));
         });
     }
 
@@ -204,12 +187,11 @@ public class PublishedPlannerQueryService {
         }
 
         final boolean hasUpvoted = hasUpvoted(plannerId, userId);
-        final boolean isBookmarked = engagementService.isBookmarked(userId, plannerId);
         final boolean isSubscribed = subscriptionService.isSubscribed(userId, plannerId);
         final boolean hasReported = reportService.hasReported(userId, plannerId);
 
         return PublishedPlannerDetailResponse.fromEntity(
-                planner, hasUpvoted, isBookmarked, isSubscribed, hasReported,
+                planner, hasUpvoted, isSubscribed, hasReported,
                 commentCount, ownerNotificationsEnabled, viewCount, upvotes);
     }
 }

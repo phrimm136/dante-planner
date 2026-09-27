@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button'
 
 import { useMDGesellschaftFilters } from './hooks/useMDGesellschaftFilters'
 import { usePlannerSearchFilters } from './hooks/usePlannerSearchFilters'
-import { useAuthQuery } from '@/shared/auth'
 
 import { MDPlannerNavButtons } from './components/plannerList/MDPlannerNavButtons'
 import { MDPlannerToolbar } from './components/plannerList/MDPlannerToolbar'
@@ -24,8 +23,6 @@ import { SECTION_STYLES } from '@/lib/constants'
 
 function GesellschaftPageContent() {
   const { t } = useTranslation(['planner', 'common'])
-  const { data: user } = useAuthQuery()
-  const isAuthenticated = !!user
 
   const { filters, setFilters } = useMDGesellschaftFilters()
 
@@ -71,11 +68,7 @@ function GesellschaftPageContent() {
 
       <ReactErrorBoundary FallbackComponent={CommunityPlansErrorFallback}>
         <Suspense fallback={<PlannerGridSkeleton geometry={PLANNER_GEOMETRY} />}>
-          <PublishedPlannerList
-            filters={filters}
-            isAuthenticated={isAuthenticated}
-            onPageChange={(p) => setFilters({ page: p })}
-          />
+          <PublishedPlannerList filters={filters} onPageChange={(p) => setFilters({ page: p })} />
         </Suspense>
       </ReactErrorBoundary>
     </div>

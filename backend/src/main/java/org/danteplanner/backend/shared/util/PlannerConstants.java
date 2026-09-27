@@ -9,6 +9,8 @@ public final class PlannerConstants {
 
     public static final int BATCH_PULL_MAX_IDS = 50;
 
+    public static final boolean RETIRED_BOOKMARK_FLAG = false;
+
     private PlannerConstants() {
     }
 }

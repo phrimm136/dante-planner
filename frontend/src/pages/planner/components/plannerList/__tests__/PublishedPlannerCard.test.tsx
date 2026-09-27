@@ -51,7 +51,6 @@ function createMockPlanner(overrides: Partial<PublicPlanner> = {}): PublicPlanne
     createdAt: '2024-01-01T00:00:00.000Z',
     firstPublishedAt: '2024-01-01T00:00:00.000Z',
     hasUpvoted: false,
-    isBookmarked: false,
     ...overrides,
   }
 }

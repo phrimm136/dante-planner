@@ -44,7 +44,6 @@ const mockPaginatedResponse = {
       createdAt: '2024-12-31T10:00:00Z',
       lastModifiedAt: '2024-12-31T12:00:00Z',
       hasUpvoted: null,
-      isBookmarked: null,
     },
   ],
   page: {

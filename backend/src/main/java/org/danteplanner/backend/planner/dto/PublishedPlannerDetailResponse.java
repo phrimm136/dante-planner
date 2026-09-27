@@ -1,10 +1,12 @@
 package org.danteplanner.backend.planner.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.shared.util.PlannerConstants;
 import org.danteplanner.backend.user.entity.User;
 
 import java.time.Instant;
@@ -26,7 +28,6 @@ public record PublishedPlannerDetailResponse(
     Instant firstPublishedAt,
     Instant lastModifiedAt,
     boolean hasUpvoted,
-    boolean isBookmarked,
     String content,
     int schemaVersion,
     int contentVersion,
@@ -41,20 +42,24 @@ public record PublishedPlannerDetailResponse(
         selectedKeywords = selectedKeywords == null ? Set.of() : Set.copyOf(selectedKeywords);
     }
 
+    @JsonProperty("isBookmarked")
+    public boolean isBookmarked() {
+        return PlannerConstants.RETIRED_BOOKMARK_FLAG;
+    }
+
     public static PublishedPlannerDetailResponse forAnonymous(
             Planner planner,
             long commentCount,
             boolean ownerNotificationsEnabled,
             int viewCount,
             int upvotes) {
-        return fromEntity(planner, false, false, false, false,
+        return fromEntity(planner, false, false, false,
                 commentCount, ownerNotificationsEnabled, viewCount, upvotes);
     }
 
     public static PublishedPlannerDetailResponse fromEntity(
             Planner planner,
             boolean hasUpvoted,
-            boolean isBookmarked,
             boolean isSubscribed,
             boolean hasReported,
             long commentCount,
@@ -76,7 +81,6 @@ public record PublishedPlannerDetailResponse(
                 .firstPublishedAt(planner.getFirstPublishedAt())
                 .lastModifiedAt(planner.getLastModifiedAt())
                 .hasUpvoted(hasUpvoted)
-                .isBookmarked(isBookmarked)
                 .content(planner.getContentJson())
                 .schemaVersion(planner.getSchemaVersion())
                 .contentVersion(planner.getContentVersion())

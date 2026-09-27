@@ -179,7 +179,6 @@ describe('CommunityPlansSection', () => {
             authorUsernameEpithet: 'TestUser',
             authorUsernameSuffix: '001',
             lastModifiedAt: '2024-12-31T12:00:00Z',
-            isBookmarked: false,
           },
         ],
         page: {
@@ -220,7 +219,6 @@ describe('CommunityPlansSection', () => {
             authorUsernameEpithet: 'TestUser',
             authorUsernameSuffix: '001',
             lastModifiedAt: '2024-12-31T12:00:00Z',
-            isBookmarked: false,
           },
           {
             id: 'test-id-2',
@@ -232,7 +230,6 @@ describe('CommunityPlansSection', () => {
             authorUsernameEpithet: 'AnotherUser',
             authorUsernameSuffix: '002',
             lastModifiedAt: '2024-12-31T13:00:00Z',
-            isBookmarked: false,
           },
         ],
         page: {

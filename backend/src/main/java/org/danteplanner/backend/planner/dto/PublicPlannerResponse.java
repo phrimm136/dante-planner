@@ -1,10 +1,12 @@
 package org.danteplanner.backend.planner.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 
 import org.danteplanner.backend.planner.entity.PlannerCatalog;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.shared.util.PlannerConstants;
 
 import java.time.Instant;
 import java.util.Set;
@@ -24,24 +26,27 @@ public record PublicPlannerResponse(
     int viewCount,
     Instant firstPublishedAt,
     boolean hasUpvoted,
-    boolean isBookmarked,
     long commentCount
 ) {
     public PublicPlannerResponse {
         selectedKeywords = selectedKeywords == null ? Set.of() : Set.copyOf(selectedKeywords);
     }
 
+    @JsonProperty("isBookmarked")
+    public boolean isBookmarked() {
+        return PlannerConstants.RETIRED_BOOKMARK_FLAG;
+    }
+
     public static PublicPlannerResponse forAnonymous(
             PlannerCatalog row, PlannerCoreInfo core, PlannerStats stats) {
-        return fromCatalog(row, core, stats, false, false);
+        return fromCatalog(row, core, stats, false);
     }
 
     public static PublicPlannerResponse fromCatalog(
             PlannerCatalog row,
             PlannerCoreInfo core,
             PlannerStats stats,
-            boolean hasUpvoted,
-            boolean isBookmarked) {
+            boolean hasUpvoted) {
         return PublicPlannerResponse.builder()
                 .id(row.getPlannerId())
                 .title(row.getTitle())
@@ -55,7 +60,6 @@ public record PublicPlannerResponse(
                 .viewCount(stats.getViewCount())
                 .firstPublishedAt(row.getFirstPublishedAt())
                 .hasUpvoted(hasUpvoted)
-                .isBookmarked(isBookmarked)
                 .commentCount(stats.getCommentCount())
                 .build();
     }

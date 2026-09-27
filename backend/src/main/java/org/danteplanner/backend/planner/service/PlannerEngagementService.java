@@ -10,7 +10,6 @@ import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.entity.PlannerVoteId;
 import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.moderation.service.PlannerReportService;
-import org.danteplanner.backend.planner.repository.PlannerBookmarkRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.planner.validation.VoteUniquenessValidator;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
@@ -29,7 +28,6 @@ import java.util.UUID;
 public class PlannerEngagementService {
 
     private final PlannerVoteRepository plannerVoteRepository;
-    private final PlannerBookmarkRepository plannerBookmarkRepository;
     private final PlannerStatsService plannerStatsService;
     private final PlannerCatalogService plannerCatalogService;
     private final DomainEventRecorder domainEventRecorder;
@@ -41,7 +39,6 @@ public class PlannerEngagementService {
 
     public PlannerEngagementService(
             PlannerVoteRepository plannerVoteRepository,
-            PlannerBookmarkRepository plannerBookmarkRepository,
             PlannerStatsService plannerStatsService,
             PlannerCatalogService plannerCatalogService,
             DomainEventRecorder domainEventRecorder,
@@ -50,7 +47,6 @@ public class PlannerEngagementService {
             VoteUniquenessValidator voteUniquenessValidator,
             @Value("${planner.recommended-threshold}") int recommendedThreshold) {
         this.plannerVoteRepository = plannerVoteRepository;
-        this.plannerBookmarkRepository = plannerBookmarkRepository;
         this.plannerStatsService = plannerStatsService;
         this.plannerCatalogService = plannerCatalogService;
         this.domainEventRecorder = domainEventRecorder;
@@ -104,10 +100,5 @@ public class PlannerEngagementService {
 
     public void reportPlanner(Long userId, UUID plannerId) {
         reportService.createReport(userId, plannerId);
-    }
-
-    @Transactional(readOnly = true)
-    public boolean isBookmarked(Long userId, UUID plannerId) {
-        return plannerBookmarkRepository.existsByUserIdAndPlannerId(userId, plannerId);
     }
 }

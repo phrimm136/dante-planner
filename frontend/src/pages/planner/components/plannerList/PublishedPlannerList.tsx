@@ -14,15 +14,10 @@ import type { MDGesellschaftFilters } from '../../types/MDPlannerListTypes'
 
 export interface PublishedPlannerListProps {
   filters: MDGesellschaftFilters
-  isAuthenticated: boolean
   onPageChange: (page: number) => void
 }
 
-export function PublishedPlannerList({
-  filters,
-  isAuthenticated,
-  onPageChange,
-}: PublishedPlannerListProps) {
+export function PublishedPlannerList({ filters, onPageChange }: PublishedPlannerListProps) {
   const { category, keyword, identity, ego, gift, themePack, search } = filters
   const { data } = useMDGesellschaftData({
     page: filters.page,
@@ -69,7 +64,7 @@ export function PublishedPlannerList({
             search={currentSearch}
             className="block"
           >
-            <PublishedPlannerCard planner={planner} showBookmark={isAuthenticated} />
+            <PublishedPlannerCard planner={planner} />
           </Link>
         ))}
       </ResponsiveCardGrid>

@@ -146,11 +146,7 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
 
       <NearViewportGate placeholder={listPlaceholder}>
         <Suspense fallback={listPlaceholder}>
-          <PlannerListSection
-            filters={filters}
-            setFilters={setFilters}
-            isAuthenticated={isAuthenticated}
-          />
+          <PlannerListSection filters={filters} setFilters={setFilters} />
         </Suspense>
       </NearViewportGate>
     </div>
@@ -170,10 +166,9 @@ const listPlaceholder = (
 interface PlannerListSectionProps {
   filters: UseMDGesellschaftFiltersResult['filters']
   setFilters: UseMDGesellschaftFiltersResult['setFilters']
-  isAuthenticated: boolean
 }
 
-function PlannerListSection({ filters, setFilters, isAuthenticated }: PlannerListSectionProps) {
+function PlannerListSection({ filters, setFilters }: PlannerListSectionProps) {
   return (
     <div className={SECTION_STYLES.SPACING.section}>
       <div className="mb-4">
@@ -204,7 +199,6 @@ function PlannerListSection({ filters, setFilters, isAuthenticated }: PlannerLis
               gift: undefined,
               themePack: undefined,
             }}
-            isAuthenticated={isAuthenticated}
             onPageChange={(p) => setFilters({ page: p })}
           />
         </Suspense>

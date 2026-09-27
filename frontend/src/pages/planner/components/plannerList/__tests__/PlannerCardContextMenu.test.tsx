@@ -68,7 +68,6 @@ const basePlanner: PublicPlanner = {
   viewCount: 100,
   commentCount: 0,
   hasUpvoted: false,
-  isBookmarked: false,
   authorUsernameEpithet: 'NAIVE',
   authorUsernameSuffix: '1234A',
   createdAt: new Date('2025-01-01T00:00:00Z').toISOString(),

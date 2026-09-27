@@ -1,11 +1,7 @@
 package org.danteplanner.backend.service;
-import org.danteplanner.backend.planner.service.PlannerCatalogService;
-import org.danteplanner.backend.planner.service.PlannerStatsService;
 import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
-import org.danteplanner.backend.planner.service.PlannerEngagementService;
 import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
 import org.danteplanner.backend.planner.validation.CatalogReadValidator;
-import org.danteplanner.backend.planner.validation.VoteUniquenessValidator;
 
 import org.danteplanner.backend.moderation.service.PlannerReportService;
 import org.danteplanner.backend.planner.dto.CatalogQuery;
@@ -22,7 +18,6 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.shared.entity.ContentEntityType;
-import org.danteplanner.backend.planner.repository.PlannerBookmarkRepository;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.service.PlannerViewRecorder;
@@ -36,8 +31,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Value;
-import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -85,9 +78,6 @@ class PublishedPlannerQueryServiceTest {
     private PlannerVoteRepository plannerVoteRepository;
 
     @Mock
-    private PlannerBookmarkRepository plannerBookmarkRepository;
-
-    @Mock
     private PlannerViewRecorder plannerViewRecorder;
 
     @Mock
@@ -97,22 +87,9 @@ class PublishedPlannerQueryServiceTest {
     private PlannerReportService reportService;
 
     @Mock
-    private PlannerStatsService plannerStatsService;
-
-    @Mock
-    private PlannerCatalogService plannerCatalogService;
-
-    @Mock
-    private DomainEventRecorder domainEventRecorder;
-
-    @Mock
     private PlannerStatsRepository plannerStatsRepository;
 
-    private PlannerEngagementService engagementService;
     private PublishedPlannerQueryService publishedQueryService;
-
-    @Value("${planner.recommended-threshold}")
-    private int recommendedThreshold;
 
     private User testUser;
 
@@ -122,28 +99,12 @@ class PublishedPlannerQueryServiceTest {
 
         PlannerAccessGuard accessGuard = new PlannerAccessGuard(userService, plannerRepository);
 
-        // engagementService is a real collaborator wired to the mocked repositories,
-        // matching how PublishedPlannerQueryService delegates isBookmarked() to it.
-        engagementService = new PlannerEngagementService(
-                plannerVoteRepository,
-                plannerBookmarkRepository,
-                plannerStatsService,
-                plannerCatalogService,
-                domainEventRecorder,
-                accessGuard,
-                reportService,
-                new VoteUniquenessValidator(),
-                recommendedThreshold
-        );
-
         publishedQueryService = new PublishedPlannerQueryService(
                 plannerRepository,
                 catalogRepository,
                 plannerVoteRepository,
-                plannerBookmarkRepository,
                 subscriptionService,
                 reportService,
-                engagementService,
                 plannerViewRecorder,
                 plannerStatsRepository,
                 accessGuard,
@@ -357,15 +318,9 @@ class PublishedPlannerQueryServiceTest {
                             .build()));
         }
 
-        /**
-         * Each of the four context flags carries a distinct value, so a response that crosses
-         * two of them fails rather than matching by coincidence.
-         */
         private void mockUserContext(UUID plannerId) {
             when(plannerVoteRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
                     .thenReturn(Optional.of(new PlannerVote(testUser.getId(), plannerId, VoteType.UP)));
-            when(plannerBookmarkRepository.existsByUserIdAndPlannerId(testUser.getId(), plannerId))
-                    .thenReturn(false);
             when(subscriptionService.isSubscribed(testUser.getId(), plannerId)).thenReturn(true);
             when(reportService.hasReported(testUser.getId(), plannerId)).thenReturn(false);
         }
@@ -408,7 +363,6 @@ class PublishedPlannerQueryServiceTest {
             verify(plannerStatsRepository, never()).incrementViewCountBy(any(), anyInt());
             assertEquals(10, result.viewCount());
             assertTrue(result.hasUpvoted());
-            assertFalse(result.isBookmarked());
             assertTrue(result.isSubscribed());
             assertFalse(result.hasReported());
         }
@@ -457,7 +411,6 @@ class PublishedPlannerQueryServiceTest {
             assertEquals(10, result.viewCount());
             assertNotNull(result.content());
             assertFalse(result.hasUpvoted());
-            assertFalse(result.isBookmarked());
         }
 
         @Test
@@ -528,7 +481,6 @@ class PublishedPlannerQueryServiceTest {
             assertEquals(7, card.upvotes());
             assertEquals(3L, card.commentCount());
             assertFalse(card.hasUpvoted());
-            assertFalse(card.isBookmarked());
         }
     }
 
@@ -556,7 +508,6 @@ class PublishedPlannerQueryServiceTest {
             assertEquals(row.getPlannerId(), card.id());
             assertEquals("Test Planner", card.title());
             assertFalse(card.hasUpvoted());
-            assertFalse(card.isBookmarked());
         }
 
         @Test

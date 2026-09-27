@@ -29,11 +29,9 @@ import static org.danteplanner.backend.support.AuthCookies.performAuthed;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
-import org.danteplanner.backend.planner.entity.PlannerBookmark;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.entity.VoteType;
-import org.danteplanner.backend.planner.repository.PlannerBookmarkRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
@@ -74,9 +72,6 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private PlannerVoteRepository voteRepository;
-
-    @Autowired
-    private PlannerBookmarkRepository bookmarkRepository;
 
     private User owner;
     private String token;
@@ -124,7 +119,6 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
 
     private void engageAsOwner() {
         voteRepository.insert(new PlannerVote(owner.getId(), published.getId(), VoteType.UP));
-        bookmarkRepository.save(new PlannerBookmark(owner.getId(), published.getId()));
     }
 
     @Test
@@ -187,13 +181,11 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
         assertThat(flag(card, "hasUpvoted"))
                 .as("an anonymous viewer has no account to have upvoted with")
                 .isFalse();
-        assertThat(flag(card, "isBookmarked"))
-                .as("an anonymous viewer has no account to have bookmarked with")
-                .isFalse();
+        assertThat(flag(card, "isBookmarked")).isFalse();
     }
 
     @Test
-    @DisplayName("list-card-fields: an authenticated list card carries the viewer's own vote and bookmark state")
+    @DisplayName("list-card-fields: an authenticated list card carries the viewer's own vote state")
     void listCardFields_WhenListedAsViewer_CarriesUserContext() throws Exception {
         statsRepository.save(PlannerStats.builder().plannerId(published.getId()).build());
         catalogService.add(published);
@@ -207,9 +199,6 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
         assertThat(fieldNames(card)).contains("hasUpvoted", "isBookmarked");
         assertThat(flag(card, "hasUpvoted"))
                 .as("the viewer's vote row is reflected on the card")
-                .isTrue();
-        assertThat(flag(card, "isBookmarked"))
-                .as("the viewer's bookmark row is reflected on the card")
                 .isTrue();
     }
 
@@ -264,9 +253,6 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
                 .contains("hasUpvoted", "isBookmarked", "isSubscribed", "hasReported");
         assertThat(flag(detail, "hasUpvoted"))
                 .as("the viewer's vote row is reflected on the detail")
-                .isTrue();
-        assertThat(flag(detail, "isBookmarked"))
-                .as("the viewer's bookmark row is reflected on the detail")
                 .isTrue();
         assertThat(flag(detail, "isSubscribed"))
                 .as("the viewer holds no subscription row")

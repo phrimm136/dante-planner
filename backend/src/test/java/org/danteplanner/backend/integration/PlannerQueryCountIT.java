@@ -4,13 +4,11 @@ import jakarta.persistence.EntityManagerFactory;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.CatalogQuery;
 import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.entity.PlannerBookmark;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.planner.entity.PlannerVote;
-import org.danteplanner.backend.planner.repository.PlannerBookmarkRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
@@ -60,7 +58,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * <p>The class is deliberately NOT {@code @Transactional}: each measured service call runs in
  * its own fresh read-only transaction (a new Hibernate session), so the author and the
- * vote/bookmark/comment context must actually be fetched from the database rather than served
+ * vote/comment context must actually be fetched from the database rather than served
  * from a shared L1 cache — otherwise an N+1 would be masked and the assertion would be a tautology.</p>
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -85,10 +83,10 @@ class PlannerQueryCountIT {
     // own database.
     private static final String SEARCH_MARKER = "querycountmarker";
 
-    // Page + count + core info + stats + votes + bookmarks.
-    private static final long PUBLISHED_LIST_STATEMENTS = 6;
-    private static final long RECOMMENDED_LIST_STATEMENTS = 6;
-    private static final long SEARCH_LIST_STATEMENTS = 6;
+    // Page + count + core info + stats + votes.
+    private static final long PUBLISHED_LIST_STATEMENTS = 5;
+    private static final long RECOMMENDED_LIST_STATEMENTS = 5;
+    private static final long SEARCH_LIST_STATEMENTS = 5;
 
     @DynamicPropertySource
     static void registerMySqlProperties(DynamicPropertyRegistry registry) {
@@ -102,9 +100,6 @@ class PlannerQueryCountIT {
 
     @Autowired
     private PlannerVoteRepository plannerVoteRepository;
-
-    @Autowired
-    private PlannerBookmarkRepository plannerBookmarkRepository;
 
     @Autowired
     private PlannerCommentRepository plannerCommentRepository;
@@ -139,7 +134,7 @@ class PlannerQueryCountIT {
     @BeforeEach
     void setUp() {
 
-        // A distinct viewer drives the authenticated read-path (vote + bookmark + comment batches).
+        // A distinct viewer drives the authenticated read-path (vote + comment batches).
         viewerId = TestDataFactory.createTestUser(userRepository, "viewer@example.com").getId();
 
         statistics = entityManagerFactory.unwrap(SessionFactory.class).getStatistics();
@@ -239,7 +234,7 @@ class PlannerQueryCountIT {
 
     /**
      * Seeds {@link #SMALL_SET} then {@link #LARGE_SET} published planners (each by a distinct
-     * author, each carrying votes/bookmarks/comments from the viewer) and asserts the measured
+     * author, each carrying votes/comments from the viewer) and asserts the measured
      * statement count does not grow with the row count.
      *
      * <p>A warm-up call precedes each measurement so one-time bootstrap statements do not land
@@ -276,7 +271,6 @@ class PlannerQueryCountIT {
             seededIds.add(planner.getId());
 
             plannerVoteRepository.save(new PlannerVote(viewerId, planner.getId(), VoteType.UP));
-            plannerBookmarkRepository.save(new PlannerBookmark(viewerId, planner.getId()));
             plannerCommentRepository.save(
                     new PlannerComment(planner.getId(), viewerId, "context comment", null, 0));
         }

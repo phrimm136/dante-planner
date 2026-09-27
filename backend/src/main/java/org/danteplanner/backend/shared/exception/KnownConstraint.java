@@ -14,7 +14,6 @@ public enum KnownConstraint {
     PLANNER_ID("planner", "PRIMARY", ConstraintViolationOutcome.UUID_COLLISION),
 
     PLANNER_VOTE("planner_votes", Keys.ANY_UNIQUE, ConstraintViolationOutcome.DUPLICATE_ACTION),
-    PLANNER_BOOKMARK("planner_bookmarks", Keys.ANY_UNIQUE, ConstraintViolationOutcome.DUPLICATE_ACTION),
     PLANNER_REPORT("planner_reports", Keys.ANY_UNIQUE, ConstraintViolationOutcome.DUPLICATE_ACTION),
     COMMENT_REPORT("planner_comment_reports", Keys.ANY_UNIQUE, ConstraintViolationOutcome.DUPLICATE_ACTION);
 

@@ -19,7 +19,6 @@ export const PublicPlannerSchema = z.object({
   createdAt: z.string(),
   firstPublishedAt: z.string(),
   hasUpvoted: z.boolean(),
-  isBookmarked: z.boolean(),
   commentCount: z.number().int().min(0),
 })
 
