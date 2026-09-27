@@ -57,13 +57,19 @@ variable "instance_class" {
 }
 
 variable "engine_version" {
-  description = "Fully-qualified MySQL minor (e.g. 8.0.40). Must be >= the source's captured @@version (runbook 0.2); replication only goes low->high. Required — no coarse '8.0' default, which would let AWS pick a minor possibly BELOW the source and silently stall replication."
+  description = "Fully-qualified MySQL 8.4 minor (e.g. 8.4.11). Must be <= every read replica's version; replication only goes low->high. Required — no coarse '8.4' default, which would let AWS pick the minor."
   type        = string
 
   validation {
-    condition     = can(regex("^8\\.0\\.\\d+$", var.engine_version))
-    error_message = "engine_version must be a fully-qualified 8.0.x minor (e.g. 8.0.40), not '8.0' — pin it to match/exceed the source minor."
+    condition     = can(regex("^8\\.4\\.\\d+$", var.engine_version))
+    error_message = "engine_version must be a fully-qualified 8.4.x minor (e.g. 8.4.11), not '8.4'."
   }
+}
+
+variable "apply_immediately" {
+  description = "Apply pending modifications now instead of in the maintenance window. Set per run; a permanent true would turn every parameter tweak into an unscheduled reboot."
+  type        = bool
+  default     = false
 }
 
 variable "ca_cert_identifier" {
@@ -99,7 +105,7 @@ variable "master_username" {
 }
 
 variable "sql_mode" {
-  description = "Set from the source's captured @@sql_mode (runbook 0.2). Empty = RDS/MySQL 8.0 default."
+  description = "Set from the source's captured @@sql_mode (runbook 0.2). Empty = RDS/MySQL 8.4 default."
   type        = string
   default     = "ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
 }

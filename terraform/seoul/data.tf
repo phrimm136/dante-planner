@@ -12,7 +12,12 @@
 variable "rds_param_group_family" {
   description = "DB parameter group family for the replica; must match the primary's engine family."
   type        = string
-  default     = "mysql8.0"
+  default     = "mysql8.4"
+}
+
+variable "rds_engine_version" {
+  description = "Fully-qualified MySQL minor for the replica. Must be >= the primary's (terraform/rds engine_version); RDS upgrades replicas before the source."
+  type        = string
 }
 
 variable "rds_instance_class" {
@@ -59,9 +64,13 @@ resource "aws_vpc_security_group_egress_rule" "replica_all" {
 }
 
 resource "aws_db_parameter_group" "replica" {
-  name        = "${var.name_prefix}-seoul-replica"
+  name        = "${var.name_prefix}-seoul-replica-${replace(var.rds_param_group_family, ".", "")}"
   family      = var.rds_param_group_family
   description = "Seoul replica: primary's hardened GTID + TLS posture so a promote is gap-free."
+
+  lifecycle {
+    create_before_destroy = true
+  }
 
   parameter {
     name         = "gtid-mode"
@@ -85,6 +94,9 @@ resource "aws_db_instance" "replica" {
   identifier          = "${var.name_prefix}-mysql-seoul"
   replicate_source_db = data.terraform_remote_state.rds.outputs.rds_arn
   instance_class      = var.rds_instance_class
+
+  engine_version              = var.rds_engine_version
+  allow_major_version_upgrade = true
 
   # Single-AZ during seed; Multi-AZ is a post-cutover action, not a seed default.
   multi_az            = false

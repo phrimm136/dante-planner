@@ -64,10 +64,16 @@ resource "aws_vpc_security_group_egress_rule" "rds_all" {
 # --- Parameter group --------------------------------------------------------
 
 resource "aws_db_parameter_group" "this" {
-  name        = "${var.name_prefix}-mysql80"
-  family      = "mysql8.0"
-  description = "Dante's Planner RDS MySQL 8.0 parameters"
+  name        = "${var.name_prefix}-mysql84"
+  family      = "mysql8.4"
+  description = "Dante's Planner RDS MySQL 8.4 parameters"
   tags        = var.tags
+
+  # A family change replaces the group; the instance must move to the new one before the
+  # old, still-attached one can be deleted.
+  lifecycle {
+    create_before_destroy = true
+  }
 
   # GTID so RDS can act as an external GTID replica (auto-position cutover).
   parameter {
@@ -112,7 +118,7 @@ resource "aws_db_parameter_group" "this" {
     value        = "0"
     apply_method = "pending-reboot"
   }
-  # Match the source's captured @@sql_mode (runbook 0.2). Default = MySQL 8.0 stock.
+  # Match the source's captured @@sql_mode (runbook 0.2). Default = MySQL 8.4 stock.
   parameter {
     name  = "sql_mode"
     value = var.sql_mode
@@ -195,8 +201,9 @@ resource "aws_db_instance" "this" {
   backup_retention_period    = var.backup_retention_period
   backup_window              = var.backup_window
   maintenance_window         = var.maintenance_window
-  auto_minor_version_upgrade = false
-  apply_immediately          = false
+  auto_minor_version_upgrade  = false
+  allow_major_version_upgrade = true
+  apply_immediately           = var.apply_immediately
 
   # Data-protection guards (invariant I4). prevent_destroy makes `terraform
   # destroy`/replace ERROR instead of deleting the data-bearing instance.

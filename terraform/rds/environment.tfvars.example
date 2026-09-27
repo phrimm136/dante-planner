@@ -18,7 +18,7 @@ db_subnet_ids = ["subnet-REPLACE_WITH_SUBNET_A", "subnet-REPLACE_WITH_SUBNET_B"]
 
 # Pin to >= the source's @@version (runbook 0.2). A coarse "8.0" would let AWS pick a minor BELOW
 # the source, which stalls replication silently; the variable's validation rejects it.
-engine_version = "8.0.40"
+engine_version = "8.4.11"
 
 # The master password is NOT set here. It is read at plan time from Secrets Manager; seed the entry
 # once with scripts/ops/provision/rds-master-password-secret.sh, then apply terraform/secrets so
