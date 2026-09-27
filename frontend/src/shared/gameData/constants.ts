@@ -104,6 +104,8 @@ export const EGO_TYPES = ['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH'] as const
 
 export type EgoType = (typeof EGO_TYPES)[number]
 
+export const REQUIRED_EGO_TYPE: EgoType = 'ZAYIN'
+
 export const KEYWORD_ORDER = [
   'Combustion',
   'Laceration',

@@ -1,6 +1,9 @@
-import { GIFT_ENHANCEMENT_PREFIX_PATTERN, GIFT_ID_PATTERN } from '@/shared/gameData'
+import {
+  GIFT_ENHANCEMENT_PREFIX_PATTERN,
+  GIFT_ID_PATTERN,
+  REQUIRED_EGO_TYPE,
+} from '@/shared/gameData'
 import { isMDPlanner } from '../types/PlannerTypes'
-import { REQUIRED_EGO_TYPE } from './plannerValidation'
 import type { IdMigrationEntry, IdMigrationTable } from './idMigrationTable'
 import type { MDPlannerContent, SaveablePlanner } from '../types/PlannerTypes'
 

@@ -1,5 +1,6 @@
 import {
   EGO_TYPES,
+  REQUIRED_EGO_TYPE,
   OFFENSIVE_SKILL_SLOTS,
   FLOOR_COUNTS,
   ALLOWED_FLOOR_DIFFICULTIES,
@@ -64,8 +65,6 @@ const ALL_SINNER_KEYS = [
   '11',
   '12',
 ] as const
-
-export const REQUIRED_EGO_TYPE = 'ZAYIN'
 
 /** Valid skill slots (0=S1, 1=S2, 2=S3) */
 const VALID_SKILL_SLOTS = new Set(['0', '1', '2'])
