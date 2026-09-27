@@ -9,7 +9,7 @@ import { IdentityDataSchema, IdentityI18nSchema } from '../schemas/IdentitySchem
 
 export const identityDetailQueryKeys = createEntityDetailQueryKeys('identity')
 
-const IDENTITY_DETAIL: EntityDetailDataConfig<
+export const IDENTITY_DETAIL: EntityDetailDataConfig<
   z.infer<typeof IdentityDataSchema>,
   z.infer<typeof IdentityI18nSchema>
 > = {

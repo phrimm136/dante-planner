@@ -5,7 +5,7 @@ import { ThemePackDetailSchema } from '../schemas/ThemePackSchemas'
 
 export const themePackDetailQueryKeys = createEntityDetailQueryKeys('themePack')
 
-function createThemePackDetailQueryOptions(id: string) {
+export function createThemePackDetailQueryOptions(id: string) {
   return createStaticDataQueryOptions(
     themePackDetailQueryKeys.detail(id),
     () => import(`@static/data/themePack/${id}.json`),

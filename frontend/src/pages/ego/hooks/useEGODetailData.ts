@@ -9,7 +9,7 @@ import { EGODataSchema, EGOI18nSchema } from '../schemas/EGOSchemas'
 
 export const egoDetailQueryKeys = createEntityDetailQueryKeys('ego')
 
-const EGO_DETAIL: EntityDetailDataConfig<
+export const EGO_DETAIL: EntityDetailDataConfig<
   z.infer<typeof EGODataSchema>,
   z.infer<typeof EGOI18nSchema>
 > = {

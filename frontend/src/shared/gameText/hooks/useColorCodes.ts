@@ -6,7 +6,7 @@ export const colorCodeQueryKeys = {
   all: () => ['colorCode'] as const,
 }
 
-function createColorCodeQueryOptions() {
+export function createColorCodeQueryOptions() {
   return createStaticDataQueryOptions(
     colorCodeQueryKeys.all(),
     () => import('@static/data/color/skillDescColorCode.json'),

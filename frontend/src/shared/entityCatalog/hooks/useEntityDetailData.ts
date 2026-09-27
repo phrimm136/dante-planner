@@ -12,7 +12,10 @@ export interface EntityDetailDataConfig<TSpec, TI18n> {
   i18nSchema: z.ZodType<TI18n>
 }
 
-function specOptions<TSpec, TI18n>(cfg: EntityDetailDataConfig<TSpec, TI18n>, id: string) {
+export function entityDetailSpecOptions<TSpec, TI18n>(
+  cfg: EntityDetailDataConfig<TSpec, TI18n>,
+  id: string,
+) {
   return createStaticDataQueryOptions(
     createEntityDetailQueryKeys(cfg.kind).detail(id),
     () => cfg.specImport(id),
@@ -38,7 +41,7 @@ export function useEntityDetailSpec<TSpec, TI18n>(
   cfg: EntityDetailDataConfig<TSpec, TI18n>,
   id: string,
 ): TSpec {
-  const { data } = useSuspenseQuery(specOptions(cfg, id))
+  const { data } = useSuspenseQuery(entityDetailSpecOptions(cfg, id))
   return data
 }
 

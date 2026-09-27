@@ -15,14 +15,21 @@ import i18n from '@/lib/i18n'
 import { untitledPlannerTitle } from '@/pages/planner/lib/loadPlannerTitle'
 import { MD_CATEGORIES } from '@/shared/gameData'
 import {
-  loadPublishedPlanner,
-  loadPlannerTitleRoute,
-  loadIdentityName,
-  loadEgoName,
-  loadEgoGiftName,
-  loadThemePackName,
-  loadKeywordName,
-  loadAbEventTitle,
+  loadPublishedPlannerRoute,
+  loadSavedPlannerRoute,
+  loadDeckBuilder,
+  loadIdentityList,
+  loadIdentityDetail,
+  loadEgoList,
+  loadEgoDetail,
+  loadEgoGiftList,
+  loadEgoGiftDetail,
+  loadThemePackList,
+  loadThemePackDetail,
+  loadAbEventList,
+  loadAbEventDetail,
+  loadKeywordList,
+  loadKeywordDetail,
 } from '@/lib/routeLoaders'
 import { syncTitleOnLanguageChange } from '@/lib/routerTitle'
 import { RouteErrorComponent } from '@/components/feedback/RouteErrorComponent'
@@ -173,7 +180,7 @@ const plannerMDGesellschaftDetailRoute = createRoute({
   search: {
     middlewares: [stripSearchParams(mdGesellschaftDefaults)],
   },
-  loader: loadPublishedPlanner,
+  loader: loadPublishedPlannerRoute,
   head: ({ loaderData }) => detailHead(loaderData?.title, untitledPlannerTitle()),
 })
 
@@ -192,6 +199,7 @@ const deckBuilderRoute = createRoute({
   path: '/planner/deck',
   component: lazyRouteComponent(() => import('@/pages/planner/DeckBuilderPage')),
   pendingComponent: DeckBuilderPageSkeleton,
+  loader: loadDeckBuilder,
   head: () => ({
     meta: [{ title: pageTitle('header.nav.deckBuilder') }],
   }),
@@ -210,7 +218,7 @@ const plannerMDDetailRoute = createRoute({
   search: {
     middlewares: [stripSearchParams(mdUserDefaults)],
   },
-  loader: loadPlannerTitleRoute,
+  loader: loadSavedPlannerRoute,
   head: ({ loaderData }) => detailHead(loaderData?.title, untitledPlannerTitle()),
 })
 
@@ -223,7 +231,7 @@ const plannerMDEditRoute = createRoute({
       <PlannerViewerSkeleton />
     </div>
   ),
-  loader: loadPlannerTitleRoute,
+  loader: loadSavedPlannerRoute,
   head: ({ loaderData }) => ({
     meta: [
       {
@@ -251,6 +259,7 @@ const identityRoute = createRoute({
       <ListPageSkeleton geometry={IDENTITY_GEOMETRY} />
     </div>
   ),
+  loader: loadIdentityList,
 
   head: () => ({
     meta: [{ title: pageTitle('header.nav.identity') }],
@@ -263,7 +272,7 @@ const identityDetailRoute = createRoute({
   component: lazyRouteComponent(() => import('@/pages/identity/IdentityDetailPage')),
   pendingComponent: IdentityDetailSkeleton,
 
-  loader: loadIdentityName,
+  loader: loadIdentityDetail,
   head: ({ loaderData }) => detailHead(loaderData?.name, 'Identity'),
 })
 
@@ -276,6 +285,7 @@ const egoRoute = createRoute({
       <EGOListSkeleton />
     </div>
   ),
+  loader: loadEgoList,
 
   head: () => ({
     meta: [{ title: pageTitle('header.nav.ego') }],
@@ -288,7 +298,7 @@ const egoDetailRoute = createRoute({
   component: lazyRouteComponent(() => import('@/pages/ego/EGODetailPage')),
   pendingComponent: EGODetailSkeleton,
 
-  loader: loadEgoName,
+  loader: loadEgoDetail,
   head: ({ loaderData }) => detailHead(loaderData?.name, 'EGO'),
 })
 
@@ -301,6 +311,7 @@ const egoGiftRoute = createRoute({
       <ListPageSkeleton geometry={EGO_GIFT_GEOMETRY} />
     </div>
   ),
+  loader: loadEgoGiftList,
 
   head: () => ({
     meta: [{ title: pageTitle('header.nav.egoGift') }],
@@ -313,7 +324,7 @@ const egoGiftDetailRoute = createRoute({
   component: lazyRouteComponent(() => import('@/pages/egoGift/EGOGiftDetailPage')),
   pendingComponent: EGOGiftDetailSkeleton,
 
-  loader: loadEgoGiftName,
+  loader: loadEgoGiftDetail,
   head: ({ loaderData }) => detailHead(loaderData?.name, 'EGO Gift'),
 })
 
@@ -326,6 +337,7 @@ const themePackRoute = createRoute({
       <ListPageSkeleton geometry={THEME_PACK_GEOMETRY} />
     </div>
   ),
+  loader: loadThemePackList,
   head: () => ({
     meta: [{ title: pageTitle('header.nav.themePack') }],
   }),
@@ -336,7 +348,7 @@ const themePackDetailRoute = createRoute({
   path: '/theme-pack/$id',
   component: lazyRouteComponent(() => import('@/pages/themePack/ThemePackDetailPage')),
   pendingComponent: ThemePackDetailSkeleton,
-  loader: loadThemePackName,
+  loader: loadThemePackDetail,
   head: ({ loaderData }) => detailHead(loaderData?.name, 'Theme Pack'),
 })
 
@@ -349,6 +361,7 @@ const abEventRoute = createRoute({
       <ListPageSkeleton geometry={AB_EVENT_GEOMETRY} />
     </div>
   ),
+  loader: loadAbEventList,
   head: () => ({
     meta: [{ title: pageTitle('header.nav.abEvent') }],
   }),
@@ -359,7 +372,7 @@ const abEventDetailRoute = createRoute({
   path: '/ab-event/$id',
   component: lazyRouteComponent(() => import('@/pages/abEvent/AbEventDetailPage')),
   pendingComponent: AbEventDetailSkeleton,
-  loader: loadAbEventTitle,
+  loader: loadAbEventDetail,
   head: ({ loaderData }) => detailHead(loaderData?.title, 'Dungeon Event'),
 })
 
@@ -372,6 +385,7 @@ const keywordRoute = createRoute({
       <ListPageSkeleton geometry={KEYWORD_GEOMETRY} filterCount={4} />
     </div>
   ),
+  loader: loadKeywordList,
   head: () => ({
     meta: [{ title: pageTitle('header.nav.keyword') }],
   }),
@@ -382,7 +396,7 @@ const keywordDetailRoute = createRoute({
   path: '/keyword/$id',
   component: lazyRouteComponent(() => import('@/pages/keyword/KeywordDetailPage')),
   pendingComponent: KeywordDetailSkeleton,
-  loader: loadKeywordName,
+  loader: loadKeywordDetail,
   head: ({ loaderData }) => detailHead(loaderData?.name, 'Keyword'),
 })
 

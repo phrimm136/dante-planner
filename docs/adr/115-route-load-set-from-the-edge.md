@@ -14,6 +14,9 @@ epic: none · pr: none
   REJECTED: a hand-maintained per-route list — correct on the day it is written and stale after the first refactor that moves a module between chunks.
   REJECTED: a declarative route table that both the router and the build read — restructures how every route is defined to serve one build step, where reading the existing definitions leaves the router as the only table.
 - @preload @budget — One `_headers` rule per route pattern, with a long chunk list split across repeated `Link` lines. Pages allows 100 rules and 2,000 characters per line and joins repeated headers with commas.
+- @preload @language — Only language-neutral files are hinted: route chunks and game-data spec files, never the per-language name and text files. The UI language is not in the URL, so a header rule is the same for every visitor; the per-language files load one wave later, after the app knows the language.
+  REJECTED: hinting every language's files — each visit fetches three languages it will not show.
+  REJECTED: putting the language in the URL — changes every public link to serve one preload list.
 
 ## Takeaway
 - takeaway: code splitting trades bytes for discovery depth, and on a 300 ms path each level of depth costs more than the bytes it saved. Declaring the load set where the URL is first answered buys the depth back without giving up the split.

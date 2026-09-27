@@ -18,7 +18,7 @@ export const abEventDetailQueryKeys = {
   ...createEntitySharedQueryKeys('abEvent'),
 }
 
-const AB_EVENT_DETAIL: EntityDetailDataConfig<
+export const AB_EVENT_DETAIL: EntityDetailDataConfig<
   z.infer<typeof AbEventDataSchema>,
   z.infer<typeof AbEventI18nSchema>
 > = {

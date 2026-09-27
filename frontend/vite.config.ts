@@ -7,6 +7,7 @@ import path from 'path'
 import fs from 'fs'
 import type { Plugin } from 'vite'
 import { hashStaticPlugin } from './vite-plugin-hash-static'
+import { routeHeadersPlugin } from './vite-plugin-route-headers'
 
 const STATIC_ROOT = path.resolve(__dirname, '../static')
 const STATIC_WHITELIST = ['images', 'data', 'i18n']
@@ -113,6 +114,10 @@ export default defineConfig({
     serveWhitelistedStatic(),
     staticFile404Plugin(),
     hashStaticPlugin({ staticDir: path.resolve(__dirname, '../static') }),
+    routeHeadersPlugin({
+      routerFile: path.resolve(__dirname, 'src/lib/router.tsx'),
+      loadersFile: path.resolve(__dirname, 'src/lib/routeLoaders.ts'),
+    }),
     react(),
     babel({ presets: [reactCompilerPreset()] }),
     tailwindcss(),
@@ -251,7 +256,7 @@ export default defineConfig({
         extends: true,
         test: {
           name: 'plugin',
-          include: ['vite-plugin-hash-static.test.ts'],
+          include: ['vite-plugin-hash-static.test.ts', 'vite-plugin-route-headers.test.ts'],
           pool: 'forks',
           environment: 'node',
         },
