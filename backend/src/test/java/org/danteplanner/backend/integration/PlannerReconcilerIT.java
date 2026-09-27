@@ -237,8 +237,8 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("reconciler-skips-unreadable: a planner whose stored keywords cannot be rebuilt is left out of the index audits, and its catalog copy is compared as the empty set the runtime serves")
-    void reconcilerSkipsUnreadable_WhenContentCannotBeParsed_ReportsNoFilterDrift() {
+    @DisplayName("corrupt keyword column: the index audits read keywords from the content and report no filter drift, and the catalog copy is compared as the empty set the runtime serves")
+    void corruptKeywordColumn_WhenTheContentIsReadable_ReportsCatalogDriftButNoFilterDrift() {
         Planner unreadable = publishClean("Unreadable Content");
         assertThat(entityFilterRows(unreadable.getId()))
                 .as("the planner starts with a correctly built index").isPositive();
@@ -428,5 +428,52 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
         filterService.rebuildFilters(planner.getId());
 
         assertThat(kindsFor(reconciler.reconcile(), planner.getId())).doesNotContain("entity_filter");
+    }
+
+    @Test
+    void reconcile_WhenTheKeywordColumnDisagreesWithTheContent_ReportsContentKeywordDrift() {
+        Planner planner = publishClean("Keyword Column Drift", Set.of("Sinking"));
+        jdbc.update("UPDATE planner_content SET selected_keywords = '[\"Burst\"]' WHERE planner_id = UUID_TO_BIN(?)",
+                planner.getId().toString());
+
+        List<DriftRecord> records = reconciler.reconcile();
+
+        assertThat(recordsFor(records, planner.getId(), "content_keywords"))
+                .singleElement()
+                .satisfies(record -> {
+                    assertThat(record.expected()).isEqualTo("[Sinking]");
+                    assertThat(record.actual()).isEqualTo("[Burst]");
+                });
+        assertThat(jdbc.queryForObject("SELECT selected_keywords FROM planner_content WHERE planner_id = UUID_TO_BIN(?)",
+                String.class, planner.getId().toString()))
+                .as("the audit repairs nothing").isEqualTo("[\"Burst\"]");
+    }
+
+    @Test
+    void reconcile_WhenADraftKeywordColumnDisagreesWithItsContent_ReportsContentKeywordDrift() {
+        Planner draft = TestDataFactory.planner(owner).title("Draft Keyword Drift")
+                .selectedKeywords(Set.of("Sinking"))
+                .save(plannerRepository);
+        jdbc.update("UPDATE planner_content SET selected_keywords = NULL WHERE planner_id = UUID_TO_BIN(?)",
+                draft.getId().toString());
+
+        assertThat(recordsFor(reconciler.reconcile(), draft.getId(), "content_keywords"))
+                .singleElement()
+                .satisfies(record -> assertThat(record.actual()).isEqualTo("[]"));
+    }
+
+    @Test
+    void reconcile_WhenTheKeywordIndexMatchesTheColumnButNotTheContent_ReportsKeywordFilterDrift() {
+        Planner planner = publishClean("Index Follows Column", Set.of("Sinking"));
+        jdbc.update("UPDATE planner_content SET selected_keywords = '[\"Burst\"]' WHERE planner_id = UUID_TO_BIN(?)",
+                planner.getId().toString());
+        jdbc.update("CALL rebuild_planner_filters(UUID_TO_BIN(?))", planner.getId().toString());
+
+        assertThat(recordsFor(reconciler.reconcile(), planner.getId(), "keyword_filter"))
+                .singleElement()
+                .satisfies(record -> {
+                    assertThat(record.expected()).isEqualTo("[Sinking]");
+                    assertThat(record.actual()).isEqualTo("[Burst]");
+                });
     }
 }

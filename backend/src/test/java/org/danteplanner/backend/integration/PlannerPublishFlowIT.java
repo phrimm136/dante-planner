@@ -39,6 +39,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -468,5 +469,94 @@ class PlannerPublishFlowIT {
         assertThat(entityFilterRows(planner.getId()))
                 .as("the changed composition rebuilt the index")
                 .isPositive();
+    }
+
+    @Test
+    void publish_WhenStoredContentSelectsAnUnknownKeyword_Returns400KeywordInvalidAndStaysUnpublished() throws Exception {
+        Planner known = TestDataFactory.planner(owner).title("Known Keyword Draft")
+                .selectedKeywords(Set.of("Sinking")).save(plannerRepository);
+        statsRepository.save(PlannerStats.builder().plannerId(known.getId()).build());
+        Planner unknown = TestDataFactory.planner(owner).title("Unknown Keyword Draft")
+                .selectedKeywords(Set.of("Sinking", "NotAKeyword")).save(plannerRepository);
+        statsRepository.save(PlannerStats.builder().plannerId(unknown.getId()).build());
+
+        mockMvc.perform(post("/api/planner/md/{id}/publish", known.getId())
+                        .cookie(AuthCookies.accessToken(token))
+                        .with(withCsrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.published").value(true));
+        mockMvc.perform(post("/api/planner/md/{id}/publish", unknown.getId())
+                        .cookie(AuthCookies.accessToken(token))
+                        .with(withCsrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("KEYWORD_INVALID"));
+
+        assertThat(stored(unknown.getId()).isPublished()).isFalse();
+        assertThat(catalogRepository.existsById(unknown.getId())).isFalse();
+    }
+
+    private Planner publishedWithUnknownKeyword(String title) {
+        Planner planner = TestDataFactory.planner(owner).title(title)
+                .selectedKeywords(Set.of("Sinking", "NotAKeyword")).published(true).save(plannerRepository);
+        statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
+        catalogService.add(planner);
+        filterService.rebuildFilters(planner.getId());
+        return stored(planner.getId());
+    }
+
+    @Test
+    void publishedTitleSave_WhenStoredContentSelectsAnUnknownKeyword_Succeeds() throws Exception {
+        Planner planner = publishedWithUnknownKeyword("Published Unknown Keyword");
+        UpsertPlannerRequest titleEdit = new UpsertPlannerRequest(
+                planner.getId().toString(), "5F", "Retitled", PlannerStatus.SAVED, planner.getContentJson(),
+                planner.getContentVersion(), PlannerType.MIRROR_DUNGEON, planner.getSyncVersion(), null);
+
+        mockMvc.perform(put("/api/planner/md/{id}", planner.getId())
+                        .cookie(AuthCookies.accessToken(token))
+                        .with(withCsrf())
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(titleEdit)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Retitled"));
+    }
+
+    @Test
+    void legacyUnpublish_WhenStoredContentSelectsAnUnknownKeyword_Succeeds() throws Exception {
+        Planner planner = publishedWithUnknownKeyword("Unpublish Unknown Keyword");
+        LegacyPublishRequest unpublish = new LegacyPublishRequest(
+                false, planner.getId().toString(), "5F", planner.getTitle(), PlannerStatus.SAVED,
+                planner.getContentJson(), planner.getContentVersion(), PlannerType.MIRROR_DUNGEON,
+                planner.getSyncVersion(), null);
+
+        mockMvc.perform(put("/api/planner/md/{id}/publish", planner.getId())
+                        .cookie(AuthCookies.accessToken(token))
+                        .with(withCsrf())
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(unpublish)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.published").value(false));
+    }
+
+    @Test
+    void publishWithContent_WhenTheDraftSelectsAnUnknownKeyword_Returns400AndRollsBackTheSave() throws Exception {
+        Planner draft = TestDataFactory.planner(owner).title("Draft Before Publish")
+                .selectedKeywords(Set.of("Sinking")).save(plannerRepository);
+        statsRepository.save(PlannerStats.builder().plannerId(draft.getId()).build());
+        UpsertPlannerRequest publishBody = new UpsertPlannerRequest(
+                draft.getId().toString(), "5F", "Draft Published With Unknown", PlannerStatus.SAVED,
+                TestDataFactory.withSelectedKeywords(draft.getContentJson(), List.of("NotAKeyword")),
+                draft.getContentVersion(), PlannerType.MIRROR_DUNGEON, draft.getSyncVersion(), null);
+
+        mockMvc.perform(post("/api/planner/md/{id}/publish", draft.getId())
+                        .cookie(AuthCookies.accessToken(token))
+                        .with(withCsrf())
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(publishBody)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("KEYWORD_INVALID"));
+
+        Planner after = stored(draft.getId());
+        assertThat(after.isPublished()).isFalse();
+        assertThat(after.getTitle()).isEqualTo("Draft Before Publish");
     }
 }

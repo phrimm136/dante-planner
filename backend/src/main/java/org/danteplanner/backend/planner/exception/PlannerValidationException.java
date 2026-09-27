@@ -20,7 +20,8 @@ public class PlannerValidationException extends DomainException {
     private static final Set<String> USER_FACING_ERROR_CODES = Stream.of(
                     ErrorCode.EMPTY_CONTENT,
                     ErrorCode.SIZE_EXCEEDED,
-                    ErrorCode.MALFORMED_JSON)
+                    ErrorCode.MALFORMED_JSON,
+                    ErrorCode.KEYWORD_INVALID)
             .map(ErrorCode::getCode)
             .collect(Collectors.toUnmodifiableSet());
 

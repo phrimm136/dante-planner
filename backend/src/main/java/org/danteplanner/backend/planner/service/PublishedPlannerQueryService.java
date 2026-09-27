@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerCatalog;
+import org.danteplanner.backend.planner.entity.PlannerKeywords;
 import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
@@ -113,7 +114,7 @@ public class PublishedPlannerQueryService {
             spec = spec.and(CatalogSpecifications.matchesQuery(searchTerm.trim()));
         }
         for (String keyword : catalogQuery.keywords()) {
-            spec = spec.and(CatalogSpecifications.hasKeyword(keyword));
+            spec = spec.and(CatalogSpecifications.hasKeyword(PlannerKeywords.filterKeyword(keyword)));
         }
         for (Map.Entry<ContentEntityType, List<String>> filter : catalogQuery.entityFilters().entrySet()) {
             for (String id : filter.getValue()) {

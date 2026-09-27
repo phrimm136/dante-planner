@@ -1,5 +1,7 @@
 package org.danteplanner.backend.planner.service;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,6 +46,8 @@ import java.util.UUID;
 @Slf4j
 public class PlannerCommandService {
 
+    private static final String TOP_LEVEL_KEYWORDS_METRIC = "planner_keywords_toplevel_total";
+
     private final PlannerRepository plannerRepository;
     private final PlannerStatsRepository statsRepository;
     private final PlannerContentValidator contentValidator;
@@ -55,6 +59,7 @@ public class PlannerCommandService {
     private final PlannerOwnershipValidator ownershipValidator;
     private final SyncVersionValidator syncVersionValidator;
     private final Optional<ContentTombstoneStore> tombstoneStore;
+    private final MeterRegistry meterRegistry;
 
     private final int maxPlannersPerUser;
     private final int currentSchemaVersion;
@@ -74,7 +79,7 @@ public class PlannerCommandService {
             int currentSchemaVersion) {
         this(plannerRepository, statsRepository, contentValidator, contentVersionValidator,
                 plannerCatalogService, accessGuard, categoryValidator, limitValidator, ownershipValidator,
-                syncVersionValidator, Optional.empty(),
+                syncVersionValidator, Optional.empty(), new SimpleMeterRegistry(),
                 maxPlannersPerUser, currentSchemaVersion);
     }
 
@@ -91,11 +96,12 @@ public class PlannerCommandService {
             PlannerOwnershipValidator ownershipValidator,
             SyncVersionValidator syncVersionValidator,
             Optional<ContentTombstoneStore> tombstoneStore,
+            MeterRegistry meterRegistry,
             @Value("${planner.max-per-user}") int maxPlannersPerUser,
             GameDataRegistry gameDataRegistry) {
         this(plannerRepository, statsRepository, contentValidator, contentVersionValidator,
                 plannerCatalogService, accessGuard, categoryValidator, limitValidator, ownershipValidator,
-                syncVersionValidator, tombstoneStore,
+                syncVersionValidator, tombstoneStore, meterRegistry,
                 maxPlannersPerUser, gameDataRegistry.plannerVersions().schemaVersion());
     }
 
@@ -111,6 +117,7 @@ public class PlannerCommandService {
             PlannerOwnershipValidator ownershipValidator,
             SyncVersionValidator syncVersionValidator,
             Optional<ContentTombstoneStore> tombstoneStore,
+            MeterRegistry meterRegistry,
             int maxPlannersPerUser,
             int currentSchemaVersion) {
         this.plannerRepository = plannerRepository;
@@ -124,6 +131,7 @@ public class PlannerCommandService {
         this.ownershipValidator = ownershipValidator;
         this.syncVersionValidator = syncVersionValidator;
         this.tombstoneStore = tombstoneStore;
+        this.meterRegistry = meterRegistry;
         this.maxPlannersPerUser = maxPlannersPerUser;
         this.currentSchemaVersion = currentSchemaVersion;
     }
@@ -146,7 +154,12 @@ public class PlannerCommandService {
             applyContent(planner, request.content(), request.contentVersion());
         }
 
-        applyKeywordsAndDeviceId(contentRow, request.selectedKeywords(), deviceId);
+        Set<String> keywords = PlannerKeywords.fromContent(contentRow.getContent()).asSet();
+        countTopLevelCopy(request.selectedKeywords(), keywords);
+        contentRow.setSelectedKeywords(keywords);
+        if (deviceId != null) {
+            contentRow.setDeviceId(deviceId);
+        }
     }
 
     private void applyTitleAndStatus(PlannerContent contentRow, String title, PlannerStatus status) {
@@ -176,16 +189,20 @@ public class PlannerCommandService {
                 ValidationPolicy.forPublicationState(planner.isPublished())));
     }
 
-    private void applyKeywordsAndDeviceId(PlannerContent contentRow, Set<String> selectedKeywords, UUID deviceId) {
-        if (selectedKeywords != null) {
-            contentRow.setSelectedKeywords(PlannerKeywords.fromClient(selectedKeywords).asSet());
+    private void countTopLevelCopy(Set<String> topLevel, Set<String> derived) {
+        String outcome;
+        if (topLevel == null) {
+            outcome = "absent";
+        } else if (PlannerKeywords.fromClient(topLevel).asSet().equals(derived)) {
+            outcome = "match";
+        } else {
+            outcome = "mismatch";
         }
-        if (deviceId != null) {
-            contentRow.setDeviceId(deviceId);
-        }
+        meterRegistry.counter(TOP_LEVEL_KEYWORDS_METRIC, "outcome", outcome).increment();
     }
 
-    private Planner buildAggregate(UUID id, User user, UpsertPlannerRequest request, String content, UUID deviceId) {
+    private Planner buildAggregate(UUID id, User user, UpsertPlannerRequest request, String content,
+            Set<String> keywords, UUID deviceId) {
         Planner planner = Planner.builder()
                 .id(id)
                 .user(user)
@@ -196,9 +213,7 @@ public class PlannerCommandService {
                         .title(request.title() != null ? request.title() : "Untitled")
                         .status(request.status() != null ? request.status() : PlannerStatus.DRAFT)
                         .category(request.category())
-                        .selectedKeywords(request.selectedKeywords() != null
-                                ? PlannerKeywords.fromClient(request.selectedKeywords()).asSet()
-                                : null)
+                        .selectedKeywords(keywords)
                         .content(content)
                         .gameContentVersion(request.contentVersion())
                         .deviceId(deviceId)
@@ -223,9 +238,11 @@ public class PlannerCommandService {
         categoryValidator.requireCategoryForType(request.plannerType(), request.category());
 
         String content = contentValidator.validate(request.content(), request.category(), request.contentVersion());
+        Set<String> keywords = PlannerKeywords.fromContent(content).asSet();
+        countTopLevelCopy(request.selectedKeywords(), keywords);
 
         Planner saved = plannerRepository.insert(
-                buildAggregate(UUID.fromString(request.id()), user, request, content, deviceId));
+                buildAggregate(UUID.fromString(request.id()), user, request, content, keywords, deviceId));
         statsRepository.insert(PlannerStats.builder().plannerId(saved.getId()).build());
         log.info("Created planner {} for user {}", saved.getId(), userId);
 
@@ -268,7 +285,6 @@ public class PlannerCommandService {
                     .content(request.content())
                     .gameContentVersion(request.contentVersion())
                     .contentSchemaVersion(currentSchemaVersion)
-                    .selectedKeywords(request.selectedKeywords())
                     .deviceId(deviceId)
                     .build();
 
@@ -277,6 +293,8 @@ public class PlannerCommandService {
             if (arbitration == WriteArbitration.ACK_NO_OP) {
                 log.info("Upsert of planner {} would move no field, acknowledging syncVersion {} without a write",
                         id, planner.getSyncVersion());
+                countTopLevelCopy(request.selectedKeywords(),
+                        PlannerKeywords.fromContent(planner.getContentJson()).asSet());
                 PlannerResponse acknowledged =
                         PlannerResponse.fromEntity(planner, statsRepository.upvotesOf(id));
                 return new UpsertedPlanner(planner, acknowledged, false);

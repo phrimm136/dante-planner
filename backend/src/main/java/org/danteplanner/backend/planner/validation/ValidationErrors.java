@@ -37,6 +37,11 @@ final class ValidationErrors {
                 "Unknown fields: " + fields);
     }
 
+    static PlannerValidationException keywordInvalid(Set<String> unknown) {
+        return new PlannerValidationException(ErrorCode.KEYWORD_INVALID.getCode(),
+                "Unknown keywords: " + unknown.stream().sorted().toList());
+    }
+
     static PlannerValidationException invalidCategory(String category) {
         return new PlannerValidationException(ErrorCode.INVALID_CATEGORY.getCode(),
                 "Invalid category: " + category);

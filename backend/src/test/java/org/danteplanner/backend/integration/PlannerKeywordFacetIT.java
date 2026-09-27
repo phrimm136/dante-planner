@@ -1,5 +1,7 @@
 package org.danteplanner.backend.integration;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.danteplanner.backend.config.TestConfig;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -15,6 +17,7 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
+import org.danteplanner.backend.planner.scheduler.PlannerKeywordBackfill;
 import org.danteplanner.backend.planner.service.PlannerFilterService;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -33,7 +36,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import javax.sql.DataSource;
+import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -95,6 +100,12 @@ class PlannerKeywordFacetIT {
 
     @Autowired
     private DataSource dataSource;
+
+    @Autowired
+    private MeterRegistry meterRegistry;
+
+    @Autowired
+    private PlannerKeywordBackfill keywordBackfill;
 
     private User owner;
 
@@ -182,13 +193,13 @@ class PlannerKeywordFacetIT {
     }
 
     @Test
-    @DisplayName("keyword-rename-normalized-on-write: a legacy client name is stored, indexed, and filterable as the current id; unknown keywords drop without failing the save")
-    void keywordRenameNormalizedOnWrite_WhenLegacyNameSynced_StoredAsCurrentId() throws Exception {
+    @DisplayName("keyword-rename-normalized-on-write: a legacy name in the content is stored, indexed, and filterable as the current id; the top-level copy is ignored")
+    void keywordRenameNormalizedOnWrite_WhenContentSelectsALegacyName_StoredAsCurrentId() throws Exception {
         Planner planner = publishWithFilters("Legacy Keywords", Set.of("Sinking"));
 
         // A stale client syncs the pre-rename name plus an unknown keyword
         UpsertPlannerRequest req = new UpsertPlannerRequest(
-                planner.getId().toString(), planner.getCategory(), null, null, planner.getContentJson(),
+                planner.getId().toString(), planner.getCategory(), null, null, contentWith(Set.of("AccelBullet")),
                 planner.getContentVersion(), PlannerType.MIRROR_DUNGEON, planner.getSyncVersion(),
                 Set.of("AccelBullet", "NotAKeyword"));
         commandService.upsertPlanner(owner.getId(), null, planner.getId(), req, false);
@@ -235,5 +246,264 @@ class PlannerKeywordFacetIT {
         mockMvc.perform(get("/api/planner/md/published/{id}", planner.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.selectedKeywords").isEmpty());
+    }
+
+    private static String contentWith(Set<String> keywords) {
+        return TestDataFactory.withSelectedKeywords(TestDataFactory.VALID_CONTENT, keywords);
+    }
+
+    private String storedKeywords(Planner planner) {
+        return new JdbcTemplate(dataSource).queryForObject(
+                "SELECT selected_keywords FROM planner_content WHERE planner_id = UUID_TO_BIN(?)",
+                String.class, planner.getId().toString());
+    }
+
+    private double topLevelCount(String outcome) {
+        Counter counter = meterRegistry.find("planner_keywords_toplevel_total").tag("outcome", outcome).counter();
+        return counter == null ? 0 : counter.count();
+    }
+
+    private UpsertPlannerRequest saving(Planner planner, String content, Set<String> topLevel) {
+        return new UpsertPlannerRequest(
+                planner.getId().toString(), planner.getCategory(), null, null, content,
+                planner.getContentVersion(), PlannerType.MIRROR_DUNGEON, planner.getSyncVersion(), topLevel);
+    }
+
+    @Test
+    void upsert_WhenTopLevelKeywordsDisagreeWithContent_StoresTheContentKeywordsAndCountsAMismatch() {
+        Planner planner = TestDataFactory.planner(owner).title("Top-Level Copy")
+                .selectedKeywords(Set.of("Sinking"))
+                .save(plannerRepository);
+        double mismatchesBefore = topLevelCount("mismatch");
+
+        commandService.upsertPlanner(owner.getId(), null, planner.getId(),
+                saving(planner, contentWith(Set.of("Sinking")), Set.of("Burst")), false);
+
+        assertThat(storedKeywords(planner)).isEqualTo("[\"Sinking\"]");
+        assertThat(topLevelCount("mismatch")).isEqualTo(mismatchesBefore + 1);
+    }
+
+    @Test
+    void upsert_WhenTopLevelKeywordsAreAbsentOrMatch_CountsEachOutcome() {
+        Planner planner = TestDataFactory.planner(owner).title("Top-Level Outcomes")
+                .selectedKeywords(Set.of("Sinking"))
+                .save(plannerRepository);
+        double absentBefore = topLevelCount("absent");
+        double matchesBefore = topLevelCount("match");
+
+        commandService.upsertPlanner(owner.getId(), null, planner.getId(),
+                saving(planner, contentWith(Set.of("Burst")), null), false);
+        commandService.upsertPlanner(owner.getId(), null, planner.getId(),
+                saving(planner, contentWith(Set.of("Combustion")), Set.of("Combustion")), true);
+
+        assertThat(topLevelCount("absent")).isEqualTo(absentBefore + 1);
+        assertThat(topLevelCount("match")).isEqualTo(matchesBefore + 1);
+    }
+
+    @Test
+    void upsert_WhenADraftCarriesARenamedAndAnUnknownKeyword_StoresTheCurrentIdAndKeepsTheBlob() {
+        Planner draft = TestDataFactory.planner(owner).title("Draft Rename").save(plannerRepository);
+
+        commandService.upsertPlanner(owner.getId(), null, draft.getId(),
+                saving(draft, contentWith(new java.util.LinkedHashSet<>(java.util.List.of("AccelBullet", "NotAKeyword"))),
+                        null), false);
+
+        assertThat(storedKeywords(draft)).isEqualTo("[\"9828\"]");
+        String blobKeywords = new JdbcTemplate(dataSource).queryForObject(
+                "SELECT JSON_EXTRACT(content, '$.selectedKeywords') FROM planner_content WHERE planner_id = UUID_TO_BIN(?)",
+                String.class, draft.getId().toString());
+        assertThat(blobKeywords).contains("\"AccelBullet\"", "\"NotAKeyword\"");
+    }
+
+    @Test
+    void upsert_WhenTheTopLevelCopyIsAbsent_DerivesTheColumnFromTheNewContent() {
+        Planner planner = TestDataFactory.planner(owner).title("Absent Copy")
+                .selectedKeywords(Set.of("Sinking"))
+                .save(plannerRepository);
+
+        commandService.upsertPlanner(owner.getId(), null, planner.getId(),
+                saving(planner, contentWith(Set.of("Burst")), null), false);
+
+        assertThat(storedKeywords(planner)).isEqualTo("[\"Burst\"]");
+    }
+
+    @Test
+    void keywordFacetFilter_WhenQueriedByARenamedKeyword_ReturnsThePlannerStoredUnderTheCurrentId() throws Exception {
+        publishWithFilters("Renamed Facet", Set.of("9828"));
+
+        mockMvc.perform(get("/api/planner/md/published").param("keyword", "AccelBullet"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.page.totalElements").value(1))
+                .andExpect(jsonPath("$.content[0].title").value("Renamed Facet"));
+
+        mockMvc.perform(get("/api/planner/md/published").param("q", "AccelBullet"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.page.totalElements").value(1))
+                .andExpect(jsonPath("$.content[0].title").value("Renamed Facet"));
+    }
+
+    private JdbcTemplate jdbc() {
+        return new JdbcTemplate(dataSource);
+    }
+
+    private Integer runBackfill() {
+        return keywordBackfill.backfill();
+    }
+
+    private void clearColumns(UUID plannerId) {
+        jdbc().update("UPDATE planner_content SET selected_keywords = NULL WHERE planner_id = UUID_TO_BIN(?)",
+                plannerId.toString());
+        jdbc().update("UPDATE planner_catalog SET selected_keywords = NULL WHERE planner_id = UUID_TO_BIN(?)",
+                plannerId.toString());
+    }
+
+    private String column(String table, UUID plannerId) {
+        return jdbc().queryForObject("SELECT selected_keywords FROM " + table + " WHERE planner_id = UUID_TO_BIN(?)",
+                String.class, plannerId.toString());
+    }
+
+    private List<String> indexedKeywords(UUID plannerId) {
+        return jdbc().queryForList("SELECT keyword FROM planner_keyword_filter WHERE planner_id = UUID_TO_BIN(?)",
+                String.class, plannerId.toString());
+    }
+
+    private Planner publishedWithoutColumn(String title, List<String> contentKeywords) {
+        Planner planner = TestDataFactory.planner(owner)
+                .title(title)
+                .content(TestDataFactory.withSelectedKeywords(TestDataFactory.VALID_CONTENT, contentKeywords))
+                .published(true)
+                .save(plannerRepository);
+        statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
+        catalogService.add(planner);
+        clearColumns(planner.getId());
+        filterService.rebuildFilters(planner.getId());
+        return planner;
+    }
+
+    @Test
+    void backfill_WhenAPublishedRowHasNoColumnButItsContentSelectsKeywords_DerivesColumnCatalogAndIndex()
+            throws Exception {
+        Planner planner = publishedWithoutColumn("Backfill Published", List.of("Burst"));
+        assertThat(column("planner_content", planner.getId())).isNull();
+        assertThat(indexedKeywords(planner.getId())).isEmpty();
+
+        runBackfill();
+
+        assertThat(column("planner_content", planner.getId())).isEqualTo("[\"Burst\"]");
+        assertThat(column("planner_catalog", planner.getId())).isEqualTo("[\"Burst\"]");
+        assertThat(indexedKeywords(planner.getId())).containsExactly("Burst");
+    }
+
+    @Test
+    void backfill_WhenADraftSelectsARenamedAndAnUnknownKeyword_StoresTheCurrentIdAndKeepsTheBlob() throws Exception {
+        Planner draft = TestDataFactory.planner(owner)
+                .title("Backfill Draft")
+                .content(TestDataFactory.withSelectedKeywords(TestDataFactory.VALID_CONTENT,
+                        List.of("AccelBullet", "NotAKeyword")))
+                .save(plannerRepository);
+        clearColumns(draft.getId());
+
+        runBackfill();
+
+        assertThat(column("planner_content", draft.getId())).isEqualTo("[\"9828\"]");
+        assertThat(jdbc().queryForObject("SELECT JSON_EXTRACT(content, '$.selectedKeywords') FROM planner_content "
+                        + "WHERE planner_id = UUID_TO_BIN(?)", String.class, draft.getId().toString()))
+                .contains("\"AccelBullet\"", "\"NotAKeyword\"");
+        assertThat(indexedKeywords(draft.getId())).isEmpty();
+    }
+
+    @Test
+    void backfill_WhenTheColumnCarriesKeywordsTheContentDoesNot_ClearsTheColumnCatalogAndIndex() {
+        Planner planner = publishedWithoutColumn("Backfill Stale Column", List.of());
+        jdbc().update("UPDATE planner_content SET selected_keywords = '[\"Sinking\"]' WHERE planner_id = UUID_TO_BIN(?)",
+                planner.getId().toString());
+        jdbc().update("UPDATE planner_catalog SET selected_keywords = '[\"Sinking\"]' WHERE planner_id = UUID_TO_BIN(?)",
+                planner.getId().toString());
+        jdbc().update("CALL rebuild_planner_filters(UUID_TO_BIN(?))", planner.getId().toString());
+        assertThat(indexedKeywords(planner.getId())).containsExactly("Sinking");
+
+        runBackfill();
+
+        assertThat(column("planner_content", planner.getId())).isNull();
+        assertThat(column("planner_catalog", planner.getId())).isNull();
+        assertThat(indexedKeywords(planner.getId())).isEmpty();
+    }
+
+    @Test
+    void backfill_WhenTheColumnStoresALegacyName_RewritesItToTheCurrentId() {
+        Planner planner = publishedWithoutColumn("Backfill Legacy Column", List.of("ChargeLoad"));
+        jdbc().update("UPDATE planner_content SET selected_keywords = '[\"ChargeLoad\"]' WHERE planner_id = UUID_TO_BIN(?)",
+                planner.getId().toString());
+        jdbc().update("CALL rebuild_planner_filters(UUID_TO_BIN(?))", planner.getId().toString());
+        assertThat(indexedKeywords(planner.getId())).containsExactly("ChargeLoad");
+
+        runBackfill();
+
+        assertThat(column("planner_content", planner.getId())).isEqualTo("[\"EmergencyChargeForceField\"]");
+        assertThat(indexedKeywords(planner.getId())).containsExactly("EmergencyChargeForceField");
+    }
+
+    @Test
+    void backfill_WhenACatalogCopyIsStaleNextToACorrectColumn_RepairsTheCatalog() {
+        Planner planner = publishWithFilters("Backfill Stale Catalog", Set.of("Burst"));
+        jdbc().update("UPDATE planner_catalog SET selected_keywords = '[\"Sinking\"]' WHERE planner_id = UUID_TO_BIN(?)",
+                planner.getId().toString());
+
+        runBackfill();
+
+        assertThat(column("planner_content", planner.getId())).isEqualTo("[\"Burst\"]");
+        assertThat(column("planner_catalog", planner.getId())).isEqualTo("[\"Burst\"]");
+        assertThat(indexedKeywords(planner.getId())).containsExactly("Burst");
+    }
+
+    @Test
+    void backfill_WhenRunTwice_CorrectsOnceAndThenChangesNothing() {
+        Planner planner = publishedWithoutColumn("Backfill Rerun", List.of("Burst"));
+        publishWithFilters("Backfill Already Consistent", Set.of("Sinking"));
+
+        assertThat(runBackfill()).isEqualTo(1);
+        assertThat(runBackfill()).isZero();
+        assertThat(column("planner_content", planner.getId())).isEqualTo("[\"Burst\"]");
+    }
+
+    @Test
+    void backfill_WhenTheContentSelectionIsNotAnArray_ClearsTheColumn() {
+        Planner planner = publishWithFilters("Backfill Not An Array", Set.of("Sinking"));
+        jdbc().update("UPDATE planner_content SET content = JSON_SET(content, '$.selectedKeywords', 'none') "
+                + "WHERE planner_id = UUID_TO_BIN(?)", planner.getId().toString());
+
+        runBackfill();
+
+        assertThat(column("planner_content", planner.getId())).isNull();
+        assertThat(column("planner_catalog", planner.getId())).isNull();
+        assertThat(indexedKeywords(planner.getId())).isEmpty();
+    }
+
+    @Test
+    void backfill_WhenTheContentSelectionHoldsANonString_KeepsOnlyTheStringKeywords() {
+        Planner planner = publishWithFilters("Backfill Non String", Set.of("Sinking"));
+        jdbc().update("UPDATE planner_content SET content = JSON_SET(content, '$.selectedKeywords', "
+                + "JSON_ARRAY(9828, 'Burst')) WHERE planner_id = UUID_TO_BIN(?)", planner.getId().toString());
+
+        runBackfill();
+
+        assertThat(column("planner_content", planner.getId())).isEqualTo("[\"Burst\"]");
+        assertThat(indexedKeywords(planner.getId())).containsExactly("Burst");
+    }
+
+    @Test
+    void keywordFacetFilter_WhenARenamedKeywordIsQueriedInAnotherCase_ReturnsThePlannerStoredUnderTheCurrentId()
+            throws Exception {
+        publishWithFilters("Renamed Facet Any Case", Set.of("9828"));
+
+        mockMvc.perform(get("/api/planner/md/published").param("keyword", "ACCELBULLET"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.page.totalElements").value(1))
+                .andExpect(jsonPath("$.content[0].title").value("Renamed Facet Any Case"));
+
+        mockMvc.perform(get("/api/planner/md/published").param("q", "accelbullet"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.page.totalElements").value(1))
+                .andExpect(jsonPath("$.content[0].title").value("Renamed Facet Any Case"));
     }
 }

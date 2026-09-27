@@ -23,7 +23,8 @@
 --                       floors the category renders; view_flush_batches)
 --
 -- Coverage:
---   - selected_keywords: all 35 keywords across 4 planners (JSON arrays)
+--   - selected_keywords: all 35 keywords across 4 planners (JSON arrays), each
+--     equal to its content's selectedKeywords (the server derives the column from it)
 --   - planner_type: MIRROR_DUNGEON, REFRACTED_RAILWAY
 --   - status: draft, saved
 --   - vote_type: UP
@@ -82,6 +83,7 @@ VALUES (
     'Seed MD Planner - Status Effects', 'saved', '5F',
     '["Combustion","Laceration","Vibration","Burst","Sinking","Breath","Charge","Slash","Penetrate","Hit"]',
     JSON_OBJECT(
+        'selectedKeywords', JSON_ARRAY('Combustion','Laceration','Vibration','Burst','Sinking','Breath','Charge','Slash','Penetrate','Hit'),
         'equipment', JSON_OBJECT(
             'slot1', JSON_OBJECT(
                 'identity', JSON_OBJECT('id', '10101'),
@@ -110,6 +112,7 @@ VALUES (
     'Seed RR Planner - Affinities', 'saved', '10F',
     '["CRIMSON","SCARLET","AMBER","SHAMROCK","AZURE","INDIGO","VIOLET"]',
     JSON_OBJECT(
+        'selectedKeywords', JSON_ARRAY('CRIMSON','SCARLET','AMBER','SHAMROCK','AZURE','INDIGO','VIOLET'),
         'equipment', JSON_OBJECT(
             'slot1', JSON_OBJECT(
                 'identity', JSON_OBJECT('id', '10301'),
@@ -131,6 +134,7 @@ VALUES (
     'Seed MD Planner - Synergy Keywords', 'saved', '15F',
     '["Assemble","KnowledgeExplored","AaCePcBt","SwordPlayOfTheHomeland","EchoOfMansion","TimeSuspend","EmergencyChargeForceField","BloodDinner","BlackCloud","RetaliationBook","HeishouSynergy","Bullet","BlessingOfIndexPrescriptAlly","Inspire","9828","SojiRyoshuEntangle","DawnTeam"]',
     JSON_OBJECT(
+        'selectedKeywords', JSON_ARRAY('Assemble','KnowledgeExplored','AaCePcBt','SwordPlayOfTheHomeland','EchoOfMansion','TimeSuspend','EmergencyChargeForceField','BloodDinner','BlackCloud','RetaliationBook','HeishouSynergy','Bullet','BlessingOfIndexPrescriptAlly','Inspire','9828','SojiRyoshuEntangle','DawnTeam'),
         'equipment', JSON_OBJECT(
             'slot1', JSON_OBJECT(
                 'identity', JSON_OBJECT('id', '10401'),
@@ -151,7 +155,7 @@ VALUES (
     UNHEX('AAAA0004000000000000000000000004'),
     'Seed Draft Planner', 'draft', '5F',
     '["9154"]',
-    JSON_OBJECT('equipment', JSON_OBJECT(), 'selectedGiftIds', JSON_ARRAY(), 'observationGiftIds', JSON_ARRAY(), 'comprehensiveGiftIds', JSON_ARRAY(), 'floorSelections', JSON_ARRAY()),
+    JSON_OBJECT('selectedKeywords', JSON_ARRAY('9154'), 'equipment', JSON_OBJECT(), 'selectedGiftIds', JSON_ARRAY(), 'observationGiftIds', JSON_ARRAY(), 'comprehensiveGiftIds', JSON_ARRAY(), 'floorSelections', JSON_ARRAY()),
     1, 6, 1, 0, NOW(6)
 );
 
@@ -162,6 +166,7 @@ VALUES (
     'Seed MD Planner - Hidden Floor', 'saved', '5F',
     '[]',
     JSON_OBJECT(
+        'selectedKeywords', JSON_ARRAY(),
         'equipment', JSON_OBJECT(),
         'selectedGiftIds', JSON_ARRAY(),
         'observationGiftIds', JSON_ARRAY(),

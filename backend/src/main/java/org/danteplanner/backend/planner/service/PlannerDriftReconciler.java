@@ -2,7 +2,9 @@ package org.danteplanner.backend.planner.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.MissingNode;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
@@ -74,6 +76,7 @@ public class PlannerDriftReconciler {
                         auditCommentCounts(),
                         auditCatalogMembership(),
                         auditCatalogScalars(),
+                        auditContentKeywords(),
                         auditCatalogKeywords(),
                         auditFilters(),
                         auditRecommended(),
@@ -137,6 +140,26 @@ public class PlannerDriftReconciler {
                 .toList();
     }
 
+    private List<DriftRecord> auditContentKeywords() {
+        return auditRepository.contentKeywordPairs().stream()
+                .map(row -> selectedInContent(row.plannerId(), row.contentKeywords())
+                        .flatMap(want -> indexDrift("content_keywords", row.plannerId(), want,
+                                keywordsAsServed(row.plannerId(), "column", row.columnKeywords()))))
+                .flatMap(Optional::stream)
+                .toList();
+    }
+
+    private Optional<Set<String>> selectedInContent(UUID plannerId, String selectionJson) {
+        try {
+            JsonNode selection = selectionJson == null ? MissingNode.getInstance() : objectMapper.readTree(selectionJson);
+            return Optional.of(PlannerKeywords.fromSelection(selection).asSet());
+        } catch (JsonProcessingException e) {
+            log.warn("Unreadable content keywords for planner {} during reconciliation: {}",
+                    plannerId, e.getMessage());
+            return Optional.empty();
+        }
+    }
+
     private Set<String> keywordsAsServed(UUID plannerId, String side, String keywordsJson) {
         return parseKeywords(plannerId, side, keywordsJson).orElseGet(Set::of);
     }
@@ -158,12 +181,17 @@ public class PlannerDriftReconciler {
         Set<UUID> unreadable = new HashSet<>();
         for (ContentDocumentRow row : auditRepository.visibleContentDocuments()) {
             UUID plannerId = row.plannerId();
-            Set<String> entities = extractEntityKeys(plannerId, row.category(), row.content()).orElse(null);
-            Set<String> keywords = parseKeywords(plannerId, "content", row.selectedKeywords()).orElse(null);
+            Optional<JsonNode> document = readContent(plannerId, row.content());
+            Set<String> entities = document
+                    .flatMap(tree -> extractEntityKeys(plannerId, row.category(), tree))
+                    .orElse(null);
+            Set<String> keywords = document
+                    .map(tree -> PlannerKeywords.fromContent(tree).asSet())
+                    .orElse(null);
 
             if (entities == null || keywords == null) {
-                log.warn("Planner {} skipped this reconciliation cycle: stored content or "
-                        + "keywords could not be read", plannerId);
+                log.warn("Planner {} skipped this reconciliation cycle: stored content could not be read",
+                        plannerId);
                 unreadable.add(plannerId);
                 continue;
             }
@@ -173,19 +201,31 @@ public class PlannerDriftReconciler {
         return new ExpectedIndexes(entitiesByPlanner, keywordsByPlanner, unreadable);
     }
 
-    private Optional<Set<String>> extractEntityKeys(UUID plannerId, String category, String contentJson) {
+    private Optional<JsonNode> readContent(UUID plannerId, String contentJson) {
         if (contentJson == null || contentJson.isBlank()) {
+            return Optional.of(MissingNode.getInstance());
+        }
+        try {
+            return Optional.of(objectMapper.readTree(contentJson));
+        } catch (JsonProcessingException e) {
+            log.warn("Unreadable content for planner {} during reconciliation: {}",
+                    plannerId, e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    private Optional<Set<String>> extractEntityKeys(UUID plannerId, String category, JsonNode content) {
+        if (content.isMissingNode()) {
             return Optional.of(Set.of());
         }
         try {
             Set<String> keys = new HashSet<>();
             for (PlannerContentEntityExtractor.EntityRef ref
-                    : PlannerContentEntityExtractor.extract(objectMapper.readTree(contentJson),
-                            MDCategory.fromValue(category))) {
+                    : PlannerContentEntityExtractor.extract(content, MDCategory.fromValue(category))) {
                 keys.add(ref.type().name() + ":" + ref.id());
             }
             return Optional.of(keys);
-        } catch (JsonProcessingException | IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             log.warn("Unreadable content for planner {} during reconciliation: {}",
                     plannerId, e.getMessage());
             return Optional.empty();

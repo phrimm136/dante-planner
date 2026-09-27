@@ -6,6 +6,7 @@ import org.danteplanner.backend.shared.entity.ContentEntityType;
 import org.danteplanner.backend.planner.entity.PlannerCatalog;
 import org.danteplanner.backend.planner.entity.PlannerEntityFilter;
 import org.danteplanner.backend.planner.entity.PlannerKeywordFilter;
+import org.danteplanner.backend.planner.entity.PlannerKeywords;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.Arrays;
@@ -36,7 +37,7 @@ public final class CatalogSpecifications {
                         cb.function("match_against", Double.class,
                                 root.get("title"), cb.literal(booleanQuery)),
                         0.0),
-                keywordExists(root, query, cb, q.trim())
+                keywordExists(root, query, cb, PlannerKeywords.filterKeyword(q.trim()))
         );
     }
 

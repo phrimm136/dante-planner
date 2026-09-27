@@ -93,6 +93,9 @@ public class PlannerPublishingService {
             planner.getContent().setContent(normalized);
         }
 
+        if (!planner.isPublished()) {
+            publishValidator.requireKnownKeywords(planner.getContentJson());
+        }
         PublicationChange change = planner.publish();
         if (!change.changed()) {
             return describe(planner);

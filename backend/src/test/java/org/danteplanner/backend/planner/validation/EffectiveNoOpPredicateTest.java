@@ -61,7 +61,6 @@ class EffectiveNoOpPredicateTest {
                 .status(PlannerStatus.SAVED)
                 .category("5F")
                 .content(DOCUMENT)
-                .selectedKeywords(Set.of("Combustion", "Sinking"))
                 .contentSchemaVersion(2)
                 .gameContentVersion(6)
                 .deviceId(DEVICE);
@@ -168,18 +167,6 @@ class EffectiveNoOpPredicateTest {
     }
 
     @Test
-    void effectiveNoOp_WhenKeywordsDiffer_IsFalse() {
-        assertThat(predicate.isEffectiveNoOp(storedRow(),
-                carryingStoredValues().selectedKeywords(Set.of("Combustion")).build())).isFalse();
-    }
-
-    @Test
-    void effectiveNoOp_WhenKeywordsAreCarriedInADifferentOrder_IsTrue() {
-        assertThat(predicate.isEffectiveNoOp(storedRow(),
-                carryingStoredValues().selectedKeywords(Set.of("Sinking", "Combustion")).build())).isTrue();
-    }
-
-    @Test
     @DisplayName("a field the request does not carry changes nothing, so it cannot defeat the no-op")
     void effectiveNoOp_WhenNoFieldIsCarried_IsTrue() {
         assertThat(predicate.isEffectiveNoOp(storedRow(), CarriedWrite.builder().build())).isTrue();
@@ -189,21 +176,5 @@ class EffectiveNoOpPredicateTest {
     void effectiveNoOp_WhenOnlyContentIsCarriedAndEqual_IsTrue() {
         assertThat(predicate.isEffectiveNoOp(storedRow(),
                 CarriedWrite.builder().content(SAME_DOCUMENT_RESTYLED).build())).isTrue();
-    }
-
-    @Test
-    void effectiveNoOp_WhenKeywordsAreCarriedButTheRowHasNone_IsFalse() {
-        PlannerContent stored = PlannerContent.builder()
-                .title("Stored Title")
-                .status(PlannerStatus.SAVED)
-                .category("5F")
-                .content(DOCUMENT)
-                .contentSchemaVersion(2)
-                .gameContentVersion(6)
-                .build();
-
-        assertThat(predicate.isEffectiveNoOp(stored, CarriedWrite.builder()
-                .selectedKeywords(Set.of())
-                .build())).isFalse();
     }
 }

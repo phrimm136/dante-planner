@@ -31,7 +31,10 @@ public class PlannerDriftAuditRepository {
     public record RecommendedDriftRow(UUID plannerId, boolean recommended, boolean derived) {
     }
 
-    public record ContentDocumentRow(UUID plannerId, String category, String content, String selectedKeywords) {
+    public record ContentDocumentRow(UUID plannerId, String category, String content) {
+    }
+
+    public record ContentKeywordRow(UUID plannerId, String contentKeywords, String columnKeywords) {
     }
 
     public record CatalogScalarDriftRow(UUID plannerId, String field, String expected, String actual) {
@@ -144,14 +147,26 @@ public class PlannerDriftAuditRepository {
 
     public List<ContentDocumentRow> visibleContentDocuments() {
         return jdbc.query("""
-                SELECT BIN_TO_UUID(c.planner_id) AS planner_id, c.category, c.content, c.selected_keywords
+                SELECT BIN_TO_UUID(c.planner_id) AS planner_id, c.category, c.content
                 FROM planner_content c
                 JOIN planner_publication pub ON pub.planner_id = c.planner_id
                 LEFT JOIN planner_moderation m ON m.planner_id = c.planner_id
                 WHERE pub.published = TRUE AND c.deleted_at IS NULL AND m.taken_down_at IS NULL
                 """,
                 (rs, rowNum) -> new ContentDocumentRow(UUID.fromString(rs.getString("planner_id")),
-                        rs.getString("category"), rs.getString("content"), rs.getString("selected_keywords")));
+                        rs.getString("category"), rs.getString("content")));
+    }
+
+    public List<ContentKeywordRow> contentKeywordPairs() {
+        return jdbc.query("""
+                SELECT BIN_TO_UUID(planner_id) AS planner_id,
+                       JSON_EXTRACT(content, '$.selectedKeywords') AS content_keywords,
+                       selected_keywords AS column_keywords
+                FROM planner_content
+                WHERE deleted_at IS NULL
+                """,
+                (rs, rowNum) -> new ContentKeywordRow(UUID.fromString(rs.getString("planner_id")),
+                        rs.getString("content_keywords"), rs.getString("column_keywords")));
     }
 
     public List<EntityFilterRow> entityFilterEntries() {

@@ -1,10 +1,18 @@
 package org.danteplanner.backend.planner.entity;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 public final class PlannerKeywords {
@@ -26,6 +34,12 @@ public final class PlannerKeywords {
             "ChargeLoad", "EmergencyChargeForceField"
     );
 
+    private static final Map<String, String> FILTER_RENAME_MAP = caseInsensitive(RENAME_MAP);
+
+    private static final String CONTENT_FIELD = "selectedKeywords";
+
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
     private final Set<String> keywords;
     private final Set<String> dropped;
 
@@ -42,13 +56,57 @@ public final class PlannerKeywords {
         return normalize(stored);
     }
 
+    public static PlannerKeywords fromContent(String contentJson) {
+        try {
+            return fromContent(MAPPER.readTree(contentJson));
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Planner content is not JSON", e);
+        }
+    }
+
+    public static PlannerKeywords fromContent(JsonNode root) {
+        return fromSelection(root.path(CONTENT_FIELD));
+    }
+
+    public static PlannerKeywords fromSelection(JsonNode selected) {
+        if (!selected.isArray()) {
+            return normalize(null);
+        }
+        List<String> named = new ArrayList<>();
+        Set<String> unnamed = new HashSet<>();
+        for (JsonNode element : selected) {
+            if (element.isTextual()) {
+                named.add(element.asText());
+            } else {
+                unnamed.add(element.toString());
+            }
+        }
+        PlannerKeywords normalized = normalize(named);
+        unnamed.addAll(normalized.dropped);
+        return new PlannerKeywords(normalized.keywords, unnamed);
+    }
+
+    public static String filterKeyword(String keyword) {
+        return FILTER_RENAME_MAP.getOrDefault(keyword, keyword);
+    }
+
+    private static String remap(String keyword) {
+        return RENAME_MAP.getOrDefault(keyword, keyword);
+    }
+
+    private static Map<String, String> caseInsensitive(Map<String, String> renames) {
+        Map<String, String> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        map.putAll(renames);
+        return Collections.unmodifiableMap(map);
+    }
+
     private static PlannerKeywords normalize(Collection<String> raw) {
         if (raw == null) {
             return new PlannerKeywords(Set.of(), Set.of());
         }
         Set<String> remapped = raw.stream()
                 .filter(k -> k != null && !k.isEmpty())
-                .map(k -> RENAME_MAP.getOrDefault(k, k))
+                .map(PlannerKeywords::remap)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         Set<String> dropped = remapped.stream()
                 .filter(k -> !VALID_KEYWORDS.contains(k))

@@ -59,7 +59,7 @@ export function localPlannerContent(): Record<string, unknown> {
   }
 
   return {
-    selectedKeywords: [],
+    selectedKeywords: [PLANNER_KEYWORD],
     selectedBuffIds: [],
     selectedGiftKeyword: null,
     selectedGiftIds: [],
@@ -81,7 +81,7 @@ export function minimalPlannerContent(): string {
   const equipment = minimalEquipment()
 
   return JSON.stringify({
-    selectedKeywords: [],
+    selectedKeywords: [PLANNER_KEYWORD],
     equipment,
     deploymentOrder: [],
     floorSelections: [],

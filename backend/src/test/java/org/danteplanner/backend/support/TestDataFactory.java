@@ -1,10 +1,16 @@
 package org.danteplanner.backend.support;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 import java.util.concurrent.atomic.AtomicLong;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerContent;
 import org.danteplanner.backend.planner.entity.PlannerContentLifecycle;
+import org.danteplanner.backend.planner.entity.PlannerKeywords;
 import org.danteplanner.backend.planner.entity.PlannerModeration;
 import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
@@ -16,6 +22,7 @@ import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
 
@@ -170,6 +177,30 @@ public class TestDataFactory {
         return new PlannerBuilder(owner);
     }
 
+    private static final ObjectMapper CONTENT_MAPPER = new ObjectMapper();
+
+    /**
+     * The content document with its {@code selectedKeywords} array replaced, the source the server
+     * derives the keyword column from.
+     *
+     * @param content a planner content JSON object
+     * @param keywords the keywords the document selects
+     * @return the rewritten document
+     */
+    public static String withSelectedKeywords(String content, Collection<String> keywords) {
+        try {
+            JsonNode root = CONTENT_MAPPER.readTree(content);
+            if (!root.isObject()) {
+                throw new IllegalArgumentException("Planner content is not a JSON object: " + content);
+            }
+            ArrayNode array = ((ObjectNode) root).putArray("selectedKeywords");
+            keywords.forEach(array::add);
+            return CONTENT_MAPPER.writeValueAsString(root);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Planner content is not JSON: " + content, e);
+        }
+    }
+
     /**
      * Fluent aggregate builder: assembles the planner core plus its content,
      * publication, and moderation satellites in one call chain.
@@ -248,6 +279,7 @@ public class TestDataFactory {
         }
 
         public Planner build() {
+            String document = selectedKeywords == null ? content : withSelectedKeywords(content, selectedKeywords);
             Planner planner = Planner.builder()
                     .id(id)
                     .user(owner)
@@ -259,10 +291,10 @@ public class TestDataFactory {
                             .category(category)
                             .status(status != null ? status
                                     : (published ? PlannerStatus.SAVED : PlannerStatus.DRAFT))
-                            .content(content)
+                            .content(document)
                             .contentSchemaVersion(schemaVersion)
                             .gameContentVersion(contentVersion)
-                            .selectedKeywords(selectedKeywords)
+                            .selectedKeywords(PlannerKeywords.fromContent(document).asSet())
                             .build()),
                     PlannerPublication.builder().build(),
                     PlannerModeration.builder().build());

@@ -1685,4 +1685,38 @@ class PlannerContentValidatorTest {
             assertFalse(validator.isSameDocument("{", "{}"));
         }
     }
+
+    @Nested
+    @DisplayName("Keyword membership Tests")
+    class KeywordMembershipTests {
+
+        private String selecting(String keywords) {
+            return createValidContent().replace("\"selectedKeywords\": [\"Combustion\", \"Slash\"]",
+                    "\"selectedKeywords\": " + keywords);
+        }
+
+        @Test
+        void validate_WhenPublishPolicyAndContentSelectsAnUnknownKeyword_Passes() {
+            setupMocksForValidIds();
+
+            assertDoesNotThrow(() ->
+                    validate(selecting("[\"Combustion\", \"NotAKeyword\"]"), "5F", ValidationPolicy.PUBLISH));
+        }
+
+        @Test
+        void validate_WhenDraftPolicyAndContentSelectsAnUnknownKeyword_Passes() {
+            setupMocksForValidIds();
+
+            assertDoesNotThrow(() ->
+                    validate(selecting("[\"Combustion\", \"NotAKeyword\"]"), "5F", ValidationPolicy.DRAFT));
+        }
+
+        @Test
+        void validate_WhenPublishPolicyAndContentSelectsARenamedKeyword_Passes() {
+            setupMocksForValidIds();
+
+            assertDoesNotThrow(() ->
+                    validate(selecting("[\"AccelBullet\", \"ChargeLoad\"]"), "5F", ValidationPolicy.PUBLISH));
+        }
+    }
 }

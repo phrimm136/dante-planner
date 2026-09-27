@@ -6,10 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import org.danteplanner.backend.planner.entity.PlannerContent;
-import org.danteplanner.backend.planner.entity.PlannerKeywords;
 
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * MySQL re-serializes a JSON column
@@ -29,17 +27,11 @@ public class EffectiveNoOpPredicate {
                 && unchanged(carried.gameContentVersion(), stored.getGameContentVersion())
                 && unchanged(carried.contentSchemaVersion(), stored.getContentSchemaVersion())
                 && unchanged(carried.deviceId(), stored.getDeviceId())
-                && keywordsUnchanged(carried.selectedKeywords(), stored.getSelectedKeywords())
                 && contentUnchanged(carried.content(), stored.getContent());
     }
 
     private static boolean unchanged(Object carried, Object storedValue) {
         return carried == null || Objects.equals(carried, storedValue);
-    }
-
-    private static boolean keywordsUnchanged(Set<String> carried, Set<String> storedValue) {
-        return carried == null
-                || Objects.equals(PlannerKeywords.fromClient(carried).asSet(), storedValue);
     }
 
     private boolean contentUnchanged(String carried, String storedValue) {

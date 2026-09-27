@@ -637,4 +637,66 @@ class PlannerCommandServiceTest {
             verify(plannerRepository, never()).existsActiveById(any());
         }
     }
+
+    @Nested
+    @DisplayName("Keyword derivation Tests")
+    class KeywordDerivationTests {
+
+        private static final String SINKING_CONTENT = "{\"selectedKeywords\":[\"Sinking\"],\"equipment\":{}}";
+        private static final String BURST_CONTENT = "{\"selectedKeywords\":[\"Burst\"],\"equipment\":{}}";
+
+        private UpsertPlannerRequest carrying(Planner planner, String content, java.util.Set<String> topLevel,
+                Long syncVersion) {
+            return new UpsertPlannerRequest(planner.getId().toString(), planner.getCategory(), planner.getTitle(),
+                    null, content, planner.getContentVersion(), PlannerType.MIRROR_DUNGEON, syncVersion, topLevel);
+        }
+
+        private Planner storedWithSinking() {
+            Planner planner = testPlanner(3L, false);
+            planner.getContent().setContent(SINKING_CONTENT);
+            planner.getContent().setSelectedKeywords(java.util.Set.of("Sinking"));
+            planner.getContent().setContentSchemaVersion(CURRENT_SCHEMA_VERSION);
+            planner.getContent().setDeviceId(deviceId);
+            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+                    .thenReturn(Optional.of(planner));
+            return planner;
+        }
+
+        @Test
+        void createPlanner_WhenTopLevelKeywordsDisagreeWithContent_StoresTheContentKeywords() {
+            UpsertPlannerRequest request = new UpsertPlannerRequest(UUID.randomUUID().toString(), "5F", "Test Planner",
+                    null, SINKING_CONTENT, 6, PlannerType.MIRROR_DUNGEON, null, java.util.Set.of("Burst"));
+            when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(0L);
+            ArgumentCaptor<Planner> plannerCaptor = ArgumentCaptor.forClass(Planner.class);
+            when(plannerRepository.insert(plannerCaptor.capture()))
+                    .thenAnswer(invocation -> PlannerContentLifecycle.asPersisted((Planner) invocation.getArgument(0)));
+
+            commandService.createPlanner(testUser.getId(), deviceId, request);
+
+            assertEquals(java.util.Set.of("Sinking"), plannerCaptor.getValue().getSelectedKeywords());
+        }
+
+        @Test
+        void upsertPlanner_WhenTopLevelKeywordsAreAbsent_DerivesTheColumnFromTheNewContent() {
+            Planner planner = storedWithSinking();
+
+            commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(),
+                    carrying(planner, BURST_CONTENT, null, planner.getSyncVersion()), false);
+
+            assertEquals(java.util.Set.of("Burst"), planner.getSelectedKeywords());
+        }
+
+        @Test
+        void upsertPlanner_WhenAStaleSaveDiffersOnlyInTopLevelKeywords_AcknowledgesWithoutConflict() {
+            Planner planner = storedWithSinking();
+            long storedVersion = planner.getSyncVersion();
+
+            UpsertResult result = assertDoesNotThrow(() -> commandService.upsertPlanner(testUser.getId(), deviceId,
+                    planner.getId(), carrying(planner, SINKING_CONTENT, java.util.Set.of("Burst"), storedVersion - 1),
+                    false));
+
+            assertEquals(storedVersion, result.response().syncVersion());
+            assertEquals(java.util.Set.of("Sinking"), planner.getSelectedKeywords());
+        }
+    }
 }

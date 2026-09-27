@@ -179,7 +179,8 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
                 planner.getCategory(),
                 title,
                 PlannerStatus.SAVED,
-                planner.getContentJson(),
+                keywords == null ? planner.getContentJson()
+                        : TestDataFactory.withSelectedKeywords(planner.getContentJson(), keywords),
                 planner.getContentVersion(),
                 PlannerType.MIRROR_DUNGEON,
                 planner.getSyncVersion(),
