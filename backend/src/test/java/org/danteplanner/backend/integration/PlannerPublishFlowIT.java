@@ -35,7 +35,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -248,6 +251,163 @@ class PlannerPublishFlowIT {
 
         assertThat(plannerRepository.existsById(plannerId))
                 .as("a refused body creates nothing").isFalse();
+    }
+
+    private static final int CURRENT_CONTENT_VERSION = 7;
+
+    private UpsertPlannerRequest upsertBody(UUID id, String title, String content, Long syncVersion) {
+        return new UpsertPlannerRequest(
+                id.toString(), "5F", title, PlannerStatus.SAVED, content,
+                CURRENT_CONTENT_VERSION, PlannerType.MIRROR_DUNGEON, syncVersion, null);
+    }
+
+    private ResultActions sendAs(UUID device, MockHttpServletRequestBuilder request, Object body) throws Exception {
+        return mockMvc.perform(request
+                .cookie(AuthCookies.session(token, device))
+                .with(withCsrf())
+                .contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(body)));
+    }
+
+    private String divergentContent() throws Exception {
+        ObjectNode root = (ObjectNode) objectMapper.readTree(TestDataFactory.VALID_CONTENT);
+        root.set("selectedBuffIds", objectMapper.createArrayNode().add(100));
+        return objectMapper.writeValueAsString(root);
+    }
+
+    /** A planner saved once from {@code device}, holding content that differs from the publish body's. */
+    private long savedPlanner(UUID id, UUID device) throws Exception {
+        sendAs(device, put("/api/planner/md/{id}", id), upsertBody(id, "Saved Draft", divergentContent(), null))
+                .andExpect(status().isCreated());
+        return plannerRepository.findAggregateForOwner(id, owner.getId()).orElseThrow().getSyncVersion();
+    }
+
+    private Planner stored(UUID id) {
+        return plannerRepository.findAggregateForOwner(id, owner.getId()).orElseThrow();
+    }
+
+    @Test
+    @DisplayName("publish-carries-the-save: one content-carrying publish leaves the state save-then-publish leaves")
+    void publishWithContent_WhenLocalEditsUnsaved_EqualsSaveThenPublish() throws Exception {
+        UUID device = UUID.randomUUID();
+        UUID throughTwoRequests = UUID.randomUUID();
+        UUID throughOneRequest = UUID.randomUUID();
+        long twoVersion = savedPlanner(throughTwoRequests, device);
+        long oneVersion = savedPlanner(throughOneRequest, device);
+
+        sendAs(device, put("/api/planner/md/{id}", throughTwoRequests),
+                upsertBody(throughTwoRequests, "Edited Title", TestDataFactory.VALID_CONTENT, twoVersion))
+                .andExpect(status().isOk());
+        String twoBody = mockMvc.perform(post("/api/planner/md/{id}/publish", throughTwoRequests)
+                        .cookie(AuthCookies.session(token, device))
+                        .with(withCsrf()))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        String oneBody = sendAs(device, post("/api/planner/md/{id}/publish", throughOneRequest),
+                        upsertBody(throughOneRequest, "Edited Title", TestDataFactory.VALID_CONTENT, oneVersion))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        ObjectNode viaTwo = (ObjectNode) objectMapper.readTree(twoBody);
+        ObjectNode viaOne = (ObjectNode) objectMapper.readTree(oneBody);
+        assertThat(viaOne.get("published").asBoolean()).isTrue();
+        assertThat(viaOne.get("title").asText()).isEqualTo("Edited Title");
+        assertThat(viaOne.get("syncVersion").asLong()).isEqualTo(oneVersion + 1);
+        assertThat(objectMapper.readTree(viaOne.get("content").asText()))
+                .isEqualTo(objectMapper.readTree(TestDataFactory.VALID_CONTENT));
+
+        List<String> perRowFields = List.of("id", "createdAt", "lastModifiedAt", "savedAt");
+        viaTwo.remove(perRowFields);
+        viaOne.remove(perRowFields);
+        viaTwo.set("content", objectMapper.readTree(viaTwo.get("content").asText()));
+        viaOne.set("content", objectMapper.readTree(viaOne.get("content").asText()));
+        assertThat(viaOne).isEqualTo(viaTwo);
+    }
+
+    @Test
+    @DisplayName("stale-publish-conflicts-like-a-stale-save: the same stale body answers the same conflict on both routes")
+    void publishWithContent_WhenSyncVersionStale_AnswersTheSaveConflict() throws Exception {
+        UUID device = UUID.randomUUID();
+        UUID id = UUID.randomUUID();
+        long version = savedPlanner(id, device);
+        sendAs(device, put("/api/planner/md/{id}", id),
+                upsertBody(id, "Advanced", divergentContent(), version))
+                .andExpect(status().isOk());
+        UpsertPlannerRequest stale = upsertBody(id, "Stale Edit", TestDataFactory.VALID_CONTENT, version);
+
+        var saveResponse = sendAs(device, put("/api/planner/md/{id}", id), stale)
+                .andReturn().getResponse();
+        var publishResponse = sendAs(device, post("/api/planner/md/{id}/publish", id), stale)
+                .andReturn().getResponse();
+
+        assertThat(saveResponse.getStatus()).isEqualTo(409);
+        assertThat(publishResponse.getStatus()).isEqualTo(saveResponse.getStatus());
+        JsonNode saveProblem = objectMapper.readTree(saveResponse.getContentAsString());
+        JsonNode publishProblem = objectMapper.readTree(publishResponse.getContentAsString());
+        assertThat(publishProblem.get("code")).isEqualTo(saveProblem.get("code"));
+        assertThat(publishProblem.get("serverVersion")).isEqualTo(saveProblem.get("serverVersion"));
+        assertThat(stored(id).isPublished()).as("a refused publish publishes nothing").isFalse();
+        assertThat(stored(id).getTitle()).isEqualTo("Advanced");
+    }
+
+    @Test
+    @DisplayName("publish-stamps-the-device: the publishing device is stored, so another device's stale resend conflicts")
+    void publishWithContent_WhenStaleResendFromAnotherDevice_ConflictsInsteadOfAcking() throws Exception {
+        UUID firstDevice = UUID.randomUUID();
+        UUID secondDevice = UUID.randomUUID();
+        UUID id = UUID.randomUUID();
+        long version = savedPlanner(id, firstDevice);
+        UpsertPlannerRequest published = upsertBody(id, "Published", TestDataFactory.VALID_CONTENT, version);
+
+        sendAs(secondDevice, post("/api/planner/md/{id}/publish", id), published)
+                .andExpect(status().isOk());
+        assertThat(stored(id).getDeviceId()).isEqualTo(secondDevice);
+
+        sendAs(firstDevice, post("/api/planner/md/{id}/publish", id), published)
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("SYNC_CONFLICT"));
+        assertThat(stored(id).getDeviceId()).isEqualTo(secondDevice);
+    }
+
+    @Test
+    @DisplayName("unpublish-ignores-a-body: the unpublish intent saves no content even when a body is sent")
+    void unpublishIntent_WhenBodySent_SavesNoContent() throws Exception {
+        UUID device = UUID.randomUUID();
+        UUID id = UUID.randomUUID();
+        long version = savedPlanner(id, device);
+        sendAs(device, post("/api/planner/md/{id}/publish", id),
+                upsertBody(id, "Published", TestDataFactory.VALID_CONTENT, version))
+                .andExpect(status().isOk());
+        long publishedVersion = stored(id).getSyncVersion();
+
+        sendAs(device, post("/api/planner/md/{id}/unpublish", id),
+                upsertBody(id, "Smuggled Title", divergentContent(), publishedVersion))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.published").value(false));
+
+        Planner after = stored(id);
+        assertThat(after.getTitle()).isEqualTo("Published");
+        assertThat(after.getSyncVersion()).isEqualTo(publishedVersion);
+    }
+
+    @Test
+    @DisplayName("legacy-unpublish-with-content-stamps-the-device: the delegate's content path stores the device")
+    void legacyUnpublish_WhenContentCarried_StoresTheDevice() throws Exception {
+        UUID firstDevice = UUID.randomUUID();
+        UUID secondDevice = UUID.randomUUID();
+        UUID id = UUID.randomUUID();
+        long version = savedPlanner(id, firstDevice);
+        LegacyPublishRequest unpublish = new LegacyPublishRequest(
+                false, id.toString(), "5F", "Withdrawn", PlannerStatus.SAVED,
+                TestDataFactory.VALID_CONTENT, CURRENT_CONTENT_VERSION, PlannerType.MIRROR_DUNGEON, version, null);
+
+        sendAs(secondDevice, put("/api/planner/md/{id}/publish", id), unpublish)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.published").value(false))
+                .andExpect(jsonPath("$.title").value("Withdrawn"));
+
+        assertThat(stored(id).getDeviceId()).isEqualTo(secondDevice);
     }
 
     private JsonNode ownerCopy(UUID plannerId) throws Exception {

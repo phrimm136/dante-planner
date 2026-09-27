@@ -2,6 +2,7 @@ package org.danteplanner.backend.planner.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.danteplanner.backend.shared.config.DeviceId;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.planner.dto.LegacyPublishRequest;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
@@ -33,24 +34,22 @@ public class PlannerPublishingController {
     @PostMapping("/{id}/publish")
     public ResponseEntity<PlannerResponse> publishPlanner(
             @AuthenticationPrincipal Long userId,
+            @DeviceId UUID deviceId,
             @PathVariable UUID id,
             @RequestBody(required = false) @Valid UpsertPlannerRequest content) {
 
         return ResponseEntity.ok(content == null
                 ? plannerPublishingService.publish(userId, id)
-                : plannerPublishingService.publish(userId, id, content));
+                : plannerPublishingService.publish(userId, deviceId, id, content));
     }
 
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "unpublish")
     @PostMapping("/{id}/unpublish")
     public ResponseEntity<PlannerResponse> unpublishPlanner(
             @AuthenticationPrincipal Long userId,
-            @PathVariable UUID id,
-            @RequestBody(required = false) @Valid UpsertPlannerRequest content) {
+            @PathVariable UUID id) {
 
-        return ResponseEntity.ok(content == null
-                ? plannerPublishingService.unpublish(userId, id)
-                : plannerPublishingService.unpublish(userId, id, content));
+        return ResponseEntity.ok(plannerPublishingService.unpublish(userId, id));
     }
 
     /**
@@ -62,13 +61,17 @@ public class PlannerPublishingController {
     @PutMapping("/{id}/publish")
     public ResponseEntity<PlannerResponse> setPublished(
             @AuthenticationPrincipal Long userId,
+            @DeviceId UUID deviceId,
             @PathVariable UUID id,
             @RequestBody @Valid LegacyPublishRequest request) {
 
         UpsertPlannerRequest content = request.carriesContent() ? request.toUpsertRequest() : null;
-        return request.published()
-                ? publishPlanner(userId, id, content)
-                : unpublishPlanner(userId, id, content);
+        if (request.published()) {
+            return publishPlanner(userId, deviceId, id, content);
+        }
+        return ResponseEntity.ok(content == null
+                ? plannerPublishingService.unpublish(userId, id)
+                : plannerPublishingService.unpublish(userId, deviceId, id, content));
     }
 
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "notifications-toggle")

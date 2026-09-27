@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { PersonalPlannerHeader } from '../PersonalPlannerHeader'
 import type { SaveablePlanner, MDPlannerContent } from '../../../types/PlannerTypes'
 import type { AcknowledgedPlanner } from '../../../hooks/usePlannerSyncAdapter'
+import type { PublishOutcome } from '../../../hooks/usePlannerPublish'
 
 // ── Router ────────────────────────────────────────────────────
 const mockNavigate = vi.fn()
@@ -120,8 +121,9 @@ vi.mock('../../../hooks/useModeratorPlannerDelete', () => ({
   useModeratorPlannerDelete: () => ({ mutate: vi.fn(), isPending: false }),
 }))
 const mockPublishMutate = vi.fn()
+let mockPublishPending = false
 vi.mock('../../../hooks/usePlannerPublish', () => ({
-  usePlannerPublish: () => ({ mutate: mockPublishMutate, isPending: false }),
+  usePlannerPublish: () => ({ mutate: mockPublishMutate, isPending: mockPublishPending }),
 }))
 
 // ── Planner validation ────────────────────────────────────────
@@ -540,6 +542,7 @@ describe('PersonalPlannerHeader – delete with local cleanup', () => {
 describe('PersonalPlannerHeader – publish sync guard', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockPublishPending = false
     mockPublishMutate.mockImplementation(vi.fn())
   })
 
@@ -585,42 +588,30 @@ describe('PersonalPlannerHeader – publish sync guard', () => {
     })
   })
 
-  it('uploads then publishes when syncEnabled is true', async () => {
-    mockSyncToServer.mockResolvedValue(syncedResult)
+  it('publishes in one request carrying the planner when syncEnabled is true', async () => {
+    const planner = makePlanner({ published: false })
     const { wrapper } = createWrapper()
-    render(
-      <PersonalPlannerHeader
-        planner={makePlanner({ published: false })}
-        isAuthenticated={true}
-        syncEnabled={true}
-      />,
-      { wrapper },
-    )
+    render(<PersonalPlannerHeader planner={planner} isAuthenticated={true} syncEnabled={true} />, {
+      wrapper,
+    })
 
     clickPublishButton()
 
     await waitFor(() => {
-      expect(mockSyncToServer).toHaveBeenCalledWith(
-        expect.objectContaining({
-          metadata: expect.objectContaining({ id: PLANNER_ID }),
-        }),
-      )
+      expect(mockPublishMutate).toHaveBeenCalledTimes(1)
       expect(mockPublishMutate).toHaveBeenCalledWith(
-        { plannerId: PLANNER_ID, published: true },
+        { intent: 'publish', planner },
         expect.objectContaining({ onSuccess: expect.any(Function) }),
       )
+      expect(mockSyncToServer).not.toHaveBeenCalled()
       expect(screen.queryByTestId('publish-sync-warning')).toBeNull()
     })
   })
 
   it('threads the server-bumped syncVersion into the local save on publish', async () => {
-    mockSyncToServer.mockResolvedValue(syncedResult) // syncVersion: 2
     mockPublishMutate.mockImplementation(
-      (
-        _id: string,
-        opts: { onSuccess: (r: { plannerId: string; published: boolean }) => void },
-      ) => {
-        opts.onSuccess({ plannerId: PLANNER_ID, published: true })
+      (_vars: unknown, opts: { onSuccess: (r: PublishOutcome) => void }) => {
+        opts.onSuccess({ published: true, acknowledged: syncedPlanner }) // syncVersion: 2
       },
     )
     const { wrapper } = createWrapper()
@@ -636,7 +627,7 @@ describe('PersonalPlannerHeader – publish sync guard', () => {
     clickPublishButton()
 
     await waitFor(() => {
-      // Must persist the synced version (2), not the stale local version (1),
+      // Must persist the acknowledged version (2), not the stale local version (1),
       // else the next toggle sends a stale version and the server 409s.
       expect(mockSavePlanner).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -646,9 +637,8 @@ describe('PersonalPlannerHeader – publish sync guard', () => {
     })
   })
 
-  it('disables the publish button during the upload window (no double-submit 409)', async () => {
-    // Never resolves — keeps syncToServer in flight so the upload window stays open.
-    mockSyncToServer.mockReturnValue(new Promise<never>(() => {}))
+  it('disables the publish button while the publish request is in flight', () => {
+    mockPublishPending = true
     const { wrapper } = createWrapper()
     render(
       <PersonalPlannerHeader
@@ -659,33 +649,8 @@ describe('PersonalPlannerHeader – publish sync guard', () => {
       { wrapper },
     )
 
-    const button = screen.getByText('pages.plannerMD.publish.button').closest('button')!
-    fireEvent.click(button)
-
-    // publishMutation.isPending is still false during the upload; the button must
-    // be disabled via isUploadingForPublish so a second click can't send a second
-    // stale-version sync (the 409 path).
-    await waitFor(() => expect(button).toBeDisabled())
-  })
-
-  it('does not call publishMutation if syncToServer fails', async () => {
-    mockSyncToServer.mockRejectedValue(new Error('Network error'))
-    const { wrapper } = createWrapper()
-    render(
-      <PersonalPlannerHeader
-        planner={makePlanner({ published: false })}
-        isAuthenticated={true}
-        syncEnabled={true}
-      />,
-      { wrapper },
-    )
-
-    clickPublishButton()
-
-    await waitFor(() => {
-      expect(mockSyncToServer).toHaveBeenCalled()
-      expect(mockPublishMutate).not.toHaveBeenCalled()
-    })
+    const button = screen.getByText('pages.plannerMD.publish.publishing').closest('button')!
+    expect(button).toBeDisabled()
   })
 })
 
@@ -696,6 +661,7 @@ describe('PersonalPlannerHeader – publish sync guard', () => {
 describe('PersonalPlannerHeader – unpublish', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockPublishPending = false
     mockSyncToServer.mockResolvedValue(syncedResult)
     mockPublishMutate.mockImplementation(vi.fn())
   })
@@ -720,7 +686,7 @@ describe('PersonalPlannerHeader – unpublish', () => {
     await waitFor(() => {
       expect(mockSyncToServer).not.toHaveBeenCalled()
       expect(mockPublishMutate).toHaveBeenCalledWith(
-        { plannerId: PLANNER_ID, published: false },
+        { intent: 'unpublish', plannerId: PLANNER_ID },
         expect.objectContaining({ onSuccess: expect.any(Function) }),
       )
     })
@@ -748,11 +714,8 @@ describe('PersonalPlannerHeader – unpublish', () => {
 
   it('saves the unpublished planner locally (published=false, version unchanged)', async () => {
     mockPublishMutate.mockImplementation(
-      (
-        _id: string,
-        opts: { onSuccess: (r: { plannerId: string; published: boolean }) => void },
-      ) => {
-        opts.onSuccess({ plannerId: PLANNER_ID, published: false })
+      (_vars: unknown, opts: { onSuccess: (r: PublishOutcome) => void }) => {
+        opts.onSuccess({ published: false, acknowledged: null })
       },
     )
     const { wrapper } = createWrapper()

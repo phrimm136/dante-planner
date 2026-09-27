@@ -244,11 +244,6 @@ public class PlannerCommandService {
     }
 
     @Transactional
-    public UpsertedPlanner upsertAggregate(Long userId, UUID id, UpsertPlannerRequest request, boolean force) {
-        return upsertAggregate(userId, null, id, request, force);
-    }
-
-    @Transactional
     public UpsertedPlanner upsertAggregate(
             Long userId, UUID deviceId, UUID id, UpsertPlannerRequest request, boolean force) {
         var existingPlanner = plannerRepository.findAggregateForOwner(id, userId);

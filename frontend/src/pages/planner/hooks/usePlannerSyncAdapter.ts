@@ -76,35 +76,36 @@ function serverSummaryToLocal(summary: ServerPlannerSummary): PlannerSummary {
   }
 }
 
+export function toUpsertRequest(planner: SaveablePlanner): UpsertPlannerRequest {
+  if (planner.config.type !== 'MIRROR_DUNGEON') {
+    throw new Error('Server sync only supports MIRROR_DUNGEON planners')
+  }
+
+  const metadata = planner.metadata
+
+  const mdContent = planner.content as import('../types/PlannerTypes').MDPlannerContent
+  const selectedKeywords = mdContent.selectedKeywords ?? []
+
+  return {
+    id: metadata.id,
+    category: planner.config.category,
+    title: metadata.title,
+    status: metadata.status,
+    content: JSON.stringify(planner.content),
+    contentVersion: metadata.contentVersion,
+    plannerType: metadata.plannerType,
+    syncVersion: metadata.syncVersion,
+    selectedKeywords,
+  }
+}
+
 export function usePlannerSyncAdapter(): PlannerSyncAdapterOperations {
   return {
     syncToServer: async (
       planner: SaveablePlanner,
       force?: boolean,
     ): Promise<AcknowledgedPlanner> => {
-      if (planner.config.type !== 'MIRROR_DUNGEON') {
-        throw new Error('Server sync only supports MIRROR_DUNGEON planners')
-      }
-
-      const content = JSON.stringify(planner.content)
-      const metadata = planner.metadata
-
-      const mdContent = planner.content as import('../types/PlannerTypes').MDPlannerContent
-      const selectedKeywords = mdContent.selectedKeywords ?? []
-
-      const request: UpsertPlannerRequest = {
-        id: metadata.id,
-        category: planner.config.category,
-        title: metadata.title,
-        status: metadata.status,
-        content,
-        contentVersion: metadata.contentVersion,
-        plannerType: metadata.plannerType,
-        syncVersion: metadata.syncVersion,
-        selectedKeywords,
-      }
-
-      const response = await plannerApi.upsert(metadata.id, request, force)
+      const response = await plannerApi.upsert(planner.metadata.id, toUpsertRequest(planner), force)
       return { planner: serverResponseToSaveable(response), ack: ackOf(response) }
     },
 

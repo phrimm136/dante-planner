@@ -80,14 +80,4 @@ export const plannerApi = {
     const data = await ApiClient.post(`${PLANNERS_BASE}/import`, request)
     return validateData(data, ImportPlannersResponseSchema, 'planner import')
   },
-
-  async publish(id: PlannerId | string): Promise<ServerPlannerResponse> {
-    const data = await ApiClient.post(`${PLANNERS_BASE}/${id}/publish`)
-    return validateData(data, ServerPlannerResponseSchema, 'planner publish')
-  },
-
-  async unpublish(id: PlannerId | string): Promise<ServerPlannerResponse> {
-    const data = await ApiClient.post(`${PLANNERS_BASE}/${id}/unpublish`)
-    return validateData(data, ServerPlannerResponseSchema, 'planner unpublish')
-  },
 }

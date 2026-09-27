@@ -17,13 +17,11 @@ import { SyncOffWarningDialog } from '../SyncOffWarningDialog'
 import { usePlannerHeaderActions } from '../../hooks/usePlannerHeaderActions'
 import { usePlannerPublish } from '../../hooks/usePlannerPublish'
 import { usePlannerStorage } from '../../hooks/usePlannerStorage'
-import { usePlannerSyncAdapter, acknowledgedCopy } from '../../hooks/usePlannerSyncAdapter'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
 import { plannerQueryKeys } from '../../lib/plannerQueryKeys'
 import { deriveSaveStatus, SAVE_STATUS_BADGE_VARIANT } from '../../lib/plannerBadges'
 import { decidePublishAction } from '../../lib/plannerPublishPolicy'
 import { showAppError, showErrorMessage, showSuccess } from '@/lib/errorPresentation'
-import { showSyncFailure } from '../../lib/syncFailure'
 import { validatePlannerForPublish } from '../../lib/plannerValidation'
 import { toUserFriendlyError } from '../../lib/plannerValidationErrors'
 
@@ -60,11 +58,9 @@ export function PersonalPlannerHeader({
   const queryClient = useQueryClient()
 
   const [showPublishWarning, setShowPublishWarning] = useState(false)
-  const [isUploadingForPublish, setIsUploadingForPublish] = useState(false)
 
   const publishMutation = usePlannerPublish()
   const { saveToLocal } = usePlannerStorage()
-  const syncAdapter = usePlannerSyncAdapter()
   const egoGiftSpec = useEGOGiftListSpec()
   const egoGiftI18n = useEGOGiftListI18n()
 
@@ -90,18 +86,19 @@ export function PersonalPlannerHeader({
     ...(onDelete !== undefined && { onDelete }),
   })
 
-  const callPublishMutation = (wasPublished: boolean, base: SaveablePlanner) => {
+  const callPublishMutation = (wasPublished: boolean) => {
     if (!plannerId) return
 
     publishMutation.mutate(
-      { plannerId, published: !wasPublished },
+      wasPublished ? { intent: 'unpublish', plannerId } : { intent: 'publish', planner },
       {
-        onSuccess: async (response) => {
+        onSuccess: async (outcome) => {
+          const base = outcome.acknowledged ?? planner
           const updatedPlanner: SaveablePlanner = {
             ...base,
             metadata: {
               ...base.metadata,
-              published: response.published,
+              published: outcome.published,
             },
           }
           const saveResult = await saveToLocal(updatedPlanner)
@@ -109,8 +106,6 @@ export function PersonalPlannerHeader({
           void queryClient.invalidateQueries({
             queryKey: plannerQueryKeys.detail(plannerId),
           })
-
-          setIsUploadingForPublish(false)
 
           if (!saveResult.ok) {
             showAppError(saveResult.error)
@@ -123,27 +118,13 @@ export function PersonalPlannerHeader({
               : 'planner:pages.plannerMD.publish.success',
           )
         },
-        onError: () => {
-          setIsUploadingForPublish(false)
-        },
       },
     )
   }
 
-  const handlePublishWithUpload = async () => {
-    if (!plannerId) return
-
-    setIsUploadingForPublish(true)
+  const handlePublishWithUpload = () => {
     setShowPublishWarning(false)
-
-    try {
-      const synced = await syncAdapter.syncToServer(planner)
-      callPublishMutation(false, acknowledgedCopy(synced))
-    } catch (error) {
-      console.error('Failed to upload plan for publishing:', error)
-      showSyncFailure(error)
-      setIsUploadingForPublish(false)
-    }
+    callPublishMutation(false)
   }
 
   const publishValidationErrors = () =>
@@ -169,7 +150,7 @@ export function PersonalPlannerHeader({
 
     switch (action.kind) {
       case 'unpublish':
-        callPublishMutation(true, planner)
+        callPublishMutation(true)
         return
       case 'invalid': {
         const friendly = toUserFriendlyError(action.error)
@@ -180,7 +161,7 @@ export function PersonalPlannerHeader({
         setShowPublishWarning(true)
         return
       case 'uploadThenPublish':
-        void handlePublishWithUpload()
+        handlePublishWithUpload()
         return
       default:
         assertNever(action)
@@ -236,7 +217,7 @@ export function PersonalPlannerHeader({
               variant="outline"
               size="sm"
               onClick={handlePublishToggle}
-              disabled={publishMutation.isPending || isUploadingForPublish}
+              disabled={publishMutation.isPending}
               aria-label={t(
                 PUBLISH_LABEL_KEYS[publishMutation.isPending ? 'pending' : 'idle'][
                   planner.metadata.published ? 'unpublish' : 'publish'
@@ -288,7 +269,7 @@ export function PersonalPlannerHeader({
         open={showPublishWarning}
         onOpenChange={setShowPublishWarning}
         onConfirm={handlePublishWithUpload}
-        isPending={isUploadingForPublish || publishMutation.isPending}
+        isPending={publishMutation.isPending}
       />
     </PlannerHeaderChrome>
   )

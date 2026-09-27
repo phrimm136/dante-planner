@@ -250,8 +250,9 @@ class PlannerPublishingServiceTest {
                     planner.getId().toString(), "5F", "Reused Aggregate", null, "{}", 1,
                     PlannerType.MIRROR_DUNGEON, null, null);
 
+            UUID deviceId = UUID.randomUUID();
             when(plannerCommandService.upsertAggregate(
-                    testUser.getId(), planner.getId(), request, false))
+                    testUser.getId(), deviceId, planner.getId(), request, false))
                     .thenReturn(new PlannerCommandService.UpsertedPlanner(
                             planner, PlannerResponse.fromEntity(planner, 0), false));
             // Decoys: a reload by either route would succeed and stay silent, so the prohibitions
@@ -261,7 +262,7 @@ class PlannerPublishingServiceTest {
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
 
             PlannerResponse result = publishingService.publish(
-                    testUser.getId(), planner.getId(), request);
+                    testUser.getId(), deviceId, planner.getId(), request);
 
             assertTrue(result.published());
             verify(plannerRepository, never()).findAggregateForOwner(any(), any());

@@ -60,10 +60,10 @@ public class PlannerPublishingService {
     }
 
     @Transactional
-    public PlannerResponse publish(Long userId, UUID plannerId, UpsertPlannerRequest content) {
+    public PlannerResponse publish(Long userId, UUID deviceId, UUID plannerId, UpsertPlannerRequest content) {
         accessGuard.checkNotRestricted(userId);
 
-        return applyPublish(userId, upserted(userId, plannerId, content));
+        return applyPublish(userId, upserted(userId, deviceId, plannerId, content));
     }
 
     @Transactional
@@ -74,15 +74,15 @@ public class PlannerPublishingService {
     }
 
     @Transactional
-    public PlannerResponse unpublish(Long userId, UUID plannerId, UpsertPlannerRequest content) {
+    public PlannerResponse unpublish(Long userId, UUID deviceId, UUID plannerId, UpsertPlannerRequest content) {
         accessGuard.checkNotRestricted(userId);
 
-        return applyUnpublish(userId, upserted(userId, plannerId, content));
+        return applyUnpublish(userId, upserted(userId, deviceId, plannerId, content));
     }
 
-    private Planner upserted(Long userId, UUID plannerId, UpsertPlannerRequest content) {
+    private Planner upserted(Long userId, UUID deviceId, UUID plannerId, UpsertPlannerRequest content) {
         return plannerCommandService
-                .upsertAggregate(userId, plannerId, content, false)
+                .upsertAggregate(userId, deviceId, plannerId, content, false)
                 .planner();
     }
 
