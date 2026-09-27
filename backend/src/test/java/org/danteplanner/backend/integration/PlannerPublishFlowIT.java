@@ -1,6 +1,8 @@
 package org.danteplanner.backend.integration;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.danteplanner.backend.config.TestConfig;
@@ -246,5 +248,65 @@ class PlannerPublishFlowIT {
 
         assertThat(plannerRepository.existsById(plannerId))
                 .as("a refused body creates nothing").isFalse();
+    }
+
+    private JsonNode ownerCopy(UUID plannerId) throws Exception {
+        String body = mockMvc.perform(get("/api/planner/md/{id}", plannerId)
+                        .cookie(AuthCookies.accessToken(token)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        return objectMapper.readTree(body);
+    }
+
+    private void saveBack(JsonNode received, String title, String content) throws Exception {
+        UpsertPlannerRequest save = new UpsertPlannerRequest(
+                received.get("id").asText(), received.get("category").asText(), title,
+                objectMapper.treeToValue(received.get("status"), PlannerStatus.class), content,
+                received.get("contentVersion").asInt(), objectMapper.treeToValue(received.get("plannerType"), PlannerType.class),
+                received.get("syncVersion").asLong(), null);
+        mockMvc.perform(put("/api/planner/md/{id}", received.get("id").asText())
+                        .cookie(AuthCookies.accessToken(token))
+                        .with(withCsrf())
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(save)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("title-only-save-skips-rebuild: resending the content exactly as the owner received it runs no filter rebuild")
+    void publishedTitleSave_WhenContentResentAsReceived_SkipsFilterRebuild() throws Exception {
+        Planner planner = TestDataFactory.planner(owner)
+                .published(true)
+                .save(plannerRepository);
+        statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
+        catalogService.add(planner);
+        JsonNode received = ownerCopy(planner.getId());
+        assertThat(entityFilterRows(planner.getId())).isZero();
+
+        saveBack(received, "Renamed", received.get("content").asText());
+
+        assertThat(entityFilterRows(planner.getId()))
+                .as("no rebuild ran, so the deliberately unbuilt index stays empty")
+                .isZero();
+    }
+
+    @Test
+    @DisplayName("composition-change-rebuilds: a save that swaps an identity rebuilds the filter index")
+    void publishedContentSave_WhenIdentityChanged_RebuildsFilters() throws Exception {
+        Planner planner = TestDataFactory.planner(owner)
+                .published(true)
+                .save(plannerRepository);
+        statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
+        catalogService.add(planner);
+        JsonNode received = ownerCopy(planner.getId());
+        assertThat(entityFilterRows(planner.getId())).isZero();
+
+        ObjectNode edited = (ObjectNode) objectMapper.readTree(received.get("content").asText());
+        ((ObjectNode) edited.get("equipment").get("01").get("identity")).put("id", "10102");
+        saveBack(received, received.get("title").asText(), objectMapper.writeValueAsString(edited));
+
+        assertThat(entityFilterRows(planner.getId()))
+                .as("the changed composition rebuilt the index")
+                .isPositive();
     }
 }

@@ -1,5 +1,7 @@
 package org.danteplanner.backend.planner.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerCatalog;
@@ -24,16 +26,19 @@ public class PlannerCatalogService {
     private final PlannerCatalogRepository catalogRepository;
     private final PlannerStatsRepository statsRepository;
     private final PlannerFilterService filterService;
+    private final ObjectMapper objectMapper;
     private final int recommendedThreshold;
 
     public PlannerCatalogService(
             PlannerCatalogRepository catalogRepository,
             PlannerStatsRepository statsRepository,
             PlannerFilterService filterService,
+            ObjectMapper objectMapper,
             @Value("${planner.recommended-threshold}") int recommendedThreshold) {
         this.catalogRepository = catalogRepository;
         this.statsRepository = statsRepository;
         this.filterService = filterService;
+        this.objectMapper = objectMapper;
         this.recommendedThreshold = recommendedThreshold;
     }
 
@@ -70,8 +75,19 @@ public class PlannerCatalogService {
     }
 
     private boolean searchableCompositionChanged(Planner planner) {
-        return !Objects.equals(planner.getContentJson(), planner.getLoadedContentJson())
+        return !sameDocument(planner.getContentJson(), planner.getLoadedContentJson())
                 || !orEmpty(planner.getSelectedKeywords()).equals(orEmpty(planner.getLoadedKeywords()));
+    }
+
+    private boolean sameDocument(String current, String loaded) {
+        if (current == null || loaded == null) {
+            return Objects.equals(current, loaded);
+        }
+        try {
+            return objectMapper.readTree(current).equals(objectMapper.readTree(loaded));
+        } catch (JsonProcessingException e) {
+            return false;
+        }
     }
 
     private static Set<String> orEmpty(Set<String> keywords) {
