@@ -1,10 +1,9 @@
 # docs
 
-Five kinds of document, five jobs. Putting something in the wrong one is how it stops being read.
+Four kinds of document, four jobs. Putting something in the wrong one is how it stops being read.
 
 | Directory | Answers | Lifecycle |
 |---|---|---|
-| `rfcs/` | What are we going to build, and why | Merges early in `Draft`; advances to `Accepted`, then `Implemented` |
 | `adr/` | What did we decide, and what lost | Append-only; superseded by a successor, never rewritten |
 | `runbooks/` | How do I execute this operation | Edited in place; retired when the operation no longer exists |
 | *(root)* | How does the system work today | Edited in place; carries no history of its own |
@@ -12,11 +11,11 @@ Five kinds of document, five jobs. Putting something in the wrong one is how it 
 
 Execution tracking lives in GitHub issues, not here.
 
-## Choosing between them
+`debt.md` sits outside all four: a pruned parking lot of found work, written so a discovery stops
+occupying attention, and read only by a deliberate defrag or design session. It is not a queue, and
+nothing is expected to pull from it on a schedule.
 
-An **RFC** is a proposal under review. It may be wrong, it may be withdrawn, and it changes by pull
-request so the argument has a diff. It merges before implementation starts, because the worktree
-threads that execute it read from the default branch.
+## Choosing between them
 
 An **ADR** is a decision already made: what was chosen, the constraint that forced it, the
 alternatives and what killed each, and the consequences accepted. Admission is deliberately narrow

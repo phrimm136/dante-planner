@@ -20,8 +20,8 @@ Query frontend, Spring Boot backend, static JSON data validated at runtime.
 
 ## Docs
 
-- `docs/README.md` routes the record system: `adr/` (decisions), `rfcs/` (design docs),
-  `runbooks/` (procedures), `debt.md` (found work, append-only).
+- `docs/README.md` routes the record system: `adr/` (decisions), `runbooks/`
+  (procedures), `debt.md` (found work, pruned on write).
 - Reviewer-finding handling: `docs/review-calibration.md`.
 - `static/` has its own `CLAUDE.md` — read it before touching data, images, or UI
   layout.

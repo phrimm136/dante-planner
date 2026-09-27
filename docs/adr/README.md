@@ -1,7 +1,7 @@
 # Architecture Decision Records
 
-A decision already made, with what lost and why. What belongs here rather than in an RFC, an issue
-or a meme fact is settled in `../README.md`.
+A decision already made, with what lost and why. What belongs here rather than in an issue or a meme
+fact is settled in `../README.md`.
 
 ## Admission test
 

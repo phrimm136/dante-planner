@@ -12,7 +12,7 @@ import {
 import { closeSeedPool, deleteUser, findUserByEmail } from '../src/seed'
 import { APP_URL, SEOUL_API } from '../src/staging'
 
-// The session after login (docs/rfcs/0006 token lineage): a live refresh token resurrects a
+// The session after login: a live refresh token resurrects a
 // session and rotates, and logout revokes the whole family — after it, neither the access token
 // nor the rotated family head buys anything. One stub login serves the whole test because every
 // callback spends a token of the per-IP AUTH rate bucket.

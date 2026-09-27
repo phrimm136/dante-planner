@@ -5,7 +5,7 @@ import { plannerPayload } from '../src/plannerContent'
 import { closeSeedPool, createUser, deleteUser, sql } from '../src/seed'
 import { OREGON_API } from '../src/staging'
 
-// The upsert restriction gate (docs/rfcs/0006): a banned or timed-out user writing to their
+// The upsert restriction gate: a banned or timed-out user writing to their
 // published planner is refused 403 before validation runs, so the restriction wins over any 409
 // the stale version would earn and no field moves. The same user's unpublished planners stay
 // writable. Restriction state is the two columns on users; the suite seeds them directly and

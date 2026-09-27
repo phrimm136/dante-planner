@@ -1,7 +1,11 @@
 # Debt
 
-Append-only dump for found work. Not a queue: entries are captured so they stop
-occupying attention, and are pulled only by a deliberate defrag or design session.
+Parking lot for found work, pruned on every write. Not a queue: entries are captured so
+they stop occupying attention, and are pulled only by a deliberate defrag or design
+session. Each entry names the condition under which it becomes worth doing. An entry
+leaves when the work landed, when its condition can no longer occur, or when a design
+session judged it not worth doing; retirement is deletion, and the git history is the
+record.
 
 The `static/` submodule keeps its own `static/docs/debt.md` for the data and
 asset pipeline.
