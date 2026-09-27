@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Measure review records against what landed on dev.
 
-Usage: review-measures.py [--repo PATH] [--reviews DIR] [--self-test]
+Usage: review-measures.py [--repo PATH] [--reviews DIR] [--since SHA] [--self-test]
   scripts/ops/review-measures.py
   scripts/ops/review-measures.py --self-test
 
 Reads every *.md record under the reviews directory and the dev reflog, and prints finding
 counts, verdict counts, landed commits whose patch-id is in no record, and files that two fix
-commits touched within 14 days.
+commits touched within 14 days. The reflog walk starts at the first dev entry containing --since,
+or by default the commit that added .githooks/reference-transaction.
 """
 
 import argparse
@@ -28,6 +29,7 @@ FIX_SUBJECT = re.compile(r"^fix(\(|:)")
 REFIX_WINDOW_SECONDS = 14 * 24 * 60 * 60
 FIELD_SEP = "\x1f"
 COMMIT_SEP = "\x00"
+LANDING_HOOK = ".githooks/reference-transaction"
 
 
 def parse_record(record_text):
@@ -62,10 +64,14 @@ def summarize_records(record_list):
     return {"units": len(record_list), "findings": finding_total, "verdicts": verdict_counts}
 
 
-def landing_ranges(reflog_text):
+def reflog_entries(reflog_text):
     entry_shas = [text_line.split()[0] for text_line in reflog_text.splitlines() if text_line.strip()]
     entry_shas.reverse()
-    return list(zip(entry_shas, entry_shas[1:]))
+    return entry_shas
+
+
+def landing_ranges(entry_shas, floor_index):
+    return list(zip(entry_shas[floor_index:], entry_shas[floor_index + 1:]))
 
 
 def parse_commit_log(log_text):
@@ -148,18 +154,36 @@ def released_commits(repo_path):
     return set(run_git(repo_path, ["rev-list", "refs/remotes/origin/main"]).split())
 
 
+def gate_floor(repo_path, since_sha):
+    if since_sha:
+        return since_sha
+    adding_shas = run_git(repo_path, ["log", "dev", "--diff-filter=A", "--format=%H", "--", LANDING_HOOK]).split()
+    return adding_shas[-1] if adding_shas else None
+
+
+def floor_index(repo_path, entry_shas, floor_sha):
+    if floor_sha is None:
+        return 0
+    for entry_index, entry_sha in enumerate(entry_shas):
+        if subprocess.run(["git", "-C", str(repo_path), "merge-base", "--is-ancestor", floor_sha, entry_sha],
+                          capture_output=True).returncode == 0:
+            return entry_index
+    return len(entry_shas)
+
+
 def read_records(reviews_dir):
     if not reviews_dir.is_dir():
         return []
     return [parse_record(record_path.read_text()) for record_path in sorted(reviews_dir.glob("*.md"))]
 
 
-def landed_commits(repo_path):
-    reflog_text = run_git(repo_path, ["reflog", "show", "dev", "--format=%H %gs"])
+def landed_commits(repo_path, since_sha):
+    entry_shas = reflog_entries(run_git(repo_path, ["reflog", "show", "dev", "--format=%H %gs"]))
+    start_index = floor_index(repo_path, entry_shas, gate_floor(repo_path, since_sha))
     commit_list = []
     seen_shas = set()
     log_format = "--format=%x00" + "%x1f".join(["%H", "%h", "%ct", "%s"])
-    for base_sha, tip_sha in landing_ranges(reflog_text):
+    for base_sha, tip_sha in landing_ranges(entry_shas, start_index):
         range_log = run_git(repo_path, ["log", "--reverse", "--no-merges", log_format, "--name-only",
                                         f"{base_sha}..{tip_sha}"])
         for commit_entry in parse_commit_log(range_log):
@@ -169,10 +193,10 @@ def landed_commits(repo_path):
     return commit_list
 
 
-def measure_repo(repo_path, reviews_dir):
+def measure_repo(repo_path, reviews_dir, since_sha):
     record_list = read_records(reviews_dir)
     reviewed_ids = set().union(*(parsed_record["patch_ids"] for parsed_record in record_list))
-    commit_list = landed_commits(repo_path)
+    commit_list = landed_commits(repo_path, since_sha)
     sha_input = "".join(commit_entry["sha"] + "\n" for commit_entry in commit_list)
     diff_text = run_git(repo_path, ["diff-tree", "--stdin", "-p"], sha_input) if commit_list else ""
     id_map = parse_patch_ids(run_git(repo_path, ["patch-id", "--stable"], diff_text)) if diff_text else {}
@@ -245,6 +269,7 @@ class FixtureRepo:
     def commit_file(self, file_name, commit_subject, day_offset=0):
         self.clock_seconds += day_offset * DAY_SECONDS + 1
         target_file = self.repo_path / file_name
+        target_file.parent.mkdir(parents=True, exist_ok=True)
         prior_text = target_file.read_text() if target_file.exists() else ""
         target_file.write_text(prior_text + commit_subject + "\n")
         self.git_cmd("add", file_name)
@@ -262,9 +287,9 @@ class FixtureRepo:
         self.reviews_dir.mkdir(exist_ok=True)
         (self.reviews_dir / record_name).write_text(record_text)
 
-    def run_script(self, reviews_dir=None):
+    def run_script(self, reviews_dir=None, extra_args=()):
         return subprocess.run([sys.executable, str(Path(__file__).resolve()), "--repo", str(self.repo_path),
-                               "--reviews", str(reviews_dir or self.reviews_dir)],
+                               "--reviews", str(reviews_dir or self.reviews_dir), *extra_args],
                               capture_output=True, text=True, env={**os.environ, **FIXTURE_ENV})
 
 
@@ -394,12 +419,40 @@ class ReviewMeasuresTest(unittest.TestCase):
         self.assertEqual(script_run.stdout.splitlines()[4:],
                          [f"unreviewed: {self.fixture.short_sha(pending_sha)} feat: pending"])
 
+    def test_commits_before_floor_not_listed(self):
+        self.fixture.commit_file("early.txt", "feat: early")
+        self.fixture.commit_file(LANDING_HOOK, "feat: landing hook")
+        late_sha = self.fixture.commit_file("late.txt", "feat: late")
+        script_run = self.fixture.run_script()
+        self.assertEqual(script_run.returncode, 0, script_run.stderr)
+        self.assertEqual(script_run.stdout.splitlines()[4:],
+                         [f"unreviewed: {self.fixture.short_sha(late_sha)} feat: late"])
+
+    def test_since_moves_floor(self):
+        self.fixture.commit_file(LANDING_HOOK, "feat: landing hook")
+        middle_sha = self.fixture.commit_file("middle.txt", "feat: middle")
+        late_sha = self.fixture.commit_file("late.txt", "feat: late")
+        script_run = self.fixture.run_script(extra_args=("--since", middle_sha))
+        self.assertEqual(script_run.returncode, 0, script_run.stderr)
+        self.assertEqual(script_run.stdout.splitlines()[4:],
+                         [f"unreviewed: {self.fixture.short_sha(late_sha)} feat: late"])
+
+    def test_no_floor_walks_everything(self):
+        early_sha = self.fixture.commit_file("early.txt", "feat: early")
+        late_sha = self.fixture.commit_file("late.txt", "feat: late")
+        script_run = self.fixture.run_script()
+        self.assertEqual(script_run.returncode, 0, script_run.stderr)
+        self.assertEqual(script_run.stdout.splitlines()[4:],
+                         [f"unreviewed: {self.fixture.short_sha(early_sha)} feat: early",
+                          f"unreviewed: {self.fixture.short_sha(late_sha)} feat: late"])
+
 
 def main():
     default_repo = Path(__file__).resolve().parents[2]
     arg_parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     arg_parser.add_argument("--repo", type=Path, default=default_repo)
     arg_parser.add_argument("--reviews", type=Path)
+    arg_parser.add_argument("--since")
     arg_parser.add_argument("--self-test", action="store_true")
     cli_args = arg_parser.parse_args()
     if cli_args.self_test:
@@ -408,7 +461,7 @@ def main():
         return 0 if test_result.wasSuccessful() else 1
     reviews_dir = cli_args.reviews or cli_args.repo / ".claude" / "reports" / "reviews"
     try:
-        sys.stdout.write(measure_repo(cli_args.repo, reviews_dir))
+        sys.stdout.write(measure_repo(cli_args.repo, reviews_dir, cli_args.since))
     except subprocess.CalledProcessError as git_error:
         sys.stderr.write(f"review-measures: {' '.join(git_error.cmd)} failed\n{git_error.stderr}")
         return 1
