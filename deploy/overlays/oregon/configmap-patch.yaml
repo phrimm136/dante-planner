@@ -25,6 +25,8 @@ data:
   # Lineage-based refresh rotation. Deployment-controlled so a region can be flipped
   # without a rebuild and every pod in it agrees across restarts.
   JWT_ROTATION_LINEAGE_ENABLED: "true"
+  DATASOURCE_ROUTING_ENABLED: "true"
+  DATASOURCE_FALLBACK_REPLICA_URL: "jdbc:mysql://mysql-replica.seoul.danteplanner.internal:${MYSQL_PORT:3306}/${MYSQL_DATABASE:danteplanner}?sslMode=VERIFY_CA&serverTimezone=UTC&connectTimeout=${DB_CONNECT_TIMEOUT_MS:10000}&socketTimeout=15000&trackSessionState=true&trustCertificateKeyStoreUrl=file:/app/certs/rds-truststore.p12&trustCertificateKeyStoreType=PKCS12&trustCertificateKeyStorePassword=changeit"
   # DB connection (MYSQL_HOST/DATABASE/USER/PASSWORD) + SENTRY_DSN come from the
   # backend-runtime-config Secrets Manager bundle (runtime-config.yaml), not here —
   # environment-specific and secret values stay out of the committed overlay.

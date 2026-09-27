@@ -21,10 +21,13 @@ public class GtidCookieFilter extends OncePerRequestFilter {
 
     private final GtidReadGate readGate;
     private final GtidWriteCapture writeCapture;
+    private final boolean replicaPresent;
 
-    public GtidCookieFilter(GtidReadGate readGate, GtidWriteCapture writeCapture) {
+    public GtidCookieFilter(
+            GtidReadGate readGate, GtidWriteCapture writeCapture, boolean replicaPresent) {
         this.readGate = readGate;
         this.writeCapture = writeCapture;
+        this.replicaPresent = replicaPresent;
     }
 
     @Override
@@ -50,7 +53,7 @@ public class GtidCookieFilter extends OncePerRequestFilter {
         String gtid = Optional.ofNullable(readCookie(request))
                 .flatMap(GtidCookie::decode)
                 .orElse(null);
-        if (gtid == null) {
+        if (gtid == null || !replicaPresent) {
             filterChain.doFilter(request, response);
             return;
         }

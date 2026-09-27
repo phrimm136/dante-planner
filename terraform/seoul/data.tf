@@ -56,6 +56,15 @@ resource "aws_vpc_security_group_ingress_rule" "replica_mysql" {
   referenced_security_group_id = module.fleet.cluster_security_group_id
 }
 
+resource "aws_vpc_security_group_ingress_rule" "replica_mysql_oregon" {
+  security_group_id = aws_security_group.replica.id
+  description       = "MySQL from Oregon fleet over the peering (read fallback while the primary is unreachable)"
+  ip_protocol       = "tcp"
+  from_port         = 3306
+  to_port           = 3306
+  cidr_ipv4         = data.terraform_remote_state.oregon.outputs.vpc_cidr
+}
+
 resource "aws_vpc_security_group_egress_rule" "replica_all" {
   security_group_id = aws_security_group.replica.id
   description       = "Replica egress (replication pull from primary + AWS APIs)"

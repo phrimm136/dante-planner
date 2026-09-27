@@ -31,7 +31,9 @@ class GtidCookieFilterTest {
 
     private final GtidReadGate readGate = mock(GtidReadGate.class);
     private final GtidWriteCapture writeCapture = mock(GtidWriteCapture.class);
-    private final GtidCookieFilter filter = new GtidCookieFilter(readGate, writeCapture);
+    private final GtidCookieFilter filter = new GtidCookieFilter(readGate, writeCapture, true);
+    private final GtidCookieFilter replicalessFilter =
+            new GtidCookieFilter(readGate, writeCapture, false);
 
     @Test
     void readGet_WhenNoCookie_PassesThroughWithoutGateOrPin() throws Exception {
@@ -150,6 +152,37 @@ class GtidCookieFilterTest {
         try (MockedStatic<ReadOnlyRoutingDataSource> ds = mockStatic(ReadOnlyRoutingDataSource.class)) {
             filter.doFilter(request, response, new MockFilterChain());
         }
+
+        assertThat(response.getHeaders(HttpHeaders.SET_COOKIE))
+                .anySatisfy(header -> assertThat(header)
+                        .contains(GtidCookie.NAME + "=" + GtidCookie.of(GTID).getValue()));
+    }
+
+    @Test
+    void readGet_WhenCookieAndNoReplica_ServesWithoutGateOrPinAndKeepsCookie() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/planners");
+        request.setCookies(new Cookie(GtidCookie.NAME, GtidCookie.of(GTID).getValue()));
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        MockFilterChain chain = new MockFilterChain();
+
+        try (MockedStatic<ReadOnlyRoutingDataSource> ds = mockStatic(ReadOnlyRoutingDataSource.class)) {
+            replicalessFilter.doFilter(request, response, chain);
+
+            ds.verify(() -> ReadOnlyRoutingDataSource.pinTo(any()), never());
+        }
+
+        assertThat(chain.getRequest()).isSameAs(request);
+        verifyNoInteractions(readGate);
+        assertThat(response.getHeaders(HttpHeaders.SET_COOKIE)).isEmpty();
+    }
+
+    @Test
+    void write_WhenNoReplicaAndCaptureHasGtid_SetsGtidCookie() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/api/planners");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        when(writeCapture.takeCapturedGtid()).thenReturn(Optional.of(GTID));
+
+        replicalessFilter.doFilter(request, response, new MockFilterChain());
 
         assertThat(response.getHeaders(HttpHeaders.SET_COOKIE))
                 .anySatisfy(header -> assertThat(header)

@@ -14,6 +14,9 @@ import org.springframework.boot.context.properties.source.MapConfigurationProper
 
 import com.zaxxer.hikari.HikariConfig;
 
+import org.danteplanner.backend.shared.config.FallbackReplicaProperties;
+import org.danteplanner.backend.shared.config.HikariTuningProperties;
+import org.danteplanner.backend.shared.config.ReadFallbackConfig;
 import org.danteplanner.backend.shared.config.ReplicaDataSourceProperties;
 import org.danteplanner.backend.shared.config.RoutingDataSourceConfig;
 import org.danteplanner.backend.shared.config.StatementCache;
@@ -57,6 +60,12 @@ class DataSourceTimeoutAndCacheConfigTest {
         return props;
     }
 
+    private static FallbackReplicaProperties fallbackReplicaProperties() {
+        FallbackReplicaProperties props = new FallbackReplicaProperties();
+        props.setUrl("jdbc:mysql://seoul-replica:3306/planner");
+        return props;
+    }
+
     private static Properties load(String resource) {
         Properties properties = new Properties();
         try (InputStream stream = DataSourceTimeoutAndCacheConfigTest.class.getResourceAsStream(resource)) {
@@ -75,19 +84,25 @@ class DataSourceTimeoutAndCacheConfigTest {
         private final RoutingDataSourceConfig config =
                 new RoutingDataSourceConfig(primaryProperties(), replicaProperties());
 
+        private final ReadFallbackConfig fallbackConfig = new ReadFallbackConfig(
+                primaryProperties(), new HikariTuningProperties(), fallbackReplicaProperties());
+
         private List<HikariConfig> allPools() {
             return List.of(
                     config.buildPrimaryHikariConfig(),
                     config.buildReplicaHikariConfig(),
-                    config.buildBulkheadHikariConfig());
+                    config.buildBulkheadHikariConfig(),
+                    fallbackConfig.buildFallbackReplicaHikariConfig());
         }
 
         @Test
-        @DisplayName("primary and replica acquire within the main pool budget")
+        @DisplayName("primary, replica and fallback replica acquire within the main pool budget")
         void buildHikariConfig_WhenBuilt_TakesConnectionTimeoutFromThePoolAcquireConstant() {
             assertThat(config.buildPrimaryHikariConfig().getConnectionTimeout())
                     .isEqualTo(TimeoutHierarchy.POOL_ACQUIRE_TIMEOUT_MS);
             assertThat(config.buildReplicaHikariConfig().getConnectionTimeout())
+                    .isEqualTo(TimeoutHierarchy.POOL_ACQUIRE_TIMEOUT_MS);
+            assertThat(fallbackConfig.buildFallbackReplicaHikariConfig().getConnectionTimeout())
                     .isEqualTo(TimeoutHierarchy.POOL_ACQUIRE_TIMEOUT_MS);
         }
 

@@ -21,6 +21,7 @@ import org.springframework.util.StringUtils;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.danteplanner.backend.shared.gtid.GtidCapturingDataSource;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
@@ -99,7 +100,7 @@ public class RoutingDataSourceConfig {
         return config;
     }
 
-    private void applyEndpoint(HikariConfig config, String url, String username, String password) {
+    static void applyEndpoint(HikariConfig config, String url, String username, String password) {
         config.setJdbcUrl(url);
         config.setUsername(username);
         config.setPassword(password);
@@ -142,7 +143,9 @@ public class RoutingDataSourceConfig {
             UndeclaredPrimaryAccessGuard undeclaredGuard,
             @Qualifier("primaryPool") HikariDataSource primaryPool,
             @Qualifier("replicaPool") ObjectProvider<HikariDataSource> replicaPool,
-            @Qualifier("bulkheadPool") ObjectProvider<HikariDataSource> bulkheadPool) {
+            @Qualifier("bulkheadPool") ObjectProvider<HikariDataSource> bulkheadPool,
+            @Qualifier("fallbackReplicaPool") ObjectProvider<HikariDataSource> fallbackReplicaPool,
+            ObjectProvider<CircuitBreaker> primaryReadBreaker) {
         // The committed GTID lives as session state on the physical connection.
         DataSource primary = new GtidCapturingDataSource(primaryPool, gtidWriteCapture);
         Map<Object, Object> targets = new HashMap<>();
@@ -151,7 +154,11 @@ public class RoutingDataSourceConfig {
             targets.put(RoutingKey.REPLICA, replicaPool.getObject());
             targets.put(RoutingKey.BULKHEAD, bulkheadPool.getObject());
         } else {
-            targets.put(RoutingKey.REPLICA, primary);
+            HikariDataSource fallbackReplica = fallbackReplicaPool.getIfAvailable();
+            targets.put(RoutingKey.REPLICA, fallbackReplica == null
+                    ? primary
+                    : new PrimaryReadFallbackDataSource(
+                            primary, fallbackReplica, primaryReadBreaker.getObject()));
         }
         ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(undeclaredGuard);
         routing.setTargetDataSources(targets);
