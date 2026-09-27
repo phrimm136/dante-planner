@@ -1,16 +1,14 @@
-import { Suspense, useRef } from 'react'
+import { Suspense, lazy, useRef } from 'react'
 import { Link, useNavigate, useParams } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
 import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorBoundary } from '@/components/feedback/ErrorBoundary'
 import { PlannerViewer } from './components/plannerViewer/PlannerViewer'
 import { PublishedPlannerHeader } from './components/plannerViewer/PublishedPlannerHeader'
 import { PlannerDetailFooter } from './components/plannerViewer/PlannerDetailFooter'
-import { CommentSection } from '@/shared/comment'
-import { PublishedPlannerList } from './components/plannerList/PublishedPlannerList'
-import { MDPlannerToolbar } from './components/plannerList/MDPlannerToolbar'
-import { PlannerListFilterPills } from './components/plannerList/PlannerListFilterPills'
+import { NearViewportGate } from './components/NearViewportGate'
 import { PlannerGridSkeleton } from '@/components/feedback/ListPageSkeleton'
 import { PlannerViewerSkeleton } from './components/plannerSkeletons'
 import { PLANNER_GEOMETRY } from '@/shared/cardLayout'
@@ -20,7 +18,27 @@ import { isMDPlanner } from './types/PlannerTypes'
 import { useAuthQuery } from '@/shared/auth'
 import { useUserSettingsQuery } from '@/shared/userSettings'
 import { useMDGesellschaftFilters } from './hooks/useMDGesellschaftFilters'
+import type { UseMDGesellschaftFiltersResult } from './hooks/useMDGesellschaftFilters'
 import { SECTION_STYLES } from '@/lib/constants'
+
+const CommentSection = lazy(() =>
+  import('@/shared/comment').then((m) => ({ default: m.CommentSection })),
+)
+const PublishedPlannerList = lazy(() =>
+  import('./components/plannerList/PublishedPlannerList').then((m) => ({
+    default: m.PublishedPlannerList,
+  })),
+)
+const MDPlannerToolbar = lazy(() =>
+  import('./components/plannerList/MDPlannerToolbar').then((m) => ({
+    default: m.MDPlannerToolbar,
+  })),
+)
+const PlannerListFilterPills = lazy(() =>
+  import('./components/plannerList/PlannerListFilterPills').then((m) => ({
+    default: m.PlannerListFilterPills,
+  })),
+)
 
 export default function PlannerMDGesellschaftDetailPage() {
   const { id } = useParams({ from: '/planner/md/gesellschaft/$id' })
@@ -113,50 +131,84 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
       <PlannerDetailFooter planner={apiData} isOwner={isOwner} isAuthenticated={isAuthenticated} />
 
       <div ref={commentsRef}>
-        <CommentSection
-          plannerId={plannerId}
-          isPublished={true}
-          isAuthenticated={isAuthenticated}
-        />
+        <NearViewportGate placeholder={commentPlaceholder}>
+          <Suspense fallback={commentPlaceholder}>
+            <CommentSection
+              plannerId={plannerId}
+              isPublished={true}
+              isAuthenticated={isAuthenticated}
+            />
+          </Suspense>
+        </NearViewportGate>
       </div>
 
       <div className="border-t border-border my-8" />
 
-      <div className={SECTION_STYLES.SPACING.section}>
-        <div className="mb-4">
-          <MDPlannerToolbar
-            search={filters.search}
-            onSearchChange={(q) => setFilters({ q, page: 0 })}
-            showModeToggle
-            mode={filters.mode}
-            onModeChange={(m) => setFilters({ mode: m, page: 0 })}
+      <NearViewportGate placeholder={listPlaceholder}>
+        <Suspense fallback={listPlaceholder}>
+          <PlannerListSection
+            filters={filters}
+            setFilters={setFilters}
+            isAuthenticated={isAuthenticated}
           />
-        </div>
+        </Suspense>
+      </NearViewportGate>
+    </div>
+  )
+}
 
-        <div className="mb-6">
-          <PlannerListFilterPills
-            selectedCategory={filters.category}
-            onCategoryChange={(c) => setFilters({ category: c, page: 0 })}
-          />
-        </div>
+const commentPlaceholder = (
+  <Skeleton data-testid="comment-section-placeholder" className="h-62 w-full" />
+)
 
-        <ReactErrorBoundary FallbackComponent={CommunityPlansErrorFallback}>
-          <Suspense fallback={<PlannerGridSkeleton geometry={PLANNER_GEOMETRY} />}>
-            <PublishedPlannerList
-              filters={{
-                ...filters,
-                keyword: undefined,
-                identity: undefined,
-                ego: undefined,
-                gift: undefined,
-                themePack: undefined,
-              }}
-              isAuthenticated={isAuthenticated}
-              onPageChange={(p) => setFilters({ page: p })}
-            />
-          </Suspense>
-        </ReactErrorBoundary>
+const listPlaceholder = (
+  <div data-testid="planner-list-placeholder">
+    <PlannerGridSkeleton geometry={PLANNER_GEOMETRY} />
+  </div>
+)
+
+interface PlannerListSectionProps {
+  filters: UseMDGesellschaftFiltersResult['filters']
+  setFilters: UseMDGesellschaftFiltersResult['setFilters']
+  isAuthenticated: boolean
+}
+
+function PlannerListSection({ filters, setFilters, isAuthenticated }: PlannerListSectionProps) {
+  return (
+    <div className={SECTION_STYLES.SPACING.section}>
+      <div className="mb-4">
+        <MDPlannerToolbar
+          search={filters.search}
+          onSearchChange={(q) => setFilters({ q, page: 0 })}
+          showModeToggle
+          mode={filters.mode}
+          onModeChange={(m) => setFilters({ mode: m, page: 0 })}
+        />
       </div>
+
+      <div className="mb-6">
+        <PlannerListFilterPills
+          selectedCategory={filters.category}
+          onCategoryChange={(c) => setFilters({ category: c, page: 0 })}
+        />
+      </div>
+
+      <ReactErrorBoundary FallbackComponent={CommunityPlansErrorFallback}>
+        <Suspense fallback={<PlannerGridSkeleton geometry={PLANNER_GEOMETRY} />}>
+          <PublishedPlannerList
+            filters={{
+              ...filters,
+              keyword: undefined,
+              identity: undefined,
+              ego: undefined,
+              gift: undefined,
+              themePack: undefined,
+            }}
+            isAuthenticated={isAuthenticated}
+            onPageChange={(p) => setFilters({ page: p })}
+          />
+        </Suspense>
+      </ReactErrorBoundary>
     </div>
   )
 }

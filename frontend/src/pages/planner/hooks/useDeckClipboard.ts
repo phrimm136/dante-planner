@@ -4,7 +4,6 @@ import { showError, showErrorMessage, showSuccess } from '@/lib/errorPresentatio
 import { useIdentityListSpec } from '@/pages/identity'
 import { useEGOListSpec } from '@/pages/ego'
 
-import { encodeDeckCode, decodeDeckCode, validateDeckCode } from '../lib/deckCode'
 import type { DecodedDeck } from '../lib/deckCode'
 import type { SinnerEquipment } from '../types/DeckTypes'
 
@@ -24,6 +23,21 @@ export interface DeckClipboard {
   clearPending: () => void
 }
 
+function loadDeckCode() {
+  return import('../lib/deckCode')
+}
+
+function writeDeckCode({ equipment, deploymentOrder }: DeckSnapshot): Promise<void> {
+  const code = loadDeckCode().then((m) => m.encodeDeckCode(equipment, deploymentOrder))
+
+  if (typeof ClipboardItem === 'undefined') {
+    return code.then((text) => navigator.clipboard.writeText(text))
+  }
+
+  const blob = code.then((text) => new Blob([text], { type: 'text/plain' }))
+  return navigator.clipboard.write([new ClipboardItem({ 'text/plain': blob })])
+}
+
 export function useDeckClipboard({ readDeck }: UseDeckClipboardOptions): DeckClipboard {
   const identitySpec = useIdentityListSpec()
   const egoSpec = useEGOListSpec()
@@ -32,9 +46,7 @@ export function useDeckClipboard({ readDeck }: UseDeckClipboardOptions): DeckCli
 
   const handleExport = async () => {
     try {
-      const { equipment, deploymentOrder } = readDeck()
-      const code = encodeDeckCode(equipment, deploymentOrder)
-      await navigator.clipboard.writeText(code)
+      await writeDeckCode(readDeck())
       showSuccess('planner:deckBuilder.exportSuccess')
     } catch (error) {
       showError(error)
@@ -44,6 +56,7 @@ export function useDeckClipboard({ readDeck }: UseDeckClipboardOptions): DeckCli
   const handleImport = async () => {
     try {
       const clipboardText = await navigator.clipboard.readText()
+      const { decodeDeckCode, validateDeckCode } = await loadDeckCode()
       const validation = validateDeckCode(clipboardText)
 
       if (!validation.isValid) {
