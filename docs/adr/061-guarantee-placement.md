@@ -13,7 +13,7 @@
   invariants types cannot carry are `Assert` one-liners into the
   IllegalArgumentException bug lane. (5) Enforced by lint where lintable: no
   method-validation AOP, no `jakarta.validation` annotations outside dto packages
-  (ArchUnit), downstream re-check idioms flagged by the forbidden-patterns hook.
+  (ArchUnit), downstream re-check idioms a checkstyle migration target recorded in debt.
   REJECTED: re-checking downstream of a gate — every defensive re-check is the ladder's
   rung 1 or 2 having been skipped, and it hides which check is authoritative.
 - @convention @nullability — A declaration may be nullable only where null is data at a

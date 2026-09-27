@@ -1,6 +1,6 @@
 #!/bin/bash
-# PreToolUse hook: enforces test/build output redirect to /tmp and prevents re-runs
-# Convention: redirect output to /tmp, then READ the file — never re-run to gather output
+# PreToolUse hook: enforces test/build output redirect to .claude/reports/logs/ and prevents re-runs
+# Convention: redirect output to .claude/reports/logs/, then READ the file — never re-run to gather output
 
 input=$(cat)
 
@@ -20,8 +20,9 @@ fi
 #   1. drop heredoc bodies      — `git commit -m "$(cat <<'EOF' ... tsc ... EOF)"`
 #   2. drop quoted spans        — `meme add "... yarn lint ..."`, `git commit -m "fix yarn test"`
 #   3. drop --cwd/-C <dir> flags — so `yarn --cwd frontend test` reads as `yarn test`
-# Redirect detection below still uses the raw $command (the `> /tmp/...` is unquoted).
-scan=$(printf '%s' "$command" | perl -0777 -pe "s/<<-?\x27?(\w+)\x27?.*?\n\1//gs; s/\x27[^\x27]*\x27//g; s/\x22[^\x22]*\x22//g; s/\s--cwd\s+\S+//g; s/\s-C\s+\S+//g" 2>/dev/null || printf '%s' "$command")
+# Redirect detection below still uses the raw $command (the `> .claude/reports/logs/...` is unquoted).
+unwrapped=$(printf '%s' "$command" | perl -0777 -pe 's/\bflock\s[^\n]*?\s-c\s+(?:\x27(.*?)\x27(?=\s|$)|\x22(.*?)\x22(?=\s|$))/$1$2/s' 2>/dev/null || printf '%s' "$command")
+scan=$(printf '%s' "$unwrapped" | perl -0777 -pe "s/<<-?\x27?(\w+)\x27?.*?\n\1//gs; s/\x27[^\x27]*\x27//g; s/\x22[^\x22]*\x22//g; s/\s--cwd\s+\S+//g; s/\s-C\s+\S+//g" 2>/dev/null || printf '%s' "$unwrapped")
 
 # Patterns that indicate test/typecheck/build commands
 # Matches: yarn test, yarn typecheck, yarn build, vitest, tsc -b, ./gradlew test, ./gradlew compile, ./gradlew build
@@ -43,12 +44,12 @@ if echo "$scan" | grep -qE '(yarn\s+(test|typecheck|tsc|build|vitest|lint)|vites
         prefix="be-build"
     fi
 
-    # Check if output is redirected to /tmp
-    # Also reject piped redirects (e.g., yarn test | grep FAIL > /tmp/...) — full output must be captured
+    # Check if output is redirected to .claude/reports/logs/
+    # Also reject piped redirects (e.g., yarn test | grep FAIL > .claude/reports/logs/...) — full output must be captured
     has_redirect=false
-    if echo "$command" | grep -qP '> /tmp/\S+\.(txt|log)'; then
-        # Extract the part before > /tmp/ and check if it ends with a pipe
-        before_redirect=$(echo "$command" | sed 's|> /tmp/.*||')
+    if echo "$command" | grep -qP '> (\S*/)?\.claude/reports/logs/\S+\.(txt|log)'; then
+        # Extract the part before the log redirect and check if it ends with a pipe
+        before_redirect=$(echo "$command" | sed -E 's#> ([^ ]*/)?\.claude/reports/logs/.*##')
         if echo "$before_redirect" | grep -qE '\|\s*(grep|head|tail|awk|sed|wc)'; then
             has_redirect=false
         else
@@ -57,10 +58,10 @@ if echo "$scan" | grep -qE '(yarn\s+(test|typecheck|tsc|build|vitest|lint)|vites
     fi
 
     # Skip "already exists" check if command deletes old files first or only reads results
-    if echo "$command" | grep -qE 'rm -f /tmp/'; then
+    if echo "$command" | grep -qE 'rm -f (\S*/)?\.claude/reports/logs/'; then
         # Command cleans up before re-running — allow it
         :
-    elif echo "$command" | grep -qE '(xargs|grep|tail|head|cat)\s.*/tmp/'; then
+    elif echo "$command" | grep -qE '(xargs|grep|tail|head|cat)\s.*\.claude/reports/logs/'; then
         # Command only reads/processes existing output — allow it
         exit 0
     fi
@@ -103,8 +104,8 @@ if echo "$scan" | grep -qE '(yarn\s+(test|typecheck|tsc|build|vitest|lint)|vites
     fi
 
     # Check if a recent output file already exists (within last 1 minute)
-    if [[ -n "$prefix" ]] && ! echo "$command" | grep -qE 'rm -f /tmp/'; then
-        recent_file=$(find /tmp -name "${prefix}-*.log" -mmin -1 -print 2>/dev/null | sort | tail -1)
+    if [[ -n "$prefix" ]] && ! echo "$command" | grep -qE 'rm -f (\S*/)?\.claude/reports/logs/'; then
+        recent_file=$(find "${CLAUDE_PROJECT_DIR:-$PWD}/.claude/reports/logs" -name "${prefix}-*.log" -mmin -1 -print 2>/dev/null | sort | tail -1)
     fi
 
     # Block re-run if recent output exists — read it instead
@@ -116,7 +117,7 @@ if echo "$scan" | grep -qE '(yarn\s+(test|typecheck|tsc|build|vitest|lint)|vites
         echo "Recent output: $recent_file" >&2
         echo "" >&2
         echo "Grep the file for errors instead of re-running the command:" >&2
-        echo "  ls /tmp/${prefix}-*.log | sort | tail -1 | xargs grep -E 'FAIL|ERROR|error TS' | tail -30" >&2
+        echo "  ls .claude/reports/logs/${prefix}-*.log | sort | tail -1 | xargs grep -E 'FAIL|ERROR|error TS' | tail -30" >&2
         echo "" >&2
         echo "WHY: Re-running wastes time and context. The output is already captured." >&2
         echo "If you need a fresh run (e.g., after fixing failures), delete the old file first:" >&2
@@ -134,13 +135,13 @@ if echo "$scan" | grep -qE '(yarn\s+(test|typecheck|tsc|build|vitest|lint)|vites
         echo "Command: $command" >&2
         echo "" >&2
         echo "Redirect pattern (append && echo PASS / || echo FAIL so the verdict lives in the log):" >&2
-        echo '  yarn --cwd frontend vitest run > /tmp/fe-test-<session-id>-<suffix>.log 2>&1 && echo PASS >> /tmp/fe-test-<session-id>-<suffix>.log || echo FAIL >> /tmp/fe-test-<session-id>-<suffix>.log' >&2
-        echo '  yarn --cwd frontend tsc --noEmit > /tmp/fe-typecheck-<session-id>-<suffix>.log 2>&1 && echo PASS >> /tmp/fe-typecheck-<session-id>-<suffix>.log || echo FAIL >> /tmp/fe-typecheck-<session-id>-<suffix>.log' >&2
-        echo '  yarn --cwd frontend build > /tmp/fe-build-<session-id>-<suffix>.log 2>&1 && echo PASS >> /tmp/fe-build-<session-id>-<suffix>.log || echo FAIL >> /tmp/fe-build-<session-id>-<suffix>.log' >&2
-        echo '  ./gradlew -p backend test > /tmp/be-test-<session-id>-<suffix>.log 2>&1 && echo PASS >> /tmp/be-test-<session-id>-<suffix>.log || echo FAIL >> /tmp/be-test-<session-id>-<suffix>.log' >&2
+        echo '  yarn --cwd frontend vitest run > .claude/reports/logs/fe-test-<session-id>-<suffix>.log 2>&1 && echo PASS >> .claude/reports/logs/fe-test-<session-id>-<suffix>.log || echo FAIL >> .claude/reports/logs/fe-test-<session-id>-<suffix>.log' >&2
+        echo '  yarn --cwd frontend tsc --noEmit > .claude/reports/logs/fe-typecheck-<session-id>-<suffix>.log 2>&1 && echo PASS >> .claude/reports/logs/fe-typecheck-<session-id>-<suffix>.log || echo FAIL >> .claude/reports/logs/fe-typecheck-<session-id>-<suffix>.log' >&2
+        echo '  yarn --cwd frontend build > .claude/reports/logs/fe-build-<session-id>-<suffix>.log 2>&1 && echo PASS >> .claude/reports/logs/fe-build-<session-id>-<suffix>.log || echo FAIL >> .claude/reports/logs/fe-build-<session-id>-<suffix>.log' >&2
+        echo '  ./gradlew -p backend test > .claude/reports/logs/be-test-<session-id>-<suffix>.log 2>&1 && echo PASS >> .claude/reports/logs/be-test-<session-id>-<suffix>.log || echo FAIL >> .claude/reports/logs/be-test-<session-id>-<suffix>.log' >&2
         echo "" >&2
         echo "Then grep the latest file for errors — do not re-run to see output:" >&2
-        echo "  ls /tmp/${prefix:-<prefix>}-*.log | sort | tail -1 | xargs grep -E 'FAIL|ERROR|error TS' | tail -30" >&2
+        echo "  ls .claude/reports/logs/${prefix:-<prefix>}-*.log | sort | tail -1 | xargs grep -E 'FAIL|ERROR|error TS' | tail -30" >&2
         echo "" >&2
         echo "WHY: Stdout gets truncated. Redirect preserves full output for analysis." >&2
         echo "Use --cwd (yarn) or -p (gradlew) to set the working directory — do NOT cd into the directory." >&2
