@@ -42,9 +42,6 @@ asset pipeline.
 - FE `selectedKeywords` schemas still allow `.nullish()` although the two response DTOs
   now always emit an array; tighten to a plain `z.array(z.string())` and drop the
   now-dead `?? []` fallbacks in the two consumers.
-- Obsolete FE snapshot in `pages/identity/__tests__/IdentityDetailPage.parity.test.tsx`
-  ("renders uptie 1 with skill1 selected 2") — regenerate on the next pass through
-  that area.
 - Stale "a fresh account's syncEnabled is null" comments in `e2e/src/plannerFixture.ts`
   and `e2e/tests/mutation-gestures.spec.ts` — behaviorally fine post-V056, textually
   outdated.
@@ -76,6 +73,58 @@ asset pipeline.
   routing target for PRIMARY is the `GtidCapturingDataSource` wrapper, not a
   `HikariDataSource`, so the helper's instanceof walk skips it. Replica and bulkhead are
   covered since the lazy-proxy descent fix; the primary needs an unwrap step.
+- No circuit breaker fronts any Redis role or the primary datasource; the 3 s command
+  bound and Hikari's connection timeout cap what one call can hold, so under a dependency
+  that stays slow rather than dead every request still pays the full bound before its
+  typed 503. Worth doing once throughput under a sustained-latency toxic is measured
+  (`DegradationIT` proves the cut and the blackhole, not the slow steady state) and shows
+  request-thread saturation, or once production sees that state; the breaker sits on top
+  of the bound, not in place of it.
+- 2026-09-23 — Latency from Korea is the client→edge leg, not the origin. From a Korean ISP,
+  `dante-planner.com` and `api.` land on SIN, HKG or NRT, while `www.cloudflare.com` on the
+  same network answers from ICN: ICMP 107 ms against 10 ms, TCP connect 194 ms against 18 ms,
+  warm-connection request→first byte 280–305 ms against 9.5 ms. On one reused connection,
+  `/cdn-cgi/trace` (answered by the colo) and `published/{id}` differ by 4–25 ms, and an
+  edge-cache HIT on a hashed asset costs the same ~300 ms, so the origin, the tunnel and
+  Traefik add almost nothing and an edge cache buys no latency for these clients. A warm
+  request costs about three ICMP round trips, which is unexplained. Why the zone lands
+  off-shore is unverified: Cloudflare's docs attribute distant colos to anycast and ISP
+  peering without naming plan tiers, and community reports of the same symptom include
+  Argo-enabled zones. The same build loaded locally with API responses replayed from fixtures
+  reaches first content on the detail page in 3.9 s at an emulated 300 ms round trip, 1.6 s at
+  100 ms, 0.48 s at 10 ms and 0.46 s at 0 ms, so at this zone's round trip nearly all of the
+  load is waiting, and at an in-country round trip the waterfall barely matters. A repeat visit
+  in production serves every chunk from the browser cache and still takes 1.2–1.4 s, all of it
+  round trips (HTML revalidation and API calls). The zone is on the Free plan. Community and
+  wiki sources (no Cloudflare statement found) say Korean visitors reach ICN only on Enterprise,
+  and Cloudflare's own blog puts Seoul transit at 15× Europe with 2% of Korean traffic peered.
+  From the same Korean ISP, CloudFront (ICN57, 17 ms connect), Bunny (KR1, 20 ms), Fastly (ICN,
+  35 ms) and Cloudflare's own Enterprise site (ICN, 15 ms) all answer in-country, while this
+  zone answers from HKG at 299 ms. CloudFront's flat-rate plans include every edge location; the
+  zone served 20.9 M requests and 480 GB in 30 days, which is Business-tier volume ($200 a
+  month), and Korea was 13% of those requests (US 18%, Vietnam, Thailand, the Philippines and
+  Indonesia about 25% together). Three ways to serve Korea in-country: Cloudflare Enterprise
+  (price not public); every visitor on CloudFront's flat-rate Business plan ($200 a month for
+  this volume; staying over a plan's allowance may move traffic to "fewer or more distant edge
+  locations"); or Korea alone on an in-country CDN (about 2.8 M requests a month, inside
+  CloudFront Pro's 10 M at $15), which needs per-country DNS routing that Cloudflare DNS on the
+  Free plan may not provide (unverified). The API hostname sits behind the same Cloudflare
+  tunnels, Access and load balancer, so moving it too reopens ADR 011 and ADR 091. Worth doing
+  when Korean users are a stated priority, weighed against ADR 115's fewer round trips, which
+  help every region.
+- `published/{id}` p99 on Seoul is ~4 s while p50 is ≤1 ms (fleet dashboard, 2026-09-16).
+  Uninvestigated. Candidates: a handful of JIT-cold requests after a rollout dominating a
+  low-traffic p99, GTID-gated reads waiting on replica catch-up before falling to the
+  primary, replica-miss re-checks over the WAN, or GC pauses on the 2 GB hosts. Worth
+  doing once the request count behind the percentile is known and shows the tail is more
+  than a few requests, or when a user reports a stalled detail load.
+- The load balancer's cookie session affinity (`__cflb`) is honored regardless of the
+  client's geography: a cookie issued in one region routes later requests to that
+  region's pool from anywhere. Harmless today (identical code in both regions, writes
+  always reach the single primary) and useful as a measurement instrument (see the entry
+  above). Becomes a decision when regional behavior ever diverges, when affinity is
+  reconsidered, or when a per-region hostname is wanted in prod — the cookie already
+  provides the pin without a public bypass of health-based failover.
 - The `FeatureBoundaryTest` frozen internal edges (34 entries on 2026-09-18) resolve to
   eight types reached across a boundary, and thaw in three lanes. Mechanical, one commit
   each, the staleness test deletes the entry: `WebConfig` reaches `planner.entity.MDCategory`
@@ -141,7 +190,7 @@ asset pipeline.
   `MD_ACCENT_COLORS: Record<number, string>` — index signatures over finite domains
   (`DifficultyLabel`, the MD versions). Keying them by those literal unions would make every
   lookup non-optional at the root and let two consumer widenings be reverted
-  (`ThemePackSelectorPane.getDifficultyColor`, `StartBuffCardVariant.descriptionColor`).
+  (`ThemePackSelectorPane.getDifficultyColor`, `StartBuffCardVariant.description.color`).
 - DOMPurify reports itself unsupported under happy-dom and hands back its input, so any test
   outside `src/shared/sanitize/**` that asserts on sanitized output is asserting on garbage.
   `vite.config.ts` routes the sanitizer's own tests to jsdom for exactly this reason; the
@@ -180,12 +229,11 @@ asset pipeline.
   (`shared/sse/SsePublisher.java`) and `planner_reconciler_drift_total`
   (`planner/service/PlannerDriftReconciler.java`) are read only by their own tests, and
   nothing under `deploy/grafana/` panels or alerts on either — a subscriber-drop burst or a
-  drift storm is invisible in production. The planned `sse.publish.unserializable` will join
+  drift storm is invisible in production. 2026-09-22: neither passes the remote-write
+  keep-list in `deploy/base/prometheus.yaml:69` either, nor do `sse.publish.unserializable`,
+  `datasource.primary.undeclared`, `tombstone.check_skipped`; five of the ten custom
+  counters never reach Grafana Cloud, so a panel alone would not fix it. The planned `sse.publish.unserializable` will join
   them. Closes when all three have a dashboard panel and an alert rule.
-- 2026-08-14 — The frontend guard scripts `check:fp` (`ast-grep scan`) and
-  `check:compiler-bailouts` (`tsx scripts/compiler-bailouts.ts`) run in no workflow under
-  `.github/workflows/`, so both are local-only and a violation ships unblocked. RFC 0004
-  wires them; this entry stands until that lands.
 - 2026-08-14 — `deploy/CLAUDE.md:14-16` inverts a security fact: it states that an absent
   `AUTH_LOCAL_REDIS_HOST` "aliases to auth (read-local no-op)", while
   `deploy/overlays/oregon/configmap-patch.yaml` documents the opposite — Spring's relaxed
@@ -259,11 +307,6 @@ asset pipeline.
   `POST /{id}/bookmark`, and `frontend/scripts/hardcoded-text-report.json` still carries an
   entry for the deleted `usePlannerBookmark.ts`. `PlannerMDGesellschaftPage.tsx`'s header
   comment still advertises bookmark functionality.
-- 2026-08-14 — The content-digest lineage rule ("written only by onCreate and recordSave,
-  never from the stored column") is enforced by review, not structure: `PlannerContent`'s
-  class-level `@Builder`/`@Getter` expose a builder slot and getter for the field, and no
-  ArchUnit/convention test pins the two legitimate write sites. A freeze test, or narrowing
-  the builder, would make the invariant hold by construction.
 - 2026-08-14 — `POST /api/planner/md/batch` (RFC 0003 Stream 1) bypasses `ByIdReadGuard`,
   which the single-planner GET goes through: on a lagging replica a just-written planner is
   silently omitted from the batch answer (indistinguishable from "not yours") instead of
@@ -286,13 +329,6 @@ asset pipeline.
   indistinguishable from dedup — benign today because arm eligibility re-reads filter deleted
   users first); the eager executor's DiscardPolicy has no rejection counter, so pool
   saturation is observable only as relay-late notifications.
-- 2026-08-14 — `CsrfDoubleSubmitFilterTest.mutation_WhenTokenTampered_Rejected` (line ~219)
-  builds its tampered token as `"x" + token.substring(1)`, which is the identity
-  transformation whenever the minted token already starts with `x` — the "tampered" request
-  is then legitimately accepted and the test fails 200-vs-403, roughly a 1-in-64 flake per
-  run. Found during RFC 0003 Stream 2's gate; pre-existing and independent of that work. Fix
-  is to flip a character to a value guaranteed different (e.g. XOR or pick from a disjoint
-  alphabet).
 - 2026-08-14 — Outbox pushes leave on the dispatch thread after commit, so a client refetch
   triggered by NOTIFY_* carries no GTID from the write that caused it; on a lagging replica
   the refetch can miss the just-committed notification row until the next natural refetch.
@@ -337,28 +373,9 @@ asset pipeline.
   must not couple to domain_events retention (permanent domain state vs consumable ledger).
   Revisit trigger for (1): when cross-feature audits outgrow subject-owner placement, extract
   a shared audit home rather than per-feature reconcilers.
-- 2026-08-14 — a refused write ack (requestDigest mismatch) is console.error-only; stream 4's
-  classifier/presenter should surface it as a real failure instead of the editor reporting a
-  clean save over a write whose lineage could not be established.
 - 2026-08-14 — BATCH_PULL_MAX_IDS is hand-mirrored (frontend constants vs backend
   PlannerConstants) with nothing cross-checking the two; the RFC 0003/0004 wrap-up verification
   should compare them, and a contract test would hold thereafter.
-- 2026-08-14 — a 404 on the comment SSE stream stops retrying silently (usePlannerCommentsSse
-  passes no onStreamGone); the planner stream toasts. Inside stream 5's contract letter, but the
-  "stop retrying and say so" prose is unmet for that consumer.
-- 2026-08-14 — RELEASE BLOCKER for RFC 0004: sync.removedOnAnotherDevice (planner ns) and the five
-  errors.* keys (common ns) exist only as uncommitted edits in the static working tree; the
-  submodule pointer on dev (b1c017c8) predates them, so both removal surfaces and the stream-4
-  error copy render raw keys until static commits land and the gitlink bumps.
-- 2026-08-14, verified 2026-09-18 — PlannerCommentSseController answers PlannerNotFoundException
-  through the generic JSON handler while declaring produces=text/event-stream, so the 404
-  degrades to a 500 (prod Loki, oregon, 00:26–00:53Z: 50 triplets of PLANNER_NOT_FOUND,
-  HttpMediaTypeNotAcceptableException in the handler, and a Tomcat ERROR for one guest and one
-  unpublished planner). stopOnNotFound never sees the 404 and the comment stream runs its full
-  retry budget every idle reset. The same degradation hits every entity-returning handler on
-  both event-stream routes. Closes with the problem-details migration of the advice, whose
-  red test is a MockMvc 404 on /api/planner/{id}/comments/events with Accept:
-  text/event-stream.
 - 2026-08-14 — the planner export silently drops rows whose local load failed: the success toast's
   count is truthful about the file but a partial export reads as a clean one. Reporting it needs
   copy that does not exist yet (stream 4 flagged; fold into the export decode→partition→persist
@@ -388,9 +405,6 @@ asset pipeline.
 - 2026-08-14 — the batch-conflict park is not durable across remount: navigation away and
   back rebuilds the batch and pops the modal uninvited. Persisting the dismissal (per
   planner-id set) or opening parked batches collapsed would make park mean park.
-- 2026-08-14 — stream 8's bookmark write-endpoint deletion (PlannerEngagementController + IT)
-  is gated on the legacy-toggle counter reading zero in prod, which needs scripts/ops/access
-  metrics — user's lane; the frontend deletions around it land independently.
 - 2026-08-15 — the api.ts 401 cache-eviction still fires synchronously inside ApiClient.fetch
   (three tests pin the timing); hoisting it to the auth layer needs a registration seam since
   lib may not import @/shared/auth. The api↔queryClient cycle it caused is already broken, so
@@ -402,11 +416,6 @@ asset pipeline.
 - 2026-08-15 — seasons/unitKeywords stay module-scope JSON in the main chunk by ruling; before
   any codegen-derived-literal move, MEASURE the two bundles' actual byte cost in the entry
   chunk — the row's value is bundle size and nothing else.
-- 2026-08-15 — the branded numeric id schemas are defined but wire to nothing: current static
-  data carries ALL value-role ids as strings (skills '2010111', passives ['2010111']), not
-  just the two fields RFC 0004 named. The realignment is a static-pipeline change across every
-  id emitter, then regeneration and a pointer bump — user's lane; the code-side brands and
-  pattern derivations are ready and waiting.
 - 2026-08-15 — extraction dead exports: the 16 production-dead exports stay exported because the
   stream-7 golden harness and 86 hand-written tests import them directly; the barrel never
   exposed them, so the public seam is already narrow. Un-exporting means the test-scale decision
@@ -415,23 +424,18 @@ asset pipeline.
   useEntityListSpec/useEntityListI18n config path (useFilterI18nData, useSearchMappings, useSkillTagI18n,
   useSanityConditionData, useColorCodes, usePlannerKeywordsI18n); two of nine migrated before the
   pattern's marginal value flattened.
-- 2026-08-15 — the passive-id/themePack numeric realignment row is REVERSED, not deferred: the
-  pipeline settled on string serialization (static b290bb8b) and the branded-string design
-  replaced the row's premise; recorded here so row-level accounting closes.
 - 2026-08-15 — the api.ts 401-eviction hoist's stated verification (auth-layer key factory) is
   unreachable from lib/ under the layer rule; the literal ['auth','me'] at the eviction site is
   the residue. Needs the registration seam noted in the earlier eviction entry.
 - 2026-08-15 — FeaturedBoss.unitId is still bare z.string(); the branded-ids rule-1 sweep missed
-  it, and seven Number()/parseInt coercion sites survive in RecipeSection and IdentitySkillCard
-  against rule 3.
+  it.
 - 2026-08-15 — NoteEditor.handlePaste policy is still inline; only its primitives moved to
   noteUtils. The policy extraction remains open.
 - 2026-08-15 — jsx-a11y ships eight of nine rules; prefer-tag-over-role is off per ADR 083
   (four correct-ARIA reports the rule cannot express as native tags) — cross-reference, since
   the acceptance row names this ledger.
-- 2026-08-15 — epic composition audit residue (RFC 0004), accepted as debt: suppressErrorToast/
-  successParams are declared-but-unconsumed sink surface; NotificationToast's sonner import and
-  toast.info sit outside the written toast law (exemption is real, law text lags); coverage
+- 2026-08-15 — epic composition audit residue (RFC 0004), accepted as debt: NotificationToast's
+  sonner import and toast.info sit outside the written toast law (exemption is real, law text lags); coverage
   thresholds are zero-margin measured values and CI runs the suite without the worker cap or
   NODE_OPTIONS the sibling jobs set; six text placeholders and LoadingState's hardcoded English
   sit beside content-shaped skeletons; String()/Number() id coercions survive in seven component
@@ -439,10 +443,8 @@ asset pipeline.
   brands (the latter needs a seventh primitive the RFC never defined); the gift enhancement
   prefix is restated inline in egoGiftEncoding; StartBuffSchemas patched the flip with
   z.coerce.number(); shared/noteEditor is a blanket deep-import exemption with nine deep
-  importers and a barrel that exports no components; ADR
-  stale-write-noop's REJECTED clause and the shipped ToleratedContentDigestSchema disagree on
-  who owns the field's removal; reportFailure can displace a live conflict where resolutionError
-  was built for exactly that; the two held-plan callers key by different identities; the comment
+  importers and a barrel that exports no components; reportFailure can
+  displace a live conflict where resolutionError was built for exactly that; the two held-plan callers key by different identities; the comment
   SSE hook mixes throwing and safeParse idioms in one file.
 - 2026-08-15 — `PLANNER_LIMIT_EXCEEDED` has no copy of its own in the i18n bundle and presents
   the generic error message, so a user who hits the server-side planner cap is not told what
@@ -529,6 +531,466 @@ asset pipeline.
   notification reads to the primary, or shorten the staleTime and accept the focus heal);
   `notification-push.spec.ts` asserts the push-driven refetch and the fresh-mount render, and
   should grow the push-then-badge assertion once this is decided.
+- 2026-09-20 — An SSE reconnect refetches nothing for notifications: `useAppSse.ts`
+  `handleConnected` invalidates only `userSettingsKeys.settings()` on a re-open, so a
+  notification committed while the stream was down (the dispatcher's post-commit push is
+  fire-and-forget) stays unseen until `STALE_TIME.MEDIUM` lapses or the page remounts. The
+  dispatched row is durable, so nothing is lost; the delivery delay just has no upper bound
+  tied to the reconnect. Worth doing when the badge-after-push entry above is decided (the
+  fix is the same invalidation call in the reconnect branch, plus a reconnect assertion in
+  `notification-push.spec.ts`), or when a user reports a missed notification after a
+  network blip.
+- 2026-08-17 — The prod-account RDS move cannot share the snapshot as-is:
+  `terraform/rds/main.tf` sets `storage_encrypted = true` with no `kms_key_id`, so the
+  instance encrypts under the AWS-managed `aws/rds` key, and AWS refuses to share
+  snapshots encrypted with an AWS-managed key across accounts. The documented path is
+  copy-with-CMK in the management account, share the CMK and the copy to
+  danteplanner-prod, and restore there (which re-encrypts again under a prod key) — two
+  extra full-storage snapshot copies of window time that `prod-account-rewire.md` §7's
+  "snapshot-share-and-restore" line does not mention. The staging drill the runbook
+  mandates would hit this on its first attempt; cheaper to provision the CMK and script
+  the copy before the drill.
+- 2026-08-17 — ADR 082 declares it supersedes 071's `@sync @digest` bullets "once the
+  arbitration is implemented", but carries no `supersedes:` key and left 071 with no
+  `## Superseded` section. The condition is met — `SyncVersionValidator.arbitrate` and
+  `EffectiveNoOpPredicate` are live, `V060` dropped `content_digest`, and no Java or TS
+  outside those two migrations references a digest — so 071 reads as a live decision for a
+  column that does not exist, and the repo's own convention (status derived from structure)
+  agrees with the wrong side. `docs/rfcs/0003-sync-identity-and-effect-delivery.md` and
+  `0005-server-noop-conflict-arbitration.md` still show the column as target state.
+- 2026-08-17 — Planner moderation authorizes on the URL role rule alone:
+  `SecurityConfig.java:134` gates `/api/moderation/**` on `hasRole("MODERATOR")`, and
+  `PlannerModerationService` (`:49`, `:69`, `:90`, `:113`) reaches
+  `plannerPublishingService` with no actor lookup, so a restricted moderator keeps takedown,
+  unpublish and recommended-listing authority until their token expires. Account restriction
+  goes through `ModerationPolicy.requireCanRestrict`, whose own comment
+  (`ModerationPolicy.java:78-84`) states a restriction withdraws authority precisely because
+  banning a moderator invalidates no token — a rule the planner endpoints never consult.
+- 2026-08-17 — `PlannerPublishingService.java:100` and `:133` pass
+  `upserted(userId, plannerId, content)` as an argument, so the whole upsert — field
+  mutation, `recordSave()`'s version bump, `onVisibleEditCommitted`, and `createAggregate`
+  for an id the server has never seen — runs before `applyPublish` reaches `requireOwner`
+  (`:154`), `requireTitle` (`:156`), the `ValidationPolicy.PUBLISH` content gate (`:157`) and
+  the takedown refusal in `Planner.publish()`. The javadoc at `:149-150` claims the opposite
+  ("a refusal leaves the planner in the state the caller found it in rather than relying on
+  the rollback"). A stale `syncVersion` on a taken-down planner answers 409 from arbitration
+  before the 403 the state warrants, which opens the client's conflict dialog for a planner
+  that can never publish.
+- 2026-08-17 — `PlannerFilterService.onFilterRebuildRequested` (`:53-55`) is an
+  `AFTER_COMMIT` listener writing `planner_entity_filter` / `planner_keyword_filter` under
+  `REQUIRES_NEW` — the shape ADR 072 names and rejects ("REJECTED: `REQUIRES_NEW` writes from
+  after-commit listeners — the crash window above, with no durable record to retry from").
+  A crash between commit and listener leaves a published planner absent from entity and
+  keyword search with no outbox row, no relay, and no alarm; only a manual
+  `CALL rebuild_planner_filters(...)` recovers it. `EffectPlacementTest.java:184-197`
+  implements the dispatcher direction of the ADR's rule (listeners reaching the dispatcher
+  are exactly the eager hop) but not its converse, so this listener passes; `:199-221`
+  likewise enforces "within the notification package" where the ADR says "only by the
+  dispatcher".
+- 2026-08-17 — The restriction gate ADR 078 describes as following the planner's public state
+  exists only in `PlannerCommandService.upsertAggregate` (`:356-358`). `deletePlanner`
+  (`:466-490`) has none while explicitly unpublishing a published planner (`:472-475`) and
+  dropping its catalog row (`:478`), so a banned user can still move a planner out of public
+  view; `importPlanners` (`:503`) and `createAggregate` (`:267`) call `getUser` rather than
+  `checkNotRestricted`. The unreachable `updatePlanner` (`:424-457`, no controller route)
+  carries no gate and a `CarriedWrite` missing `gameContentVersion` and
+  `contentSchemaVersion`, so two conjuncts of the no-op predicate are unconditionally true
+  there the day a caller is added.
+- 2026-08-17 — ADR 085 states the device stamp is compared "like every other field the write
+  path stamps" and that "the biconditional invariant admits no exception", but
+  `PlannerPublishingService.java:136-140` routes publish/unpublish-with-body through the
+  3-arg `upsertAggregate` overload, which hardcodes `deviceId = null`
+  (`PlannerCommandService.java:330`); `applyKeywordsAndDeviceId` then skips the stamp and
+  `EffectiveNoOpPredicate.java:50` reads a null carried value as unchanged. The same stale
+  cross-device resend is a 409 through `PUT /{id}` and an `ACK_NO_OP` through
+  `POST /{id}/publish`, so that client is handed another device's version as an
+  acknowledgement of its own write.
+- 2026-08-17 — Several find-then-insert paths rely on a real database constraint without the
+  handled violation ADR 023 pairs it with, so the race answers `UNEXPECTED_CONFLICT` plus a
+  Sentry page instead of a domain outcome: `RecommendedSql.java:42-55` inserts into
+  `planner_catalog` with no `IGNORE`/`ON DUPLICATE KEY` against its primary key (reached from
+  `PlannerCatalogService.java:88` on unban), `UserSettingsService.java:91-94` (reached from
+  login and from every SSE connect), `PlannerSubscriptionService.java:79-85`, and the bare
+  `planner_stats` inserts at `PlannerCommandService.java:279-281` and `:520-522`.
+- 2026-08-17 — "Left public view" writes a replica tombstone on one path only. Owner
+  soft-delete registers one after commit and, when no transaction is active, writes it inline
+  before commit (`PlannerCommandService.java:479-488`) — a pre-commit cross-store effect whose
+  rollback leaves an hour-long tombstone for a live planner, and `ContentTombstoneStore.java:62-65`
+  states a positive tombstone is the only gate on a replica hit. Moderator takedown and
+  unpublish (`PlannerPublishingService.withdrawFromPublicView`, `:213-219`) write none, so a
+  taken-down planner is served unmasked from a lagging replica for the replication window.
+- 2026-08-17 — The comment and reply effect arms re-read by bare id rather than with the raise
+  site's predicate: `CommentCommandService.java:60,62` gates the write on
+  `checkNotRestricted` plus `checkPublished`, while `CommentReceivedEffect.java:48-60` and
+  `ReplyReceivedEffect.java:46-58` check only `isDeleted()`. Dropping the published predicate
+  is deliberate for the owner notification and documented at
+  `PublishedPlannerQueryService.java:99-112`, but the same arms also push `COMMENT_ADDED` to
+  the planner's public comment channel, which the raise site would have refused; and
+  `ReplyReceivedEffect.java:68-70` loads the parent comment by bare id with no `isDeleted()`
+  check, so a withdrawn parent still receives its reply notification.
+- 2026-08-17 — A local draft kept through a tombstone can never be saved again. ADR 088 keeps
+  it (`syncPlan.ts:57-60` purges only non-draft rows), the server has no resurrect path —
+  `findAggregateForOwner` filters `deletedAt` (`PlannerRepository.java:65`), the pre-create
+  probe does not (`:131-132`), and `PlannerOwnershipValidator.java:45-49` answers 404 for the
+  owner's own tombstone, with `deleted_at` never cleared anywhere — and `performSave`
+  (`usePlannerSave.ts:477-489`) returns before `storage.saveToLocal` on failure, so the manual
+  write is discarded too and `hasUnsyncedChanges` stays true. The 404 classifies as
+  `notFound` and presents as the generic resource-not-found message; whether the client should
+  drop the row, unlink it, or offer a re-create is undecided on both sides.
+- 2026-08-17 — `status` is read as a per-device local fact by `syncPlan.ts:36,58` and
+  `deriveSaveStatus`, and as a replicated column by the wire (`usePlannerSyncAdapter.ts:158`,
+  adopted on every pull at `:72`, compared by `EffectiveNoOpPredicate.java:40`). The two
+  readings diverge inside one interpreter: `conflictChoice.keepLocal` (`:168-175`) pushes the
+  operand as-is and stamps `saved` only locally, and the list caller supplies a row whose
+  status is `draft` by construction (`useMDUserPlannersData.ts:365-374`) where the editor
+  caller supplies `saved` (`usePlannerSave.ts:695-696`). A batch Keep-Local therefore writes
+  `draft` to the server, and every other device pulls a draft it never authored — permanently
+  conflict-raising and exempt from the ADR 088 purge.
+- 2026-08-17 — Applying the latest mirror decouples content from the version that names it,
+  against the invariant stated at `usePlannerSyncAdapter.ts:47-55` ("keeping local bytes under
+  the server's version would hide that divergence from a sync that compares versions alone").
+  `usePlannerHeaderActions.ts:110-121` keeps local draft bytes and adopts the ack's version,
+  and `syncPlan.ts:35` compares versions alone, so the row reads `skip` forever. On the
+  community route the pushed object is the server's published copy rather than the owner's
+  local one (`PlannerMDGesellschaftDetailPage.tsx:131` against the prop documented at
+  `PublishedPlannerHeader.tsx:51`), so a second device can receive published content stamped
+  with a `contentVersion` its bytes were never validated against.
+- 2026-08-17 — `BatchConflictDialog` hardcodes the local side as the copy — row labels read
+  `conflict.localPlanner.metadata.title` (`:282`) and the "copy will not be published" notice
+  gates on the local row's flag (`:297-301`) — while the import caller plans with
+  `forkSide: 'incoming'` (`PlannerExportImportSection.tsx:366-375`) and forces `published:
+  false` on the imported side (`:404`). Importing a published planner over a local
+  unpublished row silently unpublishes the copy without the notice, and warns about a copy
+  whose publication was never at stake; the comment at `:281` also claims a "Server" →
+  "Imported" relabel the dialog never performs (`BatchConflictDialog.tsx:292-294`). The same
+  path applies three of `ConflictForkMetadata`'s eight fields (`:396-406` against
+  `conflictChoice.ts:43-53`), so an imported Keep-Both copy inherits the source's timestamps
+  and `status`, sorting into the list at the original's position and landing as a
+  tombstone-immune draft under a fresh id.
+- 2026-08-17 — `presentedVersion` is forward-only by construction
+  (`usePlannerSave.ts:335-344`), but the server moves a version backwards on create:
+  `UpsertPlannerRequest.withId` drops the requested value and `PlannerContent` defaults to 1,
+  so a client sending 12 for an unknown id is answered 1 with no error. `adoptAck` assigns it
+  correctly and `presentedVersion` maxes it back up against the stale prop, so the next save
+  presents an old version against a row at 1 and takes a 409 for a planner nobody else
+  touched. Reachable through any id the server has re-created, and through the import fork
+  above.
+- 2026-08-17 — ADR 073 removed the SSE planner event family on the grounds that
+  "`refetchOnWindowFocus` on the server-backed planner queries becomes the freshness
+  mechanism in their place", but every personal-planner query disables it
+  (`useMDUserPlannersData.ts:203,215`, `useSavedPlannerQuery.ts:42`) because the source is
+  IndexedDB. The only server read on that path is the one-shot sync effect
+  (`useMDUserPlannersData.ts:222-288`) gated per mount by `hasSyncedRef`, and the personal
+  detail route reads IndexedDB alone (`PlannerMDDetailPage.tsx:57`), so the promised "a delete
+  performed on another device surfaces as a 404 when the stale entry is opened" happens only
+  on the community route. Freshness is per-mount, not per-focus, on exactly the path SSE
+  covered.
+- 2026-08-17 — The denormalized keyword column is written verbatim from the client's copy
+  (`UpsertPlannerRequest.java:51` → `PlannerCommandService.java:192-196`), which ADR 030
+  records as rejected ("derived server-side from the content tree… REJECTED: accepting a
+  client-supplied projection alongside its source"). A null means "leave unchanged"
+  (`:193`), so a save carrying a changed content tree without the copy strands the column;
+  and nothing can detect it, because the drift audit takes its keyword oracle from the stored
+  column itself (`PlannerDriftReconciler.rebuildExpectedIndexes`,
+  `PlannerDriftAuditRepository.java:218-219`) rather than from the content JSON.
+- 2026-08-17 — ADR 030 also records that an unknown keyword is "rejected only when
+  publishing and tolerated on a draft sync", but `PlannerKeywords.normalize` (`:75-88`) drops
+  unknowns at every tier and `PlannerContentValidator` inspects keywords under no
+  `ValidationPolicy`, `PUBLISH` included. Publishing with an unknown keyword succeeds and
+  discards it; the two-tier rule survives only in the client, which the same ADR justifies as
+  the sole defense for guest documents alone.
+- 2026-08-17 — `KeywordParityTest.java:64-71` pins `PlannerKeywords.VALID_KEYWORDS` to the
+  members of the latest `ALTER TABLE planners MODIFY COLUMN selected_keywords SET(...)`
+  migration, but `V052:116` dropped `planners` and the live column is
+  `planner_content.selected_keywords JSON` (`V049:29`). The test passes against a fossil
+  (`V045`), and adding the next keyword by the procedure it implies means writing a migration
+  against a missing table — green test, failed deploy. ADR 030 also justifies its filtering
+  rule as forced by a column type that "physically rejects non-members", which stopped being
+  true at V049.
+- 2026-08-17 — The base-gift collapse is expressed three times and the frontend copy
+  disagrees with the two backend copies on ids outside the enhancement bands:
+  `PlannerContentEntityExtractor.java:129-132` and `V055__normalize_ego_gift_filter_ids.sql:50-52`
+  pass them through and index them, while `egoGiftEncoding.ts:29`'s
+  `^([12])?(9\d{3})$` drops them. The same filter term answers differently on the published
+  list (server index) and in "My Plans" (local predicate,
+  `plannerContentExtractors.ts:199-203`), and each side is pinned by tests to its own
+  contract. ADR 039 names this population directly — the seed carries gift ids outside every
+  valid band.
+- 2026-08-17 — `PlannerCoreInfo.absent()` yields a null `createdAt`
+  (`PublishedPlannerQueryService.java:219` uses it whenever the batch core load misses a row)
+  and the global `NON_NULL` Jackson config omits the key, but `PlannerListSchemas.ts:48`
+  declares `createdAt` required, so one catalog row without a core row rejects the entire
+  paginated community page rather than one card. The sibling fields on the same DTO are
+  correctly `.nullish()` (`:44,46`) and the components already tolerate an absent value.
+- 2026-08-17 — `AbEventSchemas.ts:15-16` types `relatedEgoGifts` as `z.array(z.string())`
+  rather than `EGOGiftIdSchema`, and 13 ids in `static/data/abEventSpecList.json`
+  (`991001`–`993004`, six digits) violate `GIFT_ID_PATTERN`. `EGOGiftGrid.tsx:34-35` renders
+  nothing for them, silently; the branded schema would have failed `dataIntegrity.test.ts` on
+  the file instead. `giftListItem.ts:28` parses the same values through `EGOGiftIdSchema` and
+  would throw.
+- 2026-08-17 — `usePlannerFork.ts:111` still parses the published payload with an unguarded
+  `JSON.parse` and assembles it with `toSaveablePlanner` (`:115-135`), skipping the
+  `validateSaveablePlanner` gate its sibling `usePublishedPlannerQuery.ts:106-133` gained, then
+  writes the unvalidated content to local storage at `:138`. `usePlannerSyncAdapter.ts:61-68`
+  guards the parse but likewise skips the schema gate.
+- 2026-08-17 — Backend content validation refuses string-form buff ids:
+  `StartBuffValidator.java:41` iterates `selectedBuffIds` with `eachNumber`, whose
+  `!element.isNumber()` check (`JsonTraversal.java:119-121`) rejects a textual element, while
+  the sibling `selectedGiftIds` goes through `eachUniqueString` (`:85`). Any move of buff ids
+  to the branded string form the rest of the entity ids use is therefore a two-sided
+  migration with a hard ordering constraint — the server must accept both forms before any
+  client writes strings, and numeric acceptance has to survive until a `contentSchemaVersion`
+  rewrite retires stored numeric arrays, since stored content re-enters validation on a
+  category change.
+- 2026-08-17 — `window-schema-decomposition.yml` drains the regions in the wrong order.
+  Its freeze job loops `"$OREGON_REGION:oregon" "$SEOUL_REGION:seoul"`, so Oregon is
+  drained first, while `docs/runbooks/schema-decomposition-migration.md` B1 step 2 states
+  the opposite and says why: "Freeze Seoul before Oregon. Seoul writes cross-region into
+  Oregon's primary, so stopping the writer before its target leaves no half-applied
+  cross-region work." As written the workflow stops the target before the writer, leaving
+  a window where Seoul pods are still accepting writes aimed at an Oregon primary whose
+  own pods are gone. The bring-up order (Oregon, then Seoul) is correct and matches B4 —
+  only the drain loop is reversed. Fix is reversing that one loop; the same ordering must
+  hold in any local port of the workflow.
+- 2026-08-17 — The stop-the-world drain uses a node label value Kubernetes rejects, so the
+  production window fails at its first step. `docs/runbooks/schema-decomposition-migration.md`
+  B1 and `.github/workflows/window-schema-decomposition.yml` both patch the backend
+  DaemonSet with `nodeSelector: {role: "__migrating__"}`, and the API server refuses it:
+  a label value must begin and end with an alphanumeric character, which `__migrating__`
+  does not. Reproduced against the prod-account fleet: "The DaemonSet backend is invalid:
+  spec.template.spec.nodeSelector: Invalid value: \"__migrating__\"". The workflow is
+  dispatch-only and has never run, which is why this survived. Any value that is legal and
+  matches no real node label works — the nodes carry role=app / data / ingress — so
+  `migrating` is enough. Four call sites: runbook lines 243 and 248 (the second is the gate
+  that greps for the value), workflow lines 96 and 108.
+- 2026-08-20 — The nightly terraform drift check has never been able to run, and its
+  schedule is now off until it can. Three independent blockers. (1) Credentials: the job
+  assumes `secrets.AWS_PROVISIONER_ROLE_ARN` while declaring no `environment:`, so it mints
+  the OIDC subject `repo:phrimm136/dante-planner:ref:refs/heads/main`; the prod account's
+  `prod-provisioner` trusts `repo:phrimm136/dante-planner:environment:production`, and the
+  run fails with "Could not assume role with OIDC: Not authorized to perform
+  sts:AssumeRoleWithWebIdentity". Declaring `environment: production` would satisfy the
+  trust but attaches that environment's required reviewer, which an unattended cron cannot
+  clear — an ungated environment plus a matching `sub` condition on the role is the shape
+  that works. (2) Inputs: `TFVARS_OREGON`, `TFVARS_SEOUL`, `TFVARS_RDS` and `TFVARS_SECRETS`
+  do not exist at repository scope or in any environment, and the workflow's own note
+  explains the consequence — "a partial set is worse than none: variables that gate a
+  resource default to empty, so a plan missing one reports the resource's destruction as
+  drift". (3) Account: the workflow writes `backend.hcl` as
+  `danteplanner-tfstate-${AWS_ACCOUNT_ID}`, which since the account cutover resolves to the
+  prod bucket, so the stack list has to describe prod and only prod. Applied here:
+  `global-accelerator` dropped from `STACKS` because it lives in the management account and
+  holds the rollback addresses for the bake, and `cloudflare` added, which needed workspace
+  support in `scripts/ops/terraform-drift-check.sh` — that stack keeps a `prod-fleet`
+  workspace alongside `default`, and planning without selecting reports the whole stack as
+  absent. Re-enabling the cron needs the four secrets populated with prod values and the
+  credential path settled.
+- 2026-08-20 — infra-suite's `edge-suites` is disabled: it cannot reach the staging origin,
+  and the staging edge it drives is unmanaged. Four defects were cleared before the fifth
+  proved blocking. (1) `STAGING_PROVISIONER_ROLE_ARN` existed nowhere, so the job could not
+  assume a role; set as a `staging` environment secret. (2) The staging provisioning role
+  granted `secretsmanager:GetSecretValue` on the RDS master password alone, so both
+  `danteplanner/cloudflare/tunnel-tokens` and `danteplanner/staging/e2e-endpoints` were
+  denied; fixed in `terraform/iam-bootstrap` and applied, which also carried in the
+  Route53InternalZone and SsmDocuments statements from ee915a74 that staging had never
+  received — it was last applied 2026-07-30, the day before that commit. (3) The readiness
+  poll issued a bare curl while the suites send a Cloudflare Access service token
+  (`e2e/src/staging.ts`), so it polled a 403 until `timeout 300` expired. (4) The tunnel
+  tokens in Secrets Manager addressed `6a435b07`/`3779a34a`, deleted 2026-07-31; the live
+  tunnels are `5cee0b27`/`77061a43`, and the secret now carries their tokens. (5) Unresolved:
+  the runner still receives 403 from Access while the same service token is admitted from a
+  workstation, which returns 530 (Access passed, origin unreachable). A presented token that
+  no policy admits is 403 where no token at all is 302, so the token reaches Access and is
+  refused there — the condition that distinguishes the two callers has not been found.
+
+  Reconciling the edge against terraform is blocked separately. A `staging` workspace now
+  exists in `terraform/cloudflare` holding nine imported resources — both tunnel configs, all
+  five DNS records, both Access policies. The remaining eight cannot be adopted as the config
+  stands: `access.tf` declares `zone_id = var.zone_id` on
+  `cloudflare_zero_trust_access_application`, while the five live applications are
+  account-scoped, so an import plans `5 to destroy` and recreates the applications guarding
+  every staging hostname. Note also that one-at-a-time `terraform import` cannot adopt the two
+  tunnels at all: `tunnels.tf:68` reads
+  `cloudflare_zero_trust_tunnel_cloudflared.region[each.key].id` for both regions, so the
+  config is unevaluable while only one is in state — config-driven `import` blocks are the
+  route. Separately, the `default` workspace still lists `cloudflare_load_balancer.api[0]`,
+  its monitor and both pools, deleted on 2026-08-17 to free the account's two-origin quota for
+  the prod load balancer; a plain apply there will try to recreate them and hit the limit.
+- 2026-08-20 — `edge-gate` in deploy-fleet is disabled, and with it the last verification
+  that a release traverses the real Cloudflare path before production capacity moves. The
+  cause is Bot Fight Mode: firewall events for `api-staging.dante-planner.com/healthz-local`
+  record `action=managed_challenge source=botFight` against `ua=curl/8.5.0` from
+  `20.15.229.149` (Microsoft ASN), once every ten seconds for the full `timeout 300` window.
+  A managed challenge cannot be solved by a non-browser client, which is why the step
+  reported 403 and died at exit 124, and why the Access service token made no difference —
+  Bot Fight Mode runs before Access, so the token was never evaluated. Four unrelated defects
+  were cleared while chasing this and each was real: a missing `STAGING_PROVISIONER_ROLE_ARN`,
+  a provisioning role that could read neither of the job's two secrets, a readiness poll that
+  sent no Access token, and tunnel tokens addressing tunnels deleted 2026-07-31. A browser
+  User-Agent on the poll was tried and did not clear it; whether the datacenter ASN alone is
+  sufficient signal was not confirmed, because Cloudflare's analytics lag left no event for
+  that run at the time of writing. The zone is on the Free plan, where Bot Fight Mode is a
+  zone-wide toggle with no exception mechanism — WAF skip rules for bot products need Super
+  Bot Fight Mode (Pro). So the choices are: disable Bot Fight Mode zone-wide, which also
+  removes it from the public production hostname; upgrade the plan and write a skip rule
+  scoped to the staging hostnames; or leave the gate off. Note the job graph needed a second
+  edit: `surge-up` declared `needs: [build-push, edge-gate]`, so gating edge-gate off with
+  `if: false` would have skipped the surge, the tag bump and the settle in turn, disabling
+  deployment rather than one check.
+- 2026-08-20 — A failed dynamic import blanks the whole SPA, so every deploy breaks any tab
+  that was already open. Asset filenames are content-hashed, so a new Pages build has an
+  entirely different chunk set (22 new, 28 gone in the 08-17 build); a shell holding the old
+  index.html then requests chunks that no longer exist. Pages rewrites unknown paths to
+  index.html, so the browser reports "Expected a JavaScript-or-Wasm module script but the
+  server responded with a MIME type of text/html" rather than a 404. `router.tsx:474` does set
+  `defaultErrorComponent: RouteErrorComponent`, but a `lazyRouteComponent` import rejects while
+  the route is still resolving, so it escapes past the route boundary to the single
+  `ErrorBoundary` wrapping `<RouterProvider>` in `main.tsx:16`. Nothing anywhere catches
+  "Failed to fetch dynamically imported module" — grep confirms — so there is no reload
+  recovery. The usual fix is catching the import rejection and calling `location.reload()` once,
+  guarded by a sessionStorage flag so it cannot loop.
+
+- 2026-08-20 — The backend DaemonSet has no `startupProbe`, so its liveness probe polices a JVM
+  that is still legitimately booting. `livenessProbe` is `initialDelaySeconds: 30`,
+  `periodSeconds: 15`, `failureThreshold: 3`, a budget of roughly 75s; during the account
+  cutover Flyway took 51.6s and the app reported `Started BackendApplication in 74.023 seconds`,
+  so probes at 30/45/60s all hit a closed port and the container was killed with exitCode 143 —
+  ten seconds after startup completed. It self-corrected because the second start had no
+  migrations to apply. The dangerous version is a kill landing mid-migration: MySQL DDL is not
+  transactional, so a partially applied V052-class migration would leave the schema wedged, and
+  Flyway's advisory lock protects against concurrent migrators, not against the migrator being
+  killed. A `startupProbe` covering worst-case boot lets liveness go back to detecting real
+  hangs.
+
+- 2026-08-20 — `docs/runbooks/prod-account-cutover.md` step 4 cannot run as written, because
+  `scripts/ops/access/rds-query.sh` forces the read-only user. `SHOW REPLICA STATUS` needs
+  `REPLICATION CLIENT`, which `danteplanner_ro` lacks, so the parity assertion errors with
+  1227. The same user cannot `SHOW EVENTS`, so the documented `mysqldump --events` aborts after
+  writing every table — leaving a 69 MB file with no `-- Dump completed` marker, which is the
+  only reliable completeness check since size looks right. The `--routines` justification is
+  also wrong: the stored procedure comes from
+  `V053__create_rebuild_planner_filters_procedure.sql`, above the V045 dump, so no migration at
+  or below V045 creates any routine, trigger or event. `@@GLOBAL.gtid_executed` is readable
+  without privileges and gives the same parity answer; note RDS's own `mysql.rds_heartbeat2`
+  writes advance it continuously, so exact equality between primary and replica is not a
+  reachable state.
+
+- 2026-08-20 — `terraform/.gitignore:9` ignores `*.tfvars`, which keeps
+  `gitops_target_revision` — the value deciding which revision production's ArgoCD syncs — out
+  of version control entirely. The rule is right for the file as a whole in a public repo, but
+  tfvars mix genuinely sensitive inputs (account ids, zone ids, API tokens) with behavioural
+  configuration that is not secret. Consequences: the value changes with no diff, review or
+  history; `cp.sh.tftpl` does `git checkout ${gitops_revision}`, so a control-plane rebuild pins
+  to whatever the applying machine's tfvars said, and two operators can produce different fleets
+  from the same repo; and the drift workflow has to reconstruct all of it from `TFVARS_*`
+  secrets, which is the same data maintained twice by hand. Terraform accepts multiple
+  `-var-file` and auto-loads `*.auto.tfvars`, so splitting each stack into a tracked non-secret
+  half and an ignored secret half would put the revision under review and shrink the secrets to
+  the genuinely secret residue.
+
+- 2026-08-20 — The provisioning role is named `danteplanner-provisioner` in the management and
+  staging accounts and `prod-provisioner` in prod, and the inconsistency has already caused an
+  outage of the deploy path. `~/.aws/config` carried a `prod-provisioner` profile whose
+  `role_arn` named `danteplanner-provisioner`, a role that does not exist in that account; that
+  value was copied into the `AWS_PROVISIONER_ROLE_ARN` GitHub secret on 2026-08-17 and stayed
+  there until 2026-08-19, so every `build-push` failed with "Not authorized to perform
+  sts:AssumeRoleWithWebIdentity" and no CloudTrail record in any account, because an ARN that
+  resolves to no role leaves no account to log the denial. The name is set per workspace in
+  `terraform/iam-bootstrap`, so aligning it is a rename plus a secret update; the cheaper
+  discipline is verifying an ARN with `aws iam get-role` before propagating it anywhere.
+
+- 2026-08-20 — Cloudflare load balancing is at its account limit of two origins, both consumed
+  by the production pools, so no second environment can hold a load balancer. Creating
+  `danteplanner-prod-oregon` and `-seoul` during the cutover required deleting the edge-test
+  build-out. Nothing in the terraform expresses the ceiling: each workspace plans happily in
+  isolation and the constraint appears only as a 400 mid-apply.
+
+- 2026-08-20 — `test-migration` gates nothing in PR Gate: no job declares it in `needs`, so a
+  build can publish while it is still running. `e2e` had the same shape and was wired into both
+  builds on 2026-08-20, but `test-migration` was left alone because its condition includes
+  `github.event_name == 'pull_request'` — it never runs on push to main, so adding it to
+  `build-backend`'s `needs` would skip that build on every push, since a skipped dependency
+  skips its dependents under the implicit `if: success()`. Wiring it in needs a condition that
+  survives both trigger types, not just an edge.
+
+- 2026-08-20 — `settle-down` only runs on the happy path, so a failure anywhere upstream leaves
+  both app ASGs at 2. It declares `needs: [bump-tag, surge-up]` with no explicit `if`, which
+  means the implicit `if: success()`; a failed `bump-tag` therefore skips the job whose entire
+  purpose is undoing `surge-up`'s temporary scale-out. Cleanup that only happens when nothing
+  went wrong is not cleanup — `if: always()` is the condition that matches the intent. The same
+  job also carries `environment: production`, so it additionally waits on a human before
+  capacity is returned.
+
+- 2026-08-20 — Approving a deploy takes up to three reviews, and cannot be reduced by editing
+  the workflow. `prod-provisioner` trusts only
+  `repo:phrimm136/dante-planner:environment:production`, and `build-push`, `surge-up` and
+  `settle-down` all assume it, so each must declare that environment to mint a matching OIDC
+  subject — and declaring it is exactly what triggers the environment's required-reviewer rule.
+  The credential and the gate are the same mechanism. Reducing it to one review means either
+  removing the reviewer rule (unattended everywhere, including the first job), or adding a
+  second ungated environment for the mechanical jobs and extending the role's trust to its
+  `sub`.
+
+- 2026-08-20 — `PlannerCatalogLifecycleIT.listRecencySort_WhenBrowsing_NewestFirstFilesortFree`
+  is mitigated, not fixed. Its three rows are stamped one to three hours in the past, so every
+  planner another test publishes sorts above them; the membership assertion now asks for the
+  controller's maximum page (`Math.min(size, 100)`) instead of the default 20, which survives
+  up to a hundred published planners in the suite's shared catalog and fails again past that.
+  The relative-order assertions were already written defensively. Eliminating the coupling means
+  the test not reading a global listing at all — filtering to its own rows, or running against
+  an isolated catalog.
+- 2026-08-20 — Two Grafana alerts stay lit for reasons that are not incidents, and both are
+  rule-definition problems rather than infrastructure ones. The ArgoCD drift alert fires on the
+  management fleet, whose Applications report `sync_status=OutOfSync, health_status=Missing`
+  because they were deliberately drained and their `syncPolicy` cleared for the account cutover
+  — that pause is what stops ArgoCD resurrecting a DaemonSet against the rollback database, so
+  the condition is correct and will persist for the whole bake. `argocd_app_info` carries
+  `autosync_enabled`, so scoping the rule to
+  `argocd_app_info{sync_status="OutOfSync", autosync_enabled="true"}` fires only when an app
+  that should be self-healing has drifted and stays quiet for one that is paused on purpose;
+  that expresses the intent, where a silence or inhibition would only mute the symptom. Note
+  both Mimir tenants return the same four series with the same `instance` addresses, so the rule
+  cannot be scoped by tenant — whichever one it lives in sees management's paused apps.
+
+  The replica alert was never a real condition. Only `hikaricp_connections_(active|pending)`
+  passed the remote-write keep-list in `deploy/base/prometheus.yaml`, and both are instantaneous
+  gauges; at Seoul's read rate a gauge samples zero almost every scrape whether or not the pool
+  is serving, so a rule written against one reads as a silent replica permanently. The keep-list
+  now admits the full Hikari set and the counters confirm the opposite of silence — Seoul's
+  `replica` pool runs at 0.10-0.14 acquisitions/sec against `primary` at 0.048-0.078, roughly
+  two reads per write. The rule needs re-pointing at
+  `rate(hikaricp_connections_usage_seconds_count[...])`; waiting will not clear it, because the
+  gauge it watches will keep reading zero.
+- 2026-08-20 — Requests for a missing `/a/*` asset return the SPA fallback `index.html`
+  with HTTP 200, and the `_headers` rule for `/a/*` stamps `max-age=31536000, immutable`
+  onto that HTML too, so Cloudflare edges and browsers cache HTML under the chunk URL
+  for a year. One poisoned entry served bare `index.html` after the 2026-08-20 FE deploy
+  (module MIME error on `/a/BzVGhZqzEgrm.js`); an edge purge cleared it, but browsers
+  that cached the HTML self-heal only when the chunk's hash changes or on a hard reload.
+  Repro probe: `curl -sS -D - -o /dev/null https://dante-planner.com/a/<any-missing>.js`
+  shows 200 + `text/html` + the immutable header. The durable fix is undecided: make
+  `/a/*` misses real 404s at the serving layer, never cache HTML bodies under `/a/*`, or
+  keep prior releases' assets available across deploys. Deciding requires naming where
+  the site is actually served from — no wrangler config exists in the repo, and
+  `frontend/scripts/dev-r2-sync.ts` references a `frontend/wrangler.jsonc` that is not
+  checked in.
+- vitest full suite: one worker OOMs (ERR_WORKER_OUT_OF_MEMORY) under parallel run while all 220 completed files pass; dataIntegrity.test.ts passes in isolation. Found 2026-08-21 during static keyword-expansion commit validation.
+- 2026-08-24 — `terraform/cloudflare` splits one logical stack across two state buckets with
+  inconsistent workspace names, and the stack's resources live in Cloudflare rather than in
+  any AWS account, so the repo's "state lives in the account whose resources it describes"
+  rule gives no answer for it. The staging edge is the staging bucket's `default` workspace
+  (19 resources, both `danteplanner-staging-*` tunnels); the production edge is the prod
+  bucket's `prod-fleet` workspace (10 resources). The prod bucket also carries an EMPTY
+  `staging` workspace that manages nothing and shares a name used meaningfully in the other
+  bucket. Selecting a workspace is therefore the only barrier between planning one
+  environment and another, and the selection lives in `.terraform/environment`, which no
+  command prints. A `plan` run in the prod bucket's `default` or `staging` workspace reads as
+  "create the whole edge" because both are empty. Resting selection should be `prod-fleet`,
+  where config and state agree. The prod bucket's `default` workspace previously held a stale
+  duplicate of the retired management edge-test setup — the same objects a second state file
+  in the management bucket also described — and an apply there would have recreated an
+  `edge-test.dante-planner.com` load balancer and a tunnel named `danteplanner-oregon`; those
+  eight addresses have been removed from state.
 - 2026-09-11 — IndexedDB still holds the one-part `deviceId` singleton row in every browser
   that ran a version before ADR 096; nothing reads it and the planner listing skips one-part
   keys. Delete it inside `onupgradeneeded` at the next database version bump, whatever that
@@ -537,6 +999,145 @@ asset pipeline.
   the server never received, a routine outcome the client already treats as success (about 5 a
   day). Worth demoting that one method-and-code pair to INFO when the WARN stream is next used
   for alerting, or when an ADR settles a client marker for never-synced rows.
+- The keyword browser builds its own grid rather than `FilteredEntityGrid`, so it still
+  renders `useProgressiveCount` batches and loses a deep scroll offset on return from a
+  keyword detail page. `CardGeometry.units` is now `CardUnits | null`, so the shared grid
+  reserves a width-only slot for a card with no fixed height and nothing blocks the fold;
+  worth doing when the keyword browser's scroll restoration is next reported or revisited.
+- `images/UI/manifest.json` records `source: null` for every asset no converter claims,
+  which is indistinguishable from an asset whose source was never recorded. Worth splitting
+  into "hand-made" and "unknown" when an asset's provenance is first disputed.
+- The theme pack list popup prefab is 310x450 while the composed art the card draws is
+  650x1069, so the list card is laid out at proportions the art was never cut for. Worth
+  recomposing the art at the list card's size when that card's proportions are next revisited.
+- Seven paths the asset getters can produce have no file behind them: the neutral skill
+  frames above tier 1 and the per-season start buff plates. Worth generating or narrowing the
+  getters when a caller reaches one of them, which no current caller does.
+- The theme pack card draws the art, the name and the highlight sprites only; the game's
+  pin, magnifier button and attribute chips are absent. Worth adding when the theme pack
+  card gets an interaction design pass.
+- The EGO rank word plate measures about 6 percent wider than the game's, inside the
+  measurement noise of a 1280-wide reference. Worth revisiting when a higher-resolution
+  reference screenshot exists.
+- 2026-09-15 — Account deactivation withdraws only the catalog rows (ADR 034 @visibility,
+  `UserAccountLifecycleService.java:96`); the aggregate visibility predicate in
+  `PlannerRepository.java:88-89` and `:123-125` checks `published` and `content.deleted_at`
+  but never the owner's `users.deleted_at`, so for the 30-day grace window a deactivated
+  owner's published planner still answers `GET /api/planner/md/published/{id}` with full
+  content and the author's name (`PublishedPlannerDetailResponse.java:103-104`), and every
+  caller of `checkPublished` (comment, vote, bookmark, report) still accepts writes against
+  it. The drift audit's two membership queries (`PlannerDriftAuditRepository.java:138`,
+  `:157`) omit the same conjunct, so those planners are reported nightly as
+  `catalog_membership` "row missing" drift for the whole window (inferred from the
+  predicate, not observed in logs). Decided: each predicate joins `users` and adds
+  `deleted_at IS NULL` directly (rejected: deriving detail visibility from catalog-row
+  presence, which the audit cannot use and which would turn a projection drift into a
+  404 for a live planner). `RESTORE_ALL_OWNED_BY` is unaffected (`user_id = :userId` is the
+  owner conjunct). Worth doing before the next account-deletion request lands in
+  production, or before the visibility definition gains another conjunct.
+- 2026-09-15 — A deactivated author's comments read differently across the two deletion
+  stages. During the grace window the body is served in full with only the author fields
+  blanked: `CommentTreeNode.java:72-80` masks `authorEpithet`/`authorSuffix` on
+  `author.isDeleted()`, but `:92` blanks `content` on `comment.isDeleted()` alone, and the
+  listing (`PlannerCommentRepository.java:30-35`) joins no user and filters nothing.
+  After the purge the body is gone (`:71-72`, `SET c.userId = :sentinelId, c.content = ''`).
+  `CommentServiceLayerTest.java:487-488` pins the grace-window body as visible. Decided:
+  the author lifecycle governs the projection only — `fromEntity` blanks `content` under
+  the same author-hidden predicate it already computes for the name fields — and the tree
+  shape stays the comment flag's alone: the `:174` leaf prune keeps `comment.isDeleted()`
+  and never consults the author, so a leaf masked for its author survives and reactivation
+  changes no row's presence. Rejected: extending the unified predicate to the prune (a
+  reactivated author's leaves reappear, and replies under them lose and regain their
+  parent); blanking at soft-delete time (reactivation cannot restore the body). Purge is
+  unchanged. Ships as the `fromEntity` predicate change, the flipped
+  `CommentServiceLayerTest` assertion, an HTTP-level IT asserting a deactivated author's
+  leaf survives with empty body (none exists today; `CommentControllerIT.java:597` covers
+  comment-level deletion only), and an ADR. Worth doing with the deactivation-visibility
+  entry above, since both are the same missing `users.deleted_at` conjunct read from
+  different tiers.
+
+- 2026-09-16 — 119 `<Skeleton>` elements across 48 files still carry their own `w-`/`h-`
+  box (41 of them inline `Suspense fallback={<Skeleton className="h-… w-…" />}` text stubs),
+  all outside the `*Skeleton*.tsx` files the size-roots unit converted and therefore outside
+  `no-sized-skeleton-tsx`, which scans only those. Condition: when a page carrying one is next
+  edited, swap the stub to `TextSkeleton` (for text) or a `CardSlot` (for a card box).
+
+## Grafana objects are provisioned by bash, invisible to drift detection (2026-08-30)
+
+Folders, alert rules, and the fleet dashboard reach Grafana through the
+`deploy/grafana/*.sh` import scripts. They post once with `X-Disable-Provenance`
+so the objects stay editable in the UI — which also means nothing detects a
+rule deleted or edited by hand. A missing `mysql_*` alert stayed unnoticed
+until the 2026-08-24 mgmt-decommission incident, and
+`scripts/ops/access/db-observability-check.sh` now verifies the DB subset only
+when someone runs it.
+
+The candidate replacement is the `grafana/grafana` Terraform provider
+(`grafana_folder`, `grafana_rule_group`, `grafana_contact_point`,
+`grafana_dashboard`) as a stack under `terraform/`, with a scheduled
+`plan -detailed-exitcode` as the drift detector; the import scripts retire
+with it. The cost is the stance flip: terraform-managed objects carry
+provenance and lock out UI edits, so every dashboard tweak must land in git.
+Terraform covers only the Grafana side; the checker's metrics half (are
+`mysql_*` series flowing) stays separate.
+
+Design lane by the repo's routing — it moves the provisioning seam and kills
+the import scripts, so `/argue` before any edit.
+
+## import-alert-rules.sh duplicates rules on re-run (2026-08-30)
+
+The Grafana provisioning API deduplicates by UID, not title, so re-running the
+import against a populated folder creates a second copy of every rule. Adding
+mysql-connectivity-lost to an already provisioned stack therefore needed a
+one-off script with an existence check instead of the import itself. Fix: an
+existence check per title inside post_rule (skip or update when the title is
+already present), after which partial re-runs are safe and one-offs of this
+class never need to exist. Same defect in import-app-alert-rules.sh and
+create-staleness-rules.sh.
+
+## Exporter endpoint secrets are hand-maintained addresses (2026-08-30)
+
+danteplanner/mysqld-exporter/primary-endpoint and replica-endpoint are written
+by hand and nothing ties them to the instances they name; the 2026-08-24
+incident was them outliving the management account's databases. The durable
+shape is the RDS terraform stack writing these secret versions from its own
+outputs, so an address cannot outlive its instance and account moves cannot
+strand it. Design call: whether the stack owns the whole secret or only the
+endpoint keys, and how Seoul's certificate-name constraint (dial the RDS name,
+not a Route53 alias) is encoded.
+
+## db-observability-check.sh runs only when someone remembers to (2026-08-30)
+
+The checker (metric families per cluster, connectivity, DB alert-rule health)
+is a plain script with no enforcement. The PR gate is the wrong home — it
+probes live prod state, not the diff. The fit is a scheduled workflow with an
+OIDC read role and a Grafana token secret, alerting on nonzero exit; it is the
+meta-monitoring layer that catches a deleted alarm, which the alarms themselves
+cannot. Blocked considerations: CI currently resolves its account from GitHub
+secrets, and no Editor-capable Grafana token exists in Secrets Manager yet.
+
+## Two cluster alert rules can never fire (2026-08-30)
+
+node-not-ready and backend-daemonset-unready use raw comparison filters
+(`... == 0`), which return the matched series with its original value 0; the
+shared threshold node fires on value > 0, so the condition is unsatisfiable.
+The `== 1` rules in the same group work, and mysql-connectivity-lost uses
+`== bool 0` for this reason. Fix is the same one-token change (`== bool 0`) in
+both expressions, plus re-provisioning; worth a drill afterwards since these
+two have silently never paged.
+
+## 2026-09-02 MySQL 8.4 upgrade (adr/092)
+
+- **`terraform/seoul` untargeted plan replaces all three fleet instances** (cp, data,
+  ingress) on an AMI data-source drift, with the launch template and SSM associations
+  following. The upgrade was applied with `-target` on the replica and its parameter
+  group; the fleet diff is untouched and still pending.
+- **`terraform/rds` untargeted plan destroys the fleet peering routes and 3306 ingress
+  rules** because `fleet_peering_connection_id`, `fleet_cluster_security_group_id`,
+  `fleet_vpc_cidr`, and `seoul_peering_connection_id` live in no committed var-file for
+  prod. Every prod apply of that stack needs them on the command line or `-target`.
+- **`docs/runbooks/prod-account-cutover.md` still pins `danteplanner-mysql80`** on the
+  restore instruction; the group is now `danteplanner-mysql84`.
 
 ## 2026-09-18 comment sweep follow-ups
 
@@ -588,3 +1189,312 @@ asset pipeline.
   (container IPs, `TRUSTED_PROXY_IPS` for the nginx range, CORS pass-through checks), and
   `SecurityProperties` and `ClientIpResolver` javadoc name nginx as the trusted proxy. Rewrite
   against the current local stack when that runbook is next followed and found wrong.
+
+## 2026-09-18 gtid gate read-through (shared/gtid)
+
+- **The read-your-writes pin has no exit.** `GtidCookieFilter.handleRead` clears `ryw_gtid`
+  only when the replica probe succeeds; a GTID the replica will never apply (a source UUID
+  from the pre-cutover primary, a rebuilt replica, or a client-supplied value that is only
+  base64-checked in `GtidCookie.decode`) fails every probe, so every GET from that client
+  holds a replica connection for the full 50 ms bound, is served cross-region, and for a
+  malformed set logs a WARN with stack trace per request (`GtidReadGate.isCaughtUp`). The
+  cookie has no max-age, and `gtid.gate{outcome=primary}` cannot tell lag from a token that
+  can never validate. ADR 008 rejects timing constants on correctness paths, and a max-age
+  fails open, so this is a decision to reopen there, not a patch: bounded pin versus
+  fail-open, plus format validation before the value reaches SQL. Worth doing before the
+  next primary cutover (the runbook in this tree), which is the event that mints such tokens
+  for every client holding a cookie at the time.
+- 2026-09-23 — Seoul writes spend most of their WAN round trips on transaction and driver
+  chatter. Mimir 7-day means, Seoul against Oregon: Save `PUT /api/planner/md/{id}` (sent on
+  an explicit save with sync on; the editor's autosave writes only IndexedDB) 2583 against
+  76 ms, publish 3663 against 205 ms, `PUT /api/user/settings` 1179 against 24 ms
+  (about 19, 27 and 9 round trips at 130 ms). A general-log trace of the causal harness's
+  primary, with Seoul routing, warm pools and 1 s idle before each request, counts 10 round
+  trips for a repeat Save on the normal path (`syncVersion` carried; `?force=true` counts the
+  same): one UPDATE, three SELECTs, and six of chatter
+  (`SET autocommit=0`, `SET autocommit=1`, `COMMIT`, Hikari's validation ping after 500 ms
+  idle, and two `SELECT @@session.transaction_read_only`). Settings counts 9, matching
+  production; publish counts 32. Every read inside a write request goes to the primary. The
+  read-only probes come from `Connection.isReadOnly()`, one of them
+  `GtidCapturingDataSource.captureCommittedGtid`, which also runs on every read-only
+  transaction where REPLICA maps onto the capturing wrapper. A raw-driver probe shows
+  `useLocalSessionState=true` removes both probes and the setup `SET autocommit=1`;
+  `TransactionSynchronizationManager.isCurrentTransactionReadOnly()` would answer the
+  wrapper's question without the driver. The per-transaction autocommit pair needs the pool
+  to start with autocommit off plus `hibernate.connection.provider_disables_autocommit`,
+  untested. Across both regions the primary receives 2.3 `SET` statements per `COMMIT`
+  (`SHOW GLOBAL STATUS` over 20.9 days of uptime, 71,487 connections). Saving a published
+  planner costs 19 round trips on warm connections and 25 on a freshly evicted pool: the
+  `AFTER_COMMIT` filter rebuild is a second transaction with its own ping and autocommit pair,
+  and a young connection prepares six statements. The Seoul primary pool replaces each of its
+  10 connections about every 26 minutes (Hikari's default `maxLifetime`), at a mean 1.21 s per
+  creation against 0.036 s in Oregon, so a Save often lands on a connection that has not
+  prepared its statements. The pool's mean acquire (95 ms, one validation ping) and mean hold
+  (0.44 s) put the Seoul→Oregon round trip nearer 95 ms than ADR 009's 130 ms. Planner bodies
+  average 7 KB (maximum 29.7 KB), so TCP slow start is at most a minor term. Worth doing as the
+  write round-trip unit that ADR 009's single-round-trip rule already demands.
+- 2026-09-23 — Two read paths take Seoul's primary across the WAN, and together with token
+  rotation (about 5,800 a week) they account for the pool's ~80,000 weekly acquisitions against
+  ~200 user writes. The view flush runs one primary transaction per detail read (6–8 round
+  trips; 6 even for a repeat view that inserts nothing), up to 46,928 a week. `/api/sse/subscribe`
+  loads notification settings through `UserSettingsService.getOrCreateEntity`, a read-write
+  `@Transactional`, so every per-pod cache miss is a primary transaction (11 round trips when it
+  creates the row), up to 27,335 a week. Neither is on a user's critical path, but both hold
+  primary connections from the smaller WAN pool and add replication traffic. Worth doing with
+  the write round-trip unit.
+- **A region flap clears the cookie without the guarantee.** In the replica-disabled region
+  the probe runs against the primary and always succeeds, so a client steered there for one
+  GET has `ryw_gtid` cleared, and its next GET in the replica region reads the lagging
+  replica unguarded. ADR 008 states the read-path contract per region; the later geo-steering
+  decision did not revisit the cookie's lifecycle across regions. Becomes worth deciding when
+  geo steering is changed again or when a stale-read report coincides with a region switch.
+- **The gate assumes the probe and the read reach the same replica.** `WAIT_FOR_EXECUTED_
+  GTID_SET` runs on one pooled connection and the request's read uses another; sound with
+  one replica behind the endpoint, void the day the endpoint resolves to more than one host.
+  No guard and no ADR names the assumption. Worth an ADR line the moment a second replica or
+  a reader endpoint is proposed.
+- **Tagged GTIDs crash a committed write.** `GtidWriteCapture.parseInterval` parses every
+  colon segment as a number; a MySQL 8.3+ tagged GTID (`uuid:tag:1-3`) throws, and the
+  exception escapes the filter as a 500 after the commit. Only reachable if something sets a
+  tagged `gtid_next`, which nothing does; worth a guard when the union parser is next touched.
+
+## 2026-09-18 rate-limit read-through (shared/ratelimit)
+
+- **A lowered limit never reaches a live bucket.** `RateLimitService.tryConsume` passes the
+  bandwidth as a creation-time supplier and `RedisConnectionConfig.buildRateLimitProxyManager`
+  sets no implicit configuration replacement, so an existing key keeps its old bandwidth until
+  it idles for the full hour of TTL. The key you lower a limit for during an incident is the
+  one that never idles. Bucket4j's versioned `withImplicitConfigurationReplacement` is the
+  documented fix; the test is one line in the Redis-backed limiter test (change bandwidth,
+  consume, assert). Worth doing before the next limit change is relied on in an incident.
+- **Every anonymous request mints a device cookie the identity discards.**
+  `RateLimitInterceptor.chargeBucket` resolves the device id before choosing the subject, and
+  `DeviceIdResolver.resolve` sets a one-year cookie when none is present; behind Cloudflare
+  the identifier is the public IP and the id is unused, yet Set-Cookie goes out on every
+  public read, which also defeats any future edge caching of those responses. Move the mint
+  behind the private-IP branch (a `Supplier` parameter). It is one of four blockers measured
+  on an anonymous `GET /api/planner/md/published` response: the same response sets `csrf`
+  (seven days), carries Spring Security's `Cache-Control: no-cache, no-store, max-age=0,
+  must-revalidate`, and is JSON, which Cloudflare caches only under a Cache Rule. Worth doing
+  with the first `Cache-Control` on a public read, or as the sibling edit of a
+  resolver-does-not-write rule.
+- **The forwarded-for fallback trusts the leftmost hop.** `ClientIpResolver.firstHop` takes
+  the client-written entry once the direct peer is a trusted proxy;
+  `ClientIpResolverTest.resolve_WhenHeaderCarriesAChainOfHops_ReturnsTheLeftmost` pins that
+  as the spec. Latent while `CF-Connecting-IP` is always present on the tunnel-only path. Replace
+  with the container's rightmost-trusted parser (`ForwardedHeaderFilter` / `RemoteIpValve`) and
+  an attacker-framed test. Worth doing before any ingress that bypasses Cloudflare exists.
+- **The 429 carries no Retry-After.** `tryConsume(1)` discards the probe that knows the wait;
+  `SseCapacityExceededException` sets the header on the SSE path and the 503 helper on the
+  degradation path, so the rate-limit 429 is the odd one out. Fix with
+  `tryConsumeAndReturnRemaining` and the one status-to-required-headers contract test that
+  covers all three. Worth doing when the error mapping is next touched.
+- **Bucket configuration is validated per request, not at bind time.** `RateLimitProperties`
+  carries no constraints (three of nine properties classes do: Redis, OAuth, JWT), and
+  `buildConfiguration` runs per request, so a zero duration fails on first use. The fix is the
+  ArchUnit rule "every `@ConfigurationProperties` class is `@Validated`" and the sibling edits
+  it lists; the rule, not the class, is the unit of work.
+- **Rate limiting fails closed on a Redis outage while the blacklist fails open, and no
+  decision chose either for the limiter.** `ApiExceptionHandler.
+  handleRateLimitRedisUnavailable` maps a limiter outage to 503 for every rate-limited
+  handler, `PUBLIC_READ` included, after up to a four-second future timeout. The 503 entered
+  in 38794748 as a fix for an untyped 500, not as a policy; ADR 049 covers endpoint coverage
+  only. ADR 010 rejected fail-closed for the blacklist because a store outage becomes a total
+  outage, and the same Redis loss here takes down anonymous reads that never need Redis. The
+  circuit-breaker entry above covers the mechanism; the per-subject-class policy (open for
+  anonymous reads, closed for writes) needs an ADR beside 010. The limiter store is a
+  per-region ephemeral `redis-ratelimit` pod, so the loss of one region's pod alone turns that
+  region's published-planner reads (`PublishedPlannerController`, `PlannerController`, both
+  `PUBLIC_READ`) into 503 while its database and auth Redis are healthy. Worth deciding at the next
+  rate-limit or degradation design session, or before any document describes the Redis
+  failure behavior as uniform.
+
+## 2026-09-18 consistency without an LLM (scheduled ratchet)
+
+- **No scheduled run measures rule drift.** The gate runs the rule engines already wired
+  (ArchUnit with freezing rules, checkstyle, oxlint plus `frontend/lint/entity-plugin.js`,
+  ast-grep via `frontend/sgconfig.yml`) only on pull requests. A weekly workflow, next to
+  `infra-suite.yml` and `verify-rds-ca.yml`, that runs every rule in report mode, diffs the
+  per-rule violation count against a stored baseline, and opens an issue on any increase
+  would make consistency a measurement rather than a per-session hope. ArchUnit's frozen
+  stores are the baseline for Java; ast-grep `scan --json` plus a count file is the baseline
+  for the rest. The same run is the home for the declared-but-dormant gates: PIT (declared in
+  `backend/build.gradle.kts`, scored 42 percent against a 50 percent threshold, never in the
+  gate), OWASP dependency-check and Sonar (declared, never run), and the backend patterns in
+  `.claude/hooks/forbidden-patterns.json` whose hook is not wired (entry above). Each is
+  reactivated as a report-mode job with a ratchet, never as a blocking gate on day one. Worth
+  doing as the first rule-into-build session, since it is what makes every later rule
+  measurable before it is enforced.
+
+- 2026-09-21 — Nothing rolls a failed backend rollout back. `deploy/base/spring-daemonset.yaml`
+  sets no `updateStrategy` (default RollingUpdate, `maxUnavailable: 1`), ArgoCD runs
+  `automated` + `selfHeal` (which converges on Git, never on the previous image, and refuses
+  `argocd app rollback` while automated sync is on), and no Argo Rollouts or analysis step
+  exists. What happens today when the new pod fails readiness: the rollout halts on the first
+  node, the surge node keeps serving the old image, `deploy-fleet.yml`'s
+  `rollout status --timeout=600s` fails the job, and the surge stays up by design
+  (`:333-337`). The bad image remains on the first node until a human reverts the tag-bump
+  commit. Closing it means choosing between a `settle-down` failure branch that reverts the
+  image-tag bump commit (Git-driven, matches CORE-mode ArgoCD) and Argo Rollouts with an
+  analysis template on `/actuator/health/readiness`; the former is one workflow step and
+  needs an `if:` on a job that today has none (the 2026-08-20 `settle-down` entry is the same
+  gap). Worth doing before the next deploy that ships a schema-coupled change, or once a
+  failed rollout is observed in production.
+- 2026-09-22 — `GET /api/planner/md/published` returns `Page<...>`, so every list request
+  issues a `COUNT(*)` over the filtered `planner_catalog` set
+  (`PublishedPlannerQueryService.java:126`), and `recencySorted` orders by
+  `firstPublishedAt DESC` with no unique tiebreaker, so rows sharing a timestamp can shift
+  between pages. Worth doing when list p99 becomes a reported problem or a duplicate-across-
+  pages report arrives: return a slice (limit+1) and append `plannerId` to the sort.
+- 2026-09-22 — `Planner.java:67-74` declares the three inverse `@OneToOne(mappedBy=...)`
+  sides without `fetch`, so they default to EAGER; no main-source caller uses an inherited
+  `findById`/`findAll` today (every path goes through the `AGGREGATE_LOAD` JOIN FETCH), so
+  the cost is latent. Worth pinning with `FetchType.LAZY` or an ArchUnit ban on inherited
+  finders the first time a caller of an inherited `PlannerRepository` method lands.
+- 2026-09-23 — `User.settings` (`User.java:96`) is the inverse side of a `@OneToOne`, which
+  Hibernate loads eagerly despite `FetchType.LAZY` because bytecode enhancement is off. Every
+  aggregate load that joins the user runs one extra `user_settings` SELECT: a Save pays it on
+  the primary (in a general-log trace of the causal harness it is one of the draft Save's three
+  reads) and a published detail read pays it on the replica. No main-source code calls
+  `getSettings()` or `setSettings()`. Deleting the association drops the read; the mapping
+  carries `cascade = ALL, orphanRemoval = true`, and V024's `fk_user_settings_user` is
+  `ON DELETE CASCADE`, so user deletion still removes the row, provided no path relies on the
+  JPA cascade before the user row is gone (unchecked). Under write forwarding the Save's copy
+  costs about 1 ms in Oregon and the content cache leaves the read's copy to edge misses. Worth
+  doing on the next touch of `User`, or if write forwarding is rolled back.
+- 2026-09-22 — `TokenBlacklistService.failOpen` increments `blacklist_check_skipped_total`
+  and logs warn, but no alert rule references the counter and no rule covers Redis
+  availability or command timeouts at all (`deploy/grafana/import-*-alert-rules.sh` grep
+  `redis` → none; MySQL has `mysql-connectivity-lost`). A fail-open storm surfaces only via
+  `backend-warn-sustained`. Worth doing before the next Redis incident drill: a rule on
+  `increase(blacklist_check_skipped_total[5m]) > 0` and one on `redis_up == 0`.
+- 2026-09-22 — `PublishedPlannerQueryService.incrementViewCount` (`:95-100`) has no
+  production caller; the live path is `PlannerViewRecorder`. Kept alive by three tests in
+  `PublishedPlannerQueryServiceTest`. Delete method and tests on the next touch of that
+  service.
+- 2026-09-23 — Reads survive a primary outage only in Seoul. The Oregon overlay sets no
+  `DATASOURCE_REPLICA_ENABLED`, so Oregon reads use the primary, and `/healthz-local` rewrites
+  to `/actuator/health/readiness`, whose group holds `readinessState` alone, so a dead primary
+  leaves Oregon healthy at the load balancer and Oregon-routed reads fail with 503. Either a
+  DB-aware readiness indicator for Oregon (steering clients to Seoul) or Oregon reads on a
+  replica would close it. Worth doing when a primary outage is drilled or observed, or before
+  any document claims read survival without naming the region.
+- 2026-09-22 — Shutdown is graceful but unbounded by anything shorter than the kill. The
+  JVM is PID 1 (BusyBox ash execs a lone `-c` command; checked in
+  `eclipse-temurin:21-jre-alpine`) and Boot 3.5 defaults `server.shutdown=graceful` with a
+  30 s phase timeout, but SSE emitters live 1 h and nothing completes them on context close,
+  so any open stream holds shutdown for the full 30 s, the same as the pod's default
+  `terminationGracePeriodSeconds`; there is no `preStop`. The surge/drain deploy moves traffic
+  first, so this shows only as slow pod termination. Worth doing when a rollout's 5xx or
+  termination time is measured non-zero: complete emitters on `ContextClosedEvent` and set a
+  phase timeout under the grace period.
+- 2026-09-22 — `PlannerDriftAuditRepository.driftedUpvoteCounters` joins `planner_votes`
+  without a `deleted_at IS NULL` predicate while `driftedCommentCounters` filters
+  `planner_comments.deleted_at IS NULL`; V018 made votes immutable so the asymmetry may be
+  correct, but nothing says so. Worth a one-line comment or a shared predicate the next time
+  either query changes.
+- 2026-09-22 — `logback-spring.xml:6-9` header still describes "stdout → awslogs →
+  CloudWatch /ecs/danteplanner/backend"; the pipeline is stdout → Alloy → Grafana Cloud Loki
+  (`deploy/base/alloy-logs.yaml`). Delete the stale comment on the next touch of that file.
+- 2026-09-23 — The published-detail loader cannot fetch until a dynamically imported 1 KB
+  chunk arrives. `loadPublishedPlanner` starts with
+  `await import('@/pages/planner/hooks/usePublishedPlannerQuery')`; the chunk's dependencies
+  already sit in the entry graph, but it is requested alongside the route component's 31
+  chunks and queues behind them, so the API request starts ~800 ms after the router runs
+  (1342 → 2137 ms in a cold load from Korea). A static import in `routeLoaders.ts` starts the
+  fetch with the router. Worth doing with any detail-page latency work; alone it does not move
+  first content, which the route's own chunks gate (next entry).
+- 2026-09-23 — The read-only detail route bundles interaction-only code at module scope.
+  `PlannerMDGesellschaftDetailPage` statically imports the comment section (`CommentEditor`,
+  so Tiptap and ProseMirror), the full published list with toolbar and filter pills, and the
+  deck-code path (`pako`). The route's second wave is 31 chunks and 1.3 MB uncompressed on top
+  of the 1.4 MB entry graph, and first content waited for its last chunk (3040 ms of a
+  3207 ms cold load from Korea). The viewer renders notes through `NoteEditor`, so Tiptap stays
+  on the critical path until notes render without the editor. The page is three sequential code
+  stages after the HTML: the entry graph (25 chunks, 1.43 MB raw on every page: `react-dom`
+  532 KB, `zod` 251 KB, the router 225 KB, `tailwind-merge` 100 KB), the route (36 chunks,
+  1.32 MB), and game data that render-time hooks `import()` (9 chunks: battle keyword, EGO gift
+  and identity spec lists at 110–162 KB each), each stage starting only after the previous one
+  executes. Alongside them the page requests 216 images (7.2 MB), the largest about 200 KB each
+  for the below-the-fold list. Worth doing when detail-page load time becomes a target: lazy
+  the comment editor, the below-the-fold list and the export path, then decide the note
+  renderer and whether game data joins the route stage.
+- 2026-09-23 — ADR 010 records that the client renders an optimistic view increment;
+  `frontend/src` has none (`viewCount` is only rendered). ADR 116 moves recording to
+  `POST .../viewcount` from the mounted page and keeps the best-effort buffer, so the rest of
+  ADR 010's view clauses stand. Worth doing when the page starts sending that POST: either
+  render the increment there or correct ADR 010's detail in place.
+- 2026-09-23 — The production build's `VITE_API_BASE_URL` ends in a newline: the shipped
+  `index.html` carries `href="https://api.dante-planner.com\n"`. URL parsing strips it, so
+  fetches and the preconnect work. The value lives in the hosting build environment, not the
+  repo. Worth fixing the next time that environment is edited, or before the value reaches a
+  consumer that does not parse it as a URL.
+- 2026-09-23 — Production still answers a missing planner on
+  `GET /api/planner/{plannerId}/comments/events` with 500: the handler renders the 404 as JSON
+  against `Accept: text/event-stream`, fails with `HttpMediaTypeNotAcceptableException`, and
+  Tomcat logs an ERROR. The RFC 9457 migration (ecb85775, 2026-09-18) fixed it in code, with the
+  red test in `PlannerCommentSseControllerIT` ("answers 404 ... when the planner is not
+  published"), but the running pods date from the 2026-09-17 13:52Z deploy. Every 5xx in the
+  metric window is this: 1,422 on Oregon from 2026-09-17 14:51Z to 2026-09-18 04:31Z, one guest
+  client re-subscribing to one missing planner every ~13 s (Loki, pod backend-vhht9). Leaves at
+  the next deploy once that URI shows no 5xx. An anonymous harness subscription that once
+  answered 500 does not reproduce against the migrated handler: over MockMvc and over real HTTP,
+  with and without `Accept: text/event-stream`, a published planner streams with 200 and a
+  missing one answers 404 as `application/problem+json`.
+- 2026-09-23 — Intent preload (`defaultPreload: 'intent'`) is off because the published-detail
+  loader records a view. It also preloaded route chunks on hover, which hides part of a chunk
+  wave per navigation. Worth doing once view recording leaves the loader: restore it.
+- 2026-09-24 — The frontend still pulls planners with `POST /api/planner/md/batch` and still
+  declares `upvotes` in `ServerPlannerResponseSchema`. Pages publishes from `main` minutes after a
+  merge while `deploy-fleet.yml` waits for PR Gate's push-run, so a frontend change that needs a
+  new backend breaks sync until the backend lands: under `.strict()` the schema rejects the old
+  backend's `upvotes`, and the old backend answers `GET /batch` through `GET /{id}` with 400.
+  Worth doing once the backend serving `GET /api/planner/md/batch?ids=` and omitting `upvotes`
+  is live in both regions: switch `plannerApi.batchChunks` to the GET and drop the schema's
+  `upvotes` line. ADR 123's `write_forwarding = "all"` waits on this release.
+- 2026-09-24 — `POST /api/planner/md/batch` and its request-body path stay beside the GET for
+  clients that have not switched, including tabs opened before the switching release, which keep
+  their old bundle until reloaded. Worth doing once the frontend release using the GET is live and
+  `http_server_requests_seconds_count` for that URI with method POST stays at zero for seven days
+  in both clusters (label names unverified against the Mimir keep-list): delete the POST handler.
+- 2026-09-24 — `terraform/cloudflare/README.md` "Applying" shows bare `terraform init/plan/apply`
+  with no `-var-file`, against the repo rule that Terraform runs through
+  `scripts/ops/terraform-run.sh` and against `environment.tfvars.example`, and `access.tf` fails
+  `terraform fmt -check` (`duration` misaligned). Worth doing on the next edit of that stack.
+- 2026-09-24 — The `it` profile keeps `spring.main.allow-bean-definition-overriding=true` only
+  because `EffectPlacementIT.OutboxHarness` and `PlannerReconcilerIT.ReconcilerLockHarness`
+  redefine `lockProvider`; with overriding on, any test bean that shadows an application bean by
+  name does so silently, which is how a bare IT-only `ObjectMapper` once hid a serialization
+  defect. `application-test.properties` sets the same flag for reasons not checked. Worth doing
+  the next time either harness changes: give the harness beans distinct names with `@Primary`
+  and drop the flag.
+- 2026-09-24 — `UserService.java:59-61` says a bare derived finder "is readOnly and would hit a
+  replica", but a read-only IT of the comment-SSE path showed a declared repository method
+  (`existsPublishedById`) called outside a transaction counting as undeclared primary access, and
+  an audit of spring-data-commons 3.5.13 found declared methods do not inherit
+  `SimpleJpaRepository`'s `readOnly`. If that holds for derived finders too, the comment's premise
+  is wrong (the recovery lookup still reaches the primary, so behavior is unaffected), and
+  `ModerationAuditService.latestReason` on `GET /api/auth/me` and the first finder in
+  `findOrCreateUser` reach the primary undeclared. Worth settling with a counter assertion the next
+  time either class is touched.
+- 2026-09-23 — ADR 015 skips the filter rebuild when content composition is unchanged, but a
+  harness save of a published planner that re-sent identical content with a new title still ran
+  `CALL rebuild_planner_filters`, on both warm and freshly evicted pools.
+  `PlannerCatalogService.searchableCompositionChanged` compares the raw content strings, so a
+  normalization between the request and the stored value is the likely cause (unverified). Each
+  needless rebuild is a second transaction on the save's request thread. Worth doing through
+  `diagnose` with the write-forwarding rollout, or sooner if publish latency is examined.
+- 2026-09-23 — `X-Served-By` is missing from every response Spring Security writes (CSRF 403,
+  unauthenticated 401, and anything else rejected in the security chain): `ServedByFilter` is a
+  plain `@Component` without `@Order`, so it registers after the security filter chain and never
+  runs for a rejected request. Region attribution for exactly the error responses therefore
+  has to come from `cf-ray` and load-balancer logs instead. Worth doing the next time a 4xx needs
+  attributing to a region: order the filter ahead of security.
+- 2026-09-23 — Whether an origin `Set-Cookie` still blocks caching once a Cache Rule makes a
+  JSON path eligible is unmeasured. Default behavior is measured: through the real edge, origin
+  `Set-Cookie`, `no-store`/`no-cache`/`max-age=0` and `private` each bypass the cache on a
+  cacheable extension, request cookies stay out of the cache key, and extension-less JSON is
+  never eligible without a rule (playground lab `cf-cache-cookie-probe`, pass 1). The second pass
+  needs a token with Cache Rules edit on the zone; the staging token gets 403 on zone rulesets.
+  Worth doing once the cookieless content endpoint exists, against that endpoint rather than the
+  synthetic origin, before the Cache Rule is relied on in production.
