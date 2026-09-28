@@ -50,15 +50,24 @@ public class GtidCookieFilter extends OncePerRequestFilter {
 
     private void handleRead(HttpServletRequest request, HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
-        String gtid = Optional.ofNullable(readCookie(request))
-                .flatMap(GtidCookie::decode)
-                .orElse(null);
-        if (gtid == null || !replicaPresent) {
+        if (!replicaPresent) {
             filterChain.doFilter(request, response);
             return;
         }
-        if (readGate.isCaughtUp(gtid)) {
+        String cookieValue = readCookie(request);
+        Optional<String> gtid = GtidCookie.decode(cookieValue);
+        if (gtid.isEmpty()) {
+            if (GtidCookie.isUnusable(cookieValue)) {
+                addCookie(response, GtidCookie.cleared());
+            }
+            filterChain.doFilter(request, response);
+            return;
+        }
+        GtidReadGate.Verdict verdict = readGate.probe(gtid.get());
+        if (verdict != GtidReadGate.Verdict.NOT_CAUGHT_UP) {
             addCookie(response, GtidCookie.cleared());
+        }
+        if (verdict == GtidReadGate.Verdict.CAUGHT_UP || verdict == GtidReadGate.Verdict.UNUSABLE) {
             filterChain.doFilter(request, response);
             return;
         }

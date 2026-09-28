@@ -55,7 +55,7 @@ class GtidCookieFilterTest {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/planners");
         request.setCookies(new Cookie(GtidCookie.NAME, GtidCookie.of(GTID).getValue()));
         MockHttpServletResponse response = new MockHttpServletResponse();
-        when(readGate.isCaughtUp(GTID)).thenReturn(true);
+        when(readGate.probe(GTID)).thenReturn(GtidReadGate.Verdict.CAUGHT_UP);
 
         try (MockedStatic<ReadOnlyRoutingDataSource> ds = mockStatic(ReadOnlyRoutingDataSource.class)) {
             filter.doFilter(request, response, new MockFilterChain());
@@ -63,7 +63,7 @@ class GtidCookieFilterTest {
             ds.verify(() -> ReadOnlyRoutingDataSource.pinTo(any()), never());
         }
 
-        verify(readGate).isCaughtUp(GTID);
+        verify(readGate).probe(GTID);
         assertThat(response.getHeaders(HttpHeaders.SET_COOKIE))
                 .anySatisfy(header -> assertThat(header)
                         .contains(GtidCookie.NAME + "=")
@@ -75,7 +75,7 @@ class GtidCookieFilterTest {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/planners");
         request.setCookies(new Cookie(GtidCookie.NAME, GtidCookie.of(GTID).getValue()));
         MockHttpServletResponse response = new MockHttpServletResponse();
-        when(readGate.isCaughtUp(GTID)).thenReturn(false);
+        when(readGate.probe(GTID)).thenReturn(GtidReadGate.Verdict.NOT_CAUGHT_UP);
 
         try (MockedStatic<ReadOnlyRoutingDataSource> ds = mockStatic(ReadOnlyRoutingDataSource.class)) {
             filter.doFilter(request, response, new MockFilterChain());
@@ -84,7 +84,7 @@ class GtidCookieFilterTest {
             ds.verify(ReadOnlyRoutingDataSource::clear);
         }
 
-        verify(readGate).isCaughtUp(GTID);
+        verify(readGate).probe(GTID);
         assertThat(response.getHeaders(HttpHeaders.SET_COOKIE)).isEmpty();
     }
 
@@ -93,7 +93,7 @@ class GtidCookieFilterTest {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/planners");
         request.setCookies(new Cookie(GtidCookie.NAME, GtidCookie.of(GTID).getValue()));
         MockHttpServletResponse response = new MockHttpServletResponse();
-        when(readGate.isCaughtUp(GTID)).thenReturn(false);
+        when(readGate.probe(GTID)).thenReturn(GtidReadGate.Verdict.NOT_CAUGHT_UP);
         RuntimeException boom = new RuntimeException("chain blew up");
         FilterChain throwingChain = (req, res) -> {
             throw boom;
@@ -202,5 +202,90 @@ class GtidCookieFilterTest {
         }
 
         verifyNoInteractions(readGate);
+    }
+
+    @Test
+    void readGet_WhenGtidNeverExecutedOnPrimary_PinsPrimaryAndClearsCookie() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/planners");
+        request.setCookies(new Cookie(GtidCookie.NAME, GtidCookie.of(GTID).getValue()));
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        when(readGate.probe(GTID)).thenReturn(GtidReadGate.Verdict.NEVER_EXECUTED);
+
+        try (MockedStatic<ReadOnlyRoutingDataSource> ds = mockStatic(ReadOnlyRoutingDataSource.class)) {
+            filter.doFilter(request, response, new MockFilterChain());
+
+            ds.verify(() -> ReadOnlyRoutingDataSource.pinTo(RoutingKey.PRIMARY));
+            ds.verify(ReadOnlyRoutingDataSource::clear);
+        }
+
+        assertThat(response.getHeaders(HttpHeaders.SET_COOKIE))
+                .anySatisfy(header -> assertThat(header)
+                        .contains(GtidCookie.NAME + "=")
+                        .contains("Max-Age=0"));
+    }
+
+    @Test
+    void readGet_WhenGateReportsUnusable_ClearsCookieAndDoesNotPin() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/planners");
+        request.setCookies(new Cookie(GtidCookie.NAME, GtidCookie.of(GTID).getValue()));
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        when(readGate.probe(GTID)).thenReturn(GtidReadGate.Verdict.UNUSABLE);
+
+        try (MockedStatic<ReadOnlyRoutingDataSource> ds = mockStatic(ReadOnlyRoutingDataSource.class)) {
+            filter.doFilter(request, response, new MockFilterChain());
+
+            ds.verify(() -> ReadOnlyRoutingDataSource.pinTo(any()), never());
+        }
+
+        assertThat(response.getHeaders(HttpHeaders.SET_COOKIE))
+                .anySatisfy(header -> assertThat(header)
+                        .contains(GtidCookie.NAME + "=")
+                        .contains("Max-Age=0"));
+    }
+
+    @Test
+    void readGet_WhenCookieIsNotGtidSyntax_ClearsCookieWithoutGateOrPin() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/planners");
+        request.setCookies(new Cookie(GtidCookie.NAME, GtidCookie.of("not-a-gtid").getValue()));
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        try (MockedStatic<ReadOnlyRoutingDataSource> ds = mockStatic(ReadOnlyRoutingDataSource.class)) {
+            filter.doFilter(request, response, new MockFilterChain());
+
+            ds.verify(() -> ReadOnlyRoutingDataSource.pinTo(any()), never());
+        }
+
+        verifyNoInteractions(readGate);
+        assertThat(response.getHeaders(HttpHeaders.SET_COOKIE))
+                .anySatisfy(header -> assertThat(header)
+                        .startsWith(GtidCookie.NAME + "=;")
+                        .contains("Path=/")
+                        .contains("Max-Age=0")
+                        .contains("Secure")
+                        .contains("HttpOnly")
+                        .contains("SameSite=Lax"));
+    }
+
+    @Test
+    void readGet_WhenCookieIsNotGtidSyntaxAndNoReplica_KeepsCookie() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/planners");
+        request.setCookies(new Cookie(GtidCookie.NAME, GtidCookie.of("not-a-gtid").getValue()));
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        replicalessFilter.doFilter(request, response, new MockFilterChain());
+
+        verifyNoInteractions(readGate);
+        assertThat(response.getHeaders(HttpHeaders.SET_COOKIE)).isEmpty();
+    }
+
+    @Test
+    void readGet_WhenCookieValueUndecodable_KeepsCookie() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/planners");
+        request.setCookies(new Cookie(GtidCookie.NAME, "not*base64url*value"));
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        filter.doFilter(request, response, new MockFilterChain());
+
+        assertThat(response.getHeaders(HttpHeaders.SET_COOKIE)).isEmpty();
     }
 }
