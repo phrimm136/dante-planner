@@ -1,0 +1,85 @@
+id: no-raw-floor-access-tsx
+language: Tsx
+severity: error
+message: Floor rules live in pages/planner/lib/floorRules.ts; call parseFloors and admitFloors instead of reading floorSelections or floor counts directly.
+files:
+  - src/**/*.tsx
+ignores:
+  - '**/__tests__/**'
+  - '**/*.test.tsx'
+  - src/pages/planner/lib/floorRules.ts
+  - src/pages/planner/schemas/**
+  - src/pages/planner/components/plannerViewer/ComprehensiveGiftGridTracker.tsx
+  - src/pages/planner/components/plannerViewer/HorizontalThemePackGallery.tsx
+  - src/pages/planner/stores/usePlannerEditorStore.tsx
+rule:
+  any:
+    - kind: subscript_expression
+      all:
+        - has:
+            field: object
+            any:
+              - { kind: identifier, regex: '^floorSelections$' }
+              - { kind: member_expression, has: { field: property, regex: '^floorSelections$' } }
+        - has:
+            field: index
+            any:
+              - kind: number
+              - kind: binary_expression
+    - kind: call_expression
+      all:
+        - has:
+            field: function
+            kind: member_expression
+            all:
+              - has:
+                  field: property
+                  regex: '^(map|flatMap|forEach|filter|slice|some|every|find|findIndex|findLast|findLastIndex|reduce)$'
+              - has:
+                  field: object
+                  any:
+                    - { kind: identifier, regex: '^floorSelections$' }
+                    - has: { stopBy: end, regex: '^floorSelections$', any: [{ kind: identifier }, { kind: property_identifier }] }
+        - has:
+            field: arguments
+            has:
+              stopBy: end
+              regex: '^(themePackId|difficulty|giftIds)$'
+              any:
+                - kind: property_identifier
+                - kind: shorthand_property_identifier_pattern
+    - kind: for_in_statement
+      all:
+        - has:
+            field: right
+            any:
+              - { kind: identifier, regex: '^floorSelections$' }
+              - has: { stopBy: end, regex: '^floorSelections$', any: [{ kind: identifier }, { kind: property_identifier }] }
+        - has:
+            field: body
+            has:
+              stopBy: end
+              regex: '^(themePackId|difficulty|giftIds)$'
+              any:
+                - kind: property_identifier
+                - kind: shorthand_property_identifier_pattern
+    - pattern: Array.isArray($$$FLOORS)
+      has:
+        field: arguments
+        has:
+          stopBy: end
+          regex: '^floorSelections$'
+          any:
+            - kind: identifier
+            - kind: property_identifier
+    - kind: binary_expression
+      all:
+        - has: { field: operator, regex: '^(<|<=|>|>=|===|!==|==|!=)$' }
+        - has: { kind: number, regex: '^(5|10|15)$' }
+        - has: { regex: '[Ff]loor', any: [{ kind: identifier }, { kind: member_expression }] }
+    - kind: pair
+      all:
+        - has: { field: key, kind: string, regex: '^.(5|10|15)F.$' }
+        - has: { field: value, kind: number, regex: '^(5|10|15)$' }
+    - kind: identifier
+      regex: '^(FLOOR_COUNTS|ALLOWED_FLOOR_DIFFICULTIES)$'

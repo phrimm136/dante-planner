@@ -144,6 +144,22 @@
       }
     },
     {
+      "files": ["src/pages/planner/lib/floorRules.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              { "group": ["@/pages/*/**"], "message": "Import a page slice via its public API (@/pages/<name>), not a deep internal path." },
+              { "group": ["@/shared/*/**", "!@/shared/noteEditor/**"], "message": "Import a shared concept via its public API (@/shared/<name>), not a deep internal path." },
+              { "group": ["dompurify"], "message": "Sanitizer configuration lives in @/shared/sanitize; import sanitizeUserHtml or sanitizeToPlainText from there." },
+              { "group": ["**/hooks", "**/hooks/**", "**/stores", "**/stores/**", "**/components", "**/components/**", "react", "react/**", "@/lib/api*"], "message": "The floor module knows no callers: it must not import hooks, stores, components, React or the API layer." }
+            ]
+          }
+        ]
+      }
+    },
+    {
       "files": ["src/pages/*/lib/**/*.ts", "src/shared/*/lib/**/*.ts", "src/lib/**/*.ts"],
       "rules": {
         "no-console": ["warn", { "allow": [] }],

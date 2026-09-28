@@ -1,0 +1,28 @@
+id: no-raw-floor-access
+valid:
+  - const parsed = parseFloors(content.floorSelections, floorCount(category))
+  - const admission = admitFloors(parseFloors(raw.floorSelections, floorCount(category)), category, 'draft')
+  - const selection = state.floorSelections[floorIndex]
+  - |
+    for (const floor of admission.floors) {
+      addIds(floor.giftIds)
+    }
+  - const shown = floorIndex < floorCount(category)
+  - "const accent = { '5F': HARD_COLOR, '10F': MIRROR_COLOR }"
+  - if (items.length < 5) return
+  - "const next = { ...content, floorSelections: normalized }"
+invalid:
+  - const previous = content.floorSelections[floorIndex - 1].themePackId
+  - const first = content.floorSelections[0].difficulty
+  - const packs = new Set(content.floorSelections.map((floor) => floor.themePackId))
+  - const hard = floorSelections.slice(0, 5).some(({ difficulty }) => difficulty === 1)
+  - |
+    for (const floor of content.floorSelections) {
+      if (!floor.themePackId) missing += 1
+    }
+  - if (Array.isArray(raw.floorSelections)) walk(raw)
+  - if (floorSelections.length < 15) return false
+  - const complete = floorCount === 10
+  - "const counts = { '5F': 5, '10F': 10, '15F': 15 }"
+  - import { FLOOR_COUNTS } from '@/shared/gameData'
+  - const allowed = ALLOWED_FLOOR_DIFFICULTIES[category][floorIndex]

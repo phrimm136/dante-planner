@@ -1,0 +1,202 @@
+id: no-raw-floor-access
+snapshots:
+  const allowed = ALLOWED_FLOOR_DIFFICULTIES[category][floorIndex]:
+    labels:
+    - source: ALLOWED_FLOOR_DIFFICULTIES
+      style: primary
+      start: 16
+      end: 42
+  const complete = floorCount === 10:
+    labels:
+    - source: floorCount === 10
+      style: primary
+      start: 17
+      end: 34
+    - source: ===
+      style: secondary
+      start: 28
+      end: 31
+    - source: '10'
+      style: secondary
+      start: 32
+      end: 34
+    - source: floorCount
+      style: secondary
+      start: 17
+      end: 27
+  'const counts = { ''5F'': 5, ''10F'': 10, ''15F'': 15 }':
+    labels:
+    - source: '''5F'': 5'
+      style: primary
+      start: 17
+      end: 24
+    - source: '''5F'''
+      style: secondary
+      start: 17
+      end: 21
+    - source: '5'
+      style: secondary
+      start: 23
+      end: 24
+  const first = content.floorSelections[0].difficulty:
+    labels:
+    - source: content.floorSelections[0]
+      style: primary
+      start: 14
+      end: 40
+    - source: floorSelections
+      style: secondary
+      start: 22
+      end: 37
+    - source: content.floorSelections
+      style: secondary
+      start: 14
+      end: 37
+    - source: '0'
+      style: secondary
+      start: 38
+      end: 39
+  const hard = floorSelections.slice(0, 5).some(({ difficulty }) => difficulty === 1):
+    labels:
+    - source: floorSelections.slice(0, 5).some(({ difficulty }) => difficulty === 1)
+      style: primary
+      start: 13
+      end: 83
+    - source: some
+      style: secondary
+      start: 41
+      end: 45
+    - source: floorSelections
+      style: secondary
+      start: 13
+      end: 28
+    - source: floorSelections.slice(0, 5)
+      style: secondary
+      start: 13
+      end: 40
+    - source: floorSelections.slice(0, 5).some
+      style: secondary
+      start: 13
+      end: 45
+    - source: difficulty
+      style: secondary
+      start: 49
+      end: 59
+    - source: difficulty
+      style: secondary
+      start: 49
+      end: 59
+  const packs = new Set(content.floorSelections.map((floor) => floor.themePackId)):
+    labels:
+    - source: content.floorSelections.map((floor) => floor.themePackId)
+      style: primary
+      start: 22
+      end: 79
+    - source: map
+      style: secondary
+      start: 46
+      end: 49
+    - source: floorSelections
+      style: secondary
+      start: 30
+      end: 45
+    - source: content.floorSelections
+      style: secondary
+      start: 22
+      end: 45
+    - source: content.floorSelections.map
+      style: secondary
+      start: 22
+      end: 49
+    - source: themePackId
+      style: secondary
+      start: 67
+      end: 78
+    - source: themePackId
+      style: secondary
+      start: 67
+      end: 78
+  const previous = content.floorSelections[floorIndex - 1].themePackId:
+    labels:
+    - source: content.floorSelections[floorIndex - 1]
+      style: primary
+      start: 17
+      end: 56
+    - source: floorSelections
+      style: secondary
+      start: 25
+      end: 40
+    - source: content.floorSelections
+      style: secondary
+      start: 17
+      end: 40
+    - source: floorIndex - 1
+      style: secondary
+      start: 41
+      end: 55
+  ? |
+    for (const floor of content.floorSelections) {
+      if (!floor.themePackId) missing += 1
+    }
+  : labels:
+    - source: |-
+        for (const floor of content.floorSelections) {
+          if (!floor.themePackId) missing += 1
+        }
+      style: primary
+      start: 0
+      end: 87
+    - source: floorSelections
+      style: secondary
+      start: 28
+      end: 43
+    - source: content.floorSelections
+      style: secondary
+      start: 20
+      end: 43
+    - source: themePackId
+      style: secondary
+      start: 60
+      end: 71
+    - source: themePackId
+      style: secondary
+      start: 60
+      end: 71
+  if (Array.isArray(raw.floorSelections)) walk(raw):
+    labels:
+    - source: Array.isArray(raw.floorSelections)
+      style: primary
+      start: 4
+      end: 38
+    - source: floorSelections
+      style: secondary
+      start: 22
+      end: 37
+    - source: floorSelections
+      style: secondary
+      start: 22
+      end: 37
+  if (floorSelections.length < 15) return false:
+    labels:
+    - source: floorSelections.length < 15
+      style: primary
+      start: 4
+      end: 31
+    - source: <
+      style: secondary
+      start: 27
+      end: 28
+    - source: '15'
+      style: secondary
+      start: 29
+      end: 31
+    - source: floorSelections.length
+      style: secondary
+      start: 4
+      end: 26
+  import { FLOOR_COUNTS } from '@/shared/gameData':
+    labels:
+    - source: FLOOR_COUNTS
+      style: primary
+      start: 9
+      end: 21

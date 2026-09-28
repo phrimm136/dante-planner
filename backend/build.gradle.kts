@@ -158,7 +158,8 @@ pitest {
     targetClasses.set(listOf(
         "org.danteplanner.backend.planner.service.*",
         "org.danteplanner.backend.auth.token.*",
-        "org.danteplanner.backend.shared.readpath.*"))
+        "org.danteplanner.backend.shared.readpath.*",
+        "org.danteplanner.backend.planner.floor.*"))
     // Without this, PIT derives targetTests from targetClasses and misses any test whose package
     // differs from the class under test.
     targetTests.set(listOf("org.danteplanner.backend.*"))
@@ -169,7 +170,7 @@ pitest {
     outputFormats.set(setOf("HTML", "XML"))
     // Pinned to 1.19.0-rc.1: the 1.19.0 release crashes the coverage minion on this project
     // (UNKNOWN_ERROR) across every pitest core from 1.19.6 to 1.22.1.
-    mutationThreshold.set(41)
+    mutationThreshold.set(49)
 }
 
 val pitestRatchet by tasks.registering {

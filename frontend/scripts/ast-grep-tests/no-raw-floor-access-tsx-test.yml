@@ -1,0 +1,35 @@
+id: no-raw-floor-access-tsx
+valid:
+  - const parsed = parseFloors(content.floorSelections, floorCount(category))
+  - const selection = state.floorSelections[floorIndex]
+  - "const Tracker = () => <FloorGalleryTracker floorSelections={content.floorSelections} category={category} />"
+  - |
+    const Packs = ({ floors }) => (
+      <ul>
+        {floors.map((floor) => (
+          <li key={floor.themePackId}>{floor.difficulty}</li>
+        ))}
+      </ul>
+    )
+  - "const accent = { '5F': HARD_COLOR, '10F': MIRROR_COLOR }"
+invalid:
+  - const previous = content.floorSelections[floorIndex - 1].themePackId
+  - |
+    const Packs = ({ floorSelections }) => (
+      <ul>
+        {floorSelections.map((floor) => (
+          <li key={floor.themePackId}>{floor.difficulty}</li>
+        ))}
+      </ul>
+    )
+  - |
+    const Gifts = ({ content }) => {
+      for (const floor of content.floorSelections) {
+        if (floor.giftIds.length > 0) return <GiftList ids={floor.giftIds} />
+      }
+      return null
+    }
+  - "const Warning = () => (Array.isArray(raw.floorSelections) ? null : <span>{label}</span>)"
+  - "const Badge = ({ floorIndex }) => (floorIndex >= 10 ? <ExtremeBadge /> : null)"
+  - "const counts = { '5F': 5, '10F': 10, '15F': 15 }"
+  - import { FLOOR_COUNTS } from '@/shared/gameData'

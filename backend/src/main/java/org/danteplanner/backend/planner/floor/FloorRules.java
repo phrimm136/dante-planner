@@ -44,6 +44,10 @@ public class FloorRules {
         this.gameDataRegistry = gameDataRegistry;
     }
 
+    static Set<String> ruleNames() {
+        return RULES.keySet();
+    }
+
     public Admission admit(FloorBoundary.Parsed parsed, MDCategory category, Stage stage) {
         FloorRuleTable table = gameDataRegistry.floorRules();
         int floorCount = table.floorCount(category);
