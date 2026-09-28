@@ -96,6 +96,7 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers-toxiproxy:2.0.4")
     testImplementation("com.redis:testcontainers-redis:2.2.2")
     testImplementation("com.tngtech.archunit:archunit-junit5:1.3.0")
+    testImplementation("net.jqwik:jqwik:1.9.3")
 
     errorprone("com.google.errorprone:error_prone_core:2.36.0")
 }
