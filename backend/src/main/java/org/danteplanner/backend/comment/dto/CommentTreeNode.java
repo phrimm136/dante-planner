@@ -39,9 +39,10 @@ public record CommentTreeNode(
             boolean hasUpvoted,
             List<CommentTreeNode> replies
     ) {
+        boolean authorHidden = author == null || author.isDeleted();
         String authorEpithet = CommentConstants.DELETED_CONTENT;
         String authorSuffix = CommentConstants.DELETED_CONTENT;
-        if (author != null && !author.isDeleted()
+        if (!authorHidden
                 && author.getUsernameEpithet() != null && author.getUsernameSuffix() != null) {
             authorEpithet = author.getUsernameEpithet();
             authorSuffix = author.getUsernameSuffix();
@@ -53,7 +54,9 @@ public record CommentTreeNode(
 
         String updatedAt = comment.getEditedAt() != null ? comment.getEditedAt().toString() : null;
 
-        String content = comment.isDeleted() ? CommentConstants.DELETED_CONTENT : comment.getContent();
+        String content = comment.isDeleted() || authorHidden
+                ? CommentConstants.DELETED_CONTENT
+                : comment.getContent();
 
         return new CommentTreeNode(
                 comment.getPublicId(),

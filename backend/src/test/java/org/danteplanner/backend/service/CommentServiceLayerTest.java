@@ -15,6 +15,7 @@ import org.danteplanner.backend.planner.validation.VoteUniquenessValidator;
 import org.danteplanner.backend.moderation.service.CommentReportService;
 import org.danteplanner.backend.planner.service.PlannerStatsService;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
+import org.danteplanner.backend.shared.util.CommentConstants;
 
 
 import org.danteplanner.backend.auth.entity.AuthProviderType;
@@ -485,8 +486,8 @@ class CommentServiceLayerTest {
             assertEquals("OTHER", active.authorEpithet(), "an active author is still named");
             assertEquals("", hidden.authorEpithet(), "a deactivated author is not named");
             assertEquals("", hidden.authorSuffix(), "nor is their suffix");
-            assertEquals("also still here", hidden.content(),
-                    "the comment itself survives so the thread keeps its shape");
+            assertEquals(CommentConstants.DELETED_CONTENT, hidden.content(),
+                    "a deactivated author's body is hidden under the same author-lifecycle rule as the name");
         }
 
         @Test

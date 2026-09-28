@@ -28,6 +28,7 @@ import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.planner.service.PlannerStatsService;
 import org.danteplanner.backend.planner.validation.VoteUniquenessValidator;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
+import org.danteplanner.backend.shared.util.CommentConstants;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.AuthCookies;
@@ -48,6 +49,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -194,6 +197,44 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(status().isForbidden());
         }
 
+
+        @Test
+        @DisplayName("A leaf by a deactivated author stays in the tree with its body and name hidden, and the row keeps its content")
+        void getComments_WhenLeafAuthorDeactivated_ServesTheLeafWithHiddenBody() throws Exception {
+            PlannerComment leaf = commentRepository.save(new PlannerComment(
+                    publishedPlanner.getId(), otherUser.getId(), "still here", null, 0));
+            otherUser.softDelete(Instant.now().plus(Duration.ofDays(30)));
+            userRepository.save(otherUser);
+
+            mockMvc.perform(get("/api/planner/{id}/comments", publishedPlanner.getId()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.length()").value(1))
+                    .andExpect(jsonPath("$[0].id").value(leaf.getPublicId().toString()))
+                    .andExpect(jsonPath("$[0].content").value(CommentConstants.DELETED_CONTENT))
+                    .andExpect(jsonPath("$[0].authorEpithet").value(CommentConstants.DELETED_CONTENT))
+                    .andExpect(jsonPath("$[0].authorSuffix").value(CommentConstants.DELETED_CONTENT));
+
+            assertThat(commentRepository.findById(leaf.getId()).orElseThrow().getContent())
+                    .isEqualTo("still here");
+        }
+
+        @Test
+        @DisplayName("A reply under a deactivated author's comment still renders with its own body")
+        void getComments_WhenParentAuthorDeactivated_ServesTheReply() throws Exception {
+            PlannerComment parent = commentRepository.save(new PlannerComment(
+                    publishedPlanner.getId(), otherUser.getId(), "still here", null, 0));
+            PlannerComment reply = commentRepository.save(new PlannerComment(
+                    publishedPlanner.getId(), testUser.getId(), "a reply", parent.getId(), 1));
+            otherUser.softDelete(Instant.now().plus(Duration.ofDays(30)));
+            userRepository.save(otherUser);
+
+            mockMvc.perform(get("/api/planner/{id}/comments", publishedPlanner.getId()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$[0].id").value(parent.getPublicId().toString()))
+                    .andExpect(jsonPath("$[0].content").value(CommentConstants.DELETED_CONTENT))
+                    .andExpect(jsonPath("$[0].replies[0].id").value(reply.getPublicId().toString()))
+                    .andExpect(jsonPath("$[0].replies[0].content").value("a reply"));
+        }
 
         @Test
         @DisplayName("Should return empty array for planner with no comments")
