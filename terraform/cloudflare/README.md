@@ -60,3 +60,9 @@ probes and are exempt; deploy-time verification stays on SSM and kubectl.
 
 The window sequence, drills, and teardown ledger live in
 `../../docs/runbooks/schema-decomposition-migration.md`.
+
+## Constraints
+
+Cloudflare load balancing is at the account's limit of two origins, both used by the production
+pools, so no second environment can hold a load balancer. Nothing in this stack expresses the
+limit: each workspace plans cleanly on its own, and the limit appears only as a 400 during apply.
