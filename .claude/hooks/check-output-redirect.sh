@@ -103,29 +103,6 @@ if echo "$scan" | grep -qE '(yarn\s+(test|typecheck|tsc|build|vitest|lint)|vites
         exit 2
     fi
 
-    # Check if a recent output file already exists (within last 1 minute)
-    if [[ -n "$prefix" ]] && ! echo "$command" | grep -qE 'rm -f (\S*/)?\.claude/reports/logs/'; then
-        recent_file=$(find "${CLAUDE_PROJECT_DIR:-$PWD}/.claude/reports/logs" -name "${prefix}-*.log" -mmin -1 -print 2>/dev/null | sort | tail -1)
-    fi
-
-    # Block re-run if recent output exists — read it instead
-    if [[ -n "$recent_file" ]]; then
-        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" >&2
-        echo "⚠️  OUTPUT ALREADY EXISTS — READ IT" >&2
-        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" >&2
-        echo "" >&2
-        echo "Recent output: $recent_file" >&2
-        echo "" >&2
-        echo "Grep the file for errors instead of re-running the command:" >&2
-        echo "  ls .claude/reports/logs/${prefix}-*.log | sort | tail -1 | xargs grep -E 'FAIL|ERROR|error TS' | tail -30" >&2
-        echo "" >&2
-        echo "WHY: Re-running wastes time and context. The output is already captured." >&2
-        echo "If you need a fresh run (e.g., after fixing failures), delete the old file first:" >&2
-        echo "  rm -f $recent_file" >&2
-        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" >&2
-        exit 2
-    fi
-
     # Block if no redirect
     if [[ "$has_redirect" != "true" ]]; then
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" >&2
