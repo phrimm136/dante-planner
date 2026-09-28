@@ -3,8 +3,10 @@ package org.danteplanner.backend.planner.floor;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.validation.FloorRuleTable;
 import org.danteplanner.backend.planner.validation.GameDataRegistry;
+import org.danteplanner.backend.shared.util.GameConstants;
 import org.springframework.stereotype.Component;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,11 +24,6 @@ public class FloorRules {
     @FunctionalInterface
     private interface Rule {
         void check(Walk walk, List<Violation> violations);
-    }
-
-    private static final class DifficultyLevels {
-        private static final int NORMAL = 0;
-        private static final int HARD = 1;
     }
 
     private static final int UNSET_DIFFICULTY_IN_MESSAGE = -1;
@@ -131,7 +128,11 @@ public class FloorRules {
             if (difficulty instanceof Difficulty.Set(int value) && allowed.contains(value)) {
                 continue;
             }
-            int shown = difficulty instanceof Difficulty.Set(int value) ? value : UNSET_DIFFICULTY_IN_MESSAGE;
+            String shown = switch (difficulty) {
+                case Difficulty.Set(int value) -> String.valueOf(value);
+                case Difficulty.OutOfRange(BigInteger value) -> value.toString();
+                case Difficulty.Unset() -> String.valueOf(UNSET_DIFFICULTY_IN_MESSAGE);
+            };
             violations.add(Violation.valueOutOfRange(FloorBoundary.floorPath(index) + ".difficulty",
                     shown, Collections.min(allowed), Collections.max(allowed)));
         }
@@ -141,12 +142,12 @@ public class FloorRules {
         int firstHard = -1;
         for (int index = 0; index < walk.floors().size(); index++) {
             Difficulty difficulty = walk.floors().get(index).difficulty();
-            if (firstHard < 0 && difficulty.equals(Difficulty.of(DifficultyLevels.HARD))) {
+            if (firstHard < 0 && difficulty.equals(Difficulty.of(GameConstants.HARD_DIFFICULTY))) {
                 firstHard = index;
                 continue;
             }
-            if (firstHard >= 0 && difficulty.equals(Difficulty.of(DifficultyLevels.NORMAL))
-                    && walk.allowedDifficulties().get(index).contains(DifficultyLevels.NORMAL)) {
+            if (firstHard >= 0 && difficulty.equals(Difficulty.of(GameConstants.NORMAL_DIFFICULTY))
+                    && walk.allowedDifficulties().get(index).contains(GameConstants.NORMAL_DIFFICULTY)) {
                 String path = FloorBoundary.floorPath(index) + ".difficulty";
                 violations.add(Violation.invalidSequence(path,
                         path + " is NORMAL after HARD in " + FloorBoundary.floorPath(firstHard) + ".difficulty"));

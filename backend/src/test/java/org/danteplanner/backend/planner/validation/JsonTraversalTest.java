@@ -7,13 +7,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
+import org.danteplanner.backend.planner.floor.Stage;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.danteplanner.backend.planner.validation.JsonTraversal.arrayField;
 import static org.danteplanner.backend.planner.validation.JsonTraversal.eachNumber;
-import static org.danteplanner.backend.planner.validation.JsonTraversal.eachObject;
 import static org.danteplanner.backend.planner.validation.JsonTraversal.eachObjectProperty;
 import static org.danteplanner.backend.planner.validation.JsonTraversal.eachUniqueString;
 
@@ -25,7 +25,7 @@ class JsonTraversalTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private final ValidationContext context = new ValidationContext(ValidationPolicy.DRAFT);
+    private final ValidationContext context = new ValidationContext(Stage.DRAFT);
 
     private final List<String> visited = new ArrayList<>();
 
@@ -109,23 +109,6 @@ class JsonTraversalTest {
 
         assertThat(visited).containsExactly("0:7", "1:7");
         assertThat(context.getErrors()).isEmpty();
-    }
-
-    @Test
-    void eachObject_WhenElementIsNotAnObject_PassesOverItInSilence() {
-        eachObject(arrayField(root("{\"floors\":[5,{\"n\":1}]}"), "floors"), 10,
-                (element, index) -> visited.add(index + ":" + element));
-
-        assertThat(visited).containsExactly("1:{\"n\":1}");
-        assertThat(context.getErrors()).isEmpty();
-    }
-
-    @Test
-    void eachObject_WhenTheArrayIsLongerThanTheLimit_StopsAtTheLimit() {
-        eachObject(arrayField(root("{\"floors\":[{\"n\":0},{\"n\":1},{\"n\":2}]}"), "floors"), 2,
-                (element, index) -> visited.add(String.valueOf(index)));
-
-        assertThat(visited).containsExactly("0", "1");
     }
 
     @Test

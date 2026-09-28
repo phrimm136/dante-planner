@@ -12,11 +12,12 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.planner.floor.Stage;
 
 /**
  * The bad-input corpus whose validator output is frozen by {@link ValidatorGoldenCorpusTest}.
  *
- * <p>Every entry names one document and the category and policy it is validated under. The
+ * <p>Every entry names one document and the category and stage it is validated under. The
  * document is assembled field by field rather than by text substitution, so field order — which
  * decides the order Jackson reports object members in, and therefore the order errors accumulate
  * in — is fixed by the corpus rather than by a search-and-replace landing where it lands.
@@ -35,10 +36,10 @@ final class ValidatorGoldenCorpus {
      *
      * @param name     the entry's identity in the snapshot file
      * @param category the MD category passed alongside the content
-     * @param policy   how completely the document must be filled in
+     * @param stage    how completely the document must be filled in
      * @param content  the raw content string, exactly as a client would send it
      */
-    record ContentEntry(String name, String category, ValidationPolicy policy, String content) {
+    record ContentEntry(String name, String category, Stage stage, String content) {
     }
 
     /**
@@ -242,14 +243,14 @@ final class ValidatorGoldenCorpus {
         entries.add(draft("category-null", null, valid()));
         entries.add(draft("category-blank", "", valid()));
         entries.add(draft("category-unknown", "20F", valid()));
-        entries.add(new ContentEntry("content-null", "5F", ValidationPolicy.DRAFT, null));
-        entries.add(new ContentEntry("content-blank", "5F", ValidationPolicy.DRAFT, "   "));
-        entries.add(new ContentEntry("content-size-exceeded", "5F", ValidationPolicy.DRAFT,
+        entries.add(new ContentEntry("content-null", "5F", Stage.DRAFT, null));
+        entries.add(new ContentEntry("content-blank", "5F", Stage.DRAFT, "   "));
+        entries.add(new ContentEntry("content-size-exceeded", "5F", Stage.DRAFT,
                 OVERSIZED_DOCUMENT));
-        entries.add(new ContentEntry("json-malformed", "5F", ValidationPolicy.DRAFT, "not json"));
-        entries.add(new ContentEntry("json-truncated", "5F", ValidationPolicy.DRAFT, "{\"selectedKeywords\":["));
-        entries.add(new ContentEntry("root-is-array", "5F", ValidationPolicy.DRAFT, "[]"));
-        entries.add(new ContentEntry("root-is-primitive", "5F", ValidationPolicy.DRAFT, "\"planner\""));
+        entries.add(new ContentEntry("json-malformed", "5F", Stage.DRAFT, "not json"));
+        entries.add(new ContentEntry("json-truncated", "5F", Stage.DRAFT, "{\"selectedKeywords\":["));
+        entries.add(new ContentEntry("root-is-array", "5F", Stage.DRAFT, "[]"));
+        entries.add(new ContentEntry("root-is-primitive", "5F", Stage.DRAFT, "\"planner\""));
 
         entries.add(draft("unknown-field-single", valid().with("theme", "\"dark\"")));
         entries.add(draft("unknown-fields-multiple",
@@ -394,10 +395,10 @@ final class ValidatorGoldenCorpus {
                 fiveFloorsWith(0, "{\"themePackId\":\"1001\",\"difficulty\":5,\"giftIds\":[]}"))));
         entries.add(publish("floor-difficulty-absent", valid().with("floorSelections",
                 fiveFloorsWith(0, "{\"themePackId\":\"1001\",\"giftIds\":[]}"))));
-        entries.add(new ContentEntry("floor-difficulty-hard-required-on-10f", "10F", ValidationPolicy.PUBLISH,
+        entries.add(new ContentEntry("floor-difficulty-hard-required-on-10f", "10F", Stage.PUBLISH,
                 valid().with("floorSelections", floors(10, level -> 1, 0,
                         "{\"themePackId\":\"1001\",\"difficulty\":0,\"giftIds\":[]}")).json()));
-        entries.add(new ContentEntry("floor-difficulty-extreme-required-on-15f", "15F", ValidationPolicy.PUBLISH,
+        entries.add(new ContentEntry("floor-difficulty-extreme-required-on-15f", "15F", Stage.PUBLISH,
                 valid().with("floorSelections", floors(15, level -> level < 10 ? 1 : 3, 10,
                         "{\"themePackId\":\"1011\",\"difficulty\":1,\"giftIds\":[]}")).json()));
         entries.add(draft("floor-sequence-gap", valid().with("floorSelections",
@@ -428,9 +429,6 @@ final class ValidatorGoldenCorpus {
                 valid().with("selectedGiftIds", "[\"9001\",\"9001\"]")));
         entries.add(draft("start-gift-not-string", valid().with("selectedGiftIds", "[9001]")));
 
-        // Each entry below pins a guard that skips an element without rejecting it. What is frozen
-        // is the ABSENCE of an error, so a traversal helper that starts reporting one of these
-        // silences fails here rather than reaching a client as a new rejection.
         entries.add(draft("silence-floor-element-not-object", valid().with("floorSelections", "[5]")));
         entries.add(draft("silence-floor-gift-ids-not-array", valid().with("floorSelections",
                 "[{\"themePackId\":\"1001\",\"difficulty\":0,\"giftIds\":5}]")));
@@ -481,10 +479,10 @@ final class ValidatorGoldenCorpus {
     }
 
     private static ContentEntry draft(String name, String category, Doc doc) {
-        return new ContentEntry(name, category, ValidationPolicy.DRAFT, doc.json());
+        return new ContentEntry(name, category, Stage.DRAFT, doc.json());
     }
 
     private static ContentEntry publish(String name, Doc doc) {
-        return new ContentEntry(name, "5F", ValidationPolicy.PUBLISH, doc.json());
+        return new ContentEntry(name, "5F", Stage.PUBLISH, doc.json());
     }
 }

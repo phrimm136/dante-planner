@@ -5,6 +5,7 @@ import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
+import org.danteplanner.backend.planner.floor.FloorRules;
 import org.danteplanner.backend.planner.exception.PlannerValidationException.ValidationError;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
@@ -35,6 +36,12 @@ class CategoryChangeFloorRulesTest {
     private static final String STATIC_DATA = "../static/data";
     private static final String UNKNOWN_EGO_CONTENT = TestDataFactory.VALID_CONTENT.replace(
             "\"ZAYIN\":{\"id\":\"20101\"", "\"ZAYIN\":{\"id\":\"20199\"");
+    private static final String FLOOR_SIX_NOT_AN_OBJECT_CONTENT = TestDataFactory.VALID_CONTENT.replace(
+            "{\"themePackId\":\"1005\",\"difficulty\":0,\"giftIds\":[]}",
+            "{\"themePackId\":\"1005\",\"difficulty\":0,\"giftIds\":[]},"
+                    + "{\"themePackId\":\"1006\",\"difficulty\":1,\"giftIds\":[]},5");
+    private static final String REPEATED_GIFT_CONTENT = TestDataFactory.VALID_CONTENT.replace(
+            "\"giftIds\":[\"9002\"]", "\"giftIds\":[\"9002\",\"9002\"]");
     private static final String UNKNOWN_START_BUFF_CONTENT = TestDataFactory.VALID_CONTENT.replace(
             "\"selectedBuffIds\":[100,201]", "\"selectedBuffIds\":[400,201]");
 
@@ -69,7 +76,8 @@ class CategoryChangeFloorRulesTest {
                 new SkillStateValidator(),
                 new IdReferenceValidator(registry, new SinnerIdValidator()),
                 new StartBuffValidator(registry),
-                registry);
+                registry,
+                new FloorRules(registry));
         commandService = new PlannerCommandService(
                 plannerRepository,
                 statsRepository,
@@ -149,5 +157,33 @@ class CategoryChangeFloorRulesTest {
                     assertThat(ex.getSubErrors()).extracting(ValidationError::code)
                             .contains("START_BUFF_UNKNOWN_ID");
                 });
+    }
+
+    @Test
+    void upsertPlanner_WhenAPublishedPlannerWhoseStoredFloorSixIsNotAnObjectMovesToFifteenFloors_RejectsTheFloorType() {
+        Planner planner = stored(TestDataFactory.planner(owner)
+                .content(FLOOR_SIX_NOT_AN_OBJECT_CONTENT).published(true).build());
+        when(userService.findById(owner.getId())).thenReturn(owner);
+
+        assertThatThrownBy(() -> commandService.upsertPlanner(
+                        owner.getId(), null, planner.getId(), resending(planner, "15F"), false))
+                .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
+                    assertThat(ex.getStatusCode().value()).isEqualTo(400);
+                    assertThat(ex.getSubErrors()).containsExactly(new ValidationError("INVALID_FIELD_TYPE",
+                            "Field 'floorSelections[6]' must be object, got number 5"));
+                });
+        assertThat(planner.getCategory()).isEqualTo("5F");
+    }
+
+    @Test
+    void upsertPlanner_WhenADraftWhoseStoredFloorRepeatsAGiftMovesToTenFloors_ReportsTheRepeat() {
+        Planner planner = stored(TestDataFactory.planner(owner).content(REPEATED_GIFT_CONTENT).build());
+
+        assertThatThrownBy(() -> commandService.upsertPlanner(
+                        owner.getId(), null, planner.getId(), resending(planner, "10F"), false))
+                .isInstanceOfSatisfying(PlannerValidationException.class, ex ->
+                        assertThat(ex.getSubErrors()).containsExactly(new ValidationError("DUPLICATE_VALUE",
+                                "Duplicate value '9002' in floorSelections[0].giftIds")));
+        assertThat(planner.getCategory()).isEqualTo("5F");
     }
 }

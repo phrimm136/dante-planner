@@ -5,6 +5,7 @@ import net.javacrumbs.shedlock.core.LockProvider;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
+import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository;
@@ -431,6 +432,23 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
     }
 
     @Test
+    void reconcile_WhenARefractedRailwayPlannerIsIndexed_SkipsItsFilterAudit() {
+        Planner planner = TestDataFactory.planner(owner)
+                .title("Railway")
+                .plannerType(PlannerType.REFRACTED_RAILWAY)
+                .category("RR_PLACEHOLDER")
+                .selectedKeywords(Set.of("Sinking"))
+                .published(true)
+                .save(plannerRepository);
+        statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
+        catalogService.add(planner);
+        filterService.rebuildFilters(planner.getId());
+
+        assertThat(kindsFor(reconciler.reconcile(), planner.getId()))
+                .doesNotContain("entity_filter", "keyword_filter");
+    }
+
+    @Test
     void reconcile_WhenTheKeywordColumnDisagreesWithTheContent_ReportsContentKeywordDrift() {
         Planner planner = publishClean("Keyword Column Drift", Set.of("Sinking"));
         jdbc.update("UPDATE planner_content SET selected_keywords = '[\"Burst\"]' WHERE planner_id = UUID_TO_BIN(?)",
@@ -467,7 +485,7 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
         Planner planner = publishClean("Index Follows Column", Set.of("Sinking"));
         jdbc.update("UPDATE planner_content SET selected_keywords = '[\"Burst\"]' WHERE planner_id = UUID_TO_BIN(?)",
                 planner.getId().toString());
-        jdbc.update("CALL rebuild_planner_filters(UUID_TO_BIN(?))", planner.getId().toString());
+        filterService.rebuildFilters(planner.getId());
 
         assertThat(recordsFor(reconciler.reconcile(), planner.getId(), "keyword_filter"))
                 .singleElement()

@@ -2,19 +2,16 @@ package org.danteplanner.backend.planner.validation;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
-import org.danteplanner.backend.planner.entity.MDCategory;
+import org.danteplanner.backend.planner.floor.FloorSelection;
+import org.danteplanner.backend.planner.floor.ThemePack;
 import org.danteplanner.backend.shared.util.GameConstants;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.function.IntFunction;
+import java.util.Set;
 
 import static org.danteplanner.backend.planner.validation.JsonTraversal.arrayField;
-import static org.danteplanner.backend.planner.validation.JsonTraversal.eachObject;
 import static org.danteplanner.backend.planner.validation.JsonTraversal.eachObjectProperty;
 import static org.danteplanner.backend.planner.validation.JsonTraversal.eachUniqueString;
 import static org.danteplanner.backend.planner.validation.JsonTraversal.isInt;
@@ -22,31 +19,6 @@ import static org.danteplanner.backend.planner.validation.JsonTraversal.isInt;
 @Component
 @RequiredArgsConstructor
 class IdReferenceValidator {
-
-    private record DifficultyRule(int min, int max) {}
-
-    private record FloorRules(IntFunction<DifficultyRule> difficultyAt) {}
-
-    private static final DifficultyRule NORMAL_OR_HARD = new DifficultyRule(0, 1);
-    private static final DifficultyRule HARD = new DifficultyRule(1, 1);
-    private static final DifficultyRule EXTREME = new DifficultyRule(3, 3);
-
-    private static final Map<MDCategory, FloorRules> FLOOR_RULES;
-
-    static {
-        Map<MDCategory, FloorRules> byCategory = new EnumMap<>(MDCategory.class);
-        byCategory.put(MDCategory.F5, new FloorRules(floor -> NORMAL_OR_HARD));
-        byCategory.put(MDCategory.F10, new FloorRules(floor -> HARD));
-        byCategory.put(MDCategory.F15, new FloorRules(floor -> floor < MDCategory.F10.floorCount() ? HARD : EXTREME));
-
-        List<MDCategory> uncovered = Arrays.stream(MDCategory.values())
-                .filter(category -> !byCategory.containsKey(category))
-                .toList();
-        if (!uncovered.isEmpty()) {
-            throw new ExceptionInInitializerError("No floor rules for MD category(s): " + uncovered);
-        }
-        FLOOR_RULES = Map.copyOf(byCategory);
-    }
 
     private final GameDataRegistry gameDataRegistry;
     private final SinnerIdValidator sinnerIdValidator;
@@ -227,135 +199,36 @@ class IdReferenceValidator {
         });
     }
 
-    void validateFloorSelectionIds(JsonNode root, String category, ValidationContext context) {
-        validateFloors(root, category, true, context);
-    }
-
-    void validateFloorRules(JsonNode root, String category, ValidationContext context) {
-        validateFloors(root, category, false, context);
-    }
-
-    private void validateFloors(JsonNode root, String category, boolean checkIds, ValidationContext context) {
-        JsonNode floorSelections = arrayField(root, "floorSelections");
-        MDCategory mdCategory = MDCategory.fromValue(category);
-        FloorRules rules = FLOOR_RULES.get(mdCategory);
-
-        validateEveryFloorPresent(floorSelections, mdCategory.floorCount(), context);
-
-        Map<String, Integer> firstFloorByThemePack = new HashMap<>();
-        eachObject(floorSelections, mdCategory.floorCount(), (floor, index) -> {
+    void validateFloorIds(List<FloorSelection> floors, ValidationContext context) {
+        for (int index = 0; index < floors.size(); index++) {
+            FloorSelection floor = floors.get(index);
             String floorPath = "floorSelections[" + index + "]";
-            JsonNode themePackNode = floor.path("themePackId");
-            boolean themePackChosen = themePackNode.isTextual();
-
-            if (!validateThemePackPresence(floorPath, themePackNode, checkIds, context)) {
-                return;
+            if (floor.themePack() instanceof ThemePack.Chosen(String themePackId)) {
+                validateThemePackIsKnown(floorPath, themePackId, context);
             }
-
-            validateThemePackNotRepeated(floorPath, themePackNode, index, firstFloorByThemePack, context);
-            validateDifficultyRange(floorPath, floor, rules.difficultyAt().apply(index), context);
-            validateThemePackSequence(floorPath, floorSelections, index, themePackChosen, context);
-            if (checkIds) {
-                validateFloorGiftIds(floorPath, floor, themePackChosen ? themePackNode.asText() : null, context);
-            }
-        });
-    }
-
-    private void validateEveryFloorPresent(JsonNode floorSelections, int floorCount, ValidationContext context) {
-        if (!floorSelections.isArray() || !context.policy().requiresPublishableContent()) {
-            return;
-        }
-
-        for (int index = 0; index < floorCount; index++) {
-            if (!floorSelections.path(index).isObject()) {
-                context.reject("floorSelections[" + index + "]", ValidationErrors::floorMissingThemePack);
-            }
+            validateFloorGiftIds(floorPath, floor, context);
         }
     }
 
-    private boolean validateThemePackPresence(String floorPath, JsonNode themePackNode, boolean checkIds,
-                                              ValidationContext context) {
-        String themePackId = themePackNode.isTextual() ? themePackNode.asText() : "";
-
-        if (themePackId.isEmpty()) {
-            if (!context.policy().requiresPublishableContent()) {
-                return true;
-            }
-            context.reject(floorPath, ValidationErrors::floorMissingThemePack);
-            return false;
-        }
-
-        if (!checkIds || gameDataRegistry.hasThemePack(themePackId)) {
-            return true;
-        }
-
-        context.reject(floorPath + ".themePackId",
-                p -> ValidationErrors.unknownId(ErrorCode.THEME_PACK_UNKNOWN_ID, p, themePackId));
-        return false;
-    }
-
-    private void validateThemePackNotRepeated(String floorPath, JsonNode themePackNode, int index,
-                                              Map<String, Integer> firstFloorByThemePack,
-                                              ValidationContext context) {
-        String themePackId = themePackNode.isTextual() ? themePackNode.asText() : "";
-        if (themePackId.isEmpty()) {
-            return;
-        }
-
-        Integer firstFloorIndex = firstFloorByThemePack.putIfAbsent(themePackId, index);
-        if (firstFloorIndex != null) {
+    private void validateThemePackIsKnown(String floorPath, String themePackId, ValidationContext context) {
+        if (!gameDataRegistry.hasThemePack(themePackId)) {
             context.reject(floorPath + ".themePackId",
-                    p -> ValidationErrors.floorDuplicateThemePack(p, themePackId, firstFloorIndex));
+                    p -> ValidationErrors.unknownId(ErrorCode.THEME_PACK_UNKNOWN_ID, p, themePackId));
         }
     }
 
-    private void validateDifficultyRange(String floorPath, JsonNode floor, DifficultyRule expected,
-                                         ValidationContext context) {
-        if (!context.policy().requiresPublishableContent()) {
-            return;
-        }
-
-        JsonNode difficultyNode = floor.path("difficulty");
-        int difficulty = isInt(difficultyNode) ? difficultyNode.asInt() : -1;
-
-        if (difficulty < expected.min() || difficulty > expected.max()) {
-            context.reject(floorPath + ".difficulty",
-                    p -> ValidationErrors.valueOutOfRange(p, difficulty, expected.min(), expected.max()));
-        }
-    }
-
-    private void validateThemePackSequence(String floorPath, JsonNode floorSelections, int index,
-                                           boolean themePackChosen, ValidationContext context) {
-        if (!themePackChosen || index == 0) {
-            return;
-        }
-
-        int previousIndex = index - 1;
-        JsonNode previousFloor = floorSelections.get(previousIndex);
-        if (!previousFloor.isObject()) {
-            return;
-        }
-
-        JsonNode previousThemePackNode = previousFloor.path("themePackId");
-        boolean previousChosen = previousThemePackNode.isTextual()
-                && !previousThemePackNode.asText().isEmpty();
-        if (!previousChosen) {
-            context.reject(floorPath, p -> ValidationErrors.invalidSequence(
-                    p + " requires themePackId in floorSelections[" + previousIndex + "]"));
-        }
-    }
-
-    private void validateFloorGiftIds(String floorPath, JsonNode floor, String themePackId,
-                                      ValidationContext context) {
+    private void validateFloorGiftIds(String floorPath, FloorSelection floor, ValidationContext context) {
         String giftsPath = floorPath + ".giftIds";
-
-        eachUniqueString(arrayField(floor, "giftIds"), giftsPath, context, (giftId, index) -> {
-            if (!validateGiftIsKnown(giftsPath, giftId, context)) {
-                return;
+        Set<String> seen = new HashSet<>();
+        for (int index = 0; index < floor.giftIds().size(); index++) {
+            String giftId = floor.giftIds().get(index);
+            if (!seen.add(giftId) || !validateGiftIsKnown(giftsPath, giftId, context)) {
+                continue;
             }
-
-            validateGiftIsAffordable(giftsPath, index, giftId, themePackId, context);
-        });
+            if (floor.themePack() instanceof ThemePack.Chosen(String themePackId)) {
+                validateGiftIsAffordable(giftsPath + "[" + index + "]", giftId, themePackId, context);
+            }
+        }
     }
 
     private boolean validateGiftIsKnown(String giftsPath, String giftId, ValidationContext context) {
@@ -367,15 +240,10 @@ class IdReferenceValidator {
         return false;
     }
 
-    private void validateGiftIsAffordable(String giftsPath, int index, String giftId, String themePackId,
+    private void validateGiftIsAffordable(String giftPath, String giftId, String themePackId,
                                           ValidationContext context) {
-        if (themePackId == null) {
-            return;
-        }
-
         if (!gameDataRegistry.isGiftAffordableForThemePack(giftId, themePackId)) {
-            context.reject(giftsPath + "[" + index + "]",
-                    p -> ValidationErrors.giftNotAffordable(giftId, themePackId));
+            context.reject(giftPath, p -> ValidationErrors.giftNotAffordable(giftId, themePackId));
         }
     }
 }

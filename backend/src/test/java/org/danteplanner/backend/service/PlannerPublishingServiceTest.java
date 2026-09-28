@@ -19,10 +19,10 @@ import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.planner.floor.Stage;
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
-import org.danteplanner.backend.planner.validation.ValidationPolicy;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.user.service.UserService;
@@ -174,7 +174,7 @@ class PlannerPublishingServiceTest {
                     "\"selectedGiftIds\":[\"9001\"]", "\"selectedGiftIds\":[\"9001\"],\"observationGiftIds\":[\"19247\"]");
             Planner planner = testPlannerBuilder().published(false).content(stored).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
-            when(contentValidator.validate(eq(stored), any(), anyInt(), eq(ValidationPolicy.PUBLISH)))
+            when(contentValidator.validate(eq(stored), any(), anyInt(), eq(Stage.PUBLISH)))
                     .thenAnswer(invocation -> table.normalize(mapper.readTree(stored)).toString());
             List<String> indexedContent = new ArrayList<>();
             doAnswer(invocation -> indexedContent.add(((Planner) invocation.getArgument(0)).getContentJson()))
@@ -564,7 +564,7 @@ class PlannerPublishingServiceTest {
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
             doThrow(new PlannerValidationException("EMPTY_CONTENT", "Content is required"))
                     .when(contentValidator)
-                    .validate(any(), any(), anyInt(), eq(ValidationPolicy.PUBLISH));
+                    .validate(any(), any(), anyInt(), eq(Stage.PUBLISH));
 
             assertThrows(
                     PlannerValidationException.class,

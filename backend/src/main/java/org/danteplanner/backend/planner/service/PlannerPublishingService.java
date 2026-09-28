@@ -7,12 +7,12 @@ import org.danteplanner.backend.planner.dto.ToggleOwnerNotificationsResponse;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PublicationChange;
+import org.danteplanner.backend.planner.floor.Stage;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
 import org.danteplanner.backend.planner.validation.PlannerOwnershipValidator;
 import org.danteplanner.backend.planner.validation.PlannerPublishValidator;
-import org.danteplanner.backend.planner.validation.ValidationPolicy;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.springframework.data.domain.Page;
@@ -90,7 +90,7 @@ public class PlannerPublishingService {
 
         publishValidator.requireTitle(planner.getTitle());
         String normalized = contentValidator.validate(planner.getContentJson(), planner.getCategory(),
-                planner.getContentVersion(), ValidationPolicy.PUBLISH);
+                planner.getContentVersion(), Stage.PUBLISH);
         if (!normalized.equals(planner.getContentJson())) {
             planner.getContent().setContent(normalized);
         }

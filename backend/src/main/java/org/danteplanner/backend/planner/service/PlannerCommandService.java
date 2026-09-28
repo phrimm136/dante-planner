@@ -15,6 +15,7 @@ import org.danteplanner.backend.planner.entity.PlannerModeration;
 import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
+import org.danteplanner.backend.planner.floor.Stage;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
@@ -26,7 +27,6 @@ import org.danteplanner.backend.planner.validation.PlannerContentValidator;
 import org.danteplanner.backend.planner.validation.PlannerLimitValidator;
 import org.danteplanner.backend.planner.validation.PlannerOwnershipValidator;
 import org.danteplanner.backend.planner.validation.SyncVersionValidator;
-import org.danteplanner.backend.planner.validation.ValidationPolicy;
 import org.danteplanner.backend.planner.validation.WriteArbitration;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
@@ -178,15 +178,20 @@ public class PlannerCommandService {
 
     private void applyCategoryOverStoredContent(Planner planner, String category) {
         categoryValidator.requireCategoryForType(planner.getPlannerType(), category);
-        contentValidator.validateFloorRules(planner.getContent().getContent(), category,
-                ValidationPolicy.forPublicationState(planner.isPublished()));
-        planner.getContent().setCategory(category);
+        PlannerContent contentRow = planner.getContent();
+        contentRow.setContent(contentValidator.validateFloorRules(contentRow.getContent(), category,
+                stageOf(planner)));
+        contentRow.setCategory(category);
     }
 
     private void applyContent(Planner planner, String content, int version) {
         PlannerContent contentRow = planner.getContent();
         contentRow.setContent(contentValidator.validate(content, contentRow.getCategory(), version,
-                ValidationPolicy.forPublicationState(planner.isPublished())));
+                stageOf(planner)));
+    }
+
+    private static Stage stageOf(Planner planner) {
+        return planner.isPublished() ? Stage.PUBLISH : Stage.DRAFT;
     }
 
     private void countTopLevelCopy(Set<String> topLevel, Set<String> derived) {
@@ -237,7 +242,8 @@ public class PlannerCommandService {
 
         categoryValidator.requireCategoryForType(request.plannerType(), request.category());
 
-        String content = contentValidator.validate(request.content(), request.category(), request.contentVersion());
+        String content = contentValidator.validate(request.content(), request.category(), request.contentVersion(),
+                Stage.DRAFT);
         Set<String> keywords = PlannerKeywords.fromContent(content).asSet();
         countTopLevelCopy(request.selectedKeywords(), keywords);
 

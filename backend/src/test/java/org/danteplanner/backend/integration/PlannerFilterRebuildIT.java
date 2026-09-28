@@ -7,9 +7,11 @@ import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerKeywordFilter;
+import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.validation.GameDataRegistry;
 import org.danteplanner.backend.planner.validation.PlannerContentEntityExtractor;
 import org.danteplanner.backend.planner.service.PlannerFilterService;
 import org.danteplanner.backend.user.entity.User;
@@ -76,12 +78,22 @@ class PlannerFilterRebuildIT {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private PlannerContentEntityExtractor extractor;
+
+    @Autowired
+    private GameDataRegistry gameDataRegistry;
+
     private User owner;
 
     private static final String SIX_FLOOR_CONTENT = TestDataFactory.VALID_CONTENT.replace(
             "{\"themePackId\":\"1005\",\"difficulty\":0,\"giftIds\":[]}",
             "{\"themePackId\":\"1005\",\"difficulty\":0,\"giftIds\":[]},"
                     + "{\"themePackId\":\"1006\",\"difficulty\":0,\"giftIds\":[\"9004\"]}");
+
+    private static final String FIFTEEN_FLOORS = IntStream.range(0, 15)
+            .mapToObj(floor -> "{\"themePackId\":\"" + (1001 + floor) + "\",\"giftIds\":[\"" + (9001 + floor) + "\"]}")
+            .collect(Collectors.joining(",", "{\"floorSelections\":[", "]}"));
 
     @BeforeEach
     void setUp() {
@@ -157,7 +169,7 @@ class PlannerFilterRebuildIT {
 
         filterService.rebuildFilters(planner.getId());
 
-        Set<String> expected = PlannerContentEntityExtractor
+        Set<String> expected = extractor
                 .extract(objectMapper.readTree(planner.getContentJson()), MDCategory.fromValue(planner.getCategory()))
                 .stream()
                 .map(ref -> ref.type().name() + ":" + ref.id())
@@ -197,7 +209,7 @@ class PlannerFilterRebuildIT {
         // 9154/19154/29154 are one gift, so the three collapse to a single row.
         assertThat(gifts).containsExactlyInAnyOrder(9154, 9001, 9002);
 
-        Set<String> oracle = PlannerContentEntityExtractor
+        Set<String> oracle = extractor
                 .extract(objectMapper.readTree(content), MDCategory.fromValue(planner.getCategory()))
                 .stream()
                 .filter(ref -> ref.type().name().equals("EGO_GIFT"))
@@ -214,7 +226,7 @@ class PlannerFilterRebuildIT {
     }
 
     private Set<String> oracleRows(Planner planner) throws Exception {
-        return PlannerContentEntityExtractor
+        return extractor
                 .extract(objectMapper.readTree(planner.getContentJson()), MDCategory.fromValue(planner.getCategory()))
                 .stream()
                 .map(ref -> ref.type().name() + ":" + ref.id())
@@ -255,20 +267,16 @@ class PlannerFilterRebuildIT {
 
     @Test
     void rebuildFilters_WhenEachCategoryStoresFifteenFloors_IndexesExactlyTheJavaFloorCount() throws Exception {
-        String fifteenFloors = IntStream.range(0, 15)
-                .mapToObj(floor -> "{\"themePackId\":\"" + (1001 + floor) + "\",\"giftIds\":[\"" + (9001 + floor) + "\"]}")
-                .collect(Collectors.joining(",", "{\"floorSelections\":[", "]}"));
-
         for (MDCategory category : MDCategory.values()) {
             Planner planner = TestDataFactory.planner(owner)
                     .category(category.getValue())
-                    .content(fifteenFloors)
+                    .content(FIFTEEN_FLOORS)
                     .published(true)
                     .save(plannerRepository);
 
             filterService.rebuildFilters(planner.getId());
 
-            Set<String> rendered = IntStream.range(0, category.floorCount())
+            Set<String> rendered = IntStream.range(0, gameDataRegistry.floorRules().floorCount(category))
                     .boxed()
                     .flatMap(floor -> Stream.of(
                             "THEME_PACK:" + (1001 + floor), "EGO_GIFT:" + (9001 + floor)))
@@ -277,5 +285,77 @@ class PlannerFilterRebuildIT {
                     .isEqualTo(rendered)
                     .isEqualTo(oracleRows(planner));
         }
+    }
+
+    private void callProcedure(Planner planner, int floorCount) {
+        new TransactionTemplate(transactionManager).executeWithoutResult(
+                status -> entityFilterRepository.rebuildPlannerFilters(planner.getId(), floorCount));
+    }
+
+    private static Set<String> floorRows(int fromFloor, int toFloor) {
+        return IntStream.range(fromFloor, toFloor)
+                .boxed()
+                .flatMap(floor -> Stream.of("THEME_PACK:" + (1001 + floor), "EGO_GIFT:" + (9001 + floor)))
+                .collect(Collectors.toSet());
+    }
+
+    @Test
+    void rebuildPlannerFilters_WhenCountIsTenOnAFifteenFloorPlanner_IndexesFloorsOneToTen() {
+        Planner planner = TestDataFactory.planner(owner)
+                .category("15F")
+                .content(FIFTEEN_FLOORS)
+                .published(true)
+                .save(plannerRepository);
+
+        callProcedure(planner, 10);
+
+        assertThat(indexedRows(planner)).isEqualTo(floorRows(0, 10));
+    }
+
+    @Test
+    void rebuildPlannerFilters_WhenCountExceedsTheStoredFloors_IndexesEveryStoredFloor() {
+        Planner planner = TestDataFactory.planner(owner)
+                .category("5F")
+                .content(SIX_FLOOR_CONTENT)
+                .published(true)
+                .save(plannerRepository);
+
+        callProcedure(planner, 15);
+
+        assertThat(indexedRows(planner))
+                .contains("THEME_PACK:1001", "THEME_PACK:1005", "THEME_PACK:1006", "EGO_GIFT:9002", "EGO_GIFT:9004");
+    }
+
+    @Test
+    void rebuildPlannerFilters_WhenCountIsZero_IndexesNoFloorButKeepsEquipmentAndTopLevelGifts() {
+        Planner planner = TestDataFactory.planner(owner)
+                .category("15F")
+                .content(SIX_FLOOR_CONTENT)
+                .published(true)
+                .save(plannerRepository);
+
+        callProcedure(planner, 0);
+
+        assertThat(indexedRows(planner))
+                .contains("IDENTITY:10101", "EGO:20101", "EGO_GIFT:9001")
+                .doesNotContain("EGO_GIFT:9002", "EGO_GIFT:9004")
+                .noneMatch(row -> row.startsWith("THEME_PACK:"));
+    }
+
+    @Test
+    void rebuildFilters_WhenARefractedRailwayPlannerIsPublished_KeepsItsNonFloorRows() {
+        Planner planner = TestDataFactory.planner(owner)
+                .plannerType(PlannerType.REFRACTED_RAILWAY)
+                .category("RR_PLACEHOLDER")
+                .content(SIX_FLOOR_CONTENT)
+                .published(true)
+                .save(plannerRepository);
+
+        filterService.rebuildFilters(planner.getId());
+
+        assertThat(indexedRows(planner))
+                .contains("IDENTITY:10101", "EGO:20101", "EGO_GIFT:9001")
+                .doesNotContain("EGO_GIFT:9002", "EGO_GIFT:9004")
+                .noneMatch(row -> row.startsWith("THEME_PACK:"));
     }
 }

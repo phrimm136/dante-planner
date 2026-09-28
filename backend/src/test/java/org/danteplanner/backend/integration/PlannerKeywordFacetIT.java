@@ -419,7 +419,7 @@ class PlannerKeywordFacetIT {
                 planner.getId().toString());
         jdbc().update("UPDATE planner_catalog SET selected_keywords = '[\"Sinking\"]' WHERE planner_id = UUID_TO_BIN(?)",
                 planner.getId().toString());
-        jdbc().update("CALL rebuild_planner_filters(UUID_TO_BIN(?))", planner.getId().toString());
+        filterService.rebuildFilters(planner.getId());
         assertThat(indexedKeywords(planner.getId())).containsExactly("Sinking");
 
         runBackfill();
@@ -434,7 +434,7 @@ class PlannerKeywordFacetIT {
         Planner planner = publishedWithoutColumn("Backfill Legacy Column", List.of("ChargeLoad"));
         jdbc().update("UPDATE planner_content SET selected_keywords = '[\"ChargeLoad\"]' WHERE planner_id = UUID_TO_BIN(?)",
                 planner.getId().toString());
-        jdbc().update("CALL rebuild_planner_filters(UUID_TO_BIN(?))", planner.getId().toString());
+        filterService.rebuildFilters(planner.getId());
         assertThat(indexedKeywords(planner.getId())).containsExactly("ChargeLoad");
 
         runBackfill();

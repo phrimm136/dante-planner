@@ -3,6 +3,10 @@ package org.danteplanner.backend.planner.validation;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
+import org.danteplanner.backend.planner.exception.PlannerValidationException.ValidationError;
+import org.danteplanner.backend.planner.floor.FloorRules;
+import org.danteplanner.backend.planner.floor.Stage;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -14,10 +18,13 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -68,9 +75,13 @@ class PlannerContentValidatorTest {
 
     private static final int VERSION = 7;
 
+    private static final FloorRuleTable FLOOR_RULE_TABLE = new GameDataLoader(new ObjectMapper())
+            .loadFloorRules(Path.of("../static/data", GameDataRegistry.FLOOR_RULES_FILE));
+
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
+        lenient().when(gameDataRegistry.floorRules()).thenReturn(FLOOR_RULE_TABLE);
         validator = new PlannerContentValidator(
                 new StructuralValidator(objectMapper, MAX_CONTENT_SIZE_BYTES, MAX_NOTE_SIZE_BYTES),
                 new CategoryValidator(),
@@ -78,7 +89,8 @@ class PlannerContentValidatorTest {
                 new SkillStateValidator(),
                 new IdReferenceValidator(gameDataRegistry, sinnerIdValidator),
                 new StartBuffValidator(gameDataRegistry),
-                gameDataRegistry);
+                gameDataRegistry,
+                new FloorRules(gameDataRegistry));
 
         // Default per-EGO max so existing tests reach gift/buff/etc. validations
         // without stubbing maxThreadspin individually. Tests that exercise the
@@ -89,11 +101,11 @@ class PlannerContentValidatorTest {
     }
 
     private String validate(String content, String category) {
-        return validator.validate(content, category, VERSION);
+        return validator.validate(content, category, VERSION, Stage.DRAFT);
     }
 
-    private String validate(String content, String category, ValidationPolicy policy) {
-        return validator.validate(content, category, VERSION, policy);
+    private String validate(String content, String category, Stage stage) {
+        return validator.validate(content, category, VERSION, stage);
     }
 
     // ========================================================================
@@ -159,6 +171,12 @@ class PlannerContentValidatorTest {
      */
     private void setupMocksForValidIdsWithoutBuffsAndGifts() {
         setupBaseMocks();
+    }
+
+    private void setupMocksForBoundaryRejectedFloors() {
+        setupMocksForGiftDuplicateFailure();
+        setupStartBuffMocks();
+        setupStartGiftMocks();
     }
 
     /**
@@ -1216,8 +1234,7 @@ class PlannerContentValidatorTest {
         @Test
         @DisplayName("Should throw exception for non-string floor giftIds element")
         void validate_WhenNonStringFloorGiftId_ThrowsException() {
-            // Floor validation fails before buff/gift pool validation
-            setupMocksForValidIdsWithoutBuffsAndGifts();
+            setupMocksForBoundaryRejectedFloors();
             String content = createValidContent().replace(
                     "\"giftIds\": [\"9002\"]",
                     "\"giftIds\": [9002]"
@@ -1600,7 +1617,7 @@ class PlannerContentValidatorTest {
             setupMocksForValidIds();
 
             assertDoesNotThrow(() ->
-                    validate(createValidContent(), "5F", ValidationPolicy.PUBLISH));
+                    validate(createValidContent(), "5F", Stage.PUBLISH));
         }
 
         @Test
@@ -1612,7 +1629,7 @@ class PlannerContentValidatorTest {
                     "{\"difficulty\": 0, \"giftIds\": []}");
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validate(content, "5F", ValidationPolicy.PUBLISH));
+                    () -> validate(content, "5F", Stage.PUBLISH));
 
             assertTrue(ex.getSubErrors().stream().anyMatch(e -> "FLOOR_MISSING_THEME_PACK".equals(e.code())
                             && "floorSelections[0] must have a theme pack selected".equals(e.message())),
@@ -1626,7 +1643,7 @@ class PlannerContentValidatorTest {
             when(gameDataRegistry.hasThemePack(anyString())).thenReturn(false);
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validate(createValidContent(), "5F", ValidationPolicy.PUBLISH));
+                    () -> validate(createValidContent(), "5F", Stage.PUBLISH));
 
             assertTrue(ex.getSubErrors().stream().anyMatch(e -> "THEME_PACK_UNKNOWN_ID".equals(e.code())
                             && "floorSelections[0].themePackId ID '1001' not found or invalid".equals(e.message())),
@@ -1641,7 +1658,7 @@ class PlannerContentValidatorTest {
             when(gameDataRegistry.isGiftAffordableForThemePack(anyString(), anyString())).thenReturn(true);
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validate(createValidContent(), "10F", ValidationPolicy.PUBLISH));
+                    () -> validate(createValidContent(), "10F", Stage.PUBLISH));
 
             assertTrue(ex.getSubErrors().stream().anyMatch(e -> "VALUE_OUT_OF_RANGE".equals(e.code())
                             && "floorSelections[0].difficulty value 0 is out of range [1-1]".equals(e.message())),
@@ -1649,19 +1666,172 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        void validate_WhenPublishPolicyAndDifficultyIsAnIntegralValuedFraction_ReportsItAsANonNumberIs() {
-            setupMocksWithoutThemePack();
-            when(gameDataRegistry.hasThemePack(anyString())).thenReturn(true);
-            when(gameDataRegistry.isGiftAffordableForThemePack(anyString(), anyString())).thenReturn(true);
+        void validate_WhenPublishPolicyAndDifficultyIsBeyondInt_ReportsItOutOfRange() {
+            setupMocksForValidIds();
             String content = createValidContent().replace(
                     "{\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}",
-                    "{\"themePackId\": \"1001\", \"difficulty\": 1.0, \"giftIds\": [\"9002\"]}");
+                    "{\"themePackId\": \"1001\", \"difficulty\": 2147483648, \"giftIds\": [\"9002\"]}");
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validate(content, "10F", ValidationPolicy.PUBLISH));
+                    () -> validate(content, "5F", Stage.PUBLISH));
 
-            assertThat(ex.getSubErrors()).contains(new PlannerValidationException.ValidationError(
-                    "VALUE_OUT_OF_RANGE", "floorSelections[0].difficulty value -1 is out of range [1-1]"));
+            assertThat(ex.getSubErrors()).containsExactly(new ValidationError("VALUE_OUT_OF_RANGE",
+                    "floorSelections[0].difficulty value 2147483648 is out of range [0-1]"));
+        }
+
+        @Test
+        void validate_WhenPublishPolicyAndDifficultyIsAnIntegralValuedFraction_AcceptsItAsAnInteger() {
+            setupMocksForValidIds();
+            String content = createValidContent().replace(
+                    "{\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}",
+                    "{\"themePackId\": \"1001\", \"difficulty\": 0.0, \"giftIds\": [\"9002\"]}");
+
+            assertThat(validate(content, "5F", Stage.PUBLISH)).isEqualTo(content);
+        }
+
+        @Test
+        void validate_WhenPublishedFloorZeroHasAnUnknownPackAndFloorTwoRepeatsAPack_ReportsBoth() {
+            setupMocksForValidIds();
+            when(gameDataRegistry.hasThemePack("9999")).thenReturn(false);
+            String content = createValidContent()
+                    .replace("{\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}",
+                            "{\"themePackId\": \"9999\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}")
+                    .replace("{\"themePackId\": \"1003\", \"difficulty\": 0, \"giftIds\": []}",
+                            "{\"themePackId\": \"1002\", \"difficulty\": 0, \"giftIds\": []}");
+
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
+                    () -> validate(content, "5F", Stage.PUBLISH));
+
+            assertThat(ex.getSubErrors()).containsExactlyInAnyOrder(
+                    new ValidationError("FLOOR_DUPLICATE_THEME_PACK",
+                            "floorSelections[2].themePackId repeats theme pack '1002' from floorSelections[1]"),
+                    new ValidationError("THEME_PACK_UNKNOWN_ID",
+                            "floorSelections[0].themePackId ID '9999' not found or invalid"));
+        }
+
+        @Test
+        void validate_WhenTheThemePackIsUnknown_StillChecksTheFloorsGifts() {
+            setupMocksWithoutThemePack();
+            when(gameDataRegistry.hasThemePack(anyString())).thenReturn(true);
+            when(gameDataRegistry.hasThemePack("+1001")).thenReturn(false);
+            when(gameDataRegistry.hasEgoGift("9999")).thenReturn(false);
+            String content = createValidContent().replace(
+                    "{\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}",
+                    "{\"themePackId\": \"+1001\", \"difficulty\": 0, \"giftIds\": [\"9999\"]}");
+
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
+                    () -> validate(content, "5F"));
+
+            assertThat(ex.getSubErrors()).containsExactly(
+                    new ValidationError("THEME_PACK_UNKNOWN_ID",
+                            "floorSelections[0].themePackId ID '+1001' not found or invalid"),
+                    new ValidationError("FLOOR_UNKNOWN_GIFT_ID",
+                            "floorSelections[0].giftIds ID '9999' not found or invalid"));
+        }
+
+        @Test
+        void validate_WhenAFloorHoldsTwoUnaffordableGifts_ReportsOneViolationPerGift() {
+            setupMocksForUnaffordableGifts();
+            String content = createValidContent().replace(
+                    "\"giftIds\": [\"9002\"]", "\"giftIds\": [\"9002\", \"9003\"]");
+
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
+                    () -> validate(content, "5F"));
+
+            assertThat(ex.getSubErrors()).containsExactly(
+                    new ValidationError("GIFT_NOT_AFFORDABLE", "Gift '9002' is not affordable for theme pack '1001'"),
+                    new ValidationError("GIFT_NOT_AFFORDABLE", "Gift '9003' is not affordable for theme pack '1001'"));
+        }
+
+        @Test
+        void validate_WhenADraftFloorsGiftIdsIsNotAnArray_ReportsTheFieldType() {
+            setupMocksForBoundaryRejectedFloors();
+            String content = createValidContent().replace(
+                    "\"giftIds\": [\"9002\"]", "\"giftIds\": \"9002\"");
+
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
+                    () -> validate(content, "5F"));
+
+            assertThat(ex.getSubErrors()).containsExactly(new ValidationError("INVALID_FIELD_TYPE",
+                    "Field 'floorSelections[0].giftIds' must be array, got string \"9002\""));
+        }
+
+        @Test
+        void validate_WhenFloorsPastTheCountHoldGarbage_AcceptsAndStoresThemUntouched() {
+            setupMocksForValidIds();
+            String content = createValidContent().replace(
+                    "{\"themePackId\": \"1005\", \"difficulty\": 0, \"giftIds\": []}",
+                    "{\"themePackId\": \"1005\", \"difficulty\": 0, \"giftIds\": []}, 7, "
+                            + "{\"themePackId\": 1001, \"difficulty\": \"hard\", \"giftIds\": {}}");
+
+            assertThat(validate(content, "5F", Stage.PUBLISH)).isEqualTo(content);
+        }
+
+        @Test
+        void validate_WhenFloorSelectionsIsNotAnArray_ReportsItOnce() {
+            setupMocksForBoundaryRejectedFloors();
+            String content = createValidContent().replaceAll(
+                    "(?s)\"floorSelections\": \\[.*?\\],\\s*\"sectionNotes\"",
+                    "\"floorSelections\": 5, \"sectionNotes\"");
+
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
+                    () -> validate(content, "5F"));
+
+            assertThat(ex.getSubErrors()).containsExactly(new ValidationError("INVALID_FIELD_TYPE",
+                    "Field 'floorSelections' must be array, got number 5"));
+        }
+
+        @Test
+        void validate_WhenFloorsFiveAndTenBothViolateAtPublish_ReportsThemInFloorOrder() {
+            setupMocksForValidIds();
+            String floors = IntStream.range(0, 15)
+                    .mapToObj(index -> "{\"themePackId\": \"" + (1001 + index) + "\", \"difficulty\": "
+                            + (index == 5 ? 0 : index == 10 ? 1 : index < 10 ? 1 : 3) + ", \"giftIds\": []}")
+                    .collect(Collectors.joining(", ", "\"floorSelections\": [", "], \"sectionNotes\""));
+            String content = createValidContent().replaceAll(
+                    "(?s)\"floorSelections\": \\[.*?\\],\\s*\"sectionNotes\"", Matcher.quoteReplacement(floors));
+
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
+                    () -> validate(content, "15F", Stage.PUBLISH));
+
+            assertThat(ex.getSubErrors()).containsExactly(
+                    new ValidationError("VALUE_OUT_OF_RANGE", "floorSelections[5].difficulty value 0 is out of range [1-1]"),
+                    new ValidationError("VALUE_OUT_OF_RANGE", "floorSelections[10].difficulty value 1 is out of range [3-3]"));
+        }
+
+        @Test
+        void validate_WhenAPackBoundGiftSitsOnAnUnknownPackOverTheRealGameData_ReportsBoth() {
+            GameDataRegistry registry = new GameDataRegistry(new GameDataLoader(objectMapper), "../static/data");
+            registry.init();
+            PlannerContentValidator realValidator = new PlannerContentValidator(
+                    new StructuralValidator(objectMapper, MAX_CONTENT_SIZE_BYTES, MAX_NOTE_SIZE_BYTES),
+                    new CategoryValidator(),
+                    new EquipmentValidator(),
+                    new SkillStateValidator(),
+                    new IdReferenceValidator(registry, new SinnerIdValidator()),
+                    new StartBuffValidator(registry),
+                    registry,
+                    new FloorRules(registry));
+            String content = TestDataFactory.VALID_CONTENT.replace(
+                    "{\"themePackId\":\"1001\",\"difficulty\":0,\"giftIds\":[\"9002\"]}",
+                    "{\"themePackId\":\"9999\",\"difficulty\":0,\"giftIds\":[\"9212\"]}");
+
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
+                    () -> realValidator.validate(content, "5F", VERSION, Stage.PUBLISH));
+
+            assertThat(ex.getSubErrors()).containsExactly(
+                    new ValidationError("THEME_PACK_UNKNOWN_ID",
+                            "floorSelections[0].themePackId ID '9999' not found or invalid"),
+                    new ValidationError("GIFT_NOT_AFFORDABLE", "Gift '9212' is not affordable for theme pack '9999'"));
+        }
+
+        @Test
+        void validate_WhenTheCategoryIsRefractedRailway_RejectsTheCategoryAloneBeforeAnyFloorCheck() {
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
+                    () -> validate(createValidContent(), "RR_PLACEHOLDER"));
+
+            assertEquals("INVALID_CATEGORY", ex.getOriginalCode());
+            assertThat(ex.getSubErrors()).isEmpty();
         }
     }
 
@@ -1700,7 +1870,7 @@ class PlannerContentValidatorTest {
             setupMocksForValidIds();
 
             assertDoesNotThrow(() ->
-                    validate(selecting("[\"Combustion\", \"NotAKeyword\"]"), "5F", ValidationPolicy.PUBLISH));
+                    validate(selecting("[\"Combustion\", \"NotAKeyword\"]"), "5F", Stage.PUBLISH));
         }
 
         @Test
@@ -1708,7 +1878,7 @@ class PlannerContentValidatorTest {
             setupMocksForValidIds();
 
             assertDoesNotThrow(() ->
-                    validate(selecting("[\"Combustion\", \"NotAKeyword\"]"), "5F", ValidationPolicy.DRAFT));
+                    validate(selecting("[\"Combustion\", \"NotAKeyword\"]"), "5F", Stage.DRAFT));
         }
 
         @Test
@@ -1716,7 +1886,7 @@ class PlannerContentValidatorTest {
             setupMocksForValidIds();
 
             assertDoesNotThrow(() ->
-                    validate(selecting("[\"AccelBullet\", \"ChargeLoad\"]"), "5F", ValidationPolicy.PUBLISH));
+                    validate(selecting("[\"AccelBullet\", \"ChargeLoad\"]"), "5F", Stage.PUBLISH));
         }
     }
 }

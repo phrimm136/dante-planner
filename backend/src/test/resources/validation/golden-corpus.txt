@@ -465,16 +465,22 @@ sub 1: INVALID_FIELD_TYPE | Field 'selectedGiftIds[0]' must be string, got numbe
 sub 2: INVALID_FIELD_TYPE | Field 'selectedGiftIds[0]' must be string, got number 9001
 
 ### silence-floor-element-not-object
-accepted
+code: VALIDATION_ERROR
+message: [INVALID_FIELD_TYPE] Field 'floorSelections[0]' must be object, got number 5
+sub 1: INVALID_FIELD_TYPE | Field 'floorSelections[0]' must be object, got number 5
 
 ### silence-floor-gift-ids-not-array
-accepted
+code: VALIDATION_ERROR
+message: [INVALID_FIELD_TYPE] Field 'floorSelections[0].giftIds' must be array, got number 5
+sub 1: INVALID_FIELD_TYPE | Field 'floorSelections[0].giftIds' must be array, got number 5
 
 ### silence-floor-theme-pack-absent-as-draft
 accepted
 
 ### silence-floor-previous-element-not-object
-accepted
+code: VALIDATION_ERROR
+message: [INVALID_FIELD_TYPE] Field 'floorSelections[0]' must be object, got number 5
+sub 1: INVALID_FIELD_TYPE | Field 'floorSelections[0]' must be object, got number 5
 
 ### silence-floor-beyond-category-count
 accepted

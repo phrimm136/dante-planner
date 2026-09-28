@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.planner.validation.ErrorCode;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigInteger;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -108,6 +109,28 @@ class FloorBoundaryTest {
         assertThat(parsed.violations()).extracting(Violation::code, Violation::path).containsExactly(
                 tuple(ErrorCode.INVALID_FIELD_TYPE, "floorSelections[0].difficulty"),
                 tuple(ErrorCode.INVALID_FIELD_TYPE, "floorSelections[1].difficulty"));
+    }
+
+    @Test
+    void parse_WhenDifficultyIsAnIntegralValuedFraction_YieldsThatInteger() {
+        assertSingleFloor(parse("[{\"themePackId\":\"1001\",\"difficulty\":1.0,\"giftIds\":[]}]"),
+                new FloorSelection(ThemePack.chosen("1001"), Difficulty.of(1), List.of()));
+    }
+
+    @Test
+    void parse_WhenDifficultyIsAnIntegerBeyondInt_YieldsAnOutOfRangeDifficulty() {
+        assertSingleFloor(parse("[{\"themePackId\":\"1001\",\"difficulty\":2147483648,\"giftIds\":[]}]"),
+                new FloorSelection(ThemePack.chosen("1001"), Difficulty.outOfRange(new BigInteger("2147483648")),
+                        List.of()));
+    }
+
+    @Test
+    void parse_WhenDifficultyIsANonIntegralNumber_RejectsTheFloorAtTheDifficultyPath() {
+        FloorBoundary.Parsed parsed = parse("[{\"themePackId\":\"1001\",\"difficulty\":1.5,\"giftIds\":[]}]");
+
+        assertThat(parsed.floors()).containsExactly(new ParsedFloor.Rejected(0));
+        assertThat(parsed.violations()).containsExactly(new Violation(ErrorCode.INVALID_FIELD_TYPE,
+                "floorSelections[0].difficulty", "Field 'floorSelections[0].difficulty' must be integer, got number 1.5"));
     }
 
     @Test

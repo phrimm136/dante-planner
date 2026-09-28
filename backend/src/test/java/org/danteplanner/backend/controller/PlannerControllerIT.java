@@ -737,6 +737,30 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
             assertEquals("5F", plannerRepository.findAggregate(planner.getId()).orElseThrow().getCategory());
         }
+
+        @Test
+        void updatePlanner_WhenAPublishedPlannersStoredFloorIsNotAnObjectAndTheCategoryGrows_Returns400() throws Exception {
+            Planner planner = TestDataFactory.planner(testUser)
+                    .status(PlannerStatus.SAVED)
+                    .content(TestDataFactory.VALID_CONTENT.replace(
+                            "{\"themePackId\":\"1005\",\"difficulty\":0,\"giftIds\":[]}",
+                            "{\"themePackId\":\"1005\",\"difficulty\":0,\"giftIds\":[]},"
+                                    + "{\"themePackId\":\"1006\",\"difficulty\":1,\"giftIds\":[]},5"))
+                    .published(true)
+                    .save(plannerRepository);
+            statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
+            catalogService.add(planner);
+            UpsertPlannerRequest request = withCategory(createUpsertRequestFromPlanner(planner), "15F");
+
+            mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
+                            .cookie(session())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+
+            assertEquals("5F", plannerRepository.findAggregate(planner.getId()).orElseThrow().getCategory());
+        }
     }
 
     @Nested

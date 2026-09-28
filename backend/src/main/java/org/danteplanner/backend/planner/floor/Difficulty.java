@@ -1,6 +1,8 @@
 package org.danteplanner.backend.planner.floor;
 
-public sealed interface Difficulty permits Difficulty.Unset, Difficulty.Set {
+import java.math.BigInteger;
+
+public sealed interface Difficulty permits Difficulty.Unset, Difficulty.Set, Difficulty.OutOfRange {
 
     static Difficulty unset() {
         return new Unset();
@@ -10,9 +12,16 @@ public sealed interface Difficulty permits Difficulty.Unset, Difficulty.Set {
         return new Set(value);
     }
 
+    static Difficulty outOfRange(BigInteger value) {
+        return new OutOfRange(value);
+    }
+
     record Unset() implements Difficulty {
     }
 
     record Set(int value) implements Difficulty {
+    }
+
+    record OutOfRange(BigInteger value) implements Difficulty {
     }
 }

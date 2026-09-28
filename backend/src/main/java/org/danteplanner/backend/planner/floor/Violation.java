@@ -5,11 +5,17 @@ import org.danteplanner.backend.planner.validation.ErrorCode;
 
 import java.util.Comparator;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public record Violation(ErrorCode code, String path, String message) {
 
     static final Comparator<Violation> BY_PATH_THEN_CODE =
-            Comparator.comparing(Violation::path).thenComparing(violation -> violation.code().getCode());
+            Comparator.comparingInt((Violation violation) -> floorIndex(violation.path()))
+                    .thenComparing(violation -> pathAfterFloor(violation.path()))
+                    .thenComparing(violation -> violation.code().getCode());
+
+    private static final Pattern FLOOR_PATH = Pattern.compile("^floorSelections\\[(\\d+)](.*)$");
 
     private static final int MAX_VALUE_LOG_LENGTH = 100;
 
@@ -28,9 +34,9 @@ public record Violation(ErrorCode code, String path, String message) {
                 String.format("%s repeats theme pack '%s' from floorSelections[%d]", path, themePackId, firstFloorIndex));
     }
 
-    static Violation valueOutOfRange(String path, int value, int min, int max) {
+    static Violation valueOutOfRange(String path, String value, int min, int max) {
         return new Violation(ErrorCode.VALUE_OUT_OF_RANGE, path,
-                String.format("%s value %d is out of range [%d-%d]", path, value, min, max));
+                String.format("%s value %s is out of range [%d-%d]", path, value, min, max));
     }
 
     static Violation duplicateValue(String path, String value) {
@@ -40,6 +46,16 @@ public record Violation(ErrorCode code, String path, String message) {
 
     static Violation invalidSequence(String path, String detail) {
         return new Violation(ErrorCode.INVALID_SEQUENCE, path, "Invalid sequence: " + detail);
+    }
+
+    private static int floorIndex(String path) {
+        Matcher floor = FLOOR_PATH.matcher(path);
+        return floor.matches() ? Integer.parseInt(floor.group(1)) : -1;
+    }
+
+    private static String pathAfterFloor(String path) {
+        Matcher floor = FLOOR_PATH.matcher(path);
+        return floor.matches() ? floor.group(2) : path;
     }
 
     private static String describe(JsonNode actual) {

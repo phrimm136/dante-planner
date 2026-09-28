@@ -23,11 +23,6 @@ final class JsonTraversal {
     }
 
     @FunctionalInterface
-    interface ObjectElement {
-        void accept(JsonNode element, int index);
-    }
-
-    @FunctionalInterface
     interface ObjectProperty {
         void accept(String key, JsonNode value);
     }
@@ -83,21 +78,6 @@ final class JsonTraversal {
             }
 
             body.accept(element.asInt(), index);
-        }
-    }
-
-    static void eachObject(JsonNode array, int atMost, ObjectElement body) {
-        if (!array.isArray()) {
-            return;
-        }
-
-        for (int index = 0; index < array.size() && index < atMost; index++) {
-            JsonNode element = array.get(index);
-            if (!element.isObject()) {
-                continue;
-            }
-
-            body.accept(element, index);
         }
     }
 

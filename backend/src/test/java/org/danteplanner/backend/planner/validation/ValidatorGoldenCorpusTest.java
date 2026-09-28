@@ -15,16 +15,21 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
+import org.danteplanner.backend.planner.floor.FloorRules;
+import org.danteplanner.backend.planner.floor.Stage;
 import org.danteplanner.backend.planner.exception.PlannerValidationException.ValidationError;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -54,6 +59,8 @@ class ValidatorGoldenCorpusTest {
     private static final Path REWRITE_TARGET =
             Path.of("src/test/resources/validation/golden-corpus.actual.txt");
 
+    private static final Path SHARED_FLOOR_CORPUS = Path.of("../testdata/planner-floor-rules.corpus.json");
+
     private static final String SECTION_MARKER = "### ";
     private static final String ACCEPTED = "accepted";
 
@@ -76,7 +83,8 @@ class ValidatorGoldenCorpusTest {
                 new SkillStateValidator(),
                 idReferenceValidator,
                 new StartBuffValidator(registry),
-                registry);
+                registry,
+                new FloorRules(registry));
         versionValidator = new ContentVersionValidator(registry);
     }
 
@@ -88,7 +96,7 @@ class ValidatorGoldenCorpusTest {
     @DisplayName("mixed-type gift array accumulates both errors")
     void validateGiftIds_WhenArrayMixesTypesAndRepeats_ProducesTypeThenDuplicateError() throws IOException {
         JsonNode root = objectMapper.readTree("{\"selectedGiftIds\":[\"gift_a\",42,\"gift_a\"]}");
-        ValidationContext context = new ValidationContext(ValidationPolicy.DRAFT);
+        ValidationContext context = new ValidationContext(Stage.DRAFT);
 
         idReferenceValidator.validateGiftIds(root, context);
 
@@ -106,7 +114,7 @@ class ValidatorGoldenCorpusTest {
         ValidatorGoldenCorpus.ContentEntry entry = CONTENT_ENTRIES.get(name);
 
         assertThat(outcomeOf(() -> contentValidator.validate(
-                entry.content(), entry.category(), ValidatorGoldenCorpus.MD_CURRENT_VERSION, entry.policy())))
+                entry.content(), entry.category(), ValidatorGoldenCorpus.MD_CURRENT_VERSION, entry.stage())))
                 .as(OUTPUT_CHANGED, name)
                 .isEqualTo(snapshot().get(name));
     }
@@ -120,6 +128,49 @@ class ValidatorGoldenCorpusTest {
                 entry.plannerType(), entry.contentVersion())))
                 .as(OUTPUT_CHANGED, name)
                 .isEqualTo(snapshot().get(name));
+    }
+
+    @ParameterizedTest(name = "{0} at {1}")
+    @MethodSource("sharedFloorCorpusCases")
+    void contentChain_WhenSharedFloorCorpusCaseReplayed_ReportsTheRecordedCodes(String name, Stage stage,
+                                                                                 JsonNode corpusCase) {
+        ObjectNode content = sharedFloorCorpus().path("base").deepCopy();
+        content.set("floorSelections", corpusCase.path("floorSelections"));
+        List<String> expected = StreamSupport.stream(
+                        corpusCase.path("expect").path(stage.tableName()).path("violations").spliterator(), false)
+                .map(violation -> violation.path("code").asText())
+                .sorted()
+                .toList();
+
+        assertThat(codesOf(() -> contentValidator.validate(content.toString(),
+                corpusCase.path("category").asText(), ValidatorGoldenCorpus.MD_CURRENT_VERSION, stage)))
+                .isEqualTo(expected);
+    }
+
+    private static Stream<Arguments> sharedFloorCorpusCases() {
+        return StreamSupport.stream(sharedFloorCorpus().path("cases").spliterator(), false)
+                .flatMap(corpusCase -> Stream.of(Stage.DRAFT, Stage.PUBLISH)
+                        .map(stage -> Arguments.of(corpusCase.path("name").asText(), stage, corpusCase)));
+    }
+
+    private static JsonNode sharedFloorCorpus() {
+        try {
+            return new ObjectMapper().readTree(SHARED_FLOOR_CORPUS.toFile());
+        } catch (IOException e) {
+            throw new UncheckedIOException("could not read " + SHARED_FLOOR_CORPUS, e);
+        }
+    }
+
+    private static List<String> codesOf(Runnable invocation) {
+        try {
+            invocation.run();
+            return List.of();
+        } catch (PlannerValidationException ex) {
+            if (ex.getSubErrors().isEmpty()) {
+                return List.of(ex.getOriginalCode());
+            }
+            return ex.getSubErrors().stream().map(ValidationError::code).sorted().toList();
+        }
     }
 
     @Test
@@ -142,7 +193,7 @@ class ValidatorGoldenCorpusTest {
         StringBuilder file = new StringBuilder();
         for (ValidatorGoldenCorpus.ContentEntry entry : ValidatorGoldenCorpus.contentEntries()) {
             appendSection(file, entry.name(), outcomeOf(() -> contentValidator.validate(
-                    entry.content(), entry.category(), ValidatorGoldenCorpus.MD_CURRENT_VERSION, entry.policy())));
+                    entry.content(), entry.category(), ValidatorGoldenCorpus.MD_CURRENT_VERSION, entry.stage())));
         }
         for (ValidatorGoldenCorpus.VersionEntry entry : ValidatorGoldenCorpus.versionEntries()) {
             appendSection(file, entry.name(), outcomeOf(() -> versionValidator.validateVersionForCreate(

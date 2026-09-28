@@ -40,16 +40,19 @@ public class PlannerDriftReconciler {
     };
 
     private final PlannerDriftAuditRepository auditRepository;
+    private final PlannerContentEntityExtractor entityExtractor;
     private final ObjectMapper objectMapper;
     private final MeterRegistry meterRegistry;
     private final int recommendedThreshold;
 
     public PlannerDriftReconciler(
             PlannerDriftAuditRepository auditRepository,
+            PlannerContentEntityExtractor entityExtractor,
             ObjectMapper objectMapper,
             MeterRegistry meterRegistry,
             @Value("${planner.recommended-threshold}") int recommendedThreshold) {
         this.auditRepository = auditRepository;
+        this.entityExtractor = entityExtractor;
         this.objectMapper = objectMapper;
         this.meterRegistry = meterRegistry;
         this.recommendedThreshold = recommendedThreshold;
@@ -221,7 +224,7 @@ public class PlannerDriftReconciler {
         try {
             Set<String> keys = new HashSet<>();
             for (PlannerContentEntityExtractor.EntityRef ref
-                    : PlannerContentEntityExtractor.extract(content, MDCategory.fromValue(category))) {
+                    : entityExtractor.extract(content, MDCategory.fromValue(category))) {
                 keys.add(ref.type().name() + ":" + ref.id());
             }
             return Optional.of(keys);

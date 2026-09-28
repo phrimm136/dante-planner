@@ -2,8 +2,10 @@ package org.danteplanner.backend.planner.floor;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public final class FloorBoundary {
 
@@ -74,11 +76,27 @@ public final class FloorBoundary {
         if (node.isMissingNode()) {
             return Difficulty.unset();
         }
-        if (!node.isIntegralNumber() || !node.canConvertToInt()) {
+        Optional<BigInteger> integral = integralValue(node);
+        if (integral.isEmpty()) {
             violations.add(Violation.invalidFieldType(path, "integer", node));
             return Difficulty.unset();
         }
-        return Difficulty.of(node.asInt());
+        BigInteger value = integral.get();
+        return value.bitLength() < Integer.SIZE ? Difficulty.of(value.intValue()) : Difficulty.outOfRange(value);
+    }
+
+    private static Optional<BigInteger> integralValue(JsonNode node) {
+        if (node.isIntegralNumber()) {
+            return Optional.of(node.bigIntegerValue());
+        }
+        if (!node.isNumber() || !Double.isFinite(node.doubleValue())) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(node.decimalValue().toBigIntegerExact());
+        } catch (ArithmeticException notIntegral) {
+            return Optional.empty();
+        }
     }
 
     private static List<String> parseGiftIds(JsonNode node, String path, List<Violation> violations) {

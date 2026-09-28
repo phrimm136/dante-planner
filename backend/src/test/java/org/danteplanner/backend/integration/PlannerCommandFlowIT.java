@@ -80,6 +80,9 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
                     + "{\"themePackId\":\"1006\",\"difficulty\":0,\"giftIds\":[\"9004\"]}");
 
     @Autowired
+    private PlannerContentEntityExtractor entityExtractor;
+
+    @Autowired
     private UserRepository userRepository;
 
     @Autowired
@@ -167,7 +170,7 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
     }
 
     private Set<String> extractorOracle(Planner planner) throws Exception {
-        return PlannerContentEntityExtractor.extract(objectMapper.readTree(planner.getContentJson()),
+        return entityExtractor.extract(objectMapper.readTree(planner.getContentJson()),
                         MDCategory.fromValue(planner.getCategory())).stream()
                 .map(ref -> ref.type() + ":" + ref.id())
                 .collect(Collectors.toSet());

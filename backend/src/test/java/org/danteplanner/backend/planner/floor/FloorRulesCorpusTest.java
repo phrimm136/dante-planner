@@ -56,7 +56,7 @@ class FloorRulesCorpusTest {
 
     private static final Set<String> CALLER_CODES = codes(ErrorCode.INVALID_CATEGORY);
 
-    private static final int MODULE_CASE_COUNT = 53;
+    private static final int MODULE_CASE_COUNT = 54;
 
     private final FloorRules rules = rulesOver(TABLE);
 
@@ -233,7 +233,7 @@ class FloorRulesCorpusTest {
 
     @Test
     void admit_WhenNormalFollowsHardWhereNormalIsNotAllowed_ReportsTheRangeAlone() {
-        JsonNode floors = json("[" + IntStream.range(0, MDCategory.F10.floorCount())
+        JsonNode floors = json("[" + IntStream.range(0, TABLE.floorCount(MDCategory.F10))
                 .mapToObj(index -> floor(String.valueOf(1001 + index), index == 3 ? 0 : 1))
                 .reduce((left, right) -> left + "," + right)
                 .orElseThrow() + "]");

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
+import org.danteplanner.backend.planner.floor.Stage;
 import org.junit.jupiter.api.Test;
 
 import java.util.stream.Collectors;
@@ -15,7 +16,7 @@ class SkillStateValidatorTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private final ValidationContext context = new ValidationContext(ValidationPolicy.DRAFT);
+    private final ValidationContext context = new ValidationContext(Stage.DRAFT);
 
     private final SkillStateValidator validator = new SkillStateValidator();
 

@@ -1,24 +1,37 @@
 package org.danteplanner.backend.planner.validation;
 
 import com.fasterxml.jackson.databind.JsonNode;
-
+import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.planner.entity.MDCategory;
+import org.danteplanner.backend.planner.floor.Admission;
+import org.danteplanner.backend.planner.floor.FloorBoundary;
+import org.danteplanner.backend.planner.floor.FloorRules;
+import org.danteplanner.backend.planner.floor.FloorSelection;
+import org.danteplanner.backend.planner.floor.Stage;
+import org.danteplanner.backend.planner.floor.ThemePack;
 import org.danteplanner.backend.shared.entity.ContentEntityType;
+import org.springframework.stereotype.Component;
 
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
-public final class PlannerContentEntityExtractor {
+@Component
+@RequiredArgsConstructor
+public class PlannerContentEntityExtractor {
 
     public record EntityRef(ContentEntityType type, int id) {
     }
 
-    private PlannerContentEntityExtractor() {
-    }
+    private static final Pattern DIGITS_ONLY = Pattern.compile("^[0-9]+$");
 
-    public static Set<EntityRef> extract(JsonNode root, MDCategory category) {
+    private final FloorRules floorRules;
+    private final GameDataRegistry gameDataRegistry;
+
+    public Set<EntityRef> extract(JsonNode root, MDCategory category) {
         Set<EntityRef> refs = new LinkedHashSet<>();
         if (root == null || !root.isObject()) {
             return refs;
@@ -27,8 +40,18 @@ public final class PlannerContentEntityExtractor {
         addIdsFromArray(root.get("selectedGiftIds"), ContentEntityType.EGO_GIFT, refs);
         addIdsFromArray(root.get("observationGiftIds"), ContentEntityType.EGO_GIFT, refs);
         addIdsFromArray(root.get("comprehensiveGiftIds"), ContentEntityType.EGO_GIFT, refs);
-        extractFromFloorSelections(root, category.floorCount(), refs);
+        admittedFloors(root, category).forEach(floor -> extractFromFloor(floor, refs));
         return refs;
+    }
+
+    private List<FloorSelection> admittedFloors(JsonNode root, MDCategory category) {
+        FloorBoundary.Parsed parsed = FloorBoundary.parse(root.path("floorSelections"),
+                gameDataRegistry.floorRules().floorCount(category));
+        return switch (floorRules.admit(parsed, category, Stage.INDEX)) {
+            case Admission.Admitted admitted -> admitted.floors();
+            case Admission.Rejected rejected -> throw new IllegalStateException(
+                    "the index stage runs no floor rule, yet admission was rejected: " + rejected.violations());
+        };
     }
 
     private static void extractFromEquipment(JsonNode root, Set<EntityRef> refs) {
@@ -59,18 +82,10 @@ public final class PlannerContentEntityExtractor {
         }
     }
 
-    private static void extractFromFloorSelections(JsonNode root, int floorCount, Set<EntityRef> refs) {
-        JsonNode floorSelections = root.get("floorSelections");
-        if (floorSelections == null || !floorSelections.isArray()) {
-            return;
-        }
-        for (int index = 0; index < floorSelections.size() && index < floorCount; index++) {
-            JsonNode floor = floorSelections.get(index);
-            if (floor == null || !floor.isObject()) {
-                continue;
-            }
-            addIdsFromArray(floor.get("giftIds"), ContentEntityType.EGO_GIFT, refs);
-            addId(floor.get("themePackId"), ContentEntityType.THEME_PACK, refs);
+    private static void extractFromFloor(FloorSelection floor, Set<EntityRef> refs) {
+        floor.giftIds().forEach(giftId -> addId(giftId, ContentEntityType.EGO_GIFT, refs));
+        if (floor.themePack() instanceof ThemePack.Chosen(String themePackId)) {
+            addId(themePackId, ContentEntityType.THEME_PACK, refs);
         }
     }
 
@@ -87,8 +102,11 @@ public final class PlannerContentEntityExtractor {
         if (idNode == null || idNode.isNull()) {
             return;
         }
-        String raw = idNode.asText();
-        if (raw.isEmpty()) {
+        addId(idNode.asText(), type, refs);
+    }
+
+    private static void addId(String raw, ContentEntityType type, Set<EntityRef> refs) {
+        if (!DIGITS_ONLY.matcher(raw).matches()) {
             return;
         }
         try {

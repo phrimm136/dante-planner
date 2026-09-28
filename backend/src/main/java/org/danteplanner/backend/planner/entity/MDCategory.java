@@ -6,20 +6,14 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum MDCategory implements ValuedEnum {
-    F5("5F", 5),
-    F10("10F", 10),
-    F15("15F", 15);
+    F5("5F"),
+    F10("10F"),
+    F15("15F");
 
     private final String value;
-    private final int floorCount;
 
-    MDCategory(String value, int floorCount) {
+    MDCategory(String value) {
         this.value = value;
-        this.floorCount = floorCount;
-    }
-
-    public int floorCount() {
-        return floorCount;
     }
 
     @JsonValue

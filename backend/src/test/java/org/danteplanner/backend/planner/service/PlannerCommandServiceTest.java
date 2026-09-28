@@ -16,6 +16,7 @@ import org.danteplanner.backend.planner.entity.PlannerModeration;
 import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.planner.floor.Stage;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerLimitExceededException;
@@ -29,7 +30,6 @@ import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.planner.validation.ContentVersionValidator;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
-import org.danteplanner.backend.planner.validation.ValidationPolicy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -114,7 +114,6 @@ class PlannerCommandServiceTest {
         deviceId = UUID.randomUUID();
 
         when(userService.findById(testUser.getId())).thenReturn(testUser);
-        when(contentValidator.validate(any(), any(), anyInt())).thenAnswer(invocation -> invocation.getArgument(0));
         when(contentValidator.validate(any(), any(), anyInt(), any())).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
@@ -270,7 +269,7 @@ class PlannerCommandServiceTest {
             when(userService.findById(testUser.getId())).thenReturn(testUser);
             // Only this exact content-and-category pair is rejected, so a validation call carrying
             // anything else leaves the stub unmatched and the create completes without throwing.
-            when(contentValidator.validate(request.content(), request.category(), request.contentVersion()))
+            when(contentValidator.validate(request.content(), request.category(), request.contentVersion(), Stage.DRAFT))
                     .thenThrow(new PlannerValidationException("INVALID_CONTENT", "Rejected content"));
 
             // Act & Assert
@@ -300,7 +299,7 @@ class PlannerCommandServiceTest {
 
             assertEquals("INVALID_CONTENT_VERSION", exception.getOriginalCode());
             verify(plannerRepository, never()).insert(any());
-            verify(contentValidator, never()).validate(anyString(), anyString(), anyInt());
+            verify(contentValidator, never()).validate(anyString(), anyString(), anyInt(), any());
         }
     }
 
@@ -321,6 +320,7 @@ class PlannerCommandServiceTest {
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
             when(contentValidator.isSameDocument(stored, stored)).thenReturn(true);
+            when(contentValidator.validateFloorRules(stored, "10F", Stage.DRAFT)).thenReturn(stored);
 
             UpsertResult result = commandService.upsertPlanner(
                     testUser.getId(), deviceId, planner.getId(), resending(planner, "10F", stored), false);
@@ -328,7 +328,7 @@ class PlannerCommandServiceTest {
             assertEquals("10F", result.response().category());
             assertEquals(stored, planner.getContentJson());
             verify(contentValidator, never()).validate(any(), any(), anyInt(), any());
-            verify(contentValidator).validateFloorRules(stored, "10F", ValidationPolicy.forPublicationState(false));
+            verify(contentValidator).validateFloorRules(stored, "10F", Stage.DRAFT);
         }
 
         @Test
@@ -342,8 +342,7 @@ class PlannerCommandServiceTest {
             commandService.upsertPlanner(
                     testUser.getId(), deviceId, planner.getId(), resending(planner, "10F", edited), false);
 
-            verify(contentValidator).validate(edited, "10F", planner.getContentVersion(),
-                    ValidationPolicy.forPublicationState(false));
+            verify(contentValidator).validate(edited, "10F", planner.getContentVersion(), Stage.DRAFT);
         }
 
         @Test
@@ -358,7 +357,7 @@ class PlannerCommandServiceTest {
 
             commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(), request, false);
 
-            verify(contentValidator).validate(stored, "10F", 7, ValidationPolicy.forPublicationState(false));
+            verify(contentValidator).validate(stored, "10F", 7, Stage.DRAFT);
             verify(contentValidator, never()).validateFloorRules(any(), any(), any());
         }
 
@@ -375,8 +374,37 @@ class PlannerCommandServiceTest {
 
             commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(), retitled, false);
 
-            verify(contentValidator).validate(stored, "5F", planner.getContentVersion(),
-                    ValidationPolicy.forPublicationState(false));
+            verify(contentValidator).validate(stored, "5F", planner.getContentVersion(), Stage.DRAFT);
+        }
+
+        @Test
+        void upsertPlanner_WhenAPublishedPlannersCategoryChanges_AdmitsAtPublishAndStoresTheNormalizedContent() {
+            Planner planner = testPlanner(1L, true);
+            String stored = planner.getContentJson();
+            String normalized = "{\"normalized\": true}";
+            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+                    .thenReturn(Optional.of(planner));
+            when(contentValidator.isSameDocument(stored, stored)).thenReturn(true);
+            when(contentValidator.validateFloorRules(stored, "10F", Stage.PUBLISH)).thenReturn(normalized);
+
+            commandService.upsertPlanner(
+                    testUser.getId(), deviceId, planner.getId(), resending(planner, "10F", stored), false);
+
+            assertEquals(normalized, planner.getContentJson());
+            assertEquals("10F", planner.getCategory());
+        }
+
+        @Test
+        void upsertPlanner_WhenAPublishedPlannersContentChanges_ValidatesAtPublish() {
+            Planner planner = testPlanner(1L, true);
+            String edited = "{\"edited\": true}";
+            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+                    .thenReturn(Optional.of(planner));
+
+            commandService.upsertPlanner(
+                    testUser.getId(), deviceId, planner.getId(), resending(planner, "5F", edited), false);
+
+            verify(contentValidator).validate(edited, "5F", planner.getContentVersion(), Stage.PUBLISH);
         }
     }
 

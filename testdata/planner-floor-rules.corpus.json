@@ -434,7 +434,7 @@
       ]
     },
     "divergentCount": 35,
-    "caseCount": 54,
+    "caseCount": 55,
     "openCases": []
   },
   "cases": [
@@ -10663,6 +10663,143 @@
         11,
         "unnamed:fe-never-reports-floor-duplicate-gifts",
         "unnamed:category-change-skips-gift-uniqueness"
+      ]
+    },
+    {
+      "name": "bi14-pack-bound-gift-on-unknown-pack",
+      "category": "5F",
+      "sources": [
+        "contract:rules-independent"
+      ],
+      "floorSelections": [
+        {
+          "themePackId": "9999",
+          "difficulty": 0,
+          "giftIds": [
+            "9004"
+          ]
+        },
+        {
+          "themePackId": "1002",
+          "difficulty": 0,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1003",
+          "difficulty": 0,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1004",
+          "difficulty": 0,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1005",
+          "difficulty": 0,
+          "giftIds": []
+        }
+      ],
+      "captured": {
+        "be.validate.DRAFT": {
+          "ok": false,
+          "violations": [
+            {
+              "code": "GIFT_NOT_AFFORDABLE",
+              "path": "floorSelections[0].giftIds[0]"
+            },
+            {
+              "code": "THEME_PACK_UNKNOWN_ID",
+              "path": "floorSelections[0].themePackId"
+            }
+          ]
+        },
+        "be.validate.PUBLISH": {
+          "ok": false,
+          "violations": [
+            {
+              "code": "GIFT_NOT_AFFORDABLE",
+              "path": "floorSelections[0].giftIds[0]"
+            },
+            {
+              "code": "THEME_PACK_UNKNOWN_ID",
+              "path": "floorSelections[0].themePackId"
+            }
+          ]
+        },
+        "be.validateFloorRules.DRAFT": {
+          "ok": true,
+          "violations": []
+        },
+        "be.validateFloorRules.PUBLISH": {
+          "ok": true,
+          "violations": []
+        },
+        "fe.schema": "NOT-CAPTURED",
+        "fe.draftSave": "NOT-CAPTURED",
+        "fe.publish": "NOT-CAPTURED",
+        "index.java": [
+          "EGO_GIFT:9004",
+          "THEME_PACK:1002",
+          "THEME_PACK:1003",
+          "THEME_PACK:1004",
+          "THEME_PACK:1005",
+          "THEME_PACK:9999"
+        ],
+        "index.sql": "NOT-CAPTURED"
+      },
+      "divergent": false,
+      "divergences": [],
+      "expect": {
+        "draft": {
+          "ok": false,
+          "violations": [
+            {
+              "code": "GIFT_NOT_AFFORDABLE",
+              "path": "floorSelections[0].giftIds[0]"
+            },
+            {
+              "code": "THEME_PACK_UNKNOWN_ID",
+              "path": "floorSelections[0].themePackId"
+            }
+          ]
+        },
+        "publish": {
+          "ok": false,
+          "violations": [
+            {
+              "code": "GIFT_NOT_AFFORDABLE",
+              "path": "floorSelections[0].giftIds[0]"
+            },
+            {
+              "code": "THEME_PACK_UNKNOWN_ID",
+              "path": "floorSelections[0].themePackId"
+            }
+          ]
+        },
+        "index": {
+          "ok": true,
+          "floors": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "violations": [],
+          "rows": [
+            "EGO_GIFT:9004",
+            "THEME_PACK:1002",
+            "THEME_PACK:1003",
+            "THEME_PACK:1004",
+            "THEME_PACK:1005",
+            "THEME_PACK:9999"
+          ]
+        }
+      },
+      "verdictRow": [
+        null,
+        "unnamed:be-unknown-pack-skips-floor-gift-checks"
       ]
     }
   ]

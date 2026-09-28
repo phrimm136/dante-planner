@@ -2,9 +2,13 @@ package org.danteplanner.backend.planner.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.planner.entity.MDCategory;
+import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.event.PlannerFilterRebuildEvent;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
+import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository.FloorScopeRow;
 import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository;
+import org.danteplanner.backend.planner.validation.GameDataRegistry;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -26,6 +30,7 @@ public class PlannerFilterService {
     private final PlannerEntityFilterRepository entityFilterRepository;
     private final PlannerKeywordFilterRepository keywordFilterRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final GameDataRegistry gameDataRegistry;
 
     public void requestRebuild(UUID plannerId) {
         eventPublisher.publishEvent(PlannerFilterRebuildEvent.rebuild(plannerId));
@@ -47,7 +52,15 @@ public class PlannerFilterService {
 
     @Transactional
     public void rebuildFilters(UUID plannerId) {
-        entityFilterRepository.rebuildPlannerFilters(plannerId);
+        int floorCount = entityFilterRepository.floorScopeOf(plannerId).map(this::floorCountOf).orElse(0);
+        entityFilterRepository.rebuildPlannerFilters(plannerId, floorCount);
+    }
+
+    private int floorCountOf(FloorScopeRow scope) {
+        if (scope.getPlannerType() != PlannerType.MIRROR_DUNGEON) {
+            return 0;
+        }
+        return gameDataRegistry.floorRules().floorCount(MDCategory.fromValue(scope.getCategory()));
     }
 
     @Transactional

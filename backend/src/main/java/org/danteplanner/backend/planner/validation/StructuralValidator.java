@@ -95,7 +95,6 @@ class StructuralValidator {
     void validateFieldTypes(JsonNode root, ValidationContext context) {
         validateType(root, "selectedKeywords", JsonNode::isArray, "array", context);
         validateType(root, "deploymentOrder", JsonNode::isArray, "array", context);
-        validateType(root, "floorSelections", JsonNode::isArray, "array", context);
         validateType(root, "equipment", JsonNode::isObject, "object", context);
         validateType(root, "sectionNotes", JsonNode::isObject, "object", context);
 

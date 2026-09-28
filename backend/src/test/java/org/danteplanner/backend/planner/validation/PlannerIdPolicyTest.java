@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
+import org.danteplanner.backend.planner.floor.FloorRules;
 import org.danteplanner.backend.planner.exception.PlannerValidationException.ValidationError;
 import org.danteplanner.backend.support.TestDataFactory;
+import org.danteplanner.backend.planner.floor.Stage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -58,7 +60,8 @@ class PlannerIdPolicyTest {
                 new SkillStateValidator(),
                 new IdReferenceValidator(registry, new SinnerIdValidator()),
                 new StartBuffValidator(registry),
-                registry);
+                registry,
+                new FloorRules(registry));
     }
 
     private static ObjectNode validContent() throws IOException {
@@ -80,7 +83,7 @@ class PlannerIdPolicyTest {
         ObjectNode content = validContent();
         content.putArray("observationGiftIds").add("9247").add("19247");
 
-        String stored = validator.validate(content.toString(), "5F", CURRENT_SEASON);
+        String stored = validator.validate(content.toString(), "5F", CURRENT_SEASON, Stage.DRAFT);
 
         assertThat(MAPPER.readTree(stored).path("observationGiftIds"))
                 .isEqualTo(MAPPER.createArrayNode().add("9002").add("19002"));
@@ -93,7 +96,7 @@ class PlannerIdPolicyTest {
         ObjectNode egos = (ObjectNode) content.path("equipment").path("01").path("egos");
         egos.putObject("TETH").put("id", "20199").put("threadspin", 4);
 
-        String stored = validator.validate(content.toString(), "5F", CURRENT_SEASON);
+        String stored = validator.validate(content.toString(), "5F", CURRENT_SEASON, Stage.DRAFT);
 
         assertThat(MAPPER.readTree(stored).path("equipment").path("01").path("egos").has("TETH")).isFalse();
         assertThat(MAPPER.readTree(stored)).isEqualTo(validContent());
@@ -103,20 +106,20 @@ class PlannerIdPolicyTest {
     void validate_WhenNoIdIsMigrated_ReturnsTheContentVerbatim() throws IOException {
         PlannerContentValidator validator = validatorOver("{\"egoGift\":{\"rename\":{\"9247\":\"9002\"}}}");
 
-        String stored = validator.validate(TestDataFactory.VALID_CONTENT, "5F", CURRENT_SEASON);
+        String stored = validator.validate(TestDataFactory.VALID_CONTENT, "5F", CURRENT_SEASON, Stage.DRAFT);
 
         assertThat(stored).isSameAs(TestDataFactory.VALID_CONTENT);
     }
 
     @ParameterizedTest
-    @EnumSource(ValidationPolicy.class)
-    void validate_WhenIdIsNeitherKnownNorMigrated_RejectsTheReference(ValidationPolicy policy) throws IOException {
+    @EnumSource(value = Stage.class, names = {"DRAFT", "PUBLISH"})
+    void validate_WhenIdIsNeitherKnownNorMigrated_RejectsTheReference(Stage stage) throws IOException {
         PlannerContentValidator validator = validatorOver("{\"egoGift\":{\"rename\":{\"9247\":\"9002\"}}}");
         ObjectNode content = validContent();
         content.putArray("observationGiftIds").add("9899");
 
         PlannerValidationException ex = rejection(
-                () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, policy));
+                () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, stage));
 
         assertThat(ex.getSubErrors()).extracting(ValidationError::code).containsExactly("GIFT_UNKNOWN_ID");
         assertThat(ex.getSubErrors().get(0).message()).contains("9899");
@@ -127,8 +130,8 @@ class PlannerIdPolicyTest {
         PlannerContentValidator validator = validatorWithPreviousSeasonLackingBuff("201");
         String content = TestDataFactory.VALID_CONTENT;
 
-        String stored = validator.validate(content, "5F", CURRENT_SEASON);
-        PlannerValidationException ex = rejection(() -> validator.validate(content, "5F", PREVIOUS_SEASON));
+        String stored = validator.validate(content, "5F", CURRENT_SEASON, Stage.DRAFT);
+        PlannerValidationException ex = rejection(() -> validator.validate(content, "5F", PREVIOUS_SEASON, Stage.DRAFT));
 
         assertThat(stored).isSameAs(content);
         assertThat(ex.getSubErrors()).extracting(ValidationError::code).containsExactly("START_BUFF_UNKNOWN_ID");
@@ -139,21 +142,21 @@ class PlannerIdPolicyTest {
     void validate_WhenPlannerDeclaresASeasonWithNoData_RejectsWithUnknownContentVersion() throws IOException {
         PlannerContentValidator validator = validatorOver(null);
 
-        assertThatThrownBy(() -> validator.validate(TestDataFactory.VALID_CONTENT, "5F", 99))
+        assertThatThrownBy(() -> validator.validate(TestDataFactory.VALID_CONTENT, "5F", 99, Stage.DRAFT))
                 .isInstanceOfSatisfying(PlannerValidationException.class, ex -> assertThat(ex.getSubErrors())
                         .extracting(ValidationError::code)
                         .containsExactly("UNKNOWN_CONTENT_VERSION"));
     }
 
     @ParameterizedTest
-    @EnumSource(ValidationPolicy.class)
-    void validate_WhenZayinSlotHoldsADroppedEgo_RejectsItAsAnUnknownEgo(ValidationPolicy policy) throws IOException {
+    @EnumSource(value = Stage.class, names = {"DRAFT", "PUBLISH"})
+    void validate_WhenZayinSlotHoldsADroppedEgo_RejectsItAsAnUnknownEgo(Stage stage) throws IOException {
         PlannerContentValidator validator = validatorOver("{\"ego\":{\"drop\":[\"20199\"]}}");
         ObjectNode content = validContent();
         ((ObjectNode) content.path("equipment").path("01").path("egos").path("ZAYIN")).put("id", "20199");
 
         PlannerValidationException ex = rejection(
-                () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, policy));
+                () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, stage));
 
         assertThat(ex.getStatusCode().value()).isEqualTo(400);
         assertThat(ex.getSubErrors()).extracting(ValidationError::code).containsExactly("EGO_UNKNOWN_ID");
@@ -166,9 +169,9 @@ class PlannerIdPolicyTest {
         ObjectNode content = validContent();
         ((ArrayNode) content.path("floorSelections")).set(4, MAPPER.readTree("{\"difficulty\":0,\"giftIds\":[]}"));
 
-        String stored = validator.validate(content.toString(), "5F", CURRENT_SEASON, ValidationPolicy.DRAFT);
+        String stored = validator.validate(content.toString(), "5F", CURRENT_SEASON, Stage.DRAFT);
         PlannerValidationException ex = rejection(
-                () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, ValidationPolicy.PUBLISH));
+                () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, Stage.PUBLISH));
 
         assertThat(stored).isEqualTo(content.toString());
         assertThat(ex.getStatusCode().value()).isEqualTo(400);
@@ -182,7 +185,7 @@ class PlannerIdPolicyTest {
         content.set("floorSelections", completeFloors(3));
 
         PlannerValidationException ex = rejection(
-                () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, ValidationPolicy.PUBLISH));
+                () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, Stage.PUBLISH));
 
         assertThat(ex.getSubErrors()).containsExactly(
                 new ValidationError("FLOOR_MISSING_THEME_PACK", "floorSelections[3] must have a theme pack selected"),
@@ -190,7 +193,7 @@ class PlannerIdPolicyTest {
     }
 
     @Test
-    void validate_WhenAFloorEntryIsNullOnPublish_ReportsItAsAMissingFloor() throws IOException {
+    void validate_WhenAFloorEntryIsNullOnPublish_ReportsItAsANonObjectFloor() throws IOException {
         PlannerContentValidator validator = validatorOver(null);
         ObjectNode content = validContent();
         ArrayNode floors = completeFloors(5);
@@ -198,10 +201,10 @@ class PlannerIdPolicyTest {
         content.set("floorSelections", floors);
 
         PlannerValidationException ex = rejection(
-                () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, ValidationPolicy.PUBLISH));
+                () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, Stage.PUBLISH));
 
         assertThat(ex.getSubErrors()).containsExactly(
-                new ValidationError("FLOOR_MISSING_THEME_PACK", "floorSelections[1] must have a theme pack selected"));
+                new ValidationError("INVALID_FIELD_TYPE", "Field 'floorSelections[1]' must be object, got null"));
     }
 
     @Test
@@ -210,7 +213,7 @@ class PlannerIdPolicyTest {
         ObjectNode content = validContent();
         content.set("floorSelections", completeFloors(3));
 
-        String stored = validator.validate(content.toString(), "5F", CURRENT_SEASON, ValidationPolicy.DRAFT);
+        String stored = validator.validate(content.toString(), "5F", CURRENT_SEASON, Stage.DRAFT);
 
         assertThat(stored).isEqualTo(content.toString());
     }
@@ -222,7 +225,7 @@ class PlannerIdPolicyTest {
         content.set("floorSelections", completeFloors(0));
 
         PlannerValidationException ex = rejection(
-                () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, ValidationPolicy.PUBLISH));
+                () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, Stage.PUBLISH));
 
         assertThat(ex.getSubErrors()).containsExactly(
                 new ValidationError("FLOOR_MISSING_THEME_PACK", "floorSelections[0] must have a theme pack selected"),
@@ -233,14 +236,14 @@ class PlannerIdPolicyTest {
     }
 
     @ParameterizedTest
-    @EnumSource(ValidationPolicy.class)
-    void validate_WhenAFloorRepeatsAnEarlierThemePack_ReportsTheRepeat(ValidationPolicy policy) throws IOException {
+    @EnumSource(value = Stage.class, names = {"DRAFT", "PUBLISH"})
+    void validate_WhenAFloorRepeatsAnEarlierThemePack_ReportsTheRepeat(Stage stage) throws IOException {
         PlannerContentValidator validator = validatorOver(null);
         ObjectNode content = validContent();
         content.set("floorSelections", floorsOn("1001", "1002", "1001", "1003", "1004"));
 
         PlannerValidationException ex = rejection(
-                () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, policy));
+                () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, stage));
 
         assertThat(ex.getSubErrors()).containsExactly(new ValidationError("FLOOR_DUPLICATE_THEME_PACK",
                 "floorSelections[2].themePackId repeats theme pack '1001' from floorSelections[0]"));
@@ -253,7 +256,7 @@ class PlannerIdPolicyTest {
         content.set("floorSelections", floorsOn("1001", "1001", "1001"));
 
         PlannerValidationException ex = rejection(
-                () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, ValidationPolicy.DRAFT));
+                () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, Stage.DRAFT));
 
         assertThat(ex.getSubErrors()).containsExactly(
                 new ValidationError("FLOOR_DUPLICATE_THEME_PACK",
@@ -269,7 +272,7 @@ class PlannerIdPolicyTest {
         content.set("floorSelections",
                 MAPPER.readTree("[{\"difficulty\":0,\"giftIds\":[]},{\"difficulty\":0,\"giftIds\":[]}]"));
 
-        String stored = validator.validate(content.toString(), "5F", CURRENT_SEASON, ValidationPolicy.DRAFT);
+        String stored = validator.validate(content.toString(), "5F", CURRENT_SEASON, Stage.DRAFT);
 
         assertThat(stored).isEqualTo(content.toString());
     }
