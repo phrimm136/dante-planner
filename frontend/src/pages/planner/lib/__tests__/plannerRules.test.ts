@@ -5,7 +5,16 @@
  */
 
 import { describe, it, expect } from 'vitest'
-import { isGiftAffordableForThemePack, getUnaffordableGiftIds } from '../plannerRules'
+import {
+  canSelectFloorThemePack,
+  isGiftAffordableForThemePack,
+  getUnaffordableGiftIds,
+  offeredFloorDifficulties,
+  usedFloorThemePackIds,
+} from '../plannerRules'
+import { DUNGEON_IDX, ThemePackIdSchema } from '@/shared/gameData'
+import type { EncodedGiftId, ThemePackId } from '@/shared/gameData'
+import type { FloorThemeSelection } from '@/pages/themePack'
 import type { EGOGiftSpec } from '@/pages/egoGift'
 import { asEncodedGiftId } from '@/test-utils/fixtures'
 
@@ -75,5 +84,68 @@ describe('getUnaffordableGiftIds', () => {
   it('gift not in spec is silently skipped', () => {
     const result = getUnaffordableGiftIds(new Set([ENCODED_9999]), '1110', spec)
     expect(result).toEqual([])
+  })
+})
+
+// ============================================================================
+// Floor selection rules the editor offers
+// ============================================================================
+
+function floorsWith(packs: (ThemePackId | '' | null)[]): FloorThemeSelection[] {
+  return packs.map((themePackId) => ({
+    themePackId: themePackId as ThemePackId | null,
+    difficulty: DUNGEON_IDX.HARD,
+    giftIds: new Set<EncodedGiftId>(),
+  }))
+}
+
+describe('offeredFloorDifficulties', () => {
+  it('offers HARD only on floor 1 of a 10F planner', () => {
+    expect(offeredFloorDifficulties('10F', 0, true)).toEqual([DUNGEON_IDX.HARD])
+  })
+
+  it('offers NORMAL and HARD on floor 1 of a 5F planner', () => {
+    expect(offeredFloorDifficulties('5F', 0, true)).toEqual([DUNGEON_IDX.NORMAL, DUNGEON_IDX.HARD])
+  })
+
+  it('offers HARD only after a HARD floor on a 5F planner', () => {
+    expect(offeredFloorDifficulties('5F', 1, false)).toEqual([DUNGEON_IDX.HARD])
+  })
+
+  it('offers EXTREME only on floor 11 of a 15F planner', () => {
+    expect(offeredFloorDifficulties('15F', 10, false)).toEqual([DUNGEON_IDX.EXTREME])
+  })
+
+  it('offers nothing past the category floor count', () => {
+    expect(offeredFloorDifficulties('5F', 5, true)).toEqual([])
+  })
+})
+
+describe('canSelectFloorThemePack', () => {
+  it('treats an empty-string pack on the previous floor as not chosen', () => {
+    expect(canSelectFloorThemePack(1, floorsWith(['']))).toBe(false)
+  })
+
+  it('allows a floor whose previous floor holds a pack', () => {
+    expect(canSelectFloorThemePack(1, floorsWith([ThemePackIdSchema.parse('1001')]))).toBe(true)
+  })
+})
+
+describe('usedFloorThemePackIds', () => {
+  it('ignores packs on floors past the category count', () => {
+    const floors = floorsWith([
+      ThemePackIdSchema.parse('1001'),
+      null,
+      null,
+      null,
+      null,
+      ThemePackIdSchema.parse('1006'),
+    ])
+    expect(usedFloorThemePackIds(floors, 1, 5)).toEqual(['1001'])
+  })
+
+  it('excludes the floor being edited', () => {
+    const floors = floorsWith([ThemePackIdSchema.parse('1001'), ThemePackIdSchema.parse('1002')])
+    expect(usedFloorThemePackIds(floors, 0, 5)).toEqual(['1002'])
   })
 })

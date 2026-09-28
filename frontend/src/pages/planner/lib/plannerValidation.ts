@@ -2,25 +2,24 @@ import {
   EGO_TYPES,
   REQUIRED_EGO_TYPE,
   OFFENSIVE_SKILL_SLOTS,
-  FLOOR_COUNTS,
-  ALLOWED_FLOOR_DIFFICULTIES,
-  DUNGEON_NAME_BY_IDX,
   PLANNER_KEYWORDS,
+  allowedDifficulties,
+  floorCount,
   migrateKeywords,
   EncodedGiftIdSchema,
 } from '@/shared/gameData'
 import { MAX_NOTE_BYTES } from '@/lib/constants'
 import { decodeGiftSelection, giftDisplayName, hasGiftId } from '@/pages/egoGift'
 import { measureDocBytes } from '@/shared/noteEditor'
+import { admitFloors, parseFloors } from './floorRules'
 import { getUnaffordableGiftIds } from './plannerRules'
-import { toUserFriendlyError } from './plannerValidationErrors'
 import type { JSONContent } from '@tiptap/core'
 import { isMDPlanner } from '../types/PlannerTypes'
 import type { MDPlannerContent, SaveablePlanner } from '../types/PlannerTypes'
-import type { FloorThemeSelection } from '@/pages/themePack'
 import type { SinnerEquipment, SkillEAState } from '../types/DeckTypes'
-import type { MDCategory } from '@/shared/gameData'
+import type { EncodedGiftId, FloorRuleStage, MDCategory } from '@/shared/gameData'
 import type { EGOGiftSpec } from '@/pages/egoGift'
+import type { FloorSelectionValue } from './floorRules'
 import type {
   PlannerValidationError,
   EquipmentValidationError,
@@ -29,8 +28,10 @@ import type {
   GiftValidationError,
   BuffValidationError,
   StartGiftValidationError,
-  FloorValidationError,
-  DifficultyValidationError,
+  FloorRuleValidationError,
+  DifficultyOutOfRangeValidationError,
+  FloorUnknownGiftValidationError,
+  GiftNotAffordableValidationError,
   KeywordValidationError,
   EntityIdValidationError,
 } from './plannerValidationErrors'
@@ -376,170 +377,6 @@ export function validateStartGiftSelection(
   return errors
 }
 
-export function validateFloorThemePacksForSave(
-  floorSelections: FloorThemeSelection[],
-  floorCount: number,
-): FloorValidationError[] {
-  const errors: FloorValidationError[] = []
-
-  const seenThemePackIds = new Map<string, number>()
-
-  for (let i = 0; i < floorCount; i++) {
-    const floor = floorSelections[i]
-    const floorNumber = i + 1
-
-    if (!floor?.themePackId) {
-      errors.push({
-        code: 'FLOOR_MISSING_THEME_PACK',
-        message: `Floor ${floorNumber} must have a theme pack selected`,
-        field: `floorSelections[${i}].themePackId`,
-        floorIndex: i,
-        floorNumber,
-      })
-      continue
-    }
-
-    if (i > 0) {
-      const previousFloor = floorSelections[i - 1]
-      if (!previousFloor?.themePackId) {
-        errors.push({
-          code: 'FLOOR_PREREQUISITE_VIOLATION',
-          message: `Floor ${floorNumber} cannot have a theme pack because Floor ${i} is missing one`,
-          field: `floorSelections[${i}].themePackId`,
-          floorIndex: i,
-          floorNumber,
-          context: { previousFloorIndex: i - 1 },
-        })
-      }
-    }
-
-    const firstFloorWithThisPack = seenThemePackIds.get(floor.themePackId)
-    if (firstFloorWithThisPack !== undefined) {
-      errors.push({
-        code: 'FLOOR_DUPLICATE_THEME_PACK',
-        message: `Floor ${floorNumber} has duplicate theme pack '${floor.themePackId}' (already used on Floor ${firstFloorWithThisPack + 1})`,
-        field: `floorSelections[${i}].themePackId`,
-        floorIndex: i,
-        floorNumber,
-        context: {
-          themePackId: floor.themePackId,
-          firstFloorIndex: firstFloorWithThisPack,
-          firstFloorNumber: firstFloorWithThisPack + 1,
-        },
-      })
-    } else {
-      seenThemePackIds.set(floor.themePackId, i)
-    }
-
-    const giftIds = Array.from(floor.giftIds)
-    const seenGiftIds = new Set<string>()
-    for (const [j, giftId] of giftIds.entries()) {
-      if (seenGiftIds.has(giftId)) {
-        errors.push({
-          code: 'FLOOR_DUPLICATE_GIFT_ID',
-          message: `Floor ${floorNumber} has duplicate gift ID: ${giftId}`,
-          field: `floorSelections[${i}].giftIds[${j}]`,
-          floorIndex: i,
-          floorNumber,
-          context: { giftId },
-        })
-      }
-      seenGiftIds.add(giftId)
-    }
-  }
-
-  return errors
-}
-
-function validateFloorDifficulties(
-  floorSelections: FloorThemeSelection[],
-  category: MDCategory,
-  floorCount: number,
-): DifficultyValidationError[] {
-  const errors: DifficultyValidationError[] = []
-  const allowedByFloor = ALLOWED_FLOOR_DIFFICULTIES[category]
-
-  for (let i = 0; i < floorCount; i++) {
-    const floor = floorSelections[i]
-    if (!floor) continue
-
-    const allowed = allowedByFloor[i]
-    if (!allowed || allowed.includes(floor.difficulty)) continue
-
-    const floorNumber = i + 1
-    const expected = allowed.map((idx) => DUNGEON_NAME_BY_IDX.get(idx)).join(' or ')
-    errors.push({
-      code: 'DIFFICULTY_INVALID_FOR_CATEGORY',
-      message: `Floor ${floorNumber} must be ${expected} for ${category} category`,
-      field: `floorSelections[${i}].difficulty`,
-      floorIndex: i,
-      floorNumber,
-    })
-  }
-
-  return errors
-}
-
-function validateFloorGiftExistence(
-  floorSelections: FloorThemeSelection[],
-  floorCount: number,
-  egoGiftSpec: Record<string, EGOGiftSpec>,
-): FloorValidationError[] {
-  return floorSelections.slice(0, floorCount).flatMap((floor, i) => {
-    const unknownIds: string[] = []
-
-    for (const giftId of floor.giftIds) {
-      const parsed = EncodedGiftIdSchema.safeParse(giftId)
-      if (!parsed.success || !hasGiftId(parsed.data, egoGiftSpec)) {
-        unknownIds.push(giftId)
-      }
-    }
-
-    if (unknownIds.length === 0) return []
-
-    const floorNumber = i + 1
-    return [
-      {
-        code: 'FLOOR_UNKNOWN_GIFT_ID' as const,
-        message: `Floor ${floorNumber}: unknown gift ID(s): ${unknownIds.join(', ')}`,
-        field: `floorSelections[${i}].giftIds`,
-        floorIndex: i,
-        floorNumber,
-        context: { giftIds: unknownIds },
-      },
-    ]
-  })
-}
-
-function validateFloorGiftAffordability(
-  floorSelections: FloorThemeSelection[],
-  floorCount: number,
-  egoGiftSpec: Record<string, EGOGiftSpec>,
-  egoGiftI18n?: Record<string, string>,
-): FloorValidationError[] {
-  return floorSelections.slice(0, floorCount).flatMap((floor, i) => {
-    if (!floor?.themePackId) return []
-
-    const unaffordableIds = getUnaffordableGiftIds(floor.giftIds, floor.themePackId, egoGiftSpec)
-
-    if (unaffordableIds.length === 0) return []
-
-    const floorNumber = i + 1
-    const giftNames = unaffordableIds.map((id) => giftDisplayName(id, egoGiftI18n ?? {})).join(', ')
-
-    return [
-      {
-        code: 'FLOOR_UNAFFORDABLE_GIFT' as const,
-        message: `Floor ${floorNumber} has ${unaffordableIds.length} gift(s) not available for theme pack: ${giftNames}`,
-        field: `floorSelections[${i}].giftIds`,
-        floorIndex: i,
-        floorNumber,
-        context: { giftIds: unaffordableIds, giftNames, themePackId: floor.themePackId },
-      },
-    ]
-  })
-}
-
 export function validateSelectedKeywords(keywords: string[]): KeywordValidationError[] {
   const errors: KeywordValidationError[] = []
   for (const keyword of keywords) {
@@ -557,7 +394,6 @@ export function validateSelectedKeywords(keywords: string[]): KeywordValidationE
 
 export function validateEntityIds(
   content: MDPlannerContent,
-  category: MDCategory,
   registry: PlannerIdRegistry,
 ): EntityIdValidationError[] {
   const errors: EntityIdValidationError[] = []
@@ -586,18 +422,6 @@ export function validateEntityIds(
     }
   }
 
-  for (const [i, floor] of content.floorSelections.slice(0, FLOOR_COUNTS[category]).entries()) {
-    const themePackId = floor?.themePackId
-    if (themePackId && !registry.themePackIds.has(themePackId)) {
-      errors.push({
-        code: 'THEME_PACK_UNKNOWN_ID',
-        message: `Floor ${i + 1} has unknown theme pack ID '${themePackId}'`,
-        field: `floorSelections[${i}].themePackId`,
-        context: { id: themePackId },
-      })
-    }
-  }
-
   for (const [i, buffId] of content.selectedBuffIds.entries()) {
     if (!registry.startBuffIds.has(String(buffId))) {
       errors.push({
@@ -612,6 +436,137 @@ export function validateEntityIds(
   return errors
 }
 
+const floorNumberAt = (floorIndex: number) => floorIndex + 1
+
+const floorPath = (floorIndex: number) => `floorSelections[${floorIndex}]`
+
+const FLOOR_INDEX_PREFIX = /^floorSelections\[(\d+)\]/
+
+const floorIndexOf = (path: string) => Number(FLOOR_INDEX_PREFIX.exec(path)?.[1])
+
+function validateFloorThemePackIds(
+  floors: readonly (FloorSelectionValue | undefined)[],
+  registry: PlannerIdRegistry,
+): EntityIdValidationError[] {
+  return floors.flatMap((floor, i) => {
+    const themePackId = floor?.themePackId
+    if (themePackId === undefined || registry.themePackIds.has(themePackId)) return []
+    return [
+      {
+        code: 'THEME_PACK_UNKNOWN_ID' as const,
+        message: `Floor ${floorNumberAt(i)} has unknown theme pack ID '${themePackId}'`,
+        field: `${floorPath(i)}.themePackId`,
+        context: { id: themePackId },
+      },
+    ]
+  })
+}
+
+function firstOccurrences(giftIds: readonly string[]): [string, number][] {
+  return giftIds.flatMap((giftId, j): [string, number][] =>
+    giftIds.indexOf(giftId) === j ? [[giftId, j]] : [],
+  )
+}
+
+function parseGiftIds(giftIds: readonly string[]): EncodedGiftId[] {
+  return giftIds.flatMap((giftId) => {
+    const parsed = EncodedGiftIdSchema.safeParse(giftId)
+    return parsed.success ? [parsed.data] : []
+  })
+}
+
+function validateFloorGiftExistence(
+  floors: readonly (FloorSelectionValue | undefined)[],
+  egoGiftSpec: Record<string, EGOGiftSpec>,
+): FloorUnknownGiftValidationError[] {
+  return floors.flatMap((floor, i) => {
+    const known = new Set<string>(
+      parseGiftIds(floor?.giftIds ?? []).filter((giftId) => hasGiftId(giftId, egoGiftSpec)),
+    )
+    return firstOccurrences(floor?.giftIds ?? [])
+      .filter(([giftId]) => !known.has(giftId))
+      .map(([giftId]) => ({
+        code: 'FLOOR_UNKNOWN_GIFT_ID' as const,
+        message: `Floor ${floorNumberAt(i)}: unknown gift ID ${giftId}`,
+        field: `${floorPath(i)}.giftIds`,
+        floorNumber: floorNumberAt(i),
+        context: { giftId },
+      }))
+  })
+}
+
+function validateFloorGiftAffordability(
+  floors: readonly (FloorSelectionValue | undefined)[],
+  egoGiftSpec: Record<string, EGOGiftSpec>,
+  egoGiftI18n: Record<string, string>,
+): GiftNotAffordableValidationError[] {
+  return floors.flatMap((floor, i) => {
+    const themePackId = floor?.themePackId
+    if (floor === undefined || themePackId === undefined) return []
+    const unaffordable = new Map<string, EncodedGiftId>(
+      getUnaffordableGiftIds(new Set(parseGiftIds(floor.giftIds)), themePackId, egoGiftSpec).map(
+        (giftId) => [giftId, giftId],
+      ),
+    )
+    return firstOccurrences(floor.giftIds).flatMap(([giftId, j]) => {
+      const encoded = unaffordable.get(giftId)
+      if (encoded === undefined) return []
+      return [
+        {
+          code: 'GIFT_NOT_AFFORDABLE' as const,
+          message: `Floor ${floorNumberAt(i)}: gift ${giftId} is not available for theme pack ${themePackId}`,
+          field: `${floorPath(i)}.giftIds[${j}]`,
+          context: { giftName: giftDisplayName(encoded, egoGiftI18n), themePackId },
+        },
+      ]
+    })
+  })
+}
+
+function validateFloors(
+  rawFloorSelections: unknown,
+  category: MDCategory,
+  stage: FloorRuleStage,
+  egoGiftSpec: Record<string, EGOGiftSpec> | undefined,
+  egoGiftI18n: Record<string, string> | undefined,
+  registry: PlannerIdRegistry | undefined,
+): PlannerValidationError[] {
+  const parsed = parseFloors(rawFloorSelections, floorCount(category))
+  const admission = admitFloors(parsed, category, stage)
+  const ruleErrors: (FloorRuleValidationError | DifficultyOutOfRangeValidationError)[] = (
+    admission.ok ? admission.boundaryViolations : admission.violations
+  ).map(({ code, path }) =>
+    code === 'VALUE_OUT_OF_RANGE'
+      ? {
+          code,
+          message: `${code} at ${path}`,
+          field: path,
+          context: {
+            allowedDifficulties: allowedDifficulties(category, floorIndexOf(path)) ?? [],
+          },
+        }
+      : { code, message: `${code} at ${path}`, field: path },
+  )
+
+  return [
+    ...ruleErrors,
+    ...(registry ? validateFloorThemePackIds(parsed.floors, registry) : []),
+    ...(egoGiftSpec
+      ? [
+          ...validateFloorGiftExistence(parsed.floors, egoGiftSpec),
+          ...validateFloorGiftAffordability(parsed.floors, egoGiftSpec, egoGiftI18n ?? {}),
+        ]
+      : []),
+  ]
+}
+
+export type PlannerValidationResult = { isValid: boolean; errors: PlannerValidationError[] }
+
+const toResult = (errors: PlannerValidationError[]): PlannerValidationResult => ({
+  isValid: errors.length === 0,
+  errors,
+})
+
 export function validatePlannerForPublish(
   title: string | undefined,
   content: MDPlannerContent,
@@ -619,7 +574,7 @@ export function validatePlannerForPublish(
   egoGiftSpec?: Record<string, EGOGiftSpec>,
   egoGiftI18n?: Record<string, string>,
   registry?: PlannerIdRegistry,
-): { isValid: boolean; errors: PlannerValidationError[] } {
+): PlannerValidationResult {
   const errors: PlannerValidationError[] = []
 
   if (!title || title.trim() === '') {
@@ -633,7 +588,7 @@ export function validatePlannerForPublish(
   errors.push(...validateEquipment(content.equipment))
 
   if (registry) {
-    errors.push(...validateEntityIds(content, category, registry))
+    errors.push(...validateEntityIds(content, registry))
   }
 
   errors.push(...validateDeploymentOrder(content.deploymentOrder))
@@ -652,36 +607,18 @@ export function validatePlannerForPublish(
 
   errors.push(...validateSelectedKeywords(migrateKeywords(content.selectedKeywords)))
 
-  const floorCount = FLOOR_COUNTS[category]
-  const deserializedFloorSelections: FloorThemeSelection[] = content.floorSelections.map(
-    (floor) => ({
-      ...floor,
-      giftIds: new Set(floor.giftIds),
-    }),
+  errors.push(
+    ...validateFloors(
+      content.floorSelections,
+      category,
+      'publish',
+      egoGiftSpec,
+      egoGiftI18n,
+      registry,
+    ),
   )
-  errors.push(...validateFloorThemePacksForSave(deserializedFloorSelections, floorCount))
 
-  errors.push(...validateFloorDifficulties(deserializedFloorSelections, category, floorCount))
-
-  if (egoGiftSpec) {
-    errors.push(...validateFloorGiftExistence(deserializedFloorSelections, floorCount, egoGiftSpec))
-  }
-
-  if (egoGiftSpec) {
-    errors.push(
-      ...validateFloorGiftAffordability(
-        deserializedFloorSelections,
-        floorCount,
-        egoGiftSpec,
-        egoGiftI18n,
-      ),
-    )
-  }
-
-  return {
-    isValid: errors.length === 0,
-    errors,
-  }
+  return toResult(errors)
 }
 
 export function validatePlannerForDraftSave(
@@ -690,11 +627,11 @@ export function validatePlannerForDraftSave(
   egoGiftSpec?: Record<string, EGOGiftSpec>,
   egoGiftI18n?: Record<string, string>,
   registry?: PlannerIdRegistry,
-): { key: string; params?: Record<string, string> } | null {
-  const errors: PlannerValidationError[] = [
+): PlannerValidationResult {
+  return toResult([
     ...validateEquipment(content.equipment),
 
-    ...(registry ? validateEntityIds(content, category, registry) : []),
+    ...(registry ? validateEntityIds(content, registry) : []),
 
     ...validateDeploymentOrder(content.deploymentOrder),
 
@@ -707,58 +644,37 @@ export function validatePlannerForDraftSave(
     ...validateStartBuffIds(content.selectedBuffIds),
 
     ...validateStartGiftSelection(content.selectedGiftKeyword, content.selectedGiftIds),
-  ]
 
-  const floorCount = FLOOR_COUNTS[category]
-  const deserializedFloorSelections: FloorThemeSelection[] = content.floorSelections.map(
-    (floor) => ({
-      ...floor,
-      giftIds: new Set(floor.giftIds),
-    }),
-  )
-  const floorErrors = validateFloorThemePacksForSave(deserializedFloorSelections, floorCount)
-  errors.push(...floorErrors.filter((e) => e.code !== 'FLOOR_MISSING_THEME_PACK'))
-
-  if (egoGiftSpec) {
-    errors.push(...validateFloorGiftExistence(deserializedFloorSelections, floorCount, egoGiftSpec))
-  }
-
-  if (egoGiftSpec) {
-    errors.push(
-      ...validateFloorGiftAffordability(
-        deserializedFloorSelections,
-        floorCount,
-        egoGiftSpec,
-        egoGiftI18n,
-      ),
-    )
-  }
-
-  const [firstError] = errors
-  if (firstError === undefined) return null
-  return toUserFriendlyError(firstError)
+    ...validateFloors(
+      content.floorSelections,
+      category,
+      'draft',
+      egoGiftSpec,
+      egoGiftI18n,
+      registry,
+    ),
+  ])
 }
 
 export function validatePlannerForImport(
   planner: SaveablePlanner,
   egoGiftSpec: Record<string, EGOGiftSpec>,
   registry: PlannerIdRegistry,
-): { key: string; params?: Record<string, string> } | null {
-  if (!isMDPlanner(planner)) return null
+): PlannerValidationResult {
+  if (!isMDPlanner(planner)) return toResult([])
 
   const { content } = planner
   const { category } = planner.config
 
   if (planner.metadata.published) {
-    const [firstError] = validatePlannerForPublish(
+    return validatePlannerForPublish(
       planner.metadata.title,
       content,
       category,
       egoGiftSpec,
       undefined,
       registry,
-    ).errors
-    return firstError ? toUserFriendlyError(firstError) : null
+    )
   }
 
   return validatePlannerForDraftSave(content, category, egoGiftSpec, undefined, registry)

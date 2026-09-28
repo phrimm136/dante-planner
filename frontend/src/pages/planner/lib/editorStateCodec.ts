@@ -6,6 +6,7 @@ import {
   migrateKeywords,
   IdentityIdSchema,
   EGOIdSchema,
+  allowedDifficulties,
 } from '@/shared/gameData'
 import { createEmptyNoteContent } from '@/shared/noteEditor'
 import egoSpecList from '@static/data/egoSpecList.json'
@@ -21,7 +22,7 @@ import type {
   DeckFilterState,
   ThreadspinTier,
 } from '../types/DeckTypes'
-import type { MDPlannerContent } from '../types/PlannerTypes'
+import type { MDPlannerContent, SerializableFloorSelection } from '../types/PlannerTypes'
 import type { PlannerState } from './saveablePlanner'
 
 const DEFAULT_ZAYIN_MAX_THREADSPIN: Record<string, ThreadspinTier> = (() => {
@@ -88,10 +89,26 @@ export function createDefaultSkillEAState(): Record<string, SkillEAState> {
   return state
 }
 
-export function createDefaultFloorSelections(): FloorThemeSelection[] {
-  return Array.from({ length: 15 }, () => ({
+export function defaultFloorDifficulty(category: MDCategory, floorIndex: number): DungeonIdx {
+  return allowedDifficulties(category, floorIndex)?.[0] ?? DUNGEON_IDX.NORMAL
+}
+
+export function toFloorThemeSelection(
+  floor: SerializableFloorSelection | undefined,
+  category: MDCategory,
+  floorIndex: number,
+): FloorThemeSelection {
+  return {
+    themePackId: floor?.themePackId || null,
+    difficulty: floor?.difficulty ?? defaultFloorDifficulty(category, floorIndex),
+    giftIds: new Set(Array.isArray(floor?.giftIds) ? floor.giftIds : []),
+  }
+}
+
+export function createDefaultFloorSelections(category: MDCategory): FloorThemeSelection[] {
+  return Array.from({ length: 15 }, (_, floorIndex) => ({
     themePackId: null,
-    difficulty: DUNGEON_IDX.NORMAL as DungeonIdx,
+    difficulty: defaultFloorDifficulty(category, floorIndex),
     giftIds: new Set<EncodedGiftId>(),
   }))
 }
@@ -170,12 +187,10 @@ export function hydrateEditorState(
 
     equipment: content.equipment ?? createDefaultEquipment(),
     floorSelections: Array.isArray(content.floorSelections)
-      ? content.floorSelections.map((floor) => ({
-          themePackId: floor?.themePackId ?? null,
-          difficulty: floor?.difficulty ?? (DUNGEON_IDX.NORMAL as DungeonIdx),
-          giftIds: new Set(Array.isArray(floor?.giftIds) ? floor.giftIds : []),
-        }))
-      : createDefaultFloorSelections(),
+      ? content.floorSelections.map((floor, floorIndex) =>
+          toFloorThemeSelection(floor, metadata.category, floorIndex),
+        )
+      : createDefaultFloorSelections(metadata.category),
     comprehensiveGiftIds: new Set(
       Array.isArray(content.comprehensiveGiftIds) ? content.comprehensiveGiftIds : [],
     ),

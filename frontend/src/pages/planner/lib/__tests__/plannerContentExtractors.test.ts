@@ -219,7 +219,7 @@ describe('extractGiftIds', () => {
       ],
     })
 
-    const result = extractGiftIds(content)
+    const result = extractGiftIds(content, '5F')
 
     expect(result).toEqual(new Set(['9001', '9002', '9003', '9004', '9005', '9006']))
   })
@@ -232,7 +232,7 @@ describe('extractGiftIds', () => {
       floorSelections: [{ themePackId: null, difficulty: 0, giftIds: [ENCODED_29154] }],
     })
 
-    const result = extractGiftIds(content)
+    const result = extractGiftIds(content, '5F')
 
     expect(result).toEqual(new Set(['9154']))
   })
@@ -250,7 +250,7 @@ describe('extractGiftIds', () => {
       floorSelections: [],
     })
 
-    expect(extractGiftIds(content)).toEqual(new Set(expected))
+    expect(extractGiftIds(content, '5F')).toEqual(new Set(expected))
   })
 
   it('drops ids that are not a valid gift encoding', () => {
@@ -261,7 +261,7 @@ describe('extractGiftIds', () => {
       floorSelections: [],
     })
 
-    expect(extractGiftIds(content)).toEqual(new Set(['9001']))
+    expect(extractGiftIds(content, '5F')).toEqual(new Set(['9001']))
   })
 
   it('deduplicates across sources', () => {
@@ -272,7 +272,7 @@ describe('extractGiftIds', () => {
       floorSelections: [{ themePackId: null, difficulty: 0, giftIds: [ENCODED_9001] }],
     })
 
-    const result = extractGiftIds(content)
+    const result = extractGiftIds(content, '5F')
 
     expect(result).toEqual(new Set(['9001', '9002', '9003']))
     expect(result.size).toBe(3)
@@ -286,7 +286,7 @@ describe('extractGiftIds', () => {
       floorSelections: [],
     })
 
-    expect(extractGiftIds(content)).toEqual(new Set())
+    expect(extractGiftIds(content, '5F')).toEqual(new Set())
   })
 
   it('handles undefined sources gracefully', () => {
@@ -298,7 +298,7 @@ describe('extractGiftIds', () => {
       floorSelections: undefined,
     })
 
-    expect(extractGiftIds(content)).toEqual(new Set())
+    expect(extractGiftIds(content, '5F')).toEqual(new Set())
   })
 })
 
@@ -315,7 +315,7 @@ describe('extractThemePackIds', () => {
       ],
     })
 
-    const result = extractThemePackIds(content)
+    const result = extractThemePackIds(content, '5F')
 
     expect(result).toEqual(new Set(['1001', '1002']))
   })
@@ -329,7 +329,7 @@ describe('extractThemePackIds', () => {
       ],
     })
 
-    const result = extractThemePackIds(content)
+    const result = extractThemePackIds(content, '5F')
 
     expect(result).toEqual(new Set(['1001', '1003']))
     expect(result.size).toBe(2)
@@ -337,13 +337,51 @@ describe('extractThemePackIds', () => {
 
   it('returns empty set when no floorSelections', () => {
     const content = createMockMDContent({ floorSelections: [] })
-    expect(extractThemePackIds(content)).toEqual(new Set())
+    expect(extractThemePackIds(content, '5F')).toEqual(new Set())
   })
 
   it('returns empty set when floorSelections is undefined', () => {
     const content = createMockMDContent()
     Object.assign(content, { floorSelections: undefined })
-    expect(extractThemePackIds(content)).toEqual(new Set())
+    expect(extractThemePackIds(content, '5F')).toEqual(new Set())
+  })
+})
+
+// ============================================================================
+// Floors past the category count (Behavior Inventory 1)
+// ============================================================================
+
+describe('extractors bound at the category floor count', () => {
+  function withSixthFloor(): MDPlannerContent {
+    return createMockMDContent({
+      selectedGiftIds: [],
+      observationGiftIds: [],
+      comprehensiveGiftIds: [],
+      floorSelections: [
+        ...Array.from({ length: 5 }, () => ({
+          themePackId: null,
+          difficulty: 0 as const,
+          giftIds: [],
+        })),
+        { themePackId: ThemePackIdSchema.parse('1006'), difficulty: 1, giftIds: [ENCODED_9006] },
+      ],
+    })
+  }
+
+  it('a 5F planner does not expose ids from floor 6', () => {
+    expect(extractGiftIds(withSixthFloor(), '5F')).toEqual(new Set())
+    expect(extractThemePackIds(withSixthFloor(), '5F')).toEqual(new Set())
+  })
+
+  it('a 10F planner exposes them', () => {
+    expect(extractGiftIds(withSixthFloor(), '10F')).toEqual(new Set(['9006']))
+    expect(extractThemePackIds(withSixthFloor(), '10F')).toEqual(new Set(['1006']))
+  })
+
+  it('the local filter does not match a gift held only on a hidden floor', () => {
+    const plan = { ...createMockPlanner(), content: withSixthFloor() }
+    expect(matchesPlannerFilters(plan, createFilters({ giftIds: ['9006'] }))).toBe(false)
+    expect(matchesPlannerFilters(plan, createFilters({ themePackIds: ['1006'] }))).toBe(false)
   })
 })
 

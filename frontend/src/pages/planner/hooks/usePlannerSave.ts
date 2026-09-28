@@ -186,27 +186,18 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     const noteSizeError = validateNoteSizes(content.sectionNotes)
     if (noteSizeError) return plannerValidationError(noteSizeError)
 
-    if (saveable.metadata.published) {
-      const { errors } = validatePlannerForPublish(
-        saveable.metadata.title,
-        content,
-        category,
-        egoGiftSpec,
-        egoGiftI18n,
-        registry,
-      )
-      const [firstError] = errors
-      return firstError ? plannerValidationError(toUserFriendlyError(firstError)) : null
-    }
-
-    const validationError = validatePlannerForDraftSave(
-      content,
-      category,
-      egoGiftSpec,
-      egoGiftI18n,
-      registry,
-    )
-    return validationError ? plannerValidationError(validationError) : null
+    const { errors } = saveable.metadata.published
+      ? validatePlannerForPublish(
+          saveable.metadata.title,
+          content,
+          category,
+          egoGiftSpec,
+          egoGiftI18n,
+          registry,
+        )
+      : validatePlannerForDraftSave(content, category, egoGiftSpec, egoGiftI18n, registry)
+    const [firstError] = errors
+    return firstError ? plannerValidationError(toUserFriendlyError(firstError)) : null
   }
 
   const syncToServer = async (

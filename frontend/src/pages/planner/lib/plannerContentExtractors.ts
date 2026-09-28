@@ -1,5 +1,6 @@
 import { decodeGiftSelection } from '@/pages/egoGift'
-import { EncodedGiftIdSchema } from '@/shared/gameData'
+import { EncodedGiftIdSchema, floorCount } from '@/shared/gameData'
+import type { MDCategory } from '@/shared/gameData'
 import { isMDPlanner } from '../types/PlannerTypes'
 import type { MDPlannerContent, SaveablePlanner } from '../types/PlannerTypes'
 import type { PlannerSearchFilters } from '../types/PlannerSearchTypes'
@@ -39,7 +40,7 @@ export function extractEgoIds(content: MDPlannerContent): Set<string> {
   return ids
 }
 
-export function extractGiftIds(content: MDPlannerContent): Set<string> {
+export function extractGiftIds(content: MDPlannerContent, category: MDCategory): Set<string> {
   const ids = new Set<string>()
 
   // Content stores an enhanced gift as its level prefixed onto the four-digit base (19154 and
@@ -57,7 +58,7 @@ export function extractGiftIds(content: MDPlannerContent): Set<string> {
   addIds(content.comprehensiveGiftIds)
 
   if (content.floorSelections) {
-    for (const floor of content.floorSelections) {
+    for (const floor of content.floorSelections.slice(0, floorCount(category))) {
       addIds(floor?.giftIds)
     }
   }
@@ -65,12 +66,12 @@ export function extractGiftIds(content: MDPlannerContent): Set<string> {
   return ids
 }
 
-export function extractThemePackIds(content: MDPlannerContent): Set<string> {
+export function extractThemePackIds(content: MDPlannerContent, category: MDCategory): Set<string> {
   const ids = new Set<string>()
 
   if (!content.floorSelections) return ids
 
-  for (const floor of content.floorSelections) {
+  for (const floor of content.floorSelections.slice(0, floorCount(category))) {
     if (floor?.themePackId != null) {
       ids.add(String(floor.themePackId))
     }
@@ -106,6 +107,7 @@ export function matchesPlannerFilters(
   }
 
   const { content } = plan
+  const { category } = plan.config
 
   if (filters.keywords.length > 0) {
     const planKeywords = content.selectedKeywords
@@ -132,13 +134,13 @@ export function matchesPlannerFilters(
   }
 
   if (filters.giftIds.length > 0) {
-    if (!containsAll(extractGiftIds(content), filters.giftIds)) {
+    if (!containsAll(extractGiftIds(content, category), filters.giftIds)) {
       return false
     }
   }
 
   if (filters.themePackIds.length > 0) {
-    if (!containsAll(extractThemePackIds(content), filters.themePackIds)) {
+    if (!containsAll(extractThemePackIds(content, category), filters.themePackIds)) {
       return false
     }
   }

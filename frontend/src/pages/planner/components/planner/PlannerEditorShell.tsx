@@ -19,9 +19,9 @@ import {
 import {
   MD_CATEGORIES,
   PLANNER_KEYWORDS,
-  FLOOR_COUNTS,
-  DUNGEON_IDX,
   DEFAULT_SKILL_EA,
+  allowedDifficulties,
+  floorCount as categoryFloorCount,
 } from '@/shared/gameData'
 import { SECTION_STYLES } from '@/lib/constants'
 import { getKeywordIconPath } from '@/shared/assets'
@@ -124,7 +124,7 @@ export function PlannerEditorShell({
   const [isDeckPaneOpen, setIsDeckPaneOpen] = useState(false)
   const [showSaveWarning, setShowSaveWarning] = useState(false)
 
-  const floorCount = FLOOR_COUNTS[category]
+  const floorCount = categoryFloorCount(category)
 
   const handleServerReload = (reloadedPlanner: SaveablePlanner): boolean => {
     if (!isMDPlanner(reloadedPlanner)) {
@@ -144,15 +144,21 @@ export function PlannerEditorShell({
   const handleCategoryChange = (newCategory: MDCategory) => {
     const currentCategory = storeApi.getState().category
     const floorSelections = storeApi.getState().floorSelections
+    const sharedFloorCount = Math.min(
+      categoryFloorCount(currentCategory),
+      categoryFloorCount(newCategory),
+    )
 
-    if (currentCategory === '5F' && (newCategory === '10F' || newCategory === '15F')) {
-      const hasNormalDifficulty = floorSelections
-        .slice(0, 5)
-        .some((floor) => floor.difficulty === DUNGEON_IDX.NORMAL)
+    const hasDisallowedDifficulty = floorSelections
+      .slice(0, sharedFloorCount)
+      .some(
+        (floor, floorIndex) =>
+          floor.themePackId !== null &&
+          !(allowedDifficulties(newCategory, floorIndex) ?? []).includes(floor.difficulty),
+      )
 
-      if (hasNormalDifficulty) {
-        showWarning('planner:pages.plannerMD.publish.requiresHardMode')
-      }
+    if (hasDisallowedDifficulty) {
+      showWarning('planner:pages.plannerMD.publish.requiresHardMode')
     }
 
     setCategory(newCategory)
@@ -502,7 +508,7 @@ export function PlannerEditorShell({
   }, [visibleSections, totalSections, setVisibleSections])
 
   useEffect(() => {
-    const newTotalSections = regularSectionCount + FLOOR_COUNTS[category]
+    const newTotalSections = regularSectionCount + categoryFloorCount(category)
     if (visibleSections > newTotalSections) {
       setVisibleSections(newTotalSections)
     }

@@ -58,7 +58,7 @@ export function ComprehensiveGiftGridTracker({
   const allComprehensiveGiftIds = (() => {
     const allGifts = new Set(comprehensiveGiftIds)
     floorSelections.forEach((selection) => {
-      selection.giftIds.forEach((giftId) => allGifts.add(giftId))
+      selection.giftIds?.forEach((giftId) => allGifts.add(giftId))
     })
     return allGifts
   })()
@@ -68,7 +68,7 @@ export function ComprehensiveGiftGridTracker({
     if (hoveredThemePackId) {
       floorSelections.forEach((selection) => {
         if (selection.themePackId === hoveredThemePackId) {
-          selection.giftIds.forEach((giftId) => ids.add(giftId))
+          selection.giftIds?.forEach((giftId) => ids.add(giftId))
         }
       })
     }

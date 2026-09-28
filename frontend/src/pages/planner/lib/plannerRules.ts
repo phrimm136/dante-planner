@@ -1,7 +1,8 @@
 import { lookupByGiftId, giftDisplayName } from '@/pages/egoGift'
 import type { FloorThemeSelection } from '@/pages/themePack'
 import type { EGOGiftSpec } from '@/pages/egoGift'
-import type { EncodedGiftId } from '@/shared/gameData'
+import { DUNGEON_IDX, allowedDifficulties } from '@/shared/gameData'
+import type { DungeonIdx, EncodedGiftId, MDCategory } from '@/shared/gameData'
 
 export function isGiftAffordableForThemePack(gift: EGOGiftSpec, themePackId: string): boolean {
   return gift.themePack.length === 0 || gift.themePack.includes(themePackId)
@@ -37,5 +38,29 @@ export function canSelectFloorThemePack(
   if (floorIndex === 0) return true
 
   const previousFloor = floorSelections[floorIndex - 1]
-  return previousFloor !== undefined && previousFloor.themePackId !== null
+  return (
+    previousFloor !== undefined &&
+    previousFloor.themePackId !== null &&
+    previousFloor.themePackId !== ''
+  )
+}
+
+export function offeredFloorDifficulties(
+  category: MDCategory,
+  floorIndex: number,
+  earlierFloorsAllNormal: boolean,
+): DungeonIdx[] {
+  return (allowedDifficulties(category, floorIndex) ?? []).filter(
+    (difficulty) => difficulty !== DUNGEON_IDX.NORMAL || earlierFloorsAllNormal,
+  )
+}
+
+export function usedFloorThemePackIds(
+  floorSelections: readonly FloorThemeSelection[],
+  floorIndex: number,
+  floorCount: number,
+): string[] {
+  return floorSelections
+    .slice(0, floorCount)
+    .flatMap((floor, i) => (i !== floorIndex && floor.themePackId ? [floor.themePackId] : []))
 }

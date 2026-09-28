@@ -75,14 +75,17 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
     }),
   })
 
-  const deserialized = deserializeSets({
-    selectedKeywords: content.selectedKeywords,
-    selectedBuffIds: content.selectedBuffIds,
-    selectedGiftIds: content.selectedGiftIds,
-    observationGiftIds: content.observationGiftIds,
-    comprehensiveGiftIds: content.comprehensiveGiftIds,
-    floorSelections: content.floorSelections,
-  })
+  const deserialized = deserializeSets(
+    {
+      selectedKeywords: content.selectedKeywords,
+      selectedBuffIds: content.selectedBuffIds,
+      selectedGiftIds: content.selectedGiftIds,
+      observationGiftIds: content.observationGiftIds,
+      comprehensiveGiftIds: content.comprehensiveGiftIds,
+      floorSelections: content.floorSelections,
+    },
+    planner.config.category,
+  )
 
   const handleImportConfirm = () => {
     if (!pendingImport) return

@@ -238,6 +238,16 @@ describe('admitFloors', () => {
     )
   })
 
+  it('orders violations by floor number, so floor 5 precedes floor 10', () => {
+    const raw = Array.from({ length: 15 }, (_, i) =>
+      pack(`${1001 + i}`, i === 5 ? 0 : i === 10 ? 1 : i < 10 ? 1 : 3),
+    )
+    expect(violationsOf(admit(raw, '15F', 'publish'))).toEqual([
+      { code: 'VALUE_OUT_OF_RANGE', path: 'floorSelections[5].difficulty' },
+      { code: 'VALUE_OUT_OF_RANGE', path: 'floorSelections[10].difficulty' },
+    ])
+  })
+
   it('treats an empty-string pack as absent in sequence', () => {
     expect(violationsOf(admit([pack(''), pack('1002')], '5F', 'draft'))).toEqual([
       { code: 'INVALID_SEQUENCE', path: 'floorSelections[1]' },

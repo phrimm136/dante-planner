@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   createDefaultDeckFilterState,
   createDefaultEquipment,
+  createDefaultFloorSelections,
   createDefaultSectionNotes,
   createDefaultSkillEAState,
   hydrateEditorState,
@@ -89,11 +90,14 @@ function roundTrip(content: MDPlannerContent, metadata: EditorMetadata = METADAT
 describe('hydrateEditorState / projectEditorState round trip', () => {
   const emptyNote = createEmptyNoteContent()
   const defaultNotes = createDefaultSectionNotes()
-  const defaultFloors: MDPlannerContent['floorSelections'] = Array.from({ length: 15 }, () => ({
-    themePackId: null,
-    difficulty: DUNGEON_IDX.NORMAL,
-    giftIds: [],
-  }))
+  const defaultFloors: ReturnType<typeof serialize>['floorSelections'] = Array.from(
+    { length: 15 },
+    (_, floorIndex) => ({
+      themePackId: null,
+      difficulty: floorIndex < 10 ? DUNGEON_IDX.HARD : DUNGEON_IDX.NORMAL,
+      giftIds: [],
+    }),
+  )
 
   const cases: {
     name: string
@@ -189,7 +193,7 @@ describe('hydrateEditorState / projectEditorState round trip', () => {
         floorSelections: [{}] as unknown as MDPlannerContent['floorSelections'],
       }),
       expected: {
-        floorSelections: [{ themePackId: null, difficulty: DUNGEON_IDX.NORMAL, giftIds: [] }],
+        floorSelections: [{ themePackId: null, difficulty: DUNGEON_IDX.HARD, giftIds: [] }],
       },
     },
   ]
@@ -310,5 +314,60 @@ describe('createDefaultDeckFilterState', () => {
 
     expect(state.entityMode).toBe('identity')
     expect(state.searchQuery).toBe('')
+  })
+})
+
+describe('floor difficulty defaults follow the category table', () => {
+  it.each([
+    ['5F', Array.from({ length: 15 }, () => DUNGEON_IDX.NORMAL)],
+    [
+      '10F',
+      [
+        ...Array.from({ length: 10 }, () => DUNGEON_IDX.HARD),
+        ...Array.from({ length: 5 }, () => DUNGEON_IDX.NORMAL),
+      ],
+    ],
+    [
+      '15F',
+      [
+        ...Array.from({ length: 10 }, () => DUNGEON_IDX.HARD),
+        ...Array.from({ length: 5 }, () => DUNGEON_IDX.EXTREME),
+      ],
+    ],
+  ] as const)('%s defaults each floor to its first allowed difficulty', (category, expected) => {
+    expect(createDefaultFloorSelections(category).map((floor) => floor.difficulty)).toEqual(
+      expected,
+    )
+  })
+
+  it('hydrate keeps a stored difficulty the table would not default to', () => {
+    const state = hydrateEditorState(makeContent(), METADATA)
+    expect(state.floorSelections[0]?.difficulty).toBe(DUNGEON_IDX.NORMAL)
+  })
+
+  // corpus: floor-theme-pack-empty-accepted-as-draft, boundary-gift-ids-absent
+  it('hydrate reads an empty-string pack as unchosen and absent giftIds as none', () => {
+    const content = makeContent({
+      floorSelections: [
+        { themePackId: '', difficulty: DUNGEON_IDX.HARD },
+      ] as unknown as MDPlannerContent['floorSelections'],
+    })
+    const floor = hydrateEditorState(content, METADATA).floorSelections[0]
+    expect(floor?.themePackId).toBeNull()
+    expect(floor?.giftIds).toEqual(new Set())
+  })
+
+  // corpus: scn-10f-difficulty-absent
+  it('hydrate fills a missing difficulty from the table', () => {
+    const content = makeContent({
+      floorSelections: [
+        {
+          themePackId: null,
+          giftIds: [],
+        } as unknown as MDPlannerContent['floorSelections'][number],
+      ],
+    })
+    const state = hydrateEditorState(content, METADATA)
+    expect(state.floorSelections[0]?.difficulty).toBe(DUNGEON_IDX.HARD)
   })
 })

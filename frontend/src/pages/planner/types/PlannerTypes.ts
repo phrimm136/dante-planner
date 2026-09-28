@@ -18,9 +18,9 @@ import type { ThemePackId } from '@/shared/gameData'
 export type PlannerStatus = 'draft' | 'saved'
 
 export interface SerializableFloorSelection {
-  themePackId: ThemePackId | null
-  difficulty: DungeonIdx
-  giftIds: EncodedGiftId[]
+  themePackId?: ThemePackId | '' | null | undefined
+  difficulty?: DungeonIdx | undefined
+  giftIds?: EncodedGiftId[] | undefined
 }
 
 export interface SerializableNoteContent {

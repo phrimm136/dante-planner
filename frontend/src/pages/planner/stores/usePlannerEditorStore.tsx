@@ -8,6 +8,7 @@ import {
   createDefaultFloorSelections,
   createDefaultSectionNotes,
   createDefaultSkillEAState,
+  defaultFloorDifficulty,
   hydrateEditorState,
   projectEditorState,
 } from '../lib/editorStateCodec'
@@ -99,27 +100,30 @@ export interface PlannerEditorActions {
 
 export type PlannerEditorStore = PlannerEditorState & PlannerEditorActions
 
-const createInitialState = (overrides?: Partial<PlannerEditorState>): PlannerEditorState => ({
-  equipment: overrides?.equipment ?? createDefaultEquipment(),
-  floorSelections: overrides?.floorSelections ?? createDefaultFloorSelections(),
-  comprehensiveGiftIds: overrides?.comprehensiveGiftIds ?? new Set(),
-  deploymentOrder: overrides?.deploymentOrder ?? [],
+const createInitialState = (overrides?: Partial<PlannerEditorState>): PlannerEditorState => {
+  const category = overrides?.category ?? '5F'
+  return {
+    equipment: overrides?.equipment ?? createDefaultEquipment(),
+    floorSelections: overrides?.floorSelections ?? createDefaultFloorSelections(category),
+    comprehensiveGiftIds: overrides?.comprehensiveGiftIds ?? new Set(),
+    deploymentOrder: overrides?.deploymentOrder ?? [],
 
-  selectedKeywords: overrides?.selectedKeywords ?? new Set(),
-  selectedBuffIds: overrides?.selectedBuffIds ?? new Set(),
-  selectedGiftIds: overrides?.selectedGiftIds ?? new Set(),
-  observationGiftIds: overrides?.observationGiftIds ?? new Set(),
-  selectedGiftKeyword: overrides?.selectedGiftKeyword ?? null,
-  skillEAState: overrides?.skillEAState ?? createDefaultSkillEAState(),
-  deckFilterState: overrides?.deckFilterState ?? createDefaultDeckFilterState(),
-  deckVisibleCount: overrides?.deckVisibleCount ?? 10,
+    selectedKeywords: overrides?.selectedKeywords ?? new Set(),
+    selectedBuffIds: overrides?.selectedBuffIds ?? new Set(),
+    selectedGiftIds: overrides?.selectedGiftIds ?? new Set(),
+    observationGiftIds: overrides?.observationGiftIds ?? new Set(),
+    selectedGiftKeyword: overrides?.selectedGiftKeyword ?? null,
+    skillEAState: overrides?.skillEAState ?? createDefaultSkillEAState(),
+    deckFilterState: overrides?.deckFilterState ?? createDefaultDeckFilterState(),
+    deckVisibleCount: overrides?.deckVisibleCount ?? 10,
 
-  title: overrides?.title ?? '',
-  category: overrides?.category ?? '5F',
-  isPublished: overrides?.isPublished ?? false,
-  visibleSections: overrides?.visibleSections ?? 1,
-  sectionNotes: overrides?.sectionNotes ?? createDefaultSectionNotes(),
-})
+    title: overrides?.title ?? '',
+    category,
+    isPublished: overrides?.isPublished ?? false,
+    visibleSections: overrides?.visibleSections ?? 1,
+    sectionNotes: overrides?.sectionNotes ?? createDefaultSectionNotes(),
+  }
+}
 
 export const createPlannerEditorStore = (initialState?: Partial<PlannerEditorState>) => {
   const state = createInitialState(initialState)
@@ -211,7 +215,19 @@ export const createPlannerEditorStore = (initialState?: Partial<PlannerEditorSta
 
         setTitle: (title) => set({ title }, false, 'setTitle'),
 
-        setCategory: (category) => set({ category }, false, 'setCategory'),
+        setCategory: (category) =>
+          set(
+            (state) => ({
+              category,
+              floorSelections: state.floorSelections.map((floor, floorIndex) =>
+                floor.themePackId === null
+                  ? { ...floor, difficulty: defaultFloorDifficulty(category, floorIndex) }
+                  : floor,
+              ),
+            }),
+            false,
+            'setCategory',
+          ),
 
         setIsPublished: (published) => set({ isPublished: published }, false, 'setIsPublished'),
 

@@ -239,27 +239,11 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
     const { title, published } = planner.metadata
     const registry = idRegistryFor(planner.metadata.contentVersion)
 
-    if (published) {
-      const { errors } = validatePlannerForPublish(
-        title,
-        content,
-        category,
-        egoGiftSpec,
-        egoGiftI18n,
-        registry,
-      )
-      const [firstError] = errors
-      return firstError ? plannerValidationError(toUserFriendlyError(firstError)) : null
-    }
-
-    const friendlyError = validatePlannerForDraftSave(
-      content,
-      category,
-      egoGiftSpec,
-      egoGiftI18n,
-      registry,
-    )
-    return friendlyError ? plannerValidationError(friendlyError) : null
+    const { errors } = published
+      ? validatePlannerForPublish(title, content, category, egoGiftSpec, egoGiftI18n, registry)
+      : validatePlannerForDraftSave(content, category, egoGiftSpec, egoGiftI18n, registry)
+    const [firstError] = errors
+    return firstError ? plannerValidationError(toUserFriendlyError(firstError)) : null
   }
 
   const conflictOps = (conflict: ConflictItem): ConflictOps => ({

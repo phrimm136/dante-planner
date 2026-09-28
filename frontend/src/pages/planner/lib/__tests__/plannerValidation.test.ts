@@ -14,26 +14,30 @@ import {
   validateGiftIdArray,
   validateStartBuffIds,
   validateStartGiftSelection,
-  validateFloorThemePacksForSave,
   validatePlannerForPublish,
   validatePlannerForDraftSave,
+  validatePlannerForImport,
   validateNoteSizes,
   validateSelectedKeywords,
 } from '../plannerValidation'
 import { normalizePlannerIds } from '../plannerIdNormalize'
 import type { IdMigrationTable } from '../idMigrationTable'
-import type { PlannerIdRegistry } from '../plannerValidation'
+import type { PlannerIdRegistry, PlannerValidationResult } from '../plannerValidation'
+import { toUserFriendlyError } from '../plannerValidationErrors'
 import { MAX_NOTE_BYTES } from '@/lib/constants'
 import { calculateNoteByteLength } from '@/shared/noteEditor'
-import type { FloorValidationError, DifficultyValidationError } from '../plannerValidationErrors'
+import type {
+  FloorUnknownGiftValidationError,
+  GiftNotAffordableValidationError,
+  PlannerValidationError,
+} from '../plannerValidationErrors'
 import type { EGOGiftSpec } from '@/pages/egoGift'
-import type { FloorThemeSelection } from '@/pages/themePack'
-import type { DungeonIdx } from '@/shared/gameData'
+import type { DungeonIdx, ThemePackId } from '@/shared/gameData'
 import type { MDPlannerContent, SerializableFloorSelection } from '../../types/PlannerTypes'
 import type { SinnerEquipment, SkillEAState } from '../../types/DeckTypes'
 import { ThemePackIdSchema } from '@/shared/gameData'
 import type { EncodedGiftId } from '@/shared/gameData'
-import { asEGOId, asEncodedGiftId, asIdentityId } from '@/test-utils/fixtures'
+import { asEGOId, asEncodedGiftId, asIdentityId, buildSaveablePlanner } from '@/test-utils/fixtures'
 
 const ENCODED_9001 = asEncodedGiftId('9001')
 const ENCODED_9220 = asEncodedGiftId('9220')
@@ -55,6 +59,20 @@ function at<T>(items: readonly T[], index: number): T {
     throw new Error(`expected an element at index ${index}, got ${items.length}`)
   }
   return item
+}
+
+/** Each error as [code, field], the shape the floor-rule corpus records. */
+function codesAndFields(result: PlannerValidationResult): [string, string | undefined][] {
+  return result.errors.map((e) => [e.code, e.field])
+}
+
+function onlyCode<C extends PlannerValidationError['code']>(
+  result: PlannerValidationResult,
+  code: C,
+): Extract<PlannerValidationError, { code: C }>[] {
+  return result.errors.filter(
+    (e): e is Extract<PlannerValidationError, { code: C }> => e.code === code,
+  )
 }
 
 /** The floor at `index`, failing loudly if the fixture is shorter than the test assumes. */
@@ -185,61 +203,102 @@ describe('validateEquipment', () => {
 })
 
 // ============================================================================
-// validateFloorThemePacksForSave
+// Floor rules through the validators (floorRules module, BE codes)
 // ============================================================================
 
-describe('validateFloorThemePacksForSave', () => {
-  function makeFloors(packs: (string | null)[]): FloorThemeSelection[] {
-    return packs.map((themePackId) => ({
+describe('floor rules through the validators', () => {
+  function withPacks(packs: (string | null)[]): MDPlannerContent {
+    const content = makeValidContent('5F')
+    content.floorSelections = packs.map((themePackId) => ({
       themePackId: themePackId === null ? null : ThemePackIdSchema.parse(themePackId),
       difficulty: 1,
-      giftIds: new Set<EncodedGiftId>(),
+      giftIds: [],
     }))
+    return content
   }
 
   it('all packs present and unique returns no errors', () => {
-    const floors = makeFloors(['1001', '1002', '1003', '1004', '1005'])
-    expect(validateFloorThemePacksForSave(floors, 5)).toHaveLength(0)
+    const content = withPacks(['1001', '1002', '1003', '1004', '1005'])
+    expect(validatePlannerForPublish('My Plan', content, '5F').errors).toEqual([])
   })
 
-  it('missing pack on floor 2 returns FLOOR_MISSING_THEME_PACK', () => {
-    const floors = makeFloors(['1001', null, '1003', '1004', '1005'])
-    const errors = validateFloorThemePacksForSave(floors, 5)
-    expect(errors.some((e) => e.code === 'FLOOR_MISSING_THEME_PACK' && e.floorNumber === 2)).toBe(
-      true,
-    )
+  // corpus: scn-publish-floor2-absent
+  it('missing pack on floor 3 at publish reports FLOOR_MISSING_THEME_PACK at the floor path', () => {
+    const content = withPacks(['1001', '1002', null, '1004', '1005'])
+    expect(codesAndFields(validatePlannerForPublish('My Plan', content, '5F'))).toEqual([
+      ['FLOOR_MISSING_THEME_PACK', 'floorSelections[2]'],
+      ['INVALID_SEQUENCE', 'floorSelections[3]'],
+    ])
   })
 
-  it('duplicate pack returns FLOOR_DUPLICATE_THEME_PACK', () => {
-    const floors = makeFloors(['1001', '1001', '1003', '1004', '1005'])
-    const errors = validateFloorThemePacksForSave(floors, 5)
-    expect(errors.some((e) => e.code === 'FLOOR_DUPLICATE_THEME_PACK')).toBe(true)
+  // corpus: scn-repeat-floor0-floor3
+  it('a repeated pack reports FLOOR_DUPLICATE_THEME_PACK on the later floor at draft', () => {
+    const content = withPacks(['1001', '1002', '1003', '1001', '1005'])
+    expect(codesAndFields(validatePlannerForDraftSave(content, '5F'))).toEqual([
+      ['FLOOR_DUPLICATE_THEME_PACK', 'floorSelections[3].themePackId'],
+    ])
   })
 
-  it('floor 3 has pack but floor 2 missing returns FLOOR_PREREQUISITE_VIOLATION', () => {
-    // Floor 1: pack, Floor 2: null, Floor 3: pack → Floor 3 fires prerequisite violation
-    const floors = makeFloors(['1001', null, '1003'])
-    const errors = validateFloorThemePacksForSave(floors, 3)
-    expect(
-      errors.some((e) => e.code === 'FLOOR_PREREQUISITE_VIOLATION' && e.floorNumber === 3),
-    ).toBe(true)
+  // corpus: floor-sequence-gap
+  it('a pack after an empty floor reports INVALID_SEQUENCE at draft', () => {
+    const content = withPacks([null, '1002'])
+    expect(codesAndFields(validatePlannerForDraftSave(content, '5F'))).toEqual([
+      ['INVALID_SEQUENCE', 'floorSelections[1]'],
+    ])
   })
 
-  it('floor with duplicate gift IDs (array cast as Set) returns FLOOR_DUPLICATE_GIFT_ID', () => {
-    // FLOOR_DUPLICATE_GIFT_ID is unreachable through validatePlannerForPublish because
-    // the Set deserialization step deduplicates giftIds before this function is called.
-    // This test calls validateFloorThemePacksForSave directly with corrupted data.
-    const floors: FloorThemeSelection[] = [
-      {
-        themePackId: ThemePackIdSchema.parse('1001'),
-        difficulty: 1,
-        // Warning: deliberately invalid input — an array masquerading as a Set
-        // exercises the duplicate-gift guard that Set deserialization would otherwise hide.
-        giftIds: [ENCODED_9001, ENCODED_9001] as unknown as Set<EncodedGiftId>,
-      },
-    ]
-    const errors = validateFloorThemePacksForSave(floors, 1)
-    expect(errors.some((e) => e.code === 'FLOOR_DUPLICATE_GIFT_ID')).toBe(true)
+  // corpus: bi5-duplicate-gifts-without-pack (Behavior Inventory 5)
+  it('duplicate gifts on a pack-less floor report DUPLICATE_VALUE at draft', () => {
+    const content = withPacks([null])
+    floorAt(content, 0).giftIds = [ENCODED_9001, ENCODED_9001]
+    expect(codesAndFields(validatePlannerForDraftSave(content, '5F'))).toEqual([
+      ['DUPLICATE_VALUE', 'floorSelections[0].giftIds'],
+    ])
+  })
+
+  // corpus: silence-floor-element-not-object (Behavior Inventory 3)
+  it('a non-object floor reports INVALID_FIELD_TYPE and nothing else', () => {
+    const content = makeValidContent('5F')
+    ;(content.floorSelections as unknown[])[0] = 'not a floor'
+    expect(codesAndFields(validatePlannerForDraftSave(content, '5F'))).toEqual([
+      ['INVALID_FIELD_TYPE', 'floorSelections[0]'],
+    ])
+  })
+
+  // corpus: floor-theme-pack-empty-accepted-as-draft (Behavior Inventory 4)
+  it('an empty-string pack is absent: draft passes, publish reports it missing', () => {
+    const content = makeValidContent('5F')
+    floorAt(content, 4).themePackId = '' as unknown as ThemePackId
+    expect(validatePlannerForDraftSave(content, '5F').errors).toEqual([])
+    expect(codesAndFields(validatePlannerForPublish('My Plan', content, '5F'))).toEqual([
+      ['FLOOR_MISSING_THEME_PACK', 'floorSelections[4]'],
+    ])
+  })
+
+  // corpus: scn-three-violations-three-floors (Behavior Inventory 11)
+  it('draft save returns every violation, one per floor', () => {
+    const spec: Record<string, EGOGiftSpec> = { '9002': makeGiftSpec([]) }
+    const content = makeValidContent('5F')
+    floorAt(content, 0).giftIds = [asEncodedGiftId('9002'), asEncodedGiftId('9002')]
+    floorAt(content, 1).giftIds = [ENCODED_9999]
+    floorAt(content, 2).themePackId = floorAt(content, 0).themePackId
+
+    expect(codesAndFields(validatePlannerForDraftSave(content, '5F', spec))).toEqual([
+      ['DUPLICATE_VALUE', 'floorSelections[0].giftIds'],
+      ['FLOOR_DUPLICATE_THEME_PACK', 'floorSelections[2].themePackId'],
+      ['FLOOR_UNKNOWN_GIFT_ID', 'floorSelections[1].giftIds'],
+    ])
+  })
+
+  // corpus: scn-15-stored-on-5f (ADR 136)
+  it('floors past the category count are not validated', () => {
+    const content = makeValidContent('5F')
+    content.floorSelections.push({
+      themePackId: floorAt(content, 0).themePackId,
+      difficulty: 0,
+      giftIds: [ENCODED_9001, ENCODED_9001],
+    })
+    expect(validatePlannerForPublish('My Plan', content, '5F').errors).toEqual([])
   })
 })
 
@@ -274,12 +333,44 @@ describe('validatePlannerForPublish (strict)', () => {
     expect(errors.some((e) => e.code === 'FLOOR_MISSING_THEME_PACK')).toBe(true)
   })
 
-  it('Normal difficulty on 10F floor returns DIFFICULTY_INVALID_FOR_CATEGORY', () => {
+  // corpus: floor-difficulty-hard-required-on-10f
+  it('Normal difficulty on 10F floor returns VALUE_OUT_OF_RANGE', () => {
     const content = makeValidContent('10F')
     floorAt(content, 0).difficulty = 0 // NORMAL — invalid for 10F
-    const { isValid, errors } = validatePlannerForPublish('My Plan', content, '10F')
-    expect(isValid).toBe(false)
-    expect(errors.some((e) => e.code === 'DIFFICULTY_INVALID_FOR_CATEGORY')).toBe(true)
+    const result = validatePlannerForPublish('My Plan', content, '10F')
+    expect(result.isValid).toBe(false)
+    expect(codesAndFields(result)).toEqual([
+      ['VALUE_OUT_OF_RANGE', 'floorSelections[0].difficulty'],
+    ])
+  })
+
+  // corpus: boundary-seq-normal-after-hard (Behavior Inventory 7)
+  it('Normal after Hard on 5F returns INVALID_SEQUENCE at the difficulty', () => {
+    const content = makeValidContent('5F')
+    floorAt(content, 1).difficulty = 0
+    const result = validatePlannerForPublish('My Plan', content, '5F')
+    expect(codesAndFields(result)).toEqual([['INVALID_SEQUENCE', 'floorSelections[1].difficulty']])
+    expect(toUserFriendlyError(at(result.errors, 0))).toEqual({
+      key: 'pages.plannerMD.publish.normalAfterHard',
+    })
+  })
+
+  // corpus: scn-seq-normal-normal-hard
+  it('Hard after Normal on 5F passes', () => {
+    const content = makeValidContent('5F')
+    floorAt(content, 0).difficulty = 0
+    floorAt(content, 1).difficulty = 0
+    expect(validatePlannerForPublish('My Plan', content, '5F').errors).toEqual([])
+  })
+
+  // corpus: scn-10f-difficulty-absent (Behavior Inventory 6)
+  it('an absent difficulty at publish returns VALUE_OUT_OF_RANGE', () => {
+    const content = makeValidContent('10F')
+    delete (floorAt(content, 0) as { difficulty?: DungeonIdx }).difficulty
+    expect(codesAndFields(validatePlannerForPublish('My Plan', content, '10F'))).toEqual([
+      ['VALUE_OUT_OF_RANGE', 'floorSelections[0].difficulty'],
+    ])
+    expect(validatePlannerForDraftSave(content, '10F').errors).toEqual([])
   })
 
   it('renamed keyword is accepted via migration and does not mutate caller state', () => {
@@ -331,30 +422,34 @@ describe('validatePlannerForDraftSave (non-strict)', () => {
     const content = makeValidContent('5F')
     for (const floor of content.floorSelections) floor.themePackId = null
     // Title is not part of MDPlannerContent — non-strict never checks it
-    expect(validatePlannerForDraftSave(content, '5F')).toBeNull()
+    expect(validatePlannerForDraftSave(content, '5F').errors).toEqual([])
   })
 
   it('missing theme pack on last floor is allowed (returns null)', () => {
     const content = makeValidContent('5F')
     // Null the last floor only — no subsequent floor can trigger a prerequisite violation
     floorAt(content, 4).themePackId = null
-    expect(validatePlannerForDraftSave(content, '5F')).toBeNull()
+    expect(validatePlannerForDraftSave(content, '5F').errors).toEqual([])
   })
 
+  // corpus: scn-publish-floor2-absent (draft column); contract: INVALID_SEQUENCE keeps the prerequisite key
   it('floor 3 has pack but floor 2 missing still returns prerequisite error', () => {
     const content = makeValidContent('5F')
-    // Floor 2 has no pack, Floor 3 has one → FLOOR_PREREQUISITE_VIOLATION
     floorAt(content, 1).themePackId = null
-    // floor 2 (index 1) missing, floor 3 (index 2) has pack
     const result = validatePlannerForDraftSave(content, '5F')
-    expect(result?.key).toBe('pages.plannerMD.validation.corruptedState')
+    expect(codesAndFields(result)).toEqual([['INVALID_SEQUENCE', 'floorSelections[2]']])
+    expect(toUserFriendlyError(at(result.errors, 0))).toEqual({
+      key: 'pages.plannerMD.previousFloorNoThemePack',
+    })
   })
 
   it('missing equipment sinner returns corruptedState i18n key', () => {
     const content = makeValidContent('5F')
     delete (content.equipment as Record<string, unknown>)['01']
     const result = validatePlannerForDraftSave(content, '5F')
-    expect(result?.key).toBe('pages.plannerMD.validation.corruptedState')
+    expect(toUserFriendlyError(at(result.errors, 0)).key).toBe(
+      'pages.plannerMD.validation.corruptedState',
+    )
   })
 
   it('unaffordable gift on floor with theme pack returns themePackEgoGiftInconsistency i18n key', () => {
@@ -365,8 +460,12 @@ describe('validatePlannerForDraftSave (non-strict)', () => {
       '9220': makeGiftSpec(['1024']),
     }
     const result = validatePlannerForDraftSave(content, '5F', spec)
-    expect(result?.key).toBe('pages.plannerMD.publish.themePackEgoGiftInconsistency')
-    expect(result?.params?.pack).toBe('1001') // floor 0's themePackId
+    expect(result.errors.map(toUserFriendlyError)).toEqual([
+      {
+        key: 'pages.plannerMD.publish.themePackEgoGiftInconsistency',
+        params: { pack: '1001', gifts: '9220' },
+      },
+    ])
   })
 })
 
@@ -574,7 +673,7 @@ describe('validateStartGiftSelection', () => {
 })
 
 // ============================================================================
-// validatePlannerForPublish – gift affordability (FLOOR_UNAFFORDABLE_GIFT)
+// validatePlannerForPublish – gift affordability (GIFT_NOT_AFFORDABLE)
 // ============================================================================
 
 describe('validatePlannerForPublish – gift affordability', () => {
@@ -584,28 +683,28 @@ describe('validatePlannerForPublish – gift affordability', () => {
   }
   const i18n: Record<string, string> = { '9220': 'Dream-Eating Tapir' }
 
-  it("gift '9220' is not affordable for theme pack '1110' → FLOOR_UNAFFORDABLE_GIFT", () => {
+  // corpus: floor-gift-not-affordable
+  it("gift '9220' is not affordable for theme pack '1110' → GIFT_NOT_AFFORDABLE at the gift", () => {
     const content = makeValidContent('5F')
     floorAt(content, 0).themePackId = ThemePackIdSchema.parse('1110')
     floorAt(content, 0).giftIds = [ENCODED_9220]
 
-    const { isValid, errors } = validatePlannerForPublish('My Plan', content, '5F', spec)
-    expect(isValid).toBe(false)
-    const err = errors.find((e) => e.code === 'FLOOR_UNAFFORDABLE_GIFT') as FloorValidationError
-    expect(err).toBeDefined()
-    expect(err.floorNumber).toBe(1)
-    expect(err.context?.themePackId).toBe('1110')
-    expect((err.context!.giftIds as string[]).includes('9220')).toBe(true)
+    const result = validatePlannerForPublish('My Plan', content, '5F', spec)
+    expect(result.isValid).toBe(false)
+    expect(codesAndFields(result)).toEqual([
+      ['GIFT_NOT_AFFORDABLE', 'floorSelections[0].giftIds[0]'],
+    ])
+    expect(at(onlyCode(result, 'GIFT_NOT_AFFORDABLE'), 0).context.themePackId).toBe('1110')
   })
 
-  it("enhanced gift '19220' (level 1) not affordable for theme pack '1110' → FLOOR_UNAFFORDABLE_GIFT", () => {
+  it("enhanced gift '19220' (level 1) not affordable for theme pack '1110' → GIFT_NOT_AFFORDABLE", () => {
     const content = makeValidContent('5F')
     floorAt(content, 0).themePackId = ThemePackIdSchema.parse('1110')
     floorAt(content, 0).giftIds = [ENCODED_19220] // encoded: enhancement=1, base=9220
 
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '5F', spec)
     expect(isValid).toBe(false)
-    expect(errors.some((e) => e.code === 'FLOOR_UNAFFORDABLE_GIFT')).toBe(true)
+    expect(errors.some((e) => e.code === 'GIFT_NOT_AFFORDABLE')).toBe(true)
   })
 
   it("gift '9220' on its correct pack '1024' passes affordability", () => {
@@ -615,7 +714,7 @@ describe('validatePlannerForPublish – gift affordability', () => {
 
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '5F', spec)
     expect(isValid).toBe(true)
-    expect(errors.filter((e) => e.code === 'FLOOR_UNAFFORDABLE_GIFT')).toHaveLength(0)
+    expect(errors.filter((e) => e.code === 'GIFT_NOT_AFFORDABLE')).toHaveLength(0)
   })
 
   it('universal gift (empty themePack) passes affordability on any pack', () => {
@@ -624,10 +723,11 @@ describe('validatePlannerForPublish – gift affordability', () => {
 
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '5F', spec)
     expect(isValid).toBe(true)
-    expect(errors.filter((e) => e.code === 'FLOOR_UNAFFORDABLE_GIFT')).toHaveLength(0)
+    expect(errors.filter((e) => e.code === 'GIFT_NOT_AFFORDABLE')).toHaveLength(0)
   })
 
-  it('multiple unaffordable gifts on one floor produce a single error listing all', () => {
+  // contract: GIFT_NOT_AFFORDABLE at floorSelections[i].giftIds[j], one per gift
+  it('multiple unaffordable gifts on one floor produce one error per gift', () => {
     const twoGiftSpec: Record<string, EGOGiftSpec> = {
       '9220': makeGiftSpec(['1024']),
       '9221': makeGiftSpec(['1024']),
@@ -636,10 +736,11 @@ describe('validatePlannerForPublish – gift affordability', () => {
     floorAt(content, 0).themePackId = ThemePackIdSchema.parse('1110')
     floorAt(content, 0).giftIds = [ENCODED_9220, ENCODED_9221]
 
-    const { errors } = validatePlannerForPublish('My Plan', content, '5F', twoGiftSpec)
-    const affordErrors = errors.filter((e) => e.code === 'FLOOR_UNAFFORDABLE_GIFT')
-    expect(affordErrors).toHaveLength(1)
-    expect((affordErrors[0] as FloorValidationError).context?.giftIds as string[]).toHaveLength(2)
+    const result = validatePlannerForPublish('My Plan', content, '5F', twoGiftSpec)
+    expect(codesAndFields(result)).toEqual([
+      ['GIFT_NOT_AFFORDABLE', 'floorSelections[0].giftIds[0]'],
+      ['GIFT_NOT_AFFORDABLE', 'floorSelections[0].giftIds[1]'],
+    ])
   })
 
   it('unaffordable gifts on two separate floors produce one error per floor', () => {
@@ -649,11 +750,11 @@ describe('validatePlannerForPublish – gift affordability', () => {
     floorAt(content, 1).themePackId = ThemePackIdSchema.parse('2000') // floor 2 (unique, not '1110')
     floorAt(content, 1).giftIds = [ENCODED_9220]
 
-    const { errors } = validatePlannerForPublish('My Plan', content, '5F', spec)
-    const affordErrors = errors.filter((e) => e.code === 'FLOOR_UNAFFORDABLE_GIFT')
-    expect(affordErrors).toHaveLength(2)
-    expect((affordErrors[0] as FloorValidationError).floorNumber).toBe(1)
-    expect((affordErrors[1] as FloorValidationError).floorNumber).toBe(2)
+    const result = validatePlannerForPublish('My Plan', content, '5F', spec)
+    expect(onlyCode(result, 'GIFT_NOT_AFFORDABLE').map((e) => e.field)).toEqual([
+      'floorSelections[0].giftIds[0]',
+      'floorSelections[1].giftIds[0]',
+    ])
   })
 
   it('egoGiftI18n resolves gift ID to display name in error context', () => {
@@ -661,9 +762,9 @@ describe('validatePlannerForPublish – gift affordability', () => {
     floorAt(content, 0).themePackId = ThemePackIdSchema.parse('1110')
     floorAt(content, 0).giftIds = [ENCODED_9220]
 
-    const { errors } = validatePlannerForPublish('My Plan', content, '5F', spec, i18n)
-    const err = errors.find((e) => e.code === 'FLOOR_UNAFFORDABLE_GIFT') as FloorValidationError
-    expect(err.context?.giftNames).toContain('Dream-Eating Tapir')
+    const result = validatePlannerForPublish('My Plan', content, '5F', spec, i18n)
+    const err: GiftNotAffordableValidationError = at(onlyCode(result, 'GIFT_NOT_AFFORDABLE'), 0)
+    expect(err.context.giftName).toBe('Dream-Eating Tapir')
   })
 
   it('affordability check is skipped when egoGiftSpec is not provided', () => {
@@ -672,7 +773,7 @@ describe('validatePlannerForPublish – gift affordability', () => {
 
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '5F') // no spec
     expect(isValid).toBe(true)
-    expect(errors.filter((e) => e.code === 'FLOOR_UNAFFORDABLE_GIFT')).toHaveLength(0)
+    expect(errors.filter((e) => e.code === 'GIFT_NOT_AFFORDABLE')).toHaveLength(0)
   })
 })
 
@@ -690,22 +791,25 @@ describe('validatePlannerForPublish – gift existence', () => {
     const content = makeValidContent('5F')
     floorAt(content, 0).giftIds = [ENCODED_9999]
 
-    const { isValid, errors } = validatePlannerForPublish('My Plan', content, '5F', spec)
-    expect(isValid).toBe(false)
-    const err = errors.find((e) => e.code === 'FLOOR_UNKNOWN_GIFT_ID') as FloorValidationError
-    expect(err).toBeDefined()
+    const result = validatePlannerForPublish('My Plan', content, '5F', spec)
+    expect(result.isValid).toBe(false)
+    const err: FloorUnknownGiftValidationError = at(onlyCode(result, 'FLOOR_UNKNOWN_GIFT_ID'), 0)
     expect(err.floorNumber).toBe(1)
-    expect(err.context?.giftIds as string[]).toContain('9999')
+    expect(err.context.giftId).toBe('9999')
   })
 
-  it('multiple unknown IDs on one floor produce a single FLOOR_UNKNOWN_GIFT_ID error listing all', () => {
+  // corpus: floor-gift-unknown (path floorSelections[i].giftIds); contract: one per gift
+  it('multiple unknown IDs on one floor produce one FLOOR_UNKNOWN_GIFT_ID error per gift', () => {
     const content = makeValidContent('5F')
     floorAt(content, 0).giftIds = [ENCODED_9999, ENCODED_9998]
 
-    const { errors } = validatePlannerForPublish('My Plan', content, '5F', spec)
-    const unknownErrors = errors.filter((e) => e.code === 'FLOOR_UNKNOWN_GIFT_ID')
-    expect(unknownErrors).toHaveLength(1)
-    expect((unknownErrors[0] as FloorValidationError).context?.giftIds as string[]).toHaveLength(2)
+    const result = validatePlannerForPublish('My Plan', content, '5F', spec)
+    expect(
+      onlyCode(result, 'FLOOR_UNKNOWN_GIFT_ID').map((e) => [e.field, e.context.giftId]),
+    ).toEqual([
+      ['floorSelections[0].giftIds', '9999'],
+      ['floorSelections[0].giftIds', '9998'],
+    ])
   })
 
   it('unknown IDs on two separate floors produce one FLOOR_UNKNOWN_GIFT_ID error per floor', () => {
@@ -713,11 +817,8 @@ describe('validatePlannerForPublish – gift existence', () => {
     floorAt(content, 0).giftIds = [ENCODED_9999]
     floorAt(content, 1).giftIds = [ENCODED_9998]
 
-    const { errors } = validatePlannerForPublish('My Plan', content, '5F', spec)
-    const unknownErrors = errors.filter((e) => e.code === 'FLOOR_UNKNOWN_GIFT_ID')
-    expect(unknownErrors).toHaveLength(2)
-    expect((unknownErrors[0] as FloorValidationError).floorNumber).toBe(1)
-    expect((unknownErrors[1] as FloorValidationError).floorNumber).toBe(2)
+    const result = validatePlannerForPublish('My Plan', content, '5F', spec)
+    expect(onlyCode(result, 'FLOOR_UNKNOWN_GIFT_ID').map((e) => e.floorNumber)).toEqual([1, 2])
   })
 
   it('valid floor gift IDs return no FLOOR_UNKNOWN_GIFT_ID errors', () => {
@@ -813,24 +914,27 @@ describe('validatePlannerForPublish – 15F difficulty', () => {
     expect(isValid).toBe(true)
   })
 
-  it('floor 11 Hard (not Extreme) in 15F returns DIFFICULTY_INVALID_FOR_CATEGORY for floor 11', () => {
+  // corpus: floor-difficulty-extreme-required-on-15f
+  it('floor 11 Hard (not Extreme) in 15F returns VALUE_OUT_OF_RANGE for floor 11', () => {
     const content = makeValidContent('15F')
     floorAt(content, 10).difficulty = 1 // index 10 = floor 11, must be Extreme (3)
-    const { isValid, errors } = validatePlannerForPublish('My Plan', content, '15F')
-    expect(isValid).toBe(false)
-    const err = errors.find(
-      (e) => e.code === 'DIFFICULTY_INVALID_FOR_CATEGORY',
-    ) as DifficultyValidationError
-    expect(err).toBeDefined()
-    expect(err.floorNumber).toBe(11)
+    const result = validatePlannerForPublish('My Plan', content, '15F')
+    expect(result.isValid).toBe(false)
+    expect(codesAndFields(result)).toEqual([
+      ['VALUE_OUT_OF_RANGE', 'floorSelections[10].difficulty'],
+    ])
+    expect(toUserFriendlyError(at(result.errors, 0))).toEqual({
+      key: 'pages.plannerMD.publish.requiresExtremeMode',
+    })
   })
 
-  it('floor 1 Normal (not Hard) in 15F returns DIFFICULTY_INVALID_FOR_CATEGORY', () => {
+  // corpus: boundary-seq-10f-normal-in-first-five
+  it('floor 1 Normal (not Hard) in 15F returns VALUE_OUT_OF_RANGE', () => {
     const content = makeValidContent('15F')
     floorAt(content, 0).difficulty = 0 // Normal — floors 1-10 must be Hard
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '15F')
     expect(isValid).toBe(false)
-    expect(errors.some((e) => e.code === 'DIFFICULTY_INVALID_FOR_CATEGORY')).toBe(true)
+    expect(errors.some((e) => e.code === 'VALUE_OUT_OF_RANGE')).toBe(true)
   })
 })
 
@@ -850,21 +954,27 @@ describe('validatePlannerForDraftSave – additional cases', () => {
     floorAt(content, 0).giftIds = [ENCODED_9220]
 
     const result = validatePlannerForDraftSave(content, '5F', spec, i18n)
-    expect(result?.key).toBe('pages.plannerMD.publish.themePackEgoGiftInconsistency')
-    expect(result?.params?.gifts).toContain('Dream-Eating Tapir')
+    expect(result.errors.map(toUserFriendlyError)).toEqual([
+      {
+        key: 'pages.plannerMD.publish.themePackEgoGiftInconsistency',
+        params: { pack: '1110', gifts: 'Dream-Eating Tapir' },
+      },
+    ])
   })
 
-  it('affordability check skipped without egoGiftSpec returns null', () => {
+  it('affordability check skipped without egoGiftSpec returns no errors', () => {
     const content = makeValidContent('5F')
     floorAt(content, 0).giftIds = [ENCODED_9220] // would fail with spec
-    expect(validatePlannerForDraftSave(content, '5F')).toBeNull()
+    expect(validatePlannerForDraftSave(content, '5F').errors).toEqual([])
   })
 
   it('duplicate pack in non-strict mode returns corruptedState key', () => {
     const content = makeValidContent('5F')
     floorAt(content, 1).themePackId = floorAt(content, 0).themePackId // duplicate
     const result = validatePlannerForDraftSave(content, '5F')
-    expect(result?.key).toBe('pages.plannerMD.validation.corruptedState')
+    expect(result.errors.map(toUserFriendlyError)).toEqual([
+      { key: 'pages.plannerMD.validation.corruptedState' },
+    ])
   })
 
   it('unknown floor gift ID returns unknownGiftId i18n key', () => {
@@ -872,23 +982,27 @@ describe('validatePlannerForDraftSave – additional cases', () => {
     floorAt(content, 0).giftIds = [ENCODED_9999]
 
     const result = validatePlannerForDraftSave(content, '5F', spec)
-    expect(result?.key).toBe('pages.plannerMD.validation.unknownGiftId')
-    expect(result?.params?.floor).toBe('1')
-    expect(result?.params?.gifts).toContain('9999')
+    expect(result.errors.map(toUserFriendlyError)).toEqual([
+      { key: 'pages.plannerMD.validation.unknownGiftId', params: { floor: '1', gifts: '9999' } },
+    ])
   })
 
-  it('existence error is reported before affordability error', () => {
+  // Behavior Inventory 11: every violation, existence before affordability
+  it('existence and affordability errors are both reported, existence first', () => {
     const content = makeValidContent('5F')
     floorAt(content, 0).themePackId = ThemePackIdSchema.parse('1110')
     floorAt(content, 0).giftIds = [ENCODED_9999, ENCODED_9220]
 
     const result = validatePlannerForDraftSave(content, '5F', spec)
-    expect(result?.key).toBe('pages.plannerMD.validation.unknownGiftId')
+    expect(codesAndFields(result)).toEqual([
+      ['FLOOR_UNKNOWN_GIFT_ID', 'floorSelections[0].giftIds'],
+      ['GIFT_NOT_AFFORDABLE', 'floorSelections[0].giftIds[1]'],
+    ])
   })
 })
 
 // ============================================================================
-// validatePlannerForDraftSave – gift affordability (FLOOR_UNAFFORDABLE_GIFT)
+// validatePlannerForDraftSave – gift affordability (GIFT_NOT_AFFORDABLE)
 // ============================================================================
 
 describe('validatePlannerForDraftSave – gift affordability', () => {
@@ -905,35 +1019,40 @@ describe('validatePlannerForDraftSave – gift affordability', () => {
     floorAt(content, 0).giftIds = [ENCODED_9220]
 
     const result = validatePlannerForDraftSave(content, '5F', spec, i18n)
-    expect(result?.key).toBe('pages.plannerMD.publish.themePackEgoGiftInconsistency')
-    expect(result?.params?.gifts).toContain('Dream-Eating Tapir')
-    expect(result?.params?.pack).toBe('1110')
+    expect(result.errors.map(toUserFriendlyError)).toEqual([
+      {
+        key: 'pages.plannerMD.publish.themePackEgoGiftInconsistency',
+        params: { pack: '1110', gifts: 'Dream-Eating Tapir' },
+      },
+    ])
   })
 
-  it('gift on correct pack returns null', () => {
+  it('gift on correct pack returns no errors', () => {
     const content = makeValidContent('5F')
     floorAt(content, 0).themePackId = ThemePackIdSchema.parse('1024')
     floorAt(content, 0).giftIds = [ENCODED_9220]
 
-    expect(validatePlannerForDraftSave(content, '5F', spec)).toBeNull()
+    expect(validatePlannerForDraftSave(content, '5F', spec).errors).toEqual([])
   })
 
-  it('universal gift on any pack returns null', () => {
+  it('universal gift on any pack returns no errors', () => {
     const content = makeValidContent('5F')
     floorAt(content, 0).giftIds = [ENCODED_9001]
 
-    expect(validatePlannerForDraftSave(content, '5F', spec)).toBeNull()
+    expect(validatePlannerForDraftSave(content, '5F', spec).errors).toEqual([])
   })
 
-  it('multiple unaffordable gifts on one floor lists all names', () => {
+  // contract: GIFT_NOT_AFFORDABLE one per gift; FE grouping goes
+  it('multiple unaffordable gifts on one floor name each gift in its own error', () => {
     const content = makeValidContent('5F')
     floorAt(content, 0).themePackId = ThemePackIdSchema.parse('1110')
     floorAt(content, 0).giftIds = [ENCODED_9220, ENCODED_9221]
 
     const result = validatePlannerForDraftSave(content, '5F', spec, i18n)
-    expect(result?.key).toBe('pages.plannerMD.publish.themePackEgoGiftInconsistency')
-    expect(result?.params?.gifts).toContain('Dream-Eating Tapir')
-    expect(result?.params?.gifts).toContain('Pulsating Husk')
+    expect(result.errors.map(toUserFriendlyError).map((e) => e.params?.gifts)).toEqual([
+      'Dream-Eating Tapir',
+      'Pulsating Husk',
+    ])
   })
 
   it('floor without theme pack skips affordability check', () => {
@@ -941,14 +1060,14 @@ describe('validatePlannerForDraftSave – gift affordability', () => {
     for (const floor of content.floorSelections) floor.themePackId = null
     floorAt(content, 0).giftIds = [ENCODED_9220]
 
-    expect(validatePlannerForDraftSave(content, '5F', spec)).toBeNull()
+    expect(validatePlannerForDraftSave(content, '5F', spec).errors).toEqual([])
   })
 
   it('affordability check skipped without egoGiftSpec', () => {
     const content = makeValidContent('5F')
     floorAt(content, 0).giftIds = [ENCODED_9220]
 
-    expect(validatePlannerForDraftSave(content, '5F')).toBeNull()
+    expect(validatePlannerForDraftSave(content, '5F').errors).toEqual([])
   })
 })
 
@@ -996,6 +1115,51 @@ describe('validateNoteSizes', () => {
     const result = validateNoteSizes({ 'floor-3': noteWithText('가'.repeat(koreanCharCount)) })
 
     expect(result?.params?.section).toBe('floor-3')
+  })
+})
+
+// ============================================================================
+// validatePlannerForImport
+// ============================================================================
+
+describe('validatePlannerForImport', () => {
+  const registry: PlannerIdRegistry = {
+    identityIds: new Set(),
+    egoIds: new Set(),
+    themePackIds: new Set(['1001', '1002', '1003', '1004', '1005']),
+    startBuffIds: new Set(),
+  }
+
+  function twoViolations(): MDPlannerContent {
+    const content = makeValidContent('5F')
+    floorAt(content, 1).difficulty = 0
+    floorAt(content, 3).themePackId = floorAt(content, 0).themePackId
+    return content
+  }
+
+  // Behavior Inventory 11: import shows every violation
+  it('a published planner reports both floor violations', () => {
+    const planner = buildSaveablePlanner({
+      metadata: { published: true },
+      content: twoViolations(),
+    })
+    const floorErrors = validatePlannerForImport(planner, {}, registry).errors.filter((e) =>
+      e.field?.startsWith('floorSelections'),
+    )
+    expect(floorErrors.map((e) => [e.code, e.field])).toEqual([
+      ['INVALID_SEQUENCE', 'floorSelections[1].difficulty'],
+      ['FLOOR_DUPLICATE_THEME_PACK', 'floorSelections[3].themePackId'],
+    ])
+  })
+
+  it('a draft planner is checked at the draft stage', () => {
+    const planner = buildSaveablePlanner({ content: twoViolations() })
+    const floorErrors = validatePlannerForImport(planner, {}, registry).errors.filter((e) =>
+      e.field?.startsWith('floorSelections'),
+    )
+    expect(floorErrors.map((e) => [e.code, e.field])).toEqual([
+      ['FLOOR_DUPLICATE_THEME_PACK', 'floorSelections[3].themePackId'],
+    ])
   })
 })
 
@@ -1063,7 +1227,9 @@ describe('entity id registry checks', () => {
       const content = { ...makeValidContent('5F'), selectedBuffIds: [100] }
       const registry = registryFor(content)
 
-      expect(validatePlannerForDraftSave(content, '5F', undefined, undefined, registry)).toBeNull()
+      expect(
+        validatePlannerForDraftSave(content, '5F', undefined, undefined, registry).errors,
+      ).toEqual([])
       expect(
         validatePlannerForPublish(
           'My Plan',
@@ -1082,10 +1248,11 @@ describe('entity id registry checks', () => {
     const registry = registryFor(makeValidContent('5F'))
     corrupt(content)
 
-    expect(validatePlannerForDraftSave(content, '5F', undefined, undefined, registry)).toEqual({
-      key,
-      params: { id },
-    })
+    expect(
+      validatePlannerForDraftSave(content, '5F', undefined, undefined, registry).errors.map(
+        toUserFriendlyError,
+      ),
+    ).toContainEqual({ key, params: { id } })
   })
 
   it.each(cases)('publish reports $code with the offending id', ({ code, id, corrupt }) => {
@@ -1113,7 +1280,9 @@ describe('entity id registry checks', () => {
       giftIds: [],
     })
 
-    expect(validatePlannerForDraftSave(content, '5F', undefined, undefined, registry)).toBeNull()
+    expect(
+      validatePlannerForDraftSave(content, '5F', undefined, undefined, registry).errors,
+    ).toEqual([])
   })
 })
 
@@ -1129,7 +1298,7 @@ describe('gift enhancement band', () => {
     content.observationGiftIds = [id as EncodedGiftId]
     floorAt(content, 0).giftIds = [id as EncodedGiftId]
 
-    expect(validatePlannerForDraftSave(content, '5F', spec)).toBeNull()
+    expect(validatePlannerForDraftSave(content, '5F', spec).errors).toEqual([])
   })
 
   it('39123 is outside the band and unknown in every gift field', () => {

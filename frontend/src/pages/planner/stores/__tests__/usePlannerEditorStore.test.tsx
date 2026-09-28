@@ -59,6 +59,10 @@ describe('usePlannerEditorStore', () => {
       expect(s.title).toBe('Preset')
       expect(s.category).toBe('15F')
       expect(s.isPublished).toBe(true)
+      expect(s.floorSelections.map((f) => f.difficulty)).toEqual([
+        ...Array.from({ length: 10 }, () => DUNGEON_IDX.HARD),
+        ...Array.from({ length: 5 }, () => DUNGEON_IDX.EXTREME),
+      ])
     })
   })
 
@@ -107,7 +111,7 @@ describe('usePlannerEditorStore', () => {
   describe('floor selection actions', () => {
     it('setFloorSelections replaces the array', () => {
       const store = createPlannerEditorStore()
-      const selections = createDefaultFloorSelections()
+      const selections = createDefaultFloorSelections('5F')
 
       store.getState().setFloorSelections(selections)
 
@@ -173,6 +177,36 @@ describe('usePlannerEditorStore', () => {
 
       store.getState().setDeckVisibleCount((prev) => prev + 5)
       expect(store.getState().deckVisibleCount).toBe(25)
+    })
+
+    it('a fresh planner switched to 10F defaults every floor to HARD', () => {
+      const store = createPlannerEditorStore()
+
+      store.getState().setCategory('10F')
+
+      expect(
+        store
+          .getState()
+          .floorSelections.slice(0, 10)
+          .map((f) => f.difficulty),
+      ).toEqual(Array.from({ length: 10 }, () => DUNGEON_IDX.HARD))
+    })
+
+    it('a category change keeps the difficulty of floors that hold a pack', () => {
+      const store = createPlannerEditorStore()
+      store.getState().updateFloorSelection(0, {
+        themePackId: ThemePackIdSchema.parse('1001'),
+        difficulty: DUNGEON_IDX.NORMAL,
+        giftIds: new Set(),
+      })
+
+      store.getState().setCategory('10F')
+
+      const floors = store.getState().floorSelections
+      expect(floors.slice(0, 2).map((f) => f.difficulty)).toEqual([
+        DUNGEON_IDX.NORMAL,
+        DUNGEON_IDX.HARD,
+      ])
     })
 
     it('setTitle / setCategory / setIsPublished update cold state', () => {

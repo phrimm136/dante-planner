@@ -15,6 +15,7 @@ import { EXPORT_FILE_EXTENSION, EXPORT_VERSION } from '@/lib/constants'
 import { GZIP_OS_BYTE_OFFSET, GZIP_OS_TOPS20 } from '../../lib/deckCode'
 
 import type { SaveablePlanner } from '../../types/PlannerTypes'
+import type { PlannerValidationResult } from '../../lib/plannerValidation'
 
 const PLANNER_ID = '00000000-0000-4000-8000-000000000001'
 
@@ -28,9 +29,23 @@ vi.mock('../../hooks/usePlannerStorage', () => ({
   usePlannerStorage: () => storageMocks,
 }))
 
+const VALID_IMPORT: PlannerValidationResult = { isValid: true, errors: [] }
+
+const UNKNOWN_IDENTITY_IMPORT: PlannerValidationResult = {
+  isValid: false,
+  errors: [
+    {
+      code: 'IDENTITY_UNKNOWN_ID',
+      message: '',
+      field: 'equipment.01.identity.id',
+      context: { id: '10199' },
+    },
+  ],
+}
+
 const validationMocks = vi.hoisted(() => ({
   validatePlannerForImport: vi.fn(
-    (_planner: unknown): { key: string; params?: Record<string, string> } | null => null,
+    (_planner: unknown): PlannerValidationResult => ({ isValid: true, errors: [] }),
   ),
 }))
 
@@ -135,8 +150,8 @@ describe('PlannerExportImportSection invalid planners', () => {
     storageMocks.saveToLocal.mockResolvedValue({ ok: true })
     validationMocks.validatePlannerForImport.mockImplementation((planner) =>
       (planner as SaveablePlanner).metadata.title === 'Plan 3'
-        ? { key: 'pages.plannerMD.validation.unknownIdentityId', params: { id: '10199' } }
-        : null,
+        ? UNKNOWN_IDENTITY_IMPORT
+        : VALID_IMPORT,
     )
   })
 
@@ -163,15 +178,12 @@ describe('PlannerExportImportSection invalid planners', () => {
     expect(showSuccess).toHaveBeenCalledWith('common:exportImport.importSuccess', { count: 2 })
     expect(showWarning).toHaveBeenCalledWith('common:exportImport.skippedInvalid', {
       count: 1,
-      titles: 'Plan 3',
+      titles: 'Plan 3: planner:pages.plannerMD.validation.unknownIdentityId',
     })
   })
 
   it('reports no success when every planner in the file is rejected', async () => {
-    validationMocks.validatePlannerForImport.mockReturnValue({
-      key: 'pages.plannerMD.validation.unknownIdentityId',
-      params: { id: '10199' },
-    })
+    validationMocks.validatePlannerForImport.mockReturnValue(UNKNOWN_IDENTITY_IMPORT)
     vi.mocked(showSuccess).mockClear()
     const user = userEvent.setup()
     const items = [4, 5].map((n) => {
@@ -191,7 +203,9 @@ describe('PlannerExportImportSection invalid planners', () => {
     await waitFor(() =>
       expect(showWarning).toHaveBeenCalledWith('common:exportImport.skippedInvalid', {
         count: 2,
-        titles: 'Plan 4, Plan 5',
+        titles:
+          'Plan 4: planner:pages.plannerMD.validation.unknownIdentityId; ' +
+          'Plan 5: planner:pages.plannerMD.validation.unknownIdentityId',
       }),
     )
     expect(storageMocks.saveToLocal).not.toHaveBeenCalled()

@@ -466,7 +466,7 @@ describe('partitionImport', () => {
 
     expect(fresh.map((p) => p.metadata.title)).toEqual(['Plan 1', 'Plan 2'])
     expect(conflicting).toEqual([])
-    expect(skipped).toEqual([{ id: items[2]?.id, title: 'Plan 3' }])
+    expect(skipped).toEqual([{ id: items[2]?.id, title: 'Plan 3', reason: rejection }])
   })
 
   it('skips a planner whose content the validator cannot read', () => {
@@ -480,7 +480,13 @@ describe('partitionImport', () => {
     )
 
     expect(fresh).toEqual([])
-    expect(skipped).toEqual([{ id: VALID_UUID, title: 'Imported plan' }])
+    expect(skipped).toEqual([
+      {
+        id: VALID_UUID,
+        title: 'Imported plan',
+        reason: { key: 'pages.plannerMD.validation.corruptedState' },
+      },
+    ])
   })
 
   it('validates the planner after applying the id-migration table', () => {

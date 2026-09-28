@@ -56,8 +56,9 @@ function admit(c: CorpusCase, stage: FloorRuleStage) {
 }
 
 describe('floor rules corpus', () => {
-  it('holds 54 cases', () => {
-    expect(corpus.cases).toHaveLength(54)
+  it('holds 55 cases, 54 of them for the module', () => {
+    expect(corpus.cases).toHaveLength(55)
+    expect(moduleCases).toHaveLength(54)
   })
 
   it('records only module codes, id-check codes and caller boundary codes', () => {

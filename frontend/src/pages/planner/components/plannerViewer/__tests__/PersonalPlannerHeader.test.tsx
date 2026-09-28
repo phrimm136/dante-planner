@@ -133,7 +133,7 @@ vi.mock('../../../hooks/usePlannerPublish', () => ({
 // ── Planner validation ────────────────────────────────────────
 vi.mock('../../../lib/plannerValidation', () => ({
   validatePlannerForPublish: () => ({ isValid: true, errors: [] }),
-  validatePlannerForDraftSave: () => null,
+  validatePlannerForDraftSave: () => ({ isValid: true, errors: [] }),
 }))
 vi.mock('../../../lib/plannerValidationErrors', () => ({
   toUserFriendlyError: (_e: unknown) => ({ key: 'error.key', params: {} }),

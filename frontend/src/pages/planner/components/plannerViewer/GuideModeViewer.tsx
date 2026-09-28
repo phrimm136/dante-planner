@@ -27,7 +27,7 @@ import { LG_BREAKPOINT_PX, MD_BREAKPOINT_PX } from '@/lib/constants'
 import { EGO_GIFT_GEOMETRY, useSlotSizePx } from '@/shared/cardLayout'
 import { GIFT_GRID_ROWS, giftGridHeightPx } from '../../lib/cardLayout'
 import type { MDSaveablePlanner } from '../../types/PlannerTypes'
-import { FLOOR_COUNTS } from '@/shared/gameData'
+import { floorCount as categoryFloorCount } from '@/shared/gameData'
 import type { NoteContent } from '@/shared/noteEditor'
 import { isNoteEmpty } from '@/shared/noteEditor'
 import { deserializeSets } from '../../schemas/PlannerSchemas'
@@ -55,16 +55,19 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
 
   const { content } = planner
   const category = planner.config.category
-  const floorCount = FLOOR_COUNTS[category]
+  const floorCount = categoryFloorCount(category)
 
-  const deserialized = deserializeSets({
-    selectedKeywords: content.selectedKeywords,
-    selectedBuffIds: content.selectedBuffIds,
-    selectedGiftIds: content.selectedGiftIds,
-    observationGiftIds: content.observationGiftIds,
-    comprehensiveGiftIds: content.comprehensiveGiftIds,
-    floorSelections: content.floorSelections,
-  })
+  const deserialized = deserializeSets(
+    {
+      selectedKeywords: content.selectedKeywords,
+      selectedBuffIds: content.selectedBuffIds,
+      selectedGiftIds: content.selectedGiftIds,
+      observationGiftIds: content.observationGiftIds,
+      comprehensiveGiftIds: content.comprehensiveGiftIds,
+      floorSelections: content.floorSelections,
+    },
+    category,
+  )
 
   const readOnlyNote = (note: NoteContent | undefined) => {
     if (!note || isNoteEmpty(note)) return null
@@ -190,6 +193,7 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
             floorSelections={content.floorSelections}
             sectionNotes={content.sectionNotes}
             floorCount={floorCount}
+            category={category}
           />
         </Suspense>
       ),

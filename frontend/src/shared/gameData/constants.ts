@@ -241,29 +241,6 @@ export const DIFFICULTY_LABELS = {
 
 export type DifficultyLabel = (typeof DIFFICULTY_LABELS)[keyof typeof DIFFICULTY_LABELS]
 
-export const FLOOR_COUNTS: Record<MDCategory, number> = {
-  '5F': 5,
-  '10F': 10,
-  '15F': 15,
-} as const
-
-/**
- * Difficulties a floor may carry, indexed by 0-based floor within the category.
- * A 15F run repeats the 10F requirement over its first `FLOOR_COUNTS['10F']`
- * floors and demands Extreme above them.
- */
-export const ALLOWED_FLOOR_DIFFICULTIES: Record<MDCategory, readonly (readonly DungeonIdx[])[]> = {
-  '5F': Array.from({ length: FLOOR_COUNTS['5F'] }, () => [DUNGEON_IDX.NORMAL, DUNGEON_IDX.HARD]),
-  '10F': Array.from({ length: FLOOR_COUNTS['10F'] }, () => [DUNGEON_IDX.HARD]),
-  '15F': Array.from({ length: FLOOR_COUNTS['15F'] }, (_, floorIndex) =>
-    floorIndex < FLOOR_COUNTS['10F'] ? [DUNGEON_IDX.HARD] : [DUNGEON_IDX.EXTREME],
-  ),
-}
-
-export const DUNGEON_NAME_BY_IDX = new Map<DungeonIdx, string>(
-  Object.entries(DUNGEON_IDX).map(([name, idx]) => [idx, name]),
-)
-
 export const PLANNER_TYPES = ['MIRROR_DUNGEON', 'REFRACTED_RAILWAY'] as const
 
 export type PlannerType = (typeof PLANNER_TYPES)[number]

@@ -8,35 +8,19 @@ import { CARD_MOBILE_SCALE_DENSE, DIFFICULTY_COLORS } from '@/lib/constants'
 import { THEME_PACK_GEOMETRY } from '@/shared/cardLayout'
 import { ThemePackViewer } from './ThemePackViewer'
 import { ThemePackExclusiveGifts } from './ThemePackExclusiveGifts'
+import { offeredFloorDifficulties } from '../../lib/plannerRules'
 import type { ThemePackListType, ThemePackSpec } from '@/pages/themePack'
 
 interface ThemePackSelectorPaneProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   floorNumber: number
-  previousFloorDifficulty: DungeonIdx | null
+  earlierFloorsAllNormal: boolean
   themePackList: ThemePackListType
   themePackI18n: Record<string, { name: string; specialName?: string | undefined }>
   onSelect: (packId: string, difficulty: DungeonIdx) => void
   usedThemePackIds: Set<string>
   category: MDCategory
-}
-
-function getAvailableDifficulties(
-  floorNumber: number,
-  previousFloorDifficulty: DungeonIdx | null,
-  category: MDCategory,
-): [DungeonIdx, ...DungeonIdx[]] {
-  if (floorNumber >= 11) {
-    return [DUNGEON_IDX.EXTREME]
-  }
-
-  const isFirstFloorWithNormalAllowed = floorNumber === 1 && category === '5F'
-  if (isFirstFloorWithNormalAllowed || previousFloorDifficulty === DUNGEON_IDX.NORMAL) {
-    return [DUNGEON_IDX.NORMAL, DUNGEON_IDX.HARD]
-  }
-
-  return [DUNGEON_IDX.HARD]
 }
 
 function filterThemePacks(
@@ -80,7 +64,7 @@ export function ThemePackSelectorPane({
   open,
   onOpenChange,
   floorNumber,
-  previousFloorDifficulty,
+  earlierFloorsAllNormal,
   themePackList,
   themePackI18n,
   onSelect,
@@ -89,15 +73,20 @@ export function ThemePackSelectorPane({
 }: ThemePackSelectorPaneProps) {
   const { t } = useTranslation(['planner', 'common'])
 
-  const availableDifficulties = getAvailableDifficulties(
-    floorNumber,
-    previousFloorDifficulty,
+  const availableDifficulties = offeredFloorDifficulties(
     category,
+    floorNumber - 1,
+    earlierFloorsAllNormal,
   )
 
-  const [selectedDifficulty, setSelectedDifficulty] = useState<DungeonIdx>(availableDifficulties[0])
+  const [chosenDifficulty, setSelectedDifficulty] = useState<DungeonIdx | undefined>(undefined)
+  const selectedDifficulty =
+    chosenDifficulty !== undefined && availableDifficulties.includes(chosenDifficulty)
+      ? chosenDifficulty
+      : availableDifficulties[0]
 
   const handlePackSelect = (packId: string) => {
+    if (selectedDifficulty === undefined) return
     startTransition(() => {
       onSelect(packId, selectedDifficulty)
       onOpenChange(false)

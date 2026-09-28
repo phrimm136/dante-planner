@@ -11,7 +11,8 @@ import {
   EncodedGiftIdSchema,
   ThemePackIdSchema,
 } from '@/shared/gameData'
-import type { DungeonIdx, EncodedGiftId, ThemePackId } from '@/shared/gameData'
+import type { DungeonIdx, EncodedGiftId, MDCategory, ThemePackId } from '@/shared/gameData'
+import { toFloorThemeSelection } from '../lib/editorStateCodec'
 import { JSONContentSchema } from '@/shared/noteEditor'
 import { pagedModelSchema } from '@/lib/validation'
 import { INITIAL_SYNC_VERSION } from '@/lib/constants'
@@ -84,15 +85,22 @@ const SinnerEquipmentSchema = z
 
 export const FloorSelectionDraftSchema = z
   .object({
-    themePackId: ThemePackIdSchema.nullable(),
+    themePackId: z
+      .union([ThemePackIdSchema, z.literal('')])
+      .nullable()
+      .optional(),
+    difficulty: DungeonIdxSchema.optional(),
+    giftIds: z.array(EncodedGiftIdSchema).optional(),
+  })
+  .strict()
+
+export const FloorSelectionSaveSchema = z
+  .object({
+    themePackId: ThemePackIdSchema,
     difficulty: DungeonIdxSchema,
     giftIds: z.array(EncodedGiftIdSchema),
   })
   .strict()
-
-export const FloorSelectionSaveSchema = FloorSelectionDraftSchema.extend({
-  themePackId: ThemePackIdSchema,
-})
 
 export const SerializableNoteContentSchema = z
   .object({
@@ -317,18 +325,19 @@ export function serializeSets(state: PageStateWithSets): SerializablePageState {
   }
 }
 
-export function deserializeSets(state: SerializablePageState): PageStateWithSets {
+export function deserializeSets(
+  state: SerializablePageState,
+  category: MDCategory,
+): PageStateWithSets {
   return {
     selectedKeywords: new Set(migrateKeywords(state.selectedKeywords)),
     selectedBuffIds: new Set(state.selectedBuffIds),
     selectedGiftIds: new Set(state.selectedGiftIds),
     observationGiftIds: new Set(state.observationGiftIds),
     comprehensiveGiftIds: new Set(state.comprehensiveGiftIds),
-    floorSelections: state.floorSelections.map((floor) => ({
-      themePackId: floor.themePackId,
-      difficulty: floor.difficulty,
-      giftIds: new Set(floor.giftIds),
-    })),
+    floorSelections: state.floorSelections.map((floor, floorIndex) =>
+      toFloorThemeSelection(floor, category, floorIndex),
+    ),
   }
 }
 

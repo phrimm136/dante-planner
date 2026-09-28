@@ -36,8 +36,18 @@ const floorPath = (floorIndex: number) => `${FLOOR_SELECTIONS}[${floorIndex}]`
 
 const violation = (code: BeErrorCode, path: string): Violation => ({ code, path })
 
+const FLOOR_INDEX_PREFIX = new RegExp(`^${FLOOR_SELECTIONS}\\[(\\d+)\\]`)
+
+function splitFloorPath(path: string): [number, string] {
+  const match = FLOOR_INDEX_PREFIX.exec(path)
+  return match ? [Number(match[1]), path.slice(match[0].length)] : [-1, path]
+}
+
 const byPathThenCode = (a: Violation, b: Violation) => {
-  if (a.path !== b.path) return a.path < b.path ? -1 : 1
+  const [aFloor, aRest] = splitFloorPath(a.path)
+  const [bFloor, bRest] = splitFloorPath(b.path)
+  if (aFloor !== bFloor) return aFloor - bFloor
+  if (aRest !== bRest) return aRest < bRest ? -1 : 1
   if (a.code !== b.code) return a.code < b.code ? -1 : 1
   return 0
 }

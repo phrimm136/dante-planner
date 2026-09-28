@@ -60,7 +60,7 @@ function PlannerEditContent({ id }: { id: string }) {
   }
 
   const { content } = planner
-  const deserialized = deserializeSets(content)
+  const deserialized = deserializeSets(content, planner.config.category)
 
   const initialState: Partial<PlannerEditorState> = {
     title: planner.metadata.title,

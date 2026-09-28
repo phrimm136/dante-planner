@@ -39,6 +39,7 @@ import {
 import { planConflictResolution } from '../lib/conflictChoice'
 import { loadIdMigrationTable } from '../hooks/loadIdMigrationTable'
 import { validatePlannerForImport } from '../lib/plannerValidation'
+import { toUserFriendlyError } from '../lib/plannerValidationErrors'
 
 import type { Result } from '@/lib/result'
 import type { ConflictItem, ConflictResolution } from './BatchConflictDialog'
@@ -54,6 +55,8 @@ import type {
 const MIME_TYPE = 'application/gzip'
 
 const NO_CONFLICTS: ConflictItem[] = []
+
+const SKIPPED_IMPORT_SEPARATOR = '; '
 
 /**
  * Run a phase, answering with what it produced or with what it threw.
@@ -115,7 +118,9 @@ function PlannerExportImportSectionContent() {
     if (skipped.length === 0) return
     showWarning('common:exportImport.skippedInvalid', {
       count: skipped.length,
-      titles: skipped.map((s) => s.title).join(', '),
+      titles: skipped
+        .map((s) => `${s.title}: ${t(`planner:${s.reason.key}`, s.reason.params ?? {})}`)
+        .join(SKIPPED_IMPORT_SEPARATOR),
     })
   }
 
@@ -241,13 +246,15 @@ function PlannerExportImportSectionContent() {
       conflicting,
       fresh,
       skipped: rejected,
-    } = partitionImport(envelope.value, existingIds, table, (planner) =>
-      validatePlannerForImport(
+    } = partitionImport(envelope.value, existingIds, table, (planner) => {
+      const { errors } = validatePlannerForImport(
         planner,
         egoGiftSpec,
         idRegistryFor(planner.metadata.contentVersion),
-      ),
-    )
+      )
+      const [firstError] = errors
+      return firstError ? toUserFriendlyError(firstError) : null
+    })
 
     const conflictItems: ConflictItem[] = []
     const nonConflicting: SaveablePlanner[] = [...fresh]

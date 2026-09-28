@@ -296,6 +296,33 @@ describe('validateSaveablePlanner', () => {
     })
   })
 
+  describe('floor selections follow the parse boundary', () => {
+    function withFloors(floorSelections: unknown[]) {
+      const planner = createValidSaveablePlanner('MIRROR_DUNGEON')
+      planner.content = { ...planner.content, floorSelections: floorSelections as never[] }
+      return planner
+    }
+
+    // corpus: floor-theme-pack-empty-accepted-as-draft, boundary-gift-ids-absent, scn-10f-difficulty-absent
+    it.each([
+      ['an empty-string pack', { themePackId: '', difficulty: 1, giftIds: [] }],
+      ['absent giftIds', { themePackId: '1001', difficulty: 1 }],
+      ['an absent difficulty', { themePackId: '1001', giftIds: [] }],
+    ])('draft mode accepts %s', (_label, floor) => {
+      const result = validateSaveablePlanner(withFloors([floor]), 'draft')
+      assert(isMDPlanner(result))
+      expect(result.content.floorSelections).toEqual([floor])
+    })
+
+    it.each([
+      ['an empty-string pack', { themePackId: '', difficulty: 1, giftIds: [] }],
+      ['absent giftIds', { themePackId: '1001', difficulty: 1 }],
+      ['an absent difficulty', { themePackId: '1001', giftIds: [] }],
+    ])('save mode rejects %s', (_label, floor) => {
+      expect(() => validateSaveablePlanner(withFloors([floor]), 'save')).toThrow(ZodError)
+    })
+  })
+
   describe('content/config type mismatch detection', () => {
     it('rejects MD content with RR config', () => {
       const planner = createValidSaveablePlanner('MIRROR_DUNGEON')

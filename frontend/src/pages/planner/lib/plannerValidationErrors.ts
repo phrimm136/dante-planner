@@ -1,4 +1,7 @@
 import { validationAppError } from '@/lib/apiErrorClassifier'
+import { DUNGEON_IDX } from '@/shared/gameData'
+import type { DungeonIdx } from '@/shared/gameData'
+import type { BeErrorCode } from './floorRules'
 
 export interface ValidationError {
   code: string
@@ -40,22 +43,28 @@ export interface StartGiftValidationError extends ValidationError {
   code: 'START_GIFT_NO_KEYWORD_BUT_HAS_GIFTS' | 'START_GIFT_DUPLICATE_ID'
 }
 
-export interface FloorValidationError extends ValidationError {
-  code:
-    | 'FLOOR_MISSING_THEME_PACK'
-    | 'FLOOR_PREREQUISITE_VIOLATION'
-    | 'FLOOR_DUPLICATE_GIFT_ID'
-    | 'FLOOR_DUPLICATE_THEME_PACK'
-    | 'FLOOR_UNAFFORDABLE_GIFT'
-    | 'FLOOR_UNKNOWN_GIFT_ID'
-  floorIndex?: number
-  floorNumber?: number
+export interface FloorRuleValidationError extends ValidationError {
+  code: Exclude<BeErrorCode, 'VALUE_OUT_OF_RANGE'>
+  field: string
 }
 
-export interface DifficultyValidationError extends ValidationError {
-  code: 'DIFFICULTY_INVALID_FOR_CATEGORY'
-  floorIndex?: number
-  floorNumber?: number
+export interface DifficultyOutOfRangeValidationError extends ValidationError {
+  code: 'VALUE_OUT_OF_RANGE'
+  field: string
+  context: { allowedDifficulties: readonly DungeonIdx[] }
+}
+
+export interface FloorUnknownGiftValidationError extends ValidationError {
+  code: 'FLOOR_UNKNOWN_GIFT_ID'
+  field: string
+  floorNumber: number
+  context: { giftId: string }
+}
+
+export interface GiftNotAffordableValidationError extends ValidationError {
+  code: 'GIFT_NOT_AFFORDABLE'
+  field: string
+  context: { giftName: string; themePackId: string }
 }
 
 export interface TitleValidationError extends ValidationError {
@@ -78,8 +87,10 @@ export type PlannerValidationError =
   | GiftValidationError
   | BuffValidationError
   | StartGiftValidationError
-  | FloorValidationError
-  | DifficultyValidationError
+  | FloorRuleValidationError
+  | DifficultyOutOfRangeValidationError
+  | FloorUnknownGiftValidationError
+  | GiftNotAffordableValidationError
   | TitleValidationError
   | KeywordValidationError
   | EntityIdValidationError
@@ -90,6 +101,19 @@ const UNKNOWN_ENTITY_ID_KEYS = {
   THEME_PACK_UNKNOWN_ID: 'pages.plannerMD.validation.unknownThemePackId',
   START_BUFF_UNKNOWN_ID: 'pages.plannerMD.validation.unknownStartBuffId',
 } as const satisfies Record<EntityIdValidationError['code'], string>
+
+const DIFFICULTY_FIELD_SUFFIX = '.difficulty'
+
+const REQUIRED_DIFFICULTY_KEYS: Partial<Record<DungeonIdx, string>> = {
+  [DUNGEON_IDX.HARD]: 'pages.plannerMD.publish.requiresHardMode',
+  [DUNGEON_IDX.EXTREME]: 'pages.plannerMD.publish.requiresExtremeMode',
+}
+
+function outOfRangeKey(allowedDifficulties: readonly DungeonIdx[]): string {
+  const [only, ...rest] = allowedDifficulties
+  const key = only !== undefined && rest.length === 0 ? REQUIRED_DIFFICULTY_KEYS[only] : undefined
+  return key ?? 'pages.plannerMD.validation.corruptedState'
+}
 
 export function plannerValidationError(friendly: { key: string; params?: Record<string, string> }) {
   return validationAppError({
@@ -107,29 +131,32 @@ export function toUserFriendlyError(error: PlannerValidationError): {
       return { key: 'pages.plannerMD.publish.missingTitle' }
     case 'FLOOR_MISSING_THEME_PACK':
       return { key: 'pages.plannerMD.publish.missingThemePack' }
-    case 'FLOOR_UNAFFORDABLE_GIFT': {
-      const floorError = error as FloorValidationError
-      const ctx = floorError.context as { giftNames?: string; themePackId?: string } | undefined
+    case 'INVALID_SEQUENCE':
+      return error.field.endsWith(DIFFICULTY_FIELD_SUFFIX)
+        ? { key: 'pages.plannerMD.publish.normalAfterHard' }
+        : { key: 'pages.plannerMD.previousFloorNoThemePack' }
+    case 'VALUE_OUT_OF_RANGE':
+      return { key: outOfRangeKey(error.context.allowedDifficulties) }
+    case 'INVALID_FIELD_TYPE':
+    case 'FLOOR_DUPLICATE_THEME_PACK':
+    case 'DUPLICATE_VALUE':
+      return { key: 'pages.plannerMD.validation.corruptedState' }
+    case 'GIFT_NOT_AFFORDABLE':
       return {
         key: 'pages.plannerMD.publish.themePackEgoGiftInconsistency',
         params: {
-          pack: ctx?.themePackId ?? '',
-          gifts: ctx?.giftNames ?? '',
+          pack: error.context.themePackId,
+          gifts: error.context.giftName,
         },
       }
-    }
-    case 'FLOOR_UNKNOWN_GIFT_ID': {
-      const ctx = error.context as { giftIds?: string[] } | undefined
+    case 'FLOOR_UNKNOWN_GIFT_ID':
       return {
         key: 'pages.plannerMD.validation.unknownGiftId',
         params: {
-          floor: String(error.floorNumber ?? ''),
-          gifts: ctx?.giftIds?.join(', ') ?? '',
+          floor: String(error.floorNumber),
+          gifts: error.context.giftId,
         },
       }
-    }
-    case 'DIFFICULTY_INVALID_FOR_CATEGORY':
-      return { key: 'pages.plannerMD.publish.requiresHardMode' }
     case 'KEYWORD_INVALID': {
       const keywordError = error as KeywordValidationError
       const ctx = keywordError.context as { keyword?: string } | undefined

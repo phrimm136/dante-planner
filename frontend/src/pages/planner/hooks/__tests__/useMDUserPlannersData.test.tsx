@@ -88,7 +88,7 @@ vi.mock('@/pages/egoGift', () => ({
 // The validators have their own suites; what this one pins is the wiring around
 // them — which planner is validated, and what a refusal does to the batch.
 vi.mock('../../lib/plannerValidation', () => ({
-  validatePlannerForDraftSave: () => null,
+  validatePlannerForDraftSave: () => ({ isValid: true, errors: [] }),
   validatePlannerForPublish: () => ({ isValid: true, errors: [] }),
 }))
 
