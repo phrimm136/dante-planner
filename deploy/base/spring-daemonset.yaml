@@ -52,17 +52,23 @@ spec:
               readOnly: true
           # Liveness/readiness are app-only (Spring health groups); dependency
           # failures alert but never deroute (requirements: health semantics).
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            periodSeconds: 5
+            failureThreshold: 48
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
               port: http
-            initialDelaySeconds: 20
+            initialDelaySeconds: 0
             periodSeconds: 10
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
               port: http
-            initialDelaySeconds: 30
+            initialDelaySeconds: 0
             periodSeconds: 15
           resources:
             requests:
