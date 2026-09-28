@@ -31,6 +31,7 @@ class GameDataRegistryTest {
 
     private static final Path STATIC_DATA = Path.of("../static/data");
     private static final String PLANNER_VERSIONS_FILE = "plannerVersions.json";
+    private static final String FLOOR_RULES_FILE = "plannerFloorRules.json";
 
     private static void linkStaticData(Path dataDir) throws IOException {
         try (Stream<Path> entries = Files.list(STATIC_DATA)) {
@@ -199,6 +200,17 @@ class GameDataRegistryTest {
         assertThatThrownBy(registry::init)
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining(PLANNER_VERSIONS_FILE);
+    }
+
+    @Test
+    void init_WhenFloorRulesFileIsAbsent_FailsNamingTheFile(@TempDir Path dataDir) throws IOException {
+        linkStaticData(dataDir);
+        Files.delete(dataDir.resolve(FLOOR_RULES_FILE));
+        GameDataRegistry registry = registryOver(dataDir);
+
+        assertThatThrownBy(registry::init)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining(FLOOR_RULES_FILE);
     }
 
     @Test

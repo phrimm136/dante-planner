@@ -126,6 +126,11 @@ class GameDataRegistrySnapshotTest {
         }
 
         @Override
+        public FloorRuleTable loadFloorRules(Path filePath) {
+            return super.loadFloorRules(Path.of("../static/data", GameDataRegistry.FLOOR_RULES_FILE));
+        }
+
+        @Override
         public Path seasonDirectory(Path dataDir, int version) {
             return dataDir.resolve(SEASON_DIRECTORY_PREFIX + version);
         }

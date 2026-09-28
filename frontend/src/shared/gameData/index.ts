@@ -94,6 +94,17 @@ export type {
   ThemePackFloor,
 } from './constants'
 
+export {
+  FLOOR_RULE_STAGES,
+  FLOOR_RULE_NAMES,
+  FloorRuleTableSchema,
+  FLOOR_RULE_TABLE,
+  floorCount,
+  allowedDifficulties,
+  stagesFor,
+} from './floorRules'
+export type { FloorRuleStage, FloorRuleName, FloorRuleTable } from './floorRules'
+
 export { getAttributeColors, getSeasonColor } from './colorUtils'
 export type { AttributeColors } from './colorUtils'
 

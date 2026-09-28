@@ -45,6 +45,25 @@ public class GameDataLoader {
         }
     }
 
+    public FloorRuleTable loadFloorRules(Path filePath) {
+        if (!Files.exists(filePath)) {
+            throw new IllegalStateException("Floor rules file not found: " + filePath);
+        }
+
+        JsonNode root;
+        try {
+            root = objectMapper.readTree(Files.readString(filePath));
+        } catch (IOException e) {
+            throw new GameDataLoadException(filePath, e);
+        }
+
+        try {
+            return FloorRuleTable.parse(root);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalStateException("Invalid floor rules file " + filePath + ": " + e.getMessage(), e);
+        }
+    }
+
     public Path seasonDirectory(Path dataDir, int version) {
         Path seasonDir = dataDir.resolve(SEASON_DIRECTORY_PREFIX + version);
         if (!Files.isDirectory(seasonDir)) {

@@ -26,6 +26,8 @@ public class GameDataRegistry {
 
     static final String PLANNER_VERSIONS_FILE = "plannerVersions.json";
 
+    static final String FLOOR_RULES_FILE = "plannerFloorRules.json";
+
     private record Season(Set<String> startBuffIds, Map<String, Set<String>> startGiftPools) {
 
         private boolean isPopulated() {
@@ -42,10 +44,11 @@ public class GameDataRegistry {
             Map<String, List<String>> egoGiftThemePackMap,
             Map<String, Integer> egoMaxThreadspin,
             PlannerIdMigrations idMigrations,
-            PlannerVersions plannerVersions) {
+            PlannerVersions plannerVersions,
+            FloorRuleTable floorRules) {
 
         private static final Snapshot EMPTY = new Snapshot(
-                Set.of(), Set.of(), Set.of(), Set.of(), Map.of(), Map.of(), Map.of(), PlannerIdMigrations.EMPTY, null);
+                Set.of(), Set.of(), Set.of(), Set.of(), Map.of(), Map.of(), Map.of(), PlannerIdMigrations.EMPTY, null, null);
 
         private boolean isPopulated() {
             return !identityIds.isEmpty()
@@ -92,6 +95,7 @@ public class GameDataRegistry {
         Set<String> egoGiftIds = Set.copyOf(loader.loadKeysFromFile(Path.of(dataPath, "egoGiftSpecList.json")));
         Set<String> themePackIds = Set.copyOf(loader.loadKeysFromFile(Path.of(dataPath, "themePackList.json")));
         PlannerVersions plannerVersions = loader.loadPlannerVersions(Path.of(dataPath, PLANNER_VERSIONS_FILE));
+        FloorRuleTable floorRules = loader.loadFloorRules(Path.of(dataPath, FLOOR_RULES_FILE));
 
         Map<Integer, Season> seasons = new HashMap<>();
         for (int version : plannerVersions.mdAvailableVersions()) {
@@ -110,7 +114,8 @@ public class GameDataRegistry {
                 Map.copyOf(loader.loadEgoGiftThemePackMap(Path.of(dataPath, "egoGiftSpecList.json"))),
                 Map.copyOf(loader.loadEgoMaxThreadspin(Path.of(dataPath, "egoSpecList.json"))),
                 loader.loadIdMigrations(Path.of(dataPath, ID_MIGRATIONS_FILE)),
-                plannerVersions);
+                plannerVersions,
+                floorRules);
 
         requireConsistentMigrations(loaded);
 
@@ -164,6 +169,10 @@ public class GameDataRegistry {
 
     public PlannerVersions plannerVersions() {
         return snapshot.plannerVersions();
+    }
+
+    public FloorRuleTable floorRules() {
+        return snapshot.floorRules();
     }
 
     public boolean hasStartBuff(int version, String id) {
