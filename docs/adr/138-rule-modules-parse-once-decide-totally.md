@@ -1,0 +1,20 @@
+# 138 rule-modules-parse-once-decide-totally
+epic: none · pr: none
+
+## Decisions
+- @rules @parsing — A raw representation of planner content (the stored JSON string, a parsed tree, an untyped map) is read in exactly one parse boundary per runtime, and every rule module takes the typed value that boundary produces. A rule can be re-derived only where its inputs are reachable, so hiding the raw form is what makes the second copy impossible to write rather than merely forbidden. Enforced by architecture and syntax rules that freeze today's raw-access sites by name and refuse new ones.
+  REJECTED: a rule module that accepts raw JSON for convenience — makes the module a second parse boundary and hands every caller the raw tree.
+- @rules @result — A decision module is total: it returns an admitted value or the full list of violations, never the first violation and never an exception for an expected outcome, and a batch returns one result per item. Import screens need every violation to show, partial import needs per-item outcomes, and a thrown exception hides which check was authoritative.
+  REJECTED: fail-fast on the first violation — the caller learns one problem per round trip.
+- @rules @axis — Variation between callers of one rule set is a closed axis (a stage such as draft, publish, index) whose values live in shared data; the module never imports a caller's types and never branches on caller identity. The floor rules were seven sites that differed only by which checks a stage requires, a boolean already encoded on the server and spelled as three function names on the client; a closed axis in data grows by a column, while a caller branch grows by a caller until the module is the god module it replaced.
+  REJECTED: one module per calling context — the contexts share most checks, so the split re-creates the drift being removed.
+  REJECTED: caller-identity branches inside the module — every new caller adds one, and the interface stops describing the behavior.
+- @rules @data — Rule data (floor count per category, difficulty range per floor, the rule-by-stage requiredness matrix) lives once, in the shared static data both runtimes load; rule code exists once per runtime, and the shared case corpus proves the two agree. The SQL rebuild procedure receives the floor count as a parameter from the server instead of carrying the category table. Consolidate when inputs, outputs and the variation axis match; separate when the output shape differs.
+  REJECTED: generating one runtime's rule code from the other — couples the builds, and rules are data plus a small walk that each runtime writes as easily as it would consume generated code.
+  REJECTED: the category table inside the procedure — a third copy of the data, and the one that cannot read the shared file.
+- @rules @consumers — Downstream consumers (the entity index, SQL) receive a rule module's output or a derived scalar and never re-derive a rule from the raw form. The one standing exception is a second derivation kept deliberately as an audit oracle, as 039 keeps the procedure's id extraction beside the server's extractor; such a site is frozen with its record number and is not a target for removal. With both engines now taking the floor count from the same table, the drift reconciler no longer witnesses a divergence in that one datum, which is accepted because the datum is data, not logic.
+  REJECTED: collapsing the audit oracle into the module — the audit would compare the module with itself.
+- @rules @inventory — When a rule set is consolidated, each divergence between the old sites gets one of three verdicts: a defect to fix, an intended context difference to keep on the axis, or an audit oracle to freeze. The captured behavior corpus that drives the consolidation proves sameness with the old sites, not correctness, so the verdict is where correctness enters.
+
+## Takeaway
+- takeaway: a rule is copied wherever its inputs are reachable and its variation is unnamed; hide the inputs, name the axis as data, and the nearest pattern for the next author becomes the call.
