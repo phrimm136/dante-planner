@@ -164,19 +164,29 @@ that says which world you are in; a ratio near 1 means the precise path is not w
 
 ### 4c. The gate, on the way in
 
-`GtidCookieFilter.handleRead` runs for GET/HEAD carrying `ryw_gtid`:
+`GtidCookieFilter.handleRead` runs for GET/HEAD carrying `ryw_gtid` when the region has a replica
+(a replica-less region skips the gate and keeps the cookie):
 
 ```
-decode cookie → GtidReadGate.isCaughtUp(gtid)
-    │              runs SELECT WAIT_FOR_EXECUTED_GTID_SET(?, 0.05) in a READ-ONLY tx,
-    │              so the probe itself resolves to the REPLICA
-    ├─ true  → clear the cookie (Max-Age=0), serve normally from the replica
-    └─ false → ReadOnlyRoutingDataSource.pinTo(PRIMARY) for this request only,
-               keep the cookie, clear the pin in finally
+decode cookie ── not base64, blank → serve normally, keep the cookie
+    │         └─ base64 but not GTID-set syntax → clear the cookie, serve normally
+    ▼
+GtidReadGate.probe(gtid)
+    │  SELECT WAIT_FOR_EXECUTED_GTID_SET(?, 0.05) in a READ-ONLY tx, so it resolves to the REPLICA
+    ├─ CAUGHT_UP      → clear the cookie (Max-Age=0), serve normally from the replica
+    ├─ UNUSABLE       → the replica rejected the set as malformed (1772/1773/1774):
+    │                   clear the cookie, one WARN without a stack trace, serve normally
+    ├─ NEVER_EXECUTED → the wait timed out and the PRIMARY reports
+    │                   GTID_SUBSET(gtid, @@GLOBAL.gtid_executed) = 0: clear the cookie,
+    │                   serve this read from the primary
+    └─ NOT_CAUGHT_UP  → timed out and the primary executed it (or the check failed):
+                        ReadOnlyRoutingDataSource.pinTo(PRIMARY) for this request only,
+                        keep the cookie, clear the pin in finally
 ```
 
-The 50ms bound is a probe timeout, not a correctness window: a `false` answer routes to the
-primary, which is always correct, just slower.
+The 50ms bound is a probe timeout, not a correctness window: every exit that clears the cookie
+rests on a causal fact (applied on the replica, unparseable, or never executed on the primary),
+and an undecided answer routes to the primary, which is always correct, just slower.
 
 ---
 
