@@ -47,6 +47,7 @@ class RateLimitBucketLifecycleIT {
     private static final RedisContainer REDIS = new RedisContainer("redis:7-alpine");
     private static final long USER_ID = 7L;
     private static final String ENDPOINT = "fixture";
+    private static final Duration REFILL_PERIOD = Duration.ofSeconds(60);
 
     private ProxyManager<byte[]> proxyManager;
     private RateLimitProperties properties;
@@ -82,7 +83,7 @@ class RateLimitBucketLifecycleIT {
         RateLimitProperties.BucketConfig config = new RateLimitProperties.BucketConfig();
         config.setCapacity(capacity);
         config.setRefillTokens(capacity);
-        config.setRefillDurationSeconds(60);
+        config.setRefillDurationSeconds((int) REFILL_PERIOD.toSeconds());
         return config;
     }
 
@@ -130,6 +131,57 @@ class RateLimitBucketLifecycleIT {
         rateLimitService.check(RateLimitPolicy.CRUD, userId, ENDPOINT);
 
         assertThat(storedCapacity(userId)).as("stored capacity after raising 3 -> 10").isEqualTo(10);
+    }
+
+    @Test
+    void check_WhenLimitRaisedOnALiveBucket_CarriesTheRemainingTokensAsIs() {
+        long userId = 105L;
+        long startNanos = System.nanoTime();
+        properties.setCrud(bucket(3));
+        rateLimitService.check(RateLimitPolicy.CRUD, userId, ENDPOINT);
+        rateLimitService.check(RateLimitPolicy.CRUD, userId, ENDPOINT);
+
+        properties.setCrud(bucket(10));
+        properties.setConfigVersion(2);
+        rateLimitService.check(RateLimitPolicy.CRUD, userId, ENDPOINT);
+        long available = availableTokens(userId);
+        long accruable = refillAccruableSince(startNanos, 10);
+
+        assertThat(available)
+                .as("1 carried token minus the versioned charge, plus at most %d refilled", accruable)
+                .isBetween(0L, accruable);
+    }
+
+    @Test
+    void check_WhenLimitRaisedOnADrainedBucket_CarriesZeroTokens() {
+        long userId = 106L;
+        long startNanos = System.nanoTime();
+        properties.setCrud(bucket(3));
+        int drained = successfulCharges(userId, 3);
+
+        properties.setCrud(bucket(10));
+        properties.setConfigVersion(2);
+        int passed = successfulCharges(userId, 1);
+        long accruable = refillAccruableSince(startNanos, 10);
+
+        SoftAssertions.assertSoftly(soft -> {
+            soft.assertThat(drained).as("charges admitted at capacity 3").isEqualTo(3);
+            soft.assertThat(passed)
+                    .as("versioned charges admitted on 0 carried tokens, at most %d refilled", accruable)
+                    .isLessThanOrEqualTo((int) accruable);
+        });
+    }
+
+    private long availableTokens(long userId) {
+        byte[] key = (userId + ":" + ENDPOINT).getBytes(StandardCharsets.UTF_8);
+        return proxyManager.builder().build(key, () -> {
+            throw new IllegalStateException("bucket " + userId + " was never created");
+        }).getAvailableTokens();
+    }
+
+    private static long refillAccruableSince(long startNanos, int tokensPerRefillPeriod) {
+        long elapsedNanos = System.nanoTime() - startNanos;
+        return elapsedNanos * tokensPerRefillPeriod / REFILL_PERIOD.toNanos();
     }
 
     @Test
