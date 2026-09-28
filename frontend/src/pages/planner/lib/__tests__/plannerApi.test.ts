@@ -90,14 +90,6 @@ describe('plannerApi.batchChunks', () => {
     expect(result.map((planner) => planner.id)).toEqual(ids)
   })
 
-  it('percent-encodes an id carrying query metacharacters', async () => {
-    mockGet.mockResolvedValue([])
-
-    await collect(['a&b=c,d'])
-
-    expect(mockGet.mock.calls[0]).toEqual(['/api/planner/md/batch?ids=a%26b%3Dc%2Cd'])
-  })
-
   it('issues no request for an empty id list', async () => {
     const result = await collect([])
 

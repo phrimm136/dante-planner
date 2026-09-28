@@ -52,7 +52,7 @@ export const plannerApi = {
 
   async *batchChunks(ids: string[]): AsyncGenerator<ServerPlannerResponse[]> {
     for (let i = 0; i < ids.length; i += BATCH_PULL_MAX_IDS) {
-      const chunk = ids.slice(i, i + BATCH_PULL_MAX_IDS).map(encodeURIComponent)
+      const chunk = ids.slice(i, i + BATCH_PULL_MAX_IDS)
       const data = await ApiClient.get(`${PLANNERS_BASE}/batch?ids=${chunk.join(',')}`)
       yield validateData(data, ServerPlannerBatchResponseSchema, 'planner batch')
     }
