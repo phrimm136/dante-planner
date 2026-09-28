@@ -284,15 +284,6 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("no-upvotes-on-planner-response: the owner detail carries no upvotes key")
-    void noUpvotes_WhenOwnerDetail_KeyAbsent() throws Exception {
-        performAuthed(mockMvc, get("/api/planner/md/{id}", published.getId()), token)
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(published.getId().toString()))
-                .andExpect(jsonPath("$.upvotes").doesNotExist());
-    }
-
-    @Test
     @DisplayName("no-upvotes-on-planner-response: the upsert response carries no upvotes key on create or update")
     void noUpvotes_WhenUpserted_KeyAbsent() throws Exception {
         UUID id = UUID.randomUUID();

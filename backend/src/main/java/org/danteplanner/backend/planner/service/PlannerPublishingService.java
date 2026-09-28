@@ -100,7 +100,7 @@ public class PlannerPublishingService {
         }
         PublicationChange change = planner.publish();
         if (!change.changed()) {
-            return describe(planner);
+            return PlannerResponse.fromEntity(planner);
         }
 
         plannerCatalogService.onBecameVisible(planner);
@@ -112,7 +112,7 @@ public class PlannerPublishingService {
         }
 
         log.info("Published planner {} by user {}", plannerId, userId);
-        return describe(planner);
+        return PlannerResponse.fromEntity(planner);
     }
 
     private PlannerResponse applyUnpublish(Long userId, Planner planner) {
@@ -120,16 +120,12 @@ public class PlannerPublishingService {
         ownershipValidator.requireOwner(planner, userId);
 
         if (!planner.unpublish().changed()) {
-            return describe(planner);
+            return PlannerResponse.fromEntity(planner);
         }
 
         plannerCatalogService.onBecameInvisible(plannerId);
 
         log.info("Unpublished planner {} by user {}", plannerId, userId);
-        return describe(planner);
-    }
-
-    private PlannerResponse describe(Planner planner) {
         return PlannerResponse.fromEntity(planner);
     }
 
