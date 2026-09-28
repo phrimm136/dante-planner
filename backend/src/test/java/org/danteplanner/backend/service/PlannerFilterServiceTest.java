@@ -18,6 +18,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.file.Path;
 import java.util.Optional;
@@ -28,7 +30,7 @@ import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for PlannerFilterService.
- * Extraction itself is server-side (the rebuild_planner_filters procedure), verified by
+ * Extraction itself is server-side (the rebuild_planner_filters_scoped procedure), verified by
  * PlannerFilterRebuildIT against the Java oracle; this tier verifies
  * delegation and event routing.
  */
@@ -100,6 +102,25 @@ class PlannerFilterServiceTest {
         assertThrows(IllegalArgumentException.class, () -> filterService.rebuildFilters(plannerId));
 
         verify(entityFilterRepository, never()).rebuildPlannerFilters(any(), anyInt());
+    }
+
+    @Test
+    void floorScopeOf_WhenDeclared_ReadsTheContentRowUnderAShareLock() throws NoSuchMethodException {
+        Query query = PlannerEntityFilterRepository.class.getMethod("floorScopeOf", UUID.class)
+                .getAnnotation(Query.class);
+
+        assertTrue(query.nativeQuery());
+        assertTrue(query.value().endsWith(" FOR SHARE OF c"), query.value());
+    }
+
+    @Test
+    void rebuildFilters_WhenDeclared_ReadsTheScopeAndCallsTheProcedureInOneWriteTransaction()
+            throws NoSuchMethodException {
+        Transactional transactional = PlannerFilterService.class.getMethod("rebuildFilters", UUID.class)
+                .getAnnotation(Transactional.class);
+
+        assertNotNull(transactional);
+        assertFalse(transactional.readOnly());
     }
 
     @Test

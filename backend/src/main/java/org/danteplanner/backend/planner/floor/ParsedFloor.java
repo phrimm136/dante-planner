@@ -5,6 +5,6 @@ public sealed interface ParsedFloor permits ParsedFloor.Accepted, ParsedFloor.Re
     record Accepted(FloorSelection floor) implements ParsedFloor {
     }
 
-    record Rejected(int index) implements ParsedFloor {
+    record Rejected(int index, FloorSelection salvage) implements ParsedFloor {
     }
 }

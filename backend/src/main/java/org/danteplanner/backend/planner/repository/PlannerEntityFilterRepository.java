@@ -35,11 +35,12 @@ public interface PlannerEntityFilterRepository
         String getCategory();
     }
 
-    @Query("SELECT p.plannerType AS plannerType, c.category AS category"
-            + " FROM PlannerContent c JOIN c.planner p WHERE c.plannerId = :plannerId")
+    @Query(value = "SELECT p.planner_type AS plannerType, c.category AS category"
+            + " FROM planner_content c JOIN planner p ON p.id = c.planner_id"
+            + " WHERE c.planner_id = :plannerId FOR SHARE OF c", nativeQuery = true)
     Optional<FloorScopeRow> floorScopeOf(@Param("plannerId") UUID plannerId);
 
     @Modifying
-    @Query(value = "CALL rebuild_planner_filters(:plannerId, :floorCount)", nativeQuery = true)
+    @Query(value = "CALL rebuild_planner_filters_scoped(:plannerId, :floorCount)", nativeQuery = true)
     void rebuildPlannerFilters(@Param("plannerId") UUID plannerId, @Param("floorCount") int floorCount);
 }

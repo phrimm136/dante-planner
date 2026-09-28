@@ -55,6 +55,23 @@ public class FloorRules {
             throw new IllegalArgumentException("floors were parsed with floor count " + parsed.floorCount() + " but "
                     + category.getValue() + " has " + floorCount);
         }
+
+        List<Rule> required = RULES.entrySet().stream()
+                .filter(rule -> table.stagesFor(rule.getKey()).contains(stage.tableName()))
+                .map(Map.Entry::getValue)
+                .toList();
+        if (required.isEmpty()) {
+            return new Admission.Admitted(parsed.floors().stream()
+                    .map(floor -> switch (floor) {
+                        case ParsedFloor.Accepted accepted -> accepted.floor();
+                        case ParsedFloor.Rejected rejected -> rejected.salvage();
+                    })
+                    .toList(), parsed.violations());
+        }
+        if (!parsed.violations().isEmpty()) {
+            return new Admission.Rejected(parsed.violations());
+        }
+
         List<FloorSelection> passed = parsed.floors().stream()
                 .<FloorSelection>mapMulti((floor, accepted) -> {
                     if (floor instanceof ParsedFloor.Accepted(FloorSelection selection)) {
@@ -62,17 +79,6 @@ public class FloorRules {
                     }
                 })
                 .toList();
-
-        List<Rule> required = RULES.entrySet().stream()
-                .filter(rule -> table.stagesFor(rule.getKey()).contains(stage.tableName()))
-                .map(Map.Entry::getValue)
-                .toList();
-        if (required.isEmpty()) {
-            return new Admission.Admitted(passed, parsed.violations());
-        }
-        if (!parsed.violations().isEmpty()) {
-            return new Admission.Rejected(parsed.violations());
-        }
 
         Walk walk = new Walk(passed, floorCount, IntStream.range(0, floorCount)
                 .mapToObj(index -> table.allowedDifficulties(category, index))

@@ -25,17 +25,24 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Filter rebuild over existing rows: rebuilding a visible planner's filter
@@ -84,12 +91,25 @@ class PlannerFilterRebuildIT {
     @Autowired
     private GameDataRegistry gameDataRegistry;
 
+    @Autowired
+    private DataSource dataSource;
+
     private User owner;
 
     private static final String SIX_FLOOR_CONTENT = TestDataFactory.VALID_CONTENT.replace(
             "{\"themePackId\":\"1005\",\"difficulty\":0,\"giftIds\":[]}",
             "{\"themePackId\":\"1005\",\"difficulty\":0,\"giftIds\":[]},"
                     + "{\"themePackId\":\"1006\",\"difficulty\":0,\"giftIds\":[\"9004\"]}");
+
+    private static final String MALFORMED_OBJECT_FLOORS = """
+            {"floorSelections":[
+              {"themePackId":"1001","giftIds":["9001"]},
+              7,
+              {"themePackId":1003,"giftIds":["9003"]},
+              {"themePackId":"1004","giftIds":["9002",9005]},
+              {"giftIds":["9004"]}
+            ]}
+            """;
 
     private static final String FIFTEEN_FLOORS = IntStream.range(0, 15)
             .mapToObj(floor -> "{\"themePackId\":\"" + (1001 + floor) + "\",\"giftIds\":[\"" + (9001 + floor) + "\"]}")
@@ -357,5 +377,101 @@ class PlannerFilterRebuildIT {
                 .contains("IDENTITY:10101", "EGO:20101", "EGO_GIFT:9001")
                 .doesNotContain("EGO_GIFT:9002", "EGO_GIFT:9004")
                 .noneMatch(row -> row.startsWith("THEME_PACK:"));
+    }
+
+    private void callRolloutProcedure(Planner planner) {
+        new JdbcTemplate(dataSource).update("CALL rebuild_planner_filters(UUID_TO_BIN(?))", planner.getId().toString());
+    }
+
+    @Test
+    void rebuildPlannerFilters_WhenThePreviousImageCallsTheOneArgumentProcedure_IndexesWhatTheScopedOneDoes()
+            throws Exception {
+        for (MDCategory category : MDCategory.values()) {
+            Planner planner = TestDataFactory.planner(owner)
+                    .category(category.getValue())
+                    .content(FIFTEEN_FLOORS)
+                    .published(true)
+                    .save(plannerRepository);
+
+            filterService.rebuildFilters(planner.getId());
+            Set<String> scoped = indexedRows(planner);
+            callRolloutProcedure(planner);
+
+            assertThat(indexedRows(planner)).as(category.getValue())
+                    .isEqualTo(scoped)
+                    .isEqualTo(floorRows(0, gameDataRegistry.floorRules().floorCount(category)))
+                    .isEqualTo(oracleRows(planner));
+        }
+    }
+
+    @Test
+    void rebuildPlannerFilters_WhenTheOneArgumentProcedureMeetsARefractedRailwayPlanner_IndexesNoFloor() {
+        Planner planner = TestDataFactory.planner(owner)
+                .plannerType(PlannerType.REFRACTED_RAILWAY)
+                .category("RR_PLACEHOLDER")
+                .content(SIX_FLOOR_CONTENT)
+                .published(true)
+                .save(plannerRepository);
+
+        filterService.rebuildFilters(planner.getId());
+        Set<String> scoped = indexedRows(planner);
+        callRolloutProcedure(planner);
+
+        assertThat(indexedRows(planner))
+                .isEqualTo(scoped)
+                .contains("IDENTITY:10101", "EGO_GIFT:9001")
+                .noneMatch(row -> row.startsWith("THEME_PACK:"));
+    }
+
+    @Test
+    void rebuildFilters_WhenObjectFloorsFailTheBoundary_IndexesTheSalvagedFieldsTheExtractorIndexes() throws Exception {
+        Planner planner = TestDataFactory.planner(owner)
+                .category("5F")
+                .content(MALFORMED_OBJECT_FLOORS)
+                .published(true)
+                .save(plannerRepository);
+
+        filterService.rebuildFilters(planner.getId());
+
+        assertThat(indexedRows(planner))
+                .filteredOn(row -> row.startsWith("THEME_PACK:") || row.startsWith("EGO_GIFT:"))
+                .containsExactlyInAnyOrder("THEME_PACK:1001", "EGO_GIFT:9001", "THEME_PACK:1003", "EGO_GIFT:9003",
+                        "THEME_PACK:1004", "EGO_GIFT:9002", "EGO_GIFT:9005", "EGO_GIFT:9004");
+        assertThat(indexedRows(planner)).isEqualTo(oracleRows(planner));
+    }
+
+    @Test
+    void floorScopeOf_WhenReadInsideARebuildTransaction_HoldsOffACategoryChangeUntilCommit() throws Exception {
+        Planner planner = TestDataFactory.planner(owner)
+                .category("5F")
+                .content(FIFTEEN_FLOORS)
+                .published(true)
+                .save(plannerRepository);
+
+        new TransactionTemplate(transactionManager).executeWithoutResult(rebuild -> {
+            assertThat(entityFilterRepository.floorScopeOf(planner.getId())).isPresent();
+
+            assertThatThrownBy(() -> changeCategory(planner, "15F"))
+                    .isInstanceOf(SQLException.class)
+                    .hasMessageContaining("Lock wait timeout");
+        });
+
+        assertThat(changeCategory(planner, "15F")).isEqualTo(1);
+    }
+
+    private int changeCategory(Planner planner, String category) throws SQLException {
+        try (Connection connection = dataSource.getConnection();
+             Statement session = connection.createStatement();
+             PreparedStatement update = connection.prepareStatement(
+                     "UPDATE planner_content SET category = ? WHERE planner_id = UUID_TO_BIN(?)")) {
+            session.execute("SET SESSION innodb_lock_wait_timeout = 1");
+            try {
+                update.setString(1, category);
+                update.setString(2, planner.getId().toString());
+                return update.executeUpdate();
+            } finally {
+                session.execute("SET SESSION innodb_lock_wait_timeout = DEFAULT");
+            }
+        }
     }
 }

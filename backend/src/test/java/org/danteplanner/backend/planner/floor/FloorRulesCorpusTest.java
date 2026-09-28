@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -81,7 +82,8 @@ class FloorRulesCorpusTest {
             case Admission.Admitted admitted -> {
                 assertThat(pairsOf(admitted.boundaryViolations())).isEqualTo(expected);
                 if (stage == Stage.INDEX) {
-                    assertThat(admitted.floors()).isEqualTo(recordedFloors(floorSelections, expect.path("floors")));
+                    assertThat(admitted.floors()).isEqualTo(
+                            recordedFloors(floorSelections, expect.path("floors"), expect.path("salvaged")));
                 } else {
                     assertThat(expected).isEmpty();
                 }
@@ -159,17 +161,46 @@ class FloorRulesCorpusTest {
     }
 
     @Test
-    void admit_WhenAFloorBelowTheCountIsNotAnObjectAtIndex_AdmitsTheOtherFloorsBesideTheViolation() {
+    void admit_WhenAFloorBelowTheCountIsNotAnObjectAtIndex_AdmitsItEmptyBesideTheViolation() {
         JsonNode floors = json("[" + floor("1001", 0) + ",5,{\"difficulty\":0}," + floor("1001", 0) + ","
                 + floor("1005", 0) + "]");
 
         Admission admission = admit(rules, floors, MDCategory.F5, Stage.INDEX);
 
         assertThat(admission).isEqualTo(new Admission.Admitted(
-                List.of(selection("1001", 0), new FloorSelection(ThemePack.none(), Difficulty.of(0), List.of()),
+                List.of(selection("1001", 0), new FloorSelection(ThemePack.none(), Difficulty.unset(), List.of()),
+                        new FloorSelection(ThemePack.none(), Difficulty.of(0), List.of()),
                         selection("1001", 0), selection("1005", 0)),
                 List.of(new Violation(ErrorCode.INVALID_FIELD_TYPE, "floorSelections[1]",
                         "Field 'floorSelections[1]' must be object, got number 5"))));
+    }
+
+    @Test
+    void admit_WhenAnObjectFloorFailsTheBoundaryAtIndex_AdmitsItsSalvagedFieldsInPlace() {
+        JsonNode floors = json("[" + floor("1001", 0) + ",{\"themePackId\":\"1004\",\"giftIds\":[\"9002\",9005]},"
+                + "{\"themePackId\":1003,\"difficulty\":\"x\",\"giftIds\":5}]");
+
+        Admission admission = admit(rules, floors, MDCategory.F5, Stage.INDEX);
+
+        assertThat(admission).isInstanceOfSatisfying(Admission.Admitted.class, admitted -> {
+            assertThat(admitted.floors()).containsExactly(selection("1001", 0),
+                    new FloorSelection(ThemePack.chosen("1004"), Difficulty.unset(), List.of("9002", "9005")),
+                    new FloorSelection(ThemePack.chosen("1003"), Difficulty.unset(), List.of()));
+            assertThat(admitted.boundaryViolations()).extracting(Violation::path).containsExactly(
+                    "floorSelections[1].giftIds[1]", "floorSelections[2].difficulty", "floorSelections[2].giftIds",
+                    "floorSelections[2].themePackId");
+        });
+    }
+
+    @Test
+    void admit_WhenAnObjectFloorFailsTheBoundaryAtDraftOrPublish_StillRejectsWithoutSalvage() {
+        JsonNode floors = json("[" + floor("1001", 0) + ",{\"themePackId\":\"1004\",\"giftIds\":[\"9002\",9005]}]");
+
+        for (Stage stage : List.of(Stage.DRAFT, Stage.PUBLISH)) {
+            assertThat(admit(rules, floors, MDCategory.F5, stage)).isEqualTo(new Admission.Rejected(List.of(
+                    new Violation(ErrorCode.INVALID_FIELD_TYPE, "floorSelections[1].giftIds[1]",
+                            "Field 'floorSelections[1].giftIds[1]' must be string, got number 9005"))));
+        }
     }
 
     @Test
@@ -301,23 +332,28 @@ class FloorRulesCorpusTest {
         return new FloorRules(registry);
     }
 
-    private static List<FloorSelection> recordedFloors(JsonNode floorSelections, JsonNode indices) {
-        List<FloorSelection> floors = new ArrayList<>();
-        for (JsonNode index : indices) {
-            floors.add(recordedFloor(floorSelections.get(index.asInt())));
-        }
-        return floors;
+    private static List<FloorSelection> recordedFloors(JsonNode floorSelections, JsonNode passed, JsonNode salvaged) {
+        Set<Integer> indices = new TreeSet<>();
+        passed.forEach(index -> indices.add(index.asInt()));
+        salvaged.forEach(index -> assertThat(indices.add(index.asInt())).as("floor %s is listed twice", index).isTrue());
+        return indices.stream().map(index -> recordedFloor(floorSelections.get(index))).toList();
     }
 
     private static FloorSelection recordedFloor(JsonNode floor) {
         JsonNode themePackId = floor.path("themePackId");
         JsonNode difficulty = floor.path("difficulty");
         List<String> giftIds = new ArrayList<>();
-        floor.path("giftIds").forEach(giftId -> giftIds.add(giftId.textValue()));
-        assertThat(giftIds).as("an admitted corpus floor holds string gift ids").doesNotContainNull();
+        JsonNode recordedGiftIds = floor.path("giftIds");
+        if (recordedGiftIds.isArray()) {
+            recordedGiftIds.forEach(giftId -> {
+                if (giftId.isTextual() || giftId.isNumber()) {
+                    giftIds.add(giftId.asText());
+                }
+            });
+        }
         return new FloorSelection(
-                themePackId.isTextual() && !themePackId.textValue().isEmpty()
-                        ? ThemePack.chosen(themePackId.textValue())
+                (themePackId.isTextual() || themePackId.isNumber()) && !themePackId.asText().isEmpty()
+                        ? ThemePack.chosen(themePackId.asText())
                         : ThemePack.none(),
                 difficulty.isInt() ? Difficulty.of(difficulty.intValue()) : Difficulty.unset(),
                 giftIds);

@@ -313,7 +313,7 @@
       "FLOOR_PREREQUISITE_VIOLATION": "INVALID_SEQUENCE"
     },
     "divergenceComparison": "draftSave first-only vs be.validate.DRAFT; fe.publish vs be.validate.PUBLISH after codeMap; validateFloorRules vs validate at each policy ignoring id-check codes (ADR 136); fe.schema acceptance vs absence of INVALID_FIELD_TYPE/INVALID_CATEGORY in be.validate.DRAFT; index.java vs index.sql",
-    "expect": "derived from the brief's verdicts and its 'Contracts settled after the capture' section; index lists the admitted floor indices, boundary violations, and the entity rows those floors yield (digits-only ids, enhanced gifts at their base)"
+    "expect": "derived from the brief's verdicts and its 'Contracts settled after the capture' section; index lists the floor indices that passed the boundary, the boundary-rejected floor indices whose individually parsed fields are salvaged (numeric ids as their JSON_TABLE text), boundary violations, and the entity rows all those floors yield (digits-only ids, enhanced gifts at their base)"
   },
   "summary": {
     "divergentByInventoryRow": {
@@ -556,6 +556,7 @@
         "index": {
           "ok": false,
           "floors": [],
+          "salvaged": [],
           "violations": [
             {
               "code": "INVALID_FIELD_TYPE",
@@ -780,6 +781,7 @@
           "floors": [
             0
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:9999"
@@ -1003,6 +1005,7 @@
           "floors": [
             0
           ],
+          "salvaged": [],
           "violations": [],
           "rows": []
         }
@@ -1162,6 +1165,7 @@
             3,
             4
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -1325,6 +1329,7 @@
             3,
             4
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -1472,6 +1477,7 @@
             3,
             4
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -1619,6 +1625,7 @@
             3,
             4
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -1793,6 +1800,7 @@
             8,
             9
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -2010,6 +2018,7 @@
             13,
             14
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -2295,6 +2304,7 @@
             0,
             1
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1002"
@@ -2555,6 +2565,7 @@
           "floors": [
             0
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "EGO_GIFT:9002",
@@ -2733,13 +2744,19 @@
         "index": {
           "ok": false,
           "floors": [],
+          "salvaged": [
+            0
+          ],
           "violations": [
             {
               "code": "INVALID_FIELD_TYPE",
               "path": "floorSelections[0].giftIds[0]"
             }
           ],
-          "rows": []
+          "rows": [
+            "EGO_GIFT:9002",
+            "THEME_PACK:1001"
+          ]
         }
       },
       "verdictRow": [
@@ -2962,6 +2979,7 @@
           "floors": [
             0
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "EGO_GIFT:9999",
@@ -3215,6 +3233,7 @@
           "floors": [
             0
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "EGO_GIFT:9004",
@@ -3431,6 +3450,9 @@
         "index": {
           "ok": false,
           "floors": [],
+          "salvaged": [
+            0
+          ],
           "violations": [
             {
               "code": "INVALID_FIELD_TYPE",
@@ -3581,13 +3603,18 @@
         "index": {
           "ok": false,
           "floors": [],
+          "salvaged": [
+            0
+          ],
           "violations": [
             {
               "code": "INVALID_FIELD_TYPE",
               "path": "floorSelections[0].giftIds"
             }
           ],
-          "rows": []
+          "rows": [
+            "THEME_PACK:1001"
+          ]
         }
       },
       "verdictRow": [
@@ -3812,6 +3839,7 @@
           "floors": [
             0
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "EGO_GIFT:9004"
@@ -4048,6 +4076,9 @@
           "floors": [
             1
           ],
+          "salvaged": [
+            0
+          ],
           "violations": [
             {
               "code": "INVALID_FIELD_TYPE",
@@ -4171,6 +4202,7 @@
             3,
             4
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -4288,6 +4320,7 @@
             3,
             4
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "EGO_GIFT:9002",
@@ -4577,6 +4610,7 @@
             0,
             1
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "EGO_GIFT:9004",
@@ -4852,6 +4886,7 @@
           "floors": [
             0
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "EGO_GIFT:9002"
@@ -5002,6 +5037,9 @@
             3,
             4
           ],
+          "salvaged": [
+            0
+          ],
           "violations": [
             {
               "code": "INVALID_FIELD_TYPE",
@@ -5009,6 +5047,7 @@
             }
           ],
           "rows": [
+            "THEME_PACK:1001",
             "THEME_PACK:1002",
             "THEME_PACK:1003",
             "THEME_PACK:1004",
@@ -5288,6 +5327,9 @@
             13,
             14
           ],
+          "salvaged": [
+            6
+          ],
           "violations": [
             {
               "code": "INVALID_FIELD_TYPE",
@@ -5517,6 +5559,7 @@
             3,
             4
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1002",
@@ -5722,6 +5765,7 @@
         "index": {
           "ok": true,
           "floors": [],
+          "salvaged": [],
           "violations": [],
           "rows": []
         }
@@ -5869,6 +5913,7 @@
             8,
             9
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -6065,6 +6110,7 @@
             13,
             14
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -6190,6 +6236,7 @@
             3,
             4
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -6442,6 +6489,7 @@
             3,
             4
           ],
+          "salvaged": [],
           "violations": [],
           "rows": []
         }
@@ -6673,6 +6721,7 @@
             3,
             4
           ],
+          "salvaged": [],
           "violations": [],
           "rows": []
         }
@@ -6784,6 +6833,7 @@
             3,
             4
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -6908,6 +6958,7 @@
             3,
             4
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -7020,6 +7071,7 @@
             3,
             4
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -7150,6 +7202,7 @@
             3,
             4
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -7295,6 +7348,7 @@
             3,
             4
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -7467,6 +7521,7 @@
             8,
             9
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -7682,6 +7737,7 @@
             13,
             14
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -7902,6 +7958,7 @@
             13,
             14
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -8028,6 +8085,7 @@
             3,
             4
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -8201,6 +8259,7 @@
             8,
             9
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -8379,6 +8438,7 @@
             8,
             9
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -8810,6 +8870,7 @@
             10,
             11
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -8968,6 +9029,7 @@
             3,
             4
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -9134,6 +9196,7 @@
             3,
             4
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -9277,6 +9340,7 @@
             2,
             3
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -9505,6 +9569,7 @@
             3,
             4
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -9658,6 +9723,7 @@
             3,
             4
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -9842,6 +9908,7 @@
             8,
             9
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -10016,6 +10083,7 @@
             1,
             2
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -10128,6 +10196,7 @@
             3,
             4
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -10405,6 +10474,7 @@
             3,
             4
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -10647,6 +10717,7 @@
             3,
             4
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "EGO_GIFT:9002",
@@ -10786,6 +10857,7 @@
             3,
             4
           ],
+          "salvaged": [],
           "violations": [],
           "rows": [
             "EGO_GIFT:9004",

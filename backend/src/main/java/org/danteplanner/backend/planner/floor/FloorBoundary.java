@@ -48,17 +48,17 @@ public final class FloorBoundary {
         String path = floorPath(index);
         if (!floor.isObject()) {
             violations.add(Violation.invalidFieldType(path, "object", floor));
-            return new ParsedFloor.Rejected(index);
+            return new ParsedFloor.Rejected(index, new FloorSelection(ThemePack.none(), Difficulty.unset(), List.of()));
         }
 
         int before = violations.size();
         ThemePack themePack = parseThemePack(floor.path(THEME_PACK_ID), path + "." + THEME_PACK_ID, violations);
         Difficulty difficulty = parseDifficulty(floor.path(DIFFICULTY), path + "." + DIFFICULTY, violations);
         List<String> giftIds = parseGiftIds(floor.path(GIFT_IDS), path + "." + GIFT_IDS, violations);
-        if (violations.size() > before) {
-            return new ParsedFloor.Rejected(index);
-        }
-        return new ParsedFloor.Accepted(new FloorSelection(themePack, difficulty, giftIds));
+        FloorSelection selection = new FloorSelection(themePack, difficulty, giftIds);
+        return violations.size() > before
+                ? new ParsedFloor.Rejected(index, selection)
+                : new ParsedFloor.Accepted(selection);
     }
 
     private static ThemePack parseThemePack(JsonNode node, String path, List<Violation> violations) {
@@ -67,7 +67,7 @@ public final class FloorBoundary {
         }
         if (!node.isTextual()) {
             violations.add(Violation.invalidFieldType(path, "string", node));
-            return ThemePack.none();
+            return node.isNumber() ? ThemePack.chosen(node.asText()) : ThemePack.none();
         }
         return node.asText().isEmpty() ? ThemePack.none() : ThemePack.chosen(node.asText());
     }
@@ -111,10 +111,11 @@ public final class FloorBoundary {
         List<String> giftIds = new ArrayList<>();
         for (int index = 0; index < node.size(); index++) {
             JsonNode giftId = node.get(index);
-            if (giftId.isTextual()) {
-                giftIds.add(giftId.asText());
-            } else {
+            if (!giftId.isTextual()) {
                 violations.add(Violation.invalidFieldType(path + "[" + index + "]", "string", giftId));
+            }
+            if (giftId.isTextual() || giftId.isNumber()) {
+                giftIds.add(giftId.asText());
             }
         }
         return giftIds;
