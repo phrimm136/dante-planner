@@ -86,6 +86,7 @@ jobs:
           path: |
             backend/build/reports/tests/
             backend/build/test-results/
+            backend/build/reports/pitest/
           retention-days: 7
 
   test-migration:
