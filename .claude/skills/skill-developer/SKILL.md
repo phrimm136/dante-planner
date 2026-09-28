@@ -1,6 +1,6 @@
 ---
 name: skill-developer
-description: Create and manage Claude Code skills. Use when creating skills, modifying skill-rules.json, or debugging activation.
+description: Create and manage Claude Code skills. Use when creating skills or debugging why a skill did not load.
 ---
 
 # Skill Developer
@@ -27,7 +27,6 @@ description: Create and manage Claude Code skills. Use when creating skills, mod
 skill-name/
 ├── SKILL.md            (required — L1 + L2)
 ├── references/         (optional — L3 detail files)
-│   ├── trigger-guide.md
 │   └── test-patterns.md
 ├── scripts/            (optional — executable helpers)
 └── assets/             (optional — images, data files)
@@ -60,50 +59,19 @@ description: Brief description with trigger keywords.
 \`\`\`
 
 ## Reference
-- Triggers: `references/trigger-guide.md`
 - Tests: `references/test-patterns.md`
 - Pattern: `ExistingFile.tsx`
 - Why: `docs/learning/topic.md`
 ```
 
-## skill-rules.json Entry
-
-```json
-{
-  "my-skill": {
-    "type": "guardrail",
-    "enforcement": "block",
-    "priority": "high",
-    "description": "What this skill does",
-    "promptTriggers": {
-      "keywords": ["keyword1", "keyword2"],
-      "intentPatterns": ["(create|add).*?something"]
-    },
-    "fileTriggers": {
-      "pathPatterns": ["src/**/*.tsx"],
-      "contentPatterns": ["import.*from"]
-    }
-  }
-}
-```
-
-See `references/trigger-guide.md` for full trigger types, enforcement levels, priority levels, and `agentConfig` fields.
-
 ## Testing
 
 Three areas — run in order:
 
-1. **Trigger** — skill loads for right prompts, skips unrelated ones
+1. **Trigger** — the skill loads for the right prompts and skips unrelated ones; the description is the
+   only trigger, so test it by phrasing prompts with and without its keywords
 2. **Functional** — correct output when skill activates (checklist)
 3. **Comparison** — skill vs. baseline improvement (new skills only)
-
-```bash
-# Trigger test
-echo '{"prompt":"your test prompt"}' | npx tsx .claude/hooks/skill-activation-prompt.ts
-
-# Validate JSON
-jq . .claude/skills/skill-rules.json
-```
 
 See `references/test-patterns.md` for functional checklist and comparison test table.
 
@@ -114,14 +82,8 @@ See `references/test-patterns.md` for functional checklist and comparison test t
 | `.claude/skills/{name}/SKILL.md` | Skill content (L1 + L2) |
 | `.claude/skills/{name}/references/` | Detail files (L3) |
 | `.claude/skills/{name}/scripts/` | Helper scripts |
-| `.claude/skills/skill-rules.json` | Trigger config |
-| `.claude/hooks/` | Hook implementations |
-| `.claude/settings.json` | Hook registration |
 
 ## Reference
 
-- Config: `.claude/skills/skill-rules.json`
-- Hooks: `.claude/hooks/skill-activation-prompt.ts`
-- Triggers: `references/trigger-guide.md`
 - Tests: `references/test-patterns.md`
 - Why: `docs/learning/skill-development.md`
