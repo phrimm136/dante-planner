@@ -68,7 +68,7 @@ public enum RateLimitPolicy {
         return endpoint == null;
     }
 
-    BucketConfig bucket(RateLimitProperties properties) {
+    public BucketConfig bucket(RateLimitProperties properties) {
         return bucket.apply(properties);
     }
 

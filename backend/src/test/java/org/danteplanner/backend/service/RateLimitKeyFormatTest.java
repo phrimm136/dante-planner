@@ -21,6 +21,7 @@ import org.junit.jupiter.api.TestFactory;
 import org.mockito.ArgumentCaptor;
 
 import io.github.bucket4j.BucketConfiguration;
+import io.github.bucket4j.ConsumptionProbe;
 import io.github.bucket4j.distributed.BucketProxy;
 import io.github.bucket4j.distributed.proxy.ProxyManager;
 import io.github.bucket4j.distributed.proxy.RemoteBucketBuilder;
@@ -187,8 +188,11 @@ class RateLimitKeyFormatTest {
             builder = mock(RemoteBucketBuilder.class);
             BucketProxy bucketProxy = mock(BucketProxy.class);
             when(proxyManager.builder()).thenReturn(builder);
+            when(builder.withImplicitConfigurationReplacement(anyLong(), any())).thenReturn(builder);
             when(builder.build(any(byte[].class), any(Supplier.class))).thenReturn(bucketProxy);
-            when(bucketProxy.tryConsume(anyLong())).thenReturn(allow);
+            when(bucketProxy.tryConsumeAndReturnRemaining(anyLong())).thenReturn(allow
+                    ? ConsumptionProbe.consumed(1, 0)
+                    : ConsumptionProbe.rejected(0, 1, 1));
         }
 
         @SuppressWarnings("unchecked")

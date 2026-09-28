@@ -81,7 +81,7 @@ class RespondDenialReaches429Test {
     @Test
     @DisplayName("An exhausted bucket on a RESPOND handler renders 429 RATE_LIMIT_EXCEEDED")
     void exhaustedBucket_WhenRespondHandlerRequested_Renders429() throws Exception {
-        doThrow(new RateLimitExceededException(7L, "fixture"))
+        doThrow(new RateLimitExceededException(7L, "fixture", 1L))
                 .when(rateLimitService).check(eq(RateLimitPolicy.CRUD), eq(7L), anyString());
 
         mockMvc.perform(get("/api/fixture/inherited"))

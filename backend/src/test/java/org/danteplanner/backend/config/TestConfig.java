@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 
+import io.github.bucket4j.ConsumptionProbe;
 import io.github.bucket4j.distributed.BucketProxy;
 import io.github.bucket4j.distributed.proxy.ProxyManager;
 import io.github.bucket4j.distributed.proxy.RemoteBucketBuilder;
@@ -44,8 +45,9 @@ public class TestConfig {
     @SuppressWarnings("unchecked")
     public ProxyManager<byte[]> testRateLimitProxyManager() {
         BucketProxy alwaysAllow = mock(BucketProxy.class);
-        when(alwaysAllow.tryConsume(anyLong())).thenReturn(true);
+        when(alwaysAllow.tryConsumeAndReturnRemaining(anyLong())).thenReturn(ConsumptionProbe.consumed(1, 0));
         RemoteBucketBuilder<byte[]> builder = mock(RemoteBucketBuilder.class);
+        when(builder.withImplicitConfigurationReplacement(anyLong(), any())).thenReturn(builder);
         when(builder.build(any(byte[].class), any(Supplier.class))).thenReturn(alwaysAllow);
         ProxyManager<byte[]> proxyManager = mock(ProxyManager.class);
         when(proxyManager.builder()).thenReturn(builder);

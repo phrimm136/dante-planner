@@ -72,7 +72,7 @@ class ApiExceptionHandlerEventStreamTest {
 
         @GetMapping(value = "/probe/throttled", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
         public SseEmitter throttled() {
-            throw new RateLimitExceededException(815L, "probe");
+            throw new RateLimitExceededException(815L, "probe", 1L);
         }
 
         @GetMapping(value = "/probe/degraded", produces = MediaType.TEXT_EVENT_STREAM_VALUE)

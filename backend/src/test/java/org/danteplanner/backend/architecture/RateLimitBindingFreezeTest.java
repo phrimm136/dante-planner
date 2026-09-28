@@ -1,7 +1,19 @@
 package org.danteplanner.backend.architecture;
 
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
+import java.util.stream.Stream;
 
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.context.properties.source.MapConfigurationPropertySource;
+
+import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
+import org.danteplanner.backend.shared.ratelimit.RateLimitProperties;
+import org.danteplanner.backend.shared.ratelimit.RateLimitProperties.BucketConfig;
 import org.danteplanner.backend.shared.ratelimit.RateLimited;
 
 import org.junit.jupiter.api.DisplayName;
@@ -92,10 +104,66 @@ class RateLimitBindingFreezeTest {
             "UserController.updateSettings -> CRUD:user-settings-update (RESPOND)",
             "UserController.updateUsernameEpithet -> CRUD:user-epithet-update (RESPOND)");
 
+    private static final String CONFIG_VERSION_PROPERTY = "rate-limit.config-version";
+
+    private static final List<String> FROZEN_LIMITS = List.of(
+            "rate-limit.config-version=1",
+            "CRUD -> capacity 60, refill 60 per 60s",
+            "SSE -> capacity 15, refill 10 per 10s",
+            "COMMENT -> capacity 10, refill 10 per 60s",
+            "REPORT -> capacity 3, refill 3 per 3600s",
+            "MODERATION -> capacity 20, refill 20 per 60s",
+            "AUTH -> capacity 5, refill 5 per 60s",
+            "PLANNER_COMMENT_SSE -> capacity 15, refill 10 per 10s",
+            "PUBLIC_READ -> capacity 120, refill 120 per 60s",
+            "PLANNER_STATS -> capacity 120, refill 120 per 60s",
+            "VIEW_RECORD -> capacity 30, refill 30 per 60s");
+
     @Test
     @DisplayName("Every handler is charged against the policy the frozen table records")
     void handlerBindings_WhenScanned_MatchTheFrozenTable() {
         assertThat(scanBindings()).containsExactlyElementsOf(FROZEN_BINDINGS);
+    }
+
+    @Test
+    @DisplayName("Every policy's limit and the config version match the frozen table")
+    void policyLimits_WhenBoundFromApplicationProperties_MatchTheFrozenTable() throws IOException {
+        List<String> bound = boundLimits();
+
+        assertThat(bound)
+                .withFailMessage(() -> limitDriftMessage(bound))
+                .containsExactlyElementsOf(FROZEN_LIMITS);
+    }
+
+    private static String limitDriftMessage(List<String> bound) {
+        if (bound.getFirst().equals(FROZEN_LIMITS.getFirst())) {
+            return ("Rate limits changed but " + CONFIG_VERSION_PROPERTY + " did not: a live bucket keeps its"
+                    + " old limit until the version rises. Bump " + CONFIG_VERSION_PROPERTY
+                    + " in application.properties, then re-freeze this table.%nfrozen: %s%nbound:  %s")
+                    .formatted(FROZEN_LIMITS, bound);
+        }
+        return ("Rate-limit configuration differs from the frozen table; re-freeze it with the new"
+                + " limits and " + CONFIG_VERSION_PROPERTY + ".%nfrozen: %s%nbound:  %s")
+                .formatted(FROZEN_LIMITS, bound);
+    }
+
+    private static List<String> boundLimits() throws IOException {
+        Properties application = PropertiesLoaderUtils.loadProperties(
+                new ClassPathResource("application.properties"));
+        RateLimitProperties properties = new Binder(new MapConfigurationPropertySource(application))
+                .bind("rate-limit", RateLimitProperties.class)
+                .orElseThrow(() -> new IllegalStateException("application.properties binds no rate-limit.*"));
+
+        return Stream.concat(
+                        Stream.of(CONFIG_VERSION_PROPERTY + "=" + properties.getConfigVersion()),
+                        Arrays.stream(RateLimitPolicy.values())
+                                .map(policy -> limit(policy, policy.bucket(properties))))
+                .toList();
+    }
+
+    private static String limit(RateLimitPolicy policy, BucketConfig bucket) {
+        return policy.name() + " -> capacity " + bucket.getCapacity()
+                + ", refill " + bucket.getRefillTokens() + " per " + bucket.getRefillDurationSeconds() + "s";
     }
 
     private static List<String> scanBindings() {

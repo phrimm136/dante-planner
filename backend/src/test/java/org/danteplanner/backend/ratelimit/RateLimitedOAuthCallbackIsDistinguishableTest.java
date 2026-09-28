@@ -87,7 +87,7 @@ class RateLimitedOAuthCallbackIsDistinguishableTest {
     @Test
     @DisplayName("An exhausted AUTH bucket redirects the callback under its own rate-limit code")
     void exhaustedAuthBucket_WhenCallbackRequested_RedirectsWithTheRateLimitCode() throws Exception {
-        doThrow(new RateLimitExceededException(null, "auth"))
+        doThrow(new RateLimitExceededException(null, "auth", 1L))
                 .when(rateLimitService).check(eq(RateLimitPolicy.AUTH), anyString());
 
         mockMvc.perform(get("/api/auth/google/callback").param("code", "any").param("state", "any"))
@@ -98,7 +98,7 @@ class RateLimitedOAuthCallbackIsDistinguishableTest {
     @Test
     @DisplayName("An exhausted AUTH bucket redirects the Apple callback under the rate-limit code")
     void exhaustedAuthBucket_WhenAppleCallbackPosted_RedirectsWithTheRateLimitCode() throws Exception {
-        doThrow(new RateLimitExceededException(null, "auth"))
+        doThrow(new RateLimitExceededException(null, "auth", 1L))
                 .when(rateLimitService).check(eq(RateLimitPolicy.AUTH), anyString());
 
         mockMvc.perform(post("/api/auth/apple/callback"))

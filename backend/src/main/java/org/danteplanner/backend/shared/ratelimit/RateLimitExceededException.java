@@ -1,5 +1,7 @@
 package org.danteplanner.backend.shared.ratelimit;
 
+import org.springframework.http.HttpHeaders;
+
 import lombok.Getter;
 import org.danteplanner.backend.shared.exception.DomainException;
 import org.danteplanner.backend.shared.exception.ErrorKind;
@@ -12,10 +14,11 @@ public class RateLimitExceededException extends DomainException {
     private final Long userId;
     private final String endpoint;
 
-    public RateLimitExceededException(Long userId, String endpoint) {
+    public RateLimitExceededException(Long userId, String endpoint, long retryAfterSeconds) {
         super(ErrorKind.OVER_QUOTA, ERROR_CODE,
                 "Rate limit exceeded for user " + userId + " on endpoint " + endpoint);
         this.userId = userId;
         this.endpoint = endpoint;
+        getHeaders().set(HttpHeaders.RETRY_AFTER, Long.toString(retryAfterSeconds));
     }
 }
