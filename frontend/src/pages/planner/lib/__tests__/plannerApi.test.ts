@@ -1,10 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { BATCH_PULL_MAX_IDS } from '@/lib/constants'
 
+const mockGet = vi.hoisted(() => vi.fn())
 const mockPost = vi.hoisted(() => vi.fn())
 
 vi.mock('@/lib/api', () => ({
-  ApiClient: { post: (...args: unknown[]) => mockPost(...args) },
+  ApiClient: {
+    get: (...args: unknown[]) => mockGet(...args),
+    post: (...args: unknown[]) => mockPost(...args),
+  },
 }))
 
 import { plannerApi } from '../plannerApi'
@@ -38,6 +42,11 @@ function idsOf(count: number): string[] {
   return Array.from({ length: count }, (_, i) => uuidAt(i))
 }
 
+function idsIn(url: string): string[] {
+  const query = new URL(url, 'http://localhost').searchParams.get('ids')
+  return query ? query.split(',') : []
+}
+
 async function collect(ids: string[]): Promise<ServerPlannerResponse[]> {
   const out: ServerPlannerResponse[] = []
   for await (const chunk of plannerApi.batchChunks(ids)) out.push(...chunk)
@@ -46,39 +55,61 @@ async function collect(ids: string[]): Promise<ServerPlannerResponse[]> {
 
 describe('plannerApi.batchChunks', () => {
   beforeEach(() => {
+    mockGet.mockReset()
     mockPost.mockReset()
-    mockPost.mockImplementation(async (_url: string, body: { ids: string[] }) =>
-      body.ids.map(responseFor),
-    )
+    mockGet.mockImplementation(async (url: string) => idsIn(url).map(responseFor))
+  })
+
+  it('pulls a few ids with one bodyless GET carrying them comma-joined in the query', async () => {
+    const ids = [uuidAt(0), uuidAt(1), uuidAt(2)]
+
+    const result = await collect(ids)
+
+    expect(mockGet).toHaveBeenCalledTimes(1)
+    expect(mockGet.mock.calls[0]).toEqual([`/api/planner/md/batch?ids=${ids.join(',')}`])
+    expect(mockPost).not.toHaveBeenCalled()
+    expect(result.map((planner) => planner.id)).toEqual(ids)
   })
 
   it('sends a residue at the id cap as a single request', async () => {
     const result = await collect(idsOf(BATCH_PULL_MAX_IDS))
 
-    expect(mockPost).toHaveBeenCalledTimes(1)
+    expect(mockGet).toHaveBeenCalledTimes(1)
     expect(result).toHaveLength(BATCH_PULL_MAX_IDS)
   })
 
-  it('chunks a residue one over the id cap into two requests', async () => {
-    const result = await collect(idsOf(BATCH_PULL_MAX_IDS + 1))
+  it('chunks ids over the cap into ceil(n / cap) requests, in order', async () => {
+    const ids = idsOf(2 * BATCH_PULL_MAX_IDS + 1)
 
-    expect(mockPost).toHaveBeenCalledTimes(2)
-    const [firstBody, secondBody] = mockPost.mock.calls.map((call) => call[1] as { ids: string[] })
-    expect(firstBody?.ids).toHaveLength(BATCH_PULL_MAX_IDS)
-    expect(secondBody?.ids).toHaveLength(1)
-    expect(result).toHaveLength(BATCH_PULL_MAX_IDS + 1)
+    const result = await collect(ids)
+
+    expect(mockGet).toHaveBeenCalledTimes(3)
+    const chunks = mockGet.mock.calls.map((call) => idsIn(call[0] as string))
+    expect(chunks.map((chunk) => chunk.length)).toEqual([BATCH_PULL_MAX_IDS, BATCH_PULL_MAX_IDS, 1])
+    expect(chunks.flat()).toEqual(ids)
+    expect(result.map((planner) => planner.id)).toEqual(ids)
+  })
+
+  it('percent-encodes an id carrying query metacharacters', async () => {
+    mockGet.mockResolvedValue([])
+
+    await collect(['a&b=c,d'])
+
+    expect(mockGet.mock.calls[0]).toEqual(['/api/planner/md/batch?ids=a%26b%3Dc%2Cd'])
   })
 
   it('issues no request for an empty id list', async () => {
     const result = await collect([])
 
-    expect(mockPost).not.toHaveBeenCalled()
+    expect(mockGet).not.toHaveBeenCalled()
     expect(result).toEqual([])
   })
 
   it('accepts a response that omits ids, which is not positionally aligned', async () => {
-    mockPost.mockImplementation(async (_url: string, body: { ids: string[] }) =>
-      body.ids.filter((id) => id !== uuidAt(1)).map(responseFor),
+    mockGet.mockImplementation(async (url: string) =>
+      idsIn(url)
+        .filter((id) => id !== uuidAt(1))
+        .map(responseFor),
     )
 
     const result = await collect([uuidAt(0), uuidAt(1), uuidAt(2)])
@@ -87,10 +118,8 @@ describe('plannerApi.batchChunks', () => {
   })
 
   it('yields earlier chunks before a later one fails', async () => {
-    mockPost.mockImplementationOnce(async (_url: string, body: { ids: string[] }) =>
-      body.ids.map(responseFor),
-    )
-    mockPost.mockImplementationOnce(async () => {
+    mockGet.mockImplementationOnce(async (url: string) => idsIn(url).map(responseFor))
+    mockGet.mockImplementationOnce(async () => {
       throw new Error('second chunk failed')
     })
 
@@ -107,9 +136,9 @@ describe('plannerApi.batchChunks', () => {
   })
 
   it('fails a whole chunk when one of its rows is malformed', async () => {
-    mockPost.mockImplementation(async (_url: string, body: { ids: string[] }) =>
+    mockGet.mockImplementation(async (url: string) =>
       // The second row of the chunk carries an out-of-range syncVersion.
-      body.ids.map((id, index) =>
+      idsIn(url).map((id, index) =>
         index === 1 ? { ...responseFor(id), syncVersion: -3 } : responseFor(id),
       ),
     )
@@ -117,5 +146,13 @@ describe('plannerApi.batchChunks', () => {
     await expect(collect([uuidAt(0), uuidAt(1)])).rejects.toThrow(
       'Too small: expected number to be >0',
     )
+  })
+
+  it('fails a chunk whose row still carries upvotes', async () => {
+    mockGet.mockImplementation(async (url: string) =>
+      idsIn(url).map((id) => Object.assign(responseFor(id), { upvotes: 0 })),
+    )
+
+    await expect(collect([uuidAt(0)])).rejects.toThrow('upvotes')
   })
 })

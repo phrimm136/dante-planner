@@ -44,7 +44,6 @@ function serverPlanner(overrides: Record<string, unknown>) {
     createdAt: '2026-01-01T00:00:00Z',
     lastModifiedAt: '2026-01-01T00:00:00Z',
     savedAt: '2026-01-01T00:00:00Z',
-    upvotes: 0,
     ...overrides,
   }
 }

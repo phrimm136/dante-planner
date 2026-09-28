@@ -331,7 +331,6 @@ export const ServerPlannerResponseSchema = z
     createdAt: z.string(),
     lastModifiedAt: z.string(),
     savedAt: z.string().nullish(),
-    upvotes: z.number().int().nonnegative().optional(),
   })
   .strict()
 

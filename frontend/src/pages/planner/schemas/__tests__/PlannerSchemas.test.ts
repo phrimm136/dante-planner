@@ -687,6 +687,13 @@ describe('frontend-schemas-parse-digestless-responses', () => {
     expect(ServerPlannerResponseSchema.safeParse(withDigest).success).toBe(false)
   })
 
+  it('rejects a response that still carries upvotes', () => {
+    const withUpvotes = { ...digestlessResponse(), upvotes: 0 }
+
+    expect(ServerPlannerResponseSchema.safeParse(withUpvotes).success).toBe(false)
+    expect(ServerPlannerBatchResponseSchema.safeParse([withUpvotes]).success).toBe(false)
+  })
+
   it('rejects a summary that still carries contentDigest', () => {
     const withDigest = { ...digestlessSummary(), contentDigest: 'ab'.repeat(32) }
 
