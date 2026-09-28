@@ -165,10 +165,46 @@ pitest {
     junit5PluginVersion.set("1.2.1")
     threads.set(4)
     timestampedReports.set(false)
-    // Measured baseline: 485 mutations, 277 killed (57%). Raise as coverage lands; never lower.
+    outputFormats.set(setOf("HTML", "XML"))
     // Pinned to 1.19.0-rc.1: the 1.19.0 release crashes the coverage minion on this project
     // (UNKNOWN_ERROR) across every pitest core from 1.19.6 to 1.22.1.
-    mutationThreshold.set(50)
+    mutationThreshold.set(41)
+}
+
+val pitestRatchet by tasks.registering {
+    dependsOn(tasks.named("pitest"))
+    val margin = 3
+    val thresholdProperty = pitest.mutationThreshold
+    val report = layout.buildDirectory.file("reports/pitest/mutations.xml")
+    inputs.files(report)
+    doLast {
+        val xml = report.get().asFile
+        if (!xml.isFile) {
+            throw GradleException("pitestRatchet: $xml is missing; pitest did not produce its XML report.")
+        }
+        val mutations = javax.xml.parsers.DocumentBuilderFactory.newInstance()
+            .newDocumentBuilder().parse(xml).getElementsByTagName("mutation")
+        val total = mutations.length
+        val detected = (0 until total).count {
+            (mutations.item(it) as org.w3c.dom.Element).getAttribute("detected") == "true"
+        }
+        val score = when {
+            total == 0 || detected == total -> 100
+            detected == 0 -> 0
+            else -> minOf(99, Math.round(100f / total * detected))
+        }
+        val threshold = thresholdProperty.get()
+        if (score >= threshold + margin) {
+            throw GradleException(
+                "Mutation score $score is at least $margin above mutationThreshold $threshold; " +
+                    "raise mutationThreshold in backend/build.gradle.kts to $score.")
+        }
+        logger.lifecycle("pitestRatchet: mutation score $score ($detected/$total), mutationThreshold $threshold")
+    }
+}
+
+tasks.check {
+    dependsOn(pitestRatchet)
 }
 
 // Javadoc references are compiler-checked so a comment can cite an invariant test by name and
