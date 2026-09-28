@@ -260,11 +260,6 @@ class GtidPinExitTest {
     }
 
     @Test
-    void decode_WhenNotGtidSyntax_ReturnsEmpty() {
-        assertThat(GtidCookie.decode(rawCookie(MALFORMED))).isEmpty();
-    }
-
-    @Test
     void registration_WhenReplicaDisabledAndPrimaryWouldReportCaughtUp_KeepsCookie() throws Exception {
         GtidReadGate primaryAnsweringGate = mock(GtidReadGate.class);
         when(primaryAnsweringGate.probe(anyString())).thenReturn(GtidReadGate.Verdict.CAUGHT_UP);

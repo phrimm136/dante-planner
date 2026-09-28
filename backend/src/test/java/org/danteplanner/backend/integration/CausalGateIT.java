@@ -14,6 +14,7 @@ import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.shared.gtid.GtidCookie;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -162,10 +163,13 @@ class CausalGateIT extends CausalHarnessSupport {
 
             GateCookie freshCookie = assertGtidCookie(updated);
 
-            mockMvc.perform(get("/api/planner/md/" + plannerId)
+            MvcResult laggingRead = mockMvc.perform(get("/api/planner/md/" + plannerId)
                             .cookie(auth, device, gateCookie(freshCookie)))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.title", is(PRIMARY_ONLY_TITLE)));
+                    .andExpect(jsonPath("$.title", is(PRIMARY_ONLY_TITLE)))
+                    .andReturn();
+
+            assertGateCookieNotCleared(laggingRead, freshCookie.name());
 
             mockMvc.perform(get("/api/planner/md/" + plannerId)
                             .cookie(auth, device))
@@ -186,6 +190,37 @@ class CausalGateIT extends CausalHarnessSupport {
             replicationControl.startReplica();
             replicationControl.awaitCaughtUp();
         }
+    }
+
+    @Test
+    @DisplayName("A token under a server uuid the primary never executed is cleared by the read against the real primary")
+    void causalGate_WhenTokenNamesForeignServerUuid_ReadClearsCookie() throws Exception {
+        User author = TestDataFactory.createTestUser(
+                userRepository, "causal-foreign-" + UUID.randomUUID() + "@example.com");
+        Cookie auth = AuthCookies.accessToken(
+                TestDataFactory.generateAccessToken(jwtTokenService, author));
+        Cookie device = AuthCookies.freshDeviceId();
+        UUID plannerId = UUID.randomUUID();
+        mockMvc.perform(put("/api/planner/md/" + plannerId).with(withCsrf())
+                        .cookie(auth, device)
+                        .contentType(APPLICATION_JSON)
+                        .content(upsertBody(plannerId, REPLICATED_TITLE)))
+                .andExpect(status().is2xxSuccessful());
+        replicationControl.awaitCaughtUp();
+        String foreignToken = UUID.randomUUID() + ":1";
+        assertThat(gtidSubset(foreignToken, primaryJdbc.queryForObject(
+                        "SELECT @@GLOBAL.gtid_executed", String.class)))
+                .as("the foreign token %s must name no transaction the primary executed", foreignToken)
+                .isFalse();
+
+        MvcResult read = mockMvc.perform(get("/api/planner/md/" + plannerId)
+                        .cookie(auth, device, new Cookie(
+                                GtidCookie.NAME, GtidCookie.of(foreignToken).getValue())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title", is(REPLICATED_TITLE)))
+                .andReturn();
+
+        assertGateCookieCleared(read, GtidCookie.NAME);
     }
 
     @Test
@@ -433,6 +468,14 @@ class CausalGateIT extends CausalHarnessSupport {
         assertThat(header.contains("Max-Age=0") || cookieValue(header).isEmpty())
                 .as("gate cookie '%s' cleared (Max-Age=0 or emptied): %s", cookieName, header)
                 .isTrue();
+    }
+
+    private static void assertGateCookieNotCleared(MvcResult result, String cookieName) {
+        List<String> setCookies = result.getResponse().getHeaders(HttpHeaders.SET_COOKIE);
+        assertThat(setCookies)
+                .as("a lagging but valid token keeps the gate cookie '%s'", cookieName)
+                .noneMatch(h -> cookieName.equals(cookieName(h))
+                        && (h.contains("Max-Age=0") || cookieValue(h).isEmpty()));
     }
 
     private static Cookie gateCookie(GateCookie gateCookie) {
