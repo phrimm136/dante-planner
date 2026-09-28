@@ -1,6 +1,6 @@
 #!/bin/bash
-# PreToolUse hook: enforces test/build output redirect to .claude/reports/logs/ and prevents re-runs
-# Convention: redirect output to .claude/reports/logs/, then READ the file — never re-run to gather output
+# PreToolUse hook: enforces test/build output redirect to .claude/reports/logs/ and project-dir targeting
+# Convention: redirect output to .claude/reports/logs/, then READ the file
 
 input=$(cat)
 
@@ -57,9 +57,9 @@ if echo "$scan" | grep -qE '(yarn\s+(test|typecheck|tsc|build|vitest|lint)|vites
         fi
     fi
 
-    # Skip "already exists" check if command deletes old files first or only reads results
+    # A command that cleans up logs still goes through the dir and redirect checks below;
+    # a command that only reads existing logs exits early.
     if echo "$command" | grep -qE 'rm -f (\S*/)?\.claude/reports/logs/'; then
-        # Command cleans up before re-running — allow it
         :
     elif echo "$command" | grep -qE '(xargs|grep|tail|head|cat)\s.*\.claude/reports/logs/'; then
         # Command only reads/processes existing output — allow it
