@@ -9,7 +9,6 @@ ignores:
   - '**/*.test.ts'
   - src/pages/planner/lib/floorRules.ts
   - src/pages/planner/schemas/**
-  - src/pages/planner/lib/deckEA.ts
   - src/pages/planner/lib/editorStateCodec.ts
   - src/pages/planner/lib/plannerContentExtractors.ts
   - src/pages/planner/lib/plannerIdNormalize.ts

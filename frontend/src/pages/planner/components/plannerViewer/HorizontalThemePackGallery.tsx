@@ -14,6 +14,7 @@ const EMPTY_NOTE = createEmptyNoteContent()
 
 interface HorizontalThemePackGalleryProps {
   floorSelections: SerializableFloorSelection[]
+  floorCount: number
   sectionNotes: Record<string, NoteContent>
   doneMarks: Record<number, Set<string>>
   onTogglePackDone: (floorIndex: number, themePackId: string, giftIds: string[]) => void
@@ -24,6 +25,7 @@ interface HorizontalThemePackGalleryProps {
 
 export function HorizontalThemePackGallery({
   floorSelections,
+  floorCount,
   sectionNotes,
   doneMarks,
   onTogglePackDone,
@@ -37,9 +39,11 @@ export function HorizontalThemePackGallery({
 
   const mobileScale = CARD_MOBILE_SCALE_DENSE
 
+  const floors = floorSelections.slice(0, floorCount)
+
   const allThemePackIds = (() => {
     const packIds: string[] = []
-    floorSelections.forEach((selection) => {
+    floors.forEach((selection) => {
       if (selection.themePackId) {
         packIds.push(selection.themePackId)
       }
@@ -56,7 +60,7 @@ export function HorizontalThemePackGallery({
   })()
 
   const getFloorIndexForPack = (themePackId: string): number => {
-    return floorSelections.findIndex((sel) => sel.themePackId === themePackId)
+    return floors.findIndex((sel) => sel.themePackId === themePackId)
   }
 
   const getNoteContentForPack = (themePackId: string): NoteContent => {
@@ -88,7 +92,7 @@ export function HorizontalThemePackGallery({
 
             const floorIndex = getFloorIndexForPack(packId)
             const isDone = allDoneMarks.has(packId)
-            const giftIds = floorSelections[floorIndex]?.giftIds ?? []
+            const giftIds = floors[floorIndex]?.giftIds ?? []
 
             return (
               <div key={packId} className="flex flex-col items-center flex-shrink-0">

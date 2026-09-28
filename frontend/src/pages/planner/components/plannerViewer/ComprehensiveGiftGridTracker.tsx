@@ -21,6 +21,7 @@ import type { SerializableFloorSelection } from '../../types/PlannerTypes'
 
 interface ComprehensiveGiftGridTrackerProps {
   floorSelections: SerializableFloorSelection[]
+  floorCount: number
   hoveredThemePackId: string | null
   egoGiftDoneMarks?: Set<string>
   onToggleEgoGiftDone?: (encodedId: string) => void
@@ -37,6 +38,7 @@ interface DecodedGift {
 
 export function ComprehensiveGiftGridTracker({
   floorSelections,
+  floorCount,
   hoveredThemePackId,
   egoGiftDoneMarks,
   onToggleEgoGiftDone,
@@ -55,9 +57,11 @@ export function ComprehensiveGiftGridTracker({
 
   const mobileScale = CARD_MOBILE_SCALE
 
+  const floors = floorSelections.slice(0, floorCount)
+
   const allComprehensiveGiftIds = (() => {
     const allGifts = new Set(comprehensiveGiftIds)
-    floorSelections.forEach((selection) => {
+    floors.forEach((selection) => {
       selection.giftIds?.forEach((giftId) => allGifts.add(giftId))
     })
     return allGifts
@@ -66,7 +70,7 @@ export function ComprehensiveGiftGridTracker({
   const highlightedGiftIds = (() => {
     const ids = new Set<string>()
     if (hoveredThemePackId) {
-      floorSelections.forEach((selection) => {
+      floors.forEach((selection) => {
         if (selection.themePackId === hoveredThemePackId) {
           selection.giftIds?.forEach((giftId) => ids.add(giftId))
         }

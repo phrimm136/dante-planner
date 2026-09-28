@@ -5,7 +5,7 @@ import { describe, it, expect } from 'vitest'
 import { MD_CATEGORIES, floorCount } from '@/shared/gameData'
 import type { FloorRuleStage, MDCategory } from '@/shared/gameData'
 import { admitFloors, parseFloors } from '../floorRules'
-import type { BeErrorCode } from '../floorRules'
+import type { BeErrorCode, FloorSelectionValue, ParsedFloors } from '../floorRules'
 
 type CorpusViolation = { code: string; path: string }
 
@@ -16,7 +16,7 @@ type CorpusCase = {
   expect: {
     draft: { ok: boolean; violations: CorpusViolation[] }
     publish: { ok: boolean; violations: CorpusViolation[] }
-    index: { ok: boolean; floors: number[]; violations: CorpusViolation[] }
+    index: { ok: boolean; floors: number[]; salvaged: number[]; violations: CorpusViolation[] }
   }
 }
 
@@ -48,6 +48,43 @@ const pairs = (violations: readonly CorpusViolation[]) =>
 const moduleCases = corpus.cases.filter((c) => isMdCategory(c.category))
 const callerCases = corpus.cases.filter((c) => !isMdCategory(c.category))
 const ruleStages: FloorRuleStage[] = ['draft', 'publish']
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value)
+
+const scalarText = (value: unknown) =>
+  typeof value === 'string' ? value : typeof value === 'number' ? String(value) : undefined
+
+function salvageOf(rawFloor: unknown): FloorSelectionValue {
+  if (!isRecord(rawFloor)) return { giftIds: [] }
+  const themePackId = scalarText(rawFloor.themePackId)
+  const giftIds: unknown[] = Array.isArray(rawFloor.giftIds) ? rawFloor.giftIds : []
+  return {
+    ...(themePackId ? { themePackId } : {}),
+    ...(Number.isInteger(rawFloor.difficulty) ? { difficulty: rawFloor.difficulty as number } : {}),
+    giftIds: giftIds.flatMap((giftId) => scalarText(giftId) ?? []),
+  }
+}
+
+function admittedIndices(parsed: ParsedFloors, admitted: readonly FloorSelectionValue[]) {
+  const passed: number[] = []
+  const salvaged: number[] = []
+  let floorIndex = 0
+  for (const floor of admitted) {
+    while (
+      floorIndex < parsed.floors.length &&
+      parsed.floors[floorIndex] !== floor &&
+      parsed.salvage[floorIndex] !== floor
+    ) {
+      floorIndex += 1
+    }
+    if (parsed.floors[floorIndex] === floor) passed.push(floorIndex)
+    else if (parsed.salvage[floorIndex] === floor) salvaged.push(floorIndex)
+    else throw new Error('admitted floor is neither parsed nor salvaged, or out of order')
+    floorIndex += 1
+  }
+  return { passed, salvaged }
+}
 
 function admit(c: CorpusCase, stage: FloorRuleStage) {
   const category = c.category as MDCategory
@@ -96,18 +133,23 @@ describe('floor rules corpus', () => {
       const { parsed, admission } = admit(c, 'index')
       const admitted = admission.ok ? admission.floors : []
       const boundaryViolations = admission.ok ? admission.boundaryViolations : admission.violations
+      const { passed, salvaged } = admittedIndices(parsed, admitted)
       expect(admission.ok).toBe(true)
       expect({
         ok: boundaryViolations.length === 0,
-        floors: parsed.floors.flatMap((floor, floorIndex) =>
-          floor !== undefined && admitted.includes(floor) ? [floorIndex] : [],
-        ),
+        floors: passed,
+        salvaged,
         violations: pairs(boundaryViolations),
       }).toEqual({
         ok: c.expect.index.ok,
         floors: c.expect.index.floors,
+        salvaged: c.expect.index.salvaged,
         violations: pairs(c.expect.index.violations),
       })
+      const rawFloors = c.floorSelections as unknown[]
+      expect(salvaged.map((floorIndex) => parsed.salvage[floorIndex])).toEqual(
+        salvaged.map((floorIndex) => salvageOf(rawFloors[floorIndex])),
+      )
     })
   })
 })

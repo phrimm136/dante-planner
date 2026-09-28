@@ -10,6 +10,7 @@ import { asEGOGiftId, asEncodedGiftId } from '@/test-utils/fixtures'
 const GIFT_9001 = asEGOGiftId('9001')
 const ENCODED_9001 = asEncodedGiftId('9001')
 const ENCODED_9002 = asEncodedGiftId('9002')
+const ENCODED_9003 = asEncodedGiftId('9003')
 
 // The card is the seam the grid renders through, so the mock surfaces the three
 // values the grid computes: which gift, at which enhancement, and highlighted or not.
@@ -92,6 +93,7 @@ describe('ComprehensiveGiftGridTracker', () => {
     it('renders the empty state when no floor and no comprehensive gift is selected', () => {
       const { container } = render(
         <ComprehensiveGiftGridTracker
+          floorCount={5}
           floorSelections={[]}
           comprehensiveGiftIds={[]}
           hoveredThemePackId={null}
@@ -108,6 +110,7 @@ describe('ComprehensiveGiftGridTracker', () => {
     it('takes the caller height when one is given', () => {
       const { container } = render(
         <ComprehensiveGiftGridTracker
+          floorCount={5}
           floorSelections={[buildFloorSelection({ giftIds: [ENCODED_9001] })]}
           comprehensiveGiftIds={[ENCODED_9001]}
           hoveredThemePackId={null}
@@ -124,6 +127,7 @@ describe('ComprehensiveGiftGridTracker', () => {
     it('stretches to its column when no height is given', () => {
       const { container } = render(
         <ComprehensiveGiftGridTracker
+          floorCount={5}
           floorSelections={[buildFloorSelection({ giftIds: [ENCODED_9001] })]}
           comprehensiveGiftIds={[ENCODED_9001]}
           hoveredThemePackId={null}
@@ -142,6 +146,7 @@ describe('ComprehensiveGiftGridTracker', () => {
     it('displays a gift in comprehensiveGiftIds that is absent from all floor giftIds', () => {
       const { getByTestId } = render(
         <ComprehensiveGiftGridTracker
+          floorCount={5}
           floorSelections={[buildFloorSelection({ giftIds: [] })]}
           comprehensiveGiftIds={[ENCODED_9001]}
           hoveredThemePackId={null}
@@ -156,6 +161,7 @@ describe('ComprehensiveGiftGridTracker', () => {
     it('displays gifts present in a floor giftIds and in comprehensiveGiftIds', () => {
       const { getByTestId } = render(
         <ComprehensiveGiftGridTracker
+          floorCount={5}
           floorSelections={[buildFloorSelection({ giftIds: [ENCODED_9002] })]}
           comprehensiveGiftIds={[ENCODED_9001]}
           hoveredThemePackId={null}
@@ -174,6 +180,7 @@ describe('ComprehensiveGiftGridTracker', () => {
 
       const { getByTestId } = render(
         <ComprehensiveGiftGridTracker
+          floorCount={5}
           floorSelections={[buildFloorSelection({ giftIds: [] })]}
           comprehensiveGiftIds={[encoded]}
           hoveredThemePackId={null}
@@ -189,6 +196,7 @@ describe('ComprehensiveGiftGridTracker', () => {
     it('keeps an enhanced and an unenhanced selection of the same base gift distinct', () => {
       const { getAllByTestId } = render(
         <ComprehensiveGiftGridTracker
+          floorCount={5}
           floorSelections={[buildFloorSelection({ giftIds: [] })]}
           comprehensiveGiftIds={[
             encodeGiftSelection(0, GIFT_9001),
@@ -215,6 +223,7 @@ describe('ComprehensiveGiftGridTracker', () => {
 
       const { getByTestId } = render(
         <ComprehensiveGiftGridTracker
+          floorCount={5}
           floorSelections={[floor]}
           comprehensiveGiftIds={[ENCODED_9001, ENCODED_9002]}
           hoveredThemePackId="1001"
@@ -234,6 +243,7 @@ describe('ComprehensiveGiftGridTracker', () => {
 
       const { getByTestId } = render(
         <ComprehensiveGiftGridTracker
+          floorCount={5}
           floorSelections={[floor]}
           comprehensiveGiftIds={[ENCODED_9001]}
           hoveredThemePackId={null}
@@ -245,10 +255,54 @@ describe('ComprehensiveGiftGridTracker', () => {
     })
   })
 
+  describe('floors past the category count', () => {
+    const PACK_1001 = ThemePackIdSchema.parse('1001')
+    const fifteenFloors = () =>
+      Array.from({ length: 15 }, (_, floorIndex) =>
+        floorIndex === 1
+          ? buildFloorSelection({ themePackId: PACK_1001, giftIds: [ENCODED_9001] })
+          : floorIndex === 6
+            ? buildFloorSelection({ themePackId: PACK_1001, giftIds: [ENCODED_9002, ENCODED_9003] })
+            : buildFloorSelection({ giftIds: [] }),
+      )
+
+    it('lists only the gifts of floors below the count', () => {
+      const { queryByTestId } = render(
+        <ComprehensiveGiftGridTracker
+          floorCount={5}
+          floorSelections={fifteenFloors()}
+          comprehensiveGiftIds={[]}
+          hoveredThemePackId={null}
+        />,
+        { wrapper: createWrapper() },
+      )
+
+      expect(queryByTestId('gift-card-9001')).toBeInTheDocument()
+      expect(queryByTestId('gift-card-9002')).toBeNull()
+      expect(queryByTestId('gift-card-9003')).toBeNull()
+    })
+
+    it('highlights a hovered pack only on the floor below the count', () => {
+      const { getByTestId } = render(
+        <ComprehensiveGiftGridTracker
+          floorCount={5}
+          floorSelections={fifteenFloors()}
+          comprehensiveGiftIds={[ENCODED_9003]}
+          hoveredThemePackId="1001"
+        />,
+        { wrapper: createWrapper() },
+      )
+
+      expect(getByTestId('gift-card-9001')).toHaveAttribute('data-selected', 'true')
+      expect(getByTestId('gift-card-9003')).toHaveAttribute('data-selected', 'false')
+    })
+  })
+
   describe('egoGiftDoneMarks', () => {
     it('dims a gift whose encoded id is marked done', () => {
       const { getByTestId } = render(
         <ComprehensiveGiftGridTracker
+          floorCount={5}
           floorSelections={[buildFloorSelection({ giftIds: [] })]}
           comprehensiveGiftIds={[ENCODED_9001, ENCODED_9002]}
           hoveredThemePackId={null}

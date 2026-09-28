@@ -9,8 +9,6 @@ ignores:
   - '**/*.test.tsx'
   - src/pages/planner/lib/floorRules.ts
   - src/pages/planner/schemas/**
-  - src/pages/planner/components/plannerViewer/ComprehensiveGiftGridTracker.tsx
-  - src/pages/planner/components/plannerViewer/HorizontalThemePackGallery.tsx
   - src/pages/planner/stores/usePlannerEditorStore.tsx
 rule:
   any:

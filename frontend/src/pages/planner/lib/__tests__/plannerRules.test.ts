@@ -6,7 +6,6 @@
 
 import { describe, it, expect } from 'vitest'
 import {
-  canSelectFloorThemePack,
   isGiftAffordableForThemePack,
   getUnaffordableGiftIds,
   offeredFloorDifficulties,
@@ -130,23 +129,5 @@ describe('offeredFloorDifficulties', () => {
 
   it('offers nothing past the category floor count', () => {
     expect(offeredFloorDifficulties([], '5F', 5)).toEqual([])
-  })
-})
-
-describe('canSelectFloorThemePack', () => {
-  it('always allows floor 1', () => {
-    expect(canSelectFloorThemePack(0, [])).toBe(true)
-  })
-
-  it('treats an empty-string pack on the previous floor as not chosen', () => {
-    expect(canSelectFloorThemePack(1, floorsWith([{ themePackId: '' }]))).toBe(false)
-  })
-
-  it('allows a floor whose previous floor holds a pack', () => {
-    expect(canSelectFloorThemePack(1, floorsWith([{ themePackId: PACK_1001 }]))).toBe(true)
-  })
-
-  it('refuses a floor whose previous floor does not exist', () => {
-    expect(canSelectFloorThemePack(2, floorsWith([{ themePackId: PACK_1001 }]))).toBe(false)
   })
 })

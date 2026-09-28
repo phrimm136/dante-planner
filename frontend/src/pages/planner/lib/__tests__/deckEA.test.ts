@@ -6,10 +6,10 @@
  */
 
 import { describe, it, expect } from 'vitest'
-import { AFFINITIES, STATUS_EFFECTS } from '@/shared/gameData'
-import type { EGOGiftId, EGOId, IdentityId } from '@/shared/gameData'
-import { asEGOGiftId, asEGOId, asIdentityId } from '@/test-utils/fixtures'
-import { computeAffinityEA, computeKeywordEA } from '../deckEA'
+import { AFFINITIES, DUNGEON_IDX, STATUS_EFFECTS, floorCount } from '@/shared/gameData'
+import type { EGOGiftId, EGOId, EncodedGiftId, IdentityId } from '@/shared/gameData'
+import { asEGOGiftId, asEGOId, asEncodedGiftId, asIdentityId } from '@/test-utils/fixtures'
+import { collectOwnedGiftIds, computeAffinityEA, computeKeywordEA } from '../deckEA'
 import type { EGOEASpec, IdentityEASpec } from '../deckEA'
 import type {
   AffinityCount,
@@ -340,5 +340,44 @@ describe('computeKeywordEA', () => {
 
       expect(countOf(result, 'Laceration')).toBe(1)
     })
+  })
+})
+
+describe('collectOwnedGiftIds', () => {
+  const NONE: ReadonlySet<EncodedGiftId> = new Set()
+  const fifteenFloors = (giftOn: (floorIndex: number) => EncodedGiftId[]) =>
+    Array.from({ length: 15 }, (_, floorIndex) => ({
+      themePackId: null,
+      difficulty: DUNGEON_IDX.NORMAL,
+      giftIds: new Set(giftOn(floorIndex)),
+    }))
+  const owned = (floorSelections: ReturnType<typeof fifteenFloors>) =>
+    collectOwnedGiftIds(
+      {
+        selectedGiftIds: NONE,
+        observationGiftIds: NONE,
+        comprehensiveGiftIds: NONE,
+        floorSelections,
+      },
+      floorCount('5F'),
+    )
+
+  it('owns only the gifts of the five floors of a 15-floor planner switched to 5F', () => {
+    const floors = fifteenFloors((floorIndex) => [asEncodedGiftId(String(9100 + floorIndex))])
+
+    expect([...owned(floors)].sort()).toEqual(['9100', '9101', '9102', '9103', '9104'])
+  })
+
+  it('grants nothing from gifts held only on floors past the count', () => {
+    const floors = fifteenFloors((floorIndex) =>
+      floorIndex === 6 ? [asEncodedGiftId(String(GIFT_9282))] : [],
+    )
+    const equipment: Record<string, SinnerEquipment> = {
+      '10': { identity: { id: IDENTITY_11009, uptie: 4, level: 45 }, egos: {} },
+    }
+    const result = computeKeywordEA(deck(equipment, [9]), emptySpec, owned(floors))
+
+    expect(owned(floors).size).toBe(0)
+    expect(result.find((entry) => entry.keyword === 'Vibration')?.allCount).toBe(0)
   })
 })

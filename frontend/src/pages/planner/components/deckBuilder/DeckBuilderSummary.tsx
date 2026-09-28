@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { DEFAULT_DEPLOYMENT_MAX } from '@/shared/gameData'
+import { DEFAULT_DEPLOYMENT_MAX, floorCount } from '@/shared/gameData'
 import { PlannerSection } from '@/components/layout/PlannerSection'
 import { useIdentityListSpec, useIdentityListI18n, toIdentityEntity } from '@/pages/identity'
 import { useEGOListSpec } from '@/pages/ego'
@@ -135,12 +135,11 @@ export function StoreBoundDeckBuilderSummary(props: StoreBoundDeckBuilderSummary
   const observationGiftIds = usePlannerEditorStore((s) => s.observationGiftIds)
   const comprehensiveGiftIds = usePlannerEditorStore((s) => s.comprehensiveGiftIds)
   const floorSelections = usePlannerEditorStore((s) => s.floorSelections)
-  const ownedGiftIds = collectOwnedGiftIds({
-    selectedGiftIds,
-    observationGiftIds,
-    comprehensiveGiftIds,
-    floorSelections,
-  })
+  const category = usePlannerEditorStore((s) => s.category)
+  const ownedGiftIds = collectOwnedGiftIds(
+    { selectedGiftIds, observationGiftIds, comprehensiveGiftIds, floorSelections },
+    floorCount(category),
+  )
 
   return (
     <DeckBuilderSummary

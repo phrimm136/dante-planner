@@ -19,6 +19,7 @@ export type FloorSelectionValue = {
 
 export type ParsedFloors = {
   floors: (FloorSelectionValue | undefined)[]
+  salvage: (FloorSelectionValue | undefined)[]
   violations: Violation[]
 }
 
@@ -55,13 +56,35 @@ const byPathThenCode = (a: Violation, b: Violation) => {
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
 
-function parseFloor(
-  raw: unknown,
-  floorIndex: number,
-): { floor: FloorSelectionValue | undefined; violations: Violation[] } {
+const scalarText = (value: unknown): string | undefined =>
+  typeof value === 'string' ? value : typeof value === 'number' ? String(value) : undefined
+
+const EMPTY_SALVAGE: FloorSelectionValue = { giftIds: [] }
+
+function salvageFloor(raw: Record<string, unknown>): FloorSelectionValue {
+  const themePackId = scalarText(raw.themePackId)
+  const giftIds: unknown[] = Array.isArray(raw.giftIds) ? raw.giftIds : []
+  return {
+    ...(themePackId ? { themePackId } : {}),
+    ...(Number.isInteger(raw.difficulty) ? { difficulty: raw.difficulty as number } : {}),
+    giftIds: giftIds.flatMap((giftId) => scalarText(giftId) ?? []),
+  }
+}
+
+type ParsedFloor = {
+  floor: FloorSelectionValue | undefined
+  salvage: FloorSelectionValue | undefined
+  violations: Violation[]
+}
+
+function parseFloor(raw: unknown, floorIndex: number): ParsedFloor {
   const path = floorPath(floorIndex)
   if (!isRecord(raw)) {
-    return { floor: undefined, violations: [violation('INVALID_FIELD_TYPE', path)] }
+    return {
+      floor: undefined,
+      salvage: EMPTY_SALVAGE,
+      violations: [violation('INVALID_FIELD_TYPE', path)],
+    }
   }
 
   const violations: Violation[] = []
@@ -94,18 +117,25 @@ function parseFloor(
     violations.push(violation('INVALID_FIELD_TYPE', `${path}.giftIds`))
   }
 
-  return violations.length > 0 ? { floor: undefined, violations } : { floor, violations }
+  return violations.length > 0
+    ? { floor: undefined, salvage: salvageFloor(raw), violations }
+    : { floor, salvage: undefined, violations }
 }
 
 export function parseFloors(raw: unknown, floorCount: number): ParsedFloors {
   if (!Array.isArray(raw)) {
-    return { floors: [], violations: [violation('INVALID_FIELD_TYPE', FLOOR_SELECTIONS)] }
+    return {
+      floors: [],
+      salvage: [],
+      violations: [violation('INVALID_FIELD_TYPE', FLOOR_SELECTIONS)],
+    }
   }
   const results = (raw as unknown[])
     .slice(0, floorCount)
     .map((floor, floorIndex) => parseFloor(floor, floorIndex))
   return {
     floors: results.map((result) => result.floor),
+    salvage: results.map((result) => result.salvage),
     violations: results.flatMap((result) => result.violations).sort(byPathThenCode),
   }
 }
@@ -193,7 +223,11 @@ export function admitFloors(
 
   const rules = CHECKED_FLOOR_RULES.filter((rule) => table.rules[rule].includes(stage))
   if (rules.length === 0) {
-    return { ok: true, floors, boundaryViolations: parsed.violations }
+    const indexed = parsed.floors
+      .slice(0, floorCount)
+      .map((floor, floorIndex) => floor ?? parsed.salvage[floorIndex])
+      .filter((floor): floor is FloorSelectionValue => floor !== undefined)
+    return { ok: true, floors: indexed, boundaryViolations: parsed.violations }
   }
   if (parsed.violations.length > 0) {
     return { ok: false, violations: parsed.violations }
@@ -253,7 +287,7 @@ export function violationsForCategory(
   table: FloorRuleTable = FLOOR_RULE_TABLE,
 ): readonly Violation[] {
   const admission = admitFloors(
-    { floors: floors.map(toFloorValue), violations: [] },
+    { floors: floors.map(toFloorValue), salvage: [], violations: [] },
     category,
     'publish',
     table,

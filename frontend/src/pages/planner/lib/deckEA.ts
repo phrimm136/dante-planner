@@ -31,18 +31,22 @@ function sinnerCodesOf(deploymentOrder: readonly number[]): string[] {
   return deploymentOrder.map((index) => String(index + 1))
 }
 
-export function collectOwnedGiftIds(source: {
-  selectedGiftIds: ReadonlySet<EncodedGiftId>
-  observationGiftIds: ReadonlySet<EncodedGiftId>
-  comprehensiveGiftIds: ReadonlySet<EncodedGiftId>
-  floorSelections: readonly FloorThemeSelection[]
-}): ReadonlySet<EGOGiftId> {
+export function collectOwnedGiftIds(
+  source: {
+    selectedGiftIds: ReadonlySet<EncodedGiftId>
+    observationGiftIds: ReadonlySet<EncodedGiftId>
+    comprehensiveGiftIds: ReadonlySet<EncodedGiftId>
+    floorSelections: readonly FloorThemeSelection[]
+  },
+  floorCount: number,
+): ReadonlySet<EGOGiftId> {
+  const floors = source.floorSelections.slice(0, floorCount)
   return new Set(
     [
       ...source.selectedGiftIds,
       ...source.observationGiftIds,
       ...source.comprehensiveGiftIds,
-      ...source.floorSelections.flatMap((floor) => [...floor.giftIds]),
+      ...floors.flatMap((floor) => Array.from(floor.giftIds)),
     ].map(getBaseGiftId),
   )
 }

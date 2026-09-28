@@ -84,7 +84,7 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
             <DeckBuilderSummary
               equipment={content.equipment}
               deploymentOrder={content.deploymentOrder}
-              ownedGiftIds={collectOwnedGiftIds(deserialized)}
+              ownedGiftIds={collectOwnedGiftIds(deserialized, floorCount)}
               readOnly={true}
             />
           </Suspense>
@@ -167,6 +167,7 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
             <Suspense fallback={<GiftGridTrackerSkeleton height={giftGridHeight} />}>
               <ComprehensiveGiftGridTracker
                 floorSelections={content.floorSelections}
+                floorCount={floorCount}
                 comprehensiveGiftIds={content.comprehensiveGiftIds}
                 hoveredThemePackId={null}
                 height={giftGridHeight}

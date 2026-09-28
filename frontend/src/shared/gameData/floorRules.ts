@@ -81,6 +81,10 @@ export function floorCount(category: MDCategory): number {
   return FLOOR_RULE_TABLE.categories[category].floorCount
 }
 
+export function maxFloorCount(): number {
+  return Math.max(...Object.values(FLOOR_RULE_TABLE.categories).map((floors) => floors.floorCount))
+}
+
 export function allowedDifficulties(
   category: MDCategory,
   floorIndex: number,

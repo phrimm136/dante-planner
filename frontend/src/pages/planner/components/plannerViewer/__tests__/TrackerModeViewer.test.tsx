@@ -90,8 +90,16 @@ vi.mock('../../../schemas/PlannerSchemas', async (importOriginal) => ({
 
 // Mock child components
 vi.mock('../DeckTrackerPanel', () => ({
-  DeckTrackerPanel: ({ deploymentOrder }: { deploymentOrder: string[] }) => (
-    <div data-testid="deck-tracker-panel">Deployment: {deploymentOrder.join(', ')}</div>
+  DeckTrackerPanel: ({
+    deploymentOrder,
+    ownedGiftIds,
+  }: {
+    deploymentOrder: string[]
+    ownedGiftIds: ReadonlySet<string>
+  }) => (
+    <div data-testid="deck-tracker-panel" data-owned={[...ownedGiftIds].sort().join(',')}>
+      Deployment: {deploymentOrder.join(', ')}
+    </div>
   ),
 }))
 
@@ -159,14 +167,20 @@ vi.mock('@/components/hooks/useProgressiveReveal', () => ({
 
 // Mock other child components
 vi.mock('../ComprehensiveGiftGridTracker', () => ({
-  ComprehensiveGiftGridTracker: () => (
-    <div data-testid="comprehensive-gift-grid-tracker">ComprehensiveGiftGridTracker</div>
+  ComprehensiveGiftGridTracker: ({ floorCount }: { floorCount: number }) => (
+    <div data-testid="comprehensive-gift-grid-tracker" data-floor-count={String(floorCount)}>
+      ComprehensiveGiftGridTracker
+    </div>
   ),
 }))
 
 vi.mock('../HorizontalThemePackGallery', () => ({
-  HorizontalThemePackGallery: () => (
-    <div data-testid="horizontal-theme-pack-gallery" data-unified="true">
+  HorizontalThemePackGallery: ({ floorCount }: { floorCount: number }) => (
+    <div
+      data-testid="horizontal-theme-pack-gallery"
+      data-unified="true"
+      data-floor-count={String(floorCount)}
+    >
       HorizontalThemePackGallery
     </div>
   ),
@@ -306,6 +320,30 @@ describe('TrackerModeViewer', () => {
 
       const deckPanel = screen.getByTestId('deck-tracker-panel')
       expect(deckPanel.textContent).toContain('Faust, YiSang, DonQuixote')
+    })
+  })
+
+  describe('Floors past the category count', () => {
+    const fifteenFloorsAs5F = (): MDSaveablePlanner => {
+      const planner = createMockPlanner(15)
+      return { ...planner, config: { ...planner.config, category: '5F' } }
+    }
+
+    it('bounds the gallery and the gift grid by the 5F floor count', () => {
+      render(<TrackerModeViewer planner={fifteenFloorsAs5F()} />, { wrapper: createWrapper() })
+
+      expect(screen.getByTestId('horizontal-theme-pack-gallery').dataset.floorCount).toBe('5')
+      expect(screen.getByTestId('comprehensive-gift-grid-tracker').dataset.floorCount).toBe('5')
+    })
+
+    it('grants the deck only the gifts of the five floors', () => {
+      render(<TrackerModeViewer planner={fifteenFloorsAs5F()} />, { wrapper: createWrapper() })
+
+      const fiveFloorGifts = Array.from({ length: 10 }, (_, i) => String(9100 + i))
+      const nonFloorGifts = ['9001', '9002', '9003', '9004', '9005']
+      expect(screen.getByTestId('deck-tracker-panel').dataset.owned).toBe(
+        [...nonFloorGifts, ...fiveFloorGifts].sort().join(','),
+      )
     })
   })
 

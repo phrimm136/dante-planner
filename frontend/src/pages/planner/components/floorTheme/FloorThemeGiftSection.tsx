@@ -17,12 +17,8 @@ import {
   type MDCategory,
 } from '@/shared/gameData'
 import { cn } from '@/lib/utils'
-import {
-  canSelectFloorThemePack,
-  getUnaffordableGiftNames,
-  offeredFloorDifficulties,
-} from '../../lib/plannerRules'
-import { packIdsUsedElsewhere } from '../../lib/floorRules'
+import { getUnaffordableGiftNames, offeredFloorDifficulties } from '../../lib/plannerRules'
+import { packIdsUsedElsewhere, packSelectableAt } from '../../lib/floorRules'
 import { PlannerSection } from '@/components/layout/PlannerSection'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import type { FloorThemeSelection } from '@/pages/themePack'
@@ -67,7 +63,7 @@ export function FloorThemeGiftSection({
   const storeSlice = usePlannerEditorStoreSafe(
     useShallow((s) => ({
       selection: s?.floorSelections?.[floorIndex],
-      previousHasThemePack: canSelectFloorThemePack(floorIndex, s?.floorSelections ?? []),
+      previousHasThemePack: packSelectableAt(s?.floorSelections ?? [], floorIndex),
       updateFloorSelection: s?.updateFloorSelection,
       storeCategory: s?.category,
     })),
@@ -97,7 +93,7 @@ export function FloorThemeGiftSection({
     ? offeredFloorDifficulties(floorSelectionsOverride, category, floorIndex)
     : (offeredFromStore ?? offeredFloorDifficulties(EMPTY_FLOORS, category, floorIndex))
   const canSelectThemePack = floorSelectionsOverride
-    ? canSelectFloorThemePack(floorIndex, floorSelectionsOverride)
+    ? packSelectableAt(floorSelectionsOverride, floorIndex)
     : (storeSlice?.previousHasThemePack ?? true)
   const usedThemePackIds = new Set(
     floorSelectionsOverride

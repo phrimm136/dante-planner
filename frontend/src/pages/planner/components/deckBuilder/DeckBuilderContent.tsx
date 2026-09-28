@@ -1,5 +1,5 @@
 import { startTransition, useState, useEffect, useRef } from 'react'
-import { MAX_LEVEL, EGO_TYPES, EGOIdSchema } from '@/shared/gameData'
+import { MAX_LEVEL, EGO_TYPES, EGOIdSchema, floorCount } from '@/shared/gameData'
 import type { EGOGiftId, EGOId, IdentityId } from '@/shared/gameData'
 import {
   PlannerEditorStoreProvider,
@@ -397,12 +397,11 @@ export function StoreBoundDeckBuilderContent(props: StoreBoundDeckBuilderContent
   const observationGiftIds = usePlannerEditorStore((s) => s.observationGiftIds)
   const comprehensiveGiftIds = usePlannerEditorStore((s) => s.comprehensiveGiftIds)
   const floorSelections = usePlannerEditorStore((s) => s.floorSelections)
-  const ownedGiftIds = collectOwnedGiftIds({
-    selectedGiftIds,
-    observationGiftIds,
-    comprehensiveGiftIds,
-    floorSelections,
-  })
+  const category = usePlannerEditorStore((s) => s.category)
+  const ownedGiftIds = collectOwnedGiftIds(
+    { selectedGiftIds, observationGiftIds, comprehensiveGiftIds, floorSelections },
+    floorCount(category),
+  )
 
   return (
     <DeckBuilderContent

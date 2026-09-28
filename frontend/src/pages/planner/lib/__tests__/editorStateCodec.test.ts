@@ -9,7 +9,7 @@ import {
   projectEditorState,
 } from '../editorStateCodec'
 import { FILTER_SET_KEYS } from '../../types/DeckTypes'
-import { DUNGEON_IDX } from '@/shared/gameData'
+import { DUNGEON_IDX, FLOOR_RULE_TABLE, MD_CATEGORIES } from '@/shared/gameData'
 import { createEmptyNoteContent } from '@/shared/noteEditor'
 
 import type { JSONContent } from '@tiptap/core'
@@ -338,6 +338,13 @@ describe('floor difficulty defaults follow the category table', () => {
     expect(createDefaultFloorSelections(category).map((floor) => floor.difficulty)).toEqual(
       expected,
     )
+  })
+
+  it.each(MD_CATEGORIES)('%s defaults as many floors as the largest category holds', (category) => {
+    const largest = Math.max(
+      ...Object.values(FLOOR_RULE_TABLE.categories).map((floors) => floors.floorCount),
+    )
+    expect(createDefaultFloorSelections(category)).toHaveLength(largest)
   })
 
   it('hydrate keeps a stored difficulty the table would not default to', () => {

@@ -2,7 +2,7 @@ import { lookupByGiftId, giftDisplayName } from '@/pages/egoGift'
 import type { FloorThemeSelection } from '@/pages/themePack'
 import type { EGOGiftSpec } from '@/pages/egoGift'
 import { DUNGEON_IDX, allowedDifficulties } from '@/shared/gameData'
-import { normalAllowedAt, packSelectableAt } from './floorRules'
+import { normalAllowedAt } from './floorRules'
 import type { DungeonIdx, EncodedGiftId, MDCategory } from '@/shared/gameData'
 
 export function isGiftAffordableForThemePack(gift: EGOGiftSpec, themePackId: string): boolean {
@@ -30,13 +30,6 @@ export function getUnaffordableGiftNames(
   const ids = getUnaffordableGiftIds(giftIds, themePackId, egoGiftSpec)
   const names = ids.map((id) => giftDisplayName(id, egoGiftI18n))
   return { ids, names }
-}
-
-export function canSelectFloorThemePack(
-  floorIndex: number,
-  floorSelections: readonly FloorThemeSelection[],
-): boolean {
-  return packSelectableAt(floorSelections, floorIndex)
 }
 
 export function offeredFloorDifficulties(

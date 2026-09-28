@@ -5,6 +5,7 @@ import {
   FloorRuleTableSchema,
   allowedDifficulties,
   floorCount,
+  maxFloorCount,
   stagesFor,
 } from '../floorRules'
 
@@ -136,6 +137,7 @@ describe('FLOOR_RULE_TABLE', () => {
     expect(floorCount('5F')).toBe(5)
     expect(floorCount('10F')).toBe(10)
     expect(floorCount('15F')).toBe(15)
+    expect(maxFloorCount()).toBe(15)
     expect(allowedDifficulties('5F', 4)).toEqual([0, 1])
     expect(allowedDifficulties('15F', 9)).toEqual([1])
     expect(allowedDifficulties('15F', 10)).toEqual([3])

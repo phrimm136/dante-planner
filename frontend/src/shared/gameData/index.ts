@@ -97,6 +97,7 @@ export {
   FloorRuleTableSchema,
   FLOOR_RULE_TABLE,
   floorCount,
+  maxFloorCount,
   allowedDifficulties,
   stagesFor,
 } from './floorRules'

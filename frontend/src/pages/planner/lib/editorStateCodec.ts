@@ -7,6 +7,7 @@ import {
   IdentityIdSchema,
   EGOIdSchema,
   allowedDifficulties,
+  maxFloorCount,
 } from '@/shared/gameData'
 import { createEmptyNoteContent } from '@/shared/noteEditor'
 import egoSpecList from '@static/data/egoSpecList.json'
@@ -106,7 +107,7 @@ export function toFloorThemeSelection(
 }
 
 export function createDefaultFloorSelections(category: MDCategory): FloorThemeSelection[] {
-  return Array.from({ length: 15 }, (_, floorIndex) => ({
+  return Array.from({ length: maxFloorCount() }, (_, floorIndex) => ({
     themePackId: null,
     difficulty: defaultFloorDifficulty(category, floorIndex),
     giftIds: new Set<EncodedGiftId>(),

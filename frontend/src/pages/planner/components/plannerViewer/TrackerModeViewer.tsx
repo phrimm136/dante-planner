@@ -27,7 +27,7 @@ import { HorizontalThemePackGallery } from './HorizontalThemePackGallery'
 import { useTrackerState } from '../../hooks/useTrackerState'
 import { useDeckClipboard } from '../../hooks/useDeckClipboard'
 import { useProgressiveReveal } from '@/components/hooks/useProgressiveReveal'
-import { DEFAULT_SKILL_EA } from '@/shared/gameData'
+import { DEFAULT_SKILL_EA, floorCount as categoryFloorCount } from '@/shared/gameData'
 import { isNoteEmpty } from '@/shared/noteEditor'
 import { NOTE_SECTIONS } from './viewerSections'
 import type { NoteSectionId } from './viewerSections'
@@ -48,6 +48,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
   const activeThemePackId = hoveredThemePackId ?? focusedThemePackId
 
   const { content } = planner
+  const floorCount = categoryFloorCount(planner.config.category)
   const introNote = content.sectionNotes?.intro
   const outroNote = content.sectionNotes?.outro
 
@@ -109,7 +110,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
           <DeckTrackerPanel
             equipment={trackerState.equipment}
             deploymentOrder={trackerState.deploymentOrder}
-            ownedGiftIds={collectOwnedGiftIds(deserialized)}
+            ownedGiftIds={collectOwnedGiftIds(deserialized, floorCount)}
             setEquipment={setEquipment}
             setDeploymentOrder={setDeploymentOrder}
             onEditDeck={() => setDeckEditPaneOpen(true)}
@@ -124,7 +125,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
         <DeckBuilderPane open={deckEditPaneOpen} onOpenChange={setDeckEditPaneOpen}>
           <TrackerDeckBuilderContent
             isActive={deckEditPaneOpen}
-            ownedGiftIds={collectOwnedGiftIds(deserialized)}
+            ownedGiftIds={collectOwnedGiftIds(deserialized, floorCount)}
             equipment={trackerState.equipment}
             setEquipment={setEquipment}
             deploymentOrder={trackerState.deploymentOrder}
@@ -215,6 +216,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
               <Suspense fallback={<GiftGridTrackerSkeleton />}>
                 <ComprehensiveGiftGridTracker
                   floorSelections={content.floorSelections}
+                  floorCount={floorCount}
                   comprehensiveGiftIds={content.comprehensiveGiftIds}
                   hoveredThemePackId={activeThemePackId}
                   egoGiftDoneMarks={trackerState.egoGiftDoneMarks}
@@ -234,6 +236,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
             >
               <HorizontalThemePackGallery
                 floorSelections={content.floorSelections}
+                floorCount={floorCount}
                 sectionNotes={content.sectionNotes}
                 doneMarks={trackerState.doneMarks}
                 onTogglePackDone={togglePackDone}
