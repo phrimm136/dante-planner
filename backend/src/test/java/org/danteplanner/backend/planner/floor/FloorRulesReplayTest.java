@@ -13,7 +13,6 @@ import org.danteplanner.backend.planner.validation.FloorRuleTable;
 import org.danteplanner.backend.planner.validation.GameDataLoader;
 import org.danteplanner.backend.planner.validation.GameDataRegistry;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -33,6 +32,7 @@ class FloorRulesReplayTest {
     private static final FloorRules RULES = rulesOver(TABLE);
     private static final String EXCHANGE_OUT = "FLOOR_EXCHANGE_OUT";
     private static final String EXCHANGE_IN = "FLOOR_EXCHANGE_IN";
+    private static final String COMMITTED_EXCHANGE = "../testdata/floor-exchange-frontend.json";
     private static final long EXCHANGE_SEED = 20260928L;
     private static final int EXCHANGE_CASES = 200;
     private static final int GENERATION_SIZE = 1000;
@@ -63,15 +63,16 @@ class FloorRulesReplayTest {
         }
         ObjectNode exchange = MAPPER.createObjectNode().put("producer", "backend");
         exchange.set("cases", cases);
-        MAPPER.writeValue(out.toFile(), exchange);
+        MAPPER.writerWithDefaultPrettyPrinter().writeValue(out.toFile(), exchange);
 
         assertThat(MAPPER.readTree(out.toFile()).path("cases").size()).isEqualTo(EXCHANGE_CASES);
     }
 
     @Test
-    @EnabledIfEnvironmentVariable(named = EXCHANGE_IN, matches = ".+")
     void replay_WhenTheFrontendsCasesAreRead_ReproducesEveryRecordedOutcome() throws IOException {
-        JsonNode exchange = MAPPER.readTree(Path.of(System.getenv(EXCHANGE_IN)).toFile());
+        String override = System.getenv(EXCHANGE_IN);
+        Path in = Path.of(override == null || override.isEmpty() ? COMMITTED_EXCHANGE : override);
+        JsonNode exchange = MAPPER.readTree(in.toFile());
         List<String> mismatches = new ArrayList<>();
         JsonNode cases = exchange.path("cases");
         for (int index = 0; index < cases.size(); index++) {

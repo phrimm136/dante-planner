@@ -84,7 +84,7 @@ final class FloorArbitraries {
     }
 
     static Arbitrary<MDCategory> category(FloorRuleTable table) {
-        return Arbitraries.of(table.categories().keySet());
+        return Arbitraries.of(table.categories().keySet().stream().sorted().toList());
     }
 
     static Arbitrary<Stage> stage() {

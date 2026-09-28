@@ -1,4 +1,5 @@
 import fs from 'node:fs'
+import path from 'node:path'
 import { isDeepStrictEqual } from 'node:util'
 import fc from 'fast-check'
 import { describe, expect, it } from 'vitest'
@@ -20,7 +21,13 @@ type ExchangeCase = { raw: unknown; category: MDCategory; stage: FloorRuleStage;
 const EXCHANGE_SEED = 20260928
 const EXCHANGE_CASES = 200
 const exchangeOut = process.env.FLOOR_EXCHANGE_OUT
-const exchangeIn = process.env.FLOOR_EXCHANGE_IN
+const FRONTEND_ROOT = path.resolve(
+  path.dirname(new URL(import.meta.url).pathname),
+  '../../../../..',
+)
+const exchangeIn =
+  process.env.FLOOR_EXCHANGE_IN ??
+  path.resolve(FRONTEND_ROOT, '../testdata/floor-exchange-backend.json')
 
 const outcomeOf = (admission: Admission): Outcome => ({
   ok: admission.ok,
@@ -49,14 +56,17 @@ describe('floor rules exchange with the backend', () => {
         stage,
         outcome: run(raw, category, stage),
       }))
-    fs.writeFileSync(exchangeOut ?? '', JSON.stringify({ producer: 'frontend', cases }))
+    fs.writeFileSync(
+      exchangeOut ?? '',
+      `${JSON.stringify({ producer: 'frontend', cases }, null, 2)}\n`,
+    )
 
     const written = JSON.parse(fs.readFileSync(exchangeOut ?? '', 'utf-8')) as { cases: unknown[] }
     expect(written.cases).toHaveLength(EXCHANGE_CASES)
   })
 
-  it.skipIf(exchangeIn === undefined)('reproduces every outcome the backend recorded', () => {
-    const exchange = JSON.parse(fs.readFileSync(exchangeIn ?? '', 'utf-8')) as {
+  it('reproduces every outcome the backend recorded', () => {
+    const exchange = JSON.parse(fs.readFileSync(exchangeIn, 'utf-8')) as {
       producer: string
       cases: ExchangeCase[]
     }
