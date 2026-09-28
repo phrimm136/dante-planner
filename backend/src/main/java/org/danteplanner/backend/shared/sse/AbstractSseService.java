@@ -1,5 +1,8 @@
 package org.danteplanner.backend.shared.sse;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -8,7 +11,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public abstract class AbstractSseService<K> {
+@Slf4j
+public abstract class AbstractSseService<K> implements ApplicationListener<ContextClosedEvent> {
 
     protected static final long SSE_TIMEOUT_MS = 3600_000L;
 
@@ -17,6 +21,8 @@ public abstract class AbstractSseService<K> {
     protected final ConcurrentHashMap<K, CopyOnWriteArrayList<EmitterEntry>> emitters = new ConcurrentHashMap<>();
 
     private final TaskExecutor heartbeatWorker;
+
+    private volatile boolean closing;
 
     protected AbstractSseService(TaskExecutor heartbeatWorker) {
         this.heartbeatWorker = heartbeatWorker;
@@ -34,6 +40,10 @@ public abstract class AbstractSseService<K> {
 
     protected SseEmitter register(K key, UUID deviceId, Long userId) throws IOException {
         SseEmitter emitter = new SseEmitter(SSE_TIMEOUT_MS);
+        if (closing) {
+            emitter.complete();
+            return emitter;
+        }
 
         emitters.compute(key, (k, existing) -> {
             var connections = existing != null ? existing : new CopyOnWriteArrayList<EmitterEntry>();
@@ -49,6 +59,9 @@ public abstract class AbstractSseService<K> {
         emitter.onError(e -> removeConnection(key, deviceId));
 
         emitter.send(SseEmitter.event().name("connected").data("{}"));
+        if (closing) {
+            emitter.complete();
+        }
 
         return emitter;
     }
@@ -111,6 +124,20 @@ public abstract class AbstractSseService<K> {
             }
         }
         return removed;
+    }
+
+    @Override
+    public void onApplicationEvent(ContextClosedEvent event) {
+        closing = true;
+        emitters.values().forEach(connections -> connections.forEach(AbstractSseService::complete));
+    }
+
+    private static void complete(EmitterEntry entry) {
+        try {
+            entry.emitter().complete();
+        } catch (IllegalStateException e) {
+            log.debug("Completing SSE emitter for device {} on shutdown failed", entry.deviceId(), e);
+        }
     }
 
     protected void beforeRegister(K key, CopyOnWriteArrayList<EmitterEntry> connections) {
