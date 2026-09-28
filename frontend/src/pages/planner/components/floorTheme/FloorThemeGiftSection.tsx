@@ -12,7 +12,6 @@ import { FloorGiftViewer } from './FloorGiftViewer'
 import { FloorGiftSelectorPane } from './FloorGiftSelectorPane'
 import {
   DUNGEON_IDX,
-  floorCount,
   type DungeonIdx,
   type EncodedGiftId,
   type MDCategory,
@@ -21,8 +20,9 @@ import { cn } from '@/lib/utils'
 import {
   canSelectFloorThemePack,
   getUnaffordableGiftNames,
-  usedFloorThemePackIds as usedPackIds,
+  offeredFloorDifficulties,
 } from '../../lib/plannerRules'
+import { packIdsUsedElsewhere } from '../../lib/floorRules'
 import { PlannerSection } from '@/components/layout/PlannerSection'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import type { FloorThemeSelection } from '@/pages/themePack'
@@ -30,8 +30,7 @@ import { ThemePackIdSchema } from '@/shared/gameData'
 
 const EMPTY_PACK_IDS: string[] = []
 
-const allNormal = (floors: readonly FloorThemeSelection[]) =>
-  floors.every((floor) => floor.difficulty === DUNGEON_IDX.NORMAL)
+const EMPTY_FLOORS: FloorThemeSelection[] = []
 
 interface FloorThemeGiftSectionProps {
   floorNumber: number
@@ -68,7 +67,6 @@ export function FloorThemeGiftSection({
   const storeSlice = usePlannerEditorStoreSafe(
     useShallow((s) => ({
       selection: s?.floorSelections?.[floorIndex],
-      earlierFloorsAllNormal: allNormal(s?.floorSelections?.slice(0, floorIndex) ?? []),
       previousHasThemePack: canSelectFloorThemePack(floorIndex, s?.floorSelections ?? []),
       updateFloorSelection: s?.updateFloorSelection,
       storeCategory: s?.category,
@@ -77,28 +75,33 @@ export function FloorThemeGiftSection({
 
   const updateFloorSelection = storeSlice?.updateFloorSelection
   const category = categoryProp ?? storeSlice?.storeCategory ?? '5F'
-  const visibleFloorCount = floorCount(category)
 
   const usedThemePackIdsFromStore = usePlannerEditorStoreSafe(
     useShallow((s) =>
       isThemePackPaneOpen && !floorSelectionsOverride
-        ? usedPackIds(s.floorSelections, floorIndex, visibleFloorCount)
+        ? packIdsUsedElsewhere(s.floorSelections, category, floorIndex)
         : EMPTY_PACK_IDS,
+    ),
+  )
+
+  const offeredFromStore = usePlannerEditorStoreSafe(
+    useShallow((s) =>
+      offeredFloorDifficulties(s?.floorSelections ?? EMPTY_FLOORS, category, floorIndex),
     ),
   )
 
   const selection = floorSelectionsOverride
     ? floorSelectionsOverride[floorIndex]
     : storeSlice?.selection
-  const earlierFloorsAllNormal = floorSelectionsOverride
-    ? allNormal(floorSelectionsOverride.slice(0, floorIndex))
-    : (storeSlice?.earlierFloorsAllNormal ?? true)
+  const availableDifficulties = floorSelectionsOverride
+    ? offeredFloorDifficulties(floorSelectionsOverride, category, floorIndex)
+    : (offeredFromStore ?? offeredFloorDifficulties(EMPTY_FLOORS, category, floorIndex))
   const canSelectThemePack = floorSelectionsOverride
     ? canSelectFloorThemePack(floorIndex, floorSelectionsOverride)
     : (storeSlice?.previousHasThemePack ?? true)
   const usedThemePackIds = new Set(
     floorSelectionsOverride
-      ? usedPackIds(floorSelectionsOverride, floorIndex, visibleFloorCount)
+      ? packIdsUsedElsewhere(floorSelectionsOverride, category, floorIndex)
       : (usedThemePackIdsFromStore ?? EMPTY_PACK_IDS),
   )
 
@@ -244,12 +247,11 @@ export function FloorThemeGiftSection({
           open={isThemePackPaneOpen}
           onOpenChange={setIsThemePackPaneOpen}
           floorNumber={floorNumber}
-          earlierFloorsAllNormal={earlierFloorsAllNormal}
+          availableDifficulties={availableDifficulties}
           themePackList={themePackList}
           themePackI18n={themePackI18n}
           onSelect={handleThemePackSelect}
           usedThemePackIds={usedThemePackIds}
-          category={category}
         />
 
         {selectedThemePackId && selectedDifficulty !== null && (

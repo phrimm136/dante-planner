@@ -20,13 +20,13 @@ import {
   MD_CATEGORIES,
   PLANNER_KEYWORDS,
   DEFAULT_SKILL_EA,
-  allowedDifficulties,
   floorCount as categoryFloorCount,
 } from '@/shared/gameData'
 import { SECTION_STYLES } from '@/lib/constants'
 import { getKeywordIconPath } from '@/shared/assets'
 import { assertNever, calculateByteLength } from '@/lib/utils'
 import { CONFLICT_TOAST_KEY } from '../../lib/conflictChoice'
+import { violationsForCategory } from '../../lib/floorRules'
 import { MdCategoryLabel } from '../MdCategoryLabel'
 import { showAppError, showErrorMessage, showSuccess, showWarning } from '@/lib/errorPresentation'
 import { isSyncConflict } from '@/lib/apiErrorClassifier'
@@ -142,26 +142,16 @@ export function PlannerEditorShell({
   }
 
   const handleCategoryChange = (newCategory: MDCategory) => {
-    const currentCategory = storeApi.getState().category
-    const floorSelections = storeApi.getState().floorSelections
-    const sharedFloorCount = Math.min(
-      categoryFloorCount(currentCategory),
-      categoryFloorCount(newCategory),
-    )
+    setCategory(newCategory)
 
-    const hasDisallowedDifficulty = floorSelections
-      .slice(0, sharedFloorCount)
-      .some(
-        (floor, floorIndex) =>
-          floor.themePackId !== null &&
-          !(allowedDifficulties(newCategory, floorIndex) ?? []).includes(floor.difficulty),
-      )
+    const hasDisallowedDifficulty = violationsForCategory(
+      storeApi.getState().floorSelections,
+      newCategory,
+    ).some((violation) => violation.code === 'VALUE_OUT_OF_RANGE')
 
     if (hasDisallowedDifficulty) {
       showWarning('planner:pages.plannerMD.publish.requiresHardMode')
     }
-
-    setCategory(newCategory)
   }
 
   const getState = () => storeApi.getState().getPlannerState()

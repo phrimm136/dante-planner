@@ -178,6 +178,8 @@ const RULES: Record<FloorRuleName, RuleCheck> = {
   giftUnique,
 }
 
+export const CHECKED_FLOOR_RULES = Object.keys(RULES) as FloorRuleName[]
+
 export function admitFloors(
   parsed: ParsedFloors,
   category: MDCategory,
@@ -189,9 +191,7 @@ export function admitFloors(
     .slice(0, floorCount)
     .filter((floor): floor is FloorSelectionValue => floor !== undefined)
 
-  const rules = (Object.keys(RULES) as FloorRuleName[]).filter((rule) =>
-    table.rules[rule].includes(stage),
-  )
+  const rules = CHECKED_FLOOR_RULES.filter((rule) => table.rules[rule].includes(stage))
   if (rules.length === 0) {
     return { ok: true, floors, boundaryViolations: parsed.violations }
   }
@@ -206,4 +206,71 @@ export function admitFloors(
   return violations.length > 0
     ? { ok: false, violations }
     : { ok: true, floors, boundaryViolations: [] }
+}
+
+export type EditorFloor = {
+  themePackId?: string | null | undefined
+  difficulty?: number | undefined
+}
+
+const PROBE_PACK = 'probe'
+
+const toFloorValue = (floor: EditorFloor | undefined): FloorSelectionValue => ({
+  ...(floor?.themePackId ? { themePackId: floor.themePackId } : {}),
+  ...(floor?.difficulty !== undefined ? { difficulty: floor.difficulty } : {}),
+  giftIds: [],
+})
+
+const reportsAt = (violations: readonly Violation[], path: string) =>
+  violations.some((found) => found.path === path)
+
+export function normalAllowedAt(
+  floors: readonly EditorFloor[],
+  category: MDCategory,
+  floorIndex: number,
+  table: FloorRuleTable = FLOOR_RULE_TABLE,
+): boolean {
+  const { floorCount, difficulties } = table.categories[category]
+  const probe = [
+    ...Array.from({ length: floorIndex }, (_, i) => toFloorValue(floors[i])),
+    { difficulty: DUNGEON_IDX.NORMAL, giftIds: [] },
+  ]
+  const path = `${floorPath(floorIndex)}.difficulty`
+  return [difficultyInRange, noNormalAfterHard].every(
+    (rule) => !reportsAt(rule(probe, floorCount, difficulties), path),
+  )
+}
+
+export function packSelectableAt(floors: readonly EditorFloor[], floorIndex: number): boolean {
+  const earlier = Array.from({ length: floorIndex }, (_, i) => toFloorValue(floors[i]))
+  const probe = [...earlier, { themePackId: PROBE_PACK, giftIds: [] }]
+  return !reportsAt(sequence(probe, probe.length, []), floorPath(floorIndex))
+}
+
+export function violationsForCategory(
+  floors: readonly EditorFloor[],
+  category: MDCategory,
+  table: FloorRuleTable = FLOOR_RULE_TABLE,
+): readonly Violation[] {
+  const admission = admitFloors(
+    { floors: floors.map(toFloorValue), violations: [] },
+    category,
+    'publish',
+    table,
+  )
+  return admission.ok ? [] : admission.violations
+}
+
+export function packIdsUsedElsewhere(
+  floors: readonly EditorFloor[],
+  category: MDCategory,
+  floorIndex: number,
+  table: FloorRuleTable = FLOOR_RULE_TABLE,
+): string[] {
+  return floors
+    .slice(0, table.categories[category].floorCount)
+    .map(toFloorValue)
+    .flatMap((floor, i) =>
+      i !== floorIndex && floor.themePackId !== undefined ? [floor.themePackId] : [],
+    )
 }

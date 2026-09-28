@@ -3,24 +3,22 @@ import { useTranslation } from 'react-i18next'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
-import { DUNGEON_IDX, DIFFICULTY_LABELS, type DungeonIdx, type MDCategory } from '@/shared/gameData'
+import { DUNGEON_IDX, DIFFICULTY_LABELS, type DungeonIdx } from '@/shared/gameData'
 import { CARD_MOBILE_SCALE_DENSE, DIFFICULTY_COLORS } from '@/lib/constants'
 import { THEME_PACK_GEOMETRY } from '@/shared/cardLayout'
 import { ThemePackViewer } from './ThemePackViewer'
 import { ThemePackExclusiveGifts } from './ThemePackExclusiveGifts'
-import { offeredFloorDifficulties } from '../../lib/plannerRules'
 import type { ThemePackListType, ThemePackSpec } from '@/pages/themePack'
 
 interface ThemePackSelectorPaneProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   floorNumber: number
-  earlierFloorsAllNormal: boolean
+  availableDifficulties: readonly DungeonIdx[]
   themePackList: ThemePackListType
   themePackI18n: Record<string, { name: string; specialName?: string | undefined }>
   onSelect: (packId: string, difficulty: DungeonIdx) => void
   usedThemePackIds: Set<string>
-  category: MDCategory
 }
 
 function filterThemePacks(
@@ -64,20 +62,13 @@ export function ThemePackSelectorPane({
   open,
   onOpenChange,
   floorNumber,
-  earlierFloorsAllNormal,
+  availableDifficulties,
   themePackList,
   themePackI18n,
   onSelect,
   usedThemePackIds,
-  category,
 }: ThemePackSelectorPaneProps) {
   const { t } = useTranslation(['planner', 'common'])
-
-  const availableDifficulties = offeredFloorDifficulties(
-    category,
-    floorNumber - 1,
-    earlierFloorsAllNormal,
-  )
 
   const [chosenDifficulty, setSelectedDifficulty] = useState<DungeonIdx | undefined>(undefined)
   const selectedDifficulty =

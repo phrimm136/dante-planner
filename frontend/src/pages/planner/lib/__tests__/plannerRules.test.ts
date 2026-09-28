@@ -10,10 +10,9 @@ import {
   isGiftAffordableForThemePack,
   getUnaffordableGiftIds,
   offeredFloorDifficulties,
-  usedFloorThemePackIds,
 } from '../plannerRules'
 import { DUNGEON_IDX, ThemePackIdSchema } from '@/shared/gameData'
-import type { EncodedGiftId, ThemePackId } from '@/shared/gameData'
+import type { DungeonIdx, EncodedGiftId, ThemePackId } from '@/shared/gameData'
 import type { FloorThemeSelection } from '@/pages/themePack'
 import type { EGOGiftSpec } from '@/pages/egoGift'
 import { asEncodedGiftId } from '@/test-utils/fixtures'
@@ -91,61 +90,63 @@ describe('getUnaffordableGiftIds', () => {
 // Floor selection rules the editor offers
 // ============================================================================
 
-function floorsWith(packs: (ThemePackId | '' | null)[]): FloorThemeSelection[] {
-  return packs.map((themePackId) => ({
+function floorsWith(
+  floors: { themePackId?: ThemePackId | '' | null; difficulty?: DungeonIdx }[],
+): FloorThemeSelection[] {
+  return floors.map(({ themePackId = null, difficulty = DUNGEON_IDX.HARD }) => ({
     themePackId: themePackId as ThemePackId | null,
-    difficulty: DUNGEON_IDX.HARD,
+    difficulty,
     giftIds: new Set<EncodedGiftId>(),
   }))
 }
 
+const PACK_1001 = ThemePackIdSchema.parse('1001')
+
 describe('offeredFloorDifficulties', () => {
   it('offers HARD only on floor 1 of a 10F planner', () => {
-    expect(offeredFloorDifficulties('10F', 0, true)).toEqual([DUNGEON_IDX.HARD])
+    expect(offeredFloorDifficulties([], '10F', 0)).toEqual([DUNGEON_IDX.HARD])
   })
 
   it('offers NORMAL and HARD on floor 1 of a 5F planner', () => {
-    expect(offeredFloorDifficulties('5F', 0, true)).toEqual([DUNGEON_IDX.NORMAL, DUNGEON_IDX.HARD])
+    expect(offeredFloorDifficulties([], '5F', 0)).toEqual([DUNGEON_IDX.NORMAL, DUNGEON_IDX.HARD])
   })
 
   it('offers HARD only after a HARD floor on a 5F planner', () => {
-    expect(offeredFloorDifficulties('5F', 1, false)).toEqual([DUNGEON_IDX.HARD])
+    const floors = floorsWith([{ themePackId: PACK_1001, difficulty: DUNGEON_IDX.HARD }])
+    expect(offeredFloorDifficulties(floors, '5F', 1)).toEqual([DUNGEON_IDX.HARD])
+  })
+
+  it('offers NORMAL and HARD after a NORMAL floor on a 5F planner', () => {
+    const floors = floorsWith([{ themePackId: PACK_1001, difficulty: DUNGEON_IDX.NORMAL }])
+    expect(offeredFloorDifficulties(floors, '5F', 1)).toEqual([
+      DUNGEON_IDX.NORMAL,
+      DUNGEON_IDX.HARD,
+    ])
   })
 
   it('offers EXTREME only on floor 11 of a 15F planner', () => {
-    expect(offeredFloorDifficulties('15F', 10, false)).toEqual([DUNGEON_IDX.EXTREME])
+    expect(offeredFloorDifficulties([], '15F', 10)).toEqual([DUNGEON_IDX.EXTREME])
   })
 
   it('offers nothing past the category floor count', () => {
-    expect(offeredFloorDifficulties('5F', 5, true)).toEqual([])
+    expect(offeredFloorDifficulties([], '5F', 5)).toEqual([])
   })
 })
 
 describe('canSelectFloorThemePack', () => {
+  it('always allows floor 1', () => {
+    expect(canSelectFloorThemePack(0, [])).toBe(true)
+  })
+
   it('treats an empty-string pack on the previous floor as not chosen', () => {
-    expect(canSelectFloorThemePack(1, floorsWith(['']))).toBe(false)
+    expect(canSelectFloorThemePack(1, floorsWith([{ themePackId: '' }]))).toBe(false)
   })
 
   it('allows a floor whose previous floor holds a pack', () => {
-    expect(canSelectFloorThemePack(1, floorsWith([ThemePackIdSchema.parse('1001')]))).toBe(true)
-  })
-})
-
-describe('usedFloorThemePackIds', () => {
-  it('ignores packs on floors past the category count', () => {
-    const floors = floorsWith([
-      ThemePackIdSchema.parse('1001'),
-      null,
-      null,
-      null,
-      null,
-      ThemePackIdSchema.parse('1006'),
-    ])
-    expect(usedFloorThemePackIds(floors, 1, 5)).toEqual(['1001'])
+    expect(canSelectFloorThemePack(1, floorsWith([{ themePackId: PACK_1001 }]))).toBe(true)
   })
 
-  it('excludes the floor being edited', () => {
-    const floors = floorsWith([ThemePackIdSchema.parse('1001'), ThemePackIdSchema.parse('1002')])
-    expect(usedFloorThemePackIds(floors, 0, 5)).toEqual(['1002'])
+  it('refuses a floor whose previous floor does not exist', () => {
+    expect(canSelectFloorThemePack(2, floorsWith([{ themePackId: PACK_1001 }]))).toBe(false)
   })
 })

@@ -2,6 +2,7 @@ import { lookupByGiftId, giftDisplayName } from '@/pages/egoGift'
 import type { FloorThemeSelection } from '@/pages/themePack'
 import type { EGOGiftSpec } from '@/pages/egoGift'
 import { DUNGEON_IDX, allowedDifficulties } from '@/shared/gameData'
+import { normalAllowedAt, packSelectableAt } from './floorRules'
 import type { DungeonIdx, EncodedGiftId, MDCategory } from '@/shared/gameData'
 
 export function isGiftAffordableForThemePack(gift: EGOGiftSpec, themePackId: string): boolean {
@@ -33,34 +34,18 @@ export function getUnaffordableGiftNames(
 
 export function canSelectFloorThemePack(
   floorIndex: number,
-  floorSelections: FloorThemeSelection[],
+  floorSelections: readonly FloorThemeSelection[],
 ): boolean {
-  if (floorIndex === 0) return true
-
-  const previousFloor = floorSelections[floorIndex - 1]
-  return (
-    previousFloor !== undefined &&
-    previousFloor.themePackId !== null &&
-    previousFloor.themePackId !== ''
-  )
+  return packSelectableAt(floorSelections, floorIndex)
 }
 
 export function offeredFloorDifficulties(
+  floorSelections: readonly FloorThemeSelection[],
   category: MDCategory,
   floorIndex: number,
-  earlierFloorsAllNormal: boolean,
 ): DungeonIdx[] {
   return (allowedDifficulties(category, floorIndex) ?? []).filter(
-    (difficulty) => difficulty !== DUNGEON_IDX.NORMAL || earlierFloorsAllNormal,
+    (difficulty) =>
+      difficulty !== DUNGEON_IDX.NORMAL || normalAllowedAt(floorSelections, category, floorIndex),
   )
-}
-
-export function usedFloorThemePackIds(
-  floorSelections: readonly FloorThemeSelection[],
-  floorIndex: number,
-  floorCount: number,
-): string[] {
-  return floorSelections
-    .slice(0, floorCount)
-    .flatMap((floor, i) => (i !== floorIndex && floor.themePackId ? [floor.themePackId] : []))
 }
