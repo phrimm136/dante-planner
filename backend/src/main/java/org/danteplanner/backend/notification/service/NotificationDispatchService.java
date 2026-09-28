@@ -88,10 +88,10 @@ public class NotificationDispatchService {
                         ? null : notification.getCommentPublicId().toString());
 
         if (written == 0) {
-            log.debug("Suppressed duplicate {} notification for user {} on content {}",
+            log.debug("Suppressed {} notification for user {} on content {}: duplicate or inactive recipient",
                     notification.getNotificationType(), notification.getUserId(),
                     notification.getContentId());
-            return new NotificationOutcome.Duplicate(
+            return new NotificationOutcome.Suppressed(
                     notification.getUserId(),
                     notification.getContentId(),
                     notification.getNotificationType());

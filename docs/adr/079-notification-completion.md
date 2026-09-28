@@ -16,6 +16,7 @@ epic: none · pr: none
   counterpart, and an effect arm, enforced by a matrix test. REJECTED: review-time vigilance —
   an unwired enum value compiles and ships unnoticed, because every existing gate sees only what
   exists.
+- @notification @recipients — A notification row is written only for a recipient whose account is live: every insert selects the recipient from `users` with `deleted_at IS NULL`, as the publication fanout already did, so no arm has to remember the check. A reply to a deactivated author's comment, reached straight through the API because the comment stays in the tree, notified that author. REJECTED: a liveness check in each effect arm — covers only the arms that remember it, and every new notification type starts without it.
 
 ## Takeaway
 

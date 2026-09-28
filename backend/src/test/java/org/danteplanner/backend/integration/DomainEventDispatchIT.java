@@ -4,6 +4,7 @@ import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.notification.entity.Notification;
+import org.danteplanner.backend.notification.entity.NotificationType;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
@@ -13,6 +14,7 @@ import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -33,6 +35,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -66,6 +69,9 @@ class DomainEventDispatchIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private NotificationRepository notificationRepository;
+
+    @Autowired
+    private UserAccountLifecycleService lifecycleService;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -112,13 +118,83 @@ class DomainEventDispatchIT extends SharedMySqlContainerSupport {
                 .isEqualTo(2);
     }
 
+    @Test
+    void commentReceived_WhenPlannerOwnerDeactivated_RaisesNoOwnerNotification() {
+        lifecycleService.deleteAccount(owner.getId());
+        PlannerComment comment = insertComment(commenter, "A comment on a deactivated owner's planner", null);
+
+        dispatcher.dispatchDomainEvent(recordEvent(comment.getId()));
+
+        assertThat(notificationRepository.findByUserIdAndContentIdAndNotificationType(
+                owner.getId(), comment.getId().toString(), NotificationType.COMMENT_RECEIVED))
+                .isEmpty();
+        verify(ssePublisher, never()).publishUserEvent(eq(owner.getId()), any(), any(), any());
+    }
+
+    @Test
+    void replyReceived_WhenParentAuthorActive_RaisesParentAuthorNotification() {
+        User parentAuthor = TestDataFactory.createTestUser(userRepository, "dispatch-parent-author@example.com");
+        PlannerComment parent = insertComment(parentAuthor, "A parent comment", null);
+        PlannerComment reply = insertComment(commenter, "A reply to a live author", parent.getId());
+
+        dispatcher.dispatchDomainEvent(recordEvent("REPLY_RECEIVED", "replyId", reply.getId()));
+
+        assertThat(notificationRepository.findByUserIdAndContentIdAndNotificationType(
+                parentAuthor.getId(), reply.getId().toString(), NotificationType.REPLY_RECEIVED))
+                .isPresent();
+        verify(ssePublisher, times(1)).publishUserEvent(
+                eq(parentAuthor.getId()), eq(SseEventType.NOTIFY_COMMENT), any(), any());
+    }
+
+    @Test
+    void replyReceived_WhenParentAuthorDeactivated_RaisesNoParentAuthorNotification() {
+        User parentAuthor = TestDataFactory.createTestUser(userRepository, "dispatch-parent-author@example.com");
+        PlannerComment parent = insertComment(parentAuthor, "A parent comment", null);
+        lifecycleService.deleteAccount(parentAuthor.getId());
+        PlannerComment reply = insertComment(commenter, "A reply to a deactivated author", parent.getId());
+
+        dispatcher.dispatchDomainEvent(recordEvent("REPLY_RECEIVED", "replyId", reply.getId()));
+
+        assertThat(notificationRepository.findByUserIdAndContentIdAndNotificationType(
+                parentAuthor.getId(), reply.getId().toString(), NotificationType.REPLY_RECEIVED))
+                .isEmpty();
+        verify(ssePublisher, never()).publishUserEvent(eq(parentAuthor.getId()), any(), any(), any());
+    }
+
+    @Test
+    void replyReceived_WhenParentAuthorReactivated_RaisesParentAuthorNotification() {
+        User parentAuthor = TestDataFactory.createTestUser(userRepository, "dispatch-parent-author@example.com");
+        PlannerComment parent = insertComment(parentAuthor, "A parent comment", null);
+        lifecycleService.deleteAccount(parentAuthor.getId());
+        lifecycleService.reactivateAccount(parentAuthor.getId());
+        PlannerComment reply = insertComment(commenter, "A reply to a reactivated author", parent.getId());
+
+        dispatcher.dispatchDomainEvent(recordEvent("REPLY_RECEIVED", "replyId", reply.getId()));
+
+        assertThat(notificationRepository.findByUserIdAndContentIdAndNotificationType(
+                parentAuthor.getId(), reply.getId().toString(), NotificationType.REPLY_RECEIVED))
+                .isPresent();
+        verify(ssePublisher, times(1)).publishUserEvent(
+                eq(parentAuthor.getId()), eq(SseEventType.NOTIFY_COMMENT), any(), any());
+    }
+
+    private PlannerComment insertComment(User author, String content, Long parentCommentId) {
+        return transaction().execute(status -> commentRepository.insert(
+                new PlannerComment(planner.getId(), author.getId(), content, parentCommentId,
+                        parentCommentId == null ? 0 : 1)));
+    }
+
     private long recordEvent(Long commentId) {
+        return recordEvent("COMMENT_RECEIVED", "commentId", commentId);
+    }
+
+    private long recordEvent(String eventType, String idKey, Long id) {
         return transaction().execute(status -> {
             jdbcTemplate.update("""
                     INSERT INTO domain_events (event_type, aggregate_id, payload, created_at)
-                    VALUES ('COMMENT_RECEIVED', UUID_TO_BIN(?), JSON_OBJECT('commentId', ?), NOW(6))
+                    VALUES (?, UUID_TO_BIN(?), JSON_OBJECT(?, ?), NOW(6))
                     """,
-                    planner.getId().toString(), commentId);
+                    eventType, planner.getId().toString(), idKey, id);
             return jdbcTemplate.queryForObject(
                     "SELECT id FROM domain_events WHERE aggregate_id = UUID_TO_BIN(?)",
                     Long.class, planner.getId().toString());

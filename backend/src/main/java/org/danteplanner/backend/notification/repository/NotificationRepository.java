@@ -30,8 +30,11 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
             INSERT IGNORE INTO notifications
                 (user_id, content_id, notification_type, public_id, planner_id, planner_title,
                  comment_snippet, comment_public_id)
-            VALUES (:userId, :contentId, :type, UUID_TO_BIN(UUID()), UUID_TO_BIN(:plannerId),
-                    :plannerTitle, :commentSnippet, UUID_TO_BIN(:commentPublicId))
+            SELECT u.id, :contentId, :type, UUID_TO_BIN(UUID()), UUID_TO_BIN(:plannerId),
+                   :plannerTitle, :commentSnippet, UUID_TO_BIN(:commentPublicId)
+            FROM users u
+            WHERE u.id = :userId
+              AND u.deleted_at IS NULL
             """, nativeQuery = true)
     int insertIgnore(
             @Param("userId") Long userId,

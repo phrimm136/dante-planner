@@ -49,14 +49,14 @@ class NotificationDispatchOutcomeTest {
     private NotificationDispatchService dispatchService;
 
     @Test
-    @DisplayName("a raise the dedup key refuses yields Duplicate and reads nothing back")
-    void raise_WhenTheDedupKeyIsAlreadyOccupied_YieldsDuplicateAndReadsNothingBack() {
+    @DisplayName("a raise the dedup key refuses yields Suppressed and reads nothing back")
+    void raise_WhenTheDedupKeyIsAlreadyOccupied_YieldsSuppressedAndReadsNothingBack() {
         whenInsertIgnoreYields(0);
 
         NotificationOutcome outcome =
                 dispatchService.notifyPlannerRecommended(PLANNER_ID, TITLE, RECIPIENT_ID);
 
-        assertThat(outcome).isEqualTo(new NotificationOutcome.Duplicate(
+        assertThat(outcome).isEqualTo(new NotificationOutcome.Suppressed(
                 RECIPIENT_ID, PLANNER_ID.toString(), NotificationType.PLANNER_RECOMMENDED));
         verify(notificationRepository, never())
                 .findByUserIdAndContentIdAndNotificationType(any(), any(), any());

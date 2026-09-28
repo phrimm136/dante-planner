@@ -137,7 +137,7 @@ class NotificationServiceLayerTest {
                     .notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId);
 
             // Assert - the constraint decides, so nothing precedes the statement and nothing follows it
-            assertInstanceOf(NotificationOutcome.Duplicate.class, outcome);
+            assertInstanceOf(NotificationOutcome.Suppressed.class, outcome);
             verify(notificationRepository, never())
                     .findByUserIdAndContentIdAndNotificationType(any(), any(), any());
         }
@@ -212,7 +212,7 @@ class NotificationServiceLayerTest {
                     "Test content", plannerOwnerId);
 
             // Assert
-            assertInstanceOf(NotificationOutcome.Duplicate.class, outcome);
+            assertInstanceOf(NotificationOutcome.Suppressed.class, outcome);
             verify(notificationRepository, never())
                     .findByUserIdAndContentIdAndNotificationType(any(), any(), any());
         }
