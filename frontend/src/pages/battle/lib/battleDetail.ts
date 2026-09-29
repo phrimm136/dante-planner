@@ -1,15 +1,17 @@
 import { ATK_TYPES } from '@/shared/gameData'
 import type { SkillEntry, SkillId } from '@/shared/gameData'
 import type {
-  BattleEngagement,
+  BattleEntityI18n,
   BattlePart,
   BattlePhase,
   BattlePhaseI18n,
+  BuffGrant,
+  EngagementRow,
   IdentityShapedPassives,
   PassiveImportanceMap,
   ResistInfo,
 } from '../schemas/BattleDetailSchemas'
-import { NEUTRAL_RESISTANCE, type BattleCase } from './battleVocabulary'
+import { NEUTRAL_RESISTANCE } from './battleVocabulary'
 
 export const ALL_PARTS = 'all'
 
@@ -49,45 +51,60 @@ export function defenseAtLevel(level: number, defCorrection: number): number {
   return Math.max(1, level + defCorrection)
 }
 
-export function engagementLevels(
-  engagements: readonly BattleEngagement[],
-  fallback: number | undefined,
-): number[] {
-  const levels = new Set<number>()
-  for (const engagement of engagements) {
-    if (engagement.level !== null) levels.add(engagement.level)
-  }
-  if (levels.size === 0 && fallback !== undefined) levels.add(fallback)
-  return [...levels].sort((a, b) => a - b)
+export function phaseTexts(
+  i18n: BattleEntityI18n,
+  unitId: string,
+  phaseId: string,
+): BattlePhaseI18n | undefined {
+  return i18n.units[unitId]?.phases?.[phaseId]
 }
 
-export function defaultEngagementLevel(
-  engagements: readonly BattleEngagement[],
-  arrivalCases: ReadonlySet<BattleCase>,
-  fallback: number | undefined,
-): number | undefined {
-  const leveled = engagements.filter((engagement) => engagement.level !== null)
-  const arrived = leveled.find((engagement) => arrivalCases.has(engagement.case))
-  return (arrived ?? leveled[0])?.level ?? fallback
+export function unitName(i18n: BattleEntityI18n, unitId: string, fallback: string): string {
+  return i18n.units[unitId]?.name ?? fallback
 }
 
-export function selectorParts(phase: BattlePhase): BattlePart[] {
-  const parts = phase.parts ?? []
+export function rowUnitId(
+  unitIds: readonly string[],
+  groupId: string,
+  row: EngagementRow | undefined,
+): string {
+  if (row !== undefined) return String(row.unit)
+  return unitIds.includes(groupId) ? groupId : (unitIds[0] ?? groupId)
+}
+
+export function rowParts(phase: BattlePhase, row: EngagementRow | undefined): BattlePart[] {
+  return (phase.parts ?? []).filter(
+    (part) => part.generatedBy === undefined || (row?.rowParts.includes(part.id) ?? false),
+  )
+}
+
+export function selectorParts(parts: readonly BattlePart[]): readonly BattlePart[] {
   return parts.length >= 2 ? parts : []
 }
 
-export function selectedPart(phase: BattlePhase, selection: PartSelection): BattlePart | undefined {
+export function selectedPart(
+  parts: readonly BattlePart[],
+  selection: PartSelection,
+): BattlePart | undefined {
   if (selection === ALL_PARTS) return undefined
-  return selectorParts(phase).find((part) => part.id === selection)
+  return selectorParts(parts).find((part) => part.id === selection)
 }
 
 export function visibleSkills(
   phase: BattlePhase,
+  parts: readonly BattlePart[],
   part: BattlePart | undefined,
 ): OrderedBattleSkill[] {
   const linked = part === undefined ? undefined : new Set(part.skillIds.map(String))
+  const present = new Set(parts.flatMap((each) => each.skillIds.map(String)))
+  const absentOnly = new Set(
+    (phase.parts ?? [])
+      .filter((each) => !parts.includes(each))
+      .flatMap((each) => each.skillIds.map(String))
+      .filter((id) => !present.has(id)),
+  )
   return (Object.entries(phase.skills) as [SkillId, SkillEntry][])
-    .filter(([id]) => linked === undefined || linked.has(id))
+    .filter(([id]) => !absentOnly.has(id) && (linked === undefined || linked.has(id)))
     .sort(([a], [b]) => Number(a) - Number(b))
     .map(([id, entry]) => ({ id, entry }))
 }
@@ -124,6 +141,7 @@ export function withShownPassives(
 
 export function visiblePassives(
   phase: BattlePhase,
+  parts: readonly BattlePart[],
   part: BattlePart | undefined,
 ): [id: string, importanceLevel: number][] {
   if (part !== undefined) {
@@ -133,7 +151,7 @@ export function visiblePassives(
   const own = isIdentityShaped(phase.passives) ? [] : importanceEntries(phase.passives)
   const seen = new Set(own.map(([id]) => id))
   const fromParts: [string, number][] = []
-  for (const each of phase.parts ?? []) {
+  for (const each of parts) {
     for (const [id, importance] of importanceEntries(each.passives)) {
       if (seen.has(id)) continue
       seen.add(id)
@@ -201,4 +219,61 @@ export function sanityConditionIds(
   return entries.flatMap((entry) =>
     (entry.conditionIDList ?? []).map((condition) => condition.conditionID),
   )
+}
+
+const KEYWORD_TOKEN = /\[([^\]]+)\]/g
+
+export function phaseTextKeywords(texts: BattlePhaseI18n | undefined): Set<string> {
+  const strings = [
+    ...Object.values(texts?.skills ?? {}).flatMap((skill) =>
+      skill.descs.flatMap((desc) => [desc.desc ?? '', ...(desc.coinDescs ?? [])]),
+    ),
+    ...Object.values(texts?.passives ?? {}).map((passive) => passive.desc ?? ''),
+  ]
+  return new Set(
+    strings.flatMap((text) => [...text.matchAll(KEYWORD_TOKEN)].map((m) => m[1] ?? '')),
+  )
+}
+
+export function unitTextKeywords(
+  i18n: BattleEntityI18n,
+  unitId: string,
+  phaseIds: readonly string[],
+): Set<string> {
+  return new Set(
+    phaseIds.flatMap((phaseId) => [...phaseTextKeywords(phaseTexts(i18n, unitId, phaseId))]),
+  )
+}
+
+export type StageEffectGrant = BuffGrant & { keywordId: string }
+
+export interface OwnSources {
+  unitIds: ReadonlySet<number>
+  partIds: ReadonlySet<number>
+}
+
+export function ownSources(unitId: string, phases: readonly BattlePhase[]): OwnSources {
+  return {
+    unitIds: new Set([Number(unitId), ...phases.map((phase) => phase.id)]),
+    partIds: new Set(phases.flatMap((phase) => (phase.parts ?? []).map((part) => part.id))),
+  }
+}
+
+export function stageEffectGrants(
+  row: EngagementRow,
+  own: OwnSources,
+  ownKeywords: ReadonlySet<string>,
+): StageEffectGrant[] {
+  const seen = new Set<string>()
+  const grants: StageEffectGrant[] = []
+  for (const grant of row.facts.buffGrants) {
+    const { keywordId } = grant
+    if (keywordId === null || seen.has(keywordId) || ownKeywords.has(keywordId)) continue
+    const { kind, unitId, partId } = grant.source
+    if (kind === 'passive' && unitId !== undefined && own.unitIds.has(unitId)) continue
+    if (kind === 'passive' && partId !== undefined && own.partIds.has(partId)) continue
+    seen.add(keywordId)
+    grants.push({ ...grant, keywordId })
+  }
+  return grants
 }

@@ -4,6 +4,7 @@ import { useStore } from 'zustand'
 import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
 import { SECTION_STYLES } from '@/lib/constants'
 import { AssistantPanel } from './components/AssistantPanel'
+import { BattleModeRow } from './components/BattleModeRow'
 import { BattleTypeRow } from './components/BattleTypeRow'
 import { EnemyPanel } from './components/EnemyPanel'
 import { SinnerEventPanel } from './components/SinnerEventPanel'
@@ -27,6 +28,7 @@ export default function BattlePage() {
   return (
     <div className={SECTION_STYLES.LAYOUT.page}>
       <div className={SECTION_STYLES.LAYOUT.column}>
+        <BattleModeRow />
         <BattleTypeRow />
         <Suspense fallback={<ListPageSkeleton geometry={BATTLE_GEOMETRY} />}>
           <ActivePanel />

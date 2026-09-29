@@ -1,16 +1,20 @@
 import {
-  IdentitySkillCard,
+  SkillCard,
   SkillDescription,
   getMergedSkillDesc,
   selectSkillLevel,
+  toSkillCardData,
 } from '@/shared/skill'
+import { getBattleSkillIconPath, getSkillImagePath } from '@/shared/assets'
 import { StyledSkillName } from '@/shared/gameText'
-import type { ImportancePalette, SkillEntry, SkillId } from '@/shared/gameData'
+import type { ImportancePalette, SkillEntry, SkillId, SkillLevel } from '@/shared/gameData'
 import { useBattleDetailI18n, type BattleI18nConfig } from '../../hooks/useBattleDetailData'
+import { phaseTexts } from '../../lib/battleDetail'
 
 export interface BattleTextSource {
   config: BattleI18nConfig
   id: string
+  unitId: string
   phaseId: string
 }
 
@@ -23,6 +27,16 @@ interface BattleSkillCardProps {
   palette: ImportancePalette
 }
 
+function battleSkillImagePath(
+  level: SkillLevel,
+  imageOwnerId: string | undefined,
+  skillId: SkillId,
+): string {
+  if (level.iconID) return getBattleSkillIconPath(level.iconID)
+  if (imageOwnerId !== undefined) return getSkillImagePath(imageOwnerId, skillId)
+  return getBattleSkillIconPath(skillId)
+}
+
 export function BattleSkillCard({
   source,
   imageOwnerId,
@@ -33,29 +47,33 @@ export function BattleSkillCard({
 }: BattleSkillCardProps) {
   const { level, isLocked } = selectSkillLevel(entry.levels, tier)
   const descriptionLevel = isLocked ? level.level : tier
+  const cardData = toSkillCardData(entry, level)
 
   return (
-    <IdentitySkillCard
-      identityId={imageOwnerId}
+    <SkillCard
       skillId={skillId}
-      entry={entry}
-      level={level}
-      renderName={(attributeType) => (
-        <BattleSkillName source={source} skillId={skillId} attributeType={attributeType} />
-      )}
+      skillData={cardData}
+      coins={level.coins}
+      skillImagePath={battleSkillImagePath(level, imageOwnerId, skillId)}
+      skillTier={entry.skillTier}
+      nameSlot={
+        <BattleSkillName source={source} skillId={skillId} attributeType={cardData.attributeType} />
+      }
       descriptionSlot={
         <BattleSkillDescription source={source} skillId={skillId} level={descriptionLevel} />
       }
-      isLocked={isLocked}
       importanceLevel={entry.importanceLevel}
       palette={palette}
+      isDefenseSkill={cardData.atkType === 'NONE' || !cardData.atkType}
+      isLocked={isLocked}
+      missingImage="frame"
     />
   )
 }
 
 function useSkillText(source: BattleTextSource, skillId: SkillId) {
   const i18n = useBattleDetailI18n(source.config, source.id)
-  return i18n.phases?.[source.phaseId]?.skills?.[skillId]
+  return phaseTexts(i18n, source.unitId, source.phaseId)?.skills?.[skillId]
 }
 
 function BattleSkillName({
@@ -86,5 +104,10 @@ function BattleSkillDescription({
   level: number
 }) {
   const text = useSkillText(source, skillId)
-  return <SkillDescription descData={getMergedSkillDesc(text?.descs ?? [], level)} />
+  return (
+    <SkillDescription
+      descData={getMergedSkillDesc(text?.descs ?? [], level)}
+      {...(text?.flavor !== undefined && { flavor: text.flavor })}
+    />
+  )
 }

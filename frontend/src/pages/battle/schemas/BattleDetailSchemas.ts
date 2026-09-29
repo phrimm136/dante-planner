@@ -9,6 +9,7 @@ import {
   skillMapWithRetiredKeys,
 } from '@/shared/gameData'
 import { BATTLE_CASES } from '../lib/battleVocabulary'
+import { BattleSpriteSchema } from './BattleSpecSchemas'
 
 const unused = z.unknown().optional()
 
@@ -128,6 +129,7 @@ export const BattlePartSchema = z
     passives: PassiveImportanceMapSchema,
     skillIds: z.array(z.number()),
     passiveIds: z.array(z.number()),
+    generatedBy: z.array(z.string()).optional(),
     _source: unused,
     attributeList: unused,
     canChangeSpriteOnDestoryed: unused,
@@ -157,6 +159,7 @@ export const BattlePhaseSchema = z
   .object({
     id: z.number(),
     spriteId: z.string(),
+    sprite: BattleSpriteSchema.optional(),
     hp: StatGrowthSchema,
     defCorrection: z.number().optional(),
     minSpeedList: z.array(z.number()).optional(),
@@ -216,28 +219,63 @@ export const BattlePhaseSchema = z
   })
   .strict()
 
-export const BattleEngagementSchema = z
+const BuffGrantSchema = z
   .object({
-    case: z.enum(BATTLE_CASES),
-    level: z.number().nullable(),
-    stage: z.string(),
-    mapName: z.string(),
-    label: z.number().int().optional(),
-    themePack: z.string().optional(),
-    eventId: z.string().optional(),
-    hiddenBattle: z.boolean().optional(),
+    buffId: z.number(),
+    keywordId: z.string().nullable(),
+    target: z.enum(['enemy', 'ally', 'unknown']),
+    stack: z.number().optional(),
+    conditional: z.boolean().optional(),
+    source: z
+      .object({
+        kind: z.enum(['stageScript', 'passive', 'buff']),
+        class: z.string(),
+        unitId: z.number().optional(),
+        partId: z.number().optional(),
+        from: z.string().optional(),
+      })
+      .strict(),
   })
   .strict()
 
-const BATTLE_RECORD_SHAPE = {
-  engagedStages: z.array(BattleEngagementSchema),
-  caseList: z.array(z.enum(BATTLE_CASES)),
-  phases: z.tuple([BattlePhaseSchema], BattlePhaseSchema),
-}
-
-export const EnemyDataSchema = z
+const SummonSchema = z
   .object({
-    ...BATTLE_RECORD_SHAPE,
+    kind: z.string(),
+    unitId: z.number(),
+    slot: z.number().optional(),
+    stages: z.array(z.object({ source: z.string(), stageId: z.number() }).strict()).optional(),
+  })
+  .strict()
+
+export const EngagementRowSchema = z
+  .object({
+    stage: z.string(),
+    case: z.enum(BATTLE_CASES),
+    label: z.array(z.number().int()),
+    level: z.number().nullable(),
+    unit: z.number(),
+    wave: z.number(),
+    spawn: z.string(),
+    hidden: z.boolean(),
+    stageScripts: z.array(z.string()),
+    mapName: z.string(),
+    rowParts: z.array(z.number()),
+    facts: z
+      .object({
+        generatedParts: z.array(z.number()),
+        phaseUnits: z.array(z.number()),
+        summons: z.array(SummonSchema),
+        buffGrants: z.array(BuffGrantSchema),
+      })
+      .strict(),
+  })
+  .strict()
+
+const PHASES = z.tuple([BattlePhaseSchema], BattlePhaseSchema)
+
+const EnemyKitSchema = z
+  .object({
+    phases: PHASES,
     badge: z
       .object({
         classType: z.string(),
@@ -248,26 +286,42 @@ export const EnemyDataSchema = z
   })
   .strict()
 
-export const AssistantDataSchema = z
+const AssistantKitSchema = z
   .object({
-    ...BATTLE_RECORD_SHAPE,
+    phases: PHASES,
     level: z.number().optional(),
   })
   .strict()
 
-export const SinnerEventDataSchema = z
+const SinnerEventKitSchema = z
   .object({
-    ...BATTLE_RECORD_SHAPE,
+    phases: PHASES,
     eventCode: z.string(),
     level: z.number(),
     uptie: z.number(),
   })
   .strict()
 
+function groupSchema<TKit extends z.ZodType>(kit: TKit) {
+  return z
+    .object({
+      units: z.record(z.string(), kit),
+      engagements: z.array(EngagementRowSchema),
+    })
+    .strict()
+}
+
+export const EnemyDataSchema = groupSchema(EnemyKitSchema)
+
+export const AssistantDataSchema = groupSchema(AssistantKitSchema)
+
+export const SinnerEventDataSchema = groupSchema(SinnerEventKitSchema)
+
 const BattleSkillI18nSchema = z
   .object({
     name: z.string(),
     descs: z.array(SkillDescEntrySchema),
+    flavor: z.string().optional(),
   })
   .strict()
 
@@ -303,7 +357,7 @@ const BattlePhaseI18nSchema = z
   })
   .strict()
 
-export const BattleEntityI18nSchema = z
+const BattleUnitI18nSchema = z
   .object({
     name: z.string().optional(),
     desc: z.string().optional(),
@@ -311,6 +365,10 @@ export const BattleEntityI18nSchema = z
     nameWithTitle: z.string().optional(),
     phases: z.record(z.string(), BattlePhaseI18nSchema).optional(),
   })
+  .strict()
+
+export const BattleEntityI18nSchema = z
+  .object({ units: z.record(z.string(), BattleUnitI18nSchema) })
   .strict()
 
 const StageLabelSchema = z.discriminatedUnion('kind', [
@@ -359,6 +417,15 @@ const StageLabelSchema = z.discriminatedUnion('kind', [
     })
     .strict(),
   z.object({ kind: z.literal('aprilFools'), titleKey: z.string() }).strict(),
+  z
+    .object({
+      kind: z.literal('rpg'),
+      canto: z.number(),
+      node: z.number(),
+      route: z.string(),
+      floor: z.string(),
+    })
+    .strict(),
   z.object({ kind: z.literal('tutorial') }).strict(),
 ])
 
@@ -372,11 +439,23 @@ const BattleStageSchema = z
     waveCount: z.number(),
     maps: z.array(z.string()),
     labels: z.array(StageLabelSchema).optional(),
+    mirror: z
+      .object({
+        themeIds: z.array(z.number()).optional(),
+        eventIds: z.array(z.string()).optional(),
+        hiddenBattle: z.boolean().optional(),
+        poolKind: unused,
+        dungeonId: unused,
+        typeIndex: unused,
+        floors: unused,
+        section: unused,
+      })
+      .strict()
+      .optional(),
     stageType: unused,
     recommendedLevel: unused,
     turnLimit: unused,
     staminaCost: unused,
-    mirror: unused,
     dangerLevel: unused,
     eventCode: unused,
     railway: unused,
@@ -403,7 +482,7 @@ export const BattleStageTextsSchema = z.record(
     .object({
       title: z.string().optional(),
       place: z.string().optional(),
-      themeNames: unused,
+      themeNames: z.array(z.string()).optional(),
       labelTexts: z.array(StageLabelTextSchema).optional(),
     })
     .strict(),
@@ -426,11 +505,15 @@ export const BattleEgoI18nSchema = z.object({
 
 export type BattlePart = z.infer<typeof BattlePartSchema>
 export type BattlePhase = z.infer<typeof BattlePhaseSchema>
-export type BattleEngagement = z.infer<typeof BattleEngagementSchema>
+export type EngagementRow = z.infer<typeof EngagementRowSchema>
+export type BuffGrant = z.infer<typeof BuffGrantSchema>
 export type EnemyData = z.infer<typeof EnemyDataSchema>
 export type AssistantData = z.infer<typeof AssistantDataSchema>
 export type SinnerEventData = z.infer<typeof SinnerEventDataSchema>
+export type EnemyKit = z.infer<typeof EnemyKitSchema>
+export type BattleKit = EnemyKit & { level?: number | undefined; uptie?: number | undefined }
 export type BattleEntityI18n = z.infer<typeof BattleEntityI18nSchema>
+export type BattleUnitI18n = z.infer<typeof BattleUnitI18nSchema>
 export type BattlePhaseI18n = z.infer<typeof BattlePhaseI18nSchema>
 export type ResistInfo = z.infer<typeof ResistInfoSchema>
 export type StageLabel = z.infer<typeof StageLabelSchema>

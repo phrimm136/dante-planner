@@ -61,9 +61,9 @@ function headerImageSources(): (string | null)[] {
 
 describe('battle detail visuals', () => {
   it(
-    'draws no separator in the skill list of enemy 1280 and no rule under any section title',
+    'draws no separator in the skill list of enemy group 8063 and no rule under any section title',
     async () => {
-      await mountBattle('enemy', '1280')
+      await mountBattle('enemy', '8063')
 
       const sections = requireSlot('detail-sections')
       expect(sections.querySelectorAll('[data-slot="skill-group-separator"]')).toHaveLength(0)

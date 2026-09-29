@@ -12,8 +12,8 @@ import i18n from '@/lib/i18n'
 import { EGODataSchema } from '@/pages/ego'
 import { IdentityDataSchema } from '@/pages/identity'
 import { mountRoute } from '@/test-utils/mountRoute'
-import enemy1280 from '@static/data/enemy/1280.json'
-import enemyI18n1280 from '@static/i18n/EN/enemy/1280.json'
+import enemy8063 from '@static/data/enemy/8063.json'
+import enemyI18n8063 from '@static/i18n/EN/enemy/8063.json'
 import assistant400001 from '@static/data/assistant/400001.json'
 import assistantI18n400001 from '@static/i18n/EN/assistant/400001.json'
 import sinnerEvent10101 from '@static/data/sinnerEvent/10101.json'
@@ -76,15 +76,17 @@ const ENTITY_ROWS: readonly EntityLayoutRow[] = [
     skillOrder: ['2010211', '2010221'],
   },
   {
-    entity: 'enemy 1280',
+    entity: 'enemy group 8063',
     path: '/battle/enemy/$id',
-    url: '/battle/enemy/1280',
+    url: '/battle/enemy/8063',
     load: () => import('@/pages/battle/EnemyDetailPage'),
-    name: enemyI18n1280.name,
+    name: enemyI18n8063.units['8063'].name,
     hasEgo: false,
     hasSanity: false,
-    selectorButton: /^Lv\. 50$/,
-    recordSkillIds: Object.keys(EnemyDataSchema.parse(enemy1280).phases[0].skills),
+    selectorButton: /^4\.5-11 \(Lv\. 35\)$/,
+    recordSkillIds: Object.keys(
+      EnemyDataSchema.parse(enemy8063).units['8063']?.phases[0].skills ?? {},
+    ),
     skillOrder: ['806301', '806302', '806303', '806304', '806305', '806306', '806307'],
   },
   {
@@ -92,11 +94,13 @@ const ENTITY_ROWS: readonly EntityLayoutRow[] = [
     path: '/battle/assistant/$id',
     url: '/battle/assistant/400001',
     load: () => import('@/pages/battle/AssistantDetailPage'),
-    name: assistantI18n400001.name,
+    name: assistantI18n400001.units['400001'].name,
     hasEgo: false,
     hasSanity: true,
-    selectorButton: /^Lv\. 50$/,
-    recordSkillIds: Object.keys(AssistantDataSchema.parse(assistant400001).phases[0].skills),
+    selectorButton: /^7-1 \(Lv\. 50\)$/,
+    recordSkillIds: Object.keys(
+      AssistantDataSchema.parse(assistant400001).units['400001']?.phases[0].skills ?? {},
+    ),
     skillOrder: ['40000101', '40000102', '40000103', '40000104'],
   },
   {
@@ -104,11 +108,13 @@ const ENTITY_ROWS: readonly EntityLayoutRow[] = [
     path: '/battle/sinnerEvent/$id',
     url: '/battle/sinnerEvent/10101',
     load: () => import('@/pages/battle/SinnerEventDetailPage'),
-    name: sinnerEventI18n10101.name,
+    name: sinnerEventI18n10101.units['10101'].name,
     hasEgo: false,
     hasSanity: true,
-    selectorButton: /^Lv\. 50$/,
-    recordSkillIds: Object.keys(SinnerEventDataSchema.parse(sinnerEvent10101).phases[0].skills),
+    selectorButton: /^A Midspring Night's Dream 2 \(Lv\. 50\)$/,
+    recordSkillIds: Object.keys(
+      SinnerEventDataSchema.parse(sinnerEvent10101).units['10101']?.phases[0].skills ?? {},
+    ),
     skillOrder: ['1010101', '1010102', '1010103', '1010104'],
   },
 ]

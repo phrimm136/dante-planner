@@ -150,6 +150,17 @@ const CASES: Case[] = [
     ['enemy', '8101_WalkingPearlAppearance'],
     '/images/enemy/8101_WalkingPearlAppearance.webp',
   ],
+  ['getBattleSkillIconPath', ['810101'], '/images/battleSkill/810101.webp'],
+  [
+    'getStageBackgroundPath',
+    ['Walpu8_WelfareHallway'],
+    '/images/stage/battle/Walpu8_WelfareHallway.webp',
+  ],
+  ['getHazardPlatePath', ['ZAYIN'], '/images/UI/common/hazard-zayin.webp'],
+  ['getHazardPlatePath', ['TETH'], '/images/UI/common/hazard-teth.webp'],
+  ['getHazardPlatePath', ['HE'], '/images/UI/common/hazard-he.webp'],
+  ['getHazardPlatePath', ['WAW'], '/images/UI/common/hazard-waw.webp'],
+  ['getHazardPlatePath', ['ALEPH'], '/images/UI/common/hazard-aleph.webp'],
   ['getBannerImagePath', [], '/images/banner/MD.webp'],
   ['getLogoPath', [], '/images/logo/LCMC.webp'],
 

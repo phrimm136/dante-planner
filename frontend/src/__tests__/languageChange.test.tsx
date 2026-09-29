@@ -43,7 +43,7 @@ const PAGES: Record<string, { url: string; load: () => Promise<PageModule> }> = 
   },
   '/battle': { url: '/battle', load: () => import('@/pages/battle/BattlePage') },
   '/battle/enemy/$id': {
-    url: '/battle/enemy/1280',
+    url: '/battle/enemy/8063',
     load: () => import('@/pages/battle/EnemyDetailPage'),
   },
   '/battle/assistant/$id': {

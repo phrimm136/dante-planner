@@ -1,11 +1,9 @@
 import { Suspense, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { TextSkeleton } from '@/components/feedback/TextSkeleton'
 import { LabeledPanel } from '@/components/layout/LabeledPanel'
 import { getHPIconPath } from '@/shared/assets'
 import { KeywordsDisplay } from '@/shared/gameText'
-import { useThemePackListI18n } from '@/shared/themePack'
 import {
   ResistancePanel,
   SinResistancePanel,
@@ -14,29 +12,27 @@ import {
   TraitsDisplay,
 } from '@/shared/unitStatus'
 import { useBattleDetailI18n, type BattleI18nConfig } from '../../hooks/useBattleDetailData'
-import { useBattleFacetNames } from '../../hooks/useBattleFacetNames'
-import { useBattleStageListI18n, useBattleStageListSpec } from '../../hooks/useBattleStageData'
 import {
   defenseAtLevel,
   partStatus,
   phaseStatus,
+  phaseTexts,
   resistances,
   speedAtTier,
   statAtLevel,
   type UnitStatus,
 } from '../../lib/battleDetail'
-import { groupEngagements } from '../../lib/engagementLabels'
-import type { Translate } from '../../lib/enemy/enemyFacetOptions'
-import type { BattleEngagement, BattlePart, BattlePhase } from '../../schemas/BattleDetailSchemas'
+import type { BattlePart, BattlePhase } from '../../schemas/BattleDetailSchemas'
 
 interface BattleInfoPaneProps {
   config: BattleI18nConfig
   id: string
+  unitId: string
   phase: BattlePhase
+  parts: readonly BattlePart[]
   part: BattlePart | undefined
   level: number | undefined
   tier: number
-  engagements: readonly BattleEngagement[]
 }
 
 function HpPanel({ hp }: { hp: number }) {
@@ -60,17 +56,20 @@ function StatusBlock({
   level,
   tier,
   title,
+  summary = false,
 }: {
   status: UnitStatus
   level: number | undefined
   tier: number
   title?: ReactNode
+  summary?: boolean
 }) {
   const hp =
     status.hp === undefined || level === undefined ? undefined : statAtLevel(status.hp, level)
   const minSpeed = speedAtTier(status.minSpeedList, tier)
   const maxSpeed = speedAtTier(status.maxSpeedList, tier)
-  const resist = status.resistInfo === undefined ? undefined : resistances(status.resistInfo)
+  const resist =
+    summary || status.resistInfo === undefined ? undefined : resistances(status.resistInfo)
 
   const defCorrection = status.defCorrection
   const hasFullStatus =
@@ -93,7 +92,7 @@ function StatusBlock({
         {resist !== undefined && (
           <ResistancePanel slash={resist.slash} pierce={resist.pierce} blunt={resist.blunt} />
         )}
-        {hp !== undefined && status.breakSection !== undefined && (
+        {!summary && hp !== undefined && status.breakSection !== undefined && (
           <div className="col-span-2 md:col-span-1">
             <StaggerPanel maxHP={hp} staggerThresholds={status.breakSection.sectionList} />
           </div>
@@ -104,20 +103,18 @@ function StatusBlock({
   )
 }
 
-function PartName({
-  config,
-  id,
-  phaseId,
-  part,
-}: {
+interface PartLabelProps {
   config: BattleI18nConfig
   id: string
+  unitId: string
   phaseId: string
   part: BattlePart
-}) {
+}
+
+function PartName({ config, id, unitId, phaseId, part }: PartLabelProps) {
   const i18n = useBattleDetailI18n(config, id)
   return (
-    i18n.phases?.[phaseId]?.parts?.[String(part.id)]?.name ?? (
+    phaseTexts(i18n, unitId, phaseId)?.parts?.[String(part.id)]?.name ?? (
       <PartTypeName partType={part.partType} />
     )
   )
@@ -128,77 +125,76 @@ function PartTypeName({ partType }: { partType: string }) {
   return t(`battle.partType.${partType}`)
 }
 
-export function BattlePartLabel({
-  config,
-  id,
-  phaseId,
-  part,
-}: {
-  config: BattleI18nConfig
-  id: string
-  phaseId: string
-  part: BattlePart
-}) {
+export function BattlePartLabel(props: PartLabelProps) {
   return (
-    <Suspense fallback={<PartTypeName partType={part.partType} />}>
-      <PartName config={config} id={id} phaseId={phaseId} part={part} />
+    <Suspense fallback={<PartTypeName partType={props.part.partType} />}>
+      <PartName {...props} />
     </Suspense>
   )
 }
 
-function EngagementsPanel({ engagements }: { engagements: readonly BattleEngagement[] }) {
-  const { t } = useTranslation('database')
-  const translate: Translate = (key, options) => t(key, options)
-  const stages = useBattleStageListSpec()
-  const texts = useBattleStageListI18n()
-  const facetNames = useBattleFacetNames()
-  const themePacks = useThemePackListI18n()
-  const groups = groupEngagements(engagements, { stages, texts, facetNames, themePacks }, translate)
-
+function PartHpLines({
+  parts,
+  level,
+  label,
+}: {
+  parts: readonly BattlePart[]
+  level: number | undefined
+  label: (part: BattlePart) => ReactNode
+}) {
   return (
-    <LabeledPanel title={t('battle.detail.engagements')} titleAlign="left">
-      <div data-testid="battle-engagements" className="max-h-64 space-y-2 overflow-y-auto text-xs">
-        {groups.map((group) => (
-          <div key={group.battleCase} data-case={group.battleCase} className="space-y-0.5">
-            <div className="font-semibold">{t(`battle.case.${group.battleCase}`)}</div>
-            <ul className="space-y-0.5">
-              {group.labels.map((label) => (
-                <li key={label} className="line-clamp-1">
-                  {label}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </div>
-    </LabeledPanel>
+    <ul className="space-y-1 text-sm">
+      {parts.map((each) => (
+        <li
+          key={each.id}
+          data-testid="battle-part-hp"
+          className="flex items-center justify-between gap-2 rounded border border-border px-3 py-1"
+        >
+          <span>{label(each)}</span>
+          {each.hp !== undefined && level !== undefined && (
+            <span className="flex items-center gap-1 tabular-nums">
+              <img src={getHPIconPath()} alt="HP" className="h-4 w-4 object-contain" />
+              {statAtLevel(each.hp, level)}
+            </span>
+          )}
+        </li>
+      ))}
+    </ul>
   )
 }
 
 export function BattleInfoPane({
   config,
   id,
+  unitId,
   phase,
+  parts,
   part,
   level,
   tier,
-  engagements,
 }: BattleInfoPaneProps) {
   const phaseId = String(phase.id)
-  const partBlocks = (part === undefined ? (phase.parts ?? []) : [part]).filter((each) =>
-    hasStatus(partStatus(each)),
+  const summary = part === undefined && parts.length >= 2
+  const partBlocks = summary
+    ? []
+    : (part === undefined ? parts : [part]).filter((each) => hasStatus(partStatus(each)))
+  const partLabel = (each: BattlePart) => (
+    <BattlePartLabel config={config} id={id} unitId={unitId} phaseId={phaseId} part={each} />
   )
 
   return (
     <div className="space-y-4">
-      {part === undefined && <StatusBlock status={phaseStatus(phase)} level={level} tier={tier} />}
+      {part === undefined && (
+        <StatusBlock status={phaseStatus(phase)} level={level} tier={tier} summary={summary} />
+      )}
+      {summary && <PartHpLines parts={parts} level={level} label={partLabel} />}
       {partBlocks.map((each) => (
         <StatusBlock
           key={each.id}
           status={partStatus(each)}
           level={level}
           tier={tier}
-          title={<BattlePartLabel config={config} id={id} phaseId={phaseId} part={each} />}
+          title={partLabel(each)}
         />
       ))}
 
@@ -208,18 +204,6 @@ export function BattleInfoPane({
       />
 
       <KeywordsDisplay keywords={phase.battleKeywordList} />
-
-      {engagements.length > 0 && (
-        <Suspense
-          fallback={
-            <LabeledPanel>
-              <TextSkeleton size="xs" lines={3} width="full" />
-            </LabeledPanel>
-          }
-        >
-          <EngagementsPanel engagements={engagements} />
-        </Suspense>
-      )}
     </div>
   )
 }

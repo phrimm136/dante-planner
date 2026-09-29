@@ -7,116 +7,167 @@ import type { ImportancePalette } from '@/shared/gameData'
 import type { BattleI18nConfig } from '../../hooks/useBattleDetailData'
 import {
   ALL_PARTS,
-  defaultEngagementLevel,
-  engagementLevels,
   phaseTier,
+  rowParts,
+  ownSources,
+  rowUnitId,
   selectedPart,
   selectorParts,
   visibleSkills,
   type PartSelection,
 } from '../../lib/battleDetail'
 import type { BattleCase, BattleFamily } from '../../lib/battleVocabulary'
-import type { BattleEngagement, BattlePhase, EnemyData } from '../../schemas/BattleDetailSchemas'
+import { defaultRowIndex, firstMapName, groupSelectorRows } from '../../lib/engagementRows'
+import type { BattleKit, EngagementRow } from '../../schemas/BattleDetailSchemas'
 import { BattleDetailHeader } from './BattleDetailHeader'
 import { BattleEgoSection } from './BattleEgoSection'
+import { BattleEngagementRows } from './BattleEngagementRows'
 import { BattleInfoPane, BattlePartLabel } from './BattleInfoPane'
 import { BattlePassivesPane } from './BattlePassivesPane'
 import { BattleSanityPane } from './BattleSanityPane'
 import { BattleSelectorRow, type SelectorOption } from './BattleSelectorRow'
 import { BattleSkillCard } from './BattleSkillCard'
+import { BattleStageEffects } from './BattleStageEffects'
+
+export interface BattleGroup {
+  units: Record<string, BattleKit>
+  engagements: readonly EngagementRow[]
+}
 
 export interface BattleDetailViewProps {
   family: BattleFamily
   id: string
   config: BattleI18nConfig
-  engagements: readonly BattleEngagement[]
-  phases: readonly [BattlePhase, ...BattlePhase[]]
+  group: BattleGroup
   palette: ImportancePalette
-  arrivalCases: ReadonlySet<BattleCase>
-  fallbackLevel: number | undefined
-  uptie: number | undefined
-  badge?: EnemyData['badge']
+  arrivalMode: BattleCase
+}
+
+interface Selection {
+  rowIndex: number | undefined
+  phaseIndex: number
+  part: PartSelection
+}
+
+function kitOf(group: BattleGroup, unitId: string): BattleKit {
+  const kit = group.units[unitId] ?? Object.values(group.units)[0]
+  if (kit === undefined) throw new Error('battle group has no unit')
+  return kit
 }
 
 export function BattleDetailView({
   family,
   id,
   config,
-  engagements,
-  phases,
+  group,
   palette,
-  arrivalCases,
-  fallbackLevel,
-  uptie,
-  badge,
+  arrivalMode,
 }: BattleDetailViewProps) {
   const { t } = useTranslation('database')
-  const [selection, setSelection] = useState<{ phaseIndex: number; part: PartSelection }>({
+  const rowGroups = groupSelectorRows(group.engagements)
+  const [selection, setSelection] = useState<Selection>(() => ({
+    rowIndex: defaultRowIndex(rowGroups, arrivalMode),
     phaseIndex: 0,
     part: ALL_PARTS,
-  })
-  const [level, setLevel] = useState(() =>
-    defaultEngagementLevel(engagements, arrivalCases, fallbackLevel),
-  )
+  }))
 
-  const phase = phases[selection.phaseIndex] ?? phases[0]
+  const row = selection.rowIndex === undefined ? undefined : group.engagements[selection.rowIndex]
+  const unitId = rowUnitId(Object.keys(group.units), id, row)
+  const kit = kitOf(group, unitId)
+  const phase = kit.phases[selection.phaseIndex] ?? kit.phases[0]
   const phaseId = String(phase.id)
-  const part = selectedPart(phase, selection.part)
-  const tier = phaseTier(phase, uptie)
-  const source = { config, id, phaseId }
+  const parts = rowParts(phase, row)
+  const part = selectedPart(parts, selection.part)
+  const level = row?.level ?? kit.level
+  const tier = phaseTier(phase, kit.uptie)
+  const source = { config, id, unitId, phaseId }
   const imageOwnerId = phase.identitySource === undefined ? undefined : String(phase.identitySource)
-  const parts = selectorParts(phase)
+  const choices = selectorParts(parts)
   const partOptions: SelectorOption<PartSelection>[] =
-    parts.length === 0
+    choices.length === 0
       ? []
       : [
           { value: ALL_PARTS, label: t('battle.detail.allParts') },
-          ...parts.map((each) => ({
+          ...choices.map((each) => ({
             value: each.id,
-            label: <BattlePartLabel config={config} id={id} phaseId={phaseId} part={each} />,
+            label: (
+              <BattlePartLabel
+                config={config}
+                id={id}
+                unitId={unitId}
+                phaseId={phaseId}
+                part={each}
+              />
+            ),
           })),
         ]
   const egoList = phase.egoList ?? []
 
   const selector = (
-    <BattleSelectorRow
-      phaseCount={phases.length}
-      phaseIndex={selection.phaseIndex}
-      onPhaseChange={(phaseIndex) => {
-        setSelection({ phaseIndex, part: ALL_PARTS })
-      }}
-      partOptions={partOptions}
-      part={part === undefined ? ALL_PARTS : part.id}
-      onPartChange={(next) => {
-        setSelection((previous) => ({ ...previous, part: next }))
-      }}
-      levels={engagementLevels(engagements, fallbackLevel)}
-      level={level}
-      onLevelChange={setLevel}
-    />
+    <>
+      <BattleSelectorRow
+        engagementRows={
+          <BattleEngagementRows
+            groups={rowGroups}
+            selected={selection.rowIndex}
+            onSelect={(rowIndex) => {
+              setSelection({ rowIndex, phaseIndex: 0, part: ALL_PARTS })
+            }}
+          />
+        }
+        phaseCount={kit.phases.length}
+        phaseIndex={selection.phaseIndex}
+        onPhaseChange={(phaseIndex) => {
+          setSelection((previous) => ({ ...previous, phaseIndex, part: ALL_PARTS }))
+        }}
+        partOptions={partOptions}
+        part={part === undefined ? ALL_PARTS : part.id}
+        onPartChange={(next) => {
+          setSelection((previous) => ({ ...previous, part: next }))
+        }}
+      />
+      {row !== undefined && (
+        <BattleStageEffects
+          source={source}
+          row={row}
+          own={ownSources(unitId, kit.phases)}
+          phaseIds={kit.phases.map((each) => String(each.id))}
+        />
+      )}
+    </>
   )
 
   return (
     <EntityDetailLayout
       header={
-        <BattleDetailHeader family={family} id={id} config={config} phase={phase} badge={badge} />
+        <BattleDetailHeader
+          family={family}
+          id={id}
+          unitId={unitId}
+          config={config}
+          phase={phase}
+          classType={kit.badge?.classType}
+          hazardGrade={kit.badge?.hazardGrade}
+          mapName={firstMapName(rowGroups)}
+        />
       }
       metadata={
         <BattleInfoPane
           config={config}
           id={id}
+          unitId={unitId}
           phase={phase}
+          parts={parts}
           part={part}
           level={level}
           tier={tier}
-          engagements={engagements}
         />
       }
       selector={selector}
     >
       <DetailSection title={t('section.skills')}>
         <div className="border rounded">
-          {visibleSkills(phase, part).map(({ id: skillId, entry }) => (
+          {visibleSkills(phase, parts, part).map(({ id: skillId, entry }) => (
             <BattleSkillCard
               key={skillId}
               source={source}
@@ -133,6 +184,7 @@ export function BattleDetailView({
         <BattlePassivesPane
           source={source}
           phase={phase}
+          parts={parts}
           part={part}
           tier={tier}
           palette={palette}

@@ -4,21 +4,35 @@ import { useTranslation } from 'react-i18next'
 import { TextSkeleton } from '@/components/feedback/TextSkeleton'
 import { SECTION_STYLES } from '@/lib/constants'
 import { getDisplayFontForLanguage } from '@/lib/utils'
-import { getBattleSpritePath, getRarityIconPath, getSinnerIconPath } from '@/shared/assets'
+import {
+  getBattleSpritePath,
+  getHazardPlatePath,
+  getRarityIconPath,
+  getSinnerIconPath,
+  getStageBackgroundPath,
+} from '@/shared/assets'
 import { SINNERS, SinnerScopedIdSchema, getSinnerFromId } from '@/shared/gameData'
 import { useBattleDetailI18n, type BattleI18nConfig } from '../../hooks/useBattleDetailData'
+import { unitName } from '../../lib/battleDetail'
 import { BATTLE_DETAIL_SPRITE_ASPECT_RATIO } from '../../lib/cardLayout'
-import type { BattleFamily } from '../../lib/battleVocabulary'
-import type { BattlePhase, EnemyData } from '../../schemas/BattleDetailSchemas'
-
-type HazardBadge = NonNullable<EnemyData['badge']>
+import { HAZARD_CLASSES, type BattleFamily } from '../../lib/battleVocabulary'
+import type { BattlePhase } from '../../schemas/BattleDetailSchemas'
 
 interface BattleDetailHeaderProps {
   family: BattleFamily
   id: string
+  unitId: string
   config: BattleI18nConfig
   phase: BattlePhase
-  badge: HazardBadge | undefined
+  classType: string | undefined
+  hazardGrade: string | undefined
+  mapName: string | undefined
+}
+
+function hazardClass(classType: string | undefined): string | undefined {
+  return (HAZARD_CLASSES as readonly (string | undefined)[]).includes(classType)
+    ? classType
+    : undefined
 }
 
 function sinnerOf(family: BattleFamily, phase: BattlePhase): string | undefined {
@@ -28,18 +42,16 @@ function sinnerOf(family: BattleFamily, phase: BattlePhase): string | undefined 
   return phase.characterId === undefined ? undefined : SINNERS[phase.characterId - 1]
 }
 
-function BattleSprite({
-  family,
-  id,
-  spriteId,
-  alt,
-}: {
+interface SpriteProps {
   family: BattleFamily
   id: string
   spriteId: string
-  alt: string
-}) {
+  mapName: string | undefined
+}
+
+function BattleSprite({ family, id, spriteId, mapName, alt }: SpriteProps & { alt: string }) {
   const [missingSprite, setMissingSprite] = useState<string | undefined>(undefined)
+  const [missingMap, setMissingMap] = useState<string | undefined>(undefined)
 
   return (
     <div
@@ -47,8 +59,19 @@ function BattleSprite({
       className="relative flex w-full items-center justify-center overflow-hidden rounded-lg bg-muted"
       style={{ aspectRatio: BATTLE_DETAIL_SPRITE_ASPECT_RATIO }}
     >
+      {mapName !== undefined && missingMap !== mapName && (
+        <img
+          data-testid="battle-detail-background"
+          src={getStageBackgroundPath(mapName)}
+          alt=""
+          onError={() => {
+            setMissingMap(mapName)
+          }}
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      )}
       {missingSprite === spriteId ? (
-        <span className="text-sm text-muted-foreground">{id}</span>
+        <span className="relative text-sm text-muted-foreground">{id}</span>
       ) : (
         <img
           src={getBattleSpritePath(family, spriteId)}
@@ -56,21 +79,27 @@ function BattleSprite({
           onError={() => {
             setMissingSprite(spriteId)
           }}
-          className="h-full w-full object-contain"
+          className="relative h-full w-full object-contain"
         />
       )}
     </div>
   )
 }
 
-function useEntityName(config: BattleI18nConfig, id: string): string {
-  const i18n = useBattleDetailI18n(config, id)
-  return i18n.name ?? id
+interface NameProps {
+  config: BattleI18nConfig
+  id: string
+  unitId: string
 }
 
-function BattleName({ config, id }: { config: BattleI18nConfig; id: string }) {
+function useEntityName({ config, id, unitId }: NameProps): string {
+  const i18n = useBattleDetailI18n(config, id)
+  return unitName(i18n, unitId, id)
+}
+
+function BattleName(props: NameProps) {
   const { i18n } = useTranslation()
-  const name = useEntityName(config, id)
+  const name = useEntityName(props)
   return (
     <h1 className={SECTION_STYLES.TEXT.pageTitle} style={getDisplayFontForLanguage(i18n.language)}>
       {name}
@@ -78,23 +107,24 @@ function BattleName({ config, id }: { config: BattleI18nConfig; id: string }) {
   )
 }
 
-function NamedSprite({
-  family,
-  id,
-  spriteId,
-  config,
-}: {
-  family: BattleFamily
-  id: string
-  spriteId: string
-  config: BattleI18nConfig
-}) {
-  const name = useEntityName(config, id)
-  return <BattleSprite family={family} id={id} spriteId={spriteId} alt={name} />
+function NamedSprite({ config, unitId, ...sprite }: SpriteProps & NameProps) {
+  const name = useEntityName({ config, id: sprite.id, unitId })
+  return <BattleSprite {...sprite} alt={name} />
 }
 
-export function BattleDetailHeader({ family, id, config, phase, badge }: BattleDetailHeaderProps) {
+export function BattleDetailHeader({
+  family,
+  id,
+  unitId,
+  config,
+  phase,
+  classType,
+  hazardGrade,
+  mapName,
+}: BattleDetailHeaderProps) {
   const sinner = sinnerOf(family, phase)
+  const hazard = hazardClass(classType)
+  const sprite = { family, id, spriteId: phase.spriteId, mapName }
 
   return (
     <div className="space-y-4">
@@ -108,6 +138,24 @@ export function BattleDetailHeader({ family, id, config, phase, badge }: BattleD
             />
           </div>
         )}
+        {hazard !== undefined && (
+          <div className="flex items-center justify-end gap-1">
+            <img
+              data-testid="battle-hazard-plate"
+              src={getHazardPlatePath(hazard)}
+              alt={hazard}
+              className="h-6 object-contain"
+            />
+            {hazardGrade !== undefined && (
+              <span
+                data-testid="battle-hazard-grade"
+                className="text-sm font-semibold tabular-nums"
+              >
+                {hazardGrade}
+              </span>
+            )}
+          </div>
+        )}
         <div className="flex items-center gap-3">
           {sinner !== undefined && (
             <img
@@ -117,22 +165,12 @@ export function BattleDetailHeader({ family, id, config, phase, badge }: BattleD
             />
           )}
           <Suspense fallback={<TextSkeleton size="2xl" width="lg" />}>
-            <BattleName config={config} id={id} />
+            <BattleName config={config} id={id} unitId={unitId} />
           </Suspense>
         </div>
-        {badge !== undefined && (
-          <div data-testid="battle-hazard-badge" className="flex gap-1 text-xs">
-            <span className="rounded border border-border px-2 py-0.5">{badge.classType}</span>
-            {badge.hazardGrade !== undefined && (
-              <span className="rounded border border-border px-2 py-0.5">{badge.hazardGrade}</span>
-            )}
-          </div>
-        )}
       </div>
-      <Suspense
-        fallback={<BattleSprite family={family} id={id} spriteId={phase.spriteId} alt="" />}
-      >
-        <NamedSprite family={family} id={id} spriteId={phase.spriteId} config={config} />
+      <Suspense fallback={<BattleSprite {...sprite} alt="" />}>
+        <NamedSprite {...sprite} config={config} unitId={unitId} />
       </Suspense>
     </div>
   )

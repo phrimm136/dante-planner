@@ -12,11 +12,11 @@ export interface SelectorOption<T> {
 interface SelectorGroupProps<T> {
   label: string
   options: readonly SelectorOption<T>[]
-  selected: T
+  selected: T | undefined
   onSelect: (value: T) => void
 }
 
-function SelectorGroup<T extends string | number>({
+export function SelectorGroup<T extends string | number>({
   label,
   options,
   selected,
@@ -53,27 +53,23 @@ function SelectorGroup<T extends string | number>({
 }
 
 interface BattleSelectorRowProps<TPart extends string | number> {
+  engagementRows: ReactNode
   phaseCount: number
   phaseIndex: number
   onPhaseChange: (index: number) => void
   partOptions: readonly SelectorOption<TPart>[]
   part: TPart
   onPartChange: (part: TPart) => void
-  levels: readonly number[]
-  level: number | undefined
-  onLevelChange: (level: number) => void
 }
 
 export function BattleSelectorRow<TPart extends string | number>({
+  engagementRows,
   phaseCount,
   phaseIndex,
   onPhaseChange,
   partOptions,
   part,
   onPartChange,
-  levels,
-  level,
-  onLevelChange,
 }: BattleSelectorRowProps<TPart>) {
   const { t } = useTranslation('database')
 
@@ -83,14 +79,11 @@ export function BattleSelectorRow<TPart extends string | number>({
       n: String(index + 1),
     }),
   }))
-  const levelOptions = levels.map((value) => ({
-    value,
-    label: t('battle.detail.levelOption', { level: String(value) }),
-  }))
 
   return (
     <div className="bg-background/95 backdrop-blur-sm border rounded-lg p-4 sticky top-0 z-10">
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-6">
+        {engagementRows}
         {phaseCount > 1 && (
           <SelectorGroup
             label={t('battle.detail.phase')}
@@ -105,14 +98,6 @@ export function BattleSelectorRow<TPart extends string | number>({
             options={partOptions}
             selected={part}
             onSelect={onPartChange}
-          />
-        )}
-        {level !== undefined && (
-          <SelectorGroup
-            label={t('battle.detail.level')}
-            options={levelOptions}
-            selected={level}
-            onSelect={onLevelChange}
           />
         )}
       </div>

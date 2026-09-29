@@ -11,12 +11,13 @@ import {
 import type { ReactNode } from 'react'
 
 import i18n from '@/lib/i18n'
+import { getBattleSkillIconPath, getHazardPlatePath, getStageBackgroundPath } from '@/shared/assets'
 import { createTestQueryClient } from '@/test-utils/queryClient'
 import { mountRoute } from '@/test-utils/mountRoute'
 import BattlePage from '../BattlePage'
 import EnemyDetailPage from '../EnemyDetailPage'
-import { enemyFilterStore, setEnemyCases } from '../stores/enemyFilterStore'
-import { setBattleType } from '../stores/battleTypeStore'
+import { enemyFilterStore } from '../stores/enemyFilterStore'
+import { battleTypeStore, setBattleMode } from '../stores/battleTypeStore'
 
 const LOAD_WAIT_MS = 10000
 const TEST_BUDGET_MS = 30000
@@ -24,7 +25,7 @@ const TEST_BUDGET_MS = 30000
 beforeEach(async () => {
   await i18n.changeLanguage('EN')
   enemyFilterStore.resetAll()
-  setBattleType('enemy')
+  battleTypeStore.setState(battleTypeStore.getInitialState())
 })
 
 function requireSlot(name: string): HTMLElement {
@@ -55,69 +56,101 @@ function groupButtons(name: string): string[] {
     .map((button) => button.textContent ?? '')
 }
 
-function renderedSkillIds(): string[] {
-  return [...requireSlot('detail-sections').querySelectorAll('[data-skill-id]')].map(
-    (card) => card.getAttribute('data-skill-id') ?? '',
-  )
-}
-
-function statusBlocks(): HTMLElement[] {
-  return within(requireSlot('detail-metadata')).queryAllByTestId('battle-status-block')
-}
-
-function pressedLevel(): string | undefined {
-  const group = selectorGroup('Level')
+function pressed(name: string): string | undefined {
+  const group = selectorGroup(name)
   if (group === null) return undefined
   return within(group)
     .getAllByRole('button')
     .find((button) => button.getAttribute('aria-pressed') === 'true')?.textContent
 }
 
-describe('enemy detail page', () => {
+function selectIn(group: string, label: string) {
+  const found = selectorGroup(group)
+  if (found === null) throw new Error(`no ${group} group`)
+  fireEvent.click(within(found).getByRole('button', { name: label }))
+}
+
+function renderedSkillIds(): string[] {
+  return [...requireSlot('detail-sections').querySelectorAll('[data-skill-id]')].map(
+    (card) => card.getAttribute('data-skill-id') ?? '',
+  )
+}
+
+function renderedPassiveIds(): (string | null)[] {
+  return [...requireSlot('detail-sections').querySelectorAll('[data-passive-id]')].map((card) =>
+    card.getAttribute('data-passive-id'),
+  )
+}
+
+function metadata() {
+  return within(requireSlot('detail-metadata'))
+}
+
+function stageEffectKeywords(): (string | null)[] {
+  const block = within(requireSlot('detail-selector')).queryByTestId('battle-stage-effects')
+  if (block === null) return []
+  return [...block.querySelectorAll('[data-keyword-id]')].map((card) =>
+    card.getAttribute('data-keyword-id'),
+  )
+}
+
+describe('engagement selector', () => {
   it(
-    'offers All/Head/Body for 1280 and narrows Head to its skills, status and passive',
+    'opens 1366 on its first Mirror Dungeon row when arriving from Mirror Dungeon',
     async () => {
-      await mountEnemy('1280')
+      setBattleMode('mirrorDungeon')
+      await mountEnemy('1366')
 
-      expect(groupButtons('Part')).toEqual(['All', 'Head', 'Body'])
-
-      fireEvent.click(
-        within(selectorGroup('Part') as HTMLElement).getByRole('button', { name: 'Head' }),
-      )
-
-      await waitFor(() =>
-        expect(renderedSkillIds()).toEqual(['806301', '806302', '806303', '806305', '806307']),
-      )
-      const blocks = statusBlocks()
-      expect(blocks).toHaveLength(1)
-      const [head] = blocks
-      if (head === undefined) throw new Error('no status block')
-      expect(within(head).getByText('Head')).toBeDefined()
-      expect(within(head).getByText('434')).toBeDefined()
-      expect(within(requireSlot('detail-metadata')).queryByText('124')).toBeNull()
-      expect(
-        await within(requireSlot('detail-sections')).findByText('Ferocious Acidic Crust'),
-      ).toBeDefined()
-      expect(
-        [...requireSlot('detail-sections').querySelectorAll('[data-passive-id]')].map((card) =>
-          card.getAttribute('data-passive-id'),
-        ),
-      ).toEqual(['806301'])
+      expect(pressed('MD')).toMatch(/\(Lv\. 60\) \(1\)$/)
+      expect(pressed('Story')).toBeUndefined()
     },
     TEST_BUDGET_MS,
   )
 
   it(
-    'draws skills without an icon as the frame only',
+    'opens 1366 on its first story row and numbers the units of stage 10570',
     async () => {
-      await mountEnemy('1280')
+      await mountEnemy('1366')
 
-      const card = requireSlot('detail-sections').querySelector<HTMLElement>(
-        '[data-skill-id="806301"]',
+      const night = 'The 8th Walpurgis Night · Normal (Lv. 45)'
+      expect(pressed('Story')).toBe(`${night} (1)`)
+      expect(groupButtons('Story')).toEqual(
+        expect.arrayContaining([`${night} (1)`, `${night} (2)`, `${night} (3)`]),
       )
-      if (card === null) throw new Error('no skill card')
-      expect(card.querySelector('img.object-cover')).toBeNull()
-      expect(within(card).queryByText('Missing')).toBeNull()
+    },
+    TEST_BUDGET_MS,
+  )
+
+  it(
+    'shows the Brazen Bull head only on a BrassBull_Second row',
+    async () => {
+      await mountEnemy('8041')
+
+      expect(pressed('Story')).toBe('4-3 (Lv. 29)')
+      expect(selectorGroup('Part')).toBeNull()
+      expect(renderedSkillIds()).toEqual(['804101', '804102', '804103', '804104'])
+
+      selectIn('Story', '4-6 (Lv. 30)')
+
+      await waitFor(() => expect(groupButtons('Part')).toEqual(['All', 'Body', 'Head']))
+      expect(renderedSkillIds()).toEqual([
+        '804101',
+        '804102',
+        '804103',
+        '804104',
+        '804105',
+        '804106',
+      ])
+    },
+    TEST_BUDGET_MS,
+  )
+
+  it(
+    'labels an RPG row by node and floor',
+    async () => {
+      await mountEnemy('1474')
+
+      expect(groupButtons('Story')).toContain('10-5 · Floor B1 (Lv. 64)')
     },
     TEST_BUDGET_MS,
   )
@@ -131,58 +164,161 @@ describe('enemy detail page', () => {
     },
     TEST_BUDGET_MS,
   )
+})
 
+describe('stage effects', () => {
   it(
-    'shows no phase selector for single-phase 1280',
+    'shows the keywords stage 10710 grants, without the unit own passives',
     async () => {
-      await mountEnemy('1280')
+      await mountEnemy('8390')
 
-      expect(selectorGroup('Phase')).toBeNull()
+      await waitFor(() => expect(stageEffectKeywords()).toContain('FragmentOfHope'))
+      const keywords = stageEffectKeywords()
+      expect(keywords).toContain('UnfinishedDream')
+      expect(keywords).not.toContain('StarvingDonqui')
+      expect(keywords).not.toContain('UnfinishedDreamTwo')
+      expect(new Set(keywords).size).toBe(keywords.length)
     },
     TEST_BUDGET_MS,
   )
 
   it(
-    'offers the distinct engagement levels and recomputes HP from the selected level',
+    'shows no block for a row without granted buffs',
     async () => {
-      await mountEnemy('1080')
+      await mountEnemy('8016')
 
-      expect(groupButtons('Level')).toEqual(['Lv. 50', 'Lv. 51', 'Lv. 60'])
-      expect(pressedLevel()).toBe('Lv. 51')
-      const [unit] = statusBlocks()
-      if (unit === undefined) throw new Error('no status block')
-      expect(within(unit).getByText('469')).toBeDefined()
+      selectIn('Story', '4-12 (Lv. 31)')
 
-      fireEvent.click(
-        within(selectorGroup('Level') as HTMLElement).getByRole('button', { name: 'Lv. 60' }),
+      await waitFor(() => expect(pressed('Story')).toBe('4-12 (Lv. 31)'))
+      expect(
+        within(requireSlot('detail-selector')).queryByTestId('battle-stage-effects'),
+      ).toBeNull()
+    },
+    TEST_BUDGET_MS,
+  )
+})
+
+describe('parts', () => {
+  it(
+    'summarizes group 8063 under All and narrows Head to its status, skills and passive',
+    async () => {
+      await mountEnemy('8063')
+
+      expect(groupButtons('Part')).toEqual(['All', 'Head', 'Shell'])
+      const lines = metadata().getAllByTestId('battle-part-hp')
+      expect(lines.map((line) => line.textContent)).toEqual(['Head357', 'Shell102'])
+      expect(metadata().getAllByTestId('battle-status-block')).toHaveLength(1)
+      expect(metadata().queryByText('552')).not.toBeNull()
+      expect(metadata().queryByText('Resistances')).toBeNull()
+      expect(metadata().queryByText('Stagger')).toBeNull()
+      expect(renderedPassiveIds()).toEqual(expect.arrayContaining(['806301']))
+
+      selectIn('Part', 'Head')
+
+      await waitFor(() =>
+        expect(renderedSkillIds()).toEqual(['806301', '806302', '806303', '806305', '806307']),
       )
+      const blocks = metadata().getAllByTestId('battle-status-block')
+      expect(blocks).toHaveLength(1)
+      const [head] = blocks
+      if (head === undefined) throw new Error('no status block')
+      expect(within(head).getByText('Head')).toBeDefined()
+      expect(within(head).getByText('357')).toBeDefined()
+      expect(within(head).getByText('Resistances')).toBeDefined()
+      expect(within(head).getByText('Stagger')).toBeDefined()
+      expect(metadata().queryAllByTestId('battle-part-hp')).toHaveLength(0)
+      expect(renderedPassiveIds()).toEqual(['806301'])
+    },
+    TEST_BUDGET_MS,
+  )
+})
 
-      await waitFor(() => expect(within(unit).getByText('534')).toBeDefined())
+describe('header', () => {
+  it(
+    'draws the first engagement map behind the sprite',
+    async () => {
+      await mountEnemy('1366')
+
+      const background = within(requireSlot('detail-header')).getByTestId(
+        'battle-detail-background',
+      )
+      expect(background.getAttribute('src')).toBe(getStageBackgroundPath('Walpu8_WelfareHallway'))
     },
     TEST_BUDGET_MS,
   )
 
   it(
-    'defaults the level to the first engagement of the case the list was filtered to',
+    'shows the hazard plate for a ZAYIN enemy',
     async () => {
-      setEnemyCases(new Set(['mirrorDungeon']))
-      await mountEnemy('1080')
+      await mountEnemy('8016')
 
-      expect(pressedLevel()).toBe('Lv. 50')
+      const plate = within(requireSlot('detail-header')).getByTestId('battle-hazard-plate')
+      expect(plate.getAttribute('alt')).toBe('ZAYIN')
+      expect(plate.getAttribute('src')).toBe(getHazardPlatePath('ZAYIN'))
+      expect(within(requireSlot('detail-header')).queryByTestId('battle-hazard-grade')).toBeNull()
     },
     TEST_BUDGET_MS,
   )
 
   it(
-    'groups engagement labels by case in the metadata panel',
+    'shows the hazard grade beside the plate when the enemy has one',
     async () => {
-      await mountEnemy('8044')
+      await mountEnemy('8041')
 
-      const panel = await within(requireSlot('detail-metadata')).findByTestId('battle-engagements')
-      const story = panel.querySelector<HTMLElement>('[data-case="story"]')
-      if (story === null) throw new Error('no story group')
-      expect(within(story).getByText('Story')).toBeDefined()
-      expect(within(story).getByText('4-48 (Lv. 35)')).toBeDefined()
+      const header = within(requireSlot('detail-header'))
+      expect(header.getByTestId('battle-hazard-plate').getAttribute('src')).toBe(
+        getHazardPlatePath('TETH'),
+      )
+      expect(header.getByTestId('battle-hazard-grade')).toHaveTextContent('03')
+    },
+    TEST_BUDGET_MS,
+  )
+
+  it(
+    'shows no plate for a HYPHEN enemy',
+    async () => {
+      await mountEnemy('8678')
+
+      expect(within(requireSlot('detail-header')).queryByTestId('battle-hazard-plate')).toBeNull()
+    },
+    TEST_BUDGET_MS,
+  )
+})
+
+describe('skills', () => {
+  it(
+    'shows the flavor of skill 132209 on enemy 1322',
+    async () => {
+      await mountEnemy('1322')
+
+      const card = requireSlot('detail-sections').querySelector<HTMLElement>(
+        '[data-skill-id="132209"]',
+      )
+      if (card === null) throw new Error('no skill card')
+      expect(await within(card).findByTestId('skill-flavor')).toHaveTextContent(
+        'A technique that cuts through space itself.',
+      )
+    },
+    TEST_BUDGET_MS,
+  )
+
+  it(
+    'reads the battle skill icon and keeps only the frame when the file is missing',
+    async () => {
+      await mountEnemy('1322')
+
+      const card = requireSlot('detail-sections').querySelector<HTMLElement>(
+        '[data-skill-id="132209"]',
+      )
+      if (card === null) throw new Error('no skill card')
+      const icon = card.querySelector('img.object-cover')
+      if (icon === null) throw new Error('no skill icon')
+      expect(icon.getAttribute('src')).toBe(getBattleSkillIconPath('132209'))
+
+      fireEvent.error(icon)
+
+      expect(card.querySelector('img.object-cover')).toBeNull()
+      expect(within(card).queryByText('Missing')).toBeNull()
     },
     TEST_BUDGET_MS,
   )
@@ -209,29 +345,10 @@ describe('enemy detail page', () => {
         ),
       ).toEqual(['2040111', '2040311', '2040321', '2040211', '2040221', '2040711', '2040721'])
       expect(await within(section).findByText('Art')).toBeDefined()
-      const card = (skillId: string): HTMLElement => {
-        const found = section.querySelector<HTMLElement>(`[data-skill-id="${skillId}"]`)
-        if (found === null) throw new Error(`no skill card ${skillId}`)
-        return found
-      }
-      expect(within(card('2040111')).getByText('+10')).toBeDefined()
-      expect(within(card('2040221')).getByText('-22')).toBeDefined()
       const lockOf = (passiveId: string) =>
         section.querySelector(`[data-passive-id="${passiveId}"]`)?.getAttribute('data-locked')
       expect(lockOf('2040211')).toBe('false')
       expect(lockOf('2040212')).toBeUndefined()
-    },
-    TEST_BUDGET_MS,
-  )
-
-  it(
-    'shows the id when the entity has no name',
-    async () => {
-      await mountEnemy('71035')
-
-      expect(
-        within(requireSlot('detail-header')).getByRole('heading', { level: 1 }).textContent,
-      ).toBe('71035')
     },
     TEST_BUDGET_MS,
   )
@@ -263,11 +380,58 @@ describe('battle list cards', () => {
         </QueryClientProvider>,
       )
 
-      const card = await screen.findByTestId('battle-card-1144', {}, { timeout: LOAD_WAIT_MS })
+      const card = await screen.findByTestId('battle-card-99001', {}, { timeout: LOAD_WAIT_MS })
       fireEvent.click(card)
 
       expect(await screen.findByTestId('enemy-detail-route')).toBeDefined()
-      expect(router.state.location.pathname).toBe('/battle/enemy/1144')
+      expect(router.state.location.pathname).toBe('/battle/enemy/99001')
+    },
+    TEST_BUDGET_MS,
+  )
+})
+
+describe('restored coverage', () => {
+  it(
+    'shows no phase selector for single-phase group 8063',
+    async () => {
+      await mountEnemy('8063')
+
+      expect(selectorGroup('Phase')).toBeNull()
+    },
+    TEST_BUDGET_MS,
+  )
+
+  it(
+    'renders no Encounters panel on a detail page',
+    async () => {
+      await mountEnemy('8044')
+
+      expect(metadata().queryByTestId('battle-engagements')).toBeNull()
+      expect(metadata().queryByText('Encounters')).toBeNull()
+    },
+    TEST_BUDGET_MS,
+  )
+
+  it.each([
+    ['1082', 'HE'],
+    ['1123', 'WAW'],
+  ])(
+    'shows the hazard plate of %s as %s',
+    async (id, classType) => {
+      await mountEnemy(id)
+
+      const plate = within(requireSlot('detail-header')).getByTestId('battle-hazard-plate')
+      expect(plate.getAttribute('src')).toBe(getHazardPlatePath(classType))
+    },
+    TEST_BUDGET_MS,
+  )
+
+  it(
+    'shows no plate for an UNDEF enemy',
+    async () => {
+      await mountEnemy('1366')
+
+      expect(within(requireSlot('detail-header')).queryByTestId('battle-hazard-plate')).toBeNull()
     },
     TEST_BUDGET_MS,
   )

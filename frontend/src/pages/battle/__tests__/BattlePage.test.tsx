@@ -5,7 +5,7 @@ import i18n from '@/lib/i18n'
 import { mountRoute } from '@/test-utils/mountRoute'
 import BattlePage from '../BattlePage'
 import { assistantFilterStore } from '../stores/assistantFilterStore'
-import { battleTypeStore, setBattleType } from '../stores/battleTypeStore'
+import { battleTypeStore } from '../stores/battleTypeStore'
 import { enemyFilterStore } from '../stores/enemyFilterStore'
 import { sinnerEventFilterStore } from '../stores/sinnerEventFilterStore'
 
@@ -16,11 +16,15 @@ beforeEach(async () => {
   enemyFilterStore.resetAll()
   assistantFilterStore.resetAll()
   sinnerEventFilterStore.resetAll()
-  setBattleType('enemy')
+  battleTypeStore.setState(battleTypeStore.getInitialState())
 })
 
 function renderPage() {
   mountRoute('/battle', '/battle', BattlePage)
+}
+
+function modeRow() {
+  return within(screen.getByRole('group', { name: 'Mode' }))
 }
 
 function desktop() {
@@ -48,8 +52,15 @@ function slotHidden(id: string): boolean | undefined {
   return card.parentElement?.classList.contains('hidden')
 }
 
-async function waitForEnemies() {
-  await waitFor(() => expect(desktop().getByRole('button', { name: 'Story' })).toBeVisible(), {
+function renderedCardIds(): string[] {
+  return [...document.querySelectorAll('[data-testid^="battle-card-"]')]
+    .map((card) => card.getAttribute('data-testid') ?? '')
+    .filter((testId) => /^battle-card-\d+$/.test(testId))
+    .map((testId) => testId.replace('battle-card-', ''))
+}
+
+async function waitForList() {
+  await waitFor(() => expect(desktop().getByPlaceholderText('Search by name...')).toBeVisible(), {
     timeout: LOAD_WAIT_MS,
   })
 }
@@ -61,70 +72,95 @@ function search(query: string) {
 }
 
 describe('BattlePage', () => {
-  it('shows the three type buttons with Enemies selected by default', async () => {
+  it('shows the mode buttons first, then the type buttons, Story and Enemies selected', async () => {
     renderPage()
-    await waitForEnemies()
+    await waitForList()
 
+    const story = modeRow().getByRole('button', { name: 'Story' })
     const enemies = screen.getByRole('button', { name: 'Enemies' })
-    const assistants = screen.getByRole('button', { name: 'Assist Units' })
-    const sinners = screen.getByRole('button', { name: 'Sinners?' })
-
+    expect(
+      modeRow()
+        .getAllByRole('button')
+        .map((button) => button.textContent),
+    ).toEqual(['Story', 'Lux', 'MD', 'RR', 'Reflectrial'])
+    expect(story.compareDocumentPosition(enemies) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(story).toHaveAttribute('aria-pressed', 'true')
     expect(enemies).toHaveAttribute('aria-pressed', 'true')
-    expect(enemies).toHaveAttribute('data-selected', 'true')
-    expect(enemies).toHaveClass('selectable')
-    expect(assistants).toHaveAttribute('aria-pressed', 'false')
-    expect(sinners).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getByRole('button', { name: 'Assist Units' })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    )
+    expect(screen.getByRole('button', { name: 'Sinners?' })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    )
   })
 
-  it('shows 1144 for Story plus "Zilu" and keeps both across a type switch', async () => {
+  it('selects one mode at a time', async () => {
     renderPage()
-    await waitForEnemies()
+    await waitForList()
 
-    fireEvent.click(desktop().getByRole('button', { name: 'Story' }))
+    fireEvent.click(modeRow().getByRole('button', { name: 'MD' }))
+
+    expect(modeRow().getByRole('button', { name: 'MD' })).toHaveAttribute('aria-pressed', 'true')
+    expect(modeRow().getByRole('button', { name: 'Story' })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    )
+  })
+
+  it('shows the empty-result state for a type the mode does not engage', async () => {
+    renderPage()
+    await waitForList()
+
+    fireEvent.click(modeRow().getByRole('button', { name: 'Lux' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Assist Units' }))
+
+    expect(
+      await screen.findByText(
+        'No battle entities match your current filters and search criteria',
+        {},
+        { timeout: LOAD_WAIT_MS },
+      ),
+    ).toBeInTheDocument()
+    expect(renderedCardIds()).toEqual([])
+  })
+
+  it('lists the mode entities in the mode order, first cards first', async () => {
+    renderPage()
+    await waitForList()
+
+    fireEvent.click(modeRow().getByRole('button', { name: 'MD' }))
+
+    await waitFor(() => expect(renderedCardIds().length).toBeGreaterThan(1), {
+      timeout: LOAD_WAIT_MS,
+    })
+    const [first] = renderedCardIds()
+    expect(first).toBe('70001')
+  })
+
+  it('finds a card by the name its mode shows', async () => {
+    renderPage()
+    await waitForList()
+
     search('Zilu')
 
     await waitFor(
       () => {
-        expect(slotHidden('1144')).toBe(false)
-        expect(slotHidden('1016')).toBe(true)
-      },
-      { timeout: LOAD_WAIT_MS },
-    )
-
-    fireEvent.click(screen.getByRole('button', { name: 'Assist Units' }))
-    await waitFor(() => expect(screen.getByTestId('battle-card-400001')).toBeInTheDocument(), {
-      timeout: LOAD_WAIT_MS,
-    })
-    expect(desktop().queryByRole('button', { name: 'Story' })).not.toBeInTheDocument()
-
-    fireEvent.click(screen.getByRole('button', { name: 'Enemies' }))
-    await waitForEnemies()
-
-    expect(desktop().getByRole('button', { name: 'Story' })).toHaveAttribute('aria-pressed', 'true')
-    expect(desktop().getByPlaceholderText('Search by name...')).toHaveValue('Zilu')
-    await waitFor(
-      () => {
-        expect(slotHidden('1144')).toBe(false)
-        expect(slotHidden('1016')).toBe(true)
+        expect(slotHidden('1133')).toBe(false)
       },
       { timeout: LOAD_WAIT_MS },
     )
   })
 
-  it('resets only the enemy filters, keeping the type and the assistant search', async () => {
+  it('resets the filters and search only, keeping the mode and type', async () => {
     renderPage()
-    await waitForEnemies()
+    await waitForList()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Assist Units' }))
-    await waitFor(() => expect(screen.getByTestId('battle-card-400001')).toBeInTheDocument(), {
-      timeout: LOAD_WAIT_MS,
-    })
-    search('Kira')
-    await waitFor(() => expect(assistantFilterStore.store.getState().searchQuery).toBe('Kira'))
-
-    fireEvent.click(screen.getByRole('button', { name: 'Enemies' }))
-    await waitForEnemies()
-    fireEvent.click(desktop().getByRole('button', { name: 'Story' }))
+    fireEvent.click(modeRow().getByRole('button', { name: 'RR' }))
+    fireEvent.click(
+      await desktop().findByRole('button', { name: 'Line 1' }, { timeout: LOAD_WAIT_MS }),
+    )
     search('Zilu')
     await waitFor(() => expect(enemyFilterStore.store.getState().searchQuery).toBe('Zilu'))
 
@@ -133,54 +169,85 @@ describe('BattlePage', () => {
     const enemyState = enemyFilterStore.store.getState()
     expect(enemyState.searchQuery).toBe('')
     expect(Object.values(enemyState.values).every((selection) => selection.size === 0)).toBe(true)
-    expect(battleTypeStore.getState().entityType).toBe('enemy')
-    expect(assistantFilterStore.store.getState().searchQuery).toBe('Kira')
-    expect(desktop().getByRole('button', { name: 'Story' })).toHaveAttribute(
-      'aria-pressed',
-      'false',
-    )
-  })
-
-  it('shows the stage filter and its drill-down on mobile without expanding', async () => {
-    renderPage()
-    await waitForEnemies()
-
-    const mobile = within(mobileContainer())
-    expect(mobile.queryByRole('button', { name: 'Expand filters' })).not.toBeInTheDocument()
-
-    fireEvent.click(mobile.getByRole('button', { name: 'Story' }))
-
-    const chapterDropdown = await mobile.findByRole('combobox', {}, { timeout: LOAD_WAIT_MS })
-    expect(chapterDropdown).toBeVisible()
-    expect(chapterDropdown).toHaveTextContent('Chapter')
-    expect(sectionTitles(mobileContainer())).toEqual(['Mode', 'Chapter'])
+    expect(battleTypeStore.getState()).toEqual({ mode: 'refractionRailway', entityType: 'enemy' })
+    expect(modeRow().getByRole('button', { name: 'RR' })).toHaveAttribute('aria-pressed', 'true')
   })
 
   it.each([
-    ['Story', ['Mode', 'Chapter']],
-    ['Lux', ['Mode', 'Luxcavation']],
-    ['MD', ['Mode', 'Theme Pack', 'Hidden Node', 'Event']],
-    ['RR', ['Mode', 'Line']],
-    ['Reflectrial', ['Mode']],
-  ])('shows the drill-down of %s alone', async (caseLabel, titles) => {
+    ['Story', ['Chapter']],
+    ['Lux', ['Luxcavation']],
+    ['MD', ['Theme Pack', 'Hidden Node', 'Event']],
+    ['RR', ['Line']],
+    ['Reflectrial', []],
+  ])('shows the drill-down of %s alone', async (modeLabel, titles) => {
     renderPage()
-    await waitForEnemies()
+    await waitForList()
 
-    expect(sectionTitles(mobileContainer())).toEqual(['Mode'])
-    fireEvent.click(desktop().getByRole('button', { name: caseLabel }))
+    fireEvent.click(modeRow().getByRole('button', { name: modeLabel }))
 
     await waitFor(() => expect(sectionTitles(mobileContainer())).toEqual(titles))
   })
 
   it('labels the rerun of line 1 as its BokGak', async () => {
     renderPage()
-    await waitForEnemies()
+    await waitForList()
 
-    fireEvent.click(desktop().getByRole('button', { name: 'RR' }))
+    fireEvent.click(modeRow().getByRole('button', { name: 'RR' }))
 
     expect(
       await desktop().findByRole('button', { name: 'Line 1 BokGak' }, { timeout: LOAD_WAIT_MS }),
     ).toBeInTheDocument()
     expect(desktop().getByRole('button', { name: 'Line 1' })).toBeInTheDocument()
+  })
+})
+
+describe('BattlePage restored coverage', () => {
+  it('keeps the search across a type switch and a mode switch', async () => {
+    renderPage()
+    await waitForList()
+
+    search('Zilu')
+    fireEvent.click(screen.getByRole('button', { name: 'Assist Units' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Enemies' }))
+    await waitForList()
+    fireEvent.click(modeRow().getByRole('button', { name: 'MD' }))
+    await waitForList()
+
+    expect(desktop().getByPlaceholderText('Search by name...')).toHaveValue('Zilu')
+    await waitFor(() => expect(slotHidden('1133')).toBe(false), { timeout: LOAD_WAIT_MS })
+  })
+
+  it('resets the enemy scope only, keeping the mode, type and the assistant search', async () => {
+    renderPage()
+    await waitForList()
+
+    fireEvent.click(modeRow().getByRole('button', { name: 'MD' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Assist Units' }))
+    await waitForList()
+    search('Kira')
+    await waitFor(() => expect(assistantFilterStore.store.getState().searchQuery).toBe('Kira'))
+
+    fireEvent.click(screen.getByRole('button', { name: 'Enemies' }))
+    await waitForList()
+    fireEvent.click(await desktop().findByRole('button', { name: 'Hidden Node' }))
+    search('Zilu')
+    await waitFor(() => expect(enemyFilterStore.store.getState().searchQuery).toBe('Zilu'))
+
+    fireEvent.click(desktop().getByRole('button', { name: /Reset All/ }))
+
+    const enemyState = enemyFilterStore.store.getState()
+    expect(enemyState.searchQuery).toBe('')
+    expect(Object.values(enemyState.values).every((selection) => selection.size === 0)).toBe(true)
+    expect(battleTypeStore.getState()).toEqual({ mode: 'mirrorDungeon', entityType: 'enemy' })
+    expect(assistantFilterStore.store.getState().searchQuery).toBe('Kira')
+  })
+
+  it('shows the filters on mobile without an expand button', async () => {
+    renderPage()
+    await waitForList()
+
+    expect(
+      within(mobileContainer()).queryByRole('button', { name: 'Expand filters' }),
+    ).not.toBeInTheDocument()
   })
 })

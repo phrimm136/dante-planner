@@ -48,7 +48,7 @@ export const AB_EVENT_ID_PATTERN = '9\\d{5}'
 
 export const ENEMY_ID_PATTERN = '\\d{4,5}'
 
-export const ASSISTANT_ID_PATTERN = '4\\d{5}'
+export const ASSISTANT_ID_PATTERN = '(?:4\\d{5}|\\d{4})'
 
 export const SINNER_EVENT_ID_PATTERN = '\\d{5,6}'
 
@@ -164,7 +164,7 @@ export const EnemyIdSchema = entityIdSchema<'EnemyId'>(
 
 export const AssistantIdSchema = entityIdSchema<'AssistantId'>(
   ASSISTANT_ID_PATTERN,
-  'Assistant ID must match pattern 4{5 digits}',
+  'Assistant ID must match pattern 4{5 digits} or {4 digits}',
 )
 
 export const SinnerEventIdSchema = entityIdSchema<'SinnerEventId'>(

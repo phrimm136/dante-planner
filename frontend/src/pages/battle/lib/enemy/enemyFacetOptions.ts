@@ -1,4 +1,4 @@
-import type { EnemySpecList } from '../../types/EnemyTypes'
+import type { EnemySpec } from '../../types/EnemyTypes'
 import { EXP_LUXCAVATION, RERUN_LINE_MIN } from '../battleVocabulary'
 
 export type Translate = (key: string, options: Record<string, string>) => string
@@ -51,14 +51,14 @@ function compareLuxcavationKeys(a: string, b: string): number {
 
 const byNumericId = (a: string, b: string) => Number(a) - Number(b)
 
-export function collectEnemyFacetKeys(spec: EnemySpecList): EnemyFacetKeys {
+export function collectEnemyFacetKeys(entries: readonly EnemySpec[]): EnemyFacetKeys {
   const chapters = new Set<string>()
   const themePacks = new Set<string>()
   const events = new Set<string>()
   const railwayLines = new Set<number>()
   const luxcavations = new Set<string>()
 
-  for (const entry of Object.values(spec)) {
+  for (const entry of entries) {
     for (const key of entry.chapters) chapters.add(key)
     for (const key of entry.themePacks) themePacks.add(key)
     for (const key of entry.events) events.add(key)

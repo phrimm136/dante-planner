@@ -147,23 +147,24 @@ export async function loadKeywordName({ params }: { params: { id: string } }) {
   return { name }
 }
 
-function battleEntityName(module: { default: unknown }, id: string): { name: string } {
-  return { name: (module.default as { name?: string }).name ?? id }
+function battleGroupName(module: { default: unknown }, id: string): { name: string } {
+  const names = module.default as Record<string, { name?: string }>
+  return { name: names[id]?.name ?? id }
 }
 
 export async function loadEnemyName({ params }: { params: { id: string } }) {
-  const module = await import(`@static/i18n/${i18n.language}/enemy/${params.id}.json`)
-  return battleEntityName(module, params.id)
+  const module = await import(`@static/i18n/${i18n.language}/enemyNameList.json`)
+  return battleGroupName(module, params.id)
 }
 
 export async function loadAssistantName({ params }: { params: { id: string } }) {
-  const module = await import(`@static/i18n/${i18n.language}/assistant/${params.id}.json`)
-  return battleEntityName(module, params.id)
+  const module = await import(`@static/i18n/${i18n.language}/assistantNameList.json`)
+  return battleGroupName(module, params.id)
 }
 
 export async function loadSinnerEventName({ params }: { params: { id: string } }) {
-  const module = await import(`@static/i18n/${i18n.language}/sinnerEvent/${params.id}.json`)
-  return battleEntityName(module, params.id)
+  const module = await import(`@static/i18n/${i18n.language}/sinnerEventNameList.json`)
+  return battleGroupName(module, params.id)
 }
 
 export async function loadAbEventTitle({ params }: { params: { id: string } }) {

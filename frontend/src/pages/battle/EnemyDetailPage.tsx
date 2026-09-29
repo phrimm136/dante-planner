@@ -5,30 +5,26 @@ import { EnemyIdSchema } from '@/shared/gameData'
 import { BattleDetailSkeleton } from './components/detail/BattleDetailSkeleton'
 import { BattleDetailView } from './components/detail/BattleDetailView'
 import { ENEMY_DETAIL, useBattleDetailSpec } from './hooks/useBattleDetailData'
-import { enemyFilterStore } from './stores/enemyFilterStore'
+import { battleTypeStore } from './stores/battleTypeStore'
 
 function EnemyDetailContent() {
   const { id } = useParams({ strict: false })
-  const [arrivalCases] = useState(() => enemyFilterStore.store.getState().values.selectedCases)
+  const [arrivalMode] = useState(() => battleTypeStore.getState().mode)
 
   if (!id) {
     throw new Error('Enemy ID is required')
   }
   const enemyId = EnemyIdSchema.parse(id)
-  const record = useBattleDetailSpec(ENEMY_DETAIL, enemyId)
+  const group = useBattleDetailSpec(ENEMY_DETAIL, enemyId)
 
   return (
     <BattleDetailView
       family="enemy"
       id={enemyId}
       config={ENEMY_DETAIL}
-      engagements={record.engagedStages}
-      phases={record.phases}
+      group={group}
       palette="enemy"
-      arrivalCases={arrivalCases}
-      fallbackLevel={undefined}
-      uptie={undefined}
-      badge={record.badge}
+      arrivalMode={arrivalMode}
     />
   )
 }

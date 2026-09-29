@@ -45,7 +45,7 @@ describe('CoinDisplay', () => {
   })
 
   it('draws enemy 1339 skill 133907 as two green coins', () => {
-    const [phase] = enemy1339.phases
+    const [phase] = enemy1339.units['1339'].phases
     const entry = SkillEntrySchema.parse(phase?.skills['133907'])
     const { container } = render(<CoinDisplay coins={entry.levels[0].coins} />)
     const green = getCoinSpritePath('GREEN')

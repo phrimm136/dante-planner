@@ -3,6 +3,7 @@ import { IdentityPassiveCard } from '@/shared/passive'
 import { FLAVOR_TEXT_COLOR } from '@/lib/constants'
 import type { ImportancePalette } from '@/shared/gameData'
 import { useBattleDetailI18n } from '../../hooks/useBattleDetailData'
+import { phaseTexts } from '../../lib/battleDetail'
 import type { BattleTextSource } from './BattleSkillCard'
 
 interface PassiveCondition {
@@ -44,7 +45,7 @@ export function BattlePassiveCard({
 
 function usePassiveText(source: BattleTextSource, passiveId: string) {
   const i18n = useBattleDetailI18n(source.config, source.id)
-  return i18n.phases?.[source.phaseId]?.passives?.[passiveId]
+  return phaseTexts(i18n, source.unitId, source.phaseId)?.passives?.[passiveId]
 }
 
 function PassiveName({ source, passiveId }: { source: BattleTextSource; passiveId: string }) {

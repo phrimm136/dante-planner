@@ -6,7 +6,7 @@ import { getCoinSpritePath, getImportanceIconPath } from '@/shared/assets'
 import { SkillEntrySchema, SkillIdSchema } from '@/shared/gameData'
 import { IdentitySkillCard } from '../IdentitySkillCard'
 
-const [phase] = enemy1339.phases
+const [phase] = enemy1339.units['1339'].phases
 const entry = SkillEntrySchema.parse(phase?.skills['133907'])
 const skillId = SkillIdSchema.parse('133907')
 

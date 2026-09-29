@@ -51,7 +51,7 @@ describe('enemy facet labels', () => {
 })
 
 describe('enemy facet keys', () => {
-  const keys = collectEnemyFacetKeys(EnemySpecListSchema.parse(enemySpec))
+  const keys = collectEnemyFacetKeys(Object.values(EnemySpecListSchema.parse(enemySpec)))
 
   it('orders the tutorial, then cantos and intervallos by number, then walpurgis, then april fools', () => {
     expect(keys.chapters).toEqual([

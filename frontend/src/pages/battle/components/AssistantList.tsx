@@ -1,25 +1,22 @@
 import type { FilterStore } from '@/components/hooks/filterStore'
 import { ASSISTANT_LIST } from '../hooks/useAssistantListData'
-import { compareBattleIds } from '../lib/battleListing'
-import { toAssistantEntity } from '../lib/assistant/assistantEntity'
 import { matchesAssistant, type AssistantFacetState } from '../lib/assistant/assistantFilter'
-import type { AssistantSpecList } from '../types/AssistantTypes'
+import type { BattleCase } from '../lib/battleVocabulary'
+import type { AssistantEntity } from '../types/AssistantTypes'
 import { BattleEntityList } from './BattleEntityList'
 
 interface AssistantListProps {
-  spec: AssistantSpecList
+  items: readonly AssistantEntity[]
+  mode: BattleCase
   store: FilterStore<AssistantFacetState>
 }
 
-export function AssistantList({ spec, store }: AssistantListProps) {
-  const entities = Object.entries(spec)
-    .map(([id, entry]) => toAssistantEntity(id, entry))
-    .sort(compareBattleIds)
-
+export function AssistantList({ items, mode, store }: AssistantListProps) {
   return (
     <BattleEntityList
       family="assistant"
-      items={entities}
+      items={items}
+      mode={mode}
       store={store}
       matches={matchesAssistant}
       listConfig={ASSISTANT_LIST}

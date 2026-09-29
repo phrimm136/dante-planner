@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { useStore } from 'zustand'
 
 import { useFilterStore } from '@/components/hooks/filterStore'
 import {
@@ -10,11 +11,13 @@ import {
   type FilterSectionEntry,
 } from '@/shared/filter'
 import { useEnemyListSpec } from '../hooks/useEnemyListData'
-import { BATTLE_CASES, type BattleCase } from '../lib/battleVocabulary'
+import { modeItems } from '../lib/battleListing'
+import type { BattleCase } from '../lib/battleVocabulary'
+import { toEnemyEntity } from '../lib/enemy/enemyEntity'
 import { collectEnemyFacetKeys } from '../lib/enemy/enemyFacetOptions'
-import { enemyFilterStore, setEnemyCases } from '../stores/enemyFilterStore'
+import { battleTypeStore, selectBattleMode } from '../stores/battleTypeStore'
+import { enemyFilterStore } from '../stores/enemyFilterStore'
 import {
-  CaseFilter,
   ChapterFilter,
   EnemyThemePackFilter,
   EventFilter,
@@ -27,7 +30,12 @@ import { EnemyList } from './EnemyList'
 export function EnemyPanel() {
   const { t } = useTranslation('database')
   const spec = useEnemyListSpec()
-  const keys = collectEnemyFacetKeys(spec)
+  const mode = useStore(battleTypeStore, selectBattleMode)
+  const items = modeItems(
+    Object.entries(spec).map(([id, entry]) => toEnemyEntity(id, entry)),
+    mode,
+  )
+  const keys = collectEnemyFacetKeys(items)
 
   const {
     values: filters,
@@ -111,18 +119,7 @@ export function EnemyPanel() {
     }
   }
 
-  const sections = [
-    filterSection({
-      key: 'selectedCases',
-      titleKey: 'battle.facet.case',
-      Component: CaseFilter,
-      selected: filters.selectedCases,
-      onSelectionChange: setEnemyCases,
-    }),
-    ...BATTLE_CASES.filter((battleCase) => filters.selectedCases.has(battleCase)).flatMap(
-      drillDowns,
-    ),
-  ]
+  const sections = drillDowns(mode)
 
   return (
     <FilterPageLayout
@@ -137,7 +134,7 @@ export function EnemyPanel() {
         />
       }
     >
-      <EnemyList spec={spec} store={store} />
+      <EnemyList items={items} mode={mode} store={store} />
     </FilterPageLayout>
   )
 }

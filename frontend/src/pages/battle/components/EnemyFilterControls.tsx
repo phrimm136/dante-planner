@@ -3,12 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useThemePackListI18n } from '@/shared/themePack'
 import { SearchableMultiSelect, ThemePackDropdown } from '@/shared/filter'
 import { useBattleFacetNames } from '../hooks/useBattleFacetNames'
-import {
-  BATTLE_CASES,
-  HIDDEN_BATTLE,
-  type BattleCase,
-  type HiddenBattle,
-} from '../lib/battleVocabulary'
+import { HIDDEN_BATTLE, type HiddenBattle } from '../lib/battleVocabulary'
 import {
   chapterLabel,
   luxcavationLabel,
@@ -24,22 +19,6 @@ interface ControlProps<T> {
 
 interface KeyedControlProps<T> extends ControlProps<T> {
   keys: readonly T[]
-}
-
-export function CaseFilter({ selected, onSelectionChange }: ControlProps<BattleCase>) {
-  const { t } = useTranslation('database')
-  const options = BATTLE_CASES.map((battleCase) => ({
-    value: battleCase,
-    label: t(`battle.case.${battleCase}`),
-  }))
-
-  return (
-    <OptionToggleGroup
-      options={options}
-      selected={selected}
-      onSelectionChange={onSelectionChange}
-    />
-  )
 }
 
 export function HiddenBattleFilter({ selected, onSelectionChange }: ControlProps<HiddenBattle>) {

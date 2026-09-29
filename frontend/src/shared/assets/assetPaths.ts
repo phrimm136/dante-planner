@@ -194,6 +194,10 @@ export const PATHS = {
   abEventImage: (eventId: string) => resolveAsset(`/images/abEvent/${eventId}.webp`),
   battleSprite: (family: string, spriteId: string) =>
     resolveAsset(`/images/${family}/${spriteId}.webp`),
+  battleSkillIcon: (iconId: string) => resolveAsset(`/images/battleSkill/${iconId}.webp`),
+  stageBackground: (mapName: string) => resolveAsset(`/images/stage/battle/${mapName}.webp`),
+  hazardPlate: (classType: string) =>
+    resolveAsset(`/images/UI/common/hazard-${classType.toLowerCase()}.webp`),
   bannerImage: () => resolveAsset('/images/banner/MD.webp'),
   logo: () => resolveAsset('/images/logo/LCMC.webp'),
 }
@@ -326,6 +330,10 @@ export const getFeaturedBossImagePath = (packId: string, portraitId: number | st
 export const getAbEventImagePath = (eventId: string): string => path('abEventImage', eventId)
 export const getBattleSpritePath = (family: string, spriteId: string): string =>
   path('battleSprite', family, spriteId)
+export const getBattleSkillIconPath = (iconId: string): string => path('battleSkillIcon', iconId)
+export const getStageBackgroundPath = (mapName: string): string =>
+  path('stageBackground', mapName)
+export const getHazardPlatePath = (classType: string): string => path('hazardPlate', classType)
 export const getBannerImagePath = (): string => path('bannerImage')
 export const getLogoPath = (): string => path('logo')
 

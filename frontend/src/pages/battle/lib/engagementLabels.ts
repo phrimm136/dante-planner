@@ -1,25 +1,21 @@
 import type { ThemePackI18n } from '@/shared/themePack'
 import type {
-  BattleEngagement,
   BattleStageList,
+  EngagementRow,
   BattleStageTexts,
   StageLabel,
   StageLabelText,
 } from '../schemas/BattleDetailSchemas'
 import type { BattleFacetNames } from '../schemas/BattleSpecSchemas'
-import { BATTLE_CASES, ENGAGEMENT_LABEL_SEPARATOR, type BattleCase } from './battleVocabulary'
+import { ENGAGEMENT_LABEL_SEPARATOR, ENGAGEMENT_PLACE_JOINER } from './battleVocabulary'
 import type { Translate } from './enemy/enemyFacetOptions'
+import type { SelectorRow } from './engagementRows'
 
 export interface EngagementSources {
   stages: BattleStageList
   texts: BattleStageTexts
   facetNames: BattleFacetNames
   themePacks: ThemePackI18n
-}
-
-export interface EngagementGroup {
-  battleCase: BattleCase
-  labels: string[]
 }
 
 function joined(...parts: (string | undefined)[]): string {
@@ -85,58 +81,65 @@ export function stageLabelText(
       return text?.title ?? label.titleKey
     case 'tutorial':
       return t('battle.chapter.tutorial', {})
+    case 'rpg':
+      return joined(
+        `${String(label.canto)}-${String(label.node)}`,
+        t('battle.rpgFloor', { floor: label.floor }),
+      )
   }
+}
+
+function mirrorPlaces(
+  stage: BattleStageList[string] | undefined,
+  sources: EngagementSources,
+  t: Translate,
+): string[] {
+  const mirror = stage?.mirror
+  if (mirror === undefined) return []
+  return [
+    ...(mirror.themeIds ?? []).flatMap((id) => sources.themePacks[String(id)]?.name ?? []),
+    ...(mirror.eventIds ?? []).flatMap((id) => sources.facetNames.events[id] ?? []),
+    ...(mirror.hiddenBattle === true ? [t('battle.facet.hidden', {})] : []),
+  ]
 }
 
 export function engagementPlace(
-  engagement: BattleEngagement,
+  row: EngagementRow,
   sources: EngagementSources,
   t: Translate,
 ): string {
-  const stage = sources.stages[engagement.stage]
-  const texts = sources.texts[engagement.stage]
-  if (engagement.label !== undefined) {
-    const label = stage?.labels?.[engagement.label]
-    if (label !== undefined) {
-      return stageLabelText(label, texts?.labelTexts?.[engagement.label], t)
-    }
-  }
-  if (engagement.themePack !== undefined) {
-    return sources.themePacks[engagement.themePack]?.name ?? engagement.themePack
-  }
-  if (engagement.eventId !== undefined) {
-    return sources.facetNames.events[engagement.eventId] ?? engagement.eventId
-  }
-  if (engagement.hiddenBattle === true) return t('battle.facet.hidden', {})
-  return texts?.title ?? engagement.stage
+  const stage = sources.stages[row.stage]
+  const texts = sources.texts[row.stage]
+  const places = [
+    ...row.label.flatMap((index) => {
+      const label = stage?.labels?.[index]
+      return label === undefined ? [] : [stageLabelText(label, texts?.labelTexts?.[index], t)]
+    }),
+    ...(row.label.length === 0 ? mirrorPlaces(stage, sources, t) : []),
+  ]
+  if (places.length > 0) return places.join(ENGAGEMENT_PLACE_JOINER)
+  return texts?.title ?? t(`battle.case.${row.case}`, {})
 }
 
 export function engagementLabel(
-  engagement: BattleEngagement,
+  row: EngagementRow,
   sources: EngagementSources,
   t: Translate,
 ): string {
-  const place = engagementPlace(engagement, sources, t)
-  if (engagement.level === null) return place
+  const place = engagementPlace(row, sources, t)
+  if (row.level === null) return place
   return t('battle.detail.engagement', {
     place,
-    level: String(engagement.level),
+    level: String(row.level),
   })
 }
 
-export function groupEngagements(
-  engagements: readonly BattleEngagement[],
+export function selectorRowLabel(
+  { row, suffix }: SelectorRow,
   sources: EngagementSources,
   t: Translate,
-): EngagementGroup[] {
-  const byCase = new Map<BattleCase, Set<string>>()
-  for (const engagement of engagements) {
-    const labels = byCase.get(engagement.case) ?? new Set<string>()
-    labels.add(engagementLabel(engagement, sources, t))
-    byCase.set(engagement.case, labels)
-  }
-  return BATTLE_CASES.flatMap((battleCase) => {
-    const labels = byCase.get(battleCase)
-    return labels === undefined ? [] : [{ battleCase, labels: [...labels] }]
-  })
+): string {
+  const label = engagementLabel(row, sources, t)
+  if (suffix === undefined) return label
+  return `${label} ${t('battle.detail.rowSuffix', { n: String(suffix) })}`
 }

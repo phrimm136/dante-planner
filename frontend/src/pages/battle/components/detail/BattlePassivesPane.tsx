@@ -10,6 +10,7 @@ import { useBattleDetailI18n } from '../../hooks/useBattleDetailData'
 import {
   isIdentityShaped,
   isShownPassive,
+  phaseTexts,
   visiblePassives,
   withShownPassives,
 } from '../../lib/battleDetail'
@@ -20,6 +21,7 @@ import type { BattleTextSource } from './BattleSkillCard'
 interface BattlePassivesPaneProps {
   source: BattleTextSource
   phase: BattlePhase
+  parts: readonly BattlePart[]
   part: BattlePart | undefined
   tier: number
   palette: ImportancePalette
@@ -39,9 +41,10 @@ export function BattlePassivesPane(props: BattlePassivesPaneProps) {
   )
 }
 
-function ShownPassives({ source, phase, part, tier, palette }: BattlePassivesPaneProps) {
+function ShownPassives({ source, phase, parts, part, tier, palette }: BattlePassivesPaneProps) {
   const { t } = useTranslation('database')
-  const texts = useBattleDetailI18n(source.config, source.id).phases?.[source.phaseId]?.passives
+  const i18n = useBattleDetailI18n(source.config, source.id)
+  const texts = phaseTexts(i18n, source.unitId, source.phaseId)?.passives
   const passives = phase.passives
 
   if (part === undefined && isIdentityShaped(passives)) {
@@ -63,7 +66,7 @@ function ShownPassives({ source, phase, part, tier, palette }: BattlePassivesPan
     )
   }
 
-  const entries = visiblePassives(phase, part).filter(([passiveId]) =>
+  const entries = visiblePassives(phase, parts, part).filter(([passiveId]) =>
     isShownPassive(texts, passiveId),
   )
 

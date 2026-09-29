@@ -32,6 +32,7 @@ interface SkillCardProps {
   isLocked?: boolean
   importanceLevel: number
   palette: ImportancePalette
+  missingImage?: 'placeholder' | 'frame'
 }
 
 export function SkillCard({
@@ -48,8 +49,10 @@ export function SkillCard({
   isLocked = false,
   importanceLevel,
   palette,
+  missingImage = 'placeholder',
 }: SkillCardProps) {
   const [showMissing, setShowMissing] = useState(false)
+  const frameOnly = showMissing && missingImage === 'frame'
 
   const attributeType = (skillData.attributeType ?? 'NEUTRAL') as SkillAttributeType
   const atkType = skillData.atkType
@@ -61,14 +64,14 @@ export function SkillCard({
       skillId={skillId}
       imageComposite={
         <SkillImageComposite
-          skillImagePath={skillImagePath}
+          skillImagePath={frameOnly ? undefined : skillImagePath}
           attributeType={attributeType}
           skillTier={skillTier}
           atkType={atkType}
           basePower={basePower}
           coinPower={coinPower}
           onImageError={() => setShowMissing(true)}
-          showMissingPlaceholder={showMissing}
+          showMissingPlaceholder={showMissing && !frameOnly}
         />
       }
       infoPanel={

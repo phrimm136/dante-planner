@@ -5,14 +5,17 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { getBattleSpritePath } from '@/shared/assets'
 import type { EntityListDataConfig } from '@/shared/entityCatalog'
-import { BATTLE_DETAIL_ROUTES, type BattleFamily } from '../lib/battleVocabulary'
-import type { BattleNameList } from '../schemas/BattleSpecSchemas'
+import { spritePlacementStyle } from '../lib/battleListing'
+import { BATTLE_DETAIL_ROUTES, type BattleCase, type BattleFamily } from '../lib/battleVocabulary'
+import type { BattleNameList, BattleSprite } from '../schemas/BattleSpecSchemas'
 import { BattleEntityName } from './BattleEntityName'
 
 interface BattleCardProps<TSpecList> {
   family: BattleFamily
   id: string
   spriteId: string
+  sprite: BattleSprite
+  mode: BattleCase
   listConfig: EntityListDataConfig<TSpecList, BattleNameList>
   enableHoverHighlight?: boolean
   enableDetailLink?: boolean
@@ -22,11 +25,14 @@ export function BattleCard<TSpecList>({
   family,
   id,
   spriteId,
+  sprite,
+  mode,
   listConfig,
   enableHoverHighlight = false,
   enableDetailLink = false,
 }: BattleCardProps<TSpecList>) {
   const [spriteMissing, setSpriteMissing] = useState(false)
+  const placement = spritePlacementStyle(sprite)
 
   const content = (
     <>
@@ -49,7 +55,8 @@ export function BattleCard<TSpecList>({
             onError={() => {
               setSpriteMissing(true)
             }}
-            className="h-full w-full object-contain"
+            style={placement}
+            className={placement === undefined ? 'h-full w-full object-contain' : undefined}
           />
         )}
       </div>
@@ -59,7 +66,7 @@ export function BattleCard<TSpecList>({
         className="truncate px-1 text-center text-xs leading-tight"
       >
         <Suspense fallback={<Skeleton className="h-4 w-full" />}>
-          <BattleEntityName listConfig={listConfig} id={id} />
+          <BattleEntityName listConfig={listConfig} id={id} mode={mode} />
         </Suspense>
       </div>
     </>

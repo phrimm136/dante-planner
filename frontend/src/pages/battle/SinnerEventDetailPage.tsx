@@ -1,33 +1,30 @@
-import { Suspense } from 'react'
+import { Suspense, useState } from 'react'
 import { useParams } from '@tanstack/react-router'
 
 import { SinnerEventIdSchema } from '@/shared/gameData'
 import { BattleDetailSkeleton } from './components/detail/BattleDetailSkeleton'
 import { BattleDetailView } from './components/detail/BattleDetailView'
 import { SINNER_EVENT_DETAIL, useBattleDetailSpec } from './hooks/useBattleDetailData'
-
-const NO_ARRIVAL_CASES: ReadonlySet<never> = new Set()
+import { battleTypeStore } from './stores/battleTypeStore'
 
 function SinnerEventDetailContent() {
   const { id } = useParams({ strict: false })
+  const [arrivalMode] = useState(() => battleTypeStore.getState().mode)
 
   if (!id) {
     throw new Error('Event sinner ID is required')
   }
   const sinnerEventId = SinnerEventIdSchema.parse(id)
-  const record = useBattleDetailSpec(SINNER_EVENT_DETAIL, sinnerEventId)
+  const group = useBattleDetailSpec(SINNER_EVENT_DETAIL, sinnerEventId)
 
   return (
     <BattleDetailView
       family="sinnerEvent"
       id={sinnerEventId}
       config={SINNER_EVENT_DETAIL}
-      engagements={record.engagedStages}
-      phases={record.phases}
+      group={group}
       palette="player"
-      arrivalCases={NO_ARRIVAL_CASES}
-      fallbackLevel={record.level}
-      uptie={record.uptie}
+      arrivalMode={arrivalMode}
     />
   )
 }

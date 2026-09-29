@@ -4,7 +4,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { FormattedDescription } from '@/shared/gameText'
 import { PanicName, PanicTypeSection, SanityConditionsSectionI18n } from '@/shared/sanity'
 import { useBattleDetailI18n } from '../../hooks/useBattleDetailData'
-import { sanityConditionIds } from '../../lib/battleDetail'
+import { phaseTexts, sanityConditionIds } from '../../lib/battleDetail'
 import type { BattlePhase } from '../../schemas/BattleDetailSchemas'
 import type { BattleTextSource } from './BattleSkillCard'
 
@@ -15,7 +15,8 @@ function BattlePanicSection({
   source: BattleTextSource
   panicType: string
 }) {
-  const sanity = useBattleDetailI18n(source.config, source.id).phases?.[source.phaseId]?.sanity
+  const i18n = useBattleDetailI18n(source.config, source.id)
+  const sanity = phaseTexts(i18n, source.unitId, source.phaseId)?.sanity
   if (sanity?.panicText === undefined) return null
 
   return (

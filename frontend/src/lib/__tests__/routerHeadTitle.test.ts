@@ -14,6 +14,8 @@ import {
   createMemoryHistory,
 } from '@tanstack/react-router'
 
+import i18n from '../i18n'
+import { router as appRouter } from '../router'
 import { titleFromMatches } from '../routerTitle'
 
 function buildRouter(readLang: () => string) {
@@ -82,5 +84,18 @@ describe('router match meta', () => {
     await router.invalidate()
 
     expect(titleFromMatches(router.state.matches)).toBe('KR-42 | suffix')
+  })
+})
+
+describe('battle detail titles', () => {
+  it.each([
+    ['/battle/enemy/$id', '8063', 'King Trash Crab'],
+    ['/battle/assistant/$id', '400001', 'Jia Xichun'],
+    ['/battle/sinnerEvent/$id', '10101', 'Yi Sang'],
+  ] as const)('%s publishes the group name of %s', async (to, id, name) => {
+    await i18n.changeLanguage('EN')
+    await appRouter.navigate({ to, params: { id } })
+
+    expect(titleFromMatches(appRouter.state.matches)).toBe(`${name} | Dante's Planner`)
   })
 })

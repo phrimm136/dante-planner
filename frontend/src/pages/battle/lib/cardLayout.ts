@@ -8,3 +8,8 @@ export const BATTLE_GEOMETRY: CardGeometry = {
 }
 
 export const BATTLE_DETAIL_SPRITE_ASPECT_RATIO = '1 / 1'
+
+export const BATTLE_CARD_SPRITE = {
+  pxPerUnit: 53,
+  anchorTopFraction: 0.15,
+} as const
