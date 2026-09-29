@@ -30,6 +30,8 @@ import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.shared.security.CsrfDoubleSubmitFilter;
 import org.danteplanner.backend.shared.security.CsrfTokenService;
 import org.danteplanner.backend.shared.util.CookieConstants;
+import org.danteplanner.backend.planner.service.PlannerCatalogSyncService;
+import org.danteplanner.backend.support.CatalogEffects;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -82,6 +84,9 @@ class ReplicaLagIT extends CausalHarnessSupport {
 
     @Autowired
     private ByIdReadGuard byIdReadGuard;
+
+    @Autowired
+    private PlannerCatalogSyncService catalogSyncService;
 
     @Autowired
     private PlannerQueryService plannerQueryService;
@@ -496,6 +501,7 @@ class ReplicaLagIT extends CausalHarnessSupport {
             case "owner-unpublish" -> plannerPublishingService.unpublish(owner.getId(), plannerId);
             default -> throw new IllegalArgumentException(withdrawal);
         }
+        CatalogEffects.drain(catalogSyncService, primaryJdbcTemplate, plannerId);
     }
 
     private boolean replicaStillPublished(UUID plannerId) {
@@ -528,6 +534,7 @@ class ReplicaLagIT extends CausalHarnessSupport {
 
         plannerPublishingService.unpublish(owner.getId(), plannerId);
         plannerPublishingService.publish(owner.getId(), plannerId);
+        CatalogEffects.drain(catalogSyncService, primaryJdbcTemplate, plannerId);
         replicationControl.awaitCaughtUp();
         double before = bulkheadQueries();
 
@@ -612,6 +619,8 @@ class ReplicaLagIT extends CausalHarnessSupport {
             replicationControl.stopReplica();
 
             userAccountLifecycleService.deleteAccount(owner.getId());
+            CatalogEffects.drain(catalogSyncService, primaryJdbcTemplate, first.getId());
+            CatalogEffects.drain(catalogSyncService, primaryJdbcTemplate, second.getId());
 
             Timestamp replicaOwnerDeletedAt = replicaJdbcTemplate.queryForObject(
                     "SELECT deleted_at FROM users WHERE id = ?", Timestamp.class, owner.getId());
@@ -635,10 +644,12 @@ class ReplicaLagIT extends CausalHarnessSupport {
         Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
 
         userAccountLifecycleService.deleteAccount(owner.getId());
+        CatalogEffects.drain(catalogSyncService, primaryJdbcTemplate, planner.getId());
         assertThat(stringRedisTemplate.hasKey("del:published-planner:" + planner.getId()))
                 .as("the deactivation must have marked the planner, or clearing it proves nothing")
                 .isTrue();
         userAccountLifecycleService.reactivateAccount(owner.getId());
+        CatalogEffects.drain(catalogSyncService, primaryJdbcTemplate, planner.getId());
         replicationControl.awaitCaughtUp();
         double before = bulkheadQueries();
 
@@ -663,6 +674,7 @@ class ReplicaLagIT extends CausalHarnessSupport {
             replicationControl.stopReplica();
 
             userAccountLifecycleService.deleteAccount(owner.getId());
+            CatalogEffects.drain(catalogSyncService, primaryJdbcTemplate, plannerId);
 
             assertThat(replicaStillPublished(plannerId)).isTrue();
             String base = "http://localhost:" + port + "/api/planner/md/published/" + plannerId;
@@ -686,6 +698,52 @@ class ReplicaLagIT extends CausalHarnessSupport {
             replicationControl.startReplica();
             replicationControl.awaitCaughtUp();
         }
+    }
+
+    @Test
+    @DisplayName("INV2 comment thread: a deactivated owner's thread answers 404 on the paused replica")
+    void commentThread_WhenOwnerDeactivatedOnPausedReplica_Returns404LikeACaughtUpReplica() throws Exception {
+        User owner = TestDataFactory.createTestUser(userRepository, "comment-lag-owner@example.com");
+        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        UUID plannerId = planner.getId();
+        replicationControl.awaitCaughtUp();
+
+        try {
+            replicationControl.stopReplica();
+
+            userAccountLifecycleService.deleteAccount(owner.getId());
+            CatalogEffects.drain(catalogSyncService, primaryJdbcTemplate, plannerId);
+
+            assertThat(replicaJdbcTemplate.queryForObject(
+                    "SELECT deleted_at FROM users WHERE id = ?", Timestamp.class, owner.getId()))
+                    .as("the paused replica must still hold the owner active")
+                    .isNull();
+            assertThat(stringRedisTemplate.hasKey("del:published-planner:" + plannerId))
+                    .as("the deactivation must have written the withdrawal marker")
+                    .isTrue();
+
+            assertNotFoundLikeACaughtUpReplica(getComments(plannerId), plannerId);
+        } finally {
+            replicationControl.startReplica();
+            replicationControl.awaitCaughtUp();
+        }
+    }
+
+    @Test
+    @DisplayName("INV2 comment thread: a deactivated owner's thread answers 404 on a caught-up replica")
+    void commentThread_WhenOwnerDeactivatedOnCaughtUpReplica_Returns404() throws Exception {
+        User owner = TestDataFactory.createTestUser(userRepository, "comment-caught-up-owner@example.com");
+        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+
+        userAccountLifecycleService.deleteAccount(owner.getId());
+        replicationControl.awaitCaughtUp();
+
+        assertNotFoundLikeACaughtUpReplica(getComments(planner.getId()), planner.getId());
+    }
+
+    private HttpResponse<String> getComments(UUID plannerId) throws Exception {
+        return send(HttpRequest.newBuilder(
+                URI.create("http://localhost:" + port + "/api/planner/" + plannerId + "/comments")).GET());
     }
 
     private HttpResponse<String> send(HttpRequest.Builder request) throws Exception {

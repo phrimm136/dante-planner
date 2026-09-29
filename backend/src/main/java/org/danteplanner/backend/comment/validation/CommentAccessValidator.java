@@ -15,10 +15,7 @@ public class CommentAccessValidator {
         if (currentUserId != null && planner.isOwnedBy(currentUserId)) {
             return;
         }
-        if (!planner.isPublished()) {
-            throw new CommentForbiddenException("Cannot view comments on unpublished planner");
-        }
-        if (planner.isOwnerDeactivated()) {
+        if (!planner.isPublished() || planner.isOwnerDeactivated()) {
             throw new PlannerNotFoundException(planner.getId());
         }
     }

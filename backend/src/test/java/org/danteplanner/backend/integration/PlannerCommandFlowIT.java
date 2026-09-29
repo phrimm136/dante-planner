@@ -21,8 +21,9 @@ import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.planner.searchindex.PlannerContentEntityExtractor;
-import org.danteplanner.backend.planner.service.PlannerFilterService;
+import org.danteplanner.backend.planner.service.PlannerCatalogSyncService;
 import org.danteplanner.backend.shared.entity.ContentEntityType;
+import org.danteplanner.backend.support.CatalogEffects;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -34,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Set;
@@ -113,10 +115,13 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
     private PlannerCatalogService catalogService;
 
     @Autowired
-    private PlannerFilterService filterService;
+    private PlannerCatalogSyncService catalogSyncService;
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     private User owner;
     private UUID deviceId;
@@ -144,7 +149,7 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
-        filterService.rebuildFilters(planner.getId());
+        catalogSyncService.syncPlanner(planner.getId(), 0L);
         // MySQL re-serializes a JSON column, so "the content did not change" is only
         // expressible against the stored form, not the string handed to the insert.
         return plannerRepository.findAggregateForOwner(planner.getId(), owner.getId()).orElseThrow();
@@ -200,6 +205,7 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
 
         commandService.upsertPlanner(owner.getId(), deviceId, plannerId,
                 edit(planner, "After Edit", null), false);
+        CatalogEffects.drain(catalogSyncService, jdbcTemplate, plannerId);
 
         PlannerCatalog catalogRow = catalogRepository.findById(plannerId).orElseThrow();
         assertThat(catalogRow.getTitle())
@@ -229,6 +235,7 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
         planner = plannerRepository.findById(plannerId).orElseThrow();
         commandService.upsertPlanner(owner.getId(), deviceId, plannerId,
                 edit(planner, "Keyword Edit", Set.of("Combustion", "Burst")), false);
+        CatalogEffects.drain(catalogSyncService, jdbcTemplate, plannerId);
 
         assertThat(keywordIndex(plannerId))
                 .as("the keyword index is re-extracted from the committed keyword set")
@@ -252,6 +259,7 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
         assertThat(keywordIndex(plannerId)).isNotEmpty();
 
         commandService.deletePlanner(owner.getId(), plannerId);
+        CatalogEffects.drain(catalogSyncService, jdbcTemplate, plannerId);
 
         assertThat(contentRepository.findById(plannerId).orElseThrow().getDeletedAt())
                 .as("the deletion stamp is on the committed row, not only on the in-memory aggregate")
@@ -280,6 +288,7 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
         commandService.upsertPlanner(owner.getId(), deviceId, plannerId, new UpsertPlannerRequest(
                 plannerId.toString(), "5F", planner.getTitle(), PlannerStatus.SAVED, SIX_FLOOR_CONTENT,
                 planner.getContentVersion(), PlannerType.MIRROR_DUNGEON, planner.getSyncVersion(), null), false);
+        CatalogEffects.drain(catalogSyncService, jdbcTemplate, plannerId);
 
         Planner saved = plannerRepository.findById(plannerId).orElseThrow();
         assertThat(saved.getContentJson()).contains("1006");
@@ -311,7 +320,7 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
-        filterService.rebuildFilters(planner.getId());
+        catalogSyncService.syncPlanner(planner.getId(), 0L);
         return plannerRepository.findById(planner.getId()).orElseThrow();
     }
 
@@ -320,6 +329,7 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
                 planner.getId().toString(), category, planner.getTitle(), PlannerStatus.SAVED,
                 planner.getContentJson(), planner.getContentVersion(), PlannerType.MIRROR_DUNGEON,
                 planner.getSyncVersion(), null), false);
+        CatalogEffects.drain(catalogSyncService, jdbcTemplate, planner.getId());
     }
 
     @Test

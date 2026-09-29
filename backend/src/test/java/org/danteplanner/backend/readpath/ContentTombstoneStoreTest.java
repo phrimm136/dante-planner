@@ -1,12 +1,12 @@
 package org.danteplanner.backend.readpath;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.dao.QueryTimeoutException;
-import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
@@ -25,9 +25,9 @@ import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -39,6 +39,7 @@ class ContentTombstoneStoreTest {
     @Mock StringRedisTemplate sharedTemplate;
     @Mock StringRedisTemplate authLocalTemplate;
     @Mock ValueOperations<String, String> authLocalValues;
+    @Mock ValueOperations<String, String> sharedValues;
 
     private SimpleMeterRegistry meterRegistry;
     private ContentTombstoneStore store;
@@ -83,20 +84,11 @@ class ContentTombstoneStoreTest {
     }
 
     @Test
-    void clearTombstone_WhenCalled_DeletesTheScopedKeyOnTheSharedStore() {
-        store.clearTombstone("published-planner", live);
+    void clearTombstoneOrThrow_WhenCalled_DeletesTheScopedKeyOnTheSharedStore() {
+        store.clearTombstoneOrThrow("published-planner", live);
 
         verify(sharedTemplate).delete("del:published-planner:" + live);
         verifyNoInteractions(authLocalTemplate);
-    }
-
-    @Test
-    void clearTombstone_WhenRedisFails_DoesNotThrow() {
-        when(sharedTemplate.delete("del:published-planner:" + live)).thenThrow(new QueryTimeoutException("down"));
-
-        store.clearTombstone("published-planner", live);
-
-        verify(sharedTemplate).delete("del:published-planner:" + live);
     }
 
     private List<ILoggingEvent> warningsDuring(Runnable action) {
@@ -113,12 +105,12 @@ class ContentTombstoneStoreTest {
     }
 
     @Test
-    void writeTombstones_WhenRedisFails_LogsAndDoesNotThrow() {
-        when(sharedTemplate.executePipelined(any(SessionCallback.class)))
-                .thenThrow(new QueryTimeoutException("down"));
+    void writeTombstone_WhenRedisFails_LogsAndDoesNotThrow() {
+        when(sharedTemplate.opsForValue()).thenReturn(sharedValues);
+        doThrow(new QueryTimeoutException("down")).when(sharedValues)
+                .set("del:planner:" + deleted, "1", Duration.ofHours(1));
 
-        List<ILoggingEvent> warnings = warningsDuring(
-                () -> store.writeTombstones("published-planner", List.of(live, deleted)));
+        List<ILoggingEvent> warnings = warningsDuring(() -> store.writeTombstone("planner", deleted));
 
         assertThat(warnings).hasSize(1);
         assertThat(warnings.get(0).getThrowableProxy().getClassName())
@@ -126,15 +118,59 @@ class ContentTombstoneStoreTest {
     }
 
     @Test
-    void clearTombstones_WhenRedisFails_LogsAndDoesNotThrow() {
-        when(sharedTemplate.delete(anyCollection())).thenThrow(new QueryTimeoutException("down"));
+    void writeTombstone_WhenCalled_SetsTheScopedKeyWithABoundedTtlOnTheSharedStore() {
+        when(sharedTemplate.opsForValue()).thenReturn(sharedValues);
 
-        List<ILoggingEvent> warnings = warningsDuring(
-                () -> store.clearTombstones("published-planner", List.of(live, deleted)));
+        store.writeTombstone("planner", deleted);
 
-        assertThat(warnings).hasSize(1);
-        assertThat(warnings.get(0).getThrowableProxy().getClassName())
-                .isEqualTo(QueryTimeoutException.class.getName());
-        verify(sharedTemplate).delete(List.of("del:published-planner:" + live, "del:published-planner:" + deleted));
+        verify(sharedValues).set("del:planner:" + deleted, "1", Duration.ofHours(1));
+        verifyNoInteractions(authLocalTemplate);
+    }
+
+    @Test
+    void writeTombstoneOrThrow_WhenCalled_SetsTheScopedKeyWithABoundedTtl() {
+        when(sharedTemplate.opsForValue()).thenReturn(sharedValues);
+
+        store.writeTombstoneOrThrow("published-planner", deleted);
+
+        verify(sharedValues).set("del:published-planner:" + deleted, "1", Duration.ofHours(1));
+    }
+
+    @Test
+    void writeTombstoneOrThrow_WhenRedisFails_Throws() {
+        when(sharedTemplate.opsForValue()).thenReturn(sharedValues);
+        doThrow(new QueryTimeoutException("down")).when(sharedValues)
+                .set("del:published-planner:" + deleted, "1", Duration.ofHours(1));
+
+        assertThatThrownBy(
+                        () -> store.writeTombstoneOrThrow("published-planner", deleted))
+                .isInstanceOf(QueryTimeoutException.class);
+    }
+
+    @Test
+    void clearTombstoneOrThrow_WhenRedisFails_Throws() {
+        when(sharedTemplate.delete("del:published-planner:" + live)).thenThrow(new QueryTimeoutException("down"));
+
+        assertThatThrownBy(
+                        () -> store.clearTombstoneOrThrow("published-planner", live))
+                .isInstanceOf(QueryTimeoutException.class);
+    }
+
+    @Test
+    void isTombstoned_WhenTheKeyExists_AnswersTrueFromTheLocalStore() {
+        when(authLocalTemplate.hasKey("del:planner:" + deleted)).thenReturn(true);
+        when(authLocalTemplate.hasKey("del:planner:" + live)).thenReturn(false);
+
+        assertThat(store.isTombstoned("planner", deleted)).isTrue();
+        assertThat(store.isTombstoned("planner", live)).isFalse();
+        verifyNoInteractions(sharedTemplate);
+    }
+
+    @Test
+    void isTombstoned_WhenRedisFails_FailsOpenAndCountsTheSkip() {
+        when(authLocalTemplate.hasKey("del:planner:" + deleted)).thenThrow(new QueryTimeoutException("down"));
+
+        assertThat(store.isTombstoned("planner", deleted)).isFalse();
+        assertThat(meterRegistry.counter("tombstone.check_skipped").count()).isEqualTo(1d);
     }
 }

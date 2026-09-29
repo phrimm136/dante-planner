@@ -9,10 +9,13 @@ import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.planner.entity.PlannerKeywords;
 import org.danteplanner.backend.planner.repository.PlannerKeywordBackfillRepository;
 import org.danteplanner.backend.planner.repository.PlannerKeywordBackfillRepository.KeywordBackfillRow;
+import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
+import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -27,7 +30,7 @@ public class PlannerKeywordBackfillService {
     };
 
     private final PlannerKeywordBackfillRepository repository;
-    private final PlannerFilterService filterService;
+    private final DomainEventRecorder domainEventRecorder;
     private final ObjectMapper objectMapper;
 
     /**
@@ -47,7 +50,8 @@ public class PlannerKeywordBackfillService {
             if (columnStale) {
                 repository.refreshContentKeywords(row.plannerId(), derived);
                 if (row.published()) {
-                    filterService.rebuildFilters(row.plannerId());
+                    domainEventRecorder.recordDomainEvent(
+                            DomainEventType.PLANNER_CATALOG_CHANGED, row.plannerId(), Map.of());
                 }
             }
             if (catalogStale) {
@@ -60,6 +64,7 @@ public class PlannerKeywordBackfillService {
         UUID last = rows.isEmpty() ? after : rows.get(rows.size() - 1).plannerId();
         return new BackfillPage(last, rows.size(), corrected);
     }
+
 
     private String derivedColumn(String selectionJson) {
         JsonNode selection;

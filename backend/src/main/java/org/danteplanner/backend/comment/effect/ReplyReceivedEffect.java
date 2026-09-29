@@ -61,8 +61,16 @@ public class ReplyReceivedEffect implements DomainEffect {
 
         Optional<PlannerComment> parent = Optional.ofNullable(reply.getParentCommentId())
                 .flatMap(commentRepository::findById);
-        parent.ifPresent(it -> notifyParentAuthor(reply, it, target.get(), pushes));
+        boolean published = plannerQueryService.isPublished(reply.getPlannerId());
+        parent.filter(it -> !it.isDeleted())
+                .filter(it -> published || it.getUserId().equals(target.get().ownerId()))
+                .ifPresent(it -> notifyParentAuthor(reply, it, target.get(), pushes));
 
+        if (!published) {
+            log.info("Planner {} left public view before reply {} was announced to its thread",
+                    reply.getPlannerId(), replyId);
+            return;
+        }
         UUID parentPublicId = parent.map(PlannerComment::getPublicId).orElse(null);
         pushes.commentEvent(reply.getPlannerId(), SseEventType.COMMENT_ADDED,
                 reply.getPublicId().toString(), reply.getUserId(),

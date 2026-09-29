@@ -75,6 +75,8 @@ class CommentReceivedEffectTest {
         effect = new CommentReceivedEffect(commentRepository, commentQueryService,
                 plannerQueryService, notificationDispatchService,
                 new DomainEventPayloadReader(new ObjectMapper()));
+
+        when(plannerQueryService.isPublished(PLANNER_ID)).thenReturn(true);
     }
 
     @Test

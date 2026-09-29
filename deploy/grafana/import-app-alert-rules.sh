@@ -115,5 +115,8 @@ post_rule "node-high-network-out" "0s" \
 TRAFFIC_DROP_EXPR='sum by (cluster) (increase(http_server_requests_seconds_count[5m])) < 1'
 post_rule "traffic-drop" "10m" "$TRAFFIC_DROP_EXPR"
 
-echo "== done: 13 rules in folder ${FOLDER}, group app-rules"
+post_rule "planner-catalog-sync-backlog" "2m" \
+  'max by (cluster) (planner_catalog_sync_backlog_age_seconds) > 60'
+
+echo "== done: 14 rules in folder ${FOLDER}, group app-rules"
 echo "   All noDataState=OK — non-paging while a series is absent; staleness-meta owns absence."

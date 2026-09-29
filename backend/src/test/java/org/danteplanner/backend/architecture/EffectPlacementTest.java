@@ -356,7 +356,11 @@ class EffectPlacementTest {
     }
 
     private static List<JavaMethod> transactionalMethods() {
-        return MAIN_CLASSES.stream()
+        return transactionalMethodsIn(MAIN_CLASSES);
+    }
+
+    private static List<JavaMethod> transactionalMethodsIn(JavaClasses classes) {
+        return classes.stream()
                 .flatMap(clazz -> clazz.getMethods().stream())
                 .filter(EffectPlacementTest::isTransactional)
                 .toList();
@@ -416,43 +420,111 @@ class EffectPlacementTest {
 
     private static final Map<String, Set<String>> TOMBSTONE_WRITES = Map.of(
             "org.danteplanner.backend.shared.readpath.ContentTombstoneStore",
-            Set.of("writeTombstone", "clearTombstone", "writeTombstones", "clearTombstones"));
+            Set.of("writeTombstone", "writeTombstoneOrThrow", "clearTombstoneOrThrow"));
+
+    private static final Set<String> ADMITTED_TOMBSTONE_WRITERS = Set.of(
+            "org.danteplanner.backend.planner.service.PlannerCatalogSyncService.syncPlanner");
+
+    private static final String ADMITTED_WRITER_CALLER =
+            "org.danteplanner.backend.planner.service.PlannerCatalogSyncService.drainPending";
+
+    private static final String FIXTURE_PACKAGE = "org.danteplanner.backend.architecture.fixture";
+
+    private static final JavaClasses FIXTURE_CLASSES = new ClassFileImporter()
+            .importPackages(FIXTURE_PACKAGE);
+
+    private static final Set<String> FIXTURE_ADMITTED_WRITERS = Set.of(
+            FIXTURE_PACKAGE + ".TombstoneWritingService.syncFromCommittedState");
+
+    private static final String FIXTURE_WRITER_CALLER = FIXTURE_PACKAGE + ".TombstoneWritingService.drainPending";
 
     @Test
-    @DisplayName("a transactional method reaches no tombstone write before its commit")
+    @DisplayName("a transactional method reaches no tombstone write before its commit, except the admitted catalog sync")
     void tombstoneWrite_WhenReachedFromATransactionalMethod_IsRejected() {
+        assertThat(tombstoneOffendersIn(MAIN_CLASSES, ADMITTED_TOMBSTONE_WRITERS))
+                .as("a tombstone written before the commit outlives a rollback and masks a live row "
+                        + "for its whole TTL; register it in an afterCommit synchronization. Only the "
+                        + "catalog sync may write inside a transaction, because it writes what state "
+                        + "already committed implies")
+                .isEmpty();
+    }
+
+    @Test
+    @DisplayName("every admitted tombstone writer still writes one and is called only by the catalog drain")
+    void admittedTombstoneWriter_WhenScanned_IsLiveAndCalledOnlyByTheDrain() {
+        assertThat(ADMITTED_TOMBSTONE_WRITERS)
+                .as("an admitted writer that no longer reaches a tombstone write grants permission "
+                        + "nobody uses; delete the entry")
+                .allSatisfy(name -> assertThat(transactionalMethodsIn(MAIN_CLASSES).stream()
+                        .filter(method -> qualifiedName(method).equals(name))
+                        .anyMatch(method -> !tombstoneWritesReachedFrom(method).isEmpty())).isTrue());
+        assertThat(callersOtherThan(MAIN_CLASSES, ADMITTED_TOMBSTONE_WRITERS, ADMITTED_WRITER_CALLER))
+                .as("the admitted sync writes before its commit, which is safe only from the catalog "
+                        + "drain deriving from committed state; a request path must record an event")
+                .isEmpty();
+    }
+
+    @Test
+    @DisplayName("the tombstone rule names the unadmitted write and the unadmitted caller in the fixture")
+    void tombstoneWrite_WhenTheRuleRunsOverTheFixture_NamesOnlyTheUnadmittedPaths() {
+        assertThat(tombstoneOffendersIn(FIXTURE_CLASSES, FIXTURE_ADMITTED_WRITERS))
+                .as("the rules above pass vacuously unless these show them rejecting a write")
+                .containsExactly(FIXTURE_PACKAGE + ".TombstoneWritingService.hideBeforeCommit -> "
+                        + "org.danteplanner.backend.shared.readpath.ContentTombstoneStore.writeTombstoneOrThrow");
+        assertThat(callersOtherThan(FIXTURE_CLASSES, FIXTURE_ADMITTED_WRITERS, FIXTURE_WRITER_CALLER))
+                .containsExactly(FIXTURE_PACKAGE + ".TombstoneWritingService.syncFromElsewhere -> "
+                        + FIXTURE_PACKAGE + ".TombstoneWritingService.syncFromCommittedState");
+    }
+
+    private static Set<String> tombstoneOffendersIn(JavaClasses classes, Set<String> admitted) {
         Set<String> offenders = new TreeSet<>();
+        for (JavaMethod root : transactionalMethodsIn(classes)) {
+            if (admitted.contains(qualifiedName(root))) {
+                continue;
+            }
+            tombstoneWritesReachedFrom(root).forEach(target -> offenders.add(qualifiedName(root) + " -> " + target));
+        }
+        return offenders;
+    }
 
-        for (JavaMethod root : transactionalMethods()) {
-            List<String> reached = new ArrayList<>();
-            Set<String> visited = new HashSet<>();
-            Deque<JavaCodeUnit> pending = new ArrayDeque<>();
-            pending.push(root);
-            visited.add(qualifiedName(root));
+    private static List<String> tombstoneWritesReachedFrom(JavaMethod root) {
+        List<String> reached = new ArrayList<>();
+        Set<String> visited = new HashSet<>();
+        Deque<JavaCodeUnit> pending = new ArrayDeque<>();
+        pending.push(root);
+        visited.add(qualifiedName(root));
 
-            while (!pending.isEmpty()) {
-                for (JavaMethodCall call : pending.pop().getMethodCallsFromSelf()) {
-                    String owner = call.getTargetOwner().getFullName();
-                    if (isEffect(TOMBSTONE_WRITES, owner, call.getTarget().getName())) {
-                        reached.add(owner + "." + call.getTarget().getName());
-                        continue;
-                    }
-                    if (!owner.startsWith("org.danteplanner.backend")) {
-                        continue;
-                    }
-                    for (JavaMethod callee : calleesOf(call)) {
-                        if (!isTransactional(callee) && visited.add(qualifiedName(callee))) {
-                            pending.push(callee);
-                        }
+        while (!pending.isEmpty()) {
+            for (JavaMethodCall call : pending.pop().getMethodCallsFromSelf()) {
+                String owner = call.getTargetOwner().getFullName();
+                if (isEffect(TOMBSTONE_WRITES, owner, call.getTarget().getName())) {
+                    reached.add(owner + "." + call.getTarget().getName());
+                    continue;
+                }
+                if (!owner.startsWith("org.danteplanner.backend")) {
+                    continue;
+                }
+                for (JavaMethod callee : calleesOf(call)) {
+                    if (!isTransactional(callee) && visited.add(qualifiedName(callee))) {
+                        pending.push(callee);
                     }
                 }
             }
-            reached.forEach(target -> offenders.add(qualifiedName(root) + " -> " + target));
         }
+        return reached;
+    }
 
-        assertThat(offenders)
-                .as("a tombstone written before the commit outlives a rollback and masks a live row "
-                        + "for its whole TTL; register it in an afterCommit synchronization")
-                .isEmpty();
+    private static Set<String> callersOtherThan(JavaClasses classes, Set<String> admitted, String allowedCaller) {
+        Set<String> offenders = new TreeSet<>();
+        for (JavaClass caller : classes) {
+            for (JavaMethodCall call : caller.getMethodCallsFromSelf()) {
+                String target = call.getTargetOwner().getFullName() + "." + call.getTarget().getName();
+                String origin = qualifiedName(call.getOrigin());
+                if (admitted.contains(target) && !origin.equals(allowedCaller)) {
+                    offenders.add(origin + " -> " + target);
+                }
+            }
+        }
+        return offenders;
     }
 }

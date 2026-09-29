@@ -18,9 +18,10 @@ import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.planner.scheduler.PlannerKeywordBackfill;
-import org.danteplanner.backend.planner.service.PlannerFilterService;
+import org.danteplanner.backend.planner.service.PlannerCatalogSyncService;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.support.CatalogEffects;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -96,7 +97,7 @@ class PlannerKeywordFacetIT {
     private PlannerCatalogService catalogService;
 
     @Autowired
-    private PlannerFilterService filterService;
+    private PlannerCatalogSyncService catalogSyncService;
 
     @Autowired
     private DataSource dataSource;
@@ -142,7 +143,7 @@ class PlannerKeywordFacetIT {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
-        filterService.rebuildFilters(planner.getId());
+        catalogSyncService.syncPlanner(planner.getId(), 0L);
         return planner;
     }
 
@@ -159,7 +160,7 @@ class PlannerKeywordFacetIT {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(empty.getId()).build());
         catalogService.add(empty);
-        filterService.rebuildFilters(empty.getId());
+        catalogSyncService.syncPlanner(empty.getId(), 0L);
 
         mockMvc.perform(get("/api/planner/md/published").param("identity", "10101"))
                 .andExpect(status().isOk())
@@ -203,6 +204,7 @@ class PlannerKeywordFacetIT {
                 planner.getContentVersion(), PlannerType.MIRROR_DUNGEON, planner.getSyncVersion(),
                 Set.of("AccelBullet", "NotAKeyword"));
         commandService.upsertPlanner(owner.getId(), null, planner.getId(), req, false);
+        CatalogEffects.drain(catalogSyncService, jdbc(), planner.getId());
 
         // Stored JSON carries only the normalized current id
         String stored = new JdbcTemplate(dataSource).queryForObject(
@@ -347,7 +349,9 @@ class PlannerKeywordFacetIT {
     }
 
     private Integer runBackfill() {
-        return keywordBackfill.backfill();
+        Integer corrected = keywordBackfill.backfill();
+        CatalogEffects.drainAll(catalogSyncService, jdbc());
+        return corrected;
     }
 
     private void clearColumns(UUID plannerId) {
@@ -376,7 +380,7 @@ class PlannerKeywordFacetIT {
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
         clearColumns(planner.getId());
-        filterService.rebuildFilters(planner.getId());
+        catalogSyncService.syncPlanner(planner.getId(), 0L);
         return planner;
     }
 
@@ -419,7 +423,7 @@ class PlannerKeywordFacetIT {
                 planner.getId().toString());
         jdbc().update("UPDATE planner_catalog SET selected_keywords = '[\"Sinking\"]' WHERE planner_id = UUID_TO_BIN(?)",
                 planner.getId().toString());
-        filterService.rebuildFilters(planner.getId());
+        catalogSyncService.syncPlanner(planner.getId(), 0L);
         assertThat(indexedKeywords(planner.getId())).containsExactly("Sinking");
 
         runBackfill();
@@ -434,7 +438,7 @@ class PlannerKeywordFacetIT {
         Planner planner = publishedWithoutColumn("Backfill Legacy Column", List.of("ChargeLoad"));
         jdbc().update("UPDATE planner_content SET selected_keywords = '[\"ChargeLoad\"]' WHERE planner_id = UUID_TO_BIN(?)",
                 planner.getId().toString());
-        filterService.rebuildFilters(planner.getId());
+        catalogSyncService.syncPlanner(planner.getId(), 0L);
         assertThat(indexedKeywords(planner.getId())).containsExactly("ChargeLoad");
 
         runBackfill();

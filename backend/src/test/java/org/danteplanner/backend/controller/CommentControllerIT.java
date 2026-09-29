@@ -190,11 +190,11 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Should return 403 when accessing unpublished planner as non-owner")
-        void getComments_WhenUnpublishedPlanner_Returns403() throws Exception {
+        @DisplayName("Should return 404 when accessing unpublished planner as non-owner")
+        void getComments_WhenUnpublishedPlanner_Returns404() throws Exception {
             mockMvc.perform(get("/api/planner/{id}/comments", unpublishedPlanner.getId())
                             .cookie(otherUserAccessTokenCookie()))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isNotFound());
         }
 
 

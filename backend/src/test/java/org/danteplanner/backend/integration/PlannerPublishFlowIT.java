@@ -17,11 +17,12 @@ import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepositor
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
-import org.danteplanner.backend.planner.service.PlannerFilterService;
+import org.danteplanner.backend.planner.service.PlannerCatalogSyncService;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.AuthCookies;
+import org.danteplanner.backend.support.CatalogEffects;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -94,10 +96,13 @@ class PlannerPublishFlowIT {
     private PlannerKeywordFilterRepository keywordFilterRepository;
 
     @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @Autowired
     private PlannerCatalogService catalogService;
 
     @Autowired
-    private PlannerFilterService filterService;
+    private PlannerCatalogSyncService catalogSyncService;
 
     @Autowired
     private JwtTokenService jwtTokenService;
@@ -145,7 +150,7 @@ class PlannerPublishFlowIT {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
-        filterService.rebuildFilters(planner.getId());
+        catalogSyncService.syncPlanner(planner.getId(), 0L);
         long filterRowsBefore = entityFilterRows(planner.getId());
         assertThat(filterRowsBefore).isPositive();
 
@@ -161,6 +166,7 @@ class PlannerPublishFlowIT {
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(titleEdit)))
                 .andExpect(status().isOk());
+        CatalogEffects.drain(catalogSyncService, jdbcTemplate, planner.getId());
 
         mockMvc.perform(get("/api/planner/md/published"))
                 .andExpect(status().isOk())
@@ -191,6 +197,7 @@ class PlannerPublishFlowIT {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.published").value(true))
                 .andExpect(jsonPath("$.title").value("Intent One-Shot"));
+        CatalogEffects.drain(catalogSyncService, jdbcTemplate, plannerId);
 
         assertThat(plannerRepository.existsById(plannerId))
                 .as("the single request created the planner").isTrue();
@@ -388,6 +395,7 @@ class PlannerPublishFlowIT {
         assertThat(entityFilterRows(planner.getId())).isZero();
 
         saveBack(received, "Renamed", received.get("content").asText());
+        CatalogEffects.drain(catalogSyncService, jdbcTemplate, planner.getId());
 
         assertThat(entityFilterRows(planner.getId()))
                 .as("no rebuild ran, so the deliberately unbuilt index stays empty")
@@ -408,6 +416,7 @@ class PlannerPublishFlowIT {
         ObjectNode edited = (ObjectNode) objectMapper.readTree(received.get("content").asText());
         ((ObjectNode) edited.get("equipment").get("1").get("identity")).put("id", "10102");
         saveBack(received, received.get("title").asText(), objectMapper.writeValueAsString(edited));
+        CatalogEffects.drain(catalogSyncService, jdbcTemplate, planner.getId());
 
         assertThat(entityFilterRows(planner.getId()))
                 .as("the changed composition rebuilt the index")
@@ -443,7 +452,7 @@ class PlannerPublishFlowIT {
                 .selectedKeywords(Set.of("Sinking", "NotAKeyword")).published(true).save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
-        filterService.rebuildFilters(planner.getId());
+        catalogSyncService.syncPlanner(planner.getId(), 0L);
         return stored(planner.getId());
     }
 

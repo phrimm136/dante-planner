@@ -11,7 +11,7 @@ import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepositor
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
-import org.danteplanner.backend.planner.service.PlannerFilterService;
+import org.danteplanner.backend.planner.service.PlannerCatalogSyncService;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -86,7 +86,7 @@ class PlannerTitleSearchIT {
     private PlannerCatalogService catalogService;
 
     @Autowired
-    private PlannerFilterService filterService;
+    private PlannerCatalogSyncService catalogSyncService;
 
     @Autowired
     private DataSource dataSource;
@@ -125,7 +125,7 @@ class PlannerTitleSearchIT {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
-        filterService.rebuildFilters(planner.getId());
+        catalogSyncService.syncPlanner(planner.getId(), 0L);
     }
 
     @Test

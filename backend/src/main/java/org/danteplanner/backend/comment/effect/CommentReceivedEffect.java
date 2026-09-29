@@ -60,6 +60,11 @@ public class CommentReceivedEffect implements DomainEffect {
 
         notifyOwner(comment, target.get(), pushes);
 
+        if (!plannerQueryService.isPublished(comment.getPlannerId())) {
+            log.info("Planner {} left public view before comment {} was announced to its thread",
+                    comment.getPlannerId(), commentId);
+            return;
+        }
         pushes.commentEvent(comment.getPlannerId(), SseEventType.COMMENT_ADDED,
                 comment.getPublicId().toString(), comment.getUserId(),
                 commentQueryService.broadcastNode(comment, null));

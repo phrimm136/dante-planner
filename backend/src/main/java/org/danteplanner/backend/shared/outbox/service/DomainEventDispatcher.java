@@ -4,6 +4,7 @@ import io.sentry.Sentry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.outbox.config.OutboxConstants;
+import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.repository.DomainEventRepository;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.springframework.stereotype.Service;
@@ -58,6 +59,6 @@ public class DomainEventDispatcher {
     @Transactional
     public List<Long> pendingEventIds(Instant cutoff, int batchSize) {
         return events.undispatchedIdsOlderThan(
-                cutoff, OutboxConstants.DISPATCH_ATTEMPT_CAP, batchSize);
+                cutoff, OutboxConstants.DISPATCH_ATTEMPT_CAP, DomainEventType.dispatchedNames(), batchSize);
     }
 }

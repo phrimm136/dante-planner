@@ -7,7 +7,7 @@ import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
-import org.danteplanner.backend.planner.service.PlannerFilterService;
+import org.danteplanner.backend.planner.service.PlannerCatalogSyncService;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -73,7 +73,7 @@ class PlannerUserDeleteSweepIT {
     private PlannerCatalogService catalogService;
 
     @Autowired
-    private PlannerFilterService filterService;
+    private PlannerCatalogSyncService catalogSyncService;
 
     @Autowired
     private UserAccountLifecycleService lifecycleService;
@@ -187,7 +187,7 @@ class PlannerUserDeleteSweepIT {
         statsRepository.save(PlannerStats.builder()
                 .plannerId(published.getId()).viewCount(3).upvotes(1).build());
         catalogService.add(published);
-        filterService.rebuildFilters(published.getId());
+        catalogSyncService.syncPlanner(published.getId(), 0L);
         insertPlannerVote(other.getId(), published.getId());
         jdbc.update("INSERT INTO planner_views (planner_id, viewer_hash, view_date, created_at) "
                 + "VALUES (UUID_TO_BIN(?), SHA2('viewer', 256), ?, NOW())",

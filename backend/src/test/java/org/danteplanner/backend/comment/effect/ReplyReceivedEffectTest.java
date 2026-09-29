@@ -77,6 +77,8 @@ class ReplyReceivedEffectTest {
                 new DomainEventPayloadReader(new ObjectMapper()));
         when(plannerQueryService.notificationTargetOf(PLANNER_ID)).thenReturn(Optional.of(
                 new PlannerNotificationTarget(PLANNER_ID, "Test Planner", OWNER_ID, true)));
+
+        when(plannerQueryService.isPublished(PLANNER_ID)).thenReturn(true);
     }
 
     @Test

@@ -1,8 +1,10 @@
 package org.danteplanner.backend.integration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import net.javacrumbs.shedlock.core.LockProvider;
 import org.danteplanner.backend.config.TestConfig;
+import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerType;
@@ -14,9 +16,11 @@ import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerDriftReconciler;
 import org.danteplanner.backend.planner.service.PlannerDriftReconciler.DriftRecord;
-import org.danteplanner.backend.planner.service.PlannerFilterService;
+import org.danteplanner.backend.planner.service.PlannerCatalogSyncService;
+import org.danteplanner.backend.planner.searchindex.PlannerContentEntityExtractor;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.support.CatalogEffects;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,7 +34,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.convention.TestBean;
 
 import javax.sql.DataSource;
+import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -81,7 +87,7 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
     private PlannerCatalogService catalogService;
 
     @Autowired
-    private PlannerFilterService filterService;
+    private PlannerCatalogSyncService catalogSyncService;
 
     @Autowired
     private PlannerDriftReconciler reconciler;
@@ -122,7 +128,7 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
-        filterService.rebuildFilters(planner.getId());
+        catalogSyncService.syncPlanner(planner.getId(), 0L);
         return planner;
     }
 
@@ -426,7 +432,7 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
-        filterService.rebuildFilters(planner.getId());
+        catalogSyncService.syncPlanner(planner.getId(), 0L);
 
         assertThat(kindsFor(reconciler.reconcile(), planner.getId())).doesNotContain("entity_filter");
     }
@@ -442,7 +448,7 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
-        filterService.rebuildFilters(planner.getId());
+        catalogSyncService.syncPlanner(planner.getId(), 0L);
 
         assertThat(kindsFor(reconciler.reconcile(), planner.getId()))
                 .doesNotContain("entity_filter", "keyword_filter");
@@ -485,7 +491,7 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
         Planner planner = publishClean("Index Follows Column", Set.of("Sinking"));
         jdbc.update("UPDATE planner_content SET selected_keywords = '[\"Burst\"]' WHERE planner_id = UUID_TO_BIN(?)",
                 planner.getId().toString());
-        filterService.rebuildFilters(planner.getId());
+        catalogSyncService.syncPlanner(planner.getId(), 0L);
 
         assertThat(recordsFor(reconciler.reconcile(), planner.getId(), "keyword_filter"))
                 .singleElement()
@@ -493,5 +499,88 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
                     assertThat(record.expected()).isEqualTo("[Sinking]");
                     assertThat(record.actual()).isEqualTo("[Burst]");
                 });
+    }
+
+    @Autowired
+    private PlannerContentEntityExtractor entityExtractor;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    private static final String CRASH_CONTENT = TestDataFactory.VALID_CONTENT.replace(
+            "\"selectedGiftIds\":[\"9001\"]", "\"selectedGiftIds\":[\"9099\"]");
+
+    private Set<String> indexedEntities(UUID plannerId) {
+        return Set.copyOf(jdbc.queryForList("SELECT CONCAT(entity_type, ':', entity_id) FROM planner_entity_filter "
+                + "WHERE planner_id = UUID_TO_BIN(?)", String.class, plannerId.toString()));
+    }
+
+    private Set<String> oracleEntities(UUID plannerId) throws Exception {
+        Map<String, Object> row = jdbc.queryForMap("SELECT content, category FROM planner_content "
+                + "WHERE planner_id = UUID_TO_BIN(?)", plannerId.toString());
+        return entityExtractor.extract(objectMapper.readTree(row.get("content").toString()),
+                        MDCategory.fromValue(row.get("category").toString()))
+                .stream()
+                .map(ref -> ref.type().name() + ":" + ref.id())
+                .collect(Collectors.toSet());
+    }
+
+    private long catalogChangedEventOf(UUID plannerId) {
+        return jdbc.queryForObject("SELECT id FROM domain_events WHERE aggregate_id = UUID_TO_BIN(?) "
+                + "AND event_type = 'PLANNER_CATALOG_CHANGED'", Long.class, plannerId.toString());
+    }
+
+    private void recordStaleCatalogChangedEvent(UUID plannerId) {
+        jdbc.update("INSERT INTO domain_events (event_type, aggregate_id, payload, created_at) "
+                + "VALUES ('PLANNER_CATALOG_CHANGED', UUID_TO_BIN(?), '{}', DATE_SUB(NOW(6), INTERVAL 2 MINUTE))",
+                plannerId.toString());
+    }
+
+    @Test
+    @DisplayName("an edit whose catalog sync fails stays pending and the next pass rebuilds its filter rows")
+    void catalogSync_WhenTheRebuildFails_TheNextPassRebuildsTheFilterRows() throws Exception {
+        Planner planner = publishClean("Crash Window Rebuild Throws", Set.of());
+        assertThat(CRASH_CONTENT).isNotEqualTo(TestDataFactory.VALID_CONTENT);
+        CatalogEffects.drainAll(catalogSyncService, jdbc);
+        Set<String> before = indexedEntities(planner.getId());
+        Object procedure = jdbc.queryForMap("SHOW CREATE PROCEDURE rebuild_planner_filters_scoped")
+                .get("Create Procedure");
+        assertThat(procedure).as("procedure body readable for restore").isNotNull();
+
+        jdbc.update("UPDATE planner_content SET content = ? WHERE planner_id = UUID_TO_BIN(?)",
+                CRASH_CONTENT, planner.getId().toString());
+        recordStaleCatalogChangedEvent(planner.getId());
+        long eventId = catalogChangedEventOf(planner.getId());
+
+        jdbc.execute("DROP PROCEDURE rebuild_planner_filters_scoped");
+        try {
+            catalogSyncService.drainPending();
+        } finally {
+            jdbc.execute(procedure.toString());
+        }
+
+        assertThat(jdbc.queryForObject("SELECT dispatched_at FROM domain_events WHERE id = ?", Timestamp.class,
+                eventId)).as("the failed sync left the row pending").isNull();
+        assertThat(jdbc.queryForObject("SELECT attempts FROM domain_events WHERE id = ?", Integer.class, eventId))
+                .as("the failed sync counted an attempt").isEqualTo(1);
+        assertThat(indexedEntities(planner.getId())).as("the failed rebuild left the old rows").isEqualTo(before);
+
+        CatalogEffects.drain(catalogSyncService, jdbc, planner.getId());
+
+        assertThat(indexedEntities(planner.getId())).isEqualTo(oracleEntities(planner.getId()));
+    }
+
+    @Test
+    @DisplayName("an edit whose after-commit step never ran has its filter rows rebuilt by the next pass")
+    void catalogSync_WhenTheEventWasNeverConsumed_TheNextPassRebuildsTheFilterRows() throws Exception {
+        Planner planner = publishClean("Crash Window Pod Dies", Set.of());
+        jdbc.update("UPDATE planner_content SET content = ? WHERE planner_id = UUID_TO_BIN(?)",
+                CRASH_CONTENT, planner.getId().toString());
+        recordStaleCatalogChangedEvent(planner.getId());
+        assertThat(indexedEntities(planner.getId())).isNotEqualTo(oracleEntities(planner.getId()));
+
+        CatalogEffects.drain(catalogSyncService, jdbc, planner.getId());
+
+        assertThat(indexedEntities(planner.getId())).isEqualTo(oracleEntities(planner.getId()));
     }
 }

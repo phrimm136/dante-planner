@@ -18,6 +18,8 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.exception.AccountDeletedException;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
+import org.danteplanner.backend.planner.service.PlannerCatalogSyncService;
+import org.danteplanner.backend.support.CatalogEffects;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -79,6 +81,9 @@ class DeactivatedOwnerVisibilityIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private PlannerCatalogSyncService catalogSyncService;
 
     @Autowired
     private UserRepository userRepository;
@@ -223,6 +228,7 @@ class DeactivatedOwnerVisibilityIT extends SharedMySqlContainerSupport {
         Planner draft = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
 
         lifecycleService.deleteAccount(owner.getId());
+        CatalogEffects.drain(catalogSyncService, new JdbcTemplate(dataSource), planner.getId());
 
         assertThat(withdrawalMarked(planner.getId())).isTrue();
         assertThat(withdrawalMarked(draft.getId())).isFalse();
@@ -257,9 +263,11 @@ class DeactivatedOwnerVisibilityIT extends SharedMySqlContainerSupport {
     @Test
     void reactivateAccount_WhenCommitted_ClearsTheWithdrawalMarkers() {
         lifecycleService.deleteAccount(owner.getId());
+        CatalogEffects.drain(catalogSyncService, new JdbcTemplate(dataSource), planner.getId());
         assertThat(withdrawalMarked(planner.getId())).isTrue();
 
         lifecycleService.reactivateAccount(owner.getId());
+        CatalogEffects.drain(catalogSyncService, new JdbcTemplate(dataSource), planner.getId());
 
         assertThat(withdrawalMarked(planner.getId())).isFalse();
     }
@@ -315,6 +323,7 @@ class DeactivatedOwnerVisibilityIT extends SharedMySqlContainerSupport {
         }
 
         if (published(draft.getId())) {
+            CatalogEffects.drain(catalogSyncService, new JdbcTemplate(dataSource), draft.getId());
             assertThat(withdrawalMarked(draft.getId()))
                     .as("a planner published around its owner's deactivation must carry the withdrawal marker")
                     .isTrue();

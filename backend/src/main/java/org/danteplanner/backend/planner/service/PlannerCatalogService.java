@@ -10,15 +10,14 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.RecommendedSql;
 import org.danteplanner.backend.planner.sync.JsonDocuments;
-import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
-import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
+import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
+import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -33,51 +32,35 @@ public class PlannerCatalogService {
     private final PlannerCatalogRepository catalogRepository;
     private final PlannerRepository plannerRepository;
     private final PlannerStatsRepository statsRepository;
-    private final PlannerFilterService filterService;
+    private final DomainEventRecorder domainEventRecorder;
     private final ObjectMapper objectMapper;
-    private final ContentTombstoneStore tombstoneStore;
     private final int recommendedThreshold;
 
     public PlannerCatalogService(
             PlannerCatalogRepository catalogRepository,
             PlannerRepository plannerRepository,
             PlannerStatsRepository statsRepository,
-            PlannerFilterService filterService,
+            DomainEventRecorder domainEventRecorder,
             ObjectMapper objectMapper,
-            ContentTombstoneStore tombstoneStore,
             @Value("${planner.recommended-threshold}") int recommendedThreshold) {
         this.catalogRepository = catalogRepository;
         this.plannerRepository = plannerRepository;
         this.statsRepository = statsRepository;
-        this.filterService = filterService;
+        this.domainEventRecorder = domainEventRecorder;
         this.objectMapper = objectMapper;
-        this.tombstoneStore = tombstoneStore;
         this.recommendedThreshold = recommendedThreshold;
     }
 
     @Transactional
     public void onBecameVisible(Planner planner) {
         add(planner);
-        filterService.requestRebuild(planner.getId());
-        UUID plannerId = planner.getId();
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-            @Override
-            public void afterCommit() {
-                tombstoneStore.clearTombstone(ByIdReadGuard.PUBLISHED_PLANNER_SCOPE, plannerId);
-            }
-        });
+        recordCatalogChanged(planner.getId());
     }
 
     @Transactional
     public void onBecameInvisible(UUID plannerId) {
         remove(plannerId);
-        filterService.requestClear(plannerId);
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-            @Override
-            public void afterCommit() {
-                tombstoneStore.writeTombstone(ByIdReadGuard.PUBLISHED_PLANNER_SCOPE, plannerId);
-            }
-        });
+        recordCatalogChanged(plannerId);
     }
 
     @Transactional
@@ -85,12 +68,7 @@ public class PlannerCatalogService {
         List<UUID> publishedIds = plannerRepository.findPublishedIdsOwnedBy(userId);
         int withdrawn = catalogRepository.withdrawAllOwnedBy(userId);
         log.debug("Withdrew {} catalog rows owned by user {}", withdrawn, userId);
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-            @Override
-            public void afterCommit() {
-                tombstoneStore.writeTombstones(ByIdReadGuard.PUBLISHED_PLANNER_SCOPE, publishedIds);
-            }
-        });
+        publishedIds.forEach(this::recordCatalogChanged);
     }
 
     @Transactional
@@ -98,20 +76,19 @@ public class PlannerCatalogService {
         List<UUID> publishedIds = plannerRepository.findPublishedIdsOwnedBy(userId);
         int restored = catalogRepository.restoreAllOwnedBy(userId, recommendedThreshold);
         log.debug("Restored {} catalog rows owned by user {}", restored, userId);
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-            @Override
-            public void afterCommit() {
-                tombstoneStore.clearTombstones(ByIdReadGuard.PUBLISHED_PLANNER_SCOPE, publishedIds);
-            }
-        });
+        publishedIds.forEach(this::recordCatalogChanged);
     }
 
     @Transactional
     public void onVisibleEditCommitted(Planner planner) {
         syncScalarCopy(planner);
         if (searchableCompositionChanged(planner)) {
-            filterService.requestRebuild(planner.getId());
+            recordCatalogChanged(planner.getId());
         }
+    }
+
+    private void recordCatalogChanged(UUID plannerId) {
+        domainEventRecorder.recordDomainEvent(DomainEventType.PLANNER_CATALOG_CHANGED, plannerId, Map.of());
     }
 
     private boolean searchableCompositionChanged(Planner planner) {

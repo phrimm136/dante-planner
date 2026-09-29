@@ -6,7 +6,7 @@ import java.util.function.Predicate;
 
 import org.danteplanner.backend.architecture.fixture.UnadmittedFilterRebuilder;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
-import org.danteplanner.backend.planner.service.PlannerFilterService;
+import org.danteplanner.backend.planner.service.PlannerCatalogSyncService;
 import org.danteplanner.backend.planner.searchindex.PlannerContentEntityExtractor;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
 import org.danteplanner.backend.planner.validation.floor.FloorRules;
@@ -30,7 +30,7 @@ class ContentWritersAdmitFloorsTest {
             PlannerContentEntityExtractor.class.getName());
 
     private static final Set<String> FROZEN_UNADMITTED_WRITERS = Set.of(
-            PlannerFilterService.class.getName());
+            PlannerCatalogSyncService.class.getName());
 
     private static final JavaClasses PRODUCTION = new ClassFileImporter()
             .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
@@ -63,7 +63,7 @@ class ContentWritersAdmitFloorsTest {
     @DisplayName("The writer selector finds today's index writers")
     void contentWriters_WhenScanned_IncludeEveryKnownWriter() {
         assertThat(topLevelNames(PRODUCTION, ContentWritersAdmitFloorsTest::writes)).containsExactlyInAnyOrder(
-                PlannerFilterService.class.getName());
+                PlannerCatalogSyncService.class.getName());
     }
 
     @Test

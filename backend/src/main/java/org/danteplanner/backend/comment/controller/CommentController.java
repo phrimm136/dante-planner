@@ -21,6 +21,7 @@ import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.moderation.dto.CommentReportRequest;
 import org.danteplanner.backend.moderation.dto.CommentReportResponse;
 import org.danteplanner.backend.shared.ratelimit.RateLimitExempt;
+import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.shared.ratelimit.RateLimited;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,6 +45,7 @@ public class CommentController {
     private final CommentQueryService commentQueryService;
     private final CommentCommandService commentCommandService;
     private final CommentEngagementService commentEngagementService;
+    private final ByIdReadGuard byIdReadGuard;
 
     @RateLimitExempt
     @GetMapping("/planner/{plannerId}/comments")
@@ -51,7 +53,9 @@ public class CommentController {
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID plannerId) {
 
-        List<CommentTreeNode> comments = commentQueryService.getCommentTree(plannerId, userId);
+        List<CommentTreeNode> comments = byIdReadGuard.readPublicView(ByIdReadGuard.PLANNER_ENTITY_TYPE,
+                ByIdReadGuard.PUBLISHED_PLANNER_SCOPE, plannerId,
+                () -> commentQueryService.getCommentTree(plannerId, userId));
         return ResponseEntity.ok(comments);
     }
 

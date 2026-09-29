@@ -221,6 +221,11 @@ public class PublishedPlannerQueryService {
     }
 
     @Transactional(readOnly = true)
+    public boolean isPublished(UUID plannerId) {
+        return plannerRepository.existsPublishedById(plannerId);
+    }
+
+    @Transactional(readOnly = true)
     public UUID requirePublished(UUID plannerId) {
         accessGuard.checkPublished(plannerId);
         return plannerId;

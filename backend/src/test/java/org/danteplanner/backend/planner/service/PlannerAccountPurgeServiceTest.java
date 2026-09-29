@@ -19,7 +19,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class PlannerAccountPurgeServiceTest {
@@ -70,5 +72,13 @@ class PlannerAccountPurgeServiceTest {
         inOrder.verify(plannerModerationRepository).deleteAllByPlannerIds(plannerIds);
         inOrder.verify(plannerPublicationRepository).deleteAllByPlannerIds(plannerIds);
         inOrder.verify(plannerContentRepository).deleteAllByPlannerIds(plannerIds);
+    }
+
+    @Test
+    void plannerIdsOwnedBy_WhenTheOwnerHasPlanners_ReturnsTheirIds() {
+        List<UUID> owned = List.of(UUID.randomUUID(), UUID.randomUUID());
+        when(plannerRepository.findIdsByUserId(USER_ID)).thenReturn(owned);
+
+        assertThat(purgeService.plannerIdsOwnedBy(USER_ID)).isEqualTo(owned);
     }
 }

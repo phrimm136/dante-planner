@@ -87,19 +87,6 @@ class CausalGateIT extends CausalHarnessSupport {
     private static final Pattern GTID_VALUE = Pattern.compile(
             "[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}:\\d");
 
-    /**
-     * The transactions a first publish commits: the main one and the {@code AFTER_COMMIT}
-     * {@code REQUIRES_NEW} filter rebuild. Each is pinned to a row this test owns, so the count is
-     * a property of the fixtures rather than of whatever else the shared harness database happens
-     * to hold.
-     *
-     * <p>The notification fan-out is deliberately not among them. It is derived from the
-     * {@code domain_events} row this request commits, in a transaction of the dispatcher's own on
-     * another thread — so it is not a commit the request could gate a replica read past, and the
-     * publisher never waits for it.</p>
-     */
-    private static final int PUBLISH_TRANSACTIONS = 2;
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -246,93 +233,6 @@ class CausalGateIT extends CausalHarnessSupport {
     }
 
     /**
-     * A first publish commits more than once on the
-     * request thread — the main transaction, then the AFTER_COMMIT {@code REQUIRES_NEW} listener
-     * transactions (filter rebuild, notification fan-out). Two properties are pinned through a
-     * real request: the transaction manager registered a commit capture for EACH of those
-     * transactions (the recording decorator observed one {@code recordCommit} per committed GTID),
-     * and the minted cookie covers every GTID the request committed, so a follow-up replica read
-     * gates past the filter rebuild, not only the main commit.
-     *
-     * <p>The fan-out writes only for users who asked for publication notices, so the test creates
-     * its own subscriber: without one the fan-out transaction is empty, commits no GTID, and the
-     * request's transaction count becomes a property of whichever neighbour last left a
-     * {@code user_settings} row in the shared harness database. Each of the three transactions is
-     * asserted through a row this test owns, and the counts are read off the request's own capture
-     * and cookie rather than off {@code @@GLOBAL.gtid_executed} — the primary is shared with every
-     * other harness class, whose contexts stay cached and keep committing, so a window on the
-     * global set counts transactions this request never made.</p>
-     *
-     * <p>Coverage, not equality: the cookie must gate past every commit, and a superset satisfies
-     * that as well as the exact union does — which is what this asserts.</p>
-     *
-     * <p>Which branch supplied the value is pinned separately by
-     * {@code ownGtidTracker_WhenWriteCommits_ReportsTransactionOwnGtid}.</p>
-     */
-    @Test
-    @DisplayName("A first publish commits more than once; every commit is captured and the ryw cookie gates past all of them")
-    void ownGtidUnionAcrossCommits_WhenPublishCommitsTwice_EveryCommitIsCapturedAndCookieCoversAll()
-            throws Exception {
-        User author = TestDataFactory.createTestUser(
-                userRepository, "gtid-union-author-" + UUID.randomUUID() + "@example.com");
-        User subscriber = TestDataFactory.createTestUser(
-                userRepository, "gtid-union-subscriber-" + UUID.randomUUID() + "@example.com");
-        subscribeToPublications(subscriber.getId());
-        Cookie auth = AuthCookies.accessToken(
-                TestDataFactory.generateAccessToken(jwtTokenService, author));
-        Cookie device = AuthCookies.freshDeviceId();
-        UUID plannerId = UUID.randomUUID();
-
-        mockMvc.perform(put("/api/planner/md/" + plannerId).with(withCsrf())
-                        .cookie(auth, device)
-                        .contentType(APPLICATION_JSON)
-                        .content(upsertBody(plannerId, "gtid-union-draft")))
-                .andExpect(status().is2xxSuccessful());
-
-        int recordingsBefore = gtidWriteCapture.commitRecordings();
-
-        MvcResult published = mockMvc.perform(post("/api/planner/md/" + plannerId + "/publish")
-                        .with(withCsrf())
-                        .cookie(auth, device)
-                        .contentType(APPLICATION_JSON))
-                .andExpect(status().is2xxSuccessful())
-                .andReturn();
-
-        int recordingsDuringPublish = gtidWriteCapture.commitRecordings() - recordingsBefore;
-        String executedAfter = primaryJdbc.queryForObject(
-                "SELECT @@GLOBAL.gtid_executed", String.class);
-        String cookieGtidSet = new String(
-                Base64.getUrlDecoder().decode(assertGtidCookie(published).value()),
-                StandardCharsets.UTF_8);
-
-        assertThat(countPublished(plannerId))
-                .as("the main transaction must have published this planner")
-                .isPositive();
-        assertThat(countByPlannerId("planner_entity_filter", plannerId))
-                .as("the filter rebuild (the AFTER_COMMIT REQUIRES_NEW commit) must have "
-                        + "populated the entity index")
-                .isPositive();
-        assertThat(countDomainEvents(plannerId))
-                .as("the publish commits the row the fan-out is later derived from, in the main "
-                        + "transaction rather than in one of its own")
-                .isPositive();
-        assertThat(recordingsDuringPublish)
-                .as("the transaction manager must register a commit capture for EACH of the %s "
-                        + "transactions the request committed, not only the main one",
-                        PUBLISH_TRANSACTIONS)
-                .isGreaterThanOrEqualTo(PUBLISH_TRANSACTIONS);
-        assertThat(countTransactions(cookieGtidSet))
-                .as("the ryw cookie (%s) must union all %s of the request's commits, so a replica "
-                        + "read gates past the filter rebuild, not only the main commit",
-                        cookieGtidSet, PUBLISH_TRANSACTIONS)
-                .isGreaterThanOrEqualTo(PUBLISH_TRANSACTIONS);
-        assertThat(gtidSubset(cookieGtidSet, executedAfter))
-                .as("the cookie (%s) must name transactions the primary committed (%s)",
-                        cookieGtidSet, executedAfter)
-                .isTrue();
-    }
-
-    /**
      * Regression test for the capture reading session state off the wrong connection. The old
      * afterCommit synchronization looked the connection up through the lazy proxy, which
      * materialised a fresh pooled one carrying no session state, so every commit silently took the
@@ -375,56 +275,6 @@ class CausalGateIT extends CausalHarnessSupport {
         Long subset = primaryJdbc.queryForObject(
                 "SELECT GTID_SUBSET(?, ?)", Long.class, candidate, containing);
         return subset != null && subset == 1L;
-    }
-
-    private int countByPlannerId(String table, UUID plannerId) {
-        Integer count = primaryJdbc.queryForObject(
-                "SELECT COUNT(*) FROM " + table + " WHERE planner_id = UUID_TO_BIN(?)",
-                Integer.class, plannerId.toString());
-        return count == null ? 0 : count;
-    }
-
-    private int countPublished(UUID plannerId) {
-        Integer count = primaryJdbc.queryForObject(
-                "SELECT COUNT(*) FROM planner_publication "
-                        + "WHERE planner_id = UUID_TO_BIN(?) AND published = TRUE",
-                Integer.class, plannerId.toString());
-        return count == null ? 0 : count;
-    }
-
-    /** Sums the transaction count over a canonical {@code gtid_set} ({@code uuid:a-b[:c-d],...}). */
-    private static long countTransactions(String gtidSet) {
-        if (gtidSet == null || gtidSet.isBlank()) {
-            return 0;
-        }
-        long total = 0;
-        for (String sourceSet : gtidSet.replaceAll("\\s+", "").split(",")) {
-            String[] parts = sourceSet.split(":");
-            for (int i = 1; i < parts.length; i++) {
-                int dash = parts[i].indexOf('-');
-                total += dash < 0
-                        ? 1
-                        : Long.parseLong(parts[i].substring(dash + 1))
-                                - Long.parseLong(parts[i].substring(0, dash)) + 1;
-            }
-        }
-        return total;
-    }
-
-    /** Opts a user into publication notices, which is what makes the fan-out write a row. */
-    private void subscribeToPublications(Long userId) {
-        primaryJdbc.update(
-                "INSERT INTO user_settings (user_id, sync_enabled, notify_comments, "
-                        + "notify_recommendations, notify_new_publications) "
-                        + "VALUES (?, FALSE, TRUE, TRUE, TRUE)",
-                userId);
-    }
-
-    private int countDomainEvents(UUID plannerId) {
-        Integer count = primaryJdbc.queryForObject(
-                "SELECT COUNT(*) FROM domain_events WHERE aggregate_id = UUID_TO_BIN(?)",
-                Integer.class, plannerId.toString());
-        return count == null ? 0 : count;
     }
 
     /**

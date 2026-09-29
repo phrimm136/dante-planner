@@ -196,8 +196,8 @@ class DomainEventDispatchIT extends SharedMySqlContainerSupport {
                     """,
                     eventType, planner.getId().toString(), idKey, id);
             return jdbcTemplate.queryForObject(
-                    "SELECT id FROM domain_events WHERE aggregate_id = UUID_TO_BIN(?)",
-                    Long.class, planner.getId().toString());
+                    "SELECT id FROM domain_events WHERE aggregate_id = UUID_TO_BIN(?) AND event_type = ?",
+                    Long.class, planner.getId().toString(), eventType);
         });
     }
 
