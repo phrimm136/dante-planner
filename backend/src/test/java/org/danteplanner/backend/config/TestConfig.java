@@ -32,11 +32,6 @@ public class TestConfig {
      * Rate-limit semantics themselves are covered by the containerized
      * {@code RateLimitServiceIT}.</p>
      *
-     * <p>Deliberately NOT named {@code rateLimitProxyManager}: with
-     * {@code allow-bean-definition-overriding=true}, the component-scanned definition of the
-     * same name would register later and silently replace this one. A distinct name plus
-     * {@code @Primary} wins by-type injection instead.</p>
-     *
      * @return a ProxyManager whose buckets never exhaust
      */
     @Bean
