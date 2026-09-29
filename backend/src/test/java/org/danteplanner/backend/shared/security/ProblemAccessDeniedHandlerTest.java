@@ -2,11 +2,14 @@ package org.danteplanner.backend.shared.security;
 
 import java.time.Instant;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.ErrorResponseException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,5 +50,18 @@ class ProblemAccessDeniedHandlerTest {
         assertThat(response.getStatus()).isEqualTo(403);
         assertThat(response.getContentType()).isEqualTo(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
         assertThat(body.path("code").asText()).isEqualTo("FORBIDDEN");
+    }
+
+    @Test
+    void handle_WhenRefusalCarriesHeaders_WritesThemWithTheBody() throws Exception {
+        ErrorResponseException unavailable = new ErrorResponseException(HttpStatus.SERVICE_UNAVAILABLE);
+        unavailable.getHeaders().set(HttpHeaders.RETRY_AFTER, "10");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        handler.handle(new MockHttpServletRequest("GET", "/api/moderation/users"), response,
+                new AccessDeniedException("denied", unavailable));
+
+        assertThat(response.getStatus()).isEqualTo(503);
+        assertThat(response.getHeader(HttpHeaders.RETRY_AFTER)).isEqualTo("10");
     }
 }

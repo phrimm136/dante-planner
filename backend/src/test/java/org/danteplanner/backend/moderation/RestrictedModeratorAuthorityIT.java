@@ -137,6 +137,7 @@ class RestrictedModeratorAuthorityIT extends SharedMySqlContainerSupport {
                 .andExpect(jsonPath("$.code").value("USER_TIMED_OUT"));
 
         assertThat(reloaded().isTakenDown()).isFalse();
+        assertThat(reloaded().isPublished()).isTrue();
     }
 
     @Test
@@ -352,6 +353,36 @@ class RestrictedModeratorAuthorityIT extends SharedMySqlContainerSupport {
         for (String field : List.of("type", "title", "status", "detail", "code", "message")) {
             assertThat(privileged.get(field)).as(field).isEqualTo(ordinary.get(field));
         }
+    }
+
+    @Test
+    void removeTimeout_WhenActorBanned_Returns403AndTargetStaysTimedOut() throws Exception {
+        timeOut(owner);
+        ban(moderator);
+
+        mockMvc.perform(post("/api/moderation/user/{suffix}/clear-timeout", owner.getUsernameSuffix()).with(withCsrf())
+                        .cookie(moderatorCookie)
+                        .contentType(APPLICATION_JSON)
+                        .content(REASON))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("USER_BANNED"));
+
+        assertThat(userRepository.findById(owner.getId()).orElseThrow().isTimedOut()).isTrue();
+    }
+
+    @Test
+    void unbanUser_WhenActorBanned_Returns403AndTargetStaysBanned() throws Exception {
+        ban(owner);
+        ban(moderator);
+
+        mockMvc.perform(post("/api/moderation/user/{suffix}/unban", owner.getUsernameSuffix()).with(withCsrf())
+                        .cookie(moderatorCookie)
+                        .contentType(APPLICATION_JSON)
+                        .content(REASON))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("USER_BANNED"));
+
+        assertThat(userRepository.findById(owner.getId()).orElseThrow().isBanned()).isTrue();
     }
 
     private JsonNode problemBody(MockHttpServletRequestBuilder request) throws Exception {

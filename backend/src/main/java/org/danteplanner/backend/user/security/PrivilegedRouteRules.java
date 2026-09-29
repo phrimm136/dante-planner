@@ -5,6 +5,10 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
@@ -12,9 +16,13 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionException;
+import org.springframework.web.ErrorResponseException;
 
 import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
+import org.danteplanner.backend.shared.exception.DegradationErrorConstants;
 import org.danteplanner.backend.shared.exception.DomainException;
+import org.danteplanner.backend.shared.exception.Problems;
 import org.danteplanner.backend.shared.security.SecurityRuleContribution;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserRole;
@@ -50,16 +58,32 @@ public class PrivilegedRouteRules implements SecurityRuleContribution {
                 .requestMatchers("/api/moderation/**").access(liveActorAtLeast(UserRole.MODERATOR));
     }
 
-    private AuthorizationManager<RequestAuthorizationContext> liveActorAtLeast(UserRole minimum) {
+    AuthorizationManager<RequestAuthorizationContext> liveActorAtLeast(UserRole minimum) {
         return (authentication, context) -> {
             if (!(authentication.get().getPrincipal() instanceof Long actorId)) {
                 return new AuthorizationDecision(false);
             }
-            refusal(userService.findActiveByIdFromPrimary(actorId), minimum, clock).ifPresent(refused -> {
+            Optional<User> actor;
+            try {
+                actor = userService.findActiveByIdFromPrimary(actorId);
+            } catch (DataAccessException | TransactionException failure) {
+                throw new AccessDeniedException(failure.getMessage(), databaseUnavailable(failure));
+            }
+            refusal(actor, minimum, clock).ifPresent(refused -> {
                 throw new AccessDeniedException(refused.getMessage(), refused);
             });
             return new AuthorizationDecision(true);
         };
+    }
+
+    private static ErrorResponseException databaseUnavailable(RuntimeException failure) {
+        ErrorResponseException unavailable = new ErrorResponseException(HttpStatus.SERVICE_UNAVAILABLE,
+                Problems.fill(ProblemDetail.forStatus(HttpStatus.SERVICE_UNAVAILABLE),
+                        DegradationErrorConstants.DB_UNAVAILABLE.code(),
+                        DegradationErrorConstants.DB_UNAVAILABLE.message()),
+                failure);
+        unavailable.getHeaders().set(HttpHeaders.RETRY_AFTER, DegradationErrorConstants.RETRY_AFTER_SECONDS);
+        return unavailable;
     }
 
     static Optional<DomainException> refusal(Optional<User> actor, UserRole minimum, Clock clock) {
