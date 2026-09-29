@@ -1,6 +1,8 @@
 package org.danteplanner.backend.architecture.fixture;
 
-import org.danteplanner.backend.planner.floor.FloorBoundary;
+import org.danteplanner.backend.planner.entity.MDCategory;
+import org.danteplanner.backend.planner.validation.FloorRuleTable;
+import org.danteplanner.backend.planner.validation.floor.FloorBoundary;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -9,8 +11,8 @@ public class BoundaryFloorReader {
 
     private static final String FLOOR_SELECTIONS = "floorSelections";
 
-    public FloorBoundary.Parsed parse(JsonNode content) {
-        return FloorBoundary.parse(content.path(FLOOR_SELECTIONS), 5);
+    public FloorBoundary.Parsed parse(JsonNode content, FloorRuleTable table) {
+        return FloorBoundary.parse(content.path(FLOOR_SELECTIONS), table.layout(MDCategory.F5));
     }
 
     public String missingFloorsMessage() {

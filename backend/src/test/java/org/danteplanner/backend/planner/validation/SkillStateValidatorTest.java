@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
-import org.danteplanner.backend.planner.floor.Stage;
+import org.danteplanner.backend.planner.validation.floor.Stage;
 import org.junit.jupiter.api.Test;
 
 import java.util.stream.Collectors;

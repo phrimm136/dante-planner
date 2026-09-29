@@ -2,7 +2,7 @@ import { lookupByGiftId, giftDisplayName } from '@/pages/egoGift'
 import type { FloorThemeSelection } from '@/pages/themePack'
 import type { EGOGiftSpec } from '@/pages/egoGift'
 import { DUNGEON_IDX, allowedDifficulties } from '@/shared/gameData'
-import { normalAllowedAt } from './floorRules'
+import { normalAllowedAt } from './validation/floor/floorRules'
 import type { DungeonIdx, EncodedGiftId, MDCategory } from '@/shared/gameData'
 
 export function isGiftAffordableForThemePack(gift: EGOGiftSpec, themePackId: string): boolean {

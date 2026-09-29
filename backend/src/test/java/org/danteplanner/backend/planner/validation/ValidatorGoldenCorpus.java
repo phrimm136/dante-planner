@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.danteplanner.backend.planner.entity.PlannerType;
-import org.danteplanner.backend.planner.floor.Stage;
+import org.danteplanner.backend.planner.validation.floor.Stage;
 
 /**
  * The bad-input corpus whose validator output is frozen by {@link ValidatorGoldenCorpusTest}.

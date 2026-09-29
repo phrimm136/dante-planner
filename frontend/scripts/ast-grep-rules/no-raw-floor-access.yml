@@ -1,13 +1,13 @@
 id: no-raw-floor-access
 language: TypeScript
 severity: error
-message: Floor rules live in pages/planner/lib/floorRules.ts; call parseFloors and admitFloors instead of reading floorSelections or floor counts directly.
+message: Floor rules live in pages/planner/lib/validation/floor/floorRules.ts; call parseFloors and admitFloors instead of reading floorSelections or floor counts directly.
 files:
   - src/**/*.ts
 ignores:
   - '**/__tests__/**'
   - '**/*.test.ts'
-  - src/pages/planner/lib/floorRules.ts
+  - src/pages/planner/lib/validation/floor/floorRules.ts
   - src/pages/planner/schemas/**
   - src/pages/planner/lib/editorStateCodec.ts
   - src/pages/planner/lib/plannerContentExtractors.ts

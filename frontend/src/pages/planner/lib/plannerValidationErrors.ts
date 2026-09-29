@@ -1,7 +1,8 @@
 import { validationAppError } from '@/lib/apiErrorClassifier'
 import { DUNGEON_IDX } from '@/shared/gameData'
 import type { DungeonIdx } from '@/shared/gameData'
-import type { BeErrorCode } from './floorRules'
+import type { ContentPath } from './validation/contentPath'
+import type { FloorRuleCode } from './validation/violation'
 
 export interface ValidationError {
   code: string
@@ -44,26 +45,25 @@ export interface StartGiftValidationError extends ValidationError {
 }
 
 export interface FloorRuleValidationError extends ValidationError {
-  code: Exclude<BeErrorCode, 'VALUE_OUT_OF_RANGE'>
-  field: string
+  code: Exclude<FloorRuleCode, 'VALUE_OUT_OF_RANGE'>
+  path: ContentPath
 }
 
 export interface DifficultyOutOfRangeValidationError extends ValidationError {
   code: 'VALUE_OUT_OF_RANGE'
-  field: string
+  path: ContentPath
   context: { allowedDifficulties: readonly DungeonIdx[] }
 }
 
 export interface FloorUnknownGiftValidationError extends ValidationError {
   code: 'FLOOR_UNKNOWN_GIFT_ID'
-  field: string
-  floorNumber: number
+  path: ContentPath
   context: { giftId: string }
 }
 
 export interface GiftNotAffordableValidationError extends ValidationError {
   code: 'GIFT_NOT_AFFORDABLE'
-  field: string
+  path: ContentPath
   context: { giftName: string; themePackId: string }
 }
 
@@ -73,6 +73,7 @@ export interface TitleValidationError extends ValidationError {
 
 export interface KeywordValidationError extends ValidationError {
   code: 'KEYWORD_INVALID'
+  context: { keyword: string }
 }
 
 export interface EntityIdValidationError extends ValidationError {
@@ -102,7 +103,16 @@ const UNKNOWN_ENTITY_ID_KEYS = {
   START_BUFF_UNKNOWN_ID: 'pages.plannerMD.validation.unknownStartBuffId',
 } as const satisfies Record<EntityIdValidationError['code'], string>
 
-const DIFFICULTY_FIELD_SUFFIX = '.difficulty'
+const DIFFICULTY_FIELD = 'difficulty'
+
+function floorNumberOf([, floor]: ContentPath): string {
+  return floor?.kind === 'index' ? String(floor.value + 1) : ''
+}
+
+function endsAtDifficulty(path: ContentPath): boolean {
+  const last = path.at(-1)
+  return last?.kind === 'field' && last.name === DIFFICULTY_FIELD
+}
 
 const REQUIRED_DIFFICULTY_KEYS: Partial<Record<DungeonIdx, string>> = {
   [DUNGEON_IDX.HARD]: 'pages.plannerMD.publish.requiresHardMode',
@@ -132,11 +142,28 @@ export function toUserFriendlyError(error: PlannerValidationError): {
     case 'FLOOR_MISSING_THEME_PACK':
       return { key: 'pages.plannerMD.publish.missingThemePack' }
     case 'INVALID_SEQUENCE':
-      return error.field.endsWith(DIFFICULTY_FIELD_SUFFIX)
+      return endsAtDifficulty(error.path)
         ? { key: 'pages.plannerMD.publish.normalAfterHard' }
         : { key: 'pages.plannerMD.previousFloorNoThemePack' }
     case 'VALUE_OUT_OF_RANGE':
       return { key: outOfRangeKey(error.context.allowedDifficulties) }
+    case 'EQUIPMENT_MISSING_SINNER':
+    case 'EQUIPMENT_MISSING_IDENTITY':
+    case 'EQUIPMENT_MISSING_ZAYIN':
+    case 'EQUIPMENT_INVALID_EGO_TYPES':
+    case 'EQUIPMENT_INVALID_ID_FORMAT':
+    case 'DEPLOYMENT_INVALID_INDEX':
+    case 'SKILL_EA_MISSING_SINNER':
+    case 'SKILL_EA_INVALID_SLOT':
+    case 'SKILL_EA_DUPLICATE_SLOT':
+    case 'SKILL_EA_INVALID_TOTAL':
+    case 'GIFT_DUPLICATE_ID':
+    case 'GIFT_UNKNOWN_ID':
+    case 'BUFF_EXCEEDS_MAX':
+    case 'BUFF_DUPLICATE_BASE_ID':
+    case 'BUFF_INVALID_FORMAT':
+    case 'START_GIFT_NO_KEYWORD_BUT_HAS_GIFTS':
+    case 'START_GIFT_DUPLICATE_ID':
     case 'INVALID_FIELD_TYPE':
     case 'FLOOR_DUPLICATE_THEME_PACK':
     case 'DUPLICATE_VALUE':
@@ -153,24 +180,19 @@ export function toUserFriendlyError(error: PlannerValidationError): {
       return {
         key: 'pages.plannerMD.validation.unknownGiftId',
         params: {
-          floor: String(error.floorNumber),
+          floor: floorNumberOf(error.path),
           gifts: error.context.giftId,
         },
       }
-    case 'KEYWORD_INVALID': {
-      const keywordError = error as KeywordValidationError
-      const ctx = keywordError.context as { keyword?: string } | undefined
+    case 'KEYWORD_INVALID':
       return {
         key: 'pages.plannerMD.validation.invalidKeyword',
-        params: { keyword: ctx?.keyword ?? '' },
+        params: { keyword: error.context.keyword },
       }
-    }
     case 'IDENTITY_UNKNOWN_ID':
     case 'EGO_UNKNOWN_ID':
     case 'THEME_PACK_UNKNOWN_ID':
     case 'START_BUFF_UNKNOWN_ID':
       return { key: UNKNOWN_ENTITY_ID_KEYS[error.code], params: { id: error.context.id } }
-    default:
-      return { key: 'pages.plannerMD.validation.corruptedState' }
   }
 }

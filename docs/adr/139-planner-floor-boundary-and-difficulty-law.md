@@ -13,10 +13,12 @@ epic: none · pr: none
   REJECTED: the editor's own offer logic — it offered Normal on ten- and fifteen-floor planners' first floors, where Hard is required, and defaulted new floors to Normal there.
 - @planner @floors @codes — Violation codes are the server's (`FLOOR_MISSING_THEME_PACK`, `FLOOR_DUPLICATE_THEME_PACK`, `INVALID_SEQUENCE`, `VALUE_OUT_OF_RANGE`, `DUPLICATE_VALUE`, `INVALID_FIELD_TYPE`) on both runtimes, sorted by floor index then path then code, one violation per floor for a repeated gift; the client maps codes to its messages. The server's codes are the wire contract that clients already match.
   REJECTED: the client's names on both sides — renames codes clients may already branch on.
-- @planner @floors @ids — Game-data reference checks (pack known, gift known, gift affordable for the pack) stay outside the floor module and run over the parsed floors when the boundary reported nothing; an unknown pack does not hide its floor's gift checks, and an unknown gift skips only its own affordability check, since the registry answers "not affordable" for a gift it does not know. They need the game-data registry, and keeping them out lets the category-change path be one admission with no extra stage.
-  REJECTED: a fourth stage that skips id checks — a second axis for one caller.
 - @planner @floors @rr — Refracted Railway planners are refused by the content validator, skipped by the drift reconciler and rebuilt with a floor count of zero, which keeps their non-floor index rows; floor rules are a Mirror Dungeon concern.
   REJECTED: failing the rebuild for a non-Mirror-Dungeon category — the publish listener has no retry and the keyword backfill would stop at the first such planner.
+
+## Superseded
+- @planner @floors @ids → 141 — Game-data reference checks (pack known, gift known, gift affordable for the pack) stay outside the floor module and run over the parsed floors when the boundary reported nothing; an unknown pack does not hide its floor's gift checks, and an unknown gift skips only its own affordability check, since the registry answers "not affordable" for a gift it does not know. They need the game-data registry, and keeping them out lets the category-change path be one admission with no extra stage.
+  REJECTED: a fourth stage that skips id checks — a second axis for one caller.
 
 ## Takeaway
 - takeaway: when one rule lives in several places, the disagreements are in the shapes at the edges (empty, null, absent, wrong type), not in the rule; decide the edge mapping once and the sites collapse.

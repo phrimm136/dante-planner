@@ -17,6 +17,14 @@ valid:
     class A {
       boolean m(List<String> names) { return names.isEmpty(); }
     }
+  - |
+    class A {
+      long m(List<Object> values) { return values.stream().filter(Objects::isNull).count(); }
+    }
+  - |
+    class A {
+      boolean m(List<String> names) { return names.stream().allMatch(String::isEmpty); }
+    }
 invalid:
   - |
     class A {
@@ -33,4 +41,12 @@ invalid:
   - |
     class A {
       boolean m(Map.Entry<String, JsonNode> rename) { return rename.getValue().isTextual(); }
+    }
+  - |
+    class A {
+      void m(JsonNode root) { validateType(root, "equipment", JsonNode::isObject, "object"); }
+    }
+  - |
+    class A {
+      boolean m(List<JsonNode> nodes) { return nodes.stream().anyMatch(JsonNode::isMissingNode); }
     }

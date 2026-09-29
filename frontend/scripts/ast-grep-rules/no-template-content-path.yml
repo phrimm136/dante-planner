@@ -3,9 +3,11 @@ language: TypeScript
 severity: error
 message: 'ADR 140: a content path is a typed value rendered to text only at the edge; build it with the content-path helper, not a template literal or string concatenation.'
 files:
-  - src/pages/planner/lib/floorRules.ts
+  - src/pages/planner/lib/validation/**
   - src/pages/planner/lib/plannerValidation.ts
   - src/pages/planner/lib/plannerValidationErrors.ts
+ignores:
+  - '**/__tests__/**'
 rule:
   any:
     - kind: template_string

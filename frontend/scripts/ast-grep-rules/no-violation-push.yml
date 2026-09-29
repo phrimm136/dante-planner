@@ -3,9 +3,11 @@ language: TypeScript
 severity: error
 message: 'ADR 140: a content rule returns its violations as values; build the list with flatMap, map, filter or spread instead of pushing into a collector array.'
 files:
-  - src/pages/planner/lib/floorRules.ts
+  - src/pages/planner/lib/validation/**
   - src/pages/planner/lib/plannerValidation.ts
   - src/pages/planner/lib/plannerValidationErrors.ts
+ignores:
+  - '**/__tests__/**'
 rule:
   pattern: $ARR.push($$$ITEMS)
 constraints:

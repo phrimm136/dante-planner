@@ -6,13 +6,13 @@ import java.util.function.Predicate;
 
 import org.danteplanner.backend.architecture.fixture.UnadmittedContentWriter;
 import org.danteplanner.backend.planner.entity.PlannerContent;
-import org.danteplanner.backend.planner.floor.FloorRules;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.planner.service.PlannerFilterService;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
 import org.danteplanner.backend.planner.validation.PlannerContentEntityExtractor;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
+import org.danteplanner.backend.planner.validation.floor.FloorRules;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

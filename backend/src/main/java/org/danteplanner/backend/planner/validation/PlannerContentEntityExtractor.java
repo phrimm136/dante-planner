@@ -3,12 +3,11 @@ package org.danteplanner.backend.planner.validation;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.planner.entity.MDCategory;
-import org.danteplanner.backend.planner.floor.Admission;
-import org.danteplanner.backend.planner.floor.FloorBoundary;
-import org.danteplanner.backend.planner.floor.FloorRules;
-import org.danteplanner.backend.planner.floor.FloorSelection;
-import org.danteplanner.backend.planner.floor.Stage;
-import org.danteplanner.backend.planner.floor.ThemePack;
+import org.danteplanner.backend.planner.validation.floor.Admission;
+import org.danteplanner.backend.planner.validation.floor.FloorBoundary;
+import org.danteplanner.backend.planner.validation.floor.FloorRules;
+import org.danteplanner.backend.planner.validation.floor.FloorSelection;
+import org.danteplanner.backend.planner.validation.floor.Stage;
 import org.danteplanner.backend.shared.entity.ContentEntityType;
 import org.springframework.stereotype.Component;
 
@@ -46,8 +45,8 @@ public class PlannerContentEntityExtractor {
 
     private List<FloorSelection> admittedFloors(JsonNode root, MDCategory category) {
         FloorBoundary.Parsed parsed = FloorBoundary.parse(root.path("floorSelections"),
-                gameDataRegistry.floorRules().floorCount(category));
-        return switch (floorRules.admit(parsed, category, Stage.INDEX)) {
+                gameDataRegistry.floorRules().layout(category));
+        return switch (floorRules.admit(parsed, Stage.INDEX)) {
             case Admission.Admitted admitted -> admitted.floors();
             case Admission.Rejected rejected -> throw new IllegalStateException(
                     "the index stage runs no floor rule, yet admission was rejected: " + rejected.violations());
@@ -84,9 +83,7 @@ public class PlannerContentEntityExtractor {
 
     private static void extractFromFloor(FloorSelection floor, Set<EntityRef> refs) {
         floor.giftIds().forEach(giftId -> addId(giftId, ContentEntityType.EGO_GIFT, refs));
-        if (floor.themePack() instanceof ThemePack.Chosen(String themePackId)) {
-            addId(themePackId, ContentEntityType.THEME_PACK, refs);
-        }
+        floor.themePack().chosenId().ifPresent(themePackId -> addId(themePackId, ContentEntityType.THEME_PACK, refs));
     }
 
     private static void addIdsFromArray(JsonNode arrayNode, ContentEntityType type, Set<EntityRef> refs) {

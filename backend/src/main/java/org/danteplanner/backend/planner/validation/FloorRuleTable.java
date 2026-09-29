@@ -6,7 +6,6 @@ import org.danteplanner.backend.planner.entity.MDCategory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -17,13 +16,29 @@ public record FloorRuleTable(
         int schemaVersion,
         List<String> stages,
         Map<MDCategory, CategoryFloors> categories,
-        Map<String, Set<String>> rules) {
+        Map<RuleName, Set<String>> rules) {
 
     public record CategoryFloors(int floorCount, List<Set<Integer>> difficulties) {}
 
-    public static final Set<String> RULE_NAMES = Set.of(
-            "everyFloorPresent", "themePackPresent", "notRepeated", "sequence",
-            "difficultyInRange", "noNormalAfterHard", "giftUnique");
+    public enum RuleName {
+        EVERY_FLOOR_PRESENT("everyFloorPresent"),
+        THEME_PACK_PRESENT("themePackPresent"),
+        NOT_REPEATED("notRepeated"),
+        SEQUENCE("sequence"),
+        DIFFICULTY_IN_RANGE("difficultyInRange"),
+        NO_NORMAL_AFTER_HARD("noNormalAfterHard"),
+        GIFT_UNIQUE("giftUnique");
+
+        private final String tableName;
+
+        RuleName(String tableName) {
+            this.tableName = tableName;
+        }
+
+        public String tableName() {
+            return tableName;
+        }
+    }
 
     private static final int MIN_DIFFICULTY = 0;
     private static final int MAX_DIFFICULTY = 3;
@@ -43,20 +58,16 @@ public record FloorRuleTable(
         rules = Map.copyOf(rules);
     }
 
+    public CategoryFloors layout(MDCategory category) {
+        return categories.get(category);
+    }
+
     public int floorCount(MDCategory category) {
-        return categories.get(category).floorCount();
+        return layout(category).floorCount();
     }
 
-    public Set<Integer> allowedDifficulties(MDCategory category, int floorIndex) {
-        return categories.get(category).difficulties().get(floorIndex);
-    }
-
-    public Set<String> stagesFor(String rule) {
-        Set<String> ruleStages = rules.get(rule);
-        if (ruleStages == null) {
-            throw new IllegalArgumentException("unknown floor rule '" + rule + "'; expected " + RULE_NAMES);
-        }
-        return ruleStages;
+    public Set<String> stagesFor(RuleName rule) {
+        return rules.get(rule);
     }
 
     public static FloorRuleTable parse(JsonNode root) {
@@ -133,20 +144,23 @@ public record FloorRuleTable(
         return Set.copyOf(difficulties);
     }
 
-    private static Map<String, Set<String>> parseRules(JsonNode node, Set<String> stages) {
-        requireObjectWithKeys(RULES, node, RULE_NAMES);
-        Map<String, Set<String>> rules = new HashMap<>();
-        for (String rule : RULE_NAMES) {
-            JsonNode ruleNode = node.path(rule);
+    private static Map<RuleName, Set<String>> parseRules(JsonNode node, Set<String> stages) {
+        Set<String> ruleNames = Arrays.stream(RuleName.values())
+                .map(RuleName::tableName)
+                .collect(Collectors.toSet());
+        requireObjectWithKeys(RULES, node, ruleNames);
+        Map<RuleName, Set<String>> rules = new EnumMap<>(RuleName.class);
+        for (RuleName rule : RuleName.values()) {
+            JsonNode ruleNode = node.path(rule.tableName());
             if (ruleNode.isMissingNode()) {
-                throw new IllegalArgumentException("'" + RULES + "' lacks rule '" + rule + "'; expected exactly "
-                        + RULE_NAMES);
+                throw new IllegalArgumentException("'" + RULES + "' lacks rule '" + rule.tableName()
+                        + "'; expected exactly " + ruleNames);
             }
-            Set<String> ruleStages = uniqueStrings(RULES + "." + rule, ruleNode);
+            Set<String> ruleStages = uniqueStrings(RULES + "." + rule.tableName(), ruleNode);
             for (String stage : ruleStages) {
                 if (!stages.contains(stage)) {
-                    throw new IllegalArgumentException("'" + RULES + "." + rule + "' names unknown stage '" + stage
-                            + "'; expected one of " + stages);
+                    throw new IllegalArgumentException("'" + RULES + "." + rule.tableName() + "' names unknown stage '"
+                            + stage + "'; expected one of " + stages);
                 }
             }
             rules.put(rule, Set.copyOf(ruleStages));

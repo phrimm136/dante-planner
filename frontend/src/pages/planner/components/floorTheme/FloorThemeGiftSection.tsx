@@ -18,7 +18,7 @@ import {
 } from '@/shared/gameData'
 import { cn } from '@/lib/utils'
 import { getUnaffordableGiftNames, offeredFloorDifficulties } from '../../lib/plannerRules'
-import { packIdsUsedElsewhere, packSelectableAt } from '../../lib/floorRules'
+import { packIdsUsedElsewhere, packSelectableAt } from '../../lib/validation/floor/floorRules'
 import { PlannerSection } from '@/components/layout/PlannerSection'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import type { FloorThemeSelection } from '@/pages/themePack'

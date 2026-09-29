@@ -98,12 +98,12 @@ class GameDataLoaderTest {
         assertEquals(5, table.floorCount(MDCategory.F5));
         assertEquals(10, table.floorCount(MDCategory.F10));
         assertEquals(15, table.floorCount(MDCategory.F15));
-        assertEquals(Set.of(0, 1), table.allowedDifficulties(MDCategory.F5, 4));
-        assertEquals(Set.of(1), table.allowedDifficulties(MDCategory.F10, 9));
-        assertEquals(Set.of(1), table.allowedDifficulties(MDCategory.F15, 9));
-        assertEquals(Set.of(3), table.allowedDifficulties(MDCategory.F15, 10));
-        assertEquals(Set.of("draft", "publish"), table.stagesFor("notRepeated"));
-        assertEquals(Set.of("publish"), table.stagesFor("noNormalAfterHard"));
+        assertEquals(Set.of(0, 1), table.layout(MDCategory.F5).difficulties().get(4));
+        assertEquals(Set.of(1), table.layout(MDCategory.F10).difficulties().get(9));
+        assertEquals(Set.of(1), table.layout(MDCategory.F15).difficulties().get(9));
+        assertEquals(Set.of(3), table.layout(MDCategory.F15).difficulties().get(10));
+        assertEquals(Set.of("draft", "publish"), table.stagesFor(FloorRuleTable.RuleName.NOT_REPEATED));
+        assertEquals(Set.of("publish"), table.stagesFor(FloorRuleTable.RuleName.NO_NORMAL_AFTER_HARD));
     }
 
     static Stream<String> floorRulesBreakingTheShape() {

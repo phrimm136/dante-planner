@@ -24,6 +24,7 @@ import { normalizePlannerIds } from '../plannerIdNormalize'
 import type { IdMigrationTable } from '../idMigrationTable'
 import type { PlannerIdRegistry, PlannerValidationResult } from '../plannerValidation'
 import { toUserFriendlyError } from '../plannerValidationErrors'
+import { renderContentPath } from '../validation/contentPath'
 import { MAX_NOTE_BYTES } from '@/lib/constants'
 import { calculateNoteByteLength } from '@/shared/noteEditor'
 import type {
@@ -61,9 +62,14 @@ function at<T>(items: readonly T[], index: number): T {
   return item
 }
 
+/** Where an error points: its rendered content path, or its field when it carries no path. */
+function fieldOf(error: PlannerValidationError): string | undefined {
+  return 'path' in error ? renderContentPath(error.path) : error.field
+}
+
 /** Each error as [code, field], the shape the floor-rule corpus records. */
 function codesAndFields(result: PlannerValidationResult): [string, string | undefined][] {
-  return result.errors.map((e) => [e.code, e.field])
+  return result.errors.map((e) => [e.code, fieldOf(e)])
 }
 
 function onlyCode<C extends PlannerValidationError['code']>(
@@ -286,7 +292,7 @@ describe('floor rules through the validators', () => {
     expect(codesAndFields(validatePlannerForDraftSave(content, '5F', spec))).toEqual([
       ['DUPLICATE_VALUE', 'floorSelections[0].giftIds'],
       ['FLOOR_DUPLICATE_THEME_PACK', 'floorSelections[2].themePackId'],
-      ['FLOOR_UNKNOWN_GIFT_ID', 'floorSelections[1].giftIds'],
+      ['FLOOR_UNKNOWN_GIFT_ID', 'floorSelections[1].giftIds[0]'],
     ])
   })
 
@@ -751,7 +757,7 @@ describe('validatePlannerForPublish – gift affordability', () => {
     floorAt(content, 1).giftIds = [ENCODED_9220]
 
     const result = validatePlannerForPublish('My Plan', content, '5F', spec)
-    expect(onlyCode(result, 'GIFT_NOT_AFFORDABLE').map((e) => e.field)).toEqual([
+    expect(onlyCode(result, 'GIFT_NOT_AFFORDABLE').map(fieldOf)).toEqual([
       'floorSelections[0].giftIds[0]',
       'floorSelections[1].giftIds[0]',
     ])
@@ -794,21 +800,21 @@ describe('validatePlannerForPublish – gift existence', () => {
     const result = validatePlannerForPublish('My Plan', content, '5F', spec)
     expect(result.isValid).toBe(false)
     const err: FloorUnknownGiftValidationError = at(onlyCode(result, 'FLOOR_UNKNOWN_GIFT_ID'), 0)
-    expect(err.floorNumber).toBe(1)
+    expect(renderContentPath(err.path)).toBe('floorSelections[0].giftIds[0]')
     expect(err.context.giftId).toBe('9999')
   })
 
-  // corpus: floor-gift-unknown (path floorSelections[i].giftIds); contract: one per gift
+  // corpus: floor-gift-unknown (path floorSelections[i].giftIds[j]); contract: one per gift
   it('multiple unknown IDs on one floor produce one FLOOR_UNKNOWN_GIFT_ID error per gift', () => {
     const content = makeValidContent('5F')
     floorAt(content, 0).giftIds = [ENCODED_9999, ENCODED_9998]
 
     const result = validatePlannerForPublish('My Plan', content, '5F', spec)
     expect(
-      onlyCode(result, 'FLOOR_UNKNOWN_GIFT_ID').map((e) => [e.field, e.context.giftId]),
+      onlyCode(result, 'FLOOR_UNKNOWN_GIFT_ID').map((e) => [fieldOf(e), e.context.giftId]),
     ).toEqual([
-      ['floorSelections[0].giftIds', '9999'],
-      ['floorSelections[0].giftIds', '9998'],
+      ['floorSelections[0].giftIds[0]', '9999'],
+      ['floorSelections[0].giftIds[1]', '9998'],
     ])
   })
 
@@ -818,7 +824,10 @@ describe('validatePlannerForPublish – gift existence', () => {
     floorAt(content, 1).giftIds = [ENCODED_9998]
 
     const result = validatePlannerForPublish('My Plan', content, '5F', spec)
-    expect(onlyCode(result, 'FLOOR_UNKNOWN_GIFT_ID').map((e) => e.floorNumber)).toEqual([1, 2])
+    expect(onlyCode(result, 'FLOOR_UNKNOWN_GIFT_ID').map(fieldOf)).toEqual([
+      'floorSelections[0].giftIds[0]',
+      'floorSelections[1].giftIds[0]',
+    ])
   })
 
   it('valid floor gift IDs return no FLOOR_UNKNOWN_GIFT_ID errors', () => {
@@ -995,7 +1004,7 @@ describe('validatePlannerForDraftSave – additional cases', () => {
 
     const result = validatePlannerForDraftSave(content, '5F', spec)
     expect(codesAndFields(result)).toEqual([
-      ['FLOOR_UNKNOWN_GIFT_ID', 'floorSelections[0].giftIds'],
+      ['FLOOR_UNKNOWN_GIFT_ID', 'floorSelections[0].giftIds[0]'],
       ['GIFT_NOT_AFFORDABLE', 'floorSelections[0].giftIds[1]'],
     ])
   })
@@ -1144,9 +1153,9 @@ describe('validatePlannerForImport', () => {
       content: twoViolations(),
     })
     const floorErrors = validatePlannerForImport(planner, {}, registry).errors.filter((e) =>
-      e.field?.startsWith('floorSelections'),
+      fieldOf(e)?.startsWith('floorSelections'),
     )
-    expect(floorErrors.map((e) => [e.code, e.field])).toEqual([
+    expect(floorErrors.map((e) => [e.code, fieldOf(e)])).toEqual([
       ['INVALID_SEQUENCE', 'floorSelections[1].difficulty'],
       ['FLOOR_DUPLICATE_THEME_PACK', 'floorSelections[3].themePackId'],
     ])
@@ -1155,9 +1164,9 @@ describe('validatePlannerForImport', () => {
   it('a draft planner is checked at the draft stage', () => {
     const planner = buildSaveablePlanner({ content: twoViolations() })
     const floorErrors = validatePlannerForImport(planner, {}, registry).errors.filter((e) =>
-      e.field?.startsWith('floorSelections'),
+      fieldOf(e)?.startsWith('floorSelections'),
     )
-    expect(floorErrors.map((e) => [e.code, e.field])).toEqual([
+    expect(floorErrors.map((e) => [e.code, fieldOf(e)])).toEqual([
       ['FLOOR_DUPLICATE_THEME_PACK', 'floorSelections[3].themePackId'],
     ])
   })

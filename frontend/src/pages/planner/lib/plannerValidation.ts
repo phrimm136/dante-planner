@@ -3,23 +3,27 @@ import {
   REQUIRED_EGO_TYPE,
   OFFENSIVE_SKILL_SLOTS,
   PLANNER_KEYWORDS,
-  allowedDifficulties,
-  floorCount,
+  FLOOR_RULE_TABLE,
   migrateKeywords,
   EncodedGiftIdSchema,
 } from '@/shared/gameData'
 import { MAX_NOTE_BYTES } from '@/lib/constants'
 import { decodeGiftSelection, giftDisplayName, hasGiftId } from '@/pages/egoGift'
 import { measureDocBytes } from '@/shared/noteEditor'
-import { admitFloors, parseFloors } from './floorRules'
+import { renderContentPath } from './validation/contentPath'
+import { admitFloors, parseFloors } from './validation/floor/floorRules'
+import { floorReferenceViolations } from './validation/floor/floorReferences'
 import { getUnaffordableGiftIds } from './plannerRules'
 import type { JSONContent } from '@tiptap/core'
 import { isMDPlanner } from '../types/PlannerTypes'
 import type { MDPlannerContent, SaveablePlanner } from '../types/PlannerTypes'
 import type { SinnerEquipment, SkillEAState } from '../types/DeckTypes'
-import type { EncodedGiftId, FloorRuleStage, MDCategory } from '@/shared/gameData'
+import type { FloorRuleStage, MDCategory } from '@/shared/gameData'
 import type { EGOGiftSpec } from '@/pages/egoGift'
-import type { FloorSelectionValue } from './floorRules'
+import type {
+  FloorReferenceData,
+  FloorReferenceViolation,
+} from './validation/floor/floorReferences'
 import type {
   PlannerValidationError,
   EquipmentValidationError,
@@ -436,91 +440,71 @@ export function validateEntityIds(
   return errors
 }
 
-const floorNumberAt = (floorIndex: number) => floorIndex + 1
-
-const floorPath = (floorIndex: number) => `floorSelections[${floorIndex}]`
-
-const FLOOR_INDEX_PREFIX = /^floorSelections\[(\d+)\]/
-
-const floorIndexOf = (path: string) => Number(FLOOR_INDEX_PREFIX.exec(path)?.[1])
-
-function validateFloorThemePackIds(
-  floors: readonly (FloorSelectionValue | undefined)[],
-  registry: PlannerIdRegistry,
-): EntityIdValidationError[] {
-  return floors.flatMap((floor, i) => {
-    const themePackId = floor?.themePackId
-    if (themePackId === undefined || registry.themePackIds.has(themePackId)) return []
-    return [
-      {
-        code: 'THEME_PACK_UNKNOWN_ID' as const,
-        message: `Floor ${floorNumberAt(i)} has unknown theme pack ID '${themePackId}'`,
-        field: `${floorPath(i)}.themePackId`,
-        context: { id: themePackId },
-      },
-    ]
-  })
+function knownGift(giftId: string, egoGiftSpec: Record<string, EGOGiftSpec>): boolean {
+  const encoded = EncodedGiftIdSchema.safeParse(giftId)
+  return encoded.success && hasGiftId(encoded.data, egoGiftSpec)
 }
 
-function firstOccurrences(giftIds: readonly string[]): [string, number][] {
-  return giftIds.flatMap((giftId, j): [string, number][] =>
-    giftIds.indexOf(giftId) === j ? [[giftId, j]] : [],
+function affordableGift(
+  giftId: string,
+  themePackId: string,
+  egoGiftSpec: Record<string, EGOGiftSpec>,
+): boolean {
+  const encoded = EncodedGiftIdSchema.safeParse(giftId)
+  return (
+    !encoded.success ||
+    getUnaffordableGiftIds(new Set([encoded.data]), themePackId, egoGiftSpec).length === 0
   )
 }
 
-function parseGiftIds(giftIds: readonly string[]): EncodedGiftId[] {
-  return giftIds.flatMap((giftId) => {
-    const parsed = EncodedGiftIdSchema.safeParse(giftId)
-    return parsed.success ? [parsed.data] : []
-  })
+function floorReferenceData(
+  egoGiftSpec: Record<string, EGOGiftSpec> | undefined,
+  registry: PlannerIdRegistry | undefined,
+): FloorReferenceData {
+  return {
+    hasThemePack: (themePackId) => registry === undefined || registry.themePackIds.has(themePackId),
+    hasEgoGift: (giftId) => egoGiftSpec === undefined || knownGift(giftId, egoGiftSpec),
+    isGiftAffordableForThemePack: (giftId, themePackId) =>
+      egoGiftSpec === undefined || affordableGift(giftId, themePackId, egoGiftSpec),
+  }
 }
 
-function validateFloorGiftExistence(
-  floors: readonly (FloorSelectionValue | undefined)[],
-  egoGiftSpec: Record<string, EGOGiftSpec>,
-): FloorUnknownGiftValidationError[] {
-  return floors.flatMap((floor, i) => {
-    const known = new Set<string>(
-      parseGiftIds(floor?.giftIds ?? []).filter((giftId) => hasGiftId(giftId, egoGiftSpec)),
-    )
-    return firstOccurrences(floor?.giftIds ?? [])
-      .filter(([giftId]) => !known.has(giftId))
-      .map(([giftId]) => ({
-        code: 'FLOOR_UNKNOWN_GIFT_ID' as const,
-        message: `Floor ${floorNumberAt(i)}: unknown gift ID ${giftId}`,
-        field: `${floorPath(i)}.giftIds`,
-        floorNumber: floorNumberAt(i),
-        context: { giftId },
-      }))
-  })
+function giftName(giftId: string, egoGiftI18n: Record<string, string>): string {
+  const encoded = EncodedGiftIdSchema.safeParse(giftId)
+  return encoded.success ? giftDisplayName(encoded.data, egoGiftI18n) : giftId
 }
 
-function validateFloorGiftAffordability(
-  floors: readonly (FloorSelectionValue | undefined)[],
-  egoGiftSpec: Record<string, EGOGiftSpec>,
+function floorReferenceError(
+  violation: FloorReferenceViolation,
   egoGiftI18n: Record<string, string>,
-): GiftNotAffordableValidationError[] {
-  return floors.flatMap((floor, i) => {
-    const themePackId = floor?.themePackId
-    if (floor === undefined || themePackId === undefined) return []
-    const unaffordable = new Map<string, EncodedGiftId>(
-      getUnaffordableGiftIds(new Set(parseGiftIds(floor.giftIds)), themePackId, egoGiftSpec).map(
-        (giftId) => [giftId, giftId],
-      ),
-    )
-    return firstOccurrences(floor.giftIds).flatMap(([giftId, j]) => {
-      const encoded = unaffordable.get(giftId)
-      if (encoded === undefined) return []
-      return [
-        {
-          code: 'GIFT_NOT_AFFORDABLE' as const,
-          message: `Floor ${floorNumberAt(i)}: gift ${giftId} is not available for theme pack ${themePackId}`,
-          field: `${floorPath(i)}.giftIds[${j}]`,
-          context: { giftName: giftDisplayName(encoded, egoGiftI18n), themePackId },
+): EntityIdValidationError | FloorUnknownGiftValidationError | GiftNotAffordableValidationError {
+  const message = `${violation.code} at ${renderContentPath(violation.path)}`
+  switch (violation.code) {
+    case 'THEME_PACK_UNKNOWN_ID':
+      return {
+        code: violation.code,
+        message,
+        field: renderContentPath(violation.path),
+        context: { id: violation.themePackId },
+      }
+    case 'FLOOR_UNKNOWN_GIFT_ID':
+      return {
+        code: violation.code,
+        message,
+        path: violation.path,
+        context: { giftId: violation.giftId },
+      }
+    case 'GIFT_NOT_AFFORDABLE':
+      return {
+        code: violation.code,
+        message,
+        path: violation.path,
+        context: {
+          giftName: giftName(violation.giftId, egoGiftI18n),
+          themePackId: violation.themePackId,
         },
-      ]
-    })
-  })
+      }
+  }
 }
 
 function validateFloors(
@@ -531,33 +515,30 @@ function validateFloors(
   egoGiftI18n: Record<string, string> | undefined,
   registry: PlannerIdRegistry | undefined,
 ): PlannerValidationError[] {
-  const parsed = parseFloors(rawFloorSelections, floorCount(category))
-  const admission = admitFloors(parsed, category, stage)
+  const parsed = parseFloors(rawFloorSelections, FLOOR_RULE_TABLE.categories[category])
+  const admission = admitFloors(parsed, stage)
   const ruleErrors: (FloorRuleValidationError | DifficultyOutOfRangeValidationError)[] = (
     admission.ok ? admission.boundaryViolations : admission.violations
-  ).map(({ code, path }) =>
-    code === 'VALUE_OUT_OF_RANGE'
+  ).map((violation) =>
+    violation.code === 'VALUE_OUT_OF_RANGE'
       ? {
-          code,
-          message: `${code} at ${path}`,
-          field: path,
-          context: {
-            allowedDifficulties: allowedDifficulties(category, floorIndexOf(path)) ?? [],
-          },
+          code: violation.code,
+          message: `${violation.code} at ${renderContentPath(violation.path)}`,
+          path: violation.path,
+          context: { allowedDifficulties: violation.allowed },
         }
-      : { code, message: `${code} at ${path}`, field: path },
+      : {
+          code: violation.code,
+          message: `${violation.code} at ${renderContentPath(violation.path)}`,
+          path: violation.path,
+        },
   )
+  const referenceErrors = floorReferenceViolations(
+    parsed,
+    floorReferenceData(egoGiftSpec, registry),
+  ).map((violation) => floorReferenceError(violation, egoGiftI18n ?? {}))
 
-  return [
-    ...ruleErrors,
-    ...(registry ? validateFloorThemePackIds(parsed.floors, registry) : []),
-    ...(egoGiftSpec
-      ? [
-          ...validateFloorGiftExistence(parsed.floors, egoGiftSpec),
-          ...validateFloorGiftAffordability(parsed.floors, egoGiftSpec, egoGiftI18n ?? {}),
-        ]
-      : []),
-  ]
+  return [...ruleErrors, ...referenceErrors]
 }
 
 export type PlannerValidationResult = { isValid: boolean; errors: PlannerValidationError[] }

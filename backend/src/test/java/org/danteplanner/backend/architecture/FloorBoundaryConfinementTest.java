@@ -10,7 +10,7 @@ import java.util.TreeSet;
 import org.danteplanner.backend.architecture.fixture.BoundaryFloorReader;
 import org.danteplanner.backend.architecture.fixture.FloorSelectionOutsideModule;
 import org.danteplanner.backend.architecture.fixture.RawFloorReader;
-import org.danteplanner.backend.planner.floor.FloorSelection;
+import org.danteplanner.backend.planner.validation.floor.FloorSelection;
 import org.springframework.asm.ClassReader;
 import org.springframework.asm.ClassVisitor;
 import org.springframework.asm.Handle;
@@ -49,20 +49,20 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class FloorBoundaryConfinementTest {
 
     private static final String MAIN = "org.danteplanner.backend.";
-    private static final String FLOOR_MODULE = MAIN + "planner.floor.";
+    private static final String FLOOR_MODULE = MAIN + "planner.validation.floor.";
 
     private static final String FLOOR_SELECTIONS = "floorSelections";
     private static final Set<String> FLOOR_FIELDS = Set.of(FLOOR_SELECTIONS, "themePackId", "giftIds", "difficulty");
     private static final Set<String> KEYED_ACCESSORS = Set.of("get", "path", "has");
     private static final String STRING_ARGUMENT = "(Ljava/lang/String;)";
-    private static final String FLOOR_BOUNDARY = "org/danteplanner/backend/planner/floor/FloorBoundary";
+    private static final String FLOOR_BOUNDARY = "org/danteplanner/backend/planner/validation/floor/FloorBoundary";
 
     private static final Set<String> FROZEN_RAW_FLOOR_READERS = Set.of(
             MAIN + "planner.validation.PlannerIdMigrations");
 
     static final ArchRule FLOOR_SELECTIONS_ARE_BUILT_BY_THE_FLOOR_MODULE =
             noClasses()
-                    .that().resideOutsideOfPackage("..planner.floor..")
+                    .that().resideOutsideOfPackage("..planner.validation.floor..")
                     .should().callConstructorWhere(target(owner(equivalentTo(FloorSelection.class))))
                     .as("floor selections are built by the floor module's parse boundary");
 
@@ -77,7 +77,7 @@ class FloorBoundaryConfinementTest {
         unfrozen.removeAll(FROZEN_RAW_FLOOR_READERS);
 
         assertThat(unfrozen)
-                .as("these read floor fields from a JsonNode outside planner.floor; parse the floors "
+                .as("these read floor fields from a JsonNode outside planner.validation.floor; parse the floors "
                         + "through FloorBoundary.parse and take the typed FloorSelection instead")
                 .isEmpty();
     }

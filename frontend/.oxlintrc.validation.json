@@ -4,13 +4,13 @@
   "categories": {
     "correctness": "off"
   },
+  "ignorePatterns": ["**/__tests__/**"],
   "overrides": [
     {
       "files": [
-        "src/pages/planner/lib/floorRules.ts",
+        "src/pages/planner/lib/validation/**/*.ts",
         "src/pages/planner/lib/plannerValidation.ts",
-        "src/pages/planner/lib/plannerValidationErrors.ts",
-        "src/pages/planner/lib/contentPath.ts"
+        "src/pages/planner/lib/plannerValidationErrors.ts"
       ],
       "rules": {
         "complexity": ["error", { "max": 5 }],

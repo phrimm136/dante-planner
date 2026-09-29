@@ -2,7 +2,7 @@ package org.danteplanner.backend.planner.validation;
 
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
-import org.danteplanner.backend.planner.floor.Stage;
+import org.danteplanner.backend.planner.validation.floor.Stage;
 
 import java.util.ArrayList;
 import java.util.List;

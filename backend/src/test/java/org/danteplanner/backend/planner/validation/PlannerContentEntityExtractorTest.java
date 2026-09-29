@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.danteplanner.backend.planner.entity.MDCategory;
-import org.danteplanner.backend.planner.floor.FloorRules;
+import org.danteplanner.backend.planner.validation.floor.FloorRules;
 import org.danteplanner.backend.planner.validation.PlannerContentEntityExtractor.EntityRef;
 import org.danteplanner.backend.shared.entity.ContentEntityType;
 import org.junit.jupiter.api.Test;

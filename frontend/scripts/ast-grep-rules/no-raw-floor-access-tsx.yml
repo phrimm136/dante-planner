@@ -1,13 +1,13 @@
 id: no-raw-floor-access-tsx
 language: Tsx
 severity: error
-message: Floor rules live in pages/planner/lib/floorRules.ts; call parseFloors and admitFloors instead of reading floorSelections or floor counts directly.
+message: Floor rules live in pages/planner/lib/validation/floor/floorRules.ts; call parseFloors and admitFloors instead of reading floorSelections or floor counts directly.
 files:
   - src/**/*.tsx
 ignores:
   - '**/__tests__/**'
   - '**/*.test.tsx'
-  - src/pages/planner/lib/floorRules.ts
+  - src/pages/planner/lib/validation/floor/floorRules.ts
   - src/pages/planner/schemas/**
   - src/pages/planner/stores/usePlannerEditorStore.tsx
 rule:

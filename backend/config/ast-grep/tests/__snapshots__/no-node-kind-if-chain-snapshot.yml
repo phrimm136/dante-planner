@@ -23,6 +23,15 @@ snapshots:
       end: 69
   ? |
     class A {
+      boolean m(List<JsonNode> nodes) { return nodes.stream().anyMatch(JsonNode::isMissingNode); }
+    }
+  : labels:
+    - source: JsonNode::isMissingNode
+      style: primary
+      start: 77
+      end: 100
+  ? |
+    class A {
       boolean m(Map.Entry<String, JsonNode> rename) { return rename.getValue().isTextual(); }
     }
   : labels:
@@ -67,3 +76,12 @@ snapshots:
       style: secondary
       start: 62
       end: 64
+  ? |
+    class A {
+      void m(JsonNode root) { validateType(root, "equipment", JsonNode::isObject, "object"); }
+    }
+  : labels:
+    - source: JsonNode::isObject
+      style: primary
+      start: 68
+      end: 86

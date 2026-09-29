@@ -2,14 +2,8 @@ package org.danteplanner.backend.planner.validation;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
-import org.danteplanner.backend.planner.floor.FloorSelection;
-import org.danteplanner.backend.planner.floor.ThemePack;
 import org.danteplanner.backend.shared.util.GameConstants;
 import org.springframework.stereotype.Component;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import static org.danteplanner.backend.planner.validation.JsonTraversal.arrayField;
 import static org.danteplanner.backend.planner.validation.JsonTraversal.eachObjectProperty;
@@ -197,53 +191,5 @@ class IdReferenceValidator {
                 context.reject(fieldName, p -> ValidationErrors.unknownId(ErrorCode.GIFT_UNKNOWN_ID, p, giftId));
             }
         });
-    }
-
-    void validateFloorIds(List<FloorSelection> floors, ValidationContext context) {
-        for (int index = 0; index < floors.size(); index++) {
-            FloorSelection floor = floors.get(index);
-            String floorPath = "floorSelections[" + index + "]";
-            if (floor.themePack() instanceof ThemePack.Chosen(String themePackId)) {
-                validateThemePackIsKnown(floorPath, themePackId, context);
-            }
-            validateFloorGiftIds(floorPath, floor, context);
-        }
-    }
-
-    private void validateThemePackIsKnown(String floorPath, String themePackId, ValidationContext context) {
-        if (!gameDataRegistry.hasThemePack(themePackId)) {
-            context.reject(floorPath + ".themePackId",
-                    p -> ValidationErrors.unknownId(ErrorCode.THEME_PACK_UNKNOWN_ID, p, themePackId));
-        }
-    }
-
-    private void validateFloorGiftIds(String floorPath, FloorSelection floor, ValidationContext context) {
-        String giftsPath = floorPath + ".giftIds";
-        Set<String> seen = new HashSet<>();
-        for (int index = 0; index < floor.giftIds().size(); index++) {
-            String giftId = floor.giftIds().get(index);
-            if (!seen.add(giftId) || !validateGiftIsKnown(giftsPath, giftId, context)) {
-                continue;
-            }
-            if (floor.themePack() instanceof ThemePack.Chosen(String themePackId)) {
-                validateGiftIsAffordable(giftsPath + "[" + index + "]", giftId, themePackId, context);
-            }
-        }
-    }
-
-    private boolean validateGiftIsKnown(String giftsPath, String giftId, ValidationContext context) {
-        if (gameDataRegistry.hasEgoGift(giftId)) {
-            return true;
-        }
-
-        context.reject(giftsPath, p -> ValidationErrors.unknownId(ErrorCode.FLOOR_UNKNOWN_GIFT_ID, p, giftId));
-        return false;
-    }
-
-    private void validateGiftIsAffordable(String giftPath, String giftId, String themePackId,
-                                          ValidationContext context) {
-        if (!gameDataRegistry.isGiftAffordableForThemePack(giftId, themePackId)) {
-            context.reject(giftPath, p -> ValidationErrors.giftNotAffordable(giftId, themePackId));
-        }
     }
 }

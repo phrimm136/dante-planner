@@ -2,9 +2,9 @@ package org.danteplanner.backend.architecture.fixture;
 
 import java.util.List;
 
-import org.danteplanner.backend.planner.floor.Difficulty;
-import org.danteplanner.backend.planner.floor.FloorSelection;
-import org.danteplanner.backend.planner.floor.ThemePack;
+import org.danteplanner.backend.planner.validation.floor.Difficulty;
+import org.danteplanner.backend.planner.validation.floor.FloorSelection;
+import org.danteplanner.backend.planner.validation.floor.ThemePack;
 
 /** Builds a floor selection without the parse boundary. */
 public class FloorSelectionOutsideModule {

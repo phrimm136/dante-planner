@@ -5,13 +5,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
-import org.danteplanner.backend.planner.floor.Admission;
-import org.danteplanner.backend.planner.floor.FloorBoundary;
-import org.danteplanner.backend.planner.floor.FloorRules;
-import org.danteplanner.backend.planner.floor.FloorSelection;
-import org.danteplanner.backend.planner.floor.ParsedFloor;
-import org.danteplanner.backend.planner.floor.Stage;
-import org.danteplanner.backend.planner.floor.Violation;
+import org.danteplanner.backend.planner.validation.floor.Admission;
+import org.danteplanner.backend.planner.validation.floor.FloorBoundary;
+import org.danteplanner.backend.planner.validation.floor.FloorReferenceData;
+import org.danteplanner.backend.planner.validation.floor.FloorReferences;
+import org.danteplanner.backend.planner.validation.floor.FloorRules;
+import org.danteplanner.backend.planner.validation.floor.Stage;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -102,7 +101,8 @@ public class PlannerContentValidator {
 
         idReferenceValidator.validateEquipmentIds(root, context);
         idReferenceValidator.validateGiftIds(root, context);
-        idReferenceValidator.validateFloorIds(admitFloors(root, category, context), context);
+        FloorReferences.check(admitFloors(root, category, context), FloorReferenceData.of(gameDataRegistry))
+                .forEach(violation -> rejectAt(violation, context));
         if (startBuffValidator.validateSeasonExists(version, context)) {
             startBuffValidator.validateStartBuffIds(root, version, context);
             startBuffValidator.validateStartGiftIds(root, version, context);
@@ -112,26 +112,20 @@ public class PlannerContentValidator {
         return root.equals(parsed) ? content : root.toString();
     }
 
-    private List<FloorSelection> admitFloors(JsonNode root, String category, ValidationContext context) {
-        MDCategory mdCategory = MDCategory.fromValue(category);
+    private FloorBoundary.Parsed admitFloors(JsonNode root, String category, ValidationContext context) {
         FloorBoundary.Parsed parsed = FloorBoundary.parse(root.path("floorSelections"),
-                gameDataRegistry.floorRules().floorCount(mdCategory));
-        List<Violation> violations = switch (floorRules.admit(parsed, mdCategory, context.stage())) {
+                gameDataRegistry.floorRules().layout(MDCategory.fromValue(category)));
+        List<Violation> violations = switch (floorRules.admit(parsed, context.stage())) {
             case Admission.Admitted admitted -> admitted.boundaryViolations();
             case Admission.Rejected rejected -> rejected.violations();
         };
-        violations.forEach(violation -> context.reject(violation.path(),
-                path -> new PlannerValidationException(violation.code().getCode(), violation.message())));
-        if (!parsed.violations().isEmpty()) {
-            return List.of();
-        }
-        return parsed.floors().stream()
-                .<FloorSelection>mapMulti((floor, accepted) -> {
-                    if (floor instanceof ParsedFloor.Accepted(FloorSelection selection)) {
-                        accepted.accept(selection);
-                    }
-                })
-                .toList();
+        violations.forEach(violation -> rejectAt(violation, context));
+        return parsed;
+    }
+
+    private static void rejectAt(Violation violation, ValidationContext context) {
+        context.reject(violation.path().render(),
+                path -> new PlannerValidationException(violation.code().getCode(), violation.message()));
     }
 
     private static void throwIfRejected(ValidationContext context) {

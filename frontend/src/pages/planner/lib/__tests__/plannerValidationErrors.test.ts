@@ -5,6 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest'
+import { contentPath, field, index } from '../validation/contentPath'
 import { toUserFriendlyError } from '../plannerValidationErrors'
 import { DUNGEON_IDX } from '@/shared/gameData'
 
@@ -22,7 +23,7 @@ describe('toUserFriendlyError', () => {
     const result = toUserFriendlyError({
       code: 'FLOOR_MISSING_THEME_PACK',
       message: '',
-      field: 'floorSelections[4]',
+      path: contentPath(field('floorSelections'), index(4)),
     })
     expect(result.key).toBe('pages.plannerMD.publish.missingThemePack')
   })
@@ -31,7 +32,7 @@ describe('toUserFriendlyError', () => {
     const result = toUserFriendlyError({
       code: 'GIFT_NOT_AFFORDABLE',
       message: '',
-      field: 'floorSelections[2].giftIds[0]',
+      path: contentPath(field('floorSelections'), index(2), field('giftIds'), index(0)),
       context: { giftName: 'Gift A', themePackId: '1001' },
     })
     expect(result).toEqual({
@@ -44,8 +45,7 @@ describe('toUserFriendlyError', () => {
     const result = toUserFriendlyError({
       code: 'FLOOR_UNKNOWN_GIFT_ID',
       message: '',
-      field: 'floorSelections[1].giftIds',
-      floorNumber: 2,
+      path: contentPath(field('floorSelections'), index(1), field('giftIds'), index(0)),
       context: { giftId: '2029' },
     })
     expect(result).toEqual({
@@ -62,7 +62,7 @@ describe('toUserFriendlyError', () => {
     const result = toUserFriendlyError({
       code: 'VALUE_OUT_OF_RANGE',
       message: '',
-      field: 'floorSelections[0].difficulty',
+      path: contentPath(field('floorSelections'), index(0), field('difficulty')),
       context: { allowedDifficulties },
     })
     expect(result.key).toBe(key)
@@ -72,7 +72,7 @@ describe('toUserFriendlyError', () => {
     const result = toUserFriendlyError({
       code: 'INVALID_SEQUENCE',
       message: '',
-      field: 'floorSelections[1].difficulty',
+      path: contentPath(field('floorSelections'), index(1), field('difficulty')),
     })
     expect(result.key).toBe('pages.plannerMD.publish.normalAfterHard')
   })
@@ -81,7 +81,7 @@ describe('toUserFriendlyError', () => {
     const result = toUserFriendlyError({
       code: 'INVALID_SEQUENCE',
       message: '',
-      field: 'floorSelections[1]',
+      path: contentPath(field('floorSelections'), index(1)),
     })
     expect(result.key).toBe('pages.plannerMD.previousFloorNoThemePack')
   })

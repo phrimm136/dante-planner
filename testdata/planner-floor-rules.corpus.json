@@ -313,7 +313,7 @@
       "FLOOR_PREREQUISITE_VIOLATION": "INVALID_SEQUENCE"
     },
     "divergenceComparison": "draftSave first-only vs be.validate.DRAFT; fe.publish vs be.validate.PUBLISH after codeMap; validateFloorRules vs validate at each policy ignoring id-check codes (ADR 136); fe.schema acceptance vs absence of INVALID_FIELD_TYPE/INVALID_CATEGORY in be.validate.DRAFT; index.java vs index.sql",
-    "expect": "derived from the brief's verdicts and its 'Contracts settled after the capture' section; index lists the floor indices that passed the boundary, the boundary-rejected floor indices whose individually parsed fields are salvaged (numeric ids as their JSON_TABLE text), boundary violations, and the entity rows all those floors yield (digits-only ids, enhanced gifts at their base)"
+    "expect": "derived from the brief's verdicts and its 'Contracts settled after the capture' section; index lists the floor indices that passed the boundary, the boundary-rejected floor indices whose individually parsed fields are salvaged (numeric ids as their JSON_TABLE text), boundary violations, and the entity rows all those floors yield (digits-only ids, enhanced gifts at their base); index.admitted lists the floors the index stage admits, in floor order, each as {themePackId, difficulty, giftIds} with an absent field as null"
   },
   "summary": {
     "divergentByInventoryRow": {
@@ -434,7 +434,7 @@
       ]
     },
     "divergentCount": 35,
-    "caseCount": 55,
+    "caseCount": 57,
     "openCases": []
   },
   "cases": [
@@ -557,6 +557,7 @@
           "ok": false,
           "floors": [],
           "salvaged": [],
+          "admitted": [],
           "violations": [
             {
               "code": "INVALID_FIELD_TYPE",
@@ -782,6 +783,13 @@
             0
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "9999",
+              "difficulty": 0,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:9999"
@@ -1006,6 +1014,13 @@
             0
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": null,
+              "difficulty": 0,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": []
         }
@@ -1166,6 +1181,33 @@
             4
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": null,
+              "difficulty": 0,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -1330,6 +1372,33 @@
             4
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": null,
+              "difficulty": 0,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -1478,6 +1547,33 @@
             4
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 5,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 0,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -1626,6 +1722,33 @@
             4
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": null,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 0,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -1801,6 +1924,58 @@
             9
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1006",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1007",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1008",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1009",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1010",
+              "difficulty": 1,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -2019,6 +2194,83 @@
             14
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1006",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1007",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1008",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1009",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1010",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1011",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1012",
+              "difficulty": 3,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1013",
+              "difficulty": 3,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1014",
+              "difficulty": 3,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1015",
+              "difficulty": 3,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -2305,6 +2557,18 @@
             1
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": null,
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 0,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1002"
@@ -2566,6 +2830,16 @@
             0
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 0,
+              "giftIds": [
+                "9002",
+                "9002"
+              ]
+            }
+          ],
           "violations": [],
           "rows": [
             "EGO_GIFT:9002",
@@ -2746,6 +3020,15 @@
           "floors": [],
           "salvaged": [
             0
+          ],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 0,
+              "giftIds": [
+                "9002"
+              ]
+            }
           ],
           "violations": [
             {
@@ -2945,7 +3228,7 @@
           "violations": [
             {
               "code": "FLOOR_UNKNOWN_GIFT_ID",
-              "path": "floorSelections[0].giftIds"
+              "path": "floorSelections[0].giftIds[0]"
             }
           ]
         },
@@ -2954,7 +3237,7 @@
           "violations": [
             {
               "code": "FLOOR_UNKNOWN_GIFT_ID",
-              "path": "floorSelections[0].giftIds"
+              "path": "floorSelections[0].giftIds[0]"
             },
             {
               "code": "FLOOR_MISSING_THEME_PACK",
@@ -2980,6 +3263,15 @@
             0
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 0,
+              "giftIds": [
+                "9999"
+              ]
+            }
+          ],
           "violations": [],
           "rows": [
             "EGO_GIFT:9999",
@@ -3234,6 +3526,15 @@
             0
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 0,
+              "giftIds": [
+                "9004"
+              ]
+            }
+          ],
           "violations": [],
           "rows": [
             "EGO_GIFT:9004",
@@ -3453,6 +3754,13 @@
           "salvaged": [
             0
           ],
+          "admitted": [
+            {
+              "themePackId": null,
+              "difficulty": null,
+              "giftIds": []
+            }
+          ],
           "violations": [
             {
               "code": "INVALID_FIELD_TYPE",
@@ -3605,6 +3913,13 @@
           "floors": [],
           "salvaged": [
             0
+          ],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 0,
+              "giftIds": []
+            }
           ],
           "violations": [
             {
@@ -3840,6 +4155,15 @@
             0
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": null,
+              "difficulty": 0,
+              "giftIds": [
+                "9004"
+              ]
+            }
+          ],
           "violations": [],
           "rows": [
             "EGO_GIFT:9004"
@@ -4079,6 +4403,18 @@
           "salvaged": [
             0
           ],
+          "admitted": [
+            {
+              "themePackId": null,
+              "difficulty": null,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 0,
+              "giftIds": []
+            }
+          ],
           "violations": [
             {
               "code": "INVALID_FIELD_TYPE",
@@ -4203,6 +4539,33 @@
             4
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 0,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -4321,6 +4684,35 @@
             4
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 0,
+              "giftIds": [
+                "9002"
+              ]
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 0,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "EGO_GIFT:9002",
@@ -4611,6 +5003,20 @@
             1
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": null,
+              "difficulty": 0,
+              "giftIds": [
+                "9004"
+              ]
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 0,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "EGO_GIFT:9004",
@@ -4887,6 +5293,16 @@
             0
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": null,
+              "difficulty": 0,
+              "giftIds": [
+                "9002",
+                "9002"
+              ]
+            }
+          ],
           "violations": [],
           "rows": [
             "EGO_GIFT:9002"
@@ -5039,6 +5455,33 @@
           ],
           "salvaged": [
             0
+          ],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": null,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 0,
+              "giftIds": []
+            }
           ],
           "violations": [
             {
@@ -5330,6 +5773,83 @@
           "salvaged": [
             6
           ],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1006",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": null,
+              "difficulty": null,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1008",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1009",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1010",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1011",
+              "difficulty": 3,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1012",
+              "difficulty": 3,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1013",
+              "difficulty": 3,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1014",
+              "difficulty": 3,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1015",
+              "difficulty": 3,
+              "giftIds": []
+            }
+          ],
           "violations": [
             {
               "code": "INVALID_FIELD_TYPE",
@@ -5529,7 +6049,7 @@
           "violations": [
             {
               "code": "FLOOR_UNKNOWN_GIFT_ID",
-              "path": "floorSelections[0].giftIds"
+              "path": "floorSelections[0].giftIds[0]"
             },
             {
               "code": "THEME_PACK_UNKNOWN_ID",
@@ -5542,7 +6062,7 @@
           "violations": [
             {
               "code": "FLOOR_UNKNOWN_GIFT_ID",
-              "path": "floorSelections[0].giftIds"
+              "path": "floorSelections[0].giftIds[0]"
             },
             {
               "code": "THEME_PACK_UNKNOWN_ID",
@@ -5560,6 +6080,35 @@
             4
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "+1001",
+              "difficulty": 0,
+              "giftIds": [
+                "+9002"
+              ]
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 0,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1002",
@@ -5766,6 +6315,7 @@
           "ok": true,
           "floors": [],
           "salvaged": [],
+          "admitted": [],
           "violations": [],
           "rows": []
         }
@@ -5914,6 +6464,58 @@
             9
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1006",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1007",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1008",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1009",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1010",
+              "difficulty": 1,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -6111,6 +6713,83 @@
             14
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1006",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1007",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1008",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1009",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1010",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1011",
+              "difficulty": 3,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1012",
+              "difficulty": 3,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1013",
+              "difficulty": 3,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1014",
+              "difficulty": 3,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1015",
+              "difficulty": 3,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -6237,6 +6916,33 @@
             4
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 0,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -6490,6 +7196,33 @@
             4
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": null,
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": null,
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": null,
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": null,
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": null,
+              "difficulty": 0,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": []
         }
@@ -6722,6 +7455,33 @@
             4
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": null,
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": null,
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": null,
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": null,
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": null,
+              "difficulty": 0,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": []
         }
@@ -6834,6 +7594,33 @@
             4
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 0,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -6959,6 +7746,33 @@
             4
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 0,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -7072,6 +7886,33 @@
             4
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 1,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -7203,6 +8044,33 @@
             4
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 2,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 0,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -7349,6 +8217,33 @@
             4
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": -1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 0,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -7522,6 +8417,58 @@
             9
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1006",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1007",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1008",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1009",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1010",
+              "difficulty": 2,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -7738,6 +8685,83 @@
             14
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1006",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1007",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1008",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1009",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1010",
+              "difficulty": 3,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1011",
+              "difficulty": 3,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1012",
+              "difficulty": 3,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1013",
+              "difficulty": 3,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1014",
+              "difficulty": 3,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1015",
+              "difficulty": 3,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -7959,6 +8983,83 @@
             14
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1006",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1007",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1008",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1009",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1010",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1011",
+              "difficulty": 3,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1012",
+              "difficulty": 3,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1013",
+              "difficulty": 3,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1014",
+              "difficulty": 3,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1015",
+              "difficulty": 2,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -8086,6 +9187,33 @@
             4
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 1,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -8260,6 +9388,58 @@
             9
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1006",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1007",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1008",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1009",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1010",
+              "difficulty": 1,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -8439,6 +9619,58 @@
             9
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1006",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1007",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1008",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1009",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1010",
+              "difficulty": 1,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -8871,6 +10103,68 @@
             11
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1006",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1007",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1008",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1009",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1010",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1011",
+              "difficulty": 3,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1012",
+              "difficulty": 3,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -9030,6 +10324,33 @@
             4
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 0,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -9197,6 +10518,33 @@
             4
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 0,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -9341,6 +10689,28 @@
             3
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 0,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -9570,6 +10940,33 @@
             4
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": null,
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 0,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -9724,6 +11121,33 @@
             4
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1001",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 0,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -9909,6 +11333,58 @@
             9
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": null,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1006",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1007",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1008",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1009",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1010",
+              "difficulty": 1,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -10084,6 +11560,23 @@
             2
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 0,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -10197,6 +11690,33 @@
             4
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 1,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -10475,6 +11995,33 @@
             4
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": null,
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 0,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "THEME_PACK:1001",
@@ -10683,7 +12230,7 @@
             },
             {
               "code": "FLOOR_UNKNOWN_GIFT_ID",
-              "path": "floorSelections[1].giftIds"
+              "path": "floorSelections[1].giftIds[0]"
             },
             {
               "code": "FLOOR_DUPLICATE_THEME_PACK",
@@ -10700,7 +12247,7 @@
             },
             {
               "code": "FLOOR_UNKNOWN_GIFT_ID",
-              "path": "floorSelections[1].giftIds"
+              "path": "floorSelections[1].giftIds[0]"
             },
             {
               "code": "FLOOR_DUPLICATE_THEME_PACK",
@@ -10718,6 +12265,38 @@
             4
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 0,
+              "giftIds": [
+                "9002",
+                "9002"
+              ]
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 0,
+              "giftIds": [
+                "9999"
+              ]
+            },
+            {
+              "themePackId": "1001",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 0,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "EGO_GIFT:9002",
@@ -10858,6 +12437,35 @@
             4
           ],
           "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "9999",
+              "difficulty": 0,
+              "giftIds": [
+                "9004"
+              ]
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 0,
+              "giftIds": []
+            }
+          ],
           "violations": [],
           "rows": [
             "EGO_GIFT:9004",
@@ -10873,6 +12481,223 @@
         null,
         "unnamed:be-unknown-pack-skips-floor-gift-checks"
       ]
+    },
+    {
+      "name": "ref-boundary-violation-skips-reference-checks",
+      "category": "5F",
+      "sources": [
+        "contract:adr-141-reference-checks-need-a-clean-boundary"
+      ],
+      "floorSelections": [
+        {
+          "themePackId": "9999",
+          "difficulty": 0,
+          "giftIds": [
+            "9999"
+          ]
+        },
+        {
+          "themePackId": "1002",
+          "difficulty": 0,
+          "giftIds": [
+            9002
+          ]
+        }
+      ],
+      "captured": {},
+      "divergent": false,
+      "divergences": [],
+      "expect": {
+        "draft": {
+          "ok": false,
+          "violations": [
+            {
+              "code": "INVALID_FIELD_TYPE",
+              "path": "floorSelections[1].giftIds[0]"
+            }
+          ]
+        },
+        "publish": {
+          "ok": false,
+          "violations": [
+            {
+              "code": "INVALID_FIELD_TYPE",
+              "path": "floorSelections[1].giftIds[0]"
+            }
+          ]
+        },
+        "index": {
+          "ok": false,
+          "floors": [
+            0
+          ],
+          "salvaged": [
+            1
+          ],
+          "admitted": [
+            {
+              "themePackId": "9999",
+              "difficulty": 0,
+              "giftIds": [
+                "9999"
+              ]
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 0,
+              "giftIds": [
+                "9002"
+              ]
+            }
+          ],
+          "violations": [
+            {
+              "code": "INVALID_FIELD_TYPE",
+              "path": "floorSelections[1].giftIds[0]"
+            }
+          ],
+          "rows": [
+            "EGO_GIFT:9002",
+            "EGO_GIFT:9999",
+            "THEME_PACK:1002",
+            "THEME_PACK:9999"
+          ]
+        }
+      },
+      "verdictRow": "adr-141"
+    },
+    {
+      "name": "ref-violations-by-path-then-code",
+      "category": "5F",
+      "sources": [
+        "contract:adr-140-violation-order"
+      ],
+      "floorSelections": [
+        {
+          "themePackId": "1001",
+          "difficulty": 0,
+          "giftIds": [
+            "9004"
+          ]
+        },
+        {
+          "themePackId": "9998",
+          "difficulty": 0,
+          "giftIds": [
+            "9001",
+            "9997"
+          ]
+        },
+        {
+          "themePackId": "1003",
+          "difficulty": 0,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1004",
+          "difficulty": 0,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1005",
+          "difficulty": 0,
+          "giftIds": []
+        }
+      ],
+      "captured": {},
+      "divergent": false,
+      "divergences": [],
+      "expect": {
+        "draft": {
+          "ok": false,
+          "violations": [
+            {
+              "code": "GIFT_NOT_AFFORDABLE",
+              "path": "floorSelections[0].giftIds[0]"
+            },
+            {
+              "code": "FLOOR_UNKNOWN_GIFT_ID",
+              "path": "floorSelections[1].giftIds[1]"
+            },
+            {
+              "code": "THEME_PACK_UNKNOWN_ID",
+              "path": "floorSelections[1].themePackId"
+            }
+          ]
+        },
+        "publish": {
+          "ok": false,
+          "violations": [
+            {
+              "code": "GIFT_NOT_AFFORDABLE",
+              "path": "floorSelections[0].giftIds[0]"
+            },
+            {
+              "code": "FLOOR_UNKNOWN_GIFT_ID",
+              "path": "floorSelections[1].giftIds[1]"
+            },
+            {
+              "code": "THEME_PACK_UNKNOWN_ID",
+              "path": "floorSelections[1].themePackId"
+            }
+          ]
+        },
+        "index": {
+          "ok": true,
+          "floors": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 0,
+              "giftIds": [
+                "9004"
+              ]
+            },
+            {
+              "themePackId": "9998",
+              "difficulty": 0,
+              "giftIds": [
+                "9001",
+                "9997"
+              ]
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 0,
+              "giftIds": []
+            }
+          ],
+          "violations": [],
+          "rows": [
+            "EGO_GIFT:9001",
+            "EGO_GIFT:9004",
+            "EGO_GIFT:9997",
+            "THEME_PACK:1001",
+            "THEME_PACK:1003",
+            "THEME_PACK:1004",
+            "THEME_PACK:1005",
+            "THEME_PACK:9998"
+          ]
+        }
+      },
+      "verdictRow": "adr-141"
     }
   ]
 }

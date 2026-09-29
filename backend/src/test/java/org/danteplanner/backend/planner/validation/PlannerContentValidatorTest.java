@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.planner.exception.PlannerValidationException.ValidationError;
-import org.danteplanner.backend.planner.floor.FloorRules;
-import org.danteplanner.backend.planner.floor.Stage;
+import org.danteplanner.backend.planner.validation.floor.FloorRules;
+import org.danteplanner.backend.planner.validation.floor.Stage;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -1723,10 +1723,10 @@ class PlannerContentValidatorTest {
                     () -> validate(content, "5F"));
 
             assertThat(ex.getSubErrors()).containsExactly(
-                    new ValidationError("THEME_PACK_UNKNOWN_ID",
-                            "floorSelections[0].themePackId ID '+1001' not found or invalid"),
                     new ValidationError("FLOOR_UNKNOWN_GIFT_ID",
-                            "floorSelections[0].giftIds ID '9999' not found or invalid"));
+                            "floorSelections[0].giftIds[0] ID '9999' not found or invalid"),
+                    new ValidationError("THEME_PACK_UNKNOWN_ID",
+                            "floorSelections[0].themePackId ID '+1001' not found or invalid"));
         }
 
         @Test
@@ -1820,9 +1820,9 @@ class PlannerContentValidatorTest {
                     () -> realValidator.validate(content, "5F", VERSION, Stage.PUBLISH));
 
             assertThat(ex.getSubErrors()).containsExactly(
+                    new ValidationError("GIFT_NOT_AFFORDABLE", "Gift '9212' is not affordable for theme pack '9999'"),
                     new ValidationError("THEME_PACK_UNKNOWN_ID",
-                            "floorSelections[0].themePackId ID '9999' not found or invalid"),
-                    new ValidationError("GIFT_NOT_AFFORDABLE", "Gift '9212' is not affordable for theme pack '9999'"));
+                            "floorSelections[0].themePackId ID '9999' not found or invalid"));
         }
 
         @Test

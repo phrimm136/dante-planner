@@ -144,7 +144,7 @@
       }
     },
     {
-      "files": ["src/pages/planner/lib/floorRules.ts"],
+      "files": ["src/pages/planner/lib/validation/floor/**/*.ts"],
       "rules": {
         "no-restricted-imports": [
           "error",

@@ -3,9 +3,11 @@ language: TypeScript
 severity: error
 message: 'ADR 140: nothing is collected through a parameter; return the violations instead of filling an array passed in.'
 files:
-  - src/pages/planner/lib/floorRules.ts
+  - src/pages/planner/lib/validation/**
   - src/pages/planner/lib/plannerValidation.ts
   - src/pages/planner/lib/plannerValidationErrors.ts
+ignores:
+  - '**/__tests__/**'
 rule:
   any:
     - kind: function_declaration

@@ -369,8 +369,8 @@ sub 1: VALUE_OUT_OF_RANGE | floorSelections[0].difficulty value 5 is out of rang
 
 ### floor-difficulty-absent
 code: VALIDATION_ERROR
-message: [VALUE_OUT_OF_RANGE] floorSelections[0].difficulty value -1 is out of range [0-1]
-sub 1: VALUE_OUT_OF_RANGE | floorSelections[0].difficulty value -1 is out of range [0-1]
+message: [VALUE_OUT_OF_RANGE] floorSelections[0].difficulty is absent; expected a value in range [0-1]
+sub 1: VALUE_OUT_OF_RANGE | floorSelections[0].difficulty is absent; expected a value in range [0-1]
 
 ### floor-difficulty-hard-required-on-10f
 code: VALIDATION_ERROR
@@ -399,8 +399,8 @@ sub 1: INVALID_FIELD_TYPE | Field 'floorSelections[0].giftIds[0]' must be string
 
 ### floor-gift-unknown
 code: VALIDATION_ERROR
-message: [FLOOR_UNKNOWN_GIFT_ID] floorSelections[0].giftIds ID '9999' not found or invalid
-sub 1: FLOOR_UNKNOWN_GIFT_ID | floorSelections[0].giftIds ID '9999' not found or invalid
+message: [FLOOR_UNKNOWN_GIFT_ID] floorSelections[0].giftIds[0] ID '9999' not found or invalid
+sub 1: FLOOR_UNKNOWN_GIFT_ID | floorSelections[0].giftIds[0] ID '9999' not found or invalid
 
 ### floor-gift-not-affordable
 code: VALIDATION_ERROR
