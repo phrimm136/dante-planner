@@ -63,13 +63,9 @@ export function ImportanceDecoration({
           />
         )}
       </span>
-      {variant === 'passive' ? (
-        <div data-slot="importance-dash-top" className="importance-dash-top" />
-      ) : (
-        <div data-slot="importance-band-top" className="importance-band importance-band-top">
-          <div className="importance-stripe importance-stripe-top" style={stripeStyle} />
-        </div>
-      )}
+      <div data-slot="importance-band-top" className="importance-band importance-band-top">
+        <div className="importance-stripe importance-stripe-top" style={stripeStyle} />
+      </div>
       <div data-slot="importance-band-bottom" className="importance-band importance-band-bottom">
         <div className="importance-stripe" style={stripeStyle} />
       </div>

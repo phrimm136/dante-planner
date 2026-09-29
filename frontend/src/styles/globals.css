@@ -394,13 +394,15 @@
   }
 }
 
-@keyframes importance-outline-flicker {
+@keyframes importance-plate-glow {
   0%,
   100% {
-    opacity: var(--importance-outline-max);
+    filter: drop-shadow(0 0 var(--importance-glow-radius) var(--importance-glow-max))
+      drop-shadow(0 0 var(--importance-glow-radius) var(--importance-glow-max));
   }
   50% {
-    opacity: var(--importance-outline-min);
+    filter: drop-shadow(0 0 var(--importance-glow-radius) var(--importance-glow-min))
+      drop-shadow(0 0 var(--importance-glow-radius) var(--importance-glow-min));
   }
 }
 
@@ -469,14 +471,6 @@
     importance-blink var(--importance-blink-period) cubic-bezier(0.37, 0, 0.63, 1) infinite;
 }
 
-.importance-dash-top {
-  position: absolute;
-  inset-inline: 0;
-  top: 0;
-  border-top: 1px dashed var(--importance-stripe-color);
-  opacity: var(--importance-blink-max);
-}
-
 .importance-stripe-top {
   animation-direction: reverse, normal;
 }
@@ -487,25 +481,17 @@
 }
 
 .importance-banner [data-slot='name-plate'] {
-  position: relative;
-}
-
-.importance-banner [data-slot='name-plate']::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  box-shadow: 0 0 var(--importance-glow-radius) var(--importance-panel-glow);
-  pointer-events: none;
-  opacity: var(--importance-outline-max);
-  animation: importance-outline-flicker var(--importance-flicker-period)
-    cubic-bezier(0.37, 0, 0.63, 1) infinite;
+  filter: drop-shadow(0 0 var(--importance-glow-radius) var(--importance-glow-max))
+    drop-shadow(0 0 var(--importance-glow-radius) var(--importance-glow-max));
+  animation: importance-plate-glow var(--importance-flicker-period) cubic-bezier(0.37, 0, 0.63, 1)
+    infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .importance-flicker-icon,
   .importance-flicker,
   .importance-stripe,
-  .importance-banner [data-slot='name-plate']::after {
+  .importance-banner [data-slot='name-plate'] {
     animation: none;
   }
 }

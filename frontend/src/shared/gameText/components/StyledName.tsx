@@ -40,7 +40,7 @@ export function StyledSkillName({ name, attributeType }: StyledSkillNameProps) {
           color: `var(--name-text, ${TEXT_COLOR})`,
           marginBottom: '10px',
           width: '100%',
-          backgroundImage: generateBackgroundGradient(`var(--name-plate, ${dark})`),
+          backgroundImage: generateBackgroundGradient(`var(--name-tail, ${dark})`),
         }}
       >
         <div
@@ -48,7 +48,7 @@ export function StyledSkillName({ name, attributeType }: StyledSkillNameProps) {
             textShadow: '2px 2px 2px black',
             padding: '0.1em 3.75em 0 0.3em',
             textAlign: 'left',
-            backgroundImage: generateStripeGradient(`var(--name-stripe, ${primary})`),
+            backgroundImage: generateStripeGradient(`var(--name-body, ${primary})`),
           }}
         >
           <span style={{ fontSize: '20px', ...displayStyle }}>{name}</span>

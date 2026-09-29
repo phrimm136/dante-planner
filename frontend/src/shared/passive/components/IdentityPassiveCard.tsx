@@ -11,7 +11,12 @@ import {
 import { cn, getDisplayFontForNumeric, getDisplayFontForLanguage } from '@/lib/utils'
 import { SECTION_STYLES } from '@/lib/constants'
 import type { ImportancePalette } from '@/shared/gameData'
-import { ImportanceBanner, ImportanceDecoration, hasImportance } from '@/shared/importance'
+import {
+  ImportanceBanner,
+  ImportanceDecoration,
+  hasImportance,
+  importanceBoxPadding,
+} from '@/shared/importance'
 
 interface IdentityPassiveCondition {
   type: string
@@ -47,6 +52,7 @@ export function IdentityPassiveCard({
         isLocked && 'opacity-50',
         decorated && 'isolate @container',
       )}
+      style={importanceBoxPadding(importanceLevel)}
     >
       <ImportanceDecoration level={importanceLevel} palette={palette} variant="passive" />
       <ImportanceBanner

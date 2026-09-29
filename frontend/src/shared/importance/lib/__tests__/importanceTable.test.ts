@@ -8,6 +8,7 @@ import {
   clientLength,
   hasImportance,
   importanceBannerStyle,
+  importanceBoxPadding,
   importanceGeometry,
   importanceStyle,
   stripeTileWidth,
@@ -58,12 +59,12 @@ describe('importance geometry', () => {
     expect(clientLength(COIN_CLIENT_WIDTH)).toBe('1.25rem')
   })
 
-  it('places the 200-unit skill icon 286 units in from the right and 22 below the box top', () => {
+  it('places the in-game 159-unit skill triangle 95 units in from the right and 45 down', () => {
     expect(importanceGeometry('skill', false)).toEqual({
-      iconSize: '5rem',
-      iconTop: '0.55rem',
-      iconRight: '7.15rem',
-      bandHeight: '0.8994rem',
+      iconSize: '3.975rem',
+      iconTop: '1.125rem',
+      iconRight: '2.375rem',
+      bandHeight: '0.675rem',
       bandOffset: '0rem',
     })
   })
@@ -72,13 +73,13 @@ describe('importance geometry', () => {
     expect(importanceGeometry('skill', true).iconRight).toBe('2.15rem')
   })
 
-  it('draws the passive triangle at the in-game 118 units, at the right edge, 14 units down', () => {
+  it('draws the passive triangle at the in-game 163 units, at the right edge, 14 units down', () => {
     expect(importanceGeometry('passive', false)).toEqual({
-      iconSize: '2.95rem',
+      iconSize: '4.075rem',
       iconTop: '0.35rem',
       iconRight: '0rem',
-      bandHeight: '0.625rem',
-      bandOffset: '-0.625rem',
+      bandHeight: '0.675rem',
+      bandOffset: '0rem',
     })
   })
 
@@ -92,11 +93,11 @@ describe('importance geometry', () => {
 describe('passive banner', () => {
   it('tints the name plate itself and glows around it', () => {
     const style = importanceBannerStyle(3, 'player') as Record<string, unknown>
-    expect(style['--name-plate']).toMatch(/^#87cb00(ff)?$/i)
+    expect(style['--name-body']).toMatch(/^#87cb00(ff)?$/i)
     expect(style['--name-text']).toMatch(/^#f6ff00(ff)?$/i)
-    expect(style['--importance-glow-radius']).toBe('0.3rem')
-    expect(style['--importance-outline-min']).toBe(0.5)
-    expect(style['--importance-outline-max']).toBe(1)
+    expect(style['--importance-glow-radius']).toBe('0.15rem')
+    expect(style['--importance-glow-min']).toMatch(/ 50%, transparent\)$/)
+    expect(style['--importance-glow-max']).toMatch(/ 100%, transparent\)$/)
     expect(style['--importance-flicker-period']).toBe('0.8s')
   })
 })
@@ -127,5 +128,16 @@ describe('stripe tile', () => {
 
   it('scales one tile width from the band height by 1102 / 42', () => {
     expect(stripeTileWidth()).toBe('calc(var(--band-h) * 1102 / 42)')
+  })
+})
+
+describe('importance box padding', () => {
+  it('pads a decorated passive box by one band and bleeds it to the pane edges', () => {
+    expect(importanceBoxPadding(3)).toEqual({
+      paddingBlock: '0.675rem',
+      paddingInline: '1rem',
+      marginInline: '-1rem',
+    })
+    expect(importanceBoxPadding(0)).toBeUndefined()
   })
 })

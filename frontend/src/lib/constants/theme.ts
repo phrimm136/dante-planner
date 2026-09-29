@@ -157,16 +157,15 @@ export const IMPORTANCE_DECORATION = {
 
 export const CLIENT_TEXT_SCALE = { LINE_UNITS: 50, LINE_REM: 1.25 } as const
 
-export const CLIENT_SKILL_BOX_WIDTH = 899.4
-
 export const COIN_CLIENT_WIDTH = 50
 
 export const IMPORTANCE_CLIENT_LAYOUT = {
-  ICON_SIZE: { skill: 200, passive: 118 },
-  ICON_TOP: { skill: 22, passive: 14 },
-  ICON_RIGHT: { skill: 286, lockedSkill: 86, passive: 0 },
-  BAND: { skill: CLIENT_SKILL_BOX_WIDTH * 0.04, passive: 25 },
-  PASSIVE_GLOW: 12,
+  ICON_SIZE: { skill: 159, passive: 163 },
+  ICON_TOP: { skill: 45, passive: 14 },
+  ICON_RIGHT: { skill: 95, lockedSkill: 86, passive: 0 },
+  BAND: { skill: 27, passive: 27 },
+  PASSIVE_GLOW: 6,
+  PASSIVE_PANE_BLEED_REM: 1,
 } as const
 
 export const IMPORTANCE_STRIPE_BLINK_SPEED = 2

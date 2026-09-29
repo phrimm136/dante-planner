@@ -5,7 +5,12 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { SECTION_STYLES } from '@/lib/constants'
 import type { ImportancePalette } from '@/shared/gameData'
-import { ImportanceBanner, ImportanceDecoration, hasImportance } from '@/shared/importance'
+import {
+  ImportanceBanner,
+  ImportanceDecoration,
+  hasImportance,
+  importanceBoxPadding,
+} from '@/shared/importance'
 
 interface EGOPassiveCardProps {
   nameSlot: ReactNode
@@ -33,6 +38,7 @@ export function EGOPassiveCard({
         isLocked && 'opacity-50',
         decorated && 'relative isolate @container',
       )}
+      style={importanceBoxPadding(importanceLevel)}
     >
       <ImportanceDecoration level={importanceLevel} palette={palette} variant="passive" />
       <ImportanceBanner

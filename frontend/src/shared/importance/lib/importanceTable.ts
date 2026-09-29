@@ -97,7 +97,17 @@ export function importanceGeometry(
     iconTop: clientLength(IMPORTANCE_CLIENT_LAYOUT.ICON_TOP[variant]),
     iconRight: clientLength(iconRight(variant, isLocked)),
     bandHeight: clientLength(band),
-    bandOffset: variant === 'passive' ? clientLength(-band) : clientLength(0),
+    bandOffset: clientLength(0),
+  }
+}
+
+export function importanceBoxPadding(level: number): CSSProperties | undefined {
+  if (!hasImportance(level)) return undefined
+  const bleed = IMPORTANCE_CLIENT_LAYOUT.PASSIVE_PANE_BLEED_REM
+  return {
+    paddingBlock: clientLength(IMPORTANCE_CLIENT_LAYOUT.BAND.passive),
+    paddingInline: `${String(bleed)}rem`,
+    marginInline: `${String(-bleed)}rem`,
   }
 }
 
@@ -133,13 +143,13 @@ export function importanceBannerStyle(
   if (style === undefined) return undefined
   const [outlineMin, outlineMax] = style.outlineAlpha
   return {
-    '--name-plate': style.colors.passivePanel,
-    '--name-stripe': `color-mix(in srgb, ${style.colors.passivePanel} 55%, black)`,
+    '--name-body': style.colors.passivePanel,
+    '--name-tail': `color-mix(in srgb, ${style.colors.passivePanel} 55%, black)`,
     '--name-text': style.colors.passiveName,
     '--importance-panel-glow': style.colors.passiveGlow,
     '--importance-glow-radius': clientLength(IMPORTANCE_CLIENT_LAYOUT.PASSIVE_GLOW),
     '--importance-flicker-period': `${String(style.flickerPeriodS)}s`,
-    '--importance-outline-min': outlineMin,
-    '--importance-outline-max': outlineMax,
+    '--importance-glow-min': `color-mix(in srgb, ${style.colors.passiveGlow} ${String(outlineMin * 100)}%, transparent)`,
+    '--importance-glow-max': `color-mix(in srgb, ${style.colors.passiveGlow} ${String(outlineMax * 100)}%, transparent)`,
   } as CSSProperties
 }
