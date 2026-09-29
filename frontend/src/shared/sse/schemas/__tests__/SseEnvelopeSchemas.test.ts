@@ -1,21 +1,23 @@
+import fs from 'node:fs'
+import path from 'node:path'
 import { describe, it, expect } from 'vitest'
 
 import { SseAccountSuspendedSchema, SseEnvelopeSchema, SseEventTypeSchema } from '@/shared/sse'
 
+const FRONTEND_ROOT = path.resolve(
+  path.dirname(new URL(import.meta.url).pathname),
+  '../../../../..',
+)
+const EVENT_TYPES_PATH = path.resolve(FRONTEND_ROOT, '../testdata/sse-event-types.json')
+
 /**
- * Transcribed from backend `SseEventType`: every constant's `@JsonValue`.
- * Compared as a set, so the order written here carries no meaning.
+ * Every backend `SseEventType` constant's `@JsonValue`, read from
+ * `testdata/sse-event-types.json`, which a backend test keeps equal to the enum.
+ * Compared as a set, so the file's order carries no meaning here.
  * `connected` is absent — `AbstractSseService` emits it as a literal, so it is
  * a transport handshake rather than a backend event constant.
  */
-const BACKEND_SSE_EVENT_TYPES = [
-  'comment:added',
-  'notify:comment',
-  'notify:published',
-  'notify:recommended',
-  'settings:invalidated',
-  'account_suspended',
-]
+const BACKEND_SSE_EVENT_TYPES = JSON.parse(fs.readFileSync(EVENT_TYPES_PATH, 'utf-8')) as string[]
 
 /** Spelled out rather than read back from the source this test is checking. */
 const CONNECTED_HANDSHAKE = 'connected'
