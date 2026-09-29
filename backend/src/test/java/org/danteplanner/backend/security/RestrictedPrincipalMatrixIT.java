@@ -48,8 +48,10 @@ import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
  * content. Everything else stays reachable, including private planner CRUD.</p>
  *
  * <p>The endpoint axis comes from {@link RequestMappingHandlerMapping}, so both arms grow on their
- * own. A newly added endpoint lands in the must-not-be-blocked arm, which is the direction where a
- * wrong answer is visible rather than silently permissive.</p>
+ * own. A newly added endpoint lands in the must-not-be-blocked arm. That arm checks only that a
+ * row clears bean validation and is not refused with {@code USER_BANNED}: its path variables are
+ * random ids, so a row keyed by an entity answers 404 at the lookup, and a ban check placed after
+ * that lookup is not caught here.</p>
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
@@ -148,7 +150,7 @@ class RestrictedPrincipalMatrixIT extends SharedMySqlContainerSupport {
                             .contains(BANNED_CODE);
                 } else {
                     assertThat(result.getResponse().getStatus())
-                            .as("%s answered 400 before reaching the guard; body: %s", key, body)
+                            .as("%s answered 400 instead of clearing request validation; body: %s", key, body)
                             .isNotEqualTo(HttpStatus.BAD_REQUEST.value());
                     assertThat(body)
                             .as("%s withdrew a capability a ban does not cover", key)
