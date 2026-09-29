@@ -300,8 +300,7 @@
   },
   "conventions": {
     "floorSelections": "replaces base.floorSelections verbatim for the case",
-    "violationOrder": "sorted lexicographically by path (null as empty), then code",
-    "pathNull": "a BE violation thrown outside the ValidationContext carries no path",
+    "violationOrder": "sorted lexicographically by path, then code",
     "fe.draftSave": "firstOnly: the violation is the error the function passed to toUserFriendlyError; returned is its actual return value",
     "fe.schema": "validateSaveablePlanner(..., 'draft') over metadata, config {type, category} and the case content; issuePaths are Zod issue paths",
     "fe.threw": "FE draftSave/publish are called with the raw case content; threw records an exception",

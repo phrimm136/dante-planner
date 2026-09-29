@@ -10,14 +10,15 @@ session is easier to keep than one that sounded sensible.
 ## 1. The two questions
 
 ```java
-verify(contentValidator).validate(request.content(), request.category());   // yes to both
+verify(contentValidator).parse(request.content(), category, season, Stage.DRAFT);   // yes to both
 ```
 
-Passes if `validate` does nothing, and fails the moment validation moves behind another seam. Its
+Passes if `parse` does nothing, and fails the moment validation moves behind another seam. Its
 subject is the wiring diagram.
 
 ```java
-when(contentValidator.validate(any(), any())).thenThrow(ValidationErrors.emptyContent());
+when(contentValidator.parse(any(), any(), any(), any()))
+        .thenThrow(new PlannerValidationException("INVALID_CONTENT", "Rejected content"));
 assertThrows(PlannerValidationException.class, () -> commandService.createPlanner(...));
 ```
 

@@ -26,7 +26,7 @@ else — see **Parallelism** for why that still matters when classes no longer o
   key gives the class its own bean, which is what the assertion actually needs. Two beans in this
   codebase hold mutable state: `PlannerViewRecorder`'s flush buffer and `AbstractSseService`'s
   emitter registry. A new one is found by looking for a collection or atomic assigned inline in a
-  `@Service` or `@Component`; per-call objects like `ValidationContext` do not count.
+  `@Service` or `@Component`; per-call objects do not count.
 - **When the subject genuinely is a whole table or index** — title search, keyword facets, a global rebuild procedure — take `SharedMySqlContainerSupport.registerOwnDatabase(registry, "name")` and truncate freely inside it. Costs one application context, so reach for a narrowed assertion first.
 
 ## `@Transactional` on a test class
