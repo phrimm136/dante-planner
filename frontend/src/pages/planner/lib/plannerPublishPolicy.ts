@@ -1,4 +1,4 @@
-import type { PlannerValidationError } from './plannerValidationErrors'
+import type { PlannerValidationError } from './validation/plannerValidationErrors'
 
 export type PublishAction =
   | { kind: 'unpublish' }

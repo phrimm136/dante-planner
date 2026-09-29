@@ -469,26 +469,6 @@ describe('partitionImport', () => {
     expect(skipped).toEqual([{ id: items[2]?.id, title: 'Plan 3', reason: rejection }])
   })
 
-  it('skips a planner whose content the validator cannot read', () => {
-    const { fresh, skipped } = partitionImport(
-      envelopeOf([EXPORT_ITEM]),
-      new Set(),
-      EMPTY_ID_MIGRATION_TABLE,
-      () => {
-        throw new TypeError('content.equipment is undefined')
-      },
-    )
-
-    expect(fresh).toEqual([])
-    expect(skipped).toEqual([
-      {
-        id: VALID_UUID,
-        title: 'Imported plan',
-        reason: { key: 'pages.plannerMD.validation.corruptedState' },
-      },
-    ])
-  })
-
   it('validates the planner after applying the id-migration table', () => {
     const withGift = { ...EXPORT_ITEM, content: { selectedGiftIds: ['19001'] } }
     const seen: unknown[] = []

@@ -8,8 +8,7 @@ import { VALIDATION_CODES } from '../codes'
 type VocabularyEntry = { emittedBy: string[] }
 
 const VALIDATION_DIR = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..')
-const LIB_DIR = path.resolve(VALIDATION_DIR, '..')
-const FRONTEND_ROOT = path.resolve(LIB_DIR, '../../../..')
+const FRONTEND_ROOT = path.resolve(VALIDATION_DIR, '../../../../..')
 const VOCABULARY_PATH = path.resolve(FRONTEND_ROOT, '../testdata/planner-error-codes.json')
 const CODES_FILE = path.resolve(VALIDATION_DIR, 'codes.ts')
 const TESTS_DIR = '__tests__'
@@ -19,14 +18,12 @@ const vocabulary = JSON.parse(fs.readFileSync(VOCABULARY_PATH, 'utf-8')) as {
   codes: Record<string, VocabularyEntry>
 }
 
-const emittingSources = (): string[] => [
-  path.resolve(LIB_DIR, 'plannerValidation.ts'),
-  ...fs
+const emittingSources = (): string[] =>
+  fs
     .readdirSync(VALIDATION_DIR, { recursive: true, encoding: 'utf-8' })
     .filter((file) => file.endsWith('.ts') && !file.split(path.sep).includes(TESTS_DIR))
     .map((file) => path.resolve(VALIDATION_DIR, file))
-    .filter((file) => file !== CODES_FILE),
-]
+    .filter((file) => file !== CODES_FILE)
 
 const insideType = (node: ts.Node): boolean =>
   node.parent !== undefined && (ts.isTypeNode(node.parent) || insideType(node.parent))

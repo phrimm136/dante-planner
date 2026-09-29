@@ -8,37 +8,24 @@
 
 import { describe, it, expect } from 'vitest'
 import {
-  validateEquipment,
-  validateDeploymentOrder,
-  validateSkillEAState,
-  validateGiftIdArray,
-  validateStartBuffIds,
-  validateStartGiftSelection,
   validatePlannerForPublish,
   validatePlannerForDraftSave,
   validatePlannerForImport,
-  validateNoteSizes,
-  validateSelectedKeywords,
 } from '../plannerValidation'
-import { normalizePlannerIds } from '../plannerIdNormalize'
-import type { IdMigrationTable } from '../idMigrationTable'
+import { normalizePlannerIds } from '../../plannerIdNormalize'
+import type { IdMigrationTable } from '../../idMigrationTable'
 import type { PlannerIdRegistry, PlannerValidationResult } from '../plannerValidation'
 import { toUserFriendlyError } from '../plannerValidationErrors'
-import { renderContentPath } from '../validation/contentPath'
-import { MAX_NOTE_BYTES } from '@/lib/constants'
-import { calculateNoteByteLength } from '@/shared/noteEditor'
-import type {
-  FloorUnknownGiftValidationError,
-  GiftNotAffordableValidationError,
-  PlannerValidationError,
-} from '../plannerValidationErrors'
+import { renderContentPath } from '../contentPath'
+import type { PlannerValidationError } from '../plannerValidationErrors'
 import type { EGOGiftSpec } from '@/pages/egoGift'
 import type { DungeonIdx, ThemePackId } from '@/shared/gameData'
-import type { MDPlannerContent, SerializableFloorSelection } from '../../types/PlannerTypes'
-import type { SinnerEquipment, SkillEAState } from '../../types/DeckTypes'
+import type { MDPlannerContent, SerializableFloorSelection } from '../../../types/PlannerTypes'
+import type { SinnerEquipment, SkillEAState } from '../../../types/DeckTypes'
 import { ThemePackIdSchema } from '@/shared/gameData'
 import type { EncodedGiftId } from '@/shared/gameData'
 import { asEGOId, asEncodedGiftId, asIdentityId, buildSaveablePlanner } from '@/test-utils/fixtures'
+import type { SaveablePlanner } from '../../../types/PlannerTypes'
 
 const ENCODED_9001 = asEncodedGiftId('9001')
 const ENCODED_9220 = asEncodedGiftId('9220')
@@ -62,13 +49,13 @@ function at<T>(items: readonly T[], index: number): T {
   return item
 }
 
-/** Where an error points: its rendered content path, or its field when it carries no path. */
-function fieldOf(error: PlannerValidationError): string | undefined {
-  return 'path' in error ? renderContentPath(error.path) : error.field
+/** Where an error points, as rendered content-path text. */
+function fieldOf(error: PlannerValidationError): string {
+  return renderContentPath(error.path)
 }
 
 /** Each error as [code, field], the shape the floor-rule corpus records. */
-function codesAndFields(result: PlannerValidationResult): [string, string | undefined][] {
+function codesAndFields(result: PlannerValidationResult): [string, string][] {
   return result.errors.map((e) => [e.code, fieldOf(e)])
 }
 
@@ -168,45 +155,6 @@ function makeValidContent(category: '5F' | '10F' | '15F' = '5F'): MDPlannerConte
     sectionNotes: {},
   }
 }
-
-// ============================================================================
-// validateEquipment
-// ============================================================================
-
-describe('validateEquipment', () => {
-  it('all 12 sinners with identity + ZAYIN returns no errors', () => {
-    expect(validateEquipment(makeValidEquipment())).toHaveLength(0)
-  })
-
-  it('missing sinner key returns MISSING_SINNER', () => {
-    const equipment = makeValidEquipment()
-    delete equipment['01']
-    const errors = validateEquipment(equipment)
-    expect(errors.some((e) => e.code === 'MISSING_SINNER')).toBe(true)
-  })
-
-  it('sinner without identity returns MISSING_IDENTITY', () => {
-    const equipment = makeValidEquipment()
-    // Warning: deliberately invalid input — null identity exercises the missing-identity guard.
-    equipment['01'] = { identity: null, egos: { ZAYIN: { id: 'z' } } } as unknown as SinnerEquipment
-    const errors = validateEquipment(equipment)
-    expect(errors.some((e) => e.code === 'MISSING_IDENTITY')).toBe(true)
-  })
-
-  it('sinner without ZAYIN returns MISSING_EGO_ZAYIN', () => {
-    const equipment = makeValidEquipment()
-    // Warning: deliberately invalid input — empty egos exercises the missing-ZAYIN guard.
-    equipment['01'] = { identity: { id: 'i' }, egos: {} } as unknown as SinnerEquipment
-    const errors = validateEquipment(equipment)
-    expect(errors.some((e) => e.code === 'MISSING_EGO_ZAYIN')).toBe(true)
-  })
-
-  it.each(['abc', '', '1.5', ' 2'])('ignores the non-integer sinner key %j', (key) => {
-    const equipment = makeValidEquipment()
-    equipment[key] = { identity: { id: 'i' }, egos: { ZAYIN: { id: 'z' } } } as SinnerEquipment
-    expect(validateEquipment(equipment)).toHaveLength(0)
-  })
-})
 
 // ============================================================================
 // Floor rules through the validators (floorRules module, BE codes)
@@ -400,28 +348,6 @@ describe('validatePlannerForPublish (strict)', () => {
 })
 
 // ============================================================================
-// validateSelectedKeywords (strict membership tier)
-// ============================================================================
-
-describe('validateSelectedKeywords', () => {
-  it('accepts current keyword ids', () => {
-    expect(validateSelectedKeywords(['9828', 'Combustion'])).toHaveLength(0)
-  })
-
-  it('rejects a legacy (renamed) keyword id — the read tier should have remapped it', () => {
-    const errors = validateSelectedKeywords(['AccelBullet'])
-    expect(errors).toHaveLength(1)
-    expect(at(errors, 0).code).toBe('UNKNOWN_KEYWORD')
-  })
-
-  it('rejects an unknown keyword id', () => {
-    const errors = validateSelectedKeywords(['GhostKeyword'])
-    expect(errors).toHaveLength(1)
-    expect(at(errors, 0).code).toBe('UNKNOWN_KEYWORD')
-  })
-})
-
-// ============================================================================
 // validatePlannerForDraftSave (non-strict mode)
 // ============================================================================
 
@@ -478,233 +404,6 @@ describe('validatePlannerForDraftSave (non-strict)', () => {
 })
 
 // ============================================================================
-// validateDeploymentOrder
-// ============================================================================
-
-describe('validateDeploymentOrder', () => {
-  it('valid order [0..11] returns no errors', () => {
-    expect(validateDeploymentOrder([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])).toHaveLength(0)
-  })
-
-  it('empty array returns no errors', () => {
-    expect(validateDeploymentOrder([])).toHaveLength(0)
-  })
-
-  it('index -1 returns OUT_OF_RANGE_DEPLOYMENT', () => {
-    const errors = validateDeploymentOrder([-1])
-    expect(errors.some((e) => e.code === 'OUT_OF_RANGE_DEPLOYMENT')).toBe(true)
-  })
-
-  it('index 12 (one beyond max) returns OUT_OF_RANGE_DEPLOYMENT', () => {
-    const errors = validateDeploymentOrder([12])
-    expect(errors.some((e) => e.code === 'OUT_OF_RANGE_DEPLOYMENT')).toBe(true)
-  })
-
-  it('multiple invalid indices produce one error each', () => {
-    const errors = validateDeploymentOrder([-1, 12, 99])
-    expect(errors.filter((e) => e.code === 'OUT_OF_RANGE_DEPLOYMENT')).toHaveLength(3)
-  })
-
-  it('a non-number entry returns INVALID_FIELD_TYPE', () => {
-    const errors = validateDeploymentOrder(['3' as unknown as number])
-    expect(errors.map((e) => e.code)).toEqual(['INVALID_FIELD_TYPE'])
-  })
-})
-
-// ============================================================================
-// validateSkillEAState
-// ============================================================================
-
-describe('validateSkillEAState', () => {
-  it('valid state for all 12 sinners returns no errors', () => {
-    expect(validateSkillEAState(makeValidSkillEAState())).toHaveLength(0)
-  })
-
-  it('missing sinner key returns MISSING_SINNER listing which sinners', () => {
-    const state = makeValidSkillEAState()
-    delete state['01']
-    const errors = validateSkillEAState(state)
-    expect(errors.some((e) => e.code === 'MISSING_SINNER')).toBe(true)
-    const err = errors.find((e) => e.code === 'MISSING_SINNER')
-    expect((err!.context!.missingSinners as string[]).includes('01')).toBe(true)
-  })
-
-  it('invalid slot key "3" returns INVALID_SKILL_SLOT', () => {
-    const state = makeValidSkillEAState()
-    // Warning: deliberately invalid input — slot key 3 is out of the valid 0-2 range.
-    state['01'] = { 0: 3, 1: 2, 3: 1 } as unknown as SkillEAState
-    const errors = validateSkillEAState(state)
-    expect(errors.some((e) => e.code === 'INVALID_SKILL_SLOT')).toBe(true)
-  })
-
-  it('a stored string value is reported as a bad total, not concatenated into one', () => {
-    const state = makeValidSkillEAState()
-    // Warning: deliberately invalid input — a value that survived storage as text.
-    state['01'] = { 0: '3', 1: 2, 2: 1 } as unknown as SkillEAState
-    const errors = validateSkillEAState(state)
-    const err = errors.find((e) => e.code === 'OUT_OF_RANGE_SKILL_TOTAL')
-    expect(err).toBeDefined()
-    // The string slot is skipped, so the total is the two numeric slots.
-    expect(err!.context!.total).toBe(3)
-  })
-
-  it('skill EA totalling 7 instead of 6 returns OUT_OF_RANGE_SKILL_TOTAL', () => {
-    const state = makeValidSkillEAState()
-    state['01'] = { 0: 4, 1: 2, 2: 1 } // 4+2+1=7
-    const errors = validateSkillEAState(state)
-    expect(errors.some((e) => e.code === 'OUT_OF_RANGE_SKILL_TOTAL')).toBe(true)
-  })
-
-  it.each(['abc', '', '1.5', ' 2'])('ignores the non-integer sinner key %j', (key) => {
-    const state = makeValidSkillEAState()
-    state[key] = { 0: 3, 1: 2, 2: 1 }
-    expect(validateSkillEAState(state)).toHaveLength(0)
-  })
-})
-
-// ============================================================================
-// validateGiftIdArray
-// ============================================================================
-
-describe('validateGiftIdArray', () => {
-  it('unique gift IDs return no errors', () => {
-    expect(
-      validateGiftIdArray(['9001', '9002', '9003'], 'selectedGiftIds', 'DUPLICATE_STARTGIFT'),
-    ).toHaveLength(0)
-  })
-
-  it('empty array returns no errors', () => {
-    expect(validateGiftIdArray([], 'observationGiftIds', 'DUPLICATE_EGOGIFT')).toHaveLength(0)
-  })
-
-  it('duplicate gift ID returns the given duplicate code with fieldName in field', () => {
-    const errors = validateGiftIdArray(
-      ['9001', '9002', '9001'],
-      'comprehensiveGiftIds',
-      'DUPLICATE_EGOGIFT',
-    )
-    expect(errors.some((e) => e.code === 'DUPLICATE_EGOGIFT')).toBe(true)
-    expect(at(errors, 0).field).toContain('comprehensiveGiftIds')
-  })
-
-  it('unknown gift ID returns UNKNOWN_EGOGIFT when egoGiftSpec is provided', () => {
-    const spec: Record<string, EGOGiftSpec> = {
-      '9001': makeGiftSpec([]),
-    }
-    const errors = validateGiftIdArray(
-      ['9001', '9999'],
-      'selectedGiftIds',
-      'DUPLICATE_STARTGIFT',
-      spec,
-    )
-    expect(errors).toHaveLength(1)
-    expect(at(errors, 0).code).toBe('UNKNOWN_EGOGIFT')
-    expect(at(errors, 0).context?.giftId).toBe('9999')
-  })
-
-  it.each(['39001', '', '900', '900a', 'gift1', ' 9001'])(
-    'malformed gift ID %j returns UNKNOWN_EGOGIFT when egoGiftSpec is provided',
-    (giftId) => {
-      const spec: Record<string, EGOGiftSpec> = { '9001': makeGiftSpec([]) }
-      const errors = validateGiftIdArray([giftId], 'selectedGiftIds', 'DUPLICATE_STARTGIFT', spec)
-      expect(errors).toHaveLength(1)
-      expect(at(errors, 0).code).toBe('UNKNOWN_EGOGIFT')
-    },
-  )
-
-  it('all valid gift IDs return no errors when egoGiftSpec is provided', () => {
-    const spec: Record<string, EGOGiftSpec> = {
-      '9001': makeGiftSpec([]),
-      '9002': makeGiftSpec([]),
-    }
-    expect(
-      validateGiftIdArray(['9001', '9002'], 'selectedGiftIds', 'DUPLICATE_STARTGIFT', spec),
-    ).toHaveLength(0)
-  })
-
-  it('enhanced gift ID resolves to base ID for existence check', () => {
-    const spec: Record<string, EGOGiftSpec> = {
-      '9220': makeGiftSpec([]),
-    }
-    expect(
-      validateGiftIdArray(['19220'], 'selectedGiftIds', 'DUPLICATE_STARTGIFT', spec),
-    ).toHaveLength(0)
-  })
-
-  it('duplicate is reported before unknown for the same ID', () => {
-    const spec: Record<string, EGOGiftSpec> = {}
-    const errors = validateGiftIdArray(
-      ['9999', '9999'],
-      'selectedGiftIds',
-      'DUPLICATE_STARTGIFT',
-      spec,
-    )
-    expect(errors).toHaveLength(2)
-    expect(at(errors, 0).code).toBe('UNKNOWN_EGOGIFT')
-    expect(at(errors, 1).code).toBe('DUPLICATE_STARTGIFT')
-  })
-
-  it('skips existence check when egoGiftSpec is not provided', () => {
-    expect(validateGiftIdArray(['9999'], 'selectedGiftIds', 'DUPLICATE_STARTGIFT')).toHaveLength(0)
-  })
-})
-
-// ============================================================================
-// validateStartBuffIds
-// ============================================================================
-
-describe('validateStartBuffIds', () => {
-  it('valid buffs within limit return no errors', () => {
-    // 100=base0, 201=base1, 302=base2 — all unique base IDs
-    expect(validateStartBuffIds([100, 201, 302])).toHaveLength(0)
-  })
-
-  it('empty array returns no errors', () => {
-    expect(validateStartBuffIds([])).toHaveLength(0)
-  })
-
-  it('11 buffs return EXCESS_STARTBUFF', () => {
-    // Only 10 unique base IDs (0-9) exist; 11 items forces repetition
-    const ids = [100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 100]
-    const errors = validateStartBuffIds(ids)
-    expect(errors.some((e) => e.code === 'EXCESS_STARTBUFF')).toBe(true)
-  })
-
-  it('buff ID 110 (base 10 > max 9) returns OUT_OF_RANGE_STARTBUFF', () => {
-    const errors = validateStartBuffIds([110]) // 110 % 100 = 10
-    expect(errors.some((e) => e.code === 'OUT_OF_RANGE_STARTBUFF')).toBe(true)
-  })
-
-  it('100 and 200 share base ID 0 and return DUPLICATE_STARTBUFF', () => {
-    const errors = validateStartBuffIds([100, 200]) // both: id % 100 = 0
-    expect(errors.some((e) => e.code === 'DUPLICATE_STARTBUFF')).toBe(true)
-  })
-})
-
-// ============================================================================
-// validateStartGiftSelection
-// ============================================================================
-
-describe('validateStartGiftSelection', () => {
-  it('no keyword and no gift IDs returns no errors', () => {
-    expect(validateStartGiftSelection(null, [])).toHaveLength(0)
-  })
-
-  it('keyword with gift IDs returns no errors', () => {
-    expect(validateStartGiftSelection('someKeyword', ['9001', '9002'])).toHaveLength(0)
-  })
-
-  it('no keyword but has gift IDs returns MISSING_STARTGIFT_KEYWORD', () => {
-    const errors = validateStartGiftSelection(null, ['9001'])
-    expect(errors.some((e) => e.code === 'MISSING_STARTGIFT_KEYWORD')).toBe(true)
-  })
-
-  it('keyword with duplicate gift ID leaves the duplicate to the gift array check', () => {
-    expect(validateStartGiftSelection('someKeyword', ['9001', '9001'])).toHaveLength(0)
-  })
-})
-
-// ============================================================================
 // validatePlannerForPublish – gift affordability (UNAFFORDABLE_EGOGIFT)
 // ============================================================================
 
@@ -726,7 +425,7 @@ describe('validatePlannerForPublish – gift affordability', () => {
     expect(codesAndFields(result)).toEqual([
       ['UNAFFORDABLE_EGOGIFT', 'floorSelections[0].giftIds[0]'],
     ])
-    expect(at(onlyCode(result, 'UNAFFORDABLE_EGOGIFT'), 0).context.themePackId).toBe('1110')
+    expect(at(onlyCode(result, 'UNAFFORDABLE_EGOGIFT'), 0).params.pack).toBe('1110')
   })
 
   it("enhanced gift '19220' (level 1) not affordable for theme pack '1110' → UNAFFORDABLE_EGOGIFT", () => {
@@ -795,8 +494,7 @@ describe('validatePlannerForPublish – gift affordability', () => {
     floorAt(content, 0).giftIds = [ENCODED_9220]
 
     const result = validatePlannerForPublish('My Plan', content, '5F', spec, i18n)
-    const err: GiftNotAffordableValidationError = at(onlyCode(result, 'UNAFFORDABLE_EGOGIFT'), 0)
-    expect(err.context.giftName).toBe('Dream-Eating Tapir')
+    expect(at(onlyCode(result, 'UNAFFORDABLE_EGOGIFT'), 0).params.gifts).toBe('Dream-Eating Tapir')
   })
 
   it('affordability check is skipped when egoGiftSpec is not provided', () => {
@@ -825,9 +523,9 @@ describe('validatePlannerForPublish – gift existence', () => {
 
     const result = validatePlannerForPublish('My Plan', content, '5F', spec)
     expect(result.isValid).toBe(false)
-    const err: FloorUnknownGiftValidationError = at(onlyCode(result, 'UNKNOWN_EGOGIFT_FLOOR'), 0)
+    const err = at(onlyCode(result, 'UNKNOWN_EGOGIFT_FLOOR'), 0)
     expect(renderContentPath(err.path)).toBe('floorSelections[0].giftIds[0]')
-    expect(err.context.giftId).toBe('9999')
+    expect(err.params.gifts).toBe('9999')
   })
 
   // corpus: floor-gift-unknown (path floorSelections[i].giftIds[j]); contract: one per gift
@@ -837,7 +535,7 @@ describe('validatePlannerForPublish – gift existence', () => {
 
     const result = validatePlannerForPublish('My Plan', content, '5F', spec)
     expect(
-      onlyCode(result, 'UNKNOWN_EGOGIFT_FLOOR').map((e) => [fieldOf(e), e.context.giftId]),
+      onlyCode(result, 'UNKNOWN_EGOGIFT_FLOOR').map((e) => [fieldOf(e), e.params.gifts]),
     ).toEqual([
       ['floorSelections[0].giftIds[0]', '9999'],
       ['floorSelections[0].giftIds[1]', '9998'],
@@ -1106,53 +804,6 @@ describe('validatePlannerForDraftSave – gift affordability', () => {
   })
 })
 
-describe('validateNoteSizes', () => {
-  /** Builds a section note whose serialized size scales 1 byte per ASCII char. */
-  function noteWithText(text: string) {
-    return {
-      content: {
-        type: 'doc',
-        content: [{ type: 'paragraph', content: [{ type: 'text', text }] }],
-      },
-    }
-  }
-
-  const overhead = calculateNoteByteLength(noteWithText(''))
-
-  it('returns null when all notes are within the limit', () => {
-    expect(
-      validateNoteSizes({ intro: noteWithText('hello'), 'floor-0': noteWithText('') }),
-    ).toBeNull()
-  })
-
-  it('returns null for an empty notes map', () => {
-    expect(validateNoteSizes({})).toBeNull()
-  })
-
-  it('accepts a note exactly at the byte limit', () => {
-    const atLimit = noteWithText('a'.repeat(MAX_NOTE_BYTES - overhead))
-    expect(calculateNoteByteLength(atLimit)).toBe(MAX_NOTE_BYTES)
-    expect(validateNoteSizes({ intro: atLimit })).toBeNull()
-  })
-
-  it('flags the offending section one byte over the limit', () => {
-    const overLimit = noteWithText('a'.repeat(MAX_NOTE_BYTES - overhead + 1))
-    const result = validateNoteSizes({ intro: noteWithText('ok'), deckBuilder: overLimit })
-
-    expect(result).toEqual({
-      key: 'pages.plannerMD.validation.noteTooLarge',
-      params: { section: 'deckBuilder', limit: String(MAX_NOTE_BYTES) },
-    })
-  })
-
-  it('measures multibyte content as UTF-8 bytes', () => {
-    const koreanCharCount = Math.ceil((MAX_NOTE_BYTES - overhead) / 3) + 1
-    const result = validateNoteSizes({ 'floor-3': noteWithText('가'.repeat(koreanCharCount)) })
-
-    expect(result?.params?.section).toBe('floor-3')
-  })
-})
-
 // ============================================================================
 // validatePlannerForImport
 // ============================================================================
@@ -1179,7 +830,7 @@ describe('validatePlannerForImport', () => {
       content: twoViolations(),
     })
     const floorErrors = validatePlannerForImport(planner, {}, registry).errors.filter((e) =>
-      fieldOf(e)?.startsWith('floorSelections'),
+      fieldOf(e).startsWith('floorSelections'),
     )
     expect(floorErrors.map((e) => [e.code, fieldOf(e)])).toEqual([
       ['OUT_OF_ORDER_DIFFICULTY', 'floorSelections[1].difficulty'],
@@ -1190,7 +841,7 @@ describe('validatePlannerForImport', () => {
   it('a draft planner is checked at the draft stage', () => {
     const planner = buildSaveablePlanner({ content: twoViolations() })
     const floorErrors = validatePlannerForImport(planner, {}, registry).errors.filter((e) =>
-      fieldOf(e)?.startsWith('floorSelections'),
+      fieldOf(e).startsWith('floorSelections'),
     )
     expect(floorErrors.map((e) => [e.code, fieldOf(e)])).toEqual([
       ['DUPLICATE_THEMEPACK', 'floorSelections[3].themePackId'],
@@ -1303,7 +954,7 @@ describe('entity id registry checks', () => {
       undefined,
       registry,
     )
-    expect(errors.find((e) => e.code === code)?.context).toEqual({ id })
+    expect(errors.find((e) => e.code === code)).toMatchObject({ params: { id } })
   })
 
   it('checks theme packs only on the floors the category plays', () => {
@@ -1390,7 +1041,9 @@ describe('retired E.G.O after id normalization', () => {
       registry(),
     )
     expect(errors.filter((e) => e.code === 'UNKNOWN_EGO')).toHaveLength(1)
-    expect(errors.find((e) => e.code === 'UNKNOWN_EGO')?.context).toEqual({ id: RETIRED_EGO })
+    expect(errors.find((e) => e.code === 'UNKNOWN_EGO')).toMatchObject({
+      params: { id: RETIRED_EGO },
+    })
     expect(errors.map((e) => e.code)).not.toContain('MISSING_EGO_ZAYIN')
   })
 
@@ -1404,5 +1057,159 @@ describe('retired E.G.O after id normalization', () => {
     expect(
       validatePlannerForPublish('My Plan', content, '5F', undefined, undefined, registry()).errors,
     ).toEqual([])
+  })
+})
+
+// ============================================================================
+// Content fields that are absent or of the wrong kind
+// ============================================================================
+
+describe('content fields that are absent or of the wrong kind', () => {
+  type Stage = 'draft' | 'publish' | 'import'
+
+  function withField(name: keyof MDPlannerContent, value: unknown): MDPlannerContent {
+    const content: Record<string, unknown> = { ...makeValidContent('5F') }
+    if (value === undefined) delete content[name]
+    else content[name] = value
+    return content as unknown as MDPlannerContent
+  }
+
+  const valid = makeValidContent('5F')
+  const KNOWN_IDS: PlannerIdRegistry = {
+    identityIds: new Set(Object.values(valid.equipment).map((e) => e.identity.id)),
+    egoIds: new Set(
+      Object.values(valid.equipment).flatMap((e) => Object.values(e.egos).map((ego) => ego.id)),
+    ),
+    themePackIds: new Set(valid.floorSelections.map((f) => f.themePackId ?? '')),
+    startBuffIds: new Set(),
+  }
+
+  const validate: Record<Stage, (content: MDPlannerContent) => PlannerValidationResult> = {
+    draft: (content) => validatePlannerForDraftSave(content, '5F'),
+    publish: (content) => validatePlannerForPublish('My Plan', content, '5F'),
+    import: (content) =>
+      validatePlannerForImport(
+        {
+          metadata: { published: false, title: 'My Plan' },
+          config: { type: 'MIRROR_DUNGEON', category: '5F' },
+          content,
+        } as unknown as SaveablePlanner,
+        {},
+        KNOWN_IDS,
+      ),
+  }
+
+  const stages: Stage[] = ['draft', 'publish', 'import']
+
+  const WRONG_KINDS: [string, unknown][] = [
+    ['null', null],
+    ['a number', 42],
+    ['a string', 'abc'],
+  ]
+
+  const sinnerContainers = ['skillEAState', 'equipment'] as const
+
+  const listFields = [
+    'deploymentOrder',
+    'selectedGiftIds',
+    'observationGiftIds',
+    'comprehensiveGiftIds',
+    'selectedBuffIds',
+  ] as const
+
+  describe.each(stages)('%s', (stage) => {
+    const codesAndFieldsOf = (name: keyof MDPlannerContent, value: unknown) =>
+      codesAndFields(validate[stage](withField(name, value))).filter(([, path]) =>
+        path.startsWith(name),
+      )
+
+    it.each(sinnerContainers)('reports an absent %s as every sinner missing', (name) => {
+      expect(codesAndFieldsOf(name, undefined)).toEqual([['MISSING_SINNER', name]])
+    })
+
+    it.each(
+      sinnerContainers.flatMap((name) =>
+        [...WRONG_KINDS, ['an array', []] as [string, unknown]].map(
+          ([label, value]) => [name, label, value] as const,
+        ),
+      ),
+    )('reports %s that is %s as INVALID_FIELD_TYPE', (name, _label, value) => {
+      expect(codesAndFieldsOf(name, value)).toEqual([['INVALID_FIELD_TYPE', name]])
+    })
+
+    it.each(listFields)('reads an absent %s as empty', (name) => {
+      expect(validate[stage](withField(name, undefined)).errors).toEqual([])
+    })
+
+    it.each(
+      listFields.flatMap((name) =>
+        [...WRONG_KINDS, ['an object', {}] as [string, unknown]].map(
+          ([label, value]) => [name, label, value] as const,
+        ),
+      ),
+    )('reports %s that is %s as INVALID_FIELD_TYPE', (name, _label, value) => {
+      expect(codesAndFieldsOf(name, value)).toEqual([['INVALID_FIELD_TYPE', name]])
+    })
+
+    it.each(sinnerContainers)('reports a null sinner in %s at that sinner', (name) => {
+      const content = makeValidContent('5F')
+      ;(content[name] as Record<string, unknown>)['01'] = null
+
+      expect(codesAndFields(validate[stage](content))).toEqual([
+        ['INVALID_FIELD_TYPE', `${name}[01]`],
+      ])
+    })
+  })
+})
+
+// ============================================================================
+// Backend parity rules through the validators
+// ============================================================================
+
+describe('backend parity rules through the validators', () => {
+  it.each([
+    [
+      'an identity of another sinner',
+      (c: MDPlannerContent) => {
+        c.equipment['01'] = {
+          ...c.equipment['01']!,
+          identity: { id: asIdentityId('10201'), uptie: 1, level: 1 },
+        }
+      },
+      [['MISMATCHED_IDENTITY', 'equipment[01].identity.id']],
+    ],
+    [
+      'an identity level past the cap',
+      (c: MDPlannerContent) => {
+        c.equipment['01'] = {
+          ...c.equipment['01']!,
+          identity: { id: asIdentityId('10101'), uptie: 1, level: 61 },
+        }
+      },
+      [['OUT_OF_RANGE_IDENTITY_LEVEL', 'equipment[01].identity.level']],
+    ],
+    [
+      'an E.G.O of another sinner',
+      (c: MDPlannerContent) => {
+        c.equipment['01'] = {
+          ...c.equipment['01']!,
+          egos: { ZAYIN: { id: asEGOId('20201'), threadspin: 1 } },
+        }
+      },
+      [['MISMATCHED_EGO', 'equipment[01].egos.ZAYIN.id']],
+    ],
+    [
+      'a sinner key outside 1-12',
+      (c: MDPlannerContent) => {
+        ;(c.skillEAState as Record<string, unknown>)['13'] = { 0: 3, 1: 2, 2: 1 }
+      },
+      [['OUT_OF_RANGE_SINNER', 'skillEAState[13]']],
+    ],
+  ] as const)('%s is reported at draft and publish', (_label, corrupt, expected) => {
+    const content = makeValidContent('5F')
+    corrupt(content)
+
+    expect(codesAndFields(validatePlannerForDraftSave(content, '5F'))).toEqual(expected)
+    expect(codesAndFields(validatePlannerForPublish('My Plan', content, '5F'))).toEqual(expected)
   })
 })

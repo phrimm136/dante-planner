@@ -7,7 +7,7 @@ import type { MDCategory } from '@/shared/gameData'
 import type { EGOGiftSpec } from '@/pages/egoGift'
 import { validatePlannerForDraftSave, validatePlannerForPublish } from '../plannerValidation'
 import type { PlannerIdRegistry, PlannerValidationResult } from '../plannerValidation'
-import type { MDPlannerContent } from '../../types/PlannerTypes'
+import type { MDPlannerContent } from '../../../types/PlannerTypes'
 
 type CorpusViolation = { code: string; path: string }
 
@@ -35,7 +35,7 @@ type Corpus = {
 
 const FRONTEND_ROOT = path.resolve(
   path.dirname(new URL(import.meta.url).pathname),
-  '../../../../..',
+  '../../../../../..',
 )
 const CORPUS_PATH = path.resolve(FRONTEND_ROOT, '../testdata/planner-floor-rules.corpus.json')
 const corpus = JSON.parse(fs.readFileSync(CORPUS_PATH, 'utf-8')) as Corpus

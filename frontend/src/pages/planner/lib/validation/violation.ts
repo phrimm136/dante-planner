@@ -1,6 +1,6 @@
 import { compareContentPaths } from './contentPath'
 import type { ContentPath } from './contentPath'
-import type { Codes } from './codes'
+import type { Codes, ValidationCode } from './codes'
 
 export const DIFFICULTY_RANGE_CODES = [
   'OUT_OF_RANGE_DIFFICULTY',
@@ -32,7 +32,9 @@ export type FloorViolationCode =
 
 export type Violation = { code: FloorViolationCode; path: ContentPath }
 
-export const byPathThenCode = (a: Violation, b: Violation): number => {
+export type Located = { code: ValidationCode; path: ContentPath }
+
+export const byPathThenCode = (a: Located, b: Located): number => {
   const byPath = compareContentPaths(a.path, b.path)
   if (byPath !== 0) return byPath
   if (a.code !== b.code) return a.code < b.code ? -1 : 1

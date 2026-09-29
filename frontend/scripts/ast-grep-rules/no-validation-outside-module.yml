@@ -1,0 +1,39 @@
+id: no-validation-outside-module
+language: TypeScript
+severity: error
+message: 'ADR 140: planner validation lives in pages/planner/lib/validation; declare violation and validation error types and functions returning them there, not beside their callers.'
+files:
+  - src/**/*.ts
+ignores:
+  - src/pages/planner/lib/validation/**
+  - '**/__tests__/**'
+  - '**/*.test.ts'
+utils:
+  validation-type:
+    kind: type_identifier
+    regex: '^\w*(Violation|ValidationError)$'
+rule:
+  any:
+    - kind: type_alias_declaration
+      has: { field: name, regex: '^\w*(Violation|ValidationError)$' }
+    - kind: interface_declaration
+      has: { field: name, regex: '^\w*(Violation|ValidationError)$' }
+    - any:
+        - kind: function_declaration
+        - kind: function_expression
+        - kind: arrow_function
+        - kind: method_definition
+        - kind: generator_function_declaration
+      has:
+        field: return_type
+        has:
+          stopBy: end
+          any:
+            - kind: array_type
+              has: { matches: validation-type }
+            - kind: generic_type
+              all:
+                - has: { field: name, regex: '^(Array|ReadonlyArray)$' }
+                - has:
+                    field: type_arguments
+                    has: { matches: validation-type }

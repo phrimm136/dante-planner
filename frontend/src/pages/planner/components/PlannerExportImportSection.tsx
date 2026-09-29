@@ -38,8 +38,8 @@ import {
 } from '../lib/plannerExportImport'
 import { planConflictResolution } from '../lib/conflictChoice'
 import { loadIdMigrationTable } from '../hooks/loadIdMigrationTable'
-import { validatePlannerForImport } from '../lib/plannerValidation'
-import { toUserFriendlyError } from '../lib/plannerValidationErrors'
+import { validatePlannerForImport } from '../lib/validation/plannerValidation'
+import { toUserFriendlyError } from '../lib/validation/plannerValidationErrors'
 
 import type { Result } from '@/lib/result'
 import type { ConflictItem, ConflictResolution } from './BatchConflictDialog'

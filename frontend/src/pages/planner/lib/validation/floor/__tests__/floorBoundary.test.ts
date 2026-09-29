@@ -391,7 +391,7 @@ describe('floorRules module', () => {
       '../contentPath',
       '../violation',
       '../violation',
-      './positions',
+      '../positions',
     ])
   })
 })

@@ -1,0 +1,17 @@
+id: no-validation-outside-module-tsx
+valid:
+  - |
+    export function Banner({ errors }: { errors: readonly PlannerValidationError[] }) {
+      return <p>{errors.length}</p>
+    }
+  - |
+    const warnings = (codes: string[]): string[] => codes.map((code) => <span>{code}</span>).map(String)
+invalid:
+  - |
+    type EditorViolation = { code: string }
+    export function Banner() {
+      return <p />
+    }
+  - |
+    export const categoryViolations = (floors: EditorFloor[]): FloorViolation[] =>
+      floors.flatMap((floor) => check(floor))

@@ -15,7 +15,8 @@ import { EXPORT_FILE_EXTENSION, EXPORT_VERSION } from '@/lib/constants'
 import { GZIP_OS_BYTE_OFFSET, GZIP_OS_TOPS20 } from '../../lib/deckCode'
 
 import type { SaveablePlanner } from '../../types/PlannerTypes'
-import type { PlannerValidationResult } from '../../lib/plannerValidation'
+import type { PlannerValidationResult } from '../../lib/validation/plannerValidation'
+import { contentPath, field, key } from '../../lib/validation/contentPath'
 
 const PLANNER_ID = '00000000-0000-4000-8000-000000000001'
 
@@ -36,9 +37,8 @@ const UNKNOWN_IDENTITY_IMPORT: PlannerValidationResult = {
   errors: [
     {
       code: 'UNKNOWN_IDENTITY',
-      message: '',
-      field: 'equipment.01.identity.id',
-      context: { id: '10199' },
+      path: contentPath(field('equipment'), key('01'), field('identity'), field('id')),
+      params: { id: '10199' },
     },
   ],
 }
@@ -49,8 +49,8 @@ const validationMocks = vi.hoisted(() => ({
   ),
 }))
 
-vi.mock('../../lib/plannerValidation', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('../../lib/plannerValidation')>()),
+vi.mock('../../lib/validation/plannerValidation', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../lib/validation/plannerValidation')>()),
   validatePlannerForImport: validationMocks.validatePlannerForImport,
 }))
 

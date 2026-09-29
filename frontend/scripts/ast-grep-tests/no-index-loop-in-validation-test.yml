@@ -15,6 +15,33 @@ valid:
       }
       return undefined
     }
+  - |
+    export function compare(left: Segment[], right: Segment[]): number {
+      for (const [position, segment] of left.entries()) {
+        const order = compareSegment(segment, right[position])
+        if (order !== 0) return order
+      }
+      return 0
+    }
+  - |
+    export function local(floors: Floor[]): void {
+      for (const floor of floors) {
+        const seen: string[] = []
+        seen.push(floor.id)
+        let count = 0
+        count += 1
+      }
+    }
+  - |
+    export function touchLoopVariable(floors: { tags: string[]; n: number }[]): void {
+      for (const floor of floors) {
+        floor.tags.push('t')
+        floor.n = 2
+      }
+      for (const { tags } of floors) {
+        tags.push('t')
+      }
+    }
 invalid:
   - |
     export function floorViolations(floors: Floor[]): Violation[] {
@@ -35,4 +62,50 @@ invalid:
       do {
         consume(queue.pop())
       } while (queue.length > 0)
+    }
+  - |
+    export function presentKeys(source: Record<string, unknown>): Set<string> {
+      const presentKeys = new Set<string>()
+      for (const key of Object.keys(source)) {
+        presentKeys.add(key)
+      }
+      return presentKeys
+    }
+  - |
+    export function unknownKeywords(keywords: string[]): Violation[] {
+      const errors: Violation[] = []
+      for (const keyword of keywords) {
+        if (!known(keyword)) {
+          errors.push(unknownKeyword(keyword))
+        }
+      }
+      return errors
+    }
+  - |
+    export function total(slots: Record<string, number>): number {
+      let sum = 0
+      for (const slot of Object.values(slots)) {
+        sum += slot
+      }
+      return sum
+    }
+  - |
+    export function counted(ids: string[], state: { count: number }): void {
+      for (const id of ids) {
+        state.count++
+      }
+    }
+  - |
+    export function marked(ids: string[], seen: Record<string, boolean>): void {
+      for (const id in ids) {
+        seen[id] = true
+      }
+    }
+  - |
+    export function lastUnknown(ids: string[]): string | undefined {
+      let found: string | undefined
+      for (const id of ids) {
+        if (!known(id)) found = id
+      }
+      return found
     }

@@ -1,0 +1,38 @@
+id: no-validation-outside-module-tsx
+snapshots:
+  ? |
+    export const categoryViolations = (floors: EditorFloor[]): FloorViolation[] =>
+      floors.flatMap((floor) => check(floor))
+  : labels:
+    - source: |-
+        (floors: EditorFloor[]): FloorViolation[] =>
+          floors.flatMap((floor) => check(floor))
+      style: primary
+      start: 34
+      end: 120
+    - source: FloorViolation
+      style: secondary
+      start: 59
+      end: 73
+    - source: FloorViolation[]
+      style: secondary
+      start: 59
+      end: 75
+    - source: FloorViolation[]
+      style: secondary
+      start: 59
+      end: 75
+  ? |
+    type EditorViolation = { code: string }
+    export function Banner() {
+      return <p />
+    }
+  : labels:
+    - source: 'type EditorViolation = { code: string }'
+      style: primary
+      start: 0
+      end: 39
+    - source: EditorViolation
+      style: secondary
+      start: 5
+      end: 20

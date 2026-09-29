@@ -20,9 +20,12 @@ import { generateUUID } from '@/lib/uuid'
 import {
   validatePlannerForDraftSave,
   validatePlannerForPublish,
-  validateNoteSizes,
-} from '../lib/plannerValidation'
-import { plannerValidationError, toUserFriendlyError } from '../lib/plannerValidationErrors'
+} from '../lib/validation/plannerValidation'
+import { validateNoteSizes } from '../lib/validation/document'
+import {
+  plannerValidationError,
+  toUserFriendlyError,
+} from '../lib/validation/plannerValidationErrors'
 import { classifyAppError, isSyncConflict } from '@/lib/apiErrorClassifier'
 import { planConflictResolution, interpretConflictPlan } from '../lib/conflictChoice'
 import {

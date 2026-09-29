@@ -1,0 +1,42 @@
+id: no-validation-outside-module
+valid:
+  - |
+    import type { PlannerValidationError } from '../lib/validation/plannerValidationErrors'
+    export type PublishAction = { kind: 'invalid'; error: PlannerValidationError }
+  - |
+    export function firstError(errors: readonly PlannerValidationError[]): PlannerValidationError | undefined {
+      return errors[0]
+    }
+  - |
+    export interface ValidationResult {
+      isValid: boolean
+      warnings: string[]
+    }
+  - |
+    export class ValidationError extends Error {}
+  - |
+    export const decode = (raw: string): DecodedDeck => parse(raw)
+invalid:
+  - |
+    export type Violation = { code: string; path: string }
+  - |
+    export interface KeywordValidationError {
+      code: 'UNKNOWN_KEYWORD'
+      keyword: string
+    }
+  - |
+    export function unknownIds(ids: string[]): Violation[] {
+      return ids.filter(isUnknown).map(unknownId)
+    }
+  - |
+    export const floorChecks = (floors: Floor[]): readonly FloorViolation[] => floors.flatMap(check)
+  - |
+    function giftChecks(gifts: string[]): Array<PlannerValidationError> {
+      return gifts.flatMap(checkGift)
+    }
+  - |
+    class Checker {
+      check(content: Content): ReadonlyArray<Violation> {
+        return rules.flatMap((rule) => rule(content))
+      }
+    }

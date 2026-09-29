@@ -1,15 +1,60 @@
 id: no-index-loop-in-validation
 language: TypeScript
 severity: error
-message: 'ADR 140: a content rule maps its input to violations with map, flatMap and filter; no index loop or while loop.'
+message: 'ADR 140: a content rule maps its input to violations with map, flatMap and filter; no index loop, while loop, or loop that fills an outer collection or variable.'
 files:
   - src/pages/planner/lib/validation/**
-  - src/pages/planner/lib/plannerValidation.ts
-  - src/pages/planner/lib/plannerValidationErrors.ts
 ignores:
   - '**/__tests__/**'
+utils:
+  mutated-root:
+    any:
+      - { kind: identifier, pattern: $TARGET }
+      - { kind: this, pattern: $TARGET }
+      - kind: member_expression
+        has: { field: object, matches: mutated-root }
+      - kind: subscript_expression
+        has: { field: object, matches: mutated-root }
 rule:
   any:
     - kind: for_statement
     - kind: while_statement
     - kind: do_statement
+    - kind: for_in_statement
+      has:
+        field: body
+        has:
+          stopBy: end
+          all:
+            - any:
+                - kind: assignment_expression
+                  has: { field: left, matches: mutated-root }
+                - kind: augmented_assignment_expression
+                  has: { field: left, matches: mutated-root }
+                - kind: update_expression
+                  has: { field: argument, matches: mutated-root }
+                - kind: call_expression
+                  has:
+                    field: function
+                    kind: member_expression
+                    all:
+                      - has: { field: object, matches: mutated-root }
+                      - has:
+                          field: property
+                          regex: '^(push|unshift|splice|add|set|delete|clear|sort|reverse|fill|copyWithin)$'
+            - not:
+                inside:
+                  stopBy: end
+                  kind: for_in_statement
+                  any:
+                    - has:
+                        field: left
+                        any:
+                          - pattern: $TARGET
+                          - has: { stopBy: end, pattern: $TARGET }
+                    - has:
+                        field: body
+                        has:
+                          stopBy: end
+                          kind: variable_declarator
+                          has: { field: name, pattern: $TARGET }

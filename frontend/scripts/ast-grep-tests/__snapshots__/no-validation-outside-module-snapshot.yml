@@ -1,0 +1,140 @@
+id: no-validation-outside-module
+snapshots:
+  ? |
+    class Checker {
+      check(content: Content): ReadonlyArray<Violation> {
+        return rules.flatMap((rule) => rule(content))
+      }
+    }
+  : labels:
+    - source: |-
+        check(content: Content): ReadonlyArray<Violation> {
+            return rules.flatMap((rule) => rule(content))
+          }
+      style: primary
+      start: 18
+      end: 123
+    - source: ReadonlyArray
+      style: secondary
+      start: 43
+      end: 56
+    - source: Violation
+      style: secondary
+      start: 57
+      end: 66
+    - source: Violation
+      style: secondary
+      start: 57
+      end: 66
+    - source: ReadonlyArray<Violation>
+      style: secondary
+      start: 43
+      end: 67
+    - source: ReadonlyArray<Violation>
+      style: secondary
+      start: 43
+      end: 67
+  ? |
+    export const floorChecks = (floors: Floor[]): readonly FloorViolation[] => floors.flatMap(check)
+  : labels:
+    - source: '(floors: Floor[]): readonly FloorViolation[] => floors.flatMap(check)'
+      style: primary
+      start: 27
+      end: 96
+    - source: FloorViolation
+      style: secondary
+      start: 55
+      end: 69
+    - source: FloorViolation[]
+      style: secondary
+      start: 55
+      end: 71
+    - source: FloorViolation[]
+      style: secondary
+      start: 55
+      end: 71
+  ? |
+    export function unknownIds(ids: string[]): Violation[] {
+      return ids.filter(isUnknown).map(unknownId)
+    }
+  : labels:
+    - source: |-
+        function unknownIds(ids: string[]): Violation[] {
+          return ids.filter(isUnknown).map(unknownId)
+        }
+      style: primary
+      start: 7
+      end: 104
+    - source: Violation
+      style: secondary
+      start: 43
+      end: 52
+    - source: Violation[]
+      style: secondary
+      start: 43
+      end: 54
+    - source: Violation[]
+      style: secondary
+      start: 43
+      end: 54
+  ? |
+    export interface KeywordValidationError {
+      code: 'UNKNOWN_KEYWORD'
+      keyword: string
+    }
+  : labels:
+    - source: |-
+        interface KeywordValidationError {
+          code: 'UNKNOWN_KEYWORD'
+          keyword: string
+        }
+      style: primary
+      start: 7
+      end: 87
+    - source: KeywordValidationError
+      style: secondary
+      start: 17
+      end: 39
+  ? |
+    export type Violation = { code: string; path: string }
+  : labels:
+    - source: 'type Violation = { code: string; path: string }'
+      style: primary
+      start: 7
+      end: 54
+    - source: Violation
+      style: secondary
+      start: 12
+      end: 21
+  ? |
+    function giftChecks(gifts: string[]): Array<PlannerValidationError> {
+      return gifts.flatMap(checkGift)
+    }
+  : labels:
+    - source: |-
+        function giftChecks(gifts: string[]): Array<PlannerValidationError> {
+          return gifts.flatMap(checkGift)
+        }
+      style: primary
+      start: 0
+      end: 105
+    - source: Array
+      style: secondary
+      start: 38
+      end: 43
+    - source: PlannerValidationError
+      style: secondary
+      start: 44
+      end: 66
+    - source: PlannerValidationError
+      style: secondary
+      start: 44
+      end: 66
+    - source: Array<PlannerValidationError>
+      style: secondary
+      start: 38
+      end: 67
+    - source: Array<PlannerValidationError>
+      style: secondary
+      start: 38
+      end: 67

@@ -2,18 +2,18 @@ import { describe, it, expect } from 'vitest'
 
 import { decidePublishAction } from '../plannerPublishPolicy'
 
-import type { PlannerValidationError } from '../plannerValidationErrors'
+import { contentPath, field, key } from '../validation/contentPath'
+import type { PlannerValidationError } from '../validation/plannerValidationErrors'
 
 const missingTitle: PlannerValidationError = {
   code: 'MISSING_TITLE',
-  message: 'Title is required for publishing',
-  field: 'title',
-} as PlannerValidationError
+  path: contentPath(field('title')),
+}
 
 const missingIdentity: PlannerValidationError = {
   code: 'MISSING_IDENTITY',
-  message: 'Identity missing',
-} as PlannerValidationError
+  path: contentPath(field('equipment'), key('01'), field('identity')),
+}
 
 describe('decidePublishAction', () => {
   it.each([true, false, null, undefined])(

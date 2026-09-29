@@ -10,7 +10,7 @@ import { contentPath, extendPath, field, index } from '../contentPath'
 import type { ContentPath } from '../contentPath'
 import { byPathThenCode } from '../violation'
 import type { DifficultyRangeCode, FloorRuleCode } from '../violation'
-import { firstIndexOf } from './positions'
+import { firstIndexOf } from '../positions'
 
 export type CategoryFloors = FloorRuleTable['categories'][MDCategory]
 

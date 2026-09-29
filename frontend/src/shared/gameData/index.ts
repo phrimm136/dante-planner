@@ -8,6 +8,7 @@ export {
 export type { AttributeColorRoles } from './schemas/ColorSchemas'
 
 export {
+  MIN_LEVEL,
   MAX_LEVEL,
   SINNERS,
   STATUS_EFFECTS,

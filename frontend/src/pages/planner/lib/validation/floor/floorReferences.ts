@@ -2,7 +2,7 @@ import type { ContentPath } from '../contentPath'
 import { byPathThenCode } from '../violation'
 import { acceptedFloors, giftIdPath, themePackPath } from './floorRules'
 import type { FloorSelectionValue, ParsedFloors } from './floorRules'
-import { firstIndexOf } from './positions'
+import { firstIndexOf } from '../positions'
 
 export type FloorReferenceData = {
   hasThemePack: (themePackId: string) => boolean

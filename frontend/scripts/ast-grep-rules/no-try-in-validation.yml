@@ -4,8 +4,6 @@ severity: error
 message: 'ADR 140: a content rule decides by value, not by catching; parse at the boundary with a Zod safeParse instead of try.'
 files:
   - src/pages/planner/lib/validation/**
-  - src/pages/planner/lib/plannerValidation.ts
-  - src/pages/planner/lib/plannerValidationErrors.ts
 ignores:
   - '**/__tests__/**'
 rule:

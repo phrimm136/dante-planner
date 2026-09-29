@@ -187,20 +187,10 @@ export interface SkippedImport {
 
 export type ImportValidator = (planner: SaveablePlanner) => ImportRejection | null
 
-const UNREADABLE_IMPORT: ImportRejection = { key: 'pages.plannerMD.validation.corruptedState' }
-
 export interface PartitionedImport {
   conflicting: ImportConflictCandidate[]
   fresh: SaveablePlanner[]
   skipped: SkippedImport[]
-}
-
-function rejectionOf(planner: SaveablePlanner, validate: ImportValidator): ImportRejection | null {
-  try {
-    return validate(planner)
-  } catch {
-    return UNREADABLE_IMPORT
-  }
 }
 
 function toImportedPlanner(item: ImportEnvelope['planners'][number]): SaveablePlanner {
@@ -226,7 +216,7 @@ export function partitionImport(
 
   for (const item of envelope.planners) {
     const incoming = withNormalizedIds(toImportedPlanner(item), table)
-    const reason = rejectionOf(incoming, validate)
+    const reason = validate(incoming)
     if (reason !== null) {
       skipped.push({ id: item.id, title: incoming.metadata.title, reason })
     } else if (existingIds.has(item.id)) {

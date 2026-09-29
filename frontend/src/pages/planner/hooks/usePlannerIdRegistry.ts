@@ -4,7 +4,7 @@ import { useEGOListSpec } from '@/pages/ego'
 import { useIdentityListSpec } from '@/pages/identity'
 import { useThemePackListSpec } from '@/pages/themePack'
 import { startBuffSpecQueryOptions } from './useStartBuffList'
-import type { PlannerIdRegistry } from '../lib/plannerValidation'
+import type { PlannerIdRegistry } from '../lib/validation/plannerValidation'
 
 const NO_IDS: ReadonlySet<string> = new Set()
 

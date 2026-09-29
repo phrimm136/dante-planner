@@ -94,7 +94,7 @@
       "subject": "SINNER",
       "problem": "OUT_OF_RANGE",
       "rule": "An equipment or skillEAState sinner key is between 1 and 12.",
-      "emittedBy": ["backend"]
+      "emittedBy": ["backend", "frontend"]
     },
     "MISSING_SINNER": {
       "kind": "rule",
@@ -122,21 +122,21 @@
       "subject": "IDENTITY",
       "problem": "MISMATCHED",
       "rule": "The identity belongs to the sinner it is equipped on.",
-      "emittedBy": ["backend"]
+      "emittedBy": ["backend", "frontend"]
     },
     "OUT_OF_RANGE_IDENTITY_LEVEL": {
       "kind": "rule",
       "subject": "IDENTITY",
       "problem": "OUT_OF_RANGE",
       "rule": "The identity level is within the game's level bounds.",
-      "emittedBy": ["backend"]
+      "emittedBy": ["backend", "frontend"]
     },
     "OUT_OF_RANGE_IDENTITY_UPTIE": {
       "kind": "rule",
       "subject": "IDENTITY",
       "problem": "OUT_OF_RANGE",
       "rule": "The identity uptie is within the game's uptie bounds.",
-      "emittedBy": ["backend"]
+      "emittedBy": ["backend", "frontend"]
     },
     "MISSING_EGO_ZAYIN": {
       "kind": "rule",
@@ -164,14 +164,14 @@
       "subject": "EGO",
       "problem": "MISMATCHED",
       "rule": "The E.G.O belongs to the sinner it is equipped on.",
-      "emittedBy": ["backend"]
+      "emittedBy": ["backend", "frontend"]
     },
     "OUT_OF_RANGE_EGO_THREADSPIN": {
       "kind": "rule",
       "subject": "EGO",
       "problem": "OUT_OF_RANGE",
       "rule": "The threadspin is within the game's bounds and at most that E.G.O's ceiling.",
-      "emittedBy": ["backend"]
+      "emittedBy": ["backend", "frontend"]
     },
     "MISSING_EGO_THREADSPIN_CEILING": {
       "kind": "rule",

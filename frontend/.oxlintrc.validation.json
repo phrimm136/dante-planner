@@ -7,11 +7,7 @@
   "ignorePatterns": ["**/__tests__/**"],
   "overrides": [
     {
-      "files": [
-        "src/pages/planner/lib/validation/**/*.ts",
-        "src/pages/planner/lib/plannerValidation.ts",
-        "src/pages/planner/lib/plannerValidationErrors.ts"
-      ],
+      "files": ["src/pages/planner/lib/validation/**/*.ts"],
       "rules": {
         "complexity": ["error", { "max": 5 }],
         "max-depth": ["error", { "max": 2 }]

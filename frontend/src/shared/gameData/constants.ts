@@ -3,6 +3,8 @@ import unitKeywordsJson from '@static/i18n/EN/unitKeywords.json'
 import { EGOGiftIdSchema, EGOIdSchema, IdentityIdSchema } from './ids'
 import type { EGOGiftId, EGOId, IdentityId, SinnerScopedId } from './ids'
 
+export const MIN_LEVEL = 1
+
 export const MAX_LEVEL = 60
 
 export const SINNERS = [

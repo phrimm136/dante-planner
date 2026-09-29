@@ -1,6 +1,36 @@
 id: no-index-loop-in-validation
 snapshots:
   ? |
+    export function counted(ids: string[], state: { count: number }): void {
+      for (const id of ids) {
+        state.count++
+      }
+    }
+  : labels:
+    - source: |-
+        for (const id of ids) {
+            state.count++
+          }
+      style: primary
+      start: 75
+      end: 120
+    - source: state
+      style: secondary
+      start: 103
+      end: 108
+    - source: state.count
+      style: secondary
+      start: 103
+      end: 114
+    - source: state.count++
+      style: secondary
+      start: 103
+      end: 116
+    - source: state.count++
+      style: secondary
+      start: 103
+      end: 116
+  ? |
     export function drain(queue: string[]): void {
       while (queue.length > 0) {
         consume(queue.pop())
@@ -44,3 +74,165 @@ snapshots:
       style: primary
       start: 103
       end: 197
+  ? |
+    export function lastUnknown(ids: string[]): string | undefined {
+      let found: string | undefined
+      for (const id of ids) {
+        if (!known(id)) found = id
+      }
+      return found
+    }
+  : labels:
+    - source: |-
+        for (const id of ids) {
+            if (!known(id)) found = id
+          }
+      style: primary
+      start: 99
+      end: 157
+    - source: found
+      style: secondary
+      start: 143
+      end: 148
+    - source: found = id
+      style: secondary
+      start: 143
+      end: 153
+    - source: found = id
+      style: secondary
+      start: 143
+      end: 153
+  ? |
+    export function marked(ids: string[], seen: Record<string, boolean>): void {
+      for (const id in ids) {
+        seen[id] = true
+      }
+    }
+  : labels:
+    - source: |-
+        for (const id in ids) {
+            seen[id] = true
+          }
+      style: primary
+      start: 79
+      end: 126
+    - source: seen
+      style: secondary
+      start: 107
+      end: 111
+    - source: seen[id]
+      style: secondary
+      start: 107
+      end: 115
+    - source: seen[id] = true
+      style: secondary
+      start: 107
+      end: 122
+    - source: seen[id] = true
+      style: secondary
+      start: 107
+      end: 122
+  ? |
+    export function presentKeys(source: Record<string, unknown>): Set<string> {
+      const presentKeys = new Set<string>()
+      for (const key of Object.keys(source)) {
+        presentKeys.add(key)
+      }
+      return presentKeys
+    }
+  : labels:
+    - source: |-
+        for (const key of Object.keys(source)) {
+            presentKeys.add(key)
+          }
+      style: primary
+      start: 118
+      end: 187
+    - source: presentKeys
+      style: secondary
+      start: 163
+      end: 174
+    - source: add
+      style: secondary
+      start: 175
+      end: 178
+    - source: presentKeys.add
+      style: secondary
+      start: 163
+      end: 178
+    - source: presentKeys.add(key)
+      style: secondary
+      start: 163
+      end: 183
+    - source: presentKeys.add(key)
+      style: secondary
+      start: 163
+      end: 183
+  ? |
+    export function total(slots: Record<string, number>): number {
+      let sum = 0
+      for (const slot of Object.values(slots)) {
+        sum += slot
+      }
+      return sum
+    }
+  : labels:
+    - source: |-
+        for (const slot of Object.values(slots)) {
+            sum += slot
+          }
+      style: primary
+      start: 79
+      end: 141
+    - source: sum
+      style: secondary
+      start: 126
+      end: 129
+    - source: sum += slot
+      style: secondary
+      start: 126
+      end: 137
+    - source: sum += slot
+      style: secondary
+      start: 126
+      end: 137
+  ? |
+    export function unknownKeywords(keywords: string[]): Violation[] {
+      const errors: Violation[] = []
+      for (const keyword of keywords) {
+        if (!known(keyword)) {
+          errors.push(unknownKeyword(keyword))
+        }
+      }
+      return errors
+    }
+  : labels:
+    - source: |-
+        for (const keyword of keywords) {
+            if (!known(keyword)) {
+              errors.push(unknownKeyword(keyword))
+            }
+          }
+      style: primary
+      start: 102
+      end: 215
+    - source: errors
+      style: secondary
+      start: 169
+      end: 175
+    - source: push
+      style: secondary
+      start: 176
+      end: 180
+    - source: errors.push
+      style: secondary
+      start: 169
+      end: 180
+    - source: errors.push(unknownKeyword(keyword))
+      style: secondary
+      start: 169
+      end: 205
+    - source: errors.push(unknownKeyword(keyword))
+      style: secondary
+      start: 169
+      end: 205

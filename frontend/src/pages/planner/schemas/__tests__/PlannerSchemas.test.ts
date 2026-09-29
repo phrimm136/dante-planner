@@ -20,7 +20,7 @@ import {
   ServerPlannerSummarySchema,
   validateSaveablePlanner,
 } from '../PlannerSchemas'
-import { validateNoteSizes } from '../../lib/plannerValidation'
+import { validateNoteSizes } from '../../lib/validation/document'
 import { isMDPlanner } from '../../types/PlannerTypes'
 import { MAX_NOTE_BYTES } from '@/lib/constants'
 

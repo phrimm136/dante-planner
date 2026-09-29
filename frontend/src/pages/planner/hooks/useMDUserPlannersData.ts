@@ -13,8 +13,14 @@ import { useAuthQuery } from '@/shared/auth'
 import { useUserSettingsQuery } from '@/shared/userSettings'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
 import { usePlannerIdRegistry } from './usePlannerIdRegistry'
-import { validatePlannerForDraftSave, validatePlannerForPublish } from '../lib/plannerValidation'
-import { plannerValidationError, toUserFriendlyError } from '../lib/plannerValidationErrors'
+import {
+  validatePlannerForDraftSave,
+  validatePlannerForPublish,
+} from '../lib/validation/plannerValidation'
+import {
+  plannerValidationError,
+  toUserFriendlyError,
+} from '../lib/validation/plannerValidationErrors'
 import { planConflictResolution, interpretConflictPlan } from '../lib/conflictChoice'
 import {
   categorizeSync,
