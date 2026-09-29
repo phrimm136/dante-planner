@@ -54,26 +54,26 @@ describe('importance tiers', () => {
 })
 
 describe('importance geometry', () => {
-  it('sizes client units against the text line: 50 units to one 1.25rem line', () => {
-    expect(clientLength(50)).toBe('1.25rem')
-    expect(clientLength(COIN_CLIENT_WIDTH)).toBe('1.25rem')
+  it('sizes client units against the description font: 40 client units are one 0.875rem description-font em', () => {
+    expect(clientLength(40)).toBe('0.875rem')
+    expect(clientLength(COIN_CLIENT_WIDTH)).toBe('1.0938rem')
   })
 
-  it('sizes the skill triangle at 13.9 % of the box width, 7.8 % in from the right, 3.1 % down', () => {
+  it('sizes the skill triangle at 200 client units, 86 in from the right, 22 down', () => {
     expect(importanceGeometry('skill')).toEqual({
-      iconSize: '13.9cqw',
-      iconTop: '3.1cqw',
-      iconRight: '7.8cqw',
+      iconSize: '4.375rem',
+      iconTop: '0.4813rem',
+      iconRight: '1.8813rem',
       bandHeight: '2.36cqw',
       bandOffset: '0cqw',
     })
   })
 
-  it('sizes the passive triangle at 14.2 % of the box width at the right edge, 2.7 % down', () => {
+  it('sizes the passive triangle at 200 client units at the right edge, 3 above the box', () => {
     expect(importanceGeometry('passive')).toEqual({
-      iconSize: '14.2cqw',
-      iconTop: '2.7cqw',
-      iconRight: '0cqw',
+      iconSize: '4.375rem',
+      iconTop: '-0.0656rem',
+      iconRight: '0rem',
       bandHeight: '2.36cqw',
       bandOffset: '0cqw',
     })
@@ -93,7 +93,7 @@ describe('passive banner', () => {
     const style = importanceBannerStyle(3, 'player') as Record<string, unknown>
     expect(style['--name-body']).toMatch(/^#87cb00(ff)?$/i)
     expect(style['--name-text']).toMatch(/^#f6ff00(ff)?$/i)
-    expect(style['--importance-glow-radius']).toBe('0.15rem')
+    expect(style['--importance-glow-radius']).toBe('0.1313rem')
     expect(style['--importance-glow-min']).toMatch(/ 50%, transparent\)$/)
     expect(style['--importance-glow-max']).toMatch(/ 100%, transparent\)$/)
     expect(style['--importance-flicker-period']).toBe('0.8s')

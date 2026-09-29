@@ -15,8 +15,8 @@ const COIN_ALT: Record<CoinColor, string> = {
 
 const COIN_WIDTH = clientUnitsToRem(
   COIN_CLIENT_WIDTH,
-  CLIENT_TEXT_SCALE.LINE_UNITS,
-  CLIENT_TEXT_SCALE.LINE_REM,
+  CLIENT_TEXT_SCALE.FONT_UNITS,
+  CLIENT_TEXT_SCALE.FONT_REM,
 )
 
 const COIN_ROW_STYLE = { '--coin-width': COIN_WIDTH } as CSSProperties

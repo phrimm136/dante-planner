@@ -5,6 +5,7 @@ import importanceColorCode from '@static/data/color/importanceColorCode.json'
 import {
   CLIENT_TEXT_SCALE,
   IMPORTANCE_BOX_LAYOUT,
+  IMPORTANCE_ICON_UNITS,
   IMPORTANCE_PLATE_GLOW_UNITS,
   PASSIVE_PANE_BLEED_REM,
   IMPORTANCE_DECORATION,
@@ -71,7 +72,7 @@ export function stripeTileWidth(): string {
 }
 
 export function clientLength(units: number): string {
-  return clientUnitsToRem(units, CLIENT_TEXT_SCALE.LINE_UNITS, CLIENT_TEXT_SCALE.LINE_REM)
+  return clientUnitsToRem(units, CLIENT_TEXT_SCALE.FONT_UNITS, CLIENT_TEXT_SCALE.FONT_REM)
 }
 
 export interface ImportanceGeometry {
@@ -88,9 +89,9 @@ function boxLength(percent: number): string {
 
 export function importanceGeometry(variant: ImportanceVariant): ImportanceGeometry {
   return {
-    iconSize: boxLength(IMPORTANCE_BOX_LAYOUT.ICON_SIZE[variant]),
-    iconTop: boxLength(IMPORTANCE_BOX_LAYOUT.ICON_TOP[variant]),
-    iconRight: boxLength(IMPORTANCE_BOX_LAYOUT.ICON_RIGHT[variant]),
+    iconSize: clientLength(IMPORTANCE_ICON_UNITS.SIZE),
+    iconTop: clientLength(IMPORTANCE_ICON_UNITS.TOP[variant]),
+    iconRight: clientLength(IMPORTANCE_ICON_UNITS.RIGHT[variant]),
     bandHeight: boxLength(IMPORTANCE_BOX_LAYOUT.BAND[variant]),
     bandOffset: boxLength(0),
   }

@@ -155,15 +155,18 @@ export const IMPORTANCE_DECORATION = {
   STRIPE_TILE: { WIDTH: 1102, HEIGHT: 42 },
 } as const
 
-export const CLIENT_TEXT_SCALE = { LINE_UNITS: 50, LINE_REM: 1.25 } as const
+export const CLIENT_TEXT_SCALE = { FONT_UNITS: 40, FONT_REM: 0.875 } as const
 
 export const COIN_CLIENT_WIDTH = 50
 
 export const IMPORTANCE_BOX_LAYOUT = {
-  ICON_SIZE: { skill: 13.9, passive: 14.2 },
-  ICON_TOP: { skill: 3.1, passive: 2.7 },
-  ICON_RIGHT: { skill: 7.8, passive: 0 },
   BAND: { skill: 2.36, passive: 2.36 },
+} as const
+
+export const IMPORTANCE_ICON_UNITS = {
+  SIZE: 200,
+  TOP: { skill: 22, passive: -3 },
+  RIGHT: { skill: 86, passive: 0 },
 } as const
 
 export const IMPORTANCE_PLATE_GLOW_UNITS = 6

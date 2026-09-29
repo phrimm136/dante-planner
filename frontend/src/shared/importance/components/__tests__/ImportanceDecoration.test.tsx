@@ -89,8 +89,8 @@ describe('ImportanceDecoration', () => {
   })
 
   it.each([
-    ['skill', 'skill', '7.8cqw', '3.1cqw', '13.9cqw'],
-    ['passive', 'passive', '0cqw', '2.7cqw', '14.2cqw'],
+    ['skill', 'skill', '1.8813rem', '0.4813rem', '4.375rem'],
+    ['passive', 'passive', '0rem', '-0.0656rem', '4.375rem'],
   ] as const)(
     'pins the %s icon from the box top-right corner',
     (_name, variant, right, top, size) => {
