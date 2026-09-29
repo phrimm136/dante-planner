@@ -465,3 +465,32 @@ describe('sanity', () => {
     TEST_BUDGET_MS,
   )
 })
+
+describe('client text styles', () => {
+  it(
+    'draws the OrangeMark clauses of passive 142302 as styled runs around their keyword chips',
+    async () => {
+      await mountEnemy('1422')
+
+      selectIn('Phase', 'Phase 2')
+
+      const card = await waitFor(() => {
+        const found = requireSlot('detail-sections').querySelector<HTMLElement>(
+          '[data-passive-id="142302"]',
+        )
+        if (found === null) throw new Error('no passive 142302')
+        return found
+      })
+      const marks = await waitFor(() => {
+        const found = [...card.querySelectorAll<HTMLElement>('[data-text-style="OrangeMark"]')]
+        expect(found.length).toBeGreaterThan(1)
+        return found
+      })
+      const [first] = marks
+      expect(first?.textContent).toContain('Gain 8')
+      expect(first?.querySelector('button')).not.toBeNull()
+      expect(card.textContent).not.toContain('<style')
+    },
+    TEST_BUDGET_MS,
+  )
+})
