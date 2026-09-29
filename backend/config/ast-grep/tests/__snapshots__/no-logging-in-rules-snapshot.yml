@@ -1,0 +1,29 @@
+id: no-logging-in-rules
+snapshots:
+  ? |
+    class A {
+      void m() { log.error("boom"); }
+    }
+  : labels:
+    - source: log.error("boom")
+      style: primary
+      start: 23
+      end: 40
+  ? |
+    class A {
+      void m(Object unknown) { log.warn("Validation failed: unknown fields - {}", unknown); }
+    }
+  : labels:
+    - source: 'log.warn("Validation failed: unknown fields - {}", unknown)'
+      style: primary
+      start: 37
+      end: 96
+  ? |
+    class A {
+      void m(int size) { log.debug("Loaded {} keys", size); }
+    }
+  : labels:
+    - source: log.debug("Loaded {} keys", size)
+      style: primary
+      start: 31
+      end: 64

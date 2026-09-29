@@ -1,0 +1,46 @@
+id: no-index-loop-in-validation
+snapshots:
+  ? |
+    export function drain(queue: string[]): void {
+      while (queue.length > 0) {
+        consume(queue.pop())
+      }
+    }
+  : labels:
+    - source: |-
+        while (queue.length > 0) {
+            consume(queue.pop())
+          }
+      style: primary
+      start: 49
+      end: 104
+  ? |
+    export function drainOnce(queue: string[]): void {
+      do {
+        consume(queue.pop())
+      } while (queue.length > 0)
+    }
+  : labels:
+    - source: |-
+        do {
+            consume(queue.pop())
+          } while (queue.length > 0)
+      style: primary
+      start: 53
+      end: 111
+  ? |
+    export function floorViolations(floors: Floor[]): Violation[] {
+      const violations: Violation[] = []
+      for (let i = 0; i < floors.length; i++) {
+        violations.push(...checkFloor(floors[i], i))
+      }
+      return violations
+    }
+  : labels:
+    - source: |-
+        for (let i = 0; i < floors.length; i++) {
+            violations.push(...checkFloor(floors[i], i))
+          }
+      style: primary
+      start: 103
+      end: 197

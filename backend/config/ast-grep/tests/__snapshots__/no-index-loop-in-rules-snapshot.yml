@@ -1,0 +1,214 @@
+id: no-index-loop-in-rules
+snapshots:
+  ? |
+    class A {
+      List<Violation> m(List<Floor> floors) {
+        List<Violation> violations = new ArrayList<>();
+        for (Floor floor : floors) {
+          violations.add(check(floor));
+        }
+        return violations;
+      }
+    }
+  : labels:
+    - source: |-
+        for (Floor floor : floors) {
+              violations.add(check(floor));
+            }
+      style: primary
+      start: 108
+      end: 178
+    - source: violations
+      style: secondary
+      start: 143
+      end: 153
+    - source: add
+      style: secondary
+      start: 154
+      end: 157
+    - source: violations.add(check(floor))
+      style: secondary
+      start: 143
+      end: 171
+    - source: violations.add(check(floor))
+      style: secondary
+      start: 143
+      end: 171
+  ? |
+    class A {
+      Map<String, JsonNode> m(JsonNode container) {
+        Map<String, JsonNode> bySinnerKey = new HashMap<>();
+        for (Map.Entry<String, JsonNode> entry : container.properties()) {
+          int index;
+          index = Integer.parseInt(entry.getKey());
+          bySinnerKey.put(String.valueOf(index), entry.getValue());
+        }
+        return bySinnerKey;
+      }
+    }
+  : labels:
+    - source: |-
+        for (Map.Entry<String, JsonNode> entry : container.properties()) {
+              int index;
+              index = Integer.parseInt(entry.getKey());
+              bySinnerKey.put(String.valueOf(index), entry.getValue());
+            }
+      style: primary
+      start: 119
+      end: 320
+    - source: bySinnerKey
+      style: secondary
+      start: 257
+      end: 268
+    - source: put
+      style: secondary
+      start: 269
+      end: 272
+    - source: bySinnerKey.put(String.valueOf(index), entry.getValue())
+      style: secondary
+      start: 257
+      end: 313
+    - source: bySinnerKey.put(String.valueOf(index), entry.getValue())
+      style: secondary
+      start: 257
+      end: 313
+  ? |
+    class A {
+      boolean m(List<String> ids) {
+        boolean found = false;
+        for (String id : ids) {
+          found = found || known(id);
+        }
+        return found;
+      }
+    }
+  : labels:
+    - source: |-
+        for (String id : ids) {
+              found = found || known(id);
+            }
+      style: primary
+      start: 73
+      end: 136
+    - source: found
+      style: secondary
+      start: 103
+      end: 108
+    - source: found = found || known(id)
+      style: secondary
+      start: 103
+      end: 129
+    - source: found = found || known(id)
+      style: secondary
+      start: 103
+      end: 129
+  ? |
+    class A {
+      int m(List<String> ids) {
+        int count = 0;
+        for (String id : ids) {
+          count++;
+        }
+        return count;
+      }
+    }
+  : labels:
+    - source: |-
+        for (String id : ids) {
+              count++;
+            }
+      style: primary
+      start: 61
+      end: 105
+    - source: count
+      style: secondary
+      start: 91
+      end: 96
+    - source: count++
+      style: secondary
+      start: 91
+      end: 98
+    - source: count++
+      style: secondary
+      start: 91
+      end: 98
+  ? |
+    class A {
+      void m(Iterator<String> fields) {
+        do {
+          check(fields.next());
+        } while (fields.hasNext());
+      }
+    }
+  : labels:
+    - source: |-
+        do {
+              check(fields.next());
+            } while (fields.hasNext());
+      style: primary
+      start: 50
+      end: 114
+  ? |
+    class A {
+      void m(Iterator<String> fields) {
+        while (fields.hasNext()) {
+          check(fields.next());
+        }
+      }
+    }
+  : labels:
+    - source: |-
+        while (fields.hasNext()) {
+              check(fields.next());
+            }
+      style: primary
+      start: 50
+      end: 110
+  ? |
+    class A {
+      void m(List<Floor> floors) {
+        for (int index = 0; index < floors.size(); index++) {
+          check(floors.get(index), index);
+        }
+      }
+    }
+  : labels:
+    - source: |-
+        for (int index = 0; index < floors.size(); index++) {
+              check(floors.get(index), index);
+            }
+      style: primary
+      start: 45
+      end: 143
+  ? |
+    class A {
+      void m(Map<String, JsonNode> fields) {
+        for (Map.Entry<String, JsonNode> field : fields.entrySet()) {
+          this.seen.put(field.getKey(), field.getValue());
+        }
+      }
+    }
+  : labels:
+    - source: |-
+        for (Map.Entry<String, JsonNode> field : fields.entrySet()) {
+              this.seen.put(field.getKey(), field.getValue());
+            }
+      style: primary
+      start: 55
+      end: 177
+    - source: this.seen
+      style: secondary
+      start: 123
+      end: 132
+    - source: put
+      style: secondary
+      start: 133
+      end: 136
+    - source: this.seen.put(field.getKey(), field.getValue())
+      style: secondary
+      start: 123
+      end: 170
+    - source: this.seen.put(field.getKey(), field.getValue())
+      style: secondary
+      start: 123
+      end: 170

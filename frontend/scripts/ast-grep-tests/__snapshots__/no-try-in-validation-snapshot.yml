@@ -1,0 +1,56 @@
+id: no-try-in-validation
+snapshots:
+  ? |
+    export const toIndex = (key: string): number | null => {
+      try {
+        return BigInt(key) > 0n ? Number(key) : null
+      } catch (error) {
+        return null
+      }
+    }
+  : labels:
+    - source: |-
+        try {
+            return BigInt(key) > 0n ? Number(key) : null
+          } catch (error) {
+            return null
+          }
+      style: primary
+      start: 59
+      end: 153
+  ? |
+    export function check(plan: Plan): Violation[] {
+      try {
+        return validate(plan)
+      } finally {
+        reset()
+      }
+    }
+  : labels:
+    - source: |-
+        try {
+            return validate(plan)
+          } finally {
+            reset()
+          }
+      style: primary
+      start: 51
+      end: 112
+  ? |
+    export function parseNote(text: string): unknown {
+      try {
+        return JSON.parse(text)
+      } catch {
+        return undefined
+      }
+    }
+  : labels:
+    - source: |-
+        try {
+            return JSON.parse(text)
+          } catch {
+            return undefined
+          }
+      style: primary
+      start: 53
+      end: 123

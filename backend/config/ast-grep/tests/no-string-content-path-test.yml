@@ -1,0 +1,51 @@
+id: no-string-content-path
+valid:
+  - |
+    class A {
+      String m(String id) { return "Gift '" + id + "' is unknown"; }
+    }
+  - |
+    class A {
+      String m(String field, long value, int min, int max) {
+        return String.format("%s value %d is out of range [%d-%d]", field, value, min, max);
+      }
+    }
+  - |
+    class A {
+      String m(String suffix) {
+        return """
+            floorSelections[0].
+            """ + suffix;
+      }
+    }
+  - |
+    class A {
+      String m(String key) { return key + '[' + ']'; }
+    }
+  - |
+    class A {
+      String m(ContentPath path) { return path.render(); }
+    }
+invalid:
+  - |
+    class A {
+      String m(int index) { return "floorSelections[" + index + "]"; }
+    }
+  - |
+    class A {
+      String m(String path) { return path + ".difficulty"; }
+    }
+  - |
+    class A {
+      String m(String sinnerKey, String egoType) {
+        return "equipment[" + sinnerKey + "].egos." + egoType + ".id";
+      }
+    }
+  - |
+    class A {
+      String m(int index) { return String.format("floorSelections[%d]", index); }
+    }
+  - |
+    class A {
+      String m(String owner, String field) { return String.format("%s.%s", owner, field); }
+    }

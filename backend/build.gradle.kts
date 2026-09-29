@@ -261,8 +261,34 @@ val checkstyleServiceJavadoc by tasks.registering(Checkstyle::class) {
     }
 }
 
+val checkstyleValidation by tasks.registering(Checkstyle::class) {
+    configFile = file("config/checkstyle/checkstyle-validation.xml")
+    source("src/main/java")
+    include("org/danteplanner/backend/planner/validation/**")
+    classpath = files()
+    reports {
+        html.required = true
+        xml.required = true
+    }
+}
+
 tasks.check {
     dependsOn(checkstyleServiceJavadoc)
+}
+
+val astGrepBinary = layout.projectDirectory.file("../frontend/node_modules/.bin/ast-grep").asFile.path
+
+val astGrepRuleTests by tasks.registering(Exec::class) {
+    group = "verification"
+    executable = astGrepBinary
+    args("test")
+}
+
+val astGrep by tasks.registering(Exec::class) {
+    group = "verification"
+    dependsOn(astGrepRuleTests)
+    executable = astGrepBinary
+    args("scan", "--error", "src/main/java")
 }
 
 // Copy-paste detection as a regression ratchet: catch NEW production duplication.

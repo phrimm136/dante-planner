@@ -1,0 +1,10 @@
+id: no-try-in-rules
+language: Java
+severity: error
+message: 'ADR 140: a rule decides by value, not by catching; the one try is the JSON parse at the boundary.'
+files:
+  - src/main/java/org/danteplanner/backend/planner/validation/**
+rule:
+  any:
+    - kind: try_statement
+    - kind: try_with_resources_statement

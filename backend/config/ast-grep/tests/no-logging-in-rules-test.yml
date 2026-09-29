@@ -1,0 +1,26 @@
+id: no-logging-in-rules
+valid:
+  - |
+    class A {
+      List<Violation> m() { return List.of(); }
+    }
+  - |
+    class A {
+      void m() {
+        logger.info("loaded");
+        catalog.warn(entry);
+      }
+    }
+invalid:
+  - |
+    class A {
+      void m(Object unknown) { log.warn("Validation failed: unknown fields - {}", unknown); }
+    }
+  - |
+    class A {
+      void m(int size) { log.debug("Loaded {} keys", size); }
+    }
+  - |
+    class A {
+      void m() { log.error("boom"); }
+    }

@@ -1,0 +1,69 @@
+id: no-try-in-rules
+snapshots:
+  ? |
+    class A {
+      JsonNode m(String content) {
+        try {
+          return objectMapper.readTree(content);
+        } catch (JsonProcessingException e) {
+          throw ValidationErrors.malformedJson(e.getMessage());
+        }
+      }
+    }
+  : labels:
+    - source: |-
+        try {
+              return objectMapper.readTree(content);
+            } catch (JsonProcessingException e) {
+              throw ValidationErrors.malformedJson(e.getMessage());
+            }
+      style: primary
+      start: 45
+      end: 203
+  ? |
+    class A {
+      Optional<Integer> m(String key) {
+        try {
+          return Optional.of(Integer.parseInt(key));
+        } catch (NumberFormatException e) {
+          return Optional.empty();
+        }
+      }
+    }
+  : labels:
+    - source: |-
+        try {
+              return Optional.of(Integer.parseInt(key));
+            } catch (NumberFormatException e) {
+              return Optional.empty();
+            }
+      style: primary
+      start: 50
+      end: 181
+  ? |
+    class A {
+      void m() {
+        try { x(); } finally { y(); }
+      }
+    }
+  : labels:
+    - source: try { x(); } finally { y(); }
+      style: primary
+      start: 27
+      end: 56
+  ? |
+    class A {
+      void m(Path path) {
+        try (var in = Files.newInputStream(path)) {
+          read(in);
+        }
+      }
+    }
+  : labels:
+    - source: |-
+        try (var in = Files.newInputStream(path)) {
+              read(in);
+            }
+      style: primary
+      start: 36
+      end: 101

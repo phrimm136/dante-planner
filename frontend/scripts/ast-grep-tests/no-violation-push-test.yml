@@ -1,0 +1,12 @@
+id: no-violation-push
+valid:
+  - missingSinners.push(sinnerKey)
+  - seen.add(giftId)
+  - errorsByCode.push(error)
+  - const violations = floors.flatMap((floor, floorIndex) => check(floor, floorIndex))
+  - const errors = [...validateEquipment(content.equipment), ...validateDeploymentOrder(content.deploymentOrder)]
+invalid:
+  - "errors.push({ code: 'MISSING_TITLE', message: 'Title is required for publishing', field: 'title' })"
+  - "violations.push(violation('INVALID_FIELD_TYPE', `${path}.themePackId`))"
+  - errors.push(...validateEquipment(content.equipment))
+  - result.ruleErrors.push(error)

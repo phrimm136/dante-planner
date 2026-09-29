@@ -1,0 +1,56 @@
+id: no-try-in-rules
+valid:
+  - |
+    class A {
+      List<Violation> m(JsonNode node) {
+        return switch (node.getNodeType()) {
+          case STRING -> List.of();
+          default -> List.of(Violation.invalidFieldType(ContentPath.root()));
+        };
+      }
+    }
+  - |
+    class A {
+      Optional<Integer> m(String text) {
+        return Optional.of(text).filter(DIGITS::matches).map(Integer::valueOf);
+      }
+    }
+  - |
+    class A {
+      void m() { throw new IllegalStateException("tryParse"); }
+    }
+invalid:
+  - |
+    class A {
+      JsonNode m(String content) {
+        try {
+          return objectMapper.readTree(content);
+        } catch (JsonProcessingException e) {
+          throw ValidationErrors.malformedJson(e.getMessage());
+        }
+      }
+    }
+  - |
+    class A {
+      Optional<Integer> m(String key) {
+        try {
+          return Optional.of(Integer.parseInt(key));
+        } catch (NumberFormatException e) {
+          return Optional.empty();
+        }
+      }
+    }
+  - |
+    class A {
+      void m(Path path) {
+        try (var in = Files.newInputStream(path)) {
+          read(in);
+        }
+      }
+    }
+  - |
+    class A {
+      void m() {
+        try { x(); } finally { y(); }
+      }
+    }

@@ -1,0 +1,44 @@
+id: no-collector-parameter
+language: TypeScript
+severity: error
+message: 'ADR 140: nothing is collected through a parameter; return the violations instead of filling an array passed in.'
+files:
+  - src/pages/planner/lib/floorRules.ts
+  - src/pages/planner/lib/plannerValidation.ts
+  - src/pages/planner/lib/plannerValidationErrors.ts
+rule:
+  any:
+    - kind: function_declaration
+    - kind: function_expression
+    - kind: arrow_function
+    - kind: method_definition
+    - kind: generator_function_declaration
+  all:
+    - has:
+        field: parameters
+        has:
+          any:
+            - kind: required_parameter
+            - kind: optional_parameter
+          all:
+            - has: { field: pattern, pattern: $PARAM }
+            - has:
+                field: type
+                has:
+                  any:
+                    - kind: array_type
+                      has: { kind: type_identifier, regex: '^(Violation|\w*ValidationError)$' }
+                    - kind: generic_type
+                      all:
+                        - has: { field: name, regex: '^Array$' }
+                        - has:
+                            field: type_arguments
+                            has: { kind: type_identifier, regex: '^(Violation|\w*ValidationError)$' }
+    - has:
+        field: body
+        has:
+          stopBy: end
+          any:
+            - pattern: $PARAM.push($$$ITEMS)
+            - pattern: $PARAM.unshift($$$ITEMS)
+            - pattern: $PARAM.splice($$$ITEMS)

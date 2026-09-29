@@ -1,0 +1,36 @@
+id: no-node-kind-if-chain
+valid:
+  - |
+    class A {
+      String m(JsonNode node) {
+        return switch (node.getNodeType()) {
+          case STRING -> node.asText();
+          default -> "";
+        };
+      }
+    }
+  - |
+    class A {
+      boolean m(Object value) { return Objects.isNull(value); }
+    }
+  - |
+    class A {
+      boolean m(List<String> names) { return names.isEmpty(); }
+    }
+invalid:
+  - |
+    class A {
+      void m(JsonNode node) {
+        if (node.isMissingNode() || node.isNull()) {
+          return;
+        }
+      }
+    }
+  - |
+    class A {
+      boolean m(JsonNode node) { return node.isIntegralNumber(); }
+    }
+  - |
+    class A {
+      boolean m(Map.Entry<String, JsonNode> rename) { return rename.getValue().isTextual(); }
+    }

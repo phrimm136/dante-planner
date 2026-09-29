@@ -1,0 +1,15 @@
+id: no-logging-in-rules
+language: Java
+severity: error
+message: 'ADR 140: a rule returns violations and logs nothing; logging belongs to the edge that renders them.'
+files:
+  - src/main/java/org/danteplanner/backend/planner/floor/**
+  - src/main/java/org/danteplanner/backend/planner/validation/**
+ignores:
+  - src/main/java/org/danteplanner/backend/planner/validation/PlannerContentValidator.java
+  - src/main/java/org/danteplanner/backend/planner/validation/GameDataLoader.java
+  - src/main/java/org/danteplanner/backend/planner/validation/GameDataRegistry.java
+  - src/main/java/org/danteplanner/backend/planner/validation/FloorRuleTable.java
+  - src/main/java/org/danteplanner/backend/planner/validation/PlannerVersions.java
+rule:
+  pattern: log.$METHOD($$$ARGS)

@@ -1,0 +1,72 @@
+id: no-violation-collector-parameter
+snapshots:
+  ? |
+    class A {
+      private static void check(Walk walk, List<Violation> violations) {}
+    }
+  : labels:
+    - source: List<Violation> violations
+      style: primary
+      start: 49
+      end: 75
+    - source: List<Violation>
+      style: secondary
+      start: 49
+      end: 64
+  ? |
+    class A {
+      static A combined(List<PlannerValidationException> errors) { return null; }
+    }
+  : labels:
+    - source: List<PlannerValidationException> errors
+      style: primary
+      start: 30
+      end: 69
+    - source: List<PlannerValidationException>
+      style: secondary
+      start: 30
+      end: 62
+  ? |
+    class A {
+      void m(Stage stage) { var context = new ValidationContext(stage); }
+    }
+  : labels:
+    - source: ValidationContext
+      style: primary
+      start: 52
+      end: 69
+  ? |
+    class A {
+      void validate(JsonNode root, ValidationContext context) {}
+    }
+  : labels:
+    - source: ValidationContext
+      style: primary
+      start: 41
+      end: 58
+  ? |
+    interface Rule {
+      void check(Walk walk, Collection<Violation> out);
+    }
+  : labels:
+    - source: Collection<Violation> out
+      style: primary
+      start: 41
+      end: 66
+    - source: Collection<Violation>
+      style: secondary
+      start: 41
+      end: 62
+  ? |
+    record Walk(int floorCount) {
+      void check(List<Violation> violations) {}
+    }
+  : labels:
+    - source: List<Violation> violations
+      style: primary
+      start: 43
+      end: 69
+    - source: List<Violation>
+      style: secondary
+      start: 43
+      end: 58

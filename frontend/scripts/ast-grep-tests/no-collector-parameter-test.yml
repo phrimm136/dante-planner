@@ -1,0 +1,33 @@
+id: no-collector-parameter
+valid:
+  - |
+    const toResult = (errors: PlannerValidationError[]): PlannerValidationResult => ({
+      isValid: errors.length === 0,
+      errors,
+    })
+  - |
+    const reportsAt = (violations: readonly Violation[], path: string) =>
+      violations.some((found) => found.path === path)
+  - |
+    function collectPresentSinnerKeys(keys: string[]): void {
+      keys.push('01')
+    }
+  - |
+    function parseFloor(raw: unknown): Violation[] {
+      const violations: Violation[] = []
+      violations.push(violation('INVALID_FIELD_TYPE', 'floorSelections'))
+      return violations
+    }
+invalid:
+  - |
+    function checkFloor(floor: FloorSelectionValue, violations: Violation[]): void {
+      violations.push(violation('FLOOR_MISSING_THEME_PACK', 'floorSelections'))
+    }
+  - |
+    const checkGift = (giftId: string, errors: Array<GiftValidationError>) => {
+      if (!known.has(giftId)) errors.push({ code: 'GIFT_UNKNOWN_ID', message: giftId })
+    }
+  - |
+    function dropFirst(errors: PlannerValidationError[]) {
+      errors.splice(0, 1)
+    }

@@ -1,0 +1,105 @@
+id: no-string-content-path
+snapshots:
+  ? |
+    class A {
+      String m(String owner, String field) { return String.format("%s.%s", owner, field); }
+    }
+  : labels:
+    - source: String.format("%s.%s", owner, field)
+      style: primary
+      start: 58
+      end: 94
+    - source: String
+      style: secondary
+      start: 58
+      end: 64
+    - source: format
+      style: secondary
+      start: 65
+      end: 71
+    - source: '"%s.%s"'
+      style: secondary
+      start: 72
+      end: 79
+    - source: '"%s.%s"'
+      style: secondary
+      start: 72
+      end: 79
+  ? |
+    class A {
+      String m(String path) { return path + ".difficulty"; }
+    }
+  : labels:
+    - source: path + ".difficulty"
+      style: primary
+      start: 43
+      end: 63
+    - source: +
+      style: secondary
+      start: 48
+      end: 49
+    - source: '".difficulty"'
+      style: secondary
+      start: 50
+      end: 63
+  ? |
+    class A {
+      String m(String sinnerKey, String egoType) {
+        return "equipment[" + sinnerKey + "].egos." + egoType + ".id";
+      }
+    }
+  : labels:
+    - source: '"equipment[" + sinnerKey + "].egos." + egoType + ".id"'
+      style: primary
+      start: 68
+      end: 122
+    - source: +
+      style: secondary
+      start: 115
+      end: 116
+    - source: '"equipment["'
+      style: secondary
+      start: 68
+      end: 80
+  ? |
+    class A {
+      String m(int index) { return "floorSelections[" + index + "]"; }
+    }
+  : labels:
+    - source: '"floorSelections[" + index + "]"'
+      style: primary
+      start: 41
+      end: 73
+    - source: +
+      style: secondary
+      start: 68
+      end: 69
+    - source: '"floorSelections["'
+      style: secondary
+      start: 41
+      end: 59
+  ? |
+    class A {
+      String m(int index) { return String.format("floorSelections[%d]", index); }
+    }
+  : labels:
+    - source: String.format("floorSelections[%d]", index)
+      style: primary
+      start: 41
+      end: 84
+    - source: String
+      style: secondary
+      start: 41
+      end: 47
+    - source: format
+      style: secondary
+      start: 48
+      end: 54
+    - source: '"floorSelections[%d]"'
+      style: secondary
+      start: 55
+      end: 76
+    - source: '"floorSelections[%d]"'
+      style: secondary
+      start: 55
+      end: 76

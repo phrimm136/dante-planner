@@ -1,0 +1,38 @@
+id: no-index-loop-in-validation
+valid:
+  - |
+    export function floorViolations(floors: Floor[]): Violation[] {
+      return floors.flatMap((floor, index) => checkFloor(floor, index))
+    }
+  - |
+    export function indexViolations(count: number): Violation[] {
+      return Array.from({ length: count }, (_, index) => index).filter(isMissing).map(missingAt)
+    }
+  - |
+    export function firstUnknown(ids: string[]): string | undefined {
+      for (const id of ids) {
+        if (!known(id)) return id
+      }
+      return undefined
+    }
+invalid:
+  - |
+    export function floorViolations(floors: Floor[]): Violation[] {
+      const violations: Violation[] = []
+      for (let i = 0; i < floors.length; i++) {
+        violations.push(...checkFloor(floors[i], i))
+      }
+      return violations
+    }
+  - |
+    export function drain(queue: string[]): void {
+      while (queue.length > 0) {
+        consume(queue.pop())
+      }
+    }
+  - |
+    export function drainOnce(queue: string[]): void {
+      do {
+        consume(queue.pop())
+      } while (queue.length > 0)
+    }

@@ -1,0 +1,35 @@
+id: no-throw-per-violation
+valid:
+  - |
+    class A {
+      void m(List<PlannerValidationException> errors) {
+        throw PlannerValidationException.combined(errors);
+      }
+    }
+  - |
+    class A {
+      void m() { throw new IllegalArgumentException("'rules' must be an object"); }
+    }
+  - |
+    class A {
+      List<Violation> m(String path, String giftId) {
+        return List.of(Violation.duplicateValue(path, giftId));
+      }
+    }
+invalid:
+  - |
+    class A {
+      void m() { throw new PlannerValidationException("MISSING_TITLE", "Title is required for publishing"); }
+    }
+  - |
+    class A {
+      PlannerValidationException m(String code, String message) {
+        return new PlannerValidationException(code, message);
+      }
+    }
+  - |
+    class A {
+      void m(ValidationContext context, Violation violation) {
+        context.reject(violation.path(), path -> new PlannerValidationException(violation.code().getCode(), violation.message()));
+      }
+    }

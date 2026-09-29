@@ -1,0 +1,18 @@
+id: no-template-content-path
+valid:
+  - const path = contentPath('floorSelections').index(floorIndex).field('difficulty')
+  - "const error = { code: 'MISSING_TITLE', message: 'Title is required for publishing', field: 'title' }"
+  - 'const message = `Deployment order[${i}] has invalid sinner index: ${index} (must be 0-11)`'
+  - 'const message = `Floor ${floorNumberAt(i)}: gift ${giftId} is not available for theme pack ${themePackId}`'
+  - 'const key = `planner:${friendly.key}`'
+  - |
+    const FLOOR_INDEX_PREFIX = new RegExp(`^${FLOOR_SELECTIONS}\\[(\\d+)\\]`)
+  - const floorNumber = floorIndex + 1
+  - const label = 'Floor ' + floorNumber
+invalid:
+  - 'const floorPath = (floorIndex: number) => `${FLOOR_SELECTIONS}[${floorIndex}]`'
+  - "violations.push(violation('INVALID_FIELD_TYPE', `${path}.difficulty`))"
+  - 'const field = `${floorPath(i)}.giftIds[${j}]`'
+  - 'const field = `equipment.${sinnerKey}.egos.${REQUIRED_EGO_TYPE}.id`'
+  - "const field = path + '.themePackId'"
+  - "const field = 'floorSelections[' + floorIndex + ']'"

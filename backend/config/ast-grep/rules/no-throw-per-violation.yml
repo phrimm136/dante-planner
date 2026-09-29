@@ -1,0 +1,13 @@
+id: no-throw-per-violation
+language: Java
+severity: error
+message: 'ADR 140: a rule returns violations as values; only PlannerValidationException turns the collected violations into the exception.'
+files:
+  - src/main/java/org/danteplanner/backend/planner/floor/**
+  - src/main/java/org/danteplanner/backend/planner/validation/**
+  - src/main/java/org/danteplanner/backend/planner/exception/PlannerValidationException.java
+ignores:
+  - src/main/java/org/danteplanner/backend/planner/exception/PlannerValidationException.java
+rule:
+  kind: object_creation_expression
+  has: { field: type, regex: '(^|\.)PlannerValidationException$' }

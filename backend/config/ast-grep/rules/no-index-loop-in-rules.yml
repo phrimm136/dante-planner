@@ -1,0 +1,52 @@
+id: no-index-loop-in-rules
+language: Java
+severity: error
+message: 'ADR 140: a rule maps its input to violations with streams; no index loop, while loop, or loop that fills an outer collection or flag.'
+files:
+  - src/main/java/org/danteplanner/backend/planner/validation/**
+rule:
+  any:
+    - kind: for_statement
+    - kind: while_statement
+    - kind: do_statement
+    - kind: enhanced_for_statement
+      has:
+        field: body
+        has:
+          stopBy: end
+          all:
+            - any:
+                - kind: assignment_expression
+                  has:
+                    field: left
+                    any: [{ kind: identifier }, { kind: field_access }]
+                    pattern: $TARGET
+                - kind: update_expression
+                  has:
+                    any: [{ kind: identifier }, { kind: field_access }]
+                    pattern: $TARGET
+                - kind: method_invocation
+                  all:
+                    - has:
+                        field: object
+                        any: [{ kind: identifier }, { kind: field_access }]
+                        pattern: $TARGET
+                    - has:
+                        field: name
+                        regex: '^(add|addAll|addFirst|addLast|put|putAll|putIfAbsent|remove|removeAll|removeIf|retainAll|replaceAll|set|clear|merge|compute|computeIfAbsent|computeIfPresent|offer|push|append|insert|sort)$'
+            - not:
+                inside:
+                  stopBy: end
+                  kind: enhanced_for_statement
+                  any:
+                    - has:
+                        field: name
+                        pattern: $TARGET
+                    - has:
+                        field: body
+                        has:
+                          stopBy: end
+                          kind: variable_declarator
+                          has:
+                            field: name
+                            pattern: $TARGET

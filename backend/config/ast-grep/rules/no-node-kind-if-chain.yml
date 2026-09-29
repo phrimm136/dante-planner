@@ -1,0 +1,14 @@
+id: no-node-kind-if-chain
+language: Java
+severity: error
+message: 'ADR 140: dispatch JSON node kinds with switch (node.getNodeType()), not isX() checks.'
+files:
+  - src/main/java/org/danteplanner/backend/planner/floor/**
+  - src/main/java/org/danteplanner/backend/planner/validation/**
+  - src/main/java/org/danteplanner/backend/planner/exception/PlannerValidationException.java
+rule:
+  kind: method_invocation
+  all:
+    - has: { field: object, pattern: $RECEIVER }
+    - has: { field: name, regex: '^(isMissingNode|isNull|isTextual|isNumber|isIntegralNumber|isArray|isObject|isBoolean)$' }
+    - has: { field: arguments, regex: '^\(\s*\)$' }

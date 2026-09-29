@@ -1,0 +1,70 @@
+id: no-template-content-path
+snapshots:
+  const field = 'floorSelections[' + floorIndex + ']':
+    labels:
+    - source: '''floorSelections['' + floorIndex + '']'''
+      style: primary
+      start: 14
+      end: 51
+    - source: +
+      style: secondary
+      start: 46
+      end: 47
+    - source: ''']'''
+      style: secondary
+      start: 48
+      end: 51
+  const field = `${floorPath(i)}.giftIds[${j}]`:
+    labels:
+    - source: '`${floorPath(i)}.giftIds[${j}]`'
+      style: primary
+      start: 14
+      end: 45
+    - source: ${floorPath(i)}
+      style: secondary
+      start: 15
+      end: 30
+  const field = `equipment.${sinnerKey}.egos.${REQUIRED_EGO_TYPE}.id`:
+    labels:
+    - source: '`equipment.${sinnerKey}.egos.${REQUIRED_EGO_TYPE}.id`'
+      style: primary
+      start: 14
+      end: 67
+    - source: ${sinnerKey}
+      style: secondary
+      start: 25
+      end: 37
+  const field = path + '.themePackId':
+    labels:
+    - source: path + '.themePackId'
+      style: primary
+      start: 14
+      end: 35
+    - source: +
+      style: secondary
+      start: 19
+      end: 20
+    - source: '''.themePackId'''
+      style: secondary
+      start: 21
+      end: 35
+  'const floorPath = (floorIndex: number) => `${FLOOR_SELECTIONS}[${floorIndex}]`':
+    labels:
+    - source: '`${FLOOR_SELECTIONS}[${floorIndex}]`'
+      style: primary
+      start: 42
+      end: 78
+    - source: ${FLOOR_SELECTIONS}
+      style: secondary
+      start: 43
+      end: 62
+  violations.push(violation('INVALID_FIELD_TYPE', `${path}.difficulty`)):
+    labels:
+    - source: '`${path}.difficulty`'
+      style: primary
+      start: 48
+      end: 68
+    - source: ${path}
+      style: secondary
+      start: 49
+      end: 56

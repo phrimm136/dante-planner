@@ -1,0 +1,43 @@
+id: no-try-in-validation
+valid:
+  - |
+    export function parseFloor(input: unknown): FloorResult {
+      const parsed = floorSchema.safeParse(input)
+      return parsed.success ? { ok: true, value: parsed.data } : { ok: false, violations: [] }
+    }
+  - |
+    export function kindOf(value: unknown): string {
+      switch (typeof value) {
+        case 'string':
+          return 'text'
+        default:
+          return 'other'
+      }
+    }
+  - |
+    export const retry = (attempts: number): number => attempts + 1
+invalid:
+  - |
+    export function parseNote(text: string): unknown {
+      try {
+        return JSON.parse(text)
+      } catch {
+        return undefined
+      }
+    }
+  - |
+    export function check(plan: Plan): Violation[] {
+      try {
+        return validate(plan)
+      } finally {
+        reset()
+      }
+    }
+  - |
+    export const toIndex = (key: string): number | null => {
+      try {
+        return BigInt(key) > 0n ? Number(key) : null
+      } catch (error) {
+        return null
+      }
+    }

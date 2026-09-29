@@ -1,0 +1,41 @@
+id: no-violation-collector-parameter
+valid:
+  - |
+    record Parsed(int floorCount, List<Violation> violations) {
+      Parsed {
+        violations = List.copyOf(violations);
+      }
+    }
+  - |
+    class A {
+      List<Violation> check(Walk walk) { return List.of(); }
+    }
+  - |
+    class A {
+      void m(List<String> names, Collection<FloorSelection> floors) {}
+    }
+invalid:
+  - |
+    class A {
+      private static void check(Walk walk, List<Violation> violations) {}
+    }
+  - |
+    interface Rule {
+      void check(Walk walk, Collection<Violation> out);
+    }
+  - |
+    class A {
+      static A combined(List<PlannerValidationException> errors) { return null; }
+    }
+  - |
+    record Walk(int floorCount) {
+      void check(List<Violation> violations) {}
+    }
+  - |
+    class A {
+      void validate(JsonNode root, ValidationContext context) {}
+    }
+  - |
+    class A {
+      void m(Stage stage) { var context = new ValidationContext(stage); }
+    }

@@ -1,0 +1,125 @@
+id: no-index-loop-in-rules
+valid:
+  - |
+    class A {
+      List<Violation> m(List<Floor> floors) {
+        return IntStream.range(0, floors.size())
+            .mapToObj(index -> check(floors.get(index), index))
+            .flatMap(List::stream)
+            .toList();
+      }
+    }
+  - |
+    class A {
+      List<Violation> m(JsonNode node) {
+        return switch (node.getNodeType()) {
+          case ARRAY -> elements(node);
+          default -> List.of();
+        };
+      }
+    }
+  - |
+    class A {
+      Optional<String> m(List<String> ids) {
+        for (String id : ids) {
+          if (unknown(id)) {
+            return Optional.of(id);
+          }
+        }
+        return Optional.empty();
+      }
+    }
+  - |
+    class A {
+      void m(List<StringBuilder> builders) {
+        for (StringBuilder builder : builders) {
+          builder.append('x');
+        }
+      }
+    }
+  - |
+    class A {
+      List<Violation> m(List<Floor> floors) {
+        List<Violation> all = new ArrayList<>();
+        for (Floor floor : floors) {
+          List<Violation> local = new ArrayList<>();
+          local.add(check(floor));
+        }
+        return all;
+      }
+    }
+invalid:
+  - |
+    class A {
+      void m(List<Floor> floors) {
+        for (int index = 0; index < floors.size(); index++) {
+          check(floors.get(index), index);
+        }
+      }
+    }
+  - |
+    class A {
+      void m(Iterator<String> fields) {
+        while (fields.hasNext()) {
+          check(fields.next());
+        }
+      }
+    }
+  - |
+    class A {
+      void m(Iterator<String> fields) {
+        do {
+          check(fields.next());
+        } while (fields.hasNext());
+      }
+    }
+  - |
+    class A {
+      List<Violation> m(List<Floor> floors) {
+        List<Violation> violations = new ArrayList<>();
+        for (Floor floor : floors) {
+          violations.add(check(floor));
+        }
+        return violations;
+      }
+    }
+  - |
+    class A {
+      boolean m(List<String> ids) {
+        boolean found = false;
+        for (String id : ids) {
+          found = found || known(id);
+        }
+        return found;
+      }
+    }
+  - |
+    class A {
+      int m(List<String> ids) {
+        int count = 0;
+        for (String id : ids) {
+          count++;
+        }
+        return count;
+      }
+    }
+  - |
+    class A {
+      void m(Map<String, JsonNode> fields) {
+        for (Map.Entry<String, JsonNode> field : fields.entrySet()) {
+          this.seen.put(field.getKey(), field.getValue());
+        }
+      }
+    }
+  - |
+    class A {
+      Map<String, JsonNode> m(JsonNode container) {
+        Map<String, JsonNode> bySinnerKey = new HashMap<>();
+        for (Map.Entry<String, JsonNode> entry : container.properties()) {
+          int index;
+          index = Integer.parseInt(entry.getKey());
+          bySinnerKey.put(String.valueOf(index), entry.getValue());
+        }
+        return bySinnerKey;
+      }
+    }

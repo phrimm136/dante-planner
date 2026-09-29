@@ -9,6 +9,7 @@
     "generate:sitemap": "tsx scripts/generate-sitemap.ts",
     "typecheck": "tsc -b",
     "lint": "oxlint --type-aware --tsconfig tsconfig.app.json src",
+    "lint:validation": "oxlint -c .oxlintrc.validation.json src/pages/planner/lib",
     "check:compiler-bailouts": "tsx scripts/compiler-bailouts.ts",
     "check:bundle-budget": "tsx scripts/check-bundle-budget.ts",
     "check:fp": "ast-grep scan",

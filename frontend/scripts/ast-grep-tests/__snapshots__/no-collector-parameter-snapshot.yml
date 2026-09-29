@@ -1,0 +1,142 @@
+id: no-collector-parameter
+snapshots:
+  ? |
+    const checkGift = (giftId: string, errors: Array<GiftValidationError>) => {
+      if (!known.has(giftId)) errors.push({ code: 'GIFT_UNKNOWN_ID', message: giftId })
+    }
+  : labels:
+    - source: |-
+        (giftId: string, errors: Array<GiftValidationError>) => {
+          if (!known.has(giftId)) errors.push({ code: 'GIFT_UNKNOWN_ID', message: giftId })
+        }
+      style: primary
+      start: 18
+      end: 161
+    - source: errors
+      style: secondary
+      start: 35
+      end: 41
+    - source: Array
+      style: secondary
+      start: 43
+      end: 48
+    - source: GiftValidationError
+      style: secondary
+      start: 49
+      end: 68
+    - source: GiftValidationError
+      style: secondary
+      start: 49
+      end: 68
+    - source: Array<GiftValidationError>
+      style: secondary
+      start: 43
+      end: 69
+    - source: Array<GiftValidationError>
+      style: secondary
+      start: 43
+      end: 69
+    - source: 'errors: Array<GiftValidationError>'
+      style: secondary
+      start: 35
+      end: 69
+    - source: 'errors: Array<GiftValidationError>'
+      style: secondary
+      start: 35
+      end: 69
+    - source: 'errors.push({ code: ''GIFT_UNKNOWN_ID'', message: giftId })'
+      style: secondary
+      start: 102
+      end: 159
+    - source: 'errors.push({ code: ''GIFT_UNKNOWN_ID'', message: giftId })'
+      style: secondary
+      start: 102
+      end: 159
+  ? |
+    function checkFloor(floor: FloorSelectionValue, violations: Violation[]): void {
+      violations.push(violation('FLOOR_MISSING_THEME_PACK', 'floorSelections'))
+    }
+  : labels:
+    - source: |-
+        function checkFloor(floor: FloorSelectionValue, violations: Violation[]): void {
+          violations.push(violation('FLOOR_MISSING_THEME_PACK', 'floorSelections'))
+        }
+      style: primary
+      start: 0
+      end: 158
+    - source: violations
+      style: secondary
+      start: 48
+      end: 58
+    - source: Violation
+      style: secondary
+      start: 60
+      end: 69
+    - source: Violation[]
+      style: secondary
+      start: 60
+      end: 71
+    - source: Violation[]
+      style: secondary
+      start: 60
+      end: 71
+    - source: 'violations: Violation[]'
+      style: secondary
+      start: 48
+      end: 71
+    - source: 'violations: Violation[]'
+      style: secondary
+      start: 48
+      end: 71
+    - source: violations.push(violation('FLOOR_MISSING_THEME_PACK', 'floorSelections'))
+      style: secondary
+      start: 83
+      end: 156
+    - source: violations.push(violation('FLOOR_MISSING_THEME_PACK', 'floorSelections'))
+      style: secondary
+      start: 83
+      end: 156
+  ? |
+    function dropFirst(errors: PlannerValidationError[]) {
+      errors.splice(0, 1)
+    }
+  : labels:
+    - source: |-
+        function dropFirst(errors: PlannerValidationError[]) {
+          errors.splice(0, 1)
+        }
+      style: primary
+      start: 0
+      end: 78
+    - source: errors
+      style: secondary
+      start: 19
+      end: 25
+    - source: PlannerValidationError
+      style: secondary
+      start: 27
+      end: 49
+    - source: PlannerValidationError[]
+      style: secondary
+      start: 27
+      end: 51
+    - source: PlannerValidationError[]
+      style: secondary
+      start: 27
+      end: 51
+    - source: 'errors: PlannerValidationError[]'
+      style: secondary
+      start: 19
+      end: 51
+    - source: 'errors: PlannerValidationError[]'
+      style: secondary
+      start: 19
+      end: 51
+    - source: errors.splice(0, 1)
+      style: secondary
+      start: 57
+      end: 76
+    - source: errors.splice(0, 1)
+      style: secondary
+      start: 57
+      end: 76

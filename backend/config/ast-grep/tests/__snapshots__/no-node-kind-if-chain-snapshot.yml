@@ -1,0 +1,69 @@
+id: no-node-kind-if-chain
+snapshots:
+  ? |
+    class A {
+      boolean m(JsonNode node) { return node.isIntegralNumber(); }
+    }
+  : labels:
+    - source: node.isIntegralNumber()
+      style: primary
+      start: 46
+      end: 69
+    - source: node
+      style: secondary
+      start: 46
+      end: 50
+    - source: isIntegralNumber
+      style: secondary
+      start: 51
+      end: 67
+    - source: ()
+      style: secondary
+      start: 67
+      end: 69
+  ? |
+    class A {
+      boolean m(Map.Entry<String, JsonNode> rename) { return rename.getValue().isTextual(); }
+    }
+  : labels:
+    - source: rename.getValue().isTextual()
+      style: primary
+      start: 67
+      end: 96
+    - source: rename.getValue()
+      style: secondary
+      start: 67
+      end: 84
+    - source: isTextual
+      style: secondary
+      start: 85
+      end: 94
+    - source: ()
+      style: secondary
+      start: 94
+      end: 96
+  ? |
+    class A {
+      void m(JsonNode node) {
+        if (node.isMissingNode() || node.isNull()) {
+          return;
+        }
+      }
+    }
+  : labels:
+    - source: node.isMissingNode()
+      style: primary
+      start: 44
+      end: 64
+    - source: node
+      style: secondary
+      start: 44
+      end: 48
+    - source: isMissingNode
+      style: secondary
+      start: 49
+      end: 62
+    - source: ()
+      style: secondary
+      start: 62
+      end: 64

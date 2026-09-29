@@ -1,0 +1,26 @@
+id: no-violation-push
+snapshots:
+  errors.push(...validateEquipment(content.equipment)):
+    labels:
+    - source: errors.push(...validateEquipment(content.equipment))
+      style: primary
+      start: 0
+      end: 52
+  'errors.push({ code: ''MISSING_TITLE'', message: ''Title is required for publishing'', field: ''title'' })':
+    labels:
+    - source: 'errors.push({ code: ''MISSING_TITLE'', message: ''Title is required for publishing'', field: ''title'' })'
+      style: primary
+      start: 0
+      end: 99
+  result.ruleErrors.push(error):
+    labels:
+    - source: result.ruleErrors.push(error)
+      style: primary
+      start: 0
+      end: 29
+  violations.push(violation('INVALID_FIELD_TYPE', `${path}.themePackId`)):
+    labels:
+    - source: violations.push(violation('INVALID_FIELD_TYPE', `${path}.themePackId`))
+      style: primary
+      start: 0
+      end: 71
