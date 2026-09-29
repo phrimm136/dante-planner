@@ -365,6 +365,7 @@ tasks.jacocoTestReport {
 }
 
 tasks.test {
+    inputs.file(layout.projectDirectory.file("config/architecture-rules-without-fixtures.txt"))
     finalizedBy(tasks.jacocoTestReport)
 }
 
