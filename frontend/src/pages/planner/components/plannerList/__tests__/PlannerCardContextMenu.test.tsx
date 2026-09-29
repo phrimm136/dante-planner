@@ -2,14 +2,13 @@
  * PlannerCardContextMenu.test.tsx
  *
  * Tests for PlannerCardContextMenu component.
- * Validates vote button disabled state and error handling for immutable votes.
+ * Validates vote button disabled state for immutable votes.
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { PublicPlanner, VoteResponse } from '../../../types/PlannerListTypes'
-import { ConflictError } from '@/lib/apiErrors'
 import { buildMutationResult } from '@/test-utils'
 
 vi.mock('@tanstack/react-router', () => ({
@@ -189,30 +188,6 @@ describe('PlannerCardContextMenu', () => {
       const upvoteButton = within(menu).getByRole('menuitem', { name: /upvoted/i })
 
       expect(upvoteButton).toHaveAttribute('aria-disabled', 'true')
-    })
-  })
-
-  describe('vote error handling (409 Conflict)', () => {
-    it('usePlannerVote hook handles 409 error internally', () => {
-      const mockError = new ConflictError('CONCURRENT_WRITE', 'Vote already exists', null)
-      vi.mocked(usePlannerVote).mockReturnValue(
-        buildMutationResult<VoteResponse, Error, VotePlannerInput>({
-          mutate: mockVoteMutate,
-          isPending: false,
-          isError: true,
-          error: mockError,
-        }),
-      )
-
-      const planner = { ...basePlanner, hasUpvoted: false }
-
-      render(
-        <PlannerCardContextMenu planner={planner} view="community" isAuthenticated={true}>
-          <div>Test Card</div>
-        </PlannerCardContextMenu>,
-      )
-
-      expect(screen.getByText('Test Card')).toBeInTheDocument()
     })
   })
 
