@@ -1,83 +1,53 @@
 package org.danteplanner.backend.planner.validation.identity;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import org.danteplanner.backend.planner.validation.ContentPath;
 import org.danteplanner.backend.planner.validation.ErrorCode;
-import org.danteplanner.backend.planner.validation.JsonKind;
-import org.danteplanner.backend.planner.validation.JsonNumbers;
-import org.danteplanner.backend.planner.validation.SinnerEntry;
 import org.danteplanner.backend.planner.validation.Violation;
 import org.danteplanner.backend.shared.util.GameConstants;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.ToLongFunction;
 import java.util.stream.Stream;
 
 public final class IdentityRules {
 
-    private record Bound(String field, ErrorCode code, int min, int max) {
+    private record Bound(String field, ToLongFunction<Identity> value, ErrorCode code, int min, int max) {
     }
 
+    private static final ContentPath EQUIPMENT = ContentPath.of("equipment");
     private static final String IDENTITY = "identity";
     private static final String ID = "id";
-    private static final Bound LEVEL = new Bound("level", ErrorCode.OUT_OF_RANGE_IDENTITY_LEVEL,
+    private static final Bound LEVEL = new Bound("level", Identity::level, ErrorCode.OUT_OF_RANGE_IDENTITY_LEVEL,
             GameConstants.MIN_LEVEL, GameConstants.MAX_LEVEL);
-    private static final Bound UPTIE = new Bound("uptie", ErrorCode.OUT_OF_RANGE_IDENTITY_UPTIE,
+    private static final Bound UPTIE = new Bound("uptie", Identity::uptie, ErrorCode.OUT_OF_RANGE_IDENTITY_UPTIE,
             GameConstants.MIN_UPTIE, GameConstants.MAX_UPTIE);
 
     private IdentityRules() {
     }
 
-    public static List<Violation> check(List<SinnerEntry> equipment, IdentityReferenceData data) {
-        return equipment.stream()
-                .flatMap(sinner -> identity(sinner, data))
+    public static List<Violation> check(Map<String, Identity> identities, IdentityReferenceData data) {
+        return identities.entrySet().stream()
+                .flatMap(sinner -> identity(sinner.getKey(), sinner.getValue(), data))
                 .sorted(Violation.BY_PATH_THEN_CODE)
                 .toList();
     }
 
-    private static Stream<Violation> identity(SinnerEntry sinner, IdentityReferenceData data) {
-        JsonNode identity = sinner.value().path(IDENTITY);
-        ContentPath path = sinner.path().field(IDENTITY);
-        return switch (identity.getNodeType()) {
-            case OBJECT -> identityId(sinner.sinnerKey(), identity, path, data);
-            case MISSING, NULL -> Stream.of(Violation.missing(ErrorCode.MISSING_IDENTITY, path));
-            default -> Stream.of(IdentityViolations.identityNotAnObject(path));
-        };
-    }
-
-    private static Stream<Violation> identityId(String sinnerKey, JsonNode identity, ContentPath path,
-                                                IdentityReferenceData data) {
-        JsonNode id = identity.path(ID);
+    private static Stream<Violation> identity(String sinnerKey, Identity identity, IdentityReferenceData data) {
+        ContentPath path = EQUIPMENT.key(sinnerKey).field(IDENTITY);
         ContentPath idPath = path.field(ID);
-        return switch (id.getNodeType()) {
-            case STRING -> id.asText().isBlank()
-                    ? Stream.of(Violation.missing(ErrorCode.MISSING_IDENTITY, idPath))
-                    : references(sinnerKey, id.asText(), identity, path, data);
-            case MISSING, NULL -> Stream.of(Violation.missing(ErrorCode.MISSING_IDENTITY, idPath));
-            default -> Stream.of(IdentityViolations.idNotAString(idPath));
-        };
-    }
-
-    private static Stream<Violation> references(String sinnerKey, String identityId, JsonNode identity,
-                                                ContentPath path, IdentityReferenceData data) {
-        ContentPath idPath = path.field(ID);
-        return !data.hasIdentity(identityId)
-                ? Stream.of(IdentityViolations.unknownIdentity(idPath, identityId))
-                : !data.belongsToSinner(sinnerKey, identityId)
-                        ? Stream.of(IdentityViolations.identityOfAnotherSinner(idPath, sinnerKey, identityId))
+        return !data.hasIdentity(identity.id())
+                ? Stream.of(IdentityViolations.unknownIdentity(idPath, identity.id()))
+                : !data.belongsToSinner(sinnerKey, identity.id())
+                        ? Stream.of(IdentityViolations.identityOfAnotherSinner(idPath, sinnerKey, identity.id()))
                         : Stream.of(LEVEL, UPTIE).flatMap(bound -> bounded(identity, path, bound));
     }
 
-    private static Stream<Violation> bounded(JsonNode identity, ContentPath path, Bound bound) {
-        JsonNode node = identity.path(bound.field());
-        ContentPath fieldPath = path.field(bound.field());
-        return switch (node.getNodeType()) {
-            case MISSING -> Stream.empty();
-            default -> JsonNumbers.intValue(node)
-                    .map(value -> value < bound.min() || value > bound.max()
-                            ? Stream.of(IdentityViolations.outOfRange(bound.code(), fieldPath, bound.field(), value,
-                                    bound.min(), bound.max()))
-                            : Stream.<Violation>empty())
-                    .orElseGet(() -> Stream.of(Violation.invalidFieldType(fieldPath, JsonKind.NUMBER, node)));
-        };
+    private static Stream<Violation> bounded(Identity identity, ContentPath path, Bound bound) {
+        long value = bound.value().applyAsLong(identity);
+        return value < bound.min() || value > bound.max()
+                ? Stream.of(IdentityViolations.outOfRange(bound.code(), path.field(bound.field()), bound.field(), value,
+                        bound.min(), bound.max()))
+                : Stream.empty();
     }
 }

@@ -34,9 +34,12 @@ epic: none · pr: none
   violator is converted.
   REJECTED: freezing the old files and converting them when touched — the scope is one closed
   package, and a frozen list keeps the old shape as a nearest pattern.
-  INVARIANT: the convention rules carry no exception list beyond the two parse edges: the one JSON
-    parse may catch, and the validator's entry point may turn a verdict into an exception and log it — unenforced; any other
-    exempted file is a review finding.
+  INVARIANT: the convention rules carry no exception list beyond the parse edges: the one JSON
+    parse may catch; the validator's entry point may turn a verdict into an exception and log it;
+    and the code that holds JSON before or beside the typed tree may take a JSON node — the parse
+    and its binding, the schema check, the entry point, the document checks on the raw content and
+    section notes, the tree's opaque notes and uncounted floors, and the floor index salvage —
+    unenforced; any other exempted file is a review finding.
 
 ## Takeaway
 - takeaway: the pattern a codebase teaches is whichever one is nearest; make one module exemplary,

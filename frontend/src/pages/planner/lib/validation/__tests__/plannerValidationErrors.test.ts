@@ -5,7 +5,7 @@ import { describe, it, expect } from 'vitest'
 import plannerMessages from '@static/i18n/EN/planner.json'
 import { VALIDATION_CODES } from '../codes'
 import type { ValidationCode } from '../codes'
-import { contentPath, field, index } from '../contentPath'
+import { contentPath, field, index, key } from '../contentPath'
 import { toUserFriendlyError, validationMessageKey } from '../plannerValidationErrors'
 import type { PlannerValidationError } from '../plannerValidationErrors'
 
@@ -92,7 +92,8 @@ describe('toUserFriendlyError', () => {
   })
 
   it.each([
-    { code: 'MISSING_SINNER', path: contentPath(field('equipment')), missingSinners: ['01'] },
+    { code: 'MISSING_REQUIRED_FIELD', path: contentPath(field('equipment'), key('1')) },
+    { code: 'UNKNOWN_FIELD', path: contentPath(field('equipment'), key('01')) },
     { code: 'OUT_OF_RANGE_DEPLOYMENT', path: contentPath(field('deploymentOrder'), index(0)) },
     { code: 'DUPLICATE_EGOGIFT', path: contentPath(field('observationGiftIds'), index(1)) },
     { code: 'EXCESS_STARTBUFF', path: contentPath(field('selectedBuffIds')) },

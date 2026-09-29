@@ -75,8 +75,7 @@ export async function parsePublishedPlanner(
   )
 
   // The content arrives as a JSON string a publisher wrote, so it is ingest like
-  // any other: parsed, then gated in draft mode, which tolerates the partial
-  // shapes a published draft can legitimately carry.
+  // any other: parsed, then gated.
   let contentData: unknown
   try {
     contentData = JSON.parse(apiData.content)
@@ -87,25 +86,22 @@ export async function parsePublishedPlanner(
     contentData = normalizePlannerIds(contentData, await loadIdMigrationTable())
   }
 
-  const planner = validateSaveablePlanner(
-    {
-      metadata: {
-        id: apiData.id,
-        title: apiData.title,
-        status: apiData.status,
-        schemaVersion: apiData.schemaVersion,
-        contentVersion: apiData.contentVersion,
-        plannerType: apiData.plannerType,
-        syncVersion: apiData.syncVersion,
-        createdAt: apiData.createdAt,
-        lastModifiedAt: apiData.lastModifiedAt,
-        published: true,
-      },
-      config: { type: apiData.plannerType, category: apiData.category },
-      content: contentData,
+  const planner = validateSaveablePlanner({
+    metadata: {
+      id: apiData.id,
+      title: apiData.title,
+      status: apiData.status,
+      schemaVersion: apiData.schemaVersion,
+      contentVersion: apiData.contentVersion,
+      plannerType: apiData.plannerType,
+      syncVersion: apiData.syncVersion,
+      createdAt: apiData.createdAt,
+      lastModifiedAt: apiData.lastModifiedAt,
+      published: true,
     },
-    'draft',
-  )
+    config: { type: apiData.plannerType, category: apiData.category },
+    content: contentData,
+  })
 
   return { apiData, planner }
 }

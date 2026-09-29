@@ -24,7 +24,6 @@ import type {
   MDConfigSchema,
   RRConfigSchema,
   PlannerConfigDiscriminatedSchema,
-  FloorSelectionDraftSchema,
   SerializableNoteContentSchema,
   SaveablePlannerSchema,
   PlannerExportItemSchema,
@@ -36,7 +35,6 @@ import type {
   MDConfig,
   RRConfig,
   PlannerEditorConfig,
-  SerializableFloorSelection,
   SerializableNoteContent,
   MDPlannerContent,
   RRPlannerContent,
@@ -87,14 +85,11 @@ export type PlannerRootDiscriminationGuard = [
 
 export type PlannerSchemaDriftGuard = [
   Expect<Equal<z.infer<typeof PlannerStatusSchema>, PlannerStatus>>,
-  Expect<Equal<z.infer<typeof FloorSelectionDraftSchema>, SerializableFloorSelection>>,
   Expect<Equal<z.infer<typeof PlannerMetadataSchema>, PlannerMetadata>>,
   Expect<Equal<z.infer<typeof MDConfigSchema>, MDConfig>>,
   Expect<Equal<z.infer<typeof RRConfigSchema>, RRConfig>>,
   Expect<Equal<z.infer<typeof PlannerConfigDiscriminatedSchema>, PlannerEditorConfig>>,
 
-  // JSONContentSchema is z.ZodType<unknown> (structural Tiptap validation),
-  // so the schema side of note content is wider than the type.
   Expect<Extends<SerializableNoteContent, z.input<typeof SerializableNoteContentSchema>>>,
 
   Expect<

@@ -37,21 +37,21 @@
       "kind": "boundary",
       "subject": "FIELD",
       "problem": "UNKNOWN",
-      "rule": "Every top-level key is in the allowed set.",
+      "rule": "Every key of every object in the content is one its schema declares.",
       "emittedBy": ["backend", "frontend"]
     },
     "MISSING_REQUIRED_FIELD": {
       "kind": "boundary",
       "subject": "FIELD",
       "problem": "MISSING",
-      "rule": "Every required top-level key is present.",
+      "rule": "Every key its schema requires is present, at every level of the content.",
       "emittedBy": ["backend", "frontend"]
     },
     "INVALID_FIELD_TYPE": {
       "kind": "boundary",
       "subject": "FIELD",
       "problem": "INVALID",
-      "rule": "A present value has the JSON kind its field declares.",
+      "rule": "A present value, at any level of the content, has the kind its field declares: the JSON kind, a non-empty value that matches its id format or holds a non-space character, and an integer within the safe integer range.",
       "emittedBy": ["backend", "frontend"]
     },
     "INVALID_CATEGORY": {
@@ -89,34 +89,6 @@
       "rule": "Every selected keyword of a published planner is a planner keyword.",
       "emittedBy": ["backend", "frontend"]
     },
-    "OUT_OF_RANGE_SINNER": {
-      "kind": "rule",
-      "subject": "SINNER",
-      "problem": "OUT_OF_RANGE",
-      "rule": "An equipment or skillEAState sinner key is between 1 and 12.",
-      "emittedBy": ["backend", "frontend"]
-    },
-    "MISSING_SINNER": {
-      "kind": "rule",
-      "subject": "SINNER",
-      "problem": "MISSING",
-      "rule": "Equipment and skillEAState each hold all 12 sinners.",
-      "emittedBy": ["backend", "frontend"]
-    },
-    "DUPLICATE_SINNER": {
-      "kind": "rule",
-      "subject": "SINNER",
-      "problem": "DUPLICATE",
-      "rule": "No sinner appears under two keys of equipment or skillEAState.",
-      "emittedBy": ["backend", "frontend"]
-    },
-    "MISSING_IDENTITY": {
-      "kind": "rule",
-      "subject": "IDENTITY",
-      "problem": "MISSING",
-      "rule": "Every sinner has an identity with a non-blank id.",
-      "emittedBy": ["backend", "frontend"]
-    },
     "UNKNOWN_IDENTITY": {
       "kind": "rule",
       "subject": "IDENTITY",
@@ -143,20 +115,6 @@
       "subject": "IDENTITY",
       "problem": "OUT_OF_RANGE",
       "rule": "The identity uptie is within the game's uptie bounds.",
-      "emittedBy": ["backend", "frontend"]
-    },
-    "MISSING_EGO_ZAYIN": {
-      "kind": "rule",
-      "subject": "EGO",
-      "problem": "MISSING",
-      "rule": "Every sinner has E.G.O equipment with a ZAYIN E.G.O that has a non-blank id.",
-      "emittedBy": ["backend", "frontend"]
-    },
-    "INVALID_EGO_TYPE": {
-      "kind": "rule",
-      "subject": "EGO",
-      "problem": "INVALID",
-      "rule": "Every E.G.O slot key is ZAYIN, TETH, HE, WAW or ALEPH.",
       "emittedBy": ["backend", "frontend"]
     },
     "UNKNOWN_EGO": {
@@ -206,13 +164,6 @@
       "subject": "DEPLOYMENT",
       "problem": "DUPLICATE",
       "rule": "No sinner repeats in the deployment order.",
-      "emittedBy": ["backend", "frontend"]
-    },
-    "INVALID_SKILL_SLOT": {
-      "kind": "rule",
-      "subject": "SKILL",
-      "problem": "INVALID",
-      "rule": "Every skillEAState slot key is 0, 1 or 2.",
       "emittedBy": ["backend", "frontend"]
     },
     "OUT_OF_RANGE_SKILL_TOTAL": {

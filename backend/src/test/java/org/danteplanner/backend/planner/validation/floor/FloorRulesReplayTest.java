@@ -85,7 +85,7 @@ class FloorRulesReplayTest {
     }
 
     private static JsonNode run(JsonNode raw, MDCategory category, Stage stage) {
-        return outcome(RULES.admit(FloorBoundary.parse(raw, TABLE.layout(category)), stage));
+        return outcome(RULES.admit(FloorFixtures.parse(raw, category), stage));
     }
 
     private static JsonNode outcome(Admission admission) {

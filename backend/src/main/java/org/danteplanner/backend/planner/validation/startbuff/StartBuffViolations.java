@@ -16,17 +16,17 @@ final class StartBuffViolations {
                 String.valueOf(count), NO_BUFFS, StartBuffRules.MAX_START_BUFFS);
     }
 
-    static Violation unknownBuff(ContentPath path, ContentPath selectedBuffIds, int buffId) {
+    static Violation unknownBuff(ContentPath path, ContentPath selectedBuffIds, long buffId) {
         return Violation.unknownId(ErrorCode.UNKNOWN_STARTBUFF, path, selectedBuffIds.render(), String.valueOf(buffId));
     }
 
-    static Violation baseIdOutOfRange(ContentPath path, int baseId) {
+    static Violation baseIdOutOfRange(ContentPath path, long baseId) {
         return Violation.valueOutOfRange(ErrorCode.OUT_OF_RANGE_STARTBUFF, path,
                 String.format("%s base ID", path.render()), String.valueOf(baseId),
                 StartBuffRules.MIN_BASE_ID, StartBuffRules.MAX_BASE_ID);
     }
 
-    static Violation duplicateBaseId(ContentPath path, ContentPath selectedBuffIds, int baseId) {
+    static Violation duplicateBaseId(ContentPath path, ContentPath selectedBuffIds, long baseId) {
         return Violation.duplicateValue(ErrorCode.DUPLICATE_STARTBUFF, path,
                 String.format("%s base IDs", selectedBuffIds.render()), String.valueOf(baseId));
     }

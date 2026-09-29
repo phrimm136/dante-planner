@@ -406,7 +406,7 @@ class PlannerPublishFlowIT {
         assertThat(entityFilterRows(planner.getId())).isZero();
 
         ObjectNode edited = (ObjectNode) objectMapper.readTree(received.get("content").asText());
-        ((ObjectNode) edited.get("equipment").get("01").get("identity")).put("id", "10102");
+        ((ObjectNode) edited.get("equipment").get("1").get("identity")).put("id", "10102");
         saveBack(received, received.get("title").asText(), objectMapper.writeValueAsString(edited));
 
         assertThat(entityFilterRows(planner.getId()))

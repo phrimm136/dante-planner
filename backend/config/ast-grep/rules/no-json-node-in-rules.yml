@@ -1,0 +1,19 @@
+id: no-json-node-in-rules
+language: Java
+severity: error
+message: 'A rule reads the typed content tree; a JsonNode parameter means it parses JSON the schema already checked.'
+files:
+  - src/main/java/org/danteplanner/backend/planner/validation/**/*.java
+ignores:
+  - src/main/java/org/danteplanner/backend/planner/validation/ContentJson.java
+  - src/main/java/org/danteplanner/backend/planner/validation/ContentSchema.java
+  - src/main/java/org/danteplanner/backend/planner/validation/DocumentChecks.java
+  - src/main/java/org/danteplanner/backend/planner/validation/PlannerContent.java
+  - src/main/java/org/danteplanner/backend/planner/validation/PlannerContentValidator.java
+  - src/main/java/org/danteplanner/backend/planner/validation/floor/FloorBoundary.java
+  - src/main/java/org/danteplanner/backend/planner/validation/floor/Floors.java
+rule:
+  kind: formal_parameter
+  has:
+    field: type
+    regex: '(^|[<,.\s])JsonNode([>,\s]|$)'

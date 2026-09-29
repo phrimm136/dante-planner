@@ -23,10 +23,11 @@ class FloorRulesPropertyTest {
     private static final int TRIES = 500;
 
     @Property(tries = TRIES)
-    void admit_WhenItsAdmittedFloorsAreReserialized_AdmitsTheSameFloorsWithNoViolations(
+    void admit_WhenItsCleanlyAdmittedFloorsAreReserialized_AdmitsTheSameFloorsWithNoViolations(
             @ForAll("floorSelections") JsonNode raw, @ForAll("categories") MDCategory category,
             @ForAll("stages") Stage stage) {
-        if (!(admit(raw, category, stage) instanceof Admission.Admitted admitted)) {
+        if (!(admit(raw, category, stage) instanceof Admission.Admitted admitted)
+                || !admitted.boundaryViolations().isEmpty()) {
             return;
         }
 
@@ -35,19 +36,18 @@ class FloorRulesPropertyTest {
     }
 
     @Property(tries = TRIES)
-    void admit_WhenFloorsAreAppendedPastTheCount_ReturnsTheSameAdmission(
+    void admit_WhenWellShapedFloorsAreAppendedPastTheCount_ReturnsTheSameAdmission(
             @ForAll("floorLists") List<JsonNode> raw, @ForAll("fillers") List<JsonNode> filler,
             @ForAll("appended") List<JsonNode> appended, @ForAll("categories") MDCategory category,
             @ForAll("stages") Stage stage) {
         int count = TABLE.floorCount(category);
-        List<JsonNode> base = new ArrayList<>(raw);
-        base.addAll(filler.subList(0, Math.max(0, count - raw.size())));
+        List<JsonNode> base = new ArrayList<>(raw.subList(0, Math.min(raw.size(), count)));
+        base.addAll(filler.subList(0, count - base.size()));
         List<JsonNode> withAppended = new ArrayList<>(base);
         withAppended.addAll(appended);
-        Admission reference = admit(FloorArbitraries.array(base.subList(0, count)), category, stage);
 
-        assertThat(admit(FloorArbitraries.array(base), category, stage)).isEqualTo(reference);
-        assertThat(admit(FloorArbitraries.array(withAppended), category, stage)).isEqualTo(reference);
+        assertThat(admit(FloorArbitraries.array(withAppended), category, stage))
+                .isEqualTo(admit(FloorArbitraries.array(base), category, stage));
     }
 
     @Property(tries = TRIES)
@@ -74,7 +74,7 @@ class FloorRulesPropertyTest {
 
     @Provide
     Arbitrary<List<JsonNode>> appended() {
-        return FloorArbitraries.pastCountFloor().list().ofMaxSize(FloorArbitraries.MAX_APPENDED_FLOORS);
+        return FloorArbitraries.wellShapedFloor().list().ofMaxSize(FloorArbitraries.MAX_APPENDED_FLOORS);
     }
 
     @Provide
@@ -93,7 +93,7 @@ class FloorRulesPropertyTest {
     }
 
     private static Admission admit(JsonNode raw, MDCategory category, Stage stage) {
-        return RULES.admit(FloorBoundary.parse(raw, TABLE.layout(category)), stage);
+        return RULES.admit(FloorFixtures.parse(raw, category), stage);
     }
 
     private static JsonNode reserialize(List<FloorSelection> floors) {
@@ -106,8 +106,7 @@ class FloorRulesPropertyTest {
         ObjectNode node = MAPPER.createObjectNode();
         switch (floor.themePack()) {
             case ThemePack.Chosen(String id) -> node.put("themePackId", id);
-            case ThemePack.None() -> {
-            }
+            case ThemePack.None() -> node.putNull("themePackId");
         }
         switch (floor.difficulty()) {
             case Difficulty.Set(int value) -> node.put("difficulty", value);

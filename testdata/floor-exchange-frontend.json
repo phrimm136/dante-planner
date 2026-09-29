@@ -66,8 +66,40 @@
         "floors": [],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].difficulty"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[3]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].giftIds"
           }
         ]
       }
@@ -176,7 +208,20 @@
             "giftIds": []
           }
         ],
-        "violations": []
+        "violations": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].difficulty"
+          }
+        ]
       }
     },
     {
@@ -294,32 +339,24 @@
         "floors": [],
         "violations": [
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[0].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[2].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].difficulty"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[2].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].giftIds"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[2].themePackId"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[11].themePackId"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[3].difficulty"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[3].themePackId"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[4].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[12].themePackId"
           }
         ]
       }
@@ -386,8 +423,20 @@
         ],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[2].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].themePackId"
           },
           {
             "code": "INVALID_FIELD_TYPE",
@@ -470,36 +519,20 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[0].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].themePackId"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[3].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].giftIds"
           },
           {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[5]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].giftIds"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[5].themePackId"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[6].themePackId"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[7].themePackId"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[9].giftIds"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[9].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].giftIds"
           }
         ]
       }
@@ -563,6 +596,30 @@
           {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[0].giftIds[1]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].giftIds"
           },
           {
             "code": "INVALID_FIELD_TYPE",
@@ -654,44 +711,20 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[1].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[1].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].giftIds"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[2].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].themePackId"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[3].giftIds"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[3].themePackId"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[4].themePackId"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[6].giftIds"
-          },
-          {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[7]"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[8].themePackId"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[9].themePackId"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[10].difficulty"
           }
         ]
       }
@@ -761,8 +794,36 @@
         "floors": [],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].difficulty"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[1].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].giftIds"
+          },
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[7].themePackId"
           }
         ]
       }
@@ -896,40 +957,20 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[1].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[1].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[4].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].themePackId"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[5].giftIds"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[5].themePackId"
-          },
-          {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[7]"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[7].themePackId"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[8].themePackId"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[9].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].difficulty"
           }
         ]
       }
@@ -989,96 +1030,20 @@
         "floors": [],
         "violations": [
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[0]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].themePackId"
           },
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[0].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[0].giftIds"
-          },
-          {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[1]"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[2]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].themePackId"
           },
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[2].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[2].giftIds"
-          },
-          {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[3]"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[3].difficulty"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[4].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[4].giftIds"
-          },
-          {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[5]"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[5].giftIds"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[6]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[7]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[8]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[9]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[10]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[11]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[12]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[13]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[14]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
           }
         ]
       }
@@ -1161,7 +1126,12 @@
             ]
           }
         ],
-        "violations": []
+        "violations": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].themePackId"
+          }
+        ]
       }
     },
     {
@@ -1202,48 +1172,12 @@
         "floors": [],
         "violations": [
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[1].difficulty"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[2].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[2].giftIds"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[3]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[4]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[5]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[6]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[7]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[8]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[9]"
           }
         ]
       }
@@ -1355,8 +1289,28 @@
         "floors": [],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].difficulty"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[3].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].difficulty"
           }
         ]
       }
@@ -1492,7 +1446,24 @@
             ]
           }
         ],
-        "violations": []
+        "violations": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].themePackId"
+          }
+        ]
       }
     },
     {
@@ -1564,32 +1535,36 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[1].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[3].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[5]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].difficulty"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[6].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].themePackId"
           },
           {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[9]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].difficulty"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[9].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].themePackId"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[10].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].giftIds"
           }
         ]
       }
@@ -1662,48 +1637,12 @@
         "floors": [],
         "violations": [
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[0]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].themePackId"
           },
           {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[1]"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[1].difficulty"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[2].difficulty"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[3]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[4]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[5]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[6]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[7]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[8]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[9]"
           }
         ]
       }
@@ -1923,7 +1862,36 @@
             "giftIds": []
           }
         ],
-        "violations": []
+        "violations": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[11].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[12].giftIds"
+          },
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[12].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[14].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[16].difficulty"
+          }
+        ]
       }
     },
     {
@@ -1971,6 +1939,14 @@
           {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[0].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
           },
           {
             "code": "INVALID_FIELD_TYPE",
@@ -2053,92 +2029,44 @@
         "floors": [],
         "violations": [
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[1].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[2].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].themePackId"
           },
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[4].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].giftIds"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[4].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].giftIds"
           },
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[5]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].themePackId"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[5].difficulty"
-          },
-          {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[6]"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[6].difficulty"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[6].themePackId"
-          },
-          {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[7]"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[7].difficulty"
-          },
-          {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[8]"
-          },
-          {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[9]"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[9].difficulty"
           },
           {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[10]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].themePackId"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME",
-            "path": "floorSelections[11].difficulty"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[11].themePackId"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[12]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[13]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[14]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[11].giftIds"
           }
         ]
       }
@@ -2206,20 +2134,8 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[2].giftIds"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[2].themePackId"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[3].giftIds"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[4].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
           }
         ]
       }
@@ -2293,16 +2209,12 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[3].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].giftIds"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[3].themePackId"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[4].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].difficulty"
           }
         ]
       }
@@ -2361,16 +2273,16 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[1].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[1].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].themePackId"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[3].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].giftIds"
           }
         ]
       }
@@ -2470,8 +2382,44 @@
         "floors": [],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[3].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[12].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[13].giftIds"
           }
         ]
       }
@@ -2654,7 +2602,36 @@
             "giftIds": []
           }
         ],
-        "violations": []
+        "violations": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[10].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[10].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[12].giftIds"
+          }
+        ]
       }
     },
     {
@@ -2702,16 +2679,20 @@
         "floors": [],
         "violations": [
           {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[2]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].themePackId"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[2].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[3].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].themePackId"
+          },
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[4].themePackId"
           }
         ]
       }
@@ -2812,8 +2793,40 @@
         "floors": [],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].themePackId"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[2].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[12].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[12].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[13].difficulty"
           }
         ]
       }
@@ -2886,8 +2899,20 @@
         "floors": [],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].difficulty"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[3].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].difficulty"
           }
         ]
       }
@@ -3010,6 +3035,14 @@
         "floors": [],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[0].themePackId"
           }
@@ -3074,24 +3107,28 @@
         "floors": [],
         "violations": [
           {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[1]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[3].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[3].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].themePackId"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[4].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[6].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].giftIds"
           }
         ]
       }
@@ -3228,8 +3265,52 @@
         ],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].difficulty"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[4].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[10].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[12].difficulty"
+          },
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[14]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[15].giftIds"
           }
         ]
       }
@@ -3316,12 +3397,24 @@
         "floors": [],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[1].themePackId"
           },
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].giftIds"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[6].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[10].giftIds"
           }
         ]
       }
@@ -3387,56 +3480,32 @@
         "floors": [],
         "violations": [
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[0]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].themePackId"
           },
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[0].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
           },
           {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[1]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].giftIds"
           },
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[2].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].giftIds"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[2].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].giftIds"
           },
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[3].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].giftIds"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[5].difficulty"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[5].themePackId"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[6].difficulty"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[7].difficulty"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[8].themePackId"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[9].difficulty"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[9].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].giftIds"
           }
         ]
       }
@@ -3460,8 +3529,8 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[0].giftIds"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[0].themePackId"
           }
         ]
       }
@@ -3620,7 +3689,52 @@
             ]
           }
         ],
-        "violations": []
+        "violations": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[10].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[11].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[13].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[14].difficulty"
+          }
+        ]
       }
     },
     {
@@ -3717,12 +3831,64 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[2].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[4]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[10].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[13].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[13].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[14].themePackId"
           }
         ]
       }
@@ -3844,24 +4010,28 @@
         "floors": [],
         "violations": [
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[0].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[0].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].giftIds"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[2].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].difficulty"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[2].themePackId"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[10]"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[3].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[14].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[16].themePackId"
           }
         ]
       }
@@ -3977,7 +4147,36 @@
             "giftIds": []
           }
         ],
-        "violations": []
+        "violations": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].giftIds"
+          },
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[6].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].giftIds"
+          }
+        ]
       }
     },
     {
@@ -4069,8 +4268,36 @@
         "floors": [],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].themePackId"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[4].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].difficulty"
           }
         ]
       }
@@ -4186,8 +4413,44 @@
         "floors": [],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].giftIds"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[11].giftIds[0]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[13].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[14].giftIds"
           }
         ]
       }
@@ -4284,68 +4547,40 @@
         "floors": [],
         "violations": [
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[0].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[1].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[2].difficulty"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[3].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[3].giftIds"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[4].difficulty"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[4].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].themePackId"
           },
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[5]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].giftIds"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[5].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].giftIds"
           },
           {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[6]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[11].difficulty"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[6].difficulty"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[7].themePackId"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[8].themePackId"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[9].giftIds"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[9].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[11].giftIds"
           }
         ]
       }
@@ -4440,8 +4675,36 @@
         "floors": [],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].difficulty"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[4].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[10].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[11].difficulty"
           }
         ]
       }
@@ -4571,8 +4834,24 @@
         ],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].themePackId"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[2].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].giftIds"
           }
         ]
       }
@@ -4725,7 +5004,40 @@
             ]
           }
         ],
-        "violations": []
+        "violations": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[10].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[10].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[10].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[13].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[13].themePackId"
+          }
+        ]
       }
     },
     {
@@ -5169,6 +5481,42 @@
           {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[1].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].giftIds"
+          },
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[6].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[13].difficulty"
           }
         ]
       }
@@ -5241,12 +5589,20 @@
         "floors": [],
         "violations": [
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[0].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].giftIds"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[2].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].giftIds"
+          },
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[6].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].giftIds"
           }
         ]
       }
@@ -5287,52 +5643,8 @@
         "floors": [],
         "violations": [
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[0].difficulty"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[1].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[1].giftIds"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[3].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[3].giftIds"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[3].themePackId"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[4]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[5]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[6]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[7]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[8]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[9]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
           }
         ]
       }
@@ -5448,8 +5760,48 @@
         "floors": [],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[3].giftIds[1]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[12].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[13].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[14].themePackId"
           }
         ]
       }
@@ -5558,6 +5910,10 @@
         "floors": [],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].difficulty"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[6]"
           }
@@ -5589,8 +5945,12 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[2].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].giftIds"
           }
         ]
       }
@@ -5647,8 +6007,24 @@
         "floors": [],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[4].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].giftIds"
           }
         ]
       }
@@ -5739,108 +6115,40 @@
         "floors": [],
         "violations": [
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[0].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].themePackId"
           },
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[1].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
           },
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[2]"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[2].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[2].giftIds"
-          },
-          {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[3]"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[3].difficulty"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[4].difficulty"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[4].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].giftIds"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[5].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].themePackId"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[5].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].giftIds"
           },
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[7]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[10].themePackId"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[7].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[11].giftIds"
           },
           {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[8]"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[8].difficulty"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[8].themePackId"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[9].difficulty"
-          },
-          {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[10]"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME",
-            "path": "floorSelections[10].difficulty"
-          },
-          {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[11]"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME",
-            "path": "floorSelections[11].difficulty"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[11].themePackId"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME",
-            "path": "floorSelections[12].difficulty"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[12].themePackId"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[13]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[14]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[12].giftIds"
           }
         ]
       }
@@ -6041,7 +6349,28 @@
             ]
           }
         ],
-        "violations": []
+        "violations": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[11].giftIds"
+          },
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[12].giftIds"
+          }
+        ]
       }
     },
     {
@@ -6082,8 +6411,12 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[1].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].themePackId"
           }
         ]
       }
@@ -6163,92 +6496,28 @@
         "floors": [],
         "violations": [
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[0].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].giftIds"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[0].giftIds"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[1].difficulty"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[2].difficulty"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[3].difficulty"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[3].themePackId"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[4].difficulty"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[4].themePackId"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[6].difficulty"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[6].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].giftIds"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[7].themePackId"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[8].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[8].giftIds"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[8].themePackId"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[9].difficulty"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[9].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[10].giftIds"
           },
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[10]"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME",
-            "path": "floorSelections[10].difficulty"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[11]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[12]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[13]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[14]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[10].themePackId"
           }
         ]
       }
@@ -6407,20 +6676,24 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[1].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].themePackId"
           },
           {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[2]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[3].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].themePackId"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[4].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[13].giftIds"
           }
         ]
       }
@@ -6494,88 +6767,32 @@
         "floors": [],
         "violations": [
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[0].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[0].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].themePackId"
           },
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[2]"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[3].themePackId"
           },
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[3]"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[3].giftIds"
-          },
-          {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[4]"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[4].difficulty"
           },
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[5]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].giftIds"
           },
           {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[6]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].giftIds"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[6].difficulty"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[6].themePackId"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[7].giftIds"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[7].themePackId"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[8].difficulty"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[8].themePackId"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[9]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[10]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[11]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[12]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[13]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[14]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].themePackId"
           }
         ]
       }
@@ -6680,7 +6897,20 @@
             ]
           }
         ],
-        "violations": []
+        "violations": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
+          }
+        ]
       }
     },
     {
@@ -6783,36 +7013,36 @@
         "floors": [],
         "violations": [
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[0].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[1]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].themePackId"
           },
           {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[2]"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[2].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[2].giftIds"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[2].themePackId"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[3].difficulty"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[4].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[11].giftIds"
           }
         ]
       }
@@ -6845,6 +7075,22 @@
           {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[0].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].themePackId"
           }
         ]
       }
@@ -6889,8 +7135,24 @@
         "floors": [],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[2].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].difficulty"
           }
         ]
       }
@@ -6940,76 +7202,8 @@
         "floors": [],
         "violations": [
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[0].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[0].giftIds"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[1].difficulty"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[1].themePackId"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[2].difficulty"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[3].difficulty"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[4].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[4].giftIds"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[5]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[6]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[7]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[8]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[9]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[10]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[11]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[12]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[13]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[14]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
           }
         ]
       }
@@ -7067,8 +7261,20 @@
         "floors": [],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].themePackId"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[4].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].giftIds"
           }
         ]
       }
@@ -7280,7 +7486,48 @@
             ]
           }
         ],
-        "violations": []
+        "violations": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[10].giftIds"
+          },
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[11].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[13].giftIds"
+          },
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[15].giftIds[0]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[16].giftIds"
+          }
+        ]
       }
     },
     {
@@ -7304,48 +7551,12 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[0].giftIds"
-          },
-          {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[1]"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[2]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[3]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[4]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[5]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[6]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[7]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[8]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[9]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
           }
         ]
       }
@@ -7370,15 +7581,14 @@
       "category": "5F",
       "stage": "draft",
       "outcome": {
-        "ok": true,
-        "floors": [
+        "ok": false,
+        "floors": [],
+        "violations": [
           {
-            "themePackId": "1002",
-            "difficulty": 0,
-            "giftIds": []
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
           }
-        ],
-        "violations": []
+        ]
       }
     },
     {
@@ -7425,68 +7635,16 @@
         "floors": [],
         "violations": [
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[1].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[1].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[2].giftIds"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[3].difficulty"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[4].themePackId"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[5].difficulty"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[5].themePackId"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[6]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[7]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[8]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[9]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[10]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[11]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[12]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[13]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[14]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
           }
         ]
       }
@@ -7635,8 +7793,32 @@
         ],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].giftIds"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[8].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].themePackId"
           }
         ]
       }
@@ -7667,72 +7849,16 @@
         "floors": [],
         "violations": [
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[0]"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[1]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].themePackId"
           },
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[2]"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[2].difficulty"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[3]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[4]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[5]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[6]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[7]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[8]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[9]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[10]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[11]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[12]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[13]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[14]"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[2].themePackId"
           }
         ]
       }
@@ -7801,32 +7927,16 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[2].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[2].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[4].giftIds"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[5].giftIds"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[5].themePackId"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[6].giftIds"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[6].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].difficulty"
           }
         ]
       }
@@ -7874,8 +7984,28 @@
         "floors": [],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[2].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].themePackId"
           }
         ]
       }
@@ -8003,12 +8133,52 @@
             "path": "floorSelections[1].difficulty"
           },
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[4].giftIds[0]"
           },
           {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[5].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[10].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[10].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[11].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[13].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[14].themePackId"
+          },
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[15].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[15].giftIds"
           }
         ]
       }
@@ -8091,8 +8261,36 @@
         "floors": [],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].difficulty"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[3].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[10].giftIds"
           }
         ]
       }
@@ -8107,15 +8305,14 @@
       "category": "5F",
       "stage": "draft",
       "outcome": {
-        "ok": true,
-        "floors": [
+        "ok": false,
+        "floors": [],
+        "violations": [
           {
-            "themePackId": "1005",
-            "difficulty": 3,
-            "giftIds": []
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
           }
-        ],
-        "violations": []
+        ]
       }
     },
     {
@@ -8156,8 +8353,16 @@
         "floors": [],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].difficulty"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[2]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
           }
         ]
       }
@@ -8196,60 +8401,12 @@
         "floors": [],
         "violations": [
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[0].difficulty"
-          },
-          {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[1]"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[1].giftIds"
-          },
-          {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[2]"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[2].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[2].giftIds"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[3]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[4]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[5]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[6]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[7]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[8]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[9]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].themePackId"
           }
         ]
       }
@@ -8272,60 +8429,12 @@
         "floors": [],
         "violations": [
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[1].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[2]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[3]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[4]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[5]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[6]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[7]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[8]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[9]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[10]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[11]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[12]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[13]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[14]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
           }
         ]
       }
@@ -8379,44 +8488,8 @@
         "floors": [],
         "violations": [
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[0].difficulty"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[1]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[2]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[3]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[4]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[5]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[6]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[7]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[8]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[9]"
           }
         ]
       }
@@ -8513,6 +8586,26 @@
           {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[2].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].giftIds"
           }
         ]
       }
@@ -8548,12 +8641,8 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[0].giftIds"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[1].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
           }
         ]
       }
@@ -8594,7 +8683,24 @@
             ]
           }
         ],
-        "violations": []
+        "violations": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
+          },
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[0].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].themePackId"
+          }
+        ]
       }
     },
     {
@@ -8642,36 +8748,36 @@
         "floors": [],
         "violations": [
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[0]"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[1]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].themePackId"
           },
           {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[2]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[2].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].themePackId"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[3].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[4]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[4].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].difficulty"
           }
         ]
       }
@@ -8824,104 +8930,28 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[0].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].themePackId"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[1].giftIds"
-          },
-          {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[3]"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[3].giftIds"
-          },
-          {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[4]"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[4].difficulty"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[4].giftIds"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[4].themePackId"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[5].difficulty"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[5].themePackId"
-          },
-          {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[6]"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[6].difficulty"
           },
           {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[7]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].themePackId"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[7].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].giftIds"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[8].difficulty"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[8].themePackId"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[9].difficulty"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[9].themePackId"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME",
-            "path": "floorSelections[10].difficulty"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME",
-            "path": "floorSelections[11].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[11].giftIds"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[11].themePackId"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[12]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[13]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[14]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[10].giftIds"
           }
         ]
       }
@@ -9014,7 +9044,28 @@
             ]
           }
         ],
-        "violations": []
+        "violations": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].themePackId"
+          }
+        ]
       }
     },
     {
@@ -9050,12 +9101,24 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[0].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[2]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].difficulty"
+          },
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[3].themePackId"
           }
         ]
       }
@@ -9247,24 +9310,40 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[1].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].themePackId"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[1].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].difficulty"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[2].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].themePackId"
           },
           {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[4]"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[7].giftIds"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[4].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[10].themePackId"
+          },
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[11].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[12].themePackId"
           }
         ]
       }
@@ -9329,68 +9408,32 @@
         "floors": [],
         "violations": [
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[2]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[2].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].themePackId"
           },
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[3]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].themePackId"
           },
           {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[4]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].giftIds"
           },
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[4].difficulty"
-          },
-          {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[5]"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[5].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[5].giftIds"
-          },
-          {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[6]"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[6].themePackId"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[7].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[7].giftIds"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[8]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[9]"
           }
         ]
       }
@@ -9559,7 +9602,28 @@
             ]
           }
         ],
-        "violations": []
+        "violations": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].giftIds"
+          }
+        ]
       }
     },
     {
@@ -9848,8 +9912,36 @@
         ],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].giftIds"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[9].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[11].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[11].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[12].themePackId"
           }
         ]
       }
@@ -9956,28 +10048,40 @@
         "floors": [],
         "violations": [
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[0].difficulty"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[2].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[3].difficulty"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[4].difficulty"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[4].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[10].difficulty"
+          },
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[10].themePackId"
+          },
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[12].difficulty"
           }
         ]
       }
@@ -10013,64 +10117,12 @@
         "floors": [],
         "violations": [
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[0].giftIds"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[2].difficulty"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[3]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[4]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[5]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[6]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[7]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[8]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[9]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[10]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[11]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[12]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[13]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[14]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].giftIds"
           }
         ]
       }
@@ -10228,7 +10280,44 @@
             "giftIds": []
           }
         ],
-        "violations": []
+        "violations": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[10].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[11].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[12].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[14].difficulty"
+          }
+        ]
       }
     },
     {
@@ -10310,36 +10399,32 @@
         "floors": [],
         "violations": [
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[0]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[1]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].themePackId"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[1].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[1].giftIds"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[3].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
           },
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[4]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].themePackId"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[4].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[10].giftIds"
           }
         ]
       }
@@ -10382,8 +10467,16 @@
         "floors": [],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].themePackId"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[2].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].themePackId"
           }
         ]
       }
@@ -10447,6 +10540,26 @@
         "ok": false,
         "floors": [],
         "violations": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].giftIds"
+          },
           {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[8]"
@@ -10539,7 +10652,12 @@
             ]
           }
         ],
-        "violations": []
+        "violations": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].difficulty"
+          }
+        ]
       }
     },
     {
@@ -10647,8 +10765,48 @@
         "floors": [],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[1]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[10].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[13].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[15].giftIds"
           }
         ]
       }
@@ -10684,7 +10842,16 @@
             ]
           }
         ],
-        "violations": []
+        "violations": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
+          }
+        ]
       }
     },
     {
@@ -10790,76 +10957,40 @@
         "floors": [],
         "violations": [
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[0].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[1]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].themePackId"
           },
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[1].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[1].giftIds"
-          },
-          {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[2]"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[2].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
           },
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[3]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].themePackId"
           },
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[3].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].giftIds"
           },
           {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[4]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].giftIds"
           },
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[4].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].giftIds"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[5].difficulty"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[6].difficulty"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[7].difficulty"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[8].difficulty"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[8].themePackId"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[9].difficulty"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[9].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].giftIds"
           }
         ]
       }
@@ -11043,6 +11174,42 @@
           {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[1].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].themePackId"
+          },
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[6].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[10].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[11].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[12].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[12].themePackId"
           }
         ]
       }
@@ -11183,6 +11350,22 @@
           }
         ],
         "violations": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].themePackId"
+          },
           {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[6].giftIds"
@@ -11408,8 +11591,20 @@
         "floors": [],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].difficulty"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[0].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].giftIds"
           }
         ]
       }
@@ -11468,24 +11663,28 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[1].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].difficulty"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[4].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
           },
           {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[6]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].difficulty"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[6].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].giftIds"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[6].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].themePackId"
           }
         ]
       }
@@ -11550,7 +11749,20 @@
             "giftIds": []
           }
         ],
-        "violations": []
+        "violations": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
+          }
+        ]
       }
     },
     {
@@ -11627,6 +11839,10 @@
           {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[0].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
           }
         ]
       }
@@ -11717,40 +11933,28 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[1].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].themePackId"
           },
           {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[2]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[2].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].themePackId"
           },
           {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[5]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].difficulty"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[5].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].giftIds"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[6].themePackId"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[7].themePackId"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[8].giftIds"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[9].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].difficulty"
           }
         ]
       }
@@ -11838,24 +12042,44 @@
         "floors": [],
         "violations": [
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[0].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[1].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].themePackId"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[2].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].giftIds"
           },
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[3]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].themePackId"
           },
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[4]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].difficulty"
+          },
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[5].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[10].giftIds"
+          },
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[10].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[11].giftIds"
           }
         ]
       }
@@ -11889,28 +12113,8 @@
         "floors": [],
         "violations": [
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[0].difficulty"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[1].difficulty"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[1].themePackId"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[2].difficulty"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[3]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[4]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
           }
         ]
       }
@@ -12028,8 +12232,24 @@
         "floors": [],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].giftIds"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[6].giftIds[1]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[11].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[12].themePackId"
           }
         ]
       }
@@ -12048,24 +12268,8 @@
         "floors": [],
         "violations": [
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[0].difficulty"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[1]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[2]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[3]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[4]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
           }
         ]
       }
@@ -12127,24 +12331,24 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[3].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[4].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[6].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[6].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].giftIds"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[7].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].giftIds"
           }
         ]
       }
@@ -12239,6 +12443,10 @@
         ],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[3].giftIds"
           }
@@ -12332,7 +12540,20 @@
             ]
           }
         ],
-        "violations": []
+        "violations": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].giftIds"
+          }
+        ]
       }
     },
     {
@@ -12375,7 +12596,20 @@
             ]
           }
         ],
-        "violations": []
+        "violations": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].difficulty"
+          }
+        ]
       }
     },
     {
@@ -12489,24 +12723,36 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[0].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].difficulty"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[1].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].themePackId"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[2].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].difficulty"
           },
           {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[3]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].giftIds"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[4].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].themePackId"
+          },
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[13]"
           }
         ]
       }
@@ -12621,36 +12867,48 @@
         "floors": [],
         "violations": [
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[0].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[1].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].giftIds"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[1].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].difficulty"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[2].giftIds"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[6].giftIds[1]"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[2].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].difficulty"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[4].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].difficulty"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[4].giftIds"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[9]"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[4].themePackId"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[10]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[11].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[11].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[15].themePackId"
           }
         ]
       }
@@ -12794,7 +13052,48 @@
             "giftIds": []
           }
         ],
-        "violations": []
+        "violations": [
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[1].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[10].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[10].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[10].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[11].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[14].giftIds"
+          }
+        ]
       }
     },
     {
@@ -12840,64 +13139,24 @@
         "floors": [],
         "violations": [
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[1].difficulty"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[3].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
           },
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[5]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].giftIds"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[5].difficulty"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[6]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[7]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[8]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[9]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[10]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[11]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[12]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[13]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[14]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].themePackId"
           }
         ]
       }
@@ -12929,7 +13188,16 @@
             "giftIds": []
           }
         ],
-        "violations": []
+        "violations": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
+          }
+        ]
       }
     },
     {
@@ -12969,8 +13237,8 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[1].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].themePackId"
           }
         ]
       }
@@ -13060,28 +13328,12 @@
         "floors": [],
         "violations": [
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[0].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[1].difficulty"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[2].themePackId"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[3].themePackId"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[4].difficulty"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[4].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].giftIds"
           }
         ]
       }
@@ -13205,64 +13457,24 @@
         "floors": [],
         "violations": [
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[0].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[0].giftIds"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[1].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[1].giftIds"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[2].themePackId"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[3].difficulty"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[3].themePackId"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[4].difficulty"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[4].giftIds"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[5].difficulty"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[7].difficulty"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[7].themePackId"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[8]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[9]"
           }
         ]
       }
@@ -13306,12 +13518,8 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[2].themePackId"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[3].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
           }
         ]
       }
@@ -13376,8 +13584,20 @@
         "floors": [],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].themePackId"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[6].giftIds[0]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].themePackId"
           }
         ]
       }
@@ -13410,12 +13630,12 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[0].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].themePackId"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[1].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].themePackId"
           }
         ]
       }
@@ -13540,92 +13760,48 @@
         "floors": [],
         "violations": [
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[0].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[0].giftIds"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[2].themePackId"
           },
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[1].difficulty"
-          },
-          {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[2]"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[2].difficulty"
-          },
-          {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[3]"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[3].difficulty"
           },
           {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[4]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
           },
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[4].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].themePackId"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[4].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].themePackId"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[5].difficulty"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[8].themePackId"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[5].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].giftIds"
           },
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[6]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[12].difficulty"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[6].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[14].difficulty"
           },
           {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[7]"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[7].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[7].giftIds"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[7].themePackId"
-          },
-          {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[8]"
-          },
-          {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[9]"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[9].difficulty"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[9].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[14].themePackId"
           }
         ]
       }
@@ -13790,7 +13966,44 @@
             ]
           }
         ],
-        "violations": []
+        "violations": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].themePackId"
+          },
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[11].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[12].difficulty"
+          },
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[15].giftIds"
+          }
+        ]
       }
     },
     {
@@ -13854,88 +14067,36 @@
         "floors": [],
         "violations": [
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[1].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[2]"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[2].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].themePackId"
           },
           {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[3]"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[3].giftIds"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[4].difficulty"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[5].difficulty"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[5].themePackId"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[6].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[6].giftIds"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[7].difficulty"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[7].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].giftIds"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[8].difficulty"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[8].themePackId"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[9]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[10]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[11]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[12]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[13]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[14]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].giftIds"
           }
         ]
       }
@@ -14012,8 +14173,32 @@
         "floors": [],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].themePackId"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[1].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].difficulty"
           }
         ]
       }
@@ -14175,7 +14360,40 @@
             "giftIds": []
           }
         ],
-        "violations": []
+        "violations": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[10].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[10].giftIds"
+          }
+        ]
       }
     },
     {
@@ -14239,6 +14457,22 @@
           {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[1].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].themePackId"
           }
         ]
       }
@@ -14268,12 +14502,28 @@
         "floors": [],
         "violations": [
           {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[1]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[2].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
+          },
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[0].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
           }
         ]
       }
@@ -14314,8 +14564,8 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[0].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
           }
         ]
       }
@@ -14512,7 +14762,24 @@
             "giftIds": []
           }
         ],
-        "violations": []
+        "violations": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].giftIds"
+          }
+        ]
       }
     },
     {
@@ -14626,20 +14893,36 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[1].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[1].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[2].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].difficulty"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[4].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[12].giftIds"
+          },
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[14].themePackId"
           }
         ]
       }
@@ -14794,7 +15077,28 @@
             "giftIds": []
           }
         ],
-        "violations": []
+        "violations": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].themePackId"
+          }
+        ]
       }
     },
     {
@@ -14830,8 +15134,8 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[0].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].difficulty"
           }
         ]
       }
@@ -14857,26 +15161,14 @@
       "category": "15F",
       "stage": "draft",
       "outcome": {
-        "ok": true,
-        "floors": [
+        "ok": false,
+        "floors": [],
+        "violations": [
           {
-            "themePackId": "1005",
-            "difficulty": null,
-            "giftIds": [
-              "9001",
-              "9003"
-            ]
-          },
-          {
-            "themePackId": "1004",
-            "difficulty": 3,
-            "giftIds": [
-              "9003",
-              "9002"
-            ]
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].difficulty"
           }
-        ],
-        "violations": []
+        ]
       }
     },
     {
@@ -14990,24 +15282,40 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[0].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[2].difficulty"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[6].giftIds"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[3].difficulty"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[8].giftIds[1]"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[3].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].difficulty"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[4].giftIds"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[9].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[10].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[11].difficulty"
+          },
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[12].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[12].giftIds"
           }
         ]
       }
@@ -15064,8 +15372,20 @@
         "floors": [],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].themePackId"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[3].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].themePackId"
           }
         ]
       }
@@ -15185,7 +15505,20 @@
             ]
           }
         ],
-        "violations": []
+        "violations": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].difficulty"
+          }
+        ]
       }
     },
     {
@@ -15262,40 +15595,36 @@
         "floors": [],
         "violations": [
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[0]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].themePackId"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[0].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].themePackId"
           },
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[1]"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[1].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[1].giftIds"
-          },
-          {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[2]"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[3].difficulty"
-          },
-          {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[4]"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[4].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].giftIds"
           }
         ]
       }
@@ -15380,44 +15709,36 @@
         "floors": [],
         "violations": [
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[0]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[0].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].themePackId"
           },
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[1]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[1].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].themePackId"
           },
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[2]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].themePackId"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[2].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
           },
           {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[3]"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[5].themePackId"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[4].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[4].giftIds"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[4].themePackId"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[10].giftIds[1]"
           }
         ]
       }
@@ -15527,8 +15848,52 @@
         "floors": [],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].difficulty"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[0].giftIds[0]"
+          },
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[2].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].themePackId"
+          },
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[7]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[11].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[12].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[12].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[14].giftIds"
           }
         ]
       }
@@ -15616,8 +15981,32 @@
         "floors": [],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].giftIds"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[2].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].themePackId"
           }
         ]
       }
@@ -15699,84 +16088,28 @@
         "floors": [],
         "violations": [
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[0].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[1].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].giftIds"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[1].giftIds"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[2].themePackId"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[3].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[3].giftIds"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[5].difficulty"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[6].difficulty"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[6].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].giftIds"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[7].difficulty"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[7].giftIds"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[7].themePackId"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[8].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[8].giftIds"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[9]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[10]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[11]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[12]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[13]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[14]"
           }
         ]
       }
@@ -15826,8 +16159,40 @@
         "floors": [],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].difficulty"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[2].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].giftIds"
           }
         ]
       }
@@ -15892,40 +16257,12 @@
         "floors": [],
         "violations": [
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[0].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].giftIds"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[0].giftIds"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[1].giftIds"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[2].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[2].giftIds"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[2].themePackId"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY",
-            "path": "floorSelections[3].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[3].giftIds"
-          },
-          {
-            "code": "OUT_OF_ORDER_DIFFICULTY",
-            "path": "floorSelections[4].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[5].themePackId"
           }
         ]
       }
@@ -16039,104 +16376,32 @@
         "floors": [],
         "violations": [
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[1]"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[1].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].themePackId"
           },
           {
-            "code": "OUT_OF_ORDER_THEMEPACK",
-            "path": "floorSelections[2]"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[2].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[2].giftIds"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[3].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[3].giftIds"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[4].themePackId"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[6].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[6].giftIds"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[6].themePackId"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[7].difficulty"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
-            "path": "floorSelections[8].difficulty"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].giftIds"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[8].themePackId"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[9].giftIds"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[9].themePackId"
-          },
-          {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[10].difficulty"
           },
           {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[11].themePackId"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[11].giftIds"
           },
           {
-            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[12].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[12].giftIds"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[12].themePackId"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[13].giftIds"
-          },
-          {
-            "code": "DUPLICATE_THEMEPACK",
-            "path": "floorSelections[13].themePackId"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[14]"
           }
         ]
       }
@@ -16158,7 +16423,16 @@
             "giftIds": []
           }
         ],
-        "violations": []
+        "violations": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].themePackId"
+          }
+        ]
       }
     },
     {
@@ -16303,8 +16577,28 @@
         ],
         "violations": [
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[0].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[4].giftIds"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[5]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[8].themePackId"
           }
         ]
       }
@@ -16399,64 +16693,24 @@
         "floors": [],
         "violations": [
           {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[0].giftIds"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[2]"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
+            "code": "MISSING_REQUIRED_FIELD",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[2].giftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].themePackId"
           },
           {
-            "code": "MISSING_THEMEPACK",
-            "path": "floorSelections[3]"
-          },
-          {
-            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
-            "path": "floorSelections[3].difficulty"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "floorSelections[3].giftIds"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[4]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[5]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[6]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[7]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[8]"
-          },
-          {
-            "code": "INSUFFICIENT_FLOORS",
-            "path": "floorSelections[9]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[3].themePackId"
           }
         ]
       }
@@ -16548,7 +16802,16 @@
             ]
           }
         ],
-        "violations": []
+        "violations": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[1].difficulty"
+          },
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[3].themePackId"
+          }
+        ]
       }
     },
     {
@@ -16619,8 +16882,16 @@
             "path": "floorSelections[0].giftIds[0]"
           },
           {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[2].giftIds"
+          },
+          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[4].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].giftIds"
           }
         ]
       }
@@ -16801,6 +17072,30 @@
           {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[3].giftIds"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[6].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[7].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[9].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[10].difficulty"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[11].themePackId"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "floorSelections[13].giftIds"
           }
         ]
       }

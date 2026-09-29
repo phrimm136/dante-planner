@@ -11,8 +11,8 @@ const missingTitle: PlannerValidationError = {
 }
 
 const missingIdentity: PlannerValidationError = {
-  code: 'MISSING_IDENTITY',
-  path: contentPath(field('equipment'), key('01'), field('identity')),
+  code: 'MISSING_REQUIRED_FIELD',
+  path: contentPath(field('equipment'), key('1'), field('identity')),
 }
 
 describe('decidePublishAction', () => {

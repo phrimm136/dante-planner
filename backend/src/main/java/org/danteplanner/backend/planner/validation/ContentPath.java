@@ -50,6 +50,11 @@ public record ContentPath(List<Segment> segments) implements Comparable<ContentP
         return then(new Key(name));
     }
 
+    public boolean within(ContentPath ancestor) {
+        return segments.size() >= ancestor.segments.size()
+                && segments.subList(0, ancestor.segments.size()).equals(ancestor.segments);
+    }
+
     public String render() {
         return IntStream.range(0, segments.size())
                 .mapToObj(position -> rendered(segments.get(position), position == 0))

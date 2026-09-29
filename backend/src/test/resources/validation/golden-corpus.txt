@@ -34,166 +34,171 @@ message: Malformed JSON: root element is not an object
 sub 1: MALFORMED_JSON | Malformed JSON: root element is not an object
 
 ### unknown-field-single
-code: UNKNOWN_FIELD
-message: Unknown fields: [theme]
-sub 1: UNKNOWN_FIELD | Unknown fields: [theme]
+code: VALIDATION_ERROR
+message: [UNKNOWN_FIELD] Field 'theme' is unknown
+sub 1: UNKNOWN_FIELD | Field 'theme' is unknown
 
 ### unknown-fields-multiple
-code: UNKNOWN_FIELD
-message: Unknown fields: [revision, theme]
-sub 1: UNKNOWN_FIELD | Unknown fields: [revision, theme]
+code: VALIDATION_ERROR
+message: [UNKNOWN_FIELD] Field 'revision' is unknown; [UNKNOWN_FIELD] Field 'theme' is unknown
+sub 1: UNKNOWN_FIELD | Field 'revision' is unknown
+sub 2: UNKNOWN_FIELD | Field 'theme' is unknown
 
 ### missing-required-single
-code: MISSING_REQUIRED_FIELD
-message: Missing required fields: [sectionNotes]
-sub 1: MISSING_REQUIRED_FIELD | Missing required fields: [sectionNotes]
+code: VALIDATION_ERROR
+message: [MISSING_REQUIRED_FIELD] Field 'sectionNotes' is missing
+sub 1: MISSING_REQUIRED_FIELD | Field 'sectionNotes' is missing
 
 ### missing-required-multiple
-code: MISSING_REQUIRED_FIELD
-message: Missing required fields: [deploymentOrder, floorSelections, sectionNotes]
-sub 1: MISSING_REQUIRED_FIELD | Missing required fields: [deploymentOrder, floorSelections, sectionNotes]
+code: VALIDATION_ERROR
+message: [MISSING_REQUIRED_FIELD] Field 'deploymentOrder' is missing; [MISSING_REQUIRED_FIELD] Field 'floorSelections' is missing; [MISSING_REQUIRED_FIELD] Field 'sectionNotes' is missing
+sub 1: MISSING_REQUIRED_FIELD | Field 'deploymentOrder' is missing
+sub 2: MISSING_REQUIRED_FIELD | Field 'floorSelections' is missing
+sub 3: MISSING_REQUIRED_FIELD | Field 'sectionNotes' is missing
 
 ### missing-required-hash-colliding-pair
-code: MISSING_REQUIRED_FIELD
-message: Missing required fields: [equipment, selectedKeywords]
-sub 1: MISSING_REQUIRED_FIELD | Missing required fields: [equipment, selectedKeywords]
+code: VALIDATION_ERROR
+message: [MISSING_REQUIRED_FIELD] Field 'equipment' is missing; [MISSING_REQUIRED_FIELD] Field 'selectedKeywords' is missing
+sub 1: MISSING_REQUIRED_FIELD | Field 'equipment' is missing
+sub 2: MISSING_REQUIRED_FIELD | Field 'selectedKeywords' is missing
 
 ### equipment-sinners-missing-hash-colliding-pair
 code: VALIDATION_ERROR
-message: [MISSING_SINNER] Missing required fields: [01, 12]
-sub 1: MISSING_SINNER | Missing required fields: [01, 12]
+message: [MISSING_REQUIRED_FIELD] Field 'equipment[1]' is missing; [MISSING_REQUIRED_FIELD] Field 'equipment[12]' is missing
+sub 1: MISSING_REQUIRED_FIELD | Field 'equipment[1]' is missing
+sub 2: MISSING_REQUIRED_FIELD | Field 'equipment[12]' is missing
 
 ### field-type-selected-keywords
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'selectedKeywords' must be array, got string "none"
-sub 1: INVALID_FIELD_TYPE | Field 'selectedKeywords' must be array, got string "none"
+message: [INVALID_FIELD_TYPE] Field 'selectedKeywords' has an invalid value: string "none"
+sub 1: INVALID_FIELD_TYPE | Field 'selectedKeywords' has an invalid value: string "none"
 
 ### field-type-deployment-order
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'deploymentOrder' must be array, got string "none"
-sub 1: INVALID_FIELD_TYPE | Field 'deploymentOrder' must be array, got string "none"
+message: [INVALID_FIELD_TYPE] Field 'deploymentOrder' has an invalid value: string "none"
+sub 1: INVALID_FIELD_TYPE | Field 'deploymentOrder' has an invalid value: string "none"
 
 ### field-type-floor-selections
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'floorSelections' must be array, got object
-sub 1: INVALID_FIELD_TYPE | Field 'floorSelections' must be array, got object
+message: [INVALID_FIELD_TYPE] Field 'floorSelections' has an invalid value: object
+sub 1: INVALID_FIELD_TYPE | Field 'floorSelections' has an invalid value: object
 
 ### field-type-equipment
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'equipment' must be object, got array
-sub 1: INVALID_FIELD_TYPE | Field 'equipment' must be object, got array
+message: [INVALID_FIELD_TYPE] Field 'equipment' has an invalid value: array
+sub 1: INVALID_FIELD_TYPE | Field 'equipment' has an invalid value: array
 
 ### field-type-section-notes
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'sectionNotes' must be object, got array
-sub 1: INVALID_FIELD_TYPE | Field 'sectionNotes' must be object, got array
+message: [INVALID_FIELD_TYPE] Field 'sectionNotes' has an invalid value: array
+sub 1: INVALID_FIELD_TYPE | Field 'sectionNotes' has an invalid value: array
 
 ### field-type-selected-buff-ids
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'selectedBuffIds' must be array, got string "none"
-sub 1: INVALID_FIELD_TYPE | Field 'selectedBuffIds' must be array, got string "none"
+message: [INVALID_FIELD_TYPE] Field 'selectedBuffIds' has an invalid value: string "none"
+sub 1: INVALID_FIELD_TYPE | Field 'selectedBuffIds' has an invalid value: string "none"
 
 ### field-type-selected-gift-ids
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'selectedGiftIds' must be array, got string "none"
-sub 1: INVALID_FIELD_TYPE | Field 'selectedGiftIds' must be array, got string "none"
+message: [INVALID_FIELD_TYPE] Field 'selectedGiftIds' has an invalid value: string "none"
+sub 1: INVALID_FIELD_TYPE | Field 'selectedGiftIds' has an invalid value: string "none"
 
 ### field-type-observation-gift-ids
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'observationGiftIds' must be array, got object
-sub 1: INVALID_FIELD_TYPE | Field 'observationGiftIds' must be array, got object
+message: [INVALID_FIELD_TYPE] Field 'observationGiftIds' has an invalid value: object
+sub 1: INVALID_FIELD_TYPE | Field 'observationGiftIds' has an invalid value: object
 
 ### field-type-comprehensive-gift-ids
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'comprehensiveGiftIds' must be array, got number 7
-sub 1: INVALID_FIELD_TYPE | Field 'comprehensiveGiftIds' must be array, got number 7
+message: [INVALID_FIELD_TYPE] Field 'comprehensiveGiftIds' has an invalid value: number 7
+sub 1: INVALID_FIELD_TYPE | Field 'comprehensiveGiftIds' has an invalid value: number 7
 
 ### field-type-skill-ea-state
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'skillEAState' must be object, got array
-sub 1: INVALID_FIELD_TYPE | Field 'skillEAState' must be object, got array
+message: [INVALID_FIELD_TYPE] Field 'skillEAState' has an invalid value: array
+sub 1: INVALID_FIELD_TYPE | Field 'skillEAState' has an invalid value: array
 
 ### field-type-selected-gift-keyword
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'selectedGiftKeyword' must be string or null, got number 123
-sub 1: INVALID_FIELD_TYPE | Field 'selectedGiftKeyword' must be string or null, got number 123
+message: [INVALID_FIELD_TYPE] Field 'selectedGiftKeyword' has an invalid value: number 123
+sub 1: INVALID_FIELD_TYPE | Field 'selectedGiftKeyword' has an invalid value: number 123
 
 ### field-type-described-as-boolean
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'selectedKeywords' must be array, got boolean true
-sub 1: INVALID_FIELD_TYPE | Field 'selectedKeywords' must be array, got boolean true
+message: [INVALID_FIELD_TYPE] Field 'selectedKeywords' has an invalid value: boolean true
+sub 1: INVALID_FIELD_TYPE | Field 'selectedKeywords' has an invalid value: boolean true
 
 ### field-type-described-as-null
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'skillEAState' must be object, got null
-sub 1: INVALID_FIELD_TYPE | Field 'skillEAState' must be object, got null
+message: [INVALID_FIELD_TYPE] Field 'skillEAState' has an invalid value: null
+sub 1: INVALID_FIELD_TYPE | Field 'skillEAState' has an invalid value: null
 
 ### field-type-described-as-long-string
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'selectedKeywords' must be array, got string "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy…"
-sub 1: INVALID_FIELD_TYPE | Field 'selectedKeywords' must be array, got string "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy…"
+message: [INVALID_FIELD_TYPE] Field 'selectedKeywords' has an invalid value: string "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy…"
+sub 1: INVALID_FIELD_TYPE | Field 'selectedKeywords' has an invalid value: string "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy…"
 
 ### note-size-exceeded
 code: SIZE_EXCEEDED
-message: Note 'floor-1' size 1111 exceeds limit 1024
-sub 1: SIZE_EXCEEDED | Note 'floor-1' size 1111 exceeds limit 1024
+message: Note 'floor-1' size 1114 exceeds limit 1024
+sub 1: SIZE_EXCEEDED | Note 'floor-1' size 1114 exceeds limit 1024
 
 ### equipment-key-non-numeric
 code: VALIDATION_ERROR
-message: [MISSING_SINNER] Missing required fields: [05]; [INVALID_FIELD_TYPE] Field 'equipment key 'yi_sang'' has wrong type, expected integer
-sub 1: MISSING_SINNER | Missing required fields: [05]
-sub 2: INVALID_FIELD_TYPE | Field 'equipment key 'yi_sang'' has wrong type, expected integer
+message: [MISSING_REQUIRED_FIELD] Field 'equipment[5]' is missing; [UNKNOWN_FIELD] Field 'equipment[yi_sang]' is unknown
+sub 1: MISSING_REQUIRED_FIELD | Field 'equipment[5]' is missing
+sub 2: UNKNOWN_FIELD | Field 'equipment[yi_sang]' is unknown
 
 ### equipment-key-out-of-range
 code: VALIDATION_ERROR
-message: [MISSING_SINNER] Missing required fields: [05]; [OUT_OF_RANGE_SINNER] equipment key value 13 is out of range [1-12]
-sub 1: MISSING_SINNER | Missing required fields: [05]
-sub 2: OUT_OF_RANGE_SINNER | equipment key value 13 is out of range [1-12]
+message: [UNKNOWN_FIELD] Field 'equipment[13]' is unknown; [MISSING_REQUIRED_FIELD] Field 'equipment[5]' is missing
+sub 1: UNKNOWN_FIELD | Field 'equipment[13]' is unknown
+sub 2: MISSING_REQUIRED_FIELD | Field 'equipment[5]' is missing
 
 ### equipment-sinner-missing
 code: VALIDATION_ERROR
-message: [MISSING_SINNER] Missing required fields: [05]
-sub 1: MISSING_SINNER | Missing required fields: [05]
+message: [MISSING_REQUIRED_FIELD] Field 'equipment[5]' is missing
+sub 1: MISSING_REQUIRED_FIELD | Field 'equipment[5]' is missing
 
 ### equipment-sinner-not-object
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'equipment[05]' has wrong type, expected object
-sub 1: INVALID_FIELD_TYPE | Field 'equipment[05]' has wrong type, expected object
+message: [INVALID_FIELD_TYPE] Field 'equipment[5]' has an invalid value: array
+sub 1: INVALID_FIELD_TYPE | Field 'equipment[5]' has an invalid value: array
 
 ### equipment-identity-missing
 code: VALIDATION_ERROR
-message: [MISSING_IDENTITY] Field 'equipment[05].identity' is missing
-sub 1: MISSING_IDENTITY | Field 'equipment[05].identity' is missing
+message: [MISSING_REQUIRED_FIELD] Field 'equipment[5].identity' is missing
+sub 1: MISSING_REQUIRED_FIELD | Field 'equipment[5].identity' is missing
 
 ### equipment-identity-id-blank
 code: VALIDATION_ERROR
-message: [MISSING_IDENTITY] Field 'equipment[05].identity.id' is missing
-sub 1: MISSING_IDENTITY | Field 'equipment[05].identity.id' is missing
+message: [INVALID_FIELD_TYPE] Field 'equipment[5].identity.id' has an invalid value: string "  "
+sub 1: INVALID_FIELD_TYPE | Field 'equipment[5].identity.id' has an invalid value: string "  "
 
 ### equipment-egos-missing
 code: VALIDATION_ERROR
-message: [MISSING_EGO_ZAYIN] Field 'equipment[05].egos' is missing
-sub 1: MISSING_EGO_ZAYIN | Field 'equipment[05].egos' is missing
+message: [MISSING_REQUIRED_FIELD] Field 'equipment[5].egos' is missing
+sub 1: MISSING_REQUIRED_FIELD | Field 'equipment[5].egos' is missing
 
 ### equipment-ego-type-unknown
 code: VALIDATION_ERROR
-message: [INVALID_EGO_TYPE] Field 'equipment[05].egos.KETHER' has wrong type, expected valid EGO type (ZAYIN/TETH/HE/WAW/ALEPH)
-sub 1: INVALID_EGO_TYPE | Field 'equipment[05].egos.KETHER' has wrong type, expected valid EGO type (ZAYIN/TETH/HE/WAW/ALEPH)
+message: [UNKNOWN_FIELD] Field 'equipment[5].egos.KETHER' is unknown
+sub 1: UNKNOWN_FIELD | Field 'equipment[5].egos.KETHER' is unknown
 
 ### equipment-zayin-missing
 code: VALIDATION_ERROR
-message: [MISSING_EGO_ZAYIN] Missing required fields: [equipment[05].egos.ZAYIN]
-sub 1: MISSING_EGO_ZAYIN | Missing required fields: [equipment[05].egos.ZAYIN]
+message: [MISSING_REQUIRED_FIELD] Field 'equipment[5].egos.ZAYIN' is missing
+sub 1: MISSING_REQUIRED_FIELD | Field 'equipment[5].egos.ZAYIN' is missing
 
 ### equipment-zayin-id-blank
 code: VALIDATION_ERROR
-message: [MISSING_EGO_ZAYIN] Field 'equipment[05].egos.ZAYIN.id' is missing
-sub 1: MISSING_EGO_ZAYIN | Field 'equipment[05].egos.ZAYIN.id' is missing
+message: [INVALID_FIELD_TYPE] Field 'equipment[5].egos.ZAYIN.id' has an invalid value: string ""
+sub 1: INVALID_FIELD_TYPE | Field 'equipment[5].egos.ZAYIN.id' has an invalid value: string ""
 
 ### deployment-order-non-number
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'deploymentOrder[1]' must be number, got string "abc"
-sub 1: INVALID_FIELD_TYPE | Field 'deploymentOrder[1]' must be number, got string "abc"
+message: [INVALID_FIELD_TYPE] Field 'deploymentOrder[1]' has an invalid value: string "abc"
+sub 1: INVALID_FIELD_TYPE | Field 'deploymentOrder[1]' has an invalid value: string "abc"
 
 ### deployment-order-out-of-range
 code: VALIDATION_ERROR
@@ -203,29 +208,29 @@ sub 2: OUT_OF_RANGE_DEPLOYMENT | deploymentOrder[1] value 12 is out of range [0-
 
 ### skill-state-slot-key-unknown
 code: VALIDATION_ERROR
-message: [OUT_OF_RANGE_SKILL_TOTAL] skillEAState[05] total value 5 is out of range [6-6]; [INVALID_SKILL_SLOT] Field 'skillEAState[05] slot '3'' has wrong type, expected 0, 1, or 2
-sub 1: OUT_OF_RANGE_SKILL_TOTAL | skillEAState[05] total value 5 is out of range [6-6]
-sub 2: INVALID_SKILL_SLOT | Field 'skillEAState[05] slot '3'' has wrong type, expected 0, 1, or 2
+message: [MISSING_REQUIRED_FIELD] Field 'skillEAState[5][2]' is missing; [UNKNOWN_FIELD] Field 'skillEAState[5][3]' is unknown
+sub 1: MISSING_REQUIRED_FIELD | Field 'skillEAState[5][2]' is missing
+sub 2: UNKNOWN_FIELD | Field 'skillEAState[5][3]' is unknown
 
 ### skill-state-slot-not-number
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'skillEAState[05][0]' must be number, got string "3"
-sub 1: INVALID_FIELD_TYPE | Field 'skillEAState[05][0]' must be number, got string "3"
+message: [INVALID_FIELD_TYPE] Field 'skillEAState[5][0]' has an invalid value: string "3"
+sub 1: INVALID_FIELD_TYPE | Field 'skillEAState[5][0]' has an invalid value: string "3"
 
 ### skill-state-total-wrong
 code: VALIDATION_ERROR
-message: [OUT_OF_RANGE_SKILL_TOTAL] skillEAState[05] total value 4 is out of range [6-6]
-sub 1: OUT_OF_RANGE_SKILL_TOTAL | skillEAState[05] total value 4 is out of range [6-6]
+message: [OUT_OF_RANGE_SKILL_TOTAL] skillEAState[5] total value 4 is out of range [6-6]
+sub 1: OUT_OF_RANGE_SKILL_TOTAL | skillEAState[5] total value 4 is out of range [6-6]
 
 ### skill-state-sinner-missing
 code: VALIDATION_ERROR
-message: [MISSING_SINNER] Missing required fields: [05]
-sub 1: MISSING_SINNER | Missing required fields: [05]
+message: [MISSING_REQUIRED_FIELD] Field 'skillEAState[5]' is missing
+sub 1: MISSING_REQUIRED_FIELD | Field 'skillEAState[5]' is missing
 
 ### skill-state-sinner-not-object
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'skillEAState[05]' has wrong type, expected object
-sub 1: INVALID_FIELD_TYPE | Field 'skillEAState[05]' has wrong type, expected object
+message: [INVALID_FIELD_TYPE] Field 'skillEAState[5]' has an invalid value: number 5
+sub 1: INVALID_FIELD_TYPE | Field 'skillEAState[5]' has an invalid value: number 5
 
 ### identity-id-unknown
 code: VALIDATION_ERROR
@@ -234,8 +239,8 @@ sub 1: UNKNOWN_IDENTITY | identity ID '10599' not found or invalid
 
 ### identity-sinner-mismatch
 code: VALIDATION_ERROR
-message: [MISMATCHED_IDENTITY] identity '10601' does not belong to sinner 05
-sub 1: MISMATCHED_IDENTITY | identity '10601' does not belong to sinner 05
+message: [MISMATCHED_IDENTITY] identity '10601' does not belong to sinner 5
+sub 1: MISMATCHED_IDENTITY | identity '10601' does not belong to sinner 5
 
 ### identity-level-out-of-range
 code: VALIDATION_ERROR
@@ -249,28 +254,28 @@ sub 1: OUT_OF_RANGE_IDENTITY_UPTIE | uptie value 9 is out of range [1-4]
 
 ### identity-level-string-rejected
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'equipment[05].identity.level' must be number, got string "45"
-sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].identity.level' must be number, got string "45"
+message: [INVALID_FIELD_TYPE] Field 'equipment[5].identity.level' has an invalid value: string "45"
+sub 1: INVALID_FIELD_TYPE | Field 'equipment[5].identity.level' has an invalid value: string "45"
 
 ### identity-level-null-rejected
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'equipment[05].identity.level' must be number, got null
-sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].identity.level' must be number, got null
+message: [INVALID_FIELD_TYPE] Field 'equipment[5].identity.level' has an invalid value: null
+sub 1: INVALID_FIELD_TYPE | Field 'equipment[5].identity.level' has an invalid value: null
 
 ### identity-uptie-string-rejected
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'equipment[05].identity.uptie' must be number, got string "4"
-sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].identity.uptie' must be number, got string "4"
+message: [INVALID_FIELD_TYPE] Field 'equipment[5].identity.uptie' has an invalid value: string "4"
+sub 1: INVALID_FIELD_TYPE | Field 'equipment[5].identity.uptie' has an invalid value: string "4"
 
 ### ego-id-not-string
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'equipment[05].egos.ZAYIN.id' must be string, got number 20501
-sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].egos.ZAYIN.id' must be string, got number 20501
+message: [INVALID_FIELD_TYPE] Field 'equipment[5].egos.ZAYIN.id' has an invalid value: number 20501
+sub 1: INVALID_FIELD_TYPE | Field 'equipment[5].egos.ZAYIN.id' has an invalid value: number 20501
 
 ### ego-id-null
 code: VALIDATION_ERROR
-message: [MISSING_EGO_ZAYIN] Field 'equipment[05].egos.ZAYIN.id' is missing
-sub 1: MISSING_EGO_ZAYIN | Field 'equipment[05].egos.ZAYIN.id' is missing
+message: [INVALID_FIELD_TYPE] Field 'equipment[5].egos.ZAYIN.id' has an invalid value: null
+sub 1: INVALID_FIELD_TYPE | Field 'equipment[5].egos.ZAYIN.id' has an invalid value: null
 
 ### ego-id-unknown
 code: VALIDATION_ERROR
@@ -279,8 +284,8 @@ sub 1: UNKNOWN_EGO | EGO ID '20599' not found or invalid
 
 ### ego-sinner-mismatch
 code: VALIDATION_ERROR
-message: [MISMATCHED_EGO] EGO '20601' does not belong to sinner 05
-sub 1: MISMATCHED_EGO | EGO '20601' does not belong to sinner 05
+message: [MISMATCHED_EGO] EGO '20601' does not belong to sinner 5
+sub 1: MISMATCHED_EGO | EGO '20601' does not belong to sinner 5
 
 ### ego-threadspin-out-of-range
 code: VALIDATION_ERROR
@@ -289,8 +294,8 @@ sub 1: OUT_OF_RANGE_EGO_THREADSPIN | threadspin value 9 is out of range [1-5]
 
 ### threadspin-string-rejected
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'equipment[05].egos.ZAYIN.threadspin' must be number, got string "4"
-sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].egos.ZAYIN.threadspin' must be number, got string "4"
+message: [INVALID_FIELD_TYPE] Field 'equipment[5].egos.ZAYIN.threadspin' has an invalid value: string "4"
+sub 1: INVALID_FIELD_TYPE | Field 'equipment[5].egos.ZAYIN.threadspin' has an invalid value: string "4"
 
 ### ego-threadspin-above-ego-ceiling
 code: VALIDATION_ERROR
@@ -304,9 +309,10 @@ sub 1: MISSING_EGO_THREADSPIN_CEILING | EGO '20502' has no threadspin ceiling in
 
 ### scenario-mixed-type-gift-array
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'selectedGiftIds[1]' must be string, got number 42; [DUPLICATE_STARTGIFT] Duplicate value 'gift_a' in selectedGiftIds
-sub 1: INVALID_FIELD_TYPE | Field 'selectedGiftIds[1]' must be string, got number 42
-sub 2: DUPLICATE_STARTGIFT | Duplicate value 'gift_a' in selectedGiftIds
+message: [INVALID_FIELD_TYPE] Field 'selectedGiftIds[0]' has an invalid value: string "gift_a"; [INVALID_FIELD_TYPE] Field 'selectedGiftIds[1]' has an invalid value: number 42; [INVALID_FIELD_TYPE] Field 'selectedGiftIds[2]' has an invalid value: string "gift_a"
+sub 1: INVALID_FIELD_TYPE | Field 'selectedGiftIds[0]' has an invalid value: string "gift_a"
+sub 2: INVALID_FIELD_TYPE | Field 'selectedGiftIds[1]' has an invalid value: number 42
+sub 3: INVALID_FIELD_TYPE | Field 'selectedGiftIds[2]' has an invalid value: string "gift_a"
 
 ### selected-gift-id-unknown
 code: VALIDATION_ERROR
@@ -320,8 +326,8 @@ sub 1: DUPLICATE_EGOGIFT | Duplicate value '9002' in observationGiftIds
 
 ### observation-gift-not-string
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'observationGiftIds[0]' must be string, got number 9002
-sub 1: INVALID_FIELD_TYPE | Field 'observationGiftIds[0]' must be string, got number 9002
+message: [INVALID_FIELD_TYPE] Field 'observationGiftIds[0]' has an invalid value: number 9002
+sub 1: INVALID_FIELD_TYPE | Field 'observationGiftIds[0]' has an invalid value: number 9002
 
 ### comprehensive-gift-unknown
 code: VALIDATION_ERROR
@@ -336,18 +342,20 @@ code: VALIDATION_ERROR
 message: [UNKNOWN_THEMEPACK] floorSelections[0].themePackId ID '9999' not found or invalid
 sub 1: UNKNOWN_THEMEPACK | floorSelections[0].themePackId ID '9999' not found or invalid
 
-### floor-theme-pack-empty-accepted-as-draft
-accepted
+### floor-theme-pack-empty-rejected-as-draft
+code: VALIDATION_ERROR
+message: [INVALID_FIELD_TYPE] Field 'floorSelections[0].themePackId' has an invalid value: string ""
+sub 1: INVALID_FIELD_TYPE | Field 'floorSelections[0].themePackId' has an invalid value: string ""
 
 ### floor-theme-pack-empty-rejected-on-publish
 code: VALIDATION_ERROR
-message: [MISSING_THEMEPACK] floorSelections[4] must have a theme pack selected
-sub 1: MISSING_THEMEPACK | floorSelections[4] must have a theme pack selected
+message: [INVALID_FIELD_TYPE] Field 'floorSelections[4].themePackId' has an invalid value: string ""
+sub 1: INVALID_FIELD_TYPE | Field 'floorSelections[4].themePackId' has an invalid value: string ""
 
 ### floor-theme-pack-absent-rejected-on-publish
 code: VALIDATION_ERROR
-message: [MISSING_THEMEPACK] floorSelections[4] must have a theme pack selected
-sub 1: MISSING_THEMEPACK | floorSelections[4] must have a theme pack selected
+message: [MISSING_REQUIRED_FIELD] Field 'floorSelections[4].themePackId' is missing
+sub 1: MISSING_REQUIRED_FIELD | Field 'floorSelections[4].themePackId' is missing
 
 ### floor-difficulty-out-of-range
 code: VALIDATION_ERROR
@@ -356,8 +364,8 @@ sub 1: OUT_OF_RANGE_DIFFICULTY | floorSelections[0].difficulty value 5 is out of
 
 ### floor-difficulty-absent
 code: VALIDATION_ERROR
-message: [OUT_OF_RANGE_DIFFICULTY] floorSelections[0].difficulty is absent; expected a value in range [0-1]
-sub 1: OUT_OF_RANGE_DIFFICULTY | floorSelections[0].difficulty is absent; expected a value in range [0-1]
+message: [MISSING_REQUIRED_FIELD] Field 'floorSelections[0].difficulty' is missing
+sub 1: MISSING_REQUIRED_FIELD | Field 'floorSelections[0].difficulty' is missing
 
 ### floor-difficulty-hard-required-on-10f
 code: VALIDATION_ERROR
@@ -371,8 +379,8 @@ sub 1: OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME | floorSelections[10].difficulty valu
 
 ### floor-sequence-gap
 code: VALIDATION_ERROR
-message: [OUT_OF_ORDER_THEMEPACK] Invalid sequence: floorSelections[1] requires themePackId in floorSelections[0]
-sub 1: OUT_OF_ORDER_THEMEPACK | Invalid sequence: floorSelections[1] requires themePackId in floorSelections[0]
+message: [MISSING_REQUIRED_FIELD] Field 'floorSelections[0].themePackId' is missing
+sub 1: MISSING_REQUIRED_FIELD | Field 'floorSelections[0].themePackId' is missing
 
 ### floor-gift-duplicate
 code: VALIDATION_ERROR
@@ -381,8 +389,8 @@ sub 1: DUPLICATE_EGOGIFT | Duplicate value '9002' in floorSelections[0].giftIds
 
 ### floor-gift-not-string
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'floorSelections[0].giftIds[0]' must be string, got number 9002
-sub 1: INVALID_FIELD_TYPE | Field 'floorSelections[0].giftIds[0]' must be string, got number 9002
+message: [INVALID_FIELD_TYPE] Field 'floorSelections[0].giftIds[0]' has an invalid value: number 9002
+sub 1: INVALID_FIELD_TYPE | Field 'floorSelections[0].giftIds[0]' has an invalid value: number 9002
 
 ### floor-gift-unknown
 code: VALIDATION_ERROR
@@ -410,8 +418,8 @@ sub 10: DUPLICATE_STARTBUFF | Duplicate value '0' in selectedBuffIds base IDs
 
 ### buff-not-number
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'selectedBuffIds[1]' must be number, got string "x"
-sub 1: INVALID_FIELD_TYPE | Field 'selectedBuffIds[1]' must be number, got string "x"
+message: [INVALID_FIELD_TYPE] Field 'selectedBuffIds[1]' has an invalid value: string "x"
+sub 1: INVALID_FIELD_TYPE | Field 'selectedBuffIds[1]' has an invalid value: string "x"
 
 ### buff-id-unknown
 code: VALIDATION_ERROR
@@ -430,8 +438,8 @@ sub 1: DUPLICATE_STARTBUFF | Duplicate value '0' in selectedBuffIds base IDs
 
 ### start-gift-keyword-absent
 code: VALIDATION_ERROR
-message: [MISSING_STARTGIFT_KEYWORD] selectedGiftIds requires a selectedGiftKeyword
-sub 1: MISSING_STARTGIFT_KEYWORD | selectedGiftIds requires a selectedGiftKeyword
+message: [MISSING_REQUIRED_FIELD] Field 'selectedGiftKeyword' is missing
+sub 1: MISSING_REQUIRED_FIELD | Field 'selectedGiftKeyword' is missing
 
 ### start-gift-keyword-null
 code: VALIDATION_ERROR
@@ -455,49 +463,51 @@ sub 1: DUPLICATE_STARTGIFT | Duplicate value '9001' in selectedGiftIds
 
 ### start-gift-not-string
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'selectedGiftIds[0]' must be string, got number 9001
-sub 1: INVALID_FIELD_TYPE | Field 'selectedGiftIds[0]' must be string, got number 9001
+message: [INVALID_FIELD_TYPE] Field 'selectedGiftIds[0]' has an invalid value: number 9001
+sub 1: INVALID_FIELD_TYPE | Field 'selectedGiftIds[0]' has an invalid value: number 9001
 
 ### silence-floor-element-not-object
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'floorSelections[0]' must be object, got number 5
-sub 1: INVALID_FIELD_TYPE | Field 'floorSelections[0]' must be object, got number 5
+message: [INVALID_FIELD_TYPE] Field 'floorSelections[0]' has an invalid value: number 5
+sub 1: INVALID_FIELD_TYPE | Field 'floorSelections[0]' has an invalid value: number 5
 
 ### silence-floor-gift-ids-not-array
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'floorSelections[0].giftIds' must be array, got number 5
-sub 1: INVALID_FIELD_TYPE | Field 'floorSelections[0].giftIds' must be array, got number 5
+message: [INVALID_FIELD_TYPE] Field 'floorSelections[0].giftIds' has an invalid value: number 5
+sub 1: INVALID_FIELD_TYPE | Field 'floorSelections[0].giftIds' has an invalid value: number 5
 
 ### silence-floor-theme-pack-absent-as-draft
-accepted
+code: VALIDATION_ERROR
+message: [MISSING_REQUIRED_FIELD] Field 'floorSelections[0].themePackId' is missing
+sub 1: MISSING_REQUIRED_FIELD | Field 'floorSelections[0].themePackId' is missing
 
 ### silence-floor-previous-element-not-object
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'floorSelections[0]' must be object, got number 5
-sub 1: INVALID_FIELD_TYPE | Field 'floorSelections[0]' must be object, got number 5
+message: [INVALID_FIELD_TYPE] Field 'floorSelections[0]' has an invalid value: number 5
+sub 1: INVALID_FIELD_TYPE | Field 'floorSelections[0]' has an invalid value: number 5
 
 ### silence-floor-beyond-category-count
 accepted
 
 ### silence-identity-not-object
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'equipment[05].identity' has wrong type, expected object
-sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].identity' has wrong type, expected object
+message: [INVALID_FIELD_TYPE] Field 'equipment[5].identity' has an invalid value: number 5
+sub 1: INVALID_FIELD_TYPE | Field 'equipment[5].identity' has an invalid value: number 5
 
 ### silence-identity-id-not-textual
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'equipment[05].identity.id' has wrong type, expected non-empty string
-sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].identity.id' has wrong type, expected non-empty string
+message: [INVALID_FIELD_TYPE] Field 'equipment[5].identity.id' has an invalid value: number 10501
+sub 1: INVALID_FIELD_TYPE | Field 'equipment[5].identity.id' has an invalid value: number 10501
 
 ### silence-egos-not-object
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'equipment[05].egos' has wrong type, expected object
-sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].egos' has wrong type, expected object
+message: [INVALID_FIELD_TYPE] Field 'equipment[5].egos' has an invalid value: number 5
+sub 1: INVALID_FIELD_TYPE | Field 'equipment[5].egos' has an invalid value: number 5
 
 ### silence-ego-value-not-object
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'equipment[05].egos.ZAYIN' must be object, got number 5
-sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].egos.ZAYIN' must be object, got number 5
+message: [INVALID_FIELD_TYPE] Field 'equipment[5].egos.ZAYIN' has an invalid value: number 5
+sub 1: INVALID_FIELD_TYPE | Field 'equipment[5].egos.ZAYIN' has an invalid value: number 5
 
 ### baseline-accepted
 accepted

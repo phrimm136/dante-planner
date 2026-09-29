@@ -5,18 +5,25 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.gamedata.FloorRuleTable;
 import org.danteplanner.backend.planner.gamedata.GameDataLoader;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.math.BigInteger;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.stream.Stream;
 
 final class FloorFixtures {
 
     static final ObjectMapper MAPPER = new ObjectMapper();
     static final FloorRuleTable TABLE =
             new GameDataLoader(MAPPER).loadFloorRules(Path.of("../static/data/plannerFloorRules.json"));
+    static final Path CORPUS_FILE = Path.of("../testdata/planner-floor-rules.corpus.json");
+
+    private static final JsonNode BASE = readCorpus().path("base");
 
     private FloorFixtures() {
     }
@@ -40,6 +47,37 @@ final class FloorFixtures {
 
     static ArrayNode floors(JsonNode... floors) {
         return MAPPER.createArrayNode().addAll(List.of(floors));
+    }
+
+    static ObjectNode content(JsonNode floorSelections) {
+        ObjectNode content = BASE.deepCopy();
+        if (floorSelections.isMissingNode()) {
+            content.remove("floorSelections");
+        } else {
+            content.set("floorSelections", floorSelections);
+        }
+        return content;
+    }
+
+    static FloorBoundary.Parsed parse(JsonNode floorSelections, MDCategory category) {
+        return FloorBoundary.parse(content(floorSelections), TABLE.layout(category));
+    }
+
+    static FloorSelection selection(String themePackId, int difficulty, String... giftIds) {
+        return new FloorSelection(ThemePack.chosen(themePackId), Difficulty.of(difficulty), List.of(giftIds));
+    }
+
+    static FloorBoundary.Parsed accepted(MDCategory category, FloorSelection... floors) {
+        return new FloorBoundary.Parsed(TABLE.layout(category),
+                Stream.of(floors).<ParsedFloor>map(ParsedFloor.Accepted::new).toList(), List.of());
+    }
+
+    static JsonNode readCorpus() {
+        try {
+            return MAPPER.readTree(CORPUS_FILE.toFile());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     static ArrayNode outcomeFloors(List<FloorSelection> floors) {

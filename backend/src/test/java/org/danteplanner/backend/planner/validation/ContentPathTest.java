@@ -50,7 +50,7 @@ class ContentPathTest {
         Set<String> recorded = recordedPaths();
 
         assertThat(recorded).contains("floorSelections", "floorSelections[14]", "floorSelections[0].giftIds[0]",
-                "equipment[05].identity", "equipment[05].egos.ZAYIN.id", "skillEAState[05][0]");
+                "equipment[5].identity", "equipment[5].egos.ZAYIN.id", "skillEAState[5][0]");
         assertThat(recorded).allSatisfy(text -> assertThat(built(text).render()).isEqualTo(text));
     }
 

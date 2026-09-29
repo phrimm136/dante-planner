@@ -1,9 +1,6 @@
 package org.danteplanner.backend.planner.validation.sinner;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import org.danteplanner.backend.planner.validation.ContentPath;
-import org.danteplanner.backend.planner.validation.FieldResult;
-import org.danteplanner.backend.planner.validation.JsonArrays;
 import org.danteplanner.backend.planner.validation.Positions;
 import org.danteplanner.backend.planner.validation.Violation;
 
@@ -24,14 +21,11 @@ public final class DeploymentOrder {
     private DeploymentOrder() {
     }
 
-    public static List<Violation> check(JsonNode deploymentOrder) {
-        FieldResult<List<Optional<Integer>>> positions = JsonArrays.ints(deploymentOrder, DEPLOYMENT_ORDER);
-        List<Optional<Integer>> sinnerIndices = positions.value();
+    public static List<Violation> check(List<Long> sinnerIndices) {
         return Stream.of(
                         sinnerIndices.size() > MAX_DEPLOYED
                                 ? Stream.of(SinnerViolations.tooManyDeployed(DEPLOYMENT_ORDER, sinnerIndices.size()))
                                 : Stream.<Violation>empty(),
-                        positions.violations().stream(),
                         outOfRange(sinnerIndices),
                         repeated(sinnerIndices))
                 .flatMap(violations -> violations)
@@ -39,21 +33,18 @@ public final class DeploymentOrder {
                 .toList();
     }
 
-    private static Stream<Violation> outOfRange(List<Optional<Integer>> sinnerIndices) {
+    private static Stream<Violation> outOfRange(List<Long> sinnerIndices) {
         return IntStream.range(0, sinnerIndices.size())
-                .boxed()
-                .flatMap(position -> sinnerIndices.get(position)
-                        .filter(sinnerIndex -> !inRange(sinnerIndex))
-                        .map(sinnerIndex -> SinnerViolations.deploymentOutOfRange(
-                                DEPLOYMENT_ORDER.index(position), sinnerIndex))
-                        .stream());
+                .filter(position -> !inRange(sinnerIndices.get(position)))
+                .mapToObj(position -> SinnerViolations.deploymentOutOfRange(DEPLOYMENT_ORDER.index(position),
+                        sinnerIndices.get(position)));
     }
 
-    private static Stream<Violation> repeated(List<Optional<Integer>> sinnerIndices) {
-        List<Optional<Integer>> deployed = sinnerIndices.stream()
-                .map(sinnerIndex -> sinnerIndex.filter(DeploymentOrder::inRange))
+    private static Stream<Violation> repeated(List<Long> sinnerIndices) {
+        List<Optional<Long>> deployed = sinnerIndices.stream()
+                .map(sinnerIndex -> Optional.of(sinnerIndex).filter(DeploymentOrder::inRange))
                 .toList();
-        Map<Optional<Integer>, Integer> firstPosition = Positions.firstIndexOf(deployed);
+        Map<Optional<Long>, Integer> firstPosition = Positions.firstIndexOf(deployed);
         return IntStream.range(0, deployed.size())
                 .boxed()
                 .flatMap(position -> deployed.get(position)
@@ -63,7 +54,7 @@ public final class DeploymentOrder {
                         .stream());
     }
 
-    private static boolean inRange(int sinnerIndex) {
+    private static boolean inRange(long sinnerIndex) {
         return sinnerIndex >= FIRST_SINNER_INDEX && sinnerIndex <= LAST_SINNER_INDEX;
     }
 }

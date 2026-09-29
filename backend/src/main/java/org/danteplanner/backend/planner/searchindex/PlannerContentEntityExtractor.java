@@ -45,8 +45,7 @@ public class PlannerContentEntityExtractor {
     }
 
     private List<FloorSelection> admittedFloors(JsonNode root, MDCategory category) {
-        FloorBoundary.Parsed parsed = FloorBoundary.parse(root.path("floorSelections"),
-                gameDataRegistry.floorRules().layout(category));
+        FloorBoundary.Parsed parsed = FloorBoundary.parse(root, gameDataRegistry.floorRules().layout(category));
         return switch (floorRules.admit(parsed, Stage.INDEX)) {
             case Admission.Admitted admitted -> admitted.floors();
             case Admission.Rejected rejected -> throw new IllegalStateException(

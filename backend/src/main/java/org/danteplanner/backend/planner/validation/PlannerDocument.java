@@ -8,10 +8,12 @@ public final class PlannerDocument {
 
     private final String json;
     private final boolean migrated;
+    private final PlannerContent content;
 
-    PlannerDocument(String json, boolean migrated) {
+    PlannerDocument(String json, boolean migrated, PlannerContent content) {
         this.json = json;
         this.migrated = migrated;
+        this.content = content;
     }
 
     public String json() {
@@ -22,7 +24,11 @@ public final class PlannerDocument {
         return migrated;
     }
 
+    public PlannerContent content() {
+        return content;
+    }
+
     public Set<String> keywords() {
-        return PlannerKeywords.fromContent(json).asSet();
+        return PlannerKeywords.fromSelection(content.selectedKeywords()).asSet();
     }
 }

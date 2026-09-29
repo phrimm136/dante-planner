@@ -95,8 +95,14 @@ final class FloorArbitraries {
         return Combinators.combine(rawFloorSelectionsOrGarbage(), category(table), stage()).as(RawCase::new);
     }
 
-    static Arbitrary<JsonNode> pastCountFloor() {
-        return Arbitraries.oneOf(rawFloor(), anyJson());
+    static Arbitrary<JsonNode> wellShapedFloor() {
+        return Combinators.combine(
+                        Arbitraries.frequencyOf(
+                                Tuple.of(9, Arbitraries.of(THEME_PACK_POOL).map(id -> (JsonNode) NODES.textNode(id))),
+                                Tuple.of(1, Arbitraries.just(NODES.nullNode()))),
+                        Arbitraries.integers().between(0, 3).map(difficulty -> (JsonNode) NODES.numberNode(difficulty)),
+                        Arbitraries.of(GIFT_POOL).list().ofMaxSize(MAX_GIFTS).map(FloorArbitraries::textArray))
+                .as(FloorArbitraries::floorOf);
     }
 
     static Arbitrary<JsonNode> anyRaw() {

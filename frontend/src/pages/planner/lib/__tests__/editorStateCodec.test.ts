@@ -352,7 +352,7 @@ describe('floor difficulty defaults follow the category table', () => {
     expect(state.floorSelections[0]?.difficulty).toBe(DUNGEON_IDX.NORMAL)
   })
 
-  // corpus: floor-theme-pack-empty-accepted-as-draft, boundary-gift-ids-absent
+  // corpus: floor-theme-pack-empty-rejected-as-draft, boundary-gift-ids-absent
   it('hydrate reads an empty-string pack as unchosen and absent giftIds as none', () => {
     const content = makeContent({
       floorSelections: [

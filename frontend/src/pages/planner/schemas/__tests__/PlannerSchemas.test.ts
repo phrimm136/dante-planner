@@ -10,7 +10,7 @@ import { describe, it, expect, assert } from 'vitest'
 import { ZodError } from 'zod'
 import {
   MDConfigSchema,
-  MDPlannerContentDraftSchema,
+  MDPlannerContentSchema,
   RRConfigSchema,
   PlannerConfigDiscriminatedSchema,
   SaveablePlannerSchema,
@@ -42,6 +42,38 @@ const validRRConfig = {
   category: 'RR_PLACEHOLDER' as const,
 }
 
+const SINNER_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
+
+function sinnerEquipment(sinnerKey: string, egoTypes: readonly string[] = ['ZAYIN']) {
+  const sinnerIdPart = sinnerKey.padStart(2, '0')
+  return {
+    identity: { id: `1${sinnerIdPart}01`, level: 45, uptie: 4 },
+    egos: Object.fromEntries(
+      egoTypes.map((egoType) => [egoType, { id: `2${sinnerIdPart}01`, threadspin: 4 }]),
+    ),
+  }
+}
+
+function storedShapeContent() {
+  return {
+    selectedKeywords: [] as string[],
+    selectedBuffIds: [] as number[],
+    selectedGiftKeyword: null as string | null,
+    selectedGiftIds: [] as string[],
+    observationGiftIds: [] as string[],
+    comprehensiveGiftIds: [] as string[],
+    equipment: Object.fromEntries(
+      SINNER_KEYS.map((sinnerKey) => [sinnerKey, sinnerEquipment(sinnerKey)]),
+    ) as Record<string, unknown>,
+    deploymentOrder: [] as number[],
+    skillEAState: Object.fromEntries(
+      SINNER_KEYS.map((sinnerKey) => [sinnerKey, { '0': 3, '1': 2, '2': 1 }]),
+    ) as Record<string, unknown>,
+    floorSelections: [] as unknown[],
+    sectionNotes: {} as Record<string, unknown>,
+  }
+}
+
 /**
  * Create a minimal valid SaveablePlanner fixture for testing
  */
@@ -52,22 +84,7 @@ function createValidSaveablePlanner(configType: 'MIRROR_DUNGEON' | 'REFRACTED_RA
       ? { type: 'MIRROR_DUNGEON' as const, category: '5F' as const }
       : { type: 'REFRACTED_RAILWAY' as const, category: 'RR_PLACEHOLDER' as const }
 
-  const content =
-    configType === 'MIRROR_DUNGEON'
-      ? {
-          selectedKeywords: [],
-          selectedBuffIds: [],
-          selectedGiftKeyword: null,
-          selectedGiftIds: [],
-          observationGiftIds: [],
-          comprehensiveGiftIds: [],
-          equipment: {},
-          deploymentOrder: [],
-          skillEAState: {},
-          floorSelections: [],
-          sectionNotes: {},
-        }
-      : {}
+  const content = configType === 'MIRROR_DUNGEON' ? storedShapeContent() : {}
 
   return {
     metadata: {
@@ -222,92 +239,203 @@ describe('PlannerConfigDiscriminatedSchema', () => {
 // validateSaveablePlanner Tests
 // ============================================================================
 
-describe('MDPlannerContentDraftSchema integer fields', () => {
-  function mdContent(overrides: Record<string, unknown>) {
-    return { ...createValidSaveablePlanner('MIRROR_DUNGEON').content, ...overrides }
+describe('MDPlannerContentSchema', () => {
+  function withOverrides(overrides: Record<string, unknown>) {
+    return { ...storedShapeContent(), ...overrides }
   }
 
+  const accepts = (content: unknown) => MDPlannerContentSchema.safeParse(content).success
+
+  describe('stored shape families (prod counts)', () => {
+    it.each([
+      [['ZAYIN']],
+      [['TETH', 'ZAYIN']],
+      [['HE', 'ZAYIN']],
+      [['WAW', 'ZAYIN']],
+      [['HE', 'TETH', 'ZAYIN']],
+      [['HE', 'WAW', 'ZAYIN']],
+      [['WAW', 'TETH', 'ZAYIN']],
+      [['HE', 'WAW', 'TETH', 'ZAYIN']],
+    ])('Given E.G.O slots %j, When parsed, Then no shape violation', (egoTypes) => {
+      const content = storedShapeContent()
+      content.equipment['1'] = sinnerEquipment('1', egoTypes)
+
+      expect(MDPlannerContentSchema.safeParse(content).error?.issues).toBeUndefined()
+    })
+
+    it.each([
+      ['a theme pack id', '1001'],
+      ['a null theme pack', null],
+    ])('Given a floor with %s, When parsed, Then no shape violation', (_label, themePackId) => {
+      const content = withOverrides({
+        floorSelections: [{ themePackId, difficulty: 1, giftIds: ['9001', '19002'] }],
+      })
+
+      expect(MDPlannerContentSchema.safeParse(content).error?.issues).toBeUndefined()
+    })
+
+    it('Given every list and keyword filled, When parsed, Then no shape violation', () => {
+      const content = withOverrides({
+        selectedKeywords: ['Combustion'],
+        selectedBuffIds: [101],
+        selectedGiftKeyword: 'Combustion',
+        selectedGiftIds: ['9001'],
+        observationGiftIds: ['9002'],
+        comprehensiveGiftIds: ['19003'],
+        deploymentOrder: [0, 1, 2],
+        sectionNotes: { floor1: { content: { type: 'doc', content: [] } } },
+      })
+
+      expect(MDPlannerContentSchema.safeParse(content).error?.issues).toBeUndefined()
+    })
+  })
+
   it('accepts integer skillEAState slot values', () => {
-    const content = mdContent({ skillEAState: { '5': { '0': 1, '1': 2, '2': 3 } } })
-    expect(MDPlannerContentDraftSchema.safeParse(content).success).toBe(true)
+    expect(accepts(storedShapeContent())).toBe(true)
   })
 
   it('rejects a fractional skillEAState slot value', () => {
-    const content = mdContent({ skillEAState: { '5': { '0': 1.5, '1': 2, '2': 3 } } })
-    expect(MDPlannerContentDraftSchema.safeParse(content).success).toBe(false)
+    const content = storedShapeContent()
+    content.skillEAState['1'] = { '0': 1.5, '1': 2, '2': 3 }
+    expect(accepts(content)).toBe(false)
   })
 
   it('accepts integer selectedBuffIds', () => {
-    expect(MDPlannerContentDraftSchema.safeParse(mdContent({ selectedBuffIds: [1] })).success).toBe(
-      true,
-    )
+    expect(accepts(withOverrides({ selectedBuffIds: [1] }))).toBe(true)
   })
 
   it('rejects a fractional selectedBuffIds entry', () => {
-    expect(
-      MDPlannerContentDraftSchema.safeParse(mdContent({ selectedBuffIds: [1.5] })).success,
-    ).toBe(false)
+    expect(accepts(withOverrides({ selectedBuffIds: [1.5] }))).toBe(false)
+  })
+
+  it('rejects a padded sinner key beside the canonical one', () => {
+    const content = storedShapeContent()
+    content.equipment['01'] = sinnerEquipment('1')
+    expect(accepts(content)).toBe(false)
+  })
+
+  it('rejects a removed sinner', () => {
+    const content = storedShapeContent()
+    delete content.equipment['12']
+    expect(accepts(content)).toBe(false)
+  })
+
+  it('rejects equipment without a ZAYIN slot', () => {
+    const content = storedShapeContent()
+    content.equipment['1'] = sinnerEquipment('1', ['TETH'])
+    expect(accepts(content)).toBe(false)
+  })
+
+  it('rejects a skill slot outside 0-2', () => {
+    const content = storedShapeContent()
+    content.skillEAState['1'] = { '0': 3, '1': 2, '2': 1, '3': 0 }
+    expect(accepts(content)).toBe(false)
+  })
+
+  it('rejects a blank start gift keyword', () => {
+    expect(accepts(withOverrides({ selectedGiftKeyword: '' }))).toBe(false)
+  })
+
+  it('rejects a whitespace start gift keyword', () => {
+    expect(accepts(withOverrides({ selectedGiftKeyword: '  ' }))).toBe(false)
+  })
+
+  it.each([
+    ['a whitespace identity id', '  '],
+    ['a malformed identity id', 'x'],
+    ['an identity id of another entity kind', '20101'],
+  ])('rejects %s', (_label, identityId) => {
+    const content = storedShapeContent()
+    content.equipment['1'] = {
+      identity: { id: identityId, level: 45, uptie: 4 },
+      egos: { ZAYIN: { id: '20101', threadspin: 4 } },
+    }
+    expect(accepts(content)).toBe(false)
+  })
+
+  it('accepts a well-formed identity id the game data may lack', () => {
+    const content = storedShapeContent()
+    content.equipment['1'] = {
+      identity: { id: '10199', level: 45, uptie: 4 },
+      egos: { ZAYIN: { id: '20199', threadspin: 4 } },
+    }
+    expect(accepts(content)).toBe(true)
+  })
+
+  it('rejects a malformed E.G.O id', () => {
+    const content = storedShapeContent()
+    content.equipment['1'] = {
+      identity: { id: '10101', level: 45, uptie: 4 },
+      egos: { ZAYIN: { id: '  ', threadspin: 4 } },
+    }
+    expect(accepts(content)).toBe(false)
+  })
+
+  it.each([
+    ['a signed theme pack id', '+1001'],
+    ['a blank theme pack id', ''],
+  ])('rejects a floor with %s', (_label, themePackId) => {
+    const floor = { themePackId, difficulty: 0, giftIds: [] }
+    expect(accepts(withOverrides({ floorSelections: [floor] }))).toBe(false)
+  })
+
+  it('rejects a malformed floor past any category count', () => {
+    const floor = { themePackId: '1001', difficulty: 0, giftIds: [] }
+    const floors = [...Array.from({ length: 15 }, () => floor), 5]
+    expect(accepts(withOverrides({ floorSelections: floors }))).toBe(false)
+  })
+
+  it('rejects an integer outside the safe range', () => {
+    expect(accepts(withOverrides({ selectedBuffIds: [2 ** 53] }))).toBe(false)
+  })
+
+  it('rejects a section note without content, as the exported schema requires it', () => {
+    expect(accepts(withOverrides({ sectionNotes: { floor1: {} } }))).toBe(false)
   })
 })
 
 describe('validateSaveablePlanner', () => {
   describe('two-step validation', () => {
-    it('validates valid MD planner in draft mode', () => {
+    it('validates a valid MD planner', () => {
       const planner = createValidSaveablePlanner('MIRROR_DUNGEON')
-      const result = validateSaveablePlanner(planner, 'draft')
+      const result = validateSaveablePlanner(planner)
       expect(result.metadata.id).toBe(planner.metadata.id)
       assert(result.config.type === 'MIRROR_DUNGEON')
       expect(result.config.category).toBe('5F')
     })
 
-    it('validates valid RR planner in draft mode', () => {
+    it('validates a valid RR planner', () => {
       const planner = createValidSaveablePlanner('REFRACTED_RAILWAY')
-      const result = validateSaveablePlanner(planner, 'draft')
+      const result = validateSaveablePlanner(planner)
       expect(result.metadata.id).toBe(planner.metadata.id)
       expect(result.config.type).toBe('REFRACTED_RAILWAY')
     })
 
-    it('validates valid MD planner in save mode', () => {
-      const planner = createValidSaveablePlanner('MIRROR_DUNGEON')
-      // Add required themePackId for save mode (all floor selections need it)
-      const result = validateSaveablePlanner(planner, 'save')
-      expect(result.config.type).toBe('MIRROR_DUNGEON')
-    })
-
     it('accepts equipment whose ego slots cover only some tiers', () => {
       const planner = createValidSaveablePlanner('MIRROR_DUNGEON')
-      planner.content = {
-        ...planner.content,
-        equipment: {
-          '1': {
-            identity: { id: '10101', uptie: 4, level: 45 },
-            egos: { ZAYIN: { id: '20101', threadspin: 2 } },
-          },
-        },
-      }
+      const content = storedShapeContent()
+      content.equipment['1'] = sinnerEquipment('1', ['ZAYIN', 'HE'])
+      planner.content = content
 
-      const result = validateSaveablePlanner(planner, 'draft')
+      const result = validateSaveablePlanner(planner)
       assert(isMDPlanner(result))
       expect(result.content.equipment['1']?.egos).toEqual({
-        ZAYIN: { id: '20101', threadspin: 2 },
+        ZAYIN: { id: '20101', threadspin: 4 },
+        HE: { id: '20101', threadspin: 4 },
       })
     })
   })
 
-  describe('floor selections follow the parse boundary', () => {
+  describe('floor selections follow the content schema', () => {
     function withFloors(floorSelections: unknown[]) {
       const planner = createValidSaveablePlanner('MIRROR_DUNGEON')
-      planner.content = { ...planner.content, floorSelections: floorSelections as never[] }
+      planner.content = { ...planner.content, floorSelections }
       return planner
     }
 
-    // corpus: floor-theme-pack-empty-accepted-as-draft, boundary-gift-ids-absent, scn-10f-difficulty-absent
-    it.each([
-      ['an empty-string pack', { themePackId: '', difficulty: 1, giftIds: [] }],
-      ['absent giftIds', { themePackId: '1001', difficulty: 1 }],
-      ['an absent difficulty', { themePackId: '1001', giftIds: [] }],
-    ])('draft mode accepts %s', (_label, floor) => {
-      const result = validateSaveablePlanner(withFloors([floor]), 'draft')
+    it('accepts a floor with a null pack', () => {
+      const floor = { themePackId: null, difficulty: 1, giftIds: [] }
+      const result = validateSaveablePlanner(withFloors([floor]))
       assert(isMDPlanner(result))
       expect(result.content.floorSelections).toEqual([floor])
     })
@@ -316,8 +444,8 @@ describe('validateSaveablePlanner', () => {
       ['an empty-string pack', { themePackId: '', difficulty: 1, giftIds: [] }],
       ['absent giftIds', { themePackId: '1001', difficulty: 1 }],
       ['an absent difficulty', { themePackId: '1001', giftIds: [] }],
-    ])('save mode rejects %s', (_label, floor) => {
-      expect(() => validateSaveablePlanner(withFloors([floor]), 'save')).toThrow(ZodError)
+    ])('rejects %s', (_label, floor) => {
+      expect(() => validateSaveablePlanner(withFloors([floor]))).toThrow(ZodError)
     })
   })
 
@@ -330,7 +458,7 @@ describe('validateSaveablePlanner', () => {
         category: 'RR_PLACEHOLDER',
       }
 
-      expect(() => validateSaveablePlanner(planner, 'draft')).toThrow(ZodError)
+      expect(() => validateSaveablePlanner(planner)).toThrow(ZodError)
     })
 
     it('rejects RR content with MD config', () => {
@@ -341,7 +469,7 @@ describe('validateSaveablePlanner', () => {
         category: '5F',
       }
 
-      expect(() => validateSaveablePlanner(planner, 'draft')).toThrow(ZodError)
+      expect(() => validateSaveablePlanner(planner)).toThrow(ZodError)
     })
   })
 
@@ -350,7 +478,7 @@ describe('validateSaveablePlanner', () => {
       const planner = createValidSaveablePlanner('MIRROR_DUNGEON')
       const stored = { ...planner, metadata: { ...planner.metadata, userId: 42 } }
 
-      const result = validateSaveablePlanner(stored, 'draft')
+      const result = validateSaveablePlanner(stored)
       expect(result.metadata).not.toHaveProperty('userId')
       expect(result.metadata.id).toBe(planner.metadata.id)
     })
@@ -359,35 +487,35 @@ describe('validateSaveablePlanner', () => {
       const planner = createValidSaveablePlanner('MIRROR_DUNGEON')
       const stored = { ...planner, metadata: { ...planner.metadata, driftKey: true } }
 
-      expect(() => validateSaveablePlanner(stored, 'draft')).toThrow(ZodError)
+      expect(() => validateSaveablePlanner(stored)).toThrow(ZodError)
     })
 
     it('rejects invalid UUID in metadata.id', () => {
       const planner = createValidSaveablePlanner('MIRROR_DUNGEON')
       planner.metadata.id = 'not-a-uuid'
 
-      expect(() => validateSaveablePlanner(planner, 'draft')).toThrow(ZodError)
+      expect(() => validateSaveablePlanner(planner)).toThrow(ZodError)
     })
 
     it('rejects invalid status in metadata', () => {
       const planner = createValidSaveablePlanner('MIRROR_DUNGEON')
       ;(planner.metadata as { status: string }).status = 'invalid_status'
 
-      expect(() => validateSaveablePlanner(planner, 'draft')).toThrow(ZodError)
+      expect(() => validateSaveablePlanner(planner)).toThrow(ZodError)
     })
 
     it('rejects invalid schemaVersion', () => {
       const planner = createValidSaveablePlanner('MIRROR_DUNGEON')
       planner.metadata.schemaVersion = 0 // Must be positive
 
-      expect(() => validateSaveablePlanner(planner, 'draft')).toThrow(ZodError)
+      expect(() => validateSaveablePlanner(planner)).toThrow(ZodError)
     })
 
     it('rejects invalid plannerType in metadata', () => {
       const planner = createValidSaveablePlanner('MIRROR_DUNGEON')
       ;(planner.metadata as { plannerType: string }).plannerType = 'INVALID_TYPE'
 
-      expect(() => validateSaveablePlanner(planner, 'draft')).toThrow(ZodError)
+      expect(() => validateSaveablePlanner(planner)).toThrow(ZodError)
     })
   })
 
@@ -396,14 +524,14 @@ describe('validateSaveablePlanner', () => {
       const planner = createValidSaveablePlanner('MIRROR_DUNGEON')
       ;(planner.config as { type: string }).type = 'INVALID_TYPE'
 
-      expect(() => validateSaveablePlanner(planner, 'draft')).toThrow(ZodError)
+      expect(() => validateSaveablePlanner(planner)).toThrow(ZodError)
     })
 
     it('rejects missing config', () => {
       const planner = createValidSaveablePlanner('MIRROR_DUNGEON')
       delete (planner as { config?: unknown }).config
 
-      expect(() => validateSaveablePlanner(planner, 'draft')).toThrow(ZodError)
+      expect(() => validateSaveablePlanner(planner)).toThrow(ZodError)
     })
   })
 })
@@ -428,7 +556,7 @@ describe('PlannerSchemas integration', () => {
 
   it('full planner roundtrip validation', () => {
     const original = createValidSaveablePlanner('MIRROR_DUNGEON')
-    const validated = validateSaveablePlanner(original, 'draft')
+    const validated = validateSaveablePlanner(original)
 
     // Structure should be preserved
     expect(validated.metadata.id).toBe(original.metadata.id)
@@ -464,6 +592,15 @@ describe('import path: oversized note tolerated by storage, gated at save', () =
 
     // Import/persist must succeed — a strict refine here would discard the
     // whole imported planner (the rejected design).
+    expect(SaveablePlannerSchema.safeParse(planner).success).toBe(true)
+  })
+
+  it('SaveablePlannerSchema admits a stored planner whose content the content schema rejects', () => {
+    const planner = createValidSaveablePlanner('MIRROR_DUNGEON')
+    const content = { ...storedShapeContent(), equipment: { '01': {} }, mystery: 1 }
+    planner.content = content as unknown as typeof planner.content
+
+    expect(MDPlannerContentSchema.safeParse(content).success).toBe(false)
     expect(SaveablePlannerSchema.safeParse(planner).success).toBe(true)
   })
 })

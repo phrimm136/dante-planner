@@ -75,7 +75,7 @@
     "observationGiftIds": [],
     "comprehensiveGiftIds": [],
     "equipment": {
-      "01": {
+      "1": {
         "identity": {
           "id": "10101",
           "level": 45,
@@ -88,7 +88,7 @@
           }
         }
       },
-      "02": {
+      "2": {
         "identity": {
           "id": "10201",
           "level": 45,
@@ -101,7 +101,7 @@
           }
         }
       },
-      "03": {
+      "3": {
         "identity": {
           "id": "10301",
           "level": 45,
@@ -114,7 +114,7 @@
           }
         }
       },
-      "04": {
+      "4": {
         "identity": {
           "id": "10401",
           "level": 45,
@@ -127,7 +127,7 @@
           }
         }
       },
-      "05": {
+      "5": {
         "identity": {
           "id": "10501",
           "level": 45,
@@ -140,7 +140,7 @@
           }
         }
       },
-      "06": {
+      "6": {
         "identity": {
           "id": "10601",
           "level": 45,
@@ -153,7 +153,7 @@
           }
         }
       },
-      "07": {
+      "7": {
         "identity": {
           "id": "10701",
           "level": 45,
@@ -166,7 +166,7 @@
           }
         }
       },
-      "08": {
+      "8": {
         "identity": {
           "id": "10801",
           "level": 45,
@@ -179,7 +179,7 @@
           }
         }
       },
-      "09": {
+      "9": {
         "identity": {
           "id": "10901",
           "level": 45,
@@ -234,47 +234,47 @@
     },
     "deploymentOrder": [],
     "skillEAState": {
-      "01": {
+      "1": {
         "0": 3,
         "1": 2,
         "2": 1
       },
-      "02": {
+      "2": {
         "0": 3,
         "1": 2,
         "2": 1
       },
-      "03": {
+      "3": {
         "0": 3,
         "1": 2,
         "2": 1
       },
-      "04": {
+      "4": {
         "0": 3,
         "1": 2,
         "2": 1
       },
-      "05": {
+      "5": {
         "0": 3,
         "1": 2,
         "2": 1
       },
-      "06": {
+      "6": {
         "0": 3,
         "1": 2,
         "2": 1
       },
-      "07": {
+      "7": {
         "0": 3,
         "1": 2,
         "2": 1
       },
-      "08": {
+      "8": {
         "0": 3,
         "1": 2,
         "2": 1
       },
-      "09": {
+      "9": {
         "0": 3,
         "1": 2,
         "2": 1
@@ -330,7 +330,7 @@
       ],
       "2": [
         "floor-theme-pack-unknown",
-        "floor-theme-pack-empty-accepted-as-draft",
+        "floor-theme-pack-empty-rejected-as-draft",
         "floor-theme-pack-empty-rejected-on-publish",
         "floor-theme-pack-absent-rejected-on-publish",
         "floor-sequence-gap",
@@ -352,7 +352,7 @@
         "scn-index-15-on-5f-floor3-no-pack"
       ],
       "4": [
-        "floor-theme-pack-empty-accepted-as-draft",
+        "floor-theme-pack-empty-rejected-as-draft",
         "floor-theme-pack-empty-rejected-on-publish",
         "bi4-empty-pack-then-pack-with-unaffordable-gift"
       ],
@@ -798,7 +798,7 @@
       ]
     },
     {
-      "name": "floor-theme-pack-empty-accepted-as-draft",
+      "name": "floor-theme-pack-empty-rejected-as-draft",
       "category": "5F",
       "sources": [
         "golden",
@@ -977,40 +977,29 @@
       ],
       "expect": {
         "draft": {
-          "ok": true,
-          "violations": []
+          "ok": false,
+          "violations": [
+            {
+              "code": "INVALID_FIELD_TYPE",
+              "path": "floorSelections[0].themePackId"
+            }
+          ]
         },
         "publish": {
           "ok": false,
           "violations": [
             {
-              "code": "MISSING_THEMEPACK",
-              "path": "floorSelections[0]"
-            },
-            {
-              "code": "INSUFFICIENT_FLOORS",
-              "path": "floorSelections[1]"
-            },
-            {
-              "code": "INSUFFICIENT_FLOORS",
-              "path": "floorSelections[2]"
-            },
-            {
-              "code": "INSUFFICIENT_FLOORS",
-              "path": "floorSelections[3]"
-            },
-            {
-              "code": "INSUFFICIENT_FLOORS",
-              "path": "floorSelections[4]"
+              "code": "INVALID_FIELD_TYPE",
+              "path": "floorSelections[0].themePackId"
             }
           ]
         },
         "index": {
-          "ok": true,
-          "floors": [
+          "ok": false,
+          "floors": [],
+          "salvaged": [
             0
           ],
-          "salvaged": [],
           "admitted": [
             {
               "themePackId": null,
@@ -1018,7 +1007,12 @@
               "giftIds": []
             }
           ],
-          "violations": [],
+          "violations": [
+            {
+              "code": "INVALID_FIELD_TYPE",
+              "path": "floorSelections[0].themePackId"
+            }
+          ],
           "rows": []
         }
       },
@@ -1156,28 +1150,34 @@
       ],
       "expect": {
         "draft": {
-          "ok": true,
-          "violations": []
+          "ok": false,
+          "violations": [
+            {
+              "code": "INVALID_FIELD_TYPE",
+              "path": "floorSelections[4].themePackId"
+            }
+          ]
         },
         "publish": {
           "ok": false,
           "violations": [
             {
-              "code": "MISSING_THEMEPACK",
-              "path": "floorSelections[4]"
+              "code": "INVALID_FIELD_TYPE",
+              "path": "floorSelections[4].themePackId"
             }
           ]
         },
         "index": {
-          "ok": true,
+          "ok": false,
           "floors": [
             0,
             1,
             2,
-            3,
+            3
+          ],
+          "salvaged": [
             4
           ],
-          "salvaged": [],
           "admitted": [
             {
               "themePackId": "1001",
@@ -1205,7 +1205,12 @@
               "giftIds": []
             }
           ],
-          "violations": [],
+          "violations": [
+            {
+              "code": "INVALID_FIELD_TYPE",
+              "path": "floorSelections[4].themePackId"
+            }
+          ],
           "rows": [
             "THEME_PACK:1001",
             "THEME_PACK:1002",
@@ -1347,28 +1352,34 @@
       ],
       "expect": {
         "draft": {
-          "ok": true,
-          "violations": []
+          "ok": false,
+          "violations": [
+            {
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[4].themePackId"
+            }
+          ]
         },
         "publish": {
           "ok": false,
           "violations": [
             {
-              "code": "MISSING_THEMEPACK",
-              "path": "floorSelections[4]"
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[4].themePackId"
             }
           ]
         },
         "index": {
-          "ok": true,
+          "ok": false,
           "floors": [
             0,
             1,
             2,
-            3,
+            3
+          ],
+          "salvaged": [
             4
           ],
-          "salvaged": [],
           "admitted": [
             {
               "themePackId": "1001",
@@ -1396,7 +1407,12 @@
               "giftIds": []
             }
           ],
-          "violations": [],
+          "violations": [
+            {
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[4].themePackId"
+            }
+          ],
           "rows": [
             "THEME_PACK:1001",
             "THEME_PACK:1002",
@@ -1697,28 +1713,34 @@
       ],
       "expect": {
         "draft": {
-          "ok": true,
-          "violations": []
+          "ok": false,
+          "violations": [
+            {
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[0].difficulty"
+            }
+          ]
         },
         "publish": {
           "ok": false,
           "violations": [
             {
-              "code": "OUT_OF_RANGE_DIFFICULTY",
+              "code": "MISSING_REQUIRED_FIELD",
               "path": "floorSelections[0].difficulty"
             }
           ]
         },
         "index": {
-          "ok": true,
+          "ok": false,
           "floors": [
-            0,
             1,
             2,
             3,
             4
           ],
-          "salvaged": [],
+          "salvaged": [
+            0
+          ],
           "admitted": [
             {
               "themePackId": "1001",
@@ -1746,7 +1768,12 @@
               "giftIds": []
             }
           ],
-          "violations": [],
+          "violations": [
+            {
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[0].difficulty"
+            }
+          ],
           "rows": [
             "THEME_PACK:1001",
             "THEME_PACK:1002",
@@ -2517,8 +2544,8 @@
           "ok": false,
           "violations": [
             {
-              "code": "OUT_OF_ORDER_THEMEPACK",
-              "path": "floorSelections[1]"
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[0].themePackId"
             }
           ]
         },
@@ -2526,34 +2553,19 @@
           "ok": false,
           "violations": [
             {
-              "code": "MISSING_THEMEPACK",
-              "path": "floorSelections[0]"
-            },
-            {
-              "code": "OUT_OF_ORDER_THEMEPACK",
-              "path": "floorSelections[1]"
-            },
-            {
-              "code": "INSUFFICIENT_FLOORS",
-              "path": "floorSelections[2]"
-            },
-            {
-              "code": "INSUFFICIENT_FLOORS",
-              "path": "floorSelections[3]"
-            },
-            {
-              "code": "INSUFFICIENT_FLOORS",
-              "path": "floorSelections[4]"
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[0].themePackId"
             }
           ]
         },
         "index": {
-          "ok": true,
+          "ok": false,
           "floors": [
-            0,
             1
           ],
-          "salvaged": [],
+          "salvaged": [
+            0
+          ],
           "admitted": [
             {
               "themePackId": null,
@@ -2566,7 +2578,12 @@
               "giftIds": []
             }
           ],
-          "violations": [],
+          "violations": [
+            {
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[0].themePackId"
+            }
+          ],
           "rows": [
             "THEME_PACK:1002"
           ]
@@ -4118,40 +4135,29 @@
       ],
       "expect": {
         "draft": {
-          "ok": true,
-          "violations": []
+          "ok": false,
+          "violations": [
+            {
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[0].themePackId"
+            }
+          ]
         },
         "publish": {
           "ok": false,
           "violations": [
             {
-              "code": "MISSING_THEMEPACK",
-              "path": "floorSelections[0]"
-            },
-            {
-              "code": "INSUFFICIENT_FLOORS",
-              "path": "floorSelections[1]"
-            },
-            {
-              "code": "INSUFFICIENT_FLOORS",
-              "path": "floorSelections[2]"
-            },
-            {
-              "code": "INSUFFICIENT_FLOORS",
-              "path": "floorSelections[3]"
-            },
-            {
-              "code": "INSUFFICIENT_FLOORS",
-              "path": "floorSelections[4]"
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[0].themePackId"
             }
           ]
         },
         "index": {
-          "ok": true,
-          "floors": [
+          "ok": false,
+          "floors": [],
+          "salvaged": [
             0
           ],
-          "salvaged": [],
           "admitted": [
             {
               "themePackId": null,
@@ -4161,7 +4167,12 @@
               ]
             }
           ],
-          "violations": [],
+          "violations": [
+            {
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[0].themePackId"
+            }
+          ],
           "rows": [
             "EGO_GIFT:9004"
           ]
@@ -4963,8 +4974,8 @@
           "ok": false,
           "violations": [
             {
-              "code": "OUT_OF_ORDER_THEMEPACK",
-              "path": "floorSelections[1]"
+              "code": "INVALID_FIELD_TYPE",
+              "path": "floorSelections[0].themePackId"
             }
           ]
         },
@@ -4972,34 +4983,19 @@
           "ok": false,
           "violations": [
             {
-              "code": "MISSING_THEMEPACK",
-              "path": "floorSelections[0]"
-            },
-            {
-              "code": "OUT_OF_ORDER_THEMEPACK",
-              "path": "floorSelections[1]"
-            },
-            {
-              "code": "INSUFFICIENT_FLOORS",
-              "path": "floorSelections[2]"
-            },
-            {
-              "code": "INSUFFICIENT_FLOORS",
-              "path": "floorSelections[3]"
-            },
-            {
-              "code": "INSUFFICIENT_FLOORS",
-              "path": "floorSelections[4]"
+              "code": "INVALID_FIELD_TYPE",
+              "path": "floorSelections[0].themePackId"
             }
           ]
         },
         "index": {
-          "ok": true,
+          "ok": false,
           "floors": [
-            0,
             1
           ],
-          "salvaged": [],
+          "salvaged": [
+            0
+          ],
           "admitted": [
             {
               "themePackId": null,
@@ -5014,7 +5010,12 @@
               "giftIds": []
             }
           ],
-          "violations": [],
+          "violations": [
+            {
+              "code": "INVALID_FIELD_TYPE",
+              "path": "floorSelections[0].themePackId"
+            }
+          ],
           "rows": [
             "EGO_GIFT:9004",
             "THEME_PACK:1002"
@@ -5250,8 +5251,8 @@
           "ok": false,
           "violations": [
             {
-              "code": "DUPLICATE_EGOGIFT",
-              "path": "floorSelections[0].giftIds"
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[0].themePackId"
             }
           ]
         },
@@ -5259,37 +5260,17 @@
           "ok": false,
           "violations": [
             {
-              "code": "MISSING_THEMEPACK",
-              "path": "floorSelections[0]"
-            },
-            {
-              "code": "DUPLICATE_EGOGIFT",
-              "path": "floorSelections[0].giftIds"
-            },
-            {
-              "code": "INSUFFICIENT_FLOORS",
-              "path": "floorSelections[1]"
-            },
-            {
-              "code": "INSUFFICIENT_FLOORS",
-              "path": "floorSelections[2]"
-            },
-            {
-              "code": "INSUFFICIENT_FLOORS",
-              "path": "floorSelections[3]"
-            },
-            {
-              "code": "INSUFFICIENT_FLOORS",
-              "path": "floorSelections[4]"
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[0].themePackId"
             }
           ]
         },
         "index": {
-          "ok": true,
-          "floors": [
+          "ok": false,
+          "floors": [],
+          "salvaged": [
             0
           ],
-          "salvaged": [],
           "admitted": [
             {
               "themePackId": null,
@@ -5300,7 +5281,12 @@
               ]
             }
           ],
-          "violations": [],
+          "violations": [
+            {
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[0].themePackId"
+            }
+          ],
           "rows": [
             "EGO_GIFT:9002"
           ]
@@ -6045,11 +6031,11 @@
           "ok": false,
           "violations": [
             {
-              "code": "UNKNOWN_EGOGIFT_FLOOR",
+              "code": "INVALID_FIELD_TYPE",
               "path": "floorSelections[0].giftIds[0]"
             },
             {
-              "code": "UNKNOWN_THEMEPACK",
+              "code": "INVALID_FIELD_TYPE",
               "path": "floorSelections[0].themePackId"
             }
           ]
@@ -6058,25 +6044,26 @@
           "ok": false,
           "violations": [
             {
-              "code": "UNKNOWN_EGOGIFT_FLOOR",
+              "code": "INVALID_FIELD_TYPE",
               "path": "floorSelections[0].giftIds[0]"
             },
             {
-              "code": "UNKNOWN_THEMEPACK",
+              "code": "INVALID_FIELD_TYPE",
               "path": "floorSelections[0].themePackId"
             }
           ]
         },
         "index": {
-          "ok": true,
+          "ok": false,
           "floors": [
-            0,
             1,
             2,
             3,
             4
           ],
-          "salvaged": [],
+          "salvaged": [
+            0
+          ],
           "admitted": [
             {
               "themePackId": "+1001",
@@ -6106,7 +6093,16 @@
               "giftIds": []
             }
           ],
-          "violations": [],
+          "violations": [
+            {
+              "code": "INVALID_FIELD_TYPE",
+              "path": "floorSelections[0].giftIds[0]"
+            },
+            {
+              "code": "INVALID_FIELD_TYPE",
+              "path": "floorSelections[0].themePackId"
+            }
+          ],
           "rows": [
             "THEME_PACK:1002",
             "THEME_PACK:1003",
@@ -7155,44 +7151,65 @@
       ],
       "expect": {
         "draft": {
-          "ok": true,
-          "violations": []
+          "ok": false,
+          "violations": [
+            {
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[0].themePackId"
+            },
+            {
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[1].themePackId"
+            },
+            {
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[2].themePackId"
+            },
+            {
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[3].themePackId"
+            },
+            {
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[4].themePackId"
+            }
+          ]
         },
         "publish": {
           "ok": false,
           "violations": [
             {
-              "code": "MISSING_THEMEPACK",
-              "path": "floorSelections[0]"
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[0].themePackId"
             },
             {
-              "code": "MISSING_THEMEPACK",
-              "path": "floorSelections[1]"
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[1].themePackId"
             },
             {
-              "code": "MISSING_THEMEPACK",
-              "path": "floorSelections[2]"
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[2].themePackId"
             },
             {
-              "code": "MISSING_THEMEPACK",
-              "path": "floorSelections[3]"
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[3].themePackId"
             },
             {
-              "code": "MISSING_THEMEPACK",
-              "path": "floorSelections[4]"
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[4].themePackId"
             }
           ]
         },
         "index": {
-          "ok": true,
-          "floors": [
+          "ok": false,
+          "floors": [],
+          "salvaged": [
             0,
             1,
             2,
             3,
             4
           ],
-          "salvaged": [],
           "admitted": [
             {
               "themePackId": null,
@@ -7220,7 +7237,28 @@
               "giftIds": []
             }
           ],
-          "violations": [],
+          "violations": [
+            {
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[0].themePackId"
+            },
+            {
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[1].themePackId"
+            },
+            {
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[2].themePackId"
+            },
+            {
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[3].themePackId"
+            },
+            {
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[4].themePackId"
+            }
+          ],
           "rows": []
         }
       },
@@ -7726,23 +7764,34 @@
       ],
       "expect": {
         "draft": {
-          "ok": true,
-          "violations": []
+          "ok": false,
+          "violations": [
+            {
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[0].giftIds"
+            }
+          ]
         },
         "publish": {
-          "ok": true,
-          "violations": []
+          "ok": false,
+          "violations": [
+            {
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[0].giftIds"
+            }
+          ]
         },
         "index": {
-          "ok": true,
+          "ok": false,
           "floors": [
-            0,
             1,
             2,
             3,
             4
           ],
-          "salvaged": [],
+          "salvaged": [
+            0
+          ],
           "admitted": [
             {
               "themePackId": "1001",
@@ -7770,7 +7819,12 @@
               "giftIds": []
             }
           ],
-          "violations": [],
+          "violations": [
+            {
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[0].giftIds"
+            }
+          ],
           "rows": [
             "THEME_PACK:1001",
             "THEME_PACK:1002",
@@ -10134,15 +10188,49 @@
       ],
       "expect": {
         "draft": {
-          "ok": true,
-          "violations": []
+          "ok": false,
+          "violations": [
+            {
+              "code": "INVALID_FIELD_TYPE",
+              "path": "floorSelections[5]"
+            },
+            {
+              "code": "INVALID_FIELD_TYPE",
+              "path": "floorSelections[6].difficulty"
+            },
+            {
+              "code": "INVALID_FIELD_TYPE",
+              "path": "floorSelections[6].giftIds"
+            },
+            {
+              "code": "INVALID_FIELD_TYPE",
+              "path": "floorSelections[6].themePackId"
+            }
+          ]
         },
         "publish": {
-          "ok": true,
-          "violations": []
+          "ok": false,
+          "violations": [
+            {
+              "code": "INVALID_FIELD_TYPE",
+              "path": "floorSelections[5]"
+            },
+            {
+              "code": "INVALID_FIELD_TYPE",
+              "path": "floorSelections[6].difficulty"
+            },
+            {
+              "code": "INVALID_FIELD_TYPE",
+              "path": "floorSelections[6].giftIds"
+            },
+            {
+              "code": "INVALID_FIELD_TYPE",
+              "path": "floorSelections[6].themePackId"
+            }
+          ]
         },
         "index": {
-          "ok": true,
+          "ok": false,
           "floors": [
             0,
             1,
@@ -10178,7 +10266,24 @@
               "giftIds": []
             }
           ],
-          "violations": [],
+          "violations": [
+            {
+              "code": "INVALID_FIELD_TYPE",
+              "path": "floorSelections[5]"
+            },
+            {
+              "code": "INVALID_FIELD_TYPE",
+              "path": "floorSelections[6].difficulty"
+            },
+            {
+              "code": "INVALID_FIELD_TYPE",
+              "path": "floorSelections[6].giftIds"
+            },
+            {
+              "code": "INVALID_FIELD_TYPE",
+              "path": "floorSelections[6].themePackId"
+            }
+          ],
           "rows": [
             "THEME_PACK:1001",
             "THEME_PACK:1002",
@@ -10739,8 +10844,8 @@
           "ok": false,
           "violations": [
             {
-              "code": "OUT_OF_ORDER_THEMEPACK",
-              "path": "floorSelections[3]"
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[2].themePackId"
             }
           ]
         },
@@ -10748,25 +10853,22 @@
           "ok": false,
           "violations": [
             {
-              "code": "MISSING_THEMEPACK",
-              "path": "floorSelections[2]"
-            },
-            {
-              "code": "OUT_OF_ORDER_THEMEPACK",
-              "path": "floorSelections[3]"
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[2].themePackId"
             }
           ]
         },
         "index": {
-          "ok": true,
+          "ok": false,
           "floors": [
             0,
             1,
-            2,
             3,
             4
           ],
-          "salvaged": [],
+          "salvaged": [
+            2
+          ],
           "admitted": [
             {
               "themePackId": "1001",
@@ -10794,7 +10896,12 @@
               "giftIds": []
             }
           ],
-          "violations": [],
+          "violations": [
+            {
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[2].themePackId"
+            }
+          ],
           "rows": [
             "THEME_PACK:1001",
             "THEME_PACK:1002",
@@ -11133,22 +11240,26 @@
       ],
       "expect": {
         "draft": {
-          "ok": true,
-          "violations": []
+          "ok": false,
+          "violations": [
+            {
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[0].difficulty"
+            }
+          ]
         },
         "publish": {
           "ok": false,
           "violations": [
             {
-              "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
+              "code": "MISSING_REQUIRED_FIELD",
               "path": "floorSelections[0].difficulty"
             }
           ]
         },
         "index": {
-          "ok": true,
+          "ok": false,
           "floors": [
-            0,
             1,
             2,
             3,
@@ -11159,7 +11270,9 @@
             8,
             9
           ],
-          "salvaged": [],
+          "salvaged": [
+            0
+          ],
           "admitted": [
             {
               "themePackId": "1001",
@@ -11212,7 +11325,12 @@
               "giftIds": []
             }
           ],
-          "violations": [],
+          "violations": [
+            {
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[0].difficulty"
+            }
+          ],
           "rows": [
             "THEME_PACK:1001",
             "THEME_PACK:1002",
@@ -11794,8 +11912,8 @@
           "ok": false,
           "violations": [
             {
-              "code": "OUT_OF_ORDER_THEMEPACK",
-              "path": "floorSelections[4]"
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[3].themePackId"
             }
           ]
         },
@@ -11803,25 +11921,22 @@
           "ok": false,
           "violations": [
             {
-              "code": "MISSING_THEMEPACK",
-              "path": "floorSelections[3]"
-            },
-            {
-              "code": "OUT_OF_ORDER_THEMEPACK",
-              "path": "floorSelections[4]"
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[3].themePackId"
             }
           ]
         },
         "index": {
-          "ok": true,
+          "ok": false,
           "floors": [
             0,
             1,
             2,
-            3,
             4
           ],
-          "salvaged": [],
+          "salvaged": [
+            3
+          ],
           "admitted": [
             {
               "themePackId": "1001",
@@ -11849,7 +11964,12 @@
               "giftIds": []
             }
           ],
-          "violations": [],
+          "violations": [
+            {
+              "code": "MISSING_REQUIRED_FIELD",
+              "path": "floorSelections[3].themePackId"
+            }
+          ],
           "rows": [
             "THEME_PACK:1001",
             "THEME_PACK:1002",

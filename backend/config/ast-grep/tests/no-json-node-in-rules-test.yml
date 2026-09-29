@@ -1,0 +1,57 @@
+id: no-json-node-in-rules
+valid:
+  - |
+    class A {
+      static List<Violation> check(Map<String, Identity> identities, IdentityReferenceData data) {
+        return List.of();
+      }
+    }
+  - |
+    class A {
+      static List<Violation> check(List<String> giftIds) {
+        JsonNode unused = null;
+        return List.of();
+      }
+    }
+  - |
+    class A {
+      static List<Violation> check(JsonNodeView view) {
+        return List.of();
+      }
+    }
+invalid:
+  - |
+    class A {
+      static List<Violation> check(JsonNode deploymentOrder) {
+        return List.of();
+      }
+    }
+  - |
+    class A {
+      static List<Violation> check(com.fasterxml.jackson.databind.JsonNode keyword, List<String> giftIds) {
+        return List.of();
+      }
+    }
+  - |
+    class A {
+      private static Stream<Violation> egos(List<JsonNode> slots) {
+        return Stream.empty();
+      }
+    }
+  - |
+    class A {
+      static List<Violation> check(Map<String, JsonNode> sinners) {
+        return List.of();
+      }
+    }
+  - |
+    class A {
+      private record Found(JsonNode node) {
+      }
+    }
+  - |
+    public final class DeploymentOrder {
+      public static List<Violation> check(JsonNode sinnerIndices) {
+        return List.of();
+      }
+    }

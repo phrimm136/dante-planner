@@ -9,10 +9,10 @@ import {
   MAX_APPENDED_FLOORS,
   anyRaw,
   category,
-  pastCountFloor,
   rawFloor,
   rawFloorSelections,
   stage,
+  storedFloor,
 } from './floorArbitraries'
 
 const RUNS = 500
@@ -25,8 +25,12 @@ describe('floor rules properties', () => {
     fc.assert(
       fc.property(rawFloorSelections, category, stage, (raw, mdCategory, ruleStage) => {
         const first = admit(raw, mdCategory, ruleStage)
-        if (!first.ok) return
-        const reserialized: unknown = JSON.parse(JSON.stringify(first.floors))
+        if (!first.ok || first.boundaryViolations.length > 0) return
+        const reserialized: unknown = JSON.parse(
+          JSON.stringify(
+            first.floors.map((floor) => ({ ...floor, themePackId: floor.themePackId ?? null })),
+          ),
+        )
 
         expect(admit(reserialized, mdCategory, ruleStage)).toEqual({
           ok: true,
@@ -38,20 +42,18 @@ describe('floor rules properties', () => {
     )
   })
 
-  it('returns the same admission when floors are appended past the count', () => {
+  it('returns the same admission when well-shaped floors are appended past the count', () => {
     fc.assert(
       fc.property(
         rawFloorSelections,
         fc.array(rawFloor, { minLength: FILLER_FLOORS, maxLength: FILLER_FLOORS }),
-        fc.array(pastCountFloor, { maxLength: MAX_APPENDED_FLOORS }),
+        fc.array(storedFloor, { maxLength: MAX_APPENDED_FLOORS }),
         category,
         stage,
         (raw, filler, appended, mdCategory, ruleStage) => {
-          const count = floorCount(mdCategory)
-          const base = [...raw, ...filler.slice(0, Math.max(0, count - raw.length))]
-          const reference = admit(base.slice(0, count), mdCategory, ruleStage)
+          const base = [...raw, ...filler].slice(0, floorCount(mdCategory))
+          const reference = admit(base, mdCategory, ruleStage)
 
-          expect(admit(base, mdCategory, ruleStage)).toEqual(reference)
           expect(admit([...base, ...appended], mdCategory, ruleStage)).toEqual(reference)
         },
       ),

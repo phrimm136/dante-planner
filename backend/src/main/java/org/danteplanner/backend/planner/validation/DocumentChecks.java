@@ -8,21 +8,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 record DocumentChecks(int maxContentSizeBytes, int maxNoteSizeBytes) {
-
-    private static final Set<String> REQUIRED_FIELDS = Set.of(
-            "selectedKeywords", "equipment",
-            "deploymentOrder", "skillEAState", "floorSelections", "sectionNotes");
-
-    private static final Set<String> ALLOWED_FIELDS = Set.of(
-            "selectedKeywords", "selectedBuffIds",
-            "selectedGiftKeyword", "selectedGiftIds", "observationGiftIds",
-            "comprehensiveGiftIds", "equipment", "deploymentOrder",
-            "skillEAState", "floorSelections", "sectionNotes");
 
     private static final String SELECTED_KEYWORDS = "selectedKeywords";
     private static final String SECTION_NOTES = "sectionNotes";
@@ -52,60 +40,27 @@ record DocumentChecks(int maxContentSizeBytes, int maxNoteSizeBytes) {
         };
     }
 
-    static Optional<Violation> unknownFields(JsonNode root) {
-        List<String> unknown = root.properties().stream()
-                .map(Map.Entry::getKey)
-                .filter(field -> !ALLOWED_FIELDS.contains(field))
-                .sorted()
-                .toList();
-        return unknown.isEmpty()
-                ? Optional.empty()
-                : Optional.of(new Violation(ErrorCode.UNKNOWN_FIELD, ContentPath.root(),
-                        String.format("Unknown fields: %s", unknown)));
+    Optional<Violation> noteSize(Map<String, JsonNode> sectionNotes) {
+        return sectionNotes.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(note -> noteSize(note.getKey(), note.getValue()))
+                .flatMap(Optional::stream)
+                .findFirst();
     }
 
-    static Optional<Violation> requiredFields(JsonNode root) {
-        List<String> missing = REQUIRED_FIELDS.stream()
-                .filter(field -> !root.has(field))
-                .toList();
-        return missing.isEmpty()
-                ? Optional.empty()
-                : Optional.of(Violation.missingFields(ErrorCode.MISSING_REQUIRED_FIELD, ContentPath.root(), missing));
-    }
-
-    Optional<Violation> noteSize(JsonNode root) {
-        JsonNode sectionNotes = root.path(SECTION_NOTES);
-        return switch (sectionNotes.getNodeType()) {
-            case OBJECT -> sectionNotes.properties().stream()
-                    .sorted(Map.Entry.comparingByKey())
-                    .map(note -> noteSize(note.getKey(), note.getValue()))
-                    .flatMap(Optional::stream)
-                    .findFirst();
-            default -> Optional.empty();
+    static List<Violation> selectedKeywords(List<String> keywords, Stage stage) {
+        return switch (stage) {
+            case PUBLISH -> unknownKeywords(keywords);
+            case DRAFT, INDEX -> List.of();
         };
     }
 
-    static List<Violation> fieldKinds(JsonNode root) {
-        return objectKind(root.path(SECTION_NOTES), ContentPath.of(SECTION_NOTES)).stream().toList();
-    }
-
-    static List<Violation> selectedKeywords(JsonNode root, Stage stage) {
-        FieldResult<List<Optional<String>>> keywords = JsonArrays.strings(root.path(SELECTED_KEYWORDS),
-                SELECTED_KEYWORDS_PATH);
-        return Stream.concat(keywords.violations().stream(), switch (stage) {
-            case PUBLISH -> unknownKeywords(keywords.value());
-            case DRAFT, INDEX -> Stream.<Violation>empty();
-        }).toList();
-    }
-
-    private static Stream<Violation> unknownKeywords(List<Optional<String>> keywords) {
+    private static List<Violation> unknownKeywords(List<String> keywords) {
         return IntStream.range(0, keywords.size())
-                .boxed()
-                .flatMap(index -> keywords.get(index)
-                        .filter(keyword -> !PlannerKeywords.isKnown(keyword))
-                        .map(keyword -> Violation.unknownValue(ErrorCode.UNKNOWN_KEYWORD,
-                                SELECTED_KEYWORDS_PATH.index(index), SELECTED_KEYWORDS, keyword))
-                        .stream());
+                .filter(index -> !PlannerKeywords.isKnown(keywords.get(index)))
+                .mapToObj(index -> Violation.unknownValue(ErrorCode.UNKNOWN_KEYWORD,
+                        SELECTED_KEYWORDS_PATH.index(index), SELECTED_KEYWORDS, keywords.get(index)))
+                .toList();
     }
 
     private Optional<Violation> noteSize(String sectionKey, JsonNode note) {
@@ -114,13 +69,6 @@ record DocumentChecks(int maxContentSizeBytes, int maxNoteSizeBytes) {
                 ? Optional.of(sizeExceeded(ContentPath.of(SECTION_NOTES).key(sectionKey),
                         String.format("Note '%s'", sectionKey), size, maxNoteSizeBytes))
                 : Optional.empty();
-    }
-
-    private static Optional<Violation> objectKind(JsonNode node, ContentPath path) {
-        return switch (node.getNodeType()) {
-            case MISSING, OBJECT -> Optional.empty();
-            default -> Optional.of(Violation.invalidFieldType(path, JsonKind.OBJECT, node));
-        };
     }
 
     private static Violation sizeExceeded(ContentPath path, String subject, int size, int limit) {

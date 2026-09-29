@@ -172,7 +172,7 @@ class CategoryChangeFloorRulesTest {
                 .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
                     assertThat(ex.getStatusCode().value()).isEqualTo(400);
                     assertThat(ex.getSubErrors()).containsExactly(new ValidationError("INVALID_FIELD_TYPE", "floorSelections[6]",
-                            "Field 'floorSelections[6]' must be object, got number 5"));
+                            "Field 'floorSelections[6]' has an invalid value: number 5"));
                 });
         assertThat(planner.getCategory()).isEqualTo("5F");
     }

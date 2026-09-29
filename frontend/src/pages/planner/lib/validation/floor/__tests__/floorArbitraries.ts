@@ -86,7 +86,11 @@ export const rawCase: fc.Arbitrary<RawCase> = fc.record({
   stage,
 })
 
-export const pastCountFloor: fc.Arbitrary<unknown> = fc.oneof(rawFloor, fc.jsonValue())
+export const storedFloor: fc.Arbitrary<unknown> = fc.record({
+  themePackId: fc.option(fc.constantFrom(...THEME_PACK_POOL), { nil: null }),
+  difficulty: fc.integer({ min: 0, max: 3 }),
+  giftIds: fc.array(fc.constantFrom(...GIFT_POOL), { maxLength: MAX_GIFTS }),
+})
 
 const anyValue = fc.anything({
   withBoxedValues: true,

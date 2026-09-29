@@ -6,39 +6,31 @@ import type { Result } from '@/lib/result'
 import type { EGOGiftSpec } from '@/pages/egoGift'
 import { getUnaffordableGiftIds } from '../plannerRules'
 import { isMDPlanner } from '../../types/PlannerTypes'
-import type { MDPlannerContent, MDSaveablePlanner, SaveablePlanner } from '../../types/PlannerTypes'
+import type { MDSaveablePlanner, SaveablePlanner } from '../../types/PlannerTypes'
 import { contentPath, field } from './contentPath'
 import type { ContentPath } from './contentPath'
-import {
-  documentRefusal,
-  keywordViolations,
-  parseKeywords,
-  sectionNotesViolations,
-  titleViolations,
-  unknownVersion,
-} from './document'
-import type { ParsedKeywords } from './document'
-import { egoRuleViolations, parseEgos } from './ego/egos'
-import type { EgoReferenceData, ParsedEgos } from './ego/egos'
+import { parseContent } from './contentShape'
+import type { PlannerContentValue } from './contentShape'
+import { keywordViolations, noteSizeViolations, titleViolations, unknownVersion } from './document'
+import { egoRuleViolations } from './ego/egos'
+import type { EgoReferenceData } from './ego/egos'
 import {
   COMPREHENSIVE_GIFT_IDS_PATH,
   OBSERVATION_GIFT_IDS_PATH,
   giftIdViolations,
-  parseGiftIds,
 } from './egogift/giftIds'
-import type { GiftReferenceData, ParsedGiftIds } from './egogift/giftIds'
+import type { GiftReferenceData } from './egogift/giftIds'
 import { floorReferenceViolations } from './floor/floorReferences'
 import type { FloorReferenceData, FloorReferenceViolation } from './floor/floorReferences'
 import { admitFloors, parseFloors } from './floor/floorRules'
-import { identityRuleViolations, parseIdentity } from './identity/identity'
-import type { IdentityReferenceData, ParsedIdentity } from './identity/identity'
+import { identityRuleViolations } from './identity/identity'
+import type { IdentityReferenceData } from './identity/identity'
 import type { FloorReferenceError, PlannerValidationError } from './plannerValidationErrors'
 import { deploymentOrderViolations } from './sinner/deploymentOrder'
-import { parseSinners } from './sinner/sinnerKeys'
-import type { ParsedSinners } from './sinner/sinnerKeys'
+import { sinnerEntries } from './sinnerEntries'
 import { sinnerSkillViolations } from './skill/skillEAState'
-import { parseStartBuffs, startBuffViolations } from './startbuff/startBuffs'
-import type { ParsedStartBuffs, StartBuffSeason } from './startbuff/startBuffs'
+import { startBuffViolations } from './startbuff/startBuffs'
+import type { StartBuffSeason } from './startbuff/startBuffs'
 import { START_GIFT_IDS_PATH, startGiftViolations } from './startgift/startGift'
 import type { StartGiftSeason } from './startgift/startGift'
 import { byPathThenCode } from './violation'
@@ -68,17 +60,8 @@ type SeasonReferenceData = StartBuffSeason & StartGiftSeason
 
 type PlannerPlan = {
   stage: ContentStage
-  content: MDPlannerContent
+  content: PlannerContentValue
   category: MDCategory
-  equipment: ParsedSinners
-  identities: readonly ParsedIdentity[]
-  egos: readonly ParsedEgos[]
-  skillEAState: ParsedSinners
-  startGifts: ParsedGiftIds
-  observationGifts: ParsedGiftIds
-  comprehensiveGifts: ParsedGiftIds
-  startBuffs: ParsedStartBuffs
-  keywords: ParsedKeywords
   references: ReferenceData
   season: SeasonReferenceData
   floorReferences: FloorReferenceData
@@ -176,46 +159,50 @@ function floorReferenceError(
   }
 }
 
-const sectionNotes: PlannerCheck = ({ content }) => sectionNotesViolations(content.sectionNotes)
-
-const keywordKinds: PlannerCheck = ({ keywords }) => [...keywords.violations]
-
-const equipment: PlannerCheck = ({ equipment: sinners, identities, egos }) => [
-  ...sinners.violations,
-  ...identities.flatMap((identity) => identity.violations),
-  ...egos.flatMap((ego) => ego.violations),
-]
-
-const equippedEntities: PlannerCheck = ({ identities, egos, references }) => [
-  ...identities.flatMap((identity) => identityRuleViolations(identity, references)),
-  ...egos.flatMap((ego) => egoRuleViolations(ego, references)),
-]
+const equippedEntities: PlannerCheck = ({ content, references }) => {
+  const entries = sinnerEntries(content.equipment, EQUIPMENT_PATH)
+  return [
+    ...entries.flatMap((entry) => identityRuleViolations(entry, references)),
+    ...entries.flatMap((entry) => egoRuleViolations(entry, references)),
+  ]
+}
 
 const deploymentOrder: PlannerCheck = ({ content }) =>
   deploymentOrderViolations(content.deploymentOrder)
 
-const skillEAState: PlannerCheck = ({ skillEAState: sinners }) => [
-  ...sinners.violations,
-  ...sinners.entries.flatMap((entry) => sinnerSkillViolations(entry.value, entry.path)),
+const skillEAState: PlannerCheck = ({ content }) =>
+  sinnerEntries(content.skillEAState, SKILL_EA_STATE_PATH).flatMap((entry) =>
+    sinnerSkillViolations(entry.value, entry.path),
+  )
+
+const giftIds: PlannerCheck = ({ content, references }) => [
+  ...giftIdViolations(
+    content.selectedGiftIds,
+    START_GIFT_IDS_PATH,
+    'DUPLICATE_STARTGIFT',
+    references,
+  ),
+  ...giftIdViolations(
+    content.observationGiftIds,
+    OBSERVATION_GIFT_IDS_PATH,
+    'DUPLICATE_EGOGIFT',
+    references,
+  ),
+  ...giftIdViolations(
+    content.comprehensiveGiftIds,
+    COMPREHENSIVE_GIFT_IDS_PATH,
+    'DUPLICATE_EGOGIFT',
+    references,
+  ),
 ]
 
-const giftIds: PlannerCheck = ({
-  startGifts,
-  observationGifts,
-  comprehensiveGifts,
-  references,
-}) => [
-  ...giftIdViolations(startGifts, 'DUPLICATE_STARTGIFT', references),
-  ...giftIdViolations(observationGifts, 'DUPLICATE_EGOGIFT', references),
-  ...giftIdViolations(comprehensiveGifts, 'DUPLICATE_EGOGIFT', references),
-]
+const startBuffs: PlannerCheck = ({ content, season }) =>
+  startBuffViolations(content.selectedBuffIds, season)
 
-const startBuffs: PlannerCheck = (plan) => startBuffViolations(plan.startBuffs, plan.season)
+const startGift: PlannerCheck = ({ content, references, season }) =>
+  startGiftViolations(content.selectedGiftKeyword, content.selectedGiftIds, references, season)
 
-const startGift: PlannerCheck = ({ content, startGifts, references, season }) =>
-  startGiftViolations(content.selectedGiftKeyword, startGifts, references, season)
-
-const keywords: PlannerCheck = (plan) => keywordViolations(plan.keywords)
+const keywords: PlannerCheck = ({ content }) => keywordViolations(content.selectedKeywords)
 
 const floors: PlannerCheck = ({ content, category, stage, floorReferences, egoGiftI18n }) => {
   const parsed = parseFloors(content.floorSelections, FLOOR_RULE_TABLE.categories[category])
@@ -229,22 +216,8 @@ const floors: PlannerCheck = ({ content, category, stage, floorReferences, egoGi
 }
 
 const CHECKS: Record<ContentStage, readonly PlannerCheck[]> = {
-  draft: [
-    sectionNotes,
-    keywordKinds,
-    equipment,
-    equippedEntities,
-    deploymentOrder,
-    skillEAState,
-    giftIds,
-    startBuffs,
-    startGift,
-    floors,
-  ],
+  draft: [equippedEntities, deploymentOrder, skillEAState, giftIds, startBuffs, startGift, floors],
   publish: [
-    sectionNotes,
-    keywordKinds,
-    equipment,
     equippedEntities,
     deploymentOrder,
     skillEAState,
@@ -258,7 +231,7 @@ const CHECKS: Record<ContentStage, readonly PlannerCheck[]> = {
 
 type PlanInput = {
   stage: ContentStage
-  content: MDPlannerContent
+  content: unknown
   category: MDCategory
   season: SeasonReferenceData
   egoGiftSpec: Record<string, EGOGiftSpec>
@@ -266,37 +239,22 @@ type PlanInput = {
   registry: PlannerIdRegistry
 }
 
-function planOf(input: PlanInput): PlannerPlan {
-  const { content, egoGiftSpec, registry } = input
-  const equipmentEntries = parseSinners(content.equipment, EQUIPMENT_PATH)
-  return {
-    stage: input.stage,
-    content,
-    category: input.category,
-    equipment: equipmentEntries,
-    identities: equipmentEntries.entries.map((entry) =>
-      parseIdentity(entry.value, entry.path, entry.sinnerKey),
-    ),
-    egos: equipmentEntries.entries.map((entry) =>
-      parseEgos(entry.value, entry.path, entry.sinnerKey),
-    ),
-    skillEAState: parseSinners(content.skillEAState, SKILL_EA_STATE_PATH),
-    startGifts: parseGiftIds(content.selectedGiftIds, START_GIFT_IDS_PATH),
-    observationGifts: parseGiftIds(content.observationGiftIds, OBSERVATION_GIFT_IDS_PATH),
-    comprehensiveGifts: parseGiftIds(content.comprehensiveGiftIds, COMPREHENSIVE_GIFT_IDS_PATH),
-    startBuffs: parseStartBuffs(content.selectedBuffIds),
-    keywords: parseKeywords(content.selectedKeywords),
-    references: referenceData(egoGiftSpec, registry),
-    season: input.season,
-    floorReferences: floorReferenceData(egoGiftSpec, registry),
-    egoGiftI18n: input.egoGiftI18n ?? {},
-  }
-}
+const planOf = (input: PlanInput, content: PlannerContentValue): PlannerPlan => ({
+  stage: input.stage,
+  content,
+  category: input.category,
+  references: referenceData(input.egoGiftSpec, input.registry),
+  season: input.season,
+  floorReferences: floorReferenceData(input.egoGiftSpec, input.registry),
+  egoGiftI18n: input.egoGiftI18n ?? {},
+})
 
 function contentViolations(input: PlanInput): PlannerValidationError[] {
-  const refused = documentRefusal(input.content)
-  if (refused !== undefined) return [refused]
-  const plan = planOf(input)
+  const parsed = parseContent(input.content)
+  if (!parsed.ok) return parsed.error
+  const oversized = noteSizeViolations(parsed.value.sectionNotes)
+  if (oversized.length > 0) return oversized
+  const plan = planOf(input, parsed.value)
   return CHECKS[input.stage].flatMap((check) => check(plan)).sort(byPathThenCode)
 }
 

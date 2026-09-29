@@ -59,6 +59,8 @@ const corpusGameData: FloorReferenceData = {
 }
 
 const MODULE_CODES: readonly FloorViolationCode[] = [
+  'MISSING_REQUIRED_FIELD',
+  'UNKNOWN_FIELD',
   'INVALID_FIELD_TYPE',
   'INSUFFICIENT_FLOORS',
   'MISSING_THEMEPACK',

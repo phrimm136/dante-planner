@@ -198,7 +198,7 @@ class PlannerPublishingServiceTest {
         void publish_WhenStoredContentHoldsARenamedGift_StoresTheNewId() throws Exception {
             PlannerContentValidator renaming = validatorRenaming("{\"egoGift\":{\"rename\":{\"9247\":\"9002\"}}}");
             String stored = TestDataFactory.VALID_CONTENT.replace(
-                    "\"selectedGiftIds\":[\"9001\"]", "\"selectedGiftIds\":[\"9001\"],\"observationGiftIds\":[\"19247\"]");
+                    "\"observationGiftIds\":[]", "\"observationGiftIds\":[\"19247\"]");
             Planner planner = testPlannerBuilder().published(false).content(stored).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
             doAnswer(invocation -> renaming.parse(stored, MDCategory.F5,

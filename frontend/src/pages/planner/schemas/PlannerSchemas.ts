@@ -1,19 +1,18 @@
 import { z } from 'zod'
 import {
-  DUNGEON_IDX,
-  MAX_LEVEL,
   MD_CATEGORIES,
+  OFFENSIVE_SKILL_SLOTS,
   RR_CATEGORIES,
   PLANNER_TYPES,
+  SINNERS,
   migrateKeywords,
-  IdentityIdSchema,
   EGOIdSchema,
   EncodedGiftIdSchema,
+  IdentityIdSchema,
   ThemePackIdSchema,
 } from '@/shared/gameData'
 import type { DungeonIdx, EncodedGiftId, MDCategory, ThemePackId } from '@/shared/gameData'
 import { toFloorThemeSelection } from '../lib/editorStateCodec'
-import { JSONContentSchema } from '@/shared/noteEditor'
 import { pagedModelSchema } from '@/lib/validation'
 import { INITIAL_SYNC_VERSION } from '@/lib/constants'
 import type {
@@ -23,7 +22,6 @@ import type {
   PlannerMetadata,
   PlannerEditorConfig,
 } from '../types/PlannerTypes'
-import { EgoTypeSchema } from '@/shared/gameData'
 
 export const PlannerStatusSchema = z.enum(['draft', 'saved'])
 
@@ -40,41 +38,41 @@ export const RRCategorySchema = z.enum(RR_CATEGORIES)
  */
 export const PlannerCategorySchema = z.enum([...MD_CATEGORIES, ...RR_CATEGORIES])
 
-export const DungeonIdxSchema = z.union([
-  z.literal(DUNGEON_IDX.NORMAL),
-  z.literal(DUNGEON_IDX.HARD),
-  z.literal(DUNGEON_IDX.PARALLEL),
-  z.literal(DUNGEON_IDX.EXTREME),
-])
+const StartGiftKeywordSchema = z.string().regex(/^[A-Z][A-Za-z]*$/)
 
-const UptieTierSchema = z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)])
+const IntegerSchema = z.number().int()
 
-const ThreadspinTierSchema = z.union([
-  z.literal(1),
-  z.literal(2),
-  z.literal(3),
-  z.literal(4),
-  z.literal(5),
-])
+const keyedObject = <K extends string, S extends z.ZodType>(keys: readonly K[], value: S) =>
+  z.object(Object.fromEntries(keys.map((objectKey) => [objectKey, value])) as Record<K, S>).strict()
+
+const SINNER_KEYS = SINNERS.map((_, sinnerIndex) => String(sinnerIndex + 1))
+
+const SKILL_SLOT_KEYS = OFFENSIVE_SKILL_SLOTS.map((slot) => `${slot}` as const)
 
 const EquippedIdentitySchema = z
   .object({
     id: IdentityIdSchema,
-    uptie: UptieTierSchema,
-    level: z.number().int().min(1).max(MAX_LEVEL),
+    level: IntegerSchema,
+    uptie: IntegerSchema,
   })
   .strict()
 
 const EquippedEGOSchema = z
   .object({
     id: EGOIdSchema,
-    threadspin: ThreadspinTierSchema,
+    threadspin: IntegerSchema,
   })
   .strict()
 
-const EGOSlotsSchema = z.partialRecord(EgoTypeSchema, EquippedEGOSchema)
-
-const SkillEAStateSchema = z.record(z.string(), z.number().int())
+const EGOSlotsSchema = z
+  .object({
+    ZAYIN: EquippedEGOSchema,
+    TETH: EquippedEGOSchema.optional(),
+    HE: EquippedEGOSchema.optional(),
+    WAW: EquippedEGOSchema.optional(),
+    ALEPH: EquippedEGOSchema.optional(),
+  })
+  .strict()
 
 const SinnerEquipmentSchema = z
   .object({
@@ -83,28 +81,17 @@ const SinnerEquipmentSchema = z
   })
   .strict()
 
-export const FloorSelectionDraftSchema = z
+export const FloorSelectionSchema = z
   .object({
-    themePackId: z
-      .union([ThemePackIdSchema, z.literal('')])
-      .nullable()
-      .optional(),
-    difficulty: DungeonIdxSchema.optional(),
-    giftIds: z.array(EncodedGiftIdSchema).optional(),
-  })
-  .strict()
-
-export const FloorSelectionSaveSchema = z
-  .object({
-    themePackId: ThemePackIdSchema,
-    difficulty: DungeonIdxSchema,
+    themePackId: ThemePackIdSchema.nullable(),
+    difficulty: IntegerSchema,
     giftIds: z.array(EncodedGiftIdSchema),
   })
   .strict()
 
 export const SerializableNoteContentSchema = z
   .object({
-    content: JSONContentSchema,
+    content: z.unknown().nonoptional(),
   })
   .strict()
 
@@ -164,36 +151,23 @@ export const PlannerConfigDiscriminatedSchema = z.discriminatedUnion('type', [
   RRConfigSchema,
 ])
 
-const MDPlannerContentBaseFields = {
-  selectedKeywords: z.array(z.string()),
-  selectedBuffIds: z.array(z.number().int()),
-  selectedGiftKeyword: z.string().nullable(),
-  selectedGiftIds: z.array(EncodedGiftIdSchema),
-  observationGiftIds: z.array(EncodedGiftIdSchema),
-  comprehensiveGiftIds: z.array(EncodedGiftIdSchema),
-  equipment: z.record(z.string(), SinnerEquipmentSchema),
-  deploymentOrder: z.array(z.number().int().min(0).max(11)),
-  skillEAState: z.record(z.string(), SkillEAStateSchema),
-  sectionNotes: z.record(z.string(), SerializableNoteContentSchema),
-} as const
-
-export const MDPlannerContentDraftSchema = z
+export const MDPlannerContentSchema = z
   .object({
-    ...MDPlannerContentBaseFields,
-    floorSelections: z.array(FloorSelectionDraftSchema),
+    selectedKeywords: z.array(z.string()),
+    selectedBuffIds: z.array(IntegerSchema),
+    selectedGiftKeyword: StartGiftKeywordSchema.nullable(),
+    selectedGiftIds: z.array(EncodedGiftIdSchema),
+    observationGiftIds: z.array(EncodedGiftIdSchema),
+    comprehensiveGiftIds: z.array(EncodedGiftIdSchema),
+    equipment: keyedObject(SINNER_KEYS, SinnerEquipmentSchema),
+    deploymentOrder: z.array(IntegerSchema),
+    skillEAState: keyedObject(SINNER_KEYS, keyedObject(SKILL_SLOT_KEYS, IntegerSchema)),
+    floorSelections: z.array(FloorSelectionSchema),
+    sectionNotes: z.record(z.string(), SerializableNoteContentSchema),
   })
   .strict()
 
-export const MDPlannerContentSaveSchema = z
-  .object({
-    ...MDPlannerContentBaseFields,
-    floorSelections: z.array(FloorSelectionSaveSchema),
-  })
-  .strict()
-
-export const RRPlannerContentDraftSchema = z.object({}).strict()
-
-export const RRPlannerContentSaveSchema = RRPlannerContentDraftSchema
+export const RRPlannerContentSchema = z.object({}).strict()
 
 export const DraftPlannerSchema = z
   .object({
@@ -239,13 +213,12 @@ export function toSaveablePlanner(
  * validate content based on a sibling field (config.type).
  *
  * @param data - Unknown data to validate
- * @param mode - 'draft' allows incomplete data, 'save' requires complete data
  * @returns Validated SaveablePlanner
  * @throws ZodError if validation fails
  *
  * @example
  * try {
- *   const planner = validateSaveablePlanner(rawData, 'draft')
+ *   const planner = validateSaveablePlanner(rawData)
  *   // planner is now typed as SaveablePlanner
  * } catch (error) {
  *   if (error instanceof z.ZodError) {
@@ -253,10 +226,7 @@ export function toSaveablePlanner(
  *   }
  * }
  */
-export function validateSaveablePlanner(
-  data: unknown,
-  mode: 'draft' | 'save' = 'draft',
-): SaveablePlanner {
+export function validateSaveablePlanner(data: unknown): SaveablePlanner {
   const base = z
     .object({
       metadata: PlannerMetadataSchema,
@@ -267,24 +237,18 @@ export function validateSaveablePlanner(
     .parse(data)
 
   if (base.config.type === 'MIRROR_DUNGEON') {
-    const contentSchema = mode === 'save' ? MDPlannerContentSaveSchema : MDPlannerContentDraftSchema
-    const parsed = contentSchema.parse(base.content)
-    const content: MDPlannerContent = {
-      ...parsed,
-      // JSONContentSchema validates note bodies structurally as `unknown`, and
-      // the skill-EA record is gated per key rather than per slot, so the parse
-      // output is wider than MDPlannerContent on exactly these two fields.
-      sectionNotes: parsed.sectionNotes as MDPlannerContent['sectionNotes'],
-      skillEAState: parsed.skillEAState as MDPlannerContent['skillEAState'],
+    const content = MDPlannerContentSchema.parse(base.content)
+    return {
+      metadata: base.metadata,
+      config: base.config,
+      content: content as unknown as MDPlannerContent,
     }
-    return { metadata: base.metadata, config: base.config, content }
   }
 
-  const contentSchema = mode === 'save' ? RRPlannerContentSaveSchema : RRPlannerContentDraftSchema
   return {
     metadata: base.metadata,
     config: base.config,
-    content: contentSchema.parse(base.content),
+    content: RRPlannerContentSchema.parse(base.content),
   }
 }
 

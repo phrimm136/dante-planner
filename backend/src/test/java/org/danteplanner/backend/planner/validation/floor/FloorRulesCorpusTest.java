@@ -43,8 +43,11 @@ class FloorRulesCorpusTest {
 
     private static final Path CORPUS_FILE = Path.of("../testdata/planner-floor-rules.corpus.json");
 
-    private static final Set<String> MODULE_CODES = codes(
+    private static final Set<String> SHAPE_CODES = codes(
             ErrorCode.INVALID_FIELD_TYPE,
+            ErrorCode.MISSING_REQUIRED_FIELD);
+
+    private static final Set<String> MODULE_CODES = codes(
             ErrorCode.INSUFFICIENT_FLOORS,
             ErrorCode.MISSING_THEMEPACK,
             ErrorCode.DUPLICATE_THEMEPACK,
@@ -79,8 +82,8 @@ class FloorRulesCorpusTest {
                                                                              JsonNode corpusCase) {
         JsonNode expect = corpusCase.path("expect").path(stage.tableName());
         JsonNode floorSelections = corpusCase.path("floorSelections");
-        FloorBoundary.Parsed parsed = FloorBoundary.parse(floorSelections,
-                TABLE.layout(MDCategory.fromValue(corpusCase.path("category").asText())));
+        FloorBoundary.Parsed parsed = FloorFixtures.parse(floorSelections,
+                MDCategory.fromValue(corpusCase.path("category").asText()));
         Admission admission = rules.admit(parsed, stage);
         List<Violation> references = stage == Stage.INDEX ? List.of() : FloorReferences.check(parsed, CORPUS_GAME_DATA);
 
@@ -103,7 +106,8 @@ class FloorRulesCorpusTest {
         cases.forEach(corpusCase -> Stream.of(Stage.values()).forEach(stage -> pairs(
                 corpusCase.path("expect").path(stage.tableName()).path("violations"))
                 .forEach(pair -> recordedCodes.add(pair.get(0)))));
-        Set<String> named = new HashSet<>(MODULE_CODES);
+        Set<String> named = new HashSet<>(SHAPE_CODES);
+        named.addAll(MODULE_CODES);
         named.addAll(ID_CHECK_CODES);
 
         assertThat(named).containsAll(recordedCodes);
@@ -112,16 +116,16 @@ class FloorRulesCorpusTest {
 
     @ParameterizedTest(name = "{0} at {1}")
     @CsvSource(delimiter = '|', textBlock = """
-            field-type-floor-selections | DRAFT | Field 'floorSelections' must be array, got object
-            floor-theme-pack-empty-rejected-on-publish | PUBLISH | floorSelections[4] must have a theme pack selected
-            floor-theme-pack-absent-rejected-on-publish | PUBLISH | floorSelections[4] must have a theme pack selected
+            field-type-floor-selections | DRAFT | Field 'floorSelections' has an invalid value: object
+            floor-theme-pack-empty-rejected-on-publish | PUBLISH | Field 'floorSelections[4].themePackId' has an invalid value: string ""
+            floor-theme-pack-absent-rejected-on-publish | PUBLISH | Field 'floorSelections[4].themePackId' is missing
             floor-difficulty-out-of-range | PUBLISH | floorSelections[0].difficulty value 5 is out of range [0-1]
-            floor-difficulty-absent | PUBLISH | floorSelections[0].difficulty is absent; expected a value in range [0-1]
+            floor-difficulty-absent | PUBLISH | Field 'floorSelections[0].difficulty' is missing
             floor-difficulty-hard-required-on-10f | PUBLISH | floorSelections[0].difficulty value 0 is out of range [1-1]
             floor-difficulty-extreme-required-on-15f | PUBLISH | floorSelections[10].difficulty value 1 is out of range [3-3]
-            floor-sequence-gap | DRAFT | Invalid sequence: floorSelections[1] requires themePackId in floorSelections[0]
+            floor-sequence-gap | DRAFT | Field 'floorSelections[0].themePackId' is missing
             floor-gift-duplicate | DRAFT | Duplicate value '9002' in floorSelections[0].giftIds
-            floor-gift-not-string | DRAFT | Field 'floorSelections[0].giftIds[0]' must be string, got number 9002
+            floor-gift-not-string | DRAFT | Field 'floorSelections[0].giftIds[0]' has an invalid value: number 9002
             """)
     void message_WhenGoldenCorpusFloorCaseRuns_MatchesTheRecordedText(String name, Stage stage, String message) {
         JsonNode corpusCase = namedCase(name);
@@ -134,14 +138,14 @@ class FloorRulesCorpusTest {
     }
 
     @Test
-    void admit_WhenAFloorBelowTheCountIsNotAnObjectAtDraftOrPublish_RejectsWithTheBoundaryViolationAlone() {
-        JsonNode floors = floors(floor("1001", 0), json("5"), json("{\"difficulty\":0}"), floor("1001", 0),
+    void admit_WhenAFloorBelowTheCountIsNotAnObjectAtDraftOrPublish_RejectsWithTheShapeViolationAlone() {
+        JsonNode floors = floors(floor("1001", 0), json("5"), floor("1003", 0), floor("1001", 0),
                 floor("1005", 0));
 
         for (Stage stage : List.of(Stage.DRAFT, Stage.PUBLISH)) {
             assertThat(admit(rules, floors, MDCategory.F5, stage)).isEqualTo(new Admission.Rejected(List.of(
                     new Violation(ErrorCode.INVALID_FIELD_TYPE, ContentPath.of("floorSelections").index(1),
-                            "Field 'floorSelections[1]' must be object, got number 5"))));
+                            "Field 'floorSelections[1]' has an invalid value: number 5"))));
         }
     }
 
@@ -157,7 +161,13 @@ class FloorRulesCorpusTest {
                         new FloorSelection(ThemePack.none(), Difficulty.of(0), List.of()),
                         selection("1001", 0), selection("1005", 0)),
                 List.of(new Violation(ErrorCode.INVALID_FIELD_TYPE, ContentPath.of("floorSelections").index(1),
-                        "Field 'floorSelections[1]' must be object, got number 5"))));
+                                "Field 'floorSelections[1]' has an invalid value: number 5"),
+                        new Violation(ErrorCode.MISSING_REQUIRED_FIELD,
+                                ContentPath.of("floorSelections").index(2).field("giftIds"),
+                                "Field 'floorSelections[2].giftIds' is missing"),
+                        new Violation(ErrorCode.MISSING_REQUIRED_FIELD,
+                                ContentPath.of("floorSelections").index(2).field("themePackId"),
+                                "Field 'floorSelections[2].themePackId' is missing"))));
     }
 
     @Test
@@ -172,19 +182,20 @@ class FloorRulesCorpusTest {
                     new FloorSelection(ThemePack.chosen("1004"), Difficulty.unset(), List.of("9002", "9005")),
                     new FloorSelection(ThemePack.chosen("1003"), Difficulty.unset(), List.of()));
             assertThat(admitted.boundaryViolations()).extracting(violation -> violation.path().render()).containsExactly(
-                    "floorSelections[1].giftIds[1]", "floorSelections[2].difficulty", "floorSelections[2].giftIds",
-                    "floorSelections[2].themePackId");
+                    "floorSelections[1].difficulty", "floorSelections[1].giftIds[1]", "floorSelections[2].difficulty",
+                    "floorSelections[2].giftIds", "floorSelections[2].themePackId");
         });
     }
 
     @Test
-    void admit_WhenAnObjectFloorFailsTheBoundaryAtDraftOrPublish_StillRejectsWithoutSalvage() {
-        JsonNode floors = floors(floor("1001", 0), json("{\"themePackId\":\"1004\",\"giftIds\":[\"9002\",9005]}"));
+    void admit_WhenAnObjectFloorFailsTheSchemaAtDraftOrPublish_StillRejectsWithoutSalvage() {
+        JsonNode floors = floors(floor("1001", 0),
+                json("{\"themePackId\":\"1004\",\"difficulty\":0,\"giftIds\":[\"9002\",9005]}"));
 
         for (Stage stage : List.of(Stage.DRAFT, Stage.PUBLISH)) {
             assertThat(admit(rules, floors, MDCategory.F5, stage)).isEqualTo(new Admission.Rejected(List.of(
                     new Violation(ErrorCode.INVALID_FIELD_TYPE, ContentPath.of("floorSelections").index(1).field("giftIds").index(1),
-                            "Field 'floorSelections[1].giftIds[1]' must be string, got number 9005"))));
+                            "Field 'floorSelections[1].giftIds[1]' has an invalid value: number 9005"))));
         }
     }
 
@@ -347,7 +358,7 @@ class FloorRulesCorpusTest {
 
     private static Admission admit(FloorRules floorRules, JsonNode floorSelections, MDCategory category,
                                    Stage stage) {
-        return floorRules.admit(FloorBoundary.parse(floorSelections, TABLE.layout(category)), stage);
+        return floorRules.admit(FloorFixtures.parse(floorSelections, category), stage);
     }
 
     private static List<Integer> indicesOf(FloorBoundary.Parsed parsed, Class<? extends ParsedFloor> kind) {

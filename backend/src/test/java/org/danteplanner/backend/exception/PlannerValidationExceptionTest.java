@@ -32,16 +32,16 @@ class PlannerValidationExceptionTest {
     @DisplayName("rejecting() carries every violation as a sub-error with its rendered path")
     void rejecting_WhenTwoViolations_CarriesBothAsSubErrorsWithPaths() {
         ContentVerdict.Rejected rejected = new ContentVerdict.Rejected(List.of(
-                new Violation(ErrorCode.MISSING_SINNER, ContentPath.of("equipment"), "First error"),
+                new Violation(ErrorCode.MISSING_REQUIRED_FIELD, ContentPath.of("equipment"), "First error"),
                 new Violation(ErrorCode.INVALID_FIELD_TYPE, ContentPath.of("equipment").key("05"), "Second error")));
 
         PlannerValidationException ex = PlannerValidationException.rejecting(rejected, CONTENT);
 
         assertEquals("VALIDATION_ERROR", ex.getOriginalCode());
         assertThat(ex.getSubErrors()).containsExactly(
-                new ValidationError("MISSING_SINNER", "equipment", "First error"),
+                new ValidationError("MISSING_REQUIRED_FIELD", "equipment", "First error"),
                 new ValidationError("INVALID_FIELD_TYPE", "equipment[05]", "Second error"));
-        assertEquals("[MISSING_SINNER] First error; [INVALID_FIELD_TYPE] Second error", ex.getMessage());
+        assertEquals("[MISSING_REQUIRED_FIELD] First error; [INVALID_FIELD_TYPE] Second error", ex.getMessage());
         assertEquals(CONTENT, ex.getFailedContent());
     }
 

@@ -18,7 +18,6 @@ import org.danteplanner.backend.planner.validation.floor.Stage;
 import org.danteplanner.backend.planner.validation.identity.IdentityRules;
 import org.danteplanner.backend.planner.validation.sinner.DeploymentOrder;
 import org.danteplanner.backend.planner.validation.sinner.SinnerIdValidator;
-import org.danteplanner.backend.planner.validation.sinner.SinnerKeys;
 import org.danteplanner.backend.planner.validation.skill.SkillRules;
 import org.danteplanner.backend.planner.validation.startbuff.StartBuffRules;
 import org.danteplanner.backend.planner.validation.startgift.StartGiftRules;
@@ -26,27 +25,29 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 @Component
 @Slf4j
 public class PlannerContentValidator {
 
-    private static final String EQUIPMENT = "equipment";
-    private static final String SKILL_EA_STATE = "skillEAState";
-    private static final String DEPLOYMENT_ORDER = "deploymentOrder";
-    private static final String OBSERVATION_GIFT_IDS = "observationGiftIds";
-    private static final String COMPREHENSIVE_GIFT_IDS = "comprehensiveGiftIds";
-    private static final String FLOOR_SELECTIONS = "floorSelections";
-    private static final String SELECTED_BUFF_IDS = "selectedBuffIds";
-    private static final String SELECTED_GIFT_KEYWORD = "selectedGiftKeyword";
-    private static final String SELECTED_GIFT_IDS = "selectedGiftIds";
+    private record Normalized(String content, JsonNode parsed, JsonNode root) {
+
+        PlannerDocument document(PlannerContent tree) {
+            return root.equals(parsed)
+                    ? new PlannerDocument(content, false, tree)
+                    : new PlannerDocument(root.toString(), true, tree);
+        }
+    }
 
     private final ObjectMapper objectMapper;
     private final DocumentChecks document;
     private final GameDataRegistry gameDataRegistry;
     private final RegistryReferences references;
     private final FloorRules floorRules;
+    private final ContentSchema schema = ContentSchema.planner();
 
     public PlannerContentValidator(
             ObjectMapper objectMapper,
@@ -113,67 +114,61 @@ public class PlannerContentValidator {
         return document.contentSize(parsed)
                 .or(() -> DocumentChecks.objectRoot(parsed))
                 .<ContentVerdict>map(ContentVerdict.Refused::new)
-                .orElseGet(() -> checkDocument(content, parsed, gameDataRegistry.idMigrations().normalize(parsed),
-                        category, season, stage));
-    }
-
-    private ContentVerdict checkDocument(String content, JsonNode parsed, JsonNode root, MDCategory category,
-                                         Season season, Stage stage) {
-        return DocumentChecks.unknownFields(root)
-                .or(() -> DocumentChecks.requiredFields(root))
-                .or(() -> document.noteSize(root))
-                .<ContentVerdict>map(ContentVerdict.Refused::new)
-                .orElseGet(() -> {
-                    List<Violation> violations = contentViolations(root, category, season, stage);
-                    return violations.isEmpty()
-                            ? new ContentVerdict.Accepted(normalized(content, parsed, root))
-                            : new ContentVerdict.Rejected(violations);
-                });
+                .orElseGet(() -> checkShape(normalized(content, parsed), category,
+                        tree -> document.noteSize(tree.sectionNotes()),
+                        tree -> contentViolations(tree, season, stage)));
     }
 
     private ContentVerdict checkFloorRules(String content, MDCategory category, Stage stage) {
         return switch (ContentJson.parse(objectMapper, content)) {
             case ContentJson.Malformed malformed ->
                     new ContentVerdict.Refused(DocumentChecks.malformed(malformed.detail()));
-            case ContentJson.Tree tree -> checkFloors(content, tree.root(), category, stage);
+            case ContentJson.Tree tree -> checkShape(normalized(content, tree.root()), category,
+                    admitted -> Optional.empty(),
+                    admitted -> admission(admitted.floorSelections().parsed(), stage));
         };
     }
 
-    private ContentVerdict checkFloors(String content, JsonNode parsed, MDCategory category, Stage stage) {
-        JsonNode root = gameDataRegistry.idMigrations().normalize(parsed);
-        List<Violation> violations = admission(parseFloors(root, category), stage);
-        return violations.isEmpty()
-                ? new ContentVerdict.Accepted(normalized(content, parsed, root))
-                : new ContentVerdict.Rejected(violations);
+    private ContentVerdict checkShape(Normalized normalized, MDCategory category,
+                                      Function<PlannerContent, Optional<Violation>> refusal,
+                                      Function<PlannerContent, List<Violation>> rules) {
+        List<Violation> shape = schema.violations(normalized.root());
+        if (!shape.isEmpty()) {
+            return new ContentVerdict.Rejected(shape);
+        }
+        PlannerContent tree = ContentJson.bind(objectMapper, normalized.root(),
+                gameDataRegistry.floorRules().layout(category));
+        return refusal.apply(tree)
+                .<ContentVerdict>map(ContentVerdict.Refused::new)
+                .orElseGet(() -> {
+                    List<Violation> violations = rules.apply(tree);
+                    return violations.isEmpty()
+                            ? new ContentVerdict.Accepted(normalized.document(tree))
+                            : new ContentVerdict.Rejected(violations);
+                });
     }
 
-    private List<Violation> contentViolations(JsonNode root, MDCategory category, Season season, Stage stage) {
-        SinnerKeys.Sinners equipment = SinnerKeys.parse(root.path(EQUIPMENT), ContentPath.of(EQUIPMENT));
-        SinnerKeys.Sinners skillEAState = SinnerKeys.parse(root.path(SKILL_EA_STATE), ContentPath.of(SKILL_EA_STATE));
-        FloorBoundary.Parsed floors = parseFloors(root, category);
+    private Normalized normalized(String content, JsonNode parsed) {
+        return new Normalized(content, parsed, gameDataRegistry.idMigrations().normalize(parsed));
+    }
+
+    private List<Violation> contentViolations(PlannerContent tree, Season season, Stage stage) {
+        FloorBoundary.Parsed floors = tree.floorSelections().parsed();
         return Stream.of(
-                        DocumentChecks.fieldKinds(root),
-                        DocumentChecks.selectedKeywords(root, stage),
-                        equipment.violations(),
-                        IdentityRules.check(equipment.entries(), references),
-                        EgoRules.check(equipment.entries(), references),
-                        DeploymentOrder.check(root.path(DEPLOYMENT_ORDER)),
-                        skillEAState.violations(),
-                        SkillRules.check(skillEAState.entries()),
-                        EgoGiftRules.check(root.path(OBSERVATION_GIFT_IDS), root.path(COMPREHENSIVE_GIFT_IDS),
-                                references),
+                        DocumentChecks.selectedKeywords(tree.selectedKeywords(), stage),
+                        IdentityRules.check(tree.identities(), references),
+                        EgoRules.check(tree.egos(), references),
+                        DeploymentOrder.check(tree.deploymentOrder()),
+                        SkillRules.check(tree.skillEAState()),
+                        EgoGiftRules.check(tree.observationGiftIds(), tree.comprehensiveGiftIds(), references),
                         admission(floors, stage),
                         FloorReferences.check(floors, FloorReferenceData.of(gameDataRegistry)),
-                        StartBuffRules.check(root.path(SELECTED_BUFF_IDS), season),
-                        StartGiftRules.check(root.path(SELECTED_GIFT_KEYWORD), root.path(SELECTED_GIFT_IDS),
+                        StartBuffRules.check(tree.selectedBuffIds(), season),
+                        StartGiftRules.check(Optional.ofNullable(tree.selectedGiftKeyword()), tree.selectedGiftIds(),
                                 references, season))
                 .flatMap(List::stream)
                 .sorted(Violation.BY_PATH_THEN_CODE)
                 .toList();
-    }
-
-    private FloorBoundary.Parsed parseFloors(JsonNode root, MDCategory category) {
-        return FloorBoundary.parse(root.path(FLOOR_SELECTIONS), gameDataRegistry.floorRules().layout(category));
     }
 
     private List<Violation> admission(FloorBoundary.Parsed floors, Stage stage) {
@@ -186,9 +181,5 @@ public class PlannerContentValidator {
     private static Violation unknownVersion(int version) {
         return new Violation(ErrorCode.UNKNOWN_VERSION, ContentPath.root(),
                 String.format("No game data for content version %d", version));
-    }
-
-    private static PlannerDocument normalized(String content, JsonNode parsed, JsonNode root) {
-        return root.equals(parsed) ? new PlannerDocument(content, false) : new PlannerDocument(root.toString(), true);
     }
 }

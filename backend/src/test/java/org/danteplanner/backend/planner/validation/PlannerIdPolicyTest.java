@@ -90,12 +90,12 @@ class PlannerIdPolicyTest {
     void validate_WhenContentHoldsADroppedEgo_StoresTheSlotRemoved() throws IOException {
         PlannerContentValidator validator = validatorOver("{\"ego\":{\"drop\":[\"20199\"]}}");
         ObjectNode content = validContent();
-        ObjectNode egos = (ObjectNode) content.path("equipment").path("01").path("egos");
+        ObjectNode egos = (ObjectNode) content.path("equipment").path("1").path("egos");
         egos.putObject("TETH").put("id", "20199").put("threadspin", 4);
 
         String stored = validator.parse(content.toString(), MDCategory.F5, validator.season(CURRENT_SEASON), Stage.DRAFT).json();
 
-        assertThat(MAPPER.readTree(stored).path("equipment").path("01").path("egos").has("TETH")).isFalse();
+        assertThat(MAPPER.readTree(stored).path("equipment").path("1").path("egos").has("TETH")).isFalse();
         assertThat(MAPPER.readTree(stored)).isEqualTo(validContent());
     }
 
@@ -150,7 +150,7 @@ class PlannerIdPolicyTest {
     void validate_WhenZayinSlotHoldsADroppedEgo_RejectsItAsAnUnknownEgo(Stage stage) throws IOException {
         PlannerContentValidator validator = validatorOver("{\"ego\":{\"drop\":[\"20199\"]}}");
         ObjectNode content = validContent();
-        ((ObjectNode) content.path("equipment").path("01").path("egos").path("ZAYIN")).put("id", "20199");
+        ((ObjectNode) content.path("equipment").path("1").path("egos").path("ZAYIN")).put("id", "20199");
 
         PlannerValidationException ex = rejection(
                 () -> validator.parse(content.toString(), MDCategory.F5, validator.season(CURRENT_SEASON), stage).json());
@@ -164,7 +164,7 @@ class PlannerIdPolicyTest {
     void validate_WhenAFloorHasNoThemePack_RejectsThePublishAndAcceptsTheDraft() throws IOException {
         PlannerContentValidator validator = validatorOver(null);
         ObjectNode content = validContent();
-        ((ArrayNode) content.path("floorSelections")).set(4, MAPPER.readTree("{\"difficulty\":0,\"giftIds\":[]}"));
+        ((ArrayNode) content.path("floorSelections")).set(4, MAPPER.readTree("{\"themePackId\":null,\"difficulty\":0,\"giftIds\":[]}"));
 
         String stored = validator.parse(content.toString(), MDCategory.F5, validator.season(CURRENT_SEASON), Stage.DRAFT).json();
         PlannerValidationException ex = rejection(
@@ -201,7 +201,7 @@ class PlannerIdPolicyTest {
                 () -> validator.parse(content.toString(), MDCategory.F5, validator.season(CURRENT_SEASON), Stage.PUBLISH).json());
 
         assertThat(ex.getSubErrors()).containsExactly(
-                new ValidationError("INVALID_FIELD_TYPE", "floorSelections[1]", "Field 'floorSelections[1]' must be object, got null"));
+                new ValidationError("INVALID_FIELD_TYPE", "floorSelections[1]", "Field 'floorSelections[1]' has an invalid value: null"));
     }
 
     @Test
@@ -267,7 +267,8 @@ class PlannerIdPolicyTest {
         PlannerContentValidator validator = validatorOver(null);
         ObjectNode content = validContent();
         content.set("floorSelections",
-                MAPPER.readTree("[{\"difficulty\":0,\"giftIds\":[]},{\"difficulty\":0,\"giftIds\":[]}]"));
+                MAPPER.readTree("[{\"themePackId\":null,\"difficulty\":0,\"giftIds\":[]},"
+                        + "{\"themePackId\":null,\"difficulty\":0,\"giftIds\":[]}]"));
 
         String stored = validator.parse(content.toString(), MDCategory.F5, validator.season(CURRENT_SEASON), Stage.DRAFT).json();
 

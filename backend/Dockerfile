@@ -9,6 +9,7 @@ RUN --mount=type=cache,target=/root/.gradle \
     gradle dependencies --no-daemon
 
 COPY backend/src ./src
+COPY testdata/planner-content.schema.json /testdata/planner-content.schema.json
 
 # Declared after the dependency layers so a new commit does not invalidate them.
 ARG GIT_SHA=unknown

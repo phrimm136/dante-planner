@@ -126,7 +126,7 @@
     "observationGiftIds": [],
     "comprehensiveGiftIds": [],
     "equipment": {
-      "01": {
+      "1": {
         "identity": {
           "id": "10101",
           "level": 45,
@@ -139,7 +139,7 @@
           }
         }
       },
-      "02": {
+      "2": {
         "identity": {
           "id": "10201",
           "level": 45,
@@ -152,7 +152,7 @@
           }
         }
       },
-      "03": {
+      "3": {
         "identity": {
           "id": "10301",
           "level": 45,
@@ -165,7 +165,7 @@
           }
         }
       },
-      "04": {
+      "4": {
         "identity": {
           "id": "10401",
           "level": 45,
@@ -178,7 +178,7 @@
           }
         }
       },
-      "05": {
+      "5": {
         "identity": {
           "id": "10501",
           "level": 45,
@@ -191,7 +191,7 @@
           }
         }
       },
-      "06": {
+      "6": {
         "identity": {
           "id": "10601",
           "level": 45,
@@ -204,7 +204,7 @@
           }
         }
       },
-      "07": {
+      "7": {
         "identity": {
           "id": "10701",
           "level": 45,
@@ -217,7 +217,7 @@
           }
         }
       },
-      "08": {
+      "8": {
         "identity": {
           "id": "10801",
           "level": 45,
@@ -230,7 +230,7 @@
           }
         }
       },
-      "09": {
+      "9": {
         "identity": {
           "id": "10901",
           "level": 45,
@@ -285,47 +285,47 @@
     },
     "deploymentOrder": [],
     "skillEAState": {
-      "01": {
+      "1": {
         "0": 3,
         "1": 2,
         "2": 1
       },
-      "02": {
+      "2": {
         "0": 3,
         "1": 2,
         "2": 1
       },
-      "03": {
+      "3": {
         "0": 3,
         "1": 2,
         "2": 1
       },
-      "04": {
+      "4": {
         "0": 3,
         "1": 2,
         "2": 1
       },
-      "05": {
+      "5": {
         "0": 3,
         "1": 2,
         "2": 1
       },
-      "06": {
+      "6": {
         "0": 3,
         "1": 2,
         "2": 1
       },
-      "07": {
+      "7": {
         "0": 3,
         "1": 2,
         "2": 1
       },
-      "08": {
+      "8": {
         "0": 3,
         "1": 2,
         "2": 1
       },
-      "09": {
+      "9": {
         "0": 3,
         "1": 2,
         "2": 1
@@ -405,13 +405,13 @@
         "draft": [
           {
             "code": "MISSING_REQUIRED_FIELD",
-            "path": ""
+            "path": "selectedKeywords"
           }
         ],
         "publish": [
           {
             "code": "MISSING_REQUIRED_FIELD",
-            "path": ""
+            "path": "selectedKeywords"
           }
         ]
       }
@@ -602,8 +602,18 @@
         "brief-v3:absent-required-lists"
       ],
       "expected": {
-        "draft": [],
-        "publish": []
+        "draft": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "selectedBuffIds"
+          }
+        ],
+        "publish": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "selectedBuffIds"
+          }
+        ]
       }
     },
     {
@@ -792,8 +802,18 @@
         "brief-v3:absent-required-lists"
       ],
       "expected": {
-        "draft": [],
-        "publish": []
+        "draft": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "selectedGiftKeyword"
+          }
+        ],
+        "publish": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "selectedGiftKeyword"
+          }
+        ]
       }
     },
     {
@@ -864,13 +884,13 @@
       "expected": {
         "draft": [
           {
-            "code": "UNKNOWN_STARTGIFT_KEYWORD",
+            "code": "INVALID_FIELD_TYPE",
             "path": "selectedGiftKeyword"
           }
         ],
         "publish": [
           {
-            "code": "UNKNOWN_STARTGIFT_KEYWORD",
+            "code": "INVALID_FIELD_TYPE",
             "path": "selectedGiftKeyword"
           }
         ]
@@ -892,8 +912,18 @@
         "brief-v3:absent-required-lists"
       ],
       "expected": {
-        "draft": [],
-        "publish": []
+        "draft": [
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "selectedGiftKeyword"
+          }
+        ],
+        "publish": [
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "selectedGiftKeyword"
+          }
+        ]
       }
     },
     {
@@ -972,8 +1002,18 @@
         "brief-v3:absent-required-lists"
       ],
       "expected": {
-        "draft": [],
-        "publish": []
+        "draft": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "selectedGiftIds"
+          }
+        ],
+        "publish": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "selectedGiftIds"
+          }
+        ]
       }
     },
     {
@@ -1162,8 +1202,18 @@
         "brief-v3:absent-required-lists"
       ],
       "expected": {
-        "draft": [],
-        "publish": []
+        "draft": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "observationGiftIds"
+          }
+        ],
+        "publish": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "observationGiftIds"
+          }
+        ]
       }
     },
     {
@@ -1352,8 +1402,18 @@
         "brief-v3:absent-required-lists"
       ],
       "expected": {
-        "draft": [],
-        "publish": []
+        "draft": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "comprehensiveGiftIds"
+          }
+        ],
+        "publish": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "comprehensiveGiftIds"
+          }
+        ]
       }
     },
     {
@@ -1545,13 +1605,13 @@
         "draft": [
           {
             "code": "MISSING_REQUIRED_FIELD",
-            "path": ""
+            "path": "equipment"
           }
         ],
         "publish": [
           {
             "code": "MISSING_REQUIRED_FIELD",
-            "path": ""
+            "path": "equipment"
           }
         ]
       }
@@ -1724,14 +1784,102 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_SINNER",
-            "path": "equipment"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[10]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[11]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[12]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[2]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[3]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[4]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[5]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[6]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[7]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[8]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[9]"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_SINNER",
-            "path": "equipment"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[10]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[11]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[12]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[2]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[3]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[4]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[5]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[6]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[7]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[8]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[9]"
           }
         ]
       }
@@ -1755,13 +1903,13 @@
         "draft": [
           {
             "code": "MISSING_REQUIRED_FIELD",
-            "path": ""
+            "path": "deploymentOrder"
           }
         ],
         "publish": [
           {
             "code": "MISSING_REQUIRED_FIELD",
-            "path": ""
+            "path": "deploymentOrder"
           }
         ]
       }
@@ -1955,13 +2103,13 @@
         "draft": [
           {
             "code": "MISSING_REQUIRED_FIELD",
-            "path": ""
+            "path": "skillEAState"
           }
         ],
         "publish": [
           {
             "code": "MISSING_REQUIRED_FIELD",
-            "path": ""
+            "path": "skillEAState"
           }
         ]
       }
@@ -2134,14 +2282,102 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_SINNER",
-            "path": "skillEAState"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[10]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[11]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[12]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[2]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[3]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[4]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[5]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[6]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[7]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[8]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[9]"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_SINNER",
-            "path": "skillEAState"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[10]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[11]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[12]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[2]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[3]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[4]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[5]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[6]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[7]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[8]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[9]"
           }
         ]
       }
@@ -2165,13 +2401,13 @@
         "draft": [
           {
             "code": "MISSING_REQUIRED_FIELD",
-            "path": ""
+            "path": "floorSelections"
           }
         ],
         "publish": [
           {
             "code": "MISSING_REQUIRED_FIELD",
-            "path": ""
+            "path": "floorSelections"
           }
         ]
       }
@@ -2386,13 +2622,13 @@
         "draft": [
           {
             "code": "MISSING_REQUIRED_FIELD",
-            "path": ""
+            "path": "sectionNotes"
           }
         ],
         "publish": [
           {
             "code": "MISSING_REQUIRED_FIELD",
-            "path": ""
+            "path": "sectionNotes"
           }
         ]
       }
@@ -2583,13 +2819,13 @@
         "draft": [
           {
             "code": "UNKNOWN_FIELD",
-            "path": ""
+            "path": "mystery"
           }
         ],
         "publish": [
           {
             "code": "UNKNOWN_FIELD",
-            "path": ""
+            "path": "mystery"
           }
         ]
       }
@@ -2788,7 +3024,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "id"
           ],
@@ -2858,7 +3094,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "id"
           ],
@@ -2932,7 +3168,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "id"
           ],
@@ -2943,13 +3179,13 @@
         "draft": [
           {
             "code": "MISSING_REQUIRED_FIELD",
-            "path": ""
+            "path": "deploymentOrder"
           }
         ],
         "publish": [
           {
             "code": "MISSING_REQUIRED_FIELD",
-            "path": ""
+            "path": "deploymentOrder"
           }
         ]
       }
@@ -3158,7 +3394,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "id"
           ],
@@ -3169,13 +3405,13 @@
         "draft": [
           {
             "code": "UNKNOWN_IDENTITY",
-            "path": "equipment[01].identity.id"
+            "path": "equipment[1].identity.id"
           }
         ],
         "publish": [
           {
             "code": "UNKNOWN_IDENTITY",
-            "path": "equipment[01].identity.id"
+            "path": "equipment[1].identity.id"
           },
           {
             "code": "UNKNOWN_KEYWORD",
@@ -3192,7 +3428,7 @@
         {
           "at": [
             "equipment",
-            "01"
+            "1"
           ],
           "remove": true
         }
@@ -3200,14 +3436,14 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_SINNER",
-            "path": "equipment"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1]"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_SINNER",
-            "path": "equipment"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1]"
           }
         ]
       }
@@ -3220,7 +3456,7 @@
         {
           "at": [
             "equipment",
-            "01"
+            "1"
           ],
           "value": null
         }
@@ -3229,13 +3465,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01]"
+            "path": "equipment[1]"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01]"
+            "path": "equipment[1]"
           }
         ]
       }
@@ -3248,7 +3484,7 @@
         {
           "at": [
             "equipment",
-            "01"
+            "1"
           ],
           "value": 7
         }
@@ -3257,13 +3493,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01]"
+            "path": "equipment[1]"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01]"
+            "path": "equipment[1]"
           }
         ]
       }
@@ -3276,7 +3512,7 @@
         {
           "at": [
             "equipment",
-            "01"
+            "1"
           ],
           "value": "x"
         }
@@ -3285,13 +3521,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01]"
+            "path": "equipment[1]"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01]"
+            "path": "equipment[1]"
           }
         ]
       }
@@ -3304,7 +3540,7 @@
         {
           "at": [
             "equipment",
-            "01"
+            "1"
           ],
           "value": ""
         }
@@ -3313,13 +3549,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01]"
+            "path": "equipment[1]"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01]"
+            "path": "equipment[1]"
           }
         ]
       }
@@ -3332,7 +3568,7 @@
         {
           "at": [
             "equipment",
-            "01"
+            "1"
           ],
           "value": []
         }
@@ -3341,13 +3577,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01]"
+            "path": "equipment[1]"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01]"
+            "path": "equipment[1]"
           }
         ]
       }
@@ -3360,7 +3596,7 @@
         {
           "at": [
             "equipment",
-            "01"
+            "1"
           ],
           "value": {}
         }
@@ -3368,42 +3604,70 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_EGO_ZAYIN",
-            "path": "equipment[01].egos"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].egos"
           },
           {
-            "code": "MISSING_IDENTITY",
-            "path": "equipment[01].identity"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].identity"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_EGO_ZAYIN",
-            "path": "equipment[01].egos"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].egos"
           },
           {
-            "code": "MISSING_IDENTITY",
-            "path": "equipment[01].identity"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].identity"
           }
         ]
       }
     },
     {
-      "name": "sinner-equipment-key-unpadded",
+      "name": "sinner-equipment-entry-12-absent",
       "subject": "sinner",
       "category": "5F",
       "edits": [
         {
           "at": [
             "equipment",
-            "01"
+            "12"
+          ],
+          "remove": true
+        }
+      ],
+      "expected": {
+        "draft": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[12]"
+          }
+        ],
+        "publish": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[12]"
+          }
+        ]
+      }
+    },
+    {
+      "name": "sinner-equipment-key-padded",
+      "subject": "sinner",
+      "category": "5F",
+      "edits": [
+        {
+          "at": [
+            "equipment",
+            "1"
           ],
           "remove": true
         },
         {
           "at": [
             "equipment",
-            "1"
+            "01"
           ],
           "value": {
             "identity": {
@@ -3421,8 +3685,26 @@
         }
       ],
       "expected": {
-        "draft": [],
-        "publish": []
+        "draft": [
+          {
+            "code": "UNKNOWN_FIELD",
+            "path": "equipment[01]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1]"
+          }
+        ],
+        "publish": [
+          {
+            "code": "UNKNOWN_FIELD",
+            "path": "equipment[01]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1]"
+          }
+        ]
       }
     },
     {
@@ -3433,7 +3715,7 @@
         {
           "at": [
             "equipment",
-            "01"
+            "1"
           ],
           "remove": true
         },
@@ -3460,22 +3742,22 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_SINNER",
-            "path": "equipment"
+            "code": "UNKNOWN_FIELD",
+            "path": "equipment[0]"
           },
           {
-            "code": "OUT_OF_RANGE_SINNER",
-            "path": "equipment[0]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1]"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_SINNER",
-            "path": "equipment"
+            "code": "UNKNOWN_FIELD",
+            "path": "equipment[0]"
           },
           {
-            "code": "OUT_OF_RANGE_SINNER",
-            "path": "equipment[0]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1]"
           }
         ]
       }
@@ -3488,7 +3770,7 @@
         {
           "at": [
             "equipment",
-            "01"
+            "1"
           ],
           "remove": true
         },
@@ -3515,21 +3797,21 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_SINNER",
-            "path": "equipment"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1]"
           },
           {
-            "code": "OUT_OF_RANGE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "equipment[13]"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_SINNER",
-            "path": "equipment"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1]"
           },
           {
-            "code": "OUT_OF_RANGE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "equipment[13]"
           }
         ]
@@ -3563,13 +3845,13 @@
       "expected": {
         "draft": [
           {
-            "code": "OUT_OF_RANGE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "equipment[13]"
           }
         ],
         "publish": [
           {
-            "code": "OUT_OF_RANGE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "equipment[13]"
           }
         ]
@@ -3583,7 +3865,7 @@
         {
           "at": [
             "equipment",
-            "01"
+            "1"
           ],
           "remove": true
         },
@@ -3610,22 +3892,22 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_SINNER",
-            "path": "equipment"
+            "code": "UNKNOWN_FIELD",
+            "path": "equipment[-1]"
           },
           {
-            "code": "OUT_OF_RANGE_SINNER",
-            "path": "equipment[-1]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1]"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_SINNER",
-            "path": "equipment"
+            "code": "UNKNOWN_FIELD",
+            "path": "equipment[-1]"
           },
           {
-            "code": "OUT_OF_RANGE_SINNER",
-            "path": "equipment[-1]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1]"
           }
         ]
       }
@@ -3638,7 +3920,7 @@
         {
           "at": [
             "equipment",
-            "01"
+            "1"
           ],
           "remove": true
         },
@@ -3663,8 +3945,26 @@
         }
       ],
       "expected": {
-        "draft": [],
-        "publish": []
+        "draft": [
+          {
+            "code": "UNKNOWN_FIELD",
+            "path": "equipment[+1]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1]"
+          }
+        ],
+        "publish": [
+          {
+            "code": "UNKNOWN_FIELD",
+            "path": "equipment[+1]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1]"
+          }
+        ]
       }
     },
     {
@@ -3675,7 +3975,7 @@
         {
           "at": [
             "equipment",
-            "01"
+            "1"
           ],
           "remove": true
         },
@@ -3700,8 +4000,26 @@
         }
       ],
       "expected": {
-        "draft": [],
-        "publish": []
+        "draft": [
+          {
+            "code": "UNKNOWN_FIELD",
+            "path": "equipment[001]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1]"
+          }
+        ],
+        "publish": [
+          {
+            "code": "UNKNOWN_FIELD",
+            "path": "equipment[001]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1]"
+          }
+        ]
       }
     },
     {
@@ -3712,7 +4030,7 @@
         {
           "at": [
             "equipment",
-            "01"
+            "1"
           ],
           "remove": true
         },
@@ -3739,21 +4057,21 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_SINNER",
-            "path": "equipment"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1]"
           },
           {
-            "code": "INVALID_FIELD_TYPE",
+            "code": "UNKNOWN_FIELD",
             "path": "equipment[1.5]"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_SINNER",
-            "path": "equipment"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1]"
           },
           {
-            "code": "INVALID_FIELD_TYPE",
+            "code": "UNKNOWN_FIELD",
             "path": "equipment[1.5]"
           }
         ]
@@ -3767,7 +4085,7 @@
         {
           "at": [
             "equipment",
-            "01"
+            "1"
           ],
           "remove": true
         },
@@ -3794,21 +4112,21 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_SINNER",
-            "path": "equipment"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1]"
           },
           {
-            "code": "INVALID_FIELD_TYPE",
+            "code": "UNKNOWN_FIELD",
             "path": "equipment[abc]"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_SINNER",
-            "path": "equipment"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1]"
           },
           {
-            "code": "INVALID_FIELD_TYPE",
+            "code": "UNKNOWN_FIELD",
             "path": "equipment[abc]"
           }
         ]
@@ -3842,13 +4160,13 @@
       "expected": {
         "draft": [
           {
-            "code": "INVALID_FIELD_TYPE",
+            "code": "UNKNOWN_FIELD",
             "path": "equipment[abc]"
           }
         ],
         "publish": [
           {
-            "code": "INVALID_FIELD_TYPE",
+            "code": "UNKNOWN_FIELD",
             "path": "equipment[abc]"
           }
         ]
@@ -3862,7 +4180,7 @@
         {
           "at": [
             "equipment",
-            "01"
+            "1"
           ],
           "remove": true
         },
@@ -3889,22 +4207,22 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_SINNER",
-            "path": "equipment"
+            "code": "UNKNOWN_FIELD",
+            "path": "equipment[]"
           },
           {
-            "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1]"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_SINNER",
-            "path": "equipment"
+            "code": "UNKNOWN_FIELD",
+            "path": "equipment[]"
           },
           {
-            "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1]"
           }
         ]
       }
@@ -3917,7 +4235,7 @@
         {
           "at": [
             "equipment",
-            "01"
+            "1"
           ],
           "remove": true
         },
@@ -3944,21 +4262,21 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_SINNER",
-            "path": "equipment"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1]"
           },
           {
-            "code": "OUT_OF_RANGE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "equipment[2147483647]"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_SINNER",
-            "path": "equipment"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1]"
           },
           {
-            "code": "OUT_OF_RANGE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "equipment[2147483647]"
           }
         ]
@@ -3972,7 +4290,7 @@
         {
           "at": [
             "equipment",
-            "01"
+            "1"
           ],
           "remove": true
         },
@@ -4002,21 +4320,21 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_SINNER",
-            "path": "equipment"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1]"
           },
           {
-            "code": "OUT_OF_RANGE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "equipment[2147483648]"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_SINNER",
-            "path": "equipment"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1]"
           },
           {
-            "code": "OUT_OF_RANGE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "equipment[2147483648]"
           }
         ]
@@ -4030,7 +4348,7 @@
         {
           "at": [
             "equipment",
-            "01"
+            "1"
           ],
           "remove": true
         },
@@ -4060,21 +4378,21 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_SINNER",
-            "path": "equipment"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1]"
           },
           {
-            "code": "OUT_OF_RANGE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "equipment[99999999999]"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_SINNER",
-            "path": "equipment"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1]"
           },
           {
-            "code": "OUT_OF_RANGE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "equipment[99999999999]"
           }
         ]
@@ -4111,13 +4429,13 @@
       "expected": {
         "draft": [
           {
-            "code": "OUT_OF_RANGE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "equipment[99999999999]"
           }
         ],
         "publish": [
           {
-            "code": "OUT_OF_RANGE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "equipment[99999999999]"
           }
         ]
@@ -4131,7 +4449,7 @@
         {
           "at": [
             "equipment",
-            "1"
+            "01"
           ],
           "value": {
             "identity": {
@@ -4151,22 +4469,14 @@
       "expected": {
         "draft": [
           {
-            "code": "DUPLICATE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "equipment[01]"
-          },
-          {
-            "code": "DUPLICATE_SINNER",
-            "path": "equipment[1]"
           }
         ],
         "publish": [
           {
-            "code": "DUPLICATE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "equipment[01]"
-          },
-          {
-            "code": "DUPLICATE_SINNER",
-            "path": "equipment[1]"
           }
         ]
       }
@@ -4179,7 +4489,7 @@
         {
           "at": [
             "equipment",
-            "1"
+            "01"
           ],
           "value": {
             "identity": {
@@ -4199,22 +4509,14 @@
       "expected": {
         "draft": [
           {
-            "code": "DUPLICATE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "equipment[01]"
-          },
-          {
-            "code": "DUPLICATE_SINNER",
-            "path": "equipment[1]"
           }
         ],
         "publish": [
           {
-            "code": "DUPLICATE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "equipment[01]"
-          },
-          {
-            "code": "DUPLICATE_SINNER",
-            "path": "equipment[1]"
           }
         ]
       }
@@ -4247,13 +4549,13 @@
       "expected": {
         "draft": [
           {
-            "code": "INVALID_FIELD_TYPE",
+            "code": "UNKNOWN_FIELD",
             "path": "equipment[\u0663]"
           }
         ],
         "publish": [
           {
-            "code": "INVALID_FIELD_TYPE",
+            "code": "UNKNOWN_FIELD",
             "path": "equipment[\u0663]"
           }
         ]
@@ -4274,14 +4576,102 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_SINNER",
-            "path": "equipment"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[10]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[11]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[12]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[2]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[3]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[4]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[5]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[6]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[7]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[8]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[9]"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_SINNER",
-            "path": "equipment"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[10]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[11]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[12]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[2]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[3]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[4]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[5]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[6]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[7]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[8]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[9]"
           }
         ]
       }
@@ -4294,7 +4684,7 @@
         {
           "at": [
             "skillEAState",
-            "01"
+            "1"
           ],
           "remove": true
         }
@@ -4302,14 +4692,14 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_SINNER",
-            "path": "skillEAState"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1]"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_SINNER",
-            "path": "skillEAState"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1]"
           }
         ]
       }
@@ -4322,7 +4712,7 @@
         {
           "at": [
             "skillEAState",
-            "01"
+            "1"
           ],
           "value": null
         }
@@ -4331,13 +4721,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "skillEAState[01]"
+            "path": "skillEAState[1]"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "skillEAState[01]"
+            "path": "skillEAState[1]"
           }
         ]
       }
@@ -4350,7 +4740,7 @@
         {
           "at": [
             "skillEAState",
-            "01"
+            "1"
           ],
           "value": 7
         }
@@ -4359,13 +4749,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "skillEAState[01]"
+            "path": "skillEAState[1]"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "skillEAState[01]"
+            "path": "skillEAState[1]"
           }
         ]
       }
@@ -4378,7 +4768,7 @@
         {
           "at": [
             "skillEAState",
-            "01"
+            "1"
           ],
           "value": "x"
         }
@@ -4387,13 +4777,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "skillEAState[01]"
+            "path": "skillEAState[1]"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "skillEAState[01]"
+            "path": "skillEAState[1]"
           }
         ]
       }
@@ -4406,7 +4796,7 @@
         {
           "at": [
             "skillEAState",
-            "01"
+            "1"
           ],
           "value": ""
         }
@@ -4415,13 +4805,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "skillEAState[01]"
+            "path": "skillEAState[1]"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "skillEAState[01]"
+            "path": "skillEAState[1]"
           }
         ]
       }
@@ -4434,7 +4824,7 @@
         {
           "at": [
             "skillEAState",
-            "01"
+            "1"
           ],
           "value": []
         }
@@ -4443,13 +4833,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "skillEAState[01]"
+            "path": "skillEAState[1]"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "skillEAState[01]"
+            "path": "skillEAState[1]"
           }
         ]
       }
@@ -4462,7 +4852,7 @@
         {
           "at": [
             "skillEAState",
-            "01"
+            "1"
           ],
           "value": {}
         }
@@ -4470,34 +4860,50 @@
       "expected": {
         "draft": [
           {
-            "code": "OUT_OF_RANGE_SKILL_TOTAL",
-            "path": "skillEAState[01]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1][0]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1][1]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1][2]"
           }
         ],
         "publish": [
           {
-            "code": "OUT_OF_RANGE_SKILL_TOTAL",
-            "path": "skillEAState[01]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1][0]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1][1]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1][2]"
           }
         ]
       }
     },
     {
-      "name": "sinner-skillEAState-key-unpadded",
+      "name": "sinner-skillEAState-key-padded",
       "subject": "sinner",
       "category": "5F",
       "edits": [
         {
           "at": [
             "skillEAState",
-            "01"
+            "1"
           ],
           "remove": true
         },
         {
           "at": [
             "skillEAState",
-            "1"
+            "01"
           ],
           "value": {
             "0": 3,
@@ -4507,8 +4913,26 @@
         }
       ],
       "expected": {
-        "draft": [],
-        "publish": []
+        "draft": [
+          {
+            "code": "UNKNOWN_FIELD",
+            "path": "skillEAState[01]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1]"
+          }
+        ],
+        "publish": [
+          {
+            "code": "UNKNOWN_FIELD",
+            "path": "skillEAState[01]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1]"
+          }
+        ]
       }
     },
     {
@@ -4519,7 +4943,7 @@
         {
           "at": [
             "skillEAState",
-            "01"
+            "1"
           ],
           "remove": true
         },
@@ -4538,22 +4962,22 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_SINNER",
-            "path": "skillEAState"
+            "code": "UNKNOWN_FIELD",
+            "path": "skillEAState[0]"
           },
           {
-            "code": "OUT_OF_RANGE_SINNER",
-            "path": "skillEAState[0]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1]"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_SINNER",
-            "path": "skillEAState"
+            "code": "UNKNOWN_FIELD",
+            "path": "skillEAState[0]"
           },
           {
-            "code": "OUT_OF_RANGE_SINNER",
-            "path": "skillEAState[0]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1]"
           }
         ]
       }
@@ -4566,7 +4990,7 @@
         {
           "at": [
             "skillEAState",
-            "01"
+            "1"
           ],
           "remove": true
         },
@@ -4585,21 +5009,21 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_SINNER",
-            "path": "skillEAState"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1]"
           },
           {
-            "code": "OUT_OF_RANGE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "skillEAState[13]"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_SINNER",
-            "path": "skillEAState"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1]"
           },
           {
-            "code": "OUT_OF_RANGE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "skillEAState[13]"
           }
         ]
@@ -4625,13 +5049,13 @@
       "expected": {
         "draft": [
           {
-            "code": "OUT_OF_RANGE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "skillEAState[13]"
           }
         ],
         "publish": [
           {
-            "code": "OUT_OF_RANGE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "skillEAState[13]"
           }
         ]
@@ -4645,7 +5069,7 @@
         {
           "at": [
             "skillEAState",
-            "01"
+            "1"
           ],
           "remove": true
         },
@@ -4664,22 +5088,22 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_SINNER",
-            "path": "skillEAState"
+            "code": "UNKNOWN_FIELD",
+            "path": "skillEAState[-1]"
           },
           {
-            "code": "OUT_OF_RANGE_SINNER",
-            "path": "skillEAState[-1]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1]"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_SINNER",
-            "path": "skillEAState"
+            "code": "UNKNOWN_FIELD",
+            "path": "skillEAState[-1]"
           },
           {
-            "code": "OUT_OF_RANGE_SINNER",
-            "path": "skillEAState[-1]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1]"
           }
         ]
       }
@@ -4692,7 +5116,7 @@
         {
           "at": [
             "skillEAState",
-            "01"
+            "1"
           ],
           "remove": true
         },
@@ -4709,8 +5133,26 @@
         }
       ],
       "expected": {
-        "draft": [],
-        "publish": []
+        "draft": [
+          {
+            "code": "UNKNOWN_FIELD",
+            "path": "skillEAState[+1]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1]"
+          }
+        ],
+        "publish": [
+          {
+            "code": "UNKNOWN_FIELD",
+            "path": "skillEAState[+1]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1]"
+          }
+        ]
       }
     },
     {
@@ -4721,7 +5163,7 @@
         {
           "at": [
             "skillEAState",
-            "01"
+            "1"
           ],
           "remove": true
         },
@@ -4738,8 +5180,26 @@
         }
       ],
       "expected": {
-        "draft": [],
-        "publish": []
+        "draft": [
+          {
+            "code": "UNKNOWN_FIELD",
+            "path": "skillEAState[001]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1]"
+          }
+        ],
+        "publish": [
+          {
+            "code": "UNKNOWN_FIELD",
+            "path": "skillEAState[001]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1]"
+          }
+        ]
       }
     },
     {
@@ -4750,7 +5210,7 @@
         {
           "at": [
             "skillEAState",
-            "01"
+            "1"
           ],
           "remove": true
         },
@@ -4769,21 +5229,21 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_SINNER",
-            "path": "skillEAState"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1]"
           },
           {
-            "code": "INVALID_FIELD_TYPE",
+            "code": "UNKNOWN_FIELD",
             "path": "skillEAState[1.5]"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_SINNER",
-            "path": "skillEAState"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1]"
           },
           {
-            "code": "INVALID_FIELD_TYPE",
+            "code": "UNKNOWN_FIELD",
             "path": "skillEAState[1.5]"
           }
         ]
@@ -4797,7 +5257,7 @@
         {
           "at": [
             "skillEAState",
-            "01"
+            "1"
           ],
           "remove": true
         },
@@ -4816,21 +5276,21 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_SINNER",
-            "path": "skillEAState"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1]"
           },
           {
-            "code": "INVALID_FIELD_TYPE",
+            "code": "UNKNOWN_FIELD",
             "path": "skillEAState[abc]"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_SINNER",
-            "path": "skillEAState"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1]"
           },
           {
-            "code": "INVALID_FIELD_TYPE",
+            "code": "UNKNOWN_FIELD",
             "path": "skillEAState[abc]"
           }
         ]
@@ -4856,13 +5316,13 @@
       "expected": {
         "draft": [
           {
-            "code": "INVALID_FIELD_TYPE",
+            "code": "UNKNOWN_FIELD",
             "path": "skillEAState[abc]"
           }
         ],
         "publish": [
           {
-            "code": "INVALID_FIELD_TYPE",
+            "code": "UNKNOWN_FIELD",
             "path": "skillEAState[abc]"
           }
         ]
@@ -4876,7 +5336,7 @@
         {
           "at": [
             "skillEAState",
-            "01"
+            "1"
           ],
           "remove": true
         },
@@ -4895,22 +5355,22 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_SINNER",
-            "path": "skillEAState"
+            "code": "UNKNOWN_FIELD",
+            "path": "skillEAState[]"
           },
           {
-            "code": "INVALID_FIELD_TYPE",
-            "path": "skillEAState[]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1]"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_SINNER",
-            "path": "skillEAState"
+            "code": "UNKNOWN_FIELD",
+            "path": "skillEAState[]"
           },
           {
-            "code": "INVALID_FIELD_TYPE",
-            "path": "skillEAState[]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1]"
           }
         ]
       }
@@ -4923,7 +5383,7 @@
         {
           "at": [
             "skillEAState",
-            "01"
+            "1"
           ],
           "remove": true
         },
@@ -4942,21 +5402,21 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_SINNER",
-            "path": "skillEAState"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1]"
           },
           {
-            "code": "OUT_OF_RANGE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "skillEAState[2147483647]"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_SINNER",
-            "path": "skillEAState"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1]"
           },
           {
-            "code": "OUT_OF_RANGE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "skillEAState[2147483647]"
           }
         ]
@@ -4970,7 +5430,7 @@
         {
           "at": [
             "skillEAState",
-            "01"
+            "1"
           ],
           "remove": true
         },
@@ -4992,21 +5452,21 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_SINNER",
-            "path": "skillEAState"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1]"
           },
           {
-            "code": "OUT_OF_RANGE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "skillEAState[2147483648]"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_SINNER",
-            "path": "skillEAState"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1]"
           },
           {
-            "code": "OUT_OF_RANGE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "skillEAState[2147483648]"
           }
         ]
@@ -5020,7 +5480,7 @@
         {
           "at": [
             "skillEAState",
-            "01"
+            "1"
           ],
           "remove": true
         },
@@ -5042,21 +5502,21 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_SINNER",
-            "path": "skillEAState"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1]"
           },
           {
-            "code": "OUT_OF_RANGE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "skillEAState[99999999999]"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_SINNER",
-            "path": "skillEAState"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1]"
           },
           {
-            "code": "OUT_OF_RANGE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "skillEAState[99999999999]"
           }
         ]
@@ -5085,13 +5545,13 @@
       "expected": {
         "draft": [
           {
-            "code": "OUT_OF_RANGE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "skillEAState[99999999999]"
           }
         ],
         "publish": [
           {
-            "code": "OUT_OF_RANGE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "skillEAState[99999999999]"
           }
         ]
@@ -5105,7 +5565,7 @@
         {
           "at": [
             "skillEAState",
-            "1"
+            "01"
           ],
           "value": {
             "0": 3,
@@ -5117,22 +5577,14 @@
       "expected": {
         "draft": [
           {
-            "code": "DUPLICATE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "skillEAState[01]"
-          },
-          {
-            "code": "DUPLICATE_SINNER",
-            "path": "skillEAState[1]"
           }
         ],
         "publish": [
           {
-            "code": "DUPLICATE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "skillEAState[01]"
-          },
-          {
-            "code": "DUPLICATE_SINNER",
-            "path": "skillEAState[1]"
           }
         ]
       }
@@ -5152,14 +5604,102 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_SINNER",
-            "path": "skillEAState"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[10]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[11]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[12]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[2]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[3]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[4]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[5]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[6]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[7]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[8]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[9]"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_SINNER",
-            "path": "skillEAState"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[10]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[11]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[12]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[2]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[3]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[4]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[5]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[6]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[7]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[8]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[9]"
           }
         ]
       }
@@ -5179,7 +5719,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "id"
           ],
@@ -5192,22 +5732,14 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_SINNER",
-            "path": "equipment"
-          },
-          {
-            "code": "UNKNOWN_IDENTITY",
-            "path": "equipment[01].identity.id"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[12]"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_SINNER",
-            "path": "equipment"
-          },
-          {
-            "code": "UNKNOWN_IDENTITY",
-            "path": "equipment[01].identity.id"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[12]"
           }
         ]
       }
@@ -5227,7 +5759,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity"
           ],
           "remove": true
@@ -5239,22 +5771,22 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_SINNER",
-            "path": "equipment"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].identity"
           },
           {
-            "code": "MISSING_IDENTITY",
-            "path": "equipment[01].identity"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[12]"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_SINNER",
-            "path": "equipment"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].identity"
           },
           {
-            "code": "MISSING_IDENTITY",
-            "path": "equipment[01].identity"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[12]"
           }
         ]
       }
@@ -5274,7 +5806,7 @@
         {
           "at": [
             "skillEAState",
-            "01",
+            "1",
             "2"
           ],
           "value": 0
@@ -5286,22 +5818,14 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_SINNER",
-            "path": "skillEAState"
-          },
-          {
-            "code": "OUT_OF_RANGE_SKILL_TOTAL",
-            "path": "skillEAState[01]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[12]"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_SINNER",
-            "path": "skillEAState"
-          },
-          {
-            "code": "OUT_OF_RANGE_SKILL_TOTAL",
-            "path": "skillEAState[01]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[12]"
           }
         ]
       }
@@ -5337,13 +5861,13 @@
       "expected": {
         "draft": [
           {
-            "code": "OUT_OF_RANGE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "equipment[13]"
           }
         ],
         "publish": [
           {
-            "code": "OUT_OF_RANGE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "equipment[13]"
           }
         ]
@@ -5371,13 +5895,13 @@
       "expected": {
         "draft": [
           {
-            "code": "OUT_OF_RANGE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "equipment[13]"
           }
         ],
         "publish": [
           {
-            "code": "OUT_OF_RANGE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "equipment[13]"
           }
         ]
@@ -5404,13 +5928,13 @@
       "expected": {
         "draft": [
           {
-            "code": "OUT_OF_RANGE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "skillEAState[13]"
           }
         ],
         "publish": [
           {
-            "code": "OUT_OF_RANGE_SINNER",
+            "code": "UNKNOWN_FIELD",
             "path": "skillEAState[13]"
           }
         ]
@@ -5785,30 +6309,14 @@
       "expected": {
         "draft": [
           {
-            "code": "OUT_OF_RANGE_DEPLOYMENT",
-            "path": "deploymentOrder[0]"
-          },
-          {
             "code": "INVALID_FIELD_TYPE",
             "path": "deploymentOrder[1]"
-          },
-          {
-            "code": "OUT_OF_RANGE_DEPLOYMENT",
-            "path": "deploymentOrder[2]"
           }
         ],
         "publish": [
           {
-            "code": "OUT_OF_RANGE_DEPLOYMENT",
-            "path": "deploymentOrder[0]"
-          },
-          {
             "code": "INVALID_FIELD_TYPE",
             "path": "deploymentOrder[1]"
-          },
-          {
-            "code": "OUT_OF_RANGE_DEPLOYMENT",
-            "path": "deploymentOrder[2]"
           }
         ]
       }
@@ -5859,7 +6367,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity"
           ],
           "remove": true
@@ -5868,14 +6376,14 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_IDENTITY",
-            "path": "equipment[01].identity"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].identity"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_IDENTITY",
-            "path": "equipment[01].identity"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].identity"
           }
         ]
       }
@@ -5888,7 +6396,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity"
           ],
           "value": null
@@ -5897,14 +6405,14 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_IDENTITY",
-            "path": "equipment[01].identity"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "equipment[1].identity"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_IDENTITY",
-            "path": "equipment[01].identity"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "equipment[1].identity"
           }
         ]
       }
@@ -5917,7 +6425,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity"
           ],
           "value": 7
@@ -5927,13 +6435,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity"
+            "path": "equipment[1].identity"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity"
+            "path": "equipment[1].identity"
           }
         ]
       }
@@ -5946,7 +6454,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity"
           ],
           "value": "x"
@@ -5956,13 +6464,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity"
+            "path": "equipment[1].identity"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity"
+            "path": "equipment[1].identity"
           }
         ]
       }
@@ -5975,7 +6483,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity"
           ],
           "value": ""
@@ -5985,13 +6493,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity"
+            "path": "equipment[1].identity"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity"
+            "path": "equipment[1].identity"
           }
         ]
       }
@@ -6004,7 +6512,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity"
           ],
           "value": []
@@ -6014,13 +6522,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity"
+            "path": "equipment[1].identity"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity"
+            "path": "equipment[1].identity"
           }
         ]
       }
@@ -6033,7 +6541,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity"
           ],
           "value": {}
@@ -6042,14 +6550,30 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_IDENTITY",
-            "path": "equipment[01].identity.id"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].identity.id"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].identity.level"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].identity.uptie"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_IDENTITY",
-            "path": "equipment[01].identity.id"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].identity.id"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].identity.level"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].identity.uptie"
           }
         ]
       }
@@ -6062,7 +6586,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity"
           ],
           "value": "  "
@@ -6072,13 +6596,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity"
+            "path": "equipment[1].identity"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity"
+            "path": "equipment[1].identity"
           }
         ]
       }
@@ -6091,7 +6615,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "id"
           ],
@@ -6101,14 +6625,14 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_IDENTITY",
-            "path": "equipment[01].identity.id"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].identity.id"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_IDENTITY",
-            "path": "equipment[01].identity.id"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].identity.id"
           }
         ]
       }
@@ -6121,7 +6645,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "id"
           ],
@@ -6131,14 +6655,14 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_IDENTITY",
-            "path": "equipment[01].identity.id"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "equipment[1].identity.id"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_IDENTITY",
-            "path": "equipment[01].identity.id"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "equipment[1].identity.id"
           }
         ]
       }
@@ -6151,7 +6675,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "id"
           ],
@@ -6162,13 +6686,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.id"
+            "path": "equipment[1].identity.id"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.id"
+            "path": "equipment[1].identity.id"
           }
         ]
       }
@@ -6181,7 +6705,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "id"
           ],
@@ -6191,14 +6715,14 @@
       "expected": {
         "draft": [
           {
-            "code": "UNKNOWN_IDENTITY",
-            "path": "equipment[01].identity.id"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "equipment[1].identity.id"
           }
         ],
         "publish": [
           {
-            "code": "UNKNOWN_IDENTITY",
-            "path": "equipment[01].identity.id"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "equipment[1].identity.id"
           }
         ]
       }
@@ -6211,7 +6735,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "id"
           ],
@@ -6221,14 +6745,14 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_IDENTITY",
-            "path": "equipment[01].identity.id"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "equipment[1].identity.id"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_IDENTITY",
-            "path": "equipment[01].identity.id"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "equipment[1].identity.id"
           }
         ]
       }
@@ -6241,7 +6765,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "id"
           ],
@@ -6252,13 +6776,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.id"
+            "path": "equipment[1].identity.id"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.id"
+            "path": "equipment[1].identity.id"
           }
         ]
       }
@@ -6271,7 +6795,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "id"
           ],
@@ -6282,13 +6806,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.id"
+            "path": "equipment[1].identity.id"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.id"
+            "path": "equipment[1].identity.id"
           }
         ]
       }
@@ -6301,7 +6825,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "id"
           ],
@@ -6311,14 +6835,44 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_IDENTITY",
-            "path": "equipment[01].identity.id"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "equipment[1].identity.id"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_IDENTITY",
-            "path": "equipment[01].identity.id"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "equipment[1].identity.id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "identity-id-trailing-newline",
+      "subject": "identity",
+      "category": "5F",
+      "edits": [
+        {
+          "at": [
+            "equipment",
+            "1",
+            "identity",
+            "id"
+          ],
+          "value": "10101\n"
+        }
+      ],
+      "expected": {
+        "draft": [
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "equipment[1].identity.id"
+          }
+        ],
+        "publish": [
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "equipment[1].identity.id"
           }
         ]
       }
@@ -6331,7 +6885,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "id"
           ],
@@ -6342,13 +6896,13 @@
         "draft": [
           {
             "code": "UNKNOWN_IDENTITY",
-            "path": "equipment[01].identity.id"
+            "path": "equipment[1].identity.id"
           }
         ],
         "publish": [
           {
             "code": "UNKNOWN_IDENTITY",
-            "path": "equipment[01].identity.id"
+            "path": "equipment[1].identity.id"
           }
         ]
       }
@@ -6361,7 +6915,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "id"
           ],
@@ -6372,13 +6926,13 @@
         "draft": [
           {
             "code": "MISMATCHED_IDENTITY",
-            "path": "equipment[01].identity.id"
+            "path": "equipment[1].identity.id"
           }
         ],
         "publish": [
           {
             "code": "MISMATCHED_IDENTITY",
-            "path": "equipment[01].identity.id"
+            "path": "equipment[1].identity.id"
           }
         ]
       }
@@ -6391,7 +6945,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "id"
           ],
@@ -6400,7 +6954,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "level"
           ],
@@ -6411,13 +6965,13 @@
         "draft": [
           {
             "code": "UNKNOWN_IDENTITY",
-            "path": "equipment[01].identity.id"
+            "path": "equipment[1].identity.id"
           }
         ],
         "publish": [
           {
             "code": "UNKNOWN_IDENTITY",
-            "path": "equipment[01].identity.id"
+            "path": "equipment[1].identity.id"
           }
         ]
       }
@@ -6430,7 +6984,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "id"
           ],
@@ -6439,7 +6993,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "level"
           ],
@@ -6450,13 +7004,13 @@
         "draft": [
           {
             "code": "MISMATCHED_IDENTITY",
-            "path": "equipment[01].identity.id"
+            "path": "equipment[1].identity.id"
           }
         ],
         "publish": [
           {
             "code": "MISMATCHED_IDENTITY",
-            "path": "equipment[01].identity.id"
+            "path": "equipment[1].identity.id"
           }
         ]
       }
@@ -6469,7 +7023,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "id"
           ],
@@ -6478,7 +7032,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "level"
           ],
@@ -6489,13 +7043,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.id"
+            "path": "equipment[1].identity.id"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.id"
+            "path": "equipment[1].identity.id"
           }
         ]
       }
@@ -6508,7 +7062,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "level"
           ],
@@ -6516,8 +7070,18 @@
         }
       ],
       "expected": {
-        "draft": [],
-        "publish": []
+        "draft": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].identity.level"
+          }
+        ],
+        "publish": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].identity.level"
+          }
+        ]
       }
     },
     {
@@ -6528,7 +7092,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "level"
           ],
@@ -6539,13 +7103,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.level"
+            "path": "equipment[1].identity.level"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.level"
+            "path": "equipment[1].identity.level"
           }
         ]
       }
@@ -6558,7 +7122,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "level"
           ],
@@ -6578,7 +7142,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "level"
           ],
@@ -6589,13 +7153,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.level"
+            "path": "equipment[1].identity.level"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.level"
+            "path": "equipment[1].identity.level"
           }
         ]
       }
@@ -6608,7 +7172,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "level"
           ],
@@ -6619,13 +7183,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.level"
+            "path": "equipment[1].identity.level"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.level"
+            "path": "equipment[1].identity.level"
           }
         ]
       }
@@ -6638,7 +7202,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "level"
           ],
@@ -6649,13 +7213,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.level"
+            "path": "equipment[1].identity.level"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.level"
+            "path": "equipment[1].identity.level"
           }
         ]
       }
@@ -6668,7 +7232,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "level"
           ],
@@ -6679,13 +7243,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.level"
+            "path": "equipment[1].identity.level"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.level"
+            "path": "equipment[1].identity.level"
           }
         ]
       }
@@ -6698,7 +7262,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "level"
           ],
@@ -6718,7 +7282,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "level"
           ],
@@ -6738,7 +7302,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "level"
           ],
@@ -6749,13 +7313,13 @@
         "draft": [
           {
             "code": "OUT_OF_RANGE_IDENTITY_LEVEL",
-            "path": "equipment[01].identity.level"
+            "path": "equipment[1].identity.level"
           }
         ],
         "publish": [
           {
             "code": "OUT_OF_RANGE_IDENTITY_LEVEL",
-            "path": "equipment[01].identity.level"
+            "path": "equipment[1].identity.level"
           }
         ]
       }
@@ -6768,7 +7332,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "level"
           ],
@@ -6779,13 +7343,13 @@
         "draft": [
           {
             "code": "OUT_OF_RANGE_IDENTITY_LEVEL",
-            "path": "equipment[01].identity.level"
+            "path": "equipment[1].identity.level"
           }
         ],
         "publish": [
           {
             "code": "OUT_OF_RANGE_IDENTITY_LEVEL",
-            "path": "equipment[01].identity.level"
+            "path": "equipment[1].identity.level"
           }
         ]
       }
@@ -6798,7 +7362,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "level"
           ],
@@ -6809,13 +7373,13 @@
         "draft": [
           {
             "code": "OUT_OF_RANGE_IDENTITY_LEVEL",
-            "path": "equipment[01].identity.level"
+            "path": "equipment[1].identity.level"
           }
         ],
         "publish": [
           {
             "code": "OUT_OF_RANGE_IDENTITY_LEVEL",
-            "path": "equipment[01].identity.level"
+            "path": "equipment[1].identity.level"
           }
         ]
       }
@@ -6828,7 +7392,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "level"
           ],
@@ -6839,13 +7403,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.level"
+            "path": "equipment[1].identity.level"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.level"
+            "path": "equipment[1].identity.level"
           }
         ]
       }
@@ -6858,7 +7422,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "level"
           ],
@@ -6878,7 +7442,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "level"
           ],
@@ -6889,13 +7453,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.level"
+            "path": "equipment[1].identity.level"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.level"
+            "path": "equipment[1].identity.level"
           }
         ]
       }
@@ -6908,7 +7472,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "level"
           ],
@@ -6919,13 +7483,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.level"
+            "path": "equipment[1].identity.level"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.level"
+            "path": "equipment[1].identity.level"
           }
         ]
       }
@@ -6938,7 +7502,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "uptie"
           ],
@@ -6946,8 +7510,18 @@
         }
       ],
       "expected": {
-        "draft": [],
-        "publish": []
+        "draft": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].identity.uptie"
+          }
+        ],
+        "publish": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].identity.uptie"
+          }
+        ]
       }
     },
     {
@@ -6958,7 +7532,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "uptie"
           ],
@@ -6969,13 +7543,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.uptie"
+            "path": "equipment[1].identity.uptie"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.uptie"
+            "path": "equipment[1].identity.uptie"
           }
         ]
       }
@@ -6988,7 +7562,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "uptie"
           ],
@@ -6999,13 +7573,13 @@
         "draft": [
           {
             "code": "OUT_OF_RANGE_IDENTITY_UPTIE",
-            "path": "equipment[01].identity.uptie"
+            "path": "equipment[1].identity.uptie"
           }
         ],
         "publish": [
           {
             "code": "OUT_OF_RANGE_IDENTITY_UPTIE",
-            "path": "equipment[01].identity.uptie"
+            "path": "equipment[1].identity.uptie"
           }
         ]
       }
@@ -7018,7 +7592,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "uptie"
           ],
@@ -7029,13 +7603,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.uptie"
+            "path": "equipment[1].identity.uptie"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.uptie"
+            "path": "equipment[1].identity.uptie"
           }
         ]
       }
@@ -7048,7 +7622,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "uptie"
           ],
@@ -7059,13 +7633,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.uptie"
+            "path": "equipment[1].identity.uptie"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.uptie"
+            "path": "equipment[1].identity.uptie"
           }
         ]
       }
@@ -7078,7 +7652,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "uptie"
           ],
@@ -7089,13 +7663,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.uptie"
+            "path": "equipment[1].identity.uptie"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.uptie"
+            "path": "equipment[1].identity.uptie"
           }
         ]
       }
@@ -7108,7 +7682,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "uptie"
           ],
@@ -7119,13 +7693,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.uptie"
+            "path": "equipment[1].identity.uptie"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.uptie"
+            "path": "equipment[1].identity.uptie"
           }
         ]
       }
@@ -7138,7 +7712,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "uptie"
           ],
@@ -7158,7 +7732,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "uptie"
           ],
@@ -7178,7 +7752,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "uptie"
           ],
@@ -7189,13 +7763,13 @@
         "draft": [
           {
             "code": "OUT_OF_RANGE_IDENTITY_UPTIE",
-            "path": "equipment[01].identity.uptie"
+            "path": "equipment[1].identity.uptie"
           }
         ],
         "publish": [
           {
             "code": "OUT_OF_RANGE_IDENTITY_UPTIE",
-            "path": "equipment[01].identity.uptie"
+            "path": "equipment[1].identity.uptie"
           }
         ]
       }
@@ -7208,7 +7782,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "uptie"
           ],
@@ -7219,13 +7793,13 @@
         "draft": [
           {
             "code": "OUT_OF_RANGE_IDENTITY_UPTIE",
-            "path": "equipment[01].identity.uptie"
+            "path": "equipment[1].identity.uptie"
           }
         ],
         "publish": [
           {
             "code": "OUT_OF_RANGE_IDENTITY_UPTIE",
-            "path": "equipment[01].identity.uptie"
+            "path": "equipment[1].identity.uptie"
           }
         ]
       }
@@ -7238,7 +7812,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "uptie"
           ],
@@ -7249,13 +7823,13 @@
         "draft": [
           {
             "code": "OUT_OF_RANGE_IDENTITY_UPTIE",
-            "path": "equipment[01].identity.uptie"
+            "path": "equipment[1].identity.uptie"
           }
         ],
         "publish": [
           {
             "code": "OUT_OF_RANGE_IDENTITY_UPTIE",
-            "path": "equipment[01].identity.uptie"
+            "path": "equipment[1].identity.uptie"
           }
         ]
       }
@@ -7268,7 +7842,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "uptie"
           ],
@@ -7279,13 +7853,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.uptie"
+            "path": "equipment[1].identity.uptie"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.uptie"
+            "path": "equipment[1].identity.uptie"
           }
         ]
       }
@@ -7298,7 +7872,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "uptie"
           ],
@@ -7318,7 +7892,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "uptie"
           ],
@@ -7329,13 +7903,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.uptie"
+            "path": "equipment[1].identity.uptie"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.uptie"
+            "path": "equipment[1].identity.uptie"
           }
         ]
       }
@@ -7348,7 +7922,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "uptie"
           ],
@@ -7359,13 +7933,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.uptie"
+            "path": "equipment[1].identity.uptie"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].identity.uptie"
+            "path": "equipment[1].identity.uptie"
           }
         ]
       }
@@ -7378,7 +7952,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos"
           ],
           "remove": true
@@ -7387,14 +7961,14 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_EGO_ZAYIN",
-            "path": "equipment[01].egos"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].egos"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_EGO_ZAYIN",
-            "path": "equipment[01].egos"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].egos"
           }
         ]
       }
@@ -7407,7 +7981,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos"
           ],
           "value": null
@@ -7416,14 +7990,14 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_EGO_ZAYIN",
-            "path": "equipment[01].egos"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "equipment[1].egos"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_EGO_ZAYIN",
-            "path": "equipment[01].egos"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "equipment[1].egos"
           }
         ]
       }
@@ -7436,7 +8010,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos"
           ],
           "value": 7
@@ -7446,13 +8020,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos"
+            "path": "equipment[1].egos"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos"
+            "path": "equipment[1].egos"
           }
         ]
       }
@@ -7465,7 +8039,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos"
           ],
           "value": "x"
@@ -7475,13 +8049,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos"
+            "path": "equipment[1].egos"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos"
+            "path": "equipment[1].egos"
           }
         ]
       }
@@ -7494,7 +8068,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos"
           ],
           "value": ""
@@ -7504,13 +8078,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos"
+            "path": "equipment[1].egos"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos"
+            "path": "equipment[1].egos"
           }
         ]
       }
@@ -7523,7 +8097,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos"
           ],
           "value": []
@@ -7533,13 +8107,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos"
+            "path": "equipment[1].egos"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos"
+            "path": "equipment[1].egos"
           }
         ]
       }
@@ -7552,7 +8126,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos"
           ],
           "value": {}
@@ -7561,14 +8135,14 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_EGO_ZAYIN",
-            "path": "equipment[01].egos.ZAYIN"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].egos.ZAYIN"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_EGO_ZAYIN",
-            "path": "equipment[01].egos.ZAYIN"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].egos.ZAYIN"
           }
         ]
       }
@@ -7581,7 +8155,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos"
           ],
           "value": "  "
@@ -7591,13 +8165,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos"
+            "path": "equipment[1].egos"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos"
+            "path": "equipment[1].egos"
           }
         ]
       }
@@ -7610,7 +8184,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN"
           ],
@@ -7620,14 +8194,14 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_EGO_ZAYIN",
-            "path": "equipment[01].egos.ZAYIN"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].egos.ZAYIN"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_EGO_ZAYIN",
-            "path": "equipment[01].egos.ZAYIN"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].egos.ZAYIN"
           }
         ]
       }
@@ -7640,7 +8214,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN"
           ],
@@ -7650,14 +8224,14 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_EGO_ZAYIN",
-            "path": "equipment[01].egos.ZAYIN"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "equipment[1].egos.ZAYIN"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_EGO_ZAYIN",
-            "path": "equipment[01].egos.ZAYIN"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "equipment[1].egos.ZAYIN"
           }
         ]
       }
@@ -7670,7 +8244,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN"
           ],
@@ -7681,13 +8255,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.ZAYIN"
+            "path": "equipment[1].egos.ZAYIN"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.ZAYIN"
+            "path": "equipment[1].egos.ZAYIN"
           }
         ]
       }
@@ -7700,7 +8274,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN"
           ],
@@ -7711,13 +8285,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.ZAYIN"
+            "path": "equipment[1].egos.ZAYIN"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.ZAYIN"
+            "path": "equipment[1].egos.ZAYIN"
           }
         ]
       }
@@ -7730,7 +8304,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN"
           ],
@@ -7741,13 +8315,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.ZAYIN"
+            "path": "equipment[1].egos.ZAYIN"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.ZAYIN"
+            "path": "equipment[1].egos.ZAYIN"
           }
         ]
       }
@@ -7760,7 +8334,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN"
           ],
@@ -7771,13 +8345,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.ZAYIN"
+            "path": "equipment[1].egos.ZAYIN"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.ZAYIN"
+            "path": "equipment[1].egos.ZAYIN"
           }
         ]
       }
@@ -7790,7 +8364,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN"
           ],
@@ -7800,14 +8374,22 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_EGO_ZAYIN",
-            "path": "equipment[01].egos.ZAYIN.id"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].egos.ZAYIN.id"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].egos.ZAYIN.threadspin"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_EGO_ZAYIN",
-            "path": "equipment[01].egos.ZAYIN.id"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].egos.ZAYIN.id"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].egos.ZAYIN.threadspin"
           }
         ]
       }
@@ -7820,7 +8402,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN"
           ],
@@ -7831,13 +8413,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.ZAYIN"
+            "path": "equipment[1].egos.ZAYIN"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.ZAYIN"
+            "path": "equipment[1].egos.ZAYIN"
           }
         ]
       }
@@ -7850,7 +8432,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN",
             "id"
@@ -7864,14 +8446,14 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_EGO_ZAYIN",
-            "path": "equipment[01].egos.ZAYIN.id"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].egos.ZAYIN.id"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_EGO_ZAYIN",
-            "path": "equipment[01].egos.ZAYIN.id"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].egos.ZAYIN.id"
           }
         ]
       }
@@ -7884,7 +8466,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN",
             "id"
@@ -7898,14 +8480,14 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_EGO_ZAYIN",
-            "path": "equipment[01].egos.ZAYIN.id"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "equipment[1].egos.ZAYIN.id"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_EGO_ZAYIN",
-            "path": "equipment[01].egos.ZAYIN.id"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "equipment[1].egos.ZAYIN.id"
           }
         ]
       }
@@ -7918,7 +8500,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN",
             "id"
@@ -7933,13 +8515,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.ZAYIN.id"
+            "path": "equipment[1].egos.ZAYIN.id"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.ZAYIN.id"
+            "path": "equipment[1].egos.ZAYIN.id"
           }
         ]
       }
@@ -7952,7 +8534,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN",
             "id"
@@ -7966,14 +8548,14 @@
       "expected": {
         "draft": [
           {
-            "code": "UNKNOWN_EGO",
-            "path": "equipment[01].egos.ZAYIN.id"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "equipment[1].egos.ZAYIN.id"
           }
         ],
         "publish": [
           {
-            "code": "UNKNOWN_EGO",
-            "path": "equipment[01].egos.ZAYIN.id"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "equipment[1].egos.ZAYIN.id"
           }
         ]
       }
@@ -7986,7 +8568,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN",
             "id"
@@ -8000,14 +8582,14 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_EGO_ZAYIN",
-            "path": "equipment[01].egos.ZAYIN.id"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "equipment[1].egos.ZAYIN.id"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_EGO_ZAYIN",
-            "path": "equipment[01].egos.ZAYIN.id"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "equipment[1].egos.ZAYIN.id"
           }
         ]
       }
@@ -8020,7 +8602,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN",
             "id"
@@ -8035,13 +8617,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.ZAYIN.id"
+            "path": "equipment[1].egos.ZAYIN.id"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.ZAYIN.id"
+            "path": "equipment[1].egos.ZAYIN.id"
           }
         ]
       }
@@ -8054,7 +8636,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN",
             "id"
@@ -8069,13 +8651,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.ZAYIN.id"
+            "path": "equipment[1].egos.ZAYIN.id"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.ZAYIN.id"
+            "path": "equipment[1].egos.ZAYIN.id"
           }
         ]
       }
@@ -8088,7 +8670,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN",
             "id"
@@ -8102,14 +8684,14 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_EGO_ZAYIN",
-            "path": "equipment[01].egos.ZAYIN.id"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "equipment[1].egos.ZAYIN.id"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_EGO_ZAYIN",
-            "path": "equipment[01].egos.ZAYIN.id"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "equipment[1].egos.ZAYIN.id"
           }
         ]
       }
@@ -8122,7 +8704,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "TETH"
           ],
@@ -8145,7 +8727,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "TETH"
           ],
@@ -8159,13 +8741,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.TETH"
+            "path": "equipment[1].egos.TETH"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.TETH"
+            "path": "equipment[1].egos.TETH"
           }
         ]
       }
@@ -8178,7 +8760,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "TETH"
           ],
@@ -8192,13 +8774,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.TETH"
+            "path": "equipment[1].egos.TETH"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.TETH"
+            "path": "equipment[1].egos.TETH"
           }
         ]
       }
@@ -8211,7 +8793,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "TETH"
           ],
@@ -8225,13 +8807,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.TETH"
+            "path": "equipment[1].egos.TETH"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.TETH"
+            "path": "equipment[1].egos.TETH"
           }
         ]
       }
@@ -8244,7 +8826,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "TETH"
           ],
@@ -8258,13 +8840,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.TETH"
+            "path": "equipment[1].egos.TETH"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.TETH"
+            "path": "equipment[1].egos.TETH"
           }
         ]
       }
@@ -8277,7 +8859,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "TETH"
           ],
@@ -8291,13 +8873,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.TETH"
+            "path": "equipment[1].egos.TETH"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.TETH"
+            "path": "equipment[1].egos.TETH"
           }
         ]
       }
@@ -8310,7 +8892,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "TETH"
           ],
@@ -8321,8 +8903,26 @@
         "brief-v3:blank-or-wrong-kind-non-zayin-slot"
       ],
       "expected": {
-        "draft": [],
-        "publish": []
+        "draft": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].egos.TETH.id"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].egos.TETH.threadspin"
+          }
+        ],
+        "publish": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].egos.TETH.id"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].egos.TETH.threadspin"
+          }
+        ]
       }
     },
     {
@@ -8333,7 +8933,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "TETH"
           ],
@@ -8347,13 +8947,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.TETH"
+            "path": "equipment[1].egos.TETH"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.TETH"
+            "path": "equipment[1].egos.TETH"
           }
         ]
       }
@@ -8366,7 +8966,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "TETH"
           ],
@@ -8377,7 +8977,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "TETH",
             "id"
@@ -8389,8 +8989,18 @@
         "brief-v3:blank-or-wrong-kind-non-zayin-slot"
       ],
       "expected": {
-        "draft": [],
-        "publish": []
+        "draft": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].egos.TETH.id"
+          }
+        ],
+        "publish": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].egos.TETH.id"
+          }
+        ]
       }
     },
     {
@@ -8401,7 +9011,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "TETH"
           ],
@@ -8412,7 +9022,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "TETH",
             "id"
@@ -8424,8 +9034,18 @@
         "brief-v3:blank-or-wrong-kind-non-zayin-slot"
       ],
       "expected": {
-        "draft": [],
-        "publish": []
+        "draft": [
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "equipment[1].egos.TETH.id"
+          }
+        ],
+        "publish": [
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "equipment[1].egos.TETH.id"
+          }
+        ]
       }
     },
     {
@@ -8436,7 +9056,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "TETH"
           ],
@@ -8447,7 +9067,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "TETH",
             "id"
@@ -8462,13 +9082,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.TETH.id"
+            "path": "equipment[1].egos.TETH.id"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.TETH.id"
+            "path": "equipment[1].egos.TETH.id"
           }
         ]
       }
@@ -8481,7 +9101,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "TETH"
           ],
@@ -8492,7 +9112,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "TETH",
             "id"
@@ -8506,14 +9126,14 @@
       "expected": {
         "draft": [
           {
-            "code": "UNKNOWN_EGO",
-            "path": "equipment[01].egos.TETH.id"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "equipment[1].egos.TETH.id"
           }
         ],
         "publish": [
           {
-            "code": "UNKNOWN_EGO",
-            "path": "equipment[01].egos.TETH.id"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "equipment[1].egos.TETH.id"
           }
         ]
       }
@@ -8526,7 +9146,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "TETH"
           ],
@@ -8537,7 +9157,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "TETH",
             "id"
@@ -8549,8 +9169,18 @@
         "brief-v3:blank-or-wrong-kind-non-zayin-slot"
       ],
       "expected": {
-        "draft": [],
-        "publish": []
+        "draft": [
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "equipment[1].egos.TETH.id"
+          }
+        ],
+        "publish": [
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "equipment[1].egos.TETH.id"
+          }
+        ]
       }
     },
     {
@@ -8561,7 +9191,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "TETH"
           ],
@@ -8572,7 +9202,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "TETH",
             "id"
@@ -8587,13 +9217,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.TETH.id"
+            "path": "equipment[1].egos.TETH.id"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.TETH.id"
+            "path": "equipment[1].egos.TETH.id"
           }
         ]
       }
@@ -8606,7 +9236,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "TETH"
           ],
@@ -8617,7 +9247,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "TETH",
             "id"
@@ -8632,13 +9262,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.TETH.id"
+            "path": "equipment[1].egos.TETH.id"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.TETH.id"
+            "path": "equipment[1].egos.TETH.id"
           }
         ]
       }
@@ -8651,7 +9281,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "TETH"
           ],
@@ -8662,7 +9292,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "TETH",
             "id"
@@ -8674,8 +9304,18 @@
         "brief-v3:blank-or-wrong-kind-non-zayin-slot"
       ],
       "expected": {
-        "draft": [],
-        "publish": []
+        "draft": [
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "equipment[1].egos.TETH.id"
+          }
+        ],
+        "publish": [
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "equipment[1].egos.TETH.id"
+          }
+        ]
       }
     },
     {
@@ -8686,7 +9326,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "TETH"
           ],
@@ -8709,7 +9349,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN",
             "id"
@@ -8721,13 +9361,13 @@
         "draft": [
           {
             "code": "UNKNOWN_EGO",
-            "path": "equipment[01].egos.ZAYIN.id"
+            "path": "equipment[1].egos.ZAYIN.id"
           }
         ],
         "publish": [
           {
             "code": "UNKNOWN_EGO",
-            "path": "equipment[01].egos.ZAYIN.id"
+            "path": "equipment[1].egos.ZAYIN.id"
           }
         ]
       }
@@ -8740,7 +9380,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN",
             "id"
@@ -8752,13 +9392,13 @@
         "draft": [
           {
             "code": "MISMATCHED_EGO",
-            "path": "equipment[01].egos.ZAYIN.id"
+            "path": "equipment[1].egos.ZAYIN.id"
           }
         ],
         "publish": [
           {
             "code": "MISMATCHED_EGO",
-            "path": "equipment[01].egos.ZAYIN.id"
+            "path": "equipment[1].egos.ZAYIN.id"
           }
         ]
       }
@@ -8771,7 +9411,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "TETH"
           ],
@@ -8785,13 +9425,13 @@
         "draft": [
           {
             "code": "UNKNOWN_EGO",
-            "path": "equipment[01].egos.TETH.id"
+            "path": "equipment[1].egos.TETH.id"
           }
         ],
         "publish": [
           {
             "code": "UNKNOWN_EGO",
-            "path": "equipment[01].egos.TETH.id"
+            "path": "equipment[1].egos.TETH.id"
           }
         ]
       }
@@ -8804,7 +9444,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "TETH"
           ],
@@ -8818,13 +9458,13 @@
         "draft": [
           {
             "code": "MISMATCHED_EGO",
-            "path": "equipment[01].egos.TETH.id"
+            "path": "equipment[1].egos.TETH.id"
           }
         ],
         "publish": [
           {
             "code": "MISMATCHED_EGO",
-            "path": "equipment[01].egos.TETH.id"
+            "path": "equipment[1].egos.TETH.id"
           }
         ]
       }
@@ -8837,7 +9477,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "FOO"
           ],
@@ -8850,14 +9490,14 @@
       "expected": {
         "draft": [
           {
-            "code": "INVALID_EGO_TYPE",
-            "path": "equipment[01].egos.FOO"
+            "code": "UNKNOWN_FIELD",
+            "path": "equipment[1].egos.FOO"
           }
         ],
         "publish": [
           {
-            "code": "INVALID_EGO_TYPE",
-            "path": "equipment[01].egos.FOO"
+            "code": "UNKNOWN_FIELD",
+            "path": "equipment[1].egos.FOO"
           }
         ]
       }
@@ -8870,7 +9510,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "FOO"
           ],
@@ -8880,14 +9520,14 @@
       "expected": {
         "draft": [
           {
-            "code": "INVALID_EGO_TYPE",
-            "path": "equipment[01].egos.FOO"
+            "code": "UNKNOWN_FIELD",
+            "path": "equipment[1].egos.FOO"
           }
         ],
         "publish": [
           {
-            "code": "INVALID_EGO_TYPE",
-            "path": "equipment[01].egos.FOO"
+            "code": "UNKNOWN_FIELD",
+            "path": "equipment[1].egos.FOO"
           }
         ]
       }
@@ -8900,7 +9540,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "teth"
           ],
@@ -8913,14 +9553,14 @@
       "expected": {
         "draft": [
           {
-            "code": "INVALID_EGO_TYPE",
-            "path": "equipment[01].egos.teth"
+            "code": "UNKNOWN_FIELD",
+            "path": "equipment[1].egos.teth"
           }
         ],
         "publish": [
           {
-            "code": "INVALID_EGO_TYPE",
-            "path": "equipment[01].egos.teth"
+            "code": "UNKNOWN_FIELD",
+            "path": "equipment[1].egos.teth"
           }
         ]
       }
@@ -8933,7 +9573,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN",
             "id"
@@ -8943,7 +9583,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN",
             "threadspin"
@@ -8955,13 +9595,13 @@
         "draft": [
           {
             "code": "UNKNOWN_EGO",
-            "path": "equipment[01].egos.ZAYIN.id"
+            "path": "equipment[1].egos.ZAYIN.id"
           }
         ],
         "publish": [
           {
             "code": "UNKNOWN_EGO",
-            "path": "equipment[01].egos.ZAYIN.id"
+            "path": "equipment[1].egos.ZAYIN.id"
           }
         ]
       }
@@ -8974,7 +9614,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN",
             "threadspin"
@@ -8983,8 +9623,18 @@
         }
       ],
       "expected": {
-        "draft": [],
-        "publish": []
+        "draft": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].egos.ZAYIN.threadspin"
+          }
+        ],
+        "publish": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].egos.ZAYIN.threadspin"
+          }
+        ]
       }
     },
     {
@@ -8995,7 +9645,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN",
             "threadspin"
@@ -9007,13 +9657,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.ZAYIN.threadspin"
+            "path": "equipment[1].egos.ZAYIN.threadspin"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.ZAYIN.threadspin"
+            "path": "equipment[1].egos.ZAYIN.threadspin"
           }
         ]
       }
@@ -9026,7 +9676,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN",
             "threadspin"
@@ -9038,13 +9688,13 @@
         "draft": [
           {
             "code": "OUT_OF_RANGE_EGO_THREADSPIN",
-            "path": "equipment[01].egos.ZAYIN.threadspin"
+            "path": "equipment[1].egos.ZAYIN.threadspin"
           }
         ],
         "publish": [
           {
             "code": "OUT_OF_RANGE_EGO_THREADSPIN",
-            "path": "equipment[01].egos.ZAYIN.threadspin"
+            "path": "equipment[1].egos.ZAYIN.threadspin"
           }
         ]
       }
@@ -9057,7 +9707,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN",
             "threadspin"
@@ -9069,13 +9719,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.ZAYIN.threadspin"
+            "path": "equipment[1].egos.ZAYIN.threadspin"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.ZAYIN.threadspin"
+            "path": "equipment[1].egos.ZAYIN.threadspin"
           }
         ]
       }
@@ -9088,7 +9738,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN",
             "threadspin"
@@ -9100,13 +9750,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.ZAYIN.threadspin"
+            "path": "equipment[1].egos.ZAYIN.threadspin"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.ZAYIN.threadspin"
+            "path": "equipment[1].egos.ZAYIN.threadspin"
           }
         ]
       }
@@ -9119,7 +9769,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN",
             "threadspin"
@@ -9131,13 +9781,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.ZAYIN.threadspin"
+            "path": "equipment[1].egos.ZAYIN.threadspin"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.ZAYIN.threadspin"
+            "path": "equipment[1].egos.ZAYIN.threadspin"
           }
         ]
       }
@@ -9150,7 +9800,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN",
             "threadspin"
@@ -9162,13 +9812,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.ZAYIN.threadspin"
+            "path": "equipment[1].egos.ZAYIN.threadspin"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.ZAYIN.threadspin"
+            "path": "equipment[1].egos.ZAYIN.threadspin"
           }
         ]
       }
@@ -9181,7 +9831,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN",
             "threadspin"
@@ -9202,7 +9852,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN",
             "threadspin"
@@ -9223,7 +9873,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN",
             "threadspin"
@@ -9235,13 +9885,13 @@
         "draft": [
           {
             "code": "OUT_OF_RANGE_EGO_THREADSPIN",
-            "path": "equipment[01].egos.ZAYIN.threadspin"
+            "path": "equipment[1].egos.ZAYIN.threadspin"
           }
         ],
         "publish": [
           {
             "code": "OUT_OF_RANGE_EGO_THREADSPIN",
-            "path": "equipment[01].egos.ZAYIN.threadspin"
+            "path": "equipment[1].egos.ZAYIN.threadspin"
           }
         ]
       }
@@ -9254,7 +9904,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN",
             "threadspin"
@@ -9266,13 +9916,13 @@
         "draft": [
           {
             "code": "OUT_OF_RANGE_EGO_THREADSPIN",
-            "path": "equipment[01].egos.ZAYIN.threadspin"
+            "path": "equipment[1].egos.ZAYIN.threadspin"
           }
         ],
         "publish": [
           {
             "code": "OUT_OF_RANGE_EGO_THREADSPIN",
-            "path": "equipment[01].egos.ZAYIN.threadspin"
+            "path": "equipment[1].egos.ZAYIN.threadspin"
           }
         ]
       }
@@ -9285,7 +9935,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN",
             "threadspin"
@@ -9297,13 +9947,13 @@
         "draft": [
           {
             "code": "OUT_OF_RANGE_EGO_THREADSPIN",
-            "path": "equipment[01].egos.ZAYIN.threadspin"
+            "path": "equipment[1].egos.ZAYIN.threadspin"
           }
         ],
         "publish": [
           {
             "code": "OUT_OF_RANGE_EGO_THREADSPIN",
-            "path": "equipment[01].egos.ZAYIN.threadspin"
+            "path": "equipment[1].egos.ZAYIN.threadspin"
           }
         ]
       }
@@ -9316,7 +9966,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN",
             "threadspin"
@@ -9328,13 +9978,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.ZAYIN.threadspin"
+            "path": "equipment[1].egos.ZAYIN.threadspin"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.ZAYIN.threadspin"
+            "path": "equipment[1].egos.ZAYIN.threadspin"
           }
         ]
       }
@@ -9347,7 +9997,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN",
             "threadspin"
@@ -9368,7 +10018,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN",
             "threadspin"
@@ -9380,13 +10030,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.ZAYIN.threadspin"
+            "path": "equipment[1].egos.ZAYIN.threadspin"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.ZAYIN.threadspin"
+            "path": "equipment[1].egos.ZAYIN.threadspin"
           }
         ]
       }
@@ -9399,7 +10049,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "ZAYIN",
             "threadspin"
@@ -9411,13 +10061,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.ZAYIN.threadspin"
+            "path": "equipment[1].egos.ZAYIN.threadspin"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "equipment[01].egos.ZAYIN.threadspin"
+            "path": "equipment[1].egos.ZAYIN.threadspin"
           }
         ]
       }
@@ -9430,7 +10080,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "TETH"
           ],
@@ -9447,13 +10097,13 @@
         "draft": [
           {
             "code": "OUT_OF_RANGE_EGO_THREADSPIN",
-            "path": "equipment[01].egos.TETH.threadspin"
+            "path": "equipment[1].egos.TETH.threadspin"
           }
         ],
         "publish": [
           {
             "code": "OUT_OF_RANGE_EGO_THREADSPIN",
-            "path": "equipment[01].egos.TETH.threadspin"
+            "path": "equipment[1].egos.TETH.threadspin"
           }
         ]
       }
@@ -9466,7 +10116,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "TETH"
           ],
@@ -9489,7 +10139,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "TETH"
           ],
@@ -9506,13 +10156,13 @@
         "draft": [
           {
             "code": "MISSING_EGO_THREADSPIN_CEILING",
-            "path": "equipment[01].egos.TETH.threadspin"
+            "path": "equipment[1].egos.TETH.threadspin"
           }
         ],
         "publish": [
           {
             "code": "MISSING_EGO_THREADSPIN_CEILING",
-            "path": "equipment[01].egos.TETH.threadspin"
+            "path": "equipment[1].egos.TETH.threadspin"
           }
         ]
       }
@@ -9525,7 +10175,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "egos",
             "TETH"
           ],
@@ -9535,8 +10185,18 @@
         }
       ],
       "expected": {
-        "draft": [],
-        "publish": []
+        "draft": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].egos.TETH.threadspin"
+          }
+        ],
+        "publish": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "equipment[1].egos.TETH.threadspin"
+          }
+        ]
       }
     },
     {
@@ -9547,7 +10207,7 @@
         {
           "at": [
             "skillEAState",
-            "01",
+            "1",
             "0"
           ],
           "remove": true
@@ -9556,14 +10216,14 @@
       "expected": {
         "draft": [
           {
-            "code": "OUT_OF_RANGE_SKILL_TOTAL",
-            "path": "skillEAState[01]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1][0]"
           }
         ],
         "publish": [
           {
-            "code": "OUT_OF_RANGE_SKILL_TOTAL",
-            "path": "skillEAState[01]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1][0]"
           }
         ]
       }
@@ -9576,7 +10236,7 @@
         {
           "at": [
             "skillEAState",
-            "01",
+            "1",
             "0"
           ],
           "value": null
@@ -9586,13 +10246,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "skillEAState[01][0]"
+            "path": "skillEAState[1][0]"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "skillEAState[01][0]"
+            "path": "skillEAState[1][0]"
           }
         ]
       }
@@ -9605,7 +10265,7 @@
         {
           "at": [
             "skillEAState",
-            "01",
+            "1",
             "0"
           ],
           "value": 7
@@ -9615,13 +10275,13 @@
         "draft": [
           {
             "code": "OUT_OF_RANGE_SKILL_TOTAL",
-            "path": "skillEAState[01]"
+            "path": "skillEAState[1]"
           }
         ],
         "publish": [
           {
             "code": "OUT_OF_RANGE_SKILL_TOTAL",
-            "path": "skillEAState[01]"
+            "path": "skillEAState[1]"
           }
         ]
       }
@@ -9634,7 +10294,7 @@
         {
           "at": [
             "skillEAState",
-            "01",
+            "1",
             "0"
           ],
           "value": "x"
@@ -9644,13 +10304,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "skillEAState[01][0]"
+            "path": "skillEAState[1][0]"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "skillEAState[01][0]"
+            "path": "skillEAState[1][0]"
           }
         ]
       }
@@ -9663,7 +10323,7 @@
         {
           "at": [
             "skillEAState",
-            "01",
+            "1",
             "0"
           ],
           "value": ""
@@ -9673,13 +10333,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "skillEAState[01][0]"
+            "path": "skillEAState[1][0]"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "skillEAState[01][0]"
+            "path": "skillEAState[1][0]"
           }
         ]
       }
@@ -9692,7 +10352,7 @@
         {
           "at": [
             "skillEAState",
-            "01",
+            "1",
             "0"
           ],
           "value": []
@@ -9702,13 +10362,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "skillEAState[01][0]"
+            "path": "skillEAState[1][0]"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "skillEAState[01][0]"
+            "path": "skillEAState[1][0]"
           }
         ]
       }
@@ -9721,7 +10381,7 @@
         {
           "at": [
             "skillEAState",
-            "01",
+            "1",
             "0"
           ],
           "value": {}
@@ -9731,13 +10391,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "skillEAState[01][0]"
+            "path": "skillEAState[1][0]"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "skillEAState[01][0]"
+            "path": "skillEAState[1][0]"
           }
         ]
       }
@@ -9750,7 +10410,7 @@
         {
           "at": [
             "skillEAState",
-            "01",
+            "1",
             "0"
           ],
           "value": -1
@@ -9760,13 +10420,13 @@
         "draft": [
           {
             "code": "OUT_OF_RANGE_SKILL_TOTAL",
-            "path": "skillEAState[01]"
+            "path": "skillEAState[1]"
           }
         ],
         "publish": [
           {
             "code": "OUT_OF_RANGE_SKILL_TOTAL",
-            "path": "skillEAState[01]"
+            "path": "skillEAState[1]"
           }
         ]
       }
@@ -9779,7 +10439,7 @@
         {
           "at": [
             "skillEAState",
-            "01",
+            "1",
             "0"
           ],
           "value": 2.5
@@ -9789,13 +10449,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "skillEAState[01][0]"
+            "path": "skillEAState[1][0]"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "skillEAState[01][0]"
+            "path": "skillEAState[1][0]"
           }
         ]
       }
@@ -9808,7 +10468,7 @@
         {
           "at": [
             "skillEAState",
-            "01",
+            "1",
             "0"
           ],
           "value": 3.0
@@ -9827,7 +10487,7 @@
         {
           "at": [
             "skillEAState",
-            "01",
+            "1",
             "0"
           ],
           "value": "3"
@@ -9837,13 +10497,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "skillEAState[01][0]"
+            "path": "skillEAState[1][0]"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "skillEAState[01][0]"
+            "path": "skillEAState[1][0]"
           }
         ]
       }
@@ -9856,7 +10516,7 @@
         {
           "at": [
             "skillEAState",
-            "01",
+            "1",
             "0"
           ],
           "value": true
@@ -9866,13 +10526,13 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "skillEAState[01][0]"
+            "path": "skillEAState[1][0]"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "skillEAState[01][0]"
+            "path": "skillEAState[1][0]"
           }
         ]
       }
@@ -9885,7 +10545,7 @@
         {
           "at": [
             "skillEAState",
-            "01",
+            "1",
             "0"
           ],
           "value": 7
@@ -9895,13 +10555,13 @@
         "draft": [
           {
             "code": "OUT_OF_RANGE_SKILL_TOTAL",
-            "path": "skillEAState[01]"
+            "path": "skillEAState[1]"
           }
         ],
         "publish": [
           {
             "code": "OUT_OF_RANGE_SKILL_TOTAL",
-            "path": "skillEAState[01]"
+            "path": "skillEAState[1]"
           }
         ]
       }
@@ -9914,7 +10574,7 @@
         {
           "at": [
             "skillEAState",
-            "01"
+            "1"
           ],
           "value": {
             "0": 2.5,
@@ -9927,21 +10587,21 @@
         "draft": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "skillEAState[01][0]"
+            "path": "skillEAState[1][0]"
           },
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "skillEAState[01][1]"
+            "path": "skillEAState[1][1]"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "skillEAState[01][0]"
+            "path": "skillEAState[1][0]"
           },
           {
             "code": "INVALID_FIELD_TYPE",
-            "path": "skillEAState[01][1]"
+            "path": "skillEAState[1][1]"
           }
         ]
       }
@@ -9954,7 +10614,7 @@
         {
           "at": [
             "skillEAState",
-            "01",
+            "1",
             "3"
           ],
           "value": 0
@@ -9963,14 +10623,14 @@
       "expected": {
         "draft": [
           {
-            "code": "INVALID_SKILL_SLOT",
-            "path": "skillEAState[01][3]"
+            "code": "UNKNOWN_FIELD",
+            "path": "skillEAState[1][3]"
           }
         ],
         "publish": [
           {
-            "code": "INVALID_SKILL_SLOT",
-            "path": "skillEAState[01][3]"
+            "code": "UNKNOWN_FIELD",
+            "path": "skillEAState[1][3]"
           }
         ]
       }
@@ -9983,7 +10643,7 @@
         {
           "at": [
             "skillEAState",
-            "01",
+            "1",
             "a"
           ],
           "value": 0
@@ -9992,14 +10652,14 @@
       "expected": {
         "draft": [
           {
-            "code": "INVALID_SKILL_SLOT",
-            "path": "skillEAState[01][a]"
+            "code": "UNKNOWN_FIELD",
+            "path": "skillEAState[1][a]"
           }
         ],
         "publish": [
           {
-            "code": "INVALID_SKILL_SLOT",
-            "path": "skillEAState[01][a]"
+            "code": "UNKNOWN_FIELD",
+            "path": "skillEAState[1][a]"
           }
         ]
       }
@@ -10012,7 +10672,7 @@
         {
           "at": [
             "skillEAState",
-            "01"
+            "1"
           ],
           "value": {
             "0": 3,
@@ -10024,22 +10684,22 @@
       "expected": {
         "draft": [
           {
-            "code": "OUT_OF_RANGE_SKILL_TOTAL",
-            "path": "skillEAState[01]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1][2]"
           },
           {
-            "code": "INVALID_SKILL_SLOT",
-            "path": "skillEAState[01][3]"
+            "code": "UNKNOWN_FIELD",
+            "path": "skillEAState[1][3]"
           }
         ],
         "publish": [
           {
-            "code": "OUT_OF_RANGE_SKILL_TOTAL",
-            "path": "skillEAState[01]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1][2]"
           },
           {
-            "code": "INVALID_SKILL_SLOT",
-            "path": "skillEAState[01][3]"
+            "code": "UNKNOWN_FIELD",
+            "path": "skillEAState[1][3]"
           }
         ]
       }
@@ -10052,7 +10712,7 @@
         {
           "at": [
             "skillEAState",
-            "01",
+            "1",
             "2"
           ],
           "value": 0
@@ -10062,13 +10722,13 @@
         "draft": [
           {
             "code": "OUT_OF_RANGE_SKILL_TOTAL",
-            "path": "skillEAState[01]"
+            "path": "skillEAState[1]"
           }
         ],
         "publish": [
           {
             "code": "OUT_OF_RANGE_SKILL_TOTAL",
-            "path": "skillEAState[01]"
+            "path": "skillEAState[1]"
           }
         ]
       }
@@ -10081,7 +10741,7 @@
         {
           "at": [
             "skillEAState",
-            "01",
+            "1",
             "2"
           ],
           "value": 2
@@ -10091,13 +10751,13 @@
         "draft": [
           {
             "code": "OUT_OF_RANGE_SKILL_TOTAL",
-            "path": "skillEAState[01]"
+            "path": "skillEAState[1]"
           }
         ],
         "publish": [
           {
             "code": "OUT_OF_RANGE_SKILL_TOTAL",
-            "path": "skillEAState[01]"
+            "path": "skillEAState[1]"
           }
         ]
       }
@@ -10110,7 +10770,7 @@
         {
           "at": [
             "skillEAState",
-            "01"
+            "1"
           ],
           "value": {}
         }
@@ -10118,14 +10778,30 @@
       "expected": {
         "draft": [
           {
-            "code": "OUT_OF_RANGE_SKILL_TOTAL",
-            "path": "skillEAState[01]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1][0]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1][1]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1][2]"
           }
         ],
         "publish": [
           {
-            "code": "OUT_OF_RANGE_SKILL_TOTAL",
-            "path": "skillEAState[01]"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1][0]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1][1]"
+          },
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "skillEAState[1][2]"
           }
         ]
       }
@@ -10214,13 +10890,13 @@
       "expected": {
         "draft": [
           {
-            "code": "UNKNOWN_EGOGIFT",
+            "code": "INVALID_FIELD_TYPE",
             "path": "observationGiftIds[0]"
           }
         ],
         "publish": [
           {
-            "code": "UNKNOWN_EGOGIFT",
+            "code": "INVALID_FIELD_TYPE",
             "path": "observationGiftIds[0]"
           }
         ]
@@ -10243,13 +10919,13 @@
       "expected": {
         "draft": [
           {
-            "code": "UNKNOWN_EGOGIFT",
+            "code": "INVALID_FIELD_TYPE",
             "path": "observationGiftIds[0]"
           }
         ],
         "publish": [
           {
-            "code": "UNKNOWN_EGOGIFT",
+            "code": "INVALID_FIELD_TYPE",
             "path": "observationGiftIds[0]"
           }
         ]
@@ -10272,13 +10948,13 @@
       "expected": {
         "draft": [
           {
-            "code": "UNKNOWN_EGOGIFT",
+            "code": "INVALID_FIELD_TYPE",
             "path": "observationGiftIds[0]"
           }
         ],
         "publish": [
           {
-            "code": "UNKNOWN_EGOGIFT",
+            "code": "INVALID_FIELD_TYPE",
             "path": "observationGiftIds[0]"
           }
         ]
@@ -10509,20 +11185,12 @@
           {
             "code": "INVALID_FIELD_TYPE",
             "path": "observationGiftIds[0]"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "observationGiftIds[2]"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
             "path": "observationGiftIds[0]"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "observationGiftIds[2]"
           }
         ]
       }
@@ -10611,13 +11279,13 @@
       "expected": {
         "draft": [
           {
-            "code": "UNKNOWN_EGOGIFT",
+            "code": "INVALID_FIELD_TYPE",
             "path": "comprehensiveGiftIds[0]"
           }
         ],
         "publish": [
           {
-            "code": "UNKNOWN_EGOGIFT",
+            "code": "INVALID_FIELD_TYPE",
             "path": "comprehensiveGiftIds[0]"
           }
         ]
@@ -10640,13 +11308,13 @@
       "expected": {
         "draft": [
           {
-            "code": "UNKNOWN_EGOGIFT",
+            "code": "INVALID_FIELD_TYPE",
             "path": "comprehensiveGiftIds[0]"
           }
         ],
         "publish": [
           {
-            "code": "UNKNOWN_EGOGIFT",
+            "code": "INVALID_FIELD_TYPE",
             "path": "comprehensiveGiftIds[0]"
           }
         ]
@@ -10669,13 +11337,13 @@
       "expected": {
         "draft": [
           {
-            "code": "UNKNOWN_EGOGIFT",
+            "code": "INVALID_FIELD_TYPE",
             "path": "comprehensiveGiftIds[0]"
           }
         ],
         "publish": [
           {
-            "code": "UNKNOWN_EGOGIFT",
+            "code": "INVALID_FIELD_TYPE",
             "path": "comprehensiveGiftIds[0]"
           }
         ]
@@ -10906,20 +11574,12 @@
           {
             "code": "INVALID_FIELD_TYPE",
             "path": "comprehensiveGiftIds[0]"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "comprehensiveGiftIds[2]"
           }
         ],
         "publish": [
           {
             "code": "INVALID_FIELD_TYPE",
             "path": "comprehensiveGiftIds[0]"
-          },
-          {
-            "code": "DUPLICATE_EGOGIFT",
-            "path": "comprehensiveGiftIds[2]"
           }
         ]
       }
@@ -11392,27 +12052,11 @@
       "expected": {
         "draft": [
           {
-            "code": "EXCESS_STARTBUFF",
-            "path": "selectedBuffIds"
-          },
-          {
-            "code": "UNKNOWN_STARTBUFF",
-            "path": "selectedBuffIds[9]"
-          },
-          {
             "code": "INVALID_FIELD_TYPE",
             "path": "selectedBuffIds[10]"
           }
         ],
         "publish": [
-          {
-            "code": "EXCESS_STARTBUFF",
-            "path": "selectedBuffIds"
-          },
-          {
-            "code": "UNKNOWN_STARTBUFF",
-            "path": "selectedBuffIds[9]"
-          },
           {
             "code": "INVALID_FIELD_TYPE",
             "path": "selectedBuffIds[10]"
@@ -11433,8 +12077,18 @@
         }
       ],
       "expected": {
-        "draft": [],
-        "publish": []
+        "draft": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "selectedGiftKeyword"
+          }
+        ],
+        "publish": [
+          {
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "selectedGiftKeyword"
+          }
+        ]
       }
     },
     {
@@ -11460,14 +12114,14 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_STARTGIFT_KEYWORD",
-            "path": "selectedGiftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "selectedGiftKeyword"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_STARTGIFT_KEYWORD",
-            "path": "selectedGiftIds"
+            "code": "MISSING_REQUIRED_FIELD",
+            "path": "selectedGiftKeyword"
           }
         ]
       }
@@ -11601,13 +12255,13 @@
       "expected": {
         "draft": [
           {
-            "code": "UNKNOWN_STARTGIFT_KEYWORD",
+            "code": "INVALID_FIELD_TYPE",
             "path": "selectedGiftKeyword"
           }
         ],
         "publish": [
           {
-            "code": "UNKNOWN_STARTGIFT_KEYWORD",
+            "code": "INVALID_FIELD_TYPE",
             "path": "selectedGiftKeyword"
           }
         ]
@@ -11636,13 +12290,13 @@
       "expected": {
         "draft": [
           {
-            "code": "UNKNOWN_STARTGIFT_KEYWORD",
+            "code": "INVALID_FIELD_TYPE",
             "path": "selectedGiftKeyword"
           }
         ],
         "publish": [
           {
-            "code": "UNKNOWN_STARTGIFT_KEYWORD",
+            "code": "INVALID_FIELD_TYPE",
             "path": "selectedGiftKeyword"
           }
         ]
@@ -11661,8 +12315,18 @@
         }
       ],
       "expected": {
-        "draft": [],
-        "publish": []
+        "draft": [
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "selectedGiftKeyword"
+          }
+        ],
+        "publish": [
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "selectedGiftKeyword"
+          }
+        ]
       }
     },
     {
@@ -11688,14 +12352,14 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_STARTGIFT_KEYWORD",
-            "path": "selectedGiftIds"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "selectedGiftKeyword"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_STARTGIFT_KEYWORD",
-            "path": "selectedGiftIds"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "selectedGiftKeyword"
           }
         ]
       }
@@ -11837,8 +12501,18 @@
         }
       ],
       "expected": {
-        "draft": [],
-        "publish": []
+        "draft": [
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "selectedGiftKeyword"
+          }
+        ],
+        "publish": [
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "selectedGiftKeyword"
+          }
+        ]
       }
     },
     {
@@ -11864,14 +12538,103 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_STARTGIFT_KEYWORD",
-            "path": "selectedGiftIds"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "selectedGiftKeyword"
           }
         ],
         "publish": [
           {
-            "code": "MISSING_STARTGIFT_KEYWORD",
-            "path": "selectedGiftIds"
+            "code": "INVALID_FIELD_TYPE",
+            "path": "selectedGiftKeyword"
+          }
+        ]
+      }
+    },
+    {
+      "name": "startgift-keyword-unicode-space",
+      "subject": "startgift",
+      "category": "5F",
+      "edits": [
+        {
+          "at": [
+            "selectedGiftKeyword"
+          ],
+          "value": "\u3000"
+        }
+      ],
+      "expected": {
+        "draft": [
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "selectedGiftKeyword"
+          }
+        ],
+        "publish": [
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "selectedGiftKeyword"
+          }
+        ]
+      }
+    },
+    {
+      "name": "startgift-keyword-trailing-space",
+      "subject": "startgift",
+      "category": "5F",
+      "edits": [
+        {
+          "at": [
+            "selectedGiftKeyword"
+          ],
+          "value": "Combustion "
+        }
+      ],
+      "expected": {
+        "draft": [
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "selectedGiftKeyword"
+          }
+        ],
+        "publish": [
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "selectedGiftKeyword"
+          }
+        ]
+      }
+    },
+    {
+      "name": "startgift-keyword-trailing-newline",
+      "subject": "startgift",
+      "category": "5F",
+      "edits": [
+        {
+          "at": [
+            "selectedGiftKeyword"
+          ],
+          "value": "Combustion\n"
+        },
+        {
+          "at": [
+            "selectedGiftIds"
+          ],
+          "value": [
+            "9001"
+          ]
+        }
+      ],
+      "expected": {
+        "draft": [
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "selectedGiftKeyword"
+          }
+        ],
+        "publish": [
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "selectedGiftKeyword"
           }
         ]
       }
@@ -12108,13 +12871,13 @@
       "expected": {
         "draft": [
           {
-            "code": "UNKNOWN_EGOGIFT",
+            "code": "INVALID_FIELD_TYPE",
             "path": "selectedGiftIds[0]"
           }
         ],
         "publish": [
           {
-            "code": "UNKNOWN_EGOGIFT",
+            "code": "INVALID_FIELD_TYPE",
             "path": "selectedGiftIds[0]"
           }
         ]
@@ -12357,19 +13120,11 @@
       "expected": {
         "draft": [
           {
-            "code": "MISSING_STARTGIFT_KEYWORD",
-            "path": "selectedGiftIds"
-          },
-          {
             "code": "INVALID_FIELD_TYPE",
             "path": "selectedGiftIds[0]"
           }
         ],
         "publish": [
-          {
-            "code": "MISSING_STARTGIFT_KEYWORD",
-            "path": "selectedGiftIds"
-          },
           {
             "code": "INVALID_FIELD_TYPE",
             "path": "selectedGiftIds[0]"
@@ -12476,6 +13231,64 @@
       }
     },
     {
+      "name": "floor-theme-pack-blank",
+      "subject": "floor",
+      "category": "5F",
+      "edits": [
+        {
+          "at": [
+            "floorSelections",
+            0,
+            "themePackId"
+          ],
+          "value": ""
+        }
+      ],
+      "expected": {
+        "draft": [
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[0].themePackId"
+          }
+        ],
+        "publish": [
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[0].themePackId"
+          }
+        ]
+      }
+    },
+    {
+      "name": "floor-theme-pack-trailing-crlf",
+      "subject": "floor",
+      "category": "5F",
+      "edits": [
+        {
+          "at": [
+            "floorSelections",
+            0,
+            "themePackId"
+          ],
+          "value": "1001\r\n"
+        }
+      ],
+      "expected": {
+        "draft": [
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[0].themePackId"
+          }
+        ],
+        "publish": [
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "floorSelections[0].themePackId"
+          }
+        ]
+      }
+    },
+    {
       "name": "floor-non-object-and-sinner-bad",
       "subject": "floor",
       "category": "5F",
@@ -12490,7 +13303,7 @@
         {
           "at": [
             "equipment",
-            "01",
+            "1",
             "identity",
             "id"
           ],
@@ -12500,22 +13313,52 @@
       "expected": {
         "draft": [
           {
-            "code": "UNKNOWN_IDENTITY",
-            "path": "equipment[01].identity.id"
-          },
-          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[0]"
           }
         ],
         "publish": [
           {
-            "code": "UNKNOWN_IDENTITY",
-            "path": "equipment[01].identity.id"
-          },
-          {
             "code": "INVALID_FIELD_TYPE",
             "path": "floorSelections[0]"
+          }
+        ]
+      }
+    },
+    {
+      "name": "document-shape-beside-rule",
+      "subject": "document",
+      "category": "5F",
+      "edits": [
+        {
+          "at": [
+            "skillEAState",
+            "1",
+            "0"
+          ],
+          "value": 2.5
+        },
+        {
+          "at": [
+            "equipment",
+            "1",
+            "identity",
+            "id"
+          ],
+          "value": "10199"
+        }
+      ],
+      "expected": {
+        "draft": [
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "skillEAState[1][0]"
+          }
+        ],
+        "publish": [
+          {
+            "code": "INVALID_FIELD_TYPE",
+            "path": "skillEAState[1][0]"
           }
         ]
       }
@@ -12545,7 +13388,7 @@
         {
           "at": [
             "skillEAState",
-            "02",
+            "2",
             "2"
           ],
           "value": 0
@@ -12587,7 +13430,7 @@
           },
           {
             "code": "OUT_OF_RANGE_SKILL_TOTAL",
-            "path": "skillEAState[02]"
+            "path": "skillEAState[2]"
           }
         ],
         "publish": [
@@ -12609,7 +13452,7 @@
           },
           {
             "code": "OUT_OF_RANGE_SKILL_TOTAL",
-            "path": "skillEAState[02]"
+            "path": "skillEAState[2]"
           }
         ]
       }
@@ -12622,7 +13465,7 @@
         {
           "at": [
             "equipment",
-            "02",
+            "2",
             "identity",
             "level"
           ],
@@ -12642,21 +13485,21 @@
         "draft": [
           {
             "code": "OUT_OF_RANGE_IDENTITY_LEVEL",
-            "path": "equipment[02].identity.level"
+            "path": "equipment[10].identity.level"
           },
           {
             "code": "OUT_OF_RANGE_IDENTITY_LEVEL",
-            "path": "equipment[10].identity.level"
+            "path": "equipment[2].identity.level"
           }
         ],
         "publish": [
           {
             "code": "OUT_OF_RANGE_IDENTITY_LEVEL",
-            "path": "equipment[02].identity.level"
+            "path": "equipment[10].identity.level"
           },
           {
             "code": "OUT_OF_RANGE_IDENTITY_LEVEL",
-            "path": "equipment[10].identity.level"
+            "path": "equipment[2].identity.level"
           }
         ]
       }

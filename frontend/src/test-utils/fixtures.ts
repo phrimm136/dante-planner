@@ -1,5 +1,5 @@
 import {
-  FloorSelectionDraftSchema,
+  FloorSelectionSchema,
   validateSaveablePlanner,
   type PlannerSummary,
   type SaveablePlanner,
@@ -12,12 +12,15 @@ import {
   type EGOGiftSpec,
 } from '@/pages/egoGift'
 import {
+  DEFAULT_SKILL_EA,
   DUNGEON_IDX,
   IdentityIdSchema,
   EGOIdSchema,
   EGOGiftIdSchema,
   EncodedGiftIdSchema,
+  SINNERS,
   SinnerScopedIdSchema,
+  ThemePackIdSchema,
 } from '@/shared/gameData'
 import type { IdentityId, EGOId, EGOGiftId, EncodedGiftId, SinnerScopedId } from '@/shared/gameData'
 
@@ -49,12 +52,37 @@ const FIXTURE_TIMESTAMP = '2026-01-01T00:00:00.000Z'
 export function buildFloorSelection(
   overrides: Partial<SerializableFloorSelection> = {},
 ): SerializableFloorSelection {
-  return FloorSelectionDraftSchema.parse({
-    themePackId: '1001',
+  const floor = {
+    themePackId: ThemePackIdSchema.parse('1001'),
     difficulty: DUNGEON_IDX.NORMAL,
     giftIds: [],
     ...overrides,
-  })
+  }
+  FloorSelectionSchema.parse(floor)
+  return floor
+}
+
+const FIXTURE_SINNER_KEYS = SINNERS.map((_, sinnerIndex) => String(sinnerIndex + 1))
+
+function fixtureEquipment(): MDPlanner['content']['equipment'] {
+  return Object.fromEntries(
+    FIXTURE_SINNER_KEYS.map((sinnerKey) => {
+      const sinnerIdPart = sinnerKey.padStart(2, '0')
+      return [
+        sinnerKey,
+        {
+          identity: { id: asIdentityId(`1${sinnerIdPart}01`), level: 1, uptie: 1 },
+          egos: { ZAYIN: { id: asEGOId(`2${sinnerIdPart}01`), threadspin: 1 } },
+        },
+      ]
+    }),
+  )
+}
+
+function fixtureSkillEAState(): MDPlanner['content']['skillEAState'] {
+  return Object.fromEntries(
+    FIXTURE_SINNER_KEYS.map((sinnerKey) => [sinnerKey, { ...DEFAULT_SKILL_EA }]),
+  )
 }
 
 export function buildSaveablePlanner(
@@ -89,9 +117,9 @@ export function buildSaveablePlanner(
       selectedGiftIds: [],
       observationGiftIds: [],
       comprehensiveGiftIds: [],
-      equipment: {},
+      equipment: fixtureEquipment(),
       deploymentOrder: [],
-      skillEAState: {},
+      skillEAState: fixtureSkillEAState(),
       sectionNotes: {},
       floorSelections: [],
       ...overrides.content,

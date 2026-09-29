@@ -1,13 +1,13 @@
 import { validationAppError } from '@/lib/apiErrorClassifier'
 import type { Codes } from './codes'
 import type { ContentPath } from './contentPath'
+import type { ShapeViolation } from './contentShape'
 import type { DocumentRefusal, DocumentViolation } from './document'
 import type { EgoViolation } from './ego/egos'
 import type { GiftIdsViolation } from './egogift/giftIds'
 import type { FloorViolation } from './floor/floorRules'
 import type { IdentityViolation } from './identity/identity'
 import type { DeploymentViolation } from './sinner/deploymentOrder'
-import type { SinnerKeyViolation } from './sinner/sinnerKeys'
 import type { SkillViolation } from './skill/skillEAState'
 import type { StartBuffViolation } from './startbuff/startBuffs'
 import type { StartGiftViolation } from './startgift/startGift'
@@ -28,7 +28,7 @@ export type FloorReferenceError =
 export type PlannerValidationError =
   | DocumentRefusal
   | DocumentViolation
-  | SinnerKeyViolation
+  | ShapeViolation
   | IdentityViolation
   | EgoViolation
   | DeploymentViolation
@@ -54,18 +54,12 @@ const MESSAGE_KEYS = {
   OUT_OF_RANGE_DIFFICULTY_NOT_HARD: 'pages.plannerMD.publish.hardModeOnly',
   OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME: 'pages.plannerMD.publish.extremeModeOnly',
   OUT_OF_RANGE_DIFFICULTY: CORRUPTED_STATE,
-  OUT_OF_RANGE_SINNER: CORRUPTED_STATE,
-  MISSING_SINNER: CORRUPTED_STATE,
-  MISSING_IDENTITY: CORRUPTED_STATE,
   MISMATCHED_IDENTITY: CORRUPTED_STATE,
   OUT_OF_RANGE_IDENTITY_LEVEL: CORRUPTED_STATE,
   OUT_OF_RANGE_IDENTITY_UPTIE: CORRUPTED_STATE,
-  MISSING_EGO_ZAYIN: CORRUPTED_STATE,
-  INVALID_EGO_TYPE: CORRUPTED_STATE,
   MISMATCHED_EGO: CORRUPTED_STATE,
   OUT_OF_RANGE_EGO_THREADSPIN: CORRUPTED_STATE,
   OUT_OF_RANGE_DEPLOYMENT: CORRUPTED_STATE,
-  INVALID_SKILL_SLOT: CORRUPTED_STATE,
   OUT_OF_RANGE_SKILL_TOTAL: CORRUPTED_STATE,
   DUPLICATE_EGOGIFT: CORRUPTED_STATE,
   DUPLICATE_STARTGIFT: CORRUPTED_STATE,
@@ -80,7 +74,6 @@ const MESSAGE_KEYS = {
   UNKNOWN_FIELD: CORRUPTED_STATE,
   UNKNOWN_STARTGIFT_KEYWORD: CORRUPTED_STATE,
   MISMATCHED_STARTGIFT: CORRUPTED_STATE,
-  DUPLICATE_SINNER: CORRUPTED_STATE,
   DUPLICATE_DEPLOYMENT: CORRUPTED_STATE,
   EXCESS_DEPLOYMENT: CORRUPTED_STATE,
   SIZE_EXCEEDED: 'pages.plannerMD.validation.noteTooLarge',

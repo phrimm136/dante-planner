@@ -1,0 +1,2147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "selectedKeywords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "selectedBuffIds": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": -9007199254740991,
+        "maximum": 9007199254740991
+      }
+    },
+    "selectedGiftKeyword": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[A-Z][A-Za-z]*$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "selectedGiftIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[12]?9\\d{3}$"
+      }
+    },
+    "observationGiftIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[12]?9\\d{3}$"
+      }
+    },
+    "comprehensiveGiftIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[12]?9\\d{3}$"
+      }
+    },
+    "equipment": {
+      "type": "object",
+      "properties": {
+        "1": {
+          "type": "object",
+          "properties": {
+            "identity": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^1(0[1-9]|1[0-2])\\d{2,}$"
+                },
+                "level": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "uptie": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "id",
+                "level",
+                "uptie"
+              ],
+              "additionalProperties": false
+            },
+            "egos": {
+              "type": "object",
+              "properties": {
+                "ZAYIN": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "TETH": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "HE": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "WAW": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "ALEPH": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "ZAYIN"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "identity",
+            "egos"
+          ],
+          "additionalProperties": false
+        },
+        "2": {
+          "type": "object",
+          "properties": {
+            "identity": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^1(0[1-9]|1[0-2])\\d{2,}$"
+                },
+                "level": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "uptie": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "id",
+                "level",
+                "uptie"
+              ],
+              "additionalProperties": false
+            },
+            "egos": {
+              "type": "object",
+              "properties": {
+                "ZAYIN": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "TETH": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "HE": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "WAW": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "ALEPH": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "ZAYIN"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "identity",
+            "egos"
+          ],
+          "additionalProperties": false
+        },
+        "3": {
+          "type": "object",
+          "properties": {
+            "identity": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^1(0[1-9]|1[0-2])\\d{2,}$"
+                },
+                "level": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "uptie": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "id",
+                "level",
+                "uptie"
+              ],
+              "additionalProperties": false
+            },
+            "egos": {
+              "type": "object",
+              "properties": {
+                "ZAYIN": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "TETH": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "HE": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "WAW": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "ALEPH": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "ZAYIN"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "identity",
+            "egos"
+          ],
+          "additionalProperties": false
+        },
+        "4": {
+          "type": "object",
+          "properties": {
+            "identity": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^1(0[1-9]|1[0-2])\\d{2,}$"
+                },
+                "level": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "uptie": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "id",
+                "level",
+                "uptie"
+              ],
+              "additionalProperties": false
+            },
+            "egos": {
+              "type": "object",
+              "properties": {
+                "ZAYIN": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "TETH": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "HE": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "WAW": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "ALEPH": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "ZAYIN"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "identity",
+            "egos"
+          ],
+          "additionalProperties": false
+        },
+        "5": {
+          "type": "object",
+          "properties": {
+            "identity": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^1(0[1-9]|1[0-2])\\d{2,}$"
+                },
+                "level": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "uptie": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "id",
+                "level",
+                "uptie"
+              ],
+              "additionalProperties": false
+            },
+            "egos": {
+              "type": "object",
+              "properties": {
+                "ZAYIN": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "TETH": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "HE": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "WAW": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "ALEPH": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "ZAYIN"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "identity",
+            "egos"
+          ],
+          "additionalProperties": false
+        },
+        "6": {
+          "type": "object",
+          "properties": {
+            "identity": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^1(0[1-9]|1[0-2])\\d{2,}$"
+                },
+                "level": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "uptie": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "id",
+                "level",
+                "uptie"
+              ],
+              "additionalProperties": false
+            },
+            "egos": {
+              "type": "object",
+              "properties": {
+                "ZAYIN": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "TETH": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "HE": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "WAW": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "ALEPH": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "ZAYIN"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "identity",
+            "egos"
+          ],
+          "additionalProperties": false
+        },
+        "7": {
+          "type": "object",
+          "properties": {
+            "identity": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^1(0[1-9]|1[0-2])\\d{2,}$"
+                },
+                "level": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "uptie": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "id",
+                "level",
+                "uptie"
+              ],
+              "additionalProperties": false
+            },
+            "egos": {
+              "type": "object",
+              "properties": {
+                "ZAYIN": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "TETH": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "HE": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "WAW": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "ALEPH": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "ZAYIN"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "identity",
+            "egos"
+          ],
+          "additionalProperties": false
+        },
+        "8": {
+          "type": "object",
+          "properties": {
+            "identity": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^1(0[1-9]|1[0-2])\\d{2,}$"
+                },
+                "level": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "uptie": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "id",
+                "level",
+                "uptie"
+              ],
+              "additionalProperties": false
+            },
+            "egos": {
+              "type": "object",
+              "properties": {
+                "ZAYIN": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "TETH": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "HE": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "WAW": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "ALEPH": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "ZAYIN"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "identity",
+            "egos"
+          ],
+          "additionalProperties": false
+        },
+        "9": {
+          "type": "object",
+          "properties": {
+            "identity": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^1(0[1-9]|1[0-2])\\d{2,}$"
+                },
+                "level": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "uptie": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "id",
+                "level",
+                "uptie"
+              ],
+              "additionalProperties": false
+            },
+            "egos": {
+              "type": "object",
+              "properties": {
+                "ZAYIN": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "TETH": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "HE": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "WAW": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "ALEPH": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "ZAYIN"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "identity",
+            "egos"
+          ],
+          "additionalProperties": false
+        },
+        "10": {
+          "type": "object",
+          "properties": {
+            "identity": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^1(0[1-9]|1[0-2])\\d{2,}$"
+                },
+                "level": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "uptie": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "id",
+                "level",
+                "uptie"
+              ],
+              "additionalProperties": false
+            },
+            "egos": {
+              "type": "object",
+              "properties": {
+                "ZAYIN": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "TETH": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "HE": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "WAW": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "ALEPH": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "ZAYIN"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "identity",
+            "egos"
+          ],
+          "additionalProperties": false
+        },
+        "11": {
+          "type": "object",
+          "properties": {
+            "identity": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^1(0[1-9]|1[0-2])\\d{2,}$"
+                },
+                "level": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "uptie": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "id",
+                "level",
+                "uptie"
+              ],
+              "additionalProperties": false
+            },
+            "egos": {
+              "type": "object",
+              "properties": {
+                "ZAYIN": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "TETH": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "HE": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "WAW": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "ALEPH": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "ZAYIN"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "identity",
+            "egos"
+          ],
+          "additionalProperties": false
+        },
+        "12": {
+          "type": "object",
+          "properties": {
+            "identity": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^1(0[1-9]|1[0-2])\\d{2,}$"
+                },
+                "level": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "uptie": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "id",
+                "level",
+                "uptie"
+              ],
+              "additionalProperties": false
+            },
+            "egos": {
+              "type": "object",
+              "properties": {
+                "ZAYIN": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "TETH": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "HE": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "WAW": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                },
+                "ALEPH": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^2(0[1-9]|1[0-2])\\d{2,}$"
+                    },
+                    "threadspin": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadspin"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "ZAYIN"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "identity",
+            "egos"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12"
+      ],
+      "additionalProperties": false
+    },
+    "deploymentOrder": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": -9007199254740991,
+        "maximum": 9007199254740991
+      }
+    },
+    "skillEAState": {
+      "type": "object",
+      "properties": {
+        "1": {
+          "type": "object",
+          "properties": {
+            "0": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "1": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "2": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "0",
+            "1",
+            "2"
+          ],
+          "additionalProperties": false
+        },
+        "2": {
+          "type": "object",
+          "properties": {
+            "0": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "1": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "2": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "0",
+            "1",
+            "2"
+          ],
+          "additionalProperties": false
+        },
+        "3": {
+          "type": "object",
+          "properties": {
+            "0": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "1": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "2": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "0",
+            "1",
+            "2"
+          ],
+          "additionalProperties": false
+        },
+        "4": {
+          "type": "object",
+          "properties": {
+            "0": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "1": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "2": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "0",
+            "1",
+            "2"
+          ],
+          "additionalProperties": false
+        },
+        "5": {
+          "type": "object",
+          "properties": {
+            "0": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "1": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "2": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "0",
+            "1",
+            "2"
+          ],
+          "additionalProperties": false
+        },
+        "6": {
+          "type": "object",
+          "properties": {
+            "0": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "1": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "2": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "0",
+            "1",
+            "2"
+          ],
+          "additionalProperties": false
+        },
+        "7": {
+          "type": "object",
+          "properties": {
+            "0": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "1": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "2": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "0",
+            "1",
+            "2"
+          ],
+          "additionalProperties": false
+        },
+        "8": {
+          "type": "object",
+          "properties": {
+            "0": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "1": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "2": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "0",
+            "1",
+            "2"
+          ],
+          "additionalProperties": false
+        },
+        "9": {
+          "type": "object",
+          "properties": {
+            "0": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "1": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "2": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "0",
+            "1",
+            "2"
+          ],
+          "additionalProperties": false
+        },
+        "10": {
+          "type": "object",
+          "properties": {
+            "0": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "1": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "2": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "0",
+            "1",
+            "2"
+          ],
+          "additionalProperties": false
+        },
+        "11": {
+          "type": "object",
+          "properties": {
+            "0": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "1": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "2": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "0",
+            "1",
+            "2"
+          ],
+          "additionalProperties": false
+        },
+        "12": {
+          "type": "object",
+          "properties": {
+            "0": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "1": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "2": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "0",
+            "1",
+            "2"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12"
+      ],
+      "additionalProperties": false
+    },
+    "floorSelections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "themePackId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "difficulty": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "giftIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[12]?9\\d{3}$"
+            }
+          }
+        },
+        "required": [
+          "themePackId",
+          "difficulty",
+          "giftIds"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "sectionNotes": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "content": {}
+        },
+        "required": [
+          "content"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "selectedKeywords",
+    "selectedBuffIds",
+    "selectedGiftKeyword",
+    "selectedGiftIds",
+    "observationGiftIds",
+    "comprehensiveGiftIds",
+    "equipment",
+    "deploymentOrder",
+    "skillEAState",
+    "floorSelections",
+    "sectionNotes"
+  ],
+  "additionalProperties": false
+}

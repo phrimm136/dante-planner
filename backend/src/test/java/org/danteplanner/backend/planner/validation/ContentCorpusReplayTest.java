@@ -77,6 +77,19 @@ class ContentCorpusReplayTest {
     }
 
     @Test
+    void parse_WhenALevelIsWrittenAsAnIntegralDouble_BindsItAsTheIntegerAndStoresTheTextAsReceived() {
+        ObjectNode content = CORPUS.path("base").deepCopy();
+        ((ObjectNode) content.path("equipment").path("1").path("identity")).put("level", 60.0);
+        String raw = content.toString();
+
+        PlannerDocument document = validator.parse(raw, MDCategory.F5, validator.season(CONTENT_VERSION), Stage.DRAFT);
+
+        assertThat(raw).contains("\"level\":60.0");
+        assertThat(document.content().identities().get("1").level()).isEqualTo(60L);
+        assertThat(document.json()).isEqualTo(raw);
+    }
+
+    @Test
     @EnabledIfEnvironmentVariable(named = OUT, matches = ".+")
     void corpus_WhenAnOutputPathIsGiven_WritesTheOrderedCodesAndPaths() throws IOException {
         ObjectNode file = MAPPER.createObjectNode().put("producer", "backend");

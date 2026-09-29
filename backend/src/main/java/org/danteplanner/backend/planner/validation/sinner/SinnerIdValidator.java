@@ -15,7 +15,8 @@ public class SinnerIdValidator {
     private static final Pattern EGO_PATTERN = Pattern.compile("^2(0[1-9]|1[0-2])\\d{2,}$");
 
     /**
-     * Equipment keys are 2-digit 1-indexed ("01"-"12"), matching ID sinner indices.
+     * Equipment keys are 1-indexed ("1"-"12"), zero-padded here to match the
+     * 2-digit sinner index embedded in the ID.
      */
     public boolean validateMatch(String equipmentKey, String entityId) {
         String normalizedKey = equipmentKey.length() == 1

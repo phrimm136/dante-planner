@@ -1,104 +1,22 @@
 import { describe, it, expect } from 'vitest'
 
 import { contentPath, field, key } from '../../contentPath'
-import { egoRuleViolations, parseEgos } from '../egos'
+import type { SinnerEquipmentValue } from '../../contentShape'
+import type { SinnerEntry } from '../../sinnerEntries'
+import { egoRuleViolations } from '../egos'
 import type { EgoReferenceData } from '../egos'
 import { rendered } from '../../__tests__/rendered'
 
-const SINNER_PATH = contentPath(field('equipment'), key('01'))
+const SINNER_PATH = contentPath(field('equipment'), key('1'))
 
-const parse = (sinnerEquipment: Record<string, unknown>) =>
-  parseEgos(sinnerEquipment, SINNER_PATH, '01')
+type Ego = { id: string; threadspin: number }
 
-const violationsOf = (egos: unknown) => rendered(parse({ egos }).violations)
-
-describe('parseEgos', () => {
-  it('admits every slot with an id', () => {
-    const parsed = parse({ egos: { ZAYIN: { id: '20101' }, TETH: { id: '20102' } } })
-
-    expect(parsed.violations).toEqual([])
-    expect(rendered(parsed.egos).map(({ egoType, id, path }) => ({ egoType, id, path }))).toEqual([
-      { egoType: 'ZAYIN', id: '20101', path: 'equipment[01].egos.ZAYIN.id' },
-      { egoType: 'TETH', id: '20102', path: 'equipment[01].egos.TETH.id' },
-    ])
-  })
-
-  it.each([
-    ['absent', undefined],
-    ['null', null],
-  ])('reports egos that are %s as MISSING_EGO_ZAYIN', (_label, egos) => {
-    expect(violationsOf(egos)).toEqual([{ code: 'MISSING_EGO_ZAYIN', path: 'equipment[01].egos' }])
-  })
-
-  it.each([
-    ['a number', 5],
-    ['a string', 'x'],
-    ['an array', []],
-  ])('reports egos that are %s as INVALID_FIELD_TYPE', (_label, egos) => {
-    expect(violationsOf(egos)).toEqual([{ code: 'INVALID_FIELD_TYPE', path: 'equipment[01].egos' }])
-  })
-
-  it.each([
-    ['absent', {}],
-    ['null', { ZAYIN: null }],
-  ])('reports a ZAYIN slot that is %s as MISSING_EGO_ZAYIN at the slot', (_label, egos) => {
-    expect(violationsOf(egos)).toEqual([
-      { code: 'MISSING_EGO_ZAYIN', path: 'equipment[01].egos.ZAYIN' },
-    ])
-  })
-
-  it('reports a ZAYIN slot of the wrong kind as INVALID_FIELD_TYPE at the slot', () => {
-    expect(violationsOf({ ZAYIN: 'z' })).toEqual([
-      { code: 'INVALID_FIELD_TYPE', path: 'equipment[01].egos.ZAYIN' },
-    ])
-  })
-
-  it.each([
-    ['absent', {}],
-    ['null', { id: null }],
-    ['blank', { id: ' ' }],
-  ])('reports a ZAYIN id that is %s as MISSING_EGO_ZAYIN at the id', (_label, zayin) => {
-    expect(violationsOf({ ZAYIN: zayin })).toEqual([
-      { code: 'MISSING_EGO_ZAYIN', path: 'equipment[01].egos.ZAYIN.id' },
-    ])
-  })
-
-  it('reports a numeric id once, as INVALID_FIELD_TYPE, in any slot', () => {
-    expect(violationsOf({ ZAYIN: { id: 20101 }, TETH: { id: 20102 } })).toEqual([
-      { code: 'INVALID_FIELD_TYPE', path: 'equipment[01].egos.TETH.id' },
-      { code: 'INVALID_FIELD_TYPE', path: 'equipment[01].egos.ZAYIN.id' },
-    ])
-  })
-
-  it('reports each slot key outside the E.G.O types at that key', () => {
-    expect(violationsOf({ ZAYIN: { id: '20101' }, FOO: { id: '20102' }, BAR: {} })).toEqual([
-      { code: 'INVALID_EGO_TYPE', path: 'equipment[01].egos.BAR' },
-      { code: 'INVALID_EGO_TYPE', path: 'equipment[01].egos.FOO' },
-    ])
-  })
-
-  it('leaves an optional slot without an id alone', () => {
-    expect(violationsOf({ ZAYIN: { id: '20101' }, TETH: {}, HE: { id: null } })).toEqual([])
-  })
-
-  it.each([
-    ['null', null],
-    ['a number', 7],
-    ['a string', 'x'],
-    ['blank', ''],
-    ['an array', []],
-  ])('reports an optional slot that is %s as INVALID_FIELD_TYPE at the slot', (_label, teth) => {
-    expect(violationsOf({ ZAYIN: { id: '20101' }, TETH: teth })).toEqual([
-      { code: 'INVALID_FIELD_TYPE', path: 'equipment[01].egos.TETH' },
-    ])
-  })
-
-  it('reports only the unknown type for a non-object slot under a key outside the types', () => {
-    expect(violationsOf({ ZAYIN: { id: '20101' }, FOO: null })).toEqual([
-      { code: 'INVALID_EGO_TYPE', path: 'equipment[01].egos.FOO' },
-    ])
-  })
-})
+const entryOf = (egos: Record<string, Ego>) =>
+  ({
+    sinnerKey: '1',
+    path: SINNER_PATH,
+    value: { identity: { id: '10101', level: 1, uptie: 1 }, egos },
+  }) as unknown as SinnerEntry<SinnerEquipmentValue>
 
 describe('egoRuleViolations', () => {
   const knows = (ids: string[]): EgoReferenceData => ({
@@ -107,8 +25,8 @@ describe('egoRuleViolations', () => {
   })
   const knowsAll: EgoReferenceData = { hasEgo: () => true, maxThreadspin: () => 5 }
 
-  const rulesOf = (egos: Record<string, unknown>, data = knowsAll) =>
-    rendered(egoRuleViolations(parse({ egos }), data))
+  const rulesOf = (egos: Record<string, Ego>, data = knowsAll) =>
+    rendered(egoRuleViolations(entryOf(egos), data))
 
   it('passes known E.G.O of their sinner within the threadspin bounds', () => {
     expect(
@@ -118,38 +36,35 @@ describe('egoRuleViolations', () => {
 
   it('reports each unknown id with the id as the message parameter, and nothing else', () => {
     expect(
-      rulesOf({ ZAYIN: { id: '20199', threadspin: 9 }, TETH: { id: '20102' } }, knows(['20102'])),
+      rulesOf(
+        { ZAYIN: { id: '20199', threadspin: 9 }, TETH: { id: '20102', threadspin: 1 } },
+        knows(['20102']),
+      ),
     ).toEqual([
-      { code: 'UNKNOWN_EGO', path: 'equipment[01].egos.ZAYIN.id', params: { id: '20199' } },
-    ])
-  })
-
-  it('checks ids under a slot key outside the E.G.O types too', () => {
-    expect(rulesOf({ ZAYIN: { id: '20101' }, FOO: { id: '20199' } }, knows(['20101']))).toEqual([
-      { code: 'UNKNOWN_EGO', path: 'equipment[01].egos.FOO.id', params: { id: '20199' } },
+      { code: 'UNKNOWN_EGO', path: 'equipment[1].egos.ZAYIN.id', params: { id: '20199' } },
     ])
   })
 
   it('reports an E.G.O of another sinner, and nothing else', () => {
     expect(rulesOf({ ZAYIN: { id: '20201', threadspin: 9 } })).toEqual([
-      { code: 'MISMATCHED_EGO', path: 'equipment[01].egos.ZAYIN.id' },
+      { code: 'MISMATCHED_EGO', path: 'equipment[1].egos.ZAYIN.id' },
     ])
+  })
+
+  it('skips an optional slot left empty', () => {
+    expect(
+      egoRuleViolations(
+        entryOf({ ZAYIN: { id: '20101', threadspin: 1 }, TETH: undefined as unknown as Ego }),
+        knowsAll,
+      ),
+    ).toEqual([])
   })
 
   it.each([0, 6])('reports threadspin %d at the field', (threadspin) => {
     expect(rulesOf({ ZAYIN: { id: '20101', threadspin } })).toEqual([
-      { code: 'OUT_OF_RANGE_EGO_THREADSPIN', path: 'equipment[01].egos.ZAYIN.threadspin' },
+      { code: 'OUT_OF_RANGE_EGO_THREADSPIN', path: 'equipment[1].egos.ZAYIN.threadspin' },
     ])
   })
-
-  it.each(['3', null, 2.5])(
-    'reports threadspin %j of the wrong kind as INVALID_FIELD_TYPE',
-    (threadspin) => {
-      expect(rulesOf({ ZAYIN: { id: '20101', threadspin } })).toEqual([
-        { code: 'INVALID_FIELD_TYPE', path: 'equipment[01].egos.ZAYIN.threadspin' },
-      ])
-    },
-  )
 
   it('bounds threadspin by the E.G.O ceiling', () => {
     const ceilings: EgoReferenceData = {
@@ -161,24 +76,26 @@ describe('egoRuleViolations', () => {
         { ZAYIN: { id: '20101', threadspin: 5 }, TETH: { id: '20102', threadspin: 4 } },
         ceilings,
       ),
-    ).toEqual([{ code: 'OUT_OF_RANGE_EGO_THREADSPIN', path: 'equipment[01].egos.TETH.threadspin' }])
+    ).toEqual([{ code: 'OUT_OF_RANGE_EGO_THREADSPIN', path: 'equipment[1].egos.TETH.threadspin' }])
     expect(
-      rulesOf({ ZAYIN: { id: '20101' }, TETH: { id: '20102', threadspin: 3 } }, ceilings),
+      rulesOf(
+        { ZAYIN: { id: '20101', threadspin: 1 }, TETH: { id: '20102', threadspin: 3 } },
+        ceilings,
+      ),
     ).toEqual([])
   })
 
   it('reports a known E.G.O without a ceiling as MISSING_EGO_THREADSPIN_CEILING', () => {
     const noCeiling: EgoReferenceData = { hasEgo: () => true, maxThreadspin: () => undefined }
     expect(rulesOf({ ZAYIN: { id: '20101', threadspin: 1 } }, noCeiling)).toEqual([
-      { code: 'MISSING_EGO_THREADSPIN_CEILING', path: 'equipment[01].egos.ZAYIN.threadspin' },
+      { code: 'MISSING_EGO_THREADSPIN_CEILING', path: 'equipment[1].egos.ZAYIN.threadspin' },
     ])
-    expect(rulesOf({ ZAYIN: { id: '20101' } }, noCeiling)).toEqual([])
   })
 
   it('reports a threadspin outside 1-5 as out of range before looking up the ceiling', () => {
     const noCeiling: EgoReferenceData = { hasEgo: () => true, maxThreadspin: () => undefined }
     expect(rulesOf({ ZAYIN: { id: '20101', threadspin: 9 } }, noCeiling)).toEqual([
-      { code: 'OUT_OF_RANGE_EGO_THREADSPIN', path: 'equipment[01].egos.ZAYIN.threadspin' },
+      { code: 'OUT_OF_RANGE_EGO_THREADSPIN', path: 'equipment[1].egos.ZAYIN.threadspin' },
     ])
   })
 })

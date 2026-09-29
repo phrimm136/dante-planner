@@ -1,0 +1,91 @@
+id: no-json-node-in-rules
+snapshots:
+  ? |
+    class A {
+      private record Found(JsonNode node) {
+      }
+    }
+  : labels:
+    - source: JsonNode node
+      style: primary
+      start: 33
+      end: 46
+    - source: JsonNode
+      style: secondary
+      start: 33
+      end: 41
+  ? |
+    class A {
+      private static Stream<Violation> egos(List<JsonNode> slots) {
+        return Stream.empty();
+      }
+    }
+  : labels:
+    - source: List<JsonNode> slots
+      style: primary
+      start: 50
+      end: 70
+    - source: List<JsonNode>
+      style: secondary
+      start: 50
+      end: 64
+  ? |
+    class A {
+      static List<Violation> check(JsonNode deploymentOrder) {
+        return List.of();
+      }
+    }
+  : labels:
+    - source: JsonNode deploymentOrder
+      style: primary
+      start: 41
+      end: 65
+    - source: JsonNode
+      style: secondary
+      start: 41
+      end: 49
+  ? |
+    class A {
+      static List<Violation> check(Map<String, JsonNode> sinners) {
+        return List.of();
+      }
+    }
+  : labels:
+    - source: Map<String, JsonNode> sinners
+      style: primary
+      start: 41
+      end: 70
+    - source: Map<String, JsonNode>
+      style: secondary
+      start: 41
+      end: 62
+  ? |
+    class A {
+      static List<Violation> check(com.fasterxml.jackson.databind.JsonNode keyword, List<String> giftIds) {
+        return List.of();
+      }
+    }
+  : labels:
+    - source: com.fasterxml.jackson.databind.JsonNode keyword
+      style: primary
+      start: 41
+      end: 88
+    - source: com.fasterxml.jackson.databind.JsonNode
+      style: secondary
+      start: 41
+      end: 80
+  ? |
+    public final class DeploymentOrder {
+      public static List<Violation> check(JsonNode sinnerIndices) {
+        return List.of();
+      }
+    }
+  : labels:
+    - source: JsonNode sinnerIndices
+      style: primary
+      start: 75
+      end: 97
+    - source: JsonNode
+      style: secondary
+      start: 75
+      end: 83

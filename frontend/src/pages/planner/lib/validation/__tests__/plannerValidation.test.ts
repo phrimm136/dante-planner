@@ -100,10 +100,10 @@ function makeGiftSpec(themePack: string[]): EGOGiftSpec {
 function makeValidEquipment(): Record<string, SinnerEquipment> {
   const equipment: Record<string, SinnerEquipment> = {}
   for (let i = 1; i <= 12; i++) {
-    const key = String(i).padStart(2, '0')
-    equipment[key] = {
-      identity: { id: asIdentityId(`1${key}01`), uptie: 1, level: 1 },
-      egos: { ZAYIN: { id: asEGOId(`2${key}01`), threadspin: 1 } },
+    const idPart = String(i).padStart(2, '0')
+    equipment[String(i)] = {
+      identity: { id: asIdentityId(`1${idPart}01`), uptie: 1, level: 1 },
+      egos: { ZAYIN: { id: asEGOId(`2${idPart}01`), threadspin: 1 } },
     }
   }
   return equipment
@@ -112,9 +112,8 @@ function makeValidEquipment(): Record<string, SinnerEquipment> {
 function makeValidSkillEAState(): Record<string, SkillEAState> {
   const state: Record<string, SkillEAState> = {}
   for (let i = 1; i <= 12; i++) {
-    const key = String(i).padStart(2, '0')
     // Slots 0+1+2 must sum to 6
-    state[key] = { 0: 3, 1: 2, 2: 1 }
+    state[String(i)] = { 0: 3, 1: 2, 2: 1 }
   }
   return state
 }
@@ -231,14 +230,13 @@ describe('floor rules through the validators', () => {
     ])
   })
 
-  // corpus: floor-theme-pack-empty-accepted-as-draft (Behavior Inventory 4)
-  it('an empty-string pack is absent: draft passes, publish reports it missing', () => {
+  // corpus: floor-theme-pack-empty-rejected-as-draft
+  it('an empty-string pack is a malformed field at draft and publish', () => {
     const content = makeValidContent('5F')
     floorAt(content, 4).themePackId = '' as unknown as ThemePackId
-    expect(draftValidation(content, '5F').errors).toEqual([])
-    expect(codesAndFields(publishValidation('My Plan', content, '5F'))).toEqual([
-      ['MISSING_THEMEPACK', 'floorSelections[4]'],
-    ])
+    const malformed = [['INVALID_FIELD_TYPE', 'floorSelections[4].themePackId']]
+    expect(codesAndFields(draftValidation(content, '5F'))).toEqual(malformed)
+    expect(codesAndFields(publishValidation('My Plan', content, '5F'))).toEqual(malformed)
   })
 
   // corpus: scn-three-violations-three-floors (Behavior Inventory 11)
@@ -341,14 +339,13 @@ describe('publishValidation (strict)', () => {
     expect(publishValidation('My Plan', content, '5F').errors).toEqual([])
   })
 
-  // corpus: scn-10f-difficulty-absent (Behavior Inventory 6)
-  it('an absent difficulty at publish returns INSUFFICIENT_DIFFICULTY_ENTRY', () => {
+  // corpus: scn-10f-difficulty-absent
+  it('an absent difficulty is a missing required field at draft and publish', () => {
     const content = makeValidContent('10F')
     delete (floorAt(content, 0) as { difficulty?: DungeonIdx }).difficulty
-    expect(codesAndFields(publishValidation('My Plan', content, '10F'))).toEqual([
-      ['INSUFFICIENT_DIFFICULTY_ENTRY', 'floorSelections[0].difficulty'],
-    ])
-    expect(draftValidation(content, '10F').errors).toEqual([])
+    const missing = [['MISSING_REQUIRED_FIELD', 'floorSelections[0].difficulty']]
+    expect(codesAndFields(publishValidation('My Plan', content, '10F'))).toEqual(missing)
+    expect(codesAndFields(draftValidation(content, '10F'))).toEqual(missing)
   })
 
   it('renamed keyword is accepted via migration and does not mutate caller state', () => {
@@ -401,7 +398,7 @@ describe('draftValidation (non-strict)', () => {
 
   it('missing equipment sinner returns corruptedState i18n key', () => {
     const content = makeValidContent('5F')
-    delete (content.equipment as Record<string, unknown>)['01']
+    delete (content.equipment as Record<string, unknown>)['1']
     const result = draftValidation(content, '5F')
     expect(toUserFriendlyError(at(result.errors, 0)).key).toBe(
       'pages.plannerMD.validation.corruptedState',
@@ -594,7 +591,7 @@ describe('publishValidation – gift existence', () => {
 
   it('unknown gift in top-level selectedGiftIds returns UNKNOWN_EGOGIFT', () => {
     const content = makeValidContent('5F')
-    content.selectedGiftKeyword = 'someKeyword'
+    content.selectedGiftKeyword = 'SomeKeyword'
     content.selectedGiftIds = [ENCODED_9999]
 
     const { isValid, errors } = publishValidation('My Plan', content, '5F', spec)
@@ -618,7 +615,7 @@ describe('publishValidation – validator propagation', () => {
 
   it('invalid skill EA total propagates OUT_OF_RANGE_SKILL_TOTAL', () => {
     const content = makeValidContent('5F')
-    content.skillEAState['01'] = { 0: 4, 1: 2, 2: 1 } // 4+2+1=7 ≠ 6
+    content.skillEAState['1'] = { 0: 4, 1: 2, 2: 1 } // 4+2+1=7 ≠ 6
     const { isValid, errors } = publishValidation('My Plan', content, '5F')
     expect(isValid).toBe(false)
     expect(errors.some((e) => e.code === 'OUT_OF_RANGE_SKILL_TOTAL')).toBe(true)
@@ -626,7 +623,7 @@ describe('publishValidation – validator propagation', () => {
 
   it('duplicate gift in selectedGiftIds propagates DUPLICATE_STARTGIFT once', () => {
     const content = makeValidContent('5F')
-    content.selectedGiftKeyword = 'someKeyword'
+    content.selectedGiftKeyword = 'SomeKeyword'
     content.selectedGiftIds = [ENCODED_9001, ENCODED_9001]
     const { isValid, errors } = publishValidation('My Plan', content, '5F')
     expect(isValid).toBe(false)
@@ -650,12 +647,12 @@ describe('publishValidation – validator propagation', () => {
     expect(errors.some((e) => e.code === 'MISSING_STARTGIFT_KEYWORD')).toBe(true)
   })
 
-  it('missing equipment sinner propagates MISSING_SINNER', () => {
+  it('missing equipment sinner is a missing required field at that sinner', () => {
     const content = makeValidContent('5F')
-    delete (content.equipment as Record<string, unknown>)['01']
-    const { isValid, errors } = publishValidation('My Plan', content, '5F')
-    expect(isValid).toBe(false)
-    expect(errors.some((e) => e.code === 'MISSING_SINNER')).toBe(true)
+    delete (content.equipment as Record<string, unknown>)['1']
+    expect(codesAndFields(publishValidation('My Plan', content, '5F'))).toEqual([
+      ['MISSING_REQUIRED_FIELD', 'equipment[1]'],
+    ])
   })
 })
 
@@ -923,8 +920,8 @@ describe('entity id registry checks', () => {
       key: 'pages.plannerMD.validation.unknownIdentityId',
       id: '10199',
       corrupt: (c: MDPlannerContent) => {
-        c.equipment['01'] = {
-          ...c.equipment['01']!,
+        c.equipment['1'] = {
+          ...c.equipment['1']!,
           identity: { id: asIdentityId('10199'), uptie: 1, level: 1 },
         }
       },
@@ -934,8 +931,8 @@ describe('entity id registry checks', () => {
       key: 'pages.plannerMD.validation.unknownEgoId',
       id: '20199',
       corrupt: (c: MDPlannerContent) => {
-        c.equipment['01'] = {
-          ...c.equipment['01']!,
+        c.equipment['1'] = {
+          ...c.equipment['1']!,
           egos: { ZAYIN: { id: asEGOId('20199'), threadspin: 1 } },
         }
       },
@@ -1020,14 +1017,15 @@ describe('gift enhancement band', () => {
     expect(draftValidation(content, '5F', spec).errors).toEqual([])
   })
 
-  it('39123 is outside the band and unknown in every gift field', () => {
+  it('39123 is outside the band and a malformed id in every gift field', () => {
     const content = makeValidContent('5F')
     content.observationGiftIds = ['39123' as EncodedGiftId]
     floorAt(content, 0).giftIds = ['39123' as EncodedGiftId]
 
-    const codes = publishValidation('My Plan', content, '5F', spec).errors.map((e) => e.code)
-    expect(codes).toContain('UNKNOWN_EGOGIFT')
-    expect(codes).toContain('UNKNOWN_EGOGIFT_FLOOR')
+    expect(codesAndFields(publishValidation('My Plan', content, '5F', spec))).toEqual([
+      ['INVALID_FIELD_TYPE', 'floorSelections[0].giftIds[0]'],
+      ['INVALID_FIELD_TYPE', 'observationGiftIds[0]'],
+    ])
   })
 })
 
@@ -1041,7 +1039,7 @@ describe('retired E.G.O after id normalization', () => {
 
   function normalizedContentWith(egos: SinnerEquipment['egos']): MDPlannerContent {
     const content = { ...makeValidContent('5F'), selectedBuffIds: [100] }
-    content.equipment['01'] = { ...content.equipment['01']!, egos }
+    content.equipment['1'] = { ...content.equipment['1']!, egos }
     return normalizePlannerIds(
       content as unknown as Record<string, unknown>,
       TABLE,
@@ -1061,16 +1059,16 @@ describe('retired E.G.O after id normalization', () => {
     }
   }
 
-  it('keeps it in the ZAYIN slot and reports one UNKNOWN_EGO, not a missing ZAYIN', () => {
+  it('keeps it in the ZAYIN slot and reports one UNKNOWN_EGO, not a missing field', () => {
     const content = normalizedContentWith({ ZAYIN: { id: asEGOId(RETIRED_EGO), threadspin: 1 } })
 
-    expect(content.equipment['01']?.egos.ZAYIN?.id).toBe(RETIRED_EGO)
+    expect(content.equipment['1']?.egos.ZAYIN?.id).toBe(RETIRED_EGO)
     const { errors } = publishValidation('My Plan', content, '5F', undefined, undefined, registry())
     expect(errors.filter((e) => e.code === 'UNKNOWN_EGO')).toHaveLength(1)
     expect(errors.find((e) => e.code === 'UNKNOWN_EGO')).toMatchObject({
       params: { id: RETIRED_EGO },
     })
-    expect(errors.map((e) => e.code)).not.toContain('MISSING_EGO_ZAYIN')
+    expect(errors.map((e) => e.code)).not.toContain('MISSING_REQUIRED_FIELD')
   })
 
   it('empties the TETH slot and reports nothing for it', () => {
@@ -1079,7 +1077,7 @@ describe('retired E.G.O after id normalization', () => {
       TETH: { id: asEGOId(RETIRED_EGO), threadspin: 1 },
     })
 
-    expect(content.equipment['01']?.egos.TETH).toBeUndefined()
+    expect(content.equipment['1']?.egos.TETH).toBeUndefined()
     expect(
       publishValidation('My Plan', content, '5F', undefined, undefined, registry()).errors,
     ).toEqual([])
@@ -1144,7 +1142,7 @@ describe('content fields that are absent or of the wrong kind', () => {
 
     it.each(sinnerContainers)('refuses an absent %s as a missing required field', (name) => {
       expect(codesAndFields(validate[stage](withField(name, undefined)))).toEqual([
-        ['MISSING_REQUIRED_FIELD', ''],
+        ['MISSING_REQUIRED_FIELD', name],
       ])
     })
 
@@ -1158,16 +1156,9 @@ describe('content fields that are absent or of the wrong kind', () => {
       expect(codesAndFieldsOf(name, value)).toEqual([['INVALID_FIELD_TYPE', name]])
     })
 
-    it.each(listFields.filter((name) => name !== 'deploymentOrder'))(
-      'reads an absent %s as empty',
-      (name) => {
-        expect(validate[stage](withField(name, undefined)).errors).toEqual([])
-      },
-    )
-
-    it('refuses an absent deploymentOrder as a missing required field', () => {
-      expect(codesAndFields(validate[stage](withField('deploymentOrder', undefined)))).toEqual([
-        ['MISSING_REQUIRED_FIELD', ''],
+    it.each(listFields)('refuses an absent %s as a missing required field', (name) => {
+      expect(codesAndFields(validate[stage](withField(name, undefined)))).toEqual([
+        ['MISSING_REQUIRED_FIELD', name],
       ])
     })
 
@@ -1183,10 +1174,10 @@ describe('content fields that are absent or of the wrong kind', () => {
 
     it.each(sinnerContainers)('reports a null sinner in %s at that sinner', (name) => {
       const content = makeValidContent('5F')
-      ;(content[name] as Record<string, unknown>)['01'] = null
+      ;(content[name] as Record<string, unknown>)['1'] = null
 
       expect(codesAndFields(validate[stage](content))).toEqual([
-        ['INVALID_FIELD_TYPE', `${name}[01]`],
+        ['INVALID_FIELD_TYPE', `${name}[1]`],
       ])
     })
   })
@@ -1201,39 +1192,39 @@ describe('backend parity rules through the validators', () => {
     [
       'an identity of another sinner',
       (c: MDPlannerContent) => {
-        c.equipment['01'] = {
-          ...c.equipment['01']!,
+        c.equipment['1'] = {
+          ...c.equipment['1']!,
           identity: { id: asIdentityId('10201'), uptie: 1, level: 1 },
         }
       },
-      [['MISMATCHED_IDENTITY', 'equipment[01].identity.id']],
+      [['MISMATCHED_IDENTITY', 'equipment[1].identity.id']],
     ],
     [
       'an identity level past the cap',
       (c: MDPlannerContent) => {
-        c.equipment['01'] = {
-          ...c.equipment['01']!,
+        c.equipment['1'] = {
+          ...c.equipment['1']!,
           identity: { id: asIdentityId('10101'), uptie: 1, level: 61 },
         }
       },
-      [['OUT_OF_RANGE_IDENTITY_LEVEL', 'equipment[01].identity.level']],
+      [['OUT_OF_RANGE_IDENTITY_LEVEL', 'equipment[1].identity.level']],
     ],
     [
       'an E.G.O of another sinner',
       (c: MDPlannerContent) => {
-        c.equipment['01'] = {
-          ...c.equipment['01']!,
+        c.equipment['1'] = {
+          ...c.equipment['1']!,
           egos: { ZAYIN: { id: asEGOId('20201'), threadspin: 1 } },
         }
       },
-      [['MISMATCHED_EGO', 'equipment[01].egos.ZAYIN.id']],
+      [['MISMATCHED_EGO', 'equipment[1].egos.ZAYIN.id']],
     ],
     [
       'a sinner key outside 1-12',
       (c: MDPlannerContent) => {
         ;(c.skillEAState as Record<string, unknown>)['13'] = { 0: 3, 1: 2, 2: 1 }
       },
-      [['OUT_OF_RANGE_SINNER', 'skillEAState[13]']],
+      [['UNKNOWN_FIELD', 'skillEAState[13]']],
     ],
   ] as const)('%s is reported at draft and publish', (_label, corrupt, expected) => {
     const content = makeValidContent('5F')
@@ -1311,16 +1302,32 @@ describe('one content verdict on both runtimes', () => {
     expect(publish(content)).toEqual([['UNKNOWN_KEYWORD', 'selectedKeywords[0]']])
   })
 
-  it('checks keyword kinds at both stages and unknown keywords at publish, per element', () => {
+  it('refuses a non-string keyword alone at both stages', () => {
     const content = makeValidContent('5F')
     ;(content as { selectedKeywords: unknown }).selectedKeywords = ['AccelBullet', 'Nope', 5, '']
 
     expect(draft(content)).toEqual([['INVALID_FIELD_TYPE', 'selectedKeywords[2]']])
+    expect(publish(content)).toEqual([['INVALID_FIELD_TYPE', 'selectedKeywords[2]']])
+  })
+
+  it('reports unknown keywords at publish only, per element, a blank one included', () => {
+    const content = makeValidContent('5F')
+    content.selectedKeywords = ['AccelBullet', 'Nope', '']
+
+    expect(draft(content)).toEqual([])
     expect(publish(content)).toEqual([
       ['UNKNOWN_KEYWORD', 'selectedKeywords[1]'],
-      ['INVALID_FIELD_TYPE', 'selectedKeywords[2]'],
-      ['UNKNOWN_KEYWORD', 'selectedKeywords[3]'],
+      ['UNKNOWN_KEYWORD', 'selectedKeywords[2]'],
     ])
+  })
+
+  it('returns a shape failure alone, without the rule violations beside it', () => {
+    const content = makeValidContent('5F')
+    content.deploymentOrder = [12]
+    ;(content.skillEAState as Record<string, unknown>)['2'] = { 0: 3, 1: 2, 2: 0.5 }
+
+    expect(draft(content)).toEqual([['INVALID_FIELD_TYPE', 'skillEAState[2][2]']])
+    expect(publish(content)).toEqual([['INVALID_FIELD_TYPE', 'skillEAState[2][2]']])
   })
 
   it('refuses a missing title alone, ahead of an unknown version and a boundary refusal', () => {
@@ -1342,14 +1349,14 @@ describe('one content verdict on both runtimes', () => {
     content.deploymentOrder = [12]
     ;(content as unknown as Record<string, unknown>)['mystery'] = 1
 
-    expect(publish(content)).toEqual([['UNKNOWN_FIELD', '']])
+    expect(publish(content)).toEqual([['UNKNOWN_FIELD', 'mystery']])
     expect(publish(content, registryWith(undefined))).toEqual([['UNKNOWN_VERSION', '']])
   })
 
   it('orders the whole result by path, then code', () => {
     const content = makeValidContent('5F')
     content.deploymentOrder = [12]
-    content.skillEAState['02'] = { 0: 3, 1: 2, 2: 0 }
+    content.skillEAState['2'] = { 0: 3, 1: 2, 2: 0 }
     content.selectedBuffIds = [999]
     content.observationGiftIds = [ENCODED_9999]
     content.equipment['12'] = {
@@ -1365,7 +1372,7 @@ describe('one content verdict on both runtimes', () => {
       ['UNKNOWN_IDENTITY', 'equipment[12].identity.id'],
       ['UNKNOWN_EGOGIFT', 'observationGiftIds[0]'],
       ['UNKNOWN_STARTBUFF', 'selectedBuffIds[0]'],
-      ['OUT_OF_RANGE_SKILL_TOTAL', 'skillEAState[02]'],
+      ['OUT_OF_RANGE_SKILL_TOTAL', 'skillEAState[2]'],
     ])
   })
 

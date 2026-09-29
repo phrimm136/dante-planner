@@ -1,22 +1,21 @@
 import { describe, it, expect } from 'vitest'
 
-import { parseStartBuffs, startBuffViolations } from '../startBuffs'
+import { startBuffViolations } from '../startBuffs'
 import type { StartBuffSeason } from '../startBuffs'
 import { rendered } from '../../__tests__/rendered'
 
 const KNOWS_ALL: StartBuffSeason = { hasStartBuff: () => true }
 
-const violationsOf = (raw: unknown, season: StartBuffSeason | undefined = KNOWS_ALL) =>
-  rendered(startBuffViolations(parseStartBuffs(raw), season))
+const violationsOf = (buffIds: number[], season: StartBuffSeason = KNOWS_ALL) =>
+  rendered(startBuffViolations(buffIds, season))
 
 describe('startBuffViolations', () => {
   it('passes buffs with distinct base ids', () => {
     expect(violationsOf([100, 201, 302])).toEqual([])
   })
 
-  it('passes an empty list and an absent one', () => {
+  it('passes an empty list', () => {
     expect(violationsOf([])).toEqual([])
-    expect(violationsOf(undefined)).toEqual([])
   })
 
   it('reports more than 10 buffs at the list', () => {
@@ -44,20 +43,6 @@ describe('startBuffViolations', () => {
       { code: 'OUT_OF_RANGE_STARTBUFF', path: 'selectedBuffIds[1]' },
     ])
   })
-
-  it.each([
-    ['a string', '101'],
-    ['a fraction', 100.5],
-    ['null', null],
-  ])('reports a buff that is %s as INVALID_FIELD_TYPE', (_label, buff) => {
-    expect(violationsOf([100, buff])).toEqual([
-      { code: 'INVALID_FIELD_TYPE', path: 'selectedBuffIds[1]' },
-    ])
-  })
-
-  it('reports a list of the wrong kind as INVALID_FIELD_TYPE', () => {
-    expect(violationsOf(null)).toEqual([{ code: 'INVALID_FIELD_TYPE', path: 'selectedBuffIds' }])
-  })
 })
 
 describe('unknown start buffs', () => {
@@ -82,11 +67,11 @@ describe('unknown start buffs', () => {
   })
 
   it('reports more than 10 buffs beside every per-buff violation', () => {
-    const buffs = [100, 101, 102, 103, 104, 105, 106, 107, 108, 999, 'x']
+    const buffs = [100, 101, 102, 103, 104, 105, 106, 107, 108, 999, 910]
     expect(violationsOf(buffs, knows(buffs.map(String).filter((id) => id !== '999')))).toEqual([
       { code: 'EXCESS_STARTBUFF', path: 'selectedBuffIds' },
       { code: 'UNKNOWN_STARTBUFF', path: 'selectedBuffIds[9]', params: { id: '999' } },
-      { code: 'INVALID_FIELD_TYPE', path: 'selectedBuffIds[10]' },
+      { code: 'OUT_OF_RANGE_STARTBUFF', path: 'selectedBuffIds[10]' },
     ])
   })
 })

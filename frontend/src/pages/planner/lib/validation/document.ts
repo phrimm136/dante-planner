@@ -1,87 +1,45 @@
 import { KEYWORD_RENAME_MAP, PLANNER_KEYWORDS } from '@/shared/gameData'
 import { MAX_NOTE_BYTES } from '@/lib/constants'
 import { calculateNoteByteLength } from '@/shared/noteEditor'
-import { invalidFieldType, isBlank, isRecord, parseList } from './boundary'
-import type { InvalidFieldType } from './boundary'
+import { isBlank } from './boundary'
 import type { Codes } from './codes'
 import { contentPath, extendPath, field, index, key } from './contentPath'
 import type { ContentPath } from './contentPath'
+import type { SectionNotesValue } from './contentShape'
 
 const ROOT_PATH = contentPath()
 const TITLE_PATH = contentPath(field('title'))
 const KEYWORDS_PATH = contentPath(field('selectedKeywords'))
-const SECTION_NOTES = 'sectionNotes'
-const SECTION_NOTES_PATH = contentPath(field(SECTION_NOTES))
-
-const REQUIRED_FIELDS: readonly string[] = [
-  'selectedKeywords',
-  'equipment',
-  'deploymentOrder',
-  'floorSelections',
-  SECTION_NOTES,
-  'skillEAState',
-]
-
-const ALLOWED_FIELDS: ReadonlySet<string> = new Set([
-  ...REQUIRED_FIELDS,
-  'selectedBuffIds',
-  'selectedGiftKeyword',
-  'selectedGiftIds',
-  'observationGiftIds',
-  'comprehensiveGiftIds',
-])
+const SECTION_NOTES_PATH = contentPath(field('sectionNotes'))
 
 const PLANNER_KEYWORD_SET: ReadonlySet<string> = new Set(PLANNER_KEYWORDS)
 
-export type DocumentRefusal =
-  | {
-      code: Codes<'UNKNOWN_FIELD' | 'MISSING_REQUIRED_FIELD'>
-      path: ContentPath
-    }
-  | {
-      code: Codes<'SIZE_EXCEEDED'>
-      path: ContentPath
-      params: { section: string; limit: string }
-    }
+export type DocumentRefusal = {
+  code: Codes<'SIZE_EXCEEDED'>
+  path: ContentPath
+  params: { section: string; limit: string }
+}
 
 export type DocumentViolation =
-  | InvalidFieldType
   | { code: Codes<'MISSING_TITLE' | 'UNKNOWN_VERSION'>; path: ContentPath }
   | { code: Codes<'UNKNOWN_KEYWORD'>; path: ContentPath; params: { keyword: string } }
 
-const refusal = (code: Codes<'UNKNOWN_FIELD' | 'MISSING_REQUIRED_FIELD'>): DocumentRefusal => ({
-  code,
-  path: ROOT_PATH,
-})
-
-const presentFields = (content: Record<string, unknown>): string[] =>
-  Object.keys(content).filter((name) => content[name] !== undefined)
-
-function oversizedNote(sectionNotes: unknown): DocumentRefusal | undefined {
-  if (!isRecord(sectionNotes)) return undefined
+export function noteSizeViolations(sectionNotes: SectionNotesValue): DocumentRefusal[] {
   const oversized = Object.keys(sectionNotes)
     .sort()
     .find((section) => {
       const note = sectionNotes[section]
-      return (
-        note !== undefined && calculateNoteByteLength(note as { content: unknown }) > MAX_NOTE_BYTES
-      )
+      return note !== undefined && calculateNoteByteLength(note) > MAX_NOTE_BYTES
     })
   return oversized === undefined
-    ? undefined
-    : {
-        code: 'SIZE_EXCEEDED',
-        path: extendPath(SECTION_NOTES_PATH, key(oversized)),
-        params: { section: oversized, limit: String(MAX_NOTE_BYTES) },
-      }
-}
-
-export function documentRefusal(content: unknown): DocumentRefusal | undefined {
-  const fields = isRecord(content) ? content : {}
-  const present = new Set(presentFields(fields))
-  if ([...present].some((name) => !ALLOWED_FIELDS.has(name))) return refusal('UNKNOWN_FIELD')
-  if (REQUIRED_FIELDS.some((name) => !present.has(name))) return refusal('MISSING_REQUIRED_FIELD')
-  return oversizedNote(fields[SECTION_NOTES])
+    ? []
+    : [
+        {
+          code: 'SIZE_EXCEEDED',
+          path: extendPath(SECTION_NOTES_PATH, key(oversized)),
+          params: { section: oversized, limit: String(MAX_NOTE_BYTES) },
+        },
+      ]
 }
 
 export const unknownVersion = (): DocumentViolation => ({
@@ -92,39 +50,14 @@ export const unknownVersion = (): DocumentViolation => ({
 export const titleViolations = (title: string | undefined): DocumentViolation[] =>
   title === undefined || isBlank(title) ? [{ code: 'MISSING_TITLE', path: TITLE_PATH }] : []
 
-export const sectionNotesViolations = (raw: unknown): DocumentViolation[] =>
-  raw === undefined || isRecord(raw) ? [] : [invalidFieldType(SECTION_NOTES_PATH)]
-
-type SelectedKeyword = { keyword: string; path: ContentPath }
-
-export type ParsedKeywords = {
-  keywords: readonly SelectedKeyword[]
-  violations: readonly InvalidFieldType[]
-}
-
 const renamedKeyword = (keyword: string): string =>
   (Object.hasOwn(KEYWORD_RENAME_MAP, keyword) ? KEYWORD_RENAME_MAP[keyword] : undefined) ?? keyword
 
-export function parseKeywords(raw: unknown): ParsedKeywords {
-  const list = parseList(raw, KEYWORDS_PATH)
-  const elements = list.elements.map((value, position) => ({
-    value,
-    path: extendPath(KEYWORDS_PATH, index(position)),
-  }))
-  return {
-    keywords: elements.flatMap(({ value, path }) =>
-      typeof value === 'string' ? [{ keyword: renamedKeyword(value), path }] : [],
-    ),
-    violations: [
-      ...list.violations,
-      ...elements.flatMap(({ value, path }) =>
-        typeof value === 'string' ? [] : [invalidFieldType(path)],
-      ),
-    ],
-  }
-}
-
-export const keywordViolations = (parsed: ParsedKeywords): DocumentViolation[] =>
-  parsed.keywords
+export const keywordViolations = (keywords: readonly string[]): DocumentViolation[] =>
+  keywords
+    .map((keyword, position) => ({
+      keyword: renamedKeyword(keyword),
+      path: extendPath(KEYWORDS_PATH, index(position)),
+    }))
     .filter(({ keyword }) => !PLANNER_KEYWORD_SET.has(keyword))
     .map(({ keyword, path }) => ({ code: 'UNKNOWN_KEYWORD', path, params: { keyword } }))

@@ -11,7 +11,7 @@ export { plannerApi } from './lib/plannerApi'
 export { plannerQueryKeys } from './lib/plannerQueryKeys'
 
 export type { MDGesellschaftMode } from './types/MDPlannerListTypes'
-export { FloorSelectionDraftSchema, validateSaveablePlanner } from './schemas/PlannerSchemas'
+export { FloorSelectionSchema, validateSaveablePlanner } from './schemas/PlannerSchemas'
 export { StartEgoGiftPoolsSchema } from './schemas/StartGiftSchemas'
 export type {
   PlannerSummary,

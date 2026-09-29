@@ -158,7 +158,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
      * Use this for update tests to satisfy validation while testing specific field changes.
      */
     private static final String UNKNOWN_GIFT_CONTENT = TestDataFactory.VALID_CONTENT.replace(
-            "\"selectedGiftIds\":[\"9001\"]", "\"selectedGiftIds\":[\"9001\"],\"observationGiftIds\":[\"9899\"]");
+            "\"observationGiftIds\":[]", "\"observationGiftIds\":[\"9899\"]");
 
     private UpsertPlannerRequest createUpsertRequestFromPlanner(Planner planner) {
         return new UpsertPlannerRequest(
@@ -1110,7 +1110,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             ObjectNode document = (ObjectNode) objectMapper.readTree(TestDataFactory.VALID_CONTENT);
             ObjectNode notes = document.putObject("sectionNotes");
             for (int i = 0; i < 45; i++) {
-                notes.set("n" + i, objectMapper.valueToTree(new int[500]));
+                notes.set("n" + i, objectMapper.createObjectNode().set("content", objectMapper.valueToTree(new int[500])));
             }
             String content = objectMapper.writeValueAsString(document);
             UpsertPlannerRequest request = withContent(createValidPlannerRequest(), content);
@@ -1137,7 +1137,8 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
         @DisplayName("a floor without a theme pack saves as a draft and is refused on publish")
         void publishIntent_WhenAFloorHasNoThemePack_Returns400AfterTheDraftSaved() throws Exception {
             ObjectNode document = (ObjectNode) objectMapper.readTree(TestDataFactory.VALID_CONTENT);
-            document.set("floorSelections", objectMapper.readTree("[{\"difficulty\":0,\"giftIds\":[]}]"));
+            document.set("floorSelections",
+                    objectMapper.readTree("[{\"themePackId\":null,\"difficulty\":0,\"giftIds\":[]}]"));
             UpsertPlannerRequest request = withContent(createValidPlannerRequest(),
                     objectMapper.writeValueAsString(document));
             UUID plannerId = UUID.fromString(request.id());

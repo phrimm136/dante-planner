@@ -43,34 +43,50 @@ const violationsOf = (admission: ReturnType<typeof renderedAdmission>) =>
   admission.ok ? [] : admission.violations
 
 describe('parseFloors boundary contract', () => {
-  it('reads absent, null and empty themePackId as absent', () => {
-    const { floors, violations } = parse([
-      { giftIds: [] },
-      { themePackId: null, giftIds: [] },
-      { themePackId: '', giftIds: [] },
-    ])
-    expect(violations).toEqual([])
-    expect(floors).toEqual([
-      accepted({ giftIds: [] }),
-      accepted({ giftIds: [] }),
-      accepted({ giftIds: [] }),
-    ])
-  })
-
-  it('reads absent giftIds as an empty list and absent difficulty as absent', () => {
-    expect(parse([{ themePackId: '1001' }])).toEqual({
-      floors: [accepted({ themePackId: '1001', giftIds: [] })],
+  it('reads a null themePackId as no pack', () => {
+    expect(parse([{ themePackId: null, difficulty: 0, giftIds: [] }])).toEqual({
+      floors: [accepted({ difficulty: 0, giftIds: [] })],
       violations: [],
     })
   })
 
+  it('rejects an empty themePackId as INVALID_FIELD_TYPE and an absent one as missing', () => {
+    expect(parse([{ themePackId: '', difficulty: 0, giftIds: [] }])).toEqual({
+      floors: [rejected({ difficulty: 0, giftIds: [] })],
+      violations: [{ code: 'INVALID_FIELD_TYPE', path: 'floorSelections[0].themePackId' }],
+    })
+    expect(parse([{ difficulty: 0, giftIds: [] }]).violations).toEqual([
+      { code: 'MISSING_REQUIRED_FIELD', path: 'floorSelections[0].themePackId' },
+    ])
+  })
+
+  it('rejects absent giftIds and difficulty as missing required fields', () => {
+    expect(parse([{ themePackId: '1001' }])).toEqual({
+      floors: [rejected({ themePackId: '1001', giftIds: [] })],
+      violations: [
+        { code: 'MISSING_REQUIRED_FIELD', path: 'floorSelections[0].difficulty' },
+        { code: 'MISSING_REQUIRED_FIELD', path: 'floorSelections[0].giftIds' },
+      ],
+    })
+  })
+
+  it('rejects an unknown floor key at that key', () => {
+    expect(parse([{ ...pack('1001'), extra: 1 }]).violations).toEqual([
+      { code: 'UNKNOWN_FIELD', path: 'floorSelections[0].extra' },
+    ])
+  })
+
   it('rejects non-array floorSelections at floorSelections', () => {
-    for (const raw of [{}, 'floors', 5, null, undefined]) {
+    for (const raw of [{}, 'floors', 5, null]) {
       expect(parse(raw)).toEqual({
         floors: [],
         violations: [{ code: 'INVALID_FIELD_TYPE', path: 'floorSelections' }],
       })
     }
+    expect(parse(undefined)).toEqual({
+      floors: [],
+      violations: [{ code: 'MISSING_REQUIRED_FIELD', path: 'floorSelections' }],
+    })
   })
 
   it('rejects a non-object floor at floorSelections[i]', () => {
@@ -86,7 +102,7 @@ describe('parseFloors boundary contract', () => {
   })
 
   it('rejects a non-string themePackId at .themePackId', () => {
-    expect(parse([{ themePackId: 1001, giftIds: [] }]).violations).toEqual([
+    expect(parse([{ themePackId: 1001, difficulty: 0, giftIds: [] }]).violations).toEqual([
       { code: 'INVALID_FIELD_TYPE', path: 'floorSelections[0].themePackId' },
     ])
   })
@@ -130,9 +146,14 @@ describe('parseFloors boundary contract', () => {
     ])
   })
 
-  it('leaves floors at index >= floorCount untouched and unreported', () => {
+  it('shape-checks floors at index >= floorCount and leaves them out of the floors', () => {
     const { floors, violations } = parse([...fivePacks(), 5, { giftIds: 7 }])
-    expect(violations).toEqual([])
+    expect(violations).toEqual([
+      { code: 'INVALID_FIELD_TYPE', path: 'floorSelections[5]' },
+      { code: 'MISSING_REQUIRED_FIELD', path: 'floorSelections[6].difficulty' },
+      { code: 'INVALID_FIELD_TYPE', path: 'floorSelections[6].giftIds' },
+      { code: 'MISSING_REQUIRED_FIELD', path: 'floorSelections[6].themePackId' },
+    ])
     expect(floors).toHaveLength(5)
   })
 
@@ -148,12 +169,12 @@ describe('parseFloors boundary contract', () => {
 
   it('lists only the accepted floors, in order, as acceptedFloors', () => {
     const parsed = parseFloors(
-      [{ themePackId: '1001' }, 5, { themePackId: '1003' }, { themePackId: 7 }],
+      [pack('1001'), 5, pack('1003'), { ...pack('1004'), themePackId: 7 }],
       FIVE_FLOORS,
     )
     expect(acceptedFloors(parsed)).toEqual([
-      { themePackId: '1001', giftIds: [] },
-      { themePackId: '1003', giftIds: [] },
+      { themePackId: '1001', difficulty: 0, giftIds: [] },
+      { themePackId: '1003', difficulty: 0, giftIds: [] },
     ])
   })
 
@@ -212,13 +233,13 @@ describe('admitFloors', () => {
   })
 
   it('indexes a rejected object floor as its salvage in floor order; draft and publish short-circuit', () => {
-    const raw = [pack('1001'), { themePackId: '1004', giftIds: ['9002', 9005] }, pack('1003')]
+    const raw = [pack('1001'), pack('1004', 0, ['9002', 9005]), pack('1003')]
     const boundary = [{ code: 'INVALID_FIELD_TYPE', path: 'floorSelections[1].giftIds[1]' }]
     expect(admit(raw, '5F', 'draft')).toEqual({ ok: false, violations: boundary })
     expect(admit(raw, '5F', 'publish')).toEqual({ ok: false, violations: boundary })
     expect(admit(raw, '5F', 'index')).toEqual({
       ok: true,
-      floors: [raw[0], { themePackId: '1004', giftIds: ['9002', '9005'] }, raw[2]],
+      floors: [raw[0], { themePackId: '1004', difficulty: 0, giftIds: ['9002', '9005'] }, raw[2]],
       boundaryViolations: boundary,
     })
   })
@@ -265,12 +286,11 @@ describe('admitFloors', () => {
     expect(admit(raw, '5F', 'publish', moved).ok).toBe(true)
   })
 
-  it('reports absent difficulty at publish only', () => {
+  it('refuses an absent difficulty as a missing field at draft and publish', () => {
     const raw = [{ themePackId: '1001', giftIds: [] }, ...fivePacks().slice(1)]
-    expect(admit(raw, '5F', 'draft').ok).toBe(true)
-    expect(violationsOf(admit(raw, '5F', 'publish'))).toEqual([
-      { code: 'OUT_OF_RANGE_DIFFICULTY', path: 'floorSelections[0].difficulty' },
-    ])
+    const missing = [{ code: 'MISSING_REQUIRED_FIELD', path: 'floorSelections[0].difficulty' }]
+    expect(violationsOf(admit(raw, '5F', 'draft'))).toEqual(missing)
+    expect(violationsOf(admit(raw, '5F', 'publish'))).toEqual(missing)
   })
 
   it('refuses NORMAL after any earlier HARD, not only adjacent', () => {
@@ -322,11 +342,16 @@ describe('admitFloors', () => {
     expect(admit(raw, '5F', 'publish').ok).toBe(true)
   })
 
-  it('ignores a malformed floor at floorCount', () => {
+  it('reports a malformed floor at floorCount without admitting it to a rule', () => {
+    const boundary = [{ code: 'INVALID_FIELD_TYPE', path: 'floorSelections[5]' }]
     expect(admit([...fivePacks(), 5], '5F', 'publish')).toEqual({
+      ok: false,
+      violations: boundary,
+    })
+    expect(admit([...fivePacks(), 5], '5F', 'index')).toEqual({
       ok: true,
       floors: fivePacks(),
-      boundaryViolations: [],
+      boundaryViolations: boundary,
     })
   })
 
@@ -363,9 +388,9 @@ describe('admitFloors', () => {
     ])
   })
 
-  it('treats an empty-string pack as absent in sequence', () => {
+  it('refuses an empty-string pack as a malformed field, not an absent pack', () => {
     expect(violationsOf(admit([pack(''), pack('1002')], '5F', 'draft'))).toEqual([
-      { code: 'OUT_OF_ORDER_THEMEPACK', path: 'floorSelections[1]' },
+      { code: 'INVALID_FIELD_TYPE', path: 'floorSelections[0].themePackId' },
     ])
   })
 
@@ -390,6 +415,8 @@ describe('floorRules module', () => {
       '../boundary',
       '../contentPath',
       '../contentPath',
+      '../contentShape',
+      '../contentShape',
       '../violation',
       '../violation',
       '../positions',

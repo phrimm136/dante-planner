@@ -7,7 +7,7 @@ import { KEYWORD_RENAME_MAP } from './constants'
  * client's planner renders and saves under the current id — users cannot hand-edit
  * stored keywords, so renames are handled by code. Unknown (non-renamed) ids are
  * deliberately NOT dropped: they are carried through so the strict publish tier can
- * reject them loudly (mirroring UNKNOWN_EGOGIFT / INVALID_EGO_TYPE), rather
+ * reject them loudly (mirroring UNKNOWN_EGOGIFT), rather
  * than being silently swallowed. Defensive against non-array input since it runs on
  * unvalidated (`z.unknown`) content. Dedupes to collapse an alias-and-current collision.
  */

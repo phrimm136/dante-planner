@@ -7,13 +7,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -241,59 +239,7 @@ class ValidatorGoldenCorpusTest {
         if (message == null) {
             return "null";
         }
-        return escape(normalizeSetOrder(elideParserDetail(message)));
-    }
-
-    private static final List<String> SET_RENDERED_PREFIXES =
-            List.of("Missing required fields: ", "Unknown fields: ");
-
-    /**
-     * Sorts the elements of the two messages that render a {@link java.util.Set} directly.
-     *
-     * <p>The sets feeding them are built from {@code Set.of} constants, whose iteration order the
-     * JVM salts per run, and the receiving {@code HashSet} resolves same-bucket ties by insertion
-     * order — so {@code selectedKeywords}/{@code equipment} and sinner {@code 01}/{@code 12} can
-     * each render in either order between runs. Sorting keeps that salt out of the snapshot, so
-     * the gate answers about validator behaviour and a corpus author need not know which keys
-     * collide.
-     *
-     * <p>Bracket depth is tracked rather than matched by regex: an element may carry brackets of
-     * its own, as {@code equipment[05].egos.ZAYIN} does.
-     */
-    private static String normalizeSetOrder(String message) {
-        String normalized = message;
-        for (String prefix : SET_RENDERED_PREFIXES) {
-            int found = normalized.indexOf(prefix);
-            while (found >= 0) {
-                int open = found + prefix.length();
-                int close = closingBracket(normalized, open);
-                if (close < 0) {
-                    break;
-                }
-                String sorted = Arrays.stream(normalized.substring(open + 1, close).split(", ", -1))
-                        .sorted()
-                        .collect(Collectors.joining(", "));
-                normalized = normalized.substring(0, open + 1) + sorted + normalized.substring(close);
-                found = normalized.indexOf(prefix, open + sorted.length());
-            }
-        }
-        return normalized;
-    }
-
-    private static int closingBracket(String text, int open) {
-        if (open >= text.length() || text.charAt(open) != '[') {
-            return -1;
-        }
-        int depth = 0;
-        for (int at = open; at < text.length(); at++) {
-            char character = text.charAt(at);
-            if (character == '[') {
-                depth++;
-            } else if (character == ']' && --depth == 0) {
-                return at;
-            }
-        }
-        return -1;
+        return escape(elideParserDetail(message));
     }
 
     private static final String PARSER_DETAIL = "Malformed JSON: <parser detail elided>";

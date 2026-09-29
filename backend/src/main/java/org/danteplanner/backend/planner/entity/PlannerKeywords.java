@@ -68,6 +68,10 @@ public final class PlannerKeywords {
         return fromSelection(root.path(CONTENT_FIELD));
     }
 
+    public static PlannerKeywords fromSelection(List<String> selected) {
+        return normalize(selected);
+    }
+
     public static PlannerKeywords fromSelection(JsonNode selected) {
         if (!selected.isArray()) {
             return normalize(null);

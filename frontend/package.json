@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsx scripts/generate-sitemap.ts && tsc -b tsconfig.app.json && ROLLDOWN_MAX_BLOCKING_THREADS=512 vite build",
     "generate:sitemap": "tsx scripts/generate-sitemap.ts",
+    "schema:export": "tsx --tsconfig tsconfig.app.json scripts/export-planner-content-schema.ts",
     "typecheck": "tsc -b",
     "lint": "oxlint --type-aware --tsconfig tsconfig.app.json src",
     "lint:validation": "oxlint -c .oxlintrc.validation.json src/pages/planner/lib",

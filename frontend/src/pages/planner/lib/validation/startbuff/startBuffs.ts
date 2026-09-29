@@ -1,5 +1,3 @@
-import { invalidFieldType, isInteger, parseList } from '../boundary'
-import type { InvalidFieldType } from '../boundary'
 import type { Codes } from '../codes'
 import { contentPath, extendPath, field, index } from '../contentPath'
 import type { ContentPath } from '../contentPath'
@@ -14,54 +12,23 @@ const MAX_BUFF_BASE_ID = 9
 const START_BUFFS_PATH = contentPath(field('selectedBuffIds'))
 
 export type StartBuffViolation =
-  | InvalidFieldType
   | {
       code: Codes<'EXCESS_STARTBUFF' | 'OUT_OF_RANGE_STARTBUFF' | 'DUPLICATE_STARTBUFF'>
       path: ContentPath
     }
   | { code: Codes<'UNKNOWN_STARTBUFF'>; path: ContentPath; params: { id: string } }
 
-export type SelectedStartBuff = { buffId: number; path: ContentPath }
-
-export type ParsedStartBuffs = {
-  elementCount: number
-  buffs: readonly SelectedStartBuff[]
-  listViolations: readonly InvalidFieldType[]
-  elementViolations: readonly InvalidFieldType[]
-}
+type SelectedStartBuff = { buffId: number; path: ContentPath }
 
 export type StartBuffSeason = { hasStartBuff: (buffId: string) => boolean }
-
-type ElementResult = { buffs: SelectedStartBuff[]; violations: InvalidFieldType[] }
-
-function parseElement(value: unknown, path: ContentPath): ElementResult {
-  return isInteger(value)
-    ? { buffs: [{ buffId: value, path }], violations: [] }
-    : { buffs: [], violations: [invalidFieldType(path)] }
-}
-
-export function parseStartBuffs(raw: unknown): ParsedStartBuffs {
-  const list = parseList(raw, START_BUFFS_PATH)
-  const elements = list.elements.map((value, position) =>
-    parseElement(value, extendPath(START_BUFFS_PATH, index(position))),
-  )
-  return {
-    elementCount: list.elements.length,
-    buffs: elements.flatMap((element) => element.buffs),
-    listViolations: list.violations,
-    elementViolations: elements.flatMap((element) => element.violations),
-  }
-}
 
 const baseIdOf = (buff: SelectedStartBuff) => buff.buffId % BASE_ID_MODULUS
 
 const hasBaseIdInRange = (buff: SelectedStartBuff) =>
   baseIdOf(buff) >= MIN_BUFF_BASE_ID && baseIdOf(buff) <= MAX_BUFF_BASE_ID
 
-const excessViolations = (parsed: ParsedStartBuffs): StartBuffViolation[] =>
-  parsed.elementCount > MAX_START_BUFFS
-    ? [{ code: 'EXCESS_STARTBUFF', path: START_BUFFS_PATH }]
-    : []
+const excessViolations = (buffCount: number): StartBuffViolation[] =>
+  buffCount > MAX_START_BUFFS ? [{ code: 'EXCESS_STARTBUFF', path: START_BUFFS_PATH }] : []
 
 const unknownBuff = (buff: SelectedStartBuff): StartBuffViolation => ({
   code: 'UNKNOWN_STARTBUFF',
@@ -82,15 +49,17 @@ function knownBuffViolations(buffs: readonly SelectedStartBuff[]): StartBuffViol
 }
 
 export function startBuffViolations(
-  parsed: ParsedStartBuffs,
+  buffIds: readonly number[],
   season: StartBuffSeason,
 ): StartBuffViolation[] {
+  const buffs = buffIds.map((buffId, position) => ({
+    buffId,
+    path: extendPath(START_BUFFS_PATH, index(position)),
+  }))
   const isKnown = (buff: SelectedStartBuff) => season.hasStartBuff(String(buff.buffId))
   return [
-    ...parsed.listViolations,
-    ...parsed.elementViolations,
-    ...excessViolations(parsed),
-    ...parsed.buffs.filter((buff) => !isKnown(buff)).map(unknownBuff),
-    ...knownBuffViolations(parsed.buffs.filter(isKnown)),
+    ...excessViolations(buffs.length),
+    ...buffs.filter((buff) => !isKnown(buff)).map(unknownBuff),
+    ...knownBuffViolations(buffs.filter(isKnown)),
   ].sort(byPathThenCode)
 }

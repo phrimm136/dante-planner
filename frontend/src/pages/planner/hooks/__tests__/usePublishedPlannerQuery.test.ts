@@ -26,6 +26,7 @@ import {
 } from '../usePublishedPlannerQuery'
 import { STALE_TIME } from '@/lib/constants'
 import { isMDPlanner } from '../../types/PlannerTypes'
+import { publishedPayload } from './publishedPlannerPayload'
 
 beforeEach(() => {
   apiMocks.get.mockReset()
@@ -40,44 +41,10 @@ describe('fetchPublishedPlanner', () => {
     expect(isPlannerRemoved(state)).toBe(true)
   })
 
-  it('accepts a real published payload through draft validation', async () => {
+  it('accepts a real published payload through validation', async () => {
     // A positive control for the ingest gate: the content schemas are strict, so
     // this fails the moment a server field stops matching what they accept.
-    const content = {
-      selectedKeywords: ['Combustion'],
-      selectedBuffIds: [101],
-      selectedGiftKeyword: 'Combustion',
-      selectedGiftIds: ['9001'],
-      observationGiftIds: ['9002'],
-      comprehensiveGiftIds: ['19003'],
-      equipment: {},
-      deploymentOrder: [0, 1, 2],
-      skillEAState: { '1': { 0: 3, 1: 2, 2: 1 } },
-      floorSelections: [{ themePackId: '1001', difficulty: 1, giftIds: ['9001'] }],
-      sectionNotes: {},
-    }
-    apiMocks.get.mockResolvedValue({
-      id: '00000000-0000-4000-8000-000000000001',
-      title: 'Published run',
-      plannerType: 'MIRROR_DUNGEON',
-      category: '5F',
-      selectedKeywords: ['Combustion'],
-      upvotes: 0,
-      viewCount: 0,
-      createdAt: '2026-01-01T00:00:00Z',
-      firstPublishedAt: '2026-01-01T00:00:00Z',
-      hasUpvoted: false,
-      commentCount: 0,
-      lastModifiedAt: '2026-01-02T00:00:00Z',
-      content: JSON.stringify(content),
-      schemaVersion: 2,
-      contentVersion: 7,
-      status: 'saved',
-      syncVersion: 1,
-      isSubscribed: false,
-      hasReported: false,
-      ownerNotificationsEnabled: false,
-    })
+    apiMocks.get.mockResolvedValue(publishedPayload)
 
     const state = await fetchPublishedPlanner('planner-1')
 

@@ -14,9 +14,10 @@ export type DifficultyRangeCode = Codes<(typeof DIFFICULTY_RANGE_CODES)[number]>
 export const isDifficultyRangeCode = (code: string): code is DifficultyRangeCode =>
   (DIFFICULTY_RANGE_CODES as readonly string[]).includes(code)
 
+export type ShapeCode = Codes<'MISSING_REQUIRED_FIELD' | 'UNKNOWN_FIELD' | 'INVALID_FIELD_TYPE'>
+
 export type FloorRuleCode =
   | Codes<
-      | 'INVALID_FIELD_TYPE'
       | 'INSUFFICIENT_FLOORS'
       | 'MISSING_THEMEPACK'
       | 'DUPLICATE_THEMEPACK'
@@ -28,6 +29,7 @@ export type FloorRuleCode =
 
 export type FloorViolationCode =
   | FloorRuleCode
+  | ShapeCode
   | Codes<'UNKNOWN_THEMEPACK' | 'UNKNOWN_EGOGIFT_FLOOR' | 'UNAFFORDABLE_EGOGIFT'>
 
 export type Violation = { code: FloorViolationCode; path: ContentPath }

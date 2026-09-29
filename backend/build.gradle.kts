@@ -84,6 +84,7 @@ dependencies {
     implementation("com.bucket4j:bucket4j-core:8.10.1")
     implementation("com.bucket4j:bucket4j-redis:8.10.1")
     implementation("org.jsoup:jsoup:1.22.1")
+    implementation("com.networknt:json-schema-validator:1.5.1")
     implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.37.1")
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
 
@@ -99,6 +100,12 @@ dependencies {
     testImplementation("net.jqwik:jqwik:1.9.3")
 
     errorprone("com.google.errorprone:error_prone_core:2.36.0")
+}
+
+tasks.processResources {
+    from(layout.projectDirectory.file("../testdata/planner-content.schema.json")) {
+        into("planner")
+    }
 }
 
 tasks.withType<Test> {

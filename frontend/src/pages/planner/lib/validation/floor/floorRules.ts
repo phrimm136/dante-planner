@@ -9,6 +9,8 @@ import type {
 import { decodeGiftId } from '../boundary'
 import { contentPath, extendPath, field, index } from '../contentPath'
 import type { ContentPath } from '../contentPath'
+import { parseFloorSelections } from '../contentShape'
+import type { ShapeViolation } from '../contentShape'
 import { byPathThenCode } from '../violation'
 import type { DifficultyRangeCode, FloorRuleCode } from '../violation'
 import { firstIndexOf } from '../positions'
@@ -30,18 +32,19 @@ export type ParsedFloor =
 export type ParsedFloors = {
   layout: CategoryFloors
   floors: readonly ParsedFloor[]
-  violations: readonly FloorViolation[]
+  violations: readonly ShapeViolation[]
 }
 
 export type Admission =
   | {
       ok: true
       floors: readonly FloorSelectionValue[]
-      boundaryViolations: readonly FloorViolation[]
+      boundaryViolations: readonly ShapeViolation[]
     }
-  | { ok: false; violations: readonly FloorViolation[] }
+  | { ok: false; violations: readonly (FloorViolation | ShapeViolation)[] }
 
 const FLOOR_SELECTIONS = 'floorSelections'
+const FLOOR_INDEX_POSITION = 1
 const THEME_PACK_ID = 'themePackId'
 const DIFFICULTY = 'difficulty'
 const GIFT_IDS = 'giftIds'
@@ -72,83 +75,46 @@ const giftText = (value: unknown): string | undefined =>
 
 const EMPTY_SALVAGE: FloorSelectionValue = { giftIds: [] }
 
-type FieldResult<T> = { value: T; violations: FloorViolation[] }
-
-const fieldValue = <T>(value: T): FieldResult<T> => ({ value, violations: [] })
-
-const fieldRejected = <T>(value: T, path: ContentPath): FieldResult<T> => ({
-  value,
-  violations: [violation('INVALID_FIELD_TYPE', path)],
-})
-
-function parseThemePackId(raw: unknown, path: ContentPath): FieldResult<string | undefined> {
-  if (typeof raw === 'string') return fieldValue(raw === '' ? undefined : raw)
-  if (raw === undefined || raw === null) return fieldValue(undefined)
-  return fieldRejected(numberText(raw), path)
+function themePackOf(raw: unknown): string | undefined {
+  if (typeof raw === 'string') return raw === '' ? undefined : raw
+  return numberText(raw)
 }
 
-function parseDifficulty(raw: unknown, path: ContentPath): FieldResult<number | undefined> {
-  if (Number.isInteger(raw)) return fieldValue(raw as number)
-  if (raw === undefined) return fieldValue(undefined)
-  return fieldRejected(undefined, path)
-}
+const giftIdsOf = (raw: unknown): string[] =>
+  Array.isArray(raw) ? (raw as unknown[]).flatMap((giftId) => giftText(giftId) ?? []) : []
 
-function parseGiftIds(raw: unknown, path: ContentPath): FieldResult<string[]> {
-  if (raw === undefined) return fieldValue([])
-  if (!Array.isArray(raw)) return fieldRejected([], path)
-  const elements: unknown[] = raw
+function floorValue(raw: unknown): FloorSelectionValue {
+  if (!isRecord(raw)) return EMPTY_SALVAGE
+  const themePackId = themePackOf(raw.themePackId)
   return {
-    value: elements.flatMap((giftId) => giftText(giftId) ?? []),
-    violations: elements.flatMap((giftId, giftIndex) =>
-      typeof giftId === 'string'
-        ? []
-        : [violation('INVALID_FIELD_TYPE', extendPath(path, index(giftIndex)))],
-    ),
+    ...(themePackId !== undefined ? { themePackId } : {}),
+    ...(Number.isInteger(raw.difficulty) ? { difficulty: raw.difficulty as number } : {}),
+    giftIds: giftIdsOf(raw.giftIds),
   }
 }
 
-type FloorResult = { floor: ParsedFloor; violations: FloorViolation[] }
+const rejectedFloorIndices = (violations: readonly ShapeViolation[]): ReadonlySet<number> =>
+  new Set(
+    violations.flatMap(({ path }) => {
+      const floor = path[FLOOR_INDEX_POSITION]
+      return floor?.kind === 'index' ? [floor.value] : []
+    }),
+  )
 
-function parseFloor(raw: unknown, floorIndex: number): FloorResult {
-  if (!isRecord(raw)) {
-    return {
-      floor: { kind: 'rejected', salvage: EMPTY_SALVAGE },
-      violations: [violation('INVALID_FIELD_TYPE', floorPath(floorIndex))],
-    }
-  }
-
-  const themePackId = parseThemePackId(raw.themePackId, themePackPath(floorIndex))
-  const difficulty = parseDifficulty(raw.difficulty, floorFieldPath(floorIndex, DIFFICULTY))
-  const giftIds = parseGiftIds(raw.giftIds, floorFieldPath(floorIndex, GIFT_IDS))
-  const violations = [...themePackId.violations, ...difficulty.violations, ...giftIds.violations]
-  const floor: FloorSelectionValue = {
-    ...(themePackId.value !== undefined ? { themePackId: themePackId.value } : {}),
-    ...(difficulty.value !== undefined ? { difficulty: difficulty.value } : {}),
-    giftIds: giftIds.value,
-  }
-
-  return {
-    floor:
-      violations.length > 0 ? { kind: 'rejected', salvage: floor } : { kind: 'accepted', floor },
-    violations,
-  }
+function parsedFloor(raw: unknown, rejected: boolean): ParsedFloor {
+  const floor = floorValue(raw)
+  return rejected ? { kind: 'rejected', salvage: floor } : { kind: 'accepted', floor }
 }
 
 export function parseFloors(raw: unknown, layout: CategoryFloors): ParsedFloors {
-  if (!Array.isArray(raw)) {
-    return {
-      layout,
-      floors: [],
-      violations: [violation('INVALID_FIELD_TYPE', FLOOR_SELECTIONS_PATH)],
-    }
-  }
-  const results = (raw as unknown[])
-    .slice(0, layout.floorCount)
-    .map((floor, floorIndex) => parseFloor(floor, floorIndex))
+  const shape = parseFloorSelections(raw)
+  const violations = shape.ok ? [] : shape.error
+  const rejected = rejectedFloorIndices(violations)
+  const floors = Array.isArray(raw) ? (raw as unknown[]).slice(0, layout.floorCount) : []
   return {
     layout,
-    floors: results.map((result) => result.floor),
-    violations: results.flatMap((result) => result.violations).sort(byPathThenCode),
+    floors: floors.map((floor, floorIndex) => parsedFloor(floor, rejected.has(floorIndex))),
+    violations,
   }
 }
 

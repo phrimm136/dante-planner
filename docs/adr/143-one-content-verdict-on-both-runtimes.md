@@ -25,18 +25,6 @@ epic: none · pr: none · supersedes: 030 @keywords @strictness
 - @validation @numbers — A JSON number with an exactly integral value is an integer on the
   server, as it already was for floor difficulty. After parsing, the client cannot tell `60.0`
   from `60`.
-- @validation @shapes — A container that must be an object and holds a string, a number or an
-  array is an invalid field type, including a non-ZAYIN E.G.O slot; null in a required container
-  (identity, E.G.O equipment, the ZAYIN slot) is that container missing, while null in an optional
-  non-ZAYIN slot is an invalid field type, since the editor deletes an emptied slot; a blank
-  string is "absent" only for a string-kinded field (the start gift keyword, a non-ZAYIN E.G.O id,
-  which then leaves the slot empty); and no rule derives a violation from a value its boundary
-  rejected (no skill total over a malformed slot, no missing-keyword report beside a wrong-kind
-  keyword).
-  REJECTED: treating a blank string as absent for every field — a blank identity or E.G.O
-  container is a wrong kind, not an unequipped sinner.
-  REJECTED: looking up a blank E.G.O id — reports an unknown E.G.O for a slot the editor leaves
-  empty.
 - @validation @references — An unknown entity is reported once, as unknown: an unknown start
   gift skips its keyword-pool check, and an unknown start buff skips its base-id range and
   duplicate checks, as an unknown floor gift already skips its affordability check.
@@ -48,7 +36,9 @@ epic: none · pr: none · supersedes: 030 @keywords @strictness
   are distinct, since enhancement happens across floors.
   REJECTED: comparing raw ids everywhere — a floor could list one gift twice, and an enhanced
   start gift would fall outside its own pool.
-- @validation @sinners — The skill plan is a required top-level field. Two keys naming one sinner
+
+## Superseded
+- @validation @sinners → 145 — The skill plan is a required top-level field. Two keys naming one sinner
   (`"01"` and `"1"`) are reported at every such key, and neither entry is checked further, because
   the runtimes enumerate object keys in different orders and so would pick different entries.
   Deployment order rejects a repeated sinner and more than twelve entries. A sinner key is ASCII
@@ -57,6 +47,18 @@ epic: none · pr: none · supersedes: 030 @keywords @strictness
   REJECTED: silently keeping one entry — the server keeps the later key in document order and the
   client the padded key, so the two can validate different sinners.
   NON-GOAL: no data migration — no stored planner holds any shape this file rejects.
+- @validation @shapes → 145 — A container that must be an object and holds a string, a number or an
+  array is an invalid field type, including a non-ZAYIN E.G.O slot; null in a required container
+  (identity, E.G.O equipment, the ZAYIN slot) is that container missing, while null in an optional
+  non-ZAYIN slot is an invalid field type, since the editor deletes an emptied slot; a blank
+  string is "absent" only for a string-kinded field (the start gift keyword, a non-ZAYIN E.G.O id,
+  which then leaves the slot empty); and no rule derives a violation from a value its boundary
+  rejected (no skill total over a malformed slot, no missing-keyword report beside a wrong-kind
+  keyword).
+  REJECTED: treating a blank string as absent for every field — a blank identity or E.G.O
+  container is a wrong kind, not an unequipped sinner.
+  REJECTED: looking up a blank E.G.O id — reports an unknown E.G.O for a slot the editor leaves
+  empty.
 
 ## Takeaway
 - takeaway: two runtimes agree only on what one corpus pins with expected output; recorded output

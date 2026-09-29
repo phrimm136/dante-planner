@@ -1,12 +1,8 @@
 package org.danteplanner.backend.planner.validation.startgift;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import org.danteplanner.backend.planner.validation.ContentPath;
 import org.danteplanner.backend.planner.validation.EncodedGiftId;
-import org.danteplanner.backend.planner.validation.FieldResult;
 import org.danteplanner.backend.planner.validation.GiftId;
-import org.danteplanner.backend.planner.validation.JsonArrays;
-import org.danteplanner.backend.planner.validation.JsonKind;
 import org.danteplanner.backend.planner.validation.Positions;
 import org.danteplanner.backend.planner.validation.Violation;
 
@@ -29,40 +25,21 @@ public final class StartGiftRules {
     private StartGiftRules() {
     }
 
-    public static List<Violation> check(JsonNode selectedGiftKeyword, JsonNode selectedGiftIds,
+    public static List<Violation> check(Optional<String> selectedGiftKeyword, List<String> selectedGiftIds,
                                         StartGiftReferenceData data, StartGiftSeason season) {
-        FieldResult<Optional<String>> keyword = keyword(selectedGiftKeyword);
-        FieldResult<List<Optional<String>>> giftIds = JsonArrays.strings(selectedGiftIds, SELECTED_GIFT_IDS);
-        List<StartGift> gifts = gifts(giftIds.value());
-        return Stream.of(
-                        keyword.violations().stream(),
-                        giftIds.violations().stream(),
+        List<StartGift> gifts = gifts(selectedGiftIds);
+        return Stream.concat(
                         gifts.stream().flatMap(gift -> giftViolation(gift, data)),
-                        keyword.violations().isEmpty()
-                                ? keywordViolations(keyword.value(), giftIds.value().size(),
-                                        knownGifts(gifts, data), season)
-                                : Stream.<Violation>empty())
-                .flatMap(violations -> violations)
+                        keywordViolations(selectedGiftKeyword, selectedGiftIds.size(), knownGifts(gifts, data),
+                                season))
                 .sorted(Violation.BY_PATH_THEN_CODE)
                 .toList();
     }
 
-    private static FieldResult<Optional<String>> keyword(JsonNode keyword) {
-        return switch (keyword.getNodeType()) {
-            case MISSING, NULL -> FieldResult.of(Optional.empty());
-            case STRING -> FieldResult.of(Optional.of(keyword.asText()).filter(chosen -> !chosen.isBlank()));
-            default -> FieldResult.rejected(Optional.empty(),
-                    Violation.invalidFieldType(SELECTED_GIFT_KEYWORD, JsonKind.STRING_OR_NULL, keyword));
-        };
-    }
-
-    private static List<StartGift> gifts(List<Optional<String>> giftIds) {
-        Map<Optional<String>, Integer> firstIndex = Positions.firstIndexOf(giftIds);
+    private static List<StartGift> gifts(List<String> giftIds) {
+        Map<String, Integer> firstIndex = Positions.firstIndexOf(giftIds);
         return IntStream.range(0, giftIds.size())
-                .boxed()
-                .flatMap(index -> giftIds.get(index)
-                        .map(giftId -> new StartGift(index, giftId, firstIndex.get(giftIds.get(index)) < index))
-                        .stream())
+                .mapToObj(index -> new StartGift(index, giftIds.get(index), firstIndex.get(giftIds.get(index)) < index))
                 .toList();
     }
 

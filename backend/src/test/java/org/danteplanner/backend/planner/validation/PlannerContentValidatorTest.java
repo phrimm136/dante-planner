@@ -33,6 +33,7 @@ import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -48,14 +49,14 @@ import static org.mockito.Mockito.when;
  *
  * <p>Note: title is in metadata, category is passed as a parameter.</p>
  *
- * <p>PlannerContent structure from frontend:
+ * <p>PlannerContent structure from frontend (all 11 fields required):
  * - selectedKeywords: string[]
- * - selectedBuffIds: number[] (optional)
- * - selectedGiftKeyword: string | null (optional)
- * - selectedGiftIds: string[] (optional)
- * - observationGiftIds: string[] (optional)
- * - comprehensiveGiftIds: string[] (optional)
- * - equipment: Record&lt;string, SinnerEquipment&gt; (keys are "0"-"11")
+ * - selectedBuffIds: number[]
+ * - selectedGiftKeyword: string | null
+ * - selectedGiftIds: string[]
+ * - observationGiftIds: string[]
+ * - comprehensiveGiftIds: string[]
+ * - equipment: Record&lt;string, SinnerEquipment&gt; (keys are "1"-"12")
  * - deploymentOrder: number[] (values 0-11)
  * - skillEAState: Record&lt;string, SkillEAState&gt;
  * - floorSelections: SerializableFloorSelection[]
@@ -171,12 +172,6 @@ class PlannerContentValidatorTest {
         setupBaseMocks();
     }
 
-    private void setupMocksForBoundaryRejectedFloors() {
-        setupMocksForGiftDuplicateFailure();
-        setupStartBuffMocks();
-        setupStartGiftMocks();
-    }
-
     /**
      * Setup mocks for tests where gift ID validation fails due to duplicate check.
      * Includes hasEgoGift since first ID is validated before duplicate detected.
@@ -188,15 +183,6 @@ class PlannerContentValidatorTest {
         when(sinnerIdValidator.validateMatch(anyString(), anyString())).thenReturn(true);
     }
 
-    /**
-     * Setup mocks for tests where gift ID validation fails due to type error.
-     * Excludes hasEgoGift since type check happens before ID lookup.
-     */
-    private void setupMocksForGiftTypeFailure() {
-        when(gameDataRegistry.hasIdentity(anyString())).thenReturn(true);
-        when(gameDataRegistry.hasEgo(anyString())).thenReturn(true);
-        when(sinnerIdValidator.validateMatch(anyString(), anyString())).thenReturn(true);
-    }
 
     /**
      * Setup mocks for tests where floor gift affordability fails.
@@ -216,7 +202,7 @@ class PlannerContentValidatorTest {
 
     /**
      * Creates minimal valid planner content with all required fields.
-     * Equipment keys are 2-digit 1-indexed ("01"-"12").
+     * Equipment keys are the sinner numbers "1" to "12".
      * EGOs are keyed by type (e.g., "ZAYIN").
      */
     private String createValidContent() {
@@ -224,39 +210,39 @@ class PlannerContentValidatorTest {
             {
                 "selectedKeywords": ["Combustion", "Slash"],
                 "equipment": {
-                    "01": {
+                    "1": {
                         "identity": {"id": "10101", "uptie": 4, "level": 45},
                         "egos": {"ZAYIN": {"id": "20101", "threadspin": 4}}
                     },
-                    "02": {
+                    "2": {
                         "identity": {"id": "10201", "uptie": 4, "level": 45},
                         "egos": {"ZAYIN": {"id": "20201", "threadspin": 4}}
                     },
-                    "03": {
+                    "3": {
                         "identity": {"id": "10301", "uptie": 4, "level": 45},
                         "egos": {"ZAYIN": {"id": "20301", "threadspin": 4}}
                     },
-                    "04": {
+                    "4": {
                         "identity": {"id": "10401", "uptie": 4, "level": 45},
                         "egos": {"ZAYIN": {"id": "20401", "threadspin": 4}}
                     },
-                    "05": {
+                    "5": {
                         "identity": {"id": "10501", "uptie": 4, "level": 45},
                         "egos": {"ZAYIN": {"id": "20501", "threadspin": 4}}
                     },
-                    "06": {
+                    "6": {
                         "identity": {"id": "10601", "uptie": 4, "level": 45},
                         "egos": {"ZAYIN": {"id": "20601", "threadspin": 4}}
                     },
-                    "07": {
+                    "7": {
                         "identity": {"id": "10701", "uptie": 4, "level": 45},
                         "egos": {"ZAYIN": {"id": "20701", "threadspin": 4}}
                     },
-                    "08": {
+                    "8": {
                         "identity": {"id": "10801", "uptie": 4, "level": 45},
                         "egos": {"ZAYIN": {"id": "20801", "threadspin": 4}}
                     },
-                    "09": {
+                    "9": {
                         "identity": {"id": "10901", "uptie": 4, "level": 45},
                         "egos": {"ZAYIN": {"id": "20901", "threadspin": 4}}
                     },
@@ -275,15 +261,15 @@ class PlannerContentValidatorTest {
                 },
                 "deploymentOrder": [0, 1, 2, 3, 4, 5],
                 "skillEAState": {
-                    "01": {"0": 3, "1": 2, "2": 1},
-                    "02": {"0": 3, "1": 2, "2": 1},
-                    "03": {"0": 3, "1": 2, "2": 1},
-                    "04": {"0": 3, "1": 2, "2": 1},
-                    "05": {"0": 3, "1": 2, "2": 1},
-                    "06": {"0": 3, "1": 2, "2": 1},
-                    "07": {"0": 3, "1": 2, "2": 1},
-                    "08": {"0": 3, "1": 2, "2": 1},
-                    "09": {"0": 3, "1": 2, "2": 1},
+                    "1": {"0": 3, "1": 2, "2": 1},
+                    "2": {"0": 3, "1": 2, "2": 1},
+                    "3": {"0": 3, "1": 2, "2": 1},
+                    "4": {"0": 3, "1": 2, "2": 1},
+                    "5": {"0": 3, "1": 2, "2": 1},
+                    "6": {"0": 3, "1": 2, "2": 1},
+                    "7": {"0": 3, "1": 2, "2": 1},
+                    "8": {"0": 3, "1": 2, "2": 1},
+                    "9": {"0": 3, "1": 2, "2": 1},
                     "10": {"0": 3, "1": 2, "2": 1},
                     "11": {"0": 3, "1": 2, "2": 1},
                     "12": {"0": 3, "1": 2, "2": 1}
@@ -291,6 +277,8 @@ class PlannerContentValidatorTest {
                 "selectedBuffIds": [100, 201],
                 "selectedGiftKeyword": "Combustion",
                 "selectedGiftIds": ["9001"],
+                "observationGiftIds": [],
+                "comprehensiveGiftIds": [],
                 "floorSelections": [
                     {"themePackId": "1001", "difficulty": 0, "giftIds": ["9002"]},
                     {"themePackId": "1002", "difficulty": 0, "giftIds": []},
@@ -305,7 +293,7 @@ class PlannerContentValidatorTest {
 
     /**
      * Creates valid planner content with all optional fields included.
-     * Equipment keys are 2-digit 1-indexed ("01"-"12").
+     * Equipment keys are the sinner numbers "1" to "12".
      * Each sinner has identity + ZAYIN ego.
      * skillEAState: each sinner's skill slots sum to 6 (3+2+1).
      */
@@ -319,30 +307,30 @@ class PlannerContentValidatorTest {
                 "observationGiftIds": ["9100"],
                 "comprehensiveGiftIds": ["19050"],
                 "equipment": {
-                    "01": {"identity": {"id": "10101", "uptie": 4, "level": 45}, "egos": {"ZAYIN": {"id": "20101", "threadspin": 4}}},
-                    "02": {"identity": {"id": "10201", "uptie": 4, "level": 45}, "egos": {"ZAYIN": {"id": "20201", "threadspin": 4}}},
-                    "03": {"identity": {"id": "10301", "uptie": 4, "level": 45}, "egos": {"ZAYIN": {"id": "20301", "threadspin": 4}}},
-                    "04": {"identity": {"id": "10401", "uptie": 4, "level": 45}, "egos": {"ZAYIN": {"id": "20401", "threadspin": 4}}},
-                    "05": {"identity": {"id": "10501", "uptie": 4, "level": 45}, "egos": {"ZAYIN": {"id": "20501", "threadspin": 4}}},
-                    "06": {"identity": {"id": "10601", "uptie": 4, "level": 45}, "egos": {"ZAYIN": {"id": "20601", "threadspin": 4}}},
-                    "07": {"identity": {"id": "10701", "uptie": 4, "level": 45}, "egos": {"ZAYIN": {"id": "20701", "threadspin": 4}}},
-                    "08": {"identity": {"id": "10801", "uptie": 4, "level": 45}, "egos": {"ZAYIN": {"id": "20801", "threadspin": 4}}},
-                    "09": {"identity": {"id": "10901", "uptie": 4, "level": 45}, "egos": {"ZAYIN": {"id": "20901", "threadspin": 4}}},
+                    "1": {"identity": {"id": "10101", "uptie": 4, "level": 45}, "egos": {"ZAYIN": {"id": "20101", "threadspin": 4}}},
+                    "2": {"identity": {"id": "10201", "uptie": 4, "level": 45}, "egos": {"ZAYIN": {"id": "20201", "threadspin": 4}}},
+                    "3": {"identity": {"id": "10301", "uptie": 4, "level": 45}, "egos": {"ZAYIN": {"id": "20301", "threadspin": 4}}},
+                    "4": {"identity": {"id": "10401", "uptie": 4, "level": 45}, "egos": {"ZAYIN": {"id": "20401", "threadspin": 4}}},
+                    "5": {"identity": {"id": "10501", "uptie": 4, "level": 45}, "egos": {"ZAYIN": {"id": "20501", "threadspin": 4}}},
+                    "6": {"identity": {"id": "10601", "uptie": 4, "level": 45}, "egos": {"ZAYIN": {"id": "20601", "threadspin": 4}}},
+                    "7": {"identity": {"id": "10701", "uptie": 4, "level": 45}, "egos": {"ZAYIN": {"id": "20701", "threadspin": 4}}},
+                    "8": {"identity": {"id": "10801", "uptie": 4, "level": 45}, "egos": {"ZAYIN": {"id": "20801", "threadspin": 4}}},
+                    "9": {"identity": {"id": "10901", "uptie": 4, "level": 45}, "egos": {"ZAYIN": {"id": "20901", "threadspin": 4}}},
                     "10": {"identity": {"id": "11001", "uptie": 4, "level": 45}, "egos": {"ZAYIN": {"id": "21001", "threadspin": 4}}},
                     "11": {"identity": {"id": "11101", "uptie": 4, "level": 45}, "egos": {"ZAYIN": {"id": "21101", "threadspin": 4}}},
                     "12": {"identity": {"id": "11201", "uptie": 3, "level": 40}, "egos": {"ZAYIN": {"id": "21201", "threadspin": 4}}}
                 },
                 "deploymentOrder": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
                 "skillEAState": {
-                    "01": {"0": 3, "1": 2, "2": 1},
-                    "02": {"0": 3, "1": 2, "2": 1},
-                    "03": {"0": 3, "1": 2, "2": 1},
-                    "04": {"0": 3, "1": 2, "2": 1},
-                    "05": {"0": 3, "1": 2, "2": 1},
-                    "06": {"0": 3, "1": 2, "2": 1},
-                    "07": {"0": 3, "1": 2, "2": 1},
-                    "08": {"0": 3, "1": 2, "2": 1},
-                    "09": {"0": 3, "1": 2, "2": 1},
+                    "1": {"0": 3, "1": 2, "2": 1},
+                    "2": {"0": 3, "1": 2, "2": 1},
+                    "3": {"0": 3, "1": 2, "2": 1},
+                    "4": {"0": 3, "1": 2, "2": 1},
+                    "5": {"0": 3, "1": 2, "2": 1},
+                    "6": {"0": 3, "1": 2, "2": 1},
+                    "7": {"0": 3, "1": 2, "2": 1},
+                    "8": {"0": 3, "1": 2, "2": 1},
+                    "9": {"0": 3, "1": 2, "2": 1},
                     "10": {"0": 3, "1": 2, "2": 1},
                     "11": {"0": 3, "1": 2, "2": 1},
                     "12": {"0": 3, "1": 2, "2": 1}
@@ -575,8 +563,9 @@ class PlannerContentValidatorTest {
                     () -> validate(content, "5F")
             );
 
-            // Granular error code for unknown fields
-            assertEquals("UNKNOWN_FIELD", exception.getOriginalCode());
+            assertEquals("VALIDATION_ERROR", exception.getOriginalCode());
+            assertThat(exception.getSubErrors()).contains(new ValidationError("UNKNOWN_FIELD", "unknownField",
+                    "Field 'unknownField' is unknown"));
         }
 
         @Test
@@ -637,34 +626,9 @@ class PlannerContentValidatorTest {
         @Test
         @DisplayName("Should throw exception when single note exceeds 1KB")
         void validate_WhenNoteTooLarge_ThrowsException() {
-            // Create a note content that exceeds 1KB when serialized
-            String largeNoteContent = "x".repeat(1100);
-            // Need valid equipment (all 12 sinners) to reach note size validation
-            String content = String.format("""
-                {
-                    "selectedKeywords": [],
-                    "equipment": {
-                        "01": {"identity": {"id": "10101"}, "egos": {"ZAYIN": {"id": "20101"}}},
-                        "02": {"identity": {"id": "10201"}, "egos": {"ZAYIN": {"id": "20201"}}},
-                        "03": {"identity": {"id": "10301"}, "egos": {"ZAYIN": {"id": "20301"}}},
-                        "04": {"identity": {"id": "10401"}, "egos": {"ZAYIN": {"id": "20401"}}},
-                        "05": {"identity": {"id": "10501"}, "egos": {"ZAYIN": {"id": "20501"}}},
-                        "06": {"identity": {"id": "10601"}, "egos": {"ZAYIN": {"id": "20601"}}},
-                        "07": {"identity": {"id": "10701"}, "egos": {"ZAYIN": {"id": "20701"}}},
-                        "08": {"identity": {"id": "10801"}, "egos": {"ZAYIN": {"id": "20801"}}},
-                        "09": {"identity": {"id": "10901"}, "egos": {"ZAYIN": {"id": "20901"}}},
-                        "10": {"identity": {"id": "11001"}, "egos": {"ZAYIN": {"id": "21001"}}},
-                        "11": {"identity": {"id": "11101"}, "egos": {"ZAYIN": {"id": "21101"}}},
-                        "12": {"identity": {"id": "11201"}, "egos": {"ZAYIN": {"id": "21201"}}}
-                    },
-                    "deploymentOrder": [],
-                    "skillEAState": {},
-                    "floorSelections": [],
-                    "sectionNotes": {
-                        "floor-1": {"content": {"type": "doc", "text": "%s"}}
-                    }
-                }
-                """, largeNoteContent);
+            String content = createValidContent().replace("\"sectionNotes\": {}",
+                    "\"sectionNotes\": {\"floor-1\": {\"content\": {\"type\": \"doc\", \"text\": \""
+                            + "x".repeat(1100) + "\"}}}");
 
             PlannerValidationException exception = assertThrows(
                     PlannerValidationException.class,
@@ -1035,17 +999,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should pass with absent keyword and empty gift IDs")
-        void validate_WhenAbsentKeywordEmptyGifts_Passes() {
-            setupMocksForValidIdsWithoutGifts();
-            // Remove keyword and empty gift IDs
-            String content = createValidContent()
-                    .replace("\"selectedGiftKeyword\": \"Combustion\",", "")
-                    .replace("\"selectedGiftIds\": [\"9001\"],", "\"selectedGiftIds\": [],");
-            assertDoesNotThrow(() -> validate(content, "5F"));
-        }
-
-        @Test
         @DisplayName("Should pass with multiple gift IDs from same keyword pool")
         void validate_WhenMultipleGiftsFromSamePool_Passes() {
             setupMocksForValidIds();
@@ -1113,8 +1066,6 @@ class PlannerContentValidatorTest {
         @Test
         @DisplayName("Should throw exception for non-string gift ID")
         void validate_WhenNonStringGiftId_ThrowsException() {
-            // Type check happens before ID lookup
-            setupMocksForGiftTypeFailure();
             String content = createValidContent().replace(
                     "\"selectedGiftIds\": [\"9001\"],",
                     "\"selectedGiftIds\": [9001],"
@@ -1150,8 +1101,6 @@ class PlannerContentValidatorTest {
         @Test
         @DisplayName("Should throw exception for non-string comprehensiveGiftIds element")
         void validate_WhenNonStringComprehensiveGiftId_ThrowsException() {
-            // Type check happens before ID lookup
-            setupMocksForGiftTypeFailure();
             String content = createFullContent().replace(
                     "\"comprehensiveGiftIds\": [\"19050\"]",
                     "\"comprehensiveGiftIds\": [19050]"
@@ -1164,11 +1113,11 @@ class PlannerContentValidatorTest {
         void validate_WhenInvalidComprehensiveGiftId_ThrowsException() {
             // ID lookup fails - need hasEgoGift mock
             setupMocksForGiftDuplicateFailure();
-            when(gameDataRegistry.hasEgoGift("99999")).thenReturn(false);
+            when(gameDataRegistry.hasEgoGift("9999")).thenReturn(false);
 
             String content = createFullContent().replace(
                     "\"comprehensiveGiftIds\": [\"19050\"]",
-                    "\"comprehensiveGiftIds\": [\"99999\"]"
+                    "\"comprehensiveGiftIds\": [\"9999\"]"
             );
             assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
@@ -1188,8 +1137,6 @@ class PlannerContentValidatorTest {
         @Test
         @DisplayName("Should throw exception for non-string observationGiftIds element")
         void validate_WhenNonStringObservationGiftId_ThrowsException() {
-            // Type check happens before ID lookup
-            setupMocksForGiftTypeFailure();
             String content = createFullContent().replace(
                     "\"observationGiftIds\": [\"9100\"]",
                     "\"observationGiftIds\": [9100]"
@@ -1225,7 +1172,6 @@ class PlannerContentValidatorTest {
         @Test
         @DisplayName("Should throw exception for non-string floor giftIds element")
         void validate_WhenNonStringFloorGiftId_ThrowsException() {
-            setupMocksForBoundaryRejectedFloors();
             String content = createValidContent().replace(
                     "\"giftIds\": [\"9002\"]",
                     "\"giftIds\": [9002]"
@@ -1238,11 +1184,11 @@ class PlannerContentValidatorTest {
         void validate_WhenInvalidFloorGiftId_ThrowsException() {
             // Floor validation fails before buff/gift pool validation
             setupMocksForValidIdsWithoutBuffsAndGifts();
-            when(gameDataRegistry.hasEgoGift("99999")).thenReturn(false);
+            when(gameDataRegistry.hasEgoGift("9999")).thenReturn(false);
 
             String content = createValidContent().replace(
                     "\"giftIds\": [\"9002\"]",
-                    "\"giftIds\": [\"99999\"]"
+                    "\"giftIds\": [\"9999\"]"
             );
             assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
@@ -1407,7 +1353,7 @@ class PlannerContentValidatorTest {
         void validate_WhenBoundarySinnerIndices_Passes() {
             setupMocksForValidIds();
             // createValidContent already uses boundary values:
-            // - Equipment keys: "01" through "12" (all 12 sinners)
+            // - Equipment keys: "1" through "12" (all 12 sinners)
             // - DeploymentOrder: includes 0 and can include 11
             String content = createValidContent().replace(
                     "\"deploymentOrder\": [0, 1, 2, 3, 4, 5]",
@@ -1513,7 +1459,6 @@ class PlannerContentValidatorTest {
 
         @Test
         void validate_WhenLevelIsAString_RejectsItAsANonNumber() {
-            setupMocksForValidIds();
             String content = createValidContent().replace(
                     "\"identity\": {\"id\": \"10101\", \"uptie\": 4, \"level\": 45}",
                     "\"identity\": {\"id\": \"10101\", \"uptie\": 4, \"level\": \"abc\"}");
@@ -1522,7 +1467,8 @@ class PlannerContentValidatorTest {
                     () -> validate(content, "5F"));
 
             assertThat(ex.getSubErrors()).containsExactly(new PlannerValidationException.ValidationError(
-                    "INVALID_FIELD_TYPE", "equipment[01].identity.level", "Field 'equipment[01].identity.level' must be number, got string \"abc\""));
+                    "INVALID_FIELD_TYPE", "equipment[1].identity.level",
+                    "Field 'equipment[1].identity.level' has an invalid value: string \"abc\""));
         }
 
         @Test
@@ -1573,7 +1519,7 @@ class PlannerContentValidatorTest {
             String content = createValidContent().replace(
                     "{\"themePackId\": \"1004\", \"difficulty\": 0, \"giftIds\": []}",
                     "{\"themePackId\": \"1004\", \"difficulty\": 0, \"giftIds\": []},\n"
-                            + "                    {\"difficulty\": 0, \"giftIds\": [\"9004\"]}");
+                            + "                    {\"themePackId\": null, \"difficulty\": 0, \"giftIds\": [\"9004\"]}");
 
             assertDoesNotThrow(() -> validate(content, "5F"));
         }
@@ -1608,7 +1554,7 @@ class PlannerContentValidatorTest {
             setupMocksWithoutThemePack();
             String content = createValidContent().replace(
                     "{\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}",
-                    "{\"difficulty\": 0, \"giftIds\": []}");
+                    "{\"themePackId\": null, \"difficulty\": 0, \"giftIds\": []}");
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
                     () -> validate(content, "5F", Stage.PUBLISH));
@@ -1695,11 +1641,11 @@ class PlannerContentValidatorTest {
         void validate_WhenTheThemePackIsUnknown_StillChecksTheFloorsGifts() {
             setupMocksWithoutThemePack();
             when(gameDataRegistry.hasThemePack(anyString())).thenReturn(true);
-            when(gameDataRegistry.hasThemePack("+1001")).thenReturn(false);
+            when(gameDataRegistry.hasThemePack("8888")).thenReturn(false);
             when(gameDataRegistry.hasEgoGift("9999")).thenReturn(false);
             String content = createValidContent().replace(
                     "{\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}",
-                    "{\"themePackId\": \"+1001\", \"difficulty\": 0, \"giftIds\": [\"9999\"]}");
+                    "{\"themePackId\": \"8888\", \"difficulty\": 0, \"giftIds\": [\"9999\"]}");
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
                     () -> validate(content, "5F"));
@@ -1708,7 +1654,7 @@ class PlannerContentValidatorTest {
                     new ValidationError("UNKNOWN_EGOGIFT_FLOOR", "floorSelections[0].giftIds[0]",
                             "floorSelections[0].giftIds[0] ID '9999' not found or invalid"),
                     new ValidationError("UNKNOWN_THEMEPACK", "floorSelections[0].themePackId",
-                            "floorSelections[0].themePackId ID '+1001' not found or invalid"));
+                            "floorSelections[0].themePackId ID '8888' not found or invalid"));
         }
 
         @Test
@@ -1727,7 +1673,6 @@ class PlannerContentValidatorTest {
 
         @Test
         void validate_WhenADraftFloorsGiftIdsIsNotAnArray_ReportsTheFieldType() {
-            setupMocksForBoundaryRejectedFloors();
             String content = createValidContent().replace(
                     "\"giftIds\": [\"9002\"]", "\"giftIds\": \"9002\"");
 
@@ -1735,23 +1680,39 @@ class PlannerContentValidatorTest {
                     () -> validate(content, "5F"));
 
             assertThat(ex.getSubErrors()).containsExactly(new ValidationError("INVALID_FIELD_TYPE", "floorSelections[0].giftIds",
-                    "Field 'floorSelections[0].giftIds' must be array, got string \"9002\""));
+                    "Field 'floorSelections[0].giftIds' has an invalid value: string \"9002\""));
         }
 
         @Test
-        void validate_WhenFloorsPastTheCountHoldGarbage_AcceptsAndStoresThemUntouched() {
+        void validate_WhenWellShapedFloorsLiePastTheCount_AcceptsAndStoresThemUntouched() {
             setupMocksForValidIds();
             String content = createValidContent().replace(
                     "{\"themePackId\": \"1005\", \"difficulty\": 0, \"giftIds\": []}",
-                    "{\"themePackId\": \"1005\", \"difficulty\": 0, \"giftIds\": []}, 7, "
-                            + "{\"themePackId\": 1001, \"difficulty\": \"hard\", \"giftIds\": {}}");
+                    "{\"themePackId\": \"1005\", \"difficulty\": 0, \"giftIds\": []}, "
+                            + "{\"themePackId\": \"1001\", \"difficulty\": 9, \"giftIds\": [\"9999\", \"9999\"]}");
 
             assertThat(validate(content, "5F", Stage.PUBLISH)).isEqualTo(content);
         }
 
         @Test
+        void validate_WhenFloorsPastTheCountHoldGarbage_RejectsTheirShapeAlone() {
+            String content = createValidContent().replace(
+                    "{\"themePackId\": \"1005\", \"difficulty\": 0, \"giftIds\": []}",
+                    "{\"themePackId\": \"1005\", \"difficulty\": 0, \"giftIds\": []}, 7, "
+                            + "{\"themePackId\": 1001, \"difficulty\": \"hard\", \"giftIds\": {}}");
+
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
+                    () -> validate(content, "5F", Stage.PUBLISH));
+
+            assertThat(ex.getSubErrors()).extracting(ValidationError::code, ValidationError::path).containsExactly(
+                    tuple("INVALID_FIELD_TYPE", "floorSelections[5]"),
+                    tuple("INVALID_FIELD_TYPE", "floorSelections[6].difficulty"),
+                    tuple("INVALID_FIELD_TYPE", "floorSelections[6].giftIds"),
+                    tuple("INVALID_FIELD_TYPE", "floorSelections[6].themePackId"));
+        }
+
+        @Test
         void validate_WhenFloorSelectionsIsNotAnArray_ReportsItOnce() {
-            setupMocksForBoundaryRejectedFloors();
             String content = createValidContent().replaceAll(
                     "(?s)\"floorSelections\": \\[.*?\\],\\s*\"sectionNotes\"",
                     "\"floorSelections\": 5, \"sectionNotes\"");
@@ -1760,7 +1721,7 @@ class PlannerContentValidatorTest {
                     () -> validate(content, "5F"));
 
             assertThat(ex.getSubErrors()).containsExactly(new ValidationError("INVALID_FIELD_TYPE", "floorSelections",
-                    "Field 'floorSelections' must be array, got number 5"));
+                    "Field 'floorSelections' has an invalid value: number 5"));
         }
 
         @Test
@@ -1856,31 +1817,34 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        void validate_WhenPublishPolicyAndKeywordsMixARenameAnUnknownANumberAndABlank_ReportsEachAtItsIndex() {
+        void validate_WhenPublishPolicyAndKeywordsMixARenameAnUnknownAndABlank_ReportsEachUnknownAtItsIndex() {
             setupMocksForValidIds();
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class, () ->
-                    validate(selecting("[\"AccelBullet\", \"Nope\", 5, \"\"]"), "5F", Stage.PUBLISH));
+                    validate(selecting("[\"AccelBullet\", \"Nope\", \"\"]"), "5F", Stage.PUBLISH));
 
             assertThat(ex.getSubErrors()).containsExactly(
                     new ValidationError("UNKNOWN_KEYWORD", "selectedKeywords[1]",
                             "selectedKeywords ID 'Nope' not found or invalid"),
-                    new ValidationError("INVALID_FIELD_TYPE", "selectedKeywords[2]",
-                            "Field 'selectedKeywords[2]' must be string, got number 5"),
-                    new ValidationError("UNKNOWN_KEYWORD", "selectedKeywords[3]",
+                    new ValidationError("UNKNOWN_KEYWORD", "selectedKeywords[2]",
                             "selectedKeywords ID '' not found or invalid"));
+        }
+
+        @Test
+        void validate_WhenKeywordsHoldANumberBesideAnUnknown_ReportsTheNumberAlone() {
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class, () ->
+                    validate(selecting("[\"AccelBullet\", \"Nope\", 5, \"\"]"), "5F", Stage.PUBLISH));
+
+            assertThat(ex.getSubErrors()).containsExactly(new ValidationError("INVALID_FIELD_TYPE",
+                    "selectedKeywords[2]", "Field 'selectedKeywords[2]' has an invalid value: number 5"));
             assertEquals("VALIDATION_ERROR", ex.getBody().getProperties().get("code"));
         }
 
         @Test
-        void validate_WhenDraftPolicyAndKeywordsMixARenameAnUnknownANumberAndABlank_ReportsOnlyTheNumber() {
+        void validate_WhenDraftPolicyAndKeywordsMixARenameAnUnknownAndABlank_Passes() {
             setupMocksForValidIds();
 
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class, () ->
-                    validate(selecting("[\"AccelBullet\", \"Nope\", 5, \"\"]"), "5F", Stage.DRAFT));
-
-            assertThat(ex.getSubErrors()).containsExactly(new ValidationError("INVALID_FIELD_TYPE",
-                    "selectedKeywords[2]", "Field 'selectedKeywords[2]' must be string, got number 5"));
+            assertDoesNotThrow(() -> validate(selecting("[\"AccelBullet\", \"Nope\", \"\"]"), "5F", Stage.DRAFT));
         }
 
         @Test

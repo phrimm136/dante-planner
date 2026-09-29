@@ -21,10 +21,6 @@ import org.danteplanner.backend.planner.validation.floor.Stage;
  * document is assembled field by field rather than by text substitution, so field order — which
  * decides the order Jackson reports object members in, and therefore the order errors accumulate
  * in — is fixed by the corpus rather than by a search-and-replace landing where it lands.
- *
- * <p>An entry needs no discipline about which fields it omits together: the snapshot renderer
- * sorts the two messages that render a set, so the JVM's per-run iteration salt cannot reach the
- * frozen text.
  */
 final class ValidatorGoldenCorpus {
 
@@ -188,10 +184,10 @@ final class ValidatorGoldenCorpus {
     static String equipmentWith(Map<String, String> replacements) {
         List<String> entries = new ArrayList<>();
         for (int sinner = 1; sinner <= 12; sinner++) {
-            String key = String.format("%02d", sinner);
+            String key = String.valueOf(sinner);
             String replacement = replacements.get(key);
             if (replacement == null) {
-                entries.add("\"" + key + "\":" + sinnerEquipment(key));
+                entries.add("\"" + key + "\":" + sinnerEquipment(String.format("%02d", sinner)));
             } else if (!replacement.isEmpty()) {
                 entries.add(replacement);
             }
@@ -199,9 +195,9 @@ final class ValidatorGoldenCorpus {
         return "{" + String.join(",", entries) + "}";
     }
 
-    private static String sinnerEquipment(String key) {
-        return "{\"identity\":{\"id\":\"1" + key + "01\",\"level\":45,\"uptie\":4},"
-                + "\"egos\":{\"ZAYIN\":{\"id\":\"2" + key + "01\",\"threadspin\":4}}}";
+    private static String sinnerEquipment(String paddedSinner) {
+        return "{\"identity\":{\"id\":\"1" + paddedSinner + "01\",\"level\":45,\"uptie\":4},"
+                + "\"egos\":{\"ZAYIN\":{\"id\":\"2" + paddedSinner + "01\",\"threadspin\":4}}}";
     }
 
     private static String skillEAState() {
@@ -211,7 +207,7 @@ final class ValidatorGoldenCorpus {
     static String skillEAStateWith(Map<String, String> replacements) {
         List<String> entries = new ArrayList<>();
         for (int sinner = 1; sinner <= 12; sinner++) {
-            String key = String.format("%02d", sinner);
+            String key = String.valueOf(sinner);
             String replacement = replacements.get(key);
             if (replacement == null) {
                 entries.add("\"" + key + "\":{\"0\":3,\"1\":2,\"2\":1}");
@@ -258,7 +254,7 @@ final class ValidatorGoldenCorpus {
         entries.add(draft("missing-required-hash-colliding-pair",
                 valid().without("selectedKeywords").without("equipment")));
         entries.add(draft("equipment-sinners-missing-hash-colliding-pair",
-                valid().with("equipment", equipmentWith(Map.of("01", "", "12", "")))));
+                valid().with("equipment", equipmentWith(Map.of("1", "", "12", "")))));
 
         entries.add(draft("field-type-selected-keywords", valid().with("selectedKeywords", "\"none\"")));
         entries.add(draft("field-type-deployment-order", valid().with("deploymentOrder", "\"none\"")));
@@ -278,93 +274,93 @@ final class ValidatorGoldenCorpus {
                 valid().with("selectedKeywords", "\"" + "y".repeat(120) + "\"")));
 
         entries.add(draft("note-size-exceeded", valid().with("sectionNotes",
-                "{\"floor-1\":{\"text\":\"" + "n".repeat(1100) + "\"}}")));
+                "{\"floor-1\":{\"content\":\"" + "n".repeat(1100) + "\"}}")));
 
         entries.add(draft("equipment-key-non-numeric", valid().with("equipment", equipmentWith(
-                Map.of("05", "\"yi_sang\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
+                Map.of("5", "\"yi_sang\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
                         + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":4}}}")))));
         entries.add(draft("equipment-key-out-of-range", valid().with("equipment", equipmentWith(
-                Map.of("05", "\"13\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
+                Map.of("5", "\"13\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
                         + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":4}}}")))));
         entries.add(draft("equipment-sinner-missing",
-                valid().with("equipment", equipmentWith(Map.of("05", "")))));
+                valid().with("equipment", equipmentWith(Map.of("5", "")))));
         entries.add(draft("equipment-sinner-not-object",
-                valid().with("equipment", equipmentWith(Map.of("05", "\"05\":[]")))));
+                valid().with("equipment", equipmentWith(Map.of("5", "\"5\":[]")))));
         entries.add(draft("equipment-identity-missing", valid().with("equipment", equipmentWith(
-                Map.of("05", "\"05\":{\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":4}}}")))));
+                Map.of("5", "\"5\":{\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":4}}}")))));
         entries.add(draft("equipment-identity-id-blank", valid().with("equipment", equipmentWith(
-                Map.of("05", "\"05\":{\"identity\":{\"id\":\"  \",\"level\":45,\"uptie\":4},"
+                Map.of("5", "\"5\":{\"identity\":{\"id\":\"  \",\"level\":45,\"uptie\":4},"
                         + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":4}}}")))));
         entries.add(draft("equipment-egos-missing", valid().with("equipment", equipmentWith(
-                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4}}")))));
+                Map.of("5", "\"5\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4}}")))));
         entries.add(draft("equipment-ego-type-unknown", valid().with("equipment", equipmentWith(
-                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
+                Map.of("5", "\"5\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
                         + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":4},\"KETHER\":{}}}")))));
         entries.add(draft("equipment-zayin-missing", valid().with("equipment", equipmentWith(
-                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
+                Map.of("5", "\"5\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
                         + "\"egos\":{\"TETH\":{\"id\":\"20501\",\"threadspin\":4}}}")))));
         entries.add(draft("equipment-zayin-id-blank", valid().with("equipment", equipmentWith(
-                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
+                Map.of("5", "\"5\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
                         + "\"egos\":{\"ZAYIN\":{\"id\":\"\",\"threadspin\":4}}}")))));
 
         entries.add(draft("deployment-order-non-number", valid().with("deploymentOrder", "[0,\"abc\"]")));
         entries.add(draft("deployment-order-out-of-range", valid().with("deploymentOrder", "[-1,12]")));
 
         entries.add(draft("skill-state-slot-key-unknown", valid().with("skillEAState", skillEAStateWith(
-                Map.of("05", "\"05\":{\"0\":3,\"1\":2,\"3\":1}")))));
+                Map.of("5", "\"5\":{\"0\":3,\"1\":2,\"3\":1}")))));
         entries.add(draft("skill-state-slot-not-number", valid().with("skillEAState", skillEAStateWith(
-                Map.of("05", "\"05\":{\"0\":\"3\",\"1\":2,\"2\":1}")))));
+                Map.of("5", "\"5\":{\"0\":\"3\",\"1\":2,\"2\":1}")))));
         entries.add(draft("skill-state-total-wrong", valid().with("skillEAState", skillEAStateWith(
-                Map.of("05", "\"05\":{\"0\":1,\"1\":2,\"2\":1}")))));
+                Map.of("5", "\"5\":{\"0\":1,\"1\":2,\"2\":1}")))));
         entries.add(draft("skill-state-sinner-missing",
-                valid().with("skillEAState", skillEAStateWith(Map.of("05", "")))));
+                valid().with("skillEAState", skillEAStateWith(Map.of("5", "")))));
         entries.add(draft("skill-state-sinner-not-object",
-                valid().with("skillEAState", skillEAStateWith(Map.of("05", "\"05\":5")))));
+                valid().with("skillEAState", skillEAStateWith(Map.of("5", "\"5\":5")))));
 
         entries.add(draft("identity-id-unknown", valid().with("equipment", equipmentWith(
-                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10599\",\"level\":45,\"uptie\":4},"
+                Map.of("5", "\"5\":{\"identity\":{\"id\":\"10599\",\"level\":45,\"uptie\":4},"
                         + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":4}}}")))));
         entries.add(draft("identity-sinner-mismatch", valid().with("equipment", equipmentWith(
-                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10601\",\"level\":45,\"uptie\":4},"
+                Map.of("5", "\"5\":{\"identity\":{\"id\":\"10601\",\"level\":45,\"uptie\":4},"
                         + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":4}}}")))));
         entries.add(draft("identity-level-out-of-range", valid().with("equipment", equipmentWith(
-                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":99,\"uptie\":4},"
+                Map.of("5", "\"5\":{\"identity\":{\"id\":\"10501\",\"level\":99,\"uptie\":4},"
                         + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":4}}}")))));
         entries.add(draft("identity-uptie-out-of-range", valid().with("equipment", equipmentWith(
-                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":9},"
+                Map.of("5", "\"5\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":9},"
                         + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":4}}}")))));
         entries.add(draft("identity-level-string-rejected", valid().with("equipment", equipmentWith(
-                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":\"45\",\"uptie\":4},"
+                Map.of("5", "\"5\":{\"identity\":{\"id\":\"10501\",\"level\":\"45\",\"uptie\":4},"
                         + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":4}}}")))));
         entries.add(draft("identity-level-null-rejected", valid().with("equipment", equipmentWith(
-                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":null,\"uptie\":4},"
+                Map.of("5", "\"5\":{\"identity\":{\"id\":\"10501\",\"level\":null,\"uptie\":4},"
                         + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":4}}}")))));
         entries.add(draft("identity-uptie-string-rejected", valid().with("equipment", equipmentWith(
-                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":\"4\"},"
+                Map.of("5", "\"5\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":\"4\"},"
                         + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":4}}}")))));
         entries.add(draft("ego-id-not-string", valid().with("equipment", equipmentWith(
-                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
+                Map.of("5", "\"5\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
                         + "\"egos\":{\"ZAYIN\":{\"id\":20501,\"threadspin\":4}}}")))));
         entries.add(draft("ego-id-null", valid().with("equipment", equipmentWith(
-                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
+                Map.of("5", "\"5\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
                         + "\"egos\":{\"ZAYIN\":{\"id\":null,\"threadspin\":4}}}")))));
         entries.add(draft("ego-id-unknown", valid().with("equipment", equipmentWith(
-                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
+                Map.of("5", "\"5\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
                         + "\"egos\":{\"ZAYIN\":{\"id\":\"20599\",\"threadspin\":4}}}")))));
         entries.add(draft("ego-sinner-mismatch", valid().with("equipment", equipmentWith(
-                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
+                Map.of("5", "\"5\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
                         + "\"egos\":{\"ZAYIN\":{\"id\":\"20601\",\"threadspin\":4}}}")))));
         entries.add(draft("ego-threadspin-out-of-range", valid().with("equipment", equipmentWith(
-                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
+                Map.of("5", "\"5\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
                         + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":9}}}")))));
         entries.add(draft("threadspin-string-rejected", valid().with("equipment", equipmentWith(
-                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
+                Map.of("5", "\"5\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
                         + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":\"4\"}}}")))));
         entries.add(draft("ego-threadspin-above-ego-ceiling", valid().with("equipment", equipmentWith(
-                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
+                Map.of("5", "\"5\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
                         + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":5}}}")))));
         entries.add(draft("ego-ceiling-unknown", valid().with("equipment", equipmentWith(
-                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
+                Map.of("5", "\"5\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
                         + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":4},"
                         + "\"TETH\":{\"id\":\"20502\",\"threadspin\":3}}}")))));
 
@@ -382,7 +378,7 @@ final class ValidatorGoldenCorpus {
 
         entries.add(draft("floor-theme-pack-unknown", valid().with("floorSelections",
                 "[{\"themePackId\":\"9999\",\"difficulty\":0,\"giftIds\":[]}]")));
-        entries.add(draft("floor-theme-pack-empty-accepted-as-draft", valid().with("floorSelections",
+        entries.add(draft("floor-theme-pack-empty-rejected-as-draft", valid().with("floorSelections",
                 "[{\"themePackId\":\"\",\"difficulty\":0,\"giftIds\":[]}]")));
         entries.add(publish("floor-theme-pack-empty-rejected-on-publish", valid().with("floorSelections",
                 fiveFloorsWith(4, "{\"themePackId\":\"\",\"difficulty\":0,\"giftIds\":[]}"))));
@@ -444,16 +440,16 @@ final class ValidatorGoldenCorpus {
                         + "{\"themePackId\":\"1005\",\"difficulty\":0,\"giftIds\":[]},"
                         + "{\"themePackId\":\"1001\",\"difficulty\":0,\"giftIds\":[\"9004\"]}]")));
         entries.add(draft("silence-identity-not-object", valid().with("equipment", equipmentWith(
-                Map.of("05", "\"05\":{\"identity\":5,"
+                Map.of("5", "\"5\":{\"identity\":5,"
                         + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":4}}}")))));
         entries.add(draft("silence-identity-id-not-textual", valid().with("equipment", equipmentWith(
-                Map.of("05", "\"05\":{\"identity\":{\"id\":10501,\"level\":45,\"uptie\":4},"
+                Map.of("5", "\"5\":{\"identity\":{\"id\":10501,\"level\":45,\"uptie\":4},"
                         + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":4}}}")))));
         entries.add(draft("silence-egos-not-object", valid().with("equipment", equipmentWith(
-                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
+                Map.of("5", "\"5\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
                         + "\"egos\":5}")))));
         entries.add(draft("silence-ego-value-not-object", valid().with("equipment", equipmentWith(
-                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
+                Map.of("5", "\"5\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
                         + "\"egos\":{\"ZAYIN\":5}}")))));
 
         entries.add(draft("baseline-accepted", valid()));
