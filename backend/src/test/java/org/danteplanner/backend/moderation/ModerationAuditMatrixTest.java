@@ -119,7 +119,7 @@ class ModerationAuditMatrixTest {
         userModerationService = new UserModerationService(userService, auditService, eventPublisher, moderationPolicy);
         plannerModerationService = new PlannerModerationService(plannerPublishingService, auditService);
         commentModerationService = new CommentModerationService(commentCommandService, commentQueryService, auditService);
-        adminService = new AdminService(userService, eventPublisher, auditService, moderationPolicy);
+        adminService = new AdminService(userService, auditService, moderationPolicy);
 
         User actor = user(ACTOR, UserRole.ADMIN);
         User target = user(TARGET, UserRole.MODERATOR);

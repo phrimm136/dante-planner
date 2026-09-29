@@ -30,6 +30,12 @@ epic: none · pr: none · supersedes: 022 @ban
   REJECTED: building the rules inside the shared security configuration — a new dependency from
   shared onto the user module.
   REJECTED: placing them in the moderation module — the administration prefix is not moderation's.
+- @security @tokens — A demotion revokes no token: every route that depends on a role reads the
+  stored role, so a token's role claim authorizes nothing.
+  REJECTED: revoking a demoted user's tokens after commit — a guard for a claim no check reads,
+  with a crash window of its own.
+  INVARIANT: no code outside the security chain reads the role claim or granted authorities for
+  authorization — the role-claim architecture rule.
 
 ## Takeaway
 - takeaway: a lazy-enforcement argument holds only where the enforcement exists; the privileged

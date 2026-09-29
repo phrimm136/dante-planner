@@ -6,14 +6,11 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserRole;
 import org.danteplanner.backend.user.exception.UserNotFoundException;
 import org.danteplanner.backend.user.service.UserService;
-import org.danteplanner.backend.user.event.UserDemotedEvent;
-import org.springframework.context.ApplicationEventPublisher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -29,16 +26,13 @@ import org.danteplanner.backend.moderation.service.ModerationPolicy;
 /**
  * Unit tests for AdminService.
  *
- * <p>Tests role change safeguards and token invalidation on demotion.</p>
+ * <p>Tests role change safeguards.</p>
  */
 @ExtendWith(MockitoExtension.class)
 class AdminServiceTest {
 
     @Mock
     private UserService userService;
-
-    @Mock
-    private ApplicationEventPublisher eventPublisher;
 
     @Mock
     private ModerationActionRepository moderationActionRepository;
@@ -51,7 +45,7 @@ class AdminServiceTest {
 
     @BeforeEach
     void setUp() {
-        adminService = new AdminService(userService, eventPublisher,
+        adminService = new AdminService(userService,
                 new ModerationAuditService(moderationActionRepository), new ModerationPolicy());
 
         adminUser = User.builder()
@@ -106,12 +100,11 @@ class AdminServiceTest {
 
             // Assert
             assertEquals(UserRole.MODERATOR, result.getRole());
-            verify(eventPublisher, never()).publishEvent(any(UserDemotedEvent.class));
         }
 
         @Test
-        @DisplayName("Admin can demote moderator to normal - tokens invalidated")
-        void changeRole_WhenAdminDemotesModerator_InvalidatesTokens() {
+        @DisplayName("Admin can demote moderator to normal")
+        void changeRole_WhenAdminDemotesModerator_Succeeds() {
             // Arrange - use locking query method
             when(userService.lockActiveById(adminUser.getId()))
                     .thenReturn(adminUser);
@@ -123,9 +116,6 @@ class AdminServiceTest {
 
             // Assert
             assertEquals(UserRole.NORMAL, result.getRole());
-            ArgumentCaptor<UserDemotedEvent> demotion = ArgumentCaptor.forClass(UserDemotedEvent.class);
-            verify(eventPublisher).publishEvent(demotion.capture());
-            assertEquals(moderatorUser.getId(), demotion.getValue().getUserId());
         }
 
         @Test
@@ -239,7 +229,6 @@ class AdminServiceTest {
             );
             assertTrue(exception.getMessage().contains("equal or higher rank"));
             assertEquals(UserRole.ADMIN, otherAdmin.getRole());
-            verify(eventPublisher, never()).publishEvent(any(UserDemotedEvent.class));
         }
 
         @Test
@@ -287,25 +276,6 @@ class AdminServiceTest {
 
             // Assert
             assertEquals(UserRole.MODERATOR, result.getRole());
-            ArgumentCaptor<UserDemotedEvent> demotion = ArgumentCaptor.forClass(UserDemotedEvent.class);
-            verify(eventPublisher).publishEvent(demotion.capture());
-            assertEquals(adminUser.getId(), demotion.getValue().getUserId());
-        }
-
-        @Test
-        @DisplayName("No token invalidation on promotion")
-        void changeRole_WhenPromotion_NoTokenInvalidation() {
-            // Arrange - use locking query method
-            when(userService.lockActiveById(adminUser.getId()))
-                    .thenReturn(adminUser);
-            when(userService.lockActiveById(normalUser.getId()))
-                    .thenReturn(normalUser);
-
-            // Act
-            adminService.changeRole(adminUser.getId(), normalUser.getId(), UserRole.ADMIN);
-
-            // Assert
-            verify(eventPublisher, never()).publishEvent(any(UserDemotedEvent.class));
         }
     }
 

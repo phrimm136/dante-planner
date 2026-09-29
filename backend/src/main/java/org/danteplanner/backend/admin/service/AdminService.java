@@ -5,9 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserRole;
 import org.danteplanner.backend.user.exception.UserNotFoundException;
-import org.danteplanner.backend.user.event.UserDemotedEvent;
 import org.danteplanner.backend.user.service.UserService;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +22,6 @@ import org.danteplanner.backend.moderation.service.ModerationPolicy;
 public class AdminService {
 
     private final UserService userService;
-    private final ApplicationEventPublisher eventPublisher;
     private final ModerationAuditService auditService;
     private final ModerationPolicy moderationPolicy;
 
@@ -50,7 +47,6 @@ public class AdminService {
                 ModerationAction.TargetType.USER, oldRole + " -> " + newRole);
 
         if (demotion) {
-            eventPublisher.publishEvent(new UserDemotedEvent(this, targetId, oldRole, newRole));
             log.info("User {} demoted from {} to {} by admin {}", targetId, oldRole, newRole, actorId);
         } else {
             log.info("User {} role changed from {} to {} by admin {}",
