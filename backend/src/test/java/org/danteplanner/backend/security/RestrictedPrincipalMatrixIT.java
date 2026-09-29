@@ -57,9 +57,10 @@ class RestrictedPrincipalMatrixIT extends SharedMySqlContainerSupport {
 
     /**
      * Out of scope for ban semantics. {@code /api/auth} is {@code permitAll} by design, so a banned
-     * user must still reach logout and their own status. The moderation and admin trees are
-     * role-gated, so a NORMAL principal is rejected by the matcher before any handler runs, and
-     * exercising them here only consumes the shared rate-limit buckets other tests depend on.
+     * user must still reach logout and their own status. The moderation and admin trees re-read
+     * the actor's row on every request and refuse a restricted actor outright, before any handler
+     * runs; {@code RestrictedModeratorAuthorityIT} covers that rule, and this matrix covers only
+     * the ordinary routes, where a ban withdraws distribution alone.
      */
     private static final Set<String> EXEMPT_PREFIXES =
             Set.of("/api/auth", "/api/moderation", "/api/admin");

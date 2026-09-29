@@ -17,10 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
-/**
- * <p>The {@code /api/moderation/**} matcher in
- * {@code SecurityConfig} requires MODERATOR, and the role hierarchy admits ADMIN through it.</p>
- */
 @RestController
 @RequestMapping("/api/moderation/planner")
 @RequiredArgsConstructor

@@ -5,11 +5,11 @@ import org.danteplanner.backend.shared.security.CsrfDoubleSubmitFilter;
 import org.danteplanner.backend.shared.security.CustomAuthenticationEntryPoint;
 import org.danteplanner.backend.shared.security.JwtAuthenticationFilter;
 import org.danteplanner.backend.shared.security.MdcLoggingFilter;
+import org.danteplanner.backend.shared.security.ProblemAccessDeniedHandler;
+import org.danteplanner.backend.shared.security.SecurityRuleContribution;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
-import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -21,6 +21,8 @@ import org.springframework.security.web.header.writers.XXssProtectionHeaderWrite
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.util.List;
+
 @Configuration
 @RequiredArgsConstructor
 @EnableWebSecurity
@@ -30,6 +32,8 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final MdcLoggingFilter mdcLoggingFilter;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+    private final ProblemAccessDeniedHandler accessDeniedHandler;
+    private final List<SecurityRuleContribution> ruleContributions;
 
     /**
      * Spring Boot auto-registers a filter bean in the servlet container, where it runs a second
@@ -59,14 +63,6 @@ public class SecurityConfig {
     }
 
     @Bean
-    public RoleHierarchy roleHierarchy() {
-        return RoleHierarchyImpl.withDefaultRolePrefix()
-                .role("ADMIN").implies("MODERATOR")
-                .role("MODERATOR").implies("NORMAL")
-                .build();
-    }
-
-    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
@@ -75,8 +71,8 @@ public class SecurityConfig {
 
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+            .authorizeHttpRequests(auth -> {
+                auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                 .dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll()
 
@@ -99,13 +95,12 @@ public class SecurityConfig {
 
                 .requestMatchers(HttpMethod.GET, "/api/planner/{plannerId}/comments").permitAll()
 
-                .requestMatchers(HttpMethod.GET, "/api/planner/{plannerId}/comments/events").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/planner/{plannerId}/comments/events").permitAll();
 
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/moderation/**").hasRole("MODERATOR")
+                ruleContributions.forEach(contribution -> contribution.contribute(auth));
 
-                .anyRequest().authenticated()
-            )
+                auth.anyRequest().authenticated();
+            })
 
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(csrfDoubleSubmitFilter, JwtAuthenticationFilter.class)
@@ -122,7 +117,9 @@ public class SecurityConfig {
                 )
             )
 
-            .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint));
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint(authenticationEntryPoint)
+                .accessDeniedHandler(accessDeniedHandler));
 
         return http.build();
     }

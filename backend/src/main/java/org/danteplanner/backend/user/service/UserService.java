@@ -164,6 +164,11 @@ public class UserService {
         return userRepository.findByIdAndDeletedAtIsNull(userId);
     }
 
+    @Transactional
+    public Optional<User> findActiveByIdFromPrimary(Long userId) {
+        return userRepository.findByIdAndDeletedAtIsNull(userId);
+    }
+
     @Transactional(readOnly = true)
     public Optional<User> findActiveByProvider(AuthProviderType providerType, String providerId) {
         return userRepository.findByProviderAndProviderIdAndDeletedAtIsNull(providerType, providerId);

@@ -1,0 +1,51 @@
+package org.danteplanner.backend.shared.security;
+
+import java.time.Instant;
+
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.access.AccessDeniedException;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
+
+import org.danteplanner.backend.shared.exception.ProblemWriter;
+import org.danteplanner.backend.user.exception.UserBannedException;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+class ProblemAccessDeniedHandlerTest {
+
+    private final ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().build();
+    private final ProblemAccessDeniedHandler handler = new ProblemAccessDeniedHandler(new ProblemWriter(objectMapper));
+
+    @Test
+    void handle_WhenDenialCarriesADomainRefusal_WritesTheRefusalBody() throws Exception {
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        handler.handle(new MockHttpServletRequest("POST", "/api/moderation/users"), response,
+                new AccessDeniedException("denied", new UserBannedException(7L, Instant.EPOCH)));
+
+        JsonNode body = objectMapper.readTree(response.getContentAsString());
+        assertThat(response.getStatus()).isEqualTo(403);
+        assertThat(response.getContentType()).isEqualTo(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
+        assertThat(body.path("code").asText()).isEqualTo("USER_BANNED");
+        assertThat(body.path("instance").asText()).isEqualTo("/api/moderation/users");
+    }
+
+    @Test
+    void handle_WhenDenialCarriesNoRefusal_WritesAForbiddenProblem() throws Exception {
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        handler.handle(new MockHttpServletRequest("GET", "/api/admin/user/1/role"), response,
+                new AccessDeniedException("denied"));
+
+        JsonNode body = objectMapper.readTree(response.getContentAsString());
+        assertThat(response.getStatus()).isEqualTo(403);
+        assertThat(response.getContentType()).isEqualTo(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
+        assertThat(body.path("code").asText()).isEqualTo("FORBIDDEN");
+    }
+}

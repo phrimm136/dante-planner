@@ -158,8 +158,8 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
 
     /**
      * A restriction on the actor is not carried by the access token, and banning invalidates no
-     * token: an admin who bans a rogue moderator rather than demoting them leaves the JWT role
-     * claim {@code SecurityConfig} gates on untouched. Authority has to be re-read from the row.
+     * token, so the privileged prefixes re-read the actor's stored role and restriction on every
+     * request rather than trusting the role claim the token still carries.
      */
     @Nested
     @DisplayName("Account restriction on the acting moderator")

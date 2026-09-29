@@ -2,14 +2,11 @@ package org.danteplanner.backend.moderation.service;
 
 import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
-import org.danteplanner.backend.user.entity.RestrictionState;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserRole;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import java.time.Clock;
 import java.util.Map;
 
 @Service
@@ -27,37 +24,14 @@ public class ModerationPolicy {
             ModerationAction.ActionType.UNBAN,
             new Authority(UserRole.ADMIN, "unban users", "unban"));
 
-    private static final Map<RestrictionState, String> RESTRICTION_ADJECTIVE = Map.of(
-            RestrictionState.TIMED_OUT, "timed-out",
-            RestrictionState.BANNED, "banned");
-
     private static final Map<UserRole, String> ROLE_PLURAL = Map.of(
             UserRole.NORMAL, "users",
             UserRole.MODERATOR, "moderators",
             UserRole.ADMIN, "administrators");
 
-    private final Clock clock;
-
-    @Autowired
-    public ModerationPolicy() {
-        this(Clock.systemUTC());
-    }
-
-    ModerationPolicy(Clock clock) {
-        this.clock = clock;
-    }
-
     public void requireCanRestrict(User actor, User target, ModerationAction.ActionType action) {
         Authority authority = AUTHORITIES.get(action);
         Assert.notNull(authority, () -> "Not an account restriction: " + action);
-
-        // A restriction withdraws the authority, and nothing else does: banning a rogue moderator
-        // invalidates no token, and the endpoint is gated on the role claim the token still carries.
-        RestrictionState actorRestriction = actor.restrictionState(clock);
-        if (actorRestriction != RestrictionState.ACTIVE) {
-            throw new ModerationForbiddenException("A %s account cannot %s"
-                    .formatted(RESTRICTION_ADJECTIVE.get(actorRestriction), authority.power()));
-        }
 
         if (!actor.getRole().hasRankAtLeast(authority.minimumActorRole())) {
             throw new ModerationForbiddenException("Only %s can %s"

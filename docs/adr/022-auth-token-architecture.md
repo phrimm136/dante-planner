@@ -13,7 +13,9 @@ epic: none · pr: none
 - @refresh @family — A token family is created per login, not per device. REJECTED: a device-to-family map — the scenarios that would need device-scoped revocation on re-login are served better by an explicit "log out everywhere" action than by inferring security intent from the fact that someone logged in.
 - @csrf @double-submit — Unsafe methods require a header echoing a readable cookie. REJECTED: the previous posture, which disabled framework CSRF on the unenforced assumption that all GET requests are read-only — nothing checked that assumption, and one mutating GET already exists on the OAuth callback.
 - @oauth @transient-cookie — The redirect scratchpad holding state and the PKCE verifier is a short-lived signed and encrypted cookie rather than server-side storage. It is set to lax same-site deliberately: strict would not survive the provider's cross-site top-level redirect back to the callback.
-- @ban @latency @threat-model — A ban takes effect within the access-token lifetime, with no per-request revocation stamp. REJECTED: a security stamp checked on every request — bans are already enforced lazily at the write layer, so a banned user holding a still-valid access token cannot mutate anything, and the stamp would put a store lookup on every authenticated read to close a window that is already harmless.
+
+## Superseded
+- @ban @latency @threat-model → 148 — A ban takes effect within the access-token lifetime, with no per-request revocation stamp. REJECTED: a security stamp checked on every request — bans are already enforced lazily at the write layer, so a banned user holding a still-valid access token cannot mutate anything, and the stamp would put a store lookup on every authenticated read to close a window that is already harmless.
 
 ## Takeaway
 - takeaway: the two recurring moves here are pushing an invariant into a place callers cannot bypass, and sizing a hardening to the actual threat rather than the theoretical maximum. The type-confusion bug is what both look like when they are absent — a check that existed, was correct, and was simply not written at the third call site.
