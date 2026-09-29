@@ -36,5 +36,5 @@ output "master_user_secret_arn" {
 
 output "seoul_return_route_enabled" {
   description = "Whether the Seoul fleet return route + 3306 ingress are wired on the RDS side."
-  value       = var.seoul_peering_connection_id != ""
+  value       = local.seoul_pcx_id != ""
 }

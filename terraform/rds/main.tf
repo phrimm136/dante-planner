@@ -198,9 +198,9 @@ resource "aws_db_instance" "this" {
   # reboot is involved.
   enabled_cloudwatch_logs_exports = ["slowquery"]
 
-  backup_retention_period    = var.backup_retention_period
-  backup_window              = var.backup_window
-  maintenance_window         = var.maintenance_window
+  backup_retention_period     = var.backup_retention_period
+  backup_window               = var.backup_window
+  maintenance_window          = var.maintenance_window
   auto_minor_version_upgrade  = false
   allow_major_version_upgrade = true
   apply_immediately           = var.apply_immediately
@@ -222,27 +222,34 @@ resource "aws_db_instance" "this" {
 # The peering is created + auto-accepted by terraform/oregon; here we add the
 # return route from the RDS VPC to the fleet and allow the fleet cluster SG to
 # reach RDS on 3306 (an SG reference resolves across same-region peering). All
-# guarded so a plain RDS apply (no fleet) is unaffected until fleet_* are set.
+# guarded so nothing is wired until the oregon state holds these outputs.
 data "aws_route_tables" "rds_vpc" {
-  count  = var.fleet_peering_connection_id != "" ? 1 : 0
+  count  = local.oregon_pcx_id != "" ? 1 : 0
   vpc_id = local.vpc_id
 }
 
 resource "aws_route" "rds_to_fleet" {
-  count                     = var.fleet_peering_connection_id != "" ? length(data.aws_route_tables.rds_vpc[0].ids) : 0
+  count                     = local.oregon_pcx_id != "" ? length(data.aws_route_tables.rds_vpc[0].ids) : 0
   route_table_id            = tolist(data.aws_route_tables.rds_vpc[0].ids)[count.index]
-  destination_cidr_block    = var.fleet_vpc_cidr
-  vpc_peering_connection_id = var.fleet_peering_connection_id
+  destination_cidr_block    = local.oregon_cidr
+  vpc_peering_connection_id = local.oregon_pcx_id
+
+  lifecycle {
+    precondition {
+      condition     = local.oregon_pcx_id == "" || local.oregon_cidr != ""
+      error_message = "The oregon state holds a peering but no vpc_cidr output; apply (or refresh) terraform/oregon first so its state records it."
+    }
+  }
 }
 
 resource "aws_vpc_security_group_ingress_rule" "fleet_to_rds" {
-  count                        = var.fleet_cluster_security_group_id != "" ? 1 : 0
+  count                        = local.oregon_cluster_sg_id != "" ? 1 : 0
   security_group_id            = aws_security_group.rds.id
   description                  = "k3s fleet app/data nodes to RDS over VPC peering"
   from_port                    = 3306
   to_port                      = 3306
   ip_protocol                  = "tcp"
-  referenced_security_group_id = var.fleet_cluster_security_group_id
+  referenced_security_group_id = local.oregon_cluster_sg_id
 }
 
 # --- Seoul fleet <-> RDS VPC peering (RDS side) -------------------------------
@@ -250,26 +257,40 @@ resource "aws_vpc_security_group_ingress_rule" "fleet_to_rds" {
 # the return route from the RDS VPC to the Seoul fleet and open 3306 to Seoul's
 # VPC CIDR. Seoul's cluster SG lives in ap-northeast-2 and SG references do NOT
 # resolve across cross-region peering, so this rule is CIDR-based (unlike the
-# same-region Oregon rule above). All guarded so a plain RDS apply is unaffected
-# until seoul_peering_connection_id is set.
+# same-region Oregon rule above). All guarded so nothing is wired until the seoul
+# state holds its peering id.
 data "aws_route_tables" "rds_vpc_seoul" {
-  count  = var.seoul_peering_connection_id != "" ? 1 : 0
+  count  = local.seoul_pcx_id != "" ? 1 : 0
   vpc_id = local.vpc_id
 }
 
 resource "aws_route" "rds_to_seoul_fleet" {
-  count                     = var.seoul_peering_connection_id != "" ? length(data.aws_route_tables.rds_vpc_seoul[0].ids) : 0
+  count                     = local.seoul_pcx_id != "" ? length(data.aws_route_tables.rds_vpc_seoul[0].ids) : 0
   route_table_id            = tolist(data.aws_route_tables.rds_vpc_seoul[0].ids)[count.index]
-  destination_cidr_block    = var.seoul_fleet_cidr
-  vpc_peering_connection_id = var.seoul_peering_connection_id
+  destination_cidr_block    = local.seoul_cidr
+  vpc_peering_connection_id = local.seoul_pcx_id
+
+  lifecycle {
+    precondition {
+      condition     = local.seoul_pcx_id == "" || local.seoul_cidr != ""
+      error_message = "The seoul state holds a peering but no vpc_cidr output; apply (or refresh) terraform/seoul first so its state records it."
+    }
+  }
 }
 
 resource "aws_vpc_security_group_ingress_rule" "seoul_fleet_to_rds" {
-  count             = var.seoul_peering_connection_id != "" ? 1 : 0
+  count             = local.seoul_pcx_id != "" ? 1 : 0
   security_group_id = aws_security_group.rds.id
   description       = "Seoul k3s fleet (VPC CIDR) to RDS over cross-region peering; SG reference impossible cross-region"
   from_port         = 3306
   to_port           = 3306
   ip_protocol       = "tcp"
-  cidr_ipv4         = var.seoul_fleet_cidr
+  cidr_ipv4         = local.seoul_cidr
+
+  lifecycle {
+    precondition {
+      condition     = local.seoul_pcx_id == "" || local.seoul_cidr != ""
+      error_message = "The seoul state holds a peering but no vpc_cidr output; apply (or refresh) terraform/seoul first so its state records it."
+    }
+  }
 }

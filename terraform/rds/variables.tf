@@ -139,24 +139,6 @@ variable "tags" {
   }
 }
 
-variable "fleet_peering_connection_id" {
-  description = "VPC peering connection id from terraform/oregon output rds_peering_connection_id. Empty = no fleet wiring."
-  type        = string
-  default     = ""
-}
-
-variable "fleet_cluster_security_group_id" {
-  description = "k3s fleet cluster SG (terraform/oregon output cluster_security_group_id) allowed to reach RDS on 3306."
-  type        = string
-  default     = ""
-}
-
-variable "fleet_vpc_cidr" {
-  description = "Fleet VPC CIDR, for the RDS-side return route over the peering."
-  type        = string
-  default     = ""
-}
-
 variable "master_password_version" {
   description = "Raise after rotating the Secrets Manager entry to push the new password to the instance. Terraform keeps no copy of the value, so nothing else makes it notice a rotation."
   type        = number
@@ -167,18 +149,6 @@ variable "master_password_secret_name" {
   description = "Secrets Manager entry holding the master password as a plain string. Read at plan time, so it must exist before this stack is applied."
   type        = string
   default     = "danteplanner/rds/master-password"
-}
-
-variable "seoul_peering_connection_id" {
-  description = "Cross-region VPC peering connection id from terraform/seoul (module.fleet output rds_peering_connection_id). Empty = no Seoul wiring."
-  type        = string
-  default     = ""
-}
-
-variable "seoul_fleet_cidr" {
-  description = "Seoul fleet VPC CIDR, for the RDS-side return route and the CIDR-based 3306 ingress (cross-region SG references are not allowed)."
-  type        = string
-  default     = "10.30.0.0/16"
 }
 
 variable "aws_account_id" {

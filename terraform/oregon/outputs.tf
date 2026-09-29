@@ -29,7 +29,7 @@ output "ingress_instance_id" {
 }
 
 output "cluster_security_group_id" {
-  description = "Cluster SG carried by every fleet node. Add this to the RDS SG allowlist (in terraform/rds's inputs) so app/data nodes can reach RDS on 3306 — this stack does NOT edit the RDS SG."
+  description = "Cluster SG carried by every fleet node. terraform/rds reads it from this stack's state to allow 3306 from fleet nodes — this stack does NOT edit the RDS SG."
   value       = module.fleet.cluster_security_group_id
 }
 
@@ -69,6 +69,6 @@ output "k3s_join_token_parameter" {
 }
 
 output "rds_peering_connection_id" {
-  description = "Feed into terraform/rds var.fleet_peering_connection_id to add the return route."
+  description = "terraform/rds reads it from this stack's state to add the return route."
   value       = module.fleet.rds_peering_connection_id
 }

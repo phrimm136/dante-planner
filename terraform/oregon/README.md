@@ -54,8 +54,9 @@ terraform output backend_ecr_repository_url
 ## Cross-stack wiring the operator must do at apply time
 
 - **RDS reachability:** this stack does **not** edit the RDS security group (owned by
-  `terraform/rds`). Take the `cluster_security_group_id` output and add it to the RDS SG
-  allowlist on 3306 (via `terraform/rds` inputs), so app/data nodes can reach the primary.
+  `terraform/rds`). `terraform/rds` reads the `cluster_security_group_id` output from this
+  stack's state on its next apply after oregon and allows it on 3306, so app/data nodes can
+  reach the primary.
 - **ECR repo collision:** if `danteplanner-backend` already exists from the task-014 single-region
   deploy, `terraform import aws_ecr_repository.backend danteplanner-backend` before apply.
 - **Alarm notifications:** set `alarm_sns_topic_arn` to receive auto-recovery alerts;
@@ -77,6 +78,6 @@ terraform output backend_ecr_repository_url
 ## Not managed here
 
 - **The RS256 private key** (Secrets Manager, operator-populated) — referenced by name only.
-- **The RDS instance and its SG** (`terraform/rds`) — referenced via the documented output wiring.
+- **The RDS instance and its SG** (`terraform/rds`) — it reads this stack's state on its next apply after oregon.
 - **State backend:** configure encrypted remote state in your private setup; local state and
   `*.tfvars` are gitignored. Never commit `*.tfstate`.

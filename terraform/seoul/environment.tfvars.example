@@ -12,8 +12,8 @@
 aws_account_id = "REPLACE_WITH_ACCOUNT_ID"
 
 # The RDS (prod) VPC to peer with, in the PRIMARY region. Cross-region peering, so terraform/rds
-# must carry the matching return route and 3306 ingress for seoul_fleet_cidr — a CIDR rule,
-# because a security-group reference cannot cross regions.
+# must carry the matching return route and 3306 ingress for Seoul's CIDR, which it reads from this
+# stack's state — a CIDR rule, because a security-group reference cannot cross regions.
 rds_vpc_id = "vpc-REPLACE_WITH_RDS_VPC_ID"
 
 # CIDRs allowed to reach the ingress node on 443. Production value = Cloudflare edge ranges only

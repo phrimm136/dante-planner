@@ -29,6 +29,6 @@ resource "aws_route" "fleet_to_rds" {
 }
 
 output "rds_peering_connection_id" {
-  description = "Feed into terraform/rds var.fleet_peering_connection_id to add the return route."
+  description = "terraform/rds reads it from this stack's state to add the return route."
   value       = aws_vpc_peering_connection.rds.id
 }

@@ -62,5 +62,5 @@ resource "aws_vpc_peering_connection_accepter" "seoul_to_rds" {
 # The RDS-side half of this peering lives in terraform/rds, not here: the return route
 # (aws_route.rds_to_seoul_fleet) and the 3306 ingress for Seoul's CIDR
 # (aws_vpc_security_group_ingress_rule.seoul_fleet_to_rds). A cross-region SG reference is not
-# allowed, so that rule is CIDR-based and terraform/rds takes seoul_fleet_cidr explicitly. Both
-# stacks must be applied for Seoul→primary-RDS writes to have a return path.
+# allowed, so that rule is CIDR-based and terraform/rds reads Seoul's CIDR from this stack's
+# state. Both stacks must be applied for Seoul→primary-RDS writes to have a return path.

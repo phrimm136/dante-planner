@@ -19,11 +19,16 @@ output "kubeconfig_ssm_parameter" {
 }
 
 output "cluster_security_group_id" {
-  description = "Seoul cluster SG. Add to the RDS SG allowlist (terraform/rds) so Seoul nodes reach the primary RDS on 3306 over the cross-region peering."
+  description = "Seoul cluster SG. Not referenced by terraform/rds: its Seoul 3306 rule is CIDR-based on vpc_cidr, since an SG reference cannot cross regions."
   value       = module.fleet.cluster_security_group_id
 }
 
 output "rds_peering_connection_id" {
-  description = "Cross-region peering id (Seoul↔RDS). Feed into terraform/rds for the return route + SG rule."
+  description = "Cross-region peering id (Seoul↔RDS) — read by terraform/rds (remote state) for the return route + 3306 ingress."
   value       = module.fleet.rds_peering_connection_id
+}
+
+output "vpc_cidr" {
+  description = "Seoul fleet VPC CIDR — read by terraform/rds (remote state) for the RDS-side return route and the CIDR-based 3306 ingress."
+  value       = module.fleet.vpc_cidr
 }

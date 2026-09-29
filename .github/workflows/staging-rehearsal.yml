@@ -58,24 +58,12 @@ jobs:
       # peering id, which exists only after the fleet apply.
       - name: Wire Oregon fleet into RDS
         run: |
-          PCX=$(terraform -chdir=terraform/oregon output -raw rds_peering_connection_id)
-          SG=$(terraform -chdir=terraform/oregon output -raw cluster_security_group_id)
-          terraform -chdir=terraform/rds apply -var-file=staging.tfvars -auto-approve -input=false -no-color \
-            -var "fleet_peering_connection_id=$PCX" \
-            -var "fleet_cluster_security_group_id=$SG" \
-            -var "fleet_vpc_cidr=10.20.0.0/16"
+          terraform -chdir=terraform/rds apply -var-file=staging.tfvars -auto-approve -input=false -no-color
 
       - name: Apply Seoul fleet and wire its return path
         run: |
           terraform -chdir=terraform/seoul apply -var-file=staging.tfvars -auto-approve -input=false -no-color
-          PCX_OR=$(terraform -chdir=terraform/oregon output -raw rds_peering_connection_id)
-          SG_OR=$(terraform -chdir=terraform/oregon output -raw cluster_security_group_id)
-          PCX_SE=$(terraform -chdir=terraform/seoul output -raw rds_peering_connection_id)
-          terraform -chdir=terraform/rds apply -var-file=staging.tfvars -auto-approve -input=false -no-color \
-            -var "fleet_peering_connection_id=$PCX_OR" \
-            -var "fleet_cluster_security_group_id=$SG_OR" \
-            -var "fleet_vpc_cidr=10.20.0.0/16" \
-            -var "seoul_peering_connection_id=$PCX_SE"
+          terraform -chdir=terraform/rds   apply -var-file=staging.tfvars -auto-approve -input=false -no-color
 
       - name: Apply Cloudflare tunnels and store their tokens
         run: |

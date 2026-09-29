@@ -19,7 +19,7 @@ output "vpc_cidr" {
 }
 
 output "cluster_security_group_id" {
-  description = "Cluster SG carried by every fleet node. Add this to the RDS SG allowlist (in terraform/rds's inputs) so app/data nodes can reach RDS on 3306 — this stack does NOT edit the RDS SG."
+  description = "Cluster SG carried by every fleet node. terraform/rds reads it from this stack's state to allow 3306 from fleet nodes — this stack does NOT edit the RDS SG."
   value       = aws_security_group.cluster.id
 }
 
