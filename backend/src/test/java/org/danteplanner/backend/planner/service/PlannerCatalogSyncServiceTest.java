@@ -1,5 +1,9 @@
 package org.danteplanner.backend.planner.service;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.entity.PlannerType;
@@ -19,17 +23,22 @@ import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.file.Path;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -58,6 +67,8 @@ class PlannerCatalogSyncServiceTest {
 
     private static final DomainEventType CATALOG_CHANGED = DomainEventType.PLANNER_CATALOG_CHANGED;
 
+    private static final Instant PASS_START = Instant.parse("2026-09-29T12:00:00Z");
+
     @Mock
     private DomainEventRepository events;
 
@@ -82,13 +93,21 @@ class PlannerCatalogSyncServiceTest {
     @Mock
     private PlannerCatalogSyncService self;
 
+    @Mock
+    private PlatformTransactionManager transactionManager;
+
+    @Mock
+    private Clock clock;
+
     private PlannerCatalogSyncService syncService;
     private UUID plannerId;
 
     @BeforeEach
     void setUp() {
         syncService = new PlannerCatalogSyncService(events, attemptRecorder, plannerRepository,
-                entityFilterRepository, keywordFilterRepository, gameDataRegistry, tombstoneStore, self);
+                entityFilterRepository, keywordFilterRepository, gameDataRegistry, tombstoneStore, self,
+                transactionManager, clock);
+        lenient().when(clock.instant()).thenReturn(PASS_START);
         plannerId = UUID.randomUUID();
     }
 
@@ -130,15 +149,38 @@ class PlannerCatalogSyncServiceTest {
     }
 
     @Test
-    void drainPending_WhenAFailedSyncSpendsTheLastAttempt_KeepsDraining() {
+    void drainPending_WhenAFailedSyncSpendsTheLastAttempt_RaisesTheAlarmAndKeepsDraining() {
         UUID other = UUID.randomUUID();
         givenPending(event(1L, plannerId), event(2L, other));
         doThrow(new IllegalStateException("store down")).when(self).syncPlanner(plannerId, 1L);
         when(attemptRecorder.recordAttempt(1L)).thenReturn(10);
 
-        assertThat(syncService.drainPending()).isEqualTo(1);
+        List<ILoggingEvent> errors = errorsDuring(() -> assertThat(syncService.drainPending()).isEqualTo(1));
 
+        assertThat(errors).as("spending the last attempt pages").hasSize(1);
         verify(self).syncPlanner(other, 2L);
+    }
+
+    @Test
+    void drainPending_WhenAFailedSyncHasAttemptsLeft_RaisesNoAlarm() {
+        givenPending(event(1L, plannerId));
+        doThrow(new IllegalStateException("store down")).when(self).syncPlanner(plannerId, 1L);
+        when(attemptRecorder.recordAttempt(1L)).thenReturn(9);
+
+        assertThat(errorsDuring(syncService::drainPending)).as("a retryable failure does not page").isEmpty();
+    }
+
+    private static List<ILoggingEvent> errorsDuring(Runnable action) {
+        Logger logger = (Logger) LoggerFactory.getLogger(PlannerCatalogSyncService.class);
+        ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
+        try {
+            action.run();
+        } finally {
+            logger.detachAppender(appender);
+        }
+        return appender.list.stream().filter(event -> event.getLevel() == Level.ERROR).toList();
     }
 
     @Test
@@ -266,14 +308,42 @@ class PlannerCatalogSyncServiceTest {
     }
 
     @Test
-    void drainPendingAndBacklogAge_WhenDeclared_ReadThePrimary() throws NoSuchMethodException {
-        for (String method : List.of("drainPending", "backlogAgeSeconds")) {
-            Transactional transactional = PlannerCatalogSyncService.class.getMethod(method)
-                    .getAnnotation(Transactional.class);
+    void drainPending_WhenThePassOutrunsItsBudget_StopsBeforeTheNextPlanner() {
+        UUID other = UUID.randomUUID();
+        givenPending(event(1L, plannerId), event(2L, other));
+        when(clock.instant()).thenReturn(PASS_START, PASS_START, PASS_START.plusSeconds(61));
 
-            assertThat(transactional).as(method).isNotNull();
-            assertThat(transactional.readOnly()).as(method).isFalse();
-        }
+        assertThat(syncService.drainPending()).isEqualTo(1);
+
+        verify(self).syncPlanner(plannerId, 1L);
+        verify(self, never()).syncPlanner(eq(other), anyLong());
+    }
+
+    @Test
+    void drainPending_WhenReadingItsBatch_UsesAShortReadWriteTransactionAndHoldsNoneAcrossThePass()
+            throws NoSuchMethodException {
+        givenPending(event(1L, plannerId));
+
+        syncService.drainPending();
+
+        ArgumentCaptor<TransactionDefinition> definition = ArgumentCaptor.forClass(TransactionDefinition.class);
+        InOrder order = inOrder(transactionManager, self);
+        order.verify(transactionManager).getTransaction(definition.capture());
+        order.verify(transactionManager).commit(any());
+        order.verify(self).syncPlanner(plannerId, 1L);
+        assertThat(definition.getValue().isReadOnly()).as("the batch read must reach the primary").isFalse();
+        assertThat(PlannerCatalogSyncService.class.getMethod("drainPending").getAnnotation(Transactional.class))
+                .as("no outer transaction may hold a connection or read view across the pass")
+                .isNull();
+    }
+
+    @Test
+    void backlogAgeSeconds_WhenDeclared_ReadsThePrimary() throws NoSuchMethodException {
+        Transactional transactional = PlannerCatalogSyncService.class.getMethod("backlogAgeSeconds")
+                .getAnnotation(Transactional.class);
+
+        assertThat(transactional).isNotNull();
+        assertThat(transactional.readOnly()).isFalse();
     }
 
     @Test

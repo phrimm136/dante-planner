@@ -501,7 +501,6 @@ class ReplicaLagIT extends CausalHarnessSupport {
             case "owner-unpublish" -> plannerPublishingService.unpublish(owner.getId(), plannerId);
             default -> throw new IllegalArgumentException(withdrawal);
         }
-        CatalogEffects.drain(catalogSyncService, primaryJdbcTemplate, plannerId);
     }
 
     private boolean replicaStillPublished(UUID plannerId) {
@@ -619,8 +618,6 @@ class ReplicaLagIT extends CausalHarnessSupport {
             replicationControl.stopReplica();
 
             userAccountLifecycleService.deleteAccount(owner.getId());
-            CatalogEffects.drain(catalogSyncService, primaryJdbcTemplate, first.getId());
-            CatalogEffects.drain(catalogSyncService, primaryJdbcTemplate, second.getId());
 
             Timestamp replicaOwnerDeletedAt = replicaJdbcTemplate.queryForObject(
                     "SELECT deleted_at FROM users WHERE id = ?", Timestamp.class, owner.getId());
@@ -644,7 +641,6 @@ class ReplicaLagIT extends CausalHarnessSupport {
         Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
 
         userAccountLifecycleService.deleteAccount(owner.getId());
-        CatalogEffects.drain(catalogSyncService, primaryJdbcTemplate, planner.getId());
         assertThat(stringRedisTemplate.hasKey("del:published-planner:" + planner.getId()))
                 .as("the deactivation must have marked the planner, or clearing it proves nothing")
                 .isTrue();
@@ -674,7 +670,6 @@ class ReplicaLagIT extends CausalHarnessSupport {
             replicationControl.stopReplica();
 
             userAccountLifecycleService.deleteAccount(owner.getId());
-            CatalogEffects.drain(catalogSyncService, primaryJdbcTemplate, plannerId);
 
             assertThat(replicaStillPublished(plannerId)).isTrue();
             String base = "http://localhost:" + port + "/api/planner/md/published/" + plannerId;
@@ -712,7 +707,6 @@ class ReplicaLagIT extends CausalHarnessSupport {
             replicationControl.stopReplica();
 
             userAccountLifecycleService.deleteAccount(owner.getId());
-            CatalogEffects.drain(catalogSyncService, primaryJdbcTemplate, plannerId);
 
             assertThat(replicaJdbcTemplate.queryForObject(
                     "SELECT deleted_at FROM users WHERE id = ?", Timestamp.class, owner.getId()))

@@ -26,22 +26,25 @@ epic: none · pr: none
   wrong one, where a re-derived effect always converges on the current state.
   REJECTED: repairing drift from the reconciler — the silent auto-repair 016 rejected, and repair
   arrives a reconcile period late.
-  INVARIANT: after the relay grace window, a planner's filter rows and withdrawal marker match its
-  committed visibility — the catalog sync integration tests (a failed sync leaves its rows pending
+  INVARIANT: once a pass has run after the last change, a planner's filter rows and withdrawal
+  marker match its committed visibility — the catalog sync integration tests (a failed sync leaves its rows pending
   and the next pass repairs it; filter rows, markers and tombstones). A pending row older than the
   alert threshold pages — the catalog sync backlog alert.
   NON-GOAL: the author's own filtered read right after a change is not guaranteed to see it; it
   sees it after the next pass, within about a second plus replication.
   NON-GOAL: the event carries no instruction; its payload is not read to decide the effect.
-- @outbox @tombstone @readpath — A delete still writes its tombstone on the request thread after
-  the commit, before the response returns, and the catalog sync writes it again; every other
-  marker write belongs to the catalog sync alone. A delete must be masked before its response,
-  which only the synchronous write provides; the sync covers the crash and store-error windows,
-  failing that planner's pass on a store error so its rows stay pending. The sync may write a
-  tombstone inside its transaction because the value it writes follows from state already
-  committed, so a rollback cannot leave it masking a live row.
-  REJECTED: moving the delete tombstone to the outbox alone — the eager dispatch is asynchronous,
-  so a read right after a delete response could be served the deleted row from a lagging replica.
+- @outbox @tombstone @readpath — A change that takes a planner out of public view (unpublish,
+  takedown, owner deactivation, delete) still writes its withdrawal marker, and a delete its
+  tombstone, on the request thread after the commit, before the response returns; the catalog
+  sync writes them again, and only the sync clears a marker. A withdrawal must be masked before a
+  lagging replica can serve it, which only the synchronous write provides; the sync covers the
+  crash and store-error windows, failing that planner's pass on a store error so its rows stay
+  pending. A marker left on a planner that became visible again costs one primary re-read per
+  public read until a pass clears it or it expires. The sync may write a tombstone inside its transaction because the value
+  it writes follows from state already committed, so a rollback cannot leave it masking a live row.
+  REJECTED: leaving withdrawal markers and delete tombstones to the catalog sync alone — the pass
+  runs up to a second after the commit, so a read in that window could be served the withdrawn or
+  deleted row from a lagging replica.
   INVARIANT: no transactional method other than the catalog sync reaches a tombstone write before
   its commit — the effect placement rule, which admits that one method.
 - @comments @visibility — A comment thread follows its planner's public view: a reader other than

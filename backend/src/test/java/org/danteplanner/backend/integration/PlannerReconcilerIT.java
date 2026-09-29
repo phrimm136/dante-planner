@@ -541,7 +541,6 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
     void catalogSync_WhenTheRebuildFails_TheNextPassRebuildsTheFilterRows() throws Exception {
         Planner planner = publishClean("Crash Window Rebuild Throws", Set.of());
         assertThat(CRASH_CONTENT).isNotEqualTo(TestDataFactory.VALID_CONTENT);
-        CatalogEffects.drainAll(catalogSyncService, jdbc);
         Set<String> before = indexedEntities(planner.getId());
         Object procedure = jdbc.queryForMap("SHOW CREATE PROCEDURE rebuild_planner_filters_scoped")
                 .get("Create Procedure");
@@ -554,7 +553,9 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
 
         jdbc.execute("DROP PROCEDURE rebuild_planner_filters_scoped");
         try {
-            catalogSyncService.drainPending();
+            CatalogEffects.drainUntil(catalogSyncService, () -> jdbc.queryForObject(
+                    "SELECT attempts FROM domain_events WHERE id = ?", Integer.class, eventId) > 0,
+                    "a pass over the planner's event");
         } finally {
             jdbc.execute(procedure.toString());
         }

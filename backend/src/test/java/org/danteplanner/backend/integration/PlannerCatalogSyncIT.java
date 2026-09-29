@@ -156,13 +156,15 @@ class PlannerCatalogSyncIT extends SharedMySqlContainerSupport {
     @DisplayName("three events for one planner in one pass cost one sync and are all marked done")
     void drainPending_WhenAPlannerHasThreeEvents_SyncsItOnceAndMarksAllThree() {
         Planner planner = publishClean("Sync Burst");
-        CatalogEffects.drainAll(catalogSyncService, jdbc);
         List<Long> ids = List.of(recordEvent(planner.getId()), recordEvent(planner.getId()),
                 recordEvent(planner.getId()));
 
-        assertThat(catalogSyncService.drainPending()).isEqualTo(1);
+        CatalogEffects.drain(catalogSyncService, jdbc, planner.getId());
 
         ids.forEach(id -> assertThat(dispatchedAt(id)).as("event %s", id).isNotNull());
+        assertThat(ids.stream().map(this::dispatchedAt).distinct().toList())
+                .as("one sync marked all three rows in a single statement")
+                .hasSize(1);
     }
 
     @Test
@@ -172,27 +174,26 @@ class PlannerCatalogSyncIT extends SharedMySqlContainerSupport {
         Planner withdrawn = publishClean("Sync Withdrawn Neighbour");
         jdbc.update("UPDATE planner_publication SET published = FALSE WHERE planner_id = UUID_TO_BIN(?)",
                 withdrawn.getId().toString());
-        CatalogEffects.drainAll(catalogSyncService, jdbc);
         long failingEvent = recordEvent(failing.getId());
         long withdrawnEvent = recordEvent(withdrawn.getId());
         Object procedure = jdbc.queryForMap("SHOW CREATE PROCEDURE rebuild_planner_filters_scoped")
                 .get("Create Procedure");
 
-        int synced;
         jdbc.execute("DROP PROCEDURE rebuild_planner_filters_scoped");
         try {
-            synced = catalogSyncService.drainPending();
+            CatalogEffects.drainUntil(catalogSyncService,
+                    () -> attempts(failingEvent) > 0 && dispatchedAt(withdrawnEvent) != null,
+                    "a pass over both planners");
         } finally {
             jdbc.execute(procedure.toString());
         }
 
-        assertThat(synced).as("only the withdrawn neighbour, whose clear needs no procedure").isEqualTo(1);
         assertThat(dispatchedAt(failingEvent)).isNull();
-        assertThat(attempts(failingEvent)).isEqualTo(1);
+        assertThat(attempts(failingEvent)).as("the failed sync counted an attempt").isPositive();
         assertThat(dispatchedAt(withdrawnEvent)).isNotNull();
         assertThat(isMarked(withdrawn.getId())).isTrue();
 
-        catalogSyncService.drainPending();
+        CatalogEffects.drain(catalogSyncService, jdbc, failing.getId());
 
         assertThat(dispatchedAt(failingEvent)).as("the next pass repairs the failed planner").isNotNull();
         assertThat(indexedEntities(failing.getId())).isEqualTo(oracleEntities(failing.getId()));

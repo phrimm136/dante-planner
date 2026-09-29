@@ -9,6 +9,7 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
+import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserRole;
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
@@ -52,13 +54,16 @@ class PlannerCatalogServiceTest {
     @Mock
     private DomainEventRecorder domainEventRecorder;
 
+    @Mock
+    private ContentTombstoneStore tombstoneStore;
+
     private PlannerCatalogService catalogService;
 
     @BeforeEach
     void setUp() {
         TransactionSynchronizationManager.initSynchronization();
         catalogService = new PlannerCatalogService(catalogRepository, plannerRepository, statsRepository,
-                domainEventRecorder, new ObjectMapper(), THRESHOLD);
+                domainEventRecorder, new ObjectMapper(), tombstoneStore, THRESHOLD);
     }
 
     @AfterEach
@@ -79,20 +84,22 @@ class PlannerCatalogServiceTest {
     }
 
     @Test
-    @DisplayName("becoming invisible removes the catalog row and records the event, with nothing left for after the commit")
-    void onBecameInvisible_WhenCalled_RemovesTheRowAndRecordsTheEvent() {
+    @DisplayName("becoming invisible removes the catalog row, records the event, and marks the planner after the commit")
+    void onBecameInvisible_WhenCommitted_RemovesTheRowRecordsTheEventAndMarksIt() {
         UUID plannerId = UUID.randomUUID();
 
         catalogService.onBecameInvisible(plannerId);
 
         verify(catalogRepository).deleteById(plannerId);
         verifyRecorded(plannerId);
-        assertThat(TransactionSynchronizationManager.getSynchronizations()).isEmpty();
+        verify(tombstoneStore, never()).writeTombstone(any(), any());
+        commit();
+        verify(tombstoneStore).writeTombstone("published-planner", plannerId);
     }
 
     @Test
-    @DisplayName("hiding an owner's planners withdraws their rows and records one event per published planner")
-    void hideAllOwnedBy_WhenCalled_WithdrawsAndRecordsAnEventPerPublishedPlanner() {
+    @DisplayName("hiding an owner's planners withdraws their rows, records one event each, and marks them after the commit")
+    void hideAllOwnedBy_WhenCommitted_WithdrawsRecordsAnEventPerPlannerAndMarksThem() {
         List<UUID> published = List.of(UUID.randomUUID(), UUID.randomUUID());
         when(plannerRepository.findPublishedIdsOwnedBy(OWNER_ID)).thenReturn(published);
 
@@ -100,7 +107,9 @@ class PlannerCatalogServiceTest {
 
         verify(catalogRepository).withdrawAllOwnedBy(OWNER_ID);
         published.forEach(this::verifyRecorded);
-        assertThat(TransactionSynchronizationManager.getSynchronizations()).isEmpty();
+        verify(tombstoneStore, never()).writeTombstones(any(), any());
+        commit();
+        verify(tombstoneStore).writeTombstones("published-planner", published);
     }
 
     @Test
@@ -217,6 +226,10 @@ class PlannerCatalogServiceTest {
 
         verifyRecorded(planner.getId());
         assertThat(TransactionSynchronizationManager.getSynchronizations()).isEmpty();
+    }
+
+    private static void commit() {
+        TransactionSynchronizationManager.getSynchronizations().forEach(TransactionSynchronization::afterCommit);
     }
 
     private void verifyRecorded(UUID plannerId) {

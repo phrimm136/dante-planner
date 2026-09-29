@@ -7,6 +7,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.dao.QueryTimeoutException;
+import org.springframework.data.redis.core.RedisOperations;
+import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
@@ -19,6 +21,7 @@ import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
@@ -26,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -40,6 +44,7 @@ class ContentTombstoneStoreTest {
     @Mock StringRedisTemplate authLocalTemplate;
     @Mock ValueOperations<String, String> authLocalValues;
     @Mock ValueOperations<String, String> sharedValues;
+    @Mock RedisOperations<String, String> pipeline;
 
     private SimpleMeterRegistry meterRegistry;
     private ContentTombstoneStore store;
@@ -102,6 +107,41 @@ class ContentTombstoneStoreTest {
             logger.detachAppender(appender);
         }
         return appender.list.stream().filter(e -> e.getLevel() == Level.WARN).toList();
+    }
+
+    @Test
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    void writeTombstones_WhenCalled_SetsEveryScopedKeyWithABoundedTtlInOnePipeline() {
+        ArgumentCaptor<SessionCallback> callback = ArgumentCaptor.forClass(SessionCallback.class);
+
+        store.writeTombstones("published-planner", List.of(live, deleted));
+
+        verify(sharedTemplate).executePipelined(callback.capture());
+        when(pipeline.opsForValue()).thenReturn(sharedValues);
+        assertThat(callback.getValue().execute(pipeline)).isNull();
+        verify(sharedValues).set("del:published-planner:" + live, "1", Duration.ofHours(1));
+        verify(sharedValues).set("del:published-planner:" + deleted, "1", Duration.ofHours(1));
+        verifyNoInteractions(authLocalTemplate);
+    }
+
+    @Test
+    void writeTombstones_WhenNoIds_SkipsRedis() {
+        store.writeTombstones("published-planner", List.of());
+
+        verifyNoInteractions(sharedTemplate, authLocalTemplate);
+    }
+
+    @Test
+    void writeTombstones_WhenRedisFails_LogsAndDoesNotThrow() {
+        when(sharedTemplate.executePipelined(any(SessionCallback.class)))
+                .thenThrow(new QueryTimeoutException("down"));
+
+        List<ILoggingEvent> warnings = warningsDuring(
+                () -> store.writeTombstones("published-planner", List.of(live, deleted)));
+
+        assertThat(warnings).hasSize(1);
+        assertThat(warnings.get(0).getThrowableProxy().getClassName())
+                .isEqualTo(QueryTimeoutException.class.getName());
     }
 
     @Test

@@ -17,12 +17,16 @@ import org.danteplanner.backend.shared.outbox.service.DomainEventAttemptRecorder
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
 import org.danteplanner.backend.shared.util.PlannerConstants;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -46,7 +50,10 @@ public class PlannerCatalogSyncService {
     private final GameDataRegistry gameDataRegistry;
     private final ContentTombstoneStore tombstoneStore;
     private final PlannerCatalogSyncService self;
+    private final TransactionTemplate batchRead;
+    private final Clock clock;
 
+    @Autowired
     public PlannerCatalogSyncService(
             DomainEventRepository events,
             DomainEventAttemptRecorder attemptRecorder,
@@ -55,7 +62,23 @@ public class PlannerCatalogSyncService {
             PlannerKeywordFilterRepository keywordFilterRepository,
             GameDataRegistry gameDataRegistry,
             ContentTombstoneStore tombstoneStore,
-            @Lazy PlannerCatalogSyncService self) {
+            @Lazy PlannerCatalogSyncService self,
+            PlatformTransactionManager transactionManager) {
+        this(events, attemptRecorder, plannerRepository, entityFilterRepository, keywordFilterRepository,
+                gameDataRegistry, tombstoneStore, self, transactionManager, Clock.systemUTC());
+    }
+
+    PlannerCatalogSyncService(
+            DomainEventRepository events,
+            DomainEventAttemptRecorder attemptRecorder,
+            PlannerRepository plannerRepository,
+            PlannerEntityFilterRepository entityFilterRepository,
+            PlannerKeywordFilterRepository keywordFilterRepository,
+            GameDataRegistry gameDataRegistry,
+            ContentTombstoneStore tombstoneStore,
+            PlannerCatalogSyncService self,
+            PlatformTransactionManager transactionManager,
+            Clock clock) {
         this.events = events;
         this.attemptRecorder = attemptRecorder;
         this.plannerRepository = plannerRepository;
@@ -64,12 +87,15 @@ public class PlannerCatalogSyncService {
         this.gameDataRegistry = gameDataRegistry;
         this.tombstoneStore = tombstoneStore;
         this.self = self;
+        this.batchRead = new TransactionTemplate(transactionManager);
+        this.clock = clock;
     }
 
-    @Transactional
     public int drainPending() {
-        List<DomainEvent> pending = events.pendingEventsOfType(DomainEventType.PLANNER_CATALOG_CHANGED,
-                OutboxConstants.DISPATCH_ATTEMPT_CAP, PageRequest.of(0, PlannerConstants.CATALOG_SYNC_BATCH_SIZE));
+        Instant deadline = clock.instant().plus(PlannerConstants.CATALOG_SYNC_PASS_BUDGET);
+        List<DomainEvent> pending = batchRead.execute(status -> events.pendingEventsOfType(
+                DomainEventType.PLANNER_CATALOG_CHANGED, OutboxConstants.DISPATCH_ATTEMPT_CAP,
+                PageRequest.of(0, PlannerConstants.CATALOG_SYNC_BATCH_SIZE)));
         Map<UUID, List<Long>> idsByPlanner = new LinkedHashMap<>();
         pending.forEach(event -> idsByPlanner
                 .computeIfAbsent(event.getAggregateId(), plannerId -> new ArrayList<>())
@@ -77,6 +103,10 @@ public class PlannerCatalogSyncService {
 
         int synced = 0;
         for (Map.Entry<UUID, List<Long>> planner : idsByPlanner.entrySet()) {
+            if (clock.instant().isAfter(deadline)) {
+                log.info("Catalog sync pass spent its budget; the remaining planners stay pending for the next pass");
+                break;
+            }
             List<Long> ids = planner.getValue();
             try {
                 self.syncPlanner(planner.getKey(), ids.get(ids.size() - 1));

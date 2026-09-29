@@ -420,7 +420,7 @@ class EffectPlacementTest {
 
     private static final Map<String, Set<String>> TOMBSTONE_WRITES = Map.of(
             "org.danteplanner.backend.shared.readpath.ContentTombstoneStore",
-            Set.of("writeTombstone", "writeTombstoneOrThrow", "clearTombstoneOrThrow"));
+            Set.of("writeTombstone", "writeTombstones", "writeTombstoneOrThrow", "clearTombstoneOrThrow"));
 
     private static final Set<String> ADMITTED_TOMBSTONE_WRITERS = Set.of(
             "org.danteplanner.backend.planner.service.PlannerCatalogSyncService.syncPlanner");

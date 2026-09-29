@@ -228,7 +228,6 @@ class DeactivatedOwnerVisibilityIT extends SharedMySqlContainerSupport {
         Planner draft = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
 
         lifecycleService.deleteAccount(owner.getId());
-        CatalogEffects.drain(catalogSyncService, new JdbcTemplate(dataSource), planner.getId());
 
         assertThat(withdrawalMarked(planner.getId())).isTrue();
         assertThat(withdrawalMarked(draft.getId())).isFalse();
@@ -263,7 +262,6 @@ class DeactivatedOwnerVisibilityIT extends SharedMySqlContainerSupport {
     @Test
     void reactivateAccount_WhenCommitted_ClearsTheWithdrawalMarkers() {
         lifecycleService.deleteAccount(owner.getId());
-        CatalogEffects.drain(catalogSyncService, new JdbcTemplate(dataSource), planner.getId());
         assertThat(withdrawalMarked(planner.getId())).isTrue();
 
         lifecycleService.reactivateAccount(owner.getId());
@@ -323,7 +321,6 @@ class DeactivatedOwnerVisibilityIT extends SharedMySqlContainerSupport {
         }
 
         if (published(draft.getId())) {
-            CatalogEffects.drain(catalogSyncService, new JdbcTemplate(dataSource), draft.getId());
             assertThat(withdrawalMarked(draft.getId()))
                     .as("a planner published around its owner's deactivation must carry the withdrawal marker")
                     .isTrue();
