@@ -37,6 +37,8 @@ export const RICH_TEXT_CORPUS: string[] = [
   '<style="fancy">x</style>',
   '<style="upgradeHighlight"></style>',
   '<style="upgradeHighlight">a [Sinking] b</style> tail',
+  'On Clash Lose, <style="OrangeMark">gain [Sinking] 2</style> next turn',
+  '<style="OrangeMark"></style>',
   '<color=#d40000><s>Jia Family</s></color>',
   'サ<size=50%>ル</size>党派',
   '<color=#a16a3b>a</color>\n<size=75%><color=#a16a3b>b</color></size>',

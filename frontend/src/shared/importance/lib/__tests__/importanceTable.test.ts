@@ -59,34 +59,32 @@ describe('importance geometry', () => {
     expect(clientLength(COIN_CLIENT_WIDTH)).toBe('1.25rem')
   })
 
-  it('places the in-game 159-unit skill triangle 95 units in from the right and 45 down', () => {
-    expect(importanceGeometry('skill', false)).toEqual({
-      iconSize: '3.975rem',
-      iconTop: '1.125rem',
-      iconRight: '2.375rem',
-      bandHeight: '0.675rem',
-      bandOffset: '0rem',
+  it('sizes the skill triangle at 13.9 % of the box width, 7.8 % in from the right, 3.1 % down', () => {
+    expect(importanceGeometry('skill')).toEqual({
+      iconSize: '13.9cqw',
+      iconTop: '3.1cqw',
+      iconRight: '7.8cqw',
+      bandHeight: '2.36cqw',
+      bandOffset: '0cqw',
     })
   })
 
-  it('moves a locked skill icon to 86 units from the right', () => {
-    expect(importanceGeometry('skill', true).iconRight).toBe('2.15rem')
-  })
-
-  it('draws the passive triangle at the in-game 163 units, at the right edge, 14 units down', () => {
-    expect(importanceGeometry('passive', false)).toEqual({
-      iconSize: '4.075rem',
-      iconTop: '0.35rem',
-      iconRight: '0rem',
-      bandHeight: '0.675rem',
-      bandOffset: '0rem',
+  it('sizes the passive triangle at 14.2 % of the box width at the right edge, 2.7 % down', () => {
+    expect(importanceGeometry('passive')).toEqual({
+      iconSize: '14.2cqw',
+      iconTop: '2.7cqw',
+      iconRight: '0cqw',
+      bandHeight: '2.36cqw',
+      bandOffset: '0cqw',
     })
   })
 
-  it('keeps the skill bands inside the box so stacked boxes never overlap', () => {
-    const { bandHeight, bandOffset } = importanceGeometry('skill', false)
-    expect(Number.parseFloat(bandOffset)).toBe(0)
-    expect(Number.parseFloat(bandHeight)).toBeLessThan(1)
+  it('keeps every band inside its box at 2.36 % of the box width', () => {
+    for (const variant of ['skill', 'passive'] as const) {
+      const { bandHeight, bandOffset } = importanceGeometry(variant)
+      expect(bandHeight).toBe('2.36cqw')
+      expect(bandOffset).toBe('0cqw')
+    }
   })
 })
 
@@ -132,9 +130,9 @@ describe('stripe tile', () => {
 })
 
 describe('importance box padding', () => {
-  it('pads a decorated passive box by one band and bleeds it to the pane edges', () => {
+  it('pads a decorated passive box by one band of the width and bleeds it to the pane edges', () => {
     expect(importanceBoxPadding(3)).toEqual({
-      paddingBlock: '0.675rem',
+      paddingBlock: '2.36%',
       paddingInline: '1rem',
       marginInline: '-1rem',
     })

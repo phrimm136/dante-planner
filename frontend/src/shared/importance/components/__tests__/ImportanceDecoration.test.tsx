@@ -62,11 +62,13 @@ describe('ImportanceDecoration', () => {
     expect(icon?.classList.contains('importance-flicker-icon')).toBe(false)
   })
 
-  it('keeps the skill bands inside the box at the in-game 27 units', () => {
+  it('keeps the skill bands inside the box at 2.36 % of its width', () => {
     const { container } = render(<ImportanceDecoration level={2} palette="enemy" variant="skill" />)
     const root = slot(container, 'importance-decoration')
-    expect(variable(root, '--importance-band-height')).toBe('0.675rem')
-    expect(variable(root, '--importance-band-offset')).toBe('0rem')
+    expect(variable(root, '--importance-band-height')).toBe('2.36cqw')
+    expect(variable(root, '--importance-band-offset')).toBe('0cqw')
+    expect(root?.classList).toContain('@container')
+    expect(root?.classList).toContain('m-0')
     expect(cssBlock('.importance-band')).toContain('height: var(--importance-band-height)')
     expect(cssBlock('.importance-band-top')).toContain('top: var(--importance-band-offset)')
     expect(cssBlock('.importance-band-bottom')).toContain('bottom: var(--importance-band-offset)')
@@ -87,14 +89,13 @@ describe('ImportanceDecoration', () => {
   })
 
   it.each([
-    ['unlocked skill', 'skill', false, '2.375rem', '1.125rem', '3.975rem'],
-    ['locked skill', 'skill', true, '2.15rem', '1.125rem', '3.975rem'],
-    ['passive', 'passive', false, '0rem', '0.35rem', '4.075rem'],
+    ['skill', 'skill', '7.8cqw', '3.1cqw', '13.9cqw'],
+    ['passive', 'passive', '0cqw', '2.7cqw', '14.2cqw'],
   ] as const)(
     'pins the %s icon from the box top-right corner',
-    (_name, variant, isLocked, right, top, size) => {
+    (_name, variant, right, top, size) => {
       const { container } = render(
-        <ImportanceDecoration level={1} palette="enemy" variant={variant} isLocked={isLocked} />,
+        <ImportanceDecoration level={1} palette="enemy" variant={variant} />,
       )
       const root = slot(container, 'importance-decoration')
       expect(variable(root, '--importance-icon-right')).toBe(right)
@@ -105,15 +106,6 @@ describe('ImportanceDecoration', () => {
       expect(rule).toContain('top: var(--importance-icon-top)')
     },
   )
-
-  it('uses the locked offset for a locked skill', () => {
-    const { container } = render(
-      <ImportanceDecoration level={1} palette="enemy" variant="skill" isLocked />,
-    )
-    expect(variable(slot(container, 'importance-decoration'), '--importance-icon-right')).toBe(
-      '2.15rem',
-    )
-  })
 
   it.each(['enemy', 'player'] as const)('paints the stripe in the %s palette', (palette) => {
     const { container } = render(
@@ -191,8 +183,8 @@ describe('ImportanceDecoration', () => {
       'importance-stripe-top',
     )
     expect(slot(container, 'importance-band-bottom')).not.toBeNull()
-    expect(variable(root, '--importance-band-offset')).toBe('0rem')
-    expect(variable(root, '--importance-band-height')).toBe('0.675rem')
+    expect(variable(root, '--importance-band-offset')).toBe('0cqw')
+    expect(variable(root, '--importance-band-height')).toBe('2.36cqw')
     expect(globalsCss).not.toContain('importance-dash-top')
     const band = cssBlock('.importance-band')
     expect(band).toContain('left: 0;')

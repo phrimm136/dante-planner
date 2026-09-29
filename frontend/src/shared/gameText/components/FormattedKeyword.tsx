@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { getBattleKeywordIconPath } from '@/shared/assets'
-import { applyStrikethrough } from '../lib/unityRichText'
+import { applyStrikethrough, applyTextStyles } from '../lib/unityRichText'
 import { cn } from '@/lib/utils'
 import type { ResolvedKeyword } from '../types/KeywordTypes'
 import { FLAVOR_TEXT_COLOR, SECTION_STYLES } from '@/lib/constants'
@@ -73,7 +73,7 @@ export function FormattedKeyword({ keyword, className }: FormattedKeywordProps) 
             <h4 className="font-bold text-lg">{applyStrikethrough(displayText)}</h4>
           </div>
           {description && (
-            <p className="text-sm whitespace-pre-line px-2">{applyStrikethrough(description)}</p>
+            <p className="text-sm whitespace-pre-line px-2">{applyTextStyles(description)}</p>
           )}
           {flavor && (
             <p

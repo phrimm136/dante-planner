@@ -8,7 +8,14 @@
 
 import { Fragment, type ReactNode } from 'react'
 
-import { STRIKETHROUGH_GRAMMAR, tokenizeRichText, type RichTextToken } from './richText'
+import { ORANGE_MARK_STYLE } from '@/lib/constants'
+import {
+  NAMED_STYLE_GRAMMAR,
+  STRIKETHROUGH_GRAMMAR,
+  TEXT_STYLE,
+  tokenizeRichText,
+  type RichTextToken,
+} from './richText'
 
 function renderToken(token: RichTextToken): ReactNode {
   if (token.kind === 'element') return <s key={`strike-${token.index}`}>{token.content}</s>
@@ -33,4 +40,28 @@ export function applyStrikethrough(text: string): ReactNode {
   if (!tokens.some((token) => token.kind === 'element')) return text
 
   return <Fragment>{tokens.map(renderToken)}</Fragment>
+}
+
+/** Render named `<style>` runs: `OrangeMark` as the client draws it, any other name as its text. */
+export function applyTextStyles(text: string): ReactNode {
+  if (!text.includes('<style=')) return applyStrikethrough(text)
+
+  return (
+    <Fragment>
+      {tokenizeRichText(text, NAMED_STYLE_GRAMMAR).map((token) => {
+        if (token.kind === 'text') {
+          return <Fragment key={token.index}>{applyStrikethrough(token.value)}</Fragment>
+        }
+        if (token.kind !== 'element') return null
+        if (token.value === TEXT_STYLE.orangeMark) {
+          return (
+            <span key={token.index} data-text-style={token.value} style={ORANGE_MARK_STYLE}>
+              {applyStrikethrough(token.content)}
+            </span>
+          )
+        }
+        return <Fragment key={token.index}>{applyStrikethrough(token.content)}</Fragment>
+      })}
+    </Fragment>
+  )
 }

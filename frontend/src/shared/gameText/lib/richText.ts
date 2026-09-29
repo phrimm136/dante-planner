@@ -23,6 +23,11 @@ export const RICH_TEXT_TAG = {
 
 export type RichTextTagName = (typeof RICH_TEXT_TAG)[keyof typeof RICH_TEXT_TAG]
 
+export const TEXT_STYLE = {
+  upgradeHighlight: 'upgradeHighlight',
+  orangeMark: 'OrangeMark',
+} as const
+
 /**
  * How a rule locates the end of its element.
  * - `lazy`: the first closing tag after the opening tag closes it
@@ -122,9 +127,9 @@ const SIZE_INLINE_RULE: RichTextRule = {
   descend: 'top',
 }
 
-const UPGRADE_HIGHLIGHT_RULE: RichTextRule = {
+const NAMED_STYLE_RULE: RichTextRule = {
   name: RICH_TEXT_TAG.style,
-  open: /<style="upgradeHighlight">/,
+  open: /<style="([^"]*)">/,
   close: '</style>',
   match: 'lazy',
   descend: 'raw',
@@ -158,9 +163,9 @@ export const FLAT_ANY_COLOR_GRAMMAR: RichTextGrammar = {
   dropStrayClose: true,
 }
 
-/** `<style="upgradeHighlight">` only; every other style value stays text */
-export const UPGRADE_HIGHLIGHT_GRAMMAR: RichTextGrammar = {
-  layers: [[UPGRADE_HIGHLIGHT_RULE]],
+/** `<style="Name">` elements, flat; the reader decides what each name renders as */
+export const NAMED_STYLE_GRAMMAR: RichTextGrammar = {
+  layers: [[NAMED_STYLE_RULE]],
 }
 
 /** Balanced `<s>` pairs, flat */

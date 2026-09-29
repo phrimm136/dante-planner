@@ -15,15 +15,9 @@ interface ImportanceDecorationProps {
   level: number
   palette: ImportancePalette
   variant: ImportanceVariant
-  isLocked?: boolean
 }
 
-export function ImportanceDecoration({
-  level,
-  palette,
-  variant,
-  isLocked = false,
-}: ImportanceDecorationProps) {
+export function ImportanceDecoration({ level, palette, variant }: ImportanceDecorationProps) {
   const style = importanceStyle(level, palette)
   if (style === undefined) return null
 
@@ -38,8 +32,8 @@ export function ImportanceDecoration({
       aria-hidden="true"
       data-slot="importance-decoration"
       data-importance-variant={variant}
-      className="pointer-events-none absolute inset-0 -z-10"
-      style={importanceCssVariables(style, importanceGeometry(variant, isLocked))}
+      className="pointer-events-none absolute inset-0 -z-10 m-0 @container"
+      style={importanceCssVariables(style, importanceGeometry(variant))}
     >
       <span
         data-slot="importance-icon"

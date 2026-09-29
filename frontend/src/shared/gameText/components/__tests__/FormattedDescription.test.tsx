@@ -323,4 +323,51 @@ describe('FormattedDescription', () => {
       expect(screen.getByText(/Text with/)).toBeInTheDocument()
     })
   })
+
+  describe('named text styles', () => {
+    const sinking: ResolvedKeyword = {
+      type: 'battleKeyword',
+      key: 'Sinking',
+      displayText: 'Sinking',
+      color: '#abcdef',
+    }
+
+    function formatBrackets(text: string): ParsedSegment[] {
+      return text.split(/(\[Sinking\])/).flatMap<ParsedSegment>((part) => {
+        if (part === '') return []
+        if (part === '[Sinking]') return [{ type: 'keyword', content: 'Sinking', keyword: sinking }]
+        return [{ type: 'text', content: part }]
+      })
+    }
+
+    it('draws an OrangeMark run as one styled span around its keyword chip', () => {
+      mockFormat.mockImplementation(formatBrackets)
+
+      const { container } = render(
+        <FormattedDescription
+          text={'On Clash Lose, <style="OrangeMark">gain [Sinking] 2</style> next'}
+        />,
+      )
+
+      const marks = container.querySelectorAll<HTMLElement>('[data-text-style="OrangeMark"]')
+      expect(marks).toHaveLength(1)
+      const [mark] = marks
+      expect(mark?.textContent).toBe('gain Sinking 2')
+      expect(mark?.querySelector('[data-testid="keyword-Sinking"]')).not.toBeNull()
+      expect(mark?.style.color).toBe('#ff6000')
+      expect(mark?.style.backgroundColor).toBe('#ff000040')
+      expect(mark?.style.fontWeight).toBe('bold')
+      expect(mark?.style.textDecoration).toBe('underline')
+      expect(container.textContent).toBe('On Clash Lose, gain Sinking 2 next')
+    })
+
+    it('renders an unknown style as its plain text', () => {
+      mockFormat.mockImplementation(formatBrackets)
+
+      const { container } = render(<FormattedDescription text={'a <style="Fancy">b</style> c'} />)
+
+      expect(container.textContent).toBe('a b c')
+      expect(container.querySelector('[data-text-style]')).toBeNull()
+    })
+  })
 })

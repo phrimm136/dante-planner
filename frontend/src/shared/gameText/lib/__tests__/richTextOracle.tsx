@@ -14,8 +14,14 @@ import { FormattedKeyword } from '../../components/FormattedKeyword'
 
 const SMALL_RE = /<small>([\s\S]*?)<\/small>/g
 const STRIKETHROUGH_RE = /<s>([\s\S]*?)<\/s>/g
-const STYLE_RE = /<style="upgradeHighlight">([\s\S]*?)<\/style>/g
+const STYLE_RE = /<style="([^"]*)">([\s\S]*?)<\/style>/g
 const UPGRADE_HIGHLIGHT_COLOR = '#f8c200'
+const ORANGE_MARK = {
+  color: '#ff6000',
+  backgroundColor: '#ff000040',
+  fontWeight: 'bold',
+  textDecoration: 'underline',
+} as const
 
 /** The capture group the pattern guarantees; a miss is a broken oracle, not empty input. */
 function captured(match: RegExpMatchArray, group: number): string {
@@ -209,7 +215,7 @@ export function OracleFormattedSanityText({
 
 interface StyleSegment {
   content: string
-  isHighlighted: boolean
+  style: string | undefined
 }
 
 export function oracleParseStyleSegments(text: string): StyleSegment[] {
@@ -218,14 +224,14 @@ export function oracleParseStyleSegments(text: string): StyleSegment[] {
 
   for (const match of text.matchAll(STYLE_RE)) {
     if (match.index > lastIndex) {
-      segments.push({ content: text.slice(lastIndex, match.index), isHighlighted: false })
+      segments.push({ content: text.slice(lastIndex, match.index), style: undefined })
     }
-    segments.push({ content: captured(match, 1), isHighlighted: true })
+    segments.push({ content: captured(match, 2), style: captured(match, 1) })
     lastIndex = match.index + match[0].length
   }
 
   if (lastIndex < text.length) {
-    segments.push({ content: text.slice(lastIndex), isHighlighted: false })
+    segments.push({ content: text.slice(lastIndex), style: undefined })
   }
 
   return segments
@@ -256,7 +262,7 @@ export function OracleFormattedDescription({
 
             const content = keywordSegments.map((segment, segmentIndex) => {
               if (segment.type === 'text') {
-                if (styleSegment.isHighlighted) {
+                if (styleSegment.style === 'upgradeHighlight') {
                   return (
                     <span key={segmentIndex} style={{ color: UPGRADE_HIGHLIGHT_COLOR }}>
                       {segment.content}
@@ -273,6 +279,13 @@ export function OracleFormattedDescription({
               return <Fragment key={segmentIndex}>{segment.content}</Fragment>
             })
 
+            if (styleSegment.style === 'OrangeMark') {
+              return (
+                <span key={styleIndex} data-text-style="OrangeMark" style={ORANGE_MARK}>
+                  {content}
+                </span>
+              )
+            }
             return <Fragment key={styleIndex}>{content}</Fragment>
           })}
         </Fragment>

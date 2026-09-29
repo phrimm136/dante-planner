@@ -4,7 +4,9 @@ import type { z } from 'zod'
 import importanceColorCode from '@static/data/color/importanceColorCode.json'
 import {
   CLIENT_TEXT_SCALE,
-  IMPORTANCE_CLIENT_LAYOUT,
+  IMPORTANCE_BOX_LAYOUT,
+  IMPORTANCE_PLATE_GLOW_UNITS,
+  PASSIVE_PANE_BLEED_REM,
   IMPORTANCE_DECORATION,
   IMPORTANCE_STRIPE_BLINK_PERIOD_S,
   IMPORTANCE_STRIPE_SCROLL_S,
@@ -72,13 +74,6 @@ export function clientLength(units: number): string {
   return clientUnitsToRem(units, CLIENT_TEXT_SCALE.LINE_UNITS, CLIENT_TEXT_SCALE.LINE_REM)
 }
 
-function iconRight(variant: ImportanceVariant, isLocked: boolean): number {
-  if (variant === 'passive') return IMPORTANCE_CLIENT_LAYOUT.ICON_RIGHT.passive
-  return isLocked
-    ? IMPORTANCE_CLIENT_LAYOUT.ICON_RIGHT.lockedSkill
-    : IMPORTANCE_CLIENT_LAYOUT.ICON_RIGHT.skill
-}
-
 export interface ImportanceGeometry {
   iconSize: string
   iconTop: string
@@ -87,27 +82,26 @@ export interface ImportanceGeometry {
   bandOffset: string
 }
 
-export function importanceGeometry(
-  variant: ImportanceVariant,
-  isLocked: boolean,
-): ImportanceGeometry {
-  const band = IMPORTANCE_CLIENT_LAYOUT.BAND[variant]
+function boxLength(percent: number): string {
+  return `${String(percent)}cqw`
+}
+
+export function importanceGeometry(variant: ImportanceVariant): ImportanceGeometry {
   return {
-    iconSize: clientLength(IMPORTANCE_CLIENT_LAYOUT.ICON_SIZE[variant]),
-    iconTop: clientLength(IMPORTANCE_CLIENT_LAYOUT.ICON_TOP[variant]),
-    iconRight: clientLength(iconRight(variant, isLocked)),
-    bandHeight: clientLength(band),
-    bandOffset: clientLength(0),
+    iconSize: boxLength(IMPORTANCE_BOX_LAYOUT.ICON_SIZE[variant]),
+    iconTop: boxLength(IMPORTANCE_BOX_LAYOUT.ICON_TOP[variant]),
+    iconRight: boxLength(IMPORTANCE_BOX_LAYOUT.ICON_RIGHT[variant]),
+    bandHeight: boxLength(IMPORTANCE_BOX_LAYOUT.BAND[variant]),
+    bandOffset: boxLength(0),
   }
 }
 
 export function importanceBoxPadding(level: number): CSSProperties | undefined {
   if (!hasImportance(level)) return undefined
-  const bleed = IMPORTANCE_CLIENT_LAYOUT.PASSIVE_PANE_BLEED_REM
   return {
-    paddingBlock: clientLength(IMPORTANCE_CLIENT_LAYOUT.BAND.passive),
-    paddingInline: `${String(bleed)}rem`,
-    marginInline: `${String(-bleed)}rem`,
+    paddingBlock: `${String(IMPORTANCE_BOX_LAYOUT.BAND.passive)}%`,
+    paddingInline: `${String(PASSIVE_PANE_BLEED_REM)}rem`,
+    marginInline: `${String(-PASSIVE_PANE_BLEED_REM)}rem`,
   }
 }
 
@@ -147,7 +141,7 @@ export function importanceBannerStyle(
     '--name-tail': `color-mix(in srgb, ${style.colors.passivePanel} 55%, black)`,
     '--name-text': style.colors.passiveName,
     '--importance-panel-glow': style.colors.passiveGlow,
-    '--importance-glow-radius': clientLength(IMPORTANCE_CLIENT_LAYOUT.PASSIVE_GLOW),
+    '--importance-glow-radius': clientLength(IMPORTANCE_PLATE_GLOW_UNITS),
     '--importance-flicker-period': `${String(style.flickerPeriodS)}s`,
     '--importance-glow-min': `color-mix(in srgb, ${style.colors.passiveGlow} ${String(outlineMin * 100)}%, transparent)`,
     '--importance-glow-max': `color-mix(in srgb, ${style.colors.passiveGlow} ${String(outlineMax * 100)}%, transparent)`,

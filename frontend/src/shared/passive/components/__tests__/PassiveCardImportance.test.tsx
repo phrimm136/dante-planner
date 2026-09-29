@@ -23,7 +23,7 @@ describe('passive card importance', () => {
     expect(card.style.backgroundColor).toBe('')
     expect(card.style.getPropertyValue('--name-body')).toBe('')
     expect(card.style.getPropertyValue('--name-text')).toBe('')
-    expect(card.style.paddingBlock).toBe('0.675rem')
+    expect(card.style.paddingBlock).toBe('2.36%')
     expect(card.style.paddingInline).toBe('1rem')
     expect(card.style.marginInline).toBe('-1rem')
   })

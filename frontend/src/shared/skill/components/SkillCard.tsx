@@ -91,12 +91,7 @@ export function SkillCard({
   const card = hasImportance(importanceLevel) ? (
     <div className="relative isolate @container">
       {layout}
-      <ImportanceDecoration
-        level={importanceLevel}
-        palette={palette}
-        variant="skill"
-        isLocked={isLocked}
-      />
+      <ImportanceDecoration level={importanceLevel} palette={palette} variant="skill" />
     </div>
   ) : (
     layout

@@ -159,17 +159,26 @@ export const CLIENT_TEXT_SCALE = { LINE_UNITS: 50, LINE_REM: 1.25 } as const
 
 export const COIN_CLIENT_WIDTH = 50
 
-export const IMPORTANCE_CLIENT_LAYOUT = {
-  ICON_SIZE: { skill: 159, passive: 163 },
-  ICON_TOP: { skill: 45, passive: 14 },
-  ICON_RIGHT: { skill: 95, lockedSkill: 86, passive: 0 },
-  BAND: { skill: 27, passive: 27 },
-  PASSIVE_GLOW: 6,
-  PASSIVE_PANE_BLEED_REM: 1,
+export const IMPORTANCE_BOX_LAYOUT = {
+  ICON_SIZE: { skill: 13.9, passive: 14.2 },
+  ICON_TOP: { skill: 3.1, passive: 2.7 },
+  ICON_RIGHT: { skill: 7.8, passive: 0 },
+  BAND: { skill: 2.36, passive: 2.36 },
 } as const
+
+export const IMPORTANCE_PLATE_GLOW_UNITS = 6
+
+export const PASSIVE_PANE_BLEED_REM = 1
 
 export const IMPORTANCE_STRIPE_BLINK_SPEED = 2
 
 export const IMPORTANCE_STRIPE_BLINK_PERIOD_S = (2 * Math.PI) / IMPORTANCE_STRIPE_BLINK_SPEED
 
 export const IMPORTANCE_STRIPE_SCROLL_S = 4
+
+export const ORANGE_MARK_STYLE = {
+  color: '#ff6000',
+  backgroundColor: '#ff000040',
+  fontWeight: 'bold',
+  textDecoration: 'underline',
+} as const
