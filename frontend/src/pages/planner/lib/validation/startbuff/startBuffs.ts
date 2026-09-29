@@ -83,9 +83,8 @@ function knownBuffViolations(buffs: readonly SelectedStartBuff[]): StartBuffViol
 
 export function startBuffViolations(
   parsed: ParsedStartBuffs,
-  season: StartBuffSeason | undefined,
+  season: StartBuffSeason,
 ): StartBuffViolation[] {
-  if (season === undefined) return [...parsed.listViolations]
   const isKnown = (buff: SelectedStartBuff) => season.hasStartBuff(String(buff.buffId))
   return [
     ...parsed.listViolations,

@@ -23,6 +23,7 @@ import lombok.Setter;
 
 import org.danteplanner.backend.planner.converter.KeywordSetConverter;
 import org.danteplanner.backend.planner.converter.PlannerStatusConverter;
+import org.danteplanner.backend.planner.validation.PlannerDocument;
 
 import java.time.Instant;
 import java.util.Set;
@@ -67,7 +68,6 @@ public class PlannerContent {
     private Set<String> selectedKeywords;
 
     @Column(columnDefinition = "JSON", nullable = false)
-    @Setter
     private String content;
 
     @Column(name = "content_schema_version", nullable = false)
@@ -130,6 +130,10 @@ public class PlannerContent {
         lastModifiedAt = Instant.now();
     }
 
+    public void replaceContent(PlannerDocument document) {
+        this.content = document.json();
+    }
+
     public boolean isDeleted() {
         return deletedAt != null;
     }
@@ -140,5 +144,13 @@ public class PlannerContent {
 
     public void recordSave() {
         this.syncVersion = this.syncVersion + 1;
+    }
+
+    public static class PlannerContentBuilder {
+
+        public PlannerContentBuilder content(PlannerDocument document) {
+            this.content = document.json();
+            return this;
+        }
     }
 }

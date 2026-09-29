@@ -10,6 +10,7 @@ import type {
   PlannerConflict,
 } from '../conflictChoice'
 import type { ConflictResolutionChoice, SaveablePlanner } from '../../types/PlannerTypes'
+import type { ValidatedPlanner } from '../validation/plannerValidation'
 
 const NOW = '2026-01-01T00:00:00.000Z'
 
@@ -135,7 +136,7 @@ describe('interpretConflictPlan', () => {
     return {
       local: async () => ok(LOCAL),
       incoming: async () => ok(INCOMING),
-      validate: () => null,
+      validate: (planner) => ok(planner as ValidatedPlanner),
       saveLocal: async () => ok(undefined),
       deleteLocal: async () => ok(undefined),
       deleteRemote: async () => ok(undefined),
@@ -349,7 +350,11 @@ describe('interpretConflictPlan', () => {
 
     const outcome = await interpretConflictPlan(
       planConflictResolution('overwrite', FORK_LOCAL, { ...ctx, copyTitle: (t) => t }),
-      operations({ saveLocal, sync, validate: () => ({ kind: 'validation', key: 'planner:bad' }) }),
+      operations({
+        saveLocal,
+        sync,
+        validate: () => err({ kind: 'validation', key: 'planner:bad' }),
+      }),
       ctx,
     )
 
@@ -359,6 +364,27 @@ describe('interpretConflictPlan', () => {
     })
     expect(saveLocal).not.toHaveBeenCalled()
     expect(sync).not.toHaveBeenCalled()
+  })
+
+  it('validates the chosen published side again and syncs what the validator returned', async () => {
+    const published = buildSaveablePlanner({
+      metadata: { id: PLANNER_ID, title: 'My Run', published: true },
+    })
+    const validatedSide = { ...published } as ValidatedPlanner
+    const validate = vi.fn((_planner: SaveablePlanner) => ok(validatedSide))
+    const sync = vi.fn(async (planner: SaveablePlanner) => ok(planner))
+    const ctx = interpreterContext()
+
+    const outcome = await interpretConflictPlan(
+      planConflictResolution('overwrite', FORK_LOCAL, { ...ctx, copyTitle: (t) => t }),
+      operations({ local: async () => ok(published), validate, sync }),
+      ctx,
+    )
+
+    expect(outcome).toEqual({ ok: true, value: undefined })
+    expect(validate).toHaveBeenCalledWith(published)
+    expect(sync).toHaveBeenCalledWith(validatedSide, true)
+    expect(sync.mock.calls[0]?.[0]).toBe(validatedSide)
   })
 
   it('marks the kept side saved under the version the server acknowledged', async () => {

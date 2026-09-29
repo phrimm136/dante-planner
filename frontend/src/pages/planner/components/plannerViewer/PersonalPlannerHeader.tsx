@@ -16,6 +16,7 @@ import { SyncOffWarningDialog } from '../SyncOffWarningDialog'
 
 import { usePlannerHeaderActions } from '../../hooks/usePlannerHeaderActions'
 import { usePlannerPublish } from '../../hooks/usePlannerPublish'
+import type { PublishVariables } from '../../hooks/usePlannerPublish'
 import { usePlannerStorage } from '../../hooks/usePlannerStorage'
 import { usePlannerIdRegistry } from '../../hooks/usePlannerIdRegistry'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
@@ -23,10 +24,10 @@ import { plannerQueryKeys } from '../../lib/plannerQueryKeys'
 import { deriveSaveStatus, SAVE_STATUS_BADGE_VARIANT } from '../../lib/plannerBadges'
 import { decidePublishAction } from '../../lib/plannerPublishPolicy'
 import { showAppError, showErrorMessage, showSuccess } from '@/lib/errorPresentation'
-import { validatePlannerForPublish } from '../../lib/validation/plannerValidation'
+import { validatePlannerForSync } from '../../lib/validation/plannerValidation'
 import { toUserFriendlyError } from '../../lib/validation/plannerValidationErrors'
+import type { PlannerValidationError } from '../../lib/validation/plannerValidationErrors'
 
-import { isMDPlanner } from '../../types/PlannerTypes'
 import type { SaveablePlanner } from '../../types/PlannerTypes'
 
 const PUBLISH_LABEL_KEYS = {
@@ -88,58 +89,69 @@ export function PersonalPlannerHeader({
     ...(onDelete !== undefined && { onDelete }),
   })
 
-  const callPublishMutation = (wasPublished: boolean) => {
-    if (!plannerId) return
+  const callPublishMutation = (variables: PublishVariables) => {
+    const wasPublished = variables.intent === 'unpublish'
 
-    publishMutation.mutate(
-      wasPublished ? { intent: 'unpublish', plannerId } : { intent: 'publish', planner },
-      {
-        onSuccess: async (outcome) => {
-          const base = outcome.acknowledged ?? planner
-          const updatedPlanner: SaveablePlanner = {
-            ...base,
-            metadata: {
-              ...base.metadata,
-              published: outcome.published,
-            },
-          }
-          const saveResult = await saveToLocal(updatedPlanner)
+    publishMutation.mutate(variables, {
+      onSuccess: async (outcome) => {
+        const base = outcome.acknowledged ?? planner
+        const updatedPlanner: SaveablePlanner = {
+          ...base,
+          metadata: {
+            ...base.metadata,
+            published: outcome.published,
+          },
+        }
+        const saveResult = await saveToLocal(updatedPlanner)
 
-          void queryClient.invalidateQueries({
-            queryKey: plannerQueryKeys.detail(plannerId),
-          })
+        void queryClient.invalidateQueries({
+          queryKey: plannerQueryKeys.detail(plannerId),
+        })
 
-          if (!saveResult.ok) {
-            showAppError(saveResult.error)
-            return
-          }
+        if (!saveResult.ok) {
+          showAppError(saveResult.error)
+          return
+        }
 
-          showSuccess(
-            wasPublished
-              ? 'planner:pages.plannerMD.publish.unpublishSuccess'
-              : 'planner:pages.plannerMD.publish.success',
-          )
-        },
+        showSuccess(
+          wasPublished
+            ? 'planner:pages.plannerMD.publish.unpublishSuccess'
+            : 'planner:pages.plannerMD.publish.success',
+        )
       },
+    })
+  }
+
+  const validateForPublish = () =>
+    validatePlannerForSync(
+      { ...planner, metadata: { ...planner.metadata, published: true } },
+      egoGiftSpec,
+      egoGiftI18n,
+      idRegistryFor(planner.metadata.contentVersion),
     )
+
+  const showInvalid = (error: PlannerValidationError) => {
+    const friendly = toUserFriendlyError(error)
+    showErrorMessage(`planner:${friendly.key}`, friendly.params)
   }
 
   const handlePublishWithUpload = () => {
     setShowPublishWarning(false)
-    callPublishMutation(false)
+    if (!plannerId) return
+
+    const validated = validateForPublish()
+    if (validated.ok) {
+      callPublishMutation({ intent: 'publish', planner: validated.value })
+      return
+    }
+    const [firstError] = validated.error
+    if (firstError) showInvalid(firstError)
   }
 
-  const publishValidationErrors = () =>
-    isMDPlanner(planner)
-      ? validatePlannerForPublish(
-          planner.metadata.title,
-          planner.content,
-          planner.config.category,
-          egoGiftSpec,
-          egoGiftI18n,
-          idRegistryFor(planner.metadata.contentVersion),
-        ).errors
-      : []
+  const publishValidationErrors = () => {
+    const validated = validateForPublish()
+    return validated.ok ? [] : validated.error
+  }
 
   const handlePublishToggle = () => {
     if (!plannerId) return
@@ -153,13 +165,11 @@ export function PersonalPlannerHeader({
 
     switch (action.kind) {
       case 'unpublish':
-        callPublishMutation(true)
+        callPublishMutation({ intent: 'unpublish', plannerId })
         return
-      case 'invalid': {
-        const friendly = toUserFriendlyError(action.error)
-        showErrorMessage(`planner:${friendly.key}`, friendly.params)
+      case 'invalid':
+        showInvalid(action.error)
         return
-      }
       case 'warnSyncDisabled':
         setShowPublishWarning(true)
         return

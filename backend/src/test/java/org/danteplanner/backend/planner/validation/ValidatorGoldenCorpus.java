@@ -240,9 +240,6 @@ final class ValidatorGoldenCorpus {
     static List<ContentEntry> contentEntries() {
         List<ContentEntry> entries = new ArrayList<>();
 
-        entries.add(draft("category-null", null, valid()));
-        entries.add(draft("category-blank", "", valid()));
-        entries.add(draft("category-unknown", "20F", valid()));
         entries.add(new ContentEntry("content-null", "5F", Stage.DRAFT, null));
         entries.add(new ContentEntry("content-blank", "5F", Stage.DRAFT, "   "));
         entries.add(new ContentEntry("content-size-exceeded", "5F", Stage.DRAFT,

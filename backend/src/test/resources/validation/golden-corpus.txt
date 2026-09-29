@@ -1,18 +1,3 @@
-### category-null
-code: INVALID_CATEGORY
-message: Invalid category: null
-sub 1: INVALID_CATEGORY | Invalid category: null
-
-### category-blank
-code: INVALID_CATEGORY
-message: Invalid category: 
-sub 1: INVALID_CATEGORY | Invalid category: 
-
-### category-unknown
-code: INVALID_CATEGORY
-message: Invalid category: 20F
-sub 1: INVALID_CATEGORY | Invalid category: 20F
-
 ### content-null
 code: EMPTY_CONTENT
 message: Content is empty or null

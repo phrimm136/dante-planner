@@ -6,7 +6,6 @@ import org.danteplanner.backend.planner.validation.ErrorCode;
 import org.danteplanner.backend.planner.validation.Violation;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -15,8 +14,7 @@ import static org.danteplanner.backend.planner.validation.ContentFixtures.json;
 
 class StartBuffRulesTest {
 
-    private static final Optional<StartBuffSeason> SEASON =
-            Optional.of(Set.of("100", "101", "115", "200", "201", "302")::contains);
+    private static final StartBuffSeason SEASON = Set.of("100", "101", "115", "200", "201", "302")::contains;
     private static final ContentPath BUFFS = ContentPath.of("selectedBuffIds");
 
     @Test
@@ -33,13 +31,6 @@ class StartBuffRulesTest {
     void check_WhenBuffsAreNotAnArray_ReportsTheirKind() {
         assertThat(StartBuffRules.check(json("\"none\""), SEASON)).containsExactly(new Violation(
                 ErrorCode.INVALID_FIELD_TYPE, BUFFS, "Field 'selectedBuffIds' must be array, got string \"none\""));
-    }
-
-    @Test
-    void check_WhenTheSeasonIsUnknown_ReportsOnlyTheKind() {
-        assertThat(StartBuffRules.check(json("[999,\"x\"]"), Optional.empty())).isEmpty();
-        assertThat(StartBuffRules.check(json("{}"), Optional.empty())).containsExactly(new Violation(
-                ErrorCode.INVALID_FIELD_TYPE, BUFFS, "Field 'selectedBuffIds' must be array, got object"));
     }
 
     @Test

@@ -5,6 +5,7 @@ import { withRollback } from '@/lib/withRollback'
 
 import type { Result } from '@/lib/result'
 import type { AppError } from '@/lib/apiErrorClassifier'
+import type { ValidatedPlanner } from './validation/plannerValidation'
 import type {
   ConflictResolutionChoice,
   PlannerStatus,
@@ -70,12 +71,12 @@ export interface ConflictOutcome {
 export interface ConflictOps {
   local: () => Promise<Result<SaveablePlanner, AppError>>
   incoming: () => Promise<Result<SaveablePlanner, AppError>>
-  validate: (planner: SaveablePlanner) => AppError | null
+  validate: (planner: SaveablePlanner) => Result<ValidatedPlanner, AppError>
   saveLocal: (planner: SaveablePlanner) => Promise<Result<void, AppError>>
   deleteLocal: (id: string) => Promise<Result<void, AppError>>
   deleteRemote: (id: string) => Promise<Result<void, AppError>>
   sync: (
-    planner: SaveablePlanner,
+    planner: ValidatedPlanner,
     force: boolean,
   ) => Promise<Result<SaveablePlanner | null, AppError>>
   sanitizeTitle: (title: string) => string
@@ -94,13 +95,13 @@ async function keepLocal(ops: ConflictOps): Promise<Result<void, ConflictFailure
   const planner = await ops.local()
   if (!planner.ok) return failed('saveLocal', planner.error)
 
-  const invalid = ops.validate(planner.value)
-  if (invalid) return failed('validate', invalid)
+  const validated = ops.validate(planner.value)
+  if (!validated.ok) return failed('validate', validated.error)
 
-  const synced = await ops.sync(planner.value, true)
+  const synced = await ops.sync(validated.value, true)
   if (!synced.ok) return failed('sync', synced.error)
 
-  const stored = synced.value ?? planner.value
+  const stored = synced.value ?? validated.value
   const saved = await ops.saveLocal({
     ...stored,
     metadata: { ...stored.metadata, status: 'saved' },
@@ -136,8 +137,8 @@ async function forkCopy(
     },
   }
 
-  const invalid = ops.validate(copy)
-  if (invalid) return failed('validate', invalid)
+  const validated = ops.validate(copy)
+  if (!validated.ok) return failed('validate', validated.error)
 
   let uploaded = false
 
@@ -147,7 +148,7 @@ async function forkCopy(
       return saved.ok ? ok(undefined) : failed('saveLocal', saved.error)
     },
     rest: async () => {
-      const synced = await ops.sync(copy, false)
+      const synced = await ops.sync(validated.value, false)
       if (!synced.ok) return failed('sync', synced.error)
       uploaded = synced.value !== null
       return interpretConflictPlan(remaining, ops, ctx)

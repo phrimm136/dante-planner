@@ -8,6 +8,7 @@ import { createTestQueryClient } from '@/test-utils/queryClient'
 import { buildSaveablePlanner } from '@/test-utils/fixtures'
 import { toUpsertRequest } from '../usePlannerSyncAdapter'
 import { usePlannerPublish } from '../usePlannerPublish'
+import type { ValidatedPlanner } from '../../lib/validation/plannerValidation'
 
 const presentation = vi.hoisted(() => ({
   showError: vi.fn(),
@@ -24,7 +25,7 @@ vi.mock('@/shared/notifications', () => ({
 
 const planner = buildSaveablePlanner({
   metadata: { title: 'Local Edit', status: 'saved', syncVersion: 3 },
-})
+}) as ValidatedPlanner
 const plannerId = planner.metadata.id
 
 function serverPlanner(overrides: Record<string, unknown>) {

@@ -5,6 +5,7 @@ import { INITIAL_SYNC_VERSION } from '@/lib/constants'
 import { useInvalidatePlannerLists } from './useInvalidatePlannerLists'
 import { usePlannerStorage } from './usePlannerStorage'
 import { usePlannerSyncAdapter } from './usePlannerSyncAdapter'
+import { loadValidationInputs } from './loadValidationInputs'
 import { useUserSettingsQuery } from '@/shared/userSettings'
 import { useAuthQuery } from '@/shared/auth'
 import { ApiClient } from '@/lib/api'
@@ -12,6 +13,7 @@ import { generateUUID } from '@/lib/uuid'
 import { validateData } from '@/lib/validation'
 import { PublishedPlannerDetailSchema } from '../schemas/PlannerListSchemas'
 import { toSaveablePlanner, PlannerConfigDiscriminatedSchema } from '../schemas/PlannerSchemas'
+import { validatePlannerForSync } from '../lib/validation/plannerValidation'
 
 import type { PublishedPlannerDetail } from '../types/PlannerListTypes'
 
@@ -80,7 +82,12 @@ export function usePlannerFork() {
 
       if (isAuthenticated && syncEnabled) {
         try {
-          await syncAdapter.syncToServer(newPlanner)
+          const { egoGiftSpec, egoGiftI18n, registry } = await loadValidationInputs(
+            newPlanner.metadata.contentVersion,
+          )
+          const validated = validatePlannerForSync(newPlanner, egoGiftSpec, egoGiftI18n, registry)
+          if (validated.ok) await syncAdapter.syncToServer(validated.value)
+          else console.warn('Failed to sync forked planner to server:', validated.error)
         } catch (syncError) {
           console.warn('Failed to sync forked planner to server:', syncError)
         }

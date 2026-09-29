@@ -36,20 +36,11 @@ public final class StartBuffRules {
     private StartBuffRules() {
     }
 
-    public static List<Violation> check(JsonNode selectedBuffIds, Optional<StartBuffSeason> season) {
+    public static List<Violation> check(JsonNode selectedBuffIds, StartBuffSeason season) {
         FieldResult<List<Optional<Integer>>> parsed = JsonArrays.ints(selectedBuffIds, SELECTED_BUFF_IDS);
-        return season
-                .map(known -> seasonal(parsed, known))
-                .orElseGet(() -> kindOnly(selectedBuffIds, parsed))
+        return seasonal(parsed, season)
                 .sorted(Violation.BY_PATH_THEN_CODE)
                 .toList();
-    }
-
-    private static Stream<Violation> kindOnly(JsonNode selectedBuffIds, FieldResult<List<Optional<Integer>>> parsed) {
-        return switch (selectedBuffIds.getNodeType()) {
-            case ARRAY -> Stream.empty();
-            default -> parsed.violations().stream();
-        };
     }
 
     private static Stream<Violation> seasonal(FieldResult<List<Optional<Integer>>> parsed, StartBuffSeason season) {

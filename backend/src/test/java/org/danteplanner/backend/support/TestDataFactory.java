@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 import java.util.concurrent.atomic.AtomicLong;
+import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerContent;
 import org.danteplanner.backend.planner.entity.PlannerContentLifecycle;
@@ -15,6 +16,14 @@ import org.danteplanner.backend.planner.entity.PlannerModeration;
 import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.planner.entity.StoredPlannerContent;
+import org.danteplanner.backend.planner.gamedata.GameDataLoader;
+import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
+import org.danteplanner.backend.planner.validation.PlannerContentValidator;
+import org.danteplanner.backend.planner.validation.PlannerDocument;
+import org.danteplanner.backend.planner.validation.floor.FloorRules;
+import org.danteplanner.backend.planner.validation.floor.Stage;
+import org.danteplanner.backend.planner.validation.sinner.SinnerIdValidator;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserRole;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
@@ -193,6 +202,25 @@ public class TestDataFactory {
 
     private static final ObjectMapper CONTENT_MAPPER = new ObjectMapper();
 
+    private static final class StaticDataParser {
+
+        private static final GameDataRegistry REGISTRY = registry();
+        private static final PlannerContentValidator VALIDATOR = new PlannerContentValidator(CONTENT_MAPPER,
+                51200, 1024, REGISTRY, new SinnerIdValidator(), new FloorRules(REGISTRY));
+
+        private static GameDataRegistry registry() {
+            GameDataRegistry registry = new GameDataRegistry(new GameDataLoader(CONTENT_MAPPER), "../static/data");
+            registry.init();
+            return registry;
+        }
+    }
+
+    public static PlannerDocument document(String content) {
+        PlannerContentValidator validator = StaticDataParser.VALIDATOR;
+        return validator.parse(content, MDCategory.F5,
+                validator.season(StaticDataParser.REGISTRY.plannerVersions().mdCurrentVersion()), Stage.DRAFT);
+    }
+
     /**
      * The content document with its {@code selectedKeywords} array replaced, the source the server
      * derives the keyword column from.
@@ -300,16 +328,15 @@ public class TestDataFactory {
                     .plannerType(plannerType)
                     .build();
             planner.attach(
-                    PlannerContentLifecycle.asPersisted(PlannerContent.builder()
+                    PlannerContentLifecycle.asPersisted(StoredPlannerContent.holding(PlannerContent.builder()
                             .title(title)
                             .category(category)
                             .status(status != null ? status
                                     : (published ? PlannerStatus.SAVED : PlannerStatus.DRAFT))
-                            .content(document)
                             .contentSchemaVersion(schemaVersion)
                             .gameContentVersion(contentVersion)
                             .selectedKeywords(PlannerKeywords.fromContent(document).asSet())
-                            .build()),
+                            .build(), document)),
                     PlannerPublication.builder().build(),
                     PlannerModeration.builder().build());
             if (published) {

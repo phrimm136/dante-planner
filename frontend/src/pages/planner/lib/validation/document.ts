@@ -1,7 +1,6 @@
-import { FLOOR_RULE_TABLE, KEYWORD_RENAME_MAP, PLANNER_KEYWORDS } from '@/shared/gameData'
+import { KEYWORD_RENAME_MAP, PLANNER_KEYWORDS } from '@/shared/gameData'
 import { MAX_NOTE_BYTES } from '@/lib/constants'
-import { calculateNoteByteLength, measureDocBytes } from '@/shared/noteEditor'
-import type { JSONContent } from '@tiptap/core'
+import { calculateNoteByteLength } from '@/shared/noteEditor'
 import { invalidFieldType, isBlank, isRecord, parseList } from './boundary'
 import type { InvalidFieldType } from './boundary'
 import type { Codes } from './codes'
@@ -36,7 +35,7 @@ const PLANNER_KEYWORD_SET: ReadonlySet<string> = new Set(PLANNER_KEYWORDS)
 
 export type DocumentRefusal =
   | {
-      code: Codes<'INVALID_CATEGORY' | 'UNKNOWN_FIELD' | 'MISSING_REQUIRED_FIELD'>
+      code: Codes<'UNKNOWN_FIELD' | 'MISSING_REQUIRED_FIELD'>
       path: ContentPath
     }
   | {
@@ -50,30 +49,34 @@ export type DocumentViolation =
   | { code: Codes<'MISSING_TITLE' | 'UNKNOWN_VERSION'>; path: ContentPath }
   | { code: Codes<'UNKNOWN_KEYWORD'>; path: ContentPath; params: { keyword: string } }
 
-const refusal = (
-  code: Codes<'INVALID_CATEGORY' | 'UNKNOWN_FIELD' | 'MISSING_REQUIRED_FIELD'>,
-): DocumentRefusal => ({ code, path: ROOT_PATH })
+const refusal = (code: Codes<'UNKNOWN_FIELD' | 'MISSING_REQUIRED_FIELD'>): DocumentRefusal => ({
+  code,
+  path: ROOT_PATH,
+})
 
 const presentFields = (content: Record<string, unknown>): string[] =>
   Object.keys(content).filter((name) => content[name] !== undefined)
 
 function oversizedNote(sectionNotes: unknown): DocumentRefusal | undefined {
   if (!isRecord(sectionNotes)) return undefined
-  const oversized = Object.entries(sectionNotes).find(
-    ([, note]) =>
-      note !== undefined && calculateNoteByteLength(note as { content: unknown }) > MAX_NOTE_BYTES,
-  )
+  const oversized = Object.keys(sectionNotes)
+    .sort()
+    .find((section) => {
+      const note = sectionNotes[section]
+      return (
+        note !== undefined && calculateNoteByteLength(note as { content: unknown }) > MAX_NOTE_BYTES
+      )
+    })
   return oversized === undefined
     ? undefined
     : {
         code: 'SIZE_EXCEEDED',
-        path: extendPath(SECTION_NOTES_PATH, key(oversized[0])),
-        params: { section: oversized[0], limit: String(MAX_NOTE_BYTES) },
+        path: extendPath(SECTION_NOTES_PATH, key(oversized)),
+        params: { section: oversized, limit: String(MAX_NOTE_BYTES) },
       }
 }
 
-export function documentRefusal(content: unknown, category: string): DocumentRefusal | undefined {
-  if (!Object.hasOwn(FLOOR_RULE_TABLE.categories, category)) return refusal('INVALID_CATEGORY')
+export function documentRefusal(content: unknown): DocumentRefusal | undefined {
   const fields = isRecord(content) ? content : {}
   const present = new Set(presentFields(fields))
   if ([...present].some((name) => !ALLOWED_FIELDS.has(name))) return refusal('UNKNOWN_FIELD')
@@ -125,18 +128,3 @@ export const keywordViolations = (parsed: ParsedKeywords): DocumentViolation[] =
   parsed.keywords
     .filter(({ keyword }) => !PLANNER_KEYWORD_SET.has(keyword))
     .map(({ keyword, path }) => ({ code: 'UNKNOWN_KEYWORD', path, params: { keyword } }))
-
-export type NoteSizeError = { key: string; params: Record<string, string> }
-
-const NOTE_TOO_LARGE = 'pages.plannerMD.validation.noteTooLarge'
-
-export function validateNoteSizes(
-  sectionNotes: Record<string, { content: unknown }>,
-): NoteSizeError | null {
-  const oversized = Object.entries(sectionNotes ?? {}).find(
-    ([, note]) => measureDocBytes(note.content as JSONContent) > MAX_NOTE_BYTES,
-  )
-  return oversized === undefined
-    ? null
-    : { key: NOTE_TOO_LARGE, params: { section: oversized[0], limit: String(MAX_NOTE_BYTES) } }
-}

@@ -132,11 +132,18 @@ vi.mock('../../../hooks/usePlannerPublish', () => ({
 
 // ── Planner validation ────────────────────────────────────────
 vi.mock('../../../lib/validation/plannerValidation', () => ({
-  validatePlannerForPublish: () => ({ isValid: true, errors: [] }),
-  validatePlannerForDraftSave: () => ({ isValid: true, errors: [] }),
+  validatePlannerForSync: (planner: unknown) => ({ ok: true, value: planner }),
+}))
+vi.mock('../../../hooks/loadValidationInputs', () => ({
+  loadValidationInputs: () =>
+    Promise.resolve({ egoGiftSpec: {}, egoGiftI18n: {}, registry: undefined }),
 }))
 vi.mock('../../../lib/validation/plannerValidationErrors', () => ({
   toUserFriendlyError: (_e: unknown) => ({ key: 'error.key', params: {} }),
+  plannerValidationError: (friendly: { key: string }) => ({
+    kind: 'validation',
+    key: friendly.key,
+  }),
 }))
 vi.mock('../../../hooks/usePlannerOwnerNotifications', () => ({
   useToggleOwnerNotifications: () => ({ mutate: vi.fn(), isPending: false }),
@@ -604,7 +611,10 @@ describe('PersonalPlannerHeader – publish sync guard', () => {
     await waitFor(() => {
       expect(mockPublishMutate).toHaveBeenCalledTimes(1)
       expect(mockPublishMutate).toHaveBeenCalledWith(
-        { intent: 'publish', planner },
+        {
+          intent: 'publish',
+          planner: { ...planner, metadata: { ...planner.metadata, published: true } },
+        },
         expect.objectContaining({ onSuccess: expect.any(Function) }),
       )
       expect(mockSyncToServer).not.toHaveBeenCalled()

@@ -5,8 +5,9 @@ import { describe, expect, it } from 'vitest'
 import type { MDCategory } from '@/shared/gameData'
 import type { EGOGiftSpec } from '@/pages/egoGift'
 import { renderContentPath } from '../contentPath'
-import { validatePlannerForDraftSave, validatePlannerForPublish } from '../plannerValidation'
-import type { PlannerIdRegistry, PlannerValidationResult } from '../plannerValidation'
+import type { PlannerIdRegistry } from '../plannerValidation'
+import { draftValidation, publishValidation } from './stagedValidation'
+import type { StagedResult } from './stagedValidation'
 import type { MDPlannerContent } from '../../../types/PlannerTypes'
 
 type Stage = 'draft' | 'publish'
@@ -110,18 +111,11 @@ function contentOf(c: CorpusCase): MDPlannerContent {
 const titleOf = (c: CorpusCase): string | undefined =>
   c.title === undefined ? DEFAULT_TITLE : (c.title ?? undefined)
 
-function validate(c: CorpusCase, stage: Stage): PlannerValidationResult {
+function validate(c: CorpusCase, stage: Stage): StagedResult {
   const category = c.category as MDCategory
   return stage === 'draft'
-    ? validatePlannerForDraftSave(contentOf(c), category, egoGiftSpec, undefined, registryFor(c))
-    : validatePlannerForPublish(
-        titleOf(c),
-        contentOf(c),
-        category,
-        egoGiftSpec,
-        undefined,
-        registryFor(c),
-      )
+    ? draftValidation(contentOf(c), category, egoGiftSpec, undefined, registryFor(c))
+    : publishValidation(titleOf(c), contentOf(c), category, egoGiftSpec, undefined, registryFor(c))
 }
 
 function outcomeOf(c: CorpusCase, stage: Stage): Outcome {

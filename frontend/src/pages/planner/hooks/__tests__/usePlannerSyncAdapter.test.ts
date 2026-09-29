@@ -14,6 +14,7 @@ import type {
   ServerPlannerSummary,
   PlannerId,
 } from '../../types/PlannerTypes'
+import type { ValidatedPlanner } from '../../lib/validation/plannerValidation'
 
 // Mock plannerApi
 const mockCreate = vi.fn()
@@ -48,7 +49,7 @@ function createMockPlanner(
     userId: string | null
     plannerType: 'MIRROR_DUNGEON' | 'REFRACTED_RAILWAY'
   }> = {},
-): SaveablePlanner {
+): ValidatedPlanner {
   return {
     metadata: {
       id: '550e8400-e29b-41d4-a716-446655440000',
@@ -79,7 +80,7 @@ function createMockPlanner(
       floorSelections: [],
       sectionNotes: {},
     },
-  } as SaveablePlanner
+  } as SaveablePlanner as ValidatedPlanner
 }
 
 /**
@@ -199,6 +200,17 @@ describe('usePlannerSyncAdapter', () => {
         expect.any(Object),
         true, // force=true passed
       )
+    })
+
+    it('does not accept a planner that has not passed the validator', async () => {
+      const unvalidated: SaveablePlanner = createMockPlanner()
+      mockUpsert.mockResolvedValue(createMockServerResponse())
+      const { result: hookResult } = renderHook(() => usePlannerSyncAdapter())
+
+      // @ts-expect-error syncToServer takes only a ValidatedPlanner
+      await hookResult.current.syncToServer(unvalidated)
+
+      expect(mockUpsert).toHaveBeenCalledTimes(1)
     })
 
     it('throws error for non-MIRROR_DUNGEON new planners', async () => {

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.planner.gamedata.FloorRuleTable;
 import org.danteplanner.backend.planner.gamedata.GameDataLoader;
@@ -107,7 +108,7 @@ class ContentCorpusReplayTest {
             if (validatorStage == Stage.PUBLISH) {
                 publishValidator.requireTitle(titleOf(corpusCase));
             }
-            validator.validate(content, category, version, validatorStage);
+            validator.parse(content, MDCategory.fromValue(category), validator.season(version), validatorStage);
             outcome.putArray("violations");
         } catch (PlannerValidationException rejected) {
             ArrayNode violations = outcome.putArray("violations");

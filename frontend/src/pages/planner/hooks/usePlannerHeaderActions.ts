@@ -12,6 +12,12 @@ import { usePlannerDelete } from './usePlannerDelete'
 import { usePlannerStorage } from './usePlannerStorage'
 import { usePlannerSyncAdapter, acknowledgedCopy } from './usePlannerSyncAdapter'
 import { usePlannerConfig } from './usePlannerConfig'
+import { loadValidationInputs } from './loadValidationInputs'
+import { validatePlannerForSync } from '../lib/validation/plannerValidation'
+import {
+  plannerValidationError,
+  toUserFriendlyError,
+} from '../lib/validation/plannerValidationErrors'
 
 import type { SaveablePlanner } from '../types/PlannerTypes'
 
@@ -108,7 +114,16 @@ export function usePlannerHeaderActions({
       }
 
       if (isAuthenticated && (syncEnabled === true || !!plannerToUpdate.metadata.published)) {
-        const synced = await syncAdapter.syncToServer(updatedPlanner)
+        const { egoGiftSpec, egoGiftI18n, registry } = await loadValidationInputs(
+          updatedPlanner.metadata.contentVersion,
+        )
+        const validated = validatePlannerForSync(updatedPlanner, egoGiftSpec, egoGiftI18n, registry)
+        if (!validated.ok) {
+          const [firstError] = validated.error
+          if (firstError) showAppError(plannerValidationError(toUserFriendlyError(firstError)))
+          return
+        }
+        const synced = await syncAdapter.syncToServer(validated.value)
 
         const localRead = await loadFromLocal(plannerId)
         const localDraft =

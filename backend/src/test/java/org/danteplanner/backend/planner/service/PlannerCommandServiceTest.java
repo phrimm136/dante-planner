@@ -8,14 +8,15 @@ import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.precondition.PlannerCategoryValidator;
 import org.danteplanner.backend.planner.precondition.PlannerLimitValidator;
 import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator;
-import org.danteplanner.backend.planner.sync.EffectiveNoOpPredicate;
 import org.danteplanner.backend.planner.sync.SyncVersionValidator;
+import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.entity.PlannerContent;
 import org.danteplanner.backend.planner.entity.PlannerContentLifecycle;
 import org.danteplanner.backend.planner.entity.PlannerModeration;
 import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.planner.entity.StoredPlannerContent;
 import org.danteplanner.backend.planner.validation.floor.Stage;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
@@ -30,6 +31,7 @@ import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.planner.precondition.ContentVersionValidator;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
+import org.danteplanner.backend.planner.validation.PlannerDocument;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -104,7 +106,8 @@ class PlannerCommandServiceTest {
                 new PlannerCategoryValidator(),
                 new PlannerLimitValidator(),
                 new PlannerOwnershipValidator(),
-                new SyncVersionValidator(new EffectiveNoOpPredicate(new ObjectMapper())),
+                new SyncVersionValidator(),
+                new ObjectMapper(),
                 maxPlannersPerUser,
                 CURRENT_SCHEMA_VERSION
         );
@@ -114,7 +117,9 @@ class PlannerCommandServiceTest {
         deviceId = UUID.randomUUID();
 
         when(userService.findById(testUser.getId())).thenReturn(testUser);
-        when(contentValidator.validate(any(), any(), anyInt(), any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(contentValidator.parse(any(), any(), any(), any()))
+                .thenAnswer(invocation -> TestDataFactory.document(invocation.getArgument(0)));
+        when(contentValidator.stageOf(any())).thenCallRealMethod();
     }
 
     private UpsertPlannerRequest createValidRequest() {
@@ -123,7 +128,7 @@ class PlannerCommandServiceTest {
                 "5F",
                 "Test Planner",
                 PlannerStatus.DRAFT,
-                "{\"data\": \"test\"}",
+                TestDataFactory.VALID_CONTENT,
                 6,
                 PlannerType.MIRROR_DUNGEON,
                 null,
@@ -153,16 +158,15 @@ class PlannerCommandServiceTest {
                 .createdAt(Instant.now())
                 .build();
         planner.attach(
-                PlannerContentLifecycle.asPersisted(PlannerContent.builder()
+                PlannerContentLifecycle.asPersisted(StoredPlannerContent.holding(PlannerContent.builder()
                         .title("Test Planner")
                         .category("5F")
                         .status(PlannerStatus.DRAFT)
-                        .content("{\"data\": \"test\"}")
                         .contentSchemaVersion(1)
                         .gameContentVersion(6)
                         .syncVersion(syncVersion)
                         .lastModifiedAt(Instant.now())
-                        .build()),
+                        .build(), "{\"data\": \"test\"}")),
                 PlannerPublication.builder().published(published).build(),
                 PlannerModeration.builder().build());
         return planner;
@@ -269,8 +273,8 @@ class PlannerCommandServiceTest {
             when(userService.findById(testUser.getId())).thenReturn(testUser);
             // Only this exact content-and-category pair is rejected, so a validation call carrying
             // anything else leaves the stub unmatched and the create completes without throwing.
-            when(contentValidator.validate(request.content(), request.category(), request.contentVersion(), Stage.DRAFT))
-                    .thenThrow(new PlannerValidationException("INVALID_CONTENT", "Rejected content"));
+            doThrow(new PlannerValidationException("INVALID_CONTENT", "Rejected content"))
+                    .when(contentValidator).parse(eq(request.content()), eq(MDCategory.F5), any(), eq(Stage.DRAFT));
 
             // Act & Assert
             PlannerValidationException exception = assertThrows(
@@ -299,7 +303,7 @@ class PlannerCommandServiceTest {
 
             assertEquals("INVALID_CONTENT_VERSION", exception.getOriginalCode());
             verify(plannerRepository, never()).insert(any());
-            verify(contentValidator, never()).validate(anyString(), anyString(), anyInt(), any());
+            verify(contentValidator, never()).parse(any(), any(), any(), any());
         }
     }
 
@@ -312,37 +316,41 @@ class PlannerCommandServiceTest {
                     content, planner.getContentVersion(), PlannerType.MIRROR_DUNGEON, planner.getSyncVersion(), null);
         }
 
+        private final String edited = TestDataFactory.withSelectedKeywords(TestDataFactory.VALID_CONTENT,
+                java.util.Set.of("Burst"));
+
         @Test
         @DisplayName("A category change resending the stored content checks only the floor rules")
         void upsertPlanner_WhenOnlyTheCategoryChanges_ChecksOnlyTheFloorRules() {
             Planner planner = createTestPlanner();
             String stored = planner.getContentJson();
+            PlannerDocument readmitted = TestDataFactory.document(TestDataFactory.VALID_CONTENT);
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
-            when(contentValidator.isSameDocument(stored, stored)).thenReturn(true);
-            when(contentValidator.validateFloorRules(stored, "10F", Stage.DRAFT)).thenReturn(stored);
+            when(contentValidator.reparseForCategory(stored, MDCategory.F10, Stage.DRAFT)).thenReturn(readmitted);
 
             UpsertResult result = commandService.upsertPlanner(
                     testUser.getId(), deviceId, planner.getId(), resending(planner, "10F", stored), false);
 
             assertEquals("10F", result.response().category());
-            assertEquals(stored, planner.getContentJson());
-            verify(contentValidator, never()).validate(any(), any(), anyInt(), any());
-            verify(contentValidator).validateFloorRules(stored, "10F", Stage.DRAFT);
+            assertEquals(readmitted.json(), planner.getContentJson());
+            verify(contentValidator, never()).parse(any(), any(), any(), any());
+            verify(contentValidator, never()).season(anyInt());
         }
 
         @Test
         @DisplayName("A category change carrying edited content validates the content")
         void upsertPlanner_WhenCategoryAndContentChange_ValidatesTheContent() {
             Planner planner = createTestPlanner();
-            String edited = "{\"edited\": true}";
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
 
             commandService.upsertPlanner(
                     testUser.getId(), deviceId, planner.getId(), resending(planner, "10F", edited), false);
 
-            verify(contentValidator).validate(edited, "10F", planner.getContentVersion(), Stage.DRAFT);
+            verify(contentValidator).season(planner.getContentVersion());
+            verify(contentValidator).parse(eq(edited), eq(MDCategory.F10), any(), eq(Stage.DRAFT));
+            verify(contentValidator, never()).reparseForCategory(any(), any(), any());
         }
 
         @Test
@@ -352,13 +360,15 @@ class PlannerCommandServiceTest {
             String stored = planner.getContentJson();
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
-            when(contentValidator.isSameDocument(stored, stored)).thenReturn(true);
+            doReturn(TestDataFactory.document(TestDataFactory.VALID_CONTENT))
+                    .when(contentValidator).parse(eq(stored), eq(MDCategory.F10), any(), eq(Stage.DRAFT));
             UpsertPlannerRequest request = withContentVersion(resending(planner, "10F", stored), 7);
 
             commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(), request, false);
 
-            verify(contentValidator).validate(stored, "10F", 7, Stage.DRAFT);
-            verify(contentValidator, never()).validateFloorRules(any(), any(), any());
+            verify(contentValidator).season(7);
+            verify(contentValidator).parse(eq(stored), eq(MDCategory.F10), any(), eq(Stage.DRAFT));
+            verify(contentValidator, never()).reparseForCategory(any(), any(), any());
         }
 
         @Test
@@ -368,43 +378,43 @@ class PlannerCommandServiceTest {
             String stored = planner.getContentJson();
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
-            when(contentValidator.isSameDocument(stored, stored)).thenReturn(true);
+            doReturn(TestDataFactory.document(TestDataFactory.VALID_CONTENT))
+                    .when(contentValidator).parse(eq(stored), eq(MDCategory.F5), any(), eq(Stage.DRAFT));
             UpsertPlannerRequest retitled = new UpsertPlannerRequest(planner.getId().toString(), "5F", "Renamed",
                     null, stored, planner.getContentVersion(), PlannerType.MIRROR_DUNGEON, planner.getSyncVersion(), null);
 
             commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(), retitled, false);
 
-            verify(contentValidator).validate(stored, "5F", planner.getContentVersion(), Stage.DRAFT);
+            verify(contentValidator).parse(eq(stored), eq(MDCategory.F5), any(), eq(Stage.DRAFT));
+            verify(contentValidator, never()).reparseForCategory(any(), any(), any());
         }
 
         @Test
         void upsertPlanner_WhenAPublishedPlannersCategoryChanges_AdmitsAtPublishAndStoresTheNormalizedContent() {
             Planner planner = testPlanner(1L, true);
             String stored = planner.getContentJson();
-            String normalized = "{\"normalized\": true}";
+            PlannerDocument normalized = TestDataFactory.document(TestDataFactory.VALID_CONTENT);
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
-            when(contentValidator.isSameDocument(stored, stored)).thenReturn(true);
-            when(contentValidator.validateFloorRules(stored, "10F", Stage.PUBLISH)).thenReturn(normalized);
+            when(contentValidator.reparseForCategory(stored, MDCategory.F10, Stage.PUBLISH)).thenReturn(normalized);
 
             commandService.upsertPlanner(
                     testUser.getId(), deviceId, planner.getId(), resending(planner, "10F", stored), false);
 
-            assertEquals(normalized, planner.getContentJson());
+            assertEquals(normalized.json(), planner.getContentJson());
             assertEquals("10F", planner.getCategory());
         }
 
         @Test
         void upsertPlanner_WhenAPublishedPlannersContentChanges_ValidatesAtPublish() {
             Planner planner = testPlanner(1L, true);
-            String edited = "{\"edited\": true}";
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
 
             commandService.upsertPlanner(
                     testUser.getId(), deviceId, planner.getId(), resending(planner, "5F", edited), false);
 
-            verify(contentValidator).validate(edited, "5F", planner.getContentVersion(), Stage.PUBLISH);
+            verify(contentValidator).parse(eq(edited), eq(MDCategory.F5), any(), eq(Stage.PUBLISH));
         }
     }
 
@@ -571,8 +581,8 @@ class PlannerCommandServiceTest {
                     .thenAnswer(invocation -> PlannerContentLifecycle.asPersisted(
                             (Planner) invocation.getArgument(0)));
 
-            UpsertPlannerRequest request = new UpsertPlannerRequest(
-                    null, "5F", "Test Planner", null, "{}", 1, PlannerType.MIRROR_DUNGEON, null, null);
+            UpsertPlannerRequest request = new UpsertPlannerRequest(null, "5F", "Test Planner", null,
+                    TestDataFactory.VALID_CONTENT, 1, PlannerType.MIRROR_DUNGEON, null, null);
 
             UUID plannerId = UUID.randomUUID();
 
@@ -593,8 +603,8 @@ class PlannerCommandServiceTest {
     class UpsertSoftDeleteGuardTests {
 
         private UpsertPlannerRequest buildRequest() {
-            UpsertPlannerRequest request = new UpsertPlannerRequest(
-                    null, "5F", "Test Planner", null, "{}", 1, PlannerType.MIRROR_DUNGEON, null, null);
+            UpsertPlannerRequest request = new UpsertPlannerRequest(null, "5F", "Test Planner", null,
+                    TestDataFactory.VALID_CONTENT, 1, PlannerType.MIRROR_DUNGEON, null, null);
             return request;
         }
 
@@ -670,8 +680,10 @@ class PlannerCommandServiceTest {
     @DisplayName("Keyword derivation Tests")
     class KeywordDerivationTests {
 
-        private static final String SINKING_CONTENT = "{\"selectedKeywords\":[\"Sinking\"],\"equipment\":{}}";
-        private static final String BURST_CONTENT = "{\"selectedKeywords\":[\"Burst\"],\"equipment\":{}}";
+        private static final String SINKING_CONTENT = TestDataFactory.withSelectedKeywords(
+                TestDataFactory.VALID_CONTENT, java.util.Set.of("Sinking"));
+        private static final String BURST_CONTENT = TestDataFactory.withSelectedKeywords(
+                TestDataFactory.VALID_CONTENT, java.util.Set.of("Burst"));
 
         private UpsertPlannerRequest carrying(Planner planner, String content, java.util.Set<String> topLevel,
                 Long syncVersion) {
@@ -681,7 +693,7 @@ class PlannerCommandServiceTest {
 
         private Planner storedWithSinking() {
             Planner planner = testPlanner(3L, false);
-            planner.getContent().setContent(SINKING_CONTENT);
+            StoredPlannerContent.holding(planner.getContent(), SINKING_CONTENT);
             planner.getContent().setSelectedKeywords(java.util.Set.of("Sinking"));
             planner.getContent().setContentSchemaVersion(CURRENT_SCHEMA_VERSION);
             planner.getContent().setDeviceId(deviceId);

@@ -7,6 +7,7 @@ import { loadIdMigrationTable } from './loadIdMigrationTable'
 import { withNormalizedIds } from '../lib/plannerIdNormalize'
 import type { Result } from '@/lib/result'
 import type { AppError } from '@/lib/apiErrorClassifier'
+import type { ValidatedPlanner } from '../lib/validation/plannerValidation'
 import type {
   SaveablePlanner,
   PlannerSummary,
@@ -22,7 +23,7 @@ export interface AcknowledgedPlanner {
 }
 
 export interface PlannerSyncAdapterOperations {
-  syncToServer: (planner: SaveablePlanner, force?: boolean) => Promise<AcknowledgedPlanner>
+  syncToServer: (planner: ValidatedPlanner, force?: boolean) => Promise<AcknowledgedPlanner>
   fetchFromServer: (id: string) => Promise<Result<AcknowledgedPlanner, AppError>>
   deleteFromServer: (id: string) => Promise<Result<void, AppError>>
   listFromServer: () => Promise<PlannerSummary[]>
@@ -78,7 +79,7 @@ function serverSummaryToLocal(summary: ServerPlannerSummary): PlannerSummary {
   }
 }
 
-export function toUpsertRequest(planner: SaveablePlanner): UpsertPlannerRequest {
+export function toUpsertRequest(planner: ValidatedPlanner): UpsertPlannerRequest {
   if (planner.config.type !== 'MIRROR_DUNGEON') {
     throw new Error('Server sync only supports MIRROR_DUNGEON planners')
   }
@@ -104,7 +105,7 @@ export function toUpsertRequest(planner: SaveablePlanner): UpsertPlannerRequest 
 export function usePlannerSyncAdapter(): PlannerSyncAdapterOperations {
   return {
     syncToServer: async (
-      planner: SaveablePlanner,
+      planner: ValidatedPlanner,
       force?: boolean,
     ): Promise<AcknowledgedPlanner> => {
       const response = await plannerApi.upsert(planner.metadata.id, toUpsertRequest(planner), force)

@@ -24,6 +24,7 @@ import type { SaveablePlanner } from '../../types/PlannerTypes'
 import type { AcknowledgedPlanner } from '../usePlannerSyncAdapter'
 import { BannedError, ConflictError, WriteTemporarilyUnavailableError } from '@/lib/apiErrors'
 import { ok, err } from '@/lib/result'
+import { MAX_NOTE_BYTES } from '@/lib/constants'
 
 // Shared call-order recorder: every adapter call pushes its label so order is assertable.
 const callOrder: string[] = []
@@ -251,6 +252,31 @@ describe('usePlannerSave - validation-first (Inv 5)', () => {
 
     expect(result.current.error?.kind).toBe('validation')
     expect(result.current.error).toMatchObject({ kind: 'validation', key: expect.any(String) })
+  })
+
+  it('refuses an oversized note as noteTooLarge, naming the first oversized section in key order', async () => {
+    authenticated()
+    const noteOf = (text: string) => ({
+      content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text }] }] },
+    })
+    const oversized = noteOf('a'.repeat(MAX_NOTE_BYTES))
+    const state = validState({
+      sectionNotes: { floor2: oversized, intro: noteOf('ok'), floor1: oversized },
+    })
+    const { result } = renderHook(() => usePlannerSave(baseOptions({ getState: () => state })))
+
+    let outcome: boolean | undefined
+    await act(async () => {
+      outcome = await result.current.save({ published: false })
+    })
+
+    expect(outcome).toBe(false)
+    expect(callOrder).toEqual([])
+    expect(result.current.error).toEqual({
+      kind: 'validation',
+      key: 'planner:pages.plannerMD.validation.noteTooLarge',
+      params: { section: 'floor1', limit: String(MAX_NOTE_BYTES) },
+    })
   })
 })
 

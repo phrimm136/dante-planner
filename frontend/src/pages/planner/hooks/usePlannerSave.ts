@@ -9,7 +9,6 @@ import { userPlannersQueryKeys } from './useMDUserPlannersData'
 import { plannerQueryKeys } from '../lib/plannerQueryKeys'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
 import { usePlannerIdRegistry } from './usePlannerIdRegistry'
-import { isMDPlanner } from '../types/PlannerTypes'
 import { queryClient } from '@/lib/queryClient'
 import { INITIAL_SYNC_VERSION } from '@/lib/constants'
 import { openStorageDb } from '@/lib/storage'
@@ -17,11 +16,7 @@ import { createWriteThrough } from '../lib/writeThrough'
 import { createSaveStatusStore } from '../stores/saveStatus'
 import type { SaveStatusStore } from '../stores/saveStatus'
 import { generateUUID } from '@/lib/uuid'
-import {
-  validatePlannerForDraftSave,
-  validatePlannerForPublish,
-} from '../lib/validation/plannerValidation'
-import { validateNoteSizes } from '../lib/validation/document'
+import { validatePlannerForSync } from '../lib/validation/plannerValidation'
 import {
   plannerValidationError,
   toUserFriendlyError,
@@ -43,6 +38,7 @@ import type { HeldResolution } from '../lib/editorConflictPlan'
 import type { PlannerState } from '../lib/saveablePlanner'
 import type { AcknowledgedPlanner } from './usePlannerSyncAdapter'
 import type { AppError } from '@/lib/apiErrorClassifier'
+import type { ValidatedPlanner } from '../lib/validation/plannerValidation'
 import type {
   SaveablePlanner,
   ConflictResolutionChoice,
@@ -179,32 +175,22 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     })
   }
 
-  const validateForSave = (saveable: SaveablePlanner): AppError | null => {
-    if (!isMDPlanner(saveable)) return null
-
-    const { content } = saveable
-    const { category } = saveable.config
-    const registry = idRegistryFor(saveable.metadata.contentVersion)
-
-    const noteSizeError = validateNoteSizes(content.sectionNotes)
-    if (noteSizeError) return plannerValidationError(noteSizeError)
-
-    const { errors } = saveable.metadata.published
-      ? validatePlannerForPublish(
-          saveable.metadata.title,
-          content,
-          category,
-          egoGiftSpec,
-          egoGiftI18n,
-          registry,
-        )
-      : validatePlannerForDraftSave(content, category, egoGiftSpec, egoGiftI18n, registry)
-    const [firstError] = errors
-    return firstError ? plannerValidationError(toUserFriendlyError(firstError)) : null
+  const validateForSave = (saveable: SaveablePlanner): Result<ValidatedPlanner, AppError> => {
+    const validated = validatePlannerForSync(
+      saveable,
+      egoGiftSpec,
+      egoGiftI18n,
+      idRegistryFor(saveable.metadata.contentVersion),
+    )
+    if (validated.ok) return validated
+    const [firstError] = validated.error
+    return err(
+      firstError ? plannerValidationError(toUserFriendlyError(firstError)) : { kind: 'unknown' },
+    )
   }
 
   const syncToServer = async (
-    planner: SaveablePlanner,
+    planner: ValidatedPlanner,
     mode: SaveMode,
   ): Promise<Result<AcknowledgedPlanner, AppError>> => {
     try {
@@ -237,12 +223,12 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
 
     const saveable = buildSaveable(currentState, status, opts.published ?? published)
 
-    const invalid = validateForSave(saveable)
-    if (invalid) return err(invalid)
+    const validated = validateForSave(saveable)
+    if (!validated.ok) return err(validated.error)
 
     let didSync = false
     if (isAuthenticated && (syncEnabled || opts.mode !== 'syncIfEnabled')) {
-      const synced = await syncToServer(saveable, opts.mode)
+      const synced = await syncToServer(validated.value, opts.mode)
       if (!synced.ok) return err(synced.error)
       didSync = true
 

@@ -15,7 +15,9 @@ import { EXPORT_FILE_EXTENSION, EXPORT_VERSION } from '@/lib/constants'
 import { GZIP_OS_BYTE_OFFSET, GZIP_OS_TOPS20 } from '../../lib/deckCode'
 
 import type { SaveablePlanner } from '../../types/PlannerTypes'
-import type { PlannerValidationResult } from '../../lib/validation/plannerValidation'
+import type { Result } from '@/lib/result'
+import type { ValidatedPlanner } from '../../lib/validation/plannerValidation'
+import type { PlannerValidationError } from '../../lib/validation/plannerValidationErrors'
 import { contentPath, field, key } from '../../lib/validation/contentPath'
 
 const PLANNER_ID = '00000000-0000-4000-8000-000000000001'
@@ -30,11 +32,16 @@ vi.mock('../../hooks/usePlannerStorage', () => ({
   usePlannerStorage: () => storageMocks,
 }))
 
-const VALID_IMPORT: PlannerValidationResult = { isValid: true, errors: [] }
+type SyncVerdict = Result<ValidatedPlanner, PlannerValidationError[]>
 
-const UNKNOWN_IDENTITY_IMPORT: PlannerValidationResult = {
-  isValid: false,
-  errors: [
+const validImport = (planner: unknown): SyncVerdict => ({
+  ok: true,
+  value: planner as ValidatedPlanner,
+})
+
+const UNKNOWN_IDENTITY_IMPORT: SyncVerdict = {
+  ok: false,
+  error: [
     {
       code: 'UNKNOWN_IDENTITY',
       path: contentPath(field('equipment'), key('01'), field('identity'), field('id')),
@@ -44,14 +51,14 @@ const UNKNOWN_IDENTITY_IMPORT: PlannerValidationResult = {
 }
 
 const validationMocks = vi.hoisted(() => ({
-  validatePlannerForImport: vi.fn(
-    (_planner: unknown): PlannerValidationResult => ({ isValid: true, errors: [] }),
+  validatePlannerForSync: vi.fn(
+    (planner: unknown): SyncVerdict => ({ ok: true, value: planner as ValidatedPlanner }),
   ),
 }))
 
 vi.mock('../../lib/validation/plannerValidation', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../../lib/validation/plannerValidation')>()),
-  validatePlannerForImport: validationMocks.validatePlannerForImport,
+  validatePlannerForSync: validationMocks.validatePlannerForSync,
 }))
 
 vi.mock('../../hooks/usePlannerIdRegistry', () => ({
@@ -148,10 +155,10 @@ describe('PlannerExportImportSection invalid planners', () => {
     storageMocks.listLocal.mockResolvedValue([])
     storageMocks.saveToLocal.mockReset()
     storageMocks.saveToLocal.mockResolvedValue({ ok: true })
-    validationMocks.validatePlannerForImport.mockImplementation((planner) =>
+    validationMocks.validatePlannerForSync.mockImplementation((planner) =>
       (planner as SaveablePlanner).metadata.title === 'Plan 3'
         ? UNKNOWN_IDENTITY_IMPORT
-        : VALID_IMPORT,
+        : validImport(planner),
     )
   })
 
@@ -183,7 +190,7 @@ describe('PlannerExportImportSection invalid planners', () => {
   })
 
   it('reports no success when every planner in the file is rejected', async () => {
-    validationMocks.validatePlannerForImport.mockReturnValue(UNKNOWN_IDENTITY_IMPORT)
+    validationMocks.validatePlannerForSync.mockReturnValue(UNKNOWN_IDENTITY_IMPORT)
     vi.mocked(showSuccess).mockClear()
     const user = userEvent.setup()
     const items = [4, 5].map((n) => {

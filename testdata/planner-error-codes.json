@@ -59,7 +59,7 @@
       "subject": "CATEGORY",
       "problem": "INVALID",
       "rule": "The category is a Mirror Dungeon category.",
-      "emittedBy": ["backend", "frontend"]
+      "emittedBy": ["backend"]
     },
     "MISMATCHED_CATEGORY": {
       "kind": "rule",

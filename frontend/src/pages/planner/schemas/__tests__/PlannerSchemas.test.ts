@@ -20,9 +20,7 @@ import {
   ServerPlannerSummarySchema,
   validateSaveablePlanner,
 } from '../PlannerSchemas'
-import { validateNoteSizes } from '../../lib/validation/document'
 import { isMDPlanner } from '../../types/PlannerTypes'
-import { MAX_NOTE_BYTES } from '@/lib/constants'
 
 // ============================================================================
 // Test Fixtures
@@ -446,8 +444,7 @@ describe('PlannerSchemas integration', () => {
 // Local-JSON import persists via savePlanner -> SaveablePlannerSchema.safeParse.
 // SaveablePlannerSchema treats `content` as an opaque record, so an oversized
 // section note must NOT brick the import (the deliberate "tolerant storage"
-// decision). Enforcement happens later at the save boundary via
-// validateNoteSizes. This pins both halves of that contract together.
+// decision).
 
 describe('import path: oversized note tolerated by storage, gated at save', () => {
   function oversizedSectionNotes() {
@@ -468,15 +465,6 @@ describe('import path: oversized note tolerated by storage, gated at save', () =
     // Import/persist must succeed — a strict refine here would discard the
     // whole imported planner (the rejected design).
     expect(SaveablePlannerSchema.safeParse(planner).success).toBe(true)
-  })
-
-  it('validateNoteSizes flags the same note so the save is blocked', () => {
-    const sectionNotes = oversizedSectionNotes()
-
-    expect(validateNoteSizes(sectionNotes)).toEqual({
-      key: 'pages.plannerMD.validation.noteTooLarge',
-      params: { section: 'intro', limit: String(MAX_NOTE_BYTES) },
-    })
   })
 })
 

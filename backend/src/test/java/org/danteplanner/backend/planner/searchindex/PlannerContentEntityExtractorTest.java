@@ -114,7 +114,6 @@ class PlannerContentEntityExtractorTest {
 
     static Stream<Arguments> moduleCorpusCases() {
         return StreamSupport.stream(CORPUS.path("cases").spliterator(), false)
-                .filter(corpusCase -> MDCategory.isValid(corpusCase.path("category").asText()))
                 .map(corpusCase -> Arguments.of(corpusCase.path("name").asText(), corpusCase));
     }
 

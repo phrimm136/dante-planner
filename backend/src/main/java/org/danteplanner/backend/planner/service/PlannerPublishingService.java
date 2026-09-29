@@ -5,12 +5,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.ToggleOwnerNotificationsResponse;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
+import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PublicationChange;
 import org.danteplanner.backend.planner.validation.floor.Stage;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
+import org.danteplanner.backend.planner.validation.PlannerDocument;
+import org.danteplanner.backend.planner.precondition.PlannerCategoryValidator;
 import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator;
 import org.danteplanner.backend.planner.precondition.PlannerPublishValidator;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
@@ -41,6 +44,7 @@ public class PlannerPublishingService {
     private final PlannerAccessGuard accessGuard;
     private final PlannerOwnershipValidator ownershipValidator;
     private final PlannerPublishValidator publishValidator;
+    private final PlannerCategoryValidator categoryValidator;
     private final DomainEventRecorder domainEventRecorder;
 
     /**
@@ -64,6 +68,7 @@ public class PlannerPublishingService {
     public PlannerResponse publish(Long userId, UUID deviceId, UUID plannerId, UpsertPlannerRequest content) {
         accessGuard.checkNotRestricted(userId);
         accessGuard.holdActiveAccount(userId);
+        requireTitleAfterUpsert(userId, plannerId, content);
 
         return applyPublish(userId, upserted(userId, deviceId, plannerId, content));
     }
@@ -71,6 +76,16 @@ public class PlannerPublishingService {
     @Transactional
     public PlannerResponse unpublish(Long userId, UUID plannerId) {
         return applyUnpublish(userId, accessGuard.requireExisting(plannerId));
+    }
+
+    private void requireTitleAfterUpsert(Long userId, UUID plannerId, UpsertPlannerRequest content) {
+        if (content.title() != null) {
+            publishValidator.requireTitle(content.title());
+            return;
+        }
+        plannerRepository.findAggregateForOwner(plannerId, userId)
+                .map(Planner::getTitle)
+                .ifPresent(publishValidator::requireTitle);
     }
 
     private Planner upserted(Long userId, UUID deviceId, UUID plannerId, UpsertPlannerRequest content) {
@@ -84,10 +99,11 @@ public class PlannerPublishingService {
         ownershipValidator.requireOwner(planner, userId);
 
         publishValidator.requireTitle(planner.getTitle());
-        String normalized = contentValidator.validate(planner.getContentJson(), planner.getCategory(),
-                planner.getContentVersion(), Stage.PUBLISH);
-        if (!normalized.equals(planner.getContentJson())) {
-            planner.getContent().setContent(normalized);
+        MDCategory category = categoryValidator.requireCategoryForType(planner.getPlannerType(), planner.getCategory());
+        PlannerDocument document = contentValidator.parse(planner.getContentJson(), category,
+                contentValidator.season(planner.getContentVersion()), Stage.PUBLISH);
+        if (document.migrated()) {
+            planner.getContent().replaceContent(document);
         }
 
         PublicationChange change = planner.publish();

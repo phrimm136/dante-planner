@@ -1,10 +1,12 @@
 import { EncodedGiftIdSchema, FLOOR_RULE_TABLE, MAX_ENTITY_TIER } from '@/shared/gameData'
 import type { FloorRuleStage, MDCategory } from '@/shared/gameData'
 import { giftDisplayName, hasGiftId } from '@/pages/egoGift'
+import { err, ok } from '@/lib/result'
+import type { Result } from '@/lib/result'
 import type { EGOGiftSpec } from '@/pages/egoGift'
 import { getUnaffordableGiftIds } from '../plannerRules'
 import { isMDPlanner } from '../../types/PlannerTypes'
-import type { MDPlannerContent, SaveablePlanner } from '../../types/PlannerTypes'
+import type { MDPlannerContent, MDSaveablePlanner, SaveablePlanner } from '../../types/PlannerTypes'
 import { contentPath, field } from './contentPath'
 import type { ContentPath } from './contentPath'
 import {
@@ -54,7 +56,9 @@ export interface PlannerIdRegistry {
     | undefined
 }
 
-export type PlannerValidationResult = { isValid: boolean; errors: PlannerValidationError[] }
+declare const validatedBrand: unique symbol
+
+export type ValidatedPlanner = SaveablePlanner & { readonly [validatedBrand]: true }
 
 type ContentStage = Exclude<FloorRuleStage, 'index'>
 
@@ -76,7 +80,7 @@ type PlannerPlan = {
   startBuffs: ParsedStartBuffs
   keywords: ParsedKeywords
   references: ReferenceData
-  season: SeasonReferenceData | undefined
+  season: SeasonReferenceData
   floorReferences: FloorReferenceData
   egoGiftI18n: Record<string, string>
 }
@@ -182,8 +186,6 @@ function floorReferenceError(
   }
 }
 
-const version: PlannerCheck = ({ season }) => (season === undefined ? [unknownVersion()] : [])
-
 const sectionNotes: PlannerCheck = ({ content }) => sectionNotesViolations(content.sectionNotes)
 
 const keywordKinds: PlannerCheck = ({ keywords }) => [...keywords.violations]
@@ -238,7 +240,6 @@ const floors: PlannerCheck = ({ content, category, stage, floorReferences, egoGi
 
 const CHECKS: Record<ContentStage, readonly PlannerCheck[]> = {
   draft: [
-    version,
     sectionNotes,
     keywordKinds,
     equipment,
@@ -251,7 +252,6 @@ const CHECKS: Record<ContentStage, readonly PlannerCheck[]> = {
     floors,
   ],
   publish: [
-    version,
     sectionNotes,
     keywordKinds,
     equipment,
@@ -268,9 +268,9 @@ const CHECKS: Record<ContentStage, readonly PlannerCheck[]> = {
 
 type PlanInput = {
   stage: ContentStage
-  title: string | undefined
   content: MDPlannerContent
   category: MDCategory
+  season: SeasonReferenceData
   egoGiftSpec: Record<string, EGOGiftSpec> | undefined
   egoGiftI18n: Record<string, string> | undefined
   registry: PlannerIdRegistry | undefined
@@ -297,72 +297,58 @@ function planOf(input: PlanInput): PlannerPlan {
     startBuffs: parseStartBuffs(content.selectedBuffIds),
     keywords: parseKeywords(content.selectedKeywords),
     references: referenceData(egoGiftSpec, registry),
-    season: seasonReferenceData(registry),
+    season: input.season,
     floorReferences: floorReferenceData(egoGiftSpec, registry),
     egoGiftI18n: input.egoGiftI18n ?? {},
   }
 }
 
-function validateContent(input: PlanInput): PlannerValidationResult {
-  const missingTitle = input.stage === 'publish' ? titleViolations(input.title) : []
-  if (missingTitle.length > 0) return { isValid: false, errors: missingTitle }
-  const refused = documentRefusal(input.content, input.category)
-  if (refused !== undefined) return { isValid: false, errors: [refused] }
+function contentViolations(input: PlanInput): PlannerValidationError[] {
+  const refused = documentRefusal(input.content)
+  if (refused !== undefined) return [refused]
   const plan = planOf(input)
-  const errors = CHECKS[input.stage].flatMap((check) => check(plan)).sort(byPathThenCode)
-  return { isValid: errors.length === 0, errors }
+  return CHECKS[input.stage].flatMap((check) => check(plan)).sort(byPathThenCode)
 }
 
-export function validatePlannerForPublish(
+function parseMetadata(
+  stage: ContentStage,
   title: string | undefined,
-  content: MDPlannerContent,
-  category: MDCategory,
-  egoGiftSpec?: Record<string, EGOGiftSpec>,
-  egoGiftI18n?: Record<string, string>,
-  registry?: PlannerIdRegistry,
-): PlannerValidationResult {
-  return validateContent({
-    stage: 'publish',
-    title,
-    content,
-    category,
-    egoGiftSpec,
-    egoGiftI18n,
-    registry,
-  })
+  registry: PlannerIdRegistry | undefined,
+): Result<SeasonReferenceData, PlannerValidationError[]> {
+  const missingTitle = stage === 'publish' ? titleViolations(title) : []
+  if (missingTitle.length > 0) return err(missingTitle)
+  const season = seasonReferenceData(registry)
+  return season === undefined ? err([unknownVersion()]) : ok(season)
 }
 
-export function validatePlannerForDraftSave(
-  content: MDPlannerContent,
-  category: MDCategory,
-  egoGiftSpec?: Record<string, EGOGiftSpec>,
-  egoGiftI18n?: Record<string, string>,
-  registry?: PlannerIdRegistry,
-): PlannerValidationResult {
-  return validateContent({
-    stage: 'draft',
-    title: undefined,
-    content,
-    category,
-    egoGiftSpec,
-    egoGiftI18n,
-    registry,
-  })
-}
-
-export function validatePlannerForImport(
-  planner: SaveablePlanner,
-  egoGiftSpec: Record<string, EGOGiftSpec>,
-  registry: PlannerIdRegistry,
-): PlannerValidationResult {
-  if (!isMDPlanner(planner)) return { isValid: true, errors: [] }
-  return validateContent({
-    stage: planner.metadata.published ? 'publish' : 'draft',
-    title: planner.metadata.title,
+function mdViolations(
+  planner: MDSaveablePlanner,
+  egoGiftSpec: Record<string, EGOGiftSpec> | undefined,
+  egoGiftI18n: Record<string, string> | undefined,
+  registry: PlannerIdRegistry | undefined,
+): PlannerValidationError[] {
+  const stage: ContentStage = planner.metadata.published ? 'publish' : 'draft'
+  const season = parseMetadata(stage, planner.metadata.title, registry)
+  if (!season.ok) return season.error
+  return contentViolations({
+    stage,
     content: planner.content,
     category: planner.config.category,
+    season: season.value,
     egoGiftSpec,
-    egoGiftI18n: undefined,
+    egoGiftI18n,
     registry,
   })
+}
+
+export function validatePlannerForSync(
+  planner: SaveablePlanner,
+  egoGiftSpec: Record<string, EGOGiftSpec> | undefined,
+  egoGiftI18n: Record<string, string> | undefined,
+  registry: PlannerIdRegistry | undefined,
+): Result<ValidatedPlanner, PlannerValidationError[]> {
+  const errors = isMDPlanner(planner)
+    ? mdViolations(planner, egoGiftSpec, egoGiftI18n, registry)
+    : []
+  return errors.length === 0 ? ok(planner as ValidatedPlanner) : err(errors)
 }

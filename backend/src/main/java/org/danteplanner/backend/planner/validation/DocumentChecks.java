@@ -1,7 +1,6 @@
 package org.danteplanner.backend.planner.validation;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.entity.PlannerKeywords;
 import org.danteplanner.backend.planner.validation.floor.Stage;
 
@@ -32,13 +31,6 @@ record DocumentChecks(int maxContentSizeBytes, int maxNoteSizeBytes) {
     static Optional<Violation> emptiness(String content) {
         return content == null || content.isBlank()
                 ? Optional.of(new Violation(ErrorCode.EMPTY_CONTENT, ContentPath.root(), "Content is empty or null"))
-                : Optional.empty();
-    }
-
-    static Optional<Violation> category(String category) {
-        return category == null || category.isBlank() || !MDCategory.isValid(category)
-                ? Optional.of(new Violation(ErrorCode.INVALID_CATEGORY, ContentPath.root(),
-                        String.format("Invalid category: %s", category)))
                 : Optional.empty();
     }
 
@@ -85,6 +77,7 @@ record DocumentChecks(int maxContentSizeBytes, int maxNoteSizeBytes) {
         JsonNode sectionNotes = root.path(SECTION_NOTES);
         return switch (sectionNotes.getNodeType()) {
             case OBJECT -> sectionNotes.properties().stream()
+                    .sorted(Map.Entry.comparingByKey())
                     .map(note -> noteSize(note.getKey(), note.getValue()))
                     .flatMap(Optional::stream)
                     .findFirst();

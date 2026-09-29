@@ -4,7 +4,7 @@ import java.util.List;
 
 public sealed interface ContentVerdict permits ContentVerdict.Accepted, ContentVerdict.Refused, ContentVerdict.Rejected {
 
-    record Accepted(String content) implements ContentVerdict {
+    record Accepted(PlannerDocument document) implements ContentVerdict {
     }
 
     record Refused(Violation violation) implements ContentVerdict {

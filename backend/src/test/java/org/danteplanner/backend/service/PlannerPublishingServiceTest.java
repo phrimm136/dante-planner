@@ -9,6 +9,7 @@ import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
 import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator;
+import org.danteplanner.backend.planner.precondition.PlannerCategoryValidator;
 import org.danteplanner.backend.planner.precondition.PlannerPublishValidator;
 
 
@@ -16,6 +17,7 @@ import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.ToggleOwnerNotificationsResponse;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
+import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
@@ -27,18 +29,26 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
-import org.danteplanner.backend.planner.gamedata.PlannerIdMigrations;
+import org.danteplanner.backend.planner.validation.PlannerDocument;
+import org.danteplanner.backend.planner.validation.floor.FloorRules;
+import org.danteplanner.backend.planner.validation.sinner.SinnerIdValidator;
+import org.danteplanner.backend.planner.gamedata.GameDataLoader;
+import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -47,9 +57,9 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -111,13 +121,15 @@ class PlannerPublishingServiceTest {
                 accessGuard,
                 new PlannerOwnershipValidator(),
                 new PlannerPublishValidator(),
+                new PlannerCategoryValidator(),
                 domainEventRecorder
         );
 
         testUser = TestDataFactory.unsavedUser(1L);
 
         when(userService.findById(testUser.getId())).thenReturn(testUser);
-        when(contentValidator.validate(any(), any(), anyInt(), any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(contentValidator.parse(any(), any(), any(), any()))
+                .thenAnswer(invocation -> TestDataFactory.document(invocation.getArgument(0)));
     }
 
     private TestDataFactory.PlannerBuilder testPlannerBuilder() {
@@ -165,17 +177,33 @@ class PlannerPublishingServiceTest {
 
         private final ObjectMapper mapper = new ObjectMapper();
 
+        @TempDir
+        private Path dataDir;
+
+        private PlannerContentValidator validatorRenaming(String idMigrations) throws IOException {
+            try (var entries = Files.list(Path.of("../static/data"))) {
+                for (Path entry : entries.toList()) {
+                    Files.createSymbolicLink(dataDir.resolve(entry.getFileName()), entry.toAbsolutePath());
+                }
+            }
+            Files.writeString(dataDir.resolve(GameDataRegistry.ID_MIGRATIONS_FILE), idMigrations);
+            GameDataRegistry registry = new GameDataRegistry(new GameDataLoader(mapper), dataDir.toString());
+            registry.init();
+            return new PlannerContentValidator(mapper, 51200, 1024, registry, new SinnerIdValidator(),
+                    new FloorRules(registry));
+        }
+
         @Test
         @DisplayName("publishing stored content that holds a renamed gift stores the replacement id")
         void publish_WhenStoredContentHoldsARenamedGift_StoresTheNewId() throws Exception {
-            PlannerIdMigrations table = PlannerIdMigrations.parse(
-                    mapper.readTree("{\"egoGift\":{\"rename\":{\"9247\":\"9002\"}}}"));
+            PlannerContentValidator renaming = validatorRenaming("{\"egoGift\":{\"rename\":{\"9247\":\"9002\"}}}");
             String stored = TestDataFactory.VALID_CONTENT.replace(
                     "\"selectedGiftIds\":[\"9001\"]", "\"selectedGiftIds\":[\"9001\"],\"observationGiftIds\":[\"19247\"]");
             Planner planner = testPlannerBuilder().published(false).content(stored).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
-            when(contentValidator.validate(eq(stored), any(), anyInt(), eq(Stage.PUBLISH)))
-                    .thenAnswer(invocation -> table.normalize(mapper.readTree(stored)).toString());
+            doAnswer(invocation -> renaming.parse(stored, MDCategory.F5,
+                    renaming.season(planner.getContentVersion()), Stage.PUBLISH))
+                    .when(contentValidator).parse(eq(stored), eq(MDCategory.F5), any(), eq(Stage.PUBLISH));
             List<String> indexedContent = new ArrayList<>();
             doAnswer(invocation -> indexedContent.add(((Planner) invocation.getArgument(0)).getContentJson()))
                     .when(plannerCatalogService).onBecameVisible(any());
@@ -193,7 +221,11 @@ class PlannerPublishingServiceTest {
         void publish_WhenNothingIsMigrated_KeepsTheStoredString() {
             Planner planner = testPlannerBuilder().published(false).build();
             String stored = planner.getContentJson();
+            PlannerDocument unmigrated = TestDataFactory.document(
+                    TestDataFactory.withSelectedKeywords(TestDataFactory.VALID_CONTENT, java.util.Set.of("Burst")));
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            doReturn(unmigrated)
+                    .when(contentValidator).parse(eq(stored), any(), any(), eq(Stage.PUBLISH));
 
             publishingService.publish(testUser.getId(), planner.getId());
 
@@ -554,13 +586,71 @@ class PlannerPublishingServiceTest {
         }
 
         @Test
+        @DisplayName("a blank title in the body refuses the publish before an unknown version reaches the upsert")
+        void publishValidatesBeforeMutating_WhenBodyTitleBlankAndVersionUnknown_RefusesTitleWithoutWrite() {
+            Planner planner = testPlannerBuilder().title("Stored Title").published(false).build();
+            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+                    .thenReturn(Optional.of(planner));
+            UpsertPlannerRequest request = new UpsertPlannerRequest(
+                    planner.getId().toString(), "5F", "  ", null, "{}", 99,
+                    PlannerType.MIRROR_DUNGEON, null, null);
+
+            PlannerValidationException thrown = assertThrows(
+                    PlannerValidationException.class,
+                    () -> publishingService.publish(testUser.getId(), UUID.randomUUID(), planner.getId(), request));
+
+            assertEquals("MISSING_TITLE", thrown.getOriginalCode());
+            verifyNoInteractions(plannerCommandService);
+            assertFalse(planner.isPublished());
+        }
+
+        @Test
+        @DisplayName("an absent body title with a blank stored title refuses the publish without a write")
+        void publishValidatesBeforeMutating_WhenBodyTitleAbsentAndStoredBlank_RefusesTitleWithoutWrite() {
+            Planner planner = testPlannerBuilder().title("   ").published(false).build();
+            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+                    .thenReturn(Optional.of(planner));
+            UpsertPlannerRequest request = new UpsertPlannerRequest(
+                    planner.getId().toString(), "5F", null, null, "{}", 99,
+                    PlannerType.MIRROR_DUNGEON, null, null);
+
+            PlannerValidationException thrown = assertThrows(
+                    PlannerValidationException.class,
+                    () -> publishingService.publish(testUser.getId(), UUID.randomUUID(), planner.getId(), request));
+
+            assertEquals("MISSING_TITLE", thrown.getOriginalCode());
+            verifyNoInteractions(plannerCommandService);
+        }
+
+        @Test
+        @DisplayName("an absent body title keeps the stored title, which admits the publish")
+        void publishValidatesBeforeMutating_WhenBodyTitleAbsentAndStoredPresent_Publishes() {
+            Planner planner = testPlannerBuilder().title("Stored Title").published(false).build();
+            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+                    .thenReturn(Optional.of(planner));
+            UpsertPlannerRequest request = new UpsertPlannerRequest(
+                    planner.getId().toString(), "5F", null, null, "{}", 1,
+                    PlannerType.MIRROR_DUNGEON, null, null);
+            UUID deviceId = UUID.randomUUID();
+            when(plannerCommandService.upsertAggregate(
+                    testUser.getId(), deviceId, planner.getId(), request, false))
+                    .thenReturn(new PlannerCommandService.UpsertedPlanner(
+                            planner, PlannerResponse.fromEntity(planner), false));
+
+            PlannerResponse result = publishingService.publish(
+                    testUser.getId(), deviceId, planner.getId(), request);
+
+            assertTrue(result.published());
+        }
+
+        @Test
         @DisplayName("refused content leaves the aggregate where it was")
         void publishValidatesBeforeMutating_WhenContentRefused_LeavesAggregateUnpublished() {
             Planner planner = testPlannerBuilder().published(false).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
             doThrow(new PlannerValidationException("EMPTY_CONTENT", "Content is required"))
                     .when(contentValidator)
-                    .validate(any(), any(), anyInt(), eq(Stage.PUBLISH));
+                    .parse(any(), any(), any(), eq(Stage.PUBLISH));
 
             assertThrows(
                     PlannerValidationException.class,

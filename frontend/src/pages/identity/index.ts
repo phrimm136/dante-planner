@@ -16,7 +16,11 @@ export { ResistancePanel } from './components/ResistancePanel'
 export { StaggerPanel } from './components/StaggerPanel'
 export { TraitsDisplay } from './components/TraitsDisplay'
 
-export { useIdentityListSpec, useIdentityListI18n } from './hooks/useIdentityListData'
+export {
+  useIdentityListSpec,
+  useIdentityListI18n,
+  IDENTITY_LIST,
+} from './hooks/useIdentityListData'
 export { useIdentityDetailSpec, useIdentityDetailI18n } from './hooks/useIdentityDetailData'
 
 export type { IdentityEntity, IdentitySpec, Uptie, IdentitySkillEntry } from './types/IdentityTypes'

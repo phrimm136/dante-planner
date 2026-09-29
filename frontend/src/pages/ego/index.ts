@@ -10,7 +10,7 @@ export { SinResistancePanel } from './components/SinResistancePanel'
 export { SkillsSectionI18n } from './components/EGOSkillI18n'
 export { PassiveCardWithSuspense } from './components/PassiveI18n'
 
-export { useEGOListSpec, useEGOListI18n } from './hooks/useEGOListData'
+export { useEGOListSpec, useEGOListI18n, EGO_LIST } from './hooks/useEGOListData'
 export { useEGODetailSpec, useEGODetailI18n } from './hooks/useEGODetailData'
 
 export { toEGOEntity } from './lib/egoEntity'

@@ -19,6 +19,7 @@ import org.danteplanner.backend.planner.entity.PlannerContent;
 import org.danteplanner.backend.planner.entity.PlannerModeration;
 import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.planner.entity.StoredPlannerContent;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.danteplanner.backend.user.entity.User;
@@ -202,7 +203,7 @@ class ModerationAuditMatrixTest {
                 .plannerType(PlannerType.MIRROR_DUNGEON)
                 .build();
         planner.attach(
-                PlannerContent.builder().title("t").category("5F").content("{}").build(),
+                StoredPlannerContent.holding(PlannerContent.builder().title("t").category("5F").build(), "{}"),
                 PlannerPublication.builder().build(),
                 PlannerModeration.builder().build());
         return planner;

@@ -93,11 +93,11 @@ export function startGiftViolations(
   rawKeyword: unknown,
   startGifts: StartGifts,
   data: StartGiftReferenceData,
-  season: StartGiftSeason | undefined,
+  season: StartGiftSeason,
 ): StartGiftViolation[] {
   const keyword = parseKeyword(rawKeyword)
   return [
     ...(keyword.kind === 'rejected' ? [keyword.violation] : []),
-    ...(season === undefined ? [] : seasonViolations(keyword, startGifts, data, season)),
+    ...seasonViolations(keyword, startGifts, data, season),
   ].sort(byPathThenCode)
 }

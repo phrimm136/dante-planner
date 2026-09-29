@@ -4,12 +4,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Predicate;
 
-import org.danteplanner.backend.architecture.fixture.UnadmittedContentWriter;
-import org.danteplanner.backend.planner.entity.PlannerContent;
+import org.danteplanner.backend.architecture.fixture.UnadmittedFilterRebuilder;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
-import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.planner.service.PlannerFilterService;
-import org.danteplanner.backend.planner.service.PlannerPublishingService;
 import org.danteplanner.backend.planner.searchindex.PlannerContentEntityExtractor;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
 import org.danteplanner.backend.planner.validation.floor.FloorRules;
@@ -27,8 +24,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ContentWritersAdmitFloorsTest {
 
-    private static final String CONTENT_BUILDER = PlannerContent.class.getName() + "$PlannerContentBuilder";
-
     private static final Set<String> ADMISSION_PATH = Set.of(
             PlannerContentValidator.class.getName(),
             FloorRules.class.getName(),
@@ -42,13 +37,13 @@ class ContentWritersAdmitFloorsTest {
             .importPackages("org.danteplanner.backend");
 
     @Test
-    @DisplayName("Every production class storing content or rebuilding the entity filter depends on the admission path")
+    @DisplayName("Every production class rebuilding the entity filter depends on the admission path")
     void contentWriters_WhenScanned_DependOnTheAdmissionPathUnlessFrozen() {
         Set<String> unfrozen = new TreeSet<>(unadmittedWriters(PRODUCTION));
         unfrozen.removeAll(FROZEN_UNADMITTED_WRITERS);
 
         assertThat(unfrozen)
-                .as("these store planner content or rebuild planner_entity_filter without depending on "
+                .as("these rebuild planner_entity_filter without depending on "
                         + "PlannerContentValidator, FloorRules or PlannerContentEntityExtractor; admit the floors first")
                 .isEmpty();
     }
@@ -65,20 +60,18 @@ class ContentWritersAdmitFloorsTest {
     }
 
     @Test
-    @DisplayName("The writer selector finds today's content and index writers")
+    @DisplayName("The writer selector finds today's index writers")
     void contentWriters_WhenScanned_IncludeEveryKnownWriter() {
         assertThat(topLevelNames(PRODUCTION, ContentWritersAdmitFloorsTest::writes)).containsExactlyInAnyOrder(
-                PlannerCommandService.class.getName(),
-                PlannerPublishingService.class.getName(),
                 PlannerFilterService.class.getName());
     }
 
     @Test
-    @DisplayName("A class storing content without the admission path is named by the rule")
-    void unadmittedContentWriter_WhenScanned_IsNamed() {
-        JavaClasses fixture = new ClassFileImporter().importClasses(UnadmittedContentWriter.class);
+    @DisplayName("A class rebuilding the entity filter without the admission path is named by the rule")
+    void unadmittedFilterRebuilder_WhenScanned_IsNamed() {
+        JavaClasses fixture = new ClassFileImporter().importClasses(UnadmittedFilterRebuilder.class);
 
-        assertThat(unadmittedWriters(fixture)).containsExactly(UnadmittedContentWriter.class.getName());
+        assertThat(unadmittedWriters(fixture)).containsExactly(UnadmittedFilterRebuilder.class.getName());
     }
 
     private static Set<String> unadmittedWriters(JavaClasses classes) {
@@ -98,11 +91,8 @@ class ContentWritersAdmitFloorsTest {
     }
 
     private static boolean isWrite(JavaMethodCall call) {
-        String owner = call.getTargetOwner().getName();
-        String name = call.getName();
-        return (owner.equals(PlannerContent.class.getName()) && name.equals("setContent"))
-                || (owner.equals(CONTENT_BUILDER) && name.equals("content"))
-                || (owner.equals(PlannerEntityFilterRepository.class.getName()) && name.equals("rebuildPlannerFilters"));
+        return call.getTargetOwner().getName().equals(PlannerEntityFilterRepository.class.getName())
+                && call.getName().equals("rebuildPlannerFilters");
     }
 
     private static boolean dependsOnAdmission(JavaClass javaClass) {

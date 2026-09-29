@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { describe, it, expect } from 'vitest'
 
-import { FLOOR_RULE_TABLE, MD_CATEGORIES } from '@/shared/gameData'
+import { FLOOR_RULE_TABLE } from '@/shared/gameData'
 import type { FloorRuleStage, MDCategory } from '@/shared/gameData'
 import { decodeGiftId } from '../../boundary'
 import { renderContentPath } from '../../contentPath'
@@ -19,7 +19,7 @@ type CorpusViolation = { code: string; path: string }
 
 type CorpusCase = {
   name: string
-  category: string
+  category: MDCategory
   floorSelections: unknown
   expect: {
     draft: { ok: boolean; violations: CorpusViolation[] }
@@ -72,11 +72,8 @@ const MODULE_CODES: readonly FloorViolationCode[] = [
   'DUPLICATE_EGOGIFT',
 ]
 const ID_CHECK_CODES = ['UNKNOWN_THEMEPACK', 'UNKNOWN_EGOGIFT_FLOOR', 'UNAFFORDABLE_EGOGIFT']
-const CALLER_BOUNDARY_CODES = ['INVALID_CATEGORY']
 
 const isModuleCode = (code: string) => (MODULE_CODES as readonly string[]).includes(code)
-const isMdCategory = (category: string): category is MDCategory =>
-  (MD_CATEGORIES as readonly string[]).includes(category)
 
 const pairs = (violations: readonly CorpusViolation[]) =>
   violations.map(({ code, path: violationPath }) => [code, violationPath])
@@ -84,29 +81,23 @@ const pairs = (violations: readonly CorpusViolation[]) =>
 const pairsOf = (violations: readonly Violation[]) =>
   violations.map(({ code, path: violationPath }) => [code, renderContentPath(violationPath)])
 
-const moduleCases = corpus.cases.filter((c) => isMdCategory(c.category))
-const callerCases = corpus.cases.filter((c) => !isMdCategory(c.category))
 const ruleStages: FloorRuleStage[] = ['draft', 'publish']
 
 const indicesOf = (parsed: ParsedFloors, kind: ParsedFloor['kind']) =>
   parsed.floors.flatMap((floor, floorIndex) => (floor.kind === kind ? [floorIndex] : []))
 
 function admit(c: CorpusCase, stage: FloorRuleStage) {
-  const parsed = parseFloors(
-    c.floorSelections,
-    FLOOR_RULE_TABLE.categories[c.category as MDCategory],
-  )
+  const parsed = parseFloors(c.floorSelections, FLOOR_RULE_TABLE.categories[c.category])
   return { parsed, admission: admitFloors(parsed, stage) }
 }
 
 describe('floor rules corpus', () => {
-  it('holds 63 cases, 62 of them for the module', () => {
-    expect(corpus.cases).toHaveLength(63)
-    expect(moduleCases).toHaveLength(62)
+  it('holds 62 cases', () => {
+    expect(corpus.cases).toHaveLength(62)
   })
 
-  it('records only module codes, id-check codes and caller boundary codes', () => {
-    const known = new Set<string>([...MODULE_CODES, ...ID_CHECK_CODES, ...CALLER_BOUNDARY_CODES])
+  it('records only module codes and id-check codes', () => {
+    const known = new Set<string>([...MODULE_CODES, ...ID_CHECK_CODES])
     const recorded = corpus.cases.flatMap((c) =>
       [c.expect.draft, c.expect.publish, c.expect.index].flatMap((e) =>
         e.violations.map((v) => v.code),
@@ -139,17 +130,8 @@ describe('floor rules corpus', () => {
     }
   })
 
-  it('leaves only the unknown-category case to the caller, which rejects it at category', () => {
-    expect(callerCases.map((c) => c.name)).toEqual(['boundary-unknown-category'])
-    for (const c of callerCases) {
-      for (const stage of ['draft', 'publish', 'index'] as const) {
-        expect(pairs(c.expect[stage].violations)).toEqual([['INVALID_CATEGORY', 'category']])
-      }
-    }
-  })
-
   describe.each(ruleStages)('%s', (stage) => {
-    it.each(moduleCases.map((c) => [c.name, c] as const))('%s', (_name, c) => {
+    it.each(corpus.cases.map((c) => [c.name, c] as const))('%s', (_name, c) => {
       const expected = c.expect[stage].violations
       const { parsed, admission } = admit(c, stage)
       const reported = [
@@ -164,7 +146,7 @@ describe('floor rules corpus', () => {
   })
 
   describe('index', () => {
-    it.each(moduleCases.map((c) => [c.name, c] as const))('%s', (_name, c) => {
+    it.each(corpus.cases.map((c) => [c.name, c] as const))('%s', (_name, c) => {
       const { parsed, admission } = admit(c, 'index')
       const admitted = admission.ok ? admission.floors : []
       const boundaryViolations = admission.ok ? admission.boundaryViolations : admission.violations

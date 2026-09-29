@@ -61,16 +61,14 @@ class FloorRulesCorpusTest {
             ErrorCode.UNKNOWN_EGOGIFT_FLOOR,
             ErrorCode.UNAFFORDABLE_EGOGIFT);
 
-    private static final Set<String> CALLER_CODES = codes(ErrorCode.INVALID_CATEGORY);
-
-    private static final int MODULE_CASE_COUNT = 62;
+    private static final int CASE_COUNT = 62;
 
     private static final FloorReferenceData CORPUS_GAME_DATA = corpusGameData(readCorpus().path("gameData"));
 
     private final FloorRules rules = new FloorRules(TABLE);
 
     static Stream<Arguments> corpusCases() {
-        return moduleCases()
+        return allCases()
                 .flatMap(corpusCase -> Stream.of(Stage.values())
                         .map(stage -> Arguments.of(corpusCase.path("name").asText(), stage, corpusCase)));
     }
@@ -107,25 +105,9 @@ class FloorRulesCorpusTest {
                 .forEach(pair -> recordedCodes.add(pair.get(0)))));
         Set<String> named = new HashSet<>(MODULE_CODES);
         named.addAll(ID_CHECK_CODES);
-        named.addAll(CALLER_CODES);
-        List<String> callerSideCases = cases.stream()
-                .filter(corpusCase -> !MDCategory.isValid(corpusCase.path("category").asText()))
-                .map(corpusCase -> corpusCase.path("name").asText())
-                .toList();
 
         assertThat(named).containsAll(recordedCodes);
-        assertThat(callerSideCases).containsExactly("boundary-unknown-category");
-        assertThat(moduleCases()).hasSize(MODULE_CASE_COUNT);
-    }
-
-    @Test
-    void corpus_WhenTheCategoryIsUnknown_RecordsOnlyTheCallersCategoryViolation() {
-        JsonNode corpusCase = namedCase("boundary-unknown-category");
-
-        for (Stage stage : Stage.values()) {
-            assertThat(pairs(corpusCase.path("expect").path(stage.tableName()).path("violations")))
-                    .containsExactly(List.of(ErrorCode.INVALID_CATEGORY.getCode(), "category"));
-        }
+        assertThat(cases).hasSize(CASE_COUNT);
     }
 
     @ParameterizedTest(name = "{0} at {1}")
@@ -350,10 +332,6 @@ class FloorRulesCorpusTest {
 
     private static Stream<JsonNode> allCases() {
         return StreamSupport.stream(readCorpus().path("cases").spliterator(), false);
-    }
-
-    private static Stream<JsonNode> moduleCases() {
-        return allCases().filter(corpusCase -> MDCategory.isValid(corpusCase.path("category").asText()));
     }
 
     private static JsonNode namedCase(String name) {

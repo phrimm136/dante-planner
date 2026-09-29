@@ -1,6 +1,7 @@
 export {
   useEntityListSpec,
   useEntityListI18n,
+  entityListSpecOptions,
   entityListI18nOptions,
 } from './hooks/useEntityListData'
 export type { EntityListDataConfig } from './hooks/useEntityListData'

@@ -13,10 +13,7 @@ import { useAuthQuery } from '@/shared/auth'
 import { useUserSettingsQuery } from '@/shared/userSettings'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
 import { usePlannerIdRegistry } from './usePlannerIdRegistry'
-import {
-  validatePlannerForDraftSave,
-  validatePlannerForPublish,
-} from '../lib/validation/plannerValidation'
+import { validatePlannerForSync } from '../lib/validation/plannerValidation'
 import {
   plannerValidationError,
   toUserFriendlyError,
@@ -38,6 +35,8 @@ import { matchesPlannerFilters } from '../lib/plannerContentExtractors'
 
 import { isMDPlanner } from '../types/PlannerTypes'
 import type { AppError } from '@/lib/apiErrorClassifier'
+import type { Result } from '@/lib/result'
+import type { ValidatedPlanner } from '../lib/validation/plannerValidation'
 import type { ConflictEffect, ConflictOps, ConflictOutcome } from '../lib/conflictChoice'
 import type { SyncOps } from '../lib/syncPlan'
 import type { PlannerSummary, SaveablePlanner } from '../types/PlannerTypes'
@@ -236,20 +235,20 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
     }
   })()
 
-  const validateBeforeSync = (planner: SaveablePlanner): AppError | null => {
-    if (!isMDPlanner(planner)) return null
-    if (!egoGiftSpec) return { kind: 'retryable' }
+  const validateBeforeSync = (planner: SaveablePlanner): Result<ValidatedPlanner, AppError> => {
+    if (isMDPlanner(planner) && !egoGiftSpec) return err({ kind: 'retryable' })
 
-    const { content } = planner
-    const { category } = planner.config
-    const { title, published } = planner.metadata
-    const registry = idRegistryFor(planner.metadata.contentVersion)
-
-    const { errors } = published
-      ? validatePlannerForPublish(title, content, category, egoGiftSpec, egoGiftI18n, registry)
-      : validatePlannerForDraftSave(content, category, egoGiftSpec, egoGiftI18n, registry)
-    const [firstError] = errors
-    return firstError ? plannerValidationError(toUserFriendlyError(firstError)) : null
+    const validated = validatePlannerForSync(
+      planner,
+      egoGiftSpec,
+      egoGiftI18n,
+      idRegistryFor(planner.metadata.contentVersion),
+    )
+    if (validated.ok) return validated
+    const [firstError] = validated.error
+    return err(
+      firstError ? plannerValidationError(toUserFriendlyError(firstError)) : { kind: 'unknown' },
+    )
   }
 
   const conflictOps = (conflict: ConflictItem): ConflictOps => ({

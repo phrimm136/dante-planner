@@ -417,9 +417,6 @@
       "unnamed:fe-schema-requires-giftIds-key": [
         "boundary-gift-ids-absent"
       ],
-      "unnamed:unknown-category-fe-rules-and-index": [
-        "boundary-unknown-category"
-      ],
       "1": [
         "boundary-malformed-past-count"
       ],
@@ -433,7 +430,7 @@
         "scn-three-violations-three-floors"
       ]
     },
-    "divergentCount": 35,
+    "divergentCount": 34,
     "caseCount": 57,
     "openCases": []
   },
@@ -9688,176 +9685,6 @@
       },
       "verdictRow": [
         7
-      ]
-    },
-    {
-      "name": "boundary-unknown-category",
-      "category": "20F",
-      "sources": [
-        "boundary:unknown-category"
-      ],
-      "floorSelections": [
-        {
-          "themePackId": "1001",
-          "difficulty": 0,
-          "giftIds": [
-            "9002"
-          ]
-        },
-        {
-          "themePackId": "1002",
-          "difficulty": 0,
-          "giftIds": []
-        },
-        {
-          "themePackId": "1003",
-          "difficulty": 0,
-          "giftIds": []
-        },
-        {
-          "themePackId": "1004",
-          "difficulty": 0,
-          "giftIds": []
-        },
-        {
-          "themePackId": "1005",
-          "difficulty": 0,
-          "giftIds": []
-        }
-      ],
-      "captured": {
-        "be.validate.DRAFT": {
-          "ok": false,
-          "violations": [
-            {
-              "code": "INVALID_CATEGORY",
-              "path": null
-            }
-          ]
-        },
-        "be.validate.PUBLISH": {
-          "ok": false,
-          "violations": [
-            {
-              "code": "INVALID_CATEGORY",
-              "path": null
-            }
-          ]
-        },
-        "be.validateFloorRules.DRAFT": {
-          "ok": false,
-          "violations": [
-            {
-              "code": "INVALID_CATEGORY",
-              "path": null
-            }
-          ]
-        },
-        "be.validateFloorRules.PUBLISH": {
-          "ok": false,
-          "violations": [
-            {
-              "code": "INVALID_CATEGORY",
-              "path": null
-            }
-          ]
-        },
-        "fe.schema": {
-          "ok": false,
-          "issuePaths": [
-            "config.category"
-          ]
-        },
-        "fe.draftSave": {
-          "ok": true,
-          "firstOnly": true,
-          "violations": [],
-          "returned": null
-        },
-        "fe.publish": {
-          "ok": true,
-          "violations": []
-        },
-        "index.java": {
-          "threw": "IllegalArgumentException: Unknown MDCategory value: 20F"
-        },
-        "index.sql": []
-      },
-      "divergent": true,
-      "divergences": [
-        {
-          "sites": [
-            "be.validate.DRAFT",
-            "fe.draftSave"
-          ],
-          "kind": "violations",
-          "be": [
-            [
-              "INVALID_CATEGORY",
-              null
-            ]
-          ],
-          "feFirst": []
-        },
-        {
-          "sites": [
-            "be.validate.PUBLISH",
-            "fe.publish"
-          ],
-          "kind": "violations",
-          "onlyLeft": [
-            [
-              "INVALID_CATEGORY",
-              null
-            ]
-          ],
-          "onlyRight": []
-        },
-        {
-          "sites": [
-            "index.java",
-            "index.sql"
-          ],
-          "kind": "rows",
-          "java": {
-            "threw": "IllegalArgumentException: Unknown MDCategory value: 20F"
-          },
-          "sql": []
-        }
-      ],
-      "expect": {
-        "draft": {
-          "ok": false,
-          "violations": [
-            {
-              "code": "INVALID_CATEGORY",
-              "path": "category"
-            }
-          ]
-        },
-        "publish": {
-          "ok": false,
-          "violations": [
-            {
-              "code": "INVALID_CATEGORY",
-              "path": "category"
-            }
-          ]
-        },
-        "index": {
-          "ok": false,
-          "floors": [],
-          "violations": [
-            {
-              "code": "INVALID_CATEGORY",
-              "path": "category"
-            }
-          ],
-          "rows": []
-        }
-      },
-      "verdictRow": [
-        "unnamed:unknown-category-fe-rules-and-index"
       ]
     },
     {

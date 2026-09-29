@@ -43,7 +43,7 @@ import static org.mockito.Mockito.when;
  * Unit tests for PlannerContentValidator.
  *
  * <p>Tests all validation rules for planner content including:
- * required fields, field types, category parameter validation, sinner indices,
+ * required fields, field types, sinner indices,
  * content size limits, note size limits, and unknown fields detection.</p>
  *
  * <p>Note: title is in metadata, category is passed as a parameter.</p>
@@ -99,11 +99,11 @@ class PlannerContentValidatorTest {
     }
 
     private String validate(String content, String category) {
-        return validator.validate(content, category, VERSION, Stage.DRAFT);
+        return validate(content, category, Stage.DRAFT);
     }
 
     private String validate(String content, String category, Stage stage) {
-        return validator.validate(content, category, VERSION, stage);
+        return validator.parse(content, MDCategory.fromValue(category), validator.season(VERSION), stage).json();
     }
 
     // ========================================================================
@@ -510,43 +510,6 @@ class PlannerContentValidatorTest {
                 """;
 
             assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
-        }
-    }
-
-    @Nested
-    @DisplayName("Invalid Category Parameter Tests")
-    class InvalidCategoryTests {
-
-        @Test
-        @DisplayName("Should throw exception for invalid category parameter")
-        void validate_WhenInvalidCategoryParam_ThrowsException() {
-            PlannerValidationException exception = assertThrows(
-                    PlannerValidationException.class,
-                    () -> validate(createValidContent(), "20F")
-            );
-
-            assertEquals("INVALID_CATEGORY", exception.getOriginalCode());
-        }
-
-        @Test
-        @DisplayName("Should throw exception for lowercase category parameter")
-        void validate_WhenLowercaseCategoryParam_ThrowsException() {
-            assertThrows(PlannerValidationException.class,
-                    () -> validate(createValidContent(), "5f"));
-        }
-
-        @Test
-        @DisplayName("Should throw exception for null category parameter")
-        void validate_WhenNullCategoryParam_ThrowsException() {
-            assertThrows(PlannerValidationException.class,
-                    () -> validate(createValidContent(), null));
-        }
-
-        @Test
-        @DisplayName("Should throw exception for empty category parameter")
-        void validate_WhenEmptyCategoryParam_ThrowsException() {
-            assertThrows(PlannerValidationException.class,
-                    () -> validate(createValidContent(), ""));
         }
     }
 
@@ -1832,43 +1795,12 @@ class PlannerContentValidatorTest {
                     "{\"themePackId\":\"9999\",\"difficulty\":0,\"giftIds\":[\"9212\"]}");
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> realValidator.validate(content, "5F", VERSION, Stage.PUBLISH));
+                    () -> realValidator.parse(content, MDCategory.F5, realValidator.season(VERSION), Stage.PUBLISH));
 
             assertThat(ex.getSubErrors()).containsExactly(
                     new ValidationError("UNAFFORDABLE_EGOGIFT", "floorSelections[0].giftIds[0]", "Gift '9212' is not affordable for theme pack '9999'"),
                     new ValidationError("UNKNOWN_THEMEPACK", "floorSelections[0].themePackId",
                             "floorSelections[0].themePackId ID '9999' not found or invalid"));
-        }
-
-        @Test
-        void validate_WhenTheCategoryIsRefractedRailway_RejectsTheCategoryAloneBeforeAnyFloorCheck() {
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validate(createValidContent(), "RR_PLACEHOLDER"));
-
-            assertEquals("INVALID_CATEGORY", ex.getOriginalCode());
-            assertThat(ex.getSubErrors()).containsExactly(
-                    new ValidationError("INVALID_CATEGORY", "", "Invalid category: RR_PLACEHOLDER"));
-        }
-    }
-
-    @Nested
-    @DisplayName("isSameDocument Tests")
-    class IsSameDocumentTests {
-
-        @Test
-        void isSameDocument_WhenOnlyFormattingDiffers_IsTrue() {
-            assertTrue(validator.isSameDocument("{\"a\": [1, 2], \"b\": 1.0}", "{\"b\":1,\"a\":[1,2]}"));
-        }
-
-        @Test
-        void isSameDocument_WhenAValueDiffers_IsFalse() {
-            assertFalse(validator.isSameDocument("{\"a\":[1,2]}", "{\"a\":[2,1]}"));
-        }
-
-        @Test
-        void isSameDocument_WhenNothingIsStoredOrContentIsMalformed_IsFalse() {
-            assertFalse(validator.isSameDocument("{}", null));
-            assertFalse(validator.isSameDocument("{", "{}"));
         }
     }
 

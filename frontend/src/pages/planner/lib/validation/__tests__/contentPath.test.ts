@@ -78,7 +78,7 @@ describe('renderContentPath', () => {
       ),
     )
     expect([...recorded]).toEqual(
-      expect.arrayContaining(['floorSelections', 'floorSelections[14]', 'category']),
+      expect.arrayContaining(['floorSelections', 'floorSelections[14]']),
     )
     const mismatches = [...recorded].filter((text) => renderContentPath(built(text)) !== text)
     expect(mismatches).toEqual([])

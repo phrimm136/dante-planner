@@ -8,7 +8,6 @@ import {
   parseKeywords,
   sectionNotesViolations,
   titleViolations,
-  validateNoteSizes,
 } from '../document'
 import { rendered } from './rendered'
 
@@ -47,52 +46,6 @@ describe('keywordViolations', () => {
     expect(rendered(parseKeywords('9828').violations)).toEqual([
       { code: 'INVALID_FIELD_TYPE', path: 'selectedKeywords' },
     ])
-  })
-})
-
-describe('validateNoteSizes', () => {
-  function noteWithText(text: string) {
-    return {
-      content: {
-        type: 'doc',
-        content: [{ type: 'paragraph', content: [{ type: 'text', text }] }],
-      },
-    }
-  }
-
-  const overhead = calculateNoteByteLength(noteWithText(''))
-
-  it('returns null when all notes are within the limit', () => {
-    expect(
-      validateNoteSizes({ intro: noteWithText('hello'), 'floor-0': noteWithText('') }),
-    ).toBeNull()
-  })
-
-  it('returns null for an empty notes map', () => {
-    expect(validateNoteSizes({})).toBeNull()
-  })
-
-  it('accepts a note exactly at the byte limit', () => {
-    const atLimit = noteWithText('a'.repeat(MAX_NOTE_BYTES - overhead))
-    expect(calculateNoteByteLength(atLimit)).toBe(MAX_NOTE_BYTES)
-    expect(validateNoteSizes({ intro: atLimit })).toBeNull()
-  })
-
-  it('flags the offending section one byte over the limit', () => {
-    const overLimit = noteWithText('a'.repeat(MAX_NOTE_BYTES - overhead + 1))
-    const result = validateNoteSizes({ intro: noteWithText('ok'), deckBuilder: overLimit })
-
-    expect(result).toEqual({
-      key: 'pages.plannerMD.validation.noteTooLarge',
-      params: { section: 'deckBuilder', limit: String(MAX_NOTE_BYTES) },
-    })
-  })
-
-  it('measures multibyte content as UTF-8 bytes', () => {
-    const koreanCharCount = Math.ceil((MAX_NOTE_BYTES - overhead) / 3) + 1
-    const result = validateNoteSizes({ 'floor-3': noteWithText('가'.repeat(koreanCharCount)) })
-
-    expect(result?.params.section).toBe('floor-3')
   })
 })
 
@@ -149,17 +102,13 @@ describe('documentRefusal', () => {
     ...fields,
   })
 
-  const refusalOf = (content: unknown, category = '5F') => {
-    const refused = documentRefusal(content, category)
+  const refusalOf = (content: unknown) => {
+    const refused = documentRefusal(content)
     return refused === undefined ? undefined : rendered([refused])[0]
   }
 
   it('admits a document with every required field and only known fields', () => {
     expect(refusalOf(document({ selectedBuffIds: [], selectedGiftKeyword: null }))).toBeUndefined()
-  })
-
-  it.each(['XX', '', 'toString'])('refuses the category %j outside the rule table', (category) => {
-    expect(refusalOf(document(), category)).toEqual({ code: 'INVALID_CATEGORY', path: '' })
   })
 
   it('refuses an unknown top-level field at the root', () => {
@@ -183,7 +132,7 @@ describe('documentRefusal', () => {
     expect(refusalOf(document({ sectionNotes: null }))).toBeUndefined()
   })
 
-  it('checks the category, then unknown fields, then required fields, then note size', () => {
+  it('checks unknown fields, then required fields, then note size', () => {
     const oversizedNotes = { floor1: noteOf('a'.repeat(MAX_NOTE_BYTES)) }
     const withoutEquipment = (fields: Record<string, unknown>) => {
       const content: Record<string, unknown> = document({ sectionNotes: oversizedNotes, ...fields })
@@ -191,7 +140,6 @@ describe('documentRefusal', () => {
       return content
     }
 
-    expect(refusalOf(withoutEquipment({ mystery: 1 }), 'XX')?.code).toBe('INVALID_CATEGORY')
     expect(refusalOf(withoutEquipment({ mystery: 1 }))?.code).toBe('UNKNOWN_FIELD')
     expect(refusalOf(withoutEquipment({}))?.code).toBe('MISSING_REQUIRED_FIELD')
     expect(refusalOf(document({ sectionNotes: oversizedNotes }))?.code).toBe('SIZE_EXCEEDED')
@@ -203,14 +151,21 @@ describe('documentRefusal', () => {
     expect(refusalOf(document({ sectionNotes: { floor1: atLimit } }))).toBeUndefined()
   })
 
-  it('refuses the first oversized note in key order, one byte over, at its key', () => {
+  it('refuses the first oversized note in plain string key order, one byte over, at its key', () => {
     const overLimit = noteOf('a'.repeat(MAX_NOTE_BYTES - overhead + 1))
     const sectionNotes = { intro: noteOf('ok'), floor2: overLimit, floor1: overLimit }
 
     expect(refusalOf(document({ sectionNotes }))).toEqual({
       code: 'SIZE_EXCEEDED',
-      path: 'sectionNotes[floor2]',
-      params: { section: 'floor2', limit: String(MAX_NOTE_BYTES) },
+      path: 'sectionNotes[floor1]',
+      params: { section: 'floor1', limit: String(MAX_NOTE_BYTES) },
     })
+  })
+
+  it('orders an integer-like note key as a string, not ahead of the others', () => {
+    const overLimit = noteOf('a'.repeat(MAX_NOTE_BYTES - overhead + 1))
+    const sectionNotes = { floor1: overLimit, '10': overLimit, '9': overLimit }
+
+    expect(refusalOf(document({ sectionNotes }))?.path).toBe('sectionNotes[10]')
   })
 })

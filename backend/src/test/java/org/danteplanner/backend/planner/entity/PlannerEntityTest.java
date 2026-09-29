@@ -22,12 +22,11 @@ class PlannerEntityTest {
                 .createdAt(Instant.now())
                 .build();
         planner.attach(
-                PlannerContent.builder()
+                StoredPlannerContent.holding(PlannerContent.builder()
                         .title("Test Planner")
                         .category("5F")
-                        .content("{}")
                         .gameContentVersion(6)
-                        .build(),
+                        .build(), "{}"),
                 PlannerPublication.builder().build(),
                 PlannerModeration.builder().build());
         planner.publish();

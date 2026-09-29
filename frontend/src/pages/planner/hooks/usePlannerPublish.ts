@@ -10,9 +10,10 @@ import { useInvalidatePlannerLists } from './useInvalidatePlannerLists'
 import { serverResponseToSaveable, toUpsertRequest } from './usePlannerSyncAdapter'
 
 import type { SaveablePlanner } from '../types/PlannerTypes'
+import type { ValidatedPlanner } from '../lib/validation/plannerValidation'
 
 export type PublishVariables =
-  | { intent: 'publish'; planner: SaveablePlanner }
+  | { intent: 'publish'; planner: ValidatedPlanner }
   | { intent: 'unpublish'; plannerId: string }
 
 export interface PublishOutcome {

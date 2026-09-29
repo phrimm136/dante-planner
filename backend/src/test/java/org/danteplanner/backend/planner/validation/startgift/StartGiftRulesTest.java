@@ -10,7 +10,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,9 +31,9 @@ class StartGiftRulesTest {
     }
 
     private static final StartGiftReferenceData GIFTS = Set.of("9001", "9002", "9003", "gift_a")::contains;
-    private static final Optional<StartGiftSeason> SEASON = Optional.of(new Pools(Map.of(
+    private static final StartGiftSeason SEASON = new Pools(Map.of(
             "Combustion", Set.of("9001", "9002", "gift_a"),
-            "Slash", Set.of("9003"))));
+            "Slash", Set.of("9003")));
     private static final ContentPath KEYWORD = ContentPath.of("selectedGiftKeyword");
     private static final ContentPath GIFT_IDS = ContentPath.of("selectedGiftIds");
 
@@ -111,15 +110,6 @@ class StartGiftRulesTest {
                                 "start gift '9001' is not in the 'Slash' keyword pool"),
                         new Violation(ErrorCode.DUPLICATE_STARTGIFT, GIFT_IDS.index(1),
                                 "Duplicate value '9001' in selectedGiftIds"));
-    }
-
-    @Test
-    void check_WhenTheSeasonIsUnknown_StillChecksTheGiftsButNotTheKeyword() {
-        assertThat(StartGiftRules.check(json("123"), json("[\"9999\"]"), GIFTS, Optional.empty())).containsExactly(
-                new Violation(ErrorCode.UNKNOWN_EGOGIFT, GIFT_IDS.index(0),
-                        "selectedGiftIds ID '9999' not found or invalid"),
-                new Violation(ErrorCode.INVALID_FIELD_TYPE, KEYWORD,
-                        "Field 'selectedGiftKeyword' must be string or null, got number 123"));
     }
 
     @ParameterizedTest

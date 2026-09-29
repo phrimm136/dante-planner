@@ -30,7 +30,7 @@ public final class StartGiftRules {
     }
 
     public static List<Violation> check(JsonNode selectedGiftKeyword, JsonNode selectedGiftIds,
-                                        StartGiftReferenceData data, Optional<StartGiftSeason> season) {
+                                        StartGiftReferenceData data, StartGiftSeason season) {
         FieldResult<Optional<String>> keyword = keyword(selectedGiftKeyword);
         FieldResult<List<Optional<String>>> giftIds = JsonArrays.strings(selectedGiftIds, SELECTED_GIFT_IDS);
         List<StartGift> gifts = gifts(giftIds.value());
@@ -39,8 +39,8 @@ public final class StartGiftRules {
                         giftIds.violations().stream(),
                         gifts.stream().flatMap(gift -> giftViolation(gift, data)),
                         keyword.violations().isEmpty()
-                                ? season.stream().flatMap(known -> keywordViolations(keyword.value(),
-                                        giftIds.value().size(), knownGifts(gifts, data), known))
+                                ? keywordViolations(keyword.value(), giftIds.value().size(),
+                                        knownGifts(gifts, data), season)
                                 : Stream.<Violation>empty())
                 .flatMap(violations -> violations)
                 .sorted(Violation.BY_PATH_THEN_CODE)

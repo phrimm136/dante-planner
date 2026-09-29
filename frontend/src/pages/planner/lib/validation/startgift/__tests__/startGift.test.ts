@@ -111,15 +111,4 @@ describe('start gift keyword and pool', () => {
       { code: 'INVALID_FIELD_TYPE', path: 'selectedGiftKeyword' },
     ])
   })
-
-  it('checks only the kind of the keyword without a season', () => {
-    const withoutSeason = (keyword: unknown, giftIds: string[]) =>
-      rendered(startGiftViolations(keyword, giftsOf(giftIds), known, undefined))
-
-    expect(withoutSeason('Nope', ['9003'])).toEqual([])
-    expect(withoutSeason(null, ['9001'])).toEqual([])
-    expect(withoutSeason(5, [])).toEqual([
-      { code: 'INVALID_FIELD_TYPE', path: 'selectedGiftKeyword' },
-    ])
-  })
 })

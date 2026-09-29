@@ -6,7 +6,15 @@ import org.danteplanner.backend.planner.validation.startgift.StartGiftSeason;
 
 import java.util.Set;
 
-record SeasonReferences(GameDataRegistry registry, int version) implements StartBuffSeason, StartGiftSeason {
+public final class Season implements StartBuffSeason, StartGiftSeason {
+
+    private final GameDataRegistry registry;
+    private final int version;
+
+    Season(GameDataRegistry registry, int version) {
+        this.registry = registry;
+        this.version = version;
+    }
 
     @Override
     public boolean hasStartBuff(String buffId) {

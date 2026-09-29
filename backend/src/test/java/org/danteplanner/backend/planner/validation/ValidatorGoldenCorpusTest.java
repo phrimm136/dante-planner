@@ -20,6 +20,7 @@ import java.util.stream.StreamSupport;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.exception.PlannerValidationException.ValidationError;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.planner.gamedata.FloorRuleTable;
@@ -88,8 +89,9 @@ class ValidatorGoldenCorpusTest {
     void contentChain_WhenCorpusEntryReplayed_MatchesSnapshot(String name) {
         ValidatorGoldenCorpus.ContentEntry entry = CONTENT_ENTRIES.get(name);
 
-        assertThat(outcomeOf(() -> contentValidator.validate(
-                entry.content(), entry.category(), ValidatorGoldenCorpus.MD_CURRENT_VERSION, entry.stage())))
+        assertThat(outcomeOf(() -> contentValidator.parse(
+                entry.content(), MDCategory.fromValue(entry.category()),
+                contentValidator.season(ValidatorGoldenCorpus.MD_CURRENT_VERSION), entry.stage())))
                 .as(OUTPUT_CHANGED, name)
                 .isEqualTo(snapshot().get(name));
     }
@@ -117,8 +119,9 @@ class ValidatorGoldenCorpusTest {
                 .sorted()
                 .toList();
 
-        assertThat(codesOf(() -> contentValidator.validate(content.toString(),
-                corpusCase.path("category").asText(), ValidatorGoldenCorpus.MD_CURRENT_VERSION, stage)))
+        assertThat(codesOf(() -> contentValidator.parse(content.toString(),
+                MDCategory.fromValue(corpusCase.path("category").asText()),
+                contentValidator.season(ValidatorGoldenCorpus.MD_CURRENT_VERSION), stage)))
                 .isEqualTo(expected);
     }
 
@@ -167,8 +170,9 @@ class ValidatorGoldenCorpusTest {
     void snapshot_WhenRewriteRequested_IsWrittenFromCurrentOutput() throws IOException {
         StringBuilder file = new StringBuilder();
         for (ValidatorGoldenCorpus.ContentEntry entry : ValidatorGoldenCorpus.contentEntries()) {
-            appendSection(file, entry.name(), outcomeOf(() -> contentValidator.validate(
-                    entry.content(), entry.category(), ValidatorGoldenCorpus.MD_CURRENT_VERSION, entry.stage())));
+            appendSection(file, entry.name(), outcomeOf(() -> contentValidator.parse(
+                    entry.content(), MDCategory.fromValue(entry.category()),
+                    contentValidator.season(ValidatorGoldenCorpus.MD_CURRENT_VERSION), entry.stage())));
         }
         for (ValidatorGoldenCorpus.VersionEntry entry : ValidatorGoldenCorpus.versionEntries()) {
             appendSection(file, entry.name(), outcomeOf(() -> versionValidator.validateVersionForCreate(
@@ -337,8 +341,7 @@ class ValidatorGoldenCorpusTest {
 
     /**
      * Drops the blank lines separating sections, and nothing else: a message may legitimately end
-     * in a space — {@code Invalid category: } for a blank category — so trailing whitespace inside
-     * a line is part of the frozen contract.
+     * in a space, so trailing whitespace inside a line is part of the frozen contract.
      */
     private static void closeSection(Map<String, String> sections, String name, List<String> body) {
         if (name == null) {

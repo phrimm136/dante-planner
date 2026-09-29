@@ -6,10 +6,9 @@ import { useThemePackListSpec } from '@/pages/themePack'
 import type { StartBuffDataList } from '@/shared/gameText'
 import { startBuffSpecQueryOptions } from './useStartBuffList'
 import { startGiftPoolsQueryOptions } from './useStartGiftPools'
+import { plannerIdRegistry } from '../lib/plannerIdRegistry'
 import type { PlannerIdRegistry } from '../lib/validation/plannerValidation'
 import type { StartEgoGiftPools } from '../types/StartGiftTypes'
-
-type Season = NonNullable<PlannerIdRegistry['season']>
 
 export function usePlannerIdRegistry(): (contentVersion: number) => PlannerIdRegistry {
   const identitySpec = useIdentityListSpec()
@@ -23,38 +22,14 @@ export function usePlannerIdRegistry(): (contentVersion: number) => PlannerIdReg
     ],
   })
 
-  const identityIds = new Set<string>(Object.keys(identitySpec))
-  const egoIds = new Set<string>(Object.keys(egoSpec))
-  const egoMaxThreadspin = new Map<string, number>(
-    Object.entries(egoSpec).map(([egoId, spec]) => [egoId, spec.maxThreadspin]),
-  )
-  const themePackIds = new Set<string>(Object.keys(themePackSpec))
-  const startBuffs = seasonData
-    .slice(0, versions.length)
-    .map(({ data }) => data as StartBuffDataList)
-  const startGiftPools = seasonData
-    .slice(versions.length)
-    .map(({ data }) => data as StartEgoGiftPools)
-  const seasons = new Map<number, Season>(
-    versions.map((version, i) => [
+  return plannerIdRegistry({
+    identitySpec,
+    egoSpec,
+    themePackSpec,
+    seasons: versions.map((version, i) => ({
       version,
-      {
-        startBuffIds: new Set(Object.keys(startBuffs[i] ?? {})),
-        startGiftPools: new Map(
-          Object.entries(startGiftPools[i] ?? {}).map(([keyword, giftIds]) => [
-            keyword,
-            new Set<string>(giftIds),
-          ]),
-        ),
-      },
-    ]),
-  )
-
-  return (contentVersion) => ({
-    identityIds,
-    egoIds,
-    egoMaxThreadspin,
-    themePackIds,
-    season: seasons.get(contentVersion),
+      startBuffs: (seasonData[i]?.data ?? {}) as StartBuffDataList,
+      startGiftPools: (seasonData[versions.length + i]?.data ?? {}) as StartEgoGiftPools,
+    })),
   })
 }

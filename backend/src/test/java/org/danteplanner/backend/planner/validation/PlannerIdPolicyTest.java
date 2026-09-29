@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.danteplanner.backend.planner.exception.PlannerValidationException.ValidationError;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
+import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.gamedata.GameDataLoader;
 import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
 import org.danteplanner.backend.planner.validation.floor.FloorRules;
@@ -79,7 +80,7 @@ class PlannerIdPolicyTest {
         ObjectNode content = validContent();
         content.putArray("observationGiftIds").add("9247").add("19247");
 
-        String stored = validator.validate(content.toString(), "5F", CURRENT_SEASON, Stage.DRAFT);
+        String stored = validator.parse(content.toString(), MDCategory.F5, validator.season(CURRENT_SEASON), Stage.DRAFT).json();
 
         assertThat(MAPPER.readTree(stored).path("observationGiftIds"))
                 .isEqualTo(MAPPER.createArrayNode().add("9002").add("19002"));
@@ -92,7 +93,7 @@ class PlannerIdPolicyTest {
         ObjectNode egos = (ObjectNode) content.path("equipment").path("01").path("egos");
         egos.putObject("TETH").put("id", "20199").put("threadspin", 4);
 
-        String stored = validator.validate(content.toString(), "5F", CURRENT_SEASON, Stage.DRAFT);
+        String stored = validator.parse(content.toString(), MDCategory.F5, validator.season(CURRENT_SEASON), Stage.DRAFT).json();
 
         assertThat(MAPPER.readTree(stored).path("equipment").path("01").path("egos").has("TETH")).isFalse();
         assertThat(MAPPER.readTree(stored)).isEqualTo(validContent());
@@ -102,7 +103,7 @@ class PlannerIdPolicyTest {
     void validate_WhenNoIdIsMigrated_ReturnsTheContentVerbatim() throws IOException {
         PlannerContentValidator validator = validatorOver("{\"egoGift\":{\"rename\":{\"9247\":\"9002\"}}}");
 
-        String stored = validator.validate(TestDataFactory.VALID_CONTENT, "5F", CURRENT_SEASON, Stage.DRAFT);
+        String stored = validator.parse(TestDataFactory.VALID_CONTENT, MDCategory.F5, validator.season(CURRENT_SEASON), Stage.DRAFT).json();
 
         assertThat(stored).isSameAs(TestDataFactory.VALID_CONTENT);
     }
@@ -115,7 +116,7 @@ class PlannerIdPolicyTest {
         content.putArray("observationGiftIds").add("9899");
 
         PlannerValidationException ex = rejection(
-                () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, stage));
+                () -> validator.parse(content.toString(), MDCategory.F5, validator.season(CURRENT_SEASON), stage).json());
 
         assertThat(ex.getSubErrors()).extracting(ValidationError::code).containsExactly("UNKNOWN_EGOGIFT");
         assertThat(ex.getSubErrors().get(0).message()).contains("9899");
@@ -126,8 +127,8 @@ class PlannerIdPolicyTest {
         PlannerContentValidator validator = validatorWithPreviousSeasonLackingBuff("201");
         String content = TestDataFactory.VALID_CONTENT;
 
-        String stored = validator.validate(content, "5F", CURRENT_SEASON, Stage.DRAFT);
-        PlannerValidationException ex = rejection(() -> validator.validate(content, "5F", PREVIOUS_SEASON, Stage.DRAFT));
+        String stored = validator.parse(content, MDCategory.F5, validator.season(CURRENT_SEASON), Stage.DRAFT).json();
+        PlannerValidationException ex = rejection(() -> validator.parse(content, MDCategory.F5, validator.season(PREVIOUS_SEASON), Stage.DRAFT).json());
 
         assertThat(stored).isSameAs(content);
         assertThat(ex.getSubErrors()).extracting(ValidationError::code).containsExactly("UNKNOWN_STARTBUFF");
@@ -138,7 +139,7 @@ class PlannerIdPolicyTest {
     void validate_WhenPlannerDeclaresASeasonWithNoData_RejectsWithUnknownContentVersion() throws IOException {
         PlannerContentValidator validator = validatorOver(null);
 
-        assertThatThrownBy(() -> validator.validate(TestDataFactory.VALID_CONTENT, "5F", 99, Stage.DRAFT))
+        assertThatThrownBy(() -> validator.season(99))
                 .isInstanceOfSatisfying(PlannerValidationException.class, ex -> assertThat(ex.getSubErrors())
                         .extracting(ValidationError::code)
                         .containsExactly("UNKNOWN_VERSION"));
@@ -152,7 +153,7 @@ class PlannerIdPolicyTest {
         ((ObjectNode) content.path("equipment").path("01").path("egos").path("ZAYIN")).put("id", "20199");
 
         PlannerValidationException ex = rejection(
-                () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, stage));
+                () -> validator.parse(content.toString(), MDCategory.F5, validator.season(CURRENT_SEASON), stage).json());
 
         assertThat(ex.getStatusCode().value()).isEqualTo(400);
         assertThat(ex.getSubErrors()).extracting(ValidationError::code).containsExactly("UNKNOWN_EGO");
@@ -165,9 +166,9 @@ class PlannerIdPolicyTest {
         ObjectNode content = validContent();
         ((ArrayNode) content.path("floorSelections")).set(4, MAPPER.readTree("{\"difficulty\":0,\"giftIds\":[]}"));
 
-        String stored = validator.validate(content.toString(), "5F", CURRENT_SEASON, Stage.DRAFT);
+        String stored = validator.parse(content.toString(), MDCategory.F5, validator.season(CURRENT_SEASON), Stage.DRAFT).json();
         PlannerValidationException ex = rejection(
-                () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, Stage.PUBLISH));
+                () -> validator.parse(content.toString(), MDCategory.F5, validator.season(CURRENT_SEASON), Stage.PUBLISH).json());
 
         assertThat(stored).isEqualTo(content.toString());
         assertThat(ex.getStatusCode().value()).isEqualTo(400);
@@ -181,7 +182,7 @@ class PlannerIdPolicyTest {
         content.set("floorSelections", completeFloors(3));
 
         PlannerValidationException ex = rejection(
-                () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, Stage.PUBLISH));
+                () -> validator.parse(content.toString(), MDCategory.F5, validator.season(CURRENT_SEASON), Stage.PUBLISH).json());
 
         assertThat(ex.getSubErrors()).containsExactly(
                 new ValidationError("INSUFFICIENT_FLOORS", "floorSelections[3]", "floorSelections[3] must have a theme pack selected"),
@@ -197,7 +198,7 @@ class PlannerIdPolicyTest {
         content.set("floorSelections", floors);
 
         PlannerValidationException ex = rejection(
-                () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, Stage.PUBLISH));
+                () -> validator.parse(content.toString(), MDCategory.F5, validator.season(CURRENT_SEASON), Stage.PUBLISH).json());
 
         assertThat(ex.getSubErrors()).containsExactly(
                 new ValidationError("INVALID_FIELD_TYPE", "floorSelections[1]", "Field 'floorSelections[1]' must be object, got null"));
@@ -209,7 +210,7 @@ class PlannerIdPolicyTest {
         ObjectNode content = validContent();
         content.set("floorSelections", completeFloors(3));
 
-        String stored = validator.validate(content.toString(), "5F", CURRENT_SEASON, Stage.DRAFT);
+        String stored = validator.parse(content.toString(), MDCategory.F5, validator.season(CURRENT_SEASON), Stage.DRAFT).json();
 
         assertThat(stored).isEqualTo(content.toString());
     }
@@ -221,7 +222,7 @@ class PlannerIdPolicyTest {
         content.set("floorSelections", completeFloors(0));
 
         PlannerValidationException ex = rejection(
-                () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, Stage.PUBLISH));
+                () -> validator.parse(content.toString(), MDCategory.F5, validator.season(CURRENT_SEASON), Stage.PUBLISH).json());
 
         assertThat(ex.getSubErrors()).containsExactly(
                 new ValidationError("INSUFFICIENT_FLOORS", "floorSelections[0]", "floorSelections[0] must have a theme pack selected"),
@@ -239,7 +240,7 @@ class PlannerIdPolicyTest {
         content.set("floorSelections", floorsOn("1001", "1002", "1001", "1003", "1004"));
 
         PlannerValidationException ex = rejection(
-                () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, stage));
+                () -> validator.parse(content.toString(), MDCategory.F5, validator.season(CURRENT_SEASON), stage).json());
 
         assertThat(ex.getSubErrors()).containsExactly(new ValidationError("DUPLICATE_THEMEPACK", "floorSelections[2].themePackId",
                 "floorSelections[2].themePackId repeats theme pack '1001' from floorSelections[0]"));
@@ -252,7 +253,7 @@ class PlannerIdPolicyTest {
         content.set("floorSelections", floorsOn("1001", "1001", "1001"));
 
         PlannerValidationException ex = rejection(
-                () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, Stage.DRAFT));
+                () -> validator.parse(content.toString(), MDCategory.F5, validator.season(CURRENT_SEASON), Stage.DRAFT).json());
 
         assertThat(ex.getSubErrors()).containsExactly(
                 new ValidationError("DUPLICATE_THEMEPACK", "floorSelections[1].themePackId",
@@ -268,7 +269,7 @@ class PlannerIdPolicyTest {
         content.set("floorSelections",
                 MAPPER.readTree("[{\"difficulty\":0,\"giftIds\":[]},{\"difficulty\":0,\"giftIds\":[]}]"));
 
-        String stored = validator.validate(content.toString(), "5F", CURRENT_SEASON, Stage.DRAFT);
+        String stored = validator.parse(content.toString(), MDCategory.F5, validator.season(CURRENT_SEASON), Stage.DRAFT).json();
 
         assertThat(stored).isEqualTo(content.toString());
     }

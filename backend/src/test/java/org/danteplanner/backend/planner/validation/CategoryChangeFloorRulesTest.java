@@ -17,7 +17,6 @@ import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
-import org.danteplanner.backend.planner.sync.EffectiveNoOpPredicate;
 import org.danteplanner.backend.planner.sync.SyncVersionValidator;
 import org.danteplanner.backend.planner.validation.floor.FloorRules;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -90,7 +89,8 @@ class CategoryChangeFloorRulesTest {
                 new PlannerCategoryValidator(),
                 new PlannerLimitValidator(),
                 new PlannerOwnershipValidator(),
-                new SyncVersionValidator(new EffectiveNoOpPredicate(MAPPER)),
+                new SyncVersionValidator(),
+                MAPPER,
                 100,
                 2);
     }

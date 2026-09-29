@@ -1,23 +1,17 @@
 package org.danteplanner.backend.planner.sync;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import org.danteplanner.backend.planner.entity.PlannerContent;
 import org.danteplanner.backend.planner.exception.PlannerConflictException;
 
 @Component
-@RequiredArgsConstructor
 public class SyncVersionValidator {
-
-    private final EffectiveNoOpPredicate effectiveNoOp;
 
     public WriteArbitration arbitrate(
             boolean force,
             Long requestedVersion,
             long actualVersion,
-            PlannerContent stored,
-            CarriedWrite carried) {
+            PlannerChange change) {
         if (force) {
             return WriteArbitration.WRITE;
         }
@@ -27,7 +21,7 @@ public class SyncVersionValidator {
         if (actualVersion == requestedVersion.longValue()) {
             return WriteArbitration.WRITE;
         }
-        if (effectiveNoOp.isEffectiveNoOp(stored, carried)) {
+        if (change.isNone()) {
             return WriteArbitration.ACK_NO_OP;
         }
         throw new PlannerConflictException(requestedVersion, actualVersion);

@@ -38,7 +38,7 @@ import {
 } from '../lib/plannerExportImport'
 import { planConflictResolution } from '../lib/conflictChoice'
 import { loadIdMigrationTable } from '../hooks/loadIdMigrationTable'
-import { validatePlannerForImport } from '../lib/validation/plannerValidation'
+import { validatePlannerForSync } from '../lib/validation/plannerValidation'
 import { toUserFriendlyError } from '../lib/validation/plannerValidationErrors'
 
 import type { Result } from '@/lib/result'
@@ -247,12 +247,13 @@ function PlannerExportImportSectionContent() {
       fresh,
       skipped: rejected,
     } = partitionImport(envelope.value, existingIds, table, (planner) => {
-      const { errors } = validatePlannerForImport(
+      const validated = validatePlannerForSync(
         planner,
         egoGiftSpec,
+        undefined,
         idRegistryFor(planner.metadata.contentVersion),
       )
-      const [firstError] = errors
+      const [firstError] = validated.ok ? [] : validated.error
       return firstError ? toUserFriendlyError(firstError) : null
     })
 

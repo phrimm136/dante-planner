@@ -12,6 +12,7 @@ import org.danteplanner.backend.planner.entity.PlannerContent;
 import org.danteplanner.backend.planner.entity.PlannerModeration;
 import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.danteplanner.backend.planner.entity.PlannerStats;
+import org.danteplanner.backend.planner.entity.StoredPlannerContent;
 import org.danteplanner.backend.user.entity.UserRole;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -87,12 +88,11 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
                 .plannerType(PlannerType.MIRROR_DUNGEON)
                 .build();
         planner.attach(
-                PlannerContent.builder()
+                StoredPlannerContent.holding(PlannerContent.builder()
                         .title(title)
                         .category("5F")
-                        .content("{}")
                         .gameContentVersion(1)
-                        .build(),
+                        .build(), "{}"),
                 PlannerPublication.builder().build(),
                 PlannerModeration.builder().build());
         return planner;

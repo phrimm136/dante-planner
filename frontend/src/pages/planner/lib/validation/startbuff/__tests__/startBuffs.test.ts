@@ -90,13 +90,3 @@ describe('unknown start buffs', () => {
     ])
   })
 })
-
-describe('start buffs without a season', () => {
-  const withoutSeason = (raw: unknown) =>
-    rendered(startBuffViolations(parseStartBuffs(raw), undefined))
-
-  it('checks only the kind of the list', () => {
-    expect(withoutSeason([999, 'x', 100, 200])).toEqual([])
-    expect(withoutSeason(7)).toEqual([{ code: 'INVALID_FIELD_TYPE', path: 'selectedBuffIds' }])
-  })
-})
