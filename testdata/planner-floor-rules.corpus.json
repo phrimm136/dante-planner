@@ -747,7 +747,7 @@
           "ok": false,
           "violations": [
             {
-              "code": "THEME_PACK_UNKNOWN_ID",
+              "code": "UNKNOWN_THEMEPACK",
               "path": "floorSelections[0].themePackId"
             }
           ]
@@ -756,23 +756,23 @@
           "ok": false,
           "violations": [
             {
-              "code": "THEME_PACK_UNKNOWN_ID",
+              "code": "UNKNOWN_THEMEPACK",
               "path": "floorSelections[0].themePackId"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[1]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[2]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[3]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[4]"
             }
           ]
@@ -987,23 +987,23 @@
           "ok": false,
           "violations": [
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "MISSING_THEMEPACK",
               "path": "floorSelections[0]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[1]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[2]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[3]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[4]"
             }
           ]
@@ -1166,7 +1166,7 @@
           "ok": false,
           "violations": [
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "MISSING_THEMEPACK",
               "path": "floorSelections[4]"
             }
           ]
@@ -1357,7 +1357,7 @@
           "ok": false,
           "violations": [
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "MISSING_THEMEPACK",
               "path": "floorSelections[4]"
             }
           ]
@@ -1532,7 +1532,7 @@
           "ok": false,
           "violations": [
             {
-              "code": "VALUE_OUT_OF_RANGE",
+              "code": "OUT_OF_RANGE_DIFFICULTY",
               "path": "floorSelections[0].difficulty"
             }
           ]
@@ -1707,7 +1707,7 @@
           "ok": false,
           "violations": [
             {
-              "code": "VALUE_OUT_OF_RANGE",
+              "code": "OUT_OF_RANGE_DIFFICULTY",
               "path": "floorSelections[0].difficulty"
             }
           ]
@@ -1904,7 +1904,7 @@
           "ok": false,
           "violations": [
             {
-              "code": "VALUE_OUT_OF_RANGE",
+              "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
               "path": "floorSelections[0].difficulty"
             }
           ]
@@ -2169,7 +2169,7 @@
           "ok": false,
           "violations": [
             {
-              "code": "VALUE_OUT_OF_RANGE",
+              "code": "OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME",
               "path": "floorSelections[10].difficulty"
             }
           ]
@@ -2520,7 +2520,7 @@
           "ok": false,
           "violations": [
             {
-              "code": "INVALID_SEQUENCE",
+              "code": "OUT_OF_ORDER_THEMEPACK",
               "path": "floorSelections[1]"
             }
           ]
@@ -2529,23 +2529,23 @@
           "ok": false,
           "violations": [
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "MISSING_THEMEPACK",
               "path": "floorSelections[0]"
             },
             {
-              "code": "INVALID_SEQUENCE",
+              "code": "OUT_OF_ORDER_THEMEPACK",
               "path": "floorSelections[1]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[2]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[3]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[4]"
             }
           ]
@@ -2794,7 +2794,7 @@
           "ok": false,
           "violations": [
             {
-              "code": "DUPLICATE_VALUE",
+              "code": "DUPLICATE_EGOGIFT",
               "path": "floorSelections[0].giftIds"
             }
           ]
@@ -2803,23 +2803,23 @@
           "ok": false,
           "violations": [
             {
-              "code": "DUPLICATE_VALUE",
+              "code": "DUPLICATE_EGOGIFT",
               "path": "floorSelections[0].giftIds"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[1]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[2]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[3]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[4]"
             }
           ]
@@ -3227,7 +3227,7 @@
           "ok": false,
           "violations": [
             {
-              "code": "FLOOR_UNKNOWN_GIFT_ID",
+              "code": "UNKNOWN_EGOGIFT_FLOOR",
               "path": "floorSelections[0].giftIds[0]"
             }
           ]
@@ -3236,23 +3236,23 @@
           "ok": false,
           "violations": [
             {
-              "code": "FLOOR_UNKNOWN_GIFT_ID",
+              "code": "UNKNOWN_EGOGIFT_FLOOR",
               "path": "floorSelections[0].giftIds[0]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[1]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[2]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[3]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[4]"
             }
           ]
@@ -3490,7 +3490,7 @@
           "ok": false,
           "violations": [
             {
-              "code": "GIFT_NOT_AFFORDABLE",
+              "code": "UNAFFORDABLE_EGOGIFT",
               "path": "floorSelections[0].giftIds[0]"
             }
           ]
@@ -3499,23 +3499,23 @@
           "ok": false,
           "violations": [
             {
-              "code": "GIFT_NOT_AFFORDABLE",
+              "code": "UNAFFORDABLE_EGOGIFT",
               "path": "floorSelections[0].giftIds[0]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[1]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[2]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[3]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[4]"
             }
           ]
@@ -4128,23 +4128,23 @@
           "ok": false,
           "violations": [
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "MISSING_THEMEPACK",
               "path": "floorSelections[0]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[1]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[2]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[3]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[4]"
             }
           ]
@@ -4966,7 +4966,7 @@
           "ok": false,
           "violations": [
             {
-              "code": "INVALID_SEQUENCE",
+              "code": "OUT_OF_ORDER_THEMEPACK",
               "path": "floorSelections[1]"
             }
           ]
@@ -4975,23 +4975,23 @@
           "ok": false,
           "violations": [
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "MISSING_THEMEPACK",
               "path": "floorSelections[0]"
             },
             {
-              "code": "INVALID_SEQUENCE",
+              "code": "OUT_OF_ORDER_THEMEPACK",
               "path": "floorSelections[1]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[2]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[3]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[4]"
             }
           ]
@@ -5253,7 +5253,7 @@
           "ok": false,
           "violations": [
             {
-              "code": "DUPLICATE_VALUE",
+              "code": "DUPLICATE_EGOGIFT",
               "path": "floorSelections[0].giftIds"
             }
           ]
@@ -5262,27 +5262,27 @@
           "ok": false,
           "violations": [
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "MISSING_THEMEPACK",
               "path": "floorSelections[0]"
             },
             {
-              "code": "DUPLICATE_VALUE",
+              "code": "DUPLICATE_EGOGIFT",
               "path": "floorSelections[0].giftIds"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[1]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[2]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[3]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[4]"
             }
           ]
@@ -6048,11 +6048,11 @@
           "ok": false,
           "violations": [
             {
-              "code": "FLOOR_UNKNOWN_GIFT_ID",
+              "code": "UNKNOWN_EGOGIFT_FLOOR",
               "path": "floorSelections[0].giftIds[0]"
             },
             {
-              "code": "THEME_PACK_UNKNOWN_ID",
+              "code": "UNKNOWN_THEMEPACK",
               "path": "floorSelections[0].themePackId"
             }
           ]
@@ -6061,11 +6061,11 @@
           "ok": false,
           "violations": [
             {
-              "code": "FLOOR_UNKNOWN_GIFT_ID",
+              "code": "UNKNOWN_EGOGIFT_FLOOR",
               "path": "floorSelections[0].giftIds[0]"
             },
             {
-              "code": "THEME_PACK_UNKNOWN_ID",
+              "code": "UNKNOWN_THEMEPACK",
               "path": "floorSelections[0].themePackId"
             }
           ]
@@ -6290,23 +6290,23 @@
           "ok": false,
           "violations": [
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[0]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[1]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[2]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[3]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[4]"
             }
           ]
@@ -7165,23 +7165,23 @@
           "ok": false,
           "violations": [
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "MISSING_THEMEPACK",
               "path": "floorSelections[0]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "MISSING_THEMEPACK",
               "path": "floorSelections[1]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "MISSING_THEMEPACK",
               "path": "floorSelections[2]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "MISSING_THEMEPACK",
               "path": "floorSelections[3]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "MISSING_THEMEPACK",
               "path": "floorSelections[4]"
             }
           ]
@@ -7424,23 +7424,23 @@
           "ok": false,
           "violations": [
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "MISSING_THEMEPACK",
               "path": "floorSelections[0]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "MISSING_THEMEPACK",
               "path": "floorSelections[1]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "MISSING_THEMEPACK",
               "path": "floorSelections[2]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "MISSING_THEMEPACK",
               "path": "floorSelections[3]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "MISSING_THEMEPACK",
               "path": "floorSelections[4]"
             }
           ]
@@ -8029,7 +8029,7 @@
           "ok": false,
           "violations": [
             {
-              "code": "VALUE_OUT_OF_RANGE",
+              "code": "OUT_OF_RANGE_DIFFICULTY",
               "path": "floorSelections[0].difficulty"
             }
           ]
@@ -8202,7 +8202,7 @@
           "ok": false,
           "violations": [
             {
-              "code": "VALUE_OUT_OF_RANGE",
+              "code": "OUT_OF_RANGE_DIFFICULTY",
               "path": "floorSelections[0].difficulty"
             }
           ]
@@ -8397,7 +8397,7 @@
           "ok": false,
           "violations": [
             {
-              "code": "VALUE_OUT_OF_RANGE",
+              "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
               "path": "floorSelections[9].difficulty"
             }
           ]
@@ -8660,7 +8660,7 @@
           "ok": false,
           "violations": [
             {
-              "code": "VALUE_OUT_OF_RANGE",
+              "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
               "path": "floorSelections[9].difficulty"
             }
           ]
@@ -8958,7 +8958,7 @@
           "ok": false,
           "violations": [
             {
-              "code": "VALUE_OUT_OF_RANGE",
+              "code": "OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME",
               "path": "floorSelections[14].difficulty"
             }
           ]
@@ -9172,7 +9172,7 @@
           "ok": false,
           "violations": [
             {
-              "code": "INVALID_SEQUENCE",
+              "code": "OUT_OF_ORDER_DIFFICULTY",
               "path": "floorSelections[1].difficulty"
             }
           ]
@@ -9368,7 +9368,7 @@
           "ok": false,
           "violations": [
             {
-              "code": "VALUE_OUT_OF_RANGE",
+              "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
               "path": "floorSelections[5].difficulty"
             }
           ]
@@ -9599,7 +9599,7 @@
           "ok": false,
           "violations": [
             {
-              "code": "VALUE_OUT_OF_RANGE",
+              "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
               "path": "floorSelections[2].difficulty"
             }
           ]
@@ -10073,15 +10073,15 @@
           "ok": false,
           "violations": [
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[12]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[13]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[14]"
             }
           ]
@@ -10675,7 +10675,7 @@
           "ok": false,
           "violations": [
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[4]"
             }
           ]
@@ -10912,7 +10912,7 @@
           "ok": false,
           "violations": [
             {
-              "code": "INVALID_SEQUENCE",
+              "code": "OUT_OF_ORDER_THEMEPACK",
               "path": "floorSelections[3]"
             }
           ]
@@ -10921,11 +10921,11 @@
           "ok": false,
           "violations": [
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "MISSING_THEMEPACK",
               "path": "floorSelections[2]"
             },
             {
-              "code": "INVALID_SEQUENCE",
+              "code": "OUT_OF_ORDER_THEMEPACK",
               "path": "floorSelections[3]"
             }
           ]
@@ -11097,7 +11097,7 @@
           "ok": false,
           "violations": [
             {
-              "code": "FLOOR_DUPLICATE_THEME_PACK",
+              "code": "DUPLICATE_THEMEPACK",
               "path": "floorSelections[3].themePackId"
             }
           ]
@@ -11106,7 +11106,7 @@
           "ok": false,
           "violations": [
             {
-              "code": "FLOOR_DUPLICATE_THEME_PACK",
+              "code": "DUPLICATE_THEMEPACK",
               "path": "floorSelections[3].themePackId"
             }
           ]
@@ -11313,7 +11313,7 @@
           "ok": false,
           "violations": [
             {
-              "code": "VALUE_OUT_OF_RANGE",
+              "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
               "path": "floorSelections[0].difficulty"
             }
           ]
@@ -11535,19 +11535,19 @@
           "ok": false,
           "violations": [
             {
-              "code": "INVALID_SEQUENCE",
+              "code": "OUT_OF_ORDER_DIFFICULTY",
               "path": "floorSelections[1].difficulty"
             },
             {
-              "code": "INVALID_SEQUENCE",
+              "code": "OUT_OF_ORDER_DIFFICULTY",
               "path": "floorSelections[2].difficulty"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[3]"
             },
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "INSUFFICIENT_FLOORS",
               "path": "floorSelections[4]"
             }
           ]
@@ -11967,7 +11967,7 @@
           "ok": false,
           "violations": [
             {
-              "code": "INVALID_SEQUENCE",
+              "code": "OUT_OF_ORDER_THEMEPACK",
               "path": "floorSelections[4]"
             }
           ]
@@ -11976,11 +11976,11 @@
           "ok": false,
           "violations": [
             {
-              "code": "FLOOR_MISSING_THEME_PACK",
+              "code": "MISSING_THEMEPACK",
               "path": "floorSelections[3]"
             },
             {
-              "code": "INVALID_SEQUENCE",
+              "code": "OUT_OF_ORDER_THEMEPACK",
               "path": "floorSelections[4]"
             }
           ]
@@ -12225,15 +12225,15 @@
           "ok": false,
           "violations": [
             {
-              "code": "DUPLICATE_VALUE",
+              "code": "DUPLICATE_EGOGIFT",
               "path": "floorSelections[0].giftIds"
             },
             {
-              "code": "FLOOR_UNKNOWN_GIFT_ID",
+              "code": "UNKNOWN_EGOGIFT_FLOOR",
               "path": "floorSelections[1].giftIds[0]"
             },
             {
-              "code": "FLOOR_DUPLICATE_THEME_PACK",
+              "code": "DUPLICATE_THEMEPACK",
               "path": "floorSelections[2].themePackId"
             }
           ]
@@ -12242,15 +12242,15 @@
           "ok": false,
           "violations": [
             {
-              "code": "DUPLICATE_VALUE",
+              "code": "DUPLICATE_EGOGIFT",
               "path": "floorSelections[0].giftIds"
             },
             {
-              "code": "FLOOR_UNKNOWN_GIFT_ID",
+              "code": "UNKNOWN_EGOGIFT_FLOOR",
               "path": "floorSelections[1].giftIds[0]"
             },
             {
-              "code": "FLOOR_DUPLICATE_THEME_PACK",
+              "code": "DUPLICATE_THEMEPACK",
               "path": "floorSelections[2].themePackId"
             }
           ]
@@ -12405,11 +12405,11 @@
           "ok": false,
           "violations": [
             {
-              "code": "GIFT_NOT_AFFORDABLE",
+              "code": "UNAFFORDABLE_EGOGIFT",
               "path": "floorSelections[0].giftIds[0]"
             },
             {
-              "code": "THEME_PACK_UNKNOWN_ID",
+              "code": "UNKNOWN_THEMEPACK",
               "path": "floorSelections[0].themePackId"
             }
           ]
@@ -12418,11 +12418,11 @@
           "ok": false,
           "violations": [
             {
-              "code": "GIFT_NOT_AFFORDABLE",
+              "code": "UNAFFORDABLE_EGOGIFT",
               "path": "floorSelections[0].giftIds[0]"
             },
             {
-              "code": "THEME_PACK_UNKNOWN_ID",
+              "code": "UNKNOWN_THEMEPACK",
               "path": "floorSelections[0].themePackId"
             }
           ]
@@ -12612,15 +12612,15 @@
           "ok": false,
           "violations": [
             {
-              "code": "GIFT_NOT_AFFORDABLE",
+              "code": "UNAFFORDABLE_EGOGIFT",
               "path": "floorSelections[0].giftIds[0]"
             },
             {
-              "code": "FLOOR_UNKNOWN_GIFT_ID",
+              "code": "UNKNOWN_EGOGIFT_FLOOR",
               "path": "floorSelections[1].giftIds[1]"
             },
             {
-              "code": "THEME_PACK_UNKNOWN_ID",
+              "code": "UNKNOWN_THEMEPACK",
               "path": "floorSelections[1].themePackId"
             }
           ]
@@ -12629,15 +12629,15 @@
           "ok": false,
           "violations": [
             {
-              "code": "GIFT_NOT_AFFORDABLE",
+              "code": "UNAFFORDABLE_EGOGIFT",
               "path": "floorSelections[0].giftIds[0]"
             },
             {
-              "code": "FLOOR_UNKNOWN_GIFT_ID",
+              "code": "UNKNOWN_EGOGIFT_FLOOR",
               "path": "floorSelections[1].giftIds[1]"
             },
             {
-              "code": "THEME_PACK_UNKNOWN_ID",
+              "code": "UNKNOWN_THEMEPACK",
               "path": "floorSelections[1].themePackId"
             }
           ]
@@ -12698,6 +12698,634 @@
         }
       },
       "verdictRow": "adr-141"
+    },
+    {
+      "name": "scn-difficulty-10f-floor3-normal",
+      "category": "10F",
+      "sources": [
+        "scenario:difficulty-code-split"
+      ],
+      "floorSelections": [
+        {
+          "themePackId": "1001",
+          "difficulty": 1,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1002",
+          "difficulty": 1,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1003",
+          "difficulty": 0,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1004",
+          "difficulty": 1,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1005",
+          "difficulty": 1,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1006",
+          "difficulty": 1,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1007",
+          "difficulty": 1,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1008",
+          "difficulty": 1,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1009",
+          "difficulty": 1,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1010",
+          "difficulty": 1,
+          "giftIds": []
+        }
+      ],
+      "divergent": false,
+      "expect": {
+        "draft": {
+          "ok": true,
+          "violations": []
+        },
+        "publish": {
+          "ok": false,
+          "violations": [
+            {
+              "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
+              "path": "floorSelections[2].difficulty"
+            }
+          ]
+        },
+        "index": {
+          "ok": true,
+          "floors": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1006",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1007",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1008",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1009",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1010",
+              "difficulty": 1,
+              "giftIds": []
+            }
+          ],
+          "violations": [],
+          "rows": [
+            "THEME_PACK:1001",
+            "THEME_PACK:1002",
+            "THEME_PACK:1003",
+            "THEME_PACK:1004",
+            "THEME_PACK:1005",
+            "THEME_PACK:1006",
+            "THEME_PACK:1007",
+            "THEME_PACK:1008",
+            "THEME_PACK:1009",
+            "THEME_PACK:1010"
+          ]
+        }
+      },
+      "verdictRow": "agree"
+    },
+    {
+      "name": "scn-difficulty-10f-floor7-normal",
+      "category": "10F",
+      "sources": [
+        "scenario:difficulty-code-split"
+      ],
+      "floorSelections": [
+        {
+          "themePackId": "1001",
+          "difficulty": 1,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1002",
+          "difficulty": 1,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1003",
+          "difficulty": 1,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1004",
+          "difficulty": 1,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1005",
+          "difficulty": 1,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1006",
+          "difficulty": 1,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1007",
+          "difficulty": 0,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1008",
+          "difficulty": 1,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1009",
+          "difficulty": 1,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1010",
+          "difficulty": 1,
+          "giftIds": []
+        }
+      ],
+      "divergent": false,
+      "expect": {
+        "draft": {
+          "ok": true,
+          "violations": []
+        },
+        "publish": {
+          "ok": false,
+          "violations": [
+            {
+              "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
+              "path": "floorSelections[6].difficulty"
+            }
+          ]
+        },
+        "index": {
+          "ok": true,
+          "floors": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1006",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1007",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1008",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1009",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1010",
+              "difficulty": 1,
+              "giftIds": []
+            }
+          ],
+          "violations": [],
+          "rows": [
+            "THEME_PACK:1001",
+            "THEME_PACK:1002",
+            "THEME_PACK:1003",
+            "THEME_PACK:1004",
+            "THEME_PACK:1005",
+            "THEME_PACK:1006",
+            "THEME_PACK:1007",
+            "THEME_PACK:1008",
+            "THEME_PACK:1009",
+            "THEME_PACK:1010"
+          ]
+        }
+      },
+      "verdictRow": "agree"
+    },
+    {
+      "name": "scn-difficulty-15f-floor12-hard",
+      "category": "15F",
+      "sources": [
+        "scenario:difficulty-code-split"
+      ],
+      "floorSelections": [
+        {
+          "themePackId": "1001",
+          "difficulty": 1,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1002",
+          "difficulty": 1,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1003",
+          "difficulty": 1,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1004",
+          "difficulty": 1,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1005",
+          "difficulty": 1,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1006",
+          "difficulty": 1,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1007",
+          "difficulty": 1,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1008",
+          "difficulty": 1,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1009",
+          "difficulty": 1,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1010",
+          "difficulty": 1,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1011",
+          "difficulty": 3,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1012",
+          "difficulty": 1,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1013",
+          "difficulty": 3,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1014",
+          "difficulty": 3,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1015",
+          "difficulty": 3,
+          "giftIds": []
+        }
+      ],
+      "divergent": false,
+      "expect": {
+        "draft": {
+          "ok": true,
+          "violations": []
+        },
+        "publish": {
+          "ok": false,
+          "violations": [
+            {
+              "code": "OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME",
+              "path": "floorSelections[11].difficulty"
+            }
+          ]
+        },
+        "index": {
+          "ok": true,
+          "floors": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14
+          ],
+          "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1006",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1007",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1008",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1009",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1010",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1011",
+              "difficulty": 3,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1012",
+              "difficulty": 1,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1013",
+              "difficulty": 3,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1014",
+              "difficulty": 3,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1015",
+              "difficulty": 3,
+              "giftIds": []
+            }
+          ],
+          "violations": [],
+          "rows": [
+            "THEME_PACK:1001",
+            "THEME_PACK:1002",
+            "THEME_PACK:1003",
+            "THEME_PACK:1004",
+            "THEME_PACK:1005",
+            "THEME_PACK:1006",
+            "THEME_PACK:1007",
+            "THEME_PACK:1008",
+            "THEME_PACK:1009",
+            "THEME_PACK:1010",
+            "THEME_PACK:1011",
+            "THEME_PACK:1012",
+            "THEME_PACK:1013",
+            "THEME_PACK:1014",
+            "THEME_PACK:1015"
+          ]
+        }
+      },
+      "verdictRow": "agree"
+    },
+    {
+      "name": "scn-difficulty-5f-floor3-extreme",
+      "category": "5F",
+      "sources": [
+        "scenario:difficulty-code-split"
+      ],
+      "floorSelections": [
+        {
+          "themePackId": "1001",
+          "difficulty": 0,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1002",
+          "difficulty": 0,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1003",
+          "difficulty": 3,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1004",
+          "difficulty": 0,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1005",
+          "difficulty": 0,
+          "giftIds": []
+        }
+      ],
+      "divergent": false,
+      "expect": {
+        "draft": {
+          "ok": true,
+          "violations": []
+        },
+        "publish": {
+          "ok": false,
+          "violations": [
+            {
+              "code": "OUT_OF_RANGE_DIFFICULTY",
+              "path": "floorSelections[2].difficulty"
+            }
+          ]
+        },
+        "index": {
+          "ok": true,
+          "floors": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 3,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 0,
+              "giftIds": []
+            }
+          ],
+          "violations": [],
+          "rows": [
+            "THEME_PACK:1001",
+            "THEME_PACK:1002",
+            "THEME_PACK:1003",
+            "THEME_PACK:1004",
+            "THEME_PACK:1005"
+          ]
+        }
+      },
+      "verdictRow": "agree"
     }
   ]
 }

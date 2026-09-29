@@ -27,6 +27,8 @@ import { getKeywordIconPath } from '@/shared/assets'
 import { assertNever, calculateByteLength } from '@/lib/utils'
 import { CONFLICT_TOAST_KEY } from '../../lib/conflictChoice'
 import { violationsForCategory } from '../../lib/validation/floor/floorRules'
+import { isDifficultyRangeCode } from '../../lib/validation/violation'
+import { validationMessageKey } from '../../lib/plannerValidationErrors'
 import { MdCategoryLabel } from '../MdCategoryLabel'
 import { showAppError, showErrorMessage, showSuccess, showWarning } from '@/lib/errorPresentation'
 import { isSyncConflict } from '@/lib/apiErrorClassifier'
@@ -144,13 +146,14 @@ export function PlannerEditorShell({
   const handleCategoryChange = (newCategory: MDCategory) => {
     setCategory(newCategory)
 
-    const hasDisallowedDifficulty = violationsForCategory(
-      storeApi.getState().floorSelections,
-      newCategory,
-    ).some((violation) => violation.code === 'VALUE_OUT_OF_RANGE')
+    const difficultyCodes = new Set(
+      violationsForCategory(storeApi.getState().floorSelections, newCategory)
+        .map((violation) => violation.code)
+        .filter(isDifficultyRangeCode),
+    )
 
-    if (hasDisallowedDifficulty) {
-      showWarning('planner:pages.plannerMD.publish.requiresHardMode')
+    for (const code of difficultyCodes) {
+      showWarning(`planner:${validationMessageKey(code)}`)
     }
   }
 

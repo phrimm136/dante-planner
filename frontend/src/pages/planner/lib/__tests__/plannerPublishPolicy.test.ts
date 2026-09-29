@@ -11,7 +11,7 @@ const missingTitle: PlannerValidationError = {
 } as PlannerValidationError
 
 const missingIdentity: PlannerValidationError = {
-  code: 'EQUIPMENT_MISSING_IDENTITY',
+  code: 'MISSING_IDENTITY',
   message: 'Identity missing',
 } as PlannerValidationError
 

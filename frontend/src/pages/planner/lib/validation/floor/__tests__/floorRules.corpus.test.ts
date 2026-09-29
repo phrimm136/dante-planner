@@ -57,13 +57,18 @@ const corpusGameData: FloorReferenceData = {
 
 const MODULE_CODES: readonly FloorViolationCode[] = [
   'INVALID_FIELD_TYPE',
-  'FLOOR_MISSING_THEME_PACK',
-  'FLOOR_DUPLICATE_THEME_PACK',
-  'INVALID_SEQUENCE',
-  'VALUE_OUT_OF_RANGE',
-  'DUPLICATE_VALUE',
+  'INSUFFICIENT_FLOORS',
+  'MISSING_THEMEPACK',
+  'DUPLICATE_THEMEPACK',
+  'OUT_OF_ORDER_THEMEPACK',
+  'OUT_OF_ORDER_DIFFICULTY',
+  'OUT_OF_RANGE_DIFFICULTY',
+  'INSUFFICIENT_DIFFICULTY_ENTRY',
+  'OUT_OF_RANGE_DIFFICULTY_NOT_HARD',
+  'OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME',
+  'DUPLICATE_EGOGIFT',
 ]
-const ID_CHECK_CODES = ['THEME_PACK_UNKNOWN_ID', 'FLOOR_UNKNOWN_GIFT_ID', 'GIFT_NOT_AFFORDABLE']
+const ID_CHECK_CODES = ['UNKNOWN_THEMEPACK', 'UNKNOWN_EGOGIFT_FLOOR', 'UNAFFORDABLE_EGOGIFT']
 const CALLER_BOUNDARY_CODES = ['INVALID_CATEGORY']
 
 const isModuleCode = (code: string) => (MODULE_CODES as readonly string[]).includes(code)
@@ -92,9 +97,9 @@ function admit(c: CorpusCase, stage: FloorRuleStage) {
 }
 
 describe('floor rules corpus', () => {
-  it('holds 57 cases, 56 of them for the module', () => {
-    expect(corpus.cases).toHaveLength(57)
-    expect(moduleCases).toHaveLength(56)
+  it('holds 61 cases, 60 of them for the module', () => {
+    expect(corpus.cases).toHaveLength(61)
+    expect(moduleCases).toHaveLength(60)
   })
 
   it('records only module codes, id-check codes and caller boundary codes', () => {

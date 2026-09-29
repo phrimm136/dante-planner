@@ -35,7 +35,7 @@ const UNKNOWN_IDENTITY_IMPORT: PlannerValidationResult = {
   isValid: false,
   errors: [
     {
-      code: 'IDENTITY_UNKNOWN_ID',
+      code: 'UNKNOWN_IDENTITY',
       message: '',
       field: 'equipment.01.identity.id',
       context: { id: '10199' },

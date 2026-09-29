@@ -1,83 +1,67 @@
 import { validationAppError } from '@/lib/apiErrorClassifier'
-import { DUNGEON_IDX } from '@/shared/gameData'
-import type { DungeonIdx } from '@/shared/gameData'
+import type { Codes, ValidationCode } from './validation/codes'
 import type { ContentPath } from './validation/contentPath'
 import type { FloorRuleCode } from './validation/violation'
 
 export interface ValidationError {
-  code: string
+  code: ValidationCode
   message: string
   field?: string
   context?: Record<string, unknown>
 }
 
 export interface EquipmentValidationError extends ValidationError {
-  code:
-    | 'EQUIPMENT_MISSING_SINNER'
-    | 'EQUIPMENT_MISSING_IDENTITY'
-    | 'EQUIPMENT_MISSING_ZAYIN'
-    | 'EQUIPMENT_INVALID_EGO_TYPES'
-    | 'EQUIPMENT_INVALID_ID_FORMAT'
+  code: Codes<'MISSING_SINNER' | 'MISSING_IDENTITY' | 'MISSING_EGO_ZAYIN' | 'INVALID_EGO_TYPE'>
 }
 
 export interface DeploymentValidationError extends ValidationError {
-  code: 'DEPLOYMENT_INVALID_INDEX'
+  code: Codes<'OUT_OF_RANGE_DEPLOYMENT' | 'INVALID_FIELD_TYPE'>
 }
 
 export interface SkillEAValidationError extends ValidationError {
-  code:
-    | 'SKILL_EA_MISSING_SINNER'
-    | 'SKILL_EA_INVALID_SLOT'
-    | 'SKILL_EA_DUPLICATE_SLOT'
-    | 'SKILL_EA_INVALID_TOTAL'
+  code: Codes<'MISSING_SINNER' | 'INVALID_SKILL_SLOT' | 'OUT_OF_RANGE_SKILL_TOTAL'>
 }
 
 export interface GiftValidationError extends ValidationError {
-  code: 'GIFT_DUPLICATE_ID' | 'GIFT_UNKNOWN_ID'
+  code: Codes<'DUPLICATE_EGOGIFT' | 'DUPLICATE_STARTGIFT' | 'UNKNOWN_EGOGIFT'>
 }
 
 export interface BuffValidationError extends ValidationError {
-  code: 'BUFF_EXCEEDS_MAX' | 'BUFF_DUPLICATE_BASE_ID' | 'BUFF_INVALID_FORMAT'
+  code: Codes<'EXCESS_STARTBUFF' | 'DUPLICATE_STARTBUFF' | 'OUT_OF_RANGE_STARTBUFF'>
 }
 
 export interface StartGiftValidationError extends ValidationError {
-  code: 'START_GIFT_NO_KEYWORD_BUT_HAS_GIFTS' | 'START_GIFT_DUPLICATE_ID'
+  code: Codes<'MISSING_STARTGIFT_KEYWORD'>
 }
 
 export interface FloorRuleValidationError extends ValidationError {
-  code: Exclude<FloorRuleCode, 'VALUE_OUT_OF_RANGE'>
+  code: FloorRuleCode
   path: ContentPath
-}
-
-export interface DifficultyOutOfRangeValidationError extends ValidationError {
-  code: 'VALUE_OUT_OF_RANGE'
-  path: ContentPath
-  context: { allowedDifficulties: readonly DungeonIdx[] }
 }
 
 export interface FloorUnknownGiftValidationError extends ValidationError {
-  code: 'FLOOR_UNKNOWN_GIFT_ID'
+  code: Codes<'UNKNOWN_EGOGIFT_FLOOR'>
   path: ContentPath
   context: { giftId: string }
 }
 
 export interface GiftNotAffordableValidationError extends ValidationError {
-  code: 'GIFT_NOT_AFFORDABLE'
+  code: Codes<'UNAFFORDABLE_EGOGIFT'>
   path: ContentPath
   context: { giftName: string; themePackId: string }
 }
 
 export interface TitleValidationError extends ValidationError {
-  code: 'MISSING_TITLE'
+  code: Codes<'MISSING_TITLE'>
 }
 
 export interface KeywordValidationError extends ValidationError {
-  code: 'KEYWORD_INVALID'
+  code: Codes<'UNKNOWN_KEYWORD'>
   context: { keyword: string }
 }
 
 export interface EntityIdValidationError extends ValidationError {
-  code: 'IDENTITY_UNKNOWN_ID' | 'EGO_UNKNOWN_ID' | 'THEME_PACK_UNKNOWN_ID' | 'START_BUFF_UNKNOWN_ID'
+  code: Codes<'UNKNOWN_IDENTITY' | 'UNKNOWN_EGO' | 'UNKNOWN_THEMEPACK' | 'UNKNOWN_STARTBUFF'>
   context: { id: string }
 }
 
@@ -89,40 +73,72 @@ export type PlannerValidationError =
   | BuffValidationError
   | StartGiftValidationError
   | FloorRuleValidationError
-  | DifficultyOutOfRangeValidationError
   | FloorUnknownGiftValidationError
   | GiftNotAffordableValidationError
   | TitleValidationError
   | KeywordValidationError
   | EntityIdValidationError
 
-const UNKNOWN_ENTITY_ID_KEYS = {
-  IDENTITY_UNKNOWN_ID: 'pages.plannerMD.validation.unknownIdentityId',
-  EGO_UNKNOWN_ID: 'pages.plannerMD.validation.unknownEgoId',
-  THEME_PACK_UNKNOWN_ID: 'pages.plannerMD.validation.unknownThemePackId',
-  START_BUFF_UNKNOWN_ID: 'pages.plannerMD.validation.unknownStartBuffId',
-} as const satisfies Record<EntityIdValidationError['code'], string>
+const CORRUPTED_STATE = 'pages.plannerMD.validation.corruptedState'
 
-const DIFFICULTY_FIELD = 'difficulty'
+const MESSAGE_KEYS = {
+  MISSING_TITLE: 'pages.plannerMD.publish.missingTitle',
+  INSUFFICIENT_FLOORS: 'pages.plannerMD.publish.missingThemePack',
+  MISSING_THEMEPACK: 'pages.plannerMD.publish.missingThemePack',
+  OUT_OF_ORDER_THEMEPACK: 'pages.plannerMD.previousFloorNoThemePack',
+  OUT_OF_ORDER_DIFFICULTY: 'pages.plannerMD.publish.normalAfterHard',
+  INSUFFICIENT_DIFFICULTY_ENTRY: 'pages.plannerMD.publish.requiresHardMode',
+  OUT_OF_RANGE_DIFFICULTY_NOT_HARD: 'pages.plannerMD.publish.hardModeOnly',
+  OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME: 'pages.plannerMD.publish.extremeModeOnly',
+  OUT_OF_RANGE_DIFFICULTY: CORRUPTED_STATE,
+  MISSING_SINNER: CORRUPTED_STATE,
+  MISSING_IDENTITY: CORRUPTED_STATE,
+  MISSING_EGO_ZAYIN: CORRUPTED_STATE,
+  INVALID_EGO_TYPE: CORRUPTED_STATE,
+  OUT_OF_RANGE_DEPLOYMENT: CORRUPTED_STATE,
+  INVALID_SKILL_SLOT: CORRUPTED_STATE,
+  OUT_OF_RANGE_SKILL_TOTAL: CORRUPTED_STATE,
+  DUPLICATE_EGOGIFT: CORRUPTED_STATE,
+  DUPLICATE_STARTGIFT: CORRUPTED_STATE,
+  UNKNOWN_EGOGIFT: CORRUPTED_STATE,
+  EXCESS_STARTBUFF: CORRUPTED_STATE,
+  DUPLICATE_STARTBUFF: CORRUPTED_STATE,
+  OUT_OF_RANGE_STARTBUFF: CORRUPTED_STATE,
+  MISSING_STARTGIFT_KEYWORD: CORRUPTED_STATE,
+  INVALID_FIELD_TYPE: CORRUPTED_STATE,
+  DUPLICATE_THEMEPACK: CORRUPTED_STATE,
+  UNAFFORDABLE_EGOGIFT: 'pages.plannerMD.publish.themePackEgoGiftInconsistency',
+  UNKNOWN_EGOGIFT_FLOOR: 'pages.plannerMD.validation.unknownGiftId',
+  UNKNOWN_KEYWORD: 'pages.plannerMD.validation.invalidKeyword',
+  UNKNOWN_IDENTITY: 'pages.plannerMD.validation.unknownIdentityId',
+  UNKNOWN_EGO: 'pages.plannerMD.validation.unknownEgoId',
+  UNKNOWN_THEMEPACK: 'pages.plannerMD.validation.unknownThemePackId',
+  UNKNOWN_STARTBUFF: 'pages.plannerMD.validation.unknownStartBuffId',
+} as const satisfies Record<PlannerValidationError['code'], string>
+
+export const validationMessageKey = (code: PlannerValidationError['code']): string =>
+  MESSAGE_KEYS[code]
 
 function floorNumberOf([, floor]: ContentPath): string {
   return floor?.kind === 'index' ? String(floor.value + 1) : ''
 }
 
-function endsAtDifficulty(path: ContentPath): boolean {
-  const last = path.at(-1)
-  return last?.kind === 'field' && last.name === DIFFICULTY_FIELD
-}
-
-const REQUIRED_DIFFICULTY_KEYS: Partial<Record<DungeonIdx, string>> = {
-  [DUNGEON_IDX.HARD]: 'pages.plannerMD.publish.requiresHardMode',
-  [DUNGEON_IDX.EXTREME]: 'pages.plannerMD.publish.requiresExtremeMode',
-}
-
-function outOfRangeKey(allowedDifficulties: readonly DungeonIdx[]): string {
-  const [only, ...rest] = allowedDifficulties
-  const key = only !== undefined && rest.length === 0 ? REQUIRED_DIFFICULTY_KEYS[only] : undefined
-  return key ?? 'pages.plannerMD.validation.corruptedState'
+function messageParams(error: PlannerValidationError): Record<string, string> | undefined {
+  switch (error.code) {
+    case 'UNAFFORDABLE_EGOGIFT':
+      return { pack: error.context.themePackId, gifts: error.context.giftName }
+    case 'UNKNOWN_EGOGIFT_FLOOR':
+      return { floor: floorNumberOf(error.path), gifts: error.context.giftId }
+    case 'UNKNOWN_KEYWORD':
+      return { keyword: error.context.keyword }
+    case 'UNKNOWN_IDENTITY':
+    case 'UNKNOWN_EGO':
+    case 'UNKNOWN_THEMEPACK':
+    case 'UNKNOWN_STARTBUFF':
+      return { id: error.context.id }
+    default:
+      return undefined
+  }
 }
 
 export function plannerValidationError(friendly: { key: string; params?: Record<string, string> }) {
@@ -136,63 +152,7 @@ export function toUserFriendlyError(error: PlannerValidationError): {
   key: string
   params?: Record<string, string>
 } {
-  switch (error.code) {
-    case 'MISSING_TITLE':
-      return { key: 'pages.plannerMD.publish.missingTitle' }
-    case 'FLOOR_MISSING_THEME_PACK':
-      return { key: 'pages.plannerMD.publish.missingThemePack' }
-    case 'INVALID_SEQUENCE':
-      return endsAtDifficulty(error.path)
-        ? { key: 'pages.plannerMD.publish.normalAfterHard' }
-        : { key: 'pages.plannerMD.previousFloorNoThemePack' }
-    case 'VALUE_OUT_OF_RANGE':
-      return { key: outOfRangeKey(error.context.allowedDifficulties) }
-    case 'EQUIPMENT_MISSING_SINNER':
-    case 'EQUIPMENT_MISSING_IDENTITY':
-    case 'EQUIPMENT_MISSING_ZAYIN':
-    case 'EQUIPMENT_INVALID_EGO_TYPES':
-    case 'EQUIPMENT_INVALID_ID_FORMAT':
-    case 'DEPLOYMENT_INVALID_INDEX':
-    case 'SKILL_EA_MISSING_SINNER':
-    case 'SKILL_EA_INVALID_SLOT':
-    case 'SKILL_EA_DUPLICATE_SLOT':
-    case 'SKILL_EA_INVALID_TOTAL':
-    case 'GIFT_DUPLICATE_ID':
-    case 'GIFT_UNKNOWN_ID':
-    case 'BUFF_EXCEEDS_MAX':
-    case 'BUFF_DUPLICATE_BASE_ID':
-    case 'BUFF_INVALID_FORMAT':
-    case 'START_GIFT_NO_KEYWORD_BUT_HAS_GIFTS':
-    case 'START_GIFT_DUPLICATE_ID':
-    case 'INVALID_FIELD_TYPE':
-    case 'FLOOR_DUPLICATE_THEME_PACK':
-    case 'DUPLICATE_VALUE':
-      return { key: 'pages.plannerMD.validation.corruptedState' }
-    case 'GIFT_NOT_AFFORDABLE':
-      return {
-        key: 'pages.plannerMD.publish.themePackEgoGiftInconsistency',
-        params: {
-          pack: error.context.themePackId,
-          gifts: error.context.giftName,
-        },
-      }
-    case 'FLOOR_UNKNOWN_GIFT_ID':
-      return {
-        key: 'pages.plannerMD.validation.unknownGiftId',
-        params: {
-          floor: floorNumberOf(error.path),
-          gifts: error.context.giftId,
-        },
-      }
-    case 'KEYWORD_INVALID':
-      return {
-        key: 'pages.plannerMD.validation.invalidKeyword',
-        params: { keyword: error.context.keyword },
-      }
-    case 'IDENTITY_UNKNOWN_ID':
-    case 'EGO_UNKNOWN_ID':
-    case 'THEME_PACK_UNKNOWN_ID':
-    case 'START_BUFF_UNKNOWN_ID':
-      return { key: UNKNOWN_ENTITY_ID_KEYS[error.code], params: { id: error.context.id } }
-  }
+  const key = validationMessageKey(error.code)
+  const params = messageParams(error)
+  return params === undefined ? { key } : { key, params }
 }

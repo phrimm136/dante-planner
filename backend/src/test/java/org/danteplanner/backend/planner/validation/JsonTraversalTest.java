@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.danteplanner.backend.planner.validation.JsonTraversal.arrayField;
+import static org.danteplanner.backend.planner.validation.JsonTraversal.eachDistinctString;
 import static org.danteplanner.backend.planner.validation.JsonTraversal.eachNumber;
 import static org.danteplanner.backend.planner.validation.JsonTraversal.eachObjectProperty;
 import static org.danteplanner.backend.planner.validation.JsonTraversal.eachUniqueString;
@@ -31,7 +32,7 @@ class JsonTraversalTest {
 
     @Test
     void eachUniqueString_WhenElementsAreTextualAndDistinct_VisitsEachWithItsIndex() {
-        eachUniqueString(arrayField(root("{\"ids\":[\"a\",\"b\"]}"), "ids"), "ids", context,
+        eachUniqueString(arrayField(root("{\"ids\":[\"a\",\"b\"]}"), "ids"), "ids", ErrorCode.DUPLICATE_EGOGIFT, context,
                 (value, index) -> visited.add(index + ":" + value));
 
         assertThat(visited).containsExactly("0:a", "1:b");
@@ -40,7 +41,7 @@ class JsonTraversalTest {
 
     @Test
     void eachUniqueString_WhenElementIsNotTextual_RejectsAtTheIndexedPathAndSkipsIt() {
-        eachUniqueString(arrayField(root("{\"ids\":[\"a\",42]}"), "ids"), "ids", context,
+        eachUniqueString(arrayField(root("{\"ids\":[\"a\",42]}"), "ids"), "ids", ErrorCode.DUPLICATE_EGOGIFT, context,
                 (value, index) -> visited.add(value));
 
         assertThat(visited).containsExactly("a");
@@ -51,18 +52,27 @@ class JsonTraversalTest {
 
     @Test
     void eachUniqueString_WhenValueRepeats_RejectsAtTheArrayPathAndSkipsIt() {
-        eachUniqueString(arrayField(root("{\"ids\":[\"a\",\"a\"]}"), "ids"), "ids", context,
+        eachUniqueString(arrayField(root("{\"ids\":[\"a\",\"a\"]}"), "ids"), "ids", ErrorCode.DUPLICATE_EGOGIFT, context,
                 (value, index) -> visited.add(index + ":" + value));
 
         assertThat(visited).containsExactly("0:a");
         assertThat(context.getErrors())
                 .extracting(PlannerValidationException::getOriginalCode, PlannerValidationException::getMessage)
-                .containsExactly(tuple("DUPLICATE_VALUE", "Duplicate value 'a' in ids"));
+                .containsExactly(tuple("DUPLICATE_EGOGIFT", "Duplicate value 'a' in ids"));
+    }
+
+    @Test
+    void eachDistinctString_WhenValueRepeats_SkipsItWithoutRejecting() {
+        eachDistinctString(arrayField(root("{\"ids\":[\"a\",\"a\",\"b\"]}"), "ids"), "ids", context,
+                (value, index) -> visited.add(index + ":" + value));
+
+        assertThat(visited).containsExactly("0:a", "2:b");
+        assertThat(context.getErrors()).isEmpty();
     }
 
     @Test
     void eachUniqueString_WhenFieldIsNotAnArray_VisitsNothingAndRejectsNothing() {
-        eachUniqueString(arrayField(root("{\"ids\":\"a\"}"), "ids"), "ids", context,
+        eachUniqueString(arrayField(root("{\"ids\":\"a\"}"), "ids"), "ids", ErrorCode.DUPLICATE_EGOGIFT, context,
                 (value, index) -> visited.add(value));
 
         assertThat(visited).isEmpty();

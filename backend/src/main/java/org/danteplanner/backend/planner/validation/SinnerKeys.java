@@ -44,7 +44,7 @@ final class SinnerKeys {
 
             if (index < MIN_EQUIPMENT_SINNER || index > MAX_EQUIPMENT_SINNER) {
                 context.reject(field + " key", p -> ValidationErrors.valueOutOfRange(
-                        p, index, MIN_EQUIPMENT_SINNER, MAX_EQUIPMENT_SINNER));
+                        ErrorCode.OUT_OF_RANGE_SINNER, p, index, MIN_EQUIPMENT_SINNER, MAX_EQUIPMENT_SINNER));
                 continue;
             }
 
@@ -54,7 +54,7 @@ final class SinnerKeys {
         Set<String> missingSinners = new HashSet<>(ALL_SINNER_KEYS);
         missingSinners.removeAll(bySinnerKey.keySet());
         if (!missingSinners.isEmpty()) {
-            context.reject(field, p -> ValidationErrors.missingRequiredField(missingSinners));
+            context.reject(field, p -> ValidationErrors.missing(ErrorCode.MISSING_SINNER, missingSinners));
             return;
         }
 

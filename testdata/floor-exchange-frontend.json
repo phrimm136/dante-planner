@@ -294,31 +294,31 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[2].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[3].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[3].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[4].difficulty"
           }
         ]
@@ -470,35 +470,35 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[3].giftIds"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[5]"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[5].themePackId"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[6].themePackId"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[7].themePackId"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[9].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[9].themePackId"
           }
         ]
@@ -654,43 +654,43 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[1].themePackId"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[3].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[3].themePackId"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[4].themePackId"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[6].giftIds"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[7]"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[8].themePackId"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[9].themePackId"
           }
         ]
@@ -896,39 +896,39 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[1].themePackId"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[4].giftIds"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[5].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[5].themePackId"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[7]"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[7].themePackId"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[8].themePackId"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[9].themePackId"
           }
         ]
@@ -989,95 +989,95 @@
         "floors": [],
         "violations": [
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[0]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[1]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[2]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[3]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[3].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[4].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[4].giftIds"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[5]"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[5].giftIds"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[6]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[7]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[8]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[9]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[10]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[11]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[12]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[13]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[14]"
           }
         ]
@@ -1202,47 +1202,47 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[3]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[4]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[5]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[6]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[7]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[8]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[9]"
           }
         ]
@@ -1564,31 +1564,31 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[3].giftIds"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[5]"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[6].themePackId"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[9]"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[9].themePackId"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[10].themePackId"
           }
         ]
@@ -1662,47 +1662,47 @@
         "floors": [],
         "violations": [
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[0]"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[1]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[3]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[4]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[5]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[6]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[7]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[8]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[9]"
           }
         ]
@@ -2053,91 +2053,91 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[2].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[4].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[4].giftIds"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[5]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[5].difficulty"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[6]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[6].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[6].themePackId"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[7]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[7].difficulty"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[8]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[9]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[9].difficulty"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[10]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME",
             "path": "floorSelections[11].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[11].themePackId"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[12]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[13]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[14]"
           }
         ]
@@ -2206,19 +2206,19 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[2].themePackId"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[3].giftIds"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[4].giftIds"
           }
         ]
@@ -2293,15 +2293,15 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[3].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[3].themePackId"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[4].themePackId"
           }
         ]
@@ -2361,15 +2361,15 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[1].themePackId"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[3].themePackId"
           }
         ]
@@ -2702,15 +2702,15 @@
         "floors": [],
         "violations": [
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[2]"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[3].giftIds"
           }
         ]
@@ -2901,43 +2901,43 @@
         "floors": [],
         "violations": [
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[0]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[1]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[2]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[3]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[4]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[5]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[6]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[7]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[8]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[9]"
           }
         ]
@@ -3074,23 +3074,23 @@
         "floors": [],
         "violations": [
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[1]"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[3].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[3].themePackId"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[4].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[6].themePackId"
           }
         ]
@@ -3387,55 +3387,55 @@
         "floors": [],
         "violations": [
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[0]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[1]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[3].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[5].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[5].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[6].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[7].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[8].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[9].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[9].themePackId"
           }
         ]
@@ -3460,7 +3460,7 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[0].giftIds"
           }
         ]
@@ -3717,11 +3717,11 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[4]"
           }
         ]
@@ -3844,23 +3844,23 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[2].themePackId"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[3].giftIds"
           }
         ]
@@ -4284,67 +4284,67 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[3].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[3].giftIds"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[4].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[4].themePackId"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[5]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[5].difficulty"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[6]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[6].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[7].themePackId"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[8].themePackId"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[9].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[9].themePackId"
           }
         ]
@@ -4737,43 +4737,43 @@
         "floors": [],
         "violations": [
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[0]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[1]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[2]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[3]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[4]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[5]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[6]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[7]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[8]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[9]"
           }
         ]
@@ -5241,11 +5241,11 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[2].giftIds"
           }
         ]
@@ -5287,51 +5287,51 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[3].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[3].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[3].themePackId"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[4]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[5]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[6]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[7]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[8]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[9]"
           }
         ]
@@ -5589,7 +5589,7 @@
         "floors": [],
         "violations": [
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[2].themePackId"
           }
         ]
@@ -5739,107 +5739,107 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[2]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[3]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[3].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[4].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[4].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[5].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[5].themePackId"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[7]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[7].difficulty"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[8]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[8].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[8].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[9].difficulty"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[10]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME",
             "path": "floorSelections[10].difficulty"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[11]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME",
             "path": "floorSelections[11].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[11].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME",
             "path": "floorSelections[12].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[12].themePackId"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[13]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[14]"
           }
         ]
@@ -6082,7 +6082,7 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[1].giftIds"
           }
         ]
@@ -6163,91 +6163,91 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[3].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[3].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[4].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[4].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[6].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[6].themePackId"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[7].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[8].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[8].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[8].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[9].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[9].themePackId"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[10]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME",
             "path": "floorSelections[10].difficulty"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[11]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[12]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[13]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[14]"
           }
         ]
@@ -6407,19 +6407,19 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[2]"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[3].giftIds"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[4].giftIds"
           }
         ]
@@ -6494,87 +6494,87 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[2]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[3]"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[3].giftIds"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[4]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[4].difficulty"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[5]"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[6]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[6].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[6].themePackId"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[7].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[7].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[8].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[8].themePackId"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[9]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[10]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[11]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[12]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[13]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[14]"
           }
         ]
@@ -6783,35 +6783,35 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[1]"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[2]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[2].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[3].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[4].difficulty"
           }
         ]
@@ -6940,75 +6940,75 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[1].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[3].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[4].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[4].giftIds"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[5]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[6]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[7]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[8]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[9]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[10]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[11]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[12]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[13]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[14]"
           }
         ]
@@ -7304,47 +7304,47 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[1]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[2]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[3]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[4]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[5]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[6]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[7]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[8]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[9]"
           }
         ]
@@ -7425,67 +7425,67 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[1].themePackId"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[3].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[4].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[5].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[5].themePackId"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[6]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[7]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[8]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[9]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[10]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[11]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[12]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[13]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[14]"
           }
         ]
@@ -7667,71 +7667,71 @@
         "floors": [],
         "violations": [
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[0]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[1]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[2]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[3]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[4]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[5]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[6]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[7]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[8]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[9]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[10]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[11]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[12]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[13]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[14]"
           }
         ]
@@ -7801,31 +7801,31 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[2].themePackId"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[4].giftIds"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[5].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[5].themePackId"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[6].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[6].themePackId"
           }
         ]
@@ -8196,59 +8196,59 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[1]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[2]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[3]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[4]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[5]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[6]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[7]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[8]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[9]"
           }
         ]
@@ -8272,59 +8272,59 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[2]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[3]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[4]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[5]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[6]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[7]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[8]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[9]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[10]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[11]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[12]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[13]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[14]"
           }
         ]
@@ -8379,43 +8379,43 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[1]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[2]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[3]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[4]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[5]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[6]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[7]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[8]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[9]"
           }
         ]
@@ -8548,11 +8548,11 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[1].themePackId"
           }
         ]
@@ -8642,35 +8642,35 @@
         "floors": [],
         "violations": [
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[0]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[1]"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[2]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[3].difficulty"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[4]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[4].difficulty"
           }
         ]
@@ -8693,43 +8693,43 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[1]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[2]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[3]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[4]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[5]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[6]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[7]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[8]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[9]"
           }
         ]
@@ -8824,103 +8824,103 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[3]"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[3].giftIds"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[4]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[4].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[4].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[4].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[5].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[5].themePackId"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[6]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[6].difficulty"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[7]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[7].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[8].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[8].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[9].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[9].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME",
             "path": "floorSelections[10].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME",
             "path": "floorSelections[11].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[11].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[11].themePackId"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[12]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[13]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[14]"
           }
         ]
@@ -9050,11 +9050,11 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[2]"
           }
         ]
@@ -9085,47 +9085,47 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[1].themePackId"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[2]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[3]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[4]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[5]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[6]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[7]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[8]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[9]"
           }
         ]
@@ -9247,23 +9247,23 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[1].themePackId"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[2].themePackId"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[4]"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[4].themePackId"
           }
         ]
@@ -9329,67 +9329,67 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[2]"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[3]"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[4]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[4].difficulty"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[5]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[5].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[5].giftIds"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[6]"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[6].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[7].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[7].giftIds"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[8]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[9]"
           }
         ]
@@ -9586,63 +9586,63 @@
         "floors": [],
         "violations": [
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[0]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[1]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[2]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[3]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[4]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[5]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[6]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[7]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[8]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[9]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[10]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[11]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[12]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[13]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[14]"
           }
         ]
@@ -9956,27 +9956,27 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[3].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[4].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[4].giftIds"
           }
         ]
@@ -10013,63 +10013,63 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[3]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[4]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[5]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[6]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[7]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[8]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[9]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[10]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[11]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[12]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[13]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[14]"
           }
         ]
@@ -10310,35 +10310,35 @@
         "floors": [],
         "violations": [
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[0]"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[1]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[3].themePackId"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[4]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[4].difficulty"
           }
         ]
@@ -10472,7 +10472,7 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[0].giftIds"
           }
         ]
@@ -10696,23 +10696,23 @@
         "floors": [],
         "violations": [
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[0]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[1]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[2]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[3]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[4]"
           }
         ]
@@ -10790,75 +10790,75 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[1]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[2]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[2].themePackId"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[3]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[3].difficulty"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[4]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[4].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[5].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[6].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[7].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[8].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[8].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[9].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[9].themePackId"
           }
         ]
@@ -11246,63 +11246,63 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[2]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[3]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[4]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[5]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[6]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[7]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[8]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[9]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[10]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[11]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[12]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[13]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[14]"
           }
         ]
@@ -11326,43 +11326,43 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[1]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[2]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[3]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[4]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[5]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[6]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[7]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[8]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[9]"
           }
         ]
@@ -11468,23 +11468,23 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[4].themePackId"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[6]"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[6].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[6].themePackId"
           }
         ]
@@ -11573,7 +11573,7 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[0].giftIds"
           }
         ]
@@ -11717,39 +11717,39 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[2]"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[5]"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[5].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[6].themePackId"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[7].themePackId"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[8].giftIds"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[9].giftIds"
           }
         ]
@@ -11838,23 +11838,23 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[2].themePackId"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[3]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[4]"
           }
         ]
@@ -11889,27 +11889,27 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[1].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[3]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[4]"
           }
         ]
@@ -12048,23 +12048,23 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[1]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[2]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[3]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[4]"
           }
         ]
@@ -12127,23 +12127,23 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[3].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[4].themePackId"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[6].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[6].themePackId"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[7].themePackId"
           }
         ]
@@ -12489,23 +12489,23 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[3]"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[4].giftIds"
           }
         ]
@@ -12621,35 +12621,35 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[2].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[4].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[4].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[4].themePackId"
           }
         ]
@@ -12840,63 +12840,63 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[3].themePackId"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[5]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[5].difficulty"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[6]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[7]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[8]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[9]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[10]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[11]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[12]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[13]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[14]"
           }
         ]
@@ -12969,7 +12969,7 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[1].giftIds"
           }
         ]
@@ -13010,7 +13010,7 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[1].giftIds"
           }
         ]
@@ -13060,27 +13060,27 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[2].themePackId"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[3].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[4].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[4].themePackId"
           }
         ]
@@ -13205,63 +13205,63 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[2].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[3].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[3].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[4].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[4].giftIds"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[5].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[7].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[7].themePackId"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[8]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[9]"
           }
         ]
@@ -13306,11 +13306,11 @@
         "floors": [],
         "violations": [
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[2].themePackId"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[3].giftIds"
           }
         ]
@@ -13410,11 +13410,11 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[1].giftIds"
           }
         ]
@@ -13540,91 +13540,91 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[2]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[3]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[3].difficulty"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[4]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[4].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[4].giftIds"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[5].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[5].giftIds"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[6]"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[6].giftIds"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[7]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[7].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[7].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[7].themePackId"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[8]"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[9]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[9].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[9].themePackId"
           }
         ]
@@ -13854,87 +13854,87 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[2]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[3]"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[3].giftIds"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[4].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[5].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[5].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[6].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[6].giftIds"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[7].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[7].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[8].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[8].themePackId"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[9]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[10]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[11]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[12]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[13]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[14]"
           }
         ]
@@ -14268,11 +14268,11 @@
         "floors": [],
         "violations": [
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[1]"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[2].themePackId"
           }
         ]
@@ -14314,7 +14314,7 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[0].giftIds"
           }
         ]
@@ -14339,67 +14339,67 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[1]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[2]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[3]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[4]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[5]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[6]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[7]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[8]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[9]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[10]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[11]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[12]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[13]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[14]"
           }
         ]
@@ -14626,19 +14626,19 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[1].themePackId"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[4].themePackId"
           }
         ]
@@ -14830,7 +14830,7 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[0].giftIds"
           }
         ]
@@ -14990,23 +14990,23 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[3].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[3].themePackId"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[4].giftIds"
           }
         ]
@@ -15262,39 +15262,39 @@
         "floors": [],
         "violations": [
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[0]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[1]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[2]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[3].difficulty"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[4]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[4].difficulty"
           }
         ]
@@ -15380,43 +15380,43 @@
         "floors": [],
         "violations": [
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[0]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[1]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[2]"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[3]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[4].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[4].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[4].themePackId"
           }
         ]
@@ -15699,83 +15699,83 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[2].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[3].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[3].giftIds"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[5].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[6].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[6].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[7].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[7].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[7].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[8].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[8].giftIds"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[9]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[10]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[11]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[12]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[13]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[14]"
           }
         ]
@@ -15892,39 +15892,39 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[2].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY",
             "path": "floorSelections[3].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[3].giftIds"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_DIFFICULTY",
             "path": "floorSelections[4].difficulty"
           }
         ]
@@ -16039,103 +16039,103 @@
         "floors": [],
         "violations": [
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[1]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[1].giftIds"
           },
           {
-            "code": "INVALID_SEQUENCE",
+            "code": "OUT_OF_ORDER_THEMEPACK",
             "path": "floorSelections[2]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[3].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[3].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[4].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[6].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[6].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[6].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[7].difficulty"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
             "path": "floorSelections[8].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[8].themePackId"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[9].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[9].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME",
             "path": "floorSelections[10].difficulty"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[11].themePackId"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME",
             "path": "floorSelections[12].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[12].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[12].themePackId"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[13].giftIds"
           },
           {
-            "code": "FLOOR_DUPLICATE_THEME_PACK",
+            "code": "DUPLICATE_THEMEPACK",
             "path": "floorSelections[13].themePackId"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[14]"
           }
         ]
@@ -16179,7 +16179,7 @@
         "floors": [],
         "violations": [
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[0].giftIds"
           }
         ]
@@ -16318,43 +16318,43 @@
         "floors": [],
         "violations": [
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[0]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[1]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[2]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[3]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[4]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[5]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[6]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[7]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[8]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[9]"
           }
         ]
@@ -16399,63 +16399,63 @@
         "floors": [],
         "violations": [
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[0].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[0].giftIds"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[1].difficulty"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[2]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[2].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[2].giftIds"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "MISSING_THEMEPACK",
             "path": "floorSelections[3]"
           },
           {
-            "code": "VALUE_OUT_OF_RANGE",
+            "code": "INSUFFICIENT_DIFFICULTY_ENTRY",
             "path": "floorSelections[3].difficulty"
           },
           {
-            "code": "DUPLICATE_VALUE",
+            "code": "DUPLICATE_EGOGIFT",
             "path": "floorSelections[3].giftIds"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[4]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[5]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[6]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[7]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[8]"
           },
           {
-            "code": "FLOOR_MISSING_THEME_PACK",
+            "code": "INSUFFICIENT_FLOORS",
             "path": "floorSelections[9]"
           }
         ]

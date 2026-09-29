@@ -13,6 +13,7 @@ public final class GameConstants {
 
     public static final int NORMAL_DIFFICULTY = 0;
     public static final int HARD_DIFFICULTY = 1;
+    public static final int EXTREME_DIFFICULTY = 3;
 
     private GameConstants() {
     }

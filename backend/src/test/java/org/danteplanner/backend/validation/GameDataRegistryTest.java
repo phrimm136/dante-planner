@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * An unreadable game-data path is a startup failure, not a silently empty registry.
  *
  * <p>Every id lookup against an empty registry returns false, so the pod reports healthy while
- * rejecting 100% of planner saves with INVALID_ID_REFERENCE.</p>
+ * rejecting 100% of planner saves as unknown ids.</p>
  */
 class GameDataRegistryTest {
 

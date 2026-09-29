@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.MissingNode;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 final class JsonTraversal {
 
@@ -36,7 +37,26 @@ final class JsonTraversal {
         return node.isIntegralNumber() && node.canConvertToInt();
     }
 
-    static void eachUniqueString(JsonNode array, String path, ValidationContext context, StringElement body) {
+    static boolean isAbsentOrBlank(JsonNode node) {
+        return switch (node.getNodeType()) {
+            case MISSING, NULL -> true;
+            case STRING -> node.asText().isBlank();
+            default -> false;
+        };
+    }
+
+    static void eachUniqueString(JsonNode array, String path, ErrorCode duplicateCode, ValidationContext context,
+                                 StringElement body) {
+        eachString(array, path, context,
+                value -> context.reject(path, p -> ValidationErrors.duplicateValue(duplicateCode, p, value)), body);
+    }
+
+    static void eachDistinctString(JsonNode array, String path, ValidationContext context, StringElement body) {
+        eachString(array, path, context, value -> { }, body);
+    }
+
+    private static void eachString(JsonNode array, String path, ValidationContext context, Consumer<String> onRepeat,
+                                   StringElement body) {
         if (!array.isArray()) {
             return;
         }
@@ -55,7 +75,7 @@ final class JsonTraversal {
             String value = element.asText();
 
             if (!seen.add(value)) {
-                context.reject(path, p -> ValidationErrors.duplicateValue(p, value));
+                onRepeat.accept(value);
                 continue;
             }
 

@@ -1,5 +1,6 @@
 package org.danteplanner.backend.planner.validation.floor;
 
+import org.danteplanner.backend.planner.validation.ErrorCode;
 import org.danteplanner.backend.planner.validation.FloorRuleTable;
 import org.danteplanner.backend.planner.validation.FloorRuleTable.CategoryFloors;
 import org.danteplanner.backend.planner.validation.FloorRuleTable.RuleName;
@@ -66,6 +67,10 @@ public class FloorRules {
         List<Violation> check(Walk walk);
     }
 
+    private static final Map<Set<Integer>, ErrorCode> SINGLE_DIFFICULTY_CODES = Map.of(
+            Set.of(GameConstants.HARD_DIFFICULTY), ErrorCode.OUT_OF_RANGE_DIFFICULTY_NOT_HARD,
+            Set.of(GameConstants.EXTREME_DIFFICULTY), ErrorCode.OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME);
+
     private final Map<Stage, List<Rule>> requiredRules;
 
     @Autowired
@@ -106,17 +111,17 @@ public class FloorRules {
     private static List<Rule> requiredAt(FloorRuleTable table, Stage stage) {
         return Arrays.stream(RuleName.values())
                 .filter(name -> table.stagesFor(name).contains(stage.tableName()))
-                .map(FloorRules::rule)
+                .map(name -> rule(name, table.entryFloorCount()))
                 .toList();
     }
 
-    private static Rule rule(RuleName name) {
+    private static Rule rule(RuleName name, int entryFloorCount) {
         return switch (name) {
             case EVERY_FLOOR_PRESENT -> FloorRules::everyFloorPresent;
             case THEME_PACK_PRESENT -> FloorRules::themePackPresent;
             case NOT_REPEATED -> FloorRules::notRepeated;
             case SEQUENCE -> FloorRules::sequence;
-            case DIFFICULTY_IN_RANGE -> FloorRules::difficultyInRange;
+            case DIFFICULTY_IN_RANGE -> walk -> difficultyInRange(walk, entryFloorCount);
             case NO_NORMAL_AFTER_HARD -> FloorRules::noNormalAfterHard;
             case GIFT_UNIQUE -> FloorRules::giftUnique;
         };
@@ -124,7 +129,7 @@ public class FloorRules {
 
     private static List<Violation> everyFloorPresent(Walk walk) {
         return IntStream.range(walk.floors().size(), walk.layout().floorCount())
-                .mapToObj(index -> FloorViolations.missingThemePack(FloorBoundary.floorPath(index)))
+                .mapToObj(index -> FloorViolations.missingFloor(FloorBoundary.floorPath(index)))
                 .toList();
     }
 
@@ -155,12 +160,22 @@ public class FloorRules {
                 .toList();
     }
 
-    private static List<Violation> difficultyInRange(Walk walk) {
+    private static List<Violation> difficultyInRange(Walk walk, int entryFloorCount) {
         return walk.indices()
                 .filter(index -> !allows(walk.allowed(index), walk.difficulty(index)))
-                .mapToObj(index -> FloorViolations.difficultyNotAllowed(FloorBoundary.difficultyPath(index),
-                        walk.difficulty(index), walk.allowed(index)))
+                .mapToObj(index -> FloorViolations.difficultyNotAllowed(difficultyCode(walk, index, entryFloorCount),
+                        FloorBoundary.difficultyPath(index), walk.difficulty(index), walk.allowed(index)))
                 .toList();
+    }
+
+    private static ErrorCode difficultyCode(Walk walk, int index, int entryFloorCount) {
+        return gatesEntry(walk.layout(), index, entryFloorCount)
+                ? ErrorCode.INSUFFICIENT_DIFFICULTY_ENTRY
+                : SINGLE_DIFFICULTY_CODES.getOrDefault(walk.allowed(index), ErrorCode.OUT_OF_RANGE_DIFFICULTY);
+    }
+
+    private static boolean gatesEntry(CategoryFloors layout, int index, int entryFloorCount) {
+        return layout.floorCount() > entryFloorCount && index < entryFloorCount;
     }
 
     private static boolean allows(Set<Integer> allowed, Difficulty difficulty) {
@@ -181,7 +196,7 @@ public class FloorRules {
         return walk.indices()
                 .boxed()
                 .flatMap(index -> Positions.firstRepeatOf(walk.giftIds(index))
-                        .map(giftId -> Violation.duplicateValue(FloorBoundary.giftIdsPath(index), giftId))
+                        .map(giftId -> FloorViolations.duplicateGift(FloorBoundary.giftIdsPath(index), giftId))
                         .stream())
                 .toList();
     }

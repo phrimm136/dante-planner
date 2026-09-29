@@ -60,8 +60,8 @@ message: Missing required fields: [equipment, selectedKeywords]
 
 ### equipment-sinners-missing-hash-colliding-pair
 code: VALIDATION_ERROR
-message: [MISSING_REQUIRED_FIELD] Missing required fields: [01, 12]
-sub 1: MISSING_REQUIRED_FIELD | Missing required fields: [01, 12]
+message: [MISSING_SINNER] Missing required fields: [01, 12]
+sub 1: MISSING_SINNER | Missing required fields: [01, 12]
 
 ### field-type-selected-keywords
 code: VALIDATION_ERROR
@@ -116,9 +116,9 @@ sub 2: INVALID_FIELD_TYPE | Field 'skillEAState' must be object, got array
 
 ### field-type-selected-gift-keyword
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'selectedGiftKeyword' must be string or null, got number 123; [INVALID_SEQUENCE] Invalid sequence: selectedGiftIds requires selectedGiftKeyword
+message: [INVALID_FIELD_TYPE] Field 'selectedGiftKeyword' must be string or null, got number 123; [MISSING_STARTGIFT_KEYWORD] Invalid sequence: selectedGiftIds requires selectedGiftKeyword
 sub 1: INVALID_FIELD_TYPE | Field 'selectedGiftKeyword' must be string or null, got number 123
-sub 2: INVALID_SEQUENCE | Invalid sequence: selectedGiftIds requires selectedGiftKeyword
+sub 2: MISSING_STARTGIFT_KEYWORD | Invalid sequence: selectedGiftIds requires selectedGiftKeyword
 
 ### field-type-described-as-boolean
 code: VALIDATION_ERROR
@@ -142,24 +142,24 @@ message: Note 'floor-1' size 1111 exceeds limit 1024
 
 ### equipment-key-non-numeric
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'equipment key 'yi_sang'' has wrong type, expected integer; [MISSING_REQUIRED_FIELD] Missing required fields: [05]; [INVALID_ID_REFERENCE] identity for sinner yi_sang ID '10501' not found or invalid; [INVALID_ID_REFERENCE] EGO for sinner yi_sang ID '20501' not found or invalid
+message: [INVALID_FIELD_TYPE] Field 'equipment key 'yi_sang'' has wrong type, expected integer; [MISSING_SINNER] Missing required fields: [05]; [MISMATCHED_IDENTITY] identity for sinner yi_sang ID '10501' not found or invalid; [MISMATCHED_EGO] EGO for sinner yi_sang ID '20501' not found or invalid
 sub 1: INVALID_FIELD_TYPE | Field 'equipment key 'yi_sang'' has wrong type, expected integer
-sub 2: MISSING_REQUIRED_FIELD | Missing required fields: [05]
-sub 3: INVALID_ID_REFERENCE | identity for sinner yi_sang ID '10501' not found or invalid
-sub 4: INVALID_ID_REFERENCE | EGO for sinner yi_sang ID '20501' not found or invalid
+sub 2: MISSING_SINNER | Missing required fields: [05]
+sub 3: MISMATCHED_IDENTITY | identity for sinner yi_sang ID '10501' not found or invalid
+sub 4: MISMATCHED_EGO | EGO for sinner yi_sang ID '20501' not found or invalid
 
 ### equipment-key-out-of-range
 code: VALIDATION_ERROR
-message: [VALUE_OUT_OF_RANGE] equipment key value 13 is out of range [1-12]; [MISSING_REQUIRED_FIELD] Missing required fields: [05]; [INVALID_ID_REFERENCE] identity for sinner 13 ID '10501' not found or invalid; [INVALID_ID_REFERENCE] EGO for sinner 13 ID '20501' not found or invalid
-sub 1: VALUE_OUT_OF_RANGE | equipment key value 13 is out of range [1-12]
-sub 2: MISSING_REQUIRED_FIELD | Missing required fields: [05]
-sub 3: INVALID_ID_REFERENCE | identity for sinner 13 ID '10501' not found or invalid
-sub 4: INVALID_ID_REFERENCE | EGO for sinner 13 ID '20501' not found or invalid
+message: [OUT_OF_RANGE_SINNER] equipment key value 13 is out of range [1-12]; [MISSING_SINNER] Missing required fields: [05]; [MISMATCHED_IDENTITY] identity for sinner 13 ID '10501' not found or invalid; [MISMATCHED_EGO] EGO for sinner 13 ID '20501' not found or invalid
+sub 1: OUT_OF_RANGE_SINNER | equipment key value 13 is out of range [1-12]
+sub 2: MISSING_SINNER | Missing required fields: [05]
+sub 3: MISMATCHED_IDENTITY | identity for sinner 13 ID '10501' not found or invalid
+sub 4: MISMATCHED_EGO | EGO for sinner 13 ID '20501' not found or invalid
 
 ### equipment-sinner-missing
 code: VALIDATION_ERROR
-message: [MISSING_REQUIRED_FIELD] Missing required fields: [05]
-sub 1: MISSING_REQUIRED_FIELD | Missing required fields: [05]
+message: [MISSING_SINNER] Missing required fields: [05]
+sub 1: MISSING_SINNER | Missing required fields: [05]
 
 ### equipment-sinner-not-object
 code: VALIDATION_ERROR
@@ -168,35 +168,35 @@ sub 1: INVALID_FIELD_TYPE | Field 'equipment[05]' has wrong type, expected objec
 
 ### equipment-identity-missing
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'equipment[05].identity' has wrong type, expected object
-sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].identity' has wrong type, expected object
+message: [MISSING_IDENTITY] Field 'equipment[05].identity' has wrong type, expected object
+sub 1: MISSING_IDENTITY | Field 'equipment[05].identity' has wrong type, expected object
 
 ### equipment-identity-id-blank
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'equipment[05].identity.id' has wrong type, expected non-empty string; [IDENTITY_UNKNOWN_ID] identity ID '  ' not found or invalid
-sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].identity.id' has wrong type, expected non-empty string
-sub 2: IDENTITY_UNKNOWN_ID | identity ID '  ' not found or invalid
+message: [MISSING_IDENTITY] Field 'equipment[05].identity.id' has wrong type, expected non-empty string; [UNKNOWN_IDENTITY] identity ID '  ' not found or invalid
+sub 1: MISSING_IDENTITY | Field 'equipment[05].identity.id' has wrong type, expected non-empty string
+sub 2: UNKNOWN_IDENTITY | identity ID '  ' not found or invalid
 
 ### equipment-egos-missing
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'equipment[05].egos' has wrong type, expected object
-sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].egos' has wrong type, expected object
+message: [MISSING_EGO_ZAYIN] Field 'equipment[05].egos' has wrong type, expected object
+sub 1: MISSING_EGO_ZAYIN | Field 'equipment[05].egos' has wrong type, expected object
 
 ### equipment-ego-type-unknown
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'equipment[05].egos.KETHER' has wrong type, expected valid EGO type (ZAYIN/TETH/HE/WAW/ALEPH)
-sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].egos.KETHER' has wrong type, expected valid EGO type (ZAYIN/TETH/HE/WAW/ALEPH)
+message: [INVALID_EGO_TYPE] Field 'equipment[05].egos.KETHER' has wrong type, expected valid EGO type (ZAYIN/TETH/HE/WAW/ALEPH)
+sub 1: INVALID_EGO_TYPE | Field 'equipment[05].egos.KETHER' has wrong type, expected valid EGO type (ZAYIN/TETH/HE/WAW/ALEPH)
 
 ### equipment-zayin-missing
 code: VALIDATION_ERROR
-message: [MISSING_REQUIRED_FIELD] Missing required fields: [equipment[05].egos.ZAYIN]
-sub 1: MISSING_REQUIRED_FIELD | Missing required fields: [equipment[05].egos.ZAYIN]
+message: [MISSING_EGO_ZAYIN] Missing required fields: [equipment[05].egos.ZAYIN]
+sub 1: MISSING_EGO_ZAYIN | Missing required fields: [equipment[05].egos.ZAYIN]
 
 ### equipment-zayin-id-blank
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'equipment[05].egos.ZAYIN.id' has wrong type, expected non-empty string; [EGO_UNKNOWN_ID] EGO ID '' not found or invalid
-sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].egos.ZAYIN.id' has wrong type, expected non-empty string
-sub 2: EGO_UNKNOWN_ID | EGO ID '' not found or invalid
+message: [MISSING_EGO_ZAYIN] Field 'equipment[05].egos.ZAYIN.id' has wrong type, expected non-empty string; [UNKNOWN_EGO] EGO ID '' not found or invalid
+sub 1: MISSING_EGO_ZAYIN | Field 'equipment[05].egos.ZAYIN.id' has wrong type, expected non-empty string
+sub 2: UNKNOWN_EGO | EGO ID '' not found or invalid
 
 ### deployment-order-non-number
 code: VALIDATION_ERROR
@@ -205,31 +205,31 @@ sub 1: INVALID_FIELD_TYPE | Field 'deploymentOrder[1]' must be number, got strin
 
 ### deployment-order-out-of-range
 code: VALIDATION_ERROR
-message: [VALUE_OUT_OF_RANGE] deploymentOrder[0] value -1 is out of range [0-11]; [VALUE_OUT_OF_RANGE] deploymentOrder[1] value 12 is out of range [0-11]
-sub 1: VALUE_OUT_OF_RANGE | deploymentOrder[0] value -1 is out of range [0-11]
-sub 2: VALUE_OUT_OF_RANGE | deploymentOrder[1] value 12 is out of range [0-11]
+message: [OUT_OF_RANGE_DEPLOYMENT] deploymentOrder[0] value -1 is out of range [0-11]; [OUT_OF_RANGE_DEPLOYMENT] deploymentOrder[1] value 12 is out of range [0-11]
+sub 1: OUT_OF_RANGE_DEPLOYMENT | deploymentOrder[0] value -1 is out of range [0-11]
+sub 2: OUT_OF_RANGE_DEPLOYMENT | deploymentOrder[1] value 12 is out of range [0-11]
 
 ### skill-state-slot-key-unknown
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'skillEAState[05] slot '3'' has wrong type, expected 0, 1, or 2; [VALUE_OUT_OF_RANGE] skillEAState[05] total value 5 is out of range [6-6]
-sub 1: INVALID_FIELD_TYPE | Field 'skillEAState[05] slot '3'' has wrong type, expected 0, 1, or 2
-sub 2: VALUE_OUT_OF_RANGE | skillEAState[05] total value 5 is out of range [6-6]
+message: [INVALID_SKILL_SLOT] Field 'skillEAState[05] slot '3'' has wrong type, expected 0, 1, or 2; [OUT_OF_RANGE_SKILL_TOTAL] skillEAState[05] total value 5 is out of range [6-6]
+sub 1: INVALID_SKILL_SLOT | Field 'skillEAState[05] slot '3'' has wrong type, expected 0, 1, or 2
+sub 2: OUT_OF_RANGE_SKILL_TOTAL | skillEAState[05] total value 5 is out of range [6-6]
 
 ### skill-state-slot-not-number
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'skillEAState[05][0]' must be number, got string "3"; [VALUE_OUT_OF_RANGE] skillEAState[05] total value 3 is out of range [6-6]
+message: [INVALID_FIELD_TYPE] Field 'skillEAState[05][0]' must be number, got string "3"; [OUT_OF_RANGE_SKILL_TOTAL] skillEAState[05] total value 3 is out of range [6-6]
 sub 1: INVALID_FIELD_TYPE | Field 'skillEAState[05][0]' must be number, got string "3"
-sub 2: VALUE_OUT_OF_RANGE | skillEAState[05] total value 3 is out of range [6-6]
+sub 2: OUT_OF_RANGE_SKILL_TOTAL | skillEAState[05] total value 3 is out of range [6-6]
 
 ### skill-state-total-wrong
 code: VALIDATION_ERROR
-message: [VALUE_OUT_OF_RANGE] skillEAState[05] total value 4 is out of range [6-6]
-sub 1: VALUE_OUT_OF_RANGE | skillEAState[05] total value 4 is out of range [6-6]
+message: [OUT_OF_RANGE_SKILL_TOTAL] skillEAState[05] total value 4 is out of range [6-6]
+sub 1: OUT_OF_RANGE_SKILL_TOTAL | skillEAState[05] total value 4 is out of range [6-6]
 
 ### skill-state-sinner-missing
 code: VALIDATION_ERROR
-message: [MISSING_REQUIRED_FIELD] Missing required fields: [05]
-sub 1: MISSING_REQUIRED_FIELD | Missing required fields: [05]
+message: [MISSING_SINNER] Missing required fields: [05]
+sub 1: MISSING_SINNER | Missing required fields: [05]
 
 ### skill-state-sinner-not-object
 code: VALIDATION_ERROR
@@ -238,23 +238,23 @@ sub 1: INVALID_FIELD_TYPE | Field 'skillEAState[05]' has wrong type, expected ob
 
 ### identity-id-unknown
 code: VALIDATION_ERROR
-message: [IDENTITY_UNKNOWN_ID] identity ID '10599' not found or invalid
-sub 1: IDENTITY_UNKNOWN_ID | identity ID '10599' not found or invalid
+message: [UNKNOWN_IDENTITY] identity ID '10599' not found or invalid
+sub 1: UNKNOWN_IDENTITY | identity ID '10599' not found or invalid
 
 ### identity-sinner-mismatch
 code: VALIDATION_ERROR
-message: [INVALID_ID_REFERENCE] identity for sinner 05 ID '10601' not found or invalid
-sub 1: INVALID_ID_REFERENCE | identity for sinner 05 ID '10601' not found or invalid
+message: [MISMATCHED_IDENTITY] identity for sinner 05 ID '10601' not found or invalid
+sub 1: MISMATCHED_IDENTITY | identity for sinner 05 ID '10601' not found or invalid
 
 ### identity-level-out-of-range
 code: VALIDATION_ERROR
-message: [VALUE_OUT_OF_RANGE] level value 99 is out of range [1-60]
-sub 1: VALUE_OUT_OF_RANGE | level value 99 is out of range [1-60]
+message: [OUT_OF_RANGE_IDENTITY_LEVEL] level value 99 is out of range [1-60]
+sub 1: OUT_OF_RANGE_IDENTITY_LEVEL | level value 99 is out of range [1-60]
 
 ### identity-uptie-out-of-range
 code: VALIDATION_ERROR
-message: [VALUE_OUT_OF_RANGE] uptie value 9 is out of range [1-4]
-sub 1: VALUE_OUT_OF_RANGE | uptie value 9 is out of range [1-4]
+message: [OUT_OF_RANGE_IDENTITY_UPTIE] uptie value 9 is out of range [1-4]
+sub 1: OUT_OF_RANGE_IDENTITY_UPTIE | uptie value 9 is out of range [1-4]
 
 ### identity-level-string-rejected
 code: VALIDATION_ERROR
@@ -279,23 +279,23 @@ sub 2: INVALID_FIELD_TYPE | Field 'equipment.05.egos.ZAYIN.id' must be string, g
 
 ### ego-id-null
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'equipment[05].egos.ZAYIN.id' has wrong type, expected non-empty string
-sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].egos.ZAYIN.id' has wrong type, expected non-empty string
+message: [MISSING_EGO_ZAYIN] Field 'equipment[05].egos.ZAYIN.id' has wrong type, expected non-empty string
+sub 1: MISSING_EGO_ZAYIN | Field 'equipment[05].egos.ZAYIN.id' has wrong type, expected non-empty string
 
 ### ego-id-unknown
 code: VALIDATION_ERROR
-message: [EGO_UNKNOWN_ID] EGO ID '20599' not found or invalid
-sub 1: EGO_UNKNOWN_ID | EGO ID '20599' not found or invalid
+message: [UNKNOWN_EGO] EGO ID '20599' not found or invalid
+sub 1: UNKNOWN_EGO | EGO ID '20599' not found or invalid
 
 ### ego-sinner-mismatch
 code: VALIDATION_ERROR
-message: [INVALID_ID_REFERENCE] EGO for sinner 05 ID '20601' not found or invalid
-sub 1: INVALID_ID_REFERENCE | EGO for sinner 05 ID '20601' not found or invalid
+message: [MISMATCHED_EGO] EGO for sinner 05 ID '20601' not found or invalid
+sub 1: MISMATCHED_EGO | EGO for sinner 05 ID '20601' not found or invalid
 
 ### ego-threadspin-out-of-range
 code: VALIDATION_ERROR
-message: [VALUE_OUT_OF_RANGE] threadspin value 9 is out of range [1-5]
-sub 1: VALUE_OUT_OF_RANGE | threadspin value 9 is out of range [1-5]
+message: [OUT_OF_RANGE_EGO_THREADSPIN] threadspin value 9 is out of range [1-5]
+sub 1: OUT_OF_RANGE_EGO_THREADSPIN | threadspin value 9 is out of range [1-5]
 
 ### threadspin-string-rejected
 code: VALIDATION_ERROR
@@ -304,32 +304,31 @@ sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].egos.ZAYIN.threadspin' must be 
 
 ### ego-threadspin-above-ego-ceiling
 code: VALIDATION_ERROR
-message: [VALUE_OUT_OF_RANGE] threadspin for EGO 20501 value 5 is out of range [1-4]
-sub 1: VALUE_OUT_OF_RANGE | threadspin for EGO 20501 value 5 is out of range [1-4]
+message: [OUT_OF_RANGE_EGO_THREADSPIN] threadspin for EGO 20501 value 5 is out of range [1-4]
+sub 1: OUT_OF_RANGE_EGO_THREADSPIN | threadspin for EGO 20501 value 5 is out of range [1-4]
 
 ### ego-ceiling-unknown
 code: VALIDATION_ERROR
-message: [INVALID_ID_REFERENCE] EGO maxThreadspin ID '20502' not found or invalid
-sub 1: INVALID_ID_REFERENCE | EGO maxThreadspin ID '20502' not found or invalid
+message: [MISSING_EGO_THREADSPIN_CEILING] EGO maxThreadspin ID '20502' not found or invalid
+sub 1: MISSING_EGO_THREADSPIN_CEILING | EGO maxThreadspin ID '20502' not found or invalid
 
 ### scenario-mixed-type-gift-array
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'selectedGiftIds[1]' must be string, got number 42; [DUPLICATE_VALUE] Duplicate value 'gift_a' in selectedGiftIds; [INVALID_FIELD_TYPE] Field 'selectedGiftIds[1]' must be string, got number 42; [DUPLICATE_VALUE] Duplicate value 'gift_a' in selectedGiftIds
+message: [INVALID_FIELD_TYPE] Field 'selectedGiftIds[1]' must be string, got number 42; [DUPLICATE_STARTGIFT] Duplicate value 'gift_a' in selectedGiftIds; [INVALID_FIELD_TYPE] Field 'selectedGiftIds[1]' must be string, got number 42
 sub 1: INVALID_FIELD_TYPE | Field 'selectedGiftIds[1]' must be string, got number 42
-sub 2: DUPLICATE_VALUE | Duplicate value 'gift_a' in selectedGiftIds
+sub 2: DUPLICATE_STARTGIFT | Duplicate value 'gift_a' in selectedGiftIds
 sub 3: INVALID_FIELD_TYPE | Field 'selectedGiftIds[1]' must be string, got number 42
-sub 4: DUPLICATE_VALUE | Duplicate value 'gift_a' in selectedGiftIds
 
 ### selected-gift-id-unknown
 code: VALIDATION_ERROR
-message: [GIFT_UNKNOWN_ID] selectedGiftIds ID '9999' not found or invalid; [INVALID_ID_REFERENCE] selectedGiftIds (not in keyword 'Combustion' pool) ID '9999' not found or invalid
-sub 1: GIFT_UNKNOWN_ID | selectedGiftIds ID '9999' not found or invalid
-sub 2: INVALID_ID_REFERENCE | selectedGiftIds (not in keyword 'Combustion' pool) ID '9999' not found or invalid
+message: [UNKNOWN_EGOGIFT] selectedGiftIds ID '9999' not found or invalid; [MISMATCHED_STARTGIFT] selectedGiftIds (not in keyword 'Combustion' pool) ID '9999' not found or invalid
+sub 1: UNKNOWN_EGOGIFT | selectedGiftIds ID '9999' not found or invalid
+sub 2: MISMATCHED_STARTGIFT | selectedGiftIds (not in keyword 'Combustion' pool) ID '9999' not found or invalid
 
 ### observation-gift-duplicate
 code: VALIDATION_ERROR
-message: [DUPLICATE_VALUE] Duplicate value '9002' in observationGiftIds
-sub 1: DUPLICATE_VALUE | Duplicate value '9002' in observationGiftIds
+message: [DUPLICATE_EGOGIFT] Duplicate value '9002' in observationGiftIds
+sub 1: DUPLICATE_EGOGIFT | Duplicate value '9002' in observationGiftIds
 
 ### observation-gift-not-string
 code: VALIDATION_ERROR
@@ -338,59 +337,59 @@ sub 1: INVALID_FIELD_TYPE | Field 'observationGiftIds[0]' must be string, got nu
 
 ### comprehensive-gift-unknown
 code: VALIDATION_ERROR
-message: [GIFT_UNKNOWN_ID] comprehensiveGiftIds ID '9999' not found or invalid
-sub 1: GIFT_UNKNOWN_ID | comprehensiveGiftIds ID '9999' not found or invalid
+message: [UNKNOWN_EGOGIFT] comprehensiveGiftIds ID '9999' not found or invalid
+sub 1: UNKNOWN_EGOGIFT | comprehensiveGiftIds ID '9999' not found or invalid
 
 ### comprehensive-gift-enhancement-prefix-accepted
 accepted
 
 ### floor-theme-pack-unknown
 code: VALIDATION_ERROR
-message: [THEME_PACK_UNKNOWN_ID] floorSelections[0].themePackId ID '9999' not found or invalid
-sub 1: THEME_PACK_UNKNOWN_ID | floorSelections[0].themePackId ID '9999' not found or invalid
+message: [UNKNOWN_THEMEPACK] floorSelections[0].themePackId ID '9999' not found or invalid
+sub 1: UNKNOWN_THEMEPACK | floorSelections[0].themePackId ID '9999' not found or invalid
 
 ### floor-theme-pack-empty-accepted-as-draft
 accepted
 
 ### floor-theme-pack-empty-rejected-on-publish
 code: VALIDATION_ERROR
-message: [FLOOR_MISSING_THEME_PACK] floorSelections[4] must have a theme pack selected
-sub 1: FLOOR_MISSING_THEME_PACK | floorSelections[4] must have a theme pack selected
+message: [MISSING_THEMEPACK] floorSelections[4] must have a theme pack selected
+sub 1: MISSING_THEMEPACK | floorSelections[4] must have a theme pack selected
 
 ### floor-theme-pack-absent-rejected-on-publish
 code: VALIDATION_ERROR
-message: [FLOOR_MISSING_THEME_PACK] floorSelections[4] must have a theme pack selected
-sub 1: FLOOR_MISSING_THEME_PACK | floorSelections[4] must have a theme pack selected
+message: [MISSING_THEMEPACK] floorSelections[4] must have a theme pack selected
+sub 1: MISSING_THEMEPACK | floorSelections[4] must have a theme pack selected
 
 ### floor-difficulty-out-of-range
 code: VALIDATION_ERROR
-message: [VALUE_OUT_OF_RANGE] floorSelections[0].difficulty value 5 is out of range [0-1]
-sub 1: VALUE_OUT_OF_RANGE | floorSelections[0].difficulty value 5 is out of range [0-1]
+message: [OUT_OF_RANGE_DIFFICULTY] floorSelections[0].difficulty value 5 is out of range [0-1]
+sub 1: OUT_OF_RANGE_DIFFICULTY | floorSelections[0].difficulty value 5 is out of range [0-1]
 
 ### floor-difficulty-absent
 code: VALIDATION_ERROR
-message: [VALUE_OUT_OF_RANGE] floorSelections[0].difficulty is absent; expected a value in range [0-1]
-sub 1: VALUE_OUT_OF_RANGE | floorSelections[0].difficulty is absent; expected a value in range [0-1]
+message: [OUT_OF_RANGE_DIFFICULTY] floorSelections[0].difficulty is absent; expected a value in range [0-1]
+sub 1: OUT_OF_RANGE_DIFFICULTY | floorSelections[0].difficulty is absent; expected a value in range [0-1]
 
 ### floor-difficulty-hard-required-on-10f
 code: VALIDATION_ERROR
-message: [VALUE_OUT_OF_RANGE] floorSelections[0].difficulty value 0 is out of range [1-1]
-sub 1: VALUE_OUT_OF_RANGE | floorSelections[0].difficulty value 0 is out of range [1-1]
+message: [INSUFFICIENT_DIFFICULTY_ENTRY] floorSelections[0].difficulty value 0 is out of range [1-1]
+sub 1: INSUFFICIENT_DIFFICULTY_ENTRY | floorSelections[0].difficulty value 0 is out of range [1-1]
 
 ### floor-difficulty-extreme-required-on-15f
 code: VALIDATION_ERROR
-message: [VALUE_OUT_OF_RANGE] floorSelections[10].difficulty value 1 is out of range [3-3]
-sub 1: VALUE_OUT_OF_RANGE | floorSelections[10].difficulty value 1 is out of range [3-3]
+message: [OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME] floorSelections[10].difficulty value 1 is out of range [3-3]
+sub 1: OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME | floorSelections[10].difficulty value 1 is out of range [3-3]
 
 ### floor-sequence-gap
 code: VALIDATION_ERROR
-message: [INVALID_SEQUENCE] Invalid sequence: floorSelections[1] requires themePackId in floorSelections[0]
-sub 1: INVALID_SEQUENCE | Invalid sequence: floorSelections[1] requires themePackId in floorSelections[0]
+message: [OUT_OF_ORDER_THEMEPACK] Invalid sequence: floorSelections[1] requires themePackId in floorSelections[0]
+sub 1: OUT_OF_ORDER_THEMEPACK | Invalid sequence: floorSelections[1] requires themePackId in floorSelections[0]
 
 ### floor-gift-duplicate
 code: VALIDATION_ERROR
-message: [DUPLICATE_VALUE] Duplicate value '9002' in floorSelections[0].giftIds
-sub 1: DUPLICATE_VALUE | Duplicate value '9002' in floorSelections[0].giftIds
+message: [DUPLICATE_EGOGIFT] Duplicate value '9002' in floorSelections[0].giftIds
+sub 1: DUPLICATE_EGOGIFT | Duplicate value '9002' in floorSelections[0].giftIds
 
 ### floor-gift-not-string
 code: VALIDATION_ERROR
@@ -399,18 +398,18 @@ sub 1: INVALID_FIELD_TYPE | Field 'floorSelections[0].giftIds[0]' must be string
 
 ### floor-gift-unknown
 code: VALIDATION_ERROR
-message: [FLOOR_UNKNOWN_GIFT_ID] floorSelections[0].giftIds[0] ID '9999' not found or invalid
-sub 1: FLOOR_UNKNOWN_GIFT_ID | floorSelections[0].giftIds[0] ID '9999' not found or invalid
+message: [UNKNOWN_EGOGIFT_FLOOR] floorSelections[0].giftIds[0] ID '9999' not found or invalid
+sub 1: UNKNOWN_EGOGIFT_FLOOR | floorSelections[0].giftIds[0] ID '9999' not found or invalid
 
 ### floor-gift-not-affordable
 code: VALIDATION_ERROR
-message: [GIFT_NOT_AFFORDABLE] Gift '9004' is not affordable for theme pack '1001'
-sub 1: GIFT_NOT_AFFORDABLE | Gift '9004' is not affordable for theme pack '1001'
+message: [UNAFFORDABLE_EGOGIFT] Gift '9004' is not affordable for theme pack '1001'
+sub 1: UNAFFORDABLE_EGOGIFT | Gift '9004' is not affordable for theme pack '1001'
 
 ### buff-count-exceeded
 code: VALIDATION_ERROR
-message: [VALUE_OUT_OF_RANGE] selectedBuffIds count value 11 is out of range [0-10]
-sub 1: VALUE_OUT_OF_RANGE | selectedBuffIds count value 11 is out of range [0-10]
+message: [EXCESS_STARTBUFF] selectedBuffIds count value 11 is out of range [0-10]
+sub 1: EXCESS_STARTBUFF | selectedBuffIds count value 11 is out of range [0-10]
 
 ### buff-not-number
 code: VALIDATION_ERROR
@@ -419,44 +418,43 @@ sub 1: INVALID_FIELD_TYPE | Field 'selectedBuffIds[1]' must be number, got strin
 
 ### buff-id-unknown
 code: VALIDATION_ERROR
-message: [START_BUFF_UNKNOWN_ID] selectedBuffIds ID '999' not found or invalid
-sub 1: START_BUFF_UNKNOWN_ID | selectedBuffIds ID '999' not found or invalid
+message: [UNKNOWN_STARTBUFF] selectedBuffIds ID '999' not found or invalid
+sub 1: UNKNOWN_STARTBUFF | selectedBuffIds ID '999' not found or invalid
 
 ### buff-base-id-out-of-range
 code: VALIDATION_ERROR
-message: [VALUE_OUT_OF_RANGE] selectedBuffIds[0] base ID value 15 is out of range [0-9]
-sub 1: VALUE_OUT_OF_RANGE | selectedBuffIds[0] base ID value 15 is out of range [0-9]
+message: [OUT_OF_RANGE_STARTBUFF] selectedBuffIds[0] base ID value 15 is out of range [0-9]
+sub 1: OUT_OF_RANGE_STARTBUFF | selectedBuffIds[0] base ID value 15 is out of range [0-9]
 
 ### buff-base-id-duplicate
 code: VALIDATION_ERROR
-message: [DUPLICATE_VALUE] Duplicate value '0' in selectedBuffIds base IDs
-sub 1: DUPLICATE_VALUE | Duplicate value '0' in selectedBuffIds base IDs
+message: [DUPLICATE_STARTBUFF] Duplicate value '0' in selectedBuffIds base IDs
+sub 1: DUPLICATE_STARTBUFF | Duplicate value '0' in selectedBuffIds base IDs
 
 ### start-gift-keyword-absent
 code: VALIDATION_ERROR
-message: [INVALID_SEQUENCE] Invalid sequence: selectedGiftIds requires selectedGiftKeyword
-sub 1: INVALID_SEQUENCE | Invalid sequence: selectedGiftIds requires selectedGiftKeyword
+message: [MISSING_STARTGIFT_KEYWORD] Invalid sequence: selectedGiftIds requires selectedGiftKeyword
+sub 1: MISSING_STARTGIFT_KEYWORD | Invalid sequence: selectedGiftIds requires selectedGiftKeyword
 
 ### start-gift-keyword-null
 code: VALIDATION_ERROR
-message: [INVALID_SEQUENCE] Invalid sequence: selectedGiftIds requires selectedGiftKeyword
-sub 1: INVALID_SEQUENCE | Invalid sequence: selectedGiftIds requires selectedGiftKeyword
+message: [MISSING_STARTGIFT_KEYWORD] Invalid sequence: selectedGiftIds requires selectedGiftKeyword
+sub 1: MISSING_STARTGIFT_KEYWORD | Invalid sequence: selectedGiftIds requires selectedGiftKeyword
 
 ### start-gift-keyword-unknown
 code: VALIDATION_ERROR
-message: [INVALID_ID_REFERENCE] selectedGiftKeyword ID 'Nonsense' not found or invalid
-sub 1: INVALID_ID_REFERENCE | selectedGiftKeyword ID 'Nonsense' not found or invalid
+message: [UNKNOWN_STARTGIFT_KEYWORD] selectedGiftKeyword ID 'Nonsense' not found or invalid
+sub 1: UNKNOWN_STARTGIFT_KEYWORD | selectedGiftKeyword ID 'Nonsense' not found or invalid
 
 ### start-gift-outside-keyword-pool
 code: VALIDATION_ERROR
-message: [INVALID_ID_REFERENCE] selectedGiftIds (not in keyword 'Combustion' pool) ID '9003' not found or invalid
-sub 1: INVALID_ID_REFERENCE | selectedGiftIds (not in keyword 'Combustion' pool) ID '9003' not found or invalid
+message: [MISMATCHED_STARTGIFT] selectedGiftIds (not in keyword 'Combustion' pool) ID '9003' not found or invalid
+sub 1: MISMATCHED_STARTGIFT | selectedGiftIds (not in keyword 'Combustion' pool) ID '9003' not found or invalid
 
 ### start-gift-duplicate
 code: VALIDATION_ERROR
-message: [DUPLICATE_VALUE] Duplicate value '9001' in selectedGiftIds; [DUPLICATE_VALUE] Duplicate value '9001' in selectedGiftIds
-sub 1: DUPLICATE_VALUE | Duplicate value '9001' in selectedGiftIds
-sub 2: DUPLICATE_VALUE | Duplicate value '9001' in selectedGiftIds
+message: [DUPLICATE_STARTGIFT] Duplicate value '9001' in selectedGiftIds
+sub 1: DUPLICATE_STARTGIFT | Duplicate value '9001' in selectedGiftIds
 
 ### start-gift-not-string
 code: VALIDATION_ERROR
@@ -502,8 +500,8 @@ sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].egos' has wrong type, expected 
 
 ### silence-ego-value-not-object
 code: VALIDATION_ERROR
-message: [MISSING_REQUIRED_FIELD] Missing required fields: [equipment[05].egos.ZAYIN]
-sub 1: MISSING_REQUIRED_FIELD | Missing required fields: [equipment[05].egos.ZAYIN]
+message: [INVALID_FIELD_TYPE] Field 'equipment[05].egos.ZAYIN' must be object, got number 5
+sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].egos.ZAYIN' must be object, got number 5
 
 ### baseline-accepted
 accepted

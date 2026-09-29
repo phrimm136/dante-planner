@@ -40,7 +40,7 @@ class SkillStateValidator {
 
             if (!VALID_SKILL_SLOTS.contains(slotKey)) {
                 context.reject(sinnerPath + " slot '" + slotKey + "'",
-                        p -> ValidationErrors.invalidFieldType(p, "0, 1, or 2"));
+                        p -> ValidationErrors.invalidField(ErrorCode.INVALID_SKILL_SLOT, p, "0, 1, or 2"));
                 continue;
             }
 
@@ -56,7 +56,8 @@ class SkillStateValidator {
         if (total != SKILL_EA_TOTAL) {
             int slotTotal = total;
             context.reject(sinnerPath + " total",
-                    p -> ValidationErrors.valueOutOfRange(p, slotTotal, SKILL_EA_TOTAL, SKILL_EA_TOTAL));
+                    p -> ValidationErrors.valueOutOfRange(
+                            ErrorCode.OUT_OF_RANGE_SKILL_TOTAL, p, slotTotal, SKILL_EA_TOTAL, SKILL_EA_TOTAL));
         }
     }
 }

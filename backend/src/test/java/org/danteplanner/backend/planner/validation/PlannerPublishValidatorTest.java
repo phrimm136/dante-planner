@@ -12,18 +12,18 @@ class PlannerPublishValidatorTest {
     private final PlannerPublishValidator validator = new PlannerPublishValidator();
 
     @Test
-    void requireKnownKeywords_WhenContentSelectsAnUnknownKeyword_ThrowsKeywordInvalid() {
+    void requireKnownKeywords_WhenContentSelectsAnUnknownKeyword_ThrowsUnknownKeyword() {
         PlannerValidationException ex = catchThrowableOfType(PlannerValidationException.class,
                 () -> validator.requireKnownKeywords("{\"selectedKeywords\":[\"Sinking\",\"NotAKeyword\"]}"));
 
         assertThat(ex).isNotNull();
-        assertThat(ex.getOriginalCode()).isEqualTo("KEYWORD_INVALID");
-        assertThat(ex.getBody().getProperties()).containsEntry("code", "KEYWORD_INVALID");
+        assertThat(ex.getOriginalCode()).isEqualTo("UNKNOWN_KEYWORD");
+        assertThat(ex.getBody().getProperties()).containsEntry("code", "UNKNOWN_KEYWORD");
         assertThat(ex.getMessage()).isEqualTo("Unknown keywords: [NotAKeyword]");
     }
 
     @Test
-    void requireKnownKeywords_WhenAnElementIsNotAString_ThrowsKeywordInvalid() {
+    void requireKnownKeywords_WhenAnElementIsNotAString_ThrowsUnknownKeyword() {
         assertThat(catchThrowableOfType(PlannerValidationException.class,
                 () -> validator.requireKnownKeywords("{\"selectedKeywords\":[9828]}")))
                 .isNotNull();

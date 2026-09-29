@@ -5,6 +5,7 @@ import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.validation.ContentPath;
 import org.danteplanner.backend.planner.validation.ErrorCode;
 import org.danteplanner.backend.planner.validation.FloorRuleTable;
+import org.danteplanner.backend.planner.validation.FloorRuleTable.CategoryFloors;
 import org.danteplanner.backend.planner.validation.FloorRuleTable.RuleName;
 import org.danteplanner.backend.planner.validation.Violation;
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -42,20 +44,25 @@ class FloorRulesCorpusTest {
 
     private static final Set<String> MODULE_CODES = codes(
             ErrorCode.INVALID_FIELD_TYPE,
-            ErrorCode.FLOOR_MISSING_THEME_PACK,
-            ErrorCode.FLOOR_DUPLICATE_THEME_PACK,
-            ErrorCode.INVALID_SEQUENCE,
-            ErrorCode.VALUE_OUT_OF_RANGE,
-            ErrorCode.DUPLICATE_VALUE);
+            ErrorCode.INSUFFICIENT_FLOORS,
+            ErrorCode.MISSING_THEMEPACK,
+            ErrorCode.DUPLICATE_THEMEPACK,
+            ErrorCode.OUT_OF_ORDER_THEMEPACK,
+            ErrorCode.OUT_OF_ORDER_DIFFICULTY,
+            ErrorCode.OUT_OF_RANGE_DIFFICULTY,
+            ErrorCode.INSUFFICIENT_DIFFICULTY_ENTRY,
+            ErrorCode.OUT_OF_RANGE_DIFFICULTY_NOT_HARD,
+            ErrorCode.OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME,
+            ErrorCode.DUPLICATE_EGOGIFT);
 
     private static final Set<String> ID_CHECK_CODES = codes(
-            ErrorCode.THEME_PACK_UNKNOWN_ID,
-            ErrorCode.FLOOR_UNKNOWN_GIFT_ID,
-            ErrorCode.GIFT_NOT_AFFORDABLE);
+            ErrorCode.UNKNOWN_THEMEPACK,
+            ErrorCode.UNKNOWN_EGOGIFT_FLOOR,
+            ErrorCode.UNAFFORDABLE_EGOGIFT);
 
     private static final Set<String> CALLER_CODES = codes(ErrorCode.INVALID_CATEGORY);
 
-    private static final int MODULE_CASE_COUNT = 56;
+    private static final int MODULE_CASE_COUNT = 60;
 
     private static final FloorReferenceData CORPUS_GAME_DATA = corpusGameData(readCorpus().path("gameData"));
 
@@ -219,9 +226,9 @@ class FloorRulesCorpusTest {
 
         assertThat(admission).isInstanceOfSatisfying(Admission.Rejected.class, rejected ->
                 assertThat(rejected.violations()).extracting(Violation::code, violation -> violation.path().render()).containsExactly(
-                        tuple(ErrorCode.INVALID_SEQUENCE, "floorSelections[1].difficulty"),
-                        tuple(ErrorCode.INVALID_SEQUENCE, "floorSelections[2].difficulty"),
-                        tuple(ErrorCode.FLOOR_DUPLICATE_THEME_PACK, "floorSelections[2].themePackId")));
+                        tuple(ErrorCode.OUT_OF_ORDER_DIFFICULTY, "floorSelections[1].difficulty"),
+                        tuple(ErrorCode.OUT_OF_ORDER_DIFFICULTY, "floorSelections[2].difficulty"),
+                        tuple(ErrorCode.DUPLICATE_THEMEPACK, "floorSelections[2].themePackId")));
     }
 
     @Test
@@ -231,7 +238,7 @@ class FloorRulesCorpusTest {
 
         Admission admission = admit(rules, floors, MDCategory.F5, Stage.DRAFT);
 
-        assertThat(admission).isEqualTo(new Admission.Rejected(List.of(new Violation(ErrorCode.DUPLICATE_VALUE,
+        assertThat(admission).isEqualTo(new Admission.Rejected(List.of(new Violation(ErrorCode.DUPLICATE_EGOGIFT,
                 ContentPath.of("floorSelections").index(0).field("giftIds"), "Duplicate value '9001' in floorSelections[0].giftIds"))));
     }
 
@@ -243,7 +250,7 @@ class FloorRulesCorpusTest {
         moved.put(RuleName.DIFFICULTY_IN_RANGE, Set.of("draft"));
         FloorRules movedRules = new FloorRules(
                 new FloorRuleTable(TABLE.schemaVersion(), TABLE.stages(), TABLE.categories(), moved));
-        Admission.Rejected outOfRange = new Admission.Rejected(List.of(new Violation(ErrorCode.VALUE_OUT_OF_RANGE,
+        Admission.Rejected outOfRange = new Admission.Rejected(List.of(new Violation(ErrorCode.OUT_OF_RANGE_DIFFICULTY,
                 ContentPath.of("floorSelections").index(0).field("difficulty"), "floorSelections[0].difficulty value 5 is out of range [0-1]")));
 
         assertThat(TABLE.stagesFor(RuleName.DIFFICULTY_IN_RANGE)).containsExactly("publish");
@@ -261,10 +268,10 @@ class FloorRulesCorpusTest {
         Admission admission = admit(rules, floors, MDCategory.F5, Stage.PUBLISH);
 
         assertThat(admission).isEqualTo(new Admission.Rejected(List.of(
-                new Violation(ErrorCode.INVALID_SEQUENCE, ContentPath.of("floorSelections").index(1).field("difficulty"),
+                new Violation(ErrorCode.OUT_OF_ORDER_DIFFICULTY, ContentPath.of("floorSelections").index(1).field("difficulty"),
                         "Invalid sequence: floorSelections[1].difficulty is NORMAL after HARD in "
                                 + "floorSelections[0].difficulty"),
-                new Violation(ErrorCode.INVALID_SEQUENCE, ContentPath.of("floorSelections").index(2).field("difficulty"),
+                new Violation(ErrorCode.OUT_OF_ORDER_DIFFICULTY, ContentPath.of("floorSelections").index(2).field("difficulty"),
                         "Invalid sequence: floorSelections[2].difficulty is NORMAL after HARD in "
                                 + "floorSelections[0].difficulty"))));
     }
@@ -279,7 +286,26 @@ class FloorRulesCorpusTest {
 
         assertThat(admission).isInstanceOfSatisfying(Admission.Rejected.class, rejected ->
                 assertThat(rejected.violations()).extracting(Violation::code, violation -> violation.path().render()).containsExactly(
-                        tuple(ErrorCode.VALUE_OUT_OF_RANGE, "floorSelections[3].difficulty")));
+                        tuple(ErrorCode.INSUFFICIENT_DIFFICULTY_ENTRY, "floorSelections[3].difficulty")));
+    }
+
+    @Test
+    void admit_WhenTheShortestCategoryShrinks_MovesTheEntryFloorsWithIt() {
+        Map<MDCategory, CategoryFloors> categories = new EnumMap<>(TABLE.categories());
+        categories.put(MDCategory.F5, new CategoryFloors(3, TABLE.layout(MDCategory.F5).difficulties().subList(0, 3)));
+        FloorRules shrunk = new FloorRules(
+                new FloorRuleTable(TABLE.schemaVersion(), TABLE.stages(), categories, TABLE.rules()));
+        JsonNode floors = floors(IntStream.range(0, TABLE.floorCount(MDCategory.F10))
+                .mapToObj(index -> floor(String.valueOf(1001 + index), index == 2 || index == 3 ? 0 : 1))
+                .toArray(JsonNode[]::new));
+
+        Admission admission = admit(shrunk, floors, MDCategory.F10, Stage.PUBLISH);
+
+        assertThat(admission).isInstanceOfSatisfying(Admission.Rejected.class, rejected ->
+                assertThat(rejected.violations()).extracting(Violation::code, violation -> violation.path().render())
+                        .containsExactly(
+                                tuple(ErrorCode.INSUFFICIENT_DIFFICULTY_ENTRY, "floorSelections[2].difficulty"),
+                                tuple(ErrorCode.OUT_OF_RANGE_DIFFICULTY_NOT_HARD, "floorSelections[3].difficulty")));
     }
 
     @Test

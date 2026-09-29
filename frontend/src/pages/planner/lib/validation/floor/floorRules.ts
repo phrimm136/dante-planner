@@ -9,7 +9,7 @@ import type {
 import { contentPath, extendPath, field, index } from '../contentPath'
 import type { ContentPath } from '../contentPath'
 import { byPathThenCode } from '../violation'
-import type { FloorRuleCode } from '../violation'
+import type { DifficultyRangeCode, FloorRuleCode } from '../violation'
 import { firstIndexOf } from './positions'
 
 export type CategoryFloors = FloorRuleTable['categories'][MDCategory]
@@ -20,9 +20,7 @@ export type FloorSelectionValue = {
   giftIds: readonly string[]
 }
 
-export type FloorViolation =
-  | { code: Exclude<FloorRuleCode, 'VALUE_OUT_OF_RANGE'>; path: ContentPath }
-  | { code: 'VALUE_OUT_OF_RANGE'; path: ContentPath; allowed: readonly DungeonIdx[] }
+export type FloorViolation = { code: FloorRuleCode; path: ContentPath }
 
 export type ParsedFloor =
   | { kind: 'accepted'; floor: FloorSelectionValue }
@@ -60,10 +58,7 @@ export const themePackPath = (floorIndex: number) => floorFieldPath(floorIndex, 
 export const giftIdPath = (floorIndex: number, giftIndex: number) =>
   extendPath(floorFieldPath(floorIndex, GIFT_IDS), index(giftIndex))
 
-const violation = (
-  code: Exclude<FloorRuleCode, 'VALUE_OUT_OF_RANGE'>,
-  path: ContentPath,
-): FloorViolation => ({ code, path })
+const violation = (code: FloorRuleCode, path: ContentPath): FloorViolation => ({ code, path })
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -162,12 +157,39 @@ export const acceptedFloors = (parsed: ParsedFloors): FloorSelectionValue[] =>
 const indexedFloors = (parsed: ParsedFloors): FloorSelectionValue[] =>
   parsed.floors.map((floor) => (floor.kind === 'accepted' ? floor.floor : floor.salvage))
 
-type FloorPlan = { floors: readonly FloorSelectionValue[]; layout: CategoryFloors }
+type FloorPlan = {
+  floors: readonly FloorSelectionValue[]
+  layout: CategoryFloors
+  entryFloorCount: number
+}
 
 type RuleCheck = (plan: FloorPlan) => FloorViolation[]
 
 const allowedAt = (layout: CategoryFloors, floorIndex: number): readonly DungeonIdx[] =>
   layout.difficulties[floorIndex] ?? []
+
+const entryFloorCount = (table: FloorRuleTable): number =>
+  Math.min(...Object.values(table.categories).map((layout) => layout.floorCount))
+
+const gatesEntry = (layout: CategoryFloors, floorIndex: number, entryFloors: number): boolean =>
+  layout.floorCount > entryFloors && floorIndex < entryFloors
+
+const SINGLE_DIFFICULTY_CODES: ReadonlyMap<DungeonIdx, DifficultyRangeCode> = new Map([
+  [DUNGEON_IDX.HARD, 'OUT_OF_RANGE_DIFFICULTY_NOT_HARD'],
+  [DUNGEON_IDX.EXTREME, 'OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME'],
+])
+
+function difficultyCode(
+  layout: CategoryFloors,
+  floorIndex: number,
+  entryFloors: number,
+): DifficultyRangeCode {
+  if (gatesEntry(layout, floorIndex, entryFloors)) return 'INSUFFICIENT_DIFFICULTY_ENTRY'
+  const [only, ...rest] = allowedAt(layout, floorIndex)
+  const single =
+    only !== undefined && rest.length === 0 ? SINGLE_DIFFICULTY_CODES.get(only) : undefined
+  return single ?? 'OUT_OF_RANGE_DIFFICULTY'
+}
 
 const isHard = (floor: { difficulty?: number }) => floor.difficulty === DUNGEON_IDX.HARD
 
@@ -179,21 +201,19 @@ const previousFloorHasPack = (floors: readonly FloorSelectionValue[], floorIndex
 
 const everyFloorPresent: RuleCheck = ({ floors, layout }) =>
   Array.from({ length: layout.floorCount - floors.length }, (_, offset) =>
-    violation('FLOOR_MISSING_THEME_PACK', floorPath(floors.length + offset)),
+    violation('INSUFFICIENT_FLOORS', floorPath(floors.length + offset)),
   )
 
 const themePackPresent: RuleCheck = ({ floors }) =>
   floors.flatMap((floor, floorIndex) =>
-    floor.themePackId === undefined
-      ? [violation('FLOOR_MISSING_THEME_PACK', floorPath(floorIndex))]
-      : [],
+    floor.themePackId === undefined ? [violation('MISSING_THEMEPACK', floorPath(floorIndex))] : [],
   )
 
 const notRepeated: RuleCheck = ({ floors }) => {
   const firstFloorOf = firstIndexOf(floors.map((floor) => floor.themePackId))
   return floors.flatMap((floor, floorIndex) =>
     floor.themePackId !== undefined && firstFloorOf.get(floor.themePackId) !== floorIndex
-      ? [violation('FLOOR_DUPLICATE_THEME_PACK', themePackPath(floorIndex))]
+      ? [violation('DUPLICATE_THEMEPACK', themePackPath(floorIndex))]
       : [],
   )
 }
@@ -201,23 +221,21 @@ const notRepeated: RuleCheck = ({ floors }) => {
 const sequence: RuleCheck = ({ floors }) =>
   floors.flatMap((floor, floorIndex) =>
     floor.themePackId !== undefined && !previousFloorHasPack(floors, floorIndex)
-      ? [violation('INVALID_SEQUENCE', floorPath(floorIndex))]
+      ? [violation('OUT_OF_ORDER_THEMEPACK', floorPath(floorIndex))]
       : [],
   )
 
-const difficultyInRange: RuleCheck = ({ floors, layout }) =>
-  floors.flatMap((floor, floorIndex) => {
-    const allowed = allowedAt(layout, floorIndex)
-    return allows(allowed, floor.difficulty)
+const difficultyInRange: RuleCheck = ({ floors, layout, entryFloorCount: entryFloors }) =>
+  floors.flatMap((floor, floorIndex) =>
+    allows(allowedAt(layout, floorIndex), floor.difficulty)
       ? []
       : [
-          {
-            code: 'VALUE_OUT_OF_RANGE' as const,
-            path: floorFieldPath(floorIndex, DIFFICULTY),
-            allowed,
-          },
-        ]
-  })
+          violation(
+            difficultyCode(layout, floorIndex, entryFloors),
+            floorFieldPath(floorIndex, DIFFICULTY),
+          ),
+        ],
+  )
 
 const noNormalAfterHard: RuleCheck = ({ floors, layout }) => {
   const firstHard = floors.findIndex(isHard)
@@ -226,7 +244,7 @@ const noNormalAfterHard: RuleCheck = ({ floors, layout }) => {
     firstHard < floorIndex &&
     floor.difficulty === DUNGEON_IDX.NORMAL &&
     allowedAt(layout, floorIndex).includes(DUNGEON_IDX.NORMAL)
-      ? [violation('INVALID_SEQUENCE', floorFieldPath(floorIndex, DIFFICULTY))]
+      ? [violation('OUT_OF_ORDER_DIFFICULTY', floorFieldPath(floorIndex, DIFFICULTY))]
       : [],
   )
 }
@@ -235,7 +253,7 @@ const giftUnique: RuleCheck = ({ floors }) =>
   floors.flatMap((floor, floorIndex) =>
     new Set(floor.giftIds).size === floor.giftIds.length
       ? []
-      : [violation('DUPLICATE_VALUE', floorFieldPath(floorIndex, GIFT_IDS))],
+      : [violation('DUPLICATE_EGOGIFT', floorFieldPath(floorIndex, GIFT_IDS))],
   )
 
 const RULES: Record<FloorRuleName, RuleCheck> = {
@@ -268,7 +286,10 @@ export function admitFloors(
   }
 
   const floors = acceptedFloors(parsed)
-  const violations = ruleViolations({ floors, layout: parsed.layout }, rules)
+  const violations = ruleViolations(
+    { floors, layout: parsed.layout, entryFloorCount: entryFloorCount(table) },
+    rules,
+  )
   return violations.length > 0
     ? { ok: false, violations }
     : { ok: true, floors, boundaryViolations: [] }
@@ -308,7 +329,11 @@ export function violationsForCategory(
 ): readonly FloorViolation[] {
   const layout = table.categories[category]
   return ruleViolations(
-    { floors: floors.slice(0, layout.floorCount).map(toFloorValue), layout },
+    {
+      floors: floors.slice(0, layout.floorCount).map(toFloorValue),
+      layout,
+      entryFloorCount: entryFloorCount(table),
+    },
     requiredRules('publish', table),
   )
 }

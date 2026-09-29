@@ -1273,20 +1273,20 @@ class PlannerContentValidatorTest {
     class GranularErrorCodeTests {
 
         @Test
-        @DisplayName("Gift not affordable for theme pack should produce GIFT_NOT_AFFORDABLE sub-error")
-        void validate_WhenGiftNotAffordable_ProducesGiftNotAffordableCode() {
+        @DisplayName("Gift not affordable for theme pack should produce UNAFFORDABLE_EGOGIFT sub-error")
+        void validate_WhenGiftNotAffordable_ProducesUnaffordableEgoGiftCode() {
             setupMocksForUnaffordableGifts();
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
                     () -> validate(createValidContent(), "5F"));
 
-            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "GIFT_NOT_AFFORDABLE".equals(e.code())),
-                    "Expected GIFT_NOT_AFFORDABLE in sub-errors");
+            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "UNAFFORDABLE_EGOGIFT".equals(e.code())),
+                    "Expected UNAFFORDABLE_EGOGIFT in sub-errors");
         }
 
         @Test
-        @DisplayName("Duplicate gift ID in floor giftIds should produce DUPLICATE_VALUE sub-error")
-        void validate_WhenDuplicateFloorGiftId_ProducesDuplicateValueCode() {
+        @DisplayName("Duplicate gift ID in floor giftIds should produce DUPLICATE_EGOGIFT sub-error")
+        void validate_WhenDuplicateFloorGiftId_ProducesDuplicateEgoGiftCode() {
             setupMocksForValidIds();
             String content = createValidContent().replace(
                     "\"giftIds\": [\"9002\"]",
@@ -1296,13 +1296,13 @@ class PlannerContentValidatorTest {
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
                     () -> validate(content, "5F"));
 
-            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "DUPLICATE_VALUE".equals(e.code())),
-                    "Expected DUPLICATE_VALUE in sub-errors");
+            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "DUPLICATE_EGOGIFT".equals(e.code())),
+                    "Expected DUPLICATE_EGOGIFT in sub-errors");
         }
 
         @Test
-        @DisplayName("Duplicate base ID in selectedBuffIds should produce DUPLICATE_VALUE sub-error")
-        void validate_WhenDuplicateBuffBaseId_ProducesDuplicateValueCode() {
+        @DisplayName("Duplicate base ID in selectedBuffIds should produce DUPLICATE_STARTBUFF sub-error")
+        void validate_WhenDuplicateBuffBaseId_ProducesDuplicateStartBuffCode() {
             setupMocksForValidIds();
             // 100 and 200 share base ID 0 (100 % 100 == 0, 200 % 100 == 0)
             String content = createValidContent().replace(
@@ -1313,13 +1313,13 @@ class PlannerContentValidatorTest {
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
                     () -> validate(content, "5F"));
 
-            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "DUPLICATE_VALUE".equals(e.code())),
-                    "Expected DUPLICATE_VALUE in sub-errors");
+            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "DUPLICATE_STARTBUFF".equals(e.code())),
+                    "Expected DUPLICATE_STARTBUFF in sub-errors");
         }
 
         @Test
-        @DisplayName("Duplicate gift ID in selectedGiftIds should produce DUPLICATE_VALUE sub-error")
-        void validate_WhenDuplicateSelectedGiftId_ProducesDuplicateValueCode() {
+        @DisplayName("Duplicate gift ID in selectedGiftIds should produce DUPLICATE_STARTGIFT sub-error")
+        void validate_WhenDuplicateSelectedGiftId_ProducesDuplicateStartGiftCode() {
             setupMocksForValidIds();
             String content = createValidContent().replace(
                     "\"selectedGiftIds\": [\"9001\"]",
@@ -1329,13 +1329,12 @@ class PlannerContentValidatorTest {
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
                     () -> validate(content, "5F"));
 
-            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "DUPLICATE_VALUE".equals(e.code())),
-                    "Expected DUPLICATE_VALUE in sub-errors");
+            assertThat(ex.getSubErrors()).extracting(ValidationError::code).containsOnlyOnce("DUPLICATE_STARTGIFT");
         }
 
         @Test
-        @DisplayName("Floor N having themePackId when floor N-1 lacks it should produce INVALID_SEQUENCE sub-error")
-        void validate_WhenFloorPrerequisiteViolation_ProducesInvalidSequenceCode() {
+        @DisplayName("Floor N having themePackId when floor N-1 lacks it should produce OUT_OF_ORDER_THEMEPACK sub-error")
+        void validate_WhenFloorPrerequisiteViolation_ProducesOutOfOrderThemePackCode() {
             setupMocksForValidIds();
             // Floor 0 has null themePackId; floor 1 has one → prerequisite violation
             String content = createValidContent().replace(
@@ -1346,13 +1345,13 @@ class PlannerContentValidatorTest {
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
                     () -> validate(content, "5F"));
 
-            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "INVALID_SEQUENCE".equals(e.code())),
-                    "Expected INVALID_SEQUENCE in sub-errors");
+            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "OUT_OF_ORDER_THEMEPACK".equals(e.code())),
+                    "Expected OUT_OF_ORDER_THEMEPACK in sub-errors");
         }
 
         @Test
-        @DisplayName("selectedGiftIds present without selectedGiftKeyword should produce INVALID_SEQUENCE sub-error")
-        void validate_WhenGiftsWithoutKeyword_ProducesInvalidSequenceCode() {
+        @DisplayName("selectedGiftIds present without selectedGiftKeyword should produce MISSING_STARTGIFT_KEYWORD sub-error")
+        void validate_WhenGiftsWithoutKeyword_ProducesMissingStartGiftKeywordCode() {
             // No start gift keyword mocks needed: validateStartGiftIds returns early on null keyword
             setupMocksForValidIdsWithoutGifts();
             String content = createValidContent().replace(
@@ -1363,8 +1362,8 @@ class PlannerContentValidatorTest {
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
                     () -> validate(content, "5F"));
 
-            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "INVALID_SEQUENCE".equals(e.code())),
-                    "Expected INVALID_SEQUENCE in sub-errors");
+            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "MISSING_STARTGIFT_KEYWORD".equals(e.code())),
+                    "Expected MISSING_STARTGIFT_KEYWORD in sub-errors");
         }
     }
 
@@ -1376,8 +1375,8 @@ class PlannerContentValidatorTest {
         @DisplayName("Two independent errors should both appear in sub-errors of combined exception")
         void validate_WhenTwoIndependentErrors_CollectsBothInSubErrors() {
             setupMocksForUnaffordableGifts();
-            // deploymentOrder[0] = 99 is OOB (0–11) → VALUE_OUT_OF_RANGE
-            // floor giftIds[0] is not affordable → GIFT_NOT_AFFORDABLE
+            // deploymentOrder[0] = 99 is OOB (0–11) → OUT_OF_RANGE_DEPLOYMENT
+            // floor giftIds[0] is not affordable → UNAFFORDABLE_EGOGIFT
             String content = createValidContent().replace(
                     "\"deploymentOrder\": [0, 1, 2, 3, 4, 5]",
                     "\"deploymentOrder\": [99]"
@@ -1388,10 +1387,10 @@ class PlannerContentValidatorTest {
 
             assertEquals("VALIDATION_ERROR", ex.getOriginalCode());
             assertTrue(ex.getSubErrors().size() >= 2, "Expected at least 2 sub-errors");
-            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "VALUE_OUT_OF_RANGE".equals(e.code())),
-                    "Expected VALUE_OUT_OF_RANGE in sub-errors");
-            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "GIFT_NOT_AFFORDABLE".equals(e.code())),
-                    "Expected GIFT_NOT_AFFORDABLE in sub-errors");
+            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "OUT_OF_RANGE_DEPLOYMENT".equals(e.code())),
+                    "Expected OUT_OF_RANGE_DEPLOYMENT in sub-errors");
+            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "UNAFFORDABLE_EGOGIFT".equals(e.code())),
+                    "Expected UNAFFORDABLE_EGOGIFT in sub-errors");
         }
 
         @Test
@@ -1404,7 +1403,7 @@ class PlannerContentValidatorTest {
 
             assertEquals("VALIDATION_ERROR", ex.getOriginalCode());
             assertEquals(1, ex.getSubErrors().size());
-            assertEquals("GIFT_NOT_AFFORDABLE", ex.getSubErrors().get(0).code());
+            assertEquals("UNAFFORDABLE_EGOGIFT", ex.getSubErrors().get(0).code());
         }
     }
 
@@ -1622,7 +1621,7 @@ class PlannerContentValidatorTest {
 
         @Test
         @DisplayName("Should reject a floor without a theme pack")
-        void validate_WhenPublishPolicyAndFloorHasNoThemePack_ReportsFloorMissingThemePack() {
+        void validate_WhenPublishPolicyAndFloorHasNoThemePack_ReportsMissingThemePack() {
             setupMocksWithoutThemePack();
             String content = createValidContent().replace(
                     "{\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}",
@@ -1631,28 +1630,28 @@ class PlannerContentValidatorTest {
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
                     () -> validate(content, "5F", Stage.PUBLISH));
 
-            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "FLOOR_MISSING_THEME_PACK".equals(e.code())
+            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "MISSING_THEMEPACK".equals(e.code())
                             && "floorSelections[0] must have a theme pack selected".equals(e.message())),
                     "Expected the missing themePackId failure in sub-errors: " + ex.getSubErrors());
         }
 
         @Test
         @DisplayName("Should reject a floor whose theme pack is unknown to game data")
-        void validate_WhenPublishPolicyAndThemePackUnknown_ReportsThemePackUnknownId() {
+        void validate_WhenPublishPolicyAndThemePackUnknown_ReportsUnknownThemePack() {
             setupMocksWithoutThemePack();
             when(gameDataRegistry.hasThemePack(anyString())).thenReturn(false);
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
                     () -> validate(createValidContent(), "5F", Stage.PUBLISH));
 
-            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "THEME_PACK_UNKNOWN_ID".equals(e.code())
+            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "UNKNOWN_THEMEPACK".equals(e.code())
                             && "floorSelections[0].themePackId ID '1001' not found or invalid".equals(e.message())),
                     "Expected the unknown themePackId failure in sub-errors: " + ex.getSubErrors());
         }
 
         @Test
         @DisplayName("Should reject a 10F floor that is not on Hard")
-        void validate_WhenPublishPolicyAndDifficultyBelowCategoryRule_ReportsOutOfRange() {
+        void validate_WhenPublishPolicyAndDifficultyBelowCategoryRule_ReportsInsufficientEntry() {
             setupMocksWithoutThemePack();
             when(gameDataRegistry.hasThemePack(anyString())).thenReturn(true);
             when(gameDataRegistry.isGiftAffordableForThemePack(anyString(), anyString())).thenReturn(true);
@@ -1660,7 +1659,7 @@ class PlannerContentValidatorTest {
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
                     () -> validate(createValidContent(), "10F", Stage.PUBLISH));
 
-            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "VALUE_OUT_OF_RANGE".equals(e.code())
+            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "INSUFFICIENT_DIFFICULTY_ENTRY".equals(e.code())
                             && "floorSelections[0].difficulty value 0 is out of range [1-1]".equals(e.message())),
                     "Expected the difficulty range failure in sub-errors: " + ex.getSubErrors());
         }
@@ -1675,7 +1674,7 @@ class PlannerContentValidatorTest {
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
                     () -> validate(content, "5F", Stage.PUBLISH));
 
-            assertThat(ex.getSubErrors()).containsExactly(new ValidationError("VALUE_OUT_OF_RANGE",
+            assertThat(ex.getSubErrors()).containsExactly(new ValidationError("OUT_OF_RANGE_DIFFICULTY",
                     "floorSelections[0].difficulty value 2147483648 is out of range [0-1]"));
         }
 
@@ -1703,9 +1702,9 @@ class PlannerContentValidatorTest {
                     () -> validate(content, "5F", Stage.PUBLISH));
 
             assertThat(ex.getSubErrors()).containsExactlyInAnyOrder(
-                    new ValidationError("FLOOR_DUPLICATE_THEME_PACK",
+                    new ValidationError("DUPLICATE_THEMEPACK",
                             "floorSelections[2].themePackId repeats theme pack '1002' from floorSelections[1]"),
-                    new ValidationError("THEME_PACK_UNKNOWN_ID",
+                    new ValidationError("UNKNOWN_THEMEPACK",
                             "floorSelections[0].themePackId ID '9999' not found or invalid"));
         }
 
@@ -1723,9 +1722,9 @@ class PlannerContentValidatorTest {
                     () -> validate(content, "5F"));
 
             assertThat(ex.getSubErrors()).containsExactly(
-                    new ValidationError("FLOOR_UNKNOWN_GIFT_ID",
+                    new ValidationError("UNKNOWN_EGOGIFT_FLOOR",
                             "floorSelections[0].giftIds[0] ID '9999' not found or invalid"),
-                    new ValidationError("THEME_PACK_UNKNOWN_ID",
+                    new ValidationError("UNKNOWN_THEMEPACK",
                             "floorSelections[0].themePackId ID '+1001' not found or invalid"));
         }
 
@@ -1739,8 +1738,8 @@ class PlannerContentValidatorTest {
                     () -> validate(content, "5F"));
 
             assertThat(ex.getSubErrors()).containsExactly(
-                    new ValidationError("GIFT_NOT_AFFORDABLE", "Gift '9002' is not affordable for theme pack '1001'"),
-                    new ValidationError("GIFT_NOT_AFFORDABLE", "Gift '9003' is not affordable for theme pack '1001'"));
+                    new ValidationError("UNAFFORDABLE_EGOGIFT", "Gift '9002' is not affordable for theme pack '1001'"),
+                    new ValidationError("UNAFFORDABLE_EGOGIFT", "Gift '9003' is not affordable for theme pack '1001'"));
         }
 
         @Test
@@ -1795,8 +1794,10 @@ class PlannerContentValidatorTest {
                     () -> validate(content, "15F", Stage.PUBLISH));
 
             assertThat(ex.getSubErrors()).containsExactly(
-                    new ValidationError("VALUE_OUT_OF_RANGE", "floorSelections[5].difficulty value 0 is out of range [1-1]"),
-                    new ValidationError("VALUE_OUT_OF_RANGE", "floorSelections[10].difficulty value 1 is out of range [3-3]"));
+                    new ValidationError("OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
+                            "floorSelections[5].difficulty value 0 is out of range [1-1]"),
+                    new ValidationError("OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME",
+                            "floorSelections[10].difficulty value 1 is out of range [3-3]"));
         }
 
         @Test
@@ -1820,8 +1821,8 @@ class PlannerContentValidatorTest {
                     () -> realValidator.validate(content, "5F", VERSION, Stage.PUBLISH));
 
             assertThat(ex.getSubErrors()).containsExactly(
-                    new ValidationError("GIFT_NOT_AFFORDABLE", "Gift '9212' is not affordable for theme pack '9999'"),
-                    new ValidationError("THEME_PACK_UNKNOWN_ID",
+                    new ValidationError("UNAFFORDABLE_EGOGIFT", "Gift '9212' is not affordable for theme pack '9999'"),
+                    new ValidationError("UNKNOWN_THEMEPACK",
                             "floorSelections[0].themePackId ID '9999' not found or invalid"));
         }
 

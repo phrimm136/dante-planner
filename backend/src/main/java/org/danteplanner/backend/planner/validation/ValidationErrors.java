@@ -27,8 +27,8 @@ final class ValidationErrors {
                 "Malformed JSON: " + details);
     }
 
-    static PlannerValidationException missingRequiredField(Set<String> fields) {
-        return new PlannerValidationException(ErrorCode.MISSING_REQUIRED_FIELD.getCode(),
+    static PlannerValidationException missing(ErrorCode code, Set<String> fields) {
+        return new PlannerValidationException(code.getCode(),
                 "Missing required fields: " + fields);
     }
 
@@ -37,8 +37,8 @@ final class ValidationErrors {
                 "Unknown fields: " + fields);
     }
 
-    static PlannerValidationException keywordInvalid(Set<String> unknown) {
-        return new PlannerValidationException(ErrorCode.KEYWORD_INVALID.getCode(),
+    static PlannerValidationException unknownKeyword(Set<String> unknown) {
+        return new PlannerValidationException(ErrorCode.UNKNOWN_KEYWORD.getCode(),
                 "Unknown keywords: " + unknown.stream().sorted().toList());
     }
 
@@ -48,7 +48,11 @@ final class ValidationErrors {
     }
 
     static PlannerValidationException invalidFieldType(String field, String expectedType) {
-        return new PlannerValidationException(ErrorCode.INVALID_FIELD_TYPE.getCode(),
+        return invalidField(ErrorCode.INVALID_FIELD_TYPE, field, expectedType);
+    }
+
+    static PlannerValidationException invalidField(ErrorCode code, String field, String expectedType) {
+        return new PlannerValidationException(code.getCode(),
                 String.format("Field '%s' has wrong type, expected %s", field, expectedType));
     }
 
@@ -70,32 +74,24 @@ final class ValidationErrors {
         };
     }
 
-    static PlannerValidationException invalidIdReference(String context, String id) {
-        return unknownId(ErrorCode.INVALID_ID_REFERENCE, context, id);
-    }
-
     static PlannerValidationException unknownId(ErrorCode code, String context, String id) {
         return new PlannerValidationException(code.getCode(),
                 String.format("%s ID '%s' not found or invalid", context, id));
     }
 
-    static PlannerValidationException valueOutOfRange(String field, int value, int min, int max) {
-        return new PlannerValidationException(ErrorCode.VALUE_OUT_OF_RANGE.getCode(),
+    static PlannerValidationException valueOutOfRange(ErrorCode code, String field, int value, int min, int max) {
+        return new PlannerValidationException(code.getCode(),
                 String.format("%s value %d is out of range [%d-%d]", field, value, min, max));
     }
 
-    static PlannerValidationException duplicateValue(String field, String value) {
-        return new PlannerValidationException(ErrorCode.DUPLICATE_VALUE.getCode(),
+    static PlannerValidationException duplicateValue(ErrorCode code, String field, String value) {
+        return new PlannerValidationException(code.getCode(),
                 String.format("Duplicate value '%s' in %s", value, field));
     }
 
-    static PlannerValidationException invalidSequence(String detail) {
-        return new PlannerValidationException(ErrorCode.INVALID_SEQUENCE.getCode(), "Invalid sequence: " + detail);
-    }
-
-    static PlannerValidationException giftNotAffordable(String giftId, String themePackId) {
-        return new PlannerValidationException(ErrorCode.GIFT_NOT_AFFORDABLE.getCode(),
-                String.format("Gift '%s' is not affordable for theme pack '%s'", giftId, themePackId));
+    static PlannerValidationException missingStartGiftKeyword(String field) {
+        return new PlannerValidationException(ErrorCode.MISSING_STARTGIFT_KEYWORD.getCode(),
+                "Invalid sequence: " + field + " requires selectedGiftKeyword");
     }
 
     private static String truncateValue(String s) {

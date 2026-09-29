@@ -21,7 +21,7 @@ public class PlannerValidationException extends DomainException {
                     ErrorCode.EMPTY_CONTENT,
                     ErrorCode.SIZE_EXCEEDED,
                     ErrorCode.MALFORMED_JSON,
-                    ErrorCode.KEYWORD_INVALID)
+                    ErrorCode.UNKNOWN_KEYWORD)
             .map(ErrorCode::getCode)
             .collect(Collectors.toUnmodifiableSet());
 

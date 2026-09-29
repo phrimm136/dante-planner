@@ -121,7 +121,7 @@ class PlannerIdPolicyTest {
         PlannerValidationException ex = rejection(
                 () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, stage));
 
-        assertThat(ex.getSubErrors()).extracting(ValidationError::code).containsExactly("GIFT_UNKNOWN_ID");
+        assertThat(ex.getSubErrors()).extracting(ValidationError::code).containsExactly("UNKNOWN_EGOGIFT");
         assertThat(ex.getSubErrors().get(0).message()).contains("9899");
     }
 
@@ -134,7 +134,7 @@ class PlannerIdPolicyTest {
         PlannerValidationException ex = rejection(() -> validator.validate(content, "5F", PREVIOUS_SEASON, Stage.DRAFT));
 
         assertThat(stored).isSameAs(content);
-        assertThat(ex.getSubErrors()).extracting(ValidationError::code).containsExactly("START_BUFF_UNKNOWN_ID");
+        assertThat(ex.getSubErrors()).extracting(ValidationError::code).containsExactly("UNKNOWN_STARTBUFF");
         assertThat(ex.getSubErrors().get(0).message()).contains("201");
     }
 
@@ -145,7 +145,7 @@ class PlannerIdPolicyTest {
         assertThatThrownBy(() -> validator.validate(TestDataFactory.VALID_CONTENT, "5F", 99, Stage.DRAFT))
                 .isInstanceOfSatisfying(PlannerValidationException.class, ex -> assertThat(ex.getSubErrors())
                         .extracting(ValidationError::code)
-                        .containsExactly("UNKNOWN_CONTENT_VERSION"));
+                        .containsExactly("UNKNOWN_VERSION"));
     }
 
     @ParameterizedTest
@@ -159,7 +159,7 @@ class PlannerIdPolicyTest {
                 () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, stage));
 
         assertThat(ex.getStatusCode().value()).isEqualTo(400);
-        assertThat(ex.getSubErrors()).extracting(ValidationError::code).containsExactly("EGO_UNKNOWN_ID");
+        assertThat(ex.getSubErrors()).extracting(ValidationError::code).containsExactly("UNKNOWN_EGO");
         assertThat(ex.getSubErrors().get(0).message()).contains("20199");
     }
 
@@ -175,7 +175,7 @@ class PlannerIdPolicyTest {
 
         assertThat(stored).isEqualTo(content.toString());
         assertThat(ex.getStatusCode().value()).isEqualTo(400);
-        assertThat(ex.getSubErrors()).extracting(ValidationError::code).containsExactly("FLOOR_MISSING_THEME_PACK");
+        assertThat(ex.getSubErrors()).extracting(ValidationError::code).containsExactly("MISSING_THEMEPACK");
     }
 
     @Test
@@ -188,8 +188,8 @@ class PlannerIdPolicyTest {
                 () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, Stage.PUBLISH));
 
         assertThat(ex.getSubErrors()).containsExactly(
-                new ValidationError("FLOOR_MISSING_THEME_PACK", "floorSelections[3] must have a theme pack selected"),
-                new ValidationError("FLOOR_MISSING_THEME_PACK", "floorSelections[4] must have a theme pack selected"));
+                new ValidationError("INSUFFICIENT_FLOORS", "floorSelections[3] must have a theme pack selected"),
+                new ValidationError("INSUFFICIENT_FLOORS", "floorSelections[4] must have a theme pack selected"));
     }
 
     @Test
@@ -228,11 +228,11 @@ class PlannerIdPolicyTest {
                 () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, Stage.PUBLISH));
 
         assertThat(ex.getSubErrors()).containsExactly(
-                new ValidationError("FLOOR_MISSING_THEME_PACK", "floorSelections[0] must have a theme pack selected"),
-                new ValidationError("FLOOR_MISSING_THEME_PACK", "floorSelections[1] must have a theme pack selected"),
-                new ValidationError("FLOOR_MISSING_THEME_PACK", "floorSelections[2] must have a theme pack selected"),
-                new ValidationError("FLOOR_MISSING_THEME_PACK", "floorSelections[3] must have a theme pack selected"),
-                new ValidationError("FLOOR_MISSING_THEME_PACK", "floorSelections[4] must have a theme pack selected"));
+                new ValidationError("INSUFFICIENT_FLOORS", "floorSelections[0] must have a theme pack selected"),
+                new ValidationError("INSUFFICIENT_FLOORS", "floorSelections[1] must have a theme pack selected"),
+                new ValidationError("INSUFFICIENT_FLOORS", "floorSelections[2] must have a theme pack selected"),
+                new ValidationError("INSUFFICIENT_FLOORS", "floorSelections[3] must have a theme pack selected"),
+                new ValidationError("INSUFFICIENT_FLOORS", "floorSelections[4] must have a theme pack selected"));
     }
 
     @ParameterizedTest
@@ -245,7 +245,7 @@ class PlannerIdPolicyTest {
         PlannerValidationException ex = rejection(
                 () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, stage));
 
-        assertThat(ex.getSubErrors()).containsExactly(new ValidationError("FLOOR_DUPLICATE_THEME_PACK",
+        assertThat(ex.getSubErrors()).containsExactly(new ValidationError("DUPLICATE_THEMEPACK",
                 "floorSelections[2].themePackId repeats theme pack '1001' from floorSelections[0]"));
     }
 
@@ -259,9 +259,9 @@ class PlannerIdPolicyTest {
                 () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, Stage.DRAFT));
 
         assertThat(ex.getSubErrors()).containsExactly(
-                new ValidationError("FLOOR_DUPLICATE_THEME_PACK",
+                new ValidationError("DUPLICATE_THEMEPACK",
                         "floorSelections[1].themePackId repeats theme pack '1001' from floorSelections[0]"),
-                new ValidationError("FLOOR_DUPLICATE_THEME_PACK",
+                new ValidationError("DUPLICATE_THEMEPACK",
                         "floorSelections[2].themePackId repeats theme pack '1001' from floorSelections[0]"));
     }
 

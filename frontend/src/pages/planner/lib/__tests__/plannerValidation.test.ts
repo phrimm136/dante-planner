@@ -178,27 +178,27 @@ describe('validateEquipment', () => {
     expect(validateEquipment(makeValidEquipment())).toHaveLength(0)
   })
 
-  it('missing sinner key returns EQUIPMENT_MISSING_SINNER', () => {
+  it('missing sinner key returns MISSING_SINNER', () => {
     const equipment = makeValidEquipment()
     delete equipment['01']
     const errors = validateEquipment(equipment)
-    expect(errors.some((e) => e.code === 'EQUIPMENT_MISSING_SINNER')).toBe(true)
+    expect(errors.some((e) => e.code === 'MISSING_SINNER')).toBe(true)
   })
 
-  it('sinner without identity returns EQUIPMENT_MISSING_IDENTITY', () => {
+  it('sinner without identity returns MISSING_IDENTITY', () => {
     const equipment = makeValidEquipment()
     // Warning: deliberately invalid input — null identity exercises the missing-identity guard.
     equipment['01'] = { identity: null, egos: { ZAYIN: { id: 'z' } } } as unknown as SinnerEquipment
     const errors = validateEquipment(equipment)
-    expect(errors.some((e) => e.code === 'EQUIPMENT_MISSING_IDENTITY')).toBe(true)
+    expect(errors.some((e) => e.code === 'MISSING_IDENTITY')).toBe(true)
   })
 
-  it('sinner without ZAYIN returns EQUIPMENT_MISSING_ZAYIN', () => {
+  it('sinner without ZAYIN returns MISSING_EGO_ZAYIN', () => {
     const equipment = makeValidEquipment()
     // Warning: deliberately invalid input — empty egos exercises the missing-ZAYIN guard.
     equipment['01'] = { identity: { id: 'i' }, egos: {} } as unknown as SinnerEquipment
     const errors = validateEquipment(equipment)
-    expect(errors.some((e) => e.code === 'EQUIPMENT_MISSING_ZAYIN')).toBe(true)
+    expect(errors.some((e) => e.code === 'MISSING_EGO_ZAYIN')).toBe(true)
   })
 
   it.each(['abc', '', '1.5', ' 2'])('ignores the non-integer sinner key %j', (key) => {
@@ -229,36 +229,36 @@ describe('floor rules through the validators', () => {
   })
 
   // corpus: scn-publish-floor2-absent
-  it('missing pack on floor 3 at publish reports FLOOR_MISSING_THEME_PACK at the floor path', () => {
+  it('missing pack on floor 3 at publish reports MISSING_THEMEPACK at the floor path', () => {
     const content = withPacks(['1001', '1002', null, '1004', '1005'])
     expect(codesAndFields(validatePlannerForPublish('My Plan', content, '5F'))).toEqual([
-      ['FLOOR_MISSING_THEME_PACK', 'floorSelections[2]'],
-      ['INVALID_SEQUENCE', 'floorSelections[3]'],
+      ['MISSING_THEMEPACK', 'floorSelections[2]'],
+      ['OUT_OF_ORDER_THEMEPACK', 'floorSelections[3]'],
     ])
   })
 
   // corpus: scn-repeat-floor0-floor3
-  it('a repeated pack reports FLOOR_DUPLICATE_THEME_PACK on the later floor at draft', () => {
+  it('a repeated pack reports DUPLICATE_THEMEPACK on the later floor at draft', () => {
     const content = withPacks(['1001', '1002', '1003', '1001', '1005'])
     expect(codesAndFields(validatePlannerForDraftSave(content, '5F'))).toEqual([
-      ['FLOOR_DUPLICATE_THEME_PACK', 'floorSelections[3].themePackId'],
+      ['DUPLICATE_THEMEPACK', 'floorSelections[3].themePackId'],
     ])
   })
 
   // corpus: floor-sequence-gap
-  it('a pack after an empty floor reports INVALID_SEQUENCE at draft', () => {
+  it('a pack after an empty floor reports OUT_OF_ORDER_THEMEPACK at draft', () => {
     const content = withPacks([null, '1002'])
     expect(codesAndFields(validatePlannerForDraftSave(content, '5F'))).toEqual([
-      ['INVALID_SEQUENCE', 'floorSelections[1]'],
+      ['OUT_OF_ORDER_THEMEPACK', 'floorSelections[1]'],
     ])
   })
 
   // corpus: bi5-duplicate-gifts-without-pack (Behavior Inventory 5)
-  it('duplicate gifts on a pack-less floor report DUPLICATE_VALUE at draft', () => {
+  it('duplicate gifts on a pack-less floor report DUPLICATE_EGOGIFT at draft', () => {
     const content = withPacks([null])
     floorAt(content, 0).giftIds = [ENCODED_9001, ENCODED_9001]
     expect(codesAndFields(validatePlannerForDraftSave(content, '5F'))).toEqual([
-      ['DUPLICATE_VALUE', 'floorSelections[0].giftIds'],
+      ['DUPLICATE_EGOGIFT', 'floorSelections[0].giftIds'],
     ])
   })
 
@@ -277,7 +277,7 @@ describe('floor rules through the validators', () => {
     floorAt(content, 4).themePackId = '' as unknown as ThemePackId
     expect(validatePlannerForDraftSave(content, '5F').errors).toEqual([])
     expect(codesAndFields(validatePlannerForPublish('My Plan', content, '5F'))).toEqual([
-      ['FLOOR_MISSING_THEME_PACK', 'floorSelections[4]'],
+      ['MISSING_THEMEPACK', 'floorSelections[4]'],
     ])
   })
 
@@ -290,9 +290,9 @@ describe('floor rules through the validators', () => {
     floorAt(content, 2).themePackId = floorAt(content, 0).themePackId
 
     expect(codesAndFields(validatePlannerForDraftSave(content, '5F', spec))).toEqual([
-      ['DUPLICATE_VALUE', 'floorSelections[0].giftIds'],
-      ['FLOOR_DUPLICATE_THEME_PACK', 'floorSelections[2].themePackId'],
-      ['FLOOR_UNKNOWN_GIFT_ID', 'floorSelections[1].giftIds[0]'],
+      ['DUPLICATE_EGOGIFT', 'floorSelections[0].giftIds'],
+      ['DUPLICATE_THEMEPACK', 'floorSelections[2].themePackId'],
+      ['UNKNOWN_EGOGIFT_FLOOR', 'floorSelections[1].giftIds[0]'],
     ])
   })
 
@@ -331,31 +331,33 @@ describe('validatePlannerForPublish (strict)', () => {
     expect(errors.some((e) => e.code === 'MISSING_TITLE')).toBe(true)
   })
 
-  it('missing theme pack on active floor returns FLOOR_MISSING_THEME_PACK', () => {
+  it('missing theme pack on active floor returns MISSING_THEMEPACK', () => {
     const content = makeValidContent('5F')
     floorAt(content, 2).themePackId = null
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '5F')
     expect(isValid).toBe(false)
-    expect(errors.some((e) => e.code === 'FLOOR_MISSING_THEME_PACK')).toBe(true)
+    expect(errors.some((e) => e.code === 'MISSING_THEMEPACK')).toBe(true)
   })
 
   // corpus: floor-difficulty-hard-required-on-10f
-  it('Normal difficulty on 10F floor returns VALUE_OUT_OF_RANGE', () => {
+  it('Normal difficulty on 10F floor returns INSUFFICIENT_DIFFICULTY_ENTRY', () => {
     const content = makeValidContent('10F')
     floorAt(content, 0).difficulty = 0 // NORMAL — invalid for 10F
     const result = validatePlannerForPublish('My Plan', content, '10F')
     expect(result.isValid).toBe(false)
     expect(codesAndFields(result)).toEqual([
-      ['VALUE_OUT_OF_RANGE', 'floorSelections[0].difficulty'],
+      ['INSUFFICIENT_DIFFICULTY_ENTRY', 'floorSelections[0].difficulty'],
     ])
   })
 
   // corpus: boundary-seq-normal-after-hard (Behavior Inventory 7)
-  it('Normal after Hard on 5F returns INVALID_SEQUENCE at the difficulty', () => {
+  it('Normal after Hard on 5F returns OUT_OF_ORDER_DIFFICULTY at the difficulty', () => {
     const content = makeValidContent('5F')
     floorAt(content, 1).difficulty = 0
     const result = validatePlannerForPublish('My Plan', content, '5F')
-    expect(codesAndFields(result)).toEqual([['INVALID_SEQUENCE', 'floorSelections[1].difficulty']])
+    expect(codesAndFields(result)).toEqual([
+      ['OUT_OF_ORDER_DIFFICULTY', 'floorSelections[1].difficulty'],
+    ])
     expect(toUserFriendlyError(at(result.errors, 0))).toEqual({
       key: 'pages.plannerMD.publish.normalAfterHard',
     })
@@ -370,11 +372,11 @@ describe('validatePlannerForPublish (strict)', () => {
   })
 
   // corpus: scn-10f-difficulty-absent (Behavior Inventory 6)
-  it('an absent difficulty at publish returns VALUE_OUT_OF_RANGE', () => {
+  it('an absent difficulty at publish returns INSUFFICIENT_DIFFICULTY_ENTRY', () => {
     const content = makeValidContent('10F')
     delete (floorAt(content, 0) as { difficulty?: DungeonIdx }).difficulty
     expect(codesAndFields(validatePlannerForPublish('My Plan', content, '10F'))).toEqual([
-      ['VALUE_OUT_OF_RANGE', 'floorSelections[0].difficulty'],
+      ['INSUFFICIENT_DIFFICULTY_ENTRY', 'floorSelections[0].difficulty'],
     ])
     expect(validatePlannerForDraftSave(content, '10F').errors).toEqual([])
   })
@@ -388,12 +390,12 @@ describe('validatePlannerForPublish (strict)', () => {
     expect(content.selectedKeywords).toEqual(['AccelBullet']) // validator does not mutate input
   })
 
-  it('unknown (non-rename) keyword fails loudly with KEYWORD_INVALID', () => {
+  it('unknown (non-rename) keyword fails loudly with UNKNOWN_KEYWORD', () => {
     const content = makeValidContent('5F')
     content.selectedKeywords = ['9828', 'GhostKeyword'] // no rename target — genuine corruption
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '5F')
     expect(isValid).toBe(false)
-    expect(errors.some((e) => e.code === 'KEYWORD_INVALID')).toBe(true)
+    expect(errors.some((e) => e.code === 'UNKNOWN_KEYWORD')).toBe(true)
   })
 })
 
@@ -409,13 +411,13 @@ describe('validateSelectedKeywords', () => {
   it('rejects a legacy (renamed) keyword id — the read tier should have remapped it', () => {
     const errors = validateSelectedKeywords(['AccelBullet'])
     expect(errors).toHaveLength(1)
-    expect(at(errors, 0).code).toBe('KEYWORD_INVALID')
+    expect(at(errors, 0).code).toBe('UNKNOWN_KEYWORD')
   })
 
   it('rejects an unknown keyword id', () => {
     const errors = validateSelectedKeywords(['GhostKeyword'])
     expect(errors).toHaveLength(1)
-    expect(at(errors, 0).code).toBe('KEYWORD_INVALID')
+    expect(at(errors, 0).code).toBe('UNKNOWN_KEYWORD')
   })
 })
 
@@ -438,12 +440,12 @@ describe('validatePlannerForDraftSave (non-strict)', () => {
     expect(validatePlannerForDraftSave(content, '5F').errors).toEqual([])
   })
 
-  // corpus: scn-publish-floor2-absent (draft column); contract: INVALID_SEQUENCE keeps the prerequisite key
+  // corpus: scn-publish-floor2-absent (draft column); contract: OUT_OF_ORDER_THEMEPACK keeps the prerequisite key
   it('floor 3 has pack but floor 2 missing still returns prerequisite error', () => {
     const content = makeValidContent('5F')
     floorAt(content, 1).themePackId = null
     const result = validatePlannerForDraftSave(content, '5F')
-    expect(codesAndFields(result)).toEqual([['INVALID_SEQUENCE', 'floorSelections[2]']])
+    expect(codesAndFields(result)).toEqual([['OUT_OF_ORDER_THEMEPACK', 'floorSelections[2]']])
     expect(toUserFriendlyError(at(result.errors, 0))).toEqual({
       key: 'pages.plannerMD.previousFloorNoThemePack',
     })
@@ -488,19 +490,24 @@ describe('validateDeploymentOrder', () => {
     expect(validateDeploymentOrder([])).toHaveLength(0)
   })
 
-  it('index -1 returns DEPLOYMENT_INVALID_INDEX', () => {
+  it('index -1 returns OUT_OF_RANGE_DEPLOYMENT', () => {
     const errors = validateDeploymentOrder([-1])
-    expect(errors.some((e) => e.code === 'DEPLOYMENT_INVALID_INDEX')).toBe(true)
+    expect(errors.some((e) => e.code === 'OUT_OF_RANGE_DEPLOYMENT')).toBe(true)
   })
 
-  it('index 12 (one beyond max) returns DEPLOYMENT_INVALID_INDEX', () => {
+  it('index 12 (one beyond max) returns OUT_OF_RANGE_DEPLOYMENT', () => {
     const errors = validateDeploymentOrder([12])
-    expect(errors.some((e) => e.code === 'DEPLOYMENT_INVALID_INDEX')).toBe(true)
+    expect(errors.some((e) => e.code === 'OUT_OF_RANGE_DEPLOYMENT')).toBe(true)
   })
 
   it('multiple invalid indices produce one error each', () => {
     const errors = validateDeploymentOrder([-1, 12, 99])
-    expect(errors.filter((e) => e.code === 'DEPLOYMENT_INVALID_INDEX')).toHaveLength(3)
+    expect(errors.filter((e) => e.code === 'OUT_OF_RANGE_DEPLOYMENT')).toHaveLength(3)
+  })
+
+  it('a non-number entry returns INVALID_FIELD_TYPE', () => {
+    const errors = validateDeploymentOrder(['3' as unknown as number])
+    expect(errors.map((e) => e.code)).toEqual(['INVALID_FIELD_TYPE'])
   })
 })
 
@@ -513,21 +520,21 @@ describe('validateSkillEAState', () => {
     expect(validateSkillEAState(makeValidSkillEAState())).toHaveLength(0)
   })
 
-  it('missing sinner key returns SKILL_EA_MISSING_SINNER listing which sinners', () => {
+  it('missing sinner key returns MISSING_SINNER listing which sinners', () => {
     const state = makeValidSkillEAState()
     delete state['01']
     const errors = validateSkillEAState(state)
-    expect(errors.some((e) => e.code === 'SKILL_EA_MISSING_SINNER')).toBe(true)
-    const err = errors.find((e) => e.code === 'SKILL_EA_MISSING_SINNER')
+    expect(errors.some((e) => e.code === 'MISSING_SINNER')).toBe(true)
+    const err = errors.find((e) => e.code === 'MISSING_SINNER')
     expect((err!.context!.missingSinners as string[]).includes('01')).toBe(true)
   })
 
-  it('invalid slot key "3" returns SKILL_EA_INVALID_SLOT', () => {
+  it('invalid slot key "3" returns INVALID_SKILL_SLOT', () => {
     const state = makeValidSkillEAState()
     // Warning: deliberately invalid input — slot key 3 is out of the valid 0-2 range.
     state['01'] = { 0: 3, 1: 2, 3: 1 } as unknown as SkillEAState
     const errors = validateSkillEAState(state)
-    expect(errors.some((e) => e.code === 'SKILL_EA_INVALID_SLOT')).toBe(true)
+    expect(errors.some((e) => e.code === 'INVALID_SKILL_SLOT')).toBe(true)
   })
 
   it('a stored string value is reported as a bad total, not concatenated into one', () => {
@@ -535,17 +542,17 @@ describe('validateSkillEAState', () => {
     // Warning: deliberately invalid input — a value that survived storage as text.
     state['01'] = { 0: '3', 1: 2, 2: 1 } as unknown as SkillEAState
     const errors = validateSkillEAState(state)
-    const err = errors.find((e) => e.code === 'SKILL_EA_INVALID_TOTAL')
+    const err = errors.find((e) => e.code === 'OUT_OF_RANGE_SKILL_TOTAL')
     expect(err).toBeDefined()
     // The string slot is skipped, so the total is the two numeric slots.
     expect(err!.context!.total).toBe(3)
   })
 
-  it('skill EA totalling 7 instead of 6 returns SKILL_EA_INVALID_TOTAL', () => {
+  it('skill EA totalling 7 instead of 6 returns OUT_OF_RANGE_SKILL_TOTAL', () => {
     const state = makeValidSkillEAState()
     state['01'] = { 0: 4, 1: 2, 2: 1 } // 4+2+1=7
     const errors = validateSkillEAState(state)
-    expect(errors.some((e) => e.code === 'SKILL_EA_INVALID_TOTAL')).toBe(true)
+    expect(errors.some((e) => e.code === 'OUT_OF_RANGE_SKILL_TOTAL')).toBe(true)
   })
 
   it.each(['abc', '', '1.5', ' 2'])('ignores the non-integer sinner key %j', (key) => {
@@ -561,36 +568,47 @@ describe('validateSkillEAState', () => {
 
 describe('validateGiftIdArray', () => {
   it('unique gift IDs return no errors', () => {
-    expect(validateGiftIdArray(['9001', '9002', '9003'], 'selectedGiftIds')).toHaveLength(0)
+    expect(
+      validateGiftIdArray(['9001', '9002', '9003'], 'selectedGiftIds', 'DUPLICATE_STARTGIFT'),
+    ).toHaveLength(0)
   })
 
   it('empty array returns no errors', () => {
-    expect(validateGiftIdArray([], 'observationGiftIds')).toHaveLength(0)
+    expect(validateGiftIdArray([], 'observationGiftIds', 'DUPLICATE_EGOGIFT')).toHaveLength(0)
   })
 
-  it('duplicate gift ID returns GIFT_DUPLICATE_ID with fieldName in field', () => {
-    const errors = validateGiftIdArray(['9001', '9002', '9001'], 'comprehensiveGiftIds')
-    expect(errors.some((e) => e.code === 'GIFT_DUPLICATE_ID')).toBe(true)
+  it('duplicate gift ID returns the given duplicate code with fieldName in field', () => {
+    const errors = validateGiftIdArray(
+      ['9001', '9002', '9001'],
+      'comprehensiveGiftIds',
+      'DUPLICATE_EGOGIFT',
+    )
+    expect(errors.some((e) => e.code === 'DUPLICATE_EGOGIFT')).toBe(true)
     expect(at(errors, 0).field).toContain('comprehensiveGiftIds')
   })
 
-  it('unknown gift ID returns GIFT_UNKNOWN_ID when egoGiftSpec is provided', () => {
+  it('unknown gift ID returns UNKNOWN_EGOGIFT when egoGiftSpec is provided', () => {
     const spec: Record<string, EGOGiftSpec> = {
       '9001': makeGiftSpec([]),
     }
-    const errors = validateGiftIdArray(['9001', '9999'], 'selectedGiftIds', spec)
+    const errors = validateGiftIdArray(
+      ['9001', '9999'],
+      'selectedGiftIds',
+      'DUPLICATE_STARTGIFT',
+      spec,
+    )
     expect(errors).toHaveLength(1)
-    expect(at(errors, 0).code).toBe('GIFT_UNKNOWN_ID')
+    expect(at(errors, 0).code).toBe('UNKNOWN_EGOGIFT')
     expect(at(errors, 0).context?.giftId).toBe('9999')
   })
 
   it.each(['39001', '', '900', '900a', 'gift1', ' 9001'])(
-    'malformed gift ID %j returns GIFT_UNKNOWN_ID when egoGiftSpec is provided',
+    'malformed gift ID %j returns UNKNOWN_EGOGIFT when egoGiftSpec is provided',
     (giftId) => {
       const spec: Record<string, EGOGiftSpec> = { '9001': makeGiftSpec([]) }
-      const errors = validateGiftIdArray([giftId], 'selectedGiftIds', spec)
+      const errors = validateGiftIdArray([giftId], 'selectedGiftIds', 'DUPLICATE_STARTGIFT', spec)
       expect(errors).toHaveLength(1)
-      expect(at(errors, 0).code).toBe('GIFT_UNKNOWN_ID')
+      expect(at(errors, 0).code).toBe('UNKNOWN_EGOGIFT')
     },
   )
 
@@ -599,26 +617,35 @@ describe('validateGiftIdArray', () => {
       '9001': makeGiftSpec([]),
       '9002': makeGiftSpec([]),
     }
-    expect(validateGiftIdArray(['9001', '9002'], 'selectedGiftIds', spec)).toHaveLength(0)
+    expect(
+      validateGiftIdArray(['9001', '9002'], 'selectedGiftIds', 'DUPLICATE_STARTGIFT', spec),
+    ).toHaveLength(0)
   })
 
   it('enhanced gift ID resolves to base ID for existence check', () => {
     const spec: Record<string, EGOGiftSpec> = {
       '9220': makeGiftSpec([]),
     }
-    expect(validateGiftIdArray(['19220'], 'selectedGiftIds', spec)).toHaveLength(0)
+    expect(
+      validateGiftIdArray(['19220'], 'selectedGiftIds', 'DUPLICATE_STARTGIFT', spec),
+    ).toHaveLength(0)
   })
 
   it('duplicate is reported before unknown for the same ID', () => {
     const spec: Record<string, EGOGiftSpec> = {}
-    const errors = validateGiftIdArray(['9999', '9999'], 'selectedGiftIds', spec)
+    const errors = validateGiftIdArray(
+      ['9999', '9999'],
+      'selectedGiftIds',
+      'DUPLICATE_STARTGIFT',
+      spec,
+    )
     expect(errors).toHaveLength(2)
-    expect(at(errors, 0).code).toBe('GIFT_UNKNOWN_ID')
-    expect(at(errors, 1).code).toBe('GIFT_DUPLICATE_ID')
+    expect(at(errors, 0).code).toBe('UNKNOWN_EGOGIFT')
+    expect(at(errors, 1).code).toBe('DUPLICATE_STARTGIFT')
   })
 
   it('skips existence check when egoGiftSpec is not provided', () => {
-    expect(validateGiftIdArray(['9999'], 'selectedGiftIds')).toHaveLength(0)
+    expect(validateGiftIdArray(['9999'], 'selectedGiftIds', 'DUPLICATE_STARTGIFT')).toHaveLength(0)
   })
 })
 
@@ -636,21 +663,21 @@ describe('validateStartBuffIds', () => {
     expect(validateStartBuffIds([])).toHaveLength(0)
   })
 
-  it('11 buffs return BUFF_EXCEEDS_MAX', () => {
+  it('11 buffs return EXCESS_STARTBUFF', () => {
     // Only 10 unique base IDs (0-9) exist; 11 items forces repetition
     const ids = [100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 100]
     const errors = validateStartBuffIds(ids)
-    expect(errors.some((e) => e.code === 'BUFF_EXCEEDS_MAX')).toBe(true)
+    expect(errors.some((e) => e.code === 'EXCESS_STARTBUFF')).toBe(true)
   })
 
-  it('buff ID 110 (base 10 > max 9) returns BUFF_INVALID_FORMAT', () => {
+  it('buff ID 110 (base 10 > max 9) returns OUT_OF_RANGE_STARTBUFF', () => {
     const errors = validateStartBuffIds([110]) // 110 % 100 = 10
-    expect(errors.some((e) => e.code === 'BUFF_INVALID_FORMAT')).toBe(true)
+    expect(errors.some((e) => e.code === 'OUT_OF_RANGE_STARTBUFF')).toBe(true)
   })
 
-  it('100 and 200 share base ID 0 and return BUFF_DUPLICATE_BASE_ID', () => {
+  it('100 and 200 share base ID 0 and return DUPLICATE_STARTBUFF', () => {
     const errors = validateStartBuffIds([100, 200]) // both: id % 100 = 0
-    expect(errors.some((e) => e.code === 'BUFF_DUPLICATE_BASE_ID')).toBe(true)
+    expect(errors.some((e) => e.code === 'DUPLICATE_STARTBUFF')).toBe(true)
   })
 })
 
@@ -667,19 +694,18 @@ describe('validateStartGiftSelection', () => {
     expect(validateStartGiftSelection('someKeyword', ['9001', '9002'])).toHaveLength(0)
   })
 
-  it('no keyword but has gift IDs returns START_GIFT_NO_KEYWORD_BUT_HAS_GIFTS', () => {
+  it('no keyword but has gift IDs returns MISSING_STARTGIFT_KEYWORD', () => {
     const errors = validateStartGiftSelection(null, ['9001'])
-    expect(errors.some((e) => e.code === 'START_GIFT_NO_KEYWORD_BUT_HAS_GIFTS')).toBe(true)
+    expect(errors.some((e) => e.code === 'MISSING_STARTGIFT_KEYWORD')).toBe(true)
   })
 
-  it('keyword with duplicate gift ID returns START_GIFT_DUPLICATE_ID', () => {
-    const errors = validateStartGiftSelection('someKeyword', ['9001', '9001'])
-    expect(errors.some((e) => e.code === 'START_GIFT_DUPLICATE_ID')).toBe(true)
+  it('keyword with duplicate gift ID leaves the duplicate to the gift array check', () => {
+    expect(validateStartGiftSelection('someKeyword', ['9001', '9001'])).toHaveLength(0)
   })
 })
 
 // ============================================================================
-// validatePlannerForPublish – gift affordability (GIFT_NOT_AFFORDABLE)
+// validatePlannerForPublish – gift affordability (UNAFFORDABLE_EGOGIFT)
 // ============================================================================
 
 describe('validatePlannerForPublish – gift affordability', () => {
@@ -690,7 +716,7 @@ describe('validatePlannerForPublish – gift affordability', () => {
   const i18n: Record<string, string> = { '9220': 'Dream-Eating Tapir' }
 
   // corpus: floor-gift-not-affordable
-  it("gift '9220' is not affordable for theme pack '1110' → GIFT_NOT_AFFORDABLE at the gift", () => {
+  it("gift '9220' is not affordable for theme pack '1110' → UNAFFORDABLE_EGOGIFT at the gift", () => {
     const content = makeValidContent('5F')
     floorAt(content, 0).themePackId = ThemePackIdSchema.parse('1110')
     floorAt(content, 0).giftIds = [ENCODED_9220]
@@ -698,19 +724,19 @@ describe('validatePlannerForPublish – gift affordability', () => {
     const result = validatePlannerForPublish('My Plan', content, '5F', spec)
     expect(result.isValid).toBe(false)
     expect(codesAndFields(result)).toEqual([
-      ['GIFT_NOT_AFFORDABLE', 'floorSelections[0].giftIds[0]'],
+      ['UNAFFORDABLE_EGOGIFT', 'floorSelections[0].giftIds[0]'],
     ])
-    expect(at(onlyCode(result, 'GIFT_NOT_AFFORDABLE'), 0).context.themePackId).toBe('1110')
+    expect(at(onlyCode(result, 'UNAFFORDABLE_EGOGIFT'), 0).context.themePackId).toBe('1110')
   })
 
-  it("enhanced gift '19220' (level 1) not affordable for theme pack '1110' → GIFT_NOT_AFFORDABLE", () => {
+  it("enhanced gift '19220' (level 1) not affordable for theme pack '1110' → UNAFFORDABLE_EGOGIFT", () => {
     const content = makeValidContent('5F')
     floorAt(content, 0).themePackId = ThemePackIdSchema.parse('1110')
     floorAt(content, 0).giftIds = [ENCODED_19220] // encoded: enhancement=1, base=9220
 
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '5F', spec)
     expect(isValid).toBe(false)
-    expect(errors.some((e) => e.code === 'GIFT_NOT_AFFORDABLE')).toBe(true)
+    expect(errors.some((e) => e.code === 'UNAFFORDABLE_EGOGIFT')).toBe(true)
   })
 
   it("gift '9220' on its correct pack '1024' passes affordability", () => {
@@ -720,7 +746,7 @@ describe('validatePlannerForPublish – gift affordability', () => {
 
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '5F', spec)
     expect(isValid).toBe(true)
-    expect(errors.filter((e) => e.code === 'GIFT_NOT_AFFORDABLE')).toHaveLength(0)
+    expect(errors.filter((e) => e.code === 'UNAFFORDABLE_EGOGIFT')).toHaveLength(0)
   })
 
   it('universal gift (empty themePack) passes affordability on any pack', () => {
@@ -729,10 +755,10 @@ describe('validatePlannerForPublish – gift affordability', () => {
 
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '5F', spec)
     expect(isValid).toBe(true)
-    expect(errors.filter((e) => e.code === 'GIFT_NOT_AFFORDABLE')).toHaveLength(0)
+    expect(errors.filter((e) => e.code === 'UNAFFORDABLE_EGOGIFT')).toHaveLength(0)
   })
 
-  // contract: GIFT_NOT_AFFORDABLE at floorSelections[i].giftIds[j], one per gift
+  // contract: UNAFFORDABLE_EGOGIFT at floorSelections[i].giftIds[j], one per gift
   it('multiple unaffordable gifts on one floor produce one error per gift', () => {
     const twoGiftSpec: Record<string, EGOGiftSpec> = {
       '9220': makeGiftSpec(['1024']),
@@ -744,8 +770,8 @@ describe('validatePlannerForPublish – gift affordability', () => {
 
     const result = validatePlannerForPublish('My Plan', content, '5F', twoGiftSpec)
     expect(codesAndFields(result)).toEqual([
-      ['GIFT_NOT_AFFORDABLE', 'floorSelections[0].giftIds[0]'],
-      ['GIFT_NOT_AFFORDABLE', 'floorSelections[0].giftIds[1]'],
+      ['UNAFFORDABLE_EGOGIFT', 'floorSelections[0].giftIds[0]'],
+      ['UNAFFORDABLE_EGOGIFT', 'floorSelections[0].giftIds[1]'],
     ])
   })
 
@@ -757,7 +783,7 @@ describe('validatePlannerForPublish – gift affordability', () => {
     floorAt(content, 1).giftIds = [ENCODED_9220]
 
     const result = validatePlannerForPublish('My Plan', content, '5F', spec)
-    expect(onlyCode(result, 'GIFT_NOT_AFFORDABLE').map(fieldOf)).toEqual([
+    expect(onlyCode(result, 'UNAFFORDABLE_EGOGIFT').map(fieldOf)).toEqual([
       'floorSelections[0].giftIds[0]',
       'floorSelections[1].giftIds[0]',
     ])
@@ -769,7 +795,7 @@ describe('validatePlannerForPublish – gift affordability', () => {
     floorAt(content, 0).giftIds = [ENCODED_9220]
 
     const result = validatePlannerForPublish('My Plan', content, '5F', spec, i18n)
-    const err: GiftNotAffordableValidationError = at(onlyCode(result, 'GIFT_NOT_AFFORDABLE'), 0)
+    const err: GiftNotAffordableValidationError = at(onlyCode(result, 'UNAFFORDABLE_EGOGIFT'), 0)
     expect(err.context.giftName).toBe('Dream-Eating Tapir')
   })
 
@@ -779,12 +805,12 @@ describe('validatePlannerForPublish – gift affordability', () => {
 
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '5F') // no spec
     expect(isValid).toBe(true)
-    expect(errors.filter((e) => e.code === 'GIFT_NOT_AFFORDABLE')).toHaveLength(0)
+    expect(errors.filter((e) => e.code === 'UNAFFORDABLE_EGOGIFT')).toHaveLength(0)
   })
 })
 
 // ============================================================================
-// validatePlannerForPublish – gift existence (FLOOR_UNKNOWN_GIFT_ID)
+// validatePlannerForPublish – gift existence (UNKNOWN_EGOGIFT_FLOOR)
 // ============================================================================
 
 describe('validatePlannerForPublish – gift existence', () => {
@@ -793,49 +819,49 @@ describe('validatePlannerForPublish – gift existence', () => {
     '9220': makeGiftSpec(['1024']),
   }
 
-  it('unknown floor gift ID returns FLOOR_UNKNOWN_GIFT_ID', () => {
+  it('unknown floor gift ID returns UNKNOWN_EGOGIFT_FLOOR', () => {
     const content = makeValidContent('5F')
     floorAt(content, 0).giftIds = [ENCODED_9999]
 
     const result = validatePlannerForPublish('My Plan', content, '5F', spec)
     expect(result.isValid).toBe(false)
-    const err: FloorUnknownGiftValidationError = at(onlyCode(result, 'FLOOR_UNKNOWN_GIFT_ID'), 0)
+    const err: FloorUnknownGiftValidationError = at(onlyCode(result, 'UNKNOWN_EGOGIFT_FLOOR'), 0)
     expect(renderContentPath(err.path)).toBe('floorSelections[0].giftIds[0]')
     expect(err.context.giftId).toBe('9999')
   })
 
   // corpus: floor-gift-unknown (path floorSelections[i].giftIds[j]); contract: one per gift
-  it('multiple unknown IDs on one floor produce one FLOOR_UNKNOWN_GIFT_ID error per gift', () => {
+  it('multiple unknown IDs on one floor produce one UNKNOWN_EGOGIFT_FLOOR error per gift', () => {
     const content = makeValidContent('5F')
     floorAt(content, 0).giftIds = [ENCODED_9999, ENCODED_9998]
 
     const result = validatePlannerForPublish('My Plan', content, '5F', spec)
     expect(
-      onlyCode(result, 'FLOOR_UNKNOWN_GIFT_ID').map((e) => [fieldOf(e), e.context.giftId]),
+      onlyCode(result, 'UNKNOWN_EGOGIFT_FLOOR').map((e) => [fieldOf(e), e.context.giftId]),
     ).toEqual([
       ['floorSelections[0].giftIds[0]', '9999'],
       ['floorSelections[0].giftIds[1]', '9998'],
     ])
   })
 
-  it('unknown IDs on two separate floors produce one FLOOR_UNKNOWN_GIFT_ID error per floor', () => {
+  it('unknown IDs on two separate floors produce one UNKNOWN_EGOGIFT_FLOOR error per floor', () => {
     const content = makeValidContent('5F')
     floorAt(content, 0).giftIds = [ENCODED_9999]
     floorAt(content, 1).giftIds = [ENCODED_9998]
 
     const result = validatePlannerForPublish('My Plan', content, '5F', spec)
-    expect(onlyCode(result, 'FLOOR_UNKNOWN_GIFT_ID').map(fieldOf)).toEqual([
+    expect(onlyCode(result, 'UNKNOWN_EGOGIFT_FLOOR').map(fieldOf)).toEqual([
       'floorSelections[0].giftIds[0]',
       'floorSelections[1].giftIds[0]',
     ])
   })
 
-  it('valid floor gift IDs return no FLOOR_UNKNOWN_GIFT_ID errors', () => {
+  it('valid floor gift IDs return no UNKNOWN_EGOGIFT_FLOOR errors', () => {
     const content = makeValidContent('5F')
     floorAt(content, 0).giftIds = [ENCODED_9001, ENCODED_9220]
 
     const { errors } = validatePlannerForPublish('My Plan', content, '5F', spec)
-    expect(errors.filter((e) => e.code === 'FLOOR_UNKNOWN_GIFT_ID')).toHaveLength(0)
+    expect(errors.filter((e) => e.code === 'UNKNOWN_EGOGIFT_FLOOR')).toHaveLength(0)
   })
 
   it('existence check is skipped when egoGiftSpec is not provided', () => {
@@ -846,14 +872,14 @@ describe('validatePlannerForPublish – gift existence', () => {
     expect(isValid).toBe(true)
   })
 
-  it('unknown gift in top-level selectedGiftIds returns GIFT_UNKNOWN_ID', () => {
+  it('unknown gift in top-level selectedGiftIds returns UNKNOWN_EGOGIFT', () => {
     const content = makeValidContent('5F')
     content.selectedGiftKeyword = 'someKeyword'
     content.selectedGiftIds = [ENCODED_9999]
 
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '5F', spec)
     expect(isValid).toBe(false)
-    expect(errors.some((e) => e.code === 'GIFT_UNKNOWN_ID')).toBe(true)
+    expect(errors.some((e) => e.code === 'UNKNOWN_EGOGIFT')).toBe(true)
   })
 })
 
@@ -862,54 +888,54 @@ describe('validatePlannerForPublish – gift existence', () => {
 // ============================================================================
 
 describe('validatePlannerForPublish – validator propagation', () => {
-  it('invalid deployment index propagates DEPLOYMENT_INVALID_INDEX', () => {
+  it('invalid deployment index propagates OUT_OF_RANGE_DEPLOYMENT', () => {
     const content = makeValidContent('5F')
     content.deploymentOrder = [-1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '5F')
     expect(isValid).toBe(false)
-    expect(errors.some((e) => e.code === 'DEPLOYMENT_INVALID_INDEX')).toBe(true)
+    expect(errors.some((e) => e.code === 'OUT_OF_RANGE_DEPLOYMENT')).toBe(true)
   })
 
-  it('invalid skill EA total propagates SKILL_EA_INVALID_TOTAL', () => {
+  it('invalid skill EA total propagates OUT_OF_RANGE_SKILL_TOTAL', () => {
     const content = makeValidContent('5F')
     content.skillEAState['01'] = { 0: 4, 1: 2, 2: 1 } // 4+2+1=7 ≠ 6
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '5F')
     expect(isValid).toBe(false)
-    expect(errors.some((e) => e.code === 'SKILL_EA_INVALID_TOTAL')).toBe(true)
+    expect(errors.some((e) => e.code === 'OUT_OF_RANGE_SKILL_TOTAL')).toBe(true)
   })
 
-  it('duplicate gift in selectedGiftIds propagates GIFT_DUPLICATE_ID', () => {
+  it('duplicate gift in selectedGiftIds propagates DUPLICATE_STARTGIFT once', () => {
     const content = makeValidContent('5F')
     content.selectedGiftKeyword = 'someKeyword'
     content.selectedGiftIds = [ENCODED_9001, ENCODED_9001]
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '5F')
     expect(isValid).toBe(false)
-    expect(errors.some((e) => e.code === 'GIFT_DUPLICATE_ID')).toBe(true)
+    expect(errors.filter((e) => e.code === 'DUPLICATE_STARTGIFT')).toHaveLength(1)
   })
 
-  it('11 start buffs propagate BUFF_EXCEEDS_MAX', () => {
+  it('11 start buffs propagate EXCESS_STARTBUFF', () => {
     const content = makeValidContent('5F')
     content.selectedBuffIds = [100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 100]
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '5F')
     expect(isValid).toBe(false)
-    expect(errors.some((e) => e.code === 'BUFF_EXCEEDS_MAX')).toBe(true)
+    expect(errors.some((e) => e.code === 'EXCESS_STARTBUFF')).toBe(true)
   })
 
-  it('gift IDs with no keyword propagate START_GIFT_NO_KEYWORD_BUT_HAS_GIFTS', () => {
+  it('gift IDs with no keyword propagate MISSING_STARTGIFT_KEYWORD', () => {
     const content = makeValidContent('5F')
     content.selectedGiftKeyword = null
     content.selectedGiftIds = [ENCODED_9001]
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '5F')
     expect(isValid).toBe(false)
-    expect(errors.some((e) => e.code === 'START_GIFT_NO_KEYWORD_BUT_HAS_GIFTS')).toBe(true)
+    expect(errors.some((e) => e.code === 'MISSING_STARTGIFT_KEYWORD')).toBe(true)
   })
 
-  it('missing equipment sinner propagates EQUIPMENT_MISSING_SINNER', () => {
+  it('missing equipment sinner propagates MISSING_SINNER', () => {
     const content = makeValidContent('5F')
     delete (content.equipment as Record<string, unknown>)['01']
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '5F')
     expect(isValid).toBe(false)
-    expect(errors.some((e) => e.code === 'EQUIPMENT_MISSING_SINNER')).toBe(true)
+    expect(errors.some((e) => e.code === 'MISSING_SINNER')).toBe(true)
   })
 })
 
@@ -924,26 +950,26 @@ describe('validatePlannerForPublish – 15F difficulty', () => {
   })
 
   // corpus: floor-difficulty-extreme-required-on-15f
-  it('floor 11 Hard (not Extreme) in 15F returns VALUE_OUT_OF_RANGE for floor 11', () => {
+  it('floor 11 Hard (not Extreme) in 15F returns OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME for floor 11', () => {
     const content = makeValidContent('15F')
     floorAt(content, 10).difficulty = 1 // index 10 = floor 11, must be Extreme (3)
     const result = validatePlannerForPublish('My Plan', content, '15F')
     expect(result.isValid).toBe(false)
     expect(codesAndFields(result)).toEqual([
-      ['VALUE_OUT_OF_RANGE', 'floorSelections[10].difficulty'],
+      ['OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME', 'floorSelections[10].difficulty'],
     ])
     expect(toUserFriendlyError(at(result.errors, 0))).toEqual({
-      key: 'pages.plannerMD.publish.requiresExtremeMode',
+      key: 'pages.plannerMD.publish.extremeModeOnly',
     })
   })
 
   // corpus: boundary-seq-10f-normal-in-first-five
-  it('floor 1 Normal (not Hard) in 15F returns VALUE_OUT_OF_RANGE', () => {
+  it('floor 1 Normal (not Hard) in 15F returns INSUFFICIENT_DIFFICULTY_ENTRY', () => {
     const content = makeValidContent('15F')
     floorAt(content, 0).difficulty = 0 // Normal — floors 1-10 must be Hard
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '15F')
     expect(isValid).toBe(false)
-    expect(errors.some((e) => e.code === 'VALUE_OUT_OF_RANGE')).toBe(true)
+    expect(errors.some((e) => e.code === 'INSUFFICIENT_DIFFICULTY_ENTRY')).toBe(true)
   })
 })
 
@@ -1004,14 +1030,14 @@ describe('validatePlannerForDraftSave – additional cases', () => {
 
     const result = validatePlannerForDraftSave(content, '5F', spec)
     expect(codesAndFields(result)).toEqual([
-      ['FLOOR_UNKNOWN_GIFT_ID', 'floorSelections[0].giftIds[0]'],
-      ['GIFT_NOT_AFFORDABLE', 'floorSelections[0].giftIds[1]'],
+      ['UNKNOWN_EGOGIFT_FLOOR', 'floorSelections[0].giftIds[0]'],
+      ['UNAFFORDABLE_EGOGIFT', 'floorSelections[0].giftIds[1]'],
     ])
   })
 })
 
 // ============================================================================
-// validatePlannerForDraftSave – gift affordability (GIFT_NOT_AFFORDABLE)
+// validatePlannerForDraftSave – gift affordability (UNAFFORDABLE_EGOGIFT)
 // ============================================================================
 
 describe('validatePlannerForDraftSave – gift affordability', () => {
@@ -1051,7 +1077,7 @@ describe('validatePlannerForDraftSave – gift affordability', () => {
     expect(validatePlannerForDraftSave(content, '5F', spec).errors).toEqual([])
   })
 
-  // contract: GIFT_NOT_AFFORDABLE one per gift; FE grouping goes
+  // contract: UNAFFORDABLE_EGOGIFT one per gift; FE grouping goes
   it('multiple unaffordable gifts on one floor name each gift in its own error', () => {
     const content = makeValidContent('5F')
     floorAt(content, 0).themePackId = ThemePackIdSchema.parse('1110')
@@ -1156,8 +1182,8 @@ describe('validatePlannerForImport', () => {
       fieldOf(e)?.startsWith('floorSelections'),
     )
     expect(floorErrors.map((e) => [e.code, fieldOf(e)])).toEqual([
-      ['INVALID_SEQUENCE', 'floorSelections[1].difficulty'],
-      ['FLOOR_DUPLICATE_THEME_PACK', 'floorSelections[3].themePackId'],
+      ['OUT_OF_ORDER_DIFFICULTY', 'floorSelections[1].difficulty'],
+      ['DUPLICATE_THEMEPACK', 'floorSelections[3].themePackId'],
     ])
   })
 
@@ -1167,13 +1193,13 @@ describe('validatePlannerForImport', () => {
       fieldOf(e)?.startsWith('floorSelections'),
     )
     expect(floorErrors.map((e) => [e.code, fieldOf(e)])).toEqual([
-      ['FLOOR_DUPLICATE_THEME_PACK', 'floorSelections[3].themePackId'],
+      ['DUPLICATE_THEMEPACK', 'floorSelections[3].themePackId'],
     ])
   })
 })
 
 // ============================================================================
-// Entity id registry checks (IDENTITY/EGO/THEME_PACK/START_BUFF_UNKNOWN_ID)
+// Entity id registry checks (UNKNOWN_IDENTITY/EGO/THEMEPACK/STARTBUFF)
 // ============================================================================
 
 describe('entity id registry checks', () => {
@@ -1193,7 +1219,7 @@ describe('entity id registry checks', () => {
 
   const cases = [
     {
-      code: 'IDENTITY_UNKNOWN_ID',
+      code: 'UNKNOWN_IDENTITY',
       key: 'pages.plannerMD.validation.unknownIdentityId',
       id: '10199',
       corrupt: (c: MDPlannerContent) => {
@@ -1204,7 +1230,7 @@ describe('entity id registry checks', () => {
       },
     },
     {
-      code: 'EGO_UNKNOWN_ID',
+      code: 'UNKNOWN_EGO',
       key: 'pages.plannerMD.validation.unknownEgoId',
       id: '20199',
       corrupt: (c: MDPlannerContent) => {
@@ -1215,7 +1241,7 @@ describe('entity id registry checks', () => {
       },
     },
     {
-      code: 'THEME_PACK_UNKNOWN_ID',
+      code: 'UNKNOWN_THEMEPACK',
       key: 'pages.plannerMD.validation.unknownThemePackId',
       id: '9999',
       corrupt: (c: MDPlannerContent) => {
@@ -1223,7 +1249,7 @@ describe('entity id registry checks', () => {
       },
     },
     {
-      code: 'START_BUFF_UNKNOWN_ID',
+      code: 'UNKNOWN_STARTBUFF',
       key: 'pages.plannerMD.validation.unknownStartBuffId',
       id: '201',
       corrupt: () => {},
@@ -1318,8 +1344,8 @@ describe('gift enhancement band', () => {
     const codes = validatePlannerForPublish('My Plan', content, '5F', spec).errors.map(
       (e) => e.code,
     )
-    expect(codes).toContain('GIFT_UNKNOWN_ID')
-    expect(codes).toContain('FLOOR_UNKNOWN_GIFT_ID')
+    expect(codes).toContain('UNKNOWN_EGOGIFT')
+    expect(codes).toContain('UNKNOWN_EGOGIFT_FLOOR')
   })
 })
 
@@ -1351,7 +1377,7 @@ describe('retired E.G.O after id normalization', () => {
     }
   }
 
-  it('keeps it in the ZAYIN slot and reports one EGO_UNKNOWN_ID, not a missing ZAYIN', () => {
+  it('keeps it in the ZAYIN slot and reports one UNKNOWN_EGO, not a missing ZAYIN', () => {
     const content = normalizedContentWith({ ZAYIN: { id: asEGOId(RETIRED_EGO), threadspin: 1 } })
 
     expect(content.equipment['01']?.egos.ZAYIN?.id).toBe(RETIRED_EGO)
@@ -1363,9 +1389,9 @@ describe('retired E.G.O after id normalization', () => {
       undefined,
       registry(),
     )
-    expect(errors.filter((e) => e.code === 'EGO_UNKNOWN_ID')).toHaveLength(1)
-    expect(errors.find((e) => e.code === 'EGO_UNKNOWN_ID')?.context).toEqual({ id: RETIRED_EGO })
-    expect(errors.map((e) => e.code)).not.toContain('EQUIPMENT_MISSING_ZAYIN')
+    expect(errors.filter((e) => e.code === 'UNKNOWN_EGO')).toHaveLength(1)
+    expect(errors.find((e) => e.code === 'UNKNOWN_EGO')?.context).toEqual({ id: RETIRED_EGO })
+    expect(errors.map((e) => e.code)).not.toContain('MISSING_EGO_ZAYIN')
   })
 
   it('empties the TETH slot and reports nothing for it', () => {

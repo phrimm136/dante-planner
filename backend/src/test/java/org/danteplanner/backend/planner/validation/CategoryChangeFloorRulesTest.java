@@ -115,7 +115,7 @@ class CategoryChangeFloorRulesTest {
         assertThat(ex.getStatusCode().value()).isEqualTo(400);
         assertThat(ex.getOriginalCode()).isEqualTo("VALIDATION_ERROR");
         assertThat(ex.getSubErrors())
-                .filteredOn(error -> error.code().equals("FLOOR_MISSING_THEME_PACK"))
+                .filteredOn(error -> error.code().equals("INSUFFICIENT_FLOORS"))
                 .extracting(ValidationError::message)
                 .containsExactlyElementsOf(missingFloors(5, 15));
     }
@@ -155,7 +155,7 @@ class CategoryChangeFloorRulesTest {
                     assertThat(ex.getStatusCode().value()).isEqualTo(400);
                     assertThat(ex.getOriginalCode()).isEqualTo("VALIDATION_ERROR");
                     assertThat(ex.getSubErrors()).extracting(ValidationError::code)
-                            .contains("START_BUFF_UNKNOWN_ID");
+                            .contains("UNKNOWN_STARTBUFF");
                 });
     }
 
@@ -182,7 +182,7 @@ class CategoryChangeFloorRulesTest {
         assertThatThrownBy(() -> commandService.upsertPlanner(
                         owner.getId(), null, planner.getId(), resending(planner, "10F"), false))
                 .isInstanceOfSatisfying(PlannerValidationException.class, ex ->
-                        assertThat(ex.getSubErrors()).containsExactly(new ValidationError("DUPLICATE_VALUE",
+                        assertThat(ex.getSubErrors()).containsExactly(new ValidationError("DUPLICATE_EGOGIFT",
                                 "Duplicate value '9002' in floorSelections[0].giftIds")));
         assertThat(planner.getCategory()).isEqualTo("5F");
     }

@@ -11,9 +11,9 @@ export type FloorReferenceData = {
 }
 
 export type FloorReferenceViolation =
-  | { code: 'THEME_PACK_UNKNOWN_ID'; path: ContentPath; themePackId: string }
-  | { code: 'FLOOR_UNKNOWN_GIFT_ID'; path: ContentPath; giftId: string }
-  | { code: 'GIFT_NOT_AFFORDABLE'; path: ContentPath; giftId: string; themePackId: string }
+  | { code: 'UNKNOWN_THEMEPACK'; path: ContentPath; themePackId: string }
+  | { code: 'UNKNOWN_EGOGIFT_FLOOR'; path: ContentPath; giftId: string }
+  | { code: 'UNAFFORDABLE_EGOGIFT'; path: ContentPath; giftId: string; themePackId: string }
 
 const themePackViolations = (
   floor: FloorSelectionValue,
@@ -24,7 +24,7 @@ const themePackViolations = (
     ? []
     : [
         {
-          code: 'THEME_PACK_UNKNOWN_ID',
+          code: 'UNKNOWN_THEMEPACK',
           path: themePackPath(floorIndex),
           themePackId: floor.themePackId,
         },
@@ -36,9 +36,9 @@ function giftViolation(
   themePackId: string | undefined,
   data: FloorReferenceData,
 ): FloorReferenceViolation[] {
-  if (!data.hasEgoGift(giftId)) return [{ code: 'FLOOR_UNKNOWN_GIFT_ID', path, giftId }]
+  if (!data.hasEgoGift(giftId)) return [{ code: 'UNKNOWN_EGOGIFT_FLOOR', path, giftId }]
   if (themePackId === undefined || data.isGiftAffordableForThemePack(giftId, themePackId)) return []
-  return [{ code: 'GIFT_NOT_AFFORDABLE', path, giftId, themePackId }]
+  return [{ code: 'UNAFFORDABLE_EGOGIFT', path, giftId, themePackId }]
 }
 
 const giftViolations = (

@@ -244,15 +244,15 @@ describe('admitFloors', () => {
       pack('1005', 1),
     ]
     expect(violationsOf(admit(raw, '5F', 'publish'))).toEqual([
-      { code: 'INVALID_SEQUENCE', path: 'floorSelections[1].difficulty' },
-      { code: 'FLOOR_DUPLICATE_THEME_PACK', path: 'floorSelections[1].themePackId' },
+      { code: 'OUT_OF_ORDER_DIFFICULTY', path: 'floorSelections[1].difficulty' },
+      { code: 'DUPLICATE_THEMEPACK', path: 'floorSelections[1].themePackId' },
     ])
   })
 
   it('runs difficultyInRange where the matrix names it', () => {
     expect(stagesFor('difficultyInRange')).toEqual(['publish'])
     const raw = [pack('1001', 2), ...fivePacks().slice(1)]
-    const outOfRange = [{ code: 'VALUE_OUT_OF_RANGE', path: 'floorSelections[0].difficulty' }]
+    const outOfRange = [{ code: 'OUT_OF_RANGE_DIFFICULTY', path: 'floorSelections[0].difficulty' }]
 
     expect(admit(raw, '5F', 'draft').ok).toBe(true)
     expect(violationsOf(admit(raw, '5F', 'publish'))).toEqual(outOfRange)
@@ -269,7 +269,7 @@ describe('admitFloors', () => {
     const raw = [{ themePackId: '1001', giftIds: [] }, ...fivePacks().slice(1)]
     expect(admit(raw, '5F', 'draft').ok).toBe(true)
     expect(violationsOf(admit(raw, '5F', 'publish'))).toEqual([
-      { code: 'VALUE_OUT_OF_RANGE', path: 'floorSelections[0].difficulty' },
+      { code: 'OUT_OF_RANGE_DIFFICULTY', path: 'floorSelections[0].difficulty' },
     ])
   })
 
@@ -283,16 +283,36 @@ describe('admitFloors', () => {
     ]
     expect(violationsOf(admit(raw, '5F', 'publish'))).toEqual(
       [1, 2, 3, 4].map((i) => ({
-        code: 'INVALID_SEQUENCE',
+        code: 'OUT_OF_ORDER_DIFFICULTY',
         path: `floorSelections[${i}].difficulty`,
       })),
     )
   })
 
-  it('reports only the range on a 10F NORMAL floor', () => {
+  it('reports only the entry condition on a 10F NORMAL floor', () => {
     const raw = Array.from({ length: 10 }, (_, i) => pack(`${1001 + i}`, i === 2 ? 0 : 1))
     expect(violationsOf(admit(raw, '10F', 'publish'))).toEqual([
-      { code: 'VALUE_OUT_OF_RANGE', path: 'floorSelections[2].difficulty' },
+      { code: 'INSUFFICIENT_DIFFICULTY_ENTRY', path: 'floorSelections[2].difficulty' },
+    ])
+  })
+
+  it('moves the entry floors with the shortest category of the table', () => {
+    const shrunk: FloorRuleTable = {
+      ...FLOOR_RULE_TABLE,
+      categories: {
+        ...FLOOR_RULE_TABLE.categories,
+        '5F': {
+          floorCount: 3,
+          difficulties: FLOOR_RULE_TABLE.categories['5F'].difficulties.slice(0, 3),
+        },
+      },
+    }
+    const raw = Array.from({ length: 10 }, (_, i) =>
+      pack(`${1001 + i}`, i === 2 || i === 3 ? 0 : 1),
+    )
+    expect(violationsOf(admit(raw, '10F', 'publish', shrunk))).toEqual([
+      { code: 'INSUFFICIENT_DIFFICULTY_ENTRY', path: 'floorSelections[2].difficulty' },
+      { code: 'OUT_OF_RANGE_DIFFICULTY_NOT_HARD', path: 'floorSelections[3].difficulty' },
     ])
   })
 
@@ -315,7 +335,7 @@ describe('admitFloors', () => {
     expect(admit([], '5F', 'index')).toEqual({ ok: true, floors: [], boundaryViolations: [] })
     expect(violationsOf(admit([], '5F', 'publish'))).toEqual(
       [0, 1, 2, 3, 4].map((i) => ({
-        code: 'FLOOR_MISSING_THEME_PACK',
+        code: 'INSUFFICIENT_FLOORS',
         path: `floorSelections[${i}]`,
       })),
     )
@@ -327,7 +347,7 @@ describe('admitFloors', () => {
     expect(indexed.ok && indexed.floors).toHaveLength(12)
     expect(violationsOf(admit(raw, '15F', 'publish'))).toEqual(
       [12, 13, 14].map((i) => ({
-        code: 'FLOOR_MISSING_THEME_PACK',
+        code: 'INSUFFICIENT_FLOORS',
         path: `floorSelections[${i}]`,
       })),
     )
@@ -338,14 +358,14 @@ describe('admitFloors', () => {
       pack(`${1001 + i}`, i === 5 ? 0 : i === 10 ? 1 : i < 10 ? 1 : 3),
     )
     expect(violationsOf(admit(raw, '15F', 'publish'))).toEqual([
-      { code: 'VALUE_OUT_OF_RANGE', path: 'floorSelections[5].difficulty' },
-      { code: 'VALUE_OUT_OF_RANGE', path: 'floorSelections[10].difficulty' },
+      { code: 'OUT_OF_RANGE_DIFFICULTY_NOT_HARD', path: 'floorSelections[5].difficulty' },
+      { code: 'OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME', path: 'floorSelections[10].difficulty' },
     ])
   })
 
   it('treats an empty-string pack as absent in sequence', () => {
     expect(violationsOf(admit([pack(''), pack('1002')], '5F', 'draft'))).toEqual([
-      { code: 'INVALID_SEQUENCE', path: 'floorSelections[1]' },
+      { code: 'OUT_OF_ORDER_THEMEPACK', path: 'floorSelections[1]' },
     ])
   })
 

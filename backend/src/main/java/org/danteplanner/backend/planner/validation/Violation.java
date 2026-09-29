@@ -17,13 +17,13 @@ public record Violation(ErrorCode code, ContentPath path, String message) {
                 String.format("Field '%s' must be %s, got %s", path.render(), expected.rendered(), describe(actual)));
     }
 
-    public static Violation valueOutOfRange(ContentPath path, String value, int min, int max) {
-        return new Violation(ErrorCode.VALUE_OUT_OF_RANGE, path,
+    public static Violation valueOutOfRange(ErrorCode code, ContentPath path, String value, int min, int max) {
+        return new Violation(code, path,
                 String.format("%s value %s is out of range [%d-%d]", path.render(), value, min, max));
     }
 
-    public static Violation duplicateValue(ContentPath path, String value) {
-        return new Violation(ErrorCode.DUPLICATE_VALUE, path,
+    public static Violation duplicateValue(ErrorCode code, ContentPath path, String value) {
+        return new Violation(code, path,
                 String.format("Duplicate value '%s' in %s", value, path.render()));
     }
 

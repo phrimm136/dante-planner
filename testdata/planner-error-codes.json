@@ -1,0 +1,359 @@
+{
+  "problems": [
+    "UNKNOWN",
+    "MISSING",
+    "INSUFFICIENT",
+    "EXCESS",
+    "DUPLICATE",
+    "OUT_OF_RANGE",
+    "OUT_OF_ORDER",
+    "MISMATCHED",
+    "UNAFFORDABLE",
+    "INVALID"
+  ],
+  "codes": {
+    "EMPTY_CONTENT": {
+      "kind": "boundary",
+      "subject": "CONTENT",
+      "problem": "EMPTY",
+      "rule": "The content is present and not blank.",
+      "emittedBy": ["backend"]
+    },
+    "SIZE_EXCEEDED": {
+      "kind": "boundary",
+      "subject": "CONTENT",
+      "problem": "EXCEEDED",
+      "rule": "The canonical content, and each section note, stays within its byte limit.",
+      "emittedBy": ["backend"]
+    },
+    "MALFORMED_JSON": {
+      "kind": "boundary",
+      "subject": "JSON",
+      "problem": "MALFORMED",
+      "rule": "The content parses as JSON, its root is an object, and it reserializes.",
+      "emittedBy": ["backend"]
+    },
+    "UNKNOWN_FIELD": {
+      "kind": "boundary",
+      "subject": "FIELD",
+      "problem": "UNKNOWN",
+      "rule": "Every top-level key is in the allowed set.",
+      "emittedBy": ["backend"]
+    },
+    "MISSING_REQUIRED_FIELD": {
+      "kind": "boundary",
+      "subject": "FIELD",
+      "problem": "MISSING",
+      "rule": "Every required top-level key is present.",
+      "emittedBy": ["backend"]
+    },
+    "INVALID_FIELD_TYPE": {
+      "kind": "boundary",
+      "subject": "FIELD",
+      "problem": "INVALID",
+      "rule": "A present value has the JSON kind its field declares.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "INVALID_CATEGORY": {
+      "kind": "rule",
+      "subject": "CATEGORY",
+      "problem": "INVALID",
+      "rule": "The category is a Mirror Dungeon category.",
+      "emittedBy": ["backend"]
+    },
+    "MISMATCHED_CATEGORY": {
+      "kind": "rule",
+      "subject": "CATEGORY",
+      "problem": "MISMATCHED",
+      "rule": "The category is valid for the planner type.",
+      "emittedBy": ["backend"]
+    },
+    "UNKNOWN_VERSION": {
+      "kind": "rule",
+      "subject": "VERSION",
+      "problem": "UNKNOWN",
+      "rule": "Season game data exists for the content version.",
+      "emittedBy": ["backend"]
+    },
+    "MISSING_TITLE": {
+      "kind": "rule",
+      "subject": "TITLE",
+      "problem": "MISSING",
+      "rule": "A published planner has a non-blank title.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "UNKNOWN_KEYWORD": {
+      "kind": "rule",
+      "subject": "KEYWORD",
+      "problem": "UNKNOWN",
+      "rule": "Every selected keyword of a published planner is a planner keyword.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "OUT_OF_RANGE_SINNER": {
+      "kind": "rule",
+      "subject": "SINNER",
+      "problem": "OUT_OF_RANGE",
+      "rule": "An equipment or skillEAState sinner key is between 1 and 12.",
+      "emittedBy": ["backend"]
+    },
+    "MISSING_SINNER": {
+      "kind": "rule",
+      "subject": "SINNER",
+      "problem": "MISSING",
+      "rule": "Equipment and skillEAState each hold all 12 sinners.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "MISSING_IDENTITY": {
+      "kind": "rule",
+      "subject": "IDENTITY",
+      "problem": "MISSING",
+      "rule": "Every sinner has an identity with a non-blank id.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "UNKNOWN_IDENTITY": {
+      "kind": "rule",
+      "subject": "IDENTITY",
+      "problem": "UNKNOWN",
+      "rule": "The identity id exists in the game data.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "MISMATCHED_IDENTITY": {
+      "kind": "rule",
+      "subject": "IDENTITY",
+      "problem": "MISMATCHED",
+      "rule": "The identity belongs to the sinner it is equipped on.",
+      "emittedBy": ["backend"]
+    },
+    "OUT_OF_RANGE_IDENTITY_LEVEL": {
+      "kind": "rule",
+      "subject": "IDENTITY",
+      "problem": "OUT_OF_RANGE",
+      "rule": "The identity level is within the game's level bounds.",
+      "emittedBy": ["backend"]
+    },
+    "OUT_OF_RANGE_IDENTITY_UPTIE": {
+      "kind": "rule",
+      "subject": "IDENTITY",
+      "problem": "OUT_OF_RANGE",
+      "rule": "The identity uptie is within the game's uptie bounds.",
+      "emittedBy": ["backend"]
+    },
+    "MISSING_EGO_ZAYIN": {
+      "kind": "rule",
+      "subject": "EGO",
+      "problem": "MISSING",
+      "rule": "Every sinner has E.G.O equipment with a ZAYIN E.G.O that has a non-blank id.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "INVALID_EGO_TYPE": {
+      "kind": "rule",
+      "subject": "EGO",
+      "problem": "INVALID",
+      "rule": "Every E.G.O slot key is ZAYIN, TETH, HE, WAW or ALEPH.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "UNKNOWN_EGO": {
+      "kind": "rule",
+      "subject": "EGO",
+      "problem": "UNKNOWN",
+      "rule": "The E.G.O id exists in the game data.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "MISMATCHED_EGO": {
+      "kind": "rule",
+      "subject": "EGO",
+      "problem": "MISMATCHED",
+      "rule": "The E.G.O belongs to the sinner it is equipped on.",
+      "emittedBy": ["backend"]
+    },
+    "OUT_OF_RANGE_EGO_THREADSPIN": {
+      "kind": "rule",
+      "subject": "EGO",
+      "problem": "OUT_OF_RANGE",
+      "rule": "The threadspin is within the game's bounds and at most that E.G.O's ceiling.",
+      "emittedBy": ["backend"]
+    },
+    "MISSING_EGO_THREADSPIN_CEILING": {
+      "kind": "rule",
+      "subject": "EGO",
+      "problem": "MISSING",
+      "rule": "A known E.G.O has a threadspin ceiling in the game data.",
+      "emittedBy": ["backend"]
+    },
+    "OUT_OF_RANGE_DEPLOYMENT": {
+      "kind": "rule",
+      "subject": "DEPLOYMENT",
+      "problem": "OUT_OF_RANGE",
+      "rule": "Every deployment order entry is a sinner index between 0 and 11.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "INVALID_SKILL_SLOT": {
+      "kind": "rule",
+      "subject": "SKILL",
+      "problem": "INVALID",
+      "rule": "Every skillEAState slot key is 0, 1 or 2.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "OUT_OF_RANGE_SKILL_TOTAL": {
+      "kind": "rule",
+      "subject": "SKILL",
+      "problem": "OUT_OF_RANGE",
+      "rule": "A sinner's skill slot values add up to 6.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "DUPLICATE_EGOGIFT": {
+      "kind": "rule",
+      "subject": "EGOGIFT",
+      "problem": "DUPLICATE",
+      "rule": "No E.G.O gift repeats within an observation, comprehensive or floor gift list.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "UNKNOWN_EGOGIFT": {
+      "kind": "rule",
+      "subject": "EGOGIFT",
+      "problem": "UNKNOWN",
+      "rule": "Every start, observation and comprehensive E.G.O gift id exists in the game data.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "EXCESS_STARTBUFF": {
+      "kind": "rule",
+      "subject": "STARTBUFF",
+      "problem": "EXCESS",
+      "rule": "At most 10 start buffs are selected.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "UNKNOWN_STARTBUFF": {
+      "kind": "rule",
+      "subject": "STARTBUFF",
+      "problem": "UNKNOWN",
+      "rule": "The start buff id exists for the season.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "OUT_OF_RANGE_STARTBUFF": {
+      "kind": "rule",
+      "subject": "STARTBUFF",
+      "problem": "OUT_OF_RANGE",
+      "rule": "A start buff's base id (id modulo 100) is between 0 and 9.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "DUPLICATE_STARTBUFF": {
+      "kind": "rule",
+      "subject": "STARTBUFF",
+      "problem": "DUPLICATE",
+      "rule": "No two selected start buffs share a base id.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "MISSING_STARTGIFT_KEYWORD": {
+      "kind": "rule",
+      "subject": "STARTGIFT",
+      "problem": "MISSING",
+      "rule": "Selected start gifts have a start gift keyword.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "UNKNOWN_STARTGIFT_KEYWORD": {
+      "kind": "rule",
+      "subject": "STARTGIFT",
+      "problem": "UNKNOWN",
+      "rule": "The start gift keyword exists for the season.",
+      "emittedBy": ["backend"]
+    },
+    "MISMATCHED_STARTGIFT": {
+      "kind": "rule",
+      "subject": "STARTGIFT",
+      "problem": "MISMATCHED",
+      "rule": "Every start gift is in its keyword's pool.",
+      "emittedBy": ["backend"]
+    },
+    "DUPLICATE_STARTGIFT": {
+      "kind": "rule",
+      "subject": "STARTGIFT",
+      "problem": "DUPLICATE",
+      "rule": "No start gift repeats, reported once per repeat.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "INSUFFICIENT_FLOORS": {
+      "kind": "rule",
+      "subject": "FLOORS",
+      "problem": "INSUFFICIENT",
+      "rule": "A published planner has every floor its category lays out.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "MISSING_THEMEPACK": {
+      "kind": "rule",
+      "subject": "THEMEPACK",
+      "problem": "MISSING",
+      "rule": "Every floor of a published planner has a theme pack.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "DUPLICATE_THEMEPACK": {
+      "kind": "rule",
+      "subject": "THEMEPACK",
+      "problem": "DUPLICATE",
+      "rule": "No theme pack repeats across floors.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "OUT_OF_ORDER_THEMEPACK": {
+      "kind": "rule",
+      "subject": "THEMEPACK",
+      "problem": "OUT_OF_ORDER",
+      "rule": "A floor has a theme pack only when the floor before it has one.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "OUT_OF_ORDER_DIFFICULTY": {
+      "kind": "rule",
+      "subject": "DIFFICULTY",
+      "problem": "OUT_OF_ORDER",
+      "rule": "No Normal floor follows the first Hard floor.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "OUT_OF_RANGE_DIFFICULTY": {
+      "kind": "rule",
+      "subject": "DIFFICULTY",
+      "problem": "OUT_OF_RANGE",
+      "rule": "A floor of the shortest category is Normal or Hard.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "INSUFFICIENT_DIFFICULTY_ENTRY": {
+      "kind": "rule",
+      "subject": "DIFFICULTY",
+      "problem": "INSUFFICIENT",
+      "rule": "The floors a longer category shares with the shortest one are Hard, which opens the floors after them.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "OUT_OF_RANGE_DIFFICULTY_NOT_HARD": {
+      "kind": "rule",
+      "subject": "DIFFICULTY",
+      "problem": "OUT_OF_RANGE",
+      "rule": "Floors six to ten are Hard only.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME": {
+      "kind": "rule",
+      "subject": "DIFFICULTY",
+      "problem": "OUT_OF_RANGE",
+      "rule": "Floors eleven to fifteen are Extreme only.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "UNKNOWN_THEMEPACK": {
+      "kind": "rule",
+      "subject": "THEMEPACK",
+      "problem": "UNKNOWN",
+      "rule": "A floor's theme pack id exists in the game data.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "UNKNOWN_EGOGIFT_FLOOR": {
+      "kind": "rule",
+      "subject": "EGOGIFT",
+      "problem": "UNKNOWN",
+      "rule": "Every floor E.G.O gift id exists in the game data.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "UNAFFORDABLE_EGOGIFT": {
+      "kind": "rule",
+      "subject": "EGOGIFT",
+      "problem": "UNAFFORDABLE",
+      "rule": "Every floor E.G.O gift is obtainable in that floor's theme pack.",
+      "emittedBy": ["backend", "frontend"]
+    }
+  }
+}

@@ -66,6 +66,10 @@ public record FloorRuleTable(
         return layout(category).floorCount();
     }
 
+    public int entryFloorCount() {
+        return categories.values().stream().mapToInt(CategoryFloors::floorCount).min().orElseThrow();
+    }
+
     public Set<String> stagesFor(RuleName rule) {
         return rules.get(rule);
     }

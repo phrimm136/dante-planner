@@ -8,6 +8,7 @@
 
 import { describe, it, expect, vi, beforeEach, assert } from 'vitest'
 import { render, act, waitFor, screen, fireEvent } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import type { StoreApi } from 'zustand'
 import { ok } from '@/lib/result'
 import type { Result } from '@/lib/result'
@@ -146,6 +147,7 @@ vi.mock('../KeywordSelector', () => ({ KeywordSelector: () => null }))
 import { PlannerEditorShell } from '../PlannerEditorShell'
 import { toast as sonnerToast } from 'sonner'
 import { ConflictError } from '@/lib/apiErrors'
+import { ThemePackIdSchema } from '@/shared/gameData'
 import {
   PlannerEditorStoreProvider,
   usePlannerEditorStoreApi,
@@ -224,5 +226,28 @@ describe('PlannerEditorShell - a rejected server write', () => {
     })
     expect(sonnerToast.error).not.toHaveBeenCalled()
     expect(sonnerToast.warning).not.toHaveBeenCalled()
+  })
+})
+
+describe('PlannerEditorShell - a category change', () => {
+  it('warns that floors eleven to fifteen are Extreme only when Hard floors move to 15F', async () => {
+    const user = userEvent.setup()
+    const { storeApi } = renderShell()
+    act(() => {
+      storeApi.getState().setFloorSelections(
+        Array.from({ length: 15 }, (_, floorIndex) => ({
+          themePackId: ThemePackIdSchema.parse(String(1001 + floorIndex)),
+          difficulty: 1,
+          giftIds: new Set(),
+        })),
+      )
+    })
+
+    await user.click(screen.getByRole('button', { name: 'pages.plannerList.mdCategory.5F' }))
+    await user.click(screen.getByRole('menuitem', { name: 'pages.plannerList.mdCategory.15F' }))
+
+    expect(vi.mocked(sonnerToast.warning).mock.calls).toEqual([
+      ['planner:pages.plannerMD.publish.extremeModeOnly'],
+    ])
   })
 })

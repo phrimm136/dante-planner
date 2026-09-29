@@ -7,7 +7,6 @@
 import { describe, it, expect } from 'vitest'
 import { contentPath, field, index } from '../validation/contentPath'
 import { toUserFriendlyError } from '../plannerValidationErrors'
-import { DUNGEON_IDX } from '@/shared/gameData'
 
 // ============================================================================
 // toUserFriendlyError
@@ -19,18 +18,21 @@ describe('toUserFriendlyError', () => {
     expect(result.key).toBe('pages.plannerMD.publish.missingTitle')
   })
 
-  it('FLOOR_MISSING_THEME_PACK → missingThemePack key', () => {
-    const result = toUserFriendlyError({
-      code: 'FLOOR_MISSING_THEME_PACK',
-      message: '',
-      path: contentPath(field('floorSelections'), index(4)),
-    })
-    expect(result.key).toBe('pages.plannerMD.publish.missingThemePack')
-  })
+  it.each(['INSUFFICIENT_FLOORS', 'MISSING_THEMEPACK'] as const)(
+    '%s → missingThemePack key',
+    (code) => {
+      const result = toUserFriendlyError({
+        code,
+        message: '',
+        path: contentPath(field('floorSelections'), index(4)),
+      })
+      expect(result.key).toBe('pages.plannerMD.publish.missingThemePack')
+    },
+  )
 
-  it('GIFT_NOT_AFFORDABLE → themePackEgoGiftInconsistency key with pack/gifts params', () => {
+  it('UNAFFORDABLE_EGOGIFT → themePackEgoGiftInconsistency key with pack/gifts params', () => {
     const result = toUserFriendlyError({
-      code: 'GIFT_NOT_AFFORDABLE',
+      code: 'UNAFFORDABLE_EGOGIFT',
       message: '',
       path: contentPath(field('floorSelections'), index(2), field('giftIds'), index(0)),
       context: { giftName: 'Gift A', themePackId: '1001' },
@@ -41,9 +43,9 @@ describe('toUserFriendlyError', () => {
     })
   })
 
-  it('FLOOR_UNKNOWN_GIFT_ID → unknownGiftId key with floor and gifts params', () => {
+  it('UNKNOWN_EGOGIFT_FLOOR → unknownGiftId key with floor and gifts params', () => {
     const result = toUserFriendlyError({
-      code: 'FLOOR_UNKNOWN_GIFT_ID',
+      code: 'UNKNOWN_EGOGIFT_FLOOR',
       message: '',
       path: contentPath(field('floorSelections'), index(1), field('giftIds'), index(0)),
       context: { giftId: '2029' },
@@ -55,40 +57,40 @@ describe('toUserFriendlyError', () => {
   })
 
   it.each([
-    [[DUNGEON_IDX.HARD], 'pages.plannerMD.publish.requiresHardMode'],
-    [[DUNGEON_IDX.EXTREME], 'pages.plannerMD.publish.requiresExtremeMode'],
-    [[DUNGEON_IDX.NORMAL, DUNGEON_IDX.HARD], 'pages.plannerMD.validation.corruptedState'],
-  ] as const)('VALUE_OUT_OF_RANGE on a floor allowing %j → %s', (allowedDifficulties, key) => {
+    ['INSUFFICIENT_DIFFICULTY_ENTRY', 'pages.plannerMD.publish.requiresHardMode'],
+    ['OUT_OF_RANGE_DIFFICULTY_NOT_HARD', 'pages.plannerMD.publish.hardModeOnly'],
+    ['OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME', 'pages.plannerMD.publish.extremeModeOnly'],
+    ['OUT_OF_RANGE_DIFFICULTY', 'pages.plannerMD.validation.corruptedState'],
+  ] as const)('%s → %s', (code, key) => {
     const result = toUserFriendlyError({
-      code: 'VALUE_OUT_OF_RANGE',
+      code,
       message: '',
       path: contentPath(field('floorSelections'), index(0), field('difficulty')),
-      context: { allowedDifficulties },
     })
     expect(result.key).toBe(key)
   })
 
-  it('INVALID_SEQUENCE on a difficulty → normalAfterHard key', () => {
+  it('OUT_OF_ORDER_DIFFICULTY → normalAfterHard key', () => {
     const result = toUserFriendlyError({
-      code: 'INVALID_SEQUENCE',
+      code: 'OUT_OF_ORDER_DIFFICULTY',
       message: '',
       path: contentPath(field('floorSelections'), index(1), field('difficulty')),
     })
     expect(result.key).toBe('pages.plannerMD.publish.normalAfterHard')
   })
 
-  it('INVALID_SEQUENCE on a floor → previousFloorNoThemePack key', () => {
+  it('OUT_OF_ORDER_THEMEPACK → previousFloorNoThemePack key', () => {
     const result = toUserFriendlyError({
-      code: 'INVALID_SEQUENCE',
+      code: 'OUT_OF_ORDER_THEMEPACK',
       message: '',
       path: contentPath(field('floorSelections'), index(1)),
     })
     expect(result.key).toBe('pages.plannerMD.previousFloorNoThemePack')
   })
 
-  it('THEME_PACK_UNKNOWN_ID → unknownThemePackId key with id param', () => {
+  it('UNKNOWN_THEMEPACK → unknownThemePackId key with id param', () => {
     const result = toUserFriendlyError({
-      code: 'THEME_PACK_UNKNOWN_ID',
+      code: 'UNKNOWN_THEMEPACK',
       message: '',
       field: 'floorSelections[0].themePackId',
       context: { id: '9999' },
@@ -99,9 +101,9 @@ describe('toUserFriendlyError', () => {
     })
   })
 
-  it('KEYWORD_INVALID → invalidKeyword key with keyword param', () => {
+  it('UNKNOWN_KEYWORD → invalidKeyword key with keyword param', () => {
     const result = toUserFriendlyError({
-      code: 'KEYWORD_INVALID',
+      code: 'UNKNOWN_KEYWORD',
       message: '',
       context: { keyword: 'GhostKeyword' },
     })
@@ -111,15 +113,13 @@ describe('toUserFriendlyError', () => {
 
   it('structural error codes → corruptedState key', () => {
     const structuralCodes = [
-      'EQUIPMENT_MISSING_SINNER',
-      'DEPLOYMENT_INVALID_INDEX',
-      'SKILL_EA_MISSING_SINNER',
-      'GIFT_DUPLICATE_ID',
-      'BUFF_EXCEEDS_MAX',
-      'START_GIFT_DUPLICATE_ID',
+      'MISSING_SINNER',
+      'OUT_OF_RANGE_DEPLOYMENT',
+      'DUPLICATE_EGOGIFT',
+      'EXCESS_STARTBUFF',
+      'DUPLICATE_STARTGIFT',
       'INVALID_FIELD_TYPE',
-      'FLOOR_DUPLICATE_THEME_PACK',
-      'DUPLICATE_VALUE',
+      'DUPLICATE_THEMEPACK',
     ] as const
 
     for (const code of structuralCodes) {

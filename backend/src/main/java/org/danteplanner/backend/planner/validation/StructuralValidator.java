@@ -88,7 +88,7 @@ class StructuralValidator {
 
         if (!missing.isEmpty()) {
             log.warn("Validation failed: missing fields - {}", missing);
-            throw ValidationErrors.missingRequiredField(missing);
+            throw ValidationErrors.missing(ErrorCode.MISSING_REQUIRED_FIELD, missing);
         }
     }
 

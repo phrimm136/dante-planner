@@ -11,6 +11,7 @@ import { MAX_NOTE_BYTES } from '@/lib/constants'
 import { decodeGiftSelection, giftDisplayName, hasGiftId } from '@/pages/egoGift'
 import { measureDocBytes } from '@/shared/noteEditor'
 import { renderContentPath } from './validation/contentPath'
+import type { Codes } from './validation/codes'
 import { admitFloors, parseFloors } from './validation/floor/floorRules'
 import { floorReferenceViolations } from './validation/floor/floorReferences'
 import { getUnaffordableGiftIds } from './plannerRules'
@@ -33,7 +34,6 @@ import type {
   BuffValidationError,
   StartGiftValidationError,
   FloorRuleValidationError,
-  DifficultyOutOfRangeValidationError,
   FloorUnknownGiftValidationError,
   GiftNotAffordableValidationError,
   KeywordValidationError,
@@ -105,7 +105,7 @@ export function validateEquipment(
   const missingSinners = ALL_SINNER_KEYS.filter((key) => !presentKeys.has(key))
   if (missingSinners.length > 0) {
     errors.push({
-      code: 'EQUIPMENT_MISSING_SINNER',
+      code: 'MISSING_SINNER',
       message: `Missing equipment for sinners: ${missingSinners.join(', ')}`,
       field: 'equipment',
       context: { missingSinners },
@@ -118,7 +118,7 @@ export function validateEquipment(
 
     if (!sinnerEquipment.identity || !sinnerEquipment.identity.id) {
       errors.push({
-        code: 'EQUIPMENT_MISSING_IDENTITY',
+        code: 'MISSING_IDENTITY',
         message: `Sinner ${sinnerKey} is missing identity`,
         field: `equipment.${sinnerKey}.identity`,
         context: { sinnerKey },
@@ -127,7 +127,7 @@ export function validateEquipment(
 
     if (!sinnerEquipment.egos) {
       errors.push({
-        code: 'EQUIPMENT_MISSING_ZAYIN',
+        code: 'MISSING_EGO_ZAYIN',
         message: `Sinner ${sinnerKey} is missing EGO configuration`,
         field: `equipment.${sinnerKey}.egos`,
         context: { sinnerKey },
@@ -143,7 +143,7 @@ export function validateEquipment(
 
     if (invalidTypes.length > 0) {
       errors.push({
-        code: 'EQUIPMENT_INVALID_EGO_TYPES',
+        code: 'INVALID_EGO_TYPE',
         message: `Sinner ${sinnerKey} has invalid EGO types: ${invalidTypes.join(', ')}`,
         field: `equipment.${sinnerKey}.egos`,
         context: { sinnerKey, invalidTypes },
@@ -152,7 +152,7 @@ export function validateEquipment(
 
     if (egoTypes.length > EGO_TYPES.length) {
       errors.push({
-        code: 'EQUIPMENT_INVALID_EGO_TYPES',
+        code: 'INVALID_EGO_TYPE',
         message: `Sinner ${sinnerKey} has more than ${EGO_TYPES.length} EGO types`,
         field: `equipment.${sinnerKey}.egos`,
         context: { sinnerKey, count: egoTypes.length },
@@ -161,14 +161,14 @@ export function validateEquipment(
 
     if (!sinnerEquipment.egos[REQUIRED_EGO_TYPE]) {
       errors.push({
-        code: 'EQUIPMENT_MISSING_ZAYIN',
+        code: 'MISSING_EGO_ZAYIN',
         message: `Sinner ${sinnerKey} is missing required ${REQUIRED_EGO_TYPE} EGO`,
         field: `equipment.${sinnerKey}.egos.${REQUIRED_EGO_TYPE}`,
         context: { sinnerKey },
       })
     } else if (!sinnerEquipment.egos[REQUIRED_EGO_TYPE]?.id) {
       errors.push({
-        code: 'EQUIPMENT_MISSING_ZAYIN',
+        code: 'MISSING_EGO_ZAYIN',
         message: `Sinner ${sinnerKey} ${REQUIRED_EGO_TYPE} EGO is missing ID`,
         field: `equipment.${sinnerKey}.egos.${REQUIRED_EGO_TYPE}.id`,
         context: { sinnerKey },
@@ -190,7 +190,7 @@ export function validateDeploymentOrder(deploymentOrder: number[]): DeploymentVa
       index > MAX_DEPLOYMENT_SINNER
     ) {
       errors.push({
-        code: 'DEPLOYMENT_INVALID_INDEX',
+        code: typeof index === 'number' ? 'OUT_OF_RANGE_DEPLOYMENT' : 'INVALID_FIELD_TYPE',
         message: `Deployment order[${i}] has invalid sinner index: ${index} (must be 0-11)`,
         field: `deploymentOrder[${i}]`,
         context: { index: i, value: index },
@@ -211,7 +211,7 @@ export function validateSkillEAState(
   const missingSinners = ALL_SINNER_KEYS.filter((key) => !presentKeys.has(key))
   if (missingSinners.length > 0) {
     errors.push({
-      code: 'SKILL_EA_MISSING_SINNER',
+      code: 'MISSING_SINNER',
       message: `Missing skill EA state for sinners: ${missingSinners.join(', ')}`,
       field: 'skillEAState',
       context: { missingSinners },
@@ -222,29 +222,18 @@ export function validateSkillEAState(
     const sinnerSkills = skillEAState[sinnerKey] || skillEAState[String(parseInt(sinnerKey, 10))]
     if (!sinnerSkills) continue
 
-    const seenSlots = new Set<string>()
     let total = 0
 
     for (const slotKey of Object.keys(sinnerSkills)) {
       if (!VALID_SKILL_SLOTS.has(slotKey)) {
         errors.push({
-          code: 'SKILL_EA_INVALID_SLOT',
+          code: 'INVALID_SKILL_SLOT',
           message: `Sinner ${sinnerKey} has invalid skill slot: ${slotKey} (must be 0, 1, or 2)`,
           field: `skillEAState.${sinnerKey}.${slotKey}`,
           context: { sinnerKey, slotKey },
         })
         continue
       }
-
-      if (seenSlots.has(slotKey)) {
-        errors.push({
-          code: 'SKILL_EA_DUPLICATE_SLOT',
-          message: `Sinner ${sinnerKey} has duplicate skill slot: ${slotKey}`,
-          field: `skillEAState.${sinnerKey}`,
-          context: { sinnerKey, slotKey },
-        })
-      }
-      seenSlots.add(slotKey)
 
       // A stored non-number would turn the running total into a string, so the
       // mismatch is reported by the total check below rather than concatenated.
@@ -255,7 +244,7 @@ export function validateSkillEAState(
 
     if (total !== SKILL_EA_TOTAL) {
       errors.push({
-        code: 'SKILL_EA_INVALID_TOTAL',
+        code: 'OUT_OF_RANGE_SKILL_TOTAL',
         message: `Sinner ${sinnerKey} skill EA total is ${total}, expected ${SKILL_EA_TOTAL}`,
         field: `skillEAState.${sinnerKey}`,
         context: { sinnerKey, total, expected: SKILL_EA_TOTAL },
@@ -269,6 +258,7 @@ export function validateSkillEAState(
 export function validateGiftIdArray(
   giftIds: string[],
   fieldName: string,
+  duplicateCode: Codes<'DUPLICATE_EGOGIFT' | 'DUPLICATE_STARTGIFT'>,
   egoGiftSpec?: Record<string, EGOGiftSpec>,
 ): GiftValidationError[] {
   const errors: GiftValidationError[] = []
@@ -277,7 +267,7 @@ export function validateGiftIdArray(
   for (const [i, giftId] of giftIds.entries()) {
     if (seen.has(giftId)) {
       errors.push({
-        code: 'GIFT_DUPLICATE_ID',
+        code: duplicateCode,
         message: `Duplicate gift ID in ${fieldName}: ${giftId}`,
         field: `${fieldName}[${i}]`,
         context: { giftId, index: i },
@@ -290,7 +280,7 @@ export function validateGiftIdArray(
       const parsed = EncodedGiftIdSchema.safeParse(giftId)
       if (!parsed.success || !(decodeGiftSelection(parsed.data).giftId in egoGiftSpec)) {
         errors.push({
-          code: 'GIFT_UNKNOWN_ID',
+          code: 'UNKNOWN_EGOGIFT',
           message: `Gift ID '${giftId}' not found in ${fieldName}`,
           field: `${fieldName}[${i}]`,
           context: { giftId },
@@ -314,7 +304,7 @@ export function validateStartBuffIds(buffIds: number[]): BuffValidationError[] {
 
   if (buffIds.length > MAX_START_BUFFS) {
     errors.push({
-      code: 'BUFF_EXCEEDS_MAX',
+      code: 'EXCESS_STARTBUFF',
       message: `Start buffs count ${buffIds.length} exceeds maximum ${MAX_START_BUFFS}`,
       field: 'selectedBuffIds',
       context: { count: buffIds.length, max: MAX_START_BUFFS },
@@ -328,7 +318,7 @@ export function validateStartBuffIds(buffIds: number[]): BuffValidationError[] {
 
     if (baseId < MIN_BUFF_BASE_ID || baseId > MAX_BUFF_BASE_ID) {
       errors.push({
-        code: 'BUFF_INVALID_FORMAT',
+        code: 'OUT_OF_RANGE_STARTBUFF',
         message: `Start buff ID ${buffId} has invalid base ID ${baseId} (must be 00-09)`,
         field: `selectedBuffIds[${i}]`,
         context: { buffId, baseId, index: i },
@@ -338,7 +328,7 @@ export function validateStartBuffIds(buffIds: number[]): BuffValidationError[] {
 
     if (seenBaseIds.has(baseId)) {
       errors.push({
-        code: 'BUFF_DUPLICATE_BASE_ID',
+        code: 'DUPLICATE_STARTBUFF',
         message: `Start buffs have duplicate base ID ${baseId} (buff ID ${buffId})`,
         field: `selectedBuffIds[${i}]`,
         context: { buffId, baseId, index: i },
@@ -358,24 +348,11 @@ export function validateStartGiftSelection(
 
   if (!selectedGiftKeyword && selectedGiftIds.length > 0) {
     errors.push({
-      code: 'START_GIFT_NO_KEYWORD_BUT_HAS_GIFTS',
+      code: 'MISSING_STARTGIFT_KEYWORD',
       message: `Start gift IDs are selected but no keyword is set`,
       field: 'selectedGiftIds',
       context: { giftCount: selectedGiftIds.length },
     })
-  }
-
-  const seen = new Set<string>()
-  for (const [i, giftId] of selectedGiftIds.entries()) {
-    if (seen.has(giftId)) {
-      errors.push({
-        code: 'START_GIFT_DUPLICATE_ID',
-        message: `Duplicate start gift ID: ${giftId}`,
-        field: `selectedGiftIds[${i}]`,
-        context: { giftId, index: i },
-      })
-    }
-    seen.add(giftId)
   }
 
   return errors
@@ -386,7 +363,7 @@ export function validateSelectedKeywords(keywords: string[]): KeywordValidationE
   for (const keyword of keywords) {
     if (!VALID_PLANNER_KEYWORDS.has(keyword)) {
       errors.push({
-        code: 'KEYWORD_INVALID',
+        code: 'UNKNOWN_KEYWORD',
         message: `Selected keyword "${keyword}" is not a valid planner keyword`,
         field: 'selectedKeywords',
         context: { keyword },
@@ -406,7 +383,7 @@ export function validateEntityIds(
     const identityId = sinnerEquipment?.identity?.id
     if (identityId && !registry.identityIds.has(identityId)) {
       errors.push({
-        code: 'IDENTITY_UNKNOWN_ID',
+        code: 'UNKNOWN_IDENTITY',
         message: `Sinner ${sinnerKey} has unknown identity ID '${identityId}'`,
         field: `equipment.${sinnerKey}.identity.id`,
         context: { id: identityId },
@@ -417,7 +394,7 @@ export function validateEntityIds(
       const egoId = ego?.id
       if (egoId && !registry.egoIds.has(egoId)) {
         errors.push({
-          code: 'EGO_UNKNOWN_ID',
+          code: 'UNKNOWN_EGO',
           message: `Sinner ${sinnerKey} has unknown ${egoType} EGO ID '${egoId}'`,
           field: `equipment.${sinnerKey}.egos.${egoType}.id`,
           context: { id: egoId },
@@ -429,7 +406,7 @@ export function validateEntityIds(
   for (const [i, buffId] of content.selectedBuffIds.entries()) {
     if (!registry.startBuffIds.has(String(buffId))) {
       errors.push({
-        code: 'START_BUFF_UNKNOWN_ID',
+        code: 'UNKNOWN_STARTBUFF',
         message: `Start buff ID ${buffId} is unknown`,
         field: `selectedBuffIds[${i}]`,
         context: { id: String(buffId) },
@@ -480,21 +457,21 @@ function floorReferenceError(
 ): EntityIdValidationError | FloorUnknownGiftValidationError | GiftNotAffordableValidationError {
   const message = `${violation.code} at ${renderContentPath(violation.path)}`
   switch (violation.code) {
-    case 'THEME_PACK_UNKNOWN_ID':
+    case 'UNKNOWN_THEMEPACK':
       return {
         code: violation.code,
         message,
         field: renderContentPath(violation.path),
         context: { id: violation.themePackId },
       }
-    case 'FLOOR_UNKNOWN_GIFT_ID':
+    case 'UNKNOWN_EGOGIFT_FLOOR':
       return {
         code: violation.code,
         message,
         path: violation.path,
         context: { giftId: violation.giftId },
       }
-    case 'GIFT_NOT_AFFORDABLE':
+    case 'UNAFFORDABLE_EGOGIFT':
       return {
         code: violation.code,
         message,
@@ -517,22 +494,13 @@ function validateFloors(
 ): PlannerValidationError[] {
   const parsed = parseFloors(rawFloorSelections, FLOOR_RULE_TABLE.categories[category])
   const admission = admitFloors(parsed, stage)
-  const ruleErrors: (FloorRuleValidationError | DifficultyOutOfRangeValidationError)[] = (
+  const ruleErrors: FloorRuleValidationError[] = (
     admission.ok ? admission.boundaryViolations : admission.violations
-  ).map((violation) =>
-    violation.code === 'VALUE_OUT_OF_RANGE'
-      ? {
-          code: violation.code,
-          message: `${violation.code} at ${renderContentPath(violation.path)}`,
-          path: violation.path,
-          context: { allowedDifficulties: violation.allowed },
-        }
-      : {
-          code: violation.code,
-          message: `${violation.code} at ${renderContentPath(violation.path)}`,
-          path: violation.path,
-        },
-  )
+  ).map((violation) => ({
+    code: violation.code,
+    message: `${violation.code} at ${renderContentPath(violation.path)}`,
+    path: violation.path,
+  }))
   const referenceErrors = floorReferenceViolations(
     parsed,
     floorReferenceData(egoGiftSpec, registry),
@@ -576,10 +544,29 @@ export function validatePlannerForPublish(
 
   errors.push(...validateSkillEAState(content.skillEAState))
 
-  errors.push(...validateGiftIdArray(content.selectedGiftIds, 'selectedGiftIds', egoGiftSpec))
-  errors.push(...validateGiftIdArray(content.observationGiftIds, 'observationGiftIds', egoGiftSpec))
   errors.push(
-    ...validateGiftIdArray(content.comprehensiveGiftIds, 'comprehensiveGiftIds', egoGiftSpec),
+    ...validateGiftIdArray(
+      content.selectedGiftIds,
+      'selectedGiftIds',
+      'DUPLICATE_STARTGIFT',
+      egoGiftSpec,
+    ),
+  )
+  errors.push(
+    ...validateGiftIdArray(
+      content.observationGiftIds,
+      'observationGiftIds',
+      'DUPLICATE_EGOGIFT',
+      egoGiftSpec,
+    ),
+  )
+  errors.push(
+    ...validateGiftIdArray(
+      content.comprehensiveGiftIds,
+      'comprehensiveGiftIds',
+      'DUPLICATE_EGOGIFT',
+      egoGiftSpec,
+    ),
   )
 
   errors.push(...validateStartBuffIds(content.selectedBuffIds))
@@ -618,9 +605,24 @@ export function validatePlannerForDraftSave(
 
     ...validateSkillEAState(content.skillEAState),
 
-    ...validateGiftIdArray(content.selectedGiftIds, 'selectedGiftIds', egoGiftSpec),
-    ...validateGiftIdArray(content.observationGiftIds, 'observationGiftIds', egoGiftSpec),
-    ...validateGiftIdArray(content.comprehensiveGiftIds, 'comprehensiveGiftIds', egoGiftSpec),
+    ...validateGiftIdArray(
+      content.selectedGiftIds,
+      'selectedGiftIds',
+      'DUPLICATE_STARTGIFT',
+      egoGiftSpec,
+    ),
+    ...validateGiftIdArray(
+      content.observationGiftIds,
+      'observationGiftIds',
+      'DUPLICATE_EGOGIFT',
+      egoGiftSpec,
+    ),
+    ...validateGiftIdArray(
+      content.comprehensiveGiftIds,
+      'comprehensiveGiftIds',
+      'DUPLICATE_EGOGIFT',
+      egoGiftSpec,
+    ),
 
     ...validateStartBuffIds(content.selectedBuffIds),
 

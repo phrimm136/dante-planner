@@ -47,14 +47,14 @@ describe('packSelectableAt', () => {
 })
 
 describe('violationsForCategory', () => {
-  it('reports a range violation for a pack-held NORMAL floor under 10F', () => {
+  it('reports the entry condition for a pack-held NORMAL floor under 10F', () => {
     const floors = Array.from({ length: 10 }, (_, i) => floor(`${1001 + i}`, i === 0 ? 0 : 1))
     expect(
       violationsForCategory(floors, '10F').map(({ code, path }) => ({
         code,
         path: renderContentPath(path),
       })),
-    ).toEqual([{ code: 'VALUE_OUT_OF_RANGE', path: 'floorSelections[0].difficulty' }])
+    ).toEqual([{ code: 'INSUFFICIENT_DIFFICULTY_ENTRY', path: 'floorSelections[0].difficulty' }])
   })
 
   it('returns no violations for publishable floors', () => {

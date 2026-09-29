@@ -102,8 +102,8 @@ class ContentPathTest {
     @Test
     void byPathThenCode_WhenPathsAreEqual_OrdersByCode() {
         ContentPath floor = ContentPath.of("floorSelections").index(1);
-        Violation sequence = new Violation(ErrorCode.INVALID_SEQUENCE, floor, "sequence");
-        Violation missing = new Violation(ErrorCode.FLOOR_MISSING_THEME_PACK, floor, "missing");
+        Violation sequence = new Violation(ErrorCode.OUT_OF_ORDER_THEMEPACK, floor, "sequence");
+        Violation missing = new Violation(ErrorCode.MISSING_THEMEPACK, floor, "missing");
 
         assertThat(Stream.of(sequence, missing).sorted(Violation.BY_PATH_THEN_CODE).toList())
                 .containsExactly(missing, sequence);

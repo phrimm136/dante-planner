@@ -13,7 +13,7 @@ public class PlannerPublishValidator {
 
     public void requireTitle(String title) {
         if (title == null || title.isBlank()) {
-            throw new PlannerValidationException("MISSING_TITLE", "Title is required for publishing");
+            throw new PlannerValidationException(ErrorCode.MISSING_TITLE.getCode(), "Title is required for publishing");
         }
     }
 
@@ -21,7 +21,7 @@ public class PlannerPublishValidator {
         Set<String> unknown = PlannerKeywords.fromContent(content).dropped();
         if (!unknown.isEmpty()) {
             log.warn("Publish refused: unknown keywords {}", unknown);
-            throw ValidationErrors.keywordInvalid(unknown);
+            throw ValidationErrors.unknownKeyword(unknown);
         }
     }
 }

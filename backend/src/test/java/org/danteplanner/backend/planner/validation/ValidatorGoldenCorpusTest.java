@@ -105,7 +105,7 @@ class ValidatorGoldenCorpusTest {
                 .containsExactly(
                         tuple("INVALID_FIELD_TYPE",
                                 "Field 'selectedGiftIds[1]' must be string, got number 42"),
-                        tuple("DUPLICATE_VALUE", "Duplicate value 'gift_a' in selectedGiftIds"));
+                        tuple("DUPLICATE_STARTGIFT", "Duplicate value 'gift_a' in selectedGiftIds"));
     }
 
     @ParameterizedTest(name = "{0}")

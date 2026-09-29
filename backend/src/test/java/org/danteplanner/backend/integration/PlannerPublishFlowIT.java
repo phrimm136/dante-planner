@@ -489,7 +489,7 @@ class PlannerPublishFlowIT {
                         .cookie(AuthCookies.accessToken(token))
                         .with(withCsrf()))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("KEYWORD_INVALID"));
+                .andExpect(jsonPath("$.code").value("UNKNOWN_KEYWORD"));
 
         assertThat(stored(unknown.getId()).isPublished()).isFalse();
         assertThat(catalogRepository.existsById(unknown.getId())).isFalse();
@@ -553,7 +553,7 @@ class PlannerPublishFlowIT {
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(publishBody)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("KEYWORD_INVALID"));
+                .andExpect(jsonPath("$.code").value("UNKNOWN_KEYWORD"));
 
         Planner after = stored(draft.getId());
         assertThat(after.isPublished()).isFalse();

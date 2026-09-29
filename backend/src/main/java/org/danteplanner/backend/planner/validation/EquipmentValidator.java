@@ -33,14 +33,14 @@ class EquipmentValidator {
         JsonNode identity = sinnerEquipment.path("identity");
         if (!identity.isObject()) {
             context.reject("equipment[" + sinnerKey + "].identity",
-                    p -> ValidationErrors.invalidFieldType(p, "object"));
+                    p -> ValidationErrors.invalidField(missingOrInvalid(identity, ErrorCode.MISSING_IDENTITY), p, "object"));
             return;
         }
 
         JsonNode idNode = identity.path("id");
         if (!idNode.isTextual() || idNode.asText().isBlank()) {
-            context.reject("equipment[" + sinnerKey + "].identity.id",
-                    p -> ValidationErrors.invalidFieldType(p, "non-empty string"));
+            context.reject("equipment[" + sinnerKey + "].identity.id", p -> ValidationErrors.invalidField(
+                    missingOrInvalid(idNode, ErrorCode.MISSING_IDENTITY), p, "non-empty string"));
         }
     }
 
@@ -48,7 +48,7 @@ class EquipmentValidator {
         JsonNode egos = sinnerEquipment.path("egos");
         if (!egos.isObject()) {
             context.reject("equipment[" + sinnerKey + "].egos",
-                    p -> ValidationErrors.invalidFieldType(p, "object"));
+                    p -> ValidationErrors.invalidField(missingOrInvalid(egos, ErrorCode.MISSING_EGO_ZAYIN), p, "object"));
             return;
         }
 
@@ -58,16 +58,19 @@ class EquipmentValidator {
 
     private void validateRequiredEgo(String sinnerKey, JsonNode egos, ValidationContext context) {
         JsonNode zayinEgo = egos.path(REQUIRED_EGO_TYPE);
+        String zayinPath = "equipment[" + sinnerKey + "].egos." + REQUIRED_EGO_TYPE;
         if (!zayinEgo.isObject()) {
-            context.reject("equipment[" + sinnerKey + "].egos." + REQUIRED_EGO_TYPE,
-                    p -> ValidationErrors.missingRequiredField(Set.of(p)));
+            context.reject(zayinPath, p -> JsonTraversal.isAbsentOrBlank(zayinEgo)
+                    ? ValidationErrors.missing(ErrorCode.MISSING_EGO_ZAYIN, Set.of(p))
+                    : ValidationErrors.invalidFieldType(p, "object", zayinEgo));
             return;
         }
 
         JsonNode idNode = zayinEgo.path("id");
         if (!idNode.isTextual() || idNode.asText().isBlank()) {
-            context.reject("equipment[" + sinnerKey + "].egos." + REQUIRED_EGO_TYPE + ".id",
-                    p -> ValidationErrors.invalidFieldType(p, "non-empty string"));
+            context.reject(zayinPath + ".id",
+                    p -> ValidationErrors.invalidField(
+                            missingOrInvalid(idNode, ErrorCode.MISSING_EGO_ZAYIN), p, "non-empty string"));
         }
     }
 
@@ -79,16 +82,21 @@ class EquipmentValidator {
 
             if (!VALID_EGO_TYPES.contains(egoType)) {
                 context.reject("equipment[" + sinnerKey + "].egos." + egoType,
-                        p -> ValidationErrors.invalidFieldType(p, "valid EGO type (ZAYIN/TETH/HE/WAW/ALEPH)"));
+                        p -> ValidationErrors.invalidField(
+                                ErrorCode.INVALID_EGO_TYPE, p, "valid EGO type (ZAYIN/TETH/HE/WAW/ALEPH)"));
             }
         }
+    }
+
+    private static ErrorCode missingOrInvalid(JsonNode node, ErrorCode missingCode) {
+        return JsonTraversal.isAbsentOrBlank(node) ? missingCode : ErrorCode.INVALID_FIELD_TYPE;
     }
 
     void validateDeploymentOrder(JsonNode root, ValidationContext context) {
         eachNumber(arrayField(root, "deploymentOrder"), "deploymentOrder", context, (sinnerIndex, position) -> {
             if (sinnerIndex < MIN_DEPLOYMENT_SINNER || sinnerIndex > MAX_DEPLOYMENT_SINNER) {
                 context.reject("deploymentOrder[" + position + "]", p -> ValidationErrors.valueOutOfRange(
-                        p, sinnerIndex, MIN_DEPLOYMENT_SINNER, MAX_DEPLOYMENT_SINNER));
+                        ErrorCode.OUT_OF_RANGE_DEPLOYMENT, p, sinnerIndex, MIN_DEPLOYMENT_SINNER, MAX_DEPLOYMENT_SINNER));
             }
         });
     }

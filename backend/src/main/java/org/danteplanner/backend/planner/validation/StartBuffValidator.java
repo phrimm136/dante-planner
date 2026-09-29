@@ -10,7 +10,7 @@ import java.util.Set;
 
 import static org.danteplanner.backend.planner.validation.JsonTraversal.arrayField;
 import static org.danteplanner.backend.planner.validation.JsonTraversal.eachNumber;
-import static org.danteplanner.backend.planner.validation.JsonTraversal.eachUniqueString;
+import static org.danteplanner.backend.planner.validation.JsonTraversal.eachDistinctString;
 
 @Component
 @RequiredArgsConstructor
@@ -28,7 +28,7 @@ class StartBuffValidator {
         }
 
         context.reject("content version", p -> new PlannerValidationException(
-                ErrorCode.UNKNOWN_CONTENT_VERSION.getCode(),
+                ErrorCode.UNKNOWN_VERSION.getCode(),
                 "No game data for content version " + version));
         return false;
     }
@@ -38,7 +38,7 @@ class StartBuffValidator {
 
         if (buffIds.size() > MAX_START_BUFFS) {
             context.reject("selectedBuffIds count",
-                    p -> ValidationErrors.valueOutOfRange(p, buffIds.size(), 0, MAX_START_BUFFS));
+                    p -> ValidationErrors.valueOutOfRange(ErrorCode.EXCESS_STARTBUFF, p, buffIds.size(), 0, MAX_START_BUFFS));
             return;
         }
 
@@ -59,7 +59,7 @@ class StartBuffValidator {
         }
 
         context.reject("selectedBuffIds",
-                p -> ValidationErrors.unknownId(ErrorCode.START_BUFF_UNKNOWN_ID, p, String.valueOf(buffId)));
+                p -> ValidationErrors.unknownId(ErrorCode.UNKNOWN_STARTBUFF, p, String.valueOf(buffId)));
         return false;
     }
 
@@ -68,13 +68,14 @@ class StartBuffValidator {
 
         if (baseId < MIN_BUFF_BASE_ID || baseId > MAX_BUFF_BASE_ID) {
             context.reject("selectedBuffIds[" + index + "] base ID",
-                    p -> ValidationErrors.valueOutOfRange(p, baseId, MIN_BUFF_BASE_ID, MAX_BUFF_BASE_ID));
+                    p -> ValidationErrors.valueOutOfRange(
+                            ErrorCode.OUT_OF_RANGE_STARTBUFF, p, baseId, MIN_BUFF_BASE_ID, MAX_BUFF_BASE_ID));
             return;
         }
 
         if (!seenBaseIds.add(baseId)) {
             context.reject("selectedBuffIds base IDs",
-                    p -> ValidationErrors.duplicateValue(p, String.valueOf(baseId)));
+                    p -> ValidationErrors.duplicateValue(ErrorCode.DUPLICATE_STARTBUFF, p, String.valueOf(baseId)));
         }
     }
 
@@ -101,8 +102,7 @@ class StartBuffValidator {
             return;
         }
 
-        context.reject("selectedGiftIds",
-                p -> ValidationErrors.invalidSequence(p + " requires selectedGiftKeyword"));
+        context.reject("selectedGiftIds", ValidationErrors::missingStartGiftKeyword);
     }
 
     private boolean validateKeywordIsKnown(int version, String keyword, ValidationContext context) {
@@ -110,7 +110,7 @@ class StartBuffValidator {
             return true;
         }
 
-        context.reject("selectedGiftKeyword", p -> ValidationErrors.invalidIdReference(p, keyword));
+        context.reject("selectedGiftKeyword", p -> ValidationErrors.unknownId(ErrorCode.UNKNOWN_STARTGIFT_KEYWORD, p, keyword));
         return false;
     }
 
@@ -118,10 +118,10 @@ class StartBuffValidator {
                                                ValidationContext context) {
         Set<String> pool = gameDataRegistry.getStartGiftPool(version, keyword);
 
-        eachUniqueString(giftIds, "selectedGiftIds", context, (giftId, index) -> {
+        eachDistinctString(giftIds, "selectedGiftIds", context, (giftId, index) -> {
             if (!pool.contains(giftId)) {
                 context.reject("selectedGiftIds (not in keyword '" + keyword + "' pool)",
-                        p -> ValidationErrors.invalidIdReference(p, giftId));
+                        p -> ValidationErrors.unknownId(ErrorCode.MISMATCHED_STARTGIFT, p, giftId));
             }
         });
     }

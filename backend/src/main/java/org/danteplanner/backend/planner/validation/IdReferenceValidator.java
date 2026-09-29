@@ -49,7 +49,7 @@ class IdReferenceValidator {
             return true;
         }
 
-        context.reject("identity", p -> ValidationErrors.unknownId(ErrorCode.IDENTITY_UNKNOWN_ID, p, identityId));
+        context.reject("identity", p -> ValidationErrors.unknownId(ErrorCode.UNKNOWN_IDENTITY, p, identityId));
         return false;
     }
 
@@ -60,17 +60,19 @@ class IdReferenceValidator {
         }
 
         context.reject("identity for sinner " + sinnerKey,
-                p -> ValidationErrors.invalidIdReference(p, identityId));
+                p -> ValidationErrors.unknownId(ErrorCode.MISMATCHED_IDENTITY, p, identityId));
         return false;
     }
 
     private void validateIdentityLevelAndUptie(String sinnerKey, JsonNode identity, ValidationContext context) {
         String identityPath = "equipment[" + sinnerKey + "].identity";
-        requireInRange(identity, identityPath, "level", GameConstants.MIN_LEVEL, GameConstants.MAX_LEVEL, context);
-        requireInRange(identity, identityPath, "uptie", GameConstants.MIN_UPTIE, GameConstants.MAX_UPTIE, context);
+        requireInRange(identity, identityPath, "level", ErrorCode.OUT_OF_RANGE_IDENTITY_LEVEL,
+                GameConstants.MIN_LEVEL, GameConstants.MAX_LEVEL, context);
+        requireInRange(identity, identityPath, "uptie", ErrorCode.OUT_OF_RANGE_IDENTITY_UPTIE,
+                GameConstants.MIN_UPTIE, GameConstants.MAX_UPTIE, context);
     }
 
-    private void requireInRange(JsonNode owner, String ownerPath, String field, int min, int max,
+    private void requireInRange(JsonNode owner, String ownerPath, String field, ErrorCode code, int min, int max,
                                 ValidationContext context) {
         JsonNode node = owner.path(field);
         if (node.isMissingNode()) {
@@ -83,7 +85,7 @@ class IdReferenceValidator {
 
         int value = node.asInt();
         if (value < min || value > max) {
-            context.reject(ownerPath + "." + field, p -> ValidationErrors.valueOutOfRange(field, value, min, max));
+            context.reject(ownerPath + "." + field, p -> ValidationErrors.valueOutOfRange(code, field, value, min, max));
         }
     }
 
@@ -121,7 +123,7 @@ class IdReferenceValidator {
             return true;
         }
 
-        context.reject("EGO", p -> ValidationErrors.unknownId(ErrorCode.EGO_UNKNOWN_ID, p, egoId));
+        context.reject("EGO", p -> ValidationErrors.unknownId(ErrorCode.UNKNOWN_EGO, p, egoId));
         return false;
     }
 
@@ -130,7 +132,7 @@ class IdReferenceValidator {
             return true;
         }
 
-        context.reject("EGO for sinner " + sinnerKey, p -> ValidationErrors.invalidIdReference(p, egoId));
+        context.reject("EGO for sinner " + sinnerKey, p -> ValidationErrors.unknownId(ErrorCode.MISMATCHED_EGO, p, egoId));
         return false;
     }
 
@@ -160,7 +162,7 @@ class IdReferenceValidator {
             return true;
         }
 
-        context.reject(threadspinPath, p -> ValidationErrors.valueOutOfRange(
+        context.reject(threadspinPath, p -> ValidationErrors.valueOutOfRange(ErrorCode.OUT_OF_RANGE_EGO_THREADSPIN,
                 "threadspin", threadspin, GameConstants.MIN_THREADSPIN, GameConstants.MAX_THREADSPIN));
         return false;
     }
@@ -169,26 +171,28 @@ class IdReferenceValidator {
                                                    ValidationContext context) {
         Integer egoMax = gameDataRegistry.getEgoMaxThreadspin(egoId);
         if (egoMax == null) {
-            context.reject("EGO maxThreadspin", p -> ValidationErrors.invalidIdReference(p, egoId));
+            context.reject("EGO maxThreadspin",
+                    p -> ValidationErrors.unknownId(ErrorCode.MISSING_EGO_THREADSPIN_CEILING, p, egoId));
             return;
         }
 
         if (threadspin > egoMax) {
-            context.reject(threadspinPath, p -> ValidationErrors.valueOutOfRange(
+            context.reject(threadspinPath, p -> ValidationErrors.valueOutOfRange(ErrorCode.OUT_OF_RANGE_EGO_THREADSPIN,
                     "threadspin for EGO " + egoId, threadspin, GameConstants.MIN_THREADSPIN, egoMax));
         }
     }
 
     void validateGiftIds(JsonNode root, ValidationContext context) {
-        validateGiftIdArray(root, "selectedGiftIds", context);
-        validateGiftIdArray(root, "observationGiftIds", context);
-        validateGiftIdArray(root, "comprehensiveGiftIds", context);
+        validateGiftIdArray(root, "selectedGiftIds", ErrorCode.DUPLICATE_STARTGIFT, context);
+        validateGiftIdArray(root, "observationGiftIds", ErrorCode.DUPLICATE_EGOGIFT, context);
+        validateGiftIdArray(root, "comprehensiveGiftIds", ErrorCode.DUPLICATE_EGOGIFT, context);
     }
 
-    private void validateGiftIdArray(JsonNode root, String fieldName, ValidationContext context) {
-        eachUniqueString(arrayField(root, fieldName), fieldName, context, (giftId, index) -> {
+    private void validateGiftIdArray(JsonNode root, String fieldName, ErrorCode duplicateCode,
+                                     ValidationContext context) {
+        eachUniqueString(arrayField(root, fieldName), fieldName, duplicateCode, context, (giftId, index) -> {
             if (!gameDataRegistry.hasEgoGift(giftId)) {
-                context.reject(fieldName, p -> ValidationErrors.unknownId(ErrorCode.GIFT_UNKNOWN_ID, p, giftId));
+                context.reject(fieldName, p -> ValidationErrors.unknownId(ErrorCode.UNKNOWN_EGOGIFT, p, giftId));
             }
         });
     }

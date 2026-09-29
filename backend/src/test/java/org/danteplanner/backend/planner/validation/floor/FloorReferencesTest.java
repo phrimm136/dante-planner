@@ -59,11 +59,11 @@ class FloorReferencesTest {
 
         assertThat(violations).extracting(Violation::code, violation -> violation.path().render(), Violation::message)
                 .containsExactly(
-                        tuple(ErrorCode.FLOOR_UNKNOWN_GIFT_ID, "floorSelections[0].giftIds[0]",
+                        tuple(ErrorCode.UNKNOWN_EGOGIFT_FLOOR, "floorSelections[0].giftIds[0]",
                                 "floorSelections[0].giftIds[0] ID '7777' not found or invalid"),
-                        tuple(ErrorCode.GIFT_NOT_AFFORDABLE, "floorSelections[0].giftIds[1]",
+                        tuple(ErrorCode.UNAFFORDABLE_EGOGIFT, "floorSelections[0].giftIds[1]",
                                 "Gift '9002' is not affordable for theme pack '8888'"),
-                        tuple(ErrorCode.THEME_PACK_UNKNOWN_ID, "floorSelections[0].themePackId",
+                        tuple(ErrorCode.UNKNOWN_THEMEPACK, "floorSelections[0].themePackId",
                                 "floorSelections[0].themePackId ID '8888' not found or invalid"));
     }
 
@@ -73,15 +73,15 @@ class FloorReferencesTest {
                 UNKNOWN_GIFT, UNAFFORDABLE_GIFT, UNKNOWN_GIFT)));
 
         assertThat(violations).extracting(Violation::code, violation -> violation.path().render()).containsExactly(
-                tuple(ErrorCode.GIFT_NOT_AFFORDABLE, "floorSelections[0].giftIds[1]"),
-                tuple(ErrorCode.FLOOR_UNKNOWN_GIFT_ID, "floorSelections[0].giftIds[2]"));
+                tuple(ErrorCode.UNAFFORDABLE_EGOGIFT, "floorSelections[0].giftIds[1]"),
+                tuple(ErrorCode.UNKNOWN_EGOGIFT_FLOOR, "floorSelections[0].giftIds[2]"));
     }
 
     @Test
     void check_WhenAFloorHasNoPack_ChecksNoAffordability() {
         List<Violation> violations = check(floors(floor(KNOWN_PACK, 0, UNAFFORDABLE_GIFT, UNKNOWN_GIFT).without("themePackId")));
 
-        assertThat(violations).extracting(Violation::code).containsExactly(ErrorCode.FLOOR_UNKNOWN_GIFT_ID);
+        assertThat(violations).extracting(Violation::code).containsExactly(ErrorCode.UNKNOWN_EGOGIFT_FLOOR);
     }
 
     @Test

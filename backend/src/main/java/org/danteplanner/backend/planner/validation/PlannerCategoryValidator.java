@@ -10,7 +10,7 @@ public class PlannerCategoryValidator {
     public void requireCategoryForType(PlannerType plannerType, String category) {
         if (!plannerType.isValidCategory(category)) {
             throw new PlannerValidationException(
-                    ErrorCode.INVALID_CATEGORY.getCode(),
+                    ErrorCode.MISMATCHED_CATEGORY.getCode(),
                     "Invalid category '" + category + "' for planner type " + plannerType);
         }
     }
