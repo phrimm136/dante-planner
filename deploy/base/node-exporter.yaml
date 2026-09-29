@@ -21,6 +21,7 @@ spec:
         prometheus.io/job: node
     spec:
       hostPID: true
+      hostNetwork: true
       tolerations:
         - operator: Exists
       containers:
@@ -36,6 +37,9 @@ spec:
             - --collector.filesystem
             - --collector.loadavg
             - --collector.conntrack
+            - --collector.diskstats
+            - --collector.netdev
+            - --collector.netdev.device-exclude=^(lo|veth.*|cni.*|flannel.*)$
           ports:
             - name: metrics
               containerPort: 9100
