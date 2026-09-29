@@ -1,11 +1,14 @@
 package org.danteplanner.backend.security;
 
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
 import org.springframework.context.annotation.Import;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.auth.token.JwtTokenService;
+import org.danteplanner.backend.planner.entity.MDCategory;
+import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
@@ -79,7 +82,22 @@ class RestrictedPrincipalMatrixIT extends SharedMySqlContainerSupport {
             "POST /api/planner/{plannerId}/comments", "{\"content\":\"body\"}",
             "POST /api/comments/{parentCommentId}/replies", "{\"content\":\"body\"}",
             "PUT /api/comments/{commentId}", "{\"content\":\"body\"}",
+            "POST /api/comments/{commentId}/report", "{\"reason\":\"spam\"}",
             "POST /api/comments/{commentId}/upvote", "{}");
+
+    private static final Map<String, String> ALLOWED_BODIES = Map.of(
+            "PUT /api/planner/md/{id}", JsonNodeFactory.instance.objectNode()
+                    .put("id", UUID.randomUUID().toString())
+                    .put("category", MDCategory.F5.getValue())
+                    .put("content", TestDataFactory.VALID_CONTENT)
+                    .put("contentVersion", 7)
+                    .put("plannerType", PlannerType.MIRROR_DUNGEON.name())
+                    .toString(),
+            "PATCH /api/planner/md/{id}/notifications", "{\"enabled\":true}",
+            "POST /api/planner/md/batch", "{\"ids\":[\"" + UUID.randomUUID() + "\"]}",
+            "PATCH /api/comments/{commentId}/notifications", "{\"enabled\":true}",
+            "PUT /api/user/me/username-epithet", "{\"epithet\":\"NAIVE\"}",
+            "PUT /api/user/settings", "{\"notifyComments\":true}");
 
     private static final String BANNED_CODE = "USER_BANNED";
 
@@ -115,7 +133,9 @@ class RestrictedPrincipalMatrixIT extends SharedMySqlContainerSupport {
             String key = endpoint.method() + " " + endpoint.pattern();
             return DynamicTest.dynamicTest(key, () -> {
                 MvcResult result = mockMvc
-                        .perform(request(endpoint, BLOCKED_FOR_BANNED.get(key), freshBannedPrincipal()))
+                        .perform(request(endpoint,
+                                BLOCKED_FOR_BANNED.getOrDefault(key, ALLOWED_BODIES.get(key)),
+                                freshBannedPrincipal()))
                         .andReturn();
                 String body = result.getResponse().getContentAsString();
 
@@ -127,6 +147,9 @@ class RestrictedPrincipalMatrixIT extends SharedMySqlContainerSupport {
                             .as("%s must name the ban as the reason it rejected", key)
                             .contains(BANNED_CODE);
                 } else {
+                    assertThat(result.getResponse().getStatus())
+                            .as("%s answered 400 before reaching the guard; body: %s", key, body)
+                            .isNotEqualTo(HttpStatus.BAD_REQUEST.value());
                     assertThat(body)
                             .as("%s withdrew a capability a ban does not cover", key)
                             .doesNotContain(BANNED_CODE);

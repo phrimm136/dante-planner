@@ -1,7 +1,6 @@
 package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.config.TestConfig;
-import static org.hamcrest.Matchers.hasItems;
 import org.danteplanner.backend.moderation.dto.HidePlannerRequest;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 import org.danteplanner.backend.moderation.service.PlannerModerationService;
@@ -14,7 +13,6 @@ import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
-import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.planner.service.PlannerEngagementService;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
@@ -31,26 +29,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
 
-import javax.sql.DataSource;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Catalog projection lifecycle: membership equals visibility, ordering is
- * recency riding the catalog index, the recommended flag follows vote and
- * moderation transitions, and a takedown pins the aggregate unpublishable.
+ * Catalog projection lifecycle: membership equals visibility, the recommended
+ * flag follows vote and moderation transitions, and a takedown pins the
+ * aggregate unpublishable.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
@@ -58,9 +47,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Tag("containerized")
 @Import(TestConfig.class)
 class PlannerCatalogLifecycleIT extends SharedMySqlContainerSupport {
-
-    @Autowired
-    private MockMvc mockMvc;
 
     @Autowired
     private UserRepository userRepository;
@@ -90,13 +76,7 @@ class PlannerCatalogLifecycleIT extends SharedMySqlContainerSupport {
     private PlannerEngagementService engagementService;
 
     @Autowired
-    private PlannerCatalogService catalogService;
-
-    @Autowired
     private PlannerModerationService plannerModerationService;
-
-    @Autowired
-    private DataSource dataSource;
 
     @Value("${planner.recommended-threshold}")
     private int recommendedThreshold;
@@ -153,45 +133,6 @@ class PlannerCatalogLifecycleIT extends SharedMySqlContainerSupport {
         assertThat(hasCatalogRow(takenDown.getId())).isTrue();
         plannerModerationService.deletePlanner(admin.getId(), takenDown.getId(), "violation");
         assertThat(hasCatalogRow(takenDown.getId())).as("taken-down planner has no catalog row").isFalse();
-    }
-
-    @Test
-    @DisplayName("list-recency-sort: newest first_published_at first, served without a filesort")
-    void listRecencySort_WhenBrowsing_NewestFirstFilesortFree() throws Exception {
-        Instant now = Instant.now();
-        for (int i = 0; i < 3; i++) {
-            Planner planner = TestDataFactory.planner(owner)
-                    .title("Recency " + i)
-                    .published(true)
-                    .firstPublishedAt(now.minus(3 - i, ChronoUnit.HOURS))
-                    .save(plannerRepository);
-            statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
-            catalogService.add(planner);
-        }
-
-        // These rows are stamped hours in the past, so anything published during the run sorts
-        // above them. The default page of 20 is smaller than the catalog this suite accumulates,
-        // which drops the older two off the first page; 100 is the controller's cap.
-        mockMvc.perform(get("/api/planner/md/published").param("size", "100"))
-                .andExpect(status().isOk())
-                // Relative order among this test's rows: the catalog also holds its neighbours',
-                // so absolute positions belong to whoever published most recently.
-                .andExpect(jsonPath("$.content[*].title", hasItems("Recency 2", "Recency 1", "Recency 0")))
-                .andExpect(result -> {
-                    List<String> titles = com.jayway.jsonpath.JsonPath.read(
-                            result.getResponse().getContentAsString(), "$.content[*].title");
-                    assertThat(titles.indexOf("Recency 2")).isLessThan(titles.indexOf("Recency 1"));
-                    assertThat(titles.indexOf("Recency 1")).isLessThan(titles.indexOf("Recency 0"));
-                });
-
-        // The browse shape must ride idx_catalog_recent instead of sorting rows
-        String plan = new JdbcTemplate(dataSource).queryForList(
-                        "EXPLAIN SELECT planner_id FROM planner_catalog "
-                                + "ORDER BY first_published_at DESC LIMIT 20")
-                .toString();
-        assertThat(plan)
-                .as("recency browse rides idx_catalog_recent without a filesort: %s", plan)
-                .doesNotContain("Using filesort");
     }
 
     @Test

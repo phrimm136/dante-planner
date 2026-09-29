@@ -24,10 +24,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import javax.sql.DataSource;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.contains;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -80,6 +87,9 @@ class PlannerTitleSearchIT {
 
     @Autowired
     private PlannerFilterService filterService;
+
+    @Autowired
+    private DataSource dataSource;
 
     private User owner;
 
@@ -170,5 +180,33 @@ class PlannerTitleSearchIT {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.page.totalElements").value(1))
                 .andExpect(jsonPath("$.content[0].title").value("Kit Collection"));
+    }
+
+    @Test
+    @DisplayName("list-recency-sort: newest first_published_at first, served without a filesort")
+    void listRecencySort_WhenBrowsing_NewestFirstFilesortFree() throws Exception {
+        catalogRepository.deleteAll();
+        Instant now = Instant.now();
+        for (int i = 0; i < 3; i++) {
+            Planner planner = TestDataFactory.planner(owner)
+                    .title("Recency " + i)
+                    .published(true)
+                    .firstPublishedAt(now.minus(3 - i, ChronoUnit.HOURS))
+                    .save(plannerRepository);
+            statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
+            catalogService.add(planner);
+        }
+
+        mockMvc.perform(get("/api/planner/md/published"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[*].title", contains("Recency 2", "Recency 1", "Recency 0")));
+
+        String plan = new JdbcTemplate(dataSource).queryForList(
+                        "EXPLAIN SELECT planner_id FROM planner_catalog "
+                                + "ORDER BY first_published_at DESC LIMIT 20")
+                .toString();
+        assertThat(plan)
+                .as("recency browse rides idx_catalog_recent without a filesort: %s", plan)
+                .doesNotContain("Using filesort");
     }
 }
