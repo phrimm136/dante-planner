@@ -42,6 +42,18 @@ const PAGES: Record<string, { url: string; load: () => Promise<PageModule> }> = 
     load: () => import('@/pages/abEvent/AbEventDetailPage'),
   },
   '/battle': { url: '/battle', load: () => import('@/pages/battle/BattlePage') },
+  '/battle/enemy/$id': {
+    url: '/battle/enemy/1280',
+    load: () => import('@/pages/battle/EnemyDetailPage'),
+  },
+  '/battle/assistant/$id': {
+    url: '/battle/assistant/400001',
+    load: () => import('@/pages/battle/AssistantDetailPage'),
+  },
+  '/battle/sinnerEvent/$id': {
+    url: '/battle/sinnerEvent/10101',
+    load: () => import('@/pages/battle/SinnerEventDetailPage'),
+  },
   '/keyword': { url: '/keyword', load: () => import('@/pages/keyword/KeywordPage') },
   '/keyword/$id': {
     url: '/keyword/A1c971a',

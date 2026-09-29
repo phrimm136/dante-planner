@@ -19,3 +19,13 @@ export type HiddenBattle = typeof HIDDEN_BATTLE
 export const RERUN_LINE_MIN = 1000
 
 export const EXP_LUXCAVATION = 'exp'
+
+export const NEUTRAL_RESISTANCE = 1
+
+export const ENGAGEMENT_LABEL_SEPARATOR = ' · '
+
+export const BATTLE_DETAIL_ROUTES = {
+  enemy: '/battle/enemy/$id',
+  assistant: '/battle/assistant/$id',
+  sinnerEvent: '/battle/sinnerEvent/$id',
+} as const satisfies Record<BattleFamily, string>

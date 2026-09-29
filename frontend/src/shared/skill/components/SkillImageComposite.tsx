@@ -10,7 +10,7 @@ import { getDisplayFontForNumeric } from '@/lib/utils'
 import { SKILL_FRAME_GLOW_COLORS } from '@/lib/constants'
 
 interface SkillImageCompositeProps {
-  skillImagePath: string
+  skillImagePath: string | undefined
   attributeType: SkillAttributeType
   skillTier: number
   atkType?: string | undefined
@@ -51,26 +51,28 @@ export function SkillImageComposite({
         className="absolute inset-0 w-full h-full object-contain pointer-events-none"
       />
 
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="relative w-16 h-16">
-          {!showMissingPlaceholder ? (
-            <img
-              src={skillImagePath}
-              alt=""
-              className="w-full h-full object-cover"
-              style={{
-                clipPath:
-                  'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)',
-              }}
-              onError={onImageError}
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
-              Missing
-            </div>
-          )}
+      {skillImagePath !== undefined && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="relative w-16 h-16">
+            {!showMissingPlaceholder ? (
+              <img
+                src={skillImagePath}
+                alt=""
+                className="w-full h-full object-cover"
+                style={{
+                  clipPath:
+                    'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)',
+                }}
+                onError={onImageError}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
+                Missing
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       <img
         src={framePath}

@@ -62,6 +62,18 @@ function generateSitemap(): void {
     urls.push({ loc: `/ego-gift/${id}`, priority: 0.5, changefreq: 'monthly' })
   }
 
+  const battleFamilies = [
+    ['enemy', 'enemySpecList.json'],
+    ['assistant', 'assistantSpecList.json'],
+    ['sinnerEvent', 'sinnerEventSpecList.json'],
+  ] as const
+  const battleIds = battleFamilies.map(([family, file]) => [family, readJsonKeys(file)] as const)
+  for (const [family, ids] of battleIds) {
+    for (const id of ids) {
+      urls.push({ loc: `/battle/${family}/${id}`, priority: 0.5, changefreq: 'monthly' })
+    }
+  }
+
   // Generate XML
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -82,6 +94,9 @@ ${urls
   console.log(`  - Identity pages: ${identityIds.length}`)
   console.log(`  - EGO pages: ${egoIds.length}`)
   console.log(`  - EGO Gift pages: ${egoGiftIds.length}`)
+  for (const [family, ids] of battleIds) {
+    console.log(`  - Battle ${family} pages: ${ids.length}`)
+  }
   console.log(`  - Total URLs: ${urls.length}`)
 }
 

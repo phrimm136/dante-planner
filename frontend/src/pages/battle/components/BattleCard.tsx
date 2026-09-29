@@ -1,10 +1,11 @@
 import { Suspense, useState } from 'react'
+import { Link } from '@tanstack/react-router'
 
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { getBattleSpritePath } from '@/shared/assets'
 import type { EntityListDataConfig } from '@/shared/entityCatalog'
-import type { BattleFamily } from '../lib/battleVocabulary'
+import { BATTLE_DETAIL_ROUTES, type BattleFamily } from '../lib/battleVocabulary'
 import type { BattleNameList } from '../schemas/BattleSpecSchemas'
 import { BattleEntityName } from './BattleEntityName'
 
@@ -14,6 +15,7 @@ interface BattleCardProps<TSpecList> {
   spriteId: string
   listConfig: EntityListDataConfig<TSpecList, BattleNameList>
   enableHoverHighlight?: boolean
+  enableDetailLink?: boolean
 }
 
 export function BattleCard<TSpecList>({
@@ -22,11 +24,12 @@ export function BattleCard<TSpecList>({
   spriteId,
   listConfig,
   enableHoverHighlight = false,
+  enableDetailLink = false,
 }: BattleCardProps<TSpecList>) {
   const [spriteMissing, setSpriteMissing] = useState(false)
 
-  return (
-    <div data-testid={`battle-card-${id}`} className="group relative flex h-full flex-col gap-1.5">
+  const content = (
+    <>
       <div
         data-testid="battle-card-sprite"
         className={cn(
@@ -59,6 +62,24 @@ export function BattleCard<TSpecList>({
           <BattleEntityName listConfig={listConfig} id={id} />
         </Suspense>
       </div>
+    </>
+  )
+
+  const testId = `battle-card-${id}`
+  const className = 'group relative flex h-full flex-col gap-1.5'
+
+  return enableDetailLink ? (
+    <Link
+      to={BATTLE_DETAIL_ROUTES[family]}
+      params={{ id }}
+      data-testid={testId}
+      className={className}
+    >
+      {content}
+    </Link>
+  ) : (
+    <div data-testid={testId} className={className}>
+      {content}
     </div>
   )
 }

@@ -22,7 +22,7 @@ interface SkillCardProps {
   skillId: string
   skillData: SkillCardData
   coins: readonly SkillCoin[]
-  skillImagePath: string
+  skillImagePath: string | undefined
   skillTier: number
   level: number
   nameSlot: ReactNode

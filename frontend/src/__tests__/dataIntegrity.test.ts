@@ -58,6 +58,12 @@ import {
   SinnerEventSpecListSchema,
   SinnerEventNameListSchema,
   BattleFacetNamesSchema,
+  EnemyDataSchema,
+  AssistantDataSchema,
+  SinnerEventDataSchema,
+  BattleEntityI18nSchema,
+  BattleStageListSchema,
+  BattleStageTextsSchema,
 } from '@/pages/battle'
 
 const STATIC_DIR = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../../../static')
@@ -143,6 +149,8 @@ describe('spec list files', () => {
     validateFile(path.join(DATA_DIR, 'assistantSpecList.json'), AssistantSpecListSchema))
   it('sinnerEventSpecList.json', () =>
     validateFile(path.join(DATA_DIR, 'sinnerEventSpecList.json'), SinnerEventSpecListSchema))
+  it('battleStageList.json', () =>
+    validateFile(path.join(DATA_DIR, 'battleStageList.json'), BattleStageListSchema))
 })
 
 // --- Mirror Dungeon versioned data files ---
@@ -172,6 +180,11 @@ describe('themePack data files', () =>
   testDirectory(path.join(DATA_DIR, 'themePack'), ThemePackDetailSchema))
 describe('abEvent data files', () =>
   testDirectory(path.join(DATA_DIR, 'abEvent'), AbEventDataSchema))
+describe('enemy data files', () => testDirectory(path.join(DATA_DIR, 'enemy'), EnemyDataSchema))
+describe('assistant data files', () =>
+  testDirectory(path.join(DATA_DIR, 'assistant'), AssistantDataSchema))
+describe('sinnerEvent data files', () =>
+  testDirectory(path.join(DATA_DIR, 'sinnerEvent'), SinnerEventDataSchema))
 
 // --- i18n files per language ---
 
@@ -189,6 +202,7 @@ describe.each(LANGS)('i18n [%s]', (lang) => {
   testFileIfExists(path.join(langDir, 'assistantNameList.json'), AssistantNameListSchema)
   testFileIfExists(path.join(langDir, 'sinnerEventNameList.json'), SinnerEventNameListSchema)
   testFileIfExists(path.join(langDir, 'battleFacetNames.json'), BattleFacetNamesSchema)
+  testFileIfExists(path.join(langDir, 'battleStageList.json'), BattleStageTextsSchema)
   for (const mdDir of MD_DIRS) {
     testFileIfExists(path.join(langDir, mdDir, 'startBuffs.json'), StartBuffI18nSchema)
   }
@@ -197,4 +211,9 @@ describe.each(LANGS)('i18n [%s]', (lang) => {
   describe('ego i18n', () => testDirectory(path.join(langDir, 'ego'), EGOI18nSchema))
   describe('egoGift i18n', () => testDirectory(path.join(langDir, 'egoGift'), EGOGiftI18nSchema))
   describe('abEvent i18n', () => testDirectory(path.join(langDir, 'abEvent'), AbEventI18nSchema))
+  describe('enemy i18n', () => testDirectory(path.join(langDir, 'enemy'), BattleEntityI18nSchema))
+  describe('assistant i18n', () =>
+    testDirectory(path.join(langDir, 'assistant'), BattleEntityI18nSchema))
+  describe('sinnerEvent i18n', () =>
+    testDirectory(path.join(langDir, 'sinnerEvent'), BattleEntityI18nSchema))
 })

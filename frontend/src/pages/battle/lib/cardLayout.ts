@@ -6,3 +6,5 @@ export const BATTLE_GEOMETRY: CardGeometry = {
   mobileScale: CARD_MOBILE_SCALE,
   rows: 'slot',
 }
+
+export const BATTLE_DETAIL_SPRITE_ASPECT_RATIO = '1 / 1'

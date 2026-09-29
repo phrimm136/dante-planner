@@ -45,6 +45,7 @@ export function BattleEntityList<TItem extends BattleListItem, TState, TSpecList
           spriteId={item.spriteId}
           listConfig={listConfig}
           enableHoverHighlight
+          enableDetailLink
         />
       )}
       emptyStateKey="battle.emptyState"

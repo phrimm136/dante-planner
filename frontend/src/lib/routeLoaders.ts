@@ -147,6 +147,25 @@ export async function loadKeywordName({ params }: { params: { id: string } }) {
   return { name }
 }
 
+function battleEntityName(module: { default: unknown }, id: string): { name: string } {
+  return { name: (module.default as { name?: string }).name ?? id }
+}
+
+export async function loadEnemyName({ params }: { params: { id: string } }) {
+  const module = await import(`@static/i18n/${i18n.language}/enemy/${params.id}.json`)
+  return battleEntityName(module, params.id)
+}
+
+export async function loadAssistantName({ params }: { params: { id: string } }) {
+  const module = await import(`@static/i18n/${i18n.language}/assistant/${params.id}.json`)
+  return battleEntityName(module, params.id)
+}
+
+export async function loadSinnerEventName({ params }: { params: { id: string } }) {
+  const module = await import(`@static/i18n/${i18n.language}/sinnerEvent/${params.id}.json`)
+  return battleEntityName(module, params.id)
+}
+
 export async function loadAbEventTitle({ params }: { params: { id: string } }) {
   try {
     const module = await import(`@static/i18n/${i18n.language}/abEvent/${params.id}.json`)

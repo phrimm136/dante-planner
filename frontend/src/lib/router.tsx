@@ -30,6 +30,9 @@ import {
   loadAbEventDetail,
   loadKeywordList,
   loadKeywordDetail,
+  loadEnemyName,
+  loadAssistantName,
+  loadSinnerEventName,
 } from '@/lib/routeLoaders'
 import { syncTitleOnLanguageChange } from '@/lib/routerTitle'
 import { RouteErrorComponent } from '@/components/feedback/RouteErrorComponent'
@@ -45,6 +48,7 @@ import { ThemePackDetailSkeleton } from '@/pages/themePack/components/ThemePackD
 import { AbEventDetailSkeleton } from '@/pages/abEvent/components/AbEventDetailSkeleton'
 import { AB_EVENT_GEOMETRY } from '@/pages/abEvent/lib/cardLayout'
 import { BATTLE_GEOMETRY } from '@/pages/battle/lib/cardLayout'
+import { BattleDetailSkeleton } from '@/pages/battle/components/detail/BattleDetailSkeleton'
 import { KeywordDetailSkeleton } from '@/pages/keyword/components/KeywordDetailSkeleton'
 import { KEYWORD_GEOMETRY } from '@/pages/keyword/lib/cardLayout'
 import {
@@ -391,6 +395,33 @@ const battleRoute = createRoute({
   }),
 })
 
+const enemyDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/battle/enemy/$id',
+  component: lazyRouteComponent(() => import('@/pages/battle/EnemyDetailPage')),
+  pendingComponent: BattleDetailSkeleton,
+  loader: loadEnemyName,
+  head: ({ loaderData }) => detailHead(loaderData?.name, 'Enemy'),
+})
+
+const assistantDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/battle/assistant/$id',
+  component: lazyRouteComponent(() => import('@/pages/battle/AssistantDetailPage')),
+  pendingComponent: BattleDetailSkeleton,
+  loader: loadAssistantName,
+  head: ({ loaderData }) => detailHead(loaderData?.name, 'Assist Unit'),
+})
+
+const sinnerEventDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/battle/sinnerEvent/$id',
+  component: lazyRouteComponent(() => import('@/pages/battle/SinnerEventDetailPage')),
+  pendingComponent: BattleDetailSkeleton,
+  loader: loadSinnerEventName,
+  head: ({ loaderData }) => detailHead(loaderData?.name, 'Sinner'),
+})
+
 const keywordRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/keyword',
@@ -467,6 +498,9 @@ const routeTree = rootRoute.addChildren([
   abEventRoute,
   abEventDetailRoute,
   battleRoute,
+  enemyDetailRoute,
+  assistantDetailRoute,
+  sinnerEventDetailRoute,
   keywordRoute,
   keywordDetailRoute,
   plannerRoute,

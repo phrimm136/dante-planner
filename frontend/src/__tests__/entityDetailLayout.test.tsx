@@ -12,6 +12,13 @@ import i18n from '@/lib/i18n'
 import { EGODataSchema } from '@/pages/ego'
 import { IdentityDataSchema } from '@/pages/identity'
 import { mountRoute } from '@/test-utils/mountRoute'
+import enemy1280 from '@static/data/enemy/1280.json'
+import enemyI18n1280 from '@static/i18n/EN/enemy/1280.json'
+import assistant400001 from '@static/data/assistant/400001.json'
+import assistantI18n400001 from '@static/i18n/EN/assistant/400001.json'
+import sinnerEvent10101 from '@static/data/sinnerEvent/10101.json'
+import sinnerEventI18n10101 from '@static/i18n/EN/sinnerEvent/10101.json'
+import { AssistantDataSchema, EnemyDataSchema, SinnerEventDataSchema } from '@/pages/battle'
 
 vi.mock('@/components/hooks/use-is-breakpoint', () => ({
   useIsBreakpoint: vi.fn(() => false),
@@ -29,6 +36,7 @@ interface EntityLayoutRow {
   name: string
   hasEgo: boolean
   hasSanity: boolean
+  selectorButton: RegExp
   recordSkillIds: readonly string[]
   skillOrder: readonly string[]
 }
@@ -42,6 +50,7 @@ const ENTITY_ROWS: readonly EntityLayoutRow[] = [
     name: identityI18n10310.name,
     hasEgo: false,
     hasSanity: true,
+    selectorButton: /tier 1/i,
     recordSkillIds: Object.keys(IdentityDataSchema.parse(identity10310).skills),
     skillOrder: [
       '1031001',
@@ -62,8 +71,45 @@ const ENTITY_ROWS: readonly EntityLayoutRow[] = [
     name: egoI18n20102.name,
     hasEgo: false,
     hasSanity: false,
+    selectorButton: /tier 1/i,
     recordSkillIds: Object.keys(EGODataSchema.parse(ego20102).skills),
     skillOrder: ['2010211', '2010221'],
+  },
+  {
+    entity: 'enemy 1280',
+    path: '/battle/enemy/$id',
+    url: '/battle/enemy/1280',
+    load: () => import('@/pages/battle/EnemyDetailPage'),
+    name: enemyI18n1280.name,
+    hasEgo: false,
+    hasSanity: false,
+    selectorButton: /^Lv\. 50$/,
+    recordSkillIds: Object.keys(EnemyDataSchema.parse(enemy1280).phases[0].skills),
+    skillOrder: ['806301', '806302', '806303', '806304', '806305', '806306', '806307'],
+  },
+  {
+    entity: 'assistant 400001',
+    path: '/battle/assistant/$id',
+    url: '/battle/assistant/400001',
+    load: () => import('@/pages/battle/AssistantDetailPage'),
+    name: assistantI18n400001.name,
+    hasEgo: false,
+    hasSanity: true,
+    selectorButton: /^Lv\. 50$/,
+    recordSkillIds: Object.keys(AssistantDataSchema.parse(assistant400001).phases[0].skills),
+    skillOrder: ['40000101', '40000102', '40000103', '40000104'],
+  },
+  {
+    entity: 'event sinner 10101',
+    path: '/battle/sinnerEvent/$id',
+    url: '/battle/sinnerEvent/10101',
+    load: () => import('@/pages/battle/SinnerEventDetailPage'),
+    name: sinnerEventI18n10101.name,
+    hasEgo: false,
+    hasSanity: true,
+    selectorButton: /^Lv\. 50$/,
+    recordSkillIds: Object.keys(SinnerEventDataSchema.parse(sinnerEvent10101).phases[0].skills),
+    skillOrder: ['1010101', '1010102', '1010103', '1010104'],
   },
 ]
 
@@ -173,7 +219,9 @@ describe.each(ENTITY_ROWS)('$entity detail layout', (row) => {
         const selectorRow = requireSlot('detail-selector')
         expect(requireSlot('detail-header-row').nextElementSibling).toBe(selectorRow)
         expect(selectorRow.nextElementSibling).toBe(requireSlot('detail-sections'))
-        expect(within(selectorRow).getAllByRole('button', { name: /tier 1/i })).toHaveLength(1)
+        expect(
+          within(selectorRow).getAllByRole('button', { name: row.selectorButton }),
+        ).toHaveLength(1)
       },
       TEST_BUDGET_MS,
     )

@@ -7,7 +7,7 @@ import type { ImportancePalette, SkillEntry, SkillLevel } from '@/shared/gameDat
 import { SkillCard } from './SkillCard'
 
 interface IdentitySkillCardProps {
-  identityId: string
+  identityId: string | undefined
   skillId: SkillId
   entry: SkillEntry
   level: SkillLevel
@@ -36,7 +36,9 @@ export function IdentitySkillCard({
 
   const skillImagePath = level.iconID
     ? getSkillImagePathFromIconID(level.iconID)
-    : getSkillImagePath(identityId, skillId)
+    : identityId === undefined
+      ? undefined
+      : getSkillImagePath(identityId, skillId)
 
   return (
     <SkillCard
