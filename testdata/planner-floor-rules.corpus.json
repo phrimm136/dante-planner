@@ -13326,6 +13326,216 @@
         }
       },
       "verdictRow": "agree"
+    },
+    {
+      "name": "floor-gift-base-and-enhanced-same-floor",
+      "category": "5F",
+      "sources": [
+        "scenario:enhanced-gift-duplicates"
+      ],
+      "floorSelections": [
+        {
+          "themePackId": "1001",
+          "difficulty": 0,
+          "giftIds": [
+            "9001",
+            "19001"
+          ]
+        },
+        {
+          "themePackId": "1002",
+          "difficulty": 0,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1003",
+          "difficulty": 0,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1004",
+          "difficulty": 0,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1005",
+          "difficulty": 0,
+          "giftIds": []
+        }
+      ],
+      "divergent": false,
+      "expect": {
+        "draft": {
+          "ok": false,
+          "violations": [
+            {
+              "code": "DUPLICATE_EGOGIFT",
+              "path": "floorSelections[0].giftIds"
+            }
+          ]
+        },
+        "publish": {
+          "ok": false,
+          "violations": [
+            {
+              "code": "DUPLICATE_EGOGIFT",
+              "path": "floorSelections[0].giftIds"
+            }
+          ]
+        },
+        "index": {
+          "ok": true,
+          "floors": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 0,
+              "giftIds": [
+                "9001",
+                "19001"
+              ]
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 0,
+              "giftIds": []
+            }
+          ],
+          "violations": [],
+          "rows": [
+            "EGO_GIFT:9001",
+            "THEME_PACK:1001",
+            "THEME_PACK:1002",
+            "THEME_PACK:1003",
+            "THEME_PACK:1004",
+            "THEME_PACK:1005"
+          ]
+        }
+      },
+      "verdictRow": "agree"
+    },
+    {
+      "name": "floor-gift-base-and-enhanced-across-floors",
+      "category": "5F",
+      "sources": [
+        "scenario:enhanced-gift-duplicates"
+      ],
+      "floorSelections": [
+        {
+          "themePackId": "1001",
+          "difficulty": 0,
+          "giftIds": [
+            "9001"
+          ]
+        },
+        {
+          "themePackId": "1002",
+          "difficulty": 0,
+          "giftIds": [
+            "19001"
+          ]
+        },
+        {
+          "themePackId": "1003",
+          "difficulty": 0,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1004",
+          "difficulty": 0,
+          "giftIds": []
+        },
+        {
+          "themePackId": "1005",
+          "difficulty": 0,
+          "giftIds": []
+        }
+      ],
+      "divergent": false,
+      "expect": {
+        "draft": {
+          "ok": true,
+          "violations": []
+        },
+        "publish": {
+          "ok": true,
+          "violations": []
+        },
+        "index": {
+          "ok": true,
+          "floors": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "salvaged": [],
+          "admitted": [
+            {
+              "themePackId": "1001",
+              "difficulty": 0,
+              "giftIds": [
+                "9001"
+              ]
+            },
+            {
+              "themePackId": "1002",
+              "difficulty": 0,
+              "giftIds": [
+                "19001"
+              ]
+            },
+            {
+              "themePackId": "1003",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1004",
+              "difficulty": 0,
+              "giftIds": []
+            },
+            {
+              "themePackId": "1005",
+              "difficulty": 0,
+              "giftIds": []
+            }
+          ],
+          "violations": [],
+          "rows": [
+            "EGO_GIFT:9001",
+            "THEME_PACK:1001",
+            "THEME_PACK:1002",
+            "THEME_PACK:1003",
+            "THEME_PACK:1004",
+            "THEME_PACK:1005"
+          ]
+        }
+      },
+      "verdictRow": "agree"
     }
   ]
 }

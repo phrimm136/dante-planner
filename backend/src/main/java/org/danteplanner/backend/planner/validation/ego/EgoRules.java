@@ -50,9 +50,6 @@ public final class EgoRules {
                                     path.field(ego.getKey())))
                             .flatMap(slot -> egoSlot(slot, data)));
             case MISSING, NULL -> Stream.of(Violation.missing(ErrorCode.MISSING_EGO_ZAYIN, path));
-            case STRING -> Stream.of(egos.asText().isBlank()
-                    ? Violation.missing(ErrorCode.MISSING_EGO_ZAYIN, path)
-                    : EgoViolations.egosNotAnObject(path));
             default -> Stream.of(EgoViolations.egosNotAnObject(path));
         };
     }
@@ -61,35 +58,48 @@ public final class EgoRules {
         return switch (ego.getNodeType()) {
             case OBJECT -> Stream.empty();
             case MISSING, NULL -> Stream.of(EgoViolations.missingRequiredEgo(path));
-            case STRING -> Stream.of(ego.asText().isBlank()
-                    ? EgoViolations.missingRequiredEgo(path)
-                    : Violation.invalidFieldType(path, JsonKind.OBJECT, ego));
             default -> Stream.of(Violation.invalidFieldType(path, JsonKind.OBJECT, ego));
         };
     }
 
     private static Stream<Violation> egoSlot(EgoSlot slot, EgoReferenceData data) {
-        Stream<Violation> type = EGO_TYPES.contains(slot.egoType())
-                ? Stream.empty()
-                : Stream.of(EgoViolations.unknownEgoType(slot.path()));
-        return Stream.concat(type, switch (slot.ego().getNodeType()) {
+        return EGO_TYPES.contains(slot.egoType())
+                ? knownSlot(slot, data)
+                : Stream.concat(Stream.of(EgoViolations.unknownEgoType(slot.path())), unknownTypeSlot(slot, data));
+    }
+
+    private static Stream<Violation> knownSlot(EgoSlot slot, EgoReferenceData data) {
+        return switch (slot.ego().getNodeType()) {
+            case OBJECT -> egoId(slot, data);
+            default -> slot.required()
+                    ? Stream.empty()
+                    : Stream.of(Violation.invalidFieldType(slot.path(), JsonKind.OBJECT, slot.ego()));
+        };
+    }
+
+    private static Stream<Violation> unknownTypeSlot(EgoSlot slot, EgoReferenceData data) {
+        return switch (slot.ego().getNodeType()) {
             case OBJECT -> egoId(slot, data);
             default -> Stream.empty();
-        });
+        };
     }
 
     private static Stream<Violation> egoId(EgoSlot slot, EgoReferenceData data) {
         JsonNode id = slot.ego().path(ID);
         ContentPath idPath = slot.path().field(ID);
         return switch (id.getNodeType()) {
-            case STRING -> id.asText().isBlank() && slot.required()
-                    ? Stream.of(Violation.missing(ErrorCode.MISSING_EGO_ZAYIN, idPath))
+            case STRING -> id.asText().isBlank()
+                    ? absentId(slot, idPath)
                     : references(slot, id.asText(), data);
-            case MISSING, NULL -> slot.required()
-                    ? Stream.of(Violation.missing(ErrorCode.MISSING_EGO_ZAYIN, idPath))
-                    : Stream.empty();
+            case MISSING, NULL -> absentId(slot, idPath);
             default -> Stream.of(Violation.invalidFieldType(idPath, JsonKind.STRING, id));
         };
+    }
+
+    private static Stream<Violation> absentId(EgoSlot slot, ContentPath idPath) {
+        return slot.required()
+                ? Stream.of(Violation.missing(ErrorCode.MISSING_EGO_ZAYIN, idPath))
+                : Stream.empty();
     }
 
     private static Stream<Violation> references(EgoSlot slot, String egoId, EgoReferenceData data) {

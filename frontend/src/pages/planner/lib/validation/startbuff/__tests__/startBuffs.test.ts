@@ -1,9 +1,13 @@
 import { describe, it, expect } from 'vitest'
 
-import { parseStartBuffs, startBuffReferenceViolations, startBuffViolations } from '../startBuffs'
+import { parseStartBuffs, startBuffViolations } from '../startBuffs'
+import type { StartBuffSeason } from '../startBuffs'
 import { rendered } from '../../__tests__/rendered'
 
-const violationsOf = (raw: unknown) => rendered(startBuffViolations(parseStartBuffs(raw)))
+const KNOWS_ALL: StartBuffSeason = { hasStartBuff: () => true }
+
+const violationsOf = (raw: unknown, season: StartBuffSeason | undefined = KNOWS_ALL) =>
+  rendered(startBuffViolations(parseStartBuffs(raw), season))
 
 describe('startBuffViolations', () => {
   it('passes buffs with distinct base ids', () => {
@@ -56,12 +60,43 @@ describe('startBuffViolations', () => {
   })
 })
 
-describe('startBuffReferenceViolations', () => {
-  it('reports each unknown buff with its id as the message parameter', () => {
-    const data = { hasStartBuff: (id: string) => id === '100' }
+describe('unknown start buffs', () => {
+  const knows = (ids: string[]): StartBuffSeason => ({ hasStartBuff: (id) => ids.includes(id) })
 
-    expect(rendered(startBuffReferenceViolations(parseStartBuffs([100, 201]), data))).toEqual([
+  it('reports each unknown buff with its id as the message parameter', () => {
+    expect(violationsOf([100, 201], knows(['100']))).toEqual([
       { code: 'UNKNOWN_STARTBUFF', path: 'selectedBuffIds[1]', params: { id: '201' } },
     ])
+  })
+
+  it('reports an unknown buff once, without its base-id range', () => {
+    expect(violationsOf([999], knows(['100']))).toEqual([
+      { code: 'UNKNOWN_STARTBUFF', path: 'selectedBuffIds[0]', params: { id: '999' } },
+    ])
+  })
+
+  it('does not count an unknown buff as a repeated base id', () => {
+    expect(violationsOf([100, 900], knows(['100']))).toEqual([
+      { code: 'UNKNOWN_STARTBUFF', path: 'selectedBuffIds[1]', params: { id: '900' } },
+    ])
+  })
+
+  it('reports more than 10 buffs beside every per-buff violation', () => {
+    const buffs = [100, 101, 102, 103, 104, 105, 106, 107, 108, 999, 'x']
+    expect(violationsOf(buffs, knows(buffs.map(String).filter((id) => id !== '999')))).toEqual([
+      { code: 'EXCESS_STARTBUFF', path: 'selectedBuffIds' },
+      { code: 'UNKNOWN_STARTBUFF', path: 'selectedBuffIds[9]', params: { id: '999' } },
+      { code: 'INVALID_FIELD_TYPE', path: 'selectedBuffIds[10]' },
+    ])
+  })
+})
+
+describe('start buffs without a season', () => {
+  const withoutSeason = (raw: unknown) =>
+    rendered(startBuffViolations(parseStartBuffs(raw), undefined))
+
+  it('checks only the kind of the list', () => {
+    expect(withoutSeason([999, 'x', 100, 200])).toEqual([])
+    expect(withoutSeason(7)).toEqual([{ code: 'INVALID_FIELD_TYPE', path: 'selectedBuffIds' }])
   })
 })

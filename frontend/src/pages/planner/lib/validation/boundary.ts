@@ -1,3 +1,5 @@
+import { EGOGiftIdSchema, EncodedGiftIdSchema, GIFT_ID_LENGTH } from '@/shared/gameData'
+import type { EGOGiftId } from '@/shared/gameData'
 import type { Codes, ValidationCode } from './codes'
 import type { ContentPath } from './contentPath'
 
@@ -21,6 +23,11 @@ export const isAbsent = (value: unknown): value is null | undefined =>
 
 export const isMissingText = (value: unknown): boolean =>
   isAbsent(value) || (typeof value === 'string' && isBlank(value))
+
+export function decodeGiftId(giftId: string): EGOGiftId | undefined {
+  const encoded = EncodedGiftIdSchema.safeParse(giftId)
+  return encoded.success ? EGOGiftIdSchema.parse(encoded.data.slice(-GIFT_ID_LENGTH)) : undefined
+}
 
 export type ParsedList = { elements: readonly unknown[]; violations: readonly InvalidFieldType[] }
 

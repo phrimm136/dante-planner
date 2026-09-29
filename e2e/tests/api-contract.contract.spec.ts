@@ -47,9 +47,7 @@ test('a published planner item matches the client schema', async ({ request, bas
       data: plannerPayload(plannerId, `e2e contract ${plannerId.slice(0, 8)}`),
     })
     expect([200, 201], await created.text()).toContain(created.status())
-    const published = await api.put(`/api/planner/md/${plannerId}/publish`, {
-      data: { published: true },
-    })
+    const published = await api.post(`/api/planner/md/${plannerId}/publish`)
     expect(published.status(), await published.text()).toBe(200)
 
     const detailResponse = await request.get(`/api/planner/md/published/${plannerId}`)

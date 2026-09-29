@@ -56,7 +56,7 @@ class PlannerValidationExceptionTest {
     }
 
     @Test
-    @DisplayName("refusing() keeps the violation's own code and message with no sub-errors")
+    @DisplayName("refusing() keeps the violation's own code and message and carries it as the one sub-error")
     void refusing_WhenAUserFacingViolation_KeepsItsCodeAndMessage() {
         PlannerValidationException ex = PlannerValidationException.refusing(new ContentVerdict.Refused(
                 new Violation(ErrorCode.EMPTY_CONTENT, ContentPath.root(), "Content is empty or null")), CONTENT);
@@ -64,7 +64,8 @@ class PlannerValidationExceptionTest {
         assertEquals("EMPTY_CONTENT", ex.getOriginalCode());
         assertEquals("Content is empty or null", ex.getMessage());
         assertEquals("EMPTY_CONTENT", ex.getBody().getProperties().get("code"));
-        assertTrue(ex.getSubErrors().isEmpty());
+        assertThat(ex.getSubErrors()).containsExactly(
+                new ValidationError("EMPTY_CONTENT", "", "Content is empty or null"));
         assertEquals(CONTENT, ex.getFailedContent());
     }
 
@@ -75,6 +76,49 @@ class PlannerValidationExceptionTest {
                 new Violation(ErrorCode.UNKNOWN_FIELD, ContentPath.root(), "Unknown fields: [theme]")), CONTENT);
 
         assertEquals("UNKNOWN_FIELD", ex.getOriginalCode());
+        assertEquals("VALIDATION_ERROR", ex.getBody().getProperties().get("code"));
+        assertEquals("Invalid planner content structure", ex.getBody().getDetail());
+    }
+
+    @Test
+    @DisplayName("refusing() an oversized note carries its path in the one sub-error and leaves the body as it was")
+    void refusing_WhenANoteIsOversized_CarriesTheNotePathAndKeepsTheBody() {
+        PlannerValidationException ex = PlannerValidationException.refusing(new ContentVerdict.Refused(
+                new Violation(ErrorCode.SIZE_EXCEEDED, ContentPath.of("sectionNotes").key("floor1"),
+                        "Note 'floor1' size 1100 exceeds limit 1024")), CONTENT);
+
+        assertThat(ex.getSubErrors()).containsExactly(
+                new ValidationError("SIZE_EXCEEDED", "sectionNotes[floor1]", "Note 'floor1' size 1100 exceeds limit 1024"));
+        assertEquals(400, ex.getBody().getStatus());
+        assertEquals(java.util.Map.of("code", "SIZE_EXCEEDED", "message", "Note 'floor1' size 1100 exceeds limit 1024"),
+                ex.getBody().getProperties());
+        assertEquals("Note 'floor1' size 1100 exceeds limit 1024", ex.getBody().getDetail());
+    }
+
+    @Test
+    @DisplayName("rejecting() only unknown keywords answers UNKNOWN_KEYWORD with the unknown keywords listed")
+    void rejecting_WhenEveryViolationIsAnUnknownKeyword_AnswersUnknownKeywordOnTheWire() {
+        PlannerValidationException ex = PlannerValidationException.rejecting(new ContentVerdict.Rejected(List.of(
+                new Violation(ErrorCode.UNKNOWN_KEYWORD, ContentPath.of("selectedKeywords").index(1), "second"),
+                new Violation(ErrorCode.UNKNOWN_KEYWORD, ContentPath.of("selectedKeywords").index(2), "third"))),
+                "{\"selectedKeywords\":[\"Sinking\",\"Zilch\",\"Nope\",\"AccelBullet\"]}");
+
+        assertEquals("UNKNOWN_KEYWORD", ex.getOriginalCode());
+        assertEquals("UNKNOWN_KEYWORD", ex.getBody().getProperties().get("code"));
+        assertEquals("Unknown keywords: [Nope, Zilch]", ex.getBody().getDetail());
+        assertFalse(ex.reportable());
+        assertThat(ex.getSubErrors()).extracting(ValidationError::path)
+                .containsExactly("selectedKeywords[1]", "selectedKeywords[2]");
+    }
+
+    @Test
+    @DisplayName("rejecting() an unknown keyword beside another violation stays the generic code")
+    void rejecting_WhenAnUnknownKeywordSitsBesideAnotherViolation_MasksToTheGenericCode() {
+        PlannerValidationException ex = PlannerValidationException.rejecting(new ContentVerdict.Rejected(List.of(
+                new Violation(ErrorCode.UNKNOWN_IDENTITY, ContentPath.of("equipment").key("01"), "identity"),
+                new Violation(ErrorCode.UNKNOWN_KEYWORD, ContentPath.of("selectedKeywords").index(0), "keyword"))),
+                "{\"selectedKeywords\":[\"Nope\"]}");
+
         assertEquals("VALIDATION_ERROR", ex.getBody().getProperties().get("code"));
         assertEquals("Invalid planner content structure", ex.getBody().getDetail());
     }

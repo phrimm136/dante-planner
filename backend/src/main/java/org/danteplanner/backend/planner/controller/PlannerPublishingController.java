@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.shared.config.DeviceId;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
-import org.danteplanner.backend.planner.dto.LegacyPublishRequest;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.shared.dto.ToggleNotificationRequest;
@@ -16,7 +15,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -50,28 +48,6 @@ public class PlannerPublishingController {
             @PathVariable UUID id) {
 
         return ResponseEntity.ok(plannerPublishingService.unpublish(userId, id));
-    }
-
-    /**
-     * @deprecated superseded by {@link #publishPlanner} and {@link #unpublishPlanner}; kept for one
-     *     release so tabs holding the previous bundle keep working, then deleted.
-     */
-    @Deprecated(forRemoval = true)
-    @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "publish")
-    @PutMapping("/{id}/publish")
-    public ResponseEntity<PlannerResponse> setPublished(
-            @AuthenticationPrincipal Long userId,
-            @DeviceId UUID deviceId,
-            @PathVariable UUID id,
-            @RequestBody @Valid LegacyPublishRequest request) {
-
-        UpsertPlannerRequest content = request.carriesContent() ? request.toUpsertRequest() : null;
-        if (request.published()) {
-            return publishPlanner(userId, deviceId, id, content);
-        }
-        return ResponseEntity.ok(content == null
-                ? plannerPublishingService.unpublish(userId, id)
-                : plannerPublishingService.unpublish(userId, deviceId, id, content));
     }
 
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "notifications-toggle")

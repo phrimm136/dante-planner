@@ -26,10 +26,11 @@ export type SelectedStartBuff = { buffId: number; path: ContentPath }
 export type ParsedStartBuffs = {
   elementCount: number
   buffs: readonly SelectedStartBuff[]
-  violations: readonly InvalidFieldType[]
+  listViolations: readonly InvalidFieldType[]
+  elementViolations: readonly InvalidFieldType[]
 }
 
-export type StartBuffReferenceData = { hasStartBuff: (buffId: string) => boolean }
+export type StartBuffSeason = { hasStartBuff: (buffId: string) => boolean }
 
 type ElementResult = { buffs: SelectedStartBuff[]; violations: InvalidFieldType[] }
 
@@ -47,7 +48,8 @@ export function parseStartBuffs(raw: unknown): ParsedStartBuffs {
   return {
     elementCount: list.elements.length,
     buffs: elements.flatMap((element) => element.buffs),
-    violations: [...list.violations, ...elements.flatMap((element) => element.violations)],
+    listViolations: list.violations,
+    elementViolations: elements.flatMap((element) => element.violations),
   }
 }
 
@@ -61,33 +63,35 @@ const excessViolations = (parsed: ParsedStartBuffs): StartBuffViolation[] =>
     ? [{ code: 'EXCESS_STARTBUFF', path: START_BUFFS_PATH }]
     : []
 
-function duplicateBaseIdViolations(buffs: readonly SelectedStartBuff[]): StartBuffViolation[] {
-  const firstIndex = firstIndexOf(buffs.map(baseIdOf))
-  return buffs
-    .filter((buff, buffIndex) => firstIndex.get(baseIdOf(buff)) !== buffIndex)
-    .map((buff) => ({ code: 'DUPLICATE_STARTBUFF', path: buff.path }))
+const unknownBuff = (buff: SelectedStartBuff): StartBuffViolation => ({
+  code: 'UNKNOWN_STARTBUFF',
+  path: buff.path,
+  params: { id: String(buff.buffId) },
+})
+
+function knownBuffViolations(buffs: readonly SelectedStartBuff[]): StartBuffViolation[] {
+  const countedBases = buffs.map((buff) => (hasBaseIdInRange(buff) ? baseIdOf(buff) : undefined))
+  const firstIndex = firstIndexOf(countedBases)
+  return buffs.flatMap((buff, buffIndex): StartBuffViolation[] => {
+    const base = countedBases[buffIndex]
+    if (base === undefined) return [{ code: 'OUT_OF_RANGE_STARTBUFF', path: buff.path }]
+    return firstIndex.get(base) === buffIndex
+      ? []
+      : [{ code: 'DUPLICATE_STARTBUFF', path: buff.path }]
+  })
 }
 
-export function startBuffViolations(parsed: ParsedStartBuffs): StartBuffViolation[] {
-  const outOfRange = parsed.buffs
-    .filter((buff) => !hasBaseIdInRange(buff))
-    .map((buff): StartBuffViolation => ({ code: 'OUT_OF_RANGE_STARTBUFF', path: buff.path }))
+export function startBuffViolations(
+  parsed: ParsedStartBuffs,
+  season: StartBuffSeason | undefined,
+): StartBuffViolation[] {
+  if (season === undefined) return [...parsed.listViolations]
+  const isKnown = (buff: SelectedStartBuff) => season.hasStartBuff(String(buff.buffId))
   return [
-    ...parsed.violations,
+    ...parsed.listViolations,
+    ...parsed.elementViolations,
     ...excessViolations(parsed),
-    ...outOfRange,
-    ...duplicateBaseIdViolations(parsed.buffs.filter(hasBaseIdInRange)),
+    ...parsed.buffs.filter((buff) => !isKnown(buff)).map(unknownBuff),
+    ...knownBuffViolations(parsed.buffs.filter(isKnown)),
   ].sort(byPathThenCode)
 }
-
-export const startBuffReferenceViolations = (
-  parsed: ParsedStartBuffs,
-  data: StartBuffReferenceData,
-): StartBuffViolation[] =>
-  parsed.buffs
-    .filter((buff) => !data.hasStartBuff(String(buff.buffId)))
-    .map((buff) => ({
-      code: 'UNKNOWN_STARTBUFF',
-      path: buff.path,
-      params: { id: String(buff.buffId) },
-    }))

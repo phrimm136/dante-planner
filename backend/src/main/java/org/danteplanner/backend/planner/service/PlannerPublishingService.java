@@ -73,11 +73,6 @@ public class PlannerPublishingService {
         return applyUnpublish(userId, accessGuard.requireExisting(plannerId));
     }
 
-    @Transactional
-    public PlannerResponse unpublish(Long userId, UUID deviceId, UUID plannerId, UpsertPlannerRequest content) {
-        return applyUnpublish(userId, upserted(userId, deviceId, plannerId, content));
-    }
-
     private Planner upserted(Long userId, UUID deviceId, UUID plannerId, UpsertPlannerRequest content) {
         return plannerCommandService
                 .upsertAggregate(userId, deviceId, plannerId, content, false)
@@ -95,9 +90,6 @@ public class PlannerPublishingService {
             planner.getContent().setContent(normalized);
         }
 
-        if (!planner.isPublished()) {
-            publishValidator.requireKnownKeywords(planner.getContentJson());
-        }
         PublicationChange change = planner.publish();
         if (!change.changed()) {
             return PlannerResponse.fromEntity(planner);

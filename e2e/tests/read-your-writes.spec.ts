@@ -111,9 +111,7 @@ test('without the cookie the same listing converges only after the replication l
     })
     expect([200, 201], await created.text()).toContain(created.status())
 
-    const published = await fixture.api.put(`/api/planner/md/${fixture.plannerId}/publish`, {
-      data: { published: true },
-    })
+    const published = await fixture.api.post(`/api/planner/md/${fixture.plannerId}/publish`)
     expect(published.status(), await published.text()).toBe(200)
 
     // No cookie, and a listing rather than a by-id read: the by-id path would be answered by the
@@ -165,15 +163,11 @@ test('publishing an already-published planner mints no ryw_gtid', async () => {
     })
     expect([200, 201], await created.text()).toContain(created.status())
 
-    const published = await fixture.api.put(`/api/planner/md/${fixture.plannerId}/publish`, {
-      data: { published: true },
-    })
+    const published = await fixture.api.post(`/api/planner/md/${fixture.plannerId}/publish`)
     expect(published.status(), await published.text()).toBe(200)
     expect(rywCookieValue(published), 'the state change minted no cookie').not.toBeNull()
 
-    const republished = await fixture.api.put(`/api/planner/md/${fixture.plannerId}/publish`, {
-      data: { published: true },
-    })
+    const republished = await fixture.api.post(`/api/planner/md/${fixture.plannerId}/publish`)
     expect(republished.status(), await republished.text()).toBe(200)
     expect(rywCookieValue(republished), 'a no-op publish committed something').toBeNull()
   } finally {
@@ -191,9 +185,7 @@ test('the cookie covers the filter-index rebuild as well as the publish itself',
     })
     expect([200, 201], await created.text()).toContain(created.status())
 
-    const published = await fixture.api.put(`/api/planner/md/${fixture.plannerId}/publish`, {
-      data: { published: true },
-    })
+    const published = await fixture.api.post(`/api/planner/md/${fixture.plannerId}/publish`)
     expect(published.status(), await published.text()).toBe(200)
 
     const minted = rywCookieValue(published)

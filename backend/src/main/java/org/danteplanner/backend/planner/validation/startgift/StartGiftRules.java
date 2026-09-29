@@ -2,7 +2,9 @@ package org.danteplanner.backend.planner.validation.startgift;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.danteplanner.backend.planner.validation.ContentPath;
+import org.danteplanner.backend.planner.validation.EncodedGiftId;
 import org.danteplanner.backend.planner.validation.FieldResult;
+import org.danteplanner.backend.planner.validation.GiftId;
 import org.danteplanner.backend.planner.validation.JsonArrays;
 import org.danteplanner.backend.planner.validation.JsonKind;
 import org.danteplanner.backend.planner.validation.Positions;
@@ -12,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -35,8 +38,10 @@ public final class StartGiftRules {
                         keyword.violations().stream(),
                         giftIds.violations().stream(),
                         gifts.stream().flatMap(gift -> giftViolation(gift, data)),
-                        season.stream().flatMap(known -> keywordViolations(keyword.value(), giftIds.value().size(),
-                                gifts, known)))
+                        keyword.violations().isEmpty()
+                                ? season.stream().flatMap(known -> keywordViolations(keyword.value(),
+                                        giftIds.value().size(), knownGifts(gifts, data), known))
+                                : Stream.<Violation>empty())
                 .flatMap(violations -> violations)
                 .sorted(Violation.BY_PATH_THEN_CODE)
                 .toList();
@@ -45,7 +50,7 @@ public final class StartGiftRules {
     private static FieldResult<Optional<String>> keyword(JsonNode keyword) {
         return switch (keyword.getNodeType()) {
             case MISSING, NULL -> FieldResult.of(Optional.empty());
-            case STRING -> FieldResult.of(Optional.of(keyword.asText()));
+            case STRING -> FieldResult.of(Optional.of(keyword.asText()).filter(chosen -> !chosen.isBlank()));
             default -> FieldResult.rejected(Optional.empty(),
                     Violation.invalidFieldType(SELECTED_GIFT_KEYWORD, JsonKind.STRING_OR_NULL, keyword));
         };
@@ -81,10 +86,19 @@ public final class StartGiftRules {
                         : Stream.of(StartGiftViolations.missingKeyword(SELECTED_GIFT_IDS)));
     }
 
+    private static List<StartGift> knownGifts(List<StartGift> gifts, StartGiftReferenceData data) {
+        return gifts.stream().filter(gift -> data.hasEgoGift(gift.giftId())).toList();
+    }
+
     private static Stream<Violation> outsidePool(String keyword, List<StartGift> gifts, Set<String> pool) {
+        Set<GiftId> poolBases = pool.stream().map(StartGiftRules::baseOf).collect(Collectors.toSet());
         return gifts.stream()
-                .filter(gift -> !gift.repeated() && !pool.contains(gift.giftId()))
+                .filter(gift -> !gift.repeated() && !poolBases.contains(baseOf(gift.giftId())))
                 .map(gift -> StartGiftViolations.outsidePool(SELECTED_GIFT_IDS.index(gift.index()), SELECTED_GIFT_IDS,
                         keyword, gift.giftId()));
+    }
+
+    private static GiftId baseOf(String giftId) {
+        return EncodedGiftId.parse(giftId).base();
     }
 }

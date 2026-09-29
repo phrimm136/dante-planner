@@ -54,9 +54,13 @@ public final class StartBuffRules {
 
     private static Stream<Violation> seasonal(FieldResult<List<Optional<Integer>>> parsed, StartBuffSeason season) {
         List<Optional<Integer>> buffIds = parsed.value();
-        return buffIds.size() > MAX_START_BUFFS
-                ? Stream.of(StartBuffViolations.tooMany(SELECTED_BUFF_IDS, buffIds.size()))
-                : Stream.concat(parsed.violations().stream(), buffs(buffIds, season));
+        return Stream.of(
+                        buffIds.size() > MAX_START_BUFFS
+                                ? Stream.of(StartBuffViolations.tooMany(SELECTED_BUFF_IDS, buffIds.size()))
+                                : Stream.<Violation>empty(),
+                        parsed.violations().stream(),
+                        buffs(buffIds, season))
+                .flatMap(violations -> violations);
     }
 
     private static Stream<Violation> buffs(List<Optional<Integer>> buffIds, StartBuffSeason season) {

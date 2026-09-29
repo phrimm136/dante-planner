@@ -291,11 +291,10 @@ class CausalGateIT extends CausalHarnessSupport {
 
         int recordingsBefore = gtidWriteCapture.commitRecordings();
 
-        MvcResult published = mockMvc.perform(put("/api/planner/md/" + plannerId + "/publish")
+        MvcResult published = mockMvc.perform(post("/api/planner/md/" + plannerId + "/publish")
                         .with(withCsrf())
                         .cookie(auth, device)
-                        .contentType(APPLICATION_JSON)
-                        .content("{\"published\":true}"))
+                        .contentType(APPLICATION_JSON))
                 .andExpect(status().is2xxSuccessful())
                 .andReturn();
 

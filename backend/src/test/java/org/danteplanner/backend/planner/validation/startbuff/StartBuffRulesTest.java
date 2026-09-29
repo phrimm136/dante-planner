@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.danteplanner.backend.planner.validation.ContentFixtures.json;
 
 class StartBuffRulesTest {
@@ -42,19 +43,36 @@ class StartBuffRulesTest {
     }
 
     @Test
-    void check_WhenThereAreMoreThanTenBuffs_ReportsTheCountAlone() {
+    void check_WhenThereAreMoreThanTenBuffs_ReportsTheCountBesideEachBuff() {
         assertThat(StartBuffRules.check(json("[100,101,102,103,104,105,106,107,108,109,\"x\"]"), SEASON))
-                .containsExactly(new Violation(ErrorCode.EXCESS_STARTBUFF, BUFFS,
-                        "selectedBuffIds count value 11 is out of range [0-10]"));
+                .containsExactly(
+                        new Violation(ErrorCode.EXCESS_STARTBUFF, BUFFS,
+                                "selectedBuffIds count value 11 is out of range [0-10]"),
+                        new Violation(ErrorCode.UNKNOWN_STARTBUFF, BUFFS.index(2),
+                                "selectedBuffIds ID '102' not found or invalid"),
+                        new Violation(ErrorCode.UNKNOWN_STARTBUFF, BUFFS.index(3),
+                                "selectedBuffIds ID '103' not found or invalid"),
+                        new Violation(ErrorCode.UNKNOWN_STARTBUFF, BUFFS.index(4),
+                                "selectedBuffIds ID '104' not found or invalid"),
+                        new Violation(ErrorCode.UNKNOWN_STARTBUFF, BUFFS.index(5),
+                                "selectedBuffIds ID '105' not found or invalid"),
+                        new Violation(ErrorCode.UNKNOWN_STARTBUFF, BUFFS.index(6),
+                                "selectedBuffIds ID '106' not found or invalid"),
+                        new Violation(ErrorCode.UNKNOWN_STARTBUFF, BUFFS.index(7),
+                                "selectedBuffIds ID '107' not found or invalid"),
+                        new Violation(ErrorCode.UNKNOWN_STARTBUFF, BUFFS.index(8),
+                                "selectedBuffIds ID '108' not found or invalid"),
+                        new Violation(ErrorCode.UNKNOWN_STARTBUFF, BUFFS.index(9),
+                                "selectedBuffIds ID '109' not found or invalid"),
+                        new Violation(ErrorCode.INVALID_FIELD_TYPE, BUFFS.index(10),
+                                "Field 'selectedBuffIds[10]' must be number, got string \"x\""));
     }
 
     @Test
     void check_WhenABuffIsNotAnInteger_ReportsItAtItsIndex() {
         assertThat(StartBuffRules.check(json("[100,\"x\",101.0]"), SEASON)).containsExactly(
                 new Violation(ErrorCode.INVALID_FIELD_TYPE, BUFFS.index(1),
-                        "Field 'selectedBuffIds[1]' must be number, got string \"x\""),
-                new Violation(ErrorCode.INVALID_FIELD_TYPE, BUFFS.index(2),
-                        "Field 'selectedBuffIds[2]' must be number, got number 101.0"));
+                        "Field 'selectedBuffIds[1]' must be number, got string \"x\""));
     }
 
     @Test
@@ -73,5 +91,18 @@ class StartBuffRulesTest {
     void check_WhenTwoBuffsShareABase_ReportsTheLaterOne() {
         assertThat(StartBuffRules.check(json("[100,200,101]"), SEASON)).containsExactly(new Violation(
                 ErrorCode.DUPLICATE_STARTBUFF, BUFFS.index(1), "Duplicate value '0' in selectedBuffIds base IDs"));
+    }
+
+    @Test
+    void check_WhenElevenBuffsRepeatABase_ReportsTheCountAndTheRepeat() {
+        assertThat(StartBuffRules.check(json("[100,101,115,201,302,100,101,115,201,302,200]"), SEASON))
+                .extracting(Violation::code, violation -> violation.path().render())
+                .contains(tuple(ErrorCode.EXCESS_STARTBUFF, "selectedBuffIds"),
+                        tuple(ErrorCode.DUPLICATE_STARTBUFF, "selectedBuffIds[10]"));
+    }
+
+    @Test
+    void check_WhenABuffIsAnIntegralValuedFraction_AcceptsItAsItsInteger() {
+        assertThat(StartBuffRules.check(json("[100.0,201]"), SEASON)).isEmpty();
     }
 }

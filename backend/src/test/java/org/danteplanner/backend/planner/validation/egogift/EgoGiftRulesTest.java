@@ -57,4 +57,12 @@ class EgoGiftRulesTest {
                         new Violation(ErrorCode.DUPLICATE_EGOGIFT, COMPREHENSIVE.index(2),
                                 "Duplicate value '9999' in comprehensiveGiftIds"));
     }
+
+    @Test
+    void check_WhenAListHoldsABaseAndItsEnhancedForm_ReportsNoRepeat() {
+        EgoGiftReferenceData enhancedGifts = id -> id.endsWith("9001");
+
+        assertThat(EgoGiftRules.check(json("[\"9001\",\"19001\"]"), json("[\"19001\",\"29001\"]"),
+                enhancedGifts)).isEmpty();
+    }
 }

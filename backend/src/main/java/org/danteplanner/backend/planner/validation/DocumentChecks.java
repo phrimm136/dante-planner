@@ -2,19 +2,22 @@ package org.danteplanner.backend.planner.validation;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.danteplanner.backend.planner.entity.MDCategory;
+import org.danteplanner.backend.planner.entity.PlannerKeywords;
+import org.danteplanner.backend.planner.validation.floor.Stage;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 record DocumentChecks(int maxContentSizeBytes, int maxNoteSizeBytes) {
 
     private static final Set<String> REQUIRED_FIELDS = Set.of(
             "selectedKeywords", "equipment",
-            "deploymentOrder", "floorSelections", "sectionNotes");
+            "deploymentOrder", "skillEAState", "floorSelections", "sectionNotes");
 
     private static final Set<String> ALLOWED_FIELDS = Set.of(
             "selectedKeywords", "selectedBuffIds",
@@ -24,6 +27,7 @@ record DocumentChecks(int maxContentSizeBytes, int maxNoteSizeBytes) {
 
     private static final String SELECTED_KEYWORDS = "selectedKeywords";
     private static final String SECTION_NOTES = "sectionNotes";
+    private static final ContentPath SELECTED_KEYWORDS_PATH = ContentPath.of(SELECTED_KEYWORDS);
 
     static Optional<Violation> emptiness(String content) {
         return content == null || content.isBlank()
@@ -89,11 +93,26 @@ record DocumentChecks(int maxContentSizeBytes, int maxNoteSizeBytes) {
     }
 
     static List<Violation> fieldKinds(JsonNode root) {
-        return Stream.of(
-                        arrayKind(root.path(SELECTED_KEYWORDS), ContentPath.of(SELECTED_KEYWORDS)),
-                        objectKind(root.path(SECTION_NOTES), ContentPath.of(SECTION_NOTES)))
-                .flatMap(Optional::stream)
-                .toList();
+        return objectKind(root.path(SECTION_NOTES), ContentPath.of(SECTION_NOTES)).stream().toList();
+    }
+
+    static List<Violation> selectedKeywords(JsonNode root, Stage stage) {
+        FieldResult<List<Optional<String>>> keywords = JsonArrays.strings(root.path(SELECTED_KEYWORDS),
+                SELECTED_KEYWORDS_PATH);
+        return Stream.concat(keywords.violations().stream(), switch (stage) {
+            case PUBLISH -> unknownKeywords(keywords.value());
+            case DRAFT, INDEX -> Stream.<Violation>empty();
+        }).toList();
+    }
+
+    private static Stream<Violation> unknownKeywords(List<Optional<String>> keywords) {
+        return IntStream.range(0, keywords.size())
+                .boxed()
+                .flatMap(index -> keywords.get(index)
+                        .filter(keyword -> !PlannerKeywords.isKnown(keyword))
+                        .map(keyword -> Violation.unknownId(ErrorCode.UNKNOWN_KEYWORD,
+                                SELECTED_KEYWORDS_PATH.index(index), SELECTED_KEYWORDS, keyword))
+                        .stream());
     }
 
     private Optional<Violation> noteSize(String sectionKey, JsonNode note) {
@@ -102,13 +121,6 @@ record DocumentChecks(int maxContentSizeBytes, int maxNoteSizeBytes) {
                 ? Optional.of(sizeExceeded(ContentPath.of(SECTION_NOTES).key(sectionKey),
                         String.format("Note '%s'", sectionKey), size, maxNoteSizeBytes))
                 : Optional.empty();
-    }
-
-    private static Optional<Violation> arrayKind(JsonNode node, ContentPath path) {
-        return switch (node.getNodeType()) {
-            case MISSING, ARRAY -> Optional.empty();
-            default -> Optional.of(Violation.invalidFieldType(path, JsonKind.ARRAY, node));
-        };
     }
 
     private static Optional<Violation> objectKind(JsonNode node, ContentPath path) {

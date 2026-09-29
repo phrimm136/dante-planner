@@ -1,6 +1,10 @@
 package org.danteplanner.backend.planner.precondition;
 
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
+import org.danteplanner.backend.planner.exception.PlannerValidationException.ValidationError;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -11,28 +15,23 @@ class PlannerPublishValidatorTest {
 
     private final PlannerPublishValidator validator = new PlannerPublishValidator();
 
-    @Test
-    void requireKnownKeywords_WhenContentSelectsAnUnknownKeyword_ThrowsUnknownKeyword() {
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {"", "   "})
+    void requireTitle_WhenTheTitleIsAbsentOrBlank_RefusesWithMissingTitleAtTheTitle(String title) {
         PlannerValidationException ex = catchThrowableOfType(PlannerValidationException.class,
-                () -> validator.requireKnownKeywords("{\"selectedKeywords\":[\"Sinking\",\"NotAKeyword\"]}"));
+                () -> validator.requireTitle(title));
 
         assertThat(ex).isNotNull();
-        assertThat(ex.getOriginalCode()).isEqualTo("UNKNOWN_KEYWORD");
-        assertThat(ex.getBody().getProperties()).containsEntry("code", "UNKNOWN_KEYWORD");
-        assertThat(ex.getMessage()).isEqualTo("Unknown keywords: [NotAKeyword]");
+        assertThat(ex.getOriginalCode()).isEqualTo("MISSING_TITLE");
+        assertThat(ex.getSubErrors()).containsExactly(
+                new ValidationError("MISSING_TITLE", "title", "Title is required for publishing"));
+        assertThat(ex.getBody().getProperties()).containsEntry("code", "VALIDATION_ERROR");
+        assertThat(ex.getBody().getDetail()).isEqualTo("Invalid planner content structure");
     }
 
     @Test
-    void requireKnownKeywords_WhenAnElementIsNotAString_ThrowsUnknownKeyword() {
-        assertThat(catchThrowableOfType(PlannerValidationException.class,
-                () -> validator.requireKnownKeywords("{\"selectedKeywords\":[9828]}")))
-                .isNotNull();
-    }
-
-    @Test
-    void requireKnownKeywords_WhenContentSelectsKnownAndRenamedKeywords_Passes() {
-        assertThatCode(() -> validator.requireKnownKeywords(
-                "{\"selectedKeywords\":[\"Sinking\",\"AccelBullet\",\"ChargeLoad\"]}"))
-                .doesNotThrowAnyException();
+    void requireTitle_WhenTheTitleIsPresent_Passes() {
+        assertThatCode(() -> validator.requireTitle("Corpus")).doesNotThrowAnyException();
     }
 }

@@ -42,9 +42,7 @@ async function writePlanner(fixture: Fixture): Promise<void> {
 }
 
 async function publishPlanner(fixture: Fixture): Promise<void> {
-  const published = await fixture.api.put(`/api/planner/md/${fixture.plannerId}/publish`, {
-    data: { published: true },
-  })
+  const published = await fixture.api.post(`/api/planner/md/${fixture.plannerId}/publish`)
   expect(published.status(), await published.text()).toBe(200)
 }
 

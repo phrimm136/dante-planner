@@ -4,6 +4,7 @@ import { describe, it, expect } from 'vitest'
 
 import { FLOOR_RULE_TABLE, MD_CATEGORIES } from '@/shared/gameData'
 import type { FloorRuleStage, MDCategory } from '@/shared/gameData'
+import { decodeGiftId } from '../../boundary'
 import { renderContentPath } from '../../contentPath'
 import { admitFloors, parseFloors } from '../floorRules'
 import type { ParsedFloor, ParsedFloors } from '../floorRules'
@@ -46,11 +47,13 @@ const corpus = JSON.parse(fs.readFileSync(CORPUS_PATH, 'utf-8')) as {
 const themePackIds = new Set(corpus.gameData.themePackIds)
 const giftThemePacks = new Map(Object.entries(corpus.gameData.egoGiftThemePacks))
 
+const baseGiftId = (giftId: string): string => decodeGiftId(giftId) ?? giftId
+
 const corpusGameData: FloorReferenceData = {
   hasThemePack: (themePackId) => themePackIds.has(themePackId),
-  hasEgoGift: (giftId) => giftThemePacks.has(giftId),
+  hasEgoGift: (giftId) => giftThemePacks.has(baseGiftId(giftId)),
   isGiftAffordableForThemePack: (giftId, themePackId) => {
-    const packs = giftThemePacks.get(giftId) ?? []
+    const packs = giftThemePacks.get(baseGiftId(giftId)) ?? []
     return packs.length === 0 || packs.includes(themePackId)
   },
 }
@@ -97,9 +100,9 @@ function admit(c: CorpusCase, stage: FloorRuleStage) {
 }
 
 describe('floor rules corpus', () => {
-  it('holds 61 cases, 60 of them for the module', () => {
-    expect(corpus.cases).toHaveLength(61)
-    expect(moduleCases).toHaveLength(60)
+  it('holds 63 cases, 62 of them for the module', () => {
+    expect(corpus.cases).toHaveLength(63)
+    expect(moduleCases).toHaveLength(62)
   })
 
   it('records only module codes, id-check codes and caller boundary codes', () => {

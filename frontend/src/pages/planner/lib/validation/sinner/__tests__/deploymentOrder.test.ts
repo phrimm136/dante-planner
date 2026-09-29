@@ -45,3 +45,28 @@ describe('deploymentOrderViolations', () => {
     expect(violationsOf(raw)).toEqual([{ code: 'INVALID_FIELD_TYPE', path: 'deploymentOrder' }])
   })
 })
+
+describe('deployment order repeats and length', () => {
+  it('reports every repeat after the first occurrence', () => {
+    expect(violationsOf([1, 1, 2, 1])).toEqual([
+      { code: 'DUPLICATE_DEPLOYMENT', path: 'deploymentOrder[1]' },
+      { code: 'DUPLICATE_DEPLOYMENT', path: 'deploymentOrder[3]' },
+    ])
+  })
+
+  it('reports more than 12 entries at the list beside the per-entry checks', () => {
+    expect(violationsOf([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0])).toEqual([
+      { code: 'EXCESS_DEPLOYMENT', path: 'deploymentOrder' },
+      { code: 'DUPLICATE_DEPLOYMENT', path: 'deploymentOrder[12]' },
+    ])
+  })
+
+  it('does not count an out-of-range or malformed entry as a repeat', () => {
+    expect(violationsOf([12, 12, 'x', 'x'])).toEqual([
+      { code: 'OUT_OF_RANGE_DEPLOYMENT', path: 'deploymentOrder[0]' },
+      { code: 'OUT_OF_RANGE_DEPLOYMENT', path: 'deploymentOrder[1]' },
+      { code: 'INVALID_FIELD_TYPE', path: 'deploymentOrder[2]' },
+      { code: 'INVALID_FIELD_TYPE', path: 'deploymentOrder[3]' },
+    ])
+  })
+})

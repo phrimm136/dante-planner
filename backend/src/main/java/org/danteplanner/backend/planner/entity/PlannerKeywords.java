@@ -86,6 +86,10 @@ public final class PlannerKeywords {
         return new PlannerKeywords(normalized.keywords, unnamed);
     }
 
+    public static boolean isKnown(String keyword) {
+        return VALID_KEYWORDS.contains(remap(keyword));
+    }
+
     public static String filterKeyword(String keyword) {
         return FILTER_RENAME_MAP.getOrDefault(keyword, keyword);
     }

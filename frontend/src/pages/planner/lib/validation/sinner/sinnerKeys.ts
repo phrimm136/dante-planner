@@ -10,6 +10,8 @@ const MAX_SINNER = 12
 const SINNER_KEY_DIGITS = 2
 const INTEGER_KEY = /^[+-]?\d+$/
 
+export type SinnerKey = { rawKey: string; sinner: number }
+
 export type SinnerEntry = {
   sinnerKey: string
   path: ContentPath
@@ -18,7 +20,7 @@ export type SinnerEntry = {
 
 export type SinnerKeyViolation =
   | { code: Codes<'MISSING_SINNER'>; path: ContentPath; missingSinners: readonly string[] }
-  | { code: Codes<'OUT_OF_RANGE_SINNER'>; path: ContentPath }
+  | { code: Codes<'OUT_OF_RANGE_SINNER' | 'DUPLICATE_SINNER'>; path: ContentPath }
   | InvalidFieldType
 
 export type ParsedSinners = {
@@ -28,58 +30,67 @@ export type ParsedSinners = {
 
 const paddedKey = (sinner: number): string => String(sinner).padStart(SINNER_KEY_DIGITS, '0')
 
-const SINNER_KEYS: readonly string[] = Array.from(
+const SINNERS: readonly number[] = Array.from(
   { length: MAX_SINNER - MIN_SINNER + 1 },
-  (_, offset) => paddedKey(MIN_SINNER + offset),
+  (_, offset) => MIN_SINNER + offset,
 )
 
-type KeyReading = { rawKey: string; sinnerKey?: string; violations: SinnerKeyViolation[] }
+type KeyReading = { sinnerKey?: SinnerKey; violations: SinnerKeyViolation[] }
 
 const inRange = (sinner: number) => sinner >= MIN_SINNER && sinner <= MAX_SINNER
 
 function readKey(rawKey: string, path: ContentPath): KeyReading {
   const keyPath = extendPath(path, key(rawKey))
-  if (!INTEGER_KEY.test(rawKey)) return { rawKey, violations: [invalidFieldType(keyPath)] }
+  if (!INTEGER_KEY.test(rawKey)) return { violations: [invalidFieldType(keyPath)] }
   const sinner = Number(rawKey)
   return inRange(sinner)
-    ? { rawKey, sinnerKey: paddedKey(sinner), violations: [] }
-    : { rawKey, violations: [{ code: 'OUT_OF_RANGE_SINNER', path: keyPath }] }
+    ? { sinnerKey: { rawKey, sinner }, violations: [] }
+    : { violations: [{ code: 'OUT_OF_RANGE_SINNER', path: keyPath }] }
 }
 
-const keepsKey = (chosen: ReadonlyMap<string, string>, sinnerKey: string, rawKey: string) =>
-  chosen.has(sinnerKey) && rawKey !== sinnerKey
-
-function rawKeysBySinner(readings: readonly KeyReading[]): ReadonlyMap<string, string> {
-  return readings.reduce((chosen, { rawKey, sinnerKey }) => {
-    return sinnerKey === undefined || keepsKey(chosen, sinnerKey, rawKey)
-      ? chosen
-      : chosen.set(sinnerKey, rawKey)
-  }, new Map<string, string>())
+function keysBySinner(readings: readonly KeyReading[]): ReadonlyMap<number, readonly SinnerKey[]> {
+  return readings.reduce((bySinner, { sinnerKey }) => {
+    if (sinnerKey === undefined) return bySinner
+    return bySinner.set(sinnerKey.sinner, [...(bySinner.get(sinnerKey.sinner) ?? []), sinnerKey])
+  }, new Map<number, SinnerKey[]>())
 }
 
 type EntryResult = { entries: SinnerEntry[]; violations: SinnerKeyViolation[] }
 
-function entryOf(value: unknown, sinnerKey: string, path: ContentPath): EntryResult {
+function entryOf(value: unknown, sinner: number, path: ContentPath): EntryResult {
+  const sinnerKey = paddedKey(sinner)
   const entryPath = extendPath(path, key(sinnerKey))
   return isRecord(value)
     ? { entries: [{ sinnerKey, path: entryPath, value }], violations: [] }
     : { entries: [], violations: [invalidFieldType(entryPath)] }
 }
 
+const duplicateSinner = (sinnerKeys: readonly SinnerKey[], path: ContentPath): EntryResult => ({
+  entries: [],
+  violations: sinnerKeys.map(({ rawKey }) => ({
+    code: 'DUPLICATE_SINNER',
+    path: extendPath(path, key(rawKey)),
+  })),
+})
+
 function missingSinners(
-  present: ReadonlyMap<string, string>,
+  present: ReadonlyMap<number, readonly SinnerKey[]>,
   path: ContentPath,
 ): SinnerKeyViolation[] {
-  const missing = SINNER_KEYS.filter((sinnerKey) => !present.has(sinnerKey))
+  const missing = SINNERS.filter((sinner) => !present.has(sinner)).map(paddedKey)
   return missing.length > 0 ? [{ code: 'MISSING_SINNER', path, missingSinners: missing }] : []
 }
 
 function parseSinnerRecord(raw: Record<string, unknown>, path: ContentPath): ParsedSinners {
   const readings = Object.keys(raw).map((rawKey) => readKey(rawKey, path))
-  const present = rawKeysBySinner(readings)
-  const results = SINNER_KEYS.flatMap((sinnerKey) => {
-    const rawKey = present.get(sinnerKey)
-    return rawKey === undefined ? [] : [entryOf(raw[rawKey], sinnerKey, path)]
+  const present = keysBySinner(readings)
+  const results = SINNERS.flatMap((sinner) => {
+    const sinnerKeys = present.get(sinner) ?? []
+    const [only, ...others] = sinnerKeys
+    if (only === undefined) return []
+    return others.length > 0
+      ? [duplicateSinner(sinnerKeys, path)]
+      : [entryOf(raw[only.rawKey], sinner, path)]
   })
   return {
     entries: results.flatMap((result) => result.entries),

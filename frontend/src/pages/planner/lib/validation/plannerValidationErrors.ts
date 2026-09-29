@@ -1,7 +1,7 @@
 import { validationAppError } from '@/lib/apiErrorClassifier'
 import type { Codes } from './codes'
 import type { ContentPath } from './contentPath'
-import type { DocumentViolation } from './document'
+import type { DocumentRefusal, DocumentViolation } from './document'
 import type { EgoViolation } from './ego/egos'
 import type { GiftIdsViolation } from './egogift/giftIds'
 import type { FloorViolation } from './floor/floorRules'
@@ -26,6 +26,7 @@ export type FloorReferenceError =
     }
 
 export type PlannerValidationError =
+  | DocumentRefusal
   | DocumentViolation
   | SinnerKeyViolation
   | IdentityViolation
@@ -41,6 +42,7 @@ export type PlannerValidationError =
 export type FriendlyError = { key: string; params?: Record<string, string> }
 
 const CORRUPTED_STATE = 'pages.plannerMD.validation.corruptedState'
+const MISSING_GAME_DATA = 'pages.plannerMD.validation.missingGameData'
 
 const MESSAGE_KEYS = {
   MISSING_TITLE: 'pages.plannerMD.publish.missingTitle',
@@ -74,6 +76,17 @@ const MESSAGE_KEYS = {
   MISSING_STARTGIFT_KEYWORD: CORRUPTED_STATE,
   INVALID_FIELD_TYPE: CORRUPTED_STATE,
   DUPLICATE_THEMEPACK: CORRUPTED_STATE,
+  MISSING_REQUIRED_FIELD: CORRUPTED_STATE,
+  UNKNOWN_FIELD: CORRUPTED_STATE,
+  INVALID_CATEGORY: CORRUPTED_STATE,
+  UNKNOWN_STARTGIFT_KEYWORD: CORRUPTED_STATE,
+  MISMATCHED_STARTGIFT: CORRUPTED_STATE,
+  DUPLICATE_SINNER: CORRUPTED_STATE,
+  DUPLICATE_DEPLOYMENT: CORRUPTED_STATE,
+  EXCESS_DEPLOYMENT: CORRUPTED_STATE,
+  SIZE_EXCEEDED: 'pages.plannerMD.validation.noteTooLarge',
+  MISSING_EGO_THREADSPIN_CEILING: MISSING_GAME_DATA,
+  UNKNOWN_VERSION: MISSING_GAME_DATA,
   UNAFFORDABLE_EGOGIFT: 'pages.plannerMD.publish.themePackEgoGiftInconsistency',
   UNKNOWN_EGOGIFT_FLOOR: 'pages.plannerMD.validation.unknownGiftId',
   UNKNOWN_KEYWORD: 'pages.plannerMD.validation.invalidKeyword',

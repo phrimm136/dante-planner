@@ -151,6 +151,7 @@ public class PlannerContentValidator {
         FloorBoundary.Parsed floors = parseFloors(root, category);
         return Stream.of(
                         DocumentChecks.fieldKinds(root),
+                        DocumentChecks.selectedKeywords(root, stage),
                         equipment.violations(),
                         IdentityRules.check(equipment.entries(), references),
                         EgoRules.check(equipment.entries(), references),

@@ -4,6 +4,7 @@ import {
   invalidFieldType,
   isAbsent,
   isBlank,
+  isInteger,
   isMissingText,
   isRecord,
 } from '../boundary'
@@ -26,7 +27,11 @@ export type EgoViolation =
   | InvalidFieldType
   | {
       code: Codes<
-        'MISSING_EGO_ZAYIN' | 'INVALID_EGO_TYPE' | 'MISMATCHED_EGO' | 'OUT_OF_RANGE_EGO_THREADSPIN'
+        | 'MISSING_EGO_ZAYIN'
+        | 'INVALID_EGO_TYPE'
+        | 'MISMATCHED_EGO'
+        | 'OUT_OF_RANGE_EGO_THREADSPIN'
+        | 'MISSING_EGO_THREADSPIN_CEILING'
       >
       path: ContentPath
     }
@@ -48,7 +53,10 @@ export type ParsedEgos = {
   violations: readonly EgoViolation[]
 }
 
-export type EgoReferenceData = { hasEgo: (egoId: string) => boolean }
+export type EgoReferenceData = {
+  hasEgo: (egoId: string) => boolean
+  maxThreadspin: (egoId: string) => number | undefined
+}
 
 type SlotResult = { egos: EquippedEgoValue[]; violations: EgoViolation[] }
 
@@ -86,8 +94,16 @@ function equippedEgo(
   }
 }
 
+const checksSlotKind = (egoType: string, ego: unknown): boolean =>
+  ego !== undefined && egoType !== REQUIRED_EGO_TYPE && KNOWN_EGO_TYPES.has(egoType)
+
+const nonObjectSlot = (egoType: string, ego: unknown, owner: SlotOwner): SlotResult =>
+  checksSlotKind(egoType, ego)
+    ? { egos: [], violations: [invalidFieldType(extendPath(owner.path, field(egoType)))] }
+    : NO_SLOT
+
 function parseSlot(egoType: string, ego: unknown, owner: SlotOwner): SlotResult {
-  if (!isRecord(ego)) return NO_SLOT
+  if (!isRecord(ego)) return nonObjectSlot(egoType, ego, owner)
   const id = ego[ID]
   if (typeof id === 'string') {
     return isBlank(id) ? NO_SLOT : { egos: [equippedEgo(egoType, id, ego, owner)], violations: [] }
@@ -120,17 +136,30 @@ export function parseEgos(
   return { egos: [], violations: [isAbsent(egos) ? missingZayin(path) : invalidFieldType(path)] }
 }
 
-function equippedEgoViolations(ego: EquippedEgoValue, data: EgoReferenceData): EgoViolation[] {
-  if (!data.hasEgo(ego.id)) {
-    return [{ code: 'UNKNOWN_EGO', path: ego.path, params: { id: ego.id } }]
-  }
-  if (!belongsToSinner(ego.id, ego.sinnerKey)) return [{ code: 'MISMATCHED_EGO', path: ego.path }]
-  return boundedIntegerViolations(
+function ceilingViolations(ego: EquippedEgoValue, data: EgoReferenceData): EgoViolation[] {
+  const { threadspin, threadspinPath: path } = ego
+  if (!isInteger(threadspin)) return []
+  const ceiling = data.maxThreadspin(ego.id)
+  if (ceiling === undefined) return [{ code: 'MISSING_EGO_THREADSPIN_CEILING', path }]
+  return threadspin > ceiling ? [{ code: 'OUT_OF_RANGE_EGO_THREADSPIN', path }] : []
+}
+
+function threadspinViolations(ego: EquippedEgoValue, data: EgoReferenceData): EgoViolation[] {
+  const bounded = boundedIntegerViolations(
     ego.threadspin,
     ego.threadspinPath,
     THREADSPIN_BOUNDS,
     'OUT_OF_RANGE_EGO_THREADSPIN',
   )
+  return bounded.length > 0 ? bounded : ceilingViolations(ego, data)
+}
+
+function equippedEgoViolations(ego: EquippedEgoValue, data: EgoReferenceData): EgoViolation[] {
+  if (!data.hasEgo(ego.id)) {
+    return [{ code: 'UNKNOWN_EGO', path: ego.path, params: { id: ego.id } }]
+  }
+  if (!belongsToSinner(ego.id, ego.sinnerKey)) return [{ code: 'MISMATCHED_EGO', path: ego.path }]
+  return threadspinViolations(ego, data)
 }
 
 export const egoRuleViolations = (parsed: ParsedEgos, data: EgoReferenceData): EgoViolation[] =>

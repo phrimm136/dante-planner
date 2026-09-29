@@ -41,12 +41,14 @@ const CORPUS_PATH = path.resolve(FRONTEND_ROOT, '../testdata/planner-floor-rules
 const corpus = JSON.parse(fs.readFileSync(CORPUS_PATH, 'utf-8')) as Corpus
 
 const TITLE = 'Corpus'
+const EGO_MAX_THREADSPIN = 5
 
 const registry: PlannerIdRegistry = {
   identityIds: new Set(corpus.gameData.identityIds),
   egoIds: new Set(corpus.gameData.egoIds),
+  egoMaxThreadspin: new Map(corpus.gameData.egoIds.map((egoId) => [egoId, EGO_MAX_THREADSPIN])),
   themePackIds: new Set(corpus.gameData.themePackIds),
-  startBuffIds: new Set(corpus.gameData.startBuffIds),
+  season: { startBuffIds: new Set(corpus.gameData.startBuffIds), startGiftPools: new Map() },
 }
 
 const egoGiftSpec: Record<string, EGOGiftSpec> = Object.fromEntries(

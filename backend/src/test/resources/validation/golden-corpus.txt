@@ -1,62 +1,77 @@
 ### category-null
 code: INVALID_CATEGORY
 message: Invalid category: null
+sub 1: INVALID_CATEGORY | Invalid category: null
 
 ### category-blank
 code: INVALID_CATEGORY
 message: Invalid category: 
+sub 1: INVALID_CATEGORY | Invalid category: 
 
 ### category-unknown
 code: INVALID_CATEGORY
 message: Invalid category: 20F
+sub 1: INVALID_CATEGORY | Invalid category: 20F
 
 ### content-null
 code: EMPTY_CONTENT
 message: Content is empty or null
+sub 1: EMPTY_CONTENT | Content is empty or null
 
 ### content-blank
 code: EMPTY_CONTENT
 message: Content is empty or null
+sub 1: EMPTY_CONTENT | Content is empty or null
 
 ### content-size-exceeded
 code: SIZE_EXCEEDED
 message: Content size 52100 exceeds limit 51200
+sub 1: SIZE_EXCEEDED | Content size 52100 exceeds limit 51200
 
 ### json-malformed
 code: MALFORMED_JSON
 message: Malformed JSON: <parser detail elided>
+sub 1: MALFORMED_JSON | Malformed JSON: <parser detail elided>
 
 ### json-truncated
 code: MALFORMED_JSON
 message: Malformed JSON: <parser detail elided>
+sub 1: MALFORMED_JSON | Malformed JSON: <parser detail elided>
 
 ### root-is-array
 code: MALFORMED_JSON
 message: Malformed JSON: root element is not an object
+sub 1: MALFORMED_JSON | Malformed JSON: root element is not an object
 
 ### root-is-primitive
 code: MALFORMED_JSON
 message: Malformed JSON: root element is not an object
+sub 1: MALFORMED_JSON | Malformed JSON: root element is not an object
 
 ### unknown-field-single
 code: UNKNOWN_FIELD
 message: Unknown fields: [theme]
+sub 1: UNKNOWN_FIELD | Unknown fields: [theme]
 
 ### unknown-fields-multiple
 code: UNKNOWN_FIELD
 message: Unknown fields: [revision, theme]
+sub 1: UNKNOWN_FIELD | Unknown fields: [revision, theme]
 
 ### missing-required-single
 code: MISSING_REQUIRED_FIELD
 message: Missing required fields: [sectionNotes]
+sub 1: MISSING_REQUIRED_FIELD | Missing required fields: [sectionNotes]
 
 ### missing-required-multiple
 code: MISSING_REQUIRED_FIELD
 message: Missing required fields: [deploymentOrder, floorSelections, sectionNotes]
+sub 1: MISSING_REQUIRED_FIELD | Missing required fields: [deploymentOrder, floorSelections, sectionNotes]
 
 ### missing-required-hash-colliding-pair
 code: MISSING_REQUIRED_FIELD
 message: Missing required fields: [equipment, selectedKeywords]
+sub 1: MISSING_REQUIRED_FIELD | Missing required fields: [equipment, selectedKeywords]
 
 ### equipment-sinners-missing-hash-colliding-pair
 code: VALIDATION_ERROR
@@ -115,9 +130,8 @@ sub 1: INVALID_FIELD_TYPE | Field 'skillEAState' must be object, got array
 
 ### field-type-selected-gift-keyword
 code: VALIDATION_ERROR
-message: [MISSING_STARTGIFT_KEYWORD] selectedGiftIds requires a selectedGiftKeyword; [INVALID_FIELD_TYPE] Field 'selectedGiftKeyword' must be string or null, got number 123
-sub 1: MISSING_STARTGIFT_KEYWORD | selectedGiftIds requires a selectedGiftKeyword
-sub 2: INVALID_FIELD_TYPE | Field 'selectedGiftKeyword' must be string or null, got number 123
+message: [INVALID_FIELD_TYPE] Field 'selectedGiftKeyword' must be string or null, got number 123
+sub 1: INVALID_FIELD_TYPE | Field 'selectedGiftKeyword' must be string or null, got number 123
 
 ### field-type-described-as-boolean
 code: VALIDATION_ERROR
@@ -137,6 +151,7 @@ sub 1: INVALID_FIELD_TYPE | Field 'selectedKeywords' must be array, got string "
 ### note-size-exceeded
 code: SIZE_EXCEEDED
 message: Note 'floor-1' size 1111 exceeds limit 1024
+sub 1: SIZE_EXCEEDED | Note 'floor-1' size 1111 exceeds limit 1024
 
 ### equipment-key-non-numeric
 code: VALIDATION_ERROR
@@ -209,9 +224,8 @@ sub 2: INVALID_SKILL_SLOT | Field 'skillEAState[05] slot '3'' has wrong type, ex
 
 ### skill-state-slot-not-number
 code: VALIDATION_ERROR
-message: [OUT_OF_RANGE_SKILL_TOTAL] skillEAState[05] total value 3 is out of range [6-6]; [INVALID_FIELD_TYPE] Field 'skillEAState[05][0]' must be number, got string "3"
-sub 1: OUT_OF_RANGE_SKILL_TOTAL | skillEAState[05] total value 3 is out of range [6-6]
-sub 2: INVALID_FIELD_TYPE | Field 'skillEAState[05][0]' must be number, got string "3"
+message: [INVALID_FIELD_TYPE] Field 'skillEAState[05][0]' must be number, got string "3"
+sub 1: INVALID_FIELD_TYPE | Field 'skillEAState[05][0]' must be number, got string "3"
 
 ### skill-state-total-wrong
 code: VALIDATION_ERROR
@@ -311,9 +325,8 @@ sub 2: DUPLICATE_STARTGIFT | Duplicate value 'gift_a' in selectedGiftIds
 
 ### selected-gift-id-unknown
 code: VALIDATION_ERROR
-message: [MISMATCHED_STARTGIFT] start gift '9999' is not in the 'Combustion' keyword pool; [UNKNOWN_EGOGIFT] selectedGiftIds ID '9999' not found or invalid
-sub 1: MISMATCHED_STARTGIFT | start gift '9999' is not in the 'Combustion' keyword pool
-sub 2: UNKNOWN_EGOGIFT | selectedGiftIds ID '9999' not found or invalid
+message: [UNKNOWN_EGOGIFT] selectedGiftIds ID '9999' not found or invalid
+sub 1: UNKNOWN_EGOGIFT | selectedGiftIds ID '9999' not found or invalid
 
 ### observation-gift-duplicate
 code: VALIDATION_ERROR
@@ -398,8 +411,17 @@ sub 1: UNAFFORDABLE_EGOGIFT | Gift '9004' is not affordable for theme pack '1001
 
 ### buff-count-exceeded
 code: VALIDATION_ERROR
-message: [EXCESS_STARTBUFF] selectedBuffIds count value 11 is out of range [0-10]
+message: [EXCESS_STARTBUFF] selectedBuffIds count value 11 is out of range [0-10]; [UNKNOWN_STARTBUFF] selectedBuffIds ID '102' not found or invalid; [UNKNOWN_STARTBUFF] selectedBuffIds ID '103' not found or invalid; [UNKNOWN_STARTBUFF] selectedBuffIds ID '104' not found or invalid; [UNKNOWN_STARTBUFF] selectedBuffIds ID '105' not found or invalid; [UNKNOWN_STARTBUFF] selectedBuffIds ID '106' not found or invalid; [UNKNOWN_STARTBUFF] selectedBuffIds ID '107' not found or invalid; [UNKNOWN_STARTBUFF] selectedBuffIds ID '108' not found or invalid; [UNKNOWN_STARTBUFF] selectedBuffIds ID '109' not found or invalid; [DUPLICATE_STARTBUFF] Duplicate value '0' in selectedBuffIds base IDs
 sub 1: EXCESS_STARTBUFF | selectedBuffIds count value 11 is out of range [0-10]
+sub 2: UNKNOWN_STARTBUFF | selectedBuffIds ID '102' not found or invalid
+sub 3: UNKNOWN_STARTBUFF | selectedBuffIds ID '103' not found or invalid
+sub 4: UNKNOWN_STARTBUFF | selectedBuffIds ID '104' not found or invalid
+sub 5: UNKNOWN_STARTBUFF | selectedBuffIds ID '105' not found or invalid
+sub 6: UNKNOWN_STARTBUFF | selectedBuffIds ID '106' not found or invalid
+sub 7: UNKNOWN_STARTBUFF | selectedBuffIds ID '107' not found or invalid
+sub 8: UNKNOWN_STARTBUFF | selectedBuffIds ID '108' not found or invalid
+sub 9: UNKNOWN_STARTBUFF | selectedBuffIds ID '109' not found or invalid
+sub 10: DUPLICATE_STARTBUFF | Duplicate value '0' in selectedBuffIds base IDs
 
 ### buff-not-number
 code: VALIDATION_ERROR

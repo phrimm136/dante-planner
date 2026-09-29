@@ -19,7 +19,7 @@ import { toUserFriendlyError } from '../plannerValidationErrors'
 import { renderContentPath } from '../contentPath'
 import type { PlannerValidationError } from '../plannerValidationErrors'
 import type { EGOGiftSpec } from '@/pages/egoGift'
-import type { DungeonIdx, ThemePackId } from '@/shared/gameData'
+import type { DungeonIdx, MDCategory, ThemePackId } from '@/shared/gameData'
 import type { MDPlannerContent, SerializableFloorSelection } from '../../../types/PlannerTypes'
 import type { SinnerEquipment, SkillEAState } from '../../../types/DeckTypes'
 import { ThemePackIdSchema } from '@/shared/gameData'
@@ -39,6 +39,13 @@ const ENCODED_9998 = asEncodedGiftId('9998')
 // ============================================================================
 // Fixtures
 // ============================================================================
+
+const EGO_MAX_THREADSPIN = 5
+
+/** Every E.G.O id with the same threadspin ceiling. */
+function ceilingsOf(egoIds: Iterable<string>): ReadonlyMap<string, number> {
+  return new Map([...egoIds].map((egoId) => [egoId, EGO_MAX_THREADSPIN]))
+}
 
 /** The element at `index`, failing with the actual length instead of yielding undefined. */
 function at<T>(items: readonly T[], index: number): T {
@@ -239,8 +246,8 @@ describe('floor rules through the validators', () => {
 
     expect(codesAndFields(validatePlannerForDraftSave(content, '5F', spec))).toEqual([
       ['DUPLICATE_EGOGIFT', 'floorSelections[0].giftIds'],
-      ['DUPLICATE_THEMEPACK', 'floorSelections[2].themePackId'],
       ['UNKNOWN_EGOGIFT_FLOOR', 'floorSelections[1].giftIds[0]'],
+      ['DUPLICATE_THEMEPACK', 'floorSelections[2].themePackId'],
     ])
   })
 
@@ -268,15 +275,25 @@ describe('validatePlannerForPublish (strict)', () => {
   })
 
   it('empty title returns MISSING_TITLE error', () => {
-    const { isValid, errors } = validatePlannerForPublish('', makeValidContent('5F'), '5F')
-    expect(isValid).toBe(false)
-    expect(errors.some((e) => e.code === 'MISSING_TITLE')).toBe(true)
+    const result = validatePlannerForPublish('', makeValidContent('5F'), '5F')
+    expect(result.isValid).toBe(false)
+    expect(codesAndFields(result)).toEqual([['MISSING_TITLE', 'title']])
   })
 
   it('whitespace-only title returns MISSING_TITLE error', () => {
-    const { isValid, errors } = validatePlannerForPublish('   ', makeValidContent('5F'), '5F')
-    expect(isValid).toBe(false)
-    expect(errors.some((e) => e.code === 'MISSING_TITLE')).toBe(true)
+    const result = validatePlannerForPublish('   ', makeValidContent('5F'), '5F')
+    expect(result.isValid).toBe(false)
+    expect(codesAndFields(result)).toEqual([['MISSING_TITLE', 'title']])
+  })
+
+  it('an absent title is refused alone, ahead of content rules', () => {
+    const content = makeValidContent('5F')
+    content.deploymentOrder = [12]
+    floorAt(content, 2).themePackId = null
+
+    expect(codesAndFields(validatePlannerForPublish(undefined, content, '5F'))).toEqual([
+      ['MISSING_TITLE', 'title'],
+    ])
   })
 
   it('missing theme pack on active floor returns MISSING_THEMEPACK', () => {
@@ -812,8 +829,9 @@ describe('validatePlannerForImport', () => {
   const registry: PlannerIdRegistry = {
     identityIds: new Set(),
     egoIds: new Set(),
+    egoMaxThreadspin: new Map(),
     themePackIds: new Set(['1001', '1002', '1003', '1004', '1005']),
-    startBuffIds: new Set(),
+    season: { startBuffIds: new Set(), startGiftPools: new Map() },
   }
 
   function twoViolations(): MDPlannerContent {
@@ -856,11 +874,13 @@ describe('validatePlannerForImport', () => {
 describe('entity id registry checks', () => {
   function registryFor(content: MDPlannerContent): PlannerIdRegistry {
     const equipment = Object.values(content.equipment)
+    const egoIds = equipment.flatMap((e) => Object.values(e.egos).map((ego) => ego.id))
     return {
       identityIds: new Set(equipment.map((e) => e.identity.id)),
-      egoIds: new Set(equipment.flatMap((e) => Object.values(e.egos).map((ego) => ego.id))),
+      egoIds: new Set(egoIds),
+      egoMaxThreadspin: ceilingsOf(egoIds),
       themePackIds: new Set(content.floorSelections.map((f) => f.themePackId ?? '')),
-      startBuffIds: new Set(['100', '101', '200']),
+      season: { startBuffIds: new Set(['100', '101', '200']), startGiftPools: new Map() },
     }
   }
 
@@ -1020,11 +1040,13 @@ describe('retired E.G.O after id normalization', () => {
   function registry(): PlannerIdRegistry {
     const content = makeValidContent('5F')
     const equipment = Object.values(content.equipment)
+    const egoIds = equipment.flatMap((e) => Object.values(e.egos).map((ego) => ego.id))
     return {
       identityIds: new Set(equipment.map((e) => e.identity.id)),
-      egoIds: new Set(equipment.flatMap((e) => Object.values(e.egos).map((ego) => ego.id))),
+      egoIds: new Set(egoIds),
+      egoMaxThreadspin: ceilingsOf(egoIds),
       themePackIds: new Set(content.floorSelections.map((f) => f.themePackId ?? '')),
-      startBuffIds: new Set(['100']),
+      season: { startBuffIds: new Set(['100']), startGiftPools: new Map() },
     }
   }
 
@@ -1075,13 +1097,15 @@ describe('content fields that are absent or of the wrong kind', () => {
   }
 
   const valid = makeValidContent('5F')
+  const validEgoIds = Object.values(valid.equipment).flatMap((e) =>
+    Object.values(e.egos).map((ego) => ego.id),
+  )
   const KNOWN_IDS: PlannerIdRegistry = {
     identityIds: new Set(Object.values(valid.equipment).map((e) => e.identity.id)),
-    egoIds: new Set(
-      Object.values(valid.equipment).flatMap((e) => Object.values(e.egos).map((ego) => ego.id)),
-    ),
+    egoIds: new Set(validEgoIds),
+    egoMaxThreadspin: ceilingsOf(validEgoIds),
     themePackIds: new Set(valid.floorSelections.map((f) => f.themePackId ?? '')),
-    startBuffIds: new Set(),
+    season: { startBuffIds: new Set(), startGiftPools: new Map() },
   }
 
   const validate: Record<Stage, (content: MDPlannerContent) => PlannerValidationResult> = {
@@ -1123,8 +1147,10 @@ describe('content fields that are absent or of the wrong kind', () => {
         path.startsWith(name),
       )
 
-    it.each(sinnerContainers)('reports an absent %s as every sinner missing', (name) => {
-      expect(codesAndFieldsOf(name, undefined)).toEqual([['MISSING_SINNER', name]])
+    it.each(sinnerContainers)('refuses an absent %s as a missing required field', (name) => {
+      expect(codesAndFields(validate[stage](withField(name, undefined)))).toEqual([
+        ['MISSING_REQUIRED_FIELD', ''],
+      ])
     })
 
     it.each(
@@ -1137,8 +1163,17 @@ describe('content fields that are absent or of the wrong kind', () => {
       expect(codesAndFieldsOf(name, value)).toEqual([['INVALID_FIELD_TYPE', name]])
     })
 
-    it.each(listFields)('reads an absent %s as empty', (name) => {
-      expect(validate[stage](withField(name, undefined)).errors).toEqual([])
+    it.each(listFields.filter((name) => name !== 'deploymentOrder'))(
+      'reads an absent %s as empty',
+      (name) => {
+        expect(validate[stage](withField(name, undefined)).errors).toEqual([])
+      },
+    )
+
+    it('refuses an absent deploymentOrder as a missing required field', () => {
+      expect(codesAndFields(validate[stage](withField('deploymentOrder', undefined)))).toEqual([
+        ['MISSING_REQUIRED_FIELD', ''],
+      ])
     })
 
     it.each(
@@ -1211,5 +1246,164 @@ describe('backend parity rules through the validators', () => {
 
     expect(codesAndFields(validatePlannerForDraftSave(content, '5F'))).toEqual(expected)
     expect(codesAndFields(validatePlannerForPublish('My Plan', content, '5F'))).toEqual(expected)
+  })
+})
+
+// ============================================================================
+// One content verdict on both runtimes
+// ============================================================================
+
+describe('one content verdict on both runtimes', () => {
+  const valid = makeValidContent('5F')
+  const validEgoIds = Object.values(valid.equipment).flatMap((e) =>
+    Object.values(e.egos).map((ego) => ego.id),
+  )
+
+  function registryWith(season: PlannerIdRegistry['season']): PlannerIdRegistry {
+    return {
+      identityIds: new Set(Object.values(valid.equipment).map((e) => e.identity.id)),
+      egoIds: new Set(validEgoIds),
+      egoMaxThreadspin: ceilingsOf(validEgoIds),
+      themePackIds: new Set(valid.floorSelections.map((f) => f.themePackId ?? '')),
+      season,
+    }
+  }
+
+  const SEASON: PlannerIdRegistry['season'] = {
+    startBuffIds: new Set(['100']),
+    startGiftPools: new Map([['Combustion', new Set(['9001'])]]),
+  }
+
+  const draft = (content: MDPlannerContent, registry = registryWith(SEASON)) =>
+    codesAndFields(validatePlannerForDraftSave(content, '5F', undefined, undefined, registry))
+
+  const publish = (content: MDPlannerContent, registry = registryWith(SEASON)) =>
+    codesAndFields(
+      validatePlannerForPublish('My Plan', content, '5F', undefined, undefined, registry),
+    )
+
+  it('reports UNKNOWN_VERSION at the root for a valid document without a season', () => {
+    expect(draft(makeValidContent('5F'), registryWith(undefined))).toEqual([
+      ['UNKNOWN_VERSION', ''],
+    ])
+    expect(publish(makeValidContent('5F'), registryWith(undefined))).toEqual([
+      ['UNKNOWN_VERSION', ''],
+    ])
+  })
+
+  it('reports UNKNOWN_VERSION beside other violations and skips the season rules', () => {
+    const content = makeValidContent('5F')
+    content.deploymentOrder = [12]
+    content.selectedBuffIds = [999, 999]
+    content.selectedGiftKeyword = 'Nope'
+    content.selectedGiftIds = [ENCODED_9001]
+
+    expect(draft(content, registryWith(undefined))).toEqual([
+      ['UNKNOWN_VERSION', ''],
+      ['OUT_OF_RANGE_DEPLOYMENT', 'deploymentOrder[0]'],
+    ])
+    expect(draft(content)).toEqual([
+      ['OUT_OF_RANGE_DEPLOYMENT', 'deploymentOrder[0]'],
+      ['UNKNOWN_STARTBUFF', 'selectedBuffIds[0]'],
+      ['UNKNOWN_STARTBUFF', 'selectedBuffIds[1]'],
+      ['UNKNOWN_STARTGIFT_KEYWORD', 'selectedGiftKeyword'],
+    ])
+  })
+
+  it('accepts an unknown keyword in an unpublished draft and reports it at publish', () => {
+    const content = makeValidContent('5F')
+    content.selectedKeywords = ['Nope']
+
+    expect(draft(content)).toEqual([])
+    expect(publish(content)).toEqual([['UNKNOWN_KEYWORD', 'selectedKeywords[0]']])
+  })
+
+  it('checks keyword kinds at both stages and unknown keywords at publish, per element', () => {
+    const content = makeValidContent('5F')
+    ;(content as { selectedKeywords: unknown }).selectedKeywords = ['AccelBullet', 'Nope', 5, '']
+
+    expect(draft(content)).toEqual([['INVALID_FIELD_TYPE', 'selectedKeywords[2]']])
+    expect(publish(content)).toEqual([
+      ['UNKNOWN_KEYWORD', 'selectedKeywords[1]'],
+      ['INVALID_FIELD_TYPE', 'selectedKeywords[2]'],
+      ['UNKNOWN_KEYWORD', 'selectedKeywords[3]'],
+    ])
+  })
+
+  it('returns INVALID_CATEGORY alone for a category outside the rule table', () => {
+    const content = makeValidContent('5F')
+    content.deploymentOrder = [12]
+    const category = 'XX' as MDCategory
+
+    expect(
+      codesAndFields(validatePlannerForDraftSave(content, category, undefined, undefined)),
+    ).toEqual([['INVALID_CATEGORY', '']])
+    expect(codesAndFields(validatePlannerForPublish('My Plan', content, category))).toEqual([
+      ['INVALID_CATEGORY', ''],
+    ])
+  })
+
+  it('refuses a missing title alone, ahead of an invalid category and a boundary refusal', () => {
+    const content = makeValidContent('5F')
+    ;(content as unknown as Record<string, unknown>)['mystery'] = 1
+
+    expect(codesAndFields(validatePlannerForPublish('', content, 'XX' as MDCategory))).toEqual([
+      ['MISSING_TITLE', 'title'],
+    ])
+    expect(codesAndFields(validatePlannerForPublish(undefined, content, '5F'))).toEqual([
+      ['MISSING_TITLE', 'title'],
+    ])
+  })
+
+  it('returns a boundary refusal alone', () => {
+    const content = makeValidContent('5F')
+    content.deploymentOrder = [12]
+    ;(content as unknown as Record<string, unknown>)['mystery'] = 1
+
+    expect(publish(content, registryWith(undefined))).toEqual([['UNKNOWN_FIELD', '']])
+  })
+
+  it('orders the whole result by path, then code', () => {
+    const content = makeValidContent('5F')
+    content.deploymentOrder = [12]
+    content.skillEAState['02'] = { 0: 3, 1: 2, 2: 0 }
+    content.selectedBuffIds = [999]
+    content.observationGiftIds = [ENCODED_9999]
+    content.equipment['12'] = {
+      ...content.equipment['12']!,
+      identity: { id: asIdentityId('11299'), uptie: 1, level: 1 },
+    }
+    const spec: Record<string, EGOGiftSpec> = { '9001': makeGiftSpec([]) }
+
+    expect(
+      codesAndFields(
+        validatePlannerForDraftSave(content, '5F', spec, undefined, registryWith(SEASON)),
+      ),
+    ).toEqual([
+      ['OUT_OF_RANGE_DEPLOYMENT', 'deploymentOrder[0]'],
+      ['UNKNOWN_IDENTITY', 'equipment[12].identity.id'],
+      ['UNKNOWN_EGOGIFT', 'observationGiftIds[0]'],
+      ['UNKNOWN_STARTBUFF', 'selectedBuffIds[0]'],
+      ['OUT_OF_RANGE_SKILL_TOTAL', 'skillEAState[02]'],
+    ])
+  })
+
+  it.each([[['19001', '9001']], [['29001', '19001']]])(
+    'reports base and enhanced forms %j of one gift on one floor as a duplicate',
+    (giftIds) => {
+      const content = makeValidContent('5F')
+      floorAt(content, 0).giftIds = giftIds.map(asEncodedGiftId)
+
+      expect(draft(content)).toEqual([['DUPLICATE_EGOGIFT', 'floorSelections[0].giftIds']])
+    },
+  )
+
+  it('keeps base and enhanced forms distinct across floors and in the gift lists', () => {
+    const content = makeValidContent('5F')
+    floorAt(content, 0).giftIds = [ENCODED_9001]
+    floorAt(content, 1).giftIds = [asEncodedGiftId('19001')]
+    content.observationGiftIds = [ENCODED_9001, asEncodedGiftId('19001')]
+
+    expect(draft(content)).toEqual([])
   })
 })

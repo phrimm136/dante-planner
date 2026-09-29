@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.planner.dto.LegacyPublishRequest;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
@@ -173,43 +172,6 @@ class PlannerPublishFlowIT {
         assertThat(entityFilterRows(planner.getId()))
                 .as("a title-only edit does not rebuild the entity filter")
                 .isEqualTo(filterRowsBefore);
-    }
-
-    @Test
-    @DisplayName("publish-single-request: one content-carrying request creates the draft server-side and publishes it atomically")
-    void publishSingleRequest_WhenContentCarried_CreatesAndPublishesAtomically() throws Exception {
-        // The draft exists only client-side: nothing on the server yet
-        UUID plannerId = UUID.randomUUID();
-        String content = TestDataFactory.planner(owner).build().getContentJson();
-        // Creating strictly requires the CURRENT game content version
-        LegacyPublishRequest publishRequest = new LegacyPublishRequest(
-                true, plannerId.toString(), "5F", "One-Shot Publish", PlannerStatus.SAVED,
-                content, 7, PlannerType.MIRROR_DUNGEON, null, null);
-
-        mockMvc.perform(put("/api/planner/md/{id}/publish", plannerId)
-                        .cookie(AuthCookies.accessToken(token))
-                        .with(withCsrf())
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(publishRequest)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.published").value(true))
-                .andExpect(jsonPath("$.title").value("One-Shot Publish"));
-
-        assertThat(plannerRepository.existsById(plannerId))
-                .as("the single request created the planner").isTrue();
-        assertThat(catalogRepository.existsById(plannerId))
-                .as("the single request published it (catalog row present)").isTrue();
-        assertThat(entityFilterRows(plannerId))
-                .as("the single request built the filter index").isPositive();
-
-        mockMvc.perform(put("/api/planner/md/{id}/publish", plannerId)
-                        .cookie(AuthCookies.accessToken(token))
-                        .with(withCsrf())
-                        .contentType(APPLICATION_JSON)
-                        .content("{\"published\":false}"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.published").value(false));
-        assertThat(catalogRepository.existsById(plannerId)).isFalse();
     }
 
     @Test
@@ -392,25 +354,6 @@ class PlannerPublishFlowIT {
         assertThat(after.getSyncVersion()).isEqualTo(publishedVersion);
     }
 
-    @Test
-    @DisplayName("legacy-unpublish-with-content-stamps-the-device: the delegate's content path stores the device")
-    void legacyUnpublish_WhenContentCarried_StoresTheDevice() throws Exception {
-        UUID firstDevice = UUID.randomUUID();
-        UUID secondDevice = UUID.randomUUID();
-        UUID id = UUID.randomUUID();
-        long version = savedPlanner(id, firstDevice);
-        LegacyPublishRequest unpublish = new LegacyPublishRequest(
-                false, id.toString(), "5F", "Withdrawn", PlannerStatus.SAVED,
-                TestDataFactory.VALID_CONTENT, CURRENT_CONTENT_VERSION, PlannerType.MIRROR_DUNGEON, version, null);
-
-        sendAs(secondDevice, put("/api/planner/md/{id}/publish", id), unpublish)
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.published").value(false))
-                .andExpect(jsonPath("$.title").value("Withdrawn"));
-
-        assertThat(stored(id).getDeviceId()).isEqualTo(secondDevice);
-    }
-
     private JsonNode ownerCopy(UUID plannerId) throws Exception {
         String body = mockMvc.perform(get("/api/planner/md/{id}", plannerId)
                         .cookie(AuthCookies.accessToken(token)))
@@ -505,7 +448,7 @@ class PlannerPublishFlowIT {
     }
 
     @Test
-    void publishedTitleSave_WhenStoredContentSelectsAnUnknownKeyword_Succeeds() throws Exception {
+    void publishedTitleSave_WhenStoredContentSelectsAnUnknownKeyword_Returns400KeywordInvalid() throws Exception {
         Planner planner = publishedWithUnknownKeyword("Published Unknown Keyword");
         UpsertPlannerRequest titleEdit = new UpsertPlannerRequest(
                 planner.getId().toString(), "5F", "Retitled", PlannerStatus.SAVED, planner.getContentJson(),
@@ -516,25 +459,11 @@ class PlannerPublishFlowIT {
                         .with(withCsrf())
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(titleEdit)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.title").value("Retitled"));
-    }
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("UNKNOWN_KEYWORD"))
+                .andExpect(jsonPath("$.detail").value("Unknown keywords: [NotAKeyword]"));
 
-    @Test
-    void legacyUnpublish_WhenStoredContentSelectsAnUnknownKeyword_Succeeds() throws Exception {
-        Planner planner = publishedWithUnknownKeyword("Unpublish Unknown Keyword");
-        LegacyPublishRequest unpublish = new LegacyPublishRequest(
-                false, planner.getId().toString(), "5F", planner.getTitle(), PlannerStatus.SAVED,
-                planner.getContentJson(), planner.getContentVersion(), PlannerType.MIRROR_DUNGEON,
-                planner.getSyncVersion(), null);
-
-        mockMvc.perform(put("/api/planner/md/{id}/publish", planner.getId())
-                        .cookie(AuthCookies.accessToken(token))
-                        .with(withCsrf())
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(unpublish)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.published").value(false));
+        assertThat(stored(planner.getId()).getTitle()).isEqualTo("Published Unknown Keyword");
     }
 
     @Test

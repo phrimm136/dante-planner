@@ -80,7 +80,7 @@ Read the set from the code: `RequestMappingHandlerMapping`, `UserRole.values()`,
 Property-based testing generates the sequences nobody writes. §3 governs whether a given law can be
 asserted without a real dependency.
 
-- `setPublished(true)` applied twice equals applied once
+- `Planner.publish()` applied twice equals applied once
 - `syncVersion` never decreases
 - `comment_count` never goes negative after any command sequence
 - keyword normalization is idempotent

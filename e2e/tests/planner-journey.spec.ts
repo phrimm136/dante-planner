@@ -24,9 +24,7 @@ test('an owner publishes a planner and it reaches the community list', async ({ 
     })
     expect([200, 201], await created.text()).toContain(created.status())
 
-    const published = await api.put(`/api/planner/md/${plannerId}/publish`, {
-      data: { published: true },
-    })
+    const published = await api.post(`/api/planner/md/${plannerId}/publish`)
     expect(published.status(), await published.text()).toBe(200)
 
     // Anonymous, because the community list is what a visitor sees. A visitor carries no
@@ -67,9 +65,7 @@ test('a published planner is visible on the community page', async ({ page, cont
     })
     expect([200, 201], await created.text()).toContain(created.status())
 
-    const published = await api.put(`/api/planner/md/${plannerId}/publish`, {
-      data: { published: true },
-    })
+    const published = await api.post(`/api/planner/md/${plannerId}/publish`)
     expect(published.status(), await published.text()).toBe(200)
 
     await authenticateContext(context, user.id, baseURL!)

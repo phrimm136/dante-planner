@@ -5,9 +5,9 @@ import org.danteplanner.backend.planner.gamedata.FloorRuleTable.CategoryFloors;
 import org.danteplanner.backend.planner.validation.ContentPath;
 import org.danteplanner.backend.planner.validation.FieldResult;
 import org.danteplanner.backend.planner.validation.JsonKind;
+import org.danteplanner.backend.planner.validation.JsonNumbers;
 import org.danteplanner.backend.planner.validation.Violation;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
@@ -118,7 +118,7 @@ public final class FloorBoundary {
     private static FieldResult<Difficulty> parseDifficulty(JsonNode node, ContentPath path) {
         return switch (node.getNodeType()) {
             case MISSING -> FieldResult.of(Difficulty.unset());
-            case NUMBER -> integralValue(node)
+            case NUMBER -> JsonNumbers.integralValue(node)
                     .map(value -> FieldResult.of(difficultyOf(value)))
                     .orElseGet(() -> FieldResult.rejected(Difficulty.unset(),
                             Violation.invalidFieldType(path, JsonKind.INTEGER, node)));
@@ -128,21 +128,6 @@ public final class FloorBoundary {
 
     private static Difficulty difficultyOf(BigInteger value) {
         return value.bitLength() < Integer.SIZE ? Difficulty.of(value.intValue()) : Difficulty.outOfRange(value);
-    }
-
-    private static Optional<BigInteger> integralValue(JsonNode number) {
-        return switch (number.numberType()) {
-            case INT, LONG, BIG_INTEGER -> Optional.of(number.bigIntegerValue());
-            case FLOAT, DOUBLE, BIG_DECIMAL -> exactIntegralValue(number);
-        };
-    }
-
-    private static Optional<BigInteger> exactIntegralValue(JsonNode fraction) {
-        return Optional.of(fraction)
-                .filter(number -> Double.isFinite(number.doubleValue()))
-                .map(JsonNode::decimalValue)
-                .filter(decimal -> decimal.stripTrailingZeros().scale() <= 0)
-                .map(BigDecimal::toBigInteger);
     }
 
     private static FieldResult<List<String>> parseGiftIds(JsonNode node, ContentPath path) {

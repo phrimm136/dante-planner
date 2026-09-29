@@ -122,8 +122,8 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("Banned user cannot toggle publish - returns 403")
-    void togglePublish_WhenOwnerBanned_Returns403() throws Exception {
+    @DisplayName("Banned user cannot publish - returns 403")
+    void publish_WhenOwnerBanned_Returns403() throws Exception {
         // Arrange - create planner first (before ban)
         Planner planner = TestDataFactory.createTestPlanner(plannerRepository, regularUser, false);
         UUID plannerId = planner.getId();
@@ -132,9 +132,8 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
         userModerationService.banUser(adminUser.getId(), regularUser.getId(), "Test ban");
 
         // Act & Assert
-        mockMvc.perform(put("/api/planner/md/" + plannerId + "/publish").with(withCsrf())
+        mockMvc.perform(post("/api/planner/md/" + plannerId + "/publish").with(withCsrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"published\":true}")
                         .cookie(userCookie()))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code", is("USER_BANNED")));

@@ -57,7 +57,7 @@ import static org.mockito.Mockito.when;
  * - comprehensiveGiftIds: string[] (optional)
  * - equipment: Record&lt;string, SinnerEquipment&gt; (keys are "0"-"11")
  * - deploymentOrder: number[] (values 0-11)
- * - skillEAState: Record&lt;string, SkillEAState&gt; (optional)
+ * - skillEAState: Record&lt;string, SkillEAState&gt;
  * - floorSelections: SerializableFloorSelection[]
  * - sectionNotes: Record&lt;string, SerializableNoteContent&gt;
  * </p>
@@ -274,6 +274,20 @@ class PlannerContentValidatorTest {
                     }
                 },
                 "deploymentOrder": [0, 1, 2, 3, 4, 5],
+                "skillEAState": {
+                    "01": {"0": 3, "1": 2, "2": 1},
+                    "02": {"0": 3, "1": 2, "2": 1},
+                    "03": {"0": 3, "1": 2, "2": 1},
+                    "04": {"0": 3, "1": 2, "2": 1},
+                    "05": {"0": 3, "1": 2, "2": 1},
+                    "06": {"0": 3, "1": 2, "2": 1},
+                    "07": {"0": 3, "1": 2, "2": 1},
+                    "08": {"0": 3, "1": 2, "2": 1},
+                    "09": {"0": 3, "1": 2, "2": 1},
+                    "10": {"0": 3, "1": 2, "2": 1},
+                    "11": {"0": 3, "1": 2, "2": 1},
+                    "12": {"0": 3, "1": 2, "2": 1}
+                },
                 "selectedBuffIds": [100, 201],
                 "selectedGiftKeyword": "Combustion",
                 "selectedGiftIds": ["9001"],
@@ -681,6 +695,7 @@ class PlannerContentValidatorTest {
                         "12": {"identity": {"id": "11201"}, "egos": {"ZAYIN": {"id": "21201"}}}
                     },
                     "deploymentOrder": [],
+                    "skillEAState": {},
                     "floorSelections": [],
                     "sectionNotes": {
                         "floor-1": {"content": {"type": "doc", "text": "%s"}}
@@ -694,6 +709,24 @@ class PlannerContentValidatorTest {
             );
 
             assertEquals("SIZE_EXCEEDED", exception.getOriginalCode());
+        }
+
+        @Test
+        void validate_WhenANoteIsOversized_RefusesWithTheNotePathAsTheOneSubError() {
+            String content = createValidContent().replace("\"sectionNotes\": {}",
+                    "\"sectionNotes\": {\"floor1\": {\"content\": {\"type\": \"doc\", \"text\": \""
+                            + "x".repeat(MAX_NOTE_SIZE_BYTES) + "\"}}}");
+
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
+                    () -> validate(content, "5F"));
+
+            assertThat(ex.getSubErrors()).singleElement().satisfies(error -> {
+                assertEquals("SIZE_EXCEEDED", error.code());
+                assertEquals("sectionNotes[floor1]", error.path());
+            });
+            String detail = ex.getSubErrors().getFirst().message();
+            assertEquals(Map.of("code", "SIZE_EXCEEDED", "message", detail), ex.getBody().getProperties());
+            assertEquals(detail, ex.getBody().getDetail());
         }
 
         @Test
@@ -978,17 +1011,14 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        void validate_WhenBuffIdIsAnIntegralValuedFraction_RejectsItAsANonNumberIs() {
+        void validate_WhenBuffIdIsAnIntegralValuedFraction_AcceptsItAsItsInteger() {
+            setupMocksForValidIds();
             String content = createValidContent().replace(
                     "\"selectedBuffIds\": [100, 201],",
                     "\"selectedBuffIds\": [100, 101.0],"
             );
 
-            PlannerValidationException thrown = assertThrows(PlannerValidationException.class,
-                    () -> validate(content, "5F"));
-
-            assertThat(thrown.getSubErrors()).contains(new PlannerValidationException.ValidationError(
-                    "INVALID_FIELD_TYPE", "selectedBuffIds[1]", "Field 'selectedBuffIds[1]' must be number, got number 101.0"));
+            assertDoesNotThrow(() -> validate(content, "5F"));
         }
 
         @Test
@@ -1533,31 +1563,23 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        void validate_WhenLevelIsAnIntegralValuedFraction_RejectsItAsANonNumber() {
+        void validate_WhenLevelIsAnIntegralValuedFraction_AcceptsItAsItsInteger() {
             setupMocksForValidIds();
             String content = createValidContent().replace(
                     "\"identity\": {\"id\": \"10101\", \"uptie\": 4, \"level\": 45}",
                     "\"identity\": {\"id\": \"10101\", \"uptie\": 4, \"level\": 45.0}");
 
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validate(content, "5F"));
-
-            assertThat(ex.getSubErrors()).containsExactly(new PlannerValidationException.ValidationError(
-                    "INVALID_FIELD_TYPE", "equipment[01].identity.level", "Field 'equipment[01].identity.level' must be number, got number 45.0"));
+            assertDoesNotThrow(() -> validate(content, "5F"));
         }
 
         @Test
-        void validate_WhenThreadspinIsAnIntegralValuedFraction_RejectsItAsANonNumber() {
+        void validate_WhenThreadspinIsAnIntegralValuedFraction_AcceptsItAsItsInteger() {
             setupMocksForValidIds();
             String content = createValidContent().replace(
                     "\"egos\": {\"ZAYIN\": {\"id\": \"20101\", \"threadspin\": 4}}",
                     "\"egos\": {\"ZAYIN\": {\"id\": \"20101\", \"threadspin\": 4.0}}");
 
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validate(content, "5F"));
-
-            assertThat(ex.getSubErrors()).containsExactly(new PlannerValidationException.ValidationError(
-                    "INVALID_FIELD_TYPE", "equipment[01].egos.ZAYIN.threadspin", "Field 'equipment[01].egos.ZAYIN.threadspin' must be number, got number 4.0"));
+            assertDoesNotThrow(() -> validate(content, "5F"));
         }
 
         @Test
@@ -1824,7 +1846,8 @@ class PlannerContentValidatorTest {
                     () -> validate(createValidContent(), "RR_PLACEHOLDER"));
 
             assertEquals("INVALID_CATEGORY", ex.getOriginalCode());
-            assertThat(ex.getSubErrors()).isEmpty();
+            assertThat(ex.getSubErrors()).containsExactly(
+                    new ValidationError("INVALID_CATEGORY", "", "Invalid category: RR_PLACEHOLDER"));
         }
     }
 
@@ -1859,11 +1882,16 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        void validate_WhenPublishPolicyAndContentSelectsAnUnknownKeyword_Passes() {
+        void validate_WhenPublishPolicyAndContentSelectsAnUnknownKeyword_RefusesItAtItsIndex() {
             setupMocksForValidIds();
 
-            assertDoesNotThrow(() ->
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class, () ->
                     validate(selecting("[\"Combustion\", \"NotAKeyword\"]"), "5F", Stage.PUBLISH));
+
+            assertThat(ex.getSubErrors()).containsExactly(new ValidationError("UNKNOWN_KEYWORD",
+                    "selectedKeywords[1]", "selectedKeywords ID 'NotAKeyword' not found or invalid"));
+            assertEquals("UNKNOWN_KEYWORD", ex.getBody().getProperties().get("code"));
+            assertEquals("Unknown keywords: [NotAKeyword]", ex.getBody().getDetail());
         }
 
         @Test
@@ -1880,6 +1908,47 @@ class PlannerContentValidatorTest {
 
             assertDoesNotThrow(() ->
                     validate(selecting("[\"AccelBullet\", \"ChargeLoad\"]"), "5F", Stage.PUBLISH));
+        }
+
+        @Test
+        void validate_WhenPublishPolicyAndKeywordsMixARenameAnUnknownANumberAndABlank_ReportsEachAtItsIndex() {
+            setupMocksForValidIds();
+
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class, () ->
+                    validate(selecting("[\"AccelBullet\", \"Nope\", 5, \"\"]"), "5F", Stage.PUBLISH));
+
+            assertThat(ex.getSubErrors()).containsExactly(
+                    new ValidationError("UNKNOWN_KEYWORD", "selectedKeywords[1]",
+                            "selectedKeywords ID 'Nope' not found or invalid"),
+                    new ValidationError("INVALID_FIELD_TYPE", "selectedKeywords[2]",
+                            "Field 'selectedKeywords[2]' must be string, got number 5"),
+                    new ValidationError("UNKNOWN_KEYWORD", "selectedKeywords[3]",
+                            "selectedKeywords ID '' not found or invalid"));
+            assertEquals("VALIDATION_ERROR", ex.getBody().getProperties().get("code"));
+        }
+
+        @Test
+        void validate_WhenDraftPolicyAndKeywordsMixARenameAnUnknownANumberAndABlank_ReportsOnlyTheNumber() {
+            setupMocksForValidIds();
+
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class, () ->
+                    validate(selecting("[\"AccelBullet\", \"Nope\", 5, \"\"]"), "5F", Stage.DRAFT));
+
+            assertThat(ex.getSubErrors()).containsExactly(new ValidationError("INVALID_FIELD_TYPE",
+                    "selectedKeywords[2]", "Field 'selectedKeywords[2]' must be string, got number 5"));
+        }
+
+        @Test
+        void validate_WhenPublishPolicyAndTwoKeywordsAreUnknown_AnswersUnknownKeywordListingBoth() {
+            setupMocksForValidIds();
+
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class, () ->
+                    validate(selecting("[\"Zilch\", \"Combustion\", \"Nope\"]"), "5F", Stage.PUBLISH));
+
+            assertThat(ex.getSubErrors()).extracting(ValidationError::path)
+                    .containsExactly("selectedKeywords[0]", "selectedKeywords[2]");
+            assertEquals("UNKNOWN_KEYWORD", ex.getBody().getProperties().get("code"));
+            assertEquals("Unknown keywords: [Nope, Zilch]", ex.getBody().getDetail());
         }
     }
 }

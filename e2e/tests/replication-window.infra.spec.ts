@@ -49,9 +49,7 @@ test('the by-id re-check answers from the primary while replication is frozen', 
       })
       expect([200, 201], await created.text()).toContain(created.status())
 
-      const published = await api.put(`/api/planner/md/${plannerId}/publish`, {
-        data: { published: true },
-      })
+      const published = await api.post(`/api/planner/md/${plannerId}/publish`)
       expect(published.status(), await published.text()).toBe(200)
 
       owner = await edgeContext({ baseURL: SEOUL_API, extraHTTPHeaders: authHeaders(user.id) })

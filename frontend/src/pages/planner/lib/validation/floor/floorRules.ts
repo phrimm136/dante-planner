@@ -6,6 +6,7 @@ import type {
   FloorRuleTable,
   MDCategory,
 } from '@/shared/gameData'
+import { decodeGiftId } from '../boundary'
 import { contentPath, extendPath, field, index } from '../contentPath'
 import type { ContentPath } from '../contentPath'
 import { byPathThenCode } from '../violation'
@@ -249,9 +250,11 @@ const noNormalAfterHard: RuleCheck = ({ floors, layout }) => {
   )
 }
 
+const giftKey = (giftId: string): string => decodeGiftId(giftId) ?? giftId
+
 const giftUnique: RuleCheck = ({ floors }) =>
   floors.flatMap((floor, floorIndex) =>
-    new Set(floor.giftIds).size === floor.giftIds.length
+    new Set(floor.giftIds.map(giftKey)).size === floor.giftIds.length
       ? []
       : [violation('DUPLICATE_EGOGIFT', floorFieldPath(floorIndex, GIFT_IDS))],
   )

@@ -8,7 +8,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.moderation.dto.BanRequest;
-import org.danteplanner.backend.planner.dto.LegacyPublishRequest;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,19 +38,6 @@ class RequestBoundarySanitizationTest {
 
         assertThat(request.title()).isEqualTo(SAFE_TITLE);
         assertThat(linkIn(request.content())).isEqualTo("#");
-    }
-
-    @Test
-    @DisplayName("the superseded publish route sanitizes the document it carries")
-    void legacyPublishRequest_WhenPayloadIsHostile_ArrivesSanitized() throws Exception {
-        ObjectNode payload = hostileUpsertPayload();
-        payload.put("published", true);
-
-        LegacyPublishRequest request = MAPPER.treeToValue(payload, LegacyPublishRequest.class);
-
-        assertThat(request.title()).isEqualTo(SAFE_TITLE);
-        assertThat(linkIn(request.content())).isEqualTo("#");
-        assertThat(linkIn(request.toUpsertRequest().content())).isEqualTo("#");
     }
 
     @Test

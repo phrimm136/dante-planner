@@ -8,7 +8,7 @@ export const startGiftPoolsQueryKeys = {
   all: (version: MDVersion) => ['startGiftPools', `md${version}`] as const,
 }
 
-function createPoolsQueryOptions(version: MDVersion) {
+export function startGiftPoolsQueryOptions(version: MDVersion) {
   return createStaticDataQueryOptions(
     startGiftPoolsQueryKeys.all(version),
     () => import(`@static/data/MD${version}/startEgoGiftPools.json`),
@@ -18,6 +18,6 @@ function createPoolsQueryOptions(version: MDVersion) {
 }
 
 export function useStartGiftPools(version: MDVersion): { data: StartEgoGiftPools } {
-  const { data } = useSuspenseQuery(createPoolsQueryOptions(version))
+  const { data } = useSuspenseQuery(startGiftPoolsQueryOptions(version))
   return { data }
 }

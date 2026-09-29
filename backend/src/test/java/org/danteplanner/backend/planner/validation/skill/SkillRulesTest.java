@@ -40,11 +40,32 @@ class SkillRulesTest {
     }
 
     @Test
-    void check_WhenASlotIsAnIntegralValuedFraction_RejectsItAsANonNumberIs() {
-        assertThat(SkillRules.check(skillsOfSinnerFive("{\"0\":1.0,\"1\":2,\"2\":3}"))).containsExactly(
+    void check_WhenASlotIsAnIntegralValuedFraction_CountsItAsItsInteger() {
+        assertThat(SkillRules.check(skillsOfSinnerFive("{\"0\":1.0,\"1\":2,\"2\":3}"))).isEmpty();
+    }
+
+    @Test
+    void check_WhenAKnownSlotIsNotAnInteger_ReportsTheSlotAndNoTotal() {
+        assertThat(SkillRules.check(skillsOfSinnerFive("{\"0\":\"3\",\"1\":2,\"2\":1}"))).containsExactly(
+                new Violation(ErrorCode.INVALID_FIELD_TYPE, SINNER_FIVE.key("0"),
+                        "Field 'skillEAState[05][0]' must be number, got string \"3\""));
+    }
+
+    @Test
+    void check_WhenTwoFractionsSumToSix_ReportsBothSlotsAndNoTotal() {
+        assertThat(SkillRules.check(skillsOfSinnerFive("{\"0\":2.5,\"1\":2.5,\"2\":1}"))).containsExactly(
+                new Violation(ErrorCode.INVALID_FIELD_TYPE, SINNER_FIVE.key("0"),
+                        "Field 'skillEAState[05][0]' must be number, got number 2.5"),
+                new Violation(ErrorCode.INVALID_FIELD_TYPE, SINNER_FIVE.key("1"),
+                        "Field 'skillEAState[05][1]' must be number, got number 2.5"));
+    }
+
+    @Test
+    void check_WhenAnUnknownSlotHoldsAMalformedValue_ReportsTheSlotAndStillTheTotal() {
+        assertThat(SkillRules.check(skillsOfSinnerFive("{\"0\":3,\"1\":2,\"3\":\"x\"}"))).containsExactly(
                 new Violation(ErrorCode.OUT_OF_RANGE_SKILL_TOTAL, SINNER_FIVE,
                         "skillEAState[05] total value 5 is out of range [6-6]"),
-                new Violation(ErrorCode.INVALID_FIELD_TYPE, SINNER_FIVE.key("0"),
-                        "Field 'skillEAState[05][0]' must be number, got number 1.0"));
+                new Violation(ErrorCode.INVALID_SKILL_SLOT, SINNER_FIVE.key("3"),
+                        "Field 'skillEAState[05] slot '3'' has wrong type, expected 0, 1, or 2"));
     }
 }

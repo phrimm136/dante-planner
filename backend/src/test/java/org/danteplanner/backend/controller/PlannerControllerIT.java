@@ -1216,119 +1216,48 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("stale-client-publishes-through-the-delegate: the legacy route answers what the intent route answers")
-        void staleClientPublishesThroughTheDelegate_WhenLegacyRouteCalled_AnswersIdentically() throws Exception {
-            // Two planners in the same starting state, so both routes drive the same transition.
-            // Publishing one planner twice compares a first publish against a republish.
-            Planner throughIntent = createTestPlanner(testUser);
-            Planner throughDelegate = createTestPlanner(testUser);
-
-            String intentBody = mockMvc.perform(
-                            post("/api/planner/md/{id}/publish", throughIntent.getId()).with(withCsrf())
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .cookie(accessTokenCookie()))
-                    .andExpect(status().isOk())
-                    .andReturn().getResponse().getContentAsString();
-
-            String delegateBody = mockMvc.perform(
-                            put("/api/planner/md/{id}/publish", throughDelegate.getId()).with(withCsrf())
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content("{\"published\":true}")
-                                    .cookie(accessTokenCookie()))
-                    .andExpect(status().isOk())
-                    .andReturn().getResponse().getContentAsString();
-
-            ObjectNode fromIntent = (ObjectNode) objectMapper.readTree(intentBody);
-            ObjectNode fromDelegate = (ObjectNode) objectMapper.readTree(delegateBody);
-
-            // Distinct rows differ in identity and timestamps whichever route wrote them. Every
-            // remaining field is one the publish decided, so those have to agree exactly.
-            List<String> perRowFields = List.of("id", "createdAt", "lastModifiedAt", "savedAt");
-            for (String field : perRowFields) {
-                assertTrue(fromIntent.has(field), field + " missing from the intent response");
-                assertTrue(fromDelegate.has(field), field + " missing from the delegate response");
-            }
-            fromIntent.remove(perRowFields);
-            fromDelegate.remove(perRowFields);
-
-            assertTrue(fromIntent.get("published").asBoolean());
-            assertEquals(fromIntent, fromDelegate);
-        }
-    }
-
-    @Nested
-    @DisplayName("PUT /api/planner/md/{id}/publish - Legacy Publish Delegate")
-    class SetPublishedTests {
-
-        @Test
-        @DisplayName("Should return 200 when owner toggles publish status")
-        void setPublished_WhenOwner_Returns200() throws Exception {
-            // Arrange - Create planner for test user
-            Planner planner = createTestPlanner(testUser);
-            assertFalse(planner.isPublished());
-
-            mockMvc.perform(put("/api/planner/md/{id}/publish", planner.getId()).with(withCsrf())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("{\"published\":true}")
-                            .cookie(accessTokenCookie()))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.id").value(planner.getId().toString()))
-                    .andExpect(jsonPath("$.published").value(true));
-
-            // Verify in database
-            Planner updated = plannerRepository.findById(planner.getId()).orElseThrow();
-            assertTrue(updated.isPublished());
-        }
-
-        @Test
-        @DisplayName("Should return 403 when non-owner attempts to toggle publish")
-        void setPublished_WhenNonOwner_Returns403() throws Exception {
-            // Arrange - Create planner for test user, but use other user's token
+        @DisplayName("the publish intent refuses a non-owner")
+        void publishIntent_WhenNonOwner_Returns403() throws Exception {
             Planner planner = createTestPlanner(testUser);
 
-            mockMvc.perform(put("/api/planner/md/{id}/publish", planner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/planner/md/{id}/publish", planner.getId()).with(withCsrf())
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content("{\"published\":true}")
                             .cookie(AuthCookies.accessToken(otherUserAccessToken)))
                     .andExpect(status().isForbidden())
                     .andExpect(jsonPath("$.code").value("PLANNER_FORBIDDEN"));
+            assertFalse(plannerRepository.findById(planner.getId()).orElseThrow().isPublished());
         }
 
         @Test
-        @DisplayName("Should return 401 without authentication")
-        void setPublished_WhenNoAuth_Returns401() throws Exception {
+        @DisplayName("the publish intent requires authentication")
+        void publishIntent_WhenNoAuth_Returns401() throws Exception {
             Planner planner = createTestPlanner(testUser);
 
-            mockMvc.perform(put("/api/planner/md/{id}/publish", planner.getId()).with(withCsrf()))
+            mockMvc.perform(post("/api/planner/md/{id}/publish", planner.getId()).with(withCsrf()))
                     .andExpect(status().isUnauthorized());
         }
 
         @Test
-        @DisplayName("Should return 404 for non-existent planner")
-        void setPublished_WhenNotFound_Returns404() throws Exception {
-            UUID nonExistentId = UUID.randomUUID();
-
-            mockMvc.perform(put("/api/planner/md/{id}/publish", nonExistentId).with(withCsrf())
+        @DisplayName("the publish intent answers 404 for a planner that does not exist")
+        void publishIntent_WhenNotFound_Returns404() throws Exception {
+            mockMvc.perform(post("/api/planner/md/{id}/publish", UUID.randomUUID()).with(withCsrf())
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content("{\"published\":true}")
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.code").value("PLANNER_NOT_FOUND"));
         }
 
         @Test
-        @DisplayName("Should toggle from published to unpublished")
-        void setPublished_WhenPublished_Unpublishes() throws Exception {
-            // Arrange - Create already published planner
-            Planner planner = createPublishedPlanner(testUser, "Published Planner", "5F", 5);
-            assertTrue(planner.isPublished());
+        @DisplayName("PUT on the publish path has no handler")
+        void publishPath_WhenCalledWithPut_Returns405() throws Exception {
+            Planner planner = createTestPlanner(testUser);
 
             mockMvc.perform(put("/api/planner/md/{id}/publish", planner.getId()).with(withCsrf())
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content("{\"published\":false}")
+                            .content("{\"published\":true}")
                             .cookie(accessTokenCookie()))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.published").value(false));
+                    .andExpect(status().isMethodNotAllowed());
+            assertFalse(plannerRepository.findById(planner.getId()).orElseThrow().isPublished());
         }
     }
 

@@ -4,7 +4,9 @@ import org.danteplanner.backend.planner.gamedata.FloorRuleTable;
 import org.danteplanner.backend.planner.gamedata.FloorRuleTable.CategoryFloors;
 import org.danteplanner.backend.planner.gamedata.FloorRuleTable.RuleName;
 import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
+import org.danteplanner.backend.planner.validation.EncodedGiftId;
 import org.danteplanner.backend.planner.validation.ErrorCode;
+import org.danteplanner.backend.planner.validation.GiftId;
 import org.danteplanner.backend.planner.validation.Positions;
 import org.danteplanner.backend.planner.validation.Violation;
 import org.danteplanner.backend.shared.util.GameConstants;
@@ -196,9 +198,18 @@ public class FloorRules {
     private static List<Violation> giftUnique(Walk walk) {
         return walk.indices()
                 .boxed()
-                .flatMap(index -> Positions.firstRepeatOf(walk.giftIds(index))
+                .flatMap(index -> firstRepeatedGift(walk.giftIds(index))
                         .map(giftId -> FloorViolations.duplicateGift(FloorBoundary.giftIdsPath(index), giftId))
                         .stream())
                 .toList();
+    }
+
+    private static Optional<String> firstRepeatedGift(List<String> giftIds) {
+        List<GiftId> bases = giftIds.stream().map(giftId -> EncodedGiftId.parse(giftId).base()).toList();
+        Map<GiftId, Integer> firstIndex = Positions.firstIndexOf(bases);
+        return IntStream.range(0, bases.size())
+                .filter(index -> firstIndex.get(bases.get(index)) < index)
+                .mapToObj(giftIds::get)
+                .findFirst();
     }
 }

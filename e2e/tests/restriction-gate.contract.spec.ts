@@ -45,9 +45,7 @@ test('a ban refuses a stale write to a published planner before the version chec
     expect([200, 201], await created.text()).toContain(created.status())
     const ackedVersion = (await created.json()).syncVersion as number
 
-    const published = await api.put(`/api/planner/md/${plannerId}/publish`, {
-      data: { published: true },
-    })
+    const published = await api.post(`/api/planner/md/${plannerId}/publish`)
     expect(published.status(), await published.text()).toBe(200)
 
     const before = await reader.get(`/api/planner/md/${plannerId}`)
@@ -123,9 +121,7 @@ test('a timeout refuses the published write with its own code', async ({ baseURL
     expect([200, 201], await created.text()).toContain(created.status())
     const ackedVersion = (await created.json()).syncVersion as number
 
-    const published = await api.put(`/api/planner/md/${plannerId}/publish`, {
-      data: { published: true },
-    })
+    const published = await api.post(`/api/planner/md/${plannerId}/publish`)
     expect(published.status(), await published.text()).toBe(200)
 
     await timeoutUser(user.id)

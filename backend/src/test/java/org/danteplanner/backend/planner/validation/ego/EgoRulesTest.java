@@ -5,12 +5,15 @@ import org.danteplanner.backend.planner.validation.ErrorCode;
 import org.danteplanner.backend.planner.validation.SinnerEntry;
 import org.danteplanner.backend.planner.validation.Violation;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.danteplanner.backend.planner.validation.ContentFixtures.equipmentOfSinnerFive;
 
 class EgoRulesTest {
@@ -146,6 +149,43 @@ class EgoRulesTest {
         assertThat(EgoRules.check(egos("{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":\"4\"}}"), DATA))
                 .containsExactly(new Violation(ErrorCode.INVALID_FIELD_TYPE, ZAYIN.field("threadspin"),
                         "Field 'equipment[05].egos.ZAYIN.threadspin' must be number, got string \"4\""));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"7", "\"x\"", "[]", "null", "\"\"", "\"  \""})
+    void check_WhenAnOptionalSlotIsNotAnObject_ReportsItsType(String slot) {
+        assertThat(EgoRules.check(egos("{\"ZAYIN\":{\"id\":\"20501\"},\"TETH\":" + slot + "}"), DATA))
+                .extracting(Violation::code, violation -> violation.path().render())
+                .containsExactly(tuple(ErrorCode.INVALID_FIELD_TYPE, "equipment[05].egos.TETH"));
+    }
+
+    @Test
+    void check_WhenAnUnknownTypeSlotIsNull_ReportsOnlyTheType() {
+        assertThat(EgoRules.check(egos("{\"ZAYIN\":{\"id\":\"20501\"},\"KETHER\":null}"), DATA))
+                .extracting(Violation::code)
+                .containsExactly(ErrorCode.INVALID_EGO_TYPE);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", "  "})
+    void check_WhenAnOptionalEgoIdIsBlank_LeavesTheSlotEmptyAndSkipsTheThreadspin(String id) {
+        assertThat(EgoRules.check(egos("{\"ZAYIN\":{\"id\":\"20501\"},\"TETH\":{\"id\":\"" + id
+                + "\",\"threadspin\":99}}"), DATA)).isEmpty();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"\"\"", "\"  \""})
+    void check_WhenEgosAreABlankString_ReportsTheirType(String egos) {
+        assertThat(EgoRules.check(egos(egos), DATA)).containsExactly(new Violation(
+                ErrorCode.INVALID_FIELD_TYPE, EGOS, "Field 'equipment[05].egos' has wrong type, expected object"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"\"\"", "\"  \""})
+    void check_WhenTheZayinIsABlankString_ReportsItsType(String zayin) {
+        assertThat(EgoRules.check(egos("{\"ZAYIN\":" + zayin + "}"), DATA))
+                .extracting(Violation::code, violation -> violation.path().render())
+                .containsExactly(tuple(ErrorCode.INVALID_FIELD_TYPE, "equipment[05].egos.ZAYIN"));
     }
 
     private static List<SinnerEntry> egos(String egos) {

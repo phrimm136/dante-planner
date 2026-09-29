@@ -40,9 +40,6 @@ public final class IdentityRules {
         return switch (identity.getNodeType()) {
             case OBJECT -> identityId(sinner.sinnerKey(), identity, path, data);
             case MISSING, NULL -> Stream.of(Violation.missing(ErrorCode.MISSING_IDENTITY, path));
-            case STRING -> Stream.of(identity.asText().isBlank()
-                    ? Violation.missing(ErrorCode.MISSING_IDENTITY, path)
-                    : IdentityViolations.identityNotAnObject(path));
             default -> Stream.of(IdentityViolations.identityNotAnObject(path));
         };
     }

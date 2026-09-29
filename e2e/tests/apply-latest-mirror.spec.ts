@@ -36,9 +36,7 @@ test('applying the latest mirror from the community page keeps local draft edits
       data: { ...browserPlannerPayload(plannerId, serverTitle), syncVersion: 1 },
     })
     expect([200, 201], await created.text()).toContain(created.status())
-    const published = await api.put(`/api/planner/md/${plannerId}/publish`, {
-      data: { published: true },
-    })
+    const published = await api.post(`/api/planner/md/${plannerId}/publish`)
     expect(published.status(), await published.text()).toBe(200)
 
     // The server validates submitted content against the game data of its stated version, so a

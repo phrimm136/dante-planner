@@ -24,7 +24,7 @@
       "subject": "CONTENT",
       "problem": "EXCEEDED",
       "rule": "The canonical content, and each section note, stays within its byte limit.",
-      "emittedBy": ["backend"]
+      "emittedBy": ["backend", "frontend"]
     },
     "MALFORMED_JSON": {
       "kind": "boundary",
@@ -38,14 +38,14 @@
       "subject": "FIELD",
       "problem": "UNKNOWN",
       "rule": "Every top-level key is in the allowed set.",
-      "emittedBy": ["backend"]
+      "emittedBy": ["backend", "frontend"]
     },
     "MISSING_REQUIRED_FIELD": {
       "kind": "boundary",
       "subject": "FIELD",
       "problem": "MISSING",
       "rule": "Every required top-level key is present.",
-      "emittedBy": ["backend"]
+      "emittedBy": ["backend", "frontend"]
     },
     "INVALID_FIELD_TYPE": {
       "kind": "boundary",
@@ -59,7 +59,7 @@
       "subject": "CATEGORY",
       "problem": "INVALID",
       "rule": "The category is a Mirror Dungeon category.",
-      "emittedBy": ["backend"]
+      "emittedBy": ["backend", "frontend"]
     },
     "MISMATCHED_CATEGORY": {
       "kind": "rule",
@@ -73,7 +73,7 @@
       "subject": "VERSION",
       "problem": "UNKNOWN",
       "rule": "Season game data exists for the content version.",
-      "emittedBy": ["backend"]
+      "emittedBy": ["backend", "frontend"]
     },
     "MISSING_TITLE": {
       "kind": "rule",
@@ -101,6 +101,13 @@
       "subject": "SINNER",
       "problem": "MISSING",
       "rule": "Equipment and skillEAState each hold all 12 sinners.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "DUPLICATE_SINNER": {
+      "kind": "rule",
+      "subject": "SINNER",
+      "problem": "DUPLICATE",
+      "rule": "No sinner appears under two keys of equipment or skillEAState.",
       "emittedBy": ["backend", "frontend"]
     },
     "MISSING_IDENTITY": {
@@ -178,13 +185,27 @@
       "subject": "EGO",
       "problem": "MISSING",
       "rule": "A known E.G.O has a threadspin ceiling in the game data.",
-      "emittedBy": ["backend"]
+      "emittedBy": ["backend", "frontend"]
+    },
+    "EXCESS_DEPLOYMENT": {
+      "kind": "rule",
+      "subject": "DEPLOYMENT",
+      "problem": "EXCESS",
+      "rule": "The deployment order holds at most 12 entries.",
+      "emittedBy": ["backend", "frontend"]
     },
     "OUT_OF_RANGE_DEPLOYMENT": {
       "kind": "rule",
       "subject": "DEPLOYMENT",
       "problem": "OUT_OF_RANGE",
       "rule": "Every deployment order entry is a sinner index between 0 and 11.",
+      "emittedBy": ["backend", "frontend"]
+    },
+    "DUPLICATE_DEPLOYMENT": {
+      "kind": "rule",
+      "subject": "DEPLOYMENT",
+      "problem": "DUPLICATE",
+      "rule": "No sinner repeats in the deployment order.",
       "emittedBy": ["backend", "frontend"]
     },
     "INVALID_SKILL_SLOT": {
@@ -255,14 +276,14 @@
       "subject": "STARTGIFT",
       "problem": "UNKNOWN",
       "rule": "The start gift keyword exists for the season.",
-      "emittedBy": ["backend"]
+      "emittedBy": ["backend", "frontend"]
     },
     "MISMATCHED_STARTGIFT": {
       "kind": "rule",
       "subject": "STARTGIFT",
       "problem": "MISMATCHED",
       "rule": "Every start gift is in its keyword's pool.",
-      "emittedBy": ["backend"]
+      "emittedBy": ["backend", "frontend"]
     },
     "DUPLICATE_STARTGIFT": {
       "kind": "rule",

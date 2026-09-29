@@ -8,12 +8,10 @@ import org.danteplanner.backend.planner.validation.JsonKind;
 import org.danteplanner.backend.planner.validation.SinnerEntry;
 import org.danteplanner.backend.planner.validation.Violation;
 
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -28,16 +26,11 @@ public final class SinnerKeys {
         }
     }
 
-    private record KeyedValue(FieldResult<Optional<String>> sinnerKey, JsonNode value) {
+    private record KeyedValue(FieldResult<Optional<SinnerKey>> sinnerKey, JsonNode value) {
     }
 
-    static final int FIRST_SINNER = 1;
-    static final int LAST_SINNER = 12;
-
-    private static final Pattern SINNER_NUMBER = Pattern.compile("[+-]?[\\p{Nd}&&[\\x{0}-\\x{FFFF}]]+");
-    private static final List<String> ALL_SINNER_KEYS = IntStream.rangeClosed(FIRST_SINNER, LAST_SINNER)
-            .mapToObj(SinnerKeys::keyOf)
-            .toList();
+    private record SinnerValue(SinnerKey sinnerKey, JsonNode value) {
+    }
 
     private SinnerKeys() {
     }
@@ -52,18 +45,20 @@ public final class SinnerKeys {
 
     private static Sinners parseEntries(JsonNode container, ContentPath path) {
         List<KeyedValue> keyed = container.properties().stream()
-                .map(property -> new KeyedValue(sinnerKey(property.getKey(), path), property.getValue()))
+                .map(property -> new KeyedValue(SinnerKey.parse(property.getKey(), path), property.getValue()))
                 .toList();
-        Map<String, JsonNode> bySinner = keyed.stream()
-                .flatMap(entry -> entry.sinnerKey().value().map(key -> Map.entry(key, entry.value())).stream())
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (first, later) -> later, TreeMap::new));
-        List<FieldResult<Optional<SinnerEntry>>> entries = bySinner.entrySet().stream()
-                .map(sinner -> entry(sinner.getKey(), sinner.getValue(), path.key(sinner.getKey())))
+        Map<Integer, List<SinnerValue>> bySinner = keyed.stream()
+                .flatMap(entry -> entry.sinnerKey().value().map(key -> new SinnerValue(key, entry.value())).stream())
+                .collect(Collectors.groupingBy(sinner -> sinner.sinnerKey().sinner(), TreeMap::new, Collectors.toList()));
+        List<FieldResult<Optional<SinnerEntry>>> entries = bySinner.values().stream()
+                .filter(named -> named.size() == 1)
+                .map(named -> entry(named.getFirst(), path))
                 .toList();
         return new Sinners(
                 entries.stream().flatMap(entry -> entry.value().stream()).toList(),
                 Stream.of(
                                 keyed.stream().flatMap(entry -> entry.sinnerKey().violations().stream()),
+                                duplicateSinners(bySinner, path),
                                 missingSinners(bySinner, path),
                                 entries.stream().flatMap(entry -> entry.violations().stream()))
                         .flatMap(violations -> violations)
@@ -71,40 +66,29 @@ public final class SinnerKeys {
                         .toList());
     }
 
-    private static FieldResult<Optional<String>> sinnerKey(String key, ContentPath containerPath) {
-        return number(key)
-                .map(number -> inRange(number)
-                        ? FieldResult.of(Optional.of(keyOf(number.intValue())))
-                        : FieldResult.<Optional<String>>rejected(Optional.empty(),
-                                SinnerViolations.keyOutOfRange(containerPath, key, number.intValue())))
-                .orElseGet(() -> FieldResult.rejected(Optional.empty(), SinnerViolations.keyNotANumber(containerPath, key)));
+    private static Stream<Violation> duplicateSinners(Map<Integer, List<SinnerValue>> bySinner, ContentPath path) {
+        return bySinner.values().stream()
+                .filter(named -> named.size() > 1)
+                .flatMap(List::stream)
+                .map(named -> SinnerViolations.duplicateSinner(path, named.sinnerKey()));
     }
 
-    private static Optional<BigInteger> number(String key) {
-        return SINNER_NUMBER.matcher(key).matches()
-                ? Optional.of(new BigInteger(key)).filter(number -> number.bitLength() < Integer.SIZE)
-                : Optional.empty();
-    }
-
-    private static boolean inRange(BigInteger number) {
-        return number.intValue() >= FIRST_SINNER && number.intValue() <= LAST_SINNER;
-    }
-
-    private static Stream<Violation> missingSinners(Map<String, JsonNode> bySinner, ContentPath path) {
-        List<String> missing = ALL_SINNER_KEYS.stream().filter(key -> !bySinner.containsKey(key)).toList();
+    private static Stream<Violation> missingSinners(Map<Integer, List<SinnerValue>> bySinner, ContentPath path) {
+        List<String> missing = IntStream.rangeClosed(SinnerKey.FIRST_SINNER, SinnerKey.LAST_SINNER)
+                .filter(sinner -> !bySinner.containsKey(sinner))
+                .mapToObj(SinnerKey::paddedOf)
+                .toList();
         return missing.isEmpty()
                 ? Stream.empty()
                 : Stream.of(Violation.missingFields(ErrorCode.MISSING_SINNER, path, missing));
     }
 
-    private static FieldResult<Optional<SinnerEntry>> entry(String sinnerKey, JsonNode value, ContentPath path) {
-        return switch (value.getNodeType()) {
-            case OBJECT -> FieldResult.of(Optional.of(new SinnerEntry(sinnerKey, path, value)));
+    private static FieldResult<Optional<SinnerEntry>> entry(SinnerValue sinner, ContentPath containerPath) {
+        String sinnerKey = sinner.sinnerKey().padded();
+        ContentPath path = containerPath.key(sinnerKey);
+        return switch (sinner.value().getNodeType()) {
+            case OBJECT -> FieldResult.of(Optional.of(new SinnerEntry(sinnerKey, path, sinner.value())));
             default -> FieldResult.rejected(Optional.empty(), SinnerViolations.sinnerNotAnObject(path));
         };
-    }
-
-    private static String keyOf(int sinner) {
-        return String.format("%02d", sinner);
     }
 }

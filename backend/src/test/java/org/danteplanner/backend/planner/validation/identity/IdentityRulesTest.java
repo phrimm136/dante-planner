@@ -4,6 +4,8 @@ import org.danteplanner.backend.planner.validation.ContentPath;
 import org.danteplanner.backend.planner.validation.ErrorCode;
 import org.danteplanner.backend.planner.validation.Violation;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
 import java.util.Set;
@@ -109,5 +111,19 @@ class IdentityRulesTest {
         assertThat(IdentityRules.check(equipmentOfSinnerFive("{\"identity\":{\"id\":\"10501\",\"uptie\":0}}"),
                 DATA)).containsExactly(new Violation(ErrorCode.OUT_OF_RANGE_IDENTITY_UPTIE, IDENTITY.field("uptie"),
                 "uptie value 0 is out of range [1-4]"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"\"\"", "\"  \""})
+    void check_WhenTheIdentityIsABlankString_ReportsItsType(String identity) {
+        assertThat(IdentityRules.check(equipmentOfSinnerFive("{\"identity\":" + identity + "}"), DATA))
+                .containsExactly(new Violation(ErrorCode.INVALID_FIELD_TYPE, IDENTITY,
+                        "Field 'equipment[05].identity' has wrong type, expected object"));
+    }
+
+    @Test
+    void check_WhenLevelAndUptieAreIntegralValuedFractions_AcceptsThem() {
+        assertThat(IdentityRules.check(equipmentOfSinnerFive(
+                "{\"identity\":{\"id\":\"10501\",\"level\":60.0,\"uptie\":4.0}}"), DATA)).isEmpty();
     }
 }

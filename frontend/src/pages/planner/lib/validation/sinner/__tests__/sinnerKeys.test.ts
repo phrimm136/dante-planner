@@ -74,14 +74,14 @@ describe('parseSinners', () => {
     expect(entries.map(([sinnerKey]) => sinnerKey)).not.toContain('01')
   })
 
-  it('reads an unpadded key as its sinner and prefers the padded spelling', () => {
+  it('reads an unpadded key as its sinner and admits neither spelling when both appear', () => {
     const sinners = allSinners()
     delete sinners['03']
     const padded = { ...sinners, '3': { spelling: 'unpadded' } }
     const both = { ...allSinners(), '3': { spelling: 'unpadded' } }
 
     expect(parseSinners(padded, EQUIPMENT).entries[2]?.value).toEqual({ spelling: 'unpadded' })
-    expect(parseSinners(both, EQUIPMENT).entries[2]?.value).toEqual({ sinnerKey: '03' })
+    expect(parse(both).entries.map(([sinnerKey]) => sinnerKey)).not.toContain('03')
   })
 
   it.each(['abc', '', '1.5', ' 2', '0x2'])(
@@ -110,5 +110,33 @@ describe('parseSinners', () => {
       { code: 'MISSING_SINNER', path: 'equipment' },
       { code: 'OUT_OF_RANGE_SINNER', path: 'equipment[13]' },
     ])
+  })
+})
+
+describe('two keys naming one sinner', () => {
+  it.each([[['01', '1']], [['1', '+1']], [['1', '01', '001']]])(
+    'reports DUPLICATE_SINNER at every raw key of %j and no entry',
+    (rawKeys) => {
+      const sinners = allSinners()
+      delete sinners['01']
+      const raw = { ...sinners, ...Object.fromEntries(rawKeys.map((rawKey) => [rawKey, {}])) }
+
+      const { entries, violations } = parse(raw)
+
+      expect(violations).toEqual(
+        [...rawKeys]
+          .sort()
+          .map((rawKey) => ({ code: 'DUPLICATE_SINNER', path: `equipment[${rawKey}]` })),
+      )
+      expect(entries.map(([sinnerKey]) => sinnerKey)).not.toContain('01')
+    },
+  )
+
+  it('reports the same violations whatever order the keys come in', () => {
+    const forward = { ...allSinners(), '1': {} }
+    const { '01': first, ...rest } = allSinners()
+    const backward = { '1': {}, ...rest, '01': first }
+
+    expect(parse(backward)).toEqual(parse(forward))
   })
 })

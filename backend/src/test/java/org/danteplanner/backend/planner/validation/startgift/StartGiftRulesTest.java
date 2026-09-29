@@ -6,6 +6,8 @@ import org.danteplanner.backend.planner.validation.ErrorCode;
 import org.danteplanner.backend.planner.validation.Violation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Map;
 import java.util.Optional;
@@ -81,10 +83,8 @@ class StartGiftRulesTest {
     }
 
     @Test
-    void check_WhenTheKeywordIsNotAString_ReportsItsTypeAndTheMissingKeyword() {
+    void check_WhenTheKeywordIsNotAString_ReportsOnlyItsType() {
         assertThat(StartGiftRules.check(json("123"), json("[\"9001\"]"), GIFTS, SEASON)).containsExactly(
-                new Violation(ErrorCode.MISSING_STARTGIFT_KEYWORD, GIFT_IDS,
-                        "selectedGiftIds requires a selectedGiftKeyword"),
                 new Violation(ErrorCode.INVALID_FIELD_TYPE, KEYWORD,
                         "Field 'selectedGiftKeyword' must be string or null, got number 123"));
     }
@@ -97,10 +97,8 @@ class StartGiftRulesTest {
     }
 
     @Test
-    void check_WhenAnUnknownGiftIsOutsideThePool_ReportsBothAtItsIndex() {
+    void check_WhenAnUnknownGiftIsOutsideThePool_ReportsItOnlyAsUnknown() {
         assertThat(StartGiftRules.check(json("\"Combustion\""), json("[\"9999\"]"), GIFTS, SEASON)).containsExactly(
-                new Violation(ErrorCode.MISMATCHED_STARTGIFT, GIFT_IDS.index(0),
-                        "start gift '9999' is not in the 'Combustion' keyword pool"),
                 new Violation(ErrorCode.UNKNOWN_EGOGIFT, GIFT_IDS.index(0),
                         "selectedGiftIds ID '9999' not found or invalid"));
     }
@@ -122,5 +120,51 @@ class StartGiftRulesTest {
                         "selectedGiftIds ID '9999' not found or invalid"),
                 new Violation(ErrorCode.INVALID_FIELD_TYPE, KEYWORD,
                         "Field 'selectedGiftKeyword' must be string or null, got number 123"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", "  "})
+    void check_WhenTheKeywordIsBlankWithGifts_ReportsTheMissingKeyword(String keyword) {
+        assertThat(StartGiftRules.check(json("\"" + keyword + "\""), json("[\"9001\"]"), GIFTS, SEASON))
+                .containsExactly(new Violation(ErrorCode.MISSING_STARTGIFT_KEYWORD, GIFT_IDS,
+                        "selectedGiftIds requires a selectedGiftKeyword"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", "  "})
+    void check_WhenTheKeywordIsBlankWithoutGifts_ReportsNothing(String keyword) {
+        assertThat(StartGiftRules.check(json("\"" + keyword + "\""), MissingNode.getInstance(), GIFTS, SEASON))
+                .isEmpty();
+    }
+
+    @Test
+    void check_WhenTheKeywordIsAnArrayWithGifts_ReportsOnlyItsType() {
+        assertThat(StartGiftRules.check(json("[]"), json("[\"9001\"]"), GIFTS, SEASON)).containsExactly(
+                new Violation(ErrorCode.INVALID_FIELD_TYPE, KEYWORD,
+                        "Field 'selectedGiftKeyword' must be string or null, got array"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"19001", "29001"})
+    void check_WhenAnEnhancedGiftsBaseIsInThePool_ReportsNothing(String giftId) {
+        StartGiftReferenceData enhancedGifts = id -> id.endsWith("9001");
+
+        assertThat(StartGiftRules.check(json("\"Combustion\""), json("[\"" + giftId + "\"]"), enhancedGifts,
+                SEASON)).isEmpty();
+    }
+
+    @Test
+    void check_WhenAnEnhancedGiftsBaseIsOutsideThePool_ReportsItsRawId() {
+        StartGiftReferenceData enhancedGifts = id -> id.endsWith("9003");
+
+        assertThat(StartGiftRules.check(json("\"Combustion\""), json("[\"19003\"]"), enhancedGifts, SEASON))
+                .containsExactly(new Violation(ErrorCode.MISMATCHED_STARTGIFT, GIFT_IDS.index(0),
+                        "start gift '19003' is not in the 'Combustion' keyword pool"));
+    }
+
+    @Test
+    void check_WhenABlankGiftIsSelected_ReportsItOnlyAsUnknown() {
+        assertThat(StartGiftRules.check(json("\"Combustion\""), json("[\"\"]"), GIFTS, SEASON)).containsExactly(
+                new Violation(ErrorCode.UNKNOWN_EGOGIFT, GIFT_IDS.index(0), "selectedGiftIds ID '' not found or invalid"));
     }
 }

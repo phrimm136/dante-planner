@@ -387,6 +387,7 @@ describe('floorRules module', () => {
     expect(imports).toEqual([
       '@/shared/gameData',
       '@/shared/gameData',
+      '../boundary',
       '../contentPath',
       '../contentPath',
       '../violation',

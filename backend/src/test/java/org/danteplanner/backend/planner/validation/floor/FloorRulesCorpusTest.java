@@ -3,6 +3,7 @@ package org.danteplanner.backend.planner.validation.floor;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.validation.ContentPath;
+import org.danteplanner.backend.planner.validation.EncodedGiftId;
 import org.danteplanner.backend.planner.validation.ErrorCode;
 import org.danteplanner.backend.planner.gamedata.FloorRuleTable;
 import org.danteplanner.backend.planner.gamedata.FloorRuleTable.CategoryFloors;
@@ -62,7 +63,7 @@ class FloorRulesCorpusTest {
 
     private static final Set<String> CALLER_CODES = codes(ErrorCode.INVALID_CATEGORY);
 
-    private static final int MODULE_CASE_COUNT = 60;
+    private static final int MODULE_CASE_COUNT = 62;
 
     private static final FloorReferenceData CORPUS_GAME_DATA = corpusGameData(readCorpus().path("gameData"));
 
@@ -242,6 +243,29 @@ class FloorRulesCorpusTest {
                 ContentPath.of("floorSelections").index(0).field("giftIds"), "Duplicate value '9001' in floorSelections[0].giftIds"))));
     }
 
+    @ParameterizedTest(name = "{0}")
+    @CsvSource(delimiter = '|', textBlock = """
+            9001  | 19001
+            19001 | 9001
+            29001 | 19001
+            """)
+    void admit_WhenAFloorHoldsTwoFormsOfOneGift_ReportsTheLaterAsARepeat(String first, String repeat) {
+        JsonNode floors = json("[{\"themePackId\":\"1001\",\"difficulty\":0,\"giftIds\":[\"" + first + "\",\""
+                + repeat + "\"]}]");
+
+        assertThat(admit(rules, floors, MDCategory.F5, Stage.DRAFT)).isEqualTo(new Admission.Rejected(List.of(
+                new Violation(ErrorCode.DUPLICATE_EGOGIFT, ContentPath.of("floorSelections").index(0).field("giftIds"),
+                        "Duplicate value '" + repeat + "' in floorSelections[0].giftIds"))));
+    }
+
+    @Test
+    void admit_WhenTwoFloorsHoldTwoFormsOfOneGift_ReportsNoRepeat() {
+        JsonNode floors = floors(json("{\"themePackId\":\"1001\",\"difficulty\":0,\"giftIds\":[\"9001\"]}"),
+                json("{\"themePackId\":\"1002\",\"difficulty\":0,\"giftIds\":[\"19001\"]}"));
+
+        assertThat(admit(rules, floors, MDCategory.F5, Stage.DRAFT)).isInstanceOf(Admission.Admitted.class);
+    }
+
     @Test
     void admit_WhenTheMatrixMovesDifficultyInRangeToDraft_ChecksTheDifficultyAtDraftInstead() {
         JsonNode floors = floors(floor("1001", 5), floor("1002", 0), floor("1003", 0), floor("1004", 0),
@@ -385,13 +409,17 @@ class FloorRulesCorpusTest {
 
         @Override
         public boolean hasEgoGift(String giftId) {
-            return giftThemePacks.containsKey(giftId);
+            return giftThemePacks.containsKey(baseOf(giftId));
         }
 
         @Override
         public boolean isGiftAffordableForThemePack(String giftId, String themePackId) {
-            List<String> themePacks = giftThemePacks.get(giftId);
+            List<String> themePacks = giftThemePacks.get(baseOf(giftId));
             return themePacks.isEmpty() || themePacks.contains(themePackId);
+        }
+
+        private static String baseOf(String giftId) {
+            return EncodedGiftId.parse(giftId).base().value();
         }
     }
 
