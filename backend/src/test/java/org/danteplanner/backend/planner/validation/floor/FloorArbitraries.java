@@ -10,7 +10,7 @@ import net.jqwik.api.Arbitrary;
 import net.jqwik.api.Combinators;
 import net.jqwik.api.Tuple;
 import org.danteplanner.backend.planner.entity.MDCategory;
-import org.danteplanner.backend.planner.validation.FloorRuleTable;
+import org.danteplanner.backend.planner.gamedata.FloorRuleTable;
 
 import java.math.BigInteger;
 import java.util.List;

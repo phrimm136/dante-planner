@@ -1,10 +1,11 @@
 package org.danteplanner.backend.planner.validation.floor;
 
+import org.danteplanner.backend.planner.gamedata.FloorRuleTable;
+import org.danteplanner.backend.planner.gamedata.FloorRuleTable.CategoryFloors;
+import org.danteplanner.backend.planner.gamedata.FloorRuleTable.RuleName;
+import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
 import org.danteplanner.backend.planner.validation.ErrorCode;
-import org.danteplanner.backend.planner.validation.FloorRuleTable;
-import org.danteplanner.backend.planner.validation.FloorRuleTable.CategoryFloors;
-import org.danteplanner.backend.planner.validation.FloorRuleTable.RuleName;
-import org.danteplanner.backend.planner.validation.GameDataRegistry;
+import org.danteplanner.backend.planner.validation.Positions;
 import org.danteplanner.backend.planner.validation.Violation;
 import org.danteplanner.backend.shared.util.GameConstants;
 import org.springframework.beans.factory.annotation.Autowired;

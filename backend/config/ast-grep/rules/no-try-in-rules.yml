@@ -4,6 +4,8 @@ severity: error
 message: 'ADR 140: a rule decides by value, not by catching; the one try is the JSON parse at the boundary.'
 files:
   - src/main/java/org/danteplanner/backend/planner/validation/**
+ignores:
+  - src/main/java/org/danteplanner/backend/planner/validation/ContentJson.java
 rule:
   any:
     - kind: try_statement

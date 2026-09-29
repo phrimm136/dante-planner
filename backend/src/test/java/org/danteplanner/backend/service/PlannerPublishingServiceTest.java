@@ -8,8 +8,8 @@ import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
-import org.danteplanner.backend.planner.validation.PlannerOwnershipValidator;
-import org.danteplanner.backend.planner.validation.PlannerPublishValidator;
+import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator;
+import org.danteplanner.backend.planner.precondition.PlannerPublishValidator;
 
 
 import org.danteplanner.backend.auth.entity.AuthProviderType;
@@ -27,7 +27,7 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
-import org.danteplanner.backend.planner.validation.PlannerIdMigrations;
+import org.danteplanner.backend.planner.gamedata.PlannerIdMigrations;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

@@ -2,7 +2,9 @@ package org.danteplanner.backend.planner.exception;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.danteplanner.backend.planner.validation.ContentVerdict;
 import org.danteplanner.backend.planner.validation.ErrorCode;
+import org.danteplanner.backend.planner.validation.Violation;
 import org.danteplanner.backend.shared.exception.DomainException;
 import org.danteplanner.backend.shared.exception.ErrorKind;
 
@@ -34,20 +36,31 @@ public class PlannerValidationException extends DomainException {
 
     private final List<ValidationError> subErrors;
 
-    public record ValidationError(String code, String message) {}
+    public record ValidationError(String code, String path, String message) {}
 
     public PlannerValidationException(String errorCode, String message) {
         this(errorCode, message, List.of());
     }
 
-    public static PlannerValidationException combined(List<PlannerValidationException> errors) {
-        List<ValidationError> sub = errors.stream()
-                .map(e -> new ValidationError(e.getOriginalCode(), e.getMessage()))
+    public static PlannerValidationException refusing(ContentVerdict.Refused refused, String failedContent) {
+        Violation violation = refused.violation();
+        PlannerValidationException exception =
+                new PlannerValidationException(violation.code().getCode(), violation.message());
+        exception.setFailedContent(failedContent);
+        return exception;
+    }
+
+    public static PlannerValidationException rejecting(ContentVerdict.Rejected rejected, String failedContent) {
+        List<ValidationError> sub = rejected.violations().stream()
+                .map(violation -> new ValidationError(violation.code().getCode(), violation.path().render(),
+                        violation.message()))
                 .toList();
-        String message = errors.stream()
-                .map(e -> "[" + e.getOriginalCode() + "] " + e.getMessage())
+        String message = sub.stream()
+                .map(error -> String.format("[%s] %s", error.code(), error.message()))
                 .collect(Collectors.joining("; "));
-        return new PlannerValidationException(GENERIC_CODE, message, sub);
+        PlannerValidationException exception = new PlannerValidationException(GENERIC_CODE, message, sub);
+        exception.setFailedContent(failedContent);
+        return exception;
     }
 
     private PlannerValidationException(String errorCode, String message, List<ValidationError> sub) {

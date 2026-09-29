@@ -11,7 +11,7 @@ import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.comment.validation.CommentAccessValidator;
 import org.danteplanner.backend.comment.validation.CommentAuthorshipValidator;
 import org.danteplanner.backend.comment.validation.CommentStateValidator;
-import org.danteplanner.backend.planner.validation.VoteUniquenessValidator;
+import org.danteplanner.backend.planner.precondition.VoteUniquenessValidator;
 import org.danteplanner.backend.moderation.service.CommentReportService;
 import org.danteplanner.backend.planner.service.PlannerStatsService;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;

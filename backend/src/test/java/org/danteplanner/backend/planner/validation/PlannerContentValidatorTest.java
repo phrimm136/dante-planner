@@ -2,11 +2,16 @@ package org.danteplanner.backend.planner.validation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.planner.entity.MDCategory;
-import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.planner.exception.PlannerValidationException.ValidationError;
+import org.danteplanner.backend.planner.exception.PlannerValidationException;
+import org.danteplanner.backend.planner.gamedata.FloorRuleTable;
+import org.danteplanner.backend.planner.gamedata.GameDataLoader;
+import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
+import org.danteplanner.backend.planner.gamedata.PlannerIdMigrations;
 import org.danteplanner.backend.planner.validation.floor.FloorRules;
 import org.danteplanner.backend.planner.validation.floor.Stage;
 import org.danteplanner.backend.support.TestDataFactory;
+import org.danteplanner.backend.planner.validation.sinner.SinnerIdValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -82,15 +87,8 @@ class PlannerContentValidatorTest {
     void setUp() {
         objectMapper = new ObjectMapper();
         lenient().when(gameDataRegistry.floorRules()).thenReturn(FLOOR_RULE_TABLE);
-        validator = new PlannerContentValidator(
-                new StructuralValidator(objectMapper, MAX_CONTENT_SIZE_BYTES, MAX_NOTE_SIZE_BYTES),
-                new CategoryValidator(),
-                new EquipmentValidator(),
-                new SkillStateValidator(),
-                new IdReferenceValidator(gameDataRegistry, sinnerIdValidator),
-                new StartBuffValidator(gameDataRegistry),
-                gameDataRegistry,
-                new FloorRules(gameDataRegistry));
+        validator = new PlannerContentValidator(objectMapper, MAX_CONTENT_SIZE_BYTES, MAX_NOTE_SIZE_BYTES,
+                gameDataRegistry, sinnerIdValidator, new FloorRules(gameDataRegistry));
 
         // Default per-EGO max so existing tests reach gift/buff/etc. validations
         // without stubbing maxThreadspin individually. Tests that exercise the
@@ -990,7 +988,7 @@ class PlannerContentValidatorTest {
                     () -> validate(content, "5F"));
 
             assertThat(thrown.getSubErrors()).contains(new PlannerValidationException.ValidationError(
-                    "INVALID_FIELD_TYPE", "Field 'selectedBuffIds[1]' must be number, got number 101.0"));
+                    "INVALID_FIELD_TYPE", "selectedBuffIds[1]", "Field 'selectedBuffIds[1]' must be number, got number 101.0"));
         }
 
         @Test
@@ -1531,7 +1529,7 @@ class PlannerContentValidatorTest {
                     () -> validate(content, "5F"));
 
             assertThat(ex.getSubErrors()).containsExactly(new PlannerValidationException.ValidationError(
-                    "INVALID_FIELD_TYPE", "Field 'equipment[01].identity.level' must be number, got string \"abc\""));
+                    "INVALID_FIELD_TYPE", "equipment[01].identity.level", "Field 'equipment[01].identity.level' must be number, got string \"abc\""));
         }
 
         @Test
@@ -1545,7 +1543,7 @@ class PlannerContentValidatorTest {
                     () -> validate(content, "5F"));
 
             assertThat(ex.getSubErrors()).containsExactly(new PlannerValidationException.ValidationError(
-                    "INVALID_FIELD_TYPE", "Field 'equipment[01].identity.level' must be number, got number 45.0"));
+                    "INVALID_FIELD_TYPE", "equipment[01].identity.level", "Field 'equipment[01].identity.level' must be number, got number 45.0"));
         }
 
         @Test
@@ -1559,7 +1557,7 @@ class PlannerContentValidatorTest {
                     () -> validate(content, "5F"));
 
             assertThat(ex.getSubErrors()).containsExactly(new PlannerValidationException.ValidationError(
-                    "INVALID_FIELD_TYPE", "Field 'equipment[01].egos.ZAYIN.threadspin' must be number, got number 4.0"));
+                    "INVALID_FIELD_TYPE", "equipment[01].egos.ZAYIN.threadspin", "Field 'equipment[01].egos.ZAYIN.threadspin' must be number, got number 4.0"));
         }
 
         @Test
@@ -1674,7 +1672,7 @@ class PlannerContentValidatorTest {
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
                     () -> validate(content, "5F", Stage.PUBLISH));
 
-            assertThat(ex.getSubErrors()).containsExactly(new ValidationError("OUT_OF_RANGE_DIFFICULTY",
+            assertThat(ex.getSubErrors()).containsExactly(new ValidationError("OUT_OF_RANGE_DIFFICULTY", "floorSelections[0].difficulty",
                     "floorSelections[0].difficulty value 2147483648 is out of range [0-1]"));
         }
 
@@ -1702,9 +1700,9 @@ class PlannerContentValidatorTest {
                     () -> validate(content, "5F", Stage.PUBLISH));
 
             assertThat(ex.getSubErrors()).containsExactlyInAnyOrder(
-                    new ValidationError("DUPLICATE_THEMEPACK",
+                    new ValidationError("DUPLICATE_THEMEPACK", "floorSelections[2].themePackId",
                             "floorSelections[2].themePackId repeats theme pack '1002' from floorSelections[1]"),
-                    new ValidationError("UNKNOWN_THEMEPACK",
+                    new ValidationError("UNKNOWN_THEMEPACK", "floorSelections[0].themePackId",
                             "floorSelections[0].themePackId ID '9999' not found or invalid"));
         }
 
@@ -1722,9 +1720,9 @@ class PlannerContentValidatorTest {
                     () -> validate(content, "5F"));
 
             assertThat(ex.getSubErrors()).containsExactly(
-                    new ValidationError("UNKNOWN_EGOGIFT_FLOOR",
+                    new ValidationError("UNKNOWN_EGOGIFT_FLOOR", "floorSelections[0].giftIds[0]",
                             "floorSelections[0].giftIds[0] ID '9999' not found or invalid"),
-                    new ValidationError("UNKNOWN_THEMEPACK",
+                    new ValidationError("UNKNOWN_THEMEPACK", "floorSelections[0].themePackId",
                             "floorSelections[0].themePackId ID '+1001' not found or invalid"));
         }
 
@@ -1738,8 +1736,8 @@ class PlannerContentValidatorTest {
                     () -> validate(content, "5F"));
 
             assertThat(ex.getSubErrors()).containsExactly(
-                    new ValidationError("UNAFFORDABLE_EGOGIFT", "Gift '9002' is not affordable for theme pack '1001'"),
-                    new ValidationError("UNAFFORDABLE_EGOGIFT", "Gift '9003' is not affordable for theme pack '1001'"));
+                    new ValidationError("UNAFFORDABLE_EGOGIFT", "floorSelections[0].giftIds[0]", "Gift '9002' is not affordable for theme pack '1001'"),
+                    new ValidationError("UNAFFORDABLE_EGOGIFT", "floorSelections[0].giftIds[1]", "Gift '9003' is not affordable for theme pack '1001'"));
         }
 
         @Test
@@ -1751,7 +1749,7 @@ class PlannerContentValidatorTest {
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
                     () -> validate(content, "5F"));
 
-            assertThat(ex.getSubErrors()).containsExactly(new ValidationError("INVALID_FIELD_TYPE",
+            assertThat(ex.getSubErrors()).containsExactly(new ValidationError("INVALID_FIELD_TYPE", "floorSelections[0].giftIds",
                     "Field 'floorSelections[0].giftIds' must be array, got string \"9002\""));
         }
 
@@ -1776,7 +1774,7 @@ class PlannerContentValidatorTest {
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
                     () -> validate(content, "5F"));
 
-            assertThat(ex.getSubErrors()).containsExactly(new ValidationError("INVALID_FIELD_TYPE",
+            assertThat(ex.getSubErrors()).containsExactly(new ValidationError("INVALID_FIELD_TYPE", "floorSelections",
                     "Field 'floorSelections' must be array, got number 5"));
         }
 
@@ -1794,9 +1792,9 @@ class PlannerContentValidatorTest {
                     () -> validate(content, "15F", Stage.PUBLISH));
 
             assertThat(ex.getSubErrors()).containsExactly(
-                    new ValidationError("OUT_OF_RANGE_DIFFICULTY_NOT_HARD",
+                    new ValidationError("OUT_OF_RANGE_DIFFICULTY_NOT_HARD", "floorSelections[5].difficulty",
                             "floorSelections[5].difficulty value 0 is out of range [1-1]"),
-                    new ValidationError("OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME",
+                    new ValidationError("OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME", "floorSelections[10].difficulty",
                             "floorSelections[10].difficulty value 1 is out of range [3-3]"));
         }
 
@@ -1804,15 +1802,9 @@ class PlannerContentValidatorTest {
         void validate_WhenAPackBoundGiftSitsOnAnUnknownPackOverTheRealGameData_ReportsBoth() {
             GameDataRegistry registry = new GameDataRegistry(new GameDataLoader(objectMapper), "../static/data");
             registry.init();
-            PlannerContentValidator realValidator = new PlannerContentValidator(
-                    new StructuralValidator(objectMapper, MAX_CONTENT_SIZE_BYTES, MAX_NOTE_SIZE_BYTES),
-                    new CategoryValidator(),
-                    new EquipmentValidator(),
-                    new SkillStateValidator(),
-                    new IdReferenceValidator(registry, new SinnerIdValidator()),
-                    new StartBuffValidator(registry),
-                    registry,
-                    new FloorRules(registry));
+            PlannerContentValidator realValidator = new PlannerContentValidator(objectMapper,
+                    MAX_CONTENT_SIZE_BYTES, MAX_NOTE_SIZE_BYTES,
+                    registry, new SinnerIdValidator(), new FloorRules(registry));
             String content = TestDataFactory.VALID_CONTENT.replace(
                     "{\"themePackId\":\"1001\",\"difficulty\":0,\"giftIds\":[\"9002\"]}",
                     "{\"themePackId\":\"9999\",\"difficulty\":0,\"giftIds\":[\"9212\"]}");
@@ -1821,8 +1813,8 @@ class PlannerContentValidatorTest {
                     () -> realValidator.validate(content, "5F", VERSION, Stage.PUBLISH));
 
             assertThat(ex.getSubErrors()).containsExactly(
-                    new ValidationError("UNAFFORDABLE_EGOGIFT", "Gift '9212' is not affordable for theme pack '9999'"),
-                    new ValidationError("UNKNOWN_THEMEPACK",
+                    new ValidationError("UNAFFORDABLE_EGOGIFT", "floorSelections[0].giftIds[0]", "Gift '9212' is not affordable for theme pack '9999'"),
+                    new ValidationError("UNKNOWN_THEMEPACK", "floorSelections[0].themePackId",
                             "floorSelections[0].themePackId ID '9999' not found or invalid"));
         }
 

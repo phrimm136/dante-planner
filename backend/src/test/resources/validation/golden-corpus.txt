@@ -110,15 +110,14 @@ sub 1: INVALID_FIELD_TYPE | Field 'comprehensiveGiftIds' must be array, got numb
 
 ### field-type-skill-ea-state
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'skillEAState' must be object, got array; [INVALID_FIELD_TYPE] Field 'skillEAState' must be object, got array
+message: [INVALID_FIELD_TYPE] Field 'skillEAState' must be object, got array
 sub 1: INVALID_FIELD_TYPE | Field 'skillEAState' must be object, got array
-sub 2: INVALID_FIELD_TYPE | Field 'skillEAState' must be object, got array
 
 ### field-type-selected-gift-keyword
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'selectedGiftKeyword' must be string or null, got number 123; [MISSING_STARTGIFT_KEYWORD] Invalid sequence: selectedGiftIds requires selectedGiftKeyword
-sub 1: INVALID_FIELD_TYPE | Field 'selectedGiftKeyword' must be string or null, got number 123
-sub 2: MISSING_STARTGIFT_KEYWORD | Invalid sequence: selectedGiftIds requires selectedGiftKeyword
+message: [MISSING_STARTGIFT_KEYWORD] selectedGiftIds requires a selectedGiftKeyword; [INVALID_FIELD_TYPE] Field 'selectedGiftKeyword' must be string or null, got number 123
+sub 1: MISSING_STARTGIFT_KEYWORD | selectedGiftIds requires a selectedGiftKeyword
+sub 2: INVALID_FIELD_TYPE | Field 'selectedGiftKeyword' must be string or null, got number 123
 
 ### field-type-described-as-boolean
 code: VALIDATION_ERROR
@@ -127,9 +126,8 @@ sub 1: INVALID_FIELD_TYPE | Field 'selectedKeywords' must be array, got boolean 
 
 ### field-type-described-as-null
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'skillEAState' must be object, got null; [INVALID_FIELD_TYPE] Field 'skillEAState' must be object, got null
+message: [INVALID_FIELD_TYPE] Field 'skillEAState' must be object, got null
 sub 1: INVALID_FIELD_TYPE | Field 'skillEAState' must be object, got null
-sub 2: INVALID_FIELD_TYPE | Field 'skillEAState' must be object, got null
 
 ### field-type-described-as-long-string
 code: VALIDATION_ERROR
@@ -142,19 +140,15 @@ message: Note 'floor-1' size 1111 exceeds limit 1024
 
 ### equipment-key-non-numeric
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'equipment key 'yi_sang'' has wrong type, expected integer; [MISSING_SINNER] Missing required fields: [05]; [MISMATCHED_IDENTITY] identity for sinner yi_sang ID '10501' not found or invalid; [MISMATCHED_EGO] EGO for sinner yi_sang ID '20501' not found or invalid
-sub 1: INVALID_FIELD_TYPE | Field 'equipment key 'yi_sang'' has wrong type, expected integer
-sub 2: MISSING_SINNER | Missing required fields: [05]
-sub 3: MISMATCHED_IDENTITY | identity for sinner yi_sang ID '10501' not found or invalid
-sub 4: MISMATCHED_EGO | EGO for sinner yi_sang ID '20501' not found or invalid
+message: [MISSING_SINNER] Missing required fields: [05]; [INVALID_FIELD_TYPE] Field 'equipment key 'yi_sang'' has wrong type, expected integer
+sub 1: MISSING_SINNER | Missing required fields: [05]
+sub 2: INVALID_FIELD_TYPE | Field 'equipment key 'yi_sang'' has wrong type, expected integer
 
 ### equipment-key-out-of-range
 code: VALIDATION_ERROR
-message: [OUT_OF_RANGE_SINNER] equipment key value 13 is out of range [1-12]; [MISSING_SINNER] Missing required fields: [05]; [MISMATCHED_IDENTITY] identity for sinner 13 ID '10501' not found or invalid; [MISMATCHED_EGO] EGO for sinner 13 ID '20501' not found or invalid
-sub 1: OUT_OF_RANGE_SINNER | equipment key value 13 is out of range [1-12]
-sub 2: MISSING_SINNER | Missing required fields: [05]
-sub 3: MISMATCHED_IDENTITY | identity for sinner 13 ID '10501' not found or invalid
-sub 4: MISMATCHED_EGO | EGO for sinner 13 ID '20501' not found or invalid
+message: [MISSING_SINNER] Missing required fields: [05]; [OUT_OF_RANGE_SINNER] equipment key value 13 is out of range [1-12]
+sub 1: MISSING_SINNER | Missing required fields: [05]
+sub 2: OUT_OF_RANGE_SINNER | equipment key value 13 is out of range [1-12]
 
 ### equipment-sinner-missing
 code: VALIDATION_ERROR
@@ -168,19 +162,18 @@ sub 1: INVALID_FIELD_TYPE | Field 'equipment[05]' has wrong type, expected objec
 
 ### equipment-identity-missing
 code: VALIDATION_ERROR
-message: [MISSING_IDENTITY] Field 'equipment[05].identity' has wrong type, expected object
-sub 1: MISSING_IDENTITY | Field 'equipment[05].identity' has wrong type, expected object
+message: [MISSING_IDENTITY] Field 'equipment[05].identity' is missing
+sub 1: MISSING_IDENTITY | Field 'equipment[05].identity' is missing
 
 ### equipment-identity-id-blank
 code: VALIDATION_ERROR
-message: [MISSING_IDENTITY] Field 'equipment[05].identity.id' has wrong type, expected non-empty string; [UNKNOWN_IDENTITY] identity ID '  ' not found or invalid
-sub 1: MISSING_IDENTITY | Field 'equipment[05].identity.id' has wrong type, expected non-empty string
-sub 2: UNKNOWN_IDENTITY | identity ID '  ' not found or invalid
+message: [MISSING_IDENTITY] Field 'equipment[05].identity.id' is missing
+sub 1: MISSING_IDENTITY | Field 'equipment[05].identity.id' is missing
 
 ### equipment-egos-missing
 code: VALIDATION_ERROR
-message: [MISSING_EGO_ZAYIN] Field 'equipment[05].egos' has wrong type, expected object
-sub 1: MISSING_EGO_ZAYIN | Field 'equipment[05].egos' has wrong type, expected object
+message: [MISSING_EGO_ZAYIN] Field 'equipment[05].egos' is missing
+sub 1: MISSING_EGO_ZAYIN | Field 'equipment[05].egos' is missing
 
 ### equipment-ego-type-unknown
 code: VALIDATION_ERROR
@@ -194,9 +187,8 @@ sub 1: MISSING_EGO_ZAYIN | Missing required fields: [equipment[05].egos.ZAYIN]
 
 ### equipment-zayin-id-blank
 code: VALIDATION_ERROR
-message: [MISSING_EGO_ZAYIN] Field 'equipment[05].egos.ZAYIN.id' has wrong type, expected non-empty string; [UNKNOWN_EGO] EGO ID '' not found or invalid
-sub 1: MISSING_EGO_ZAYIN | Field 'equipment[05].egos.ZAYIN.id' has wrong type, expected non-empty string
-sub 2: UNKNOWN_EGO | EGO ID '' not found or invalid
+message: [MISSING_EGO_ZAYIN] Field 'equipment[05].egos.ZAYIN.id' is missing
+sub 1: MISSING_EGO_ZAYIN | Field 'equipment[05].egos.ZAYIN.id' is missing
 
 ### deployment-order-non-number
 code: VALIDATION_ERROR
@@ -211,15 +203,15 @@ sub 2: OUT_OF_RANGE_DEPLOYMENT | deploymentOrder[1] value 12 is out of range [0-
 
 ### skill-state-slot-key-unknown
 code: VALIDATION_ERROR
-message: [INVALID_SKILL_SLOT] Field 'skillEAState[05] slot '3'' has wrong type, expected 0, 1, or 2; [OUT_OF_RANGE_SKILL_TOTAL] skillEAState[05] total value 5 is out of range [6-6]
-sub 1: INVALID_SKILL_SLOT | Field 'skillEAState[05] slot '3'' has wrong type, expected 0, 1, or 2
-sub 2: OUT_OF_RANGE_SKILL_TOTAL | skillEAState[05] total value 5 is out of range [6-6]
+message: [OUT_OF_RANGE_SKILL_TOTAL] skillEAState[05] total value 5 is out of range [6-6]; [INVALID_SKILL_SLOT] Field 'skillEAState[05] slot '3'' has wrong type, expected 0, 1, or 2
+sub 1: OUT_OF_RANGE_SKILL_TOTAL | skillEAState[05] total value 5 is out of range [6-6]
+sub 2: INVALID_SKILL_SLOT | Field 'skillEAState[05] slot '3'' has wrong type, expected 0, 1, or 2
 
 ### skill-state-slot-not-number
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'skillEAState[05][0]' must be number, got string "3"; [OUT_OF_RANGE_SKILL_TOTAL] skillEAState[05] total value 3 is out of range [6-6]
-sub 1: INVALID_FIELD_TYPE | Field 'skillEAState[05][0]' must be number, got string "3"
-sub 2: OUT_OF_RANGE_SKILL_TOTAL | skillEAState[05] total value 3 is out of range [6-6]
+message: [OUT_OF_RANGE_SKILL_TOTAL] skillEAState[05] total value 3 is out of range [6-6]; [INVALID_FIELD_TYPE] Field 'skillEAState[05][0]' must be number, got string "3"
+sub 1: OUT_OF_RANGE_SKILL_TOTAL | skillEAState[05] total value 3 is out of range [6-6]
+sub 2: INVALID_FIELD_TYPE | Field 'skillEAState[05][0]' must be number, got string "3"
 
 ### skill-state-total-wrong
 code: VALIDATION_ERROR
@@ -243,8 +235,8 @@ sub 1: UNKNOWN_IDENTITY | identity ID '10599' not found or invalid
 
 ### identity-sinner-mismatch
 code: VALIDATION_ERROR
-message: [MISMATCHED_IDENTITY] identity for sinner 05 ID '10601' not found or invalid
-sub 1: MISMATCHED_IDENTITY | identity for sinner 05 ID '10601' not found or invalid
+message: [MISMATCHED_IDENTITY] identity '10601' does not belong to sinner 05
+sub 1: MISMATCHED_IDENTITY | identity '10601' does not belong to sinner 05
 
 ### identity-level-out-of-range
 code: VALIDATION_ERROR
@@ -273,14 +265,13 @@ sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].identity.uptie' must be number,
 
 ### ego-id-not-string
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'equipment[05].egos.ZAYIN.id' has wrong type, expected non-empty string; [INVALID_FIELD_TYPE] Field 'equipment.05.egos.ZAYIN.id' must be string, got number 20501
-sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].egos.ZAYIN.id' has wrong type, expected non-empty string
-sub 2: INVALID_FIELD_TYPE | Field 'equipment.05.egos.ZAYIN.id' must be string, got number 20501
+message: [INVALID_FIELD_TYPE] Field 'equipment[05].egos.ZAYIN.id' must be string, got number 20501
+sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].egos.ZAYIN.id' must be string, got number 20501
 
 ### ego-id-null
 code: VALIDATION_ERROR
-message: [MISSING_EGO_ZAYIN] Field 'equipment[05].egos.ZAYIN.id' has wrong type, expected non-empty string
-sub 1: MISSING_EGO_ZAYIN | Field 'equipment[05].egos.ZAYIN.id' has wrong type, expected non-empty string
+message: [MISSING_EGO_ZAYIN] Field 'equipment[05].egos.ZAYIN.id' is missing
+sub 1: MISSING_EGO_ZAYIN | Field 'equipment[05].egos.ZAYIN.id' is missing
 
 ### ego-id-unknown
 code: VALIDATION_ERROR
@@ -289,8 +280,8 @@ sub 1: UNKNOWN_EGO | EGO ID '20599' not found or invalid
 
 ### ego-sinner-mismatch
 code: VALIDATION_ERROR
-message: [MISMATCHED_EGO] EGO for sinner 05 ID '20601' not found or invalid
-sub 1: MISMATCHED_EGO | EGO for sinner 05 ID '20601' not found or invalid
+message: [MISMATCHED_EGO] EGO '20601' does not belong to sinner 05
+sub 1: MISMATCHED_EGO | EGO '20601' does not belong to sinner 05
 
 ### ego-threadspin-out-of-range
 code: VALIDATION_ERROR
@@ -309,21 +300,20 @@ sub 1: OUT_OF_RANGE_EGO_THREADSPIN | threadspin for EGO 20501 value 5 is out of 
 
 ### ego-ceiling-unknown
 code: VALIDATION_ERROR
-message: [MISSING_EGO_THREADSPIN_CEILING] EGO maxThreadspin ID '20502' not found or invalid
-sub 1: MISSING_EGO_THREADSPIN_CEILING | EGO maxThreadspin ID '20502' not found or invalid
+message: [MISSING_EGO_THREADSPIN_CEILING] EGO '20502' has no threadspin ceiling in game data
+sub 1: MISSING_EGO_THREADSPIN_CEILING | EGO '20502' has no threadspin ceiling in game data
 
 ### scenario-mixed-type-gift-array
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'selectedGiftIds[1]' must be string, got number 42; [DUPLICATE_STARTGIFT] Duplicate value 'gift_a' in selectedGiftIds; [INVALID_FIELD_TYPE] Field 'selectedGiftIds[1]' must be string, got number 42
+message: [INVALID_FIELD_TYPE] Field 'selectedGiftIds[1]' must be string, got number 42; [DUPLICATE_STARTGIFT] Duplicate value 'gift_a' in selectedGiftIds
 sub 1: INVALID_FIELD_TYPE | Field 'selectedGiftIds[1]' must be string, got number 42
 sub 2: DUPLICATE_STARTGIFT | Duplicate value 'gift_a' in selectedGiftIds
-sub 3: INVALID_FIELD_TYPE | Field 'selectedGiftIds[1]' must be string, got number 42
 
 ### selected-gift-id-unknown
 code: VALIDATION_ERROR
-message: [UNKNOWN_EGOGIFT] selectedGiftIds ID '9999' not found or invalid; [MISMATCHED_STARTGIFT] selectedGiftIds (not in keyword 'Combustion' pool) ID '9999' not found or invalid
-sub 1: UNKNOWN_EGOGIFT | selectedGiftIds ID '9999' not found or invalid
-sub 2: MISMATCHED_STARTGIFT | selectedGiftIds (not in keyword 'Combustion' pool) ID '9999' not found or invalid
+message: [MISMATCHED_STARTGIFT] start gift '9999' is not in the 'Combustion' keyword pool; [UNKNOWN_EGOGIFT] selectedGiftIds ID '9999' not found or invalid
+sub 1: MISMATCHED_STARTGIFT | start gift '9999' is not in the 'Combustion' keyword pool
+sub 2: UNKNOWN_EGOGIFT | selectedGiftIds ID '9999' not found or invalid
 
 ### observation-gift-duplicate
 code: VALIDATION_ERROR
@@ -433,13 +423,13 @@ sub 1: DUPLICATE_STARTBUFF | Duplicate value '0' in selectedBuffIds base IDs
 
 ### start-gift-keyword-absent
 code: VALIDATION_ERROR
-message: [MISSING_STARTGIFT_KEYWORD] Invalid sequence: selectedGiftIds requires selectedGiftKeyword
-sub 1: MISSING_STARTGIFT_KEYWORD | Invalid sequence: selectedGiftIds requires selectedGiftKeyword
+message: [MISSING_STARTGIFT_KEYWORD] selectedGiftIds requires a selectedGiftKeyword
+sub 1: MISSING_STARTGIFT_KEYWORD | selectedGiftIds requires a selectedGiftKeyword
 
 ### start-gift-keyword-null
 code: VALIDATION_ERROR
-message: [MISSING_STARTGIFT_KEYWORD] Invalid sequence: selectedGiftIds requires selectedGiftKeyword
-sub 1: MISSING_STARTGIFT_KEYWORD | Invalid sequence: selectedGiftIds requires selectedGiftKeyword
+message: [MISSING_STARTGIFT_KEYWORD] selectedGiftIds requires a selectedGiftKeyword
+sub 1: MISSING_STARTGIFT_KEYWORD | selectedGiftIds requires a selectedGiftKeyword
 
 ### start-gift-keyword-unknown
 code: VALIDATION_ERROR
@@ -448,8 +438,8 @@ sub 1: UNKNOWN_STARTGIFT_KEYWORD | selectedGiftKeyword ID 'Nonsense' not found o
 
 ### start-gift-outside-keyword-pool
 code: VALIDATION_ERROR
-message: [MISMATCHED_STARTGIFT] selectedGiftIds (not in keyword 'Combustion' pool) ID '9003' not found or invalid
-sub 1: MISMATCHED_STARTGIFT | selectedGiftIds (not in keyword 'Combustion' pool) ID '9003' not found or invalid
+message: [MISMATCHED_STARTGIFT] start gift '9003' is not in the 'Combustion' keyword pool
+sub 1: MISMATCHED_STARTGIFT | start gift '9003' is not in the 'Combustion' keyword pool
 
 ### start-gift-duplicate
 code: VALIDATION_ERROR
@@ -458,9 +448,8 @@ sub 1: DUPLICATE_STARTGIFT | Duplicate value '9001' in selectedGiftIds
 
 ### start-gift-not-string
 code: VALIDATION_ERROR
-message: [INVALID_FIELD_TYPE] Field 'selectedGiftIds[0]' must be string, got number 9001; [INVALID_FIELD_TYPE] Field 'selectedGiftIds[0]' must be string, got number 9001
+message: [INVALID_FIELD_TYPE] Field 'selectedGiftIds[0]' must be string, got number 9001
 sub 1: INVALID_FIELD_TYPE | Field 'selectedGiftIds[0]' must be string, got number 9001
-sub 2: INVALID_FIELD_TYPE | Field 'selectedGiftIds[0]' must be string, got number 9001
 
 ### silence-floor-element-not-object
 code: VALIDATION_ERROR

@@ -58,7 +58,7 @@ class FloorBoundaryConfinementTest {
     private static final String FLOOR_BOUNDARY = "org/danteplanner/backend/planner/validation/floor/FloorBoundary";
 
     private static final Set<String> FROZEN_RAW_FLOOR_READERS = Set.of(
-            MAIN + "planner.validation.PlannerIdMigrations");
+            MAIN + "planner.gamedata.PlannerIdMigrations");
 
     static final ArchRule FLOOR_SELECTIONS_ARE_BUILT_BY_THE_FLOOR_MODULE =
             noClasses()

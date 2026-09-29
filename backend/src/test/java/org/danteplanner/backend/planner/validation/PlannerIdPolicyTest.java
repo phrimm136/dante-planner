@@ -4,11 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.danteplanner.backend.planner.exception.PlannerValidationException;
-import org.danteplanner.backend.planner.validation.floor.FloorRules;
 import org.danteplanner.backend.planner.exception.PlannerValidationException.ValidationError;
-import org.danteplanner.backend.support.TestDataFactory;
+import org.danteplanner.backend.planner.exception.PlannerValidationException;
+import org.danteplanner.backend.planner.gamedata.GameDataLoader;
+import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
+import org.danteplanner.backend.planner.validation.floor.FloorRules;
 import org.danteplanner.backend.planner.validation.floor.Stage;
+import org.danteplanner.backend.support.TestDataFactory;
+import org.danteplanner.backend.planner.validation.sinner.SinnerIdValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -52,16 +55,9 @@ class PlannerIdPolicyTest {
     private PlannerContentValidator validatorOverDataDir() {
         GameDataRegistry registry = new GameDataRegistry(new GameDataLoader(MAPPER), dataDir.toString());
         registry.init();
-        return new PlannerContentValidator(
-                new StructuralValidator(MAPPER,
-                        ValidatorGoldenCorpus.MAX_CONTENT_SIZE_BYTES, ValidatorGoldenCorpus.MAX_NOTE_SIZE_BYTES),
-                new CategoryValidator(),
-                new EquipmentValidator(),
-                new SkillStateValidator(),
-                new IdReferenceValidator(registry, new SinnerIdValidator()),
-                new StartBuffValidator(registry),
-                registry,
-                new FloorRules(registry));
+        return new PlannerContentValidator(MAPPER,
+                ValidatorGoldenCorpus.MAX_CONTENT_SIZE_BYTES, ValidatorGoldenCorpus.MAX_NOTE_SIZE_BYTES,
+                registry, new SinnerIdValidator(), new FloorRules(registry));
     }
 
     private static ObjectNode validContent() throws IOException {
@@ -188,8 +184,8 @@ class PlannerIdPolicyTest {
                 () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, Stage.PUBLISH));
 
         assertThat(ex.getSubErrors()).containsExactly(
-                new ValidationError("INSUFFICIENT_FLOORS", "floorSelections[3] must have a theme pack selected"),
-                new ValidationError("INSUFFICIENT_FLOORS", "floorSelections[4] must have a theme pack selected"));
+                new ValidationError("INSUFFICIENT_FLOORS", "floorSelections[3]", "floorSelections[3] must have a theme pack selected"),
+                new ValidationError("INSUFFICIENT_FLOORS", "floorSelections[4]", "floorSelections[4] must have a theme pack selected"));
     }
 
     @Test
@@ -204,7 +200,7 @@ class PlannerIdPolicyTest {
                 () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, Stage.PUBLISH));
 
         assertThat(ex.getSubErrors()).containsExactly(
-                new ValidationError("INVALID_FIELD_TYPE", "Field 'floorSelections[1]' must be object, got null"));
+                new ValidationError("INVALID_FIELD_TYPE", "floorSelections[1]", "Field 'floorSelections[1]' must be object, got null"));
     }
 
     @Test
@@ -228,11 +224,11 @@ class PlannerIdPolicyTest {
                 () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, Stage.PUBLISH));
 
         assertThat(ex.getSubErrors()).containsExactly(
-                new ValidationError("INSUFFICIENT_FLOORS", "floorSelections[0] must have a theme pack selected"),
-                new ValidationError("INSUFFICIENT_FLOORS", "floorSelections[1] must have a theme pack selected"),
-                new ValidationError("INSUFFICIENT_FLOORS", "floorSelections[2] must have a theme pack selected"),
-                new ValidationError("INSUFFICIENT_FLOORS", "floorSelections[3] must have a theme pack selected"),
-                new ValidationError("INSUFFICIENT_FLOORS", "floorSelections[4] must have a theme pack selected"));
+                new ValidationError("INSUFFICIENT_FLOORS", "floorSelections[0]", "floorSelections[0] must have a theme pack selected"),
+                new ValidationError("INSUFFICIENT_FLOORS", "floorSelections[1]", "floorSelections[1] must have a theme pack selected"),
+                new ValidationError("INSUFFICIENT_FLOORS", "floorSelections[2]", "floorSelections[2] must have a theme pack selected"),
+                new ValidationError("INSUFFICIENT_FLOORS", "floorSelections[3]", "floorSelections[3] must have a theme pack selected"),
+                new ValidationError("INSUFFICIENT_FLOORS", "floorSelections[4]", "floorSelections[4] must have a theme pack selected"));
     }
 
     @ParameterizedTest
@@ -245,7 +241,7 @@ class PlannerIdPolicyTest {
         PlannerValidationException ex = rejection(
                 () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, stage));
 
-        assertThat(ex.getSubErrors()).containsExactly(new ValidationError("DUPLICATE_THEMEPACK",
+        assertThat(ex.getSubErrors()).containsExactly(new ValidationError("DUPLICATE_THEMEPACK", "floorSelections[2].themePackId",
                 "floorSelections[2].themePackId repeats theme pack '1001' from floorSelections[0]"));
     }
 
@@ -259,9 +255,9 @@ class PlannerIdPolicyTest {
                 () -> validator.validate(content.toString(), "5F", CURRENT_SEASON, Stage.DRAFT));
 
         assertThat(ex.getSubErrors()).containsExactly(
-                new ValidationError("DUPLICATE_THEMEPACK",
+                new ValidationError("DUPLICATE_THEMEPACK", "floorSelections[1].themePackId",
                         "floorSelections[1].themePackId repeats theme pack '1001' from floorSelections[0]"),
-                new ValidationError("DUPLICATE_THEMEPACK",
+                new ValidationError("DUPLICATE_THEMEPACK", "floorSelections[2].themePackId",
                         "floorSelections[2].themePackId repeats theme pack '1001' from floorSelections[0]"));
     }
 

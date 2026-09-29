@@ -1,7 +1,7 @@
 package org.danteplanner.backend.validation;
-import org.danteplanner.backend.planner.validation.ContentVersionValidator;
-import org.danteplanner.backend.planner.validation.GameDataRegistry;
-import org.danteplanner.backend.planner.validation.PlannerVersions;
+import org.danteplanner.backend.planner.precondition.ContentVersionValidator;
+import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
+import org.danteplanner.backend.planner.gamedata.PlannerVersions;
 
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;

@@ -1,8 +1,9 @@
 package org.danteplanner.backend.planner.validation.floor;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.danteplanner.backend.planner.gamedata.FloorRuleTable.CategoryFloors;
 import org.danteplanner.backend.planner.validation.ContentPath;
-import org.danteplanner.backend.planner.validation.FloorRuleTable.CategoryFloors;
+import org.danteplanner.backend.planner.validation.FieldResult;
 import org.danteplanner.backend.planner.validation.JsonKind;
 import org.danteplanner.backend.planner.validation.Violation;
 
@@ -32,17 +33,6 @@ public final class FloorBoundary {
 
         List<FloorSelection> indexed() {
             return floors.stream().map(ParsedFloor::indexed).toList();
-        }
-    }
-
-    private record FieldResult<T>(T value, List<Violation> violations) {
-
-        static <T> FieldResult<T> of(T value) {
-            return new FieldResult<>(value, List.of());
-        }
-
-        static <T> FieldResult<T> rejected(T value, Violation violation) {
-            return new FieldResult<>(value, List.of(violation));
         }
     }
 

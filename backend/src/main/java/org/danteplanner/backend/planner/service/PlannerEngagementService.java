@@ -11,7 +11,7 @@ import org.danteplanner.backend.planner.entity.PlannerVoteId;
 import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.moderation.service.PlannerReportService;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
-import org.danteplanner.backend.planner.validation.VoteUniquenessValidator;
+import org.danteplanner.backend.planner.precondition.VoteUniquenessValidator;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.springframework.stereotype.Service;

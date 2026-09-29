@@ -1,5 +1,6 @@
 package org.danteplanner.backend.architecture;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -43,8 +44,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * {@code shared} and are out of this rule's scope.</p>
  *
  * <p>The rules above constrain which features may see each other at all. The internals rules below
- * constrain how: a feature's {@code ..repository..}, {@code ..validation..} and {@code ..entity..}
- * packages are private to that feature, so a permitted cross-feature edge must land on the owning
+ * constrain how: a feature's {@code ..repository..}, {@code ..validation..}, {@code ..precondition..},
+ * {@code ..gamedata..}, {@code ..sync..}, {@code ..searchindex..} and {@code ..entity..} packages are
+ * private to that feature, so a permitted cross-feature edge must land on the owning
  * feature's service and DTOs, never on its persistence, its invariants, or its mapped rows. Without
  * them a feature package can reach straight into another's internals while every feature-granular
  * rule still passes.</p>
@@ -59,6 +61,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 class FeatureBoundaryTest {
 
     private static final String MAIN = "org.danteplanner.backend.";
+
+    private static final List<String> INTERNAL_PACKAGES =
+            List.of("repository", "validation", "precondition", "gamedata", "sync", "searchindex", "entity");
 
     private static final Set<String> COMMENT_INTERNALS_FROZEN = Set.of(
             MAIN + "moderation.service.CommentModerationService",
@@ -230,11 +235,9 @@ class FeatureBoundaryTest {
     }
 
     private static String[] internalsOf(String feature) {
-        return new String[] {
-                "..%s.repository..".formatted(feature),
-                "..%s.validation..".formatted(feature),
-                "..%s.entity..".formatted(feature),
-        };
+        return INTERNAL_PACKAGES.stream()
+                .map(internal -> "..%s.%s..".formatted(feature, internal))
+                .toArray(String[]::new);
     }
 
     private static DescribedPredicate<JavaClass> notFrozenFor(String feature) {
@@ -250,9 +253,8 @@ class FeatureBoundaryTest {
                 .filter(javaClass -> topLevel(javaClass).equals(origin))
                 .flatMap(javaClass -> javaClass.getDirectDependenciesFromSelf().stream())
                 .map(dependency -> dependency.getTargetClass().getFullName())
-                .anyMatch(target -> target.startsWith(root + "repository.")
-                        || target.startsWith(root + "validation.")
-                        || target.startsWith(root + "entity."));
+                .anyMatch(target -> INTERNAL_PACKAGES.stream()
+                        .anyMatch(internal -> target.startsWith(root + internal + ".")));
     }
 
     /**

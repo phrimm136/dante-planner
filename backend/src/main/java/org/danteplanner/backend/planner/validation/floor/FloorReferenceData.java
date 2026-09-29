@@ -1,6 +1,6 @@
 package org.danteplanner.backend.planner.validation.floor;
 
-import org.danteplanner.backend.planner.validation.GameDataRegistry;
+import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
 
 public interface FloorReferenceData {
 

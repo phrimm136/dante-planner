@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.danteplanner.backend.planner.validation.FloorRuleTable;
-import org.danteplanner.backend.planner.validation.GameDataLoader;
+import org.danteplanner.backend.planner.gamedata.FloorRuleTable;
+import org.danteplanner.backend.planner.gamedata.GameDataLoader;
 
 import java.math.BigInteger;
 import java.nio.file.Path;

@@ -1,10 +1,10 @@
 package org.danteplanner.backend.validation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.danteplanner.backend.planner.validation.GameDataLoadException;
-import org.danteplanner.backend.planner.validation.GameDataLoader;
-import org.danteplanner.backend.planner.validation.GameDataRegistry;
-import org.danteplanner.backend.planner.validation.PlannerIdMigrations;
+import org.danteplanner.backend.planner.gamedata.GameDataLoadException;
+import org.danteplanner.backend.planner.gamedata.GameDataLoader;
+import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
+import org.danteplanner.backend.planner.gamedata.PlannerIdMigrations;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;

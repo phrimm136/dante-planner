@@ -9,7 +9,7 @@ import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.RecommendedSql;
-import org.danteplanner.backend.planner.validation.JsonDocuments;
+import org.danteplanner.backend.planner.sync.JsonDocuments;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
 import org.springframework.beans.factory.annotation.Value;

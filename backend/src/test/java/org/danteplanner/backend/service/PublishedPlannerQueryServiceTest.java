@@ -1,7 +1,7 @@
 package org.danteplanner.backend.service;
 import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
 import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
-import org.danteplanner.backend.planner.validation.CatalogReadValidator;
+import org.danteplanner.backend.planner.precondition.CatalogReadValidator;
 
 import org.danteplanner.backend.moderation.service.PlannerReportService;
 import org.danteplanner.backend.planner.dto.CatalogQuery;

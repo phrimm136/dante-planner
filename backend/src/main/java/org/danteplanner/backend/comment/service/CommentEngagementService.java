@@ -17,7 +17,7 @@ import org.danteplanner.backend.moderation.dto.CommentReportRequest;
 import org.danteplanner.backend.moderation.dto.CommentReportResponse;
 import org.danteplanner.backend.moderation.service.CommentReportService;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
-import org.danteplanner.backend.planner.validation.VoteUniquenessValidator;
+import org.danteplanner.backend.planner.precondition.VoteUniquenessValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

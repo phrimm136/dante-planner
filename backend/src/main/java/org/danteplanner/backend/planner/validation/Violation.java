@@ -2,6 +2,7 @@ package org.danteplanner.backend.planner.validation;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Locale;
 
@@ -17,18 +18,43 @@ public record Violation(ErrorCode code, ContentPath path, String message) {
                 String.format("Field '%s' must be %s, got %s", path.render(), expected.rendered(), describe(actual)));
     }
 
-    public static Violation valueOutOfRange(ErrorCode code, ContentPath path, String value, int min, int max) {
+    public static Violation wrongType(ErrorCode code, ContentPath path, String subject, String expected) {
+        return new Violation(code, path, String.format("Field '%s' has wrong type, expected %s", subject, expected));
+    }
+
+    public static Violation missing(ErrorCode code, ContentPath path) {
+        return new Violation(code, path, String.format("Field '%s' is missing", path.render()));
+    }
+
+    public static Violation missingFields(ErrorCode code, ContentPath path, Collection<String> fields) {
         return new Violation(code, path,
-                String.format("%s value %s is out of range [%d-%d]", path.render(), value, min, max));
+                String.format("Missing required fields: %s", fields.stream().sorted().toList()));
+    }
+
+    public static Violation valueOutOfRange(ErrorCode code, ContentPath path, String value, int min, int max) {
+        return valueOutOfRange(code, path, path.render(), value, min, max);
+    }
+
+    public static Violation valueOutOfRange(ErrorCode code, ContentPath path, String subject, String value, int min,
+                                            int max) {
+        return new Violation(code, path,
+                String.format("%s value %s is out of range [%d-%d]", subject, value, min, max));
     }
 
     public static Violation duplicateValue(ErrorCode code, ContentPath path, String value) {
-        return new Violation(code, path,
-                String.format("Duplicate value '%s' in %s", value, path.render()));
+        return duplicateValue(code, path, path.render(), value);
+    }
+
+    public static Violation duplicateValue(ErrorCode code, ContentPath path, String subject, String value) {
+        return new Violation(code, path, String.format("Duplicate value '%s' in %s", value, subject));
     }
 
     public static Violation unknownId(ErrorCode code, ContentPath path, String id) {
-        return new Violation(code, path, String.format("%s ID '%s' not found or invalid", path.render(), id));
+        return unknownId(code, path, path.render(), id);
+    }
+
+    public static Violation unknownId(ErrorCode code, ContentPath path, String subject, String id) {
+        return new Violation(code, path, String.format("%s ID '%s' not found or invalid", subject, id));
     }
 
     private static String describe(JsonNode actual) {

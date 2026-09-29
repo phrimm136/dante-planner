@@ -20,10 +20,16 @@ import java.util.stream.StreamSupport;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.danteplanner.backend.planner.exception.PlannerValidationException.ValidationError;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
+import org.danteplanner.backend.planner.gamedata.FloorRuleTable;
+import org.danteplanner.backend.planner.gamedata.GameDataLoader;
+import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
+import org.danteplanner.backend.planner.gamedata.PlannerVersions;
+import org.danteplanner.backend.planner.precondition.ContentVersionValidator;
 import org.danteplanner.backend.planner.validation.floor.FloorRules;
 import org.danteplanner.backend.planner.validation.floor.Stage;
-import org.danteplanner.backend.planner.exception.PlannerValidationException.ValidationError;
+import org.danteplanner.backend.planner.validation.sinner.SinnerIdValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,7 +39,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 
 /**
  * Freezes the error output of every planner-content validator over a corpus of bad inputs.
@@ -67,45 +72,15 @@ class ValidatorGoldenCorpusTest {
     private ObjectMapper objectMapper;
     private PlannerContentValidator contentValidator;
     private ContentVersionValidator versionValidator;
-    private IdReferenceValidator idReferenceValidator;
 
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
         GameDataRegistry registry = fixedRegistry(objectMapper);
-        idReferenceValidator = new IdReferenceValidator(registry, new SinnerIdValidator());
-        contentValidator = new PlannerContentValidator(
-                new StructuralValidator(objectMapper,
-                        ValidatorGoldenCorpus.MAX_CONTENT_SIZE_BYTES,
-                        ValidatorGoldenCorpus.MAX_NOTE_SIZE_BYTES),
-                new CategoryValidator(),
-                new EquipmentValidator(),
-                new SkillStateValidator(),
-                idReferenceValidator,
-                new StartBuffValidator(registry),
-                registry,
-                new FloorRules(registry));
+        contentValidator = new PlannerContentValidator(objectMapper,
+                ValidatorGoldenCorpus.MAX_CONTENT_SIZE_BYTES, ValidatorGoldenCorpus.MAX_NOTE_SIZE_BYTES,
+                registry, new SinnerIdValidator(), new FloorRules(registry));
         versionValidator = new ContentVersionValidator(registry);
-    }
-
-    /**
-     * The scenario the traversal conversion is measured against: one array carrying a wrong-typed
-     * element and a repeat produces one error for each, in document order, and nothing else.
-     */
-    @Test
-    @DisplayName("mixed-type gift array accumulates both errors")
-    void validateGiftIds_WhenArrayMixesTypesAndRepeats_ProducesTypeThenDuplicateError() throws IOException {
-        JsonNode root = objectMapper.readTree("{\"selectedGiftIds\":[\"gift_a\",42,\"gift_a\"]}");
-        ValidationContext context = new ValidationContext(Stage.DRAFT);
-
-        idReferenceValidator.validateGiftIds(root, context);
-
-        assertThat(context.getErrors())
-                .extracting(PlannerValidationException::getOriginalCode, PlannerValidationException::getMessage)
-                .containsExactly(
-                        tuple("INVALID_FIELD_TYPE",
-                                "Field 'selectedGiftIds[1]' must be string, got number 42"),
-                        tuple("DUPLICATE_STARTGIFT", "Duplicate value 'gift_a' in selectedGiftIds"));
     }
 
     @ParameterizedTest(name = "{0}")

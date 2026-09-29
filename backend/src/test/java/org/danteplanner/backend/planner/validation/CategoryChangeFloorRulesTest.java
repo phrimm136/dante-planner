@@ -4,17 +4,26 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerType;
-import org.danteplanner.backend.planner.exception.PlannerValidationException;
-import org.danteplanner.backend.planner.validation.floor.FloorRules;
 import org.danteplanner.backend.planner.exception.PlannerValidationException.ValidationError;
+import org.danteplanner.backend.planner.exception.PlannerValidationException;
+import org.danteplanner.backend.planner.gamedata.GameDataLoader;
+import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
+import org.danteplanner.backend.planner.precondition.ContentVersionValidator;
+import org.danteplanner.backend.planner.precondition.PlannerCategoryValidator;
+import org.danteplanner.backend.planner.precondition.PlannerLimitValidator;
+import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
+import org.danteplanner.backend.planner.sync.EffectiveNoOpPredicate;
+import org.danteplanner.backend.planner.sync.SyncVersionValidator;
+import org.danteplanner.backend.planner.validation.floor.FloorRules;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.service.UserService;
+import org.danteplanner.backend.planner.validation.sinner.SinnerIdValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -68,16 +77,9 @@ class CategoryChangeFloorRulesTest {
     void setUp() {
         GameDataRegistry registry = new GameDataRegistry(new GameDataLoader(MAPPER), STATIC_DATA);
         registry.init();
-        PlannerContentValidator contentValidator = new PlannerContentValidator(
-                new StructuralValidator(MAPPER,
-                        ValidatorGoldenCorpus.MAX_CONTENT_SIZE_BYTES, ValidatorGoldenCorpus.MAX_NOTE_SIZE_BYTES),
-                new CategoryValidator(),
-                new EquipmentValidator(),
-                new SkillStateValidator(),
-                new IdReferenceValidator(registry, new SinnerIdValidator()),
-                new StartBuffValidator(registry),
-                registry,
-                new FloorRules(registry));
+        PlannerContentValidator contentValidator = new PlannerContentValidator(MAPPER,
+                ValidatorGoldenCorpus.MAX_CONTENT_SIZE_BYTES, ValidatorGoldenCorpus.MAX_NOTE_SIZE_BYTES,
+                registry, new SinnerIdValidator(), new FloorRules(registry));
         commandService = new PlannerCommandService(
                 plannerRepository,
                 statsRepository,
@@ -169,7 +171,7 @@ class CategoryChangeFloorRulesTest {
                         owner.getId(), null, planner.getId(), resending(planner, "15F"), false))
                 .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
                     assertThat(ex.getStatusCode().value()).isEqualTo(400);
-                    assertThat(ex.getSubErrors()).containsExactly(new ValidationError("INVALID_FIELD_TYPE",
+                    assertThat(ex.getSubErrors()).containsExactly(new ValidationError("INVALID_FIELD_TYPE", "floorSelections[6]",
                             "Field 'floorSelections[6]' must be object, got number 5"));
                 });
         assertThat(planner.getCategory()).isEqualTo("5F");
@@ -182,7 +184,7 @@ class CategoryChangeFloorRulesTest {
         assertThatThrownBy(() -> commandService.upsertPlanner(
                         owner.getId(), null, planner.getId(), resending(planner, "10F"), false))
                 .isInstanceOfSatisfying(PlannerValidationException.class, ex ->
-                        assertThat(ex.getSubErrors()).containsExactly(new ValidationError("DUPLICATE_EGOGIFT",
+                        assertThat(ex.getSubErrors()).containsExactly(new ValidationError("DUPLICATE_EGOGIFT", "floorSelections[0].giftIds",
                                 "Duplicate value '9002' in floorSelections[0].giftIds")));
         assertThat(planner.getCategory()).isEqualTo("5F");
     }

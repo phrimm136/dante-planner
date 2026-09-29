@@ -8,7 +8,7 @@ import org.danteplanner.backend.planner.event.PlannerFilterRebuildEvent;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository.FloorScopeRow;
 import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository;
-import org.danteplanner.backend.planner.validation.GameDataRegistry;
+import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;

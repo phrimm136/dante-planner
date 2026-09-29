@@ -39,7 +39,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.ArgumentMatchers.anyLong;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerStatsService;
-import org.danteplanner.backend.planner.validation.VoteUniquenessValidator;
+import org.danteplanner.backend.planner.precondition.VoteUniquenessValidator;
 import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.entity.PlannerVoteId;
 import org.danteplanner.backend.planner.exception.VoteAlreadyExistsException;

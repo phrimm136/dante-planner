@@ -14,7 +14,7 @@ import org.danteplanner.backend.planner.repository.PlannerDriftAuditRepository;
 import org.danteplanner.backend.planner.repository.PlannerDriftAuditRepository.ContentDocumentRow;
 import org.danteplanner.backend.planner.repository.PlannerDriftAuditRepository.EntityFilterRow;
 import org.danteplanner.backend.planner.repository.PlannerDriftAuditRepository.KeywordFilterRow;
-import org.danteplanner.backend.planner.validation.PlannerContentEntityExtractor;
+import org.danteplanner.backend.planner.searchindex.PlannerContentEntityExtractor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;

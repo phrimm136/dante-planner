@@ -23,7 +23,7 @@ import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
-import org.danteplanner.backend.planner.validation.CatalogReadValidator;
+import org.danteplanner.backend.planner.precondition.CatalogReadValidator;
 import org.danteplanner.backend.shared.util.ViewerHashUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

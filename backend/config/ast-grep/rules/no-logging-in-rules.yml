@@ -6,7 +6,5 @@ files:
   - src/main/java/org/danteplanner/backend/planner/validation/**
 ignores:
   - src/main/java/org/danteplanner/backend/planner/validation/PlannerContentValidator.java
-  - src/main/java/org/danteplanner/backend/planner/validation/GameDataLoader.java
-  - src/main/java/org/danteplanner/backend/planner/validation/GameDataRegistry.java
 rule:
   pattern: log.$METHOD($$$ARGS)

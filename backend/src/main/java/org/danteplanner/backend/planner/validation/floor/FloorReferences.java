@@ -1,6 +1,7 @@
 package org.danteplanner.backend.planner.validation.floor;
 
 import org.danteplanner.backend.planner.validation.ContentPath;
+import org.danteplanner.backend.planner.validation.Positions;
 import org.danteplanner.backend.planner.validation.Violation;
 
 import java.util.List;

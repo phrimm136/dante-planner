@@ -1,14 +1,20 @@
 package org.danteplanner.backend.planner.validation;
 
-import java.util.Locale;
-
 public enum JsonKind {
-    ARRAY,
-    OBJECT,
-    STRING,
-    INTEGER;
+    ARRAY("array"),
+    OBJECT("object"),
+    STRING("string"),
+    STRING_OR_NULL("string or null"),
+    INTEGER("integer"),
+    NUMBER("number");
+
+    private final String rendered;
+
+    JsonKind(String rendered) {
+        this.rendered = rendered;
+    }
 
     String rendered() {
-        return name().toLowerCase(Locale.ROOT);
+        return rendered;
     }
 }

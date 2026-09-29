@@ -1,7 +1,7 @@
 package org.danteplanner.backend.architecture.fixture;
 
 import org.danteplanner.backend.planner.entity.MDCategory;
-import org.danteplanner.backend.planner.validation.FloorRuleTable;
+import org.danteplanner.backend.planner.gamedata.FloorRuleTable;
 import org.danteplanner.backend.planner.validation.floor.FloorBoundary;
 
 import com.fasterxml.jackson.databind.JsonNode;
