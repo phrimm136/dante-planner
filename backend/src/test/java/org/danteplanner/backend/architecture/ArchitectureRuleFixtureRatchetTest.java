@@ -47,12 +47,14 @@ class ArchitectureRuleFixtureRatchetTest {
             "org.assertj.core.api.Assertions.assertThatThrownBy",
             "org.assertj.core.api.Assertions.assertThatExceptionOfType",
             "org.junit.jupiter.api.Assertions.assertThrows");
+    private static final String MESSAGE_ASSERTION_PREFIX = "hasMessage";
 
     private static final JavaClasses ARCHITECTURE_CLASSES = new ClassFileImporter().importPackages(ARCHITECTURE);
     private static final Rules RULES = rulesIn(ARCHITECTURE_CLASSES.stream()
             .filter(holder -> !isFixturePackage(holder.getPackageName()))
             .toList());
-    private static final SortedSet<String> FIXTURED = rulesWithNegativeFixture(ARCHITECTURE_CLASSES, RULES);
+    private static final FixtureScan SCAN = scanNegativeFixtures(ARCHITECTURE_CLASSES, RULES);
+    private static final SortedSet<String> FIXTURED = SCAN.credited();
 
     @Test
     void unlistedRule_WhenItHasNoNegativeFixture_IsNamed() {
@@ -63,8 +65,18 @@ class ArchitectureRuleFixtureRatchetTest {
         assertThat(RULES.ids()).as("no rule found under %s; the scan itself is broken", ARCHITECTURE).isNotEmpty();
         assertThat(missing)
                 .as("these rules are never run against a violating fixture by a test asserting that they fail; "
-                        + "add a *RuleTest that does (PrivilegedRouteCoverageRuleTest is the shape). "
-                        + "%s only shrinks", FROZEN_LIST)
+                        + "add a *RuleTest under %s, the only package scanned, whose test method reads exactly "
+                        + "this one rule, asserts that checking it throws, and asserts the failure message names "
+                        + "the fixture (PrivilegedRouteCoverageRuleTest is the shape). %s only shrinks",
+                        ARCHITECTURE, FROZEN_LIST)
+                .isEmpty();
+    }
+
+    @Test
+    void negativeTest_WhenItReadsMoreThanOneRule_IsNamed() {
+        assertThat(SCAN.multiRuleTests())
+                .as("these test methods assert a failure while reading more than one rule, so the scan cannot "
+                        + "tell which rule the failure belongs to; split them, one rule per negative test")
                 .isEmpty();
     }
 
@@ -104,16 +116,27 @@ class ArchitectureRuleFixtureRatchetTest {
                 "RatchetFixtureRules.FAILED_DIRECTLY",
                 "RatchetFixtureRules.FAILED_THROUGH_A_HELPER",
                 "RatchetFixtureRules.NEVER_CHECKED",
-                "RatchetFixtureRules.PASSED_ONLY");
+                "RatchetFixtureRules.NEW_RULE",
+                "RatchetFixtureRules.OLD_RULE",
+                "RatchetFixtureRules.PASSED_ONLY",
+                "RatchetFixtureRules.TYPE_ONLY");
     }
 
     @Test
-    void fixtureScan_WhenRunOverTheRatchetFixture_CreditsOnlyRulesAssertedToFail() {
+    void fixtureScan_WhenRunOverTheRatchetFixture_CreditsOnlySingleRuleFailuresThatReadTheMessage() {
         JavaClasses fixture = new ClassFileImporter().importPackages(RATCHET_FIXTURE);
 
-        assertThat(rulesWithNegativeFixture(fixture, rulesIn(fixture))).containsExactly(
+        assertThat(scanNegativeFixtures(fixture, rulesIn(fixture)).credited()).containsExactly(
                 "RatchetFixtureRules.FAILED_DIRECTLY",
                 "RatchetFixtureRules.FAILED_THROUGH_A_HELPER");
+    }
+
+    @Test
+    void fixtureScan_WhenAFailureTestReadsTwoRules_NamesTheMethod() {
+        JavaClasses fixture = new ClassFileImporter().importPackages(RATCHET_FIXTURE);
+
+        assertThat(scanNegativeFixtures(fixture, rulesIn(fixture)).multiRuleTests()).containsExactly(
+                "RatchetFixtureRulesRuleTest.oldRuleAndNewRule_WhenCheckedInOneTest_FailAndPass");
     }
 
     private static Set<String> frozen() {
@@ -196,8 +219,9 @@ class ArchitectureRuleFixtureRatchetTest {
         }
     }
 
-    private static SortedSet<String> rulesWithNegativeFixture(JavaClasses classes, Rules rules) {
+    private static FixtureScan scanNegativeFixtures(JavaClasses classes, Rules rules) {
         SortedSet<String> fixtured = new TreeSet<>();
+        SortedSet<String> multiRuleTests = new TreeSet<>();
         for (JavaClass candidate : classes) {
             if (!isFixtureTest(candidate)) {
                 continue;
@@ -207,12 +231,19 @@ class ArchitectureRuleFixtureRatchetTest {
                     continue;
                 }
                 Set<JavaCodeUnit> reached = sameClassClosure(test);
-                if (reached.stream().anyMatch(ArchitectureRuleFixtureRatchetTest::assertsAFailure)) {
-                    reached.forEach(unit -> fixtured.addAll(rulesReferencedBy(unit, rules)));
+                if (reached.stream().noneMatch(ArchitectureRuleFixtureRatchetTest::assertsAFailure)) {
+                    continue;
+                }
+                Set<String> read = new TreeSet<>();
+                reached.forEach(unit -> read.addAll(rulesReferencedBy(unit, rules)));
+                if (read.size() > 1) {
+                    multiRuleTests.add(idOf(candidate, test.getName()));
+                } else if (reached.stream().anyMatch(ArchitectureRuleFixtureRatchetTest::inspectsTheMessage)) {
+                    fixtured.addAll(read);
                 }
             }
         }
-        return fixtured;
+        return new FixtureScan(fixtured, multiRuleTests);
     }
 
     private static boolean isFixtureTest(JavaClass candidate) {
@@ -250,6 +281,19 @@ class ArchitectureRuleFixtureRatchetTest {
                 .anyMatch(call -> FAILURE_ASSERTIONS.contains(memberKey(call.getTargetOwner(), call.getName())));
     }
 
+    private static boolean inspectsTheMessage(JavaCodeUnit unit) {
+        return unit.getMethodCallsFromSelf().stream().anyMatch(call -> isMessageAssertion(call.getTargetOwner(),
+                call.getName()) || isMessageRead(call.getTargetOwner(), call.getName()));
+    }
+
+    private static boolean isMessageAssertion(JavaClass owner, String method) {
+        return owner.getPackageName().startsWith("org.assertj.") && method.startsWith(MESSAGE_ASSERTION_PREFIX);
+    }
+
+    private static boolean isMessageRead(JavaClass owner, String method) {
+        return method.equals("getMessage") && owner.isAssignableTo(Throwable.class);
+    }
+
     private static Set<String> rulesReferencedBy(JavaCodeUnit unit, Rules rules) {
         Set<String> referenced = new TreeSet<>();
         unit.getFieldAccesses().stream()
@@ -270,6 +314,9 @@ class ArchitectureRuleFixtureRatchetTest {
 
     private static String idOf(JavaClass owner, String member) {
         return owner.getSimpleName() + "." + member;
+    }
+
+    private record FixtureScan(SortedSet<String> credited, SortedSet<String> multiRuleTests) {
     }
 
     private record Rules(SortedSet<String> ids, Map<String, String> idByMember) {

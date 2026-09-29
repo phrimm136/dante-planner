@@ -14,5 +14,11 @@ public class RatchetFixtureRules {
 
     static final ArchRule NEVER_CHECKED = classes().should().haveSimpleNameEndingWith("Unused");
 
+    static final ArchRule OLD_RULE = classes().should().haveSimpleNameEndingWith("Stale");
+
+    static final ArchRule NEW_RULE = classes().should().haveSimpleNameStartingWith("Ratchet");
+
+    static final ArchRule TYPE_ONLY = classes().should().haveSimpleNameEndingWith("Untyped");
+
     static final ArchRule ALIAS_OF_FAILED_DIRECTLY = FAILED_DIRECTLY;
 }
