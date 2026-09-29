@@ -31,3 +31,7 @@ invalid:
     function dropFirst(errors: PlannerValidationError[]) {
       errors.splice(0, 1)
     }
+  - |
+    function collect(out: EgoViolation[]): void {
+      out.push({ code: 'UNKNOWN_EGO', path: 'equipment' })
+    }

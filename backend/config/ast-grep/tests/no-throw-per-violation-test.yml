@@ -2,8 +2,8 @@ id: no-throw-per-violation
 valid:
   - |
     class A {
-      void m(List<PlannerValidationException> errors) {
-        throw PlannerValidationException.combined(errors);
+      void m(PlannerValidationException exception) {
+        throw exception;
       }
     }
   - |
@@ -31,5 +31,30 @@ invalid:
     class A {
       void m(ValidationContext context, Violation violation) {
         context.reject(violation.path(), path -> new PlannerValidationException(violation.code().getCode(), violation.message()));
+      }
+    }
+  - |
+    class A {
+      void m(Violation violation) {
+        throw PlannerValidationException.refusing(new ContentVerdict.Refused(violation), null);
+      }
+    }
+  - |
+    class A {
+      void m(ContentVerdict.Rejected rejected, String content) {
+        throw org.danteplanner.backend.planner.exception.PlannerValidationException.rejecting(rejected, content);
+      }
+    }
+  - |
+    class A {
+      PlannerValidationException m(ContentVerdict.Refused refused) {
+        return PlannerValidationException.refusing(refused, null);
+      }
+    }
+  - |
+    class A {
+      void m(Violation violation) {
+        PlannerValidationException failure = PlannerValidationException.refusing(new ContentVerdict.Refused(violation), null);
+        throw failure;
       }
     }

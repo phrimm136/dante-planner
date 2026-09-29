@@ -1,7 +1,7 @@
 id: no-collector-parameter
 language: TypeScript
 severity: error
-message: 'ADR 140: nothing is collected through a parameter; return the violations instead of filling an array passed in.'
+message: 'Nothing is collected through a parameter; return the violations instead of filling an array passed in.'
 files:
   - src/pages/planner/lib/validation/**
 ignores:
@@ -27,13 +27,13 @@ rule:
                 has:
                   any:
                     - kind: array_type
-                      has: { kind: type_identifier, regex: '^(Violation|\w*ValidationError)$' }
+                      has: { kind: type_identifier, regex: '^\w*(Violation|ValidationError)$' }
                     - kind: generic_type
                       all:
                         - has: { field: name, regex: '^Array$' }
                         - has:
                             field: type_arguments
-                            has: { kind: type_identifier, regex: '^(Violation|\w*ValidationError)$' }
+                            has: { kind: type_identifier, regex: '^\w*(Violation|ValidationError)$' }
     - has:
         field: body
         has:

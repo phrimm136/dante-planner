@@ -1,7 +1,7 @@
 id: no-index-loop-in-rules
 language: Java
 severity: error
-message: 'ADR 140: a rule maps its input to violations with streams; no index loop, while loop, or loop that fills an outer collection or flag.'
+message: 'A rule maps its input to violations with streams; no index loop, while loop, or loop that fills an outer collection or flag.'
 files:
   - src/main/java/org/danteplanner/backend/planner/validation/**
 rule:

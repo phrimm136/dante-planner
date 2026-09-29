@@ -103,7 +103,7 @@ record DocumentChecks(int maxContentSizeBytes, int maxNoteSizeBytes) {
                 .boxed()
                 .flatMap(index -> keywords.get(index)
                         .filter(keyword -> !PlannerKeywords.isKnown(keyword))
-                        .map(keyword -> Violation.unknownId(ErrorCode.UNKNOWN_KEYWORD,
+                        .map(keyword -> Violation.unknownValue(ErrorCode.UNKNOWN_KEYWORD,
                                 SELECTED_KEYWORDS_PATH.index(index), SELECTED_KEYWORDS, keyword))
                         .stream());
     }

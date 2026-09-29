@@ -1,7 +1,7 @@
 id: no-index-loop-in-validation
 language: TypeScript
 severity: error
-message: 'ADR 140: a content rule maps its input to violations with map, flatMap and filter; no index loop, while loop, or loop that fills an outer collection or variable.'
+message: 'A content rule maps its input to violations with map, flatMap and filter; no index loop, while loop, or loop that fills an outer collection or variable.'
 files:
   - src/pages/planner/lib/validation/**
 ignores:

@@ -415,7 +415,7 @@ class PlannerPublishFlowIT {
     }
 
     @Test
-    void publish_WhenStoredContentSelectsAnUnknownKeyword_Returns400KeywordInvalidAndStaysUnpublished() throws Exception {
+    void publish_WhenStoredContentSelectsAnUnknownKeyword_Returns400UnknownKeywordAndStaysUnpublished() throws Exception {
         Planner known = TestDataFactory.planner(owner).title("Known Keyword Draft")
                 .selectedKeywords(Set.of("Sinking")).save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(known.getId()).build());
@@ -448,7 +448,7 @@ class PlannerPublishFlowIT {
     }
 
     @Test
-    void publishedTitleSave_WhenStoredContentSelectsAnUnknownKeyword_Returns400KeywordInvalid() throws Exception {
+    void publishedTitleSave_WhenStoredContentSelectsAnUnknownKeyword_Returns400UnknownKeyword() throws Exception {
         Planner planner = publishedWithUnknownKeyword("Published Unknown Keyword");
         UpsertPlannerRequest titleEdit = new UpsertPlannerRequest(
                 planner.getId().toString(), "5F", "Retitled", PlannerStatus.SAVED, planner.getContentJson(),

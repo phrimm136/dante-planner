@@ -97,6 +97,50 @@ snapshots:
       start: 83
       end: 156
   ? |
+    function collect(out: EgoViolation[]): void {
+      out.push({ code: 'UNKNOWN_EGO', path: 'equipment' })
+    }
+  : labels:
+    - source: |-
+        function collect(out: EgoViolation[]): void {
+          out.push({ code: 'UNKNOWN_EGO', path: 'equipment' })
+        }
+      style: primary
+      start: 0
+      end: 102
+    - source: out
+      style: secondary
+      start: 17
+      end: 20
+    - source: EgoViolation
+      style: secondary
+      start: 22
+      end: 34
+    - source: EgoViolation[]
+      style: secondary
+      start: 22
+      end: 36
+    - source: EgoViolation[]
+      style: secondary
+      start: 22
+      end: 36
+    - source: 'out: EgoViolation[]'
+      style: secondary
+      start: 17
+      end: 36
+    - source: 'out: EgoViolation[]'
+      style: secondary
+      start: 17
+      end: 36
+    - source: 'out.push({ code: ''UNKNOWN_EGO'', path: ''equipment'' })'
+      style: secondary
+      start: 48
+      end: 100
+    - source: 'out.push({ code: ''UNKNOWN_EGO'', path: ''equipment'' })'
+      style: secondary
+      start: 48
+      end: 100
+  ? |
     function dropFirst(errors: PlannerValidationError[]) {
       errors.splice(0, 1)
     }

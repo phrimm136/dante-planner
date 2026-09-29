@@ -5,8 +5,8 @@ epic: none · pr: none · supersedes: 030 @keywords @strictness
 - @validation @parity — For every case of the shared content corpus, both runtimes return the
   same ordered list of (code, path), and the corpus holds that expected list; the client mirrors
   the document boundary the server applies to parsed content (unknown and required top-level
-  fields, section note size, content version, category) and returns a boundary refusal alone, as
-  the server does. Guest documents and imports are judged by the client alone, so a boundary only
+  fields, section note size, content version) and returns a boundary refusal alone, as the server
+  does; the category is metadata the content check receives already typed. Guest documents and imports are judged by the client alone, so a boundary only
   the server applies is a second definition of acceptable content.
   REJECTED: scoping the comparison to codes both runtimes emit — the corpus then records its own
   exclusions, and a document the client accepts can still be refused on upload.

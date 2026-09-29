@@ -1,7 +1,7 @@
 id: no-try-in-validation
 language: TypeScript
 severity: error
-message: 'ADR 140: a content rule decides by value, not by catching; parse at the boundary with a Zod safeParse instead of try.'
+message: 'A content rule decides by value, not by catching; parse at the boundary with a Zod safeParse instead of try.'
 files:
   - src/pages/planner/lib/validation/**
 ignores:

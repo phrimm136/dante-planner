@@ -83,9 +83,10 @@ vi.mock('@/shared/auth/hooks/useAuthQuery', () => ({
   authQueryKeys: { me: ['auth', 'me'] as const },
 }))
 
-vi.mock('../usePlannerIdRegistry', () => ({
-  usePlannerIdRegistry: () => () => undefined,
-}))
+vi.mock('../usePlannerIdRegistry', async () => {
+  const { EVERY_ID_REGISTRY } = await import('../../lib/validation/__tests__/stagedValidation')
+  return { usePlannerIdRegistry: () => () => EVERY_ID_REGISTRY }
+})
 
 vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
   useEGOGiftListSpec: () => ({ spec: {}, i18n: {} }).spec,

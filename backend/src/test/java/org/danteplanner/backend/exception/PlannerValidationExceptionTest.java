@@ -99,8 +99,10 @@ class PlannerValidationExceptionTest {
     @DisplayName("rejecting() only unknown keywords answers UNKNOWN_KEYWORD with the unknown keywords listed")
     void rejecting_WhenEveryViolationIsAnUnknownKeyword_AnswersUnknownKeywordOnTheWire() {
         PlannerValidationException ex = PlannerValidationException.rejecting(new ContentVerdict.Rejected(List.of(
-                new Violation(ErrorCode.UNKNOWN_KEYWORD, ContentPath.of("selectedKeywords").index(1), "second"),
-                new Violation(ErrorCode.UNKNOWN_KEYWORD, ContentPath.of("selectedKeywords").index(2), "third"))),
+                Violation.unknownValue(ErrorCode.UNKNOWN_KEYWORD, ContentPath.of("selectedKeywords").index(1),
+                        "selectedKeywords", "Zilch"),
+                Violation.unknownValue(ErrorCode.UNKNOWN_KEYWORD, ContentPath.of("selectedKeywords").index(2),
+                        "selectedKeywords", "Nope"))),
                 "{\"selectedKeywords\":[\"Sinking\",\"Zilch\",\"Nope\",\"AccelBullet\"]}");
 
         assertEquals("UNKNOWN_KEYWORD", ex.getOriginalCode());
@@ -116,7 +118,8 @@ class PlannerValidationExceptionTest {
     void rejecting_WhenAnUnknownKeywordSitsBesideAnotherViolation_MasksToTheGenericCode() {
         PlannerValidationException ex = PlannerValidationException.rejecting(new ContentVerdict.Rejected(List.of(
                 new Violation(ErrorCode.UNKNOWN_IDENTITY, ContentPath.of("equipment").key("01"), "identity"),
-                new Violation(ErrorCode.UNKNOWN_KEYWORD, ContentPath.of("selectedKeywords").index(0), "keyword"))),
+                Violation.unknownValue(ErrorCode.UNKNOWN_KEYWORD, ContentPath.of("selectedKeywords").index(0),
+                        "selectedKeywords", "Nope"))),
                 "{\"selectedKeywords\":[\"Nope\"]}");
 
         assertEquals("VALIDATION_ERROR", ex.getBody().getProperties().get("code"));

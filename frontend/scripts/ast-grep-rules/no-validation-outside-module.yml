@@ -1,7 +1,7 @@
 id: no-validation-outside-module
 language: TypeScript
 severity: error
-message: 'ADR 140: planner validation lives in pages/planner/lib/validation; declare violation and validation error types and functions returning them there, not beside their callers.'
+message: 'Planner validation lives in pages/planner/lib/validation; declare violation and validation error types and functions returning them there, not beside their callers.'
 files:
   - src/**/*.ts
 ignores:

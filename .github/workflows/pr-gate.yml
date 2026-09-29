@@ -75,6 +75,15 @@ jobs:
           cache: gradle
       - name: Restore file permissions
         run: chmod +x backend/gradlew
+      - name: Setup Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38  # v6
+        with:
+          node-version: '24'
+          cache: 'yarn'
+          cache-dependency-path: frontend/yarn.lock
+      - name: FE Install for ast-grep
+        working-directory: ./frontend
+        run: yarn install --frozen-lockfile
       - name: BE Test
         working-directory: ./backend
         run: ./gradlew check -q
@@ -230,6 +239,9 @@ jobs:
       - name: FE Lint
         working-directory: ./frontend
         run: yarn lint
+      - name: FE Validation Lint
+        working-directory: ./frontend
+        run: yarn lint:validation
       - name: FE False Positive Scan
         working-directory: ./frontend
         run: yarn check:fp

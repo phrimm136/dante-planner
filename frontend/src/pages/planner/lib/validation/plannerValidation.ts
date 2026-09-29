@@ -1,4 +1,4 @@
-import { EncodedGiftIdSchema, FLOOR_RULE_TABLE, MAX_ENTITY_TIER } from '@/shared/gameData'
+import { EncodedGiftIdSchema, FLOOR_RULE_TABLE } from '@/shared/gameData'
 import type { FloorRuleStage, MDCategory } from '@/shared/gameData'
 import { giftDisplayName, hasGiftId } from '@/pages/egoGift'
 import { err, ok } from '@/lib/result'
@@ -109,28 +109,18 @@ function affordableGift(
 }
 
 function referenceData(
-  egoGiftSpec: Record<string, EGOGiftSpec> | undefined,
-  registry: PlannerIdRegistry | undefined,
+  egoGiftSpec: Record<string, EGOGiftSpec>,
+  registry: PlannerIdRegistry,
 ): ReferenceData {
   return {
-    hasIdentity: (identityId) => registry === undefined || registry.identityIds.has(identityId),
-    hasEgo: (egoId) => registry === undefined || registry.egoIds.has(egoId),
-    maxThreadspin: (egoId) =>
-      registry === undefined ? MAX_ENTITY_TIER.ego : registry.egoMaxThreadspin.get(egoId),
-    hasEgoGift: (giftId) => egoGiftSpec === undefined || knownGift(giftId, egoGiftSpec),
+    hasIdentity: (identityId) => registry.identityIds.has(identityId),
+    hasEgo: (egoId) => registry.egoIds.has(egoId),
+    maxThreadspin: (egoId) => registry.egoMaxThreadspin.get(egoId),
+    hasEgoGift: (giftId) => knownGift(giftId, egoGiftSpec),
   }
 }
 
-const EVERY_SEASON_ID: SeasonReferenceData = {
-  hasStartBuff: () => true,
-  hasStartGiftKeyword: () => true,
-  inStartGiftPool: () => true,
-}
-
-function seasonReferenceData(
-  registry: PlannerIdRegistry | undefined,
-): SeasonReferenceData | undefined {
-  if (registry === undefined) return EVERY_SEASON_ID
+function seasonReferenceData(registry: PlannerIdRegistry): SeasonReferenceData | undefined {
   const { season } = registry
   if (season === undefined) return undefined
   return {
@@ -142,14 +132,14 @@ function seasonReferenceData(
 }
 
 function floorReferenceData(
-  egoGiftSpec: Record<string, EGOGiftSpec> | undefined,
-  registry: PlannerIdRegistry | undefined,
+  egoGiftSpec: Record<string, EGOGiftSpec>,
+  registry: PlannerIdRegistry,
 ): FloorReferenceData {
   return {
-    hasThemePack: (themePackId) => registry === undefined || registry.themePackIds.has(themePackId),
-    hasEgoGift: (giftId) => egoGiftSpec === undefined || knownGift(giftId, egoGiftSpec),
+    hasThemePack: (themePackId) => registry.themePackIds.has(themePackId),
+    hasEgoGift: (giftId) => knownGift(giftId, egoGiftSpec),
     isGiftAffordableForThemePack: (giftId, themePackId) =>
-      egoGiftSpec === undefined || affordableGift(giftId, themePackId, egoGiftSpec),
+      affordableGift(giftId, themePackId, egoGiftSpec),
   }
 }
 
@@ -271,9 +261,9 @@ type PlanInput = {
   content: MDPlannerContent
   category: MDCategory
   season: SeasonReferenceData
-  egoGiftSpec: Record<string, EGOGiftSpec> | undefined
+  egoGiftSpec: Record<string, EGOGiftSpec>
   egoGiftI18n: Record<string, string> | undefined
-  registry: PlannerIdRegistry | undefined
+  registry: PlannerIdRegistry
 }
 
 function planOf(input: PlanInput): PlannerPlan {
@@ -313,7 +303,7 @@ function contentViolations(input: PlanInput): PlannerValidationError[] {
 function parseMetadata(
   stage: ContentStage,
   title: string | undefined,
-  registry: PlannerIdRegistry | undefined,
+  registry: PlannerIdRegistry,
 ): Result<SeasonReferenceData, PlannerValidationError[]> {
   const missingTitle = stage === 'publish' ? titleViolations(title) : []
   if (missingTitle.length > 0) return err(missingTitle)
@@ -323,9 +313,9 @@ function parseMetadata(
 
 function mdViolations(
   planner: MDSaveablePlanner,
-  egoGiftSpec: Record<string, EGOGiftSpec> | undefined,
+  egoGiftSpec: Record<string, EGOGiftSpec>,
   egoGiftI18n: Record<string, string> | undefined,
-  registry: PlannerIdRegistry | undefined,
+  registry: PlannerIdRegistry,
 ): PlannerValidationError[] {
   const stage: ContentStage = planner.metadata.published ? 'publish' : 'draft'
   const season = parseMetadata(stage, planner.metadata.title, registry)
@@ -343,9 +333,9 @@ function mdViolations(
 
 export function validatePlannerForSync(
   planner: SaveablePlanner,
-  egoGiftSpec: Record<string, EGOGiftSpec> | undefined,
+  egoGiftSpec: Record<string, EGOGiftSpec>,
   egoGiftI18n: Record<string, string> | undefined,
-  registry: PlannerIdRegistry | undefined,
+  registry: PlannerIdRegistry,
 ): Result<ValidatedPlanner, PlannerValidationError[]> {
   const errors = isMDPlanner(planner)
     ? mdViolations(planner, egoGiftSpec, egoGiftI18n, registry)

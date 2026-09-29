@@ -9,7 +9,13 @@
 import { describe, it, expect } from 'vitest'
 import { unwrapOrThrow } from '@/lib/result'
 import { validatePlannerForSync } from '../plannerValidation'
-import { draftValidation, plannerOf, publishValidation } from './stagedValidation'
+import {
+  draftValidation,
+  EVERY_GIFT_SPEC,
+  EVERY_ID_REGISTRY,
+  plannerOf,
+  publishValidation,
+} from './stagedValidation'
 import type { StagedResult } from './stagedValidation'
 import { normalizePlannerIds } from '../../plannerIdNormalize'
 import type { IdMigrationTable } from '../../idMigrationTable'
@@ -869,7 +875,7 @@ describe('validatePlannerForSync', () => {
 
   it('returns the valid planner itself as the validated planner', () => {
     const planner = plannerOf(true, 'My Plan', makeValidContent('5F'), '5F')
-    const validated = validatePlannerForSync(planner, undefined, undefined, undefined)
+    const validated = validatePlannerForSync(planner, EVERY_GIFT_SPEC, undefined, EVERY_ID_REGISTRY)
 
     const sent: ValidatedPlanner = unwrapOrThrow(validated)
     expect(sent).toBe(planner)
@@ -878,9 +884,9 @@ describe('validatePlannerForSync', () => {
   it('returns the violations of an invalid planner as the error', () => {
     const validated = validatePlannerForSync(
       plannerOf(true, '', makeValidContent('5F'), '5F'),
+      EVERY_GIFT_SPEC,
       undefined,
-      undefined,
-      undefined,
+      EVERY_ID_REGISTRY,
     )
 
     expect(validated.ok).toBe(false)

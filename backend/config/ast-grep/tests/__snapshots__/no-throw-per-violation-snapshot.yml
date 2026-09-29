@@ -2,6 +2,21 @@ id: no-throw-per-violation
 snapshots:
   ? |
     class A {
+      PlannerValidationException m(ContentVerdict.Refused refused) {
+        return PlannerValidationException.refusing(refused, null);
+      }
+    }
+  : labels:
+    - source: PlannerValidationException.refusing(refused, null)
+      style: primary
+      start: 86
+      end: 136
+    - source: PlannerValidationException
+      style: secondary
+      start: 86
+      end: 112
+  ? |
+    class A {
       PlannerValidationException m(String code, String message) {
         return new PlannerValidationException(code, message);
       }
@@ -30,6 +45,21 @@ snapshots:
       end: 59
   ? |
     class A {
+      void m(ContentVerdict.Rejected rejected, String content) {
+        throw org.danteplanner.backend.planner.exception.PlannerValidationException.rejecting(rejected, content);
+      }
+    }
+  : labels:
+    - source: org.danteplanner.backend.planner.exception.PlannerValidationException.rejecting(rejected, content)
+      style: primary
+      start: 81
+      end: 179
+    - source: org.danteplanner.backend.planner.exception.PlannerValidationException
+      style: secondary
+      start: 81
+      end: 150
+  ? |
+    class A {
       void m(ValidationContext context, Violation violation) {
         context.reject(violation.path(), path -> new PlannerValidationException(violation.code().getCode(), violation.message()));
       }
@@ -43,3 +73,34 @@ snapshots:
       style: secondary
       start: 118
       end: 144
+  ? |
+    class A {
+      void m(Violation violation) {
+        PlannerValidationException failure = PlannerValidationException.refusing(new ContentVerdict.Refused(violation), null);
+        throw failure;
+      }
+    }
+  : labels:
+    - source: PlannerValidationException.refusing(new ContentVerdict.Refused(violation), null)
+      style: primary
+      start: 83
+      end: 163
+    - source: PlannerValidationException
+      style: secondary
+      start: 83
+      end: 109
+  ? |
+    class A {
+      void m(Violation violation) {
+        throw PlannerValidationException.refusing(new ContentVerdict.Refused(violation), null);
+      }
+    }
+  : labels:
+    - source: PlannerValidationException.refusing(new ContentVerdict.Refused(violation), null)
+      style: primary
+      start: 52
+      end: 132
+    - source: PlannerValidationException
+      style: secondary
+      start: 52
+      end: 78

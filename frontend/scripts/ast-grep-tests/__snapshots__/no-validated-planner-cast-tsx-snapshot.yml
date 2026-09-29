@@ -1,0 +1,20 @@
+id: no-validated-planner-cast-tsx
+snapshots:
+  <PublishButton planner={planner as ValidatedPlanner} />:
+    labels:
+    - source: planner as ValidatedPlanner
+      style: primary
+      start: 24
+      end: 51
+  const validated = planner as ValidatedPlanner:
+    labels:
+    - source: planner as ValidatedPlanner
+      style: primary
+      start: 18
+      end: 45
+  const validated = planner as unknown as ValidatedPlanner:
+    labels:
+    - source: planner as unknown as ValidatedPlanner
+      style: primary
+      start: 18
+      end: 56

@@ -1827,6 +1827,19 @@ class PlannerContentValidatorTest {
         }
 
         @Test
+        void validate_WhenPublishPolicyAndContentSelectsABlankKeyword_AnswersUnknownKeywordNamingTheBlank() {
+            setupMocksForValidIds();
+
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class, () ->
+                    validate(selecting("[\"Sinking\", \"\"]"), "5F", Stage.PUBLISH));
+
+            assertThat(ex.getSubErrors()).containsExactly(new ValidationError("UNKNOWN_KEYWORD",
+                    "selectedKeywords[1]", "selectedKeywords ID '' not found or invalid"));
+            assertEquals("UNKNOWN_KEYWORD", ex.getBody().getProperties().get("code"));
+            assertEquals("Unknown keywords: [\"\"]", ex.getBody().getDetail());
+        }
+
+        @Test
         void validate_WhenDraftPolicyAndContentSelectsAnUnknownKeyword_Passes() {
             setupMocksForValidIds();
 

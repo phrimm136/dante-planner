@@ -13,7 +13,8 @@ epic: none · pr: none
   REJECTED: keeping the string and the architecture test — it proves a dependency, not that the
   stored value came out of the parse.
   INVARIANT: no production path stores planner content except as a parsed document — enforced by
-    the type: the content entity has no string writer.
+    the type: the content entity has no string writer; on the frontend, no code outside the parse
+    asserts a `ValidatedPlanner` — `no-validated-planner-cast`.
   NON-GOAL: the editor's local write-through stays unvalidated — a draft mid-edit must save.
   NON-GOAL: a loaded row's content stays a string — see the rejected converter.
 - @validation @metadata — Title (at publish), category and content version are parsed before the

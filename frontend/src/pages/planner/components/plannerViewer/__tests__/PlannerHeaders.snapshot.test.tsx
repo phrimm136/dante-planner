@@ -49,9 +49,10 @@ vi.mock('../../../hooks/usePlannerSyncAdapter', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../../../hooks/usePlannerSyncAdapter')>()),
   usePlannerSyncAdapter: () => ({ syncToServer: vi.fn() }),
 }))
-vi.mock('../../../hooks/usePlannerIdRegistry', () => ({
-  usePlannerIdRegistry: () => () => undefined,
-}))
+vi.mock('../../../hooks/usePlannerIdRegistry', async () => {
+  const { EVERY_ID_REGISTRY } = await import('../../../lib/validation/__tests__/stagedValidation')
+  return { usePlannerIdRegistry: () => () => EVERY_ID_REGISTRY }
+})
 
 vi.mock('../../../hooks/usePlannerConfig', () => ({
   usePlannerConfig: () => ({ mdCurrentVersion: 7, schemaVersion: 2 }),

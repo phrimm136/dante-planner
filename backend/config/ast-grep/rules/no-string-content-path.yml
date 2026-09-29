@@ -1,7 +1,7 @@
 id: no-string-content-path
 language: Java
 severity: error
-message: 'ADR 140: a content path is a ContentPath value with typed segments, rendered to text only at the edge; never build one by string concatenation or format.'
+message: 'A content path is a ContentPath value with typed segments, rendered to text only at the edge; never build one by string concatenation or format.'
 files:
   - src/main/java/org/danteplanner/backend/planner/validation/**
   - src/main/java/org/danteplanner/backend/planner/exception/PlannerValidationException.java

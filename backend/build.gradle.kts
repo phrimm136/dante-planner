@@ -301,6 +301,10 @@ val astGrep by tasks.registering(Exec::class) {
     args("scan", "--error", "src/main/java")
 }
 
+tasks.check {
+    dependsOn(astGrep, checkstyleValidation)
+}
+
 // Copy-paste detection as a regression ratchet: catch NEW production duplication.
 // Test sources are excluded — assertion/arrange scaffolding legitimately repeats
 // and would force a threshold high enough to blind the main-source check.

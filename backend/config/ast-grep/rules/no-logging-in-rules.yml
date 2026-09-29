@@ -1,7 +1,7 @@
 id: no-logging-in-rules
 language: Java
 severity: error
-message: 'ADR 140: a rule returns violations and logs nothing; logging belongs to the edge that renders them.'
+message: 'A rule returns violations and logs nothing; logging belongs to the edge that renders them.'
 files:
   - src/main/java/org/danteplanner/backend/planner/validation/**
 ignores:

@@ -1,0 +1,13 @@
+id: no-validated-planner-cast
+language: TypeScript
+severity: error
+message: A ValidatedPlanner is minted only by the planner validation parse; a type assertion claims validation that never ran. Validate the planner and use the returned value.
+files:
+  - src/**/*.ts
+ignores:
+  - '**/__tests__/**'
+  - src/pages/planner/lib/validation/plannerValidation.ts
+rule:
+  any:
+    - pattern: $EXPR as ValidatedPlanner
+    - pattern: <ValidatedPlanner>$EXPR

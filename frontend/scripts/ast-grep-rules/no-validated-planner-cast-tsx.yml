@@ -1,0 +1,10 @@
+id: no-validated-planner-cast-tsx
+language: Tsx
+severity: error
+message: A ValidatedPlanner is minted only by the planner validation parse; a type assertion claims validation that never ran. Validate the planner and use the returned value.
+files:
+  - src/**/*.tsx
+ignores:
+  - '**/__tests__/**'
+rule:
+  pattern: $EXPR as ValidatedPlanner

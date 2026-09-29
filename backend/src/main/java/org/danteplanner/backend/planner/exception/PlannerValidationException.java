@@ -2,7 +2,6 @@ package org.danteplanner.backend.planner.exception;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.danteplanner.backend.planner.entity.PlannerKeywords;
 import org.danteplanner.backend.planner.validation.ContentVerdict;
 import org.danteplanner.backend.planner.validation.ErrorCode;
 import org.danteplanner.backend.planner.validation.Violation;
@@ -20,6 +19,7 @@ public class PlannerValidationException extends DomainException {
     private static final String GENERIC_CODE = "VALIDATION_ERROR";
     private static final String GENERIC_DETAIL = "Invalid planner content structure";
     private static final String UNKNOWN_KEYWORDS_DETAIL = "Unknown keywords: ";
+    private static final String BLANK_KEYWORD = "\"\"";
 
     private static final Set<String> USER_FACING_ERROR_CODES = Stream.of(
                     ErrorCode.EMPTY_CONTENT,
@@ -58,8 +58,11 @@ public class PlannerValidationException extends DomainException {
                 .toList();
         PlannerValidationException exception = onlyUnknownKeywords(rejected)
                 ? new PlannerValidationException(ErrorCode.UNKNOWN_KEYWORD.getCode(),
-                        UNKNOWN_KEYWORDS_DETAIL + PlannerKeywords.fromContent(failedContent).dropped().stream()
+                        UNKNOWN_KEYWORDS_DETAIL + rejected.violations().stream()
+                                .map(Violation::value)
+                                .distinct()
                                 .sorted()
+                                .map(keyword -> keyword.isEmpty() ? BLANK_KEYWORD : keyword)
                                 .toList(),
                         sub)
                 : new PlannerValidationException(GENERIC_CODE, joined(sub), sub);

@@ -1,4 +1,5 @@
 import type { EGOGiftSpec } from '@/pages/egoGift'
+import { MAX_ENTITY_TIER } from '@/shared/gameData'
 import type { MDCategory } from '@/shared/gameData'
 import { validatePlannerForSync } from '../plannerValidation'
 import type { PlannerIdRegistry } from '../plannerValidation'
@@ -6,6 +7,38 @@ import type { PlannerValidationError } from '../plannerValidationErrors'
 import type { MDPlannerContent, SaveablePlanner } from '../../../types/PlannerTypes'
 
 export type StagedResult = { isValid: boolean; errors: PlannerValidationError[] }
+
+class EveryId extends Set<string> {
+  override has(): boolean {
+    return true
+  }
+}
+
+class EveryEgoCeiling extends Map<string, number> {
+  override get(): number {
+    return MAX_ENTITY_TIER.ego
+  }
+}
+
+class EveryStartGiftPool extends Map<string, ReadonlySet<string>> {
+  override has(): boolean {
+    return true
+  }
+
+  override get(): ReadonlySet<string> {
+    return new EveryId()
+  }
+}
+
+export const EVERY_ID_REGISTRY: PlannerIdRegistry = {
+  identityIds: new EveryId(),
+  egoIds: new EveryId(),
+  egoMaxThreadspin: new EveryEgoCeiling(),
+  themePackIds: new EveryId(),
+  season: { startBuffIds: new EveryId(), startGiftPools: new EveryStartGiftPool() },
+}
+
+export const EVERY_GIFT_SPEC: Record<string, EGOGiftSpec> = new Proxy({}, { has: () => true })
 
 export const plannerOf = (
   published: boolean,
@@ -25,7 +58,12 @@ function staged(
   egoGiftI18n: Record<string, string> | undefined,
   registry: PlannerIdRegistry | undefined,
 ): StagedResult {
-  const validated = validatePlannerForSync(planner, egoGiftSpec, egoGiftI18n, registry)
+  const validated = validatePlannerForSync(
+    planner,
+    egoGiftSpec ?? EVERY_GIFT_SPEC,
+    egoGiftI18n,
+    registry ?? EVERY_ID_REGISTRY,
+  )
   return validated.ok ? { isValid: true, errors: [] } : { isValid: false, errors: validated.error }
 }
 

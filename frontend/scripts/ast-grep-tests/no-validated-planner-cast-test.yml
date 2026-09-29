@@ -1,0 +1,13 @@
+id: no-validated-planner-cast
+valid:
+  - const verdict = validatePlannerForSync(planner, registry)
+  - 'const sent: ValidatedPlanner = unwrapOrThrow(verdict)'
+  - const saveable = planner as SaveablePlanner
+  - const other = planner as ValidatedPlannerDraft
+  - 'function send(planner: ValidatedPlanner) { return toUpsertRequest(planner) }'
+invalid:
+  - const validated = planner as ValidatedPlanner
+  - const validated = <ValidatedPlanner>planner
+  - const validated = planner as unknown as ValidatedPlanner
+  - const validated = planner as SaveablePlanner as ValidatedPlanner
+  - 'syncToServer({ ...planner, title } as ValidatedPlanner)'

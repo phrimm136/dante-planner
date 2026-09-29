@@ -1,0 +1,32 @@
+id: no-validated-planner-cast
+snapshots:
+  const validated = <ValidatedPlanner>planner:
+    labels:
+    - source: <ValidatedPlanner>planner
+      style: primary
+      start: 18
+      end: 43
+  const validated = planner as SaveablePlanner as ValidatedPlanner:
+    labels:
+    - source: planner as SaveablePlanner as ValidatedPlanner
+      style: primary
+      start: 18
+      end: 64
+  const validated = planner as ValidatedPlanner:
+    labels:
+    - source: planner as ValidatedPlanner
+      style: primary
+      start: 18
+      end: 45
+  const validated = planner as unknown as ValidatedPlanner:
+    labels:
+    - source: planner as unknown as ValidatedPlanner
+      style: primary
+      start: 18
+      end: 56
+  syncToServer({ ...planner, title } as ValidatedPlanner):
+    labels:
+    - source: '{ ...planner, title } as ValidatedPlanner'
+      style: primary
+      start: 13
+      end: 54

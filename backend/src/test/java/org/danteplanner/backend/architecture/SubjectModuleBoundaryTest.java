@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Each content subject under planner validation knows no callers and no sibling subject: it
- * depends on the validation root and game data only (ADR 138).
+ * depends on the validation root and game data only.
  */
 class SubjectModuleBoundaryTest {
 
