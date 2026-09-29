@@ -11,6 +11,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import com.tngtech.archunit.core.domain.AccessTarget;
 import com.tngtech.archunit.core.domain.JavaAccess;
 import com.tngtech.archunit.core.domain.JavaClass;
@@ -19,6 +21,7 @@ import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.lang.ConditionEvents;
 import com.tngtech.archunit.lang.SimpleConditionEvent;
 
+import org.danteplanner.backend.auth.token.RefreshRotationService;
 import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.shared.security.AccessTokenAuthenticator;
 
@@ -26,7 +29,13 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 
 final class RoleClaimAuthorizationRule {
 
-    private static final String EFFECTIVE_ROLE = "getEffectiveRole";
+    private static final Set<String> ROLE_CLAIM_READERS = Set.of("getEffectiveRole", "role");
+
+    private static final Set<String> ROLE_CLAIM_READING_CLASSES = Set.of(
+            AccessTokenAuthenticator.class.getName(),
+            RefreshRotationService.class.getName());
+
+    private static final String IS_USER_IN_ROLE = "isUserInRole";
 
     private static final String GET_AUTHORITIES = "getAuthorities";
 
@@ -47,10 +56,12 @@ final class RoleClaimAuthorizationRule {
     static final ArchRule ONLY_THE_AUTHENTICATOR_READS_THE_ROLE_CLAIM =
             classes()
                     .should(accessNothingWhere(
-                            RoleClaimAuthorizationRule::readsTheEffectiveRole,
-                            type -> type.getName().equals(AccessTokenAuthenticator.class.getName()),
+                            RoleClaimAuthorizationRule::readsTheRoleClaim,
+                            type -> ROLE_CLAIM_READING_CLASSES.contains(type.getName()),
                             "reads the token's role claim outside AccessTokenAuthenticator"))
-                    .as("only AccessTokenAuthenticator calls TokenClaims.getEffectiveRole()");
+                    .as("only AccessTokenAuthenticator reads TokenClaims.role() or getEffectiveRole(),"
+                            + " besides RefreshRotationService, which copies the claim into an admitted"
+                            + " legacy token without authorizing on it");
 
     static final ArchRule NO_ROLE_CHECK_THROUGH_SPRING_SECURITY =
             classes()
@@ -60,7 +71,7 @@ final class RoleClaimAuthorizationRule {
                             type -> false,
                             "authorizes on granted authorities through Spring Security"))
                     .as("no class authorizes through hasRole, hasAnyRole, hasAuthority, hasAnyAuthority,"
-                            + " @PreAuthorize, @PostAuthorize or @Secured");
+                            + " HttpServletRequest.isUserInRole, @PreAuthorize, @PostAuthorize or @Secured");
 
     static final ArchRule ONLY_THE_SECURITY_CHAIN_READS_GRANTED_AUTHORITIES =
             classes()
@@ -110,13 +121,17 @@ final class RoleClaimAuthorizationRule {
         };
     }
 
-    private static boolean readsTheEffectiveRole(AccessTarget target) {
-        return target.getOwner().isEquivalentTo(TokenClaims.class) && target.getName().equals(EFFECTIVE_ROLE);
+    private static boolean readsTheRoleClaim(AccessTarget target) {
+        return target instanceof AccessTarget.CodeUnitAccessTarget
+                && target.getOwner().isEquivalentTo(TokenClaims.class)
+                && ROLE_CLAIM_READERS.contains(target.getName());
     }
 
     private static boolean isASpringSecurityRoleCheck(AccessTarget target) {
-        return target.getOwner().getPackageName().startsWith(SPRING_SECURITY_PACKAGE)
-                && ROLE_CHECK_METHODS.contains(target.getName());
+        return (target.getOwner().getPackageName().startsWith(SPRING_SECURITY_PACKAGE)
+                        && ROLE_CHECK_METHODS.contains(target.getName()))
+                || (target.getOwner().isAssignableTo(HttpServletRequest.class)
+                        && target.getName().equals(IS_USER_IN_ROLE));
     }
 
     private static boolean readsGrantedAuthorities(AccessTarget target) {
