@@ -15,10 +15,12 @@ epic: none · pr: none
 - @harness @brief — A spawn of an implementation worker is refused unless its prompt carries four headings: Scenarios, Dependents holding at least one fenced block of pasted search output, Boundary cases, and Relies on. Presence is checked, content is not; a recorded `no-design:` reason bypasses. Most review findings traced to briefs that never listed who consumes the changed code, which boundary cases exist, or which decisions the brief leaned on, and a pasted search result cannot be written without running the search.
   REJECTED: token-level requirements inside scenarios (a `then:` or `negative:` marker) — cheap to sprinkle, and a negative scenario is not a boundary case.
   REJECTED: gating only the implementor agent type — any other agent type would skip it; the existing implementation-verb heuristic stays as the second trigger.
-- @harness @gates — Mutation testing blocks from its first run at the score that run measures, and the threshold only rises; there is no report-mode period. The report-mode-first plan was declared twice and never executed, so a gate that starts in report mode here starts never.
-  REJECTED: report mode with a later promotion — the promotion is the step that does not happen.
-- @harness @gates — Every build-side check (shared case corpus, derived-subject invariant tests, boundary lints, contract scripts) joins the per-unit local gates, since the pull-request workflow runs only against the release branch and would see a unit at range end, which is the latency being removed. Corollary of the landing decision.
 - @harness @hooks — Codebase rules that the deleted forbidden-patterns hook declared are debt against 070, listed there for migration to the build's linters; the hook, its enforcer chain, its read tracker, and the skill-activation files leave with their wiring and their documentation. Forced by 070.
+
+## Superseded
+- @harness @gates → 146 — Mutation testing blocks from its first run at the score that run measures, and the threshold only rises; there is no report-mode period. The report-mode-first plan was declared twice and never executed, so a gate that starts in report mode here starts never.
+  REJECTED: report mode with a later promotion — the promotion is the step that does not happen.
+- @harness @gates → 146 — Every build-side check (shared case corpus, derived-subject invariant tests, boundary lints, contract scripts) joins the per-unit local gates, since the pull-request workflow runs only against the release branch and would see a unit at range end, which is the latency being removed. Corollary of the landing decision.
 
 ## Takeaway
 - takeaway: a hook that can be satisfied by changing how you work, rather than what you produce, will be satisfied that way; check the artifact at the transition and leave the work alone.

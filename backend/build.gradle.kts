@@ -160,7 +160,7 @@ tasks.withType<Test> {
 // skips, so the generator and the analyzer do not fight. JDK 16+ requires the javac
 // internals to be exported to the Error Prone plugin, via a forked compiler.
 // Mutation coverage, not line coverage: a surviving mutant is a line no test protects.
-// Scoped to the packages carrying the most behavior per line; the threshold is a ratchet, raise only.
+// Scoped to the packages carrying the most behavior per line.
 pitest {
     targetClasses.set(listOf(
         "org.danteplanner.backend.planner.service.*",
@@ -187,15 +187,13 @@ pitest {
     outputFormats.set(setOf("HTML", "XML"))
     // Pinned to 1.19.0-rc.1: the 1.19.0 release crashes the coverage minion on this project
     // (UNKNOWN_ERROR) across every pitest core from 1.19.6 to 1.22.1.
-    mutationThreshold.set(66)
 }
 
 val pitestRatchet by tasks.registering {
     dependsOn(tasks.named("pitest"))
-    val margin = 3
-    val thresholdProperty = pitest.mutationThreshold
     val report = layout.buildDirectory.file("reports/pitest/mutations.xml")
-    inputs.files(report)
+    val baselineFile = layout.projectDirectory.file("config/pitest-surviving-mutants.json")
+    inputs.files(report, baselineFile)
     doLast {
         val xml = report.get().asFile
         if (!xml.isFile) {
@@ -203,22 +201,42 @@ val pitestRatchet by tasks.registering {
         }
         val mutations = javax.xml.parsers.DocumentBuilderFactory.newInstance()
             .newDocumentBuilder().parse(xml).getElementsByTagName("mutation")
-        val total = mutations.length
-        val detected = (0 until total).count {
-            (mutations.item(it) as org.w3c.dom.Element).getAttribute("detected") == "true"
+        val elements = (0 until mutations.length).map { mutations.item(it) as org.w3c.dom.Element }
+        fun org.w3c.dom.Element.child(name: String): String = getElementsByTagName(name).item(0).textContent
+        val survivors = elements.filter { it.getAttribute("detected") == "false" }
+            .groupBy { it.child("mutatedClass").substringBeforeLast('.') }
+        val current = survivors.mapValues { it.value.size }.toSortedMap()
+        val baseline = (groovy.json.JsonSlurper().parse(baselineFile.asFile) as Map<*, *>)
+            .entries.associate { it.key as String to (it.value as Number).toInt() }
+        val packages = (current.keys + baseline.keys).toSortedSet()
+        val raised = packages.filter { (current[it] ?: 0) > (baseline[it] ?: 0) }
+        val lowered = packages.filter { (current[it] ?: 0) < (baseline[it] ?: 0) }
+        val baselinePath = "backend/config/pitest-surviving-mutants.json"
+        val failures = mutableListOf<String>()
+        if (raised.isNotEmpty()) {
+            failures += "Surviving mutants rose above $baselinePath in:\n" + raised.joinToString("\n") { pkg ->
+                "  $pkg: baseline ${baseline[pkg] ?: 0}, current ${current.getValue(pkg)}\n" +
+                    survivors.getValue(pkg)
+                        .map { Triple(it.child("mutatedClass"), it.child("lineNumber").toInt(), it.child("mutator")) }
+                        .sortedWith(compareBy({ it.first }, { it.second }, { it.third }))
+                        .take(20)
+                        .joinToString("\n") { (cls, line, mutator) ->
+                            "    ${cls.substringAfterLast('.')}:$line:${mutator.substringAfterLast('.')}"
+                        }
+            }
         }
-        val score = when {
-            total == 0 || detected == total -> 100
-            detected == 0 -> 0
-            else -> minOf(99, Math.round(100f / total * detected))
+        if (lowered.isNotEmpty()) {
+            failures += "Surviving mutants fell below $baselinePath in " +
+                lowered.joinToString(", ") { "$it (baseline ${baseline[it]}, current ${current[it] ?: 0})" } +
+                "; lower the counts in $baselinePath to:\n" +
+                groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(current))
         }
-        val threshold = thresholdProperty.get()
-        if (score >= threshold + margin) {
-            throw GradleException(
-                "Mutation score $score is at least $margin above mutationThreshold $threshold; " +
-                    "raise mutationThreshold in backend/build.gradle.kts to $score.")
+        if (failures.isNotEmpty()) {
+            throw GradleException("pitestRatchet: " + failures.joinToString("\n"))
         }
-        logger.lifecycle("pitestRatchet: mutation score $score ($detected/$total), mutationThreshold $threshold")
+        logger.lifecycle(
+            "pitestRatchet: ${current.values.sum()} surviving of ${elements.size} mutants across " +
+                "${current.size} packages, equal to $baselinePath")
     }
 }
 
