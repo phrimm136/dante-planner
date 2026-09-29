@@ -28,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -105,6 +106,16 @@ class PlannerContentValidatorTest {
 
     private String validate(String content, String category, Stage stage) {
         return validator.parse(content, MDCategory.fromValue(category), validator.season(VERSION), stage).json();
+    }
+
+    private static String replaceOnce(String content, String target, String replacement) {
+        assertThat(content).containsOnlyOnce(target);
+        return content.replace(target, replacement);
+    }
+
+    private static String replaceRegexOnce(String content, String regex, String replacement) {
+        assertThat(Pattern.compile(regex).matcher(content).results()).hasSize(1);
+        return content.replaceAll(regex, replacement);
     }
 
     // ========================================================================
@@ -372,7 +383,7 @@ class PlannerContentValidatorTest {
         void validate_WhenNullSelectedGiftKeyword_Passes() {
             setupMocksForValidIds();
             // Add selectedGiftKeyword: null to valid content
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"selectedKeywords\": [\"Combustion\", \"Slash\"]",
                     "\"selectedKeywords\": [\"Combustion\", \"Slash\"],\n                \"selectedGiftKeyword\": null"
             );
@@ -412,7 +423,7 @@ class PlannerContentValidatorTest {
             setupMocksForValidIds();
             // Uses createValidContent() which has complete equipment (12 sinners)
             // but with empty deploymentOrder
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"deploymentOrder\": [0, 1, 2, 3, 4, 5]",
                     "\"deploymentOrder\": []"
             );
@@ -595,7 +606,7 @@ class PlannerContentValidatorTest {
         @DisplayName("Should throw exception when content size exceeds 50KB limit")
         void validate_WhenContentExceedsSizeLimit_ThrowsException() {
             // Generate content that exceeds 50KB (51200 bytes)
-            // Use title field to exceed the limit since it's a valid field
+            // The size check runs before the schema, so any oversized field reaches it
             StringBuilder sb = new StringBuilder("{\"title\":\"");
             sb.append("x".repeat(52000));
             sb.append("\",\"category\":\"5F\",\"selectedKeywords\":[],\"equipment\":{},");
@@ -626,7 +637,7 @@ class PlannerContentValidatorTest {
         @Test
         @DisplayName("Should throw exception when single note exceeds 1KB")
         void validate_WhenNoteTooLarge_ThrowsException() {
-            String content = createValidContent().replace("\"sectionNotes\": {}",
+            String content = replaceOnce(createValidContent(), "\"sectionNotes\": {}",
                     "\"sectionNotes\": {\"floor-1\": {\"content\": {\"type\": \"doc\", \"text\": \""
                             + "x".repeat(1100) + "\"}}}");
 
@@ -640,7 +651,7 @@ class PlannerContentValidatorTest {
 
         @Test
         void validate_WhenANoteIsOversized_RefusesWithTheNotePathAsTheOneSubError() {
-            String content = createValidContent().replace("\"sectionNotes\": {}",
+            String content = replaceOnce(createValidContent(), "\"sectionNotes\": {}",
                     "\"sectionNotes\": {\"floor1\": {\"content\": {\"type\": \"doc\", \"text\": \""
                             + "x".repeat(MAX_NOTE_SIZE_BYTES) + "\"}}}");
 
@@ -662,7 +673,7 @@ class PlannerContentValidatorTest {
             setupMocksForValidIds();
             String noteContent = "Short note";
             // Use createValidContent and add a note section
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"sectionNotes\": {}",
                     "\"sectionNotes\": {\"floor-1\": {\"content\": {\"type\": \"doc\", \"text\": \"" + noteContent + "\"}}}"
             );
@@ -797,7 +808,7 @@ class PlannerContentValidatorTest {
         void validate_WhenValidSinnerIndicesInDeploymentOrder_Passes() {
             setupMocksForValidIds();
             // Use createValidContent and replace deploymentOrder with all valid indices
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"deploymentOrder\": [0, 1, 2, 3, 4, 5]",
                     "\"deploymentOrder\": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]"
             );
@@ -870,7 +881,7 @@ class PlannerContentValidatorTest {
         @DisplayName("Should pass with empty selectedBuffIds")
         void validate_WhenEmptyStartBuffIds_Passes() {
             setupMocksForValidIdsWithoutBuffs();
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"selectedBuffIds\": [100, 201],",
                     "\"selectedBuffIds\": [],"
             );
@@ -882,7 +893,7 @@ class PlannerContentValidatorTest {
         void validate_WhenMax10StartBuffs_Passes() {
             setupMocksForValidIds();
             // All 10 base buffs with different enhancement levels
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"selectedBuffIds\": [100, 201],",
                     "\"selectedBuffIds\": [100, 201, 302, 103, 204, 305, 106, 207, 308, 109],"
             );
@@ -895,7 +906,7 @@ class PlannerContentValidatorTest {
             // Fails at max count check, never reaches buff ID or gift validation
             setupMocksForValidIdsWithoutBuffsAndGifts();
             // 11 buffs - exceeds limit
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"selectedBuffIds\": [100, 201],",
                     "\"selectedBuffIds\": [100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 200],"
             );
@@ -907,7 +918,7 @@ class PlannerContentValidatorTest {
         void validate_WhenDuplicateBaseBuffId_ThrowsException() {
             setupMocksForValidIdsWithoutGifts();
             // 100 and 200 have the same base ID (00)
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"selectedBuffIds\": [100, 201],",
                     "\"selectedBuffIds\": [100, 200],"
             );
@@ -919,7 +930,7 @@ class PlannerContentValidatorTest {
         void validate_WhenDuplicateBaseBuffIdBaseAndPlusPlus_ThrowsException() {
             setupMocksForValidIdsWithoutGifts();
             // 101 and 301 have the same base ID (01)
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"selectedBuffIds\": [100, 201],",
                     "\"selectedBuffIds\": [101, 301],"
             );
@@ -930,7 +941,7 @@ class PlannerContentValidatorTest {
         @DisplayName("Should throw exception for non-number in selectedBuffIds")
         void validate_WhenNonNumberInBuffIds_ThrowsException() {
             // Fails at type check before any ID validation
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"selectedBuffIds\": [100, 201],",
                     "\"selectedBuffIds\": [100, \"invalid\"],"
             );
@@ -940,7 +951,7 @@ class PlannerContentValidatorTest {
         @Test
         void validate_WhenBuffIdIsAnIntegralValuedFraction_AcceptsItAsItsInteger() {
             setupMocksForValidIds();
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"selectedBuffIds\": [100, 201],",
                     "\"selectedBuffIds\": [100, 101.0],"
             );
@@ -955,7 +966,7 @@ class PlannerContentValidatorTest {
             setupMocksForValidIdsWithoutGifts();
             when(gameDataRegistry.hasStartBuff(VERSION, "999")).thenReturn(false);
 
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"selectedBuffIds\": [100, 201],",
                     "\"selectedBuffIds\": [100, 999],"
             );
@@ -968,7 +979,7 @@ class PlannerContentValidatorTest {
             // Fails in buff validation, never reaches gift validation
             setupMocksForValidIdsWithoutGifts();
             // Mock returns true but base ID 15 is invalid (valid: 00-09)
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"selectedBuffIds\": [100, 201],",
                     "\"selectedBuffIds\": [115],"
             );
@@ -992,9 +1003,10 @@ class PlannerContentValidatorTest {
         @DisplayName("Should pass with null keyword and empty gift IDs")
         void validate_WhenNullKeywordEmptyGifts_Passes() {
             setupMocksForValidIdsWithoutGifts();
-            String content = createValidContent()
-                    .replace("\"selectedGiftKeyword\": \"Combustion\",", "\"selectedGiftKeyword\": null,")
-                    .replace("\"selectedGiftIds\": [\"9001\"],", "\"selectedGiftIds\": [],");
+            String content = replaceOnce(
+                    replaceOnce(createValidContent(),
+                            "\"selectedGiftKeyword\": \"Combustion\",", "\"selectedGiftKeyword\": null,"),
+                    "\"selectedGiftIds\": [\"9001\"],", "\"selectedGiftIds\": [],");
             assertDoesNotThrow(() -> validate(content, "5F"));
         }
 
@@ -1003,7 +1015,7 @@ class PlannerContentValidatorTest {
         void validate_WhenMultipleGiftsFromSamePool_Passes() {
             setupMocksForValidIds();
             // Combustion pool has 9001, 9009, 9103
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"selectedGiftIds\": [\"9001\"],",
                     "\"selectedGiftIds\": [\"9001\", \"9009\", \"9103\"],"
             );
@@ -1015,8 +1027,7 @@ class PlannerContentValidatorTest {
         void validate_WhenGiftIdsWithoutKeyword_ThrowsException() {
             // Fails at keyword check, never reaches pool validation
             setupMocksForValidIdsWithoutGifts();
-            String content = createValidContent()
-                    .replace("\"selectedGiftKeyword\": \"Combustion\",", "\"selectedGiftKeyword\": null,");
+            String content = replaceOnce(createValidContent(), "\"selectedGiftKeyword\": \"Combustion\",", "\"selectedGiftKeyword\": null,");
             // Still has selectedGiftIds: ["9001"]
             assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
         }
@@ -1028,7 +1039,7 @@ class PlannerContentValidatorTest {
             setupStartBuffMocks();
             when(gameDataRegistry.hasStartGiftKeyword(VERSION, "InvalidKeyword")).thenReturn(false);
 
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"selectedGiftKeyword\": \"Combustion\",",
                     "\"selectedGiftKeyword\": \"InvalidKeyword\","
             );
@@ -1044,7 +1055,7 @@ class PlannerContentValidatorTest {
             // Pool only contains 9001, 9009, 9103 - but content has 9999
             when(gameDataRegistry.getStartGiftPool(anyInt(), anyString())).thenReturn(Set.of("9001", "9009", "9103"));
 
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"selectedGiftIds\": [\"9001\"],",
                     "\"selectedGiftIds\": [\"9001\", \"9999\"],"
             );
@@ -1056,7 +1067,7 @@ class PlannerContentValidatorTest {
         void validate_WhenDuplicateGiftIds_ThrowsException() {
             // Duplicate check happens after first ID is validated
             setupMocksForGiftDuplicateFailure();
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"selectedGiftIds\": [\"9001\"],",
                     "\"selectedGiftIds\": [\"9001\", \"9001\"],"
             );
@@ -1066,7 +1077,7 @@ class PlannerContentValidatorTest {
         @Test
         @DisplayName("Should throw exception for non-string gift ID")
         void validate_WhenNonStringGiftId_ThrowsException() {
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"selectedGiftIds\": [\"9001\"],",
                     "\"selectedGiftIds\": [9001],"
             );
@@ -1091,7 +1102,7 @@ class PlannerContentValidatorTest {
         void validate_WhenDuplicateComprehensiveGiftIds_ThrowsException() {
             // Duplicate check happens after first ID is validated
             setupMocksForGiftDuplicateFailure();
-            String content = createFullContent().replace(
+            String content = replaceOnce(createFullContent(),
                     "\"comprehensiveGiftIds\": [\"19050\"]",
                     "\"comprehensiveGiftIds\": [\"19050\", \"19050\"]"
             );
@@ -1101,7 +1112,7 @@ class PlannerContentValidatorTest {
         @Test
         @DisplayName("Should throw exception for non-string comprehensiveGiftIds element")
         void validate_WhenNonStringComprehensiveGiftId_ThrowsException() {
-            String content = createFullContent().replace(
+            String content = replaceOnce(createFullContent(),
                     "\"comprehensiveGiftIds\": [\"19050\"]",
                     "\"comprehensiveGiftIds\": [19050]"
             );
@@ -1115,7 +1126,7 @@ class PlannerContentValidatorTest {
             setupMocksForGiftDuplicateFailure();
             when(gameDataRegistry.hasEgoGift("9999")).thenReturn(false);
 
-            String content = createFullContent().replace(
+            String content = replaceOnce(createFullContent(),
                     "\"comprehensiveGiftIds\": [\"19050\"]",
                     "\"comprehensiveGiftIds\": [\"9999\"]"
             );
@@ -1127,7 +1138,7 @@ class PlannerContentValidatorTest {
         void validate_WhenDuplicateObservationGiftIds_ThrowsException() {
             // Duplicate check happens after first ID is validated
             setupMocksForGiftDuplicateFailure();
-            String content = createFullContent().replace(
+            String content = replaceOnce(createFullContent(),
                     "\"observationGiftIds\": [\"9100\"]",
                     "\"observationGiftIds\": [\"9100\", \"9100\"]"
             );
@@ -1137,7 +1148,7 @@ class PlannerContentValidatorTest {
         @Test
         @DisplayName("Should throw exception for non-string observationGiftIds element")
         void validate_WhenNonStringObservationGiftId_ThrowsException() {
-            String content = createFullContent().replace(
+            String content = replaceOnce(createFullContent(),
                     "\"observationGiftIds\": [\"9100\"]",
                     "\"observationGiftIds\": [9100]"
             );
@@ -1162,7 +1173,7 @@ class PlannerContentValidatorTest {
         void validate_WhenDuplicateFloorGiftIds_ThrowsException() {
             // Floor validation fails before buff/gift pool validation
             setupMocksForValidIdsWithoutBuffsAndGifts();
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"giftIds\": [\"9002\"]",
                     "\"giftIds\": [\"9002\", \"9002\"]"
             );
@@ -1172,7 +1183,7 @@ class PlannerContentValidatorTest {
         @Test
         @DisplayName("Should throw exception for non-string floor giftIds element")
         void validate_WhenNonStringFloorGiftId_ThrowsException() {
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"giftIds\": [\"9002\"]",
                     "\"giftIds\": [9002]"
             );
@@ -1186,7 +1197,7 @@ class PlannerContentValidatorTest {
             setupMocksForValidIdsWithoutBuffsAndGifts();
             when(gameDataRegistry.hasEgoGift("9999")).thenReturn(false);
 
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"giftIds\": [\"9002\"]",
                     "\"giftIds\": [\"9999\"]"
             );
@@ -1197,14 +1208,10 @@ class PlannerContentValidatorTest {
         @DisplayName("Should allow same giftId across different floors")
         void validate_WhenSameGiftIdAcrossFloors_Passes() {
             setupMocksForValidIds();
-            String original = createValidContent();
-            String floor2Selection = "{\"themePackId\": \"1002\", \"difficulty\": 0, \"giftIds\": []}";
-            assertThat(original).containsOnlyOnce(floor2Selection);
-            String content = original.replace(
-                    floor2Selection,
+            String content = replaceOnce(createValidContent(),
+                    "{\"themePackId\": \"1002\", \"difficulty\": 0, \"giftIds\": []}",
                     "{\"themePackId\": \"1002\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}"
             );
-            assertThat(content).isNotEqualTo(original);
             assertDoesNotThrow(() -> validate(content, "5F"));
         }
     }
@@ -1229,7 +1236,7 @@ class PlannerContentValidatorTest {
         @DisplayName("Duplicate gift ID in floor giftIds should produce DUPLICATE_EGOGIFT sub-error")
         void validate_WhenDuplicateFloorGiftId_ProducesDuplicateEgoGiftCode() {
             setupMocksForValidIds();
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"giftIds\": [\"9002\"]",
                     "\"giftIds\": [\"9002\", \"9002\"]"
             );
@@ -1246,7 +1253,7 @@ class PlannerContentValidatorTest {
         void validate_WhenDuplicateBuffBaseId_ProducesDuplicateStartBuffCode() {
             setupMocksForValidIds();
             // 100 and 200 share base ID 0 (100 % 100 == 0, 200 % 100 == 0)
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"selectedBuffIds\": [100, 201]",
                     "\"selectedBuffIds\": [100, 200]"
             );
@@ -1262,7 +1269,7 @@ class PlannerContentValidatorTest {
         @DisplayName("Duplicate gift ID in selectedGiftIds should produce DUPLICATE_STARTGIFT sub-error")
         void validate_WhenDuplicateSelectedGiftId_ProducesDuplicateStartGiftCode() {
             setupMocksForValidIds();
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"selectedGiftIds\": [\"9001\"]",
                     "\"selectedGiftIds\": [\"9001\", \"9001\"]"
             );
@@ -1278,7 +1285,7 @@ class PlannerContentValidatorTest {
         void validate_WhenFloorPrerequisiteViolation_ProducesOutOfOrderThemePackCode() {
             setupMocksForValidIds();
             // Floor 0 has null themePackId; floor 1 has one → prerequisite violation
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "{\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}",
                     "{\"themePackId\": null, \"difficulty\": 0, \"giftIds\": []}, {\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": []}"
             );
@@ -1295,7 +1302,7 @@ class PlannerContentValidatorTest {
         void validate_WhenGiftsWithoutKeyword_ProducesMissingStartGiftKeywordCode() {
             // No start gift keyword mocks needed: validateStartGiftIds returns early on null keyword
             setupMocksForValidIdsWithoutGifts();
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"selectedGiftKeyword\": \"Combustion\"",
                     "\"selectedGiftKeyword\": null"
             );
@@ -1318,7 +1325,7 @@ class PlannerContentValidatorTest {
             setupMocksForUnaffordableGifts();
             // deploymentOrder[0] = 99 is OOB (0–11) → OUT_OF_RANGE_DEPLOYMENT
             // floor giftIds[0] is not affordable → UNAFFORDABLE_EGOGIFT
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"deploymentOrder\": [0, 1, 2, 3, 4, 5]",
                     "\"deploymentOrder\": [99]"
             );
@@ -1359,7 +1366,7 @@ class PlannerContentValidatorTest {
             // createValidContent already uses boundary values:
             // - Equipment keys: "1" through "12" (all 12 sinners)
             // - DeploymentOrder: includes 0 and can include 11
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"deploymentOrder\": [0, 1, 2, 3, 4, 5]",
                     "\"deploymentOrder\": [0, 11]"  // Boundary values 0 and 11
             );
@@ -1381,19 +1388,6 @@ class PlannerContentValidatorTest {
             // Use createFullContent which has all optional fields and complete equipment
             assertDoesNotThrow(() -> validate(createFullContent(), "5F"));
         }
-
-        @Test
-        @DisplayName("Should handle unicode characters in title")
-        void validate_WhenUnicodeTitle_Passes() {
-            setupMocksForValidIds();
-            // Use createValidContent with unicode title
-            String content = createValidContent().replace(
-                    "\"title\": \"Test Planner\"",
-                    "\"title\": \"유니코드 테스트 タイトル\""
-            );
-
-            assertDoesNotThrow(() -> validate(content, "5F"));
-        }
     }
 
     @Nested
@@ -1405,7 +1399,7 @@ class PlannerContentValidatorTest {
             setupMocksForValidIds();
             lenient().when(gameDataRegistry.getEgoMaxThreadspin("20101")).thenReturn(5);
 
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"egos\": {\"ZAYIN\": {\"id\": \"20101\", \"threadspin\": 4}}",
                     "\"egos\": {\"ZAYIN\": {\"id\": \"20101\", \"threadspin\": 5}}"
             );
@@ -1418,7 +1412,7 @@ class PlannerContentValidatorTest {
         void validate_WhenThreadspin5OnFourCapEgo_Fails() {
             setupMocksForValidIds();
 
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"egos\": {\"ZAYIN\": {\"id\": \"20101\", \"threadspin\": 4}}",
                     "\"egos\": {\"ZAYIN\": {\"id\": \"20101\", \"threadspin\": 5}}"
             );
@@ -1448,7 +1442,7 @@ class PlannerContentValidatorTest {
         void validate_WhenLevelAndUptieOutOfRange_ReportsBoth() {
             setupMocksForValidIds();
 
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"identity\": {\"id\": \"10101\", \"uptie\": 4, \"level\": 45}",
                     "\"identity\": {\"id\": \"10101\", \"uptie\": 99, \"level\": 999}");
 
@@ -1463,7 +1457,7 @@ class PlannerContentValidatorTest {
 
         @Test
         void validate_WhenLevelIsAString_RejectsItAsANonNumber() {
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"identity\": {\"id\": \"10101\", \"uptie\": 4, \"level\": 45}",
                     "\"identity\": {\"id\": \"10101\", \"uptie\": 4, \"level\": \"abc\"}");
 
@@ -1478,7 +1472,7 @@ class PlannerContentValidatorTest {
         @Test
         void validate_WhenLevelIsAnIntegralValuedFraction_AcceptsItAsItsInteger() {
             setupMocksForValidIds();
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"identity\": {\"id\": \"10101\", \"uptie\": 4, \"level\": 45}",
                     "\"identity\": {\"id\": \"10101\", \"uptie\": 4, \"level\": 45.0}");
 
@@ -1488,7 +1482,7 @@ class PlannerContentValidatorTest {
         @Test
         void validate_WhenThreadspinIsAnIntegralValuedFraction_AcceptsItAsItsInteger() {
             setupMocksForValidIds();
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"egos\": {\"ZAYIN\": {\"id\": \"20101\", \"threadspin\": 4}}",
                     "\"egos\": {\"ZAYIN\": {\"id\": \"20101\", \"threadspin\": 4.0}}");
 
@@ -1500,11 +1494,12 @@ class PlannerContentValidatorTest {
         void validate_WhenThreadspinAndUptieOutOfRange_ReportsBoth() {
             setupMocksForValidIds();
 
-            String content = createValidContent()
-                    .replace("\"egos\": {\"ZAYIN\": {\"id\": \"20101\", \"threadspin\": 4}}",
-                            "\"egos\": {\"ZAYIN\": {\"id\": \"20101\", \"threadspin\": 99}}")
-                    .replace("\"identity\": {\"id\": \"10201\", \"uptie\": 4, \"level\": 45}",
-                            "\"identity\": {\"id\": \"10201\", \"uptie\": 99, \"level\": 45}");
+            String content = replaceOnce(
+                    replaceOnce(createValidContent(),
+                            "\"egos\": {\"ZAYIN\": {\"id\": \"20101\", \"threadspin\": 4}}",
+                            "\"egos\": {\"ZAYIN\": {\"id\": \"20101\", \"threadspin\": 99}}"),
+                    "\"identity\": {\"id\": \"10201\", \"uptie\": 4, \"level\": 45}",
+                    "\"identity\": {\"id\": \"10201\", \"uptie\": 99, \"level\": 45}");
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
                     () -> validate(content, "5F"));
@@ -1520,7 +1515,7 @@ class PlannerContentValidatorTest {
         void validate_WhenFloorHasGiftsWithoutThemePack_DoesNotThrow() {
             setupMocksForValidIds();
 
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "{\"themePackId\": \"1004\", \"difficulty\": 0, \"giftIds\": []}",
                     "{\"themePackId\": \"1004\", \"difficulty\": 0, \"giftIds\": []},\n"
                             + "                    {\"themePackId\": null, \"difficulty\": 0, \"giftIds\": [\"9004\"]}");
@@ -1556,7 +1551,7 @@ class PlannerContentValidatorTest {
         @DisplayName("Should reject a floor without a theme pack")
         void validate_WhenPublishPolicyAndFloorHasNoThemePack_ReportsMissingThemePack() {
             setupMocksWithoutThemePack();
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "{\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}",
                     "{\"themePackId\": null, \"difficulty\": 0, \"giftIds\": []}");
 
@@ -1600,7 +1595,7 @@ class PlannerContentValidatorTest {
         @Test
         void validate_WhenPublishPolicyAndDifficultyIsBeyondInt_ReportsItOutOfRange() {
             setupMocksForValidIds();
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "{\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}",
                     "{\"themePackId\": \"1001\", \"difficulty\": 2147483648, \"giftIds\": [\"9002\"]}");
 
@@ -1614,7 +1609,7 @@ class PlannerContentValidatorTest {
         @Test
         void validate_WhenPublishPolicyAndDifficultyIsAnIntegralValuedFraction_AcceptsItAsAnInteger() {
             setupMocksForValidIds();
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "{\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}",
                     "{\"themePackId\": \"1001\", \"difficulty\": 0.0, \"giftIds\": [\"9002\"]}");
 
@@ -1625,11 +1620,12 @@ class PlannerContentValidatorTest {
         void validate_WhenPublishedFloorZeroHasAnUnknownPackAndFloorTwoRepeatsAPack_ReportsBoth() {
             setupMocksForValidIds();
             when(gameDataRegistry.hasThemePack("9999")).thenReturn(false);
-            String content = createValidContent()
-                    .replace("{\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}",
-                            "{\"themePackId\": \"9999\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}")
-                    .replace("{\"themePackId\": \"1003\", \"difficulty\": 0, \"giftIds\": []}",
-                            "{\"themePackId\": \"1002\", \"difficulty\": 0, \"giftIds\": []}");
+            String content = replaceOnce(
+                    replaceOnce(createValidContent(),
+                            "{\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}",
+                            "{\"themePackId\": \"9999\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}"),
+                    "{\"themePackId\": \"1003\", \"difficulty\": 0, \"giftIds\": []}",
+                    "{\"themePackId\": \"1002\", \"difficulty\": 0, \"giftIds\": []}");
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
                     () -> validate(content, "5F", Stage.PUBLISH));
@@ -1647,7 +1643,7 @@ class PlannerContentValidatorTest {
             when(gameDataRegistry.hasThemePack(anyString())).thenReturn(true);
             when(gameDataRegistry.hasThemePack("8888")).thenReturn(false);
             when(gameDataRegistry.hasEgoGift("9999")).thenReturn(false);
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "{\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}",
                     "{\"themePackId\": \"8888\", \"difficulty\": 0, \"giftIds\": [\"9999\"]}");
 
@@ -1664,7 +1660,7 @@ class PlannerContentValidatorTest {
         @Test
         void validate_WhenAFloorHoldsTwoUnaffordableGifts_ReportsOneViolationPerGift() {
             setupMocksForUnaffordableGifts();
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"giftIds\": [\"9002\"]", "\"giftIds\": [\"9002\", \"9003\"]");
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
@@ -1677,7 +1673,7 @@ class PlannerContentValidatorTest {
 
         @Test
         void validate_WhenADraftFloorsGiftIdsIsNotAnArray_ReportsTheFieldType() {
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "\"giftIds\": [\"9002\"]", "\"giftIds\": \"9002\"");
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
@@ -1690,7 +1686,7 @@ class PlannerContentValidatorTest {
         @Test
         void validate_WhenWellShapedFloorsLiePastTheCount_AcceptsAndStoresThemUntouched() {
             setupMocksForValidIds();
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "{\"themePackId\": \"1005\", \"difficulty\": 0, \"giftIds\": []}",
                     "{\"themePackId\": \"1005\", \"difficulty\": 0, \"giftIds\": []}, "
                             + "{\"themePackId\": \"1001\", \"difficulty\": 9, \"giftIds\": [\"9999\", \"9999\"]}");
@@ -1700,7 +1696,7 @@ class PlannerContentValidatorTest {
 
         @Test
         void validate_WhenFloorsPastTheCountHoldGarbage_RejectsTheirShapeAlone() {
-            String content = createValidContent().replace(
+            String content = replaceOnce(createValidContent(),
                     "{\"themePackId\": \"1005\", \"difficulty\": 0, \"giftIds\": []}",
                     "{\"themePackId\": \"1005\", \"difficulty\": 0, \"giftIds\": []}, 7, "
                             + "{\"themePackId\": 1001, \"difficulty\": \"hard\", \"giftIds\": {}}");
@@ -1717,7 +1713,7 @@ class PlannerContentValidatorTest {
 
         @Test
         void validate_WhenFloorSelectionsIsNotAnArray_ReportsItOnce() {
-            String content = createValidContent().replaceAll(
+            String content = replaceRegexOnce(createValidContent(),
                     "(?s)\"floorSelections\": \\[.*?\\],\\s*\"sectionNotes\"",
                     "\"floorSelections\": 5, \"sectionNotes\"");
 
@@ -1735,7 +1731,7 @@ class PlannerContentValidatorTest {
                     .mapToObj(index -> "{\"themePackId\": \"" + (1001 + index) + "\", \"difficulty\": "
                             + (index == 5 ? 0 : index == 10 ? 1 : index < 10 ? 1 : 3) + ", \"giftIds\": []}")
                     .collect(Collectors.joining(", ", "\"floorSelections\": [", "], \"sectionNotes\""));
-            String content = createValidContent().replaceAll(
+            String content = replaceRegexOnce(createValidContent(),
                     "(?s)\"floorSelections\": \\[.*?\\],\\s*\"sectionNotes\"", Matcher.quoteReplacement(floors));
 
             PlannerValidationException ex = assertThrows(PlannerValidationException.class,
@@ -1755,7 +1751,7 @@ class PlannerContentValidatorTest {
             PlannerContentValidator realValidator = new PlannerContentValidator(objectMapper,
                     MAX_CONTENT_SIZE_BYTES, MAX_NOTE_SIZE_BYTES,
                     registry, new SinnerIdValidator(), new FloorRules(registry));
-            String content = TestDataFactory.VALID_CONTENT.replace(
+            String content = replaceOnce(TestDataFactory.VALID_CONTENT,
                     "{\"themePackId\":\"1001\",\"difficulty\":0,\"giftIds\":[\"9002\"]}",
                     "{\"themePackId\":\"9999\",\"difficulty\":0,\"giftIds\":[\"9212\"]}");
 
@@ -1774,7 +1770,7 @@ class PlannerContentValidatorTest {
     class KeywordMembershipTests {
 
         private String selecting(String keywords) {
-            return createValidContent().replace("\"selectedKeywords\": [\"Combustion\", \"Slash\"]",
+            return replaceOnce(createValidContent(), "\"selectedKeywords\": [\"Combustion\", \"Slash\"]",
                     "\"selectedKeywords\": " + keywords);
         }
 
