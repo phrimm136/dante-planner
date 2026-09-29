@@ -12,21 +12,30 @@ epic: none · pr: none
   every rule depends on a mutable argument.
   REJECTED: a validation library (Vavr `Validation`) — the sealed result types already carry the
   accumulate-or-accept distinction.
+  INVARIANT: no rule under the planner content packages collects through a parameter, throws per
+    violation or logs — the backend ast-grep rules (`no-violation-collector-parameter`,
+    `no-throw-per-violation`, `no-logging-in-rules`, `no-try-in-rules`) and the frontend
+    `lint:validation` rules.
 - @validation @path — Content paths are a value type with typed segments (field, index, key),
   rendered to the existing dotted/bracket text only at the edge, and ordered segment by segment
   with numeric indices. The forcing constraint: string paths sorted lexicographically, so index 10
   preceded index 2, and three path grammars coexisted.
   REJECTED: string paths with a regex-parsing comparator — re-derives structure the builder
   already had.
+  INVARIANT: both runtimes order violations by path segment then code, and no code parses rendered
+    path text back into structure — the content corpus replays and the `no-string-content-path` rule.
 - @validation @boundary — JSON node kinds are dispatched with `switch (node.getNodeType())`, not
   `isX()` chains.
   REJECTED: a type-pattern switch over `JsonNode` subclasses — Jackson 2's `JsonNode` is not
   sealed, so the switch needs a default and loses the compiler's exhaustiveness check.
+  INVARIANT: no `isX()` chain dispatches a node kind in the content packages — `no-node-kind-if-chain`.
 - @validation @enforcement — The convention is enforced by backend ast-grep rules over the
   planner content packages, with no frozen exceptions: the rules join the build once the last
   violator is converted.
   REJECTED: freezing the old files and converting them when touched — the scope is one closed
   package, and a frozen list keeps the old shape as a nearest pattern.
+  INVARIANT: the convention rules carry no exception list — unenforced; a frozen entry is a review
+    finding.
 
 ## Takeaway
 - takeaway: the pattern a codebase teaches is whichever one is nearest; make one module exemplary,

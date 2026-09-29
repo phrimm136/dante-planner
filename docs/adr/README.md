@@ -39,6 +39,8 @@ epic: <id> · pr: <id> · supersedes: NNN @tag @tag
 ## Decisions
 - @tag @tag [(taste)] — <decision, one sentence>. <the constraint that forced it>.
   REJECTED: <alternative> — <why it loses>.
+  INVARIANT: <property that must always hold> — <what enforces it: a type, a test, a constraint>.
+  NON-GOAL: <what the decision deliberately does not do> — <why>.
 
 ## Superseded
 - @tag @tag → NNN — <original text, verbatim>
@@ -65,6 +67,15 @@ bullet is one of three cases:
 - **forced** — the alternative is physically unavailable, so it was never rejected
 - **corollary** — it follows from a sibling decision in the same file
 - **summary** — it restates the file's decisions as a single contract
+
+**`INVARIANT:`** names a property the decision makes permanent and what enforces it, named by a
+stable identifier (a type, a test class, a database constraint), never a path. A property no gate
+enforces is still written, with "unenforced" as its enforcer, so the gap is visible.
+
+**`NON-GOAL:`** names something the decision deliberately leaves out, with why, so a later reader
+does not add it back as an apparent omission. Both are the decision's consequences: they live in
+its bullet and move with it when it is superseded. Invariants and non-goals are recorded here, in
+the decision, and nowhere else is their record.
 
 ## Lifecycle
 

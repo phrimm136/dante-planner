@@ -16,6 +16,9 @@ epic: none · pr: none · supersedes: 139 @planner @floors @codes
   covered more than one rule.
   REJECTED: a code per message rather than per rule — two rules sharing a message today would have
   to be split again the day their messages diverge.
+  INVARIANT: the backend enum and the frontend code union each equal the committed vocabulary, and
+    each runtime emits exactly the codes the vocabulary assigns to it — `ErrorCodeVocabularyTest`
+    and the frontend codes test.
 - @validation @codes @granularity — One code per rule, so the code alone selects the message: the
   floor sequence code splits into a theme-pack order and a difficulty order code, floor difficulty
   splits four ways (out of range on five-floor categories; floors one to five of longer categories,
@@ -34,6 +37,8 @@ epic: none · pr: none · supersedes: 139 @planner @floors @codes
   renamed in a single step to `UNKNOWN_KEYWORD`, with no coexistence window, since no client reads
   it.
   REJECTED: a coexistence window for the keyword code — nothing branches on the old name.
+  NON-GOAL: no change to wire responses — every sub-code stays masked to the generic validation
+    code except the four user-facing ones (`PlannerValidationExceptionTest`).
 
 ## Takeaway
 - takeaway: when a code needs a second input to pick its message, it names more than one rule;

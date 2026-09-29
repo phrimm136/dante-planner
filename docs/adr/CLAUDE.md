@@ -26,6 +26,8 @@ epic: <id> · pr: <id> · supersedes: NNN @tag @tag
 ## Decisions
 - @tag @tag [(taste)] — <decision, one sentence>. <the constraint that forced it>.
   REJECTED: <alternative> — <why it loses>.
+  INVARIANT: <property that must always hold> — <its enforcer: type, test, constraint, or "unenforced">.
+  NON-GOAL: <what it deliberately does not do> — <why>.
 
 ## Superseded
 - @tag @tag → NNN — <original text, verbatim>
@@ -36,6 +38,9 @@ epic: <id> · pr: <id> · supersedes: NNN @tag @tag
 
 `NNN` is the next free number, three digits, never reused. Every decision line starts `- @`.
 `## Superseded` and `supersedes:` appear only when they have content.
+
+`INVARIANT:` and `NON-GOAL:` lines are the decision's consequences; write every invariant and
+non-goal the decision settles, in the bullet it follows from.
 
 `(taste)` is the only qualifier — it marks judgment without measurement. `REJECTED:` is required
 unless the bullet is forced (no alternative existed), a corollary of a sibling, or a summary of the

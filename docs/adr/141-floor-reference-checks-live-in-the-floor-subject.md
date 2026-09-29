@@ -13,6 +13,8 @@ epic: none · pr: none · supersedes: 139 @planner @floors @ids
   subject's fields, and a subject's rules are no longer found in its module.
   REJECTED: folding them into admission — admission gains the game-data registry, and the
   category-change path, which admits only, would start running reference checks.
+  INVARIANT: a subject package depends only on the validation root and the game data, never on a
+    sibling subject or a caller — `SubjectModuleBoundaryTest`, `FloorModuleBoundaryTest`.
 
 ## Takeaway
 - takeaway: group rules by the data they read, not by the kind of check they perform; a "kind"
