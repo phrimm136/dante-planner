@@ -172,7 +172,7 @@ pitest {
     outputFormats.set(setOf("HTML", "XML"))
     // Pinned to 1.19.0-rc.1: the 1.19.0 release crashes the coverage minion on this project
     // (UNKNOWN_ERROR) across every pitest core from 1.19.6 to 1.22.1.
-    mutationThreshold.set(53)
+    mutationThreshold.set(57)
 }
 
 val pitestRatchet by tasks.registering {
