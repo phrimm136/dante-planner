@@ -1197,10 +1197,14 @@ class PlannerContentValidatorTest {
         @DisplayName("Should allow same giftId across different floors")
         void validate_WhenSameGiftIdAcrossFloors_Passes() {
             setupMocksForValidIds();
-            String content = createValidContent().replace(
-                    "\"floorSelections\": [{\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}]",
-                    "\"floorSelections\": [{\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}, {\"themePackId\": \"1002\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}]"
+            String original = createValidContent();
+            String floor2Selection = "{\"themePackId\": \"1002\", \"difficulty\": 0, \"giftIds\": []}";
+            assertThat(original).containsOnlyOnce(floor2Selection);
+            String content = original.replace(
+                    floor2Selection,
+                    "{\"themePackId\": \"1002\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}"
             );
+            assertThat(content).isNotEqualTo(original);
             assertDoesNotThrow(() -> validate(content, "5F"));
         }
     }
