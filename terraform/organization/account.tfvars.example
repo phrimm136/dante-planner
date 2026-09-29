@@ -16,6 +16,11 @@ aws_account_id = "REPLACE_WITH_ACCOUNT_ID"
 #   aws organizations describe-organization --query Organization.Id --output text
 organization_id = "o-REPLACE_WITH_ORG_ID"
 
+# The account's existing services-dimension Cost Anomaly Detection monitor, which this stack
+# adopts rather than creates:
+#   aws ce get-anomaly-monitors
+anomaly_monitor_arn = "arn:aws:ce::REPLACE_WITH_ACCOUNT_ID:anomalymonitor/REPLACE_WITH_MONITOR_ID"
+
 # The human to create in the Identity Center directory. Terraform creates the user without a
 # password; AWS emails a verification link only when you send one from the console, so a user
 # created here cannot sign in until that invitation is sent.
