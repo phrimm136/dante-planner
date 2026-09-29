@@ -469,30 +469,32 @@
     importance-blink var(--importance-blink-period) cubic-bezier(0.37, 0, 0.63, 1) infinite;
 }
 
+.importance-dash-top {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  border-top: 1px dashed var(--importance-stripe-color);
+  opacity: var(--importance-blink-max);
+}
+
 .importance-stripe-top {
   animation-direction: reverse, normal;
 }
 
 .importance-banner {
   position: relative;
-  margin-left: var(--importance-banner-left);
-  min-width: var(--importance-banner-width);
-  min-height: var(--importance-banner-height);
   width: fit-content;
-  padding-inline: var(--importance-outline-side);
-  background-color: var(--importance-panel);
 }
 
-.importance-banner * {
-  color: var(--importance-name);
+.importance-banner [data-slot='name-plate'] {
+  position: relative;
 }
 
-.importance-banner-outline {
+.importance-banner [data-slot='name-plate']::after {
+  content: '';
   position: absolute;
-  inset: calc(-1 * var(--importance-outline-cap)) calc(-1 * var(--importance-outline-side));
-  border-style: solid;
-  border-color: var(--importance-panel-glow);
-  border-width: var(--importance-outline-cap) var(--importance-outline-side);
+  inset: 0;
+  box-shadow: 0 0 var(--importance-glow-radius) var(--importance-panel-glow);
   pointer-events: none;
   opacity: var(--importance-outline-max);
   animation: importance-outline-flicker var(--importance-flicker-period)
@@ -503,7 +505,7 @@
   .importance-flicker-icon,
   .importance-flicker,
   .importance-stripe,
-  .importance-banner-outline {
+  .importance-banner [data-slot='name-plate']::after {
     animation: none;
   }
 }

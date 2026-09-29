@@ -108,6 +108,9 @@ export function BattleDetailView({
       <BattleSelectorRow
         engagementRows={
           <BattleEngagementRows
+            config={config}
+            id={id}
+            units={group.units}
             groups={rowGroups}
             selected={selection.rowIndex}
             onSelect={(rowIndex) => {

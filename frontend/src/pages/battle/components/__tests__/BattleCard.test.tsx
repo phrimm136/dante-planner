@@ -4,7 +4,6 @@ import { fireEvent, screen } from '@testing-library/react'
 import enemySpec from '@static/data/enemySpecList.json'
 import i18n from '@/lib/i18n'
 import { renderWithProviders } from '@/test-utils/renderWithProviders'
-import { ENEMY_LIST } from '../../hooks/useEnemyListData'
 import type { BattleCase } from '../../lib/battleVocabulary'
 import { BATTLE_GEOMETRY } from '../../lib/cardLayout'
 import { EnemySpecListSchema } from '../../schemas/EnemySchemas'
@@ -26,7 +25,6 @@ function renderCard(id: string, { hover = true, mode = 'story' as BattleCase } =
       spriteId={entry.spriteId}
       sprite={entry.sprite}
       mode={mode}
-      listConfig={ENEMY_LIST}
       enableHoverHighlight={hover}
     />,
   )
@@ -45,17 +43,17 @@ describe('BattleCard', () => {
     expect(BATTLE_GEOMETRY.mobileScale).toBeGreaterThan(0)
   })
 
-  it('places the sprite at 53 px per world unit with its anchor 15 % below the top', () => {
+  it('places the sprite at 45 px per world unit with its anchor 35 % below the top', () => {
     renderCard('1133')
 
     const style = spriteImage().style
     expect(style.position).toBe('absolute')
     expect(style.left).toBe('50%')
-    expect(style.top).toBe('15%')
+    expect(style.top).toBe('35%')
     expect(style.marginLeft).toBe('-558.13px')
     expect(style.marginTop).toBe('-135.45px')
     expect(style.transformOrigin).toBe('558.13px 135.45px')
-    expect(style.transform).toBe(`scale(${String(53 / 240)})`)
+    expect(style.transform).toBe(`scale(${String(45 / 240)})`)
     expect(style.maxWidth).toBe('none')
     expect(screen.getByTestId('battle-card-sprite')).toHaveClass('overflow-hidden')
   })

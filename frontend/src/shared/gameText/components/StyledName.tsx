@@ -35,11 +35,12 @@ export function StyledSkillName({ name, attributeType }: StyledSkillNameProps) {
   return (
     <div className="w-fit">
       <div
+        data-slot="name-plate"
         style={{
-          color: TEXT_COLOR,
+          color: `var(--name-text, ${TEXT_COLOR})`,
           marginBottom: '10px',
           width: '100%',
-          backgroundImage: generateBackgroundGradient(dark),
+          backgroundImage: generateBackgroundGradient(`var(--name-plate, ${dark})`),
         }}
       >
         <div
@@ -47,7 +48,7 @@ export function StyledSkillName({ name, attributeType }: StyledSkillNameProps) {
             textShadow: '2px 2px 2px black',
             padding: '0.1em 3.75em 0 0.3em',
             textAlign: 'left',
-            backgroundImage: generateStripeGradient(primary),
+            backgroundImage: generateStripeGradient(`var(--name-stripe, ${primary})`),
           }}
         >
           <span style={{ fontSize: '20px', ...displayStyle }}>{name}</span>

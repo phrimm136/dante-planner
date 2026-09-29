@@ -7,9 +7,13 @@ import type {
   StageLabelText,
 } from '../schemas/BattleDetailSchemas'
 import type { BattleFacetNames } from '../schemas/BattleSpecSchemas'
-import { ENGAGEMENT_LABEL_SEPARATOR, ENGAGEMENT_PLACE_JOINER } from './battleVocabulary'
-import type { Translate } from './enemy/enemyFacetOptions'
-import type { SelectorRow } from './engagementRows'
+import {
+  ENGAGEMENT_LABEL_SEPARATOR,
+  ENGAGEMENT_PLACE_JOINER,
+  PROLOGUE_CANTO,
+} from './battleVocabulary'
+import { cantoLabel, type Translate } from './enemy/enemyFacetOptions'
+import type { SelectorEntry } from './engagementRows'
 
 export interface EngagementSources {
   stages: BattleStageList
@@ -35,7 +39,7 @@ function chapterText(
   chapter: { canto?: number | undefined; number?: string | undefined; part?: string | undefined },
   t: Translate,
 ): string | undefined {
-  if (chapter.canto !== undefined) return t('battle.chapter.canto', { n: String(chapter.canto) })
+  if (chapter.canto !== undefined) return cantoLabel(chapter.canto, t)
   if (chapter.number !== undefined) {
     return t('battle.chapter.intervallo', {
       number: intervalloPrefix(chapter.number, chapter.part),
@@ -52,7 +56,7 @@ export function stageLabelText(
   switch (label.kind) {
     case 'canto':
       return label.node === undefined
-        ? t('battle.chapter.canto', { n: String(label.canto) })
+        ? cantoLabel(label.canto, t)
         : `${String(label.canto)}-${String(label.node)}`
     case 'intervallo': {
       const prefix = intervalloPrefix(label.number, label.part)
@@ -80,7 +84,7 @@ export function stageLabelText(
     case 'aprilFools':
       return text?.title ?? label.titleKey
     case 'tutorial':
-      return t('battle.chapter.tutorial', {})
+      return cantoLabel(PROLOGUE_CANTO, t)
     case 'rpg':
       return joined(
         `${String(label.canto)}-${String(label.node)}`,
@@ -134,12 +138,7 @@ export function engagementLabel(
   })
 }
 
-export function selectorRowLabel(
-  { row, suffix }: SelectorRow,
-  sources: EngagementSources,
-  t: Translate,
-): string {
-  const label = engagementLabel(row, sources, t)
+export function suffixedLabel({ label, suffix }: SelectorEntry, t: Translate): string {
   if (suffix === undefined) return label
   return `${label} ${t('battle.detail.rowSuffix', { n: String(suffix) })}`
 }

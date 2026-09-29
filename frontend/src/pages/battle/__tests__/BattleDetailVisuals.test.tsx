@@ -120,8 +120,10 @@ describe('battle detail visuals', () => {
 
       const sanity = section('Sanity')
       expect(await within(sanity).findByText('Atrophied')).toBeDefined()
-      const chip = await within(sanity).findByRole('button', { name: 'Attack Power Down' })
-      expect(chip.closest('div')?.textContent).toContain('Turn Start: Gain 4')
+      const chips = await within(sanity).findAllByRole('button', { name: 'Attack Power Down' })
+      expect(
+        chips.some((chip) => chip.closest('div')?.textContent?.includes('Turn Start: Gain 4')),
+      ).toBe(true)
       expect(sanity.textContent).not.toContain('[Reduction]')
       const html = document.body.innerHTML
       expect(html).not.toMatch(/&lt;sprite|<sprite|&lt;link|<link/)

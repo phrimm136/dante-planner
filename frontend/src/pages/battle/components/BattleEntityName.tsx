@@ -1,19 +1,15 @@
-import { useEntityListI18n, type EntityListDataConfig } from '@/shared/entityCatalog'
+import { useEntityListI18n } from '@/shared/entityCatalog'
+import { BATTLE_NAME_LISTS } from '../hooks/battleNameLists'
 import { battleDisplayName } from '../lib/battleListing'
-import type { BattleCase } from '../lib/battleVocabulary'
-import type { BattleNameList } from '../schemas/BattleSpecSchemas'
+import type { BattleCase, BattleFamily } from '../lib/battleVocabulary'
 
-interface BattleEntityNameProps<TSpecList> {
-  listConfig: EntityListDataConfig<TSpecList, BattleNameList>
+interface BattleEntityNameProps {
+  family: BattleFamily
   id: string
   mode: BattleCase
 }
 
-export function BattleEntityName<TSpecList>({
-  listConfig,
-  id,
-  mode,
-}: BattleEntityNameProps<TSpecList>) {
-  const names = useEntityListI18n(listConfig)
+export function BattleEntityName({ family, id, mode }: BattleEntityNameProps) {
+  const names = useEntityListI18n(BATTLE_NAME_LISTS[family])
   return battleDisplayName(names[id], mode, id)
 }

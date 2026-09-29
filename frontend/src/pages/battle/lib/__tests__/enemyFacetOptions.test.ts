@@ -1,14 +1,16 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 import enemySpec from '@static/data/enemySpecList.json'
 import enFacetNames from '@static/i18n/EN/battleFacetNames.json'
 import i18n from '@/lib/i18n'
 import { EnemySpecListSchema } from '../../schemas/EnemySchemas'
 import {
+  cantoLabel,
   chapterLabel,
   collectEnemyFacetKeys,
   luxcavationLabel,
   railwayLineLabel,
+  romanNumeral,
   type Translate,
 } from '../enemy/enemyFacetOptions'
 
@@ -27,10 +29,11 @@ describe('enemy facet labels', () => {
     expect(railwayLineLabel(1, enFacetNames.railwayLines, translate)).toBe('Line 1')
   })
 
-  it('formats cantos, intervallos and the tutorial from templates', () => {
-    expect(chapterLabel('canto:4', enFacetNames.chapters, translate)).toBe('Canto 4')
+  it('formats cantos in the game numbering, intervallos, and the tutorial as the prologue', () => {
+    expect(chapterLabel('canto:4', enFacetNames.chapters, translate)).toBe('Canto IV')
+    expect(chapterLabel('canto:10', enFacetNames.chapters, translate)).toBe('Canto X')
     expect(chapterLabel('intervallo:5.5', enFacetNames.chapters, translate)).toBe('Intervallo 5.5')
-    expect(chapterLabel('tutorial', enFacetNames.chapters, translate)).toBe('Tutorial')
+    expect(chapterLabel('tutorial', enFacetNames.chapters, translate)).toBe('Prologue')
   })
 
   it('reads walpurgis and april fools titles from the facet names', () => {
@@ -99,5 +102,19 @@ describe('enemy facet keys', () => {
       'thread:6',
       'thread:7',
     ])
+  })
+})
+
+describe('canto labels per language', () => {
+  it('reads the game term: KR 0장 and N장, JP 0章 and N章, EN Prologue and Canto N', async () => {
+    await i18n.changeLanguage('KR')
+    await vi.waitFor(() => expect(cantoLabel(4, translate)).toBe('4장'))
+    expect(cantoLabel(0, translate)).toBe('0장')
+    await i18n.changeLanguage('JP')
+    await vi.waitFor(() => expect(cantoLabel(4, translate)).toBe('4章'))
+    expect(cantoLabel(0, translate)).toBe('0章')
+    await i18n.changeLanguage('EN')
+    expect(cantoLabel(0, translate)).toBe('Prologue')
+    expect(romanNumeral(9)).toBe('IX')
   })
 })

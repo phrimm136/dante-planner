@@ -3,8 +3,9 @@ import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import importanceColorCode from '@static/data/color/importanceColorCode.json'
-import { IMPORTANCE_DECORATION } from '@/lib/constants'
+import { COIN_CLIENT_WIDTH, IMPORTANCE_DECORATION } from '@/lib/constants'
 import {
+  clientLength,
   hasImportance,
   importanceBannerStyle,
   importanceGeometry,
@@ -52,50 +53,48 @@ describe('importance tiers', () => {
 })
 
 describe('importance geometry', () => {
-  it('places the skill icon 286 of 899.4 units in from the right and 22 below the box top', () => {
+  it('sizes client units against the text line: 50 units to one 1.25rem line', () => {
+    expect(clientLength(50)).toBe('1.25rem')
+    expect(clientLength(COIN_CLIENT_WIDTH)).toBe('1.25rem')
+  })
+
+  it('places the 200-unit skill icon 286 units in from the right and 22 below the box top', () => {
     expect(importanceGeometry('skill', false)).toEqual({
-      iconSize: '22.237cqw',
-      iconTop: '2.4461cqw',
-      iconRight: '31.799cqw',
-      bandHeight: '4cqw',
-      bandOffset: '-1.6678cqw',
+      iconSize: '5rem',
+      iconTop: '0.55rem',
+      iconRight: '7.15rem',
+      bandHeight: '0.8994rem',
+      bandOffset: '0rem',
     })
   })
 
   it('moves a locked skill icon to 86 units from the right', () => {
-    expect(importanceGeometry('skill', true).iconRight).toBe('9.5619cqw')
+    expect(importanceGeometry('skill', true).iconRight).toBe('2.15rem')
   })
 
-  it('pins the passive icon to the right edge of the 1304.2-unit box, 3 units above it', () => {
+  it('draws the passive triangle at the in-game 118 units, at the right edge, 14 units down', () => {
     expect(importanceGeometry('passive', false)).toEqual({
-      iconSize: '15.3351cqw',
-      iconTop: '-0.23cqw',
-      iconRight: '0cqw',
-      bandHeight: '4cqw',
-      bandOffset: '-3.067cqw',
+      iconSize: '2.95rem',
+      iconTop: '0.35rem',
+      iconRight: '0rem',
+      bandHeight: '0.625rem',
+      bandOffset: '-0.625rem',
     })
   })
 
-  it('straddles the box edge with a band 4 % of the box width tall', () => {
-    for (const variant of ['skill', 'passive'] as const) {
-      const { bandHeight, bandOffset } = importanceGeometry(variant, false)
-      const height = Number.parseFloat(bandHeight)
-      const offset = Number.parseFloat(bandOffset)
-      expect(height).toBe(4)
-      expect(offset).toBeLessThan(0)
-      expect(height + offset).toBeGreaterThan(0)
-    }
+  it('keeps the skill bands inside the box so stacked boxes never overlap', () => {
+    const { bandHeight, bandOffset } = importanceGeometry('skill', false)
+    expect(Number.parseFloat(bandOffset)).toBe(0)
+    expect(Number.parseFloat(bandHeight)).toBeLessThan(1)
   })
 })
 
 describe('passive banner', () => {
-  it('sizes the name banner and its outline from the passive box', () => {
+  it('tints the name plate itself and glows around it', () => {
     const style = importanceBannerStyle(3, 'player') as Record<string, unknown>
-    expect(style['--importance-banner-left']).toBe('2.1469cqw')
-    expect(style['--importance-banner-width']).toBe('51.4492cqw')
-    expect(style['--importance-banner-height']).toBe('5.5743cqw')
-    expect(style['--importance-outline-side']).toBe('0.7668cqw')
-    expect(style['--importance-outline-cap']).toBe('1.2383cqw')
+    expect(style['--name-plate']).toMatch(/^#87cb00(ff)?$/i)
+    expect(style['--name-text']).toMatch(/^#f6ff00(ff)?$/i)
+    expect(style['--importance-glow-radius']).toBe('0.3rem')
     expect(style['--importance-outline-min']).toBe(0.5)
     expect(style['--importance-outline-max']).toBe(1)
     expect(style['--importance-flicker-period']).toBe('0.8s')

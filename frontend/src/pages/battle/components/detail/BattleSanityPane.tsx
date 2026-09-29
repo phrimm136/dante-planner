@@ -24,6 +24,9 @@ function BattlePanicSection({
       panicType={panicType}
       nameSlot={<PanicName name={sanity.panicName ?? ''} />}
       descSlot={<FormattedDescription text={sanity.panicText} />}
+      {...(sanity.lowMoraleText !== undefined && {
+        lowMoraleSlot: <FormattedDescription text={sanity.lowMoraleText} />,
+      })}
     />
   )
 }

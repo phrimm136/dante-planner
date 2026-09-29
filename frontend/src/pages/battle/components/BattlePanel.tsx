@@ -10,13 +10,18 @@ import {
   filterSection,
   type FilterSectionEntry,
 } from '@/shared/filter'
+import { useAssistantListSpec } from '../hooks/useAssistantListData'
 import { useEnemyListSpec } from '../hooks/useEnemyListData'
-import { modeItems } from '../lib/battleListing'
+import { useSinnerEventListSpec } from '../hooks/useSinnerEventListData'
+import { toAssistantEntity } from '../lib/assistant/assistantEntity'
+import { modeItems, type BattleCardItem } from '../lib/battleListing'
 import type { BattleCase } from '../lib/battleVocabulary'
 import { toEnemyEntity } from '../lib/enemy/enemyEntity'
 import { collectEnemyFacetKeys } from '../lib/enemy/enemyFacetOptions'
-import { battleTypeStore, selectBattleMode } from '../stores/battleTypeStore'
-import { enemyFilterStore } from '../stores/enemyFilterStore'
+import { toSinnerEventEntity } from '../lib/sinnerEvent/sinnerEventEntity'
+import { battleFilterStore } from '../stores/battleFilterStore'
+import { battleModeStore, selectBattleMode } from '../stores/battleModeStore'
+import { BattleList } from './BattleList'
 import {
   ChapterFilter,
   EnemyThemePackFilter,
@@ -24,18 +29,33 @@ import {
   HiddenBattleFilter,
   LuxcavationFilter,
   RailwayLineFilter,
+  TypeFilter,
 } from './EnemyFilterControls'
-import { EnemyList } from './EnemyList'
 
-export function EnemyPanel() {
+export function BattlePanel() {
   const { t } = useTranslation('database')
-  const spec = useEnemyListSpec()
-  const mode = useStore(battleTypeStore, selectBattleMode)
-  const items = modeItems(
-    Object.entries(spec).map(([id, entry]) => toEnemyEntity(id, entry)),
+  const mode = useStore(battleModeStore, selectBattleMode)
+  const enemies = useEnemyListSpec()
+  const assistants = useAssistantListSpec()
+  const sinnerEvents = useSinnerEventListSpec()
+  const items = modeItems<BattleCardItem>(
+    [
+      ...Object.entries(enemies).map(([id, entry]) => ({
+        family: 'enemy' as const,
+        entity: toEnemyEntity(id, entry),
+      })),
+      ...Object.entries(assistants).map(([id, entry]) => ({
+        family: 'assistant' as const,
+        entity: toAssistantEntity(id, entry),
+      })),
+      ...Object.entries(sinnerEvents).map(([id, entry]) => ({
+        family: 'sinnerEvent' as const,
+        entity: toSinnerEventEntity(id, entry),
+      })),
+    ],
     mode,
   )
-  const keys = collectEnemyFacetKeys(items)
+  const keys = collectEnemyFacetKeys(items.map((item) => item.entity))
 
   const {
     values: filters,
@@ -44,7 +64,7 @@ export function EnemyPanel() {
     setSearchQuery,
     resetAll,
     store,
-  } = useFilterStore(enemyFilterStore)
+  } = useFilterStore(battleFilterStore)
 
   const activeFilterCount = calculateActiveFilterCount(...Object.values(filters))
 
@@ -119,7 +139,16 @@ export function EnemyPanel() {
     }
   }
 
-  const sections = drillDowns(mode)
+  const sections = [
+    filterSection({
+      key: 'selectedTypes',
+      titleKey: 'battle.facet.type',
+      Component: TypeFilter,
+      selected: filters.selectedTypes,
+      onSelectionChange: setters.selectedTypes,
+    }),
+    ...drillDowns(mode),
+  ]
 
   return (
     <FilterPageLayout
@@ -134,7 +163,7 @@ export function EnemyPanel() {
         />
       }
     >
-      <EnemyList items={items} mode={mode} store={store} />
+      <BattleList items={items} mode={mode} store={store} />
     </FilterPageLayout>
   )
 }

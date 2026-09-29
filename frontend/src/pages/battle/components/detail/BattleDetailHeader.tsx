@@ -15,6 +15,8 @@ import { SINNERS, SinnerScopedIdSchema, getSinnerFromId } from '@/shared/gameDat
 import { useBattleDetailI18n, type BattleI18nConfig } from '../../hooks/useBattleDetailData'
 import { unitName } from '../../lib/battleDetail'
 import { BATTLE_DETAIL_SPRITE_ASPECT_RATIO } from '../../lib/cardLayout'
+import { headerSpriteStyle } from '../../lib/headerSprite'
+import type { BattleSprite } from '../../schemas/BattleSpecSchemas'
 import { HAZARD_CLASSES, type BattleFamily } from '../../lib/battleVocabulary'
 import type { BattlePhase } from '../../schemas/BattleDetailSchemas'
 
@@ -46,17 +48,35 @@ interface SpriteProps {
   family: BattleFamily
   id: string
   spriteId: string
+  sprite: BattleSprite | undefined
   mapName: string | undefined
 }
 
-function BattleSprite({ family, id, spriteId, mapName, alt }: SpriteProps & { alt: string }) {
+function spriteClassName(placed: boolean, placement: boolean): string | undefined {
+  if (placed) return undefined
+  return placement ? 'absolute opacity-0' : 'relative h-full w-full object-contain'
+}
+
+function BattleSpriteBox({
+  family,
+  id,
+  spriteId,
+  sprite,
+  mapName,
+  alt,
+}: SpriteProps & { alt: string }) {
   const [missingSprite, setMissingSprite] = useState<string | undefined>(undefined)
   const [missingMap, setMissingMap] = useState<string | undefined>(undefined)
+  const [loaded, setLoaded] = useState<{ spriteId: string; width: number } | undefined>(undefined)
+  const placement = headerSpriteStyle(
+    sprite,
+    loaded?.spriteId === spriteId ? loaded.width : undefined,
+  )
 
   return (
     <div
       data-testid="battle-detail-sprite"
-      className="relative flex w-full items-center justify-center overflow-hidden rounded-lg bg-muted"
+      className="@container relative flex w-full items-center justify-center overflow-hidden rounded-lg bg-muted"
       style={{ aspectRatio: BATTLE_DETAIL_SPRITE_ASPECT_RATIO }}
     >
       {mapName !== undefined && missingMap !== mapName && (
@@ -76,10 +96,17 @@ function BattleSprite({ family, id, spriteId, mapName, alt }: SpriteProps & { al
         <img
           src={getBattleSpritePath(family, spriteId)}
           alt={alt}
+          onLoad={(event) => {
+            setLoaded({ spriteId, width: event.currentTarget.naturalWidth })
+          }}
           onError={() => {
             setMissingSprite(spriteId)
           }}
-          className="relative h-full w-full object-contain"
+          style={placement}
+          className={spriteClassName(
+            placement !== undefined,
+            sprite !== undefined && 'ppu' in sprite,
+          )}
         />
       )}
     </div>
@@ -109,7 +136,7 @@ function BattleName(props: NameProps) {
 
 function NamedSprite({ config, unitId, ...sprite }: SpriteProps & NameProps) {
   const name = useEntityName({ config, id: sprite.id, unitId })
-  return <BattleSprite {...sprite} alt={name} />
+  return <BattleSpriteBox {...sprite} alt={name} />
 }
 
 export function BattleDetailHeader({
@@ -124,7 +151,7 @@ export function BattleDetailHeader({
 }: BattleDetailHeaderProps) {
   const sinner = sinnerOf(family, phase)
   const hazard = hazardClass(classType)
-  const sprite = { family, id, spriteId: phase.spriteId, mapName }
+  const sprite = { family, id, spriteId: phase.spriteId, sprite: phase.sprite, mapName }
 
   return (
     <div className="space-y-4">
@@ -169,7 +196,7 @@ export function BattleDetailHeader({
           </Suspense>
         </div>
       </div>
-      <Suspense fallback={<BattleSprite {...sprite} alt="" />}>
+      <Suspense fallback={<BattleSpriteBox {...sprite} alt="" />}>
         <NamedSprite {...sprite} config={config} unitId={unitId} />
       </Suspense>
     </div>

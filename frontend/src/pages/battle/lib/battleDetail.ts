@@ -245,6 +245,27 @@ export function unitTextKeywords(
   )
 }
 
+export function rowContentKey(
+  row: EngagementRow,
+  phases: readonly BattlePhase[],
+  i18n: BattleEntityI18n,
+): string {
+  const unitId = String(row.unit)
+  const keywords = stageEffectGrants(
+    row,
+    ownSources(unitId, phases),
+    unitTextKeywords(
+      i18n,
+      unitId,
+      phases.map((phase) => String(phase.id)),
+    ),
+  )
+    .map((grant) => grant.keywordId)
+    .sort()
+  const parts = [...row.rowParts].sort((a, b) => a - b)
+  return JSON.stringify([row.unit, row.level, parts, keywords])
+}
+
 export type StageEffectGrant = BuffGrant & { keywordId: string }
 
 export interface OwnSources {
@@ -268,7 +289,8 @@ export function stageEffectGrants(
   const grants: StageEffectGrant[] = []
   for (const grant of row.facts.buffGrants) {
     const { keywordId } = grant
-    if (keywordId === null || seen.has(keywordId) || ownKeywords.has(keywordId)) continue
+    if (grant.derivable || keywordId === null) continue
+    if (seen.has(keywordId) || ownKeywords.has(keywordId)) continue
     const { kind, unitId, partId } = grant.source
     if (kind === 'passive' && unitId !== undefined && own.unitIds.has(unitId)) continue
     if (kind === 'passive' && partId !== undefined && own.partIds.has(partId)) continue

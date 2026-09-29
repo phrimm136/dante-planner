@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react'
 
-import { CLIENT_BOX_WIDTH, COIN_CLIENT_WIDTH } from '@/lib/constants'
-import { lengthToCqw } from '@/lib/utils'
+import { COIN_CLIENT_WIDTH, CLIENT_TEXT_SCALE } from '@/lib/constants'
+import { clientUnitsToRem } from '@/lib/utils'
 import { getCoinSpritePath } from '@/shared/assets'
 import type { CoinColor, SkillCoin } from '@/shared/gameData'
 import { isCoinColor } from '../lib/coinColor'
@@ -13,7 +13,11 @@ const COIN_ALT: Record<CoinColor, string> = {
   PURPLE: 'Purple coin',
 }
 
-const COIN_WIDTH = lengthToCqw(COIN_CLIENT_WIDTH, CLIENT_BOX_WIDTH.skill)
+const COIN_WIDTH = clientUnitsToRem(
+  COIN_CLIENT_WIDTH,
+  CLIENT_TEXT_SCALE.LINE_UNITS,
+  CLIENT_TEXT_SCALE.LINE_REM,
+)
 
 const COIN_ROW_STYLE = { '--coin-width': COIN_WIDTH } as CSSProperties
 

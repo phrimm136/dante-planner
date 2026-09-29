@@ -17,11 +17,6 @@ export function ImportanceBanner({ level, palette, className, children }: Import
 
   return (
     <div data-slot="importance-banner" className={cn(className, 'importance-banner')} style={style}>
-      <span
-        aria-hidden="true"
-        data-slot="importance-banner-outline"
-        className="importance-banner-outline"
-      />
       {children}
     </div>
   )

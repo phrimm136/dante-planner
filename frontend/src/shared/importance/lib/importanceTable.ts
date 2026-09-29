@@ -3,13 +3,13 @@ import type { z } from 'zod'
 
 import importanceColorCode from '@static/data/color/importanceColorCode.json'
 import {
-  CLIENT_BOX_WIDTH,
+  CLIENT_TEXT_SCALE,
   IMPORTANCE_CLIENT_LAYOUT,
   IMPORTANCE_DECORATION,
   IMPORTANCE_STRIPE_BLINK_PERIOD_S,
   IMPORTANCE_STRIPE_SCROLL_S,
 } from '@/lib/constants'
-import { lengthToCqw } from '@/lib/utils'
+import { clientUnitsToRem } from '@/lib/utils'
 import { ImportanceColorCodeSchema, PASSIVE_IMPORTANCE_LEVELS } from '@/shared/gameData'
 import type { ImportancePalette, ImportanceTier } from '@/shared/gameData'
 
@@ -68,6 +68,10 @@ export function stripeTileWidth(): string {
   return `calc(var(--band-h) * ${String(WIDTH)} / ${String(HEIGHT)})`
 }
 
+export function clientLength(units: number): string {
+  return clientUnitsToRem(units, CLIENT_TEXT_SCALE.LINE_UNITS, CLIENT_TEXT_SCALE.LINE_REM)
+}
+
 function iconRight(variant: ImportanceVariant, isLocked: boolean): number {
   if (variant === 'passive') return IMPORTANCE_CLIENT_LAYOUT.ICON_RIGHT.passive
   return isLocked
@@ -87,14 +91,13 @@ export function importanceGeometry(
   variant: ImportanceVariant,
   isLocked: boolean,
 ): ImportanceGeometry {
-  const boxWidth = CLIENT_BOX_WIDTH[variant]
-  const overhang = IMPORTANCE_CLIENT_LAYOUT.GROUP_OVERHANG[variant]
+  const band = IMPORTANCE_CLIENT_LAYOUT.BAND[variant]
   return {
-    iconSize: lengthToCqw(IMPORTANCE_CLIENT_LAYOUT.ICON_SIZE, boxWidth),
-    iconTop: lengthToCqw(IMPORTANCE_CLIENT_LAYOUT.ICON_TOP - overhang, boxWidth),
-    iconRight: lengthToCqw(iconRight(variant, isLocked), boxWidth),
-    bandHeight: lengthToCqw(boxWidth * IMPORTANCE_DECORATION.STRIPE_BAND_WIDTH_RATIO, boxWidth),
-    bandOffset: lengthToCqw(-overhang, boxWidth),
+    iconSize: clientLength(IMPORTANCE_CLIENT_LAYOUT.ICON_SIZE[variant]),
+    iconTop: clientLength(IMPORTANCE_CLIENT_LAYOUT.ICON_TOP[variant]),
+    iconRight: clientLength(iconRight(variant, isLocked)),
+    bandHeight: clientLength(band),
+    bandOffset: variant === 'passive' ? clientLength(-band) : clientLength(0),
   }
 }
 
@@ -128,19 +131,13 @@ export function importanceBannerStyle(
 ): CSSProperties | undefined {
   const style = importanceStyle(level, palette)
   if (style === undefined) return undefined
-  const boxWidth = CLIENT_BOX_WIDTH.passive
-  const banner = IMPORTANCE_CLIENT_LAYOUT.PASSIVE_BANNER
-  const outline = IMPORTANCE_CLIENT_LAYOUT.PASSIVE_OUTLINE
   const [outlineMin, outlineMax] = style.outlineAlpha
   return {
-    '--importance-panel': style.colors.passivePanel,
+    '--name-plate': style.colors.passivePanel,
+    '--name-stripe': `color-mix(in srgb, ${style.colors.passivePanel} 55%, black)`,
+    '--name-text': style.colors.passiveName,
     '--importance-panel-glow': style.colors.passiveGlow,
-    '--importance-name': style.colors.passiveName,
-    '--importance-banner-left': lengthToCqw(banner.LEFT, boxWidth),
-    '--importance-banner-width': lengthToCqw(banner.WIDTH, boxWidth),
-    '--importance-banner-height': lengthToCqw(banner.HEIGHT, boxWidth),
-    '--importance-outline-side': lengthToCqw(outline.SIDE, boxWidth),
-    '--importance-outline-cap': lengthToCqw((outline.HEIGHT - banner.HEIGHT) / 2, boxWidth),
+    '--importance-glow-radius': clientLength(IMPORTANCE_CLIENT_LAYOUT.PASSIVE_GLOW),
     '--importance-flicker-period': `${String(style.flickerPeriodS)}s`,
     '--importance-outline-min': outlineMin,
     '--importance-outline-max': outlineMax,

@@ -10,3 +10,4 @@ export {
   BattleStageListSchema,
   BattleStageTextsSchema,
 } from './schemas/BattleDetailSchemas'
+export { BATTLE_FAMILIES } from './lib/battleVocabulary'

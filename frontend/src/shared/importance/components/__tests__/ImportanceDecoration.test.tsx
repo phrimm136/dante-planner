@@ -62,11 +62,11 @@ describe('ImportanceDecoration', () => {
     expect(icon?.classList.contains('importance-flicker-icon')).toBe(false)
   })
 
-  it('sizes the stripe band at 4 % of the box width, overhanging the box edge', () => {
+  it('keeps the skill bands inside the box at 4 % of the 899.4-unit box width', () => {
     const { container } = render(<ImportanceDecoration level={2} palette="enemy" variant="skill" />)
     const root = slot(container, 'importance-decoration')
-    expect(variable(root, '--importance-band-height')).toBe('4cqw')
-    expect(variable(root, '--importance-band-offset')).toBe('-1.6678cqw')
+    expect(variable(root, '--importance-band-height')).toBe('0.8994rem')
+    expect(variable(root, '--importance-band-offset')).toBe('0rem')
     expect(cssBlock('.importance-band')).toContain('height: var(--importance-band-height)')
     expect(cssBlock('.importance-band-top')).toContain('top: var(--importance-band-offset)')
     expect(cssBlock('.importance-band-bottom')).toContain('bottom: var(--importance-band-offset)')
@@ -87,9 +87,9 @@ describe('ImportanceDecoration', () => {
   })
 
   it.each([
-    ['unlocked skill', 'skill', false, '31.799cqw', '2.4461cqw', '22.237cqw'],
-    ['locked skill', 'skill', true, '9.5619cqw', '2.4461cqw', '22.237cqw'],
-    ['passive', 'passive', false, '0cqw', '-0.23cqw', '15.3351cqw'],
+    ['unlocked skill', 'skill', false, '7.15rem', '0.55rem', '5rem'],
+    ['locked skill', 'skill', true, '2.15rem', '0.55rem', '5rem'],
+    ['passive', 'passive', false, '0rem', '0.35rem', '2.95rem'],
   ] as const)(
     'pins the %s icon from the box top-right corner',
     (_name, variant, isLocked, right, top, size) => {
@@ -111,7 +111,7 @@ describe('ImportanceDecoration', () => {
       <ImportanceDecoration level={1} palette="enemy" variant="skill" isLocked />,
     )
     expect(variable(slot(container, 'importance-decoration'), '--importance-icon-right')).toBe(
-      '9.5619cqw',
+      '2.15rem',
     )
   })
 
@@ -129,7 +129,8 @@ describe('ImportanceDecoration', () => {
       <ImportanceDecoration level={3} palette="player" variant="passive" />,
     )
     const root = slot(container, 'importance-decoration')
-    expect(variable(root, '--importance-panel')).toBe('')
+    expect(variable(root, '--name-plate')).toBe('')
+    expect(variable(root, '--importance-panel-glow')).toBe('')
     expect(root?.style.backgroundColor).toBe('')
   })
 
@@ -167,7 +168,7 @@ describe('ImportanceDecoration', () => {
       '.importance-flicker-icon',
       '.importance-flicker',
       '.importance-stripe',
-      '.importance-banner-outline',
+      ".importance-banner [data-slot='name-plate']::after",
     ]) {
       expect(block).toContain(selector)
     }
@@ -176,14 +177,26 @@ describe('ImportanceDecoration', () => {
       'opacity: calc(var(--importance-icon-alpha) * var(--importance-flicker-max))',
     )
     expect(cssBlock('.importance-glow')).toContain('opacity: var(--importance-flicker-max)')
-    expect(cssBlock('.importance-banner-outline')).toContain(
+    expect(cssBlock(".importance-banner [data-slot='name-plate']::after")).toContain(
       'opacity: var(--importance-outline-max)',
     )
+  })
+
+  it('draws a passive with a bottom stripe below the box and a dashed top edge', () => {
+    const { container } = render(
+      <ImportanceDecoration level={3} palette="enemy" variant="passive" />,
+    )
+    const root = slot(container, 'importance-decoration')
+    expect(slot(container, 'importance-band-top')).toBeNull()
+    expect(slot(container, 'importance-dash-top')).not.toBeNull()
+    expect(slot(container, 'importance-band-bottom')).not.toBeNull()
+    expect(variable(root, '--importance-band-offset')).toBe('-0.625rem')
+    expect(cssBlock('.importance-dash-top')).toContain('border-top: 1px dashed')
   })
 })
 
 describe('ImportanceBanner', () => {
-  it('tints the banner with the panel color and outlines it with the glow color', () => {
+  it('tints only the name plate with the panel color and glows around it', () => {
     const { container } = render(
       <ImportanceBanner level={3} palette="player" className="row">
         <span>Name</span>
@@ -191,15 +204,15 @@ describe('ImportanceBanner', () => {
     )
     const banner = slot(container, 'importance-banner')
     expect(banner?.classList.contains('row')).toBe(true)
-    expect(variable(banner, '--importance-panel')).toMatch(/^#87cb00(ff)?$/i)
+    expect(variable(banner, '--name-plate')).toMatch(/^#87cb00(ff)?$/i)
     expect(variable(banner, '--importance-panel-glow')).toBe(
       importanceColorCode.player['3'].passiveGlow,
     )
-    expect(variable(banner, '--importance-name')).toMatch(/^#f6ff00(ff)?$/i)
-    expect(slot(container, 'importance-banner-outline')?.parentElement).toBe(banner)
-    expect(cssBlock('.importance-banner')).toContain('background-color: var(--importance-panel)')
-    expect(cssBlock('.importance-banner-outline')).toContain(
-      'border-color: var(--importance-panel-glow)',
+    expect(variable(banner, '--name-text')).toMatch(/^#f6ff00(ff)?$/i)
+    expect(banner?.style.backgroundColor).toBe('')
+    expect(cssBlock('.importance-banner')).not.toContain('background-color')
+    expect(cssBlock(".importance-banner [data-slot='name-plate']::after")).toContain(
+      'box-shadow: 0 0 var(--importance-glow-radius) var(--importance-panel-glow)',
     )
   })
 

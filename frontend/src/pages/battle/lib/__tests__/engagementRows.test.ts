@@ -1,9 +1,13 @@
 import { describe, it, expect } from 'vitest'
 
 import enemy1366 from '@static/data/enemy/1366.json'
-import enemy8390 from '@static/data/enemy/8390.json'
 import { EnemyDataSchema } from '../../schemas/BattleDetailSchemas'
-import { defaultRowIndex, firstMapName, groupSelectorRows } from '../engagementRows'
+import {
+  defaultRowIndex,
+  firstMapName,
+  groupSelectorRows,
+  selectorEntries,
+} from '../engagementRows'
 
 const rows1366 = EnemyDataSchema.parse(enemy1366).engagements
 const groups1366 = groupSelectorRows(rows1366)
@@ -15,20 +19,24 @@ describe('selector rows', () => {
     expect(story).toEqual([...story].sort((a, b) => a - b))
   })
 
-  it('numbers the units of one stage in row order and leaves single-unit stages bare', () => {
-    const stage10570 = groups1366[0]?.rows.filter(({ row }) => row.stage.endsWith('#10570')) ?? []
-    expect(stage10570.map(({ row, suffix }) => [row.unit, suffix])).toEqual([
-      [1366, 1],
-      [1366, 1],
-      [1367, 2],
-      [1367, 2],
-      [1368, 3],
-      [1368, 3],
-    ])
-    const single = groupSelectorRows(EnemyDataSchema.parse(enemy8390).engagements)
-    expect(single.flatMap((group) => group.rows.map(({ suffix }) => suffix))).toEqual([
-      undefined,
-      undefined,
+  it('collapses rows whose label and content match and numbers those whose content differs', () => {
+    const rows = [
+      { index: 0, label: 'A', content: 'x' },
+      { index: 1, label: 'A', content: 'x' },
+      { index: 2, label: 'A', content: 'y' },
+      { index: 3, label: 'B', content: 'x' },
+    ]
+    const story = groups1366[0]?.rows.slice(0, 4) ?? []
+    const specs = new Map(story.map((each, position) => [each.row, rows[position]]))
+    const entries = selectorEntries(
+      story,
+      (row) => specs.get(row)?.label ?? '',
+      (row) => specs.get(row)?.content ?? '',
+    )
+    expect(entries.map(({ index, label, suffix }) => [index, label, suffix])).toEqual([
+      [story[0]?.index, 'A', 1],
+      [story[2]?.index, 'A', 2],
+      [story[3]?.index, 'B', undefined],
     ])
   })
 

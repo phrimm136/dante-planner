@@ -5,11 +5,11 @@ import { AssistantIdSchema } from '@/shared/gameData'
 import { BattleDetailSkeleton } from './components/detail/BattleDetailSkeleton'
 import { BattleDetailView } from './components/detail/BattleDetailView'
 import { ASSISTANT_DETAIL, useBattleDetailSpec } from './hooks/useBattleDetailData'
-import { battleTypeStore } from './stores/battleTypeStore'
+import { battleModeStore } from './stores/battleModeStore'
 
 function AssistantDetailContent() {
   const { id } = useParams({ strict: false })
-  const [arrivalMode] = useState(() => battleTypeStore.getState().mode)
+  const [arrivalMode] = useState(() => battleModeStore.getState().mode)
 
   if (!id) {
     throw new Error('Assistant ID is required')

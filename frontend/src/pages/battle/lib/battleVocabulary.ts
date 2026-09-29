@@ -24,6 +24,10 @@ export const RERUN_LINE_MIN = 1000
 
 export const EXP_LUXCAVATION = 'exp'
 
+export const ROMAN_NUMERALS = 'roman'
+
+export const PROLOGUE_CANTO = 0
+
 export const NEUTRAL_RESISTANCE = 1
 
 export const ENGAGEMENT_LABEL_SEPARATOR = ' · '

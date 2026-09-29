@@ -6,14 +6,18 @@ import type {
   BattleSortKeys,
   BattleSprite,
 } from '../schemas/BattleSpecSchemas'
-import type { BattleCase } from './battleVocabulary'
+import type { EnemyEntity } from '../types/EnemyTypes'
+import type { AssistantEntity } from '../types/AssistantTypes'
+import type { SinnerEventEntity } from '../types/SinnerEventTypes'
+import type { BattleListItem } from './battleFilter'
+import { BATTLE_FAMILIES, type BattleCase } from './battleVocabulary'
 import { BATTLE_CARD_SPRITE } from './cardLayout'
 
-export interface BattleListItem {
-  id: string
-  spriteId: string
-  sprite: BattleSprite
-  sortKey: BattleSortKeys
+export type BattleCardItem = BattleListItem<EnemyEntity | AssistantEntity | SinnerEventEntity>
+
+interface SortableItem {
+  family: BattleCardItem['family']
+  entity: { id: string; sortKey: BattleSortKeys }
 }
 
 export function battleDisplayName(
@@ -42,16 +46,17 @@ function compareSortKeys(a: readonly number[], b: readonly number[]): number {
   return a.length - b.length
 }
 
-export function modeItems<TItem extends BattleListItem>(
+export function modeItems<TItem extends SortableItem>(
   items: readonly TItem[],
   mode: BattleCase,
 ): TItem[] {
   return items
-    .filter((item) => item.sortKey[mode] !== undefined)
+    .filter((item) => item.entity.sortKey[mode] !== undefined)
     .sort(
       (a, b) =>
-        compareSortKeys(a.sortKey[mode] ?? [], b.sortKey[mode] ?? []) ||
-        Number(a.id) - Number(b.id),
+        compareSortKeys(a.entity.sortKey[mode] ?? [], b.entity.sortKey[mode] ?? []) ||
+        BATTLE_FAMILIES.indexOf(a.family) - BATTLE_FAMILIES.indexOf(b.family) ||
+        Number(a.entity.id) - Number(b.entity.id),
     )
 }
 

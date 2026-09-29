@@ -9,6 +9,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 import { describe, it, expect } from 'vitest'
 
+import { BATTLE_FAMILIES } from '@/pages/battle'
 import type { AnyEntitySection } from '@/shared/filter'
 
 const fs = require('fs') as typeof import('fs')
@@ -30,23 +31,15 @@ const SECTIONS = Object.values(
 const dirsOf = (pattern: Record<string, unknown>): string[] =>
   Object.keys(pattern).map((p) => p.split('/')[3] ?? '')
 
-const LIST_FILES = Object.keys(import.meta.glob('/src/pages/*/components/*List.tsx'))
+const FACET_DIRS = dirsOf(import.meta.glob('/src/pages/*/lib/*Filter.ts')).filter((dir) =>
+  dirsOf(import.meta.glob('/src/pages/*/components/*List.tsx')).includes(dir),
+)
 
-const familyListFile = (slice: string, family: string): string =>
-  `/src/pages/${slice}/components/${family.charAt(0).toUpperCase()}${family.slice(1)}List.tsx`
+const SHARED_FACET_SLICE = 'battle'
 
-const NESTED_FACET_SECTIONS = Object.keys(import.meta.glob('/src/pages/*/lib/*/*Filter.ts'))
-  .map((p) => p.split('/'))
-  .map((parts) => [parts[3] ?? '', parts[5] ?? ''] as const)
-  .filter(([slice, family]) => LIST_FILES.includes(familyListFile(slice, family)))
-  .map(([slice, family]) => `${slice}/${family}`)
-
-const FACET_DIRS = [
-  ...dirsOf(import.meta.glob('/src/pages/*/lib/*Filter.ts')).filter((dir) =>
-    dirsOf(import.meta.glob('/src/pages/*/components/*List.tsx')).includes(dir),
-  ),
-  ...NESTED_FACET_SECTIONS,
-]
+const EXPECTED_SECTIONS = FACET_DIRS.flatMap((dir) =>
+  dir === SHARED_FACET_SLICE ? BATTLE_FAMILIES.map((family) => `${dir}/${family}`) : [dir],
+)
 
 function readSpecList(section: AnyEntitySection): [string, Record<string, unknown>][] {
   const raw: unknown = JSON.parse(
@@ -58,9 +51,7 @@ function readSpecList(section: AnyEntitySection): [string, Record<string, unknow
 describe('entity sections', () => {
   it('every section with a facet table declares an entitySection', () => {
     const declared = SECTIONS.map((s) => s.name)
-    const missing = FACET_DIRS.filter((d) => !declared.includes(d))
-    const extra = declared.filter((d) => !FACET_DIRS.includes(d))
-    expect({ missing, extra }).toEqual({ missing: [], extra: [] })
+    expect([...declared].sort()).toEqual([...EXPECTED_SECTIONS].sort())
   })
 })
 

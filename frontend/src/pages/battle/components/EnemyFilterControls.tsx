@@ -3,7 +3,12 @@ import { useTranslation } from 'react-i18next'
 import { useThemePackListI18n } from '@/shared/themePack'
 import { SearchableMultiSelect, ThemePackDropdown } from '@/shared/filter'
 import { useBattleFacetNames } from '../hooks/useBattleFacetNames'
-import { HIDDEN_BATTLE, type HiddenBattle } from '../lib/battleVocabulary'
+import {
+  BATTLE_FAMILIES,
+  HIDDEN_BATTLE,
+  type BattleFamily,
+  type HiddenBattle,
+} from '../lib/battleVocabulary'
 import {
   chapterLabel,
   luxcavationLabel,
@@ -19,6 +24,22 @@ interface ControlProps<T> {
 
 interface KeyedControlProps<T> extends ControlProps<T> {
   keys: readonly T[]
+}
+
+export function TypeFilter({ selected, onSelectionChange }: ControlProps<BattleFamily>) {
+  const { t } = useTranslation('database')
+  const options = BATTLE_FAMILIES.map((family) => ({
+    value: family,
+    label: t(`battle.type.${family}`),
+  }))
+
+  return (
+    <OptionToggleGroup
+      options={options}
+      selected={selected}
+      onSelectionChange={onSelectionChange}
+    />
+  )
 }
 
 export function HiddenBattleFilter({ selected, onSelectionChange }: ControlProps<HiddenBattle>) {

@@ -1,5 +1,10 @@
 import type { EnemySpec } from '../../types/EnemyTypes'
-import { EXP_LUXCAVATION, RERUN_LINE_MIN } from '../battleVocabulary'
+import {
+  EXP_LUXCAVATION,
+  PROLOGUE_CANTO,
+  RERUN_LINE_MIN,
+  ROMAN_NUMERALS,
+} from '../battleVocabulary'
 
 export type Translate = (key: string, options: Record<string, string>) => string
 
@@ -75,11 +80,38 @@ export function collectEnemyFacetKeys(entries: readonly EnemySpec[]): EnemyFacet
   }
 }
 
+const ROMAN_DIGITS: readonly (readonly [number, string])[] = [
+  [10, 'X'],
+  [9, 'IX'],
+  [5, 'V'],
+  [4, 'IV'],
+  [1, 'I'],
+]
+
+export function romanNumeral(value: number): string {
+  let rest = value
+  let numeral = ''
+  for (const [amount, digits] of ROMAN_DIGITS) {
+    while (rest >= amount) {
+      numeral += digits
+      rest -= amount
+    }
+  }
+  return numeral
+}
+
+export function cantoLabel(canto: number, t: Translate): string {
+  if (canto === PROLOGUE_CANTO) return t('battle.chapter.prologue', {})
+  const numeral =
+    t('battle.chapter.numerals', {}) === ROMAN_NUMERALS ? romanNumeral(canto) : String(canto)
+  return t('battle.chapter.canto', { n: numeral })
+}
+
 export function chapterLabel(key: string, names: FacetTexts, t: Translate): string {
   const [kind, arg] = splitKey(key)
-  if (kind === 'canto') return t('battle.chapter.canto', { n: arg })
+  if (kind === 'canto') return cantoLabel(Number(arg), t)
   if (kind === 'intervallo') return t('battle.chapter.intervallo', { number: arg })
-  if (kind === 'tutorial') return t('battle.chapter.tutorial', {})
+  if (kind === 'tutorial') return cantoLabel(PROLOGUE_CANTO, t)
   return names[key] ?? key
 }
 

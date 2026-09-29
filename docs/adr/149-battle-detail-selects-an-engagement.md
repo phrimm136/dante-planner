@@ -1,5 +1,5 @@
 # 149 battle-detail-selects-an-engagement
-epic: none · pr: none
+epic: none · pr: none · supersedes: 119 @level @engagement
 
 ## Decisions
 - @battle @engagement — The battle detail page's selector row picks one engagement row (stage, unit, level) of the origin group, grouped by mode; the chosen row decides the unit's kit, name, level and the stage-script facts shown, and every section renders the composition that row spawns. The page opens on the first row of the mode the user arrived from. Supersedes ADR 119 @level and @engagement: the selector is the list of engagements, so no separate encounters panel remains. REJECTED: level buttons — 636 of 736 multi-stage files reuse one level across stages with different kits or scripts, so a level cannot pick what the player fights.

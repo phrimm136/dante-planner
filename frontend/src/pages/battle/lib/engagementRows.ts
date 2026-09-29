@@ -4,7 +4,6 @@ import { BATTLE_CASES, type BattleCase } from './battleVocabulary'
 export interface SelectorRow {
   index: number
   row: EngagementRow
-  suffix: number | undefined
 }
 
 export interface SelectorRowGroup {
@@ -12,26 +11,43 @@ export interface SelectorRowGroup {
   rows: SelectorRow[]
 }
 
-function unitPositions(rows: readonly EngagementRow[]): Map<string, Map<number, number>> {
-  const byStage = new Map<string, Map<number, number>>()
-  for (const row of rows) {
-    const units = byStage.get(row.stage) ?? new Map<number, number>()
-    if (!units.has(row.unit)) units.set(row.unit, units.size + 1)
-    byStage.set(row.stage, units)
-  }
-  return byStage
+export interface SelectorEntry {
+  index: number
+  label: string
+  suffix: number | undefined
 }
 
 export function groupSelectorRows(rows: readonly EngagementRow[]): SelectorRowGroup[] {
-  const positions = unitPositions(rows)
-  const indexed = rows.map((row, index): SelectorRow => {
-    const units = positions.get(row.stage)
-    const suffix = units !== undefined && units.size > 1 ? units.get(row.unit) : undefined
-    return { index, row, suffix }
-  })
+  const indexed = rows.map((row, index): SelectorRow => ({ index, row }))
   return BATTLE_CASES.flatMap((battleCase) => {
     const inCase = indexed.filter(({ row }) => row.case === battleCase)
     return inCase.length === 0 ? [] : [{ battleCase, rows: inCase }]
+  })
+}
+
+export function selectorEntries(
+  rows: readonly SelectorRow[],
+  labelOf: (row: EngagementRow) => string,
+  contentOf: (row: EngagementRow) => string,
+): SelectorEntry[] {
+  const contentsByLabel = new Map<string, string[]>()
+  const firsts: { index: number; label: string; content: string }[] = []
+  for (const { index, row } of rows) {
+    const label = labelOf(row)
+    const content = contentOf(row)
+    const contents = contentsByLabel.get(label) ?? []
+    if (contents.includes(content)) continue
+    contents.push(content)
+    contentsByLabel.set(label, contents)
+    firsts.push({ index, label, content })
+  }
+  return firsts.map(({ index, label, content }) => {
+    const contents = contentsByLabel.get(label) ?? []
+    return {
+      index,
+      label,
+      suffix: contents.length > 1 ? contents.indexOf(content) + 1 : undefined,
+    }
   })
 }
 

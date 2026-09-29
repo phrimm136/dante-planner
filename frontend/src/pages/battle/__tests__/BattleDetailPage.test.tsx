@@ -16,16 +16,16 @@ import { createTestQueryClient } from '@/test-utils/queryClient'
 import { mountRoute } from '@/test-utils/mountRoute'
 import BattlePage from '../BattlePage'
 import EnemyDetailPage from '../EnemyDetailPage'
-import { enemyFilterStore } from '../stores/enemyFilterStore'
-import { battleTypeStore, setBattleMode } from '../stores/battleTypeStore'
+import { battleFilterStore } from '../stores/battleFilterStore'
+import { battleModeStore, setBattleMode } from '../stores/battleModeStore'
 
 const LOAD_WAIT_MS = 10000
 const TEST_BUDGET_MS = 30000
 
 beforeEach(async () => {
   await i18n.changeLanguage('EN')
-  enemyFilterStore.resetAll()
-  battleTypeStore.setState(battleTypeStore.getInitialState())
+  battleFilterStore.resetAll()
+  battleModeStore.setState(battleModeStore.getInitialState())
 })
 
 function requireSlot(name: string): HTMLElement {
@@ -172,9 +172,9 @@ describe('stage effects', () => {
     async () => {
       await mountEnemy('8390')
 
-      await waitFor(() => expect(stageEffectKeywords()).toContain('FragmentOfHope'))
+      await waitFor(() => expect(stageEffectKeywords()).toContain('UnfinishedDream'))
       const keywords = stageEffectKeywords()
-      expect(keywords).toContain('UnfinishedDream')
+      expect(keywords).not.toContain('FragmentOfHope')
       expect(keywords).not.toContain('StarvingDonqui')
       expect(keywords).not.toContain('UnfinishedDreamTwo')
       expect(new Set(keywords).size).toBe(keywords.length)
@@ -432,6 +432,35 @@ describe('restored coverage', () => {
       await mountEnemy('1366')
 
       expect(within(requireSlot('detail-header')).queryByTestId('battle-hazard-plate')).toBeNull()
+    },
+    TEST_BUDGET_MS,
+  )
+})
+
+describe('stage effects left to the stage', () => {
+  it(
+    'shows UnstoppableFunny on railway stage 503',
+    async () => {
+      await mountEnemy('8678')
+
+      await waitFor(() => expect(stageEffectKeywords()).toContain('UnstoppableFunny'))
+    },
+    TEST_BUDGET_MS,
+  )
+})
+
+describe('sanity', () => {
+  it(
+    'shows the low-morale effect of enemy 8627 beside its panic',
+    async () => {
+      await mountEnemy('8627')
+
+      const lowMorale = await within(requireSlot('detail-sections')).findByText(
+        '·Low Morale Effects',
+      )
+      const block = lowMorale.closest('[data-slot="low-morale-effect"]')
+      expect(block?.textContent).toContain('(3 times per turn)')
+      expect(within(requireSlot('detail-sections')).getByText('·Panic Effects')).toBeDefined()
     },
     TEST_BUDGET_MS,
   )

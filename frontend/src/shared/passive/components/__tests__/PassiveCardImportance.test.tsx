@@ -17,12 +17,12 @@ describe('passive card importance', () => {
     const card = container.firstElementChild as HTMLElement
     const banner = slot(container, 'importance-banner')
     expect(slot(container, 'importance-decoration')?.dataset.importanceVariant).toBe('passive')
-    expect(banner?.style.getPropertyValue('--importance-panel')).toMatch(/^#87cb00(ff)?$/i)
-    expect(banner?.style.getPropertyValue('--importance-name')).toMatch(/^#f6ff00(ff)?$/i)
+    expect(banner?.style.getPropertyValue('--name-plate')).toMatch(/^#87cb00(ff)?$/i)
+    expect(banner?.style.getPropertyValue('--name-text')).toMatch(/^#f6ff00(ff)?$/i)
     expect(banner?.textContent).toBe('Name')
     expect(card.style.backgroundColor).toBe('')
-    expect(card.style.getPropertyValue('--importance-panel')).toBe('')
-    expect(slot(container, 'importance-panel')).toBeNull()
+    expect(card.style.getPropertyValue('--name-plate')).toBe('')
+    expect(card.style.getPropertyValue('--name-text')).toBe('')
   })
 
   it('uses the enemy palette for an enemy passive', () => {
@@ -30,8 +30,8 @@ describe('passive card importance', () => {
       <EGOPassiveCard {...slots} isLocked={false} importanceLevel={3} palette="enemy" />,
     )
     const banner = slot(container, 'importance-banner')
-    expect(banner?.style.getPropertyValue('--importance-panel')).toMatch(/^#ff0000(ff)?$/i)
-    expect(banner?.style.getPropertyValue('--importance-name')).toMatch(/^#f8c200(ff)?$/i)
+    expect(banner?.style.getPropertyValue('--name-plate')).toMatch(/^#ff0000(ff)?$/i)
+    expect(banner?.style.getPropertyValue('--name-text')).toMatch(/^#f8c200(ff)?$/i)
   })
 
   it.each([

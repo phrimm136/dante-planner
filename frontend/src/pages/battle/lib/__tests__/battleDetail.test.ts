@@ -19,6 +19,7 @@ import {
   SinnerEventDataSchema,
   type BattleKit,
   type BattlePhase,
+  type BuffGrant,
   type EngagementRow,
 } from '../../schemas/BattleDetailSchemas'
 import {
@@ -40,6 +41,8 @@ import {
   visibleSkills,
   withShownPassives,
 } from '../battleDetail'
+
+const undecided = (grant: BuffGrant): BuffGrant => ({ ...grant, derivable: false })
 
 const skillIdsOf = (skills: { id: string }[]) => skills.map((skill) => skill.id)
 
@@ -221,9 +224,9 @@ describe('stage effect grants', () => {
   const OWN_8390 = ownSources('8390', group.units['8390']?.phases ?? [])
   const NO_OWN = { unitIds: new Set<number>(), partIds: new Set<number>() }
 
-  it('keeps stage-script and other-unit keywords once each', () => {
+  it('keeps only the keywords no spawned unit explains, once each', () => {
     const keywords = keywordsOf(stageEffectGrants(row, OWN_8390, new Set()))
-    expect(keywords).toContain('FragmentOfHope')
+    expect(keywords).not.toContain('FragmentOfHope')
     expect(keywords).toContain('UnfinishedDream')
     expect(new Set(keywords).size).toBe(keywords.length)
   })
@@ -235,8 +238,8 @@ describe('stage effect grants', () => {
   })
 
   it('drops the keywords the displayed form already names in its own text', () => {
-    const keywords = keywordsOf(stageEffectGrants(row, NO_OWN, new Set(['FragmentOfHope'])))
-    expect(keywords).not.toContain('FragmentOfHope')
+    const keywords = keywordsOf(stageEffectGrants(row, NO_OWN, new Set(['UnfinishedDream'])))
+    expect(keywords).not.toContain('UnfinishedDream')
   })
 
   it('reads the bracketed keyword tokens of skill, coin and passive text', () => {
@@ -255,9 +258,9 @@ describe('stage effect grants', () => {
   it('treats a grant from one of the unit parts as its own under another unit id', () => {
     const bossGroup = EnemyDataSchema.parse(enemy8209)
     const bossRow = rowOn(bossGroup.engagements, '10644')
-    const fromPart = bossRow.facts.buffGrants.filter(
-      (grant) => grant.source.unitId === 8221 && grant.source.partId === 821901,
-    )
+    const fromPart = bossRow.facts.buffGrants
+      .filter((grant) => grant.source.unitId === 8221 && grant.source.partId === 821901)
+      .map(undecided)
     expect(fromPart.length).toBeGreaterThan(0)
     const onlyPartGrants = { ...bossRow, facts: { ...bossRow.facts, buffGrants: fromPart } }
     const own = ownSources('8209', bossGroup.units['8209']?.phases ?? [])
@@ -270,9 +273,25 @@ describe('stage effect grants', () => {
     const i18n = BattleEntityI18nSchema.parse(enemy8390I18n)
     const firstOnly = unitTextKeywords(i18n, '8390', ['8390'])
     const every = unitTextKeywords(i18n, '8390', ['8390', '8410'])
+    const undecidedRow = {
+      ...row,
+      facts: {
+        ...row.facts,
+        buffGrants: row.facts.buffGrants.map(undecided),
+      },
+    }
     expect(firstOnly.has('RegainedStrength')).toBe(false)
     expect(every.has('RegainedStrength')).toBe(true)
-    expect(keywordsOf(stageEffectGrants(row, NO_OWN, every))).not.toContain('RegainedStrength')
-    expect(keywordsOf(stageEffectGrants(row, NO_OWN, firstOnly))).toContain('RegainedStrength')
+    expect(keywordsOf(stageEffectGrants(undecidedRow, NO_OWN, every))).not.toContain(
+      'RegainedStrength',
+    )
+    expect(keywordsOf(stageEffectGrants(undecidedRow, NO_OWN, firstOnly))).toContain(
+      'RegainedStrength',
+    )
+  })
+
+  it('drops a grant a spawned unit already explains', () => {
+    const grants = row.facts.buffGrants.filter((grant) => grant.keywordId === 'FragmentOfHope')
+    expect(grants.every((grant) => grant.derivable)).toBe(true)
   })
 })

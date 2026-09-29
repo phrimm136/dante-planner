@@ -16,9 +16,15 @@ interface PanicTypeSectionProps {
   panicType: string
   nameSlot: ReactNode
   descSlot: ReactNode
+  lowMoraleSlot?: ReactNode
 }
 
-export function PanicTypeSection({ panicType, nameSlot, descSlot }: PanicTypeSectionProps) {
+export function PanicTypeSection({
+  panicType,
+  nameSlot,
+  descSlot,
+  lowMoraleSlot,
+}: PanicTypeSectionProps) {
   const { t, i18n } = useTranslation(['database', 'common'])
   const displayStyle = getDisplayFontForLanguage(i18n.language)
 
@@ -48,7 +54,15 @@ export function PanicTypeSection({ panicType, nameSlot, descSlot }: PanicTypeSec
       </div>
 
       <div className="flex-1 text-sm">
-        <div className="mt-8">
+        {lowMoraleSlot !== undefined && (
+          <div data-slot="low-morale-effect" className="mt-8">
+            <span>·{t('sanity.lowMoraleEffect')}</span>
+            <div>
+              <Suspense fallback={<Skeleton className="h-8 w-full" />}>{lowMoraleSlot}</Suspense>
+            </div>
+          </div>
+        )}
+        <div className={lowMoraleSlot === undefined ? 'mt-8' : 'mt-4'}>
           <span>·{t('sanity.panicEffect')}</span>
         </div>
         <div>

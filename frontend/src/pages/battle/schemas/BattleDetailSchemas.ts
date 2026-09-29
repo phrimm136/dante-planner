@@ -226,6 +226,7 @@ const BuffGrantSchema = z
     target: z.enum(['enemy', 'ally', 'unknown']),
     stack: z.number().optional(),
     conditional: z.boolean().optional(),
+    derivable: z.boolean(),
     source: z
       .object({
         kind: z.enum(['stageScript', 'passive', 'buff']),
