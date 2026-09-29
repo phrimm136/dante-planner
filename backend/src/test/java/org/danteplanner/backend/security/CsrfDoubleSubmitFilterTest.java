@@ -229,7 +229,8 @@ class CsrfDoubleSubmitFilterTest {
         @Test
         @DisplayName("A minted token whose payload was edited is rejected")
         void mutation_WhenTokenTampered_Rejected() throws Exception {
-            String tampered = "x" + token.substring(1);
+            String tampered = (token.charAt(0) == 'x' ? 'y' : 'x') + token.substring(1);
+            assertThat(tampered).isNotEqualTo(token);
             MockHttpServletRequest req = request("POST", "/api/planner/md/1");
             req.setCookies(csrfCookie(tampered));
             req.addHeader(CsrfDoubleSubmitFilter.CSRF_HEADER, tampered);
