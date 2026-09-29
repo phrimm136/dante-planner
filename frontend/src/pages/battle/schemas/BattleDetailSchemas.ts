@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import {
+  EgoTypeSchema,
   PassiveIdSchema,
   SkillDescEntrySchema,
   SkillEntrySchema,
@@ -176,7 +177,7 @@ export const BattlePhaseSchema = z
     _source: unused,
     aggro: unused,
     appearance: unused,
-    associationList: unused,
+    associationList: z.array(z.string()).optional(),
     attributeType: unused,
     category: unused,
     classType: unused,
@@ -409,6 +410,7 @@ export const BattleStageTextsSchema = z.record(
 )
 
 export const BattleEgoDataSchema = z.object({
+  egoType: EgoTypeSchema,
   skills: skillMapWithRetiredKeys(['awaken', 'erosion']),
   passives: z.object({ passiveList: z.array(z.array(PassiveIdSchema)) }),
 })

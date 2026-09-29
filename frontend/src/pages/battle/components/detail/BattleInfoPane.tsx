@@ -202,7 +202,10 @@ export function BattleInfoPane({
         />
       ))}
 
-      <TraitsDisplay traits={phase.unitKeywordList ?? []} />
+      <TraitsDisplay
+        traits={[...(phase.unitKeywordList ?? []), ...(phase.associationList ?? [])]}
+        table="all"
+      />
 
       <KeywordsDisplay keywords={phase.battleKeywordList} />
 

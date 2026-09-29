@@ -364,31 +364,43 @@
    Importance Decoration
    ========================================================================== */
 
-@keyframes importance-flicker {
+@keyframes importance-flicker-icon {
   0%,
   100% {
-    opacity: 1;
+    opacity: calc(var(--importance-icon-alpha) * var(--importance-flicker-max));
   }
   50% {
-    opacity: 0;
+    opacity: calc(var(--importance-icon-alpha) * var(--importance-flicker-min));
   }
 }
 
-@keyframes importance-glow-fade {
-  from {
-    opacity: 1;
+@keyframes importance-flicker {
+  0%,
+  100% {
+    opacity: var(--importance-flicker-max);
   }
-  to {
-    opacity: 0;
+  50% {
+    opacity: var(--importance-flicker-min);
   }
 }
 
 @keyframes importance-blink {
-  from {
+  0%,
+  100% {
+    opacity: var(--importance-blink-max);
+  }
+  50% {
     opacity: var(--importance-blink-min);
   }
-  to {
-    opacity: var(--importance-blink-max);
+}
+
+@keyframes importance-outline-flicker {
+  0%,
+  100% {
+    opacity: var(--importance-outline-max);
+  }
+  50% {
+    opacity: var(--importance-outline-min);
   }
 }
 
@@ -401,25 +413,32 @@
   }
 }
 
-@keyframes importance-panel-glow {
-  from {
-    box-shadow: 0 0 0 var(--importance-panel-glow);
-  }
-  to {
-    box-shadow: 0 0 var(--importance-panel-glow-blur) var(--importance-panel-glow);
-  }
+.importance-icon {
+  position: absolute;
+  top: var(--importance-icon-top);
+  right: var(--importance-icon-right);
+  width: var(--importance-icon-size);
+  height: var(--importance-icon-size);
+  opacity: calc(var(--importance-icon-alpha) * var(--importance-flicker-max));
 }
 
-.importance-icon {
-  opacity: var(--importance-icon-alpha);
+.importance-flicker-icon {
+  animation: importance-flicker-icon var(--importance-flicker-period)
+    cubic-bezier(0.37, 0, 0.63, 1) infinite;
+}
+
+.importance-glow {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: var(--importance-flicker-max);
 }
 
 .importance-flicker {
-  animation: importance-flicker var(--importance-flicker-period) ease-in-out infinite;
-}
-
-.importance-glow-fade {
-  animation: importance-glow-fade var(--importance-glow-fade) linear infinite;
+  animation: importance-flicker var(--importance-flicker-period) cubic-bezier(0.37, 0, 0.63, 1)
+    infinite;
 }
 
 .importance-band {
@@ -430,35 +449,61 @@
   container-type: size;
 }
 
+.importance-band-top {
+  top: var(--importance-band-offset);
+}
+
+.importance-band-bottom {
+  bottom: var(--importance-band-offset);
+}
+
 .importance-stripe {
   position: absolute;
   inset: 0;
   background-color: var(--importance-stripe-color);
   mask-repeat: repeat-x;
   mask-size: auto 100%;
+  opacity: var(--importance-blink-max);
   animation:
     importance-scroll var(--importance-stripe-scroll) linear infinite,
-    importance-blink var(--importance-flicker-period) ease-in-out infinite alternate;
+    importance-blink var(--importance-blink-period) cubic-bezier(0.37, 0, 0.63, 1) infinite;
 }
 
 .importance-stripe-top {
-  animation-direction: reverse, alternate;
+  animation-direction: reverse, normal;
 }
 
-.importance-panel {
+.importance-banner {
+  position: relative;
+  margin-left: var(--importance-banner-left);
+  min-width: var(--importance-banner-width);
+  min-height: var(--importance-banner-height);
+  width: fit-content;
+  padding-inline: var(--importance-outline-side);
   background-color: var(--importance-panel);
-  animation: importance-panel-glow var(--importance-panel-pulse) ease-in-out infinite alternate;
 }
 
-.importance-name * {
+.importance-banner * {
   color: var(--importance-name);
 }
 
+.importance-banner-outline {
+  position: absolute;
+  inset: calc(-1 * var(--importance-outline-cap)) calc(-1 * var(--importance-outline-side));
+  border-style: solid;
+  border-color: var(--importance-panel-glow);
+  border-width: var(--importance-outline-cap) var(--importance-outline-side);
+  pointer-events: none;
+  opacity: var(--importance-outline-max);
+  animation: importance-outline-flicker var(--importance-flicker-period)
+    cubic-bezier(0.37, 0, 0.63, 1) infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .importance-flicker-icon,
   .importance-flicker,
-  .importance-glow-fade,
   .importance-stripe,
-  .importance-panel {
+  .importance-banner-outline {
     animation: none;
   }
 }

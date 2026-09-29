@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { SECTION_STYLES } from '@/lib/constants'
 import type { ImportancePalette } from '@/shared/gameData'
-import { ImportanceDecoration, importanceNameStyle } from '@/shared/importance'
+import { ImportanceBanner, ImportanceDecoration, hasImportance } from '@/shared/importance'
 
 interface EGOPassiveCardProps {
   nameSlot: ReactNode
@@ -24,20 +24,25 @@ export function EGOPassiveCard({
   importanceLevel,
   palette,
 }: EGOPassiveCardProps) {
-  const nameStyle = importanceNameStyle(importanceLevel, palette)
+  const decorated = hasImportance(importanceLevel)
 
   return (
-    <div className={cn('space-y-1', isLocked && 'opacity-50', nameStyle && 'relative isolate')}>
+    <div
+      className={cn(
+        'space-y-1',
+        isLocked && 'opacity-50',
+        decorated && 'relative isolate @container',
+      )}
+    >
       <ImportanceDecoration level={importanceLevel} palette={palette} variant="passive" />
-      <div
-        className={
-          nameStyle ? cn(SECTION_STYLES.LAYOUT.row, 'importance-name') : SECTION_STYLES.LAYOUT.row
-        }
-        style={nameStyle}
+      <ImportanceBanner
+        level={importanceLevel}
+        palette={palette}
+        className={SECTION_STYLES.LAYOUT.row}
       >
         <Suspense fallback={<StyledNameSkeleton attributeType="NEUTRAL" />}>{nameSlot}</Suspense>
         {isLocked && <span className="text-xs">🔒</span>}
-      </div>
+      </ImportanceBanner>
       <div className="text-sm">
         <Suspense fallback={<Skeleton className="h-4 w-full" />}>{descSlot}</Suspense>
       </div>

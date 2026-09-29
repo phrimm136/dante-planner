@@ -65,3 +65,11 @@ export function getDisplayFontForLabel(): string {
 export function clamp01(value: number): number {
   return Math.min(1, Math.max(0, value))
 }
+
+const CQW_PER_WIDTH = 100
+const CQW_DECIMALS = 4
+
+export function lengthToCqw(length: number, containerWidth: number): string {
+  const cqw = Number(((length / containerWidth) * CQW_PER_WIDTH).toFixed(CQW_DECIMALS))
+  return `${String(cqw)}cqw`
+}

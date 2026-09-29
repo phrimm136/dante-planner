@@ -4,6 +4,7 @@ import type {
   BattleEngagement,
   BattlePart,
   BattlePhase,
+  BattlePhaseI18n,
   IdentityShapedPassives,
   PassiveImportanceMap,
   ResistInfo,
@@ -99,6 +100,26 @@ export function isIdentityShaped(
 
 function importanceEntries(passives: PassiveImportanceMap): [string, number][] {
   return Object.entries(passives).map(([id, entry]) => [id, entry.importanceLevel])
+}
+
+export type PassiveTexts = BattlePhaseI18n['passives']
+
+export function isShownPassive(texts: PassiveTexts, passiveId: string): boolean {
+  const text = texts?.[passiveId]
+  return text !== undefined && text.hidden !== true
+}
+
+export function withShownPassives(
+  passives: IdentityShapedPassives,
+  texts: PassiveTexts,
+): IdentityShapedPassives {
+  const shown = (lists: IdentityShapedPassives['battlePassiveList']) =>
+    lists.map((list) => list.filter((id) => isShownPassive(texts, id)))
+  return {
+    ...passives,
+    battlePassiveList: shown(passives.battlePassiveList),
+    supportPassiveList: shown(passives.supportPassiveList),
+  }
 }
 
 export function visiblePassives(

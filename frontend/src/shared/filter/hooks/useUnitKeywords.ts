@@ -6,6 +6,7 @@ import type { UnitKeywords } from '../schemas/SearchMappingSchemas'
 
 export const unitKeywordsQueryKeys = {
   i18n: (language: string) => ['unitKeywords', 'i18n', language] as const,
+  allI18n: (language: string) => ['unitKeywords', 'all', 'i18n', language] as const,
 }
 
 export function createUnitKeywordsQueryOptions(language: string) {
@@ -26,5 +27,20 @@ export function createUnitKeywordsQueryOptions(language: string) {
 export function useUnitKeywords(): UnitKeywords {
   const { i18n } = useTranslation()
   const { data } = useSuspenseQuery(createUnitKeywordsQueryOptions(i18n.language))
+  return data
+}
+
+function createUnitKeywordsAllQueryOptions(language: string) {
+  return createStaticDataQueryOptions(
+    unitKeywordsQueryKeys.allI18n(language),
+    () => import(`@static/i18n/${language}/unitKeywordsAll.json`),
+    UnitKeywordsSchema,
+    `unitKeywordsAll / ${language}`,
+  )
+}
+
+export function useUnitKeywordsAll(): UnitKeywords {
+  const { i18n } = useTranslation()
+  const { data } = useSuspenseQuery(createUnitKeywordsAllQueryOptions(i18n.language))
   return data
 }

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 
-import { useUnitKeywords } from '@/shared/filter'
+import { useUnitKeywords, useUnitKeywordsAll } from '@/shared/filter'
+import type { UnitKeywords } from '@/shared/filter'
 import { applyStrikethrough, extractLeadingColor } from '@/shared/gameText'
 
 const HIDDEN_TRAITS = new Set(['BASE_APPEARANCE', 'SMALL'])
@@ -33,12 +34,18 @@ interface TraitsI18nProps {
 }
 
 export function TraitsI18n({ traits }: TraitsI18nProps) {
-  const traitsI18n = useUnitKeywords()
+  return <TraitChips traits={traits} names={useUnitKeywords()} />
+}
 
-  const visibleTraits = traits.filter((trait) => !HIDDEN_TRAITS.has(trait))
+export function AllTraitsI18n({ traits }: TraitsI18nProps) {
+  return <TraitChips traits={traits} names={useUnitKeywordsAll()} />
+}
+
+function TraitChips({ traits, names }: { traits: string[]; names: UnitKeywords }) {
+  const visibleTraits = [...new Set(traits)].filter((trait) => !HIDDEN_TRAITS.has(trait))
 
   const translatedTraits = visibleTraits.flatMap((trait) => {
-    const translated = traitsI18n[trait]
+    const translated = names[trait]
     return translated === undefined ? [] : [parseUnityRichText(trait, translated)]
   })
 

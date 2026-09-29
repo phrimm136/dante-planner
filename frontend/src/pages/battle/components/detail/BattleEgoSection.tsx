@@ -3,9 +3,11 @@ import { Suspense } from 'react'
 import { TextSkeleton } from '@/components/feedback/TextSkeleton'
 import { FormattedDescription, StyledSkillName } from '@/shared/gameText'
 import { EGOPassiveCard, EGOPassivesPane } from '@/shared/passive'
+import { getEGORankIconPath } from '@/shared/assets'
 import {
   EGOSkillCard,
   SkillDescription,
+  SkillGroupList,
   getMergedSkillDesc,
   orderEgoSkills,
   selectSkillLevel,
@@ -16,11 +18,6 @@ import { useBattleEgoDetailI18n, useBattleEgoDetailSpec } from '../../hooks/useB
 interface EgoEntry {
   egoID: number
   egoLevel: number
-}
-
-function EgoName({ egoId }: { egoId: string }) {
-  const i18n = useBattleEgoDetailI18n(egoId)
-  return <h3 className="text-lg font-semibold">{i18n.name}</h3>
 }
 
 function EgoSkillName({
@@ -104,21 +101,23 @@ function EgoBlock({ ego, palette }: { ego: EgoEntry; palette: ImportancePalette 
 
   return (
     <div data-ego-id={egoId} className="space-y-2">
-      <Suspense fallback={<TextSkeleton size="lg" width="sm" />}>
-        <EgoName egoId={egoId} />
-      </Suspense>
-      <div className="border rounded divide-y">
-        {orderEgoSkills(spec.skills).map(({ id: skillId, entry }) => (
+      <img
+        src={getEGORankIconPath(spec.egoType)}
+        alt={`${spec.egoType} rank`}
+        className="h-6 object-contain"
+      />
+      <SkillGroupList
+        skills={orderEgoSkills(spec.skills)}
+        renderSkill={({ id: skillId, entry }) => (
           <EgoSkillCard
-            key={skillId}
             egoId={egoId}
             skillId={skillId}
             entry={entry}
             egoLevel={ego.egoLevel}
             palette={palette}
           />
-        ))}
-      </div>
+        )}
+      />
       <EGOPassivesPane
         passives={spec.passives}
         threadspinLevel={ego.egoLevel as Threadspin}

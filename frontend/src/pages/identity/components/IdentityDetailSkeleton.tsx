@@ -3,6 +3,7 @@ import { TextSkeleton } from '@/components/feedback/TextSkeleton'
 import { CharacterImageSection } from '@/components/layout/CharacterImageSection'
 import { EntityDetailLayout } from '@/components/layout/EntityDetailLayout'
 import { LabeledPanel } from '@/components/layout/LabeledPanel'
+import { Separator } from '@/components/ui/separator'
 import { DETAIL_IMAGE_ASPECT_RATIO } from '@/lib/constants'
 
 function SkillCardBlock() {
@@ -96,10 +97,13 @@ export function IdentityDetailSkeleton() {
         }
       >
         <DetailSectionSkeleton>
-          <div className="border rounded divide-y">
+          <div className="border rounded">
             <SkillCardBlock />
+            <Separator />
             <SkillCardBlock />
+            <Separator />
             <SkillCardBlock />
+            <Separator />
             <SkillCardBlock />
           </div>
         </DetailSectionSkeleton>

@@ -21,7 +21,8 @@ interface BattleDetailHeaderProps {
   badge: HazardBadge | undefined
 }
 
-function sinnerOf(phase: BattlePhase): string | undefined {
+function sinnerOf(family: BattleFamily, phase: BattlePhase): string | undefined {
+  if (family !== 'sinnerEvent') return undefined
   const scoped = SinnerScopedIdSchema.safeParse(String(phase.identitySource))
   if (scoped.success) return getSinnerFromId(scoped.data)
   return phase.characterId === undefined ? undefined : SINNERS[phase.characterId - 1]
@@ -93,7 +94,7 @@ function NamedSprite({
 }
 
 export function BattleDetailHeader({ family, id, config, phase, badge }: BattleDetailHeaderProps) {
-  const sinner = sinnerOf(phase)
+  const sinner = sinnerOf(family, phase)
 
   return (
     <div className="space-y-4">

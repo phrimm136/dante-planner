@@ -51,4 +51,13 @@ describe('CoinDisplay', () => {
     const green = getCoinSpritePath('GREEN')
     expect(sources(container)).toEqual([green, green])
   })
+
+  it('sizes coins at 50 of 899.4 skill-box units and leaves the height to the sprite aspect', () => {
+    const { container } = render(<CoinDisplay coins={[coin('GOLD'), coin('GREEN')]} />)
+    const row = container.firstElementChild as HTMLElement
+    expect(row.style.getPropertyValue('--coin-width')).toBe('5.5593cqw')
+    for (const img of container.querySelectorAll('img')) {
+      expect([...img.classList]).toEqual(['w-(--coin-width)', 'h-auto'])
+    }
+  })
 })

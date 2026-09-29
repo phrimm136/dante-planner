@@ -64,7 +64,7 @@ export function BattleDetailSkeleton() {
         }
       >
         <DetailSectionSkeleton>
-          <div className="border rounded divide-y">
+          <div className="border rounded">
             <SkillCardBlock />
             <SkillCardBlock />
             <SkillCardBlock />

@@ -1,4 +1,4 @@
-import { Suspense } from 'react'
+import { Suspense, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { usePanicInfo, getPanicEntry } from '../hooks/usePanicInfo'
@@ -12,11 +12,13 @@ import { SANITY_INDICATOR_COLORS, SECTION_STYLES } from '@/lib/constants'
 import type { SanityConditionType } from '@/shared/gameData'
 import { getDisplayFontForLanguage } from '@/lib/utils'
 
-interface PanicTypeSectionI18nProps {
+interface PanicTypeSectionProps {
   panicType: string
+  nameSlot: ReactNode
+  descSlot: ReactNode
 }
 
-export function PanicTypeSectionI18n({ panicType }: PanicTypeSectionI18nProps) {
+export function PanicTypeSection({ panicType, nameSlot, descSlot }: PanicTypeSectionProps) {
   const { t, i18n } = useTranslation(['database', 'common'])
   const displayStyle = getDisplayFontForLanguage(i18n.language)
 
@@ -41,9 +43,7 @@ export function PanicTypeSectionI18n({ panicType }: PanicTypeSectionI18nProps) {
           className="w-20 h-20 object-contain"
         />
         <div className="text-xl mt-1">
-          <Suspense fallback={<Skeleton className="h-4 w-16" />}>
-            <SanityNameI18n panicType={panicType} />
-          </Suspense>
+          <Suspense fallback={<Skeleton className="h-4 w-16" />}>{nameSlot}</Suspense>
         </div>
       </div>
 
@@ -52,12 +52,30 @@ export function PanicTypeSectionI18n({ panicType }: PanicTypeSectionI18nProps) {
           <span>·{t('sanity.panicEffect')}</span>
         </div>
         <div>
-          <Suspense fallback={<Skeleton className="h-8 w-full" />}>
-            <SanityDescContent panicType={panicType} />
-          </Suspense>
+          <Suspense fallback={<Skeleton className="h-8 w-full" />}>{descSlot}</Suspense>
         </div>
       </div>
     </div>
+  )
+}
+
+export function PanicName({ name }: { name: string }) {
+  const { i18n } = useTranslation()
+  const displayStyle = getDisplayFontForLanguage(i18n.language)
+  return <span style={{ ...displayStyle, color: SANITY_INDICATOR_COLORS.INCREMENT }}>{name}</span>
+}
+
+interface PanicTypeSectionI18nProps {
+  panicType: string
+}
+
+export function PanicTypeSectionI18n({ panicType }: PanicTypeSectionI18nProps) {
+  return (
+    <PanicTypeSection
+      panicType={panicType}
+      nameSlot={<SanityNameI18n panicType={panicType} />}
+      descSlot={<SanityDescContent panicType={panicType} />}
+    />
   )
 }
 
@@ -73,13 +91,9 @@ interface SanityNameI18nProps {
 }
 
 function SanityNameI18n({ panicType }: SanityNameI18nProps) {
-  const { i18n } = useTranslation()
   const { data: panicInfo } = usePanicInfo()
   const panicEntry = getPanicEntry(panicInfo, panicType)
-  const name = panicEntry?.name ?? ''
-  const displayStyle = getDisplayFontForLanguage(i18n.language)
-
-  return <span style={{ ...displayStyle, color: SANITY_INDICATOR_COLORS.INCREMENT }}>{name}</span>
+  return <PanicName name={panicEntry?.name ?? ''} />
 }
 
 interface SanityConditionsSectionI18nProps {

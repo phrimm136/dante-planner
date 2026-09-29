@@ -7,16 +7,27 @@ import enemy8277 from '@static/data/enemy/8277.json'
 import enemy9620 from '@static/data/enemy/9620.json'
 import assistant400001 from '@static/data/assistant/400001.json'
 import assistant400038 from '@static/data/assistant/400038.json'
-import { AssistantDataSchema, EnemyDataSchema } from '../../schemas/BattleDetailSchemas'
+import assistant400038I18n from '@static/i18n/EN/assistant/400038.json'
+import sinnerEvent10101 from '@static/data/sinnerEvent/10101.json'
+import sinnerEvent10101I18n from '@static/i18n/EN/sinnerEvent/10101.json'
+import {
+  AssistantDataSchema,
+  BattleEntityI18nSchema,
+  EnemyDataSchema,
+  SinnerEventDataSchema,
+} from '../../schemas/BattleDetailSchemas'
 import {
   ALL_PARTS,
   defaultEngagementLevel,
   engagementLevels,
+  isIdentityShaped,
+  isShownPassive,
   selectedPart,
   selectorParts,
   statAtLevel,
   visiblePassives,
   visibleSkills,
+  withShownPassives,
 } from '../battleDetail'
 import type { BattleCase } from '../battleVocabulary'
 
@@ -125,5 +136,32 @@ describe('part selection', () => {
     for (const part of selectorParts(phase)) {
       expect(skillIdsOf(visibleSkills(phase, part))).not.toContain('962006')
     }
+  })
+})
+
+describe('shown passives', () => {
+  it('drops the passives assistant 400038 marks hidden, 9999994 among them', () => {
+    const [phase] = AssistantDataSchema.parse(assistant400038).phases
+    const texts = BattleEntityI18nSchema.parse(assistant400038I18n).phases?.['400038']?.passives
+    expect(
+      visiblePassives(phase, undefined)
+        .map(([id]) => id)
+        .filter((id) => isShownPassive(texts, id)),
+    ).toEqual(['40003801', '40003802', '40003803', '40003804'])
+  })
+
+  it('drops a passive without any text', () => {
+    expect(isShownPassive({}, '9999994')).toBe(false)
+    expect(isShownPassive(undefined, '9999994')).toBe(false)
+  })
+
+  it('keeps the uptie slots of an identity-shaped list while dropping hidden passives', () => {
+    const [phase] = SinnerEventDataSchema.parse(sinnerEvent10101).phases
+    const texts = BattleEntityI18nSchema.parse(sinnerEvent10101I18n).phases?.['10101']?.passives
+    if (!isIdentityShaped(phase.passives)) throw new Error('10101 is not identity-shaped')
+    const hidden = { ...texts, '1010121': { hidden: true } }
+    const shown = withShownPassives(phase.passives, hidden)
+    expect(shown.battlePassiveList).toEqual([['1010101'], [], [], []])
+    expect(shown.supportPassiveList).toEqual([[], [], [], []])
   })
 })

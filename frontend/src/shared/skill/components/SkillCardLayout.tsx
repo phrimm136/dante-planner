@@ -12,7 +12,7 @@ export function SkillCardLayout({
   description,
 }: SkillCardLayoutProps) {
   return (
-    <div className="p-4" data-skill-id={skillId}>
+    <div className="@container p-4" data-skill-id={skillId}>
       <div className="flex gap-1">
         {imageComposite}
         {infoPanel}

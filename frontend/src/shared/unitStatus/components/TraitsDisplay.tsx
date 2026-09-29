@@ -4,13 +4,14 @@ import { useTranslation } from 'react-i18next'
 import { LabeledPanel } from '@/components/layout/LabeledPanel'
 import { Skeleton } from '@/components/ui/skeleton'
 
-import { TraitsI18n } from './TraitsI18n'
+import { AllTraitsI18n, TraitsI18n } from './TraitsI18n'
 
 interface TraitsDisplayProps {
   traits: string[]
+  table?: 'playable' | 'all'
 }
 
-export function TraitsDisplay({ traits }: TraitsDisplayProps) {
+export function TraitsDisplay({ traits, table = 'playable' }: TraitsDisplayProps) {
   const { t } = useTranslation(['database', 'common'])
 
   if (!traits || traits.length === 0) {
@@ -20,7 +21,7 @@ export function TraitsDisplay({ traits }: TraitsDisplayProps) {
   return (
     <LabeledPanel title={t('identity.unitKeyword')}>
       <Suspense fallback={<Skeleton className="h-6 w-full" />}>
-        <TraitsI18n traits={traits} />
+        {table === 'all' ? <AllTraitsI18n traits={traits} /> : <TraitsI18n traits={traits} />}
       </Suspense>
     </LabeledPanel>
   )

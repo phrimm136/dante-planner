@@ -148,13 +148,29 @@ export const DIFFICULTY_BADGE_STYLES = {
 export const IMPORTANCE_DECORATION = {
   ICON_ALPHA: { '1': 0.2, '2': 0.4, '3': 0.5 },
   FLICKER_PERIOD_S: { '1': 3.0, '2': 2.0, '3': 0.8 },
+  FLICKER_ALPHA: { '1': [0.7, 1.0], '2': [0.7, 1.0], '3': [0.5, 1.0] },
   STRIPE_BLINK_ALPHA: { '1': [0.3, 0.4], '2': [0.4, 0.6], '3': [0.5, 0.8] },
+  PASSIVE_OUTLINE_ALPHA: { '1': [0, 0.3], '2': [0.2, 0.5], '3': [0.5, 1.0] },
   GLOW_MIN_LEVEL: 2,
-  GLOW_FADE_S: 1.5,
-  PANEL_GLOW_PULSE_S: 0.5,
-  PANEL_GLOW_BLUR_PX: 8,
-  STRIPE_BAND_HEIGHT_PERCENT: 2.5,
+  STRIPE_BAND_WIDTH_RATIO: 0.04,
   STRIPE_TILE: { WIDTH: 1102, HEIGHT: 42 },
 } as const
+
+export const CLIENT_BOX_WIDTH = { skill: 899.4, passive: 1304.2 } as const
+
+export const COIN_CLIENT_WIDTH = 50
+
+export const IMPORTANCE_CLIENT_LAYOUT = {
+  GROUP_OVERHANG: { skill: 15, passive: 40 },
+  ICON_SIZE: 200,
+  ICON_TOP: 37,
+  ICON_RIGHT: { skill: 286, lockedSkill: 86, passive: 0 },
+  PASSIVE_BANNER: { LEFT: 28, WIDTH: 671, HEIGHT: 72.7 },
+  PASSIVE_OUTLINE: { SIDE: 10, HEIGHT: 105 },
+} as const
+
+export const IMPORTANCE_STRIPE_BLINK_SPEED = 2
+
+export const IMPORTANCE_STRIPE_BLINK_PERIOD_S = (2 * Math.PI) / IMPORTANCE_STRIPE_BLINK_SPEED
 
 export const IMPORTANCE_STRIPE_SCROLL_S = 4

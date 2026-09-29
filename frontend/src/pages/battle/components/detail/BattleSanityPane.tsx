@@ -1,14 +1,47 @@
-import { PanicTypeSectionI18n, SanityConditionsSectionI18n } from '@/shared/sanity'
+import { Suspense } from 'react'
+
+import { Skeleton } from '@/components/ui/skeleton'
+import { FormattedDescription } from '@/shared/gameText'
+import { PanicName, PanicTypeSection, SanityConditionsSectionI18n } from '@/shared/sanity'
+import { useBattleDetailI18n } from '../../hooks/useBattleDetailData'
 import { sanityConditionIds } from '../../lib/battleDetail'
 import type { BattlePhase } from '../../schemas/BattleDetailSchemas'
+import type { BattleTextSource } from './BattleSkillCard'
 
-export function BattleSanityPane({ sanity }: { sanity: BattlePhase['sanity'] }) {
+function BattlePanicSection({
+  source,
+  panicType,
+}: {
+  source: BattleTextSource
+  panicType: string
+}) {
+  const sanity = useBattleDetailI18n(source.config, source.id).phases?.[source.phaseId]?.sanity
+  if (sanity?.panicText === undefined) return null
+
+  return (
+    <PanicTypeSection
+      panicType={panicType}
+      nameSlot={<PanicName name={sanity.panicName ?? ''} />}
+      descSlot={<FormattedDescription text={sanity.panicText} />}
+    />
+  )
+}
+
+export function BattleSanityPane({
+  source,
+  sanity,
+}: {
+  source: BattleTextSource
+  sanity: BattlePhase['sanity']
+}) {
   const conditions = sanity.mentalConditionInfo
 
   return (
     <div className="border rounded p-4 space-y-4">
       {sanity.panicType !== undefined && sanity.panicType !== null && (
-        <PanicTypeSectionI18n panicType={String(sanity.panicType)} />
+        <Suspense fallback={<Skeleton className="h-28 w-full" />}>
+          <BattlePanicSection source={source} panicType={String(sanity.panicType)} />
+        </Suspense>
       )}
       <SanityConditionsSectionI18n
         addConditions={sanityConditionIds(conditions?.add ?? [])}

@@ -11,7 +11,7 @@ import {
 import { cn, getDisplayFontForNumeric, getDisplayFontForLanguage } from '@/lib/utils'
 import { SECTION_STYLES } from '@/lib/constants'
 import type { ImportancePalette } from '@/shared/gameData'
-import { ImportanceDecoration, importanceNameStyle } from '@/shared/importance'
+import { ImportanceBanner, ImportanceDecoration, hasImportance } from '@/shared/importance'
 
 interface IdentityPassiveCondition {
   type: string
@@ -38,19 +38,24 @@ export function IdentityPassiveCard({
   palette,
 }: IdentityPassiveCardProps) {
   const { t, i18n } = useTranslation(['database', 'common'])
-  const nameStyle = importanceNameStyle(importanceLevel, palette)
+  const decorated = hasImportance(importanceLevel)
 
   return (
-    <div className={cn('relative space-y-1', isLocked && 'opacity-50', nameStyle && 'isolate')}>
+    <div
+      className={cn(
+        'relative space-y-1',
+        isLocked && 'opacity-50',
+        decorated && 'isolate @container',
+      )}
+    >
       <ImportanceDecoration level={importanceLevel} palette={palette} variant="passive" />
-      <div
-        className={
-          nameStyle ? cn(SECTION_STYLES.LAYOUT.row, 'importance-name') : SECTION_STYLES.LAYOUT.row
-        }
-        style={nameStyle}
+      <ImportanceBanner
+        level={importanceLevel}
+        palette={palette}
+        className={SECTION_STYLES.LAYOUT.row}
       >
         <Suspense fallback={<StyledNameSkeleton attributeType="NEUTRAL" />}>{nameSlot}</Suspense>
-      </div>
+      </ImportanceBanner>
       {isLocked && (
         <img
           src={getLockIconPath()}

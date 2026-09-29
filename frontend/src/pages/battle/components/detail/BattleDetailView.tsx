@@ -115,7 +115,7 @@ export function BattleDetailView({
       selector={selector}
     >
       <DetailSection title={t('section.skills')}>
-        <div className="border rounded divide-y">
+        <div className="border rounded">
           {visibleSkills(phase, part).map(({ id: skillId, entry }) => (
             <BattleSkillCard
               key={skillId}
@@ -145,7 +145,7 @@ export function BattleDetailView({
       )}
       {phase.sanity.hasSanity && (
         <DetailSection title={t('section.sanity')}>
-          <BattleSanityPane sanity={phase.sanity} />
+          <BattleSanityPane source={source} sanity={phase.sanity} />
         </DetailSection>
       )}
     </EntityDetailLayout>

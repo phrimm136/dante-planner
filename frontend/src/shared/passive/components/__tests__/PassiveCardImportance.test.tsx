@@ -6,32 +6,32 @@ import { IdentityPassiveCard } from '../IdentityPassiveCard'
 
 const slots = { nameSlot: <span>Name</span>, descSlot: <span>Desc</span>, flavorSlot: null }
 
-const nameRow = (container: HTMLElement): HTMLElement | null =>
-  container.querySelector<HTMLElement>('.importance-name')
+const slot = (container: HTMLElement, name: string): HTMLElement | null =>
+  container.querySelector<HTMLElement>(`[data-slot="${name}"]`)
 
 describe('passive card importance', () => {
-  it('decorates an assistant level 3 passive in the player palette', () => {
+  it('tints only the name banner of an assistant level 3 passive in the player palette', () => {
     const { container } = render(
       <IdentityPassiveCard {...slots} isLocked={false} importanceLevel={3} palette="player" />,
     )
-    const decoration = container.querySelector<HTMLElement>('[data-slot="importance-decoration"]')
-    expect(decoration?.dataset.importanceVariant).toBe('passive')
-    expect(decoration?.style.getPropertyValue('--importance-panel')).toMatch(/^#87cb00(ff)?$/i)
-    expect(nameRow(container)?.style.getPropertyValue('--importance-name')).toMatch(
-      /^#f6ff00(ff)?$/i,
-    )
-    expect(nameRow(container)?.textContent).toBe('Name')
+    const card = container.firstElementChild as HTMLElement
+    const banner = slot(container, 'importance-banner')
+    expect(slot(container, 'importance-decoration')?.dataset.importanceVariant).toBe('passive')
+    expect(banner?.style.getPropertyValue('--importance-panel')).toMatch(/^#87cb00(ff)?$/i)
+    expect(banner?.style.getPropertyValue('--importance-name')).toMatch(/^#f6ff00(ff)?$/i)
+    expect(banner?.textContent).toBe('Name')
+    expect(card.style.backgroundColor).toBe('')
+    expect(card.style.getPropertyValue('--importance-panel')).toBe('')
+    expect(slot(container, 'importance-panel')).toBeNull()
   })
 
   it('uses the enemy palette for an enemy passive', () => {
     const { container } = render(
       <EGOPassiveCard {...slots} isLocked={false} importanceLevel={3} palette="enemy" />,
     )
-    const decoration = container.querySelector<HTMLElement>('[data-slot="importance-decoration"]')
-    expect(decoration?.style.getPropertyValue('--importance-panel')).toMatch(/^#ff0000(ff)?$/i)
-    expect(nameRow(container)?.style.getPropertyValue('--importance-name')).toMatch(
-      /^#f8c200(ff)?$/i,
-    )
+    const banner = slot(container, 'importance-banner')
+    expect(banner?.style.getPropertyValue('--importance-panel')).toMatch(/^#ff0000(ff)?$/i)
+    expect(banner?.style.getPropertyValue('--importance-name')).toMatch(/^#f8c200(ff)?$/i)
   })
 
   it.each([
@@ -41,8 +41,8 @@ describe('passive card importance', () => {
     const { container } = render(
       <Card {...slots} isLocked={false} importanceLevel={0} palette="player" />,
     )
-    expect(container.querySelector('[data-slot="importance-decoration"]')).toBeNull()
-    expect(nameRow(container)).toBeNull()
+    expect(slot(container, 'importance-decoration')).toBeNull()
+    expect(slot(container, 'importance-banner')).toBeNull()
     expect(container.querySelector('.isolate')).toBeNull()
   })
 })

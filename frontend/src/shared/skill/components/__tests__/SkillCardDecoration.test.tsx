@@ -31,9 +31,9 @@ describe('skill core decoration from enemy 1339 skill 133907', () => {
     expect(coinSources).toEqual([green, green])
 
     expect(entry.importanceLevel).toBe(2)
-    expect(container.querySelector('[data-slot="importance-icon"]')?.getAttribute('src')).toBe(
-      getImportanceIconPath('enemy', '2'),
-    )
+    expect(
+      container.querySelector('[data-slot="importance-icon-image"]')?.getAttribute('src'),
+    ).toBe(getImportanceIconPath('enemy', '2'))
     expect(container.querySelector('[data-slot="importance-glow"]')).not.toBeNull()
   })
 
@@ -52,5 +52,6 @@ describe('skill core decoration from enemy 1339 skill 133907', () => {
     )
     expect(container.querySelector('[data-slot="importance-decoration"]')).toBeNull()
     expect(container.firstElementChild?.getAttribute('data-skill-id')).toBe('133907')
+    expect(container.firstElementChild?.classList.contains('@container')).toBe(true)
   })
 })
