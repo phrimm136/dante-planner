@@ -134,6 +134,7 @@ export const PATHS = {
   importanceGlow: (palette: ImportancePalette, tier: ImportanceTier) =>
     resolveAsset(`/images/UI/common/importance-glow-${palette}-${tier}.webp`),
   cautionStripe: () => resolveAsset('/images/UI/common/caution-stripe.webp'),
+  namePlate: (kind: 'skill' | 'passive') => resolveAsset(`/images/UI/common/name-plate-${kind}.webp`),
   egoTierIcon: (tier: number) => resolveAsset(`/images/UI/common/tier-${String(tier)}.webp`),
   attackWeightIcon: () => resolveAsset('/images/UI/common/atkWeight.webp'),
   lockIcon: () => resolveAsset('/images/UI/common/lock.webp'),
@@ -274,6 +275,7 @@ export const getImportanceIconPath = (palette: ImportancePalette, tier: Importan
 export const getImportanceGlowPath = (palette: ImportancePalette, tier: ImportanceTier): string =>
   path('importanceGlow', palette, tier)
 export const getCautionStripePath = (): string => path('cautionStripe')
+export const getNamePlatePath = (kind: 'skill' | 'passive'): string => path('namePlate', kind)
 export const getEGOTierIconPath = (tier: number): string => path('egoTierIcon', tier)
 export const getAttackWeightIconPath = (): string => path('attackWeightIcon')
 export const getLockIconPath = (): string => path('lockIcon')

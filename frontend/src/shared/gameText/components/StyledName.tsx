@@ -10,6 +10,7 @@ import {
 } from '@/shared/cardLayout'
 import { panelNameShadow } from '../lib/panelUnderlay'
 import { importanceBannerStyle } from '@/shared/importance'
+import { namePlateSliceStyles, type NamePlateKind } from '../lib/namePlate'
 import { CLIENT_TEXT_SCALE, NAME_PLATE_UNITS, UNIT_PANEL_COLORS } from '@/lib/constants'
 import { clientLength, cn, getDisplayFontForLanguage } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -24,8 +25,6 @@ export interface NamePlateImportance {
   palette: ImportancePalette
 }
 
-export type NamePlateKind = 'skill' | 'passive'
-
 interface NamePlateProps {
   kind: NamePlateKind
   name: string
@@ -33,14 +32,19 @@ interface NamePlateProps {
   importance?: NamePlateImportance | undefined
 }
 
+interface PlateSlice {
+  LEFT: number
+  RIGHT: number
+  SPRITE_WIDTH: number
+}
+
 interface NamePlateSpec {
   node: TextNodeSpec
   marginX: number
   textHeight: number
   body: CSSProperties
-  textBox: CSSProperties
-  midline: boolean
-  bodyInsetLeft: number
+  slice: PlateSlice
+  tinted: boolean
 }
 
 const TEXT_COLOR = '#eecea4'
@@ -57,47 +61,69 @@ function nameNode(maxSize: number, minSize: number): TextNodeSpec {
 
 const { SKILL, PASSIVE } = NAME_PLATE_UNITS
 
+const PASSIVE_TEXT_INSET = Number(((PASSIVE.HEIGHT - PASSIVE.TEXT_HEIGHT) / 2).toFixed(3))
+
 const NAME_PLATES: Record<NamePlateKind, NamePlateSpec> = {
   skill: {
     node: nameNode(SKILL.FONT, SKILL.MIN_FONT),
     marginX: SKILL.PAD_LEFT + SKILL.PAD_RIGHT,
     textHeight: SKILL.TEXT_HEIGHT,
     body: {
-      height: clientLength(NAME_PLATE_UNITS.HEIGHT),
+      height: clientLength(SKILL.HEIGHT),
       paddingLeft: clientLength(SKILL.PAD_LEFT),
       paddingRight: clientLength(SKILL.PAD_RIGHT),
-      paddingTop: clientLength(SKILL.TEXT_TOP),
-      paddingBottom: clientLength(NAME_PLATE_UNITS.HEIGHT - SKILL.TEXT_TOP - SKILL.TEXT_HEIGHT),
+      paddingTop: clientLength(0),
+      paddingBottom: clientLength(SKILL.TEXT_MARGIN_BOTTOM),
     },
-    textBox: { display: 'flex', alignItems: 'center' },
-    midline: true,
-    bodyInsetLeft: SKILL.BODY_INSET_LEFT,
+    slice: SKILL.SLICE,
+    tinted: true,
   },
   passive: {
     node: nameNode(PASSIVE.FONT, PASSIVE.MIN_FONT),
     marginX: PASSIVE.PAD_LEFT + PASSIVE.PAD_RIGHT,
     textHeight: PASSIVE.TEXT_HEIGHT,
     body: {
-      height: clientLength(NAME_PLATE_UNITS.HEIGHT),
+      height: clientLength(PASSIVE.HEIGHT),
       paddingLeft: clientLength(PASSIVE.PAD_LEFT),
       paddingRight: clientLength(PASSIVE.PAD_RIGHT),
-      paddingTop: clientLength(PASSIVE.PAD_TOP),
-      paddingBottom: clientLength(0),
+      paddingTop: clientLength(PASSIVE_TEXT_INSET),
+      paddingBottom: clientLength(PASSIVE_TEXT_INSET),
     },
-    textBox: {},
-    midline: false,
-    bodyInsetLeft: 0,
+    slice: PASSIVE.SLICE,
+    tinted: false,
   },
 }
 
-function insetBackground(image: string, insetLeft: number): CSSProperties {
-  if (insetLeft === 0) return { backgroundImage: image }
+const TEXT_BOX: CSSProperties = { display: 'flex', alignItems: 'center' }
+
+function PlateSlices({ kind, tint }: { kind: NamePlateKind; tint: string | undefined }) {
+  const pieces = namePlateSliceStyles(kind, tint)
+  return (
+    <div
+      data-slot="name-plate-slices"
+      aria-hidden
+      style={{ position: 'absolute', inset: 0, zIndex: -1, display: 'flex', pointerEvents: 'none' }}
+    >
+      <div data-slot="name-plate-left" style={pieces.left} />
+      <div data-slot="name-plate-centre" style={pieces.centre} />
+      <div data-slot="name-plate-right" style={pieces.right} />
+    </div>
+  )
+}
+
+function plateFrame(kind: NamePlateKind): CSSProperties {
+  const { LEFT, RIGHT } = NAME_PLATES[kind].slice
   return {
-    backgroundImage: image,
-    backgroundSize: `calc(100% - ${clientLength(insetLeft)}) 100%`,
-    backgroundPosition: 'right top',
-    backgroundRepeat: 'no-repeat',
+    position: 'relative',
+    isolation: 'isolate',
+    width: '100%',
+    minWidth: clientLength(LEFT + RIGHT),
   }
+}
+
+function plateTint(kind: NamePlateKind, primary: string, hasBanner: boolean): string | undefined {
+  if (hasBanner) return 'var(--name-body)'
+  return NAME_PLATES[kind].tinted ? primary : undefined
 }
 
 function generateStripeGradient(color: string): string {
@@ -115,23 +141,6 @@ function generateStripeGradient(color: string): string {
 
 function generateBackgroundGradient(darkColor: string): string {
   return `linear-gradient(255deg, transparent 1.5em, ${darkColor} 1.5em)`
-}
-
-function plateTailGradient(darkColor: string): string {
-  const cut = clientLength(NAME_PLATE_UNITS.TAIL.CUT)
-  return `linear-gradient(${String(NAME_PLATE_UNITS.TAIL.ANGLE)}deg, transparent ${cut}, ${darkColor} ${cut})`
-}
-
-function plateBodyGradient(color: string): string {
-  const { STRIPE_ANGLE, STRIPES_START, STRIPE, BODY } = NAME_PLATE_UNITS.TAIL
-  const stops: string[] = []
-  for (let start = STRIPES_START; start < BODY; start += 2 * STRIPE) {
-    const from = clientLength(start)
-    const to = clientLength(Math.min(start + STRIPE, BODY))
-    stops.push(`transparent ${from}`, `${color} ${from}`, `${color} ${to}`, `transparent ${to}`)
-  }
-  const body = clientLength(BODY)
-  return `linear-gradient(${String(STRIPE_ANGLE)}deg, ${stops.join(', ')}, transparent ${body}, ${color} ${body})`
 }
 
 function pxPerClientUnit(): number {
@@ -161,7 +170,7 @@ function useClientWidth(): [number | undefined, (element: HTMLDivElement | null)
 export function NamePlate({ kind, name, attributeType, importance }: NamePlateProps) {
   const { i18n } = useTranslation()
   const table = useFontAdvances(i18n.language)
-  const { primary, dark } = getAttributeColors(attributeType)
+  const { primary } = getAttributeColors(attributeType)
   const [areaWidth, measureRef] = useClientWidth()
   const spec = NAME_PLATES[kind]
   const fitted =
@@ -186,31 +195,15 @@ export function NamePlate({ kind, name, attributeType, importance }: NamePlatePr
       >
         <div
           data-slot="name-plate"
-          style={{
-            color: `var(--name-text, ${UNIT_PANEL_COLORS.NAME})`,
-            width: '100%',
-            backgroundImage: plateTailGradient(`var(--name-tail, ${dark})`),
-          }}
+          style={{ ...plateFrame(kind), color: `var(--name-text, ${UNIT_PANEL_COLORS.NAME})` }}
         >
-          <div
-            style={{
-              ...spec.body,
-              ...spec.textBox,
-              textAlign: 'left',
-              ...insetBackground(
-                plateBodyGradient(`var(--name-body, ${primary})`),
-                spec.bodyInsetLeft,
-              ),
-            }}
-          >
+          <div style={{ ...spec.body, ...TEXT_BOX, textAlign: 'left' }}>
             <span
               data-slot="name-text"
               style={{
                 fontSize: clientLength(fitted.fontSize),
-                ...(spec.midline && {
-                  lineHeight: 1,
-                  transform: `translateY(${String(midlineOffsetEm(table))}em)`,
-                }),
+                lineHeight: 1,
+                transform: `translateY(${String(midlineOffsetEm(table))}em)`,
                 letterSpacing: `${String(tracking.letterSpacingEm)}em`,
                 wordSpacing: `${String(tracking.wordSpacingEm)}em`,
                 whiteSpace: 'nowrap',
@@ -226,6 +219,7 @@ export function NamePlate({ kind, name, attributeType, importance }: NamePlatePr
               ))}
             </span>
           </div>
+          <PlateSlices kind={kind} tint={plateTint(kind, primary, bannerStyle !== undefined)} />
         </div>
       </div>
     </div>
@@ -239,29 +233,16 @@ export function NamePlateSkeleton({
   kind: NamePlateKind
   attributeType?: string | undefined
 }) {
-  const { primary, dark } = getAttributeColors(attributeType)
+  const { primary } = getAttributeColors(attributeType)
   const spec = NAME_PLATES[kind]
 
   return (
     <div className="w-fit">
-      <div
-        style={{
-          marginBottom: '5px',
-          padding: '2px',
-          width: '100%',
-          backgroundImage: plateTailGradient(dark),
-        }}
-      >
-        <div
-          style={{
-            ...spec.body,
-            fontSize: clientLength(spec.node.maxSize),
-            paddingTop: '0.3em',
-            ...insetBackground(plateBodyGradient(primary), spec.bodyInsetLeft),
-          }}
-        >
+      <div style={plateFrame(kind)}>
+        <div style={{ ...spec.body, ...TEXT_BOX, fontSize: clientLength(spec.node.maxSize) }}>
           <Skeleton className="h-5 w-20" style={{ backgroundColor: TEXT_COLOR }} />
         </div>
+        <PlateSlices kind={kind} tint={plateTint(kind, primary, false)} />
       </div>
     </div>
   )

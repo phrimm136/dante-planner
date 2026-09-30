@@ -90,7 +90,7 @@ export function skillUpperLayout(): SkillUpperLayout {
     coins: { left: clientLength(COINS.LEFT), top: clientLength(COINS.TOP) },
     nameArea: {
       left: clientLength(NAME_PLATE.LEFT),
-      top: clientLength(NAME_PLATE.CENTER_Y - NAME_PLATE_UNITS.HEIGHT / 2),
+      top: clientLength(NAME_PLATE.CENTER_Y - NAME_PLATE_UNITS.SKILL.HEIGHT / 2),
       right: clientLength(NAME_PLATE.RIGHT_MIN),
     },
     levelIcon: box(LEVEL.ICON_LEFT, LEVEL.ICON_TOP, LEVEL.ICON_WIDTH, LEVEL.ICON_HEIGHT),

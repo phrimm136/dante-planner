@@ -25,6 +25,7 @@ export {
   getImportanceIconPath,
   getImportanceGlowPath,
   getCautionStripePath,
+  getNamePlatePath,
   getEGOImagePath,
   getEGOProfileImagePath,
   getEGOCardFramePath,

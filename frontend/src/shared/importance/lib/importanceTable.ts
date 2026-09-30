@@ -137,7 +137,6 @@ export function importanceBannerStyle(
   const [outlineMin, outlineMax] = style.outlineAlpha
   return {
     '--name-body': style.colors.passivePanel,
-    '--name-tail': `color-mix(in srgb, ${style.colors.passivePanel} 55%, black)`,
     '--name-text': style.colors.passiveName,
     '--importance-panel-glow': style.colors.passiveGlow,
     '--importance-glow-radius': clientLength(IMPORTANCE_PLATE_GLOW_UNITS),

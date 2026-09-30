@@ -62,7 +62,7 @@ describe('skillUpperLayout', () => {
   })
 
   it('centres the name plate on y 111.3 and keeps its area 100 units clear of the right edge', () => {
-    expect(upper.nameArea).toEqual({ left: '5.985rem', top: '1.6391rem', right: '2.1875rem' })
+    expect(upper.nameArea).toEqual({ left: '5.985rem', top: '1.6764rem', right: '2.1875rem' })
   })
 
   it('places the level icon and number', () => {

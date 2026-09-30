@@ -1,7 +1,11 @@
 import { Suspense, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { SANITY_INDICATOR_COLORS, UNIT_PANEL_COLORS } from '@/lib/constants'
+import {
+  SANITY_INDICATOR_COLORS,
+  TARGET_LABEL_GEO_SHIFT_EM,
+  UNIT_PANEL_COLORS,
+} from '@/lib/constants'
 import { getDisplayFontForNumeric } from '@/lib/utils'
 import { NamePlateSkeleton, PANEL_LEVEL_SHADOW } from '@/shared/gameText'
 import {
@@ -39,7 +43,7 @@ export function SkillInfoPanelWithSuspense({
   isDefenseSkill = false,
   sanityCost,
 }: SkillInfoPanelWithSuspenseProps) {
-  const { t } = useTranslation('database')
+  const { t, i18n } = useTranslation('database')
   const totalLevel = skillLevelAt(unitLevel, skillData.skillLevelCorrection ?? 0)
   const atkWeight = skillData.targetNum ?? 1
 
@@ -82,7 +86,11 @@ export function SkillInfoPanelWithSuspense({
       <span
         data-slot="skill-target-label"
         className="absolute flex items-center whitespace-nowrap"
-        style={{ ...LAYOUT.targetLabel, color: UNIT_PANEL_COLORS.TARGET_LABEL }}
+        style={{
+          ...LAYOUT.targetLabel,
+          color: UNIT_PANEL_COLORS.TARGET_LABEL,
+          transform: `translateY(${String(TARGET_LABEL_GEO_SHIFT_EM[i18n.language] ?? 0)}em)`,
+        }}
       >
         {t('identity.atkWeight')}
       </span>

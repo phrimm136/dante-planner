@@ -1,8 +1,9 @@
 import { use } from 'react'
-import { describe, expect, it } from 'vitest'
-import { render } from '@testing-library/react'
+import { afterEach, describe, expect, it } from 'vitest'
+import { act, render } from '@testing-library/react'
 
 import enemy1339 from '@static/data/enemy/1339.json'
+import i18n from '@/lib/i18n'
 import { getCoinSpritePath, getImportanceIconPath } from '@/shared/assets'
 import { SkillEntrySchema, SkillIdSchema } from '@/shared/gameData'
 import { toSkillCardData } from '../../lib/skillLevel'
@@ -120,7 +121,7 @@ describe('skill card frame from enemy 1339 skill 133907', () => {
     const { container } = renderCard(0)
     const area = slot(container, 'skill-name-area')
     expect(area.style.left).toBe('5.985rem')
-    expect(area.style.top).toBe('1.6391rem')
+    expect(area.style.top).toBe('1.6764rem')
     expect(area.style.right).toBe('2.1875rem')
     expect(area.textContent).toBe('Name')
   })
@@ -218,11 +219,11 @@ describe('skill card upper block slots', () => {
     const { container } = renderCore(<SuspendedName />)
     const area = slot(container, 'skill-name-area')
     const body = area.firstElementChild?.firstElementChild?.firstElementChild as HTMLElement
-    expect(body.style.height).toBe('1.5912rem')
+    expect(body.style.height).toBe('1.5166rem')
     expect(body.style.fontSize).toBe('0.9844rem')
     expect(body.style.paddingLeft).toBe('0.4375rem')
     expect(body.style.paddingRight).toBe('1.0938rem')
-    expect(body.style.paddingBottom).toBe('0.2487rem')
+    expect(body.style.paddingBottom).toBe('0.2188rem')
   })
 
   it('puts an E.G.O sanity cost under the attack-weight label', () => {
@@ -238,5 +239,24 @@ describe('skill card upper block slots', () => {
   it('draws no sanity cost without one', () => {
     const { container } = renderCore(<span>Name</span>)
     expect(container.querySelector('[data-slot="skill-sanity-cost"]')).toBeNull()
+  })
+})
+
+describe('attack-weight label Geo shift', () => {
+  const startLanguage = i18n.language
+
+  afterEach(async () => {
+    await act(() => i18n.changeLanguage(startLanguage))
+  })
+
+  it.each([
+    ['KR', 'translateY(0.07em)'],
+    ['EN', 'translateY(-0.0952em)'],
+    ['JP', 'translateY(0.0153em)'],
+    ['CN', 'translateY(0em)'],
+  ])('moves the %s label by its glyph-box offset', async (language, transform) => {
+    await act(() => i18n.changeLanguage(language))
+    const { container } = renderCard(0)
+    expect(slot(container, 'skill-target-label').style.transform).toBe(transform)
   })
 })

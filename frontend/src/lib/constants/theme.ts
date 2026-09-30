@@ -171,34 +171,45 @@ export const IMPORTANCE_ICON_UNITS = {
 } as const
 
 export const NAME_PLATE_UNITS = {
-  HEIGHT: 72.74,
   SKILL: {
     FONT: 45,
     MIN_FONT: 0,
     PAD_LEFT: 20,
     PAD_RIGHT: 50,
-    TEXT_TOP: 1.37,
     TEXT_HEIGHT: 60,
-    BODY_INSET_LEFT: 8,
+    // [Tmpro]SkillName margin B10: TMP Geo centres the ink 5u above the plate centre.
+    TEXT_MARGIN_BOTTOM: 10,
+    // [Image]SkillNameBg height; BattleUI_CoinPopup_skillName 148.5x25.5 px drawn at 2.5u/px
+    // (ppu 50, ppuMul 0.8), borders L 4.5 / R 49.5 px.
+    HEIGHT: 69.33,
+    SLICE: { LEFT: 11.25, RIGHT: 123.75, SPRITE_WIDTH: 371.25 },
   },
   PASSIVE: {
     FONT: 40,
     MIN_FONT: 25,
     PAD_LEFT: 30,
     PAD_RIGHT: 100,
-    PAD_TOP: 4.571,
     TEXT_HEIGHT: 52.74,
+    // [Script]SkillNameBg height; New_MainUI_PersonalityList_2_46 387x54 px at 1u/px (ppu 100),
+    // borders L 112 / R 171 px, Image m_Color #ffffff.
+    HEIGHT: 72.74,
+    SLICE: { LEFT: 112, RIGHT: 171, SPRITE_WIDTH: 387 },
   },
   LETTER_SPACING_EM: -0.02,
   WORD_SPACING_EM: -0.05,
-  TAIL: {
-    ANGLE: 255,
-    CUT: 68.571,
-    STRIPE_ANGLE: 290,
-    STRIPES_START: 114.286,
-    STRIPE: 6.857,
-    BODY: 155.429,
-  },
+} as const
+
+/**
+ * Downward shift of the attack-weight label, in em: TMP Geo centres the label's glyph box
+ * ([Text]TargetNumLabel face SDF glyph table) where CSS centres the web face's content area.
+ * KR SCDream5 SDF 0.3945 vs SCDream5.otf hhea 0.9/0.251 (0.3245); EN Pretendard-Regular SDF
+ * 0.2600 vs Pretendard typo 0.9517/0.2412 (0.3552); JP HigashiOme-Gothic-C-1 0.3729 vs
+ * HigashiOme hhea 0.9521/0.2368 (0.3577). CN has no client label face.
+ */
+export const TARGET_LABEL_GEO_SHIFT_EM: Record<string, number> = {
+  KR: 0.07,
+  EN: -0.0952,
+  JP: 0.0153,
 } as const
 
 export const SKILL_UPPER_UNITS = {
