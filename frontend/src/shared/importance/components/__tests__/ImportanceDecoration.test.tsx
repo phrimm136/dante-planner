@@ -62,12 +62,12 @@ describe('ImportanceDecoration', () => {
     expect(icon?.classList.contains('importance-flicker-icon')).toBe(false)
   })
 
-  it('keeps the skill bands inside the box at 2.36 % of its width', () => {
+  it('keeps the skill bands inside the box at 52.2 client units', () => {
     const { container } = render(<ImportanceDecoration level={2} palette="enemy" variant="skill" />)
     const root = slot(container, 'importance-decoration')
-    expect(variable(root, '--importance-band-height')).toBe('2.36cqw')
-    expect(variable(root, '--importance-band-offset')).toBe('0cqw')
-    expect(root?.classList).toContain('@container')
+    expect(variable(root, '--importance-band-height')).toBe('1.1412rem')
+    expect(variable(root, '--importance-band-offset')).toBe('0rem')
+    expect(root?.classList).not.toContain('@container')
     expect(root?.classList).toContain('m-0')
     expect(cssBlock('.importance-band')).toContain('height: var(--importance-band-height)')
     expect(cssBlock('.importance-band-top')).toContain('top: var(--importance-band-offset)')
@@ -89,8 +89,8 @@ describe('ImportanceDecoration', () => {
   })
 
   it.each([
-    ['skill', 'skill', '1.8813rem', '0.4813rem', '4.375rem'],
-    ['passive', 'passive', '0rem', '-0.0656rem', '4.375rem'],
+    ['skill', 'skill', '1.8813rem', '0.8094rem', '4.375rem'],
+    ['passive', 'passive', '0rem', '0.8094rem', '4.375rem'],
   ] as const)(
     'pins the %s icon from the box top-right corner',
     (_name, variant, right, top, size) => {
@@ -126,14 +126,30 @@ describe('ImportanceDecoration', () => {
     expect(root?.style.backgroundColor).toBe('')
   })
 
-  it('sizes the stripe tile from the band height by the texture ratio', () => {
+  it('stretches one caution texture copy over 1304.2 client units and the band height, one copy per 10 s', () => {
     const { container } = render(<ImportanceDecoration level={2} palette="enemy" variant="skill" />)
     const stripes = container.querySelectorAll<HTMLElement>('.importance-stripe')
     expect(stripes).toHaveLength(2)
     for (const stripe of stripes) {
-      expect(stripe.style.getPropertyValue('--band-h')).toBe('100cqh')
-      expect(stripe.style.getPropertyValue('--tile-w')).toBe('calc(var(--band-h) * 1102 / 42)')
+      expect(stripe.style.getPropertyValue('--band-h')).toBe('')
+      expect(stripe.style.getPropertyValue('--tile-w')).toBe('28.5294rem')
     }
+    expect(variable(slot(container, 'importance-decoration'), '--importance-stripe-scroll')).toBe(
+      '10s',
+    )
+    expect(cssBlock('.importance-stripe')).toContain('mask-size: var(--tile-w) 100%;')
+    expect(cssBlock('.importance-stripe')).toContain('mask-repeat: repeat-x;')
+  })
+
+  it('draws the same band height for skills and passives, fixed in client units rather than the card width', () => {
+    const heights = (['skill', 'passive'] as const).map((variant) => {
+      const { container } = render(
+        <ImportanceDecoration level={2} palette="enemy" variant={variant} />,
+      )
+      return variable(slot(container, 'importance-decoration'), '--importance-band-height')
+    })
+    expect(heights).toEqual(['1.1412rem', '1.1412rem'])
+    expect(cssBlock('.importance-band')).not.toContain('container-type')
   })
 
   it('scrolls the top band opposite the bottom band by one tile width', () => {
@@ -183,8 +199,8 @@ describe('ImportanceDecoration', () => {
       'importance-stripe-top',
     )
     expect(slot(container, 'importance-band-bottom')).not.toBeNull()
-    expect(variable(root, '--importance-band-offset')).toBe('0cqw')
-    expect(variable(root, '--importance-band-height')).toBe('2.36cqw')
+    expect(variable(root, '--importance-band-offset')).toBe('0rem')
+    expect(variable(root, '--importance-band-height')).toBe('1.1412rem')
     expect(globalsCss).not.toContain('importance-dash-top')
     const band = cssBlock('.importance-band')
     expect(band).toContain('left: 0;')

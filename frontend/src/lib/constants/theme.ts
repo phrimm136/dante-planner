@@ -152,20 +152,19 @@ export const IMPORTANCE_DECORATION = {
   STRIPE_BLINK_ALPHA: { '1': [0.3, 0.4], '2': [0.4, 0.6], '3': [0.5, 0.8] },
   PASSIVE_OUTLINE_ALPHA: { '1': [0, 0.3], '2': [0.2, 0.5], '3': [0.5, 1.0] },
   GLOW_MIN_LEVEL: 2,
-  STRIPE_TILE: { WIDTH: 1102, HEIGHT: 42 },
 } as const
 
 export const CLIENT_TEXT_SCALE = { FONT_UNITS: 40, FONT_REM: 0.875 } as const
 
-export const COIN_CLIENT_WIDTH = 50
+export const COIN_CLIENT_WIDTH = 65
 
-export const IMPORTANCE_BOX_LAYOUT = {
-  BAND: { skill: 2.36, passive: 2.36 },
-} as const
+export const COIN_CLIENT_SPACING = -10
+
+export const IMPORTANCE_BAND_UNITS = { THICKNESS: 52.168, TEXTURE_WIDTH: 1304.2 } as const
 
 export const IMPORTANCE_ICON_UNITS = {
   SIZE: 200,
-  TOP: { skill: 22, passive: -3 },
+  TOP: { skill: 37, passive: 37 },
   RIGHT: { skill: 86, passive: 0 },
 } as const
 
@@ -177,7 +176,7 @@ export const IMPORTANCE_STRIPE_BLINK_SPEED = 2
 
 export const IMPORTANCE_STRIPE_BLINK_PERIOD_S = (2 * Math.PI) / IMPORTANCE_STRIPE_BLINK_SPEED
 
-export const IMPORTANCE_STRIPE_SCROLL_S = 4
+export const IMPORTANCE_STRIPE_SCROLL_S = 10
 
 export const ORANGE_MARK_STYLE = {
   color: '#ff6000',

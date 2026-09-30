@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react'
 
-import { COIN_CLIENT_WIDTH, CLIENT_TEXT_SCALE } from '@/lib/constants'
+import { COIN_CLIENT_SPACING, COIN_CLIENT_WIDTH, CLIENT_TEXT_SCALE } from '@/lib/constants'
 import { clientUnitsToRem } from '@/lib/utils'
 import { getCoinSpritePath } from '@/shared/assets'
 import type { CoinColor, SkillCoin } from '@/shared/gameData'
@@ -19,7 +19,15 @@ const COIN_WIDTH = clientUnitsToRem(
   CLIENT_TEXT_SCALE.FONT_REM,
 )
 
-const COIN_ROW_STYLE = { '--coin-width': COIN_WIDTH } as CSSProperties
+const COIN_GAP = clientUnitsToRem(
+  COIN_CLIENT_SPACING,
+  CLIENT_TEXT_SCALE.FONT_UNITS,
+  CLIENT_TEXT_SCALE.FONT_REM,
+)
+
+const COIN_ROW_STYLE = { '--coin-width': COIN_WIDTH, '--coin-gap': COIN_GAP } as CSSProperties
+
+const OVERLAPPING_COIN_STYLE: CSSProperties = { marginInlineStart: 'var(--coin-gap)' }
 
 interface CoinDisplayProps {
   coins: readonly SkillCoin[]
@@ -39,6 +47,7 @@ export function CoinDisplay({ coins }: CoinDisplayProps) {
           src={getCoinSpritePath(color)}
           alt={COIN_ALT[color]}
           className="w-(--coin-width) h-auto"
+          style={index === 0 ? undefined : OVERLAPPING_COIN_STYLE}
         />
       ))}
     </div>

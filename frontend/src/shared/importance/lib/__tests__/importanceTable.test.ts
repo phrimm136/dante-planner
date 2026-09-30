@@ -1,9 +1,7 @@
-import { readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import importanceColorCode from '@static/data/color/importanceColorCode.json'
-import { COIN_CLIENT_WIDTH, IMPORTANCE_DECORATION } from '@/lib/constants'
+import { COIN_CLIENT_WIDTH } from '@/lib/constants'
 import {
   clientLength,
   hasImportance,
@@ -14,17 +12,6 @@ import {
   stripeTileWidth,
   toImportanceTier,
 } from '../importanceTable'
-
-const CAUTION_STRIPE = resolve(
-  import.meta.dirname,
-  '../../../../../../static/images/UI/common/caution-stripe.webp',
-)
-
-function webpCanvasSize(file: string): { width: number; height: number } {
-  const bytes = readFileSync(file)
-  expect(bytes.toString('ascii', 12, 16)).toBe('VP8X')
-  return { width: bytes.readUIntLE(24, 3) + 1, height: bytes.readUIntLE(27, 3) + 1 }
-}
 
 describe('importance tiers', () => {
   it.each([0, 4, -1])('treats level %i as undecorated', (level) => {
@@ -56,34 +43,34 @@ describe('importance tiers', () => {
 describe('importance geometry', () => {
   it('sizes client units against the description font: 40 client units are one 0.875rem description-font em', () => {
     expect(clientLength(40)).toBe('0.875rem')
-    expect(clientLength(COIN_CLIENT_WIDTH)).toBe('1.0938rem')
+    expect(clientLength(COIN_CLIENT_WIDTH)).toBe('1.4219rem')
   })
 
-  it('sizes the skill triangle at 200 client units, 86 in from the right, 22 down', () => {
+  it('sizes the skill triangle at 200 client units, 86 in from the right, 37 down', () => {
     expect(importanceGeometry('skill')).toEqual({
       iconSize: '4.375rem',
-      iconTop: '0.4813rem',
+      iconTop: '0.8094rem',
       iconRight: '1.8813rem',
-      bandHeight: '2.36cqw',
-      bandOffset: '0cqw',
+      bandHeight: '1.1412rem',
+      bandOffset: '0rem',
     })
   })
 
-  it('sizes the passive triangle at 200 client units at the right edge, 3 above the box', () => {
+  it('sizes the passive triangle at 200 client units at the right edge, 37 down', () => {
     expect(importanceGeometry('passive')).toEqual({
       iconSize: '4.375rem',
-      iconTop: '-0.0656rem',
+      iconTop: '0.8094rem',
       iconRight: '0rem',
-      bandHeight: '2.36cqw',
-      bandOffset: '0cqw',
+      bandHeight: '1.1412rem',
+      bandOffset: '0rem',
     })
   })
 
-  it('keeps every band inside its box at 2.36 % of the box width', () => {
+  it('keeps every band inside its box at 52.2 client units', () => {
     for (const variant of ['skill', 'passive'] as const) {
       const { bandHeight, bandOffset } = importanceGeometry(variant)
-      expect(bandHeight).toBe('2.36cqw')
-      expect(bandOffset).toBe('0cqw')
+      expect(bandHeight).toBe('1.1412rem')
+      expect(bandOffset).toBe('0rem')
     }
   })
 })
@@ -117,22 +104,15 @@ describe('importance palettes', () => {
 })
 
 describe('stripe tile', () => {
-  it('matches the caution texture pixel size', () => {
-    expect(webpCanvasSize(CAUTION_STRIPE)).toEqual({
-      width: IMPORTANCE_DECORATION.STRIPE_TILE.WIDTH,
-      height: IMPORTANCE_DECORATION.STRIPE_TILE.HEIGHT,
-    })
-  })
-
-  it('scales one tile width from the band height by 1102 / 42', () => {
-    expect(stripeTileWidth()).toBe('calc(var(--band-h) * 1102 / 42)')
+  it('spans one caution texture copy over 1304.2 client units', () => {
+    expect(stripeTileWidth()).toBe('28.5294rem')
   })
 })
 
 describe('importance box padding', () => {
-  it('pads a decorated passive box by one band of the width and bleeds it to the pane edges', () => {
+  it('pads a decorated passive box by one 52.2-unit band and bleeds it to the pane edges', () => {
     expect(importanceBoxPadding(3)).toEqual({
-      paddingBlock: '2.36%',
+      paddingBlock: '1.1412rem',
       paddingInline: '1rem',
       marginInline: '-1rem',
     })

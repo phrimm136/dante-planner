@@ -4,7 +4,7 @@ import type { z } from 'zod'
 import importanceColorCode from '@static/data/color/importanceColorCode.json'
 import {
   CLIENT_TEXT_SCALE,
-  IMPORTANCE_BOX_LAYOUT,
+  IMPORTANCE_BAND_UNITS,
   IMPORTANCE_ICON_UNITS,
   IMPORTANCE_PLATE_GLOW_UNITS,
   PASSIVE_PANE_BLEED_REM,
@@ -67,8 +67,7 @@ export function importanceStyle(
 }
 
 export function stripeTileWidth(): string {
-  const { WIDTH, HEIGHT } = IMPORTANCE_DECORATION.STRIPE_TILE
-  return `calc(var(--band-h) * ${String(WIDTH)} / ${String(HEIGHT)})`
+  return clientLength(IMPORTANCE_BAND_UNITS.TEXTURE_WIDTH)
 }
 
 export function clientLength(units: number): string {
@@ -83,24 +82,20 @@ export interface ImportanceGeometry {
   bandOffset: string
 }
 
-function boxLength(percent: number): string {
-  return `${String(percent)}cqw`
-}
-
 export function importanceGeometry(variant: ImportanceVariant): ImportanceGeometry {
   return {
     iconSize: clientLength(IMPORTANCE_ICON_UNITS.SIZE),
     iconTop: clientLength(IMPORTANCE_ICON_UNITS.TOP[variant]),
     iconRight: clientLength(IMPORTANCE_ICON_UNITS.RIGHT[variant]),
-    bandHeight: boxLength(IMPORTANCE_BOX_LAYOUT.BAND[variant]),
-    bandOffset: boxLength(0),
+    bandHeight: clientLength(IMPORTANCE_BAND_UNITS.THICKNESS),
+    bandOffset: clientLength(0),
   }
 }
 
 export function importanceBoxPadding(level: number): CSSProperties | undefined {
   if (!hasImportance(level)) return undefined
   return {
-    paddingBlock: `${String(IMPORTANCE_BOX_LAYOUT.BAND.passive)}%`,
+    paddingBlock: clientLength(IMPORTANCE_BAND_UNITS.THICKNESS),
     paddingInline: `${String(PASSIVE_PANE_BLEED_REM)}rem`,
     marginInline: `${String(-PASSIVE_PANE_BLEED_REM)}rem`,
   }

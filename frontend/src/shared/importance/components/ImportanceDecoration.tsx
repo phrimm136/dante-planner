@@ -23,7 +23,6 @@ export function ImportanceDecoration({ level, palette, variant }: ImportanceDeco
 
   const stripeStyle = {
     maskImage: `url(${getCautionStripePath()})`,
-    '--band-h': '100cqh',
     '--tile-w': stripeTileWidth(),
   } as CSSProperties
 
@@ -32,7 +31,7 @@ export function ImportanceDecoration({ level, palette, variant }: ImportanceDeco
       aria-hidden="true"
       data-slot="importance-decoration"
       data-importance-variant={variant}
-      className="pointer-events-none absolute inset-0 -z-10 m-0 @container"
+      className="pointer-events-none absolute inset-0 -z-10 m-0"
       style={importanceCssVariables(style, importanceGeometry(variant))}
     >
       <span

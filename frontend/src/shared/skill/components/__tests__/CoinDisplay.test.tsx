@@ -52,12 +52,24 @@ describe('CoinDisplay', () => {
     expect(sources(container)).toEqual([green, green])
   })
 
-  it('sizes coins at 50 client units under the description-font scale and leaves the height to the sprite aspect', () => {
+  it('sizes coins at 65 client units under the description-font scale and leaves the height to the sprite aspect', () => {
     const { container } = render(<CoinDisplay coins={[coin('GOLD'), coin('GREEN')]} />)
     const row = container.firstElementChild as HTMLElement
-    expect(row.style.getPropertyValue('--coin-width')).toBe('1.0938rem')
+    expect(row.style.getPropertyValue('--coin-width')).toBe('1.4219rem')
     for (const img of container.querySelectorAll('img')) {
       expect([...img.classList]).toEqual(['w-(--coin-width)', 'h-auto'])
     }
+  })
+
+  it('overlaps every coin after the first by 10 client units', () => {
+    const { container } = render(
+      <CoinDisplay coins={[coin('GOLD'), coin('GREY'), coin('GREEN')]} />,
+    )
+    const row = container.firstElementChild as HTMLElement
+    expect(row.style.getPropertyValue('--coin-gap')).toBe('-0.2188rem')
+    const margins = Array.from(container.querySelectorAll('img')).map((img) =>
+      img.style.getPropertyValue('margin-inline-start'),
+    )
+    expect(margins).toEqual(['', 'var(--coin-gap)', 'var(--coin-gap)'])
   })
 })
