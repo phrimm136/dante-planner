@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import {
   createAdvanceMeasure,
+  faceTracking,
   fitFontSize,
   midlineOffsetEm,
   nameShadow,
@@ -12,7 +13,6 @@ import { applyTextStyles, tmpPlainText } from '@/shared/gameText'
 import { useThemePackListI18n } from '@/shared/themePack'
 import {
   THEME_PACK_NAME_MAX_CQW,
-  THEME_PACK_NAME_TEXT,
   THEME_PACK_NAME_TRACKING,
   themePackCardName,
 } from '../lib/cardLayout'
@@ -39,6 +39,7 @@ export function ThemePackName({ packId, packEntry, rect }: ThemePackNameProps) {
     { max: THEME_PACK_NAME_MAX_CQW, min: 0, width: rect.width },
     measure,
   )
+  const tracking = faceTracking(fontTable, THEME_PACK_NAME_TRACKING)
 
   return (
     <span
@@ -49,8 +50,8 @@ export function ThemePackName({ packId, packEntry, rect }: ThemePackNameProps) {
         fontSize: `${String(fontSize)}cqw`,
         lineHeight: 1,
         transform: `translateY(${String(midlineOffsetEm(fontTable) * fontSize)}cqw)`,
-        letterSpacing: THEME_PACK_NAME_TEXT.letterSpacing,
-        wordSpacing: THEME_PACK_NAME_TEXT.wordSpacing,
+        letterSpacing: `${String(tracking.letterSpacingEm)}em`,
+        wordSpacing: `${String(tracking.wordSpacingEm)}em`,
         textShadow: nameShadow('themePack', i18n.language),
       }}
     >

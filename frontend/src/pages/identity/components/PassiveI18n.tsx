@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 
 import { useIdentityDetailI18n } from '../hooks/useIdentityDetailData'
 import { FormattedDescription } from '@/shared/gameText'
-import { StyledSkillName } from '@/shared/gameText'
+import { NamePlate, StyledSkillName, type NamePlateImportance } from '@/shared/gameText'
 import { IdentityPassiveCard, passiveBoxLayout } from '@/shared/passive'
 import {
   getAffinityIconPath,
@@ -85,7 +85,9 @@ export function PassiveCardWithSuspense({
 }: PassiveCardWithSuspenseProps) {
   return (
     <IdentityPassiveCard
-      nameSlot={<PassiveNameContent id={id} passiveId={passiveId} />}
+      renderName={(importance) => (
+        <PassiveNameContent id={id} passiveId={passiveId} importance={importance} />
+      )}
       descSlot={<PassiveDescContent id={id} passiveId={passiveId} />}
       flavorSlot={<PassiveFlavorContent id={id} passiveId={passiveId} />}
       condition={condition}
@@ -96,14 +98,23 @@ export function PassiveCardWithSuspense({
   )
 }
 
-function PassiveNameContent({ id, passiveId }: { id: string; passiveId: PassiveId }) {
+function PassiveNameContent({
+  id,
+  passiveId,
+  importance,
+}: {
+  id: string
+  passiveId: PassiveId
+  importance: NamePlateImportance
+}) {
   const i18n = useIdentityDetailI18n(id)
   const passiveI18n = i18n.passives[passiveId]
   return (
-    <StyledSkillName
+    <NamePlate
+      kind="passive"
       name={passiveI18n?.name ?? ''}
       attributeType="NEUTRAL"
-      plate={passiveBoxLayout().plate}
+      importance={importance}
     />
   )
 }
@@ -123,7 +134,7 @@ function PassiveFlavorContent({ id, passiveId }: { id: string; passiveId: Passiv
     <p
       data-testid="passive-flavor"
       className="italic whitespace-pre-line"
-      style={{ ...passiveBoxLayout().flavor, color: FLAVOR_TEXT_COLOR }}
+      style={passiveBoxLayout().flavor}
     >
       {flavor}
     </p>

@@ -78,16 +78,12 @@ export function rowParts(phase: BattlePhase, row: EngagementRow | undefined): Ba
   )
 }
 
-export function selectorParts(parts: readonly BattlePart[]): readonly BattlePart[] {
-  return parts.length >= 2 ? parts : []
-}
-
 export function selectedPart(
   parts: readonly BattlePart[],
   selection: PartSelection,
 ): BattlePart | undefined {
   if (selection === ALL_PARTS) return undefined
-  return selectorParts(parts).find((part) => part.id === selection)
+  return parts.find((part) => part.id === selection)
 }
 
 export function visibleSkills(

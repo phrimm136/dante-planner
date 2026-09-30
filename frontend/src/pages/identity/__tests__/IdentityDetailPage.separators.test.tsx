@@ -67,7 +67,7 @@ describe('IdentityDetailPage separators', () => {
       expect(skillPlates.length).toBeGreaterThan(0)
       expect(passivePlates.length).toBeGreaterThan(0)
       for (const [plates, height, fontSize] of [
-        [skillPlates, '1.5166rem', '0.9844rem'],
+        [skillPlates, '1.5912rem', '0.9844rem'],
         [passivePlates, '1.5912rem', '0.875rem'],
       ] as const) {
         for (const plate of plates) {

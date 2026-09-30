@@ -1,7 +1,12 @@
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { PASSIVE_INDICATOR_COLORS, PASSIVE_TAB_UNITS, SECTION_STYLES } from '@/lib/constants'
+import {
+  PASSIVE_INDICATOR_COLORS,
+  PASSIVE_TAB_UNITS,
+  SECTION_STYLES,
+  UNIT_PANEL_COLORS,
+} from '@/lib/constants'
 import { clientLength, getDisplayFontForLanguage } from '@/lib/utils'
 import { getEffectivePassives, getLockedPassives } from '../lib/identityPassiveSelection'
 import { PassiveRun, PassiveTab } from './EGOPassivesPane'
@@ -20,7 +25,7 @@ interface IdentityPassivesPaneProps {
 }
 
 const HEADER_STYLE: CSSProperties = {
-  color: PASSIVE_INDICATOR_COLORS.TEXT,
+  color: UNIT_PANEL_COLORS.PASSIVE_HEADER,
   border: `2px solid ${PASSIVE_INDICATOR_COLORS.BORDER}`,
   marginLeft: clientLength(PASSIVE_TAB_UNITS.HEADER.LEFT),
   width: clientLength(PASSIVE_TAB_UNITS.HEADER.WIDTH),

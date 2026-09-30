@@ -416,15 +416,6 @@ describe('the wrapping name’s box', () => {
 
     expect(width).toBeGreaterThan(IDENTITY_NAME_WRAP_WIDTH_UNITS)
   })
-
-  it('clears both bounds by a tracking step, which the pen reading is worth', () => {
-    const trackingStep = -IDENTITY_NAME_TRACKING.letterSpacingEm * IDENTITY_NAME_FONT_UNITS
-    const lowerBound = jpMeasure('ロボトミーE.G.O::', IDENTITY_NAME_FONT_UNITS)
-    const upperBound = jpMeasure('人差し指遂行者:', IDENTITY_NAME_FONT_UNITS)
-
-    expect(IDENTITY_NAME_WRAP_WIDTH_UNITS - lowerBound).toBeGreaterThan(trackingStep)
-    expect(upperBound - IDENTITY_NAME_WRAP_WIDTH_UNITS).toBeGreaterThan(trackingStep)
-  })
 })
 
 describe('formationSlotLayers', () => {

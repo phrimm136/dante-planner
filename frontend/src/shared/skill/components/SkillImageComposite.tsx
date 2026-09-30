@@ -6,8 +6,9 @@ import {
   getAttackTypeFrameBGPath,
 } from '@/shared/assets'
 import { type SkillAttributeType } from '@/shared/gameData'
+import { PANEL_COIN_NUMBER_SHADOW } from '@/shared/gameText'
 import { getDisplayFontForNumeric } from '@/lib/utils'
-import { SKILL_FRAME_GLOW_COLORS } from '@/lib/constants'
+import { SKILL_FRAME_GLOW_COLORS, UNIT_PANEL_COLORS } from '@/lib/constants'
 import { skillUpperLayout } from '../lib/skillLayout'
 
 interface SkillImageCompositeProps {
@@ -117,16 +118,26 @@ export function SkillImageComposite({
 
       <div
         data-slot="base-power"
-        className="absolute flex justify-end leading-none [-webkit-text-stroke:0.01px_black] text-power"
-        style={{ ...LAYOUT.basePower, fontFamily: getDisplayFontForNumeric() }}
+        className="absolute flex justify-end leading-none"
+        style={{
+          ...LAYOUT.basePower,
+          color: UNIT_PANEL_COLORS.BASE_POWER,
+          textShadow: PANEL_COIN_NUMBER_SHADOW,
+          fontFamily: getDisplayFontForNumeric(),
+        }}
       >
         {basePower}
       </div>
 
       <div
         data-slot="coin-scale"
-        className="absolute leading-none stroke-black font-bold [-webkit-text-stroke:0.01px_black]"
-        style={{ ...LAYOUT.coinScale, fontFamily: getDisplayFontForNumeric() }}
+        className="absolute leading-none"
+        style={{
+          ...LAYOUT.coinScale,
+          color: UNIT_PANEL_COLORS.COIN_SCALE,
+          textShadow: PANEL_COIN_NUMBER_SHADOW,
+          fontFamily: getDisplayFontForNumeric(),
+        }}
       >
         {coinPower > 0 ? `+${coinPower}` : coinPower}
       </div>

@@ -1,8 +1,12 @@
 import type { CSSProperties } from 'react'
 
-import { SKILL_LOCK_UNITS, SKILL_LOWER_UNITS, SKILL_UPPER_UNITS } from '@/lib/constants'
+import {
+  NAME_PLATE_UNITS,
+  SKILL_LOCK_UNITS,
+  SKILL_LOWER_UNITS,
+  SKILL_UPPER_UNITS,
+} from '@/lib/constants'
 import { clientLength } from '@/lib/utils'
-import type { PlateGeometry } from '@/shared/gameText'
 
 const CENTRED = 'translate(-50%, -50%)'
 const CENTRED_Y = 'translateY(-50%)'
@@ -17,11 +21,11 @@ export interface SkillUpperLayout {
   basePower: CSSProperties
   coins: CSSProperties
   nameArea: CSSProperties
-  namePlate: PlateGeometry
   levelIcon: CSSProperties
   levelText: CSSProperties
   targetLabel: CSSProperties
   targetCount: CSSProperties
+  targetSquare: CSSProperties
   sanityCost: CSSProperties
 }
 
@@ -44,6 +48,11 @@ function centredBox(centerX: number, centerY: number, width: number, height: num
   return { ...box(centerX, centerY, width, height), transform: CENTRED }
 }
 
+function numericInkShiftEm(): number {
+  const { ASCENT_EM, DESCENT_EM, DIGIT_HEIGHT_EM } = SKILL_UPPER_UNITS.NUMERIC_FACE
+  return (DIGIT_HEIGHT_EM - ASCENT_EM + DESCENT_EM) / 2
+}
+
 export function skillUpperLayout(): SkillUpperLayout {
   const { ICON, ATTACK_ICON, COIN_SCALE, COIN_BG, BASE_POWER, COINS, NAME_PLATE, LEVEL, TARGET } =
     SKILL_UPPER_UNITS
@@ -62,28 +71,27 @@ export function skillUpperLayout(): SkillUpperLayout {
       top: clientLength(COIN_SCALE.CENTER_Y),
       transform: CENTRED,
       fontSize: clientLength(COIN_SCALE.FONT),
+      letterSpacing: `${String(SKILL_UPPER_UNITS.COIN_SCALE_LETTER_SPACING_EM)}em`,
     },
-    coinScaleBg: centredBox(COIN_BG.CENTER_X, COIN_BG.CENTER_Y, COIN_BG.WIDTH, COIN_BG.HEIGHT),
+    coinScaleBg: centredBox(
+      COIN_BG.CENTER_X,
+      COIN_BG.CENTER_Y,
+      COIN_BG.WIDTH,
+      (COIN_BG.WIDTH * COIN_BG.SPRITE_HEIGHT) / COIN_BG.SPRITE_WIDTH,
+    ),
     basePower: {
       left: '0',
       width: clientLength(BASE_POWER.RIGHT_EDGE_X),
       top: clientLength(BASE_POWER.CENTER_Y),
-      transform: CENTRED_Y,
+      transform: `translateY(calc(-50% + ${String(Number(numericInkShiftEm().toFixed(4)))}em))`,
       textAlign: 'right',
       fontSize: clientLength(BASE_POWER.FONT),
     },
     coins: { left: clientLength(COINS.LEFT), top: clientLength(COINS.TOP) },
     nameArea: {
       left: clientLength(NAME_PLATE.LEFT),
-      top: clientLength(NAME_PLATE.TOP),
+      top: clientLength(NAME_PLATE.CENTER_Y - NAME_PLATE_UNITS.HEIGHT / 2),
       right: clientLength(NAME_PLATE.RIGHT_MIN),
-    },
-    namePlate: {
-      height: clientLength(NAME_PLATE.HEIGHT),
-      fontSize: clientLength(NAME_PLATE.FONT),
-      paddingLeft: clientLength(NAME_PLATE.PAD_LEFT),
-      paddingRight: clientLength(NAME_PLATE.PAD_RIGHT),
-      paddingBottom: clientLength(NAME_PLATE.PAD_BOTTOM),
     },
     levelIcon: box(LEVEL.ICON_LEFT, LEVEL.ICON_TOP, LEVEL.ICON_WIDTH, LEVEL.ICON_HEIGHT),
     levelText: {
@@ -101,7 +109,9 @@ export function skillUpperLayout(): SkillUpperLayout {
     targetCount: {
       ...box(TARGET.COUNT_LEFT, TARGET.TOP, TARGET.COUNT_WIDTH, TARGET.HEIGHT),
       fontSize: clientLength(TARGET.COUNT_FONT),
+      columnGap: clientLength(TARGET.SQUARE_GAP),
     },
+    targetSquare: { width: clientLength(TARGET.SQUARE), height: clientLength(TARGET.SQUARE) },
     sanityCost: {
       left: clientLength(TARGET.LEFT),
       top: clientLength(TARGET.TOP + TARGET.HEIGHT),

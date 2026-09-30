@@ -19,11 +19,6 @@ epic: none · pr: none · supersedes: 103 @cards @text @i18n
   face in the game's own fallback chain draws full-width CJK at exactly one em, so the fallback needs
   no table of its own. REJECTED: shipping the fallback faces' tables as well — four more tables to
   keep in step for one glyph class whose advance is fixed by construction.
-- @cards @text — Letter spacing is charged after every code point of a line, including the last.
-  TextMeshPro advances the pen by the character spacing on every glyph it sets, and the cards are
-  drawn with CSS letter-spacing, which does the same. REJECTED: charging it only between neighbours —
-  it is a hundredth of an em narrower per line, which is enough to move a break on a name whose own
-  margin is that small.
 - @cards @text — A line's ascender, descender and line height are the tallest of the faces whose
   glyphs that line actually carries, and the block is the first line's ascender, each line's own
   pitch, and the last line's descender. TextMeshPro lays each line out from the font assets that drew
@@ -66,6 +61,13 @@ epic: none · pr: none · supersedes: 103 @cards @text @i18n
   against the material data: English was the one language whose identity name read flat against the
   art. REJECTED: leaving English undecorated to match the shipped material — the card then contradicts
   every other language on the same grid.
+
+## Superseded
+- @cards @text → 158 — Letter spacing is charged after every code point of a line, including the last.
+  TextMeshPro advances the pen by the character spacing on every glyph it sets, and the cards are
+  drawn with CSS letter-spacing, which does the same. REJECTED: charging it only between neighbours —
+  it is a hundredth of an em narrower per line, which is enough to move a break on a name whose own
+  margin is that small.
 
 ## Takeaway
 - takeaway: when a layout decision turns on a margin the browser itself cannot reproduce twice, move

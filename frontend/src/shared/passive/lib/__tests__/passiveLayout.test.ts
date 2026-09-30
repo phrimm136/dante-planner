@@ -11,13 +11,6 @@ describe('passiveBoxLayout', () => {
 
   it('keeps the plate 28 units from the left and 372 units clear of the right edge', () => {
     expect(layout.plateRow).toEqual({ marginLeft: '0.6125rem', marginRight: '8.1375rem' })
-    expect(layout.plate).toEqual({
-      height: '1.5912rem',
-      fontSize: '0.875rem',
-      paddingLeft: '0.6563rem',
-      paddingRight: '2.1875rem',
-      paddingBottom: '0rem',
-    })
   })
 
   it('places the sin requirement row 20 units below the plate', () => {
@@ -33,9 +26,14 @@ describe('passiveBoxLayout', () => {
     expect(layout.sinLabel).toEqual({ fontSize: '1.0938rem', marginLeft: '0.4375rem' })
   })
 
-  it('insets the info text 27 units left and 20 right, 20 units below the header', () => {
+  it('insets the info text 27 units left and 20 right, 20 units below the header less its line trim', () => {
     expect(layout.info).toEqual({
-      marginTop: '0.4375rem',
+      lineHeight: 1.394,
+      letterSpacing: '-0.02em',
+      wordSpacing: '-0.05em',
+      color: '#ebcaa2',
+      marginTop: '0.3312rem',
+      marginBottom: '-0.1063rem',
       paddingLeft: '0.5906rem',
       paddingRight: '0.4375rem',
     })
@@ -43,9 +41,13 @@ describe('passiveBoxLayout', () => {
 
   it('sets the flavor at 33 units with 47 above and 35 below', () => {
     expect(layout.flavor).toEqual({
+      lineHeight: 1.444,
+      letterSpacing: '0em',
+      wordSpacing: '-0.05em',
+      color: '#724b2b',
       fontSize: '0.7219rem',
-      marginTop: '1.0281rem',
-      marginBottom: '0.7656rem',
+      marginTop: '0.9224rem',
+      marginBottom: '0.6599rem',
       paddingLeft: '0.5906rem',
       paddingRight: '0.4375rem',
     })

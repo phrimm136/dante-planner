@@ -4,9 +4,8 @@ import {
   SkillDescription,
   getMergedSkillDesc,
   selectSkillLevel,
-  skillUpperLayout,
 } from '@/shared/skill'
-import { StyledSkillName } from '@/shared/gameText'
+import { NamePlate } from '@/shared/gameText'
 import type { Threadspin } from '../types/EGOTypes'
 import { IDENTITY_LEVEL_CAP } from '@/shared/gameData'
 import type { SkillEntry, SkillId } from '@/shared/gameData'
@@ -54,10 +53,10 @@ function EGOSkillName({
 }) {
   const i18n = useEGODetailI18n(egoId)
   return (
-    <StyledSkillName
+    <NamePlate
+      kind="skill"
       name={i18n.skills[skillId]?.name ?? ''}
       {...(attributeType !== undefined && { attributeType })}
-      plate={skillUpperLayout().namePlate}
     />
   )
 }

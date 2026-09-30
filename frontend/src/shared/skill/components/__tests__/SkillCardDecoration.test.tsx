@@ -18,6 +18,7 @@ function renderCard(importanceLevel: number, isLocked = false) {
       level={entry.levels[0]}
       renderName={() => <span>Name</span>}
       descriptionSlot={<span>Desc</span>}
+      unitLevel={60}
       importanceLevel={importanceLevel}
       palette="enemy"
       isLocked={isLocked}
@@ -51,6 +52,7 @@ describe('skill core decoration from enemy 1339 skill 133907', () => {
         level={entry.levels[0]}
         renderName={() => <span>Name</span>}
         descriptionSlot={<span>Desc</span>}
+        unitLevel={60}
         importanceLevel={entry.importanceLevel}
         palette="enemy"
       />,
@@ -77,6 +79,7 @@ describe('skill core decoration from enemy 1339 skill 133907', () => {
         level={entry.levels[0]}
         renderName={() => <span>Name</span>}
         descriptionSlot={<span>Desc</span>}
+        unitLevel={60}
         importanceLevel={0}
         palette="enemy"
       />,
@@ -117,7 +120,7 @@ describe('skill card frame from enemy 1339 skill 133907', () => {
     const { container } = renderCard(0)
     const area = slot(container, 'skill-name-area')
     expect(area.style.left).toBe('5.985rem')
-    expect(area.style.top).toBe('1.6691rem')
+    expect(area.style.top).toBe('1.6391rem')
     expect(area.style.right).toBe('2.1875rem')
     expect(area.textContent).toBe('Name')
   })
@@ -202,6 +205,7 @@ function renderCore(nameSlot: React.ReactNode, sanityCost?: number) {
       skillTier={entry.skillTier}
       nameSlot={nameSlot}
       descriptionSlot={<span>Desc</span>}
+      unitLevel={60}
       importanceLevel={0}
       palette="enemy"
       {...(sanityCost !== undefined && { sanityCost })}
@@ -210,15 +214,15 @@ function renderCore(nameSlot: React.ReactNode, sanityCost?: number) {
 }
 
 describe('skill card upper block slots', () => {
-  it('draws the loading plate with the client plate geometry', () => {
+  it('draws the loading plate with the skill name plate geometry', () => {
     const { container } = renderCore(<SuspendedName />)
     const area = slot(container, 'skill-name-area')
     const body = area.firstElementChild?.firstElementChild?.firstElementChild as HTMLElement
-    expect(body.style.height).toBe('1.5166rem')
+    expect(body.style.height).toBe('1.5912rem')
     expect(body.style.fontSize).toBe('0.9844rem')
     expect(body.style.paddingLeft).toBe('0.4375rem')
     expect(body.style.paddingRight).toBe('1.0938rem')
-    expect(body.style.paddingBottom).toBe('0.2188rem')
+    expect(body.style.paddingBottom).toBe('0.2487rem')
   })
 
   it('puts an E.G.O sanity cost under the attack-weight label', () => {

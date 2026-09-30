@@ -32,6 +32,7 @@ const FONT_TABLE = {
   descender: 0.25,
   capLine: 0.7,
   lineHeight: 1.25,
+  normalSpacingOffset: 0,
   averageAdvance: 0.5,
   advances: {},
   fallbacks: [],

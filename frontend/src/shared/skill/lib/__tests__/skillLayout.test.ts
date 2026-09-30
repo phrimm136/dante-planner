@@ -35,22 +35,23 @@ describe('skillUpperLayout', () => {
       top: '1.1134rem',
       transform: 'translate(-50%, -50%)',
       fontSize: '1.3125rem',
+      letterSpacing: '-0.06em',
     })
     expect(upper.coinScaleBg).toEqual({
       left: '4.0622rem',
       top: '1.1812rem',
       width: '2.1368rem',
-      height: '1.9241rem',
+      height: '1.3228rem',
       transform: 'translate(-50%, -50%)',
     })
   })
 
-  it('right-aligns the base power to x 104', () => {
+  it('right-aligns the base power to x 104 and centres its digit ink on y 142.7', () => {
     expect(upper.basePower).toEqual({
       left: '0',
       width: '2.275rem',
       top: '3.1216rem',
-      transform: 'translateY(-50%)',
+      transform: 'translateY(calc(-50% + -0.1531em))',
       textAlign: 'right',
       fontSize: '2.2431rem',
     })
@@ -60,15 +61,8 @@ describe('skillUpperLayout', () => {
     expect(upper.coins).toEqual({ left: '5.9323rem', top: '0.3128rem' })
   })
 
-  it('keeps the name area 100 units clear of the right edge', () => {
-    expect(upper.nameArea).toEqual({ left: '5.985rem', top: '1.6691rem', right: '2.1875rem' })
-    expect(upper.namePlate).toEqual({
-      height: '1.5166rem',
-      fontSize: '0.9844rem',
-      paddingLeft: '0.4375rem',
-      paddingRight: '1.0938rem',
-      paddingBottom: '0.2188rem',
-    })
+  it('centres the name plate on y 111.3 and keeps its area 100 units clear of the right edge', () => {
+    expect(upper.nameArea).toEqual({ left: '5.985rem', top: '1.6391rem', right: '2.1875rem' })
   })
 
   it('places the level icon and number', () => {
@@ -102,7 +96,9 @@ describe('skillUpperLayout', () => {
       width: '8.2556rem',
       height: '0.8313rem',
       fontSize: '0.7722rem',
+      columnGap: '0.1794rem',
     })
+    expect(upper.targetSquare).toEqual({ width: '0.5381rem', height: '0.5381rem' })
   })
 
   it('puts the sanity cost under the attack-weight label', () => {

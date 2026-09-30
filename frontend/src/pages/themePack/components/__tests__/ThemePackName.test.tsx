@@ -11,7 +11,6 @@ import type { ThemePackSpec } from '../../types/ThemePackTypes'
 import {
   THEME_PACK_LAYOUT,
   THEME_PACK_NAME_MAX_CQW,
-  THEME_PACK_NAME_TEXT,
   THEME_PACK_NAME_TRACKING,
 } from '../../lib/cardLayout'
 import { ThemePackName } from '../ThemePackName'
@@ -24,6 +23,7 @@ const TABLE: FontAdvanceTable = {
   descender: 0.25,
   capLine: 0.7,
   lineHeight: 1.25,
+  normalSpacingOffset: 0,
   averageAdvance: 0.5,
   advances: {},
   fallbacks: [],
@@ -151,8 +151,8 @@ describe('ThemePackName', () => {
     names.pack1 = { name: 'Two Words' }
 
     const style = renderName('pack1').style
-    expect(style.letterSpacing).toBe(THEME_PACK_NAME_TEXT.letterSpacing)
-    expect(style.wordSpacing).toBe(THEME_PACK_NAME_TEXT.wordSpacing)
+    expect(style.letterSpacing).toBe(`${String(THEME_PACK_NAME_TRACKING.letterSpacingEm)}em`)
+    expect(style.wordSpacing).toBe(`${String(THEME_PACK_NAME_TRACKING.wordSpacingEm)}em`)
   })
 
   it('drops the name on to its box’s midline', () => {

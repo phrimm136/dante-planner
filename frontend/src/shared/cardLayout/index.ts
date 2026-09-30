@@ -15,17 +15,20 @@ export {
   fitText,
   wrapText,
   type FitSpec,
+  type FittedText,
   type LineMetrics,
   type Measure,
 } from './fitText'
 export {
   createAdvanceMeasure,
+  faceTracking,
   FontAdvanceTableSchema,
   lineMetrics,
   midlineOffsetEm,
   type FontAdvanceTable,
   type TrackingSpec,
 } from './fontAdvances'
+export { fitNodeLine, fitNodeText, type TextBox, type TextNodeSpec } from './textNode'
 export {
   createFontAdvanceQueryOptions,
   fontTableLanguage,

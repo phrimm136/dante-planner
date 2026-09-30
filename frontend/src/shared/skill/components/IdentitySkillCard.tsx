@@ -11,7 +11,7 @@ interface IdentitySkillCardProps {
   skillId: SkillId
   entry: SkillEntry
   level: SkillLevel
-  unitLevel: number
+  unitLevel: number | undefined
   renderName: (attributeType: string | undefined) => ReactNode
   descriptionSlot: ReactNode
   importanceLevel: number
@@ -47,9 +47,9 @@ export function IdentitySkillCard({
       coins={level.coins}
       skillImagePath={skillImagePath}
       skillTier={entry.skillTier}
-      level={unitLevel}
       nameSlot={renderName(cardData.attributeType)}
       descriptionSlot={descriptionSlot}
+      unitLevel={unitLevel}
       importanceLevel={importanceLevel}
       palette={palette}
       isDefenseSkill={isDefenseSkill}

@@ -1,8 +1,8 @@
 import { Suspense } from 'react'
 
 import { TextSkeleton } from '@/components/feedback/TextSkeleton'
-import { FormattedDescription, StyledSkillName } from '@/shared/gameText'
-import { EGOPassiveCard, EGOPassivesPane, passiveBoxLayout } from '@/shared/passive'
+import { FormattedDescription, NamePlate, type NamePlateImportance } from '@/shared/gameText'
+import { EGOPassiveCard, EGOPassivesPane } from '@/shared/passive'
 import { getEGORankIconPath } from '@/shared/assets'
 import {
   EGOSkillCard,
@@ -11,7 +11,6 @@ import {
   getMergedSkillDesc,
   orderEgoSkills,
   selectSkillLevel,
-  skillUpperLayout,
 } from '@/shared/skill'
 import type { ImportancePalette, SkillEntry, SkillId, Threadspin } from '@/shared/gameData'
 import { useBattleEgoDetailI18n, useBattleEgoDetailSpec } from '../../hooks/useBattleEgoDetailData'
@@ -32,10 +31,10 @@ function EgoSkillName({
 }) {
   const i18n = useBattleEgoDetailI18n(egoId)
   return (
-    <StyledSkillName
+    <NamePlate
+      kind="skill"
       name={i18n.skills[skillId]?.name ?? skillId}
       {...(attributeType !== undefined && { attributeType })}
-      plate={skillUpperLayout().namePlate}
     />
   )
 }
@@ -55,13 +54,22 @@ function EgoSkillDescription({
   )
 }
 
-function EgoPassiveName({ egoId, passiveId }: { egoId: string; passiveId: string }) {
+function EgoPassiveName({
+  egoId,
+  passiveId,
+  importance,
+}: {
+  egoId: string
+  passiveId: string
+  importance: NamePlateImportance
+}) {
   const i18n = useBattleEgoDetailI18n(egoId)
   return (
-    <StyledSkillName
+    <NamePlate
+      kind="passive"
       name={i18n.passives[passiveId]?.name ?? passiveId}
       attributeType="NEUTRAL"
-      plate={passiveBoxLayout().plate}
+      importance={importance}
     />
   )
 }
@@ -76,12 +84,14 @@ function EgoSkillCard({
   skillId,
   entry,
   egoLevel,
+  unitLevel,
   palette,
 }: {
   egoId: string
   skillId: SkillId
   entry: SkillEntry
   egoLevel: number
+  unitLevel: number | undefined
   palette: ImportancePalette
 }) {
   const { level } = selectSkillLevel(entry.levels, egoLevel)
@@ -91,6 +101,7 @@ function EgoSkillCard({
       skillId={skillId}
       entry={entry}
       level={level}
+      unitLevel={unitLevel}
       renderName={(attributeType) => (
         <EgoSkillName egoId={egoId} skillId={skillId} attributeType={attributeType} />
       )}
@@ -101,7 +112,15 @@ function EgoSkillCard({
   )
 }
 
-function EgoBlock({ ego, palette }: { ego: EgoEntry; palette: ImportancePalette }) {
+function EgoBlock({
+  ego,
+  unitLevel,
+  palette,
+}: {
+  ego: EgoEntry
+  unitLevel: number | undefined
+  palette: ImportancePalette
+}) {
   const egoId = String(ego.egoID)
   const spec = useBattleEgoDetailSpec(egoId)
 
@@ -120,6 +139,7 @@ function EgoBlock({ ego, palette }: { ego: EgoEntry; palette: ImportancePalette 
             skillId={skillId}
             entry={entry}
             egoLevel={ego.egoLevel}
+            unitLevel={unitLevel}
             palette={palette}
           />
         )}
@@ -130,7 +150,9 @@ function EgoBlock({ ego, palette }: { ego: EgoEntry; palette: ImportancePalette 
         renderPassive={(passiveId, isLocked) => (
           <div data-passive-id={passiveId} data-locked={isLocked}>
             <EGOPassiveCard
-              nameSlot={<EgoPassiveName egoId={egoId} passiveId={passiveId} />}
+              renderName={(importance) => (
+                <EgoPassiveName egoId={egoId} passiveId={passiveId} importance={importance} />
+              )}
               descSlot={<EgoPassiveDesc egoId={egoId} passiveId={passiveId} />}
               flavorSlot={null}
               isLocked={isLocked}
@@ -146,16 +168,18 @@ function EgoBlock({ ego, palette }: { ego: EgoEntry; palette: ImportancePalette 
 
 export function BattleEgoSection({
   egoList,
+  unitLevel,
   palette,
 }: {
   egoList: readonly EgoEntry[]
+  unitLevel: number | undefined
   palette: ImportancePalette
 }) {
   return (
     <div className="space-y-6">
       {egoList.map((ego) => (
         <Suspense key={ego.egoID} fallback={<TextSkeleton lines={3} width="full" />}>
-          <EgoBlock ego={ego} palette={palette} />
+          <EgoBlock ego={ego} unitLevel={unitLevel} palette={palette} />
         </Suspense>
       ))}
     </div>

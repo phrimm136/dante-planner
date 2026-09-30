@@ -8,10 +8,27 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { getPanicIconPath, getSanityIncIconPath, getSanityDecIconPath } from '@/shared/assets'
 import { useSanityConditionFormatter } from '../hooks/useSanityConditionFormatter'
 import { PANIC_TYPE_DESC_ONLY, SANITY_CONDITION_TYPE } from '@/shared/gameData'
-import { SANITY_INDICATOR_COLORS, SECTION_STYLES } from '@/lib/constants'
+import { SANITY_INDICATOR_COLORS, SECTION_STYLES, UNIT_PANEL_COLORS } from '@/lib/constants'
 import type { SanityConditionType } from '@/shared/gameData'
-import { getDisplayFontForLanguage } from '@/lib/utils'
-import { conditionLayout, panicLayout, type SanityConditionKind } from '../lib/sanityLayout'
+import { clientLength, getDisplayFontForLanguage } from '@/lib/utils'
+import {
+  faceTracking,
+  fitNodeLine,
+  fitNodeText,
+  lineMetrics,
+  useFontAdvances,
+} from '@/shared/cardLayout'
+import {
+  CONDITION_TAG_NODE,
+  CONDITION_TAG_TEXT_WIDTH,
+  PANIC_NAME_BOX,
+  PANIC_NAME_NODE,
+  PANIC_TAG_NODE,
+  PANIC_TAG_TEXT_WIDTH,
+  conditionLayout,
+  panicLayout,
+  type SanityConditionKind,
+} from '../lib/sanityLayout'
 
 interface PanicTypeSectionProps {
   panicType: string
@@ -30,6 +47,7 @@ export function PanicTypeSection({
   const displayStyle = getDisplayFontForLanguage(i18n.language)
   const layout = panicLayout()
   const descOnly = panicType === PANIC_TYPE_DESC_ONLY
+  const panicTag = t('sanity.panicType', 'Panic Type')
 
   return (
     <div data-slot="panic-section" style={layout.section}>
@@ -43,10 +61,12 @@ export function PanicTypeSection({
       />
       <span
         data-slot="panic-tag"
-        className="flex items-center justify-center font-bold"
-        style={{ ...layout.tagText, color: SANITY_INDICATOR_COLORS.INCREMENT, ...displayStyle }}
+        className="flex items-center justify-center"
+        style={{ ...layout.tagText, color: UNIT_PANEL_COLORS.PANIC_TAG, ...displayStyle }}
       >
-        {t('sanity.panicType', 'Panic Type')}
+        <Suspense fallback={panicTag}>
+          <PanicTagText label={panicTag} />
+        </Suspense>
       </span>
       <img
         data-slot="panic-icon"
@@ -57,7 +77,7 @@ export function PanicTypeSection({
       />
       <div
         data-slot="panic-name"
-        className="flex items-center justify-center text-center"
+        className="flex flex-col items-center justify-center text-center"
         style={layout.name}
       >
         <Suspense fallback={<Skeleton className="h-4 w-16" />}>{nameSlot}</Suspense>
@@ -86,10 +106,48 @@ export function PanicTypeSection({
   )
 }
 
+function PanicTagText({ label }: { label: string }) {
+  const { i18n } = useTranslation()
+  const table = useFontAdvances(i18n.language)
+  const tracking = faceTracking(table, PANIC_TAG_NODE)
+  const fontSize = fitNodeLine(label, table, PANIC_TAG_NODE, PANIC_TAG_TEXT_WIDTH)
+  return (
+    <span
+      data-slot="panic-tag-text"
+      style={{
+        fontSize: clientLength(fontSize),
+        letterSpacing: `${String(tracking.letterSpacingEm)}em`,
+        wordSpacing: `${String(tracking.wordSpacingEm)}em`,
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {label}
+    </span>
+  )
+}
+
 export function PanicName({ name }: { name: string }) {
   const { i18n } = useTranslation()
-  const displayStyle = getDisplayFontForLanguage(i18n.language)
-  return <span style={{ ...displayStyle, color: SANITY_INDICATOR_COLORS.INCREMENT }}>{name}</span>
+  const table = useFontAdvances(i18n.language)
+  const fitted = fitNodeText(name, table, PANIC_NAME_NODE, PANIC_NAME_BOX)
+  const tracking = faceTracking(table, PANIC_NAME_NODE)
+  return fitted.lines.map((line, index) => (
+    <span
+      key={`${String(index)}:${line}`}
+      data-slot="panic-name-line"
+      style={{
+        ...getDisplayFontForLanguage(i18n.language),
+        fontSize: clientLength(fitted.fontSize),
+        lineHeight: lineMetrics(table, line).lineHeight + PANIC_NAME_NODE.lineSpacingEm,
+        letterSpacing: `${String(tracking.letterSpacingEm)}em`,
+        wordSpacing: `${String(tracking.wordSpacingEm)}em`,
+        whiteSpace: 'nowrap',
+        color: UNIT_PANEL_COLORS.PANIC_NAME,
+      }}
+    >
+      {line}
+    </span>
+  ))
 }
 
 interface PanicTypeSectionI18nProps {
@@ -139,7 +197,6 @@ export function SanityConditionsSectionI18n({
         type={SANITY_CONDITION_TYPE.INCREMENT}
         header={t('sanity.increaseHeader', 'Factors increasing Sanity')}
         emptyText={t('sanity.noIncrease', 'No sanity increase conditions')}
-        color={SANITY_INDICATOR_COLORS.INCREMENT}
         borderColor={SANITY_INDICATOR_COLORS.INCREMENT_BORDER}
         iconPath={getSanityIncIconPath()}
       />
@@ -149,7 +206,6 @@ export function SanityConditionsSectionI18n({
         type={SANITY_CONDITION_TYPE.DECREMENT}
         header={t('sanity.decreaseHeader', 'Factors decreasing Sanity')}
         emptyText={t('sanity.noDecrease', 'No sanity decrease conditions')}
-        color={SANITY_INDICATOR_COLORS.DECREMENT}
         borderColor={SANITY_INDICATOR_COLORS.DECREMENT_BORDER}
         iconPath={getSanityDecIconPath()}
       />
@@ -163,7 +219,6 @@ interface SanityConditionSectionProps {
   type: SanityConditionType
   header: string
   emptyText: string
-  color: string
   borderColor: string
   iconPath: string
 }
@@ -174,7 +229,6 @@ function SanityConditionSection({
   type,
   header,
   emptyText,
-  color,
   borderColor,
   iconPath,
 }: SanityConditionSectionProps) {
@@ -186,10 +240,16 @@ function SanityConditionSection({
     <div data-slot="sanity-condition" data-kind={kind} className="isolate" style={layout.section}>
       <span
         data-slot="sanity-condition-tag"
-        className="flex items-center justify-center text-center font-bold"
-        style={{ ...layout.tag, color, border: `2px solid ${borderColor}`, ...displayStyle }}
+        className="flex items-center justify-center text-center"
+        style={{ ...layout.tag, border: `2px solid ${borderColor}`, ...displayStyle }}
       >
-        {header}
+        <Suspense
+          fallback={
+            <span style={{ fontSize: clientLength(CONDITION_TAG_NODE.maxSize) }}>{header}</span>
+          }
+        >
+          <ConditionTagText header={header} />
+        </Suspense>
       </span>
       <div data-slot="sanity-condition-list" className="text-sm" style={layout.list}>
         {conditions.length > 0 ? (
@@ -208,6 +268,26 @@ function SanityConditionSection({
         style={layout.icon}
       />
     </div>
+  )
+}
+
+function ConditionTagText({ header }: { header: string }) {
+  const { i18n } = useTranslation()
+  const table = useFontAdvances(i18n.language)
+  const tracking = faceTracking(table, CONDITION_TAG_NODE)
+  const fontSize = fitNodeLine(header, table, CONDITION_TAG_NODE, CONDITION_TAG_TEXT_WIDTH)
+  return (
+    <span
+      data-slot="sanity-condition-tag-text"
+      style={{
+        fontSize: clientLength(fontSize),
+        letterSpacing: `${String(tracking.letterSpacingEm)}em`,
+        wordSpacing: `${String(tracking.wordSpacingEm)}em`,
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {header}
+    </span>
   )
 }
 

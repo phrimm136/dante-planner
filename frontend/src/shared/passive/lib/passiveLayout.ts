@@ -1,13 +1,12 @@
 import type { CSSProperties } from 'react'
 
-import { PASSIVE_BOX_UNITS } from '@/lib/constants'
+import { PANEL_TEXT_NODES, PASSIVE_BOX_UNITS, UNIT_PANEL_COLORS } from '@/lib/constants'
 import { clientLength } from '@/lib/utils'
-import type { PlateGeometry } from '@/shared/gameText'
+import { textBlockStyle, textBlockTrim, trimmedLength } from '@/shared/skill'
 
 export interface PassiveBoxLayout {
   box: CSSProperties
   plateRow: CSSProperties
-  plate: PlateGeometry
   sinRow: CSSProperties
   sinItem: CSSProperties
   sinIcon: CSSProperties
@@ -21,6 +20,7 @@ export interface PassiveBoxLayout {
 
 export function passiveBoxLayout(): PassiveBoxLayout {
   const { MIN_HEIGHT, PLATE, HEADER_GAP, SIN_ROW, INFO, FLAVOR, LOCK } = PASSIVE_BOX_UNITS
+  const { PASSIVE_INFO, PASSIVE_FLAVOR } = PANEL_TEXT_NODES
   const square = (units: number): CSSProperties => ({
     width: clientLength(units),
     height: clientLength(units),
@@ -30,13 +30,6 @@ export function passiveBoxLayout(): PassiveBoxLayout {
     plateRow: {
       marginLeft: clientLength(PLATE.LEFT),
       marginRight: clientLength(PLATE.RIGHT_MIN),
-    },
-    plate: {
-      height: clientLength(PLATE.HEIGHT),
-      fontSize: clientLength(PLATE.FONT),
-      paddingLeft: clientLength(PLATE.PAD_LEFT),
-      paddingRight: clientLength(PLATE.PAD_RIGHT),
-      paddingBottom: clientLength(0),
     },
     sinRow: {
       marginTop: clientLength(HEADER_GAP),
@@ -55,14 +48,17 @@ export function passiveBoxLayout(): PassiveBoxLayout {
       marginLeft: clientLength(SIN_ROW.LABEL_LEFT),
     },
     info: {
-      marginTop: clientLength(HEADER_GAP),
+      ...textBlockStyle(PASSIVE_INFO, UNIT_PANEL_COLORS.PASSIVE_INFO),
+      marginTop: trimmedLength(HEADER_GAP, PASSIVE_INFO),
+      marginBottom: textBlockTrim(PASSIVE_INFO),
       paddingLeft: clientLength(INFO.LEFT),
       paddingRight: clientLength(INFO.RIGHT),
     },
     flavor: {
+      ...textBlockStyle(PASSIVE_FLAVOR, UNIT_PANEL_COLORS.FLAVOR),
       fontSize: clientLength(FLAVOR.FONT),
-      marginTop: clientLength(FLAVOR.TOP),
-      marginBottom: clientLength(FLAVOR.BOTTOM),
+      marginTop: trimmedLength(FLAVOR.TOP, PASSIVE_FLAVOR, FLAVOR.FONT),
+      marginBottom: trimmedLength(FLAVOR.BOTTOM, PASSIVE_FLAVOR, FLAVOR.FONT),
       paddingLeft: clientLength(FLAVOR.LEFT),
       paddingRight: clientLength(FLAVOR.RIGHT),
     },

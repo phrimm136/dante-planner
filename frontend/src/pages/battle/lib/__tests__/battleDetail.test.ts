@@ -34,7 +34,6 @@ import {
   unitName,
   unitTextKeywords,
   selectedPart,
-  selectorParts,
   stageEffectGrants,
   statAtLevel,
   visiblePassives,
@@ -74,7 +73,7 @@ describe('part selection', () => {
   const parts = rowParts(phase, undefined)
 
   it('offers HEAD and BODY for 1280 and filters HEAD to its linked skills and passive', () => {
-    expect(selectorParts(parts).map((part) => part.partType)).toEqual(['HEAD', 'BODY'])
+    expect(parts.map((part) => part.partType)).toEqual(['HEAD', 'BODY'])
 
     const head = selectedPart(parts, 813401)
     expect(skillIdsOf(visibleSkills(phase, parts, head))).toEqual([
@@ -99,16 +98,18 @@ describe('part selection', () => {
     ])
   })
 
-  it('offers no part selector for a single-part phase', () => {
+  it('offers the one part of a single-part phase', () => {
     const single = firstPhase(EnemyDataSchema.parse(enemy1110), '1110')
-    expect(selectorParts(rowParts(single, undefined))).toEqual([])
+    const parts = rowParts(single, undefined)
+    expect(parts.map((part) => part.id)).toEqual([111001])
+    expect(selectedPart(parts, 111001)?.partType).toBe('BODY')
   })
 
   it('lists every head-linked skill under each of the five HEAD parts of phase 8278', () => {
     const kit = EnemyDataSchema.parse(enemy8277).units['8277']
     const heavy = kit?.phases.find((each) => each.id === 8278)
     if (heavy === undefined) throw new Error('phase 8278 missing')
-    const heads = selectorParts(rowParts(heavy, undefined))
+    const heads = rowParts(heavy, undefined)
     expect(heads.map((part) => part.partType)).toEqual(['HEAD', 'HEAD', 'HEAD', 'HEAD', 'HEAD'])
     for (const head of heads) {
       expect(skillIdsOf(visibleSkills(heavy, heads, head))).toEqual([
@@ -129,7 +130,7 @@ describe('part selection', () => {
     expect(skillIdsOf(visibleSkills(unlinked, rowParts(unlinked, undefined), undefined))).toContain(
       '962006',
     )
-    for (const part of selectorParts(rowParts(unlinked, undefined))) {
+    for (const part of rowParts(unlinked, undefined)) {
       expect(
         skillIdsOf(visibleSkills(unlinked, rowParts(unlinked, undefined), part)),
       ).not.toContain('962006')

@@ -21,6 +21,7 @@ function renderCard(missingImage?: 'placeholder' | 'frame') {
       skillTier={entry.skillTier}
       nameSlot={<span>Name</span>}
       descriptionSlot={<span>Desc</span>}
+      unitLevel={60}
       importanceLevel={0}
       palette="enemy"
       {...(missingImage !== undefined && { missingImage })}

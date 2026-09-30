@@ -75,15 +75,17 @@ describe('SkillImageComposite placement in the upper block', () => {
     expect(value.style.top).toBe('1.1134rem')
     expect(value.style.transform).toBe('translate(-50%, -50%)')
     expect(value.style.fontSize).toBe('1.3125rem')
+    expect(value.style.letterSpacing).toBe('-0.06em')
+    expect(value.classList.contains('font-bold')).toBe(false)
     const backing = slot(container, 'coin-scale-bg')
     expect(backing.style.left).toBe('4.0622rem')
     expect(backing.style.top).toBe('1.1812rem')
     expect(backing.style.width).toBe('2.1368rem')
-    expect(backing.style.height).toBe('1.9241rem')
+    expect(backing.style.height).toBe('1.3228rem')
     expect(backing.style.transform).toBe('translate(-50%, -50%)')
   })
 
-  it('right-aligns the base power to x 104', () => {
+  it('right-aligns the base power to x 104 with its digit ink centred on y 142.7', () => {
     const { container } = renderComposite(undefined)
     const power = slot(container, 'base-power')
     expect(power.textContent).toBe('3')
@@ -91,7 +93,7 @@ describe('SkillImageComposite placement in the upper block', () => {
     expect(power.style.width).toBe('2.275rem')
     expect(power.style.textAlign).toBe('right')
     expect(power.style.top).toBe('3.1216rem')
-    expect(power.style.transform).toBe('translateY(-50%)')
+    expect(power.style.transform).toBe('translateY(calc(-50% + -0.1531em))')
     expect(power.style.fontSize).toBe('2.2431rem')
     expect(power.classList.contains('text-[48px]')).toBe(false)
   })

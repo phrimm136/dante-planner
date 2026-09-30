@@ -1,7 +1,7 @@
 import { Suspense, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { StyledNameSkeleton } from '@/shared/gameText'
+import { NamePlateSkeleton, type NamePlateImportance } from '@/shared/gameText'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   getAffinityIconPath,
@@ -11,12 +11,7 @@ import {
 import { cn, getDisplayFontForNumeric, getDisplayFontForLanguage } from '@/lib/utils'
 import { SECTION_STYLES } from '@/lib/constants'
 import type { ImportancePalette } from '@/shared/gameData'
-import {
-  ImportanceBanner,
-  ImportanceDecoration,
-  hasImportance,
-  importanceBoxPadding,
-} from '@/shared/importance'
+import { ImportanceDecoration, hasImportance, importanceBoxPadding } from '@/shared/importance'
 import { passiveBoxLayout } from '../lib/passiveLayout'
 
 interface IdentityPassiveCondition {
@@ -25,7 +20,7 @@ interface IdentityPassiveCondition {
 }
 
 interface IdentityPassiveCardProps {
-  nameSlot: ReactNode
+  renderName: (importance: NamePlateImportance) => ReactNode
   descSlot: ReactNode
   flavorSlot: ReactNode
   condition?: IdentityPassiveCondition | undefined
@@ -35,7 +30,7 @@ interface IdentityPassiveCardProps {
 }
 
 export function IdentityPassiveCard({
-  nameSlot,
+  renderName,
   descSlot,
   flavorSlot,
   condition,
@@ -54,16 +49,11 @@ export function IdentityPassiveCard({
     >
       <ImportanceDecoration level={importanceLevel} palette={palette} variant="passive" />
       <div data-slot="passive-box" className="relative" style={layout.box}>
-        <ImportanceBanner
-          level={importanceLevel}
-          palette={palette}
-          className={SECTION_STYLES.LAYOUT.row}
-          style={layout.plateRow}
-        >
-          <Suspense fallback={<StyledNameSkeleton attributeType="NEUTRAL" plate={layout.plate} />}>
-            {nameSlot}
+        <div className={SECTION_STYLES.LAYOUT.row} style={layout.plateRow}>
+          <Suspense fallback={<NamePlateSkeleton kind="passive" attributeType="NEUTRAL" />}>
+            {renderName({ level: importanceLevel, palette })}
           </Suspense>
-        </ImportanceBanner>
+        </div>
         {condition && (
           <div
             data-slot="passive-sin-row"

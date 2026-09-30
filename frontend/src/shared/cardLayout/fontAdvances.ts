@@ -10,6 +10,8 @@ export const FaceFallbackSchema = z
     descender: z.number(),
     capLine: z.number(),
     lineHeight: z.number(),
+    /** The face's `normalSpacingOffset`, in em, added to the spacing after each glyph it draws. */
+    normalSpacingOffset: z.number(),
     /** The code points this face is the first in the chain to supply. */
     codePoints: z.array(z.number()),
   })
@@ -33,6 +35,8 @@ export const FontAdvanceTableSchema = z
     capLine: z.number(),
     /** The face's own line height, in em, before any node's `m_lineSpacing`. */
     lineHeight: z.number(),
+    /** The face's `normalSpacingOffset`, in em, added to the spacing after each glyph it draws. */
+    normalSpacingOffset: z.number(),
     /** The mean advance of the table, drawn for a code point it does not carry. */
     averageAdvance: z.number(),
     advances: z.record(z.string(), z.number()),
@@ -67,6 +71,7 @@ export function midlineOffsetEm(face: FaceMetrics): number {
 /** One face of a chain, and the code points it draws. */
 interface ChainFace {
   face: FaceMetrics
+  spacingOffsetEm: number
   covers: ReadonlySet<number>
 }
 
@@ -80,10 +85,12 @@ function faceChain(table: FontAdvanceTable): readonly ChainFace[] {
   const chain: ChainFace[] = [
     {
       face: table,
+      spacingOffsetEm: table.normalSpacingOffset,
       covers: new Set(Object.keys(table.advances).map(Number)),
     },
     ...table.fallbacks.map((fallback) => ({
       face: fallback,
+      spacingOffsetEm: fallback.normalSpacingOffset,
       covers: new Set(fallback.codePoints),
     })),
   ]
@@ -106,21 +113,28 @@ export function lineFaces(table: FontAdvanceTable, line: string): readonly FaceM
   return used.length > 0 ? used : [table]
 }
 
-/** The metrics a line is laid out from: the tallest of every face that draws it. */
-export function lineMetrics(table: FontAdvanceTable, line: string): FaceMetrics {
-  return lineFaces(table, line)
-    .map(({ ascender, descender, capLine, lineHeight }) => ({
-      ascender,
-      descender,
-      capLine,
-      lineHeight,
-    }))
-    .reduce((tallest, face) => ({
-      ascender: Math.max(tallest.ascender, face.ascender),
-      descender: Math.max(tallest.descender, face.descender),
-      capLine: Math.max(tallest.capLine, face.capLine),
-      lineHeight: Math.max(tallest.lineHeight, face.lineHeight),
-    }))
+/** A line's metrics, and the gap the display face sets between it and the line above. */
+export interface LineFaceMetrics extends FaceMetrics {
+  lineGap: number
+}
+
+/**
+ * The metrics a line is laid out from: the tallest of every face that draws it.
+ *
+ * The gap is the display face's alone: TextMeshPro reads it once from the node's own font
+ * asset, whichever fallback face drew the line.
+ */
+export function lineMetrics(table: FontAdvanceTable, line: string): LineFaceMetrics {
+  const tallest = lineFaces(table, line).reduce(
+    (metrics, face) => ({
+      ascender: Math.max(metrics.ascender, face.ascender),
+      descender: Math.max(metrics.descender, face.descender),
+      capLine: Math.max(metrics.capLine, face.capLine),
+      lineHeight: Math.max(metrics.lineHeight, face.lineHeight),
+    }),
+    { ascender: 0, descender: 0, capLine: 0, lineHeight: 0 },
+  )
+  return { ...tallest, lineGap: table.lineHeight - table.ascender - table.descender }
 }
 
 /** The tracking a node applies, in em, as TextMeshPro's character and word spacing. */
@@ -153,11 +167,27 @@ export function advanceOf(table: FontAdvanceTable, codePoint: number): number {
   return isIdeograph(codePoint) ? IDEOGRAPH_ADVANCE : table.averageAdvance
 }
 
+/** The spacing offset of the face that draws a code point, the display face's when none does. */
+function spacingOffsetOf(table: FontAdvanceTable, codePoint: number): number {
+  const drawing = faceChain(table).find((entry) => entry.covers.has(codePoint))
+  return drawing?.spacingOffsetEm ?? table.normalSpacingOffset
+}
+
+/** The tracking a node is drawn with: its own, plus the display face's spacing offset. */
+export function faceTracking(table: FontAdvanceTable, spacing: TrackingSpec): TrackingSpec {
+  return {
+    letterSpacingEm: spacing.letterSpacingEm + table.normalSpacingOffset,
+    wordSpacingEm: spacing.wordSpacingEm,
+  }
+}
+
 /**
  * A measurer over a face's own advance table, tracking included.
  *
- * A string's width is the sum of its code points' advances, plus letter spacing after every
- * code point and word spacing on every space, as TextMeshPro advances the pen.
+ * A string's width is the sum of its code points' advances, plus the spacing the pen moves
+ * after every code point but the last: the letter spacing, the spacing offset of the face
+ * that drew it, and the word spacing when it is a space. TextMeshPro tests a line's width
+ * before it moves the pen past the glyph it is setting.
  */
 export function createAdvanceMeasure(
   table: FontAdvanceTable,
@@ -165,23 +195,22 @@ export function createAdvanceMeasure(
   advanceOverrides: ReadonlyMap<string, number> = new Map(),
 ): Measure {
   return (text: string, px: number): number => {
-    let advanceEm = 0
-    let codePointCount = 0
-    let spaceCount = 0
+    let widthEm = 0
+    let previous: string | undefined
 
     for (const character of text) {
-      advanceEm +=
+      if (previous !== undefined) widthEm += penSpacingEm(table, spacing, previous)
+      widthEm +=
         advanceOverrides.get(character) ?? advanceOf(table, character.codePointAt(0) ?? 0)
-      codePointCount += 1
-      if (character === SPACE) spaceCount += 1
+      previous = character
     }
 
-    if (codePointCount === 0) return 0
-
-    return (
-      advanceEm * px +
-      spacing.letterSpacingEm * px * codePointCount +
-      spacing.wordSpacingEm * px * spaceCount
-    )
+    return widthEm * px
   }
+}
+
+function penSpacingEm(table: FontAdvanceTable, spacing: TrackingSpec, character: string): number {
+  const offset = spacingOffsetOf(table, character.codePointAt(0) ?? 0)
+  const word = character === SPACE ? spacing.wordSpacingEm : 0
+  return spacing.letterSpacingEm + offset + word
 }

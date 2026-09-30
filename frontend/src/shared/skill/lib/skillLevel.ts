@@ -47,3 +47,10 @@ export function toSkillCardData(entry: SkillEntry, level: SkillLevel): SkillCard
     mpUsage: entry.mpUsage,
   }
 }
+
+export function skillLevelAt(
+  unitLevel: number | undefined,
+  correction: number,
+): number | undefined {
+  return unitLevel === undefined ? undefined : Math.max(1, unitLevel + correction)
+}

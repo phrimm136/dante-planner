@@ -25,9 +25,9 @@ interface SkillCardProps {
   coins: readonly SkillCoin[]
   skillImagePath: string | undefined
   skillTier: number
-  level: number
   nameSlot: ReactNode
   descriptionSlot: ReactNode
+  unitLevel: number | undefined
   isDefenseSkill?: boolean
   sanityCost?: number
   isLocked?: boolean
@@ -43,9 +43,9 @@ export function SkillCard({
   coins,
   skillImagePath,
   skillTier,
-  level,
   nameSlot,
   descriptionSlot,
+  unitLevel,
   isDefenseSkill = false,
   sanityCost,
   isLocked = false,
@@ -82,9 +82,9 @@ export function SkillCard({
       infoPanel={
         <SkillInfoPanelWithSuspense
           skillData={skillData}
-          level={level}
           coins={coins}
           nameSlot={nameSlot}
+          unitLevel={unitLevel}
           isDefenseSkill={isDefenseSkill}
           sanityCost={sanityCost}
         />

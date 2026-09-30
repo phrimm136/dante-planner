@@ -2,10 +2,24 @@ import { getCoinDescIconPath } from '@/shared/assets'
 import { type SkillDescEntry } from '@/shared/gameData'
 import { FormattedDescription } from '@/shared/gameText'
 import { Skeleton } from '@/components/ui/skeleton'
-import { FLAVOR_TEXT_COLOR, SKILL_LOWER_UNITS } from '@/lib/constants'
+import { PANEL_TEXT_NODES, SKILL_LOWER_UNITS, UNIT_PANEL_COLORS } from '@/lib/constants'
 import { clientLength } from '@/lib/utils'
+import { textBlockStyle, textBlockTrim, trimmedLength } from '../lib/textBlock'
 
 const { COIN_LIST, FLAVOR } = SKILL_LOWER_UNITS
+const { SKILL_DESCRIPTION, COIN_TEXT, SKILL_FLAVOR } = PANEL_TEXT_NODES
+
+const descriptionStyle = {
+  ...textBlockStyle(SKILL_DESCRIPTION, UNIT_PANEL_COLORS.DESCRIPTION),
+  marginTop: textBlockTrim(SKILL_DESCRIPTION),
+  marginBottom: textBlockTrim(SKILL_DESCRIPTION),
+}
+
+const coinTextBodyStyle = {
+  ...textBlockStyle(COIN_TEXT, UNIT_PANEL_COLORS.COIN_TEXT),
+  marginTop: textBlockTrim(COIN_TEXT),
+  marginBottom: textBlockTrim(COIN_TEXT),
+}
 
 const coinListStyle = {
   paddingTop: clientLength(COIN_LIST.PAD_TOP),
@@ -28,10 +42,10 @@ const coinTextStyle = {
 }
 
 const flavorStyle = {
-  color: FLAVOR_TEXT_COLOR,
+  ...textBlockStyle(SKILL_FLAVOR, UNIT_PANEL_COLORS.FLAVOR),
   fontSize: clientLength(FLAVOR.FONT),
-  marginTop: clientLength(FLAVOR.TOP),
-  marginBottom: clientLength(FLAVOR.BOTTOM),
+  marginTop: trimmedLength(FLAVOR.TOP, SKILL_FLAVOR, FLAVOR.FONT),
+  marginBottom: trimmedLength(FLAVOR.BOTTOM, SKILL_FLAVOR, FLAVOR.FONT),
 }
 
 interface SkillDescriptionProps {
@@ -47,7 +61,7 @@ export function SkillDescription({ descData, flavor }: SkillDescriptionProps) {
 
   return (
     <div className="text-sm">
-      <div>
+      <div data-slot="skill-desc" style={desc ? descriptionStyle : undefined}>
         <FormattedDescription text={desc ?? ''} />
       </div>
 
@@ -62,7 +76,9 @@ export function SkillDescription({ descData, flavor }: SkillDescriptionProps) {
                 style={coinIconStyle}
               />
               <div style={coinTextStyle}>
-                <FormattedDescription text={text} />
+                <div data-slot="skill-coin-text" style={coinTextBodyStyle}>
+                  <FormattedDescription text={text} />
+                </div>
               </div>
             </div>
           ))}

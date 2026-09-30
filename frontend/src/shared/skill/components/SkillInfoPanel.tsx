@@ -1,16 +1,16 @@
 import { Suspense, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { MIN_LEVEL } from '@/shared/gameData'
-import { SANITY_INDICATOR_COLORS } from '@/lib/constants'
+import { SANITY_INDICATOR_COLORS, UNIT_PANEL_COLORS } from '@/lib/constants'
 import { getDisplayFontForNumeric } from '@/lib/utils'
-import { StyledNameSkeleton } from '@/shared/gameText'
+import { NamePlateSkeleton, PANEL_LEVEL_SHADOW } from '@/shared/gameText'
 import {
   getAttackWeightIconPath,
   getAttackLevelIconPath,
   getDefenseLevelIconPath,
 } from '@/shared/assets'
 import type { SkillCoin } from '@/shared/gameData'
+import { skillLevelAt } from '../lib/skillLevel'
 import { skillUpperLayout } from '../lib/skillLayout'
 import { CoinDisplay } from './CoinDisplay'
 
@@ -22,9 +22,9 @@ interface SkillInfoPanelData {
 
 interface SkillInfoPanelWithSuspenseProps {
   skillData: SkillInfoPanelData
-  level: number
   coins: readonly SkillCoin[]
   nameSlot: ReactNode
+  unitLevel: number | undefined
   isDefenseSkill?: boolean
   sanityCost?: number | undefined
 }
@@ -33,15 +33,14 @@ const LAYOUT = skillUpperLayout()
 
 export function SkillInfoPanelWithSuspense({
   skillData,
-  level,
   coins,
   nameSlot,
+  unitLevel,
   isDefenseSkill = false,
   sanityCost,
 }: SkillInfoPanelWithSuspenseProps) {
   const { t } = useTranslation('database')
-  const skillLevelCorrection = skillData.skillLevelCorrection ?? 0
-  const totalLevel = Math.max(MIN_LEVEL, level + skillLevelCorrection)
+  const totalLevel = skillLevelAt(unitLevel, skillData.skillLevelCorrection ?? 0)
   const atkWeight = skillData.targetNum ?? 1
 
   return (
@@ -52,9 +51,7 @@ export function SkillInfoPanelWithSuspense({
 
       <div data-slot="skill-name-area" className="absolute" style={LAYOUT.nameArea}>
         <Suspense
-          fallback={
-            <StyledNameSkeleton attributeType={skillData.attributeType} plate={LAYOUT.namePlate} />
-          }
+          fallback={<NamePlateSkeleton kind="skill" attributeType={skillData.attributeType} />}
         >
           {nameSlot}
         </Suspense>
@@ -67,28 +64,35 @@ export function SkillInfoPanelWithSuspense({
         className="absolute"
         style={LAYOUT.levelIcon}
       />
-      <span
-        data-slot="skill-level"
-        className="absolute underline leading-none whitespace-nowrap"
-        style={{ ...LAYOUT.levelText, fontFamily: getDisplayFontForNumeric() }}
-      >
-        {totalLevel}
-      </span>
+      {totalLevel !== undefined && (
+        <span
+          data-slot="skill-level"
+          className="absolute underline leading-none whitespace-nowrap"
+          style={{
+            ...LAYOUT.levelText,
+            textDecorationColor: UNIT_PANEL_COLORS.LEVEL_UNDERLINE,
+            textShadow: PANEL_LEVEL_SHADOW,
+            fontFamily: getDisplayFontForNumeric(),
+          }}
+        >
+          {totalLevel}
+        </span>
+      )}
 
       <span
         data-slot="skill-target-label"
-        className="absolute flex items-center whitespace-nowrap text-yellow-400"
-        style={LAYOUT.targetLabel}
+        className="absolute flex items-center whitespace-nowrap"
+        style={{ ...LAYOUT.targetLabel, color: UNIT_PANEL_COLORS.TARGET_LABEL }}
       >
         {t('identity.atkWeight')}
       </span>
       <div
         data-slot="skill-target-count"
-        className="absolute flex items-center gap-1"
+        className="absolute flex items-center"
         style={LAYOUT.targetCount}
       >
         {Array.from({ length: atkWeight }).map((_, index) => (
-          <img key={index} src={getAttackWeightIconPath()} alt="" className="size-[1em]" />
+          <img key={index} src={getAttackWeightIconPath()} alt="" style={LAYOUT.targetSquare} />
         ))}
       </div>
 

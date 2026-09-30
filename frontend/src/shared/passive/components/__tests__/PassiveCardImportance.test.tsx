@@ -1,10 +1,27 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { render } from '@testing-library/react'
+
+import krTable from '@static/data/fontAdvances/KR.json'
+import { FontAdvanceTableSchema } from '@/shared/cardLayout'
+import { NamePlate, type NamePlateImportance } from '@/shared/gameText'
 
 import { EGOPassiveCard } from '../EGOPassiveCard'
 import { IdentityPassiveCard } from '../IdentityPassiveCard'
 
-const slots = { nameSlot: <span>Name</span>, descSlot: <span>Desc</span>, flavorSlot: null }
+const slots = {
+  renderName: (importance: NamePlateImportance) => (
+    <NamePlate kind="passive" name="Name" importance={importance} />
+  ),
+  descSlot: <span>Desc</span>,
+  flavorSlot: null,
+}
+
+const KR_TABLE = FontAdvanceTableSchema.parse(krTable)
+
+vi.mock('@/shared/cardLayout', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/shared/cardLayout')>()),
+  useFontAdvances: () => KR_TABLE,
+}))
 
 const slot = (container: HTMLElement, name: string): HTMLElement | null =>
   container.querySelector<HTMLElement>(`[data-slot="${name}"]`)

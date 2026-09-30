@@ -134,14 +134,15 @@ describe('EGOName', () => {
 
 /**
  * The nine names the game's own screenshots were taken of, measured against the shipped
- * Korean advance table rather than the browser's canvas: the lines they break into and
- * the size they are drawn at, in cqw of the card root.
+ * Korean advance table rather than the browser's canvas: the lines they break into, which
+ * are the game's, and the size they are drawn at, in cqw of the card root, which is our
+ * model's output rather than a measurement of the game.
  */
 const NAME_FIXTURES: readonly (readonly [string, string, readonly string[], number])[] = [
   ['20310', '난 가위를 낼게, 너는?', ['난 가위를', '낼게, 너는?'], EGO_NAME_CQW.maxSize],
-  ['20609', '영작오 [宁作吾]', ['영작오 [宁作', '吾]'], 8.0276],
-  ['21008', '오혈읍루 [汚血泣淚]', ['오혈읍루 [汚血', '泣淚]'], 8.0848],
-  ['20809', '즉저살 [蝍蛆殺]', ['즉저살 [蝍蛆', '殺]'], 8.0848],
+  ['20609', '영작오 [宁作吾]', ['영작오 [宁作', '吾]'], 8.1563],
+  ['21008', '오혈읍루 [汚血泣淚]', ['오혈읍루 [汚血', '泣淚]'], 7.5414],
+  ['20809', '즉저살 [蝍蛆殺]', ['즉저살 [蝍蛆殺]'], 7.6415],
   ['20507', '갈망-미르칼라', ['갈망-', '미르칼라'], EGO_NAME_CQW.maxSize],
   ['21101', '토 파토스 마토스', ['토 파토스', '마토스'], EGO_NAME_CQW.maxSize],
   ['21001', '지식나무의 가지', ['지식나무의', '가지'], EGO_NAME_CQW.maxSize],

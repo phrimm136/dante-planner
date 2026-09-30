@@ -9,7 +9,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { SkillDescription } from '../SkillDescription'
-import { FLAVOR_TEXT_COLOR } from '@/lib/constants'
+import { UNIT_PANEL_COLORS } from '@/lib/constants'
 import type { SkillDescEntry } from '@/shared/gameData'
 
 // Asset path helper is used by the coin row renderer.
@@ -54,12 +54,12 @@ describe('SkillDescription', () => {
       expect(screen.queryByTestId('skill-flavor')).not.toBeInTheDocument()
     })
 
-    it('applies the FLAVOR_TEXT_COLOR brand color', () => {
+    it('applies the client flavor color', () => {
       render(<SkillDescription descData={baseDesc} flavor="lore" />)
 
       const flavor = screen.getByTestId('skill-flavor')
       // jsdom serializes hex into rgb(...) when comparing inline styles.
-      expect(flavor).toHaveStyle({ color: FLAVOR_TEXT_COLOR })
+      expect(flavor).toHaveStyle({ color: UNIT_PANEL_COLORS.FLAVOR })
     })
 
     it('renders flavor as the last child of the description container', () => {
@@ -162,13 +162,43 @@ describe('SkillDescription', () => {
       expect(screen.getByAltText('Coin 2')).toHaveAttribute('src', '/icons/coin-2.webp')
     })
 
-    it('sizes the flavor at 33 units with 15 and 35 unit margins', () => {
+    it('sets the description at a 1.394 em pitch trimmed to its first line', () => {
+      const { container } = render(<SkillDescription descData={baseDesc} />)
+
+      const desc = container.querySelector<HTMLElement>('[data-slot="skill-desc"]')
+      expect(desc?.style.lineHeight).toBe('1.394')
+      expect(desc?.style.marginTop).toBe('-0.1063rem')
+      expect(desc?.style.letterSpacing).toBe('-0.02em')
+      expect(desc?.style.wordSpacing).toBe('-0.05em')
+      expect(desc).toHaveStyle({ color: UNIT_PANEL_COLORS.DESCRIPTION })
+    })
+
+    it('draws no trim above an empty description', () => {
+      const { container } = render(<SkillDescription descData={{ coinDescs: ['x'] }} />)
+
+      expect(
+        container.querySelector<HTMLElement>('[data-slot="skill-desc"]')?.style.marginTop,
+      ).toBe('')
+    })
+
+    it('sets the coin text at a 1.194 em pitch with no spacing', () => {
+      const { container } = render(<SkillDescription descData={baseDesc} />)
+
+      const coin = container.querySelector<HTMLElement>('[data-slot="skill-coin-text"]')
+      expect(coin?.style.lineHeight).toBe('1.194')
+      expect(coin?.style.marginTop).toBe('-0.0188rem')
+      expect(coin?.style.letterSpacing).toBe('0em')
+      expect(coin).toHaveStyle({ color: UNIT_PANEL_COLORS.COIN_TEXT })
+    })
+
+    it('sizes the flavor at 33 units with 15 and 35 unit margins less its line trim', () => {
       render(<SkillDescription descData={baseDesc} flavor="x" />)
 
       const flavor = screen.getByTestId('skill-flavor')
       expect(flavor.style.fontSize).toBe('0.7219rem')
-      expect(flavor.style.marginTop).toBe('0.3281rem')
-      expect(flavor.style.marginBottom).toBe('0.7656rem')
+      expect(flavor.style.marginTop).toBe('0.2404rem')
+      expect(flavor.style.marginBottom).toBe('0.6779rem')
+      expect(flavor.style.lineHeight).toBe('1.394')
     })
 
     it('sits the description flush on the coin list', () => {

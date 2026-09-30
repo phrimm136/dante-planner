@@ -5,7 +5,7 @@ import { render } from '@testing-library/react'
 
 import importanceColorCode from '@static/data/color/importanceColorCode.json'
 import { getImportanceGlowPath, getImportanceIconPath } from '@/shared/assets'
-import { ImportanceBanner } from '../ImportanceBanner'
+import { importanceBannerStyle } from '../../lib/importanceTable'
 import { ImportanceDecoration } from '../ImportanceDecoration'
 
 const globalsCss = readFileSync(
@@ -221,21 +221,13 @@ describe('ImportanceDecoration', () => {
   })
 })
 
-describe('ImportanceBanner', () => {
+describe('importanceBannerStyle', () => {
   it('tints only the name plate with the panel color and glows around it', () => {
-    const { container } = render(
-      <ImportanceBanner level={3} palette="player" className="row">
-        <span>Name</span>
-      </ImportanceBanner>,
-    )
-    const banner = slot(container, 'importance-banner')
-    expect(banner?.classList.contains('row')).toBe(true)
-    expect(variable(banner, '--name-body')).toMatch(/^#87cb00(ff)?$/i)
-    expect(variable(banner, '--importance-panel-glow')).toBe(
-      importanceColorCode.player['3'].passiveGlow,
-    )
-    expect(variable(banner, '--name-text')).toMatch(/^#f6ff00(ff)?$/i)
-    expect(banner?.style.backgroundColor).toBe('')
+    const banner = importanceBannerStyle(3, 'player') as Record<string, string>
+    expect(banner['--name-body']).toMatch(/^#87cb00(ff)?$/i)
+    expect(banner['--importance-panel-glow']).toBe(importanceColorCode.player['3'].passiveGlow)
+    expect(banner['--name-text']).toMatch(/^#f6ff00(ff)?$/i)
+    expect(banner.backgroundColor).toBeUndefined()
     expect(cssBlock('.importance-banner')).not.toContain('background-color')
     expect(cssBlock(".importance-banner [data-slot='name-plate']")).toContain(
       'animation: importance-plate-glow',
@@ -246,12 +238,7 @@ describe('ImportanceBanner', () => {
     )
   })
 
-  it('renders a plain row at level 0', () => {
-    const { container } = render(
-      <ImportanceBanner level={0} palette="player" className="row">
-        <span>Name</span>
-      </ImportanceBanner>,
-    )
-    expect(container.innerHTML).toBe('<div class="row"><span>Name</span></div>')
+  it('sets no banner at level 0', () => {
+    expect(importanceBannerStyle(0, 'player')).toBeUndefined()
   })
 })

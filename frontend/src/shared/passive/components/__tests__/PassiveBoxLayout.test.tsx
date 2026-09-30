@@ -1,11 +1,26 @@
 import { use } from 'react'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { render } from '@testing-library/react'
+
+import krTable from '@static/data/fontAdvances/KR.json'
+import { FontAdvanceTableSchema } from '@/shared/cardLayout'
+import { NamePlate } from '@/shared/gameText'
 
 import { EGOPassiveCard } from '../EGOPassiveCard'
 import { IdentityPassiveCard } from '../IdentityPassiveCard'
 
-const slots = { nameSlot: <span>Name</span>, descSlot: <span>Desc</span>, flavorSlot: null }
+const slots = {
+  renderName: () => <span>Name</span>,
+  descSlot: <span>Desc</span>,
+  flavorSlot: null,
+}
+
+const KR_TABLE = FontAdvanceTableSchema.parse(krTable)
+
+vi.mock('@/shared/cardLayout', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/shared/cardLayout')>()),
+  useFontAdvances: () => KR_TABLE,
+}))
 
 const slot = (container: HTMLElement, name: string): HTMLElement => {
   const found = container.querySelector<HTMLElement>(`[data-slot="${name}"]`)
@@ -49,12 +64,22 @@ describe('passive box layout', () => {
     },
   )
 
-  it('keeps the banner colours when the plate row gets its margins', () => {
+  it('keeps the banner colours on the plate inside the margined row', () => {
     const { container } = render(
-      <IdentityPassiveCard {...slots} isLocked={false} importanceLevel={3} palette="player" />,
+      <IdentityPassiveCard
+        {...slots}
+        renderName={(importance) => (
+          <NamePlate kind="passive" name="Name" importance={importance} />
+        )}
+        isLocked={false}
+        importanceLevel={3}
+        palette="player"
+      />,
     )
+    const row = slot(container, 'passive-box').firstElementChild as HTMLElement
     const banner = slot(container, 'importance-banner')
-    expect(banner.style.marginRight).toBe('8.1375rem')
+    expect(row.style.marginRight).toBe('8.1375rem')
+    expect(row.contains(banner)).toBe(true)
     expect(banner.style.getPropertyValue('--name-body')).not.toBe('')
   })
 
@@ -62,7 +87,7 @@ describe('passive box layout', () => {
     const { container } = render(
       <Card
         {...slots}
-        nameSlot={<NeverResolves />}
+        renderName={() => <NeverResolves />}
         isLocked={false}
         importanceLevel={0}
         palette="player"
@@ -82,7 +107,7 @@ describe('passive box layout', () => {
     )
     const info = slot(container, 'passive-info')
     expect(info.textContent).toBe('Desc')
-    expect(info.style.marginTop).toBe('0.4375rem')
+    expect(info.style.marginTop).toBe('0.3312rem')
     expect(info.style.paddingLeft).toBe('0.5906rem')
     expect(info.style.paddingRight).toBe('0.4375rem')
   })

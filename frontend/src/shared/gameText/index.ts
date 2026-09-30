@@ -3,8 +3,8 @@ export { FormattedDescription } from './components/FormattedDescription'
 export { KeywordString } from './components/KeywordString'
 export { KeywordsDisplay } from './components/KeywordsDisplay'
 export { FormattedSanityText } from './components/FormattedSanityText'
-export { StyledSkillName, StyledNameSkeleton } from './components/StyledName'
-export type { PlateGeometry } from './components/StyledName'
+export { NamePlate, NamePlateSkeleton, StyledSkillName } from './components/StyledName'
+export type { NamePlateImportance, NamePlateKind } from './components/StyledName'
 
 export { useColorCodes } from './hooks/useColorCodes'
 export { useSanityConditionI18n } from './hooks/useSanityConditionData'
@@ -18,6 +18,12 @@ export {
 
 export { applyTextStyles } from './lib/unityRichText'
 export { colorRuns, tmpPlainText, type ColorRun } from './lib/tmpRichText'
+export {
+  PANEL_COIN_NUMBER_SHADOW,
+  PANEL_LEVEL_SHADOW,
+  emUnderlayShadow,
+  panelNameShadow,
+} from './lib/panelUnderlay'
 
 export { ColorCodeMapSchema } from './schemas/ColorCodeSchemas'
 export { SanityConditionI18nSchema } from './schemas/SanityConditionSchemas'

@@ -3,11 +3,10 @@ import {
   SkillDescription,
   getMergedSkillDesc,
   selectSkillLevel,
-  skillUpperLayout,
   toSkillCardData,
 } from '@/shared/skill'
 import { getBattleSkillIconPath, getSkillImagePath } from '@/shared/assets'
-import { StyledSkillName } from '@/shared/gameText'
+import { NamePlate } from '@/shared/gameText'
 import type { ImportancePalette, SkillEntry, SkillId, SkillLevel } from '@/shared/gameData'
 import { useBattleDetailI18n, type BattleI18nConfig } from '../../hooks/useBattleDetailData'
 import { phaseTexts } from '../../lib/battleDetail'
@@ -27,6 +26,7 @@ interface BattleSkillCardProps {
   tier: number
   palette: ImportancePalette
   importancePosition: 'unlock' | 'base'
+  unitLevel: number | undefined
 }
 
 function battleSkillImagePath(
@@ -47,6 +47,7 @@ export function BattleSkillCard({
   tier,
   palette,
   importancePosition,
+  unitLevel,
 }: BattleSkillCardProps) {
   const { level, isLocked } = selectSkillLevel(entry.levels, tier)
   const descriptionLevel = isLocked ? level.level : tier
@@ -68,6 +69,7 @@ export function BattleSkillCard({
       importanceLevel={entry.importanceLevel}
       palette={palette}
       importancePosition={importancePosition}
+      unitLevel={unitLevel}
       isDefenseSkill={cardData.atkType === 'NONE' || !cardData.atkType}
       isLocked={isLocked}
       missingImage="frame"
@@ -91,10 +93,10 @@ function BattleSkillName({
 }) {
   const text = useSkillText(source, skillId)
   return (
-    <StyledSkillName
+    <NamePlate
+      kind="skill"
       name={text?.name ?? skillId}
       {...(attributeType !== undefined && { attributeType })}
-      plate={skillUpperLayout().namePlate}
     />
   )
 }

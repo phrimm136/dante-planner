@@ -18,6 +18,8 @@ export interface LineMetrics {
   ascender: number
   descender: number
   lineHeight: number
+  /** The display face's gap below its descender, whichever faces drew the line. */
+  lineGap: number
 }
 
 /** The band, box and line metrics a wrapping name is fitted into. */
@@ -148,11 +150,21 @@ export function wrapText(
 }
 
 /**
+ * The distance from one line's baseline to the next, in em.
+ *
+ * TextMeshPro drops each new line by the deepest descender above it plus the tallest
+ * ascender on it, then the display face's line gap and the node's line spacing, so a hanja
+ * on either line deepens the step by its fallback face's own ascender or descender.
+ */
+export function linePitch(above: LineMetrics, below: LineMetrics, lineSpacingEm: number): number {
+  return above.descender + below.ascender + below.lineGap + lineSpacingEm
+}
+
+/**
  * Whether `lines` stand inside the box at `size`.
  *
- * The block runs from the first line's ascender, down each line's own pitch, to the
- * descender under the last baseline; every line takes the metrics of the faces that draw
- * it, so one hanja sets that line from the face that supplied it.
+ * The block runs from the first line's ascender, down each pitch, to the descender under
+ * the last baseline.
  */
 function fitsHeight(lines: string[], size: number, spec: FitSpec): boolean {
   const metrics = lines.map((line) => spec.metricsOf(line))
@@ -161,16 +173,48 @@ function fitsHeight(lines: string[], size: number, spec: FitSpec): boolean {
   if (first === undefined || last === undefined) return true
 
   let height = first.ascender + last.descender
-  for (const line of metrics.slice(0, -1)) height += line.lineHeight + spec.lineSpacingEm
+  let above = first
+  for (const below of metrics.slice(1)) {
+    height += linePitch(above, below, spec.lineSpacingEm)
+    above = below
+  }
   return height * size <= spec.height
 }
 
+const AUTO_SIZE_MAX_PASSES = 100
+
+const AUTO_SIZE_SETTLE_STEPS = 1.02
+
+function roundToStep(size: number, spec: FitSpec): number {
+  return spec.max + Math.floor((size - spec.max) / spec.step + 0.5) * spec.step
+}
+
+function overflows(fitted: { lines: string[]; overran: boolean }, size: number, spec: FitSpec) {
+  return fitted.overran || !fitsHeight(fitted.lines, size, spec)
+}
+
 export function fitText(text: string, spec: FitSpec, measure: Measure): FittedText {
-  for (let size = spec.max; size > spec.min; size -= spec.step) {
-    const { lines, overran } = wrapText(text, size, spec, measure)
-    if (!overran && fitsHeight(lines, size, spec)) return { fontSize: size, lines }
+  let ceiling = spec.max
+  let floor = spec.min
+  let size = spec.max
+
+  for (let pass = 0; pass < AUTO_SIZE_MAX_PASSES; pass += 1) {
+    const fitted = wrapText(text, size, spec, measure)
+
+    if (size > spec.min && overflows(fitted, size, spec)) {
+      ceiling = size
+      size = Math.max(roundToStep(size - Math.max((size - floor) / 2, spec.step), spec), spec.min)
+      continue
+    }
+    if (ceiling - floor > spec.step * AUTO_SIZE_SETTLE_STEPS && size < spec.max) {
+      floor = size
+      size = Math.min(roundToStep(size + Math.max((ceiling - size) / 2, spec.step), spec), spec.max)
+      continue
+    }
+    return { fontSize: size, lines: fitted.lines }
   }
-  return { fontSize: spec.min, lines: wrapText(text, spec.min, spec, measure).lines }
+
+  return { fontSize: size, lines: wrapText(text, size, spec, measure).lines }
 }
 
 export function fitFontSize(text: string, spec: ScaleSpec, measure: Measure): number {

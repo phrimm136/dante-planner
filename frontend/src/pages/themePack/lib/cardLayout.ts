@@ -44,11 +44,6 @@ export const THEME_PACK_NAME_TRACKING: TrackingSpec = {
   wordSpacingEm: -0.05,
 }
 
-export const THEME_PACK_NAME_TEXT = {
-  letterSpacing: `${String(THEME_PACK_NAME_TRACKING.letterSpacingEm)}em`,
-  wordSpacing: `${String(THEME_PACK_NAME_TRACKING.wordSpacingEm)}em`,
-} as const
-
 const NEWLINE = /\n/g
 
 export function themePackCardName(raw: string): string {

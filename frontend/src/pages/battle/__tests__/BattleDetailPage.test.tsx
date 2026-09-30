@@ -127,7 +127,7 @@ describe('engagement selector', () => {
       await mountEnemy('8041')
 
       expect(pressed('Story')).toBe('4-3 (Lv. 29)')
-      expect(selectorGroup('Part')).toBeNull()
+      expect(groupButtons('Part')).toEqual(['All', 'Body'])
       expect(renderedSkillIds()).toEqual(['804101', '804102', '804103', '804104'])
 
       selectIn('Story', '4-6 (Lv. 30)')
@@ -228,6 +228,23 @@ describe('parts', () => {
       expect(within(head).getByText('Stagger')).toBeDefined()
       expect(metadata().queryAllByTestId('battle-part-hp')).toHaveLength(0)
       expect(renderedPassiveIds()).toEqual(['806301'])
+    },
+    TEST_BUDGET_MS,
+  )
+})
+
+describe('single-part units', () => {
+  it(
+    'offers All and the one part of 1347 and draws its skills at the row level',
+    async () => {
+      await mountEnemy('1347')
+
+      const parts = groupButtons('Part')
+      expect(parts).toHaveLength(2)
+      expect(parts[0]).toBe('All')
+
+      const card = requireSlot('detail-sections').querySelector('[data-skill-id="134707"]')
+      expect(card?.querySelector('[data-slot="skill-level"]')?.textContent).toBe('88')
     },
     TEST_BUDGET_MS,
   )

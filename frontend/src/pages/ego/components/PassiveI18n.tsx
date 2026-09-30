@@ -1,8 +1,7 @@
 import { useEGODetailI18n } from '../hooks/useEGODetailData'
 import { FormattedDescription } from '@/shared/gameText'
-import { StyledSkillName } from '@/shared/gameText'
+import { NamePlate, type NamePlateImportance } from '@/shared/gameText'
 import { EGOPassiveCard, passiveBoxLayout } from '@/shared/passive'
-import { FLAVOR_TEXT_COLOR } from '@/lib/constants'
 import type { PassiveId } from '@/shared/gameData'
 
 interface PassiveCardWithSuspenseProps {
@@ -14,7 +13,9 @@ interface PassiveCardWithSuspenseProps {
 export function PassiveCardWithSuspense({ id, passiveId, isLocked }: PassiveCardWithSuspenseProps) {
   return (
     <EGOPassiveCard
-      nameSlot={<PassiveNameContent id={id} passiveId={passiveId} />}
+      renderName={(importance) => (
+        <PassiveNameContent id={id} passiveId={passiveId} importance={importance} />
+      )}
       descSlot={<PassiveDescContent id={id} passiveId={passiveId} />}
       flavorSlot={<PassiveFlavorContent id={id} passiveId={passiveId} />}
       isLocked={isLocked}
@@ -24,14 +25,23 @@ export function PassiveCardWithSuspense({ id, passiveId, isLocked }: PassiveCard
   )
 }
 
-function PassiveNameContent({ id, passiveId }: { id: string; passiveId: PassiveId }) {
+function PassiveNameContent({
+  id,
+  passiveId,
+  importance,
+}: {
+  id: string
+  passiveId: PassiveId
+  importance: NamePlateImportance
+}) {
   const i18n = useEGODetailI18n(id)
   const passive = i18n.passives[passiveId]
   return (
-    <StyledSkillName
+    <NamePlate
+      kind="passive"
       name={passive?.name || passiveId}
       attributeType="NEUTRAL"
-      plate={passiveBoxLayout().plate}
+      importance={importance}
     />
   )
 }
@@ -51,7 +61,7 @@ function PassiveFlavorContent({ id, passiveId }: { id: string; passiveId: Passiv
     <p
       data-testid="passive-flavor"
       className="italic whitespace-pre-line"
-      style={{ ...passiveBoxLayout().flavor, color: FLAVOR_TEXT_COLOR }}
+      style={passiveBoxLayout().flavor}
     >
       {flavor}
     </p>

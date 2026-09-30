@@ -1,9 +1,11 @@
 import { describe, it, expect } from 'vitest'
 
 import krTable from '@static/data/fontAdvances/KR.json'
+import enTable from '@static/data/fontAdvances/EN.json'
 import {
   advanceOf,
   createAdvanceMeasure,
+  faceTracking,
   FontAdvanceTableSchema,
   lineFaces,
   lineMetrics,
@@ -19,6 +21,7 @@ const TABLE: FontAdvanceTable = {
   descender: 0.3,
   capLine: 0.7,
   lineHeight: 1.4,
+  normalSpacingOffset: 0,
   averageAdvance: 0.5,
   advances: { '97': 0.5, '98': 0.5, '32': 1 },
   fallbacks: [
@@ -28,6 +31,7 @@ const TABLE: FontAdvanceTable = {
       descender: 0.4,
       capLine: 0.9,
       lineHeight: 1.6,
+      normalSpacingOffset: -0.2,
       codePoints: ['汚'.codePointAt(0) ?? 0],
     },
   ],
@@ -61,11 +65,11 @@ describe('createAdvanceMeasure', () => {
     expect(createAdvanceMeasure(TABLE, NO_TRACKING)('', 20)).toBe(0)
   })
 
-  it('charges letter spacing after every glyph, as the pen advances', () => {
+  it('charges letter spacing between glyphs and not after the last', () => {
     const measure = createAdvanceMeasure(TABLE, { letterSpacingEm: -0.1, wordSpacingEm: 0 })
 
-    expect(measure('ab', 10)).toBeCloseTo(10 - 2, 6)
-    expect(measure('a', 10)).toBeCloseTo(5 - 1, 6)
+    expect(measure('ab', 10)).toBeCloseTo(10 - 1, 6)
+    expect(measure('a', 10)).toBeCloseTo(5, 6)
   })
 
   it('charges word spacing once per space', () => {
@@ -77,7 +81,25 @@ describe('createAdvanceMeasure', () => {
   it('counts an astral code point once, not as two units', () => {
     const measure = createAdvanceMeasure(TABLE, { letterSpacingEm: -0.1, wordSpacingEm: 0 })
 
-    expect(measure('\u{20001}', 10)).toBeCloseTo(10 - 1, 6)
+    expect(measure('\u{20001}\u{20001}', 10)).toBeCloseTo(20 - 1, 6)
+  })
+
+  it('charges the spacing offset of the face that draws each glyph', () => {
+    const measure = createAdvanceMeasure(TABLE, NO_TRACKING)
+
+    expect(measure('a汚', 10)).toBeCloseTo(5 + 10, 6)
+    expect(measure('汚a', 10)).toBeCloseTo(10 - 2 + 5, 6)
+  })
+})
+
+describe('faceTracking', () => {
+  it('adds the display face spacing offset to the node character spacing', () => {
+    const table = { ...TABLE, normalSpacingOffset: 0.06 }
+
+    expect(faceTracking(table, { letterSpacingEm: -0.03, wordSpacingEm: -0.05 })).toEqual({
+      letterSpacingEm: -0.03 + 0.06,
+      wordSpacingEm: -0.05,
+    })
   })
 
   it('draws an overridden glyph at the advance it is handed', () => {
@@ -107,7 +129,7 @@ describe('lineFaces', () => {
 
 describe('lineMetrics', () => {
   it('lays a line out from the tallest of the faces that draw it', () => {
-    expect(lineMetrics(TABLE, 'a汚')).toEqual({
+    expect(lineMetrics(TABLE, 'a汚')).toMatchObject({
       ascender: 1.2,
       descender: 0.4,
       capLine: 0.9,
@@ -115,8 +137,12 @@ describe('lineMetrics', () => {
     })
   })
 
+  it('keeps the display face’s line gap on a line a fallback face draws', () => {
+    expect(lineMetrics(TABLE, 'a汚').lineGap).toBeCloseTo(1.4 - 0.9 - 0.3, 6)
+  })
+
   it('leaves a line the display face draws alone on its own metrics', () => {
-    expect(lineMetrics(TABLE, 'ab')).toEqual({
+    expect(lineMetrics(TABLE, 'ab')).toMatchObject({
       ascender: 0.9,
       descender: 0.3,
       capLine: 0.7,
@@ -139,6 +165,24 @@ describe('midlineOffsetEm', () => {
 
   it('leaves a face whose glyphs already centre on its leading where it stands', () => {
     expect(midlineOffsetEm({ ...TABLE, capLine: 0.6 })).toBeCloseTo(0, 6)
+  })
+})
+
+describe('the shipped spacing offsets', () => {
+  it('carries the Mikodacs face offset of +6 hundredths of an em', () => {
+    const table = FontAdvanceTableSchema.parse(enTable)
+
+    expect(table.face).toBe('Mikodacs SDF')
+    expect(table.normalSpacingOffset).toBeCloseTo(0.06, 6)
+  })
+
+  it('carries each Korean fallback face its own offset', () => {
+    const table = FontAdvanceTableSchema.parse(krTable)
+
+    expect(table.normalSpacingOffset).toBe(0)
+    expect(table.fallbacks.map((fallback) => fallback.normalSpacingOffset)).toEqual([
+      0.06, 0, 0, -0.15,
+    ])
   })
 })
 
@@ -170,12 +214,16 @@ describe('the shipped Korean table', () => {
   })
 
   it('lays a hanja line out from the face that supplies it', () => {
-    expect(lineMetrics(table, '오혈읍루 [汚血')).toEqual({
+    expect(lineMetrics(table, '오혈읍루 [汚血')).toMatchObject({
       ascender: 1.16,
       descender: 0.390625,
       capLine: 0.745098,
       lineHeight: 1.48,
     })
+  })
+
+  it('gaps a hanja line by KOTRA’s own line gap, not the fallback face’s', () => {
+    expect(lineMetrics(table, '오혈읍루 [汚血').lineGap).toBeCloseTo(0.132813, 6)
   })
 
   it('carries a Hangul syllable and no hanja, which the game falls back for', () => {

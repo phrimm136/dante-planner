@@ -1,20 +1,15 @@
 import { Suspense, type ReactNode } from 'react'
 
-import { StyledNameSkeleton } from '@/shared/gameText'
+import { NamePlateSkeleton, type NamePlateImportance } from '@/shared/gameText'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { SECTION_STYLES } from '@/lib/constants'
 import type { ImportancePalette } from '@/shared/gameData'
-import {
-  ImportanceBanner,
-  ImportanceDecoration,
-  hasImportance,
-  importanceBoxPadding,
-} from '@/shared/importance'
+import { ImportanceDecoration, hasImportance, importanceBoxPadding } from '@/shared/importance'
 import { passiveBoxLayout } from '../lib/passiveLayout'
 
 interface EGOPassiveCardProps {
-  nameSlot: ReactNode
+  renderName: (importance: NamePlateImportance) => ReactNode
   descSlot: ReactNode
   flavorSlot: ReactNode
   isLocked: boolean
@@ -23,7 +18,7 @@ interface EGOPassiveCardProps {
 }
 
 export function EGOPassiveCard({
-  nameSlot,
+  renderName,
   descSlot,
   flavorSlot,
   isLocked,
@@ -40,17 +35,12 @@ export function EGOPassiveCard({
     >
       <ImportanceDecoration level={importanceLevel} palette={palette} variant="passive" />
       <div data-slot="passive-box" className="relative" style={layout.box}>
-        <ImportanceBanner
-          level={importanceLevel}
-          palette={palette}
-          className={SECTION_STYLES.LAYOUT.row}
-          style={layout.plateRow}
-        >
-          <Suspense fallback={<StyledNameSkeleton attributeType="NEUTRAL" plate={layout.plate} />}>
-            {nameSlot}
+        <div className={SECTION_STYLES.LAYOUT.row} style={layout.plateRow}>
+          <Suspense fallback={<NamePlateSkeleton kind="passive" attributeType="NEUTRAL" />}>
+            {renderName({ level: importanceLevel, palette })}
           </Suspense>
           {isLocked && <span className="text-xs">🔒</span>}
-        </ImportanceBanner>
+        </div>
         <div data-slot="passive-info" className="text-sm" style={layout.info}>
           <Suspense fallback={<Skeleton className="h-4 w-full" />}>{descSlot}</Suspense>
         </div>

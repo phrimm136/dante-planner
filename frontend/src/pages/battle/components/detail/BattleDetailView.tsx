@@ -13,7 +13,6 @@ import {
   ownSources,
   rowUnitId,
   selectedPart,
-  selectorParts,
   visibleSkills,
   type PartSelection,
 } from '../../lib/battleDetail'
@@ -83,13 +82,12 @@ export function BattleDetailView({
   const tier = phaseTier(phase, kit.uptie)
   const source = { config, id, unitId, phaseId }
   const imageOwnerId = phase.identitySource === undefined ? undefined : String(phase.identitySource)
-  const choices = selectorParts(parts)
   const partOptions: SelectorOption<PartSelection>[] =
-    choices.length === 0
+    parts.length === 0
       ? []
       : [
           { value: ALL_PARTS, label: t('battle.detail.allParts') },
-          ...choices.map((each) => ({
+          ...parts.map((each) => ({
             value: each.id,
             label: (
               <BattlePartLabel
@@ -183,6 +181,7 @@ export function BattleDetailView({
               tier={tier}
               palette={palette}
               importancePosition={importancePosition}
+              unitLevel={level}
             />
           )}
         />
@@ -199,7 +198,7 @@ export function BattleDetailView({
       </DetailSection>
       {egoList.length > 0 && (
         <DetailSection title={t('section.ego')}>
-          <BattleEgoSection egoList={egoList} palette={palette} />
+          <BattleEgoSection egoList={egoList} unitLevel={level} palette={palette} />
         </DetailSection>
       )}
       {phase.sanity.hasSanity && (

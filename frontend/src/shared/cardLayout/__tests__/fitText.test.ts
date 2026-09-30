@@ -4,6 +4,7 @@ import {
   breakOpportunities,
   fitFontSize,
   fitText,
+  linePitch,
   wrapText,
   type FitSpec,
   type Measure,
@@ -13,8 +14,8 @@ import {
 const WIDTH_PER_PX = 0.5
 const measure: Measure = (text, px) => text.length * px * WIDTH_PER_PX
 
-/** One face for every line: ascender 1, descender 0.5, and a 1.5 em line height. */
-const PLAIN_METRICS = { ascender: 1, descender: 0.5, lineHeight: 1.5 }
+/** One face for every line: ascender 1, descender 0.5, a 1.5 em line height and no gap. */
+const PLAIN_METRICS = { ascender: 1, descender: 0.5, lineHeight: 1.5, lineGap: 0 }
 
 const SPEC: FitSpec = {
   max: 20,
@@ -27,7 +28,7 @@ const SPEC: FitSpec = {
 }
 
 /** A face twice as tall, for the lines carrying a glyph the display face has none for. */
-const TALL_METRICS = { ascender: 2, descender: 0.5, lineHeight: 2.5 }
+const TALL_METRICS = { ascender: 2, descender: 0.5, lineHeight: 2.5, lineGap: 0 }
 const tallOn =
   (mark: string): FitSpec['metricsOf'] =>
   (line) =>
@@ -148,20 +149,36 @@ describe('fitText', () => {
     expect(fitText('ab', tall, measure).fontSize).toBe(20)
   })
 
-  it('takes each line’s own pitch, not one pitch for the block', () => {
+  it('steps each line down by the descender above it and the ascender on it', () => {
     const mixed: FitSpec = { ...SPEC, width: 30, height: 70, step: 2, metricsOf: tallOn('汚') }
 
-    // First line ascender 2, its own pitch 2.5, last line descender 0.5: 5em fills 70px at 14px.
+    // Ascender 2, then descender 0.5 + ascender 1, then descender 0.5: 4em fits 70px at 16px.
     expect(fitText('汚血 ab', mixed, measure).lines).toEqual(['汚血', 'ab'])
-    expect(fitText('汚血 ab', mixed, measure).fontSize).toBe(14)
-    // The same two lines the other way round cost the short line's pitch: 1 + 1.5 + 0.5.
-    expect(fitText('ab 汚血', mixed, measure).fontSize).toBe(20)
+    expect(fitText('汚血 ab', mixed, measure).fontSize).toBe(16)
+    // The other way round: ascender 1, then descender 0.5 + ascender 2, then descender 0.5.
+    expect(fitText('ab 汚血', mixed, measure).fontSize).toBe(16)
   })
 
   it('stops at the first size that fits and never shrinks on to one line', () => {
     const mixed: FitSpec = { ...SPEC, width: 30, height: 70, step: 2, metricsOf: tallOn('汚') }
 
     expect(fitText('汚血 ab', mixed, measure).lines).toHaveLength(2)
+  })
+})
+
+describe('linePitch', () => {
+  it('steps a KOTRA line carrying a Noto hanja down to a Noto line as TextMeshPro does', () => {
+    // KOTRA descender 0.390625 under 汚, Noto ascender 1.16 over 泣, KOTRA's gap 0.132813, -0.2.
+    const above = { ascender: 1.16, descender: 0.390625, lineHeight: 1.48, lineGap: 0.132813 }
+    const below = { ascender: 1.16, descender: 0.390625, lineHeight: 1.48, lineGap: 0.132813 }
+
+    expect(linePitch(above, below, -0.2)).toBeCloseTo(1.483438, 6)
+  })
+
+  it('reduces to the face line height between two lines of the display face', () => {
+    const kotra = { ascender: 0.927734, descender: 0.390625, lineHeight: 1.451172, lineGap: 0.132813 }
+
+    expect(linePitch(kotra, kotra, 0)).toBeCloseTo(1.451172, 6)
   })
 })
 

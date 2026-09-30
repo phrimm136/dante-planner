@@ -1,6 +1,5 @@
-import { FormattedDescription, StyledSkillName } from '@/shared/gameText'
+import { FormattedDescription, NamePlate, type NamePlateImportance } from '@/shared/gameText'
 import { IdentityPassiveCard, passiveBoxLayout } from '@/shared/passive'
-import { FLAVOR_TEXT_COLOR } from '@/lib/constants'
 import type { ImportancePalette } from '@/shared/gameData'
 import { useBattleDetailI18n } from '../../hooks/useBattleDetailData'
 import { phaseTexts } from '../../lib/battleDetail'
@@ -31,7 +30,9 @@ export function BattlePassiveCard({
   return (
     <div data-passive-id={passiveId}>
       <IdentityPassiveCard
-        nameSlot={<PassiveName source={source} passiveId={passiveId} />}
+        renderName={(importance) => (
+          <PassiveName source={source} passiveId={passiveId} importance={importance} />
+        )}
         descSlot={<PassiveDesc source={source} passiveId={passiveId} />}
         flavorSlot={<PassiveFlavor source={source} passiveId={passiveId} />}
         condition={condition}
@@ -48,13 +49,22 @@ function usePassiveText(source: BattleTextSource, passiveId: string) {
   return phaseTexts(i18n, source.unitId, source.phaseId)?.passives?.[passiveId]
 }
 
-function PassiveName({ source, passiveId }: { source: BattleTextSource; passiveId: string }) {
+function PassiveName({
+  source,
+  passiveId,
+  importance,
+}: {
+  source: BattleTextSource
+  passiveId: string
+  importance: NamePlateImportance
+}) {
   const text = usePassiveText(source, passiveId)
   return (
-    <StyledSkillName
+    <NamePlate
+      kind="passive"
       name={text?.name ?? passiveId}
       attributeType="NEUTRAL"
-      plate={passiveBoxLayout().plate}
+      importance={importance}
     />
   )
 }
@@ -71,7 +81,7 @@ function PassiveFlavor({ source, passiveId }: { source: BattleTextSource; passiv
     <p
       data-testid="passive-flavor"
       className="italic whitespace-pre-line"
-      style={{ ...passiveBoxLayout().flavor, color: FLAVOR_TEXT_COLOR }}
+      style={passiveBoxLayout().flavor}
     >
       {flavor}
     </p>

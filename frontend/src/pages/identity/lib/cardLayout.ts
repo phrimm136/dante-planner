@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react'
 import {
   aspectOf,
   createAdvanceMeasure,
+  faceTracking,
   IDENTITY_GEOMETRY,
   layerStyle,
   levelShadow,
@@ -297,12 +298,13 @@ export function nameFirstLineOffset(table: FontAdvanceTable, language: FontTable
 }
 
 export function nameTextStyle(table: FontAdvanceTable, language: FontTableLanguage): CSSProperties {
+  const tracking = faceTracking(table, IDENTITY_NAME_TRACKING)
   return {
     marginTop: `${String(nameFirstLineOffset(table, language))}cqw`,
     fontSize: `${String(IDENTITY_CARD_TEXT.name.fontSize)}cqw`,
     lineHeight: nameLinePitch(table, language),
-    letterSpacing: `${String(IDENTITY_NAME_TRACKING.letterSpacingEm)}em`,
-    wordSpacing: `${String(IDENTITY_NAME_TRACKING.wordSpacingEm)}em`,
+    letterSpacing: `${String(tracking.letterSpacingEm)}em`,
+    wordSpacing: `${String(tracking.wordSpacingEm)}em`,
   }
 }
 

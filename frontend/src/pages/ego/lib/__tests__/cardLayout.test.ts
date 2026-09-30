@@ -117,7 +117,7 @@ describe('fitText over the game’s EGO names', () => {
     ['20310', '난 가위를 낼게, 너는?', ['난 가위를', '낼게, 너는?']],
     ['20507', '갈망-미르칼라', ['갈망-', '미르칼라']],
     ['21008', '오혈읍루 [汚血泣淚]', ['오혈읍루 [汚血', '泣淚]']],
-    ['20809', '즉저살 [蝍蛆殺]', ['즉저살 [蝍蛆', '殺]']],
+    ['20809', '즉저살 [蝍蛆殺]', ['즉저살 [蝍蛆殺]']],
     ['20609', '영작오 [宁作吾]', ['영작오 [宁作', '吾]']],
     ['21101', '토 파토스 마토스', ['토 파토스', '마토스']],
     ['21001', '지식나무의 가지', ['지식나무의', '가지']],
@@ -132,7 +132,7 @@ describe('fitText over the game’s EGO names', () => {
     const fitted = fitText('영작오 [宁作吾]', spec, egoMeasure)
 
     expect(fitted.lines).toHaveLength(2)
-    expect(fitted.fontSize).toBeCloseTo(8.0276, 4)
+    expect(fitted.fontSize).toBeCloseTo(8.1563, 4)
     expect(fitted.fontSize).toBeLessThan(spec.max)
   })
 })

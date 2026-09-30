@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 
 import {
   createAdvanceMeasure,
+  faceTracking,
   fitText,
   lineMetrics,
   midlineOffsetEm,
@@ -13,7 +14,6 @@ import { getDisplayFontForLanguage } from '@/lib/utils'
 import type { EGOId } from '@/shared/gameData'
 import { useEGOListI18n } from '../hooks/useEGOListData'
 import {
-  EGO_NAME_CQW,
   EGO_NAME_RECT,
   EGO_NAME_TRACKING,
   egoNameFitSpec,
@@ -32,6 +32,7 @@ export function EGOName({ id }: EGONameProps) {
   const fontTable = useFontAdvances(i18n.language)
   const measure = createAdvanceMeasure(fontTable, EGO_NAME_TRACKING)
   const fitted = fitText(name, egoNameFitSpec(fontTable), measure)
+  const tracking = faceTracking(fontTable, EGO_NAME_TRACKING)
 
   return (
     <div
@@ -51,8 +52,8 @@ export function EGOName({ id }: EGONameProps) {
             ...getDisplayFontForLanguage(i18n.language),
             fontSize: `${String(fitted.fontSize)}cqw`,
             lineHeight: egoNameLineHeight(lineMetrics(fontTable, line)),
-            letterSpacing: `${String(EGO_NAME_CQW.letterSpacingEm)}em`,
-            wordSpacing: `${String(EGO_NAME_CQW.wordSpacingEm)}em`,
+            letterSpacing: `${String(tracking.letterSpacingEm)}em`,
+            wordSpacing: `${String(tracking.wordSpacingEm)}em`,
             whiteSpace: 'nowrap',
             textShadow: nameShadow('ego', i18n.language),
           }}

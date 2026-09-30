@@ -2,6 +2,10 @@ import { describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 
 import panicInfoEN from '@static/i18n/EN/panicInfo.json'
+import enTable from '@static/data/fontAdvances/EN.json'
+import { FontAdvanceTableSchema } from '@/shared/cardLayout'
+import { CLIENT_TEXT_SCALE, SANITY_UNITS } from '@/lib/constants'
+import { clientLength } from '@/lib/utils'
 import { PanicTypeSection, PanicTypeSectionI18n, SanityConditionsSectionI18n } from '../SanityI18n'
 
 const LABELS: Record<string, string> = {
@@ -21,6 +25,13 @@ vi.mock(import('react-i18next'), async (importOriginal) => {
       }) as unknown as ReturnType<typeof actual.useTranslation>,
   }
 })
+
+const EN_TABLE = FontAdvanceTableSchema.parse(enTable)
+
+vi.mock('@/shared/cardLayout', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/shared/cardLayout')>()),
+  useFontAdvances: () => EN_TABLE,
+}))
 
 vi.mock(import('@/shared/gameText'), async (importOriginal) => ({
   ...(await importOriginal()),
@@ -92,14 +103,43 @@ describe('panic section', () => {
     expect(icon.classList).toContain('object-contain')
 
     const name = slot(container, 'panic-name')
-    expect(name.style.fontSize).toBe('1.12rem')
     expect(name.classList).toContain('text-center')
     expect(name.textContent).toBe('Panic')
 
     const desc = slot(container, 'panic-desc')
     expect(desc.style.marginLeft).toBe('6.5625rem')
-    expect(desc.style.paddingTop).toBe('2.625rem')
+    expect(desc.style.paddingTop).toBe('2.5187rem')
     expect(desc.style.top).toBe('0.3719rem')
+  })
+
+  it('draws the panic tag label in the regular weight at the top of its band', async () => {
+    const { container } = renderPanic()
+    const text = await screen.findByText('Panic Type', { selector: '[data-slot="panic-tag-text"]' })
+    expect(slot(container, 'panic-tag').classList).not.toContain('font-bold')
+    expect(text.style.fontSize).toBe(clientLength(SANITY_UNITS.PANIC.TAG_TEXT.FONT))
+    expect(text.style.letterSpacing).toBe(
+      `${String(SANITY_UNITS.PANIC.TAG_TEXT.LETTER_SPACING_EM + EN_TABLE.normalSpacingOffset)}em`,
+    )
+    expect(text.style.whiteSpace).toBe('nowrap')
+  })
+
+  it('shrinks a panic tag label that overruns the tag instead of wrapping it', async () => {
+    const shipped = LABELS['sanity.panicType']
+    LABELS['sanity.panicType'] = 'Panic Type Label'
+    try {
+      renderPanic()
+      const text = await screen.findByText('Panic Type Label', {
+        selector: '[data-slot="panic-tag-text"]',
+      })
+      const { FONT, MIN_FONT } = SANITY_UNITS.PANIC.TAG_TEXT
+      const units =
+        (Number.parseFloat(text.style.fontSize) / CLIENT_TEXT_SCALE.FONT_REM) *
+        CLIENT_TEXT_SCALE.FONT_UNITS
+      expect(units).toBeLessThan(FONT)
+      expect(units).toBeGreaterThanOrEqual(MIN_FONT)
+    } finally {
+      LABELS['sanity.panicType'] = shipped ?? ''
+    }
   })
 
   it('renders only the panic description, with no labels, for panic type 9997', () => {
@@ -158,7 +198,7 @@ describe('condition sections', () => {
     expect(tag.style.minWidth).toBe('8.8594rem')
     expect(tag.style.maxWidth).toBe('12.5781rem')
     expect(tag.style.paddingInline).toBe('0.5469rem')
-    expect(tag.style.fontSize).toBe('0.875rem')
+    expect(slot(tag, 'sanity-condition-tag-text').style.fontSize).toBe('0.875rem')
     expect(tag.style.whiteSpace).toBe('')
   })
 
@@ -166,7 +206,7 @@ describe('condition sections', () => {
     const { container } = renderConditions(['first', 'second'], ['third'])
     const list = slot(section(container, 'add'), 'sanity-condition-list')
     expect(list.style.rowGap).toBe('0.7313rem')
-    expect(list.style.paddingTop).toBe('2.1875rem')
+    expect(list.style.paddingTop).toBe('2.0812rem')
     expect(list.children).toHaveLength(2)
     expect(list.textContent).toBe('·first·second')
   })

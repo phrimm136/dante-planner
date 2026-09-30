@@ -46,6 +46,7 @@ export const SkillEntrySchema = z
     mpUsage: z.number(),
     isArea: z.boolean(),
     requireIDList: z.array(z.string()).optional(),
+    linkedPartTypes: z.array(z.string()).optional(),
     levels: z.tuple([SkillLevelSchema], SkillLevelSchema),
   })
   .strict()
