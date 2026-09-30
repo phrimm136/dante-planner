@@ -167,7 +167,21 @@ export const IMPORTANCE_PASSIVE_OVERHANG_UNITS = 40
 export const IMPORTANCE_ICON_UNITS = {
   SIZE: 200,
   TOP: { skill: 37, passive: 37 },
-  RIGHT: { skill: { unlock: 86, base: 286 }, passive: 0 },
+  RIGHT: { skill: { unlock: 86, base: 286, partIcon: 486 }, passive: 0 },
+} as const
+
+// [Rect]AbPartsIconGroup pos (-100, -30) from the box top-right; five [Image]AbPartsIcon 200x200 at
+// scale 1.3, columns x 300 / 100, rows y -100 / -300 / -500, colour #ebcaa2 alpha 0.275.
+// UpdateLayout floors the box at min(n, 3) * 200 + 60.
+export const PART_ICON_UNITS = {
+  SIZE: 260,
+  RIGHT: [70, 270],
+  ROW_PITCH: 200,
+  ROWS_PER_COLUMN: 3,
+  MAX_ICONS: 5,
+  BOX_FLOOR_PAD: 60,
+  COLOR: '#ebcaa2',
+  ALPHA: 0.275,
 } as const
 
 export const NAME_PLATE_UNITS = {
@@ -221,7 +235,11 @@ export const SKILL_UPPER_UNITS = {
   COIN_BG: { CENTER_X: 185.7, CENTER_Y: 54, WIDTH: 97.68, SPRITE_WIDTH: 73.5, SPRITE_HEIGHT: 45.5 },
   COIN_SCALE_LETTER_SPACING_EM: -0.06,
   BASE_POWER: { RIGHT_EDGE_X: 104, CENTER_Y: 142.7, FONT: 102.54 },
-  NUMERIC_FACE: { ASCENT_EM: 0.759766, DESCENT_EM: -0.240234, DIGIT_HEIGHT_EM: 0.693848 },
+  NUMERIC_FACE: {
+    FAMILY: 'var(--font-excelsior-ink)',
+    // ExcelsiorSans SDF digit ink top 44.40625 / 64; globals.css ascent-override 69.3848%.
+    DIGIT_HEIGHT_EM: 0.693848,
+  },
   COINS: { LEFT: 271.19, TOP: 14.3 },
   NAME_PLATE: { LEFT: 273.6, CENTER_Y: 111.3, RIGHT_MIN: 100 },
   LEVEL: {
@@ -241,11 +259,19 @@ export const SKILL_UPPER_UNITS = {
     WIDTH: 181.04,
     HEIGHT: 38,
     FONT: 33,
-    COUNT_LEFT: 643.86,
-    COUNT_WIDTH: 377.4,
-    COUNT_FONT: 35.3,
-    SQUARE: 24.6,
-    SQUARE_GAP: 8.2,
+    // [Text]TargetNumCount pos (7.221, 4.3), sizeDelta (377.416, 17.528), margin top 6,
+    // auto size 15-50, charSp 5.
+    COUNT_LEFT: 643.864,
+    COUNT_WIDTH: 377.416,
+    COUNT_POS_Y: 4.3,
+    COUNT_HEIGHT_DELTA: 17.528,
+    COUNT_MARGIN_TOP: 6,
+    COUNT_FONT_MAX: 50,
+    COUNT_FONT_MIN: 15,
+    COUNT_LETTER_SPACING_EM: 0.05,
+    // KOTRA_BOLD SDF ascent 47.314 / descent 19.922 at 51pt; U+25A0 advance 43.078.
+    COUNT_FACE_EM: { ASCENT: 0.927734, DESCENT: 0.390625, SQUARE_ADVANCE: 0.844669 },
+    COUNT_GLYPH: '■',
   },
 } as const
 

@@ -35,6 +35,7 @@ describe('ImportanceDecoration', () => {
     [{}, '1.8813rem'],
     [{ position: 'unlock' }, '1.8813rem'],
     [{ position: 'base' }, '6.2562rem'],
+    [{ position: 'partIcon' }, '10.6312rem'],
   ] as const)('places the skill triangle for %j at %s from the right', (positionProp, right) => {
     const { container } = render(
       <ImportanceDecoration level={1} palette="enemy" variant="skill" {...positionProp} />,

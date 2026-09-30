@@ -67,7 +67,7 @@ export {
   getBattleKeywordIconPath,
   getPanicIconPath,
   getIdentityPassiveCountIconPath,
-  getAttackWeightIconPath,
+  getAbPartIconPath,
   getBannerImagePath,
   getLockIconPath,
   getSanityIncIconPath,

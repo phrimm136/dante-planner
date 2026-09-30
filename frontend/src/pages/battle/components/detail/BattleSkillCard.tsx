@@ -69,6 +69,7 @@ export function BattleSkillCard({
       importanceLevel={entry.importanceLevel}
       palette={palette}
       importancePosition={importancePosition}
+      partTypes={entry.linkedPartTypes}
       unitLevel={unitLevel}
       isDefenseSkill={cardData.atkType === 'NONE' || !cardData.atkType}
       isLocked={isLocked}

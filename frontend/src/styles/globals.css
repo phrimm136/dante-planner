@@ -67,6 +67,15 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'Excelsior Sans Ink';
+  src: url('../assets/fonts/ExcelsiorSans.ttf');
+  ascent-override: 69.3848%;
+  descent-override: 0%;
+  line-gap-override: 0%;
+  font-display: swap;
+}
+
 /* Bebas Neue - UI label font */
 @font-face {
   font-family: 'Bebas Neue';
@@ -95,6 +104,7 @@
   --font-higashiome: 'HigashiOme Gothic C', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
   --font-chinese: 'Chinese Font', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   --font-excelsior: 'Excelsior Sans', sans-serif;
+  --font-excelsior-ink: 'Excelsior Sans Ink', sans-serif;
   --font-bebas: 'Bebas Neue', sans-serif;
   --font-tagmarker: 'Tagmarker', sans-serif;
 }

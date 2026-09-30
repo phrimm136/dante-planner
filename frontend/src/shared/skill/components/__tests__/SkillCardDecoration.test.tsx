@@ -158,8 +158,9 @@ describe('skill card frame from enemy 1339 skill 133907', () => {
     expect(label.style.height).toBe('0.8313rem')
     expect(label.style.fontSize).toBe('0.7219rem')
     const count = slot(container, 'skill-target-count')
-    expect(count.style.left).toBe('14.0844rem')
-    expect(count.style.width).toBe('8.2556rem')
+    expect(count.style.left).toBe('14.0845rem')
+    expect(count.style.top).toBe('4.1956rem')
+    expect(count.style.transform).toBe('translateY(-50%)')
   })
 
   it('insets the lower block 30 units on each side', () => {

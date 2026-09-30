@@ -39,6 +39,12 @@ describe('SkillEntrySchema', () => {
     ).toBe(false)
   })
 
+  it('rejects a linked part type outside AB_PART_TYPE', () => {
+    const skill = identity10310.skills['1031001']
+    expect(SkillEntrySchema.safeParse({ ...skill, linkedPartTypes: ['BODY'] }).success).toBe(true)
+    expect(SkillEntrySchema.safeParse({ ...skill, linkedPartTypes: ['WING'] }).success).toBe(false)
+  })
+
   it('rejects an unknown field', () => {
     expect(
       SkillEntrySchema.safeParse({ ...identity10310.skills['1031001'], slot: 1 }).success,

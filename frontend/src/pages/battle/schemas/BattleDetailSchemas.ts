@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import {
+  AbPartTypeSchema,
   EgoTypeSchema,
   PassiveIdSchema,
   SkillDescEntrySchema,
@@ -93,7 +94,7 @@ const BattleSkillLevelSchema = SkillLevelSchema.extend({ unlock: unused })
 
 const BattleSkillEntrySchema = SkillEntrySchema.extend({
   textID: z.number().optional(),
-  linkedPartTypes: z.array(z.string()).optional(),
+  linkedPartTypes: z.array(AbPartTypeSchema).optional(),
   levels: z.tuple([BattleSkillLevelSchema], BattleSkillLevelSchema),
 })
 

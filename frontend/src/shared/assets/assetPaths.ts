@@ -1,5 +1,6 @@
 import { AFFINITIES, ATK_TYPES } from '@/shared/gameData'
 import type {
+  AbPartType,
   CoinColor,
   ImportancePalette,
   ImportanceTier,
@@ -22,6 +23,20 @@ const COIN_SPRITES: Record<CoinColor, string> = {
   GREY: 'grey',
   GREEN: 'green',
   PURPLE: 'purple',
+}
+
+const AB_PART_SPRITES: Record<AbPartType, string> = {
+  HEAD: 'head',
+  BACK_HEAD: 'head',
+  BODY: 'body',
+  LEFT_ARM: 'left-arm',
+  RIGHT_ARM: 'right-arm',
+  LEG: 'leg',
+  TAIL: 'tail',
+  BACK: 'back',
+  RIGHT_EYE: 'right-eye',
+  LEFT_EYE: 'left-eye',
+  HEAD_PLATE: 'head-plate',
 }
 
 const frameLevel = (skillTier: number): number => Math.max(1, Math.min(3, skillTier))
@@ -136,7 +151,7 @@ export const PATHS = {
   cautionStripe: () => resolveAsset('/images/UI/common/caution-stripe.webp'),
   namePlate: (kind: 'skill' | 'passive') => resolveAsset(`/images/UI/common/name-plate-${kind}.webp`),
   egoTierIcon: (tier: number) => resolveAsset(`/images/UI/common/tier-${String(tier)}.webp`),
-  attackWeightIcon: () => resolveAsset('/images/UI/common/atkWeight.webp'),
+  abPartIcon: (sprite: string) => resolveAsset(`/images/UI/common/part-${sprite}.webp`),
   lockIcon: () => resolveAsset('/images/UI/common/lock.webp'),
   buttonBase: () => resolveAsset('/images/UI/common/button.webp'),
   buttonOnHover: () => resolveAsset('/images/UI/common/button-hover.webp'),
@@ -277,7 +292,8 @@ export const getImportanceGlowPath = (palette: ImportancePalette, tier: Importan
 export const getCautionStripePath = (): string => path('cautionStripe')
 export const getNamePlatePath = (kind: 'skill' | 'passive'): string => path('namePlate', kind)
 export const getEGOTierIconPath = (tier: number): string => path('egoTierIcon', tier)
-export const getAttackWeightIconPath = (): string => path('attackWeightIcon')
+export const getAbPartIconPath = (partType: AbPartType): string =>
+  path('abPartIcon', AB_PART_SPRITES[partType])
 export const getLockIconPath = (): string => path('lockIcon')
 export const getButtonBasePath = (): string => path('buttonBase')
 export const getButtonOnHoverPath = (): string => path('buttonOnHover')

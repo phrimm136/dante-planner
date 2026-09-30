@@ -23,7 +23,7 @@ const IMPORTANCE_COLORS = ImportanceColorCodeSchema.parse(importanceColorCode)
 
 export type ImportanceVariant = 'skill' | 'passive'
 
-export type ImportancePosition = 'unlock' | 'base'
+export type ImportancePosition = 'unlock' | 'base' | 'partIcon'
 
 type AlphaRange = readonly [number, number]
 

@@ -52,6 +52,20 @@ describe('battle skill linked part types', () => {
     })
   })
 
+  it('rejects a linked part type outside AB_PART_TYPE', () => {
+    const [phase] = enemy1519.units['1519'].phases
+    if (phase === undefined) throw new Error('no phase')
+    const skills = {
+      ...phase.skills,
+      '151901': { ...phase.skills['151901'], linkedPartTypes: ['WING'] },
+    }
+    const raw = {
+      ...enemy1519,
+      units: { '1519': { ...enemy1519.units['1519'], phases: [{ ...phase, skills }] } },
+    }
+    expect(EnemyDataSchema.safeParse(raw).success).toBe(false)
+  })
+
   it('parses enemy 91059 skills without linked part types', () => {
     const [phase] = EnemyDataSchema.parse(enemy91059).units['91059']?.phases ?? []
     const skills = Object.values(phase?.skills ?? {})

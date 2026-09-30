@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import { SkillIdSchema } from '../ids'
+import { AbPartTypeSchema } from './SharedSchemas'
 
 export const SkillDescEntrySchema = z.object({
   desc: z.string().optional(),
@@ -46,7 +47,7 @@ export const SkillEntrySchema = z
     mpUsage: z.number(),
     isArea: z.boolean(),
     requireIDList: z.array(z.string()).optional(),
-    linkedPartTypes: z.array(z.string()).optional(),
+    linkedPartTypes: z.array(AbPartTypeSchema).optional(),
     levels: z.tuple([SkillLevelSchema], SkillLevelSchema),
   })
   .strict()

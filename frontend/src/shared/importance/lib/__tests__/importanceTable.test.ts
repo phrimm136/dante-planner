@@ -61,6 +61,7 @@ describe('importance geometry', () => {
   it.each([
     ['unlock', '1.8813rem'],
     ['base', '6.2562rem'],
+    ['partIcon', '10.6312rem'],
   ] as const)(
     'places the skill triangle at its %s position, %s in from the right',
     (position, right) => {

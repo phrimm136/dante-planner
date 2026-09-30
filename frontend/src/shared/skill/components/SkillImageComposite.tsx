@@ -7,7 +7,6 @@ import {
 } from '@/shared/assets'
 import { type SkillAttributeType } from '@/shared/gameData'
 import { PANEL_COIN_NUMBER_SHADOW } from '@/shared/gameText'
-import { getDisplayFontForNumeric } from '@/lib/utils'
 import { SKILL_FRAME_GLOW_COLORS, UNIT_PANEL_COLORS } from '@/lib/constants'
 import { skillUpperLayout } from '../lib/skillLayout'
 
@@ -123,7 +122,6 @@ export function SkillImageComposite({
           ...LAYOUT.basePower,
           color: UNIT_PANEL_COLORS.BASE_POWER,
           textShadow: PANEL_COIN_NUMBER_SHADOW,
-          fontFamily: getDisplayFontForNumeric(),
         }}
       >
         {basePower}
@@ -136,7 +134,6 @@ export function SkillImageComposite({
           ...LAYOUT.coinScale,
           color: UNIT_PANEL_COLORS.COIN_SCALE,
           textShadow: PANEL_COIN_NUMBER_SHADOW,
-          fontFamily: getDisplayFontForNumeric(),
         }}
       >
         {coinPower > 0 ? `+${coinPower}` : coinPower}

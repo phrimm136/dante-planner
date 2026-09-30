@@ -1,14 +1,19 @@
 import { Suspense, useState, type ReactNode } from 'react'
 
-import { getLockIconPath } from '@/shared/assets'
+import { getAbPartIconPath, getLockIconPath } from '@/shared/assets'
 import { type SkillAttributeType } from '@/shared/gameData'
-import type { ImportancePalette, SkillCoin } from '@/shared/gameData'
+import type { AbPartType, ImportancePalette, SkillCoin } from '@/shared/gameData'
 import { ImportanceDecoration, hasImportance } from '@/shared/importance'
 import { SkillImageComposite } from './SkillImageComposite'
 import { SkillCardLayout } from './SkillCardLayout'
 import { SkillInfoPanelWithSuspense } from './SkillInfoPanel'
 import { SkillDescriptionSkeleton } from './SkillDescription'
-import { skillLowerLayout } from '../lib/skillLayout'
+import {
+  partIconBoxFloor,
+  partIconSlots,
+  partIconsMoveImportance,
+  skillLowerLayout,
+} from '../lib/skillLayout'
 
 interface SkillCardData {
   attributeType?: string | undefined
@@ -34,6 +39,7 @@ interface SkillCardProps {
   importanceLevel: number
   palette: ImportancePalette
   importancePosition?: 'unlock' | 'base'
+  partTypes?: readonly AbPartType[] | undefined
   missingImage?: 'placeholder' | 'frame'
 }
 
@@ -52,6 +58,7 @@ export function SkillCard({
   importanceLevel,
   palette,
   importancePosition = 'unlock',
+  partTypes,
   missingImage = 'placeholder',
 }: SkillCardProps) {
   const [showMissing, setShowMissing] = useState(false)
@@ -62,6 +69,9 @@ export function SkillCard({
   const basePower = skillData.defaultValue ?? 0
   const coinPower = skillData.scale ?? 0
   const decorated = hasImportance(importanceLevel)
+  const shownPartTypes =
+    importancePosition === 'base' && !isLocked && partTypes !== undefined ? partTypes : []
+  const hasPartIcons = shownPartTypes.length > 0
 
   const layout = (
     <SkillCardLayout
@@ -93,19 +103,47 @@ export function SkillCard({
     />
   )
 
-  const card = decorated ? (
-    <div className="relative isolate @container" data-importance-box="">
-      {layout}
-      <ImportanceDecoration
-        level={importanceLevel}
-        palette={palette}
-        variant="skill"
-        position={importancePosition}
-      />
-    </div>
-  ) : (
-    layout
-  )
+  const card =
+    decorated || hasPartIcons ? (
+      <div
+        className="relative isolate @container"
+        data-importance-box={decorated ? '' : undefined}
+        style={partIconBoxFloor(shownPartTypes.length)}
+      >
+        {layout}
+        {decorated && (
+          <ImportanceDecoration
+            level={importanceLevel}
+            palette={palette}
+            variant="skill"
+            position={
+              partIconsMoveImportance(shownPartTypes.length) ? 'partIcon' : importancePosition
+            }
+          />
+        )}
+        {partIconSlots(shownPartTypes).map(({ partType, style }, index) => {
+          const mask = `url(${getAbPartIconPath(partType)})`
+          return (
+            <span
+              key={index}
+              aria-hidden="true"
+              data-slot="skill-part-icon"
+              data-part-type={partType}
+              className="pointer-events-none absolute -z-10"
+              style={{
+                ...style,
+                WebkitMaskImage: mask,
+                maskImage: mask,
+                maskSize: '100% 100%',
+                maskRepeat: 'no-repeat',
+              }}
+            />
+          )
+        })}
+      </div>
+    ) : (
+      layout
+    )
 
   if (!isLocked) return card
 

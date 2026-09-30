@@ -3,19 +3,18 @@ import { useTranslation } from 'react-i18next'
 
 import {
   SANITY_INDICATOR_COLORS,
+  SKILL_UPPER_UNITS,
   TARGET_LABEL_GEO_SHIFT_EM,
   UNIT_PANEL_COLORS,
+  UNIT_PANEL_UNDERLAY_COLORS,
+  UNIT_PANEL_UNDERLAYS_EM,
 } from '@/lib/constants'
-import { getDisplayFontForNumeric } from '@/lib/utils'
-import { NamePlateSkeleton, PANEL_LEVEL_SHADOW } from '@/shared/gameText'
-import {
-  getAttackWeightIconPath,
-  getAttackLevelIconPath,
-  getDefenseLevelIconPath,
-} from '@/shared/assets'
+import { clientLength, getDisplayFontForLanguage, getDisplayFontForNumeric } from '@/lib/utils'
+import { NamePlateSkeleton, PANEL_LEVEL_SHADOW, emUnderlayShadow } from '@/shared/gameText'
+import { getAttackLevelIconPath, getDefenseLevelIconPath } from '@/shared/assets'
 import type { SkillCoin } from '@/shared/gameData'
 import { skillLevelAt } from '../lib/skillLevel'
-import { skillUpperLayout } from '../lib/skillLayout'
+import { skillUpperLayout, targetCountFontUnits } from '../lib/skillLayout'
 import { CoinDisplay } from './CoinDisplay'
 
 interface SkillInfoPanelData {
@@ -34,6 +33,11 @@ interface SkillInfoPanelWithSuspenseProps {
 }
 
 const LAYOUT = skillUpperLayout()
+
+const TARGET_COUNT_SHADOW = emUnderlayShadow(
+  UNIT_PANEL_UNDERLAYS_EM.NAME.KR,
+  UNIT_PANEL_UNDERLAY_COLORS.NAME,
+)
 
 export function SkillInfoPanelWithSuspense({
   skillData,
@@ -94,15 +98,19 @@ export function SkillInfoPanelWithSuspense({
       >
         {t('identity.atkWeight')}
       </span>
-      <div
+      <span
         data-slot="skill-target-count"
-        className="absolute flex items-center"
-        style={LAYOUT.targetCount}
+        className="absolute font-bold whitespace-nowrap"
+        style={{
+          ...LAYOUT.targetCount,
+          ...getDisplayFontForLanguage('KR'),
+          fontSize: clientLength(targetCountFontUnits(atkWeight)),
+          color: UNIT_PANEL_COLORS.TARGET_LABEL,
+          textShadow: TARGET_COUNT_SHADOW,
+        }}
       >
-        {Array.from({ length: atkWeight }).map((_, index) => (
-          <img key={index} src={getAttackWeightIconPath()} alt="" style={LAYOUT.targetSquare} />
-        ))}
-      </div>
+        {SKILL_UPPER_UNITS.TARGET.COUNT_GLYPH.repeat(atkWeight)}
+      </span>
 
       {sanityCost !== undefined && (
         <div

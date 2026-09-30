@@ -122,6 +122,22 @@ export type EgoType = (typeof EGO_TYPES)[number]
 
 export const REQUIRED_EGO_TYPE: EgoType = 'ZAYIN'
 
+export const AB_PART_TYPES = [
+  'HEAD',
+  'BODY',
+  'LEFT_ARM',
+  'RIGHT_ARM',
+  'LEG',
+  'TAIL',
+  'BACK',
+  'BACK_HEAD',
+  'RIGHT_EYE',
+  'LEFT_EYE',
+  'HEAD_PLATE',
+] as const
+
+export type AbPartType = (typeof AB_PART_TYPES)[number]
+
 export const KEYWORD_ORDER = [
   'Combustion',
   'Laceration',

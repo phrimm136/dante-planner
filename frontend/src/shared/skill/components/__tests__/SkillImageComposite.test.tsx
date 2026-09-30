@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 
@@ -74,6 +76,7 @@ describe('SkillImageComposite placement in the upper block', () => {
     expect(value.style.left).toBe('3.9769rem')
     expect(value.style.top).toBe('1.1134rem')
     expect(value.style.transform).toBe('translate(-50%, -50%)')
+    expect(value.style.fontFamily).toBe('var(--font-excelsior-ink)')
     expect(value.style.fontSize).toBe('1.3125rem')
     expect(value.style.letterSpacing).toBe('-0.06em')
     expect(value.classList.contains('font-bold')).toBe(false)
@@ -93,7 +96,8 @@ describe('SkillImageComposite placement in the upper block', () => {
     expect(power.style.width).toBe('2.275rem')
     expect(power.style.textAlign).toBe('right')
     expect(power.style.top).toBe('3.1216rem')
-    expect(power.style.transform).toBe('translateY(calc(-50% + -0.1531em))')
+    expect(power.style.transform).toBe('translateY(-50%)')
+    expect(power.style.fontFamily).toBe('var(--font-excelsior-ink)')
     expect(power.style.fontSize).toBe('2.2431rem')
     expect(power.classList.contains('text-[48px]')).toBe(false)
   })
@@ -111,5 +115,25 @@ describe('SkillImageComposite placement in the upper block', () => {
     )
     expect(container.querySelector('[data-slot="attack-icon"]')).toBeNull()
     expect(container.querySelector('[data-slot="attack-backing"]')).toBeNull()
+  })
+})
+
+describe('numeric ink face', () => {
+  const globalsCss = readFileSync(
+    resolve(import.meta.dirname, '../../../../styles/globals.css'),
+    'utf8',
+  )
+
+  it('declares Excelsior Sans Ink with its ascent at the digit ink top and no descent or gap', () => {
+    const face = globalsCss
+      .match(/@font-face\s*\{[^}]*\}/g)
+      ?.find((rule) => rule.includes("font-family: 'Excelsior Sans Ink'"))
+    expect(face).toBeDefined()
+    expect(face).toContain("src: url('../assets/fonts/ExcelsiorSans.ttf')")
+    expect(face).toContain('ascent-override: 69.3848%')
+    expect(face).toContain('descent-override: 0%')
+    expect(face).toContain('line-gap-override: 0%')
+    expect(face).toContain('font-display: swap')
+    expect(globalsCss).toContain("--font-excelsior-ink: 'Excelsior Sans Ink', sans-serif;")
   })
 })

@@ -2,11 +2,13 @@ import type { CSSProperties } from 'react'
 
 import {
   NAME_PLATE_UNITS,
+  PART_ICON_UNITS,
   SKILL_LOCK_UNITS,
   SKILL_LOWER_UNITS,
   SKILL_UPPER_UNITS,
 } from '@/lib/constants'
 import { clientLength } from '@/lib/utils'
+import type { AbPartType } from '@/shared/gameData'
 
 const CENTRED = 'translate(-50%, -50%)'
 const CENTRED_Y = 'translateY(-50%)'
@@ -25,7 +27,6 @@ export interface SkillUpperLayout {
   levelText: CSSProperties
   targetLabel: CSSProperties
   targetCount: CSSProperties
-  targetSquare: CSSProperties
   sanityCost: CSSProperties
 }
 
@@ -48,9 +49,26 @@ function centredBox(centerX: number, centerY: number, width: number, height: num
   return { ...box(centerX, centerY, width, height), transform: CENTRED }
 }
 
-function numericInkShiftEm(): number {
-  const { ASCENT_EM, DESCENT_EM, DIGIT_HEIGHT_EM } = SKILL_UPPER_UNITS.NUMERIC_FACE
-  return (DIGIT_HEIGHT_EM - ASCENT_EM + DESCENT_EM) / 2
+function targetCountLineEm(): number {
+  const { ASCENT, DESCENT } = SKILL_UPPER_UNITS.TARGET.COUNT_FACE_EM
+  return Number((ASCENT + DESCENT).toFixed(6))
+}
+
+export function targetCountFontUnits(count: number): number {
+  const {
+    HEIGHT,
+    COUNT_HEIGHT_DELTA,
+    COUNT_MARGIN_TOP,
+    COUNT_WIDTH,
+    COUNT_FONT_MAX,
+    COUNT_FONT_MIN,
+  } = SKILL_UPPER_UNITS.TARGET
+  const { SQUARE_ADVANCE } = SKILL_UPPER_UNITS.TARGET.COUNT_FACE_EM
+  const spacing = SKILL_UPPER_UNITS.TARGET.COUNT_LETTER_SPACING_EM
+  const heightBound = (HEIGHT + COUNT_HEIGHT_DELTA - COUNT_MARGIN_TOP) / targetCountLineEm()
+  const widthBound = COUNT_WIDTH / (SQUARE_ADVANCE * count + spacing * (count - 1))
+  const size = Math.min(COUNT_FONT_MAX, heightBound, widthBound)
+  return Math.max(COUNT_FONT_MIN, size)
 }
 
 export function skillUpperLayout(): SkillUpperLayout {
@@ -70,6 +88,7 @@ export function skillUpperLayout(): SkillUpperLayout {
       left: clientLength(COIN_SCALE.CENTER_X),
       top: clientLength(COIN_SCALE.CENTER_Y),
       transform: CENTRED,
+      fontFamily: SKILL_UPPER_UNITS.NUMERIC_FACE.FAMILY,
       fontSize: clientLength(COIN_SCALE.FONT),
       letterSpacing: `${String(SKILL_UPPER_UNITS.COIN_SCALE_LETTER_SPACING_EM)}em`,
     },
@@ -83,8 +102,9 @@ export function skillUpperLayout(): SkillUpperLayout {
       left: '0',
       width: clientLength(BASE_POWER.RIGHT_EDGE_X),
       top: clientLength(BASE_POWER.CENTER_Y),
-      transform: `translateY(calc(-50% + ${String(Number(numericInkShiftEm().toFixed(4)))}em))`,
+      transform: CENTRED_Y,
       textAlign: 'right',
+      fontFamily: SKILL_UPPER_UNITS.NUMERIC_FACE.FAMILY,
       fontSize: clientLength(BASE_POWER.FONT),
     },
     coins: { left: clientLength(COINS.LEFT), top: clientLength(COINS.TOP) },
@@ -107,11 +127,14 @@ export function skillUpperLayout(): SkillUpperLayout {
       fontSize: clientLength(TARGET.FONT),
     },
     targetCount: {
-      ...box(TARGET.COUNT_LEFT, TARGET.TOP, TARGET.COUNT_WIDTH, TARGET.HEIGHT),
-      fontSize: clientLength(TARGET.COUNT_FONT),
-      columnGap: clientLength(TARGET.SQUARE_GAP),
+      left: clientLength(TARGET.COUNT_LEFT),
+      top: clientLength(
+        TARGET.TOP + TARGET.HEIGHT / 2 - TARGET.COUNT_POS_Y + TARGET.COUNT_MARGIN_TOP / 2,
+      ),
+      transform: CENTRED_Y,
+      letterSpacing: `${String(TARGET.COUNT_LETTER_SPACING_EM)}em`,
+      lineHeight: targetCountLineEm(),
     },
-    targetSquare: { width: clientLength(TARGET.SQUARE), height: clientLength(TARGET.SQUARE) },
     sanityCost: {
       left: clientLength(TARGET.LEFT),
       top: clientLength(TARGET.TOP + TARGET.HEIGHT),
@@ -135,4 +158,38 @@ export function skillLowerLayout(hasImportance: boolean): SkillLowerLayout {
       opacity: SKILL_LOCK_UNITS.ALPHA,
     },
   }
+}
+
+export interface PartIconSlot {
+  partType: AbPartType
+  style: CSSProperties
+}
+
+export function partIconSlots(partTypes: readonly AbPartType[]): PartIconSlot[] {
+  const { SIZE, RIGHT, ROW_PITCH, ROWS_PER_COLUMN, MAX_ICONS, COLOR, ALPHA } = PART_ICON_UNITS
+  return partTypes.slice(0, MAX_ICONS).map((partType, index) => {
+    const column = index < ROWS_PER_COLUMN ? 0 : 1
+    const row = index - column * ROWS_PER_COLUMN
+    return {
+      partType,
+      style: {
+        right: clientLength(RIGHT[column]),
+        top: clientLength(row * ROW_PITCH),
+        width: clientLength(SIZE),
+        height: clientLength(SIZE),
+        backgroundColor: COLOR,
+        opacity: ALPHA,
+      },
+    }
+  })
+}
+
+export function partIconBoxFloor(count: number): CSSProperties | undefined {
+  if (count === 0) return undefined
+  const { ROW_PITCH, ROWS_PER_COLUMN, BOX_FLOOR_PAD } = PART_ICON_UNITS
+  return { minHeight: clientLength(Math.min(count, ROWS_PER_COLUMN) * ROW_PITCH + BOX_FLOOR_PAD) }
+}
+
+export function partIconsMoveImportance(count: number): boolean {
+  return count > PART_ICON_UNITS.ROWS_PER_COLUMN
 }

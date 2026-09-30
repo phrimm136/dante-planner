@@ -1,4 +1,4 @@
-export { AffinitySchema, EgoTypeSchema } from './schemas/SharedSchemas'
+export { AbPartTypeSchema, AffinitySchema, EgoTypeSchema } from './schemas/SharedSchemas'
 export {
   AttributeColorCodeSchema,
   SinnerColorCodeSchema,
@@ -28,6 +28,7 @@ export {
   COIN_COLORS,
   EGO_TYPES,
   REQUIRED_EGO_TYPE,
+  AB_PART_TYPES,
   KEYWORD_ORDER,
   MD_CATEGORIES,
   RR_CATEGORIES,
@@ -79,6 +80,7 @@ export type {
   AtkType,
   DefType,
   EgoType,
+  AbPartType,
   Keyword,
   MDCategory,
   RRCategory,

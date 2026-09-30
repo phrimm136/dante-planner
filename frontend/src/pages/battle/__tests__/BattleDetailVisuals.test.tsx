@@ -283,3 +283,31 @@ describe('skill triangle position by unit owner', () => {
     TEST_BUDGET_MS,
   )
 })
+
+function partIconsOf(skillId: string): (string | undefined)[] {
+  const card = requireSlot('detail-sections').querySelector<HTMLElement>(
+    `[data-skill-id="${skillId}"]`,
+  )
+  if (card === null) throw new Error(`no skill card ${skillId}`)
+  return [
+    ...(card.parentElement?.querySelectorAll<HTMLElement>(
+      ':scope > [data-slot="skill-part-icon"]',
+    ) ?? []),
+  ].map((icon) => icon.dataset.partType)
+}
+
+describe('skill part icons by view', () => {
+  it(
+    'draws the LEG icon of skill 130711 on abnormality 1307 under All and drops it once Roots is selected',
+    async () => {
+      await mountBattle('enemy', '1307')
+
+      expect(partIconsOf('130711')).toEqual(['LEG'])
+
+      selectPart('Roots')
+
+      await waitFor(() => expect(partIconsOf('130711')).toEqual([]))
+    },
+    TEST_BUDGET_MS,
+  )
+})
