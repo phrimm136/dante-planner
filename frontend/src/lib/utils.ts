@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import keywordMatch from '@static/i18n/EN/keywordMatch.json'
+import { CLIENT_TEXT_SCALE } from './constants'
 import i18n from './i18n'
 
 export function cn(...inputs: ClassValue[]) {
@@ -71,4 +72,8 @@ const REM_DECIMALS = 4
 export function clientUnitsToRem(units: number, lineUnits: number, lineRem: number): string {
   const rem = Number(((units * lineRem) / lineUnits).toFixed(REM_DECIMALS))
   return `${String(rem)}rem`
+}
+
+export function clientLength(units: number): string {
+  return clientUnitsToRem(units, CLIENT_TEXT_SCALE.FONT_UNITS, CLIENT_TEXT_SCALE.FONT_REM)
 }

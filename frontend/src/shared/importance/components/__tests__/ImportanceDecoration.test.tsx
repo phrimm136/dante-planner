@@ -31,6 +31,19 @@ describe('ImportanceDecoration', () => {
     expect(container).toBeEmptyDOMElement()
   })
 
+  it.each([
+    [{}, '1.8813rem'],
+    [{ position: 'unlock' }, '1.8813rem'],
+    [{ position: 'base' }, '6.2562rem'],
+  ] as const)('places the skill triangle for %j at %s from the right', (positionProp, right) => {
+    const { container } = render(
+      <ImportanceDecoration level={1} palette="enemy" variant="skill" {...positionProp} />,
+    )
+    expect(variable(slot(container, 'importance-decoration'), '--importance-icon-right')).toBe(
+      right,
+    )
+  })
+
   it('flickers the level 1 icon between 0.7 and 1.0 over 3 s and draws no glow', () => {
     const { container } = render(
       <ImportanceDecoration level={1} palette="player" variant="skill" />,

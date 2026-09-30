@@ -3,7 +3,6 @@ import type { z } from 'zod'
 
 import importanceColorCode from '@static/data/color/importanceColorCode.json'
 import {
-  CLIENT_TEXT_SCALE,
   IMPORTANCE_BAND_UNITS,
   IMPORTANCE_ICON_UNITS,
   IMPORTANCE_PASSIVE_OVERHANG_UNITS,
@@ -13,7 +12,7 @@ import {
   IMPORTANCE_STRIPE_BLINK_PERIOD_S,
   IMPORTANCE_STRIPE_SCROLL_S,
 } from '@/lib/constants'
-import { clientUnitsToRem } from '@/lib/utils'
+import { clientLength } from '@/lib/utils'
 import { ImportanceColorCodeSchema, PASSIVE_IMPORTANCE_LEVELS } from '@/shared/gameData'
 import type { ImportancePalette, ImportanceTier } from '@/shared/gameData'
 
@@ -24,6 +23,8 @@ type ImportanceColorRoles = z.infer<
 const IMPORTANCE_COLORS = ImportanceColorCodeSchema.parse(importanceColorCode)
 
 export type ImportanceVariant = 'skill' | 'passive'
+
+export type ImportancePosition = 'unlock' | 'base'
 
 type AlphaRange = readonly [number, number]
 
@@ -71,10 +72,6 @@ export function stripeTileWidth(): string {
   return clientLength(IMPORTANCE_BAND_UNITS.TEXTURE_WIDTH)
 }
 
-export function clientLength(units: number): string {
-  return clientUnitsToRem(units, CLIENT_TEXT_SCALE.FONT_UNITS, CLIENT_TEXT_SCALE.FONT_REM)
-}
-
 export interface ImportanceGeometry {
   iconSize: string
   iconTop: string
@@ -83,11 +80,18 @@ export interface ImportanceGeometry {
   bandOffset: string
 }
 
-export function importanceGeometry(variant: ImportanceVariant): ImportanceGeometry {
+export function importanceGeometry(
+  variant: ImportanceVariant,
+  position: ImportancePosition = 'unlock',
+): ImportanceGeometry {
+  const iconRight =
+    variant === 'skill'
+      ? IMPORTANCE_ICON_UNITS.RIGHT.skill[position]
+      : IMPORTANCE_ICON_UNITS.RIGHT.passive
   return {
     iconSize: clientLength(IMPORTANCE_ICON_UNITS.SIZE),
     iconTop: clientLength(IMPORTANCE_ICON_UNITS.TOP[variant]),
-    iconRight: clientLength(IMPORTANCE_ICON_UNITS.RIGHT[variant]),
+    iconRight: clientLength(iconRight),
     bandHeight: clientLength(IMPORTANCE_BAND_UNITS.THICKNESS),
     bandOffset: clientLength(0),
   }

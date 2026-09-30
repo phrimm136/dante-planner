@@ -3,9 +3,18 @@ import { getAttributeColors } from '@/shared/gameData'
 import { getDisplayFontForLanguage } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
 
+export interface PlateGeometry {
+  height: string
+  fontSize: string
+  paddingLeft: string
+  paddingRight: string
+  paddingBottom: string
+}
+
 interface StyledSkillNameProps {
   name: string
   attributeType?: string
+  plate?: PlateGeometry
 }
 
 const TEXT_COLOR = '#eecea4'
@@ -27,7 +36,7 @@ function generateBackgroundGradient(darkColor: string): string {
   return `linear-gradient(255deg, transparent 1.5em, ${darkColor} 1.5em)`
 }
 
-export function StyledSkillName({ name, attributeType }: StyledSkillNameProps) {
+export function StyledSkillName({ name, attributeType, plate }: StyledSkillNameProps) {
   const { i18n } = useTranslation()
   const { primary, dark } = getAttributeColors(attributeType)
   const displayStyle = getDisplayFontForLanguage(i18n.language)
@@ -46,19 +55,33 @@ export function StyledSkillName({ name, attributeType }: StyledSkillNameProps) {
         <div
           style={{
             textShadow: '2px 2px 2px black',
-            padding: '0.1em 3.75em 0 0.3em',
+            ...(plate === undefined
+              ? { padding: '0.1em 3.75em 0 0.3em' }
+              : {
+                  height: plate.height,
+                  paddingTop: '0.1em',
+                  paddingLeft: plate.paddingLeft,
+                  paddingRight: plate.paddingRight,
+                  paddingBottom: plate.paddingBottom,
+                }),
             textAlign: 'left',
             backgroundImage: generateStripeGradient(`var(--name-body, ${primary})`),
           }}
         >
-          <span style={{ fontSize: '20px', ...displayStyle }}>{name}</span>
+          <span style={{ fontSize: plate?.fontSize ?? '20px', ...displayStyle }}>{name}</span>
         </div>
       </div>
     </div>
   )
 }
 
-export function StyledNameSkeleton({ attributeType }: { attributeType?: string | undefined }) {
+export function StyledNameSkeleton({
+  attributeType,
+  plate,
+}: {
+  attributeType?: string | undefined
+  plate?: PlateGeometry
+}) {
   const { primary, dark } = getAttributeColors(attributeType)
 
   return (
@@ -73,7 +96,16 @@ export function StyledNameSkeleton({ attributeType }: { attributeType?: string |
       >
         <div
           style={{
-            padding: '0.3em 3.75em 0.3em 10px',
+            ...(plate === undefined
+              ? { padding: '0.3em 3.75em 0.3em 10px' }
+              : {
+                  height: plate.height,
+                  fontSize: plate.fontSize,
+                  paddingTop: '0.3em',
+                  paddingLeft: plate.paddingLeft,
+                  paddingRight: plate.paddingRight,
+                  paddingBottom: plate.paddingBottom,
+                }),
             backgroundImage: generateStripeGradient(primary),
           }}
         >

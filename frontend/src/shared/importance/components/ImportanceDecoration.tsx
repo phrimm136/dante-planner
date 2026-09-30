@@ -8,6 +8,7 @@ import {
   importanceGeometry,
   importanceStyle,
   stripeTileWidth,
+  type ImportancePosition,
   type ImportanceVariant,
 } from '../lib/importanceTable'
 
@@ -15,9 +16,15 @@ interface ImportanceDecorationProps {
   level: number
   palette: ImportancePalette
   variant: ImportanceVariant
+  position?: ImportancePosition
 }
 
-export function ImportanceDecoration({ level, palette, variant }: ImportanceDecorationProps) {
+export function ImportanceDecoration({
+  level,
+  palette,
+  variant,
+  position = 'unlock',
+}: ImportanceDecorationProps) {
   const style = importanceStyle(level, palette)
   if (style === undefined) return null
 
@@ -32,7 +39,7 @@ export function ImportanceDecoration({ level, palette, variant }: ImportanceDeco
       data-slot="importance-decoration"
       data-importance-variant={variant}
       className="pointer-events-none absolute inset-0 -z-10 m-0"
-      style={importanceCssVariables(style, importanceGeometry(variant))}
+      style={importanceCssVariables(style, importanceGeometry(variant, position))}
     >
       <span
         data-slot="importance-icon"

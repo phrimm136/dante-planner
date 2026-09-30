@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest'
 
 import importanceColorCode from '@static/data/color/importanceColorCode.json'
 import { COIN_CLIENT_WIDTH } from '@/lib/constants'
+import { clientLength } from '@/lib/utils'
 import {
-  clientLength,
   hasImportance,
   importanceBannerStyle,
   importanceBoxPadding,
@@ -44,6 +44,8 @@ describe('importance geometry', () => {
   it('sizes client units against the description font: 40 client units are one 0.875rem description-font em', () => {
     expect(clientLength(40)).toBe('0.875rem')
     expect(clientLength(COIN_CLIENT_WIDTH)).toBe('1.4219rem')
+    expect(clientLength(30)).toBe('0.6563rem')
+    expect(clientLength(-10)).toBe('-0.2188rem')
   })
 
   it('sizes the skill triangle at 200 client units, 86 in from the right, 37 down', () => {
@@ -55,6 +57,23 @@ describe('importance geometry', () => {
       bandOffset: '0rem',
     })
   })
+
+  it.each([
+    ['unlock', '1.8813rem'],
+    ['base', '6.2562rem'],
+  ] as const)(
+    'places the skill triangle at its %s position, %s in from the right',
+    (position, right) => {
+      expect(importanceGeometry('skill', position).iconRight).toBe(right)
+    },
+  )
+
+  it.each(['unlock', 'base'] as const)(
+    'keeps the passive triangle at the right edge for the %s position',
+    (position) => {
+      expect(importanceGeometry('passive', position)).toEqual(importanceGeometry('passive'))
+    },
+  )
 
   it('sizes the passive triangle at 200 client units at the right edge, 37 down', () => {
     expect(importanceGeometry('passive')).toEqual({
