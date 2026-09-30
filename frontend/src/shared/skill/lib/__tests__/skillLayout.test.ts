@@ -43,7 +43,7 @@ describe('skillUpperLayout', () => {
       left: '3.9769rem',
       top: '1.1134rem',
       transform: 'translate(-50%, -50%)',
-      fontFamily: 'var(--font-excelsior-ink)',
+      fontFamily: 'var(--font-numerals-ink)',
       fontSize: '1.3125rem',
       letterSpacing: '-0.06em',
     })
@@ -63,7 +63,7 @@ describe('skillUpperLayout', () => {
       top: '3.1216rem',
       transform: 'translateY(-50%)',
       textAlign: 'right',
-      fontFamily: 'var(--font-excelsior-ink)',
+      fontFamily: 'var(--font-numerals-ink)',
       fontSize: '2.2431rem',
     })
   })

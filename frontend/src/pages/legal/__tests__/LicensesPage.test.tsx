@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 
 import sarasaLicence from '@/assets/fonts/ChineseFont.OFL.txt?url'
 import corporateLogoLicence from '@/assets/fonts/Corporate-Logo-Bold-ver2.OFL.txt?url'
-import { FONT_LICENCE_KINDS, FONT_LICENSES, PENDING_REPLACEMENT_FONTS } from '@/lib/constants'
+import { FONT_LICENCE_KINDS, FONT_LICENSES } from '@/lib/constants'
 import i18n from '@/lib/i18n'
 import { mountRoute } from '@/test-utils/mountRoute'
 import LicensesPage from '../LicensesPage'
@@ -52,7 +52,7 @@ describe('LicensesPage', () => {
     )
   })
 
-  it('lists every font file under assets/fonts, except the named pending replacements', () => {
+  it('lists every font file under assets/fonts', () => {
     const covered = (file: string) =>
       FONT_LICENSES.some((font) =>
         font.files.some((listed) =>
@@ -60,24 +60,15 @@ describe('LicensesPage', () => {
         ),
       )
 
-    const unlisted = fontFiles(FONTS_DIR).filter(
-      (file) => !covered(file) && !PENDING_REPLACEMENT_FONTS.includes(file),
-    )
+    const unlisted = fontFiles(FONTS_DIR).filter((file) => !covered(file))
 
     expect(unlisted).toEqual([])
   })
 
   it('names only paths that exist', () => {
-    const listed = [...FONT_LICENSES.flatMap((font) => font.files), ...PENDING_REPLACEMENT_FONTS]
+    const listed = FONT_LICENSES.flatMap((font) => font.files)
 
     expect(listed.filter((file) => !fs.existsSync(path.join(FONTS_DIR, file)))).toEqual([])
-  })
-
-  it('renders nothing for a pending replacement', async () => {
-    renderPage()
-    await screen.findAllByTestId('font-license')
-
-    expect(screen.queryByText(/Excelsior/)).not.toBeInTheDocument()
   })
 
   it('shows the KOTRA attribution on the Korean page', async () => {

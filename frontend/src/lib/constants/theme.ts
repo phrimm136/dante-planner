@@ -259,9 +259,9 @@ export const SKILL_UPPER_UNITS = {
   COIN_SCALE_LETTER_SPACING_EM: -0.06,
   BASE_POWER: { RIGHT_EDGE_X: 104, CENTER_Y: 142.7, FONT: 102.54 },
   NUMERIC_FACE: {
-    FAMILY: 'var(--font-excelsior-ink)',
-    // ExcelsiorSans SDF digit ink top 44.40625 / 64; globals.css ascent-override 69.3848%.
-    DIGIT_HEIGHT_EM: 0.693848,
+    FAMILY: 'var(--font-numerals-ink)',
+    // planner-numerals.ttf digit ink top 700 / 1000; globals.css ascent-override 70%.
+    DIGIT_HEIGHT_EM: 0.7,
   },
   COINS: { LEFT: 271.19, TOP: 14.3 },
   NAME_PLATE: { LEFT: 273.6, CENTER_Y: 111.3, RIGHT_MIN: 100 },

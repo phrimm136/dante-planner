@@ -2,6 +2,7 @@ import bebasNeueLicence from '@/assets/fonts/Bebas_Neue/OFL.txt?url'
 import sarasaLicence from '@/assets/fonts/ChineseFont.OFL.txt?url'
 import corporateLogoLicence from '@/assets/fonts/Corporate-Logo-Bold-ver2.OFL.txt?url'
 import plannerLatinLicence from '@/assets/fonts/planner-latin.OFL.txt?url'
+import plannerNumeralsLicence from '@/assets/fonts/planner-numerals.OFL.txt?url'
 import pretendardLicence from '@/assets/fonts/Pretendard-1.3.9/LICENSE.txt?url'
 import sCoreDreamLicence from '@/assets/fonts/S-Core_Dream_OTF/S-Core_Dream_License.png?url'
 
@@ -39,6 +40,17 @@ export const FONT_LICENSES: readonly FontLicense[] = [
     ],
     hasNote: true,
     files: ['planner-latin.otf'],
+  },
+  {
+    id: 'plannerNumerals',
+    family: 'PlannerNumerals',
+    author: "Dante's Planner contributors",
+    licence: 'ofl',
+    licenceUrl: OFL_URL,
+    licenceFileUrl: plannerNumeralsLicence,
+    copyright: ["Copyright 2026 Dante's Planner contributors"],
+    hasNote: true,
+    files: ['planner-numerals.ttf'],
   },
   {
     id: 'pretendard',
@@ -148,5 +160,3 @@ export const FONT_LICENSES: readonly FontLicense[] = [
     files: ['tagmarker.ttf'],
   },
 ]
-
-export const PENDING_REPLACEMENT_FONTS: readonly string[] = ['ExcelsiorSans.ttf']

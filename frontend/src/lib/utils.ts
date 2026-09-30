@@ -65,7 +65,7 @@ export function getGeometryFontForLanguage(language?: string): React.CSSProperti
 }
 
 export function getDisplayFontForNumeric(): string {
-  return 'var(--font-excelsior)'
+  return 'var(--font-numerals)'
 }
 
 export function getDisplayFontForFallback(): string {
