@@ -194,9 +194,18 @@ export const NAME_PLATE_UNITS = {
     // [Tmpro]SkillName margin B10: TMP Geo centres the ink 5u above the plate centre.
     TEXT_MARGIN_BOTTOM: 10,
     // [Image]SkillNameBg height; BattleUI_CoinPopup_skillName 148.5x25.5 px drawn at 2.5u/px
-    // (ppu 50, ppuMul 0.8), borders L 4.5 / R 49.5 px.
+    // (ppu 50, ppuMul 0.8), borders L 4.5 / R 49.5 px, shipped as its 149x26 whole-texel cover.
     HEIGHT: 69.33,
-    SLICE: { LEFT: 11.25, RIGHT: 123.75, SPRITE_WIDTH: 371.25 },
+    // [Script]SkillNameRect: (1304.2 - 273.6) area width - _rightPadding 100.
+    TEXT_WIDTH_MAX: 930.6,
+    SLICE: {
+      LEFT: 11.25,
+      RIGHT: 123.75,
+      SPRITE_WIDTH: 371.25,
+      IMAGE_WIDTH: 372.5,
+      SPRITE_TEXELS_HEIGHT: 25.5,
+      IMAGE_TEXELS_HEIGHT: 26,
+    },
   },
   PASSIVE: {
     FONT: 40,
@@ -207,7 +216,16 @@ export const NAME_PLATE_UNITS = {
     // [Script]SkillNameBg height; New_MainUI_PersonalityList_2_46 387x54 px at 1u/px (ppu 100),
     // borders L 112 / R 171 px, Image m_Color #ffffff.
     HEIGHT: 72.74,
-    SLICE: { LEFT: 112, RIGHT: 171, SPRITE_WIDTH: 387 },
+    // [Script]SkillNameBg rect_area is UnitInformationPassiveContent: 1304.2 - _rightPadding 400.
+    TEXT_WIDTH_MAX: 904.2,
+    SLICE: {
+      LEFT: 112,
+      RIGHT: 171,
+      SPRITE_WIDTH: 387,
+      IMAGE_WIDTH: 387,
+      SPRITE_TEXELS_HEIGHT: 54,
+      IMAGE_TEXELS_HEIGHT: 54,
+    },
   },
   LETTER_SPACING_EM: -0.02,
   WORD_SPACING_EM: -0.05,

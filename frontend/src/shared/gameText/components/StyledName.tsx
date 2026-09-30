@@ -1,4 +1,4 @@
-import { Fragment, useLayoutEffect, useState, type CSSProperties } from 'react'
+import { Fragment, useId, useLayoutEffect, useState, type CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getAttributeColors, type ImportancePalette } from '@/shared/gameData'
 import {
@@ -10,7 +10,7 @@ import {
 } from '@/shared/cardLayout'
 import { panelNameShadow } from '../lib/panelUnderlay'
 import { importanceBannerStyle } from '@/shared/importance'
-import { namePlateSliceStyles, type NamePlateKind } from '../lib/namePlate'
+import { namePlateSliceStyles, tintColorMatrix, type NamePlateKind } from '../lib/namePlate'
 import { CLIENT_TEXT_SCALE, NAME_PLATE_UNITS, UNIT_PANEL_COLORS } from '@/lib/constants'
 import { clientLength, cn, getDisplayFontForLanguage } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -41,6 +41,7 @@ interface PlateSlice {
 interface NamePlateSpec {
   node: TextNodeSpec
   marginX: number
+  textWidthMax: number
   textHeight: number
   body: CSSProperties
   slice: PlateSlice
@@ -67,6 +68,7 @@ const NAME_PLATES: Record<NamePlateKind, NamePlateSpec> = {
   skill: {
     node: nameNode(SKILL.FONT, SKILL.MIN_FONT),
     marginX: SKILL.PAD_LEFT + SKILL.PAD_RIGHT,
+    textWidthMax: SKILL.TEXT_WIDTH_MAX,
     textHeight: SKILL.TEXT_HEIGHT,
     body: {
       height: clientLength(SKILL.HEIGHT),
@@ -81,6 +83,7 @@ const NAME_PLATES: Record<NamePlateKind, NamePlateSpec> = {
   passive: {
     node: nameNode(PASSIVE.FONT, PASSIVE.MIN_FONT),
     marginX: PASSIVE.PAD_LEFT + PASSIVE.PAD_RIGHT,
+    textWidthMax: PASSIVE.TEXT_WIDTH_MAX,
     textHeight: PASSIVE.TEXT_HEIGHT,
     body: {
       height: clientLength(PASSIVE.HEIGHT),
@@ -97,13 +100,27 @@ const NAME_PLATES: Record<NamePlateKind, NamePlateSpec> = {
 const TEXT_BOX: CSSProperties = { display: 'flex', alignItems: 'center' }
 
 function PlateSlices({ kind, tint }: { kind: NamePlateKind; tint: string | undefined }) {
-  const pieces = namePlateSliceStyles(kind, tint)
+  const filterId = useId()
+  const pieces = namePlateSliceStyles(kind, tint === undefined ? undefined : filterId)
   return (
     <div
       data-slot="name-plate-slices"
       aria-hidden
       style={{ position: 'absolute', inset: 0, zIndex: -1, display: 'flex', pointerEvents: 'none' }}
     >
+      {tint !== undefined && (
+        <svg
+          data-slot="name-plate-tint"
+          aria-hidden
+          width={0}
+          height={0}
+          style={{ position: 'absolute' }}
+        >
+          <filter id={filterId} colorInterpolationFilters="sRGB">
+            <feColorMatrix type="matrix" values={tintColorMatrix(tint)} />
+          </filter>
+        </svg>
+      )}
       <div data-slot="name-plate-left" style={pieces.left} />
       <div data-slot="name-plate-centre" style={pieces.centre} />
       <div data-slot="name-plate-right" style={pieces.right} />
@@ -121,8 +138,15 @@ function plateFrame(kind: NamePlateKind): CSSProperties {
   }
 }
 
-function plateTint(kind: NamePlateKind, primary: string, hasBanner: boolean): string | undefined {
-  if (hasBanner) return 'var(--name-body)'
+function plateTint(
+  kind: NamePlateKind,
+  primary: string,
+  bannerStyle: CSSProperties | undefined,
+): string | undefined {
+  if (bannerStyle !== undefined) {
+    const body: unknown = (bannerStyle as Record<string, unknown>)['--name-body']
+    return typeof body === 'string' ? body : undefined
+  }
   return NAME_PLATES[kind].tinted ? primary : undefined
 }
 
@@ -177,7 +201,7 @@ export function NamePlate({ kind, name, attributeType, importance }: NamePlatePr
     areaWidth === undefined
       ? { fontSize: spec.node.maxSize, lines: [name] }
       : fitNodeText(name, table, spec.node, {
-          width: areaWidth - spec.marginX,
+          width: Math.min(areaWidth, spec.textWidthMax) - spec.marginX,
           height: spec.textHeight,
         })
   const tracking = faceTracking(table, spec.node)
@@ -219,7 +243,7 @@ export function NamePlate({ kind, name, attributeType, importance }: NamePlatePr
               ))}
             </span>
           </div>
-          <PlateSlices kind={kind} tint={plateTint(kind, primary, bannerStyle !== undefined)} />
+          <PlateSlices kind={kind} tint={plateTint(kind, primary, bannerStyle)} />
         </div>
       </div>
     </div>
@@ -242,7 +266,7 @@ export function NamePlateSkeleton({
         <div style={{ ...spec.body, ...TEXT_BOX, fontSize: clientLength(spec.node.maxSize) }}>
           <Skeleton className="h-5 w-20" style={{ backgroundColor: TEXT_COLOR }} />
         </div>
-        <PlateSlices kind={kind} tint={plateTint(kind, primary, false)} />
+        <PlateSlices kind={kind} tint={plateTint(kind, primary, undefined)} />
       </div>
     </div>
   )

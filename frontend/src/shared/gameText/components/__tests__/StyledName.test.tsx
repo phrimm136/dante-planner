@@ -1,8 +1,9 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { render } from '@testing-library/react'
 
 import krTable from '@static/data/fontAdvances/KR.json'
-import { FontAdvanceTableSchema } from '@/shared/cardLayout'
+import { NAME_PLATE_UNITS } from '@/lib/constants'
+import { createAdvanceMeasure, fitNodeText, FontAdvanceTableSchema } from '@/shared/cardLayout'
 import { NamePlate, NamePlateSkeleton, StyledSkillName } from '@/shared/gameText'
 import { getNamePlatePath } from '@/shared/assets'
 import { SKILL_ATTRIBUTE_TYPES, getAttributeColors } from '@/shared/gameData'
@@ -35,11 +36,78 @@ function slices(container: HTMLElement): {
   return { left: piece('left'), centre: piece('centre'), right: piece('right') }
 }
 
-function cssColor(color: string): string {
-  const probe = document.createElement('div')
-  probe.style.backgroundColor = color
-  return probe.style.backgroundColor
+const PX_PER_UNIT = (16 * 0.875) / 40
+
+const LONG_NAME = 'Crush the Sound, Flatten the Thought into Paste'
+
+function nodeOf(kind: 'SKILL' | 'PASSIVE') {
+  return {
+    maxSize: NAME_PLATE_UNITS[kind].FONT,
+    minSize: NAME_PLATE_UNITS[kind].MIN_FONT,
+    letterSpacingEm: -0.02,
+    wordSpacingEm: -0.05,
+    lineSpacingEm: 0,
+  }
 }
+
+function renderInArea(kind: 'skill' | 'passive', name: string, areaUnits: number): number {
+  vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(
+    DOMRect.fromRect({ width: areaUnits * PX_PER_UNIT, height: 0 }),
+  )
+  const { container } = render(<NamePlate kind={kind} name={name} attributeType="CRIMSON" />)
+  const rem = Number.parseFloat(nameParts(container).name.style.fontSize)
+  return (rem * 40) / 0.875
+}
+
+interface TintReading {
+  filterCount: number
+  matrixType: string | null
+  space: string | null
+  matrix: number[]
+  pieces: { referencesFilter: boolean; backgroundColor: string; blend: string }[]
+}
+
+function fourPlaces(value: number): number {
+  return Number(value.toFixed(4))
+}
+
+function tintReading(container: HTMLElement): TintReading {
+  const filters = [...container.querySelectorAll('svg[data-slot="name-plate-tint"] filter')]
+  const filter = filters[0]
+  const matrix = filter?.querySelector('feColorMatrix')
+  return {
+    filterCount: filters.length,
+    matrixType: matrix?.getAttribute('type') ?? null,
+    space: filter?.getAttribute('color-interpolation-filters') ?? null,
+    matrix: (matrix?.getAttribute('values') ?? '').trim().split(/\s+/).map(Number).map(fourPlaces),
+    pieces: Object.values(slices(container)).map((piece) => ({
+      referencesFilter: filter?.id !== undefined && piece.style.filter === `url(#${filter.id})`,
+      backgroundColor: piece.style.backgroundColor,
+      blend: piece.style.getPropertyValue('background-blend-mode'),
+    })),
+  }
+}
+
+function multiplyOnly(hex: string): TintReading {
+  const [red, green, blue] = [1, 3, 5].map(
+    (start) => parseInt(hex.slice(start, start + 2), 16) / 255,
+  ) as [number, number, number]
+  return {
+    filterCount: 1,
+    matrixType: 'matrix',
+    space: 'sRGB',
+    matrix: [red, 0, 0, 0, 0, 0, green, 0, 0, 0, 0, 0, blue, 0, 0, 0, 0, 0, 1, 0].map(fourPlaces),
+    pieces: Array.from({ length: 3 }, () => ({
+      referencesFilter: true,
+      backgroundColor: '',
+      blend: '',
+    })),
+  }
+}
+
+afterEach(() => {
+  vi.restoreAllMocks()
+})
 
 describe('StyledSkillName', () => {
   it('keeps the page plate', () => {
@@ -115,40 +183,103 @@ describe('NamePlate', () => {
     expect(centre.style.flexGrow).toBe('1')
     expect(left.style.flexShrink).toBe('0')
     expect(right.style.flexShrink).toBe('0')
-    expect(left.style.backgroundSize).toBe('8.1211rem 100%')
-    expect(left.style.backgroundPosition).toBe('left top')
-    expect(right.style.backgroundPosition).toBe('right top')
-    expect(centre.style.backgroundSize).toBe('157.1429% 100%')
-    expect(centre.style.backgroundPosition).toBe('8.3333% top')
+    expect(left.style.backgroundSize).toBe('8.1484rem 101.9608%')
+    expect(left.style.backgroundPosition).toBe('left bottom')
+    expect(right.style.backgroundPosition).toBe('-5.4141rem bottom')
+    expect(centre.style.backgroundSize).toBe('157.672% 101.9608%')
+    expect(centre.style.backgroundPosition).toBe('8.2569% bottom')
     for (const piece of [left, centre, right]) {
       expect(piece.style.height).toBe('100%')
       expect(piece.style.backgroundImage).toContain(sprite)
-      expect(piece.style.backgroundBlendMode).toBe('multiply')
     }
   })
 
+  it('maps the 25.5 skill sprite texels onto the 69.33-unit plate and the half texel outside it', () => {
+    const { left, centre, right } = namePlateSliceStyles('skill', undefined)
+    const texelUnits = 69.33 / 25.5
+    const [, imageHeight] = String(left.backgroundSize).split(' ')
+    expect((Number.parseFloat(imageHeight ?? '') / 100) * 69.33).toBeCloseTo(26 * texelUnits, 2)
+    for (const piece of [left, centre, right]) {
+      expect(String(piece.backgroundPosition).endsWith(' bottom')).toBe(true)
+    }
+    const [imageWidth] = String(left.backgroundSize).split(' ')
+    expect((Number.parseFloat(imageWidth ?? '') * 40) / 0.875).toBeCloseTo(149 * 2.5, 1)
+    const rightOffset = (Number.parseFloat(String(right.backgroundPosition)) * 40) / 0.875
+    expect(rightOffset + 148.5 * 2.5).toBeCloseTo(123.75, 1)
+  })
+
   it.each(['skill', 'passive'] as const)(
-    'masks every %s plate piece with the same sprite piece it draws',
+    'draws every %s plate piece from its sprite with no mask or blend',
     (kind) => {
-      for (const piece of Object.values(namePlateSliceStyles(kind, undefined))) {
-        expect(piece.maskImage).toBe(`url(${getNamePlatePath(kind)})`)
-        expect(piece.maskImage).toBe(piece.backgroundImage)
-        expect(piece.maskSize).toBe(piece.backgroundSize)
-        expect(piece.maskPosition).toBe(piece.backgroundPosition)
-        expect(piece.maskRepeat).toBe('no-repeat')
+      for (const piece of Object.values(namePlateSliceStyles(kind, 'plate-tint'))) {
+        expect(piece.backgroundImage).toBe(`url(${getNamePlatePath(kind)})`)
+        expect(piece.filter).toBe('url(#plate-tint)')
+        expect(
+          Object.keys(piece).filter((key) => /^mask|BlendMode$|^backgroundColor$/.test(key)),
+        ).toEqual([])
       }
     },
   )
 
   it.each(SKILL_ATTRIBUTE_TYPES)(
-    'tints every skill plate piece with the %s colour',
+    'multiplies the colour channels of every skill plate piece by the %s colour',
     (attribute) => {
       const { container } = render(<NamePlate kind="skill" name="Name" attributeType={attribute} />)
-      for (const piece of Object.values(slices(container))) {
-        expect(piece.style.backgroundColor).toBe(cssColor(getAttributeColors(attribute).primary))
-      }
+      expect(tintReading(container)).toEqual(multiplyOnly(getAttributeColors(attribute).primary))
     },
   )
+
+  it('gives every plate on a page its own tint filter', () => {
+    const { container } = render(
+      <>
+        <NamePlate kind="skill" name="One" attributeType="CRIMSON" />
+        <NamePlate kind="skill" name="Two" attributeType="AZURE" />
+      </>,
+    )
+    const ids = [...container.querySelectorAll('filter')].map((filter) => filter.id)
+    expect(ids).toHaveLength(2)
+    expect(new Set(ids).size).toBe(2)
+    const pieces = container.querySelectorAll<HTMLElement>('[data-slot="name-plate-left"]')
+    expect([...pieces].map((piece) => piece.style.filter)).toEqual(ids.map((id) => `url(#${id})`))
+  })
+
+  it('fits a long skill name within the client text width on a card wider than the panel', () => {
+    const glyphRoom = NAME_PLATE_UNITS.SKILL.TEXT_WIDTH_MAX - 70
+    const size = renderInArea('skill', LONG_NAME, 1500)
+    const uncapped = fitNodeText(LONG_NAME, KR_TABLE, nodeOf('SKILL'), { width: 1430, height: 60 })
+    expect(glyphRoom).toBeCloseTo(860.6, 6)
+    expect(createAdvanceMeasure(KR_TABLE, nodeOf('SKILL'))(LONG_NAME, size)).toBeLessThanOrEqual(
+      glyphRoom,
+    )
+    expect(size).toBeLessThan(uncapped.fontSize)
+  })
+
+  it('keeps the card fit for a skill name on a card narrower than the panel', () => {
+    const size = renderInArea('skill', LONG_NAME, 600)
+    const cardFit = fitNodeText(LONG_NAME, KR_TABLE, nodeOf('SKILL'), { width: 530, height: 60 })
+    expect(size).toBeCloseTo(cardFit.fontSize, 2)
+  })
+
+  it('keeps a short skill name at its largest size on a wide card', () => {
+    expect(renderInArea('skill', '소리를 부수고, 생각을 납작하게 짓이겨라', 1500)).toBeCloseTo(
+      45,
+      2,
+    )
+  })
+
+  it('fits a long passive name within the client text width on a card wider than the panel', () => {
+    const glyphRoom = NAME_PLATE_UNITS.PASSIVE.TEXT_WIDTH_MAX - 130
+    const size = renderInArea('passive', LONG_NAME, 1500)
+    const uncapped = fitNodeText(LONG_NAME, KR_TABLE, nodeOf('PASSIVE'), {
+      width: 1370,
+      height: 52.74,
+    })
+    expect(glyphRoom).toBeCloseTo(774.2, 6)
+    expect(createAdvanceMeasure(KR_TABLE, nodeOf('PASSIVE'))(LONG_NAME, size)).toBeLessThanOrEqual(
+      glyphRoom,
+    )
+    expect(size).toBeLessThan(uncapped.fontSize)
+  })
 
   it('slices the white passive sprite at 112 and 171 units and leaves it untinted', () => {
     const { container } = render(<NamePlate kind="passive" name="Name" attributeType="CRIMSON" />)
@@ -159,11 +290,13 @@ describe('NamePlate', () => {
     expect(right.style.width).toBe('3.7406rem')
     expect(left.style.backgroundSize).toBe('8.4656rem 100%')
     expect(centre.style.backgroundSize).toBe('372.1154% 100%')
-    expect(centre.style.backgroundPosition).toBe('39.576% top')
+    expect(centre.style.backgroundPosition).toBe('39.576% bottom')
+    expect(container.querySelector('svg[data-slot="name-plate-tint"]')).toBeNull()
     for (const piece of [left, centre, right]) {
       expect(piece.style.backgroundImage).toContain(getNamePlatePath('passive'))
+      expect(piece.style.filter).toBe('')
       expect(piece.style.backgroundColor).toBe('')
-      expect(piece.style.backgroundBlendMode).toBe('')
+      expect(piece.style.getPropertyValue('background-blend-mode')).toBe('')
     }
   })
 
@@ -189,10 +322,7 @@ describe('NamePlate', () => {
     expect(banner?.classList).toContain('importance-banner')
     expect(banner?.style.getPropertyValue('--name-body')).not.toBe('')
     expect(banner?.contains(nameParts(container).plate)).toBe(true)
-    for (const piece of Object.values(slices(container))) {
-      expect(piece.style.backgroundColor).toBe('var(--name-body)')
-      expect(piece.style.backgroundBlendMode).toBe('multiply')
-    }
+    expect(tintReading(container)).toEqual(multiplyOnly('#87cb00'))
   })
 })
 

@@ -13,11 +13,21 @@ vi.mock('@/shared/cardLayout', async (importOriginal) => ({
   useFontAdvances: () => KR_TABLE,
 }))
 
-function tintVariables(container: HTMLElement): string[] {
-  return ['left', 'centre', 'right'].map((piece) => {
-    const element = container.querySelector<HTMLElement>(`[data-slot="name-plate-${piece}"]`)
-    return /^var\((--[\w-]+)\)$/.exec(element?.style.backgroundColor ?? '')?.[1] ?? ''
-  })
+function tintDiagonal(container: HTMLElement): number[] {
+  const values = container
+    .querySelector('svg[data-slot="name-plate-tint"] feColorMatrix')
+    ?.getAttribute('values')
+  const matrix = (values ?? '').trim().split(/\s+/).map(Number)
+  return [0, 6, 12, 18].map((index) => matrix[index] ?? Number.NaN)
+}
+
+function channelDiagonal(hex: string): number[] {
+  return [
+    ...[1, 3, 5].map((start) =>
+      Number((parseInt(hex.slice(start, start + 2), 16) / 255).toFixed(4)),
+    ),
+    1,
+  ]
 }
 
 describe('importance name plate colors', () => {
@@ -32,11 +42,8 @@ describe('importance name plate colors', () => {
           importance={{ level: Number(level), palette: 'enemy' }}
         />,
       )
-      const banner = container.querySelector<HTMLElement>('[data-slot="importance-banner"]')
       const colors = importanceColorCode.enemy[level]
-      for (const tint of tintVariables(container)) {
-        expect(banner?.style.getPropertyValue(tint)).toBe(colors.passivePanel)
-      }
+      expect(tintDiagonal(container)).toEqual(channelDiagonal(colors.passivePanel))
     },
   )
 })
