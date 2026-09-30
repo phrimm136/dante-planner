@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { TextSkeleton } from '@/components/feedback/TextSkeleton'
 
 import { SECTION_STYLES } from '@/lib/constants'
-import { IdentityPassivesPane } from '@/shared/passive'
+import { IdentityPassivesPane, PassiveRun, PassiveTab } from '@/shared/passive'
 import type { ImportancePalette, Uptie } from '@/shared/gameData'
 import { useBattleDetailI18n } from '../../hooks/useBattleDetailData'
 import {
@@ -69,22 +69,25 @@ function ShownPassives({ source, phase, parts, part, tier, palette }: BattlePass
   const entries = visiblePassives(phase, parts, part).filter(([passiveId]) =>
     isShownPassive(texts, passiveId),
   )
+  const importanceOf = new Map(entries)
 
   return (
-    <div className="border rounded p-4 space-y-4">
-      {entries.map(([passiveId, importanceLevel]) => (
-        <BattlePassiveCard
-          key={passiveId}
-          source={source}
-          passiveId={passiveId}
-          isLocked={false}
-          importanceLevel={importanceLevel}
-          palette={palette}
-        />
-      ))}
+    <PassiveTab>
+      <PassiveRun
+        passives={entries.map(([id]) => ({ id, isLocked: false }))}
+        renderPassive={(passiveId, isLocked) => (
+          <BattlePassiveCard
+            source={source}
+            passiveId={passiveId}
+            isLocked={isLocked}
+            importanceLevel={importanceOf.get(passiveId) ?? 0}
+            palette={palette}
+          />
+        )}
+      />
       {entries.length === 0 && (
         <div className={SECTION_STYLES.TEXT.caption}>{t('passive.none')}</div>
       )}
-    </div>
+    </PassiveTab>
   )
 }

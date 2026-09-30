@@ -4,6 +4,7 @@ import {
   SkillDescription,
   getMergedSkillDesc,
   selectSkillLevel,
+  skillUpperLayout,
 } from '@/shared/skill'
 import { StyledSkillName } from '@/shared/gameText'
 import type { Threadspin } from '../types/EGOTypes'
@@ -56,6 +57,7 @@ function EGOSkillName({
     <StyledSkillName
       name={i18n.skills[skillId]?.name ?? ''}
       {...(attributeType !== undefined && { attributeType })}
+      plate={skillUpperLayout().namePlate}
     />
   )
 }

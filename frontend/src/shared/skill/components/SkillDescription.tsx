@@ -2,7 +2,37 @@ import { getCoinDescIconPath } from '@/shared/assets'
 import { type SkillDescEntry } from '@/shared/gameData'
 import { FormattedDescription } from '@/shared/gameText'
 import { Skeleton } from '@/components/ui/skeleton'
-import { FLAVOR_TEXT_COLOR } from '@/lib/constants'
+import { FLAVOR_TEXT_COLOR, SKILL_LOWER_UNITS } from '@/lib/constants'
+import { clientLength } from '@/lib/utils'
+
+const { COIN_LIST, FLAVOR } = SKILL_LOWER_UNITS
+
+const coinListStyle = {
+  paddingTop: clientLength(COIN_LIST.PAD_TOP),
+  paddingBottom: clientLength(COIN_LIST.PAD_BOTTOM),
+}
+
+const coinRowStyle = { minHeight: clientLength(COIN_LIST.SLOT_MIN) }
+
+const coinIconStyle = {
+  left: clientLength(COIN_LIST.ICON_LEFT),
+  top: 0,
+  width: clientLength(COIN_LIST.ICON_SIZE),
+  height: clientLength(COIN_LIST.ICON_SIZE),
+}
+
+const coinTextStyle = {
+  padding: [COIN_LIST.TEXT_TOP, COIN_LIST.TEXT_RIGHT, COIN_LIST.TEXT_BOTTOM, COIN_LIST.TEXT_LEFT]
+    .map(clientLength)
+    .join(' '),
+}
+
+const flavorStyle = {
+  color: FLAVOR_TEXT_COLOR,
+  fontSize: clientLength(FLAVOR.FONT),
+  marginTop: clientLength(FLAVOR.TOP),
+  marginBottom: clientLength(FLAVOR.BOTTOM),
+}
 
 interface SkillDescriptionProps {
   descData: SkillDescEntry
@@ -11,42 +41,36 @@ interface SkillDescriptionProps {
 
 export function SkillDescription({ descData, flavor }: SkillDescriptionProps) {
   const { desc, coinDescs } = descData
+  const coinSlots = (coinDescs ?? [])
+    .map((text, index) => ({ text, index }))
+    .filter((slot) => slot.text)
 
   return (
-    <div className="text-sm space-y-2">
-      <div className="pb-1">
+    <div className="text-sm">
+      <div>
         <FormattedDescription text={desc ?? ''} />
       </div>
 
-      {coinDescs && coinDescs.length > 0 && (
-        <div className="space-y-1">
-          {coinDescs.map((coinDesc: string, index: number) => {
-            if (!coinDesc) return null
-
-            const coinIconPath = getCoinDescIconPath(index)
-
-            return (
-              <div key={index} className="flex gap-2">
-                <img
-                  src={coinIconPath}
-                  alt={`Coin ${index + 1}`}
-                  className="w-9 h-9 shrink-0 mt-0.5"
-                />
-                <div className="mt-4">
-                  <FormattedDescription text={coinDesc} />
-                </div>
+      {coinSlots.length > 0 && (
+        <div data-slot="skill-coin-list" style={coinListStyle}>
+          {coinSlots.map(({ text, index }) => (
+            <div key={index} className="relative" style={coinRowStyle}>
+              <img
+                src={getCoinDescIconPath(index)}
+                alt={`Coin ${index + 1}`}
+                className="absolute"
+                style={coinIconStyle}
+              />
+              <div style={coinTextStyle}>
+                <FormattedDescription text={text} />
               </div>
-            )
-          })}
+            </div>
+          ))}
         </div>
       )}
 
       {flavor && (
-        <p
-          data-testid="skill-flavor"
-          className="italic whitespace-pre-line pt-1"
-          style={{ color: FLAVOR_TEXT_COLOR }}
-        >
+        <p data-testid="skill-flavor" className="italic whitespace-pre-line" style={flavorStyle}>
           {flavor}
         </p>
       )}

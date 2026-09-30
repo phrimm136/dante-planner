@@ -2,7 +2,7 @@ import { Suspense, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { MIN_LEVEL } from '@/shared/gameData'
-import { SANITY_INDICATOR_COLORS, SECTION_STYLES } from '@/lib/constants'
+import { SANITY_INDICATOR_COLORS } from '@/lib/constants'
 import { getDisplayFontForNumeric } from '@/lib/utils'
 import { StyledNameSkeleton } from '@/shared/gameText'
 import {
@@ -11,6 +11,7 @@ import {
   getDefenseLevelIconPath,
 } from '@/shared/assets'
 import type { SkillCoin } from '@/shared/gameData'
+import { skillUpperLayout } from '../lib/skillLayout'
 import { CoinDisplay } from './CoinDisplay'
 
 interface SkillInfoPanelData {
@@ -28,6 +29,8 @@ interface SkillInfoPanelWithSuspenseProps {
   sanityCost?: number | undefined
 }
 
+const LAYOUT = skillUpperLayout()
+
 export function SkillInfoPanelWithSuspense({
   skillData,
   level,
@@ -42,45 +45,62 @@ export function SkillInfoPanelWithSuspense({
   const atkWeight = skillData.targetNum ?? 1
 
   return (
-    <div className="flex grow flex-col pb-4 -ml-5">
-      <div>
+    <>
+      <div data-slot="skill-coins" className="absolute w-max" style={LAYOUT.coins}>
         <CoinDisplay coins={coins} />
       </div>
 
-      <Suspense fallback={<StyledNameSkeleton attributeType={skillData.attributeType} />}>
-        {nameSlot}
-      </Suspense>
-
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-        <div className={SECTION_STYLES.LAYOUT.row}>
-          <img
-            src={isDefenseSkill ? getDefenseLevelIconPath() : getAttackLevelIconPath()}
-            alt={isDefenseSkill ? 'Defense' : 'Attack'}
-            className="w-11 h-11"
-          />
-          <span
-            className="underline text-[38px] -translate-y-1.5 leading-none"
-            style={{ fontFamily: getDisplayFontForNumeric() }}
-          >
-            {totalLevel}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2 text-yellow-400">
-          <span>{t('identity.atkWeight')}</span>
-          <div className="flex gap-1 h-3.5">
-            {Array.from({ length: atkWeight }).map((_, index) => (
-              <img key={index} src={getAttackWeightIconPath()} alt="" className="w-3 h-3" />
-            ))}
-          </div>
-        </div>
-
-        {sanityCost !== undefined && (
-          <div style={{ color: SANITY_INDICATOR_COLORS.INCREMENT }}>
-            {t('ego.sanityCost')} {sanityCost}
-          </div>
-        )}
+      <div data-slot="skill-name-area" className="absolute" style={LAYOUT.nameArea}>
+        <Suspense
+          fallback={
+            <StyledNameSkeleton attributeType={skillData.attributeType} plate={LAYOUT.namePlate} />
+          }
+        >
+          {nameSlot}
+        </Suspense>
       </div>
-    </div>
+
+      <img
+        src={isDefenseSkill ? getDefenseLevelIconPath() : getAttackLevelIconPath()}
+        alt={isDefenseSkill ? 'Defense' : 'Attack'}
+        data-slot="skill-level-icon"
+        className="absolute"
+        style={LAYOUT.levelIcon}
+      />
+      <span
+        data-slot="skill-level"
+        className="absolute underline leading-none whitespace-nowrap"
+        style={{ ...LAYOUT.levelText, fontFamily: getDisplayFontForNumeric() }}
+      >
+        {totalLevel}
+      </span>
+
+      <span
+        data-slot="skill-target-label"
+        className="absolute flex items-center whitespace-nowrap text-yellow-400"
+        style={LAYOUT.targetLabel}
+      >
+        {t('identity.atkWeight')}
+      </span>
+      <div
+        data-slot="skill-target-count"
+        className="absolute flex items-center gap-1"
+        style={LAYOUT.targetCount}
+      >
+        {Array.from({ length: atkWeight }).map((_, index) => (
+          <img key={index} src={getAttackWeightIconPath()} alt="" className="size-[1em]" />
+        ))}
+      </div>
+
+      {sanityCost !== undefined && (
+        <div
+          data-slot="skill-sanity-cost"
+          className="absolute whitespace-nowrap"
+          style={{ ...LAYOUT.sanityCost, color: SANITY_INDICATOR_COLORS.INCREMENT }}
+        >
+          {t('ego.sanityCost')} {sanityCost}
+        </div>
+      )}
+    </>
   )
 }

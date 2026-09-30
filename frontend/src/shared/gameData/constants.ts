@@ -309,6 +309,8 @@ export const SANITY_CONDITION_TYPE = {
 
 export type SanityConditionType = (typeof SANITY_CONDITION_TYPE)[keyof typeof SANITY_CONDITION_TYPE]
 
+export const PANIC_TYPE_DESC_ONLY = '9997'
+
 /**
  * EGO Gift tiers (display format: Roman numerals)
  * Maps to TIER_1...TIER_EX tags in data

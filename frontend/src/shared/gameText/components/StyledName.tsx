@@ -47,7 +47,7 @@ export function StyledSkillName({ name, attributeType, plate }: StyledSkillNameP
         data-slot="name-plate"
         style={{
           color: `var(--name-text, ${TEXT_COLOR})`,
-          marginBottom: '10px',
+          ...(plate === undefined && { marginBottom: '10px' }),
           width: '100%',
           backgroundImage: generateBackgroundGradient(`var(--name-tail, ${dark})`),
         }}

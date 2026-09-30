@@ -1,0 +1,199 @@
+import { describe, expect, it, vi } from 'vitest'
+import { render, screen } from '@testing-library/react'
+
+import panicInfoEN from '@static/i18n/EN/panicInfo.json'
+import { PanicTypeSection, PanicTypeSectionI18n, SanityConditionsSectionI18n } from '../SanityI18n'
+
+const LABELS: Record<string, string> = {
+  'sanity.lowMoraleEffect': 'Low Morale Effects',
+  'sanity.panicEffect': 'Panic Effects',
+  'sanity.panicType': 'Panic Type',
+}
+
+vi.mock(import('react-i18next'), async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    useTranslation: () =>
+      ({
+        t: (key: string, fallback?: string) => LABELS[key] ?? fallback ?? key,
+        i18n: { language: 'EN' },
+      }) as unknown as ReturnType<typeof actual.useTranslation>,
+  }
+})
+
+vi.mock(import('@/shared/gameText'), async (importOriginal) => ({
+  ...(await importOriginal()),
+  FormattedDescription: ({ text }: { text: string }) => <span>{text}</span>,
+}))
+
+vi.mock(import('../../hooks/usePanicInfo'), async (importOriginal) => ({
+  ...(await importOriginal()),
+  usePanicInfo: () => ({ data: panicInfoEN }),
+}))
+
+vi.mock('../../hooks/useSanityConditionFormatter', () => ({
+  useSanityConditionFormatter: () => ({ formatAll: (names: string[]) => names }),
+}))
+
+const slot = (container: HTMLElement, name: string): HTMLElement => {
+  const found = container.querySelector<HTMLElement>(`[data-slot="${name}"]`)
+  if (found === null) throw new Error(`missing [data-slot="${name}"]`)
+  return found
+}
+
+function flatten(node: Node): string {
+  if (node.nodeType === Node.TEXT_NODE) return node.textContent ?? ''
+  if (node.nodeName === 'BR') return '|'
+  return Array.from(node.childNodes).map(flatten).join('')
+}
+
+function renderPanic(lowMorale?: string, panicType = '9999') {
+  return render(
+    <PanicTypeSection
+      panicType={panicType}
+      nameSlot={<span>Panic</span>}
+      descSlot={<span>Does not act.</span>}
+      {...(lowMorale !== undefined && { lowMoraleSlot: <span>{lowMorale}</span> })}
+    />,
+  )
+}
+
+describe('panic section', () => {
+  it('renders both parts as one block with no margin between them', () => {
+    const { container } = renderPanic('Lose 3 SP.')
+    const desc = slot(container, 'panic-desc')
+    expect(flatten(desc)).toBe('·Low Morale Effects|Lose 3 SP.|·Panic Effects|Does not act.')
+    expect(desc.querySelectorAll('[class*="mt-"]')).toHaveLength(0)
+    expect(slot(container, 'low-morale-effect').textContent).toBe('·Low Morale EffectsLose 3 SP.')
+  })
+
+  it('renders only the panic part without low-morale text', () => {
+    const { container } = renderPanic()
+    expect(flatten(slot(container, 'panic-desc'))).toBe('·Panic Effects|Does not act.')
+    expect(container.querySelector('[data-slot="low-morale-effect"]')).toBeNull()
+  })
+
+  it('places the column pieces absolutely and the description in flow', () => {
+    const { container } = renderPanic()
+    const section = slot(container, 'panic-section')
+    expect(section.style.position).toBe('relative')
+    expect(section.style.minHeight).toBe('9.8438rem')
+    expect(section.style.marginBottom).toBe('1.0938rem')
+
+    const tag = slot(container, 'panic-tag')
+    expect(tag.style.position).toBe('absolute')
+    expect(tag.style.fontSize).toBe('0.9844rem')
+    expect(tag.style.whiteSpace).toBe('nowrap')
+    expect(slot(container, 'panic-tag-bg').style.width).toBe('6.0156rem')
+
+    const icon = slot(container, 'panic-icon')
+    expect(icon.style.left).toBe('1.0544rem')
+    expect(icon.classList).toContain('object-contain')
+
+    const name = slot(container, 'panic-name')
+    expect(name.style.fontSize).toBe('1.12rem')
+    expect(name.classList).toContain('text-center')
+    expect(name.textContent).toBe('Panic')
+
+    const desc = slot(container, 'panic-desc')
+    expect(desc.style.marginLeft).toBe('6.5625rem')
+    expect(desc.style.paddingTop).toBe('2.625rem')
+    expect(desc.style.top).toBe('0.3719rem')
+  })
+
+  it('renders only the panic description, with no labels, for panic type 9997', () => {
+    const { container } = renderPanic('Lose 3 SP.', '9997')
+    expect(flatten(slot(container, 'panic-desc'))).toBe('Does not act.')
+    expect(container.querySelector('[data-slot="low-morale-effect"]')).toBeNull()
+  })
+
+  it('draws no runtime panic-buff row', () => {
+    const { container } = renderPanic('Lose 3 SP.')
+    expect(container.querySelector('[data-slot="panic-buff"]')).toBeNull()
+  })
+})
+
+describe('panic section from panic info', () => {
+  it('shows the low-morale text of an identity panic type before its panic text', async () => {
+    const { container } = render(<PanicTypeSectionI18n panicType="1001" />)
+    await screen.findByText('Compulsion')
+    expect(flatten(slot(container, 'panic-desc'))).toBe(
+      '·Low Morale Effects|Turn Start: Gain 2 [Agility] and 2 [Vulnerable]|·Panic Effects|Turn Start: Lose 10 HP.',
+    )
+  })
+
+  it('shows only [Unobservable] for panic type 9997', async () => {
+    const { container } = render(<PanicTypeSectionI18n panicType="9997" />)
+    await screen.findByText('???')
+    expect(flatten(slot(container, 'panic-desc'))).toBe('[Unobservable]')
+  })
+
+  it('shows no low-morale part when the entry has no low-morale text', async () => {
+    const { container } = render(<PanicTypeSectionI18n panicType="9999" />)
+    await screen.findByText('Panic Effects', { exact: false })
+    expect(container.querySelector('[data-slot="low-morale-effect"]')).toBeNull()
+  })
+})
+
+describe('condition sections', () => {
+  const renderConditions = (add: string[], min: string[]) =>
+    render(<SanityConditionsSectionI18n addConditions={add} minConditions={min} />)
+
+  const section = (container: HTMLElement, kind: 'add' | 'min'): HTMLElement => {
+    const found = container.querySelector<HTMLElement>(
+      `[data-slot="sanity-condition"][data-kind="${kind}"]`,
+    )
+    if (found === null) throw new Error(`missing ${kind} section`)
+    return found
+  }
+
+  it.each([
+    ['add', '1.6406rem'],
+    ['min', '1.6187rem'],
+  ] as const)('clamps the %s tag and keeps its height %s', (kind, height) => {
+    const { container } = renderConditions(['a'], ['b'])
+    const tag = slot(section(container, kind), 'sanity-condition-tag')
+    expect(tag.style.height).toBe(height)
+    expect(tag.style.minWidth).toBe('8.8594rem')
+    expect(tag.style.maxWidth).toBe('12.5781rem')
+    expect(tag.style.paddingInline).toBe('0.5469rem')
+    expect(tag.style.fontSize).toBe('0.875rem')
+    expect(tag.style.whiteSpace).toBe('')
+  })
+
+  it('separates condition items by the item gap', () => {
+    const { container } = renderConditions(['first', 'second'], ['third'])
+    const list = slot(section(container, 'add'), 'sanity-condition-list')
+    expect(list.style.rowGap).toBe('0.7313rem')
+    expect(list.style.paddingTop).toBe('2.1875rem')
+    expect(list.children).toHaveLength(2)
+    expect(list.textContent).toBe('·first·second')
+  })
+
+  it.each([
+    ['add', '1.0938rem', '6.2772rem'],
+    ['min', '1.0933rem', '6.2781rem'],
+  ] as const)('draws the %s icon under the text', (kind, right, height) => {
+    const { container } = renderConditions(['a'], ['b'])
+    const box = section(container, kind)
+    const icon = slot(box, 'sanity-condition-icon')
+    expect(box.classList).toContain('isolate')
+    expect(box.style.minHeight).toBe('6.5625rem')
+    expect(box.style.marginBottom).toBe('1.0938rem')
+    expect(icon.classList).toContain('-z-10')
+    expect(icon.classList).toContain('object-contain')
+    expect(icon.style.right).toBe(right)
+    expect(icon.style.height).toBe(height)
+    expect(icon.style.width).toBe('6.125rem')
+    expect(icon.style.opacity).toBe('0.275')
+  })
+
+  it('keeps the empty placeholder when a kind has no conditions', () => {
+    const { container } = renderConditions([], ['b'])
+    expect(slot(section(container, 'add'), 'sanity-condition-list').textContent).toBe(
+      'No sanity increase conditions',
+    )
+    expect(section(container, 'min').textContent).toContain('·b')
+  })
+})

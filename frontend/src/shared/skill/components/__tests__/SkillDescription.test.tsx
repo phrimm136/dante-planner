@@ -112,4 +112,74 @@ describe('SkillDescription', () => {
       expect(screen.getByTestId('skill-flavor')).toBeInTheDocument()
     })
   })
+
+  describe('client lower-block geometry', () => {
+    const twoCoins: SkillDescEntry = {
+      desc: 'Inflict +1 Sinking Count',
+      coinDescs: ['On Hit: gain 1 Sinking', 'On Hit: gain 2 Sinking'],
+    }
+
+    it('lays out the coin list in client units with contiguous rows', () => {
+      const { container } = render(<SkillDescription descData={twoCoins} />)
+
+      const list = container.querySelector('[data-slot="skill-coin-list"]') as HTMLElement
+      expect(list.style.paddingTop).toBe('0.2712rem')
+      expect(list.style.paddingBottom).toBe('0.9319rem')
+      expect(list.className).not.toMatch(/space-y|gap/)
+
+      const rows = Array.from(list.children) as HTMLElement[]
+      expect(rows).toHaveLength(2)
+      for (const row of rows) {
+        expect(row.style.minHeight).toBe('2.016rem')
+        expect(row.style.margin).toBe('')
+        expect(row.className).not.toMatch(/\bm[ty]?-|space-y|gap/)
+
+        const icon = row.querySelector('img') as HTMLImageElement
+        expect(icon).toHaveClass('absolute')
+        expect(icon.style.left).toBe('-0.1137rem')
+        expect(icon.style.top).toBe('0px')
+        expect(icon.style.width).toBe('2.016rem')
+        expect(icon.style.height).toBe('2.016rem')
+
+        const text = icon.nextElementSibling as HTMLElement
+        expect(text.style.padding).toBe('0.6869rem 0.4813rem 0.1881rem 2.2925rem')
+      }
+    })
+
+    it('renders no coin list without coin descs', () => {
+      const { container } = render(<SkillDescription descData={{ desc: 'only desc' }} />)
+      expect(container.querySelector('[data-slot="skill-coin-list"]')).toBeNull()
+    })
+
+    it('renders no coin list when every coin desc is empty', () => {
+      const { container } = render(<SkillDescription descData={{ coinDescs: ['', ''] }} />)
+      expect(container.querySelector('[data-slot="skill-coin-list"]')).toBeNull()
+    })
+
+    it('skips empty coin descs and keeps the coin number of the rest', () => {
+      render(<SkillDescription descData={{ coinDescs: ['', 'second coin'] }} />)
+      expect(screen.queryByAltText('Coin 1')).not.toBeInTheDocument()
+      expect(screen.getByAltText('Coin 2')).toHaveAttribute('src', '/icons/coin-2.webp')
+    })
+
+    it('sizes the flavor at 33 units with 15 and 35 unit margins', () => {
+      render(<SkillDescription descData={baseDesc} flavor="x" />)
+
+      const flavor = screen.getByTestId('skill-flavor')
+      expect(flavor.style.fontSize).toBe('0.7219rem')
+      expect(flavor.style.marginTop).toBe('0.3281rem')
+      expect(flavor.style.marginBottom).toBe('0.7656rem')
+    })
+
+    it('sits the description flush on the coin list', () => {
+      const { container } = render(<SkillDescription descData={twoCoins} />)
+
+      const wrapper = container.firstChild as HTMLElement
+      expect(wrapper.className).not.toMatch(/space-y/)
+      const descWrapper = wrapper.firstElementChild as HTMLElement
+      expect(descWrapper).toHaveTextContent('Inflict +1 Sinking Count')
+      expect(descWrapper.className).not.toMatch(/\bp[by]?-/)
+      expect(descWrapper.style.paddingBottom).toBe('')
+    })
+  })
 })

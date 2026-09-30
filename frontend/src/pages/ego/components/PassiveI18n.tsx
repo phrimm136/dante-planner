@@ -1,7 +1,7 @@
 import { useEGODetailI18n } from '../hooks/useEGODetailData'
 import { FormattedDescription } from '@/shared/gameText'
 import { StyledSkillName } from '@/shared/gameText'
-import { EGOPassiveCard } from '@/shared/passive'
+import { EGOPassiveCard, passiveBoxLayout } from '@/shared/passive'
 import { FLAVOR_TEXT_COLOR } from '@/lib/constants'
 import type { PassiveId } from '@/shared/gameData'
 
@@ -27,7 +27,13 @@ export function PassiveCardWithSuspense({ id, passiveId, isLocked }: PassiveCard
 function PassiveNameContent({ id, passiveId }: { id: string; passiveId: PassiveId }) {
   const i18n = useEGODetailI18n(id)
   const passive = i18n.passives[passiveId]
-  return <StyledSkillName name={passive?.name || passiveId} attributeType="NEUTRAL" />
+  return (
+    <StyledSkillName
+      name={passive?.name || passiveId}
+      attributeType="NEUTRAL"
+      plate={passiveBoxLayout().plate}
+    />
+  )
 }
 
 function PassiveDescContent({ id, passiveId }: { id: string; passiveId: PassiveId }) {
@@ -44,8 +50,8 @@ function PassiveFlavorContent({ id, passiveId }: { id: string; passiveId: Passiv
   return (
     <p
       data-testid="passive-flavor"
-      className="text-sm italic whitespace-pre-line pt-1"
-      style={{ color: FLAVOR_TEXT_COLOR }}
+      className="italic whitespace-pre-line"
+      style={{ ...passiveBoxLayout().flavor, color: FLAVOR_TEXT_COLOR }}
     >
       {flavor}
     </p>

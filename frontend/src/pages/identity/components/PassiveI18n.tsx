@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useIdentityDetailI18n } from '../hooks/useIdentityDetailData'
 import { FormattedDescription } from '@/shared/gameText'
 import { StyledSkillName } from '@/shared/gameText'
-import { IdentityPassiveCard } from '@/shared/passive'
+import { IdentityPassiveCard, passiveBoxLayout } from '@/shared/passive'
 import {
   getAffinityIconPath,
   getIdentityPassiveCountIconPath,
@@ -99,7 +99,13 @@ export function PassiveCardWithSuspense({
 function PassiveNameContent({ id, passiveId }: { id: string; passiveId: PassiveId }) {
   const i18n = useIdentityDetailI18n(id)
   const passiveI18n = i18n.passives[passiveId]
-  return <StyledSkillName name={passiveI18n?.name ?? ''} attributeType="NEUTRAL" />
+  return (
+    <StyledSkillName
+      name={passiveI18n?.name ?? ''}
+      attributeType="NEUTRAL"
+      plate={passiveBoxLayout().plate}
+    />
+  )
 }
 
 function PassiveDescContent({ id, passiveId }: { id: string; passiveId: PassiveId }) {
@@ -116,8 +122,8 @@ function PassiveFlavorContent({ id, passiveId }: { id: string; passiveId: Passiv
   return (
     <p
       data-testid="passive-flavor"
-      className="text-sm italic whitespace-pre-line pt-1"
-      style={{ color: FLAVOR_TEXT_COLOR }}
+      className="italic whitespace-pre-line"
+      style={{ ...passiveBoxLayout().flavor, color: FLAVOR_TEXT_COLOR }}
     >
       {flavor}
     </p>

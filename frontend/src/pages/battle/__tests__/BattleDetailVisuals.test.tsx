@@ -49,6 +49,20 @@ function section(name: string): HTMLElement {
   return found
 }
 
+function paneOf(region: HTMLElement): HTMLElement {
+  const pane = region.querySelector<HTMLElement>(':scope > h2 + div')
+  if (pane === null) throw new Error('no pane under the section title')
+  return pane
+}
+
+function expectOnlyBetweenBoxes(pane: HTMLElement, slot: string) {
+  expect(pane.firstElementChild?.getAttribute('data-slot')).not.toBe(slot)
+  expect(pane.lastElementChild?.getAttribute('data-slot')).not.toBe(slot)
+  for (const separator of pane.querySelectorAll(`[data-slot="${slot}"]`)) {
+    expect(separator.nextElementSibling?.getAttribute('data-slot')).not.toBe(slot)
+  }
+}
+
 function sinnerIconOf(identityId: string): string {
   return getSinnerIconPath(getSinnerFromId(SinnerScopedIdSchema.parse(identityId)))
 }
@@ -61,15 +75,70 @@ function headerImageSources(): (string | null)[] {
 
 describe('battle detail visuals', () => {
   it(
-    'draws no separator in the skill list of enemy group 8063 and no rule under any section title',
+    'separates every pair of skill boxes of enemy group 8063 with a 5-unit line and 15 units on each side, and puts no rule under any section title',
     async () => {
       await mountBattle('enemy', '8063')
 
+      const pane = paneOf(section('Skills'))
+      const cards = pane.querySelectorAll('[data-skill-id]')
+      const separators = [...pane.querySelectorAll<HTMLElement>('[data-slot="skill-separator"]')]
+      expect(cards.length).toBeGreaterThan(1)
+      expect(separators).toHaveLength(cards.length - 1)
+      for (const separator of separators) {
+        expect(separator.style.height).toBe('0.1094rem')
+        expect(separator.style.marginBlock).toBe('0.3281rem')
+      }
+      expectOnlyBetweenBoxes(pane, 'skill-separator')
+      expect(pane.style.paddingBottom).toBe('1.0938rem')
+
       const sections = requireSlot('detail-sections')
-      expect(sections.querySelectorAll('[data-slot="skill-group-separator"]')).toHaveLength(0)
       expect(sections.querySelector('.divide-y')).toBeNull()
       for (const title of sections.querySelectorAll('h2')) {
         expect(title.nextElementSibling?.getAttribute('data-slot')).not.toBe('separator')
+      }
+    },
+    TEST_BUDGET_MS,
+  )
+
+  it(
+    'frames the passive pane of assistant 400040 at 15 units above and 30 below with no inline padding, and draws a 5-unit line in the middle of each 80-unit gap',
+    async () => {
+      await mountBattle('assistant', '400040')
+
+      const pane = paneOf(section('Passives'))
+      expect(pane.style.padding).toBe('0.3281rem 0px 0.6563rem')
+      const separators = [...pane.querySelectorAll<HTMLElement>('[data-slot="passive-separator"]')]
+      expect(separators).toHaveLength(pane.querySelectorAll('[data-passive-id]').length - 1)
+      for (const separator of separators) {
+        expect(separator.style.height).toBe('0.1094rem')
+        expect(separator.style.marginBlock).toBe('0.8203rem')
+      }
+      expectOnlyBetweenBoxes(pane, 'passive-separator')
+    },
+    TEST_BUDGET_MS,
+  )
+
+  it(
+    'places the battle and support passive headers of event sinner 10101 at their client offsets with no line beside either',
+    async () => {
+      await mountBattle('sinnerEvent', '10101')
+
+      const headers = [
+        ...section('Passives').querySelectorAll<HTMLElement>('[data-slot="passive-header"]'),
+      ]
+      expect(headers).toHaveLength(2)
+      const [battle, support] = headers as [HTMLElement, HTMLElement]
+      expect(battle.style.marginLeft).toBe('0.3281rem')
+      expect(battle.style.width).toBe('8.2906rem')
+      expect(battle.style.height).toBe('1.7281rem')
+      expect(battle.style.fontSize).toBe('0.9844rem')
+      expect(battle.style.marginBottom).toBe('0.875rem')
+      expect(support.style.marginTop).toBe('1.75rem')
+      for (const header of headers) {
+        expect(header.previousElementSibling?.getAttribute('data-slot')).not.toBe(
+          'passive-separator',
+        )
+        expect(header.nextElementSibling?.getAttribute('data-slot')).not.toBe('passive-separator')
       }
     },
     TEST_BUDGET_MS,

@@ -17,6 +17,7 @@ import {
   hasImportance,
   importanceBoxPadding,
 } from '@/shared/importance'
+import { passiveBoxLayout } from '../lib/passiveLayout'
 
 interface IdentityPassiveCondition {
   type: string
@@ -44,54 +45,70 @@ export function IdentityPassiveCard({
 }: IdentityPassiveCardProps) {
   const { t, i18n } = useTranslation(['database', 'common'])
   const decorated = hasImportance(importanceLevel)
+  const layout = passiveBoxLayout()
 
   return (
     <div
-      className={cn(
-        'relative space-y-1',
-        isLocked && 'opacity-50',
-        decorated && 'isolate @container',
-      )}
+      className={cn('relative', isLocked && 'opacity-50', decorated && 'isolate @container')}
       style={importanceBoxPadding(importanceLevel)}
     >
       <ImportanceDecoration level={importanceLevel} palette={palette} variant="passive" />
-      <ImportanceBanner
-        level={importanceLevel}
-        palette={palette}
-        className={SECTION_STYLES.LAYOUT.row}
-      >
-        <Suspense fallback={<StyledNameSkeleton attributeType="NEUTRAL" />}>{nameSlot}</Suspense>
-      </ImportanceBanner>
-      {isLocked && (
-        <img
-          src={getLockIconPath()}
-          alt=""
-          className="absolute right-0 bottom-0 -z-10 h-20 brightness-20"
-        />
-      )}
-      {condition && (
-        <div className="flex items-center gap-3 text-md ml-1">
-          {Object.entries(condition.values).map(([affinity, count]) => (
-            <span key={affinity} className={SECTION_STYLES.LAYOUT.rowTight}>
-              <img src={getAffinityIconPath(affinity)} alt={affinity} className="h-8" />
-              <img src={getIdentityPassiveCountIconPath()} alt="x" className="w-4 h-4" />
+      <div data-slot="passive-box" className="relative" style={layout.box}>
+        <ImportanceBanner
+          level={importanceLevel}
+          palette={palette}
+          className={SECTION_STYLES.LAYOUT.row}
+          style={layout.plateRow}
+        >
+          <Suspense fallback={<StyledNameSkeleton attributeType="NEUTRAL" plate={layout.plate} />}>
+            {nameSlot}
+          </Suspense>
+        </ImportanceBanner>
+        {condition && (
+          <div
+            data-slot="passive-sin-row"
+            className="flex items-center gap-3"
+            style={layout.sinRow}
+          >
+            {Object.entries(condition.values).map(([affinity, count]) => (
               <span
-                className="text-[32px] leading-[32px] -mt-3"
-                style={{ fontFamily: getDisplayFontForNumeric() }}
+                key={affinity}
+                data-slot="passive-sin-item"
+                className={SECTION_STYLES.LAYOUT.rowTight}
+                style={layout.sinItem}
               >
-                {count}
+                <img src={getAffinityIconPath(affinity)} alt={affinity} style={layout.sinIcon} />
+                <img src={getIdentityPassiveCountIconPath()} alt="x" style={layout.sinTimes} />
+                <span
+                  className="-mt-3"
+                  style={{ ...layout.sinCount, fontFamily: getDisplayFontForNumeric() }}
+                >
+                  {count}
+                </span>
               </span>
+            ))}
+            <span
+              data-slot="passive-sin-label"
+              style={{ ...layout.sinLabel, ...getDisplayFontForLanguage(i18n.language) }}
+            >
+              {t(`passive.${condition.type.toLowerCase()}`)}
             </span>
-          ))}
-          <span className="text-lg" style={getDisplayFontForLanguage(i18n.language)}>
-            {t(`passive.${condition.type.toLowerCase()}`)}
-          </span>
+          </div>
+        )}
+        <div data-slot="passive-info" className="text-sm" style={layout.info}>
+          <Suspense fallback={<Skeleton className="h-4 w-full" />}>{descSlot}</Suspense>
         </div>
-      )}
-      <div className="text-sm">
-        <Suspense fallback={<Skeleton className="h-4 w-full" />}>{descSlot}</Suspense>
+        <Suspense fallback={null}>{flavorSlot}</Suspense>
+        {isLocked && (
+          <img
+            src={getLockIconPath()}
+            alt=""
+            data-slot="passive-lock"
+            className="absolute -z-10 object-contain brightness-20"
+            style={layout.lock}
+          />
+        )}
       </div>
-      <Suspense fallback={null}>{flavorSlot}</Suspense>
     </div>
   )
 }

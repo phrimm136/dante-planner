@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { DetailSection } from '@/components/layout/DetailSection'
 import { EntityDetailLayout } from '@/components/layout/EntityDetailLayout'
 import type { ImportancePalette } from '@/shared/gameData'
+import { SkillList } from '@/shared/skill'
 import type { BattleI18nConfig } from '../../hooks/useBattleDetailData'
 import {
   ALL_PARTS,
@@ -169,10 +170,10 @@ export function BattleDetailView({
       selector={selector}
     >
       <DetailSection title={t('section.skills')}>
-        <div className="border rounded">
-          {visibleSkills(phase, parts, part).map(({ id: skillId, entry }) => (
+        <SkillList
+          skills={visibleSkills(phase, parts, part)}
+          renderSkill={({ id: skillId, entry }) => (
             <BattleSkillCard
-              key={skillId}
               source={source}
               imageOwnerId={imageOwnerId}
               skillId={skillId}
@@ -180,8 +181,8 @@ export function BattleDetailView({
               tier={tier}
               palette={palette}
             />
-          ))}
-        </div>
+          )}
+        />
       </DetailSection>
       <DetailSection title={t('section.passives')}>
         <BattlePassivesPane

@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react'
 
-import { COIN_CLIENT_SPACING, COIN_CLIENT_WIDTH, CLIENT_TEXT_SCALE } from '@/lib/constants'
-import { clientUnitsToRem } from '@/lib/utils'
+import { COIN_CLIENT_SPACING, COIN_CLIENT_WIDTH } from '@/lib/constants'
+import { clientLength } from '@/lib/utils'
 import { getCoinSpritePath } from '@/shared/assets'
 import type { CoinColor, SkillCoin } from '@/shared/gameData'
 import { isCoinColor } from '../lib/coinColor'
@@ -13,17 +13,9 @@ const COIN_ALT: Record<CoinColor, string> = {
   PURPLE: 'Purple coin',
 }
 
-const COIN_WIDTH = clientUnitsToRem(
-  COIN_CLIENT_WIDTH,
-  CLIENT_TEXT_SCALE.FONT_UNITS,
-  CLIENT_TEXT_SCALE.FONT_REM,
-)
+const COIN_WIDTH = clientLength(COIN_CLIENT_WIDTH)
 
-const COIN_GAP = clientUnitsToRem(
-  COIN_CLIENT_SPACING,
-  CLIENT_TEXT_SCALE.FONT_UNITS,
-  CLIENT_TEXT_SCALE.FONT_REM,
-)
+const COIN_GAP = clientLength(COIN_CLIENT_SPACING)
 
 const COIN_ROW_STYLE = { '--coin-width': COIN_WIDTH, '--coin-gap': COIN_GAP } as CSSProperties
 
@@ -40,7 +32,7 @@ export function CoinDisplay({ coins }: CoinDisplayProps) {
   }
 
   return (
-    <div className="flex items-center mb-0.5" style={COIN_ROW_STYLE}>
+    <div className="flex items-center" style={COIN_ROW_STYLE}>
       {colors.map((color, index) => (
         <img
           key={index}

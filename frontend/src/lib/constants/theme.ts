@@ -174,10 +174,10 @@ export const SKILL_UPPER_UNITS = {
   HEIGHT: 270,
   CARD_TOP: 15,
   ICON: { LEFT: 65.4, TOP: 23.26, SIZE: 252 },
-  ATTACK_ICON: { CENTER_X: 184.4, CENTER_Y: 218.7, SIZE: 62.4, GLOW: 216 },
+  ATTACK_ICON: { CENTER_X: 184.4, CENTER_Y: 218.7, SIZE: 62.4 },
   COIN_SCALE: { CENTER_X: 181.8, CENTER_Y: 50.9, FONT: 60 },
   COIN_BG: { CENTER_X: 185.7, CENTER_Y: 54, WIDTH: 97.68, HEIGHT: 87.96 },
-  BASE_POWER: { RIGHT_EDGE_X: 104, CENTER_Y: 142.7 },
+  BASE_POWER: { RIGHT_EDGE_X: 104, CENTER_Y: 142.7, FONT: 102.54 },
   COINS: { LEFT: 271.19, TOP: 14.3 },
   NAME_PLATE: {
     LEFT: 273.6,
@@ -299,17 +299,8 @@ export const SANITY_UNITS = {
 
 export const IMPORTANCE_PLATE_GLOW_UNITS = 6
 
-export const PASSIVE_PANE_BLEED_REM = 1
-
 export const IMPORTANCE_STRIPE_BLINK_SPEED = 2
 
 export const IMPORTANCE_STRIPE_BLINK_PERIOD_S = (2 * Math.PI) / IMPORTANCE_STRIPE_BLINK_SPEED
 
 export const IMPORTANCE_STRIPE_SCROLL_S = 10
-
-export const ORANGE_MARK_STYLE = {
-  color: '#ff6000',
-  backgroundColor: '#ff000040',
-  fontWeight: 'bold',
-  textDecoration: 'underline',
-} as const

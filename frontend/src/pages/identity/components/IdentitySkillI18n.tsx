@@ -1,4 +1,4 @@
-import { SkillGroupList, orderIdentitySkills } from '@/shared/skill'
+import { SkillList, orderIdentitySkills } from '@/shared/skill'
 import type { SkillMap } from '@/shared/gameData'
 import { IdentitySkillCardWithGranularI18n } from './IdentitySkillCard'
 import type { Uptie } from '../types/IdentityTypes'
@@ -12,7 +12,7 @@ interface SkillsSectionI18nProps {
 
 export function SkillsSectionI18n({ id, skills, uptieLevel, level }: SkillsSectionI18nProps) {
   return (
-    <SkillGroupList
+    <SkillList
       skills={orderIdentitySkills(skills)}
       renderSkill={({ id: skillId, entry }) => (
         <IdentitySkillCardWithGranularI18n

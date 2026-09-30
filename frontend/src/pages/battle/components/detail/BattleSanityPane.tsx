@@ -41,7 +41,7 @@ export function BattleSanityPane({
   const conditions = sanity.mentalConditionInfo
 
   return (
-    <div className="border rounded p-4 space-y-4">
+    <div data-slot="sanity-pane" className="border rounded">
       {sanity.panicType !== undefined && sanity.panicType !== null && (
         <Suspense fallback={<Skeleton className="h-28 w-full" />}>
           <BattlePanicSection source={source} panicType={String(sanity.panicType)} />

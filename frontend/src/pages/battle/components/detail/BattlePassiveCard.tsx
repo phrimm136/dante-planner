@@ -1,5 +1,5 @@
 import { FormattedDescription, StyledSkillName } from '@/shared/gameText'
-import { IdentityPassiveCard } from '@/shared/passive'
+import { IdentityPassiveCard, passiveBoxLayout } from '@/shared/passive'
 import { FLAVOR_TEXT_COLOR } from '@/lib/constants'
 import type { ImportancePalette } from '@/shared/gameData'
 import { useBattleDetailI18n } from '../../hooks/useBattleDetailData'
@@ -50,7 +50,13 @@ function usePassiveText(source: BattleTextSource, passiveId: string) {
 
 function PassiveName({ source, passiveId }: { source: BattleTextSource; passiveId: string }) {
   const text = usePassiveText(source, passiveId)
-  return <StyledSkillName name={text?.name ?? passiveId} attributeType="NEUTRAL" />
+  return (
+    <StyledSkillName
+      name={text?.name ?? passiveId}
+      attributeType="NEUTRAL"
+      plate={passiveBoxLayout().plate}
+    />
+  )
 }
 
 function PassiveDesc({ source, passiveId }: { source: BattleTextSource; passiveId: string }) {
@@ -64,8 +70,8 @@ function PassiveFlavor({ source, passiveId }: { source: BattleTextSource; passiv
   return (
     <p
       data-testid="passive-flavor"
-      className="text-sm italic whitespace-pre-line pt-1"
-      style={{ color: FLAVOR_TEXT_COLOR }}
+      className="italic whitespace-pre-line"
+      style={{ ...passiveBoxLayout().flavor, color: FLAVOR_TEXT_COLOR }}
     >
       {flavor}
     </p>

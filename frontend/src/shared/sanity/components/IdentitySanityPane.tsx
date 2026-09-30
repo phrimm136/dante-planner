@@ -12,7 +12,7 @@ interface IdentitySanityPaneProps {
 
 export function IdentitySanityPane({ panicType, mentalConditionInfo }: IdentitySanityPaneProps) {
   return (
-    <div className="border rounded p-4 space-y-4">
+    <div data-slot="sanity-pane" className="border rounded">
       <PanicTypeSectionI18n panicType={panicType} />
 
       <SanityConditionsSectionI18n

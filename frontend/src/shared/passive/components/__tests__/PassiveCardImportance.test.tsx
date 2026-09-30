@@ -24,8 +24,9 @@ describe('passive card importance', () => {
     expect(card.style.getPropertyValue('--name-body')).toBe('')
     expect(card.style.getPropertyValue('--name-text')).toBe('')
     expect(card.style.paddingBlock).toBe('0.875rem')
-    expect(card.style.paddingInline).toBe('1rem')
-    expect(card.style.marginInline).toBe('-1rem')
+    expect(card.style.marginBlock).toBe('-0.875rem')
+    expect([undefined, '']).toContain(card.style.paddingInline)
+    expect([undefined, '']).toContain(card.style.marginInline)
   })
 
   it('uses the enemy palette for an enemy passive', () => {

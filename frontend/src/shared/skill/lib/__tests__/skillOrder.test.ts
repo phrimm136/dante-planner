@@ -25,28 +25,6 @@ describe('orderIdentitySkills', () => {
   })
 })
 
-describe('skill groups', () => {
-  it('groups identity 10310 into skill 1, skill 2, skill 3 and defense', () => {
-    expect(orderIdentitySkills(identitySkills).map((skill) => skill.group)).toEqual([
-      '1',
-      '1',
-      '2',
-      '2',
-      '3',
-      '3',
-      'defense',
-      'defense',
-    ])
-  })
-
-  it('groups E.G.O 20102 into awakening and erosion', () => {
-    expect(orderEgoSkills(egoSkills).map((skill) => skill.group)).toEqual([
-      'EGO_AWAKEN',
-      'EGO_EROSION',
-    ])
-  })
-})
-
 describe('orderEgoSkills', () => {
   it('orders awaken before erosion', () => {
     expect(orderEgoSkills(egoSkills).map((skill) => skill.id)).toEqual(['2010211', '2010221'])

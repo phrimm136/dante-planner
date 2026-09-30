@@ -8,6 +8,7 @@ import { SkillImageComposite } from './SkillImageComposite'
 import { SkillCardLayout } from './SkillCardLayout'
 import { SkillInfoPanelWithSuspense } from './SkillInfoPanel'
 import { SkillDescriptionSkeleton } from './SkillDescription'
+import { skillLowerLayout } from '../lib/skillLayout'
 
 interface SkillCardData {
   attributeType?: string | undefined
@@ -58,10 +59,12 @@ export function SkillCard({
   const atkType = skillData.atkType
   const basePower = skillData.defaultValue ?? 0
   const coinPower = skillData.scale ?? 0
+  const decorated = hasImportance(importanceLevel)
 
   const layout = (
     <SkillCardLayout
       skillId={skillId}
+      hasImportance={decorated}
       imageComposite={
         <SkillImageComposite
           skillImagePath={frameOnly ? undefined : skillImagePath}
@@ -88,7 +91,7 @@ export function SkillCard({
     />
   )
 
-  const card = hasImportance(importanceLevel) ? (
+  const card = decorated ? (
     <div className="relative isolate @container">
       {layout}
       <ImportanceDecoration level={importanceLevel} palette={palette} variant="skill" />
@@ -105,7 +108,9 @@ export function SkillCard({
       <img
         src={getLockIconPath()}
         alt=""
-        className="absolute right-8 bottom-8 -z-10 h-30 brightness-20"
+        data-slot="skill-lock"
+        className="absolute -z-10 object-contain brightness-20"
+        style={skillLowerLayout(decorated).lock}
       />
     </div>
   )

@@ -11,6 +11,7 @@ import {
   hasImportance,
   importanceBoxPadding,
 } from '@/shared/importance'
+import { passiveBoxLayout } from '../lib/passiveLayout'
 
 interface EGOPassiveCardProps {
   nameSlot: ReactNode
@@ -30,29 +31,31 @@ export function EGOPassiveCard({
   palette,
 }: EGOPassiveCardProps) {
   const decorated = hasImportance(importanceLevel)
+  const layout = passiveBoxLayout()
 
   return (
     <div
-      className={cn(
-        'space-y-1',
-        isLocked && 'opacity-50',
-        decorated && 'relative isolate @container',
-      )}
+      className={cn(isLocked && 'opacity-50', decorated && 'relative isolate @container')}
       style={importanceBoxPadding(importanceLevel)}
     >
       <ImportanceDecoration level={importanceLevel} palette={palette} variant="passive" />
-      <ImportanceBanner
-        level={importanceLevel}
-        palette={palette}
-        className={SECTION_STYLES.LAYOUT.row}
-      >
-        <Suspense fallback={<StyledNameSkeleton attributeType="NEUTRAL" />}>{nameSlot}</Suspense>
-        {isLocked && <span className="text-xs">🔒</span>}
-      </ImportanceBanner>
-      <div className="text-sm">
-        <Suspense fallback={<Skeleton className="h-4 w-full" />}>{descSlot}</Suspense>
+      <div data-slot="passive-box" className="relative" style={layout.box}>
+        <ImportanceBanner
+          level={importanceLevel}
+          palette={palette}
+          className={SECTION_STYLES.LAYOUT.row}
+          style={layout.plateRow}
+        >
+          <Suspense fallback={<StyledNameSkeleton attributeType="NEUTRAL" plate={layout.plate} />}>
+            {nameSlot}
+          </Suspense>
+          {isLocked && <span className="text-xs">🔒</span>}
+        </ImportanceBanner>
+        <div data-slot="passive-info" className="text-sm" style={layout.info}>
+          <Suspense fallback={<Skeleton className="h-4 w-full" />}>{descSlot}</Suspense>
+        </div>
+        <Suspense fallback={null}>{flavorSlot}</Suspense>
       </div>
-      <Suspense fallback={null}>{flavorSlot}</Suspense>
     </div>
   )
 }

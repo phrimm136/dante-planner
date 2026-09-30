@@ -1,4 +1,4 @@
-import { SkillGroupList, orderEgoSkills } from '@/shared/skill'
+import { SkillList, orderEgoSkills } from '@/shared/skill'
 import type { SkillMap } from '@/shared/gameData'
 import { EGOSkillCardWithGranularI18n } from './EGOSkillCard'
 import type { Threadspin } from '../types/EGOTypes'
@@ -11,7 +11,7 @@ interface SkillsSectionI18nProps {
 
 export function SkillsSectionI18n({ egoId, skills, threadspin }: SkillsSectionI18nProps) {
   return (
-    <SkillGroupList
+    <SkillList
       skills={orderEgoSkills(skills)}
       renderSkill={({ id: skillId, entry }) => (
         <EGOSkillCardWithGranularI18n

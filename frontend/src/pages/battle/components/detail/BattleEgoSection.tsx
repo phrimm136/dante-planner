@@ -2,15 +2,16 @@ import { Suspense } from 'react'
 
 import { TextSkeleton } from '@/components/feedback/TextSkeleton'
 import { FormattedDescription, StyledSkillName } from '@/shared/gameText'
-import { EGOPassiveCard, EGOPassivesPane } from '@/shared/passive'
+import { EGOPassiveCard, EGOPassivesPane, passiveBoxLayout } from '@/shared/passive'
 import { getEGORankIconPath } from '@/shared/assets'
 import {
   EGOSkillCard,
   SkillDescription,
-  SkillGroupList,
+  SkillList,
   getMergedSkillDesc,
   orderEgoSkills,
   selectSkillLevel,
+  skillUpperLayout,
 } from '@/shared/skill'
 import type { ImportancePalette, SkillEntry, SkillId, Threadspin } from '@/shared/gameData'
 import { useBattleEgoDetailI18n, useBattleEgoDetailSpec } from '../../hooks/useBattleEgoDetailData'
@@ -34,6 +35,7 @@ function EgoSkillName({
     <StyledSkillName
       name={i18n.skills[skillId]?.name ?? skillId}
       {...(attributeType !== undefined && { attributeType })}
+      plate={skillUpperLayout().namePlate}
     />
   )
 }
@@ -56,7 +58,11 @@ function EgoSkillDescription({
 function EgoPassiveName({ egoId, passiveId }: { egoId: string; passiveId: string }) {
   const i18n = useBattleEgoDetailI18n(egoId)
   return (
-    <StyledSkillName name={i18n.passives[passiveId]?.name ?? passiveId} attributeType="NEUTRAL" />
+    <StyledSkillName
+      name={i18n.passives[passiveId]?.name ?? passiveId}
+      attributeType="NEUTRAL"
+      plate={passiveBoxLayout().plate}
+    />
   )
 }
 
@@ -106,7 +112,7 @@ function EgoBlock({ ego, palette }: { ego: EgoEntry; palette: ImportancePalette 
         alt={`${spec.egoType} rank`}
         className="h-6 object-contain"
       />
-      <SkillGroupList
+      <SkillList
         skills={orderEgoSkills(spec.skills)}
         renderSkill={({ id: skillId, entry }) => (
           <EgoSkillCard

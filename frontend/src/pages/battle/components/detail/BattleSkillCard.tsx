@@ -3,6 +3,7 @@ import {
   SkillDescription,
   getMergedSkillDesc,
   selectSkillLevel,
+  skillUpperLayout,
   toSkillCardData,
 } from '@/shared/skill'
 import { getBattleSkillIconPath, getSkillImagePath } from '@/shared/assets'
@@ -90,6 +91,7 @@ function BattleSkillName({
     <StyledSkillName
       name={text?.name ?? skillId}
       {...(attributeType !== undefined && { attributeType })}
+      plate={skillUpperLayout().namePlate}
     />
   )
 }

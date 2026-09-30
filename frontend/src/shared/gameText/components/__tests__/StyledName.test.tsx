@@ -11,10 +11,14 @@ const PLATE: PlateGeometry = {
   paddingBottom: '0.2188rem',
 }
 
-function nameParts(container: HTMLElement): { body: HTMLElement; name: HTMLElement } {
-  const plate = container.querySelector<HTMLElement>('[data-slot="name-plate"]')
-  const body = plate?.firstElementChild as HTMLElement
-  return { body, name: body.querySelector('span') as HTMLElement }
+function nameParts(container: HTMLElement): {
+  plate: HTMLElement
+  body: HTMLElement
+  name: HTMLElement
+} {
+  const plate = container.querySelector<HTMLElement>('[data-slot="name-plate"]') as HTMLElement
+  const body = plate.firstElementChild as HTMLElement
+  return { plate, body, name: body.querySelector('span') as HTMLElement }
 }
 
 function skeletonBody(container: HTMLElement): HTMLElement {
@@ -24,7 +28,8 @@ function skeletonBody(container: HTMLElement): HTMLElement {
 describe('StyledSkillName plate geometry', () => {
   it('keeps the page plate when no client plate is given', () => {
     const { container } = render(<StyledSkillName name="Name" attributeType="NEUTRAL" />)
-    const { body, name } = nameParts(container)
+    const { plate, body, name } = nameParts(container)
+    expect(plate.style.marginBottom).toBe('10px')
     expect(body.style.padding).toBe('0.1em 3.75em 0px 0.3em')
     expect(body.style.height).toBe('')
     expect(name.style.fontSize).toBe('20px')
@@ -34,7 +39,8 @@ describe('StyledSkillName plate geometry', () => {
     const { container } = render(
       <StyledSkillName name="Name" attributeType="NEUTRAL" plate={PLATE} />,
     )
-    const { body, name } = nameParts(container)
+    const { plate, body, name } = nameParts(container)
+    expect(plate.style.marginBottom).toBe('')
     expect(body.style.height).toBe(PLATE.height)
     expect(body.style.paddingLeft).toBe(PLATE.paddingLeft)
     expect(body.style.paddingRight).toBe(PLATE.paddingRight)

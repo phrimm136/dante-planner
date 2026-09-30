@@ -4,6 +4,7 @@ import {
   SkillDescription,
   getMergedSkillDesc,
   selectSkillLevel,
+  skillUpperLayout,
 } from '@/shared/skill'
 import { StyledSkillName } from '@/shared/gameText'
 import type { Uptie } from '../types/IdentityTypes'
@@ -69,6 +70,7 @@ function IdentitySkillName({
     <StyledSkillName
       name={i18n.skills[skillId]?.name ?? ''}
       {...(attributeType !== undefined && { attributeType })}
+      plate={skillUpperLayout().namePlate}
     />
   )
 }

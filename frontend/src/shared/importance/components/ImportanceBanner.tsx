@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 
 import { cn } from '@/lib/utils'
 import type { ImportancePalette } from '@/shared/gameData'
@@ -8,15 +8,31 @@ interface ImportanceBannerProps {
   level: number
   palette: ImportancePalette
   className: string
+  style?: CSSProperties
   children: ReactNode
 }
 
-export function ImportanceBanner({ level, palette, className, children }: ImportanceBannerProps) {
-  const style = importanceBannerStyle(level, palette)
-  if (style === undefined) return <div className={className}>{children}</div>
+export function ImportanceBanner({
+  level,
+  palette,
+  className,
+  style,
+  children,
+}: ImportanceBannerProps) {
+  const bannerStyle = importanceBannerStyle(level, palette)
+  if (bannerStyle === undefined)
+    return (
+      <div className={className} style={style}>
+        {children}
+      </div>
+    )
 
   return (
-    <div data-slot="importance-banner" className={cn(className, 'importance-banner')} style={style}>
+    <div
+      data-slot="importance-banner"
+      className={cn(className, 'importance-banner')}
+      style={{ ...bannerStyle, ...style }}
+    >
       {children}
     </div>
   )
