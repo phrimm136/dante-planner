@@ -93,6 +93,7 @@ const BattleSkillLevelSchema = SkillLevelSchema.extend({ unlock: unused })
 
 const BattleSkillEntrySchema = SkillEntrySchema.extend({
   textID: z.number().optional(),
+  linkedPartTypes: z.array(z.string()).optional(),
   levels: z.tuple([BattleSkillLevelSchema], BattleSkillLevelSchema),
 })
 

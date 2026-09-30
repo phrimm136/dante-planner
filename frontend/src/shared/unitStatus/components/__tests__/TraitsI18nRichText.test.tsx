@@ -1,6 +1,8 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render } from '@testing-library/react'
 
+import unitKeywordsEn from '@static/i18n/EN/unitKeywords.json'
+
 import { TraitsI18n } from '../TraitsI18n'
 
 vi.mock('@/shared/filter/hooks/useUnitKeywords', () => ({
@@ -37,6 +39,15 @@ describe('TraitsI18n rich text', () => {
 
     expect(runs(badge)).toEqual([
       { text: 'Jia Family', color: '#d40000', decoration: 'line-through', fontSize: '' },
+    ])
+  })
+
+  it('strikes the shipped Le Sette Famiglie label that repeats <s> where </s> belongs', () => {
+    const badge = badgeOf(unitKeywordsEn.SEVENFAMILIES_CANCELED)
+
+    expect(badge.textContent).toBe('Le Sette Famiglie')
+    expect(runs(badge)).toEqual([
+      { text: 'Le Sette Famiglie', color: '#d40000', decoration: 'line-through', fontSize: '' },
     ])
   })
 

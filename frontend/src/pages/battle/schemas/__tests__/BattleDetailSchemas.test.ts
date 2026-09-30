@@ -36,3 +36,26 @@ describe('battle unit owner type', () => {
     expect(EnemyDataSchema.safeParse(raw).success).toBe(false)
   })
 })
+
+describe('battle skill linked part types', () => {
+  it('reads BODY on every skill of enemy 1519', () => {
+    const [phase] = EnemyDataSchema.parse(enemy1519).units['1519']?.phases ?? []
+    const linked = Object.fromEntries(
+      Object.entries(phase?.skills ?? {}).map(([id, skill]) => [id, skill.linkedPartTypes]),
+    )
+    expect(linked).toEqual({
+      '151901': ['BODY'],
+      '151902': ['BODY'],
+      '151903': ['BODY'],
+      '151904': ['BODY'],
+      '151905': ['BODY'],
+    })
+  })
+
+  it('parses enemy 91059 skills without linked part types', () => {
+    const [phase] = EnemyDataSchema.parse(enemy91059).units['91059']?.phases ?? []
+    const skills = Object.values(phase?.skills ?? {})
+    expect(skills.length).toBeGreaterThan(0)
+    expect(skills.every((skill) => skill.linkedPartTypes === undefined)).toBe(true)
+  })
+})
