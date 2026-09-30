@@ -110,8 +110,9 @@ export const IDENTITY_CARD_TEXT = {
 /**
  * The tracking the name is measured and drawn with, in em.
  *
- * `m_characterSpacing` on `[Text]GroupUpperName` is -2 in hundredths of an em; the slot's
- * other name node, `[Text]GroupName`, carries -5.
+ * `m_characterSpacing` is -2 hundredths of an em on `[Text]GroupUpperName` and -5 on
+ * `[Text]GroupName`, yet the breaks `[Text]GroupName` draws in game hold under -2 between
+ * letters and -5 between words.
  */
 export const IDENTITY_NAME_TRACKING: TrackingSpec = {
   letterSpacingEm: -0.02,
@@ -125,14 +126,13 @@ export const IDENTITY_NAME_FONT_UNITS =
 /**
  * The box a name segment wraps in, in the slot's own units.
  *
- * The block's own 240u is `[Text]GroupName`'s box, and the segment that wraps is drawn by
- * `[Text]GroupUpperName`, whose box the prefab transcription never covered. The twelve
- * Japanese formation cards bracket it: the widest line the game keeps whole measures
- * 240.75u and the narrowest it breaks measures 243.00u, and TextMeshPro's pen reading —
- * tracking after every glyph, or only between them — moves both bounds by one 0.7u
- * tracking step. 242 is the one whole unit inside the bracket either reading allows.
+ * The segment that wraps is drawn by `[Text]GroupName`, whose prefab box is 240u;
+ * `[Text]GroupUpperName` does not draw it. Every confirmed in-game break — the
+ * English list and the twelve Japanese formation cards — holds under this tracking for a
+ * box between 241.45u and 241.85u, and this is that interval's midpoint. The measure thus
+ * reads about 0.7 % wide of the prefab box; the cause is unverified.
  */
-export const IDENTITY_NAME_WRAP_WIDTH_UNITS = 242
+export const IDENTITY_NAME_WRAP_WIDTH_UNITS = 241.65
 
 /**
  * The lines a name is drawn as: its own newlines kept, each segment wrapped to the box.

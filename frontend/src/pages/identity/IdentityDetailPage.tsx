@@ -84,7 +84,12 @@ function IdentityDetailContent() {
     >
       {visibleSections >= 1 && (
         <DetailSection title={t('section.skills')}>
-          <SkillsSectionI18n id={id} skills={identityData.skills} uptieLevel={uptieLevel} level={level} />
+          <SkillsSectionI18n
+            id={id}
+            skills={identityData.skills}
+            uptieLevel={uptieLevel}
+            level={level}
+          />
         </DetailSection>
       )}
       {visibleSections >= 2 && (

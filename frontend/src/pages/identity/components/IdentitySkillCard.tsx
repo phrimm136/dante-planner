@@ -7,7 +7,7 @@ import {
 } from '@/shared/skill'
 import { NamePlate } from '@/shared/gameText'
 import type { Uptie } from '../types/IdentityTypes'
-import type { SkillEntry, SkillId } from '@/shared/gameData'
+import { type SkillEntry, type SkillId } from '@/shared/gameData'
 
 interface IdentitySkillCardWithGranularI18nProps {
   identityId: string

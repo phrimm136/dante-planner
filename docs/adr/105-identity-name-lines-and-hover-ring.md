@@ -12,7 +12,16 @@ epic: none · pr: none
   the platform's hinting, which is what the shipped advance tables exist to take out of the loop.
   REJECTED: keeping ` ` before a dash to glue `" - "` — the game breaks at exactly that space
   (identity 10314 draws `人差し指代行者` over `-`), so the glue was moving a break the game makes.
-- @cards @text — The wrapping name segment measures against its own box, 242 units of the 305-unit
+- @cards @geometry — The identity hover ring ships as one sprite per frame sprite, carrying that
+  frame's canvas with the ring's ink resampled onto the frame's ink, and is drawn with the frame's
+  own rect, fit and origin. One ring on a derived `fill` rect matched the frame's ink to a hundredth
+  of a pixel only at the scale it was measured at; two elements with different rects and different
+  fits round to different device pixels at other zoom levels. REJECTED: keeping the per-sprite rect
+  derivation and the ink tables in the layout — twenty-four hand-transcribed sprite boxes existed
+  only to line up two layers that can share one box instead.
+
+## Superseded
+- @cards @text → 161 — The wrapping name segment measures against its own box, 242 units of the 305-unit
   formation slot, not against the 240-unit `[Text]GroupName` rect the name block is positioned from.
   The twelve reference cards bracket it: the widest line the game keeps whole measures 240.75u and
   the narrowest it breaks measures 243.00u, so no box of 240u can produce the game's output, and the
@@ -21,13 +30,6 @@ epic: none · pr: none
   `Corporate-Logo-Bold-ver2` face has no GPOS pair adjustment for any pair in that string, so kerning
   cannot supply the missing 0.021 em. REJECTED: transcribing `[Text]GroupUpperName`'s rect instead —
   the prefab is not in a checkout without `static/raw/`, and the bracket is the evidence that exists.
-- @cards @geometry — The identity hover ring ships as one sprite per frame sprite, carrying that
-  frame's canvas with the ring's ink resampled onto the frame's ink, and is drawn with the frame's
-  own rect, fit and origin. One ring on a derived `fill` rect matched the frame's ink to a hundredth
-  of a pixel only at the scale it was measured at; two elements with different rects and different
-  fits round to different device pixels at other zoom levels. REJECTED: keeping the per-sprite rect
-  derivation and the ink tables in the layout — twenty-four hand-transcribed sprite boxes existed
-  only to line up two layers that can share one box instead.
 
 ## Takeaway
 - takeaway: when two layers must coincide, give them one box rather than two boxes computed to agree;

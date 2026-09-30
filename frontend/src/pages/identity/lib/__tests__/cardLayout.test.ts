@@ -4,6 +4,7 @@ import cnTable from '@static/data/fontAdvances/CN.json'
 import enTable from '@static/data/fontAdvances/EN.json'
 import jpTable from '@static/data/fontAdvances/JP.json'
 import krTable from '@static/data/fontAdvances/KR.json'
+import enIdentityNames from '@static/i18n/EN/identityNameList.json'
 import {
   FontAdvanceTableSchema,
   IDENTITY_GEOMETRY,
@@ -396,7 +397,7 @@ describe('identityNameLines over the twelve cards of the Japanese formation refe
 })
 
 describe('the wrapping name’s box', () => {
-  it('stands wider than the block’s own 240u, which the lower name segment keeps', () => {
+  it('stands wider than `[Text]GroupName`’s 240u prefab box', () => {
     expect((IDENTITY_NAME_BLOCK.width / 100) * IDENTITY_SLOT_RECT_UNITS.widthUnits).toBeCloseTo(
       240,
       4,
@@ -557,5 +558,28 @@ describe('formationOrderStyle', () => {
         .map((part) => Number(part.replace('cqw', ''))) ?? []
 
     expect(Math.hypot(dx ?? 0, dy ?? 0) + (blur ?? 0)).toBeCloseTo(DILATE, 5)
+  })
+})
+
+describe('the wrap box the in-game breaks settle', () => {
+  it('is 241.65u', () => {
+    expect(IDENTITY_NAME_WRAP_WIDTH_UNITS).toBe(241.65)
+  })
+})
+
+describe('identityNameLines over the English names the game was checked against', () => {
+  const EN_TABLE = faceTable('EN')
+
+  it.each([
+    ['10812', ['Family', 'Hierarch', 'Candidate']],
+    ['10105', ['Molar Office', 'Fixer']],
+    ['11105', ['Molar Office', 'Fixer']],
+    ['10807', ['Molar', 'Boatworks', 'Fixer']],
+    ['11007', ['Molar', 'Boatworks', 'Fixer']],
+  ] as const)('breaks %s as the game does', (id, expected) => {
+    const name = (enIdentityNames as Record<string, string>)[id]
+
+    expect(name).toBeDefined()
+    expect(identityNameLines(name ?? '', EN_TABLE)).toEqual(expected)
   })
 })
