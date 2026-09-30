@@ -281,7 +281,7 @@ describe('NamePlate', () => {
     expect(size).toBeLessThan(uncapped.fontSize)
   })
 
-  it('slices the white passive sprite at 112 and 171 units and leaves it untinted', () => {
+  it('slices the white passive sprite at 112 and 171 units', () => {
     const { container } = render(<NamePlate kind="passive" name="Name" attributeType="CRIMSON" />)
     const { plate } = nameParts(container)
     const { left, centre, right } = slices(container)
@@ -291,13 +291,31 @@ describe('NamePlate', () => {
     expect(left.style.backgroundSize).toBe('8.4656rem 100%')
     expect(centre.style.backgroundSize).toBe('372.1154% 100%')
     expect(centre.style.backgroundPosition).toBe('39.576% bottom')
-    expect(container.querySelector('svg[data-slot="name-plate-tint"]')).toBeNull()
     for (const piece of [left, centre, right]) {
       expect(piece.style.backgroundImage).toContain(getNamePlatePath('passive'))
-      expect(piece.style.filter).toBe('')
-      expect(piece.style.backgroundColor).toBe('')
-      expect(piece.style.getPropertyValue('background-blend-mode')).toBe('')
     }
+  })
+
+  it.each(['CRIMSON', 'NEUTRAL', undefined])(
+    'tints an undecorated passive plate with the client panel brown for attribute %s',
+    (attributeType) => {
+      const { container } = render(
+        <NamePlate kind="passive" name="Name" attributeType={attributeType} />,
+      )
+      expect(tintReading(container)).toEqual(multiplyOnly('#a16a3b'))
+    },
+  )
+
+  it('tints a passive plate below importance level 1 with the client panel brown', () => {
+    const { container } = render(
+      <NamePlate kind="passive" name="Name" importance={{ level: 0, palette: 'enemy' }} />,
+    )
+    expect(tintReading(container)).toEqual(multiplyOnly('#a16a3b'))
+  })
+
+  it('tints the loading passive plate with the client panel brown', () => {
+    const { container } = render(<NamePlateSkeleton kind="passive" attributeType="NEUTRAL" />)
+    expect(tintReading(container)).toEqual(multiplyOnly('#a16a3b'))
   })
 
   it('draws no gradient on the plate', () => {

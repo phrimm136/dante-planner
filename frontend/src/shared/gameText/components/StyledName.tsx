@@ -45,7 +45,7 @@ interface NamePlateSpec {
   textHeight: number
   body: CSSProperties
   slice: PlateSlice
-  tinted: boolean
+  tint: (attributePrimary: string) => string
 }
 
 const TEXT_COLOR = '#eecea4'
@@ -78,7 +78,7 @@ const NAME_PLATES: Record<NamePlateKind, NamePlateSpec> = {
       paddingBottom: clientLength(SKILL.TEXT_MARGIN_BOTTOM),
     },
     slice: SKILL.SLICE,
-    tinted: true,
+    tint: (attributePrimary) => attributePrimary,
   },
   passive: {
     node: nameNode(PASSIVE.FONT, PASSIVE.MIN_FONT),
@@ -93,7 +93,7 @@ const NAME_PLATES: Record<NamePlateKind, NamePlateSpec> = {
       paddingBottom: clientLength(PASSIVE_TEXT_INSET),
     },
     slice: PASSIVE.SLICE,
-    tinted: false,
+    tint: () => PASSIVE.TINT,
   },
 }
 
@@ -147,7 +147,7 @@ function plateTint(
     const body: unknown = (bannerStyle as Record<string, unknown>)['--name-body']
     return typeof body === 'string' ? body : undefined
   }
-  return NAME_PLATES[kind].tinted ? primary : undefined
+  return NAME_PLATES[kind].tint(primary)
 }
 
 function generateStripeGradient(color: string): string {

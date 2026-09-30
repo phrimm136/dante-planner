@@ -216,8 +216,11 @@ export const NAME_PLATE_UNITS = {
     PAD_RIGHT: 100,
     TEXT_HEIGHT: 52.74,
     // [Script]SkillNameBg height; New_MainUI_PersonalityList_2_46 387x54 px at 1u/px (ppu 100),
-    // borders L 112 / R 171 px, Image m_Color #ffffff.
+    // borders L 112 / R 171 px.
     HEIGHT: 72.74,
+    // UnitInformationNewPassiveBox.SetData sets the SkillNameBg color to
+    // UIColorManager._uiTextDarkColor (+0xe0) unless an importance level colours it.
+    TINT: '#a16a3b',
     // [Script]SkillNameBg rect_area is UnitInformationPassiveContent: 1304.2 - _rightPadding 400.
     TEXT_WIDTH_MAX: 904.2,
     SLICE: {
