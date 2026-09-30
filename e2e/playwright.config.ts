@@ -47,7 +47,12 @@ export default defineConfig({
     },
     {
       name: 'chromium',
-      testIgnore: /.*\.(contract|infra)\.spec\.ts/,
+      testIgnore: /.*\.(contract|infra|crawl)\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'crawl',
+      testMatch: /.*\.crawl\.spec\.ts/,
       use: { ...devices['Desktop Chrome'] },
     },
   ],
