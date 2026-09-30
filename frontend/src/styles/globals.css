@@ -9,10 +9,10 @@
    (generated) with a unicode-range that excludes their blank Hangul glyphs.
    ========================================================================== */
 
-/* Mikodacs Regular - Stylized display font */
+/* PlannerLatin Regular - Stylized display font (modified Mikodacs, SIL OFL 1.1) */
 @font-face {
-  font-family: 'Mikodacs';
-  src: url('../assets/fonts/mikodacs.regular.ttf');
+  font-family: 'PlannerLatin';
+  src: url('../assets/fonts/planner-latin.otf') format('opentype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -59,8 +59,8 @@
 }
 
 @font-face {
-  font-family: 'Mikodacs Geo';
-  src: url('../assets/fonts/mikodacs.regular.ttf');
+  font-family: 'PlannerLatin Geo';
+  src: url('../assets/fonts/planner-latin.otf') format('opentype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -131,7 +131,7 @@
 :root {
   --font-kotra: 'KOTRA_BOLD', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
   --font-score-dream: 'S-Core Dream', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
-  --font-mikodacs: 'Mikodacs', sans-serif;
+  --font-planner-latin: 'PlannerLatin', sans-serif;
   --font-pretendard: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
   --font-corporate: 'Corporate Logo Bold', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
   --font-higashiome: 'HigashiOme Gothic C', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;

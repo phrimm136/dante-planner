@@ -41,7 +41,7 @@ export function getDisplayFontForLanguage(language?: string): React.CSSPropertie
     case 'KR':
       return { fontFamily: 'var(--font-kotra)' }
     case 'EN':
-      return { fontFamily: 'var(--font-mikodacs)' }
+      return { fontFamily: 'var(--font-planner-latin)' }
     case 'JP':
       return { fontFamily: 'var(--font-corporate)' }
     case 'CN':
@@ -53,7 +53,7 @@ export function getDisplayFontForLanguage(language?: string): React.CSSPropertie
 
 const GEOMETRY_FAMILIES: Record<string, string> = {
   KR: "'KOTRA_BOLD Geo', var(--font-kotra)",
-  EN: "'Mikodacs Geo', var(--font-mikodacs)",
+  EN: "'PlannerLatin Geo', var(--font-planner-latin)",
   JP: "'Corporate Logo Bold Geo', var(--font-corporate)",
   CN: "'Chinese Font Geo', var(--font-chinese)",
 }

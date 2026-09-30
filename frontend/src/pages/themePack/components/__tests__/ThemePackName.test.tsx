@@ -168,7 +168,7 @@ describe('ThemePackName', () => {
     names.pack1 = { name: 'Ab' }
 
     const style = renderName('pack1').style
-    expect(style.fontFamily).toContain('Mikodacs Geo')
+    expect(style.fontFamily).toContain('PlannerLatin Geo')
     expect(style.lineHeight).toBe('0')
     expect(style.position).toBe('relative')
     expect(Number.parseFloat(style.top)).toBeCloseTo((0.72 - 0.01) / 2, 6)
