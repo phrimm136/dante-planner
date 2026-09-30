@@ -176,7 +176,12 @@ describe('linePitch', () => {
   })
 
   it('reduces to the face line height between two lines of the display face', () => {
-    const kotra = { ascender: 0.927734, descender: 0.390625, lineHeight: 1.451172, lineGap: 0.132813 }
+    const kotra = {
+      ascender: 0.927734,
+      descender: 0.390625,
+      lineHeight: 1.451172,
+      lineGap: 0.132813,
+    }
 
     expect(linePitch(kotra, kotra, 0)).toBeCloseTo(1.451172, 6)
   })
