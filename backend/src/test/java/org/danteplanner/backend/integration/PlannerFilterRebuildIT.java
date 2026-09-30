@@ -35,6 +35,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -141,11 +142,11 @@ class PlannerFilterRebuildIT {
                 .published(true)
                 .save(plannerRepository);
 
-        catalogSyncService.syncPlanner(planner.getId(), 0L);
+        catalogSyncService.syncPlanner(planner.getId(), List.of());
         long entityRowsAfterFirstBuild = entityFilterRepository.count();
         assertThat(entityRowsAfterFirstBuild).isPositive();
 
-        catalogSyncService.syncPlanner(planner.getId(), 0L);
+        catalogSyncService.syncPlanner(planner.getId(), List.of());
 
         assertThat(entityFilterRepository.count()).isEqualTo(entityRowsAfterFirstBuild);
         assertThat(keywordFilterRepository.findAll())
@@ -160,7 +161,7 @@ class PlannerFilterRebuildIT {
                 .published(true)
                 .save(plannerRepository);
 
-        catalogSyncService.syncPlanner(planner.getId(), 0L);
+        catalogSyncService.syncPlanner(planner.getId(), List.of());
 
         Set<String> expected = extractor
                 .extract(objectMapper.readTree(planner.getContentJson()), MDCategory.fromValue(planner.getCategory()))
@@ -191,7 +192,7 @@ class PlannerFilterRebuildIT {
                 .content(content)
                 .save(plannerRepository);
 
-        catalogSyncService.syncPlanner(planner.getId(), 0L);
+        catalogSyncService.syncPlanner(planner.getId(), List.of());
 
         Set<Integer> gifts = entityFilterRepository.findAll().stream()
                 .filter(f -> f.getPlannerId().equals(planner.getId()))
@@ -234,7 +235,7 @@ class PlannerFilterRebuildIT {
                 .published(true)
                 .save(plannerRepository);
 
-        catalogSyncService.syncPlanner(planner.getId(), 0L);
+        catalogSyncService.syncPlanner(planner.getId(), List.of());
 
         assertThat(indexedRows(planner))
                 .doesNotContain("THEME_PACK:1006", "EGO_GIFT:9004")
@@ -251,7 +252,7 @@ class PlannerFilterRebuildIT {
                 .published(true)
                 .save(plannerRepository);
 
-        catalogSyncService.syncPlanner(planner.getId(), 0L);
+        catalogSyncService.syncPlanner(planner.getId(), List.of());
 
         assertThat(indexedRows(planner))
                 .contains("THEME_PACK:1006", "EGO_GIFT:9004")
@@ -267,7 +268,7 @@ class PlannerFilterRebuildIT {
                     .published(true)
                     .save(plannerRepository);
 
-            catalogSyncService.syncPlanner(planner.getId(), 0L);
+            catalogSyncService.syncPlanner(planner.getId(), List.of());
 
             Set<String> rendered = IntStream.range(0, gameDataRegistry.floorRules().floorCount(category))
                     .boxed()
@@ -344,7 +345,7 @@ class PlannerFilterRebuildIT {
                 .published(true)
                 .save(plannerRepository);
 
-        catalogSyncService.syncPlanner(planner.getId(), 0L);
+        catalogSyncService.syncPlanner(planner.getId(), List.of());
 
         assertThat(indexedRows(planner))
                 .contains("IDENTITY:10101", "EGO:20101", "EGO_GIFT:9001")
@@ -366,7 +367,7 @@ class PlannerFilterRebuildIT {
                     .published(true)
                     .save(plannerRepository);
 
-            catalogSyncService.syncPlanner(planner.getId(), 0L);
+            catalogSyncService.syncPlanner(planner.getId(), List.of());
             Set<String> scoped = indexedRows(planner);
             callRolloutProcedure(planner);
 
@@ -386,7 +387,7 @@ class PlannerFilterRebuildIT {
                 .published(true)
                 .save(plannerRepository);
 
-        catalogSyncService.syncPlanner(planner.getId(), 0L);
+        catalogSyncService.syncPlanner(planner.getId(), List.of());
         Set<String> scoped = indexedRows(planner);
         callRolloutProcedure(planner);
 
@@ -404,7 +405,7 @@ class PlannerFilterRebuildIT {
                 .published(true)
                 .save(plannerRepository);
 
-        catalogSyncService.syncPlanner(planner.getId(), 0L);
+        catalogSyncService.syncPlanner(planner.getId(), List.of());
 
         assertThat(indexedRows(planner))
                 .filteredOn(row -> row.startsWith("THEME_PACK:") || row.startsWith("EGO_GIFT:"))

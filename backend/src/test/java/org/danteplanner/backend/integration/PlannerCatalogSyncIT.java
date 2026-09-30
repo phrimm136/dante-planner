@@ -12,6 +12,8 @@ import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerCatalogSyncService;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
+import org.danteplanner.backend.shared.outbox.config.OutboxConstants;
+import org.danteplanner.backend.shared.outbox.repository.DomainEventRepository;
 import org.danteplanner.backend.support.CatalogEffects;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
@@ -27,12 +29,20 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.Timestamp;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
 
@@ -83,6 +93,12 @@ class PlannerCatalogSyncIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private DataSource dataSource;
+
+    @Autowired
+    private DomainEventRepository domainEventRepository;
+
+    @Autowired
+    private PlatformTransactionManager transactionManager;
 
     private JdbcTemplate jdbc;
     private User owner;
@@ -206,10 +222,70 @@ class PlannerCatalogSyncIT extends SharedMySqlContainerSupport {
         long read = recordEvent(planner.getId());
         long arrivedLater = recordEvent(planner.getId());
 
-        catalogSyncService.syncPlanner(planner.getId(), read);
+        catalogSyncService.syncPlanner(planner.getId(), List.of(read));
 
         assertThat(dispatchedAt(read)).isNotNull();
         assertThat(dispatchedAt(arrivedLater)).isNull();
+    }
+
+    @Test
+    @DisplayName("the catalog sync's mark does not wait on an earlier-inserted aggregate's locked event row")
+    void markDispatched_WhenAnEarlierAggregatesEventIsLocked_MarksWithoutWaiting() throws Exception {
+        UUID planner = UUID.randomUUID();
+        assertMarkDoesNotWaitOn(new UUID(0L, UUID.randomUUID().getLeastSignificantBits()), planner);
+    }
+
+    @Test
+    @DisplayName("the catalog sync's mark does not wait on the locked event row of the aggregate sorting right after it")
+    void markDispatched_WhenTheNextAggregatesEventIsLocked_MarksWithoutWaiting() throws Exception {
+        UUID planner = UUID.randomUUID();
+        assertMarkDoesNotWaitOn(
+                new UUID(planner.getMostSignificantBits(), planner.getLeastSignificantBits() + 1), planner);
+    }
+
+    @Test
+    @DisplayName("a pending row that spent its attempts does not age the backlog while a retryable one does")
+    void backlogAgeSeconds_WhenTheOldestPendingRowIsCapped_ReportsTheOldestRetryableRow() {
+        long capped = recordEvent(UUID.randomUUID());
+        long retryable = recordEvent(UUID.randomUUID());
+        jdbc.update("UPDATE domain_events SET attempts = ?, created_at = NOW(6) - INTERVAL 30 DAY WHERE id = ?",
+                OutboxConstants.DISPATCH_ATTEMPT_CAP, capped);
+        jdbc.update("UPDATE domain_events SET attempts = ?, created_at = NOW(6) - INTERVAL 20 DAY WHERE id = ?",
+                OutboxConstants.DISPATCH_ATTEMPT_CAP - 1, retryable);
+
+        try {
+            assertThat(catalogSyncService.backlogAgeSeconds())
+                    .isGreaterThanOrEqualTo(Duration.ofDays(20).toSeconds())
+                    .isLessThan(Duration.ofDays(30).toSeconds());
+        } finally {
+            jdbc.update("UPDATE domain_events SET dispatched_at = NOW(6) WHERE id IN (?, ?)", capped, retryable);
+        }
+    }
+
+    private void assertMarkDoesNotWaitOn(UUID neighbour, UUID planner) throws Exception {
+        long neighbourEvent = recordEvent(neighbour, "COMMENT_RECEIVED");
+        long plannerEvent = recordEvent(planner);
+
+        try (Connection holder = dataSource.getConnection()) {
+            holder.setAutoCommit(false);
+            try (PreparedStatement lock = holder.prepareStatement(
+                    "SELECT id FROM domain_events WHERE id = ? FOR UPDATE")) {
+                lock.setLong(1, neighbourEvent);
+                lock.executeQuery().close();
+            }
+
+            CompletableFuture<Integer> mark = CompletableFuture.supplyAsync(() ->
+                    new TransactionTemplate(transactionManager).execute(status ->
+                            domainEventRepository.markDispatched(List.of(plannerEvent), Instant.now())));
+            try {
+                assertThat(mark.get(3, TimeUnit.SECONDS)).isEqualTo(1);
+                assertThat(dispatchedAt(plannerEvent)).isNotNull();
+            } finally {
+                holder.rollback();
+                mark.get(60, TimeUnit.SECONDS);
+                jdbc.update("UPDATE domain_events SET dispatched_at = NOW(6) WHERE id = ?", neighbourEvent);
+            }
+        }
     }
 
     private Planner publishClean(String title) {
@@ -220,15 +296,19 @@ class PlannerCatalogSyncIT extends SharedMySqlContainerSupport {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
-        catalogSyncService.syncPlanner(planner.getId(), 0L);
+        catalogSyncService.syncPlanner(planner.getId(), List.of());
         return planner;
     }
 
     private long recordEvent(UUID plannerId) {
+        return recordEvent(plannerId, "PLANNER_CATALOG_CHANGED");
+    }
+
+    private long recordEvent(UUID aggregateId, String eventType) {
         jdbc.update("INSERT INTO domain_events (event_type, aggregate_id, payload) "
-                + "VALUES ('PLANNER_CATALOG_CHANGED', UUID_TO_BIN(?), '{}')", plannerId.toString());
+                + "VALUES (?, UUID_TO_BIN(?), '{}')", eventType, aggregateId.toString());
         return jdbc.queryForObject("SELECT MAX(id) FROM domain_events WHERE aggregate_id = UUID_TO_BIN(?)",
-                Long.class, plannerId.toString());
+                Long.class, aggregateId.toString());
     }
 
     private Timestamp dispatchedAt(long eventId) {

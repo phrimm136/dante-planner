@@ -9,7 +9,7 @@ epic: none · pr: none
   consumer, held by a single instance at a time, drains those events every second: it groups the
   pending rows by planner, and for each planner reads the committed state, rebuilds or clears the
   filter rows, writes or clears the withdrawal marker or writes the delete tombstone, and marks
-  that planner's rows up to the highest id it read as done, in one transaction. The filter rebuild
+  exactly the rows it read for that planner as done, by id, in one transaction. The filter rebuild
   ran in an after-commit listener in its own transaction, so a throw or a crash after the commit
   lost it with nothing to retry from, and the reconciler only reports drift. A single consumer
   writes the filter tables one planner at a time, so no two syncs contend for their gap locks and
@@ -22,14 +22,23 @@ epic: none · pr: none
   still deadlocked on the filter indexes' gap locks.
   REJECTED: per-event dispatch under one global lock — the same serialization without the
   coalescing, so a save burst queues one sync per change.
+  REJECTED: marking a planner's rows by aggregate and an id bound — with no aggregate index it
+  range-scanned the primary key and locked every earlier event, deadlocking the dispatcher and
+  event inserts; an aggregate index still locked the next aggregate in index order, and the
+  optimizer skipped it whenever one row was pending.
   REJECTED: separate rebuild and clear event types — a retried or reordered pair can finish on the
   wrong one, where a re-derived effect always converges on the current state.
   REJECTED: repairing drift from the reconciler — the silent auto-repair 016 rejected, and repair
   arrives a reconcile period late.
   INVARIANT: once a pass has run after the last change, a planner's filter rows and withdrawal
-  marker match its committed visibility — the catalog sync integration tests (a failed sync leaves its rows pending
-  and the next pass repairs it; filter rows, markers and tombstones). A pending row older than the
-  alert threshold pages — the catalog sync backlog alert.
+  marker match its committed visibility — the catalog sync integration tests (a failed sync leaves
+  its rows pending and the next pass repairs it; filter rows, markers and tombstones). Marking a
+  planner's rows never waits on another aggregate's event — the catalog sync lock-footprint
+  integration tests. A pending row with attempts left that is older than the alert threshold pages
+  — the catalog sync backlog alert; a row that reaches the attempt cap pages once when it does —
+  the cap alarm.
+  NON-GOAL: a capped row is not retired by a later successful sync of its planner; it stays
+  undispatched until someone resets or marks it, since a pass marks only the rows it read.
   NON-GOAL: the author's own filtered read right after a change is not guaranteed to see it; it
   sees it after the next pass, within about a second plus replication.
   NON-GOAL: the event carries no instruction; its payload is not read to decide the effect.

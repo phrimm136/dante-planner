@@ -31,6 +31,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import javax.sql.DataSource;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -125,7 +126,7 @@ class PlannerTitleSearchIT {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
-        catalogSyncService.syncPlanner(planner.getId(), 0L);
+        catalogSyncService.syncPlanner(planner.getId(), List.of());
     }
 
     @Test

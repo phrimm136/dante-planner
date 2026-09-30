@@ -15,7 +15,6 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 public interface DomainEventRepository extends JpaRepository<DomainEvent, Long> {
 
@@ -39,16 +38,14 @@ public interface DomainEventRepository extends JpaRepository<DomainEvent, Long> 
             Pageable page);
 
     @Modifying
-    @Query("UPDATE DomainEvent e SET e.dispatchedAt = :now WHERE e.aggregateId = :aggregateId "
-            + "AND e.eventType = :type AND e.id <= :throughId AND e.dispatchedAt IS NULL")
-    int markDispatchedThrough(@Param("aggregateId") UUID aggregateId, @Param("type") DomainEventType type,
-            @Param("throughId") long throughId, @Param("now") Instant now);
+    @Query("UPDATE DomainEvent e SET e.dispatchedAt = :now WHERE e.id IN :ids AND e.dispatchedAt IS NULL")
+    int markDispatched(@Param("ids") Collection<Long> ids, @Param("now") Instant now);
 
     @Query(value = """
             SELECT COALESCE(TIMESTAMPDIFF(SECOND, MIN(created_at), NOW(6)), 0) FROM domain_events
-            WHERE event_type = :type AND dispatched_at IS NULL
+            WHERE event_type = :type AND dispatched_at IS NULL AND attempts < :cap
             """, nativeQuery = true)
-    long oldestPendingAgeSecondsOf(@Param("type") String type);
+    long oldestPendingAgeSecondsOf(@Param("type") String type, @Param("cap") int cap);
 
     @Modifying
     @Query("UPDATE DomainEvent e SET e.attempts = e.attempts + 1 WHERE e.id = :id")

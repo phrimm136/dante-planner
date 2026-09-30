@@ -143,7 +143,7 @@ class PlannerKeywordFacetIT {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
-        catalogSyncService.syncPlanner(planner.getId(), 0L);
+        catalogSyncService.syncPlanner(planner.getId(), List.of());
         return planner;
     }
 
@@ -160,7 +160,7 @@ class PlannerKeywordFacetIT {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(empty.getId()).build());
         catalogService.add(empty);
-        catalogSyncService.syncPlanner(empty.getId(), 0L);
+        catalogSyncService.syncPlanner(empty.getId(), List.of());
 
         mockMvc.perform(get("/api/planner/md/published").param("identity", "10101"))
                 .andExpect(status().isOk())
@@ -380,7 +380,7 @@ class PlannerKeywordFacetIT {
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
         clearColumns(planner.getId());
-        catalogSyncService.syncPlanner(planner.getId(), 0L);
+        catalogSyncService.syncPlanner(planner.getId(), List.of());
         return planner;
     }
 
@@ -423,7 +423,7 @@ class PlannerKeywordFacetIT {
                 planner.getId().toString());
         jdbc().update("UPDATE planner_catalog SET selected_keywords = '[\"Sinking\"]' WHERE planner_id = UUID_TO_BIN(?)",
                 planner.getId().toString());
-        catalogSyncService.syncPlanner(planner.getId(), 0L);
+        catalogSyncService.syncPlanner(planner.getId(), List.of());
         assertThat(indexedKeywords(planner.getId())).containsExactly("Sinking");
 
         runBackfill();
@@ -438,7 +438,7 @@ class PlannerKeywordFacetIT {
         Planner planner = publishedWithoutColumn("Backfill Legacy Column", List.of("ChargeLoad"));
         jdbc().update("UPDATE planner_content SET selected_keywords = '[\"ChargeLoad\"]' WHERE planner_id = UUID_TO_BIN(?)",
                 planner.getId().toString());
-        catalogSyncService.syncPlanner(planner.getId(), 0L);
+        catalogSyncService.syncPlanner(planner.getId(), List.of());
         assertThat(indexedKeywords(planner.getId())).containsExactly("ChargeLoad");
 
         runBackfill();

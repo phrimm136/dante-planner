@@ -38,6 +38,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -149,7 +150,7 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
-        catalogSyncService.syncPlanner(planner.getId(), 0L);
+        catalogSyncService.syncPlanner(planner.getId(), List.of());
         // MySQL re-serializes a JSON column, so "the content did not change" is only
         // expressible against the stored form, not the string handed to the insert.
         return plannerRepository.findAggregateForOwner(planner.getId(), owner.getId()).orElseThrow();
@@ -320,7 +321,7 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
-        catalogSyncService.syncPlanner(planner.getId(), 0L);
+        catalogSyncService.syncPlanner(planner.getId(), List.of());
         return plannerRepository.findById(planner.getId()).orElseThrow();
     }
 

@@ -128,7 +128,7 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
-        catalogSyncService.syncPlanner(planner.getId(), 0L);
+        catalogSyncService.syncPlanner(planner.getId(), List.of());
         return planner;
     }
 
@@ -432,7 +432,7 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
-        catalogSyncService.syncPlanner(planner.getId(), 0L);
+        catalogSyncService.syncPlanner(planner.getId(), List.of());
 
         assertThat(kindsFor(reconciler.reconcile(), planner.getId())).doesNotContain("entity_filter");
     }
@@ -448,7 +448,7 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
-        catalogSyncService.syncPlanner(planner.getId(), 0L);
+        catalogSyncService.syncPlanner(planner.getId(), List.of());
 
         assertThat(kindsFor(reconciler.reconcile(), planner.getId()))
                 .doesNotContain("entity_filter", "keyword_filter");
@@ -491,7 +491,7 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
         Planner planner = publishClean("Index Follows Column", Set.of("Sinking"));
         jdbc.update("UPDATE planner_content SET selected_keywords = '[\"Burst\"]' WHERE planner_id = UUID_TO_BIN(?)",
                 planner.getId().toString());
-        catalogSyncService.syncPlanner(planner.getId(), 0L);
+        catalogSyncService.syncPlanner(planner.getId(), List.of());
 
         assertThat(recordsFor(reconciler.reconcile(), planner.getId(), "keyword_filter"))
                 .singleElement()

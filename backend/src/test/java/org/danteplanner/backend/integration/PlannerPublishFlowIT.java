@@ -150,7 +150,7 @@ class PlannerPublishFlowIT {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
-        catalogSyncService.syncPlanner(planner.getId(), 0L);
+        catalogSyncService.syncPlanner(planner.getId(), List.of());
         long filterRowsBefore = entityFilterRows(planner.getId());
         assertThat(filterRowsBefore).isPositive();
 
@@ -452,7 +452,7 @@ class PlannerPublishFlowIT {
                 .selectedKeywords(Set.of("Sinking", "NotAKeyword")).published(true).save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
-        catalogSyncService.syncPlanner(planner.getId(), 0L);
+        catalogSyncService.syncPlanner(planner.getId(), List.of());
         return stored(planner.getId());
     }
 

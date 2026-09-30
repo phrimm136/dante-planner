@@ -187,7 +187,7 @@ class PlannerUserDeleteSweepIT {
         statsRepository.save(PlannerStats.builder()
                 .plannerId(published.getId()).viewCount(3).upvotes(1).build());
         catalogService.add(published);
-        catalogSyncService.syncPlanner(published.getId(), 0L);
+        catalogSyncService.syncPlanner(published.getId(), List.of());
         insertPlannerVote(other.getId(), published.getId());
         jdbc.update("INSERT INTO planner_views (planner_id, viewer_hash, view_date, created_at) "
                 + "VALUES (UUID_TO_BIN(?), SHA2('viewer', 256), ?, NOW())",

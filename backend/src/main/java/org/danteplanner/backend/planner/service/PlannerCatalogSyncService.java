@@ -109,7 +109,7 @@ public class PlannerCatalogSyncService {
             }
             List<Long> ids = planner.getValue();
             try {
-                self.syncPlanner(planner.getKey(), ids.get(ids.size() - 1));
+                self.syncPlanner(planner.getKey(), ids);
                 synced++;
             } catch (RuntimeException e) {
                 recordFailedSync(planner.getKey(), ids, e);
@@ -119,7 +119,7 @@ public class PlannerCatalogSyncService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void syncPlanner(UUID plannerId, long throughEventId) {
+    public void syncPlanner(UUID plannerId, List<Long> eventIds) {
         if (plannerRepository.existsPublishedById(plannerId)) {
             rebuildFilters(plannerId);
             tombstoneStore.clearTombstoneOrThrow(ByIdReadGuard.PUBLISHED_PLANNER_SCOPE, plannerId);
@@ -130,13 +130,15 @@ public class PlannerCatalogSyncService {
                 tombstoneStore.writeTombstoneOrThrow(ByIdReadGuard.PLANNER_ENTITY_TYPE, plannerId);
             }
         }
-        events.markDispatchedThrough(plannerId, DomainEventType.PLANNER_CATALOG_CHANGED, throughEventId,
-                Instant.now());
+        if (!eventIds.isEmpty()) {
+            events.markDispatched(eventIds, Instant.now());
+        }
     }
 
     @Transactional
     public double backlogAgeSeconds() {
-        return events.oldestPendingAgeSecondsOf(DomainEventType.PLANNER_CATALOG_CHANGED.name());
+        return events.oldestPendingAgeSecondsOf(DomainEventType.PLANNER_CATALOG_CHANGED.name(),
+                OutboxConstants.DISPATCH_ATTEMPT_CAP);
     }
 
     private void recordFailedSync(UUID plannerId, List<Long> ids, RuntimeException cause) {

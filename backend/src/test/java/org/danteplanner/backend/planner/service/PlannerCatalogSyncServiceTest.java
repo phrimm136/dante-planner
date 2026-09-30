@@ -48,6 +48,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -112,15 +113,15 @@ class PlannerCatalogSyncServiceTest {
     }
 
     @Test
-    void drainPending_WhenAPlannerHasSeveralEvents_SyncsItOnceThroughItsHighestIdInFirstSeenOrder() {
+    void drainPending_WhenAPlannerHasSeveralEvents_SyncsItOnceWithEveryIdItReadInFirstSeenOrder() {
         UUID other = UUID.randomUUID();
         givenPending(event(1L, plannerId), event(2L, other), event(3L, plannerId));
 
         assertThat(syncService.drainPending()).isEqualTo(2);
 
         InOrder order = inOrder(self);
-        order.verify(self).syncPlanner(plannerId, 3L);
-        order.verify(self).syncPlanner(other, 2L);
+        order.verify(self).syncPlanner(plannerId, List.of(1L, 3L));
+        order.verify(self).syncPlanner(other, List.of(2L));
         verifyNoInteractions(attemptRecorder);
     }
 
@@ -137,7 +138,7 @@ class PlannerCatalogSyncServiceTest {
     void drainPending_WhenOnePlannersSyncThrows_RecordsItsAttemptsAndSyncsTheNext() {
         UUID other = UUID.randomUUID();
         givenPending(event(1L, plannerId), event(2L, other), event(3L, plannerId));
-        doThrow(new IllegalStateException("store down")).when(self).syncPlanner(plannerId, 3L);
+        doThrow(new IllegalStateException("store down")).when(self).syncPlanner(plannerId, List.of(1L, 3L));
         when(attemptRecorder.recordAttempt(anyLong())).thenReturn(1);
 
         assertThat(syncService.drainPending()).isEqualTo(1);
@@ -145,26 +146,26 @@ class PlannerCatalogSyncServiceTest {
         verify(attemptRecorder).recordAttempt(1L);
         verify(attemptRecorder).recordAttempt(3L);
         verify(attemptRecorder, never()).recordAttempt(2L);
-        verify(self).syncPlanner(other, 2L);
+        verify(self).syncPlanner(other, List.of(2L));
     }
 
     @Test
     void drainPending_WhenAFailedSyncSpendsTheLastAttempt_RaisesTheAlarmAndKeepsDraining() {
         UUID other = UUID.randomUUID();
         givenPending(event(1L, plannerId), event(2L, other));
-        doThrow(new IllegalStateException("store down")).when(self).syncPlanner(plannerId, 1L);
+        doThrow(new IllegalStateException("store down")).when(self).syncPlanner(plannerId, List.of(1L));
         when(attemptRecorder.recordAttempt(1L)).thenReturn(10);
 
         List<ILoggingEvent> errors = errorsDuring(() -> assertThat(syncService.drainPending()).isEqualTo(1));
 
         assertThat(errors).as("spending the last attempt pages").hasSize(1);
-        verify(self).syncPlanner(other, 2L);
+        verify(self).syncPlanner(other, List.of(2L));
     }
 
     @Test
     void drainPending_WhenAFailedSyncHasAttemptsLeft_RaisesNoAlarm() {
         givenPending(event(1L, plannerId));
-        doThrow(new IllegalStateException("store down")).when(self).syncPlanner(plannerId, 1L);
+        doThrow(new IllegalStateException("store down")).when(self).syncPlanner(plannerId, List.of(1L));
         when(attemptRecorder.recordAttempt(1L)).thenReturn(9);
 
         assertThat(errorsDuring(syncService::drainPending)).as("a retryable failure does not page").isEmpty();
@@ -188,12 +189,12 @@ class PlannerCatalogSyncServiceTest {
         givenVisible(true);
         stubScope(PlannerType.REFRACTED_RAILWAY, "RR_PLACEHOLDER");
 
-        syncService.syncPlanner(plannerId, 7L);
+        syncService.syncPlanner(plannerId, List.of(7L));
 
         InOrder order = inOrder(entityFilterRepository, tombstoneStore, events);
         order.verify(entityFilterRepository).rebuildPlannerFilters(plannerId, 0);
         order.verify(tombstoneStore).clearTombstoneOrThrow("published-planner", plannerId);
-        order.verify(events).markDispatchedThrough(eq(plannerId), eq(CATALOG_CHANGED), eq(7L), any(Instant.class));
+        order.verify(events).markDispatched(eq(List.of(7L)), any(Instant.class));
         verify(entityFilterRepository, never()).deleteByPlannerId(any());
         verifyNoInteractions(keywordFilterRepository);
         verify(tombstoneStore, never()).writeTombstoneOrThrow(any(), any());
@@ -204,14 +205,25 @@ class PlannerCatalogSyncServiceTest {
         givenVisible(false);
         givenDeleted(false);
 
-        syncService.syncPlanner(plannerId, 7L);
+        syncService.syncPlanner(plannerId, List.of(7L));
 
         verify(entityFilterRepository).deleteByPlannerId(plannerId);
         verify(keywordFilterRepository).deleteByPlannerId(plannerId);
         verify(entityFilterRepository, never()).rebuildPlannerFilters(any(), anyInt());
         verify(tombstoneStore).writeTombstoneOrThrow("published-planner", plannerId);
         verify(tombstoneStore, never()).writeTombstoneOrThrow("planner", plannerId);
-        verify(events).markDispatchedThrough(eq(plannerId), eq(CATALOG_CHANGED), eq(7L), any(Instant.class));
+        verify(events).markDispatched(eq(List.of(7L)), any(Instant.class));
+    }
+
+    @Test
+    void syncPlanner_WhenGivenNoEventIds_SyncsAndMarksNothing() {
+        givenVisible(false);
+        givenDeleted(false);
+
+        syncService.syncPlanner(plannerId, List.of());
+
+        verify(tombstoneStore).writeTombstoneOrThrow("published-planner", plannerId);
+        verify(events, never()).markDispatched(any(), any());
     }
 
     @Test
@@ -219,7 +231,7 @@ class PlannerCatalogSyncServiceTest {
         givenVisible(false);
         givenDeleted(true);
 
-        syncService.syncPlanner(plannerId, 7L);
+        syncService.syncPlanner(plannerId, List.of(7L));
 
         verify(tombstoneStore).writeTombstoneOrThrow("published-planner", plannerId);
         verify(tombstoneStore).writeTombstoneOrThrow("planner", plannerId);
@@ -230,7 +242,7 @@ class PlannerCatalogSyncServiceTest {
         givenVisible(false);
         when(plannerRepository.findOwnershipById(plannerId)).thenReturn(Optional.empty());
 
-        syncService.syncPlanner(plannerId, 7L);
+        syncService.syncPlanner(plannerId, List.of(7L));
 
         verify(tombstoneStore).writeTombstoneOrThrow("planner", plannerId);
     }
@@ -241,9 +253,9 @@ class PlannerCatalogSyncServiceTest {
         doThrow(new IllegalStateException("store down"))
                 .when(tombstoneStore).writeTombstoneOrThrow("published-planner", plannerId);
 
-        assertThatThrownBy(() -> syncService.syncPlanner(plannerId, 7L)).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> syncService.syncPlanner(plannerId, List.of(7L))).isInstanceOf(IllegalStateException.class);
 
-        verify(events, never()).markDispatchedThrough(any(), any(), anyLong(), any());
+        verify(events, never()).markDispatched(any(), any());
     }
 
     @Test
@@ -252,7 +264,7 @@ class PlannerCatalogSyncServiceTest {
         stubScope(PlannerType.MIRROR_DUNGEON, "10F");
         when(gameDataRegistry.floorRules()).thenReturn(TABLE);
 
-        syncService.syncPlanner(plannerId, 7L);
+        syncService.syncPlanner(plannerId, List.of(7L));
 
         verify(entityFilterRepository).rebuildPlannerFilters(plannerId, TABLE.floorCount(MDCategory.F10));
     }
@@ -262,7 +274,7 @@ class PlannerCatalogSyncServiceTest {
         givenVisible(true);
         stubScope(PlannerType.REFRACTED_RAILWAY, "RR_PLACEHOLDER");
 
-        syncService.syncPlanner(plannerId, 7L);
+        syncService.syncPlanner(plannerId, List.of(7L));
 
         verify(entityFilterRepository).rebuildPlannerFilters(plannerId, 0);
         verifyNoInteractions(gameDataRegistry);
@@ -273,7 +285,7 @@ class PlannerCatalogSyncServiceTest {
         givenVisible(true);
         when(entityFilterRepository.floorScopeOf(plannerId)).thenReturn(Optional.empty());
 
-        syncService.syncPlanner(plannerId, 7L);
+        syncService.syncPlanner(plannerId, List.of(7L));
 
         verify(entityFilterRepository).rebuildPlannerFilters(plannerId, 0);
     }
@@ -284,15 +296,15 @@ class PlannerCatalogSyncServiceTest {
         stubScope(PlannerType.MIRROR_DUNGEON, "20F");
         when(gameDataRegistry.floorRules()).thenReturn(TABLE);
 
-        assertThatThrownBy(() -> syncService.syncPlanner(plannerId, 7L)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> syncService.syncPlanner(plannerId, List.of(7L))).isInstanceOf(IllegalArgumentException.class);
 
         verify(entityFilterRepository, never()).rebuildPlannerFilters(any(), anyInt());
-        verify(events, never()).markDispatchedThrough(any(), any(), anyLong(), any());
+        verify(events, never()).markDispatched(any(), any());
     }
 
     @Test
-    void backlogAgeSeconds_WhenAsked_ReadsTheOldestPendingCatalogEvent() {
-        when(events.oldestPendingAgeSecondsOf("PLANNER_CATALOG_CHANGED")).thenReturn(42L);
+    void backlogAgeSeconds_WhenAsked_ReadsTheOldestPendingCatalogEventBelowTheAttemptCap() {
+        when(events.oldestPendingAgeSecondsOf("PLANNER_CATALOG_CHANGED", 10)).thenReturn(42L);
 
         assertThat(syncService.backlogAgeSeconds()).isEqualTo(42.0);
     }
@@ -300,7 +312,7 @@ class PlannerCatalogSyncServiceTest {
     @Test
     void syncPlanner_WhenDeclared_RunsInItsOwnWriteTransactionAtTheDefaultIsolation() throws NoSuchMethodException {
         Transactional transactional = PlannerCatalogSyncService.class
-                .getMethod("syncPlanner", UUID.class, long.class).getAnnotation(Transactional.class);
+                .getMethod("syncPlanner", UUID.class, List.class).getAnnotation(Transactional.class);
 
         assertThat(transactional.readOnly()).isFalse();
         assertThat(transactional.propagation()).isEqualTo(Propagation.REQUIRES_NEW);
@@ -315,8 +327,8 @@ class PlannerCatalogSyncServiceTest {
 
         assertThat(syncService.drainPending()).isEqualTo(1);
 
-        verify(self).syncPlanner(plannerId, 1L);
-        verify(self, never()).syncPlanner(eq(other), anyLong());
+        verify(self).syncPlanner(plannerId, List.of(1L));
+        verify(self, never()).syncPlanner(eq(other), anyList());
     }
 
     @Test
@@ -330,7 +342,7 @@ class PlannerCatalogSyncServiceTest {
         InOrder order = inOrder(transactionManager, self);
         order.verify(transactionManager).getTransaction(definition.capture());
         order.verify(transactionManager).commit(any());
-        order.verify(self).syncPlanner(plannerId, 1L);
+        order.verify(self).syncPlanner(plannerId, List.of(1L));
         assertThat(definition.getValue().isReadOnly()).as("the batch read must reach the primary").isFalse();
         assertThat(PlannerCatalogSyncService.class.getMethod("drainPending").getAnnotation(Transactional.class))
                 .as("no outer transaction may hold a connection or read view across the pass")
