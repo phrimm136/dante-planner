@@ -8,7 +8,8 @@ import {
   useFontAdvances,
   type PctRect,
 } from '@/shared/cardLayout'
-import { getDisplayFontForLanguage } from '@/lib/utils'
+import { GAME_TEXT_CLASS } from '@/lib/constants'
+import { cn, getDisplayFontForLanguage } from '@/lib/utils'
 import { applyTextStyles, tmpPlainText } from '@/shared/gameText'
 import { useThemePackListI18n } from '@/shared/themePack'
 import {
@@ -43,7 +44,7 @@ export function ThemePackName({ packId, packEntry, rect }: ThemePackNameProps) {
 
   return (
     <span
-      className="whitespace-nowrap text-center"
+      className={cn('whitespace-nowrap text-center', GAME_TEXT_CLASS)}
       style={{
         ...getDisplayFontForLanguage(i18n.language),
         ...(specialName ? {} : { color: `#${packEntry.themePackConfig.textColor}` }),

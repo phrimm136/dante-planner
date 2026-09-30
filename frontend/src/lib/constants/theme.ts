@@ -28,6 +28,8 @@ export const STATUS_TEXT_COLORS = {
 
 export const STAR_ICON_CLASS = 'fill-yellow-400 text-yellow-400'
 
+export const GAME_TEXT_CLASS = 'game-text'
+
 export const ACCENT_COLORS = {
   ENHANCED: '#f8c200',
   TIER: '#fcba03',

@@ -10,7 +10,8 @@ import {
   pctStyle,
   useFontAdvances,
 } from '@/shared/cardLayout'
-import { getDisplayFontForLanguage } from '@/lib/utils'
+import { GAME_TEXT_CLASS } from '@/lib/constants'
+import { cn, getDisplayFontForLanguage } from '@/lib/utils'
 import type { EGOId } from '@/shared/gameData'
 import { useEGOListI18n } from '../hooks/useEGOListData'
 import {
@@ -41,7 +42,10 @@ export function EGOName({ id }: EGONameProps) {
         ...pctStyle(EGO_NAME_RECT),
         transform: `translateY(${String(midlineOffsetEm(fontTable) * fitted.fontSize)}cqw)`,
       }}
-      className="flex flex-col items-center justify-center pointer-events-none"
+      className={cn(
+        'flex flex-col items-center justify-center pointer-events-none',
+        GAME_TEXT_CLASS,
+      )}
     >
       {fitted.lines.map((line, index) => (
         <span

@@ -274,3 +274,11 @@ describe('StartBuffCard', () => {
     expect(bullet?.style.fontFamily).toBe('var(--font-pretendard)')
   })
 })
+
+describe('StartBuffCard name text rendering', () => {
+  it('marks the name root as game text', () => {
+    renderCard()
+
+    expect(screen.getByText('Test Buff')).toHaveClass('game-text')
+  })
+})

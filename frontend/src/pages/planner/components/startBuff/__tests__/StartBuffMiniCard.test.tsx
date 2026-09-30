@@ -95,3 +95,13 @@ describe('StartBuffMiniCard', () => {
     expect(spriteFiles(container)).toContain('MainUI_MirrorDungeon6_4_4.webp')
   })
 })
+
+describe('StartBuffMiniCard name text rendering', () => {
+  it('marks the name root, not its lines, as game text', () => {
+    render(<StartBuffMiniCard buffId={100} displayName="Test Buff" mdVersion={6} />)
+    const line = screen.getByText('Test Buff')
+
+    expect(line).not.toHaveClass('game-text')
+    expect(line.parentElement).toHaveClass('game-text')
+  })
+})

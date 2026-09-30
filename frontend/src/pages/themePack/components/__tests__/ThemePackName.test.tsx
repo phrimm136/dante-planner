@@ -177,3 +177,11 @@ describe('ThemePackName', () => {
     expect(fittedCqw('Two Words')).toBeCloseTo(MAX_CQW, 6)
   })
 })
+
+describe('ThemePackName text rendering', () => {
+  it('marks its root as game text', () => {
+    names.pack1 = { name: 'Ab' }
+
+    expect(renderName('pack1')).toHaveClass('game-text')
+  })
+})

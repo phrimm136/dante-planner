@@ -616,6 +616,10 @@
   color: var(--formation-backup-color);
 }
 
+.game-text {
+  text-rendering: geometricPrecision;
+}
+
 .rt-ink {
   color: color-mix(
     in srgb,

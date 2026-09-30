@@ -79,3 +79,12 @@ describe('IdentityName', () => {
     )
   })
 })
+
+describe('IdentityName text rendering', () => {
+  it('marks its root as game text', () => {
+    language.current = 'KR'
+    const { container } = render(<IdentityName id={asIdentityId('10201')} />)
+
+    expect(container.firstElementChild).toHaveClass('game-text')
+  })
+})

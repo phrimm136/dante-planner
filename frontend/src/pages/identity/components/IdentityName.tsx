@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { useIdentityListI18n } from '../hooks/useIdentityListData'
-import { getDisplayFontForLanguage } from '@/lib/utils'
+import { GAME_TEXT_CLASS } from '@/lib/constants'
+import { cn, getDisplayFontForLanguage } from '@/lib/utils'
 import { fontTableLanguage, nameShadow, useFontAdvances } from '@/shared/cardLayout'
 import { identityNameLines, nameLineStyle, nameTextStyle } from '../lib/cardLayout'
 import type { IdentityId } from '@/shared/gameData'
@@ -18,7 +19,7 @@ export function IdentityName({ id }: IdentityNameProps) {
 
   return (
     <span
-      className="text-identity-name"
+      className={cn('text-identity-name', GAME_TEXT_CLASS)}
       style={{
         ...nameTextStyle(fontTable, fontTableLanguage(i18n.language)),
         ...getDisplayFontForLanguage(i18n.language),

@@ -237,3 +237,21 @@ describe('condition sections', () => {
     expect(section(container, 'min').textContent).toContain('·b')
   })
 })
+
+describe('sanity text rendering', () => {
+  it('marks the panic section root as game text', () => {
+    const { container } = renderPanic()
+
+    expect(slot(container, 'panic-section')).toHaveClass('game-text')
+  })
+
+  it('marks each condition section root as game text', () => {
+    const { container } = render(
+      <SanityConditionsSectionI18n addConditions={['a']} minConditions={[]} />,
+    )
+    const sections = container.querySelectorAll('[data-slot="sanity-condition"]')
+
+    expect(sections).toHaveLength(2)
+    for (const section of sections) expect(section).toHaveClass('game-text')
+  })
+})

@@ -2,8 +2,8 @@ import { Fragment, type CSSProperties, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Separator } from '@/components/ui/separator'
-import { PASSIVE_TAB_UNITS, SECTION_STYLES } from '@/lib/constants'
-import { clientLength } from '@/lib/utils'
+import { GAME_TEXT_CLASS, PASSIVE_TAB_UNITS, SECTION_STYLES } from '@/lib/constants'
+import { clientLength, cn } from '@/lib/utils'
 import { getEffectiveEgoPassives, getLockedEgoPassives } from '../lib/egoPassiveSelection'
 
 import type { PassiveId, Threadspin } from '@/shared/gameData'
@@ -34,7 +34,10 @@ interface ShownPassive<Id extends string> {
 
 export function PassiveTab({ children }: { children: ReactNode }) {
   return (
-    <div className="importance-pane border rounded" style={PASSIVE_TAB_STYLE}>
+    <div
+      className={cn('importance-pane border rounded', GAME_TEXT_CLASS)}
+      style={PASSIVE_TAB_STYLE}
+    >
       {children}
     </div>
   )

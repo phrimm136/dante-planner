@@ -5,7 +5,7 @@ import { render } from '@testing-library/react'
 
 import { PassiveIdSchema } from '@/shared/gameData'
 import { EGOPassiveCard } from '../EGOPassiveCard'
-import { PassiveRun, PassiveTab } from '../EGOPassivesPane'
+import { EGOPassivesPane, PassiveRun, PassiveTab } from '../EGOPassivesPane'
 import { IdentityPassiveCard } from '../IdentityPassiveCard'
 import { IdentityPassivesPane } from '../IdentityPassivesPane'
 
@@ -128,5 +128,41 @@ describe('importance bands at the passive pane edges', () => {
     expect(margins(battle as HTMLElement)).not.toContain('0px')
     expect(margins(support as HTMLElement)[0]).not.toBe('0px')
     expect(margins(support as HTMLElement)[1]).toBe('0px')
+  })
+})
+
+describe('passive tab text rendering', () => {
+  it('marks the tab root as game text', () => {
+    const { container } = render(
+      <PassiveTab>
+        <span>Passive</span>
+      </PassiveTab>,
+    )
+
+    expect(container.firstElementChild).toHaveClass('game-text')
+  })
+
+  it('marks the E.G.O pane root as game text', () => {
+    const { container } = render(
+      <EGOPassivesPane
+        passives={{ passiveList: [] }}
+        threadspinLevel={4}
+        renderPassive={() => null}
+      />,
+    )
+
+    expect(container.firstElementChild).toHaveClass('game-text')
+  })
+
+  it('marks the identity pane root as game text', () => {
+    const { container } = render(
+      <IdentityPassivesPane
+        passives={{ battlePassiveList: [], supportPassiveList: [] }}
+        uptieLevel={4}
+        renderPassive={() => null}
+      />,
+    )
+
+    expect(container.firstElementChild).toHaveClass('game-text')
   })
 })

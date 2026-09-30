@@ -352,3 +352,17 @@ describe('attack-weight label Geo shift', () => {
     expect(slot(container, 'skill-target-label').style.transform).toBe(transform)
   })
 })
+
+describe('skill card text rendering', () => {
+  it('marks the card root as game text, decorated or not', () => {
+    for (const level of [0, entry.importanceLevel]) {
+      const { container, unmount } = renderCard(level)
+      expect(card(container)).toHaveClass('game-text')
+      unmount()
+    }
+  })
+
+  it('draws game text at the advances the tables measure', () => {
+    expect(globalsCss).toMatch(/\.game-text\s*\{\s*text-rendering:\s*geometricPrecision;\s*\}/)
+  })
+})

@@ -164,3 +164,12 @@ describe('EGO names on a card', () => {
     },
   )
 })
+
+describe('EGOName text rendering', () => {
+  it('marks its root as game text', () => {
+    vi.mocked(useEGOListI18n).mockReturnValue({ [EGO_20101]: 'Fluid Sac' })
+    renderName()
+
+    expect(screen.getByTestId('ego-name')).toHaveClass('game-text')
+  })
+})

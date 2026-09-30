@@ -1,3 +1,4 @@
+import { GAME_TEXT_CLASS } from '@/lib/constants'
 import { Suspense, type CSSProperties } from 'react'
 
 import { Skeleton } from '@/components/ui/skeleton'
@@ -78,7 +79,7 @@ function CardTextBody({
   }
 
   return (
-    <div data-testid={testId} style={boxStyle}>
+    <div data-testid={testId} className={GAME_TEXT_CLASS} style={boxStyle}>
       {fitted.lines.map((line, index) => (
         <span
           key={`${String(index)}:${line}`}

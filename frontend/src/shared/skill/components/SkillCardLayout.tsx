@@ -1,3 +1,5 @@
+import { GAME_TEXT_CLASS } from '@/lib/constants'
+import { cn } from '@/lib/utils'
 import { skillLowerLayout, skillUpperLayout } from '../lib/skillLayout'
 
 interface SkillCardLayoutProps {
@@ -20,7 +22,11 @@ export function SkillCardLayout({
   const lower = skillLowerLayout(hasImportance)
 
   return (
-    <div className="@container" data-skill-id={skillId} style={{ ...UPPER.card, ...lower.card }}>
+    <div
+      className={cn('@container', GAME_TEXT_CLASS)}
+      data-skill-id={skillId}
+      style={{ ...UPPER.card, ...lower.card }}
+    >
       <div data-slot="skill-upper" className="relative" style={UPPER.block}>
         {imageComposite}
         {infoPanel}

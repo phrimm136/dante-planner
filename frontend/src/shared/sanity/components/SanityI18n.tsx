@@ -8,9 +8,14 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { getPanicIconPath, getSanityIncIconPath, getSanityDecIconPath } from '@/shared/assets'
 import { useSanityConditionFormatter } from '../hooks/useSanityConditionFormatter'
 import { PANIC_TYPE_DESC_ONLY, SANITY_CONDITION_TYPE } from '@/shared/gameData'
-import { SANITY_INDICATOR_COLORS, SECTION_STYLES, UNIT_PANEL_COLORS } from '@/lib/constants'
+import {
+  GAME_TEXT_CLASS,
+  SANITY_INDICATOR_COLORS,
+  SECTION_STYLES,
+  UNIT_PANEL_COLORS,
+} from '@/lib/constants'
 import type { SanityConditionType } from '@/shared/gameData'
-import { clientLength, getDisplayFontForLanguage } from '@/lib/utils'
+import { clientLength, cn, getDisplayFontForLanguage } from '@/lib/utils'
 import {
   faceTracking,
   fitNodeLine,
@@ -50,7 +55,7 @@ export function PanicTypeSection({
   const panicTag = t('sanity.panicType', 'Panic Type')
 
   return (
-    <div data-slot="panic-section" style={layout.section}>
+    <div data-slot="panic-section" className={GAME_TEXT_CLASS} style={layout.section}>
       <div
         data-slot="panic-tag-bg"
         aria-hidden="true"
@@ -237,7 +242,12 @@ function SanityConditionSection({
   const layout = conditionLayout(kind)
 
   return (
-    <div data-slot="sanity-condition" data-kind={kind} className="isolate" style={layout.section}>
+    <div
+      data-slot="sanity-condition"
+      data-kind={kind}
+      className={cn('isolate', GAME_TEXT_CLASS)}
+      style={layout.section}
+    >
       <span
         data-slot="sanity-condition-tag"
         className="flex items-center justify-center text-center"
