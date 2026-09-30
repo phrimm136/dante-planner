@@ -110,9 +110,9 @@ describe('stripe tile', () => {
 })
 
 describe('importance box padding', () => {
-  it('pads a decorated passive box by one 52.2-unit band and bleeds it to the pane edges', () => {
+  it('pads a decorated passive box by the 40-unit importance group overhang and bleeds it to the pane edges', () => {
     expect(importanceBoxPadding(3)).toEqual({
-      paddingBlock: '1.1412rem',
+      paddingBlock: '0.875rem',
       paddingInline: '1rem',
       marginInline: '-1rem',
     })

@@ -23,7 +23,7 @@ describe('passive card importance', () => {
     expect(card.style.backgroundColor).toBe('')
     expect(card.style.getPropertyValue('--name-body')).toBe('')
     expect(card.style.getPropertyValue('--name-text')).toBe('')
-    expect(card.style.paddingBlock).toBe('1.1412rem')
+    expect(card.style.paddingBlock).toBe('0.875rem')
     expect(card.style.paddingInline).toBe('1rem')
     expect(card.style.marginInline).toBe('-1rem')
   })
@@ -35,6 +35,18 @@ describe('passive card importance', () => {
     const banner = slot(container, 'importance-banner')
     expect(banner?.style.getPropertyValue('--name-body')).toMatch(/^#ff0000(ff)?$/i)
     expect(banner?.style.getPropertyValue('--name-text')).toMatch(/^#f8c200(ff)?$/i)
+  })
+
+  it.each([
+    ['identity', IdentityPassiveCard],
+    ['E.G.O', EGOPassiveCard],
+  ] as const)('draws a decorated %s passive content above its decoration', (_name, Card) => {
+    const { container } = render(
+      <Card {...slots} isLocked={false} importanceLevel={3} palette="player" />,
+    )
+    const card = container.firstElementChild as HTMLElement
+    expect(card.classList).toContain('isolate')
+    expect(slot(container, 'importance-decoration')?.classList).toContain('-z-10')
   })
 
   it.each([

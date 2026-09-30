@@ -162,6 +162,8 @@ export const COIN_CLIENT_SPACING = -10
 
 export const IMPORTANCE_BAND_UNITS = { THICKNESS: 52.168, TEXTURE_WIDTH: 1304.2 } as const
 
+export const IMPORTANCE_PASSIVE_OVERHANG_UNITS = 40
+
 export const IMPORTANCE_ICON_UNITS = {
   SIZE: 200,
   TOP: { skill: 37, passive: 37 },

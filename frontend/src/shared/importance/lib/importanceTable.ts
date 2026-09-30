@@ -6,6 +6,7 @@ import {
   CLIENT_TEXT_SCALE,
   IMPORTANCE_BAND_UNITS,
   IMPORTANCE_ICON_UNITS,
+  IMPORTANCE_PASSIVE_OVERHANG_UNITS,
   IMPORTANCE_PLATE_GLOW_UNITS,
   PASSIVE_PANE_BLEED_REM,
   IMPORTANCE_DECORATION,
@@ -95,7 +96,7 @@ export function importanceGeometry(variant: ImportanceVariant): ImportanceGeomet
 export function importanceBoxPadding(level: number): CSSProperties | undefined {
   if (!hasImportance(level)) return undefined
   return {
-    paddingBlock: clientLength(IMPORTANCE_BAND_UNITS.THICKNESS),
+    paddingBlock: clientLength(IMPORTANCE_PASSIVE_OVERHANG_UNITS),
     paddingInline: `${String(PASSIVE_PANE_BLEED_REM)}rem`,
     marginInline: `${String(-PASSIVE_PANE_BLEED_REM)}rem`,
   }
