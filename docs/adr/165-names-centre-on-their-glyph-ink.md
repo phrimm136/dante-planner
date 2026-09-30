@@ -1,0 +1,10 @@
+# 165 names-centre-on-their-glyph-ink
+epic: none · pr: none
+
+## Decisions
+- @skill @passive @cards @text — A name TextMeshPro centres by its Geometry alignment is drawn in a variant of its face whose ascent and descent are each overridden to half an em, with a zero line height inside the flex-centred text box, and is moved by the centre of its visible glyphs' ink boxes — the highest ink top and lowest ink bottom over its non-whitespace code points, read per glyph from the game's own font files into the advance tables (Chinese from the served face, since the client ships no Chinese font); a multi-line name centres the union of its lines placed by the line pitch. TextMeshPro places the midpoint of the drawn glyphs' boxes on the rect's centre, while the page centred half the cap height, which sat 0.04 em off for Hangul and further for Latin drawn in the Korean face, and matched the game at one size only because Chromium's whole-pixel baseline happened to cancel it; with the baseline on the box centre by construction, the residual is one device pixel's snap at every size and scale factor. REJECTED: a translation from the capital height — off by a glyph-dependent amount; REJECTED: shifting over the face's own line box — Chromium sizes that box from metrics the TextMeshPro asset does not use; REJECTED: measuring ink at runtime with a canvas — off by up to 2.6 device pixels and unavailable to the unit tests; REJECTED: ink boxes from the served font files — the served Mikodacs is the game's font at 1000/1024 scale and the served Corporate sits 0.04 em higher on 913 glyphs.
+  INVARIANT: every Geometry-aligned name reads its offset from the ink tables — geometry-centre tests over the tables and the name components.
+  NON-GOAL: glyphs the page draws in a system fallback font the game does not use (hanja in E.G.O names), which can sit up to 1.7 device pixels off.
+
+## Takeaway
+- takeaway: to place ink where an engine places it, make the browser's line box a known point and carry the ink geometry as data, rather than computing a shift from metrics the browser reads differently.

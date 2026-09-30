@@ -51,6 +51,19 @@ export function getDisplayFontForLanguage(language?: string): React.CSSPropertie
   }
 }
 
+const GEOMETRY_FAMILIES: Record<string, string> = {
+  KR: "'KOTRA_BOLD Geo', var(--font-kotra)",
+  EN: "'Mikodacs Geo', var(--font-mikodacs)",
+  JP: "'Corporate Logo Bold Geo', var(--font-corporate)",
+  CN: "'Chinese Font Geo', var(--font-chinese)",
+}
+
+export function getGeometryFontForLanguage(language?: string): React.CSSProperties {
+  const lang = language ?? i18n.language
+  const family = GEOMETRY_FAMILIES[lang]
+  return family === undefined ? getDisplayFontForLanguage(lang) : { fontFamily: family }
+}
+
 export function getDisplayFontForNumeric(): string {
   return 'var(--font-excelsior)'
 }

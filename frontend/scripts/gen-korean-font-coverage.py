@@ -39,6 +39,9 @@ FACES = [
         "src": "url('../assets/fonts/KOTRA_BOLD.ttf')",
         "weight": "700",
         "comment": "KOTRA Bold - Korean display font",
+        "range_note": "real-outline codepoints, U+20 included",
+        "extra_codepoints": {0x20},
+        "geometry_family": "KOTRA_BOLD Geo",
     },
     {
         "family": "S-Core Dream",
@@ -96,20 +99,39 @@ def format_unicode_range(ranges: list[tuple[int, int]]) -> str:
     )
 
 
-def build_face(face: dict) -> str:
-    real = real_codepoints(FONT_DIR / face["file"])
-    ranges = to_ranges(real)
+def font_face_rule(face: dict, font_family: str, unicode_range: str, metric_overrides: str) -> str:
     return (
-        f"/* {face['comment']} - unicode-range = real-outline codepoints only */\n"
         f"@font-face {{\n"
-        f"  font-family: '{face['family']}';\n"
+        f"  font-family: '{font_family}';\n"
         f"  src: {face['src']};\n"
         f"  font-weight: {face['weight']};\n"
         f"  font-style: normal;\n"
         f"  font-display: swap;\n"
-        f"  unicode-range: {format_unicode_range(ranges)};\n"
+        f"{metric_overrides}"
+        f"  unicode-range: {unicode_range};\n"
         f"}}\n"
     )
+
+
+GEOMETRY_OVERRIDES = (
+    "  ascent-override: 50%;\n"
+    "  descent-override: 50%;\n"
+    "  line-gap-override: 0%;\n"
+)
+
+
+def build_face(face: dict) -> str:
+    real = real_codepoints(FONT_DIR / face["file"])
+    claimed_codepoints = real | face.get("extra_codepoints", set())
+    unicode_range = format_unicode_range(to_ranges(claimed_codepoints))
+    range_note = face.get("range_note", "real-outline codepoints only")
+    rule_text = f"/* {face['comment']} - unicode-range = {range_note} */\n" + font_face_rule(
+        face, face["family"], unicode_range, ""
+    )
+    geometry_family = face.get("geometry_family")
+    if geometry_family is not None:
+        rule_text += "\n" + font_face_rule(face, geometry_family, unicode_range, GEOMETRY_OVERRIDES)
+    return rule_text
 
 
 def main() -> None:

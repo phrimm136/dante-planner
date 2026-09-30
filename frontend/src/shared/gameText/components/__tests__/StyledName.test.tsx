@@ -155,8 +155,21 @@ describe('NamePlate', () => {
     expect(body.style.paddingBottom).toBe('0.2188rem')
     expect(body.style.display).toBe('flex')
     expect(body.style.alignItems).toBe('center')
-    expect(name.style.lineHeight).toBe('1')
-    expect(name.style.transform).toMatch(/^translateY\(-?[\d.]+em\)$/)
+    expect(name.style.lineHeight).toBe('0')
+    expect(name.style.transform).toBe('')
+    expect(Number.parseFloat(name.style.top)).toBeCloseTo((0.727 - 0.075) / 2, 6)
+  })
+
+  it('sets a skill name in the geometry face and drops it by its ink centre', () => {
+    const { container } = render(
+      <NamePlate kind="skill" name="파멸의 일격" attributeType="CRIMSON" />,
+    )
+    const { name } = nameParts(container)
+    expect(name.style.fontFamily).toContain(' Geo')
+    expect(name.style.lineHeight).toBe('0')
+    expect(name.style.position).toBe('relative')
+    expect(name.style.top.endsWith('em')).toBe(true)
+    expect(Number.parseFloat(name.style.top)).toBeCloseTo((0.828 - 0.146) / 2, 6)
   })
 
   it('draws the name with the node spacing on one line and a hard offset underlay', () => {

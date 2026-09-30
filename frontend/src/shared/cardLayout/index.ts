@@ -20,11 +20,13 @@ export {
   type Measure,
 } from './fitText'
 export {
+  blockGeometryCentreEm,
   createAdvanceMeasure,
   faceTracking,
   FontAdvanceTableSchema,
+  geometryCentreEm,
   lineMetrics,
-  midlineOffsetEm,
+  linePitchesEm,
   type FontAdvanceTable,
   type TrackingSpec,
 } from './fontAdvances'

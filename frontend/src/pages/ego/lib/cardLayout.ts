@@ -8,7 +8,6 @@ import {
   type CardLayer,
   type FitSpec,
   type FontAdvanceTable,
-  type LineMetrics,
   type PctRect,
   type TrackingSpec,
 } from '@/shared/cardLayout'
@@ -149,10 +148,6 @@ export function egoNameFitSpec(table: FontAdvanceTable): FitSpec {
     lineSpacingEm: EGO_NAME_CQW.lineSpacing,
     metricsOf: (line) => lineMetrics(table, line),
   }
-}
-
-export function egoNameLineHeight(metrics: LineMetrics): number {
-  return metrics.lineHeight + EGO_NAME_CQW.lineSpacing
 }
 
 export function egoPortraitWindowStyle(maskUrl: string): CSSProperties {

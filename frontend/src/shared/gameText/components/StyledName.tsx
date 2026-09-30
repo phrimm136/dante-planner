@@ -1,10 +1,11 @@
-import { Fragment, useId, useLayoutEffect, useState, type CSSProperties } from 'react'
+import { useId, useLayoutEffect, useState, type CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getAttributeColors, type ImportancePalette } from '@/shared/gameData'
 import {
+  blockGeometryCentreEm,
   faceTracking,
   fitNodeText,
-  midlineOffsetEm,
+  linePitchesEm,
   useFontAdvances,
   type TextNodeSpec,
 } from '@/shared/cardLayout'
@@ -12,7 +13,12 @@ import { panelNameShadow } from '../lib/panelUnderlay'
 import { importanceBannerStyle } from '@/shared/importance'
 import { namePlateSliceStyles, tintColorMatrix, type NamePlateKind } from '../lib/namePlate'
 import { CLIENT_TEXT_SCALE, NAME_PLATE_UNITS, UNIT_PANEL_COLORS } from '@/lib/constants'
-import { clientLength, cn, getDisplayFontForLanguage } from '@/lib/utils'
+import {
+  clientLength,
+  cn,
+  getDisplayFontForLanguage,
+  getGeometryFontForLanguage,
+} from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
 
 interface StyledSkillNameProps {
@@ -205,6 +211,8 @@ export function NamePlate({ kind, name, attributeType, importance }: NamePlatePr
           height: spec.textHeight,
         })
   const tracking = faceTracking(table, spec.node)
+  const pitches = linePitchesEm(table, fitted.lines, spec.node.lineSpacingEm)
+  const centreEm = blockGeometryCentreEm(table, fitted.lines, spec.node.lineSpacingEm)
   const bannerStyle =
     importance === undefined
       ? undefined
@@ -226,20 +234,24 @@ export function NamePlate({ kind, name, attributeType, importance }: NamePlatePr
               data-slot="name-text"
               style={{
                 fontSize: clientLength(fitted.fontSize),
-                lineHeight: 1,
-                transform: `translateY(${String(midlineOffsetEm(table))}em)`,
+                lineHeight: 0,
+                position: 'relative',
+                top: `${String(centreEm)}em`,
                 letterSpacing: `${String(tracking.letterSpacingEm)}em`,
                 wordSpacing: `${String(tracking.wordSpacingEm)}em`,
                 whiteSpace: 'nowrap',
                 textShadow: panelNameShadow(i18n.language),
-                ...getDisplayFontForLanguage(i18n.language),
+                ...getGeometryFontForLanguage(i18n.language),
               }}
             >
               {fitted.lines.map((line, index) => (
-                <Fragment key={`${String(index)}:${line}`}>
-                  {index > 0 && <br />}
+                <span
+                  key={`${String(index)}:${line}`}
+                  data-slot="name-line"
+                  style={{ display: 'block', marginTop: `${String(pitches[index] ?? 0)}em` }}
+                >
                   {line}
-                </Fragment>
+                </span>
               ))}
             </span>
           </div>

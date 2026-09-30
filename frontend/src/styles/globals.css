@@ -58,6 +58,39 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'Mikodacs Geo';
+  src: url('../assets/fonts/mikodacs.regular.ttf');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  ascent-override: 50%;
+  descent-override: 50%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Corporate Logo Bold Geo';
+  src: url('../assets/fonts/Corporate-Logo-Bold-ver2.ttf');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  ascent-override: 50%;
+  descent-override: 50%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Chinese Font Geo';
+  src: url('../assets/fonts/ChineseFont.ttf');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  ascent-override: 50%;
+  descent-override: 50%;
+  line-gap-override: 0%;
+}
+
 /* Excelsior Sans - Game numeric display font */
 @font-face {
   font-family: 'Excelsior Sans';

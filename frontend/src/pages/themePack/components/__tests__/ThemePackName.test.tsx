@@ -1,11 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from '@testing-library/react'
-import {
-  createAdvanceMeasure,
-  fitFontSize,
-  midlineOffsetEm,
-  type FontAdvanceTable,
-} from '@/shared/cardLayout'
+import { createAdvanceMeasure, fitFontSize, type FontAdvanceTable } from '@/shared/cardLayout'
 import { DUNGEON_IDX } from '@/shared/gameData'
 import type { ThemePackSpec } from '../../types/ThemePackTypes'
 import {
@@ -26,7 +21,21 @@ const TABLE: FontAdvanceTable = {
   normalSpacingOffset: 0,
   averageAdvance: 0.5,
   advances: {},
-  fallbacks: [],
+  inkTop: [],
+  inkBottom: [],
+  fallbacks: [
+    {
+      face: 'Ink SDF',
+      ascender: 1,
+      descender: 0.25,
+      capLine: 0.7,
+      lineHeight: 1.25,
+      normalSpacingOffset: 0,
+      codePoints: ['A'.codePointAt(0) ?? 0, 'b'.codePointAt(0) ?? 0],
+      inkTop: [700, 720],
+      inkBottom: [0, -10],
+    },
+  ],
 }
 
 const measure = createAdvanceMeasure(TABLE, THEME_PACK_NAME_TRACKING)
@@ -155,12 +164,16 @@ describe('ThemePackName', () => {
     expect(style.wordSpacing).toBe(`${String(THEME_PACK_NAME_TRACKING.wordSpacingEm)}em`)
   })
 
-  it('drops the name on to its box’s midline', () => {
+  it('sets the name in the geometry face and drops it by its ink centre', () => {
     names.pack1 = { name: 'Ab' }
 
-    expect(renderName('pack1').style.transform).toBe(
-      `translateY(${String(midlineOffsetEm(TABLE) * MAX_CQW)}cqw)`,
-    )
+    const style = renderName('pack1').style
+    expect(style.fontFamily).toContain('Mikodacs Geo')
+    expect(style.lineHeight).toBe('0')
+    expect(style.position).toBe('relative')
+    expect(Number.parseFloat(style.top)).toBeCloseTo((0.72 - 0.01) / 2, 6)
+    expect(style.top.endsWith('em')).toBe(true)
+    expect(style.transform).toBe('')
   })
 
   it('never wraps the name', () => {

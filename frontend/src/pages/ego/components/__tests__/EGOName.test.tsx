@@ -3,20 +3,9 @@ import { render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 import krTable from '@static/data/fontAdvances/KR.json'
-import {
-  createAdvanceMeasure,
-  fitText,
-  FontAdvanceTableSchema,
-  lineMetrics,
-  midlineOffsetEm,
-} from '@/shared/cardLayout'
+import { createAdvanceMeasure, fitText, FontAdvanceTableSchema } from '@/shared/cardLayout'
 import { asEGOId } from '@/test-utils/fixtures'
-import {
-  EGO_NAME_CQW,
-  EGO_NAME_TRACKING,
-  egoNameFitSpec,
-  egoNameLineHeight,
-} from '../../lib/cardLayout'
+import { EGO_NAME_CQW, EGO_NAME_TRACKING, egoNameFitSpec } from '../../lib/cardLayout'
 import { EGOName } from '../EGOName'
 
 /** The face the Korean cards are drawn in, as the site ships it. */
@@ -103,18 +92,34 @@ describe('EGOName', () => {
     expect(style.textShadow).not.toBe('')
     expect(style.letterSpacing).toBe(`${String(EGO_NAME_CQW.letterSpacingEm)}em`)
     expect(style.wordSpacing).toBe(`${String(EGO_NAME_CQW.wordSpacingEm)}em`)
-    expect(style.lineHeight).toBe(String(egoNameLineHeight(lineMetrics(KR_TABLE, 'Fluid Sac'))))
+    expect(style.lineHeight).toBe('0')
+    expect(style.marginTop).toBe('0em')
   })
 
-  it('drops the line block on to the name box’s midline', () => {
+  it('sets a one-line name in the geometry face and drops it by its ink centre', () => {
     vi.mocked(useEGOListI18n).mockReturnValue({ [EGO_20101]: '가' })
 
     renderName()
-    const block = screen.getByTestId('ego-name')
+    const style = nameStyle()
 
-    expect(block.style.transform).toBe(
-      `translateY(${String(midlineOffsetEm(KR_TABLE) * SPEC.max)}cqw)`,
-    )
+    expect(style.fontFamily).toContain(' Geo')
+    expect(style.position).toBe('relative')
+    expect(Number.parseFloat(style.top)).toBeCloseTo((0.821 - 0.146) / 2, 6)
+    expect(style.top.endsWith('em')).toBe(true)
+    expect(screen.getByTestId('ego-name').style.transform).toBe('')
+  })
+
+  it('pitches a two-line name and drops both lines by the centre of their ink union', () => {
+    vi.mocked(useEGOListI18n).mockReturnValue({ [EGO_20101]: '눈부시지 않은 영광' })
+
+    renderName()
+    const [first, second] = lines().map((line) => line.style)
+
+    expect(Number.parseFloat(first?.marginTop ?? '')).toBe(0)
+    expect(Number.parseFloat(second?.marginTop ?? '')).toBeCloseTo(1.251172, 6)
+    for (const style of [first, second]) {
+      expect(Number.parseFloat(style?.top ?? '')).toBeCloseTo((0.827 - 0.176) / 2, 6)
+    }
   })
 
   it('forbids the browser re-breaking the lines it was given', () => {

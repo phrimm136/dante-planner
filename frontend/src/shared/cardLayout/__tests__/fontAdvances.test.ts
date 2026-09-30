@@ -4,12 +4,14 @@ import krTable from '@static/data/fontAdvances/KR.json'
 import enTable from '@static/data/fontAdvances/EN.json'
 import {
   advanceOf,
+  blockGeometryCentreEm,
   createAdvanceMeasure,
   faceTracking,
   FontAdvanceTableSchema,
+  geometryCentreEm,
   lineFaces,
   lineMetrics,
-  midlineOffsetEm,
+  linePitchesEm,
   type FontAdvanceTable,
 } from '../fontAdvances'
 
@@ -24,6 +26,8 @@ const TABLE: FontAdvanceTable = {
   normalSpacingOffset: 0,
   averageAdvance: 0.5,
   advances: { '97': 0.5, '98': 0.5, '32': 1 },
+  inkTop: [0, 500, 700],
+  inkBottom: [0, -200, 0],
   fallbacks: [
     {
       face: 'Tall SDF',
@@ -33,6 +37,8 @@ const TABLE: FontAdvanceTable = {
       lineHeight: 1.6,
       normalSpacingOffset: -0.2,
       codePoints: ['汚'.codePointAt(0) ?? 0],
+      inkTop: [800],
+      inkBottom: [-100],
     },
   ],
 }
@@ -132,7 +138,6 @@ describe('lineMetrics', () => {
     expect(lineMetrics(TABLE, 'a汚')).toMatchObject({
       ascender: 1.2,
       descender: 0.4,
-      capLine: 0.9,
       lineHeight: 1.6,
     })
   })
@@ -145,7 +150,6 @@ describe('lineMetrics', () => {
     expect(lineMetrics(TABLE, 'ab')).toMatchObject({
       ascender: 0.9,
       descender: 0.3,
-      capLine: 0.7,
       lineHeight: 1.4,
     })
   })
@@ -158,13 +162,59 @@ describe('lineMetrics', () => {
   })
 })
 
-describe('midlineOffsetEm', () => {
-  it('drops the block by the gap between the leading’s middle and the glyphs’ middle', () => {
-    expect(midlineOffsetEm(TABLE)).toBeCloseTo(0.7 / 2 - (0.9 - 0.3) / 2, 6)
+describe('geometryCentreEm', () => {
+  it('drops a line by the middle of its visible glyphs’ ink union', () => {
+    expect(geometryCentreEm(TABLE, 'ab')).toBeCloseTo((0.7 - 0.2) / 2, 6)
   })
 
-  it('leaves a face whose glyphs already centre on its leading where it stands', () => {
-    expect(midlineOffsetEm({ ...TABLE, capLine: 0.6 })).toBeCloseTo(0, 6)
+  it('ignores spaces, zero width spaces, soft hyphens and code points it has no ink for', () => {
+    expect(geometryCentreEm(TABLE, ' a\u200bb\u00ad Z\u3000')).toBeCloseTo((0.7 - 0.2) / 2, 6)
+  })
+
+  it('reads a fallback face’s glyph from that face’s ink', () => {
+    expect(geometryCentreEm(TABLE, 'a汚')).toBeCloseTo((0.8 - 0.2) / 2, 6)
+  })
+
+  it('leaves an empty or whitespace-only line where it stands', () => {
+    expect(geometryCentreEm(TABLE, '')).toBe(0)
+    expect(geometryCentreEm(TABLE, ' \u200b ')).toBe(0)
+  })
+})
+
+describe('linePitchesEm', () => {
+  it('drops each line below the first by the TextMeshPro pitch', () => {
+    expect(linePitchesEm(TABLE, ['a', 'b'], 0)).toEqual([0, expect.closeTo(0.3 + 0.9 + 0.2, 6)])
+    expect(linePitchesEm(TABLE, ['a', 'b'], -0.2)).toEqual([0, expect.closeTo(1.2, 6)])
+  })
+})
+
+describe('blockGeometryCentreEm', () => {
+  it('drops a single line as geometryCentreEm does', () => {
+    expect(blockGeometryCentreEm(TABLE, ['ab'], 0)).toBeCloseTo(geometryCentreEm(TABLE, 'ab'), 6)
+  })
+
+  it('centres the union of every line’s ink, each line dropped by its pitch', () => {
+    expect(blockGeometryCentreEm(TABLE, ['a', 'b'], 0)).toBeCloseTo((0.5 + 0) / 2, 6)
+    expect(blockGeometryCentreEm(TABLE, ['b', 'a'], -0.2)).toBeCloseTo((0.7 - 0.2) / 2, 6)
+  })
+
+  it('leaves a block with no ink where it stands', () => {
+    expect(blockGeometryCentreEm(TABLE, [' ', ' '], 0)).toBe(0)
+  })
+})
+
+describe('FontAdvanceTableSchema', () => {
+  it('rejects ink edges that do not align with the advances', () => {
+    expect(() => FontAdvanceTableSchema.parse({ ...TABLE, inkTop: [0, 500] })).toThrow(
+      'ink edges must align with the advances',
+    )
+  })
+
+  it('rejects fallback ink edges that do not align with its code points', () => {
+    const fallbacks = TABLE.fallbacks.map((fallback) => ({ ...fallback, inkBottom: [] }))
+    expect(() => FontAdvanceTableSchema.parse({ ...TABLE, fallbacks })).toThrow(
+      'ink edges must align with the fallback code points',
+    )
   })
 })
 
@@ -200,8 +250,16 @@ describe('the shipped Korean table', () => {
     expect(table.lineHeight).toBeCloseTo(1.451172, 6)
   })
 
-  it('drops the Korean name block on to the box’s midline', () => {
-    expect(midlineOffsetEm(table)).toBeCloseTo(0.103995, 6)
+  it('centres a Hangul name on the ink of its tallest and deepest glyphs', () => {
+    expect(geometryCentreEm(table, '파멸의 일격')).toBeCloseTo((0.828 - 0.146) / 2, 6)
+    expect(geometryCentreEm(table, '파멸의\u200b 일격 ')).toBeCloseTo((0.828 - 0.146) / 2, 6)
+  })
+
+  it('centres a Latin line on its own ink, not half the cap line', () => {
+    const centre = geometryCentreEm(table, 'ABCdefg')
+
+    expect(centre).toBeCloseTo((0.763 - 0.245) / 2, 6)
+    expect(Math.abs(centre - table.capLine / 2)).toBeGreaterThanOrEqual(0.05)
   })
 
   it('names the fallback chain the face hands a hanja on to', () => {
@@ -217,7 +275,6 @@ describe('the shipped Korean table', () => {
     expect(lineMetrics(table, '오혈읍루 [汚血')).toMatchObject({
       ascender: 1.16,
       descender: 0.390625,
-      capLine: 0.745098,
       lineHeight: 1.48,
     })
   })

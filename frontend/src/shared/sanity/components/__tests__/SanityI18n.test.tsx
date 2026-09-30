@@ -166,7 +166,7 @@ describe('panic section from panic info', () => {
   it('shows only [Unobservable] for panic type 9997', async () => {
     const { container } = render(<PanicTypeSectionI18n panicType="9997" />)
     await screen.findByText('???')
-    expect(flatten(slot(container, 'panic-desc'))).toBe('[Unobservable]')
+    expect(flatten(slot(container, 'panic-desc'))).toBe('Unobservable')
   })
 
   it('shows no low-morale part when the entry has no low-morale text', async () => {

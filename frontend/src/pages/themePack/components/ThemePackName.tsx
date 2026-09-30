@@ -3,13 +3,13 @@ import {
   createAdvanceMeasure,
   faceTracking,
   fitFontSize,
-  midlineOffsetEm,
+  geometryCentreEm,
   nameShadow,
   useFontAdvances,
   type PctRect,
 } from '@/shared/cardLayout'
 import { GAME_TEXT_CLASS } from '@/lib/constants'
-import { cn, getDisplayFontForLanguage } from '@/lib/utils'
+import { cn, getGeometryFontForLanguage } from '@/lib/utils'
 import { applyTextStyles, tmpPlainText } from '@/shared/gameText'
 import { useThemePackListI18n } from '@/shared/themePack'
 import {
@@ -46,11 +46,12 @@ export function ThemePackName({ packId, packEntry, rect }: ThemePackNameProps) {
     <span
       className={cn('whitespace-nowrap text-center', GAME_TEXT_CLASS)}
       style={{
-        ...getDisplayFontForLanguage(i18n.language),
+        ...getGeometryFontForLanguage(i18n.language),
         ...(specialName ? {} : { color: `#${packEntry.themePackConfig.textColor}` }),
         fontSize: `${String(fontSize)}cqw`,
-        lineHeight: 1,
-        transform: `translateY(${String(midlineOffsetEm(fontTable) * fontSize)}cqw)`,
+        lineHeight: 0,
+        position: 'relative',
+        top: `${String(geometryCentreEm(fontTable, text))}em`,
         letterSpacing: `${String(tracking.letterSpacingEm)}em`,
         wordSpacing: `${String(tracking.wordSpacingEm)}em`,
         textShadow: nameShadow('themePack', i18n.language),

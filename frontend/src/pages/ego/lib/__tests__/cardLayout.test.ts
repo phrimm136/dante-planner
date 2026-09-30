@@ -6,8 +6,7 @@ import {
   createAdvanceMeasure,
   fitText,
   FontAdvanceTableSchema,
-  lineMetrics,
-  midlineOffsetEm,
+  geometryCentreEm,
 } from '@/shared/cardLayout'
 import {
   EGO_CARD_LAYERS,
@@ -15,7 +14,6 @@ import {
   EGO_NAME_RECT,
   EGO_NAME_TRACKING,
   egoNameFitSpec,
-  egoNameLineHeight,
 } from '../cardLayout'
 
 /** The face the Korean cards are drawn in, as the site ships it. */
@@ -102,14 +100,6 @@ describe('the name block’s line metrics', () => {
     expect(spec.metricsOf('눈부시지').ascender).toBeCloseTo(KR_TABLE.ascender, 6)
     expect(spec.metricsOf('泣淚]').ascender).toBeCloseTo(1.16, 6)
   })
-
-  it('pitches a Hangul line at the face line height plus the node’s line spacing', () => {
-    expect(egoNameLineHeight(lineMetrics(KR_TABLE, '눈부시지'))).toBeCloseTo(1.251172, 6)
-  })
-
-  it('pitches a hanja line at the fallback face’s taller line height', () => {
-    expect(egoNameLineHeight(lineMetrics(KR_TABLE, '泣淚]'))).toBeCloseTo(1.28, 6)
-  })
 })
 
 describe('fitText over the game’s EGO names', () => {
@@ -171,8 +161,8 @@ describe('fitText over the game’s Japanese EGO names', () => {
     expect(fitText('愛と憎悪の名の下に', spec, jpMeasure).fontSize).toBe(spec.max)
   })
 
-  it('offsets a Japanese line block by its own face’s midline, not the Korean one', () => {
-    expect(midlineOffsetEm(JP_TABLE)).toBeCloseTo(-0.027059, 6)
-    expect(midlineOffsetEm(KR_TABLE)).toBeCloseTo(0.1039945, 6)
+  it('centres a Japanese line on its own face’s ink, not the Korean one', () => {
+    expect(geometryCentreEm(JP_TABLE, '渇望-ミルカラ')).toBeCloseTo((0.854 - 0.105) / 2, 6)
+    expect(geometryCentreEm(KR_TABLE, '갈망-미르칼라')).toBeCloseTo((0.835 - 0.176) / 2, 6)
   })
 })
