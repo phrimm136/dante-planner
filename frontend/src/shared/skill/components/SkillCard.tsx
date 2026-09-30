@@ -21,7 +21,7 @@ interface SkillCardData {
   defaultValue?: number | undefined
   scale?: number | undefined
   skillLevelCorrection?: number | undefined
-  targetNum?: number | undefined
+  targetNum: number
 }
 
 interface SkillCardProps {

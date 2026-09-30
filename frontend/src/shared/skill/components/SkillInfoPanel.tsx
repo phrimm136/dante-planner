@@ -20,7 +20,7 @@ import { CoinDisplay } from './CoinDisplay'
 interface SkillInfoPanelData {
   attributeType?: string | undefined
   skillLevelCorrection?: number | undefined
-  targetNum?: number | undefined
+  targetNum: number
 }
 
 interface SkillInfoPanelWithSuspenseProps {
@@ -49,7 +49,6 @@ export function SkillInfoPanelWithSuspense({
 }: SkillInfoPanelWithSuspenseProps) {
   const { t, i18n } = useTranslation('database')
   const totalLevel = skillLevelAt(unitLevel, skillData.skillLevelCorrection ?? 0)
-  const atkWeight = skillData.targetNum ?? 1
 
   return (
     <>
@@ -104,12 +103,12 @@ export function SkillInfoPanelWithSuspense({
         style={{
           ...LAYOUT.targetCount,
           ...getDisplayFontForLanguage('KR'),
-          fontSize: clientLength(targetCountFontUnits(atkWeight)),
+          fontSize: clientLength(targetCountFontUnits(skillData.targetNum)),
           color: UNIT_PANEL_COLORS.TARGET_LABEL,
           textShadow: TARGET_COUNT_SHADOW,
         }}
       >
-        {SKILL_UPPER_UNITS.TARGET.COUNT_GLYPH.repeat(atkWeight)}
+        {SKILL_UPPER_UNITS.TARGET.COUNT_GLYPH.repeat(skillData.targetNum)}
       </span>
 
       {sanityCost !== undefined && (

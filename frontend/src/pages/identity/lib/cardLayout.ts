@@ -110,9 +110,9 @@ export const IDENTITY_CARD_TEXT = {
 /**
  * The tracking the name is measured and drawn with, in em.
  *
- * `m_characterSpacing` is -2 hundredths of an em on `[Text]GroupUpperName` and -5 on
- * `[Text]GroupName`, yet the breaks `[Text]GroupName` draws in game hold under -2 between
- * letters and -5 between words.
+ * The card reproduces the identity list item `PersonalitySwitchableSlot`, whose
+ * `[Text]GroupName` draws the wrapping title with `m_characterSpacing` -2 and
+ * `m_wordSpacing` -5. The formation slot's `[Text]GroupName` carries -5 and -5 in a 230u box.
  */
 export const IDENTITY_NAME_TRACKING: TrackingSpec = {
   letterSpacingEm: -0.02,
@@ -126,9 +126,9 @@ export const IDENTITY_NAME_FONT_UNITS =
 /**
  * The box a name segment wraps in, in the slot's own units.
  *
- * The segment that wraps is drawn by `[Text]GroupName`, whose prefab box is 240u;
- * `[Text]GroupUpperName` does not draw it. Every confirmed in-game break — the
- * English list and the twelve Japanese formation cards — holds under this tracking for a
+ * The segment that wraps is drawn by the list item's `[Text]GroupName`, whose prefab box is
+ * 240u; `[Text]GroupUpperName` does not draw it. Every confirmed in-game break — the
+ * English list and the twelve Japanese list cards — holds under this tracking for a
  * box between 241.45u and 241.85u, and this is that interval's midpoint. The measure thus
  * reads about 0.7 % wide of the prefab box; the cause is unverified.
  */
