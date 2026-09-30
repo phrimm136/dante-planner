@@ -8,18 +8,28 @@ function renderStyled(text: string): HTMLElement {
 }
 
 describe('applyTextStyles', () => {
-  it('draws an OrangeMark run in the client style and keeps strikethrough inside it', () => {
-    const container = renderStyled('Gain <style="OrangeMark">2 <s>old</s> Haste</style> now')
+  it('draws a mark run with its tag state and strikes the struck run inside it', () => {
+    const container = renderStyled(
+      'Gain <color=#ff6000><mark=#ff000040><b><u>2 <s>old</s> Haste</u></b></mark></color> now',
+    )
 
-    const mark = container.querySelector<HTMLElement>('[data-text-style="OrangeMark"]')
-    expect(mark?.textContent).toBe('2 old Haste')
-    expect(mark?.querySelector('s')?.textContent).toBe('old')
-    expect(mark?.style.textDecoration).toBe('underline')
+    const marks = [...container.querySelectorAll<HTMLElement>('.rt-mark')]
+    expect(marks.map((mark) => mark.textContent)).toEqual(['2 ', 'old', ' Haste'])
+    expect(marks[1]?.style.textDecorationLine).toBe('underline line-through')
+    expect(marks[0]?.style.textDecorationLine).toBe('underline')
     expect(container.textContent).toBe('Gain 2 old Haste now')
   })
 
-  it('renders an unknown style as its text and leaves unstyled text alone', () => {
-    expect(renderStyled('a <style="Fancy">b</style> c').textContent).toBe('a b c')
+  it('renders a named style as its text and leaves unstyled text alone', () => {
+    expect(renderStyled('a <style="OrangeMark">b</style> c').textContent).toBe('a b c')
+    expect(renderStyled('a <style="OrangeMark">b</style> c').querySelector('.rt-mark')).toBeNull()
     expect(applyTextStyles('plain')).toBe('plain')
+  })
+
+  it('breaks lines at newlines', () => {
+    const container = renderStyled('a\nb')
+
+    expect(container.querySelectorAll('br')).toHaveLength(1)
+    expect(container.textContent).toBe('ab')
   })
 })

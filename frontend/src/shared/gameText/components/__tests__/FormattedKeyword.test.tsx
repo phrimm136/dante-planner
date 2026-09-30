@@ -55,8 +55,8 @@ describe('FormattedKeyword', () => {
       render(<FormattedKeyword keyword={keyword} />)
 
       const element = screen.getByText('[On Use]')
-      expect(element).toBeInTheDocument()
-      expect(element).toHaveStyle({ color: '#00ff00' })
+      expect(element).toHaveClass('rt-ink')
+      expect(element.style.getPropertyValue('--rt-color')).toBe('#00ff00')
     })
 
     it('does not render popover for skill tags', () => {
@@ -88,8 +88,8 @@ describe('FormattedKeyword', () => {
       render(<FormattedKeyword keyword={battleKeyword} />)
 
       const button = screen.getByRole('button')
-      expect(button).toBeInTheDocument()
-      expect(button).toHaveStyle({ color: '#4a9eff' })
+      expect(button).toHaveClass('rt-ink')
+      expect(button.style.getPropertyValue('--rt-color')).toBe('#4a9eff')
 
       const icon = button.querySelector('img')
       expect(icon).toBeInTheDocument()
@@ -181,6 +181,26 @@ describe('FormattedKeyword', () => {
       expect(popoverTitle).toHaveTextContent('Burn')
       // Should not have inline style attribute
       expect(popoverTitle).not.toHaveAttribute('style')
+    })
+
+    it('draws a mark run in the description with the page renderer', async () => {
+      const user = userEvent.setup()
+      render(
+        <FormattedKeyword
+          keyword={{
+            ...battleKeyword,
+            description: 'Deal <color=#ff6000><mark=#ff000040><b><u>+2</u></b></mark></color> dmg',
+          }}
+        />,
+      )
+
+      await user.click(screen.getByRole('button'))
+
+      const popover = document.body.querySelector('[data-slot="popover-content"]')
+      const mark = popover?.querySelector<HTMLElement>('.rt-mark')
+      expect(mark?.textContent).toBe('+2')
+      expect(mark?.style.getPropertyValue('--rt-mark-color')).toBe('#ff0000')
+      expect(popover?.textContent).not.toContain('<')
     })
 
     it('displays description text', async () => {

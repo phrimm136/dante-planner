@@ -464,11 +464,24 @@ describe('sanity', () => {
     },
     TEST_BUDGET_MS,
   )
+
+  it(
+    'shows only the panic description of enemy 8389, whose panic type is 9997, with no labels',
+    async () => {
+      await mountEnemy('8389')
+
+      const desc = await waitFor(() => requireSlot('panic-desc'))
+      await waitFor(() => expect(desc.textContent).toContain('Unobservable'))
+      expect(desc.textContent).not.toContain('·')
+      expect(desc.querySelector('[data-slot="low-morale-effect"]')).toBeNull()
+    },
+    TEST_BUDGET_MS,
+  )
 })
 
 describe('client text styles', () => {
   it(
-    'draws the OrangeMark clauses of passive 142302 as styled runs around their keyword chips',
+    'draws the OrangeMark clauses of passive 142302 as mark runs around their keyword chips',
     async () => {
       await mountEnemy('1422')
 
@@ -482,14 +495,14 @@ describe('client text styles', () => {
         return found
       })
       const marks = await waitFor(() => {
-        const found = [...card.querySelectorAll<HTMLElement>('[data-text-style="OrangeMark"]')]
+        const found = [...card.querySelectorAll<HTMLElement>('.rt-mark')]
         expect(found.length).toBeGreaterThan(1)
         return found
       })
       const [first] = marks
       expect(first?.textContent).toContain('Gain 8')
       expect(first?.querySelector('button')).not.toBeNull()
-      expect(card.textContent).not.toContain('<style')
+      expect(card.textContent).not.toContain('<')
     },
     TEST_BUDGET_MS,
   )

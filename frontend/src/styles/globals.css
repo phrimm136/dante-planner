@@ -585,3 +585,23 @@
 .formation-number-backup {
   color: var(--formation-backup-color);
 }
+
+.rt-ink {
+  color: color-mix(
+    in srgb,
+    var(--rt-color, currentColor),
+    var(--rt-mark-color, transparent) var(--rt-mark-alpha, 0%)
+  );
+}
+
+.rt-mark {
+  background-color: color-mix(in srgb, var(--rt-mark-color) var(--rt-mark-alpha), transparent);
+}
+
+.rt-deco {
+  text-decoration-color: color-mix(
+    in srgb,
+    var(--rt-decoration-color),
+    var(--rt-mark-color, transparent) var(--rt-mark-alpha, 0%)
+  );
+}

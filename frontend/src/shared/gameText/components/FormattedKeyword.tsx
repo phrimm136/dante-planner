@@ -1,10 +1,14 @@
-import { useState } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { getBattleKeywordIconPath } from '@/shared/assets'
 import { applyStrikethrough, applyTextStyles } from '../lib/unityRichText'
 import { cn } from '@/lib/utils'
 import type { ResolvedKeyword } from '../types/KeywordTypes'
 import { FLAVOR_TEXT_COLOR, SECTION_STYLES } from '@/lib/constants'
+
+function inkStyle(color: string | undefined): CSSProperties | undefined {
+  return color ? ({ '--rt-color': color } as CSSProperties) : undefined
+}
 
 interface FormattedKeywordProps {
   keyword: ResolvedKeyword
@@ -21,7 +25,7 @@ export function FormattedKeyword({ keyword, className }: FormattedKeywordProps) 
 
   if (type === 'skillTag') {
     return (
-      <span className={cn('font-medium', className)} style={{ color }}>
+      <span className={cn('font-medium', color && 'rt-ink', className)} style={inkStyle(color)}>
         {applyStrikethrough(displayText)}
       </span>
     )
@@ -41,9 +45,10 @@ export function FormattedKeyword({ keyword, className }: FormattedKeywordProps) 
             'items-center gap-1 font-medium',
             'cursor-pointer underline transition-opacity',
             'border-0 bg-transparent p-0 m-0',
+            color && 'rt-ink',
             className,
           )}
-          style={{ color }}
+          style={inkStyle(color)}
         >
           <img
             src={getBattleKeywordIconPath(path)}

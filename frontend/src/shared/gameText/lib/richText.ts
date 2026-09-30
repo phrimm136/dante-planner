@@ -25,7 +25,6 @@ export type RichTextTagName = (typeof RICH_TEXT_TAG)[keyof typeof RICH_TEXT_TAG]
 
 export const TEXT_STYLE = {
   upgradeHighlight: 'upgradeHighlight',
-  orangeMark: 'OrangeMark',
 } as const
 
 /**
@@ -127,14 +126,6 @@ const SIZE_INLINE_RULE: RichTextRule = {
   descend: 'top',
 }
 
-const NAMED_STYLE_RULE: RichTextRule = {
-  name: RICH_TEXT_TAG.style,
-  open: /<style="([^"]*)">/,
-  close: '</style>',
-  match: 'lazy',
-  descend: 'raw',
-}
-
 const STRIKETHROUGH_RULE: RichTextRule = {
   name: RICH_TEXT_TAG.strike,
   open: /<s>/,
@@ -161,11 +152,6 @@ export const FLAT_ANY_COLOR_GRAMMAR: RichTextGrammar = {
   layers: [[SIZE_INLINE_RULE, COLOR_ANY_RULE]],
   breaks: true,
   dropStrayClose: true,
-}
-
-/** `<style="Name">` elements, flat; the reader decides what each name renders as */
-export const NAMED_STYLE_GRAMMAR: RichTextGrammar = {
-  layers: [[NAMED_STYLE_RULE]],
 }
 
 /** Balanced `<s>` pairs, flat */
