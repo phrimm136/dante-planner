@@ -550,3 +550,28 @@ export function scanTmpRuns(input: string): TmpToken[] {
 
   return tokens
 }
+
+export function tmpPlainText(input: string): string {
+  return scanTmpRuns(input)
+    .map((token) => (token.kind === 'run' ? token.text : ' '))
+    .join('')
+}
+
+export interface ColorRun {
+  text: string
+  color: string | undefined
+}
+
+export function colorRuns(input: string): ColorRun[] {
+  const runs: ColorRun[] = []
+  const append = (text: string, color: string | undefined) => {
+    const last = runs[runs.length - 1]
+    if (last && last.color === color) last.text += text
+    else runs.push({ text, color })
+  }
+  for (const token of scanTmpRuns(input)) {
+    if (token.kind === 'run') append(token.text, token.color)
+    else append('\n', runs[runs.length - 1]?.color)
+  }
+  return runs
+}

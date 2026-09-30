@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 
 import { ASSOCIATIONS } from '@/shared/gameData'
 import { useFilterI18nData } from '../hooks/useFilterI18nData'
-import { applyStrikethrough, extractLeadingColor, stripRichTextTags } from '@/shared/gameText'
+import { applyTextStyles, tmpPlainText } from '@/shared/gameText'
 import { SearchableMultiSelect } from './SearchableMultiSelect'
 
 interface UnitKeywordDropdownProps {
@@ -10,13 +10,6 @@ interface UnitKeywordDropdownProps {
   onSelectionChange: (unitKeywords: Set<string>) => void
   counts?: Record<string, number>
   className?: string
-}
-
-function formatUnitKeywordLabel(label: string) {
-  const { color, text } = extractLeadingColor(label)
-  if (color === undefined) return applyStrikethrough(text)
-
-  return <span style={{ color }}>{applyStrikethrough(text)}</span>
 }
 
 export function UnitKeywordDropdown({
@@ -32,8 +25,8 @@ export function UnitKeywordDropdown({
     const rawLabel = unitKeywordsI18n[unitKeyword] || unitKeyword
     return {
       value: unitKeyword,
-      label: stripRichTextTags(rawLabel),
-      renderLabel: formatUnitKeywordLabel(rawLabel),
+      label: tmpPlainText(rawLabel),
+      renderLabel: applyTextStyles(rawLabel),
       count: counts?.[unitKeyword],
     }
   })

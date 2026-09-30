@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
-import { scanTmpRuns, type TmpBreak, type TmpRun, type TmpToken } from '../tmpRichText'
+import {
+  scanTmpRuns,
+  tmpPlainText,
+  type TmpBreak,
+  type TmpRun,
+  type TmpToken,
+} from '../tmpRichText'
+import readings from './__fixtures__/plainTextReadings.json'
 
 function run(text: string, state: Partial<Omit<TmpRun, 'kind' | 'text'>> = {}): TmpRun {
   return { kind: 'run', text, bold: false, underline: false, strike: false, ...state }
@@ -279,5 +286,18 @@ describe('scanTmpRuns', () => {
 
   it('returns nothing for empty text', () => {
     expect(scanTmpRuns('')).toEqual([])
+  })
+})
+
+describe('tmpPlainText', () => {
+  it.each([...readings.unitKeywordLabels, ...readings.themePackNames])(
+    'reads shipped label $input as the grammar reader did',
+    ({ input, plain }) => {
+      expect(tmpPlainText(input)).toBe(plain)
+    },
+  )
+
+  it('reads a line break as a space', () => {
+    expect(tmpPlainText('<color=#ff0000>a</color>\nb<br>c')).toBe('a b c')
   })
 })

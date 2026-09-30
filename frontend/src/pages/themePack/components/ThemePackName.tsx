@@ -8,7 +8,7 @@ import {
   type PctRect,
 } from '@/shared/cardLayout'
 import { getDisplayFontForLanguage } from '@/lib/utils'
-import { parseColorTags, stripColorTags } from '@/shared/gameText'
+import { applyTextStyles, tmpPlainText } from '@/shared/gameText'
 import { useThemePackListI18n } from '@/shared/themePack'
 import {
   THEME_PACK_NAME_MAX_CQW,
@@ -31,9 +31,7 @@ export function ThemePackName({ packId, packEntry, rect }: ThemePackNameProps) {
 
   const entry = names[packId]
   const specialName = entry?.specialName
-  const text = themePackCardName(
-    specialName ? stripColorTags(specialName) : (entry?.name ?? packId),
-  )
+  const text = themePackCardName(specialName ? tmpPlainText(specialName) : (entry?.name ?? packId))
 
   const measure = createAdvanceMeasure(fontTable, THEME_PACK_NAME_TRACKING)
   const fontSize = fitFontSize(
@@ -56,7 +54,7 @@ export function ThemePackName({ packId, packEntry, rect }: ThemePackNameProps) {
         textShadow: nameShadow('themePack', i18n.language),
       }}
     >
-      {specialName ? parseColorTags(themePackCardName(specialName)) : text}
+      {specialName ? applyTextStyles(themePackCardName(specialName)) : text}
     </span>
   )
 }

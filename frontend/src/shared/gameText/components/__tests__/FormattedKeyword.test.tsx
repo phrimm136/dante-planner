@@ -242,6 +242,40 @@ describe('FormattedKeyword', () => {
       expect(flavor).toHaveClass('italic')
     })
 
+    it('colours a flavor line by its colour tag', async () => {
+      const user = userEvent.setup()
+      render(
+        <FormattedKeyword
+          keyword={{
+            ...battleKeyword,
+            flavor:
+              '<color=#2e72b9>All that remains is the hollow pride of a weathered knight.</color>',
+          }}
+        />,
+      )
+      await user.click(screen.getByRole('button'))
+
+      const flavor = await screen.findByTestId('keyword-flavor')
+      const run = flavor.querySelector<HTMLElement>('.rt-ink')
+      expect(flavor.textContent).toBe('All that remains is the hollow pride of a weathered knight.')
+      expect(run?.style.getPropertyValue('--rt-color')).toBe('#2e72b9')
+    })
+
+    it('shrinks the sized part of a keyword name', () => {
+      render(
+        <FormattedKeyword
+          keyword={{ ...battleKeyword, displayText: '本国剣術[サ<size=50%>ル</size>]' }}
+        />,
+      )
+
+      const button = screen.getByRole('button')
+      const sized = [...button.querySelectorAll<HTMLElement>('span')].find(
+        (span) => span.style.fontSize === '50%',
+      )
+      expect(button.textContent).toBe('本国剣術[サル]')
+      expect(sized?.textContent).toBe('ル')
+    })
+
     it('flavor appears after the description in DOM order', async () => {
       const user = userEvent.setup()
       const keywordWithFlavor: ResolvedKeyword = {

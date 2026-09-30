@@ -1,0 +1,2490 @@
+[
+  {
+    "input": "\"Are you... alright, Executive Manager...?!\"\n\n<… Uh, yeah?>\n\n\"It's because they've got a clock for a noggin'!\"\n\nBlocking their ears don't seem to help at all against the toad's cry; the Sinners begin writhing in pain.\n\nThen, all of a sudden, someone decides that they've had enough of this toad and swings their weapon wildly at the entity.",
+    "runs": [
+      [
+        "\"Are you... alright, Executive Manager...?!\"\n\n<… Uh, yeah?>\n\n\"It's because they've got a clock for a noggin'!\"\n\nBlocking their ears don't seem to help at all against the toad's cry; the Sinners begin writhing in pain.\n\nThen, all of a sudden, someone decides that they've had enough of this toad and swings their weapon wildly at the entity.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "The robot lifts both arms with some struggle.\n\nThe terminal prints out its words:\n\n<Welcome, Dear Guest. Have you enjoyed the town tour?\nWe’d like you to have a souvenir. :-)>\n\nA smile is displayed on the terminal,\nbut in the robot’s gestures, you feel a plea for help.",
+    "runs": [
+      [
+        "The robot lifts both arms with some struggle.\n\nThe terminal prints out its words:\n\n<Welcome, Dear Guest. Have you enjoyed the town tour?\nWe’d like you to have a souvenir. :-)>\n\nA smile is displayed on the terminal,\nbut in the robot’s gestures, you feel a plea for help.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "The terminal’s light goes red, and warnings start to blare.\n\nThe robot shakes intensely as if in pain.\n\n<Farewell. Farewell, FarewellFarewellFarewellFarewellFarewellFarewellFarewellFarewellFarewell>\n\nA single word filled the whole screen moments before the robot exploded into bits of metal and gore before your eyes.",
+    "runs": [
+      [
+        "The terminal’s light goes red, and warnings start to blare.\n\nThe robot shakes intensely as if in pain.\n\n<Farewell. Farewell, FarewellFarewellFarewellFarewellFarewellFarewellFarewellFarewellFarewell>\n\nA single word filled the whole screen moments before the robot exploded into bits of metal and gore before your eyes.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "The robot begins to tremble uncontrollably.\n\nNot out of fear, no—out of anger.\n\nMaybe it knows what the word written on the terminal means?\n\n<Hostile entity detected. Hostile entity detected.>\n\n<Commencing eviction in accordance to rule D63ICRQ1!>\n\nThe robot begins wildly flailing its arms.",
+    "runs": [
+      [
+        "The robot begins to tremble uncontrollably.\n\nNot out of fear, no—out of anger.\n\nMaybe it knows what the word written on the terminal means?\n\n<Hostile entity detected. Hostile entity detected.>\n\n<Commencing eviction in accordance to rule D63ICRQ1!>\n\nThe robot begins wildly flailing its arms.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "<Failed to parse question.>\n\nThe robot tilted its head.\n\nWhile unable to lift and tilt its head in the other direction,\nit displays a question on the screen.\n\n<Did you not take a tour of the town, Dear Guest?>\n\nIt seems to want an answer.",
+    "runs": [
+      [
+        "<Failed to parse question.>\n\nThe robot tilted its head.\n\nWhile unable to lift and tilt its head in the other direction,\nit displays a question on the screen.\n\n<Did you not take a tour of the town, Dear Guest?>\n\nIt seems to want an answer.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "<Then you may not have a souvenir!>\n\nThe terminal suddenly opened upward,\nand a mechanical arm popped out, trying to snatch something from you.\n\n<Please cooperate with confiscation! Lying is bad behavior.>\n\nAs you duck and twist out of the arm’s way,\nit gradually grew faster.\n\n<Please cooperate,\nor you may be punished according to Rule #A62GBFE1!>\n\nYou hurriedly made your escape,\nfleeing the robot’s unending rampage.",
+    "runs": [
+      [
+        "<Then you may not have a souvenir!>\n\nThe terminal suddenly opened upward,\nand a mechanical arm popped out, trying to snatch something from you.\n\n<Please cooperate with confiscation! Lying is bad behavior.>\n\nAs you duck and twist out of the arm’s way,\nit gradually grew faster.\n\n<Please cooperate,\nor you may be punished according to Rule #A62GBFE1!>\n\nYou hurriedly made your escape,\nfleeing the robot’s unending rampage.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "<There must have been an issue with the tour program.>\n\nAfter printing those words,\nthe robot stood still for a while.\n\nJust when you started to wonder if it was broken,\nthe terminal flashed.\n\n<No response after multiple requests to the Administrator.>\n\n<System Error. System Error.>\n\n<Rebooting…>\n\nAfter that, it kept throwing up complicated words\non a blue screen.",
+    "runs": [
+      [
+        "<There must have been an issue with the tour program.>\n\nAfter printing those words,\nthe robot stood still for a while.\n\nJust when you started to wonder if it was broken,\nthe terminal flashed.\n\n<No response after multiple requests to the Administrator.>\n\n<System Error. System Error.>\n\n<Rebooting…>\n\nAfter that, it kept throwing up complicated words\non a blue screen.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "There's a report on a Central Command Team Clerk's desk.\n\n<DAY ■■, ■■ ■■ Research Service Postmortem Report>\n\nThe report was partially censored, but it seemed to be talking about a newly developed shield bullet of sorts.\n\n'The Trauma Shield can protect its user from psychological damages from external sources for a ■■■■■■■ ■■■■ or ■■■■■■■■■.'\n\n'If Shield bullet ■■■■■■ is needed, request the manager or a ■■■■■■■■ for assistance.'\n\nNext to the heavily redacted report is a box labeled 'Trauma Shield sample & manual'.",
+    "runs": [
+      [
+        "There's a report on a Central Command Team Clerk's desk.\n\n<DAY ■■, ■■ ■■ Research Service Postmortem Report>\n\nThe report was partially censored, but it seemed to be talking about a newly developed shield bullet of sorts.\n\n'The Trauma Shield can protect its user from psychological damages from external sources for a ■■■■■■■ ■■■■ or ■■■■■■■■■.'\n\n'If Shield bullet ■■■■■■ is needed, request the manager or a ■■■■■■■■ for assistance.'\n\nNext to the heavily redacted report is a box labeled 'Trauma Shield sample & manual'.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "I can feel the mob turning toward us.\n\n\"An evil sorcerer started the Profound Silence.\"\n\"He pretended to work for us, but it turned out that he was driven by envy for Iberia's prosperity.\"\n\"Don't try to stop us, outsiders.\"\n\"They came from the sea, just like the sorcerer himself.\"\n\nAs they were protesting, the hungry, harrowed look of villagers came into the Sinners' eyes.\n\nA villager, cradling an empty bundle of cloth.\nA child, holding a staff and a hat that was far too large for him.\n\n\"... They've all lost a lot.\"\n\n\"And that void in your heart blinds you.\"\n\n\"It makes it unbearable to keep your emotions in check.\"\n\nThis is how they deal with sorrow.\n\nThere were no emotions or intent to be found in the great calamity that devoured Iberia whole.\n\nSo they sharpen their sorrows into wayward wraths against those who came from the sea, just like the calamity itself.\n\n\"Which means... someone needs to direct their anger against the rightful foes.\"\n\n<Irene?>\n\n\"Step back, citizen.\"\n\n\"Even if we were to determine that the Ægir has committed crimes, it falls under the Inquisition's jurisdiction to carry out the consequences.\"\n\n\"If the Ægir is innocent... do understand that your actions cannot be permitted.\"\n\nIt seemed that Irene managed to provoke some thought in the mob as they slowly walked away from the Ægir...\n\nUntil they eventually scattered away.",
+    "runs": [
+      [
+        "I can feel the mob turning toward us.\n\n\"An evil sorcerer started the Profound Silence.\"\n\"He pretended to work for us, but it turned out that he was driven by envy for Iberia's prosperity.\"\n\"Don't try to stop us, outsiders.\"\n\"They came from the sea, just like the sorcerer himself.\"\n\nAs they were protesting, the hungry, harrowed look of villagers came into the Sinners' eyes.\n\nA villager, cradling an empty bundle of cloth.\nA child, holding a staff and a hat that was far too large for him.\n\n\"... They've all lost a lot.\"\n\n\"And that void in your heart blinds you.\"\n\n\"It makes it unbearable to keep your emotions in check.\"\n\nThis is how they deal with sorrow.\n\nThere were no emotions or intent to be found in the great calamity that devoured Iberia whole.\n\nSo they sharpen their sorrows into wayward wraths against those who came from the sea, just like the calamity itself.\n\n\"Which means... someone needs to direct their anger against the rightful foes.\"\n\n<Irene?>\n\n\"Step back, citizen.\"\n\n\"Even if we were to determine that the Ægir has committed crimes, it falls under the Inquisition's jurisdiction to carry out the consequences.\"\n\n\"If the Ægir is innocent... do understand that your actions cannot be permitted.\"\n\nIt seemed that Irene managed to provoke some thought in the mob as they slowly walked away from the Ægir...\n\nUntil they eventually scattered away.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "At the center of what appears to be an ark symbolizing the City,\n\nat the center of that brilliant, golden light... must be Mayors.\n\n\"Let's take a quick break here.\"\n\n\"Are you alright, Doctor?\"\n\n\"I just need to take a... quick breather...\"\n\n\"Fuhu... You should probably work on your cardio, or Miss Amiya might have to piggyback you around.\"\n\n\"Yeah, well... once we get back, I'll start working out like Kal'tsit suggested.\"\n\n\"Hmph. Executive Manager, if it ever comes to it, you may trust me with the piggybacking.\"\n\n<I'm good.>\n\nPerhaps being in close proximity to Mayors's vision of utopia and the center of the light did something...\n\nSeaborns near us only gave us a passing glance without attacking us.\n\nSomething about the way they looked at us felt like... they were concerned about us—the Sinners couldn't help but look away with a funny feeling.\n\n\"I feel... sorrow, regret... Maybe these feelings are denials for all those times she spent agonizing over this.\"\n\n\"Can we really bring back Miss Mayors?\"\n\n<We'll help her return. That's what we're here to do, after all.>\n\n<Alright, let's rest up for a bit before moving on.>",
+    "runs": [
+      [
+        "At the center of what appears to be an ark symbolizing the City,\n\nat the center of that brilliant, golden light... must be Mayors.\n\n\"Let's take a quick break here.\"\n\n\"Are you alright, Doctor?\"\n\n\"I just need to take a... quick breather...\"\n\n\"Fuhu... You should probably work on your cardio, or Miss Amiya might have to piggyback you around.\"\n\n\"Yeah, well... once we get back, I'll start working out like Kal'tsit suggested.\"\n\n\"Hmph. Executive Manager, if it ever comes to it, you may trust me with the piggybacking.\"\n\n<I'm good.>\n\nPerhaps being in close proximity to Mayors's vision of utopia and the center of the light did something...\n\nSeaborns near us only gave us a passing glance without attacking us.\n\nSomething about the way they looked at us felt like... they were concerned about us—the Sinners couldn't help but look away with a funny feeling.\n\n\"I feel... sorrow, regret... Maybe these feelings are denials for all those times she spent agonizing over this.\"\n\n\"Can we really bring back Miss Mayors?\"\n\n<We'll help her return. That's what we're here to do, after all.>\n\n<Alright, let's rest up for a bit before moving on.>",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "In the midst of our battle against the nigh-endless Bloodbag horde...\n\n<Hm...?>\n\n... we came across an ominous object on the ground.\n\nWhile it resembled the Bloodbags' weapons somewhat, there was enough to distinguish it from them.\n\n\"It's gotta be a powerful weapon, right?\"\n\n\"It has got to be a rather dangerous weapon.\"\n\n\"Verily, 'tis an item most puzzling!\"\n\nClearly, the Sinners are having a hard time coming to a consensus.\n\n... Looks like it's up to me to decide whether we're picking that thing up or not.",
+    "runs": [
+      [
+        "In the midst of our battle against the nigh-endless Bloodbag horde...\n\n<Hm...?>\n\n... we came across an ominous object on the ground.\n\nWhile it resembled the Bloodbags' weapons somewhat, there was enough to distinguish it from them.\n\n\"It's gotta be a powerful weapon, right?\"\n\n\"It has got to be a rather dangerous weapon.\"\n\n\"Verily, 'tis an item most puzzling!\"\n\nClearly, the Sinners are having a hard time coming to a consensus.\n\n... Looks like it's up to me to decide whether we're picking that thing up or not.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "\"Lo! A lone warrior battles a horde of Bloodbags!\"\n\nThe Sinners were looking at someone wearing a W Corp. uniform.\n\nHe seemed rather skilled, but the sheer number of Bloodbags were about to overwhelm him.\n\n<We've got to help—>\n\nBut I am cut off by another horde of Bloodbags that poured into this cabin, surrounding us.\n\n\"Dammit... prepare for battle!\"\n\n\"Y-yet what of the lone warrior?!\"\n\n\"Well—\"",
+    "runs": [
+      [
+        "\"Lo! A lone warrior battles a horde of Bloodbags!\"\n\nThe Sinners were looking at someone wearing a W Corp. uniform.\n\nHe seemed rather skilled, but the sheer number of Bloodbags were about to overwhelm him.\n\n<We've got to help—>\n\nBut I am cut off by another horde of Bloodbags that poured into this cabin, surrounding us.\n\n\"Dammit... prepare for battle!\"\n\n\"Y-yet what of the lone warrior?!\"\n\n\"Well—\"",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "Behind an old billboard that's seen better days stands a vending machine emblazoned with a half-faded T Corp. logo.\n\nThe machine is tall, with dozens of thin clock hands ticking and turning down its cylindrical body; there's a promotional tagline written beneath it.\n\n\"Stop borrowing time!\"\n\"Pre-pay with your disposable time, and buy time without delay when in a pinch!\"\n\nThere's a small slot next to the machine for users to insert their hands.\nWait, underneath the slot—there are warnings written in nigh-illegibly small font.\n\n<Just what the heck does it say?>\n\"Upon use of this device, with the proviso that the user makes a payment of a sum of temporal resource, the user will be imposed a temporary time shortage open parenthesis for the purposes of this agreement, the \"temporary time shortage\" mentioned will be predicated on the T Corp. Variable Time Scale; however, any sum of a day or greater will be measured based on the A Corp. Standard Time Scale close parenthesis; received time prepayment will automatically be deposited and amassed within the ancillary accumulation device within the machine and will be prepared for provision to the user upon circumstances in which they make a withdrawal request via undertaking a series of procedures or the fulfillment of refund conditions stipulated in the manual thereof, by summation of the user's total per-day hours and the extrapolated acceleration rate subsidies calculated by a distinct formula; the precise period, order, and limitations in reflecting these changes to the user's account balance is determined by the device's terms of service as described—\"\n\n\"V-very well. The full extent of this multiloquous writing needn't be recited in full.\"\n\n\"Hang on, ain't this one of them things the Collectors wear on their arms?\"",
+    "runs": [
+      [
+        "Behind an old billboard that's seen better days stands a vending machine emblazoned with a half-faded T Corp. logo.\n\nThe machine is tall, with dozens of thin clock hands ticking and turning down its cylindrical body; there's a promotional tagline written beneath it.\n\n\"Stop borrowing time!\"\n\"Pre-pay with your disposable time, and buy time without delay when in a pinch!\"\n\nThere's a small slot next to the machine for users to insert their hands.\nWait, underneath the slot—there are warnings written in nigh-illegibly small font.\n\n<Just what the heck does it say?>\n\"Upon use of this device, with the proviso that the user makes a payment of a sum of temporal resource, the user will be imposed a temporary time shortage open parenthesis for the purposes of this agreement, the \"temporary time shortage\" mentioned will be predicated on the T Corp. Variable Time Scale; however, any sum of a day or greater will be measured based on the A Corp. Standard Time Scale close parenthesis; received time prepayment will automatically be deposited and amassed within the ancillary accumulation device within the machine and will be prepared for provision to the user upon circumstances in which they make a withdrawal request via undertaking a series of procedures or the fulfillment of refund conditions stipulated in the manual thereof, by summation of the user's total per-day hours and the extrapolated acceleration rate subsidies calculated by a distinct formula; the precise period, order, and limitations in reflecting these changes to the user's account balance is determined by the device's terms of service as described—\"\n\n\"V-very well. The full extent of this multiloquous writing needn't be recited in full.\"\n\n\"Hang on, ain't this one of them things the Collectors wear on their arms?\"",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "Well, might as well make a deposit while we've got time to burn.\n\n\"It appears that this device functions on a mechanism not dissimilar from those installed in T Corp. Collection Staff's gauntlets, Executive Manager.\"\n\n\"Are you sure the payment went through? I don't feel any different.\"\n\n<…….>\n\nWith the Sinners' slowed speech trailing behind, I hurried onward.",
+    "runs": [
+      [
+        "Well, might as well make a deposit while we've got time to burn.\n\n\"It appears that this device functions on a mechanism not dissimilar from those installed in T Corp. Collection Staff's gauntlets, Executive Manager.\"\n\n\"Are you sure the payment went through? I don't feel any different.\"\n\n<…….>\n\nWith the Sinners' slowed speech trailing behind, I hurried onward.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "We see an old voice recorder with a faded label.\n\n<Lobotomy Corporation ■■ Branch Survivor Interview Logs>\n\nThe \"Play\" button is smooth and worn from use—as though someone pressed it hundreds of times.",
+    "runs": [
+      [
+        "We see an old voice recorder with a faded label.\n\n<Lobotomy Corporation ■■ Branch Survivor Interview Logs>\n\nThe \"Play\" button is smooth and worn from use—as though someone pressed it hundreds of times.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "'Eunbong's Bar & Fryers!'\n'Dial 555-0102-0386-2664! That's 555-0102-Zero-EUN-BONG!'\n\nWe followed the weird, catchy jingle and found ourselves standing before an oddly familiar machine.\n\n\"Hey, that's a claw machine. It's got... Huh, these are...\"\n<... Why are there Bongy plushies here?>\n\"Didn't that guy say something about how the one he gave us was an invaluable, one-of-a-kind treasure? That there's nothing else like it?\"\n\"... Such promise carries very little weight in the Mirror Dungeon.\"\n\"Mm. It may be an idiosyncrasy of the experience that is yet to be identified.\"\n\"Guys, hold on. Look at that plush there—I just saw a golden twinkle through its seams! There's gotta be money in these things!\n\nThere are Bongy plushies of various design inside the claw machine.\nWhich one should we go for?",
+    "runs": [
+      [
+        "'Eunbong's Bar & Fryers!'\n'Dial 555-0102-0386-2664! That's 555-0102-Zero-EUN-BONG!'\n\nWe followed the weird, catchy jingle and found ourselves standing before an oddly familiar machine.\n\n\"Hey, that's a claw machine. It's got... Huh, these are...\"\n<... Why are there Bongy plushies here?>\n\"Didn't that guy say something about how the one he gave us was an invaluable, one-of-a-kind treasure? That there's nothing else like it?\"\n\"... Such promise carries very little weight in the Mirror Dungeon.\"\n\"Mm. It may be an idiosyncrasy of the experience that is yet to be identified.\"\n\"Guys, hold on. Look at that plush there—I just saw a golden twinkle through its seams! There's gotta be money in these things!\n\nThere are Bongy plushies of various design inside the claw machine.\nWhich one should we go for?",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "We identified the medium-sized Bongy Plushie in a decent spot to be plucked, and decided to try our luck.\n\nI carefully maneuver the claw over the plushies and grab the medium-sized plushie with utmost care... and somehow, it managed to travel to the chute without dropping midway through the journey. A heavy, metallic clunk echoes from the port. Twice.\n\n\"Ooh... Abreast the selected Bongy is a Bongy of smaller dimensions; indeed, the idiom \"two birds with one stone\" would be most apt here. Not only did the two avians grant us subsistence, it also gave us riches.\"\n<Well, I hear something jingling in there. Coins, maybe?>\n\"Ya think? Gimme that, Dante!\"\n\"What the hell are you—\"\n\"Gonna cut their bellies right open!\"\n\"Little Sir Bongy! And Littlest Sir Bongy!!!!!\"\n\nOne of the Sinners cuts open both Bongy plushies' bellies, and coins start spilling out of them.\nWhile we were occupied with counting the coins, the jingle slowly quieted down, and soon, disappeared with the claw machine.",
+    "runs": [
+      [
+        "We identified the medium-sized Bongy Plushie in a decent spot to be plucked, and decided to try our luck.\n\nI carefully maneuver the claw over the plushies and grab the medium-sized plushie with utmost care... and somehow, it managed to travel to the chute without dropping midway through the journey. A heavy, metallic clunk echoes from the port. Twice.\n\n\"Ooh... Abreast the selected Bongy is a Bongy of smaller dimensions; indeed, the idiom \"two birds with one stone\" would be most apt here. Not only did the two avians grant us subsistence, it also gave us riches.\"\n<Well, I hear something jingling in there. Coins, maybe?>\n\"Ya think? Gimme that, Dante!\"\n\"What the hell are you—\"\n\"Gonna cut their bellies right open!\"\n\"Little Sir Bongy! And Littlest Sir Bongy!!!!!\"\n\nOne of the Sinners cuts open both Bongy plushies' bellies, and coins start spilling out of them.\nWhile we were occupied with counting the coins, the jingle slowly quieted down, and soon, disappeared with the claw machine.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "Could those flimsy little pincers even lift that massive Bongy plushie?\n\nI wasn't really sure, but I carefully maneuvered the claw and went for the grab anyway.\n\nWe could hear a rattle from the prize chute as the doll dropped in.\n\n\"It won't come down... I think it's stuck.\"\n\"The seams must've come loose—there are coins falling out.\"\n<Let's at least pick them up.>\n\nWhile we were occupied with counting the coins, the jingle slowly quieted down, and soon, disappeared with the claw machine.",
+    "runs": [
+      [
+        "Could those flimsy little pincers even lift that massive Bongy plushie?\n\nI wasn't really sure, but I carefully maneuvered the claw and went for the grab anyway.\n\nWe could hear a rattle from the prize chute as the doll dropped in.\n\n\"It won't come down... I think it's stuck.\"\n\"The seams must've come loose—there are coins falling out.\"\n<Let's at least pick them up.>\n\nWhile we were occupied with counting the coins, the jingle slowly quieted down, and soon, disappeared with the claw machine.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "Order the Sinner with Ashen Constellation's Blessing to conduct \"Insight Work\" on the Abnormality.\n<size=75%><color=#a16a3b>Choice unlocked with the E.G.O Gift \"Ashen Constellation's Blessing\"</color></size>",
+    "runs": [
+      [
+        "Order the Sinner with Ashen Constellation's Blessing to conduct \"Insight Work\" on the Abnormality.\n",
+        null,
+        null
+      ],
+      ["Choice unlocked with the E.G.O Gift \"Ashen Constellation's Blessing\"", "#a16a3b", "75%"]
+    ]
+  },
+  {
+    "input": "<Do any of you know how to manage this thing?>\n\".......\"\n<... Let's skedaddle.>\n\nNothing good can come of rushing in to conduct Work on an Abnormality we have absolutely no idea how to manage.\nWe quickly made ourselves scarce from the hallway before the Qliphoth Counter dropped to 0.",
+    "runs": [
+      [
+        "<Do any of you know how to manage this thing?>\n\".......\"\n<... Let's skedaddle.>\n\nNothing good can come of rushing in to conduct Work on an Abnormality we have absolutely no idea how to manage.\nWe quickly made ourselves scarce from the hallway before the Qliphoth Counter dropped to 0.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "Order the Sinner with Trauma Shield to conduct \"Insight Work\" on the Abnormality.\n<size=75%><color=#a16a3b>Choice unlocked with the E.G.O Gift \"Trauma Shield\"</color></size>",
+    "runs": [
+      [
+        "Order the Sinner with Trauma Shield to conduct \"Insight Work\" on the Abnormality.\n",
+        null,
+        null
+      ],
+      ["Choice unlocked with the E.G.O Gift \"Trauma Shield\"", "#a16a3b", "75%"]
+    ]
+  },
+  {
+    "input": "Tell them that we're from the Upper Layer, and present our E.G.O Gifts.\n<size=75%><color=#a16a3b>Choice unlocked by carrying 5+ Theme Pack-exclusive E.G.O Gifts from \"The Noon of Violet\" and \"Hatred and Despair\" Packs</color></size>",
+    "runs": [
+      ["Tell them that we're from the Upper Layer, and present our E.G.O Gifts.\n", null, null],
+      [
+        "Choice unlocked by carrying 5+ Theme Pack-exclusive E.G.O Gifts from \"The Noon of Violet\" and \"Hatred and Despair\" Packs",
+        "#a16a3b",
+        "75%"
+      ]
+    ]
+  },
+  {
+    "input": "Open the door with the Operation Authorization Card.\n<size=75%><color=#a16a3b>Choice unlocked with the E.G.O Gift \"Operation Authorization Card\"</color></size>",
+    "runs": [
+      ["Open the door with the Operation Authorization Card.\n", null, null],
+      ["Choice unlocked with the E.G.O Gift \"Operation Authorization Card\"", "#a16a3b", "75%"]
+    ]
+  },
+  {
+    "input": "{0} reaches into the pile and pulls out something fashioned of bones and musculature.\n\n<This is...>\n\nA broken artwork, by the looks of it—likely the work of Corporists.\n\nPerhaps setting the artwork on a pedestal will return to it the value it once held.",
+    "runs": [
+      [
+        "{0} reaches into the pile and pulls out something fashioned of bones and musculature.\n\n<This is...>\n\nA broken artwork, by the looks of it—likely the work of Corporists.\n\nPerhaps setting the artwork on a pedestal will return to it the value it once held.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "{0} reaches into the pile and grabs something fashioned of bones and musculature.\n\n<Ah... W-watch out!>\n\n{0} quickly pulls their hand away and retreats a safe distance.\n\n... It was close—for a moment, the samples stacked on top threatened to collapse and bury the Sinners under them.\n\nIt hardly seems worth risking harm just to take something we're not even sure will prove useful.",
+    "runs": [
+      [
+        "{0} reaches into the pile and grabs something fashioned of bones and musculature.\n\n<Ah... W-watch out!>\n\n{0} quickly pulls their hand away and retreats a safe distance.\n\n... It was close—for a moment, the samples stacked on top threatened to collapse and bury the Sinners under them.\n\nIt hardly seems worth risking harm just to take something we're not even sure will prove useful.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "{0} reaches into the pile and pulls out something fashioned of hide and fangs.\n\n<This is...>\n\nA broken artwork, by the looks of it—likely the work of Fauvists.\n\nPerhaps setting the artwork on a pedestal will return to it the value it once held.",
+    "runs": [
+      [
+        "{0} reaches into the pile and pulls out something fashioned of hide and fangs.\n\n<This is...>\n\nA broken artwork, by the looks of it—likely the work of Fauvists.\n\nPerhaps setting the artwork on a pedestal will return to it the value it once held.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "{0} reaches into the pile and grabs something fashioned of hide and fangs.\n\n<Ah... W-watch out!>\n\n{0} quickly pulls their hand away and retreats a safe distance.\n\n... It was close—for a moment, the samples stacked on top threatened to collapse and bury the Sinners under them.\n\nIt hardly seems worth risking harm just to take something we're not even sure will prove useful.",
+    "runs": [
+      [
+        "{0} reaches into the pile and grabs something fashioned of hide and fangs.\n\n<Ah... W-watch out!>\n\n{0} quickly pulls their hand away and retreats a safe distance.\n\n... It was close—for a moment, the samples stacked on top threatened to collapse and bury the Sinners under them.\n\nIt hardly seems worth risking harm just to take something we're not even sure will prove useful.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "Show them the Harestride and tell them you're new.\n<size=75%><color=#a16a3b>Choice unlocked with the E.G.O Gift \"Harestride\"</color></size>",
+    "runs": [
+      ["Show them the Harestride and tell them you're new.\n", null, null],
+      ["Choice unlocked with the E.G.O Gift \"Harestride\"", "#a16a3b", "75%"]
+    ]
+  },
+  {
+    "input": "{0} stealthily picked up the boombox.\n\nWe brought it to an adjacent street and hit the \"play\" button, blasting the alleyways with electronic dance music.\n\nNearby members of the Middle, alerted by the sudden burst of music, moved away from their stations toward that alley.\n\n<The earlier path should be open now. Let's hurry through before they get back.>\n\nWe shut off the music and snuck back to the original road, which was now open.\n\nWith the path ahead cleared, we were able to pass through without trouble.",
+    "runs": [
+      [
+        "{0} stealthily picked up the boombox.\n\nWe brought it to an adjacent street and hit the \"play\" button, blasting the alleyways with electronic dance music.\n\nNearby members of the Middle, alerted by the sudden burst of music, moved away from their stations toward that alley.\n\n<The earlier path should be open now. Let's hurry through before they get back.>\n\nWe shut off the music and snuck back to the original road, which was now open.\n\nWith the path ahead cleared, we were able to pass through without trouble.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2><color=#ebcaa2>All Allies</color> <color=#e48801>without the Sloth Sin Affinity Attack Skill</color><color=#ebcaa2></color> </color> <color=#ebcaa2>took</color> <color=#e30000>15 HP Damage!</color>",
+    "runs": [
+      ["All Allies ", "#ebcaa2", null],
+      ["without the Sloth Sin Affinity Attack Skill", "#e48801", null],
+      [" ", "#ebcaa2", null],
+      [" ", null, null],
+      ["took", "#ebcaa2", null],
+      [" ", null, null],
+      ["15 HP Damage!", "#e30000", null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2><color=#ebcaa2>All Allies</color> <color=#e48801>with the Sloth Sin Affinity Attack Skill</color><color=#ebcaa2></color> </color> <color=#ebcaa2>healed for</color> <color=#00ff9c>20 HP.</color>",
+    "runs": [
+      ["All Allies ", "#ebcaa2", null],
+      ["with the Sloth Sin Affinity Attack Skill", "#e48801", null],
+      [" ", "#ebcaa2", null],
+      [" ", null, null],
+      ["healed for", "#ebcaa2", null],
+      [" ", null, null],
+      ["20 HP.", "#00ff9c", null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2><color=#ebcaa2>All Allies</color> <color=#e48801>without the Sloth Sin Affinity Attack Skill</color><color=#ebcaa2></color> </color> <color=#ebcaa2>lost</color> <color=#fe4b48>15 SP!</color>",
+    "runs": [
+      ["All Allies ", "#ebcaa2", null],
+      ["without the Sloth Sin Affinity Attack Skill", "#e48801", null],
+      [" ", "#ebcaa2", null],
+      [" ", null, null],
+      ["lost", "#ebcaa2", null],
+      [" ", null, null],
+      ["15 SP!", "#fe4b48", null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2><color=#ebcaa2>All Allies</color> <color=#e48801>with the Sloth Sin Affinity Attack Skill</color><color=#ebcaa2></color> </color> <color=#ebcaa2>healed for</color> <color=#80c9ff>20 SP.</color>",
+    "runs": [
+      ["All Allies ", "#ebcaa2", null],
+      ["with the Sloth Sin Affinity Attack Skill", "#e48801", null],
+      [" ", "#ebcaa2", null],
+      [" ", null, null],
+      ["healed for", "#ebcaa2", null],
+      [" ", null, null],
+      ["20 SP.", "#80c9ff", null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2><color=#ebcaa2>All Allies</color> <color=#61822b>without the Gluttony Sin Affinity Attack Skill</color><color=#ebcaa2></color> </color> <color=#ebcaa2>took</color> <color=#e30000>10 HP Damage!</color>",
+    "runs": [
+      ["All Allies ", "#ebcaa2", null],
+      ["without the Gluttony Sin Affinity Attack Skill", "#61822b", null],
+      [" ", "#ebcaa2", null],
+      [" ", null, null],
+      ["took", "#ebcaa2", null],
+      [" ", null, null],
+      ["10 HP Damage!", "#e30000", null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2><color=#ebcaa2>Friendly Units with the lowest SP</color> <color=#306471>with the Gloom Sin Affinity Attack Skill</color><color=#ebcaa2></color> </color> <color=#ebcaa2>healed back to</color> <color=#00ff9c>Full HP.</color>",
+    "runs": [
+      ["Friendly Units with the lowest SP ", "#ebcaa2", null],
+      ["with the Gloom Sin Affinity Attack Skill", "#306471", null],
+      [" ", "#ebcaa2", null],
+      [" ", null, null],
+      ["healed back to", "#ebcaa2", null],
+      [" ", null, null],
+      ["Full HP.", "#00ff9c", null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2><color=#ebcaa2>All Allies</color> <color=#61822b>without the Gluttony Sin Affinity Attack Skill</color><color=#ebcaa2></color><color=#ebcaa2>, </color><color=#e48801>without the Sloth Sin Affinity Attack Skill</color><color=#ebcaa2></color> </color> <color=#ebcaa2>took</color> <color=#e30000>20 HP</color> and <color=#fe4b48>SP damage!</color>",
+    "runs": [
+      ["All Allies ", "#ebcaa2", null],
+      ["without the Gluttony Sin Affinity Attack Skill", "#61822b", null],
+      [", ", "#ebcaa2", null],
+      ["without the Sloth Sin Affinity Attack Skill", "#e48801", null],
+      [" ", "#ebcaa2", null],
+      [" ", null, null],
+      ["took", "#ebcaa2", null],
+      [" ", null, null],
+      ["20 HP", "#e30000", null],
+      [" and ", null, null],
+      ["SP damage!", "#fe4b48", null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2><color=#ebcaa2>All Allies</color> <color=#a0392b>without the Wrath Sin Affinity Attack Skill</color><color=#ebcaa2></color><color=#ebcaa2>, </color><color=#7d4e94>without the Envy Sin Affinity Attack Skill</color><color=#ebcaa2></color> </color> <color=#ebcaa2>took</color> <color=#e30000>20 HP</color> and <color=#fe4b48>SP damage!</color>",
+    "runs": [
+      ["All Allies ", "#ebcaa2", null],
+      ["without the Wrath Sin Affinity Attack Skill", "#a0392b", null],
+      [", ", "#ebcaa2", null],
+      ["without the Envy Sin Affinity Attack Skill", "#7d4e94", null],
+      [" ", "#ebcaa2", null],
+      [" ", null, null],
+      ["took", "#ebcaa2", null],
+      [" ", null, null],
+      ["20 HP", "#e30000", null],
+      [" and ", null, null],
+      ["SP damage!", "#fe4b48", null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2><color=#ebcaa2>All Allies</color> <color=#bb521f>without the Lust Sin Affinity Attack Skill</color><color=#ebcaa2></color><color=#ebcaa2>, </color><color=#306471>without the Gloom Sin Affinity Attack Skill</color><color=#ebcaa2></color> </color> <color=#ebcaa2>took</color> <color=#e30000>20 HP</color> and <color=#fe4b48>SP damage!</color>",
+    "runs": [
+      ["All Allies ", "#ebcaa2", null],
+      ["without the Lust Sin Affinity Attack Skill", "#bb521f", null],
+      [", ", "#ebcaa2", null],
+      ["without the Gloom Sin Affinity Attack Skill", "#306471", null],
+      [" ", "#ebcaa2", null],
+      [" ", null, null],
+      ["took", "#ebcaa2", null],
+      [" ", null, null],
+      ["20 HP", "#e30000", null],
+      [" and ", null, null],
+      ["SP damage!", "#fe4b48", null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2><color=#ebcaa2>All Allies</color> <color=#e48801>without the Sloth Sin Affinity Attack Skill</color><color=#ebcaa2></color> </color> <color=#ebcaa2>took</color> <color=#e30000>15 HP</color> and <color=#fe4b48>SP damage!</color>",
+    "runs": [
+      ["All Allies ", "#ebcaa2", null],
+      ["without the Sloth Sin Affinity Attack Skill", "#e48801", null],
+      [" ", "#ebcaa2", null],
+      [" ", null, null],
+      ["took", "#ebcaa2", null],
+      [" ", null, null],
+      ["15 HP", "#e30000", null],
+      [" and ", null, null],
+      ["SP damage!", "#fe4b48", null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2><color=#ebcaa2>All Allies</color> <color=#61822b>without the Gluttony Sin Affinity Attack Skill</color><color=#ebcaa2></color> </color> <color=#ebcaa2>lost</color> <color=#fe4b48>20 SP!</color>",
+    "runs": [
+      ["All Allies ", "#ebcaa2", null],
+      ["without the Gluttony Sin Affinity Attack Skill", "#61822b", null],
+      [" ", "#ebcaa2", null],
+      [" ", null, null],
+      ["lost", "#ebcaa2", null],
+      [" ", null, null],
+      ["20 SP!", "#fe4b48", null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2><color=#ebcaa2>All Allies</color> <color=#306471>without the Gloom Sin Affinity Attack Skill</color><color=#ebcaa2></color> </color> <color=#ebcaa2>took</color> <color=#e30000>13 HP</color> and <color=#fe4b48>SP damage!</color>",
+    "runs": [
+      ["All Allies ", "#ebcaa2", null],
+      ["without the Gloom Sin Affinity Attack Skill", "#306471", null],
+      [" ", "#ebcaa2", null],
+      [" ", null, null],
+      ["took", "#ebcaa2", null],
+      [" ", null, null],
+      ["13 HP", "#e30000", null],
+      [" and ", null, null],
+      ["SP damage!", "#fe4b48", null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2><color=#ebcaa2>All Allies</color> <color=#306471>without the Gloom Sin Affinity Attack Skill</color><color=#ebcaa2></color> </color> <color=#ebcaa2>lost</color> <color=#fe4b48>20 SP!</color>",
+    "runs": [
+      ["All Allies ", "#ebcaa2", null],
+      ["without the Gloom Sin Affinity Attack Skill", "#306471", null],
+      [" ", "#ebcaa2", null],
+      [" ", null, null],
+      ["lost", "#ebcaa2", null],
+      [" ", null, null],
+      ["20 SP!", "#fe4b48", null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2><color=#ebcaa2>All Allies</color> <color=#185188>with the Pride Sin Affinity Attack Skill</color><color=#ebcaa2></color> </color> <color=#ebcaa2>healed for</color> <color=#00ff9c>15 HP</color> and <color=#80c9ff>SP.</color>",
+    "runs": [
+      ["All Allies ", "#ebcaa2", null],
+      ["with the Pride Sin Affinity Attack Skill", "#185188", null],
+      [" ", "#ebcaa2", null],
+      [" ", null, null],
+      ["healed for", "#ebcaa2", null],
+      [" ", null, null],
+      ["15 HP", "#00ff9c", null],
+      [" and ", null, null],
+      ["SP.", "#80c9ff", null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2><color=#ebcaa2>All Allies</color> <color=#185188>without the Pride Sin Affinity Attack Skill</color><color=#ebcaa2></color> </color> <color=#ebcaa2>took</color> <color=#e30000>20 HP</color> and <color=#fe4b48>SP damage!</color>",
+    "runs": [
+      ["All Allies ", "#ebcaa2", null],
+      ["without the Pride Sin Affinity Attack Skill", "#185188", null],
+      [" ", "#ebcaa2", null],
+      [" ", null, null],
+      ["took", "#ebcaa2", null],
+      [" ", null, null],
+      ["20 HP", "#e30000", null],
+      [" and ", null, null],
+      ["SP damage!", "#fe4b48", null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2><color=#ebcaa2>All Allies</color> <color=#7d4e94>without the Envy Sin Affinity Attack Skill</color><color=#ebcaa2></color> </color> <color=#ebcaa2>took</color> <color=#e30000>10 HP</color> and <color=#fe4b48>SP damage!</color>",
+    "runs": [
+      ["All Allies ", "#ebcaa2", null],
+      ["without the Envy Sin Affinity Attack Skill", "#7d4e94", null],
+      [" ", "#ebcaa2", null],
+      [" ", null, null],
+      ["took", "#ebcaa2", null],
+      [" ", null, null],
+      ["10 HP", "#e30000", null],
+      [" and ", null, null],
+      ["SP damage!", "#fe4b48", null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2><color=#ebcaa2>All Allies</color> <color=#306471>without the Gloom Sin Affinity Attack Skill</color><color=#ebcaa2></color> </color> <color=#ebcaa2>took</color> <color=#e30000>10 HP</color> and <color=#fe4b48>SP damage!</color>",
+    "runs": [
+      ["All Allies ", "#ebcaa2", null],
+      ["without the Gloom Sin Affinity Attack Skill", "#306471", null],
+      [" ", "#ebcaa2", null],
+      [" ", null, null],
+      ["took", "#ebcaa2", null],
+      [" ", null, null],
+      ["10 HP", "#e30000", null],
+      [" and ", null, null],
+      ["SP damage!", "#fe4b48", null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2><color=#ebcaa2>All Allies</color> <color=#e48801>without the Sloth Sin Affinity Attack Skill</color><color=#ebcaa2></color> </color> <color=#ebcaa2>took</color> <color=#e30000>10 HP Damage!</color>",
+    "runs": [
+      ["All Allies ", "#ebcaa2", null],
+      ["without the Sloth Sin Affinity Attack Skill", "#e48801", null],
+      [" ", "#ebcaa2", null],
+      [" ", null, null],
+      ["took", "#ebcaa2", null],
+      [" ", null, null],
+      ["10 HP Damage!", "#e30000", null]
+    ]
+  },
+  {
+    "input": "\"관리자님 괜찮으십니까?\"\n\n <…괜찮은데?>\n\n\"대가리가 시계라서 괜찮은 거겠지!\"\n\n두꺼비의 울음소리가 귀를 막아도 머릿속에 울리는지, 수감자들이 괴로워한다.\n\n그러다가 결국 누군가 참지 못하고 두꺼비를 향해 무기를 휘둘렀다.",
+    "runs": [
+      [
+        "\"관리자님 괜찮으십니까?\"\n\n <…괜찮은데?>\n\n\"대가리가 시계라서 괜찮은 거겠지!\"\n\n두꺼비의 울음소리가 귀를 막아도 머릿속에 울리는지, 수감자들이 괴로워한다.\n\n그러다가 결국 누군가 참지 못하고 두꺼비를 향해 무기를 휘둘렀다.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "로봇은 힘겹게 양팔을 들어 올린다.\n\n단말기에는 다음과 같은 말이 출력된다.\n\n<환영합니다, 손님. 마을 견학은 즐거우셨습니까?\n기념품을 증정해 드립니다.>\n\n단말기는 웃고 있지만 로봇의 몸짓에서\n살려달라는 아우성이 들리는 것만 같다.",
+    "runs": [
+      [
+        "로봇은 힘겹게 양팔을 들어 올린다.\n\n단말기에는 다음과 같은 말이 출력된다.\n\n<환영합니다, 손님. 마을 견학은 즐거우셨습니까?\n기념품을 증정해 드립니다.>\n\n단말기는 웃고 있지만 로봇의 몸짓에서\n살려달라는 아우성이 들리는 것만 같다.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "단말기가 붉게 변하고, 경고음이 울려 퍼진다.\n\n로봇은 괴로워하듯 격하게 진동한다.\n\n<잘 가요. 잘 가, 잘가잘가잘가잘가잘가잘가잘가잘가잘가>\n\n단말기에 한 가지 단어만 빽빽하게 차더니,\n부품들과 살점을 뿜어내며 눈앞에서 로봇은 폭발했다.",
+    "runs": [
+      [
+        "단말기가 붉게 변하고, 경고음이 울려 퍼진다.\n\n로봇은 괴로워하듯 격하게 진동한다.\n\n<잘 가요. 잘 가, 잘가잘가잘가잘가잘가잘가잘가잘가잘가>\n\n단말기에 한 가지 단어만 빽빽하게 차더니,\n부품들과 살점을 뿜어내며 눈앞에서 로봇은 폭발했다.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "로봇이 바들바들 떨기 시작한다.\n\n겁에 질렸다기보다는 화가 난 것처럼 보인다.\n\n단말기에 적힌 단어의 의미를 알아차린 걸까?\n\n<적대적 개체 감지, 적대적 개체 감지.>\n\n<규칙 D63ICRQ1에 의해 퇴거 절차를 이행합니다!>\n\n로봇이 양팔을 맹렬하게 휘두른다.",
+    "runs": [
+      [
+        "로봇이 바들바들 떨기 시작한다.\n\n겁에 질렸다기보다는 화가 난 것처럼 보인다.\n\n단말기에 적힌 단어의 의미를 알아차린 걸까?\n\n<적대적 개체 감지, 적대적 개체 감지.>\n\n<규칙 D63ICRQ1에 의해 퇴거 절차를 이행합니다!>\n\n로봇이 양팔을 맹렬하게 휘두른다.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "<질문을 이해하지 못했습니다.>\n\n로봇은 고개를 갸웃거리며 그런 말을 출력했다.\n\n반대쪽으로 까딱이지 않는 고개를 계속해서\n들어 올리려 시도하며, 다음 말을 출력한다.\n\n<혹시 손님은 마을을 견학하지 않았습니까?>\n\n그것은 대답을 원하는 것 같다.",
+    "runs": [
+      [
+        "<질문을 이해하지 못했습니다.>\n\n로봇은 고개를 갸웃거리며 그런 말을 출력했다.\n\n반대쪽으로 까딱이지 않는 고개를 계속해서\n들어 올리려 시도하며, 다음 말을 출력한다.\n\n<혹시 손님은 마을을 견학하지 않았습니까?>\n\n그것은 대답을 원하는 것 같다.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "<그렇다면 기념품을 증정할 수 없습니다!>\n\n갑자기 단말기가 위로 덜컹거리며 열리더니,\n기계 팔이 튀어나와 내게서 무언가를 잡아채려 했다.\n\n<기념품 압수에 협조하십시오! 거짓말은 나쁩니다.>\n\n이리저리 몸을 비틀어 피하자,\n기계 팔의 속도는 더욱 빨라져 갔다.\n\n<협조하지 않을 경우,\n규칙A62GBFE1에 의해 처벌될 수 있습니다!>\n\n자리를 벗어나지 않고는 그것은 멈출 것 같지 않았기에,\n나는 넘어지듯이 그곳에서 달려 빠져나왔다.",
+    "runs": [
+      [
+        "<그렇다면 기념품을 증정할 수 없습니다!>\n\n갑자기 단말기가 위로 덜컹거리며 열리더니,\n기계 팔이 튀어나와 내게서 무언가를 잡아채려 했다.\n\n<기념품 압수에 협조하십시오! 거짓말은 나쁩니다.>\n\n이리저리 몸을 비틀어 피하자,\n기계 팔의 속도는 더욱 빨라져 갔다.\n\n<협조하지 않을 경우,\n규칙A62GBFE1에 의해 처벌될 수 있습니다!>\n\n자리를 벗어나지 않고는 그것은 멈출 것 같지 않았기에,\n나는 넘어지듯이 그곳에서 달려 빠져나왔다.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "<그렇다면 견학 프로그램에 문제가 있었던 것 같습니다.>\n\n로봇은 그 말을 출력한 뒤\n한참을 가만히 서 있었다.\n\n망가진 걸까, 그런 생각을\n하고 있을 때 단말기가 번쩍였다.\n\n<관리자 호출을 계속 시도했지만 응답하지 않습니다.>\n\n<시스템 이상, 시스템 이상.>\n\n<재부팅 중…>\n\n그러고는 파란 화면에 무언가 복잡한\n말을 계속해서 뱉어낼 뿐이었다.",
+    "runs": [
+      [
+        "<그렇다면 견학 프로그램에 문제가 있었던 것 같습니다.>\n\n로봇은 그 말을 출력한 뒤\n한참을 가만히 서 있었다.\n\n망가진 걸까, 그런 생각을\n하고 있을 때 단말기가 번쩍였다.\n\n<관리자 호출을 계속 시도했지만 응답하지 않습니다.>\n\n<시스템 이상, 시스템 이상.>\n\n<재부팅 중…>\n\n그러고는 파란 화면에 무언가 복잡한\n말을 계속해서 뱉어낼 뿐이었다.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "중앙본부 사무직 책상 위에 보고서가 놓여 있다.\n\n<DAY ■■, ■■ ■■ 연구 용역 결과 보고서>\n\n몇 군데 검열되어 있었지만 내용은, 새로운 보호장 탄환에 대한 것인 것 같았다.\n\n'트라우마 방지장은 외부에서 오는 정신 피해를 ■■ ■■, 또는 ■■■ 방지함.'\n\n'보호장 탄환 ■■이 ■■할 시, 관리자 또는 ■■■에게 문의할 것.'\n\n무언가 잔뜩 지워진 보고서 옆에는 '트라우마 방지장 샘플 및 설명서'이라고 적힌 박스가 있다.",
+    "runs": [
+      [
+        "중앙본부 사무직 책상 위에 보고서가 놓여 있다.\n\n<DAY ■■, ■■ ■■ 연구 용역 결과 보고서>\n\n몇 군데 검열되어 있었지만 내용은, 새로운 보호장 탄환에 대한 것인 것 같았다.\n\n'트라우마 방지장은 외부에서 오는 정신 피해를 ■■ ■■, 또는 ■■■ 방지함.'\n\n'보호장 탄환 ■■이 ■■할 시, 관리자 또는 ■■■에게 문의할 것.'\n\n무언가 잔뜩 지워진 보고서 옆에는 '트라우마 방지장 샘플 및 설명서'이라고 적힌 박스가 있다.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "사람들의 시선이 우리를 향해 옮겨붙는다.\n\n\"사악한 주술사가 고요함을 일으켰다.\"\n\"그는 우리를 위해 주는 척했지만, 결국 이베리아의 눈부신 번영을 시기했을 뿐이야.\"\n\"우리를 말리지 마, 외지인.\"\n\"이들도 그 주술사와 똑같은 바다에서 이곳으로 왔다.\"\n\n반발하는 수감자들의 눈에 굶주린 채, 피폐해진 주민들이 보였다.\n\n비어 있는 천을 소중하게 껴안고 있는 한 주민이.\n어울리지 않는 지팡이와 모자를 손에 쥔 어린아이가.\n\n\"…저 사람들은 소중한 것을 잃었어.\"\n\n\"소중한 것을 잃은 사람들에게는 앞이 보이지 않아.\"\n\n\"감정을 쏟아내지 않으면 버틸 수 없거든.\"\n\n이들은 슬픔을 해소하고 있었다.\n\n이베리아를 집어삼킨 그 거대한 재난에서… 그 어떤 감정도 의도도 읽을 수 없었기에.\n\n그저 같은 바다에서 온 이들을 향해 길 잃은 분노를 날카롭게 세우고 있다.\n\n\"그러니… 누군가는 그들이 세운 날이 향할 방향을 바로 잡아야 할 거야.\"\n\n<아이린?>\n\n\"물러서도록 해, 시민.\"\n\n\"그자에게 설령 죄가 있다고 해도, 그것을 집행하는 건 재판소의 소관이어야 해.\"\n\n\"죄가 없다면, 더더욱 너희의 행동은 용납할 수 없어.\"\n\n군중들은 아이린의 말에 고민에 잠긴 표정으로 에기르인에게서 멀어지다가…\n\n이내 흩어지듯 사라졌다.",
+    "runs": [
+      [
+        "사람들의 시선이 우리를 향해 옮겨붙는다.\n\n\"사악한 주술사가 고요함을 일으켰다.\"\n\"그는 우리를 위해 주는 척했지만, 결국 이베리아의 눈부신 번영을 시기했을 뿐이야.\"\n\"우리를 말리지 마, 외지인.\"\n\"이들도 그 주술사와 똑같은 바다에서 이곳으로 왔다.\"\n\n반발하는 수감자들의 눈에 굶주린 채, 피폐해진 주민들이 보였다.\n\n비어 있는 천을 소중하게 껴안고 있는 한 주민이.\n어울리지 않는 지팡이와 모자를 손에 쥔 어린아이가.\n\n\"…저 사람들은 소중한 것을 잃었어.\"\n\n\"소중한 것을 잃은 사람들에게는 앞이 보이지 않아.\"\n\n\"감정을 쏟아내지 않으면 버틸 수 없거든.\"\n\n이들은 슬픔을 해소하고 있었다.\n\n이베리아를 집어삼킨 그 거대한 재난에서… 그 어떤 감정도 의도도 읽을 수 없었기에.\n\n그저 같은 바다에서 온 이들을 향해 길 잃은 분노를 날카롭게 세우고 있다.\n\n\"그러니… 누군가는 그들이 세운 날이 향할 방향을 바로 잡아야 할 거야.\"\n\n<아이린?>\n\n\"물러서도록 해, 시민.\"\n\n\"그자에게 설령 죄가 있다고 해도, 그것을 집행하는 건 재판소의 소관이어야 해.\"\n\n\"죄가 없다면, 더더욱 너희의 행동은 용납할 수 없어.\"\n\n군중들은 아이린의 말에 고민에 잠긴 표정으로 에기르인에게서 멀어지다가…\n\n이내 흩어지듯 사라졌다.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "도시가 형상화된 듯한 방주의 중앙.\n\n눈부신 빛이 일렁이는 저곳에... 아마도 메이어스가 있을 것이다.\n\n\"…잠시 쉬었다 가자.\"\n\n\"괜찮으신가요, 박사님?\"\n\n\"조금만 쉬면… 괜찮아질 것 같아…\"\n\n\"후후… 체력을 기르지 않으면, 아미야 씨에게 업혀 다니시게 될지도 모르겠어요.\"\n\n\"돌아가면… 켈시 말대로 운동 좀 열심히 해야겠어.\"\n\n\"훗. 만약의 경우, 관리자님은 제가 업어드리겠습니다.\"\n\n<필요 없어.>\n\n메이어스가 바란 이상향, 빛의 중심에 가까워졌기 때문일까.\n\n돌아다니는 시본들은 다친 우리를 한 번씩 물끄러미 바라볼 뿐, 달려들지 않고 우리를 지나쳤다.\n\n그 시선은… 마치 걱정하는 것처럼도 느껴져서, 수감자들은 대부분 미묘한 표정으로 그들에게서 눈을 돌렸다.\n\n\"슬픔... 회한... 어쩌면, 자신이 고민했던 시간에 대한 부정일지도 모를 감정이 느껴져요.\"\n\n\"메이어스 씨는 돌아올 수 있는 걸까요?\"\n\n<돌아오게 만들어야지. 그걸 위해 여기에 들어온 거니까.>\n\n<조금만 더 쉬고 출발하자.>",
+    "runs": [
+      [
+        "도시가 형상화된 듯한 방주의 중앙.\n\n눈부신 빛이 일렁이는 저곳에... 아마도 메이어스가 있을 것이다.\n\n\"…잠시 쉬었다 가자.\"\n\n\"괜찮으신가요, 박사님?\"\n\n\"조금만 쉬면… 괜찮아질 것 같아…\"\n\n\"후후… 체력을 기르지 않으면, 아미야 씨에게 업혀 다니시게 될지도 모르겠어요.\"\n\n\"돌아가면… 켈시 말대로 운동 좀 열심히 해야겠어.\"\n\n\"훗. 만약의 경우, 관리자님은 제가 업어드리겠습니다.\"\n\n<필요 없어.>\n\n메이어스가 바란 이상향, 빛의 중심에 가까워졌기 때문일까.\n\n돌아다니는 시본들은 다친 우리를 한 번씩 물끄러미 바라볼 뿐, 달려들지 않고 우리를 지나쳤다.\n\n그 시선은… 마치 걱정하는 것처럼도 느껴져서, 수감자들은 대부분 미묘한 표정으로 그들에게서 눈을 돌렸다.\n\n\"슬픔... 회한... 어쩌면, 자신이 고민했던 시간에 대한 부정일지도 모를 감정이 느껴져요.\"\n\n\"메이어스 씨는 돌아올 수 있는 걸까요?\"\n\n<돌아오게 만들어야지. 그걸 위해 여기에 들어온 거니까.>\n\n<조금만 더 쉬고 출발하자.>",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "끝없이 몰려드는 피주머니와의 전투 중에…\n\n<음…?>\n\n불길한 물건이 떨어져 있는 것을 발견했다.\n\n그건 피주머니가 들고 있던 무기와 비슷하면서도, 또 다른 무언가였다.\n\n\"딱 봐도 강력해 보이는데?\"\n\n\"딱 봐도 위험해 보이는구료.\"\n\n\"딱 봐도 본인은 잘 모르겠네!\"\n\n수감자들의 의견이 저마다 분분하다.\n\n…아무래도 저걸 주워서 쓸지는 내 선택에 달린 것 같다.",
+    "runs": [
+      [
+        "끝없이 몰려드는 피주머니와의 전투 중에…\n\n<음…?>\n\n불길한 물건이 떨어져 있는 것을 발견했다.\n\n그건 피주머니가 들고 있던 무기와 비슷하면서도, 또 다른 무언가였다.\n\n\"딱 봐도 강력해 보이는데?\"\n\n\"딱 봐도 위험해 보이는구료.\"\n\n\"딱 봐도 본인은 잘 모르겠네!\"\n\n수감자들의 의견이 저마다 분분하다.\n\n…아무래도 저걸 주워서 쓸지는 내 선택에 달린 것 같다.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "\"저기! 혼자 피주머니와 싸우고 있는 자가 있네!\"\n\n수감자들이 바라본 방향에는 W사의 제복을 입고 있는 자가 있었다.\n\n실력은 뛰어나 보였지만, 피주머니의 숫자가 너무 많아 금방이라도 쓰러질 것만 같다.\n\n<도와줘야…>\n\n말을 끝마치기도 전에, 우리를 발견한 다른 피주머니들이 쏟아져나와 우리를 포위한다.\n\n\"큭… 전투 준비!\"\n\n\"하, 하지만 저자는 어떻게 하려는 겐가!\"\n\n\"그건…\"",
+    "runs": [
+      [
+        "\"저기! 혼자 피주머니와 싸우고 있는 자가 있네!\"\n\n수감자들이 바라본 방향에는 W사의 제복을 입고 있는 자가 있었다.\n\n실력은 뛰어나 보였지만, 피주머니의 숫자가 너무 많아 금방이라도 쓰러질 것만 같다.\n\n<도와줘야…>\n\n말을 끝마치기도 전에, 우리를 발견한 다른 피주머니들이 쏟아져나와 우리를 포위한다.\n\n\"큭… 전투 준비!\"\n\n\"하, 하지만 저자는 어떻게 하려는 겐가!\"\n\n\"그건…\"",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "낡은 광고판 뒤편, T사 로고가 반쯤 벗겨진 자판기가 보인다.\n\n얇은 시곗바늘이 층층이 겹쳐 돌아가는 원통 모양의 본체 아래, 홍보 문구가 새겨져 있다.\n\n‛더 이상 시간을 빌리지 마세요!’\n‛불필요한 시간을 미리 지불하고, 중요할 때 사용하세요!’\n\n장치 옆에는 손을 넣을 수 있는 작은 슬롯이 보인다.\n그 아래에는 알아보기 힘들 만큼 작은 글씨로 주의 사항이 적혀있다.\n\n<뭐라고 적혀있는 거야?>\n“본 장치는, 이용자가 본 장치의 사용 개시에 앞서 특정한 시간적 자원을 선지급하는 행위를 전제로 사용자에게 일시적인 시간 저하 괄호 열고 상기 시간 저하는 T사 변동 시간을 기준으로 산정하되, 하루 또는 일일의 범위는 A사 표준 시간에 따라 측정함 괄호 닫고가 발생하며, 회수된 선납 시간은 본 장치 내부의 보조 적립 장치에 자동 적립 및 축적되어 사용자가 차후 소정의 절차에 의거하여 환급을 요청하거나, 매뉴얼에 명시된 환급 요건이 충족된 것으로 확인되는 경우에 한하여 사용자의 하루 시간 총량에 별도 셈식에 따라 산출된 가속률 가산분을 합산하는 방식으로 지급되며, 구체적인 반영 시점, 적용 순서 및 제한 조건은 본 장치의 운영 규정에…”\n\n“그, 그만. 그만 읽어도 괜찮을 것 같소.”\n\n“이거 징수직 놈들이 팔에 달고 다니는 그거 아니냐?”",
+    "runs": [
+      [
+        "낡은 광고판 뒤편, T사 로고가 반쯤 벗겨진 자판기가 보인다.\n\n얇은 시곗바늘이 층층이 겹쳐 돌아가는 원통 모양의 본체 아래, 홍보 문구가 새겨져 있다.\n\n‛더 이상 시간을 빌리지 마세요!’\n‛불필요한 시간을 미리 지불하고, 중요할 때 사용하세요!’\n\n장치 옆에는 손을 넣을 수 있는 작은 슬롯이 보인다.\n그 아래에는 알아보기 힘들 만큼 작은 글씨로 주의 사항이 적혀있다.\n\n<뭐라고 적혀있는 거야?>\n“본 장치는, 이용자가 본 장치의 사용 개시에 앞서 특정한 시간적 자원을 선지급하는 행위를 전제로 사용자에게 일시적인 시간 저하 괄호 열고 상기 시간 저하는 T사 변동 시간을 기준으로 산정하되, 하루 또는 일일의 범위는 A사 표준 시간에 따라 측정함 괄호 닫고가 발생하며, 회수된 선납 시간은 본 장치 내부의 보조 적립 장치에 자동 적립 및 축적되어 사용자가 차후 소정의 절차에 의거하여 환급을 요청하거나, 매뉴얼에 명시된 환급 요건이 충족된 것으로 확인되는 경우에 한하여 사용자의 하루 시간 총량에 별도 셈식에 따라 산출된 가속률 가산분을 합산하는 방식으로 지급되며, 구체적인 반영 시점, 적용 순서 및 제한 조건은 본 장치의 운영 규정에…”\n\n“그, 그만. 그만 읽어도 괜찮을 것 같소.”\n\n“이거 징수직 놈들이 팔에 달고 다니는 그거 아니냐?”",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "여유가 있을 때 시간을 넣어두기로 했다.\n\n”원리는 T사 징수직 직원들이 사용하던 건틀릿과 유사한 것 같습니다, 관리자님.”\n\n”그런데 이거 제대로 넣은 거 맞아? 별로 바뀐 게 없는 것 같단 말이지.”\n\n<…….>\n\n느릿느릿하게 말하는 수감자들을 이끌고, 다시 걸음을 재촉했다.",
+    "runs": [
+      [
+        "여유가 있을 때 시간을 넣어두기로 했다.\n\n”원리는 T사 징수직 직원들이 사용하던 건틀릿과 유사한 것 같습니다, 관리자님.”\n\n”그런데 이거 제대로 넣은 거 맞아? 별로 바뀐 게 없는 것 같단 말이지.”\n\n<…….>\n\n느릿느릿하게 말하는 수감자들을 이끌고, 다시 걸음을 재촉했다.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "낡은 녹음기에 색바랜 라벨이 붙어있다.\n\n<로보토미 코퍼레이션 ■■지부 생존자 면담 기록>\n\n재생 버튼은 누군가가 수백 번 누른 것처럼 유달리 닳아 있다.",
+    "runs": [
+      [
+        "낡은 녹음기에 색바랜 라벨이 붙어있다.\n\n<로보토미 코퍼레이션 ■■지부 생존자 면담 기록>\n\n재생 버튼은 누군가가 수백 번 누른 것처럼 유달리 닳아 있다.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "‘은봉이네 호프치킨!’\n’일오팔팔~ 은봉은봉! 일오팔팔~ 은봉은봉!’\n\n이상한 광고 음악을 따라가니, 어디서 본 듯한 기계 하나가 덩그러니 놓여있다.\n\n“인형 뽑기 기계네요. 그런데 안에 든 인형이…”\n<…봉이잖아?>\n“그런데 이거 가게에 하나밖에 없는 귀한 보물이라고 하지 않았나요?”\n“…거울 던전에서 그런 상식은 대체로 무의미한 편이죠.”\n“음. 확인되지 않은 특성일 가능성이 있다.”\n“잠깐. 저기 인형 실밥 틈새 보여? 저 황금빛, 분명 돈 되는 게 들어있을 거라구!”\n\n기계 안에는 다양한 봉이 인형이 보인다.\n어떤 걸 노리는 게 좋을까?",
+    "runs": [
+      [
+        "‘은봉이네 호프치킨!’\n’일오팔팔~ 은봉은봉! 일오팔팔~ 은봉은봉!’\n\n이상한 광고 음악을 따라가니, 어디서 본 듯한 기계 하나가 덩그러니 놓여있다.\n\n“인형 뽑기 기계네요. 그런데 안에 든 인형이…”\n<…봉이잖아?>\n“그런데 이거 가게에 하나밖에 없는 귀한 보물이라고 하지 않았나요?”\n“…거울 던전에서 그런 상식은 대체로 무의미한 편이죠.”\n“음. 확인되지 않은 특성일 가능성이 있다.”\n“잠깐. 저기 인형 실밥 틈새 보여? 저 황금빛, 분명 돈 되는 게 들어있을 거라구!”\n\n기계 안에는 다양한 봉이 인형이 보인다.\n어떤 걸 노리는 게 좋을까?",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "괜찮은 위치에 있는 어중간한 봉이 인형을 노리기로 했다.\n\n집게를 신중하게 조작해 인형을 뽑아내자, 상품 출구에서 묵직한 금속음이 두 번 들려왔다.\n\n“오… 인형 옆에 작은 인형이 붙어있소. 꿩 먹고 알 먹고, 마당 쓸고 동전 주운 격이구료.”\n<짤랑거리긴 하는데, 진짜 동전이라도 들어있는 건가?>\n“그렇지 않을까? 이리 줘 봐, 단테!”\n“지금 뭐 하시는…”\n“당연히 이런 건 갈라봐야 하는 거라구.”\n“봉이봉이군!!!!!!”\n\n한 수감자가 봉이 인형의 배를 가르자, 그 안에서 동전이 쏟아져 나왔다.\n동전을 세는 동안, 광고 음악이 서서히 조용해지더니, 이내 기계까지 모습을 감췄다.",
+    "runs": [
+      [
+        "괜찮은 위치에 있는 어중간한 봉이 인형을 노리기로 했다.\n\n집게를 신중하게 조작해 인형을 뽑아내자, 상품 출구에서 묵직한 금속음이 두 번 들려왔다.\n\n“오… 인형 옆에 작은 인형이 붙어있소. 꿩 먹고 알 먹고, 마당 쓸고 동전 주운 격이구료.”\n<짤랑거리긴 하는데, 진짜 동전이라도 들어있는 건가?>\n“그렇지 않을까? 이리 줘 봐, 단테!”\n“지금 뭐 하시는…”\n“당연히 이런 건 갈라봐야 하는 거라구.”\n“봉이봉이군!!!!!!”\n\n한 수감자가 봉이 인형의 배를 가르자, 그 안에서 동전이 쏟아져 나왔다.\n동전을 세는 동안, 광고 음악이 서서히 조용해지더니, 이내 기계까지 모습을 감췄다.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "가느다란 집게로 저 거대한 봉이 인형을 들어올릴 수 있을까?\n\n확신은 없지만, 신중하게 거대한 봉이 인형을 출구 방향으로 들어올렸다.\n\n인형을 떨어뜨리자, 상품 출구에서 덜그럭거리는 소리가 들려왔다.\n\n“껴서 안 내려오나 봐요.”\n“실밥도 터졌는지, 안에 있던 동전 같은 게 조금 떨어졌네요.”\n<저거라도 주워가자.>\n\n동전을 세는 동안, 광고 음악이 서서히 조용해지더니, 이내 기계까지 모습을 감췄다.",
+    "runs": [
+      [
+        "가느다란 집게로 저 거대한 봉이 인형을 들어올릴 수 있을까?\n\n확신은 없지만, 신중하게 거대한 봉이 인형을 출구 방향으로 들어올렸다.\n\n인형을 떨어뜨리자, 상품 출구에서 덜그럭거리는 소리가 들려왔다.\n\n“껴서 안 내려오나 봐요.”\n“실밥도 터졌는지, 안에 있던 동전 같은 게 조금 떨어졌네요.”\n<저거라도 주워가자.>\n\n동전을 세는 동안, 광고 음악이 서서히 조용해지더니, 이내 기계까지 모습을 감췄다.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "잿빛 별자리의 가호를 가진 수감자에게 통찰 작업을 지시한다.\n<size=75%><color=#a16a3b>E.G.O 기프트「잿빛 별자리의 가호」보유 시 선택 가능</color></size>",
+    "runs": [
+      ["잿빛 별자리의 가호를 가진 수감자에게 통찰 작업을 지시한다.\n", null, null],
+      ["E.G.O 기프트「잿빛 별자리의 가호」보유 시 선택 가능", "#a16a3b", "75%"]
+    ]
+  },
+  {
+    "input": "<관리법 아는 사람 있어?>\n\"…….\"\n<…도망치자.>\n\n관리법을 모르는 환상체를 우리가 작업하는 건 리스크가 크다.\n우리는 남은 카운트가 0이 되기 전에 복도에서 재빨리 벗어났다.",
+    "runs": [
+      [
+        "<관리법 아는 사람 있어?>\n\"…….\"\n<…도망치자.>\n\n관리법을 모르는 환상체를 우리가 작업하는 건 리스크가 크다.\n우리는 남은 카운트가 0이 되기 전에 복도에서 재빨리 벗어났다.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "트라우마 방지장을 가진 수감자에게 억압 작업을 지시한다.\n<size=75%><color=#a16a3b>E.G.O 기프트「트라우마 방지장」보유 시 선택 가능</color></size>",
+    "runs": [
+      ["트라우마 방지장을 가진 수감자에게 억압 작업을 지시한다.\n", null, null],
+      ["E.G.O 기프트「트라우마 방지장」보유 시 선택 가능", "#a16a3b", "75%"]
+    ]
+  },
+  {
+    "input": "상층에서 내려왔다고 말하며, E.G.O 기프트를 보여준다.\n<size=75%><color=#a16a3b>「자색 정오의 시련」,「증오와 절망」\n테마팩 전용 E.G.O 기프트 5종 이상 있을 시 선택 가능</color></size>",
+    "runs": [
+      ["상층에서 내려왔다고 말하며, E.G.O 기프트를 보여준다.\n", null, null],
+      ["「자색 정오의 시련」,「증오와 절망」", "#a16a3b", "75%"],
+      ["\n", null, null],
+      ["테마팩 전용 E.G.O 기프트 5종 이상 있을 시 선택 가능", "#a16a3b", "75%"]
+    ]
+  },
+  {
+    "input": "작전 승인 카드로 문을 연다.\n<size=75%><color=#a16a3b>E.G.O 기프트「작전 승인 카드」보유 시 선택 가능</color></size>",
+    "runs": [
+      ["작전 승인 카드로 문을 연다.\n", null, null],
+      ["E.G.O 기프트「작전 승인 카드」보유 시 선택 가능", "#a16a3b", "75%"]
+    ]
+  },
+  {
+    "input": "{0} 수감자가 쌓여있는 것들 중 뼈와 근육으로 구성된 무언가를 집고 꺼냈다.\n\n<이건...>\n\n조각난 예술품인 것 같다. 아마 신체파의 작품 아니었을까?\n\n전시대에 올려두면 이전의 가치를 회복할 수 있을지도 모르겠다.",
+    "runs": [
+      [
+        "{0} 수감자가 쌓여있는 것들 중 뼈와 근육으로 구성된 무언가를 집고 꺼냈다.\n\n<이건...>\n\n조각난 예술품인 것 같다. 아마 신체파의 작품 아니었을까?\n\n전시대에 올려두면 이전의 가치를 회복할 수 있을지도 모르겠다.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "{0} 수감자가 쌓여있는 것들 중 뼈와 근육으로 구성된 무언가를 집었다.\n\n<엇... 조, 조심해!>\n\n{0} 수감자는 신속하게 손을 떼고 멀찍이 물러섰다.\n\n...하마터면 윗쪽에 쌓여있던 조각들이 굴러떨어져 수감자들 위로 쏟아져 내릴 뻔했다.\n\n굳이 필요하지 않을 수도 있는 걸 피해를 감수하면서 가져갈 필요는 없을 것 같다.",
+    "runs": [
+      [
+        "{0} 수감자가 쌓여있는 것들 중 뼈와 근육으로 구성된 무언가를 집었다.\n\n<엇... 조, 조심해!>\n\n{0} 수감자는 신속하게 손을 떼고 멀찍이 물러섰다.\n\n...하마터면 윗쪽에 쌓여있던 조각들이 굴러떨어져 수감자들 위로 쏟아져 내릴 뻔했다.\n\n굳이 필요하지 않을 수도 있는 걸 피해를 감수하면서 가져갈 필요는 없을 것 같다.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "{0} 수감자가 쌓여있는 것들 중 가죽과 이빨로 구성된 무언가를 집고 꺼냈다.\n\n<이건...>\n\n조각난 예술품인 것 같다. 아마 야수파의 작품 아니었을까?\n\n전시대에 올려두면 이전의 가치를 회복할 수 있을지도 모르겠다.",
+    "runs": [
+      [
+        "{0} 수감자가 쌓여있는 것들 중 가죽과 이빨로 구성된 무언가를 집고 꺼냈다.\n\n<이건...>\n\n조각난 예술품인 것 같다. 아마 야수파의 작품 아니었을까?\n\n전시대에 올려두면 이전의 가치를 회복할 수 있을지도 모르겠다.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "{0} 수감자가 쌓여있는 것들 중 가죽과 이빨로 구성된 무언가를 집었다.\n\n<엇... 조, 조심해!>\n\n{0} 수감자는 신속하게 손을 떼고 멀찍이 물러섰다.\n\n...하마터면 윗쪽에 쌓여있던 조각들이 굴러떨어져 수감자들 위로 쏟아져 내릴 뻔했다.\n\n굳이 필요하지 않을 수도 있는 걸 피해를 감수하면서 가져갈 필요는 없을 것 같다.",
+    "runs": [
+      [
+        "{0} 수감자가 쌓여있는 것들 중 가죽과 이빨로 구성된 무언가를 집었다.\n\n<엇... 조, 조심해!>\n\n{0} 수감자는 신속하게 손을 떼고 멀찍이 물러섰다.\n\n...하마터면 윗쪽에 쌓여있던 조각들이 굴러떨어져 수감자들 위로 쏟아져 내릴 뻔했다.\n\n굳이 필요하지 않을 수도 있는 걸 피해를 감수하면서 가져갈 필요는 없을 것 같다.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "신입이라고 말하며 묘각을 보여준다.\n<size=75%><color=#a16a3b>E.G.O 기프트「묘각」보유 시 선택 가능</color></size>",
+    "runs": [
+      ["신입이라고 말하며 묘각을 보여준다.\n", null, null],
+      ["E.G.O 기프트「묘각」보유 시 선택 가능", "#a16a3b", "75%"]
+    ]
+  },
+  {
+    "input": "{0} 수감자가 조용히 붐박스를 가져왔다.\n\n가져온 붐박스를 옆골목에서 틀자, 붐박스에서 요란한 전자음악이 흘러나오기 시작했다.\n\n그에 주변에 있던 중지 조직원들이 붐박스를 찾듯 다가오기 시작했다.\n\n<아까 골목은 이제 비었을 테니까, 서두르자.>\n\n음악소리를 끄고, 조용히 원래 있던 길목으로 돌아왔다.\n\n더 이상 길목을 막고 있는 조직원이 없어, 그대로 지나갔다.",
+    "runs": [
+      [
+        "{0} 수감자가 조용히 붐박스를 가져왔다.\n\n가져온 붐박스를 옆골목에서 틀자, 붐박스에서 요란한 전자음악이 흘러나오기 시작했다.\n\n그에 주변에 있던 중지 조직원들이 붐박스를 찾듯 다가오기 시작했다.\n\n<아까 골목은 이제 비었을 테니까, 서두르자.>\n\n음악소리를 끄고, 조용히 원래 있던 길목으로 돌아왔다.\n\n더 이상 길목을 막고 있는 조직원이 없어, 그대로 지나갔다.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2>다음 전투에서 모든 속성의 <color=#f8c200>E.G.O 자원을 2</color> <color=#ebcaa2>얻고 시작함</color>",
+    "runs": [
+      ["다음 전투에서 모든 속성의 ", "#ebcaa2", null],
+      ["E.G.O 자원을 2", "#f8c200", null],
+      [" 얻고 시작함", "#ebcaa2", null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2>다음 전투에서 모든 인격이 <color=#f8c200>최종 스킬 위력 2</color> <color=#ebcaa2>증가</color>",
+    "runs": [
+      ["다음 전투에서 모든 인격이 ", "#ebcaa2", null],
+      ["최종 스킬 위력 2", "#f8c200", null],
+      [" 증가", "#ebcaa2", null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2>다음 전투에서 모든 인격이 <color=#f8c200>스킬 위력 1</color> <color=#ebcaa2>증가</color>",
+    "runs": [
+      ["다음 전투에서 모든 인격이 ", "#ebcaa2", null],
+      ["스킬 위력 1", "#f8c200", null],
+      [" 증가", "#ebcaa2", null]
+    ]
+  },
+  {
+    "input": "입장 시, <color=#dd0000>어두운 잔영, <color=#f8c200>아스라한 잔영</color></color> 각각 1개 획득",
+    "runs": [
+      ["입장 시, ", null, null],
+      ["어두운 잔영, ", "#dd0000", null],
+      ["아스라한 잔영", "#f8c200", null],
+      [" 각각 1개 획득", null, null]
+    ]
+  },
+  {
+    "input": "입장 시, <color=#dd0000>어두운 잔영, <color=#f8c200>아스라한 잔영, 빛나는 잔영</color></color> 각각 1개 획득",
+    "runs": [
+      ["입장 시, ", null, null],
+      ["어두운 잔영, ", "#dd0000", null],
+      ["아스라한 잔영, 빛나는 잔영", "#f8c200", null],
+      [" 각각 1개 획득", null, null]
+    ]
+  },
+  {
+    "input": "「管理人様、大丈夫でしょうか？」\n\n<…大丈夫だけど？>\n\n耳を塞いでもヒキガエルの鳴き声が頭に響くのか、囚人達が苦しんでいる。\n\nすると耐えきれなかったのか、誰かがヒキガエルに向かって武器を振りかざし始めた。",
+    "runs": [
+      [
+        "「管理人様、大丈夫でしょうか？」\n\n<…大丈夫だけど？>\n\n耳を塞いでもヒキガエルの鳴き声が頭に響くのか、囚人達が苦しんでいる。\n\nすると耐えきれなかったのか、誰かがヒキガエルに向かって武器を振りかざし始めた。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "ロボットはかろうじて両腕を持ち上げた。\n\n端末には次のような言葉が出力された。\n\n<ようこそ、お客様。町の見学は楽しめましたでしょうか？\n記念品を贈呈いたします。>\n\n端末は笑っているが、ロボットの動きから\n助けてという叫びが聞こえてならない。",
+    "runs": [
+      [
+        "ロボットはかろうじて両腕を持ち上げた。\n\n端末には次のような言葉が出力された。\n\n<ようこそ、お客様。町の見学は楽しめましたでしょうか？\n記念品を贈呈いたします。>\n\n端末は笑っているが、ロボットの動きから\n助けてという叫びが聞こえてならない。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "端末が赤くなり、警告音が鳴り響く。\n\nロボットは、苦しんでいるかのように激しく振動する。\n\n<さようなら。さよなら、さよならさよならさよならさよ>\n\n端末が一つの単語でびっちり埋まると、\n部品と肉を吐き出し、目の前でロボットは爆発した。",
+    "runs": [
+      [
+        "端末が赤くなり、警告音が鳴り響く。\n\nロボットは、苦しんでいるかのように激しく振動する。\n\n<さようなら。さよなら、さよならさよならさよならさよ>\n\n端末が一つの単語でびっちり埋まると、\n部品と肉を吐き出し、目の前でロボットは爆発した。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "ロボットがぶるぶると震え始める。\n\n怖がっているというより、怒っているように見える。\n\n端末に書かれた単語の意味が分かったのかな？\n\n<敵対的個体検知、敵対的個体検知。>\n\n<規則D63ICRQ1により退去手続きを履行します！>\n\nロボットが両腕を猛烈に振り回す。",
+    "runs": [
+      [
+        "ロボットがぶるぶると震え始める。\n\n怖がっているというより、怒っているように見える。\n\n端末に書かれた単語の意味が分かったのかな？\n\n<敵対的個体検知、敵対的個体検知。>\n\n<規則D63ICRQ1により退去手続きを履行します！>\n\nロボットが両腕を猛烈に振り回す。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "<質問を理解できませんでした。>\n\nロボットは首を傾げながら、言葉を出力した。\n\n反対側に傾かない首を何度も\n持ち上げようと試みながら、次の言葉を出力する。\n\n<もしかしてお客様は町を見学しなかったのですか？>\n\nそれは答えを求めているようだった。",
+    "runs": [
+      [
+        "<質問を理解できませんでした。>\n\nロボットは首を傾げながら、言葉を出力した。\n\n反対側に傾かない首を何度も\n持ち上げようと試みながら、次の言葉を出力する。\n\n<もしかしてお客様は町を見学しなかったのですか？>\n\nそれは答えを求めているようだった。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "<それなら記念品を贈呈することはできません！>\n\n急に端末が上へガタガタしながら開くと、\n機械の腕が飛び出してきて、私から何かを掴もうとした。\n\n<記念品の押収にご協力ください！嘘は悪いです。>\n\nあちこち体をひねって避けると、\n機械の腕の速度は、より速くなっていった。\n\n<協力しない場合、\n規則A62GBFE1により処罰される怖れがあります！>\n\nその場から離れなければそれは止まりそうになかったので、\n私は転ぶようにそこから走って抜け出した。",
+    "runs": [
+      [
+        "<それなら記念品を贈呈することはできません！>\n\n急に端末が上へガタガタしながら開くと、\n機械の腕が飛び出してきて、私から何かを掴もうとした。\n\n<記念品の押収にご協力ください！嘘は悪いです。>\n\nあちこち体をひねって避けると、\n機械の腕の速度は、より速くなっていった。\n\n<協力しない場合、\n規則A62GBFE1により処罰される怖れがあります！>\n\nその場から離れなければそれは止まりそうになかったので、\n私は転ぶようにそこから走って抜け出した。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "<それなら見学プログラムに問題があった模様です。>\n\nロボットはその言葉を出力し、\n長らくじっと立っていた。\n\n壊れたんだろうか、そんな考えが\n頭をよぎり始める頃に端末が点滅した。\n\n<管理者呼び出しを試行し続けましたが、応答しません。>\n\n<システム異常、システム異常。>\n\n<リブート中…。>\n\nそうして、青い画面に何か複雑な\n文字列をただ吐き出し続けた。",
+    "runs": [
+      [
+        "<それなら見学プログラムに問題があった模様です。>\n\nロボットはその言葉を出力し、\n長らくじっと立っていた。\n\n壊れたんだろうか、そんな考えが\n頭をよぎり始める頃に端末が点滅した。\n\n<管理者呼び出しを試行し続けましたが、応答しません。>\n\n<システム異常、システム異常。>\n\n<リブート中…。>\n\nそうして、青い画面に何か複雑な\n文字列をただ吐き出し続けた。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "中央本部の事務職のデスク上に報告書が置かれている。\n\n<DAY ■■, ■■ ■■ 研究業務結果報告書>\n\n何ヶ所か検閲されているみたいだけど、内容は新しい保護フィールド弾に関するもののようだ。\n\n「トラウマ防止フィールドは外部からの精神ダメージを■■■■、あるいは■■■防止する。」\n\n「保護フィールド弾の■■が■■な際は、管理人または■■■■に問い合わせること。」\n\n内容が大量に塗りつぶされた報告書の隣には、「トラウマ防止フィールドサンプルおよび説明書」と書かれた箱がある。",
+    "runs": [
+      [
+        "中央本部の事務職のデスク上に報告書が置かれている。\n\n<DAY ■■, ■■ ■■ 研究業務結果報告書>\n\n何ヶ所か検閲されているみたいだけど、内容は新しい保護フィールド弾に関するもののようだ。\n\n「トラウマ防止フィールドは外部からの精神ダメージを■■■■、あるいは■■■防止する。」\n\n「保護フィールド弾の■■が■■な際は、管理人または■■■■に問い合わせること。」\n\n内容が大量に塗りつぶされた報告書の隣には、「トラウマ防止フィールドサンプルおよび説明書」と書かれた箱がある。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "人々の視線が、こちらへ移る。\n\n「邪悪な呪術師が大いなる静謐を引き起こしたのだ。」\n「あいつは我々のために尽くしているふりをしてたが、結局はイベリアの輝かしい繁栄を妬んでいただけだ。」\n「私たちを止めるな、よそ者。」\n「こいつらも、その呪術師と同じ海からここへ来た。」\n\n反発する囚人たちの目に、飢え衰えた住民たちの姿が映った。\n\n中身のないおくるみを大切そうに抱きしめる住民が。\n似合わない杖と帽子を手に握った子どもが。\n\n「…あの人たちは、大切なものを失いました。」\n\n「大切なものを失った人は、前が見えなくなります。」\n\n「感情を吐き出さなければ、耐えられないんです。」\n\n彼らは悲しみを紛らわせていた。\n\nイベリアを呑み込んだ、あの巨大な災厄からは…いかなる感情も意図も読み取れなかったのだから。\n\nただ同じ海から来た者たちへ、行き場を失った怒りの刃を鋭く向けている。\n\n「だけど…誰かしらが、彼らの向ける刃の向かう先を正さなければなりません。」\n\n<アイリーニ？>\n\n「下がってください、市民。」\n\n「かの者に罪があろうと、それを執行するのは裁判所の所管であるべきです。」\n\n「罪がないのなら、なおさらあなたたちの行いは許されません。」\n\n群衆はアイリーニの言葉に、思い悩んだ表情でエーギル人から距離を取ると…。\n\nやがて霧散するように去っていった。",
+    "runs": [
+      [
+        "人々の視線が、こちらへ移る。\n\n「邪悪な呪術師が大いなる静謐を引き起こしたのだ。」\n「あいつは我々のために尽くしているふりをしてたが、結局はイベリアの輝かしい繁栄を妬んでいただけだ。」\n「私たちを止めるな、よそ者。」\n「こいつらも、その呪術師と同じ海からここへ来た。」\n\n反発する囚人たちの目に、飢え衰えた住民たちの姿が映った。\n\n中身のないおくるみを大切そうに抱きしめる住民が。\n似合わない杖と帽子を手に握った子どもが。\n\n「…あの人たちは、大切なものを失いました。」\n\n「大切なものを失った人は、前が見えなくなります。」\n\n「感情を吐き出さなければ、耐えられないんです。」\n\n彼らは悲しみを紛らわせていた。\n\nイベリアを呑み込んだ、あの巨大な災厄からは…いかなる感情も意図も読み取れなかったのだから。\n\nただ同じ海から来た者たちへ、行き場を失った怒りの刃を鋭く向けている。\n\n「だけど…誰かしらが、彼らの向ける刃の向かう先を正さなければなりません。」\n\n<アイリーニ？>\n\n「下がってください、市民。」\n\n「かの者に罪があろうと、それを執行するのは裁判所の所管であるべきです。」\n\n「罪がないのなら、なおさらあなたたちの行いは許されません。」\n\n群衆はアイリーニの言葉に、思い悩んだ表情でエーギル人から距離を取ると…。\n\nやがて霧散するように去っていった。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "都市が形象化されたような方舟の中央。\n\n眩い光が揺らめく彼の場所に…おそらくマイヤーズがいる。\n\n「…少し、休んでいこう」\n\n「大丈夫ですか、ドクター？」\n\n「少し休めば…マシになるだろう…。」\n\n「ふふ…体力をつけないと、アーミヤさんにおんぶされて動き回ることになるかもしれませんよ。」\n\n「戻ったら…ケルシーの言う通り、運動を頑張らないとな。」\n\n「ふっ。万一の場合には、管理人様はわたくしがおぶって差し上げましょう。」\n\n<要らない。>\n\nマイヤーズの願った理想郷、光の中心に近づいたからだろうか。\n\n歩き回るシーボーンたちは、傷を負った私たちを少しの間じっと見やるだけで、襲いかからずに通り過ぎていった。\n\nその視線は…どこか私たちのことを案じているようにも感じられて、大体の囚人たちは複雑な表情をしながら彼らから目をそらした。\n\n「悲しみ…悔恨…あるいは、自分が悩み続けた時間への否定なのかもしれない感情が伝わってきます。」\n\n「マイヤーズさんは、元に戻れるのでしょうか？」\n\n<戻さないと。そうするために、ここへ入ってきたんだし。>\n\n<もう少しだけ休んで出発しよう。>",
+    "runs": [
+      [
+        "都市が形象化されたような方舟の中央。\n\n眩い光が揺らめく彼の場所に…おそらくマイヤーズがいる。\n\n「…少し、休んでいこう」\n\n「大丈夫ですか、ドクター？」\n\n「少し休めば…マシになるだろう…。」\n\n「ふふ…体力をつけないと、アーミヤさんにおんぶされて動き回ることになるかもしれませんよ。」\n\n「戻ったら…ケルシーの言う通り、運動を頑張らないとな。」\n\n「ふっ。万一の場合には、管理人様はわたくしがおぶって差し上げましょう。」\n\n<要らない。>\n\nマイヤーズの願った理想郷、光の中心に近づいたからだろうか。\n\n歩き回るシーボーンたちは、傷を負った私たちを少しの間じっと見やるだけで、襲いかからずに通り過ぎていった。\n\nその視線は…どこか私たちのことを案じているようにも感じられて、大体の囚人たちは複雑な表情をしながら彼らから目をそらした。\n\n「悲しみ…悔恨…あるいは、自分が悩み続けた時間への否定なのかもしれない感情が伝わってきます。」\n\n「マイヤーズさんは、元に戻れるのでしょうか？」\n\n<戻さないと。そうするために、ここへ入ってきたんだし。>\n\n<もう少しだけ休んで出発しよう。>",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "果てしなく押し寄せる血袋との戦闘のさなか…。\n\n<ん…？>\n\n不吉な物体が落ちているのを見つけた。\n\nそれは血袋が携えていた武器に似ていながら、どこか違う何かだった。\n\n「見た感じ、強そうじゃない？」\n\n「見た感じ、危うげに見ゆるなり。」\n\n「見た感じ、当人にはよく分かりませぬ！」\n\n囚人たちの意見は、てんでばらばらだ。\n\n…どうやら、あれを拾って使うかどうかは私の選択にかかっているようだ。",
+    "runs": [
+      [
+        "果てしなく押し寄せる血袋との戦闘のさなか…。\n\n<ん…？>\n\n不吉な物体が落ちているのを見つけた。\n\nそれは血袋が携えていた武器に似ていながら、どこか違う何かだった。\n\n「見た感じ、強そうじゃない？」\n\n「見た感じ、危うげに見ゆるなり。」\n\n「見た感じ、当人にはよく分かりませぬ！」\n\n囚人たちの意見は、てんでばらばらだ。\n\n…どうやら、あれを拾って使うかどうかは私の選択にかかっているようだ。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "「見るがよい！一人で血袋と戦っている者がいるぞ！」\n\n囚人たちが目を向けた先には、W社の制服を着た者がいた。\n\n腕は立つように見えたけど、血袋の数が多すぎて今にも倒れそうだ。\n\n<助けないと―>\n\n言葉を終える間もなく、こちらに気づいた別の血袋たちがどっと溢れ出し、私たちを包囲する。\n\n「くっ…戦闘準備！」\n\n「し、しかしあの者はどうするつもりだというのだ！」\n\n「それは…。」",
+    "runs": [
+      [
+        "「見るがよい！一人で血袋と戦っている者がいるぞ！」\n\n囚人たちが目を向けた先には、W社の制服を着た者がいた。\n\n腕は立つように見えたけど、血袋の数が多すぎて今にも倒れそうだ。\n\n<助けないと―>\n\n言葉を終える間もなく、こちらに気づいた別の血袋たちがどっと溢れ出し、私たちを包囲する。\n\n「くっ…戦闘準備！」\n\n「し、しかしあの者はどうするつもりだというのだ！」\n\n「それは…。」",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "古びた広告板の裏側に、T社のロゴが半分剥がれた自動販売機が見える。\n\n細い時計の針が幾重にも重なって回る円筒形の本体の下に、宣伝文句が刻まれている。\n\n「もう時間を借りるのはやめましょう！」\n「不要な時間をあらかじめ支払い、大切な時に使いましょう！」\n\n装置の横には、手を入れられる小さなスロットが見える。\nその下には、判読しづらいほどの小さな文字で注意事項が書かれている。\n\n<何て書いてあるの？>\n「本装置は利用者が本装置の使用開始に先立ち、特定の時間的資源を前払いする行為を前提として、利用者に一時的な時間低下、括弧開く、上記の時間低下はT社変動時間を基準に算定するが、一日ないし日単位の範囲はA社標準時間に従い計測する、括弧閉じる、が発生し、回収された前納時間は本装置内部の補助積立装置に自動積立・蓄積され、利用者が後日所定の手続きに基づいて変換を請求するか、マニュアルに明示された返還要件が充足されていると確認された場合に限り、利用者の一日当たりの総時間量に、別途計算式により算出された加速率加算分を合算する方式で支給され、具体的な反映時点・適用順序および制限条件は本装置の運用規定に…。」\n\n「や、やめよ。最早読み続けずともよかるべし。」\n\n「これ、徴収職の野郎どもが腕に着けて回ってるアレじゃねぇか？」",
+    "runs": [
+      [
+        "古びた広告板の裏側に、T社のロゴが半分剥がれた自動販売機が見える。\n\n細い時計の針が幾重にも重なって回る円筒形の本体の下に、宣伝文句が刻まれている。\n\n「もう時間を借りるのはやめましょう！」\n「不要な時間をあらかじめ支払い、大切な時に使いましょう！」\n\n装置の横には、手を入れられる小さなスロットが見える。\nその下には、判読しづらいほどの小さな文字で注意事項が書かれている。\n\n<何て書いてあるの？>\n「本装置は利用者が本装置の使用開始に先立ち、特定の時間的資源を前払いする行為を前提として、利用者に一時的な時間低下、括弧開く、上記の時間低下はT社変動時間を基準に算定するが、一日ないし日単位の範囲はA社標準時間に従い計測する、括弧閉じる、が発生し、回収された前納時間は本装置内部の補助積立装置に自動積立・蓄積され、利用者が後日所定の手続きに基づいて変換を請求するか、マニュアルに明示された返還要件が充足されていると確認された場合に限り、利用者の一日当たりの総時間量に、別途計算式により算出された加速率加算分を合算する方式で支給され、具体的な反映時点・適用順序および制限条件は本装置の運用規定に…。」\n\n「や、やめよ。最早読み続けずともよかるべし。」\n\n「これ、徴収職の野郎どもが腕に着けて回ってるアレじゃねぇか？」",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "余裕があるうちに時間を入れておくことにした。\n\n「原理はT社徴収職職員が使用していたガントレットと類似しているようです、管理人様。」\n\n「ところで、これちゃんと入れられたの？あんまり変わった感じしないんだけど。」\n\n<……。>\n\nのろのろと話す囚人たちを連れて、再び足を速めた。",
+    "runs": [
+      [
+        "余裕があるうちに時間を入れておくことにした。\n\n「原理はT社徴収職職員が使用していたガントレットと類似しているようです、管理人様。」\n\n「ところで、これちゃんと入れられたの？あんまり変わった感じしないんだけど。」\n\n<……。>\n\nのろのろと話す囚人たちを連れて、再び足を速めた。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "古びたレコーダーに色褪せたラベルが貼ってある。\n\n<ロボトミー・コーポレーション ■■支部 生存者面談記録>\n\n再生ボタンは誰かが幾百回も押したかのように、ひときわ擦り減っている。",
+    "runs": [
+      [
+        "古びたレコーダーに色褪せたラベルが貼ってある。\n\n<ロボトミー・コーポレーション ■■支部 生存者面談記録>\n\n再生ボタンは誰かが幾百回も押したかのように、ひときわ擦り減っている。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "「ウンボンのチキン酒場！」\n「いちご～はちはち！ウンボンウンボン！いちご～はちはち！ウンボンウンボン！」\n\n変なCMソングを辿っていくと、どこかで見たような機械がぽつんと置かれていた。\n\n「クレーンゲーム機ですね。けど、中に入っているぬいぐるみが…。」\n<…ボンちゃんじゃない？>\n「でも、これって店に一つしかない貴重な宝物だって言っていませんでしたっけ？」\n「…鏡ダンジョンでは、そういった常識はたいてい無意味である傾向があります。」\n「うむ。確認されていない特性である可能性がある。」\n「まって。あそこのぬいぐるみの縫い目の隙間、見える？あの金色、絶対カネになるものが入ってるって！」\n\n機械の中には、さまざまなボンちゃん人形が見える。\nどれを狙うのがよさそうだろうか？",
+    "runs": [
+      [
+        "「ウンボンのチキン酒場！」\n「いちご～はちはち！ウンボンウンボン！いちご～はちはち！ウンボンウンボン！」\n\n変なCMソングを辿っていくと、どこかで見たような機械がぽつんと置かれていた。\n\n「クレーンゲーム機ですね。けど、中に入っているぬいぐるみが…。」\n<…ボンちゃんじゃない？>\n「でも、これって店に一つしかない貴重な宝物だって言っていませんでしたっけ？」\n「…鏡ダンジョンでは、そういった常識はたいてい無意味である傾向があります。」\n「うむ。確認されていない特性である可能性がある。」\n「まって。あそこのぬいぐるみの縫い目の隙間、見える？あの金色、絶対カネになるものが入ってるって！」\n\n機械の中には、さまざまなボンちゃん人形が見える。\nどれを狙うのがよさそうだろうか？",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "良い感じの場所にある中くらいのボンちゃん人形を狙うことにした。\n\n慎重にアームを操作してぬいぐるみを取り出すと、景品取り出し口からずしりとした金属音が二度聞こえた。\n\n「おぉ…。人形の傍らに、小さき人形の付きいる。雉を食いて卵をも得、庭を掃きて銭を拾うがごときものなりけり。」\n<じゃらじゃら鳴ってるけど、本当に硬貨でも入ってるのかな？>\n「そうじゃない？こっちに寄越して、ダンテ！」\n「今、何を―」\n「もちろん、こういうのは裂いてみなきゃ。」\n「ボンちゃんボンちゃんくん！！！！！！」\n\nある囚人がボンちゃん人形の腹を裂くと、その中から硬貨がどっとこぼれ落ちた。\n硬貨を数えている間に、CMソングは次第に静かになっていき、やがて機械までもが姿を消した。",
+    "runs": [
+      [
+        "良い感じの場所にある中くらいのボンちゃん人形を狙うことにした。\n\n慎重にアームを操作してぬいぐるみを取り出すと、景品取り出し口からずしりとした金属音が二度聞こえた。\n\n「おぉ…。人形の傍らに、小さき人形の付きいる。雉を食いて卵をも得、庭を掃きて銭を拾うがごときものなりけり。」\n<じゃらじゃら鳴ってるけど、本当に硬貨でも入ってるのかな？>\n「そうじゃない？こっちに寄越して、ダンテ！」\n「今、何を―」\n「もちろん、こういうのは裂いてみなきゃ。」\n「ボンちゃんボンちゃんくん！！！！！！」\n\nある囚人がボンちゃん人形の腹を裂くと、その中から硬貨がどっとこぼれ落ちた。\n硬貨を数えている間に、CMソングは次第に静かになっていき、やがて機械までもが姿を消した。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "細いアームで、あの巨大なボンちゃん人形を持ち上げられるだろうか？\n\n確信はなかったけど、慎重に巨大なボンちゃん人形を出口のほうへ持ち上げた。\n\nぬいぐるみを落とすと、景品取り出し口からガタンと音が聞こえてきた。\n\n「ハマって出て来ないみたいです。」\n「縫い目も破れたみたいですね。中にあった硬貨みたいなのが少し落ちてます。」\n<あれだけでも拾っていこう。>\n\n硬貨を数えている間に、CMソングは次第に静かになっていき、やがて機械までもが姿を消した。",
+    "runs": [
+      [
+        "細いアームで、あの巨大なボンちゃん人形を持ち上げられるだろうか？\n\n確信はなかったけど、慎重に巨大なボンちゃん人形を出口のほうへ持ち上げた。\n\nぬいぐるみを落とすと、景品取り出し口からガタンと音が聞こえてきた。\n\n「ハマって出て来ないみたいです。」\n「縫い目も破れたみたいですね。中にあった硬貨みたいなのが少し落ちてます。」\n<あれだけでも拾っていこう。>\n\n硬貨を数えている間に、CMソングは次第に静かになっていき、やがて機械までもが姿を消した。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "灰色の星座の加護を持つ囚人に洞察作業を指示する。\n<size=75%><color=#a16a3b>E.G.Oギフト「灰色の星座の加護」保有時に選択可能</color></size>",
+    "runs": [
+      ["灰色の星座の加護を持つ囚人に洞察作業を指示する。\n", null, null],
+      ["E.G.Oギフト「灰色の星座の加護」保有時に選択可能", "#a16a3b", "75%"]
+    ]
+  },
+  {
+    "input": "<管理方法知ってる人いる？>\n「……。」\n<…逃げよう。>\n\n管理方法の分からない幻想体に対して私たちが作業をするのはリスクが大きい。\n私たちは残りカウントが0になる前に、廊下から素早く立ち去った。",
+    "runs": [
+      [
+        "<管理方法知ってる人いる？>\n「……。」\n<…逃げよう。>\n\n管理方法の分からない幻想体に対して私たちが作業をするのはリスクが大きい。\n私たちは残りカウントが0になる前に、廊下から素早く立ち去った。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "トラウマ防止フィールドを持つ囚人に抑圧作業を指示する。\n<size=75%><color=#a16a3b>E.G.Oギフト「トラウマ防止フィールド」保有時に選択可能</color></size>",
+    "runs": [
+      ["トラウマ防止フィールドを持つ囚人に抑圧作業を指示する。\n", null, null],
+      ["E.G.Oギフト「トラウマ防止フィールド」保有時に選択可能", "#a16a3b", "75%"]
+    ]
+  },
+  {
+    "input": "上層から降りてきたと言いながら、E.G.Oギフトを見せる。\n<size=75%><color=#a16a3b>「紫の白昼」、「憎悪と絶望」\nテーマパック専用E.G.Oギフトを5種以上保有時に選択可能</color></size>",
+    "runs": [
+      ["上層から降りてきたと言いながら、E.G.Oギフトを見せる。\n", null, null],
+      ["「紫の白昼」、「憎悪と絶望」", "#a16a3b", "75%"],
+      ["\n", null, null],
+      ["テーマパック専用E.G.Oギフトを5種以上保有時に選択可能", "#a16a3b", "75%"]
+    ]
+  },
+  {
+    "input": "作戦承認カードで扉を開く。\n<size=75%><color=#a16a3b>E.G.Oギフト「作戦承認カード」保有時に選択可能</color></size>",
+    "runs": [
+      ["作戦承認カードで扉を開く。\n", null, null],
+      ["E.G.Oギフト「作戦承認カード」保有時に選択可能", "#a16a3b", "75%"]
+    ]
+  },
+  {
+    "input": "囚人{0}が、積まれているものの中から骨と筋肉でできた何かを拾い上げ、取り出した。\n\n<これは…。>\n\nバラバラになった芸術品みたいだ。多分、身体派の作品だったのかも？\n\n展示台に載せておけば、元の価値を取り戻せるかもしれない。",
+    "runs": [
+      [
+        "囚人{0}が、積まれているものの中から骨と筋肉でできた何かを拾い上げ、取り出した。\n\n<これは…。>\n\nバラバラになった芸術品みたいだ。多分、身体派の作品だったのかも？\n\n展示台に載せておけば、元の価値を取り戻せるかもしれない。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "囚人{0}が、積まれているものの中から骨と筋肉でできた何かを拾った。\n\n<あっ… き、気をつけて！>\n\n囚人{0}は素早く手を離し、さっと距離を取った。\n\n…下手したら、上の方に積まれていた欠片が転がり落ちて、囚人たちの頭の上に降り注ぐところだった。\n\nわざわざ必要になるかも分からないものを、被害を覚悟してまで持っていく必要はないと思う。",
+    "runs": [
+      [
+        "囚人{0}が、積まれているものの中から骨と筋肉でできた何かを拾った。\n\n<あっ… き、気をつけて！>\n\n囚人{0}は素早く手を離し、さっと距離を取った。\n\n…下手したら、上の方に積まれていた欠片が転がり落ちて、囚人たちの頭の上に降り注ぐところだった。\n\nわざわざ必要になるかも分からないものを、被害を覚悟してまで持っていく必要はないと思う。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "囚人{0}が、積まれているものの中から革と牙でできた何かを拾い上げ、取り出した。\n\n<これは…。>\n\nバラバラになった芸術品みたいだ。多分、野獣派の作品だったのかも？\n\n展示台に載せておけば、元の価値を取り戻せるかもしれない。",
+    "runs": [
+      [
+        "囚人{0}が、積まれているものの中から革と牙でできた何かを拾い上げ、取り出した。\n\n<これは…。>\n\nバラバラになった芸術品みたいだ。多分、野獣派の作品だったのかも？\n\n展示台に載せておけば、元の価値を取り戻せるかもしれない。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "囚人{0}が、積まれているものの中から革と牙でできた何かを拾った。\n\n<あっ… き、気をつけて！>\n\n囚人{0}は素早く手を離し、さっと距離を取った。\n\n…下手したら、上の方に積まれていた欠片が転がり落ちて、囚人たちの頭の上に降り注ぐところだった。\n\nわざわざ必要になるかも分からないものを、被害を覚悟してまで持っていく必要はないと思う。",
+    "runs": [
+      [
+        "囚人{0}が、積まれているものの中から革と牙でできた何かを拾った。\n\n<あっ… き、気をつけて！>\n\n囚人{0}は素早く手を離し、さっと距離を取った。\n\n…下手したら、上の方に積まれていた欠片が転がり落ちて、囚人たちの頭の上に降り注ぐところだった。\n\nわざわざ必要になるかも分からないものを、被害を覚悟してまで持っていく必要はないと思う。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "新入りだと言いつつ卯脚を見せてあげる。\n<size=75%><color=#a16a3b>E.G.Oギフト「卯脚」保有時に選択可能</color></size>",
+    "runs": [
+      ["新入りだと言いつつ卯脚を見せてあげる。\n", null, null],
+      ["E.G.Oギフト「卯脚」保有時に選択可能", "#a16a3b", "75%"]
+    ]
+  },
+  {
+    "input": "囚人{0}が静かにブームボックスを持ってきた。\n\n持ってきたブームボックスを隣の路地で鳴らすと、ブームボックスからけたたましい電子音楽が流れ始めた。\n\nそれに反応して、周囲にいた中指の構成員たちがブームボックスを探すように近づき始めた。\n\n<さっきの路地、今なら空いているはずだから急ごう。>\n\n音楽を止めて、静かに元の道へ戻った。\n\nもう道を塞いでいる構成員はいなかったから、そのまま通り過ぎた。",
+    "runs": [
+      [
+        "囚人{0}が静かにブームボックスを持ってきた。\n\n持ってきたブームボックスを隣の路地で鳴らすと、ブームボックスからけたたましい電子音楽が流れ始めた。\n\nそれに反応して、周囲にいた中指の構成員たちがブームボックスを探すように近づき始めた。\n\n<さっきの路地、今なら空いているはずだから急ごう。>\n\n音楽を止めて、静かに元の道へ戻った。\n\nもう道を塞いでいる構成員はいなかったから、そのまま通り過ぎた。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2>次の戦闘にて全属性の<color=#f8c200>E.G.O資源を2</color><color=#ebcaa2>得て開始</color>",
+    "runs": [
+      ["次の戦闘にて全属性の", "#ebcaa2", null],
+      ["E.G.O資源を2", "#f8c200", null],
+      ["得て開始", "#ebcaa2", null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2>次の戦闘にて全人格が<color=#f8c200>最終スキル威力2</color><color=#ebcaa2>増加</color>",
+    "runs": [
+      ["次の戦闘にて全人格が", "#ebcaa2", null],
+      ["最終スキル威力2", "#f8c200", null],
+      ["増加", "#ebcaa2", null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2>次の戦闘にて全人格が<color=#f8c200>スキル威力1</color><color=#ebcaa2>増加</color>",
+    "runs": [
+      ["次の戦闘にて全人格が", "#ebcaa2", null],
+      ["スキル威力1", "#f8c200", null],
+      ["増加", "#ebcaa2", null]
+    ]
+  },
+  {
+    "input": "3<color=#f8c200>, 5<階層</color>入場時、<color=#f8c200>選んだキーワード</color>のランダムなランク3<color=#5bffde>ギフト</color>を1個獲得",
+    "runs": [
+      ["3", null, null],
+      [", 5<階層", "#f8c200", null],
+      ["入場時、", null, null],
+      ["選んだキーワード", "#f8c200", null],
+      ["のランダムなランク3", null, null],
+      ["ギフト", "#5bffde", null],
+      ["を1個獲得", null, null]
+    ]
+  },
+  {
+    "input": "3<color=#f8c200>, 5, 7<階層</color>入場時、<color=#f8c200>選んだキーワード</color>のランダムな<color=#f8c200>ランク4<color=#5bffde><color=#5bffde>ギフト</color>を{0}個獲得",
+    "runs": [
+      ["3", null, null],
+      [", 5, 7<階層", "#f8c200", null],
+      ["入場時、", null, null],
+      ["選んだキーワード", "#f8c200", null],
+      ["のランダムな", null, null],
+      ["ランク4", "#f8c200", null],
+      ["ギフトを{0}個獲得", "#5bffde", null]
+    ]
+  },
+  {
+    "input": "入場時、<color=#dd0000>暗い残影・<color=#f8c200>微かな残影</color></color>をそれぞれ1個獲得",
+    "runs": [
+      ["入場時、", null, null],
+      ["暗い残影・", "#dd0000", null],
+      ["微かな残影", "#f8c200", null],
+      ["をそれぞれ1個獲得", null, null]
+    ]
+  },
+  {
+    "input": "入場時、<color=#dd0000>暗い残影・<color=#f8c200>微かな残影・輝く残影</color></color>をそれぞれ1個獲得",
+    "runs": [
+      ["入場時、", null, null],
+      ["暗い残影・", "#dd0000", null],
+      ["微かな残影・輝く残影", "#f8c200", null],
+      ["をそれぞれ1個獲得", null, null]
+    ]
+  },
+  {
+    "input": "“执行经理，您没事吧？”\n\n<……没事啊？>\n\n“还不是因为经理脑袋是钟表才没事的啊！”\n\n即使捂住耳朵，脑中也依然回响着蟾蜍的鸣叫声，害得罪人们十分痛苦。\n\n似乎是终于忍不住了，有人举起武器挥向蟾蜍。",
+    "runs": [
+      [
+        "“执行经理，您没事吧？”\n\n<……没事啊？>\n\n“还不是因为经理脑袋是钟表才没事的啊！”\n\n即使捂住耳朵，脑中也依然回响着蟾蜍的鸣叫声，害得罪人们十分痛苦。\n\n似乎是终于忍不住了，有人举起武器挥向蟾蜍。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "机器人吃力地举起双臂。\n\n终端上显示出这样的话。\n\n<欢迎光临，尊敬的客人。小镇参观令您满意吗？\n这是赠与您的纪念品。>\n\n即使终端显示着笑脸，\n但从机器人的动作中，我似乎能听到求救的呐喊声。",
+    "runs": [
+      [
+        "机器人吃力地举起双臂。\n\n终端上显示出这样的话。\n\n<欢迎光临，尊敬的客人。小镇参观令您满意吗？\n这是赠与您的纪念品。>\n\n即使终端显示着笑脸，\n但从机器人的动作中，我似乎能听到求救的呐喊声。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "终端变得赤红，警报声响彻四周。\n\n机器人剧烈颤抖着，看起来十分痛苦。\n\n<再见。再见。再见再见再见再见再见再见再见再见再见>\n\n当终端被那一个词语占满时，\n那个机器人在我眼前爆炸了，许多的零件和肉块从中迸裂出来。",
+    "runs": [
+      [
+        "终端变得赤红，警报声响彻四周。\n\n机器人剧烈颤抖着，看起来十分痛苦。\n\n<再见。再见。再见再见再见再见再见再见再见再见再见>\n\n当终端被那一个词语占满时，\n那个机器人在我眼前爆炸了，许多的零件和肉块从中迸裂出来。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "机器人剧烈颤抖起来。\n\n与其说是恐惧，不如说是愤怒。\n\n它能理解终端上写着的文字吗？\n\n<检测到敌对个体，检测到敌对个体。>\n\n<依照规则D63ICRQ1实行驱逐程序！>\n\n机器人疯狂地挥舞起双臂。",
+    "runs": [
+      [
+        "机器人剧烈颤抖起来。\n\n与其说是恐惧，不如说是愤怒。\n\n它能理解终端上写着的文字吗？\n\n<检测到敌对个体，检测到敌对个体。>\n\n<依照规则D63ICRQ1实行驱逐程序！>\n\n机器人疯狂地挥舞起双臂。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "<无法理解您的问题。>\n\n机器人歪着头，在终端上显示出这句话。\n\n它一边反复尝试将头歪向另一侧，\n一边输出如下的话：\n\n<莫非客人并未参观小镇？>\n\n它似乎在等待答案。",
+    "runs": [
+      [
+        "<无法理解您的问题。>\n\n机器人歪着头，在终端上显示出这句话。\n\n它一边反复尝试将头歪向另一侧，\n一边输出如下的话：\n\n<莫非客人并未参观小镇？>\n\n它似乎在等待答案。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "<那请恕我无法赠与您纪念品！>\n\n终端突然咯哒咯哒地向上打开，\n一个机械手臂猛地飞出，试图从我身上拿走什么。\n\n<请配合我回收纪念品！说谎是不好的。>\n\n我四处躲闪，\n但机械手的速度变得更快了。\n\n<如您拒不合作，\n将依据规则A62GBFE1对您进行处罚！>\n\n不离开这里似乎就无法停止机器人的行动，\n于是我跌跌撞撞地逃跑了。",
+    "runs": [
+      [
+        "<那请恕我无法赠与您纪念品！>\n\n终端突然咯哒咯哒地向上打开，\n一个机械手臂猛地飞出，试图从我身上拿走什么。\n\n<请配合我回收纪念品！说谎是不好的。>\n\n我四处躲闪，\n但机械手的速度变得更快了。\n\n<如您拒不合作，\n将依据规则A62GBFE1对您进行处罚！>\n\n不离开这里似乎就无法停止机器人的行动，\n于是我跌跌撞撞地逃跑了。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "<那或许是参观程序出现了问题。>\n\n在终端上显示出这样的话后，\n那个机器人呆立了许久。\n\n直到我脑中浮现出“它是坏掉了吗？”的想法时，\n终端开始闪动。\n\n<多次尝试呼叫管理员，无人应答。>\n\n<系统异常。系统异常。>\n\n<重启中……>\n\n随后，青色屏幕上接连不断输出着某些复杂的文字序列。",
+    "runs": [
+      [
+        "<那或许是参观程序出现了问题。>\n\n在终端上显示出这样的话后，\n那个机器人呆立了许久。\n\n直到我脑中浮现出“它是坏掉了吗？”的想法时，\n终端开始闪动。\n\n<多次尝试呼叫管理员，无人应答。>\n\n<系统异常。系统异常。>\n\n<重启中……>\n\n随后，青色屏幕上接连不断输出着某些复杂的文字序列。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "中央本部的文职办公桌上放着一份报告书。\n\n<第■■天，■■ ■■研究业务结果报告书>\n\n虽然部分被删改了，但其内容似乎是关于新型屏蔽力场子弹的。\n\n“精神屏蔽力场可以在■■■■内防止自外部而来的■■■■精神伤害。”\n\n“关于屏蔽力场子弹的■■，请咨询主管或■■■■■■■■。”\n\n在这份被删改了大量内容的报告书旁边，有一个写着“精神屏蔽力场样品及说明书”的箱子。",
+    "runs": [
+      [
+        "中央本部的文职办公桌上放着一份报告书。\n\n<第■■天，■■ ■■研究业务结果报告书>\n\n虽然部分被删改了，但其内容似乎是关于新型屏蔽力场子弹的。\n\n“精神屏蔽力场可以在■■■■内防止自外部而来的■■■■精神伤害。”\n\n“关于屏蔽力场子弹的■■，请咨询主管或■■■■■■■■。”\n\n在这份被删改了大量内容的报告书旁边，有一个写着“精神屏蔽力场样品及说明书”的箱子。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "人们的目光转向了我们。\n\n“邪恶的咒术师，引发了大静谧。”\n“那家伙假装为了我们尽心尽力，实际上不过是嫉妒伊比利亚的辉煌繁荣罢了。”\n“别阻拦我们，外来者。”\n“这些家伙也和那个咒术师一样，是从海上来到这里的吧。”\n\n反抗的罪人们眼中，映现出饥饿憔悴的村民们的身影。\n\n小心翼翼地抱着空荡荡襁褓的村民。\n手里握着不合身的拐杖与帽子的孩子们。\n\n“……那些人，失去了珍贵之物。”\n\n“失去珍贵之物的人，会变得看不清前方。”\n\n“若不将感情倾吐出来，便会无法承受。”\n\n他们以此掩饰悲伤。\n\n因为从那吞噬伊比利亚的巨大灾厄中……无法读出任何感情与意图。\n\n只是将无处宣泄的愤怒之刃，尖锐地指向了同样来自海洋的人们。\n\n“但是……必须有人去纠正他们刀锋所指的方向。”\n\n<艾丽妮？>\n\n“请退后，公民。”\n\n“即使此人有罪，执行也应为审判庭的职责。”\n\n“若此人无罪，你们的行为便更加不可原谅。”\n\n群众听了艾丽妮的话后，露出了苦恼的表情，与阿戈尔人保持着距离……\n\n最终如雾散般消失。",
+    "runs": [
+      [
+        "人们的目光转向了我们。\n\n“邪恶的咒术师，引发了大静谧。”\n“那家伙假装为了我们尽心尽力，实际上不过是嫉妒伊比利亚的辉煌繁荣罢了。”\n“别阻拦我们，外来者。”\n“这些家伙也和那个咒术师一样，是从海上来到这里的吧。”\n\n反抗的罪人们眼中，映现出饥饿憔悴的村民们的身影。\n\n小心翼翼地抱着空荡荡襁褓的村民。\n手里握着不合身的拐杖与帽子的孩子们。\n\n“……那些人，失去了珍贵之物。”\n\n“失去珍贵之物的人，会变得看不清前方。”\n\n“若不将感情倾吐出来，便会无法承受。”\n\n他们以此掩饰悲伤。\n\n因为从那吞噬伊比利亚的巨大灾厄中……无法读出任何感情与意图。\n\n只是将无处宣泄的愤怒之刃，尖锐地指向了同样来自海洋的人们。\n\n“但是……必须有人去纠正他们刀锋所指的方向。”\n\n<艾丽妮？>\n\n“请退后，公民。”\n\n“即使此人有罪，执行也应为审判庭的职责。”\n\n“若此人无罪，你们的行为便更加不可原谅。”\n\n群众听了艾丽妮的话后，露出了苦恼的表情，与阿戈尔人保持着距离……\n\n最终如雾散般消失。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "在宛如都市具象化一般的方舟中央。\n\n那耀眼的光芒摇曳之处……梅厄斯大概就在那里。\n\n“……先稍微休息一下再走吧。”\n\n“你没事吧，博士？”\n\n“稍微休息一下……应该就好点了……”\n\n“呼呼……不增强体力的话，说不定就得靠阿米娅小姐背着你走来走去了哦。”\n\n“回去之后……得按凯尔希说的，好好锻炼才行。”\n\n“哼。万一出了什么事，尊敬的执行经理，就由我来背您吧。”\n\n<不必了。>\n\n或许是因为我们已逐渐接近梅厄斯所期盼的理想乡，那片光芒的中心了吧。\n\n游荡的海嗣们只是默默地盯着受伤的我们看了一会，却并未发起攻击，只是径直从我们身旁经过。\n\n那目光……让人感觉像在担忧我们。大多数罪人因此露出复杂的神情，并移开了视线。\n\n“我感受到传达过来的情绪，像是悲伤……悔恨……或是否定自己长久苦恼过的时光。”\n\n“梅厄斯小姐还能恢复原样吗？”\n\n<我们必须要让她恢复。正因如此，我们才来到这里。>\n\n<再休息一会儿，就继续前进吧。>",
+    "runs": [
+      [
+        "在宛如都市具象化一般的方舟中央。\n\n那耀眼的光芒摇曳之处……梅厄斯大概就在那里。\n\n“……先稍微休息一下再走吧。”\n\n“你没事吧，博士？”\n\n“稍微休息一下……应该就好点了……”\n\n“呼呼……不增强体力的话，说不定就得靠阿米娅小姐背着你走来走去了哦。”\n\n“回去之后……得按凯尔希说的，好好锻炼才行。”\n\n“哼。万一出了什么事，尊敬的执行经理，就由我来背您吧。”\n\n<不必了。>\n\n或许是因为我们已逐渐接近梅厄斯所期盼的理想乡，那片光芒的中心了吧。\n\n游荡的海嗣们只是默默地盯着受伤的我们看了一会，却并未发起攻击，只是径直从我们身旁经过。\n\n那目光……让人感觉像在担忧我们。大多数罪人因此露出复杂的神情，并移开了视线。\n\n“我感受到传达过来的情绪，像是悲伤……悔恨……或是否定自己长久苦恼过的时光。”\n\n“梅厄斯小姐还能恢复原样吗？”\n\n<我们必须要让她恢复。正因如此，我们才来到这里。>\n\n<再休息一会儿，就继续前进吧。>",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "在与无尽涌来的血袋的战斗中……\n\n<嗯……？>\n\n我们发现了一个不祥的物体掉落在地。\n\n那东西与血袋持有的武器相似，却又有哪里不同。\n\n“看来似乎很强？”\n\n“看来此物凶险。”\n\n“看来吾搞不清！”\n\n罪人们众说纷纭。\n\n……看来是否捡起并使用它，全凭我的选择了。",
+    "runs": [
+      [
+        "在与无尽涌来的血袋的战斗中……\n\n<嗯……？>\n\n我们发现了一个不祥的物体掉落在地。\n\n那东西与血袋持有的武器相似，却又有哪里不同。\n\n“看来似乎很强？”\n\n“看来此物凶险。”\n\n“看来吾搞不清！”\n\n罪人们众说纷纭。\n\n……看来是否捡起并使用它，全凭我的选择了。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "“那边！有人在独自与血袋战斗！”\n\n罪人们循声望去，一个身穿W公司制服的人影映入眼帘。\n\n他看似身手不凡，但血袋的数量实在太多，眼看就要支撑不住。\n\n<得去帮他……>\n\n话音未落，其他注意到我们的血袋便蜂拥而至，将我们团团包围。\n\n“啧……准备战斗！”\n\n“可、可是那个人怎么办！”\n\n“那就……”",
+    "runs": [
+      [
+        "“那边！有人在独自与血袋战斗！”\n\n罪人们循声望去，一个身穿W公司制服的人影映入眼帘。\n\n他看似身手不凡，但血袋的数量实在太多，眼看就要支撑不住。\n\n<得去帮他……>\n\n话音未落，其他注意到我们的血袋便蜂拥而至，将我们团团包围。\n\n“啧……准备战斗！”\n\n“可、可是那个人怎么办！”\n\n“那就……”",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "在破旧的广告牌后方，可以看到一台T公司标志已经剥落一半的自动贩卖机。\n\n在细长的指针层层交错旋转的圆筒形机体下方，刻着宣传标语。\n\n“别再借用时间了！”\n“请预付不必要的时间，以在关键时刻使用！”\n\n装置旁边有一个可以伸手进去的小槽口。\n下面用难以辨认的小字写着注意事项。\n\n<上面写了什么？>\n“本装置以使用者在使用本装置前，预先支付特定时间资源的行为为前提，会对使用者造成暂时性时间下降，左括号，上述时间下降以T公司的浮动时间为基准计算，一天或以日为单位的范围将依据A公司的标准时间来计算，右括号，所回收的预付时间将自动储存于本装置内部的辅助积存模块中，并仅在使用者日后依照规定流程提出返还申请，或经确认满足使用手册所列返还条件时，将以依据另行计算公式得出的加速率加算至使用者每日时间总量的形式返还。具体的返还时间点、适用顺序与限制条件，依照本装置的运营规章……”\n\n“够、够了，不继续读也无妨。”\n\n“这不就是那帮叫什么征收人员的家伙总戴在胳膊上的那个玩意儿吗？”",
+    "runs": [
+      [
+        "在破旧的广告牌后方，可以看到一台T公司标志已经剥落一半的自动贩卖机。\n\n在细长的指针层层交错旋转的圆筒形机体下方，刻着宣传标语。\n\n“别再借用时间了！”\n“请预付不必要的时间，以在关键时刻使用！”\n\n装置旁边有一个可以伸手进去的小槽口。\n下面用难以辨认的小字写着注意事项。\n\n<上面写了什么？>\n“本装置以使用者在使用本装置前，预先支付特定时间资源的行为为前提，会对使用者造成暂时性时间下降，左括号，上述时间下降以T公司的浮动时间为基准计算，一天或以日为单位的范围将依据A公司的标准时间来计算，右括号，所回收的预付时间将自动储存于本装置内部的辅助积存模块中，并仅在使用者日后依照规定流程提出返还申请，或经确认满足使用手册所列返还条件时，将以依据另行计算公式得出的加速率加算至使用者每日时间总量的形式返还。具体的返还时间点、适用顺序与限制条件，依照本装置的运营规章……”\n\n“够、够了，不继续读也无妨。”\n\n“这不就是那帮叫什么征收人员的家伙总戴在胳膊上的那个玩意儿吗？”",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "我决定趁还有余裕，先把时间存进去。\n\n“原理似乎与T公司征收人员使用的护手相似，经理。”\n\n“不过……真的付进去了吗？感觉好像没什么变化啊。”\n\n<……>\n\n带着说话慢吞吞的罪人们，我再次加快了脚步。",
+    "runs": [
+      [
+        "我决定趁还有余裕，先把时间存进去。\n\n“原理似乎与T公司征收人员使用的护手相似，经理。”\n\n“不过……真的付进去了吗？感觉好像没什么变化啊。”\n\n<……>\n\n带着说话慢吞吞的罪人们，我再次加快了脚步。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "“银凤炸鸡酒吧！”\n“1588~银凤银凤！1588~银凤银凤！”\n\n顺着奇怪的广告音乐声走去，发现了一台莫名眼熟的机器孤零零地摆在那里。\n\n“这是台抓娃娃机。不过里面的玩偶是……”\n<……这不是小凤吗？>\n“可是那家伙不是说他给我们的是店里的无价之宝，再也找不出第二个来了吗？”\n“……在镜像迷宫里，这种常识基本上是毫无意义的。”\n“嗯。可能是未确认的特性。”\n“等等。看到那边那个玩偶缝线的缝隙了吗？里面有金光，肯定装着值钱的东西！”\n\n机器里能看到各种各样的小凤玩偶。\n要以哪一个为目标呢？",
+    "runs": [
+      [
+        "“银凤炸鸡酒吧！”\n“1588~银凤银凤！1588~银凤银凤！”\n\n顺着奇怪的广告音乐声走去，发现了一台莫名眼熟的机器孤零零地摆在那里。\n\n“这是台抓娃娃机。不过里面的玩偶是……”\n<……这不是小凤吗？>\n“可是那家伙不是说他给我们的是店里的无价之宝，再也找不出第二个来了吗？”\n“……在镜像迷宫里，这种常识基本上是毫无意义的。”\n“嗯。可能是未确认的特性。”\n“等等。看到那边那个玩偶缝线的缝隙了吗？里面有金光，肯定装着值钱的东西！”\n\n机器里能看到各种各样的小凤玩偶。\n要以哪一个为目标呢？",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "决定瞄准一只位置不错、适合抓取的中号的小凤玩偶。\n\n我小心翼翼地操控机械爪抓起玩偶，出口处传来了两声沉闷的金属碰撞声。\n\n“哦……选中的玩偶旁边还有一只体型更小的玩偶。这简直就是一石二鸟，一举两得呀。”\n<我好像听到里面叮当作响，会是硬币吗？>\n“你觉得呢？快给我，但丁！”\n“你在搞什么鬼……”\n“这种东西就是要拆开来看才行嘛。”\n“小凤！！！！！！”\n\n一名罪人剖开了小凤玩偶的腹部，硬币从里面倾泻而出。\n就在大家清点硬币的时候，广告的音乐声逐渐平息，很快连那台抓娃娃机也消失了。",
+    "runs": [
+      [
+        "决定瞄准一只位置不错、适合抓取的中号的小凤玩偶。\n\n我小心翼翼地操控机械爪抓起玩偶，出口处传来了两声沉闷的金属碰撞声。\n\n“哦……选中的玩偶旁边还有一只体型更小的玩偶。这简直就是一石二鸟，一举两得呀。”\n<我好像听到里面叮当作响，会是硬币吗？>\n“你觉得呢？快给我，但丁！”\n“你在搞什么鬼……”\n“这种东西就是要拆开来看才行嘛。”\n“小凤！！！！！！”\n\n一名罪人剖开了小凤玩偶的腹部，硬币从里面倾泻而出。\n就在大家清点硬币的时候，广告的音乐声逐渐平息，很快连那台抓娃娃机也消失了。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "凭这根细细的机械爪，真的能把那只大号的小凤玩偶抓起来吗？\n\n虽然心里没底，但还是小心翼翼地抓起大号的玩偶朝着出口方向移动。\n\n随着玩偶落入出口处，我们听到了一阵哗啦啦的声音。\n\n“好像卡住下不来了。”\n“缝线是不是崩开了？里面好像有硬币掉下来了。”\n<先把那些给捡走吧。>\n\n就在大家清点硬币的时候，广告的音乐声逐渐平息，很快连那台抓娃娃机也消失了。",
+    "runs": [
+      [
+        "凭这根细细的机械爪，真的能把那只大号的小凤玩偶抓起来吗？\n\n虽然心里没底，但还是小心翼翼地抓起大号的玩偶朝着出口方向移动。\n\n随着玩偶落入出口处，我们听到了一阵哗啦啦的声音。\n\n“好像卡住下不来了。”\n“缝线是不是崩开了？里面好像有硬币掉下来了。”\n<先把那些给捡走吧。>\n\n就在大家清点硬币的时候，广告的音乐声逐渐平息，很快连那台抓娃娃机也消失了。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "指派带有灰色星座的加护的罪人进行洞察工作。\n<size=75%><color=#a16a3b>持有E.G.O饰品“灰色星座的加护”时可选择</color></size>",
+    "runs": [
+      ["指派带有灰色星座的加护的罪人进行洞察工作。\n", null, null],
+      ["持有E.G.O饰品“灰色星座的加护”时可选择", "#a16a3b", "75%"]
+    ]
+  },
+  {
+    "input": "<有谁知道管理方法吗？>\n“……”\n<……快逃吧。>\n\n对我们不清楚管理方法的异想体进行工作的风险很大。\n在计时归零前，我们迅速离开了走廊。",
+    "runs": [
+      [
+        "<有谁知道管理方法吗？>\n“……”\n<……快逃吧。>\n\n对我们不清楚管理方法的异想体进行工作的风险很大。\n在计时归零前，我们迅速离开了走廊。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "指派带有精神屏蔽力场的罪人进行压迫工作。\n<size=75%><color=#a16a3b>持有E.G.O饰品“精神屏蔽力场”时可选择</color></size>",
+    "runs": [
+      ["指派带有精神屏蔽力场的罪人进行压迫工作。\n", null, null],
+      ["持有E.G.O饰品“精神屏蔽力场”时可选择", "#a16a3b", "75%"]
+    ]
+  },
+  {
+    "input": "说我们是从上层下来的，并展示E.G.O饰品。\n<size=75%><color=#a16a3b>持有不少于5件“紫罗兰的正午”、“憎恶与绝望”\n的主题卡包专属E.G.O饰品时可选择</color></size>",
+    "runs": [
+      ["说我们是从上层下来的，并展示E.G.O饰品。\n", null, null],
+      ["持有不少于5件“紫罗兰的正午”、“憎恶与绝望”", "#a16a3b", "75%"],
+      ["\n", null, null],
+      ["的主题卡包专属E.G.O饰品时可选择", "#a16a3b", "75%"]
+    ]
+  },
+  {
+    "input": "使用作战批准卡开门。\n<size=75%><color=#a16a3b>持有E.G.O饰品\"作战批准卡\"时可选</color></size>",
+    "runs": [
+      ["使用作战批准卡开门。\n", null, null],
+      ["持有E.G.O饰品\"作战批准卡\"时可选", "#a16a3b", "75%"]
+    ]
+  },
+  {
+    "input": "罪人{0}从堆放的物品中取出了一件由骨骼与肌肉构成的东西。\n\n<这是……>\n\n看起来是一件被打碎的艺术品。大概是人体派的作品？\n\n如果将它放到展台上，也许能使其恢复曾经的价值。",
+    "runs": [
+      [
+        "罪人{0}从堆放的物品中取出了一件由骨骼与肌肉构成的东西。\n\n<这是……>\n\n看起来是一件被打碎的艺术品。大概是人体派的作品？\n\n如果将它放到展台上，也许能使其恢复曾经的价值。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "罪人{0}在堆放的物品中抓住了一件由骨骼与肌肉构成的东西。\n\n<啊……小、小心！>\n\n罪人{0}迅速抽回手，退到安全距离外。\n\n……只差一点，上方堆放着的残骸就要倒塌、埋住罪人们了。\n\n看起来，没必要冒着受伤的风险去拿那些未必有用的东西。",
+    "runs": [
+      [
+        "罪人{0}在堆放的物品中抓住了一件由骨骼与肌肉构成的东西。\n\n<啊……小、小心！>\n\n罪人{0}迅速抽回手，退到安全距离外。\n\n……只差一点，上方堆放着的残骸就要倒塌、埋住罪人们了。\n\n看起来，没必要冒着受伤的风险去拿那些未必有用的东西。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "罪人{0}从堆放的物品中取出了一件由兽皮与尖牙构成的东西。\n\n<这是……>\n\n看起来是一件被打碎的艺术品。大概是野兽派的作品？\n\n如果将它放到展台上，也许能使其恢复曾经的价值。",
+    "runs": [
+      [
+        "罪人{0}从堆放的物品中取出了一件由兽皮与尖牙构成的东西。\n\n<这是……>\n\n看起来是一件被打碎的艺术品。大概是野兽派的作品？\n\n如果将它放到展台上，也许能使其恢复曾经的价值。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "罪人{0}在堆放的物品中抓住了一件由兽皮与尖牙构成的东西。\n\n<啊……小、小心！>\n\n罪人{0}迅速抽回手，退到安全距离外。\n\n……只差一点，上方堆放着的残骸就要倒塌、埋住罪人们了。\n\n看起来，没必要冒着受伤的风险去拿那些未必有用的东西。",
+    "runs": [
+      [
+        "罪人{0}在堆放的物品中抓住了一件由兽皮与尖牙构成的东西。\n\n<啊……小、小心！>\n\n罪人{0}迅速抽回手，退到安全距离外。\n\n……只差一点，上方堆放着的残骸就要倒塌、埋住罪人们了。\n\n看起来，没必要冒着受伤的风险去拿那些未必有用的东西。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "展示卯足，说我们是新来的。\n<size=75%><color=#a16a3b>持有E.G.O饰品“卯足”时可选</color></size>",
+    "runs": [
+      ["展示卯足，说我们是新来的。\n", null, null],
+      ["持有E.G.O饰品“卯足”时可选", "#a16a3b", "75%"]
+    ]
+  },
+  {
+    "input": "罪人{0}悄悄拿起了音响。\n\n将拿来的音响放在另一条小巷里播放后，吵闹的电子音乐从中传出。\n\n周围对那声音有所反应的中指成员们接近过来，想要找到音响。\n\n<刚刚那条小巷子里现在应该已经没有人了，快走吧。>\n\n我们暂停了音乐，悄悄地回到原本的路上。\n\n原本堵在路前的成员们已经离开，我们顺利通过了道路。",
+    "runs": [
+      [
+        "罪人{0}悄悄拿起了音响。\n\n将拿来的音响放在另一条小巷里播放后，吵闹的电子音乐从中传出。\n\n周围对那声音有所反应的中指成员们接近过来，想要找到音响。\n\n<刚刚那条小巷子里现在应该已经没有人了，快走吧。>\n\n我们暂停了音乐，悄悄地回到原本的路上。\n\n原本堵在路前的成员们已经离开，我们顺利通过了道路。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2>下场战斗开始时生效获得所有<color=#f8c200>E.G.O资源各2个</color><color=#ebcaa2></color>",
+    "runs": [
+      ["下场战斗开始时生效获得所有", "#ebcaa2", null],
+      ["E.G.O资源各2个", "#f8c200", null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2>下场战斗全体人格<color=#f8c200>技能最终威力+2</color><color=#ebcaa2></color>",
+    "runs": [
+      ["下场战斗全体人格", "#ebcaa2", null],
+      ["技能最终威力+2", "#f8c200", null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2>下场战斗全体人格<color=#f8c200>技能威力+1</color><color=#ebcaa2></color>",
+    "runs": [
+      ["下场战斗全体人格", "#ebcaa2", null],
+      ["技能威力+1", "#f8c200", null]
+    ]
+  },
+  {
+    "input": "Orange circles float in the air before your eyes.\nThe lights flutter and dance in the air, creating a haze.\n\nSomething is burning to death within.\nWould you be scorched as well if the flames touched you?",
+    "runs": [
+      [
+        "Orange circles float in the air before your eyes.\nThe lights flutter and dance in the air, creating a haze.\n\nSomething is burning to death within.\nWould you be scorched as well if the flames touched you?",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "You gathered the scattered candles to a single spot.\nThe flames suddenly rise high when a gust of wind whooshes past the gathered candles.\n@#$!!@#*!\nAs soon as the pillar of flame touches the book, the three eyes all whip around to glare at the Sinners.",
+    "runs": [
+      [
+        "You gathered the scattered candles to a single spot.\nThe flames suddenly rise high when a gust of wind whooshes past the gathered candles.\n@#$!!@#*!\nAs soon as the pillar of flame touches the book, the three eyes all whip around to glare at the Sinners.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "It’s a tablet of unknown letters.\n\nWhile you’re unable to fully grasp it,\na few words stand out.\n\nJudgement…\nRetribution…\nPunishment…\n\nYou also see some combinations of words\nthat might have deadly consequences if you try to understand them.\n\nWhen you look back up, the scribe gives a short nod\nbefore soaring into the sky.",
+    "runs": [
+      [
+        "It’s a tablet of unknown letters.\n\nWhile you’re unable to fully grasp it,\na few words stand out.\n\nJudgement…\nRetribution…\nPunishment…\n\nYou also see some combinations of words\nthat might have deadly consequences if you try to understand them.\n\nWhen you look back up, the scribe gives a short nod\nbefore soaring into the sky.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "Oncoming fortune will slip past if you avoid it.\n\nMisfortune you thought to avoid will come back to bite you.\n\nAlthough the gun was pointed at their head,\nthe bullet came your way.",
+    "runs": [
+      [
+        "Oncoming fortune will slip past if you avoid it.\n\nMisfortune you thought to avoid will come back to bite you.\n\nAlthough the gun was pointed at their head,\nthe bullet came your way.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "What is the nature of the blood that fills the spring? Who—or what—is it from?\n\nInstead of feeding it that mysterious blood, I decide to feed it blood of the Sinners.\n\nThe bloodsteeped rose extends its petals, yearning for our blood nevertheless.\n\nThe rose drinks the blood of the Sinners, and a smaller flower blossoms next to the base of its stem.\n\nPerhaps it is giving us a gift in return for our blood. I carefully pick up the flower.",
+    "runs": [
+      [
+        "What is the nature of the blood that fills the spring? Who—or what—is it from?\n\nInstead of feeding it that mysterious blood, I decide to feed it blood of the Sinners.\n\nThe bloodsteeped rose extends its petals, yearning for our blood nevertheless.\n\nThe rose drinks the blood of the Sinners, and a smaller flower blossoms next to the base of its stem.\n\nPerhaps it is giving us a gift in return for our blood. I carefully pick up the flower.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "I command death to it.\n\n\"...Your command is understood. However-\"\n\n\"I do not detect any sense of purpose in your voice. You are speaking without knowing why the command is to be made.\"\n\n\"You will be punished for giving meaningless commands.\"\n\nBefore a word could be said, the hand on its tail comes forth.",
+    "runs": [
+      [
+        "I command death to it.\n\n\"...Your command is understood. However-\"\n\n\"I do not detect any sense of purpose in your voice. You are speaking without knowing why the command is to be made.\"\n\n\"You will be punished for giving meaningless commands.\"\n\nBefore a word could be said, the hand on its tail comes forth.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "{0} interrogates the Abnormality, suggesting that maybe it just didn't do enough to prepare for the interview.\nI also quickly tried to add that what really matters is the will to pass...\n... but the Abnormality is already casting a downward gaze, beaten down from {0}'s brutally rational advice.\n\n'I'm not looking for an advice right now.'\n'No, actually, I don't think your advice will be of any comfort to me, now or later.'\n\nThe streetlight dies, and shadow fills the space.\nI can no longer feel the Abnormality's presence.",
+    "runs": [
+      [
+        "{0} interrogates the Abnormality, suggesting that maybe it just didn't do enough to prepare for the interview.\nI also quickly tried to add that what really matters is the will to pass...\n... but the Abnormality is already casting a downward gaze, beaten down from {0}'s brutally rational advice.\n\n'I'm not looking for an advice right now.'\n'No, actually, I don't think your advice will be of any comfort to me, now or later.'\n\nThe streetlight dies, and shadow fills the space.\nI can no longer feel the Abnormality's presence.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "This place resembles the operating room of an abandoned hospital.\n\nA few clangs and rumbles later, a blinding white light flashed the eye.\n\nThe light is soon blocked by a being with multiple heads.\n\nThose heads were all wearing masks and surgical caps, facing me at the same time.\n\n'Ah, a patient's here.'\n\n'Right, a patient's here.'\n\n'The patient needs curing.'\n\n'Where?'\n\n'The abdomen?'\n\n'The legs?'\n\n'No, the head. The frontal lobe.'\n\nEach head gives its opinion as they prepare for surgery.",
+    "runs": [
+      [
+        "This place resembles the operating room of an abandoned hospital.\n\nA few clangs and rumbles later, a blinding white light flashed the eye.\n\nThe light is soon blocked by a being with multiple heads.\n\nThose heads were all wearing masks and surgical caps, facing me at the same time.\n\n'Ah, a patient's here.'\n\n'Right, a patient's here.'\n\n'The patient needs curing.'\n\n'Where?'\n\n'The abdomen?'\n\n'The legs?'\n\n'No, the head. The frontal lobe.'\n\nEach head gives its opinion as they prepare for surgery.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "The city was infinitely vast, and no one even dares to breathe as we walk.\n\nAnd its citizens are forever at peace.",
+    "runs": [
+      [
+        "The city was infinitely vast, and no one even dares to breathe as we walk.\n\nAnd its citizens are forever at peace.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "\"... That's one nasty joke, fellas~\"\n\nMaybe {0} sounded awkward when they claimed to be from the Blade Lineage. The civilian's eyebrow twitched for a brief second before he burst into laughter.\n\n\"Why would they be out here, in these streets?\"\n\n\"Right, right. Besides, why'd they ever help us? We just turned a blind eye when they—\"\n\n\"Hey now! Shh, watch your mouth!\"\n\n\"Ah!\"\n\nAfter an exchange none of us had enough context for, they suddenly snapped as though they realized we were still standing right here.\n\n\"W-well then... Thank you for the help anyway!\"\n\n\"But don't say something like that, even as a joke! You never know what'll happen...\"\n\nWith that, the civilians hurriedly left the scene.\n\nThis did nothing but bring down our mood, did it...",
+    "runs": [
+      [
+        "\"... That's one nasty joke, fellas~\"\n\nMaybe {0} sounded awkward when they claimed to be from the Blade Lineage. The civilian's eyebrow twitched for a brief second before he burst into laughter.\n\n\"Why would they be out here, in these streets?\"\n\n\"Right, right. Besides, why'd they ever help us? We just turned a blind eye when they—\"\n\n\"Hey now! Shh, watch your mouth!\"\n\n\"Ah!\"\n\nAfter an exchange none of us had enough context for, they suddenly snapped as though they realized we were still standing right here.\n\n\"W-well then... Thank you for the help anyway!\"\n\n\"But don't say something like that, even as a joke! You never know what'll happen...\"\n\nWith that, the civilians hurriedly left the scene.\n\nThis did nothing but bring down our mood, did it...",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "You have to go after the Time Ripper.\n\nNo time to waste.",
+    "runs": [["You have to go after the Time Ripper.\n\nNo time to waste.", null, null]]
+  },
+  {
+    "input": "[{0}] prays before the skull.\n\nTo whom they pray, we cannot hear.\n\nFor what they pray, we cannot hear.\n\nWe cannot know if that even was a prayer, in this place of unholiness.\n\nGaze of judgment cascades from the hollows of the Skull's eyes.\n\nIt makes a threatening noise from time to time, snapping its teeth together, but [{0}] remains calm, certain that the Skull will not hurt them.\n\nOnce the pious ritual was over, a solitary scarecrow stands in the place of the great Skull, showering in the mysterious light.",
+    "runs": [
+      [
+        "[{0}] prays before the skull.\n\nTo whom they pray, we cannot hear.\n\nFor what they pray, we cannot hear.\n\nWe cannot know if that even was a prayer, in this place of unholiness.\n\nGaze of judgment cascades from the hollows of the Skull's eyes.\n\nIt makes a threatening noise from time to time, snapping its teeth together, but [{0}] remains calm, certain that the Skull will not hurt them.\n\nOnce the pious ritual was over, a solitary scarecrow stands in the place of the great Skull, showering in the mysterious light.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "{0}'s face lights up with surprise as soon as they take a swig of the researcher's potion.\n\nThe potion seems to have alleviated a great degree of stress from {0}—their eyes were practically twinkling.\n\n\"This clinical trial was a success. Thanks for volunteering.\"\n\n\"Please, take this. It's one of our newest line of medicines.\"",
+    "runs": [
+      [
+        "{0}'s face lights up with surprise as soon as they take a swig of the researcher's potion.\n\nThe potion seems to have alleviated a great degree of stress from {0}—their eyes were practically twinkling.\n\n\"This clinical trial was a success. Thanks for volunteering.\"\n\n\"Please, take this. It's one of our newest line of medicines.\"",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "On closer examination, this coin could come in useful in the dungeon.\n\n... We should quit while we're ahead, even for a small gain. Much better than gambling this coin away into that suspicious machine for some unknown, mysterious outcome we have no way of gauging.\n\nWe pocket the coin and leave the machine.",
+    "runs": [
+      [
+        "On closer examination, this coin could come in useful in the dungeon.\n\n... We should quit while we're ahead, even for a small gain. Much better than gambling this coin away into that suspicious machine for some unknown, mysterious outcome we have no way of gauging.\n\nWe pocket the coin and leave the machine.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "We turn into a corner and come across a rather crudely drawn poster.\n\nWritten on the poster is a brief introduction next to a small note with directions.\n\n'Running low on time, but burning full of frustration? Then come join the Yurodiviye.\n\nAre you content with letting the inequity walk all over you?\n\nOr would you rather live for its destruction?\n\nDesire it, desire it hard!\n\nTake this poster, let it be your train ticket.\n\nAt the ■■■ alley, face the ■■ road and walk at a speed of 120km per day. Alone.'",
+    "runs": [
+      [
+        "We turn into a corner and come across a rather crudely drawn poster.\n\nWritten on the poster is a brief introduction next to a small note with directions.\n\n'Running low on time, but burning full of frustration? Then come join the Yurodiviye.\n\nAre you content with letting the inequity walk all over you?\n\nOr would you rather live for its destruction?\n\nDesire it, desire it hard!\n\nTake this poster, let it be your train ticket.\n\nAt the ■■■ alley, face the ■■ road and walk at a speed of 120km per day. Alone.'",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "\"This is the last evidence in this world that the light ever existed out there, at sea.\"\n\n\"Ha ha... but don't force yourselves to listen to this old man's ramblings.\"\n\n\"I can tell from your looks that none of you are very interested anyhow.\"\n\n\"It's getting late. Hurry you home, or to wherever you were going.\"\n\nAs we were descending the cliffs after bidding the old man farewell, I heard the splash of waves coming from behind us.\n\nThe old man was nowhere to be seen on the cliff.",
+    "runs": [
+      [
+        "\"This is the last evidence in this world that the light ever existed out there, at sea.\"\n\n\"Ha ha... but don't force yourselves to listen to this old man's ramblings.\"\n\n\"I can tell from your looks that none of you are very interested anyhow.\"\n\n\"It's getting late. Hurry you home, or to wherever you were going.\"\n\nAs we were descending the cliffs after bidding the old man farewell, I heard the splash of waves coming from behind us.\n\nThe old man was nowhere to be seen on the cliff.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "We cannot take our eyes off the spinning roulette wheel.\n\nThe roulette comes to a stop, just short of slipping past the blue slot.\n\n\"Too bad, that's a bust. And that means no prize money for you.\"\n\"Had a. Feeling. Don't. Ever. Come back.\"\n\nWe were booted out of there, empty-handed.",
+    "runs": [
+      [
+        "We cannot take our eyes off the spinning roulette wheel.\n\nThe roulette comes to a stop, just short of slipping past the blue slot.\n\n\"Too bad, that's a bust. And that means no prize money for you.\"\n\"Had a. Feeling. Don't. Ever. Come back.\"\n\nWe were booted out of there, empty-handed.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "In the blink of an eye, the Ardor Blossom Moth's beating wings engulfed the researchers before {0} could even react.\n\n... Then, slowly, the Abnormality turned to face us.",
+    "runs": [
+      [
+        "In the blink of an eye, the Ardor Blossom Moth's beating wings engulfed the researchers before {0} could even react.\n\n... Then, slowly, the Abnormality turned to face us.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "\"... You're not?\"\n\"Then might I... consider you naught but spies who have infiltrated the prison of the Royal Court?\"\n\nWe took to our heels as the woman, without giving us even a second to explain ourselves, charged at us with her weapon drawn.",
+    "runs": [
+      [
+        "\"... You're not?\"\n\"Then might I... consider you naught but spies who have infiltrated the prison of the Royal Court?\"\n\nWe took to our heels as the woman, without giving us even a second to explain ourselves, charged at us with her weapon drawn.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2>Identities without</color> <color=#bb521f>Lust Affinity Attack Skill</color> <color=#ebcaa2>take</color> <color=#fe4b48>10 SP</color> <color=#ebcaa2>damage!</color>",
+    "runs": [
+      ["Identities without", "#ebcaa2", null],
+      [" ", null, null],
+      ["Lust Affinity Attack Skill", "#bb521f", null],
+      [" ", null, null],
+      ["take", "#ebcaa2", null],
+      [" ", null, null],
+      ["10 SP", "#fe4b48", null],
+      [" ", null, null],
+      ["damage!", "#ebcaa2", null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2>All Allies </color> <color=#ebcaa2>healed for</color> <color=#00ff9c>30 HP</color> and <color=#80c9ff>SP.</color>",
+    "runs": [
+      ["All Allies ", "#ebcaa2", null],
+      [" ", null, null],
+      ["healed for", "#ebcaa2", null],
+      [" ", null, null],
+      ["30 HP", "#00ff9c", null],
+      [" and ", null, null],
+      ["SP.", "#80c9ff", null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2>Cost 50 gained</color>",
+    "runs": [["Cost 50 gained", "#ebcaa2", null]]
+  },
+  {
+    "input": "<color=#ebcaa2>Win the next battle to gain E.G.O Gift \"Pendant of Nostalgia\"!</color>",
+    "runs": [["Win the next battle to gain E.G.O Gift \"Pendant of Nostalgia\"!", "#ebcaa2", null]]
+  },
+  {
+    "input": "<color=#ebcaa2>E.G.O Gift \"T-1B Octagonal Bolt\" obtained!</color>",
+    "runs": [["E.G.O Gift \"T-1B Octagonal Bolt\" obtained!", "#ebcaa2", null]]
+  },
+  {
+    "input": "<color=#ebcaa2>E.G.O Gift \"Misaligned Transistor\" obtained!</color>",
+    "runs": [["E.G.O Gift \"Misaligned Transistor\" obtained!", "#ebcaa2", null]]
+  },
+  {
+    "input": "<color=#ebcaa2>Cost 40 lost</color>",
+    "runs": [["Cost 40 lost", "#ebcaa2", null]]
+  },
+  {
+    "input": "<color=#ebcaa2>E.G.O Gift \"Blackiron Barding\" obtained!</color>",
+    "runs": [["E.G.O Gift \"Blackiron Barding\" obtained!", "#ebcaa2", null]]
+  },
+  {
+    "input": "<color=#ebcaa2>Win the next battle to gain E.G.O Gift \"Trial Extraction : A.B.S\"!</color>",
+    "runs": [
+      ["Win the next battle to gain E.G.O Gift \"Trial Extraction : A.B.S\"!", "#ebcaa2", null]
+    ]
+  },
+  {
+    "input": "<color=#5bffde>Greater chance for high Tier E.G.O Gifts</color> to appear in Shops",
+    "runs": [
+      ["Greater chance for high Tier E.G.O Gifts", "#5bffde", null],
+      [" to appear in Shops", null, null]
+    ]
+  },
+  {
+    "input": "Starting <color=#dd0000>E.G.O Gift</color> Choice +{0}",
+    "runs": [
+      ["Starting ", null, null],
+      ["E.G.O Gift", "#dd0000", null],
+      [" Choice +{0}", null, null]
+    ]
+  },
+  {
+    "input": "눈처럼 보이는 그것을 응시했다.\n그것이 부르고 있는 끝없는 절망의\n노래와 통곡의 눈을 뚫어지게 쏘아보았다.\n\n그제야 그것이 안개가 아닌 것을 알 수 있었다.\n이어서 그것의 눈도, 입도 그저 착각 뿐임을 알 수 있었다.\n그저 음영이 사람과 같아 보였을 뿐.\n\n울음소리가 강한 바람의 소리였을\n뿐이라는 걸 깨닫자, 모든 것이 사라졌다.",
+    "runs": [
+      [
+        "눈처럼 보이는 그것을 응시했다.\n그것이 부르고 있는 끝없는 절망의\n노래와 통곡의 눈을 뚫어지게 쏘아보았다.\n\n그제야 그것이 안개가 아닌 것을 알 수 있었다.\n이어서 그것의 눈도, 입도 그저 착각 뿐임을 알 수 있었다.\n그저 음영이 사람과 같아 보였을 뿐.\n\n울음소리가 강한 바람의 소리였을\n뿐이라는 걸 깨닫자, 모든 것이 사라졌다.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "\"웃어? 웃어? 웃어!\"\n\n소음과도 같은 괴기한 웃음 소리가 퍼진다.\n\n\"웃을게! 웃을게!\"\n\n찌익, 휘리릭. 타다닥.\n\n굳은 가죽이 억지로 늘려지는 소리, 표정이 정신 없이 바뀌는 소리.\n\n그 모든 것들이 한 차례 휩쓸고 간 후에야, 나의 가죽을 앗아갔다는 걸 깨달을 수 있었다.",
+    "runs": [
+      [
+        "\"웃어? 웃어? 웃어!\"\n\n소음과도 같은 괴기한 웃음 소리가 퍼진다.\n\n\"웃을게! 웃을게!\"\n\n찌익, 휘리릭. 타다닥.\n\n굳은 가죽이 억지로 늘려지는 소리, 표정이 정신 없이 바뀌는 소리.\n\n그 모든 것들이 한 차례 휩쓸고 간 후에야, 나의 가죽을 앗아갔다는 걸 깨달을 수 있었다.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "유리병을 들고 그것에게 다가간다.\n\n하지만 내내 고민하다가 이내 돌아선다.\n\n도저히 저것이 지닌 오물은\n손을 내밀어 담지 못할 것만 같다.\n\n오히려, 담아서는 안 될 것이라는 생각이 든다.",
+    "runs": [
+      [
+        "유리병을 들고 그것에게 다가간다.\n\n하지만 내내 고민하다가 이내 돌아선다.\n\n도저히 저것이 지닌 오물은\n손을 내밀어 담지 못할 것만 같다.\n\n오히려, 담아서는 안 될 것이라는 생각이 든다.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "이 곳은 어두운 동굴이다.\n\n동굴속에서는 딱딱한 것을 부딪히는 듯한 소리가 시끄럽고 요란스럽게 불규칙적으로 들려온다.\n\n소음의 주인은 거대한 세 개의 두개골이다. 저마다 딱딱거리는 소리를 내며 앞으로 다가온다.\n\n그들은 몸이 없다. 그러니 구른다. 구르면서도 쉬지 않고 소리를 낸다.\n\n발 밑 까지 굴러온 세 해골을 보니, 셋 다 각각의 표정을 가지고 있다.\n\n하나를 선택해야 하는 걸까?",
+    "runs": [
+      [
+        "이 곳은 어두운 동굴이다.\n\n동굴속에서는 딱딱한 것을 부딪히는 듯한 소리가 시끄럽고 요란스럽게 불규칙적으로 들려온다.\n\n소음의 주인은 거대한 세 개의 두개골이다. 저마다 딱딱거리는 소리를 내며 앞으로 다가온다.\n\n그들은 몸이 없다. 그러니 구른다. 구르면서도 쉬지 않고 소리를 낸다.\n\n발 밑 까지 굴러온 세 해골을 보니, 셋 다 각각의 표정을 가지고 있다.\n\n하나를 선택해야 하는 걸까?",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "그림을 벽에서 떼어내자, 별안간 등 뒤가 묵지근해지는 느낌이 들었다.\n\n돌아보니, 진득한 연기가 아까보다 훨씬 많이 뿜어져 나오고 있었다.\n\n\"내게는 그것이 유일한 집이었는데...\"\n\n최대한 할 말을 삼키려는 듯한 그것의 모습은 차라리 절규에 가까웠다.\n\n다시 그림을 돌려놓으려고 하자...\n\n\"아니! 그러지 말게... 가져가게. 나는 결심했으니.\"\n\n라는 외침이 들려왔다.\n\n\"내가 자네의 집을 빼앗기 전에, 어서 가지고 달아나게. 어서.\"\n\n...그 말을 따라 서둘러 그림을 들고 빠져나왔다.",
+    "runs": [
+      [
+        "그림을 벽에서 떼어내자, 별안간 등 뒤가 묵지근해지는 느낌이 들었다.\n\n돌아보니, 진득한 연기가 아까보다 훨씬 많이 뿜어져 나오고 있었다.\n\n\"내게는 그것이 유일한 집이었는데...\"\n\n최대한 할 말을 삼키려는 듯한 그것의 모습은 차라리 절규에 가까웠다.\n\n다시 그림을 돌려놓으려고 하자...\n\n\"아니! 그러지 말게... 가져가게. 나는 결심했으니.\"\n\n라는 외침이 들려왔다.\n\n\"내가 자네의 집을 빼앗기 전에, 어서 가지고 달아나게. 어서.\"\n\n...그 말을 따라 서둘러 그림을 들고 빠져나왔다.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "'어때요, 비를 맞지 않으니 너무나 아늑하죠?'\n\n'이 빌어먹을 비만 내리면 먹을게 없어지지 뭡니까'\n\n'여러분만큼은 맛이 유지될 수 있어서 다행이에요'\n\n'저 비를 맞으면 녹는게 아니냐구요? 하하하 그럴리가요, 저 비는 오히려 당신들을 치료해주겠죠'\n\n'그러면 왜 녹아버린다고 말했냐고요?'\n\n'그야 당신들이 이 비를 다 맞아버렸다면... 매끈해진 당신의 겉 피부들을 제 손으로 녹여내 한땀 한땀 벗겨내야 할 테니까요.' \n\n'그런데 이제는 감사히도… 수고를 덜었군요'\n\n이보다 기쁜 일은 없다는 듯 활짝 웃으면서 그것이 말을 마쳤다.\n\n비는 조금씩 그쳐가고 있었다. ",
+    "runs": [
+      [
+        "'어때요, 비를 맞지 않으니 너무나 아늑하죠?'\n\n'이 빌어먹을 비만 내리면 먹을게 없어지지 뭡니까'\n\n'여러분만큼은 맛이 유지될 수 있어서 다행이에요'\n\n'저 비를 맞으면 녹는게 아니냐구요? 하하하 그럴리가요, 저 비는 오히려 당신들을 치료해주겠죠'\n\n'그러면 왜 녹아버린다고 말했냐고요?'\n\n'그야 당신들이 이 비를 다 맞아버렸다면... 매끈해진 당신의 겉 피부들을 제 손으로 녹여내 한땀 한땀 벗겨내야 할 테니까요.' \n\n'그런데 이제는 감사히도… 수고를 덜었군요'\n\n이보다 기쁜 일은 없다는 듯 활짝 웃으면서 그것이 말을 마쳤다.\n\n비는 조금씩 그쳐가고 있었다. ",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "'그래서 였구나 네가 이곳에 오자마자...'\n\n'이 종이 뭉치들이 미친듯이 너를 향해 부스럭 거리고 있다고, 들려?'\n\n'여기에 적힌 건, 네 이름이지?'\n\n반가움인지 원망의 표출인지 색 바랜 종이들이 아우성 치는 소리가 들린다.\n\n어쩔 수 없지. 담담하게 지난 날의 과오를 마주하자.  ",
+    "runs": [
+      [
+        "'그래서 였구나 네가 이곳에 오자마자...'\n\n'이 종이 뭉치들이 미친듯이 너를 향해 부스럭 거리고 있다고, 들려?'\n\n'여기에 적힌 건, 네 이름이지?'\n\n반가움인지 원망의 표출인지 색 바랜 종이들이 아우성 치는 소리가 들린다.\n\n어쩔 수 없지. 담담하게 지난 날의 과오를 마주하자.  ",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "악수를 하기 전엔 손에 묻은 땀부터 닦아야 하는 게 기본 예절이라는 걸 잊고 만 걸까.\n\n나는 그 손을 놓쳐버렸고 비어버린 그 손아귀는 다른 왼손을 찾듯 꿈틀거린다.\n\n하지만 시도만으로도 그 결핍은 메꿔졌는지 더 이상 무분별하게 헤집으려 하진 않는다.",
+    "runs": [
+      [
+        "악수를 하기 전엔 손에 묻은 땀부터 닦아야 하는 게 기본 예절이라는 걸 잊고 만 걸까.\n\n나는 그 손을 놓쳐버렸고 비어버린 그 손아귀는 다른 왼손을 찾듯 꿈틀거린다.\n\n하지만 시도만으로도 그 결핍은 메꿔졌는지 더 이상 무분별하게 헤집으려 하진 않는다.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "수감자들과 함께 거대한 팔각 나사를 주웠다.\n\n천천히 멀어짐에도 공장에선 아무런 반응도 없다.\n\n마치 그 나사는 우리에게 필요하지 않다는 듯, 공장은 이전과 다를 바 없이 돌아간다.",
+    "runs": [
+      [
+        "수감자들과 함께 거대한 팔각 나사를 주웠다.\n\n천천히 멀어짐에도 공장에선 아무런 반응도 없다.\n\n마치 그 나사는 우리에게 필요하지 않다는 듯, 공장은 이전과 다를 바 없이 돌아간다.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "\"안타깝다라...\"\n\n검을 찬 자가 팔짱을 낀 채로 한숨을 푹 쉰다.\n\n\"그래, 그리 생각할 수도 있겠지. 생각은 자유히 해야하는 법.\"\n\n\"그러나 별 생각이 없을 것이라면, 함부로 안타까움을 느끼는 것도 죄악일 수 있음은 알았으면 좋겠군.\"\n\n둘은 어딘가 어두운 표정을 지으며, 등을 돌려 어딘가로 걸어나갔다.",
+    "runs": [
+      [
+        "\"안타깝다라...\"\n\n검을 찬 자가 팔짱을 낀 채로 한숨을 푹 쉰다.\n\n\"그래, 그리 생각할 수도 있겠지. 생각은 자유히 해야하는 법.\"\n\n\"그러나 별 생각이 없을 것이라면, 함부로 안타까움을 느끼는 것도 죄악일 수 있음은 알았으면 좋겠군.\"\n\n둘은 어딘가 어두운 표정을 지으며, 등을 돌려 어딘가로 걸어나갔다.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "\"어? 그, 그래. 너희도 좋은 여행 해라.\"\n\n인사하고 도망치듯 다른 줄로 옮겼다..",
+    "runs": [
+      [
+        "\"어? 그, 그래. 너희도 좋은 여행 해라.\"\n\n인사하고 도망치듯 다른 줄로 옮겼다..",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "[{0}] 수감자가 발을 내디딜 때마다, 나무 바닥이 끼릭거린다.\n\n주변의 불빛은 경고를 보내듯 불안하게 흔들린다.\n\n[{0}] 수감자가 천천히 허리를 숙여, 침대 밑을 바라보았다.\n\n그곳에는 타오르지 않는 랜턴과 촛대가 쓰러져있다.\n\n걱정하던 것은 보이지 않는다.\n\n침대 밑에는 그 무엇도 살고 있지 않다.",
+    "runs": [
+      [
+        "[{0}] 수감자가 발을 내디딜 때마다, 나무 바닥이 끼릭거린다.\n\n주변의 불빛은 경고를 보내듯 불안하게 흔들린다.\n\n[{0}] 수감자가 천천히 허리를 숙여, 침대 밑을 바라보았다.\n\n그곳에는 타오르지 않는 랜턴과 촛대가 쓰러져있다.\n\n걱정하던 것은 보이지 않는다.\n\n침대 밑에는 그 무엇도 살고 있지 않다.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "이런 곳에 오래 있어봤자, 수감자들에게 좋지 못한 영향을 줄 뿐이다.\n\n살펴보지 않고, 빠르게 지나치기로 했다.",
+    "runs": [
+      [
+        "이런 곳에 오래 있어봤자, 수감자들에게 좋지 못한 영향을 줄 뿐이다.\n\n살펴보지 않고, 빠르게 지나치기로 했다.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "{0} 수감자가 나섰지만, 형태를 구분하기 힘든 그 검은 인영에게 공격은 닿지 않았고, {0} 수감자에게 상처만 늘어날 뿐이었다.\n\n검은 것이 다시 환상체의 품 속으로 빨려 들어갔고, 우리는 다시 공격 받기 전에 이 곳을 빠르게 빠져나가기로 했다.\n\n…하지만 아직도, 우리의 곁에 그 환상체의 숨결이 감도는 듯한 기분이 든다.",
+    "runs": [
+      [
+        "{0} 수감자가 나섰지만, 형태를 구분하기 힘든 그 검은 인영에게 공격은 닿지 않았고, {0} 수감자에게 상처만 늘어날 뿐이었다.\n\n검은 것이 다시 환상체의 품 속으로 빨려 들어갔고, 우리는 다시 공격 받기 전에 이 곳을 빠르게 빠져나가기로 했다.\n\n…하지만 아직도, 우리의 곁에 그 환상체의 숨결이 감도는 듯한 기분이 든다.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "\"...뭐? 그게 말이 돼?\"\n\n{0} 수감자의 조언이 마음에 안 들었는지, 시춘은 그에게 근신 처분을 내렸다.\n\n\"뜻을 따르겠습니다. 두 번 다시 이런 일은 없게... 하겠습니다.\"\n\n흑수-유는  기꺼이 자신의 양팔을 결박했다.\n\n...시춘은 만족스럽지 못한 것 같다.",
+    "runs": [
+      [
+        "\"...뭐? 그게 말이 돼?\"\n\n{0} 수감자의 조언이 마음에 안 들었는지, 시춘은 그에게 근신 처분을 내렸다.\n\n\"뜻을 따르겠습니다. 두 번 다시 이런 일은 없게... 하겠습니다.\"\n\n흑수-유는  기꺼이 자신의 양팔을 결박했다.\n\n...시춘은 만족스럽지 못한 것 같다.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "이런 곳에서 시간을 낭비할만큼 상황이 여유롭지 않다.\n\n건틀릿을 뒤로 하고 우리는 계속 전진했다.",
+    "runs": [
+      [
+        "이런 곳에서 시간을 낭비할만큼 상황이 여유롭지 않다.\n\n건틀릿을 뒤로 하고 우리는 계속 전진했다.",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "휴게실에 E.G.O 장비를 입은 직원들이 도란도란 모여있다.\n그들은 모두 커피가 담긴 흰 머그컵을 손에 쥐고 있다.\n\n\"응? 못보던 사람들인데, 어디 부서야?\"",
+    "runs": [
+      [
+        "휴게실에 E.G.O 장비를 입은 직원들이 도란도란 모여있다.\n그들은 모두 커피가 담긴 흰 머그컵을 손에 쥐고 있다.\n\n\"응? 못보던 사람들인데, 어디 부서야?\"",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "LCE의 연구원들이 거미집에서 수거한 물품들을 들고 바쁘게 돌아다니고 있다.\n\n그 중 눈에 익은 것이 보여 그 주위를 기웃거리고 있자, 한 연구원이 다가와 말을 걸었다.\n\n“아, 그쪽에 쌓여있는 건 이번에 약지의 갤러리로 보이는 곳에서 가져온 샘플입니다. 성분 분석은 다 끝낸 것들이라 필요하시다면 가져가셔도 됩니다.”\n\n어떻게 할까?",
+    "runs": [
+      [
+        "LCE의 연구원들이 거미집에서 수거한 물품들을 들고 바쁘게 돌아다니고 있다.\n\n그 중 눈에 익은 것이 보여 그 주위를 기웃거리고 있자, 한 연구원이 다가와 말을 걸었다.\n\n“아, 그쪽에 쌓여있는 건 이번에 약지의 갤러리로 보이는 곳에서 가져온 샘플입니다. 성분 분석은 다 끝낸 것들이라 필요하시다면 가져가셔도 됩니다.”\n\n어떻게 할까?",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2>모든 아군</color> <color=#80c9ff>15만큼 정신력</color> <color=#ebcaa2>회복</color>",
+    "runs": [
+      ["모든 아군", "#ebcaa2", null],
+      [" ", null, null],
+      ["15만큼 정신력", "#80c9ff", null],
+      [" ", null, null],
+      ["회복", "#ebcaa2", null]
+    ]
+  },
+  {
+    "input": "<color=#e48801>나태 속성 공격 스킬</color><color=#ebcaa2>을 보유하지 않은 인격</color> <color=#fe4b48>12만큼 체력</color>과 <color=#fe4b48>정신력</color> <color=#ebcaa2>피해!</color>",
+    "runs": [
+      ["나태 속성 공격 스킬", "#e48801", null],
+      ["을 보유하지 않은 인격", "#ebcaa2", null],
+      [" ", null, null],
+      ["12만큼 체력", "#fe4b48", null],
+      ["과 ", null, null],
+      ["정신력", "#fe4b48", null],
+      [" ", null, null],
+      ["피해!", "#ebcaa2", null]
+    ]
+  },
+  {
+    "input": "<color=#185188>오만 속성 공격 스킬</color><color=#ebcaa2>을 보유하지 않은 인격</color> <color=#fe4b48>10만큼 체력</color> <color=#ebcaa2>피해!</color>",
+    "runs": [
+      ["오만 속성 공격 스킬", "#185188", null],
+      ["을 보유하지 않은 인격", "#ebcaa2", null],
+      [" ", null, null],
+      ["10만큼 체력", "#fe4b48", null],
+      [" ", null, null],
+      ["피해!", "#ebcaa2", null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2>모든 아군</color> <color=#e30000>11만큼 체력</color>, <color=#fe4b48>정신력</color> <color=#ebcaa2>피해!</color>",
+    "runs": [
+      ["모든 아군", "#ebcaa2", null],
+      [" ", null, null],
+      ["11만큼 체력", "#e30000", null],
+      [", ", null, null],
+      ["정신력", "#fe4b48", null],
+      [" ", null, null],
+      ["피해!", "#ebcaa2", null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2>모든 아군</color> <color=#fe4b48>20만큼 정신력</color> <color=#ebcaa2>피해!</color>",
+    "runs": [
+      ["모든 아군", "#ebcaa2", null],
+      [" ", null, null],
+      ["20만큼 정신력", "#fe4b48", null],
+      [" ", null, null],
+      ["피해!", "#ebcaa2", null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2>E.G.O 기프트 \"미니어처 전봇대\" 획득!</color>",
+    "runs": [["E.G.O 기프트 \"미니어처 전봇대\" 획득!", "#ebcaa2", null]]
+  },
+  {
+    "input": "<color=#ebcaa2>E.G.O 기프트 \"치사랑\" 획득!</color>",
+    "runs": [["E.G.O 기프트 \"치사랑\" 획득!", "#ebcaa2", null]]
+  },
+  {
+    "input": "<color=#ebcaa2>E.G.O 기프트 \"묘각\" 획득!</color>",
+    "runs": [["E.G.O 기프트 \"묘각\" 획득!", "#ebcaa2", null]]
+  },
+  {
+    "input": "<color=#ebcaa2>E.G.O 기프트 \"덕목 - 용(勇)\" 획득!</color>",
+    "runs": [["E.G.O 기프트 \"덕목 - 용(勇)\" 획득!", "#ebcaa2", null]]
+  },
+  {
+    "input": "<color=#ebcaa2>E.G.O 기프트 \"워킹 베이스\" 획득!</color>",
+    "runs": [["E.G.O 기프트 \"워킹 베이스\" 획득!", "#ebcaa2", null]]
+  },
+  {
+    "input": "<color=#f8c200>전투 보상 카드에서 별빛 선택 시, 코스트 +{0}</color>",
+    "runs": [["전투 보상 카드에서 별빛 선택 시, 코스트 +{0}", "#f8c200", null]]
+  },
+  {
+    "input": "<color=#dd0000>테마팩 새로고침</color> 횟수 <color=#f8c200>+{0}</color>",
+    "runs": [
+      ["테마팩 새로고침", "#dd0000", null],
+      [" 횟수 ", null, null],
+      ["+{0}", "#f8c200", null]
+    ]
+  },
+  {
+    "input": "目のように見えるそれを凝視した。\nそれが歌っている果てしない絶望の\n歌と痛哭の目を穴が空くほど睨み付けた。\n\nそしてようやく、それが霧でないことが分かった。\n続いてそれの目も、口もただ錯覚であることが分かった。\nただ陰影が人のように見えただけ。\n\n泣き声が強い風の音でしかなかった\nことに気付くと、全てが消えた。",
+    "runs": [
+      [
+        "目のように見えるそれを凝視した。\nそれが歌っている果てしない絶望の\n歌と痛哭の目を穴が空くほど睨み付けた。\n\nそしてようやく、それが霧でないことが分かった。\n続いてそれの目も、口もただ錯覚であることが分かった。\nただ陰影が人のように見えただけ。\n\n泣き声が強い風の音でしかなかった\nことに気付くと、全てが消えた。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "「笑う？笑う？笑う！」\n\n騒音のような怪奇な笑い声が広がる。\n\n「笑うね！笑うね！」\n\nビリッ、ひゅいぃっ。タダダッ。\n\n固い革が無理やり伸ばされる音、表情が慌ただしく変わる音。\n\nそれら全てが一斉に押し寄せ、そして去ってようやく、私の皮を奪っていったことに気づいた。",
+    "runs": [
+      [
+        "「笑う？笑う？笑う！」\n\n騒音のような怪奇な笑い声が広がる。\n\n「笑うね！笑うね！」\n\nビリッ、ひゅいぃっ。タダダッ。\n\n固い革が無理やり伸ばされる音、表情が慌ただしく変わる音。\n\nそれら全てが一斉に押し寄せ、そして去ってようやく、私の皮を奪っていったことに気づいた。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "白いけど、暗い花々の畑が広がっている。\nここの空は赤く、冷たい風が吹きすさんでいる。\n\n花畑の真ん中で、巨大な花がゆらゆら動く。\n\nまるで遠くから、誰かが手招きしているようだ。",
+    "runs": [
+      [
+        "白いけど、暗い花々の畑が広がっている。\nここの空は赤く、冷たい風が吹きすさんでいる。\n\n花畑の真ん中で、巨大な花がゆらゆら動く。\n\nまるで遠くから、誰かが手招きしているようだ。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "笑っている骸骨を持ち上げた。\n\n何が楽しいのか、それはずっと歯をカタカタ鳴らしながら手の中で動く。\n\nそうするうちにふと、身体が軽くなるのを感じる。\n\n周りを見回すと、みんなそうらしい。\n\n不思議だなと思いながら両手に目を向けると、いつの間にか骸骨は消えていた。",
+    "runs": [
+      [
+        "笑っている骸骨を持ち上げた。\n\n何が楽しいのか、それはずっと歯をカタカタ鳴らしながら手の中で動く。\n\nそうするうちにふと、身体が軽くなるのを感じる。\n\n周りを見回すと、みんなそうらしい。\n\n不思議だなと思いながら両手に目を向けると、いつの間にか骸骨は消えていた。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "[しくしく。どうしてこれを置いていくんじゃ。でもありがたいから、これでも持って行きなさい。でもとてもつらいんじゃ。]\n\nそれが絵を眺めているのは、単なる鑑賞のためという雰囲気ではなかった。\n\n凝視を超える執着、ある意味では愛着とも似ていた。\n\n絵を持っていくのはやめることにした。\n\n「どうして…これを置いていくんじゃ…。」\n\nその声は震えていたが、確かな安堵の空気が感じられたりもした。\n\n「そう、これは帰れない儂の家じゃ。眺めているだけでも悲しいが…眺めないと安心できん。」\n\n「絵を置いてくれたのはつらいが…ありがとう。代わりに旅費としてこれでも持って行きなさい。」\n\nそれは明るく輝く何かを握らせてくると、再び絵を見始めた。",
+    "runs": [
+      [
+        "[しくしく。どうしてこれを置いていくんじゃ。でもありがたいから、これでも持って行きなさい。でもとてもつらいんじゃ。]\n\nそれが絵を眺めているのは、単なる鑑賞のためという雰囲気ではなかった。\n\n凝視を超える執着、ある意味では愛着とも似ていた。\n\n絵を持っていくのはやめることにした。\n\n「どうして…これを置いていくんじゃ…。」\n\nその声は震えていたが、確かな安堵の空気が感じられたりもした。\n\n「そう、これは帰れない儂の家じゃ。眺めているだけでも悲しいが…眺めないと安心できん。」\n\n「絵を置いてくれたのはつらいが…ありがとう。代わりに旅費としてこれでも持って行きなさい。」\n\nそれは明るく輝く何かを握らせてくると、再び絵を見始めた。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "好意を足蹴にして、私たちは雨に降られながら足を速めた。\n\n夢中で走っていると、いつの間にか手に何かを握っていることに気づいた。\n\nその傘を差さなかったことが、私たちが握った幸運だったのだろうか。",
+    "runs": [
+      [
+        "好意を足蹴にして、私たちは雨に降られながら足を速めた。\n\n夢中で走っていると、いつの間にか手に何かを握っていることに気づいた。\n\nその傘を差さなかったことが、私たちが握った幸運だったのだろうか。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "華美な椅子に縛られている存在がある。\n\n厳かにこちらを見つめてきているようだ。\n\nそのまま何かを言おうとしたようだが、その口は縛られている。\n\n椅子に座った王は体をひねりながら近寄ろうとするが…すぐさま縛られたものに引きずり戻される。\n\n美しい赤色だが、残忍に引き寄せる生地。これは…。",
+    "runs": [
+      [
+        "華美な椅子に縛られている存在がある。\n\n厳かにこちらを見つめてきているようだ。\n\nそのまま何かを言おうとしたようだが、その口は縛られている。\n\n椅子に座った王は体をひねりながら近寄ろうとするが…すぐさま縛られたものに引きずり戻される。\n\n美しい赤色だが、残忍に引き寄せる生地。これは…。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "広く長く伸びた道路が見える。\n\n道路の入口の前には表示板を持って立っている者が見える。\n\n『片道道路だよ。 Uターンはなし。』\n\n『この道路を進めば、再び戻ってくるまでとても沢山時間が掛かるだろうね。』\n\nその言葉を裏付けるように、道路の端は見当がつかないほど遥か遠く見える。",
+    "runs": [
+      [
+        "広く長く伸びた道路が見える。\n\n道路の入口の前には表示板を持って立っている者が見える。\n\n『片道道路だよ。 Uターンはなし。』\n\n『この道路を進めば、再び戻ってくるまでとても沢山時間が掛かるだろうね。』\n\nその言葉を裏付けるように、道路の端は見当がつかないほど遥か遠く見える。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "じっと見守っていると、ネジは再び工場の中へと戻っていった。\n\nネジは工場の部品だったんだろうか、それとも工場で生産されていたものだったんだろうか。\n\nそれは分からないけども、聞こえてくる金属音が少しだけ繊細になった気がする。",
+    "runs": [
+      [
+        "じっと見守っていると、ネジは再び工場の中へと戻っていった。\n\nネジは工場の部品だったんだろうか、それとも工場で生産されていたものだったんだろうか。\n\nそれは分からないけども、聞こえてくる金属音が少しだけ繊細になった気がする。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "「はっ！」\n\n剣を腰に携えた者が笑い出した。\n\n「愚問賢答だ。都市じゃこんな問答に意味があるわけなどないだろう。」\n\n彼はガハハとより豪快に笑い、自分の剣についた房飾りをぐっと引きちぎって渡してきた。\n\n「そなたの答えが気に入った。これは贈り物だ。剣契の人と衝突することがあれば、これを見せるんだよ。」\n\n「どんな使い方をしても役に立つだろう。」\n\n彼らはそう言い、手を振りながら別の方向へと向かっていった。",
+    "runs": [
+      [
+        "「はっ！」\n\n剣を腰に携えた者が笑い出した。\n\n「愚問賢答だ。都市じゃこんな問答に意味があるわけなどないだろう。」\n\n彼はガハハとより豪快に笑い、自分の剣についた房飾りをぐっと引きちぎって渡してきた。\n\n「そなたの答えが気に入った。これは贈り物だ。剣契の人と衝突することがあれば、これを見せるんだよ。」\n\n「どんな使い方をしても役に立つだろう。」\n\n彼らはそう言い、手を振りながら別の方向へと向かっていった。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "「高価な工房で作ってもらったから、まず頑丈なんだ。フィクサーの仕事をしていると、手や腕を怪我することが多いだろう？」\n\n「そのたびに腕を再生させるより、ずっと安い費用で修理してもらえるんだ。」\n\n「それに、タイピングしながらも電話を楽に受けられるし…資料を見ているときにアイスクリームの缶詰も余裕で開けられる。」\n\n「そういえば、西部にいたときなんかは、四本の腕でも足りないくらいの仕事があって―」\n\n「……。」\n\n耳はないけど、耳が痛くなるってこんな感じなんだろうという気分がした。\n\n四本の腕の利点をたくさん教えてもらった。\n\n仕事をしながら缶詰を開けられる辺りまでは覚えている。\n\n「おっと、そろそろこの列車に乗らなきゃならないんだ。」\n\n「好奇心旺盛な諸君。これも何かの縁だろうし、これをどうぞ。」",
+    "runs": [
+      [
+        "「高価な工房で作ってもらったから、まず頑丈なんだ。フィクサーの仕事をしていると、手や腕を怪我することが多いだろう？」\n\n「そのたびに腕を再生させるより、ずっと安い費用で修理してもらえるんだ。」\n\n「それに、タイピングしながらも電話を楽に受けられるし…資料を見ているときにアイスクリームの缶詰も余裕で開けられる。」\n\n「そういえば、西部にいたときなんかは、四本の腕でも足りないくらいの仕事があって―」\n\n「……。」\n\n耳はないけど、耳が痛くなるってこんな感じなんだろうという気分がした。\n\n四本の腕の利点をたくさん教えてもらった。\n\n仕事をしながら缶詰を開けられる辺りまでは覚えている。\n\n「おっと、そろそろこの列車に乗らなきゃならないんだ。」\n\n「好奇心旺盛な諸君。これも何かの縁だろうし、これをどうぞ。」",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "囚人[{0}]が足を踏み出すたびに、木の床が軋(きし)む。\n\n周囲の明かりは、まるで警告するかのように不安げに揺れる。\n\n囚人[{0}]はゆっくりと腰をかがめ、ベッドの下を覗き込んだ。\n\n囚人[{0}]はしばらく固まったままだったが、しばらくしてゆっくりと後退った。\n\n床を引っ掻く音が聞こえ、振り返る間もなく他の囚人たちと一緒に部屋から飛び出した。\n\nベッドの下には、怪物が棲んでいる。",
+    "runs": [
+      [
+        "囚人[{0}]が足を踏み出すたびに、木の床が軋(きし)む。\n\n周囲の明かりは、まるで警告するかのように不安げに揺れる。\n\n囚人[{0}]はゆっくりと腰をかがめ、ベッドの下を覗き込んだ。\n\n囚人[{0}]はしばらく固まったままだったが、しばらくしてゆっくりと後退った。\n\n床を引っ掻く音が聞こえ、振り返る間もなく他の囚人たちと一緒に部屋から飛び出した。\n\nベッドの下には、怪物が棲んでいる。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "囚人{0}は何かを見つけたらしく、壁の隅を指差した。\n\n無数の文字の間にできた隙間にそっと手を差し込むと…。\n\n誰かが隠していたらしきカードが一枚、指先に引っかかった。\n\nどこかしらで使えるだろう。",
+    "runs": [
+      [
+        "囚人{0}は何かを見つけたらしく、壁の隅を指差した。\n\n無数の文字の間にできた隙間にそっと手を差し込むと…。\n\n誰かが隠していたらしきカードが一枚、指先に引っかかった。\n\nどこかしらで使えるだろう。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "鮮血を宿した花びらは、今にも血を滴らせんばかりに赤い。\n\nその花びらにどこからか集めた血液を分け与えている茎もまた、黒ずんだ赤色を帯びて奇妙に曲がっている。\n\nその茎には、ぞっとするほど鋭い棘がびっしりと生えている。\n\nふと、その棘を一本折れば、真っ赤な血液が流れ出るのではないかという好奇心が湧き上がった。",
+    "runs": [
+      [
+        "鮮血を宿した花びらは、今にも血を滴らせんばかりに赤い。\n\nその花びらにどこからか集めた血液を分け与えている茎もまた、黒ずんだ赤色を帯びて奇妙に曲がっている。\n\nその茎には、ぞっとするほど鋭い棘がびっしりと生えている。\n\nふと、その棘を一本折れば、真っ赤な血液が流れ出るのではないかという好奇心が湧き上がった。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "授業が全部終わったある午後。\n\nシーチュンは囚人たちを自分の執務室に招いた。\n\nある囚人が床に落ちていた紅い布について尋ねると、シーチュンは首をかしげた。\n\n「それは私の物じゃないよ。変だな…先代のジア・ムーの持ち物は全部片づけたはずなんだけど…。」\n\n紅い布は、不快な血(汚血)でびっしょりと濡れていた。",
+    "runs": [
+      [
+        "授業が全部終わったある午後。\n\nシーチュンは囚人たちを自分の執務室に招いた。\n\nある囚人が床に落ちていた紅い布について尋ねると、シーチュンは首をかしげた。\n\n「それは私の物じゃないよ。変だな…先代のジア・ムーの持ち物は全部片づけたはずなんだけど…。」\n\n紅い布は、不快な血(汚血)でびっしょりと濡れていた。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "囚人{0}が血と肉片を完全に剥ぎ取った。\n\n「あっ…。」\n\nしかし、どこかしら変なところに触れたからか、ガントレットは作動しなかった。",
+    "runs": [
+      [
+        "囚人{0}が血と肉片を完全に剥ぎ取った。\n\n「あっ…。」\n\nしかし、どこかしら変なところに触れたからか、ガントレットは作動しなかった。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "様々なギフトを目にした職員たちは、一斉に気の毒そうな眼差しで囚人を見つめ始めた。\n\n「よくマトモでいられるね。」\n「上層はどう？あそこ、作業量がすごいって聞くけど。」\n\n次々と労いの言葉を掛けていた職員のうち一人が少し席を外したかと思うと、コーヒーの入ったマグカップを差し出してきた。\n\n「気をしっかり持って、今日も頑張ってこ。」",
+    "runs": [
+      [
+        "様々なギフトを目にした職員たちは、一斉に気の毒そうな眼差しで囚人を見つめ始めた。\n\n「よくマトモでいられるね。」\n「上層はどう？あそこ、作業量がすごいって聞くけど。」\n\n次々と労いの言葉を掛けていた職員のうち一人が少し席を外したかと思うと、コーヒーの入ったマグカップを差し出してきた。\n\n「気をしっかり持って、今日も頑張ってこ。」",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "どこからか、穏やかな音楽が流れてきているみたいだ。\n\n音を辿っていくと、いろんな作品が展示されている空間が現れた。\n\n薬指のギャラリーみたいだけど…見て回っているうちに、作品はなく展示台だけが置かれている場所を見つけた。\n\n片手でも持ち上げられるくらいの大きさで、持っていくのも悪くなさそうだ。\n\nひとまず持っていこうか？",
+    "runs": [
+      [
+        "どこからか、穏やかな音楽が流れてきているみたいだ。\n\n音を辿っていくと、いろんな作品が展示されている空間が現れた。\n\n薬指のギャラリーみたいだけど…見て回っているうちに、作品はなく展示台だけが置かれている場所を見つけた。\n\n片手でも持ち上げられるくらいの大きさで、持っていくのも悪くなさそうだ。\n\nひとまず持っていこうか？",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2>E.G.Oギフト\"血液採取パック\"獲得！</color>",
+    "runs": [["E.G.Oギフト\"血液採取パック\"獲得！", "#ebcaa2", null]]
+  },
+  {
+    "input": "<color=#ebcaa2>選択した人格</color> <color=#00ff9c>体力と</color><color=#80c9ff>精神力を</color> <color=#ebcaa2>20回復</color>",
+    "runs": [
+      ["選択した人格", "#ebcaa2", null],
+      [" ", null, null],
+      ["体力と", "#00ff9c", null],
+      ["精神力を", "#80c9ff", null],
+      [" ", null, null],
+      ["20回復", "#ebcaa2", null]
+    ]
+  },
+  {
+    "input": "<color=#185188>傲慢属性の攻撃スキル</color><color=#ebcaa2>を保有していない人格に</color><color=#fe4b48>25</color><color=#ebcaa2>ダメージ！</color>",
+    "runs": [
+      ["傲慢属性の攻撃スキル", "#185188", null],
+      ["を保有していない人格に", "#ebcaa2", null],
+      ["25", "#fe4b48", null],
+      ["ダメージ！", "#ebcaa2", null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2>E.G.Oギフト\"煙と鉄条網\"獲得！</color>",
+    "runs": [["E.G.Oギフト\"煙と鉄条網\"獲得！", "#ebcaa2", null]]
+  },
+  {
+    "input": "<color=#ebcaa2>E.G.Oギフト\"ネブライザー\"獲得！</color>",
+    "runs": [["E.G.Oギフト\"ネブライザー\"獲得！", "#ebcaa2", null]]
+  },
+  {
+    "input": "<color=#ebcaa2>次の戦闘に勝利時、E.G.Oギフト\"1Bタイプ八角ボルト\"を獲得！</color>",
+    "runs": [["次の戦闘に勝利時、E.G.Oギフト\"1Bタイプ八角ボルト\"を獲得！", "#ebcaa2", null]]
+  },
+  {
+    "input": "<color=#ebcaa2>全味方</color> <color=#e30000>体力に20</color><color=#ebcaa2>ダメージ</color>、<color=#fe4b48>精神力に12</color><color=#ebcaa2>ダメージ！</color>",
+    "runs": [
+      ["全味方", "#ebcaa2", null],
+      [" ", null, null],
+      ["体力に20", "#e30000", null],
+      ["ダメージ", "#ebcaa2", null],
+      ["、", null, null],
+      ["精神力に12", "#fe4b48", null],
+      ["ダメージ！", "#ebcaa2", null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2>E.G.Oギフト\"義理の鎖\"獲得！</color>",
+    "runs": [["E.G.Oギフト\"義理の鎖\"獲得！", "#ebcaa2", null]]
+  },
+  {
+    "input": "<color=#ebcaa2>E.G.Oギフト\"黒鉄馬甲\"獲得！</color>",
+    "runs": [["E.G.Oギフト\"黒鉄馬甲\"獲得！", "#ebcaa2", null]]
+  },
+  {
+    "input": "<color=#ebcaa2>次の戦闘に勝利時、E.G.Oギフト\"試験抽出 : 紅炎殺\"を獲得！</color>",
+    "runs": [["次の戦闘に勝利時、E.G.Oギフト\"試験抽出 : 紅炎殺\"を獲得！", "#ebcaa2", null]]
+  },
+  {
+    "input": "ショップにて<color=#5bffde>高いランクのギフト出現確率上昇</color>",
+    "runs": [
+      ["ショップにて", null, null],
+      ["高いランクのギフト出現確率上昇", "#5bffde", null]
+    ]
+  },
+  {
+    "input": "<color=#f8c200>戦闘報酬カードから星明かりを選択時、コスト +{0}</color>",
+    "runs": [["戦闘報酬カードから星明かりを選択時、コスト +{0}", "#f8c200", null]]
+  },
+  {
+    "input": "它将血分给需要的人。\n但是，能分出的也只有它自己的血。\n\n即便是不需要血的人\n它也会用剪刀放干对方的血，再注入自己的血液。\n\n正因如此，它的面前只有需要血的人。",
+    "runs": [
+      [
+        "它将血分给需要的人。\n但是，能分出的也只有它自己的血。\n\n即便是不需要血的人\n它也会用剪刀放干对方的血，再注入自己的血液。\n\n正因如此，它的面前只有需要血的人。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "“呜呜呜！”\n\n如同无数生命共同迸发而出的哭声贯穿双耳。\n\n“哇！哇！”\n\n当那令人失魂落魄的哭声消失时，\n\n它已经离去了，空余饱经风霜的心灵。",
+    "runs": [
+      [
+        "“呜呜呜！”\n\n如同无数生命共同迸发而出的哭声贯穿双耳。\n\n“哇！哇！”\n\n当那令人失魂落魄的哭声消失时，\n\n它已经离去了，空余饱经风霜的心灵。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "我挪开视线，原路返回。\n那巨大的花更加激动地摇曳起来，似乎在迫使我们看向它。\n那副姿态令人莫名感到不安与恐怖。\n将看花了眼的罪人们召集起来后，我们立刻离开了花甸。",
+    "runs": [
+      [
+        "我挪开视线，原路返回。\n那巨大的花更加激动地摇曳起来，似乎在迫使我们看向它。\n那副姿态令人莫名感到不安与恐怖。\n将看花了眼的罪人们召集起来后，我们立刻离开了花甸。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "我举起了愤怒的颅骨。\n\n仿佛被什么东西冒犯到了一般，它怒气冲天，咬牙切齿地想要咬住空气中的什么东西。\n\n突然，我感觉我的手变轻了。\n\n“这是……”\n\n一直嘎嘎作响的骷髅消失得无影无踪，唯有一个发光的物体留在我的手中。",
+    "runs": [
+      [
+        "我举起了愤怒的颅骨。\n\n仿佛被什么东西冒犯到了一般，它怒气冲天，咬牙切齿地想要咬住空气中的什么东西。\n\n突然，我感觉我的手变轻了。\n\n“这是……”\n\n一直嘎嘎作响的骷髅消失得无影无踪，唯有一个发光的物体留在我的手中。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "我告诉那个人，它手中的只是个蓝色弹珠。\n\n“是的。在你看来它们当然就是这样。”\n\n那个人很平静，就好像他早就知道我想说什么一样。\n\n“如果你真的这么想的话，那就随便吧。”\n\n他缓缓摇动着手中的珠子，很快消失了。\n\n感觉我好像知道了什么重要的真相。",
+    "runs": [
+      [
+        "我告诉那个人，它手中的只是个蓝色弹珠。\n\n“是的。在你看来它们当然就是这样。”\n\n那个人很平静，就好像他早就知道我想说什么一样。\n\n“如果你真的这么想的话，那就随便吧。”\n\n他缓缓摇动着手中的珠子，很快消失了。\n\n感觉我好像知道了什么重要的真相。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "这是一间空无一物的水泥房。\n\n但我无法摆脱或许有什么东西在这儿的毛骨悚然感。\n\n其他罪人们不同意我并嗤之以鼻。\n\n房间里有一个开关。",
+    "runs": [
+      [
+        "这是一间空无一物的水泥房。\n\n但我无法摆脱或许有什么东西在这儿的毛骨悚然感。\n\n其他罪人们不同意我并嗤之以鼻。\n\n房间里有一个开关。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "一直绑着绷带的伤口，没有愈合的迹象，只会继续化脓腐烂。\n\n那不是在治疗伤口，只是在隐藏丑陋。",
+    "runs": [
+      [
+        "一直绑着绷带的伤口，没有愈合的迹象，只会继续化脓腐烂。\n\n那不是在治疗伤口，只是在隐藏丑陋。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "这可不是个好选择。\n\n“每个人都必须在公路上遵守同样的规矩。无论如何，这条高速公路可是为了所有人使用。”\n\n“我保证，交通之神绝不会放过这种低贱的捷径。”\n\n走在这岔道上，锐利的目光如芒在背，我只能久久忍受。",
+    "runs": [
+      [
+        "这可不是个好选择。\n\n“每个人都必须在公路上遵守同样的规矩。无论如何，这条高速公路可是为了所有人使用。”\n\n“我保证，交通之神绝不会放过这种低贱的捷径。”\n\n走在这岔道上，锐利的目光如芒在背，我只能久久忍受。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "人迹罕至的旅馆。\n\n空无一人的厨房飘出了香浓的炖菜味。\n\n顺着诱人的香气走入其中，能看见一只脑袋如同大锅一样的蜥蜴盘绕在屋内。\n\n它的头中悬挂着炙热的火焰和一个小小的锅。\n\n锅里的炖菜煮得浓稠，已经无法分辨其中的原料了。\n\n正犹豫着拿那炖菜如何是好时，从锅的下方传来了声音。\n\n是摇曳的炉火在向我们搭话。\n\n“这里已经没有人会来吃这炖菜了。”\n“请帮我把锅拿下来吧。”",
+    "runs": [
+      [
+        "人迹罕至的旅馆。\n\n空无一人的厨房飘出了香浓的炖菜味。\n\n顺着诱人的香气走入其中，能看见一只脑袋如同大锅一样的蜥蜴盘绕在屋内。\n\n它的头中悬挂着炙热的火焰和一个小小的锅。\n\n锅里的炖菜煮得浓稠，已经无法分辨其中的原料了。\n\n正犹豫着拿那炖菜如何是好时，从锅的下方传来了声音。\n\n是摇曳的炉火在向我们搭话。\n\n“这里已经没有人会来吃这炖菜了。”\n“请帮我把锅拿下来吧。”",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "眼前漂浮着闪闪发光的青色文字。\n\n那些文字是由相似的词汇罗列而成，令人难以理解。\n\n“是是非非非是是，”\n\n“是非非非是非是。”\n\n“是非非是是非非，”\n\n“是是非非是是非。”\n\n……需要对这些话做出回应吗？\n\n是什么意思呢。",
+    "runs": [
+      [
+        "眼前漂浮着闪闪发光的青色文字。\n\n那些文字是由相似的词汇罗列而成，令人难以理解。\n\n“是是非非非是是，”\n\n“是非非非是非是。”\n\n“是非非是是非非，”\n\n“是是非非是是非。”\n\n……需要对这些话做出回应吗？\n\n是什么意思呢。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "透过车厢的窗户，可以看到变成血袋的W公司清扫人员们。\n\n他们在火车内不停地徘徊，就像在巡逻一样。\n\n可能是经过了一场激烈的战斗，地上散落着一些装备，上面粘满了血管和血肉。\n\n看起来好像还没有注意到这边。\n\n如果悄悄地过去的话，说不定就能顺利出去……\n\n周围的装备中可能有一些有用的东西。",
+    "runs": [
+      [
+        "透过车厢的窗户，可以看到变成血袋的W公司清扫人员们。\n\n他们在火车内不停地徘徊，就像在巡逻一样。\n\n可能是经过了一场激烈的战斗，地上散落着一些装备，上面粘满了血管和血肉。\n\n看起来好像还没有注意到这边。\n\n如果悄悄地过去的话，说不定就能顺利出去……\n\n周围的装备中可能有一些有用的东西。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "“偶尔，被这样怀疑也不坏吧。”\n“好吧。我就在契约中多加一发不需要代价就能射出的子弹吧。”",
+    "runs": [
+      [
+        "“偶尔，被这样怀疑也不坏吧。”\n“好吧。我就在契约中多加一发不需要代价就能射出的子弹吧。”",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "“这里是居酒屋吗？”\n\n在貌似是酒馆的空间中，人们兴高采烈地喧闹着。\n\n我们自然地找了一个空位坐下休息，但坐在附近的人却过来向我们搭话。\n\n“搞什么。没见过的脸啊？”\n\n“今天是个好日子，坐吧。就算有什么让人不爽的，今天也都一概原谅。”\n\n“是！明白了，大姐！”\n\n周围的人都佩着刀。\n\n刀上雕有宛如波浪般流动的奇异的云纹。\n\n“你看到最近新成立的帮派了吗？”\n\n“啊，那个……以长矛为主要武器的……”\n\n“放着最棒的武器刀不用，竟然去用那玩意儿。”\n\n“老实说，虽然我们属于拇指麾下，但比起拳头和枪，还是刀更帅吧。”\n\n“正好这里有能公正看待事情的人呢。”\n\n视线转向了我和罪人们。",
+    "runs": [
+      [
+        "“这里是居酒屋吗？”\n\n在貌似是酒馆的空间中，人们兴高采烈地喧闹着。\n\n我们自然地找了一个空位坐下休息，但坐在附近的人却过来向我们搭话。\n\n“搞什么。没见过的脸啊？”\n\n“今天是个好日子，坐吧。就算有什么让人不爽的，今天也都一概原谅。”\n\n“是！明白了，大姐！”\n\n周围的人都佩着刀。\n\n刀上雕有宛如波浪般流动的奇异的云纹。\n\n“你看到最近新成立的帮派了吗？”\n\n“啊，那个……以长矛为主要武器的……”\n\n“放着最棒的武器刀不用，竟然去用那玩意儿。”\n\n“老实说，虽然我们属于拇指麾下，但比起拳头和枪，还是刀更帅吧。”\n\n“正好这里有能公正看待事情的人呢。”\n\n视线转向了我和罪人们。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "罪人{0}悄无声息地接近玫瑰，猛然挥下武器。\n\n一根被干净利落切断的荆棘掉落在地上，鲜红的血液从切口处汩汩流出。\n\n……出乎意料的是，玫瑰似乎并没有因被切断一根荆棘而受到刺激。\n\n我们松了口气，捡起隐隐散发出气场的荆棘向外走去。",
+    "runs": [
+      [
+        "罪人{0}悄无声息地接近玫瑰，猛然挥下武器。\n\n一根被干净利落切断的荆棘掉落在地上，鲜红的血液从切口处汩汩流出。\n\n……出乎意料的是，玫瑰似乎并没有因被切断一根荆棘而受到刺激。\n\n我们松了口气，捡起隐隐散发出气场的荆棘向外走去。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "“啊……？想要这个？不嫌脏吗……？哎，如果你们需要那当然可以给你们……”\n\n罪人{0}一提出请求，惜春便爽快地将那块布让给了我们。\n\n“除了那块让人不爽的布以外，还需要什么都可以随时告诉我。”\n\n……我好不容易才劝住了想趁机提出各种要求的某些罪人。\n\n不知何时，那块红布已经系在了罪人{0}的手腕上。",
+    "runs": [
+      [
+        "“啊……？想要这个？不嫌脏吗……？哎，如果你们需要那当然可以给你们……”\n\n罪人{0}一提出请求，惜春便爽快地将那块布让给了我们。\n\n“除了那块让人不爽的布以外，还需要什么都可以随时告诉我。”\n\n……我好不容易才劝住了想趁机提出各种要求的某些罪人。\n\n不知何时，那块红布已经系在了罪人{0}的手腕上。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "看起来马上就能修好了。\n\n但是没必要冒险让罪人受多余的伤吧？",
+    "runs": [["看起来马上就能修好了。\n\n但是没必要冒险让罪人受多余的伤吧？", null, null]]
+  },
+  {
+    "input": "“……啊，这样吗？”\n\n休息室内弥漫着寒冷彻骨的寂静。\n令人尴尬的寂静持续了数分钟后，杯中的咖啡彻底冷掉了。",
+    "runs": [
+      [
+        "“……啊，这样吗？”\n\n休息室内弥漫着寒冷彻骨的寂静。\n令人尴尬的寂静持续了数分钟后，杯中的咖啡彻底冷掉了。",
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "input": "想不到有什么特别能用得上的地方，没必要平白增加负担。\n\n我们决定离开展台。",
+    "runs": [
+      ["想不到有什么特别能用得上的地方，没必要平白增加负担。\n\n我们决定离开展台。", null, null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2>全体友方单位</color> <color=#ebcaa2>恢复</color><color=#00ff9c>12点体力</color>",
+    "runs": [
+      ["全体友方单位", "#ebcaa2", null],
+      [" ", null, null],
+      ["恢复", "#ebcaa2", null],
+      ["12点体力", "#00ff9c", null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2>获得100经费</color>",
+    "runs": [["获得100经费", "#ebcaa2", null]]
+  },
+  {
+    "input": "<color=#ebcaa2>获得E.G.O饰品 \"谷底之星\"！</color>",
+    "runs": [["获得E.G.O饰品 \"谷底之星\"！", "#ebcaa2", null]]
+  },
+  {
+    "input": "<color=#ebcaa2>所选人格</color> <color=#ebcaa2>失去</color><color=#e30000>30点体力！</color>",
+    "runs": [
+      ["所选人格", "#ebcaa2", null],
+      [" ", null, null],
+      ["失去", "#ebcaa2", null],
+      ["30点体力！", "#e30000", null]
+    ]
+  },
+  {
+    "input": "<color=#ebcaa2>获得E.G.O饰品 \"特别合约\"！</color>",
+    "runs": [["获得E.G.O饰品 \"特别合约\"！", "#ebcaa2", null]]
+  },
+  {
+    "input": "<color=#ebcaa2>下场战斗胜利后，将获得E.G.O饰品 \"定制\" ！</color>",
+    "runs": [["下场战斗胜利后，将获得E.G.O饰品 \"定制\" ！", "#ebcaa2", null]]
+  },
+  {
+    "input": "<color=#ebcaa2>获得E.G.O饰品 \"泄露的脑啡肽\"！</color>",
+    "runs": [["获得E.G.O饰品 \"泄露的脑啡肽\"！", "#ebcaa2", null]]
+  },
+  {
+    "input": "<color=#ebcaa2>获得E.G.O饰品 \"强化纹身-中指\"！</color>",
+    "runs": [["获得E.G.O饰品 \"强化纹身-中指\"！", "#ebcaa2", null]]
+  },
+  {
+    "input": "<color=#ebcaa2>失去100经费</color>",
+    "runs": [["失去100经费", "#ebcaa2", null]]
+  },
+  {
+    "input": "<color=#ebcaa2>获得E.G.O饰品 \"试验提取：提灯\"！</color>",
+    "runs": [["获得E.G.O饰品 \"试验提取：提灯\"！", "#ebcaa2", null]]
+  },
+  {
+    "input": "战斗胜利时获得的<color=#5bffde>经费</color> <color=#f8c200>+{0}%</color>",
+    "runs": [
+      ["战斗胜利时获得的", null, null],
+      ["经费", "#5bffde", null],
+      [" ", null, null],
+      ["+{0}%", "#f8c200", null]
+    ]
+  },
+  {
+    "input": "战斗胜利时获得的<color=#dd0000>经费</color> +{0}%",
+    "runs": [
+      ["战斗胜利时获得的", null, null],
+      ["经费", "#dd0000", null],
+      [" +{0}%", null, null]
+    ]
+  }
+]

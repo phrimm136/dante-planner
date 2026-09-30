@@ -1,0 +1,102 @@
+{
+  "unitKeywordLabels": [
+    {
+      "input": "<color=#d40000><s>Great Sister</s></color>",
+      "plain": "Great Sister"
+    },
+    {
+      "input": "<color=#d40000><s>Jia Family</s></color>",
+      "plain": "Jia Family"
+    },
+    {
+      "input": "<color=#d40000><s>Maestro</s></color>",
+      "plain": "Maestro"
+    },
+    {
+      "input": "<color=#d40000><s>Le Sette Famiglie</s></color>",
+      "plain": "Le Sette Famiglie"
+    },
+    {
+      "input": "<color=#d40000><s>Sottocapo</s></color>",
+      "plain": "Sottocapo"
+    },
+    {
+      "input": "<color=#d40000><s>큰 누님</s></color>",
+      "plain": "큰 누님"
+    },
+    {
+      "input": "<color=#d40000><s>가씨 가문</s></color>",
+      "plain": "가씨 가문"
+    },
+    {
+      "input": "<color=#d40000><s>마에스트로</s></color>",
+      "plain": "마에스트로"
+    },
+    {
+      "input": "<color=#d40000><s>7대 패밀리</s></color>",
+      "plain": "7대 패밀리"
+    },
+    {
+      "input": "<color=#d40000><s>언더보스</s></color>",
+      "plain": "언더보스"
+    },
+    {
+      "input": "<color=#d40000><s>長姉</s></color>",
+      "plain": "長姉"
+    },
+    {
+      "input": "<color=#d40000><s>ジア家</s></color>",
+      "plain": "ジア家"
+    },
+    {
+      "input": "<color=#d40000><s>マエストロ</s></color>",
+      "plain": "マエストロ"
+    },
+    {
+      "input": "<color=#d40000><s>七大ファミリー</s></color>",
+      "plain": "七大ファミリー"
+    },
+    {
+      "input": "<color=#d40000><s>アンダーボス</s></color>",
+      "plain": "アンダーボス"
+    },
+    {
+      "input": "<color=#d40000><s>长姊</s></color>",
+      "plain": "长姊"
+    },
+    {
+      "input": "<color=#d40000><s>贾家</s></color>",
+      "plain": "贾家"
+    },
+    {
+      "input": "<color=#d40000><s>大师</s></color>",
+      "plain": "大师"
+    },
+    {
+      "input": "<color=#d40000><s>七大家族</s></color>",
+      "plain": "七大家族"
+    },
+    {
+      "input": "<color=#d40000><s>二老板</s></color>",
+      "plain": "二老板"
+    }
+  ],
+  "themePackNames": [
+    {
+      "input": "<color=#ee4893>Hatred</color> and <color=#0060c5>Despair</color>",
+      "plain": "Hatred and Despair"
+    },
+    {
+      "input": "<color=#ee4893>증오와</color> <color=#0060c5>절망</color>",
+      "plain": "증오와 절망"
+    },
+    {
+      "input": "<color=#ee4893>憎悪と</color><color=#0060c5>絶望</color>",
+      "plain": "憎悪と絶望"
+    },
+    {
+      "input": "<color=#ee4893>憎恶</color>与<color=#0060c5>绝望</color>",
+      "plain": "憎恶与绝望"
+    }
+  ]
+}

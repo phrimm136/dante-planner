@@ -171,9 +171,8 @@ describe('TraitsI18n', () => {
       expect(screen.getByText('Jia Family')).toBeDefined()
     })
 
-    // The span should have the color style
     const traitElement = screen.getByText('Jia Family')
-    expect(traitElement.getAttribute('style')).toContain('color')
+    expect(traitElement.style.getPropertyValue('--rt-color')).toBe('#d40000')
   })
 
   it('handles Unity rich text with strikethrough', async () => {
@@ -187,9 +186,8 @@ describe('TraitsI18n', () => {
       expect(screen.getByText('Deprecated')).toBeDefined()
     })
 
-    // Should render as strikethrough
     const strikeElement = screen.getByText('Deprecated')
-    expect(strikeElement.tagName).toBe('S')
+    expect(strikeElement.style.textDecorationLine).toBe('line-through')
   })
 
   it('handles combined color and strikethrough', async () => {

@@ -1,4 +1,4 @@
-export { ColoredText, parseColorTags, stripColorTags } from './components/ColoredText'
+export { ColoredText } from './components/ColoredText'
 export { FormattedDescription } from './components/FormattedDescription'
 export { KeywordString } from './components/KeywordString'
 export { KeywordsDisplay } from './components/KeywordsDisplay'
@@ -16,8 +16,8 @@ export {
   KEYWORD_LIST,
 } from './hooks/useKeywordListData'
 
-export { applyStrikethrough } from './lib/unityRichText'
-export { colorRuns, extractLeadingColor, stripRichTextTags, type ColorRun } from './lib/richText'
+export { applyTextStyles } from './lib/unityRichText'
+export { colorRuns, tmpPlainText, type ColorRun } from './lib/tmpRichText'
 
 export { ColorCodeMapSchema } from './schemas/ColorCodeSchemas'
 export { SanityConditionI18nSchema } from './schemas/SanityConditionSchemas'

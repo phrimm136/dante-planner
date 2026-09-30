@@ -1,7 +1,7 @@
 import { useState, type CSSProperties } from 'react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { getBattleKeywordIconPath } from '@/shared/assets'
-import { applyStrikethrough, applyTextStyles } from '../lib/unityRichText'
+import { applyTextStyles } from '../lib/unityRichText'
 import { cn } from '@/lib/utils'
 import type { ResolvedKeyword } from '../types/KeywordTypes'
 import { FLAVOR_TEXT_COLOR, SECTION_STYLES } from '@/lib/constants'
@@ -26,7 +26,7 @@ export function FormattedKeyword({ keyword, className }: FormattedKeywordProps) 
   if (type === 'skillTag') {
     return (
       <span className={cn('font-medium', color && 'rt-ink', className)} style={inkStyle(color)}>
-        {applyStrikethrough(displayText)}
+        {applyTextStyles(displayText)}
       </span>
     )
   }
@@ -56,7 +56,7 @@ export function FormattedKeyword({ keyword, className }: FormattedKeywordProps) 
             aria-hidden="true"
             className="w-4 h-4 inline-block shrink-0"
           />
-          <span>{applyStrikethrough(displayText)}</span>
+          <span>{applyTextStyles(displayText)}</span>
         </button>
       </PopoverTrigger>
       <PopoverContent
@@ -75,7 +75,7 @@ export function FormattedKeyword({ keyword, className }: FormattedKeywordProps) 
               aria-hidden="true"
               className="w-6 h-6 shrink-0"
             />
-            <h4 className="font-bold text-lg">{applyStrikethrough(displayText)}</h4>
+            <h4 className="font-bold text-lg">{applyTextStyles(displayText)}</h4>
           </div>
           {description && (
             <p className="text-sm whitespace-pre-line px-2">{applyTextStyles(description)}</p>
@@ -86,7 +86,7 @@ export function FormattedKeyword({ keyword, className }: FormattedKeywordProps) 
               className="text-xs italic whitespace-pre-line px-2"
               style={{ color: FLAVOR_TEXT_COLOR }}
             >
-              {applyStrikethrough(flavor)}
+              {applyTextStyles(flavor)}
             </p>
           )}
         </div>

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { colorRuns } from '../richText'
+import { colorRuns } from '../tmpRichText'
 
 describe('colorRuns', () => {
   it('splits text into runs carrying the colour of their innermost tag', () => {

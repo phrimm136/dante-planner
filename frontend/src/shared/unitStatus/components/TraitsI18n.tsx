@@ -1,33 +1,8 @@
-import type { ReactNode } from 'react'
-
 import { useUnitKeywords, useUnitKeywordsAll } from '@/shared/filter'
 import type { UnitKeywords } from '@/shared/filter'
-import { applyStrikethrough, extractLeadingColor } from '@/shared/gameText'
+import { applyTextStyles } from '@/shared/gameText'
 
 const HIDDEN_TRAITS = new Set(['BASE_APPEARANCE', 'SMALL'])
-
-interface ParsedTrait {
-  key: string
-  /** Text with <color> stripped; may still contain <s>...</s> tags */
-  text: string
-  color?: string
-}
-
-/**
- * Strip the outer <color=...> wrapper, leaving any inner <s> tags
- * for {@link applyStrikethrough} to handle at render time.
- *
- * @example "<color=#d40000><s>Jia Family</s></color>"
- *       -> { color: "#d40000", text: "<s>Jia Family</s>" }
- */
-function parseUnityRichText(key: string, input: string): ParsedTrait {
-  return { key, ...extractLeadingColor(input) }
-}
-
-function renderTrait(parsed: ParsedTrait): ReactNode {
-  const content = applyStrikethrough(parsed.text)
-  return parsed.color ? <span style={{ color: parsed.color }}>{content}</span> : content
-}
 
 interface TraitsI18nProps {
   traits: string[]
@@ -46,7 +21,7 @@ function TraitChips({ traits, names }: { traits: string[]; names: UnitKeywords }
 
   const translatedTraits = visibleTraits.flatMap((trait) => {
     const translated = names[trait]
-    return translated === undefined ? [] : [parseUnityRichText(trait, translated)]
+    return translated === undefined ? [] : [{ key: trait, text: translated }]
   })
 
   if (translatedTraits.length === 0) {
@@ -60,7 +35,7 @@ function TraitChips({ traits, names }: { traits: string[]; names: UnitKeywords }
           key={trait.key}
           className="px-2 py-0.5 text-xs bg-secondary text-secondary-foreground border border-border"
         >
-          {renderTrait(trait)}
+          {applyTextStyles(trait.text)}
         </span>
       ))}
     </div>
