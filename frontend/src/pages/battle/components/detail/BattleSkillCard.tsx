@@ -26,6 +26,7 @@ interface BattleSkillCardProps {
   entry: SkillEntry
   tier: number
   palette: ImportancePalette
+  importancePosition: 'unlock' | 'base'
 }
 
 function battleSkillImagePath(
@@ -45,6 +46,7 @@ export function BattleSkillCard({
   entry,
   tier,
   palette,
+  importancePosition,
 }: BattleSkillCardProps) {
   const { level, isLocked } = selectSkillLevel(entry.levels, tier)
   const descriptionLevel = isLocked ? level.level : tier
@@ -65,6 +67,7 @@ export function BattleSkillCard({
       }
       importanceLevel={entry.importanceLevel}
       palette={palette}
+      importancePosition={importancePosition}
       isDefenseSkill={cardData.atkType === 'NONE' || !cardData.atkType}
       isLocked={isLocked}
       missingImage="frame"

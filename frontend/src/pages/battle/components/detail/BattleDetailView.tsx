@@ -103,6 +103,8 @@ export function BattleDetailView({
           })),
         ]
   const egoList = phase.egoList ?? []
+  const importancePosition =
+    phase.ownerType === 'ABNORMALITY' && part === undefined ? 'base' : 'unlock'
 
   const selector = (
     <>
@@ -180,6 +182,7 @@ export function BattleDetailView({
               entry={entry}
               tier={tier}
               palette={palette}
+              importancePosition={importancePosition}
             />
           )}
         />

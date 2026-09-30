@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { waitFor, within } from '@testing-library/react'
+import { fireEvent, waitFor, within } from '@testing-library/react'
 import type { ReactNode } from 'react'
 
 import i18n from '@/lib/i18n'
@@ -216,6 +216,69 @@ describe('battle detail visuals', () => {
           { timeout: LOAD_WAIT_MS },
         ),
       ).toBeDefined()
+    },
+    TEST_BUDGET_MS,
+  )
+})
+
+function triangleRight(skillId: string): string {
+  const card = requireSlot('detail-sections').querySelector<HTMLElement>(
+    `[data-skill-id="${skillId}"]`,
+  )
+  if (card === null) throw new Error(`no skill card ${skillId}`)
+  const decoration = card.parentElement?.querySelector<HTMLElement>(
+    ':scope > [data-slot="importance-decoration"]',
+  )
+  if (decoration == null) throw new Error(`skill ${skillId} is not decorated`)
+  return decoration.style.getPropertyValue('--importance-icon-right')
+}
+
+function selectPart(label: string) {
+  const group = within(requireSlot('detail-selector')).getByRole('group', { name: 'Part' })
+  fireEvent.click(within(group).getByRole('button', { name: label }))
+}
+
+describe('skill triangle position by unit owner', () => {
+  it(
+    'places the triangle of skill 151905 on abnormality 1519 at the base position, 286 units in',
+    async () => {
+      await mountBattle('enemy', '1519')
+
+      expect(triangleRight('151905')).toBe('6.2562rem')
+    },
+    TEST_BUDGET_MS,
+  )
+
+  it(
+    'places the triangle of skill 9106603 on enemy 91068 at the unlock position, 86 units in',
+    async () => {
+      await mountBattle('enemy', '91068')
+
+      expect(triangleRight('9106603')).toBe('1.8813rem')
+    },
+    TEST_BUDGET_MS,
+  )
+
+  it(
+    'moves the triangle of abnormality 1307 from the base position under All to the unlock position once Roots is selected',
+    async () => {
+      await mountBattle('enemy', '1307')
+
+      expect(triangleRight('130711')).toBe('6.2562rem')
+
+      selectPart('Roots')
+
+      await waitFor(() => expect(triangleRight('130711')).toBe('1.8813rem'))
+    },
+    TEST_BUDGET_MS,
+  )
+
+  it(
+    'places the triangle of skill 40003804 on assistant 400038 at the unlock position',
+    async () => {
+      await mountBattle('assistant', '400038')
+
+      expect(triangleRight('40003804')).toBe('1.8813rem')
     },
     TEST_BUDGET_MS,
   )

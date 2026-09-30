@@ -33,6 +33,7 @@ interface SkillCardProps {
   isLocked?: boolean
   importanceLevel: number
   palette: ImportancePalette
+  importancePosition?: 'unlock' | 'base'
   missingImage?: 'placeholder' | 'frame'
 }
 
@@ -50,6 +51,7 @@ export function SkillCard({
   isLocked = false,
   importanceLevel,
   palette,
+  importancePosition = 'unlock',
   missingImage = 'placeholder',
 }: SkillCardProps) {
   const [showMissing, setShowMissing] = useState(false)
@@ -94,7 +96,12 @@ export function SkillCard({
   const card = decorated ? (
     <div className="relative isolate @container">
       {layout}
-      <ImportanceDecoration level={importanceLevel} palette={palette} variant="skill" />
+      <ImportanceDecoration
+        level={importanceLevel}
+        palette={palette}
+        variant="skill"
+        position={importancePosition}
+      />
     </div>
   ) : (
     layout

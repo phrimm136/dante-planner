@@ -13,6 +13,8 @@ import { BattleSpriteSchema } from './BattleSpecSchemas'
 
 const unused = z.unknown().optional()
 
+const OwnerTypeSchema = z.enum(['ABNORMALITY', 'ENEMY'])
+
 const StatGrowthSchema = z
   .object({
     defaultStat: z.number(),
@@ -130,6 +132,7 @@ export const BattlePartSchema = z
     skillIds: z.array(z.number()),
     passiveIds: z.array(z.number()),
     generatedBy: z.array(z.string()).optional(),
+    ownerType: OwnerTypeSchema,
     _source: unused,
     attributeList: unused,
     canChangeSpriteOnDestoryed: unused,
@@ -177,6 +180,7 @@ export const BattlePhaseSchema = z
     identitySource: z.number().optional(),
     characterId: z.number().optional(),
     rank: z.number().optional(),
+    ownerType: OwnerTypeSchema.optional(),
     _source: unused,
     aggro: unused,
     appearance: unused,

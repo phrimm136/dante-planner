@@ -85,6 +85,13 @@ describe('skill core decoration from enemy 1339 skill 133907', () => {
     expect(container.firstElementChild?.getAttribute('data-skill-id')).toBe('133907')
     expect(container.firstElementChild?.classList.contains('@container')).toBe(true)
   })
+
+  it('places an identity skill triangle at the unlock position, 86 units in', () => {
+    const { container } = renderCard(2)
+    expect(
+      slot(container, 'importance-decoration').style.getPropertyValue('--importance-icon-right'),
+    ).toBe('1.8813rem')
+  })
 })
 
 describe('skill card frame from enemy 1339 skill 133907', () => {
