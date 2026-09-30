@@ -1,5 +1,7 @@
 import { use } from 'react'
-import { afterEach, describe, expect, it } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 import { act, render } from '@testing-library/react'
 
 import enemy1339 from '@static/data/enemy/1339.json'
@@ -9,6 +11,7 @@ import { SkillEntrySchema, SkillIdSchema } from '@/shared/gameData'
 import { toSkillCardData } from '../../lib/skillLevel'
 import { IdentitySkillCard } from '../IdentitySkillCard'
 import { SkillCard } from '../SkillCard'
+import { SkillList } from '../SkillList'
 
 function renderCard(importanceLevel: number, isLocked = false) {
   return render(
@@ -38,6 +41,11 @@ function card(container: HTMLElement): HTMLElement {
   if (element === null) throw new Error('no card')
   return element
 }
+
+const globalsCss = readFileSync(
+  resolve(import.meta.dirname, '../../../../styles/globals.css'),
+  'utf8',
+)
 
 const [phase] = enemy1339.units['1339'].phases
 const entry = SkillEntrySchema.parse(phase?.skills['133907'])
@@ -239,6 +247,89 @@ describe('skill card upper block slots', () => {
   it('draws no sanity cost without one', () => {
     const { container } = renderCore(<span>Name</span>)
     expect(container.querySelector('[data-slot="skill-sanity-cost"]')).toBeNull()
+  })
+})
+
+describe('skill pane edges', () => {
+  const skillPaneRules = globalsCss.match(/\.importance-skill-pane[^{]*\{[^}]*\}/g) ?? []
+  let sheet: HTMLStyleElement
+  beforeAll(() => {
+    sheet = document.createElement('style')
+    sheet.textContent = skillPaneRules.join('\n')
+    document.head.append(sheet)
+  })
+  afterAll(() => sheet.remove())
+
+  function renderPane(levels: readonly number[]) {
+    const skills = levels.map((level, index) => ({
+      id: SkillIdSchema.parse(`13390${String(index + 1)}`),
+      level,
+      isLocked: index === 1,
+    }))
+    const { container } = render(
+      <SkillList
+        skills={skills}
+        renderSkill={({ level, isLocked }) => (
+          <IdentitySkillCard
+            identityId="1339"
+            skillId={skillId}
+            entry={entry}
+            level={entry.levels[0]}
+            renderName={() => <span>Name</span>}
+            descriptionSlot={<span>Desc</span>}
+            unitLevel={60}
+            importanceLevel={level}
+            palette="enemy"
+            isLocked={isLocked}
+          />
+        )}
+      />,
+    )
+    const pane = container.firstElementChild as HTMLElement
+    const layouts = [...pane.querySelectorAll<HTMLElement>('[data-skill-id]')]
+    return { pane, layouts, boxes: layouts.map((layout) => layout.parentElement as HTMLElement) }
+  }
+
+  const EDGE_PX = '5.2496px'
+
+  const margins = (element: HTMLElement) => {
+    const style = getComputedStyle(element)
+    return [style.marginTop, style.marginBottom]
+  }
+
+  it('ships a first-child and a last-child rule for the skill pane', () => {
+    expect(skillPaneRules).toHaveLength(2)
+  })
+
+  it('sets decorated edge skills 15 units inside the pane and leaves a decorated middle skill alone', () => {
+    const { pane, boxes } = renderPane([2, 2, 2])
+    expect(pane.classList).toContain('importance-skill-pane')
+    expect(pane.style.getPropertyValue('--importance-pane-edge')).toBe('0.3281rem')
+    const [first, middle, last] = boxes
+    for (const box of boxes) {
+      expect(box.hasAttribute('data-importance-box')).toBe(true)
+      expect(box.style.cssText).toBe('')
+    }
+    expect(margins(first as HTMLElement)).toEqual([EDGE_PX, ''])
+    expect(margins(middle as HTMLElement)).toEqual(['', ''])
+    expect(margins(last as HTMLElement)).toEqual(['', EDGE_PX])
+  })
+
+  it('sets both ends of a lone decorated skill 15 units inside the pane', () => {
+    const { boxes } = renderPane([2])
+    expect(margins(boxes[0] as HTMLElement)).toEqual([EDGE_PX, EDGE_PX])
+  })
+
+  it('leaves an undecorated edge skill 15 units from each pane edge through its own padding', () => {
+    const { pane, layouts } = renderPane([0, 0])
+    for (const layout of layouts) {
+      expect(layout.parentElement?.hasAttribute('data-importance-box')).toBe(false)
+    }
+    expect(margins(layouts[0] as HTMLElement)).toEqual(['', ''])
+    expect(layouts[0]?.style.paddingTop).toBe('0.3281rem')
+    expect(layouts.at(-1)?.style.paddingBottom).toBe('0.3281rem')
+    expect(pane.style.paddingTop).toBe('')
+    expect(pane.style.paddingBottom).toBe('')
   })
 })
 

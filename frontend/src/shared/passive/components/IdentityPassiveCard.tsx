@@ -45,6 +45,7 @@ export function IdentityPassiveCard({
   return (
     <div
       className={cn('relative', isLocked && 'opacity-50', decorated && 'isolate @container')}
+      data-importance-box={decorated ? '' : undefined}
       style={importanceBoxPadding(importanceLevel)}
     >
       <ImportanceDecoration level={importanceLevel} palette={palette} variant="passive" />

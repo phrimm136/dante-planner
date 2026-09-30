@@ -94,7 +94,7 @@ export function SkillCard({
   )
 
   const card = decorated ? (
-    <div className="relative isolate @container">
+    <div className="relative isolate @container" data-importance-box="">
       {layout}
       <ImportanceDecoration
         level={importanceLevel}

@@ -31,6 +31,7 @@ export function EGOPassiveCard({
   return (
     <div
       className={cn(isLocked && 'opacity-50', decorated && 'relative isolate @container')}
+      data-importance-box={decorated ? '' : undefined}
       style={importanceBoxPadding(importanceLevel)}
     >
       <ImportanceDecoration level={importanceLevel} palette={palette} variant="passive" />

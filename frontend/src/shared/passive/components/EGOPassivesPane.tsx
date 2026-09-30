@@ -34,7 +34,7 @@ interface ShownPassive<Id extends string> {
 
 export function PassiveTab({ children }: { children: ReactNode }) {
   return (
-    <div className="border rounded" style={PASSIVE_TAB_STYLE}>
+    <div className="importance-pane border rounded" style={PASSIVE_TAB_STYLE}>
       {children}
     </div>
   )

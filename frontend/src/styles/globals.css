@@ -470,8 +470,28 @@
     importance-blink var(--importance-blink-period) cubic-bezier(0.37, 0, 0.63, 1) infinite;
 }
 
-.importance-stripe-top {
+.importance-stripe-bottom {
   animation-direction: reverse, normal;
+}
+
+.importance-pane > :first-child [data-importance-box],
+.importance-pane > [data-importance-box]:first-child {
+  margin-top: 0 !important;
+}
+
+.importance-pane > :last-child [data-importance-box],
+.importance-pane > [data-importance-box]:last-child {
+  margin-bottom: 0 !important;
+}
+
+.importance-skill-pane > :first-child [data-importance-box],
+.importance-skill-pane > [data-importance-box]:first-child {
+  margin-top: var(--importance-pane-edge);
+}
+
+.importance-skill-pane > :last-child [data-importance-box],
+.importance-skill-pane > [data-importance-box]:last-child {
+  margin-bottom: var(--importance-pane-edge);
 }
 
 .importance-banner {

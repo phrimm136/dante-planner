@@ -10,7 +10,9 @@ interface SkillListProps<T extends { id: SkillId }> {
   renderSkill: (skill: T) => ReactNode
 }
 
-const TAB_STYLE: CSSProperties = { paddingBottom: clientLength(SKILL_TAB_UNITS.BOTTOM) }
+const TAB_STYLE = {
+  '--importance-pane-edge': clientLength(SKILL_TAB_UNITS.EDGE),
+} as CSSProperties
 
 const SEPARATOR_STYLE: CSSProperties = {
   height: clientLength(SKILL_TAB_UNITS.LINE),
@@ -19,7 +21,7 @@ const SEPARATOR_STYLE: CSSProperties = {
 
 export function SkillList<T extends { id: SkillId }>({ skills, renderSkill }: SkillListProps<T>) {
   return (
-    <div className="border rounded" style={TAB_STYLE}>
+    <div className="importance-skill-pane border rounded" style={TAB_STYLE}>
       {skills.map((skill, index) => (
         <Fragment key={skill.id}>
           {index > 0 && <Separator data-slot="skill-separator" style={SEPARATOR_STYLE} />}

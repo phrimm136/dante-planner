@@ -274,13 +274,13 @@ export const SKILL_LOCK_UNITS = {
   ALPHA: 0.275,
 } as const
 
-export const SKILL_TAB_UNITS = { GAP: 15, LINE: 5, BOTTOM: 50 } as const
+export const SKILL_TAB_UNITS = { GAP: 15, LINE: 5, EDGE: 15 } as const
 
 export const PASSIVE_TAB_UNITS = {
   TOP: 15,
   GAP: 80,
   LINE: 5,
-  BOTTOM: 30,
+  BOTTOM: 15,
   HEADER: { LEFT: 15, WIDTH: 379, HEIGHT: 79, FONT: 45, AFTER: 40, SUPPORT_BEFORE: 80 },
 } as const
 

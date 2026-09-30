@@ -89,7 +89,7 @@ describe('battle detail visuals', () => {
         expect(separator.style.marginBlock).toBe('0.3281rem')
       }
       expectOnlyBetweenBoxes(pane, 'skill-separator')
-      expect(pane.style.paddingBottom).toBe('1.0938rem')
+      expect(pane.style.paddingBottom).toBe('')
 
       const sections = requireSlot('detail-sections')
       expect(sections.querySelector('.divide-y')).toBeNull()
@@ -101,12 +101,12 @@ describe('battle detail visuals', () => {
   )
 
   it(
-    'frames the passive pane of assistant 400040 at 15 units above and 30 below with no inline padding, and draws a 5-unit line in the middle of each 80-unit gap',
+    'frames the passive pane of assistant 400040 at 15 units above and below with no inline padding, and draws a 5-unit line in the middle of each 80-unit gap',
     async () => {
       await mountBattle('assistant', '400040')
 
       const pane = paneOf(section('Passives'))
-      expect(pane.style.padding).toBe('0.3281rem 0px 0.6563rem')
+      expect(pane.style.padding).toBe('0.3281rem 0px')
       const separators = [...pane.querySelectorAll<HTMLElement>('[data-slot="passive-separator"]')]
       expect(separators).toHaveLength(pane.querySelectorAll('[data-passive-id]').length - 1)
       for (const separator of separators) {

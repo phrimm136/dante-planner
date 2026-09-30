@@ -165,14 +165,16 @@ describe('ImportanceDecoration', () => {
     expect(cssBlock('.importance-band')).not.toContain('container-type')
   })
 
-  it('scrolls the top band opposite the bottom band by one tile width', () => {
+  it('scrolls the top band right and the bottom band left by one tile width', () => {
     const { container } = render(<ImportanceDecoration level={2} palette="enemy" variant="skill" />)
     const top = slot(container, 'importance-band-top')?.firstElementChild
     const bottom = slot(container, 'importance-band-bottom')?.firstElementChild
-    expect(top?.classList.contains('importance-stripe-top')).toBe(true)
-    expect(bottom?.classList.contains('importance-stripe-top')).toBe(false)
+    expect(top?.className).toBe('importance-stripe')
+    expect(bottom?.classList.contains('importance-stripe-bottom')).toBe(true)
 
-    expect(cssBlock('.importance-stripe-top')).toContain('animation-direction: reverse, normal')
+    expect(cssBlock('.importance-stripe')).not.toContain('animation-direction')
+    expect(cssBlock('.importance-stripe-bottom')).toContain('animation-direction: reverse, normal')
+    expect(globalsCss).not.toContain('importance-stripe-top')
     expect(cssBlock('.importance-stripe')).toMatch(/importance-scroll [^,]* linear infinite,/)
     const keyframes = cssBlock('@keyframes importance-scroll')
     expect(keyframes).toMatch(/from \{\s*mask-position: 0 0;/)
@@ -208,8 +210,8 @@ describe('ImportanceDecoration', () => {
       <ImportanceDecoration level={3} palette="enemy" variant="passive" />,
     )
     const root = slot(container, 'importance-decoration')
-    expect(slot(container, 'importance-band-top')?.firstElementChild?.classList).toContain(
-      'importance-stripe-top',
+    expect(slot(container, 'importance-band-bottom')?.firstElementChild?.classList).toContain(
+      'importance-stripe-bottom',
     )
     expect(slot(container, 'importance-band-bottom')).not.toBeNull()
     expect(variable(root, '--importance-band-offset')).toBe('0rem')
