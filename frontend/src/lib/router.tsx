@@ -483,6 +483,15 @@ const termsRoute = createRoute({
   }),
 })
 
+const licensesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/licenses',
+  component: lazyRouteComponent(() => import('@/pages/legal/LicensesPage')),
+  head: () => ({
+    meta: [{ title: pageTitle('pages.licenses.title') }],
+  }),
+})
+
 // Note: TanStack Router handles route specificity automatically
 // More specific routes like /planner/md/new will match before /planner/md
 const routeTree = rootRoute.addChildren([
@@ -516,6 +525,7 @@ const routeTree = rootRoute.addChildren([
   moderationRoute,
   privacyRoute,
   termsRoute,
+  licensesRoute,
 ])
 
 /**

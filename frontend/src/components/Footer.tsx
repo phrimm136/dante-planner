@@ -38,6 +38,13 @@ export function Footer() {
             {t('footer.links.terms')}
           </Link>
           <span className="text-muted-foreground/50">·</span>
+          <Link
+            to="/licenses"
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {t('footer.links.licenses')}
+          </Link>
+          <span className="text-muted-foreground/50">·</span>
           <a
             href={`mailto:${CONTACT_EMAIL}`}
             className="text-muted-foreground hover:text-foreground transition-colors"
