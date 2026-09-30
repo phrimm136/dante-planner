@@ -4,7 +4,7 @@ plugins {
     java
     id("org.springframework.boot") version "3.5.16"
     id("io.spring.dependency-management") version "1.1.7"
-    id("org.sonarqube") version "7.2.3.7755"
+    id("org.sonarqube") version "7.5.0.8588"
     id("org.owasp.dependencycheck") version "12.2.0"
     id("de.aaschmid.cpd") version "3.5"
     id("net.ltgt.errorprone") version "4.3.0"
@@ -38,9 +38,9 @@ repositories {
 dependencyManagement {
     imports {
         // Override log4j to fix CVE-2025-68161
-        mavenBom("org.apache.logging.log4j:log4j-bom:2.25.4")
+        mavenBom("org.apache.logging.log4j:log4j-bom:2.26.1")
         // Override Jackson to fix CVE-2026-54515
-        mavenBom("com.fasterxml.jackson:jackson-bom:2.21.5")
+        mavenBom("com.fasterxml.jackson:jackson-bom:2.22.3")
     }
 }
 
@@ -78,27 +78,27 @@ dependencies {
     implementation("net.javacrumbs.shedlock:shedlock-spring:5.16.0")
     implementation("net.javacrumbs.shedlock:shedlock-provider-redis-spring:5.16.0")
 
-    implementation("io.github.resilience4j:resilience4j-circuitbreaker:2.3.0")
-    implementation("io.github.resilience4j:resilience4j-micrometer:2.3.0")
+    implementation("io.github.resilience4j:resilience4j-circuitbreaker:2.4.0")
+    implementation("io.github.resilience4j:resilience4j-micrometer:2.4.0")
 
     implementation("com.bucket4j:bucket4j-core:8.10.1")
     implementation("com.bucket4j:bucket4j-redis:8.10.1")
-    implementation("org.jsoup:jsoup:1.22.1")
-    implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.37.1")
+    implementation("org.jsoup:jsoup:1.23.2")
+    implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.58.0")
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
     testRuntimeOnly("com.h2database:h2")
-    testImplementation("org.testcontainers:testcontainers:2.0.4")
-    testImplementation("org.testcontainers:testcontainers-mysql:2.0.4")
-    testImplementation("org.testcontainers:testcontainers-junit-jupiter:2.0.4")
-    testImplementation("org.testcontainers:testcontainers-toxiproxy:2.0.4")
-    testImplementation("com.redis:testcontainers-redis:2.2.2")
-    testImplementation("com.tngtech.archunit:archunit-junit5:1.3.0")
-    testImplementation("net.jqwik:jqwik:1.9.3")
+    testImplementation("org.testcontainers:testcontainers:2.0.5")
+    testImplementation("org.testcontainers:testcontainers-mysql:2.0.5")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter:2.0.5")
+    testImplementation("org.testcontainers:testcontainers-toxiproxy:2.0.5")
+    testImplementation("com.redis:testcontainers-redis:2.2.4")
+    testImplementation("com.tngtech.archunit:archunit-junit5:1.5.1")
+    testImplementation("net.jqwik:jqwik:1.10.1")
 
-    errorprone("com.google.errorprone:error_prone_core:2.36.0")
+    errorprone("com.google.errorprone:error_prone_core:2.50.0")
 }
 
 tasks.withType<Test> {
