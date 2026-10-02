@@ -8,6 +8,7 @@ import fs from 'fs'
 import type { Plugin } from 'vite'
 import { hashStaticPlugin } from './vite-plugin-hash-static'
 import { routeHeadersPlugin } from './vite-plugin-route-headers'
+import { assetNotFoundPlugin } from './vite-plugin-asset-not-found'
 
 const STATIC_ROOT = path.resolve(__dirname, '../static')
 const STATIC_WHITELIST = ['images', 'data', 'i18n']
@@ -118,6 +119,7 @@ export default defineConfig({
       routerFile: path.resolve(__dirname, 'src/lib/router.tsx'),
       loadersFile: path.resolve(__dirname, 'src/lib/routeLoaders.ts'),
     }),
+    assetNotFoundPlugin(),
     react(),
     babel({ presets: [reactCompilerPreset()] }),
     tailwindcss(),
@@ -259,6 +261,8 @@ export default defineConfig({
           include: [
             'vite-plugin-hash-static.test.ts',
             'vite-plugin-route-headers.test.ts',
+            'vite-plugin-asset-not-found.test.ts',
+            'vite-config.test.ts',
             'scripts/lib/*.test.ts',
           ],
           pool: 'forks',

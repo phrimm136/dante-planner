@@ -30,6 +30,9 @@
     "vite-plugin-hash-static.test.ts",
     "vite-plugin-route-headers.ts",
     "vite-plugin-route-headers.test.ts",
+    "vite-plugin-asset-not-found.ts",
+    "vite-plugin-asset-not-found.test.ts",
+    "vite-config.test.ts",
     "scripts/check-bundle-budget.ts",
     "scripts/lib/*.ts"
   ],
