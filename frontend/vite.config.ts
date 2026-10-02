@@ -5,10 +5,14 @@ import babel from '@rolldown/plugin-babel'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 import fs from 'fs'
+import { randomUUID } from 'node:crypto'
 import type { Plugin } from 'vite'
 import { hashStaticPlugin } from './vite-plugin-hash-static'
 import { routeHeadersPlugin } from './vite-plugin-route-headers'
 import { assetNotFoundPlugin } from './vite-plugin-asset-not-found'
+import { buildIdPlugin } from './vite-plugin-build-id'
+
+const BUILD_ID = randomUUID()
 
 const STATIC_ROOT = path.resolve(__dirname, '../static')
 const STATIC_WHITELIST = ['images', 'data', 'i18n']
@@ -120,6 +124,7 @@ export default defineConfig({
       loadersFile: path.resolve(__dirname, 'src/lib/routeLoaders.ts'),
     }),
     assetNotFoundPlugin(),
+    buildIdPlugin(BUILD_ID),
     react(),
     babel({ presets: [reactCompilerPreset()] }),
     tailwindcss(),
@@ -262,6 +267,7 @@ export default defineConfig({
             'vite-plugin-hash-static.test.ts',
             'vite-plugin-route-headers.test.ts',
             'vite-plugin-asset-not-found.test.ts',
+            'vite-plugin-build-id.test.ts',
             'vite-config.test.ts',
             'scripts/lib/*.test.ts',
           ],

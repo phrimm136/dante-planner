@@ -32,6 +32,8 @@
     "vite-plugin-route-headers.test.ts",
     "vite-plugin-asset-not-found.ts",
     "vite-plugin-asset-not-found.test.ts",
+    "vite-plugin-build-id.ts",
+    "vite-plugin-build-id.test.ts",
     "vite-config.test.ts",
     "scripts/check-bundle-budget.ts",
     "scripts/lib/*.ts"

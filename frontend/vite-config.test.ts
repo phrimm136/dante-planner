@@ -2,8 +2,10 @@ import { describe, it, expect, vi } from 'vitest'
 import path from 'path'
 import type { Plugin } from 'vite'
 import config from './vite.config'
+import { VERSION_FILE_PATH } from './src/lib/constants/app'
 
 type GenerateBundle = (this: unknown, outputOptions: { chunkFileNames: unknown }) => void
+type ConfigHook = () => { define: Record<string, string> }
 
 function isPlugin(value: unknown): value is Plugin {
   return typeof value === 'object' && value !== null && 'name' in value
@@ -63,5 +65,21 @@ describe('vite.config.ts', () => {
       chunkFileNames: notFoundDir,
       assetFileNames: notFoundDir,
     })
+  })
+
+  it('registers the build-id plugin, emitting the file the client polls', () => {
+    const plugin = findPlugin('build-id')
+    if (plugin === undefined) throw new Error('build-id is not registered')
+    const emitFile = vi.fn()
+    const generateBundle = plugin.generateBundle as GenerateBundle
+    const configHook = plugin.config as ConfigHook
+
+    generateBundle.call({ emitFile }, { chunkFileNames: undefined })
+
+    const [emitted] = emitFile.mock.calls[0] as [{ fileName: string; source: string }]
+    expect(`/${emitted.fileName}`).toBe(VERSION_FILE_PATH)
+    expect(JSON.stringify(JSON.parse(emitted.source).buildId)).toBe(
+      configHook().define.__BUILD_ID__,
+    )
   })
 })

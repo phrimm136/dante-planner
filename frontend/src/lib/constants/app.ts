@@ -20,3 +20,7 @@ export const CHUNK_RELOAD_STORAGE_KEY = 'chunkReloadAt'
 export const CHUNK_RELOAD_WINDOW_MS = 10_000
 
 export const BANNER_DISMISS_STORAGE_KEY = 'dismissedBanners'
+
+export const VERSION_CHECK_INTERVAL_MS = 10 * 60 * 1000
+
+export const VERSION_FILE_PATH = '/version.json'

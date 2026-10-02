@@ -26,6 +26,8 @@ vi.mock('@/lib/banner/useBannerSignals', async (importOriginal) => {
 
 vi.mock('@/lib/banner/useStorageUnavailable', () => ({ useStorageUnavailable: () => false }))
 
+vi.mock('@/lib/banner/useUpdateAvailable', () => ({ useUpdateAvailable: () => null }))
+
 vi.mock('react-i18next', async (importOriginal) => {
   const actual = await importOriginal<typeof import('react-i18next')>()
   return {
