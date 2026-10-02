@@ -2,6 +2,7 @@ import { Suspense, lazy, useEffect } from 'react'
 import { Header } from './Header'
 import { Footer } from '../Footer'
 import { LanguageSync } from '../LanguageSync'
+import { AppBanner } from '@/components/feedback/AppBanner'
 import { SyncChoiceDialog } from '@/pages/settings'
 import { useDragToScroll } from '@/components/hooks/useDragToScroll'
 import { useAuthQueryNonBlocking } from '@/shared/auth'
@@ -46,6 +47,7 @@ export function GlobalLayout({ children }: GlobalLayoutProps) {
         <AppSse />
       </Suspense>
       <LanguageSync />
+      <AppBanner />
       <div className="bg-card border-b border-border">
         <Header />
       </div>

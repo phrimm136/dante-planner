@@ -24,6 +24,7 @@ vi.mock('sonner', () => {
   return { toast: toastFn }
 })
 
+import { BackendUnavailableError } from '@/lib/apiErrors'
 import { createTestQueryClient } from '../queryClient'
 
 beforeEach(() => {
@@ -56,5 +57,14 @@ describe('createTestQueryClient', () => {
     client.getQueryCache().config.onError?.(new Error('boom'), {} as never)
 
     expect(console.error).toHaveBeenCalled()
+  })
+
+  it('leaves a query unavailable error to the banner rather than a toast', () => {
+    const client = createTestQueryClient()
+
+    client.getQueryCache().config.onError?.(new BackendUnavailableError('down'), {} as never)
+
+    expect(toast.warning).not.toHaveBeenCalled()
+    expect(toast.error).not.toHaveBeenCalled()
   })
 })

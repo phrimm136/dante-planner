@@ -103,15 +103,6 @@ export function showError(error: unknown): void {
   showAppError(classifyAppError(error))
 }
 
-export function showUnavailable(error: unknown): void {
-  const classified = classifyAppError(error)
-  if (classified.kind !== 'unavailable') return
-
-  const presentation = presentError(classified)
-  if (presentation === null) return
-  emit(presentation)
-}
-
 export function showErrorMessage(key: string, params?: Record<string, string | number>): void {
   showAppError(validationAppError({ key, ...(params !== undefined && { params }) }))
 }

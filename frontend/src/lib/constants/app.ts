@@ -18,3 +18,5 @@ export const BOOLEAN_FILTER_OPTIONS = ['N', 'Y'] as const
 export const CHUNK_RELOAD_STORAGE_KEY = 'chunkReloadAt'
 
 export const CHUNK_RELOAD_WINDOW_MS = 10_000
+
+export const BANNER_DISMISS_STORAGE_KEY = 'dismissedBanners'

@@ -5,7 +5,7 @@ import {
   BackendUnavailableError,
   RetryableUnavailableError,
 } from './apiErrors'
-import { showError, showSuccess, showUnavailable } from './errorPresentation'
+import { showError, showSuccess } from './errorPresentation'
 import {
   GC_TIME,
   MAX_RETRYABLE_ATTEMPTS,
@@ -28,7 +28,6 @@ export function createQueryCache(): QueryCache {
   return new QueryCache({
     onError: (error) => {
       console.error('Query failed:', error)
-      showUnavailable(error)
     },
   })
 }

@@ -68,22 +68,12 @@ describe('window-focus refetching', () => {
 })
 
 describe('QueryCache onError', () => {
-  it('reports a planned deploy', () => {
+  it('never toasts an unavailable error, which the app banner carries', () => {
     queryOnError?.(new ServiceUpdatingError('updating'), {} as never)
-
-    expect(toast.warning).toHaveBeenCalledWith('common:errors.serviceUpdating', undefined)
-  })
-
-  it('reports an unreachable backend', () => {
     queryOnError?.(new BackendUnavailableError('down'), {} as never)
-
-    expect(toast.warning).toHaveBeenCalledWith('common:errors.backendUnavailable', undefined)
-  })
-
-  it('reports unavailable auth', () => {
     queryOnError?.(new AuthTemporarilyUnavailableError('paused'), {} as never)
 
-    expect(toast.warning).toHaveBeenCalledWith('common:errors.authUnavailable', undefined)
+    expect(toastCount()).toBe(0)
   })
 
   it('stays silent for anything the route error component already shows', () => {
@@ -126,6 +116,19 @@ describe('MutationCache onError', () => {
       {} as never,
     )
 
+    expect(toastCount()).toBe(1)
+  })
+
+  it("still toasts an unavailable backend, because it answers the user's own action", () => {
+    mutationOnError?.(
+      new BackendUnavailableError('down'),
+      {} as never,
+      {} as never,
+      mutationWith(),
+      {} as never,
+    )
+
+    expect(toast.warning).toHaveBeenCalledWith('common:errors.backendUnavailable', undefined)
     expect(toastCount()).toBe(1)
   })
 

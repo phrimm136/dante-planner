@@ -4,18 +4,11 @@ import { toast as sonnerToast } from 'sonner'
 import {
   BannedError,
   ConflictError,
-  RetryableUnavailableError,
   ServiceUpdatingError,
   WriteTemporarilyUnavailableError,
 } from '@/lib/apiErrors'
 
-import {
-  presentError,
-  showError,
-  showSuccess,
-  showUnavailable,
-  showErrorMessage,
-} from '../errorPresentation'
+import { presentError, showError, showSuccess, showErrorMessage } from '../errorPresentation'
 import type { ErrorPresentation } from '../errorPresentation'
 import type { AppError, RestrictionKind, UnavailableScope } from '../apiErrorClassifier'
 
@@ -259,32 +252,6 @@ describe('showError', () => {
 
   it('reports a paused write rather than swallowing the failed save', () => {
     showError(new WriteTemporarilyUnavailableError('paused'))
-
-    expect(sonnerToast.warning).toHaveBeenCalledWith(
-      'common:errors.writeUnavailable.message',
-      undefined,
-    )
-  })
-})
-
-describe('showUnavailable', () => {
-  it('reports the unavailable family', () => {
-    showUnavailable(new ServiceUpdatingError('updating'))
-
-    expect(sonnerToast.warning).toHaveBeenCalledWith('common:errors.serviceUpdating', undefined)
-  })
-
-  it('says nothing for a failure outside that family', () => {
-    showUnavailable(new Error('boom'))
-    showUnavailable(new BannedError('banned'))
-    showUnavailable(new RetryableUnavailableError('deadlock'))
-
-    expect(sonnerToast.error).not.toHaveBeenCalled()
-    expect(sonnerToast.warning).not.toHaveBeenCalled()
-  })
-
-  it('reports the unavailable write like the rest of its family', () => {
-    showUnavailable(new WriteTemporarilyUnavailableError('paused'))
 
     expect(sonnerToast.warning).toHaveBeenCalledWith(
       'common:errors.writeUnavailable.message',

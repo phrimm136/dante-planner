@@ -14,6 +14,7 @@ import {
   ValidationError,
   WriteTemporarilyUnavailableError,
 } from './apiErrors'
+import { useServerStatusStore, type ServerStatus } from './banner/serverStatus'
 import { ProblemSchema, type Problem } from './problem'
 import { queryClient } from './queryClient'
 
@@ -55,11 +56,20 @@ const UNAVAILABLE_ERROR_BY_CODE: Record<string, ApiErrorConstructor> = {
   DEADLOCK: RetryableUnavailableError,
 }
 
+const SERVER_DOWN_ERRORS: ReadonlySet<ApiErrorConstructor> = new Set([
+  BackendUnavailableError,
+  WriteTemporarilyUnavailableError,
+])
+
 const DEFAULT_UNAVAILABLE_MESSAGE = 'Service temporarily unavailable'
 const DEFAULT_RATE_LIMIT_MESSAGE = 'Too many requests'
 const DEFAULT_VALIDATION_MESSAGE = 'Invalid request'
 const DEFAULT_VALIDATION_CODE = 'VALIDATION_ERROR'
 const DEFAULT_CONFLICT_CODE = 'CONFLICT'
+
+function recordServerStatus(status: ServerStatus): void {
+  useServerStatusStore.getState().setStatus(status)
+}
 
 async function readErrorBody(response: Response): Promise<Problem | null> {
   const parsed = ProblemSchema.safeParse(await response.json().catch(() => null))
@@ -88,11 +98,17 @@ export class ApiClient {
       }
     }
 
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      ...options,
-      headers,
-      credentials: 'include', // Include HttpOnly cookies
-    })
+    let response: Response
+    try {
+      response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        ...options,
+        headers,
+        credentials: 'include', // Include HttpOnly cookies
+      })
+    } catch (error) {
+      if (options.signal?.aborted !== true) recordServerStatus('down')
+      throw error
+    }
 
     if (response.status === 401) {
       queryClient.setQueryData(['auth', 'me'], null)
@@ -142,12 +158,15 @@ export class ApiClient {
       const message = body?.detail || DEFAULT_UNAVAILABLE_MESSAGE
       const UnavailableError =
         UNAVAILABLE_ERROR_BY_CODE[body?.code ?? ''] ?? BackendUnavailableError
+      if (SERVER_DOWN_ERRORS.has(UnavailableError)) recordServerStatus('down')
       throw new UnavailableError(message)
     }
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
+
+    recordServerStatus('ok')
 
     if (response.status === 204) {
       return undefined as T

@@ -7,6 +7,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { ApiClient } from '../api'
+import { useServerStatusStore, type ServerStatus } from '../banner/serverStatus'
 import {
   ConflictError,
   ForbiddenError,
@@ -16,6 +17,7 @@ import {
   WriteTemporarilyUnavailableError,
   AuthTemporarilyUnavailableError,
   BackendUnavailableError,
+  ServiceUpdatingError,
   UnauthorizedError,
 } from '../apiErrors'
 
@@ -516,6 +518,116 @@ describe('ApiClient', () => {
       await ApiClient.post('/api/planner', { name: 'Test' })
 
       expect(sentHeaders().get('X-CSRF-Token')).toBe('abc=def==')
+    })
+  })
+
+  describe('server status recording', () => {
+    const status = () => useServerStatusStore.getState().status
+    const respond = (code: number, body: unknown = null) =>
+      mockFetch.mockResolvedValue({
+        ok: code >= 200 && code < 300,
+        status: code,
+        json: vi.fn().mockResolvedValue(body),
+      })
+
+    function startFrom(initial: ServerStatus) {
+      useServerStatusStore.setState({ status: initial })
+    }
+
+    beforeEach(() => {
+      startFrom('ok')
+    })
+
+    it('records down when a read answers 503 WRITE_TEMPORARILY_UNAVAILABLE', async () => {
+      respond(503, { code: 'WRITE_TEMPORARILY_UNAVAILABLE' })
+
+      await expect(ApiClient.get('/api/auth/me')).rejects.toBeInstanceOf(
+        WriteTemporarilyUnavailableError,
+      )
+
+      expect(status()).toBe('down')
+    })
+
+    it('records down when /api/auth/me answers 503 without a code', async () => {
+      respond(503, { detail: 'down' })
+
+      await expect(ApiClient.get('/api/auth/me')).rejects.toBeInstanceOf(BackendUnavailableError)
+
+      expect(status()).toBe('down')
+    })
+
+    it('records down for a 503 whose body cannot be parsed', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 503,
+        json: vi.fn().mockRejectedValue(new SyntaxError('Unexpected token')),
+      })
+
+      await expect(ApiClient.get('/api/planner/md')).rejects.toBeInstanceOf(BackendUnavailableError)
+
+      expect(status()).toBe('down')
+    })
+
+    it('records down when the request never reaches a server', async () => {
+      mockFetch.mockRejectedValue(new TypeError('Failed to fetch'))
+
+      await expect(ApiClient.get('/api/planner/md')).rejects.toBeInstanceOf(TypeError)
+
+      expect(status()).toBe('down')
+    })
+
+    it('leaves the status alone when the caller aborted the request', async () => {
+      const controller = new AbortController()
+      controller.abort()
+      mockFetch.mockRejectedValue(new DOMException('aborted', 'AbortError'))
+
+      await expect(
+        ApiClient.get('/api/planner/md', { signal: controller.signal }),
+      ).rejects.toBeInstanceOf(DOMException)
+
+      expect(status()).toBe('ok')
+    })
+
+    it.each([200, 204])('clears the status on a %i response', async (code) => {
+      startFrom('down')
+      respond(code, {})
+
+      await ApiClient.get('/api/planner/md')
+
+      expect(status()).toBe('ok')
+    })
+
+    const initialStatuses: readonly ServerStatus[] = ['ok', 'down']
+
+    it.each(
+      [
+        ['AUTH_TEMPORARILY_UNAVAILABLE', AuthTemporarilyUnavailableError],
+        ['RATE_LIMIT_TEMPORARILY_UNAVAILABLE', RetryableUnavailableError],
+        ['DEADLOCK', RetryableUnavailableError],
+        ['SERVICE_UPDATING', ServiceUpdatingError],
+      ].flatMap(([code, error]) =>
+        initialStatuses.map((initial) => [code, error, initial] as const),
+      ),
+    )('leaves the status alone for a 503 %s from %s', async (code, error, initial) => {
+      startFrom(initial)
+      respond(503, { code })
+
+      await expect(ApiClient.get('/api/planner/md')).rejects.toBeInstanceOf(error)
+
+      expect(status()).toBe(initial)
+    })
+
+    it.each(
+      [401, 404, 409, 429, 500].flatMap((code) =>
+        initialStatuses.map((initial) => [code, initial] as const),
+      ),
+    )('leaves the status alone for a %i from %s', async (code, initial) => {
+      startFrom(initial)
+      respond(code, {})
+
+      await expect(ApiClient.get('/api/planner/md')).rejects.toBeInstanceOf(Error)
+
+      expect(status()).toBe(initial)
     })
   })
 })
