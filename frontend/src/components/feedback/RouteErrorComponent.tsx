@@ -4,6 +4,7 @@ import { useLocation } from '@tanstack/react-router'
 import { PlannerNotFound } from './PlannerNotFound'
 import { Button } from '@/components/ui/button'
 import { NotFoundError } from '@/lib/apiErrors'
+import { classifyRouteError, routeErrorLabel } from '@/lib/routeErrorCode'
 import NotFoundPage from './NotFoundPage'
 
 export function RouteErrorComponent({ error, reset }: ErrorComponentProps) {
@@ -34,6 +35,7 @@ export function RouteErrorComponent({ error, reset }: ErrorComponentProps) {
       <div className="bg-destructive/10 border border-destructive rounded-lg p-6 text-center max-w-2xl">
         <h2 className="text-xl font-bold text-destructive mb-2">{t('errors.generic.title')}</h2>
         <p className="text-muted-foreground mb-4">{errorMessage}</p>
+        <code className="block text-xs text-muted-foreground">{routeErrorLabel(error)}</code>
         {isDev && error instanceof Error && error.stack && (
           <details className="mt-4 text-left">
             <summary className="cursor-pointer text-sm font-semibold text-muted-foreground hover:text-foreground">
@@ -42,7 +44,17 @@ export function RouteErrorComponent({ error, reset }: ErrorComponentProps) {
             <pre className="mt-2 overflow-auto rounded bg-muted p-4 text-xs">{error.stack}</pre>
           </details>
         )}
-        <Button onClick={reset} variant="destructive" className="mt-4">
+        <Button
+          onClick={() => {
+            if (classifyRouteError(error) === 'CHUNK_LOAD') {
+              window.location.reload()
+            } else {
+              reset()
+            }
+          }}
+          variant="destructive"
+          className="mt-4"
+        >
           {t('errors.generic.retry')}
         </Button>
       </div>

@@ -3,6 +3,7 @@ import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { NotFoundError } from '@/lib/apiErrors'
+import { routeErrorLabel } from '@/lib/routeErrorCode'
 import NotFoundPage from './NotFoundPage'
 
 interface ErrorFallbackProps {
@@ -27,6 +28,7 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
       <div className="bg-destructive/10 border border-destructive rounded-lg p-6 text-center max-w-2xl">
         <h2 className="text-xl font-bold text-destructive mb-2">{t('errors.generic.title')}</h2>
         <p className="text-muted-foreground mb-4">{errorMessage}</p>
+        <code className="block text-xs text-muted-foreground">{routeErrorLabel(error)}</code>
         {isDev && errorObj.stack && (
           <details className="mt-4 text-left">
             <summary className="cursor-pointer text-sm font-semibold text-muted-foreground hover:text-foreground">
