@@ -227,6 +227,13 @@ export async function openStorageDb(): Promise<IDBDatabase | null> {
   return getDB()
 }
 
+export function probeStorage(): Promise<boolean> {
+  return openStorageDb().then(
+    (db) => db !== null,
+    () => false,
+  )
+}
+
 function issueWrite(
   db: IDBDatabase,
   label: string,

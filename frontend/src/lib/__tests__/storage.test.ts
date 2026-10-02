@@ -343,3 +343,30 @@ describe('storage store name', () => {
     expect(STORAGE_STORE_NAME).toBe(STORE_NAME)
   })
 })
+
+describe('probeStorage', () => {
+  it('answers true when the database opens', async () => {
+    installIndexedDB([{ kind: 'success', rows: new Map() }])
+    const { probeStorage } = await importStorage()
+
+    await expect(probeStorage()).resolves.toBe(true)
+  })
+
+  it('answers false when the open fails', async () => {
+    installIndexedDB([{ kind: 'error', error: new Error('open failed') }])
+    const { probeStorage } = await importStorage()
+
+    await expect(probeStorage()).resolves.toBe(false)
+  })
+
+  it('answers false when opening throws, as a denied origin does', async () => {
+    vi.stubGlobal('indexedDB', {
+      open: () => {
+        throw new DOMException('blocked', 'SecurityError')
+      },
+    })
+    const { probeStorage } = await importStorage()
+
+    await expect(probeStorage()).resolves.toBe(false)
+  })
+})

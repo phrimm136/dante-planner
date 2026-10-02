@@ -29,6 +29,7 @@ import {
 import { classifyAppError } from '@/lib/apiErrorClassifier'
 import { ok, err } from '@/lib/result'
 import { generateUUID } from '@/lib/uuid'
+import { probeStorage } from '@/lib/storage'
 import { PLANNER_LIST, STALE_TIME } from '@/lib/constants'
 
 import { matchesPlannerFilters } from '../lib/plannerContentExtractors'
@@ -72,6 +73,14 @@ export interface MDUserPlannersResult {
   isResolvingConflicts: boolean
 }
 
+function readOrEmpty<T>(read: Promise<T[]>): Promise<T[]> {
+  return read.catch(async (failure: unknown) => {
+    if (await probeStorage()) throw failure
+    console.error('Planner list could not read local storage', failure)
+    return []
+  })
+}
+
 export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MDUserPlannersResult {
   const { category, page, search, contentFilters } = options
 
@@ -111,7 +120,7 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
   const { data: allPlanners } = useSuspenseQuery(
     queryOptions({
       queryKey: userPlannersQueryKeys.list(isAuthenticated),
-      queryFn: () => storage.listLocal(),
+      queryFn: () => readOrEmpty(storage.listLocal()),
       staleTime: STALE_TIME.FREQUENT,
       refetchOnWindowFocus: false,
     }),
@@ -119,7 +128,7 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
 
   const { data: allFullPlanners } = useQuery({
     queryKey: userPlannersQueryKeys.listFull(isAuthenticated),
-    queryFn: () => storage.listLocalFull(),
+    queryFn: () => readOrEmpty(storage.listLocalFull()),
     staleTime: STALE_TIME.FREQUENT,
     enabled: hasContentFilters,
     refetchOnWindowFocus: false,

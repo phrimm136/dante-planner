@@ -18,6 +18,7 @@ const syncMocks = vi.hoisted(() => ({
   syncEnabled: true,
   listFromServer: vi.fn(async (): Promise<unknown[]> => []),
   listLocal: vi.fn(async (): Promise<unknown[]> => []),
+  listLocalFull: vi.fn(async (): Promise<unknown[]> => []),
   saveToLocal: vi.fn(async (_planner: unknown): Promise<unknown> => ({ ok: true })),
   loadFromLocal: vi.fn(async (_id: string): Promise<unknown> => null),
   fetchFromServer: vi.fn(async (_id: string): Promise<unknown> => null),
@@ -31,7 +32,13 @@ const syncMocks = vi.hoisted(() => ({
   batchChunks: vi.fn(async function* (ids: string[]): AsyncGenerator<unknown[]> {
     yield ids.map((id) => ({ id }))
   }),
+  probeStorage: vi.fn(async (): Promise<boolean> => true),
 }))
+
+vi.mock('@/lib/storage', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/storage')>()
+  return { ...actual, probeStorage: () => syncMocks.probeStorage() }
+})
 
 vi.mock('../../lib/plannerApi', () => ({
   plannerApi: { batchChunks: (ids: string[]) => syncMocks.batchChunks(ids) },
@@ -44,7 +51,7 @@ vi.mock('../usePlannerStorage', () => ({
     saveToLocal: syncMocks.saveToLocal,
     loadFromLocal: syncMocks.loadFromLocal,
     listLocal: syncMocks.listLocal,
-    listLocalFull: vi.fn(async () => []),
+    listLocalFull: syncMocks.listLocalFull,
     deleteFromLocal: vi.fn(async () => ({ ok: true })),
     clearCorruptedLocal: vi.fn(async () => undefined),
     listTombstones: syncMocks.listTombstones,
@@ -670,5 +677,143 @@ describe('useMDUserPlannersData batch conflict resolution', () => {
     })
 
     expect(result.current.isResolvingConflicts).toBe(false)
+  })
+})
+
+describe('useMDUserPlannersData when local storage cannot open', () => {
+  const blocked = new DOMException('blocked', 'SecurityError')
+  const noFilters = { title: null, keywords: [], identityIds: [], egoIds: [], giftIds: [] }
+
+  function renderWith(
+    queryClient: QueryClient,
+    options: Parameters<typeof useMDUserPlannersData>[0],
+  ) {
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <QueryClientProvider client={queryClient}>
+        <React.Suspense fallback={null}>{children}</React.Suspense>
+      </QueryClientProvider>
+    )
+    return renderHook(() => useMDUserPlannersData(options), { wrapper })
+  }
+
+  beforeEach(() => {
+    syncMocks.isAuthenticated = false
+    syncMocks.syncEnabled = false
+    for (const mock of [
+      syncMocks.listFromServer,
+      syncMocks.listLocal,
+      syncMocks.listLocalFull,
+      syncMocks.listTombstones,
+      syncMocks.saveToLocal,
+      syncMocks.deleteFromServer,
+      syncMocks.batchChunks,
+    ]) {
+      mock.mockClear()
+    }
+    syncMocks.listFromServer.mockResolvedValue([])
+    syncMocks.listLocal.mockResolvedValue([])
+    syncMocks.listLocalFull.mockResolvedValue([])
+    syncMocks.listTombstones.mockResolvedValue([])
+    syncMocks.batchChunks.mockImplementation(async function* (ids: string[]) {
+      yield ids.map((id) => ({ id }))
+    })
+    syncMocks.probeStorage.mockReset()
+    syncMocks.probeStorage.mockResolvedValue(false)
+  })
+
+  it('shows an empty list when the summary read rejects', async () => {
+    syncMocks.listLocal.mockRejectedValue(blocked)
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+
+    const { result } = renderWith(queryClient, { page: 0 })
+
+    await waitFor(() => expect(result.current).not.toBeNull())
+    expect(result.current.planners).toEqual([])
+    expect(result.current.totalCount).toBe(0)
+    expect(queryClient.getQueryData(userPlannersQueryKeys.list(false))).toEqual([])
+    expect(logged).toHaveBeenCalledWith('Planner list could not read local storage', blocked)
+    logged.mockRestore()
+  })
+
+  it('resolves the full read empty when it rejects under content filters', async () => {
+    syncMocks.listLocalFull.mockRejectedValue(blocked)
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+
+    const { result } = renderWith(queryClient, {
+      page: 0,
+      contentFilters: { ...noFilters, themePackIds: ['pack-1'] },
+    })
+
+    await waitFor(() =>
+      expect(queryClient.getQueryState(userPlannersQueryKeys.listFull(false))?.status).toBe(
+        'success',
+      ),
+    )
+    expect(queryClient.getQueryData(userPlannersQueryKeys.listFull(false))).toEqual([])
+    expect(result.current.planners).toEqual([])
+    expect(logged).toHaveBeenCalledWith('Planner list could not read local storage', blocked)
+    logged.mockRestore()
+  })
+
+  it('sends a read that fails after storage opened to the error boundary', async () => {
+    const failure = new Error('transaction failed')
+    syncMocks.listLocal.mockRejectedValue(failure)
+    syncMocks.probeStorage.mockResolvedValue(true)
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    const caught: unknown[] = []
+    class Boundary extends React.Component<{ children: React.ReactNode }, { failed: boolean }> {
+      state = { failed: false }
+      static getDerivedStateFromError() {
+        return { failed: true }
+      }
+      componentDidCatch(error: unknown) {
+        caught.push(error)
+      }
+      render() {
+        return this.state.failed ? null : this.props.children
+      }
+    }
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <QueryClientProvider client={queryClient}>
+        <Boundary>
+          <React.Suspense fallback={null}>{children}</React.Suspense>
+        </Boundary>
+      </QueryClientProvider>
+    )
+
+    renderHook(() => useMDUserPlannersData({ page: 0 }), { wrapper })
+
+    await waitFor(() => expect(caught).toEqual([failure]))
+    expect(queryClient.getQueryState(userPlannersQueryKeys.list(false))?.status).toBe('error')
+    expect(queryClient.getQueryData(userPlannersQueryKeys.list(false))).toBeUndefined()
+    expect(logged).not.toHaveBeenCalledWith('Planner list could not read local storage', failure)
+    logged.mockRestore()
+  })
+
+  it('aborts sync before writing anything when the local read rejects', async () => {
+    syncMocks.isAuthenticated = true
+    syncMocks.syncEnabled = true
+    syncMocks.listLocal.mockRejectedValue(blocked)
+    syncMocks.listFromServer.mockResolvedValue([
+      { id: 'server-only', syncVersion: 1 },
+      { id: 'tombstoned', syncVersion: 2 },
+    ])
+    syncMocks.listTombstones.mockResolvedValue([
+      { id: 'tombstoned', syncVersion: 2, deletedAt: '2026-06-01T00:00:00.000Z' },
+    ])
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+
+    const { result } = renderWith(queryClient, { page: 0 })
+
+    await waitFor(() => expect(logged).toHaveBeenCalledWith('Background sync failed:', blocked))
+    await waitFor(() => expect(result.current.isSyncing).toBe(false))
+    expect(syncMocks.batchChunks).not.toHaveBeenCalled()
+    expect(syncMocks.saveToLocal).not.toHaveBeenCalled()
+    expect(syncMocks.deleteFromServer).not.toHaveBeenCalled()
+    logged.mockRestore()
   })
 })

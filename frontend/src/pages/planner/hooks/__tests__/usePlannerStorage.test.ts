@@ -142,3 +142,17 @@ describe('listLocal', () => {
     expect(summaries.map((s) => s.id)).toEqual([newer.metadata.id, older.metadata.id])
   })
 })
+
+describe('lists when the database cannot open', () => {
+  const blocked = new DOMException('blocked', 'SecurityError')
+
+  it.each([
+    ['listLocal', () => storageHook().listLocal()],
+    ['listLocalFull', () => storageHook().listLocalFull()],
+    ['listTombstones', () => storageHook().listTombstones()],
+  ])('%s rejects with the open failure', async (_name, list) => {
+    mockOpenStorageDb.mockRejectedValue(blocked)
+
+    await expect(list()).rejects.toBe(blocked)
+  })
+})

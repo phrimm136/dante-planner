@@ -96,3 +96,5 @@ export const COMMENT_MAX_VISUAL_DEPTH_MOBILE = 2
 export const COMMENT_MAX_VISUAL_DEPTH_DESKTOP = 10
 
 export const MAX_DEPLOYED_ORDER = 7
+
+export const PLANNER_PATH_PREFIX = '/planner'
