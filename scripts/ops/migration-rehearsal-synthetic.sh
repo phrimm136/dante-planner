@@ -33,13 +33,13 @@ cleanup() {
   if [[ "${KEEP:-0}" == "1" ]]; then
     echo "container left up: docker exec -it $CONTAINER mysql -uroot -p$ROOT_PW danteplanner"
   else
-    docker rm -f "$CONTAINER" >/dev/null 2>&1 || true
+    docker rm -fv "$CONTAINER" >/dev/null 2>&1 || true
   fi
 }
 trap cleanup EXIT
 
 say "1. starting $SERVER_IMAGE"
-docker rm -f "$CONTAINER" >/dev/null 2>&1 || true
+docker rm -fv "$CONTAINER" >/dev/null 2>&1 || true
 docker run -d --name "$CONTAINER" \
   -e MYSQL_ROOT_PASSWORD="$ROOT_PW" -e MYSQL_DATABASE=danteplanner \
   -p "$LOCAL_PORT:3306" "$SERVER_IMAGE" \
