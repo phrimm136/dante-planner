@@ -3,8 +3,10 @@ package org.danteplanner.backend.planner.service;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
-import org.danteplanner.backend.user.exception.UserBannedException;
-import org.danteplanner.backend.user.exception.UserTimedOutException;
+import org.danteplanner.backend.user.api.UserBannedException;
+import org.danteplanner.backend.user.api.UserSummary;
+import org.danteplanner.backend.user.api.UserTimedOutException;
+import org.danteplanner.backend.user.api.Users;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,16 +20,18 @@ import java.util.UUID;
 public class PlannerAccessGuard {
 
     private final UserService userService;
+    private final Users users;
     private final PlannerRepository plannerRepository;
     private final Clock clock;
 
     @Autowired
-    public PlannerAccessGuard(UserService userService, PlannerRepository plannerRepository) {
-        this(userService, plannerRepository, Clock.systemUTC());
+    public PlannerAccessGuard(UserService userService, Users users, PlannerRepository plannerRepository) {
+        this(userService, users, plannerRepository, Clock.systemUTC());
     }
 
-    PlannerAccessGuard(UserService userService, PlannerRepository plannerRepository, Clock clock) {
+    PlannerAccessGuard(UserService userService, Users users, PlannerRepository plannerRepository, Clock clock) {
         this.userService = userService;
+        this.users = users;
         this.plannerRepository = plannerRepository;
         this.clock = clock;
     }
@@ -37,24 +41,24 @@ public class PlannerAccessGuard {
     }
 
     public void checkNotRestricted(Long userId) {
-        User user = getUser(userId);
+        UserSummary user = users.findById(userId);
 
         switch (user.restrictionState(clock)) {
-            case TIMED_OUT -> throw new UserTimedOutException(userId, user.getTimeoutUntil());
-            case BANNED -> throw new UserBannedException(user.getId(), user.getBannedAt());
+            case TIMED_OUT -> throw new UserTimedOutException(userId, user.timeoutUntil());
+            case BANNED -> throw new UserBannedException(user.id(), user.bannedAt());
             case ACTIVE -> { }
         }
     }
 
     public void holdActiveAccount(Long userId) {
-        userService.holdActiveById(userId);
+        users.holdActiveById(userId);
     }
 
     public void checkNotBanned(Long userId) {
-        User user = getUser(userId);
+        UserSummary user = users.findById(userId);
 
         if (user.isBanned()) {
-            throw new UserBannedException(user.getId(), user.getBannedAt());
+            throw new UserBannedException(user.id(), user.bannedAt());
         }
     }
 

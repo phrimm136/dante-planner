@@ -2,7 +2,7 @@ package org.danteplanner.backend.comment.dto;
 
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.shared.util.CommentConstants;
-import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.user.api.UserSummary;
 
 import java.util.List;
 import java.util.UUID;
@@ -26,7 +26,7 @@ public record CommentTreeNode(
     public static CommentTreeNode forBroadcast(
             PlannerComment comment,
             UUID parentPublicId,
-            User author
+            UserSummary author
     ) {
         return fromEntity(comment, parentPublicId, author, null, false, List.of());
     }
@@ -34,18 +34,18 @@ public record CommentTreeNode(
     public static CommentTreeNode fromEntity(
             PlannerComment comment,
             UUID parentPublicId,
-            User author,
+            UserSummary author,
             Long currentUserId,
             boolean hasUpvoted,
             List<CommentTreeNode> replies
     ) {
-        boolean authorHidden = author == null || author.isDeleted();
+        boolean authorHidden = author == null || author.deleted();
         String authorEpithet = CommentConstants.DELETED_CONTENT;
         String authorSuffix = CommentConstants.DELETED_CONTENT;
         if (!authorHidden
-                && author.getUsernameEpithet() != null && author.getUsernameSuffix() != null) {
-            authorEpithet = author.getUsernameEpithet();
-            authorSuffix = author.getUsernameSuffix();
+                && author.usernameEpithet() != null && author.usernameSuffix() != null) {
+            authorEpithet = author.usernameEpithet();
+            authorSuffix = author.usernameSuffix();
         }
 
         boolean isAuthor = currentUserId != null && comment.getUserId().equals(currentUserId);

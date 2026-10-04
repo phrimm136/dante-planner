@@ -1,6 +1,7 @@
 package org.danteplanner.backend.planner.validation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.user.service.UsersApiAdapter;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerType;
@@ -85,7 +86,7 @@ class CategoryChangeFloorRulesTest {
                 contentValidator,
                 contentVersionValidator,
                 plannerCatalogService,
-                new PlannerAccessGuard(userService, plannerRepository),
+                new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository),
                 new PlannerCategoryValidator(),
                 new PlannerLimitValidator(),
                 new PlannerOwnershipValidator(),

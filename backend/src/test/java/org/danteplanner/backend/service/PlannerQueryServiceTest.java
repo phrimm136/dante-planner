@@ -1,5 +1,6 @@
 package org.danteplanner.backend.service;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
+import org.danteplanner.backend.user.service.UsersApiAdapter;
 import org.danteplanner.backend.planner.service.PlannerQueryService;
 
 import org.danteplanner.backend.planner.dto.PlannerResponse;
@@ -56,7 +57,7 @@ class PlannerQueryServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        PlannerAccessGuard accessGuard = new PlannerAccessGuard(userService, plannerRepository);
+        PlannerAccessGuard accessGuard = new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository);
         queryService = new PlannerQueryService(plannerRepository, accessGuard);
 
         testUser = TestDataFactory.unsavedUser(1L);

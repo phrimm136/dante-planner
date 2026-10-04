@@ -8,7 +8,7 @@ import org.danteplanner.backend.user.dto.UpdateUserSettingsRequest;
 import org.danteplanner.backend.user.dto.UserSettingsResponse;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserSettings;
-import org.danteplanner.backend.user.exception.UserNotFoundException;
+import org.danteplanner.backend.user.api.UserNotFoundException;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.repository.UserSettingsRepository;
 import org.springframework.stereotype.Service;

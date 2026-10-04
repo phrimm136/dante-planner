@@ -1,6 +1,6 @@
 package org.danteplanner.backend.auth.token;
 
-import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.user.api.UserRole;
 
 public interface TokenGenerator {
 

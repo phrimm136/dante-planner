@@ -3,7 +3,8 @@ package org.danteplanner.backend.moderation.service;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.user.api.UserRole;
+import org.danteplanner.backend.user.api.UserSummary;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -54,13 +55,13 @@ public class ModerationPolicy {
         }
     }
 
-    public void requireCanChangeRole(User actor, User target, UserRole newRole) {
-        if (newRole.outranks(actor.getRole())) {
+    public void requireCanChangeRole(UserSummary actor, UserSummary target, UserRole newRole) {
+        if (newRole.outranks(actor.role())) {
             throw new ModerationForbiddenException("Cannot grant role higher than your own");
         }
 
-        boolean self = actor.getId().equals(target.getId());
-        if (!self && target.getRole().hasRankAtLeast(actor.getRole())) {
+        boolean self = actor.id().equals(target.id());
+        if (!self && target.role().hasRankAtLeast(actor.role())) {
             throw new ModerationForbiddenException("Cannot modify user of equal or higher rank");
         }
     }

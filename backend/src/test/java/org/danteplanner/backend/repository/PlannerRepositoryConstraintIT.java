@@ -13,13 +13,13 @@ import org.danteplanner.backend.planner.entity.PlannerModeration;
 import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.StoredPlannerContent;
-import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 
-import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.api.AuthProviderType;
 import jakarta.persistence.EntityManager;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.support.TestDataFactory;

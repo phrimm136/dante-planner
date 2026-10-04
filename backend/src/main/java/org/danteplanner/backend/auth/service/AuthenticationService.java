@@ -2,12 +2,12 @@ package org.danteplanner.backend.auth.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.api.AuthProviderType;
+import org.danteplanner.backend.user.api.UserSummary;
+import org.danteplanner.backend.user.api.Users;
 import org.danteplanner.backend.user.dto.UserResponse;
-import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.danteplanner.backend.shared.config.LineageRotationFlag;
-import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.auth.oauth.OAuthProvider;
 import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
@@ -40,13 +40,13 @@ public class AuthenticationService {
     private final TokenValidator tokenValidator;
     private final TokenBlacklistService tokenBlacklistService;
     private final UserService userService;
-    private final UserAccountLifecycleService lifecycleService;
+    private final Users users;
     private final LineageRotationFlag lineageRotationFlag;
 
     /**
      * Result of authentication containing user and token pair.
      */
-    public record AuthResult(User user, String accessToken, String refreshToken, boolean reactivated) {
+    public record AuthResult(UserSummary user, String accessToken, String refreshToken, boolean reactivated) {
     }
 
     public AuthResult authenticateWithOAuth(String providerName, String code,
@@ -63,19 +63,19 @@ public class AuthenticationService {
         AuthProviderType providerType = AuthProviderType.fromValue(providerName);
         boolean reactivated = false;
 
-        Optional<User> activeUser = userService.findActiveByProvider(providerType, providerId);
+        Optional<UserSummary> activeUser = users.findActiveByProvider(providerType, providerId);
 
-        User user;
+        UserSummary user;
         if (activeUser.isPresent()) {
             user = activeUser.get();
         } else {
-            Optional<User> deletedUser = userService.findByProvider(providerType, providerId);
+            Optional<UserSummary> deletedUser = users.findByProvider(providerType, providerId);
 
-            if (deletedUser.isPresent() && deletedUser.get().isDeleted()) {
+            if (deletedUser.isPresent() && deletedUser.get().deleted()) {
                 user = deletedUser.get();
-                lifecycleService.reactivateAccount(user.getId());
+                users.reactivateAccount(user.id());
                 reactivated = true;
-                log.info("Reactivated soft-deleted account for user: {}", user.getId());
+                log.info("Reactivated soft-deleted account for user: {}", user.id());
             } else if (deletedUser.isPresent()) {
                 user = deletedUser.get();
             } else {
@@ -83,15 +83,15 @@ public class AuthenticationService {
                         "id", providerId,
                         "email", userInfo.email()
                 );
-                user = userService.findOrCreateUser(providerName, userInfoMap);
+                user = users.findOrCreateUser(providerName, userInfoMap);
             }
         }
 
-        String accessToken = tokenGenerator.generateAccessToken(user.getId(), user.getRole());
-        String refreshToken = tokenGenerator.generateRefreshToken(user.getId());
+        String accessToken = tokenGenerator.generateAccessToken(user.id(), user.role());
+        String refreshToken = tokenGenerator.generateRefreshToken(user.id());
 
         log.info("User authenticated successfully via {}: userId={} (reactivated: {})",
-                providerName, user.getId(), reactivated);
+                providerName, user.id(), reactivated);
         return new AuthResult(user, accessToken, refreshToken, reactivated);
     }
 

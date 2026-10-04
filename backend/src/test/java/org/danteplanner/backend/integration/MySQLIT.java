@@ -17,7 +17,7 @@ import org.danteplanner.backend.notification.entity.NotificationType;
 
 import org.danteplanner.backend.notification.entity.Notification;
 
-import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.api.AuthProviderType;
 import jakarta.persistence.EntityManager;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.PlannerKeywords;

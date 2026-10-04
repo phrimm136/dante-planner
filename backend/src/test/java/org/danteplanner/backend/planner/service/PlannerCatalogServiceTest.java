@@ -1,7 +1,7 @@
 package org.danteplanner.backend.planner.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerCatalog;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
@@ -12,7 +12,7 @@ import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.user.api.UserRole;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

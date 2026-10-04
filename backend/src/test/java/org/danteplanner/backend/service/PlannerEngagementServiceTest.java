@@ -1,5 +1,6 @@
 package org.danteplanner.backend.service;
 import org.danteplanner.backend.planner.service.PlannerEngagementService;
+import org.danteplanner.backend.user.service.UsersApiAdapter;
 import org.mockito.ArgumentCaptor;
 
 import org.danteplanner.backend.planner.entity.Planner;
@@ -90,7 +91,7 @@ class PlannerEngagementServiceTest {
                 plannerStatsService,
                 plannerCatalogService,
                 domainEventRecorder,
-                new PlannerAccessGuard(userService, plannerRepository),
+                new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository),
                 reportService,
                 new VoteUniquenessValidator(),
                 recommendedThreshold

@@ -1,8 +1,8 @@
 package org.danteplanner.backend.admin.dto;
 
 import lombok.Builder;
-import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.user.api.UserRole;
+import org.danteplanner.backend.user.api.UserSummary;
 
 @Builder
 public record UserRoleResponse(
@@ -11,11 +11,11 @@ public record UserRoleResponse(
     String email
 ) {
 
-    public static UserRoleResponse fromUser(User user) {
+    public static UserRoleResponse fromUser(UserSummary user) {
         return UserRoleResponse.builder()
-                .userId(user.getId())
-                .role(user.getRole())
-                .email(user.getEmail())
+                .userId(user.id())
+                .role(user.role())
+                .email(user.email())
                 .build();
     }
 }

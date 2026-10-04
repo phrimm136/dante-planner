@@ -14,7 +14,7 @@ import org.danteplanner.backend.moderation.exception.CommentReportAlreadyExistsE
 import org.danteplanner.backend.moderation.repository.PlannerCommentReportRepository;
 import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
-import org.danteplanner.backend.user.exception.UserBannedException;
+import org.danteplanner.backend.user.api.UserBannedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

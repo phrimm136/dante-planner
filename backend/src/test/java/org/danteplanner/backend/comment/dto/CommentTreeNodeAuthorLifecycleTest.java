@@ -1,10 +1,11 @@
 package org.danteplanner.backend.comment.dto;
 
-import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.api.AuthProviderType;
+import org.danteplanner.backend.user.service.UsersApiAdapter;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.shared.util.CommentConstants;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.user.api.UserRole;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -42,7 +43,8 @@ class CommentTreeNodeAuthorLifecycleTest {
     }
 
     private static CommentTreeNode project(PlannerComment comment, User author) {
-        return CommentTreeNode.fromEntity(comment, null, author, null, false, List.of());
+        return CommentTreeNode.fromEntity(
+                comment, null, author == null ? null : UsersApiAdapter.toSummary(author), null, false, List.of());
     }
 
     @Test

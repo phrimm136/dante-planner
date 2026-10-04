@@ -1,10 +1,11 @@
 package org.danteplanner.backend.auth.service;
 
-import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.api.AuthProviderType;
+import org.danteplanner.backend.user.service.UsersApiAdapter;
 import org.danteplanner.backend.shared.config.LineageRotationFlag;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.danteplanner.backend.user.service.UserService;
@@ -80,7 +81,7 @@ class AuthenticationServiceTest {
                 tokenValidator,
                 tokenBlacklistService,
                 userService,
-                lifecycleService,
+                new UsersApiAdapter(userService, lifecycleService),
                 new LineageRotationFlag(false)
         );
 
@@ -120,7 +121,7 @@ class AuthenticationServiceTest {
 
             // Assert
             assertNotNull(result);
-            assertSame(testUser, result.user());
+            assertEquals(testUser.getId(), result.user().id());
             assertEquals("jwt-access-token", result.accessToken());
             assertEquals("jwt-refresh-token", result.refreshToken());
             assertFalse(result.reactivated());
@@ -171,7 +172,7 @@ class AuthenticationServiceTest {
 
             // Assert
             assertFalse(result.reactivated());
-            assertSame(testUser, result.user());
+            assertEquals(testUser.getId(), result.user().id());
             assertEquals("access", result.accessToken());
             assertEquals("refresh", result.refreshToken());
         }
@@ -209,7 +210,7 @@ class AuthenticationServiceTest {
 
             // Assert
             assertTrue(result.reactivated());
-            assertSame(deletedUser, result.user());
+            assertEquals(deletedUser.getId(), result.user().id());
             // Reactivation is only observable as a cleared deleted_at row, which needs a containerized test.
             verify(lifecycleService).reactivateAccount(deletedUser.getId());
         }

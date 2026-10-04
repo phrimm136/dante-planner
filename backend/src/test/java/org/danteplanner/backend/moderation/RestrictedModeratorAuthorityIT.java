@@ -13,7 +13,7 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;

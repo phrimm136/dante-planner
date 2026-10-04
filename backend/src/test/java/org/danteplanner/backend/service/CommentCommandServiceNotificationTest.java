@@ -1,6 +1,7 @@
 package org.danteplanner.backend.service;
 
 import org.danteplanner.backend.comment.entity.PlannerComment;
+import org.danteplanner.backend.user.service.UsersApiAdapter;
 import org.danteplanner.backend.comment.service.CommentCommandService;
 import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.comment.validation.CommentAccessValidator;
@@ -11,10 +12,10 @@ import org.danteplanner.backend.planner.service.PlannerStatsService;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 
-import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.comment.dto.CreateCommentRequest;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
@@ -78,11 +79,11 @@ class CommentCommandServiceNotificationTest {
     void setUp() {
         service = new CommentCommandService(
                 commentRepository,
-                new CommentQueryService(commentRepository, commentVoteRepository, userService,
-                        new PlannerAccessGuard(userService, plannerRepository),
+                new CommentQueryService(commentRepository, commentVoteRepository, new UsersApiAdapter(userService, null),
+                        new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository),
                         new CommentAccessValidator()),
                 domainEventRecorder,
-                new PlannerAccessGuard(userService, plannerRepository),
+                new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository),
                 new PlannerStatsService(plannerStatsRepository),
                 new CommentAccessValidator(), new CommentAuthorshipValidator(),
                 new CommentStateValidator());

@@ -4,7 +4,7 @@ import org.danteplanner.backend.shared.exception.ProblemWriter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import jakarta.servlet.http.Cookie;
 
-import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.auth.token.RefreshRotationService;
 import org.danteplanner.backend.auth.token.RotationResult;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;

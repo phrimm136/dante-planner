@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.moderation.dto.ModerationActionResponse;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
-import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.service.UserService;
+import org.danteplanner.backend.user.api.UserSummary;
+import org.danteplanner.backend.user.api.Users;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,12 +24,12 @@ public class ModerationQueryService {
 
     private static final int RECENT_ACTION_LIMIT = 100;
 
-    private final UserService userService;
+    private final Users users;
     private final ModerationActionRepository moderationActionRepository;
 
     @Transactional(readOnly = true)
-    public List<User> getAllUsers() {
-        return userService.listActiveAccounts();
+    public List<UserSummary> getAllUsers() {
+        return users.listActiveAccounts();
     }
 
     @Transactional(readOnly = true)
@@ -46,21 +46,21 @@ public class ModerationQueryService {
                 .distinct()
                 .toList();
 
-        Map<Long, User> actorMap = userService.findAllByIds(actorIds).stream()
-                .collect(Collectors.toMap(User::getId, user -> user));
+        Map<Long, UserSummary> actorMap = users.findAllByIds(actorIds).stream()
+                .collect(Collectors.toMap(UserSummary::id, user -> user));
 
         return actions.stream()
                 .map(action -> {
-                    User actor = actorMap.get(action.getActorId());
-                    String epithet = actor != null ? actor.getUsernameEpithet() : "Unknown";
-                    String suffix = actor != null ? actor.getUsernameSuffix() : "";
+                    UserSummary actor = actorMap.get(action.getActorId());
+                    String epithet = actor != null ? actor.usernameEpithet() : "Unknown";
+                    String suffix = actor != null ? actor.usernameSuffix() : "";
                     return ModerationActionResponse.fromEntity(action, epithet, suffix);
                 })
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<User> getTimedOutUsers() {
-        return userService.listTimedOutAccounts();
+    public List<UserSummary> getTimedOutUsers() {
+        return users.listTimedOutAccounts();
     }
 }

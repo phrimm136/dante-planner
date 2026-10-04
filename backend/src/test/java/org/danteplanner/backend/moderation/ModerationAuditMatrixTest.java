@@ -1,7 +1,8 @@
 package org.danteplanner.backend.moderation;
 
 import org.danteplanner.backend.admin.service.AdminService;
-import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.service.UsersApiAdapter;
+import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.service.CommentCommandService;
@@ -23,7 +24,7 @@ import org.danteplanner.backend.planner.entity.StoredPlannerContent;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -119,7 +120,7 @@ class ModerationAuditMatrixTest {
         userModerationService = new UserModerationService(userService, auditService, eventPublisher, moderationPolicy);
         plannerModerationService = new PlannerModerationService(plannerPublishingService, auditService);
         commentModerationService = new CommentModerationService(commentCommandService, commentQueryService, auditService);
-        adminService = new AdminService(userService, auditService, moderationPolicy);
+        adminService = new AdminService(new UsersApiAdapter(userService, null), auditService, moderationPolicy);
 
         User actor = user(ACTOR, UserRole.ADMIN);
         User target = user(TARGET, UserRole.MODERATOR);

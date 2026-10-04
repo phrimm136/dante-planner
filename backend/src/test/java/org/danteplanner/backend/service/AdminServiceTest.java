@@ -1,10 +1,12 @@
 package org.danteplanner.backend.service;
 
 import org.danteplanner.backend.admin.service.AdminService;
-import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.api.UserSummary;
+import org.danteplanner.backend.user.service.UsersApiAdapter;
+import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.entity.UserRole;
-import org.danteplanner.backend.user.exception.UserNotFoundException;
+import org.danteplanner.backend.user.api.UserRole;
+import org.danteplanner.backend.user.api.UserNotFoundException;
 import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -45,7 +47,7 @@ class AdminServiceTest {
 
     @BeforeEach
     void setUp() {
-        adminService = new AdminService(userService,
+        adminService = new AdminService(new UsersApiAdapter(userService, null),
                 new ModerationAuditService(moderationActionRepository), new ModerationPolicy());
 
         adminUser = User.builder()
@@ -96,10 +98,10 @@ class AdminServiceTest {
                     .thenReturn(normalUser);
 
             // Act
-            User result = adminService.changeRole(adminUser.getId(), normalUser.getId(), UserRole.MODERATOR);
+            UserSummary result = adminService.changeRole(adminUser.getId(), normalUser.getId(), UserRole.MODERATOR);
 
             // Assert
-            assertEquals(UserRole.MODERATOR, result.getRole());
+            assertEquals(UserRole.MODERATOR, result.role());
         }
 
         @Test
@@ -112,10 +114,10 @@ class AdminServiceTest {
                     .thenReturn(moderatorUser);
 
             // Act
-            User result = adminService.changeRole(adminUser.getId(), moderatorUser.getId(), UserRole.NORMAL);
+            UserSummary result = adminService.changeRole(adminUser.getId(), moderatorUser.getId(), UserRole.NORMAL);
 
             // Assert
-            assertEquals(UserRole.NORMAL, result.getRole());
+            assertEquals(UserRole.NORMAL, result.role());
         }
 
         @Test
@@ -272,10 +274,10 @@ class AdminServiceTest {
             when(userService.countByRole(UserRole.ADMIN)).thenReturn(2L);
 
             // Act
-            User result = adminService.changeRole(adminUser.getId(), adminUser.getId(), UserRole.MODERATOR);
+            UserSummary result = adminService.changeRole(adminUser.getId(), adminUser.getId(), UserRole.MODERATOR);
 
             // Assert
-            assertEquals(UserRole.MODERATOR, result.getRole());
+            assertEquals(UserRole.MODERATOR, result.role());
         }
     }
 

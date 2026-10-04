@@ -1,7 +1,7 @@
 package org.danteplanner.backend.auth.token;
 
 import org.danteplanner.backend.shared.config.JwtProperties;
-import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

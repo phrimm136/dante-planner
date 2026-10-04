@@ -1,5 +1,6 @@
 package org.danteplanner.backend.planner.service;
 import org.danteplanner.backend.planner.dto.UpsertResult;
+import org.danteplanner.backend.user.service.UsersApiAdapter;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 
@@ -25,7 +26,7 @@ import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerOwnershipRow;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
-import org.danteplanner.backend.user.exception.UserNotFoundException;
+import org.danteplanner.backend.user.api.UserNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.user.service.UserService;
@@ -52,7 +53,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import org.danteplanner.backend.user.exception.UserBannedException;
+import org.danteplanner.backend.user.api.UserBannedException;
 
 /**
  * Unit tests for PlannerCommandService (owner CRUD write operations:
@@ -94,7 +95,7 @@ class PlannerCommandServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        PlannerAccessGuard accessGuard = new PlannerAccessGuard(userService, plannerRepository);
+        PlannerAccessGuard accessGuard = new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository);
 
         commandService = new PlannerCommandService(
                 plannerRepository,

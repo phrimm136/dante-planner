@@ -1,6 +1,6 @@
 package org.danteplanner.backend.entity;
 
-import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.junit.jupiter.api.Test;
 

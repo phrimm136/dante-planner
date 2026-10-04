@@ -1,7 +1,7 @@
 package org.danteplanner.roleclaimfixture;
 
 import org.danteplanner.backend.auth.token.TokenClaims;
-import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.user.api.UserRole;
 
 public class RoleAccessorReaderFixture {
 

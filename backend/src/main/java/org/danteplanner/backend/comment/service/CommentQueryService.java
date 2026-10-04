@@ -9,9 +9,8 @@ import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.comment.validation.CommentAccessValidator;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
-import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.service.UserAccountLifecycleService;
-import org.danteplanner.backend.user.service.UserService;
+import org.danteplanner.backend.user.api.UserSummary;
+import org.danteplanner.backend.user.api.Users;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +35,7 @@ public class CommentQueryService {
 
     private final PlannerCommentRepository commentRepository;
     private final PlannerCommentVoteRepository commentVoteRepository;
-    private final UserService userService;
+    private final Users users;
     private final PlannerAccessGuard accessGuard;
     private final CommentAccessValidator accessValidator;
 
@@ -53,10 +52,10 @@ public class CommentQueryService {
 
         Set<Long> userIds = comments.stream()
                 .map(PlannerComment::getUserId)
-                .filter(id -> !UserAccountLifecycleService.SENTINEL_USER_ID.equals(id))
+                .filter(id -> !Users.SENTINEL_USER_ID.equals(id))
                 .collect(Collectors.toSet());
-        Map<Long, User> userMap = userService.findAllByIds(userIds).stream()
-                .collect(Collectors.toMap(User::getId, Function.identity()));
+        Map<Long, UserSummary> userMap = users.findAllByIds(userIds).stream()
+                .collect(Collectors.toMap(UserSummary::id, Function.identity()));
 
         Set<Long> upvotedIds = Collections.emptySet();
         if (currentUserId != null) {
@@ -71,7 +70,7 @@ public class CommentQueryService {
 
     @Transactional(readOnly = true)
     public CommentTreeNode broadcastNode(PlannerComment comment, UUID parentPublicId) {
-        User author = userService.findOptionalById(comment.getUserId()).orElse(null);
+        UserSummary author = users.findOptionalById(comment.getUserId()).orElse(null);
         return CommentTreeNode.forBroadcast(comment, parentPublicId, author);
     }
 
@@ -89,7 +88,7 @@ public class CommentQueryService {
 
     private List<CommentTreeNode> buildCommentTree(
             List<PlannerComment> comments,
-            Map<Long, User> userMap,
+            Map<Long, UserSummary> userMap,
             Set<Long> upvotedIds,
             Long currentUserId
     ) {
@@ -112,7 +111,7 @@ public class CommentQueryService {
             PlannerComment comment,
             UUID parentPublicId,
             Map<Long, List<PlannerComment>> childrenMap,
-            Map<Long, User> userMap,
+            Map<Long, UserSummary> userMap,
             Set<Long> upvotedIds,
             Long currentUserId
     ) {
@@ -127,7 +126,7 @@ public class CommentQueryService {
             return Optional.empty();
         }
 
-        User author = userMap.get(comment.getUserId());
+        UserSummary author = userMap.get(comment.getUserId());
         boolean hasUpvoted = upvotedIds.contains(comment.getId());
 
         return Optional.of(CommentTreeNode.fromEntity(

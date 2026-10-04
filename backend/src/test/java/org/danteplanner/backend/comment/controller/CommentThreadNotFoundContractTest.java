@@ -1,6 +1,7 @@
 package org.danteplanner.backend.comment.controller;
 
-import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.api.AuthProviderType;
+import org.danteplanner.backend.user.service.UsersApiAdapter;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.comment.service.CommentQueryService;
@@ -14,7 +15,7 @@ import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,8 +57,8 @@ class CommentThreadNotFoundContractTest {
     @BeforeEach
     void setUp() {
         CommentQueryService queryService = new CommentQueryService(
-                commentRepository, mock(PlannerCommentVoteRepository.class), userService,
-                new PlannerAccessGuard(userService, plannerRepository), new CommentAccessValidator());
+                commentRepository, mock(PlannerCommentVoteRepository.class), new UsersApiAdapter(userService, null),
+                new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository), new CommentAccessValidator());
         mockMvc = standaloneSetup(new CommentController(queryService, null, null, new ByIdReadGuard()))
                 .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
                 .setControllerAdvice(new ApiExceptionHandler(mock(CookieUtils.class)))

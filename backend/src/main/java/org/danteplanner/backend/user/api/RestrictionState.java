@@ -1,4 +1,4 @@
-package org.danteplanner.backend.user.entity;
+package org.danteplanner.backend.user.api;
 
 public enum RestrictionState {
 

@@ -1,5 +1,6 @@
 package org.danteplanner.backend.service;
 import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
+import org.danteplanner.backend.user.service.UsersApiAdapter;
 import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
 import org.danteplanner.backend.planner.precondition.CatalogReadValidator;
 
@@ -99,7 +100,7 @@ class PublishedPlannerQueryServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        PlannerAccessGuard accessGuard = new PlannerAccessGuard(userService, plannerRepository);
+        PlannerAccessGuard accessGuard = new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository);
 
         publishedQueryService = new PublishedPlannerQueryService(
                 plannerRepository,

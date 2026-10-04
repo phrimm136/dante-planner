@@ -1,9 +1,10 @@
 package org.danteplanner.backend.auth.service;
 
-import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.api.AuthProviderType;
+import org.danteplanner.backend.user.service.UsersApiAdapter;
 import org.danteplanner.backend.shared.config.LineageRotationFlag;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
@@ -60,7 +61,7 @@ class AuthenticationServiceLineageTest {
     void setUp() {
         facade = new AuthenticationService(
                 providerRegistry, tokenGenerator, tokenValidator, tokenBlacklistService,
-                userService, lifecycleService, new LineageRotationFlag(true));
+                userService, new UsersApiAdapter(userService, lifecycleService), new LineageRotationFlag(true));
 
         testUser = User.builder()
                 .id(123L)

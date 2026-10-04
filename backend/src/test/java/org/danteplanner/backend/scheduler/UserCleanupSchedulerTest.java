@@ -1,7 +1,7 @@
 package org.danteplanner.backend.scheduler;
 import org.danteplanner.backend.user.scheduler.UserCleanupScheduler;
 
-import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;

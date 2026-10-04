@@ -1,6 +1,6 @@
 package org.danteplanner.backend.moderation;
 
-import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
@@ -11,8 +11,8 @@ import org.danteplanner.backend.moderation.event.AccountSuspendedEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.danteplanner.backend.shared.sse.SuspensionType;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.entity.UserRole;
-import org.danteplanner.backend.user.exception.UserNotFoundException;
+import org.danteplanner.backend.user.api.UserRole;
+import org.danteplanner.backend.user.api.UserNotFoundException;
 import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

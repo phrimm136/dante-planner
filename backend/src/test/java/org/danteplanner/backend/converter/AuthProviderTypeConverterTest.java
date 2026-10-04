@@ -1,7 +1,7 @@
 package org.danteplanner.backend.converter;
-import org.danteplanner.backend.auth.converter.AuthProviderTypeConverter;
+import org.danteplanner.backend.user.entity.AuthProviderTypeConverter;
 
-import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.api.AuthProviderType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

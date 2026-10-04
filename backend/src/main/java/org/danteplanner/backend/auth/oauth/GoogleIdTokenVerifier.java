@@ -1,7 +1,7 @@
 package org.danteplanner.backend.auth.oauth;
 
 import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.auth.exception.OAuthException;
 import org.danteplanner.backend.shared.config.OAuthProperties;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;

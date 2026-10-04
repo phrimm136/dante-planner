@@ -1,0 +1,41 @@
+package org.danteplanner.backend.user.api;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+public interface Users {
+
+    Long SENTINEL_USER_ID = 0L;
+
+    long countByRole(UserRole role);
+
+    Optional<UserSummary> findActiveById(Long userId);
+
+    UserSummary lockActiveById(Long userId);
+
+    UserSummary findOrCreateUser(String provider, Map<String, String> userInfo);
+
+    Optional<UserSummary> findByProvider(AuthProviderType providerType, String providerId);
+
+    Optional<UserSummary> findActiveByProvider(AuthProviderType providerType, String providerId);
+
+    UserSummary findById(Long id);
+
+    Optional<UserSummary> findActiveBySuffix(String usernameSuffix);
+
+    List<UserSummary> findAllByIds(Collection<Long> ids);
+
+    List<UserSummary> listActiveAccounts();
+
+    List<UserSummary> listTimedOutAccounts();
+
+    UserSummary holdActiveById(Long userId);
+
+    Optional<UserSummary> findOptionalById(Long id);
+
+    void reactivateAccount(Long userId);
+
+    UserSummary changeRole(long userId, UserRole role);
+}

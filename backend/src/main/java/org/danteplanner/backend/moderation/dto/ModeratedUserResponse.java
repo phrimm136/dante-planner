@@ -2,7 +2,7 @@ package org.danteplanner.backend.moderation.dto;
 
 import java.time.Instant;
 
-import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.user.api.UserSummary;
 
 public record ModeratedUserResponse(
     String usernameEpithet,
@@ -14,14 +14,14 @@ public record ModeratedUserResponse(
     Instant timeoutUntil
 ) {
 
-    public static ModeratedUserResponse fromUser(User user) {
+    public static ModeratedUserResponse fromUser(UserSummary user) {
         return new ModeratedUserResponse(
-                user.getUsernameEpithet(),
-                user.getUsernameSuffix(),
-                user.getRole().name(),
+                user.usernameEpithet(),
+                user.usernameSuffix(),
+                user.role().name(),
                 user.isBanned(),
-                user.getBannedAt(),
+                user.bannedAt(),
                 user.isTimedOut(),
-                user.getTimeoutUntil());
+                user.timeoutUntil());
     }
 }

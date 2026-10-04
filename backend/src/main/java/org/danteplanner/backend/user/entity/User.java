@@ -18,8 +18,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import org.danteplanner.backend.auth.converter.AuthProviderTypeConverter;
-import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.api.AuthProviderType;
+import org.danteplanner.backend.user.api.RestrictionState;
+import org.danteplanner.backend.user.api.UserRole;
 
 import java.time.Clock;
 import java.time.Instant;

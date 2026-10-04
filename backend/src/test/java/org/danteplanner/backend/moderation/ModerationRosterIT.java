@@ -1,6 +1,7 @@
 package org.danteplanner.backend.moderation;
 
 import org.danteplanner.backend.config.TestConfig;
+import org.danteplanner.backend.user.api.UserSummary;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.moderation.service.ModerationQueryService;
@@ -57,7 +58,7 @@ class ModerationRosterIT extends SharedMySqlContainerSupport {
         removed.softDelete(Instant.now().plus(30, ChronoUnit.DAYS));
         userRepository.save(removed);
 
-        List<Long> roster = idsOf(moderationQueryService.getAllUsers());
+        List<Long> roster = moderationQueryService.getAllUsers().stream().map(UserSummary::id).toList();
 
         assertTrue(roster.contains(active.getId()));
         assertFalse(roster.contains(removed.getId()));

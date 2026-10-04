@@ -16,7 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.shared.exception.ProblemWriter;
-import org.danteplanner.backend.user.exception.UserBannedException;
+import org.danteplanner.backend.user.api.UserBannedException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

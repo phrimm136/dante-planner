@@ -3,13 +3,13 @@ import org.danteplanner.backend.user.service.RandomUsernameGenerator;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.user.service.UserSettingsService;
 
-import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.shared.config.EpithetConfig;
 import org.danteplanner.backend.user.validation.EpithetValidator;
 import org.danteplanner.backend.support.IntegrityViolations;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.exception.UserNotFoundException;
+import org.danteplanner.backend.user.api.UserNotFoundException;
 import org.danteplanner.backend.user.exception.UsernameGenerationException;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;

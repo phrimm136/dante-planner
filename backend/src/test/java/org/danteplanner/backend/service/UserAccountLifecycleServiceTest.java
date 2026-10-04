@@ -3,7 +3,7 @@ import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.exception.UserNotFoundException;
+import org.danteplanner.backend.user.api.UserNotFoundException;
 import org.danteplanner.backend.comment.service.CommentAccountPurgeService;
 import org.danteplanner.backend.moderation.service.ModerationAccountPurgeService;
 import org.danteplanner.backend.planner.service.PlannerAccountPurgeService;

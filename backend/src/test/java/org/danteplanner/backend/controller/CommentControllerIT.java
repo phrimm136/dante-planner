@@ -2,6 +2,7 @@ package org.danteplanner.backend.controller;
 
 
 import jakarta.servlet.http.Cookie;
+import org.danteplanner.backend.user.service.UsersApiAdapter;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.config.TestConfig;
@@ -77,8 +78,8 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
                 PlannerCommentVoteRepository commentVoteRepository,
                 PlannerRepository plannerRepository,
                 UserService userService) {
-            return new CommentQueryService(commentRepository, commentVoteRepository, userService,
-                    new PlannerAccessGuard(userService, plannerRepository),
+            return new CommentQueryService(commentRepository, commentVoteRepository, new UsersApiAdapter(userService, null),
+                    new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository),
                     new CommentAccessValidator());
         }
 
@@ -93,7 +94,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
                 PlannerStatsRepository plannerStatsRepository) {
             return new CommentCommandService(commentRepository, commentQueryService,
                     domainEventRecorder,
-                    new PlannerAccessGuard(userService, plannerRepository),
+                    new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository),
                     new PlannerStatsService(plannerStatsRepository),
                     new CommentAccessValidator(), new CommentAuthorshipValidator(),
                     new CommentStateValidator());
@@ -109,7 +110,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
                 UserService userService,
                 CommentReportService commentReportService) {
             return new CommentEngagementService(commentRepository, commentVoteRepository, commentQueryService,
-                    new PlannerAccessGuard(userService, plannerRepository),
+                    new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository),
                     commentReportService, new CommentAuthorshipValidator(),
                     new CommentStateValidator(), new VoteUniquenessValidator());
         }

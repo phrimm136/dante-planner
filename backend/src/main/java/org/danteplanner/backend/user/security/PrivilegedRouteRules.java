@@ -25,9 +25,9 @@ import org.danteplanner.backend.shared.exception.DomainException;
 import org.danteplanner.backend.shared.exception.Problems;
 import org.danteplanner.backend.shared.security.SecurityRuleContribution;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.entity.UserRole;
-import org.danteplanner.backend.user.exception.UserBannedException;
-import org.danteplanner.backend.user.exception.UserTimedOutException;
+import org.danteplanner.backend.user.api.UserRole;
+import org.danteplanner.backend.user.api.UserBannedException;
+import org.danteplanner.backend.user.api.UserTimedOutException;
 import org.danteplanner.backend.user.service.UserService;
 
 @Component

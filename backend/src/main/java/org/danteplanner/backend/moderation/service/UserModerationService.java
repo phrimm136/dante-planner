@@ -6,7 +6,7 @@ import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.moderation.event.AccountSuspendedEvent;
 import org.danteplanner.backend.shared.sse.SuspensionType;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.exception.UserNotFoundException;
+import org.danteplanner.backend.user.api.UserNotFoundException;
 import org.danteplanner.backend.user.service.UserService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;

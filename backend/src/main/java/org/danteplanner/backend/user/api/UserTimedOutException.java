@@ -1,4 +1,4 @@
-package org.danteplanner.backend.user.exception;
+package org.danteplanner.backend.user.api;
 
 import lombok.Getter;
 import org.danteplanner.backend.shared.exception.DomainException;

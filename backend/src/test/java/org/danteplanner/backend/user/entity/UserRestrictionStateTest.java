@@ -1,5 +1,6 @@
 package org.danteplanner.backend.user.entity;
 
+import org.danteplanner.backend.user.api.RestrictionState;
 import org.junit.jupiter.api.Test;
 
 import java.time.Clock;

@@ -5,7 +5,7 @@ import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.AuthCookies;

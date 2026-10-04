@@ -3,7 +3,7 @@ package org.danteplanner.backend.moderation.dto;
 import java.time.Instant;
 
 import lombok.Builder;
-import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.user.api.UserSummary;
 
 @Builder
 public record TimeoutResponse(
@@ -12,15 +12,10 @@ public record TimeoutResponse(
     String message
 ) {
 
-    public static TimeoutResponse fromUser(User user) {
-        return fromUser(user, null);
-    }
-
-    public static TimeoutResponse fromUser(User user, String message) {
+    public static TimeoutResponse fromUser(UserSummary user) {
         return TimeoutResponse.builder()
-                .usernameSuffix(user.getUsernameSuffix())
-                .timeoutUntil(user.getTimeoutUntil())
-                .message(message)
+                .usernameSuffix(user.usernameSuffix())
+                .timeoutUntil(user.timeoutUntil())
                 .build();
     }
 }

@@ -4,7 +4,7 @@ import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.user.api.UserSummary;
 import org.danteplanner.backend.auth.service.AuthenticationService;
 import org.danteplanner.backend.auth.service.AuthenticationService.AuthResult;
 import org.danteplanner.backend.auth.oauth.OAuthStateService;
@@ -79,7 +79,7 @@ class AuthControllerBffIT extends SharedMySqlContainerSupport {
         String returnTo = "http://localhost:5173/planner/1";
         String oauthTx = oAuthStateService.seal(state, verifier, returnTo);
 
-        User user = Mockito.mock(User.class);
+        UserSummary user = Mockito.mock(UserSummary.class);
         when(authService.authenticateWithOAuth(eq("google"), eq("auth-code"), anyString(), eq(verifier)))
                 .thenReturn(new AuthResult(user, "access-jwt", "refresh-jwt", false));
 

@@ -1,6 +1,6 @@
 package org.danteplanner.backend.shared.security;
 
-import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.api.AuthProviderType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.shared.exception.ProblemWriter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
@@ -9,7 +9,7 @@ import jakarta.servlet.http.Cookie;
 import java.util.List;
 import org.danteplanner.backend.shared.config.LineageRotationFlag;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.auth.token.RefreshRotationService;

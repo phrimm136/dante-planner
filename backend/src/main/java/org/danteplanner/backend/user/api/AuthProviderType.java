@@ -1,4 +1,4 @@
-package org.danteplanner.backend.auth.entity;
+package org.danteplanner.backend.user.api;
 
 import org.danteplanner.backend.shared.entity.EnumLookup;
 import org.danteplanner.backend.shared.entity.ValuedEnum;

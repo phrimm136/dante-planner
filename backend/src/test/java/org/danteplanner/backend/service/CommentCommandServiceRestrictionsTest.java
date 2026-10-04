@@ -1,6 +1,7 @@
 package org.danteplanner.backend.service;
 
-import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.api.AuthProviderType;
+import org.danteplanner.backend.user.service.UsersApiAdapter;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.comment.service.CommentCommandService;
@@ -14,9 +15,9 @@ import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.entity.UserRole;
-import org.danteplanner.backend.user.exception.UserBannedException;
-import org.danteplanner.backend.user.exception.UserTimedOutException;
+import org.danteplanner.backend.user.api.UserRole;
+import org.danteplanner.backend.user.api.UserBannedException;
+import org.danteplanner.backend.user.api.UserTimedOutException;
 import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -54,11 +55,11 @@ class CommentCommandServiceRestrictionsTest {
     private CommentCommandService commentService() {
         return new CommentCommandService(
                 commentRepository,
-                new CommentQueryService(commentRepository, commentVoteRepository, userService,
-                        new PlannerAccessGuard(userService, plannerRepository),
+                new CommentQueryService(commentRepository, commentVoteRepository, new UsersApiAdapter(userService, null),
+                        new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository),
                         new CommentAccessValidator()),
                 domainEventRecorder,
-                new PlannerAccessGuard(userService, plannerRepository),
+                new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository),
                 new PlannerStatsService(plannerStatsRepository),
                 new CommentAccessValidator(), new CommentAuthorshipValidator(),
                 new CommentStateValidator());

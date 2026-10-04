@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.danteplanner.backend.shared.exception.DegradationErrorConstants;
 import org.danteplanner.backend.shared.exception.DomainException;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.service.UserService;
 
 import static org.assertj.core.api.Assertions.assertThat;

@@ -1,6 +1,7 @@
 package org.danteplanner.backend.planner.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.user.service.UsersApiAdapter;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerContent;
 import org.danteplanner.backend.planner.entity.PlannerContentLifecycle;
@@ -19,8 +20,8 @@ import org.danteplanner.backend.planner.sync.SyncVersionValidator;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.exception.UserBannedException;
-import org.danteplanner.backend.user.exception.UserTimedOutException;
+import org.danteplanner.backend.user.api.UserBannedException;
+import org.danteplanner.backend.user.api.UserTimedOutException;
 import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,7 +50,7 @@ class PlannerDeleteRestrictionTest {
 
     @BeforeEach
     void setUp() {
-        accessGuard = new PlannerAccessGuard(userService, plannerRepository);
+        accessGuard = new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository);
         commandService = new PlannerCommandService(
                 plannerRepository,
                 mock(PlannerStatsRepository.class),

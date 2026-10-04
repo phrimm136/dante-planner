@@ -2,7 +2,7 @@ package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.admin.service.AdminService;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.Tag;

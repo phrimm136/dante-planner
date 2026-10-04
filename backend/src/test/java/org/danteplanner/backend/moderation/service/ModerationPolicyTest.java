@@ -3,7 +3,8 @@ package org.danteplanner.backend.moderation.service;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.user.api.UserRole;
+import org.danteplanner.backend.user.api.UserSummary;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -49,7 +50,7 @@ class ModerationPolicyTest {
     @DisplayName("an admin cannot grant a role above their own")
     void requireCanChangeRole_WhenNewRoleOutranksActor_ThrowsModerationForbidden() {
         assertThatThrownBy(() -> POLICY.requireCanChangeRole(
-                user(1L, UserRole.MODERATOR), normalUser(), UserRole.ADMIN))
+                summary(1L, UserRole.MODERATOR), summary(2L, UserRole.NORMAL), UserRole.ADMIN))
                 .isInstanceOf(ModerationForbiddenException.class)
                 .hasMessage("Cannot grant role higher than your own");
     }
@@ -57,7 +58,7 @@ class ModerationPolicyTest {
     @Test
     @DisplayName("an admin may change their own role")
     void requireCanChangeRole_WhenActorIsTheTarget_Allows() {
-        User actor = user(1L, UserRole.ADMIN);
+        UserSummary actor = summary(1L, UserRole.ADMIN);
 
         assertThatCode(() -> POLICY.requireCanChangeRole(actor, actor, UserRole.NORMAL))
                 .doesNotThrowAnyException();
@@ -69,5 +70,9 @@ class ModerationPolicyTest {
 
     private static User user(Long id, UserRole role) {
         return User.builder().id(id).role(role).build();
+    }
+
+    private static UserSummary summary(Long id, UserRole role) {
+        return new UserSummary(id, null, null, null, null, role, false, null, null);
     }
 }

@@ -1,5 +1,6 @@
 package org.danteplanner.backend.service;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.danteplanner.backend.user.service.UsersApiAdapter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
@@ -13,7 +14,7 @@ import org.danteplanner.backend.planner.precondition.PlannerCategoryValidator;
 import org.danteplanner.backend.planner.precondition.PlannerPublishValidator;
 
 
-import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.ToggleOwnerNotificationsResponse;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
@@ -68,7 +69,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import org.danteplanner.backend.user.exception.UserBannedException;
+import org.danteplanner.backend.user.api.UserBannedException;
 
 /**
  * Unit tests for PlannerPublishingService (publish toggle, owner notification settings).
@@ -109,7 +110,7 @@ class PlannerPublishingServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        PlannerAccessGuard accessGuard = new PlannerAccessGuard(userService, plannerRepository);
+        PlannerAccessGuard accessGuard = new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository);
 
         publishingService = new PlannerPublishingService(
                 plannerRepository,
@@ -128,6 +129,7 @@ class PlannerPublishingServiceTest {
         testUser = TestDataFactory.unsavedUser(1L);
 
         when(userService.findById(testUser.getId())).thenReturn(testUser);
+        when(userService.holdActiveById(testUser.getId())).thenReturn(testUser);
         when(contentValidator.parse(any(), any(), any(), any()))
                 .thenAnswer(invocation -> TestDataFactory.document(invocation.getArgument(0)));
     }

@@ -2,7 +2,7 @@ package org.danteplanner.backend.auth.token;
 
 import org.springframework.util.Assert;
 
-import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.user.api.UserRole;
 
 import java.util.Date;
 

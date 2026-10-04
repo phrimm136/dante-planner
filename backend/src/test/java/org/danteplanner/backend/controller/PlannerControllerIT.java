@@ -16,7 +16,7 @@ import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.entity.PlannerView;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerViewRepository;

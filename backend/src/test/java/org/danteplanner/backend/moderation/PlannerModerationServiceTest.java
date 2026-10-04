@@ -1,6 +1,6 @@
 package org.danteplanner.backend.moderation;
 
-import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 import org.danteplanner.backend.moderation.service.ModerationAuditService;
 import org.danteplanner.backend.moderation.service.PlannerModerationService;
@@ -10,7 +10,7 @@ import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.user.api.UserRole;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

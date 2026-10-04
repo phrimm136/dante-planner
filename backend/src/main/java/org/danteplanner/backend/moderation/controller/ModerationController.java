@@ -15,6 +15,7 @@ import org.danteplanner.backend.moderation.dto.TimeoutRequest;
 import org.danteplanner.backend.moderation.dto.TimeoutResponse;
 import org.danteplanner.backend.moderation.dto.UnpublishPlannerResponse;
 import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.user.api.UserSummary;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.moderation.service.CommentModerationService;
 import org.danteplanner.backend.moderation.service.ModerationQueryService;
@@ -55,7 +56,11 @@ public class ModerationController {
                 actorId, usernameSuffix, request.durationMinutes(), request.reason());
 
         User user = userModerationService.timeoutUserBySuffix(actorId, usernameSuffix, request.durationMinutes(), request.reason());
-        return ResponseEntity.ok(TimeoutResponse.fromUser(user, "User timed out successfully"));
+        return ResponseEntity.ok(TimeoutResponse.builder()
+                .usernameSuffix(user.getUsernameSuffix())
+                .timeoutUntil(user.getTimeoutUntil())
+                .message("User timed out successfully")
+                .build());
     }
 
     @PostMapping("/user/{usernameSuffix}/clear-timeout")
@@ -67,7 +72,11 @@ public class ModerationController {
         log.info("Moderator {} removing timeout from user with suffix {} with reason: {}", actorId, usernameSuffix, request.reason());
 
         User user = userModerationService.removeTimeoutBySuffix(actorId, usernameSuffix, request.reason());
-        return ResponseEntity.ok(TimeoutResponse.fromUser(user, "Timeout removed successfully"));
+        return ResponseEntity.ok(TimeoutResponse.builder()
+                .usernameSuffix(user.getUsernameSuffix())
+                .timeoutUntil(user.getTimeoutUntil())
+                .message("Timeout removed successfully")
+                .build());
     }
 
     @PutMapping("/planner/{plannerId}/unpublish")
@@ -118,7 +127,7 @@ public class ModerationController {
     @RateLimitExempt
     @GetMapping("/users/timed-out")
     public ResponseEntity<List<TimeoutResponse>> getTimedOutUsers() {
-        List<User> timedOutUsers = moderationQueryService.getTimedOutUsers();
+        List<UserSummary> timedOutUsers = moderationQueryService.getTimedOutUsers();
         List<TimeoutResponse> responses = timedOutUsers.stream()
                 .map(TimeoutResponse::fromUser)
                 .toList();

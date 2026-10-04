@@ -1,6 +1,7 @@
 package org.danteplanner.backend.planner.service;
 
 import java.util.Optional;
+import org.danteplanner.backend.user.service.UsersApiAdapter;
 import java.util.UUID;
 
 import org.danteplanner.backend.planner.entity.Planner;
@@ -43,7 +44,7 @@ class PlannerAccessGuardTest {
 
     @BeforeEach
     void setUp() {
-        accessGuard = new PlannerAccessGuard(userService, plannerRepository);
+        accessGuard = new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository);
         plannerId = UUID.randomUUID();
     }
 

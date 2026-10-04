@@ -1,9 +1,9 @@
-package org.danteplanner.backend.auth.converter;
+package org.danteplanner.backend.user.entity;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.api.AuthProviderType;
 
 @Converter
 public class AuthProviderTypeConverter implements AttributeConverter<AuthProviderType, String> {

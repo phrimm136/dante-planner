@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.OAuthProperties;
-import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.auth.exception.OAuthException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;

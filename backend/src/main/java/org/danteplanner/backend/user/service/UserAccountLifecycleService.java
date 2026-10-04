@@ -2,7 +2,8 @@ package org.danteplanner.backend.user.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.exception.UserNotFoundException;
+import org.danteplanner.backend.user.api.UserNotFoundException;
+import org.danteplanner.backend.user.api.Users;
 import org.danteplanner.backend.comment.service.CommentAccountPurgeService;
 import org.danteplanner.backend.moderation.service.ModerationAccountPurgeService;
 import org.danteplanner.backend.planner.service.PlannerAccountPurgeService;
@@ -27,7 +28,7 @@ import java.util.UUID;
 @Slf4j
 public class UserAccountLifecycleService {
 
-    public static final Long SENTINEL_USER_ID = 0L;
+    public static final Long SENTINEL_USER_ID = Users.SENTINEL_USER_ID;
 
     private final UserRepository userRepository;
     private final PlannerAccountPurgeService plannerAccountPurgeService;

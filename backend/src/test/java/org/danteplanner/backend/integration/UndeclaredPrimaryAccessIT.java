@@ -9,7 +9,7 @@ import java.time.Duration;
 import java.util.UUID;
 import javax.sql.DataSource;
 
-import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.moderation.service.ModerationAuditService;
 import org.danteplanner.backend.planner.repository.PlannerRepository;

@@ -7,7 +7,7 @@ import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.auth.token.TokenValidator;
-import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

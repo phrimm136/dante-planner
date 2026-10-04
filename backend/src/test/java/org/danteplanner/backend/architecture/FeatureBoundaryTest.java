@@ -82,24 +82,11 @@ class FeatureBoundaryTest {
 
     /**
      * The widest of the lists: {@code user.entity} carries the account types the whole tree reads —
-     * {@code User} on a planner, {@code UserRole} in a token claim, {@code RestrictionState} in a
-     * moderation decision.
+     * {@code User} on a planner.
      */
     private static final Set<String> USER_INTERNALS_FROZEN = Set.of(
-            MAIN + "admin.dto.ChangeRoleRequest",
-            MAIN + "admin.dto.UserRoleResponse",
-            MAIN + "admin.service.AdminService",
-            MAIN + "auth.service.AuthenticationService",
-            MAIN + "auth.token.JwtTokenService",
-            MAIN + "auth.token.TokenClaims",
-            MAIN + "auth.token.TokenGenerator",
-            MAIN + "comment.dto.CommentTreeNode",
-            MAIN + "comment.service.CommentQueryService",
             MAIN + "moderation.controller.ModerationController",
-            MAIN + "moderation.dto.ModeratedUserResponse",
-            MAIN + "moderation.dto.TimeoutResponse",
             MAIN + "moderation.service.ModerationPolicy",
-            MAIN + "moderation.service.ModerationQueryService",
             MAIN + "moderation.service.UserModerationService",
             MAIN + "planner.dto.PlannerPublishedPayload",
             MAIN + "planner.dto.PublishedPlannerDetailResponse",
@@ -107,7 +94,6 @@ class FeatureBoundaryTest {
             MAIN + "planner.service.PlannerAccessGuard",
             MAIN + "planner.service.PlannerCommandService",
             MAIN + "planner.service.PlannerEngagementService",
-            MAIN + "shared.security.AccessTokenAuthenticator",
             MAIN + "shared.security.JwtAuthenticationFilter",
             MAIN + "shared.sse.SseService");
 

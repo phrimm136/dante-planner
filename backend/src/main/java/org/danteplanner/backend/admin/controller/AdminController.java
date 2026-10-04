@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.admin.dto.ChangeRoleRequest;
 import org.danteplanner.backend.admin.dto.UserRoleResponse;
-import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.user.api.UserRole;
+import org.danteplanner.backend.user.api.UserSummary;
 import org.danteplanner.backend.admin.service.AdminService;
 import org.danteplanner.backend.shared.ratelimit.RateLimitExempt;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +35,7 @@ public class AdminController {
 
         log.info("Admin {} changing role of user {} to {}", actorId, targetId, request.role());
 
-        User updated = adminService.changeRole(actorId, targetId, request.role());
+        UserSummary updated = adminService.changeRole(actorId, targetId, request.role());
         return ResponseEntity.ok(UserRoleResponse.fromUser(updated));
     }
 

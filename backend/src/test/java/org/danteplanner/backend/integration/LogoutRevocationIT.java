@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.danteplanner.backend.auth.service.AuthenticationService;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.user.api.UserRole;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
