@@ -4,214 +4,265 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import com.tngtech.archunit.base.DescribedPredicate;
+import com.tngtech.archunit.core.domain.Dependency;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
+import com.tngtech.archunit.lang.ArchCondition;
 import com.tngtech.archunit.lang.ArchRule;
+import com.tngtech.archunit.lang.ConditionEvents;
+import com.tngtech.archunit.lang.SimpleConditionEvent;
+import com.tngtech.archunit.library.dependencies.SliceAssignment;
+import com.tngtech.archunit.library.dependencies.SliceIdentifier;
 
+import org.danteplanner.backend.shared.TypeLabel;
+
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
+import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices;
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Freezes the cross-feature dependency graph after the package-by-feature move (B12).
- *
- * <p>Each feature package ({@code admin, auth, comment, moderation, notification, planner, shared,
- * user}) may only reach the other features on its allowlist. The rules below are the negative form
- * of that allowlist: they name the features each package must NOT depend on. Any new cross-feature
- * edge that is not already part of the frozen graph makes the owning feature's rule fail, forcing
- * the edge to be declared here deliberately rather than accreting silently.</p>
- *
- * <p>The universal edges {@code * -> shared} and {@code * -> auth} (AuthenticationService, token
- * infrastructure) are permitted everywhere and therefore never appear in any disallowed list.</p>
- *
- * <p>{@code shared} is intended as a dependency sink. It is not a <em>pure</em> sink today: the
- * security filter reaches {@code user}/{@code auth.token}, and a few config classes read
- * {@code user} types — those out-edges are inherent while those classes live in
- * {@code shared}. The
- * {@link #shared_should_not_depend_on_admin_or_notification} rule freezes the sink in its true,
- * currently-passing form: {@code shared} must not grow edges into {@code admin} or
- * {@code notification}.</p>
- *
- * <p>The read seam {@code shared.readpath} is held to a stricter, feature-agnostic contract by
- * {@link #shared_readpath_must_not_depend_on_planner}: it dereferences entities through opaque
- * suppliers and a base {@code EntityNotFoundException}, so it must carry no dependency on
- * {@code planner} (or any feature).</p>
- *
- * <p>The rules above constrain which features may see each other at all. The internals rules below
- * constrain how: a feature's {@code ..repository..}, {@code ..validation..}, {@code ..precondition..},
- * {@code ..gamedata..}, {@code ..sync..}, {@code ..searchindex..} and {@code ..entity..} packages are
- * private to that feature, so a permitted cross-feature edge must land on the owning
- * feature's service and DTOs, never on its persistence, its invariants, or its mapped rows. Without
- * them a feature package can reach straight into another's internals while every feature-granular
- * rule still passes.</p>
- *
- * <p>The edges that already exist are frozen by name in the {@code *_INTERNALS_FROZEN} lists.
- * {@link #frozenInternalEdges_WhenScanned_AreStillLive} fails once an entry stops describing a real
- * edge. An entry names a source file, so a nested class is covered by its outer one.</p>
- */
 @AnalyzeClasses(
         packages = "org.danteplanner.backend",
         importOptions = ImportOption.DoNotIncludeTests.class)
 class FeatureBoundaryTest {
 
-    private static final String MAIN = "org.danteplanner.backend.";
+    private static final String PROJECT = "org.danteplanner.";
+    private static final String MODULE_PARENT = "backend";
+    private static final String SHARED = "shared";
+    private static final String API = "api";
 
-    private static final List<String> INTERNAL_PACKAGES =
-            List.of("repository", "validation", "precondition", "gamedata", "sync", "searchindex", "entity");
+    private static final List<String> ROLE_WORDS = List.of("Provider", "Participant", "Target", "Handler");
 
-    private static final Set<String> USER_INTERNALS_FROZEN = Set.of(
-            MAIN + "moderation.controller.ModerationController",
-            MAIN + "moderation.service.ModerationPolicy",
-            MAIN + "moderation.service.UserModerationService");
+    private static final Map<String, String> FROZEN = Map.of(
+            "moderation.controller.ModerationController", "user",
+            "moderation.service.ModerationPolicy", "user",
+            "moderation.service.UserModerationService", "user");
 
-    private static final Map<String, Set<String>> FROZEN_INTERNAL_EDGES = Map.of(
-            "comment", Set.of(),
-            "moderation", Set.of(),
-            "notification", Set.of(),
-            "planner", Set.of(),
-            "user", USER_INTERNALS_FROZEN);
+    private static final DescribedPredicate<JavaClass> IN_SHARED = DescribedPredicate.describe(
+            "reside in shared", javaClass -> SHARED.equals(moduleOf(javaClass)));
 
-    @ArchTest
-    static final ArchRule admin_only_depends_on_auth_user_shared =
-            noClasses()
-                    .that().resideInAPackage("..admin..")
-                    .should().dependOnClassesThat()
-                    .resideInAnyPackage("..comment..", "..notification..", "..planner..")
-                    .as("admin may only depend on auth, user, shared, moderation (+ its own package)");
-    // moderation is permitted for one reason: a role change is a moderator action and must leave an
-    // audit record in the same transaction, which rules out an after-commit listener as the seam.
+    private static final DescribedPredicate<JavaClass> IN_A_MODULE = DescribedPredicate.describe(
+            "reside in a module", javaClass -> isModule(moduleOf(javaClass)));
 
-    @ArchTest
-    static final ArchRule auth_only_depends_on_user_shared =
-            noClasses()
-                    .that().resideInAPackage("..auth..")
-                    .should().dependOnClassesThat()
-                    .resideInAnyPackage("..admin..", "..comment..", "..moderation..", "..notification..", "..planner..")
-                    .as("auth may only depend on user, shared (+ its own package)");
+    private static final DescribedPredicate<JavaClass> IN_AN_API = DescribedPredicate.describe(
+            "reside in a module's api package", FeatureBoundaryTest::inApi);
 
-    @ArchTest
-    static final ArchRule comment_does_not_depend_on_admin =
-            noClasses()
-                    .that().resideInAPackage("..comment..")
-                    .should().dependOnClassesThat().resideInAPackage("..admin..")
-                    .as("comment may depend on auth, moderation, notification, planner, shared, user — not admin");
+    private static final DescribedPredicate<JavaClass> IMPLEMENTED_OUTSIDE_ITS_MODULE = DescribedPredicate.describe(
+            "are interfaces declared in a module's api or in shared and implemented outside their module",
+            FeatureBoundaryTest::isImplementedOutsideItsModule);
 
-    @ArchTest
-    static final ArchRule moderation_does_not_depend_on_admin_or_notification =
-            noClasses()
-                    .that().resideInAPackage("..moderation..")
-                    .should().dependOnClassesThat().resideInAnyPackage("..admin..", "..notification..")
-                    .as("moderation may depend on auth, comment, planner, shared, user — not admin or notification");
+    private static final DescribedPredicate<JavaClass> IMPLEMENT_A_TYPE_LABEL = DescribedPredicate.describe(
+            "implement a @TypeLabel interface",
+            javaClass -> javaClass.getAllRawInterfaces().stream()
+                    .anyMatch(implemented -> implemented.isAnnotatedWith(TypeLabel.class)));
+
+    private static final SliceAssignment BY_MODULE = new SliceAssignment() {
+        @Override
+        public SliceIdentifier getIdentifierOf(JavaClass javaClass) {
+            String module = moduleOf(javaClass);
+            return isModule(module) ? SliceIdentifier.of(module) : SliceIdentifier.ignore();
+        }
+
+        @Override
+        public String getDescription() {
+            return "modules";
+        }
+    };
 
     @ArchTest
-    static final ArchRule notification_does_not_depend_on_admin_comment_moderation =
-            noClasses()
-                    .that().resideInAPackage("..notification..")
-                    .should().dependOnClassesThat()
-                    .resideInAnyPackage("..admin..", "..comment..", "..moderation..")
-                    .as("notification may depend on auth, planner, shared, user — not admin, comment, moderation");
+    static final ArchRule modules_meet_only_through_published_apis =
+            classes()
+                    .should(dependOnOtherModulesOnlyThroughTheirApi())
+                    .as("a class depends on another module only through that module's api package");
 
     @ArchTest
-    static final ArchRule planner_does_not_depend_on_admin =
+    static final ArchRule shared_depends_on_no_module =
             noClasses()
-                    .that().resideInAPackage("..planner..")
-                    .should().dependOnClassesThat().resideInAPackage("..admin..")
-                    .as("planner may depend on auth, comment, moderation, notification, shared, user — not admin");
+                    .that(IN_SHARED)
+                    .should().dependOnClassesThat(IN_A_MODULE)
+                    .as("shared is platform: it depends on no module");
 
     @ArchTest
-    static final ArchRule shared_should_not_depend_on_admin_or_notification =
-            noClasses()
-                    .that().resideInAPackage("..shared..")
-                    .should().dependOnClassesThat().resideInAnyPackage("..admin..", "..notification..")
-                    .as("shared is a dependency sink: it must not grow edges into admin or notification");
+    static final ArchRule modules_are_free_of_cycles =
+            slices()
+                    .assignedFrom(BY_MODULE)
+                    .should().beFreeOfCycles()
+                    .as("the module dependency graph has no cycles");
 
     @ArchTest
-    static final ArchRule shared_readpath_must_not_depend_on_planner =
-            noClasses()
-                    .that().resideInAPackage("..shared.readpath..")
-                    .should().dependOnClassesThat().resideInAPackage("..planner..")
-                    .as("the shared read seam must stay feature-agnostic: shared.readpath must not depend on planner");
+    static final ArchRule api_depends_on_no_internal_of_its_module =
+            classes()
+                    .that(IN_AN_API)
+                    .should(dependOnNoNonApiClassOfTheirOwnModule())
+                    .as("an api package depends on no non-api class of its own module");
 
     @ArchTest
-    static final ArchRule user_does_not_depend_on_admin_or_notification =
-            noClasses()
-                    .that().resideInAPackage("..user..")
-                    .should().dependOnClassesThat().resideInAnyPackage("..admin..", "..notification..")
-                    .as("user may depend on auth, comment, moderation, planner, shared — not admin or notification");
+    static final ArchRule interfaces_implemented_across_modules_name_their_role =
+            classes()
+                    .that(IMPLEMENTED_OUTSIDE_ITS_MODULE)
+                    .should(endInARoleWordOrCarryATypeLabel())
+                    .as("an interface implemented outside its module ends in Provider, Participant, Target "
+                            + "or Handler, or carries @TypeLabel");
 
     @ArchTest
-    static final ArchRule comment_internals_are_private_to_comment =
-            noClasses()
-                    .that().resideOutsideOfPackage("..comment..").and(notFrozenFor("comment"))
-                    .should().dependOnClassesThat().resideInAnyPackage(internalsOf("comment"))
-                    .as("comment internals are private to comment: outside callers go through a comment service");
-
-    @ArchTest
-    static final ArchRule moderation_internals_are_private_to_moderation =
-            noClasses()
-                    .that().resideOutsideOfPackage("..moderation..").and(notFrozenFor("moderation"))
-                    .should().dependOnClassesThat().resideInAnyPackage(internalsOf("moderation"))
-                    .as("moderation internals are private to moderation: outside callers go through a moderation service");
-
-    @ArchTest
-    static final ArchRule notification_internals_are_private_to_notification =
-            noClasses()
-                    .that().resideOutsideOfPackage("..notification..").and(notFrozenFor("notification"))
-                    .should().dependOnClassesThat().resideInAnyPackage(internalsOf("notification"))
-                    .as("notification internals are private to notification: outside callers go through a notification service");
-
-    @ArchTest
-    static final ArchRule planner_internals_are_private_to_planner =
-            noClasses()
-                    .that().resideOutsideOfPackage("..planner..").and(notFrozenFor("planner"))
-                    .should().dependOnClassesThat().resideInAnyPackage(internalsOf("planner"))
-                    .as("planner internals are private to planner: outside callers go through a planner service");
-
-    @ArchTest
-    static final ArchRule user_internals_are_private_to_user =
-            noClasses()
-                    .that().resideOutsideOfPackage("..user..").and(notFrozenFor("user"))
-                    .should().dependOnClassesThat().resideInAnyPackage(internalsOf("user"))
-                    .as("user internals are private to user: outside callers go through a user service");
+    static final ArchRule type_labels_are_implemented_only_by_data_types =
+            classes()
+                    .that(IMPLEMENT_A_TYPE_LABEL)
+                    .should(beADataType())
+                    .as("only enums, records and interfaces implement a @TypeLabel interface");
 
     @ArchTest
     static void frozenInternalEdges_WhenScanned_AreStillLive(JavaClasses classes) {
-        Set<String> stale = new TreeSet<>();
-        FROZEN_INTERNAL_EDGES.forEach((feature, frozen) -> frozen.stream()
-                .filter(origin -> !reachesInternalsOf(classes, origin, feature))
-                .forEach(stale::add));
+        Set<String> stale = FROZEN.entrySet().stream()
+                .filter(entry -> !reachesInternalsOf(classes, entry.getKey(), entry.getValue()))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toCollection(TreeSet::new));
 
         assertThat(stale)
-                .as("these no longer reach the feature's internals, so the entry now excuses an "
+                .as("these no longer reach the frozen module's internals, so the entry now excuses an "
                         + "edge nobody has; delete it and let the rule cover the class again")
                 .isEmpty();
     }
 
-    private static String[] internalsOf(String feature) {
-        return INTERNAL_PACKAGES.stream()
-                .map(internal -> "..%s.%s..".formatted(feature, internal))
-                .toArray(String[]::new);
+    private static ArchCondition<JavaClass> dependOnOtherModulesOnlyThroughTheirApi() {
+        return new ArchCondition<>("depend on another module only through its api package") {
+            @Override
+            public void check(JavaClass javaClass, ConditionEvents events) {
+                javaClass.getDirectDependenciesFromSelf().stream()
+                        .filter(FeatureBoundaryTest::reachesAnotherModulesInternals)
+                        .filter(dependency -> !isFrozen(dependency))
+                        .forEach(dependency -> events.add(
+                                SimpleConditionEvent.violated(dependency, dependency.getDescription())));
+            }
+        };
     }
 
-    private static DescribedPredicate<JavaClass> notFrozenFor(String feature) {
-        Set<String> frozen = FROZEN_INTERNAL_EDGES.get(feature);
-        return DescribedPredicate.describe(
-                "are not frozen against " + feature,
-                javaClass -> !frozen.contains(topLevel(javaClass)));
+    private static ArchCondition<JavaClass> dependOnNoNonApiClassOfTheirOwnModule() {
+        return new ArchCondition<>("depend on no non-api class of their own module") {
+            @Override
+            public void check(JavaClass javaClass, ConditionEvents events) {
+                String module = moduleOf(javaClass);
+                javaClass.getDirectDependenciesFromSelf().stream()
+                        .filter(dependency -> module.equals(moduleOf(dependency.getTargetClass())))
+                        .filter(dependency -> !inApi(dependency.getTargetClass()))
+                        .forEach(dependency -> events.add(
+                                SimpleConditionEvent.violated(dependency, dependency.getDescription())));
+            }
+        };
     }
 
-    private static boolean reachesInternalsOf(JavaClasses classes, String origin, String feature) {
-        String root = MAIN + feature + ".";
+    private static ArchCondition<JavaClass> endInARoleWordOrCarryATypeLabel() {
+        return new ArchCondition<>("end in a role word or carry @TypeLabel") {
+            @Override
+            public void check(JavaClass javaClass, ConditionEvents events) {
+                boolean named = ROLE_WORDS.stream().anyMatch(javaClass.getSimpleName()::endsWith);
+                boolean labeled = javaClass.isAnnotatedWith(TypeLabel.class);
+                events.add(new SimpleConditionEvent(javaClass, named || labeled,
+                        javaClass.getFullName() + " is implemented outside its module by "
+                                + outsideImplementers(javaClass) + " and neither ends in a role word nor carries "
+                                + "@TypeLabel"));
+            }
+        };
+    }
+
+    private static ArchCondition<JavaClass> beADataType() {
+        return new ArchCondition<>("be an enum, a record or an interface") {
+            @Override
+            public void check(JavaClass javaClass, ConditionEvents events) {
+                boolean dataType = javaClass.isInterface()
+                        || extendsRaw(javaClass, Enum.class)
+                        || extendsRaw(javaClass, Record.class);
+                events.add(new SimpleConditionEvent(javaClass, dataType,
+                        javaClass.getFullName() + " implements a @TypeLabel interface but is not an enum, "
+                                + "a record or an interface"));
+            }
+        };
+    }
+
+    static Set<String> modulesOf(JavaClasses classes) {
         return classes.stream()
-                .filter(javaClass -> topLevel(javaClass).equals(origin))
+                .map(FeatureBoundaryTest::moduleOf)
+                .filter(FeatureBoundaryTest::isModule)
+                .collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    private static boolean reachesInternalsOf(JavaClasses classes, String origin, String module) {
+        return classes.stream()
+                .filter(javaClass -> moduleRelativeName(javaClass).equals(origin))
                 .flatMap(javaClass -> javaClass.getDirectDependenciesFromSelf().stream())
-                .map(dependency -> dependency.getTargetClass().getFullName())
-                .anyMatch(target -> INTERNAL_PACKAGES.stream()
-                        .anyMatch(internal -> target.startsWith(root + internal + ".")));
+                .filter(FeatureBoundaryTest::reachesAnotherModulesInternals)
+                .anyMatch(dependency -> module.equals(moduleOf(dependency.getTargetClass())));
+    }
+
+    private static boolean isFrozen(Dependency dependency) {
+        String frozenModule = FROZEN.get(moduleRelativeName(dependency.getOriginClass()));
+        return frozenModule != null && frozenModule.equals(moduleOf(dependency.getTargetClass()));
+    }
+
+    private static boolean reachesAnotherModulesInternals(Dependency dependency) {
+        JavaClass target = dependency.getTargetClass();
+        String targetModule = moduleOf(target);
+        return isModule(targetModule)
+                && !targetModule.equals(moduleOf(dependency.getOriginClass()))
+                && !inApi(target);
+    }
+
+    private static boolean isImplementedOutsideItsModule(JavaClass javaClass) {
+        if (!javaClass.isInterface() || javaClass.isAnnotation()) {
+            return false;
+        }
+        if (!inApi(javaClass) && !SHARED.equals(moduleOf(javaClass))) {
+            return false;
+        }
+        return !outsideImplementers(javaClass).isEmpty();
+    }
+
+    private static Set<String> outsideImplementers(JavaClass declared) {
+        String module = moduleOf(declared);
+        return declared.getAllSubclasses().stream()
+                .filter(implementer -> !module.equals(moduleOf(implementer)))
+                .map(JavaClass::getFullName)
+                .collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    private static boolean extendsRaw(JavaClass javaClass, Class<?> superclass) {
+        return javaClass.getAllRawSuperclasses().stream()
+                .anyMatch(ancestor -> ancestor.getFullName().equals(superclass.getName()));
+    }
+
+    private static boolean inApi(JavaClass javaClass) {
+        String module = moduleOf(javaClass);
+        if (!isModule(module)) {
+            return false;
+        }
+        String packageName = javaClass.getPackageName() + ".";
+        return packageName.contains("." + MODULE_PARENT + "." + module + "." + API + ".");
+    }
+
+    private static boolean isModule(String module) {
+        return !module.isEmpty() && !SHARED.equals(module);
+    }
+
+    private static String moduleOf(JavaClass javaClass) {
+        String relative = moduleRelativeName(javaClass);
+        int end = relative.indexOf('.');
+        return end < 0 ? "" : relative.substring(0, end);
+    }
+
+    private static String moduleRelativeName(JavaClass javaClass) {
+        String fullName = topLevel(javaClass);
+        if (!fullName.startsWith(PROJECT)) {
+            return "";
+        }
+        String marker = "." + MODULE_PARENT + ".";
+        int parent = fullName.indexOf(marker);
+        return parent < 0 ? "" : fullName.substring(parent + marker.length());
     }
 
     /**

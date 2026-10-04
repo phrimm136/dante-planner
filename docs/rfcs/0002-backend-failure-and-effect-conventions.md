@@ -64,7 +64,7 @@ reintroduce (build failure) or fails loudly at runtime.
   through exactly one adapter; classifiers are pure functions with reactions living at consumers.
   This proposal transplants all three rules to the backend's control-flow owners.
 - In-repo: `RotationResult` proves the sealed-union shape on Java 21 with zero dependencies.
-  `FeatureBoundaryTest` proves freeze-with-allowlist architecture enforcement.
+  `FeatureBoundaryTest` proves architecture enforcement by rule with a shrinking frozen list.
   `RateLimitKeyFormatTest` proves key spellings as pinned production contract.
 - External: functional core / imperative shell; write-ahead ordering as the atomicity substitute
   between stores that share no transaction (MySQL and Redis here).

@@ -13,11 +13,11 @@ import java.util.stream.Collectors;
 @Component
 public class DomainEffectRegistry {
 
-    private final Map<DomainEventType, DomainEffect> effectsByType;
+    private final Map<DomainEventType, DomainEffectHandler> effectsByType;
 
-    public DomainEffectRegistry(List<DomainEffect> effects) {
+    public DomainEffectRegistry(List<DomainEffectHandler> effects) {
         this.effectsByType = effects.stream()
-                .collect(Collectors.toUnmodifiableMap(DomainEffect::type, Function.identity()));
+                .collect(Collectors.toUnmodifiableMap(DomainEffectHandler::type, Function.identity()));
     }
 
     public void applyEffectFor(DomainEvent event, EffectPushQueue pushes) {

@@ -140,7 +140,7 @@ class EffectPlacementTest {
             "org.danteplanner.backend.shared.outbox.service.DomainEventDispatcher";
 
     private static final String DOMAIN_EFFECT =
-            "org.danteplanner.backend.shared.outbox.service.DomainEffect";
+            "org.danteplanner.backend.shared.outbox.service.DomainEffectHandler";
 
     private static final String NOTIFICATION_DISPATCH_SERVICE =
             "org.danteplanner.backend.notification.service.NotificationDispatchService";

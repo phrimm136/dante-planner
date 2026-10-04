@@ -22,7 +22,7 @@ import org.springframework.web.ErrorResponseException;
 import org.danteplanner.backend.shared.exception.DegradationErrorConstants;
 import org.danteplanner.backend.shared.exception.DomainException;
 import org.danteplanner.backend.shared.exception.Problems;
-import org.danteplanner.backend.shared.security.SecurityRuleContribution;
+import org.danteplanner.backend.shared.security.SecurityRuleProvider;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.UserBannedException;
@@ -31,7 +31,7 @@ import org.danteplanner.backend.user.exception.UserForbiddenException;
 import org.danteplanner.backend.user.service.UserService;
 
 @Component
-public class PrivilegedRouteRules implements SecurityRuleContribution {
+public class PrivilegedRouteRules implements SecurityRuleProvider {
 
     private static final Map<UserRole, String> ROLE_PLURAL = Map.of(
             UserRole.MODERATOR, "moderators",

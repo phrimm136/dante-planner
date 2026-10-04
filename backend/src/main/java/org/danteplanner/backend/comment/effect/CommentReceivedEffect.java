@@ -12,7 +12,7 @@ import org.danteplanner.backend.planner.api.PublishedPlanners;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
-import org.danteplanner.backend.shared.outbox.service.DomainEffect;
+import org.danteplanner.backend.shared.outbox.service.DomainEffectHandler;
 import org.danteplanner.backend.shared.outbox.service.DomainEventPayloadReader;
 import org.danteplanner.backend.shared.outbox.service.EffectPushQueue;
 import org.springframework.stereotype.Component;
@@ -22,7 +22,7 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class CommentReceivedEffect implements DomainEffect {
+public class CommentReceivedEffect implements DomainEffectHandler {
 
     private final PlannerCommentRepository commentRepository;
     private final CommentQueryService commentQueryService;

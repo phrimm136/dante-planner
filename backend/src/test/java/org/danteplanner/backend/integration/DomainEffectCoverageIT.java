@@ -2,7 +2,7 @@ package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
-import org.danteplanner.backend.shared.outbox.service.DomainEffect;
+import org.danteplanner.backend.shared.outbox.service.DomainEffectHandler;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DomainEffectCoverageIT extends SharedMySqlContainerSupport {
 
     @Autowired
-    private List<DomainEffect> effects;
+    private List<DomainEffectHandler> effects;
 
     @Test
     @DisplayName("every declared event type is either armed or batch-consumed, never both and never neither")
@@ -40,7 +40,7 @@ class DomainEffectCoverageIT extends SharedMySqlContainerSupport {
                 .as("two arms declaring one type would leave the registry silently holding one; an arm "
                         + "for a batch-consumed type would never be dispatched, and a type with neither "
                         + "stays pending forever")
-                .extracting(DomainEffect::type)
+                .extracting(DomainEffectHandler::type)
                 .containsExactlyInAnyOrder(Arrays.stream(DomainEventType.values())
                         .filter(type -> !type.isBatchConsumed())
                         .toArray(DomainEventType[]::new));

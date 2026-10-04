@@ -1,12 +1,12 @@
 # Main Source
 
-Package-by-feature: feature roots (`admin`, `auth`, `comment`, `moderation`, `notification`, `planner`, `user`) plus `shared`, each keeping layer subpackages (`controller`, `service`, `repository`, ...) — ArchUnit `..service..`/`..controller..` matchers depend on them. `FeatureBoundaryTest` freezes cross-feature edges via an explicit allowlist; extend the allowlist deliberately, never delete the rule. `shared` imports no feature module; a feature that the platform needs to call implements an interface `shared` declares.
+Package-by-feature: feature roots (`admin`, `auth`, `comment`, `moderation`, `notification`, `planner`, `user`) plus `shared`, each keeping layer subpackages (`controller`, `service`, `repository`, ...) — ArchUnit `..service..`/`..controller..` matchers depend on them. `FeatureBoundaryTest` lets a class reach another module only through that module's `api` package (subpackages included), keeps the module graph free of cycles and each `api` package free of its own module's internals, and requires an interface implemented outside its module to end in `Provider`, `Participant`, `Target` or `Handler` or carry `@TypeLabel` (implemented only by enums, records and interfaces). Its frozen list only shrinks; never add an entry. `shared` imports no feature module; a feature that the platform needs to call implements an interface `shared` declares.
 
 ## Transactions & replica routing (most important)
 
 - `@Transactional(readOnly = true)` is the REPLICA-ROUTING SIGNAL (`ReadOnlyRoutingDataSource`), not a free optimization. Read-after-write paths must use the GTID cookie gate / primary re-check / tombstone layer; never assume a readOnly read sees your own just-committed write.
 - `@Transactional` at the service layer only, on public methods only. No external API calls inside a transaction.
-- Layering: Controller → Service → Repository, never skip. Cross-domain: inject the other Service, never its Repository.
+- Layering: Controller → Service → Repository, never skip. Cross-module: inject the other module's `api` interface; its services, repositories and entities are internal.
 
 ## Async
 

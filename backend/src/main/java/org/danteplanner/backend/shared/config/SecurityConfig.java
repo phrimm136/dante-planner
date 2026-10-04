@@ -6,7 +6,7 @@ import org.danteplanner.backend.shared.security.CsrfDoubleSubmitFilter;
 import org.danteplanner.backend.shared.security.CustomAuthenticationEntryPoint;
 import org.danteplanner.backend.shared.security.MdcLoggingFilter;
 import org.danteplanner.backend.shared.security.ProblemAccessDeniedHandler;
-import org.danteplanner.backend.shared.security.SecurityRuleContribution;
+import org.danteplanner.backend.shared.security.SecurityRuleProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.context.annotation.Configuration;
@@ -33,7 +33,7 @@ public class SecurityConfig {
     private final MdcLoggingFilter mdcLoggingFilter;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
     private final ProblemAccessDeniedHandler accessDeniedHandler;
-    private final List<SecurityRuleContribution> ruleContributions;
+    private final List<SecurityRuleProvider> ruleContributions;
 
     /**
      * Spring Boot auto-registers a filter bean in the servlet container, where it runs a second

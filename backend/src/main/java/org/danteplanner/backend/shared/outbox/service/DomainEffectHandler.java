@@ -3,7 +3,7 @@ package org.danteplanner.backend.shared.outbox.service;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 
-public interface DomainEffect {
+public interface DomainEffectHandler {
 
     DomainEventType type();
 

@@ -345,7 +345,7 @@ exclusive lock on the same row for the rest of the dispatch, and a `REQUIRES_NEW
 behind that lock waits on a transaction that is itself waiting on it.
 
 ```java
-public interface DomainEffect {
+public interface DomainEffectHandler {
 
     DomainEventType type();
 
@@ -355,11 +355,11 @@ public interface DomainEffect {
 @Component
 public class DomainEffectRegistry {
 
-    private final Map<DomainEventType, DomainEffect> effectsByType;
+    private final Map<DomainEventType, DomainEffectHandler> effectsByType;
 
-    public DomainEffectRegistry(List<DomainEffect> effects) {
+    public DomainEffectRegistry(List<DomainEffectHandler> effects) {
         this.effectsByType = effects.stream()
-                .collect(Collectors.toUnmodifiableMap(DomainEffect::type, Function.identity()));
+                .collect(Collectors.toUnmodifiableMap(DomainEffectHandler::type, Function.identity()));
     }
 
     public void applyEffectFor(DomainEvent event, EffectPushQueue pushes) {
@@ -524,7 +524,7 @@ private static final String UNSERIALIZABLE_COUNTER = "sse.publish.unserializable
 1. `db/migration/V059__create_domain_events.sql` and the migration smoke seed — new table.
 2. `shared/outbox/entity/DomainEvent.java`, `DomainEventType.java`; `shared/outbox/repository/
    DomainEventRepository.java`; `shared/outbox/service/{DomainEventDispatcher,DomainEffectRegistry,
-   DomainEffect,DomainEventRecorder,DomainEventRecorded,DomainEventAttemptRecorder,EffectPushQueue,
+   DomainEffectHandler,DomainEventRecorder,DomainEventRecorded,DomainEventAttemptRecorder,EffectPushQueue,
    EffectPushSynchronization}.java`; `shared/outbox/scheduler/DomainEventRelay.java` — new.
    `DomainEventDispatcher` also owns `pendingEventIds`, the read-write scan the relay drives.
 3. `shared/outbox/config/OutboxAsyncConfig.java` — new: `@EnableAsync`, `@EnableRetry`, and a bounded
@@ -591,10 +591,10 @@ private static final String UNSERIALIZABLE_COUNTER = "sse.publish.unserializable
 - `EffectPlacementTest` extended: after-commit listeners reach only `DomainEventDispatcher`;
   `NotificationRepository` write methods are reached only from `..notification..`, and
   `NotificationDispatchService`'s raise methods only from `..effect..` and the dispatcher; every
-  `DomainEffect` implementation resides in a `..effect..` package; and no `..effect..` class depends
+  `DomainEffectHandler` implementation resides in a `..effect..` package; and no `..effect..` class depends
   on `SsePublisher` at all, which is what makes the transactional-reachability rule true of the
   outbox rather than merely unreached by it.
-- `DomainEffectCoverageIT` — injects `List<DomainEffect>` and asserts the declared `type()` set equals
+- `DomainEffectCoverageIT` — injects `List<DomainEffectHandler>` and asserts the declared `type()` set equals
   `DomainEventType.values()`. No freeze list: the tree passes it, so ADR 067's exception mechanism
   applies only if an arm is ever deliberately deferred.
 - Dispatcher IT: dispatching the same event id twice writes one notification row and pushes once.
@@ -857,7 +857,7 @@ lineage. Do not treat a pre-migration digest as evidence about author bytes.
       pre-check anywhere in the derivation path.
 - [ ] Dispatching one event twice produces one notification row and one push.
 - [ ] Killing the eager path still delivers every effect within one relay tick.
-- [ ] `DomainEventType.values()` and the registered `DomainEffect` arms are the same set.
+- [ ] `DomainEventType.values()` and the registered `DomainEffectHandler` arms are the same set.
 - [ ] `@Async` appears on exactly one method, named in the `ConventionBaselineTest` freeze list, with
       a live staleness check.
 - [ ] `sse.publish.unserializable` increments and reports to Sentry on a serialization failure;
