@@ -147,6 +147,19 @@ class FeatureBoundaryRuleTest {
     }
 
     @Test
+    void frozenEntry_WhenItsFileReachesOnlyAnotherModulesInternals_FailsNamingTheEntry() {
+        JavaClasses fixture = new ClassFileImporter().importClasses(ModerationController.class,
+                org.danteplanner.moduleboundaryfixture.stale.backend.moderation.service.ModerationPolicy.class,
+                UserModerationService.class);
+
+        assertThatThrownBy(() -> FeatureBoundaryTest.frozenInternalEdges_WhenScanned_AreStillLive(fixture))
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("moderation.service.ModerationPolicy")
+                .hasMessageNotContaining("moderation.controller.ModerationController")
+                .hasMessageNotContaining("moderation.service.UserModerationService");
+    }
+
+    @Test
     void frozenEntries_WhenEachFileStillReachesTheFrozenModule_Pass() {
         JavaClasses fixture = new ClassFileImporter().importClasses(
                 ModerationController.class, ModerationPolicy.class, UserModerationService.class);

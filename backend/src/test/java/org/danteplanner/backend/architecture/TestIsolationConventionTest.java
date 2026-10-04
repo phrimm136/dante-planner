@@ -265,7 +265,7 @@ class TestIsolationConventionTest {
         List<String> offenders = testSources().entrySet().stream()
                 // Excludes this file: the token it searches for is a literal in its own source, so
                 // a scanner that scans itself reports itself.
-                .filter(entry -> !entry.getKey().equals("TestIsolationConventionTest.java"))
+                .filter(entry -> !entry.getKey().equals("org/danteplanner/backend/architecture/TestIsolationConventionTest.java"))
                 .filter(entry -> entry.getValue().contains("SecurityContextHolder"))
                 .filter(entry -> !CLEARS_AFTER_EACH.matcher(entry.getValue()).find())
                 .map(java.util.Map.Entry::getKey)
@@ -278,7 +278,7 @@ class TestIsolationConventionTest {
                 .isEmpty();
     }
 
-    /** Source text of every class tagged containerized, keyed by file name. */
+    /** Source text of every class tagged containerized, keyed by path relative to the test source root. */
     private static java.util.Map<String, String> containerizedSources() {
         return testSources().entrySet().stream()
                 .filter(entry -> entry.getValue().contains("@Tag(\"containerized\")"))
@@ -286,13 +286,13 @@ class TestIsolationConventionTest {
                         java.util.Map.Entry::getKey, java.util.Map.Entry::getValue));
     }
 
-    /** Source text of every test class, keyed by file name. */
+    /** Source text of every test class, keyed by path relative to the test source root. */
     private static java.util.Map<String, String> testSources() {
-        try (java.util.stream.Stream<java.nio.file.Path> files =
-                java.nio.file.Files.walk(java.nio.file.Path.of("src/test/java"))) {
+        java.nio.file.Path root = java.nio.file.Path.of("src/test/java");
+        try (java.util.stream.Stream<java.nio.file.Path> files = java.nio.file.Files.walk(root)) {
             return files.filter(path -> path.toString().endsWith(".java"))
                     .collect(java.util.stream.Collectors.toMap(
-                            path -> path.getFileName().toString(),
+                            path -> root.relativize(path).toString(),
                             TestIsolationConventionTest::readSource));
         } catch (IOException e) {
             throw new UncheckedIOException("could not read the test sources", e);
