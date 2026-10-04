@@ -9,6 +9,7 @@ plugins {
     id("de.aaschmid.cpd") version "3.5"
     id("net.ltgt.errorprone") version "4.3.0"
     id("info.solidsoft.pitest") version "1.19.0-rc.1"
+    id("org.gradle.test-retry") version "1.6.6"
     checkstyle
     jacoco
 }
@@ -367,6 +368,12 @@ tasks.jacocoTestReport {
 tasks.test {
     inputs.file(layout.projectDirectory.file("config/architecture-rules-without-fixtures.txt"))
     finalizedBy(tasks.jacocoTestReport)
+    retry {
+        maxRetries = 1
+        maxFailures = 5
+        failOnPassedAfterRetry = true
+        failOnSkippedAfterRetry = true
+    }
 }
 
 tasks.jacocoTestCoverageVerification {

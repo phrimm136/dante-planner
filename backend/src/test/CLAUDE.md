@@ -62,4 +62,5 @@ which point it costs a debugging session in somebody else's class.
 - Time-dependent JWT tests inject a fixed `Clock` — never 1 ms expiries (see `JwtTokenServiceTest`).
 - Deterministic ordering via `entity.setCreatedAt(now.minusSeconds(n))` — never `Thread.sleep()`.
 - Build reusable entities with `TestDataFactory`.
+- A failing test is retried once and fails the build even when the retry passes: a test the console prints `FAILED` once, whose XML result holds a failed and then a passing execution, is flaky — fix or file it, never raise `maxRetries`.
 - Gradle does not capture application stdout in this project's test output — localize a failing integration test by assertion-based bisection, not log statements.
