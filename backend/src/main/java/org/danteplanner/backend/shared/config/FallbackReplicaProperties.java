@@ -31,13 +31,22 @@ public class FallbackReplicaProperties {
     public static final int SLIDING_WINDOW_CALLS = 20;
     public static final int MINIMUM_CALLS = 10;
     public static final float FAILURE_RATE_PERCENT = 50f;
-    public static final Duration WAIT_IN_OPEN_STATE = Duration.ofSeconds(30);
+    public static final Duration WAIT_IN_OPEN_STATE = Duration.ofHours(1);
     public static final int HALF_OPEN_PROBES = 3;
+
+    public static final String PROBE_INTERVAL_PROPERTY = "datasource.fallback-replica.probe.interval";
+    public static final String PROBE_INTERVAL_TEXT = "PT1S";
+    public static final Duration PROBE_INTERVAL = Duration.parse(PROBE_INTERVAL_TEXT);
+    public static final Duration PROBE_TIMEOUT = Duration.ofSeconds(1);
+    public static final int PROBE_FAILURE_THRESHOLD = 2;
 
     private String url;
 
     @Valid
     private Breaker breaker = new Breaker();
+
+    @Valid
+    private Probe probe = new Probe();
 
     @Getter
     @Setter
@@ -72,5 +81,21 @@ public class FallbackReplicaProperties {
                     .ignoreException(failure -> !PrimaryReadFallbackDataSource.isConnectionFailure(failure))
                     .build();
         }
+    }
+
+    @Getter
+    @Setter
+    public static class Probe {
+
+        @NotNull
+        @DurationMin(millis = 1)
+        private Duration interval = PROBE_INTERVAL;
+
+        @NotNull
+        @DurationMin(millis = 1)
+        private Duration timeout = PROBE_TIMEOUT;
+
+        @Min(1)
+        private int failureThreshold = PROBE_FAILURE_THRESHOLD;
     }
 }

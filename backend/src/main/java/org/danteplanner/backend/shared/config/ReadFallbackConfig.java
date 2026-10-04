@@ -1,14 +1,18 @@
 package org.danteplanner.backend.shared.config;
 
 import java.util.Locale;
+import java.util.Properties;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.SimpleDriverDataSource;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
+import com.mysql.cj.jdbc.Driver;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -26,6 +30,9 @@ public class ReadFallbackConfig {
 
     public static final String PRIMARY_READ_BREAKER = "primary-read";
     public static final String BREAKER_TRANSITIONS = "datasource.primary.read.breaker.transitions";
+    public static final String PRIMARY_PROBE_SCHEDULER = "primaryProbeScheduler";
+
+    private static final String CONNECT_TIMEOUT_PROPERTY = "connectTimeout";
 
     private static final long START_WITHOUT_CONNECTING = -1L;
 
@@ -53,6 +60,20 @@ public class ReadFallbackConfig {
         return config;
     }
 
+    public SimpleDriverDataSource buildPrimaryProbeDataSource() {
+        String timeoutMs = String.valueOf(fallbackProperties.getProbe().getTimeout().toMillis());
+        Properties driverProperties = new Properties();
+        driverProperties.setProperty(CONNECT_TIMEOUT_PROPERTY, timeoutMs);
+        driverProperties.setProperty(TimeoutHierarchy.SOCKET_TIMEOUT_PROPERTY, timeoutMs);
+        SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
+        dataSource.setDriverClass(Driver.class);
+        dataSource.setUrl(primaryProperties.getUrl());
+        dataSource.setUsername(primaryProperties.getUsername());
+        dataSource.setPassword(primaryProperties.getPassword());
+        dataSource.setConnectionProperties(driverProperties);
+        return dataSource;
+    }
+
     @Bean
     public HikariDataSource fallbackReplicaPool() {
         return new HikariDataSource(buildFallbackReplicaHikariConfig());
@@ -78,5 +99,20 @@ public class ReadFallbackConfig {
                 "to", event.getStateTransition().getToState().name().toLowerCase(Locale.ROOT))
                 .increment());
         return breaker;
+    }
+
+    @Bean(PRIMARY_PROBE_SCHEDULER)
+    public ThreadPoolTaskScheduler primaryProbeScheduler() {
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setPoolSize(1);
+        scheduler.setThreadNamePrefix("primary-probe-");
+        scheduler.setRemoveOnCancelPolicy(true);
+        return scheduler;
+    }
+
+    @Bean
+    public PrimaryHealthProbe primaryHealthProbe(CircuitBreaker primaryReadBreaker) {
+        return new PrimaryHealthProbe(
+                buildPrimaryProbeDataSource(), primaryReadBreaker, fallbackProperties.getProbe());
     }
 }

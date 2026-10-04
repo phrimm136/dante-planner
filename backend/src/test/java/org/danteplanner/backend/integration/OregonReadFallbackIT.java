@@ -65,10 +65,11 @@ class OregonReadFallbackIT {
     private static final String PRIMARY_ONLY_TITLE = "oregon-fallback-primary-only";
 
     private static final int BREAKER_WINDOW = 2;
-    private static final String WAIT_IN_OPEN_STATE = "PT1S";
 
-    private static final long RECOVERY_DEADLINE_MS = 60_000L;
-    private static final long RECOVERY_POLL_INTERVAL_MS = 250L;
+    private static final long PROBE_DEADLINE_MS = 5_000L;
+    private static final long STATE_POLL_INTERVAL_MS = 100L;
+    private static final long RELAPSE_WINDOW_MS = 6_000L;
+    private static final long READ_INTERVAL_MS = 250L;
 
     private static final String BREAKER_STATE_GAUGE = "resilience4j.circuitbreaker.state";
 
@@ -125,7 +126,6 @@ class OregonReadFallbackIT {
         registry.add(FallbackReplicaProperties.URL_PROPERTY, CausalHarnessSupport.REPLICA::getJdbcUrl);
         registry.add("datasource.fallback-replica.breaker.sliding-window-size", () -> BREAKER_WINDOW);
         registry.add("datasource.fallback-replica.breaker.minimum-number-of-calls", () -> BREAKER_WINDOW);
-        registry.add("datasource.fallback-replica.breaker.wait-duration-in-open-state", () -> WAIT_IN_OPEN_STATE);
     }
 
     private static String primaryUrlThroughProxy() {
@@ -184,66 +184,124 @@ class OregonReadFallbackIT {
     }
 
     @Test
-    @DisplayName("Primary unreachable: past the breaker threshold reads serve from the fallback replica and writes fail typed; once the primary returns, half-open probes move reads back")
-    void primaryReadBreaker_WhenPrimaryUnreachable_ReadsFallBackToReplicaUntilProbesSucceed()
-            throws Exception {
-        Session session = newSession("oregon-breaker-");
+    @DisplayName("Primary unreachable with no traffic: the probe opens the breaker within five seconds")
+    void primaryReadBreaker_WhenPrimaryUnreachableWithoutTraffic_ProbeOpensTheBreaker() throws Exception {
+        double openedBefore = transitions("closed", "open");
+
+        try {
+            cutThePrimary();
+            awaitBreaker(CircuitBreaker.State.OPEN);
+
+            assertThat(transitions("closed", "open")).isGreaterThanOrEqualTo(openedBefore + 1);
+            assertThat(breakerStateGauge("open")).isEqualTo(1.0);
+        } finally {
+            restoreThePrimary();
+        }
+    }
+
+    @Test
+    @DisplayName("Primary returns with no traffic: the probe closes the breaker within five seconds and reads go back to the primary")
+    void primaryReadBreaker_WhenPrimaryReturnsWithoutTraffic_ProbeClosesTheBreaker() throws Exception {
+        Session session = newSession("oregon-probe-close-");
         UUID plannerId = UUID.randomUUID();
 
         try {
-            upsert(session, plannerId, REPLICATED_TITLE, false).andExpect(status().is2xxSuccessful());
-            replicationControl.awaitCaughtUp();
-            replicationControl.stopReplica();
-            upsert(session, plannerId, PRIMARY_ONLY_TITLE, true).andExpect(status().is2xxSuccessful());
+            writePrimaryOnlyTitle(session, plannerId);
+            cutThePrimary();
+            awaitBreaker(CircuitBreaker.State.OPEN);
+
+            CausalHarnessSupport.APP_TO_PRIMARY_PROXY.enable();
+            awaitBreaker(CircuitBreaker.State.CLOSED);
+
             assertThat(readTitle(session, plannerId))
-                    .as("closed breaker: reads go to the primary")
+                    .as("a closed breaker sends reads back to the primary")
                     .isEqualTo(PRIMARY_ONLY_TITLE);
-
-            CausalHarnessSupport.APP_TO_PRIMARY_PROXY.disable();
-            primaryPool.getHikariPoolMXBean().softEvictConnections();
-
-            for (int attempt = 0; attempt < BREAKER_WINDOW
-                    && primaryReadBreaker.getState() == CircuitBreaker.State.CLOSED; attempt++) {
-                mockMvc.perform(get("/api/planner/md/" + plannerId).cookie(session.auth(), session.device()))
-                        .andExpect(status().isServiceUnavailable());
-            }
-            assertThat(primaryReadBreaker.getState()).isEqualTo(CircuitBreaker.State.OPEN);
-            assertThat(breakerStateGauge("open")).isEqualTo(1.0);
-            assertThat(transitions("closed", "open")).isGreaterThanOrEqualTo(1.0);
-
-            assertThat(readTitle(session, plannerId))
-                    .as("open breaker: reads are served by the fallback replica, stale by design")
-                    .isEqualTo(REPLICATED_TITLE);
-
-            upsert(session, UUID.randomUUID(), "oregon-breaker-blocked-write", false)
-                    .andExpect(status().isServiceUnavailable())
-                    .andExpect(jsonPath("$.code").value("WRITE_TEMPORARILY_UNAVAILABLE"));
-
-            CausalHarnessSupport.APP_TO_PRIMARY_PROXY.enable();
-            awaitReadsBackOnThePrimary(session, plannerId);
-
-            assertThat(transitions("open", "half_open")).isGreaterThanOrEqualTo(1.0);
-            assertThat(transitions("half_open", "closed")).isGreaterThanOrEqualTo(1.0);
         } finally {
-            CausalHarnessSupport.APP_TO_PRIMARY_PROXY.enable();
+            restoreThePrimary();
             replicationControl.startReplica();
             replicationControl.awaitCaughtUp();
         }
     }
 
-    private void awaitReadsBackOnThePrimary(Session session, UUID plannerId) throws Exception {
-        long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(RECOVERY_DEADLINE_MS);
-        String title = readTitle(session, plannerId);
-        while ((!PRIMARY_ONLY_TITLE.equals(title)
-                || primaryReadBreaker.getState() != CircuitBreaker.State.CLOSED)
-                && System.nanoTime() < deadline) {
-            LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(RECOVERY_POLL_INTERVAL_MS));
-            title = readTitle(session, plannerId);
+    @Test
+    @DisplayName("Open breaker: reads are served stale by the fallback replica and writes fail typed")
+    void primaryReadBreaker_WhenOpen_ServesStaleReadsAndFailsWritesTyped() throws Exception {
+        Session session = newSession("oregon-breaker-");
+        UUID plannerId = UUID.randomUUID();
+
+        try {
+            writePrimaryOnlyTitle(session, plannerId);
+            assertThat(readTitle(session, plannerId))
+                    .as("closed breaker: reads go to the primary")
+                    .isEqualTo(PRIMARY_ONLY_TITLE);
+
+            cutThePrimary();
+            awaitBreaker(CircuitBreaker.State.OPEN);
+
+            assertThat(readTitle(session, plannerId))
+                    .as("open breaker: reads are served by the fallback replica, stale by design")
+                    .isEqualTo(REPLICATED_TITLE);
+            upsert(session, UUID.randomUUID(), "oregon-breaker-blocked-write", false)
+                    .andExpect(status().isServiceUnavailable())
+                    .andExpect(jsonPath("$.code").value("WRITE_TEMPORARILY_UNAVAILABLE"));
+        } finally {
+            restoreThePrimary();
+            replicationControl.startReplica();
+            replicationControl.awaitCaughtUp();
         }
-        assertThat(title)
-                .as("after the primary returns, a half-open probe must move reads back to it")
-                .isEqualTo(PRIMARY_ONLY_TITLE);
-        assertThat(primaryReadBreaker.getState()).isEqualTo(CircuitBreaker.State.CLOSED);
+    }
+
+    @Test
+    @DisplayName("Primary fails again right after a recovery: every read in the relapse window still returns 200")
+    void primaryReadBreaker_WhenPrimaryFailsAgainRightAfterRecovery_ReadsStayUp() throws Exception {
+        Session session = newSession("oregon-relapse-");
+        UUID plannerId = UUID.randomUUID();
+
+        try {
+            upsert(session, plannerId, REPLICATED_TITLE, false).andExpect(status().is2xxSuccessful());
+            replicationControl.awaitCaughtUp();
+            cutThePrimary();
+            awaitBreaker(CircuitBreaker.State.OPEN);
+            CausalHarnessSupport.APP_TO_PRIMARY_PROXY.enable();
+            awaitBreaker(CircuitBreaker.State.CLOSED);
+
+            cutThePrimary();
+            long relapseEnd = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(RELAPSE_WINDOW_MS);
+            while (System.nanoTime() < relapseEnd) {
+                mockMvc.perform(get("/api/planner/md/" + plannerId).cookie(session.auth(), session.device()))
+                        .andExpect(status().isOk());
+                LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(READ_INTERVAL_MS));
+            }
+        } finally {
+            restoreThePrimary();
+        }
+    }
+
+    private void writePrimaryOnlyTitle(Session session, UUID plannerId) throws Exception {
+        upsert(session, plannerId, REPLICATED_TITLE, false).andExpect(status().is2xxSuccessful());
+        replicationControl.awaitCaughtUp();
+        replicationControl.stopReplica();
+        upsert(session, plannerId, PRIMARY_ONLY_TITLE, true).andExpect(status().is2xxSuccessful());
+    }
+
+    private void cutThePrimary() throws IOException {
+        CausalHarnessSupport.APP_TO_PRIMARY_PROXY.disable();
+        primaryPool.getHikariPoolMXBean().softEvictConnections();
+    }
+
+    private void restoreThePrimary() throws IOException {
+        CausalHarnessSupport.APP_TO_PRIMARY_PROXY.enable();
+        awaitBreaker(CircuitBreaker.State.CLOSED);
+    }
+
+    private void awaitBreaker(CircuitBreaker.State expected) {
+        long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(PROBE_DEADLINE_MS);
+        while (primaryReadBreaker.getState() != expected && System.nanoTime() < deadline) {
+            LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(STATE_POLL_INTERVAL_MS));
+        }
+        assertThat(primaryReadBreaker.getState())
+                .as("the probe must move the breaker to %s within %d ms", expected, PROBE_DEADLINE_MS)
+                .isEqualTo(expected);
     }
 
     private String readTitle(Session session, UUID plannerId) throws Exception {

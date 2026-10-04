@@ -83,7 +83,20 @@ public class PrimaryReadFallbackDataSource extends AbstractDataSource {
             return connection;
         } catch (SQLException | RuntimeException e) {
             breaker.onError(System.nanoTime() - start, TimeUnit.NANOSECONDS, e);
-            throw e;
+            if (!isConnectionFailure(e)) {
+                throw e;
+            }
+            return fallBackAfter(e, fromFallback);
+        }
+    }
+
+    private static Connection fallBackAfter(Exception primaryFailure, ConnectionSource fromFallback)
+            throws SQLException {
+        try {
+            return fromFallback.connect();
+        } catch (SQLException | RuntimeException fallbackFailure) {
+            fallbackFailure.addSuppressed(primaryFailure);
+            throw fallbackFailure;
         }
     }
 
