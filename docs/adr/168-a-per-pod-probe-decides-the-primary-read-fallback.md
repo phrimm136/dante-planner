@@ -7,8 +7,7 @@ epic: none · pr: none · supersedes: 130 @reads @outage @trigger
   primary-read breaker, and one success closes it from any other state. User reads never act as
   half-open probes, because the breaker waits an hour in the open state. The breaker still records
   connection failures from user reads, so heavy traffic can trip it before the probe does. In
-  Oregon the primary is also the same-region read database. While the half-open probes were user
-  reads, every probe that failed after a recovery returned 503 to that reader.
+  Oregon the primary is also the same-region read database.
   REJECTED: user reads as half-open probes (ADR 130) — a failed probe is a failed user read. A
   primary that flaps right after it returns fails the reads that were sent to test it.
   REJECTED: one probe for the cluster behind ShedLock — each pod needs its own view of its network
@@ -21,10 +20,12 @@ epic: none · pr: none · supersedes: 130 @reads @outage @trigger
   four threads cannot delay detection — PrimaryHealthProbeTest and OregonReadFallbackIT.
   NON-GOAL: a shared breaker state across pods — each pod opens and closes on its own evidence.
 - @reads @outage @acquire — When a read cannot get a connection from the primary, the breaker
-  records the failure and the same request reads from the Seoul replica. Before this change, a read
-  that was let through to the primary and failed to connect returned 503. Errors other than
+  records the failure and the same request reads from the Seoul replica. Oregon has no replica of
+  its own, so the Seoul replica is the only other source for that read. Errors other than
   connection failures still propagate. If the replica also fails, the replica's error propagates
   with the primary's error attached as suppressed.
+  REJECTED: rethrowing the connection failure — the reader gets 503 while the replica could serve
+  the read.
   REJECTED: retry the primary once before falling back — it doubles the wait on a dead primary,
   which already costs the pool's connection timeout.
   INVARIANT: a read that fails to acquire a primary connection is served from the replica —
