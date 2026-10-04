@@ -1,6 +1,6 @@
 package org.danteplanner.backend.moderation.dto;
 
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.moderation.api.ModeratedPlanner;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -15,14 +15,14 @@ public record ModerationResponse(
     int upvotes
 ) {
 
-    public static ModerationResponse fromEntity(Planner planner, int upvotes) {
+    public static ModerationResponse from(ModeratedPlanner planner, int upvotes) {
         return new ModerationResponse(
-                planner.getId(),
-                planner.getTitle(),
-                planner.isHiddenFromRecommended(),
-                planner.getModeration().getHiddenByModeratorId(),
-                planner.getModeration().getHiddenReason(),
-                planner.getModeration().getHiddenAt(),
+                planner.id(),
+                planner.title(),
+                planner.hiddenFromRecommended(),
+                planner.hiddenByModeratorId(),
+                planner.hiddenReason(),
+                planner.hiddenAt(),
                 upvotes
         );
     }

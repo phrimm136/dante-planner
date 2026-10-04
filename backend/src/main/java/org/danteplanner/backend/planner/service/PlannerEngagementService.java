@@ -9,7 +9,7 @@ import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.entity.PlannerVoteId;
 import org.danteplanner.backend.planner.entity.VoteType;
-import org.danteplanner.backend.moderation.service.PlannerReportService;
+import org.danteplanner.backend.moderation.api.PlannerReports;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.planner.precondition.VoteUniquenessValidator;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
@@ -32,7 +32,7 @@ public class PlannerEngagementService {
     private final PlannerCatalogService plannerCatalogService;
     private final DomainEventRecorder domainEventRecorder;
     private final PlannerAccessGuard accessGuard;
-    private final PlannerReportService reportService;
+    private final PlannerReports reportService;
     private final VoteUniquenessValidator voteUniquenessValidator;
 
     private final int recommendedThreshold;
@@ -43,7 +43,7 @@ public class PlannerEngagementService {
             PlannerCatalogService plannerCatalogService,
             DomainEventRecorder domainEventRecorder,
             PlannerAccessGuard accessGuard,
-            PlannerReportService reportService,
+            PlannerReports reportService,
             VoteUniquenessValidator voteUniquenessValidator,
             @Value("${planner.recommended-threshold}") int recommendedThreshold) {
         this.plannerVoteRepository = plannerVoteRepository;

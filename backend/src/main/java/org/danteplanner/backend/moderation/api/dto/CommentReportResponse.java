@@ -1,4 +1,4 @@
-package org.danteplanner.backend.moderation.dto;
+package org.danteplanner.backend.moderation.api.dto;
 
 import java.time.Instant;
 

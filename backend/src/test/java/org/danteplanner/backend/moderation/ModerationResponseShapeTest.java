@@ -11,7 +11,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.moderation.dto.BanStatusResponse;
 import org.danteplanner.backend.moderation.dto.ModeratedUserResponse;
-import org.danteplanner.backend.moderation.dto.PlannerActionResponse;
+import org.danteplanner.backend.moderation.api.dto.PlannerActionResponse;
 import org.danteplanner.backend.moderation.dto.UnpublishPlannerResponse;
 import org.junit.jupiter.api.Test;
 

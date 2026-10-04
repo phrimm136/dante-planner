@@ -3,7 +3,7 @@ package org.danteplanner.backend.planner.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
-import org.danteplanner.backend.moderation.dto.PlannerActionResponse;
+import org.danteplanner.backend.moderation.api.dto.PlannerActionResponse;
 import org.danteplanner.backend.planner.dto.SubscriptionResponse;
 import org.danteplanner.backend.planner.dto.VoteRequest;
 import org.danteplanner.backend.planner.dto.VoteResponse;

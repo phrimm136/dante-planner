@@ -1,6 +1,6 @@
 package org.danteplanner.backend.moderation.service;
 
-import org.danteplanner.backend.moderation.entity.ModerationAction;
+import org.danteplanner.backend.moderation.api.ModerationActionType;
 import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
@@ -22,7 +22,7 @@ class ModerationPolicyTest {
     @DisplayName("a moderator cannot ban, whatever the target's rank")
     void requireCanRestrict_WhenActorRankTooLow_ThrowsModerationForbidden() {
         assertThatThrownBy(() -> POLICY.requireCanRestrict(
-                user(1L, UserRole.MODERATOR), normalUser(), ModerationAction.ActionType.BAN))
+                user(1L, UserRole.MODERATOR), normalUser(), ModerationActionType.BAN))
                 .isInstanceOf(ModerationForbiddenException.class)
                 .hasMessage("Only administrators can ban users");
     }
@@ -32,7 +32,7 @@ class ModerationPolicyTest {
     void requireCanRestrict_WhenTargetOfEqualRank_ThrowsModerationForbidden() {
         assertThatThrownBy(() -> POLICY.requireCanRestrict(
                 user(1L, UserRole.MODERATOR), user(2L, UserRole.MODERATOR),
-                ModerationAction.ActionType.TIMEOUT))
+                ModerationActionType.TIMEOUT))
                 .isInstanceOf(ModerationForbiddenException.class)
                 .hasMessage("Cannot timeout a user of equal or higher rank");
     }
@@ -42,7 +42,7 @@ class ModerationPolicyTest {
     void requireCanRestrict_WhenActionIsNotARestriction_ThrowsIllegalArgument() {
         assertThatThrownBy(() -> POLICY.requireCanRestrict(
                 user(1L, UserRole.ADMIN), normalUser(),
-                ModerationAction.ActionType.DELETE_COMMENT))
+                ModerationActionType.DELETE_COMMENT))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 

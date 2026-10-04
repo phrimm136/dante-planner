@@ -34,7 +34,8 @@ class SanitizationCoverageTest {
     private static final Set<String> USER_CONTENT_DTO_PACKAGES = Set.of(
             "org.danteplanner.backend.planner.dto",
             "org.danteplanner.backend.comment.dto",
-            "org.danteplanner.backend.moderation.dto");
+            "org.danteplanner.backend.moderation.dto",
+            "org.danteplanner.backend.moderation.api.dto");
 
     /**
      * The components allowed to carry neither declaration, each named {@code Record.component}.

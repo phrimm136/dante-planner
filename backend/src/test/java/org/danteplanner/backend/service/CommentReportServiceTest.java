@@ -4,8 +4,8 @@ import org.danteplanner.backend.moderation.service.CommentReportService;
 import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator;
 import org.danteplanner.backend.comment.validation.CommentStateValidator;
 import org.mockito.ArgumentCaptor;
-import org.danteplanner.backend.moderation.dto.CommentReportRequest;
-import org.danteplanner.backend.moderation.dto.CommentReportResponse;
+import org.danteplanner.backend.moderation.api.dto.CommentReportRequest;
+import org.danteplanner.backend.moderation.api.dto.CommentReportResponse;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.moderation.entity.PlannerCommentReport;
 import org.danteplanner.backend.comment.exception.CommentForbiddenException;
@@ -13,7 +13,9 @@ import org.danteplanner.backend.comment.exception.CommentNotFoundException;
 import org.danteplanner.backend.moderation.exception.CommentReportAlreadyExistsException;
 import org.danteplanner.backend.moderation.repository.PlannerCommentReportRepository;
 import org.danteplanner.backend.comment.service.CommentQueryService;
-import org.danteplanner.backend.planner.service.PlannerAccessGuard;
+import org.danteplanner.backend.comment.service.CommentModerationTargetAdapter;
+import org.danteplanner.backend.comment.service.CommentCommandService;
+import org.danteplanner.backend.moderation.validation.ReporterStandingValidator;
 import org.danteplanner.backend.user.api.UserBannedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -43,7 +45,10 @@ class CommentReportServiceTest {
     private CommentQueryService commentQueryService;
 
     @Mock
-    private PlannerAccessGuard accessGuard;
+    private CommentCommandService commentCommandService;
+
+    @Mock
+    private ReporterStandingValidator accessGuard;
 
     private CommentReportService service;
 
@@ -55,8 +60,10 @@ class CommentReportServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new CommentReportService(reportRepository, commentQueryService, accessGuard,
-                new CommentStateValidator(), new ReportUniquenessValidator());
+        service = new CommentReportService(reportRepository,
+                new CommentModerationTargetAdapter(commentQueryService, commentCommandService,
+                        new CommentStateValidator()),
+                accessGuard, new ReportUniquenessValidator());
     }
 
     @Nested

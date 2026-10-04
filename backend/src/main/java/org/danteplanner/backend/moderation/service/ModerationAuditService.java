@@ -1,5 +1,8 @@
 package org.danteplanner.backend.moderation.service;
 
+import org.danteplanner.backend.moderation.api.ModerationActionType;
+import org.danteplanner.backend.moderation.api.ModerationAudit;
+import org.danteplanner.backend.moderation.api.ModerationTargetType;
 import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
@@ -14,22 +17,23 @@ import java.util.UUID;
  */
 @Service
 @RequiredArgsConstructor
-public class ModerationAuditService {
+public class ModerationAuditService implements ModerationAudit {
 
     private final ModerationActionRepository moderationActionRepository;
 
-    public void record(Long actorId, String targetUuid, ModerationAction.ActionType actionType,
-            ModerationAction.TargetType targetType) {
+    public void record(Long actorId, String targetUuid, ModerationActionType actionType,
+            ModerationTargetType targetType) {
         record(actorId, targetUuid, actionType, targetType, null, null);
     }
 
-    public void record(Long actorId, String targetUuid, ModerationAction.ActionType actionType,
-            ModerationAction.TargetType targetType, String reason) {
+    @Override
+    public void record(Long actorId, String targetUuid, ModerationActionType actionType,
+            ModerationTargetType targetType, String reason) {
         record(actorId, targetUuid, actionType, targetType, reason, null);
     }
 
-    public void record(Long actorId, String targetUuid, ModerationAction.ActionType actionType,
-            ModerationAction.TargetType targetType, String reason, Integer durationMinutes) {
+    public void record(Long actorId, String targetUuid, ModerationActionType actionType,
+            ModerationTargetType targetType, String reason, Integer durationMinutes) {
         moderationActionRepository.insert(ModerationAction.builder()
                 .actorId(actorId)
                 .targetUuid(targetUuid)
@@ -40,17 +44,19 @@ public class ModerationAuditService {
                 .build());
     }
 
+    @Override
     @Transactional(readOnly = true)
     public Optional<String> latestBanReason(UUID targetPublicId) {
-        return latestReason(targetPublicId, ModerationAction.ActionType.BAN);
+        return latestReason(targetPublicId, ModerationActionType.BAN);
     }
 
+    @Override
     @Transactional(readOnly = true)
     public Optional<String> latestTimeoutReason(UUID targetPublicId) {
-        return latestReason(targetPublicId, ModerationAction.ActionType.TIMEOUT);
+        return latestReason(targetPublicId, ModerationActionType.TIMEOUT);
     }
 
-    private Optional<String> latestReason(UUID targetPublicId, ModerationAction.ActionType type) {
+    private Optional<String> latestReason(UUID targetPublicId, ModerationActionType type) {
         return moderationActionRepository
                 .findFirstByTargetUuidAndActionTypeOrderByCreatedAtDesc(targetPublicId.toString(), type)
                 .map(ModerationAction::getReason);

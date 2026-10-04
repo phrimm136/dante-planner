@@ -1,12 +1,13 @@
 package org.danteplanner.backend.moderation.service;
 
+import org.danteplanner.backend.moderation.api.ModeratedPlanner;
+import org.danteplanner.backend.moderation.api.ModerationActionType;
+import org.danteplanner.backend.moderation.api.ModerationTargetType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.moderation.dto.HidePlannerRequest;
 import org.danteplanner.backend.moderation.dto.ModerationResponse;
-import org.danteplanner.backend.moderation.entity.ModerationAction;
-import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.service.PlannerPublishingService;
+import org.danteplanner.backend.moderation.api.PlannerModerationTarget;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,26 +24,26 @@ import java.util.UUID;
 @Slf4j
 public class PlannerModerationService {
 
-    private final PlannerPublishingService plannerPublishingService;
+    private final PlannerModerationTarget plannerTarget;
     private final ModerationAuditService auditService;
 
     @Transactional
-    public Planner deletePlanner(Long actorId, UUID plannerId, String reason) {
-        Planner saved = plannerPublishingService.withdrawFromPublicView(plannerId, Planner::takeDown);
+    public ModeratedPlanner deletePlanner(Long actorId, UUID plannerId, String reason) {
+        ModeratedPlanner saved = plannerTarget.takeDown(plannerId);
 
         auditService.record(actorId, plannerId.toString(),
-                ModerationAction.ActionType.DELETE_PLANNER, ModerationAction.TargetType.PLANNER, reason);
+                ModerationActionType.DELETE_PLANNER, ModerationTargetType.PLANNER, reason);
 
         log.info("Planner {} taken down by moderator {} with reason: {}", plannerId, actorId, reason);
         return saved;
     }
 
     @Transactional
-    public Planner unpublishPlanner(Long actorId, UUID plannerId) {
-        Planner saved = plannerPublishingService.withdrawFromPublicView(plannerId, Planner::unpublish);
+    public ModeratedPlanner unpublishPlanner(Long actorId, UUID plannerId) {
+        ModeratedPlanner saved = plannerTarget.unpublish(plannerId);
 
         auditService.record(actorId, plannerId.toString(),
-                ModerationAction.ActionType.UNPUBLISH_PLANNER, ModerationAction.TargetType.PLANNER);
+                ModerationActionType.UNPUBLISH_PLANNER, ModerationTargetType.PLANNER);
 
         log.info("Planner {} unpublished by moderator {}", plannerId, actorId);
         return saved;
@@ -50,11 +51,10 @@ public class PlannerModerationService {
 
     @Transactional
     public ModerationResponse hideFromRecommended(UUID plannerId, Long moderatorId, HidePlannerRequest request) {
-        Planner saved = plannerPublishingService.changeRecommendedListing(plannerId,
-                planner -> planner.hideFromRecommended(moderatorId, request.reason()));
+        ModeratedPlanner saved = plannerTarget.hideFromRecommended(plannerId, moderatorId, request.reason());
 
         auditService.record(moderatorId, plannerId.toString(),
-                ModerationAction.ActionType.HIDE_FROM_RECOMMENDED, ModerationAction.TargetType.PLANNER,
+                ModerationActionType.HIDE_FROM_RECOMMENDED, ModerationTargetType.PLANNER,
                 request.reason());
 
         log.info("Planner {} hidden from recommended by moderator {} with reason: {}",
@@ -65,11 +65,10 @@ public class PlannerModerationService {
 
     @Transactional
     public ModerationResponse unhideFromRecommended(UUID plannerId, Long moderatorId) {
-        Planner saved = plannerPublishingService.changeRecommendedListing(plannerId,
-                Planner::unhideFromRecommended);
+        ModeratedPlanner saved = plannerTarget.unhideFromRecommended(plannerId);
 
         auditService.record(moderatorId, plannerId.toString(),
-                ModerationAction.ActionType.UNHIDE_FROM_RECOMMENDED, ModerationAction.TargetType.PLANNER);
+                ModerationActionType.UNHIDE_FROM_RECOMMENDED, ModerationTargetType.PLANNER);
 
         log.info("Planner {} unhidden from recommended by moderator {}", plannerId, moderatorId);
 
@@ -78,11 +77,11 @@ public class PlannerModerationService {
 
     @Transactional(readOnly = true)
     public Page<ModerationResponse> listHiddenPlanners(Pageable pageable) {
-        return plannerPublishingService.listHiddenFromRecommended(pageable)
+        return plannerTarget.listHiddenFromRecommended(pageable)
                 .map(this::describe);
     }
 
-    private ModerationResponse describe(Planner planner) {
-        return ModerationResponse.fromEntity(planner, plannerPublishingService.upvoteCount(planner.getId()));
+    private ModerationResponse describe(ModeratedPlanner planner) {
+        return ModerationResponse.from(planner, plannerTarget.upvoteCount(planner.id()));
     }
 }

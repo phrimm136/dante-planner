@@ -1,5 +1,7 @@
 package org.danteplanner.backend.moderation;
 
+import org.danteplanner.backend.moderation.api.ModerationActionType;
+import org.danteplanner.backend.moderation.api.ModerationTargetType;
 import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
@@ -364,8 +366,8 @@ class UserModerationServiceTest {
             assertEquals(adminUser.getId(), normalUser.getBannedBy());
 
             ModerationAction action = persistedAction();
-            assertEquals(ModerationAction.ActionType.BAN, action.getActionType());
-            assertEquals(ModerationAction.TargetType.USER, action.getTargetType());
+            assertEquals(ModerationActionType.BAN, action.getActionType());
+            assertEquals(ModerationTargetType.USER, action.getTargetType());
             assertEquals(adminUser.getId(), action.getActorId());
             assertEquals("Test ban reason", action.getReason());
 
@@ -389,7 +391,7 @@ class UserModerationServiceTest {
             assertTrue(result.isBanned());
 
             ModerationAction action = persistedAction();
-            assertEquals(ModerationAction.ActionType.BAN, action.getActionType());
+            assertEquals(ModerationActionType.BAN, action.getActionType());
             assertEquals(adminUser.getId(), action.getActorId());
             assertNull(action.getReason());
         }
@@ -466,8 +468,8 @@ class UserModerationServiceTest {
             assertNull(normalUser.getBannedBy());
 
             ModerationAction action = persistedAction();
-            assertEquals(ModerationAction.ActionType.UNBAN, action.getActionType());
-            assertEquals(ModerationAction.TargetType.USER, action.getTargetType());
+            assertEquals(ModerationActionType.UNBAN, action.getActionType());
+            assertEquals(ModerationTargetType.USER, action.getTargetType());
             assertEquals(adminUser.getId(), action.getActorId());
         }
 

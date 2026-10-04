@@ -1,5 +1,7 @@
 package org.danteplanner.backend.moderation;
 
+import org.danteplanner.backend.moderation.api.ModerationActionType;
+import org.danteplanner.backend.moderation.api.ModerationTargetType;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
@@ -71,8 +73,8 @@ class ModerationAuditTrailBoundIT {
             moderationActionRepository.save(ModerationAction.builder()
                     .actorId(actorId)
                     .targetUuid(UUID.randomUUID().toString())
-                    .actionType(ModerationAction.ActionType.TIMEOUT)
-                    .targetType(ModerationAction.TargetType.USER)
+                    .actionType(ModerationActionType.TIMEOUT)
+                    .targetType(ModerationTargetType.USER)
                     .reason("seed " + i)
                     .build());
         }

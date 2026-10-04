@@ -1,5 +1,6 @@
 package org.danteplanner.backend.moderation.repository;
 
+import org.danteplanner.backend.moderation.api.ModerationActionType;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,7 +25,7 @@ public interface ModerationActionRepository extends JpaRepository<ModerationActi
 
     Optional<ModerationAction> findFirstByTargetUuidAndActionTypeOrderByCreatedAtDesc(
             String targetUuid,
-            ModerationAction.ActionType actionType
+            ModerationActionType actionType
     );
 
     /**

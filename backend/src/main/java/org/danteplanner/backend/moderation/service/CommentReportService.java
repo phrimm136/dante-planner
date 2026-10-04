@@ -2,15 +2,14 @@ package org.danteplanner.backend.moderation.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.moderation.dto.CommentReportRequest;
-import org.danteplanner.backend.moderation.dto.CommentReportResponse;
-import org.danteplanner.backend.comment.entity.PlannerComment;
+import org.danteplanner.backend.moderation.api.CommentModerationTarget;
+import org.danteplanner.backend.moderation.api.CommentReports;
+import org.danteplanner.backend.moderation.api.dto.CommentReportRequest;
+import org.danteplanner.backend.moderation.api.dto.CommentReportResponse;
 import org.danteplanner.backend.moderation.entity.PlannerCommentReport;
 import org.danteplanner.backend.moderation.repository.PlannerCommentReportRepository;
 import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator;
-import org.danteplanner.backend.comment.service.CommentQueryService;
-import org.danteplanner.backend.comment.validation.CommentStateValidator;
-import org.danteplanner.backend.planner.service.PlannerAccessGuard;
+import org.danteplanner.backend.moderation.validation.ReporterStandingValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,23 +21,20 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class CommentReportService {
+public class CommentReportService implements CommentReports {
 
     private final PlannerCommentReportRepository reportRepository;
-    private final CommentQueryService commentQueryService;
-    private final PlannerAccessGuard accessGuard;
-    private final CommentStateValidator commentStateValidator;
+    private final CommentModerationTarget commentTarget;
+    private final ReporterStandingValidator reporterStandingValidator;
     private final ReportUniquenessValidator reportUniquenessValidator;
 
+    @Override
     @Transactional
     public CommentReportResponse createReport(UUID commentPublicId, Long userId, CommentReportRequest request) {
-        accessGuard.checkNotBanned(userId);
+        reporterStandingValidator.checkNotBanned(userId);
 
-        PlannerComment comment = commentQueryService.requireByPublicId(commentPublicId);
+        Long internalId = commentTarget.requireReportable(commentPublicId);
 
-        Long internalId = comment.getId();
-
-        commentStateValidator.requireReportable(comment);
         reportUniquenessValidator.requireFirstCommentReport(
                 reportRepository.existsByReporterIdAndCommentId(userId, internalId), internalId, userId);
 

@@ -14,6 +14,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.danteplanner.backend.moderation.api.ModerationActionType;
+import org.danteplanner.backend.moderation.api.ModerationTargetType;
 
 import java.time.Instant;
 
@@ -36,7 +38,7 @@ public class ModerationAction {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "action_type", nullable = false, length = 50)
-    private ActionType actionType;
+    private ModerationActionType actionType;
 
     @Column(name = "actor_id", nullable = false)
     private Long actorId;
@@ -52,7 +54,7 @@ public class ModerationAction {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "target_type", nullable = false, length = 20)
-    private TargetType targetType;
+    private ModerationTargetType targetType;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -60,25 +62,5 @@ public class ModerationAction {
     @PrePersist
     protected void onCreate() {
         createdAt = Instant.now();
-    }
-
-    public enum ActionType {
-        BAN,
-        UNBAN,
-        TIMEOUT,
-        CLEAR_TIMEOUT,
-        PROMOTE,
-        DEMOTE,
-        DELETE_PLANNER,
-        DELETE_COMMENT,
-        UNPUBLISH_PLANNER,
-        HIDE_FROM_RECOMMENDED,
-        UNHIDE_FROM_RECOMMENDED
-    }
-
-    public enum TargetType {
-        USER,
-        PLANNER,
-        COMMENT
     }
 }

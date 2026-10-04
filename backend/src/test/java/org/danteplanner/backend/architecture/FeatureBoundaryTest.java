@@ -65,19 +65,9 @@ class FeatureBoundaryTest {
     private static final List<String> INTERNAL_PACKAGES =
             List.of("repository", "validation", "precondition", "gamedata", "sync", "searchindex", "entity");
 
-    private static final Set<String> COMMENT_INTERNALS_FROZEN = Set.of(
-            MAIN + "moderation.service.CommentModerationService",
-            MAIN + "moderation.service.CommentReportService");
-
-    private static final Set<String> MODERATION_INTERNALS_FROZEN = Set.of(
-            MAIN + "admin.service.AdminService");
-
     private static final Set<String> PLANNER_INTERNALS_FROZEN = Set.of(
             MAIN + "comment.service.CommentEngagementService",
             MAIN + "comment.validation.CommentAccessValidator",
-            MAIN + "moderation.controller.ModerationController",
-            MAIN + "moderation.dto.ModerationResponse",
-            MAIN + "moderation.service.PlannerModerationService",
             MAIN + "shared.config.WebConfig");
 
     /**
@@ -98,8 +88,8 @@ class FeatureBoundaryTest {
             MAIN + "shared.sse.SseService");
 
     private static final Map<String, Set<String>> FROZEN_INTERNAL_EDGES = Map.of(
-            "comment", COMMENT_INTERNALS_FROZEN,
-            "moderation", MODERATION_INTERNALS_FROZEN,
+            "comment", Set.of(),
+            "moderation", Set.of(),
             "notification", Set.of(),
             "planner", PLANNER_INTERNALS_FROZEN,
             "user", USER_INTERNALS_FROZEN);

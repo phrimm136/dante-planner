@@ -1,12 +1,15 @@
 package org.danteplanner.backend.moderation;
 
+import org.danteplanner.backend.moderation.api.ModerationActionType;
 import org.danteplanner.backend.admin.service.AdminService;
 import org.danteplanner.backend.user.service.UsersApiAdapter;
 import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.service.CommentCommandService;
+import org.danteplanner.backend.comment.service.CommentModerationTargetAdapter;
 import org.danteplanner.backend.comment.service.CommentQueryService;
+import org.danteplanner.backend.comment.validation.CommentStateValidator;
 import org.danteplanner.backend.moderation.dto.HidePlannerRequest;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
@@ -21,6 +24,7 @@ import org.danteplanner.backend.planner.entity.PlannerModeration;
 import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.entity.StoredPlannerContent;
+import org.danteplanner.backend.planner.service.PlannerModerationTargetAdapter;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.danteplanner.backend.user.entity.User;
@@ -59,7 +63,7 @@ import static org.mockito.Mockito.when;
 /**
  * Every moderator action leaves an audit record, and every declared action type has a producer.
  *
- * <p>The completeness case derives its axis from {@link ModerationAction.ActionType#values()}, so a
+ * <p>The completeness case derives its axis from {@link ModerationActionType#values()}, so a
  * constant added without a case here fails rather than joining the enum unused. That is how
  * {@code PROMOTE} and {@code DEMOTE} went unwritten: they were declared and never reached.</p>
  */
@@ -86,29 +90,29 @@ class ModerationAuditMatrixTest {
     private final UUID plannerId = UUID.randomUUID();
 
     /** Each entry drives one operation and names the record it must leave behind. */
-    private Map<ModerationAction.ActionType, Runnable> auditProducers() {
-        Map<ModerationAction.ActionType, Runnable> producers = new LinkedHashMap<>();
-        producers.put(ModerationAction.ActionType.TIMEOUT,
+    private Map<ModerationActionType, Runnable> auditProducers() {
+        Map<ModerationActionType, Runnable> producers = new LinkedHashMap<>();
+        producers.put(ModerationActionType.TIMEOUT,
                 () -> userModerationService.timeoutUser(ACTOR, TARGET, 60, "spam"));
-        producers.put(ModerationAction.ActionType.CLEAR_TIMEOUT,
+        producers.put(ModerationActionType.CLEAR_TIMEOUT,
                 () -> userModerationService.removeTimeout(ACTOR, TARGET, "appealed"));
-        producers.put(ModerationAction.ActionType.BAN,
+        producers.put(ModerationActionType.BAN,
                 () -> userModerationService.banUser(ACTOR, TARGET, "repeat offender"));
-        producers.put(ModerationAction.ActionType.UNBAN,
+        producers.put(ModerationActionType.UNBAN,
                 () -> userModerationService.unbanUser(ACTOR, TARGET, "appealed"));
-        producers.put(ModerationAction.ActionType.DELETE_PLANNER,
+        producers.put(ModerationActionType.DELETE_PLANNER,
                 () -> plannerModerationService.deletePlanner(ACTOR, plannerId, "off topic"));
-        producers.put(ModerationAction.ActionType.UNPUBLISH_PLANNER,
+        producers.put(ModerationActionType.UNPUBLISH_PLANNER,
                 () -> plannerModerationService.unpublishPlanner(ACTOR, plannerId));
-        producers.put(ModerationAction.ActionType.DELETE_COMMENT,
+        producers.put(ModerationActionType.DELETE_COMMENT,
                 () -> commentModerationService.deleteComment(ACTOR, 10L));
-        producers.put(ModerationAction.ActionType.HIDE_FROM_RECOMMENDED,
+        producers.put(ModerationActionType.HIDE_FROM_RECOMMENDED,
                 () -> plannerModerationService.hideFromRecommended(plannerId, ACTOR, new HidePlannerRequest("misleading")));
-        producers.put(ModerationAction.ActionType.UNHIDE_FROM_RECOMMENDED,
+        producers.put(ModerationActionType.UNHIDE_FROM_RECOMMENDED,
                 () -> plannerModerationService.unhideFromRecommended(plannerId, ACTOR));
-        producers.put(ModerationAction.ActionType.PROMOTE,
+        producers.put(ModerationActionType.PROMOTE,
                 () -> adminService.changeRole(ACTOR, TARGET, UserRole.MODERATOR));
-        producers.put(ModerationAction.ActionType.DEMOTE,
+        producers.put(ModerationActionType.DEMOTE,
                 () -> adminService.changeRole(ACTOR, TARGET, UserRole.NORMAL));
         return producers;
     }
@@ -118,8 +122,12 @@ class ModerationAuditMatrixTest {
         auditService = new ModerationAuditService(moderationActionRepository);
         ModerationPolicy moderationPolicy = new ModerationPolicy();
         userModerationService = new UserModerationService(userService, auditService, eventPublisher, moderationPolicy);
-        plannerModerationService = new PlannerModerationService(plannerPublishingService, auditService);
-        commentModerationService = new CommentModerationService(commentCommandService, commentQueryService, auditService);
+        plannerModerationService = new PlannerModerationService(
+                new PlannerModerationTargetAdapter(plannerPublishingService, null), auditService);
+        commentModerationService = new CommentModerationService(
+                new CommentModerationTargetAdapter(commentQueryService, commentCommandService,
+                        new CommentStateValidator()),
+                auditService);
         adminService = new AdminService(new UsersApiAdapter(userService, null), auditService, moderationPolicy);
 
         User actor = user(ACTOR, UserRole.ADMIN);
@@ -162,8 +170,8 @@ class ModerationAuditMatrixTest {
     @Test
     @DisplayName("no declared action type is left without a producer")
     void actionType_WhenEnumerated_HasAProducer() {
-        Set<ModerationAction.ActionType> covered = auditProducers().keySet();
-        Set<ModerationAction.ActionType> declared = EnumSet.allOf(ModerationAction.ActionType.class);
+        Set<ModerationActionType> covered = auditProducers().keySet();
+        Set<ModerationActionType> declared = EnumSet.allOf(ModerationActionType.class);
 
         assertEquals(declared, EnumSet.copyOf(covered),
                 "an action type with no producer is either an unaudited action or dead weight");

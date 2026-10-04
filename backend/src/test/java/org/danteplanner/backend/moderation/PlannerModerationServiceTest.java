@@ -1,12 +1,14 @@
 package org.danteplanner.backend.moderation;
 
 import org.danteplanner.backend.user.api.AuthProviderType;
+import org.danteplanner.backend.moderation.api.ModeratedPlanner;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 import org.danteplanner.backend.moderation.service.ModerationAuditService;
 import org.danteplanner.backend.moderation.service.PlannerModerationService;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
+import org.danteplanner.backend.planner.service.PlannerModerationTargetAdapter;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
@@ -49,7 +51,8 @@ class PlannerModerationServiceTest {
 
     @BeforeEach
     void setUp() {
-        moderationService = new PlannerModerationService(plannerPublishingService,
+        moderationService = new PlannerModerationService(
+                new PlannerModerationTargetAdapter(plannerPublishingService, null),
                 new ModerationAuditService(moderationActionRepository));
 
         adminUser = User.builder()
@@ -123,10 +126,10 @@ class PlannerModerationServiceTest {
             seamWithdraws(plannerId, planner);
 
             // Act
-            Planner result = moderationService.unpublishPlanner(moderatorUser.getId(), plannerId);
+            ModeratedPlanner result = moderationService.unpublishPlanner(moderatorUser.getId(), plannerId);
 
             // Assert
-            assertFalse(result.isPublished());
+            assertFalse(result.published());
 
             Planner persisted = persistedPlanner();
             assertEquals(plannerId, persisted.getId());
@@ -150,10 +153,10 @@ class PlannerModerationServiceTest {
             seamWithdraws(plannerId, planner);
 
             // Act
-            Planner result = moderationService.unpublishPlanner(adminUser.getId(), plannerId);
+            ModeratedPlanner result = moderationService.unpublishPlanner(adminUser.getId(), plannerId);
 
             // Assert
-            assertFalse(result.isPublished());
+            assertFalse(result.published());
         }
 
         @Test
@@ -173,10 +176,10 @@ class PlannerModerationServiceTest {
             seamWithdraws(plannerId, planner);
 
             // Act
-            Planner result = moderationService.unpublishPlanner(moderatorUser.getId(), plannerId);
+            ModeratedPlanner result = moderationService.unpublishPlanner(moderatorUser.getId(), plannerId);
 
             // Assert
-            assertFalse(result.isPublished());
+            assertFalse(result.published());
         }
 
         @Test

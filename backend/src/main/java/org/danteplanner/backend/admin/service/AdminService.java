@@ -1,5 +1,7 @@
 package org.danteplanner.backend.admin.service;
 
+import org.danteplanner.backend.moderation.api.ModerationActionType;
+import org.danteplanner.backend.moderation.api.ModerationTargetType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.user.api.UserNotFoundException;
@@ -9,9 +11,8 @@ import org.danteplanner.backend.user.api.Users;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import org.danteplanner.backend.moderation.entity.ModerationAction;
-import org.danteplanner.backend.moderation.service.ModerationAuditService;
-import org.danteplanner.backend.moderation.service.ModerationPolicy;
+import org.danteplanner.backend.moderation.api.ModerationAudit;
+import org.danteplanner.backend.moderation.api.RoleChangePolicy;
 
 /**
  * Service for administrative operations.
@@ -22,8 +23,8 @@ import org.danteplanner.backend.moderation.service.ModerationPolicy;
 public class AdminService {
 
     private final Users users;
-    private final ModerationAuditService auditService;
-    private final ModerationPolicy moderationPolicy;
+    private final ModerationAudit auditService;
+    private final RoleChangePolicy moderationPolicy;
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public UserSummary changeRole(Long actorId, Long targetId, UserRole newRole) {
@@ -43,8 +44,8 @@ public class AdminService {
 
         boolean demotion = oldRole.outranks(newRole);
         auditService.record(actorId, target.publicId().toString(),
-                demotion ? ModerationAction.ActionType.DEMOTE : ModerationAction.ActionType.PROMOTE,
-                ModerationAction.TargetType.USER, oldRole + " -> " + newRole);
+                demotion ? ModerationActionType.DEMOTE : ModerationActionType.PROMOTE,
+                ModerationTargetType.USER, oldRole + " -> " + newRole);
 
         if (demotion) {
             log.info("User {} demoted from {} to {} by admin {}", targetId, oldRole, newRole, actorId);

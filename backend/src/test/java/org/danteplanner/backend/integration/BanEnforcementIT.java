@@ -1,5 +1,6 @@
 package org.danteplanner.backend.integration;
 
+import org.danteplanner.backend.moderation.api.ModerationActionType;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.config.TestConfig;
@@ -184,8 +185,8 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
                 .filter(action -> regularUser.getPublicId().toString().equals(action.getTargetUuid()))
                 .toList();
         assertEquals(2, actions.size());
-        assertTrue(actions.stream().anyMatch(a -> a.getActionType() == ModerationAction.ActionType.BAN));
-        assertTrue(actions.stream().anyMatch(a -> a.getActionType() == ModerationAction.ActionType.UNBAN));
+        assertTrue(actions.stream().anyMatch(a -> a.getActionType() == ModerationActionType.BAN));
+        assertTrue(actions.stream().anyMatch(a -> a.getActionType() == ModerationActionType.UNBAN));
     }
 
     @Test
@@ -202,7 +203,7 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
         assertEquals(1, actions.size());
 
         ModerationAction action = actions.get(0);
-        assertEquals(ModerationAction.ActionType.BAN, action.getActionType());
+        assertEquals(ModerationActionType.BAN, action.getActionType());
         assertEquals(adminUser.getId(), action.getActorId());
         assertEquals(regularUser.getPublicId().toString(), action.getTargetUuid());
         assertEquals("Test reason", action.getReason());
@@ -226,13 +227,13 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
         assertEquals(2, actions.size());
 
         ModerationAction banAction = actions.stream()
-                .filter(a -> a.getActionType() == ModerationAction.ActionType.BAN)
+                .filter(a -> a.getActionType() == ModerationActionType.BAN)
                 .findFirst()
                 .orElseThrow();
         assertEquals("Test ban", banAction.getReason());
 
         ModerationAction unbanAction = actions.stream()
-                .filter(a -> a.getActionType() == ModerationAction.ActionType.UNBAN)
+                .filter(a -> a.getActionType() == ModerationActionType.UNBAN)
                 .findFirst()
                 .orElseThrow();
         assertNotNull(unbanAction.getCreatedAt());

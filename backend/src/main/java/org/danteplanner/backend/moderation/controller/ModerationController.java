@@ -10,11 +10,11 @@ import org.danteplanner.backend.moderation.dto.BanRequest;
 import org.danteplanner.backend.moderation.dto.BanStatusResponse;
 import org.danteplanner.backend.moderation.dto.ModeratedUserResponse;
 import org.danteplanner.backend.moderation.dto.ModerationActionResponse;
-import org.danteplanner.backend.moderation.dto.PlannerActionResponse;
+import org.danteplanner.backend.moderation.api.ModeratedPlanner;
+import org.danteplanner.backend.moderation.api.dto.PlannerActionResponse;
 import org.danteplanner.backend.moderation.dto.TimeoutRequest;
 import org.danteplanner.backend.moderation.dto.TimeoutResponse;
 import org.danteplanner.backend.moderation.dto.UnpublishPlannerResponse;
-import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.user.api.UserSummary;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.moderation.service.CommentModerationService;
@@ -86,9 +86,9 @@ public class ModerationController {
 
         log.info("Moderator {} unpublishing planner {}", actorId, plannerId);
 
-        Planner planner = plannerModerationService.unpublishPlanner(actorId, plannerId);
+        ModeratedPlanner planner = plannerModerationService.unpublishPlanner(actorId, plannerId);
         return ResponseEntity.ok(new UnpublishPlannerResponse(
-                planner.getId(), planner.isPublished(), "Planner unpublished successfully"));
+                planner.id(), planner.published(), "Planner unpublished successfully"));
     }
 
     @PostMapping("/user/{usernameSuffix}/ban")

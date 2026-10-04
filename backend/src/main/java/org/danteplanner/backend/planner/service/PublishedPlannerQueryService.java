@@ -1,7 +1,7 @@
 package org.danteplanner.backend.planner.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.moderation.service.PlannerReportService;
+import org.danteplanner.backend.moderation.api.PlannerReports;
 import org.danteplanner.backend.planner.dto.CatalogQuery;
 import org.danteplanner.backend.planner.dto.PlannerCoreInfo;
 import org.danteplanner.backend.planner.dto.PlannerFlagsResponse;
@@ -55,7 +55,7 @@ public class PublishedPlannerQueryService {
     private final PlannerCatalogRepository catalogRepository;
     private final PlannerVoteRepository plannerVoteRepository;
     private final PlannerSubscriptionService subscriptionService;
-    private final PlannerReportService reportService;
+    private final PlannerReports reportService;
     private final PlannerViewRecorder plannerViewRecorder;
     private final RedisViewRecorder redisViewRecorder;
     private final PlannerStatsRepository plannerStatsRepository;
@@ -67,7 +67,7 @@ public class PublishedPlannerQueryService {
             PlannerCatalogRepository catalogRepository,
             PlannerVoteRepository plannerVoteRepository,
             PlannerSubscriptionService subscriptionService,
-            PlannerReportService reportService,
+            PlannerReports reportService,
             PlannerViewRecorder plannerViewRecorder,
             RedisViewRecorder redisViewRecorder,
             PlannerStatsRepository plannerStatsRepository,

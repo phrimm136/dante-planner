@@ -3,6 +3,7 @@ package org.danteplanner.backend.service;
 import org.danteplanner.backend.moderation.service.PlannerReportService;
 import org.danteplanner.backend.user.service.UsersApiAdapter;
 import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator;
+import org.danteplanner.backend.moderation.validation.ReporterStandingValidator;
 import org.danteplanner.backend.moderation.entity.PlannerReport;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
@@ -25,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
+import org.danteplanner.backend.planner.service.PlannerModerationTargetAdapter;
 import org.danteplanner.backend.user.service.UserService;
 
 /**
@@ -51,8 +53,11 @@ class PlannerReportServiceTest {
 
     @BeforeEach
     void setUp() {
+        UsersApiAdapter users = new UsersApiAdapter(userService, null);
         reportService = new PlannerReportService(reportRepository,
-                new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository),
+                new ReporterStandingValidator(users),
+                new PlannerModerationTargetAdapter(null,
+                        new PlannerAccessGuard(userService, users, plannerRepository)),
                 new ReportUniquenessValidator());
 
         testUser = TestDataFactory.unsavedUser(1L);
@@ -80,13 +85,9 @@ class PlannerReportServiceTest {
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            PlannerReport result = reportService.createReport(testUser.getId(), plannerId);
+            reportService.createReport(testUser.getId(), plannerId);
 
             // Assert
-            assertNotNull(result);
-            assertEquals(testUser.getId(), result.getUserId());
-            assertEquals(plannerId, result.getPlannerId());
-
             ArgumentCaptor<PlannerReport> captor = ArgumentCaptor.forClass(PlannerReport.class);
             verify(reportRepository).insert(captor.capture());
             assertEquals(testUser.getId(), captor.getValue().getUserId());

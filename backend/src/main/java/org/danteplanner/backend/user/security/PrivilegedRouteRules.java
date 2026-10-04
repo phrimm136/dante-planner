@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionException;
 import org.springframework.web.ErrorResponseException;
 
-import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
 import org.danteplanner.backend.shared.exception.DegradationErrorConstants;
 import org.danteplanner.backend.shared.exception.DomainException;
 import org.danteplanner.backend.shared.exception.Problems;
@@ -28,6 +27,7 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.UserBannedException;
 import org.danteplanner.backend.user.api.UserTimedOutException;
+import org.danteplanner.backend.user.exception.UserForbiddenException;
 import org.danteplanner.backend.user.service.UserService;
 
 @Component
@@ -101,6 +101,6 @@ public class PrivilegedRouteRules implements SecurityRuleContribution {
     }
 
     private static DomainException belowRole(UserRole minimum) {
-        return new ModerationForbiddenException("Only %s can access this route".formatted(ROLE_PLURAL.get(minimum)));
+        return new UserForbiddenException("Only %s can access this route".formatted(ROLE_PLURAL.get(minimum)));
     }
 }

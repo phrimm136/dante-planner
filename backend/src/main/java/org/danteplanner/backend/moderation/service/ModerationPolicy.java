@@ -1,6 +1,7 @@
 package org.danteplanner.backend.moderation.service;
 
-import org.danteplanner.backend.moderation.entity.ModerationAction;
+import org.danteplanner.backend.moderation.api.ModerationActionType;
+import org.danteplanner.backend.moderation.api.RoleChangePolicy;
 import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
@@ -11,18 +12,18 @@ import org.springframework.util.Assert;
 import java.util.Map;
 
 @Service
-public class ModerationPolicy {
+public class ModerationPolicy implements RoleChangePolicy {
 
     private record Authority(UserRole minimumActorRole, String power, String verb) {}
 
-    private static final Map<ModerationAction.ActionType, Authority> AUTHORITIES = Map.of(
-            ModerationAction.ActionType.TIMEOUT,
+    private static final Map<ModerationActionType, Authority> AUTHORITIES = Map.of(
+            ModerationActionType.TIMEOUT,
             new Authority(UserRole.MODERATOR, "timeout users", "timeout"),
-            ModerationAction.ActionType.CLEAR_TIMEOUT,
+            ModerationActionType.CLEAR_TIMEOUT,
             new Authority(UserRole.MODERATOR, "clear timeouts", "clear the timeout of"),
-            ModerationAction.ActionType.BAN,
+            ModerationActionType.BAN,
             new Authority(UserRole.ADMIN, "ban users", "ban"),
-            ModerationAction.ActionType.UNBAN,
+            ModerationActionType.UNBAN,
             new Authority(UserRole.ADMIN, "unban users", "unban"));
 
     private static final Map<UserRole, String> ROLE_PLURAL = Map.of(
@@ -30,7 +31,7 @@ public class ModerationPolicy {
             UserRole.MODERATOR, "moderators",
             UserRole.ADMIN, "administrators");
 
-    public void requireCanRestrict(User actor, User target, ModerationAction.ActionType action) {
+    public void requireCanRestrict(User actor, User target, ModerationActionType action) {
         Authority authority = AUTHORITIES.get(action);
         Assert.notNull(authority, () -> "Not an account restriction: " + action);
 
@@ -45,16 +46,19 @@ public class ModerationPolicy {
         }
     }
 
+    @Override
     public boolean demotesAnAdministrator(UserRole currentRole, UserRole newRole) {
         return currentRole == UserRole.ADMIN && newRole != UserRole.ADMIN;
     }
 
+    @Override
     public void requireAnotherAdministratorRemains(long administratorCount) {
         if (administratorCount <= 1) {
             throw new ModerationForbiddenException("Cannot demote the last administrator");
         }
     }
 
+    @Override
     public void requireCanChangeRole(UserSummary actor, UserSummary target, UserRole newRole) {
         if (newRole.outranks(actor.role())) {
             throw new ModerationForbiddenException("Cannot grant role higher than your own");

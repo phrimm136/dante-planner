@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 
 import { ModerationActionSchema, ModerationActionTypeSchema } from '../ModeratorSchemas'
 
-/** Transcribed from backend `ModerationAction.ActionType`, in declaration order. */
+/** Transcribed from backend `moderation.api.ModerationActionType`, in declaration order. */
 const BACKEND_ACTION_TYPES = [
   'BAN',
   'UNBAN',
