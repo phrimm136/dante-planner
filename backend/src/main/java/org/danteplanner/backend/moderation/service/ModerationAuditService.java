@@ -6,6 +6,7 @@ import org.danteplanner.backend.moderation.api.ModerationTargetType;
 import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
+import org.danteplanner.backend.user.api.RestrictionReasonProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,7 +18,7 @@ import java.util.UUID;
  */
 @Service
 @RequiredArgsConstructor
-public class ModerationAuditService implements ModerationAudit {
+public class ModerationAuditService implements ModerationAudit, RestrictionReasonProvider {
 
     private final ModerationActionRepository moderationActionRepository;
 

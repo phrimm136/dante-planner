@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
+import org.danteplanner.backend.user.api.AccountLifecycleParticipant;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,13 +14,14 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @RequiredArgsConstructor
-public class CommentAccountPurgeService {
+public class CommentAccountPurgeService implements AccountLifecycleParticipant {
 
     private final PlannerCommentRepository plannerCommentRepository;
     private final PlannerCommentVoteRepository plannerCommentVoteRepository;
 
+    @Override
     @Transactional(propagation = Propagation.MANDATORY)
-    public void reassignAuthorshipToSentinel(Long userId, Long sentinelId) {
+    public void reassignToSentinel(Long userId, Long sentinelId) {
         plannerCommentVoteRepository.deleteVotesCollidingWithSentinel(userId, sentinelId);
         plannerCommentVoteRepository.reassignUserVotes(userId, sentinelId);
         plannerCommentRepository.anonymizeCommentsToSentinel(userId, sentinelId);

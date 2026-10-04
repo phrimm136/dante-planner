@@ -3,8 +3,6 @@ package org.danteplanner.backend.shared.sse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.user.entity.UserSettings;
-import org.danteplanner.backend.user.service.UserSettingsService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -29,35 +27,21 @@ public class SseService extends AbstractSseService<Long> {
     private static final long SETTINGS_CACHE_MAX_ENTRIES = 10_000;
 
     private final ObjectMapper objectMapper;
-    private final UserSettingsService userSettingsService;
+    private final NotificationPreferenceProvider preferenceProvider;
 
     public SseService(
             ObjectMapper objectMapper,
-            UserSettingsService userSettingsService,
+            NotificationPreferenceProvider preferenceProvider,
             @Qualifier(SseHeartbeatWorkerConfig.SSE_HEARTBEAT_WORKER) TaskExecutor heartbeatWorker) {
         super(heartbeatWorker);
         this.objectMapper = objectMapper;
-        this.userSettingsService = userSettingsService;
+        this.preferenceProvider = preferenceProvider;
     }
 
-    private final Cache<Long, CachedSettings> settingsCache = Caffeine.newBuilder()
+    private final Cache<Long, NotificationPreferenceProvider.Preferences> settingsCache = Caffeine.newBuilder()
             .expireAfterWrite(SETTINGS_CACHE_TTL)
             .maximumSize(SETTINGS_CACHE_MAX_ENTRIES)
             .build();
-
-    private record CachedSettings(
-            boolean notifyComments,
-            boolean notifyRecommendations,
-            boolean notifyNewPublications
-    ) {
-        static CachedSettings from(UserSettings settings) {
-            return new CachedSettings(
-                    settings.isNotifyComments(),
-                    settings.isNotifyRecommendations(),
-                    settings.isNotifyNewPublications()
-            );
-        }
-    }
 
     public SseEmitter subscribe(Long userId, UUID deviceId) throws IOException {
         SseEmitter emitter = register(userId, deviceId);
@@ -194,7 +178,7 @@ public class SseService extends AbstractSseService<Long> {
             return false;
         }
 
-        CachedSettings settings = cacheSettingsIfAbsent(userId);
+        NotificationPreferenceProvider.Preferences settings = cacheSettingsIfAbsent(userId);
 
         return switch (type) {
             case NOTIFY_COMMENT -> settings.notifyComments();
@@ -204,10 +188,7 @@ public class SseService extends AbstractSseService<Long> {
         };
     }
 
-    private CachedSettings cacheSettingsIfAbsent(Long userId) {
-        return settingsCache.get(userId, id -> {
-            UserSettings settings = userSettingsService.getOrCreateEntity(id);
-            return CachedSettings.from(settings);
-        });
+    private NotificationPreferenceProvider.Preferences cacheSettingsIfAbsent(Long userId) {
+        return settingsCache.get(userId, preferenceProvider::preferencesOf);
     }
 }

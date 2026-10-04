@@ -1,6 +1,7 @@
 package org.danteplanner.backend.exception;
 
 import org.danteplanner.backend.auth.exception.SessionRevokedException;
+import org.danteplanner.backend.auth.security.SessionRevokedExceptionAdvice;
 import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 import org.danteplanner.backend.shared.exception.StreamLifecycleExceptionAdvice;
@@ -107,8 +108,10 @@ class ApiExceptionHandlerEventStreamTest {
     @BeforeEach
     void setUp() {
         cookieUtils = mock(CookieUtils.class);
+        ApiExceptionHandler apiExceptionHandler = new ApiExceptionHandler();
         mockMvc = standaloneSetup(new EventStreamThrowingController())
-                .setControllerAdvice(new ApiExceptionHandler(cookieUtils), new StreamLifecycleExceptionAdvice())
+                .setControllerAdvice(apiExceptionHandler, new StreamLifecycleExceptionAdvice(),
+                        new SessionRevokedExceptionAdvice(cookieUtils, apiExceptionHandler))
                 .build();
     }
 

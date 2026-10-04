@@ -2,6 +2,7 @@ package org.danteplanner.backend.architecture;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -58,9 +59,11 @@ class SecurityChainFilterRegistrationTest {
                 .isNotEmpty();
 
         Set<String> doubleRegistered = new TreeSet<>();
-        for (Class<?> filter : chainFilters) {
-            if (filter.isAnnotationPresent(Component.class) && !isDisabledForTheContainer(filter)) {
-                doubleRegistered.add(filter.getName());
+        for (Class<?> declared : chainFilters) {
+            for (Class<?> filter : componentsOf(declared)) {
+                if (!isDisabledForTheContainer(filter, declared)) {
+                    doubleRegistered.add(filter.getName());
+                }
             }
         }
 
@@ -86,14 +89,26 @@ class SecurityChainFilterRegistrationTest {
         return filters;
     }
 
-    private static boolean isDisabledForTheContainer(Class<?> filter) {
+    private static List<Class<?>> componentsOf(Class<?> declared) {
+        if (!Modifier.isAbstract(declared.getModifiers())) {
+            return declared.isAnnotationPresent(Component.class) ? List.of(declared) : List.of();
+        }
+        return MAIN_CLASSES.stream()
+                .filter(javaClass -> javaClass.isAssignableTo(declared))
+                .map(JavaClass::reflect)
+                .filter(type -> !Modifier.isAbstract(type.getModifiers()))
+                .filter(type -> type.isAnnotationPresent(Component.class))
+                .toList();
+    }
+
+    private static boolean isDisabledForTheContainer(Class<?> filter, Class<?> declared) {
         return MAIN_CLASSES.stream()
                 .filter(javaClass -> javaClass.isAnnotatedWith(Configuration.class))
                 .map(JavaClass::reflect)
                 .flatMap(configuration -> Arrays.stream(configuration.getDeclaredMethods()))
                 .filter(method -> method.isAnnotationPresent(Bean.class))
                 .filter(method -> FilterRegistrationBean.class.isAssignableFrom(method.getReturnType()))
-                .filter(method -> registeredFilter(method) == filter)
+                .filter(method -> registeredFilter(method) == filter || registeredFilter(method) == declared)
                 .anyMatch(method -> !invoke(method).isEnabled());
     }
 

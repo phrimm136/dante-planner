@@ -22,8 +22,8 @@ class CommentAccountPurgeServiceTest {
     @InjectMocks private CommentAccountPurgeService purgeService;
 
     @Test
-    void reassignAuthorshipToSentinel_WhenSentinelAlreadyVoted_DeletesCollisionsFirst() {
-        purgeService.reassignAuthorshipToSentinel(USER_ID, SENTINEL_ID);
+    void reassignToSentinel_WhenSentinelAlreadyVoted_DeletesCollisionsFirst() {
+        purgeService.reassignToSentinel(USER_ID, SENTINEL_ID);
 
         // Reassigning a vote the sentinel already cast on the same comment would duplicate the
         // composite key, so the collision has to be dropped before the reassignment runs.

@@ -7,6 +7,7 @@ import org.danteplanner.backend.auth.controller.AuthController;
 import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
 import org.danteplanner.backend.auth.oauth.OAuthStateService;
 import org.danteplanner.backend.auth.service.AuthenticationService;
+import org.danteplanner.backend.auth.service.SessionRevocationService;
 import org.danteplanner.backend.auth.token.TokenValidator;
 import org.danteplanner.backend.shared.config.DeviceIdResolver;
 import org.danteplanner.backend.shared.config.FrontendProperties;
@@ -63,6 +64,7 @@ class RateLimitedOAuthCallbackIsDistinguishableTest {
 
         AuthController authController = new AuthController(
                 mock(AuthenticationService.class),
+                mock(SessionRevocationService.class),
                 mock(TokenValidator.class),
                 mock(OAuthProperties.class),
                 new CookieUtils(false, "", "Lax"),

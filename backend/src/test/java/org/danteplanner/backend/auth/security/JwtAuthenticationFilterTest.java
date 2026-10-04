@@ -1,4 +1,6 @@
-package org.danteplanner.backend.shared.security;
+package org.danteplanner.backend.auth.security;
+
+import org.danteplanner.backend.shared.security.AuthDegradationResponder;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletResponse;
@@ -6,7 +8,8 @@ import org.danteplanner.backend.shared.config.LineageRotationFlag;
 import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
-import org.danteplanner.backend.user.service.UserService;
+import org.danteplanner.backend.user.api.Users;
+import org.danteplanner.backend.user.service.UsersApiAdapter;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.auth.token.TokenGenerator;
@@ -55,7 +58,7 @@ import org.danteplanner.backend.auth.token.RefreshRotationService;
  * Unit tests for JwtAuthenticationFilter.
  *
  * <p>The filter authenticates from token claims alone (no per-request DB lookup): a valid
- * token authenticates without touching {@code UserService}; deleted/demoted users are rejected
+ * token authenticates without touching {@code Users}; deleted/demoted users are rejected
  * via the in-memory {@code isUserTokenInvalidated} check; and a DB outage during the refresh
  * path returns 503 rather than a 500 or a silent guest downgrade.</p>
  */
@@ -78,7 +81,7 @@ class JwtAuthenticationFilterTest {
     private CookieUtils cookieUtils;
 
     @Mock
-    private UserService userService;
+    private Users users;
 
     @Mock
     private TokenGenerator tokenGenerator;
@@ -101,7 +104,7 @@ class JwtAuthenticationFilterTest {
     void setUp() {
         objectMapper = Jackson2ObjectMapperBuilder.json().build();
         filter = new JwtAuthenticationFilter(tokenValidator, tokenBlacklistService,
-                new AccessTokenAuthenticator(tokenValidator, tokenBlacklistService), cookieUtils, userService, new AuthDegradationResponder(new ProblemWriter(objectMapper)), tokenGenerator, refreshRotationService, new LineageRotationFlag(false), new JwtProperties());
+                new AccessTokenAuthenticator(tokenValidator, tokenBlacklistService), cookieUtils, users, new AuthDegradationResponder(new ProblemWriter(objectMapper)), tokenGenerator, refreshRotationService, new LineageRotationFlag(false), new JwtProperties());
         SecurityContextHolder.clearContext();
         request = new MockHttpServletRequest("GET", "/test");
         response = new MockHttpServletResponse();
@@ -189,8 +192,8 @@ class JwtAuthenticationFilterTest {
             assertEquals(userId, SecurityContextHolder.getContext().getAuthentication().getPrincipal());
             assertEquals(List.of("ROLE_" + UserRole.NORMAL.getValue()), grantedAuthorities());
             // The hot path must not touch the DB (keeps auth alive during DB maintenance)
-            verify(userService, never()).findActiveById(any());
-            verify(userService, never()).findById(any());
+            verify(users, never()).findActiveById(any());
+            verify(users, never()).findById(any());
         }
     }
 
@@ -215,7 +218,7 @@ class JwtAuthenticationFilterTest {
             verify(filterChain).doFilter(request, response);
             assertNull(SecurityContextHolder.getContext().getAuthentication(),
                     "Invalidated user must not be authenticated");
-            verify(userService, never()).findActiveById(any());
+            verify(users, never()).findActiveById(any());
         }
     }
 
@@ -237,7 +240,7 @@ class JwtAuthenticationFilterTest {
 
             verify(filterChain).doFilter(request, response);
             assertNull(SecurityContextHolder.getContext().getAuthentication());
-            verify(userService, never()).findActiveById(any());
+            verify(users, never()).findActiveById(any());
         }
     }
 
@@ -275,7 +278,7 @@ class JwtAuthenticationFilterTest {
             lenient().when(tokenValidator.validateAccessToken(expiredToken))
                     .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.EXPIRED));
             lenient().when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(createRefreshClaims(userId));
-            when(userService.findActiveById(userId))
+            when(users.findActiveById(userId))
                     .thenThrow(new DataAccessResourceFailureException("DB unreachable"));
 
             filter.doFilterInternal(request, response, filterChain);
@@ -297,7 +300,7 @@ class JwtAuthenticationFilterTest {
             when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(Optional.empty());
             when(cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)).thenReturn(Optional.of(refreshToken));
             lenient().when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(createRefreshClaims(userId));
-            when(userService.findActiveById(userId))
+            when(users.findActiveById(userId))
                     .thenThrow(new DataAccessResourceFailureException("DB unreachable"));
 
             filter.doFilterInternal(request, response, filterChain);
@@ -321,7 +324,7 @@ class JwtAuthenticationFilterTest {
             lenient().when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(createRefreshClaims(userId));
             // findActiveById is @Transactional; a DB-down failure surfaces at transaction-begin
             // as CannotCreateTransactionException, NOT DataAccessResourceFailureException.
-            when(userService.findActiveById(userId))
+            when(users.findActiveById(userId))
                     .thenThrow(new CannotCreateTransactionException("Could not open JPA EntityManager for transaction"));
 
             filter.doFilterInternal(request, response, filterChain);
@@ -343,7 +346,7 @@ class JwtAuthenticationFilterTest {
             lenient().when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(createRefreshClaims(userId));
             when(tokenBlacklistService.isBlacklisted(refreshToken)).thenReturn(false);
             when(tokenBlacklistService.isUserTokenInvalidated(eq(userId), anyLong())).thenReturn(false);
-            when(userService.findActiveById(userId)).thenReturn(Optional.of(user));
+            when(users.findActiveById(userId)).thenReturn(Optional.of(UsersApiAdapter.toSummary(user)));
             doThrow(new org.springframework.data.redis.RedisConnectionFailureException("auth redis down"))
                     .when(tokenBlacklistService).blacklistTokenForRotation(eq(refreshToken), any());
 
@@ -370,7 +373,7 @@ class JwtAuthenticationFilterTest {
             lenient().when(tokenValidator.validateAccessToken(expiredToken))
                     .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.EXPIRED));
             lenient().when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(createRefreshClaims(userId));
-            when(userService.findActiveById(userId))
+            when(users.findActiveById(userId))
                     .thenThrow(new DataAccessResourceFailureException("DB unreachable"));
 
             filter.doFilterInternal(request, response, filterChain);

@@ -4,7 +4,6 @@ import io.sentry.Sentry;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.catalina.connector.ClientAbortException;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
-import org.danteplanner.backend.shared.util.CookieUtils;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.junit.jupiter.api.Test;
@@ -55,7 +54,7 @@ class ApiExceptionHandlerSseDisconnectTest {
     }
 
     private static void handle(IOException ex) {
-        new ApiExceptionHandler(mock(CookieUtils.class))
+        new ApiExceptionHandler()
                 .handleIOException(ex, mock(HttpServletResponse.class), webRequest());
     }
 

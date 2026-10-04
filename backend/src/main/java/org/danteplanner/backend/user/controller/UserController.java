@@ -5,7 +5,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.shared.config.EpithetConfig;
-import org.danteplanner.backend.user.dto.UserResponse;
+import org.danteplanner.backend.user.api.SessionEndHandler;
+import org.danteplanner.backend.user.api.dto.UserResponse;
 import org.danteplanner.backend.user.dto.EpithetListResponse;
 import org.danteplanner.backend.user.dto.UpdateUsernameEpithetRequest;
 import org.danteplanner.backend.user.dto.UpdateUserSettingsRequest;
@@ -14,7 +15,6 @@ import org.danteplanner.backend.user.dto.UserSettingsResponse;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.danteplanner.backend.user.service.UserService;
-import org.danteplanner.backend.user.service.UserSessionService;
 import org.danteplanner.backend.user.service.UserSettingsService;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.shared.util.CookieConstants;
@@ -42,7 +42,7 @@ public class UserController {
     private final UserSettingsService userSettingsService;
     private final SsePublisher ssePublisher;
     private final EpithetConfig epithetConfig;
-    private final UserSessionService userSessionService;
+    private final SessionEndHandler sessionEndHandler;
     private final CookieUtils cookieUtils;
     private final int gracePeriodDays;
 
@@ -52,7 +52,7 @@ public class UserController {
             UserSettingsService userSettingsService,
             SsePublisher ssePublisher,
             EpithetConfig epithetConfig,
-            UserSessionService userSessionService,
+            SessionEndHandler sessionEndHandler,
             CookieUtils cookieUtils,
             @Value("${app.user.deletion.grace-period-days:30}") int gracePeriodDays) {
         this.lifecycleService = lifecycleService;
@@ -60,7 +60,7 @@ public class UserController {
         this.userSettingsService = userSettingsService;
         this.ssePublisher = ssePublisher;
         this.epithetConfig = epithetConfig;
-        this.userSessionService = userSessionService;
+        this.sessionEndHandler = sessionEndHandler;
         this.cookieUtils = cookieUtils;
         this.gracePeriodDays = gracePeriodDays;
     }
@@ -93,7 +93,7 @@ public class UserController {
                 .orElse(null);
         String refreshToken = cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)
                 .orElse(null);
-        userSessionService.logout(accessToken, refreshToken);
+        sessionEndHandler.endSession(accessToken, refreshToken);
         cookieUtils.clearAuthCookies(response);
 
         return ResponseEntity.ok(new UserDeletionResponse(

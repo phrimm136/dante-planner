@@ -4,7 +4,6 @@ import io.sentry.Sentry;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 import org.danteplanner.backend.shared.exception.Problems;
 import org.danteplanner.backend.shared.exception.KnownConstraint;
-import org.danteplanner.backend.shared.util.CookieUtils;
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,7 +29,6 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 
@@ -203,7 +201,7 @@ class ApiExceptionHandlerConstraintMappingTest {
     }
 
     private static ResponseEntity<Object> handle(DataIntegrityViolationException ex) {
-        return new ApiExceptionHandler(mock(CookieUtils.class))
+        return new ApiExceptionHandler()
                 .handleDataIntegrityViolation(ex, new ServletWebRequest(new MockHttpServletRequest()));
     }
 

@@ -99,11 +99,11 @@ class PlannerCatalogServiceTest {
 
     @Test
     @DisplayName("hiding an owner's planners withdraws their rows, records one event each, and marks them after the commit")
-    void hideAllOwnedBy_WhenCommitted_WithdrawsRecordsAnEventPerPlannerAndMarksThem() {
+    void accountDeactivated_WhenCommitted_WithdrawsRecordsAnEventPerPlannerAndMarksThem() {
         List<UUID> published = List.of(UUID.randomUUID(), UUID.randomUUID());
         when(plannerRepository.findPublishedIdsOwnedBy(OWNER_ID)).thenReturn(published);
 
-        catalogService.hideAllOwnedBy(OWNER_ID);
+        catalogService.accountDeactivated(OWNER_ID);
 
         verify(catalogRepository).withdrawAllOwnedBy(OWNER_ID);
         published.forEach(this::verifyRecorded);
@@ -114,11 +114,11 @@ class PlannerCatalogServiceTest {
 
     @Test
     @DisplayName("restoring an owner's planners restores their rows and records one event per published planner")
-    void restoreAllOwnedBy_WhenCalled_RestoresAndRecordsAnEventPerPublishedPlanner() {
+    void accountReactivated_WhenCalled_RestoresAndRecordsAnEventPerPublishedPlanner() {
         List<UUID> published = List.of(UUID.randomUUID(), UUID.randomUUID());
         when(plannerRepository.findPublishedIdsOwnedBy(OWNER_ID)).thenReturn(published);
 
-        catalogService.restoreAllOwnedBy(OWNER_ID);
+        catalogService.accountReactivated(OWNER_ID);
 
         verify(catalogRepository).restoreAllOwnedBy(OWNER_ID, THRESHOLD);
         published.forEach(this::verifyRecorded);

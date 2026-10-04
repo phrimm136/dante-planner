@@ -9,7 +9,7 @@ import org.danteplanner.backend.user.dto.UpdateUserSettingsRequest;
 import org.danteplanner.backend.user.dto.UserDeletionResponse;
 import org.danteplanner.backend.user.dto.UserSettingsResponse;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
-import org.danteplanner.backend.user.service.UserSessionService;
+import org.danteplanner.backend.user.api.SessionEndHandler;
 import org.danteplanner.backend.user.service.UserSettingsService;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
@@ -59,7 +59,7 @@ class UserControllerTest {
     private SsePublisher ssePublisher;
 
     @Mock
-    private UserSessionService userSessionService;
+    private SessionEndHandler sessionEndHandler;
 
     /**
      * Real, so the auth cookies the controller clears are inspectable state on the response.
@@ -84,7 +84,7 @@ class UserControllerTest {
 
     private UserController controllerWithGracePeriod(int gracePeriodDays) {
         return new UserController(lifecycleService, userService, userSettingsService, ssePublisher,
-                epithetConfig, userSessionService, cookieUtils, gracePeriodDays);
+                epithetConfig, sessionEndHandler, cookieUtils, gracePeriodDays);
     }
 
     @Nested
@@ -140,7 +140,7 @@ class UserControllerTest {
             // Blacklisting lands in Redis and has no response-visible form; asserting it as state
             // needs the containerized tier with a live TokenBlacklistService. The arguments prove
             // both tokens were read from their own cookies.
-            verify(userSessionService).logout(TEST_ACCESS_TOKEN, TEST_REFRESH_TOKEN);
+            verify(sessionEndHandler).endSession(TEST_ACCESS_TOKEN, TEST_REFRESH_TOKEN);
         }
 
         @Test

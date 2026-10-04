@@ -1,8 +1,8 @@
-package org.danteplanner.backend.shared.config;
+package org.danteplanner.backend.user.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.user.service.UserAccountLifecycleService;
+import org.danteplanner.backend.user.api.Users;
 import org.danteplanner.backend.user.service.UserService;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Profile("!test & !it") // Skip verification in test environments (TestDataInitializer handles it)
 public class SentinelUserVerifier implements ApplicationRunner {
 
-    private static final Long SENTINEL_USER_ID = UserAccountLifecycleService.SENTINEL_USER_ID;
+    private static final Long SENTINEL_USER_ID = Users.SENTINEL_USER_ID;
 
     private final UserService userService;
 

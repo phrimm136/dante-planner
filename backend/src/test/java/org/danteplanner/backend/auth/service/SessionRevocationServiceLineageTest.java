@@ -1,17 +1,12 @@
 package org.danteplanner.backend.auth.service;
 
 import org.danteplanner.backend.user.api.AuthProviderType;
-import org.danteplanner.backend.user.service.UsersApiAdapter;
 import org.danteplanner.backend.shared.config.LineageRotationFlag;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
-import org.danteplanner.backend.user.service.UserAccountLifecycleService;
-import org.danteplanner.backend.user.service.UserService;
-import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
 import org.danteplanner.backend.auth.token.LogoutRevocation;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.auth.token.TokenClaims;
-import org.danteplanner.backend.auth.token.TokenGenerator;
 import org.danteplanner.backend.auth.token.TokenValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,19 +22,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * {@link AuthenticationService} logout with {@code jwt.rotation.lineage-enabled} turned on.
+ * {@link SessionRevocationService} logout with {@code jwt.rotation.lineage-enabled} turned on.
  *
  * <p>Logout revokes the current refresh-token family and still blacklists the access token
  * immediately, so neither half of the pair outlives the session.</p>
  */
 @ExtendWith(MockitoExtension.class)
-class AuthenticationServiceLineageTest {
-
-    @Mock
-    private OAuthProviderRegistry providerRegistry;
-
-    @Mock
-    private TokenGenerator tokenGenerator;
+class SessionRevocationServiceLineageTest {
 
     @Mock
     private TokenValidator tokenValidator;
@@ -47,21 +36,12 @@ class AuthenticationServiceLineageTest {
     @Mock
     private TokenBlacklistService tokenBlacklistService;
 
-    @Mock
-    private UserService userService;
-
-    @Mock
-    private UserAccountLifecycleService lifecycleService;
-
-
-    private AuthenticationService facade;
+    private SessionRevocationService facade;
     private User testUser;
 
     @BeforeEach
     void setUp() {
-        facade = new AuthenticationService(
-                providerRegistry, tokenGenerator, tokenValidator, tokenBlacklistService,
-                userService, new UsersApiAdapter(userService, lifecycleService), new LineageRotationFlag(true));
+        facade = new SessionRevocationService(tokenValidator, tokenBlacklistService, new LineageRotationFlag(true));
 
         testUser = User.builder()
                 .id(123L)

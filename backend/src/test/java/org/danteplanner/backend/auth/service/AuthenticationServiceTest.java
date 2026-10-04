@@ -2,22 +2,16 @@ package org.danteplanner.backend.auth.service;
 
 import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.user.service.UsersApiAdapter;
-import org.danteplanner.backend.shared.config.LineageRotationFlag;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
-import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.auth.oauth.OAuthProvider;
 import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
 import org.danteplanner.backend.auth.oauth.OAuthTokens;
 import org.danteplanner.backend.auth.oauth.OAuthUserInfo;
-import org.danteplanner.backend.auth.token.LogoutRevocation;
-import org.danteplanner.backend.auth.token.TokenBlacklistService;
-import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.auth.token.TokenGenerator;
-import org.danteplanner.backend.auth.token.TokenValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -26,8 +20,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -39,7 +31,7 @@ import static org.mockito.Mockito.*;
 /**
  * Unit tests for AuthenticationService.
  *
- * <p>Tests OAuth authentication, token refresh, and logout flows
+ * <p>Tests OAuth authentication and token refresh flows
  * with all dependencies mocked.</p>
  */
 @ExtendWith(MockitoExtension.class)
@@ -50,12 +42,6 @@ class AuthenticationServiceTest {
 
     @Mock
     private TokenGenerator tokenGenerator;
-
-    @Mock
-    private TokenValidator tokenValidator;
-
-    @Mock
-    private TokenBlacklistService tokenBlacklistService;
 
     @Mock
     private UserService userService;
@@ -78,11 +64,7 @@ class AuthenticationServiceTest {
         authenticationService = new AuthenticationService(
                 providerRegistry,
                 tokenGenerator,
-                tokenValidator,
-                tokenBlacklistService,
-                userService,
-                new UsersApiAdapter(userService, lifecycleService),
-                new LineageRotationFlag(false)
+                new UsersApiAdapter(userService, lifecycleService)
         );
 
         testUser = TestDataFactory.unsavedUser(123L);
@@ -216,138 +198,6 @@ class AuthenticationServiceTest {
         }
     }
 
-
-    /** logout is void: the revoked-session entry lands in Redis, observable only in a containerized test. */
-    @Nested
-    @DisplayName("logout Tests")
-    class LogoutTests {
-
-        @Test
-        @DisplayName("Should blacklist both tokens")
-        void logout_WhenBothTokensValid_BlacklistsBoth() {
-            // Arrange
-            String accessToken = "access-token";
-            String refreshToken = "refresh-token";
-            Date accessExpiry = new Date(System.currentTimeMillis() + 60000);
-            Date refreshExpiry = new Date(System.currentTimeMillis() + 86400000);
-
-            TokenClaims accessClaims = new TokenClaims(
-                    123L, TokenClaims.TYPE_ACCESS, UserRole.NORMAL, new Date(), accessExpiry
-            );
-            TokenClaims refreshClaims = new TokenClaims(
-                    123L, TokenClaims.TYPE_REFRESH, null, new Date(), refreshExpiry
-            );
-
-            when(tokenValidator.validateAccessToken(accessToken)).thenReturn(accessClaims);
-            when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(refreshClaims);
-
-            // Act
-            authenticationService.logout(accessToken, refreshToken);
-
-            // Assert
-            verify(tokenBlacklistService).revokeLogoutSession(List.of(
-                    new LogoutRevocation.TokenRevocation(accessToken, accessExpiry),
-                    new LogoutRevocation.TokenRevocation(refreshToken, refreshExpiry)));
-        }
-
-        @Test
-        @DisplayName("Should handle null access token")
-        void logout_WhenNullAccessToken_BlacklistsOnlyRefresh() {
-            // Arrange
-            String refreshToken = "refresh-token";
-            Date refreshExpiry = new Date(System.currentTimeMillis() + 86400000);
-            TokenClaims refreshClaims = new TokenClaims(
-                    123L, TokenClaims.TYPE_REFRESH, null, new Date(), refreshExpiry
-            );
-
-            when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(refreshClaims);
-
-            // Act
-            authenticationService.logout(null, refreshToken);
-
-            // Assert - only refresh token blacklisted
-            verify(tokenBlacklistService).revokeLogoutSession(List.of(
-                    new LogoutRevocation.TokenRevocation(refreshToken, refreshExpiry)));
-        }
-
-        @Test
-        @DisplayName("logout-with-only-an-access-token-revokes-exactly-it: no refresh cookie, no family revocation")
-        void logout_WhenNullRefreshToken_BlacklistsOnlyAccess() {
-            // Arrange
-            String accessToken = "access-token";
-            Date accessExpiry = new Date(System.currentTimeMillis() + 60000);
-            TokenClaims accessClaims = new TokenClaims(
-                    123L, TokenClaims.TYPE_ACCESS, UserRole.NORMAL, new Date(), accessExpiry
-            );
-
-            when(tokenValidator.validateAccessToken(accessToken)).thenReturn(accessClaims);
-
-            // Act
-            authenticationService.logout(accessToken, null);
-
-            // Assert - only access token blacklisted
-            verify(tokenBlacklistService).revokeLogoutSession(List.of(
-                    new LogoutRevocation.TokenRevocation(accessToken, accessExpiry)));
-        }
-
-        @Test
-        @DisplayName("Should handle both tokens null")
-        void logout_WhenBothTokensNull_DoesNothing() {
-            // Act
-            authenticationService.logout(null, null);
-
-            // Assert - nothing present to revoke
-            verify(tokenBlacklistService).revokeLogoutSession(List.of());
-            verify(tokenBlacklistService, never()).blacklistToken(any(), any());
-            verify(tokenValidator, never()).validateToken(any());
-        }
-
-        @Test
-        @DisplayName("Should skip blacklist for already invalid access token")
-        void logout_WhenInvalidAccessToken_SkipsBlacklist() {
-            // Arrange
-            String invalidAccessToken = "invalid-access";
-            String validRefreshToken = "valid-refresh";
-            Date refreshExpiry = new Date(System.currentTimeMillis() + 86400000);
-            TokenClaims refreshClaims = new TokenClaims(
-                    123L, TokenClaims.TYPE_REFRESH, null, new Date(), refreshExpiry
-            );
-
-            when(tokenValidator.validateAccessToken(invalidAccessToken))
-                    .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.EXPIRED));
-            when(tokenValidator.validateRefreshToken(validRefreshToken)).thenReturn(refreshClaims);
-
-            // Act
-            authenticationService.logout(invalidAccessToken, validRefreshToken);
-
-            // Assert - only refresh token blacklisted
-            verify(tokenBlacklistService).revokeLogoutSession(List.of(
-                    new LogoutRevocation.TokenRevocation(validRefreshToken, refreshExpiry)));
-        }
-
-        @Test
-        @DisplayName("Should skip blacklist for already invalid refresh token")
-        void logout_WhenInvalidRefreshToken_SkipsBlacklist() {
-            // Arrange
-            String validAccessToken = "valid-access";
-            String invalidRefreshToken = "invalid-refresh";
-            Date accessExpiry = new Date(System.currentTimeMillis() + 60000);
-            TokenClaims accessClaims = new TokenClaims(
-                    123L, TokenClaims.TYPE_ACCESS, UserRole.NORMAL, new Date(), accessExpiry
-            );
-
-            when(tokenValidator.validateAccessToken(validAccessToken)).thenReturn(accessClaims);
-            when(tokenValidator.validateRefreshToken(invalidRefreshToken))
-                    .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.MALFORMED));
-
-            // Act
-            authenticationService.logout(validAccessToken, invalidRefreshToken);
-
-            // Assert - only access token blacklisted
-            verify(tokenBlacklistService).revokeLogoutSession(List.of(
-                    new LogoutRevocation.TokenRevocation(validAccessToken, accessExpiry)));
-        }
-    }
 
     /**
      * TW6 — type enforcement at the facade seams, exercised with a REAL {@link JwtTokenService}

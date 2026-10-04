@@ -11,6 +11,7 @@ import org.danteplanner.backend.user.entity.UserSettings;
 import org.danteplanner.backend.user.api.UserNotFoundException;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.repository.UserSettingsRepository;
+import org.danteplanner.backend.shared.sse.NotificationPreferenceProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class UserSettingsService {
+public class UserSettingsService implements NotificationPreferenceProvider {
 
 
     private static final boolean DEFAULT_SYNC_ENABLED = false;
@@ -62,6 +63,16 @@ public class UserSettingsService {
         if (value != null) {
             setter.accept(value);
         }
+    }
+
+    @Override
+    @Transactional
+    public Preferences preferencesOf(Long userId) {
+        UserSettings settings = getOrCreateEntity(userId);
+        return new Preferences(
+                settings.isNotifyComments(),
+                settings.isNotifyRecommendations(),
+                settings.isNotifyNewPublications());
     }
 
     @Transactional

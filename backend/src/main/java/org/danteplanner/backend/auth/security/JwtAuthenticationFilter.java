@@ -1,4 +1,4 @@
-package org.danteplanner.backend.shared.security;
+package org.danteplanner.backend.auth.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -7,10 +7,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.LineageRotationFlag;
-import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.shared.security.AuthDegradationResponder;
+import org.danteplanner.backend.shared.security.ChainAuthenticationFilter;
+import org.danteplanner.backend.shared.security.CustomAuthenticationEntryPoint;
+import org.danteplanner.backend.user.api.UserSummary;
+import org.danteplanner.backend.user.api.Users;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.danteplanner.backend.auth.exception.SessionRevokedException;
-import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.auth.token.RefreshRotationService;
 import org.danteplanner.backend.auth.token.RotationResult;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
@@ -23,7 +26,6 @@ import org.springframework.dao.QueryTimeoutException;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
 
 
 import jakarta.servlet.DispatcherType;
@@ -40,7 +42,7 @@ import org.danteplanner.backend.shared.config.JwtProperties;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class JwtAuthenticationFilter extends OncePerRequestFilter {
+public class JwtAuthenticationFilter extends ChainAuthenticationFilter {
 
     private static final Set<String> EXCLUDED_PATHS = Set.of(
             "/api/auth/google/start",
@@ -53,7 +55,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final TokenBlacklistService tokenBlacklistService;
     private final AccessTokenAuthenticator accessTokenAuthenticator;
     private final CookieUtils cookieUtils;
-    private final UserService userService;
+    private final Users users;
     private final AuthDegradationResponder degradationResponder;
     private final TokenGenerator tokenGenerator;
     private final RefreshRotationService refreshRotationService;
@@ -166,25 +168,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return abandonSession(request, response, CustomAuthenticationEntryPoint.SESSION_REVOKED);
             }
 
-            Optional<User> activeUser = userService.findActiveById(claims.userId());
+            Optional<UserSummary> activeUser = users.findActiveById(claims.userId());
             if (activeUser.isEmpty()) {
                 log.warn("Attempted auto-refresh for non-existent or deleted user: {}", claims.userId());
                 return abandonSession(request, response, CustomAuthenticationEntryPoint.SESSION_REVOKED);
             }
 
-            User user = activeUser.get();
+            UserSummary user = activeUser.get();
 
             if (!rotateRefreshCookie(refreshToken, claims, user, request, response)) {
                 return false;
             }
 
-            String newAccessToken = tokenGenerator.generateAccessToken(user.getId(), user.getRole());
+            String newAccessToken = tokenGenerator.generateAccessToken(user.id(), user.role());
             cookieUtils.setCookie(response, CookieConstants.ACCESS_TOKEN, newAccessToken,
                     jwtProperties.getAccessTokenExpirySeconds());
 
-            accessTokenAuthenticator.authenticateAs(user.getId(), user.getRole(), request);
+            accessTokenAuthenticator.authenticateAs(user.id(), user.role(), request);
 
-            log.debug("Auto-refreshed tokens for user: {}", user.getEmail());
+            log.debug("Auto-refreshed tokens for user: {}", user.email());
             return true;
 
         } catch (DataAccessException | TransactionException e) {
@@ -198,7 +200,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private boolean rotateRefreshCookie(
             String refreshToken,
             TokenClaims claims,
-            User user,
+            UserSummary user,
             HttpServletRequest request,
             HttpServletResponse response
     ) {
@@ -217,7 +219,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         tokenBlacklistService.blacklistTokenForRotation(refreshToken, claims.expiration());
         cookieUtils.setCookie(response, CookieConstants.REFRESH_TOKEN,
-                tokenGenerator.generateRefreshToken(user.getId()),
+                tokenGenerator.generateRefreshToken(user.id()),
                 jwtProperties.getRefreshTokenExpirySeconds());
         return true;
     }

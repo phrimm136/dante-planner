@@ -10,7 +10,6 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
-import org.danteplanner.backend.shared.util.CookieUtils;
 import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,7 +55,7 @@ class CommentThreadNotFoundContractTest {
                 new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository), new CommentAccessValidator());
         mockMvc = standaloneSetup(new CommentController(queryService, null, null, new ByIdReadGuard()))
                 .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
-                .setControllerAdvice(new ApiExceptionHandler(mock(CookieUtils.class)))
+                .setControllerAdvice(new ApiExceptionHandler())
                 .build();
 
         plannerId = UUID.randomUUID();

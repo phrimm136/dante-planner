@@ -227,7 +227,7 @@ class RateLimitBucketLifecycleIT {
                 new SimpleMeterRegistry());
         MockMvc mockMvc = MockMvcBuilders.standaloneSetup(new DeclaredHandlerFixture())
                 .addInterceptors(interceptor)
-                .setControllerAdvice(new ApiExceptionHandler(new CookieUtils(false, "", "Lax")))
+                .setControllerAdvice(new ApiExceptionHandler())
                 .build();
 
         MvcResult first = mockMvc.perform(get("/api/fixture/inherited")).andReturn();

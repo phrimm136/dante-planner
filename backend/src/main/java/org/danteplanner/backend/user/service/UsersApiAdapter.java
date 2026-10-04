@@ -5,6 +5,7 @@ import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.UserSummary;
 import org.danteplanner.backend.user.api.Users;
+import org.danteplanner.backend.user.api.dto.UserResponse;
 import org.danteplanner.backend.user.entity.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -68,6 +69,11 @@ public class UsersApiAdapter implements Users {
     @Override
     public UserSummary findById(Long id) {
         return toSummary(userService.findById(id));
+    }
+
+    @Override
+    public UserResponse describeById(Long id) {
+        return userService.toResponse(userService.findById(id));
     }
 
     @Override

@@ -7,7 +7,7 @@ import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.lang.ArchRule;
 
 import org.danteplanner.backend.auth.token.RefreshRotationService;
-import org.danteplanner.backend.shared.security.AccessTokenAuthenticator;
+import org.danteplanner.backend.auth.security.AccessTokenAuthenticator;
 import org.danteplanner.roleclaimfixture.AuthorityNameReferenceFixture;
 import org.danteplanner.roleclaimfixture.AuthorityReaderFixture;
 import org.danteplanner.roleclaimfixture.EffectiveRoleReaderFixture;

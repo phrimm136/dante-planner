@@ -1,7 +1,6 @@
 package org.danteplanner.backend.repository;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.danteplanner.backend.planner.api.PlannerThread;
@@ -10,10 +9,9 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerSummaryRow;
 import org.danteplanner.backend.planner.repository.PublishedPlannerRow;
 import org.danteplanner.backend.support.TestDataFactory;
+import org.danteplanner.backend.support.ThreadStatementCounter;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
-import org.hibernate.SessionFactory;
-import org.hibernate.stat.Statistics;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -46,9 +44,6 @@ class PlannerAuthorJoinIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private EntityManager entityManager;
-
-    @Autowired
-    private EntityManagerFactory entityManagerFactory;
 
     @Autowired
     private TransactionTemplate transactionTemplate;
@@ -153,18 +148,17 @@ class PlannerAuthorJoinIT extends SharedMySqlContainerSupport {
     }
 
     private <T> Counted<T> counted(Supplier<T> read) {
-        Statistics statistics = entityManagerFactory.unwrap(SessionFactory.class).getStatistics();
-        boolean statisticsWereEnabled = statistics.isStatisticsEnabled();
-        statistics.setStatisticsEnabled(true);
-        try {
-            return transactionTemplate.execute(status -> {
-                entityManager.clear();
-                long before = statistics.getPrepareStatementCount();
-                T value = read.get();
-                return new Counted<>(value, statistics.getPrepareStatementCount() - before);
-            });
-        } finally {
-            statistics.setStatisticsEnabled(statisticsWereEnabled);
-        }
+        return transactionTemplate.execute(status -> {
+            entityManager.clear();
+            ThreadStatementCounter.start();
+            T value;
+            long statements;
+            try {
+                value = read.get();
+            } finally {
+                statements = ThreadStatementCounter.stop();
+            }
+            return new Counted<>(value, statements);
+        });
     }
 }

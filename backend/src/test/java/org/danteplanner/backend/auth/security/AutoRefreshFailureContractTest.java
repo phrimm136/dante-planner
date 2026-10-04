@@ -1,4 +1,7 @@
-package org.danteplanner.backend.shared.security;
+package org.danteplanner.backend.auth.security;
+
+import org.danteplanner.backend.shared.security.AuthDegradationResponder;
+import org.danteplanner.backend.shared.security.CustomAuthenticationEntryPoint;
 
 import org.danteplanner.backend.shared.exception.ProblemWriter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
@@ -16,7 +19,8 @@ import org.danteplanner.backend.shared.config.LineageRotationFlag;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.service.UserService;
+import org.danteplanner.backend.user.api.Users;
+import org.danteplanner.backend.user.service.UsersApiAdapter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,7 +62,7 @@ class AutoRefreshFailureContractTest {
 
     @Mock private TokenValidator tokenValidator;
     @Mock private TokenBlacklistService tokenBlacklistService;
-    @Mock private UserService userService;
+    @Mock private Users users;
     @Mock private TokenGenerator tokenGenerator;
     @Mock private RefreshRotationService refreshRotationService;
     @Mock private JwtProperties jwtProperties;
@@ -106,7 +110,7 @@ class AutoRefreshFailureContractTest {
     private void givenTheTokenIsDead(boolean lineageEnabled) {
         when(tokenValidator.validateRefreshToken(DEAD_REFRESH_TOKEN)).thenReturn(refreshClaims());
         if (lineageEnabled) {
-            when(userService.findActiveById(USER_ID)).thenReturn(Optional.of(activeUser()));
+            when(users.findActiveById(USER_ID)).thenReturn(Optional.of(UsersApiAdapter.toSummary(activeUser())));
             when(refreshRotationService.rotate(DEAD_REFRESH_TOKEN))
                     .thenReturn(new RotationResult.Revoked("fam-revoked"));
         } else {
@@ -123,7 +127,7 @@ class AutoRefreshFailureContractTest {
     private JwtAuthenticationFilter filterWithFlag(boolean lineageEnabled) {
         return new JwtAuthenticationFilter(
                 tokenValidator, tokenBlacklistService,
-                new AccessTokenAuthenticator(tokenValidator, tokenBlacklistService), cookieUtils, userService,
+                new AccessTokenAuthenticator(tokenValidator, tokenBlacklistService), cookieUtils, users,
                 new AuthDegradationResponder(new ProblemWriter(Jackson2ObjectMapperBuilder.json().build())), tokenGenerator, refreshRotationService,
                 new LineageRotationFlag(lineageEnabled), jwtProperties);
     }

@@ -3,7 +3,6 @@ package org.danteplanner.backend.exception;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.catalina.connector.ClientAbortException;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
-import org.danteplanner.backend.shared.util.CookieUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -80,7 +79,7 @@ class ApiExceptionHandlerIoFailureTest {
     }
 
     private static ApiExceptionHandler handler() {
-        return new ApiExceptionHandler(mock(CookieUtils.class));
+        return new ApiExceptionHandler();
     }
 
     private static ServletWebRequest webRequest() {

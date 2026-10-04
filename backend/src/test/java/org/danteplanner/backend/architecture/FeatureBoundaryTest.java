@@ -66,9 +66,7 @@ class FeatureBoundaryTest {
     private static final Set<String> USER_INTERNALS_FROZEN = Set.of(
             MAIN + "moderation.controller.ModerationController",
             MAIN + "moderation.service.ModerationPolicy",
-            MAIN + "moderation.service.UserModerationService",
-            MAIN + "shared.security.JwtAuthenticationFilter",
-            MAIN + "shared.sse.SseService");
+            MAIN + "moderation.service.UserModerationService");
 
     private static final Map<String, Set<String>> FROZEN_INTERNAL_EDGES = Map.of(
             "comment", Set.of(),

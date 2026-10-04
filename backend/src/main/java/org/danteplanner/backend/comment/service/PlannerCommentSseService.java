@@ -2,7 +2,9 @@ package org.danteplanner.backend.comment.service;
 
 import org.danteplanner.backend.shared.sse.AbstractSseService;
 import org.danteplanner.backend.shared.sse.SseCapacityExceededException;
+import org.danteplanner.backend.shared.sse.SseChannelHandler;
 import org.danteplanner.backend.shared.sse.SseConstants;
+import org.danteplanner.backend.shared.sse.SseEnvelope;
 import org.danteplanner.backend.shared.sse.SseHeartbeatWorkerConfig;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,7 +25,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 @Service
 @Slf4j
-public class PlannerCommentSseService extends AbstractSseService<UUID> {
+public class PlannerCommentSseService extends AbstractSseService<UUID> implements SseChannelHandler {
 
     private static final long HEARTBEAT_INTERVAL_MS = SseConstants.COMMENT_STREAM_HEARTBEAT_INTERVAL_MS;
     private static final long HEARTBEAT_INITIAL_DELAY_MS = 5_000L;
@@ -85,6 +87,16 @@ public class PlannerCommentSseService extends AbstractSseService<UUID> {
         }
 
         sendToSubscribers(plannerId, subscribers, eventType, jsonData, excludeUserId);
+    }
+
+    @Override
+    public void deliver(SseEnvelope envelope, Object clientPayload) {
+        if (envelope.plannerId() == null || envelope.plannerId().isBlank()) {
+            log.error("Comment SSE envelope missing plannerId; dropping");
+            return;
+        }
+        broadcast(UUID.fromString(envelope.plannerId()), envelope.type().getValue(),
+                clientPayload, envelope.excludeUserId());
     }
 
     public int getSubscriberCount(UUID plannerId) {

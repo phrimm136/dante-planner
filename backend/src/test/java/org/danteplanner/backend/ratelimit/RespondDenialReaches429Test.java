@@ -66,7 +66,7 @@ class RespondDenialReaches429Test {
 
         mockMvc = MockMvcBuilders.standaloneSetup(new DeclaredHandlerFixture())
                 .addInterceptors(interceptor)
-                .setControllerAdvice(new ApiExceptionHandler(new CookieUtils(false, "", "Lax")))
+                .setControllerAdvice(new ApiExceptionHandler())
                 .build();
 
         SecurityContextHolder.getContext().setAuthentication(

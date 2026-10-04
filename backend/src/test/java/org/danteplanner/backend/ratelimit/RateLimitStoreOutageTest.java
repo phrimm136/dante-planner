@@ -15,6 +15,7 @@ import org.danteplanner.backend.auth.controller.AuthController;
 import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
 import org.danteplanner.backend.auth.oauth.OAuthStateService;
 import org.danteplanner.backend.auth.service.AuthenticationService;
+import org.danteplanner.backend.auth.service.SessionRevocationService;
 import org.danteplanner.backend.auth.token.TokenValidator;
 import org.danteplanner.backend.planner.controller.PublishedPlannerController;
 import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
@@ -219,6 +220,7 @@ class RateLimitStoreOutageTest {
 
         AuthController authController = new AuthController(
                 mock(AuthenticationService.class),
+                mock(SessionRevocationService.class),
                 mock(TokenValidator.class),
                 mock(OAuthProperties.class),
                 cookieUtils,
@@ -231,7 +233,7 @@ class RateLimitStoreOutageTest {
 
         return MockMvcBuilders.standaloneSetup(authController, publishedPlannerController, new DeclaredHandlerFixture())
                 .addInterceptors(interceptor)
-                .setControllerAdvice(new ApiExceptionHandler(cookieUtils))
+                .setControllerAdvice(new ApiExceptionHandler())
                 .build();
     }
 

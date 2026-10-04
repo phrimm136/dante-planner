@@ -3,12 +3,9 @@ package org.danteplanner.backend.shared.exception;
 import io.lettuce.core.RedisException;
 import io.sentry.Sentry;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.ClientAbortException;
-import org.danteplanner.backend.auth.exception.SessionRevokedException;
 import org.danteplanner.backend.shared.sse.SseCapacityExceededException;
-import org.danteplanner.backend.shared.util.CookieUtils;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataAccessResourceFailureException;
@@ -41,7 +38,6 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 @Slf4j
-@RequiredArgsConstructor
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final String VALIDATION_ERROR_CODE = "VALIDATION_ERROR";
@@ -54,9 +50,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     private static final String CONCURRENT_WRITE_CODE = "CONCURRENT_WRITE";
     private static final String CONCURRENT_WRITE_DETAIL = "The resource was modified concurrently";
 
-    private final CookieUtils cookieUtils;
-
-    private ResponseEntity<Object> respond(
+    public ResponseEntity<Object> respond(
             Exception ex, ProblemDetail body, HttpHeaders headers, WebRequest request) {
         return handleExceptionInternal(ex, body, headers, HttpStatus.valueOf(body.getStatus()), request);
     }
@@ -129,13 +123,6 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         log.debug("No handler found: {} {}", ex.getHttpMethod(), ex.getResourcePath());
         return respond(ex, Problems.fill(ProblemDetail.forStatus(HttpStatus.NOT_FOUND),
                 NOT_FOUND_CODE, NOT_FOUND_DETAIL), headers, request);
-    }
-
-    @ExceptionHandler(SessionRevokedException.class)
-    public ResponseEntity<Object> handleSessionRevoked(
-            SessionRevokedException ex, HttpServletResponse response, WebRequest request) {
-        cookieUtils.clearAuthCookies(response);
-        return respond(ex, ex.getBody(), ex.getHeaders(), request);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)

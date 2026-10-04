@@ -1,5 +1,7 @@
 package org.danteplanner.backend.user.api;
 
+import org.danteplanner.backend.user.api.dto.UserResponse;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +24,8 @@ public interface Users {
     Optional<UserSummary> findActiveByProvider(AuthProviderType providerType, String providerId);
 
     UserSummary findById(Long id);
+
+    UserResponse describeById(Long id);
 
     Optional<UserSummary> findActiveBySuffix(String usernameSuffix);
 

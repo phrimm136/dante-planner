@@ -1,10 +1,10 @@
 package org.danteplanner.backend.service;
 import org.danteplanner.backend.shared.sse.SseService;
-import org.danteplanner.backend.user.service.UserSettingsService;
+import org.danteplanner.backend.shared.sse.NotificationPreferenceProvider;
+import org.danteplanner.backend.shared.sse.NotificationPreferenceProvider.Preferences;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.danteplanner.backend.user.entity.UserSettings;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -48,7 +48,7 @@ class SseServiceTest {
     private static final TaskExecutor SAME_THREAD = Runnable::run;
 
     @Mock
-    private UserSettingsService userSettingsService;
+    private NotificationPreferenceProvider preferenceProvider;
 
     private ObjectMapper objectMapper;
     private SseService sseService;
@@ -56,18 +56,12 @@ class SseServiceTest {
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        sseService = new SseService(objectMapper, userSettingsService, SAME_THREAD);
-        lenient().when(userSettingsService.getOrCreateEntity(anyLong())).thenReturn(allEnabledSettings());
+        sseService = new SseService(objectMapper, preferenceProvider, SAME_THREAD);
+        lenient().when(preferenceProvider.preferencesOf(anyLong())).thenReturn(allEnabledSettings());
     }
 
-    private UserSettings allEnabledSettings() {
-        return UserSettings.builder()
-                .userId(USER_ID)
-                .syncEnabled(true)
-                .notifyComments(true)
-                .notifyRecommendations(true)
-                .notifyNewPublications(true)
-                .build();
+    private Preferences allEnabledSettings() {
+        return new Preferences(true, true, true);
     }
 
     @Nested
@@ -121,11 +115,23 @@ class SseServiceTest {
         }
 
         @Test
+        @DisplayName("sends nothing when the user turned comment notifications off")
+        void sendToUser_WhenCommentNotificationsOff_DoesNotSend() throws IOException {
+            when(preferenceProvider.preferencesOf(USER_ID)).thenReturn(new Preferences(false, true, true));
+            SseEmitter emitter = sseService.subscribe(USER_ID, UUID.randomUUID());
+            emitter.complete();
+
+            sseService.sendToUser(USER_ID, "notify:comment", Map.of("k", "v"));
+
+            assertThat(sseService.getActiveConnectionCount(USER_ID)).isEqualTo(1);
+        }
+
+        @Test
         @DisplayName("does not propagate or remove when serialization fails")
         void sendToUser_WhenSerializationFails_DoesNotThrowNorRemove() throws Exception {
             ObjectMapper failingMapper = mock(ObjectMapper.class);
             when(failingMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("boom") {});
-            SseService service = new SseService(failingMapper, userSettingsService, SAME_THREAD);
+            SseService service = new SseService(failingMapper, preferenceProvider, SAME_THREAD);
             service.subscribe(USER_ID, UUID.randomUUID());
 
             assertThatCode(() -> service.sendToUser(USER_ID, "notify:comment", Map.of("k", "v")))
@@ -137,7 +143,7 @@ class SseServiceTest {
         @DisplayName("does not deliver an event type this node does not recognize")
         void sendToUser_WhenEventTypeUnrecognized_DoesNotDeliver() throws Exception {
             ObjectMapper watchedMapper = mock(ObjectMapper.class);
-            SseService service = new SseService(watchedMapper, userSettingsService, SAME_THREAD);
+            SseService service = new SseService(watchedMapper, preferenceProvider, SAME_THREAD);
             service.subscribe(USER_ID, UUID.randomUUID());
 
             service.sendToUser(USER_ID, "notify:something-this-node-cannot-name", Map.of("k", "v"));
@@ -171,7 +177,7 @@ class SseServiceTest {
         void broadcastToAll_WhenSerializationFails_DoesNotThrow() throws Exception {
             ObjectMapper failingMapper = mock(ObjectMapper.class);
             when(failingMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("boom") {});
-            SseService service = new SseService(failingMapper, userSettingsService, SAME_THREAD);
+            SseService service = new SseService(failingMapper, preferenceProvider, SAME_THREAD);
             service.subscribe(USER_ID, UUID.randomUUID());
 
             assertThatCode(() -> service.broadcastToAll(null, "notify:published", Map.of("k", "v")))

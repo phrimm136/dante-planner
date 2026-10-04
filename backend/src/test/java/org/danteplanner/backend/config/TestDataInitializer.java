@@ -1,5 +1,5 @@
 package org.danteplanner.backend.config;
-import org.danteplanner.backend.shared.config.SentinelUserVerifier;
+import org.danteplanner.backend.user.config.SentinelUserVerifier;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;

@@ -1,4 +1,4 @@
-package org.danteplanner.backend.user.dto;
+package org.danteplanner.backend.user.api.dto;
 
 import lombok.Builder;
 

@@ -1,5 +1,6 @@
 package org.danteplanner.backend.planner.service;
 
+import org.danteplanner.backend.moderation.api.PlannerReportPurge;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerContentRepository;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
@@ -19,8 +20,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,12 +40,13 @@ class PlannerAccountPurgeServiceTest {
     @Mock private PlannerKeywordFilterRepository plannerKeywordFilterRepository;
     @Mock private PlannerViewRepository plannerViewRepository;
     @Mock private PlannerVoteRepository plannerVoteRepository;
+    @Mock private PlannerReportPurge plannerReportPurge;
 
     @InjectMocks private PlannerAccountPurgeService purgeService;
 
     @Test
-    void reassignVotesToSentinel_WhenSentinelAlreadyVoted_DeletesCollisionsFirst() {
-        purgeService.reassignVotesToSentinel(USER_ID, SENTINEL_ID);
+    void reassignToSentinel_WhenSentinelAlreadyVoted_DeletesCollisionsFirst() {
+        purgeService.reassignToSentinel(USER_ID, SENTINEL_ID);
 
         // Reassigning a vote the sentinel already cast on the same planner would duplicate the
         // composite key, so the collision has to be dropped before the reassignment runs.
@@ -54,10 +56,11 @@ class PlannerAccountPurgeServiceTest {
     }
 
     @Test
-    void deleteProjectionsFor_WhenPlannersGiven_SweepsEveryRowKeyedByPlannerId() {
+    void deleteOwnedData_WhenPlannersOwned_SweepsEveryRowKeyedByPlannerId() {
         List<UUID> plannerIds = List.of(UUID.randomUUID());
+        when(plannerRepository.findIdsByUserId(USER_ID)).thenReturn(plannerIds);
 
-        purgeService.deleteProjectionsFor(plannerIds);
+        purgeService.deleteOwnedData(USER_ID);
 
         // None of these carry an FK to the planner core, so none is removed by the cascade; every
         // one left behind here outlives the planner it describes.
@@ -75,10 +78,25 @@ class PlannerAccountPurgeServiceTest {
     }
 
     @Test
-    void plannerIdsOwnedBy_WhenTheOwnerHasPlanners_ReturnsTheirIds() {
-        List<UUID> owned = List.of(UUID.randomUUID(), UUID.randomUUID());
+    void deleteOwnedData_WhenTheOwnerHasPlanners_DeletesReportsBeforeProjections() {
+        List<UUID> owned = List.of(UUID.randomUUID());
         when(plannerRepository.findIdsByUserId(USER_ID)).thenReturn(owned);
 
-        assertThat(purgeService.plannerIdsOwnedBy(USER_ID)).isEqualTo(owned);
+        purgeService.deleteOwnedData(USER_ID);
+
+        // Reports hold no-action FKs to the rows the sweep and the cascade remove, so they go first.
+        var inOrder = inOrder(plannerReportPurge, plannerViewRepository, plannerContentRepository);
+        inOrder.verify(plannerReportPurge).deleteReportsFor(owned);
+        inOrder.verify(plannerViewRepository).deleteViewsByPlannerIds(owned);
+        inOrder.verify(plannerContentRepository).deleteAllByPlannerIds(owned);
+    }
+
+    @Test
+    void deleteOwnedData_WhenTheOwnerHasNoPlanners_DeletesNothing() {
+        when(plannerRepository.findIdsByUserId(USER_ID)).thenReturn(List.of());
+
+        purgeService.deleteOwnedData(USER_ID);
+
+        verifyNoInteractions(plannerReportPurge, plannerViewRepository, plannerContentRepository);
     }
 }

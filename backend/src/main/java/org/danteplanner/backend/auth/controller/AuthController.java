@@ -9,9 +9,10 @@ import org.danteplanner.backend.shared.config.LoginRedirect;
 import org.danteplanner.backend.shared.config.JwtProperties;
 import org.danteplanner.backend.shared.config.OAuthProperties;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
-import org.danteplanner.backend.user.dto.UserResponse;
+import org.danteplanner.backend.user.api.dto.UserResponse;
 import org.danteplanner.backend.auth.service.AuthenticationService;
 import org.danteplanner.backend.auth.service.AuthenticationService.AuthResult;
+import org.danteplanner.backend.auth.service.SessionRevocationService;
 import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
 import org.danteplanner.backend.auth.oauth.OAuthStateService;
 import org.danteplanner.backend.auth.oauth.OAuthStateService.OAuthTransaction;
@@ -44,6 +45,7 @@ import java.util.Optional;
 public class AuthController {
 
     private final AuthenticationService authService;
+    private final SessionRevocationService sessionRevocationService;
     private final TokenValidator tokenValidator;
     private final OAuthProperties oAuthProperties;
     private final CookieUtils cookieUtils;
@@ -158,7 +160,7 @@ public class AuthController {
         String refreshToken = cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)
                 .orElse(null);
 
-        authService.logout(accessToken, refreshToken);
+        sessionRevocationService.logout(accessToken, refreshToken);
 
         cookieUtils.clearAuthCookies(response);
 
@@ -173,7 +175,7 @@ public class AuthController {
 
         String accessToken = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)
                 .orElse(null);
-        authService.logoutAll(userId, accessToken);
+        sessionRevocationService.logoutAll(userId, accessToken);
 
         cookieUtils.clearAuthCookies(response);
 

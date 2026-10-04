@@ -1,9 +1,9 @@
 package org.danteplanner.backend.shared.config;
 
 import lombok.RequiredArgsConstructor;
+import org.danteplanner.backend.shared.security.ChainAuthenticationFilter;
 import org.danteplanner.backend.shared.security.CsrfDoubleSubmitFilter;
 import org.danteplanner.backend.shared.security.CustomAuthenticationEntryPoint;
-import org.danteplanner.backend.shared.security.JwtAuthenticationFilter;
 import org.danteplanner.backend.shared.security.MdcLoggingFilter;
 import org.danteplanner.backend.shared.security.ProblemAccessDeniedHandler;
 import org.danteplanner.backend.shared.security.SecurityRuleContribution;
@@ -29,7 +29,7 @@ import java.util.List;
 public class SecurityConfig {
 
     private final CsrfDoubleSubmitFilter csrfDoubleSubmitFilter;
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final ChainAuthenticationFilter authenticationFilter;
     private final MdcLoggingFilter mdcLoggingFilter;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
     private final ProblemAccessDeniedHandler accessDeniedHandler;
@@ -48,9 +48,9 @@ public class SecurityConfig {
     }
 
     @Bean
-    public FilterRegistrationBean<JwtAuthenticationFilter> jwtFilterRegistration(
-            JwtAuthenticationFilter filter) {
-        FilterRegistrationBean<JwtAuthenticationFilter> bean = new FilterRegistrationBean<>(filter);
+    public FilterRegistrationBean<ChainAuthenticationFilter> authenticationFilterRegistration(
+            ChainAuthenticationFilter filter) {
+        FilterRegistrationBean<ChainAuthenticationFilter> bean = new FilterRegistrationBean<>(filter);
         bean.setEnabled(false);
         return bean;
     }
@@ -102,9 +102,9 @@ public class SecurityConfig {
                 auth.anyRequest().authenticated();
             })
 
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-            .addFilterBefore(csrfDoubleSubmitFilter, JwtAuthenticationFilter.class)
-            .addFilterAfter(mdcLoggingFilter, JwtAuthenticationFilter.class)
+            .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(csrfDoubleSubmitFilter, authenticationFilter.getClass())
+            .addFilterAfter(mdcLoggingFilter, authenticationFilter.getClass())
 
             .headers(headers -> headers
                 .xssProtection(xss -> xss.headerValue(

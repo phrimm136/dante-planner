@@ -2,6 +2,7 @@ package org.danteplanner.backend.planner.service;
 
 import lombok.RequiredArgsConstructor;
 
+import org.danteplanner.backend.moderation.api.PlannerReportPurge;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerContentRepository;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
@@ -12,6 +13,7 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerViewRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
+import org.danteplanner.backend.user.api.AccountLifecycleParticipant;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +26,7 @@ import java.util.UUID;
  */
 @Service
 @RequiredArgsConstructor
-public class PlannerAccountPurgeService {
+public class PlannerAccountPurgeService implements AccountLifecycleParticipant {
 
     private final PlannerRepository plannerRepository;
     private final PlannerContentRepository plannerContentRepository;
@@ -36,20 +38,31 @@ public class PlannerAccountPurgeService {
     private final PlannerKeywordFilterRepository plannerKeywordFilterRepository;
     private final PlannerViewRepository plannerViewRepository;
     private final PlannerVoteRepository plannerVoteRepository;
+    private final PlannerReportPurge plannerReportPurge;
 
+    @Override
     @Transactional(propagation = Propagation.MANDATORY)
-    public void reassignVotesToSentinel(Long userId, Long sentinelId) {
+    public void reassignToSentinel(Long userId, Long sentinelId) {
         plannerVoteRepository.deleteVotesCollidingWithSentinel(userId, sentinelId);
         plannerVoteRepository.reassignUserVotes(userId, sentinelId);
     }
 
+    @Override
     @Transactional(propagation = Propagation.MANDATORY)
-    public List<UUID> plannerIdsOwnedBy(Long userId) {
+    public void deleteOwnedData(Long userId) {
+        List<UUID> plannerIds = plannerIdsOwnedBy(userId);
+        if (!plannerIds.isEmpty()) {
+            // Reports first: their no-action FKs would block the cascade the user delete relies on.
+            plannerReportPurge.deleteReportsFor(plannerIds);
+            deleteProjectionsFor(plannerIds);
+        }
+    }
+
+    private List<UUID> plannerIdsOwnedBy(Long userId) {
         return plannerRepository.findIdsByUserId(userId);
     }
 
-    @Transactional(propagation = Propagation.MANDATORY)
-    public void deleteProjectionsFor(List<UUID> plannerIds) {
+    private void deleteProjectionsFor(List<UUID> plannerIds) {
         plannerViewRepository.deleteViewsByPlannerIds(plannerIds);
         plannerEntityFilterRepository.deleteAllByPlannerIds(plannerIds);
         plannerKeywordFilterRepository.deleteAllByPlannerIds(plannerIds);

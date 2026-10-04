@@ -3,14 +3,14 @@ package org.danteplanner.backend.user.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
-import org.danteplanner.backend.user.dto.UserResponse;
+import org.danteplanner.backend.user.api.dto.UserResponse;
 import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.exception.AccountDeletedException;
 import org.danteplanner.backend.user.exception.UsernameGenerationException;
 import org.danteplanner.backend.user.api.UserNotFoundException;
-import org.danteplanner.backend.moderation.service.ModerationAuditService;
+import org.danteplanner.backend.user.api.RestrictionReasonProvider;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.RandomUsernameGenerator.UsernameComponents;
 import org.danteplanner.backend.user.validation.EpithetValidator;
@@ -42,7 +42,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final RandomUsernameGenerator usernameGenerator;
     private final EpithetValidator epithetValidator;
-    private final ModerationAuditService moderationAuditService;
+    private final RestrictionReasonProvider restrictionReasonProvider;
     private final UserSettingsService userSettingsService;
     private final TransactionTemplate transactionTemplate;
 
@@ -130,14 +130,14 @@ public class UserService {
         if (user.isBanned()) {
             builder.isBanned(true)
                     .bannedAt(user.getBannedAt());
-            moderationAuditService.latestBanReason(user.getPublicId())
+            restrictionReasonProvider.latestBanReason(user.getPublicId())
                     .ifPresent(builder::banReason);
         }
 
         if (user.isTimedOut()) {
             builder.isTimedOut(true)
                     .timeoutUntil(user.getTimeoutUntil());
-            moderationAuditService.latestTimeoutReason(user.getPublicId())
+            restrictionReasonProvider.latestTimeoutReason(user.getPublicId())
                     .ifPresent(builder::timeoutReason);
         }
 

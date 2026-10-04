@@ -23,7 +23,7 @@ import com.tngtech.archunit.lang.SimpleConditionEvent;
 
 import org.danteplanner.backend.auth.token.RefreshRotationService;
 import org.danteplanner.backend.auth.token.TokenClaims;
-import org.danteplanner.backend.shared.security.AccessTokenAuthenticator;
+import org.danteplanner.backend.auth.security.AccessTokenAuthenticator;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 
@@ -51,7 +51,8 @@ final class RoleClaimAuthorizationRule {
 
     private static final List<String> SECURITY_CHAIN_PACKAGES = List.of(
             "org.danteplanner.backend.shared.security",
-            "org.danteplanner.backend.shared.config");
+            "org.danteplanner.backend.shared.config",
+            "org.danteplanner.backend.auth.security");
 
     static final ArchRule ONLY_THE_AUTHENTICATOR_READS_THE_ROLE_CLAIM =
             classes()
@@ -79,7 +80,7 @@ final class RoleClaimAuthorizationRule {
                             RoleClaimAuthorizationRule::readsGrantedAuthorities,
                             RoleClaimAuthorizationRule::belongsToTheSecurityChain,
                             "reads granted authorities outside the security chain"))
-                    .as("no class outside shared.security and shared.config reads GrantedAuthority"
+                    .as("no class outside shared.security, shared.config and auth.security reads GrantedAuthority"
                             + " or Authentication.getAuthorities()");
 
     private RoleClaimAuthorizationRule() {

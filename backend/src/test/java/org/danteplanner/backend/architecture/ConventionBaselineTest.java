@@ -187,8 +187,7 @@ class ConventionBaselineTest {
     @ArchTest
     static final ArchRule owned_errors_need_no_handler =
             methods()
-                    .that().areDeclaredInClassesThat().resideInAPackage("..shared.exception..")
-                    .and().areAnnotatedWith(EXCEPTION_HANDLER)
+                    .that().areAnnotatedWith(EXCEPTION_HANDLER)
                     .should(new ArchCondition<JavaMethod>("take no owned error back") {
                         @Override
                         public void check(JavaMethod method, ConditionEvents events) {

@@ -2,7 +2,6 @@ package org.danteplanner.backend.exception;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 
 import org.danteplanner.backend.shared.ratelimit.RateLimitExceededException;
-import org.danteplanner.backend.shared.util.CookieUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,7 +10,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -40,7 +38,7 @@ class ApiExceptionHandlerRateLimitSseTest {
     @BeforeEach
     void setUp() {
         mockMvc = standaloneSetup(new SseThrowingController())
-                .setControllerAdvice(new ApiExceptionHandler(mock(CookieUtils.class)))
+                .setControllerAdvice(new ApiExceptionHandler())
                 .build();
     }
 

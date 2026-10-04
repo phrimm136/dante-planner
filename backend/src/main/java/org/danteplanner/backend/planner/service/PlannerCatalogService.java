@@ -14,6 +14,7 @@ import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
+import org.danteplanner.backend.user.api.AccountLifecycleParticipant;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +32,7 @@ import java.util.UUID;
  */
 @Service
 @Slf4j
-public class PlannerCatalogService {
+public class PlannerCatalogService implements AccountLifecycleParticipant {
 
     private final PlannerCatalogRepository catalogRepository;
     private final PlannerRepository plannerRepository;
@@ -77,7 +78,8 @@ public class PlannerCatalogService {
     }
 
     @Transactional
-    public void hideAllOwnedBy(Long userId) {
+    @Override
+    public void accountDeactivated(Long userId) {
         List<UUID> publishedIds = plannerRepository.findPublishedIdsOwnedBy(userId);
         int withdrawn = catalogRepository.withdrawAllOwnedBy(userId);
         log.debug("Withdrew {} catalog rows owned by user {}", withdrawn, userId);
@@ -91,7 +93,8 @@ public class PlannerCatalogService {
     }
 
     @Transactional
-    public void restoreAllOwnedBy(Long userId) {
+    @Override
+    public void accountReactivated(Long userId) {
         List<UUID> publishedIds = plannerRepository.findPublishedIdsOwnedBy(userId);
         int restored = catalogRepository.restoreAllOwnedBy(userId, recommendedThreshold);
         log.debug("Restored {} catalog rows owned by user {}", restored, userId);

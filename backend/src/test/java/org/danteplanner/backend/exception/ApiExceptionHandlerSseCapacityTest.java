@@ -3,7 +3,6 @@ package org.danteplanner.backend.exception;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 import org.danteplanner.backend.shared.sse.SseCapacityExceededException;
 import org.danteplanner.backend.shared.sse.SseConstants;
-import org.danteplanner.backend.shared.util.CookieUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
-import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -45,7 +43,7 @@ class ApiExceptionHandlerSseCapacityTest {
     @BeforeEach
     void setUp() {
         mockMvc = standaloneSetup(new FullRegistryController())
-                .setControllerAdvice(new ApiExceptionHandler(mock(CookieUtils.class)))
+                .setControllerAdvice(new ApiExceptionHandler())
                 .build();
     }
 

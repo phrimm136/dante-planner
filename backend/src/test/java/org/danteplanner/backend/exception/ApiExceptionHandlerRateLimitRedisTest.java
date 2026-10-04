@@ -1,7 +1,6 @@
 package org.danteplanner.backend.exception;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 
-import org.danteplanner.backend.shared.util.CookieUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.lettuce.core.RedisCommandTimeoutException;
 
-import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
@@ -49,7 +47,7 @@ class ApiExceptionHandlerRateLimitRedisTest {
     @BeforeEach
     void setUp() {
         mockMvc = standaloneSetup(new ThrowingController())
-                .setControllerAdvice(new ApiExceptionHandler(mock(CookieUtils.class)))
+                .setControllerAdvice(new ApiExceptionHandler())
                 .build();
     }
 

@@ -1,6 +1,6 @@
 # Main Source
 
-Package-by-feature: feature roots (`admin`, `auth`, `comment`, `moderation`, `notification`, `planner`, `user`) plus `shared`, each keeping layer subpackages (`controller`, `service`, `repository`, ...) — ArchUnit `..service..`/`..controller..` matchers depend on them. `FeatureBoundaryTest` freezes cross-feature edges via an explicit allowlist; extend the allowlist deliberately, never delete the rule. `shared` is not a pure sink (it legitimately imports some feature code); keep its rule in the truthful residual form rather than faking a pure-sink rule.
+Package-by-feature: feature roots (`admin`, `auth`, `comment`, `moderation`, `notification`, `planner`, `user`) plus `shared`, each keeping layer subpackages (`controller`, `service`, `repository`, ...) — ArchUnit `..service..`/`..controller..` matchers depend on them. `FeatureBoundaryTest` freezes cross-feature edges via an explicit allowlist; extend the allowlist deliberately, never delete the rule. `shared` imports no feature module; a feature that the platform needs to call implements an interface `shared` declares.
 
 ## Transactions & replica routing (most important)
 
@@ -36,7 +36,7 @@ Package-by-feature: feature roots (`admin`, `auth`, `comment`, `moderation`, `no
 
 ## Security
 
-- JWT access tokens are read from COOKIES (not the Authorization header) by `JwtAuthenticationFilter` in `shared/security/`, which also consults `TokenBlacklistService` (Redis-backed, fail-open ladder). The filter skips ASYNC dispatch.
+- JWT access tokens are read from COOKIES (not the Authorization header) by `JwtAuthenticationFilter` in `auth/security/`. The filter also consults `TokenBlacklistService` (Redis-backed, fail-open ladder) and skips ASYNC dispatch; `shared/config/SecurityConfig` places it in the chain.
 - RSA PEM keys are validated ≥2048-bit at startup, fail-fast.
 - Verify ownership server-side; never trust client-supplied IDs.
 - No wildcard CORS origins — env-driven explicit list. Rate-limit public endpoints via bucket4j-redis.
@@ -44,7 +44,7 @@ Package-by-feature: feature roots (`admin`, `auth`, `comment`, `moderation`, `no
 
 ## Exceptions
 
-- One class per business error, extending `DomainException`, which builds its own RFC 9457 body: PlannerNotFound→404, PlannerForbidden→403, PlannerConflict→409, PlannerLimitExceeded→409, RateLimitExceeded→429, InvalidToken→401, UserBanned/UserTimedOut→403. `ApiExceptionHandler` renders; it adds a handler only for a response a body cannot express.
+- One class per business error, extending `DomainException`, which builds its own RFC 9457 body: PlannerNotFound→404, PlannerForbidden→403, PlannerConflict→409, PlannerLimitExceeded→409, RateLimitExceeded→429, InvalidToken→401, UserBanned/UserTimedOut→403. `ApiExceptionHandler` renders; a handler exists only for a response a body cannot express, such as `SessionRevokedException`'s cookie clear in `auth/security/SessionRevokedExceptionAdvice`.
 - `PlannerConflictException`'s field is `actualVersion`, surfaced in JSON as the `serverVersion` problem property.
 - Errors answer `application/problem+json`: the code rides as the `code` property, the text as `detail`.
 - Typed degradation: DB/Redis/Lettuce failures map to 503 with `DB_UNAVAILABLE` / `AUTH_UNAVAILABLE` / `RATE_LIMIT_UNAVAILABLE` — deliberately not sent to Sentry.

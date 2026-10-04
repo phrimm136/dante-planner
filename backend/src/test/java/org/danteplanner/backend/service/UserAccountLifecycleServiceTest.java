@@ -4,12 +4,9 @@ import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserNotFoundException;
-import org.danteplanner.backend.comment.service.CommentAccountPurgeService;
-import org.danteplanner.backend.moderation.service.ModerationAccountPurgeService;
-import org.danteplanner.backend.planner.service.PlannerAccountPurgeService;
-import org.danteplanner.backend.planner.service.PlannerCatalogService;
+import org.danteplanner.backend.user.api.AccountLifecycleParticipant;
+import org.danteplanner.backend.user.api.SessionEndHandler;
 import org.danteplanner.backend.user.repository.UserRepository;
-import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -17,12 +14,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.RedisConnectionFailureException;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,19 +38,13 @@ class UserAccountLifecycleServiceTest {
     private UserRepository userRepository;
 
     @Mock
-    private PlannerAccountPurgeService plannerAccountPurgeService;
+    private AccountLifecycleParticipant firstParticipant;
 
     @Mock
-    private PlannerCatalogService plannerCatalogService;
+    private AccountLifecycleParticipant secondParticipant;
 
     @Mock
-    private CommentAccountPurgeService commentAccountPurgeService;
-
-    @Mock
-    private ModerationAccountPurgeService moderationAccountPurgeService;
-
-    @Mock
-    private TokenBlacklistService tokenBlacklistService;
+    private SessionEndHandler sessionEndHandler;
 
     private UserAccountLifecycleService lifecycleService;
 
@@ -65,11 +56,8 @@ class UserAccountLifecycleServiceTest {
     void setUp() {
         lifecycleService = new UserAccountLifecycleService(
                 userRepository,
-                plannerAccountPurgeService,
-                plannerCatalogService,
-                commentAccountPurgeService,
-                moderationAccountPurgeService,
-                tokenBlacklistService,
+                List.of(firstParticipant, secondParticipant),
+                sessionEndHandler,
                 GRACE_PERIOD_DAYS
         );
 
@@ -101,10 +89,10 @@ class UserAccountLifecycleServiceTest {
             assertTrue(scheduledDate.isAfter(expectedScheduleMin));
             assertTrue(scheduledDate.isBefore(expectedScheduleMax));
 
-            // Auth is token-only, so deletion must push token invalidation itself.
-            // The outcome form — a request carrying the old token is rejected — is only
-            // reachable through the filter chain, so it needs a MockMvc-tier test.
-            verify(tokenBlacklistService).invalidateUserTokens(testUser.getId());
+            var inOrder = inOrder(firstParticipant, secondParticipant, sessionEndHandler);
+            inOrder.verify(firstParticipant).accountDeactivated(testUser.getId());
+            inOrder.verify(secondParticipant).accountDeactivated(testUser.getId());
+            inOrder.verify(sessionEndHandler).endAllSessions(testUser.getId());
         }
 
         @Test
@@ -121,7 +109,19 @@ class UserAccountLifecycleServiceTest {
 
             // Assert
             assertEquals(existingScheduledAt, scheduledDate);
-            verify(tokenBlacklistService, never()).invalidateUserTokens(any()); // No re-invalidation
+            verify(firstParticipant, never()).accountDeactivated(any());
+            verify(sessionEndHandler, never()).endAllSessions(any());
+        }
+
+        @Test
+        @DisplayName("Should fail the deletion when the token store is unreachable")
+        void deleteAccount_WhenEndingSessionsFails_Propagates() {
+            when(userRepository.findWithLockById(testUser.getId())).thenReturn(Optional.of(testUser));
+            doThrow(new RedisConnectionFailureException("token store unreachable"))
+                    .when(sessionEndHandler).endAllSessions(testUser.getId());
+
+            assertThrows(RedisConnectionFailureException.class,
+                    () -> lifecycleService.deleteAccount(testUser.getId()));
         }
 
         @Test
@@ -161,6 +161,8 @@ class UserAccountLifecycleServiceTest {
             assertFalse(testUser.isDeleted());
             assertNull(testUser.getDeletedAt());
             assertNull(testUser.getPermanentDeleteScheduledAt());
+            verify(firstParticipant).accountReactivated(testUser.getId());
+            verify(secondParticipant).accountReactivated(testUser.getId());
         }
 
         @Test
@@ -192,6 +194,7 @@ class UserAccountLifecycleServiceTest {
 
             // Assert
             assertFalse(testUser.isDeleted());
+            verify(firstParticipant, never()).accountReactivated(any());
         }
     }
 
@@ -200,50 +203,38 @@ class UserAccountLifecycleServiceTest {
     class PerformHardDeleteTests {
 
         @Test
-        @DisplayName("Should anonymize authorship, sweep planner rows, then delete the user")
-        void performHardDelete_WhenUserOwnsPlanners_AnonymizesThenSweepsThenDeletes() {
-            List<UUID> plannerIds = List.of(UUID.randomUUID());
+        @DisplayName("Should reassign in every participant before any deletes, then delete the user")
+        void performHardDelete_WhenPurgeable_ReassignsEverywhereBeforeAnyDeletion() {
             when(userRepository.findWithLockPurgeable(eq(testUser.getId()), any(Instant.class)))
                     .thenReturn(Optional.of(testUser));
-            when(plannerAccountPurgeService.plannerIdsOwnedBy(testUser.getId())).thenReturn(plannerIds);
 
             lifecycleService.performHardDelete(testUser.getId(), Instant.now());
 
-            var inOrder = inOrder(plannerAccountPurgeService, commentAccountPurgeService,
-                    moderationAccountPurgeService, userRepository);
-            inOrder.verify(plannerAccountPurgeService)
-                    .reassignVotesToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
-            inOrder.verify(commentAccountPurgeService)
-                    .reassignAuthorshipToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
-            // The actor FK is RESTRICT, so the audit rows must change hands before the delete.
-            inOrder.verify(moderationAccountPurgeService)
-                    .reassignActionsToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
-            // Reports hold no-action FKs to the rows the sweep and the cascade remove, so they go first.
-            inOrder.verify(moderationAccountPurgeService).deleteReportsFor(plannerIds);
-            inOrder.verify(plannerAccountPurgeService).deleteProjectionsFor(plannerIds);
+            var inOrder = inOrder(sessionEndHandler, firstParticipant, secondParticipant, userRepository);
+            inOrder.verify(sessionEndHandler).endAllSessions(testUser.getId());
+            inOrder.verify(firstParticipant)
+                    .reassignToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
+            inOrder.verify(secondParticipant)
+                    .reassignToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
+            inOrder.verify(firstParticipant).deleteOwnedData(testUser.getId());
+            inOrder.verify(secondParticipant).deleteOwnedData(testUser.getId());
             // Last: the cascade off this row removes the planner cores the sweep left behind.
             inOrder.verify(userRepository).delete(testUser);
-            // A purged account's cookie would otherwise keep authenticating until natural expiry.
-            verify(tokenBlacklistService).invalidateUserTokens(testUser.getId());
         }
 
         @Test
-        @DisplayName("Should still anonymize authorship when the account owns no planners")
-        void performHardDelete_WhenUserOwnsNoPlanners_SkipsSweepButStillAnonymizes() {
+        @DisplayName("Should purge anyway when the token store is unreachable")
+        void performHardDelete_WhenEndingSessionsFails_StillPurges() {
             when(userRepository.findWithLockPurgeable(eq(testUser.getId()), any(Instant.class)))
                     .thenReturn(Optional.of(testUser));
-            when(plannerAccountPurgeService.plannerIdsOwnedBy(testUser.getId())).thenReturn(List.of());
+            doThrow(new RedisConnectionFailureException("token store unreachable"))
+                    .when(sessionEndHandler).endAllSessions(testUser.getId());
 
-            lifecycleService.performHardDelete(testUser.getId(), Instant.now());
+            assertTrue(lifecycleService.performHardDelete(testUser.getId(), Instant.now()));
 
-            verify(plannerAccountPurgeService)
-                    .reassignVotesToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
-            verify(commentAccountPurgeService)
-                    .reassignAuthorshipToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
-            verify(moderationAccountPurgeService)
-                    .reassignActionsToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
-            verify(moderationAccountPurgeService, never()).deleteReportsFor(any());
-            verify(plannerAccountPurgeService, never()).deleteProjectionsFor(any());
+            verify(firstParticipant)
+                    .reassignToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
+            verify(firstParticipant).deleteOwnedData(testUser.getId());
             verify(userRepository).delete(testUser);
         }
 
@@ -257,9 +248,7 @@ class UserAccountLifecycleServiceTest {
 
             assertFalse(deleted);
             verify(userRepository, never()).delete(any(User.class));
-            verify(tokenBlacklistService, never()).invalidateUserTokens(any());
-            verify(plannerAccountPurgeService, never()).reassignVotesToSentinel(any(), any());
-            verify(moderationAccountPurgeService, never()).reassignActionsToSentinel(any(), any());
+            verifyNoInteractions(firstParticipant, secondParticipant, sessionEndHandler);
         }
     }
 }
