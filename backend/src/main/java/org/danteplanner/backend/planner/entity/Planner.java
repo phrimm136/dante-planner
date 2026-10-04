@@ -5,10 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.PostPersist;
@@ -26,7 +23,6 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.springframework.data.domain.Persistable;
 
-import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
 
 import java.time.Instant;
@@ -50,10 +46,9 @@ public class Planner implements Persistable<UUID> {
     @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
     @Setter
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.CHAR)
@@ -186,11 +181,7 @@ public class Planner implements Persistable<UUID> {
     }
 
     public boolean isOwnedBy(Long userId) {
-        return user.getId().equals(userId);
-    }
-
-    public boolean isOwnerDeactivated() {
-        return user.isDeleted();
+        return this.userId.equals(userId);
     }
 
     public void softDelete() {

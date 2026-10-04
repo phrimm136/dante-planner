@@ -7,8 +7,8 @@ import org.danteplanner.backend.comment.exception.CommentNotFoundException;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.comment.validation.CommentAccessValidator;
-import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.service.PlannerAccessGuard;
+import org.danteplanner.backend.planner.api.PlannerThread;
+import org.danteplanner.backend.planner.api.PlannerAccess;
 import org.danteplanner.backend.user.api.UserSummary;
 import org.danteplanner.backend.user.api.Users;
 import org.springframework.stereotype.Service;
@@ -36,12 +36,12 @@ public class CommentQueryService {
     private final PlannerCommentRepository commentRepository;
     private final PlannerCommentVoteRepository commentVoteRepository;
     private final Users users;
-    private final PlannerAccessGuard accessGuard;
+    private final PlannerAccess plannerAccess;
     private final CommentAccessValidator accessValidator;
 
     @Transactional(readOnly = true)
     public List<CommentTreeNode> getCommentTree(UUID plannerId, Long currentUserId) {
-        Planner planner = accessGuard.requireExisting(plannerId);
+        PlannerThread planner = plannerAccess.requireExisting(plannerId);
 
         accessValidator.requireThreadVisible(planner, currentUserId);
 

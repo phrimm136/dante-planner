@@ -81,10 +81,10 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         testUser = TestDataFactory.createTestUser(userRepository, "test@example.com");
     }
 
-    private Planner buildPlanner(User owner, String title) {
+    private Planner buildPlanner(Long ownerId, String title) {
         Planner planner = Planner.builder()
                 .id(UUID.randomUUID())
-                .user(owner)
+                .userId(ownerId)
                 .plannerType(PlannerType.MIRROR_DUNGEON)
                 .build();
         planner.attach(
@@ -354,7 +354,7 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         @DisplayName("Missing planner title throws NOT NULL constraint exception")
         void notNullConstraint_WhenMissingTitle_ThrowsException() {
             assertThatThrownBy(() -> {
-                Planner planner = buildPlanner(testUser, null);
+                Planner planner = buildPlanner(testUser.getId(), null);
                 plannerRepository.save(planner);
                 entityManager.flush();
             }).satisfiesAnyOf(
@@ -448,14 +448,14 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         @Test
         @DisplayName("Empty string title allowed, null forbidden")
         void notNullConstraint_WhenEmptyStringAllowed_NullForbidden() {
-            Planner planner1 = buildPlanner(testUser, "");
+            Planner planner1 = buildPlanner(testUser.getId(), "");
             plannerRepository.save(planner1);
             assertThatNoException().isThrownBy(() -> entityManager.flush());
 
             entityManager.clear();
 
             assertThatThrownBy(() -> {
-                Planner planner2 = buildPlanner(testUser, null);
+                Planner planner2 = buildPlanner(testUser.getId(), null);
                 plannerRepository.save(planner2);
                 entityManager.flush();
             }).satisfiesAnyOf(
@@ -467,7 +467,7 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         @Test
         @DisplayName("Default value applied for published field (false)")
         void notNullConstraint_WhenDefaultValueApplied_PublishedFalse() {
-            Planner planner = buildPlanner(testUser, "Test");
+            Planner planner = buildPlanner(testUser.getId(), "Test");
             plannerRepository.save(planner);
             entityManager.flush();
 
@@ -478,7 +478,7 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         @Test
         @DisplayName("Default value applied for upvotes field (0)")
         void notNullConstraint_WhenDefaultValueApplied_UpvotesZero() {
-            Planner planner = buildPlanner(testUser, "Test");
+            Planner planner = buildPlanner(testUser.getId(), "Test");
             plannerRepository.save(planner);
             statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
             entityManager.flush();

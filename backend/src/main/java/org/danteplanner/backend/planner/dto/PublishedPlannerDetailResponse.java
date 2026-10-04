@@ -7,7 +7,7 @@ import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.shared.util.PlannerConstants;
-import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.user.api.UserProfile;
 
 import java.time.Instant;
 import java.util.Set;
@@ -49,16 +49,18 @@ public record PublishedPlannerDetailResponse(
 
     public static PublishedPlannerDetailResponse forAnonymous(
             Planner planner,
+            UserProfile author,
             long commentCount,
             boolean ownerNotificationsEnabled,
             int viewCount,
             int upvotes) {
-        return fromEntity(planner, false, false, false,
+        return fromEntity(planner, author, false, false, false,
                 commentCount, ownerNotificationsEnabled, viewCount, upvotes);
     }
 
     public static PublishedPlannerDetailResponse fromEntity(
             Planner planner,
+            UserProfile author,
             boolean hasUpvoted,
             boolean isSubscribed,
             boolean hasReported,
@@ -66,15 +68,14 @@ public record PublishedPlannerDetailResponse(
             boolean ownerNotificationsEnabled,
             int viewCount,
             int upvotes) {
-        User author = planner.getUser();
         return PublishedPlannerDetailResponse.builder()
                 .id(planner.getId())
                 .title(planner.getTitle())
                 .category(planner.getCategory())
                 .plannerType(planner.getPlannerType())
                 .selectedKeywords(planner.getSelectedKeywords())
-                .authorUsernameEpithet(author == null ? null : author.getUsernameEpithet())
-                .authorUsernameSuffix(author == null ? null : author.getUsernameSuffix())
+                .authorUsernameEpithet(author.getUsernameEpithet())
+                .authorUsernameSuffix(author.getUsernameSuffix())
                 .upvotes(upvotes)
                 .viewCount(viewCount)
                 .createdAt(planner.getCreatedAt())

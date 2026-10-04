@@ -18,7 +18,6 @@ import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.validation.floor.Stage;
-import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.sync.CarriedWrite;
@@ -190,11 +189,11 @@ public class PlannerCommandService {
         meterRegistry.counter(TOP_LEVEL_KEYWORDS_METRIC, "outcome", outcome).increment();
     }
 
-    private Planner buildAggregate(UUID id, User user, UpsertPlannerRequest request, PlannerDocument document,
+    private Planner buildAggregate(UUID id, Long userId, UpsertPlannerRequest request, PlannerDocument document,
             UUID deviceId) {
         Planner planner = Planner.builder()
                 .id(id)
-                .user(user)
+                .userId(userId)
                 .plannerType(request.plannerType())
                 .build();
         planner.attach(
@@ -218,7 +217,7 @@ public class PlannerCommandService {
     }
 
     UpsertedPlanner createAggregate(Long userId, UUID deviceId, UpsertPlannerRequest request) {
-        User user = accessGuard.getUser(userId);
+        accessGuard.requireUser(userId);
 
         limitValidator.requireRoomFor(plannerRepository.countActiveByUserId(userId), 1, maxPlannersPerUser);
 
@@ -231,7 +230,7 @@ public class PlannerCommandService {
         countTopLevelCopy(request.selectedKeywords(), document.keywords());
 
         Planner saved = plannerRepository.insert(
-                buildAggregate(UUID.fromString(request.id()), user, request, document, deviceId));
+                buildAggregate(UUID.fromString(request.id()), userId, request, document, deviceId));
         statsRepository.insert(PlannerStats.builder().plannerId(saved.getId()).build());
         log.info("Created planner {} for user {}", saved.getId(), userId);
 

@@ -1,12 +1,9 @@
 package org.danteplanner.backend.shared.config;
 
 import lombok.RequiredArgsConstructor;
-import org.danteplanner.backend.planner.entity.MDCategory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.data.web.config.EnableSpringDataWebSupport.PageSerializationMode;
-import org.springframework.format.FormatterRegistry;
-import org.springframework.core.convert.converter.Converter;
 import org.danteplanner.backend.shared.ratelimit.RateLimitInterceptor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -30,17 +27,5 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(rateLimitInterceptor).addPathPatterns("/api/**");
-    }
-
-    @Override
-    public void addFormatters(FormatterRegistry registry) {
-        registry.addConverter(new StringToMDCategoryConverter());
-    }
-
-    private static class StringToMDCategoryConverter implements Converter<String, MDCategory> {
-        @Override
-        public MDCategory convert(String source) {
-            return MDCategory.fromValue(source);
-        }
     }
 }

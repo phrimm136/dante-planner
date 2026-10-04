@@ -24,7 +24,10 @@ import org.danteplanner.backend.planner.validation.PlannerDocument;
 import org.danteplanner.backend.planner.validation.floor.FloorRules;
 import org.danteplanner.backend.planner.validation.floor.Stage;
 import org.danteplanner.backend.planner.validation.sinner.SinnerIdValidator;
+import org.danteplanner.backend.user.api.UserProfile;
 import org.danteplanner.backend.user.entity.User;
+import org.springframework.beans.BeanUtils;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -168,6 +171,15 @@ public class TestDataFactory {
                 .usernameEpithet("W_CORP")
                 .usernameSuffix("test1")
                 .build();
+    }
+
+    public static UserProfile profileOf(User user) {
+        UserProfile profile = BeanUtils.instantiateClass(UserProfile.class);
+        ReflectionTestUtils.setField(profile, "id", user.getId());
+        ReflectionTestUtils.setField(profile, "usernameEpithet", user.getUsernameEpithet());
+        ReflectionTestUtils.setField(profile, "usernameSuffix", user.getUsernameSuffix());
+        ReflectionTestUtils.setField(profile, "deletedAt", user.getDeletedAt());
+        return profile;
     }
 
     public static User createAdmin(UserRepository userRepository, String email) {
@@ -326,7 +338,7 @@ public class TestDataFactory {
             String document = selectedKeywords == null ? content : withSelectedKeywords(content, selectedKeywords);
             Planner planner = Planner.builder()
                     .id(id)
-                    .user(owner)
+                    .userId(owner.getId())
                     .plannerType(plannerType)
                     .build();
             planner.attach(

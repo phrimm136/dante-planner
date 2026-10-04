@@ -2,8 +2,8 @@ package org.danteplanner.backend.comment.validation;
 
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.exception.CommentForbiddenException;
-import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
+import org.danteplanner.backend.planner.api.PlannerNotFoundException;
+import org.danteplanner.backend.planner.api.PlannerThread;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -11,12 +11,12 @@ import java.util.UUID;
 @Component
 public class CommentAccessValidator {
 
-    public void requireThreadVisible(Planner planner, Long currentUserId) {
+    public void requireThreadVisible(PlannerThread planner, Long currentUserId) {
         if (currentUserId != null && planner.isOwnedBy(currentUserId)) {
             return;
         }
-        if (!planner.isPublished() || planner.isOwnerDeactivated()) {
-            throw new PlannerNotFoundException(planner.getId());
+        if (!planner.published() || planner.ownerDeactivated()) {
+            throw new PlannerNotFoundException(planner.id());
         }
     }
 

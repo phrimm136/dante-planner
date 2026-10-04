@@ -8,6 +8,7 @@ import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PublishedPlannerRow;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.moderation.service.PlannerReportService;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -91,7 +92,7 @@ class PlannerEngagementServiceTest {
                 plannerStatsService,
                 plannerCatalogService,
                 domainEventRecorder,
-                new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository),
+                new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository),
                 reportService,
                 new VoteUniquenessValidator(),
                 recommendedThreshold
@@ -133,7 +134,7 @@ class PlannerEngagementServiceTest {
                 new PlannerVoteId(testUser.getId(), plannerId);
 
             when(plannerRepository.findPublishedAggregate(plannerId))
-                    .thenReturn(Optional.of(planner));
+                    .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(testUser))));
             when(plannerVoteRepository.existsById(voteId))
                     .thenReturn(true);
 
@@ -159,7 +160,7 @@ class PlannerEngagementServiceTest {
                 new PlannerVoteId(testUser.getId(), plannerId);
 
             when(plannerRepository.findPublishedAggregate(plannerId))
-                    .thenReturn(Optional.of(planner));
+                    .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(testUser))));
             when(plannerVoteRepository.existsById(voteId))
                     .thenReturn(false);
             when(plannerVoteRepository.insert(any(PlannerVote.class)))
@@ -190,7 +191,7 @@ class PlannerEngagementServiceTest {
             UUID plannerId = planner.getId();
 
             when(plannerRepository.findPublishedAggregate(plannerId))
-                    .thenReturn(Optional.of(planner));
+                    .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(testUser))));
             when(plannerVoteRepository.existsById(any(PlannerVoteId.class))).thenReturn(false);
             when(plannerVoteRepository.insert(any(PlannerVote.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
@@ -202,7 +203,7 @@ class PlannerEngagementServiceTest {
 
             verify(domainEventRecorder).recordDomainEvent(
                     DomainEventType.PLANNER_RECOMMENDED, plannerId,
-                    Map.of("ownerId", planner.getUser().getId()));
+                    Map.of("ownerId", planner.getUserId()));
         }
 
         @Test
@@ -212,7 +213,7 @@ class PlannerEngagementServiceTest {
             UUID plannerId = planner.getId();
 
             when(plannerRepository.findPublishedAggregate(plannerId))
-                    .thenReturn(Optional.of(planner));
+                    .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(testUser))));
             when(plannerVoteRepository.existsById(any(PlannerVoteId.class))).thenReturn(false);
             when(plannerVoteRepository.insert(any(PlannerVote.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
@@ -232,7 +233,7 @@ class PlannerEngagementServiceTest {
             UUID plannerId = planner.getId();
 
             when(plannerRepository.findPublishedAggregate(plannerId))
-                    .thenReturn(Optional.of(planner));
+                    .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(testUser))));
             when(plannerVoteRepository.existsById(any(PlannerVoteId.class))).thenReturn(false);
             when(plannerVoteRepository.insert(any(PlannerVote.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));

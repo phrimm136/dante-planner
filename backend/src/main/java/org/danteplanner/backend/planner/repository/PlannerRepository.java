@@ -1,8 +1,9 @@
 package org.danteplanner.backend.planner.repository;
 
 
+import org.danteplanner.backend.planner.api.PlannerNotificationTarget;
+import org.danteplanner.backend.planner.api.PlannerThread;
 import org.danteplanner.backend.planner.dto.PlannerCoreInfo;
-import org.danteplanner.backend.planner.dto.PlannerNotificationTarget;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,77 +20,88 @@ import java.util.UUID;
 @Repository
 public interface PlannerRepository extends JpaRepository<Planner, UUID> {
 
-    String AGGREGATE_LOAD = "SELECT p FROM Planner p "
-            + "JOIN FETCH p.content c JOIN FETCH p.publication JOIN FETCH p.moderation "
-            + "JOIN FETCH p.user u ";
+    String AGGREGATE_JOINS = "JOIN FETCH p.content c JOIN FETCH p.publication JOIN FETCH p.moderation ";
+
+    String AGGREGATE_LOAD = "SELECT p FROM Planner p " + AGGREGATE_JOINS;
 
     @Query(value = "SELECT p.id AS id, c.title AS title, c.category AS category, "
             + "p.plannerType AS plannerType, c.status AS status, c.syncVersion AS syncVersion, "
             + "c.lastModifiedAt AS lastModifiedAt, c.deletedAt AS deletedAt "
             + "FROM Planner p JOIN PlannerContent c ON c.plannerId = p.id "
-            + "WHERE p.user.id = :userId AND c.deletedAt IS NULL "
+            + "WHERE p.userId = :userId AND c.deletedAt IS NULL "
             + "ORDER BY c.lastModifiedAt DESC",
             countQuery = "SELECT COUNT(p) FROM Planner p JOIN PlannerContent c ON c.plannerId = p.id "
-            + "WHERE p.user.id = :userId AND c.deletedAt IS NULL")
+            + "WHERE p.userId = :userId AND c.deletedAt IS NULL")
     Page<PlannerSummaryRow> findOwnerSummaries(@Param("userId") Long userId, Pageable pageable);
 
     @Query(value = "SELECT p.id AS id, c.title AS title, c.category AS category, "
             + "p.plannerType AS plannerType, c.status AS status, c.syncVersion AS syncVersion, "
             + "c.lastModifiedAt AS lastModifiedAt, c.deletedAt AS deletedAt "
             + "FROM Planner p JOIN PlannerContent c ON c.plannerId = p.id "
-            + "WHERE p.user.id = :userId "
+            + "WHERE p.userId = :userId "
             + "ORDER BY c.lastModifiedAt DESC",
             countQuery = "SELECT COUNT(p) FROM Planner p JOIN PlannerContent c ON c.plannerId = p.id "
-            + "WHERE p.user.id = :userId")
+            + "WHERE p.userId = :userId")
     Page<PlannerSummaryRow> findOwnerSummariesIncludingDeleted(
             @Param("userId") Long userId, Pageable pageable);
 
-    @Query(AGGREGATE_LOAD + "WHERE p.id = :id AND p.user.id = :userId AND c.deletedAt IS NULL")
+    @Query(AGGREGATE_LOAD + "WHERE p.id = :id AND p.userId = :userId AND c.deletedAt IS NULL")
     Optional<Planner> findAggregateForOwner(@Param("id") UUID id, @Param("userId") Long userId);
 
-    @Query(AGGREGATE_LOAD + "WHERE p.id IN :ids AND p.user.id = :userId AND c.deletedAt IS NULL")
+    @Query(AGGREGATE_LOAD + "WHERE p.id IN :ids AND p.userId = :userId AND c.deletedAt IS NULL")
     List<Planner> findAggregatesForOwner(@Param("ids") Collection<UUID> ids,
             @Param("userId") Long userId);
 
     @Query(AGGREGATE_LOAD + "WHERE p.id = :id AND c.deletedAt IS NULL")
     Optional<Planner> findAggregate(@Param("id") UUID id);
 
-    @Query(AGGREGATE_LOAD + "WHERE p.id = :id AND p.publication.published = TRUE AND c.deletedAt IS NULL "
-            + "AND u.deletedAt IS NULL")
-    Optional<Planner> findPublishedAggregate(@Param("id") UUID id);
+    @Query("SELECT new org.danteplanner.backend.planner.repository.PublishedPlannerRow(p, a) "
+            + "FROM Planner p " + AGGREGATE_JOINS + "JOIN UserProfile a ON a.id = p.userId "
+            + "WHERE p.id = :id AND p.publication.published = TRUE AND c.deletedAt IS NULL "
+            + "AND a.deletedAt IS NULL")
+    Optional<PublishedPlannerRow> findPublishedAggregate(@Param("id") UUID id);
 
     @Query("""
-            SELECT new org.danteplanner.backend.planner.dto.PlannerNotificationTarget(
-                p.id, c.title, p.user.id, pub.ownerNotificationsEnabled)
+            SELECT new org.danteplanner.backend.planner.api.PlannerThread(
+                p.id, p.userId, pub.published, CASE WHEN a.deletedAt IS NULL THEN FALSE ELSE TRUE END)
+            FROM Planner p JOIN p.content c JOIN p.publication pub JOIN UserProfile a ON a.id = p.userId
+            WHERE p.id = :id AND c.deletedAt IS NULL
+            """)
+    Optional<PlannerThread> findThread(@Param("id") UUID id);
+
+    @Query("""
+            SELECT new org.danteplanner.backend.planner.api.PlannerNotificationTarget(
+                p.id, c.title, p.userId, pub.ownerNotificationsEnabled)
             FROM Planner p JOIN p.content c JOIN p.publication pub
             WHERE p.id = :id AND c.deletedAt IS NULL
             """)
     Optional<PlannerNotificationTarget> findNotificationTarget(@Param("id") UUID id);
 
-    @Query("SELECT COUNT(p) FROM Planner p JOIN p.content c WHERE p.user.id = :userId AND c.deletedAt IS NULL")
+    @Query("SELECT COUNT(p) FROM Planner p JOIN p.content c WHERE p.userId = :userId AND c.deletedAt IS NULL")
     long countActiveByUserId(@Param("userId") Long userId);
 
     @Query("SELECT COUNT(p) > 0 FROM Planner p JOIN p.content c WHERE p.id = :id AND c.deletedAt IS NULL")
     boolean existsActiveById(@Param("id") UUID id);
 
-    @Query("SELECT COUNT(p) > 0 FROM Planner p JOIN p.content c JOIN p.publication pub JOIN p.user u "
-            + "WHERE p.id = :id AND pub.published = TRUE AND c.deletedAt IS NULL AND u.deletedAt IS NULL")
+    @Query("SELECT COUNT(p) > 0 FROM Planner p JOIN p.content c JOIN p.publication pub "
+            + "JOIN UserProfile a ON a.id = p.userId "
+            + "WHERE p.id = :id AND pub.published = TRUE AND c.deletedAt IS NULL AND a.deletedAt IS NULL")
     boolean existsPublishedById(@Param("id") UUID id);
 
     @Query("SELECT p.id FROM Planner p JOIN p.content c JOIN p.publication pub "
-            + "WHERE p.user.id = :userId AND pub.published = TRUE AND c.deletedAt IS NULL")
+            + "WHERE p.userId = :userId AND pub.published = TRUE AND c.deletedAt IS NULL")
     List<UUID> findPublishedIdsOwnedBy(@Param("userId") Long userId);
 
-    @Query("SELECT p.user.id AS userId, c.deletedAt AS deletedAt "
+    @Query("SELECT p.userId AS userId, c.deletedAt AS deletedAt "
             + "FROM Planner p JOIN p.content c WHERE p.id = :id")
     Optional<PlannerOwnershipRow> findOwnershipById(@Param("id") UUID id);
 
     @Query("SELECT new org.danteplanner.backend.planner.dto.PlannerCoreInfo("
-            + "p.id, p.createdAt, u.usernameEpithet, u.usernameSuffix) "
-            + "FROM Planner p JOIN p.user u WHERE p.id IN :ids")
+            + "p.id, p.createdAt, a.usernameEpithet, a.usernameSuffix) "
+            + "FROM Planner p JOIN UserProfile a ON a.id = p.userId WHERE p.id IN :ids")
     List<PlannerCoreInfo> findCoreInfoByIds(@Param("ids") Collection<UUID> ids);
 
-    @Query("SELECT p.id FROM Planner p WHERE p.user.id = :userId")
+    @Query("SELECT p.id FROM Planner p WHERE p.userId = :userId")
     List<UUID> findIdsByUserId(@Param("userId") Long userId);
 
     @Query(value = AGGREGATE_LOAD

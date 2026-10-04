@@ -23,7 +23,7 @@ import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerLimitExceededException;
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
-import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
+import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerOwnershipRow;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.user.api.UserNotFoundException;
@@ -95,7 +95,7 @@ class PlannerCommandServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        PlannerAccessGuard accessGuard = new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository);
+        PlannerAccessGuard accessGuard = new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository);
 
         commandService = new PlannerCommandService(
                 plannerRepository,
@@ -154,7 +154,7 @@ class PlannerCommandServiceTest {
     private Planner testPlanner(long syncVersion, boolean published) {
         Planner planner = Planner.builder()
                 .id(UUID.randomUUID())
-                .user(testUser)
+                .userId(testUser.getId())
                 .plannerType(PlannerType.MIRROR_DUNGEON)
                 .createdAt(Instant.now())
                 .build();

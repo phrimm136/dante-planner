@@ -5,7 +5,8 @@ import org.danteplanner.backend.moderation.api.PlannerReports;
 import org.danteplanner.backend.planner.dto.CatalogQuery;
 import org.danteplanner.backend.planner.dto.PlannerCoreInfo;
 import org.danteplanner.backend.planner.dto.PlannerFlagsResponse;
-import org.danteplanner.backend.planner.dto.PlannerNotificationTarget;
+import org.danteplanner.backend.planner.api.PlannerNotificationTarget;
+import org.danteplanner.backend.planner.api.PublishedPlanners;
 import org.danteplanner.backend.planner.dto.PlannerStatsResponse;
 import org.danteplanner.backend.planner.dto.PublicPlannerResponse;
 import org.danteplanner.backend.planner.dto.PublishedPlannerDetailResponse;
@@ -23,6 +24,7 @@ import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
+import org.danteplanner.backend.planner.repository.PublishedPlannerRow;
 import org.danteplanner.backend.planner.precondition.CatalogReadValidator;
 import org.danteplanner.backend.shared.util.ViewerHashUtil;
 import org.springframework.stereotype.Service;
@@ -46,7 +48,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
-public class PublishedPlannerQueryService {
+public class PublishedPlannerQueryService implements PublishedPlanners {
 
     private static final PlannerStats NO_STATS = PlannerStats.builder().build();
     private static final PlannerCoreInfo NO_CORE = PlannerCoreInfo.absent();
@@ -85,6 +87,7 @@ public class PublishedPlannerQueryService {
         this.catalogReadValidator = catalogReadValidator;
     }
 
+    @Override
     @Transactional(readOnly = true)
     public Optional<PlannerNotificationTarget> notificationTargetOf(UUID plannerId) {
         return plannerRepository.findNotificationTarget(plannerId);
@@ -172,7 +175,8 @@ public class PublishedPlannerQueryService {
     @Transactional(readOnly = true)
     public PublishedPlannerDetailResponse getPublishedPlanner(
             UUID plannerId, Long userId, String viewerIdentity, String userAgent) {
-        Planner planner = accessGuard.requirePublished(plannerId);
+        PublishedPlannerRow published = accessGuard.requirePublishedWithAuthor(plannerId);
+        Planner planner = published.planner();
 
         String viewerHash = userId != null
                 ? ViewerHashUtil.hashForAuthenticatedUser(userId, plannerId)
@@ -189,7 +193,7 @@ public class PublishedPlannerQueryService {
 
         if (userId == null) {
             return PublishedPlannerDetailResponse.forAnonymous(
-                    planner, commentCount, ownerNotificationsEnabled, viewCount, upvotes);
+                    planner, published.author(), commentCount, ownerNotificationsEnabled, viewCount, upvotes);
         }
 
         final boolean hasUpvoted = hasUpvoted(plannerId, userId);
@@ -197,7 +201,7 @@ public class PublishedPlannerQueryService {
         final boolean hasReported = reportService.hasReported(userId, plannerId);
 
         return PublishedPlannerDetailResponse.fromEntity(
-                planner, hasUpvoted, isSubscribed, hasReported,
+                planner, published.author(), hasUpvoted, isSubscribed, hasReported,
                 commentCount, ownerNotificationsEnabled, viewCount, upvotes);
     }
 
@@ -220,6 +224,7 @@ public class PublishedPlannerQueryService {
                 planner.isOwnedBy(userId) && planner.isOwnerNotificationsEnabled());
     }
 
+    @Override
     @Transactional(readOnly = true)
     public boolean isPublished(UUID plannerId) {
         return plannerRepository.existsPublishedById(plannerId);

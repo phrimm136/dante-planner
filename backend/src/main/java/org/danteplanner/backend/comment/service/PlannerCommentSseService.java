@@ -7,7 +7,7 @@ import org.danteplanner.backend.shared.sse.SseHeartbeatWorkerConfig;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.planner.service.PlannerAccessGuard;
+import org.danteplanner.backend.planner.api.PlannerAccess;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -31,19 +31,19 @@ public class PlannerCommentSseService extends AbstractSseService<UUID> {
     private static final int MAX_CONNECTIONS_PER_PLANNER = 500;
 
     private final ObjectMapper objectMapper;
-    private final PlannerAccessGuard plannerAccessGuard;
+    private final PlannerAccess plannerAccess;
 
     public PlannerCommentSseService(
             ObjectMapper objectMapper,
-            PlannerAccessGuard plannerAccessGuard,
+            PlannerAccess plannerAccess,
             @Qualifier(SseHeartbeatWorkerConfig.SSE_HEARTBEAT_WORKER) TaskExecutor heartbeatWorker) {
         super(heartbeatWorker);
         this.objectMapper = objectMapper;
-        this.plannerAccessGuard = plannerAccessGuard;
+        this.plannerAccess = plannerAccess;
     }
 
     public SseEmitter subscribe(UUID plannerId, UUID deviceId, Long userId) throws IOException {
-        plannerAccessGuard.checkPublished(plannerId);
+        plannerAccess.checkPublished(plannerId);
         SseEmitter emitter = register(plannerId, deviceId, userId);
         log.debug("Comment SSE subscribed: planner={}, device={}", plannerId, deviceId);
         return emitter;

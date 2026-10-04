@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * <p>{@code shared} is intended as a dependency sink. It is not a <em>pure</em> sink today: the
  * security filter reaches {@code user}/{@code auth.token}, and a few config classes read
- * {@code user}/{@code planner} types — those out-edges are inherent while those classes live in
+ * {@code user} types — those out-edges are inherent while those classes live in
  * {@code shared}. The
  * {@link #shared_should_not_depend_on_admin_or_notification} rule freezes the sink in its true,
  * currently-passing form: {@code shared} must not grow edges into {@code admin} or
@@ -39,9 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * <p>The read seam {@code shared.readpath} is held to a stricter, feature-agnostic contract by
  * {@link #shared_readpath_must_not_depend_on_planner}: it dereferences entities through opaque
  * suppliers and a base {@code EntityNotFoundException}, so it must carry no dependency on
- * {@code planner} (or any feature). The broader {@code shared}-wide planner edges that remain
- * (a config class reading a planner entity) are inherent to those classes living in
- * {@code shared} and are out of this rule's scope.</p>
+ * {@code planner} (or any feature).</p>
  *
  * <p>The rules above constrain which features may see each other at all. The internals rules below
  * constrain how: a feature's {@code ..repository..}, {@code ..validation..}, {@code ..precondition..},
@@ -65,25 +63,10 @@ class FeatureBoundaryTest {
     private static final List<String> INTERNAL_PACKAGES =
             List.of("repository", "validation", "precondition", "gamedata", "sync", "searchindex", "entity");
 
-    private static final Set<String> PLANNER_INTERNALS_FROZEN = Set.of(
-            MAIN + "comment.service.CommentEngagementService",
-            MAIN + "comment.validation.CommentAccessValidator",
-            MAIN + "shared.config.WebConfig");
-
-    /**
-     * The widest of the lists: {@code user.entity} carries the account types the whole tree reads —
-     * {@code User} on a planner.
-     */
     private static final Set<String> USER_INTERNALS_FROZEN = Set.of(
             MAIN + "moderation.controller.ModerationController",
             MAIN + "moderation.service.ModerationPolicy",
             MAIN + "moderation.service.UserModerationService",
-            MAIN + "planner.dto.PlannerPublishedPayload",
-            MAIN + "planner.dto.PublishedPlannerDetailResponse",
-            MAIN + "planner.entity.Planner",
-            MAIN + "planner.service.PlannerAccessGuard",
-            MAIN + "planner.service.PlannerCommandService",
-            MAIN + "planner.service.PlannerEngagementService",
             MAIN + "shared.security.JwtAuthenticationFilter",
             MAIN + "shared.sse.SseService");
 
@@ -91,7 +74,7 @@ class FeatureBoundaryTest {
             "comment", Set.of(),
             "moderation", Set.of(),
             "notification", Set.of(),
-            "planner", PLANNER_INTERNALS_FROZEN,
+            "planner", Set.of(),
             "user", USER_INTERNALS_FROZEN);
 
     @ArchTest

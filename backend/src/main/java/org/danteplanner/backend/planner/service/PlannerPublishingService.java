@@ -61,7 +61,7 @@ public class PlannerPublishingService {
         accessGuard.checkNotRestricted(userId);
         accessGuard.holdActiveAccount(userId);
 
-        return applyPublish(userId, accessGuard.requireExisting(plannerId));
+        return applyPublish(userId, accessGuard.requireAggregate(plannerId));
     }
 
     @Transactional
@@ -75,7 +75,7 @@ public class PlannerPublishingService {
 
     @Transactional
     public PlannerResponse unpublish(Long userId, UUID plannerId) {
-        return applyUnpublish(userId, accessGuard.requireExisting(plannerId));
+        return applyUnpublish(userId, accessGuard.requireAggregate(plannerId));
     }
 
     private void requireTitleAfterUpsert(Long userId, UUID plannerId, UpsertPlannerRequest content) {
@@ -139,7 +139,7 @@ public class PlannerPublishingService {
 
     @Transactional
     public Planner withdrawFromPublicView(UUID plannerId, Withdrawal withdrawal) {
-        Planner planner = accessGuard.requireExisting(plannerId);
+        Planner planner = accessGuard.requireAggregate(plannerId);
 
         if (!withdrawal.apply(planner).changed()) {
             return planner;
@@ -151,7 +151,7 @@ public class PlannerPublishingService {
 
     @Transactional
     public Planner changeRecommendedListing(UUID plannerId, Consumer<Planner> change) {
-        Planner planner = accessGuard.requireExisting(plannerId);
+        Planner planner = accessGuard.requireAggregate(plannerId);
 
         change.accept(planner);
         plannerCatalogService.refreshRecommended(plannerId);
@@ -171,7 +171,7 @@ public class PlannerPublishingService {
 
     @Transactional
     public ToggleOwnerNotificationsResponse toggleOwnerNotifications(Long userId, UUID plannerId, boolean enabled) {
-        Planner planner = accessGuard.requireExisting(plannerId);
+        Planner planner = accessGuard.requireAggregate(plannerId);
 
         ownershipValidator.requireOwner(planner, userId);
 

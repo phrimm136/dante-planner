@@ -56,7 +56,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import org.danteplanner.backend.shared.exception.EntityNotFoundException;
-import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
+import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 
 /**
  * Phase-3 acceptance test (INV1): a replica {@code byId} miss re-checks the primary before
@@ -67,7 +67,7 @@ import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
  * is {@code @Transactional(readOnly = true)} and therefore routes to the stale replica — a genuine
  * miss. The contract: the seam re-checks the primary, finds the entity, serves it, and increments
  * {@code replica_miss_promoted_total}. The seam is a pass-through today, so the miss surfaces as a
- * {@link org.danteplanner.backend.planner.exception.PlannerNotFoundException} where a promotion was
+ * {@link org.danteplanner.backend.planner.api.PlannerNotFoundException} where a promotion was
  * expected.</p>
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)

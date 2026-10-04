@@ -1,6 +1,7 @@
 package org.danteplanner.backend.planner.service;
 
 import lombok.RequiredArgsConstructor;
+import org.danteplanner.backend.planner.api.PlannerCommentCounts;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -13,15 +14,17 @@ import java.util.UUID;
  */
 @Service
 @RequiredArgsConstructor
-public class PlannerStatsService {
+public class PlannerStatsService implements PlannerCommentCounts {
 
     private final PlannerStatsRepository plannerStatsRepository;
 
+    @Override
     @Transactional(propagation = Propagation.MANDATORY)
     public void incrementCommentCount(UUID plannerId) {
         plannerStatsRepository.incrementCommentCount(plannerId);
     }
 
+    @Override
     @Transactional(propagation = Propagation.MANDATORY)
     public void decrementCommentCount(UUID plannerId) {
         plannerStatsRepository.decrementCommentCount(plannerId);

@@ -11,8 +11,8 @@ import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.validation.CommentAccessValidator;
 import org.danteplanner.backend.comment.validation.CommentAuthorshipValidator;
 import org.danteplanner.backend.comment.validation.CommentStateValidator;
-import org.danteplanner.backend.planner.service.PlannerAccessGuard;
-import org.danteplanner.backend.planner.service.PlannerStatsService;
+import org.danteplanner.backend.planner.api.PlannerAccess;
+import org.danteplanner.backend.planner.api.PlannerCommentCounts;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.danteplanner.backend.shared.util.CommentConstants;
@@ -34,17 +34,17 @@ public class CommentCommandService {
     private final PlannerCommentRepository commentRepository;
     private final CommentQueryService commentQueryService;
     private final DomainEventRecorder domainEventRecorder;
-    private final PlannerAccessGuard accessGuard;
-    private final PlannerStatsService plannerStatsService;
+    private final PlannerAccess plannerAccess;
+    private final PlannerCommentCounts plannerCommentCounts;
     private final CommentAccessValidator accessValidator;
     private final CommentAuthorshipValidator authorshipValidator;
     private final CommentStateValidator stateValidator;
 
     @Transactional
     public CreateCommentResponse createComment(UUID plannerId, Long userId, UUID deviceId, CreateCommentRequest request) {
-        accessGuard.checkNotRestricted(userId);
+        plannerAccess.checkNotRestricted(userId);
 
-        accessGuard.checkPublished(plannerId);
+        plannerAccess.checkPublished(plannerId);
 
         int depth = 0;
         Long effectiveParentId = null;
@@ -66,7 +66,7 @@ public class CommentCommandService {
 
         PlannerComment comment = new PlannerComment(plannerId, userId, request.content(), effectiveParentId, depth);
         PlannerComment saved = commentRepository.insert(comment);
-        plannerStatsService.incrementCommentCount(plannerId);
+        plannerCommentCounts.incrementCommentCount(plannerId);
 
         if (effectiveParentId == null) {
             domainEventRecorder.recordDomainEvent(DomainEventType.COMMENT_RECEIVED, plannerId,
@@ -83,13 +83,13 @@ public class CommentCommandService {
 
     @Transactional
     public CreateCommentResponse createReply(UUID parentPublicId, Long userId, UUID deviceId, String content) {
-        accessGuard.checkNotRestricted(userId);
+        plannerAccess.checkNotRestricted(userId);
 
         PlannerComment parent = commentQueryService.requireByPublicId(parentPublicId);
 
         UUID plannerId = parent.getPlannerId();
 
-        accessGuard.checkPublished(plannerId);
+        plannerAccess.checkPublished(plannerId);
 
         stateValidator.requireReplyable(parent);
 
@@ -102,7 +102,7 @@ public class CommentCommandService {
 
         PlannerComment reply = new PlannerComment(plannerId, userId, content, effectiveParentId, depth);
         PlannerComment saved = commentRepository.insert(reply);
-        plannerStatsService.incrementCommentCount(plannerId);
+        plannerCommentCounts.incrementCommentCount(plannerId);
 
         domainEventRecorder.recordDomainEvent(DomainEventType.REPLY_RECEIVED, plannerId,
                 Map.of("replyId", saved.getId()));
@@ -114,7 +114,7 @@ public class CommentCommandService {
 
     @Transactional
     public UpdateCommentResponse updateComment(UUID commentPublicId, Long userId, UpdateCommentRequest request) {
-        accessGuard.checkNotRestricted(userId);
+        plannerAccess.checkNotRestricted(userId);
 
         PlannerComment comment = commentQueryService.requireByPublicId(commentPublicId);
 
@@ -132,7 +132,7 @@ public class CommentCommandService {
         // The withdrawal must precede the counter: decrementing detaches the comment, and a
         // mutation made after it would never reach the row.
         comment.softDelete();
-        plannerStatsService.decrementCommentCount(comment.getPlannerId());
+        plannerCommentCounts.decrementCommentCount(comment.getPlannerId());
     }
 
     @Transactional

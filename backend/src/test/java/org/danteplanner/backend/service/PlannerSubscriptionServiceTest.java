@@ -4,7 +4,7 @@ import org.danteplanner.backend.user.service.UsersApiAdapter;
 
 import org.danteplanner.backend.planner.entity.PlannerSubscription;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
+import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerSubscriptionRepository;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
@@ -52,7 +52,7 @@ class PlannerSubscriptionServiceTest {
     @BeforeEach
     void setUp() {
         subscriptionService = new PlannerSubscriptionService(
-                subscriptionRepository, new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository));
+                subscriptionRepository, new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository));
 
         testUser = TestDataFactory.unsavedUser(1L);
 

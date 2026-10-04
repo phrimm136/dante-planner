@@ -7,7 +7,7 @@ import org.danteplanner.backend.moderation.service.ModerationAuditService;
 import org.danteplanner.backend.moderation.service.PlannerModerationService;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerType;
-import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
+import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.planner.service.PlannerModerationTargetAdapter;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
 import org.danteplanner.backend.support.TestDataFactory;

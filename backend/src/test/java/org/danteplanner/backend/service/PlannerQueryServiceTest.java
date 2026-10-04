@@ -9,7 +9,7 @@ import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
+import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerSummaryRow;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -57,7 +57,7 @@ class PlannerQueryServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        PlannerAccessGuard accessGuard = new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository);
+        PlannerAccessGuard accessGuard = new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository);
         queryService = new PlannerQueryService(plannerRepository, accessGuard);
 
         testUser = TestDataFactory.unsavedUser(1L);

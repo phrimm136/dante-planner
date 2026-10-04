@@ -50,7 +50,7 @@ class PlannerDeleteRestrictionTest {
 
     @BeforeEach
     void setUp() {
-        accessGuard = new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository);
+        accessGuard = new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository);
         commandService = new PlannerCommandService(
                 plannerRepository,
                 mock(PlannerStatsRepository.class),
@@ -72,7 +72,7 @@ class PlannerDeleteRestrictionTest {
     private Planner ownedPlanner(boolean published) {
         Planner planner = Planner.builder()
                 .id(UUID.randomUUID())
-                .user(owner)
+                .userId(owner.getId())
                 .plannerType(PlannerType.MIRROR_DUNGEON)
                 .createdAt(Instant.now())
                 .build();

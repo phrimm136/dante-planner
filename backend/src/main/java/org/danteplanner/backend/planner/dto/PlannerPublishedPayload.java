@@ -1,7 +1,7 @@
 package org.danteplanner.backend.planner.dto;
 
 import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.user.api.UserProfile;
 
 public record PlannerPublishedPayload(
     String plannerId,
@@ -10,12 +10,11 @@ public record PlannerPublishedPayload(
     String authorSuffix
 ) {
 
-    public static PlannerPublishedPayload fromEntity(Planner planner) {
-        User author = planner.getUser();
+    public static PlannerPublishedPayload fromEntity(Planner planner, UserProfile author) {
         return new PlannerPublishedPayload(
                 planner.getId().toString(),
                 planner.getTitle(),
-                author == null ? null : author.getUsernameEpithet(),
-                author == null ? null : author.getUsernameSuffix());
+                author.getUsernameEpithet(),
+                author.getUsernameSuffix());
     }
 }

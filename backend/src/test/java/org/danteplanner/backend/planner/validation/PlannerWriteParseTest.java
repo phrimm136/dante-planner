@@ -79,7 +79,7 @@ class PlannerWriteParseTest {
                 contentValidator,
                 contentVersionValidator,
                 plannerCatalogService,
-                new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository),
+                new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository),
                 new PlannerCategoryValidator(),
                 new PlannerLimitValidator(),
                 new PlannerOwnershipValidator(),

@@ -16,11 +16,12 @@ import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
+import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.shared.entity.ContentEntityType;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PublishedPlannerRow;
 import org.danteplanner.backend.planner.service.PlannerViewRecorder;
 import org.danteplanner.backend.planner.service.RedisViewRecorder;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
@@ -100,7 +101,7 @@ class PublishedPlannerQueryServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        PlannerAccessGuard accessGuard = new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository);
+        PlannerAccessGuard accessGuard = new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository);
 
         publishedQueryService = new PublishedPlannerQueryService(
                 plannerRepository,
@@ -314,7 +315,7 @@ class PublishedPlannerQueryServiceTest {
 
         private void mockNewView(UUID plannerId) {
             when(plannerRepository.findPublishedAggregate(plannerId))
-                    .thenReturn(Optional.of(createPublishedPlannerWithId(plannerId)));
+                    .thenReturn(Optional.of(new PublishedPlannerRow(createPublishedPlannerWithId(plannerId), TestDataFactory.profileOf(testUser))));
             when(plannerStatsRepository.findById(plannerId))
                     .thenReturn(Optional.of(PlannerStats.builder()
                             .plannerId(plannerId)
@@ -346,6 +347,8 @@ class PublishedPlannerQueryServiceTest {
             verify(plannerViewRecorder).record(eq(plannerId), any(), any());
             verify(plannerStatsRepository, never()).incrementViewCountBy(any(), anyInt());
             assertEquals(10, result.viewCount());
+            assertEquals(testUser.getUsernameEpithet(), result.authorUsernameEpithet());
+            assertEquals(testUser.getUsernameSuffix(), result.authorUsernameSuffix());
         }
 
         @Test
@@ -369,6 +372,8 @@ class PublishedPlannerQueryServiceTest {
             assertTrue(result.hasUpvoted());
             assertTrue(result.isSubscribed());
             assertFalse(result.hasReported());
+            assertEquals(testUser.getUsernameEpithet(), result.authorUsernameEpithet());
+            assertEquals(testUser.getUsernameSuffix(), result.authorUsernameSuffix());
         }
 
         @Test

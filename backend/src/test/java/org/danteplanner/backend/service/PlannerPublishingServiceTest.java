@@ -24,7 +24,7 @@ import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.validation.floor.Stage;
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
-import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
+import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
@@ -110,7 +110,7 @@ class PlannerPublishingServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        PlannerAccessGuard accessGuard = new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository);
+        PlannerAccessGuard accessGuard = new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository);
 
         publishingService = new PlannerPublishingService(
                 plannerRepository,
@@ -403,7 +403,7 @@ class PlannerPublishingServiceTest {
                     .usernameSuffix("test2")
                     .build();
             Planner planner = createTestPlanner();
-            planner.setUser(otherUser);
+            planner.setUserId(otherUser.getId());
 
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
 
@@ -555,7 +555,7 @@ class PlannerPublishingServiceTest {
                     .usernameSuffix("test2")
                     .build();
             Planner planner = createTestPlanner();
-            planner.setUser(otherUser);
+            planner.setUserId(otherUser.getId());
 
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
 

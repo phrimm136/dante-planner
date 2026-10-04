@@ -6,7 +6,7 @@ import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator;
 import org.danteplanner.backend.moderation.validation.ReporterStandingValidator;
 import org.danteplanner.backend.moderation.entity.PlannerReport;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
+import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.moderation.exception.ReportAlreadyExistsException;
 import org.danteplanner.backend.moderation.repository.PlannerReportRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
@@ -57,7 +57,7 @@ class PlannerReportServiceTest {
         reportService = new PlannerReportService(reportRepository,
                 new ReporterStandingValidator(users),
                 new PlannerModerationTargetAdapter(null,
-                        new PlannerAccessGuard(userService, users, plannerRepository)),
+                        new PlannerAccessGuard(users, plannerRepository)),
                 new ReportUniquenessValidator());
 
         testUser = TestDataFactory.unsavedUser(1L);

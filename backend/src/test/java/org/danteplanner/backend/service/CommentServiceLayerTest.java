@@ -27,9 +27,10 @@ import org.danteplanner.backend.comment.dto.CreateCommentRequest;
 import org.danteplanner.backend.comment.dto.UpdateCommentRequest;
 import org.danteplanner.backend.comment.exception.CommentForbiddenException;
 import org.danteplanner.backend.comment.exception.CommentNotFoundException;
-import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
+import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
+import org.danteplanner.backend.planner.api.PlannerThread;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.service.UserService;
@@ -104,17 +105,17 @@ class CommentServiceLayerTest {
     void setUp() {
         queryService = new CommentQueryService(
                 commentRepository, commentVoteRepository, new UsersApiAdapter(userService, null),
-                new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository),
+                new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository),
                 new CommentAccessValidator());
         commandService = new CommentCommandService(
                 commentRepository, queryService, domainEventRecorder,
-                new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository),
+                new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository),
                 new PlannerStatsService(plannerStatsRepository),
                 new CommentAccessValidator(), new CommentAuthorshipValidator(),
                 new CommentStateValidator());
         engagementService = new CommentEngagementService(
                 commentRepository, commentVoteRepository, queryService,
-                new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository),
+                new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository),
                 commentReportService, new CommentAuthorshipValidator(),
                 new CommentStateValidator(), new VoteUniquenessValidator());
 
@@ -433,8 +434,8 @@ class CommentServiceLayerTest {
         @DisplayName("Returns empty list for planner with no comments")
         void getCommentTree_WhenNoComments_ReturnsEmptyList() {
             // Arrange
-            when(plannerRepository.findAggregate(plannerId))
-                    .thenReturn(Optional.of(publishedPlanner));
+            when(plannerRepository.findThread(plannerId))
+                    .thenReturn(Optional.of(new PlannerThread(plannerId, publishedPlanner.getUserId(), publishedPlanner.isPublished(), false)));
             when(commentRepository.findByPlannerId(plannerId))
                     .thenReturn(Collections.emptyList());
 
@@ -471,7 +472,8 @@ class CommentServiceLayerTest {
             byDeactivated.setPublicId(UUID.randomUUID());
             byDeactivated.setCreatedAt(Instant.now());
 
-            when(plannerRepository.findAggregate(plannerId)).thenReturn(Optional.of(publishedPlanner));
+            when(plannerRepository.findThread(plannerId))
+                    .thenReturn(Optional.of(new PlannerThread(plannerId, publishedPlanner.getUserId(), publishedPlanner.isPublished(), false)));
             when(commentRepository.findByPlannerId(plannerId))
                     .thenReturn(List.of(byActive, byDeactivated));
             when(userService.findAllByIds(anyCollection()))
@@ -495,7 +497,7 @@ class CommentServiceLayerTest {
         @DisplayName("Throws PlannerNotFoundException for non-existent planner")
         void getCommentTree_WhenPlannerNotFound_ThrowsException() {
             // Arrange
-            when(plannerRepository.findAggregate(plannerId))
+            when(plannerRepository.findThread(plannerId))
                     .thenReturn(Optional.empty());
 
             // Act & Assert

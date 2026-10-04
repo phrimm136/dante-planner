@@ -11,7 +11,7 @@ import java.util.concurrent.Future;
 import javax.sql.DataSource;
 
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
+import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.planner.service.PlannerQueryService;
 import org.danteplanner.backend.shared.config.PoolLedger;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;

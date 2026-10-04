@@ -6,6 +6,7 @@ import org.danteplanner.backend.notification.api.NotificationOutcome;
 import org.danteplanner.backend.notification.api.Notifications;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PublishedPlannerRow;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
@@ -32,14 +33,14 @@ public class PlannerRecommendedEffect implements DomainEffect {
 
     @Override
     public void applyEffect(DomainEvent event, EffectPushQueue pushes) {
-        Optional<Planner> found = plannerRepository.findPublishedAggregate(event.getAggregateId());
+        Optional<PublishedPlannerRow> found = plannerRepository.findPublishedAggregate(event.getAggregateId());
         if (found.isEmpty()) {
             log.info("Planner {} is no longer published; its recommendation goes unannounced",
                     event.getAggregateId());
             return;
         }
 
-        Planner planner = found.get();
+        Planner planner = found.get().planner();
         long ownerId = payloads.requireId(event, "ownerId");
         NotificationOutcome outcome = notifications.notifyPlannerRecommended(
                 planner.getId(), planner.getTitle(), ownerId);

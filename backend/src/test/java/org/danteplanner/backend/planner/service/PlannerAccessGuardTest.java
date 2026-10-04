@@ -5,8 +5,10 @@ import org.danteplanner.backend.user.service.UsersApiAdapter;
 import java.util.UUID;
 
 import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
+import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PublishedPlannerRow;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -44,7 +46,7 @@ class PlannerAccessGuardTest {
 
     @BeforeEach
     void setUp() {
-        accessGuard = new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository);
+        accessGuard = new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository);
         plannerId = UUID.randomUUID();
     }
 
@@ -93,7 +95,7 @@ class PlannerAccessGuardTest {
         @DisplayName("returns the loaded aggregate when the planner is published")
         void requirePublished_WhenPublished_ReturnsAggregate() {
             Planner planner = new Planner();
-            when(plannerRepository.findPublishedAggregate(plannerId)).thenReturn(Optional.of(planner));
+            when(plannerRepository.findPublishedAggregate(plannerId)).thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(TestDataFactory.unsavedUser(1L)))));
 
             assertThat(accessGuard.requirePublished(plannerId)).isSameAs(planner);
         }

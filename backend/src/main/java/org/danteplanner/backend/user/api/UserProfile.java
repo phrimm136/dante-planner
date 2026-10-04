@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Immutable;
 
+import java.time.Instant;
+
 @Entity
 @Immutable
 @Table(name = "users")
@@ -24,4 +26,7 @@ public class UserProfile {
 
     @Column(name = "username_suffix", nullable = false, length = 5)
     private String usernameSuffix;
+
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
 }

@@ -79,7 +79,7 @@ public class PlannerEngagementService {
             int rowsUpdated = plannerStatsService.trySetRecommendedNotified(plannerId, recommendedThreshold);
             if (rowsUpdated > 0) {
                 domainEventRecorder.recordDomainEvent(DomainEventType.PLANNER_RECOMMENDED, plannerId,
-                        Map.of("ownerId", planner.getUser().getId()));
+                        Map.of("ownerId", planner.getUserId()));
                 log.debug("Planner {} crossed threshold ({}→{}), notification recorded",
                         plannerId, upvotesBefore, upvotesAfter);
             } else {

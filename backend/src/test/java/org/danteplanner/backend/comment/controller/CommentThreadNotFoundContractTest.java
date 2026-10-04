@@ -1,21 +1,16 @@
 package org.danteplanner.backend.comment.controller;
 
-import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.user.service.UsersApiAdapter;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.comment.validation.CommentAccessValidator;
-import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.planner.api.PlannerThread;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.shared.util.CookieUtils;
-import org.danteplanner.backend.support.TestDataFactory;
-import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,31 +53,15 @@ class CommentThreadNotFoundContractTest {
     void setUp() {
         CommentQueryService queryService = new CommentQueryService(
                 commentRepository, mock(PlannerCommentVoteRepository.class), new UsersApiAdapter(userService, null),
-                new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository), new CommentAccessValidator());
+                new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository), new CommentAccessValidator());
         mockMvc = standaloneSetup(new CommentController(queryService, null, null, new ByIdReadGuard()))
                 .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
                 .setControllerAdvice(new ApiExceptionHandler(mock(CookieUtils.class)))
                 .build();
 
-        User owner = User.builder()
-                .id(OWNER_ID)
-                .email("owner@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("owner-1")
-                .usernameEpithet("OWNER")
-                .usernameSuffix("own01")
-                .role(UserRole.NORMAL)
-                .build();
         plannerId = UUID.randomUUID();
-        Planner unpublished = TestDataFactory.planner(owner)
-                .id(plannerId)
-                .category("5F")
-                .content("{}")
-                .contentVersion(1)
-                .plannerType(PlannerType.MIRROR_DUNGEON)
-                .published(false)
-                .build();
-        when(plannerRepository.findAggregate(plannerId)).thenReturn(Optional.of(unpublished));
+        when(plannerRepository.findThread(plannerId))
+                .thenReturn(Optional.of(new PlannerThread(plannerId, OWNER_ID, false, false)));
         when(commentRepository.findByPlannerId(plannerId)).thenReturn(List.of());
     }
 

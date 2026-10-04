@@ -1,6 +1,6 @@
 package org.danteplanner.backend.planner.precondition;
 
-import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
+import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.springframework.stereotype.Component;
 

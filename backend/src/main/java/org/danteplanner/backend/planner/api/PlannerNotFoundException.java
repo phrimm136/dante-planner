@@ -1,4 +1,4 @@
-package org.danteplanner.backend.planner.exception;
+package org.danteplanner.backend.planner.api;
 
 import java.util.UUID;
 

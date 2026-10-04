@@ -56,10 +56,10 @@ class CommentCommandServiceRestrictionsTest {
         return new CommentCommandService(
                 commentRepository,
                 new CommentQueryService(commentRepository, commentVoteRepository, new UsersApiAdapter(userService, null),
-                        new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository),
+                        new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository),
                         new CommentAccessValidator()),
                 domainEventRecorder,
-                new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository),
+                new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository),
                 new PlannerStatsService(plannerStatsRepository),
                 new CommentAccessValidator(), new CommentAuthorshipValidator(),
                 new CommentStateValidator());

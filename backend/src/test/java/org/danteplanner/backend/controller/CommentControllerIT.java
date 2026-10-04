@@ -16,8 +16,10 @@ import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.moderation.repository.PlannerCommentReportRepository;
 import org.danteplanner.backend.moderation.service.CommentReportService;
+import org.danteplanner.backend.planner.api.PlannerAccess;
+import org.danteplanner.backend.planner.api.PlannerCommentCounts;
+import org.danteplanner.backend.planner.api.PlannerVotes;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
-import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.comment.service.CommentCommandService;
 import org.danteplanner.backend.comment.service.CommentEngagementService;
@@ -25,9 +27,6 @@ import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.comment.validation.CommentAccessValidator;
 import org.danteplanner.backend.comment.validation.CommentAuthorshipValidator;
 import org.danteplanner.backend.comment.validation.CommentStateValidator;
-import org.danteplanner.backend.planner.service.PlannerAccessGuard;
-import org.danteplanner.backend.planner.service.PlannerStatsService;
-import org.danteplanner.backend.planner.precondition.VoteUniquenessValidator;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.danteplanner.backend.shared.util.CommentConstants;
 import org.danteplanner.backend.user.service.UserService;
@@ -76,10 +75,10 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         public CommentQueryService commentQueryService(
                 PlannerCommentRepository commentRepository,
                 PlannerCommentVoteRepository commentVoteRepository,
-                PlannerRepository plannerRepository,
+                PlannerAccess plannerAccess,
                 UserService userService) {
             return new CommentQueryService(commentRepository, commentVoteRepository, new UsersApiAdapter(userService, null),
-                    new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository),
+                    plannerAccess,
                     new CommentAccessValidator());
         }
 
@@ -88,14 +87,13 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         public CommentCommandService commentCommandService(
                 PlannerCommentRepository commentRepository,
                 CommentQueryService commentQueryService,
-                PlannerRepository plannerRepository,
-                UserService userService,
-                DomainEventRecorder domainEventRecorder,
-                PlannerStatsRepository plannerStatsRepository) {
+                PlannerAccess plannerAccess,
+                PlannerCommentCounts plannerCommentCounts,
+                DomainEventRecorder domainEventRecorder) {
             return new CommentCommandService(commentRepository, commentQueryService,
                     domainEventRecorder,
-                    new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository),
-                    new PlannerStatsService(plannerStatsRepository),
+                    plannerAccess,
+                    plannerCommentCounts,
                     new CommentAccessValidator(), new CommentAuthorshipValidator(),
                     new CommentStateValidator());
         }
@@ -106,13 +104,13 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
                 PlannerCommentRepository commentRepository,
                 PlannerCommentVoteRepository commentVoteRepository,
                 CommentQueryService commentQueryService,
-                PlannerRepository plannerRepository,
-                UserService userService,
+                PlannerAccess plannerAccess,
+                PlannerVotes plannerVotes,
                 CommentReportService commentReportService) {
             return new CommentEngagementService(commentRepository, commentVoteRepository, commentQueryService,
-                    new PlannerAccessGuard(userService, new UsersApiAdapter(userService, null), plannerRepository),
+                    plannerAccess,
                     commentReportService, new CommentAuthorshipValidator(),
-                    new CommentStateValidator(), new VoteUniquenessValidator());
+                    new CommentStateValidator(), plannerVotes);
         }
     }
 

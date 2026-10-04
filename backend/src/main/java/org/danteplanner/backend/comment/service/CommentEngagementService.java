@@ -16,8 +16,8 @@ import org.danteplanner.backend.comment.validation.CommentStateValidator;
 import org.danteplanner.backend.moderation.api.dto.CommentReportRequest;
 import org.danteplanner.backend.moderation.api.dto.CommentReportResponse;
 import org.danteplanner.backend.moderation.api.CommentReports;
-import org.danteplanner.backend.planner.service.PlannerAccessGuard;
-import org.danteplanner.backend.planner.precondition.VoteUniquenessValidator;
+import org.danteplanner.backend.planner.api.PlannerAccess;
+import org.danteplanner.backend.planner.api.PlannerVotes;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,15 +35,15 @@ public class CommentEngagementService {
     private final PlannerCommentRepository commentRepository;
     private final PlannerCommentVoteRepository commentVoteRepository;
     private final CommentQueryService commentQueryService;
-    private final PlannerAccessGuard accessGuard;
+    private final PlannerAccess plannerAccess;
     private final CommentReports reportService;
     private final CommentAuthorshipValidator authorshipValidator;
     private final CommentStateValidator stateValidator;
-    private final VoteUniquenessValidator voteUniquenessValidator;
+    private final PlannerVotes plannerVotes;
 
     @Transactional
     public CommentVoteResponse toggleUpvote(UUID commentPublicId, Long userId) {
-        accessGuard.checkNotBanned(userId);
+        plannerAccess.checkNotBanned(userId);
 
         PlannerComment comment = commentQueryService.requireByPublicId(commentPublicId);
         Long internalId = comment.getId();
@@ -51,7 +51,7 @@ public class CommentEngagementService {
         stateValidator.requireVotable(comment);
 
         PlannerCommentVoteId voteId = new PlannerCommentVoteId(internalId, userId);
-        voteUniquenessValidator.requireFirstVote(
+        plannerVotes.requireFirstVote(
                 commentVoteRepository.existsById(voteId), comment.getPlannerId(), userId);
 
         PlannerCommentVote newVote = new PlannerCommentVote(internalId, userId, CommentVoteType.UP);

@@ -6,6 +6,7 @@ import org.danteplanner.backend.notification.api.Notifications;
 import org.danteplanner.backend.planner.dto.PlannerPublishedPayload;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PublishedPlannerRow;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
@@ -32,17 +33,17 @@ public class PlannerPublishedEffect implements DomainEffect {
 
     @Override
     public void applyEffect(DomainEvent event, EffectPushQueue pushes) {
-        Optional<Planner> found = plannerRepository.findPublishedAggregate(event.getAggregateId());
+        Optional<PublishedPlannerRow> found = plannerRepository.findPublishedAggregate(event.getAggregateId());
         if (found.isEmpty()) {
             log.info("Planner {} is no longer published; its publication goes unannounced",
                     event.getAggregateId());
             return;
         }
 
-        Planner planner = found.get();
+        Planner planner = found.get().planner();
         long authorId = payloads.requireId(event, "authorId");
         notifications.notifyPlannerPublished(authorId, planner.getId(), planner.getTitle());
         pushes.broadcast(authorId, SseEventType.NOTIFY_PUBLISHED,
-                PlannerPublishedPayload.fromEntity(planner));
+                PlannerPublishedPayload.fromEntity(planner, found.get().author()));
     }
 }

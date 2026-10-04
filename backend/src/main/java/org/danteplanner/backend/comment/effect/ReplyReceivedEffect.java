@@ -7,8 +7,8 @@ import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.notification.api.NotificationOutcome;
 import org.danteplanner.backend.notification.api.Notifications;
-import org.danteplanner.backend.planner.dto.PlannerNotificationTarget;
-import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
+import org.danteplanner.backend.planner.api.PlannerNotificationTarget;
+import org.danteplanner.backend.planner.api.PublishedPlanners;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
@@ -27,7 +27,7 @@ public class ReplyReceivedEffect implements DomainEffect {
 
     private final PlannerCommentRepository commentRepository;
     private final CommentQueryService commentQueryService;
-    private final PublishedPlannerQueryService plannerQueryService;
+    private final PublishedPlanners publishedPlanners;
     private final Notifications notifications;
     private final DomainEventPayloadReader payloads;
 
@@ -52,7 +52,7 @@ public class ReplyReceivedEffect implements DomainEffect {
         }
 
         Optional<PlannerNotificationTarget> target =
-                plannerQueryService.notificationTargetOf(reply.getPlannerId());
+                publishedPlanners.notificationTargetOf(reply.getPlannerId());
         if (target.isEmpty()) {
             log.info("Planner {} is gone before reply {} was announced",
                     reply.getPlannerId(), replyId);
@@ -61,7 +61,7 @@ public class ReplyReceivedEffect implements DomainEffect {
 
         Optional<PlannerComment> parent = Optional.ofNullable(reply.getParentCommentId())
                 .flatMap(commentRepository::findById);
-        boolean published = plannerQueryService.isPublished(reply.getPlannerId());
+        boolean published = publishedPlanners.isPublished(reply.getPlannerId());
         parent.filter(it -> !it.isDeleted())
                 .filter(it -> published || it.getUserId().equals(target.get().ownerId()))
                 .ifPresent(it -> notifyParentAuthor(reply, it, target.get(), pushes));

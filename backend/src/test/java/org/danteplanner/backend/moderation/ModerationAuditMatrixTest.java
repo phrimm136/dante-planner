@@ -208,7 +208,7 @@ class ModerationAuditMatrixTest {
     private Planner plannerAggregate(User owner) {
         Planner planner = Planner.builder()
                 .id(plannerId)
-                .user(owner)
+                .userId(owner.getId())
                 .plannerType(PlannerType.MIRROR_DUNGEON)
                 .build();
         planner.attach(

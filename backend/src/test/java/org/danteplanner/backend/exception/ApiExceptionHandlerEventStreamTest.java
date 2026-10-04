@@ -1,7 +1,7 @@
 package org.danteplanner.backend.exception;
 
 import org.danteplanner.backend.auth.exception.SessionRevokedException;
-import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
+import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 import org.danteplanner.backend.shared.exception.StreamLifecycleExceptionAdvice;
 import org.danteplanner.backend.shared.ratelimit.RateLimitExceededException;

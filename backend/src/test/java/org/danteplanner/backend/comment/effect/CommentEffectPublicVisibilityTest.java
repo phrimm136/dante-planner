@@ -7,8 +7,8 @@ import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.notification.api.NotificationEventPayload;
 import org.danteplanner.backend.notification.api.NotificationOutcome;
 import org.danteplanner.backend.notification.api.Notifications;
-import org.danteplanner.backend.planner.dto.PlannerNotificationTarget;
-import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
+import org.danteplanner.backend.planner.api.PlannerNotificationTarget;
+import org.danteplanner.backend.planner.api.PublishedPlanners;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
@@ -62,7 +62,7 @@ class CommentEffectPublicVisibilityTest {
     private CommentQueryService commentQueryService;
 
     @Mock
-    private PublishedPlannerQueryService plannerQueryService;
+    private PublishedPlanners plannerQueryService;
 
     @Mock
     private Notifications notificationDispatchService;

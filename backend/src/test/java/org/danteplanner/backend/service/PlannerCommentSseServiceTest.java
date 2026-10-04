@@ -3,7 +3,7 @@ import org.danteplanner.backend.comment.service.PlannerCommentSseService;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.danteplanner.backend.planner.service.PlannerAccessGuard;
+import org.danteplanner.backend.planner.api.PlannerAccess;
 import org.danteplanner.backend.shared.sse.SseCapacityExceededException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -43,14 +43,14 @@ class PlannerCommentSseServiceTest {
     private static final TaskExecutor SAME_THREAD = Runnable::run;
 
     private ObjectMapper objectMapper;
-    private PlannerAccessGuard plannerAccessGuard;
+    private PlannerAccess plannerAccessGuard;
     private PlannerCommentSseService service;
     private UUID plannerId;
 
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        plannerAccessGuard = mock(PlannerAccessGuard.class);
+        plannerAccessGuard = mock(PlannerAccess.class);
         service = new PlannerCommentSseService(objectMapper, plannerAccessGuard, SAME_THREAD);
         plannerId = UUID.randomUUID();
     }

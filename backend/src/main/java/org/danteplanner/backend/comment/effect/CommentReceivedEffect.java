@@ -7,8 +7,8 @@ import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.notification.api.NotificationOutcome;
 import org.danteplanner.backend.notification.api.Notifications;
-import org.danteplanner.backend.planner.dto.PlannerNotificationTarget;
-import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
+import org.danteplanner.backend.planner.api.PlannerNotificationTarget;
+import org.danteplanner.backend.planner.api.PublishedPlanners;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
@@ -26,7 +26,7 @@ public class CommentReceivedEffect implements DomainEffect {
 
     private final PlannerCommentRepository commentRepository;
     private final CommentQueryService commentQueryService;
-    private final PublishedPlannerQueryService plannerQueryService;
+    private final PublishedPlanners publishedPlanners;
     private final Notifications notifications;
     private final DomainEventPayloadReader payloads;
 
@@ -51,7 +51,7 @@ public class CommentReceivedEffect implements DomainEffect {
         }
 
         Optional<PlannerNotificationTarget> target =
-                plannerQueryService.notificationTargetOf(comment.getPlannerId());
+                publishedPlanners.notificationTargetOf(comment.getPlannerId());
         if (target.isEmpty()) {
             log.info("Planner {} is gone before comment {} was announced",
                     comment.getPlannerId(), commentId);
@@ -60,7 +60,7 @@ public class CommentReceivedEffect implements DomainEffect {
 
         notifyOwner(comment, target.get(), pushes);
 
-        if (!plannerQueryService.isPublished(comment.getPlannerId())) {
+        if (!publishedPlanners.isPublished(comment.getPlannerId())) {
             log.info("Planner {} left public view before comment {} was announced to its thread",
                     comment.getPlannerId(), commentId);
             return;

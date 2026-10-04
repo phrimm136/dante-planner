@@ -3,7 +3,7 @@ package org.danteplanner.backend.planner.precondition;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
-import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
+import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerOwnershipRow;
 import org.springframework.stereotype.Component;
 
