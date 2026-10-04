@@ -1,7 +1,7 @@
 package org.danteplanner.backend.planner.effect;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.danteplanner.backend.notification.service.NotificationDispatchService;
+import org.danteplanner.backend.notification.api.Notifications;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
@@ -38,7 +38,7 @@ class PlannerEffectVisibilityTest {
     private PlannerRepository plannerRepository;
 
     @Mock
-    private NotificationDispatchService notificationDispatchService;
+    private Notifications notificationDispatchService;
 
     @Mock
     private SsePublisher ssePublisher;

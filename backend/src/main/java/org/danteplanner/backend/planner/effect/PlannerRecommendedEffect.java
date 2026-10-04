@@ -2,8 +2,8 @@ package org.danteplanner.backend.planner.effect;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.notification.service.NotificationDispatchService;
-import org.danteplanner.backend.notification.service.NotificationOutcome;
+import org.danteplanner.backend.notification.api.NotificationOutcome;
+import org.danteplanner.backend.notification.api.Notifications;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.entity.SseEventType;
@@ -22,7 +22,7 @@ import java.util.Optional;
 public class PlannerRecommendedEffect implements DomainEffect {
 
     private final PlannerRepository plannerRepository;
-    private final NotificationDispatchService notificationDispatchService;
+    private final Notifications notifications;
     private final DomainEventPayloadReader payloads;
 
     @Override
@@ -41,7 +41,7 @@ public class PlannerRecommendedEffect implements DomainEffect {
 
         Planner planner = found.get();
         long ownerId = payloads.requireId(event, "ownerId");
-        NotificationOutcome outcome = notificationDispatchService.notifyPlannerRecommended(
+        NotificationOutcome outcome = notifications.notifyPlannerRecommended(
                 planner.getId(), planner.getTitle(), ownerId);
 
         if (outcome instanceof NotificationOutcome.Delivered delivered) {

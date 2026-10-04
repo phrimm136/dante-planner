@@ -7,7 +7,7 @@ import java.time.temporal.ChronoUnit;
 import static org.assertj.core.api.Assertions.within;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.notification.entity.Notification;
-import org.danteplanner.backend.notification.entity.NotificationType;
+import org.danteplanner.backend.notification.api.NotificationType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;

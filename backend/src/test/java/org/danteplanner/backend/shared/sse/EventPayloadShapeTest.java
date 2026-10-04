@@ -8,7 +8,7 @@ import org.springframework.boot.test.autoconfigure.json.JsonTest;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.danteplanner.backend.notification.dto.NotificationEventPayload;
+import org.danteplanner.backend.notification.api.NotificationEventPayload;
 import org.danteplanner.backend.planner.dto.PlannerPublishedPayload;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.junit.jupiter.api.Test;

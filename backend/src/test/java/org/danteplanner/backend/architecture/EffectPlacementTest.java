@@ -145,6 +145,10 @@ class EffectPlacementTest {
     private static final String NOTIFICATION_DISPATCH_SERVICE =
             "org.danteplanner.backend.notification.service.NotificationDispatchService";
 
+    private static final String NOTIFICATIONS = "org.danteplanner.backend.notification.api.Notifications";
+
+    private static final Set<String> RAISE_OWNERS = Set.of(NOTIFICATIONS, NOTIFICATION_DISPATCH_SERVICE);
+
     private static final String NOTIFICATION_REPOSITORY =
             "org.danteplanner.backend.notification.repository.NotificationRepository";
 
@@ -170,7 +174,7 @@ class EffectPlacementTest {
     @DisplayName("no after-commit listener derives a notification")
     void afterCommitListener_WhenItDerivesANotification_IsRejected() {
         Set<String> offenders = afterCommitListeners().stream()
-                .filter(listener -> reaches(listener, NOTIFICATION_DISPATCH_SERVICE))
+                .filter(listener -> RAISE_OWNERS.stream().anyMatch(owner -> reaches(listener, owner)))
                 .map(EffectPlacementTest::qualifiedName)
                 .collect(Collectors.toCollection(TreeSet::new));
 
@@ -232,7 +236,7 @@ class EffectPlacementTest {
                 continue;
             }
             for (JavaMethodCall call : caller.getMethodCallsFromSelf()) {
-                if (NOTIFICATION_DISPATCH_SERVICE.equals(call.getTargetOwner().getFullName())
+                if (RAISE_OWNERS.contains(call.getTargetOwner().getFullName())
                         && RAISE_METHODS.contains(call.getTarget().getName())) {
                     offenders.add(caller.getFullName() + " -> " + call.getTarget().getName());
                 }

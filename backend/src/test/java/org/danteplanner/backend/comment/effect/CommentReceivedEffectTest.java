@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.service.CommentQueryService;
-import org.danteplanner.backend.notification.dto.NotificationEventPayload;
-import org.danteplanner.backend.notification.service.NotificationDispatchService;
-import org.danteplanner.backend.notification.service.NotificationOutcome;
+import org.danteplanner.backend.notification.api.NotificationEventPayload;
+import org.danteplanner.backend.notification.api.NotificationOutcome;
+import org.danteplanner.backend.notification.api.Notifications;
 import org.danteplanner.backend.planner.dto.PlannerNotificationTarget;
 import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
 import org.danteplanner.backend.shared.entity.SseEventType;
@@ -63,7 +63,7 @@ class CommentReceivedEffectTest {
     private PublishedPlannerQueryService plannerQueryService;
 
     @Mock
-    private NotificationDispatchService notificationDispatchService;
+    private Notifications notificationDispatchService;
 
     @Mock
     private SsePublisher ssePublisher;

@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.service.CommentQueryService;
-import org.danteplanner.backend.notification.service.NotificationDispatchService;
-import org.danteplanner.backend.notification.service.NotificationOutcome;
+import org.danteplanner.backend.notification.api.NotificationOutcome;
+import org.danteplanner.backend.notification.api.Notifications;
 import org.danteplanner.backend.planner.dto.PlannerNotificationTarget;
 import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
 import org.danteplanner.backend.shared.entity.SseEventType;
@@ -28,7 +28,7 @@ public class ReplyReceivedEffect implements DomainEffect {
     private final PlannerCommentRepository commentRepository;
     private final CommentQueryService commentQueryService;
     private final PublishedPlannerQueryService plannerQueryService;
-    private final NotificationDispatchService notificationDispatchService;
+    private final Notifications notifications;
     private final DomainEventPayloadReader payloads;
 
     @Override
@@ -83,7 +83,7 @@ public class ReplyReceivedEffect implements DomainEffect {
             return;
         }
 
-        NotificationOutcome outcome = notificationDispatchService.notifyReplyReceived(
+        NotificationOutcome outcome = notifications.notifyReplyReceived(
                 reply.getId(),
                 reply.getPublicId(),
                 target.plannerId(),

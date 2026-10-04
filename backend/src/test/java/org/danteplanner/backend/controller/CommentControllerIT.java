@@ -7,7 +7,7 @@ import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.notification.entity.Notification;
-import org.danteplanner.backend.notification.entity.NotificationType;
+import org.danteplanner.backend.notification.api.NotificationType;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.user.entity.User;

@@ -4,13 +4,13 @@ import org.danteplanner.backend.shared.exception.EntityNotFoundException;
 import org.danteplanner.backend.notification.service.NotificationRetentionService;
 import org.danteplanner.backend.notification.service.NotificationDispatchService;
 import org.danteplanner.backend.notification.service.NotificationInboxService;
-import org.danteplanner.backend.notification.service.NotificationOutcome;
+import org.danteplanner.backend.notification.api.NotificationOutcome;
 
 import org.danteplanner.backend.notification.dto.NotificationInboxResponse;
 import org.danteplanner.backend.notification.dto.NotificationResponse;
 import org.danteplanner.backend.notification.dto.UnreadCountResponse;
 import org.danteplanner.backend.notification.entity.Notification;
-import org.danteplanner.backend.notification.entity.NotificationType;
+import org.danteplanner.backend.notification.api.NotificationType;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

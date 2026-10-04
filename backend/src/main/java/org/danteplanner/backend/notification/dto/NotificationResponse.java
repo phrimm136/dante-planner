@@ -1,7 +1,7 @@
 package org.danteplanner.backend.notification.dto;
 
 import org.danteplanner.backend.notification.entity.Notification;
-import org.danteplanner.backend.notification.entity.NotificationType;
+import org.danteplanner.backend.notification.api.NotificationType;
 
 import java.time.Instant;
 import java.util.UUID;

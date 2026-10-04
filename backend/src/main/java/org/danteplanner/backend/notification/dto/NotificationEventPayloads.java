@@ -1,17 +1,12 @@
 package org.danteplanner.backend.notification.dto;
 
+import org.danteplanner.backend.notification.api.NotificationEventPayload;
 import org.danteplanner.backend.notification.entity.Notification;
 
-public record NotificationEventPayload(
-    String id,
-    String type,
-    String contentId,
-    String createdAt,
-    String plannerId,
-    String plannerTitle,
-    String commentSnippet,
-    String commentPublicId
-) {
+public final class NotificationEventPayloads {
+
+    private NotificationEventPayloads() {
+    }
 
     public static NotificationEventPayload fromEntity(Notification notification) {
         return new NotificationEventPayload(

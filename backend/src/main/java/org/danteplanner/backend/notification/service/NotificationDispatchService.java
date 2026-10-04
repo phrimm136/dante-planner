@@ -2,9 +2,11 @@ package org.danteplanner.backend.notification.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.notification.dto.NotificationEventPayload;
+import org.danteplanner.backend.notification.api.NotificationOutcome;
+import org.danteplanner.backend.notification.api.NotificationType;
+import org.danteplanner.backend.notification.api.Notifications;
+import org.danteplanner.backend.notification.dto.NotificationEventPayloads;
 import org.danteplanner.backend.notification.entity.Notification;
-import org.danteplanner.backend.notification.entity.NotificationType;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
 import org.springframework.stereotype.Service;
 
@@ -16,10 +18,11 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class NotificationDispatchService {
+public class NotificationDispatchService implements Notifications {
 
     private final NotificationRepository notificationRepository;
 
+    @Override
     public NotificationOutcome notifyPlannerRecommended(
             UUID plannerId, String plannerTitle, Long plannerOwnerId) {
         return raise(Notification.plannerScoped(
@@ -31,6 +34,7 @@ public class NotificationDispatchService {
         ));
     }
 
+    @Override
     public NotificationOutcome notifyCommentReceived(
             Long commentId,
             UUID commentPublicId,
@@ -50,6 +54,7 @@ public class NotificationDispatchService {
         ));
     }
 
+    @Override
     public NotificationOutcome notifyReplyReceived(
             Long replyId,
             UUID replyPublicId,
@@ -69,6 +74,7 @@ public class NotificationDispatchService {
         ));
     }
 
+    @Override
     public void notifyPlannerPublished(Long authorId, UUID plannerId, String plannerTitle) {
         int inserted = notificationRepository.insertPublishedFanout(
                 authorId, plannerId.toString(), plannerTitle);
@@ -105,6 +111,6 @@ public class NotificationDispatchService {
                 stored.getNotificationType(), stored.getPublicId(), stored.getUserId(),
                 stored.getContentId());
         return new NotificationOutcome.Delivered(stored.getUserId(),
-                NotificationEventPayload.fromEntity(stored));
+                NotificationEventPayloads.fromEntity(stored));
     }
 }

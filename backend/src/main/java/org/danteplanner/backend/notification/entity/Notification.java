@@ -14,6 +14,7 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.danteplanner.backend.notification.api.NotificationType;
 
 import java.time.Instant;
 import java.util.UUID;

@@ -1,4 +1,4 @@
-package org.danteplanner.backend.notification.entity;
+package org.danteplanner.backend.notification.api;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;

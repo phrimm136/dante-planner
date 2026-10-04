@@ -2,7 +2,7 @@ package org.danteplanner.backend.planner.effect;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.notification.service.NotificationDispatchService;
+import org.danteplanner.backend.notification.api.Notifications;
 import org.danteplanner.backend.planner.dto.PlannerPublishedPayload;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
@@ -22,7 +22,7 @@ import java.util.Optional;
 public class PlannerPublishedEffect implements DomainEffect {
 
     private final PlannerRepository plannerRepository;
-    private final NotificationDispatchService notificationDispatchService;
+    private final Notifications notifications;
     private final DomainEventPayloadReader payloads;
 
     @Override
@@ -41,7 +41,7 @@ public class PlannerPublishedEffect implements DomainEffect {
 
         Planner planner = found.get();
         long authorId = payloads.requireId(event, "authorId");
-        notificationDispatchService.notifyPlannerPublished(authorId, planner.getId(), planner.getTitle());
+        notifications.notifyPlannerPublished(authorId, planner.getId(), planner.getTitle());
         pushes.broadcast(authorId, SseEventType.NOTIFY_PUBLISHED,
                 PlannerPublishedPayload.fromEntity(planner));
     }

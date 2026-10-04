@@ -13,7 +13,7 @@ import org.danteplanner.backend.user.repository.UserRepository;
 
 import org.danteplanner.backend.notification.repository.NotificationRepository;
 
-import org.danteplanner.backend.notification.entity.NotificationType;
+import org.danteplanner.backend.notification.api.NotificationType;
 
 import org.danteplanner.backend.notification.entity.Notification;
 
