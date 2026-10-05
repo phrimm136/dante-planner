@@ -16,7 +16,7 @@ Run: default `test` task is both tiers (Docker required); `-PexcludeTags=contain
 ## What a test may assume about data
 
 Every integration class in a fork shares one database. A test owns the rows it creates and nothing
-else — see **Parallelism** for why that still matters when classes no longer overlap.
+else — see **Parallelism** for which classes run beside it.
 
 - **Fixtures carry a unique identity.** `TestDataFactory` sub-addresses every email it issues, so two classes asking for `owner@example.com` get different rows. Anything built by hand needs the same treatment.
 - **Never truncate in the shared database.** `deleteAll()` there removes rows a concurrent neighbour is mid-assertion on. `@ResourceLock` does not make it safe: a lock excludes only the classes that declare it.
@@ -43,11 +43,11 @@ Three costs, all silent:
 
 ## Parallelism
 
-One class at a time inside a fork; Gradle runs a JVM per `maxParallelForks` slot, and each fork owns
-its own containers (`junit-platform.properties`). So nothing in the tier runs concurrently against
-shared state, and the ownership rules above are what keeps that switchable rather than what keeps the
-suite passing today. Breaking one costs nothing until class-level concurrency is turned back on, at
-which point it costs a debugging session in somebody else's class.
+Classes run concurrently inside a fork, three at a time and in random order; the methods of one class
+run on one thread (`junit-platform.properties`). Gradle runs a JVM per `maxParallelForks` slot on top,
+and each fork owns its own containers. So every class runs beside others against the same database,
+Redis and application context, and the ownership rules above are what keeps the suite passing.
+Breaking one costs a debugging session in somebody else's class.
 
 - **Never annotate a class with `@Execution`.** The mode propagates to its methods, and concurrent methods share the class's `@BeforeEach` fixtures.
 - **Never add a second `@BeforeEach`.** JUnit does not order siblings, so a cleanup method can run after the setup it was meant to precede. Put cleanup as the first statements of the one existing setup method.

@@ -1,0 +1,50 @@
+package org.danteplanner.backend.support;
+
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+class LogCaptureTest {
+
+    private static final Logger LOG = (Logger) LoggerFactory.getLogger(LogCaptureTest.class);
+
+    @Test
+    void onThisThread_WhenAnotherThreadLogsThroughTheSameLogger_KeepsOnlyThisThreadsEvents() throws Exception {
+        try (LogCapture capture = LogCapture.onThisThread(LogCaptureTest.class)) {
+            Thread neighbour = new Thread(() -> LOG.warn("neighbour"));
+            neighbour.start();
+            neighbour.join();
+            LOG.warn("own");
+
+            assertThat(capture.events()).extracting(ILoggingEvent::getFormattedMessage).containsExactly("own");
+        }
+    }
+
+    @Test
+    void close_WhenCalled_DetachesFromTheLogger() {
+        LogCapture capture = LogCapture.onThisThread(LogCaptureTest.class);
+        capture.close();
+
+        LOG.warn("after close");
+
+        assertThat(capture.events()).isEmpty();
+        assertThat(LOG.iteratorForAppenders()).isExhausted();
+    }
+
+    @Test
+    void during_WhenTheActionLogsAtSeveralLevels_ReturnsOnlyTheRequestedLevel() {
+        List<ILoggingEvent> warnings = LogCapture.during(() -> {
+            LOG.warn("warned");
+            LOG.error("failed");
+        }, Level.WARN, LogCaptureTest.class);
+
+        assertThat(warnings).extracting(ILoggingEvent::getFormattedMessage).containsExactly("warned");
+    }
+}

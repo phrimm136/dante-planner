@@ -14,6 +14,7 @@ import org.danteplanner.backend.planner.entity.PlannerContentLifecycle;
 import org.danteplanner.backend.planner.entity.PlannerKeywords;
 import org.danteplanner.backend.planner.entity.PlannerModeration;
 import org.danteplanner.backend.planner.entity.PlannerPublication;
+import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.entity.StoredPlannerContent;
@@ -30,6 +31,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
+import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 
@@ -173,6 +176,20 @@ public class TestDataFactory {
                 .build();
     }
 
+    public static User unsavedUser(UserRole role) {
+        Long id = nextUserId();
+        return User.builder()
+                .id(id)
+                .publicId(UUID.randomUUID())
+                .email("test@example.com")
+                .provider(AuthProviderType.GOOGLE)
+                .providerId("google-" + id)
+                .usernameEpithet("W_CORP")
+                .usernameSuffix(uniqueSuffix(""))
+                .role(role)
+                .build();
+    }
+
     public static UserProfile profileOf(User user) {
         UserProfile profile = BeanUtils.instantiateClass(UserProfile.class);
         ReflectionTestUtils.setField(profile, "id", user.getId());
@@ -229,10 +246,14 @@ public class TestDataFactory {
         }
     }
 
+    static int mdCurrentVersion() {
+        return StaticDataParser.REGISTRY.plannerVersions().mdCurrentVersion();
+    }
+
     public static PlannerDocument document(String content) {
         PlannerContentValidator validator = StaticDataParser.VALIDATOR;
         return validator.parse(content, MDCategory.F5,
-                validator.season(StaticDataParser.REGISTRY.plannerVersions().mdCurrentVersion()), Stage.DRAFT);
+                validator.season(mdCurrentVersion()), Stage.DRAFT);
     }
 
     /**
@@ -274,6 +295,7 @@ public class TestDataFactory {
         private Set<String> selectedKeywords;
         private boolean published;
         private Instant firstPublishedAt;
+        private int upvotes;
 
         private PlannerBuilder(User owner) {
             this.owner = owner;
@@ -334,6 +356,11 @@ public class TestDataFactory {
             return this;
         }
 
+        public PlannerBuilder upvotes(int upvotes) {
+            this.upvotes = upvotes;
+            return this;
+        }
+
         public Planner build() {
             String document = selectedKeywords == null ? content : withSelectedKeywords(content, selectedKeywords);
             Planner planner = Planner.builder()
@@ -364,6 +391,18 @@ public class TestDataFactory {
 
         public Planner save(PlannerRepository plannerRepository) {
             return plannerRepository.save(build());
+        }
+
+        public Planner savePublished(PlannerRepository plannerRepository, PlannerStatsRepository statsRepository,
+                PlannerCatalogService catalogService) {
+            published = true;
+            Planner planner = save(plannerRepository);
+            statsRepository.save(PlannerStats.builder()
+                    .plannerId(planner.getId())
+                    .upvotes(upvotes)
+                    .build());
+            catalogService.add(planner);
+            return planner;
         }
     }
 
