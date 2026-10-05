@@ -244,4 +244,13 @@ class PlannerEngagementServiceTest {
             verifyNoInteractions(domainEventRecorder);
         }
     }
+
+    @Test
+    void reportPlanner_WhenCalled_CreatesTheReportForTheReporterAndPlanner() {
+        UUID plannerId = UUID.randomUUID();
+
+        engagementService.reportPlanner(testUser.getId(), plannerId);
+
+        verify(reportService).createReport(testUser.getId(), plannerId);
+    }
 }
