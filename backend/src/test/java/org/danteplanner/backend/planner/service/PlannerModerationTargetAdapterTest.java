@@ -53,24 +53,37 @@ class PlannerModerationTargetAdapterTest {
     }
 
     @Test
-    void takeDown_WhenWithdrawn_ReturnsTheWithdrawnPlanner() {
-        when(plannerPublishingService.withdrawFromPublicView(eq(planner.getId()), any())).thenReturn(planner);
+    void takeDown_WhenWithdrawn_TakesThePlannerDownAndReturnsIt() {
+        withdrawalAppliesTo(planner);
 
         ModeratedPlanner result = adapter.takeDown(planner.getId());
 
+        assertThat(planner.isTakenDown()).isTrue();
+        assertThat(planner.isPublished()).isFalse();
         assertThat(result.id()).isEqualTo(planner.getId());
         assertThat(result.title()).isEqualTo("Moderated Planner");
-        assertThat(result.published()).isTrue();
+        assertThat(result.published()).isFalse();
     }
 
     @Test
-    void unpublish_WhenWithdrawn_ReturnsTheWithdrawnPlanner() {
-        when(plannerPublishingService.withdrawFromPublicView(eq(planner.getId()), any())).thenReturn(planner);
+    void unpublish_WhenWithdrawn_UnpublishesWithoutTakingDownAndReturnsIt() {
+        withdrawalAppliesTo(planner);
 
         ModeratedPlanner result = adapter.unpublish(planner.getId());
 
+        assertThat(planner.isTakenDown()).isFalse();
+        assertThat(planner.isPublished()).isFalse();
         assertThat(result.id()).isEqualTo(planner.getId());
         assertThat(result.title()).isEqualTo("Moderated Planner");
+        assertThat(result.published()).isFalse();
+    }
+
+    private void withdrawalAppliesTo(Planner target) {
+        when(plannerPublishingService.withdrawFromPublicView(eq(target.getId()), any()))
+                .thenAnswer(invocation -> {
+                    invocation.<PlannerPublishingService.Withdrawal>getArgument(1).apply(target);
+                    return target;
+                });
     }
 
     @Test
